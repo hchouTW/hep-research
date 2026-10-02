@@ -250,6 +250,13 @@ class EvidenceSchemaTests(unittest.TestCase):
         self.assertTrue(validate_ledger([self._src("fx:S01")], [], "fx").ok)
         self.assertTrue(validate_ledger([self._src("fy:S01")], [], "fy").ok)
 
+    def test_three_dates_are_separate_fields(self):
+        """Section 12: publication date, data-taking period and verification date are distinct fields."""
+        props = load(ROOT / "contracts" / "schemas" / "evidence_source.json")["properties"]
+        for key in ("publication_date", "data_taking_period", "verification_date"):
+            self.assertIn(key, props)
+        self.assertIn("verification_date", load(ROOT / "contracts" / "schemas" / "evidence_source.json")["required"])
+
     def test_unknown_verification_date_allowed_but_not_zero(self):
         s = self._src()
         s["verification_date"] = "unknown"

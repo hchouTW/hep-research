@@ -54,6 +54,19 @@ def _parse_day(text) -> date | None:
         return None
 
 
+def _partial(text) -> tuple | None:
+    """'YYYY', 'YYYY-MM' or 'YYYY-MM-DD' as a tuple of ints, for comparison at shared precision."""
+    if text is None or not ISO_ANY.match(str(text)):
+        return None
+    return tuple(int(x) for x in str(text).split("-"))
+
+
+def _later(a: tuple, b: tuple) -> bool:
+    """True when date a is certainly after date b (compared at the precision both share)."""
+    n = min(len(a), len(b))
+    return a[:n] > b[:n]
+
+
 class Findings:
     def __init__(self) -> None:
         self.errors: list[dict] = []
@@ -117,6 +130,17 @@ def _check_sources(sources: list, f: Findings, today: date, namespace: str | Non
             f.add("errors", "source.future_access_date", where, f"verification_date {acc} is after today {today}")
         if acc and s.get("year") and s["year"] > acc.year:
             f.add("errors", "source.published_after_access", where, f"year {s['year']} is after the verification date {acc}: cannot have been read")
+        pub_t = _partial(pub)
+        if acc and pub_t and _later(pub_t, (acc.year, acc.month, acc.day)):
+            f.add("errors", "source.published_after_access", where,
+                  f"publication_date {pub} is after the verification date {acc}: cannot have been read")
+        if isinstance(per, dict):
+            start_t, end_t = _partial(per.get("start")), _partial(per.get("end"))
+            if start_t and end_t and _later(start_t, end_t):
+                f.add("errors", "source.data_period_reversed", where, f"data_taking_period starts {per['start']} after it ends {per['end']}")
+            if end_t and pub_t and _later(end_t, pub_t):
+                f.add("errors", "source.data_after_publication", where,
+                      f"data_taking_period ends {per['end']} after the publication date {pub}")
         if level in STRENGTH and STRENGTH[level] >= 1 and not _parse_day(_read_date(s)):
             f.add("errors", "source.level_without_access_date", where, f"level '{level}' requires a verification_date")
         if level in ("not-verified", "not-opened") and not s.get("verification_limitations"):

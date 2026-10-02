@@ -72,5 +72,28 @@ class NewerLiteratureTests(unittest.TestCase):
         self.assertIn("claim.stronger_than_sources", {e["code"] for e in bad["errors"]})
 
 
+class DateWordingTests(unittest.TestCase):
+    """Section 12: fixed-date wording conflated the host date with the source verification date."""
+
+    POLICY = (ROOT / "modules" / "sources" / "source-policy.md").read_text(encoding="utf-8")
+    RULES = (ROOT / "modules" / "working-rules.md").read_text(encoding="utf-8")
+
+    def test_three_dates_named_distinctly(self):
+        for phrase in ("**current date**", "**publication date and data-taking period**", "**verification date**"):
+            self.assertIn(phrase, self.POLICY)
+        self.assertIn("Never present a verification date as today's date", self.POLICY)
+
+    def test_no_single_fixed_verification_date_for_the_whole_ledger(self):
+        for text in (self.POLICY, self.RULES):
+            self.assertNotIn("post-2025", text)
+            self.assertNotIn("as of the last verification, 2026-09-20", text)
+            self.assertNotIn("skill's last verification", text)
+
+    def test_ledger_rows_really_have_different_verification_dates(self):
+        import json
+        dates = {s["verification_date"] for s in json.loads((ROOT / "evidence" / "sources.json").read_text(encoding="utf-8"))}
+        self.assertGreater(len(dates - {"unknown"}), 1)
+
+
 if __name__ == "__main__":
     unittest.main()

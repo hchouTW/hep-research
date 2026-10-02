@@ -63,6 +63,38 @@ class LedgerTests(unittest.TestCase):
         self.assertIn("claim.stronger_than_sources", codes(run(self.s, self.c)))
 
 
+class DateDistinctionTests(unittest.TestCase):
+    """Section 12: current date, publication/data-taking dates and verification date stay distinct."""
+
+    def setUp(self):
+        self.s, self.c = [copy.deepcopy(SOURCE)], [copy.deepcopy(CLAIM)]
+
+    def test_full_publication_date_after_verification(self):
+        self.s[0].update(publication_date="2026-09-30", year=2026, year_text="2026")  # same year, later day
+        self.assertIn("source.published_after_access", codes(run(self.s, self.c)))
+
+    def test_publication_month_compared_at_shared_precision(self):
+        self.s[0].update(publication_date="2026-09", year=2026, year_text="2026")  # cannot tell: same month
+        self.assertNotIn("source.published_after_access", codes(run(self.s, self.c)))
+        self.s[0]["publication_date"] = "2026-10"
+        self.assertIn("source.published_after_access", codes(run(self.s, self.c)))
+
+    def test_data_period_reversed(self):
+        self.s[0]["data_taking_period"] = {"start": "2019-01-01", "end": "2018-12-31"}
+        self.assertIn("source.data_period_reversed", codes(run(self.s, self.c)))
+
+    def test_data_taken_after_publication(self):
+        self.s[0]["data_taking_period"] = {"start": "2018-01-01", "end": "2021-06-30"}
+        self.assertIn("source.data_after_publication", codes(run(self.s, self.c)))
+
+    def test_verification_date_after_current_date(self):
+        self.assertIn("source.future_access_date", codes(vel.check_ledger(self.s, self.c, date(2026, 9, 1), 365, "fx")))
+
+    def test_consistent_dates_pass(self):
+        self.s[0]["data_taking_period"] = {"start": "2018-01-01", "end": "2019-06-30"}
+        self.assertEqual(run(self.s, self.c)["status"], "pass")
+
+
 class RenderTests(unittest.TestCase):
     def test_round_trip(self):
         text = "# Index\n\n<!-- BEGIN GENERATED: source-table -->\n<!-- END GENERATED: source-table -->\n\n" \
