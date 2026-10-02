@@ -28,7 +28,7 @@ SciPy 1.17.1, Matplotlib 3.11.2, SymPy 1.14.0, Claude Code CLI 2.1.287, 2026-10-
 | Combinations (GLS) with declared correlations | hep-statistics | tested (E1), Gaussian only | T04, T05, T09 |
 | Comparison with published records, no detector modules | hep-statistics | tested (E1) | T24 (synthetic published-style record) |
 | Bayesian inference (samplers, priors, convergence) | hep-statistics | contract checks only | T28; no sampler run |
-| HistFactory / pyhf workflows | hep-statistics | demonstrated on synthetic data (E1 + pyhf 0.7.6), one counting channel | `tests/adapters/test_pyhf_counting.py`: CLs limit 2.153 agrees with an independent scipy profile likelihood (2.154); end-to-end sample passes; multi-channel and shape workspaces not tried |
+| HistFactory / pyhf workflows | hep-statistics | demonstrated on synthetic data (E1 + pyhf 0.7.6), asymptotic CLs | counting and two-channel shape workspaces (normsys, histosys, staterror, shapesys) match an independent likelihood in log-likelihood, best fit and limit (`tests/adapters/test_pyhf_counting.py`, `test_pyhf_shape.py`); end-to-end sample passes; toy-based CLs and other modifier types not tried |
 | Local partition, resubmission, merge | hep-computing | tested (E1) | T21 |
 | ROOT, PyROOT, uproot/awkward tools | hep-computing | unverified | tools not installed; tests skipped |
 | Task files for coding agents (task authoring) | hep-computing | tested (E1) | bundle validator, lint_task tests |
