@@ -8,3 +8,4 @@ venv/
 .worktrees/
 .venv-hep/
 .legacy/
+.venv-hep-root/
