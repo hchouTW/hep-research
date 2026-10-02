@@ -86,7 +86,8 @@ class CombineRunTests(unittest.TestCase):
             Path(tmp, 'card.txt').write_text(fill())
             self.run_cmd('python3', 'make_shapes.py', cwd=tmp)
             self.run_cmd('text2workspace.py', 'card.txt', '-o', 'ws.root', cwd=tmp)
-            out = self.run_cmd('combine', '-M', 'AsymptoticLimits', 'ws.root', '--rMax', '10', cwd=tmp)
+            # --strictBounds: without it the observed-limit search sets r above its range, which ROOT 6.40 rejects
+            out = self.run_cmd('combine', '-M', 'AsymptoticLimits', 'ws.root', '--rMax', '10', '--strictBounds', cwd=tmp)
         observed = float(re.search(r'Observed Limit: r < ([\d.]+)', out).group(1))
         median = float(re.search(r'Expected 50\.0%: r < ([\d.]+)', out).group(1))
         self.assertAlmostEqual(observed, PYHF_LIMIT, delta=0.02 * PYHF_LIMIT)

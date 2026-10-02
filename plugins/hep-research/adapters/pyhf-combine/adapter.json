@@ -1,6 +1,6 @@
 {
  "id": "adapter:pyhf-combine",
- "version": "0.4.0",
+ "version": "0.4.1",
  "status": "demonstrated-on-synthetic-data",
  "purpose": "Starting points for HistFactory-style likelihoods: a pyhf counting workspace and a CMS Combine datacard template",
  "tools": [
@@ -19,7 +19,7 @@
    ]
   }
  ],
- "environment": "E1 (docs/capability-matrix.md) plus pyhf 0.7.6 (numpy backend, scipy optimizer); CMS Combine 11.1.0 from conda-forge built against ROOT 6.36.14 (Python 3.13), run through $HEP_COMBINE_WRAPPER; the conda-forge build against ROOT 6.40.04 fails in AsymptoticLimits (VALIDATION COMBINE-RUN)",
+ "environment": "E1 (docs/capability-matrix.md) plus pyhf 0.7.6 (numpy backend, scipy optimizer); CMS Combine 11.1.0 from conda-forge, checked with its ROOT 6.40.04 and ROOT 6.36.14 builds, run through $HEP_COMBINE_WRAPPER; AsymptoticLimits needs --strictBounds with ROOT 6.40 (VALIDATION COMBINE-ROOT640)",
  "assets": [
   "assets/pyhf-counting.json",
   "assets/pyhf-shape-synthetic.json",

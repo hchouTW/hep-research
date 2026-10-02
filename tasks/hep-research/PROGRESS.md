@@ -119,6 +119,8 @@ M4 exit checks: Path D and T24 pass; every negative composition/compatibility fi
 - [x] torchvision 0.29.1 installed (user approved, PyPI, torch unchanged): `vision_transfer.py` help and a one-epoch run on synthetic images pass (untrained ResNet-18; pretrained weights need a blocked host); VALIDATION TORCHVISION-RUN
 - [x] PR #7 merged (`062ac17`)
 - [x] CMS Combine 11.1.0 installed from conda-forge (user approved) in `.venv-hep-combine/env-root636` (ROOT 6.36.14; the ROOT 6.40.04 build fails in AsymptoticLimits): datacard limit 2.1565 vs pyhf 2.153; `adapters/pyhf-combine` demonstrated-on-synthetic-data; VALIDATION COMBINE-RUN
+- [x] PR #8 and PR #9 merged (`be2839d`, `6f2c0ce`)
+- [x] Combine under ROOT 6.40.04 debugged: the observed search sets r above its range, which ROOT 6.40 rejects; `--strictBounds` fixes it and gives 2.1518 in both ROOT builds; the test and the wrapper now use the ROOT 6.40 build; VALIDATION COMBINE-ROOT640
 
 ## Blockers / needs user
 
@@ -129,7 +131,7 @@ M4 exit checks: Path D and T24 pass; every negative composition/compatibility fi
 
 1. `tasks/hep-research/scripts/fetch_legacy.sh`
 2. `python3 -m venv .venv-hep && .venv-hep/bin/pip install -r tasks/hep-research/m6/pytorch/pip-freeze-pytorch.txt` (D5 + pyhf + uproot/awkward + PyTorch; `m6/uproot/pip-freeze-uproot.txt` without PyTorch; `baseline/pip-freeze-d5.txt` for D5 only)
-3. `.venv-hep/bin/python plugins/hep-research/tools/run_all_checks.py` (with ROOT: recreate `.venv-hep-root/env` from `tasks/hep-research/m6/root/conda-explicit-root.txt` with micromamba and set `HEP_ROOT_PYTHON=.venv-hep-root/env/bin/python`; with Combine: recreate `.venv-hep-combine/env-root636` from `tasks/hep-research/m6/combine/conda-explicit-combine-root636.txt` and set `HEP_COMBINE_WRAPPER` as in VALIDATION COMBINE-RUN; with diagram tools: recreate `.venv-hep-diagrams/` as in VALIDATION DIAGRAM-RUN and put `.venv-hep-diagrams/bin` first on PATH)
+3. `.venv-hep/bin/python plugins/hep-research/tools/run_all_checks.py` (with ROOT: recreate `.venv-hep-root/env` from `tasks/hep-research/m6/root/conda-explicit-root.txt` with micromamba and set `HEP_ROOT_PYTHON=.venv-hep-root/env/bin/python`; with Combine: recreate `.venv-hep-combine/env-root640` from `tasks/hep-research/m6/combine/conda-explicit-combine-root640.txt` and set `HEP_COMBINE_WRAPPER` as in VALIDATION COMBINE-RUN; with diagram tools: recreate `.venv-hep-diagrams/` as in VALIDATION DIAGRAM-RUN and put `.venv-hep-diagrams/bin` first on PATH)
 
 ## Next step
 

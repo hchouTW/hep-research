@@ -40,6 +40,8 @@ are not double-counted as both a normalization and a shape effect.
 
 A common workflow creates a workspace and runs fit diagnostics, asymptotic limits, or suitable toy calculations. Verify options through the release's help and [official documentation](https://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/latest/). Blinded work uses authorized expected/Asimov modes; do not default to commands that inspect observations.
 
+With Combine 11.1.0 built against ROOT 6.40, `combine -M AsymptoticLimits` can stop with `Value ... is outside the default range ... of the variable "r"` and print no observed limit: its observed-limit search tries an r above the POI range, which older ROOT silently clipped and ROOT 6.40 rejects. Pass `--strictBounds` with an `--rMax` well above the expected limit, and check that the limit is not at `--rMax` (seen on the synthetic counting card; VALIDATION COMBINE-ROOT640).
+
 Check the naming, correlations, positivity, interpolation, and bounds of rate, shape, normalization, and MC-statistical constraints. Translating textual fields between tools does not necessarily create equivalent likelihoods.
 
 ## Worked walkthrough: a pyhf workflow end to end (verified 2026-09-24)
