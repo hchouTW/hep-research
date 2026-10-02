@@ -93,7 +93,7 @@ def artifacts(der: dict, pred: dict, created: str):
            "level": "parton", "frame": "center-of-mass",
            "normalization": {"kind": "integrated-luminosity", "value": "not-applicable",
                              "convention": "absolute cross section; a comparison multiplies by the measurement's integrated luminosity"},
-           "bin_semantics": "bin-averaged", "unit": "pb",
+           "bin_semantics": "bin-averaged", "unit": "pb", "validity_range": {"cos_theta": [-1.0, 1.0]},
            "conventions": {"energy_variable": "sqrt_s", "angle_definition": CONVENTIONS["angle_definition"],
                            "spin_treatment": CONVENTIONS["spin_treatment"], "mass_approximation": "massless final state (beta -> 1)"}}
     prediction = dict(base, artifact_id="qedbench-path-c-prediction", artifact_type="prediction",
@@ -112,7 +112,8 @@ def artifacts(der: dict, pred: dict, created: str):
                                                 {"name": "numerical integration", "kind": "numerical",
                                                  "values": [pred["convergence"]["quad_abs_error"] / 2.0] * len(vals), "correlation": "unknown"}]},
                                  "uncertainties": [{"name": "missing higher orders and Z exchange", "kind": "truncation", "correlation": "unknown"}],
-                                 "allowed_transformations": ["forward-fold", "rebin by exact integration", "multiply by integrated luminosity"]})
+                                 "allowed_transformations": ["bin-integrate", "rebin", "fiducial-restriction", "unit-conversion",
+                                                             "multiply-by-normalization", "level-identification", "forward-fold"]})
     docs = {"theory_spec": spec, "prediction": prediction}
     return docs, {k: {"ok": (r := validate_artifact(v, vocab)).ok, "errors": [f.message for f in r.errors]} for k, v in docs.items()}
 

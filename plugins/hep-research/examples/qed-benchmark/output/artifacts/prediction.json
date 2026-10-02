@@ -80,6 +80,12 @@
    },
    "bin_semantics": "bin-averaged",
    "unit": "pb",
+   "validity_range": {
+    "cos_theta": [
+     -1.0,
+     1.0
+    ]
+   },
    "conventions": {
     "energy_variable": "sqrt_s",
     "angle_definition": "theta between the incoming e- and the outgoing mu- in the c.m. frame",
@@ -173,9 +179,13 @@
    }
   ],
   "allowed_transformations": [
-   "forward-fold",
-   "rebin by exact integration",
-   "multiply by integrated luminosity"
+   "bin-integrate",
+   "rebin",
+   "fiducial-restriction",
+   "unit-conversion",
+   "multiply-by-normalization",
+   "level-identification",
+   "forward-fold"
   ]
  }
 }
