@@ -39,3 +39,9 @@ AMS-specific interpretation (which variable a given AMS publication reports, iso
 | ams-analysis/references/source-index.md | evidence/index.md | Prose kept, paths updated; tables regenerated from the migrated ledger. | Index in sync (test). |
 | ams-analysis/SKILL.md body | modules/working-rules.md | Routing, invariants, labels, source rule and script list kept; skill wording changed to profile wording. Frontmatter becomes `profile.json` scope. | — |
 | hep-analysis/references/38-ams02-case-study.md | modules/subsystems/instrument-overview.md | Links to hep-analysis references point to their new skill folders; "use the ams-analysis skill" now points to this profile. | — |
+
+## Skill redistribution (move, 2026-10-02)
+
+394 legacy files from hep-analysis, deep-learning, academic-papers, academic-diagrams, agile-development, task-authoring and docs/detector-principles. Each has a record in `m2/redistribution/<legacy>.csv` (move, move+path-edit, port, retain-outside, deferred, retire) and the outcome is written back to `docs/migration-map.csv` by `scripts/apply_redistribution_records.py`. Code is unchanged apart from two user-facing strings that named legacy paths (hep-analysis worker report). Ported tests under `tests/skills/` pass except skips for tools not installed here (PyTorch, PyROOT, awkward/uproot, Combine, Graphviz, Mermaid, PlantUML, tectonic). Eight legacy tests that only checked legacy SKILL.md wording were retired (named in `hep-analysis.csv`). Deferred to M3: `end_to_end_sample_analysis.py` and its test.
+
+Later edits, separate commits: legacy skill names routed to plugin skills (`legacy-name-edits.csv`); experiment passages marked as example blocks; T12 and theory-routing `sci-fix:` commits with regressions.

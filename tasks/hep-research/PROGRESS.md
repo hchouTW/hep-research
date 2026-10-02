@@ -1,6 +1,6 @@
 # PROGRESS — hep-research plugin
 
-- Current milestone: **M1 complete, waiting at GATE G1** (G0 passed 2026-10-02: D1–D5 confirmed, network approved, branch pushed to origin)
+- Current milestone: **M2 complete** (exit checks pass); next M3. G0 and G1 passed 2026-10-02
 - Repository: `hchouTW/hep-research`, branch `feat/hep-research-plugin` (no PR). Legacy source: read-only `agentic-ai-skills@3e995a4` via `tasks/hep-research/scripts/fetch_legacy.sh`
 - Base commit: `3e995a49a89fad8e0e9d52130ee1fd93a3a0f4f9`
 - Last session: 2026-10-02, Claude Code cloud container (CLI 2.1.287), Python 3.11.15
@@ -42,12 +42,27 @@
 - [x] 10. `tools/run_all_checks.py`, `check_layering.py`, `measure_entrypoints.py`, `build_stanzas.py`
 - [x] 11. `docs/architecture-review.md` (10/10 items met; item 2 at file level)
 
-Latest check run: `check-runs/check-run-2026-10-02T134449Z.json` (6 pass, 0 fail, 0 skip; 47 tests).
+M1 check run: `check-runs/check-run-2026-10-02T134449Z.json` (6 pass, 0 fail, 0 skip; 47 tests).
+
+## M2 steps
+
+- [x] 1. Shared code in `core/` with stewards (`core/stats`, `core/kinematics`, `core/evidence`); original tests ported (`m2/equivalence.md`)
+- [x] 2. `profiles/experiments/ams-02`: 60 sources / 183 claims as `ams02:` IDs with legacy map; `check_ams_ledger_preservation.py` passes
+- [x] 3. AMS distinctions kept in modules and conventions (rigidity definition and sign, charge-sign source, mass-number assumption; species/period restrictions stay per source)
+- [x] 4. Seven metadata-only dataset records (no values: none exist in the legacy repo with provenance)
+- [x] 5. Legacy spec converter (`profiles/experiments/ams-02/scripts/convert_legacy_spec.py`, 20 tests)
+- [x] 6. All five Section 12 corrections as `sci-fix:` commits with regressions
+- [x] 7. Path A: `examples/ams-flux-ratio/run_path_a.py` (all pre-declared criteria pass; `tests/examples/test_path_a.py`)
+- [x] Skill redistribution: 394 legacy files recorded (`m2/redistribution/*.csv`), moved in one `move:` commit, then legacy-name routes, example-block marking and SKILL.md resource routes as separate commits; `docs/migration-map.csv` updated from the records
+
+M2 exit checks: ledger preservation pass; migrated-helper regressions pass (816 pass, 35 skip for missing optional tools: PyTorch, PyROOT, awkward/uproot, Combine, Graphviz, Mermaid, PlantUML, tectonic); Path A pass; AMS tasks read `profiles/registry.json` then the profile `index.md` (2.4 KB) and only the modules they need; layering pass.
+
+Latest check run: `check-runs/check-run-2026-10-02T150623Z.json` (8 pass, 0 fail, 0 skip; 851 tests, 816 pass, 35 skip).
 
 ## Blockers / needs user
 
-1. G1 review: approve the architecture, journeys, contracts and skill descriptions.
-2. None other. Work lives in hchouTW/hep-research (DECISIONS M1-09, M1-11).
+1. None at M2. Next gate needing the user is G5 (native install test).
+2. Open from M1: the old branch in agentic-ai-skills (M1-12) is for the user to delete.
 
 ## Resume checklist
 
@@ -57,4 +72,4 @@ Latest check run: `check-runs/check-run-2026-10-02T134449Z.json` (6 pass, 0 fail
 
 ## Next step
 
-After G1: M2.1 migrate shared numerical code into `core/` with stewards, porting original tests.
+M3: theory capability (`theory:qed-benchmark`, Path C) and the extension proof (`experiment:synthetic-collider`, Path B). Carry-overs: T18 blinding checks across plots/logs/caches/reports (not yet implemented); port `end_to_end_sample_analysis.py`; rewrite the obsolete host-install notes in `hep-computing/references/{claude-code,antigravity,codex}.md`; dedupe generic content in AMS modules against core skills (M2-04).
