@@ -1,3 +1,4 @@
+<!-- example: experiment-specific illustration -->
 # Design a CMS Higgs Boson Significance-Measurement Workflow
 
 > Snapshot note (2026-10-01): the environment statements below (`pyhf`, `ROOT`/PyROOT and Combine not usable) describe the machine checked on 2026-09-12. Since then `hep-analysis` has run PyROOT under a Homebrew Python, and pyhf and Combine from scratch environments, so re-check them before relying on them.
@@ -227,3 +228,4 @@ Verified by direct inspection of `agentic-ai-skills` on 2026-09-12:
   otherwise used by this task.
 - No prior CMS-analysis or Higgs-analysis task, dataset, or implementation
   file exists in this repository to reference.
+<!-- /example -->

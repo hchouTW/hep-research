@@ -153,7 +153,8 @@ def check(root: Path) -> list[dict]:
         if not scanned or "fixtures" in rel.parts or rel.parts[:2] == ("contracts", "vocab"):
             continue
         body = blank_examples(text, MD_EXAMPLE if f.suffix == ".md" else PY_EXAMPLE)
-        patterns = [(EXPERIMENT_NAMES, "experiment-name"), (PROFILE_ID, "profile-id")]
+        patterns = [(EXPERIMENT_NAMES, "experiment-name"), (PROFILE_ID, "profile-id"),
+                    (r"profiles/(?:experiments|theory)/[a-z0-9-]+", "profile-path")]
         if namespaces:
             patterns.append((r"\b(" + "|".join(sorted(map(re.escape, namespaces))) + r"):[A-Za-z0-9_]", "namespace"))
         for pat, rule in patterns:

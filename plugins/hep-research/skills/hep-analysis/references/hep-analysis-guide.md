@@ -207,9 +207,13 @@ Resolve relative paths from this file's directory (script paths are given from `
 - "What should I check before trusting fast simulation for this measurement?"
 - "Is a 4.8-sigma excess in my ON/OFF gamma-ray source search significant after accounting for the sky scan?"
 - "Why does my composition analysis using X_max disagree with the one using muon content?"
+<!-- example: experiment-specific illustration -->
 - "Review my IceCube-style point-source likelihood - is the background estimation and trials factor right?"
+<!-- /example -->
 - "Fit the spectral break in this cosmic-ray flux and check whether it's consistent with a knee-like feature."
+<!-- example: experiment-specific illustration -->
 - "What geomagnetic cutoff range does an AMS-02-like instrument on the ISS orbit see, and how should that shape my low-rigidity selection?"
+<!-- /example -->
 - "Convert this local-interstellar proton spectrum to what we'd expect at 1 AU during solar minimum vs. solar maximum."
 - "Propagate the uncertainty on a positron fraction from independent positron and electron template-fit yields."
 - "Compute the differential flux and its statistical uncertainty from these raw counts, exposure, and bin width."

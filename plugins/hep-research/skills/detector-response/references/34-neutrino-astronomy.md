@@ -1,5 +1,6 @@
 # High-Energy Neutrino Astronomy
 
+<!-- example: experiment-specific illustration -->
 Covers large-volume Cherenkov neutrino telescopes (IceCube in glacial ice, KM3NeT in
 seawater, and similar designs) - how a neutrino interaction becomes a detectable light
 pattern, the backgrounds that dominate any astrophysical search, and how significance
@@ -9,6 +10,7 @@ with [imaging Cherenkov](33-imaging-atmospheric-cherenkov.md) and
 physics (though in a very different regime - a natural medium, kilometer-scale
 baselines, not a dense radiator) with
 [particle identification](24-particle-identification.md).
+<!-- /example -->
 
 ## Detection principle
 

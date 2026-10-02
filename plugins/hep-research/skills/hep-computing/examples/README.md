@@ -8,6 +8,7 @@ each demonstrates the Confirmed / Inferred / Unresolved distinction from
 of them mark an unknown as resolved just to look complete. `tests/` checks that
 every `*-task.md` here carries the 12 required sections in order.
 
+<!-- example: experiment-specific illustration -->
 All of them target this repository (`agentic-ai-skills`) itself as the inspected
 repository, so every Repository Context claim was a real, verified fact about it
 when written rather than an invented one. The feature, bug and research examples
@@ -15,6 +16,7 @@ were rewritten on 2026-10-02 against the repository as it is now (seven skills,
 no `academic-papers/examples/`, no byte-identical reference files). The
 performance, CMS and AMS examples were written in September 2026; those that
 went stale carry a dated "Snapshot note" under their title.
+<!-- /example -->
 
 | Example | Category | Scenario | Open Questions highlight |
 |---|---|---|---|
@@ -31,13 +33,17 @@ Three examples cover categories the first four did not:
 | [agentic-loop-task.md](agentic-loop-task.md) | Agentic loop | A bounded retry-until-complete mode for `tests/behavior_eval.py run`; names the pattern, termination, early-stop and cap | The maximum number of passes is TBD (none was given) |
 | [data-ml-task.md](data-ml-task.md) | Data / ML | Gating `deep-learning/assets/train_classifier.py` on `check_split_integrity.py` | The synthetic data has no sample IDs, so what a manifest ID refers to is unresolved |
 
+<!-- example: experiment-specific illustration -->
 Two further examples target `hep-analysis` domain requests specifically -
 still Task Markdown outputs against this same repository, but chosen to
 contrast a request the repository genuinely cannot fulfill (no CMS analysis
 code or data exists here) against one it already has real, working building
 blocks for (the AMS-02 scripts and their tests):
+<!-- /example -->
 
+<!-- example: experiment-specific illustration -->
 | Example | Category | Scenario | Open Questions highlight |
 |---|---|---|---|
 | [cms-higgs-analysis-task.md](cms-higgs-analysis-task.md) | Research | "Create a task for a CMS experiment Higgs boson analysis" - this repository has no CMS dataset, MC, or channel-specific code, only generic Combine/pyhf templates and likelihood/inference guidance | Which Higgs channel to target, and whether `pyhf`/ROOT/Combine are expected to be installed in the execution environment (confirmed absent/broken in the one checked here) |
 | [ams-antiproton-analysis-task.md](ams-antiproton-analysis-task.md) | Feature | Composing the five existing, individually-tested AMS-02 building-block scripts into one antiproton/proton-ratio worked pipeline - fully completable in this repository, unlike the RICH and CMS-Higgs examples above | Whether `--demodulate` support, a new `scripts/pipelines/` layout, and a matching `hep-analysis/examples/` entry are wanted alongside the script |
+<!-- /example -->

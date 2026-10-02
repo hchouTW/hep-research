@@ -1,5 +1,6 @@
 # Space-Based and Balloon-Borne Direct Cosmic-Ray Detection
 
+<!-- example: experiment-specific illustration -->
 Covers cosmic-ray measurements made *above the atmosphere* (satellite or long-duration
 balloon magnetic spectrometers and calorimeters, e.g. AMS-02-class instruments), where
 individual nuclei are measured directly rather than inferred from an air shower. The
@@ -10,6 +11,7 @@ the material in
 unchanged; this file covers what is specific to the near-Earth space environment:
 geomagnetic and solar effects that ground- and space-based measurements alike must
 correct for, and that have no collider-physics analog.
+<!-- /example -->
 
 ## Rigidity, not energy, is the natural variable
 

@@ -1,3 +1,4 @@
+<!-- example: experiment-specific illustration -->
 # Compose an AMS-02 Antiproton/Proton Ratio Worked-Pipeline Script
 
 > Snapshot note (2026-10-01): the repository facts below were verified on 2026-09-12. The AMS-02 case study is now `hep-analysis/references/38-ams02-case-study.md` (it was numbered 40; paths here are updated), and `hep-analysis/examples/` was removed on 2026-09-25, so the last Open Question about a matching example no longer has a home in this repository.
@@ -225,3 +226,4 @@ Verified by direct inspection of `agentic-ai-skills` on 2026-09-12:
 - `hep-analysis/VALIDATION.md` - the prior validation discipline on
   avoiding real-value/synthetic-value confusion, which this task's
   Acceptance Criteria extend to the new script.
+<!-- /example -->

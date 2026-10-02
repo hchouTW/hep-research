@@ -23,6 +23,7 @@ entries — it is maintained, includes arXiv/journal cross-references, and its
 keys are recognized by collaborators and referees. Workflow:
 
 1. Search the paper on INSPIRE-HEP by title, author, or arXiv number.
+<!-- example: experiment-specific illustration -->
 2. Use INSPIRE's "Cite" / export feature to get a BibTeX entry with its
    standard key format: first-author surname, year, three random letters
    (`Cowan:2010js`); for a collaboration paper, the collaboration name instead
@@ -33,6 +34,7 @@ keys are recognized by collaborators and referees. Workflow:
    (`Aad:2012tfa`); INSPIRE still resolves them as aliases, but a `.bib` that
    mixes old and new keys holds the same paper twice — deduplicate on
    `eprint`/`doi` when merging an older `.bib` (checked 2026-09-26).
+<!-- /example -->
 3. Paste the entry as-is into the `.bib` file rather than retyping it by
    hand — this preserves the `eprint`, `archivePrefix`, `doi`, and `journal`
    fields that different `.bst` styles rely on.
@@ -40,9 +42,11 @@ keys are recognized by collaborators and referees. Workflow:
    co-authors and referees often expect it, and it avoids key collisions
    across a large `.bib` file.
 
+<!-- example: experiment-specific illustration -->
 Never fabricate a citation or a plausible-looking INSPIRE key — if the exact
 reference can't be located, mark it (`[CITATION NEEDED: original ATLAS
 combined mass paper]`) rather than inventing one.
+<!-- /example -->
 
 ## ADS for astroparticle/astronomy-facing venues
 
@@ -209,12 +213,14 @@ live:
   digitized tables, cutflows, and machine-readable versions of a paper's plots —
   link it explicitly in the paper (footnote or a dedicated "Data availability"
   statement) rather than assuming a reader will find it by searching.
+<!-- example: experiment-specific illustration -->
 - **Some collaborations host supplemental data on their own site instead of, or in
   addition to, HEPData.** AMS-02 is a concrete example: its publications page
   (`ams02.space/publications`) links "supplemental material and data" per paper
   directly alongside the journal DOI, separate from any HEPData record. Check the
   specific collaboration's convention before assuming HEPData is the only place a
   result's tables will be published.
+<!-- /example -->
 - State clearly in the paper *which* venue holds the data (HEPData record number,
   a collaboration data-release URL, or a Zenodo/institutional DOI) rather than a
   vague "data available upon request," which most venues now discourage or forbid.
@@ -234,11 +240,13 @@ paper's own authors.
   received, or quotes the commentary's own framing), cite it separately with its
   own byline and venue — an APS Viewpoint has its own citable identity, e.g.
   `Physics 18, 19 (2025)`, distinct from the paper it comments on.
+<!-- example: experiment-specific illustration -->
 - Don't assume a page hosted on a collaboration's own domain is collaboration-
   authored — check the byline before citing or characterizing its authorship. See
   `outreach-and-public-facing-summaries.md` for a worked AMS-02 example
   where three same-looking pages turn out to be three different bylines (a
   journalist's recap, an APS Synopsis, and an APS Viewpoint).
+<!-- /example -->
 
 ## Availability statements
 

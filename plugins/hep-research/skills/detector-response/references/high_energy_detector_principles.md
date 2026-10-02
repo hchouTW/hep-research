@@ -2245,6 +2245,7 @@ online track. Each type has its own efficiency, purity, and momentum resolution.
 
 ## Chapter 13: Noble-Liquid, Neutrino, and Rare-Event Detectors
 
+<!-- example: experiment-specific illustration -->
 Liquid-argon and liquid-xenon TPCs, dual-phase detectors, large water Cherenkov and
 liquid-scintillator detectors, neutrino near/far systems, cryogenic bolometers,
 semiconductor ionization detectors, dark-matter TPCs, and neutrinoless-double-beta-decay
@@ -2253,6 +2254,7 @@ are treated in extensive air showers-the AMS-02 case study and
 neutrino astronomy; this file integrates them into the common framework
 ([Chapter 1](#chapter-1-detector-measurement-framework-forward-model-inverse-problem-and-the-chain)). Signal formation (recombination,
 lifetime, quenching) is in [Chapter 3](#chapter-3-signal-formation-transport-and-readout).
+<!-- /example -->
 
 ### Noble-liquid TPCs
 
@@ -2397,9 +2399,11 @@ fiducialization, and energy scale** dominate the result.
 - **Neutrino telescopes in water/ice**: sparse timing geometry, track vs cascade
   hypotheses, angular resolution, **effective volume**, and medium optics (scattering
   and absorption) as dominant `theta` (neutrino astronomy).
+<!-- example: experiment-specific illustration -->
 - **Space-based direct detection**: spectrometer and calorimeter combination, geomagnetic
   cutoff and solar modulation (space-based direct detection,
   the AMS-02 case study).
+<!-- /example -->
 
 ### Common misconceptions and failure modes
 

@@ -40,6 +40,7 @@ on the same underlying shape information plus timing across pixels; see
 requirements that apply to training such a classifier on simulated gamma showers and
 applying it to real hadronic-background-dominated data.
 
+<!-- example: experiment-specific illustration -->
 **Stereoscopic reconstruction**: an array of multiple telescopes viewing the same
 shower from different ground positions intersects each telescope's image axis to
 reconstruct the shower's true (not just camera-projected) arrival direction and
@@ -47,9 +48,11 @@ impact point, dramatically improving angular resolution and background rejection
 relative to a single telescope - the reason all current-generation instruments
 (H.E.S.S., MAGIC, VERITAS, and the planned CTA) are arrays rather than single
 telescopes.
+<!-- /example -->
 
 ## Energy reconstruction
 
+<!-- example: experiment-specific illustration -->
 Cherenkov light yield in the image scales with the primary energy (Cherenkov photon
 number tracks the electromagnetic cascade's total track length, itself proportional
 to energy for a fixed atmospheric depth of first interaction), so image intensity,
@@ -63,6 +66,7 @@ energy scale for IACTs carries a larger systematic uncertainty (typically ~10-20
 dominated by the atmospheric-transparency model and the assumed telescope optical
 throughput; report the assumed atmospheric model and its calibration/monitoring
 alongside any absolute flux or spectral normalization.
+<!-- /example -->
 
 ## Background rejection and significance
 

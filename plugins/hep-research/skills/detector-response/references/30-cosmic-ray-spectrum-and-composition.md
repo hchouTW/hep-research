@@ -33,6 +33,7 @@ cosmic-ray review (revised March 2026); see the latest-results policy in
   confinement scale with rigidity, `R = E / (Z * e)`, not raw energy. This predicts a
   "knee" for each species in sequence, sometimes called the composition unfolding into
   a "second knee" (~100 PeV, steepening to `gamma ~ 3.3`) as iron's cutoff is reached.
+<!-- example: experiment-specific illustration -->
 - **The ankle** (~5 EeV): the spectrum flattens back toward `gamma ~ 2.5`. A further
   feature, the "instep" (a steepening that starts around 10 EeV, established above 5
   sigma by Auger), sits between the ankle and the suppression. The
@@ -41,6 +42,7 @@ cosmic-ray review (revised March 2026); see the latest-results policy in
   driven "dip" scenario (pair-production energy losses of extragalactic protons on the
   CMB) predicts a similar flattening without invoking a new source population, and
   distinguishing the two requires composition, not just spectral shape.
+<!-- /example -->
 - **The GZK suppression** (starting around 5*10^19 eV = 50 EeV; whether it is a
   propagation (GZK) cutoff or the sources' maximum energy is still open): a cutoff from photopion production,
   `p + gamma_CMB -> Delta -> p/n + pi`, once a proton's energy exceeds the pion-

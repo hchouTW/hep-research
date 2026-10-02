@@ -4,7 +4,7 @@ Liquid-argon and liquid-xenon TPCs, dual-phase detectors, large water Cherenkov 
 liquid-scintillator detectors, neutrino near/far systems, cryogenic bolometers,
 semiconductor ionization detectors, dark-matter TPCs, and neutrinoless-double-beta-decay
 detectors. Air-shower arrays, imaging Cherenkov telescopes, and neutrino telescopes
-are treated in [31](31-extensive-air-showers.md)-[38](../../../profiles/experiments/ams-02/modules/subsystems/instrument-overview.md) and
+are treated in [31](31-extensive-air-showers.md)-[36](36-multimessenger-analysis.md) (experiment case studies: the bound experiment profile) and
 [34](34-neutrino-astronomy.md); this file integrates them into the common framework
 ([39](39-detector-measurement-framework.md)). Signal formation (recombination,
 lifetime, quenching) is in [40](40-signal-formation-and-readout.md).
@@ -153,8 +153,8 @@ fiducialization, and energy scale** dominate the result.
   hypotheses, angular resolution, **effective volume**, and medium optics (scattering
   and absorption) as dominant `theta` ([34](34-neutrino-astronomy.md)).
 - **Space-based direct detection**: spectrometer and calorimeter combination, geomagnetic
-  cutoff and solar modulation ([35](35-space-based-direct-detection.md),
-  [38](../../../profiles/experiments/ams-02/modules/subsystems/instrument-overview.md)).
+  cutoff and solar modulation ([35](35-space-based-direct-detection.md); experiment case
+  studies: the bound experiment profile).
 
 ## Common misconceptions and failure modes
 

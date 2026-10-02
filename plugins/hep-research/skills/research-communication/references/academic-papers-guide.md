@@ -78,7 +78,9 @@ are stated here in full.
    characters; JHEP/JCAP are `article` + `jheppub`/`jcappub` with `\flushbottom`
    after `\maketitle`. Before converting between classes, read
    `latex-and-formatting.md`.
+<!-- example: experiment-specific illustration -->
 9. **One INSPIRE record under two keys.** When two `.bib` entries share an `eprint`, they are one paper: keep the current key, update every `\cite` to it, and delete the other. For a collaboration paper the collaboration key (`ATLAS:2012yve`) is the current one and the first-author key (`Aad:2012tfa`) is the older export; say so, and tell the user to confirm on INSPIRE. A `.bib` year taken from arXiv may be the latest-version year, not the publication year.
+<!-- /example -->
 10. **A single run is not a variance estimate.** In any ML audit or results review, state that one split or one seed gives no variance estimate. Besides fixing the seed, recommend several seeds or cross-validation and report the mean and the spread.
 
 ## When to use this skill
@@ -336,6 +338,7 @@ review. Grouped by function; within a group, order roughly follows the workflow.
   plain-language public/outreach summary, and telling apart collaboration-voice
   outreach from syndicated third-party commentary (a journalist's recap, an
   APS Synopsis, an APS Viewpoint)
+<!-- example: experiment-specific illustration -->
 - `astroparticle-and-cosmic-ray-papers.md` — how structure, venues,
   author lists, citations, figures, and phrasing shift for astroparticle-physics
   and cosmic-ray papers (ground arrays, IACTs, neutrino observatories, space-based
@@ -346,6 +349,7 @@ review. Grouped by function; within a group, order roughly follows the workflow.
   letters, 44-institution author-list scale, a web-only non-citable
   "advances-in-data-analysis" technical-progress genre, and syndicated vs.
   collaboration-authored outreach pages)
+<!-- /example -->
 - `statistics-and-ml-papers.md` — how structure, venues, author-
   contribution statements, citations, and review process shift for statistics and
   machine-learning papers: required Limitations/Broader-Impact sections,

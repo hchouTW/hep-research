@@ -76,9 +76,11 @@ the textbooks are for principles.
 
 - T. Ypsilantis and J. Seguinot, "Theory of ring imaging Cherenkov counters", Nucl.
   Instrum. Methods A343 (1994) 30-51, DOI 10.1016/0168-9002(94)90532-0. RICH principles, resolution terms.
+<!-- example: experiment-specific illustration -->
 - I. Adam et al. (BaBar DIRC), "The DIRC particle identification system for the BaBar
   experiment", Nucl. Instrum. Methods A538 (2005) 281-357, DOI 10.1016/j.nima.2004.08.129. DIRC principle and a worked
   implementation; TOP is the time-of-propagation extension of the same idea.
+<!-- /example -->
 - B. Dolgoshein, "Transition radiation detectors", Nucl. Instrum. Methods A326 (1993)
   434-469, DOI 10.1016/0168-9002(93)90846-A. TRD principles and electron/hadron separation.
 - Hamamatsu Photonics, *Photomultiplier Tubes: Basics and Applications* (manufacturer

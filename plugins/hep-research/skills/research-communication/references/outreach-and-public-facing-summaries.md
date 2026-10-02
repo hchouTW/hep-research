@@ -34,17 +34,21 @@ Rules that don't relax just because the audience is general:
 
 ## Collaboration voice vs. syndicated commentary
 
+<!-- example: experiment-specific illustration -->
 Not every "physics highlight" page on a collaboration's own website is written by
 the collaboration. AMS-02's `ams02.space/physics/*` pages are a useful worked
 example precisely because checking the actual byline on each one — rather than
 assuming collaboration authorship because the page lives on the collaboration's
 domain — turns up three different genres:
+<!-- /example -->
 
+<!-- example: experiment-specific illustration -->
 - **Journalist-written recap**, e.g. "AMS Releases New Cosmic-Ray Measurements"
   (byline: Emma Hattersley, dated 2026-06-26) — third-person journalistic voice
   ("reports," "describes"), built around direct quotes from collaboration
   spokespeople (Samuel Ting, Sunil Gupta) rather than a first-person collaboration
   statement.
+<!-- /example -->
 - **APS *Physics Magazine* Synopsis**, e.g. "Lithium Cosmic Rays Are Not
   Primordial" (byline: Rachel Berkowitz, "Corresponding Editor for *Physics
   Magazine*") — a neutral staff-written recap syndicated from `physics.aps.org`,
@@ -74,7 +78,9 @@ Why this distinction matters when drafting one of these for a user:
   see `citations-and-bibliography.md`'s note on citing an accompanying Viewpoint
   or Synopsis.
 
+<!-- example: experiment-specific illustration -->
 (Verified 2026-09-10 by checking each page's own byline directly rather than
 assuming authorship from the hosting domain — re-check before reusing this as a
 current example, since AMS periodically publishes new physics-highlight pages
 and the mix of voices may change.)
+<!-- /example -->

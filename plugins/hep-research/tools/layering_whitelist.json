@@ -1,0 +1,7 @@
+[
+ {
+  "file": "skills/research-communication/references/latex-mechanics-and-tooling.md",
+  "pattern": "^AMS$",
+  "reason": "the only AMS in this LaTeX reference is the American Mathematical Society (amsmath/amssymb), not an experiment"
+ }
+]

@@ -1,5 +1,6 @@
 # Astroparticle and Cosmic-Ray Papers
 
+<!-- example: experiment-specific illustration -->
 How writing and reading conventions shift for astroparticle physics and cosmic-ray
 papers — ground-based air-shower arrays (Pierre Auger, Telescope Array), imaging
 atmospheric Cherenkov telescopes (CTA, H.E.S.S., MAGIC, VERITAS), water/ice Cherenkov
@@ -11,13 +12,16 @@ astroparticle references (cosmic-ray spectrum and composition, extensive air sho
 ground-based arrays, imaging Cherenkov, neutrino astronomy, space-based direct
 detection, astroparticle statistics) for the content itself. Everything below assumes
 that physics is already worked out and focuses on how to write it up.
+<!-- /example -->
 
 ## Table of contents
 - [How the structure differs from collider HEP](#how-the-structure-differs-from-collider-hep)
 - [Journals and venues](#journals-and-venues)
 - [Collaboration author lists and acknowledgments](#collaboration-author-lists-and-acknowledgments)
 - [Citations: ADS vs. INSPIRE-HEP](#citations-ads-vs-inspire-hep)
+<!-- example: experiment-specific illustration -->
 - [Worked example: AMS-02's publication pattern](#worked-example-ams-02s-publication-pattern)
+<!-- /example -->
 - [Figures: spectra, skymaps, and exposure](#figures-spectra-skymaps-and-exposure)
 - [Phrasing conventions specific to this field](#phrasing-conventions-specific-to-this-field)
 - [Reading checklist additions](#reading-checklist-additions)
@@ -32,12 +36,14 @@ substitutions:
   paper describes station spacing, trigger logic, and array livetime rather than a
   collider subdetector's geometry; ask which term the target collaboration's prior
   papers use rather than guessing.
+<!-- example: experiment-specific illustration -->
 - **"Luminosity" becomes "exposure."** Ground-based arrays report exposure in units
   of area × solid angle × time (e.g. km²·sr·yr for Auger surface-detector analyses);
   space-based spectrometers report it in m²·sr·s or as an effective-area-vs-energy
   curve integrated over livetime. State how the exposure was calculated (Monte Carlo
   vs. data-driven) the same way a collider paper would justify a luminosity
   measurement.
+<!-- /example -->
 - **An arrival-direction / anisotropy section is often its own block**, distinct from
   the energy-spectrum section, since the statistical treatment (pre-trial vs.
   post-trial significance over a scanned sky region, angular resolution) differs from
@@ -51,11 +57,13 @@ substitutions:
   circular, a particular gravitational-wave or neutrino event), what the coincidence
   window and localization were, and whether the association is being claimed or only
   reported as a search.
+<!-- example: experiment-specific illustration -->
 - **Solar modulation** is a required systematic discussion for any low-energy
   (sub-~30 GeV/nucleon) cosmic-ray flux measurement from a space-based detector —
   state the solar activity period (which matters for AMS-02/PAMELA-era comparisons)
   and whether a force-field or numerical modulation model was used to compare across
   epochs.
+<!-- /example -->
 
 ## Journals and venues
 
@@ -74,14 +82,17 @@ As with the collider-physics class files, always pull the current `.cls`/`.bst` 
 the publisher rather than reconstructing from memory — AASTeX in particular changes
 version numbers with formatting-relevant changes (author lists, table environments).
 
+<!-- example: experiment-specific illustration -->
 arXiv category: `astro-ph.HE` (high-energy astrophysical phenomena) is the primary
 category for most cosmic-ray/gamma-ray/neutrino result papers; cross-list `hep-ex` if
 the result also has direct particle-physics relevance (e.g. an AMS-02 antimatter/dark
 matter search). See `latex-and-formatting.md`'s arXiv-specific-rules section for the
 general category-selection guidance.
+<!-- /example -->
 
 ## Collaboration author lists and acknowledgments
 
+<!-- example: experiment-specific illustration -->
 - Large observatory collaborations (Pierre Auger, IceCube, AMS-02, CTA, HAWC,
   LHAASO, Telescope Array) follow the same "don't hand-type hundreds of `\author{}`
   lines" rule as collider collaborations — ask for the collaboration's current
@@ -95,6 +106,7 @@ general category-selection guidance.
   the user for the collaboration's existing acknowledgments template rather than
   drafting one from scratch — this is boilerplate that changes rarely and is
   centrally maintained.
+<!-- /example -->
 
 ## Citations: ADS vs. INSPIRE-HEP
 
@@ -122,13 +134,18 @@ astronomy (rather than particle-physics) readership:
   — check the specific venue's current style file rather than assuming numbered
   citations carry over.
 
+<!-- example: experiment-specific illustration -->
 ## Worked example: AMS-02's publication pattern
+<!-- /example -->
 
+<!-- example: experiment-specific illustration -->
 The Alpha Magnetic Spectrometer (AMS-02) collaboration (source: `ams02.space`,
 cross-checked against INSPIRE-HEP records) is a useful concrete illustration of
 several points above, precisely because it deviates from the "typical" pattern in a
 few visible ways:
+<!-- /example -->
 
+<!-- example: experiment-specific illustration -->
 - **Single-venue, letter-only publishing.** Of AMS-02's collaboration papers (31 as
   of 2026-09-10, verified against `ams02.space/publications` and cross-checked
   against raw page content — see the verification note below), essentially all are
@@ -144,6 +161,7 @@ few visible ways:
   This is a deliberate collaboration policy, not a missing upload: **do not assume
   every physics paper has, or will get, an arXiv preprint** — ask the user which
   policy their own collaboration follows before defaulting to "post to arXiv first."
+<!-- /example -->
 - **One long review alongside many short letters.** "The Alpha Magnetic Spectrometer
   on the International Space Station: Part II — Results from the First Seven Years"
   is published in *Physics Reports*, not PRL — a single comprehensive review sitting
@@ -151,6 +169,7 @@ few visible ways:
   from `paper-genre-variants.md`'s "Review articles" section applied at collaboration
   scale: a Phys. Rept. periodically consolidates and cross-references the individual
   PRL results rather than duplicating their derivations.
+<!-- example: experiment-specific illustration -->
 - **A very large, structured author list.** AMS-02 is 44 institutions across the
   Americas, Europe, and Asia, with one PI (Samuel C. C. Ting) and six named deputy
   PIs, operating out of CERN (which hosts the Payload Operations Control Center) in
@@ -185,6 +204,7 @@ few visible ways:
   peer-reviewed literature on its own. Ask the user's own collaboration whether
   it maintains an equivalent "advances" page and what fraction of its entries
   get a dedicated write-up before assuming either way.
+<!-- /example -->
 - **The `ams02.space/physics/*` "highlight" pages are not collaboration-authored
   outreach**, despite living on the collaboration's own domain — see
   `outreach-and-public-facing-summaries.md`'s "Collaboration voice vs.
@@ -204,8 +224,10 @@ forward past its verification date as if it were still current. This is
 `citation-verification.md`'s "record the lookup date" requirement applied to a
 worked example rather than a manuscript claim.
 
+<!-- example: experiment-specific illustration -->
 For the physics/instrument content behind these papers (the AMS-02 detector,
 analysis techniques, and results themselves), see the bound experiment profile (see the context-resolution steps in the skill's SKILL.md; profiles are listed in `${CLAUDE_PLUGIN_ROOT}/profiles/registry.json`) — this section is only about the publication pattern.
+<!-- /example -->
 
 ## Figures: spectra, skymaps, and exposure
 

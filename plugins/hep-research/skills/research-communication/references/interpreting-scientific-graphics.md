@@ -52,12 +52,14 @@ Each plot type has a specific thing readers most often misread:
 
 ## Extracting approximate values when no data table is given
 
+<!-- example: experiment-specific illustration -->
 - Prefer a linked data table, HEPData record, or supplemental file over
   reading pixels off a figure whenever one exists — check for it first (see
   `citations-and-bibliography.md`'s supplemental-material-linking guidance,
   and the AMS-02 case study in `astroparticle-and-cosmic-ray-papers.md`,
   where the underlying flux tables are often published as a separate
   collaboration-site link rather than in the paper's own figure).
+<!-- /example -->
 - If reading from an image is the only option, read against the plot's own
   gridlines/tick marks rather than eyeballing a fraction of the panel, and
   state the result as an approximate value with its precision made

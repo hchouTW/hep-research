@@ -2,6 +2,7 @@
 
 This package is original operational guidance, not a complete summary of the manuals below. Apply formulas with their stated assumptions. Experiment-specific prescriptions must follow the formal sources supplied by the user. Links were consulted during preparation on 2026-09-05, with the astroparticle-physics entries added 2026-09-09; rolling/development pages do not pin an API version.
 
+<!-- example: experiment-specific illustration -->
 | Topic | Primary source | Purpose |
 |---|---|---|
 | HEP statistics | [PDG Statistics review](https://pdg.lbl.gov/2026/reviews/rpp2026-rev-statistics.pdf) | Check interval, likelihood, and inference terminology |
@@ -33,6 +34,7 @@ This package is original operational guidance, not a complete summary of the man
 | Exact binomial/Poisson intervals | Clopper & Pearson, Biometrika 26 (1934) 404; Garwood, Biometrika 28 (1936) 437 | `tag_and_probe_efficiency.py` and `cosmic_ray_flux.py`; cross-checked against `scipy.stats` beta/chi2 quantiles in `${CLAUDE_PLUGIN_ROOT}/tests/skills/detector_response/test_hep_analysis_reference_values.py` |
 | Longitudinal shower profile | Gaisser & Hillas, Proc. 15th ICRC (Plovdiv) 8 (1977) 353 | Functional form in `${CLAUDE_PLUGIN_ROOT}/skills/detector-response/scripts/xmax_gaisser_hillas.py` |
 | Detector-performance definitions | Experiment technical design reports and official performance papers for the apparatus in question (cite by name, configuration, and phase space; none is pinned here) | Any numeric performance claim in references 39-49 must come from one of these, not from this package |
+<!-- /example -->
 
 | Claude Code skills | [Official documentation](https://code.claude.com/docs/en/skills) | Skill directories and invocation |
 
@@ -50,6 +52,7 @@ performance and mission status are superseded by later publications. Rules:
   12 months, or state that it was not re-checked.
 - Standard physics constants and textbook formulas (PDG constants, Bethe-Bloch, Highland,
   Stormer, force field) are stable and exempt, but still cite the edition they came from.
+<!-- example: experiment-specific illustration -->
 - Items to re-verify on each pass. Live checks done 2026-09-25 and re-run 2026-10-02 (the
   2026-09-24 pass was from knowledge only):
   - PDG edition: the 2026 edition is current; the links above now point to it (all four
@@ -93,4 +96,5 @@ performance and mission status are superseded by later publications. Rules:
     is given only as a figure (Fig. 28) with no number in the text, so quote it from the figure
     or a later publication. These apply to the instrument before Layer-0; the upgrade changes
     the tracker configuration.
+<!-- /example -->
 

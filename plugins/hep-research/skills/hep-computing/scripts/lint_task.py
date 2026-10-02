@@ -34,7 +34,7 @@ from validate_skill_bundle import check_template_sections  # noqa: E402
 
 PATH_RE = re.compile(r"`((?:[\w.-]+/)+[\w.-]+\.\w{1,8})`")
 CREATE_RE = re.compile(r"\b(creat\w*|add\w*|new|propos\w*|writ\w*|introduc\w*|generat\w*)\b", re.I)
-PLACEHOLDER_RE = re.compile(r"\{\{.*?\}\}|<!--.*?-->|\bFIXME\b", re.S)
+PLACEHOLDER_RE = re.compile(r"\{\{.*?\}\}|<!--(?!\s*/?example\b).*?-->|\bFIXME\b", re.S)  # plugin example-block markers are not placeholders
 LOOP_RE = re.compile(r"\b(retry|retries|retrying|self-heal\w*|iterative loop|agentic loop|ReAct|until (?:it )?(?:passes|succeeds|works|is green))\b", re.I)
 LIMIT_RE = re.compile(r"\b(max(?:imum)?[- ](?:iteration|pass|attempt|retr|step|turn|number of)\w*|iteration (?:cap|limit|ceiling)|cap\b)", re.I)
 ABSENT_RE = re.compile(r"\b(do(?:es)? not exist|not found|no such|absent|missing|hypothetical|does not have|e\.g\.)", re.I)

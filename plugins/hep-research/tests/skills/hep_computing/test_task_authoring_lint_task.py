@@ -89,6 +89,12 @@ class LintTests(unittest.TestCase):
         errors, _ = self.lint(GOOD.replace("- Other endpoints.", "{{fill in}}"))
         self.assertTrue(any("leftover placeholder" in e for e in errors))
 
+    def test_example_block_markers_are_not_placeholders(self):
+        errors, _ = self.lint("<!-- example: experiment-specific illustration -->\n" + GOOD + "\n<!-- /example -->\n")
+        self.assertFalse(any("leftover placeholder" in e for e in errors), errors)
+        errors, _ = self.lint(GOOD.replace("- Other endpoints.", "<!-- TODO -->"))
+        self.assertTrue(any("leftover placeholder" in e for e in errors))
+
     def test_open_questions_without_an_item_is_an_error(self):
         errors, _ = self.lint(GOOD.replace("- The limit value is TBD.", "None."))
         self.assertTrue(any("no list item" in e for e in errors))

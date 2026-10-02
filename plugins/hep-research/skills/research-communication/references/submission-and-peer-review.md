@@ -105,12 +105,14 @@ publication committee or spokesperson signs off. When helping at this stage:
 - For collaboration papers, follow the collaboration's internal approval
   process before arXiv submission — arXiv submission is often the public
   step *after* internal review, not a substitute for it.
+<!-- example: experiment-specific illustration -->
 - Don't assume every collaboration posts an arXiv preprint at all — some
   (e.g. AMS-02) publish directly to the journal with no arXiv companion, by
   policy, not oversight. Confirm the collaboration's own practice (check its
   recent papers on INSPIRE-HEP for a populated `arXiv:` field) before
   defaulting to "submit to arXiv first." See
   `astroparticle-and-cosmic-ray-papers.md`'s AMS-02 case study.
+<!-- /example -->
 - **Licence** (checked 2026-09-27 on arXiv's help pages): arXiv offers CC BY 4.0,
   CC BY-SA 4.0, CC BY-NC-SA 4.0, CC BY-NC-ND 4.0, CC0, or its own perpetual,
   non-exclusive licence 1.0. The choice is irrevocable for that version, so check

@@ -70,6 +70,7 @@ rather than of the shower physics.
 - **`X_max` is read directly off the fitted longitudinal profile** (Gaisser-Hillas,
   see [31-extensive-air-showers.md](31-extensive-air-showers.md)), making
   fluorescence the primary composition-measuring technique among ground-based methods.
+<!-- example: experiment-specific illustration -->
 - **Duty cycle is roughly 10-15%**: fluorescence light is faint UV, requiring dark,
   clear, moonless nights, so only a fraction of showers that trigger a co-located
   surface array are also seen by fluorescence. This asymmetry is exactly what a
@@ -81,6 +82,7 @@ rather than of the shower physics.
   measurement's own systematic uncertainty (dominated by the fluorescence yield and
   atmospheric transparency/aerosol content, both requiring independent atmospheric
   monitoring instruments co-located with the telescopes).
+<!-- /example -->
 
 ## Atmospheric monitoring
 

@@ -50,11 +50,13 @@ python3 ${CLAUDE_PLUGIN_ROOT}/skills/research-communication/scripts/build_lit_ma
 Expected CSV columns are flexible — the script uses whatever header row is given —
 but a typical one looks like:
 
+<!-- example: experiment-specific illustration -->
 ```csv
 key,year,method,dataset,result,notes
 ATLAS:2012yve,2012,cut-based search,7-8 TeV ATLAS,"126.0 +/- 0.4 +/- 0.4 GeV",discovery paper
 Chatrchyan:2012xdj,2012,cut-based search,7-8 TeV CMS,"125.3 +/- 0.4 +/- 0.5 GeV",independent discovery
 ```
+<!-- /example -->
 
 The result is a compact table the user can paste straight into a draft and adjust the
 prose around, rather than reformatting a spreadsheet by hand each time a paper is

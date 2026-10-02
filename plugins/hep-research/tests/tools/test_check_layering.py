@@ -65,6 +65,10 @@ class LayeringTests(unittest.TestCase):
         v = self.run_case({"skills/hep-analysis/SKILL.md": "# x\n\nAlways use experiment:ams-02 defaults.\n"})
         self.assertViolation(v, "hard-coded-profile-id", "skills/hep-analysis/SKILL.md", 3)
 
+    def test_profile_path_in_skill_text(self):
+        v = self.run_case({"skills/hep-analysis/scripts/s.py": '"""See ${CLAUDE_PLUGIN_ROOT}/profiles/experiments/foo-1/index.md."""\n'})
+        self.assertViolation(v, "hard-coded-profile-path", "skills/hep-analysis/scripts/s.py", 1)
+
     def test_experiment_name_in_skill_text(self):
         v = self.run_case({"skills/hep-analysis/SKILL.md": "line\nAMS-02 uses rigidity.\n"})
         self.assertViolation(v, "hard-coded-experiment-name", "skills/hep-analysis/SKILL.md", 2)

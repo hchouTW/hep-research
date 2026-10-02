@@ -2,11 +2,11 @@
 """Differential cosmic-ray flux from raw counts, exposure, and bin width.
 
 Purpose: the standard final step of any cosmic-ray counting measurement (ground
-array, IACT, neutrino telescope, or a space-based spectrometer like AMS-02) -
+array, IACT, neutrino telescope, or a space-based magnetic spectrometer) -
 turning selected event counts into a differential flux with a statistically correct
 uncertainty - rather than leaving the statistics implicit. See
 ${CLAUDE_PLUGIN_ROOT}/skills/hep-statistics/references/37-astroparticle-statistics.md (exposure/forward-folding discipline) and
-${CLAUDE_PLUGIN_ROOT}/profiles/experiments/ams-02/modules/subsystems/instrument-overview.md.
+the bound experiment profile's instrument overview.
 
 What it does: for one or more energy/rigidity bins, given the observed count N,
 the exposure (effective area or geometric factor, times live time, times solid

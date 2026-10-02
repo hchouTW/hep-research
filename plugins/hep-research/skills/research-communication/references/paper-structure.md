@@ -24,8 +24,10 @@ than the whole file when time-pressed.
 
 - States the *result*, not the method: "Measurement of the top-quark mass in
   ttbar events" beats "A study of ttbar events using kinematic reconstruction."
+<!-- example: experiment-specific illustration -->
 - Avoid acronyms unless they are field-standard (LHC, ATLAS is fine; a
   collaboration-internal acronym is not).
+<!-- /example -->
 - No punctuation-heavy titles ("Results, revisited: a new look at...") for
   experimental papers; theory papers have more latitude.
 - Keep it under ~15 words where the venue doesn't dictate otherwise.
@@ -38,8 +40,10 @@ one to two sentences each):
 
 1. **Context** — what physics question, in one sentence, assuming an educated
    physicist reader but not a specialist in this exact sub-topic.
+<!-- example: experiment-specific illustration -->
 2. **What was done** — data source, method, in the fewest words that are still
    accurate ("Using 139 fb⁻¹ of pp collisions at √s = 13 TeV recorded by ATLAS...").
+<!-- /example -->
 3. **The result** — the number, with uncertainty, and its statistical
    significance if relevant. This is the sentence people will quote.
 4. **Significance / comparison** — how it compares to previous measurements or

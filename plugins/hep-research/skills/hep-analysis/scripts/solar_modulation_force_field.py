@@ -4,8 +4,8 @@
 Purpose: convert between the local interstellar spectrum (LIS, outside the
 heliosphere) and the flux measured at 1 AU, given a single effective modulation
 potential phi - the standard first-order correction described in
-${CLAUDE_PLUGIN_ROOT}/skills/detector-response/references/35-space-based-direct-detection.md and ${CLAUDE_PLUGIN_ROOT}/profiles/experiments/ams-02/modules/subsystems/instrument-overview.md,
-needed because AMS-02-class instruments measure at 1 AU during a specific, time-
+${CLAUDE_PLUGIN_ROOT}/skills/detector-response/references/35-space-based-direct-detection.md and the bound experiment profile's modules,
+needed because space-based magnetic spectrometers measure at 1 AU during a specific, time-
 varying solar-activity epoch, not the LIS directly.
 
 What it does: implements
