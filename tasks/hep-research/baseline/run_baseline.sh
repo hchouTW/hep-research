@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -u
-REPO="${REPO:-$(git rev-parse --show-toplevel)}"
-OUT="$REPO/tasks/hep-research/baseline"; mkdir -p "$OUT"
+# Legacy skills live in a read-only checkout of agentic-ai-skills (see tasks/hep-research/LEGACY_SOURCE.md).
+HERE="$(git rev-parse --show-toplevel)"
+REPO="${LEGACY_REPO:-$HERE/.legacy/agentic-ai-skills}"
+OUT="$HERE/tasks/hep-research/baseline"; mkdir -p "$OUT"
 SUMMARY="$OUT/summary.csv"; echo "skill,step,result" > "$SUMMARY"
 for skill in ams-analysis hep-analysis deep-learning academic-papers \
              academic-diagrams agile-development task-authoring; do
