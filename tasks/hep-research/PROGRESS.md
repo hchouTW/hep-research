@@ -107,18 +107,20 @@ M4 exit checks: Path D and T24 pass; every negative composition/compatibility fi
 - [x] pyhf 0.7.6 installed (user approved): end-to-end sample passes; counting and two-channel shape workspaces match an independent likelihood (`tests/adapters/test_pyhf_*.py`); VALIDATION PYHF-RUN
 - [x] PR #1 opened and merged into `main` (merge commit, history kept); `main` made the default branch by the user
 - [x] uproot 5.7.6 and awkward 2.14.0 installed (user approved): uproot-dependent tests pass; `uproot_awkward_analysis.py` asset verified on synthetic files (`tests/adapters/test_uproot_awkward_asset.py`); VALIDATION UPROOT-RUN
+- [x] PR #2 merged (`e48f521`); GitHub auto-deletes merged PR branches (user setting)
+- [x] PyTorch 2.14.1 installed (user approved; PyPI build, CPU): physics-ml tests and a 2-process DDP run pass; VALIDATION PYTORCH-RUN
 
 ## Blockers / needs user
 
-1. Open for the user: ROOT/PyROOT, CMS Combine, PyTorch and the diagram tools are not installed (each install needs approval); their tests stay skipped and unverified.
+1. Open for the user: ROOT/PyROOT, CMS Combine, torchvision and the diagram tools are not installed (each install needs approval); their tests stay skipped and unverified.
 2. Open from M1: the old branch in agentic-ai-skills (M1-12) is for the user to delete.
 
 ## Resume checklist
 
 1. `tasks/hep-research/scripts/fetch_legacy.sh`
-2. `python3 -m venv .venv-hep && .venv-hep/bin/pip install -r tasks/hep-research/m6/uproot/pip-freeze-uproot.txt` (D5 + pyhf + uproot/awkward; `baseline/pip-freeze-d5.txt` for D5 only)
+2. `python3 -m venv .venv-hep && .venv-hep/bin/pip install -r tasks/hep-research/m6/pytorch/pip-freeze-pytorch.txt` (D5 + pyhf + uproot/awkward + PyTorch; `m6/uproot/pip-freeze-uproot.txt` without PyTorch; `baseline/pip-freeze-d5.txt` for D5 only)
 3. `.venv-hep/bin/python plugins/hep-research/tools/run_all_checks.py`
 
 ## Next step
 
-None planned. Possible follow-ups need the user: ROOT, Combine or PyTorch environments to verify the remaining skipped tests and adapter parts.
+None planned. Possible follow-ups need the user: ROOT, Combine or torchvision environments to verify the remaining skipped tests and adapter parts.
