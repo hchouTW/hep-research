@@ -117,18 +117,20 @@ M4 exit checks: Path D and T24 pass; every negative composition/compatibility fi
 - [x] Diagram tools installed (user approved): Graphviz 14.1.2, PlantUML 1.2026.8, Mermaid CLI 12.0.0 pass their real-tool tests (4 tests no longer skipped); tectonic 0.17.0 installed but its TeX bundle host is blocked, so the paper compile stays unverified; VALIDATION DIAGRAM-RUN
 - [x] PR #6 merged (`9823a4a`)
 - [x] torchvision 0.29.1 installed (user approved, PyPI, torch unchanged): `vision_transfer.py` help and a one-epoch run on synthetic images pass (untrained ResNet-18; pretrained weights need a blocked host); VALIDATION TORCHVISION-RUN
+- [x] PR #7 merged (`062ac17`)
+- [x] CMS Combine 11.1.0 installed from conda-forge (user approved) in `.venv-hep-combine/env-root636` (ROOT 6.36.14; the ROOT 6.40.04 build fails in AsymptoticLimits): datacard limit 2.1565 vs pyhf 2.153; `adapters/pyhf-combine` demonstrated-on-synthetic-data; VALIDATION COMBINE-RUN
 
 ## Blockers / needs user
 
-1. Open for the user: CMS Combine is not installed (each install needs approval); the tectonic paper compile needs network access to relay.fullyjustified.net (or an offline TeX bundle). Their tests stay skipped and unverified. `vision_transfer.py` with pretrained weights needs download.pytorch.org (blocked).
+1. Open for the user: the tectonic paper compile needs network access to relay.fullyjustified.net (or an offline TeX bundle); its test stays skipped and unverified. `vision_transfer.py` with pretrained weights needs download.pytorch.org (blocked).
 2. Open from M1: the old branch in agentic-ai-skills (M1-12) is for the user to delete.
 
 ## Resume checklist
 
 1. `tasks/hep-research/scripts/fetch_legacy.sh`
 2. `python3 -m venv .venv-hep && .venv-hep/bin/pip install -r tasks/hep-research/m6/pytorch/pip-freeze-pytorch.txt` (D5 + pyhf + uproot/awkward + PyTorch; `m6/uproot/pip-freeze-uproot.txt` without PyTorch; `baseline/pip-freeze-d5.txt` for D5 only)
-3. `.venv-hep/bin/python plugins/hep-research/tools/run_all_checks.py` (with ROOT: recreate `.venv-hep-root/env` from `tasks/hep-research/m6/root/conda-explicit-root.txt` with micromamba and set `HEP_ROOT_PYTHON=.venv-hep-root/env/bin/python`; with diagram tools: recreate `.venv-hep-diagrams/` as in VALIDATION DIAGRAM-RUN and put `.venv-hep-diagrams/bin` first on PATH)
+3. `.venv-hep/bin/python plugins/hep-research/tools/run_all_checks.py` (with ROOT: recreate `.venv-hep-root/env` from `tasks/hep-research/m6/root/conda-explicit-root.txt` with micromamba and set `HEP_ROOT_PYTHON=.venv-hep-root/env/bin/python`; with Combine: recreate `.venv-hep-combine/env-root636` from `tasks/hep-research/m6/combine/conda-explicit-combine-root636.txt` and set `HEP_COMBINE_WRAPPER` as in VALIDATION COMBINE-RUN; with diagram tools: recreate `.venv-hep-diagrams/` as in VALIDATION DIAGRAM-RUN and put `.venv-hep-diagrams/bin` first on PATH)
 
 ## Next step
 
-None planned. Possible follow-ups need the user: a Combine environment, or network access for the tectonic bundle, to verify the remaining skipped tests and adapter parts.
+None planned. A possible follow-up needs the user: network access for the tectonic bundle (or pretrained-weight downloads) to verify the last skipped test and the pretrained path of `vision_transfer.py`.

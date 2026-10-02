@@ -42,6 +42,6 @@ Bump its version, rerun its tests in the declared environment, record the run in
 environment, command, result), and update the matrix. A tool upgrade that changes numbers beyond the declared
 tolerance is a breaking change.
 
-`adapters/pyhf-combine` is `proposed`: its pyhf part is `demonstrated-on-synthetic-data` (pyhf 0.7.6) and its
-Combine part is `proposed`. `adapters/root-uproot` is `demonstrated-on-synthetic-data`
+`adapters/pyhf-combine` is `demonstrated-on-synthetic-data`: its pyhf part with pyhf 0.7.6 and its Combine part with
+Combine 11.1.0 (conda-forge, ROOT 6.36.14), which the Combine test reaches through `HEP_COMBINE_WRAPPER`. `adapters/root-uproot` is `demonstrated-on-synthetic-data`
 (ROOT 6.40.04, uproot 5.7.6, awkward 2.14.0); its ROOT tests find ROOT through `HEP_ROOT_PYTHON` or `HEP_ROOT_CONFIG`.
