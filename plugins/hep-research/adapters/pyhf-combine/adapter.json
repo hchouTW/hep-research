@@ -1,0 +1,11 @@
+{
+ "id": "adapter:pyhf-combine",
+ "version": "0.1.0",
+ "status": "proposed",
+ "purpose": "Starting points for HistFactory-style likelihoods: a pyhf counting workspace and a CMS Combine datacard template",
+ "tools": [{"name": "pyhf", "tested_versions": []}, {"name": "CMS Combine", "tested_versions": []}],
+ "environment": "none declared; pyhf and Combine were not installed in v1 checks",
+ "assets": ["assets/pyhf-counting.json", "assets/combine_datacard_template.txt"],
+ "tests": [],
+ "owner_skill": "hep-statistics"
+}

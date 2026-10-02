@@ -1,5 +1,7 @@
 # Analysis Artifacts: Specification, Ledgers, Response Card, and Review Report
 
+> Method owner: [hep-analysis](../../../../../skills/hep-analysis/SKILL.md) defines the general method (measurement specifications (schemas: `contracts/`)); implementation in `contracts/`. This module records how AMS-02 analyses apply it. General statements here are snapshots carried from the legacy `ams-analysis` skill; where they differ from the owner, the owner's text applies.
+
 ## When to read this file
 
 Read only when the request is to design or write down an AMS measurement as a structured specification, generate a measurement brief or any ledger/registry (selection, background, systematic, response, evidence), run or interpret the deterministic checkers in `scripts/`, or write a formal verdict-first analysis review. Do not load it for a conceptual question or a quick conversion. Field semantics for selections, backgrounds and systematics stay in their canonical homes: [reconstruction-and-data-quality](../methods/reconstruction-and-data-quality.md#cut-flow-ledger), [efficiency-acceptance-backgrounds](../methods/efficiency-acceptance-backgrounds.md#background-ledger), [calibration-mc-systematics](../methods/calibration-mc-systematics.md#systematic-ledger). Evidence rules are in [source-policy](../sources/source-policy.md).

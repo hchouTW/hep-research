@@ -69,6 +69,26 @@ class ArtifactFixtureTests(unittest.TestCase):
             self.assertIn("SYNTHETIC", load(p)["objective"], p.name)
 
 
+class DataKindStatusTests(unittest.TestCase):
+    """AC22: synthetic, Asimov and observed stay distinct labels."""
+
+    def test_observed_cannot_be_combined_with_synthetic_or_asimov(self):
+        base = load(ART / "valid" / "dataset_record.json")
+        for other in ("synthetic", "asimov"):
+            with self.subTest(other=other):
+                doc = copy.deepcopy(base)
+                doc["status"] = ["observed", other]
+                self.assertIn("status.conflict", codes(validate_artifact(doc)))
+
+    def test_synthetic_and_asimov_labels_validate_alone(self):
+        base = load(ART / "valid" / "dataset_record.json")
+        for st in (["synthetic"], ["asimov", "synthetic"]):
+            with self.subTest(status=st):
+                doc = copy.deepcopy(base)
+                doc["status"] = st
+                self.assertNotIn("status.conflict", codes(validate_artifact(doc)))
+
+
 class NonColliderNormalizationTests(unittest.TestCase):
     """T26: exposure, protons-on-target, target-exposure validate with no luminosity field."""
 

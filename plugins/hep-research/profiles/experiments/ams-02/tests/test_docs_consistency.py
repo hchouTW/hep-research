@@ -95,5 +95,19 @@ class DateWordingTests(unittest.TestCase):
         self.assertGreater(len(dates - {"unknown"}), 1)
 
 
+class MethodOwnerTests(unittest.TestCase):
+    """AC05: each AMS method module names the core skill that owns the general method (one definition owner)."""
+
+    def test_every_method_module_names_an_existing_owner(self):
+        for f in sorted((ROOT / "modules" / "methods").glob("*.md")):
+            if f.name == "worked-examples.md":
+                continue
+            text = f.read_text(encoding="utf-8")
+            m = re.search(r"^> Method owner: \[([a-z-]+)\]\(([^)]+)\)", text, re.M)
+            self.assertIsNotNone(m, f.name)
+            self.assertTrue((f.parent / m.group(2)).resolve().is_file(), (f.name, m.group(2)))
+            self.assertEqual((f.parent / m.group(2)).resolve().parent.name, m.group(1))
+
+
 if __name__ == "__main__":
     unittest.main()

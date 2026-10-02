@@ -94,6 +94,8 @@ def main(argv=None) -> int:
         run_script("ams_optional", [py, "tools/check_ams_optional.py"]),
         run_script("routing_static", [py, "tools/check_routing_static.py"]),
         run_script("packaging_scan", [py, "tools/check_packaging.py"]),
+        run_script("traceability", [py, "tools/check_traceability.py"]
+                   + (["--legacy", str(LEGACY)] if (LEGACY := ROOT.parents[1] / ".legacy" / "agentic-ai-skills").is_dir() else [])),
         run_script("measure_entrypoints", [py, "tools/measure_entrypoints.py"] + (["--no-cli"] if "--no-cli" in args else [])),
         host_validate() if "--no-cli" not in args else {"name": "claude-plugin-validate", "status": "skip", "reason": "--no-cli"},
     ]

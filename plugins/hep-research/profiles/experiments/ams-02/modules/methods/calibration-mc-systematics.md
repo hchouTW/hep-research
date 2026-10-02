@@ -1,5 +1,7 @@
 # Calibration, Monte Carlo, and Systematic Uncertainties
 
+> Method owner: [detector-response](../../../../../skills/detector-response/SKILL.md) defines the general method (calibration, simulation and response systematics). This module records how AMS-02 analyses apply it. General statements here are snapshots carried from the legacy `ams-analysis` skill; where they differ from the owner, the owner's text applies.
+
 ## When to read this file
 
 Read when linking conditions and calibrations to reconstructed quantities, validating MC against data, assembling a systematic ledger, or checking that a systematic is neither missing nor counted twice. The four correction categories are defined in [reconstruction-and-data-quality](../methods/reconstruction-and-data-quality.md#four-categories-of-correction); the likelihood treatment of nuisances in [inference-and-unfolding](../methods/inference-and-unfolding.md).

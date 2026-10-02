@@ -1,5 +1,7 @@
 # Reconstruction, Selection, and Data Quality
 
+> Method owner: [detector-response](../../../../../skills/detector-response/SKILL.md) defines the general method (reconstruction and data-quality methods). This module records how AMS-02 analyses apply it. General statements here are snapshots carried from the legacy `ams-analysis` skill; where they differ from the owner, the owner's text applies.
+
 ## When to read this file
 
 Read when defining or reviewing reconstruction objects, matching, cut flows, run/event quality, time dependence, or the separation of training/tuning/control/measurement samples. It owns the **conditions model** and the **four-category distinction** (veto, calibration, efficiency, response). Subsystem physics is in [detector-and-observables](../subsystems/detector-and-observables.md); calibrations and MC provenance in [calibration-mc-systematics](../methods/calibration-mc-systematics.md).

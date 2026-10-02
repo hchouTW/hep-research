@@ -1,5 +1,7 @@
 # Efficiency, Acceptance, Exposure, Backgrounds, and Template-Fit Design
 
+> Method owner: [hep-analysis](../../../../../skills/hep-analysis/SKILL.md) defines the general method (correction chains and background estimation (efficiency methods themselves: detector-response)). This module records how AMS-02 analyses apply it. General statements here are snapshots carried from the legacy `ams-analysis` skill; where they differ from the owner, the owner's text applies.
+
 ## When to read this file
 
 Read when defining efficiencies, acceptance, exposure, MC generation, background ledgers, or when designing/reviewing a template fit. It is the canonical home for conditional efficiencies, the exposure/acceptance definitions, the background ledger, and the template-fit checklist. The count/response likelihood is in [inference-and-unfolding](../methods/inference-and-unfolding.md); calibrations and MC provenance in [calibration-mc-systematics](../methods/calibration-mc-systematics.md).
