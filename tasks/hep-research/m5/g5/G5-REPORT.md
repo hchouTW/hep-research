@@ -85,7 +85,7 @@ model (claude-sonnet-5-5), tools, 4-turn limit, synthetic inputs and plugin-only
 | Expected skill chosen first (or clarifying question) | 43 of 48 (en 29/33, zh-Hant 14/15) |
 | Another `hep-research` skill | 1: J5 fold-and-fit to `detector-response` (unchanged) |
 | No skill loaded | 3: `co-neighbor-1` and `j08` (answered directly), `rc-neighbor-1` (asked for the diagram) |
-| Scored fail | 1: `underspec-2` asked for the missing results in Chinese without a question mark, which the scorer does not count as a question; the behavior is the expected one, the score is left as computed |
+| Scored fail | 1: `underspec-2` asked for the missing results in Chinese without a question mark, which the scorer did not count as a question; the behavior is the expected one, the score is left as computed (fixed later; see "Scorer fix") |
 
 Cost $4.24. Traces: `routing-run4-tuned.json`, `routing-run4-score.json`.
 
@@ -111,4 +111,12 @@ Short theory questions answered from memory (`co-neighbor-1`, `co-negative-1`) r
 version. `rc-neighbor-1` does not look at `diagram.md` (it searches for images); `j05` goes to `detector-response`,
 which owns folding, so the case's expectation (`hep-theory`, the J5 chain head) may be the thing to revisit rather
 than the description. Three runs per case is a small sample; differences of one run are within noise.
+
+## Scorer fix (2026-10-02, after PR #8)
+
+`score_routing.py` now also counts a request for the missing input as a clarifying question when it has no question
+mark: `ASK_MARKERS` adds 請你提供, 請你告訴, 請說明, 請給我, 請確認 and the Simplified forms. Every saved run was
+re-scored offline with the old and new scorer (no model calls). Only one outcome changed: `underspec-2` in run 4
+("請你提供下列任一項") goes from fail to pass, so run 4 is 44/48 (`routing-run4-score-rescored.json`; the original
+`routing-run4-score.json`, 43/48, is kept). Runs 1 to 3 and the round-2 repeats are unchanged.
 

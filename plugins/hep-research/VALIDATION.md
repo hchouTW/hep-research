@@ -164,7 +164,7 @@ plugins/hep-research/tools/run_all_checks.py --out tasks/hep-research/check-runs
 | Mermaid CLI rejects bad flowchart syntax | pass, no longer skipped | same file, `test_real_mmdc_rejects_bad_syntax` |
 | PlantUML rejects a one-line class body | pass, no longer skipped | same file, `test_real_plantuml_rejects_one_line_class_body` |
 | Every shipped diagram source passes `check_diagram_sources.py` with the real tools present | pass | same file, `test_shipped_diagram_sources_pass` |
-| Bundled paper skeleton compiles with tectonic | unverified | with tectonic on PATH the test fails before compiling: tectonic must download its TeX bundle from relay.fullyjustified.net, which the network policy rejects (proxy CONNECT 403). tectonic is therefore left off PATH and the test skips; its skip message still says "tectonic not installed" |
+| Bundled paper skeleton compiles with tectonic | unverified | with tectonic on PATH the test fails before compiling: tectonic must download its TeX bundle from relay.fullyjustified.net, which the network policy rejects (proxy CONNECT 403). tectonic is therefore left off PATH and the test skips; its skip message said "tectonic not installed" until the later cleanup, which changed it to "tectonic not on PATH (it also downloads a TeX bundle on first use)" |
 
 ## TORCHVISION-RUN (2026-10-02, after the merge of PR #6)
 

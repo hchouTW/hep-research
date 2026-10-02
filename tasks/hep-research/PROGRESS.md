@@ -110,7 +110,7 @@ M4 exit checks: Path D and T24 pass; every negative composition/compatibility fi
 - [x] PR #2 merged (`e48f521`); GitHub auto-deletes merged PR branches (user setting)
 - [x] PyTorch 2.14.1 installed (user approved; PyPI build, CPU): physics-ml tests and a 2-process DDP run pass; VALIDATION PYTORCH-RUN
 - [x] PR #3 merged (`cd5cf6f`)
-- [x] Routing round 2 (user approved, paid runs): tuned `hep-theory` and `hep-statistics` descriptions; run 4 43/48; repeats old 12/30 vs new 16/30 on the 10 changed cases (G5-REPORT "Routing round 2")
+- [x] Routing round 2 (user approved, paid runs): tuned `hep-theory` and `hep-statistics` descriptions; run 4 43/48 (44/48 after the scorer fix); repeats old 12/30 vs new 16/30 on the 10 changed cases (G5-REPORT "Routing round 2")
 - [x] PR #4 merged (`57c0f62`)
 - [x] ROOT 6.40.04 installed from conda-forge into `.venv-hep-root/` (user approved, micromamba): PyROOT tests and C++ assets pass; `adapters/root-uproot` demonstrated-on-synthetic-data; VALIDATION ROOT-RUN
 - [x] PR #5 merged (`a9cab97`)
