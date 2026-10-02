@@ -1,0 +1,65 @@
+{
+ "contract_version": "1.0.0",
+ "bindings": {
+  "experiments": [],
+  "theory": [
+   {
+    "profile": "theory:qed-benchmark",
+    "version": "1.0.0"
+   }
+  ]
+ },
+ "versions": {
+  "plugin": "0.1.0",
+  "contracts": "1.0.0",
+  "profiles": {
+   "theory:qed-benchmark": "1.0.0"
+  }
+ },
+ "outputs": [],
+ "unresolved_inputs": [
+  "truncation (higher orders, Z exchange) not quantified in the prediction"
+ ],
+ "artifact_id": "synthetic-t24-mu",
+ "artifact_type": "statistical-result",
+ "status": [
+  "synthetic"
+ ],
+ "inputs": [
+  {
+   "ref": "artifacts/comparison_spec.json",
+   "artifact_type": "comparison-spec",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "objective": "Normalization scale of the QED prediction on a SYNTHETIC published-style record",
+ "provenance": {
+  "producer_skill": "hep-statistics",
+  "created": "2026-10-02"
+ },
+ "extension": {
+  "paradigm": "frequentist",
+  "likelihood": {
+   "form": "multivariate Gaussian with the record covariance"
+  },
+  "parameters_of_interest": [
+   "mu"
+  ],
+  "nuisances": [],
+  "test_statistic": "chi2(mu) = (d - mu p)^T C^-1 (d - mu p)",
+  "construction": "asymptotic",
+  "coverage": {
+   "method": "not studied here; Gaussian, linear in mu, so exact if the covariance is right"
+  },
+  "fit_status": "converged",
+  "results": {
+   "mu_hat": 0.9950962580369148,
+   "sigma_mu": 0.021816617742651704,
+   "chi2": 10.274833881611531,
+   "ndf": 9,
+   "p_value": 0.3286975482644167
+  }
+ }
+}
