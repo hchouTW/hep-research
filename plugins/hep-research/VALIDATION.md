@@ -1,7 +1,7 @@
 # VALIDATION — hep-research 0.1.0 (handover, M6)
 
 Environment E1 for all entries below unless a row says otherwise: Claude Code cloud container (Linux 6.18 x86_64), Python 3.11.15, `.venv-hep` with numpy 2.4.6, scipy 1.17.1, matplotlib 3.11.2, sympy 1.14.0 (`requirements-core.txt`); Claude Code CLI 2.1.287. Date 2026-10-02. Branch `feat/hep-research-plugin` of hchouTW/hep-research; each row's evidence is at the final handover commit unless it names another. Legacy source `agentic-ai-skills@3e995a4`.
-Aggregate command: `python3 tools/run_all_checks.py --out <dir>` (from the plugin root). Final run `tasks/hep-research/check-runs/check-run-2026-10-02T172338Z.json`: 14 checks pass / 0 fail / 0 skip; 960 unit tests: 921 pass, 0 fail, 39 skip (PyTorch, PyROOT, awkward/uproot, pyhf, Combine, Graphviz, Mermaid, PlantUML, tectonic not installed; these are unverified, not passing); profile suites: ams-02 258, synthetic-collider 9, qed-benchmark 16 pass. Seeds and tolerances of every example are in its `results.json`; commands are in each row.
+Aggregate command: `python3 tools/run_all_checks.py --out <dir>` (from the plugin root). Final run `tasks/hep-research/check-runs/check-run-2026-10-02T174050Z.json`: 14 checks pass / 0 fail / 0 skip; 973 unit tests: 934 pass, 0 fail, 39 skip (PyTorch, PyROOT, awkward/uproot, pyhf, Combine, Graphviz, Mermaid, PlantUML, tectonic not installed; these are unverified, not passing); profile suites: ams-02 258, synthetic-collider 9, qed-benchmark 16 pass. Seeds and tolerances of every example are in its `results.json`; commands are in each row.
 Software checks establish contract consistency only: not physical validity, proof, statistical coverage, or authorization to unblind.
 
 | AC | Result | Evidence | Remaining |
