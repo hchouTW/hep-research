@@ -46,7 +46,7 @@ Check the naming, correlations, positivity, interpolation, and bounds of rate, s
 
 ```bash
 pyhf cls ${CLAUDE_PLUGIN_ROOT}/adapters/pyhf-combine/assets/pyhf-counting.json                       # single-bin schema and CLs check
-# end-to-end sample analysis: deferred to the M3 example; not shipped yet
+python3 ${CLAUDE_PLUGIN_ROOT}/examples/end-to-end-sample/end_to_end_sample_analysis.py --outdir demo_out   # full chain, needs numpy + pyhf
 ```
 
 The first command gives CLs_obs = 0.335 at mu = 1 for n = b = 20 with a 10% normsys. The second
