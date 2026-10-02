@@ -8,6 +8,7 @@ A valid artifact is self-consistent under the contract; that says nothing about 
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -27,6 +28,14 @@ EXTENSION_SCHEMAS = {
 # Statuses that must survive every handoff: a consumer of such an input carries the label.
 STICKY_STATUSES = ["failed", "unvalidated", "preliminary", "synthetic", "asimov", "user-supplied"]
 NON_GAUSSIAN_KINDS = {"scale-envelope", "model-alternative", "truncation"}
+UPGRADED = {"observed", "validated-in-scope"}
+AUC_ONLY = re.compile(r"^\s*(roc[\s_-]*)?auc(\s*\(?roc\)?)?\s*$", re.I)
+
+
+def required_statuses(inputs) -> list[str]:
+    """Sticky statuses any consumer of these inputs must carry (failed, synthetic, asimov, ...)."""
+    found = {s for i in inputs for s in i.get("status", [])}
+    return [s for s in STICKY_STATUSES if s in found]
 EXPERIMENT_ONLY_FIELDS = {"selections", "backgrounds", "blinding", "detector", "response", "corrections", "period"}
 
 
@@ -141,6 +150,23 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:
     elif t == "ml-artifact":
         if not ext.get("splits", {}).get("grouping_key"):
             rep.add("error", "$.extension.splits.grouping_key", "ml.no_grouping", "splits need a grouping key (leakage control)")
+        dv = ext.get("downstream_validation", [])
+        if not dv:
+            rep.add("unresolved", "$.extension.downstream_validation", "ml.no_downstream_validation",
+                    "no downstream validation yet: a model is not usable in an analysis until it is validated there")
+        elif all(AUC_ONLY.search(str(v.get("metric", v) if isinstance(v, dict) else v)) for v in dv):
+            rep.add("error", "$.extension.downstream_validation", "ml.auc_only",
+                    "AUC alone is insufficient: add calibration, working-point efficiency, or data/simulation agreement in the analysis region")
+        if ext.get("task") == "surrogate" and not ext.get("training_domain"):
+            rep.add("error", "$.extension.training_domain", "ml.no_training_domain", "a surrogate needs its training domain to detect extrapolation")
+    elif t == "communication":
+        for i, c in enumerate(ext.get("claims", [])):
+            cs = c.get("status")
+            cs = set(cs) if isinstance(cs, list) else {cs}
+            missing = sorted(set(required_statuses(doc.get("inputs", []))) - cs)
+            if missing or (cs & UPGRADED and inherited & set(STICKY_STATUSES)):
+                rep.add("error", f"$.extension.claims[{i}].status", "communication.status_upgraded",
+                        f"a claim must keep its inputs' statuses {missing or sorted(inherited & set(STICKY_STATUSES))}; communication never upgrades status")
 
 
 def validate_artifact(doc, vocab: Vocabulary | None = None) -> Report:

@@ -22,7 +22,7 @@ description: "Use when the deliverable is a statistical inference or its diagnos
 ## Workflow
 
 1. Resolve context (stanza below). Collect inputs as artifacts: measurement spec, response, prediction, dataset records.
-2. Run the compatibility gate when inputs come from different producers.
+2. Run the compatibility gate when inputs come from different producers: `python3 ${CLAUDE_PLUGIN_ROOT}/contracts/compat/gate.py PREDICTION.json MEASUREMENT.json --plan PLAN.json` (declared transformations, mappings and measurement conditions; exit 1 lists each mismatch and what would resolve it).
 3. Build the statistical model: observables, parameters of interest, nuisances and constraints, correlations with their evidence.
 4. Validate on Asimov and toys (bias, pull widths, coverage), then fit.
 5. Write the `statistical-result` with paradigm-specific fields and validate it.
@@ -41,7 +41,7 @@ description: "Use when the deliverable is a statistical inference or its diagnos
 
 References under `references/`: likelihood fitting (`07`), inference (`08`), statistical tools including pyhf and Combine (`09`), astroparticle statistics (`37`), and [inference reasoning](references/statistical-inference-for-physics.md) for checking a likelihood, test, interval or limit.
 
-Executable checks live in `${CLAUDE_PLUGIN_ROOT}/core/stats/` (likelihood limits, template fits, unfolding diagnostics, Poisson diagnostics, toys, covariance and response validation); run each with `--help` first. `${CLAUDE_PLUGIN_ROOT}/skills/hep-statistics/scripts/li_ma_significance.py` gives the ON/OFF significance. pyhf and Combine starting points are in `${CLAUDE_PLUGIN_ROOT}/adapters/pyhf-combine/assets/`.
+Executable checks live in `${CLAUDE_PLUGIN_ROOT}/core/stats/` (likelihood limits, template fits, unfolding diagnostics, Poisson diagnostics, toys, covariance and response validation); run each with `--help` first. `${CLAUDE_PLUGIN_ROOT}/skills/hep-statistics/scripts/li_ma_significance.py` gives the ON/OFF significance; `combine_measurements.py` combines measurements of one observable by generalized least squares only after the combination plan accepts them (declared cross-dataset blocks, shared auxiliary measurements, no Gaussianized envelopes). pyhf and Combine starting points are in `${CLAUDE_PLUGIN_ROOT}/adapters/pyhf-combine/assets/`.
 
 ## Handoffs
 
