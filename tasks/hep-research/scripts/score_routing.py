@@ -24,7 +24,8 @@ def classify(tr):
     if first is None and tr.get("subtype") not in ("success", "error_max_turns"):
         return "run-error", first
     if exp == "ask":
-        asks = "?" in (tr.get("result") or "") or "？" in (tr.get("result") or "")
+        r = tr.get("result") or ""
+        asks = any(m in r for m in ("?", "？", "請告訴", "請提供", "請問"))
         return ("pass" if asks else "fail"), first
     if first is None:
         return "no-skill", first

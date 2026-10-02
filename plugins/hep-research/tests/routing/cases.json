@@ -9,7 +9,10 @@
    "expected_primary": "detector-response",
    "trigger_terms": [
     "tag-and-probe"
-   ]
+   ],
+   "inputs": {
+    "tnp_counts.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\npt_lo,pt_hi,probes,passing_probes\n20,30,1200,1104\n30,50,2400,2280\n50,100,900,873\n"
+   }
   },
   {
    "id": "dr-direct-2",
@@ -20,7 +23,10 @@
    "trigger_terms": [
     "response matrices",
     "data/MC agreement"
-   ]
+   ],
+   "inputs": {
+    "calo_scan.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nbeam_energy_GeV,mean_reco_GeV,sigma_reco_GeV,data_or_mc\n10,9.6,0.62,data\n10,9.7,0.58,mc\n50,48.9,1.71,data\n50,49.2,1.60,mc\n"
+   }
   },
   {
    "id": "dr-neighbor-1",
@@ -31,7 +37,11 @@
    "trigger_terms": [
     "unfolding"
    ],
-   "not": "detector-response"
+   "not": "detector-response",
+   "inputs": {
+    "measured_spectrum.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nbin,lo,hi,counts\n0,0,10,520\n1,10,20,310\n2,20,40,140\n",
+    "response_matrix.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nreco_bin,true0,true1,true2\n0,0.80,0.12,0.01\n1,0.15,0.75,0.10\n2,0.01,0.10,0.82\n"
+   }
   },
   {
    "id": "dr-negative-1",
@@ -43,7 +53,10 @@
     "background estimation",
     "control regions"
    ],
-   "not": "detector-response"
+   "not": "detector-response",
+   "inputs": {
+    "analysis_note.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\n# Dilepton measurement (draft)\nSignal region: two opposite-sign muons, m_ll in 200-1000 GeV.\nMain backgrounds: Drell-Yan, ttbar, fakes. No background method chosen yet.\n"
+   }
   },
   {
    "id": "an-direct-1",
@@ -55,7 +68,10 @@
     "estimand",
     "systematic uncertainties",
     "measurement review"
-   ]
+   ],
+   "inputs": {
+    "measurement_spec.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\n# Measurement spec\nObservable: number of events with two jets above 30 GeV.\nResult: 'the rate'.\nSystematics: jet energy scale.\n"
+   }
   },
   {
    "id": "an-direct-2",
@@ -77,7 +93,10 @@
    "trigger_terms": [
     "CLs"
    ],
-   "not": "hep-analysis"
+   "not": "hep-analysis",
+   "inputs": {
+    "yields.json": "{\"_note\": \"SYNTHETIC routing fixture: invented values, not data from any experiment.\", \"observed\": 7, \"background\": 4.2, \"background_unc\": 0.9, \"signal_mu1\": 3.1}\n"
+   }
   },
   {
    "id": "an-negative-1",
@@ -89,7 +108,10 @@
     "crashes",
     "ROOT/PyROOT"
    ],
-   "not": "hep-analysis"
+   "not": "hep-analysis",
+   "inputs": {
+    "read_tree.py": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nimport ROOT\nf = ROOT.TFile.Open('events.root')\nt = f.Get('Events')\nfor ev in t:\n    print(ev.Muon_pt[0])  # crashes on events with no muon\n"
+   }
   },
   {
    "id": "co-direct-1",
@@ -100,7 +122,10 @@
    "trigger_terms": [
     "memory leaks",
     "ROOT/PyROOT"
-   ]
+   ],
+   "inputs": {
+    "loop.C": "// SYNTHETIC routing fixture: invented values, not data from any experiment.\nvoid loop() {\n  for (int i = 0; i < 1000000; ++i) {\n    TH1F* h = new TH1F(Form(\"h%d\", i), \"\", 10, 0, 1);\n    h->Fill(0.5);\n  }\n}\n"
+   }
   },
   {
    "id": "co-direct-2",
@@ -110,7 +135,10 @@
    "expected_primary": "hep-computing",
    "trigger_terms": [
     "batch submission, merging and recovery"
-   ]
+   ],
+   "inputs": {
+    "generate.py": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nimport sys, json, random\nn = int(sys.argv[1]); random.seed(int(sys.argv[2]))\nprint(json.dumps({'n': n, 'sum': sum(random.random() for _ in range(n))}))\n"
+   }
   },
   {
    "id": "co-neighbor-1",
@@ -121,7 +149,10 @@
    "trigger_terms": [
     "cross sections"
    ],
-   "not": "hep-computing"
+   "not": "hep-computing",
+   "inputs": {
+    "result.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\nExtracted sigma(e+e- -> mu+mu-) at sqrt(s) = 10 GeV: 0.92 +- 0.03 nb.\nTree-level QED expectation quoted by the student: 0.87 nb.\n"
+   }
   },
   {
    "id": "co-negative-1",
@@ -133,7 +164,10 @@
     "decay rates",
     "validity domains"
    ],
-   "not": "hep-computing"
+   "not": "hep-computing",
+   "inputs": {
+    "process.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\n過程：純量粒子 S（質量 M）衰變為一對狄拉克費米子，Yukawa 耦合 y。\n"
+   }
   },
   {
    "id": "st-direct-1",
@@ -165,7 +199,10 @@
    "trigger_terms": [
     "event/candidate selection"
    ],
-   "not": "hep-statistics"
+   "not": "hep-statistics",
+   "inputs": {
+    "analysis_summary.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\nSearch for a 1 TeV resonance decaying to two b-jets. Available variables: m_jj, b-tag score, delta_eta_jj, jet pT.\n"
+   }
   },
   {
    "id": "st-negative-1",
@@ -176,7 +213,10 @@
    "trigger_terms": [
     "predictions"
    ],
-   "not": "hep-statistics"
+   "not": "hep-statistics",
+   "inputs": {
+    "model.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\nModel: a new vector boson Z' with mass 2 TeV coupling to muons with strength g'. Observable: dimuon mass spectrum.\n"
+   }
   },
   {
    "id": "th-direct-1",
@@ -208,7 +248,12 @@
    "trigger_terms": [
     "fits"
    ],
-   "not": "hep-theory"
+   "not": "hep-theory",
+   "inputs": {
+    "published_points.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nx,y,stat,syst_corr\n1,10.2,0.5,0.3\n2,8.1,0.4,0.25\n3,6.3,0.4,0.2\n",
+    "covariance.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\ni,j,cov\n0,0,0.34\n1,1,0.2225\n2,2,0.2\n0,1,0.075\n1,2,0.05\n0,2,0.06\n",
+    "model.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\nPrediction y(x; g) = g^2 * 12 / (1 + 0.2 x).\n"
+   }
   },
   {
    "id": "th-negative-1",
@@ -219,7 +264,10 @@
    "trigger_terms": [
     "drafting or revising paper sections"
    ],
-   "not": "hep-theory"
+   "not": "hep-theory",
+   "inputs": {
+    "fit_outputs.json": "{\"_note\": \"SYNTHETIC routing fixture: invented values, not data from any experiment.\", \"status\": [\"synthetic\"], \"mu\": 1.02, \"mu_err\": [0.11, 0.12], \"chi2\": 9.8, \"ndf\": 9}\n"
+   }
   },
   {
    "id": "ml-direct-1",
@@ -229,7 +277,10 @@
    "expected_primary": "physics-ml",
    "trigger_terms": [
     "grouped train/validation/test splits and leakage checks"
-   ]
+   ],
+   "inputs": {
+    "jets.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nrun,event,pt,eta,n_constituents,label\n1001,1,45.2,0.3,23,1\n1001,2,38.1,-1.2,17,0\n1002,1,52.7,2.0,31,1\n"
+   }
   },
   {
    "id": "ml-direct-2",
@@ -251,7 +302,10 @@
    "trigger_terms": [
     "coverage"
    ],
-   "not": "physics-ml"
+   "not": "physics-ml",
+   "inputs": {
+    "lfi_notes.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\nA neural ratio estimator trained on 1e5 simulated samples gives a 68% interval for theta of [0.8, 1.3]. No coverage test yet.\n"
+   }
   },
   {
    "id": "ml-negative-1",
@@ -262,7 +316,10 @@
    "trigger_terms": [
     "CMake builds"
    ],
-   "not": "physics-ml"
+   "not": "physics-ml",
+   "inputs": {
+    "CMakeLists.txt": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\ncmake_minimum_required(VERSION 3.16)\nproject(ana CXX)\nadd_executable(ana main.cpp)\n"
+   }
   },
   {
    "id": "rc-direct-1",
@@ -273,7 +330,10 @@
    "trigger_terms": [
     "citations",
     "INSPIRE-HEP"
-   ]
+   ],
+   "inputs": {
+    "draft.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\nThe trigger efficiency uncertainty is 2.1% [INSPIRE: Example:2020abc].\n"
+   }
   },
   {
    "id": "rc-direct-2",
@@ -284,7 +344,10 @@
    "trigger_terms": [
     "referee reports",
     "abstracts"
-   ]
+   ],
+   "inputs": {
+    "referee_report.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\n審稿人一：摘要沒有說明系統誤差的主要來源。審稿人二：圖三缺少誤差帶。\n"
+   }
   },
   {
    "id": "rc-neighbor-1",
@@ -295,7 +358,10 @@
    "trigger_terms": [
     "amplitudes"
    ],
-   "not": "research-communication"
+   "not": "research-communication",
+   "inputs": {
+    "diagram.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\nDiagram: e- e+ annihilate into a photon, which produces a single muon (no antimuon) at tree level.\n"
+   }
   },
   {
    "id": "rc-negative-1",
@@ -306,7 +372,13 @@
    "trigger_terms": [
     "template fits"
    ],
-   "not": "research-communication"
+   "not": "research-communication",
+   "inputs": {
+    "fit_config.json": "{\"_note\": \"SYNTHETIC routing fixture: invented values, not data from any experiment.\", \"templates\": [\"signal.csv\", \"background.csv\"], \"data\": \"data.csv\", \"poi\": \"mu\"}\n",
+    "signal.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nbin,count\n0,3\n1,8\n2,4\n",
+    "background.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nbin,count\n0,40\n1,30\n2,20\n",
+    "data.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nbin,count\n0,45\n1,37\n2,25\n"
+   }
   },
   {
    "id": "j01",
@@ -379,7 +451,10 @@
     "hep-theory",
     "hep-computing",
     "hep-theory"
-   ]
+   ],
+   "inputs": {
+    "process.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\nProcess: e+ e- -> mu+ mu- through one photon at sqrt(s) = 10 GeV, unpolarized beams.\n"
+   }
   },
   {
    "id": "j05",
@@ -395,7 +470,12 @@
     "hep-theory",
     "hep-statistics",
     "research-communication"
-   ]
+   ],
+   "inputs": {
+    "prediction.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nbin,lo,hi,sigma_pb\n0,-1,0,370\n1,0,1,375\n",
+    "response.json": "{\"_note\": \"SYNTHETIC routing fixture: invented values, not data from any experiment.\", \"level_in\": \"particle\", \"level_out\": \"detector\", \"matrix\": [[0.9,0.05],[0.05,0.9]], \"efficiency_included\": true}\n",
+    "observed.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nbin,counts\n0,3410\n1,3460\n"
+   }
   },
   {
    "id": "j06",
@@ -442,7 +522,10 @@
    "chain": [
     "hep-computing",
     "hep-theory"
-   ]
+   ],
+   "inputs": {
+    "integral.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\nI(a) = integral_0^1 x^a log(x) dx, symbolic result -1/(a+1)^2. Check at a = 0.5 and a = 3.\n"
+   }
   },
   {
    "id": "j09",
@@ -471,7 +554,10 @@
    "journey": "J10",
    "chain": [
     "research-communication"
-   ]
+   ],
+   "inputs": {
+    "results.json": "{\"_note\": \"SYNTHETIC routing fixture: invented values, not data from any experiment.\", \"status\": [\"synthetic\"], \"sigma_pb\": 745.6, \"stat\": 6.6, \"syst\": 14.9}\n"
+   }
   },
   {
    "id": "j11",
@@ -486,7 +572,12 @@
    "chain": [
     "detector-response"
    ],
-   "note": "local profile via project config; nothing enters the plugin"
+   "note": "local profile via project config; nothing enters the plugin",
+   "inputs": {
+    "hep-research.project.json": "{\n \"schema_version\": \"1.0.0\",\n \"plugin_version\": \">=0.1,<1.0\",\n \"local_profile_paths\": [\"private-profile\"]\n}\n",
+    "private-profile/README.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\nLocal profile with calibration constants (invented).\n",
+    "private-profile/calibration.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nchannel,gain\n0,1.02\n1,0.98\n"
+   }
   },
   {
    "id": "j12",
@@ -512,7 +603,10 @@
     "crashes"
    ],
    "not": "hep-analysis",
-   "note": "experiment name does not route; the code problem does"
+   "note": "experiment name does not route; the code problem does",
+   "inputs": {
+    "reco_ntuple.py": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nimport ctypes\nbuf = (ctypes.c_float * 10)()\nfor i in range(100):\n    buf[i] = 0.0  # writes past the buffer\n"
+   }
   },
   {
    "id": "ams-computing-2",
@@ -523,7 +617,10 @@
    "trigger_terms": [
     "batch submission, merging and recovery"
    ],
-   "not": "hep-analysis"
+   "not": "hep-analysis",
+   "inputs": {
+    "merge.sh": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\ncat out/job_*.txt out/job_*_retry.txt > merged.txt\n"
+   }
   },
   {
    "id": "theory-no-exp-1",

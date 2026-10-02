@@ -5,7 +5,7 @@ Not part of the plugin. It must be run with CLAUDE_CONFIG_DIR pointing at an iso
 installed; it never touches ~/.claude. Each run is a paid model call.
 
   run_headless.py invoke --prompt TEXT --cwd DIR --out trace.json [--max-turns N]
-  run_headless.py routing --cases cases.json --cwd DIR --out routing.json [--jobs 6] [--max-turns 4] [--ids a,b]
+  run_headless.py routing --cases cases.json --cwd BASE_DIR (one fresh subdirectory per case) --out routing.json [--jobs 6] [--max-turns 4] [--ids a,b]
 
 A trace records: host version, model, plugin path the host loaded, skills invoked (Skill tool), files read (with
 whether each is inside the plugin and whether it is an experiment-profile file), permission denials, cost, result.
@@ -99,8 +99,16 @@ def main(argv=None) -> int:
     if args.ids:
         keep = set(args.ids.split(","))
         cases = [c for c in cases if c["id"] in keep]
+    def one(c):
+        # a fresh project directory per case, holding the case's synthetic input files (if any)
+        d = Path(args.cwd) / c["id"]
+        d.mkdir(parents=True, exist_ok=False)
+        for name, text in c.get("inputs", {}).items():
+            (d / name).parent.mkdir(parents=True, exist_ok=True)
+            (d / name).write_text(text, encoding="utf-8")
+        return dict(run(c["prompt"], str(d), args.max_turns), case=c)
     with ThreadPoolExecutor(args.jobs) as ex:
-        traces = list(ex.map(lambda c: dict(run(c["prompt"], args.cwd, args.max_turns), case=c), cases))
+        traces = list(ex.map(one, cases))
     args.out.write_text(json.dumps(traces, indent=1, ensure_ascii=False), encoding="utf-8")
     print(f"{len(traces)} runs written to {args.out}")
     return 0

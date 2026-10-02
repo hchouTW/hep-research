@@ -1,6 +1,10 @@
 """Writes tests/routing/cases.json (routing cases for task M5.3). Edit the table here, then rerun."""
 import json
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from inputs import INPUTS  # noqa: E402
 
 # (id, lang, kind, prompt, expected, triggers, not_skill, journey, extra)
 C = [
@@ -71,6 +75,8 @@ for cid, lang, kind, prompt, exp, trig, notsk, journey, extra in C:
     if journey:
         d["journey"] = journey
     d.update(extra)
+    if cid in INPUTS:
+        d["inputs"] = INPUTS[cid]
     cases.append(d)
 out = Path(__file__).resolve().parent / "cases.json"
 out.write_text(json.dumps({"note": "Routing cases (task M5.3). Static check: tools/check_routing_static.py. "
