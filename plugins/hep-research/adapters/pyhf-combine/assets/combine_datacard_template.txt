@@ -1,0 +1,20 @@
+# Minimal Combine-style counting datacard template.
+# Replace placeholders in braces before use.
+
+imax {num_channels} number of channels
+jmax {num_backgrounds} number of backgrounds
+kmax * number of nuisance parameters
+------------
+shapes * * {shapes_file} $CHANNEL/$PROCESS $CHANNEL/$PROCESS_$SYSTEMATIC
+------------
+bin {channel}
+observation {observation}
+------------
+bin              {channel_bins}
+process          {process_names}
+process          {process_ids}
+rate             {rates}
+------------
+lumi_{year} lnN  {lumi_effects}
+{rate_nuisances}
+{shape_nuisances}

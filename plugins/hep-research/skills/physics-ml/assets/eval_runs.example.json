@@ -1,0 +1,8 @@
+{
+  "_comment": "Synthetic per-seed validation accuracies for compare_model_runs.py. Five matched seeds per arm. The variant looks better on the means, but the difference sits inside the seed spread - the case this script exists to catch. Illustrative only.",
+  "metric": "validation accuracy",
+  "seeds": [0, 1, 2, 3, 4],
+  "baseline": [0.8123, 0.8256, 0.8071, 0.8199, 0.8145],
+  "variant": [0.8201, 0.8288, 0.8154, 0.8221, 0.8190],
+  "lower_is_better": false
+}

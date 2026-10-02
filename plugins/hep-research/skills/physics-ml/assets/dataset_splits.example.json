@@ -1,0 +1,15 @@
+{
+  "_comment": "Synthetic split manifest for check_split_integrity.py. Deliberately contains one group leak (patient p2 appears in both train and test) and one temporal violation, so the script demonstrates a FAIL. Illustrative only.",
+  "train": ["r1", "r2", "r3", "r4", "r5", "r6"],
+  "val": ["r7", "r8"],
+  "test": ["r9", "r10"],
+  "groups": {
+    "r1": "p1", "r2": "p1", "r3": "p2", "r4": "p3", "r5": "p3", "r6": "p4",
+    "r7": "p5", "r8": "p5", "r9": "p2", "r10": "p6"
+  },
+  "timestamps": {
+    "r1": 1, "r2": 2, "r3": 3, "r4": 4, "r5": 5, "r6": 12,
+    "r7": 7, "r8": 8, "r9": 9, "r10": 10
+  },
+  "temporal_order": ["train", "val", "test"]
+}

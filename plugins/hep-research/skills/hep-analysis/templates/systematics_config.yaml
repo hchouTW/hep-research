@@ -1,0 +1,33 @@
+# Template systematic-variation registry for histogram production.
+#
+# Copy this file into an analysis repository and replace placeholder values with
+# the experiment or framework convention used by downstream tools.
+
+nominal:
+  weight: event_weight
+  suffix: nominal
+
+variations:
+  - name: MuonSF
+    type: weight
+    applies_to: [mc, signal]
+    up_weight: event_weight * muon_sf_up / muon_sf
+    down_weight: event_weight * muon_sf_down / muon_sf
+    output_suffixes: [MuonSFUp, MuonSFDown]
+    correlation: correlated_across_years
+
+  - name: JES
+    type: shape
+    applies_to: [mc, signal]
+    shifted_columns:
+      Jet_pt: [Jet_pt_jes_up, Jet_pt_jes_down]
+      MET_pt: [MET_pt_jes_up, MET_pt_jes_down]
+    output_suffixes: [JESUp, JESDown]
+    correlation: uncorrelated_by_year
+
+validation:
+  require_up_down_pairs: true
+  require_same_binning_as_nominal: true
+  flag_identical_to_nominal: true
+  max_relative_integral_change: 0.5
+  allow_negative_bins: false

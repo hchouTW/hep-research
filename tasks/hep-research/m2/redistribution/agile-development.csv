@@ -1,0 +1,42 @@
+source_path,destination,disposition,note
+agile-development/SKILL.md,skills/hep-computing/references/agile-development-guide.md,move+path-edit,"frontmatter dropped; title '# Agile Development (guide)'; added '## When to read this file'; links references/X -> X and assets/X -> ../assets/X; scripts/create_story_card.py and scripts/validate_agile_notes.py -> ${CLAUDE_PLUGIN_ROOT}/skills/hep-computing/scripts/...; scripts/validate_skill_bundle.py (retired), tests/test_agile_skill.py, tests/behavior_eval.py, tests/trigger_queries.json and README -> plain text 'legacy agile-development/... at agentic-ai-skills@3e995a4'; 'this skill' wording and mentions of the task-authoring skill left as is"
+agile-development/assets/completion-summary.md,skills/hep-computing/assets/completion-summary.md,move,verbatim; relative links (if any) still resolve
+agile-development/assets/definition-of-done.md,skills/hep-computing/assets/definition-of-done.md,move+path-edit,'see SKILL.md' -> 'see ../references/agile-development-guide.md'
+agile-development/assets/risk-register.md,skills/hep-computing/assets/risk-register.md,move,verbatim; relative links (if any) still resolve
+agile-development/assets/story-card.md,skills/hep-computing/assets/story-card.md,move,verbatim; relative links (if any) still resolve
+agile-development/references/bash-balanced-design-guidelines.md,skills/hep-computing/references/bash-balanced-design-guidelines.md,move,verbatim; relative links (if any) still resolve
+agile-development/references/communication.md,skills/hep-computing/references/communication.md,move,verbatim; relative links (if any) still resolve
+agile-development/references/cpp-balanced-design-guidelines.md,skills/hep-computing/references/cpp-balanced-design-guidelines.md,move,verbatim; relative links (if any) still resolve
+agile-development/references/design-and-estimation.md,skills/hep-computing/references/design-and-estimation.md,move,verbatim; relative links (if any) still resolve
+agile-development/references/engineering-playbook.md,skills/hep-computing/references/engineering-playbook.md,move,verbatim; relative links (if any) still resolve
+agile-development/references/implementation-discipline.md,skills/hep-computing/references/implementation-discipline.md,move+path-edit,`scripts/validate_agile_notes.py` -> `${CLAUDE_PLUGIN_ROOT}/skills/hep-computing/scripts/validate_agile_notes.py`
+agile-development/references/product-framing.md,skills/hep-computing/references/product-framing.md,move,verbatim; relative links (if any) still resolve
+agile-development/references/python-balanced-design-guidelines.md,skills/hep-computing/references/python-balanced-design-guidelines.md,move,verbatim; relative links (if any) still resolve
+agile-development/references/risk-and-quality.md,skills/hep-computing/references/risk-and-quality.md,move+path-edit,two 'SKILL.md' (Decision Rules) mentions -> 'agile-development-guide.md'
+agile-development/references/software-architecture.md,skills/hep-computing/references/software-architecture.md,move,verbatim; relative links (if any) still resolve
+agile-development/references/validation-and-done.md,skills/hep-computing/references/validation-and-done.md,move+path-edit,"'SKILL.md's ""Before Reporting Done""' -> 'agile-development-guide.md's'; ../assets/definition-of-done.md link unchanged (still resolves)"
+agile-development/scripts/create_story_card.py,skills/hep-computing/scripts/create_story_card.py,move,code identical; no sibling imports or legacy-folder paths to change
+agile-development/scripts/validate_agile_notes.py,skills/hep-computing/scripts/validate_agile_notes.py,move,code identical; no sibling imports or legacy-folder paths to change
+agile-development/scripts/validate_skill_bundle.py,-,retire,"legacy bundle validator; superseded by `claude plugin validate --strict`, tools/check_layering.py and tools/measure_entrypoints.py"
+agile-development/tests/behavior_eval.py,-,retain-outside,"model-behavior eval harness (calls the claude CLI); grading material, not shipped"
+agile-development/tests/fixtures/shop_repo/README.md,-,retain-outside,eval-only fixture: demo repo for the routing/trigger eval (trigger_queries*.json); no ported test uses it
+agile-development/tests/fixtures/shop_repo/app/auth_middleware.py,-,retain-outside,eval-only fixture: demo repo for the routing/trigger eval (trigger_queries*.json); no ported test uses it
+agile-development/tests/fixtures/shop_repo/app/billing.py,-,retain-outside,eval-only fixture: demo repo for the routing/trigger eval (trigger_queries*.json); no ported test uses it
+agile-development/tests/fixtures/shop_repo/app/cart.py,-,retain-outside,eval-only fixture: demo repo for the routing/trigger eval (trigger_queries*.json); no ported test uses it
+agile-development/tests/fixtures/shop_repo/app/cli.py,-,retain-outside,eval-only fixture: demo repo for the routing/trigger eval (trigger_queries*.json); no ported test uses it
+agile-development/tests/fixtures/shop_repo/app/db.py,-,retain-outside,eval-only fixture: demo repo for the routing/trigger eval (trigger_queries*.json); no ported test uses it
+agile-development/tests/fixtures/shop_repo/app/exporters.py,-,retain-outside,eval-only fixture: demo repo for the routing/trigger eval (trigger_queries*.json); no ported test uses it
+agile-development/tests/fixtures/shop_repo/app/refunds.py,-,retain-outside,eval-only fixture: demo repo for the routing/trigger eval (trigger_queries*.json); no ported test uses it
+agile-development/tests/fixtures/shop_repo/app/sessions.py,-,retain-outside,eval-only fixture: demo repo for the routing/trigger eval (trigger_queries*.json); no ported test uses it
+agile-development/tests/fixtures/shop_repo/app/users_api.py,-,retain-outside,eval-only fixture: demo repo for the routing/trigger eval (trigger_queries*.json); no ported test uses it
+agile-development/tests/fixtures/shop_repo/migrations/001_orders.sql,-,retain-outside,eval-only fixture: demo repo for the routing/trigger eval (trigger_queries*.json); no ported test uses it
+agile-development/tests/fixtures/shop_repo/package.json,-,retain-outside,eval-only fixture: demo repo for the routing/trigger eval (trigger_queries*.json); no ported test uses it
+agile-development/tests/fixtures/shop_repo/requirements.txt,-,retain-outside,eval-only fixture: demo repo for the routing/trigger eval (trigger_queries*.json); no ported test uses it
+agile-development/tests/fixtures/shop_repo/tests/test_cart.py,-,retain-outside,eval-only fixture: demo repo for the routing/trigger eval (trigger_queries*.json); no ported test uses it
+agile-development/tests/fixtures/shop_repo/web/settings.html,-,retain-outside,eval-only fixture: demo repo for the routing/trigger eval (trigger_queries*.json); no ported test uses it
+agile-development/tests/prompts.md,-,retain-outside,"behavior-eval prompts and rubric; grading material, not shipped"
+agile-development/tests/test_agile_skill.py,tests/skills/hep_computing/test_agile_development_agile_skill.py,port,"-> tests/skills/hep_computing/test_agile_development_agile_skill.py; ROOT -> plugin skills/hep-computing; scratch files and the missing-file path under the test's own folder (TESTS_DIR) instead of ROOT/tests; BehaviorEvalOfflineTests (3 tests: test_prompts_table_parses_all_h_rows_with_bullets, test_redact_removes_skill_names_paths_and_sections, test_redact_leaves_ordinary_plan_text_alone) not ported: they test the retained-outside behavior_eval.py/prompts.md; 41 ported tests, 41 pass"
+agile-development/tests/trigger_queries.json,-,retain-outside,input for M5 routing cases
+agile-development/tests/trigger_queries_holdout.json,-,retain-outside,input for M5 routing cases
+agile-development/tests/trigger_queries_holdout2.json,-,retain-outside,input for M5 routing cases
+agile-development/tests/trigger_queries_holdout3.json,-,retain-outside,input for M5 routing cases
