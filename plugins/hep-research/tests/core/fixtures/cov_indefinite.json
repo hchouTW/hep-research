@@ -1,0 +1,6 @@
+{
+  "labels": ["b0", "b1", "b2"],
+  "kind": "relative",
+  "units": "dimensionless",
+  "matrix": [[1.0, -0.9, -0.9], [-0.9, 1.0, -0.9], [-0.9, -0.9, 1.0]]
+}

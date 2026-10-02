@@ -1,0 +1,70 @@
+{
+  "metadata": {
+    "truth_axis": {
+      "variable": "rigidity",
+      "unit": "GV",
+      "edges": [
+        1,
+        2,
+        4,
+        8
+      ]
+    },
+    "reco_axis": {
+      "variable": "rigidity",
+      "unit": "GV",
+      "edges": [
+        1,
+        2,
+        4,
+        8
+      ]
+    },
+    "orientation": "rows_reco_cols_truth",
+    "normalization": "conditional_on_selected",
+    "inefficiency": "outside_matrix",
+    "acceptance": "outside_matrix",
+    "underflow_overflow": "explicit_bins",
+    "efficiency_applied_separately": true,
+    "acceptance_applied_separately": true
+  },
+  "matrix": [
+    [
+      0.8,
+      0.1,
+      0.0
+    ],
+    [
+      0.1,
+      0.8,
+      0.1
+    ],
+    [
+      0.0,
+      0.1,
+      0.8
+    ]
+  ],
+  "underflow": [
+    0.1,
+    0.0,
+    0.0
+  ],
+  "overflow": [
+    0.0,
+    0.0,
+    0.1
+  ],
+  "closure": {
+    "truth": [
+      100,
+      90,
+      80
+    ],
+    "reco": [
+      92,
+      88,
+      75
+    ]
+  }
+}
