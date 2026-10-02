@@ -1,0 +1,480 @@
+[
+ {
+  "prompt": "Is this extracted cross section physically consistent with the tree-level prediction?",
+  "exit_code": 0,
+  "skills_invoked": [],
+  "files_read": [
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4b/co-neighbor-1/result.md"
+  ],
+  "globs": [
+   {
+    "pattern": "**/*"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy 4/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "**Short answer:** Yes, at the level of the quoted uncertainty. The result is also what you would expect if loop corrections are included. This uses only the two numbers in `result.md` (`result.md:2-3`), and I don't know the selection, acceptance or what the 0.03 nb covers.\n\n**Tree-level check.** The pure-QED point cross section is σ = 4πα²/(3s) ≈ 86.8 nb·GeV² / s. At √s = 10 GeV that gives 0.868 nb, so the student's 0.87 nb is correct.\n\n**Comparison.**\n- The extracted value is 0.92 ± 0.03 nb, which is 0.052 nb above 0.868 nb.\n- That is about 1.7σ if the 0.03 nb is the full uncertainty. This is mild tension at most.\n- It is a +6% excess, so the data sit slightly high rather than low.\n\n**Why the offset is probably physical rather than a problem.**\n- **Vacuum polarization.** The running coupling gives α(10 GeV) ≈ 1/131 instead of 1/137, which raises σ by roughly (1.047)² ≈ 1.10. That puts the expectation near 0.95 nb, and 0.92 ± 0.03 nb agrees with that.\n- **Other corrections.** ISR and vertex corrections add a further shift of a few percent that depends on the cuts. Z interference is small at this energy.\n- **Consequence.** The measurement is arguably more consistent with the loop-corrected prediction than with the tree-level number. A tree-level comparison is only a rough check at the ~5–10% level.\n\n**What I'd ask the student to do.**\n1. Say whether the 0.03 nb is statistical only or includes systematics.\n2. Compare with a higher-order prediction, such as KKMC or BHLUMI-style radiative corrections or a vacuum-polarization-corrected formula, using the same acceptance cuts.\n3. State the prediction's uncertainty and the selection used.\n\nI can compute the corrected prediction and the pull if you give me the selection cuts.",
+  "cost_usd": 0.0553666,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "memory_paths": null,
+  "mcp_tools": [],
+  "subtype": "success",
+  "num_turns": 3,
+  "files_read_detail": [
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4b/co-neighbor-1/result.md",
+    "inside_plugin": false,
+    "experiment_profile": false
+   }
+  ],
+  "case": {
+   "id": "co-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Is this extracted cross section physically consistent with the tree-level prediction?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "cross sections"
+   ],
+   "not": "hep-computing",
+   "inputs": {
+    "result.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\nExtracted sigma(e+e- -> mu+mu-) at sqrt(s) = 10 GeV: 0.92 +- 0.03 nb.\nTree-level QED expectation quoted by the student: 0.87 nb.\n"
+   }
+  }
+ },
+ {
+  "prompt": "請幫我推導這個衰變寬度的解析式，並說明近似的適用範圍。",
+  "exit_code": 1,
+  "skills_invoked": [],
+  "files_read": [
+   "/tmp/claude-0/-home-claude-0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4b/co-negative-1/process.md"
+  ],
+  "globs": [
+   {
+    "pattern": "**/*"
+   },
+   {
+    "pattern": "*",
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4b/co-negative-1"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy 4/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": null,
+  "cost_usd": 0.054517,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "memory_paths": null,
+  "mcp_tools": [],
+  "subtype": "error_max_turns",
+  "num_turns": 5,
+  "files_read_detail": [
+   {
+    "path": "/tmp/claude-0/-home-claude-0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4b/co-negative-1/process.md",
+    "inside_plugin": false,
+    "experiment_profile": false
+   }
+  ],
+  "case": {
+   "id": "co-negative-1",
+   "lang": "zh-Hant",
+   "kind": "negative",
+   "prompt": "請幫我推導這個衰變寬度的解析式，並說明近似的適用範圍。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "decay rates",
+    "validity domains"
+   ],
+   "not": "hep-computing",
+   "inputs": {
+    "process.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\n過程：純量粒子 S（質量 M）衰變為一對狄拉克費米子，Yukawa 耦合 y。\n"
+   }
+  }
+ },
+ {
+  "prompt": "Fit the coupling of my model to these published data points with their covariance.",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:hep-statistics"
+  ],
+  "files_read": [
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4b/th-neighbor-1/model.md",
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4b/th-neighbor-1/published_points.csv",
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4b/th-neighbor-1/covariance.csv"
+  ],
+  "globs": [
+   {
+    "pattern": "**/*"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy 4/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "**Result: g = 0.967 ± 0.021, taking g > 0 because the model depends only on g² and the sign can't be fixed. The fit is marginal: χ²/ndf = 6.07/2, p ≈ 0.05.**\n\nI had no shell in this session, so I did the arithmetic by hand and ran none of the toy or injection checks. Treat the numbers as a hand calculation until they are re-run in code.\n\n**Inputs.** All three files are labelled SYNTHETIC, so everything below is `synthetic` and `user-supplied`.\n\n**Covariance check.**\n- The matrix is the upper triangle only. I mirrored it.\n- The diagonal equals stat² + syst_corr², for example 0.5² + 0.3² = 0.34.\n- The off-diagonals equal syst_i·syst_j, for example 0.3·0.25 = 0.075.\n- So the matrix encodes uncorrelated statistical errors and a fully correlated systematic across the three points. This matches the files and is not an assumption I added.\n- Its determinant is 0.012804 and it is positive definite.\n\n**Method.** Frequentist generalized least squares, with χ²(g) = (y − g²f)ᵀ C⁻¹ (y − g²f) and f(x) = 12/(1 + 0.2x). The model is linear in a = g², so the minimum is exact:\n- a = fᵀC⁻¹y / fᵀC⁻¹f = 0.936 ± 0.0406.\n- g = √a = 0.967, with σ_g = σ_a / 2g = 0.021.\n- The Δχ² = 1 interval is g ∈ [0.946, 0.988], which is symmetric to this precision.\n\n**Goodness of fit.**\n- Residuals y − g²f are +0.84, +0.08 and −0.72.\n- The pulls using diagonal errors only are +1.4, +0.2 and −1.6.\n- The residuals trend from positive to negative with x, so the data fall faster than 1/(1 + 0.2x). With one fitted parameter that tension is built into the shape.\n- p ≈ 0.048 comes from χ² with 2 degrees of freedom. That is exact for a linear Gaussian model, but with only three points I would not claim more than \"mild tension\".\n\n**Caveats.**\n- The uncertainty on g relies on the Gaussian covariance you supplied.\n- With a fully correlated systematic and so few points, g is sensitive to that assumption. I did not test it.\n- Dropping the correlation would change the result, so I did not do that silently.\n- Not run: toy and injection closure (bias, pull width, coverage), and a `statistical-result` artifact validated by `validate.py`.\n\nOnce a shell is available I can run the toy closure and write the validated artifact. I can also try a model with an extra shape parameter if you want to explore the residual trend.",
+  "cost_usd": 0.1038084,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "memory_paths": null,
+  "mcp_tools": [],
+  "subtype": "success",
+  "num_turns": 8,
+  "files_read_detail": [
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4b/th-neighbor-1/model.md",
+    "inside_plugin": false,
+    "experiment_profile": false
+   },
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4b/th-neighbor-1/published_points.csv",
+    "inside_plugin": false,
+    "experiment_profile": false
+   },
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4b/th-neighbor-1/covariance.csv",
+    "inside_plugin": false,
+    "experiment_profile": false
+   }
+  ],
+  "case": {
+   "id": "th-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Fit the coupling of my model to these published data points with their covariance.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "fits"
+   ],
+   "not": "hep-theory",
+   "inputs": {
+    "published_points.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nx,y,stat,syst_corr\n1,10.2,0.5,0.3\n2,8.1,0.4,0.25\n3,6.3,0.4,0.2\n",
+    "covariance.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\ni,j,cov\n0,0,0.34\n1,1,0.2225\n2,2,0.2\n0,1,0.075\n1,2,0.05\n0,2,0.06\n",
+    "model.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\nPrediction y(x; g) = g^2 * 12 / (1 + 0.2 x).\n"
+   }
+  }
+ },
+ {
+  "prompt": "Is this Feynman diagram physically allowed at tree level?",
+  "exit_code": 0,
+  "skills_invoked": [],
+  "files_read": [
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4b/rc-neighbor-1/diagram.md"
+  ],
+  "globs": [
+   {
+    "pattern": "**/*.{png,jpg,jpeg,gif,svg,pdf,tex,txt,md}"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy 4/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "**No, this diagram is not allowed.** The process e⁻ e⁺ → γ* → μ⁻ (with no μ⁺) violates several conservation laws, and none of them depends on the loop order.\n\n- **Electric charge:** The initial state is e⁻ e⁺, with total charge 0. A single μ⁻ in the final state has charge −1, so charge is not conserved. Even at the vertex, γ → μ⁻ alone cannot conserve charge, because the photon is neutral.\n- **Lepton flavor number:** The initial state has L_e = 0 (+1 from e⁻, −1 from e⁺). The final state would have L_μ = +1, so a lone muon violates L_μ conservation. The QED vertex always has the form ψ̄γ^μψ A_μ, which creates or annihilates a fermion and its antiparticle together.\n- **Fermion line topology:** The photon couples to a fermion line that comes in and goes out. The vertex γ μ⁻ μ⁻ needs both a μ⁻ line entering and one leaving. A muon line cannot start at the photon vertex and end nowhere in the final state.\n\nThe allowed version is **e⁻ e⁺ → γ* → μ⁻ μ⁺**. It is s-channel, and its tree-level cross section is σ = 4πα²/(3s) for √s ≫ m_μ.\n\nThe file you have (`diagram.md`) is a one-line text description, not a drawn diagram. If you meant a different diagram, for example an image, send it and I'll check that one.",
+  "cost_usd": 0.0510028,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "memory_paths": null,
+  "mcp_tools": [],
+  "subtype": "success",
+  "num_turns": 3,
+  "files_read_detail": [
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4b/rc-neighbor-1/diagram.md",
+    "inside_plugin": false,
+    "experiment_profile": false
+   }
+  ],
+  "case": {
+   "id": "rc-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Is this Feynman diagram physically allowed at tree level?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "amplitudes"
+   ],
+   "not": "research-communication",
+   "inputs": {
+    "diagram.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\nDiagram: e- e+ annihilate into a photon, which produces a single muon (no antimuon) at tree level.\n"
+   }
+  }
+ },
+ {
+  "prompt": "Fold my prediction through the detector response and fit a normalization scale.",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:detector-response"
+  ],
+  "files_read": [
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4b/j05/response.json",
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4b/j05/prediction.csv",
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4b/j05/observed.csv"
+  ],
+  "globs": [
+   {
+    "pattern": "**/*"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy 4/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "**Result (all inputs are labelled SYNTHETIC, so this is a routing-fixture result and not physics):** the fitted normalization scale is **μ = 9.707 ± 0.117 (stat)**. I did the arithmetic by hand and did not run a script.\n\n**Folding.** I read `response.json` as a particle→detector matrix with efficiency already included. I did not apply any efficiency again outside it. The matrix is symmetric, so the orientation convention (rows = detector or rows = particle) doesn't change the result here. Truth and reco bins match (-1..0, 0..1).\n\n| bin | prediction σ (pb) | folded m = R·σ |\n|---|---|---|\n| 0 | 370 | 0.9·370 + 0.05·375 = 351.75 |\n| 1 | 375 | 0.05·370 + 0.9·375 = 356.00 |\n\n**Fit.** I fit n_i ~ Poisson(μ·m_i) with a single free scale. In that case the maximum-likelihood estimate has a closed form, μ̂ = Σn / Σm = 6870 / 707.75 = 9.707. The statistical uncertainty is μ̂/√Σn = 0.117, about 1.2%.\n\n**Goodness of fit.** The expected counts are 3414 and 3456 against 3410 and 3460 observed. The pulls are -0.08 and +0.08, giving χ² ≈ 0.01 for 1 degree of freedom. The shape agrees extremely well, which is expected for an invented fixture.\n\n**Caveats**\n- μ is a pure normalization. Here it is σ in pb mapped to counts, so it would be an effective integrated luminosity of about 9.7 pb⁻¹. No luminosity was given, so I didn't assign that meaning. μ also absorbs any overall efficiency or normalization mismatch.\n- The uncertainty is statistical only. No systematics, response-matrix uncertainties or prediction uncertainties were provided, and I assumed none.\n- With two bins and one parameter, the check on shape is weak.\n\nI haven't written a `response` or fit artifact. If you want one for hand-off to hep-statistics, I can write it and validate it.",
+  "cost_usd": 0.0724926,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "memory_paths": null,
+  "mcp_tools": [],
+  "subtype": "success",
+  "num_turns": 7,
+  "files_read_detail": [
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4b/j05/response.json",
+    "inside_plugin": false,
+    "experiment_profile": false
+   },
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4b/j05/prediction.csv",
+    "inside_plugin": false,
+    "experiment_profile": false
+   },
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4b/j05/observed.csv",
+    "inside_plugin": false,
+    "experiment_profile": false
+   }
+  ],
+  "case": {
+   "id": "j05",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Fold my prediction through the detector response and fit a normalization scale.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "predictions"
+   ],
+   "journey": "J5",
+   "chain": [
+    "hep-theory",
+    "hep-statistics",
+    "research-communication"
+   ],
+   "inputs": {
+    "prediction.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nbin,lo,hi,sigma_pb\n0,-1,0,370\n1,0,1,375\n",
+    "response.json": "{\"_note\": \"SYNTHETIC routing fixture: invented values, not data from any experiment.\", \"level_in\": \"particle\", \"level_out\": \"detector\", \"matrix\": [[0.9,0.05],[0.05,0.9]], \"efficiency_included\": true}\n",
+    "observed.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nbin,counts\n0,3410\n1,3460\n"
+   }
+  }
+ },
+ {
+  "prompt": "Recast the published search with its efficiency maps to constrain my model.",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:hep-theory"
+  ],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/*"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy 4/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "I can't start yet. The working directory is empty and there's no `hep-research.project.json`, so I have no search or model to work from. I won't guess either one. Which of these do you have?\n\n1. **The published search.** Give me an arXiv or INSPIRE ID, or the experiment and analysis name (for example \"CMS-SUS-xx-xxx\"). I need to know whether it has efficiency maps. These are usually HEPData tables of acceptance × efficiency, binned in the kinematics or in the model's mass plane. Efficiency maps are the right ingredient for this kind of recast. Tell me if you also have the cutflows, the signal-region definitions, or a covariance or likelihood. They decide how rigorous the constraint can be.\n\n2. **Your model.**\n   - Lagrangian or simplified-model definition, new particles, couplings and decay modes.\n   - The parameter points or grid to test.\n   - Cross-section source and order, such as NLO+NLL or your own calculation. If you'll supply the cross sections, say so.\n\n3. **Output you want.** For example an exclusion on your parameter plane (95% CL, CLs or a simple r-value), or just the predicted signal yields per region.\n\n4. **Existing files.** If you have a model file, an event sample or code, tell me where it is. Nothing is in this directory.\n\nI'll work this way once I have the inputs:\n\n- **Signal prediction.** Compute signal yields per signal region as σ × L × Σ(acceptance × efficiency), using the published maps. I'll state the validity domain: the map's kinematic coverage, and any model-dependence such as differences in spin, decay topology or branching ratios from the model the map was built for.\n- **Statistics.** I'll hand the yields to the statistics step for the limit. If the paper doesn't give a likelihood or covariance, I'll pick the most sensitive region, and I'll label the result as conservative.\n- **Status labels.** Everything is labelled as a recast, `unvalidated` until I reproduce the paper's own benchmark exclusion with its efficiency maps. I'll report any failure to reproduce it.",
+  "cost_usd": 0.053891,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "memory_paths": null,
+  "mcp_tools": [],
+  "subtype": "success",
+  "num_turns": 4,
+  "files_read_detail": [],
+  "case": {
+   "id": "j07",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Recast the published search with its efficiency maps to constrain my model.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "recasting a published analysis"
+   ],
+   "journey": "J7",
+   "chain": [
+    "hep-theory",
+    "detector-response",
+    "hep-statistics"
+   ]
+  }
+ },
+ {
+  "prompt": "Run a convergence study of this integral and cross-check the symbolic result numerically.",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:hep-computing"
+  ],
+  "files_read": [
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4b/j08/integral.md"
+  ],
+  "globs": [
+   {
+    "pattern": "**/*"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy 4/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "I haven't run anything. Bash is disabled in this session and I have no file-write tool, so none of the numerical results below are computed. What I can give you is the analytic check, the expected values, and a script to run yourself.\n\n**Integral** (`integral.md`): I(a) = ∫₀¹ xᵃ ln x dx, with claimed result −1/(a+1)².\n\n**Analytic check (done by hand, valid for a > −1):**\n- Since ∫₀¹ xᵃ dx = 1/(a+1), differentiating under the integral with respect to a gives I(a) = d/da [1/(a+1)] = −1/(a+1)². The claimed result is correct.\n- Integration by parts gives the same answer. The boundary term [xᵃ⁺¹ ln x/(a+1)]₀¹ is 0, leaving −(1/(a+1))∫₀¹ xᵃ dx = −1/(a+1)².\n\n**Expected values the numerics should reproduce:**\n- a = 0.5: −1/2.25 = −0.4444444444…\n- a = 3: −1/16 = −0.0625 exactly\n\n**Convergence study script** (not run). The log singularity at x = 0 means fixed-order Gauss–Legendre should converge only algebraically. For a = 0.5 the integrand behaves like x^0.5 ln x, so the error should fall roughly as n^−3.\n```python\nimport json, sys, mpmath as mp, numpy as np\nfrom scipy import integrate\nmp.mp.dps = 30\nout = {}\nfor a in (0.5, 3.0):\n    exact = -1/(a+1)**2\n    f = lambda x: x**a*np.log(x)\n    rows = []\n    for n in (4, 8, 16, 32, 64, 128, 256, 512):          # Gauss-Legendre order\n        xg, wg = np.polynomial.legendre.leggauss(n)\n        val = 0.5*np.sum(wg*f(0.5*(xg+1)))\n        rows.append({\"n\": n, \"value\": val, \"abs_err\": abs(val-exact)})\n    q, qerr = integrate.quad(f, 0, 1, epsabs=1e-14, epsrel=1e-14, limit=200)\n    mpv = mp.quad(lambda x: x**a*mp.log(x), [0, 1])       # tanh-sinh\n    out[str(a)] = {\"exact\": exact, \"gauss_legendre\": rows,\n                   \"quad\": {\"value\": q, \"est_err\": qerr, \"abs_err\": abs(q-exact)},\n                   \"mpmath_tanh_sinh_abs_err\": float(abs(mpv-exact))}\n    # observed order p from successive error ratios (n doubles)\n    e = [r[\"abs_err\"] for r in rows]\n    out[str(a)][\"observed_order\"] = [float(np.log2(e[i]/e[i+1])) for i in range(len(e)-1) if e[i+1] > 0]\nprint(json.dumps(out, indent=1))\nsys.exit(0 if all(v[\"quad\"][\"abs_err\"] < 1e-10 and v[\"mpmath_tanh_sinh_abs_err\"] < 1e-20 for v in out.values()) else 1)\n```\n\n**What a pass looks like:**\n- `quad` and mpmath tanh-sinh agree with the exact value to about 1e-14 and 1e-25 respectively.\n- Gauss–Legendre errors fall monotonically.\n- For a = 3, the x³ ln x integrand is smoother, so Gauss–Legendre should converge faster than it does for a = 0.5.\n\nOnce Bash or a write tool is available, I can run the script and record the environment and output hashes. You can also run it yourself and paste the output, and I'll interpret it.",
+  "cost_usd": 0.0780554,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "memory_paths": null,
+  "mcp_tools": [],
+  "subtype": "success",
+  "num_turns": 6,
+  "files_read_detail": [
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4b/j08/integral.md",
+    "inside_plugin": false,
+    "experiment_profile": false
+   }
+  ],
+  "case": {
+   "id": "j08",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Run a convergence study of this integral and cross-check the symbolic result numerically.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "convergence and tolerance studies"
+   ],
+   "journey": "J8",
+   "chain": [
+    "hep-computing",
+    "hep-theory"
+   ],
+   "inputs": {
+    "integral.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\nI(a) = integral_0^1 x^a log(x) dx, symbolic result -1/(a+1)^2. Check at a = 0.5 and a = 3.\n"
+   }
+  }
+ },
+ {
+  "prompt": "Set up a lattice QCD global analysis of form factors.",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:hep-theory"
+  ],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/*"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy 4/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "There's no validated domain profile for lattice QCD or form-factor global fits, so I'll work from the general discipline in the theory skill. I haven't created any files yet. The directory is empty, and a few choices change the whole setup.\n\n**What I need from you**\n1. **Which form factors?** For example:\n   - B→π/K and B_s→K semileptonic decays, for |V_ub| (z-expansion/BCL).\n   - D→π/K, for |V_cd| and |V_cs|.\n   - K→π, for |V_us| f₊(0).\n   - Nucleon electromagnetic or axial form factors (dipole or z-expansion).\n2. **Which lattice inputs?** Do you have them as files, such as FLAG averages, published fit parameters with covariance, or ensemble-level correlator data? Or should I pull them from the literature (INSPIRE/arXiv)? If so, name the collaborations.\n3. **What is the goal?** Options include extracting a CKM element by combining with experimental data, a combined fit across lattice collaborations, or a pure form-factor shape determination.\n4. **Do you want to include experimental data?** If so, I'd pass that step to the statistics skill.\n\n**Proposed default if you don't mind choosing for you**\nI'd build a Python project, `hep-research.project.json` plus `hep-research-artifacts/`, with these parts:\n- **Theory spec:** a conventions block (form-factor definitions f₊/f₀, q² vs z variable, t₀ choice, normalization, units) and a validity domain.\n- **Parametrization:** a BCL z-expansion with unitarity bounds and the kinematic constraint f₊(0)=f₀(0).\n- **Inputs:** each lattice dataset as a record, with form-factor values at q² points, full covariance and a source citation. Every number is tagged `user-supplied` or `unvalidated` until I've read the source.\n- **Fit:** a correlated χ² with covariance validity checks (positive-definiteness, SVD cut). It would use a truncation-order scan and report a goodness of fit. Inter-collaboration correlations and the continuum/chiral systematics would be handled explicitly.\n- **Checks:** known limits, the unitarity bound, and a truncation-stability test.\n\nTell me the channel and data source and I'll build it. A single sentence like \"B→π, FNAL/MILC + RBC/UKQCD, z-expansion, extract |V_ub|\" is enough.",
+  "cost_usd": 0.0555826,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "memory_paths": null,
+  "mcp_tools": [],
+  "subtype": "success",
+  "num_turns": 4,
+  "files_read_detail": [],
+  "case": {
+   "id": "j12",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Set up a lattice QCD global analysis of form factors.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "journey": "J12",
+   "chain": [
+    "hep-theory",
+    "hep-statistics"
+   ],
+   "limited_support": true
+  }
+ },
+ {
+  "prompt": "Fit cosmic-ray propagation parameters with GALPROP across all species.",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:hep-statistics"
+  ],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/*"
+   },
+   {
+    "pattern": "galprop",
+    "-i": true,
+    "output_mode": "files_with_matches",
+    "head_limit": 20
+   },
+   {
+    "pattern": ".",
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4b/out-of-v1-1",
+    "head_limit": 5
+   },
+   {
+    "pattern": "**/{galprop*,GALPROP*,*.fits*,hep-research.project.json}",
+    "path": "/"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy 4/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "I haven't run a fit, because nothing here is set up for one. The project directory is empty and there's no `hep-research.project.json`. I also found no GALPROP installation or build, and no data files. The only hits for `.fits` and project-config files are the plugin's own test fixtures, which I did not use.\n\nThis is also a domain the statistics skill has no validated profile for. Cosmic-ray propagation fits are outside it. I can still apply its general rules: declared paradigm, no invented covariances or priors, injection tests on synthetic data before touching observed data, and no reporting of a fit that didn't converge.\n\n\"All species\" is too open to fit as stated, so I need these from you:\n\n1. **GALPROP:** where it is, which version, and whether it's built. If it isn't installed, I can try to build it, but that needs the source tarball and the data tables, and downloads go through the sandbox proxy. Do you want me to try?\n2. **Data:** which species and experiments, for example B/C, ¹⁰Be/⁹Be, p, He, e⁺/e⁻, p̄, and which data release for each. Please also send the data files, or confirm I should fetch published tables. I won't type in numbers from memory.\n3. **Uncertainties:**\n   - Do you have covariance matrices, or only separate statistical and systematic errors?\n   - If a correlation between species or experiments isn't documented, I'll leave it missing or ask you for a scoped assumption. I won't assume it's diagonal.\n   - AMS-02 species share systematics, so I can't just multiply their likelihoods as if independent.\n4. **Parameters to fit:** for example D₀, δ, the Alfvén speed v_A, the halo height z_h, the convection velocity, and the injection indices and breaks. I also need which ones to fix, any priors, and whether you want a frequentist profile-likelihood fit or a Bayesian MCMC.\n5. **Solar modulation:** force-field φ per experiment, or a fixed value? This strongly affects low-energy results.\n6. **Compute:** each GALPROP run takes minutes to hours, so a full fit needs a surrogate or an emulator, or a batch budget. How much compute do you have?\n\nIf you'd rather start with a smaller, fully validated version, I'd suggest B/C plus the proton and helium spectra, using the published AMS-02 data and a Bayesian MCMC. That means writing the configuration, a run wrapper and a likelihood, then checking it on synthetic data before using the real data.",
+  "cost_usd": 0.0986158,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "memory_paths": null,
+  "mcp_tools": [],
+  "subtype": "success",
+  "num_turns": 7,
+  "files_read_detail": [],
+  "case": {
+   "id": "out-of-v1-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "prompt": "Fit cosmic-ray propagation parameters with GALPROP across all species.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [],
+   "limited_support": true
+  }
+ },
+ {
+  "prompt": "比較這兩個實驗的結果。",
+  "exit_code": 0,
+  "skills_invoked": [],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/*"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy 4/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "工作目錄是空的，我找不到任何實驗結果可以比較。\n\n請告訴我是哪兩個實驗，可以用下列任一方式：\n\n- 把結果檔案放進 `/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4b/underspec-2`，或給我檔案的絕對路徑。\n- 直接貼上數據或日誌。\n- 如果它們是已發佈的 Artifact，給我連結。\n\n另外也請說明你最在意哪一種比較，例如指標差異、統計顯著性，或不確定度與系統誤差。這樣我可以直接聚焦在那一部分。",
+  "cost_usd": 0.03926060000000001,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "memory_paths": null,
+  "mcp_tools": [],
+  "subtype": "success",
+  "num_turns": 2,
+  "files_read_detail": [],
+  "case": {
+   "id": "underspec-2",
+   "lang": "zh-Hant",
+   "kind": "underspecified",
+   "prompt": "比較這兩個實驗的結果。",
+   "expected_primary": "ask",
+   "trigger_terms": []
+  }
+ }
+]

@@ -1,0 +1,204 @@
+{
+ "summary": {
+  "cases": 10,
+  "outcomes": {
+   "no-skill": 3,
+   "pass": 5,
+   "other-hep-research-skill": 2
+  },
+  "by_lang": {
+   "en": {
+    "no-skill": 2,
+    "pass": 4,
+    "other-hep-research-skill": 2
+   },
+   "zh-Hant": {
+    "no-skill": 1,
+    "pass": 1
+   }
+  },
+  "loading_violations": [],
+  "total_cost_usd": 0.649,
+  "model": "claude-sonnet-5-5",
+  "host_version": "2.1.287",
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy 4/plugins/hep-research"
+ },
+ "rows": [
+  {
+   "id": "co-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "expected": "hep-theory",
+   "first_skill": null,
+   "all_skills": [],
+   "outcome": "no-skill",
+   "files_read": 1,
+   "outside_plugin_reads": [
+    "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4a/co-neighbor-1/result.md"
+   ],
+   "experiment_profile_reads": [],
+   "loading_violation": false,
+   "cost_usd": 0.0562046,
+   "num_turns": 3
+  },
+  {
+   "id": "co-negative-1",
+   "lang": "zh-Hant",
+   "kind": "negative",
+   "expected": "hep-theory",
+   "first_skill": null,
+   "all_skills": [],
+   "outcome": "no-skill",
+   "files_read": 1,
+   "outside_plugin_reads": [
+    "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4a/co-negative-1/process.md"
+   ],
+   "experiment_profile_reads": [],
+   "loading_violation": false,
+   "cost_usd": 0.0642534,
+   "num_turns": 3
+  },
+  {
+   "id": "th-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "expected": "hep-statistics",
+   "first_skill": "hep-research:hep-statistics",
+   "all_skills": [
+    "hep-research:hep-statistics"
+   ],
+   "outcome": "pass",
+   "files_read": 3,
+   "outside_plugin_reads": [
+    "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4a/th-neighbor-1/model.md",
+    "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4a/th-neighbor-1/published_points.csv",
+    "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4a/th-neighbor-1/covariance.csv"
+   ],
+   "experiment_profile_reads": [],
+   "loading_violation": false,
+   "cost_usd": 0.10826140000000001,
+   "num_turns": 8
+  },
+  {
+   "id": "rc-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "expected": "hep-theory",
+   "first_skill": null,
+   "all_skills": [],
+   "outcome": "no-skill",
+   "files_read": 0,
+   "outside_plugin_reads": [],
+   "experiment_profile_reads": [],
+   "loading_violation": false,
+   "cost_usd": 0.0409686,
+   "num_turns": 2
+  },
+  {
+   "id": "j05",
+   "lang": "en",
+   "kind": "journey",
+   "expected": "hep-theory",
+   "first_skill": "hep-research:detector-response",
+   "all_skills": [
+    "hep-research:detector-response"
+   ],
+   "outcome": "other-hep-research-skill",
+   "files_read": 3,
+   "outside_plugin_reads": [
+    "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4a/j05/response.json",
+    "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4a/j05/prediction.csv",
+    "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4a/j05/observed.csv"
+   ],
+   "experiment_profile_reads": [],
+   "loading_violation": false,
+   "cost_usd": 0.0735608,
+   "num_turns": 7
+  },
+  {
+   "id": "j07",
+   "lang": "en",
+   "kind": "journey",
+   "expected": "hep-theory",
+   "first_skill": "hep-research:hep-theory",
+   "all_skills": [
+    "hep-research:hep-theory"
+   ],
+   "outcome": "pass",
+   "files_read": 0,
+   "outside_plugin_reads": [],
+   "experiment_profile_reads": [],
+   "loading_violation": false,
+   "cost_usd": 0.053907,
+   "num_turns": 4
+  },
+  {
+   "id": "j08",
+   "lang": "en",
+   "kind": "journey",
+   "expected": "hep-computing",
+   "first_skill": "hep-research:hep-computing",
+   "all_skills": [
+    "hep-research:hep-computing"
+   ],
+   "outcome": "pass",
+   "files_read": 1,
+   "outside_plugin_reads": [
+    "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/projects rep4a/j08/integral.md"
+   ],
+   "experiment_profile_reads": [],
+   "loading_violation": false,
+   "cost_usd": 0.0945764,
+   "num_turns": 6
+  },
+  {
+   "id": "j12",
+   "lang": "en",
+   "kind": "journey",
+   "expected": "hep-theory",
+   "first_skill": "hep-research:hep-statistics",
+   "all_skills": [
+    "hep-research:hep-statistics"
+   ],
+   "outcome": "other-hep-research-skill",
+   "files_read": 0,
+   "outside_plugin_reads": [],
+   "experiment_profile_reads": [],
+   "loading_violation": false,
+   "cost_usd": 0.058436600000000005,
+   "num_turns": 4
+  },
+  {
+   "id": "out-of-v1-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "expected": "hep-statistics",
+   "first_skill": "hep-research:hep-statistics",
+   "all_skills": [
+    "hep-research:hep-statistics"
+   ],
+   "outcome": "pass",
+   "files_read": 0,
+   "outside_plugin_reads": [],
+   "experiment_profile_reads": [],
+   "loading_violation": false,
+   "cost_usd": 0.059752400000000004,
+   "num_turns": 4
+  },
+  {
+   "id": "underspec-2",
+   "lang": "zh-Hant",
+   "kind": "underspecified",
+   "expected": "ask",
+   "first_skill": null,
+   "all_skills": [],
+   "outcome": "pass",
+   "files_read": 0,
+   "outside_plugin_reads": [],
+   "experiment_profile_reads": [],
+   "loading_violation": false,
+   "cost_usd": 0.039119600000000004,
+   "num_turns": 2
+  }
+ ]
+}
