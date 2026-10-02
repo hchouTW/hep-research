@@ -1,5 +1,6 @@
 """Regression tests tying the profile's documentation to the code it describes (task Section 12)."""
 import re
+from datetime import date
 import sys
 import unittest
 from pathlib import Path
@@ -7,6 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]  # the ams-02 profile folder
 sys.path.insert(0, str(ROOT.parents[2]))  # plugin root
 from contracts.legacy import yaml_subset as ys  # noqa: E402
+from core.evidence import ledger as vel  # noqa: E402
 
 ARTIFACTS = (ROOT / "modules" / "methods" / "analysis-artifacts.md").read_text(encoding="utf-8")
 
@@ -41,6 +43,33 @@ class YamlDocumentationTests(unittest.TestCase):
 
     def test_strings_stay_strings(self):
         self.assertEqual(ys.loads("d: 2026-10-02\ny: yes\n"), {"d": "2026-10-02", "y": "yes"})
+
+
+class NewerLiteratureTests(unittest.TestCase):
+    """Section 12 / T17: newer or inaccessible literature is unverified, not nonexistent; the level read is kept."""
+
+    POLICY = (ROOT / "modules" / "sources" / "source-policy.md").read_text(encoding="utf-8")
+
+    def test_policy_classifies_newer_citations_as_unverified(self):
+        self.assertNotIn("likely nonexistent", self.POLICY)
+        line = next(l for l in self.POLICY.splitlines() if "after the verification date" in l)
+        self.assertIn("unverified", line)
+        self.assertIn("not as nonexistent", line)
+        self.assertIn("level actually read", line)
+
+    def test_a_newer_source_enters_the_ledger_at_the_level_read(self):
+        sources, claims = vel.load_ledger(ROOT / "evidence" / "sources.json", ROOT / "evidence" / "claims.json")
+        new = dict(sources[0], id="ams02:S61", legacy_id=None, title="A paper published after the last verification (test record)",
+                   year=2026, year_text="2026", publication_date="2026-09-30", verification_level="metadata-only",
+                   verification_note=None, verification_date="2026-10-02", data_taking_period=None,
+                   supersedes=[], superseded_by=[], dois=[], locator_text="test")
+        claim = dict(claims[0], id="ams02:C184", legacy_id=None, source_ids=["ams02:S61"], claim="test claim",
+                     verification_strength="metadata-only", numeric_quotation_allowed=False)
+        ok = vel.check_ledger(sources + [new], claims + [claim], date(2026, 10, 2), 365, "ams02")
+        self.assertEqual(ok["status"], "pass", ok["errors"])
+        over = dict(claim, verification_strength="full-text")
+        bad = vel.check_ledger(sources + [new], claims + [over], date(2026, 10, 2), 365, "ams02")
+        self.assertIn("claim.stronger_than_sources", {e["code"] for e in bad["errors"]})
 
 
 if __name__ == "__main__":
