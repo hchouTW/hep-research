@@ -1,0 +1,311 @@
+{
+  "spec_version": "1",
+  "measurement": {
+    "title": "Proton flux, illustrative specification",
+    "target": "flux",
+    "estimand": "Differential proton flux Phi(R) at the top of the instrument, in m^-2 sr^-1 s^-1 GV^-1, per rigidity bin, for downward-going primary protons with rigidity above the geomagnetic cutoff criterion",
+    "level": "flux",
+    "species": [
+      {
+        "name": "proton",
+        "abs_Z": 1,
+        "A": 1,
+        "charge_sign": 1,
+        "mass_GeV": 0.9383
+      }
+    ],
+    "variable": "rigidity",
+    "unit": "GV",
+    "range": [
+      1.0,
+      100.0
+    ],
+    "bin_edges": [
+      1.0,
+      2.0,
+      5.0,
+      10.0,
+      50.0,
+      100.0
+    ],
+    "sample": "public"
+  },
+  "data_scope": {
+    "data_or_mc": "both",
+    "period": {
+      "start": "2011-05-19",
+      "end": "2013-11-26"
+    },
+    "mc_scope": "user-supplied MC production; generation record and version to be attached"
+  },
+  "observables": [
+    {
+      "name": "tracker_rigidity",
+      "subsystem": "Tracker",
+      "role": "rigidity"
+    },
+    {
+      "name": "tracker_charge_sign",
+      "subsystem": "Tracker",
+      "role": "charge_sign"
+    },
+    {
+      "name": "tof_beta",
+      "subsystem": "TOF",
+      "role": "velocity"
+    },
+    {
+      "name": "abs_charge_estimate",
+      "subsystem": "combined",
+      "role": "abs_charge"
+    }
+  ],
+  "selections": [
+    {
+      "name": "downward_primary",
+      "level": "event",
+      "definition": "downward-going, tracker track present, rigidity above the cutoff criterion",
+      "target_failure_mode": "albedo and secondary particles at low rigidity",
+      "conditional_denominator": "events with a reconstructed tracker track",
+      "efficiency_source": "hybrid",
+      "correlated_with": [
+        "charge_consistency"
+      ],
+      "validation": [
+        {
+          "metric": "data/MC efficiency ratio in an orthogonal control sample, per rigidity bin",
+          "threshold": "deviation size that would move the flux by more than its total uncertainty, fixed in advance",
+          "action": "apply a scale factor with uncertainty; otherwise add a systematic"
+        }
+      ]
+    },
+    {
+      "name": "charge_consistency",
+      "level": "event",
+      "definition": "absolute charge consistent with one across the subsystems that measure it",
+      "target_failure_mode": "heavier-species and charge-migration contamination",
+      "conditional_denominator": "events passing downward_primary",
+      "efficiency_source": "hybrid",
+      "correlated_with": [
+        "downward_primary"
+      ],
+      "validation": [
+        {
+          "metric": "efficiency in a loosened-selection control sample versus rigidity",
+          "threshold": "pre-declared tolerance from its effect on the flux",
+          "action": "add a rigidity-dependent systematic or change the estimator"
+        }
+      ]
+    }
+  ],
+  "signal": {
+    "name": "primary protons",
+    "definition": "singly charged, positive-sign, downward-going primaries"
+  },
+  "backgrounds": [
+    {
+      "name": "helium_and_deuteron_contamination",
+      "origin": "neighbouring charge or mass species entering the singly charged sample",
+      "entry_mechanism": "charge migration and fragmentation upstream of the tracker",
+      "control_region": "loosened charge-consistency sample that is depleted in signal",
+      "estimator": "template_fit",
+      "transfer_model": "templates per rigidity bin carry over to the signal region; tested with alternate templates",
+      "contamination_correction": "signal leakage into the control sample estimated from data and propagated",
+      "closure_test": "inject a known contamination fraction and recover it",
+      "nuisance_parameters": [
+        "template_shape"
+      ],
+      "correlations": [
+        "template_shape correlated between adjacent bins"
+      ]
+    },
+    {
+      "name": "charge_confusion",
+      "origin": "wrong charge-sign assignment from tracker resolution tails",
+      "entry_mechanism": "tail migration of negative-sign particles into the positive sample",
+      "control_region": "negative-sign sample with the same selection",
+      "estimator": "migration_matrix",
+      "transfer_model": "tail probability measured on the control sample and applied per rigidity bin",
+      "contamination_correction": "control sample purity from a template fit",
+      "closure_test": "compare data and MC in a tail-populating loosened selection",
+      "nuisance_parameters": [
+        "tail_probability"
+      ],
+      "correlations": [
+        "tail_probability fully correlated across bins"
+      ]
+    }
+  ],
+  "corrections": [
+    {
+      "effect_id": "trigger_efficiency",
+      "category": "efficiency",
+      "applied_in": "estimator"
+    },
+    {
+      "effect_id": "geometric_acceptance",
+      "category": "acceptance",
+      "applied_in": "estimator"
+    },
+    {
+      "effect_id": "livetime",
+      "category": "livetime",
+      "applied_in": "estimator"
+    },
+    {
+      "effect_id": "rigidity_migration",
+      "category": "response",
+      "applied_in": "response_matrix"
+    },
+    {
+      "effect_id": "tof_timing_drift",
+      "category": "calibration",
+      "applied_in": "calibration"
+    }
+  ],
+  "response": {
+    "truth_variable": "rigidity",
+    "reco_variable": "rigidity",
+    "orientation": "rows_reco_cols_truth",
+    "normalization": "conditional_on_selected",
+    "includes": [],
+    "matrix_file": "response.json"
+  },
+  "estimator": {
+    "form": "response_model",
+    "applies": [
+      "efficiency",
+      "acceptance",
+      "livetime"
+    ]
+  },
+  "inference": {
+    "method": "unfolding",
+    "parameters_of_interest": [
+      "flux per rigidity bin"
+    ],
+    "approximation": "toys",
+    "approximation_validated": true,
+    "min_expected_counts": 1000,
+    "parameter_on_boundary": false
+  },
+  "systematics": [
+    {
+      "name": "rigidity_scale",
+      "source": "calibration",
+      "kind": "scale",
+      "affected_objects": [
+        "tracker_rigidity"
+      ],
+      "representation": "nuisance",
+      "variation_basis": "bound from an independent reference measurement, user-supplied",
+      "effect": "migration",
+      "applied_via": "migration",
+      "correlations_across_bins": "smooth, fully correlated shape",
+      "correlations_across_species_or_time": "persists across data-taking periods",
+      "validation": "recompute the migration with the shifted scale and compare with linear propagation",
+      "double_counting_checks": [
+        "calibration residual only; drift is not also counted as an efficiency effect"
+      ]
+    },
+    {
+      "name": "trigger_efficiency",
+      "source": "efficiency",
+      "kind": "efficiency",
+      "affected_objects": [
+        "trigger_efficiency"
+      ],
+      "representation": "nuisance",
+      "variation_basis": "statistical and method uncertainty of the unbiased-trigger sample",
+      "effect": "normalization",
+      "applied_via": "nuisance_in_likelihood",
+      "correlations_across_bins": "partially correlated through the shared control sample",
+      "correlations_across_species_or_time": "independent between periods",
+      "validation": "compare against an orthogonal-selector estimate",
+      "double_counting_checks": [
+        "not also included in the data/MC scale factor"
+      ]
+    }
+  ],
+  "tail_estimates": [
+    {
+      "name": "charge_confusion",
+      "process": "charge_confusion",
+      "method": "data_driven_tail",
+      "tail_validation": "tail region populated by a loosened selection; data and MC compared there"
+    }
+  ],
+  "validation": [
+    {
+      "name": "mc_closure",
+      "kind": "closure",
+      "metric": "unfolded minus truth over statistical error, per bin",
+      "threshold": "bound fixed before looking at data",
+      "action": "change the method or add a systematic"
+    },
+    {
+      "name": "distorted_spectrum",
+      "kind": "stress",
+      "metric": "bias on a spectrum with a feature absent from the prior",
+      "threshold": "bias below one statistical error",
+      "action": "increase regularization study or use forward folding"
+    }
+  ],
+  "parameters": [
+    {
+      "name": "geomagnetic cutoff safety factor",
+      "value": 1.2,
+      "unit": "x maximum cutoff in the field of view",
+      "provenance": "documented",
+      "claim_ids": [
+        "C31"
+      ],
+      "applies_to": {
+        "species": [
+          "proton"
+        ]
+      }
+    },
+    {
+      "name": "data period of the cited proton analysis",
+      "value": "2011-05-19 to 2013-11-26",
+      "unit": "date range",
+      "provenance": "documented",
+      "claim_ids": [
+        "C31"
+      ],
+      "applies_to": {
+        "species": [
+          "proton"
+        ]
+      }
+    },
+    {
+      "name": "rigidity range",
+      "value": [
+        1.0,
+        100.0
+      ],
+      "unit": "GV",
+      "provenance": "user_supplied"
+    }
+  ],
+  "ams_claims": [
+    {
+      "text": "A public AMS proton flux analysis required rigidity above 1.2 times the maximum geomagnetic cutoff and corrected bin-to-bin migration by iterative unfolding",
+      "label": "Documented",
+      "claim_ids": [
+        "C31"
+      ]
+    },
+    {
+      "text": "Use a hybrid data/MC efficiency estimate with scale factors",
+      "label": "Proposal",
+      "claim_ids": []
+    }
+  ],
+  "unresolved_inputs": [
+    "MC production and reconstruction version",
+    "generation record for the acceptance"
+  ]
+}
