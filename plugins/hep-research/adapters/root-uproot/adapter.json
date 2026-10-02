@@ -1,13 +1,15 @@
 {
  "id": "adapter:root-uproot",
- "version": "0.2.0",
- "status": "proposed",
+ "version": "0.3.0",
+ "status": "demonstrated-on-synthetic-data",
  "purpose": "Starting points for ROOT (RDataFrame, RooFit, C++/PyROOT) and uproot/awkward analysis code",
  "tools": [
   {
    "name": "ROOT",
-   "status": "proposed",
-   "tested_versions": []
+   "status": "demonstrated-on-synthetic-data",
+   "tested_versions": [
+    "6.40.04"
+   ]
   },
   {
    "name": "uproot",
@@ -24,7 +26,7 @@
    ]
   }
  ],
- "environment": "E1 (docs/capability-matrix.md) plus uproot 5.7.6, awkward 2.14.0, PyYAML 6.0.3; ROOT not installed",
+ "environment": "E1 (docs/capability-matrix.md) plus uproot 5.7.6, awkward 2.14.0, PyYAML 6.0.3 in .venv-hep; ROOT 6.40.04 (conda-forge, Python 3.11.16, conda gcc 16.2.0, C++20 build) in a project-local micromamba environment, cmake 3.28.3; tests find it through HEP_ROOT_PYTHON or HEP_ROOT_CONFIG",
  "assets": [
   "assets/CMakeLists.txt",
   "assets/cpp_rdataframe_analysis.cpp",
@@ -36,7 +38,9 @@
   "assets/uproot_awkward_analysis.py"
  ],
  "tests": [
-  "../../tests/adapters/test_uproot_awkward_asset.py"
+  "../../tests/adapters/test_uproot_awkward_asset.py",
+  "../../tests/adapters/test_root_cpp_assets.py",
+  "../../tests/skills/hep_computing/test_hep_analysis_root_integration.py"
  ],
  "owner_skill": "hep-computing",
  "status_rule": "the adapter status is the lowest of its tools' statuses; each tool's own status is in tools[]"
