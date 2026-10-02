@@ -1,0 +1,9 @@
+{
+ "label": "Benchmark settings for Path C (theory only; no experiment resource)",
+ "sqrt_s_gev": 10.0,
+ "reference_constant_nb_gev2": 86.8,
+ "reference_constant_rounding_nb_gev2": 0.05,
+ "edges": [-1.0, -0.9, -0.72, -0.54, -0.36, -0.18, 0.0, 0.18, 0.36, 0.54, 0.72, 0.9, 1.0],
+ "fiducial_abs_cos_max": 0.9,
+ "convergence_points": [3, 5, 9, 17, 33, 65, 129, 257]
+}

@@ -1,0 +1,13 @@
+{
+ "unit_system": "natural-HEP: GeV for energies, s in GeV^2; cross sections quoted in pb (1 nb = 1000 pb)",
+ "hbar_c_one": true,
+ "metric_signature": "+--- (used in the amplitude derivation)",
+ "coupling_normalization": "alpha = e^2 / (4 pi), Heaviside-Lorentz units",
+ "renormalization_scheme": "not-applicable at tree level; alpha is a fixed input (its value enters only through the reference constant below)",
+ "energy_variable": "sqrt_s",
+ "frame": "center-of-mass",
+ "angle_definition": "theta between the incoming e- and the outgoing mu- in the c.m. frame",
+ "spin_treatment": "unpolarized beams: average over the four initial spin states, sum over final spins",
+ "mass_approximation": "electrons massless; muon mass kept in the derivation, massless (beta -> 1) in the numerical prediction",
+ "qedbench:reference_constant": "4 pi alpha^2 / 3 converted to nb GeV^2 is taken as 86.8 nb GeV^2 from PDG eq. (51.3) [qedbench:C02], three significant figures"
+}
