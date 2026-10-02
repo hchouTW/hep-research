@@ -386,6 +386,7 @@ tests/adapters/histfactory_reference.py,5d8910f,M6,new in hep-research (no legac
 tests/adapters/test_adapter_declarations.py,5deda65,M6,new in hep-research (no legacy source)
 tests/adapters/test_pyhf_counting.py,2d61eee,M6,new in hep-research (no legacy source)
 tests/adapters/test_pyhf_shape.py,5d8910f,M6,new in hep-research (no legacy source)
+tests/adapters/test_uproot_awkward_asset.py,0920cc9,M6,new in hep-research (no legacy source)
 tests/contracts/__init__.py,7111892,M0,new in hep-research (no legacy source)
 tests/contracts/make_fixtures.py,e712c96,M1,new in hep-research (no legacy source)
 tests/contracts/make_registry_fixtures.py,e712c96,M1,new in hep-research (no legacy source)
