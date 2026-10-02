@@ -34,7 +34,7 @@ SciPy 1.17.1, Matplotlib 3.11.2, SymPy 1.14.0, Claude Code CLI 2.1.287, 2026-10-
 | ROOT, PyROOT tools | hep-computing | unverified | ROOT not installed; tests skipped |
 | Task files for coding agents (task authoring) | hep-computing | tested (E1) | bundle validator, lint_task tests |
 | Split integrity, surrogate domain, ML artifact checks | physics-ml | tested (E1) | T16 |
-| PyTorch training, inference, profiling assets | physics-ml | unverified | PyTorch not installed; tests skipped |
+| PyTorch training, inference, profiling assets | physics-ml | tested (E1 + PyTorch 2.14.1, CPU only) | asset smoke tests (training, inference, datasets, allocation measurement) and a 2-process DDP run on the gloo backend pass; GPU, NCCL, mixed precision on GPU and torchvision (`vision_transfer.py`) not tried |
 | Claims linked to results, status preserved in text | research-communication | tested (E1) | T20 |
 | Literature and citation verification online | research-communication | unverified | needs network; offline it marks citations unverified |
 | Diagrams and paper builds (Graphviz, Mermaid, PlantUML, tectonic) | research-communication | unverified | tools not installed; tests skipped |

@@ -21,7 +21,8 @@ sys.path.insert(0, str(ASSETS))
 
 TORCH = importlib.util.find_spec("torch") is not None
 TORCHVISION = TORCH and importlib.util.find_spec("torchvision") is not None
-TORCHRUN = shutil.which("torchrun") is not None
+# torchrun installed next to the interpreter running the tests (a venv not on PATH), else from PATH
+TORCHRUN = shutil.which("torchrun", path=str(Path(sys.executable).parent)) or shutil.which("torchrun")
 
 
 def run(args: list[str], cwd: Path, timeout: int = 180) -> subprocess.CompletedProcess:
@@ -87,9 +88,9 @@ class AssetSmokeTests(unittest.TestCase):
         torch.save(torch.zeros(4), self.dir / "y.pt")
         self.assertEqual(len(CustomTensorDataset(self.dir / "x.pt", self.dir / "y.pt")), 4)
 
-    @unittest.skipUnless(TORCHRUN, "torchrun not on PATH")
+    @unittest.skipUnless(TORCHRUN, "torchrun not found next to the interpreter or on PATH")
     def test_ddp_skeleton_two_gloo_processes(self):
-        result = run(["torchrun", "--nproc_per_node=2", str(ASSETS / "ddp_train_skeleton.py")], self.dir, timeout=300)
+        result = run([TORCHRUN, "--nproc_per_node=2", str(ASSETS / "ddp_train_skeleton.py")], self.dir, timeout=300)
         self.assertEqual(result.returncode, 0, result.stderr[-2000:])
         self.assertIn("epoch=5", result.stdout)
         self.assertTrue((self.dir / "ddp_model.pt").exists())
