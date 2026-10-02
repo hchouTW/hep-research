@@ -1,6 +1,6 @@
 # PROGRESS — hep-research plugin
 
-- Current milestone: **M0 complete, waiting at GATE G0**
+- Current milestone: **M1 complete, waiting at GATE G1** (G0 passed 2026-10-02: D1–D5 confirmed, network approved, push approved but blocked on GitHub link)
 - Branch: `feat/hep-research-plugin` (local; nothing pushed)
 - Base commit: `3e995a49a89fad8e0e9d52130ee1fd93a3a0f4f9`
 - Last session: 2026-10-02, Claude Code cloud container (CLI 2.1.287), Python 3.11.15
@@ -28,12 +28,27 @@
 | No root plugin manifest, no root LICENSE | Confirmed |
 | Differences vs 4.1 map | `ams-analysis/scripts/{crdb_query,fetch_papers,poisson_diagnostics,statistical_toys,yaml_subset}.py` and `docs/detector-principles/` are not in the 4.1 map; added to migration-map.csv |
 
+## M1 steps
+
+- [x] 1. `docs/researcher-journeys.md` (J1–J12; 3 gaps fixed, 2 limitations)
+- [x] 2. `docs/architecture.md`, `core/OWNERS.json`
+- [x] 3. `docs/routing-contract.md`
+- [x] 4. Vocabulary (`contracts/vocab/core.json`, `contracts/vocab.py`) and common schemas
+- [x] 5. Envelope + 10 typed extensions + validator; 16 valid / 18 invalid fixtures
+- [x] 6. Two-tier registry, templates, validator; 11 registry packages
+- [x] 7. Project config, resolution order, local profiles; 16 configs
+- [x] 8. Evidence schema and namespacing (`contracts/evidence.py`)
+- [x] 9. Skeleton: manifest, seven SKILL.md, generated stanza, dev marketplace; `claude plugin validate --strict` passes
+- [x] 10. `tools/run_all_checks.py`, `check_layering.py`, `measure_entrypoints.py`, `build_stanzas.py`
+- [x] 11. `docs/architecture-review.md` (10/10 items met; item 2 at file level)
+
+Latest check run: `check-runs/check-run-2026-10-02T134449Z.json` (6 pass, 0 fail, 0 skip; 47 tests).
+
 ## Blockers / needs user
 
-1. Confirm D1–D5 (G0).
-2. Approve network for: (a) reading official Claude Code plugin docs (5.1 items 2, 3, 4, 8); (b) `pip install` of D5 packages into `.venv-hep`.
-3. The repository is read-only from this cloud session; commits are local only. A patch/bundle is exported to the project folder.
+1. G1 review: approve the architecture, journeys, contracts and skill descriptions.
+2. Push blocked: GitHub account not linked to Claude. Work is exported as git bundles to the project folder `hep-research/`.
 
 ## Next step
 
-After G0: M1.1 `docs/researcher-journeys.md`.
+After G1: M2.1 migrate shared numerical code into `core/` with stewards, porting original tests.

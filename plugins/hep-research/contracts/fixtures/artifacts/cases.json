@@ -8,10 +8,12 @@
   "measurement_collider.json",
   "measurement_exposure.json",
   "measurement_protons_on_target.json",
+  "measurement_ratio.json",
   "measurement_target_exposure.json",
   "ml_artifact.json",
   "prediction.json",
   "response.json",
+  "response_parametrized.json",
   "statres_bayesian.json",
   "statres_frequentist.json",
   "theory_spec.json"
@@ -63,6 +65,12 @@
    "ml.no_grouping"
   ],
   "envelope_missing_status.json": [
+   "schema.required"
+  ],
+  "response_parametrized_missing.json": [
+   "response.parametrization_missing"
+  ],
+  "measurement_ratio_no_correlation_model.json": [
    "schema.required"
   ]
  }

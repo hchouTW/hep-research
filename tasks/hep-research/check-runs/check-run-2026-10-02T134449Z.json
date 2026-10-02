@@ -1,0 +1,153 @@
+{
+ "timestamp_utc": "2026-10-02T13:44:49Z",
+ "plugin_version": "0.1.0",
+ "environment": {
+  "python": "3.11.15",
+  "platform": "Linux-6.18.44-fc-v51-x86_64-with-glibc2.39",
+  "executable": "/home/claude/hchoutw/agentic-ai-skills/.venv-hep/bin/python"
+ },
+ "git_commit": "c5ee57514920c809ab8e4efd01d38ce48f2ee3a7",
+ "counts": {
+  "pass": 6,
+  "fail": 0,
+  "skip": 0
+ },
+ "checks": [
+  {
+   "name": "unittest",
+   "command": "python3 -m unittest discover -s tests -t .",
+   "status": "pass",
+   "counts": {
+    "run": 47,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 47
+   },
+   "failed": [],
+   "skipped": []
+  },
+  {
+   "name": "check_layering",
+   "command": "/home/claude/hchoutw/agentic-ai-skills/.venv-hep/bin/python tools/check_layering.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "ok": true,
+    "violations": []
+   }
+  },
+  {
+   "name": "stanza_consistency",
+   "command": "/home/claude/hchoutw/agentic-ai-skills/.venv-hep/bin/python tools/build_stanzas.py --check",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "ok": true,
+    "problems": []
+   }
+  },
+  {
+   "name": "registry",
+   "command": "/home/claude/hchoutw/agentic-ai-skills/.venv-hep/bin/python contracts/registry.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "ok": true,
+    "findings": [],
+    "profiles": []
+   }
+  },
+  {
+   "name": "measure_entrypoints",
+   "command": "/home/claude/hchoutw/agentic-ai-skills/.venv-hep/bin/python tools/measure_entrypoints.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "ok": true,
+    "budget": {
+     "skill_bytes": 8192,
+     "skill_lines_max": 180,
+     "description_chars": 1024,
+     "registry_bytes": 2048,
+     "index_bytes": 4096
+    },
+    "skills": [
+     {
+      "skill": "detector-response",
+      "lines": 55,
+      "bytes": 5279,
+      "description_chars": 814
+     },
+     {
+      "skill": "hep-analysis",
+      "lines": 60,
+      "bytes": 6002,
+      "description_chars": 921
+     },
+     {
+      "skill": "hep-computing",
+      "lines": 53,
+      "bytes": 5279,
+      "description_chars": 859
+     },
+     {
+      "skill": "hep-statistics",
+      "lines": 51,
+      "bytes": 5227,
+      "description_chars": 845
+     },
+     {
+      "skill": "hep-theory",
+      "lines": 52,
+      "bytes": 5652,
+      "description_chars": 886
+     },
+     {
+      "skill": "physics-ml",
+      "lines": 49,
+      "bytes": 4381,
+      "description_chars": 803
+     },
+     {
+      "skill": "research-communication",
+      "lines": 47,
+      "bytes": 4576,
+      "description_chars": 773
+     }
+    ],
+    "totals": {
+     "skill_bytes": 36396,
+     "description_chars": 5901
+    },
+    "registry_bytes": 46,
+    "profile_index_bytes": {},
+    "over_budget": [],
+    "exceptions": {},
+    "host_estimate": {
+     "status": "measured",
+     "always_on_tokens": 2005,
+     "per_skill_always_on": {
+      "hep-computing": 290,
+      "hep-theory": 300,
+      "research-communication": 270,
+      "detector-response": 280,
+      "hep-statistics": 290,
+      "hep-analysis": 310,
+      "physics-ml": 270
+     },
+     "source": "claude --plugin-dir <root> plugin details hep-research (host estimate)"
+    },
+    "note": "Line counts are informative: SKILL.md paragraphs are unwrapped, so bytes are the binding budget."
+   }
+  },
+  {
+   "name": "claude-plugin-validate",
+   "command": "claude plugin validate <plugin> --strict",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": "Validating plugin manifest: /home/claude/hchoutw/agentic-ai-skills/plugins/hep-research/.claude-plugin/plugin.json\n\n\u221a Validation passed"
+  }
+ ],
+ "caveat": "Software checks only; not physical validity, proof, statistical coverage, or authorization to unblind."
+}

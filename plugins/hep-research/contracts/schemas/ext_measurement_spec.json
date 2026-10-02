@@ -1,15 +1,170 @@
-{"$comment": "Owner: hep-analysis. Experiment-neutral: the normalization kind decides which exposure field is needed.",
+{
+ "$comment": "Owner: hep-analysis. Experiment-neutral: the normalization kind decides which exposure field is needed. Ratios and fractions list every effect assumed to cancel, with a correlation model.",
  "type": "object",
- "required": ["observable", "period", "selections", "backgrounds", "corrections", "systematics", "blinding"],
+ "required": [
+  "observable",
+  "period",
+  "selections",
+  "backgrounds",
+  "corrections",
+  "systematics",
+  "blinding"
+ ],
  "properties": {
-  "observable": {"$ref": "common.json#/$defs/observable_spec"},
-  "species_or_process": {"type": "string"},
-  "period": {"anyOf": [{"type": "object", "required": ["start", "end"]}, {"type": "array", "items": {"type": "object", "required": ["start", "end"]}, "minItems": 1}, {"$ref": "common.json#/$defs/missing"}]},
-  "selections": {"type": "array", "items": {"type": "object", "required": ["name", "definition", "conditional_denominator"]}},
-  "backgrounds": {"type": "array", "items": {"type": "object", "required": ["name", "estimator"]}},
-  "corrections": {"type": "array", "items": {"type": "object", "required": ["effect_id", "category", "applied_in"]}},
-  "systematics": {"type": "array", "items": {"type": "object", "required": ["name", "source", "effect", "applied_via"],
-     "properties": {"effect": {"type": "string", "enum": ["normalization", "shape", "migration", "mixed"]}}}},
-  "blinding": {"anyOf": [{"type": "object", "required": ["blinded"], "properties": {"blinded": {"type": "boolean"}}}, {"$ref": "common.json#/$defs/missing"}]},
-  "experiment_fields": {"type": "object", "$comment": "Profile-namespaced fields, e.g. '<ns>:<field>'"}
- }}
+  "observable": {
+   "$ref": "common.json#/$defs/observable_spec"
+  },
+  "species_or_process": {
+   "type": "string"
+  },
+  "period": {
+   "anyOf": [
+    {
+     "type": "object",
+     "required": [
+      "start",
+      "end"
+     ]
+    },
+    {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "start",
+       "end"
+      ]
+     },
+     "minItems": 1
+    },
+    {
+     "$ref": "common.json#/$defs/missing"
+    }
+   ]
+  },
+  "selections": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "name",
+     "definition",
+     "conditional_denominator"
+    ]
+   }
+  },
+  "backgrounds": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "name",
+     "estimator"
+    ]
+   }
+  },
+  "corrections": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "effect_id",
+     "category",
+     "applied_in"
+    ]
+   }
+  },
+  "systematics": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "name",
+     "source",
+     "effect",
+     "applied_via"
+    ],
+    "properties": {
+     "effect": {
+      "type": "string",
+      "enum": [
+       "normalization",
+       "shape",
+       "migration",
+       "mixed"
+      ]
+     }
+    }
+   }
+  },
+  "blinding": {
+   "anyOf": [
+    {
+     "type": "object",
+     "required": [
+      "blinded"
+     ],
+     "properties": {
+      "blinded": {
+       "type": "boolean"
+      }
+     }
+    },
+    {
+     "$ref": "common.json#/$defs/missing"
+    }
+   ]
+  },
+  "experiment_fields": {
+   "type": "object",
+   "$comment": "Profile-namespaced fields, e.g. '<ns>:<field>'"
+  },
+  "ratio": {
+   "type": "object",
+   "required": [
+    "numerator",
+    "denominator",
+    "cancellations"
+   ],
+   "properties": {
+    "numerator": {
+     "type": "string"
+    },
+    "denominator": {
+     "type": "string"
+    },
+    "cancellations": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "effect",
+       "treatment",
+       "correlation_model"
+      ],
+      "properties": {
+       "effect": {
+        "type": "string"
+       },
+       "treatment": {
+        "type": "string",
+        "enum": [
+         "cancels",
+         "correlated",
+         "partial",
+         "independent"
+        ]
+       },
+       "correlation_model": {
+        "type": "string"
+       },
+       "verification": {
+        "type": "string"
+       }
+      }
+     }
+    }
+   }
+  }
+ }
+}

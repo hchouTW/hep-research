@@ -100,6 +100,15 @@ VALID = {
                                            "inefficiency": "inside_matrix", "acceptance": "inside_matrix",
                                            "includes": ["efficiency", "acceptance"], "applied_separately": [],
                                            "conditions": "synthetic", "provenance": SYN}, "detector-response"),
+    "response_parametrized.json": envelope("response", {"form": "parametrized", "truth_axis": "not-applicable", "reco_axis": "not-applicable",
+                                                        "orientation": "rows_reco_cols_truth", "normalization": "unnormalized",
+                                                        "inefficiency": "inside_matrix", "acceptance": "inside_matrix", "includes": ["efficiency"],
+                                                        "parametrization": {"variables": ["pt"], "function_ref": "synthetic-eff.json", "validity_range": {"pt": [10, 1000]}},
+                                                        "conditions": "synthetic", "provenance": SYN}, "detector-response"),
+    "measurement_ratio.json": measurement("exposure", observable=observable("exposure", level="detector", quantity="ratio", unit="1",
+                                                                            variables=[{"name": "rigidity", "unit": "GV", "edges": [1, 2, 4]}]),
+                                          ratio={"numerator": "species-A", "denominator": "species-B",
+                                                 "cancellations": [{"effect": "exposure", "treatment": "cancels", "correlation_model": "identical exposure per period"}]}),
     "theory_spec.json": theory(),
     "prediction.json": prediction(),
     "dataset_record.json": dataset(),
@@ -139,6 +148,8 @@ d = prediction(); d["inputs"] = [{"ref": "x.json", "status": ["asimov"]}]; bad["
 d = copy.deepcopy(VALID["computational_run.json"]); d["extension"]["exit_status"] = 3; bad["run_failed_unlabeled.json"] = (d, ["status.failed_unlabeled"])
 d = copy.deepcopy(VALID["ml_artifact.json"]); d["extension"]["splits"] = {"grouping_key": ""}; bad["ml_no_grouping.json"] = (d, ["ml.no_grouping"])
 d = theory(); del d["status"]; bad["envelope_missing_status.json"] = (d, ["schema.required"])
+d = copy.deepcopy(VALID["response_parametrized.json"]); del d["extension"]["parametrization"]; bad["response_parametrized_missing.json"] = (d, ["response.parametrization_missing"])
+d = measurement(ratio={"numerator": "a", "denominator": "b", "cancellations": [{"effect": "exposure", "treatment": "cancels"}]}); bad["measurement_ratio_no_correlation_model.json"] = (d, ["schema.required"])
 
 
 def main() -> None:

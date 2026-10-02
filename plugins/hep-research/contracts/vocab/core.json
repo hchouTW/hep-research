@@ -1,72 +1,120 @@
 {
-  "contracts_version": "1.0.0",
-  "note": "Core vocabularies. Profiles extend them only with namespaced terms '<namespace>:<term>' declared in profile.json vocabulary_extensions. Unknown un-namespaced terms are rejected.",
-  "vocabularies": {
-    "levels": {
-      "parton": "Partons/leptons of the hard process before showering or hadronization",
-      "particle-fiducial": "Stable final-state particles inside a declared fiducial phase space",
-      "detector": "Reconstructed quantities, including detector effects",
-      "unfolded": "Detector effects removed by an unfolding procedure; the target level must be declared separately"
-    },
-    "normalization_kinds": {
-      "integrated-luminosity": "Collider luminosity (e.g. pb^-1)",
-      "exposure": "Acceptance x time (e.g. m^2 sr s), space and ground-based cosmic-ray instruments",
-      "protons-on-target": "Accelerator beam on fixed target or neutrino beam",
-      "target-exposure": "Target mass x time (e.g. tonne-year), rare-event and neutrino detectors",
-      "live-time": "Detector live time only",
-      "shape-only": "Normalized to unit area or a reference bin; no absolute normalization"
-    },
-    "quantity_types": {
-      "flux": "Particles per area, time, solid angle", "differential-flux": "Flux per unit of a variable",
-      "cross-section": "Integrated cross section", "differential-cross-section": "Cross section per unit of a variable",
-      "ratio": "Ratio of two quantities", "fraction": "Ratio with numerator contained in denominator",
-      "rate": "Events per unit time", "event-count": "Raw or selected counts", "yield": "Expected or fitted counts",
-      "asymmetry": "Normalized difference", "efficiency": "Conditional probability", "parameter": "Model or nuisance parameter",
-      "limit": "Interval bound on a parameter or quantity"
-    },
-    "bin_semantics": {
-      "point": "Value at a point of the variable", "bin-averaged": "Average over the bin (divided by bin width)",
-      "bin-integrated": "Integral over the bin"
-    },
-    "artifact_statuses": {
-      "failed": "Production failed; downstream must not treat as a result", "unvalidated": "Not yet validated",
-      "preliminary": "Not final", "synthetic": "Generated synthetic data", "asimov": "Asimov (expected) dataset",
-      "observed": "Real observed data", "user-supplied": "Supplied by the user without independent verification",
-      "validated-in-scope": "Passed declared checks within a declared scope (not physical validity)"
-    },
-    "dataset_statuses": {
-      "published": "Formally published", "preliminary": "Public but preliminary", "synthetic": "Synthetic", "user-supplied": "User supplied"
-    },
-    "derivation_statuses": {
-      "formal-proof": "Every step follows from stated premises", "analytic-derivation": "Exact result under stated assumptions",
-      "perturbative-argument": "Valid to a stated order", "asymptotic-argument": "Valid in a stated limit",
-      "heuristic-argument": "Motivates without establishing", "numerical-evidence": "Computed instances consistent with the claim",
-      "empirical-observation": "Pattern seen in data", "conjecture": "Unproven", "not-derived": "No derivation yet"
-    },
-    "uncertainty_kinds": {
-      "statistical": "", "systematic": "", "scale-envelope": "Theory scale variation envelope (never auto-Gaussianized)",
-      "pdf": "PDF uncertainty", "truncation": "Missing higher orders", "model-alternative": "Alternative model choice",
-      "numerical": "Numerical integration/solver error", "parametric": "Input-parameter uncertainty"
-    },
-    "missing_markers": {
-      "unknown": "Exists but value not known", "not-applicable": "Does not apply to this artifact", "not-provided": "Applies but was not supplied"
-    },
-    "convention_keys": {
-      "unit_system": "e.g. SI, natural-HEP (GeV, hbar=c=1)", "hbar_c_one": "true if hbar = c = 1",
-      "metric_signature": "+--- or -+++", "coupling_normalization": "e.g. alpha = e^2/(4 pi)",
-      "renormalization_scheme": "e.g. MSbar, on-shell", "scales": "Renormalization/factorization scale choices",
-      "energy_variable": "e.g. sqrt_s, E_beam, rigidity, kinetic_energy_per_nucleon",
-      "frame": "e.g. center-of-mass, lab", "angle_definition": "e.g. theta between incoming e- and outgoing mu-",
-      "spin_treatment": "e.g. spin-averaged initial, summed final", "mass_approximation": "e.g. massless final state"
-    },
-    "evidence_statuses": {
-      "public-fact": "", "general-method": "", "user-supplied-internal": "", "proposal": "", "unknown": "", "derived-result": ""
-    },
-    "verification_levels": {
-      "not-verified": "0", "not-opened": "0", "metadata-only": "1", "abstract+metadata": "2", "page": "2", "full-text": "3"
-    },
-    "capability_statuses": {
-      "proposed": "", "documented": "", "demonstrated-on-synthetic-data": "", "tested-in-declared-environment": "", "unavailable": ""
-    }
+ "contracts_version": "1.0.0",
+ "note": "Core vocabularies. Profiles extend them only with namespaced terms '<namespace>:<term>' declared in profile.json vocabulary_extensions. Unknown un-namespaced terms are rejected.",
+ "vocabularies": {
+  "levels": {
+   "parton": "Partons/leptons of the hard process before showering or hadronization",
+   "particle-fiducial": "Stable final-state particles inside a declared fiducial phase space",
+   "detector": "Reconstructed quantities, including detector effects",
+   "unfolded": "Detector effects removed by an unfolding procedure; the target level must be declared separately"
+  },
+  "normalization_kinds": {
+   "integrated-luminosity": "Collider luminosity (e.g. pb^-1)",
+   "exposure": "Acceptance x time (e.g. m^2 sr s), space and ground-based cosmic-ray instruments",
+   "protons-on-target": "Accelerator beam on fixed target or neutrino beam",
+   "target-exposure": "Target mass x time (e.g. tonne-year), rare-event and neutrino detectors",
+   "live-time": "Detector live time only",
+   "shape-only": "Normalized to unit area or a reference bin; no absolute normalization"
+  },
+  "quantity_types": {
+   "flux": "Particles per area, time, solid angle",
+   "differential-flux": "Flux per unit of a variable",
+   "cross-section": "Integrated cross section",
+   "differential-cross-section": "Cross section per unit of a variable",
+   "ratio": "Ratio of two quantities",
+   "fraction": "Ratio with numerator contained in denominator",
+   "rate": "Events per unit time",
+   "event-count": "Raw or selected counts",
+   "yield": "Expected or fitted counts",
+   "asymmetry": "Normalized difference",
+   "efficiency": "Conditional probability",
+   "parameter": "Model or nuisance parameter",
+   "limit": "Interval bound on a parameter or quantity",
+   "resolution": "Width of a response distribution (core and tails reported separately)",
+   "scale": "Energy or momentum scale relative to truth"
+  },
+  "bin_semantics": {
+   "point": "Value at a point of the variable",
+   "bin-averaged": "Average over the bin (divided by bin width)",
+   "bin-integrated": "Integral over the bin"
+  },
+  "artifact_statuses": {
+   "failed": "Production failed; downstream must not treat as a result",
+   "unvalidated": "Not yet validated",
+   "preliminary": "Not final",
+   "synthetic": "Generated synthetic data",
+   "asimov": "Asimov (expected) dataset",
+   "observed": "Real observed data",
+   "user-supplied": "Supplied by the user without independent verification",
+   "validated-in-scope": "Passed declared checks within a declared scope (not physical validity)"
+  },
+  "dataset_statuses": {
+   "published": "Formally published",
+   "preliminary": "Public but preliminary",
+   "synthetic": "Synthetic",
+   "user-supplied": "User supplied"
+  },
+  "derivation_statuses": {
+   "formal-proof": "Every step follows from stated premises",
+   "analytic-derivation": "Exact result under stated assumptions",
+   "perturbative-argument": "Valid to a stated order",
+   "asymptotic-argument": "Valid in a stated limit",
+   "heuristic-argument": "Motivates without establishing",
+   "numerical-evidence": "Computed instances consistent with the claim",
+   "empirical-observation": "Pattern seen in data",
+   "conjecture": "Unproven",
+   "not-derived": "No derivation yet"
+  },
+  "uncertainty_kinds": {
+   "statistical": "",
+   "systematic": "",
+   "scale-envelope": "Theory scale variation envelope (never auto-Gaussianized)",
+   "pdf": "PDF uncertainty",
+   "truncation": "Missing higher orders",
+   "model-alternative": "Alternative model choice",
+   "numerical": "Numerical integration/solver error",
+   "parametric": "Input-parameter uncertainty"
+  },
+  "missing_markers": {
+   "unknown": "Exists but value not known",
+   "not-applicable": "Does not apply to this artifact",
+   "not-provided": "Applies but was not supplied"
+  },
+  "convention_keys": {
+   "unit_system": "e.g. SI, natural-HEP (GeV, hbar=c=1)",
+   "hbar_c_one": "true if hbar = c = 1",
+   "metric_signature": "+--- or -+++",
+   "coupling_normalization": "e.g. alpha = e^2/(4 pi)",
+   "renormalization_scheme": "e.g. MSbar, on-shell",
+   "scales": "Renormalization/factorization scale choices",
+   "energy_variable": "e.g. sqrt_s, E_beam, rigidity, kinetic_energy_per_nucleon",
+   "frame": "e.g. center-of-mass, lab",
+   "angle_definition": "e.g. theta between incoming e- and outgoing mu-",
+   "spin_treatment": "e.g. spin-averaged initial, summed final",
+   "mass_approximation": "e.g. massless final state"
+  },
+  "evidence_statuses": {
+   "public-fact": "",
+   "general-method": "",
+   "user-supplied-internal": "",
+   "proposal": "",
+   "unknown": "",
+   "derived-result": ""
+  },
+  "verification_levels": {
+   "not-verified": "0",
+   "not-opened": "0",
+   "metadata-only": "1",
+   "abstract+metadata": "2",
+   "page": "2",
+   "full-text": "3"
+  },
+  "capability_statuses": {
+   "proposed": "",
+   "documented": "",
+   "demonstrated-on-synthetic-data": "",
+   "tested-in-declared-environment": "",
+   "unavailable": ""
   }
+ }
 }

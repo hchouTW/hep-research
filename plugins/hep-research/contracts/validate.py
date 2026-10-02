@@ -86,6 +86,10 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:
         both = set(ext.get("includes", [])) & set(ext.get("applied_separately", []))
         for x in sorted(both):
             rep.add("error", "$.extension", "response.double_counted", f"'{x}' is inside the matrix and applied separately")
+        if ext.get("form") == "parametrized" and not ext.get("parametrization"):
+            rep.add("error", "$.extension.parametrization", "response.parametrization_missing", "parametrized response needs a parametrization with validity range")
+        if ext.get("form", "matrix") == "matrix" and not all(isinstance(ext.get(a), dict) for a in ("truth_axis", "reco_axis")):
+            rep.add("error", "$.extension", "response.axes_missing", "a response matrix needs truth and reco axes")
         if ext.get("inefficiency") == "inside_matrix" and "efficiency" in ext.get("applied_separately", []):
             rep.add("error", "$.extension", "response.double_counted", "inefficiency inside the matrix and efficiency applied separately")
     elif t == "theory-spec":
