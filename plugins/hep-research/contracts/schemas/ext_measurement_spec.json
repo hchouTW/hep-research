@@ -1,4 +1,4 @@
-{"$comment": "Owner: hep-analysis. Collider- and AMS-neutral: normalization kind decides which exposure field is needed.",
+{"$comment": "Owner: hep-analysis. Experiment-neutral: the normalization kind decides which exposure field is needed.",
  "type": "object",
  "required": ["observable", "period", "selections", "backgrounds", "corrections", "systematics", "blinding"],
  "properties": {
@@ -11,5 +11,5 @@
   "systematics": {"type": "array", "items": {"type": "object", "required": ["name", "source", "effect", "applied_via"],
      "properties": {"effect": {"type": "string", "enum": ["normalization", "shape", "migration", "mixed"]}}}},
   "blinding": {"anyOf": [{"type": "object", "required": ["blinded"], "properties": {"blinded": {"type": "boolean"}}}, {"$ref": "common.json#/$defs/missing"}]},
-  "experiment_fields": {"type": "object", "$comment": "Profile-namespaced fields, e.g. 'ams02:charge_sign_source'"}
+  "experiment_fields": {"type": "object", "$comment": "Profile-namespaced fields, e.g. '<ns>:<field>'"}
  }}
