@@ -113,18 +113,20 @@ M4 exit checks: Path D and T24 pass; every negative composition/compatibility fi
 - [x] Routing round 2 (user approved, paid runs): tuned `hep-theory` and `hep-statistics` descriptions; run 4 43/48; repeats old 12/30 vs new 16/30 on the 10 changed cases (G5-REPORT "Routing round 2")
 - [x] PR #4 merged (`57c0f62`)
 - [x] ROOT 6.40.04 installed from conda-forge into `.venv-hep-root/` (user approved, micromamba): PyROOT tests and C++ assets pass; `adapters/root-uproot` demonstrated-on-synthetic-data; VALIDATION ROOT-RUN
+- [x] PR #5 merged (`a9cab97`)
+- [x] Diagram tools installed (user approved): Graphviz 14.1.2, PlantUML 1.2026.8, Mermaid CLI 12.0.0 pass their real-tool tests (4 tests no longer skipped); tectonic 0.17.0 installed but its TeX bundle host is blocked, so the paper compile stays unverified; VALIDATION DIAGRAM-RUN
 
 ## Blockers / needs user
 
-1. Open for the user: CMS Combine, torchvision and the diagram tools are not installed (each install needs approval); their tests stay skipped and unverified.
+1. Open for the user: CMS Combine and torchvision are not installed (each install needs approval); the tectonic paper compile needs network access to relay.fullyjustified.net (or an offline TeX bundle). Their tests stay skipped and unverified.
 2. Open from M1: the old branch in agentic-ai-skills (M1-12) is for the user to delete.
 
 ## Resume checklist
 
 1. `tasks/hep-research/scripts/fetch_legacy.sh`
 2. `python3 -m venv .venv-hep && .venv-hep/bin/pip install -r tasks/hep-research/m6/pytorch/pip-freeze-pytorch.txt` (D5 + pyhf + uproot/awkward + PyTorch; `m6/uproot/pip-freeze-uproot.txt` without PyTorch; `baseline/pip-freeze-d5.txt` for D5 only)
-3. `.venv-hep/bin/python plugins/hep-research/tools/run_all_checks.py` (with ROOT: recreate `.venv-hep-root/env` from `tasks/hep-research/m6/root/conda-explicit-root.txt` with micromamba and set `HEP_ROOT_PYTHON=.venv-hep-root/env/bin/python`)
+3. `.venv-hep/bin/python plugins/hep-research/tools/run_all_checks.py` (with ROOT: recreate `.venv-hep-root/env` from `tasks/hep-research/m6/root/conda-explicit-root.txt` with micromamba and set `HEP_ROOT_PYTHON=.venv-hep-root/env/bin/python`; with diagram tools: recreate `.venv-hep-diagrams/` as in VALIDATION DIAGRAM-RUN and put `.venv-hep-diagrams/bin` first on PATH)
 
 ## Next step
 
-None planned. Possible follow-ups need the user: Combine, torchvision or diagram-tool environments to verify the remaining skipped tests and adapter parts.
+None planned. Possible follow-ups need the user: Combine or torchvision environments, or network access for the tectonic bundle, to verify the remaining skipped tests and adapter parts.

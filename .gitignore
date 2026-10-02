@@ -9,3 +9,4 @@ venv/
 .venv-hep/
 .legacy/
 .venv-hep-root/
+.venv-hep-diagrams/

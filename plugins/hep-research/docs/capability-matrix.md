@@ -37,7 +37,8 @@ SciPy 1.17.1, Matplotlib 3.11.2, SymPy 1.14.0, Claude Code CLI 2.1.287, 2026-10-
 | PyTorch training, inference, profiling assets | physics-ml | tested (E1 + PyTorch 2.14.1, CPU only) | asset smoke tests (training, inference, datasets, allocation measurement) and a 2-process DDP run on the gloo backend pass; GPU, NCCL, mixed precision on GPU and torchvision (`vision_transfer.py`) not tried |
 | Claims linked to results, status preserved in text | research-communication | tested (E1) | T20 |
 | Literature and citation verification online | research-communication | unverified | needs network; offline it marks citations unverified |
-| Diagrams and paper builds (Graphviz, Mermaid, PlantUML, tectonic) | research-communication | unverified | tools not installed; tests skipped |
+| Diagram source checks (Graphviz, Mermaid, PlantUML) | research-communication | tested (Graphviz 14.1.2, PlantUML 1.2026.8, Mermaid CLI 12.0.0 with Chromium 141, project-local) | real `dot`, `mmdc` and `plantuml` accept valid and reject invalid sources; every shipped diagram source passes `check_diagram_sources.py` (`tests/skills/research_communication/test_academic_diagrams_academic_diagrams_skill.py`) |
+| Paper builds (tectonic) | research-communication | unverified | tectonic 0.17.0 installed, but the network policy blocks its TeX bundle host (relay.fullyjustified.net), so the skeleton compile test stays skipped (VALIDATION DIAGRAM-RUN) |
 | Lattice QCD, EFT global fits, cosmic-ray propagation, other domains | none | not in v1 | limited-support response (J12) |
 
 ## Profiles
