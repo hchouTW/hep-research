@@ -1,7 +1,7 @@
 # PROGRESS — hep-research plugin
 
 - Current milestone: **M1 complete, waiting at GATE G1** (G0 passed 2026-10-02: D1–D5 confirmed, network approved, branch pushed to origin)
-- Repository: `hchouTW/hep-research-plugin`, branch `feat/hep-research-plugin` (no PR). Legacy source: read-only `agentic-ai-skills@3e995a4` via `tasks/hep-research/scripts/fetch_legacy.sh`
+- Repository: `hchouTW/hep-research`, branch `feat/hep-research-plugin` (no PR). Legacy source: read-only `agentic-ai-skills@3e995a4` via `tasks/hep-research/scripts/fetch_legacy.sh`
 - Base commit: `3e995a49a89fad8e0e9d52130ee1fd93a3a0f4f9`
 - Last session: 2026-10-02, Claude Code cloud container (CLI 2.1.287), Python 3.11.15
 
@@ -47,7 +47,7 @@ Latest check run: `check-runs/check-run-2026-10-02T134449Z.json` (6 pass, 0 fail
 ## Blockers / needs user
 
 1. G1 review: approve the architecture, journeys, contracts and skill descriptions.
-2. None other. Work moved to hep-research-plugin (DECISIONS M1-09).
+2. None other. Work lives in hchouTW/hep-research (DECISIONS M1-09, M1-11).
 
 ## Resume checklist
 

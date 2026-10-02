@@ -1,4 +1,4 @@
-# hep-research-plugin
+# hep-research
 
 Development repository for **hep-research**, a Claude Code plugin for experimental and theoretical
 high-energy physics research (seven core skills plus optional experiment and theory-domain profiles).
