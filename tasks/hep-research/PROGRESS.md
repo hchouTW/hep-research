@@ -1,6 +1,6 @@
 # PROGRESS — hep-research plugin
 
-- Current milestone: **M2 complete** (exit checks pass); next M3. G0 and G1 passed 2026-10-02
+- Current milestone: **M3 complete** (exit checks pass); next M4. G0 and G1 passed 2026-10-02
 - Repository: `hchouTW/hep-research`, branch `feat/hep-research-plugin` (no PR). Legacy source: read-only `agentic-ai-skills@3e995a4` via `tasks/hep-research/scripts/fetch_legacy.sh`
 - Base commit: `3e995a49a89fad8e0e9d52130ee1fd93a3a0f4f9`
 - Last session: 2026-10-02, Claude Code cloud container (CLI 2.1.287), Python 3.11.15
@@ -59,9 +59,20 @@ M2 exit checks: ledger preservation pass; migrated-helper regressions pass (816 
 
 Latest check run: `check-runs/check-run-2026-10-02T150623Z.json` (8 pass, 0 fail, 0 skip; 851 tests, 816 pass, 35 skip).
 
+## M3 steps
+
+- [x] 1. `profiles/theory/qed-benchmark`: PDG review eqs. 51.2/51.3 read at page level (DECISIONS M3-04/05), SymPy trace derivation with 8 checks (`analytic-derivation`, not proof), prediction with convergence study, 16 tests (incl. T13 convention mismatch)
+- [x] 2. Path C (`examples/qed-benchmark/run_path_c.py`): zero experiment-profile files read (audit hook), no detector/data/blinding fields, no GPU or commercial CAS; theory_spec and prediction artifacts
+- [x] 3. `profiles/experiments/synthetic-collider` (illustrative) via profile resources and registry only; AC10 diff in `m3/ac10-diff.txt`; generator imports no theory code
+- [x] 4. Path B (`examples/collider-angular/run_path_b.py`): unfolded dσ/dcosθ, fiducial σ 745.65 ± 6.63 (stat) ± 14.9 (lumi) pb vs 745.81 expected, χ² 10.4/10, reproducible
+- [x] 5. AMS optionality: `tools/check_ams_optional.py` (copy without the AMS profile, path with spaces) passes; part of `run_all_checks.py`
+- [x] Carry-over T18: `core/blinding` with two consumer scripts and synthetic leak tests
+
+M3 exit checks: Paths B and C pass; AMS-absent run passes; AC10 diff touches no core, contracts or skill files.
+
 ## Blockers / needs user
 
-1. None at M2. Next gate needing the user is G5 (native install test).
+1. None at M3. Next gate needing the user is G5 (native install test).
 2. Open from M1: the old branch in agentic-ai-skills (M1-12) is for the user to delete.
 
 ## Resume checklist
@@ -72,4 +83,4 @@ Latest check run: `check-runs/check-run-2026-10-02T150623Z.json` (8 pass, 0 fail
 
 ## Next step
 
-M3: theory capability (`theory:qed-benchmark`, Path C) and the extension proof (`experiment:synthetic-collider`, Path B). Carry-overs: T18 blinding checks across plots/logs/caches/reports (not yet implemented); port `end_to_end_sample_analysis.py`; rewrite the obsolete host-install notes in `hep-computing/references/{claude-code,antigravity,codex}.md`; dedupe generic content in AMS modules against core skills (M2-04).
+M4: composition and Path D (QED prediction vs synthetic-collider measurement; the harness injects σ_gen = μ·σ_pred, DECISIONS M3-07), T03–T09, T16, T19–T21. Carry-overs: port `end_to_end_sample_analysis.py`; rewrite the obsolete host-install notes in `hep-computing/references/{claude-code,antigravity,codex}.md`; dedupe generic content in AMS modules against core skills (M2-04).
