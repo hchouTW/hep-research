@@ -6,7 +6,7 @@ validate it. This is a scientific-reasoning reference, not a physics textbook - 
 does not teach what a constraint or a surrogate is, only how to decide whether to use
 one and how to check it. For the statistical/inference validity of the resulting
 scientific claim (likelihoods, discovery significance) see
-`academic-papers`, not this file - see the boundary note in `deep-learning-guide.md`. For
+`hep-statistics`, not this file - see the boundary note in `deep-learning-guide.md`. For
 symmetry-specific architecture decisions see
 [geometric-and-equivariant-learning.md](geometric-and-equivariant-learning.md).
 

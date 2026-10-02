@@ -25,7 +25,7 @@ automatically imply improved downstream scientific inference.** A classifier wit
 higher AUC does not necessarily produce better parameter estimates, better confidence
 intervals, better discovery significance, or more reliable uncertainty - each of those
 is a separate claim requiring separate validation. Do not substitute a predictive
-metric for a downstream one; see the deep-learning/academic-papers boundary in
+metric for a downstream one; see the physics-ml/hep-statistics boundary in
 `deep-learning-guide.md`.
 
 ## Aleatoric vs. epistemic uncertainty

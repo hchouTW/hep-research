@@ -312,5 +312,5 @@ corrected snippet -> a quick diagnostic print/assert to confirm the fix.
   `hep-computing` ([agile-development-guide.md](../../hep-computing/references/agile-development-guide.md)).
 - For the scientific/statistical validity of conclusions drawn from model outputs -
   likelihoods, confidence intervals, discovery/exclusion claims - pair with
-  `academic-papers`; this guide covers whether the model itself is trained,
+  `hep-statistics` (and `research-communication` for how the claim is written up); this guide covers whether the model itself is trained,
   evaluated, calibrated, and robust.

@@ -3,9 +3,14 @@
 Use when evaluating or constructing a statistical inference — checking whether a
 paper's likelihood, test, interval, or limit is set up and interpreted correctly,
 or reasoning through one while drafting a Results/Systematic Uncertainties
-section. This is inference *reasoning*, not the fit or limit-setting itself —
-use `hep-analysis` (pyhf/Combine/RooStats, cutflows, toy generation) or
-`deep-learning` (evaluation-harness design) to actually run the computation.
+section. This is inference *reasoning*; the fit, limit or toy campaign itself is
+also `hep-statistics` work (`${CLAUDE_PLUGIN_ROOT}/core/stats` and the pyhf/Combine
+adapter). Route the neighbouring steps by what is being done: deriving the model,
+prediction or approximation is `hep-theory`
+(`../../hep-theory/references/mathematical-reasoning-and-proof.md`); designing the
+selection, cutflow or systematic variations is `hep-analysis`; an ML evaluation
+harness is `physics-ml`; explaining or writing up the result is
+`research-communication`.
 Cross-references: `../../research-communication/references/claim-evidence-mapping.md` for whether the conclusion follows
 from the result; `../../research-communication/references/equation-and-notation-auditing.md` for whether the likelihood's
 algebra/dimensions are internally consistent; `../../research-communication/references/scientific-style.md` for how to

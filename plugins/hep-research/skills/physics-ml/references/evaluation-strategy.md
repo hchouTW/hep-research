@@ -93,7 +93,8 @@ behavior; a model backing a scientific or safety-relevant claim needs the full c
 See [uncertainty-and-calibration.md](uncertainty-and-calibration.md) for calibration
 and [robustness-and-distribution-shift.md](robustness-and-distribution-shift.md) for
 the robustness/shift levels; for the statistical validity of a downstream scientific
-conclusion itself, see `academic-papers`.
+conclusion itself (likelihoods, intervals, significance), see `hep-statistics`; for how
+the conclusion is stated, see `research-communication`.
 
 ## Deciding to ship
 
