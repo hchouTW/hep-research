@@ -1,59 +1,64 @@
 {
-  "admission_rule": "A module enters core/ only when code is used by more than one top-level component (skills/*/scripts, profiles/*, adapters/*, contracts/). Experiment- or theory-domain specifics never enter core/.",
-  "modules": {
-    "bootstrap": {
-      "steward": "hep-computing",
-      "status": "implemented",
-      "purpose": "Plugin-root resolution from __file__"
-    },
-    "units": {
-      "steward": "hep-theory",
-      "status": "planned-M2",
-      "purpose": "Unit registry and conversions with provenance"
-    },
-    "constants": {
-      "steward": "hep-theory",
-      "status": "planned-M2",
-      "purpose": "Physical constants with source and edition"
-    },
-    "kinematics": {
-      "steward": "hep-theory",
-      "status": "implemented-M2",
-      "purpose": "Generic relativistic kinematics (rigidity/momentum/energy, Jacobians)",
-      "files": [
-        "relativistic"
-      ],
-      "source": "agentic-ai-skills@3e995a4 ams-analysis/scripts/ams_kinematics.py (moved whole: all conversions are generic; no constants embedded, masses are caller-supplied)"
-    },
-    "binned": {
-      "steward": "hep-computing",
-      "status": "planned-M2",
-      "purpose": "Binned-data representation and JSON I/O"
-    },
-    "stats": {
-      "steward": "hep-statistics",
-      "status": "implemented-M2",
-      "purpose": "Likelihoods, limits, template fits, unfolding diagnostics, toys, covariance/response checks",
-      "files": [
-        "statistical_toys",
-        "unfolding_diagnostics",
-        "likelihood_limits",
-        "template_fit",
-        "poisson_diagnostics",
-        "validate_covariance",
-        "validate_response"
-      ],
-      "source": "agentic-ai-skills@3e995a4 ams-analysis/scripts (moved; docstrings de-AMSed, imports packaged)"
-    },
-    "blinding": {
-      "steward": "hep-computing",
-      "status": "planned-M2",
-      "purpose": "Masking of blinded values in outputs, logs, caches"
-    },
-    "evidence": {
-      "steward": "research-communication",
-      "status": "planned-M2",
-      "purpose": "Evidence-ledger validation and index rendering"
-    }
+ "admission_rule": "A module enters core/ only when code is used by more than one top-level component (skills/*/scripts, profiles/*, adapters/*, contracts/). Experiment- or theory-domain specifics never enter core/.",
+ "modules": {
+  "bootstrap": {
+   "steward": "hep-computing",
+   "status": "implemented",
+   "purpose": "Plugin-root resolution from __file__"
+  },
+  "units": {
+   "steward": "hep-theory",
+   "status": "planned-M2",
+   "purpose": "Unit registry and conversions with provenance"
+  },
+  "constants": {
+   "steward": "hep-theory",
+   "status": "planned-M2",
+   "purpose": "Physical constants with source and edition"
+  },
+  "kinematics": {
+   "steward": "hep-theory",
+   "status": "implemented-M2",
+   "purpose": "Generic relativistic kinematics (rigidity/momentum/energy, Jacobians)",
+   "files": [
+    "relativistic"
+   ],
+   "source": "agentic-ai-skills@3e995a4 ams-analysis/scripts/ams_kinematics.py (moved whole: all conversions are generic; no constants embedded, masses are caller-supplied)"
+  },
+  "binned": {
+   "steward": "hep-computing",
+   "status": "planned-M2",
+   "purpose": "Binned-data representation and JSON I/O"
+  },
+  "stats": {
+   "steward": "hep-statistics",
+   "status": "implemented-M2",
+   "purpose": "Likelihoods, limits, template fits, unfolding diagnostics, toys, covariance/response checks",
+   "files": [
+    "statistical_toys",
+    "unfolding_diagnostics",
+    "likelihood_limits",
+    "template_fit",
+    "poisson_diagnostics",
+    "validate_covariance",
+    "validate_response"
+   ],
+   "source": "agentic-ai-skills@3e995a4 ams-analysis/scripts (moved; docstrings de-AMSed, imports packaged)"
+  },
+  "blinding": {
+   "steward": "hep-computing",
+   "status": "planned-M2",
+   "purpose": "Masking of blinded values in outputs, logs, caches"
+  },
+  "evidence": {
+   "steward": "research-communication",
+   "status": "implemented-M2",
+   "purpose": "Evidence-ledger validation and index rendering",
+   "files": [
+    "ledger",
+    "render_index"
+   ],
+   "source": "agentic-ai-skills@3e995a4 ams-analysis/scripts/{validate_evidence_ledger,render_source_index}.py (moved; explicit paths, optional ID namespace, verification_date with access_date fallback, generic messages)"
   }
+ }
 }

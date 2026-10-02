@@ -1,18 +1,73 @@
-{"$comment": "Shared evidence schema, claim record. A claim's strength never exceeds its best source's verification level.",
+{
+ "$comment": "Shared evidence schema, claim record. A claim's strength never exceeds its best source's verification level.",
  "type": "object",
- "required": ["id", "claim", "evidence_status", "source_ids", "location", "scope", "verification_strength", "numeric_quotation_allowed", "last_reviewed"],
+ "required": [
+  "id",
+  "claim",
+  "evidence_status",
+  "source_ids",
+  "location",
+  "scope",
+  "verification_strength",
+  "numeric_quotation_allowed",
+  "last_reviewed"
+ ],
  "properties": {
-  "id": {"type": "string", "pattern": "^[a-z][a-z0-9-]*:C[0-9A-Za-z_.-]+$"},
-  "legacy_id": {"type": "string"},
-  "claim": {"type": "string", "minLength": 1},
-  "claim_types": {"type": "array", "items": {"type": "string"}},
-  "support_kind": {"type": "string"},
-  "evidence_status": {"type": "string", "x-vocab": "evidence_statuses"},
-  "source_ids": {"type": "array", "items": {"$ref": "common.json#/$defs/namespaced_id"}},
-  "location": {"type": "string"},
-  "scope": {"type": "object", "required": ["text"]},
-  "limitations": {"type": ["string", "array"]},
-  "verification_strength": {"type": "string", "x-vocab": "verification_levels"},
-  "numeric_quotation_allowed": {"type": "boolean"},
-  "last_reviewed": {"type": "string"}
- }}
+  "id": {
+   "type": "string",
+   "pattern": "^[a-z][a-z0-9-]*:C[0-9A-Za-z_.-]+$"
+  },
+  "legacy_id": {
+   "type": "string"
+  },
+  "claim": {
+   "type": "string",
+   "minLength": 1
+  },
+  "claim_types": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "support_kind": {
+   "type": "string"
+  },
+  "evidence_status": {
+   "type": "string",
+   "x-vocab": "evidence_statuses"
+  },
+  "source_ids": {
+   "type": "array",
+   "items": {
+    "$ref": "common.json#/$defs/namespaced_id"
+   }
+  },
+  "location": {
+   "type": "string"
+  },
+  "scope": {
+   "type": "object",
+   "required": [
+    "text"
+   ]
+  },
+  "limitations": {
+   "type": [
+    "string",
+    "array",
+    "null"
+   ]
+  },
+  "verification_strength": {
+   "type": "string",
+   "x-vocab": "verification_levels"
+  },
+  "numeric_quotation_allowed": {
+   "type": "boolean"
+  },
+  "last_reviewed": {
+   "type": "string"
+  }
+ }
+}
