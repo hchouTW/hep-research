@@ -54,7 +54,7 @@ SciPy 1.17.1, Matplotlib 3.11.2, SymPy 1.14.0, Claude Code CLI 2.1.287, 2026-10-
 
 | Adapter | Status | Notes |
 |---|---|---|
-| `adapters/pyhf-combine` (pyhf JSON, Combine datacard template) | demonstrated-on-synthetic-data | adapter status is its least-tested tool: pyhf part demonstrated-on-synthetic-data (pyhf 0.7.6); Combine part demonstrated-on-synthetic-data (Combine 11.1.0 with ROOT 6.36.14: the filled datacard gives observed 2.1565 and median expected 2.1562 against pyhf 2.153); Combine with ROOT 6.40.04 fails (COMBINE-RUN) |
+| `adapters/pyhf-combine` (pyhf JSON, Combine datacard template) | demonstrated-on-synthetic-data | adapter status is its least-tested tool: pyhf part demonstrated-on-synthetic-data (pyhf 0.7.6); Combine part demonstrated-on-synthetic-data (Combine 11.1.0 with ROOT 6.40.04 and 6.36.14: with `--strictBounds` the filled datacard gives observed 2.1518 and median expected 2.1562 against pyhf 2.153 in both; without it ROOT 6.40 rejects an out-of-range r, COMBINE-ROOT640) |
 | `adapters/root-uproot` (ROOT, RDataFrame, RooFit, uproot/awkward assets) | demonstrated-on-synthetic-data | ROOT 6.40.04, uproot 5.7.6 and awkward 2.14.0 each run on synthetic fixtures; not run on real experiment files |
 | Interchange formats for recasting and published data | proposed | named as optional in the J7 trace; no code |
 
