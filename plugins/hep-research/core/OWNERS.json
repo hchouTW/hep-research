@@ -18,8 +18,12 @@
     },
     "kinematics": {
       "steward": "hep-theory",
-      "status": "planned-M2",
-      "purpose": "Generic relativistic kinematics (rigidity/momentum/energy, Jacobians)"
+      "status": "implemented-M2",
+      "purpose": "Generic relativistic kinematics (rigidity/momentum/energy, Jacobians)",
+      "files": [
+        "relativistic"
+      ],
+      "source": "agentic-ai-skills@3e995a4 ams-analysis/scripts/ams_kinematics.py (moved whole: all conversions are generic; no constants embedded, masses are caller-supplied)"
     },
     "binned": {
       "steward": "hep-computing",
