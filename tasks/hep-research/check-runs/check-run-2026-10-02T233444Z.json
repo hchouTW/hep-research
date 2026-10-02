@@ -1,0 +1,379 @@
+{
+ "timestamp_utc": "2026-10-02T23:34:44Z",
+ "plugin_version": "0.1.0",
+ "environment": {
+  "python": "3.11.15",
+  "platform": "Linux-6.18.44-fc-v64-x86_64-with-glibc2.39",
+  "executable": "/home/claude/hep-research-plugin/.venv-hep/bin/python"
+ },
+ "git_commit": "062ac1741b832454622465b81229e45ec4d6cc95",
+ "counts": {
+  "pass": 14,
+  "fail": 0,
+  "skip": 0
+ },
+ "checks": [
+  {
+   "name": "unittest",
+   "command": "python3 -m unittest discover -s tests -t .",
+   "status": "pass",
+   "counts": {
+    "run": 988,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 3,
+    "passed": 985
+   },
+   "failed": [],
+   "skipped": [
+    "test_check_pytorch_env_reports_missing_torch_cleanly (tests.skills.physics_ml.test_deep_learning_deep_learning_skill.CleanDegradationWithoutTorchTests.test_check_pytorch_env_reports_missing_torch_cleanly): only meaningful when PyTorch is not installed",
+    "test_exits_with_clear_message_not_traceback (tests.skills.physics_ml.test_deep_learning_deep_learning_skill.CleanDegradationWithoutTorchTests.test_exits_with_clear_message_not_traceback): only meaningful when PyTorch is not installed",
+    "test_bundled_skeleton_compiles (tests.skills.research_communication.test_academic_papers_end_to_end.TestEndToEnd.test_bundled_skeleton_compiles): tectonic not installed"
+   ]
+  },
+  {
+   "name": "profile-tests:experiment:ams-02",
+   "command": "(cd profiles/experiments/ams-02 && python3 -m unittest discover -s tests -t tests)",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "status": "pass",
+    "counts": {
+     "run": 258,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0,
+     "passed": 258
+    },
+    "failed": [],
+    "skipped": []
+   },
+   "counts": {
+    "run": 258,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 258
+   }
+  },
+  {
+   "name": "profile-tests:experiment:synthetic-collider",
+   "command": "(cd profiles/experiments/synthetic-collider && python3 -m unittest discover -s tests -t tests)",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "status": "pass",
+    "counts": {
+     "run": 9,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0,
+     "passed": 9
+    },
+    "failed": [],
+    "skipped": []
+   },
+   "counts": {
+    "run": 9,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 9
+   }
+  },
+  {
+   "name": "profile-tests:theory:qed-benchmark",
+   "command": "(cd profiles/theory/qed-benchmark && python3 -m unittest discover -s tests -t tests)",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "status": "pass",
+    "counts": {
+     "run": 16,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0,
+     "passed": 16
+    },
+    "failed": [],
+    "skipped": []
+   },
+   "counts": {
+    "run": 16,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 16
+   }
+  },
+  {
+   "name": "check_layering",
+   "command": "/home/claude/hep-research-plugin/.venv-hep/bin/python tools/check_layering.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "ok": true,
+    "violations": []
+   }
+  },
+  {
+   "name": "stanza_consistency",
+   "command": "/home/claude/hep-research-plugin/.venv-hep/bin/python tools/build_stanzas.py --check",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "ok": true,
+    "problems": []
+   }
+  },
+  {
+   "name": "registry",
+   "command": "/home/claude/hep-research-plugin/.venv-hep/bin/python contracts/registry.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "ok": true,
+    "findings": [],
+    "profiles": [
+     "experiment:ams-02",
+     "experiment:synthetic-collider",
+     "theory:qed-benchmark"
+    ]
+   }
+  },
+  {
+   "name": "ams_ledger_preservation",
+   "command": "/home/claude/hep-research-plugin/.venv-hep/bin/python tools/check_ams_ledger_preservation.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "status": "pass",
+    "legacy": "/home/claude/hep-research-plugin/.legacy/agentic-ai-skills/ams-analysis/data",
+    "pinned_commit": "3e995a49a89fad8e0e9d52130ee1fd93a3a0f4f9",
+    "counts": {
+     "legacy_sources": 60,
+     "legacy_claims": 183,
+     "sources": 60,
+     "claims": 183
+    },
+    "differences": []
+   }
+  },
+  {
+   "name": "ams_optional",
+   "command": "/home/claude/hep-research-plugin/.venv-hep/bin/python tools/check_ams_optional.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "ok": true,
+    "copy": "/tmp/hep research no ams mxxy9atx/hep-research",
+    "checks": [
+     {
+      "name": "ams_profile_absent",
+      "status": "pass"
+     },
+     {
+      "name": "registry",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "path_b",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "path_c",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "tests_core",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "tests_contracts",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "tests_hep_statistics",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "tests_hep_computing",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "tests_paths_b_c",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "profile-tests:experiments/synthetic-collider",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "profile-tests:theory/qed-benchmark",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     }
+    ]
+   }
+  },
+  {
+   "name": "routing_static",
+   "command": "/home/claude/hep-research-plugin/.venv-hep/bin/python tools/check_routing_static.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "cases": 48,
+    "failed": [],
+    "coverage_errors": [],
+    "dispatch_api_mentions": [],
+    "languages": [
+     "en",
+     "zh-Hant"
+    ],
+    "note": "static check only: descriptions cover the cases; a live routing run needs approval (paid model calls)",
+    "ok": true
+   }
+  },
+  {
+   "name": "packaging_scan",
+   "command": "/home/claude/hep-research-plugin/.venv-hep/bin/python tools/check_packaging.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "files_scanned": 816,
+    "findings": [],
+    "ok": true
+   }
+  },
+  {
+   "name": "traceability",
+   "command": "/home/claude/hep-research-plugin/.venv-hep/bin/python tools/check_traceability.py --legacy /home/claude/hep-research-plugin/.legacy/agentic-ai-skills",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "ok": true,
+    "problems": [],
+    "skipped": [],
+    "map_rows": 949,
+    "legacy_tracked_files": 949,
+    "plugin_files": 816,
+    "from_legacy": 380,
+    "registered_new": 436
+   }
+  },
+  {
+   "name": "measure_entrypoints",
+   "command": "/home/claude/hep-research-plugin/.venv-hep/bin/python tools/measure_entrypoints.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "ok": true,
+    "budget": {
+     "skill_bytes": 8192,
+     "skill_lines_max": 180,
+     "description_chars": 1024,
+     "registry_bytes": 2048,
+     "index_bytes": 4096
+    },
+    "skills": [
+     {
+      "skill": "detector-response",
+      "lines": 58,
+      "bytes": 6072,
+      "description_chars": 814
+     },
+     {
+      "skill": "hep-analysis",
+      "lines": 63,
+      "bytes": 7115,
+      "description_chars": 921
+     },
+     {
+      "skill": "hep-computing",
+      "lines": 56,
+      "bytes": 6493,
+      "description_chars": 859
+     },
+     {
+      "skill": "hep-statistics",
+      "lines": 54,
+      "bytes": 6542,
+      "description_chars": 1014
+     },
+     {
+      "skill": "hep-theory",
+      "lines": 53,
+      "bytes": 6212,
+      "description_chars": 1022
+     },
+     {
+      "skill": "physics-ml",
+      "lines": 52,
+      "bytes": 5325,
+      "description_chars": 803
+     },
+     {
+      "skill": "research-communication",
+      "lines": 50,
+      "bytes": 5418,
+      "description_chars": 773
+     }
+    ],
+    "totals": {
+     "skill_bytes": 43177,
+     "description_chars": 6206
+    },
+    "registry_bytes": 690,
+    "profile_index_bytes": {
+     "experiment:ams-02": 2370,
+     "experiment:synthetic-collider": 956,
+     "theory:qed-benchmark": 896
+    },
+    "over_budget": [],
+    "exceptions": {},
+    "host_estimate": {
+     "status": "measured",
+     "always_on_tokens": 2111,
+     "per_skill_always_on": {
+      "hep-computing": 290,
+      "hep-theory": 350,
+      "research-communication": 270,
+      "detector-response": 280,
+      "hep-statistics": 340,
+      "hep-analysis": 310,
+      "physics-ml": 270
+     },
+     "source": "claude --plugin-dir <root> plugin details hep-research (host estimate)"
+    },
+    "note": "Line counts are informative: SKILL.md paragraphs are unwrapped, so bytes are the binding budget."
+   }
+  },
+  {
+   "name": "claude-plugin-validate",
+   "command": "claude plugin validate <plugin> --strict",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": "Validating plugin manifest: /home/claude/hep-research-plugin/plugins/hep-research/.claude-plugin/plugin.json\n\n\u221a Validation passed"
+  }
+ ],
+ "caveat": "Software checks only; not physical validity, proof, statistical coverage, or authorization to unblind."
+}

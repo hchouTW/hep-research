@@ -90,7 +90,8 @@ the config's `local_profile_paths`; check the config with
   [requirements-core.txt](requirements-core.txt) (NumPy, SciPy, Matplotlib, SymPy). Install them in a project
   virtual environment, for example `python3 -m venv .venv-hep && .venv-hep/bin/pip install -r requirements-core.txt`.
   Contract, registry and blinding checks need only the standard library.
-- **Optional, not tested in v1:** PyTorch (`physics-ml` assets), ROOT/PyROOT, uproot and awkward (`hep-computing`
+- **Optional (skipped in the v1 handover run; each was installed and verified afterwards, see the `*-RUN` sections of
+  `VALIDATION.md`, except the tectonic paper build):** PyTorch (`physics-ml` assets), ROOT/PyROOT, uproot and awkward (`hep-computing`
   ROOT tools, `adapters/root-uproot`), pyhf and CMS Combine (`adapters/pyhf-combine`, the end-to-end sample),
   Graphviz, Mermaid, PlantUML and tectonic (diagrams and papers). Scripts that need them report the missing tool
   and stop with a `failed` status; tests that need them are skipped and counted as unverified.

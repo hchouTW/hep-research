@@ -10,3 +10,4 @@ venv/
 .legacy/
 .venv-hep-root/
 .venv-hep-diagrams/
+.venv-hep-combine/
