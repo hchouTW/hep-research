@@ -1,6 +1,6 @@
 # PROGRESS — hep-research plugin
 
-- Current milestone: **M5 complete, G5 recorded, routing round done (41/48 live)**; next M6. G0 and G1 passed 2026-10-02
+- Current milestone: **M6 complete: handover** (all milestones M0–M6 done; no PR opened, per the task rules). G0 and G1 passed 2026-10-02
 - Repository: `hchouTW/hep-research`, branch `feat/hep-research-plugin` (no PR). Legacy source: read-only `agentic-ai-skills@3e995a4` via `tasks/hep-research/scripts/fetch_legacy.sh`
 - Base commit: `3e995a49a89fad8e0e9d52130ee1fd93a3a0f4f9`
 - Last session: 2026-10-02, Claude Code cloud container (CLI 2.1.287), Python 3.11.15
@@ -94,9 +94,16 @@ M4 exit checks: Path D and T24 pass; every negative composition/compatibility fi
 - [x] 5. `README.md`, `requirements-core.txt`, `docs/capability-matrix.md`; host notes rewritten; bundle validator fixed
 - [x] 6. GATE G5 (run here, user choice): install, discovery, namespaced invocation, profile access, coexistence, removal pass on Claude Code 2.1.287; live routing partial (`tasks/hep-research/m5/g5/G5-REPORT.md`)
 
+## M6 steps
+
+- [x] 1. VALIDATION complete for AC01–AC31 and T01–T28 with environment, commands, evidence and limitations
+- [x] 2. `docs/profile-authoring.md`, `docs/adapter-authoring.md`, `docs/maintenance.md`, `docs/migration.md`
+- [x] 3. Final `run_all_checks.py` (14 pass; 921 tests pass, 39 skip) and relocation rerun; limitations listed in VALIDATION
+- [x] Carry-overs: traceability audit (`tools/check_traceability.py`), AMS method owners (M6-02), adapter declarations
+
 ## Blockers / needs user
 
-1. None. Routing round done per the user's choice; M6 next.
+1. Handover done. Open for the user: whether to open a PR, approve pyhf installation, or remove the old agentic-ai-skills branch.
 2. Open from M1: the old branch in agentic-ai-skills (M1-12) is for the user to delete.
 
 ## Resume checklist
@@ -107,4 +114,4 @@ M4 exit checks: Path D and T24 pass; every negative composition/compatibility fi
 
 ## Next step
 
-M6: handover, final traceability audit (AC01), AMS dedupe (M2-04), authoring/maintenance guides (AC26), final capability matrix review (AC27), AC28 handover. pyhf example stays unverified until pyhf is approved.
+None planned. Possible follow-ups need the user: a PR (not opened without approval), pyhf/ROOT/PyTorch environments to verify the skipped tests and adapters, executed J2 and J7 examples.

@@ -1,0 +1,115 @@
+{
+ "relocated_to": "/tmp/hep research relocated 4czrfige/plugin copy/hep-research",
+ "path_has_spaces": true,
+ "outside_repository": true,
+ "symlinks": [],
+ "files_naming_source_path": [],
+ "cwd": "/tmp/unrelated cwd x8bbw0np",
+ "exit_code": 0,
+ "summary": {
+  "counts": {
+   "pass": 12,
+   "fail": 0,
+   "skip": 2
+  },
+  "timestamp_utc": "2026-10-02T17:27:35Z"
+ },
+ "checks": [
+  {
+   "name": "unittest",
+   "status": "pass",
+   "counts": {
+    "run": 960,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 40,
+    "passed": 920
+   }
+  },
+  {
+   "name": "profile-tests:experiment:ams-02",
+   "status": "pass",
+   "counts": {
+    "run": 258,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 258
+   }
+  },
+  {
+   "name": "profile-tests:experiment:synthetic-collider",
+   "status": "pass",
+   "counts": {
+    "run": 9,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 9
+   }
+  },
+  {
+   "name": "profile-tests:theory:qed-benchmark",
+   "status": "pass",
+   "counts": {
+    "run": 16,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 16
+   }
+  },
+  {
+   "name": "check_layering",
+   "status": "pass",
+   "counts": null
+  },
+  {
+   "name": "stanza_consistency",
+   "status": "pass",
+   "counts": null
+  },
+  {
+   "name": "registry",
+   "status": "pass",
+   "counts": null
+  },
+  {
+   "name": "ams_ledger_preservation",
+   "status": "skip",
+   "counts": null
+  },
+  {
+   "name": "ams_optional",
+   "status": "pass",
+   "counts": null
+  },
+  {
+   "name": "routing_static",
+   "status": "pass",
+   "counts": null
+  },
+  {
+   "name": "packaging_scan",
+   "status": "pass",
+   "counts": null
+  },
+  {
+   "name": "traceability",
+   "status": "skip",
+   "counts": null
+  },
+  {
+   "name": "measure_entrypoints",
+   "status": "pass",
+   "counts": null
+  },
+  {
+   "name": "claude-plugin-validate",
+   "status": "pass",
+   "counts": null
+  }
+ ],
+ "stderr_tail": "",
+ "pass": true
+}
