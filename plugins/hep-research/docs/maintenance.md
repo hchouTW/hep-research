@@ -27,7 +27,7 @@ separately; a skipped test (missing tool) is unverified, never passing.
 Each example writes byte-reproducible output with its seed and tolerances:
 `examples/ams-flux-ratio/run_path_a.py`, `examples/collider-angular/run_path_b.py`, `examples/qed-benchmark/run_path_c.py`,
 `examples/theory-comparison/run_path_d.py`, `examples/published-comparison/run_t24.py`,
-`examples/local-partition/run_partition.py` (each takes `--help`). `tests/examples/` compares a fresh run with the
+`examples/local-partition/run_partition.py`, `examples/detector-resolution/run_j2.py`, `examples/recasting/run_j7.py` (each takes `--help`). `tests/examples/` compares a fresh run with the
 committed output. When a change alters a committed number, explain why in the commit, regenerate the output, and
 record the old and new values; a change beyond the declared tolerance is a breaking change.
 

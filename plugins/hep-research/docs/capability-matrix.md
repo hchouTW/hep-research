@@ -17,11 +17,12 @@ SciPy 1.17.1, Matplotlib 3.11.2, SymPy 1.14.0, Claude Code CLI 2.1.287, 2026-10-
 | Blinding: masks, sealing, scans of plots, logs, CSV and caches | hep-analysis, core | tested (E1) | T18 |
 | Analysis-change review (tuning after unblinding flagged) | hep-analysis | tested (E1) | T19 |
 | Response objects, forward folding, double-counting checks | detector-response | tested (E1) | Path B, T07 |
+| Resolution and efficiency studies (detector level) | detector-response | tested (E1), synthetic detector | J2 example (`examples/detector-resolution/`) |
 | Unfolding | detector-response | guidance only | reference text; no unfolding is executed in v1 checks |
 | Theory specs, conventions, analytic derivation status | hep-theory | tested (E1), tree-level QED only | Path C, T13, T14 |
 | Numerical checks and convergence studies | hep-theory, hep-computing | tested (E1) | T15 |
 | Competing models kept distinct; envelopes only by prescription | hep-theory | tested (E1) | T03 |
-| Recasting with parametrized response | hep-theory, detector-response | proposed | J7 desk trace; no executed recast |
+| Recasting with parametrized response | hep-theory, detector-response, hep-statistics | tested (E1), synthetic, one signal region | J7 example (`examples/recasting/`); interchange formats still proposed |
 | Comparison gate (observable, units, level, binning, conventions, corrections) | hep-statistics, contracts | tested (E1) | Path D, T08, T25 |
 | Binned Poisson likelihoods with nuisance parameters, toys | hep-statistics | tested (E1) | Path D, low and zero counts |
 | Combinations (GLS) with declared correlations | hep-statistics | tested (E1), Gaussian only | T04, T05, T09 |

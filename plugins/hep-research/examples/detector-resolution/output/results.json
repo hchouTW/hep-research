@@ -1,0 +1,117 @@
+{
+ "label": "SYNTHETIC and ILLUSTRATIVE: invented detector model; describes no experiment",
+ "profiles_loaded": [
+  "experiment:synthetic-collider"
+ ],
+ "seed": 20261005,
+ "criteria": {
+  "width_fit_pull_abs": 3.0,
+  "width_chi2_p_min": 0.001,
+  "efficiency_chi2_p_min": 0.001,
+  "replicate_mean_pull_abs": 0.25,
+  "replicate_pull_width": [
+   0.8,
+   1.2
+  ]
+ },
+ "pass": {
+  "width_closure": true,
+  "width_constant_model": true,
+  "efficiency_vs_model": true,
+  "replicate_mean_pull": true,
+  "replicate_pull_width": true,
+  "contracts": true
+ },
+ "abs_cos_edges": [
+  0.0,
+  0.18,
+  0.36,
+  0.54,
+  0.72,
+  0.9
+ ],
+ "configured_width": 0.02,
+ "per_bin": {
+  "width": [
+   0.019511426434547233,
+   0.019769537915606303,
+   0.01969182236241797,
+   0.020024818200986876,
+   0.019668694617265278
+  ],
+  "width_err": [
+   0.0002961038888885321,
+   0.0002880009216246761,
+   0.00027370880942286966,
+   0.00025990919002424515,
+   0.00025438856297951146
+  ],
+  "eff": [
+   0.9164204305614183,
+   0.9203125,
+   0.9119097956307258,
+   0.8788865857269766,
+   0.799625468164794
+  ],
+  "eff_err": [
+   0.005686105532011019,
+   0.005352328725940453,
+   0.00532026853798072,
+   0.0056143180456406,
+   0.006547038891917586
+  ],
+  "n_selected": [
+   2171,
+   2356,
+   2588,
+   2968,
+   2989
+  ],
+  "n_generated": [
+   2369,
+   2560,
+   2838,
+   3377,
+   3738
+  ]
+ },
+ "expected_efficiency": [
+  0.9199468710701567,
+  0.9183438102172872,
+  0.9087354122251198,
+  0.8783891538366062,
+  0.8083075375920629
+ ],
+ "width_fit": {
+  "value": 0.019743286643401917,
+  "error": 0.00012210947070136422,
+  "chi2": 1.9160918065121224,
+  "ndf": 4,
+  "p_value": 0.7511883081261318
+ },
+ "efficiency_check": {
+  "chi2": 2.6423304577351594,
+  "ndf": 5,
+  "p_value": 0.754923609814216
+ },
+ "replicates": {
+  "n": 200,
+  "seed_first": 20261006,
+  "mean_pull": -0.09003064612491612,
+  "pull_width": 1.0319210260563136
+ },
+ "contract_validation": {
+  "resolution": {
+   "ok": true,
+   "errors": []
+  },
+  "efficiency": {
+   "ok": true,
+   "errors": []
+  },
+  "width_fit": {
+   "ok": true,
+   "errors": []
+  }
+ }
+}

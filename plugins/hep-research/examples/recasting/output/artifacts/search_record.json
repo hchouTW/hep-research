@@ -1,0 +1,88 @@
+{
+ "contract_version": "1.0.0",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.1.0",
+  "contracts": "1.0.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-statistics",
+  "created": "2026-10-02",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "artifact_id": "synthetic-j7-search-record",
+ "artifact_type": "dataset-record",
+ "objective": "SYNTHETIC published-style search record: one signal region, observed count and background",
+ "extension": {
+  "dataset_id": "synthetic:j7-search-record",
+  "source_evidence_ids": [],
+  "observable": {
+   "quantity": "event-count",
+   "process": "illustrative toy signal (synthetic)",
+   "variables": [
+    {
+     "name": "m_ll",
+     "unit": "GeV",
+     "edges": [
+      150.0,
+      1000.0
+     ]
+    }
+   ],
+   "phase_space": {
+    "definition": "SYNTHETIC signal region 150 < m_ll < 1000 GeV",
+    "fiducial": false
+   },
+   "level": "detector",
+   "frame": "laboratory",
+   "normalization": {
+    "kind": "integrated-luminosity",
+    "value": 20.0,
+    "unit": "pb^-1"
+   },
+   "bin_semantics": "bin-integrated",
+   "unit": "1",
+   "conventions": {
+    "energy_variable": "sqrt_s"
+   }
+  },
+  "data": {
+   "edges": [
+    150.0,
+    1000.0
+   ],
+   "values": [
+    9
+   ],
+   "unit": "1",
+   "uncertainties": [
+    {
+     "name": "background",
+     "kind": "systematic",
+     "correlation": "uncorrelated",
+     "values": [
+      1.4
+     ]
+    }
+   ]
+  },
+  "covariance": {
+   "status": "present",
+   "ref": "results.json#record",
+   "note": "one bin: the background uncertainty is the whole covariance"
+  },
+  "conditions": "sqrt_s = 500.0",
+  "period": "not-applicable",
+  "status": "synthetic"
+ }
+}

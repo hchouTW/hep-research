@@ -65,6 +65,14 @@
    "tests": [
     "../../../tests/examples/test_path_b.py"
    ]
+  },
+  {
+   "name": "resolution-and-efficiency-study",
+   "status": "demonstrated-on-synthetic-data",
+   "scope": "J2 (examples/detector-resolution): per-bin cos theta resolution and efficiency at detector level with a constant-width fit and replicate pulls. Synthetic and illustrative only",
+   "tests": [
+    "../../../tests/examples/test_journeys_j2_j7.py"
+   ]
   }
  ]
 }
