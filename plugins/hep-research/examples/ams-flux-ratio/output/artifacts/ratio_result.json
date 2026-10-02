@@ -1,0 +1,63 @@
+{
+ "contract_version": "1.0.0",
+ "bindings": {
+  "experiments": [
+   {
+    "profile": "experiment:ams-02",
+    "version": "1.0.0"
+   }
+  ],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.1.0",
+  "contracts": "1.0.0",
+  "profiles": {
+   "experiment:ams-02": "1.0.0"
+  }
+ },
+ "inputs": [
+  {
+   "ref": "artifacts/measurement_spec.json",
+   "artifact_type": "measurement-spec",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "artifact_id": "synthetic-path-a-ratio-result",
+ "artifact_type": "statistical-result",
+ "objective": "SYNTHETIC He/p ratio per bin and period with covariance",
+ "provenance": {
+  "producer_skill": "hep-statistics",
+  "created": "2026-10-02"
+ },
+ "status": [
+  "synthetic"
+ ],
+ "extension": {
+  "paradigm": "frequentist",
+  "likelihood": {
+   "form": "Poisson counts per reco bin; unfolding by full-rank weighted least squares (no regularization)"
+  },
+  "parameters_of_interest": [
+   "He/p ratio per rigidity bin and period"
+  ],
+  "nuisances": [
+   "trigger efficiency per period",
+   "selection efficiency per bin and species"
+  ],
+  "test_statistic": "not-applicable (point estimates with linear covariance)",
+  "construction": "other",
+  "coverage": {
+   "method": "seeded toys of the full chain",
+   "result_ref": "results.json#toy_closure"
+  },
+  "fit_status": "converged",
+  "results": {
+   "ref": "results.json#ratio"
+  }
+ }
+}

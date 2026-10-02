@@ -1,0 +1,30 @@
+[
+ {
+  "id": "qedbench:C01",
+  "claim": "For e+e- -> gamma* -> f fbar of point-like spin-1/2 fermions at c.m. energy squared s: d sigma / d Omega = N_c (alpha^2 / 4s) beta [1 + cos^2 theta + (1 - beta^2) sin^2 theta] Q_f^2, with beta = v/c of the produced fermions in the c.m. and theta the c.m. scattering angle",
+  "claim_types": ["formula"],
+  "support_kind": "reference formula",
+  "evidence_status": "public-fact",
+  "source_ids": ["qedbench:S01"],
+  "location": "section 51.2 'Production of light particles', eq. (51.2)",
+  "scope": {"text": "single virtual photon; N_c = 1 for charged leptons; the text read does not state the spin treatment explicitly (unpolarized beams inferred)"},
+  "limitations": "Z exchange and radiative corrections are not part of this formula; spin treatment not stated in the passage read",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-02"
+ },
+ {
+  "id": "qedbench:C02",
+  "claim": "In the ultrarelativistic limit beta -> 1: sigma = N_c Q_f^2 (4 pi alpha^2 / 3s) = N_c Q_f^2 (86.8 nb / s(GeV^2))",
+  "claim_types": ["formula", "numeric"],
+  "support_kind": "reference formula",
+  "evidence_status": "public-fact",
+  "source_ids": ["qedbench:S01"],
+  "location": "section 51.2, eq. (51.3)",
+  "scope": {"text": "massless limit of eq. (51.2); the number 86.8 nb GeV^2 is given to three significant figures"},
+  "limitations": "rounded to three significant figures",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-02"
+ }
+]

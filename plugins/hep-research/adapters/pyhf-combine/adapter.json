@@ -1,0 +1,33 @@
+{
+ "id": "adapter:pyhf-combine",
+ "version": "0.3.0",
+ "status": "proposed",
+ "purpose": "Starting points for HistFactory-style likelihoods: a pyhf counting workspace and a CMS Combine datacard template",
+ "tools": [
+  {
+   "name": "pyhf",
+   "status": "demonstrated-on-synthetic-data",
+   "tested_versions": [
+    "0.7.6"
+   ]
+  },
+  {
+   "name": "CMS Combine",
+   "status": "proposed",
+   "tested_versions": []
+  }
+ ],
+ "environment": "E1 (docs/capability-matrix.md) plus pyhf 0.7.6 (numpy backend, scipy optimizer); CMS Combine not installed",
+ "assets": [
+  "assets/pyhf-counting.json",
+  "assets/pyhf-shape-synthetic.json",
+  "assets/combine_datacard_template.txt"
+ ],
+ "tests": [
+  "../../tests/adapters/test_pyhf_counting.py",
+  "../../tests/adapters/test_pyhf_shape.py",
+  "../../tests/examples/test_end_to_end_sample.py"
+ ],
+ "owner_skill": "hep-statistics",
+ "status_rule": "the adapter status is the lowest of its tools' statuses; each tool's own status is in tools[]"
+}

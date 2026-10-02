@@ -1,0 +1,20 @@
+[
+ {
+  "id": "qedbench:S01",
+  "title": "Cross-Section Formulae for Specific Processes (Review of Particle Physics, section 51)",
+  "authors": "H. Baer and R.N. Cahn (revised August 2019); in F. Takahashi et al. (Particle Data Group), Int. J. Mod. Phys. A 41, 2630011 (2026)",
+  "year": 2026,
+  "identifiers": {"dois": [], "arxiv_ids": [], "inspire_record_id": null,
+                  "url": "https://pdg.lbl.gov/2026/reviews/rpp2026-rev-cross-section-formulae.pdf"},
+  "tier": 1,
+  "verification_level": "page",
+  "verification_date": "2026-10-02",
+  "publication_date": "2026",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "Particle Data Group",
+  "notes": "Read on 2026-10-02 through a fetch tool that extracted the text of the PDF (subsection 51.2 'Production of light particles', eqs. 51.2 and 51.3, and the first-page citation line); the full PDF was not stored. The tool's extraction is trusted; equation text was quoted from it."
+ }
+]

@@ -1,0 +1,2103 @@
+[
+ {
+  "prompt": "Measure the muon trigger efficiency with tag-and-probe and give me the per-bin uncertainty.",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:detector-response"
+  ],
+  "files_read": [
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/detector-response/scripts/tag_and_probe_efficiency.py"
+  ],
+  "globs": [
+   {
+    "pattern": "**/*"
+   },
+   {
+    "pattern": "hep-research.project.json"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "I can't measure it yet because there's no data to measure. The working directory is empty and there's no `hep-research.project.json`. I won't invent counts or a detector. Here is what I need, and what you'll get once I have it.\n\n**What I need**\n1. **Input.** This could be a ROOT/NumPy/CSV file of dimuon events, or a synthetic-collider sample from the project's e+e- → μ+μ- benchmark. If you want the synthetic one, tell me and I'll generate it. The result would be labelled `synthetic`.\n2. **Trigger definition.** Which trigger counts as \"pass\", and which probe-matching criterion defines that (ΔR or a hit match).\n3. **Binning.** For example probe pT and |η|.\n4. **Tag selection.** Tight ID, isolation, and a trigger match on the tag. The tag has to be independent of the trigger on the probe.\n5. **Mass window.** The dimuon mass range, for example Z → μμ, and whether to fit it or use sideband subtraction.\n\n**Method I'll use**\n- **Efficiency.** ε = N_pass / (N_pass + N_fail) in each bin, where the denominator is all probes that pass the ID.\n- **Signal yield.** A simultaneous fit to the pass and fail dimuon-mass spectra in each bin, with a signal shape plus a background shape. If you prefer, I'll use sideband subtraction instead.\n- **Statistical uncertainty per bin.** From the fit, or from an exact Clopper-Pearson interval when the sample is clean or the bin is near ε=0 or 1. The plugin script `tag_and_probe_efficiency.py` does this one.\n- **Systematics per bin.**\n  - signal and background shape alternatives;\n  - fit window;\n  - tag selection;\n  - pileup, as a function of the number of vertices;\n  - a data/MC comparison with scale factors, if you have MC.\n- **Report.** The central value, the statistical and systematic components separately, the validity range, and the conditions and periods.\n\nSend me the file (or say \"use synthetic\") and the answers to items 2–5, and I'll run it.",
+  "cost_usd": 0.09416079999999999,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 6,
+  "files_read_detail": [
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/detector-response/scripts/tag_and_probe_efficiency.py",
+    "inside_plugin": true,
+    "experiment_profile": false
+   }
+  ],
+  "case": {
+   "id": "dr-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Measure the muon trigger efficiency with tag-and-probe and give me the per-bin uncertainty.",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "tag-and-probe"
+   ]
+  }
+ },
+ {
+  "prompt": "請幫我建立這個量能器的響應矩陣，並檢查 data/MC agreement。",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:detector-response"
+  ],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/*"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "目前還沒辦法開始建立，因為工作目錄 `/tmp/claude-0/.../project dir` 是空的。裡面沒有 `data/` 目錄、`hep-research.project.json`，也沒有任何 ROOT、CSV、npz 檔案。\n\n「這個量能器」在對話裡沒有指定是哪一台，所以我不會替它編造幾何、解析度或條件。請先告訴我以下幾點：\n\n1. **資料來源**：data 和 MC 檔案的路徑與格式（ROOT / parquet / npz 等），以及 tree 和 branch 名稱。若檔案不在這個目錄，請放進來或給我正確路徑。\n2. **探測器**：是哪個實驗或哪台量能器。有 experiment profile 就請指定；沒有的話，請給我材料、深度、讀出方式與運作條件（時間段、版本）。\n3. **響應矩陣的定義**：\n   - truth 與 reco 變數（例如入射能量 E_true 對重建能量 E_reco），單位和 binning。\n   - 效率與接受度放在矩陣內還是矩陣外。\n   - underflow/overflow 的處理方式。\n   - 歸一化方向：P(reco|truth) 或 P(truth|reco)。\n4. **Data/MC 比較的參考樣本**：data 端是用 tag-and-probe、test beam 還是控制樣本，以及要比較哪些量（能量尺度、解析度的 core 與 tail、shower shape、效率）。\n5. **MC 是否有 truth 資訊**：沒有的話，只能做 data/MC 比較，建不出矩陣。\n\n如果你只是想先看流程，我也可以用 synthetic 的玩具量能器示範，輸出會全程標記 `synthetic`，不會當成真實量能器的結果。你要等資料，還是先跑 synthetic 示範？",
+  "cost_usd": 0.07612719999999999,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 4,
+  "files_read_detail": [],
+  "case": {
+   "id": "dr-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請幫我建立這個量能器的響應矩陣，並檢查 data/MC agreement。",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "response matrices",
+    "data/MC agreement"
+   ]
+  }
+ },
+ {
+  "prompt": "Unfold this measured spectrum with the response matrix I already have.",
+  "exit_code": 0,
+  "skills_invoked": [],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/*"
+   },
+   {
+    "pattern": "**/*.{csv,txt,npy,npz,root,json,h5,yaml,yml,dat}",
+    "path": "/mnt/project-files"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "I can't find either input. The working directory is empty, and there are no data files under `/mnt/project-files`. To unfold, I need:\n\n1. **The measured spectrum.** This is the observed counts per reconstructed bin, with bin edges. I also need its uncertainties, or a statement that they are Poisson.\n2. **The response matrix.** I need to know which axis is truth and which is reconstructed. I also need to know whether the entries are probabilities, P(reco bin i | truth bin j), or raw counts. If they are probabilities, I need to know whether they are normalised to include inefficiency.\n3. **The truth binning.** I need the edges, to check that they match the matrix dimensions.\n\nYou can give me a path or paste the arrays. Any of CSV, NPZ, or ROOT works.\n\nTwo choices change the result, so tell me if you have a preference:\n- **Method:** I'd default to iterative Bayesian (D'Agostini) unfolding, with the iteration count chosen by a stability and coverage check on toys. Regularised SVD or Tikhonov, or a plain matrix inversion if the matrix is well conditioned, are the alternatives.\n- **Corrections:** If the matrix doesn't already include efficiency and acceptance, I need those separately. Background subtraction before unfolding is the other piece to settle.\n\nOnce I have the files, I'll check the matrix condition number, unfold, and report the unfolded spectrum with its full covariance. I'll also run a forward-fold closure test, where the unfolded result folded back through the matrix should reproduce the data.",
+  "cost_usd": 0.064743,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 3,
+  "files_read_detail": [],
+  "case": {
+   "id": "dr-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Unfold this measured spectrum with the response matrix I already have.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "unfolding"
+   ],
+   "not": "detector-response"
+  }
+ },
+ {
+  "prompt": "Design the background estimate for my dilepton measurement using control regions.",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:hep-analysis"
+  ],
+  "files_read": [
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/hep-analysis/references/05-backgrounds.md"
+  ],
+  "globs": [
+   {
+    "pattern": "**/hep-research.project.json"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "No project config (`hep-research.project.json`) or experiment profile exists, and you haven't said which process is the signal. So this is a design template. It has no cut values, efficiencies or yields, and every number is marked `unknown` until you supply it.\n\n## 1. Inputs I need\n- **Estimand:** the quantity, such as a cross section, a mass-spectrum shape or an asymmetry, and its variable, range and level (detector or fiducial).\n- **Final state:** ee, μμ, eμ, or all of them, and opposite-sign or same-sign.\n- **Data type:** observed, synthetic or Asimov. Each gets its own label.\n- **Backgrounds that matter:** which of them are relevant, and whether the signal region (SR) is blinded.\n- **Simulation and lepton selection:** which MC samples exist, and the loose and tight lepton definitions.\n\n## 2. Background ledger\nThis is the usual list for a dilepton final state. Drop the rows that don't apply.\n\n| Background | Estimator | Control region / constraint | Closure test |\n|---|---|---|---|\n| Top (tt̄, tW) | MC shape, normalization fit in a CR | Opposite-flavour (eμ) region, or a ≥1 b-tag region | Validation region (VR) with the same selection but a different jet or MET cut |\n| Drell-Yan (Z/γ*→ℓℓ, ττ) | MC shape, normalization in a CR | Z-mass window sideband, with MET or jet-multiplicity extrapolation | VR in a different mass window |\n| Diboson (WW, WZ, ZZ) | MC, normalization from a dedicated CR | A selection that enhances one diboson process, such as a 3ℓ or 4ℓ region | VR with a different lepton multiplicity |\n| Non-prompt and fake leptons | Fake factor or matrix method | Loose-lepton sample, with prompt-lepton subtraction | Same-sign VR, plus a separate fake-enriched VR |\n| Charge misidentification (if opposite-sign is required) | Charge-flip rate from same-sign Z events | Same-sign Z peak | Same-sign VR away from the peak |\n| Beam-related or cosmic background (if relevant) | Data-driven, from timing or impact-parameter sidebands | Out-of-time or large-impact-parameter sample | VR with a different timing window |\n\n## 3. Method per background\n**Simultaneous CR+SR fit (default for top, DY and diboson).**\n- Give each process one shared normalization parameter, so the CRs and the SR constrain it together.\n- Build transfer factors CR→SR from MC. Give each one detector, theory and MC-statistics uncertainties, listed by source.\n- Keep signal contamination in every CR. Don't treat a CR as pure background.\n- If the CR counts enter the joint likelihood, don't also add a separate Gaussian estimate derived from the same data.\n\n**Fake factors or matrix method.**\n- Define loose and tight, prompt and fake, the measurement and application regions, and the parameterization (pT, η, flavour).\n- Subtract the prompt contamination in the measurement region.\n- The failing-sample weight is f/(1−f). Handle two-lepton events by inclusion–exclusion. Don't multiply per-lepton weights.\n- If f approaches 1, investigate the method's stability. Don't just cap the weight.\n\n**ABCD (only if two nearly independent variables exist).**\n- Fix the A–D definitions before looking at the SR, with A as the target and A ≈ B·C/D.\n- Measure κ = AD/(BC) in MC and in a validation region, and assign its uncertainty.\n- If D is small or zero, use a joint four-region likelihood. Don't replace D by 1.\n\n**Sidebands for a mass-spectrum shape.**\n- Model or exclude signal leakage.\n- Test spurious signal with alternative functional forms.\n- Treat the discrete choice of function as a coherent uncertainty. Don't add an arbitrary rate error.\n\n## 4. Validation plan\nEach estimator is checked three ways, with the metric, threshold and action fixed before looking at the SR.\n- **Normalization:** compare the prediction with data in a VR that is independent of the CR.\n- **Shape:** compare the kinematic distributions, with a separate χ² or Kolmogorov–Smirnov-type metric and an action if it fails.\n- **Extrapolation:** vary the CR→SR distance, for example by moving the CR boundaries, and check the stability of the prediction.\n\nDon't tune a closure uncertainty to force agreement in the observed SR. If a CR is also used to train a reweighter, split the sample or use cross-fitting.\n\n## 5. Systematics\nEach uncertainty is evaluated through its physical effect: normalization, shape, migration or a mix.\n- **MC modelling:** generator, PDF and scale variations on the transfer factors.\n- **Lepton reconstruction:** efficiency, energy or momentum scale, and resolution, with different effects in the CR and the SR.\n- **CR statistics:** the finite counts propagate directly.\n- **Method:** the fake-factor composition and the κ non-closure.\n- **Subtraction:** the prompt-lepton subtraction uncertainty.\n\nAn unchanged integrated yield doesn't show the systematic was propagated. Check shape and bin-to-bin migration as well. `scripts/check_systematic_variations.py` classifies each variation.\n\n## 6. Blinding\nKeep the SR data bins and any data/MC ratio there masked in every plot, log and cache until you authorize unblinding. `scripts/mask_blinded_bins.py` does this. Passing the closure checks does not count as authorization.\n\n## 7. Handoff\n- **Likelihood and fit:** hep-statistics takes the `measurement-spec` file in `./hep-research-artifacts/`.\n- **Lepton efficiencies and charge-flip rates:** detector-response.\n- **Pipeline code:** hep-computing.\n\nIf you give me the inputs in section 1, I'll write this as a `measurement-spec` artifact and validate it.",
+  "cost_usd": 0.10601959999999999,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 5,
+  "files_read_detail": [
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/hep-analysis/references/05-backgrounds.md",
+    "inside_plugin": true,
+    "experiment_profile": false
+   }
+  ],
+  "case": {
+   "id": "dr-negative-1",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "Design the background estimate for my dilepton measurement using control regions.",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "background estimation",
+    "control regions"
+   ],
+   "not": "detector-response"
+  }
+ },
+ {
+  "prompt": "Review this measurement spec: is the estimand clear and are the systematic uncertainties complete?",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:hep-analysis"
+  ],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/*"
+   },
+   {
+    "pattern": "**/*measurement*spec*",
+    "path": "/mnt/project-files"
+   },
+   {
+    "pattern": "hep-research.project.json"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "I can't review it yet because I couldn't find a measurement spec. The working directory is empty. There is no `hep-research.project.json`, and `/mnt/project-files` has nothing matching `*measurement*spec*`. Nothing was attached to your message either.\n\nCould you point me to one of these?\n- **A file path** to the spec, for example a `measurement-spec` JSON or Markdown file in an `hep-research-artifacts/` folder.\n- **The spec pasted into the chat.**\n- **A spec I should draft first**, such as the tree-level e⁺e⁻ → μ⁺μ⁻ synthetic-collider benchmark. I'd only do this if that is what you meant.\n\nOnce I have it, I'll review against two questions:\n- **Is the estimand clear?** It should state the quantity, process, variable, range, level and what is held fixed in one sentence. It also needs the fiducial definition, the normalization kind, and what the bins mean.\n- **Are the systematics complete?** Each one should name its physical effect (normalization, shape, migration or mixed) and how it is applied. Efficiency, acceptance, exposure and live time should each appear once. The review would flag any unknown input that was treated as zero.\n\nI'll open the review with a verdict, then list the gaps.",
+  "cost_usd": 0.0842956,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 6,
+  "files_read_detail": [],
+  "case": {
+   "id": "an-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Review this measurement spec: is the estimand clear and are the systematic uncertainties complete?",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "estimand",
+    "systematic uncertainties",
+    "measurement review"
+   ]
+  }
+ },
+ {
+  "prompt": "我要設計一個中微子截面量測的事件選擇與 cutflows，還有 blinding policy。",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:hep-analysis"
+  ],
+  "files_read": [
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/hep-analysis/references/hep-analysis-guide.md",
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/hep-analysis/references/10-measurements-unfolding.md"
+  ],
+  "globs": [
+   {
+    "pattern": "**/hep-research.project.json"
+   },
+   {
+    "pattern": "(?i)blind",
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/hep-analysis/references/01-analysis-design.md",
+    "output_mode": "content",
+    "-C": 3
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "先給結論：**實驗和通道還沒定，所以我不填任何 cut 數值、效率或解析度。** 下面是可以先凍結的骨架：估計量、cutflow 表結構、blinding policy。數值留待你提供，或由 MC 獨立最佳化。\n\n## 1. 估計量（填空後才算定案）\n\n> 在 ⟨探測器/靶⟩ 上，量測 ⟨ν 種類/反應道，例如 νμ CC 0π⟩ 的 ⟨flux-integrated 微分截面 dσ/dx⟩，變數 ⟨pμ, cosθμ⟩，範圍 ⟨…⟩，truth-level fiducial 定義，每 ⟨核子/原子核⟩，並固定 ⟨通量模型、事件產生器、FSI 模型⟩。\n\n截面公式（各項各出現一次，不重複修正）：\n\n`dσ/dx_i = Σ_j U_ij (N_j^sel − B_j) / (ε_i · Φ · N_target · Δx_i)`\n\n- ε 是效率，條件分母為「truth 落在 fiducial 相空間的訊號事件」。\n- 接受度、Φ（通量，以 POT 或曝光量表示）、N_target、live time 各自獨立列出。\n- 要聲明：是 flux-integrated，還是對通量去摺積。\n- 要聲明：是否含分支比、是否外推到全相空間。\n\n## 2. 選擇與 cutflow 骨架\n\n選擇階段（順序和值待定，值只能由 MC、獨立最佳化樣本或 Asimov 決定）：\n\n| # | 階段 | 目的 | 驗證 |\n|---|---|---|---|\n| 0 | 束流與探測器品質（beam quality、live time） | 資料可用性 | 指標、門檻、動作要事先寫好 |\n| 1 | 觸發/時間窗 | 壓低宇宙線與束外事件 | beam-off 比對 |\n| 2 | Fiducial 體積 | 壓低體積外與 dirt 事件 | 邊界系統不確定性 |\n| 3 | 拓撲與粒子鑑別（例如 μ 候選） | 區分 CC 與 NC | 在 CR 做 data/MC |\n| 4 | 相空間與門檻（例如 μ 最小動量） | 讓 ε 可量測 | 與 truth fiducial 對齊 |\n| 5 | 品質/包含性 | 重建可靠度 | 對解析度的影響 |\n\nCutflow 表每個階段要有這些欄位：\n\n- 訊號（truth 在 fiducial 內）與訊號（truth 在 fiducial 外，算作背景）的 sumw 與 sumw²。\n- 各背景分類：NC、νe 污染、wrong-sign、dirt、宇宙線。\n- 相對效率、累積效率、純度。\n- 觀測資料欄：在 blinding 解除前，SR 這一欄一律遮蔽。\n\nMC 要用**帶號**的 generator 權重，以完整產生樣本的 sumw 歸一化，不能用 skim 之後的事件數。\n\n## 3. 背景（估計器、CR、closure 三者缺一不可）\n\n- **宇宙線與束外**：用 beam-off 資料，依 live time 比例縮放。closure 用束外窗。\n- **體積外與 dirt**：用 MC，並在 fiducial 邊界側帶 CR 約束。\n- **NC、νe、wrong-sign 等束流相關背景**：用 MC，搭配富含該背景的 CR 約束。CR 與 SR 不可重疊。\n\n## 4. 系統不確定性（以物理效應評估）\n\n- 通量（hadron production、束線）、事件產生器與截面模型、FSI/再作用、探測器響應與重建、POT 計數、靶核數、MC 統計。\n- 每一項要判定是歸一化、形狀、migration 還是混合效應。\n- 動力學變因（能量尺度、角度）要在物件層級變動後重跑選擇與 migration，不能只縮放最終直方圖。\n- 同一來源在響應矩陣、背景、效率中要用同一個 nuisance 變動。\n\n## 5. Blinding policy（草案，最後請你確認）\n\n**分層：**\n\n| 層級 | 內容 | 規則 |\n|---|---|---|\n| 公開 | MC、beam-off、與 SR 正交的 CR 和側帶、偽資料（另一種產生器的 MC 或 Asimov） | 全程可看，必須標註來源（`synthetic` / `asimov` / `observed`） |\n| 遮蔽 | SR 的 beam-on 觀測量（在測量變數上的分佈與計數）、抽出的 σ | 解除前不得出現在圖、比值、log、快取、報告 |\n| 可選：公開部分資料 | 用小比例資料做除錯 | 比例由你決定，且那部分資料之後不得再當盲樣本 |\n\n**執行（技術強制，不靠自律）：**\n\n- 遮蔽就是移除觀測值（設 NaN、丟棄或根本不讀）。陰影或疊圖不算遮蔽。可用 `scripts/mask_blinded_bins.py`。\n- 遮蔽要涵蓋 log、暫存表、最佳化迴圈、快取。\n- 公開層內的檢查只用 MC、Asimov 或 CR。\n\n**凍結（unblinding 前）：** 記錄 commit、選擇與 cut 值、binning、背景模型、系統不確定性清單、unfolding 的正規化與停止準則、通過標準。通過標準要事先寫定，並用另一種真實分佈做 closure 與注入測試。\n\n**分階段開盒：**\n\n1. 偽資料全流程演練，結果仍為預期。\n2. 打開 CR 的資料，看 data/MC。\n3. 在凍結的流程下打開 SR 的 reco 層級。\n4. 才公布 σ。\n\n**開盒授權：** 由你或你的合作組流程授權。檢查全部通過不等於授權。\n\n**開盒後規則：**\n\n- 任何改動都要記錄，並標為 post-unblinding。\n- 不得為了讓 data/MC 吻合而調 MC、校正或 prior。\n- 若 closure 失敗，要先查原因，再決定是否重新凍結，並明說這一點。\n\n另一個可選做法是對 σ 加隱藏偏移（hidden shift），所有檢查完成後才公開真值。這適合通量或模型系統不確定性很大的情況，是否採用請你決定。\n\n## 我需要你回答（決定後才能填 cut 與 ledger）\n\n1. **實驗與探測器**：LArTPC、閃爍體、水契忍可夫，還是其他？是否有實驗 profile？目前沒有 `hep-research.project.json`，我不會自行推斷。\n2. **束與通道**：加速器束或大氣微中子？通道是 CC inclusive、CC0π，還是 νe？\n3. **觀測變數與層級**：微分變數是什麼？單一或雙微分？\n4. **資料現況**：有真實資料、MC，還是只有合成資料？這會決定 blinding 的實際階段。\n5. **Blinding 的授權者與比例**：誰授權開盒？是否保留一部分資料作公開除錯？\n\n回答後我可以把這份寫成 `measurement-spec`（含選擇、背景、系統三個 ledger），存進專案的 `hep-research-artifacts/`，並用 `validate.py` 檢查。你若要給合作者或在會議上用，也可以發成 artifact 頁面，請告訴我。",
+  "cost_usd": 0.21201160000000002,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 7,
+  "files_read_detail": [
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/hep-analysis/references/hep-analysis-guide.md",
+    "inside_plugin": true,
+    "experiment_profile": false
+   },
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/hep-analysis/references/10-measurements-unfolding.md",
+    "inside_plugin": true,
+    "experiment_profile": false
+   }
+  ],
+  "case": {
+   "id": "an-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我要設計一個中微子截面量測的事件選擇與 cutflows，還有 blinding policy。",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "cutflows",
+    "blinding policy"
+   ]
+  }
+ },
+ {
+  "prompt": "Set a CLs upper limit on the signal strength from these yields.",
+  "exit_code": 0,
+  "skills_invoked": [],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "yield",
+    "-i": true,
+    "output_mode": "files_with_matches",
+    "head_limit": 30
+   },
+   {
+    "pattern": "**/*"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "I can't find any yields. Nothing in this message lists them, and the working directory is empty (no files, no matches for \"yield\"). I'd rather not invent numbers for a limit.\n\nTo set the CLs upper limit I need:\n\n1. **Observed count** `n_obs`, or the observed histogram if it's binned.\n2. **Expected signal yield** `s` at μ=1, per bin if binned.\n3. **Expected background** `b`, with its uncertainty if you want it treated as a nuisance parameter.\n4. **Systematics** on signal and background, if any, and how they are correlated.\n\nYou can paste the numbers here or point me to the file. The earlier reports are under `/mnt/project-files/hep-research/`, so if the yields are in one of those, tell me which.\n\nOnce I have them, my default is a one-bin or multi-bin Poisson likelihood with Gaussian-constrained background. The test statistic is the profile-likelihood q̃_μ, with a 95% CL CLs upper limit on μ. I'd compute it with toys and cross-check with the asymptotic formulae. I'd also report the expected limit with ±1σ and ±2σ bands.\n\npyhf is still not approved (see the G5 note), so I'd write this with numpy/scipy in `.venv-hep`, unless you approve pyhf now.",
+  "cost_usd": 0.064036,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 3,
+  "files_read_detail": [],
+  "case": {
+   "id": "an-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Set a CLs upper limit on the signal strength from these yields.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "CLs"
+   ],
+   "not": "hep-analysis"
+  }
+ },
+ {
+  "prompt": "我的分析程式在讀取 ROOT 檔時 crashes，請幫我除錯。",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:hep-computing"
+  ],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/*.{py,C,cc,cpp,cxx,h,hpp,root,txt,log,sh}"
+   },
+   {
+    "pattern": "**/*"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "目前的工作目錄（`.../scratchpad/g5/project dir`）是空的，找不到你的分析程式、ROOT 檔或 crash log，所以還沒辦法重現問題。請提供下面幾項，我就能繼續：\n\n1. **程式碼位置**：路徑，或直接貼上讀檔的那一段。請說明是 PyROOT、uproot、RDataFrame 還是 C++ ROOT。\n2. **錯誤訊息**：完整的 traceback、segfault 輸出，或 `core dump` 的 backtrace。\n3. **ROOT 檔**：路徑，或檔案大小和來源（本地、EOS、xrootd）。若檔案不能提供，`inspect_root_file.py` 的輸出也可以。\n4. **環境**：ROOT 或 uproot 的版本、Python 版本，以及 `root-config --version` 的結果。\n5. **發生時機**：是每個檔案都 crash，還是只有特定檔案。是剛開檔就 crash，還是讀到某個 branch 或某個 event 才 crash。是否最近改過程式或升級過環境。\n\n常見原因有：\n- 檔案損毀或寫入時沒有正常關閉（有 \"recovered\" 警告）\n- branch 型別和讀取方式不符\n- 版本不相容（ROOT 或 uproot）\n- 記憶體不足\n- `TTree` 或 `TFile` 的物件在 Python 端被提前回收\n\n你把上面的資料給我之後，我會先重現問題，再用最小的改動修正。如果檔案很大，也可以先給我 `inspect_root_file.py` 的輸出。",
+  "cost_usd": 0.0847432,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 5,
+  "files_read_detail": [],
+  "case": {
+   "id": "an-negative-1",
+   "lang": "zh-Hant",
+   "kind": "negative",
+   "prompt": "我的分析程式在讀取 ROOT 檔時 crashes，請幫我除錯。",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "crashes",
+    "ROOT/PyROOT"
+   ],
+   "not": "hep-analysis"
+  }
+ },
+ {
+  "prompt": "My ROOT macro has a memory leak after 10^6 events; find it.",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:hep-computing"
+  ],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/*.{C,cc,cxx,cpp,h,hpp,py}"
+   },
+   {
+    "pattern": "**/*.C",
+    "path": "/mnt/project-files"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "I can't find your macro. The working directory has no `.C`, `.cc`, `.cxx`, `.cpp`, `.h` or `.py` files, and `/mnt/project-files` has no `.C` files either. I haven't read any code, so I can't say where the leak is.\n\nPlease paste the macro or give me its path. If you can, also send:\n- **How you run it**: interpreted (`root -l macro.C+`), compiled, or PyROOT.\n- **What the leak looks like**: resident memory (RSS) growth per event, or whether it crashes at around 10^6 events.\n- **Which ROOT version you use.**\n\nWhile you get that, these are the usual causes in a ROOT event loop:\n1. **Objects allocated per event and never deleted.** Examples are `new TLorentzVector`, `new TH1`, `new TF1`, `new TCanvas`, or a `TObjArray` that is cleared with `Clear()` when it should be `Delete()`d.\n2. **Histograms, `TF1`s or fit results created inside the loop.** ROOT registers them in `gDirectory` or `gROOT`, so they stay alive. They also slow down name lookups as the list grows. Fix this with `SetDirectory(nullptr)` or by creating them outside the loop.\n3. **`TTree::GetEntry` with branches that are never reset.** `TClonesArray` is the usual case: call `Clear(\"C\")` and `ConstructedAt()` instead of `new` for each event.\n4. **Calling `TTree::Fill()` without `AutoSave`, `SetMaxVirtualSize` or `FlushBaskets`.** This is common for output trees written in a long loop.\n5. **`TFile::Open` or `TChain` without a matching `Close()` or `delete`**, and `TTree` or `TBranch` pointers left behind when a file is closed.\n6. **`TCanvas::Print` or `Draw` inside the loop.**\n7. **Interpreted-macro (CINT/Cling) leaks**, for example in macros run with `.x` instead of compiled with ACLiC.\n\nOnce I have the code, I'll find the specific line. I can also confirm it empirically with `valgrind --leak-check=full` or `heaptrack`, if you approve installing one.",
+  "cost_usd": 0.08734920000000002,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 5,
+  "files_read_detail": [],
+  "case": {
+   "id": "co-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My ROOT macro has a memory leak after 10^6 events; find it.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "memory leaks",
+    "ROOT/PyROOT"
+   ]
+  }
+ },
+ {
+  "prompt": "Split this event generation into chunks for batch submission, with resubmission and a merge that does not double count.",
+  "exit_code": 1,
+  "skills_invoked": [
+   "hep-research:hep-computing"
+  ],
+  "files_read": [
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/hep-computing/scripts/local_partition.py",
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/profiles/experiments/synthetic-collider/scripts/generate_events.py",
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/profiles/experiments/synthetic-collider/tests/test_generator.py"
+  ],
+  "globs": [
+   {
+    "pattern": "**/*"
+   },
+   {
+    "pattern": "**/*",
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5"
+   },
+   {
+    "pattern": "def .*generate|mu\\+mu-|mumu|synthetic.collider",
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+    "glob": "*.py",
+    "output_mode": "files_with_matches"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": null,
+  "cost_usd": 0.163452,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "error_max_turns",
+  "num_turns": 5,
+  "files_read_detail": [
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/hep-computing/scripts/local_partition.py",
+    "inside_plugin": true,
+    "experiment_profile": false
+   },
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/profiles/experiments/synthetic-collider/scripts/generate_events.py",
+    "inside_plugin": true,
+    "experiment_profile": true
+   },
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/profiles/experiments/synthetic-collider/tests/test_generator.py",
+    "inside_plugin": true,
+    "experiment_profile": true
+   }
+  ],
+  "case": {
+   "id": "co-direct-2",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Split this event generation into chunks for batch submission, with resubmission and a merge that does not double count.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "batch submission, merging and recovery"
+   ]
+  }
+ },
+ {
+  "prompt": "Is this extracted cross section physically consistent with the tree-level prediction?",
+  "exit_code": 0,
+  "skills_invoked": [],
+  "files_read": [
+   "/mnt/project-files/hep-research/m3/path-b/report.md",
+   "/mnt/project-files/hep-research/m3/path-c/report.md",
+   "/mnt/project-files/hep-research/m4/path-d-report.md"
+  ],
+  "globs": [
+   {
+    "pattern": "**/*"
+   },
+   {
+    "pattern": "/mnt/project-files/hep-research/**/*"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "**Yes, but only as a check of the chain. It isn't physics validation.** I'm assuming \"this extracted cross section\" means the Path B result, since you didn't point me to a file. I read the reports and did not re-run anything.\n\n**Fiducial cross section (|cos θ| < 0.9)**\n- Extracted (Path B): 745.65 ± 6.63 (stat) ± 14.91 (lumi) pb.\n- Tree-level QED (Path C): 744.1 pb. This is 868.0 pb × 0.857, where 0.857 = (3/8)·∫(1+c²)dc over |c| < 0.9.\n- The difference is 1.5 pb, about 0.1σ of the combined 16.3 pb uncertainty. That's consistent.\n\n**Shape**\n- The chi² against the expected binned shape is 10.38 for 10 degrees of freedom (p = 0.41).\n- The 1+cos²θ shape shows up as symmetric forward and backward bins, with edge bins about 1.6 times the central ones.\n- Path C also checks that A_FB = 0 and that the distribution is even in cos θ.\n\n**Caveats**\n- **Circularity:** Path B's \"expected\" values come from the synthetic generator, not from an independent calculation. The generator was fed the 1+cos²θ shape and a cross section, so agreement is guaranteed by construction. Path B's own report says this.\n- **Generator input:** its expected fiducial value of 745.81 pb implies about 870 pb, not 868.0 pb. That is a 0.23% difference, far below the 2% luminosity uncertainty, and presumably a rounded input. I inferred it from the numbers and did not check it against the generator config.\n- **Path D:** Path D feeds 868.0 pb in directly and recovers μ̂ = 1.023, interval [1.001, 1.046]. That is again a consistency test of the chain.\n- **Tree-level truncation:** the tree-level prediction is quoted without Z exchange, ISR/FSR or other higher-order corrections, and the reports do not quantify them. A real measurement would need those before it could be called consistent at the percent level.\n- **Not modeled in Path B:** backgrounds, radiative corrections and the model dependence of the unfolding.\n\nIf you meant a different extraction, such as the m2 flux or ratio results, or a number you have in mind, point me to it and I'll check that one.",
+  "cost_usd": 0.1054214,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 6,
+  "files_read_detail": [
+   {
+    "path": "/mnt/project-files/hep-research/m3/path-b/report.md",
+    "inside_plugin": false,
+    "experiment_profile": false
+   },
+   {
+    "path": "/mnt/project-files/hep-research/m3/path-c/report.md",
+    "inside_plugin": false,
+    "experiment_profile": false
+   },
+   {
+    "path": "/mnt/project-files/hep-research/m4/path-d-report.md",
+    "inside_plugin": false,
+    "experiment_profile": false
+   }
+  ],
+  "case": {
+   "id": "co-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Is this extracted cross section physically consistent with the tree-level prediction?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "cross sections"
+   ],
+   "not": "hep-computing"
+  }
+ },
+ {
+  "prompt": "請幫我推導這個衰變寬度的解析式，並說明近似的適用範圍。",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:hep-theory"
+  ],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/*"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "我還不能開始推導，因為「這個衰變寬度」沒有指明是哪一個。工作目錄是空的，沒有檔案或公式可讀，我手上也沒有你前面提到的內容。依這個流程，我不會自行猜測模型或過程。\n\n請告訴我下面幾項，貼在對話裡或給我檔案路徑都可以：\n\n1. **衰變過程**：例如 Z → f f̄、W → ℓν、H → b b̄ 或 H → γγ、μ → eνν̄、t → bW、π → ℓν，或你自己的模型，例如暗光子 A′ → ℓ⁺ℓ⁻。\n2. **理論設定**：樹圖或單圈，以及拉格朗日量或耦合的寫法。\n3. **慣例**：自然單位（ħ = c = 1）、度規、耦合歸一化，還有質量是否近似為零。\n4. **近似**：你想要的近似，例如 m_f → 0、窄寬度、非相對論極限，或只取領頭階。\n\n如果它和先前的任務有關，例如 TASK 裡的 e⁺e⁻ → μ⁺μ⁻ 基準，也請告訴我。那是散射截面，不是衰變寬度，但可以用 Z/γ* → μ⁺μ⁻ 的部分寬度接上。\n\n拿到這些後，我會依序做下面幾件事：\n\n- 寫出理論規格：模型、假設、慣例和階數。\n- 推導：算出 |M|² 並對自旋求和或平均，積分兩體相空間，得到 Γ 的解析式。\n- 列出檢查項目：量綱、m → 0 的極限、和已知結果（例如 PDG 公式）比對。我會標明各項是否已經做過。\n- 說明適用範圍：忽略了哪些效應（輻射修正、有限寬度、閾值附近的庫侖效應等），以及這些近似在哪個能區失效。\n- 如果你要，我再用 sympy 做符號與數值的交叉驗證。\n\n只要告訴我是哪一個衰變，我就開始。",
+  "cost_usd": 0.075759,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 4,
+  "files_read_detail": [],
+  "case": {
+   "id": "co-negative-1",
+   "lang": "zh-Hant",
+   "kind": "negative",
+   "prompt": "請幫我推導這個衰變寬度的解析式，並說明近似的適用範圍。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "decay rates",
+    "validity domains"
+   ],
+   "not": "hep-computing"
+  }
+ },
+ {
+  "prompt": "Give me a Feldman-Cousins interval for zero observed events with background 0.8.",
+  "exit_code": 0,
+  "skills_invoked": [],
+  "files_read": [],
+  "globs": [],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "**90% CL Feldman-Cousins interval for n_obs = 0, b = 0.8: μ ∈ [0, ≈1.7]**\n\nI couldn't run code in this session because the shell is disabled. This number is therefore interpolated from the published table, not computed. It is also not a result I verified.\n\n- **Source:** Feldman & Cousins, Table IV (90% CL, Poisson signal with known background). For n₀ = 0 the upper limits are:\n\n  | b | Upper limit |\n  |---|---|\n  | 0.0 | 2.44 |\n  | 0.5 | 1.94 |\n  | 1.0 | 1.61 |\n\n  b = 0.8 isn't tabulated. Interpolating between b = 0.5 and 1.0 gives about 1.74, so I quote ≈1.7.\n- **Lower edge:** it is exactly 0. For n = 0 the lower edge of the interval is 0 at any background.\n- **Background dependence:** the limit falls as b rises. With no events observed, a larger expected background leaves less room for signal. This differs from the CLs method, which gives 2.30 whatever b is. Don't read the FC limit as a stronger exclusion without that context.\n\nHere is a short script that computes the exact value. Run it to confirm.\n\n```python\nimport numpy as np\nfrom scipy.stats import poisson\nb, n0, cl = 0.8, 0, 0.90\nN = np.arange(60)\ndef accepted(mu):\n    p = poisson.pmf(N, mu + b)\n    r = p / poisson.pmf(N, np.maximum(N - b, 0) + b)   # likelihood ratio ordering\n    o = np.argsort(-r)\n    k = np.searchsorted(np.cumsum(p[o]), cl) + 1\n    s = np.zeros(len(N), bool); s[o[:k]] = True\n    return s\nok = [m for m in np.arange(0, 8, 0.001) if accepted(m)[n0]]\nprint(min(ok), max(ok))\n```\n\nIf you'd like, I can run it once the shell is available. I can also give 68% or 95% intervals, or work through other values of b.",
+  "cost_usd": 0.07265440000000001,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 2,
+  "files_read_detail": [],
+  "case": {
+   "id": "st-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Give me a Feldman-Cousins interval for zero observed events with background 0.8.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "Feldman-Cousins",
+    "low or zero counts"
+   ]
+  }
+ },
+ {
+  "prompt": "兩個實驗量測同一觀測量，有共同的系統誤差，請做 combinations across datasets。",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:hep-statistics"
+  ],
+  "files_read": [
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/hep-statistics/scripts/combine_measurements.py"
+  ],
+  "globs": [],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "我還不能算，因為你沒有給數值，也沒有給共同系統誤差的相關係數。依這個外掛的規則，我不會自己假設相關係數，也不會預設誤差互相獨立或完全相關。請提供下列資料，我就能用 `combine_measurements.py` 做廣義最小平方（GLS，等同 BLUE）組合。\n\n**需要的輸入**\n\n1. **兩個實驗的結果**：每個實驗給中心值 xᵢ，並把不確定度拆成統計、獨立系統、共同系統三部分。若是多個 bin，請給各 bin 的值和協方差。\n2. **共同系統誤差的細節**：\n   - 它的來源，例如共用的外部輸入量、同一個理論預測、同一個校正或同一個光度。\n   - 兩邊對它的相關係數 ρ。請說明依據；若是假設，請說明範圍，例如 ρ=1 並掃描 0.5–1。\n   - 兩邊是否用同一個定義和同一個參考值。若不是，我們得先做轉換。\n3. **可比較性**：兩邊是同一個觀測量，單位、相空間、修正層級（detector level 還是 unfolded）和慣例都要一致，這樣才能通過 compatibility gate。\n4. **資料集是否重疊**：若兩邊用到同一批事例，不能當成獨立資料組合，要另外處理。\n\n**我會做的事（兩個實驗、單一觀測量的情形）**\n\n- 建立聯合協方差 C。對角塊是各自的 σᵢ²。非對角塊是 ρ·σ_共同,₁·σ_共同,₂，加上你宣告的其他相關。\n- 解 x̂ = (1ᵀC⁻¹1)⁻¹ 1ᵀC⁻¹y，並給出 σ_x̂、χ²/ndf、各實驗的權重和最終的誤差分解（統計、獨立系統、共同系統）。\n- 檢查權重：當 ρ·σ₂ > σ₁（σ₁<σ₂）時，權重會出現負值，這時組合值會落在兩個測量值範圍之外。若出現，我會明確標出並說明原因，不會硬報一個結果。\n- 做 ρ 的敏感度掃描，並用 toy 驗證偏差、pull 寬度和涵蓋率。\n- 結果寫成 `statistical-result`，並標明狀態（`user-supplied` 或 `observed`），同時存下輸入 JSON 供重現。\n\n**如果你只想先看範例**\n\n你可以給我假想的數字，例如 x₁=…、x₂=…，各自的統計、系統和共同誤差。我會把結果標成 `synthetic`，只用來示範流程，不當成物理結果。\n\n請貼上數字和相關係數的資訊。若資料在檔案裡，給我路徑也可以。",
+  "cost_usd": 0.09500240000000001,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 4,
+  "files_read_detail": [
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/hep-statistics/scripts/combine_measurements.py",
+    "inside_plugin": true,
+    "experiment_profile": false
+   }
+  ],
+  "case": {
+   "id": "st-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "兩個實驗量測同一觀測量，有共同的系統誤差，請做 combinations across datasets。",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "combinations across datasets or experiments"
+   ]
+  }
+ },
+ {
+  "prompt": "Which selection cuts should define my signal region?",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:hep-analysis"
+  ],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/hep-research.project.json"
+   },
+   {
+    "pattern": "**/*"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "I can't give you cut values yet. The working directory is empty, and there's no `hep-research.project.json` or analysis spec for me to read. I won't invent thresholds. Cut values have to come from your detector resolutions, your backgrounds and the estimand, and I don't have any of those. What I can give you is how the signal region gets defined, and the questions that decide it.\n\n**1. Fix the estimand first.** The cuts follow from it. For example, \"σ(e⁺e⁻→μ⁺μ⁻) at √s = X, within |cosθ| < Y, at the generator level\" implies different cuts from \"forward-backward asymmetry A_FB\".\n\n**2. Candidate cut families for e⁺e⁻ → μ⁺μ⁻.** Each one needs a validation plan, a stated denominator and a physical reason.\n\n| Family | What it enforces | Where the threshold comes from |\n|---|---|---|\n| Two opposite-sign muon candidates | Final-state identity | Muon ID efficiency, which you'd measure by tag-and-probe on the data |\n| Acceptance, \\|cosθ\\| < c | The region the detector covers well | Detector geometry and the fiducial definition of the estimand |\n| Dimuon invariant mass or √s′ near √s | Rejects radiative return to the Z (ISR) | Mass resolution and the ISR tail |\n| Back-to-back (acollinearity < a) | Rejects τ⁺τ⁻, and ISR/FSR | Angular resolution |\n| Momentum, p/E_beam > f | Rejects τ⁺τ⁻ and two-photon (γγ→μμ) events | Momentum resolution |\n| Track-quality and vertex cuts | Rejects cosmic rays | Detector response |\n\n**3. How to set the thresholds.**\n- Take the resolutions from your detector model. If the model is a synthetic one you wrote, take them from it. Don't tune them on the data you'll measure.\n- Define the cuts, then check the efficiency and purity on simulation.\n- Keep the control regions and sidebands (for example high acollinearity, or low mass) separate from the signal region. Each background should have a control region and a closure test.\n- If you have blinded observables, define the cuts without looking at them.\n- Don't choose cuts by maximizing signal significance on the same data you then report. If you optimize anything, do it on simulation or a held-out sample.\n\n**4. What I need from you:**\n- the estimand, in one sentence\n- the √s and the detector resolutions you assume\n- which backgrounds your synthetic collider generates (τ⁺τ⁻, γγ, ISR, or only signal)\n- whether this is the M-milestone benchmark in the plugin repo\n\nIf you point me at the repo, the TASK file or the synthetic-collider config, I'll draft a measurement-spec with a selection ledger. The unknown values will stay marked `unknown` instead of guessed. If it's the G5 benchmark, the quickest route is to read the synthetic-collider config and propose cuts from the resolutions defined there.",
+  "cost_usd": 0.0888468,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 5,
+  "files_read_detail": [],
+  "case": {
+   "id": "st-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Which selection cuts should define my signal region?",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "event/candidate selection"
+   ],
+   "not": "hep-statistics"
+  }
+ },
+ {
+  "prompt": "Derive the prediction for this new-physics coupling so I can fit it later.",
+  "exit_code": 0,
+  "skills_invoked": [],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/*"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "I can't derive this yet, because I don't know which coupling you mean. Your message doesn't define one, and the working directory is empty, so there's no TASK file or notes to read it from.\n\nThe project memory says the D3 benchmark is tree-level e⁺e⁻ → μ⁺μ⁻. If the new-physics coupling is meant to extend that process, I need these before I can start:\n\n1. **Model:**\n   - Is it a Z′ (vector, axial or chiral couplings g_V, g_A)?\n   - Is it a contact interaction (Λ, η_{ij} for LL, RR, LR and RL)?\n   - Is it a scalar or leptoquark exchange, or something else?\n2. **Observable to predict:** Do you want σ_tot, dσ/dcosθ, A_FB, or polarized variants?\n3. **Conventions:**\n   - What is √s, or what is the range?\n   - Do you want to include γ/Z interference, and should the SM piece be tree-level only?\n   - Do you want m_μ neglected?\n4. **Fit parametrization:** For example, should the output be a closed form linear and quadratic in the coupling (SM + interference + |NP|²), so the fit reduces to a few template coefficients?\n\nOnce you name the model and observable, I'll derive it symbolically with sympy and check it against the SM limit. I'll write it up in the repo, on the `feat/hep-research-plugin` branch, under `plugins/hep-research/`.",
+  "cost_usd": 0.0632066,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 2,
+  "files_read_detail": [],
+  "case": {
+   "id": "st-negative-1",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "Derive the prediction for this new-physics coupling so I can fit it later.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "predictions"
+   ],
+   "not": "hep-statistics"
+  }
+ },
+ {
+  "prompt": "Derive the tree-level e+e- -> mu+mu- cross section with explicit conventions and check the limits.",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:hep-theory"
+  ],
+  "files_read": [],
+  "globs": [],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "# Tree-level e⁺e⁻ → μ⁺μ⁻ (QED, one-photon exchange)\n\n**Derivation status:** analytic derivation, perturbative argument at lowest order (σ ∝ e⁴ ∝ α²). I did the algebra by hand. No code could run in this session because Bash is disabled, so the symbolic and numerical cross-checks are listed as **not run** below.\n\n## Conventions\n\n| Item | Choice |\n|---|---|\n| Units | ħ = c = 1. Convert with (ħc)² = 0.389379 mb·GeV² = 3.89379×10⁸ pb·GeV² |\n| Metric | (+,−,−,−) |\n| Coupling | Heaviside–Lorentz, α = e²/4π, with α(0) = 1/137.036 (no running) |\n| Process | Only the s-channel photon. No Z, no ISR/FSR, no vacuum polarization |\n| Spin | Unpolarized beams, averaged (¼) over initial spins and summed over final spins |\n| Masses | m_e = 0, m_μ ≡ m kept |\n| Frame and energy | CM frame, s = (p₁+p₂)², E = √s/2 |\n| Angle | θ is the angle between the outgoing μ⁻ and the incoming e⁻ |\n| Velocity | β = √(1−4m²/s) |\n\n## Derivation\n\n**Amplitude.** Both leptons have charge −e, so the product of charges is +e². With p₁, p₂ the e⁻, e⁺ momenta and k₁, k₂ the μ⁻, μ⁺ momenta:\n\nM = (e²/s) [v̄(p₂)γ^μ u(p₁)] [ū(k₁)γ_μ v(k₂)]\n\n**Spin sum.** The lepton tensors are:\n\n- L_e^{μν} = Tr[p̸₂γ^μ p̸₁γ^ν] = 4[p₂^μp₁^ν + p₂^νp₁^μ − g^{μν} p₁·p₂]\n- L_μ^{μν} = Tr[(k̸₁+m)γ_μ(k̸₂−m)γ_ν] = 4[k₁μk₂ν + k₁νk₂μ − g_{μν}(k₁·k₂+m²)]\n\nContracting them gives:\n\n¼Σ|M|² = (8e⁴/s²) [ (p₁·k₁)(p₂·k₂) + (p₁·k₂)(p₂·k₁) + m²(p₁·p₂) ]\n\n**CM kinematics.**\n\n- p₁·k₁ = p₂·k₂ = E²(1−β cosθ)\n- p₁·k₂ = p₂·k₁ = E²(1+β cosθ)\n- p₁·p₂ = s/2 = 2E²\n- m² = E²(1−β²)\n\nThe bracket becomes 2E⁴(2−β² sin²θ), and E⁴ = s²/16. So:\n\n¼Σ|M|² = e⁴ [1 + cos²θ + (1−β²) sin²θ] = e⁴ (2 − β² sin²θ)\n\n**Phase space.** For 2→2 with massless initial state, dσ/dΩ = (1/64π²s)(|k|/|p|)·¼Σ|M|², with |k|/|p| = β. Using e⁴ = 16π²α²:\n\n**dσ/dΩ = (α²β / 4s) [ 1 + cos²θ + (1−β²) sin²θ ]**\n\n**Total cross section.** The angular integral is ∫dΩ (2−β² sin²θ) = 8π(1−β²/3). Therefore:\n\n**σ = (4πα² / 3s) · β(3−β²)/2 = (2πα²/s) β (1 − β²/3)**\n\n## Limit and consistency checks\n\n| Check | Result | Status |\n|---|---|---|\n| Dimensions | σ ~ α²/s is GeV⁻², an area. dσ/dΩ is dimensionally consistent | run |\n| Positivity | 2 − β² sin²θ ≥ 1 > 0 for 0 ≤ β ≤ 1 | run |\n| β→1 (√s ≫ m) | σ → 4πα²/3s and dσ/dΩ → (α²/4s)(1+cos²θ) | run |\n| Helicity | Massless chirality conservation allows only e⁻_L e⁺_R and e⁻_R e⁺_L, giving μ⁻_L μ⁺_R and μ⁻_R μ⁺_L. The (1±cosθ)² pieces sum to 1+cos²θ, so A_FB = 0 in pure QED | run (argument) |\n| β→0 (threshold) | σ → 2πα²β/s, with isotropic dσ/dΩ = α²β/2s. This is S-wave pair production from a vector current, and σ ∝ β as phase space requires | run |\n| Normalization | 4πα²/3 × (ħc)² = 86.85 nb·GeV², so σ ≈ 86.85 nb / s[GeV²] (about 0.869 nb at √s = 10 GeV). I did this arithmetic by hand | run (by hand) |\n| Symbolic trace and contraction (sympy) | not run, no execution available | **not run** |\n| Numerical angular integration, with tolerance and convergence | not run | **not run** |\n| Comparison with the PDG formula | not run. The 86.8 nb/s value above is from memory and is not a cited benchmark | **not run** |\n\n## Validity domain and what was neglected\n\n- **Threshold.** Tree level fails when β ≲ α, because the Coulomb/Sommerfeld enhancement (a factor ~πα/β) is not captured. This is order-α̃ resummation, outside this result.\n- **Z exchange.** The size of the correction is of order s/M_Z², about 1% at √s = 10 GeV. It also generates a nonzero A_FB through γ–Z interference. The result is valid for √s ≪ M_Z and is not valid near the Z pole.\n- **Radiative corrections.** ISR, FSR, vacuum polarization (α → α(s)) and box diagrams are all neglected. These are next order in α and are not a tree-level uncertainty. I give no theory-uncertainty estimate here and do not treat the missing orders as Gaussian.\n- **Electron mass.** Neglecting m_e costs O(m_e²/s).\n- **Beam effects.** Beam polarization and energy spread are not included.\n\n## Next steps\n\nOnce execution is available, I can run a sympy gamma-matrix trace check and a scipy angular-integration convergence study. I can also read the PDG cross-section formulae you approved earlier and cite the exact location. Say if you want those done. I can also write this up as a `theory-spec` or `prediction` artifact in `hep-research-artifacts/`, or publish it as a page.",
+  "cost_usd": 0.1324826,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 4,
+  "files_read_detail": [],
+  "case": {
+   "id": "th-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Derive the tree-level e+e- -> mu+mu- cross section with explicit conventions and check the limits.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "cross sections",
+    "conventions"
+   ]
+  }
+ },
+ {
+  "prompt": "請說明這個 NLO 計算的 scale envelopes 該如何給出理論誤差。",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:hep-theory"
+  ],
+  "files_read": [],
+  "globs": [],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "# NLO 計算的 scale envelope 如何給出理論誤差\n\n我沒有看到具體是哪一個計算,也沒有載入任何理論 profile,以下是一般性的做法。\n\n## 1. 它估計的是什麼\n\n變動 μ_R(重整化標度)和 μ_F(因子化標度),估計的是**被截斷的高階項**,也就是 NLO 之後 NNLO 以上的貢獻。\n\n- 它不涵蓋 PDF 不確定度、α_s 的輸入值、強子化或 shower 模型、質量方案。\n- 它不是統計意義上的誤差,不具有高斯性或任何機率詮釋。\n- 這些不確定度要分開報告,不要混在一起,也不要事先把 scale envelope 當成 1σ。\n\n## 2. 標準流程\n\n1. **選中心標度 μ₀**,並明講理由。例如固定標度用 Q 或 m_V,動態標度用 H_T/2 或 m_T。中心標度本身就是一個選擇,必須記錄。\n2. **變動 μ_R 和 μ_F**。慣例是 μ_R = ξ_R μ₀、μ_F = ξ_F μ₀,其中 ξ ∈ {1/2, 1, 2}。\n3. **用七點(7-point)方案**:\n   - 取 (ξ_R, ξ_F) ∈ {(1,1), (½,½), (2,2), (½,1), (1,½), (2,1), (1,2)}。\n   - 排除 (½,2) 和 (2,½),因為這兩個點會產生大 log 比值 ln(μ_R/μ_F)。\n   - 這是 LHC 的常用方案。\n4. **取包絡(envelope)**:每個 bin 或每個觀測量取這 7 個點的最大值與最小值,\n   - σ⁺ = max_i σ_i − σ(1,1)\n   - σ⁻ = σ(1,1) − min_i σ_i\n5. **報告成不對稱誤差**:σ ^{+σ⁺}_{−σ⁻}。\n6. **分佈要逐 bin 做**。如果每個 bin 各取自己的 max/min,誤差帶要視為**完全相關**的單一擾動,不能當成獨立的 bin 誤差。\n\n## 3. 需要注意的地方\n\n- **NLO 時 scale 依賴只被壓低一階**。σ 的 scale 依賴要到 O(α_s^{n+1}) 才抵消,所以 NLO 的包絡常常**低估**真實的高階效應。最典型的例子是 gg→H 的 NNLO/NLO 修正落在 NLO 誤差帶外。\n- **新開的通道會讓包絡失效**。如果 NLO 才首次出現某個通道(例如 qg 通道),或者 LO 本身沒有 α_s 依賴,scale 變動就會嚴重偏小。這種情形要另外評估。\n- **在 LO 到 NLO 的收斂性上做檢查**:看 NLO 中心值是否落在 LO 的包絡內,以及 K 因子的大小。如果 NLO 中心值在 LO 誤差帶之外,就要懷疑誤差帶的可靠度。\n- **不要把包絡除以 √3 或 2 當成 1σ,除非你明確寫出這個處方**。常見的選擇有三種:\n  - 把它當成平坦分佈,σ = (半寬)/√3。\n  - 直接當作硬邊界,不做機率詮釋。\n  - 在 hep-statistics 中當作單一擾動參數,用高斯或 log-normal 先驗,並寫明這個選擇。\n  \n  不同選擇會明顯影響下游的限制或顯著性,所以處方必須寫進結果裡。\n- **替代方案**:\n  - 用 scale 依賴的導數、Stewart–Tackmann 方法,或 Cacciari–Houdeau 的貝氏方法來處理截斷誤差。這些方法在有 jet bin 的觀測量上特別有用。\n  - 對比兩種中心標度(例如固定標度 vs 動態標度),把差異當作**模型替代**不確定度,另外列出。\n\n## 4. 報告時應附的內容\n\n- 約定區塊:標度的定義(μ₀)、方案(例如 MS-bar)、α_s 的跑動階數、PDF 集合與它的階數。\n- 變動的集合(7 點或 9 點),以及是否排除了反向的點。\n- 這個誤差帶的狀態:**微擾論論證,階數 O(α_s^{n+1})**。\n- 檢查的狀態:LO→NLO 收斂性、K 因子、已執行或未執行,逐項列出。\n- 處理方式:包絡是 **scale envelope**,不是高斯誤差。\n\n如果你告訴我具體是哪個過程、觀測量(整體截面還是分佈)、使用的中心標度,以及這個誤差之後要送到哪裡(例如進 pyhf 或 hep-statistics 的擬合),我可以把處方寫得更具體,也可以幫你寫成 `prediction` 的 JSON 與 CSV。",
+  "cost_usd": 0.0862972,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 3,
+  "files_read_detail": [],
+  "case": {
+   "id": "th-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請說明這個 NLO 計算的 scale envelopes 該如何給出理論誤差。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "scale envelopes"
+   ]
+  }
+ },
+ {
+  "prompt": "Fit the coupling of my model to these published data points with their covariance.",
+  "exit_code": 0,
+  "skills_invoked": [],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/*"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "The working directory is empty, so I can't find your model or the data points. I need these to run the fit:\n\n1. **Model**: the prediction as a function of the coupling. A formula, a code file, or a description such as \"tree-level e⁺e⁻ → μ⁺μ⁻ with a Z′ coupling g\". Please include the convention for the coupling (units, normalization, scheme) and any fixed parameters.\n2. **Data points**: the values with their observable and binning, for example x, y, or the paper's table.\n3. **Covariance**: the matrix itself, or a pointer to it (HEPData record, arXiv number and table, or a file). Please say whether it is the full covariance or only statistical, and whether it is absolute or relative. If the paper gives separate stat and syst correlation matrices, say how to combine them.\n4. **Fit choices** (optional): Gaussian χ² with the full covariance is my default. Tell me if you want something different, such as a profile-likelihood interval, a Bayesian posterior, or nuisance parameters for correlated systematics.\n\nIf the data are on HEPData or arXiv, send the link and I'll fetch them. I'd also need your OK to download them.\n\nOnce I have these, I'll fit with the full covariance and report the best-fit coupling, its uncertainty, χ²/ndf and p-value, and a pull plot. I'll check the covariance is positive definite and well-conditioned before fitting.",
+  "cost_usd": 0.062624,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 2,
+  "files_read_detail": [],
+  "case": {
+   "id": "th-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Fit the coupling of my model to these published data points with their covariance.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "fits"
+   ],
+   "not": "hep-theory"
+  }
+ },
+ {
+  "prompt": "Write the results section of the paper from these fit outputs.",
+  "exit_code": 1,
+  "skills_invoked": [
+   "hep-research:research-communication"
+  ],
+  "files_read": [
+   "/mnt/project-files/hep-research/m4/path-d-report.md",
+   "/mnt/project-files/hep-research/m3/path-b/report.md",
+   "/mnt/project-files/hep-research/m2-path-a/report.md",
+   "/mnt/project-files/hep-research/m4/t24-report.md"
+  ],
+  "globs": [
+   {
+    "pattern": "**/*"
+   },
+   {
+    "pattern": "/mnt/project-files/hep-research/**/*"
+   },
+   {
+    "pattern": "fit|chi2|χ|chi\\^2|best-fit|pull",
+    "path": "/mnt/project-files/hep-research",
+    "glob": "*.md",
+    "output_mode": "count"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": null,
+  "cost_usd": 0.11647759999999999,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "error_max_turns",
+  "num_turns": 5,
+  "files_read_detail": [
+   {
+    "path": "/mnt/project-files/hep-research/m4/path-d-report.md",
+    "inside_plugin": false,
+    "experiment_profile": false
+   },
+   {
+    "path": "/mnt/project-files/hep-research/m3/path-b/report.md",
+    "inside_plugin": false,
+    "experiment_profile": false
+   },
+   {
+    "path": "/mnt/project-files/hep-research/m2-path-a/report.md",
+    "inside_plugin": false,
+    "experiment_profile": false
+   },
+   {
+    "path": "/mnt/project-files/hep-research/m4/t24-report.md",
+    "inside_plugin": false,
+    "experiment_profile": false
+   }
+  ],
+  "case": {
+   "id": "th-negative-1",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "Write the results section of the paper from these fit outputs.",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "drafting or revising paper sections"
+   ],
+   "not": "hep-theory"
+  }
+ },
+ {
+  "prompt": "Train a jet classifier in PyTorch with grouped splits by run so nothing leaks.",
+  "exit_code": 1,
+  "skills_invoked": [
+   "hep-research:physics-ml"
+  ],
+  "files_read": [
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/physics-ml/assets/train_classifier.py",
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/physics-ml/scripts/check_split_integrity.py",
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/physics-ml/assets/dataset_splits.example.json"
+  ],
+  "globs": [
+   {
+    "pattern": "**/*"
+   },
+   {
+    "pattern": "**/*",
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/physics-ml"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": null,
+  "cost_usd": 0.1465388,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "error_max_turns",
+  "num_turns": 5,
+  "files_read_detail": [
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/physics-ml/assets/train_classifier.py",
+    "inside_plugin": true,
+    "experiment_profile": false
+   },
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/physics-ml/scripts/check_split_integrity.py",
+    "inside_plugin": true,
+    "experiment_profile": false
+   },
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/physics-ml/assets/dataset_splits.example.json",
+    "inside_plugin": true,
+    "experiment_profile": false
+   }
+  ],
+  "case": {
+   "id": "ml-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Train a jet classifier in PyTorch with grouped splits by run so nothing leaks.",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "grouped train/validation/test splits and leakage checks"
+   ]
+  }
+ },
+ {
+  "prompt": "我的模擬太慢，想用 PyTorch 做 surrogates，並檢查 domain shift。",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:physics-ml"
+  ],
+  "files_read": [
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/physics-ml/scripts/check_surrogate_domain.py"
+  ],
+  "globs": [
+   {
+    "pattern": "**/*"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "專案目錄目前是空的，找不到你的模擬程式或資料。我不想憑空假設，所以先請你回答幾個會決定設計的問題。\n\n**需要你確認**\n1. **模擬是什麼？** 例如事例產生、探測器響應或 Geant4。輸入是什麼（參數點、粒子運動學）？輸出又是什麼（純量、直方圖、事例級量）？\n2. **一次模擬要多久？** 你手上已經有多少樣本？這決定 surrogate 的容量和主動取樣策略。\n3. **分組鍵（grouping key）是什麼？** 可能是參數點、模擬 seed、run 或探測器時期。train/val/test 要依這個鍵切分，不能隨機切事例，否則會洩漏。\n4. **「domain shift」指哪一種？**\n   - (a) 查詢點跑到 surrogate 訓練範圍之外（參數外插）。\n   - (b) 模擬與真實資料不一致（sim→data）。\n   - (c) 兩者都要。\n5. **surrogate 的輸出之後要餵給什麼？** 例如擬合或量測。這決定下游驗證要怎麼做。\n6. 有沒有事例權重（含負權重）？\n\n**我預計的做法**（確認後開工）\n- **模型：** PyTorch MLP 回歸，輸入與輸出標準化，記錄 seed 和環境。若需要不確定度，用 ensemble 或 heteroscedastic 輸出。\n- **切分：** 依分組鍵切分，用 `check_split_integrity.py` 檢查洩漏。\n- **訓練域聲明：** 逐特徵的範圍加最近鄰間距。推論時用 `check_surrogate_domain.py` 標記「域外」和「稀疏區」。\n- **domain shift 檢查：**\n  - 對查詢集與訓練集做 classifier two-sample test（C2ST），看 AUC 是否偏離 0.5。\n  - 比較逐特徵的 KS 分佈，並對比 ensemble 分歧度與實際誤差的相關性。\n  - 若是 sim→data，用控制樣本檢查。\n- **下游驗證：** 比較 surrogate 與真實模擬進入物理結果時的差異，而不只看 MSE。\n- **產出：** `ml-artifact`，用 `validate.py` 驗證。沒有真實資料驗證前，所有結果標為 `unvalidated` 或 `synthetic`。\n\n如果你一時說不清楚，也可以先給我一個最小的模擬呼叫範例或一小批輸出，我先建一個可跑的骨架。",
+  "cost_usd": 0.0915652,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 5,
+  "files_read_detail": [
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/physics-ml/scripts/check_surrogate_domain.py",
+    "inside_plugin": true,
+    "experiment_profile": false
+   }
+  ],
+  "case": {
+   "id": "ml-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我的模擬太慢，想用 PyTorch 做 surrogates，並檢查 domain shift。",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "surrogates",
+    "domain shift"
+   ]
+  }
+ },
+ {
+  "prompt": "Is the likelihood-free inference built on my network statistically valid, with coverage?",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:hep-statistics"
+  ],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/*"
+   },
+   {
+    "pattern": "\\b(sbi|NPE|NRE|NLE|likelihood-free|simulation-based)\\b",
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5",
+    "-i": true,
+    "output_mode": "files_with_matches",
+    "head_limit": 20
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "These hits are all plugin and skill reference docs. None of them is your network or your inference code.\n\n**I can't say whether it's statistically valid, and nothing in this session shows that it is.** The project directory is empty. I found no trained network, simulator, or inference code to examine. Anything I said about your particular network would be a guess.\n\nI can say what \"valid, with coverage\" requires. Coverage is an empirical property, so it has to be tested and can't be argued from the architecture.\n\n1. **State the paradigm.** A neural posterior estimator (NPE) gives Bayesian credible regions. Those are calibrated only on average over your prior, not at a fixed true parameter. A neural likelihood or ratio estimator (NLE/NRE) fed into a Neyman or profile-likelihood construction gives frequentist intervals. Which of the two you have decides what \"coverage\" means.\n2. **Test coverage on held-out simulations.**\n   - For NPE, draw θ from the prior and simulate x. Then check rank or SBC histograms, and run an expected-coverage test such as TARP or HPD-level versus empirical-level curves. Use data the network never saw, and report the calibration curve.\n   - For frequentist intervals, test at fixed θ on a grid. That means toys at fixed true values and the observed fraction of intervals that contain the truth, with a binomial error on that fraction. Expected coverage can look fine while coverage at specific θ is badly off.\n3. **Check the boundaries.** Look at parameters near physical limits, low-statistics regions, and the edges of the prior. Overconfidence from a network tends to show up there first.\n4. **Check the simulator itself.** Coverage on synthetic data only certifies the inference against that simulator. If real data differs from the simulation (misspecification, domain shift, mismodelled nuisances), the coverage guarantee doesn't carry over. Test with perturbed nuisance values, and be explicit about what the claim covers.\n5. **Check stability and sample size.** Test across training seeds and across training-set sizes, because a coverage result from one seed is weak evidence.\n6. **Keep the labels.** Results on synthetic or Asimov data stay labelled `synthetic` or `asimov`, and a failed calibration check stays `failed`.\n\nIf you point me to the code or checkpoint (for example the `hep-research` branch, or a path you upload), I'll run these checks. The plugin has toy and coverage tools under `core/stats/`. I'd also need to know whether you're doing NPE, NLE, or NRE, and what the simulator and prior are.",
+  "cost_usd": 0.09969739999999999,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 5,
+  "files_read_detail": [],
+  "case": {
+   "id": "ml-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Is the likelihood-free inference built on my network statistically valid, with coverage?",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "coverage"
+   ],
+   "not": "physics-ml"
+  }
+ },
+ {
+  "prompt": "My C++ CMake build fails to link ROOT libraries.",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-analysis"
+  ],
+  "files_read": [
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/config/skills/hep-analysis/references/15-cmake-and-build.md"
+  ],
+  "globs": [
+   {
+    "pattern": "**/CMakeLists.txt"
+   },
+   {
+    "pattern": "**/*.{cmake,txt,cpp,cc,C,h}"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "There's no CMake project in the working directory, so I can't see your build yet. Please paste these:\n\n1. Your `CMakeLists.txt`.\n2. The full linker error, starting from the first `undefined reference` or `cannot find -l...` line.\n3. The output of `root-config --version --libdir` and `echo $ROOTSYS`.\n4. The cmake configure command you ran, and whether you sourced `thisroot.sh` first.\n\nHere are the usual causes, most likely first.\n\n**1. CMake can't find ROOT, or finds the wrong one.** Point it at your install:\n```bash\nsource /path/to/root/bin/thisroot.sh\ncmake -S . -B build -DCMAKE_PREFIX_PATH=$ROOTSYS\n```\nIf another ROOT is on `PATH`, or a stale `build/CMakeCache.txt` remembers an old one, delete `build/` and reconfigure.\n\n**2. Missing components.** Too few components in `find_package` give errors that look like missing symbols. For example, `ROOT::RDataFrame` needs the `ROOTDataFrame` component, and fitting or RooFit code needs `Minuit`, `RooFit` or `RooFitCore`.\n```cmake\nfind_package(ROOT REQUIRED COMPONENTS RIO Tree Hist Graf Gpad ROOTDataFrame)\nadd_executable(analysis src/analysis.cpp)\ntarget_link_libraries(analysis PRIVATE ROOT::RIO ROOT::Tree ROOT::Hist ROOT::ROOTDataFrame)\n```\nLinking the imported `ROOT::` targets is more robust than `${ROOT_LIBRARIES}`. Alternatively, `find_package(ROOT REQUIRED)` with no components gives you `ROOT::Core` and the other targets.\n\n**3. C++ standard or ABI mismatch.** Undefined references involving `std::__cxx11::string` usually mean a different compiler, `_GLIBCXX_USE_CXX11_ABI` or `-std` than the one ROOT was built with. Compare `root-config --cflags` with your compile line. Set `CMAKE_CXX_STANDARD` to match, which is 17 or higher for recent ROOT, and use the same compiler.\n\n**4. Runtime library path.** If it links but fails at run time with `cannot open shared object file`, source `thisroot.sh`, or add `$(root-config --libdir)` to `LD_LIBRARY_PATH`.\n\n**5. A custom class with a dictionary.** `undefined reference to vtable` or `TClass`/`ClassImp` errors need `ROOT_GENERATE_DICTIONARY`, with the generated dictionary or library linked in.\n\nAs a quick check, `root-config --libs` shows the libraries ROOT itself would link. If a manual `g++ analysis.cpp $(root-config --cflags --libs)` works but CMake doesn't, the problem is in the CMake setup, not in ROOT.",
+  "cost_usd": 0.14077900000000002,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 6,
+  "files_read_detail": [
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/config/skills/hep-analysis/references/15-cmake-and-build.md",
+    "inside_plugin": false,
+    "experiment_profile": false
+   }
+  ],
+  "case": {
+   "id": "ml-negative-1",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "My C++ CMake build fails to link ROOT libraries.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "CMake builds"
+   ],
+   "not": "physics-ml"
+  }
+ },
+ {
+  "prompt": "Check whether this INSPIRE citation really supports the 2.1% number in my draft.",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:research-communication"
+  ],
+  "files_read": [
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/research-communication/references/citation-verification.md"
+  ],
+  "globs": [
+   {
+    "pattern": "**/*.{tex,bib,md,txt}"
+   },
+   {
+    "pattern": "2\\.1\\s*(\\\\?%|per ?cent)",
+    "output_mode": "content",
+    "-n": true
+   },
+   {
+    "pattern": "**/*"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "I can't check this yet, because I don't have either side of it. The working directory is empty: there's no draft, no `.bib` file, and no \"2.1%\" anywhere.\n\nPlease send me:\n\n1. **The draft sentence.** Paste the sentence that contains the 2.1% figure, plus the sentence around it if the context matters. A file path works too.\n2. **The citation.** Any of these will do: the INSPIRE record or texkey (e.g. `Author:2023abc`), the arXiv ID, or the DOI.\n\nOnce I have them, I'll do the following:\n\n- **Resolve the record.** I'll fetch the INSPIRE record and match title, authors, year and arXiv/DOI against what your draft cites. This also catches a wrong version or a wrong paper.\n- **Find the number in the source.** I'll read the full text, not the abstract or a snippet. I'll look for 2.1% in a table, figure or paragraph, and I'll quote the passage with its location.\n- **Compare it with your claim.** Several things can make a matching number still fail to support the claim:\n  - the quantity (statistical vs. systematic vs. total uncertainty, or a relative vs. absolute value)\n  - the dataset, energy or kinematic range\n  - rounding, or a different scheme or scale\n  - a number you derived rather than one the paper states\n- **Check for corrections.** I'll look for errata, retractions and newer versions that change the value.\n\nYou'll get a verdict of supported, partial, unsupported or unverified, with the evidence passage and a proposed fix. If I can't read the full text, I'll mark the claim unverified and won't infer an answer.",
+  "cost_usd": 0.0885952,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 7,
+  "files_read_detail": [
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/research-communication/references/citation-verification.md",
+    "inside_plugin": true,
+    "experiment_profile": false
+   }
+  ],
+  "case": {
+   "id": "rc-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Check whether this INSPIRE citation really supports the 2.1% number in my draft.",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "citations",
+    "INSPIRE-HEP"
+   ]
+  }
+ },
+ {
+  "prompt": "請幫我回覆審稿人的 referee reports，並修改摘要。",
+  "exit_code": 0,
+  "skills_invoked": [],
+  "files_read": [
+   "/mnt/project-files/uploads/hearth/31497c1c-23fa-4f94-b136-8f00dc4ea7e0"
+  ],
+  "globs": [
+   {
+    "pattern": "**/*"
+   },
+   {
+    "pattern": "/mnt/project-files/**/*"
+   },
+   {
+    "pattern": "referee|Referee|審稿|abstract",
+    "path": "/mnt/project-files",
+    "output_mode": "files_with_matches"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "我找不到審稿意見和稿件，所以現在沒辦法回覆或改摘要。\n\n- 工作目錄是空的。\n- `/mnt/project-files/` 裡只有 hep-research 外掛的任務檔（TASK）、各階段報告（G0、G1、M2 到 M4）和圖。\n- 搜尋 \"referee\"、\"審稿\"、\"abstract\" 只命中外掛的任務檔和 `M0.patch`。這兩個檔案是外掛的規格與程式修改，不是論文稿或審稿意見。\n\n我不會憑空編寫審稿人的意見或你論文的內容，因為這樣的回覆信會是捏造的。\n\n請提供下面幾樣東西，擇一方式都可以：貼在對話裡、放到 `/mnt/project-files/` 或工作目錄，或給我檔案路徑。\n\n1. **Referee reports 全文**，包含所有審稿人、編輯信，以及投稿期刊（用來決定格式與篇幅限制）。\n2. **目前的稿件**，可以是 LaTeX 或 PDF，至少要有摘要，最好含相關章節與圖表。\n3. **目前的摘要**，如果稿件沒有一併提供的話。\n4. **你的立場**（如果已有想法），例如哪些意見你接受、哪些要反駁，或已經做了哪些新分析。\n\n回覆信我會用英文寫，並依審稿人逐點回覆（意見、回應、對應的稿件修改）。需要新分析或新數字才能回答的意見，我會標成待你確認，不會編造結果。摘要會以修訂後的內容為準，並附上與原版的差異說明。你也可以另外指定要不要附中文版說明。\n\n這件事與目前的 hep-research 外掛任務（等待 G5 閘門）是分開的。你確認之後，我就開始處理。",
+  "cost_usd": 0.18174659999999998,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 5,
+  "files_read_detail": [
+   {
+    "path": "/mnt/project-files/uploads/hearth/31497c1c-23fa-4f94-b136-8f00dc4ea7e0",
+    "inside_plugin": false,
+    "experiment_profile": false
+   }
+  ],
+  "case": {
+   "id": "rc-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請幫我回覆審稿人的 referee reports，並修改摘要。",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "referee reports",
+    "abstracts"
+   ]
+  }
+ },
+ {
+  "prompt": "Is this Feynman diagram physically allowed at tree level?",
+  "exit_code": 0,
+  "skills_invoked": [],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/*.{png,jpg,jpeg,svg,pdf,tex,tikz,gif,webp}"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "I can't see a diagram. Nothing came through with your message, and the working directory has no image, SVG, PDF or TikZ files.\n\nCould you attach the image, or describe it in text? For the text version, I need:\n\n- the incoming and outgoing particles\n- each vertex, with the lines that meet there\n- the internal propagators, and whether they are in the s, t or u channel\n\nHere is what I'll check once I have it:\n\n1. **Conservation at every vertex.** Electric charge, lepton number (per flavour), baryon number, and colour must all be conserved. Strong and EM vertices also conserve flavour, so that includes quark flavour and parity. Only the charged-current weak vertex changes flavour.\n2. **Allowed vertices.** Examples are γ/Z/g coupling to a fermion–antifermion pair of the same flavour, W coupling to an up-type and down-type pair of the same generation (up to CKM mixing), and the triple and quartic gauge vertices. A vertex such as γ–ν–ν̄ or Z–e–μ doesn't exist.\n3. **Tree-level topology.** There must be no closed loops. The number of vertices fixes the order in couplings, and the diagram must be connected.\n4. **Kinematics and external states.** Each line must be a particle or an antiparticle, with arrows consistent with fermion flow. The initial-state quantum numbers must match the final-state ones.\n\nIf this is the benchmark process in the hep-research task, e⁺e⁻ → μ⁺μ⁻, the tree-level diagrams are s-channel γ and Z exchange. There is no t-channel at tree level, because the e⁻ and μ⁻ lines can't connect directly through a neutral boson without a flavour-changing vertex. If your diagram is one of those, send it and I'll confirm.",
+  "cost_usd": 0.0646298,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 2,
+  "files_read_detail": [],
+  "case": {
+   "id": "rc-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Is this Feynman diagram physically allowed at tree level?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "amplitudes"
+   ],
+   "not": "research-communication"
+  }
+ },
+ {
+  "prompt": "Run the template fit for the paper's main result.",
+  "exit_code": 0,
+  "skills_invoked": [],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/*"
+   },
+   {
+    "pattern": "template",
+    "-i": true,
+    "output_mode": "files_with_matches",
+    "head_limit": 50
+   },
+   {
+    "pattern": "**/*",
+    "path": "/mnt/project-files/hep-research"
+   },
+   {
+    "pattern": "template fit|main result",
+    "-i": true,
+    "path": "/mnt/project-files/hep-research",
+    "output_mode": "content",
+    "head_limit": 30
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "I can't run this yet because I can't find a template fit or a paper to run it on.\n\n- The project directory (`.../g5/project dir`) is empty. It has no data, scripts, config or manuscript.\n- `/mnt/project-files/hep-research/` holds the G0/G1 reports, the M2–M4 reports and plots, and the M0/M1 bundles. None of them mention a \"template fit\" or a \"main result\". The M2–M4 paths cover per-period flux and ratio, the dσ/dcosθ benchmark, and path-d.\n- The plugin repo (`hchouTW/hep-research`, branch `feat/hep-research-plugin`) isn't checked out here. I haven't looked in it, so I can't say whether it has a template-fit script.\n\nI don't want to guess at which fit you mean, because a template fit run on the wrong inputs would give a misleading number. Could you tell me:\n\n1. Which paper or analysis you mean, and where its data or manuscript is? That could be a path, or a repo to clone.\n2. Which fit you want: a script that already exists, or one I should build from the paper's method?\n3. Whether the Python packages (numpy/scipy/matplotlib/sympy) are installed in `.venv-hep`. pyhf is still not approved, so I'll avoid it unless you approve it.\n\nOnce I know where the inputs are, I'll run the fit and report the result.",
+  "cost_usd": 0.0846806,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 5,
+  "files_read_detail": [],
+  "case": {
+   "id": "rc-negative-1",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "Run the template fit for the paper's main result.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "template fits"
+   ],
+   "not": "research-communication"
+  }
+ },
+ {
+  "prompt": "Plan the time-dependent helium flux and He/p ratio measurement for AMS-02 across two periods.",
+  "exit_code": 0,
+  "skills_invoked": [
+   "ams-analysis"
+  ],
+  "files_read": [
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/config/skills/ams-analysis/references/time-dependent-analysis.md",
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/config/skills/ams-analysis/references/charged-cosmic-rays.md"
+  ],
+  "globs": [],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "# Plan: time-dependent He flux and He/p ratio across two periods (AMS-02)\n\nI'm assuming the two periods are P1 and P2 and haven't fixed their dates, so everything is symbolic. Tags follow the ams-analysis skill's source convention: **[Documented, C##]** is a ledger claim, **[General method]** is textbook method, **[Proposal]** is my recommendation, and **[Unknown]** needs your input. I quote no AMS-internal cuts, efficiencies or systematic sizes.\n\n## 1. Estimand (fix this before choosing algorithms)\n\n- **Flux:** Φ_He(R; k), top-of-instrument differential flux in m⁻² sr⁻¹ s⁻¹ GV⁻¹, in rigidity R, in time bins k that sit inside P1 and P2.\n- **Ratio:** ρ(R; k) = Φ_He / Φ_p (or p/He), with the same R bins, time bins, fiducial region and cutoff treatment for both species.\n- **Headline quantity:** the change between periods, Φ(P2)/Φ(P1) and ρ(P2)/ρ(P1) as functions of R, with full covariance.\n- **Out of scope:** converting to T/A, applying a modulation model, or a force-field interpretation. Each is a separate model step.\n- **[Documented, C10, C09]** The AMS deuteron paper (S13) and the He-isotope paper (S12) note that He, p and D share nearly the same time variation. A He/p ratio that is flat in time is therefore a plausible outcome, and a null result would still be informative.\n\n## 2. Open inputs that change the plan\n\n1. P1 and P2 dates, and whether they sit on either side of a hardware-era or reconstruction-version boundary.\n2. Public data or internal, and which track configuration (L1+L9 or inner tracker only). The top rigidity reach depends on this.\n3. Rigidity range. [Proposal] Start at about 1 GV to 100 GV, where statistics are high and time dependence is largest. Extend to the TV range only for time-integrated checks.\n4. Whether the target is two period-averaged points or a within-period time series. The plan below covers both: Level A is the period-averaged result, and Level B is the time series.\n\n## 3. Time binning\n\n- **[Documented, C27, C29]** The deuteron and Li-isotope analyses used four-Bartels-rotation blocks (108 days). That is those analyses' choice, not a rule.\n- **[Proposal]** Level B uses 1 Bartels rotation (27 d) at low R and 4 rotations at high R, or merged R bins instead. Fix the binning and the stability metric before looking at the data, and log any later change.\n- **[General method]** No bin may straddle a hardware or reconstruction-version boundary. A period boundary that coincides with one forces separate responses and templates for P1 and P2.\n- **[General method]** Check that the least populated R bin in each time bin has enough He events. If not, use Poisson-exact or toy-validated intervals instead of Gaussian errors.\n\n## 4. Per-time-bin flux chain\n\nFor each time bin k and species s ∈ {p, He}:\n\n**Φ_s,j(k) = [unfolded (n − b)]_{s,j}(k) / (ΔR_j · A_j ε_j(k) T_j(k))**\n\n| Step | Content |\n|---|---|\n| Selection | Downward-going track, matching |Z|, quality time, pointing and SAA conditions. [Documented, C31, C48, C51] AMS analyses use ≈40° pointing and exclude the SAA. [Documented, C54, C56] The daily He analysis and the Bartels-rotation nuclei analysis use different pointing and cutoff choices, so no single selection is the AMS standard. State your own choices. |\n| Cutoff | Compute transmission per time bin, not once for the whole period. [Documented, C20, C23, C60] AMS scans a 1.0–1.4 safety factor around 1.2 as a systematic. Vary it per bin and per species. |\n| Backgrounds | He: charge migration from neighbouring Z and fragmentation from heavier nuclei. p: He and D contamination, e⁻ at some R, and charge confusion. Estimate with template fits. Use `scripts/template_fit.py` (full Barlow–Beeston) if finite MC statistics matter. |\n| Efficiencies | Conditional factors with data/MC scale factors, evaluated per time bin. Do not multiply them as if independent. |\n| Exposure | E_k = Σ A_eff · T_live · transmission accumulated inside the bin. Never average fluxes across bins with different exposure. Average through counts and exposures. |\n| Response | Rigidity migration unfolded independently in each time bin. [Documented, C43, C46, C49] AMS does this for its time-resolved results. Compare forward folding with unfolding on toys, and report the regularization choice and closure. |\n| Charge | He and p are the same sign, so charge-sign confusion is a small effect. Charge-|Z| migration between He and neighbours matters for He. |\n\nDo not use the diagonal estimator for this analysis, because migration is not negligible for steep spectra.\n\n## 5. He/p ratio\n\n- **[General method]** Common to both: time bins, R bins, fiducial geometry, and the same-period livetime. Species-specific: charge-estimator windows, trigger efficiency, material survival and cross sections, charge-migration matrices, and templates.\n- **[General method]** Cancellations are not automatic. Classify each nuisance as correlated, partial or independent, and verify per effect:\n  - Livetime and exposure: common.\n  - Geometric acceptance: largely common, to be verified by MC.\n  - Trigger and selection efficiency: partial.\n  - Cross-section and survival: species-specific, since He interacts more.\n  - Unfolding and rigidity scale: correlated only if the same scale is used.\n- Propagate **Var(He/p)** with the numerator–denominator covariance (delta method, then toys at low counts). Use `scripts/unfolding_diagnostics.py` and `scripts/statistical_toys.py` (ratio-spread mode) as checks.\n- **[Documented, C82, C88]** The review (S01) parameterizes p/He above 3.5 GV as A + C(R/3.5 GV)^Δ and describes a change-point fit of the p/He ratio. Treat these as the collaboration's descriptive fits and potential comparison points, not as a model you must adopt.\n\n## 6. Systematics and covariance across time\n\nClassify each source on two axes: time (persistent, slowly varying, independent per period) and rigidity (normalization, smooth shape, independent).\n\n- **Persistent across P1 and P2** (partly cancels in the P2/P1 ratio): cross-section model, template shape, rigidity scale, Monte Carlo acceptance.\n- **Period-specific:** calibration drift, efficiency evaluated per period, time-dependent acceptance, cutoff transmission.\n- **Statistical:** independent across disjoint time bins. But if you normalize to a reference period, carry the reference's statistical covariance into every other period.\n- Build one covariance over (time, rigidity) with a documented ordering. Use a Kronecker factorization only if you can show the correlation factorizes. Check with `scripts/validate_covariance.py`.\n- **[Unknown, evidence gap]** The public AMS papers I have indexed do not state how systematics are correlated across days or rotations. I won't invent it. Your covariance model is a [Proposal] to be documented, not an AMS practice.\n- **[Documented, C44]** AMS splits systematics into time-independent parts and time-dependent parts, with the latter added in quadrature. That is one approach, not a rule.\n\n## 7. Period comparison and inference\n\n- Primary result: per-period Φ_He(R), Φ_p(R), ρ(R) with covariance, and the ratio-of-periods R-dependence. Publish exposures and response so others can refit.\n- **[Proposal]** If you test \"no change in He/p between periods\", build a joint likelihood L = ΠPoisson(n | μ(θ_shared, φ_k, η)). Here θ_shared holds the spectral-shape parameters common to both periods, φ_k the period-specific normalization or modulation, and η the nuisances.\n  - Test the shared-shape hypothesis against separate fits with toys. It is a hypothesis, not a definition.\n  - Use a toy-calibrated test statistic, not Wilks.\n  - Pre-declare the R range, and report a global p-value if you scan R.\n- Do not merge periods that use different definitions (R range, track configuration, cutoff treatment). Explain the difference instead of averaging.\n\n## 8. Validation (each with a metric and trigger)\n\n| Check | Targets | Trigger |\n|---|---|---|\n| Rate of an abundant control species vs time, after livetime and cutoff correction | Drift in efficiency or exposure | Deviation beyond a pre-set tolerance → period split, scale factor with uncertainty, or added systematic |\n| He/p ratio vs time at high R, where physical time variation should be small | Species-dependent efficiency drift | Same |\n| Injected-spectrum closure on MC, per period | Unfolding bias | Pulls and closure above tolerance → change regularization or response |\n| Alternate track configuration, loose/tight charge cuts, geometry and detector-region splits | Selection systematics | Deviation → add uncertainty |\n| Data/MC agreement on a data-derived efficiency per period | MC-based efficiency | Same |\n| Compare with published AMS Φ_p, Φ_He, p/He at the same R | Plausibility only | Agreement doesn't prove correctness. Compare via `cosmic-ray-databases` and `crdb_query.py`, and label CRDB values as secondary |\n\n## 9. Known failure modes to avoid\n\n- Using one cutoff transmission, or one calibration, for the whole period.\n- Treating a drift as both a veto and an efficiency correction.\n- Independent errors across time while persistent systematics are shared.\n- Assuming the ratio cancels acceptance and efficiency without a per-effect check.\n- Quoting the 108-day binning or the 40° quality-time conditions as AMS-wide rules.\n- Converting to T/A with an unstated A for He.\n\n## 10. Proposed work order\n\n1. Fix the estimand, P1 and P2 dates and bins, and write the spec. `scripts/audit_analysis_spec.py` can audit a JSON or YAML specification.\n2. Build the conditions model and the era and reconstruction-version map, and set the time-bin edges.\n3. Compute per-bin exposure and cutoff transmission, and run the control-species stability check.\n4. Do the p and He selection, the cut-flow ledger, background templates, and the per-period efficiencies.\n5. Build the response and run unfolding closure.\n6. Compute the per-period flux, the ratio and the covariance.\n7. Run systematics and cross-checks, then the period-comparison inference.\n8. Run a blinding or review gate before unblinding P2, if the work is collaboration-internal.\n\nTo make this concrete I need the period dates, public or internal data, the track configuration, the rigidity range, and whether you want the two-period average (Level A) or the time series (Level B). I can then turn this into a structured spec for the audit script, or into a shareable page.",
+  "cost_usd": 0.1907022,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 5,
+  "files_read_detail": [
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/config/skills/ams-analysis/references/time-dependent-analysis.md",
+    "inside_plugin": false,
+    "experiment_profile": false
+   },
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/config/skills/ams-analysis/references/charged-cosmic-rays.md",
+    "inside_plugin": false,
+    "experiment_profile": false
+   }
+  ],
+  "case": {
+   "id": "j01",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Plan the time-dependent helium flux and He/p ratio measurement for AMS-02 across two periods.",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "exposure"
+   ],
+   "journey": "J1",
+   "profiles": [
+    "experiment:ams-02"
+   ],
+   "chain": [
+    "hep-analysis",
+    "detector-response",
+    "hep-statistics",
+    "research-communication"
+   ]
+  }
+ },
+ {
+  "prompt": "研究 AMS-02 RICH 的速度解析度隨電荷的變化。",
+  "exit_code": 1,
+  "skills_invoked": [
+   "ams-analysis",
+   "hep-research:detector-response"
+  ],
+  "files_read": [
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/config/skills/ams-analysis/references/detector-and-observables.md",
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/profiles/experiments/ams-02/index.md"
+  ],
+  "globs": [
+   {
+    "pattern": "**/{detector-and-observables,source-index,nuclei-and-isotopes}.md",
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5"
+   },
+   {
+    "pattern": "profiles/**/*",
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research"
+   },
+   {
+    "pattern": "RICH",
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/config/skills/ams-analysis/references/source-index.md",
+    "output_mode": "content"
+   },
+   {
+    "pattern": "RICH",
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/profiles/experiments/ams-02/evidence/claims.json",
+    "output_mode": "content",
+    "-C": 3
+   },
+   {
+    "pattern": "RICH|Cherenkov",
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/config/skills/ams-analysis/references/nuclei-and-isotopes.md",
+    "output_mode": "content"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": null,
+  "cost_usd": 0.200764,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "error_max_turns",
+  "num_turns": 5,
+  "files_read_detail": [
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/config/skills/ams-analysis/references/detector-and-observables.md",
+    "inside_plugin": false,
+    "experiment_profile": false
+   },
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/profiles/experiments/ams-02/index.md",
+    "inside_plugin": true,
+    "experiment_profile": true
+   }
+  ],
+  "case": {
+   "id": "j02",
+   "lang": "zh-Hant",
+   "kind": "journey",
+   "prompt": "研究 AMS-02 RICH 的速度解析度隨電荷的變化。",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "Cherenkov/RICH",
+    "resolution"
+   ],
+   "journey": "J2",
+   "profiles": [
+    "experiment:ams-02"
+   ],
+   "chain": [
+    "detector-response",
+    "hep-statistics"
+   ]
+  }
+ },
+ {
+  "prompt": "Measure the corrected angular distribution at my e+e- collider with its own luminosity and response.",
+  "exit_code": 0,
+  "skills_invoked": [],
+  "files_read": [
+   "/mnt/project-files/hep-research/m4/path-d-report.md",
+   "/mnt/project-files/hep-research/m3/path-b/report.md",
+   "/mnt/project-files/hep-research/m4/t24-report.md"
+  ],
+  "globs": [
+   {
+    "pattern": "**/*"
+   },
+   {
+    "pattern": "/mnt/project-files/hep-research/**/*"
+   },
+   {
+    "pattern": "**/profiles/experiments/*/**",
+    "path": "/mnt"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "I can't run this measurement yet, because I don't have your collider's inputs. The project directory is empty, and the plugin repo isn't checked out in this session. The only experiment profile I know of is the invented `synthetic-collider`. If I ran Path B with it, the \"measurement\" would be synthetic numbers presented as yours.\n\nWhat I need:\n\n1. **Data.** The reconstructed events or the binned counts in cos θ. Please give the file path and format, plus the cos θ range and binning you want.\n2. **Luminosity.** The integrated luminosity and its uncertainty. I also need to know whether the uncertainty is fully correlated across bins.\n3. **Response.** A response matrix, or an efficiency and resolution parametrization. I need to know whether the efficiency is included in the matrix. The Path B report says the synthetic response includes it, and the Path D gate rejects applying efficiency twice.\n4. **Backgrounds and fiducial region.** Which backgrounds to subtract, and whether to report in a fiducial region. The Path B benchmark used |cos θ| < 0.9, with the outer truth bins absorbing migration.\n5. **Collider details.** √s and the final state. The benchmark was tree-level e⁺e⁻ → μ⁺μ⁻. Radiative corrections and charge confusion were not modeled there.\n6. **Repo access.** Should I work in `hchouTW/hep-research` on `feat/hep-research-plugin`, as before? I need a clone, or your approval to clone it, so I can write your inputs as a new experiment profile instead of reusing the synthetic one.\n\nOnce you send these, I'll run the Path B chain on your inputs:\n\n- full-rank unfolding with the response\n- division by luminosity and bin width\n- a covariance with statistical and luminosity blocks\n- toy closure checks\n\nThe report will go under `/mnt/project-files/hep-research/` with the pre-declared pass/fail criteria. Because the model-dependence of the unfolding was not studied in the benchmark, I'll flag that as a limitation unless you want it studied.",
+  "cost_usd": 0.10831940000000001,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 7,
+  "files_read_detail": [
+   {
+    "path": "/mnt/project-files/hep-research/m4/path-d-report.md",
+    "inside_plugin": false,
+    "experiment_profile": false
+   },
+   {
+    "path": "/mnt/project-files/hep-research/m3/path-b/report.md",
+    "inside_plugin": false,
+    "experiment_profile": false
+   },
+   {
+    "path": "/mnt/project-files/hep-research/m4/t24-report.md",
+    "inside_plugin": false,
+    "experiment_profile": false
+   }
+  ],
+  "case": {
+   "id": "j03",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Measure the corrected angular distribution at my e+e- collider with its own luminosity and response.",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "luminosity"
+   ],
+   "journey": "J3",
+   "chain": [
+    "hep-analysis",
+    "detector-response",
+    "hep-statistics"
+   ]
+  }
+ },
+ {
+  "prompt": "Compute the tree-level cross section with all conventions stated and check it numerically.",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:hep-theory"
+  ],
+  "files_read": [],
+  "globs": [],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "I couldn't run the numerical check. Bash is disabled in this session and I have no file-write tool, so none of the code below has been executed. The derivation and the hand arithmetic are done. The script check is still open.\n\n## Process\ne⁺e⁻ → γ* → μ⁺μ⁻, tree level, QED only (single s-channel photon).\n\n## Conventions\n- **Units:** natural, ħ = c = 1. Cross sections are converted with (ħc)² = 0.3893794 GeV²·mb, so 1 GeV⁻² = 0.3893794 mb = 3.893794×10⁸ pb.\n- **Metric:** (+,−,−,−).\n- **Coupling:** α = e²/(4π) = 1/137.036, fixed. This is the Thomson-limit value, with no running.\n- **Scheme and scale:** none are needed at tree level. The scale choice only enters through running α, which is neglected.\n- **Energy variable:** s = (p₁+p₂)² = E_cm².\n- **Frame:** the e⁺e⁻ centre-of-mass frame.\n- **Angle:** θ is the angle between the outgoing μ⁻ and the incoming e⁻.\n- **Spin:** the initial state is unpolarized and averaged (factor 1/4). The final-state spins are summed.\n- **Masses:** m_e = 0 and m_μ = 0, the massless limit, valid for s ≫ m_μ² (about 0.011 GeV²).\n- **Neglected:** Z exchange, ISR/FSR, and loop and vacuum-polarization corrections.\n\n## Result\nThe spin-averaged squared amplitude is\n\n⟨|M|²⟩ = e⁴(1+cos²θ)\n\nThe differential cross section is\n\ndσ/dΩ = α²(1+cos²θ)/(4s)\n\nIntegrating over the full solid angle gives\n\nσ = 4πα²/(3s) ≈ 86.84 nb·GeV² / s\n\nFor reference, 4πα²/3 = 2.2307×10⁻⁴.\n\n**Status:** analytic derivation at tree level (leading order in α). I did not derive the |M|² trace step in this session. It is the textbook result, and I haven't read a source for it here, so no benchmark source is cited.\n\n## Hand checks\n- **Angular integral:** ∫₋₁¹(1+c²)dc = 8/3. Then 2π · α²/(4s) · 8/3 = 4πα²/(3s), which matches the closed form.\n- **Dimensions:** σ ∝ 1/s, which has dimensions of GeV⁻², as it should.\n- **Number at √s = 10 GeV (s = 100 GeV²):** 2.2307×10⁻⁶ GeV⁻² × 3.894×10⁸ pb·GeV² ≈ 868.6 pb. This agrees with the familiar 86.8 nb/s[GeV²] rule of thumb. That rule is from memory, not a source I read.\n- **Forward-backward asymmetry:** A_FB = 0 at this order, since (1+cos²θ) is symmetric in cos θ.\n\n## Checks not run\n- Numerical integration against the analytic form, with a stated tolerance and a convergence study.\n- A symbolic trace check in SymPy.\n- A comparison against the PDG cross-section formula. You approved a read-only fetch of it earlier, but I haven't done that fetch.\n\nThe script below, run with the `.venv-hep` environment, would cover the first two. I'd expect agreement at about 1e-10 relative:\n\n```python\nimport numpy as np\nfrom scipy.integrate import quad\na=1/137.036; s=100.0; conv=0.3893794e9  # pb GeV^2\ndsig=lambda c: a**2*(1+c*c)/(4*s)\nnum=2*np.pi*quad(dsig,-1,1,epsabs=0,epsrel=1e-12)[0]\nana=4*np.pi*a**2/(3*s)\nprint(num*conv, ana*conv, abs(num/ana-1))\n```\n\nIf you want, I can write this up as a `theory-spec` artifact once a tool that can write files is available. Or you can run the script and send me the output.",
+  "cost_usd": 0.0965944,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 4,
+  "files_read_detail": [],
+  "case": {
+   "id": "j04",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Compute the tree-level cross section with all conventions stated and check it numerically.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "cross sections",
+    "consistency checks"
+   ],
+   "journey": "J4",
+   "profiles": [],
+   "chain": [
+    "hep-theory",
+    "hep-computing",
+    "hep-theory"
+   ]
+  }
+ },
+ {
+  "prompt": "Fold my prediction through the detector response and fit a normalization scale.",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:detector-response"
+  ],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/*"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "I can't run this yet, because I can't find your prediction or any detector response. The project directory is empty, so there's no `hep-research.project.json` and no artifacts directory. I didn't want to guess what you meant by \"my prediction\".\n\nI need these from you:\n\n1. **Prediction:** a file path, or the values pasted in. I need the truth-level binning and units, and whether it's a differential cross section, a rate or a count. If it's the tree-level e⁺e⁻ → μ⁺μ⁻ benchmark, say so and I'll regenerate it.\n2. **Detector response:** one of these:\n   - a response matrix, with its orientation, normalization, and whether inefficiency and acceptance sit inside the matrix\n   - a parametrized response (resolution, efficiency)\n   - an experiment profile, or \"synthetic-collider\" with the parameters you want\n\n   If you give me none of these, I'll use a declared synthetic response and label everything `synthetic`. I won't invent detector facts.\n3. **Data to fit:** the observed or pseudo-data spectrum, including its status (`asimov`, `observed` or `synthetic`) and its uncertainties. The normalization fit needs this.\n4. **Scale definition:** I'll assume a single multiplicative factor μ on the folded prediction. Tell me if you mean something else, such as luminosity or a per-bin scale. I'll fit it by Poisson likelihood unless you prefer χ².\n\nOnce I have these, I'll fold the prediction, fit μ and write the `response` artifact.\n\nThe folding and the likelihood fit are separate tasks. The fit belongs to hep-statistics, so I'll hand it the `response` artifact.",
+  "cost_usd": 0.07430120000000001,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 4,
+  "files_read_detail": [],
+  "case": {
+   "id": "j05",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Fold my prediction through the detector response and fit a normalization scale.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "predictions"
+   ],
+   "journey": "J5",
+   "chain": [
+    "hep-theory",
+    "hep-statistics",
+    "research-communication"
+   ]
+  }
+ },
+ {
+  "prompt": "用已發表的資料比較我的模型（comparing a model with published data），不需要偵測器細節。",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:hep-theory"
+  ],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/hep-research.project.json"
+   },
+   {
+    "pattern": "*"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "專案目錄是空的，也沒有 `hep-research.project.json`，所以我不知道你的模型是什麼，也不知道要比對哪一筆已發表資料。我不會自己猜。目前也沒有已驗證的理論領域 profile，所以我會用 hep-theory 的一般規範來做，不依賴 profile。\n\n做法是在已發表的觀測量空間中給出預測，不做偵測器摺積（folding），然後用已發表的不確定度交給 hep-statistics 做比對。開始前我需要你提供下面幾項：\n\n1. **模型**\n   - 拉格朗日量或截面公式。\n   - 參數及其數值，例如質量、耦合、尺度。\n   - 微擾階數，例如 LO 或 NLO。\n   - 如果模型在檔案裡，請給我路徑。\n\n2. **要比對的已發表資料**\n   - 論文，例如 arXiv 或 INSPIRE 編號，或實驗名稱。\n   - 要比對哪一張圖或表，例如 HEPData 記錄。\n   - 觀測量，例如微分截面 dσ/dcosθ、不變質量譜、通量。\n   - 發表的不確定度與其相關性，是否提供協方差矩陣。\n\n3. **比對方式**\n   - 只做定性的圖形疊合。\n   - 還是做定量的 χ² 或 p-value，或對參數做限制或排除。\n\n4. **預測端的約定**\n   - 單位、能量變數、PDF 與尺度選擇。\n   - 這些會寫進 conventions 區塊，隨預測一起保存。\n\n如果你只是想做 repo 裡 e⁺e⁻ → μ⁺μ⁻ 的 benchmark，請直接告訴我，我就用那個設定。實際取得已發表資料需要讀取 HEPData 或論文，我會在你確認後才連線讀取。",
+  "cost_usd": 0.082838,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 5,
+  "files_read_detail": [],
+  "case": {
+   "id": "j06",
+   "lang": "zh-Hant",
+   "kind": "journey",
+   "prompt": "用已發表的資料比較我的模型（comparing a model with published data），不需要偵測器細節。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "comparing a model with an experiment's published data"
+   ],
+   "journey": "J6",
+   "chain": [
+    "hep-theory",
+    "hep-statistics"
+   ],
+   "loads": "dataset records only"
+  }
+ },
+ {
+  "prompt": "Recast the published search with its efficiency maps to constrain my model.",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:hep-theory"
+  ],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/*"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "I can't start this yet: the request doesn't say which search or which model, and the project directory is empty. It has no `hep-research.project.json`, model files or search records. I won't guess either one, because a recast only means something against a specific analysis and a specific model.\n\nI need these from you:\n\n1. **Published search.** Give the analysis (experiment, arXiv or INSPIRE ID, or HEPData record). I also need to know which efficiency maps you mean: the experiment's own, or public ones such as SModelS or MadAnalysis5 or CheckMATE validated recasts. I'll fetch the actual record and cite the table I read.\n2. **Your model.** I need the Lagrangian or parameter set, the production and decay modes that feed the search's signal regions, and the parameter points or grid to test. A UFO/SLHA file or an equation is fine.\n3. **What \"constrain\" should output.** Options are an allowed/excluded verdict per point, an r-value (σ_pred/σ_UL), or a full CLs from the published likelihood. The last needs a pyhf-format likelihood and, per your project notes, pyhf isn't approved yet. Say if you want that approved.\n4. **Cross-section and generator setup.** Tell me which order and PDF set you want, or whether I should propose a setup for you to approve.\n\nTwo caveats up front. Efficiency maps are only valid in the topology and kinematic region where they were derived. Points outside it get flagged as outside the validated domain, not extrapolated. I'll also label results `unvalidated` until I've reproduced a published exclusion contour for the same search. Without a cut-flow validation, the numbers aren't a physics claim.\n\nIf you send the search and the model, I'll start with the theory spec and conventions block.",
+  "cost_usd": 0.074238,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 4,
+  "files_read_detail": [],
+  "case": {
+   "id": "j07",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Recast the published search with its efficiency maps to constrain my model.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "recasting a published analysis"
+   ],
+   "journey": "J7",
+   "chain": [
+    "hep-theory",
+    "detector-response",
+    "hep-statistics"
+   ]
+  }
+ },
+ {
+  "prompt": "Run a convergence study of this integral and cross-check the symbolic result numerically.",
+  "exit_code": 0,
+  "skills_invoked": [],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/*"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "Which integral should I study? The working directory is empty and your message doesn't include one, so I have nothing to work from.\n\nPlease send one of these:\n- **The integral itself.** For example, the integrand, limits and any parameters, such as the angular integral of dσ/dΩ for e⁺e⁻ → μ⁺μ⁻, which has the symbolic result 4πα²/(3s).\n- **A file path.** This would be a script or notebook that already contains it.\n\nOnce I have it, I'll do the following:\n1. Derive the closed form with SymPy.\n2. Evaluate it numerically with scipy `quad` and with fixed-grid rules (trapezoid, Simpson, Gauss–Legendre) at increasing resolution.\n3. Plot the error against N or tolerance, and fit the observed convergence order.\n4. Report the symbolic-versus-numerical agreement against a stated tolerance. If either side has a singularity or an endpoint divergence, I'll flag it.\n\nIf the benchmark integral is the one you meant, tell me and I'll use it.",
+  "cost_usd": 0.06139399999999999,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 2,
+  "files_read_detail": [],
+  "case": {
+   "id": "j08",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Run a convergence study of this integral and cross-check the symbolic result numerically.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "convergence and tolerance studies"
+   ],
+   "journey": "J8",
+   "chain": [
+    "hep-computing",
+    "hep-theory"
+   ]
+  }
+ },
+ {
+  "prompt": "訓練一個分類器並宣告 surrogates 的有效範圍，之後用於推論。",
+  "exit_code": 1,
+  "skills_invoked": [
+   "hep-research:physics-ml"
+  ],
+  "files_read": [
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/physics-ml/scripts/check_surrogate_domain.py"
+  ],
+  "globs": [
+   {
+    "pattern": "**/*"
+   },
+   {
+    "pattern": "**/*",
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research"
+   },
+   {
+    "pattern": "**/hep-research.project.json",
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5"
+   },
+   {
+    "pattern": "**/*ml-artifact*",
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research"
+   },
+   {
+    "pattern": "skills/physics-ml/{scripts,assets}/*",
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research"
+   },
+   {
+    "pattern": "**/*synthetic*",
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy"
+   },
+   {
+    "pattern": "**/*ml*",
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/contracts"
+   },
+   {
+    "pattern": "**/*",
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/examples"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": null,
+  "cost_usd": 0.1624568,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "error_max_turns",
+  "num_turns": 5,
+  "files_read_detail": [
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/physics-ml/scripts/check_surrogate_domain.py",
+    "inside_plugin": true,
+    "experiment_profile": false
+   }
+  ],
+  "case": {
+   "id": "j09",
+   "lang": "zh-Hant",
+   "kind": "journey",
+   "prompt": "訓練一個分類器並宣告 surrogates 的有效範圍，之後用於推論。",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "surrogates"
+   ],
+   "journey": "J9",
+   "chain": [
+    "physics-ml",
+    "hep-statistics"
+   ]
+  }
+ },
+ {
+  "prompt": "Draft the paper section and figures with claim-to-result links and honest status.",
+  "exit_code": 1,
+  "skills_invoked": [
+   "hep-research:research-communication"
+  ],
+  "files_read": [
+   "/mnt/project-files/hep-research/G1-report.md",
+   "/mnt/project-files/hep-research/m2-path-a/report.md",
+   "/mnt/project-files/hep-research/m3/path-b/report.md",
+   "/mnt/project-files/hep-research/m3/path-c/report.md",
+   "/mnt/project-files/hep-research/m4/t24-report.md",
+   "/mnt/project-files/hep-research/m4/path-d-report.md",
+   "/mnt/project-files/hep-research/G0-report.md",
+   "/mnt/project-files/hep-research/m2-path-a/flux_per_period.png",
+   "/mnt/project-files/hep-research/m3/path-b/dsigma_dcos.png",
+   "/mnt/project-files/hep-research/m4/path-d.png",
+   "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/research-communication/references/claim-evidence-mapping.md"
+  ],
+  "globs": [
+   {
+    "pattern": "**/*"
+   },
+   {
+    "pattern": "/mnt/project-files/hep-research/**/*"
+   },
+   {
+    "pattern": "**/*communication*",
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/contracts"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": null,
+  "cost_usd": 0.1504916,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "error_max_turns",
+  "num_turns": 5,
+  "files_read_detail": [
+   {
+    "path": "/mnt/project-files/hep-research/G1-report.md",
+    "inside_plugin": false,
+    "experiment_profile": false
+   },
+   {
+    "path": "/mnt/project-files/hep-research/m2-path-a/report.md",
+    "inside_plugin": false,
+    "experiment_profile": false
+   },
+   {
+    "path": "/mnt/project-files/hep-research/m3/path-b/report.md",
+    "inside_plugin": false,
+    "experiment_profile": false
+   },
+   {
+    "path": "/mnt/project-files/hep-research/m3/path-c/report.md",
+    "inside_plugin": false,
+    "experiment_profile": false
+   },
+   {
+    "path": "/mnt/project-files/hep-research/m4/t24-report.md",
+    "inside_plugin": false,
+    "experiment_profile": false
+   },
+   {
+    "path": "/mnt/project-files/hep-research/m4/path-d-report.md",
+    "inside_plugin": false,
+    "experiment_profile": false
+   },
+   {
+    "path": "/mnt/project-files/hep-research/G0-report.md",
+    "inside_plugin": false,
+    "experiment_profile": false
+   },
+   {
+    "path": "/mnt/project-files/hep-research/m2-path-a/flux_per_period.png",
+    "inside_plugin": false,
+    "experiment_profile": false
+   },
+   {
+    "path": "/mnt/project-files/hep-research/m3/path-b/dsigma_dcos.png",
+    "inside_plugin": false,
+    "experiment_profile": false
+   },
+   {
+    "path": "/mnt/project-files/hep-research/m4/path-d.png",
+    "inside_plugin": false,
+    "experiment_profile": false
+   },
+   {
+    "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/skills/research-communication/references/claim-evidence-mapping.md",
+    "inside_plugin": true,
+    "experiment_profile": false
+   }
+  ],
+  "case": {
+   "id": "j10",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Draft the paper section and figures with claim-to-result links and honest status.",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "claim-to-result links"
+   ],
+   "journey": "J10",
+   "chain": [
+    "research-communication"
+   ]
+  }
+ },
+ {
+  "prompt": "Use our collaboration's private calibration constants from my local profile in the efficiency study.",
+  "exit_code": 0,
+  "skills_invoked": [],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/*{profile,calib,constants}*"
+   },
+   {
+    "pattern": "/mnt/project-files/**/*"
+   },
+   {
+    "pattern": "calibration constant|efficiency study",
+    "path": "/mnt/project-files",
+    "-i": true,
+    "output_mode": "files_with_matches"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "I couldn't find your calibration constants, so I haven't used any. This session runs in the cloud and has no access to your local profile. I searched the working directory and `/mnt/project-files` for profile, calibration or constants files, and for the phrases \"calibration constant\" and \"efficiency study\". None turned up. The only unlabeled file is an upload under `/mnt/project-files/uploads/hearth/`, which I didn't open because nothing suggests it's the profile.\n\nI haven't guessed values or substituted placeholders, because the efficiency study would silently inherit them.\n\nYou could do either of these:\n- **Paste the constants here.** Give the names, values, units and any uncertainties, plus the convention they assume. I'll wire them into the efficiency study.\n- **Upload the profile file into the project directory.** I'll read it from there.\n\nSince these are private to your collaboration, I'll keep them out of the shared team memory and out of anything pushed to the repo. They would stay in a local, git-ignored config. Tell me if you'd rather handle them differently.\n\nAlso, which efficiency study do you mean? The synthetic-collider benchmark in the plugin, or something else?",
+  "cost_usd": 0.07579820000000001,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 4,
+  "files_read_detail": [],
+  "case": {
+   "id": "j11",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Use our collaboration's private calibration constants from my local profile in the efficiency study.",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "calibration"
+   ],
+   "journey": "J11",
+   "chain": [
+    "detector-response"
+   ],
+   "note": "local profile via project config; nothing enters the plugin"
+  }
+ },
+ {
+  "prompt": "Set up a lattice QCD global analysis of form factors.",
+  "exit_code": 0,
+  "skills_invoked": [],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/*"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "The working directory is empty, and \"a lattice QCD global analysis of form factors\" could mean several different projects. I haven't scaffolded anything yet. Four choices decide what gets built:\n\n1. **Which form factors?** For example, B→D(*)ℓν, B→π, K→π, D→K, or nucleon (g_A, electromagnetic). Each has a different parametrization (BGL, CLN, BCL, z-expansion) and different available lattice inputs.\n2. **Which data go into the fit?**\n   - **Lattice only:** published FLAG/collaboration results, or the collaborations' correlated z-expansion coefficients.\n   - **Lattice plus experiment:** add measured differential rates, for example from Belle, BaBar or LHCb, to extract |V_cb| or |V_ub|.\n   - **Raw correlators:** fit lattice two- and three-point functions directly, which is a much larger scope.\n3. **Which statistical framework?** A frequentist χ² fit with a full covariance matrix (scipy or iminuit), or a Bayesian fit (such as lsqfit or emcee) with priors on the higher-order coefficients. The second is standard for z-expansion truncation studies.\n4. **Where does it live?** This directory isn't a git repo and is empty. Your project memory says HEP work goes into `hchouTW/hep-research`, branch `feat/hep-research-plugin`, under `plugins/hep-research/`. Should this be a new analysis package in a standalone directory, a new skill or module in that plugin, or something else?\n\nIf you'd rather I just pick, I'd do this: B→D*ℓν with a BGL z-expansion, a Bayesian fit to synthetic lattice-style inputs with a full covariance matrix, and unitarity-bound and truncation-order checks. It would be a standalone Python package here (numpy, scipy, matplotlib) that you can later point at real FLAG or collaboration data. The synthetic inputs would only validate the machinery, not give physics results. Tell me which of these to use, or give me the real target.",
+  "cost_usd": 0.0652526,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 2,
+  "files_read_detail": [],
+  "case": {
+   "id": "j12",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Set up a lattice QCD global analysis of form factors.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "journey": "J12",
+   "chain": [
+    "hep-theory",
+    "hep-statistics"
+   ],
+   "limited_support": true
+  }
+ },
+ {
+  "prompt": "My AMS-02 reconstruction script segfaults when reading the ntuple.",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:hep-computing"
+  ],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/*.{py,C,cc,cxx,cpp,h,hh,sh,txt,log,root}"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "I can't see your script or ntuple yet. The working directory has no source, log or ROOT files, so I can't reproduce the crash. Can you send the following?\n\n1. **The script**, or the part that opens the file and loops over entries. Please also say which tool it uses: PyROOT, uproot, or compiled ROOT C++ (an AMS `AMSEventR`-style class, for example).\n2. **The crash output**: the last lines before \"Segmentation fault\", plus a backtrace if you can get one. Either of these works:\n   - `gdb -batch -ex run -ex bt --args python script.py ...`\n   - `python -X faulthandler script.py ...`\n3. **The ntuple**: its path, and ideally the output of `rootls -t file.root` or `python3 .../scripts/inspect_root_file.py file.root`. Does it crash on every file or only some? Does it crash at the same entry each time?\n4. **The environment**: ROOT version, Python version, and whether the AMS library or the ntuple was built against a different ROOT version.\n\nMeanwhile, these are the usual causes of a segfault when reading AMS-style ntuples, in rough order of likelihood:\n\n- **ROOT version or ABI mismatch** between the library that wrote the dictionary and the one reading it. This often shows up as a crash in `TBranchElement` or `TClass`.\n- **A missing or stale dictionary** for the event class (`libAMS.so`, or a `.so` not loaded before `TFile::Open`).\n- **A branch pointer that is not initialised**, or a `SetBranchAddress` target that is smaller than the stored object, for example a fixed-size array indexed by `nTrack` or `nHit`.\n- **Using an object after its file closes**: a `TTree` or `TFile` that was garbage-collected, or a `TChain` that switched files while you held a pointer.\n- **Out-of-range indexing** into per-event vectors, such as `ParticleR(i)` with `i >= NParticle()`.\n- **A truncated or corrupt file**, for example one left by an interrupted transfer. `TFile::Recover` or a size/checksum comparison will show it.\n\nOnce I have the script and the backtrace, I'll reproduce the crash and make a minimal fix.",
+  "cost_usd": 0.077761,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 4,
+  "files_read_detail": [],
+  "case": {
+   "id": "ams-computing-1",
+   "lang": "en",
+   "kind": "ams-computing",
+   "prompt": "My AMS-02 reconstruction script segfaults when reading the ntuple.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "crashes"
+   ],
+   "not": "hep-analysis",
+   "note": "experiment name does not route; the code problem does"
+  }
+ },
+ {
+  "prompt": "AMS 的資料處理程式在 batch submission 後合併結果重複計算。",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:hep-computing"
+  ],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/*"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "工作目錄是空的,我還沒看到你的程式,所以先不猜原因。需要你提供下面這些資訊。\n\n**需要的資訊**\n1. 程式或腳本的位置:submission 腳本、worker 的處理程式、merge 腳本。\n2. 用哪種 batch 系統(HTCondor、Slurm、LSF、本機平行),以及有沒有重新提交或 retry 的機制。\n3. 重複的現象:合併後的事件數比輸入多多少?是整數倍(例如 2×),還是只有部分檔案或事件重複?\n4. 輸出格式(ROOT 或 ntuple、histogram、JSON、npz),以及 merge 用的工具(`hadd`、自寫腳本)。\n\n**常見原因**(拿到程式後我會逐一檢查)\n- 失敗或逾時的 job 被重新提交,但舊 job 的部分輸出還留著,merge 時兩份都被讀進去。\n- 輸出檔名用 glob(例如 `out_*.root`)抓取,同時抓到舊輪次、暫存檔或上次 merge 的結果。\n- 輸入檔案清單在分割時重疊,例如邊界檔案被重複分配,或同一個 run 同時出現在兩份 list。\n- `hadd` 或 merge 腳本把上一次的合併檔又當成輸入。\n- 把 histogram 直接相加,而 job 之間的 weight 或 normalization 已經各自歸一化。\n- 事件層級沒有用 (run, event) 去重,AMS 的 run 與 event 若被多個 chunk 同時涵蓋就會重複。\n\n**建議的修法**:用 manifest 記錄每個 chunk 的輸入範圍和輸出檔案的 checksum,重新提交時只補缺失的 chunk,merge 時檢查沒有重複也沒有遺漏。最後比對合併結果和單次執行的結果在容許誤差內一致。這個 plugin 的 `local_partition.py` 已有這套機制,可以當參考。\n\n把程式路徑貼上來,或放進工作目錄,我就先重現問題。",
+  "cost_usd": 0.0775964,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 4,
+  "files_read_detail": [],
+  "case": {
+   "id": "ams-computing-2",
+   "lang": "zh-Hant",
+   "kind": "ams-computing",
+   "prompt": "AMS 的資料處理程式在 batch submission 後合併結果重複計算。",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "batch submission, merging and recovery"
+   ],
+   "not": "hep-analysis"
+  }
+ },
+ {
+  "prompt": "Derive the decay rate of a scalar to two fermions; no experiment involved.",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:hep-theory"
+  ],
+  "files_read": [],
+  "globs": [],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "# Decay rate of a scalar to two fermions: φ → f f̄\n\n**Status:** analytic derivation at tree level (leading order in the Yukawa coupling). I did not run any numerical check, and I did not read an external benchmark source. The checks below are done by hand.\n\n## Conventions\n\n- Natural units, ħ = c = 1. Metric (+,−,−,−).\n- Scalar φ has mass M and is real and neutral.\n- The fermion f is Dirac, with mass m. Its Yukawa coupling is y, with L = −y φ f̄f (scalar coupling).\n- The pseudoscalar case is L = −i y φ f̄γ⁵f.\n- There is no colour factor. For quarks, multiply by N_c = 3.\n- The calculation is in the φ rest frame. Spins are summed over in the final state, and φ has spin 0, so there is no initial-spin average.\n- The calculation is tree level. There are no radiative corrections.\n\n## 1. Amplitude\n\nFor φ(P) → f(p₁, s₁) f̄(p₂, s₂):\n\n𝓜 = −i y ū(p₁,s₁) v(p₂,s₂)\n\n## 2. Spin sum\n\n|𝓜|² summed over spins:\n\nΣ|𝓜|² = y² Tr[(p̸₁ + m)(p̸₂ − m)]\n\nUsing Tr[p̸₁p̸₂] = 4 p₁·p₂ and Tr[1] = 4:\n\nΣ|𝓜|² = 4y² (p₁·p₂ − m²)\n\nEnergy–momentum conservation gives M² = 2m² + 2 p₁·p₂. Therefore p₁·p₂ = (M² − 2m²)/2, and\n\nΣ|𝓜|² = 2y² (M² − 4m²) = 2y² M² β²,  with β ≡ √(1 − 4m²/M²)\n\nThe amplitude squared is independent of angle, as it must be for a spin-0 decay.\n\n## 3. Two-body phase space\n\nIn the rest frame, the momentum of each daughter is |p| = (M/2)β. The two-body phase space is\n\n∫dΦ₂ = |p| / (4π M) × (1/…)\n\nThe standard form is\n\nΓ = (|p| / (8π M²)) Σ|𝓜|²\n\nThis comes from Γ = (1/2M) ∫dΦ₂ Σ|𝓜|², with ∫dΦ₂ = |p|/(4π M) after integrating over the full solid angle. Since 𝓜 does not depend on angle, the integral is trivial.\n\n## 4. Result\n\nΓ(φ → f f̄) = (|p| / 8π M²) · 2y² M² β² = (y² / 4π)|p| β²\n\nSubstituting |p| = Mβ/2:\n\n**Γ(φ → f f̄) = (y² M / 8π) β³,  β = √(1 − 4m²/M²)**   (scalar coupling)\n\nWith N_c colours, this is multiplied by N_c.\n\n**Pseudoscalar coupling:** the trace gives Σ|𝓜|² = 2y² M², so\n\nΓ(A → f f̄) = (y² M / 8π) β\n\nHere the rate scales with β¹ rather than β³.\n\n**Standard Model Higgs:** use y = m/v, with v = 246 GeV. Then\n\nΓ(h → f f̄) = (N_c G_F m² M / 4√2 π) β³\n\nThis is the textbook formula, consistent with G_F/√2 = 1/(2v²).\n\n## Checks\n\n| Check | Result |\n|---|---|\n| Dimensions | y is dimensionless, so Γ ∝ M has the dimension of mass. ✔ |\n| Threshold M → 2m | β → 0, so Γ → 0. The scalar rate vanishes as β³, which is p-wave. This is expected: a scalar decays to f f̄ in a ³P₀ state, with L = 1. ✔ |\n| Massless limit M ≫ m | β → 1, so Γ → y² M / 8π. ✔ |\n| Pseudoscalar | The β¹ threshold behaviour is s-wave (¹S₀), as expected for 0⁻⁺. ✔ |\n| Helicity | In the massless limit, the scalar vertex couples fermions of the same chirality (L–L̄ or R–R̄ in the final state, with opposite helicities) with amplitude ∝ M. ✔ |\n| Independent numerical integration | **Not run.** |\n| Benchmark against a cited source | **Not run.** |\n\n## Validity and what was neglected\n\n- Tree level only. QCD corrections for quark final states (a large correction at O(α_s)), electroweak corrections and running of the mass and coupling are all neglected.\n- The calculation assumes a narrow width, Γ ≪ M, and an on-shell φ.\n- There is no mixing with other scalars and no CP-violating mix of scalar and pseudoscalar couplings. For a mixed coupling L = −φ f̄(a + i b γ⁵)f, the rate is Γ = (M/8π)(a²β³ + b²β).\n- This is not a validated domain profile. No theory-domain profile was loaded, since none is configured and none is needed for tree-level kinematics.",
+  "cost_usd": 0.084755,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 3,
+  "files_read_detail": [],
+  "case": {
+   "id": "theory-no-exp-1",
+   "lang": "en",
+   "kind": "theory-no-experiment",
+   "prompt": "Derive the decay rate of a scalar to two fermions; no experiment involved.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "decay rates"
+   ],
+   "profiles": []
+  }
+ },
+ {
+  "prompt": "請重新詮釋（recasting a published analysis）這個 LHC 搜尋結果以限制我的模型。",
+  "exit_code": 0,
+  "skills_invoked": [
+   "hep-research:hep-theory"
+  ],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/*"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "目前我還沒辦法開始重新詮釋，因為「這個搜尋結果」和「你的模型」我都沒收到。工作目錄是空的，也沒有 `hep-research.project.json`。我不會自己猜是哪個分析或哪個模型。\n\n**需要你提供的資訊**\n\n1. **要重新詮釋的搜尋**\n   - 合作組、論文或 arXiv/HEPData 編號，以及使用的資料集（能量、積分亮度）。\n   - 要用的是哪個 signal region、哪些 bin。\n   - 已發表的資料：觀測事例數、背景期望與其不確定性、共變異矩陣或 pyhf 全似然（若有）、已發表的 95% CL 上限。\n   - 若有官方 cutflow、效率表或 Rivet/CheckMATE/MadAnalysis5 的驗證材料，也請提供。\n\n2. **你的模型**\n   - Lagrangian 或模型檔（例如 UFO、SLHA 或 FeynRules）。\n   - 參數掃描範圍，以及要約束的參數。\n   - 慣例：耦合歸一化、重整化方案、理論階數（LO 或 NLO）和 scale，以及用哪組 PDF。\n\n3. **幾個選擇**\n   - 事例產生的方式：用 MadGraph+Pythia 做完整模擬，還是只做 parton-level 的解析近似。\n   - 偵測器效應：用 Delphes 卡、已發表的 efficiency map，還是參數化的 response。\n   - 輸出：只要排除區域圖，還是還要信賴區間與 CLs 的細節。\n\n**我之後會怎麼做**\n\n- 先寫理論規格（模型、慣例、階數、有效範圍），再在已發表分析的觀測量空間裡算出預測。\n- 不確定度（scale envelope、截斷、模型替代）分開列出，不隨便當成高斯。\n- 把重新詮釋的有效性標清楚：沒有官方驗證的話，標為 `unvalidated`。\n- 擬合與 CLs 上限交給 hep-statistics，偵測器折疊交給 detector-response。\n\n**需要先說明的限制**\n\n- 目前環境不一定有 MadGraph、Pythia 或 Delphes，沒有的話要先確認能否安裝。\n- 若沒有已發表的全似然，只用公開的 signal region 摘要，只能得到近似結果，我會標註其保守或近似的程度。\n\n你可以直接把論文編號和模型檔（或模型的簡述）貼過來，我就從理論規格開始。",
+  "cost_usd": 0.0776654,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 4,
+  "files_read_detail": [],
+  "case": {
+   "id": "recast-1",
+   "lang": "zh-Hant",
+   "kind": "recasting",
+   "prompt": "請重新詮釋（recasting a published analysis）這個 LHC 搜尋結果以限制我的模型。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "recasting a published analysis"
+   ],
+   "chain": [
+    "hep-theory",
+    "detector-response",
+    "hep-statistics"
+   ]
+  }
+ },
+ {
+  "prompt": "Fit cosmic-ray propagation parameters with GALPROP across all species.",
+  "exit_code": 0,
+  "skills_invoked": [],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/*{galprop,GALPROP,.galdef,galdef*}*"
+   },
+   {
+    "pattern": "*"
+   },
+   {
+    "pattern": "**/*",
+    "path": "/mnt/project-files"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "I can't run this fit in this session, and I haven't started it.\n\n- **No shell.** The Bash tool is disabled here, including for subagents. I can't build or run GALPROP, install anything, or execute a fit.\n- **Nothing to fit with.** The working directory is empty. There is no GALPROP install, no galdef configuration, and no cosmic-ray data (AMS-02, Voyager, CALET, DAMPE or similar). The only files I found are the earlier hep-research plugin reports under `/mnt/project-files/hep-research/`, and those are unrelated to this fit.\n\n\"Across all species\" also needs your decision before anyone runs it, because the answer depends heavily on the choices:\n\n1. **Which data.** Examples are AMS-02 p, He, B/C, Be/Be and positron/antiproton, plus Voyager for the interstellar low-energy points. Do you have the files, or should I fetch the published tables?\n2. **Which species.** Do you want primaries and secondaries (p, He, C, O, B, Be isotopes) fitted jointly? Do you also want leptons and antiprotons, or only nuclei?\n3. **Which parameters and model.** For example, diffusion coefficient D0 and index δ, halo height zh, Alfvén speed vA, convection velocity, source injection indices and break rigidities, and the solar modulation potential. Plain diffusion-reacceleration, or a diffusion-convection variant?\n4. **Fitting method.** A full MCMC or MultiNest scan needs thousands of GALPROP runs. That calls for a batch or cluster setup, or a fast surrogate fitted first (for example a trained emulator or a semi-analytic model), with GALPROP used to validate the best fit.\n5. **Where to run it.** I need a session with shell access and GALPROP installed (or permission to build it), plus a rough CPU budget.\n\nOnce Bash is enabled and you've answered 1–3 and 5, I'd start with one baseline GALPROP run to check the setup. Then I'd build the fit around the compute budget you give me.\n\nShould I draft the fit plan and galdef parameter table as a document in the meantime, so you can sign off on the choices?",
+  "cost_usd": 0.0809326,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 5,
+  "files_read_detail": [],
+  "case": {
+   "id": "out-of-v1-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "prompt": "Fit cosmic-ray propagation parameters with GALPROP across all species.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [],
+   "limited_support": true
+  }
+ },
+ {
+  "prompt": "幫我做 SMEFT 全域擬合。",
+  "exit_code": 0,
+  "skills_invoked": [],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/*"
+   },
+   {
+    "pattern": "/mnt/project-files/hep-research/**/*"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "我還不能直接開跑。SMEFT 全域擬合的範圍可以差很多,而且目前的資料不足以假設。\n\n**我看到的現況**\n- 工作目錄是空的,沒有資料、模型或程式碼。\n- 專案記憶顯示,`hep-research` 外掛目前停在 G5 gate,等你做原生安裝測試。它的基準是合成的 tree-level e⁺e⁻→μ⁺μ⁻,不是真實的全域擬合。\n- pyhf 尚未核准安裝。\n\n**需要你決定的事**\n1. **這是外掛 TASK 的一部分,還是新的獨立工作?** 如果是 TASK 的一部分,請指出對應的 milestone。如果是新工作,要不要先處理 G5?\n2. **範圍和輸入**\n   - **玩具版**:沿用合成 e⁺e⁻→μ⁺μ⁻ 資料,擬合少數 dim-6 算符(例如 C_ll、C_He、C_HWB 這類四費米子或電弱算符)。這個版本可以在 `.venv-hep` 裡用 numpy/scipy 完成,不需要新的外部資料。\n   - **真實版**:使用公開測量(EWPO、Higgs 訊號強度、diboson、top 等)。這需要下載資料或表格,例如 HEPData 或 SMEFiT/fitmaker 的輸入,也需要你核准網路存取。\n3. **設定**:算符基底(Warsaw 或 SMEFTsim 的 U(2)⁵ 或 U(3)⁵ 味道假設)、只用線性項還是包含 Λ⁻⁴ 的二次項、擬合方式(profile likelihood、MCMC 或 nested sampling),以及要用現成框架還是自己寫。\n4. **輸出**:報告、約束圖(1σ/2σ 與相關矩陣),還是整理成可重現的 skill 或腳本。\n\n如果你想要最快看到結果,我建議做「玩具版」:用合成資料擬合 3–5 個算符,輸出線性加二次的約束與相關矩陣,再附上與已知解析結果的一致性檢查。你確認範圍後我就開始。",
+  "cost_usd": 0.0708512,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 3,
+  "files_read_detail": [],
+  "case": {
+   "id": "out-of-v1-2",
+   "lang": "zh-Hant",
+   "kind": "out-of-v1",
+   "prompt": "幫我做 SMEFT 全域擬合。",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [],
+   "limited_support": true
+  }
+ },
+ {
+  "prompt": "Compare the two experiments.",
+  "exit_code": 0,
+  "skills_invoked": [],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/*"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "The working directory is empty, and nothing in our conversation says which two experiments you mean, so I can't compare them yet.\n\nCould you tell me one of these?\n- **File paths or a link:** where the two experiments' data, reports or configs are. The project reports usually sit under `/mnt/project-files/hep-research/`.\n- **Names:** if you mean real experiments, for example AMS-02 and another cosmic-ray detector, or ATLAS and CMS, say which.\n- **Pasted content:** the results or descriptions of the two experiments.\n\nPlease also say what to compare, for example detector design, selection and background methods, systematics, results, or the synthetic-collider benchmark runs.",
+  "cost_usd": 0.0600266,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 2,
+  "files_read_detail": [],
+  "case": {
+   "id": "underspec-1",
+   "lang": "en",
+   "kind": "underspecified",
+   "prompt": "Compare the two experiments.",
+   "expected_primary": "ask",
+   "trigger_terms": [],
+   "note": "ask which datasets and observables; never pick experiments"
+  }
+ },
+ {
+  "prompt": "比較這兩個實驗的結果。",
+  "exit_code": 0,
+  "skills_invoked": [],
+  "files_read": [],
+  "globs": [
+   {
+    "pattern": "**/*"
+   },
+   {
+    "pattern": "/mnt/project-files/hep-research/**/*"
+   }
+  ],
+  "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+  "model": "claude-sonnet-5-5",
+  "result": "目前沒有指定是哪兩個實驗，工作目錄也是空的。專案報告資料夾 `/mnt/project-files/hep-research/` 裡有這幾組結果：\n\n- **M2 path-a**：每個 period 的 flux 與 ratio\n- **M3 path-b 與 path-c**：dσ/dcosθ，一個是測量，一個是預測\n- **M4 path-d**，以及 t24 報告\n\n最像一對的是 M3 的 path-b 和 path-c。要比較的是這一對嗎？如果是別的組合，或是你另外有檔案，請告訴我路徑或名稱。",
+  "cost_usd": 0.0640794,
+  "permission_denials": [],
+  "stderr_tail": "",
+  "host_version": "2.1.287",
+  "subtype": "success",
+  "num_turns": 3,
+  "files_read_detail": [],
+  "case": {
+   "id": "underspec-2",
+   "lang": "zh-Hant",
+   "kind": "underspecified",
+   "prompt": "比較這兩個實驗的結果。",
+   "expected_primary": "ask",
+   "trigger_terms": []
+  }
+ }
+]

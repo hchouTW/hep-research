@@ -1,0 +1,129 @@
+{
+ "label": "SYNTHETIC job; injected failures",
+ "manifest": {
+  "job_id": "synthetic-angular-histogram",
+  "n_items": 200000,
+  "chunk_size": 20000,
+  "seed": 20261005,
+  "manifest_hash": "4379bcf1f00c45fd0bca8b8718b9e665ebaa7b58b7f1e714359bf235b777e41e"
+ },
+ "tolerance": {
+  "counts": 0,
+  "sum_cos_abs": 1e-09
+ },
+ "pass": {
+  "no_retry_without_config": true,
+  "missing_work_detected": true,
+  "finished_chunks_not_rerun": true,
+  "transient_failure_recovered": true,
+  "repeated_identical_failure_stops": true,
+  "state_retained": true,
+  "completes_after_fix": true,
+  "merged_equals_single_run": true,
+  "duplicates_and_foreign_chunks_rejected": true,
+  "histogram_matches_analytic_shape": true
+ },
+ "log": {
+  "1_no_config": {
+   "not_done": [
+    "c0002",
+    "c0004"
+   ],
+   "calls": {
+    "c0000": 1,
+    "c0001": 1,
+    "c0002": 1,
+    "c0003": 1,
+    "c0004": 1,
+    "c0005": 1,
+    "c0006": 1,
+    "c0007": 1,
+    "c0008": 1,
+    "c0009": 1
+   },
+   "merge_status": "incomplete",
+   "missing": [
+    "c0002",
+    "c0004"
+   ],
+   "retries_configured": false
+  },
+  "2_resubmit_max3": {
+   "not_done": [
+    "c0004"
+   ],
+   "calls": {
+    "c0002": 1,
+    "c0004": 1
+   },
+   "c0004": {
+    "attempts": 2,
+    "errors": [
+     "OSError: input file for c0004 not found (synthetic injected failure)",
+     "OSError: input file for c0004 not found (synthetic injected failure)"
+    ],
+    "status": "stopped-repeated-failure"
+   },
+   "skipped_done": 8
+  },
+  "2b_resubmit_again_unfixed": {
+   "calls": {},
+   "c0004_status": "stopped-repeated-failure"
+  },
+  "3_after_fix": {
+   "complete": true,
+   "calls": {
+    "c0004": 1
+   },
+   "merge_status": "complete"
+  },
+  "5_stray_files": {
+   "status": "complete",
+   "chunks_merged": 10,
+   "codes": [
+    "merge.duplicate_chunk",
+    "merge.foreign_chunk"
+   ],
+   "counts_unchanged": true
+  }
+ },
+ "agreement": {
+  "counts_equal": true,
+  "n_equal": true,
+  "sum_cos_abs_diff": 2.842170943040401e-14
+ },
+ "merged": {
+  "counts": [
+   23134,
+   19670,
+   16649,
+   14619,
+   13405,
+   12566,
+   12571,
+   13394,
+   14772,
+   16835,
+   19496,
+   22889
+  ],
+  "n": 200000,
+  "sum_cos": -202.23230211395256
+ },
+ "expected_counts": [
+  23032.40740740741,
+  19560.185185185186,
+  16782.40740740741,
+  14699.07407407407,
+  13310.185185185186,
+  12615.740740740745,
+  12615.740740740723,
+  13310.185185185186,
+  14699.074074074093,
+  16782.407407407394,
+  19560.185185185186,
+  23032.40740740742
+ ],
+ "chi2_vs_analytic": 5.749449698186192,
+ "ndf": 12
+}

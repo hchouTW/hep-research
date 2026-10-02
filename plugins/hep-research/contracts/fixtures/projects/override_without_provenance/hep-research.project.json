@@ -1,0 +1,10 @@
+{
+ "schema_version": "1.0.0",
+ "plugin_version": ">=0.1,<1.0",
+ "overrides": [
+  {
+   "target": "x",
+   "value": 1
+  }
+ ]
+}

@@ -1,0 +1,10 @@
+{"$comment": "Owner: hep-computing.",
+ "type": "object",
+ "required": ["input_manifest", "tools", "commands", "environment", "seeds", "tolerances", "exit_status", "output_hashes"],
+ "properties": {
+  "input_manifest": {"type": "array", "items": {"type": "object", "required": ["path", "sha256"]}},
+  "tools": {"type": "array", "items": {"type": "object", "required": ["name", "version"]}},
+  "commands": {"type": "array", "items": {"type": "string"}}, "environment": {"type": "object"},
+  "seeds": {"type": "object"}, "tolerances": {"type": "object"}, "resources": {"type": "object"},
+  "exit_status": {"type": "integer"}, "output_hashes": {"type": "object"}
+ }}

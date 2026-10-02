@@ -1,0 +1,370 @@
+{
+ "timestamp_utc": "2026-10-02T16:06:13Z",
+ "plugin_version": "0.1.0",
+ "environment": {
+  "python": "3.11.15",
+  "platform": "Linux-6.18.44-fc-v51-x86_64-with-glibc2.39",
+  "executable": "/home/claude/hep-research-plugin/plugins/hep-research/../../.venv-hep/bin/python"
+ },
+ "git_commit": "a7f36fad6a8d03a38d4c853be322ad081be261d0",
+ "counts": {
+  "pass": 11,
+  "fail": 0,
+  "skip": 0
+ },
+ "checks": [
+  {
+   "name": "unittest",
+   "command": "python3 -m unittest discover -s tests -t .",
+   "status": "pass",
+   "counts": {
+    "run": 952,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 39,
+    "passed": 913
+   },
+   "failed": [],
+   "skipped": [
+    "test_fit_recovers_injected_signal (tests.examples.test_end_to_end_sample.EndToEndTests.test_fit_recovers_injected_signal): numpy/pyhf not importable (set HEP_PYHF_PYTHON)",
+    "test_normalization_uses_full_signed_weight_sum (tests.examples.test_end_to_end_sample.EndToEndTests.test_normalization_uses_full_signed_weight_sum): numpy/pyhf not importable (set HEP_PYHF_PYTHON)",
+    "test_regions_are_orthogonal_and_complete (tests.examples.test_end_to_end_sample.EndToEndTests.test_regions_are_orthogonal_and_complete): numpy/pyhf not importable (set HEP_PYHF_PYTHON)",
+    "test_yield_table_printed_with_labelled_pseudo_data (tests.examples.test_end_to_end_sample.EndToEndTests.test_yield_table_printed_with_labelled_pseudo_data): numpy/pyhf not importable (set HEP_PYHF_PYTHON)",
+    "test_documented_pattern_picks_leading_jets_and_the_banned_one_does_not (tests.skills.detector_response.test_hep_analysis_reference_values.SkillAwkwardLeadingObjectTest.test_documented_pattern_picks_leading_jets_and_the_banned_one_does_not): awkward not installed",
+    "test_check_systematic_variations (tests.skills.hep_computing.test_hep_analysis_root_integration.RootIntegrationTests.test_check_systematic_variations): PyROOT not importable (set HEP_ROOT_PYTHON)",
+    "test_compare_histograms_sees_two_percent_shift (tests.skills.hep_computing.test_hep_analysis_root_integration.RootIntegrationTests.test_compare_histograms_sees_two_percent_shift): PyROOT not importable (set HEP_ROOT_PYTHON)",
+    "test_inspect_reports_leaf_types (tests.skills.hep_computing.test_hep_analysis_root_integration.RootIntegrationTests.test_inspect_reports_leaf_types): PyROOT not importable (set HEP_ROOT_PYTHON)",
+    "test_pyroot_rdataframe_asset_cutflow (tests.skills.hep_computing.test_hep_analysis_root_integration.RootIntegrationTests.test_pyroot_rdataframe_asset_cutflow): PyROOT not importable (set HEP_ROOT_PYTHON)",
+    "test_pyroot_roofit_asset_recovers_peak (tests.skills.hep_computing.test_hep_analysis_root_integration.RootIntegrationTests.test_pyroot_roofit_asset_recovers_peak): PyROOT not importable (set HEP_ROOT_PYTHON)",
+    "test_roofit_workspace_summary (tests.skills.hep_computing.test_hep_analysis_root_integration.RootIntegrationTests.test_roofit_workspace_summary): PyROOT not importable (set HEP_ROOT_PYTHON)",
+    "test_summarize_histogram_statistics (tests.skills.hep_computing.test_hep_analysis_root_integration.RootIntegrationTests.test_summarize_histogram_statistics): PyROOT not importable (set HEP_ROOT_PYTHON)",
+    "test_bad_arguments_are_rejected (tests.skills.hep_computing.test_hep_analysis_synthetic_nanoaod.SyntheticNanoAODTests.test_bad_arguments_are_rejected): numpy, awkward and uproot are required",
+    "test_expectations_match_independent_awkward_recomputation (tests.skills.hep_computing.test_hep_analysis_synthetic_nanoaod.SyntheticNanoAODTests.test_expectations_match_independent_awkward_recomputation): numpy, awkward and uproot are required",
+    "test_file_is_ttree_with_events_and_runs (tests.skills.hep_computing.test_hep_analysis_synthetic_nanoaod.SyntheticNanoAODTests.test_file_is_ttree_with_events_and_runs): numpy, awkward and uproot are required",
+    "test_leading_pair_mass_matches_vectorised_calculation (tests.skills.hep_computing.test_hep_analysis_synthetic_nanoaod.SyntheticNanoAODTests.test_leading_pair_mass_matches_vectorised_calculation): numpy, awkward and uproot are required",
+    "test_runs_tree_holds_full_sample_signed_totals (tests.skills.hep_computing.test_hep_analysis_synthetic_nanoaod.SyntheticNanoAODTests.test_runs_tree_holds_full_sample_signed_totals): numpy, awkward and uproot are required",
+    "test_same_seed_same_file_and_numbers (tests.skills.hep_computing.test_hep_analysis_synthetic_nanoaod.SyntheticNanoAODTests.test_same_seed_same_file_and_numbers): numpy, awkward and uproot are required",
+    "test_summary_is_labelled_synthetic (tests.skills.hep_computing.test_hep_analysis_synthetic_nanoaod.SyntheticNanoAODTests.test_summary_is_labelled_synthetic): numpy, awkward and uproot are required",
+    "test_limit_matches_pyhf (tests.skills.hep_statistics.test_hep_analysis_combine_template.CombineRunTests.test_limit_matches_pyhf): Combine not available (set HEP_COMBINE_WRAPPER)",
+    "test_dataset_template_length_check (tests.skills.physics_ml.test_deep_learning_assets_smoke.AssetSmokeTests.test_dataset_template_length_check): PyTorch not installed",
+    "test_ddp_skeleton_two_gloo_processes (tests.skills.physics_ml.test_deep_learning_assets_smoke.AssetSmokeTests.test_ddp_skeleton_two_gloo_processes): PyTorch not installed",
+    "test_lora_trains_only_adapters (tests.skills.physics_ml.test_deep_learning_assets_smoke.AssetSmokeTests.test_lora_trains_only_adapters): PyTorch not installed",
+    "test_models_and_metrics_shapes (tests.skills.physics_ml.test_deep_learning_assets_smoke.AssetSmokeTests.test_models_and_metrics_shapes): PyTorch not installed",
+    "test_train_classifier_then_inference (tests.skills.physics_ml.test_deep_learning_assets_smoke.AssetSmokeTests.test_train_classifier_then_inference): PyTorch not installed",
+    "test_transformer_classifier_forward_backward (tests.skills.physics_ml.test_deep_learning_assets_smoke.AssetSmokeTests.test_transformer_classifier_forward_backward): PyTorch not installed",
+    "test_vision_transfer_help (tests.skills.physics_ml.test_deep_learning_assets_smoke.AssetSmokeTests.test_vision_transfer_help): PyTorch not installed",
+    "test_contract_clean_dataset_exits_zero (tests.skills.physics_ml.test_deep_learning_deep_learning_skill.DataScriptExitCodeTests.test_contract_clean_dataset_exits_zero): PyTorch is required to build datasets",
+    "test_contract_ragged_samples_exit_with_message_not_traceback (tests.skills.physics_ml.test_deep_learning_deep_learning_skill.DataScriptExitCodeTests.test_contract_ragged_samples_exit_with_message_not_traceback): PyTorch is required to build datasets",
+    "test_find_nan_batches_exits_nonzero_on_nan (tests.skills.physics_ml.test_deep_learning_deep_learning_skill.DataScriptExitCodeTests.test_find_nan_batches_exits_nonzero_on_nan): PyTorch is required to build datasets",
+    "test_find_nan_batches_exits_zero_when_clean (tests.skills.physics_ml.test_deep_learning_deep_learning_skill.DataScriptExitCodeTests.test_find_nan_batches_exits_zero_when_clean): PyTorch is required to build datasets",
+    "test_estimated_model_state_bytes_match_measurement (tests.skills.physics_ml.test_deep_learning_deep_learning_skill.MemoryEstimateAgainstTorchTests.test_estimated_model_state_bytes_match_measurement): PyTorch is required to measure real allocations",
+    "test_measured_bytes_per_parameter_match_the_table (tests.skills.physics_ml.test_deep_learning_deep_learning_skill.MemoryEstimateAgainstTorchTests.test_measured_bytes_per_parameter_match_the_table): PyTorch is required to measure real allocations",
+    "test_parameter_count_matches_a_real_model_exactly (tests.skills.physics_ml.test_deep_learning_deep_learning_skill.MemoryEstimateAgainstTorchTests.test_parameter_count_matches_a_real_model_exactly): PyTorch is required to measure real allocations",
+    "test_invalid_dot (tests.skills.research_communication.test_academic_diagrams_academic_diagrams_skill.DotCompile.test_invalid_dot): Graphviz not installed",
+    "test_valid_dot (tests.skills.research_communication.test_academic_diagrams_academic_diagrams_skill.DotCompile.test_valid_dot): Graphviz not installed",
+    "test_real_mmdc_rejects_bad_syntax (tests.skills.research_communication.test_academic_diagrams_academic_diagrams_skill.MermaidRender.test_real_mmdc_rejects_bad_syntax): Mermaid CLI not installed",
+    "test_real_plantuml_rejects_one_line_class_body (tests.skills.research_communication.test_academic_diagrams_academic_diagrams_skill.PlantUmlRender.test_real_plantuml_rejects_one_line_class_body): PlantUML not installed",
+    "test_bundled_skeleton_compiles (tests.skills.research_communication.test_academic_papers_end_to_end.TestEndToEnd.test_bundled_skeleton_compiles): tectonic not installed"
+   ]
+  },
+  {
+   "name": "profile-tests:experiment:ams-02",
+   "command": "(cd profiles/experiments/ams-02 && python3 -m unittest discover -s tests -t tests)",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "status": "pass",
+    "counts": {
+     "run": 257,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0,
+     "passed": 257
+    },
+    "failed": [],
+    "skipped": []
+   },
+   "counts": {
+    "run": 257,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 257
+   }
+  },
+  {
+   "name": "profile-tests:experiment:synthetic-collider",
+   "command": "(cd profiles/experiments/synthetic-collider && python3 -m unittest discover -s tests -t tests)",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "status": "pass",
+    "counts": {
+     "run": 9,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0,
+     "passed": 9
+    },
+    "failed": [],
+    "skipped": []
+   },
+   "counts": {
+    "run": 9,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 9
+   }
+  },
+  {
+   "name": "profile-tests:theory:qed-benchmark",
+   "command": "(cd profiles/theory/qed-benchmark && python3 -m unittest discover -s tests -t tests)",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "status": "pass",
+    "counts": {
+     "run": 16,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0,
+     "passed": 16
+    },
+    "failed": [],
+    "skipped": []
+   },
+   "counts": {
+    "run": 16,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 16
+   }
+  },
+  {
+   "name": "check_layering",
+   "command": "/home/claude/hep-research-plugin/plugins/hep-research/../../.venv-hep/bin/python tools/check_layering.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "ok": true,
+    "violations": []
+   }
+  },
+  {
+   "name": "stanza_consistency",
+   "command": "/home/claude/hep-research-plugin/plugins/hep-research/../../.venv-hep/bin/python tools/build_stanzas.py --check",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "ok": true,
+    "problems": []
+   }
+  },
+  {
+   "name": "registry",
+   "command": "/home/claude/hep-research-plugin/plugins/hep-research/../../.venv-hep/bin/python contracts/registry.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "ok": true,
+    "findings": [],
+    "profiles": [
+     "experiment:ams-02",
+     "experiment:synthetic-collider",
+     "theory:qed-benchmark"
+    ]
+   }
+  },
+  {
+   "name": "ams_ledger_preservation",
+   "command": "/home/claude/hep-research-plugin/plugins/hep-research/../../.venv-hep/bin/python tools/check_ams_ledger_preservation.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "status": "pass",
+    "legacy": "/home/claude/hep-research-plugin/.legacy/agentic-ai-skills/ams-analysis/data",
+    "pinned_commit": "3e995a49a89fad8e0e9d52130ee1fd93a3a0f4f9",
+    "counts": {
+     "legacy_sources": 60,
+     "legacy_claims": 183,
+     "sources": 60,
+     "claims": 183
+    },
+    "differences": []
+   }
+  },
+  {
+   "name": "ams_optional",
+   "command": "/home/claude/hep-research-plugin/plugins/hep-research/../../.venv-hep/bin/python tools/check_ams_optional.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "ok": true,
+    "copy": "/tmp/hep research no ams q9f2j0mg/hep-research",
+    "checks": [
+     {
+      "name": "ams_profile_absent",
+      "status": "pass"
+     },
+     {
+      "name": "registry",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "path_b",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "path_c",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "tests_core",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "tests_contracts",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "tests_hep_statistics",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "tests_hep_computing",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "tests_paths_b_c",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "profile-tests:experiments/synthetic-collider",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "profile-tests:theory/qed-benchmark",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     }
+    ]
+   }
+  },
+  {
+   "name": "measure_entrypoints",
+   "command": "/home/claude/hep-research-plugin/plugins/hep-research/../../.venv-hep/bin/python tools/measure_entrypoints.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "ok": true,
+    "budget": {
+     "skill_bytes": 8192,
+     "skill_lines_max": 180,
+     "description_chars": 1024,
+     "registry_bytes": 2048,
+     "index_bytes": 4096
+    },
+    "skills": [
+     {
+      "skill": "detector-response",
+      "lines": 57,
+      "bytes": 5920,
+      "description_chars": 814
+     },
+     {
+      "skill": "hep-analysis",
+      "lines": 62,
+      "bytes": 6963,
+      "description_chars": 921
+     },
+     {
+      "skill": "hep-computing",
+      "lines": 55,
+      "bytes": 6341,
+      "description_chars": 859
+     },
+     {
+      "skill": "hep-statistics",
+      "lines": 53,
+      "bytes": 6221,
+      "description_chars": 845
+     },
+     {
+      "skill": "hep-theory",
+      "lines": 52,
+      "bytes": 5924,
+      "description_chars": 886
+     },
+     {
+      "skill": "physics-ml",
+      "lines": 51,
+      "bytes": 5173,
+      "description_chars": 803
+     },
+     {
+      "skill": "research-communication",
+      "lines": 49,
+      "bytes": 5266,
+      "description_chars": 773
+     }
+    ],
+    "totals": {
+     "skill_bytes": 41808,
+     "description_chars": 5901
+    },
+    "registry_bytes": 690,
+    "profile_index_bytes": {
+     "experiment:ams-02": 2370,
+     "experiment:synthetic-collider": 956,
+     "theory:qed-benchmark": 896
+    },
+    "over_budget": [],
+    "exceptions": {},
+    "host_estimate": {
+     "status": "measured",
+     "always_on_tokens": 2005,
+     "per_skill_always_on": {
+      "hep-computing": 290,
+      "hep-theory": 300,
+      "research-communication": 270,
+      "detector-response": 280,
+      "hep-statistics": 290,
+      "hep-analysis": 310,
+      "physics-ml": 270
+     },
+     "source": "claude --plugin-dir <root> plugin details hep-research (host estimate)"
+    },
+    "note": "Line counts are informative: SKILL.md paragraphs are unwrapped, so bytes are the binding budget."
+   }
+  },
+  {
+   "name": "claude-plugin-validate",
+   "command": "claude plugin validate <plugin> --strict",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": "Validating plugin manifest: /home/claude/hep-research-plugin/plugins/hep-research/.claude-plugin/plugin.json\n\n\u221a Validation passed"
+  }
+ ],
+ "caveat": "Software checks only; not physical validity, proof, statistical coverage, or authorization to unblind."
+}

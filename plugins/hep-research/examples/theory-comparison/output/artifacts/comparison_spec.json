@@ -1,0 +1,170 @@
+{
+ "contract_version": "1.0.0",
+ "bindings": {
+  "experiments": [
+   {
+    "profile": "experiment:synthetic-collider",
+    "version": "1.0.0"
+   }
+  ],
+  "theory": [
+   {
+    "profile": "theory:qed-benchmark",
+    "version": "1.0.0"
+   }
+  ]
+ },
+ "versions": {
+  "plugin": "0.1.0",
+  "contracts": "1.0.0",
+  "profiles": {
+   "experiment:synthetic-collider": "1.0.0",
+   "theory:qed-benchmark": "1.0.0"
+  }
+ },
+ "outputs": [],
+ "unresolved_inputs": [],
+ "artifact_id": "synthetic-path-d-comparison",
+ "artifact_type": "comparison-spec",
+ "inputs": [
+  {
+   "ref": "../qed-benchmark/output/artifacts/prediction.json",
+   "artifact_type": "prediction",
+   "status": [
+    "validated-in-scope"
+   ]
+  },
+  {
+   "ref": "artifacts/dataset_record.json",
+   "artifact_type": "dataset-record",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "../collider-angular/output/artifacts/response.json",
+   "artifact_type": "response",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "objective": "Gate and plan: QED prediction vs SYNTHETIC reconstructed counts",
+ "provenance": {
+  "producer_skill": "hep-statistics",
+  "created": "2026-10-02"
+ },
+ "status": [
+  "synthetic"
+ ],
+ "extension": {
+  "dataset_bindings": [
+   "synthcol:synthetic-path-d-reco-counts"
+  ],
+  "prediction_bindings": [
+   "qedbench-path-c-prediction"
+  ],
+  "gate_result": {
+   "comparable": true,
+   "mismatches": [],
+   "notes": [
+    {
+     "field": "conventions.mass_approximation",
+     "note": "core key only on side a; confirm it does not affect the comparison"
+    },
+    {
+     "field": "conventions.spin_treatment",
+     "note": "core key only on side a; confirm it does not affect the comparison"
+    },
+    {
+     "field": "covariance",
+     "note": "measurement covariance is absent: it stays absent; inference must not assume a diagonal matrix"
+    }
+   ]
+  },
+  "transformations": [
+   {
+    "kind": "bin-integrate",
+    "owner": "hep-theory",
+    "note": "bin-averaged d sigma / d cos theta x bin width",
+    "ok": true
+   },
+   {
+    "kind": "multiply-by-normalization",
+    "owner": "hep-statistics",
+    "normalization_kind": "integrated-luminosity",
+    "value": 20.0,
+    "value_unit": "pb^-1",
+    "unit_in": "pb",
+    "unit_out": "1",
+    "ok": true
+   },
+   {
+    "kind": "forward-fold",
+    "owner": "hep-statistics",
+    "truth_edges": [
+     -1.0,
+     -0.9,
+     -0.72,
+     -0.54,
+     -0.36,
+     -0.18,
+     0.0,
+     0.18,
+     0.36,
+     0.54,
+     0.72,
+     0.9,
+     1.0
+    ],
+    "reco_edges": [
+     -1.0,
+     -0.9,
+     -0.72,
+     -0.54,
+     -0.36,
+     -0.18,
+     0.0,
+     0.18,
+     0.36,
+     0.54,
+     0.72,
+     0.9,
+     1.0
+    ],
+    "truth_level": "parton",
+    "includes": [
+     "migration",
+     "efficiency"
+    ],
+    "justification": "the synthetic generator has no QED radiation, so its truth muons are the hard-process leptons; the response is built with the in-bin weighting 1 + cos^2 theta, the predicted shape",
+    "ok": true
+   }
+  ],
+  "correlations": [
+   {
+    "between": [
+     "luminosity",
+     "all reco bins"
+    ],
+    "kind": "fully correlated normalization"
+   },
+   {
+    "between": [
+     "reference-constant rounding",
+     "all bins"
+    ],
+    "kind": "fully correlated, bounded"
+   }
+  ],
+  "inference_assumptions": [
+   "luminosity uncertainty Gaussian with the synthetic 2% width (declared in the profile benchmark)",
+   "reference-constant rounding is a bounded flat interval, not Gaussianized",
+   "truncation (higher orders, Z exchange) is not quantified: mu is conditional on the tree-level prediction"
+  ],
+  "limits": [
+   "synthetic data; mu = 1 is the generated truth",
+   "no statement about physics beyond the benchmark"
+  ]
+ }
+}

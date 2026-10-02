@@ -1,0 +1,65 @@
+source_path,destination,disposition,note
+deep-learning/SKILL.md,skills/physics-ml/references/deep-learning-guide.md,move+path-edit,frontmatter dropped; heading '# PyTorch Engineering (guide)' + '## When to read this file'; 'this skill' -> 'this guide' twice (Do not apply this guide's Workflow; this guide covers whether the model itself); reference link targets references/x.md -> x.md (32); [assets/](assets/) -> ../assets/; agile-development cpp-balanced-design-guidelines link -> ../../hep-computing/references/cpp-balanced-design-guidelines.md; task-authoring example-authoring link -> ../../hep-computing/references/example-authoring.md; 'this skill's README' -> plain text legacy deep-learning/README.md at agentic-ai-skills@3e995a4; scripts/validate_skill_bundle.py and tests/test_*.py entries -> plain text legacy paths at agentic-ai-skills@3e995a4; backticked scripts/ (18) and assets/ (14) paths -> ${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/...
+deep-learning/assets/config.yaml,skills/physics-ml/assets/config.yaml,move,verbatim
+deep-learning/assets/dataset_splits.example.json,skills/physics-ml/assets/dataset_splits.example.json,move,verbatim
+deep-learning/assets/dataset_template.py,skills/physics-ml/assets/dataset_template.py,move,verbatim
+deep-learning/assets/ddp_train_skeleton.py,skills/physics-ml/assets/ddp_train_skeleton.py,move,verbatim
+deep-learning/assets/eval_runs.example.json,skills/physics-ml/assets/eval_runs.example.json,move,verbatim
+deep-learning/assets/inference.py,skills/physics-ml/assets/inference.py,move,verbatim
+deep-learning/assets/lora_finetune.py,skills/physics-ml/assets/lora_finetune.py,move+path-edit,docstring path references/efficient-finetuning.md -> ${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/references/efficient-finetuning.md; code unchanged
+deep-learning/assets/metrics.py,skills/physics-ml/assets/metrics.py,move,verbatim
+deep-learning/assets/models.py,skills/physics-ml/assets/models.py,move,verbatim
+deep-learning/assets/scaling_plan.example.json,skills/physics-ml/assets/scaling_plan.example.json,move,verbatim
+deep-learning/assets/train_classifier.py,skills/physics-ml/assets/train_classifier.py,move,verbatim
+deep-learning/assets/transformer_classifier.py,skills/physics-ml/assets/transformer_classifier.py,move+path-edit,docstring path references/transformer-architectures.md -> ${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/references/transformer-architectures.md; code unchanged
+deep-learning/assets/vision_transfer.py,skills/physics-ml/assets/vision_transfer.py,move,verbatim
+deep-learning/references/ablation-and-design-review.md,skills/physics-ml/references/ablation-and-design-review.md,move+path-edit,scripts/x.py -> ${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/scripts/x.py in prose
+deep-learning/references/architecture-selection.md,skills/physics-ml/references/architecture-selection.md,move+path-edit,scripts/x.py -> ${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/scripts/x.py in prose (2); `SKILL.md` -> `deep-learning-guide.md`
+deep-learning/references/checkpointing.md,skills/physics-ml/references/checkpointing.md,move,verbatim
+deep-learning/references/custom-autograd-and-hooks.md,skills/physics-ml/references/custom-autograd-and-hooks.md,move,verbatim
+deep-learning/references/data-loading.md,skills/physics-ml/references/data-loading.md,move,verbatim
+deep-learning/references/data-strategy.md,skills/physics-ml/references/data-strategy.md,move+path-edit,scripts/x.py -> ${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/scripts/x.py in prose
+deep-learning/references/debugging-pytorch.md,skills/physics-ml/references/debugging-pytorch.md,move,verbatim
+deep-learning/references/distributed-training.md,skills/physics-ml/references/distributed-training.md,move,verbatim
+deep-learning/references/efficient-finetuning.md,skills/physics-ml/references/efficient-finetuning.md,move,verbatim
+deep-learning/references/evaluation-metrics.md,skills/physics-ml/references/evaluation-metrics.md,move,verbatim
+deep-learning/references/evaluation-strategy.md,skills/physics-ml/references/evaluation-strategy.md,move,verbatim
+deep-learning/references/export-and-deployment.md,skills/physics-ml/references/export-and-deployment.md,move,verbatim
+deep-learning/references/generative-models.md,skills/physics-ml/references/generative-models.md,move,verbatim
+deep-learning/references/geometric-and-equivariant-learning.md,skills/physics-ml/references/geometric-and-equivariant-learning.md,move,verbatim
+deep-learning/references/interpretability-and-explainability.md,skills/physics-ml/references/interpretability-and-explainability.md,move,verbatim
+deep-learning/references/mixed-precision.md,skills/physics-ml/references/mixed-precision.md,move,verbatim
+deep-learning/references/monitoring-and-lifecycle.md,skills/physics-ml/references/monitoring-and-lifecycle.md,move,verbatim
+deep-learning/references/optimization-and-training-dynamics.md,skills/physics-ml/references/optimization-and-training-dynamics.md,move+path-edit,'see SKILL.md Task -> Loss/Output Conventions' -> 'see deep-learning-guide.md ...'
+deep-learning/references/parallelism-strategy.md,skills/physics-ml/references/parallelism-strategy.md,move+path-edit,scripts/x.py -> ${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/scripts/x.py in prose
+deep-learning/references/performance-memory.md,skills/physics-ml/references/performance-memory.md,move,verbatim
+deep-learning/references/reproducibility.md,skills/physics-ml/references/reproducibility.md,move,verbatim
+deep-learning/references/robustness-and-distribution-shift.md,skills/physics-ml/references/robustness-and-distribution-shift.md,move,verbatim
+deep-learning/references/scientific-machine-learning.md,skills/physics-ml/references/scientific-machine-learning.md,move+path-edit,`SKILL.md` -> `deep-learning-guide.md`
+deep-learning/references/sequence-models.md,skills/physics-ml/references/sequence-models.md,move,verbatim
+deep-learning/references/serving-architecture.md,skills/physics-ml/references/serving-architecture.md,move+path-edit,scripts/x.py -> ${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/scripts/x.py in prose
+deep-learning/references/tensor-shapes.md,skills/physics-ml/references/tensor-shapes.md,move,verbatim
+deep-learning/references/training-at-scale.md,skills/physics-ml/references/training-at-scale.md,move+path-edit,scripts/x.py -> ${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/scripts/x.py in prose
+deep-learning/references/training-loop.md,skills/physics-ml/references/training-loop.md,move,verbatim
+deep-learning/references/transfer-learning.md,skills/physics-ml/references/transfer-learning.md,move,verbatim
+deep-learning/references/transformer-architectures.md,skills/physics-ml/references/transformer-architectures.md,move+path-edit,`references/debugging-pytorch.md` -> `debugging-pytorch.md` (relative to new location)
+deep-learning/references/uncertainty-and-calibration.md,skills/physics-ml/references/uncertainty-and-calibration.md,move+path-edit,`SKILL.md` -> `deep-learning-guide.md`
+deep-learning/scripts/benchmark_model.py,skills/physics-ml/scripts/benchmark_model.py,move,verbatim
+deep-learning/scripts/check_dataset_contract.py,skills/physics-ml/scripts/check_dataset_contract.py,move,verbatim
+deep-learning/scripts/check_pytorch_env.py,skills/physics-ml/scripts/check_pytorch_env.py,move,verbatim
+deep-learning/scripts/check_split_integrity.py,skills/physics-ml/scripts/check_split_integrity.py,move+path-edit,docstring: references/data-strategy.md and Run: usage line paths -> ${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/...; code unchanged
+deep-learning/scripts/compare_model_runs.py,skills/physics-ml/scripts/compare_model_runs.py,move+path-edit,docstring Run: usage line paths -> ${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/...; code unchanged
+deep-learning/scripts/estimate_compute_budget.py,skills/physics-ml/scripts/estimate_compute_budget.py,move+path-edit,docstring Run: usage line path -> ${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/...; code unchanged
+deep-learning/scripts/estimate_training_memory.py,skills/physics-ml/scripts/estimate_training_memory.py,move+path-edit,docstring Run: usage line paths -> ${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/...; code unchanged
+deep-learning/scripts/find_nan_batches.py,skills/physics-ml/scripts/find_nan_batches.py,move,verbatim
+deep-learning/scripts/inspect_checkpoint.py,skills/physics-ml/scripts/inspect_checkpoint.py,move,verbatim
+deep-learning/scripts/profile_dataloader.py,skills/physics-ml/scripts/profile_dataloader.py,move,verbatim
+deep-learning/scripts/serving_capacity.py,skills/physics-ml/scripts/serving_capacity.py,move+path-edit,docstring Run: usage line path -> ${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/...; code unchanged
+deep-learning/scripts/validate_skill_bundle.py,-,retire,"legacy bundle validator; superseded by `claude plugin validate --strict`, tools/check_layering.py and tools/measure_entrypoints.py; not copied"
+deep-learning/tests/behavior_eval.py,-,retain-outside,"model-evaluation harness (claude -p arms, blind scorer); not shipped"
+deep-learning/tests/prompts.md,-,retain-outside,model-evaluation prompts/rubrics; not shipped
+deep-learning/tests/prompts_fresh.md,-,retain-outside,model-evaluation prompts; not shipped
+deep-learning/tests/test_assets_smoke.py,tests/skills/physics_ml/test_deep_learning_assets_smoke.py,port,"edits: ROOT = parents[3]/skills/physics-ml, docstring run line; 7 run, 7 skip (PyTorch not installed), as in legacy"
+deep-learning/tests/test_deep_learning_skill.py,tests/skills/physics_ml/test_deep_learning_deep_learning_skill.py,port,"all 111 tests are script behavior tests (no legacy-bundle checks found, nothing retired); edits: ROOT = parents[3]/skills/physics-ml, docstring run line; seeds/tolerances/assertions unchanged; 111 run, 104 pass, 0 fail, 7 skip (torch not installed)"
+deep-learning/tests/trigger_queries.json,-,retain-outside,input for M5 routing cases
+deep-learning/tests/trigger_queries_holdout.json,-,retain-outside,input for M5 routing cases

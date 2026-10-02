@@ -1,0 +1,10 @@
+{"$comment": "Owner: physics-ml.",
+ "type": "object",
+ "required": ["task", "labels", "features", "splits", "training_domain", "preprocessing", "model_hash", "downstream_validation"],
+ "properties": {
+  "task": {"type": "string", "enum": ["classification", "regression", "generation", "surrogate", "inference"]},
+  "labels": {"type": "array"}, "features": {"type": "array"},
+  "splits": {"type": "object", "required": ["grouping_key"], "properties": {"grouping_key": {"type": "string"}}},
+  "training_domain": {"type": "object"}, "preprocessing": {"type": "array"}, "weights": {"type": "string"},
+  "model_hash": {"type": "string"}, "calibration": {"type": "object"}, "downstream_validation": {"type": "array"}
+ }}

@@ -1,0 +1,7 @@
+{
+  "name": "hep-research",
+  "version": "0.1.0",
+  "description": "Research assistant for experimental and theoretical high-energy physics: seven core skills (analysis, detector response, theory, statistics, computing, physics ML, research communication) with optional experiment and theory-domain profiles. Not endorsed by AMS or any collaboration.",
+  "author": {"name": "hchouTW"},
+  "keywords": ["physics", "hep", "statistics", "theory", "ams-02"]
+}

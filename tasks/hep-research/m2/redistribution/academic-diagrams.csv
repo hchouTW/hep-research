@@ -1,0 +1,62 @@
+source_path,destination,disposition,note
+academic-diagrams/SKILL.md,skills/research-communication/references/academic-diagrams-guide.md,move+path-edit,"references/figures-and-tables.md -> figures-and-tables.md; references/academic-figure-style.md -> academic-figure-style.md; references/high-energy-physics.md -> high-energy-physics.md; references/probability-statistics.md -> probability-statistics.md; references/computer-science.md -> computer-science.md; references/general-diagram-principles.md -> general-diagram-principles.md; references/mermaid-patterns.md -> mermaid-patterns.md; references/graphviz-patterns.md -> graphviz-patterns.md; references/plantuml-patterns.md -> plantuml-patterns.md; references/tikz-patterns.md -> tikz-patterns.md; references/figure-captions.md -> figure-captions.md; references/legends-panels-and-export.md -> legends-panels-and-export.md; frontmatter dropped; title -> '(guide)'; added 'When to read this file'; `templates/svg-spec.md` -> `../templates/svg-spec.md`; `templates/` (research-workflow -> `../templates/` (research-workflow; `examples/general/`, `examples/hep/`, `examples/statistics/`, `examples/computer-science/` -> `../examples/general/`, `../examples/hep/`, `../examples/statistics/`, `../examples/computer-science/`; (see `examples/README.md`) -> (see `../examples/README.md`); no ""this skill"" -> ""this guide"" substitutions were needed; prose mention of `SKILL.md` and `references/` in the 33-vs-31 anecdote left as is"
+academic-diagrams/examples/README.md,skills/research-communication/examples/README.md,move,verbatim
+academic-diagrams/examples/computer-science/01-microservice-architecture.md,skills/research-communication/examples/computer-science/01-microservice-architecture.md,move,verbatim
+academic-diagrams/examples/computer-science/02-transformer-architecture.md,skills/research-communication/examples/computer-science/02-transformer-architecture.md,move,verbatim
+academic-diagrams/examples/computer-science/03-rag-architecture.md,skills/research-communication/examples/computer-science/03-rag-architecture.md,move,verbatim
+academic-diagrams/examples/computer-science/04-agentic-ai-architecture.md,skills/research-communication/examples/computer-science/04-agentic-ai-architecture.md,move,verbatim
+academic-diagrams/examples/computer-science/05-distributed-processing-pipeline.md,skills/research-communication/examples/computer-science/05-distributed-processing-pipeline.md,move,verbatim
+academic-diagrams/examples/computer-science/06-api-sequence-diagram.md,skills/research-communication/examples/computer-science/06-api-sequence-diagram.md,move,verbatim
+academic-diagrams/examples/computer-science/07-database-architecture.md,skills/research-communication/examples/computer-science/07-database-architecture.md,move+path-edit,references/mermaid-patterns.md -> ../../references/mermaid-patterns.md
+academic-diagrams/examples/computer-science/08-ml-training-pipeline.md,skills/research-communication/examples/computer-science/08-ml-training-pipeline.md,move,verbatim
+academic-diagrams/examples/computer-science/09-plantuml-component-diagram.md,skills/research-communication/examples/computer-science/09-plantuml-component-diagram.md,move,verbatim
+academic-diagrams/examples/computer-science/10-plantuml-sequence-diagram.md,skills/research-communication/examples/computer-science/10-plantuml-sequence-diagram.md,move,verbatim
+academic-diagrams/examples/general/01-research-workflow.md,skills/research-communication/examples/general/01-research-workflow.md,move,verbatim
+academic-diagrams/examples/general/02-methodology-pipeline.md,skills/research-communication/examples/general/02-methodology-pipeline.md,move,verbatim
+academic-diagrams/examples/general/03-conceptual-framework.md,skills/research-communication/examples/general/03-conceptual-framework.md,move,verbatim
+academic-diagrams/examples/general/04-experimental-workflow.md,skills/research-communication/examples/general/04-experimental-workflow.md,move,verbatim
+academic-diagrams/examples/general/05-repository-architecture.md,skills/research-communication/examples/general/05-repository-architecture.md,move,"verbatim; the legacy repository paths in it (SKILL.md, scripts/validate_skill_bundle.py, agents/openai.yaml) are the diagram subject matter, not links, so left unchanged"
+academic-diagrams/examples/general/06-methods-text-to-workflow.md,skills/research-communication/examples/general/06-methods-text-to-workflow.md,move,verbatim
+academic-diagrams/examples/general/07-svg-spec-figure.md,skills/research-communication/examples/general/07-svg-spec-figure.md,move,verbatim
+academic-diagrams/examples/hep/01-collider-analysis-pipeline.md,skills/research-communication/examples/hep/01-collider-analysis-pipeline.md,move,verbatim
+academic-diagrams/examples/hep/02-monte-carlo-simulation-chain.md,skills/research-communication/examples/hep/02-monte-carlo-simulation-chain.md,move,verbatim
+academic-diagrams/examples/hep/03-simplified-detector-architecture.md,skills/research-communication/examples/hep/03-simplified-detector-architecture.md,move+path-edit,references/tikz-patterns.md -> ../../references/tikz-patterns.md
+academic-diagrams/examples/hep/04-likelihood-analysis-architecture.md,skills/research-communication/examples/hep/04-likelihood-analysis-architecture.md,move,verbatim
+academic-diagrams/examples/hep/05-particle-decay-tree.md,skills/research-communication/examples/hep/05-particle-decay-tree.md,move,verbatim
+academic-diagrams/examples/hep/06-signal-control-region-workflow.md,skills/research-communication/examples/hep/06-signal-control-region-workflow.md,move,verbatim
+academic-diagrams/examples/hep/07-feynman-style-interaction.md,skills/research-communication/examples/hep/07-feynman-style-interaction.md,move,verbatim
+academic-diagrams/examples/hep/08-lhc-pipeline-graphviz.md,skills/research-communication/examples/hep/08-lhc-pipeline-graphviz.md,move,verbatim
+academic-diagrams/examples/statistics/01-bayesian-inference-workflow.md,skills/research-communication/examples/statistics/01-bayesian-inference-workflow.md,move,verbatim
+academic-diagrams/examples/statistics/02-hierarchical-bayesian-model-plate.md,skills/research-communication/examples/statistics/02-hierarchical-bayesian-model-plate.md,move+path-edit,references/graphviz-patterns.md -> ../../references/graphviz-patterns.md
+academic-diagrams/examples/statistics/03-causal-dag.md,skills/research-communication/examples/statistics/03-causal-dag.md,move,verbatim
+academic-diagrams/examples/statistics/04-mcmc-workflow.md,skills/research-communication/examples/statistics/04-mcmc-workflow.md,move,verbatim
+academic-diagrams/examples/statistics/05-hypothesis-testing-pipeline.md,skills/research-communication/examples/statistics/05-hypothesis-testing-pipeline.md,move,verbatim
+academic-diagrams/examples/statistics/06-bootstrap-procedure.md,skills/research-communication/examples/statistics/06-bootstrap-procedure.md,move,verbatim
+academic-diagrams/examples/statistics/07-hidden-markov-model.md,skills/research-communication/examples/statistics/07-hidden-markov-model.md,move,verbatim
+academic-diagrams/references/academic-figure-style.md,skills/research-communication/references/academic-figure-style.md,move,verbatim
+academic-diagrams/references/computer-science.md,skills/research-communication/references/computer-science.md,move,verbatim
+academic-diagrams/references/figure-captions.md,skills/research-communication/references/figure-captions.md,move,verbatim
+academic-diagrams/references/general-diagram-principles.md,skills/research-communication/references/general-diagram-principles.md,move,verbatim
+academic-diagrams/references/graphviz-patterns.md,skills/research-communication/references/graphviz-patterns.md,move,verbatim
+academic-diagrams/references/high-energy-physics.md,skills/research-communication/references/high-energy-physics.md,move,verbatim
+academic-diagrams/references/legends-panels-and-export.md,skills/research-communication/references/legends-panels-and-export.md,move,verbatim
+academic-diagrams/references/mermaid-patterns.md,skills/research-communication/references/mermaid-patterns.md,move,verbatim
+academic-diagrams/references/plantuml-patterns.md,skills/research-communication/references/plantuml-patterns.md,move+path-edit,scripts/check_diagram_sources.py -> ${CLAUDE_PLUGIN_ROOT}/skills/research-communication/scripts/check_diagram_sources.py
+academic-diagrams/references/probability-statistics.md,skills/research-communication/references/probability-statistics.md,move,verbatim
+academic-diagrams/references/tikz-patterns.md,skills/research-communication/references/tikz-patterns.md,move,verbatim
+academic-diagrams/scripts/check_diagram_sources.py,skills/research-communication/scripts/check_diagram_sources.py,move+path-edit,"docstring usage line: scripts/check_diagram_sources.py -> ${CLAUDE_PLUGIN_ROOT}/skills/research-communication/scripts/check_diagram_sources.py; code unchanged (ROOT = parents[1] now resolves to skills/research-communication, so the default scan covers that whole skill folder)"
+academic-diagrams/scripts/validate_skill_bundle.py,-,retire,"legacy bundle validator; superseded by `claude plugin validate --strict`, tools/check_layering.py and tools/measure_entrypoints.py"
+academic-diagrams/templates/agentic-ai-architecture.md,skills/research-communication/templates/agentic-ai-architecture.md,move,verbatim
+academic-diagrams/templates/algorithm-flowchart.md,skills/research-communication/templates/algorithm-flowchart.md,move,verbatim
+academic-diagrams/templates/bayesian-model.md,skills/research-communication/templates/bayesian-model.md,move,verbatim
+academic-diagrams/templates/hep-analysis-pipeline.md,skills/research-communication/templates/hep-analysis-pipeline.md,move,verbatim
+academic-diagrams/templates/ml-pipeline.md,skills/research-communication/templates/ml-pipeline.md,move,verbatim
+academic-diagrams/templates/probabilistic-graphical-model.md,skills/research-communication/templates/probabilistic-graphical-model.md,move,verbatim
+academic-diagrams/templates/research-workflow.md,skills/research-communication/templates/research-workflow.md,move,verbatim
+academic-diagrams/templates/svg-spec.md,skills/research-communication/templates/svg-spec.md,move+path-edit,scripts/check_diagram_sources.py -> ${CLAUDE_PLUGIN_ROOT}/skills/research-communication/scripts/check_diagram_sources.py
+academic-diagrams/templates/system-architecture.md,skills/research-communication/templates/system-architecture.md,move,verbatim
+academic-diagrams/tests/prompts.md,-,retain-outside,"model-evaluation prompts and rubrics; grading material, not shipped"
+academic-diagrams/tests/run_prompts.py,-,retain-outside,"model-evaluation prompt runner; grading material, not shipped"
+academic-diagrams/tests/test_academic_diagrams_skill.py,tests/skills/research_communication/test_academic_diagrams_academic_diagrams_skill.py,port,"mixed file: ported MermaidLint, DotCompile, SvgCheck, MermaidRender, PlantUmlRender, RealBundle.test_shipped_diagram_sources_pass, RealBundle.test_every_example_has_caption_and_source; ROOT now parents[3]/skills/research-communication (the source checker default scan is now the whole research-communication folder); docstring updated. Retired (bundle validator / legacy SKILL.md frontmatter; retired: the legacy bundle no longer exists; plugin checks (claude plugin validate --strict, tools/check_layering.py, tools/measure_entrypoints.py) replace it): FrontmatterAndLinks.test_frontmatter_parsed, test_frontmatter_absent, test_broken_link_detected, test_description_within_limit, test_validator_flags_long_description, test_skill_name_matches_folder, RealBundle.test_bundle_validates. Retired with run_prompts.py (retain-outside): BehaviorPrompts.test_prompts_parse_with_rubrics. 20 run, 16 pass, 4 skip (DotCompile x2: Graphviz not installed; test_real_mmdc_rejects_bad_syntax: Mermaid CLI not installed; test_real_plantuml_rejects_one_line_class_body: PlantUML not installed)"
+academic-diagrams/tests/trigger_queries.json,-,retain-outside,input for M5 routing cases
+academic-diagrams/tests/trigger_queries_holdout.json,-,retain-outside,input for M5 routing cases

@@ -1,0 +1,20 @@
+{"$comment": "Owner: hep-theory. Covers theory spec and derivation record header. No experiment, detector, data, or blinding fields are required or allowed.",
+ "type": "object",
+ "required": ["model", "assumptions", "conventions", "order", "parameters", "derivation_status", "validity_domain", "checks_run", "checks_not_run"],
+ "additionalProperties": false,
+ "properties": {
+  "model": {"type": "object", "required": ["id", "description"]},
+  "domain_profile": {"$ref": "common.json#/$defs/profile_id"},
+  "assumptions": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+  "conventions": {"$ref": "common.json#/$defs/conventions"},
+  "order": {"type": "string"},
+  "parameters": {"type": "object"},
+  "scales": {"anyOf": [{"type": "object"}, {"$ref": "common.json#/$defs/missing"}]},
+  "derivation_status": {"type": "string", "x-vocab": "derivation_statuses"},
+  "validity_domain": {"type": "object"},
+  "checks_run": {"type": "array", "items": {"type": "object", "required": ["name", "result"]}},
+  "checks_not_run": {"type": "array", "items": {"type": "string"}},
+  "references_read": {"type": "array", "items": {"type": "object", "required": ["citation", "location"]}},
+  "derivation_record": {"type": "string"},
+  "inapplicable": {"type": "array", "items": {"type": "string"}}
+ }}

@@ -1,0 +1,89 @@
+{
+ "contract_version": "1.0.0",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.1.0",
+  "contracts": "1.0.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-theory",
+  "created": "2026-10-02",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "artifact_id": "synthetic-j7-prediction-m300",
+ "artifact_type": "prediction",
+ "objective": "ILLUSTRATIVE toy-model fiducial cross section in the signal region at m_X = 300.0 GeV, g = 1",
+ "extension": {
+  "observable": {
+   "quantity": "cross-section",
+   "process": "illustrative toy signal (synthetic)",
+   "variables": [
+    {
+     "name": "m_ll",
+     "unit": "GeV",
+     "edges": [
+      150.0,
+      1000.0
+     ]
+    }
+   ],
+   "phase_space": {
+    "definition": "SYNTHETIC signal region 150 < m_ll < 1000 GeV",
+    "fiducial": true
+   },
+   "level": "particle-fiducial",
+   "frame": "laboratory",
+   "normalization": {
+    "kind": "integrated-luminosity",
+    "value": 20.0,
+    "unit": "pb^-1"
+   },
+   "bin_semantics": "bin-integrated",
+   "unit": "pb",
+   "conventions": {
+    "energy_variable": "sqrt_s"
+   }
+  },
+  "theory_spec_ref": "examples/recasting/run_j7.py#MODEL (illustrative toy, not a physical model)",
+  "parameter_point": {
+   "sqrt_s": 500.0
+  },
+  "model_point": {
+   "m_X_gev": 300.0,
+   "g": 1.0
+  },
+  "representation": "numerical",
+  "values": {
+   "edges": [
+    150.0,
+    1000.0
+   ],
+   "values": [
+    2.0
+   ],
+   "unit": "pb"
+  },
+  "expression": "sigma = g^2 sigma_ref (m_ref / m_X)^4 (illustrative)",
+  "uncertainties": [
+   {
+    "name": "toy model",
+    "kind": "model-alternative",
+    "correlation": "unknown"
+   }
+  ],
+  "allowed_transformations": [
+   "multiply-by-normalization",
+   "forward-fold"
+  ]
+ }
+}

@@ -1,0 +1,32 @@
+{
+  "$comment": "Common envelope for every durable artifact and cross-skill handoff (task 7.10).",
+  "type": "object",
+  "required": ["contract_version", "artifact_id", "artifact_type", "objective", "versions", "provenance", "status", "unresolved_inputs", "extension"],
+  "properties": {
+    "contract_version": {"$ref": "common.json#/$defs/version"},
+    "artifact_id": {"$ref": "common.json#/$defs/nonempty"},
+    "artifact_type": {"type": "string", "enum": ["measurement-spec", "response", "theory-spec", "prediction", "comparison-spec",
+                                                  "statistical-result", "ml-artifact", "computational-run", "communication", "dataset-record"]},
+    "objective": {"$ref": "common.json#/$defs/nonempty"},
+    "bindings": {"type": "object", "additionalProperties": false, "properties": {
+      "experiments": {"type": "array", "items": {"$ref": "common.json#/$defs/binding"}},
+      "theory": {"type": "array", "items": {"$ref": "common.json#/$defs/binding"}}}},
+    "versions": {"type": "object", "required": ["plugin", "contracts"], "properties": {
+      "plugin": {"$ref": "common.json#/$defs/version"}, "contracts": {"$ref": "common.json#/$defs/version"},
+      "profiles": {"type": "object", "additionalProperties": {"$ref": "common.json#/$defs/version"}}}},
+    "provenance": {"type": "object", "required": ["producer_skill", "created"], "properties": {
+      "producer_skill": {"type": "string", "enum": ["hep-analysis", "detector-response", "hep-theory", "hep-statistics",
+                                                     "hep-computing", "physics-ml", "research-communication"]},
+      "created": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}"},
+      "evidence_ids": {"type": "array", "items": {"$ref": "common.json#/$defs/namespaced_id"}}}},
+    "inputs": {"type": "array", "items": {"type": "object", "required": ["ref"], "properties": {
+      "ref": {"type": "string"}, "artifact_type": {"type": "string"}, "sha256": {"type": "string"},
+      "status": {"type": "array", "items": {"type": "string", "x-vocab": "artifact_statuses"}}}}},
+    "outputs": {"type": "array", "items": {"type": "object", "required": ["ref"]}},
+    "status": {"type": "array", "items": {"type": "string", "x-vocab": "artifact_statuses"}, "minItems": 1},
+    "handoff": {"type": "object", "required": ["to_skill", "artifact_path"], "properties": {
+      "to_skill": {"type": "string"}, "artifact_path": {"type": "string"}, "reason": {"type": "string"}}},
+    "unresolved_inputs": {"type": "array", "items": {"type": "string"}},
+    "extension": {"type": "object"}
+  }
+}

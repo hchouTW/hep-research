@@ -1,0 +1,13 @@
+{"$comment": "Owner: hep-theory.",
+ "type": "object",
+ "required": ["observable", "parameter_point", "representation", "uncertainties", "allowed_transformations"],
+ "properties": {
+  "observable": {"$ref": "common.json#/$defs/observable_spec"},
+  "theory_spec_ref": {"type": "string"},
+  "parameter_point": {"type": "object"},
+  "representation": {"type": "string", "enum": ["symbolic", "numerical", "grid"]},
+  "values": {"$ref": "common.json#/$defs/binned_data"},
+  "expression": {"type": "string"},
+  "uncertainties": {"type": "array", "items": {"$ref": "common.json#/$defs/uncertainty_component"}},
+  "allowed_transformations": {"type": "array", "items": {"type": "string"}}
+ }}

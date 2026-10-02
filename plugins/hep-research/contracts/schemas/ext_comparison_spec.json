@@ -1,0 +1,12 @@
+{"$comment": "Owner: contracts layer (gate) + hep-statistics (inference).",
+ "type": "object",
+ "required": ["dataset_bindings", "prediction_bindings", "gate_result", "transformations", "correlations", "inference_assumptions"],
+ "properties": {
+  "dataset_bindings": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+  "prediction_bindings": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+  "gate_result": {"type": "object", "required": ["comparable"], "properties": {"comparable": {"type": "boolean"}, "mismatches": {"type": "array"}}},
+  "transformations": {"type": "array", "items": {"type": "object", "required": ["kind", "owner"]}},
+  "correlations": {"type": "array", "items": {"type": "object"}},
+  "inference_assumptions": {"type": "array", "items": {"type": "string"}},
+  "limits": {"type": "array", "items": {"type": "string"}}
+ }}

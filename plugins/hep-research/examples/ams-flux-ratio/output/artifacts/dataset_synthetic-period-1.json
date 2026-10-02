@@ -1,0 +1,130 @@
+{
+ "contract_version": "1.0.0",
+ "bindings": {
+  "experiments": [
+   {
+    "profile": "experiment:ams-02",
+    "version": "1.0.0"
+   }
+  ],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.1.0",
+  "contracts": "1.0.0",
+  "profiles": {
+   "experiment:ams-02": "1.0.0"
+  }
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "artifact_id": "synthetic-path-a-ratio-synthetic-period-1",
+ "artifact_type": "dataset-record",
+ "objective": "SYNTHETIC He/p ratio, synthetic-period-1",
+ "status": [
+  "synthetic"
+ ],
+ "provenance": {
+  "producer_skill": "hep-analysis",
+  "created": "2026-10-02"
+ },
+ "extension": {
+  "dataset_id": "ams02:synthetic-path-a-ratio-synthetic-period-1",
+  "source_evidence_ids": [],
+  "observable": {
+   "quantity": "ratio",
+   "species": [
+    {
+     "name": "helium",
+     "abs_Z": 2,
+     "A": 4
+    },
+    {
+     "name": "proton",
+     "abs_Z": 1,
+     "A": 1
+    }
+   ],
+   "variables": [
+    {
+     "name": "rigidity",
+     "unit": "GV",
+     "edges": [
+      2.0,
+      3.0,
+      4.5,
+      7.0,
+      10.0,
+      15.0,
+      25.0,
+      40.0,
+      60.0,
+      100.0
+     ]
+    }
+   ],
+   "phase_space": {
+    "definition": "synthetic: downward-going particles inside the synthetic acceptance, R > 1.2 x maximum cutoff per bin lower edge",
+    "fiducial": true
+   },
+   "level": "crflux:top-of-instrument",
+   "frame": "detector location",
+   "normalization": {
+    "kind": "exposure",
+    "value": "not-applicable",
+    "convention": "ratio of exposure-normalized fluxes; exposure = acceptance x livetime x cutoff fraction per period"
+   },
+   "bin_semantics": "bin-averaged",
+   "unit": "1",
+   "conventions": {
+    "energy_variable": "rigidity",
+    "ams02:rigidity_definition": "R = pc/(Ze) in GV; p = |Z|R/c; rigidity is not momentum"
+   }
+  },
+  "data": {
+   "edges": [
+    2.0,
+    3.0,
+    4.5,
+    7.0,
+    10.0,
+    15.0,
+    25.0,
+    40.0,
+    60.0,
+    100.0
+   ],
+   "values": [
+    0.16999550613380537,
+    0.17298262048575616,
+    0.18169329405015508,
+    0.18864079950298418,
+    0.19563839350955614,
+    0.20927395417922212,
+    0.2308416381641652,
+    0.2369199146382435,
+    0.21696494048631246
+   ],
+   "unit": "1",
+   "uncertainties": [
+    {
+     "name": "total",
+     "kind": "statistical",
+     "correlation": "covariance",
+     "covariance_ref": "results.json#ratio/synthetic-period-1/covariance"
+    }
+   ]
+  },
+  "covariance": {
+   "status": "present",
+   "ref": "results.json#ratio/synthetic-period-1/covariance"
+  },
+  "period": {
+   "start": "synthetic-period-1",
+   "end": "synthetic-period-1"
+  },
+  "status": "synthetic",
+  "experiment_profile": "experiment:ams-02"
+ }
+}

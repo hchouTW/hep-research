@@ -1,0 +1,1576 @@
+{
+ "schema": "1",
+ "generated": "2026-10-02",
+ "source": "INSPIRE-HEP literature API, q='collaboration:AMS and document_type:article'; open-access locations from OpenAlex",
+ "note": "Metadata only. 'generation' is a heuristic. 'pdf_candidates' are tried in order; a publisher PDF is preferred, arXiv and repository copies are labeled as such when cached. No PDFs are stored in this repository.",
+ "papers": [
+  {
+   "key": "10.1016_S0370-2693_99_00874-6",
+   "doi": "10.1016/S0370-2693(99)00874-6",
+   "inspire_id": 522697,
+   "title": "Search for anti-helium in cosmic rays",
+   "journal_ref": "Phys.Lett.B 461 (1999) 387",
+   "date": "1999",
+   "generation": "ams-01-or-earlier",
+   "publisher": "elsevier",
+   "oa_status": "green",
+   "source_ids": [
+    "ams02:S22"
+   ],
+   "arxiv": [
+    "hep-ex/0002048"
+   ],
+   "pdf_candidates": [
+    {
+     "url": "https://arxiv.org/pdf/hep-ex/0002048",
+     "kind": "arxiv"
+    }
+   ],
+   "supplement_pages": []
+  },
+  {
+   "key": "10.1016_S0370-2693_00_00588-8",
+   "doi": "10.1016/S0370-2693(00)00588-8",
+   "inspire_id": 533073,
+   "title": "Leptons in near earth orbit",
+   "journal_ref": "Phys.Lett.B 484 (2000) 10",
+   "date": "2000",
+   "generation": "ams-01-or-earlier",
+   "publisher": "elsevier",
+   "oa_status": "green",
+   "source_ids": [],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://in2p3.hal.science/in2p3-00005529/document",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": []
+  },
+  {
+   "key": "10.1016_S0370-2693_00_00970-9",
+   "doi": "10.1016/S0370-2693(00)00970-9",
+   "inspire_id": 536945,
+   "title": "Cosmic protons",
+   "journal_ref": "Phys.Lett.B 490 (2000) 27",
+   "date": "2000",
+   "generation": "ams-01-or-earlier",
+   "publisher": "elsevier",
+   "oa_status": "bronze",
+   "source_ids": [],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://www.sciencedirect.com/science/article/pii/S0370269300009709",
+     "kind": "repository"
+    },
+    {
+     "url": "https://in2p3.hal.science/in2p3-00006367v1/document",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": []
+  },
+  {
+   "key": "10.1016_S0370-2693_99_01427-6",
+   "doi": "10.1016/S0370-2693(99)01427-6",
+   "inspire_id": 524104,
+   "title": "Protons in near earth orbit",
+   "journal_ref": "Phys.Lett.B 472 (2000) 215",
+   "date": "2000-02",
+   "generation": "ams-01-or-earlier",
+   "publisher": "elsevier",
+   "oa_status": "green",
+   "source_ids": [],
+   "arxiv": [
+    "hep-ex/0002049"
+   ],
+   "pdf_candidates": [
+    {
+     "url": "https://arxiv.org/pdf/hep-ex/0002049",
+     "kind": "arxiv"
+    }
+   ],
+   "supplement_pages": []
+  },
+  {
+   "key": "10.1016_S0370-2693_00_01193-X",
+   "doi": "10.1016/S0370-2693(00)01193-X",
+   "inspire_id": 551446,
+   "title": "Helium in near Earth orbit",
+   "journal_ref": "Phys.Lett.B 494 (2000) 193",
+   "date": "2000-11",
+   "generation": "ams-01-or-earlier",
+   "publisher": "elsevier",
+   "oa_status": "green",
+   "source_ids": [],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://in2p3.hal.science/in2p3-00007897/document",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": []
+  },
+  {
+   "key": "10.1016_S0370-2693_01_00907-8",
+   "doi": "10.1016/S0370-2693(01)00907-8",
+   "inspire_id": 554589,
+   "title": "Calculation of atmospheric neutrino flux",
+   "journal_ref": "Phys.Lett.B 516 (2001) 213",
+   "date": "2001-03",
+   "generation": "ams-01-or-earlier",
+   "publisher": "elsevier",
+   "oa_status": "green",
+   "source_ids": [],
+   "arxiv": [
+    "hep-ph/0103286"
+   ],
+   "pdf_candidates": [
+    {
+     "url": "https://arxiv.org/pdf/hep-ph/0103286",
+     "kind": "arxiv"
+    }
+   ],
+   "supplement_pages": []
+  },
+  {
+   "key": "10.1016_S0370-1573_02_00013-3",
+   "doi": "10.1016/S0370-1573(02)00013-3",
+   "inspire_id": 599412,
+   "title": "The Alpha Magnetic Spectrometer (AMS) on the International Space Station. I: Results from the test flight on the space shuttle",
+   "journal_ref": "Phys.Rept. 366 (2002) 331",
+   "date": "2002-04-09",
+   "generation": "ams-01-or-earlier",
+   "publisher": "elsevier",
+   "oa_status": "green",
+   "source_ids": [
+    "ams02:S23"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [],
+   "supplement_pages": []
+  },
+  {
+   "key": "10.1016_j.nimb.2005.01.015",
+   "doi": "10.1016/j.nimb.2005.01.015",
+   "inspire_id": 652968,
+   "title": "A Study of cosmic ray secondaries induced by the Mir space station using AMS-01",
+   "journal_ref": "Nucl.Instrum.Meth.B 234 (2005) 321",
+   "date": "2004-06",
+   "generation": "ams-01-or-earlier",
+   "publisher": "elsevier",
+   "oa_status": "green",
+   "source_ids": [],
+   "arxiv": [
+    "hep-ex/0406065"
+   ],
+   "pdf_candidates": [
+    {
+     "url": "https://arxiv.org/pdf/hep-ex/0406065",
+     "kind": "arxiv"
+    }
+   ],
+   "supplement_pages": []
+  },
+  {
+   "key": "10.1109_TNS.2005.862781",
+   "doi": "10.1109/TNS.2005.862781",
+   "inspire_id": 705134,
+   "title": "The Alpha Magnetic Spectrometer on the International Space Station",
+   "journal_ref": "IEEE Trans.Nucl.Sci. 52 (2005) 2786",
+   "date": "2005",
+   "generation": "ams-02",
+   "publisher": "ieee",
+   "oa_status": "closed",
+   "source_ids": [],
+   "arxiv": [],
+   "pdf_candidates": [],
+   "supplement_pages": []
+  },
+  {
+   "key": "10.1016_j.physletb.2007.01.024",
+   "doi": "10.1016/j.physletb.2007.01.024",
+   "inspire_id": 745945,
+   "title": "Cosmic-ray positron fraction measurement from 1 to 30-GeV with AMS-01",
+   "journal_ref": "Phys.Lett.B 646 (2007) 145",
+   "date": "2007-03",
+   "generation": "ams-01-or-earlier",
+   "publisher": "elsevier",
+   "oa_status": "hybrid",
+   "source_ids": [],
+   "arxiv": [
+    "astro-ph/0703154"
+   ],
+   "pdf_candidates": [
+    {
+     "url": "https://linkinghub.elsevier.com/science/article/pii/S0370269307001104/pdfft?md5=16ac188e2da77f1301e90ed1d0e98d7c&pid=1-s2.0-S0370269307001104-main.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://arxiv.org/pdf/astro-ph/0703154",
+     "kind": "arxiv"
+    },
+    {
+     "url": "https://iris.unitn.it/bitstream/11572/195491/5/1-s2.0-S0370269307001104-main.pdf",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": []
+  },
+  {
+   "key": "10.1016_j.asr.2009.08.005",
+   "doi": "10.1016/j.asr.2009.08.005",
+   "inspire_id": 845350,
+   "title": "Results of 2007 test beam of AMS-02 Electromagnetic Calorimeter",
+   "journal_ref": "Adv.Space Res. 45 (2010) 112",
+   "date": "2010",
+   "generation": "ams-02",
+   "publisher": "elsevier",
+   "oa_status": "closed",
+   "source_ids": [],
+   "arxiv": [],
+   "pdf_candidates": [],
+   "supplement_pages": []
+  },
+  {
+   "key": "10.1088_0004-637X_724_1_329",
+   "doi": "10.1088/0004-637X/724/1/329",
+   "inspire_id": 866582,
+   "title": "Relative Composition and Energy Spectra of Light Nuclei in Cosmic Rays. Results from AMS-01",
+   "journal_ref": "Astrophys.J. 724 (2010) 329",
+   "date": "2010-08",
+   "generation": "ams-01-or-earlier",
+   "publisher": "iop",
+   "oa_status": "green",
+   "source_ids": [],
+   "arxiv": [
+    "1008.5051"
+   ],
+   "pdf_candidates": [
+    {
+     "url": "https://arxiv.org/pdf/1008.5051",
+     "kind": "arxiv"
+    },
+    {
+     "url": "https://iopscience.iop.org/article/10.1088/0004-637X/724/1/329/pdf",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": []
+  },
+  {
+   "key": "inspire-867676",
+   "doi": null,
+   "inspire_id": 867676,
+   "title": "Measurement of the Cosmic Ray B/C Ratio with the AMS-01 Experiment",
+   "journal_ref": "",
+   "date": "2010-09",
+   "generation": "ams-01-or-earlier",
+   "publisher": "unknown",
+   "oa_status": null,
+   "source_ids": [],
+   "arxiv": [
+    "1009.1908"
+   ],
+   "pdf_candidates": [
+    {
+     "url": "https://arxiv.org/pdf/1009.1908",
+     "kind": "arxiv"
+    }
+   ],
+   "supplement_pages": []
+  },
+  {
+   "key": "10.1088_0004-637X_736_2_105",
+   "doi": "10.1088/0004-637X/736/2/105",
+   "inspire_id": 913484,
+   "title": "Isotopic Composition of Light Nuclei in Cosmic Rays: Results from AMS-01",
+   "journal_ref": "Astrophys.J. 736 (2011) 105",
+   "date": "2011-06",
+   "generation": "ams-01-or-earlier",
+   "publisher": "iop",
+   "oa_status": "bronze",
+   "source_ids": [],
+   "arxiv": [
+    "1106.2269"
+   ],
+   "pdf_candidates": [
+    {
+     "url": "https://iopscience.iop.org/article/10.1088/0004-637X/736/2/105/pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://arxiv.org/pdf/1106.2269",
+     "kind": "arxiv"
+    },
+    {
+     "url": "https://cds.cern.ch/record/1399726",
+     "kind": "repository"
+    },
+    {
+     "url": "https://iopscience.iop.org/0004-637X/736/2/105/pdf/0004-637X_736_2_105.pdf",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": []
+  },
+  {
+   "key": "10.1103_PhysRevLett.110.141102",
+   "doi": "10.1103/PhysRevLett.110.141102",
+   "inspire_id": 1227034,
+   "title": "First Result from the Alpha Magnetic Spectrometer on the International Space Station: Precision Measurement of the Positron Fraction in Primary Cosmic Rays of 0.5–350 GeV",
+   "journal_ref": "Phys.Rev.Lett. 110 (2013) 141102",
+   "date": "2013-04-03",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "bronze",
+   "source_ids": [
+    "ams02:S02"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.110.141102",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.110.141102",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://in2p3.hal.science/in2p3-00807613v1/file/PhysRevLett.110.141102-accepted.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://hdl.handle.net/10281/44680",
+     "kind": "repository"
+    },
+    {
+     "url": "https://hdl.handle.net/11365/981934",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.110.141102"
+   ]
+  },
+  {
+   "key": "inspire-1258536",
+   "doi": null,
+   "inspire_id": 1258536,
+   "title": "AMS-02 provides a precise measure of cosmic rays",
+   "journal_ref": "CERN Cour. 53 (2013) 23",
+   "date": "2013-09-27",
+   "generation": "ams-02",
+   "publisher": "unknown",
+   "oa_status": null,
+   "source_ids": [],
+   "arxiv": [],
+   "pdf_candidates": [],
+   "supplement_pages": []
+  },
+  {
+   "key": "10.1103_PhysRevLett.113.121101",
+   "doi": "10.1103/PhysRevLett.113.121101",
+   "inspire_id": 1317847,
+   "title": "High Statistics Measurement of the Positron Fraction in Primary Cosmic Rays of 0.5–500 GeV with the Alpha Magnetic Spectrometer on the International Space Station",
+   "journal_ref": "Phys.Rev.Lett. 113 (2014) 121101",
+   "date": "2014-09-18",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "bronze",
+   "source_ids": [
+    "ams02:S03"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.113.121101",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.113.121101",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://iris.unitn.it/bitstream/11572/113696/1/PhysRevLett.113.121101-accepted.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://hdl.handle.net/11365/981932",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.113.121101"
+   ]
+  },
+  {
+   "key": "10.1103_PhysRevLett.113.121102",
+   "doi": "10.1103/PhysRevLett.113.121102",
+   "inspire_id": 1317848,
+   "title": "Electron and Positron Fluxes in Primary Cosmic Rays Measured with the Alpha Magnetic Spectrometer on the International Space Station",
+   "journal_ref": "Phys.Rev.Lett. 113 (2014) 121102",
+   "date": "2014-09-18",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S03"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.113.121102",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.113.121102",
+     "kind": "publisher"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.113.121102"
+   ]
+  },
+  {
+   "key": "10.1103_PhysRevLett.113.221102",
+   "doi": "10.1103/PhysRevLett.113.221102",
+   "inspire_id": 1331153,
+   "title": "Precision Measurement of the ($e^+ + e^−$) Flux in Primary Cosmic Rays from 0.5 GeV to 1 TeV with the Alpha Magnetic Spectrometer on the International Space Station",
+   "journal_ref": "Phys.Rev.Lett. 113 (2014) 221102",
+   "date": "2014-11-26",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "bronze",
+   "source_ids": [
+    "ams02:S03"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.113.221102",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.113.221102",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://hdl.handle.net/10281/55518",
+     "kind": "repository"
+    },
+    {
+     "url": "https://hdl.handle.net/11365/981933",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.113.221102"
+   ]
+  },
+  {
+   "key": "10.1103_PhysRevLett.114.171103",
+   "doi": "10.1103/PhysRevLett.114.171103",
+   "inspire_id": 1365898,
+   "title": "Precision Measurement of the Proton Flux in Primary Cosmic Rays from Rigidity 1 GV to 1.8 TV with the Alpha Magnetic Spectrometer on the International Space Station",
+   "journal_ref": "Phys.Rev.Lett. 114 (2015) 171103",
+   "date": "2015-04-30",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S06"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.114.171103",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.114.171103",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://iris.unitn.it/bitstream/11572/195456/2/2015_PhysRevLett.114.171103-2.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://hdl.handle.net/11365/981871",
+     "kind": "repository"
+    },
+    {
+     "url": "https://www.utupub.fi/bitstream/10024/190674/1/Phys_Rev_Lett_114_171103_2015.pdf",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.114.171103"
+   ]
+  },
+  {
+   "key": "10.1103_PhysRevLett.115.211101",
+   "doi": "10.1103/PhysRevLett.115.211101",
+   "inspire_id": 1405556,
+   "title": "Precision Measurement of the Helium Flux in Primary Cosmic Rays of Rigidities 1.9 GV to 3 TV with the Alpha Magnetic Spectrometer on the International Space Station",
+   "journal_ref": "Phys.Rev.Lett. 115 (2015) 211101",
+   "date": "2015-11-17",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S07"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.115.211101",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.115.211101",
+     "kind": "publisher"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.115.211101"
+   ]
+  },
+  {
+   "key": "10.1103_PhysRevLett.117.091103",
+   "doi": "10.1103/PhysRevLett.117.091103",
+   "inspire_id": 1484387,
+   "title": "Antiproton Flux, Antiproton-to-Proton Flux Ratio, and Properties of Elementary Particle Fluxes in Primary Cosmic Rays Measured with the Alpha Magnetic Spectrometer on the International Space Station",
+   "journal_ref": "Phys.Rev.Lett. 117 (2016) 091103",
+   "date": "2016-08-26",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S08"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.117.091103",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.117.091103",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://hdl.handle.net/10281/130322",
+     "kind": "repository"
+    },
+    {
+     "url": "https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.117.091103",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://cds.cern.ch/record/2261344/files/10.1103_PhysRevLett.117.091103.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://hdl.handle.net/11572/153789",
+     "kind": "repository"
+    },
+    {
+     "url": "https://iris.unitn.it/bitstream/11572/354267/1/2016_PhysRevLett.117.091103-Antip.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://www.utupub.fi/bitstream/10024/169731/1/Antiproton%20Flux%2c%20Antiproton-to-Proton%20Flux%20Ratio%2c%20and%20Properties%20of%20Elementary%20Particle%20Fluxes%20in%20Primary%20Cosmic%20Rays%20Measured%20with%20the%20Alpha%20Magnetic%20Spectrometer%20on%20the%20International%20Space%20Station.pdf",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.117.091103"
+   ]
+  },
+  {
+   "key": "10.1103_PhysRevLett.117.231102",
+   "doi": "10.1103/PhysRevLett.117.231102",
+   "inspire_id": 1501164,
+   "title": "Precision Measurement of the Boron to Carbon Flux Ratio in Cosmic Rays from 1.9 GV to 2.6 TV with the Alpha Magnetic Spectrometer on the International Space Station",
+   "journal_ref": "Phys.Rev.Lett. 117 (2016) 231102",
+   "date": "2016-11-28",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S10"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.117.231102",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.117.231102",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://iris.unitn.it/bitstream/11572/195474/2/2016_PhysRevLett.117.231102.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://www.utupub.fi/bitstream/10024/169528/1/Phys_Rev_Lett_117_231102_2016.pdf",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.117.231102"
+   ]
+  },
+  {
+   "key": "10.1103_PhysRevLett.119.251101",
+   "doi": "10.1103/PhysRevLett.119.251101",
+   "inspire_id": 1644260,
+   "title": "Observation of the Identical Rigidity Dependence of He, C, and O Cosmic Rays at High Rigidities by the Alpha Magnetic Spectrometer on the International Space Station",
+   "journal_ref": "Phys.Rev.Lett. 119 (2017) 251101",
+   "date": "2017-12-18",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S11"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.119.251101",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.119.251101",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.119.251101",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://iris.unitn.it/bitstream/11572/191758/1/PhysRevLett.119.251101.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://www.utupub.fi/bitstream/10024/160935/1/Phys_Rev_Lett_119_251101_2017.pdf",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.119.251101"
+   ]
+  },
+  {
+   "key": "10.1103_PhysRevLett.120.021101",
+   "doi": "10.1103/PhysRevLett.120.021101",
+   "inspire_id": 1648089,
+   "title": "Observation of New Properties of Secondary Cosmic Rays Lithium, Beryllium, and Boron by the Alpha Magnetic Spectrometer on the International Space Station",
+   "journal_ref": "Phys.Rev.Lett. 120 (2018) 021101",
+   "date": "2018-01-12",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S54"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.120.021101",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.120.021101",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://iris.unitn.it/bitstream/11572/193552/1/PhysRevLett.120.021101.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://www.utupub.fi/bitstream/10024/187144/1/PhysRevLett.120.pdf",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.120.021101"
+   ]
+  },
+  {
+   "key": "10.1103_PhysRevLett.121.051101",
+   "doi": "10.1103/PhysRevLett.121.051101",
+   "inspire_id": 1685025,
+   "title": "Observation of Fine Time Structures in the Cosmic Proton and Helium Fluxes with the Alpha Magnetic Spectrometer on the International Space Station",
+   "journal_ref": "Phys.Rev.Lett. 121 (2018) 051101",
+   "date": "2018-08-01",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S16",
+    "ams02:S41"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.121.051101",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.121.051101",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://open.metu.edu.tr/bitstream/handle/11511/28440/index.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://hdl.handle.net/10400.26/27697",
+     "kind": "repository"
+    },
+    {
+     "url": "https://iris.unitn.it/bitstream/11572/212679/2/PhysRevLett.121.051101.pdf",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.121.051101"
+   ]
+  },
+  {
+   "key": "10.1103_PhysRevLett.121.051102",
+   "doi": "10.1103/PhysRevLett.121.051102",
+   "inspire_id": 1685021,
+   "title": "Observation of Complex Time Structures in the Cosmic-Ray Electron and Positron Fluxes with the Alpha Magnetic Spectrometer on the International Space Station",
+   "journal_ref": "Phys.Rev.Lett. 121 (2018) 051102",
+   "date": "2018-08-01",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S42"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.121.051102",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.121.051102",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://iris.unitn.it/bitstream/11572/212681/2/2018_PhysRevLett.121.051102.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://www.utupub.fi/bitstream/10024/193122/1/PhysRevLett.121.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://www.utupub.fi/bitstream/10024/193949/1/PhysRevLett.121.pdf",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.121.051102"
+   ]
+  },
+  {
+   "key": "10.1103_PhysRevLett.121.051103",
+   "doi": "10.1103/PhysRevLett.121.051103",
+   "inspire_id": 1685026,
+   "title": "Precision Measurement of Cosmic-Ray Nitrogen and its Primary and Secondary Components with the Alpha Magnetic Spectrometer on the International Space Station",
+   "journal_ref": "Phys.Rev.Lett. 121 (2018) 051103",
+   "date": "2018-08-01",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S55"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.121.051103",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.121.051103",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://iris.unitn.it/bitstream/11572/212677/2/PhysRevLett.121.051103.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://www.utupub.fi/bitstream/10024/172820/1/PhysRevLett.121.pdf",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.121.051103"
+   ]
+  },
+  {
+   "key": "10.1103_PhysRevLett.122.041102",
+   "doi": "10.1103/PhysRevLett.122.041102",
+   "inspire_id": 1718083,
+   "title": "Towards Understanding the Origin of Cosmic-Ray Positrons",
+   "journal_ref": "Phys.Rev.Lett. 122 (2019) 041102",
+   "date": "2019-01-30",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S04"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.122.041102",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.122.041102",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://iris.unitn.it/bitstream/11572/226282/1/PhysRevLett.122.041102.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://research.rug.nl/files/144164311/PhysRevLett.122.041102.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://www.utupub.fi/bitstream/10024/159193/1/PhysRevLett.122.041102.pdf",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.122.041102"
+   ]
+  },
+  {
+   "key": "10.1103_PhysRevLett.122.101101",
+   "doi": "10.1103/PhysRevLett.122.101101",
+   "inspire_id": 1725636,
+   "title": "Towards Understanding the Origin of Cosmic-Ray Electrons",
+   "journal_ref": "Phys.Rev.Lett. 122 (2019) 101101",
+   "date": "2019-03-13",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S05"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.122.101101",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.122.101101",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://iris.unitn.it/bitstream/11572/230954/1/PhysRevLett.122.101101.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://www.utupub.fi/bitstream/10024/159875/1/PhysRevLett.122.101101.pdf",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.122.101101"
+   ]
+  },
+  {
+   "key": "10.1103_PhysRevLett.123.181102",
+   "doi": "10.1103/PhysRevLett.123.181102",
+   "inspire_id": 1762930,
+   "title": "Properties of Cosmic Helium Isotopes Measured by the Alpha Magnetic Spectrometer",
+   "journal_ref": "Phys.Rev.Lett. 123 (2019) 181102",
+   "date": "2019-11-02",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S12"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.123.181102",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.123.181102",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://dspace.mit.edu/bitstreams/cbc00eef-4f65-44cd-a92d-5c367f01500a/download",
+     "kind": "repository"
+    },
+    {
+     "url": "https://iris.unitn.it/bitstream/11572/244603/1/PhysRevLett.123.181102.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://publications.rwth-aachen.de/record/774495",
+     "kind": "repository"
+    },
+    {
+     "url": "https://www.utupub.fi/bitstream/10024/157418/1/PhysRevLett.123.181102.pdf",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.123.181102"
+   ]
+  },
+  {
+   "key": "10.1016_j.nima.2020.163657",
+   "doi": "10.1016/j.nima.2020.163657",
+   "inspire_id": 1798598,
+   "title": "Space application: The AMS RICH",
+   "journal_ref": "Nucl.Instrum.Meth.A 970 (2020) 163657",
+   "date": "2020-03-06",
+   "generation": "ams-02",
+   "publisher": "elsevier",
+   "oa_status": "closed",
+   "source_ids": [],
+   "arxiv": [],
+   "pdf_candidates": [],
+   "supplement_pages": []
+  },
+  {
+   "key": "10.1103_PhysRevLett.124.211102",
+   "doi": "10.1103/PhysRevLett.124.211102",
+   "inspire_id": 1798811,
+   "title": "Properties of Neon, Magnesium, and Silicon Primary Cosmic Rays Results from the Alpha Magnetic Spectrometer",
+   "journal_ref": "Phys.Rev.Lett. 124 (2020) 211102",
+   "date": "2020-05-30",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S56"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.124.211102",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.124.211102",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://dspace.mit.edu/bitstreams/bd3c3c19-9091-4b85-b7e2-e23c910e209c/download",
+     "kind": "repository"
+    },
+    {
+     "url": "https://archive-ouverte.unige.ch/unige:137447",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.124.211102"
+   ]
+  },
+  {
+   "key": "10.1103_PhysRevLett.126.041104",
+   "doi": "10.1103/PhysRevLett.126.041104",
+   "inspire_id": 1844651,
+   "title": "Properties of Iron Primary Cosmic Rays: Results from the Alpha Magnetic Spectrometer",
+   "journal_ref": "Phys.Rev.Lett. 126 (2021) 041104",
+   "date": "2021-01-29",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S57"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.126.041104",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.126.041104",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://hdl.handle.net/11572/290336",
+     "kind": "repository"
+    },
+    {
+     "url": "https://research.rug.nl/files/176975606/PhysRevLett.126.041104.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://www.utupub.fi/bitstream/10024/157917/1/PhysRevLett.126.041104.pdf",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.126.041104"
+   ]
+  },
+  {
+   "key": "10.1016_j.physrep.2020.09.003",
+   "doi": "10.1016/j.physrep.2020.09.003",
+   "inspire_id": 1841796,
+   "title": "The Alpha Magnetic Spectrometer (AMS) on the international space station: Part II — Results from the first seven years",
+   "journal_ref": "Phys.Rept. 894 (2021) 1",
+   "date": "2021-02-07",
+   "generation": "ams-02",
+   "publisher": "elsevier",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S01"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://www.sciencedirect.com/science/article/am/pii/S0370157320303434?via%3Dihub",
+     "kind": "repository"
+    },
+    {
+     "url": "https://iris.unitn.it/bitstream/11572/275670/4/2021_Pysics_Report.pdf",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": []
+  },
+  {
+   "key": "10.1103_PhysRevLett.126.081102",
+   "doi": "10.1103/PhysRevLett.126.081102",
+   "inspire_id": 1849433,
+   "title": "Properties of Heavy Secondary Fluorine Cosmic Rays: Results from the Alpha Magnetic Spectrometer",
+   "journal_ref": "Phys.Rev.Lett. 126 (2021) 081102",
+   "date": "2021-02-25",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S58"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.126.081102",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.126.081102",
+     "kind": "publisher"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.126.081102"
+   ]
+  },
+  {
+   "key": "10.1103_PhysRevLett.127.021101",
+   "doi": "10.1103/PhysRevLett.127.021101",
+   "inspire_id": 1879225,
+   "title": "Properties of a New Group of Cosmic Nuclei: Results from the Alpha Magnetic Spectrometer on Sodium, Aluminum, and Nitrogen",
+   "journal_ref": "Phys.Rev.Lett. 127 (2021) 02101",
+   "date": "2021-07-07",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S59"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.127.021101",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.127.021101",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://dspace.mit.edu/bitstream/1721.1/141734.2/4/PhysRevLett.127.021101.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://iris.unitn.it/bitstream/11572/312674/1/PhysRevLett.127.021101.pdf",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.127.021101"
+   ]
+  },
+  {
+   "key": "10.1103_PhysRevLett.127.271102",
+   "doi": "10.1103/PhysRevLett.127.271102",
+   "inspire_id": 1997584,
+   "title": "Periodicities in the Daily Proton Fluxes from 2011 to 2019 Measured by the Alpha Magnetic Spectrometer on the International Space Station from 1 to 100 GV",
+   "journal_ref": "Phys.Rev.Lett. 127 (2021) 271102",
+   "date": "2021-12-27",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S43"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.127.271102",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.127.271102",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://iris.unitn.it/bitstream/11572/326913/1/PhysRevLett.127.271102.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://www.utupub.fi/bitstream/10024/164559/1/PhysRevLett.127.271102.pdf",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.127.271102"
+   ]
+  },
+  {
+   "key": "10.1103_PhysRevLett.128.231102",
+   "doi": "10.1103/PhysRevLett.128.231102",
+   "inspire_id": 2094254,
+   "title": "Properties of Daily Helium Fluxes",
+   "journal_ref": "Phys.Rev.Lett. 128 (2022) 231102",
+   "date": "2022-06-10",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S44"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.128.231102",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.128.231102",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://iris.unitn.it/bitstream/11572/352362/1/2022_PhysRevLett.128.231102_He_daily.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://www.utupub.fi/bitstream/10024/164680/1/PhysRevLett.128.231102.pdf",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.128.231102"
+   ]
+  },
+  {
+   "key": "10.3103_S0027134922020126",
+   "doi": "10.3103/S0027134922020126",
+   "inspire_id": 2149965,
+   "title": "Latest Results of the Alpha Magnetic Spectrometer on the International Space Station",
+   "journal_ref": "Moscow Univ.Phys.Bull. 77 (2022) 71",
+   "date": "2022-09-09",
+   "generation": "ams-02",
+   "publisher": "springer",
+   "oa_status": "closed",
+   "source_ids": [],
+   "arxiv": [],
+   "pdf_candidates": [],
+   "supplement_pages": []
+  },
+  {
+   "key": "10.1103_PhysRevLett.130.161001",
+   "doi": "10.1103/PhysRevLett.130.161001",
+   "inspire_id": 2651726,
+   "title": "Temporal Structures in Electron Spectra and Charge Sign Effects in Galactic Cosmic Rays",
+   "journal_ref": "Phys.Rev.Lett. 130 (2023) 161001",
+   "date": "2023-04-17",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S45"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.130.161001",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.130.161001",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://boa.unimib.it/bitstream/10281/411797/2/10281-411797_VoR.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://cris.unibo.it/bitstream/11585/962070/1/PhysRevLett.130.161001.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://iris.unitn.it/bitstream/11572/380210/1/PhysRevLett.130.161001.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://access.archive-ouverte.unige.ch/access/metadata/1e10ab56-98e0-46a6-9b52-59600ff69e8f/download",
+     "kind": "repository"
+    },
+    {
+     "url": "https://www.utupub.fi/bitstream/10024/184345/1/TorstiEtAl2023TemporalStructuresInElectronSpectra.pdf",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.130.161001"
+   ]
+  },
+  {
+   "key": "10.1103_PhysRevLett.130.211002",
+   "doi": "10.1103/PhysRevLett.130.211002",
+   "inspire_id": 2662857,
+   "title": "Properties of Cosmic-Ray Sulfur and Determination of the Composition of Primary Cosmic-Ray Carbon, Neon, Magnesium, and Sulfur: Ten-Year Results from the Alpha Magnetic Spectrometer",
+   "journal_ref": "Phys.Rev.Lett. 130 (2023) 211002",
+   "date": "2023-05-25",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S60"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.130.211002",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.130.211002",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://boa.unimib.it/bitstream/10281/417176/2/Aguilar-2023-Physical%20Review%20Letters-VoR.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://cds.cern.ch/record/2861092/files/PhysRevLett.130.211002.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://cris.unibo.it/bitstream/11585/962084/1/PhysRevLett.130.211002.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://iris.unitn.it/bitstream/11572/393254/1/PhysRevLett.130.211002.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://access.archive-ouverte.unige.ch/access/metadata/2fa724bd-65bc-4a8f-8f52-33a497b86f8b/download",
+     "kind": "repository"
+    },
+    {
+     "url": "https://www.utupub.fi/bitstream/10024/185741/1/PhysRevLett.130.211002.pdf",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.130.211002"
+   ]
+  },
+  {
+   "key": "10.1016_j.nima.2023.168434",
+   "doi": "10.1016/j.nima.2023.168434",
+   "inspire_id": 2675429,
+   "title": "The RICH detector of the AMS-02 experiment aboard the International Space Station",
+   "journal_ref": "Nucl.Instrum.Meth.A 1055 (2023) 168434",
+   "date": "2023-06-19",
+   "generation": "ams-02",
+   "publisher": "elsevier",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S18"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [],
+   "supplement_pages": []
+  },
+  {
+   "key": "10.1103_PhysRevLett.131.151002",
+   "doi": "10.1103/PhysRevLett.131.151002",
+   "inspire_id": 2710091,
+   "title": "Temporal Structures in Positron Spectra and Charge-Sign Effects in Galactic Cosmic Rays",
+   "journal_ref": "Phys.Rev.Lett. 131 (2023) 151002",
+   "date": "2023-10-12",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S46"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.131.151002",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.131.151002",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://boa.unimib.it/bitstream/10281/443118/2/10281-443118_VoR.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://cds.cern.ch/record/2875972/files/Publication.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://cris.unibo.it/bitstream/11585/962058/1/PhysRevLett.131.151002.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://iris.unitn.it/bitstream/11572/399337/1/PhysRevLett.131.151002.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://www.utupub.fi/bitstream/10024/183332/1/PhysRevLett.131.151002.pdf",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.131.151002"
+   ]
+  },
+  {
+   "key": "10.1103_PhysRevLett.132.261001",
+   "doi": "10.1103/PhysRevLett.132.261001",
+   "inspire_id": 2802516,
+   "title": "Properties of Cosmic Deuterons Measured by the Alpha Magnetic Spectrometer",
+   "journal_ref": "Phys.Rev.Lett. 132 (2024) 261001",
+   "date": "2024-06-25",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S13"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.132.261001",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.132.261001",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://boa.unimib.it/bitstream/10281/488539/1/Aguilar-2024-Physical%20Review%20Letters-VoR.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://cds.cern.ch/record/2903405/files/PhysRevLett.132.261001.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://iris.unitn.it/bitstream/11572/419651/1/PhysRevLett.132.261001.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://www.utupub.fi/bitstream/10024/189868/1/PhysRevLett.132.261001.pdf",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.132.261001"
+   ]
+  },
+  {
+   "key": "10.1103_PhysRevLett.134.051001",
+   "doi": "10.1103/PhysRevLett.134.051001",
+   "inspire_id": 2875088,
+   "title": "Solar Modulation of Cosmic Nuclei over a Solar Cycle: Results from the Alpha Magnetic Spectrometer",
+   "journal_ref": "Phys.Rev.Lett. 134 (2025) 051001",
+   "date": "2025-02-03",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S20",
+    "ams02:S47"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.134.051001",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://cds.cern.ch/record/2924577/files/Publication.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://www.utupub.fi/bitstream/10024/188663/1/PhysRevLett.134.051001.pdf",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.134.051001"
+   ]
+  },
+  {
+   "key": "10.1103_PhysRevLett.134.051002",
+   "doi": "10.1103/PhysRevLett.134.051002",
+   "inspire_id": 2874917,
+   "title": "Antiprotons and Elementary Particles over a Solar Cycle: Results from the Alpha Magnetic Spectrometer",
+   "journal_ref": "Phys.Rev.Lett. 134 (2025) 051002",
+   "date": "2025-02-03",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S09"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.134.051002",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://cds.cern.ch/record/2924587/files/Publication.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://publications.rwth-aachen.de/record/1012903/files/1012903.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://www.utupub.fi/bitstream/10024/188726/1/PhysRevLett.134.051002.pdf",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.134.051002"
+   ]
+  },
+  {
+   "key": "10.1103_PhysRevLett.134.201001",
+   "doi": "10.1103/PhysRevLett.134.201001",
+   "inspire_id": 2923260,
+   "title": "Properties of Cosmic Lithium Isotopes Measured by the Alpha Magnetic Spectrometer",
+   "journal_ref": "Phys.Rev.Lett. 134 (2025) 201001",
+   "date": "2025-05-20",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S14"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.134.201001",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://link.aps.org/pdf/10.1103/PhysRevLett.134.201001",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://cds.cern.ch/record/2933217/files/publication.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://www.utupub.fi/bitstream/10024/189439/1/Torsti_etal_properties_of_cosmic_2025.pdf",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/PhysRevLett.134.201001"
+   ]
+  },
+  {
+   "key": "10.1016_j.nima.2026.171364",
+   "doi": "10.1016/j.nima.2026.171364",
+   "inspire_id": 3120138,
+   "title": "The AMS-02 RICH detector: Status, latest results, and physics prospects",
+   "journal_ref": "Nucl.Instrum.Meth.A 1086 (2026) 171364",
+   "date": "2026-02-05",
+   "generation": "ams-02",
+   "publisher": "elsevier",
+   "oa_status": "closed",
+   "source_ids": [
+    "ams02:S18"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [],
+   "supplement_pages": []
+  },
+  {
+   "key": "10.1103_d2vf-fw3v",
+   "doi": "10.1103/d2vf-fw3v",
+   "inspire_id": 3175455,
+   "title": "Properties of Heavy Cosmic Nuclei Phosphorus, Chlorine, Argon, Potassium, and Calcium: Results from the Alpha Magnetic Spectrometer",
+   "journal_ref": "Phys.Rev.Lett. 136 (2026) 241002",
+   "date": "2026-06-17",
+   "generation": "ams-02",
+   "publisher": "aps",
+   "oa_status": "hybrid",
+   "source_ids": [
+    "ams02:S15"
+   ],
+   "arxiv": [],
+   "pdf_candidates": [
+    {
+     "url": "https://journals.aps.org/prl/pdf/10.1103/d2vf-fw3v",
+     "kind": "publisher"
+    },
+    {
+     "url": "https://boa.unimib.it/bitstream/10281/613841/1/Aceituno%20et%20al-2026-Physical%20Review%20Letters-VoR.pdf",
+     "kind": "repository"
+    },
+    {
+     "url": "https://iris.unitn.it/bitstream/11572/496474/1/d2vf-fw3v.pdf",
+     "kind": "repository"
+    }
+   ],
+   "supplement_pages": [
+    "https://journals.aps.org/prl/supplemental/10.1103/d2vf-fw3v"
+   ]
+  }
+ ]
+}

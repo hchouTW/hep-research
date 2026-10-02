@@ -1,0 +1,290 @@
+{
+ "label": "SYNTHETIC and ILLUSTRATIVE: invented search record and toy model; no experiment, search or physical model",
+ "profiles_loaded": [],
+ "seed": 20261006,
+ "toys": 20000,
+ "criteria": {
+  "toy_vs_closed_form_rel": 0.03
+ },
+ "pass": {
+  "gate_comparable_all_masses": true,
+  "gate_rejects_double_efficiency": true,
+  "outside_validity_refused": true,
+  "toy_vs_closed_form": true,
+  "coupling_limit_weakens_with_mass": true,
+  "contracts": true
+ },
+ "record": {
+  "sqrt_s_gev": 500.0,
+  "integrated_luminosity_pb": 20.0,
+  "sr_edges_gev": [
+   150.0,
+   1000.0
+  ],
+  "n_obs": 9,
+  "background": 6.2,
+  "background_unc": 1.4,
+  "efficiency_map": {
+   "m_ref_gev": 300.0,
+   "a": 0.35,
+   "b_per_gev": 0.0004,
+   "validity_gev": [
+    200.0,
+    800.0
+   ]
+  }
+ },
+ "model": {
+  "sigma_ref_pb": 2.0,
+  "m_ref_gev": 300.0,
+  "power": 4
+ },
+ "cl": 0.95,
+ "gates": {
+  "200.0": {
+   "comparable": true,
+   "mismatches": [],
+   "final": {
+    "quantity": "event-count",
+    "unit": "1",
+    "level": "detector",
+    "edges": [
+     150.0,
+     1000.0
+    ],
+    "bin_semantics": "bin-integrated",
+    "fiducial": false,
+    "corrections": [
+     "normalization",
+     "efficiency",
+     "acceptance"
+    ]
+   }
+  },
+  "300.0": {
+   "comparable": true,
+   "mismatches": [],
+   "final": {
+    "quantity": "event-count",
+    "unit": "1",
+    "level": "detector",
+    "edges": [
+     150.0,
+     1000.0
+    ],
+    "bin_semantics": "bin-integrated",
+    "fiducial": false,
+    "corrections": [
+     "normalization",
+     "efficiency",
+     "acceptance"
+    ]
+   }
+  },
+  "400.0": {
+   "comparable": true,
+   "mismatches": [],
+   "final": {
+    "quantity": "event-count",
+    "unit": "1",
+    "level": "detector",
+    "edges": [
+     150.0,
+     1000.0
+    ],
+    "bin_semantics": "bin-integrated",
+    "fiducial": false,
+    "corrections": [
+     "normalization",
+     "efficiency",
+     "acceptance"
+    ]
+   }
+  },
+  "500.0": {
+   "comparable": true,
+   "mismatches": [],
+   "final": {
+    "quantity": "event-count",
+    "unit": "1",
+    "level": "detector",
+    "edges": [
+     150.0,
+     1000.0
+    ],
+    "bin_semantics": "bin-integrated",
+    "fiducial": false,
+    "corrections": [
+     "normalization",
+     "efficiency",
+     "acceptance"
+    ]
+   }
+  },
+  "600.0": {
+   "comparable": true,
+   "mismatches": [],
+   "final": {
+    "quantity": "event-count",
+    "unit": "1",
+    "level": "detector",
+    "edges": [
+     150.0,
+     1000.0
+    ],
+    "bin_semantics": "bin-integrated",
+    "fiducial": false,
+    "corrections": [
+     "normalization",
+     "efficiency",
+     "acceptance"
+    ]
+   }
+  },
+  "700.0": {
+   "comparable": true,
+   "mismatches": [],
+   "final": {
+    "quantity": "event-count",
+    "unit": "1",
+    "level": "detector",
+    "edges": [
+     150.0,
+     1000.0
+    ],
+    "bin_semantics": "bin-integrated",
+    "fiducial": false,
+    "corrections": [
+     "normalization",
+     "efficiency",
+     "acceptance"
+    ]
+   }
+  },
+  "800.0": {
+   "comparable": true,
+   "mismatches": [],
+   "final": {
+    "quantity": "event-count",
+    "unit": "1",
+    "level": "detector",
+    "edges": [
+     150.0,
+     1000.0
+    ],
+    "bin_semantics": "bin-integrated",
+    "fiducial": false,
+    "corrections": [
+     "normalization",
+     "efficiency",
+     "acceptance"
+    ]
+   }
+  }
+ },
+ "double_efficiency_variant": {
+  "comparable": false,
+  "mismatches": [
+   {
+    "field": "transformations[2]",
+    "prediction": "efficiency",
+    "measurement": null,
+    "reason": "'efficiency' already applied before folding; the response includes it too",
+    "resolve": "drop the separate correction"
+   }
+  ]
+ },
+ "outside_validity": {
+  "m_X_gev": 1000.0,
+  "refused": true,
+  "reason": "m_X = 1000.0 GeV is outside the efficiency map's validity range [200.0, 800.0] GeV; not extrapolated"
+ },
+ "signal_count_limit": {
+  "method": "CLs upper limit with the background nuisance profiled, seeded toys of q-tilde",
+  "observed_upper_limit": 9.57073232132316,
+  "toys": 20000,
+  "seed": 20261006
+ },
+ "closed_form_check": {
+  "sigma_b": 0.0,
+  "toy_limit": 9.568082219600626,
+  "closed_form_limit": 9.717838962549816,
+  "rel_diff": -0.015410498519919491
+ },
+ "limits": [
+  {
+   "m_X_gev": 200.0,
+   "sigma_g1_pb": 10.125,
+   "efficiency": 0.31,
+   "expected_signal_g1": 62.775,
+   "g2_upper": 0.15246088922856488,
+   "g_upper": 0.3904624043727704
+  },
+  {
+   "m_X_gev": 300.0,
+   "sigma_g1_pb": 2.0,
+   "efficiency": 0.35,
+   "expected_signal_g1": 14.0,
+   "g2_upper": 0.6836237372373686,
+   "g_upper": 0.8268154190854018
+  },
+  {
+   "m_X_gev": 400.0,
+   "sigma_g1_pb": 0.6328125,
+   "efficiency": 0.38999999999999996,
+   "expected_signal_g1": 4.9359375,
+   "g2_upper": 1.9389897707017483,
+   "g_upper": 1.3924761293112886
+  },
+  {
+   "m_X_gev": 500.0,
+   "sigma_g1_pb": 0.2592,
+   "efficiency": 0.43,
+   "expected_signal_g1": 2.2291199999999995,
+   "g2_upper": 4.293502512795705,
+   "g_upper": 2.072076859770338
+  },
+  {
+   "m_X_gev": 600.0,
+   "sigma_g1_pb": 0.125,
+   "efficiency": 0.47,
+   "expected_signal_g1": 1.1749999999999998,
+   "g2_upper": 8.145304103253753,
+   "g_upper": 2.853997915776
+  },
+  {
+   "m_X_gev": 700.0,
+   "sigma_g1_pb": 0.06747188671386921,
+   "efficiency": 0.51,
+   "expected_signal_g1": 0.6882132444814659,
+   "g2_upper": 13.906637801680532,
+   "g_upper": 3.7291604687490363
+  },
+  {
+   "m_X_gev": 800.0,
+   "sigma_g1_pb": 0.03955078125,
+   "efficiency": 0.55,
+   "expected_signal_g1": 0.43505859375000006,
+   "g2_upper": 21.998720307598013,
+   "g_upper": 4.690279342171212
+  }
+ ],
+ "contract_validation": {
+  "search_record": {
+   "ok": true,
+   "errors": []
+  },
+  "prediction_m300": {
+   "ok": true,
+   "errors": []
+  },
+  "efficiency_map": {
+   "ok": true,
+   "errors": []
+  },
+  "result": {
+   "ok": true,
+   "errors": []
+  }
+ }
+}

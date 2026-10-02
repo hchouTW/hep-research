@@ -1,0 +1,63 @@
+{
+ "contract_version": "1.0.0",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.1.0",
+  "contracts": "1.0.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-statistics",
+  "created": "2026-10-02",
+  "evidence_ids": []
+ },
+ "inputs": [
+  {
+   "ref": "artifacts/search_record.json",
+   "artifact_type": "dataset-record",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "artifacts/efficiency_map.json",
+   "artifact_type": "response",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "artifact_id": "synthetic-j7-coupling-limit",
+ "artifact_type": "statistical-result",
+ "objective": "SYNTHETIC 95% CLs upper limit on the toy-model coupling versus m_X (illustrative recast)",
+ "extension": {
+  "paradigm": "frequentist",
+  "likelihood": {
+   "form": "Poisson count with a Gaussian-constrained background (one signal region)"
+  },
+  "parameters_of_interest": [
+   "signal count s",
+   "toy coupling g^2 via s = g^2 L sigma_ref (m_ref/m_X)^4 eps(m_X)"
+  ],
+  "nuisances": [
+   "background"
+  ],
+  "test_statistic": "one-sided profile likelihood ratio (q-tilde)",
+  "construction": "cls",
+  "coverage": {
+   "method": "CLs over-covers by design; not studied further here"
+  },
+  "fit_status": "converged",
+  "results": {
+   "ref": "results.json#limits"
+  }
+ }
+}

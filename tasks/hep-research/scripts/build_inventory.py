@@ -1,18 +1,22 @@
 #!/usr/bin/env python3
 """M0 step 6: build integration-inventory.json and the first-draft migration-map.csv.
 
-Dev tooling (outside the distributable plugin). Rules are a [Proposal] first draft;
+Dev tooling (outside the distributable plugin). Reads the legacy skills from a read-only
+checkout of agentic-ai-skills ($LEGACY_REPO, default .legacy/agentic-ai-skills; see LEGACY_SOURCE.md)
+and writes into this repository. Rules are a [Proposal] first draft;
 M1 refines per-section ownership. Usage: python3 build_inventory.py [--commit HASH]
 """
 import csv, hashlib, json, re, subprocess, sys
 from pathlib import Path
 
-REPO = Path(subprocess.check_output(["git", "rev-parse", "--show-toplevel"], text=True).strip())
+import os
+HERE = Path(subprocess.check_output(["git", "rev-parse", "--show-toplevel"], text=True).strip())
+REPO = Path(os.environ.get("LEGACY_REPO", HERE / ".legacy" / "agentic-ai-skills"))
 SKILLS = ["ams-analysis", "hep-analysis", "deep-learning", "academic-papers",
           "academic-diagrams", "agile-development", "task-authoring"]
-DOCS = REPO / "plugins/hep-research/docs"
+DOCS = HERE / "plugins/hep-research/docs"
 COMMIT = sys.argv[sys.argv.index("--commit") + 1] if "--commit" in sys.argv else \
-    subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+    subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO, text=True).strip()
 
 def ftype(p):
     parts = p.split("/")

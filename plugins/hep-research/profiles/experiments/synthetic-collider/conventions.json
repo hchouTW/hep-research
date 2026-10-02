@@ -1,0 +1,8 @@
+{
+ "unit_system": "natural-HEP: GeV for energies; cross sections in pb; integrated luminosity in pb^-1",
+ "energy_variable": "sqrt_s",
+ "frame": "center-of-mass (symmetric beams, so lab = CM)",
+ "angle_definition": "theta between the incoming e- beam and the outgoing mu-",
+ "synthcol:fiducial_definition": "|cos theta| < 0.9 at particle level (outgoing mu- direction before detector effects)",
+ "synthcol:luminosity_definition": "integrated luminosity of the synthetic run, with an invented 2% fully correlated uncertainty"
+}

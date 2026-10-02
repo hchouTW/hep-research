@@ -1,0 +1,29 @@
+# AC10 evidence: files changed to add experiment:synthetic-collider (b8e3d6a..0669f54)
+
+ .../output/artifacts/dataset_record.json           | 121 +++
+ .../output/artifacts/measurement_spec.json         | 112 +++
+ .../output/artifacts/response.json                 |  88 ++
+ .../collider-angular/output/artifacts/result.json  |  63 ++
+ .../collider-angular/output/dsigma_dcos.png        | Bin 0 -> 27109 bytes
+ .../examples/collider-angular/output/report.md     |  54 ++
+ .../examples/collider-angular/output/results.json  | 939 +++++++++++++++++++++
+ .../examples/collider-angular/run_path_b.py        | 328 +++++++
+ .../synthetic-collider/benchmarks/path-b.json      |  14 +
+ .../synthetic-collider/conventions.json            |   8 +
+ .../datasets/synthetic-path-b-dsigma.json          | 121 +++
+ .../synthetic-collider/evidence/claims.json        |   1 +
+ .../synthetic-collider/evidence/sources.json       |   1 +
+ .../experiments/synthetic-collider/index.md        |  14 +
+ .../synthetic-collider/modules/detector-model.md   |  13 +
+ .../synthetic-collider/modules/working-rules.md    |   7 +
+ .../experiments/synthetic-collider/profile.json    |  70 ++
+ .../synthetic-collider/scripts/detector.py         |  48 ++
+ .../synthetic-collider/scripts/generate_events.py  |  82 ++
+ .../synthetic-collider/tests/test_detector.py      |  46 +
+ .../synthetic-collider/tests/test_generator.py     |  55 ++
+ plugins/hep-research/profiles/registry.json        |   7 +
+ plugins/hep-research/tests/examples/test_path_b.py | 100 +++
+ 23 files changed, 2292 insertions(+)
+
+Files outside profiles/experiments/synthetic-collider, profiles/registry.json, examples/ and tests/examples/:
+(none)

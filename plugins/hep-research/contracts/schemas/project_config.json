@@ -1,0 +1,20 @@
+{"$comment": "hep-research.project.json in the researcher's project directory (never inside the plugin). Task 7.8.",
+ "type": "object", "required": ["schema_version", "plugin_version"], "additionalProperties": false,
+ "properties": {
+  "schema_version": {"$ref": "common.json#/$defs/version"},
+  "plugin_version": {"type": "string"},
+  "experiments": {"type": "array", "items": {"type": "object", "required": ["profile", "version"], "additionalProperties": false, "properties": {
+     "profile": {"$ref": "common.json#/$defs/profile_id"}, "version": {"$ref": "common.json#/$defs/version"},
+     "datasets": {"type": "array", "items": {"type": "string"}}, "conditions": {"type": "array", "items": {"type": "string"}},
+     "periods": {"type": "array", "items": {"type": "object"}}}}},
+  "theory": {"type": "array", "items": {"type": "object", "required": ["profile", "version"], "additionalProperties": false, "properties": {
+     "profile": {"$ref": "common.json#/$defs/profile_id"}, "version": {"$ref": "common.json#/$defs/version"},
+     "models": {"type": "array", "items": {"type": "string"}}, "parameter_points": {"type": "array", "items": {"type": "object"}}}}},
+  "local_profile_paths": {"type": "array", "items": {"type": "string"}},
+  "local_adapters": {"type": "array", "items": {"type": "string"}},
+  "blinding": {"type": "object", "properties": {"blinded": {"type": "array", "items": {"type": "string"}}, "allowed_outputs": {"type": "array", "items": {"type": "string"}}}},
+  "private_evidence": {"type": "array", "items": {"type": "string"}},
+  "overrides": {"type": "array", "items": {"type": "object", "required": ["target", "value", "provenance"], "properties": {
+     "target": {"type": "string"}, "provenance": {"type": "string", "minLength": 1}, "variant_of": {"type": "string"}}}},
+  "artifacts_dir": {"type": "string"}
+ }}

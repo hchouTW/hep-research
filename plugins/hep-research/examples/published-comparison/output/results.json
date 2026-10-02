@@ -1,0 +1,81 @@
+{
+ "label": "SYNTHETIC record shaped like a published table; not a physics result",
+ "criteria": {
+  "mu_vs_whitened_lstsq_rel": 1e-12,
+  "chi2_p_min": 0.001
+ },
+ "pass": {
+  "gate_comparable": true,
+  "mu_matches_whitened_lstsq": true,
+  "chi2_reasonable": true,
+  "no_detector_files_read": true,
+  "contracts": true
+ },
+ "mu_hat": 0.9950962580369148,
+ "sigma_mu": 0.021816617742651704,
+ "mu_whitened_lstsq": 0.9950962580369154,
+ "chi2": 10.274833881611531,
+ "ndf": 9,
+ "p_value": 0.3286975482644167,
+ "prediction_restricted_pb": [
+  539.9394,
+  455.56980000000004,
+  392.2925999999999,
+  350.1078,
+  329.0154,
+  329.0154,
+  350.1078,
+  392.2925999999999,
+  455.56980000000004,
+  539.9394
+ ],
+ "fiducial_prediction_pb": 744.0929999999998,
+ "edges": [
+  -0.9,
+  -0.72,
+  -0.54,
+  -0.36,
+  -0.18,
+  0.0,
+  0.18,
+  0.36,
+  0.54,
+  0.72,
+  0.9
+ ],
+ "gate_transformations": [
+  "level-identification",
+  "fiducial-restriction"
+ ],
+ "gate_notes": [
+  {
+   "field": "conventions.mass_approximation",
+   "note": "core key only on side a; confirm it does not affect the comparison"
+  },
+  {
+   "field": "conventions.spin_treatment",
+   "note": "core key only on side a; confirm it does not affect the comparison"
+  }
+ ],
+ "files_read": [
+  "contracts/schemas/common.json",
+  "contracts/schemas/envelope.json",
+  "contracts/schemas/ext_comparison_spec.json",
+  "contracts/schemas/ext_statistical_result.json",
+  "contracts/vocab/core.json",
+  "examples/published-comparison/synthetic-published-covariance.json",
+  "examples/published-comparison/synthetic-published-record.json",
+  "examples/qed-benchmark/output/artifacts/prediction.json"
+ ],
+ "detector_files_read": [],
+ "contract_validation": {
+  "comparison_spec": {
+   "ok": true,
+   "errors": []
+  },
+  "result": {
+   "ok": true,
+   "errors": []
+  }
+ }
+}

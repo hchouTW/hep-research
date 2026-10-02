@@ -1,0 +1,9 @@
+{
+ "unit_system": "GeV for energies, GV for rigidity, m^2 sr s for exposure; c kept explicit in R = pc/(Ze)",
+ "energy_variable": "declared per measurement: rigidity R (GV), kinetic energy per nucleon T/A (GeV/n) or energy E (GeV); every conversion states Z and A (or the mass)",
+ "frame": "detector location (top of the instrument) unless a solar-modulation model is applied and stated",
+ "ams02:rigidity_definition": "R = pc/(Ze) in GV; p = |Z|R/c; rigidity is not momentum",
+ "ams02:rigidity_sign": "follows a convention stated by each analysis; this profile does not fix it",
+ "ams02:charge_sign_source": "Tracker and magnet curvature only; TOF, TRD, ECAL and RICH do not measure charge sign",
+ "ams02:mass_number_assumption": "elemental fluxes converted to T/A need a stated A or an isotope-composition model, whose uncertainty is part of the result"
+}

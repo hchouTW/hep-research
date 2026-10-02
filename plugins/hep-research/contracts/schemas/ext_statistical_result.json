@@ -1,0 +1,15 @@
+{"$comment": "Owner: hep-statistics. Paradigm-specific requirements are enforced in contracts.validate.",
+ "type": "object",
+ "required": ["paradigm", "likelihood", "parameters_of_interest", "nuisances", "fit_status"],
+ "properties": {
+  "paradigm": {"type": "string", "enum": ["frequentist", "bayesian", "likelihood-only"]},
+  "likelihood": {"type": "object"}, "parameters_of_interest": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+  "nuisances": {"type": "array"}, "constraints": {"type": "array"},
+  "test_statistic": {"type": "string"},
+  "construction": {"type": "string", "enum": ["neyman", "feldman-cousins", "cls", "asymptotic", "profile-likelihood-wilks", "other"]},
+  "coverage": {"type": "object"},
+  "priors": {"type": "array", "items": {"type": "object", "required": ["parameter", "form"]}},
+  "sampler": {"type": "object"}, "convergence": {"type": "object"},
+  "fit_status": {"type": "string", "enum": ["converged", "failed", "not-run", "converged-with-warnings"]},
+  "results": {"type": "object"}
+ }}

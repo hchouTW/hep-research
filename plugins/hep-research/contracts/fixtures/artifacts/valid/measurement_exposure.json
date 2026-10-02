@@ -1,0 +1,96 @@
+{
+ "contract_version": "1.0.0",
+ "artifact_id": "fixture-synthetic-measurement-spec",
+ "artifact_type": "measurement-spec",
+ "objective": "SYNTHETIC structural fixture; values are placeholders, not physics",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.1.0",
+  "contracts": "1.0.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-analysis",
+  "created": "2026-10-02",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "observable": {
+   "quantity": "differential-flux",
+   "process": "synthetic e+ e- -> mu+ mu-",
+   "variables": [
+    {
+     "name": "rigidity",
+     "unit": "GV",
+     "edges": [
+      1,
+      2,
+      4
+     ]
+    }
+   ],
+   "phase_space": {
+    "definition": "synthetic fiducial region",
+    "fiducial": true
+   },
+   "level": "detector",
+   "frame": "center-of-mass",
+   "normalization": {
+    "kind": "exposure",
+    "ref": "synthetic-normalization.json"
+   },
+   "bin_semantics": "bin-averaged",
+   "unit": "m^-2 sr^-1 s^-1 GV^-1",
+   "conventions": {
+    "energy_variable": "sqrt_s",
+    "frame": "center-of-mass"
+   }
+  },
+  "species_or_process": "synthetic",
+  "period": {
+   "start": "synthetic-period-1",
+   "end": "synthetic-period-1"
+  },
+  "selections": [
+   {
+    "name": "two-muons",
+    "definition": "placeholder",
+    "conditional_denominator": "all events"
+   }
+  ],
+  "backgrounds": [
+   {
+    "name": "placeholder-bkg",
+    "estimator": "sideband"
+   }
+  ],
+  "corrections": [
+   {
+    "effect_id": "trigger-eff",
+    "category": "efficiency",
+    "applied_in": "estimator"
+   }
+  ],
+  "systematics": [
+   {
+    "name": "energy-scale",
+    "source": "calibration",
+    "effect": "migration",
+    "applied_via": "migration"
+   }
+  ],
+  "blinding": {
+   "blinded": false
+  }
+ }
+}

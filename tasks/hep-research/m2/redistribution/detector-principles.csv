@@ -1,0 +1,6 @@
+source_path,destination,disposition,note
+docs/detector-principles/detector_comparison_tables.md,skills/detector-response/references/detector_comparison_tables.md,move+path-edit,`references.md` x1 -> `detector-principles-bibliography.md`; plan: detector principles merged into detector-response references
+docs/detector-principles/glossary.md,skills/detector-response/references/glossary.md,move,verbatim; plan: detector principles merged into detector-response references
+docs/detector-principles/high_energy_detector_principles.md,skills/detector-response/references/high_energy_detector_principles.md,move+path-edit,`references.md` x3 -> `detector-principles-bibliography.md`; plan: detector principles merged into detector-response references
+docs/detector-principles/high_energy_detector_principles_summary.md,skills/detector-response/references/high_energy_detector_principles_summary.md,move,verbatim; plan: detector principles merged into detector-response references
+docs/detector-principles/references.md,skills/detector-response/references/detector-principles-bibliography.md,move,verbatim; plan: detector principles merged into detector-response references; renamed to detector-principles-bibliography.md (plan destination)

@@ -1,0 +1,6 @@
+# Core scientific stack for hep-research scripts, examples and tests (decision D5).
+# Versions are the ones the v1 checks ran with; nearby versions are expected to work but are not tested.
+numpy>=2.4,<3
+scipy>=1.17,<2
+matplotlib>=3.11,<4
+sympy>=1.14,<2

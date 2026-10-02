@@ -1,0 +1,18 @@
+{
+  "_comment": "Synthetic 7B-class training plan for estimate_training_memory.py. Illustrative geometry, not a real published model configuration.",
+  "layers": 32,
+  "hidden": 4096,
+  "heads": 32,
+  "vocab_size": 32000,
+  "ffn_ratio": 4.0,
+  "seq_len": 4096,
+  "micro_batch": 1,
+  "gpus": 8,
+  "gpu_memory_gb": 80.0,
+  "precision": "mixed",
+  "optimizer": "adam",
+  "zero_stage": 0,
+  "tensor_parallel": 1,
+  "pipeline_parallel": 1,
+  "recompute": "none"
+}

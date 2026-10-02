@@ -1,0 +1,14 @@
+{
+ "label": "SYNTHETIC: invented run configuration for Path B; describes no experiment",
+ "sqrt_s_gev": 10.0,
+ "integrated_luminosity_pb": 20.0,
+ "luminosity_rel_uncertainty": 0.02,
+ "generator": {"sigma_pb": 870.0, "shape_a": 1.0, "shape_b": 0.0},
+ "efficiency": {"e0": 0.92, "e1": 0.25},
+ "resolution": {"sigma_cos": 0.02},
+ "truth_edges": [-1.0, -0.9, -0.72, -0.54, -0.36, -0.18, 0.0, 0.18, 0.36, 0.54, 0.72, 0.9, 1.0],
+ "reco_edges": [-1.0, -0.9, -0.72, -0.54, -0.36, -0.18, 0.0, 0.18, 0.36, 0.54, 0.72, 0.9, 1.0],
+ "reported_truth_bins": [1, 11],
+ "seed": 20261003,
+ "toys": 400
+}

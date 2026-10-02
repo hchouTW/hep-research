@@ -1,0 +1,57 @@
+{
+ "contract_version": "1.0.0",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.1.0",
+  "contracts": "1.0.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "detector-response",
+  "created": "2026-10-02",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "artifact_id": "synthetic-j7-efficiency-map",
+ "artifact_type": "response",
+ "objective": "SYNTHETIC published efficiency map as a parametrized response (recasting)",
+ "extension": {
+  "truth_axis": "not-applicable",
+  "reco_axis": "not-applicable",
+  "orientation": "rows_reco_cols_truth",
+  "normalization": "conditional_on_generated",
+  "inefficiency": "inside_matrix",
+  "acceptance": "inside_matrix",
+  "includes": [
+   "efficiency",
+   "acceptance"
+  ],
+  "applied_separately": [
+   "luminosity"
+  ],
+  "conditions": "sqrt_s = 500.0 GeV (synthetic)",
+  "provenance": "invented in run_j7.py",
+  "form": "parametrized",
+  "parametrization": {
+   "variables": [
+    "m_X"
+   ],
+   "function_ref": "run_j7.py#efficiency",
+   "function": "eps = 0.35 + 0.0004 (m_X - 300.0)",
+   "validity_range": {
+    "m_X": [
+     200.0,
+     800.0
+    ]
+   }
+  }
+ }
+}
