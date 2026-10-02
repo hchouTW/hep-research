@@ -1,7 +1,7 @@
 # VALIDATION — hep-research 0.1.0 (handover, M6)
 
 Environment E1 for all entries below unless a row says otherwise: Claude Code cloud container (Linux 6.18 x86_64), Python 3.11.15, `.venv-hep` with numpy 2.4.6, scipy 1.17.1, matplotlib 3.11.2, sympy 1.14.0 (`requirements-core.txt`); Claude Code CLI 2.1.287. Date 2026-10-02. Branch `feat/hep-research-plugin` of hchouTW/hep-research; each row's evidence is at the final handover commit unless it names another. Legacy source `agentic-ai-skills@3e995a4`.
-Aggregate command: `python3 tools/run_all_checks.py --out <dir>` (from the plugin root). Final run `tasks/hep-research/check-runs/check-run-2026-10-02T174050Z.json`: 14 checks pass / 0 fail / 0 skip; 973 unit tests: 934 pass, 0 fail, 39 skip (PyTorch, PyROOT, awkward/uproot, pyhf, Combine, Graphviz, Mermaid, PlantUML, tectonic not installed; these are unverified, not passing); profile suites: ams-02 258, synthetic-collider 9, qed-benchmark 16 pass. pyhf rerun (user-approved install of pyhf 0.7.6 into `.venv-hep`, `tasks/hep-research/m6/pyhf/pip-freeze-pyhf.txt`): see PYHF-RUN below; uproot/awkward rerun: see UPROOT-RUN below. Seeds and tolerances of every example are in its `results.json`; commands are in each row.
+Aggregate command: `python3 tools/run_all_checks.py --out <dir>` (from the plugin root). Final run `tasks/hep-research/check-runs/check-run-2026-10-02T174050Z.json`: 14 checks pass / 0 fail / 0 skip; 973 unit tests: 934 pass, 0 fail, 39 skip (PyTorch, PyROOT, awkward/uproot, pyhf, Combine, Graphviz, Mermaid, PlantUML, tectonic not installed; these are unverified, not passing); profile suites: ams-02 258, synthetic-collider 9, qed-benchmark 16 pass. pyhf rerun (user-approved install of pyhf 0.7.6 into `.venv-hep`, `tasks/hep-research/m6/pyhf/pip-freeze-pyhf.txt`): see PYHF-RUN below; uproot/awkward rerun: see UPROOT-RUN below; PyTorch rerun: see PYTORCH-RUN below. Seeds and tolerances of every example are in its `results.json`; commands are in each row.
 Software checks establish contract consistency only: not physical validity, proof, statistical coverage, or authorization to unblind.
 
 | AC | Result | Evidence | Remaining |
@@ -75,7 +75,8 @@ Software checks establish contract consistency only: not physical validity, proo
 
 | Item | Effect |
 |---|---|
-| CMS Combine, ROOT/PyROOT, PyTorch, Graphviz, Mermaid, PlantUML, tectonic not installed | 27 tests skipped (unverified); both adapters stay `proposed`; the matching capability rows are `unverified`. pyhf, uproot and awkward were installed after approval and their tests pass (PYHF-RUN, UPROOT-RUN) |
+| CMS Combine, ROOT/PyROOT, torchvision, Graphviz, Mermaid, PlantUML, tectonic not installed | 16 tests skipped (14 unverified tools; 2 no-PyTorch degradation tests that skip when PyTorch is present and pass under the system Python without it); both adapters stay `proposed`; the matching capability rows are `unverified`. pyhf, uproot, awkward and PyTorch were installed after approval and their tests pass (PYHF-RUN, UPROOT-RUN, PYTORCH-RUN) |
+| PyTorch verified on CPU only | GPU, NCCL and GPU mixed precision not tried; the CPU-only wheel index is blocked by the network policy, so the PyPI build (with CUDA libraries, unused) was installed |
 | pyhf demonstrated on two synthetic workspaces, asymptotic only | toy-based CLs, lumi/shapefactor modifiers and non-default interpolation codes not tried |
 | Live routing measured once on one host model (claude-sonnet-5-5 via `claude -p`) | 41/48 cases correct; 7 misses listed in the G5 report; with legacy skills co-installed the legacy predecessor wins some requests (7/48 in run 2) |
 | J2 and J7 run on synthetic inputs only | J2 uses the invented Gaussian detector; J7 has one signal region, an efficiency map without its own uncertainty, and a toy model; interchange formats (HEPData-style records, recasting frameworks) stay `proposed` |
@@ -115,3 +116,17 @@ registering the new test file.
 | Previously skipped uproot/awkward tests (synthetic NanoAOD generator, awkward reference values) | pass, 8 tests no longer skipped | `tests/skills/hep_computing/test_hep_analysis_synthetic_nanoaod.py`, `tests/skills/detector_response/test_hep_analysis_reference_values.py` |
 | `adapters/root-uproot/assets/uproot_awkward_analysis.py` on a SYNTHETIC file (4000 events, 0–4 muons, 15% negative weights) | pass | `tests/adapters/test_uproot_awkward_asset.py` (3 tests): TH1D bin contents and sum(w^2) equal an independent numpy computation; selected-event count matches; a missing branch is refused |
 | PyROOT / RDataFrame / RooFit assets | skip (ROOT not installed) | unverified |
+
+## PYTORCH-RUN (2026-10-02, after the merge of PR #2)
+
+Environment: E1 plus pyhf, uproot and awkward (PYHF-RUN, UPROOT-RUN) and PyTorch 2.14.1 from PyPI (CUDA 13.0 build;
+no GPU, so all runs are CPU, 4 threads); full list in `tasks/hep-research/m6/pytorch/pip-freeze-pytorch.txt`. Run
+`tasks/hep-research/check-runs/check-run-2026-10-02T190132Z.json`: 14 checks pass; 982 unit tests, 966 pass, 0 fail,
+16 skip; profile suites unchanged (258, 9, 16 pass).
+
+| Item | Result | Evidence |
+|---|---|---|
+| physics-ml tests needing PyTorch (allocation measurement, dataset building, asset smoke tests: training, inference, metrics, datasets) | pass, 13 tests no longer skipped | `tests/skills/physics_ml/test_deep_learning_deep_learning_skill.py`, `test_deep_learning_assets_smoke.py` |
+| `ddp_train_skeleton.py` with `torchrun --nproc_per_node=2` (gloo backend) | pass | `test_ddp_skeleton_two_gloo_processes`; the test now finds `torchrun` next to the interpreter, not only on PATH |
+| Clean degradation without PyTorch | pass under the system Python 3.11 (no torch), skipped in `.venv-hep` | `CleanDegradationWithoutTorchTests` (2 tests) |
+| `vision_transfer.py` | skip (torchvision not installed, not approved) | unverified |
