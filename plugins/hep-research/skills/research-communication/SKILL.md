@@ -36,7 +36,9 @@ description: "Use when the deliverable is scientific communication or literature
 
 ## Resources
 
-Writing, citation-verification, venue-formatting and diagram references and templates arrive in M2 under `references/` and `templates/`.
+Start with [the papers guide](references/academic-papers-guide.md) for reading, reviewing and writing, or [the diagrams guide](references/academic-diagrams-guide.md) for diagrams. Citation work: [citation verification](references/citation-verification.md), [citations and bibliography](references/citations-and-bibliography.md), [source list](references/13-sources.md). Claims: [claim-evidence mapping](references/claim-evidence-mapping.md). Field-specific paper patterns, figures, talks, reviews and venue formatting have their own files under `references/`; diagram templates are in `templates/` and `assets/templates/`, worked examples in `examples/`.
+
+Scripts in `${CLAUDE_PLUGIN_ROOT}/skills/research-communication/scripts/` (read `--help` first): `build_lit_matrix.py`, `check_manuscript.py`, `check_diagram_sources.py`.
 
 ## Handoffs
 

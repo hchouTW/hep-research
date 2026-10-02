@@ -39,7 +39,9 @@ description: "Use when the deliverable is a statistical inference or its diagnos
 
 ## Resources
 
-`core/stats` (likelihood limits, template fits, unfolding diagnostics, Poisson diagnostics, toys, covariance and response checks) and statistics references arrive in M2.
+References under `references/`: likelihood fitting (`07`), inference (`08`), statistical tools including pyhf and Combine (`09`), astroparticle statistics (`37`), and [inference reasoning](references/statistical-inference-for-physics.md) for checking a likelihood, test, interval or limit.
+
+Executable checks live in `${CLAUDE_PLUGIN_ROOT}/core/stats/` (likelihood limits, template fits, unfolding diagnostics, Poisson diagnostics, toys, covariance and response validation); run each with `--help` first. `${CLAUDE_PLUGIN_ROOT}/skills/hep-statistics/scripts/li_ma_significance.py` gives the ON/OFF significance. pyhf and Combine starting points are in `${CLAUDE_PLUGIN_ROOT}/adapters/pyhf-combine/assets/`.
 
 ## Handoffs
 

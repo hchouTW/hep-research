@@ -38,7 +38,9 @@ description: "Use when the deliverable is about how a detector responds: signal 
 
 ## Resources
 
-Migrated detector references (detector systems, tracking, calorimetry, PID, reconstruction performance, calibration, simulation, astroparticle instruments) arrive in M2 under `references/`.
+Start with [the detector principles summary](references/high_energy_detector_principles_summary.md); the full text is `references/high_energy_detector_principles.md`. Topic references under `references/`: physics objects (`18`), triggers, luminosity and pileup (`19`), detector systems (`21`), tracking (`22`), calorimetry (`23`), PID (`24`), reconstruction (`25`, `26`), simulation (`28`), calibration (`29`), astroparticle instruments (`30`-`36`), measurement framework and readout (`39`-`46`), case studies, comparison tables and glossary (`48`-`50`).
+
+Scripts in `${CLAUDE_PLUGIN_ROOT}/skills/detector-response/scripts/` (read `--help` first): `calorimeter_resolution.py`, `cherenkov_angle.py`, `multiple_scattering.py`, `pid_separation_power.py`, `pileup_reweight.py`, `tag_and_probe_efficiency.py`, `xmax_gaisser_hillas.py`.
 
 ## Handoffs
 

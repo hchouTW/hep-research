@@ -39,7 +39,7 @@ description: "Use when the deliverable is a theoretical or phenomenological resu
 
 ## Resources
 
-Migrated references (mathematical reasoning and proof status, event-generation physics, scientific-ML boundaries) arrive in M2 under `references/`; the first theory-domain profile arrives in M3.
+References under `references/`: [mathematical reasoning and proof status](references/mathematical-reasoning-and-proof.md) (derivation validity, approximation domains, counterexamples, separating derivation from numerical corroboration) and [event-generation physics](references/27-event-generation.md). Scientific-ML boundaries are in `${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/references/scientific-machine-learning.md`. The first theory-domain profile arrives in M3.
 
 ## Handoffs
 

@@ -38,7 +38,9 @@ description: "Use when the deliverable is working, reproducible scientific softw
 
 ## Resources
 
-Engineering-discipline, ROOT design, build, debugging, numerical-methods and research-task-authoring references arrive in M2 under `references/`. Optional tool adapters live in `${CLAUDE_PLUGIN_ROOT}/adapters/` and are `proposed` until tested in a declared environment.
+Guides under `references/`: [engineering playbook](references/engineering-playbook.md) and [agile delivery](references/agile-development-guide.md); [research task authoring](references/task-authoring-guide.md) with `templates/task-template.md` and worked tasks in `examples/`; ROOT design, CMake, ROOT debugging and Python HEP coding (`14`-`17`); [numerical and computational methods](references/numerical-and-computational-methods.md); language design guidelines (Python, C++, Bash); validation and definition of done.
+
+Scripts in `${CLAUDE_PLUGIN_ROOT}/skills/hep-computing/scripts/` (read `--help` first): ROOT file inspection and comparison (`inspect_root_file.py`, `compare_root_histograms.py`, `summarize_histogram_statistics.py`, `roofit_workspace_summary.py`, `audit_histograms.py`), environment and project checks (`check_root_cpp_env.sh`, `new_root_cpp_project.sh`), `make_synthetic_nanoaod.py`, and task checks (`lint_task.py`). ROOT and uproot starting points are in `${CLAUDE_PLUGIN_ROOT}/adapters/root-uproot/assets/`.
 
 ## Handoffs
 
