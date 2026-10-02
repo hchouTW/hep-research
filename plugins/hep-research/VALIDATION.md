@@ -1,7 +1,7 @@
 # VALIDATION — hep-research 0.1.0 (handover, M6)
 
 Environment E1 for all entries below unless a row says otherwise: Claude Code cloud container (Linux 6.18 x86_64), Python 3.11.15, `.venv-hep` with numpy 2.4.6, scipy 1.17.1, matplotlib 3.11.2, sympy 1.14.0 (`requirements-core.txt`); Claude Code CLI 2.1.287. Date 2026-10-02. Branch `feat/hep-research-plugin` of hchouTW/hep-research; each row's evidence is at the final handover commit unless it names another. Legacy source `agentic-ai-skills@3e995a4`.
-Aggregate command: `python3 tools/run_all_checks.py --out <dir>` (from the plugin root). Final run `tasks/hep-research/check-runs/check-run-2026-10-02T174050Z.json`: 14 checks pass / 0 fail / 0 skip; 973 unit tests: 934 pass, 0 fail, 39 skip (PyTorch, PyROOT, awkward/uproot, pyhf, Combine, Graphviz, Mermaid, PlantUML, tectonic not installed; these are unverified, not passing); profile suites: ams-02 258, synthetic-collider 9, qed-benchmark 16 pass. pyhf rerun (user-approved install of pyhf 0.7.6 into `.venv-hep`, `tasks/hep-research/m6/pyhf/pip-freeze-pyhf.txt`): see PYHF-RUN below; uproot/awkward rerun: see UPROOT-RUN below; PyTorch rerun: see PYTORCH-RUN below; ROOT rerun: see ROOT-RUN below. Seeds and tolerances of every example are in its `results.json`; commands are in each row.
+Aggregate command: `python3 tools/run_all_checks.py --out <dir>` (from the plugin root). Handover run `tasks/hep-research/check-runs/check-run-2026-10-02T174050Z.json`: 14 checks pass / 0 fail / 0 skip; 973 unit tests: 934 pass, 0 fail, 39 skip (PyTorch, PyROOT, awkward/uproot, pyhf, Combine, Graphviz, Mermaid, PlantUML, tectonic not installed; these are unverified, not passing); profile suites: ams-02 258, synthetic-collider 9, qed-benchmark 16 pass. pyhf rerun (user-approved install of pyhf 0.7.6 into `.venv-hep`, `tasks/hep-research/m6/pyhf/pip-freeze-pyhf.txt`): see PYHF-RUN below; uproot/awkward rerun: see UPROOT-RUN below; PyTorch rerun: see PYTORCH-RUN below; ROOT rerun: see ROOT-RUN below; diagram-tool rerun (latest run, 982 pass, 0 fail, 5 skip): see DIAGRAM-RUN below. Seeds and tolerances of every example are in its `results.json`; commands are in each row.
 Software checks establish contract consistency only: not physical validity, proof, statistical coverage, or authorization to unblind.
 
 | AC | Result | Evidence | Remaining |
@@ -75,7 +75,7 @@ Software checks establish contract consistency only: not physical validity, proo
 
 | Item | Effect |
 |---|---|
-| CMS Combine, torchvision, Graphviz, Mermaid, PlantUML, tectonic not installed | 9 tests skipped (7 unverified tools; 2 no-PyTorch degradation tests that skip when PyTorch is present and pass under the system Python without it); `adapters/pyhf-combine` stays `proposed`; the matching capability rows are `unverified`. pyhf, uproot, awkward, PyTorch and ROOT were installed after approval and their tests pass (PYHF-RUN, UPROOT-RUN, PYTORCH-RUN, ROOT-RUN) |
+| CMS Combine and torchvision not installed; tectonic 0.17.0 installed but unusable because the network policy blocks its TeX bundle host (relay.fullyjustified.net) | 5 tests skipped (Combine, torchvision and tectonic, all unverified; 2 no-PyTorch degradation tests that skip when PyTorch is present and pass under the system Python without it); `adapters/pyhf-combine` stays `proposed`; the matching capability rows are `unverified`. pyhf, uproot, awkward, PyTorch, ROOT, Graphviz, Mermaid CLI and PlantUML were installed after approval and their tests pass (PYHF-RUN, UPROOT-RUN, PYTORCH-RUN, ROOT-RUN, DIAGRAM-RUN) |
 | PyTorch verified on CPU only | GPU, NCCL and GPU mixed precision not tried; the CPU-only wheel index is blocked by the network policy, so the PyPI build (with CUDA libraries, unused) was installed |
 | pyhf demonstrated on two synthetic workspaces, asymptotic only | toy-based CLs, lumi/shapefactor modifiers and non-default interpolation codes not tried |
 | Live routing measured once on one host model (claude-sonnet-5-5 via `claude -p`) | 41/48 cases correct; 7 misses listed in the G5 report; with legacy skills co-installed the legacy predecessor wins some requests (7/48 in run 2) |
@@ -145,3 +145,24 @@ profile suites unchanged; traceability passed after registering the new test fil
 | PyROOT scripts and assets (inspection, histogram comparison, systematic variations, histogram statistics, RooFit workspace summary, RDataFrame cutflow, RooFit peak fit recovers mean 91 within 0.5) | pass, 7 tests no longer skipped | `tests/skills/hep_computing/test_hep_analysis_root_integration.py` |
 | C++ assets `cpp_rdataframe_analysis.cpp`, `fit_histogram.cpp`, `rdf_analysis.cpp` built with `root-config`; CMake `analysis` target; `plot_branch.C` in batch | pass, 5 new tests | `tests/adapters/test_root_cpp_assets.py`; the C++ cutflow (3044, 2718, 2223 of 5000 synthetic events) equals the PyROOT asset's |
 | CMS Combine run of the datacard template | skip (Combine not installed) | unverified |
+
+## DIAGRAM-RUN (2026-10-02, after the merge of PR #5)
+
+Environment: as in ROOT-RUN, plus Graphviz 14.1.2, PlantUML 1.2026.8 (with its conda-forge OpenJDK) and tectonic
+0.17.0 from conda-forge in a project-local micromamba environment (`.venv-hep-diagrams/env`, gitignored; package list
+`tasks/hep-research/m6/diagrams/conda-explicit-diagrams.txt`), and Mermaid CLI 12.0.0 from npm in
+`.venv-hep-diagrams/node` (Node 22.22.0; `tasks/hep-research/m6/diagrams/npm-mermaid.txt`) driven by the preinstalled
+Playwright Chromium 141 through a wrapper `.venv-hep-diagrams/bin/mmdc` (puppeteer config with `--no-sandbox`).
+`.venv-hep-diagrams/bin` holds `dot`, `plantuml` and `mmdc` and is put first on PATH.
+Command: `PATH=.venv-hep-diagrams/bin:$PATH HEP_ROOT_PYTHON=.venv-hep-root/env/bin/python .venv-hep/bin/python
+plugins/hep-research/tools/run_all_checks.py --out tasks/hep-research/check-runs`, run `check-run-2026-10-02T201906Z.json`:
+987 unit tests, 982 pass, 0 fail, 5 skip; all 14 checks pass.
+
+| Item | Result | Evidence |
+|---|---|---|
+| Graphviz `dot` accepts a valid graph and rejects an invalid one | pass, 2 tests no longer skipped | `tests/skills/research_communication/test_academic_diagrams_academic_diagrams_skill.py` (DotCompile) |
+| Mermaid CLI rejects bad flowchart syntax | pass, no longer skipped | same file, `test_real_mmdc_rejects_bad_syntax` |
+| PlantUML rejects a one-line class body | pass, no longer skipped | same file, `test_real_plantuml_rejects_one_line_class_body` |
+| Every shipped diagram source passes `check_diagram_sources.py` with the real tools present | pass | same file, `test_shipped_diagram_sources_pass` |
+| Bundled paper skeleton compiles with tectonic | unverified | with tectonic on PATH the test fails before compiling: tectonic must download its TeX bundle from relay.fullyjustified.net, which the network policy rejects (proxy CONNECT 403). tectonic is therefore left off PATH and the test skips; its skip message still says "tectonic not installed" |
+
