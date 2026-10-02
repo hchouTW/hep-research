@@ -59,7 +59,9 @@ M2 exit checks: ledger preservation pass; migrated-helper regressions pass (816 
 
 M2 check run: `check-runs/check-run-2026-10-02T150623Z.json`.
 
-Latest check run (M3): `check-runs/check-run-2026-10-02T153532Z.json` (11 pass, 0 fail, 0 skip; 878 unit tests, 843 pass, 35 skip; profile suites 257 + 9 + 16 pass).
+M3 check run: `check-runs/check-run-2026-10-02T153532Z.json`.
+
+Latest check run (M4): `check-runs/check-run-2026-10-02T160613Z.json` (11 pass, 0 fail, 0 skip; 952 unit tests, 913 pass, 39 skip; profile suites 257 + 9 + 16 pass). The Path D low-count test was added while this run was in progress and passed on its own.
 
 ## M3 steps
 

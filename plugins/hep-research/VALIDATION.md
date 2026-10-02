@@ -1,7 +1,7 @@
 # VALIDATION — hep-research (partial, through M4)
 
 Environment for all entries below: Claude Code cloud container (Linux 6.18 x86_64), Python 3.11.15, `.venv-hep` with numpy 2.4.6, scipy 1.17.1, matplotlib 3.11.2, sympy 1.14.0; Claude Code CLI 2.1.287. Date 2026-10-02.
-Aggregate command: `python3 tools/run_all_checks.py --out <dir>`; latest run `tasks/hep-research/check-runs/check-run-2026-10-02T153532Z.json`: 11 pass / 0 fail / 0 skip; 878 unit tests: 843 pass, 0 fail, 35 skip (PyTorch, PyROOT, awkward/uproot, Combine, Graphviz, Mermaid, PlantUML, tectonic not installed here; these are unverified, not passing); profile suites: ams-02 257, synthetic-collider 9, qed-benchmark 16 pass.
+Aggregate command: `python3 tools/run_all_checks.py --out <dir>`; latest run `tasks/hep-research/check-runs/check-run-2026-10-02T160613Z.json`: 11 pass / 0 fail / 0 skip; 952 unit tests: 913 pass, 0 fail, 39 skip (PyTorch, PyROOT, awkward/uproot, pyhf, Combine, Graphviz, Mermaid, PlantUML, tectonic not installed here; these are unverified, not passing); profile suites: ams-02 257, synthetic-collider 9, qed-benchmark 16 pass.
 Software checks establish contract consistency only: not physical validity, proof, statistical coverage, or authorization to unblind.
 
 | AC | Result so far | Evidence | Remaining |
