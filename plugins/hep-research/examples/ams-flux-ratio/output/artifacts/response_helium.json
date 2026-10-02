@@ -1,0 +1,88 @@
+{
+ "contract_version": "1.0.0",
+ "bindings": {
+  "experiments": [
+   {
+    "profile": "experiment:ams-02",
+    "version": "1.0.0"
+   }
+  ],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.1.0",
+  "contracts": "1.0.0",
+  "profiles": {
+   "experiment:ams-02": "1.0.0"
+  }
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "artifact_id": "synthetic-path-a-response-helium",
+ "artifact_type": "response",
+ "objective": "SYNTHETIC rigidity migration for helium",
+ "status": [
+  "synthetic"
+ ],
+ "provenance": {
+  "producer_skill": "detector-response",
+  "created": "2026-10-02"
+ },
+ "extension": {
+  "truth_axis": {
+   "name": "rigidity",
+   "unit": "GV",
+   "edges": [
+    1.5,
+    2.0,
+    3.0,
+    4.5,
+    7.0,
+    10.0,
+    15.0,
+    25.0,
+    40.0,
+    60.0,
+    100.0,
+    150.0
+   ]
+  },
+  "reco_axis": {
+   "name": "rigidity",
+   "unit": "GV",
+   "edges": [
+    1.5,
+    2.0,
+    3.0,
+    4.5,
+    7.0,
+    10.0,
+    15.0,
+    25.0,
+    40.0,
+    60.0,
+    100.0,
+    150.0
+   ]
+  },
+  "orientation": "rows_reco_cols_truth",
+  "normalization": "conditional_on_selected",
+  "inefficiency": "outside_matrix",
+  "acceptance": "outside_matrix",
+  "includes": [
+   "migration"
+  ],
+  "applied_separately": [
+   "trigger_efficiency",
+   "selection_efficiency",
+   "acceptance",
+   "exposure"
+  ],
+  "underflow_overflow": "lost outside [1.5, 150] GV; first and last bins are buffers",
+  "conditions": "per synthetic period (spectral shape inside bins differs slightly)",
+  "provenance": "computed analytically from the synthetic resolution model",
+  "matrix_ref": "results.json",
+  "form": "matrix"
+ }
+}

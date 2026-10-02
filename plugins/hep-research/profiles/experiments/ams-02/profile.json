@@ -94,8 +94,11 @@
   },
   {
    "name": "flux-ratio-synthetic",
-   "status": "proposed",
-   "scope": "Path A: synthetic time-dependent flux and correlated ratio with exposure normalization and closure (to be demonstrated in M2)"
+   "status": "demonstrated-on-synthetic-data",
+   "scope": "Path A: synthetic two-period proton and helium fluxes with exposure normalization, unfolding, efficiency covariance, correlated He/p ratio and exposure-weighted period average; Asimov and seeded-toy closure (examples/ams-flux-ratio). Synthetic inputs only; says nothing about the real detector",
+   "tests": [
+    "../../../tests/examples/test_path_a.py"
+   ]
   }
  ]
 }

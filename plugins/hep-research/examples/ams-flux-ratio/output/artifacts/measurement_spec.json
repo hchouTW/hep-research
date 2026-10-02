@@ -1,0 +1,212 @@
+{
+ "contract_version": "1.0.0",
+ "bindings": {
+  "experiments": [
+   {
+    "profile": "experiment:ams-02",
+    "version": "1.0.0"
+   }
+  ],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.1.0",
+  "contracts": "1.0.0",
+  "profiles": {
+   "experiment:ams-02": "1.0.0"
+  }
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "artifact_id": "synthetic-path-a-measurement-spec",
+ "artifact_type": "measurement-spec",
+ "objective": "SYNTHETIC Path A: He/p flux ratio per rigidity bin in two synthetic periods",
+ "provenance": {
+  "producer_skill": "hep-analysis",
+  "created": "2026-10-02",
+  "evidence_ids": [
+   "ams02:C31"
+  ]
+ },
+ "status": [
+  "synthetic"
+ ],
+ "extension": {
+  "observable": {
+   "quantity": "ratio",
+   "species": [
+    {
+     "name": "helium",
+     "abs_Z": 2,
+     "A": 4
+    },
+    {
+     "name": "proton",
+     "abs_Z": 1,
+     "A": 1
+    }
+   ],
+   "variables": [
+    {
+     "name": "rigidity",
+     "unit": "GV",
+     "edges": [
+      2.0,
+      3.0,
+      4.5,
+      7.0,
+      10.0,
+      15.0,
+      25.0,
+      40.0,
+      60.0,
+      100.0
+     ]
+    }
+   ],
+   "phase_space": {
+    "definition": "synthetic: downward-going particles inside the synthetic acceptance, R > 1.2 x maximum cutoff per bin lower edge",
+    "fiducial": true
+   },
+   "level": "crflux:top-of-instrument",
+   "frame": "detector location",
+   "normalization": {
+    "kind": "exposure",
+    "value": "not-applicable",
+    "convention": "ratio of exposure-normalized fluxes; exposure = acceptance x livetime x cutoff fraction per period"
+   },
+   "bin_semantics": "bin-averaged",
+   "unit": "1",
+   "conventions": {
+    "energy_variable": "rigidity",
+    "ams02:rigidity_definition": "R = pc/(Ze) in GV; p = |Z|R/c; rigidity is not momentum"
+   }
+  },
+  "species_or_process": "helium, proton (synthetic)",
+  "period": [
+   {
+    "start": "synthetic-period-1",
+    "end": "synthetic-period-1"
+   },
+   {
+    "start": "synthetic-period-2",
+    "end": "synthetic-period-2"
+   }
+  ],
+  "selections": [
+   {
+    "name": "geomagnetic",
+    "definition": "bin lower edge > 1.2 x maximum cutoff",
+    "conditional_denominator": "livetime"
+   },
+   {
+    "name": "species selection",
+    "definition": "synthetic per-species selection",
+    "conditional_denominator": "triggered events in acceptance"
+   }
+  ],
+  "backgrounds": [],
+  "corrections": [
+   {
+    "effect_id": "trigger_efficiency",
+    "category": "efficiency",
+    "applied_in": "estimator"
+   },
+   {
+    "effect_id": "selection_efficiency",
+    "category": "efficiency",
+    "applied_in": "estimator"
+   },
+   {
+    "effect_id": "acceptance",
+    "category": "acceptance",
+    "applied_in": "estimator"
+   },
+   {
+    "effect_id": "livetime_and_cutoff",
+    "category": "exposure",
+    "applied_in": "estimator"
+   },
+   {
+    "effect_id": "rigidity_migration",
+    "category": "response",
+    "applied_in": "response_matrix"
+   }
+  ],
+  "systematics": [
+   {
+    "name": "trigger_efficiency",
+    "source": "control sample",
+    "effect": "normalization",
+    "applied_via": "covariance (fully correlated across bins, shared by species)"
+   },
+   {
+    "name": "selection_efficiency",
+    "source": "control sample",
+    "effect": "normalization",
+    "applied_via": "covariance (per bin, per species)"
+   }
+  ],
+  "blinding": {
+   "blinded": false
+  },
+  "ratio": {
+   "numerator": "helium flux",
+   "denominator": "proton flux",
+   "cancellations": [
+    {
+     "effect": "trigger_efficiency",
+     "treatment": "cancels",
+     "correlation_model": "the same per-period estimate divides both species",
+     "verification": "independent linear propagation with the shared component (core.stats ratio_measured) agrees"
+    },
+    {
+     "effect": "livetime_and_cutoff",
+     "treatment": "cancels",
+     "correlation_model": "identical livetime and cutoff fraction per period and bin",
+     "verification": "by construction of the exposure"
+    },
+    {
+     "effect": "acceptance",
+     "treatment": "independent",
+     "correlation_model": "species-specific acceptance (assumed exactly known here)"
+    },
+    {
+     "effect": "selection_efficiency",
+     "treatment": "independent",
+     "correlation_model": "separate control samples per species"
+    }
+   ]
+  },
+  "experiment_fields": {
+   "ams02:parameters": [
+    {
+     "name": "geomagnetic cutoff safety factor",
+     "value": 1.2,
+     "provenance": "documented",
+     "claim_ids": [
+      "C31"
+     ],
+     "applies_to": {
+      "species": [
+       "proton"
+      ]
+     }
+    },
+    {
+     "name": "geomagnetic cutoff safety factor",
+     "value": 1.2,
+     "provenance": "proposal",
+     "claim_ids": [],
+     "applies_to": {
+      "species": [
+       "helium"
+      ]
+     }
+    }
+   ],
+   "ams02:note": "SYNTHETIC: every number except the documented cutoff factor is invented"
+  }
+ }
+}
