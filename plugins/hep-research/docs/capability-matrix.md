@@ -28,7 +28,7 @@ SciPy 1.17.1, Matplotlib 3.11.2, SymPy 1.14.0, Claude Code CLI 2.1.287, 2026-10-
 | Combinations (GLS) with declared correlations | hep-statistics | tested (E1), Gaussian only | T04, T05, T09 |
 | Comparison with published records, no detector modules | hep-statistics | tested (E1) | T24 (synthetic published-style record) |
 | Bayesian inference (samplers, priors, convergence) | hep-statistics | contract checks only | T28; no sampler run |
-| HistFactory / pyhf workflows | hep-statistics | unverified | pyhf not installed (not approved) |
+| HistFactory / pyhf workflows | hep-statistics | demonstrated on synthetic data (E1 + pyhf 0.7.6), one counting channel | `tests/adapters/test_pyhf_counting.py`: CLs limit 2.153 agrees with an independent scipy profile likelihood (2.154); end-to-end sample passes; multi-channel and shape workspaces not tried |
 | Local partition, resubmission, merge | hep-computing | tested (E1) | T21 |
 | ROOT, PyROOT, uproot/awkward tools | hep-computing | unverified | tools not installed; tests skipped |
 | Task files for coding agents (task authoring) | hep-computing | tested (E1) | bundle validator, lint_task tests |
@@ -52,7 +52,7 @@ SciPy 1.17.1, Matplotlib 3.11.2, SymPy 1.14.0, Claude Code CLI 2.1.287, 2026-10-
 
 | Adapter | Status | Notes |
 |---|---|---|
-| `adapters/pyhf-combine` (pyhf JSON, Combine datacard template) | proposed | starting points only; pyhf and Combine not installed |
+| `adapters/pyhf-combine` (pyhf JSON, Combine datacard template) | proposed | adapter status is its least-tested tool: pyhf part demonstrated-on-synthetic-data (pyhf 0.7.6); Combine part proposed, Combine not installed |
 | `adapters/root-uproot` (ROOT, RDataFrame, RooFit, uproot/awkward assets) | proposed | starting points only; ROOT and uproot not installed |
 | Interchange formats for recasting and published data | proposed | named as optional in the J7 trace; no code |
 

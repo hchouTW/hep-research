@@ -20,15 +20,16 @@ adapters/<name>/
 | `version` | SemVer of the adapter |
 | `status` | a capability state from `contracts/vocab/core.json` (`proposed`, `documented`, `demonstrated-on-synthetic-data`, `tested-in-declared-environment`, `unavailable`) |
 | `purpose` | one sentence |
-| `tools` | each tool with the versions it was actually run with (`tested_versions`, empty until run) |
+| `tools` | each tool with its own `status` and the versions it was actually run with (`tested_versions`, empty until run) |
 | `environment` | where the tests ran (OS, Python, tool builds), or "none declared" |
 | `assets`, `tests` | relative paths; every listed file must exist |
 | `owner_skill` | the core skill that owns the method the adapter executes |
 
 ## Honesty rules
 
-- A status above `documented` needs tests that run the tool, a declared environment, and tested versions for every
-  tool. The declaration test fails otherwise.
+- A tool status above `documented` needs tests that run the tool, a declared environment, and tested versions; a
+  tool not run lists no versions. The adapter status is the lowest of its tools' statuses. The declaration test
+  fails otherwise.
 - Never name a tool, version or feature as supported unless a test ran it. Untested names stay `proposed`.
 - A missing tool at run time yields an artifact with status `failed` and the reason, never a silent fallback.
 - Outputs pass through the plugin's contracts (`contracts/validate.py`), so the comparison gate and status labels
@@ -41,5 +42,5 @@ Bump its version, rerun its tests in the declared environment, record the run in
 environment, command, result), and update the matrix. A tool upgrade that changes numbers beyond the declared
 tolerance is a breaking change.
 
-The two shipped adapters, `adapters/pyhf-combine` and `adapters/root-uproot`, are `proposed`: their tools were not
-installed in the v1 checks.
+Both shipped adapters are `proposed`. In `adapters/pyhf-combine` the pyhf part is `demonstrated-on-synthetic-data`
+(pyhf 0.7.6) and the Combine part is `proposed`; `adapters/root-uproot` tools were not installed in the v1 checks.

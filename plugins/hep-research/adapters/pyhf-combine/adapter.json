@@ -1,11 +1,31 @@
 {
  "id": "adapter:pyhf-combine",
- "version": "0.1.0",
+ "version": "0.2.0",
  "status": "proposed",
  "purpose": "Starting points for HistFactory-style likelihoods: a pyhf counting workspace and a CMS Combine datacard template",
- "tools": [{"name": "pyhf", "tested_versions": []}, {"name": "CMS Combine", "tested_versions": []}],
- "environment": "none declared; pyhf and Combine were not installed in v1 checks",
- "assets": ["assets/pyhf-counting.json", "assets/combine_datacard_template.txt"],
- "tests": [],
- "owner_skill": "hep-statistics"
+ "tools": [
+  {
+   "name": "pyhf",
+   "status": "demonstrated-on-synthetic-data",
+   "tested_versions": [
+    "0.7.6"
+   ]
+  },
+  {
+   "name": "CMS Combine",
+   "status": "proposed",
+   "tested_versions": []
+  }
+ ],
+ "environment": "E1 (docs/capability-matrix.md) plus pyhf 0.7.6 (numpy backend, scipy optimizer); CMS Combine not installed",
+ "assets": [
+  "assets/pyhf-counting.json",
+  "assets/combine_datacard_template.txt"
+ ],
+ "tests": [
+  "../../tests/adapters/test_pyhf_counting.py",
+  "../../tests/examples/test_end_to_end_sample.py"
+ ],
+ "owner_skill": "hep-statistics",
+ "status_rule": "the adapter status is the lowest of its tools' statuses; each tool's own status is in tools[]"
 }

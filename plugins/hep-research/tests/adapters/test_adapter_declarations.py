@@ -6,6 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 STATUSES = set(json.loads((ROOT / "contracts" / "vocab" / "core.json").read_text(encoding="utf-8"))["vocabularies"]["capability_statuses"])
 DEMONSTRATED = {"demonstrated-on-synthetic-data", "tested-in-declared-environment"}
+ORDER = ["unavailable", "proposed", "documented", "demonstrated-on-synthetic-data", "tested-in-declared-environment"]
 
 
 class AdapterDeclarationTests(unittest.TestCase):
@@ -19,12 +20,19 @@ class AdapterDeclarationTests(unittest.TestCase):
                 self.assertIn(doc["status"], STATUSES)
                 for a in doc["assets"]:
                     self.assertTrue((d / a).is_file(), a)
-                if doc["status"] in DEMONSTRATED:
-                    self.assertTrue(doc["tests"], "a demonstrated or tested adapter needs tests")
-                    self.assertNotIn("none declared", doc["environment"])
-                    for t in doc["tests"]:
-                        self.assertTrue((d / t).exists(), t)
-                    self.assertTrue(all(t["tested_versions"] for t in doc["tools"]))
+                for t in doc["tests"]:
+                    self.assertTrue((d / t).is_file(), t)
+                tool_statuses = [t.get("status", doc["status"]) for t in doc["tools"]]
+                for tool, st in zip(doc["tools"], tool_statuses):
+                    self.assertIn(st, STATUSES)
+                    if st in DEMONSTRATED:  # a tool above "documented" was run: tests, environment and versions
+                        self.assertTrue(doc["tests"], f"{tool['name']}: a demonstrated or tested tool needs tests")
+                        self.assertNotIn("none declared", doc["environment"])
+                        self.assertTrue(tool["tested_versions"], tool["name"])
+                    else:
+                        self.assertFalse(tool["tested_versions"], f"{tool['name']}: versions listed but not run")
+                # the adapter never claims more than its least-tested tool
+                self.assertEqual(doc["status"], min(tool_statuses, key=ORDER.index))
 
     def test_capability_matrix_matches_declarations(self):
         matrix = (ROOT / "docs" / "capability-matrix.md").read_text(encoding="utf-8")
