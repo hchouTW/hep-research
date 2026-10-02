@@ -47,8 +47,16 @@
   },
   "blinding": {
    "steward": "hep-computing",
-   "status": "planned-M2",
-   "purpose": "Masking of blinded values in outputs, logs, caches"
+   "status": "implemented-M3",
+   "purpose": "Masking of blinded values in outputs, logs, caches",
+   "files": [
+    "blinding"
+   ],
+   "consumers": [
+    "skills/hep-computing/scripts/audit_blinded_outputs.py",
+    "skills/hep-analysis/scripts/mask_blinded_bins.py"
+   ],
+   "source": "new in M3 (task T18); no legacy blinding enforcement existed"
   },
   "evidence": {
    "steward": "research-communication",
