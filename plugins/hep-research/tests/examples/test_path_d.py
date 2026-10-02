@@ -94,5 +94,21 @@ class PathDTests(unittest.TestCase):
             self.m.plan = orig
 
 
+@unittest.skipUnless(HAVE_DEPS, "numpy, scipy and matplotlib are required (D5 environment)")
+class LowCountTests(unittest.TestCase):
+    """AC17: low and zero counts in the Path D likelihood (no Gaussian approximation, empty bins allowed)."""
+
+    def test_zero_and_low_count_bins(self):
+        spec = importlib.util.spec_from_file_location("run_path_d_low", SCRIPT)
+        m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(m)
+        a = [0.4, 0.3, 0.2, 0.1, 0.5, 0.5]
+        fit = m.Model([0, 1, 0, 0, 2, 0], a, 0.02, 5.8e-4).fit()
+        self.assertAlmostEqual(fit["mu_hat"], 3 / 2.0, places=12)
+        lo, hi = fit["interval_68"]
+        self.assertGreater(lo, 0.0)
+        self.assertGreater(hi - fit["mu_hat"], fit["mu_hat"] - lo)  # Poisson asymmetry is kept
+
+
 if __name__ == "__main__":
     unittest.main()

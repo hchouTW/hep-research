@@ -1,6 +1,6 @@
 # PROGRESS — hep-research plugin
 
-- Current milestone: **M3 complete** (exit checks pass); next M4. G0 and G1 passed 2026-10-02
+- Current milestone: **M4 complete** (exit checks pass); next M5 (G5 needs the user). G0 and G1 passed 2026-10-02
 - Repository: `hchouTW/hep-research`, branch `feat/hep-research-plugin` (no PR). Legacy source: read-only `agentic-ai-skills@3e995a4` via `tasks/hep-research/scripts/fetch_legacy.sh`
 - Base commit: `3e995a49a89fad8e0e9d52130ee1fd93a3a0f4f9`
 - Last session: 2026-10-02, Claude Code cloud container (CLI 2.1.287), Python 3.11.15
@@ -72,9 +72,20 @@ Latest check run (M3): `check-runs/check-run-2026-10-02T153532Z.json` (11 pass, 
 
 M3 exit checks: Paths B and C pass; AMS-absent run passes; AC10 diff touches no core, contracts or skill files.
 
+## M4 steps
+
+- [x] 1. Comparison gate (`contracts/compat/gate.py`, CLI) and composition diagnostics (`compose.py`); combination plan (`combine.py`) with `hep-statistics/scripts/combine_measurements.py`; competing-model set (`models.py`)
+- [x] 2. Path D (`examples/theory-comparison/run_path_d.py`): gate, forward folding, mu fit, Asimov injection at 1 and 1.25, 200 toys at mu = 1 and 0.8, 9 rejected variants, one documented conversion; T24 (`examples/published-comparison/`)
+- [x] 3. Handoffs exercised by Section 11 tests (`tests/integration/test_handoffs.py`): detector -> statistics (T07), ML (T16, new `check_surrogate_domain.py`, AUC-only rule), analysis changes (T19, new `review_analysis_change.py`), failure propagation and communication (T20), private local profile (T27), paradigms (T28)
+- [x] 4. Local partition/merge/recovery (`skills/hep-computing/scripts/local_partition.py`, `examples/local-partition/`, T21)
+- [x] 5. Section 11 tests mapped to M4 run: T03–T09, T16, T19–T21, T24, T27, T28 pass
+- [x] Carry-over: legacy end-to-end sample analysis moved to `examples/end-to-end-sample/` (skipped without pyhf)
+
+M4 exit checks: Path D and T24 pass; every negative composition/compatibility fixture fails with an actionable message (field, reason, resolution); failure statuses propagate downstream (T20).
+
 ## Blockers / needs user
 
-1. None at M3. Next gate needing the user is G5 (native install test).
+1. None at M4. Next gate needing the user is G5 (native install test).
 2. Open from M1: the old branch in agentic-ai-skills (M1-12) is for the user to delete.
 
 ## Resume checklist
@@ -85,4 +96,4 @@ M3 exit checks: Paths B and C pass; AMS-absent run passes; AC10 diff touches no 
 
 ## Next step
 
-M4: composition and Path D (QED prediction vs synthetic-collider measurement; the harness injects σ_gen = μ·σ_pred, DECISIONS M3-07), T03–T09, T16, T19–T21. Carry-overs: port `end_to_end_sample_analysis.py`; rewrite the obsolete host-install notes in `hep-computing/references/{claude-code,antigravity,codex}.md`; dedupe generic content in AMS modules against core skills (M2-04).
+M5: relocation run from a temp path with spaces, budgets, routing cases (static; live runs need approval for paid model calls), packaging scan, README and capability matrix, then GATE G5 (native install test, needs the user). Carry-overs: rewrite the obsolete host-install notes in `hep-computing/references/{claude-code,antigravity,codex}.md`; dedupe generic content in AMS modules against core skills (M2-04); pyhf-based example unverified until pyhf is approved for installation.
