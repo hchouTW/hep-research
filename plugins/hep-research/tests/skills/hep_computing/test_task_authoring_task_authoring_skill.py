@@ -94,5 +94,13 @@ class ShippedExamplesTests(unittest.TestCase):
                 self.assertEqual(problems, [])
 
 
+class BundleInPluginTests(unittest.TestCase):
+    def test_validator_passes_on_the_plugin_layout(self) -> None:
+        proc = subprocess.run([sys.executable, str(ROOT / "scripts" / "validate_skill_bundle.py")],
+                              capture_output=True, text=True)
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        self.assertIn("Bundle OK", proc.stdout)
+
+
 if __name__ == "__main__":
     unittest.main()

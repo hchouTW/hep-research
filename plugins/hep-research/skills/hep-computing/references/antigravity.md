@@ -1,15 +1,12 @@
-# Antigravity Adapter
+# Antigravity host notes
 
-Discovery notes only - the authoring rules live in `SKILL.md` and
-`references/`, not here.
+The `hep-research` plugin is built and tested for Claude Code only. Installing it, or the task-authoring material
+inside `hep-computing`, in Antigravity is **not tested** in v1: no install path, discovery behavior or invocation syntax
+is claimed here.
 
-- Install by copying the whole `task-authoring/` folder to
-  `.agents/skills/task-authoring/` in the workspace, or
-  `~/.gemini/config/skills/task-authoring/` for a global install (older
-  installs may still read `.agent/skills/`).
-- Antigravity reads every installed skill's `name`/`description` frontmatter
-  at session start and loads the full `SKILL.md` automatically when a task
-  matches - no explicit invocation command is needed.
-- See the
-  [Antigravity skills documentation](https://antigravity.google/docs/skills)
-  for the general skill-discovery mechanism.
+- What carries over without a host: the Markdown references and the standard-library scripts (run them with
+  `python3 <script> --help`). Paths in the skill text use `${CLAUDE_PLUGIN_ROOT}`; another host must substitute
+  the plugin's install directory.
+- What does not: plugin manifests, namespaced skill invocation, and the generated context stanza assume Claude Code.
+- If you need Antigravity support, record it as an adapter request; it stays `proposed` until it is executed in a
+  declared environment.

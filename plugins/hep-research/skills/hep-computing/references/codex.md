@@ -1,15 +1,12 @@
-# Codex Adapter
+# Codex host notes
 
-Discovery notes only - the authoring rules live in `SKILL.md` and
-`references/`, not here.
+The `hep-research` plugin is built and tested for Claude Code only. Installing it, or the task-authoring material
+inside `hep-computing`, in Codex is **not tested** in v1: no install path, discovery behavior or invocation syntax
+is claimed here.
 
-- Install by copying the whole `task-authoring/` folder to the skill
-  directory used by your Codex environment, commonly `~/.codex/skills/`, or
-  import it through whichever mechanism your Codex version supports.
-- Reload skills and invoke with `$task-authoring`.
-- `agents/openai.yaml` supplies optional Codex UI metadata (`display_name`,
-  `short_description`, `default_prompt`) - it is a thin descriptor, not a copy
-  of the workflow itself.
-- As with any skill folder, keep `SKILL.md`, `templates/`, `references/`, and
-  `examples/` together - Codex resolves the relative links between them from
-  the folder's own root.
+- What carries over without a host: the Markdown references and the standard-library scripts (run them with
+  `python3 <script> --help`). Paths in the skill text use `${CLAUDE_PLUGIN_ROOT}`; another host must substitute
+  the plugin's install directory.
+- What does not: plugin manifests, namespaced skill invocation, and the generated context stanza assume Claude Code.
+- If you need Codex support, record it as an adapter request; it stays `proposed` until it is executed in a
+  declared environment.

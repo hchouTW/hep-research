@@ -1,0 +1,590 @@
+{
+ "note": "Routing cases (task M5.3). Static check: tools/check_routing_static.py. A live check needs approval for paid model calls.",
+ "cases": [
+  {
+   "id": "dr-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Measure the muon trigger efficiency with tag-and-probe and give me the per-bin uncertainty.",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "tag-and-probe"
+   ]
+  },
+  {
+   "id": "dr-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請幫我建立這個量能器的響應矩陣，並檢查 data/MC agreement。",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "response matrices",
+    "data/MC agreement"
+   ]
+  },
+  {
+   "id": "dr-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Unfold this measured spectrum with the response matrix I already have.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "unfolding"
+   ],
+   "not": "detector-response"
+  },
+  {
+   "id": "dr-negative-1",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "Design the background estimate for my dilepton measurement using control regions.",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "background estimation",
+    "control regions"
+   ],
+   "not": "detector-response"
+  },
+  {
+   "id": "an-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Review this measurement spec: is the estimand clear and are the systematic uncertainties complete?",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "estimand",
+    "systematic uncertainties",
+    "measurement review"
+   ]
+  },
+  {
+   "id": "an-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我要設計一個中微子截面量測的事件選擇與 cutflows，還有 blinding policy。",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "cutflows",
+    "blinding policy"
+   ]
+  },
+  {
+   "id": "an-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Set a CLs upper limit on the signal strength from these yields.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "CLs"
+   ],
+   "not": "hep-analysis"
+  },
+  {
+   "id": "an-negative-1",
+   "lang": "zh-Hant",
+   "kind": "negative",
+   "prompt": "我的分析程式在讀取 ROOT 檔時 crashes，請幫我除錯。",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "crashes",
+    "ROOT/PyROOT"
+   ],
+   "not": "hep-analysis"
+  },
+  {
+   "id": "co-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My ROOT macro has a memory leak after 10^6 events; find it.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "memory leaks",
+    "ROOT/PyROOT"
+   ]
+  },
+  {
+   "id": "co-direct-2",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Split this event generation into chunks for batch submission, with resubmission and a merge that does not double count.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "batch submission, merging and recovery"
+   ]
+  },
+  {
+   "id": "co-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Is this extracted cross section physically consistent with the tree-level prediction?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "cross sections"
+   ],
+   "not": "hep-computing"
+  },
+  {
+   "id": "co-negative-1",
+   "lang": "zh-Hant",
+   "kind": "negative",
+   "prompt": "請幫我推導這個衰變寬度的解析式，並說明近似的適用範圍。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "decay rates",
+    "validity domains"
+   ],
+   "not": "hep-computing"
+  },
+  {
+   "id": "st-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Give me a Feldman-Cousins interval for zero observed events with background 0.8.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "Feldman-Cousins",
+    "low or zero counts"
+   ]
+  },
+  {
+   "id": "st-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "兩個實驗量測同一觀測量，有共同的系統誤差，請做 combinations across datasets。",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "combinations across datasets or experiments"
+   ]
+  },
+  {
+   "id": "st-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Which selection cuts should define my signal region?",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "event/candidate selection"
+   ],
+   "not": "hep-statistics"
+  },
+  {
+   "id": "st-negative-1",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "Derive the prediction for this new-physics coupling so I can fit it later.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "predictions"
+   ],
+   "not": "hep-statistics"
+  },
+  {
+   "id": "th-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Derive the tree-level e+e- -> mu+mu- cross section with explicit conventions and check the limits.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "cross sections",
+    "conventions"
+   ]
+  },
+  {
+   "id": "th-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請說明這個 NLO 計算的 scale envelopes 該如何給出理論誤差。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "scale envelopes"
+   ]
+  },
+  {
+   "id": "th-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Fit the coupling of my model to these published data points with their covariance.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "fits"
+   ],
+   "not": "hep-theory"
+  },
+  {
+   "id": "th-negative-1",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "Write the results section of the paper from these fit outputs.",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "drafting or revising paper sections"
+   ],
+   "not": "hep-theory"
+  },
+  {
+   "id": "ml-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Train a jet classifier in PyTorch with grouped splits by run so nothing leaks.",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "grouped train/validation/test splits and leakage checks"
+   ]
+  },
+  {
+   "id": "ml-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我的模擬太慢，想用 PyTorch 做 surrogates，並檢查 domain shift。",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "surrogates",
+    "domain shift"
+   ]
+  },
+  {
+   "id": "ml-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Is the likelihood-free inference built on my network statistically valid, with coverage?",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "coverage"
+   ],
+   "not": "physics-ml"
+  },
+  {
+   "id": "ml-negative-1",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "My C++ CMake build fails to link ROOT libraries.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "CMake builds"
+   ],
+   "not": "physics-ml"
+  },
+  {
+   "id": "rc-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Check whether this INSPIRE citation really supports the 2.1% number in my draft.",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "citations",
+    "INSPIRE-HEP"
+   ]
+  },
+  {
+   "id": "rc-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請幫我回覆審稿人的 referee reports，並修改摘要。",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "referee reports",
+    "abstracts"
+   ]
+  },
+  {
+   "id": "rc-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Is this Feynman diagram physically allowed at tree level?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "amplitudes"
+   ],
+   "not": "research-communication"
+  },
+  {
+   "id": "rc-negative-1",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "Run the template fit for the paper's main result.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "template fits"
+   ],
+   "not": "research-communication"
+  },
+  {
+   "id": "j01",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Plan the time-dependent helium flux and He/p ratio measurement for AMS-02 across two periods.",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "exposure"
+   ],
+   "journey": "J1",
+   "profiles": [
+    "experiment:ams-02"
+   ],
+   "chain": [
+    "hep-analysis",
+    "detector-response",
+    "hep-statistics",
+    "research-communication"
+   ]
+  },
+  {
+   "id": "j02",
+   "lang": "zh-Hant",
+   "kind": "journey",
+   "prompt": "研究 AMS-02 RICH 的速度解析度隨電荷的變化。",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "Cherenkov/RICH",
+    "resolution"
+   ],
+   "journey": "J2",
+   "profiles": [
+    "experiment:ams-02"
+   ],
+   "chain": [
+    "detector-response",
+    "hep-statistics"
+   ]
+  },
+  {
+   "id": "j03",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Measure the corrected angular distribution at my e+e- collider with its own luminosity and response.",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "luminosity"
+   ],
+   "journey": "J3",
+   "chain": [
+    "hep-analysis",
+    "detector-response",
+    "hep-statistics"
+   ]
+  },
+  {
+   "id": "j04",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Compute the tree-level cross section with all conventions stated and check it numerically.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "cross sections",
+    "consistency checks"
+   ],
+   "journey": "J4",
+   "profiles": [],
+   "chain": [
+    "hep-theory",
+    "hep-computing",
+    "hep-theory"
+   ]
+  },
+  {
+   "id": "j05",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Fold my prediction through the detector response and fit a normalization scale.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "predictions"
+   ],
+   "journey": "J5",
+   "chain": [
+    "hep-theory",
+    "hep-statistics",
+    "research-communication"
+   ]
+  },
+  {
+   "id": "j06",
+   "lang": "zh-Hant",
+   "kind": "journey",
+   "prompt": "用已發表的資料比較我的模型（comparing a model with published data），不需要偵測器細節。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "comparing a model with an experiment's published data"
+   ],
+   "journey": "J6",
+   "chain": [
+    "hep-theory",
+    "hep-statistics"
+   ],
+   "loads": "dataset records only"
+  },
+  {
+   "id": "j07",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Recast the published search with its efficiency maps to constrain my model.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "recasting a published analysis"
+   ],
+   "journey": "J7",
+   "chain": [
+    "hep-theory",
+    "detector-response",
+    "hep-statistics"
+   ]
+  },
+  {
+   "id": "j08",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Run a convergence study of this integral and cross-check the symbolic result numerically.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "convergence and tolerance studies"
+   ],
+   "journey": "J8",
+   "chain": [
+    "hep-computing",
+    "hep-theory"
+   ]
+  },
+  {
+   "id": "j09",
+   "lang": "zh-Hant",
+   "kind": "journey",
+   "prompt": "訓練一個分類器並宣告 surrogates 的有效範圍，之後用於推論。",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "surrogates"
+   ],
+   "journey": "J9",
+   "chain": [
+    "physics-ml",
+    "hep-statistics"
+   ]
+  },
+  {
+   "id": "j10",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Draft the paper section and figures with claim-to-result links and honest status.",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "claim-to-result links"
+   ],
+   "journey": "J10",
+   "chain": [
+    "research-communication"
+   ]
+  },
+  {
+   "id": "j11",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Use our collaboration's private calibration constants from my local profile in the efficiency study.",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "calibration"
+   ],
+   "journey": "J11",
+   "chain": [
+    "detector-response"
+   ],
+   "note": "local profile via project config; nothing enters the plugin"
+  },
+  {
+   "id": "j12",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Set up a lattice QCD global analysis of form factors.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "journey": "J12",
+   "chain": [
+    "hep-theory",
+    "hep-statistics"
+   ],
+   "limited_support": true
+  },
+  {
+   "id": "ams-computing-1",
+   "lang": "en",
+   "kind": "ams-computing",
+   "prompt": "My AMS-02 reconstruction script segfaults when reading the ntuple.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "crashes"
+   ],
+   "not": "hep-analysis",
+   "note": "experiment name does not route; the code problem does"
+  },
+  {
+   "id": "ams-computing-2",
+   "lang": "zh-Hant",
+   "kind": "ams-computing",
+   "prompt": "AMS 的資料處理程式在 batch submission 後合併結果重複計算。",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "batch submission, merging and recovery"
+   ],
+   "not": "hep-analysis"
+  },
+  {
+   "id": "theory-no-exp-1",
+   "lang": "en",
+   "kind": "theory-no-experiment",
+   "prompt": "Derive the decay rate of a scalar to two fermions; no experiment involved.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "decay rates"
+   ],
+   "profiles": []
+  },
+  {
+   "id": "recast-1",
+   "lang": "zh-Hant",
+   "kind": "recasting",
+   "prompt": "請重新詮釋（recasting a published analysis）這個 LHC 搜尋結果以限制我的模型。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "recasting a published analysis"
+   ],
+   "chain": [
+    "hep-theory",
+    "detector-response",
+    "hep-statistics"
+   ]
+  },
+  {
+   "id": "out-of-v1-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "prompt": "Fit cosmic-ray propagation parameters with GALPROP across all species.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [],
+   "limited_support": true
+  },
+  {
+   "id": "out-of-v1-2",
+   "lang": "zh-Hant",
+   "kind": "out-of-v1",
+   "prompt": "幫我做 SMEFT 全域擬合。",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [],
+   "limited_support": true
+  },
+  {
+   "id": "underspec-1",
+   "lang": "en",
+   "kind": "underspecified",
+   "prompt": "Compare the two experiments.",
+   "expected_primary": "ask",
+   "trigger_terms": [],
+   "note": "ask which datasets and observables; never pick experiments"
+  },
+  {
+   "id": "underspec-2",
+   "lang": "zh-Hant",
+   "kind": "underspecified",
+   "prompt": "比較這兩個實驗的結果。",
+   "expected_primary": "ask",
+   "trigger_terms": []
+  }
+ ]
+}

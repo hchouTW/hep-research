@@ -1,6 +1,6 @@
 # PROGRESS — hep-research plugin
 
-- Current milestone: **M4 complete** (exit checks pass); next M5 (G5 needs the user). G0 and G1 passed 2026-10-02
+- Current milestone: **M5 work done, waiting at GATE G5** (native install test needs the user's choice). G0 and G1 passed 2026-10-02
 - Repository: `hchouTW/hep-research`, branch `feat/hep-research-plugin` (no PR). Legacy source: read-only `agentic-ai-skills@3e995a4` via `tasks/hep-research/scripts/fetch_legacy.sh`
 - Base commit: `3e995a49a89fad8e0e9d52130ee1fd93a3a0f4f9`
 - Last session: 2026-10-02, Claude Code cloud container (CLI 2.1.287), Python 3.11.15
@@ -85,9 +85,18 @@ M3 exit checks: Paths B and C pass; AMS-absent run passes; AC10 diff touches no 
 
 M4 exit checks: Path D and T24 pass; every negative composition/compatibility fixture fails with an actionable message (field, reason, resolution); failure statuses propagate downstream (T20).
 
+## M5 steps
+
+- [x] 1. Relocation (`tools/check_relocation.py`): path with spaces, unrelated cwd, no symlinks or source-path references; all checks pass
+- [x] 2. Budgets measured (`tasks/hep-research/m5/budgets.json`); all within budget (M5-02)
+- [x] 3. Routing: 48 cases (`tests/routing/cases.json`) and `tools/check_routing_static.py` pass; live routing pending approval
+- [x] 4. Packaging scan (`tools/check_packaging.py`) clean
+- [x] 5. `README.md`, `requirements-core.txt`, `docs/capability-matrix.md`; host notes rewritten; bundle validator fixed
+- [ ] 6. GATE G5: native install, discovery, namespaced invocation, profile-resource access, legacy coexistence, removal; host and version recorded
+
 ## Blockers / needs user
 
-1. None at M4. Next gate needing the user is G5 (native install test).
+1. GATE G5: the user runs the native install test, or approves an isolated run here (and, separately, paid live routing/loading traces).
 2. Open from M1: the old branch in agentic-ai-skills (M1-12) is for the user to delete.
 
 ## Resume checklist
@@ -98,4 +107,4 @@ M4 exit checks: Path D and T24 pass; every negative composition/compatibility fi
 
 ## Next step
 
-M5: relocation run from a temp path with spaces, budgets, routing cases (static; live runs need approval for paid model calls), packaging scan, README and capability matrix, then GATE G5 (native install test, needs the user). Carry-overs: rewrite the obsolete host-install notes in `hep-computing/references/{claude-code,antigravity,codex}.md`; dedupe generic content in AMS modules against core skills (M2-04); pyhf-based example unverified until pyhf is approved for installation.
+G5 per the user's choice, then record it in VALIDATION (AC02, AC04 traces, AC20 live, AC24, AC25, T22) and start M6. Carry-overs: dedupe generic content in AMS modules (M2-04); pyhf example unverified until pyhf is approved.

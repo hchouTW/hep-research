@@ -1,15 +1,15 @@
-# VALIDATION — hep-research (partial, through M4)
+# VALIDATION — hep-research (partial, through M5 before gate G5)
 
 Environment for all entries below: Claude Code cloud container (Linux 6.18 x86_64), Python 3.11.15, `.venv-hep` with numpy 2.4.6, scipy 1.17.1, matplotlib 3.11.2, sympy 1.14.0; Claude Code CLI 2.1.287. Date 2026-10-02.
-Aggregate command: `python3 tools/run_all_checks.py --out <dir>`; latest run `tasks/hep-research/check-runs/check-run-2026-10-02T160613Z.json`: 11 pass / 0 fail / 0 skip; 952 unit tests: 913 pass, 0 fail, 39 skip (PyTorch, PyROOT, awkward/uproot, pyhf, Combine, Graphviz, Mermaid, PlantUML, tectonic not installed here; these are unverified, not passing); profile suites: ams-02 257, synthetic-collider 9, qed-benchmark 16 pass.
+Aggregate command: `python3 tools/run_all_checks.py --out <dir>`; latest run `tasks/hep-research/check-runs/check-run-2026-10-02T162614Z.json`: 13 pass / 0 fail / 0 skip; 956 unit tests: 917 pass, 0 fail, 39 skip (PyTorch, PyROOT, awkward/uproot, pyhf, Combine, Graphviz, Mermaid, PlantUML, tectonic not installed here; these are unverified, not passing); profile suites: ams-02 257, synthetic-collider 9, qed-benchmark 16 pass.
 Software checks establish contract consistency only: not physical validity, proof, statistical coverage, or authorization to unblind.
 
 | AC | Result so far | Evidence | Remaining |
 |---|---|---|---|
 | AC01 | partial | Inventory covers 100% of 942 files; every one of 394 redistributed files has a record (`tasks/hep-research/m2/redistribution/*.csv`) written back to `docs/migration-map.csv`; AMS ledger and modules mapped (`m2/equivalence.md`); legacy skills untouched | Final traceability audit M6 |
 | AC02 | partial | Seven SKILL.md with uses, exclusions, owned artifacts, handoffs; host validator `--strict` passes; no profile adds a skill | Discovery at G5 |
-| AC03 | pass (M2 scope) | `check_layering.py` 0 violations after migration; experiment passages in moved text inside example blocks; new rule rejects profile paths in skill/core/contract text | Re-check M5 |
-| AC04 | partial | ~2,005 always-on tokens (host estimate), SKILL.md 4.4–6.0 KiB | Real traces M5 |
+| AC03 | pass | `check_layering.py` 0 violations (re-run in M5, `check-run-2026-10-02T162614Z.json`); experiment passages in moved text inside example blocks; profile paths rejected in skill/core/contract text | — |
+| AC04 | partial | `tasks/hep-research/m5/budgets.json`: SKILL.md 50–63 lines and 5.2–7.0 KiB (budget 180 lines, 8 KiB), descriptions 773–921 chars (limit 1024), always-on ≈2,005 tokens (host estimate from `claude plugin details`), registry 690 B (≤2 KiB), profile indexes 2,370 / 956 / 896 B (≤4 KiB); no exceptions needed. Lines are below the 100-line guide because paragraphs are unwrapped; bytes are the binding budget (DECISIONS M5-02). Theory-only Path C and T24 load no experiment-profile file (audit hooks) | Real host loading traces need headless model runs (paid; asked at G5) |
 | AC05 | partial | One owner per method recorded in `core/OWNERS.json` and the migration map; generic text inside AMS modules is a recorded dedupe item (DECISIONS M2-04) | Dedupe pass M3 |
 | AC06 | pass | Registry negatives: duplicate ID, incompatible version, missing resource, template violation, escaping path (incl. symlink), cycle, missing dependency, unbacked capability, bad namespace, registry mismatch (`RegistryTests`) | — |
 | AC07 | pass (M4 scope) | 0/1/many × 0/1/many configs, local profile, conflict diagnostics, overrides need provenance (`ProjectConfigTests`) ; composition diagnostics for several profiles (`contracts/compat/compose.py`, `ComposeTests`; Path D binds two profiles) | Discovery and project use at G5 |
@@ -25,15 +25,18 @@ Software checks establish contract consistency only: not physical validity, proo
 | AC17 | pass | Correlated ratio and time-dependent exposure (Path A, T10/T11); unchanged integral with changed shape (T12); theory conventions and checks (T13–T15, M3) ; response inefficiency and double-counted efficiency (T07), ML group leakage and surrogate domain (T16), low and zero counts in the Path D Poisson likelihood (`LowCountTests`) | — |
 | AC18 | pass (M2 scope) | Ported original tests pass where tools exist (skips listed above); algorithm fixes only in `sci-fix:` commits, moves in `move:` commits; Path A seeds and tolerances in `results.json` | — |
 | AC19 | pass | Failure statuses propagate (T20: missing tool, solver failure, `failed` required downstream and in communication claims); bounded recovery in `local_partition.py`: no retries without configuration, `max_attempts` limit, stop after two identical failures with state kept, explicit reset with a reason (T21, `tests/skills/hep_computing/test_local_partition.py`) | — |
-| AC21 | partial | No values invented in dataset records; newer or inaccessible citations classed unverified (T17 sci-fix); three dates kept distinct (schema and ledger checks) ; a private local profile is validated and usable through project config and absent from the plugin tree (T27) | Packaging scan M5 |
+| AC21 | pass | No values invented in dataset records; newer or inaccessible citations classed unverified (T17); three dates kept distinct; a private local profile is usable through project config and absent from the plugin tree (T27); packaging scan of every distributable file finds no private paths, credentials, transcripts, rubrics, caches or project artifacts (`tools/check_packaging.py`) | — |
 | AC22 | partial | All five Section 12 corrections applied as `sci-fix:` commits with regressions (YAML subset docs, unverified citations, dates, T12, theory routing); synthetic labels on every Path A output; T18 blinding enforcement in `core/blinding` with synthetic tests across plots, ratios, logs, CSV and caches | Weight/normalization conventions and synthetic/Asimov/observed distinctions re-checked in Path D (M4) |
-| AC23 | partial | No adapter is claimed as tested: `adapters/pyhf-combine` and `adapters/root-uproot` hold starting points only; the ported pyhf end-to-end example (`examples/end-to-end-sample/`) is skipped here because pyhf is not installed, so it is unverified, not passing | Adapter declarations and capability matrix M5 |
-| AC29 | partial | Layering directions, no-hard-coded-profile rule (names, IDs, namespaces, paths), steward check enforced; one documented whitelist entry | Re-run M5 |
-| AC30 | partial | J1–J12 traced (`docs/researcher-journeys.md`) | Executions M2–M5 |
+| AC23 | pass | No adapter is claimed: `adapters/pyhf-combine` and `adapters/root-uproot` are labeled `proposed` in `docs/capability-matrix.md`; tools not installed are labeled unverified; the pyhf end-to-end example is skipped and reported unverified | — |
+| AC20 | partial | `tests/routing/cases.json`: 48 cases, English and Traditional Chinese, direct/neighboring/negative per skill, one per journey J1–J12, special categories (AMS computing, theory without experiment, recasting, outside v1, underspecified); `tools/check_routing_static.py` passes: trigger terms in the owner's description, exclusions name the neighbor, limited-support notice in every skill, handoff chains terminate, no dispatch API named | Live routing by the host (paid model calls) needs approval at G5 |
+| AC24 | partial | `tools/check_relocation.py`: plugin copied to `/tmp/hep research relocated …/plugin copy/hep-research`, run from an unrelated cwd with spaces; no symlinks, no file names the source path; all checks pass (`tasks/hep-research/m5/relocation-20261002T161906Z.json`) | Native install, discovery, invocation, resource access and removal at G5 |
+| AC27 | partial | `docs/capability-matrix.md`: per capability, profile, adapter and host with tested / unverified / proposed / not-in-v1 and environment E1 | Host row pending G5; final review M6 |
+| AC29 | pass | Layering directions, no-hard-coded-profile rule (names, IDs, namespaces, paths), steward check enforced and re-run in M5; one documented whitelist entry | — |
+| AC30 | partial | J1–J12 traced (`docs/researcher-journeys.md`); one routing case per journey passes the static check (M5) | Live routing at G5 if approved |
 | AC31 | pass | Vocabularies extensible by namespaced profile terms; non-collider normalization validates (T26); conventions gate T25 ; published-style record compared without detector modules (T24, load trace) | — |
 | others | not started | — | per task Section 10 |
 
-## Tests (Section 11), through M4
+## Tests (Section 11), through M5
 
 | Test | Result | Evidence |
 |---|---|---|
@@ -59,3 +62,4 @@ Software checks establish contract consistency only: not physical validity, proo
 | T27 | pass | `PrivateLocalProfileT27`: local profile in a project path with spaces validates, extends the vocabulary only when loaded, and its namespace appears nowhere in the plugin |
 | T28 | pass | Bayesian needs priors, sampler and convergence; frequentist needs construction and coverage; mislabeled results rejected (`ParadigmsT28` and M1 fixtures) |
 | T18 | pass | `tests/core/test_blinding.py` (15 tests, synthetic): masked JSON/log/CSV/npz and a masked plot pass; detected leaks: SR value in a log, a rounded value (`1234.6`, `1.235e+03`) in a CSV, a raw npz cache, a data/MC ratio and a total including the SR, SR points in a main or ratio panel and in bar charts; CLI exit 0/1/2 |
+| T22 | partial | Relocation passes (AC24 row); install, removal and legacy coexistence pending G5 |

@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Validate the task-authoring skill bundle's structural integrity.
+"""Validate the structural integrity of the task-authoring material in hep-computing.
 
 Purpose: catch accidental deletions or truncations of files this skill's SKILL.md
-and README.md depend on, and confirm the generated-task output contract
+depends on, and confirm the generated-task output contract
 (templates/task-template.md) still carries exactly the sections the authoring
 reference specifies - no more, no fewer.
 
-What it does: checks that every file this package is expected to ship (SKILL.md,
-README.md, agents metadata, references, adapters, templates, examples, scripts,
-tests) exists and is non-empty, that SKILL.md has YAML frontmatter with
-name/description (description at most 1024 characters), that README.md has its expected section headers, and that
+What it does: checks that every task-authoring file inside the hep-research plugin's
+hep-computing skill (SKILL.md, references, host notes, templates, examples, scripts) exists
+and is non-empty, that SKILL.md has YAML frontmatter with name/description (description at
+most 1024 characters), and that
 templates/task-template.md's heading structure exactly matches the section
 contract (one top-level title, then the fixed list of ## / ### sections in order).
 
@@ -23,19 +23,17 @@ from pathlib import Path
 
 REQUIRED_PATHS = [
     "SKILL.md",
-    "README.md",
-    "VALIDATION.md",
-    "agents/openai.yaml",
     "templates/task-template.md",
+    "references/task-authoring-guide.md",
     "references/acceptance-criteria.md",
     "references/task-quality-checklist.md",
     "references/example-authoring.md",
     "references/prompt-engineering-and-token-optimization.md",
     "references/loop-engineering.md",
-    "references/adapters/claude-code.md",
-    "references/adapters/codex.md",
-    "references/adapters/antigravity.md",
-    "references/adapters/generic-agent.md",
+    "references/claude-code.md",
+    "references/codex.md",
+    "references/antigravity.md",
+    "references/generic-agent.md",
     "examples/README.md",
     "examples/feature-task.md",
     "examples/bug-task.md",
@@ -49,16 +47,6 @@ REQUIRED_PATHS = [
     "scripts/validate_skill_example.py",
     "scripts/check_example_diversity.py",
     "scripts/lint_task.py",
-    "tests/test_task_authoring_skill.py",
-    "tests/test_example_authoring.py",
-    "tests/test_lint_task.py",
-]
-
-REQUIRED_README_SECTIONS = [
-    "## Installation and invocation",
-    "## Quick checks",
-    "## Coverage and boundaries",
-    "## Example prompts",
 ]
 
 # The exact, ordered section contract from "Task Generation Requirements" in
@@ -145,14 +133,6 @@ def main() -> None:
     match = re.search(r'^description:\s*"?(.*?)"?\s*$', frontmatter, re.MULTILINE)
     if match and len(match.group(1)) > DESCRIPTION_LIMIT:
         print(f"SKILL.md description is {len(match.group(1))} characters; limit is {DESCRIPTION_LIMIT}")
-        raise SystemExit(1)
-
-    readme = (root / "README.md").read_text(encoding="utf-8")
-    missing_sections = [s for s in REQUIRED_README_SECTIONS if s not in readme]
-    if missing_sections:
-        print("README.md is missing sections:")
-        for section in missing_sections:
-            print(f"  {section}")
         raise SystemExit(1)
 
     template = (root / "templates/task-template.md").read_text(encoding="utf-8")

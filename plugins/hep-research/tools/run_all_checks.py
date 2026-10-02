@@ -92,6 +92,8 @@ def main(argv=None) -> int:
         run_script("registry", [py, "contracts/registry.py"]),
         run_script("ams_ledger_preservation", [py, "tools/check_ams_ledger_preservation.py"]),
         run_script("ams_optional", [py, "tools/check_ams_optional.py"]),
+        run_script("routing_static", [py, "tools/check_routing_static.py"]),
+        run_script("packaging_scan", [py, "tools/check_packaging.py"]),
         run_script("measure_entrypoints", [py, "tools/measure_entrypoints.py"] + (["--no-cli"] if "--no-cli" in args else [])),
         host_validate() if "--no-cli" not in args else {"name": "claude-plugin-validate", "status": "skip", "reason": "--no-cli"},
     ]
