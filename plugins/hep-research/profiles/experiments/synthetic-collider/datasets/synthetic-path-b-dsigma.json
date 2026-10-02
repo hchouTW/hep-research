@@ -1,0 +1,121 @@
+{
+ "contract_version": "1.0.0",
+ "bindings": {
+  "experiments": [
+   {
+    "profile": "experiment:synthetic-collider",
+    "version": "1.0.0"
+   }
+  ],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.1.0",
+  "contracts": "1.0.0",
+  "profiles": {
+   "experiment:synthetic-collider": "1.0.0"
+  }
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "artifact_id": "synthetic-path-b-dsigma",
+ "artifact_type": "dataset-record",
+ "objective": "SYNTHETIC corrected d sigma / d cos theta (illustrative)",
+ "status": [
+  "synthetic"
+ ],
+ "provenance": {
+  "producer_skill": "hep-analysis",
+  "created": "2026-10-02"
+ },
+ "extension": {
+  "dataset_id": "synthcol:synthetic-path-b-dsigma",
+  "source_evidence_ids": [],
+  "observable": {
+   "quantity": "differential-cross-section",
+   "process": "e+e- -> mu+mu- (synthetic generator)",
+   "variables": [
+    {
+     "name": "cos_theta",
+     "unit": "1",
+     "edges": [
+      -0.9,
+      -0.72,
+      -0.54,
+      -0.36,
+      -0.18,
+      0.0,
+      0.18,
+      0.36,
+      0.54,
+      0.72,
+      0.9
+     ]
+    }
+   ],
+   "phase_space": {
+    "definition": "SYNTHETIC: |cos theta| < 0.9 at particle level, fixed sqrt(s) = 10 GeV",
+    "fiducial": true
+   },
+   "level": "particle-fiducial",
+   "frame": "center-of-mass",
+   "normalization": {
+    "kind": "integrated-luminosity",
+    "value": 20.0,
+    "unit": "pb^-1",
+    "convention": "unfolded truth counts / (integrated luminosity x bin width)"
+   },
+   "bin_semantics": "bin-averaged",
+   "unit": "pb",
+   "conventions": {
+    "energy_variable": "sqrt_s",
+    "angle_definition": "theta between the incoming e- beam and the outgoing mu-",
+    "synthcol:fiducial_definition": "|cos theta| < 0.9 at particle level"
+   }
+  },
+  "data": {
+   "edges": [
+    -0.9,
+    -0.72,
+    -0.54,
+    -0.36,
+    -0.18,
+    0.0,
+    0.18,
+    0.36,
+    0.54,
+    0.72,
+    0.9
+   ],
+   "values": [
+    561.5388531191692,
+    440.42865038650444,
+    388.79110919516785,
+    336.23066326592044,
+    325.31336497359086,
+    329.528259581844,
+    335.4889916277714,
+    407.6656213939705,
+    454.2756002527706,
+    563.253392501791
+   ],
+   "unit": "pb",
+   "uncertainties": [
+    {
+     "name": "total",
+     "kind": "statistical",
+     "correlation": "covariance",
+     "covariance_ref": "results.json#dsigma/covariance"
+    }
+   ]
+  },
+  "covariance": {
+   "status": "present",
+   "ref": "results.json#dsigma/covariance"
+  },
+  "period": "not-applicable",
+  "status": "synthetic",
+  "experiment_profile": "experiment:synthetic-collider"
+ }
+}

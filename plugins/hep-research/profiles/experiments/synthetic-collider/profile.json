@@ -1,0 +1,70 @@
+{
+ "id": "experiment:synthetic-collider",
+ "kind": "experiment",
+ "version": "1.0.0",
+ "scope": "ILLUSTRATIVE, SYNTHETIC: an invented e+e- collider detector at fixed sqrt(s) used to show that a non-AMS experiment plugs in through profile resources only. Event generator, efficiency, resolution and luminosity are invented and describe no real experiment.",
+ "exclusions": [
+  "Any real experiment's detector, data, performance numbers or practice",
+  "Physics claims: the generated angular shape and cross section are synthetic inputs, not predictions"
+ ],
+ "compatible": {
+  "core": ">=1.0,<2.0",
+  "contracts": ">=1.0,<2.0"
+ },
+ "related_skills": [
+  "hep-analysis",
+  "detector-response",
+  "hep-statistics"
+ ],
+ "resources": {
+  "index": "index.md",
+  "conventions": "conventions.json",
+  "detector_model": "modules/detector-model.md",
+  "working_rules": "modules/working-rules.md",
+  "benchmarks": "benchmarks/",
+  "datasets": "datasets/",
+  "evidence": "evidence/"
+ },
+ "vocabulary_namespaces": [
+  "synthcol"
+ ],
+ "vocabulary_extensions": {
+  "conventions": [
+   "synthcol:fiducial_definition",
+   "synthcol:luminosity_definition"
+  ]
+ },
+ "adapters": {
+  "required": [],
+  "optional": []
+ },
+ "depends_on": [],
+ "evidence_namespace": "synthcol",
+ "maintainer": "hchouTW (illustrative profile written for task M3.3; not a real experiment)",
+ "capabilities": [
+  {
+   "name": "synthetic-event-generation",
+   "status": "tested-in-declared-environment",
+   "scope": "Seeded synthetic e+e- -> mu+mu- angular events (cos theta) with a configurable 1 + a cos^2 + b cos shape; no theory code imported",
+   "tests": [
+    "tests/test_generator.py"
+   ]
+  },
+  {
+   "name": "synthetic-detector-model",
+   "status": "tested-in-declared-environment",
+   "scope": "Invented efficiency and Gaussian cos theta smearing with an analytic response matrix that includes the efficiency",
+   "tests": [
+    "tests/test_detector.py"
+   ]
+  },
+  {
+   "name": "corrected-angular-distribution",
+   "status": "demonstrated-on-synthetic-data",
+   "scope": "Path B (examples/collider-angular): luminosity-normalized, efficiency- and resolution-corrected d sigma / d cos theta and fiducial cross section with covariance; Asimov and seeded-toy closure against independent analytic expected values. Synthetic and illustrative only",
+   "tests": [
+    "../../../tests/examples/test_path_b.py"
+   ]
+  }
+ ]
+}
