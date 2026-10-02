@@ -1,0 +1,12 @@
+{
+ "registry_version": "1.0.0",
+ "profiles": [
+  {
+   "id": "experiment:fixture-exp-a",
+   "kind": "experiment",
+   "version": "1.1.0",
+   "scope": "fixture",
+   "path": "experiments/a"
+  }
+ ]
+}

@@ -1,0 +1,20 @@
+{
+ "schema_version": "1.0.0",
+ "plugin_version": ">=0.1,<1.0",
+ "experiments": [
+  {
+   "profile": "experiment:fixture-local",
+   "version": "1.0.0"
+  }
+ ],
+ "local_profile_paths": [
+  "local-profiles/exp-local"
+ ],
+ "overrides": [
+  {
+   "target": "fxa:placeholder",
+   "value": 1,
+   "provenance": "fixture: user-supplied note"
+  }
+ ]
+}

@@ -1,0 +1,15 @@
+{"$comment": "Owner: hep-analysis. Collider- and AMS-neutral: normalization kind decides which exposure field is needed.",
+ "type": "object",
+ "required": ["observable", "period", "selections", "backgrounds", "corrections", "systematics", "blinding"],
+ "properties": {
+  "observable": {"$ref": "common.json#/$defs/observable_spec"},
+  "species_or_process": {"type": "string"},
+  "period": {"anyOf": [{"type": "object", "required": ["start", "end"]}, {"type": "array", "items": {"type": "object", "required": ["start", "end"]}, "minItems": 1}, {"$ref": "common.json#/$defs/missing"}]},
+  "selections": {"type": "array", "items": {"type": "object", "required": ["name", "definition", "conditional_denominator"]}},
+  "backgrounds": {"type": "array", "items": {"type": "object", "required": ["name", "estimator"]}},
+  "corrections": {"type": "array", "items": {"type": "object", "required": ["effect_id", "category", "applied_in"]}},
+  "systematics": {"type": "array", "items": {"type": "object", "required": ["name", "source", "effect", "applied_via"],
+     "properties": {"effect": {"type": "string", "enum": ["normalization", "shape", "migration", "mixed"]}}}},
+  "blinding": {"anyOf": [{"type": "object", "required": ["blinded"], "properties": {"blinded": {"type": "boolean"}}}, {"$ref": "common.json#/$defs/missing"}]},
+  "experiment_fields": {"type": "object", "$comment": "Profile-namespaced fields, e.g. 'ams02:charge_sign_source'"}
+ }}

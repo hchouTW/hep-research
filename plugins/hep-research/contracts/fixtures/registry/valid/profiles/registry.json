@@ -1,0 +1,33 @@
+{
+ "registry_version": "1.0.0",
+ "profiles": [
+  {
+   "id": "experiment:fixture-exp-a",
+   "kind": "experiment",
+   "version": "1.0.0",
+   "scope": "fixture",
+   "path": "experiments/a"
+  },
+  {
+   "id": "experiment:fixture-exp-b",
+   "kind": "experiment",
+   "version": "1.0.0",
+   "scope": "fixture",
+   "path": "experiments/b"
+  },
+  {
+   "id": "theory:fixture-th-a",
+   "kind": "theory-domain",
+   "version": "1.0.0",
+   "scope": "fixture",
+   "path": "theory/a"
+  },
+  {
+   "id": "theory:fixture-th-b",
+   "kind": "theory-domain",
+   "version": "1.0.0",
+   "scope": "fixture",
+   "path": "theory/b"
+  }
+ ]
+}

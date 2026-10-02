@@ -1,0 +1,8 @@
+{
+  "name": "hep-research-dev",
+  "description": "Local development marketplace for the hep-research plugin (not published).",
+  "owner": {"name": "hchouTW"},
+  "plugins": [
+    {"name": "hep-research", "source": "./plugins/hep-research", "description": "Experimental and theoretical HEP research assistant (development build)."}
+  ]
+}

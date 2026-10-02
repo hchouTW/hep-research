@@ -1,0 +1,50 @@
+{
+ "contract_version": "1.0.0",
+ "artifact_id": "fixture-synthetic-statistical-result",
+ "artifact_type": "statistical-result",
+ "objective": "SYNTHETIC structural fixture; values are placeholders, not physics",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.1.0",
+  "contracts": "1.0.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-statistics",
+  "created": "2026-10-02",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "asimov",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "paradigm": "frequentist",
+  "likelihood": {
+   "form": "poisson"
+  },
+  "parameters_of_interest": [
+   "mu"
+  ],
+  "nuisances": [],
+  "fit_status": "converged",
+  "test_statistic": "q_mu",
+  "construction": "neyman",
+  "coverage": {
+   "toys": 0,
+   "note": "fixture"
+  },
+  "priors": [
+   {
+    "parameter": "mu",
+    "form": "flat"
+   }
+  ]
+ }
+}

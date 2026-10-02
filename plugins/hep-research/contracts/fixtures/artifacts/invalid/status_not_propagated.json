@@ -1,0 +1,99 @@
+{
+ "contract_version": "1.0.0",
+ "artifact_id": "fixture-synthetic-prediction",
+ "artifact_type": "prediction",
+ "objective": "SYNTHETIC structural fixture; values are placeholders, not physics",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.1.0",
+  "contracts": "1.0.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-theory",
+  "created": "2026-10-02",
+  "evidence_ids": []
+ },
+ "inputs": [
+  {
+   "ref": "x.json",
+   "status": [
+    "asimov"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "observable": {
+   "quantity": "differential-cross-section",
+   "process": "synthetic e+ e- -> mu+ mu-",
+   "variables": [
+    {
+     "name": "cos_theta",
+     "unit": "1",
+     "edges": [
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0
+     ]
+    }
+   ],
+   "phase_space": {
+    "definition": "synthetic fiducial region",
+    "fiducial": true
+   },
+   "level": "particle-fiducial",
+   "frame": "center-of-mass",
+   "normalization": {
+    "kind": "integrated-luminosity",
+    "ref": "synthetic-normalization.json"
+   },
+   "bin_semantics": "bin-averaged",
+   "unit": "pb",
+   "conventions": {
+    "energy_variable": "sqrt_s",
+    "frame": "center-of-mass"
+   }
+  },
+  "parameter_point": {
+   "p": 1
+  },
+  "representation": "numerical",
+  "values": {
+   "edges": [
+    -1.0,
+    -0.5,
+    0.0,
+    0.5,
+    1.0
+   ],
+   "values": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "unit": "pb"
+  },
+  "uncertainties": [
+   {
+    "name": "scale",
+    "kind": "scale-envelope",
+    "correlation": "unknown"
+   }
+  ],
+  "allowed_transformations": [
+   "forward-fold"
+  ]
+ }
+}

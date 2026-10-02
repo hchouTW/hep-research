@@ -1,0 +1,85 @@
+{
+  "$comment": "Shared definitions for hep-research contracts v1. Units are strings (e.g. 'GeV', 'pb', 'm^2 sr s GV', '1' for dimensionless).",
+  "$defs": {
+    "missing": {"type": "string", "enum": ["unknown", "not-applicable", "not-provided"]},
+    "nonempty": {"type": "string", "minLength": 1},
+    "version": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$"},
+    "profile_id": {"type": "string", "pattern": "^(experiment|theory):[a-z0-9][a-z0-9-]*$"},
+    "namespaced_id": {"type": "string", "pattern": "^[a-z][a-z0-9-]*:[A-Za-z0-9_.-]+$"},
+    "edges": {"type": "array", "items": {"type": "number"}, "minItems": 2},
+    "variable": {
+      "type": "object",
+      "required": ["name", "unit"],
+      "properties": {
+        "name": {"$ref": "#/$defs/nonempty"},
+        "unit": {"type": "string"},
+        "edges": {"$ref": "#/$defs/edges"},
+        "points": {"type": "array", "items": {"type": "number"}, "minItems": 1}
+      }
+    },
+    "conventions": {
+      "$comment": "Flat map. Keys are core convention_keys or namespaced '<ns>:<key>'. Unknown keys are allowed with a warning; the compatibility gate treats them as not comparable unless mapped.",
+      "type": "object"
+    },
+    "normalization": {
+      "type": "object",
+      "required": ["kind"],
+      "properties": {
+        "kind": {"type": "string", "x-vocab": "normalization_kinds"},
+        "convention": {"type": "string"},
+        "value": {"anyOf": [{"type": "number"}, {"$ref": "#/$defs/missing"}]},
+        "unit": {"type": "string"},
+        "ref": {"type": "string"}
+      }
+    },
+    "observable_spec": {
+      "type": "object",
+      "required": ["quantity", "variables", "level", "normalization", "bin_semantics", "unit"],
+      "properties": {
+        "quantity": {"type": "string", "x-vocab": "quantity_types"},
+        "process": {"type": "string"},
+        "species": {"type": "array", "items": {"type": "object", "required": ["name"]}},
+        "variables": {"type": "array", "items": {"$ref": "#/$defs/variable"}, "minItems": 1},
+        "phase_space": {"type": "object", "required": ["definition"],
+                        "properties": {"definition": {"type": "string"}, "fiducial": {"type": "boolean"}}},
+        "level": {"type": "string", "x-vocab": "levels"},
+        "frame": {"type": "string"},
+        "normalization": {"$ref": "#/$defs/normalization"},
+        "bin_semantics": {"type": "string", "x-vocab": "bin_semantics"},
+        "unit": {"type": "string"},
+        "conventions": {"$ref": "#/$defs/conventions"},
+        "included_corrections": {"type": "array", "items": {"type": "string"}},
+        "validity_range": {"type": "object"},
+        "external_ids": {"type": "object", "properties": {"hepdata": {"type": "string"}, "rivet": {"type": "string"}}}
+      }
+    },
+    "uncertainty_component": {
+      "type": "object",
+      "required": ["name", "kind", "correlation"],
+      "properties": {
+        "name": {"$ref": "#/$defs/nonempty"},
+        "kind": {"type": "string", "x-vocab": "uncertainty_kinds"},
+        "values": {"type": "array", "items": {"type": "number"}},
+        "correlation": {"type": "string", "enum": ["uncorrelated", "fully-correlated", "covariance", "unknown"]},
+        "covariance_ref": {"type": "string"},
+        "gaussian": {"type": "boolean"}
+      }
+    },
+    "binned_data": {
+      "type": "object",
+      "required": ["edges", "values", "unit"],
+      "properties": {
+        "edges": {"$ref": "#/$defs/edges"},
+        "values": {"type": "array", "items": {"type": "number"}},
+        "unit": {"type": "string"},
+        "uncertainties": {"type": "array", "items": {"$ref": "#/$defs/uncertainty_component"}},
+        "covariance_refs": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "binding": {
+      "type": "object",
+      "required": ["profile", "version"],
+      "properties": {"profile": {"$ref": "#/$defs/profile_id"}, "version": {"$ref": "#/$defs/version"}}
+    }
+  }
+}

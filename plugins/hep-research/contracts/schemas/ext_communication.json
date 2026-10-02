@@ -1,0 +1,9 @@
+{"$comment": "Owner: research-communication. Never upgrades derivation or result status.",
+ "type": "object",
+ "required": ["claims", "sources_read", "limitations"],
+ "properties": {
+  "claims": {"type": "array", "items": {"type": "object", "required": ["text", "result_ref", "status"]}},
+  "sources_read": {"type": "array", "items": {"type": "object", "required": ["id", "level"],
+      "properties": {"level": {"type": "string", "x-vocab": "verification_levels"}}}},
+  "figure_inputs": {"type": "array"}, "limitations": {"type": "array", "items": {"type": "string"}}
+ }}

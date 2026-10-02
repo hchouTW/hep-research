@@ -1,0 +1,15 @@
+{
+ "schema_version": "1.0.0",
+ "plugin_version": ">=0.1,<1.0",
+ "experiments": [],
+ "theory": [
+  {
+   "profile": "theory:fixture-th-a",
+   "version": "1.0.0"
+  },
+  {
+   "profile": "theory:fixture-th-b",
+   "version": "1.0.0"
+  }
+ ]
+}

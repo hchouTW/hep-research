@@ -1,0 +1,49 @@
+{
+ "contract_version": "1.0.0",
+ "artifact_id": "fixture-synthetic-ml-artifact",
+ "artifact_type": "ml-artifact",
+ "objective": "SYNTHETIC structural fixture; values are placeholders, not physics",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.1.0",
+  "contracts": "1.0.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "physics-ml",
+  "created": "2026-10-02",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "task": "classification",
+  "labels": [
+   "sig",
+   "bkg"
+  ],
+  "features": [
+   "x"
+  ],
+  "splits": {
+   "grouping_key": ""
+  },
+  "training_domain": {
+   "x": [
+    0,
+    1
+   ]
+  },
+  "preprocessing": [],
+  "model_hash": "sha256:placeholder",
+  "downstream_validation": []
+ }
+}

@@ -1,0 +1,16 @@
+{"$comment": "Owner: detector-response.",
+ "type": "object",
+ "required": ["truth_axis", "reco_axis", "orientation", "normalization", "inefficiency", "acceptance", "includes", "conditions", "provenance"],
+ "properties": {
+  "truth_axis": {"$ref": "common.json#/$defs/variable"}, "reco_axis": {"$ref": "common.json#/$defs/variable"},
+  "orientation": {"type": "string", "enum": ["rows_reco_cols_truth", "rows_truth_cols_reco"]},
+  "normalization": {"type": "string", "enum": ["conditional_on_selected", "conditional_on_generated", "joint_counts", "unnormalized"]},
+  "inefficiency": {"type": "string", "enum": ["inside_matrix", "outside_matrix"]},
+  "acceptance": {"type": "string", "enum": ["inside_matrix", "outside_matrix", "not-applicable"]},
+  "includes": {"type": "array", "items": {"type": "string"}},
+  "applied_separately": {"type": "array", "items": {"type": "string"}},
+  "underflow_overflow": {"type": "string"},
+  "conditions": {"type": "string"},
+  "provenance": {"type": "string"},
+  "matrix_ref": {"type": "string"}
+ }}

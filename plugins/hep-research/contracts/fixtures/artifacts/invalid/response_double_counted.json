@@ -1,0 +1,60 @@
+{
+ "contract_version": "1.0.0",
+ "artifact_id": "fixture-synthetic-response",
+ "artifact_type": "response",
+ "objective": "SYNTHETIC structural fixture; values are placeholders, not physics",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.1.0",
+  "contracts": "1.0.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "detector-response",
+  "created": "2026-10-02",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "truth_axis": {
+   "name": "cos_theta",
+   "unit": "1",
+   "edges": [
+    -1,
+    0,
+    1
+   ]
+  },
+  "reco_axis": {
+   "name": "cos_theta",
+   "unit": "1",
+   "edges": [
+    -1,
+    0,
+    1
+   ]
+  },
+  "orientation": "rows_reco_cols_truth",
+  "normalization": "conditional_on_generated",
+  "inefficiency": "inside_matrix",
+  "acceptance": "inside_matrix",
+  "includes": [
+   "efficiency",
+   "acceptance"
+  ],
+  "applied_separately": [
+   "efficiency"
+  ],
+  "conditions": "synthetic",
+  "provenance": "SYNTHETIC structural fixture; values are placeholders, not physics"
+ }
+}
