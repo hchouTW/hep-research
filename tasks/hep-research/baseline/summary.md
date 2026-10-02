@@ -42,3 +42,8 @@ The 42 skipped tests are **unverified** in this environment, not passed. Several
 - `ams-analysis/scripts/fetch_papers.py`, `crdb_query.py` use `urllib`. Their tests (`test_fetch_papers.py`, `test_crdb_query.py`) inject a `FakeHttp` object; no real requests. Not skipped.
 - `*/tests/run_prompts.py`, `behavior_eval.py`, `prompts_eval.py`, `routing_eval.py` invoke model CLIs (paid). They are not matched by `unittest discover` (`test*.py` pattern) and were not run.
 - No API keys found.
+
+## Re-run with D5 installed (2026-10-02, after G0)
+
+`.venv-hep` with numpy 2.4.6, scipy 1.17.1, matplotlib 3.11.2, sympy 1.14.0 (`pip-freeze-d5.txt`). Logs: `with-d5/`.
+All seven suites exit 0. Skips drop from 42 to 39: the 3 `scipy not installed` tests in hep-analysis now run and pass; remaining skips need ROOT, PyTorch, uproot/awkward, pyhf, Combine, Graphviz, PlantUML, Mermaid, tectonic (all optional per D5).

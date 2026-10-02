@@ -1,0 +1,68 @@
+test_empty_and_non_utf8_files_exit_2_without_traceback (test_build_lit_matrix.TestBuildLitMatrix.test_empty_and_non_utf8_files_exit_2_without_traceback) ... ok
+test_escape_cell_handles_pipe_and_newline (test_build_lit_matrix.TestBuildLitMatrix.test_escape_cell_handles_pipe_and_newline) ... ok
+test_excel_bom_is_not_part_of_first_column (test_build_lit_matrix.TestBuildLitMatrix.test_excel_bom_is_not_part_of_first_column) ... ok
+test_extra_cells_dropped_with_warning (test_build_lit_matrix.TestBuildLitMatrix.test_extra_cells_dropped_with_warning) ... ok
+test_main_rejects_missing_file (test_build_lit_matrix.TestBuildLitMatrix.test_main_rejects_missing_file) ... error: /tmp/tmpp6crxd5z/does_not_exist.csv is not a file
+ok
+test_main_rejects_unknown_sort_column (test_build_lit_matrix.TestBuildLitMatrix.test_main_rejects_unknown_sort_column) ... error: --sort-by 'not_a_column' is not a column in /tmp/tmp8i4p4wnp/notes.csv (columns: key, year)
+ok
+test_main_writes_output_file (test_build_lit_matrix.TestBuildLitMatrix.test_main_writes_output_file) ... Wrote 2 row(s) to /tmp/tmph3cwvq91/out.md
+ok
+test_no_sort_preserves_order (test_build_lit_matrix.TestBuildLitMatrix.test_no_sort_preserves_order) ... ok
+test_pipe_in_header_and_carriage_return_escaped (test_build_lit_matrix.TestBuildLitMatrix.test_pipe_in_header_and_carriage_return_escaped) ... ok
+test_read_rows_basic (test_build_lit_matrix.TestBuildLitMatrix.test_read_rows_basic) ... ok
+test_semicolon_file_warns (test_build_lit_matrix.TestBuildLitMatrix.test_semicolon_file_warns) ... ok
+test_short_row_gives_empty_cells (test_build_lit_matrix.TestBuildLitMatrix.test_short_row_gives_empty_cells) ... ok
+test_sort_by_numeric_column_ascending (test_build_lit_matrix.TestBuildLitMatrix.test_sort_by_numeric_column_ascending) ... ok
+test_sort_by_numeric_column_descending (test_build_lit_matrix.TestBuildLitMatrix.test_sort_by_numeric_column_descending) ... ok
+test_sort_by_text_column (test_build_lit_matrix.TestBuildLitMatrix.test_sort_by_text_column) ... ok
+test_to_markdown_table_shape (test_build_lit_matrix.TestBuildLitMatrix.test_to_markdown_table_shape) ... ok
+test_cite_variants_count_as_cited (test_check_manuscript.TestCheckManuscript.test_cite_variants_count_as_cited) ... ok
+test_clean_manuscript_has_no_issues (test_check_manuscript.TestCheckManuscript.test_clean_manuscript_has_no_issues) ... ok
+test_commented_out_cite_and_label_are_ignored (test_check_manuscript.TestCheckManuscript.test_commented_out_cite_and_label_are_ignored) ... ok
+test_cref_list_split_and_pageref_checked (test_check_manuscript.TestCheckManuscript.test_cref_list_split_and_pageref_checked) ... ok
+test_duplicate_bib_key_detected_case_insensitively (test_check_manuscript.TestCheckManuscript.test_duplicate_bib_key_detected_case_insensitively) ... ok
+test_duplicate_label_detected (test_check_manuscript.TestCheckManuscript.test_duplicate_label_detected) ... ok
+test_macro_parameters_are_not_labels (test_check_manuscript.TestCheckManuscript.test_macro_parameters_are_not_labels) ... ok
+test_missing_bib_entry_detected (test_check_manuscript.TestCheckManuscript.test_missing_bib_entry_detected) ... ok
+test_nocite_star_marks_all_entries_cited (test_check_manuscript.TestCheckManuscript.test_nocite_star_marks_all_entries_cited) ... ok
+test_placeholder_text_detected (test_check_manuscript.TestCheckManuscript.test_placeholder_text_detected) ... ok
+test_report_exit_code_nonzero_when_issues (test_check_manuscript.TestCheckManuscript.test_report_exit_code_nonzero_when_issues) ... Scanned 1 .tex file(s) and 1 .bib file(s).
+
+[MISSING BIB ENTRY] 1 cite key(s) not found in any .bib file:
+  - Missing  (paper.tex:1)
+
+[INFO] 1 .bib entry is never cited (harmless in a shared library, worth checking in a single-paper .bib):
+  - Other
+
+Total issues: 1
+ok
+test_report_exit_code_zero_when_clean (test_check_manuscript.TestCheckManuscript.test_report_exit_code_zero_when_clean) ... Scanned 1 .tex file(s) and 1 .bib file(s).
+
+No issues found.
+ok
+test_style_findings_do_not_change_exit_code (test_check_manuscript.TestCheckManuscript.test_style_findings_do_not_change_exit_code) ... ok
+test_style_number_unit_spacing_skips_layout_lengths (test_check_manuscript.TestCheckManuscript.test_style_number_unit_spacing_skips_layout_lengths) ... ok
+test_style_ref_without_tie_only_after_label_words (test_check_manuscript.TestCheckManuscript.test_style_ref_without_tie_only_after_label_words) ... ok
+test_todo_in_comment_and_todo_call_are_markers (test_check_manuscript.TestCheckManuscript.test_todo_in_comment_and_todo_call_are_markers) ... ok
+test_todo_macro_definitions_and_lowercase_xxx_are_not_markers (test_check_manuscript.TestCheckManuscript.test_todo_macro_definitions_and_lowercase_xxx_are_not_markers) ... ok
+test_todo_marker_detected (test_check_manuscript.TestCheckManuscript.test_todo_marker_detected) ... ok
+test_undefined_ref_detected (test_check_manuscript.TestCheckManuscript.test_undefined_ref_detected) ... ok
+test_unused_bib_entry_detected (test_check_manuscript.TestCheckManuscript.test_unused_bib_entry_detected) ... ok
+test_value_needed_marker_detected (test_check_manuscript.TestCheckManuscript.test_value_needed_marker_detected) ... ok
+test_bundled_skeleton_compiles (test_end_to_end.TestEndToEnd.test_bundled_skeleton_compiles) ... skipped 'tectonic not installed'
+test_bundled_templates_pass_the_checker (test_end_to_end.TestEndToEnd.test_bundled_templates_pass_the_checker) ... ok
+test_drafting_mistakes_are_caught (test_end_to_end.TestEndToEnd.test_drafting_mistakes_are_caught) ... ok
+test_lit_matrix_feeds_the_paper (test_end_to_end.TestEndToEnd.test_lit_matrix_feeds_the_paper) ... ok
+test_real_bundle_has_no_errors (test_skill_bundle.TestRealBundle.test_real_bundle_has_no_errors) ... ok
+test_bad_python_syntax_detected (test_skill_bundle.TestSyntheticBundles.test_bad_python_syntax_detected) ... ok
+test_missing_frontmatter (test_skill_bundle.TestSyntheticBundles.test_missing_frontmatter) ... ok
+test_missing_skill_md (test_skill_bundle.TestSyntheticBundles.test_missing_skill_md) ... ok
+test_name_mismatch (test_skill_bundle.TestSyntheticBundles.test_name_mismatch) ... ok
+test_orphaned_file_detected (test_skill_bundle.TestSyntheticBundles.test_orphaned_file_detected) ... ok
+test_valid_minimal_bundle (test_skill_bundle.TestSyntheticBundles.test_valid_minimal_bundle) ... ok
+
+----------------------------------------------------------------------
+Ran 48 tests in 0.044s
+
+OK (skipped=1)
