@@ -101,6 +101,43 @@ class AssetSmokeTests(unittest.TestCase):
         result = run([sys.executable, str(ASSETS / "vision_transfer.py"), "--help"], self.dir)
         self.assertEqual(result.returncode, 0, result.stderr)
 
+    @unittest.skipUnless(TORCHVISION, "torchvision not installed")
+    def test_vision_transfer_trains_on_synthetic_image_folder(self):
+        # SYNTHETIC random 32x32 images in an ImageFolder tree. The pretrained ResNet-18 weights are a download
+        # (not exercised here), so the run builds the same architecture with weights=None.
+        from PIL import Image
+        import numpy as np
+
+        rng = np.random.default_rng(7)
+        for split, count in (("train", 4), ("val", 2)):
+            for label in ("synthetic_a", "synthetic_b"):
+                folder = self.dir / "data" / split / label
+                folder.mkdir(parents=True)
+                for i in range(count):
+                    pixels = rng.integers(0, 256, size=(32, 32, 3), dtype=np.uint8)
+                    Image.fromarray(pixels).save(folder / f"synthetic_{i}.png")
+        driver = (
+            "import sys, runpy\n"
+            "from torchvision import models\n"
+            "original = models.resnet18\n"
+            "models.resnet18 = lambda weights=None, **kw: original(weights=None, **kw)\n"
+            f"sys.argv = ['vision_transfer.py', 'data', '--epochs', '1', '--batch-size', '4', '--num-workers', '0',"
+            f" '--freeze-backbone', '--output', 'best.pt']\n"
+            f"runpy.run_path({str(ASSETS / 'vision_transfer.py')!r}, run_name='__main__')\n"
+        )
+        result = run([sys.executable, "-c", driver], self.dir, timeout=600)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("epoch=001", result.stdout)
+        saved = torch_load(self.dir / "best.pt")
+        self.assertEqual(saved["classes"], ["synthetic_a", "synthetic_b"])
+        self.assertEqual(tuple(saved["model_state_dict"]["fc.weight"].shape), (2, 512))
+
+
+def torch_load(path: Path):
+    import torch
+
+    return torch.load(path, map_location="cpu", weights_only=False)
+
 
 if __name__ == "__main__":
     unittest.main()

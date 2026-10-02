@@ -115,10 +115,12 @@ M4 exit checks: Path D and T24 pass; every negative composition/compatibility fi
 - [x] ROOT 6.40.04 installed from conda-forge into `.venv-hep-root/` (user approved, micromamba): PyROOT tests and C++ assets pass; `adapters/root-uproot` demonstrated-on-synthetic-data; VALIDATION ROOT-RUN
 - [x] PR #5 merged (`a9cab97`)
 - [x] Diagram tools installed (user approved): Graphviz 14.1.2, PlantUML 1.2026.8, Mermaid CLI 12.0.0 pass their real-tool tests (4 tests no longer skipped); tectonic 0.17.0 installed but its TeX bundle host is blocked, so the paper compile stays unverified; VALIDATION DIAGRAM-RUN
+- [x] PR #6 merged (`9823a4a`)
+- [x] torchvision 0.29.1 installed (user approved, PyPI, torch unchanged): `vision_transfer.py` help and a one-epoch run on synthetic images pass (untrained ResNet-18; pretrained weights need a blocked host); VALIDATION TORCHVISION-RUN
 
 ## Blockers / needs user
 
-1. Open for the user: CMS Combine and torchvision are not installed (each install needs approval); the tectonic paper compile needs network access to relay.fullyjustified.net (or an offline TeX bundle). Their tests stay skipped and unverified.
+1. Open for the user: CMS Combine is not installed (each install needs approval); the tectonic paper compile needs network access to relay.fullyjustified.net (or an offline TeX bundle). Their tests stay skipped and unverified. `vision_transfer.py` with pretrained weights needs download.pytorch.org (blocked).
 2. Open from M1: the old branch in agentic-ai-skills (M1-12) is for the user to delete.
 
 ## Resume checklist
@@ -129,4 +131,4 @@ M4 exit checks: Path D and T24 pass; every negative composition/compatibility fi
 
 ## Next step
 
-None planned. Possible follow-ups need the user: Combine or torchvision environments, or network access for the tectonic bundle, to verify the remaining skipped tests and adapter parts.
+None planned. Possible follow-ups need the user: a Combine environment, or network access for the tectonic bundle, to verify the remaining skipped tests and adapter parts.

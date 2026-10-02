@@ -1,7 +1,7 @@
 # VALIDATION — hep-research 0.1.0 (handover, M6)
 
 Environment E1 for all entries below unless a row says otherwise: Claude Code cloud container (Linux 6.18 x86_64), Python 3.11.15, `.venv-hep` with numpy 2.4.6, scipy 1.17.1, matplotlib 3.11.2, sympy 1.14.0 (`requirements-core.txt`); Claude Code CLI 2.1.287. Date 2026-10-02. Branch `feat/hep-research-plugin` of hchouTW/hep-research; each row's evidence is at the final handover commit unless it names another. Legacy source `agentic-ai-skills@3e995a4`.
-Aggregate command: `python3 tools/run_all_checks.py --out <dir>` (from the plugin root). Handover run `tasks/hep-research/check-runs/check-run-2026-10-02T174050Z.json`: 14 checks pass / 0 fail / 0 skip; 973 unit tests: 934 pass, 0 fail, 39 skip (PyTorch, PyROOT, awkward/uproot, pyhf, Combine, Graphviz, Mermaid, PlantUML, tectonic not installed; these are unverified, not passing); profile suites: ams-02 258, synthetic-collider 9, qed-benchmark 16 pass. pyhf rerun (user-approved install of pyhf 0.7.6 into `.venv-hep`, `tasks/hep-research/m6/pyhf/pip-freeze-pyhf.txt`): see PYHF-RUN below; uproot/awkward rerun: see UPROOT-RUN below; PyTorch rerun: see PYTORCH-RUN below; ROOT rerun: see ROOT-RUN below; diagram-tool rerun (latest run, 982 pass, 0 fail, 5 skip): see DIAGRAM-RUN below. Seeds and tolerances of every example are in its `results.json`; commands are in each row.
+Aggregate command: `python3 tools/run_all_checks.py --out <dir>` (from the plugin root). Handover run `tasks/hep-research/check-runs/check-run-2026-10-02T174050Z.json`: 14 checks pass / 0 fail / 0 skip; 973 unit tests: 934 pass, 0 fail, 39 skip (PyTorch, PyROOT, awkward/uproot, pyhf, Combine, Graphviz, Mermaid, PlantUML, tectonic not installed; these are unverified, not passing); profile suites: ams-02 258, synthetic-collider 9, qed-benchmark 16 pass. pyhf rerun (user-approved install of pyhf 0.7.6 into `.venv-hep`, `tasks/hep-research/m6/pyhf/pip-freeze-pyhf.txt`): see PYHF-RUN below; uproot/awkward rerun: see UPROOT-RUN below; PyTorch rerun: see PYTORCH-RUN below; ROOT rerun: see ROOT-RUN below; diagram-tool rerun: see DIAGRAM-RUN below; torchvision rerun (latest run, 984 pass, 0 fail, 4 skip): see TORCHVISION-RUN below. Seeds and tolerances of every example are in its `results.json`; commands are in each row.
 Software checks establish contract consistency only: not physical validity, proof, statistical coverage, or authorization to unblind.
 
 | AC | Result | Evidence | Remaining |
@@ -75,7 +75,7 @@ Software checks establish contract consistency only: not physical validity, proo
 
 | Item | Effect |
 |---|---|
-| CMS Combine and torchvision not installed; tectonic 0.17.0 installed but unusable because the network policy blocks its TeX bundle host (relay.fullyjustified.net) | 5 tests skipped (Combine, torchvision and tectonic, all unverified; 2 no-PyTorch degradation tests that skip when PyTorch is present and pass under the system Python without it); `adapters/pyhf-combine` stays `proposed`; the matching capability rows are `unverified`. pyhf, uproot, awkward, PyTorch, ROOT, Graphviz, Mermaid CLI and PlantUML were installed after approval and their tests pass (PYHF-RUN, UPROOT-RUN, PYTORCH-RUN, ROOT-RUN, DIAGRAM-RUN) |
+| CMS Combine not installed; tectonic 0.17.0 installed but unusable because the network policy blocks its TeX bundle host (relay.fullyjustified.net) | 4 tests skipped (Combine and tectonic, both unverified; 2 no-PyTorch degradation tests that skip when PyTorch is present and pass under the system Python without it); `adapters/pyhf-combine` stays `proposed`; the matching capability rows are `unverified`. pyhf, uproot, awkward, PyTorch, torchvision, ROOT, Graphviz, Mermaid CLI and PlantUML were installed after approval and their tests pass (PYHF-RUN, UPROOT-RUN, PYTORCH-RUN, ROOT-RUN, DIAGRAM-RUN, TORCHVISION-RUN); `vision_transfer.py` is not run with its pretrained ResNet-18 weights, which it downloads from download.pytorch.org (blocked by the network policy) |
 | PyTorch verified on CPU only | GPU, NCCL and GPU mixed precision not tried; the CPU-only wheel index is blocked by the network policy, so the PyPI build (with CUDA libraries, unused) was installed |
 | pyhf demonstrated on two synthetic workspaces, asymptotic only | toy-based CLs, lumi/shapefactor modifiers and non-default interpolation codes not tried |
 | Live routing measured once on one host model (claude-sonnet-5-5 via `claude -p`) | 41/48 cases correct; 7 misses listed in the G5 report; with legacy skills co-installed the legacy predecessor wins some requests (7/48 in run 2) |
@@ -129,7 +129,7 @@ no GPU, so all runs are CPU, 4 threads); full list in `tasks/hep-research/m6/pyt
 | physics-ml tests needing PyTorch (allocation measurement, dataset building, asset smoke tests: training, inference, metrics, datasets) | pass, 13 tests no longer skipped | `tests/skills/physics_ml/test_deep_learning_deep_learning_skill.py`, `test_deep_learning_assets_smoke.py` |
 | `ddp_train_skeleton.py` with `torchrun --nproc_per_node=2` (gloo backend) | pass | `test_ddp_skeleton_two_gloo_processes`; the test now finds `torchrun` next to the interpreter, not only on PATH |
 | Clean degradation without PyTorch | pass under the system Python 3.11 (no torch), skipped in `.venv-hep` | `CleanDegradationWithoutTorchTests` (2 tests) |
-| `vision_transfer.py` | skip (torchvision not installed, not approved) | unverified |
+| `vision_transfer.py` | skip (torchvision not installed, not approved); verified later in TORCHVISION-RUN | unverified in this run |
 
 ## ROOT-RUN (2026-10-02, after the merge of PR #4)
 
@@ -165,4 +165,17 @@ plugins/hep-research/tools/run_all_checks.py --out tasks/hep-research/check-runs
 | PlantUML rejects a one-line class body | pass, no longer skipped | same file, `test_real_plantuml_rejects_one_line_class_body` |
 | Every shipped diagram source passes `check_diagram_sources.py` with the real tools present | pass | same file, `test_shipped_diagram_sources_pass` |
 | Bundled paper skeleton compiles with tectonic | unverified | with tectonic on PATH the test fails before compiling: tectonic must download its TeX bundle from relay.fullyjustified.net, which the network policy rejects (proxy CONNECT 403). tectonic is therefore left off PATH and the test skips; its skip message still says "tectonic not installed" |
+
+## TORCHVISION-RUN (2026-10-02, after the merge of PR #6)
+
+Environment: as in DIAGRAM-RUN, plus torchvision 0.29.1 from PyPI installed into `.venv-hep` with `--no-deps` so torch
+2.14.1 stays unchanged (its requirements torch>=2.14.0, numpy and pillow 12.3.0 were already present; `pip check`
+clean); list in `tasks/hep-research/m6/torchvision/pip-freeze-torchvision.txt`. Same command as DIAGRAM-RUN, run
+`check-run-2026-10-02T231655Z.json`: 988 unit tests, 984 pass, 0 fail, 4 skip; all 14 checks pass.
+
+| Item | Result | Evidence |
+|---|---|---|
+| `vision_transfer.py --help` | pass, no longer skipped | `tests/skills/physics_ml/test_deep_learning_assets_smoke.py`, `test_vision_transfer_help` |
+| `vision_transfer.py` trains one epoch on a SYNTHETIC ImageFolder (random 32x32 images, 2 classes, 8 train and 4 val) with a frozen backbone and saves a checkpoint with the right classes and a 2x512 head | pass, new test | same file, `test_vision_transfer_trains_on_synthetic_image_folder`; the test builds ResNet-18 with `weights=None` |
+| `vision_transfer.py` with its pretrained ResNet-18 weights | unverified | the weights download from download.pytorch.org, which the network policy blocks; accuracy on real images is not assessed |
 
