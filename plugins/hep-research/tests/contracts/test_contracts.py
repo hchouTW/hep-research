@@ -286,5 +286,18 @@ class TheoryIndependenceTests(unittest.TestCase):
         self.assertTrue(validate_artifact(pub).ok)
 
 
+    def test_metadata_only_record_with_unknown_bin_semantics(self):
+        """M2: a record read at abstract level may not know its bin semantics; it validates
+        with an unresolved finding instead of forcing an invented term."""
+        doc = load(ART / "valid" / "dataset_record.json")
+        doc["extension"]["observable"]["bin_semantics"] = "unknown"
+        doc["extension"].pop("data", None)
+        rep = validate_artifact(doc)
+        self.assertTrue(rep.ok, [f.message for f in rep.errors])
+        self.assertIn("observable.bin_semantics_missing", {f.code for f in rep.findings if f.severity == "unresolved"})
+        doc["extension"]["observable"]["bin_semantics"] = "bin-ish"
+        self.assertIn("schema.any_of", codes(validate_artifact(doc)))
+
+
 if __name__ == "__main__":
     unittest.main()

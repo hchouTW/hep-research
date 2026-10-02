@@ -45,7 +45,7 @@
         "level": {"type": "string", "x-vocab": "levels"},
         "frame": {"type": "string"},
         "normalization": {"$ref": "#/$defs/normalization"},
-        "bin_semantics": {"type": "string", "x-vocab": "bin_semantics"},
+        "bin_semantics": {"anyOf": [{"type": "string", "x-vocab": "bin_semantics"}, {"$ref": "#/$defs/missing"}], "$comment": "a missing marker is allowed for metadata-only records (for example a published result read at abstract level); the validator reports it as unresolved"},
         "unit": {"type": "string"},
         "conventions": {"$ref": "#/$defs/conventions"},
         "included_corrections": {"type": "array", "items": {"type": "string"}},

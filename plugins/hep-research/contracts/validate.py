@@ -55,6 +55,9 @@ def check_observable(obs: dict, vocab: Vocabulary, rep: Report, path: str) -> No
     for i, v in enumerate(obs.get("variables", [])):
         if "edges" in v and "points" in v:
             rep.add("error", f"{path}.variables[{i}]", "observable.edges_and_points", "give edges or points, not both")
+    if obs.get("bin_semantics") in ("unknown", "not-applicable", "not-provided"):
+        rep.add("unresolved", f"{path}.bin_semantics", "observable.bin_semantics_missing",
+                f"bin semantics '{obs['bin_semantics']}': a comparison cannot be made until it is known")
     if obs.get("bin_semantics") == "point" and any("edges" in v for v in obs.get("variables", [])):
         rep.add("warning", path, "observable.point_with_edges",
                 "point semantics with bin edges: the comparison gate needs an explicit point-to-bin mapping")

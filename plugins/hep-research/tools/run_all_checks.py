@@ -34,13 +34,42 @@ def run_unittests() -> dict:
             "failed": [str(t) for t, _ in res.failures + res.errors], "skipped": [f"{t}: {r}" for t, r in res.skipped]}
 
 
+PROFILE_RUNNER = """
+import io, json, sys, unittest
+suite = unittest.TestLoader().discover("tests", top_level_dir="tests")
+res = unittest.TextTestRunner(stream=io.StringIO(), verbosity=2).run(suite)
+print(json.dumps({"status": "pass" if res.wasSuccessful() else "fail",
+  "counts": {"run": res.testsRun, "failures": len(res.failures), "errors": len(res.errors), "skipped": len(res.skipped),
+             "passed": res.testsRun - len(res.failures) - len(res.errors) - len(res.skipped)},
+  "failed": [str(t) for t, _ in res.failures + res.errors], "skipped": [f"{t}: {r}" for t, r in res.skipped]}))
+"""
+
+
+def run_profile_tests() -> list[dict]:
+    """Each registered profile's own tests, one subprocess per profile so test module names cannot collide."""
+    reg = json.loads((ROOT / "profiles" / "registry.json").read_text(encoding="utf-8"))
+    out = []
+    for prof in reg["profiles"]:
+        pdir = ROOT / "profiles" / prof["path"]
+        if not (pdir / "tests").is_dir():
+            out.append({"name": f"profile-tests:{prof['id']}", "status": "skip", "reason": "no tests folder"})
+            continue
+        r = run_script(f"profile-tests:{prof['id']}", [sys.executable, "-c", PROFILE_RUNNER], cwd=pdir)
+        r["command"] = f"(cd profiles/{prof['path']} && python3 -m unittest discover -s tests -t tests)"
+        r["counts"] = (r.get("detail") or {}).get("counts")
+        out.append(r)
+    return out
+
+
 def run_script(name: str, cmd: list[str], cwd: Path = ROOT) -> dict:
     p = subprocess.run(cmd, capture_output=True, text=True, cwd=str(cwd))
     try:
         detail = json.loads(p.stdout)
     except ValueError:
         detail = {"stdout": p.stdout[-2000:], "stderr": p.stderr[-2000:]}
-    return {"name": name, "command": " ".join(cmd), "exit_code": p.returncode, "status": "pass" if p.returncode == 0 else "fail", "detail": detail}
+    status = "pass" if p.returncode == 0 else ("skip" if isinstance(detail, dict) and detail.get("status") == "skip" else "fail")
+    return {"name": name, "command": " ".join(cmd), "exit_code": p.returncode, "status": status, "detail": detail,
+            **({"reason": detail.get("reason")} if status == "skip" else {})}
 
 
 def host_validate() -> dict:
@@ -57,9 +86,11 @@ def main(argv=None) -> int:
     py = sys.executable
     checks = [
         run_unittests(),
+        *run_profile_tests(),
         run_script("check_layering", [py, "tools/check_layering.py"]),
         run_script("stanza_consistency", [py, "tools/build_stanzas.py", "--check"]),
         run_script("registry", [py, "contracts/registry.py"]),
+        run_script("ams_ledger_preservation", [py, "tools/check_ams_ledger_preservation.py"]),
         run_script("measure_entrypoints", [py, "tools/measure_entrypoints.py"] + (["--no-cli"] if "--no-cli" in args else [])),
         host_validate() if "--no-cli" not in args else {"name": "claude-plugin-validate", "status": "skip", "reason": "--no-cli"},
     ]

@@ -1,1 +1,12 @@
-{"registry_version": "1.0.0", "profiles": []}
+{
+ "registry_version": "1.0.0",
+ "profiles": [
+  {
+   "id": "experiment:ams-02",
+   "kind": "experiment",
+   "version": "1.0.0",
+   "scope": "AMS-02 on the ISS: charged cosmic rays, public evidence ledger",
+   "path": "experiments/ams-02"
+  }
+ ]
+}
