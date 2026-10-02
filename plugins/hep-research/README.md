@@ -42,8 +42,10 @@ claude plugin marketplace remove hep-research-dev
 ```
 
 The plugin does not touch skills you installed separately (for example the older standalone skills in
-`~/.claude/skills/`); both can be installed at once. The native install test is recorded in
-[VALIDATION.md](VALIDATION.md) under AC24/T22 once it has run. Other hosts are not tested in v1.
+`~/.claude/skills/`); both can be installed at once, but then Claude may pick an older skill for some requests, so
+name the plugin skill (`/hep-research:<skill>`) when it matters. With a local-directory marketplace, Claude Code loads
+the plugin in place from that directory, so keep it at a stable path. Install, discovery, invocation, removal and
+coexistence were tested with Claude Code 2.1.287 (VALIDATION.md, AC24/AC25/T22). Other hosts are not tested in v1.
 
 ## Quick start: example prompts
 

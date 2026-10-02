@@ -1,0 +1,45 @@
+{
+ "prompt": "/hep-research:hep-theory Using the theory:qed-benchmark profile, list the conventions it fixes for e+e- -> mu+mu- and name the profile files you read.",
+ "exit_code": 0,
+ "skills_invoked": [],
+ "files_read": [
+  "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/profiles/registry.json",
+  "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/profiles/theory/qed-benchmark/index.md",
+  "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/profiles/theory/qed-benchmark/conventions.json"
+ ],
+ "globs": [
+  {
+   "pattern": "hep-research.project.json"
+  },
+  {
+   "pattern": "**/*",
+   "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/profiles/theory/qed-benchmark"
+  }
+ ],
+ "plugin_path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research",
+ "model": "claude-sonnet-5-5",
+ "result": "**Profile used:** `theory:qed-benchmark` v1.0.0. It was selected by name, and no `hep-research.project.json` exists in the project root. The profile covers tree-level e+e- → μ+μ- through one s-channel photon.\n\n**Conventions fixed by `conventions.json`:**\n\n| Item | Convention |\n|---|---|\n| Unit system | Natural HEP units: energies in GeV, s in GeV². Cross sections in pb (1 nb = 1000 pb). |\n| ħ = c = 1 | Yes. |\n| Metric signature | +−−−, used in the amplitude derivation. |\n| Coupling normalization | α = e²/(4π), Heaviside-Lorentz units. |\n| Scheme | Not applicable at tree level. α is a fixed input and enters only through the reference constant below. |\n| Energy variable | √s. |\n| Frame | Center of mass. |\n| Angle | θ between the incoming e⁻ and the outgoing μ⁻ in the c.m. frame. |\n| Spin treatment | Unpolarized beams: average over the 4 initial spin states, sum over final spins. |\n| Mass approximation | Electrons massless. Muon mass kept in the derivation, but set to zero (β → 1) in the numerical prediction. |\n| Reference constant | 4πα²/3, converted to nb·GeV², is taken as 86.8 nb·GeV² from PDG eq. (51.3) [qedbench:C02], to three significant figures. |\n\n**Profile files I read:**\n- `profiles/registry.json` (the index, which lists the profile and its path)\n- `profiles/theory/qed-benchmark/index.md` (the routing map)\n- `profiles/theory/qed-benchmark/conventions.json` (the source of the table above)\n\nI did not open the model, derivation, evidence, prediction or benchmark files. The question didn't need them. So I can't say here what derivation status or validity domain the profile records. The index only says not to present the derivation as a formal proof, and not to treat numerical agreement as proof.\n\nThe PDG reference constant comes from the profile's own evidence ledger. I did not check it against `evidence/sources.json` or `claims.json`, so I haven't confirmed that source was actually read.",
+ "cost_usd": 0.1070652,
+ "permission_denials": [],
+ "stderr_tail": "Warning: no stdin data received in 3s, proceeding without it. If piping from a slow command, redirect stdin explicitly: < /dev/null to skip, or wait longer.\n",
+ "host_version": "2.1.287",
+ "subtype": "success",
+ "num_turns": 6,
+ "files_read_detail": [
+  {
+   "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/profiles/registry.json",
+   "inside_plugin": true,
+   "experiment_profile": false
+  },
+  {
+   "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/profiles/theory/qed-benchmark/index.md",
+   "inside_plugin": true,
+   "experiment_profile": false
+  },
+  {
+   "path": "/tmp/claude-0/-home-claude/0f8a0515-50e0-5de5-9c89-64693ad6aafe/scratchpad/g5/market place copy/plugins/hep-research/profiles/theory/qed-benchmark/conventions.json",
+   "inside_plugin": true,
+   "experiment_profile": false
+  }
+ ]
+}

@@ -59,5 +59,5 @@ SciPy 1.17.1, Matplotlib 3.11.2, SymPy 1.14.0, Claude Code CLI 2.1.287, 2026-10-
 
 | Host | Status | Notes |
 |---|---|---|
-| Claude Code (plugin, development marketplace) | pending gate G5 | install commands read from CLI 2.1.287 help; relocation tested (E1) |
+| Claude Code (plugin, development marketplace) | tested (E1, CLI 2.1.287) | install, discovery, namespaced invocation, profile access, removal, legacy coexistence (G5); routing quality not yet established |
 | Codex, Antigravity, other agents | not tested | see `skills/hep-computing/references/{codex,antigravity,generic-agent}.md` |

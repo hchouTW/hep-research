@@ -1,6 +1,6 @@
 # PROGRESS — hep-research plugin
 
-- Current milestone: **M5 work done, waiting at GATE G5** (native install test needs the user's choice). G0 and G1 passed 2026-10-02
+- Current milestone: **M5 complete; G5 test run and recorded** (routing quality open, user decides next step before M6). G0 and G1 passed 2026-10-02
 - Repository: `hchouTW/hep-research`, branch `feat/hep-research-plugin` (no PR). Legacy source: read-only `agentic-ai-skills@3e995a4` via `tasks/hep-research/scripts/fetch_legacy.sh`
 - Base commit: `3e995a49a89fad8e0e9d52130ee1fd93a3a0f4f9`
 - Last session: 2026-10-02, Claude Code cloud container (CLI 2.1.287), Python 3.11.15
@@ -92,11 +92,11 @@ M4 exit checks: Path D and T24 pass; every negative composition/compatibility fi
 - [x] 3. Routing: 48 cases (`tests/routing/cases.json`) and `tools/check_routing_static.py` pass; live routing pending approval
 - [x] 4. Packaging scan (`tools/check_packaging.py`) clean
 - [x] 5. `README.md`, `requirements-core.txt`, `docs/capability-matrix.md`; host notes rewritten; bundle validator fixed
-- [ ] 6. GATE G5: native install, discovery, namespaced invocation, profile-resource access, legacy coexistence, removal; host and version recorded
+- [x] 6. GATE G5 (run here, user choice): install, discovery, namespaced invocation, profile access, coexistence, removal pass on Claude Code 2.1.287; live routing partial (`tasks/hep-research/m5/g5/G5-REPORT.md`)
 
 ## Blockers / needs user
 
-1. GATE G5: the user runs the native install test, or approves an isolated run here (and, separately, paid live routing/loading traces).
+1. User decides: accept G5 with routing recorded as partial and start M6, or improve routing first (input fixtures, a run without legacy skills; paid).
 2. Open from M1: the old branch in agentic-ai-skills (M1-12) is for the user to delete.
 
 ## Resume checklist
@@ -107,4 +107,4 @@ M4 exit checks: Path D and T24 pass; every negative composition/compatibility fi
 
 ## Next step
 
-G5 per the user's choice, then record it in VALIDATION (AC02, AC04 traces, AC20 live, AC24, AC25, T22) and start M6. Carry-overs: dedupe generic content in AMS modules (M2-04); pyhf example unverified until pyhf is approved.
+Per the user's G5 decision: either M6 (handover, final traceability audit, AMS dedupe M2-04), or a routing improvement round first. pyhf example stays unverified until pyhf is approved.
