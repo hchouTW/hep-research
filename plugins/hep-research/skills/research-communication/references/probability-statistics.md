@@ -97,7 +97,7 @@ carry joint probabilities (product along the path); Bayesian updating = reversin
 - correlation vs causation
 - plates enclose exactly the indexed quantities
 
-For statistical *analysis*/code (fits, limits, unfolding) see `hep-analysis` and `deep-learning`
+For statistical *analysis*/code (fits, limits, unfolding) see `hep-statistics` and `physics-ml`
 (calibration); this reference only covers the diagram semantics.
 
 ## Identification claims on causal DAGs

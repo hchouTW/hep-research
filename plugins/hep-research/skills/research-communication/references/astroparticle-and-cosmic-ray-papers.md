@@ -6,7 +6,7 @@ atmospheric Cherenkov telescopes (CTA, H.E.S.S., MAGIC, VERITAS), water/ice Cher
 and neutrino observatories (IceCube, HAWC, LHAASO), and space-based direct detection
 (AMS-02, DAMPE, CALET, Fermi-LAT). This file covers the *writing/venue/citation*
 differences; the physics content itself (spectrum, composition, anisotropy, shower
-physics, statistics for point-source searches) is `hep-analysis`'s domain — see its
+physics, statistics for point-source searches) is `detector-response`'s domain (statistics: `hep-statistics`) — see their
 astroparticle references (cosmic-ray spectrum and composition, extensive air showers,
 ground-based arrays, imaging Cherenkov, neutrino astronomy, space-based direct
 detection, astroparticle statistics) for the content itself. Everything below assumes
@@ -205,8 +205,7 @@ forward past its verification date as if it were still current. This is
 worked example rather than a manuscript claim.
 
 For the physics/instrument content behind these papers (the AMS-02 detector,
-analysis techniques, and results themselves), see `hep-analysis`'s dedicated case
-study — this section is only about the publication pattern.
+analysis techniques, and results themselves), see the bound experiment profile (see the context-resolution steps in the skill's SKILL.md; profiles are listed in `${CLAUDE_PLUGIN_ROOT}/profiles/registry.json`) — this section is only about the publication pattern.
 
 ## Figures: spectra, skymaps, and exposure
 
@@ -236,7 +235,7 @@ These extend, not replace, `scientific-style.md`'s significance-language table:
   missing. For an ON/OFF (source vs. background region) count, the pre-trial
   significance is usually Li & Ma's eq. 17 (T.-P. Li and Y.-Q. Ma, ApJ 272, 317
   (1983), doi:10.1086/161295; checked 2026-09-26): cite it and state the ON/OFF
-  exposure ratio alpha used. Computing it belongs to `hep-analysis`.
+  exposure ratio alpha used. Computing it belongs to `hep-statistics`.
 - **"Detection" vs. "hint" vs. "evidence"** for a point source or transient
   association follows the same σ-based conventions as `scientific-style.md`'s table,
   but state explicitly whether the quoted significance is pre- or post-trial each

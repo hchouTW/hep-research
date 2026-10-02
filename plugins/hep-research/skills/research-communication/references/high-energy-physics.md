@@ -106,4 +106,4 @@ Drawing a decay chain as a Feynman diagram; putting DAQ inside the calorimeter b
 info in a selection; drawing arrows from limit back to likelihood.
 
 For actual analysis code, cutflows, fits, and detector physics see the `hep-analysis` skill;
-for AMS-02 specifics use `ams-analysis`.
+for experiment specifics use the bound experiment profile (see the context-resolution steps in the skill's SKILL.md; profiles are listed in `${CLAUDE_PLUGIN_ROOT}/profiles/registry.json`).

@@ -60,7 +60,7 @@ This 13-point instruction is the reusable contract every supported agent
 follows, regardless of vendor. When asked to create or refine an engineering
 task:
 
-1. Read the relevant task-authoring skill or reference before drafting.
+1. Read the relevant task-authoring guide or reference before drafting.
 2. Inspect the target repository for relevant implementation details.
 3. Prefer repository facts over generic assumptions.
 4. Distinguish confirmed information from inference.
@@ -136,7 +136,7 @@ task:
   Add no sections the format does not have.
 - When the request is "write the task, then implement it", deliver the task
   document and stop there. Say that implementation is a separate step for
-  `agile-development` (or a domain skill); do not write the implementation
+  [agile-development-guide.md](agile-development-guide.md) (or a domain skill); do not write the implementation
   code in the same reply.
 - When the change is destructive or hard to reverse (dropping a column or
   table, deleting data, a migration with no down path), say so in Technical
@@ -162,7 +162,7 @@ task:
 ## Caveats
 
 - This skill decides *how to write the task*, not *how to implement it* -
-  pair it with `agile-development` (or a domain skill) once the generated
+  pair it with [agile-development-guide.md](agile-development-guide.md) (or a domain skill) once the generated
   task is handed off for implementation.
 - Building a new LLM, a vendor-specific API integration, or a full autonomous
   development agent is out of scope; so is replacing human review for
@@ -183,7 +183,7 @@ task:
 - "Generate a canonical `examples/` entry for the `hep-analysis` skill contrasting a
   weak vs. expert systematics writeup." (Contrast archetype)
 - "Walk the cart-total discount-code bug report through a full triage-to-verified-fix
-  trajectory for `agile-development/examples/`." (Execution Trajectory archetype)
+  trajectory for `hep-computing/examples/`." (Execution Trajectory archetype)
 - "Author a gated-pipeline example showing how to draft and red-team an RFC for a
   feature-flagged rollout." (Gated Pipeline archetype)
 - "Author a decision-tree example for triaging an ambiguous production incident page."

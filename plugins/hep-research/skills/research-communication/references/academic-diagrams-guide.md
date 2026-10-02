@@ -15,9 +15,9 @@ Scientific meaning -> Logical graph -> Visual grammar -> Layout -> Rendering for
 
 Use for structural diagrams (things, stages, relations). Not for quantitative data
 plots (histograms, spectra, fit results) - those belong to `hep-analysis` /
-`academic-papers` (`figures-and-tables.md` there). Division of labor with
-`academic-papers`: it owns the scientific narrative and method interpretation; this
-skill owns diagram selection, abstraction, specification, validation, and captions.
+[figures-and-tables.md](figures-and-tables.md). Division of labor with
+[academic-papers-guide.md](academic-papers-guide.md): it owns the scientific narrative and method interpretation; this
+guide owns diagram selection, abstraction, specification, validation, and captions.
 
 ## Workflow
 

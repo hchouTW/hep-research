@@ -7,7 +7,7 @@ and NLP venues (ACL, EMNLP, NAACL) and their journal counterparts (JMLR, TMLR). 
 file covers the *writing/venue/citation/review-process* differences; the actual
 statistical or ML rigor behind a claim (matched compute budgets, seed variance,
 ablations that isolate a mechanism, proving an improvement is real rather than
-noise) is `deep-learning`'s domain — see its `../../physics-ml/references/ablation-and-design-review.md` and
+noise) is `physics-ml`'s domain — see its `../../physics-ml/references/ablation-and-design-review.md` and
 `../../physics-ml/references/evaluation-strategy.md` for that content. Everything below assumes the analysis is
 already done and correct, and focuses on how to write it up and get it through
 review.
@@ -184,7 +184,7 @@ critical-reading checklist with:
 
 - **Baseline fairness**: are baselines tuned to a comparable degree as the
   proposed method (same compute/search budget), or is the comparison against an
-  under-tuned baseline from an older paper? See `deep-learning`'s
+  under-tuned baseline from an older paper? See `physics-ml`'s
   `../../physics-ml/references/ablation-and-design-review.md` for the full treatment of matched-budget
   comparisons.
 - **Statistical significance across seeds/splits**: is a reported improvement

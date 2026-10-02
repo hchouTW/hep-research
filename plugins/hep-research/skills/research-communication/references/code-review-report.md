@@ -44,7 +44,7 @@ guidance that already exists elsewhere. Once the paper-alignment pass above
 is done, hand off:
 
 - PyTorch code (models, training/eval loops, data pipelines) — invoke
-  `deep-learning` for correctness, numerical stability, and performance
+  `physics-ml` for correctness, numerical stability, and performance
   issues.
 - ROOT/PyROOT/RDataFrame or uproot/awkward columnar analysis code — invoke
   `hep-analysis` for cutflow logic, statistical treatment, and systematic

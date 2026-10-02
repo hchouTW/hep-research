@@ -1,5 +1,5 @@
 {
-  "description": "Synthetic broken-power-law cosmic-ray flux for cr_spectrum_powerlaw_fit.py. Generated exactly from index 2.7 below and 3.1 above a break at 4e15 eV (illustrative of a 'knee'-like feature; see references/32-cosmic-ray-spectrum-and-composition.md), with no added scatter, so a segmented fit recovers both indices and the index change to numerical precision. Illustrative only - not a measurement of any real spectrum.",
+  "description": "Synthetic broken-power-law cosmic-ray flux for cr_spectrum_powerlaw_fit.py. Generated exactly from index 2.7 below and 3.1 above a break at 4e15 eV (illustrative of a 'knee'-like feature; see skills/detector-response/references/30-cosmic-ray-spectrum-and-composition.md), with no added scatter, so a segmented fit recovers both indices and the index change to numerical precision. Illustrative only - not a measurement of any real spectrum.",
   "generated_from": {
     "index_below_break": 2.7,
     "index_above_break": 3.1,

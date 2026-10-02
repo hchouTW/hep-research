@@ -82,7 +82,7 @@ performance and mission status are superseded by later publications. Rules:
     to 30 August, CERN measurements in October, flight to Kennedy Space Center in January
     2027, Dragon launch in April 2027 and connections by May 2027 (planned, Tier 6
     context). The June 2025 qualification date in earlier notes was not re-verified. The
-    ledger entries are claims C101-C102 in `ams-analysis`. Re-check after that.
+    ledger entries are claims C101-C102 in the bound experiment profile (see the context-resolution steps in the skill's SKILL.md; profiles are listed in `${CLAUDE_PLUGIN_ROOT}/profiles/registry.json`). Re-check after that.
     Instrument parameters: checked 2026-10-02 against the text of Phys. Rept. 894 (read from
     a local copy of the publisher PDF, not redistributed). Confirmed there: RICH radiator
     = 16 NaF tiles (n = 1.33) surrounded by 92 aerogel tiles (n = 1.05), thresholds beta > 0.75

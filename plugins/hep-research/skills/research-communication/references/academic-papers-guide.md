@@ -17,12 +17,12 @@ conventions apply to scientific writing generally.
 
 Pairs well with `hep-analysis` (the physics content: cutflows, fits, systematics,
 limits, and — for the astroparticle side — spectrum/composition/anisotropy analysis
-and astroparticle statistics) and `deep-learning` (the ML/statistical rigor itself:
+and astroparticle statistics) and `physics-ml` (the ML/statistical rigor itself:
 ablations, seed variance, matched-budget comparisons, evaluation-harness design —
 not just a methods section to read through). This skill owns the *reading and
 writing*, not the analysis itself — if the user still needs to run a fit, produce a
 limit, prove an improvement is real, or debug a plot, hand that off to
-`hep-analysis` or `deep-learning` first.
+`hep-statistics` or `physics-ml` first.
 
 ## Rules for every task
 
@@ -35,8 +35,8 @@ are stated here in full.
    trial counts, "standard" systematic breakdowns, validation studies or uncertainties
    the source or user did not give; say they are missing.
 2. **No computed statistical results.** A limit, significance, fit value or interval
-   the user did not supply is analysis output: hand it to `hep-analysis`
-   (pyhf/Combine/RooStats) or `deep-learning`, and write `[VALUE NEEDED: 95% CL CLs
+   the user did not supply is analysis output: hand it to `hep-statistics`
+   (pyhf/Combine/RooStats) or `physics-ml`, and write `[VALUE NEEDED: 95% CL CLs
    limit]`. Reading a plotted value is fine if labeled approximate (see
    `interpreting-scientific-graphics.md`). A back-of-envelope result, if
    given at all, is labeled approximate with its method and what it ignores. The
@@ -130,9 +130,9 @@ Use it for any of:
   code against an already-written paper (`code-review-report.md`, below)
 
 Do **not** reach for this skill for pure numerical/statistical work (fitting, limit
-setting, unfolding — `hep-analysis`; ablations, seed variance, proving an ML result
-is real — `deep-learning`), AMS-02 data analysis (`ams-analysis`), or drawing a
-schematic or diagram (`academic-diagrams`). Do reach for it the moment that work needs to be
+setting, unfolding — `hep-statistics`; ablations, seed variance, proving an ML result
+is real — `physics-ml`), experiment-specific data analysis (the bound experiment profile (see the context-resolution steps in the skill's SKILL.md; profiles are listed in `${CLAUDE_PLUGIN_ROOT}/profiles/registry.json`)), or drawing a
+schematic or diagram ([academic-diagrams-guide.md](academic-diagrams-guide.md)). Do reach for it the moment that work needs to be
 understood from someone else's paper, or turned into English prose,
 a figure caption, or a formatted document of your own.
 
@@ -173,8 +173,8 @@ Use these when requested or needed to substantiate claims — not for an ordinar
 **Verification and auditing**
 - **Citation verification** — reference identity/version/status and whether cited text supports the claim (a resolving DOI/valid BibTeX entry alone doesn't verify it): `citation-verification.md`
 - **Systematic-review screening** — eligibility, reproducible search logs, deduplication, screening decisions; keep narrative reviews lightweight unless this is requested: `systematic-review-screening.md`
-- **Reproducibility auditing** — trace results to methods/data/code/config/execution evidence; distinguish documentation inspection from an actual rerun (hand execution to `hep-analysis`/`deep-learning`): `reproducibility-auditing.md`
-- **Code review report** — paper-to-code alignment, documentation, packaging, severity-ranked findings; distinct from reproducibility auditing, delegates framework correctness to `deep-learning`/`hep-analysis`: `code-review-report.md`
+- **Reproducibility auditing** — trace results to methods/data/code/config/execution evidence; distinguish documentation inspection from an actual rerun (hand execution to `hep-analysis`/`physics-ml`): `reproducibility-auditing.md`
+- **Code review report** — paper-to-code alignment, documentation, packaging, severity-ranked findings; distinct from reproducibility auditing, delegates framework correctness to `physics-ml`/`hep-analysis`: `code-review-report.md`
 - **Equation and notation auditing** — definitions, dimensions, index/shape consistency, assumptions, derivation steps: `equation-and-notation-auditing.md`
 - **Mathematical reasoning and proof status** — soundness of assumptions vs. claimed proof status (formal/analytic/perturbative/asymptotic/heuristic/numerical/empirical/conjecture): `../../hep-theory/references/mathematical-reasoning-and-proof.md`
 - **Statistical inference for physics** — correctness of a likelihood/test/interval/limit vs. the stated conclusion: `../../hep-statistics/references/statistical-inference-for-physics.md`
@@ -423,7 +423,7 @@ review. Grouped by function; within a group, order roughly follows the workflow.
   software with no mathematical content) into a Methodology + Technical
   Manual document: codebase dissection, math/algorithm reconstruction,
   two-part synthesis; delegates correctness verification to
-  `hep-analysis`/`deep-learning` where applicable; template skeleton in
+  `hep-analysis`/`physics-ml` where applicable; template skeleton in
   `../assets/templates/code_to_methodology_manual_template.md`
 
 ## Bundled scripts

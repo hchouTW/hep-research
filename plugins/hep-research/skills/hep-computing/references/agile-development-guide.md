@@ -173,7 +173,7 @@ Run with `python3`. Read a script before changing it.
 ## Caveats
 
 - This skill governs *how* to work, not *what* to build - pair it with
-  domain skills (e.g. `deep-learning`, `hep-analysis`) for specialized code.
+  domain skills (e.g. `physics-ml`, `hep-analysis`) for specialized code.
 - If the user explicitly says not to run tests or not to use TDD, follow that -
   user instructions take precedence over this workflow.
 - Don't pad small fixes with the full template structure; collapse the completion

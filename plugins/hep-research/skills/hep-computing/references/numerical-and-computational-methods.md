@@ -5,8 +5,8 @@ result — whether a paper's integral, fit, simulation, or scan is actually
 trustworthy, or checking one's own computation before reporting it. This is
 about *scientific validity of the computation*, not general software
 engineering — code architecture, deployment, and service boundaries belong to
-`agile-development`; running the actual physics fit or ML training belongs to
-`hep-analysis`/`deep-learning`. **A numerical result is not validated merely
+[agile-development-guide.md](agile-development-guide.md); running the actual physics fit or ML training belongs to
+`hep-statistics`/`physics-ml`. **A numerical result is not validated merely
 because the code runs.**
 
 ## Table of contents
@@ -103,14 +103,14 @@ statistic) unless the sampling method and claim actually call for it.
 
 Scope this section to what materially affects scientific correctness or
 reproducibility — not general software engineering, which belongs to
-`agile-development`:
+[agile-development-guide.md](agile-development-guide.md):
 
 | Concern | Home |
 |---|---|
-| Code architecture, service boundaries, deployment | `agile-development` |
+| Code architecture, service boundaries, deployment | [agile-development-guide.md](agile-development-guide.md) |
 | Numerical convergence, precision, reproducible seeds | this file |
 | Provenance of a specific reported number (code version, config, inputs) | this file / `../../research-communication/references/reproducibility-auditing.md` |
-| General CI/testing practice for a codebase | `agile-development` |
+| General CI/testing practice for a codebase | [agile-development-guide.md](agile-development-guide.md) |
 | Monte Carlo/statistical validation of a scientific result | this file / `../../hep-statistics/references/statistical-inference-for-physics.md` |
 
 Within that scope, check: is the random-state/seed management explicit enough
@@ -144,7 +144,7 @@ method recover a known/injected answer on a control sample); injection tests
 tests (does the method report nothing when nothing is there); and whether
 sensitivity/robustness was checked against the choices that were somewhat
 arbitrary (binning, a selection threshold). For the depth of an ML ablation or
-matched-budget comparison itself, hand off to `deep-learning`; for a physics
+matched-budget comparison itself, hand off to `physics-ml`; for a physics
 control/validation-region design, hand off to `hep-analysis` — this section is
 for recognizing the gap while reading or reviewing, not for running the study.
 

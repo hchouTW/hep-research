@@ -94,7 +94,7 @@ in categories with re-derived background shapes).
   step; monitor the effective sample size within batches (or pre-bin/cap extreme
   weights, documenting the cap) rather than assuming standard-deep-learning batching
   intuition transfers unchanged from unweighted computer-vision-style datasets. See
-  `deep-learning` for general PyTorch training-loop and debugging practices (NaN
+  [deep-learning-guide.md](deep-learning-guide.md) for general PyTorch training-loop and debugging practices (NaN
   losses, gradient clipping, evaluation-mode pitfalls) that apply here unchanged once
   the physics-specific weighting above is handled correctly.
 - Prefer starting from a simple, shallow architecture and confirming it beats (or at

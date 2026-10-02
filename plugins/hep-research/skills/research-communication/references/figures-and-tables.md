@@ -46,11 +46,11 @@ interpreting a figure already in someone else's paper.
 | Systematic breakdown | Stacked or grouped bar chart, or a table if there are more than ~6 sources |
 | Cosmic-ray energy spectrum | Flux scaled by `E^n` (`n` ~2.6-3) vs. energy, log-log — see `astroparticle-and-cosmic-ray-papers.md` |
 | Arrival-direction / significance skymap | All-sky equal-area projection (Mollweide/Hammer-Aitoff), coordinate system stated explicitly — see `astroparticle-and-cosmic-ray-papers.md` |
-| Workflow, pipeline, architecture, graphical model, causal DAG, detector schematic, decay tree | A structural diagram as editable text (Mermaid, Graphviz, TikZ), not a data plot - use the `academic-diagrams` skill when installed |
+| Workflow, pipeline, architecture, graphical model, causal DAG, detector schematic, decay tree | A structural diagram as editable text (Mermaid, Graphviz, TikZ), not a data plot - use [academic-diagrams-guide.md](academic-diagrams-guide.md) |
 | Training progress | Learning curve: loss/metric vs. epoch or step, train and validation on the same axes so overfitting is visible |
 | Classifier performance | ROC or precision-recall curve (report AUC alongside the curve, not instead of it); confusion matrix for a fixed operating point |
 | Comparing many methods on many datasets/tasks | Leaderboard-style table, not a figure, with the best result per column in **bold**, or underlined if bold is taken by the paper's own method |
-| Isolating which component caused an improvement | Ablation table: one row per component removed/added, same metric column(s) as the main results table — see `deep-learning`'s `../../physics-ml/references/ablation-and-design-review.md` for how to design the ablation itself |
+| Isolating which component caused an improvement | Ablation table: one row per component removed/added, same metric column(s) as the main results table — see `physics-ml`'s `../../physics-ml/references/ablation-and-design-review.md` for how to design the ablation itself |
 
 Avoid 3D plots for print publications — they rarely survive being flattened to
 a static page and are hard to read precisely; a 2D projection or a pair of 2D

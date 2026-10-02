@@ -2,7 +2,7 @@
 
 **Use for:** training and evaluation workflows, MLOps figures, experimental-setup schematics for a learned model.
 **Assumption line (always):** conceptual pipeline; arrows are data flow; the training path and the inference path are drawn separately.
-For the model *itself* (layers, attention) use the model-architecture guidance in `../references/computer-science.md`; for the PyTorch code use `deep-learning`.
+For the model *itself* (layers, attention) use the model-architecture guidance in `../references/computer-science.md`; for the PyTorch code use `physics-ml`.
 
 ## Stage table (fill before drawing)
 

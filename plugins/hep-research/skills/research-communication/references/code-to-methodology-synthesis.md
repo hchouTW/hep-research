@@ -40,7 +40,7 @@ see the last decision-rule bullet below.
 This produces a documented *reading* of the code — what it appears to
 implement — not a certified-correct derivation. Once a candidate
 mathematical formulation is reconstructed, hand off correctness
-verification: PyTorch model/training/data-pipeline code to `deep-learning`;
+verification: PyTorch model/training/data-pipeline code to `physics-ml`;
 ROOT/PyROOT/RDataFrame/uproot analysis code to `hep-analysis`. Never present
 a reconstructed formula as verified correct in the output document itself.
 For a formulation outside those two domains (classical numerical methods,

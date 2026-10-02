@@ -90,5 +90,5 @@ data vs control flow; sync vs async; stateless vs stateful; local vs remote; tra
 persistent vs cache; request-response vs event-driven; orchestration vs execution; components verified
 against code when code exists; assumptions listed for anything inferred.
 
-For implementing or debugging the systems themselves see `deep-learning` (PyTorch) and
-`agile-development` (architecture/ADR guidance).
+For implementing or debugging the systems themselves see `physics-ml` (PyTorch) and
+`hep-computing` (architecture/ADR guidance).

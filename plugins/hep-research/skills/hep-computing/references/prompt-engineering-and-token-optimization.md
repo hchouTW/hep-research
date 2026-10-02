@@ -36,21 +36,21 @@ Plan-and-Solve), self-healing error feedback, and mandatory guardrails
 - **Structured output**: when downstream code parses the response, specify the
   exact contract (JSON Schema, a fixed set of headings, an enum of allowed
   values) and validate it where the response is consumed - this is the same
-  boundary-validation habit as `agile-development`'s risk-and-quality.md's
+  boundary-validation habit as [risk-and-quality.md](risk-and-quality.md)'s
   API and Interface Changes section, applied to an LLM response instead of
   an HTTP request.
 - **Guardrails**: constrain in the prompt only what you can't enforce in code
   (tone, scope of a persona, refusal style). Enforce everything else in code
   - schema validation, allow-lists, rate limits, auth checks - the same way
-  `agile-development`'s risk-and-quality.md treats a prompt's instructions as
+  [risk-and-quality.md](risk-and-quality.md) treats a prompt's instructions as
   advisory, not as a substitute for validating untrusted input at a real
   boundary.
 
 ## Token Budgeting
 
 - Give any new or changed LLM call an explicit input/output token ceiling as
-  part of its acceptance criteria, the same way `agile-development`'s
-  risk-and-quality.md's Performance section treats a latency or query-count
+  part of its acceptance criteria, the same way
+  [risk-and-quality.md](risk-and-quality.md)'s Performance section treats a latency or query-count
   budget.
 - Measure token counts with the provider's token-counting endpoint, not an
   estimate or another vendor's tokenizer, and re-measure when the model
@@ -100,8 +100,8 @@ When a feature strings multiple LLM calls together (e.g. extract -> classify
   and early stopping) to bound its total cost; budget each iteration's calls
   the same way as a chain stage, then multiply by that limit.
 - Whether to merge two calls into one to save tokens is a component-boundary
-  decision, not a token-budgeting one - use `agile-development`'s
-  software-architecture.md's architecture-drivers framework and "comparing
+  decision, not a token-budgeting one - use
+  [software-architecture.md](software-architecture.md)'s architecture-drivers framework and "comparing
   materially different options" guidance for that call. The practical test
   that decides most cases: merge only if it removes real replayed input, not
   merely because two prompts look similar.
@@ -127,9 +127,8 @@ When a feature strings multiple LLM calls together (e.g. extract -> classify
 ## Extending the User Story Template
 
 When a story's behavior depends on an LLM call, add two optional lines to
-`agile-development`'s
 [assets/story-card.md](../assets/story-card.md)'s Story
-section (requires `agile-development` installed alongside this skill) - keep
+section - keep
 them only when they carry a real constraint, and treat them as acceptance
 criteria, not documentation:
 
@@ -150,7 +149,7 @@ A change that alters the prompt without meeting the stated budget is not done.
   change, rather than judging a new prompt "looks right."
 - Don't stand up a new metrics dashboard for a single-feature change; if the
   project already tracks LLM cost/latency, report the change against those
-  existing numbers - see `agile-development`'s Decision Rules on writing the
+  existing numbers - see [agile-development-guide.md](agile-development-guide.md)'s Decision Rules on writing the
   minimum that solves the problem.
 
 ## Quick Reference

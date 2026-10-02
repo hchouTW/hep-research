@@ -46,11 +46,12 @@ Check the naming, correlations, positivity, interpolation, and bounds of rate, s
 
 ```bash
 pyhf cls ${CLAUDE_PLUGIN_ROOT}/adapters/pyhf-combine/assets/pyhf-counting.json                       # single-bin schema and CLs check
-python3 legacy hep-analysis/assets/end_to_end_sample_analysis.py at agentic-ai-skills@3e995a4 --outdir demo_out   # full chain, needs numpy + pyhf
+# end-to-end sample analysis: deferred to the M3 example; not shipped yet
 ```
 
 The first command gives CLs_obs = 0.335 at mu = 1 for n = b = 20 with a 10% normsys. The second
-builds a synthetic ntuple, normalizes it by the full signed weight sum, and makes a sumw/sumw2
+(the legacy end-to-end sample analysis at agentic-ai-skills@3e995a4, verified there on 2026-09-24 and
+not re-run in this plugin until its M3 port) builds a synthetic ntuple, normalizes it by the full signed weight sum, and makes a sumw/sumw2
 cutflow. It then fills orthogonal SR (njet >= 4) and CR (njet == 3) histograms and fits a shared
 `mu_bkg` normfactor, per-bin `staterror` from sumw2, and a lumi normsys to labelled Poisson
 pseudo-data. With mu injected = 1 it recovers mu = 0.91 +- 0.16 (Minuit) with an observed 95% CLs

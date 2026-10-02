@@ -109,7 +109,7 @@ phrasing sits inside):
   physics measurement. State how many runs/seeds and what the spread was.
 - **"Outperforms" is a comparison claim, not just a bigger number** — state
   whether the comparison used a matched compute/tuning budget (see
-  `deep-learning`'s `../../physics-ml/references/ablation-and-design-review.md`); a claim of outperforming an
+  `physics-ml`'s `../../physics-ml/references/ablation-and-design-review.md`); a claim of outperforming an
   under-tuned baseline should be phrased accordingly, not as an unconditional win.
 
 ## Sentence and paragraph shape

@@ -170,13 +170,12 @@ the code. Distinct from inline comments above - this describes the file as a who
 - **VAE/GAN/diffusion training loops and failure modes (posterior collapse, mode collapse)** -> [references/generative-models.md](generative-models.md)
 - **Custom autograd.Function, hooks, activation/gradient checkpointing** -> [references/custom-autograd-and-hooks.md](custom-autograd-and-hooks.md)
 - **TorchScript/ONNX export, torch.compile deployment modes, inference serving** -> [references/export-and-deployment.md](export-and-deployment.md)
-- **LibTorch, custom ops, CUDA/C++ extensions** -> [agile-development's C++ design guidelines](../../hep-computing/references/cpp-balanced-design-guidelines.md) (not vendored here; see legacy deep-learning/README.md at agentic-ai-skills@3e995a4 for the cross-skill dependency note)
+- **LibTorch, custom ops, CUDA/C++ extensions** -> [hep-computing's C++ design guidelines](../../hep-computing/references/cpp-balanced-design-guidelines.md) (not vendored here; see legacy deep-learning/README.md at agentic-ai-skills@3e995a4 for the cross-skill dependency note)
 - **Authoring a canonical worked example** (Contrast, Execution Trajectory,
   Gated Pipeline, Decision-Tree, Interactive Elicitation, Adversarial Audit,
   Test-First, or Postmortem archetype) for `examples/` ->
-  `task-authoring`'s
+  `hep-computing`'s
   [references/example-authoring.md](../../hep-computing/references/example-authoring.md)
-  (requires `task-authoring` installed alongside this skill)
 
 Architect-level references - decisions made before or around the code:
 
@@ -310,7 +309,7 @@ corrected snippet -> a quick diagnostic print/assert to confirm the fix.
 - Deterministic mode (`cudnn.deterministic=True`) trades performance for
   reproducibility - mention this tradeoff when you enable it.
 - For broader engineering process (scoping, testing, review), pair with
-  `agile-development`.
+  `hep-computing` ([agile-development-guide.md](../../hep-computing/references/agile-development-guide.md)).
 - For the scientific/statistical validity of conclusions drawn from model outputs -
   likelihoods, confidence intervals, discovery/exclusion claims - pair with
   `academic-papers`; this guide covers whether the model itself is trained,

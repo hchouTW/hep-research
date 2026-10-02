@@ -24,7 +24,7 @@ differently (resolution estimators, muon types, efficiency denominators) the
 alternatives are stated and one convention is adopted explicitly.
 
 **Note on helper-script names.** A few passages name small Python helpers (for example
-`multiple_scattering.py`) from the accompanying `hep-analysis` skill; they are optional
+`multiple_scattering.py`) from this skill's `scripts/`; they are optional
 and the text is complete without them. Sections labeled *Deliverables* list what a
 complete analysis of that topic should state.
 
