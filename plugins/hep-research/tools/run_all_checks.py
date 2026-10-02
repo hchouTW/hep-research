@@ -91,6 +91,7 @@ def main(argv=None) -> int:
         run_script("stanza_consistency", [py, "tools/build_stanzas.py", "--check"]),
         run_script("registry", [py, "contracts/registry.py"]),
         run_script("ams_ledger_preservation", [py, "tools/check_ams_ledger_preservation.py"]),
+        run_script("ams_optional", [py, "tools/check_ams_optional.py"]),
         run_script("measure_entrypoints", [py, "tools/measure_entrypoints.py"] + (["--no-cli"] if "--no-cli" in args else [])),
         host_validate() if "--no-cli" not in args else {"name": "claude-plugin-validate", "status": "skip", "reason": "--no-cli"},
     ]
