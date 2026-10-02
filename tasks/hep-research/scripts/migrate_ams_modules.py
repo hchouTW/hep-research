@@ -10,6 +10,7 @@ import csv
 import os
 import re
 import shutil
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -184,10 +185,13 @@ def evidence_index(t: str) -> str:
 
 
 def main() -> None:
-    M.mkdir(parents=True, exist_ok=True)
+    if M.exists() and "--force" not in sys.argv:
+        # After the move commit, sci-fix commits edit the modules in place; a rerun would erase them.
+        raise SystemExit(f"{M} exists: this script records the M2 move and would overwrite later sci-fix commits. "
+                         "Use --force only to reproduce the move commit on a clean checkout.")
     n = 0
     if M.exists():
-        shutil.rmtree(M)  # generated folder: rebuilt from the pinned legacy source every run
+        shutil.rmtree(M)
     texts = {}
     for f in sorted(L.glob("*.md")):
         if f.name == "source-index.md":
@@ -206,7 +210,7 @@ def main() -> None:
         n += 1
     ev = M.parent / "evidence/index.md"
     ev.write_text(evidence_index((L / "source-index.md").read_text()))
-    import sys  # regenerate the tables from the migrated ledger so the index is never stale
+    # regenerate the tables from the migrated ledger so the index is never stale
     sys.path.insert(0, str(ROOT / "plugins/hep-research"))
     from core.evidence import ledger, render_index
     sources, claims = ledger.load_ledger(ev.parent / "sources.json", ev.parent / "claims.json")
