@@ -30,7 +30,8 @@ SciPy 1.17.1, Matplotlib 3.11.2, SymPy 1.14.0, Claude Code CLI 2.1.287, 2026-10-
 | Bayesian inference (samplers, priors, convergence) | hep-statistics | contract checks only | T28; no sampler run |
 | HistFactory / pyhf workflows | hep-statistics | demonstrated on synthetic data (E1 + pyhf 0.7.6), asymptotic CLs | counting and two-channel shape workspaces (normsys, histosys, staterror, shapesys) match an independent likelihood in log-likelihood, best fit and limit (`tests/adapters/test_pyhf_counting.py`, `test_pyhf_shape.py`); end-to-end sample passes; toy-based CLs and other modifier types not tried |
 | Local partition, resubmission, merge | hep-computing | tested (E1) | T21 |
-| ROOT, PyROOT, uproot/awkward tools | hep-computing | unverified | tools not installed; tests skipped |
+| uproot/awkward tools | hep-computing | demonstrated on synthetic data (E1 + uproot 5.7.6, awkward 2.14.0) | synthetic NanoAOD-like files written and read; `uproot_awkward_analysis.py` histogram and sum(w^2) match numpy (`tests/adapters/test_uproot_awkward_asset.py`) |
+| ROOT, PyROOT tools | hep-computing | unverified | ROOT not installed; tests skipped |
 | Task files for coding agents (task authoring) | hep-computing | tested (E1) | bundle validator, lint_task tests |
 | Split integrity, surrogate domain, ML artifact checks | physics-ml | tested (E1) | T16 |
 | PyTorch training, inference, profiling assets | physics-ml | unverified | PyTorch not installed; tests skipped |
@@ -53,7 +54,7 @@ SciPy 1.17.1, Matplotlib 3.11.2, SymPy 1.14.0, Claude Code CLI 2.1.287, 2026-10-
 | Adapter | Status | Notes |
 |---|---|---|
 | `adapters/pyhf-combine` (pyhf JSON, Combine datacard template) | proposed | adapter status is its least-tested tool: pyhf part demonstrated-on-synthetic-data (pyhf 0.7.6); Combine part proposed, Combine not installed |
-| `adapters/root-uproot` (ROOT, RDataFrame, RooFit, uproot/awkward assets) | proposed | starting points only; ROOT and uproot not installed |
+| `adapters/root-uproot` (ROOT, RDataFrame, RooFit, uproot/awkward assets) | proposed | adapter status is its least-tested tool: uproot/awkward part demonstrated-on-synthetic-data; ROOT part proposed, ROOT not installed |
 | Interchange formats for recasting and published data | proposed | named as optional in the J7 trace; no code |
 
 ## Hosts
