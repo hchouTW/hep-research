@@ -43,4 +43,5 @@ environment, command, result), and update the matrix. A tool upgrade that change
 tolerance is a breaking change.
 
 Both shipped adapters are `proposed`. In `adapters/pyhf-combine` the pyhf part is `demonstrated-on-synthetic-data`
-(pyhf 0.7.6) and the Combine part is `proposed`; `adapters/root-uproot` tools were not installed in the v1 checks.
+(pyhf 0.7.6) and the Combine part is `proposed`. In `adapters/root-uproot` the uproot/awkward part is
+`demonstrated-on-synthetic-data` (uproot 5.7.6, awkward 2.14.0) and the ROOT part is `proposed`.

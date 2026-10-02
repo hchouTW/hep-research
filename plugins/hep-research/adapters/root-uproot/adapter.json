@@ -1,13 +1,43 @@
 {
  "id": "adapter:root-uproot",
- "version": "0.1.0",
+ "version": "0.2.0",
  "status": "proposed",
  "purpose": "Starting points for ROOT (RDataFrame, RooFit, C++/PyROOT) and uproot/awkward analysis code",
- "tools": [{"name": "ROOT", "tested_versions": []}, {"name": "uproot", "tested_versions": []}, {"name": "awkward", "tested_versions": []}],
- "environment": "none declared; ROOT, uproot and awkward were not installed in v1 checks",
- "assets": ["assets/CMakeLists.txt", "assets/cpp_rdataframe_analysis.cpp", "assets/fit_histogram.cpp", "assets/plot_branch.C",
-            "assets/pyroot_rdataframe_analysis.py", "assets/pyroot_roofit_signal_background.py", "assets/rdf_analysis.cpp",
-            "assets/uproot_awkward_analysis.py"],
- "tests": [],
- "owner_skill": "hep-computing"
+ "tools": [
+  {
+   "name": "ROOT",
+   "status": "proposed",
+   "tested_versions": []
+  },
+  {
+   "name": "uproot",
+   "status": "demonstrated-on-synthetic-data",
+   "tested_versions": [
+    "5.7.6"
+   ]
+  },
+  {
+   "name": "awkward",
+   "status": "demonstrated-on-synthetic-data",
+   "tested_versions": [
+    "2.14.0"
+   ]
+  }
+ ],
+ "environment": "E1 (docs/capability-matrix.md) plus uproot 5.7.6, awkward 2.14.0, PyYAML 6.0.3; ROOT not installed",
+ "assets": [
+  "assets/CMakeLists.txt",
+  "assets/cpp_rdataframe_analysis.cpp",
+  "assets/fit_histogram.cpp",
+  "assets/plot_branch.C",
+  "assets/pyroot_rdataframe_analysis.py",
+  "assets/pyroot_roofit_signal_background.py",
+  "assets/rdf_analysis.cpp",
+  "assets/uproot_awkward_analysis.py"
+ ],
+ "tests": [
+  "../../tests/adapters/test_uproot_awkward_asset.py"
+ ],
+ "owner_skill": "hep-computing",
+ "status_rule": "the adapter status is the lowest of its tools' statuses; each tool's own status is in tools[]"
 }

@@ -1,7 +1,7 @@
 # PROGRESS — hep-research plugin
 
-- Current milestone: **M6 complete: handover** (all milestones M0–M6 done; no PR opened, per the task rules). G0 and G1 passed 2026-10-02
-- Repository: `hchouTW/hep-research`, branch `feat/hep-research-plugin` (no PR). Legacy source: read-only `agentic-ai-skills@3e995a4` via `tasks/hep-research/scripts/fetch_legacy.sh`
+- Current milestone: **M6 complete: handover, merged** (all milestones M0–M6 done; PR #1 merged into `main` at `c31c98f` on 2026-10-02 at the user's request). G0 and G1 passed 2026-10-02
+- Repository: `hchouTW/hep-research`, default branch `main` (`feat/hep-research-plugin` merged and deleted). Follow-up work goes on a new branch off `main` and lands through a PR. Legacy source: read-only `agentic-ai-skills@3e995a4` via `tasks/hep-research/scripts/fetch_legacy.sh`
 - Base commit: `3e995a49a89fad8e0e9d52130ee1fd93a3a0f4f9`
 - Last session: 2026-10-02, Claude Code cloud container (CLI 2.1.287), Python 3.11.15
 
@@ -101,17 +101,24 @@ M4 exit checks: Path D and T24 pass; every negative composition/compatibility fi
 - [x] 3. Final `run_all_checks.py` (14 pass; 921 tests pass, 39 skip) and relocation rerun; limitations listed in VALIDATION
 - [x] Carry-overs: traceability audit (`tools/check_traceability.py`), AMS method owners (M6-02), adapter declarations
 
+## After handover (2026-10-02, each step on user request)
+
+- [x] J2 and J7 executed on synthetic inputs (`examples/detector-resolution/`, `examples/recasting/`)
+- [x] pyhf 0.7.6 installed (user approved): end-to-end sample passes; counting and two-channel shape workspaces match an independent likelihood (`tests/adapters/test_pyhf_*.py`); VALIDATION PYHF-RUN
+- [x] PR #1 opened and merged into `main` (merge commit, history kept); `main` made the default branch by the user
+- [x] uproot 5.7.6 and awkward 2.14.0 installed (user approved): uproot-dependent tests pass; `uproot_awkward_analysis.py` asset verified on synthetic files (`tests/adapters/test_uproot_awkward_asset.py`); VALIDATION UPROOT-RUN
+
 ## Blockers / needs user
 
-1. Handover done. Open for the user: whether to open a PR, approve pyhf installation, or remove the old agentic-ai-skills branch.
+1. Open for the user: ROOT/PyROOT, CMS Combine, PyTorch and the diagram tools are not installed (each install needs approval); their tests stay skipped and unverified.
 2. Open from M1: the old branch in agentic-ai-skills (M1-12) is for the user to delete.
 
 ## Resume checklist
 
 1. `tasks/hep-research/scripts/fetch_legacy.sh`
-2. `python3 -m venv .venv-hep && .venv-hep/bin/pip install -r tasks/hep-research/baseline/pip-freeze-d5.txt`
+2. `python3 -m venv .venv-hep && .venv-hep/bin/pip install -r tasks/hep-research/m6/uproot/pip-freeze-uproot.txt` (D5 + pyhf + uproot/awkward; `baseline/pip-freeze-d5.txt` for D5 only)
 3. `.venv-hep/bin/python plugins/hep-research/tools/run_all_checks.py`
 
 ## Next step
 
-None planned. Possible follow-ups need the user: a PR (not opened without approval), pyhf/ROOT/PyTorch environments to verify the skipped tests and adapters, executed J2 and J7 examples.
+None planned. Possible follow-ups need the user: ROOT, Combine or PyTorch environments to verify the remaining skipped tests and adapter parts.
