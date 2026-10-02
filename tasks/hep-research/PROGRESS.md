@@ -109,6 +109,8 @@ M4 exit checks: Path D and T24 pass; every negative composition/compatibility fi
 - [x] uproot 5.7.6 and awkward 2.14.0 installed (user approved): uproot-dependent tests pass; `uproot_awkward_analysis.py` asset verified on synthetic files (`tests/adapters/test_uproot_awkward_asset.py`); VALIDATION UPROOT-RUN
 - [x] PR #2 merged (`e48f521`); GitHub auto-deletes merged PR branches (user setting)
 - [x] PyTorch 2.14.1 installed (user approved; PyPI build, CPU): physics-ml tests and a 2-process DDP run pass; VALIDATION PYTORCH-RUN
+- [x] PR #3 merged (`cd5cf6f`)
+- [x] Routing round 2 (user approved, paid runs): tuned `hep-theory` and `hep-statistics` descriptions; run 4 43/48; repeats old 12/30 vs new 16/30 on the 10 changed cases (G5-REPORT "Routing round 2")
 
 ## Blockers / needs user
 

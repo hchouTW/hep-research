@@ -71,3 +71,44 @@ fresh isolated config with no legacy skills; same model, host and tool limits.
 
 Loading: no theory or computing case read an experiment-profile file. Cost: $3.64. Traces: `routing-run3-*.json`.
 The run-2 finding stands for setups with both installed: the legacy predecessor skills can win.
+
+## Routing round 2 (run 4, 2026-10-02, after the merge of PR #3, user choice "Routing round 2")
+
+Change: the `hep-theory` and `hep-statistics` descriptions name the run-3 misses (whether a process or Feynman
+diagram is allowed; fits of model parameters to published points with their covariance; recasting) and ask to be
+loaded first, including for topics outside v1 (lattice QCD, EFT global fits; cosmic-ray propagation fits), where the
+skill says what it cannot cover. Both stay under the 1,024-character budget (1,022 and 1,014). Same host (2.1.287),
+model (claude-sonnet-5-5), tools, 4-turn limit, synthetic inputs and plugin-only isolated config as run 3.
+
+| Outcome (run 4, all 48 cases) | Cases |
+|---|---|
+| Expected skill chosen first (or clarifying question) | 43 of 48 (en 29/33, zh-Hant 14/15) |
+| Another `hep-research` skill | 1: J5 fold-and-fit to `detector-response` (unchanged) |
+| No skill loaded | 3: `co-neighbor-1` and `j08` (answered directly), `rc-neighbor-1` (asked for the diagram) |
+| Scored fail | 1: `underspec-2` asked for the missing results in Chinese without a question mark, which the scorer does not count as a question; the behavior is the expected one, the score is left as computed |
+
+Cost $4.24. Traces: `routing-run4-tuned.json`, `routing-run4-score.json`.
+
+Because one live run is noisy, the 10 cases whose outcome differed between runs 3 and 4 were run twice more with
+the old (run-3) and the new descriptions (`round2-repeats/`, $2.60). Passes over three runs each:
+
+| Case | Old descriptions | New descriptions |
+|---|---|---|
+| `th-neighbor-1` fit to published points | 0/3 | 3/3 |
+| `out-of-v1-1` cosmic-ray propagation (limited support) | 1/3 | 3/3 |
+| `j12` lattice QCD (limited support) | 0/3 | 2/3 |
+| `j07` recasting | 2/3 | 3/3 |
+| `co-negative-1` decay-width derivation (zh-Hant) | 2/3 | 1/3 |
+| `co-neighbor-1` cross section vs tree-level prediction | 1/3 | 0/3 |
+| `j08` convergence study (`hep-computing`, unchanged) | 3/3 | 2/3 |
+| `underspec-2` underspecified (scorer limit above) | 3/3 | 2/3 |
+| `rc-neighbor-1` Feynman diagram | 0/3 | 0/3 |
+| `j05` fold and fit | 0/3 | 0/3 |
+| Total | 12/30 | 16/30 |
+
+Reading: the change reliably fixes fits to published points and the two out-of-v1 requests, and helps recasting.
+Short theory questions answered from memory (`co-neighbor-1`, `co-negative-1`) remain unreliable with either
+version. `rc-neighbor-1` does not look at `diagram.md` (it searches for images); `j05` goes to `detector-response`,
+which owns folding, so the case's expectation (`hep-theory`, the J5 chain head) may be the thing to revisit rather
+than the description. Three runs per case is a small sample; differences of one run are within noise.
+
