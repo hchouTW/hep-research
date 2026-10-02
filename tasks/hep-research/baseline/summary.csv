@@ -1,0 +1,15 @@
+skill,step,result
+ams-analysis,bundle,0
+ams-analysis,unittest,0
+hep-analysis,bundle,0
+hep-analysis,unittest,0
+deep-learning,bundle,0
+deep-learning,unittest,0
+academic-papers,bundle,0
+academic-papers,unittest,0
+academic-diagrams,bundle,0
+academic-diagrams,unittest,0
+agile-development,bundle,0
+agile-development,unittest,0
+task-authoring,bundle,0
+task-authoring,unittest,0

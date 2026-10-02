@@ -1,0 +1,33 @@
+test_prompts_parse_with_rubrics (test_academic_diagrams_skill.BehaviorPrompts.test_prompts_parse_with_rubrics) ... ok
+test_invalid_dot (test_academic_diagrams_skill.DotCompile.test_invalid_dot) ... skipped 'Graphviz not installed'
+test_valid_dot (test_academic_diagrams_skill.DotCompile.test_valid_dot) ... skipped 'Graphviz not installed'
+test_broken_link_detected (test_academic_diagrams_skill.FrontmatterAndLinks.test_broken_link_detected) ... ok
+test_description_within_limit (test_academic_diagrams_skill.FrontmatterAndLinks.test_description_within_limit) ... ok
+test_frontmatter_absent (test_academic_diagrams_skill.FrontmatterAndLinks.test_frontmatter_absent) ... ok
+test_frontmatter_parsed (test_academic_diagrams_skill.FrontmatterAndLinks.test_frontmatter_parsed) ... ok
+test_skill_name_matches_folder (test_academic_diagrams_skill.FrontmatterAndLinks.test_skill_name_matches_folder) ... ok
+test_validator_flags_long_description (test_academic_diagrams_skill.FrontmatterAndLinks.test_validator_flags_long_description) ... ok
+test_er_crows_foot_allowed (test_academic_diagrams_skill.MermaidLint.test_er_crows_foot_allowed) ... ok
+test_extract_blocks (test_academic_diagrams_skill.MermaidLint.test_extract_blocks) ... ok
+test_good_flowchart (test_academic_diagrams_skill.MermaidLint.test_good_flowchart) ... ok
+test_sequence_async_arrow_is_not_a_bracket (test_academic_diagrams_skill.MermaidLint.test_sequence_async_arrow_is_not_a_bracket) ... ok
+test_unbalanced_bracket (test_academic_diagrams_skill.MermaidLint.test_unbalanced_bracket) ... ok
+test_unknown_type (test_academic_diagrams_skill.MermaidLint.test_unknown_type) ... ok
+test_real_mmdc_rejects_bad_syntax (test_academic_diagrams_skill.MermaidRender.test_real_mmdc_rejects_bad_syntax) ... skipped 'Mermaid CLI not installed'
+test_render_failure_reports_stderr (test_academic_diagrams_skill.MermaidRender.test_render_failure_reports_stderr) ... ok
+test_render_success (test_academic_diagrams_skill.MermaidRender.test_render_success) ... ok
+test_failure_reports_stderr (test_academic_diagrams_skill.PlantUmlRender.test_failure_reports_stderr) ... ok
+test_fragment_is_wrapped (test_academic_diagrams_skill.PlantUmlRender.test_fragment_is_wrapped) ... ok
+test_plantuml_fence_extracted (test_academic_diagrams_skill.PlantUmlRender.test_plantuml_fence_extracted) ... ok
+test_real_plantuml_rejects_one_line_class_body (test_academic_diagrams_skill.PlantUmlRender.test_real_plantuml_rejects_one_line_class_body) ... skipped 'PlantUML not installed'
+test_bundle_validates (test_academic_diagrams_skill.RealBundle.test_bundle_validates) ... ok
+test_every_example_has_caption_and_source (test_academic_diagrams_skill.RealBundle.test_every_example_has_caption_and_source) ... ok
+test_shipped_diagram_sources_pass (test_academic_diagrams_skill.RealBundle.test_shipped_diagram_sources_pass) ... ok
+test_malformed (test_academic_diagrams_skill.SvgCheck.test_malformed) ... ok
+test_svg_fence_extracted (test_academic_diagrams_skill.SvgCheck.test_svg_fence_extracted) ... ok
+test_well_formed (test_academic_diagrams_skill.SvgCheck.test_well_formed) ... ok
+
+----------------------------------------------------------------------
+Ran 28 tests in 0.117s
+
+OK (skipped=4)

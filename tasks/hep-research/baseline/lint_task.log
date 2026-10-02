@@ -1,0 +1,66 @@
+warning: path not checked (no --repo): tasks/hep-research-plugin.md
+warning: path not checked (no --repo): tasks/hep-research/PROGRESS.md
+warning: path not checked (no --repo): tasks/hep-research/DECISIONS.md
+warning: path not checked (no --repo): ams-analysis/SKILL.md
+warning: path not checked (no --repo): hep-analysis/SKILL.md
+warning: path not checked (no --repo): ams-analysis/references/analysis-artifacts.md
+warning: path not checked (no --repo): tests/fixtures/spec_valid.json
+warning: path not checked (no --repo): ams-analysis/data/sources.json
+warning: path not checked (no --repo): data/claims.json
+warning: path not checked (no --repo): ams-analysis/data/papers_manifest.json
+warning: path not checked (no --repo): references/source-policy.md
+warning: path not checked (no --repo): ams-analysis/scripts/audit_analysis_spec.py
+warning: path not checked (no --repo): ams-analysis/scripts/ams_kinematics.py
+warning: path not checked (no --repo): ams-analysis/scripts/validate_response.py
+warning: path not checked (no --repo): ams-analysis/scripts/likelihood_limits.py
+warning: path not checked (no --repo): ams-analysis/scripts/validate_evidence_ledger.py
+warning: path not checked (no --repo): ams-analysis/scripts/validate_skill_bundle.py
+warning: path not checked (no --repo): agents/openai.yaml
+warning: path not checked (no --repo): references/12-validation.md
+warning: path not checked (no --repo): hep-analysis/references/27-event-generation.md
+warning: path not checked (no --repo): hep-analysis/assets/end_to_end_sample_analysis.py
+warning: path not checked (no --repo): tests/test_end_to_end.py
+warning: path not checked (no --repo): deep-learning/SKILL.md
+warning: path not checked (no --repo): scripts/check_split_integrity.py
+warning: path not checked (no --repo): deep-learning/references/scientific-machine-learning.md
+warning: path not checked (no --repo): academic-papers/references/mathematical-reasoning-and-proof.md
+warning: path not checked (no --repo): academic-papers/references/numerical-and-computational-methods.md
+warning: path not checked (no --repo): academic-papers/SKILL.md
+warning: path not checked (no --repo): scripts/check_manuscript.py
+warning: path not checked (no --repo): academic-diagrams/SKILL.md
+warning: path not checked (no --repo): agile-development/SKILL.md
+warning: path not checked (no --repo): task-authoring/SKILL.md
+warning: path not checked (no --repo): templates/task-template.md
+warning: path not checked (no --repo): tools/run_all_checks.py
+warning: path not checked (no --repo): docs/architecture.md
+warning: path not checked (no --repo): .claude-plugin/plugin.json
+warning: path not checked (no --repo): .claude-plugin/marketplace.json
+warning: path not checked (no --repo): docs/researcher-journeys.md
+warning: path not checked (no --repo): core/OWNERS.json
+warning: path not checked (no --repo): tools/check_layering.py
+warning: path not checked (no --repo): profiles/registry.json
+warning: path not checked (no --repo): docs/maintenance.md
+warning: path not checked (no --repo): contracts/stanzas/context-resolution.md
+warning: path not checked (no --repo): core/bootstrap.py
+warning: path not checked (no --repo): docs/architecture-review.md
+warning: path not checked (no --repo): baseline/summary.md
+warning: path not checked (no --repo): docs/integration-inventory.json
+warning: path not checked (no --repo): docs/migration-map.csv
+warning: path not checked (no --repo): task-authoring/scripts/lint_task.py
+warning: path not checked (no --repo): docs/routing-contract.md
+warning: path not checked (no --repo): tools/measure_entrypoints.py
+warning: path not checked (no --repo): tools/check_ams_ledger_preservation.py
+warning: path not checked (no --repo): tests/routing/cases.json
+warning: path not checked (no --repo): docs/profile-authoring.md
+warning: path not checked (no --repo): docs/adapter-authoring.md
+warning: path not checked (no --repo): docs/migration.md
+warning: path not checked (no --repo): task-authoring/templates/task-template.md
+warning: path not checked (no --repo): task-authoring/references/acceptance-criteria.md
+warning: path not checked (no --repo): task-authoring/references/task-quality-checklist.md
+warning: path not checked (no --repo): references/analysis-artifacts.md
+warning: path not checked (no --repo): references/27-event-generation.md
+ERROR: missing sections: ['## Background', '## Objective', '## Scope', '### In Scope', '### Out of Scope', '## Repository Context', '## Technical Approach', '## Deliverables', '## Acceptance Criteria', '## Validation', '## Open Questions', '## References']
+ERROR: unexpected extra sections: ['## 0. How to Start (for the human)', '## 1. Mission', '## 2. Operating Rules (non-negotiable)', '### 2.1 Safety and repository hygiene', '### 2.2 Evidence labels (use in all docs you write)', '### 2.3 Ask vs. proceed', '### 2.4 Honesty in reporting', '### 2.5 Context management', '### 2.6 Language', '## 3. Session Protocol', '## 4. Fixed Facts (inspection baseline)', '### 4.1 Source → destination map', '## 5. Decisions and Defaults', '### 5.1 Claude Code plugin facts to verify in M0 `[To verify]`', '## 6. Who the Plugin Serves', '## 7. Target Architecture', '### 7.1 Plugin components', '### 7.2 Core skill ownership', '### 7.3 Contested-ownership resolutions', '### 7.4 Layers and dependency directions', '### 7.5 Proposed layout', '### 7.6 Profiles', '### 7.7 Profile metadata (minimum fields)', '### 7.8 Project configuration', '### 7.9 Shared scientific vocabulary', '### 7.10 Research contracts', '### 7.11 Comparison gate (before any mixed inference)', '### 7.12 Evidence, adapters, run state', '### 7.13 Versioning', '### 7.14 Runtime mechanics in Claude Code', '### 7.15 Loading budget', '### 7.16 Architecture risk register', '### 7.17 Architecture review (gate G1)', '## 8. Milestones', '### M0 — Baseline and release scope', '### M1 — Architecture, vocabulary, and contracts', '### M2 — Shared core and AMS migration', '### M3 — Theory capability and extension proof', '### M4 — Comparison and supporting integration', '### M5 — Packaging and evaluation', '### M6 — Handover', '## 9. Mandatory End-to-End Paths', '## 10. Acceptance Criteria', '## 11. Targeted Test Matrix', '## 12. Known Source Defects to Correct (in the plugin copy only)', '## 13. Stop / Escalation Conditions', '## 14. Status Report Template (English, at every gate and session end)', '## 15. Out of Scope', '## 16. References']
+ERROR: section '## 2. Operating Rules (non-negotiable)' is empty
+ERROR: section '## 7. Target Architecture' is empty
+4 error(s), 61 warning(s)
