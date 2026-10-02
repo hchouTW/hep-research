@@ -1,6 +1,6 @@
 # PROGRESS — hep-research plugin
 
-- Current milestone: **M5 complete; G5 test run and recorded** (routing quality open, user decides next step before M6). G0 and G1 passed 2026-10-02
+- Current milestone: **M5 complete, G5 recorded, routing round done (41/48 live)**; next M6. G0 and G1 passed 2026-10-02
 - Repository: `hchouTW/hep-research`, branch `feat/hep-research-plugin` (no PR). Legacy source: read-only `agentic-ai-skills@3e995a4` via `tasks/hep-research/scripts/fetch_legacy.sh`
 - Base commit: `3e995a49a89fad8e0e9d52130ee1fd93a3a0f4f9`
 - Last session: 2026-10-02, Claude Code cloud container (CLI 2.1.287), Python 3.11.15
@@ -96,7 +96,7 @@ M4 exit checks: Path D and T24 pass; every negative composition/compatibility fi
 
 ## Blockers / needs user
 
-1. User decides: accept G5 with routing recorded as partial and start M6, or improve routing first (input fixtures, a run without legacy skills; paid).
+1. None. Routing round done per the user's choice; M6 next.
 2. Open from M1: the old branch in agentic-ai-skills (M1-12) is for the user to delete.
 
 ## Resume checklist
@@ -107,4 +107,4 @@ M4 exit checks: Path D and T24 pass; every negative composition/compatibility fi
 
 ## Next step
 
-Per the user's G5 decision: either M6 (handover, final traceability audit, AMS dedupe M2-04), or a routing improvement round first. pyhf example stays unverified until pyhf is approved.
+M6: handover, final traceability audit (AC01), AMS dedupe (M2-04), authoring/maintenance guides (AC26), final capability matrix review (AC27), AC28 handover. pyhf example stays unverified until pyhf is approved.

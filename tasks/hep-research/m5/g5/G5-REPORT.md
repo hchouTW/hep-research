@@ -56,3 +56,18 @@ Cost: run 1 $4.77, run 2 $4.79, invocation runs about $0.23 (host-reported list 
 Established: native install, discovery, namespaced invocation, profile access from the install, coexistence without
 overwrite, isolated project state, and removal, on this host and version. Not established: routing quality. Measuring
 it needs cases with input files in the project, and a run without the legacy skills installed.
+
+## Routing round (run 3, after the user chose "Routing round first")
+
+Changes: synthetic input files for 29 cases (`tests/routing/inputs.py`, written into a fresh project directory per
+case); one sentence added to the `hep-statistics` and `hep-theory` descriptions ("load it even for a quick …");
+fresh isolated config with no legacy skills; same model, host and tool limits.
+
+| Outcome (run 3) | Cases |
+|---|---|
+| Expected skill chosen first (or clarifying question for underspecified requests) | 41 of 48 (en 27/33, zh-Hant 14/15) |
+| Another `hep-research` skill | 2: J5 fold-and-fit went to `detector-response` (it owns folding); J12 lattice QCD went to `hep-computing`, which did give the limited-support notice |
+| No skill loaded | 5: `th-neighbor-1` (fit to published points, answered directly), `rc-neighbor-1` (looked for an image, not `diagram.md`), `j07` and `out-of-v1-1` (no inputs; asked for them), `co-negative-1` (hit the 4-turn limit before choosing) |
+
+Loading: no theory or computing case read an experiment-profile file. Cost: $3.64. Traces: `routing-run3-*.json`.
+The run-2 finding stands for setups with both installed: the legacy predecessor skills can win.
