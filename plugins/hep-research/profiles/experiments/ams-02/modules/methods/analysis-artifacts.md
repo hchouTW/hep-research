@@ -17,7 +17,7 @@ Read only when the request is to design or write down an AMS measurement as a st
 
 ## Format and provenance rules
 
-- Specifications are **JSON** (the scripts use only the standard library; there is no YAML parser). YAML blocks elsewhere in the skill are display sketches of the same keys.
+- Specifications are **JSON**, or **YAML in a strict subset** read by `${CLAUDE_PLUGIN_ROOT}/contracts/legacy/yaml_subset.py` (standard library only; the subset and the features it rejects are listed at the end of this section). YAML blocks in other modules are display sketches of the same keys and may use syntax outside the subset (for example `a | b` alternatives); they are not specifications.
 - `abs_Z` is the absolute charge number `|Z|`; the sign of the charge is a separate field `charge_sign` (`+1`, `-1`, or `"both"`). Rigidity is in GV, momentum and energies in GeV (momentum in GeV/c), kinetic energy per nucleon in GeV/n.
 - Every number that describes AMS (a cut value, a resolution, an efficiency, a systematic size, a cutoff factor) is an entry in `parameters` with a `provenance` of `documented` (needs `claim_ids` in `${CLAUDE_PLUGIN_ROOT}/profiles/experiments/ams-02/evidence/claims.json`), `general_method`, `proposal`, `user_supplied` or `unknown`. A `documented` entry whose claim is scoped to another species, range, period or analysis is a scope violation, not documentation.
 - `unresolved_inputs` lists what the analysis still needs; the auditor reports it as `unresolved`, never as an error.
