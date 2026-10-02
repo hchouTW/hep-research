@@ -57,7 +57,9 @@ M1 check run: `check-runs/check-run-2026-10-02T134449Z.json` (6 pass, 0 fail, 0 
 
 M2 exit checks: ledger preservation pass; migrated-helper regressions pass (816 pass, 35 skip for missing optional tools: PyTorch, PyROOT, awkward/uproot, Combine, Graphviz, Mermaid, PlantUML, tectonic); Path A pass; AMS tasks read `profiles/registry.json` then the profile `index.md` (2.4 KB) and only the modules they need; layering pass.
 
-Latest check run: `check-runs/check-run-2026-10-02T150623Z.json` (8 pass, 0 fail, 0 skip; 851 tests, 816 pass, 35 skip).
+M2 check run: `check-runs/check-run-2026-10-02T150623Z.json`.
+
+Latest check run (M3): `check-runs/check-run-2026-10-02T153532Z.json` (11 pass, 0 fail, 0 skip; 878 unit tests, 843 pass, 35 skip; profile suites 257 + 9 + 16 pass).
 
 ## M3 steps
 
