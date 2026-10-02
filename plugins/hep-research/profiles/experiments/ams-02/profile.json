@@ -9,8 +9,17 @@
   "Collaboration review, blinding decisions and peer review",
   "Other experiments' methods presented as AMS practice"
  ],
- "compatible": {"core": ">=1.0,<2.0", "contracts": ">=1.0,<2.0"},
- "related_skills": ["hep-analysis", "detector-response", "hep-statistics", "hep-theory", "research-communication"],
+ "compatible": {
+  "core": ">=1.0,<2.0",
+  "contracts": ">=1.0,<2.0"
+ },
+ "related_skills": [
+  "hep-analysis",
+  "detector-response",
+  "hep-statistics",
+  "hep-theory",
+  "research-communication"
+ ],
  "resources": {
   "index": "index.md",
   "conventions": "conventions.json",
@@ -19,28 +28,74 @@
   "evidence_index": "evidence/index.md",
   "datasets": "datasets/"
  },
- "vocabulary_namespaces": ["ams02", "crflux"],
+ "vocabulary_namespaces": [
+  "ams02",
+  "crflux"
+ ],
  "vocabulary_extensions": {
-  "levels": ["crflux:top-of-instrument", "crflux:local-interstellar"],
-  "conventions": ["ams02:rigidity_definition", "ams02:rigidity_sign", "ams02:charge_sign_source", "ams02:mass_number_assumption"]
+  "levels": [
+   "crflux:top-of-instrument",
+   "crflux:local-interstellar"
+  ],
+  "conventions": [
+   "ams02:rigidity_definition",
+   "ams02:rigidity_sign",
+   "ams02:charge_sign_source",
+   "ams02:mass_number_assumption"
+  ]
  },
- "adapters": {"required": [], "optional": []},
+ "adapters": {
+  "required": [],
+  "optional": []
+ },
  "depends_on": [],
  "evidence_namespace": "ams02",
  "maintainer": "hchouTW (migrated from agentic-ai-skills@3e995a4 ams-analysis)",
  "capabilities": [
-  {"name": "domain-modules", "status": "documented",
-   "scope": "Migrated reference modules (species, subsystems, methods, periods, sources) and working rules; text guidance, not executable checks"},
-  {"name": "evidence-ledger", "status": "tested-in-declared-environment",
+  {
+   "name": "domain-modules",
+   "status": "documented",
+   "scope": "Migrated reference modules (species, subsystems, methods, periods, sources) and working rules; text guidance, not executable checks"
+  },
+  {
+   "name": "evidence-ledger",
+   "status": "tested-in-declared-environment",
    "scope": "Structural validity of the ams02 ledger, verification-strength ordering, index sync and preservation of the legacy ledger; not the truth of any claim",
-   "tests": ["tests/test_evidence_ledger.py", "tests/test_ledger_preservation.py"]},
-  {"name": "analysis-spec-audit", "status": "tested-in-declared-environment",
+   "tests": [
+    "tests/test_evidence_ledger.py",
+    "tests/test_ledger_preservation.py"
+   ]
+  },
+  {
+   "name": "analysis-spec-audit",
+   "status": "tested-in-declared-environment",
    "scope": "Internal completeness and consistency of a JSON or strict-YAML AMS analysis specification; a clean audit is not physical validity",
-   "tests": ["tests/test_analysis_spec.py", "tests/test_yaml_subset.py"]},
-  {"name": "papers-manifest-and-crdb-query", "status": "tested-in-declared-environment",
+   "tests": [
+    "tests/test_analysis_spec.py",
+    "tests/test_yaml_subset.py"
+   ]
+  },
+  {
+   "name": "legacy-spec-conversion",
+   "status": "tested-in-declared-environment",
+   "scope": "Converts a legacy ams-analysis spec (spec_version 1, JSON or strict YAML) into a measurement-spec artifact; refuses on legacy-audit or contract errors; lossless (original carried under ams02:legacy_spec); fills no missing value",
+   "tests": [
+    "tests/test_convert_legacy_spec.py"
+   ]
+  },
+  {
+   "name": "papers-manifest-and-crdb-query",
+   "status": "tested-in-declared-environment",
    "scope": "Offline subcommands only (manifest check, URL building, CSV summary); networked fetches are opt-in, need user approval and are not exercised by the tests",
-   "tests": ["tests/test_fetch_papers.py", "tests/test_crdb_query.py"]},
-  {"name": "flux-ratio-synthetic", "status": "proposed",
-   "scope": "Path A: synthetic time-dependent flux and correlated ratio with exposure normalization and closure (to be demonstrated in M2)"}
+   "tests": [
+    "tests/test_fetch_papers.py",
+    "tests/test_crdb_query.py"
+   ]
+  },
+  {
+   "name": "flux-ratio-synthetic",
+   "status": "proposed",
+   "scope": "Path A: synthetic time-dependent flux and correlated ratio with exposure normalization and closure (to be demonstrated in M2)"
+  }
  ]
 }

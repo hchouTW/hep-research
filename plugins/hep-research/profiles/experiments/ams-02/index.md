@@ -12,7 +12,7 @@ Profile `experiment:ams-02` adds AMS-02 knowledge to the core skills; it is neve
 | Efficiency, acceptance, exposure, backgrounds | `modules/methods/efficiency-acceptance-backgrounds.md` |
 | Calibration, MC, systematics | `modules/methods/calibration-mc-systematics.md` |
 | Response, likelihood, unfolding, limits | `modules/methods/inference-and-unfolding.md`; exact numbers via `modules/methods/statistical-diagnostics.md` |
-| Specification, ledger or formal review as deliverable | `modules/methods/analysis-artifacts.md` (audit with `scripts/audit_analysis_spec.py`) |
+| Specification, ledger or formal review as deliverable | `modules/methods/analysis-artifacts.md` (audit with `scripts/audit_analysis_spec.py`; convert a legacy spec to a contract artifact with `scripts/convert_legacy_spec.py`) |
 | Time-resolved flux or ratio, solar cycle, periodicity | `modules/periods/time-dependent-analysis.md` |
 | What AMS published, "latest", is a paper real | `modules/sources/source-policy.md`, then `evidence/index.md` |
 | Other experiments' data, CRDB, SSDC database | `modules/sources/cosmic-ray-databases.md` |
