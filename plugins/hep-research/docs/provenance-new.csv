@@ -382,6 +382,7 @@ skills/research-communication/SKILL.md,e712c96,M1,new in hep-research (no legacy
 tests/__init__.py,7111892,M0,new in hep-research (no legacy source)
 tests/adapters/__init__.py,7111892,M0,new in hep-research (no legacy source)
 tests/adapters/test_adapter_declarations.py,5deda65,M6,new in hep-research (no legacy source)
+tests/adapters/test_pyhf_counting.py,2d61eee,M6,new in hep-research (no legacy source)
 tests/contracts/__init__.py,7111892,M0,new in hep-research (no legacy source)
 tests/contracts/make_fixtures.py,e712c96,M1,new in hep-research (no legacy source)
 tests/contracts/make_registry_fixtures.py,e712c96,M1,new in hep-research (no legacy source)
