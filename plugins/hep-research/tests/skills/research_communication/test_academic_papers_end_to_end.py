@@ -92,7 +92,7 @@ class TestEndToEnd(unittest.TestCase):
         for key in ("Cowan:2010js", "Gross:2010qma", "Feldman:1997qc"):
             self.assertIn(key, out)
 
-    @unittest.skipUnless(shutil.which("tectonic"), "tectonic not installed")
+    @unittest.skipUnless(shutil.which("tectonic"), "tectonic not on PATH (it also downloads a TeX bundle on first use)")
     def test_bundled_skeleton_compiles(self):
         run = subprocess.run(["tectonic", "--keep-logs", "paper.tex"], cwd=self.dir,
                              capture_output=True, text=True, timeout=600)

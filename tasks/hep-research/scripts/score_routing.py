@@ -14,6 +14,10 @@ from collections import Counter
 
 LEGACY = {"academic-diagrams", "academic-papers", "agile-development", "ams-analysis", "deep-learning", "hep-analysis",
           "task-authoring"}
+# A clarifying question: a question mark, or a request for the missing input. Chinese answers often ask with
+# "請你提供 ..." or "請說明 ..." and no question mark (Traditional and Simplified forms).
+ASK_MARKERS = ("?", "？", "請告訴", "請提供", "請問", "請你提供", "請你告訴", "請說明", "請給我", "請確認",
+               "请告诉", "请提供", "请问", "请你提供", "请你告诉", "请说明", "请给我", "请确认")
 
 
 def classify(tr):
@@ -25,7 +29,7 @@ def classify(tr):
         return "run-error", first
     if exp == "ask":
         r = tr.get("result") or ""
-        asks = any(m in r for m in ("?", "？", "請告訴", "請提供", "請問"))
+        asks = any(m in r for m in ASK_MARKERS)
         return ("pass" if asks else "fail"), first
     if first is None:
         return "no-skill", first
