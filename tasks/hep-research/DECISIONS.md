@@ -17,7 +17,7 @@ Evidence labels per task Section 2.2.
 | M0-05 | 2026-10-02 | `lint_task.py` fails on this task file only on section structure (numbered headings vs. template headings). Adapted, not force-fit: the task file is not restructured | Decided | Step 9 says adapt rather than force-fit |
 | M0-06 | 2026-10-02 | Root `.gitignore` ignores `docs/*`; plugin docs live under `plugins/hep-research/docs/`, which is unaffected | Recorded | — |
 | G0-01 | 2026-10-02 | User approved network for (a) reading official Claude Code docs, (b) pip install of D5 packages into `.venv-hep` | Approved | G0 answer |
-| G0-02 | 2026-10-02 | User chose to push `feat/hep-research-plugin` (no PR without approval). Blocked: GitHub account not linked to Claude; bundles exported to project files meanwhile | Approved, blocked on access | G0 answer |
+| G0-02 | 2026-10-02 | User chose to push `feat/hep-research-plugin` (no PR without approval). Blocked: GitHub account not linked to Claude; bundles exported to project files meanwhile | Approved; pushed 2026-10-02 after GitHub link | G0 answer |
 | M1-01 | 2026-10-02 | `contracts/` may import `core/`; `core/` never imports `contracts/` | Decided `[Proposal]` refinement of 7.4 | Registry needs CORE_VERSION; keeps core the lowest layer |
 | M1-02 | 2026-10-02 | In-house JSON-schema subset validator (`contracts/schema.py`) plus a custom `x-vocab` keyword | Decided | Stdlib only; no extra mandatory dependency |
 | M1-03 | 2026-10-02 | Profiles may declare `vocabulary_namespaces`; default is the evidence namespace | Decided | Task 7.9 example uses `crflux:` levels next to `ams02:` keys |
