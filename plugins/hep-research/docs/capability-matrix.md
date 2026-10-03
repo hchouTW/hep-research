@@ -87,14 +87,14 @@ results; they are listed in "E2 results" at the end. Evidence: VALIDATION FULLTE
 
 | Capability or tool | E2 status | Evidence or reason |
 |---|---|---|
-| Core checks, profile suites, examples | tested (E2) | 13 of 14 aggregate checks pass (unittest fails only on the DDP row below); all ten examples rerun byte-identically on E2; committed output equal or numerically equal except `ams-flux-ratio` toy closure (stream divergence across platforms) |
+| Core checks, profile suites, examples | tested (E2) | 14 of 14 aggregate checks pass at `e54707d`; all ten examples rerun byte-identically on E2; committed output equal or numerically equal, with the `ams-flux-ratio` toy-closure summary equal at Monte Carlo precision |
 | pyhf workflows | tested (E2 + pyhf 0.7.6) | adapter and statistics tests pass |
 | uproot/awkward tools | tested (E2 + uproot 5.7.6, awkward 2.14.0) | `test_uproot_awkward_asset` passes |
 | ROOT, PyROOT tools | tested (E2 + ROOT 6.38.04, Homebrew, PyROOT under Python 3.14) | ROOT C++ assets, PyROOT integration and scripts pass; older than the E1 version 6.40.04 |
 | CMS Combine | unverified (E2) | no `combine`, no Docker |
-| PyTorch assets | tested (E2 + PyTorch 2.14.1, torchvision 0.29.1, CPU) except DDP | the 2-process gloo DDP run hangs when the host name does not resolve (network-dependent) |
+| PyTorch assets | tested (E2 + PyTorch 2.14.1, torchvision 0.29.1, CPU) | the 2-process gloo DDP run passes with `--standalone --local-addr=127.0.0.1`, also with an unresolvable host name (FULLTEST-E2-FOLLOWUPS) |
 | Diagram source checks | tested (E2: Graphviz 16.1.0, PlantUML 1.2026.8, Mermaid CLI 12.0.0 with chrome-headless-shell 154) | Homebrew `mermaid-cli` needs a separate `chrome-headless-shell` install |
 | Batch campaigns | protocol tested (E2) against fake schedulers; real Slurm/HTCondor unverified | no `sbatch`, no `condor_submit` |
-| Relocation (AC24) | tested (E2) apart from the DDP row | copy at a path with spaces: same results as in place; the 2 legacy checks and 1 legacy-dependent unit test skip in the copy |
+| Relocation (AC24) | tested (E2) | copy of the git-listed files at a path with spaces passes, also with an ignored venv in the tree; the 2 legacy checks and 1 legacy-dependent unit test skip in the copy |
 | Claude Code (plugin, isolated config) | tested (E2, CLI 2.1.288): install, discovery, removal; namespaced invocation unverified (isolated config not logged in) | invocation passed in the user configuration (VALIDATION INSTALL) |
 | Live routing | not run (E2) | not approved |

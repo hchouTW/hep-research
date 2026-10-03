@@ -1,0 +1,115 @@
+{
+ "relocated_to": "/var/folders/hx/8f9thc314n97_jdmzxyqy_mc0000gn/T/hep research relocated ug9996o7/plugin copy/hep-research",
+ "path_has_spaces": true,
+ "outside_repository": true,
+ "symlinks": [],
+ "files_naming_source_path": [],
+ "cwd": "/var/folders/hx/8f9thc314n97_jdmzxyqy_mc0000gn/T/unrelated cwd 9kh8z4w0",
+ "exit_code": 0,
+ "summary": {
+  "counts": {
+   "pass": 12,
+   "fail": 0,
+   "skip": 2
+  },
+  "timestamp_utc": "2026-10-03T20:22:24Z"
+ },
+ "checks": [
+  {
+   "name": "unittest",
+   "status": "pass",
+   "counts": {
+    "run": 1242,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 10,
+    "passed": 1232
+   }
+  },
+  {
+   "name": "profile-tests:experiment:ams-02",
+   "status": "pass",
+   "counts": {
+    "run": 258,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 258
+   }
+  },
+  {
+   "name": "profile-tests:experiment:synthetic-collider",
+   "status": "pass",
+   "counts": {
+    "run": 9,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 9
+   }
+  },
+  {
+   "name": "profile-tests:theory:qed-benchmark",
+   "status": "pass",
+   "counts": {
+    "run": 16,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 16
+   }
+  },
+  {
+   "name": "check_layering",
+   "status": "pass",
+   "counts": null
+  },
+  {
+   "name": "stanza_consistency",
+   "status": "pass",
+   "counts": null
+  },
+  {
+   "name": "registry",
+   "status": "pass",
+   "counts": null
+  },
+  {
+   "name": "ams_ledger_preservation",
+   "status": "skip",
+   "counts": null
+  },
+  {
+   "name": "ams_optional",
+   "status": "pass",
+   "counts": null
+  },
+  {
+   "name": "routing_static",
+   "status": "pass",
+   "counts": null
+  },
+  {
+   "name": "packaging_scan",
+   "status": "pass",
+   "counts": null
+  },
+  {
+   "name": "traceability",
+   "status": "skip",
+   "counts": null
+  },
+  {
+   "name": "measure_entrypoints",
+   "status": "pass",
+   "counts": null
+  },
+  {
+   "name": "claude-plugin-validate",
+   "status": "pass",
+   "counts": null
+  }
+ ],
+ "stderr_tail": "",
+ "pass": true
+}

@@ -406,3 +406,20 @@ rerun (scratch) gives 1241 run, 1231 pass, 0 fail, 1 error, 9 skip.
 | F08 live routing | not run | not approved; AC20 unchanged |
 
 No E1 entry was edited.
+
+## FULLTEST-E2-FOLLOWUPS (2026-10-04, E2)
+
+Follow-ups 1–4 of `tasks/hep-research/isolated-full-test/FINAL-REPORT.md`, fixed in `7f8249c` (PR #21, merge
+`e54707d`; same tree). Same E2 environment as FULLTEST-E2. Check-run
+`tasks/hep-research/check-runs/check-run-2026-10-03T202224Z.json` (records `e54707d`): **14 pass, 0 fail, 0 skip**;
+unit tests 1242 run, 1233 pass, 0 fail, 9 skip (3 missing tool, 4 slow by design, 2 meaningful only without
+PyTorch); profile suites 258, 9, 16 pass.
+
+| Follow-up | Result | Evidence |
+|---|---|---|
+| 1 DDP smoke test | pass | `torchrun --standalone --local-addr=127.0.0.1`. With the host name made unresolvable (a `sitecustomize` that returns `unresolvable.invalid`), the default launch and `--standalone` alone both hang; with `--local-addr=127.0.0.1`, all 9 smoke tests pass. The report's proposed fix (`--standalone` alone) was wrong |
+| 2 ams-flux-ratio committed output | pass | new `test_matches_committed_output`: deterministic values to rel 1e-9 / abs 1e-12, toy-closure summary within 3 Monte Carlo standard errors (0.15 mean, 0.106 width at 400 toys); the E1 committed output passes on E2 (largest differences 0.017, 0.020) |
+| 3 relocation copy | pass | `relocation-20261003T202224Z.json`: copy of the git-listed files (885), run with an ignored `.venv-hep` holding an e-mail address planted in the plugin tree; packaging passes; relocation **pass** (unit 1242 run, 0 fail, 10 skip; the 2 legacy checks and `test_lint_task` skip in the copy, as before) |
+| 4 Mermaid browser note | done | `references/mermaid-patterns.md`, `check_diagram_sources.py` |
+
+No E1 entry was edited.
