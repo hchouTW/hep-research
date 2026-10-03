@@ -1,5 +1,5 @@
 {
- "contract_version": "1.0.0",
+ "contract_version": "1.1.0",
  "bindings": {
   "experiments": [
    {
@@ -16,7 +16,7 @@
  },
  "versions": {
   "plugin": "0.1.0",
-  "contracts": "1.0.0",
+  "contracts": "1.1.0",
   "profiles": {
    "experiment:synthetic-collider": "1.0.0",
    "theory:qed-benchmark": "1.0.0"

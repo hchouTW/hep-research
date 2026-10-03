@@ -262,3 +262,32 @@ optional tools, 2 slow tests run separately below); profile suites 258, 9, 16 pa
 Not demonstrated: undercoverage of the Berger-Boos implementation (none was found in the scan). The plug-in profile limit
 fell below nominal at some scan points (lowest 0.8717 ± 0.0137 at cl 0.90, s = 2, b = 8, σ_b = 0.5, about 2σ), which
 supports using the Berger-Boos construction when coverage matters; this is one seeded scan, not a characterization.
+
+## STATS-REINFORCEMENT-RUN (2026-10-03, hep-statistics reinforcement S01–S12)
+
+Work order `tasks/hep-research/stats-reinforcement/TASK.md` (revision r2, checked against `main` at `dbda2aa`).
+Environment: E1 core stack (Python 3.11.15, numpy 2.4.6, scipy 1.17.1, matplotlib 3.11.2, sympy 1.14.0) plus
+pyhf 0.7.6 in `.venv-hep`; PyTorch, ROOT, uproot/awkward, Combine and the diagram tools were not installed in this
+container, so their tests skip. Phase 0 baseline on `dbda2aa`: 1094 unit tests, 0 failures, 59 skips;
+`tasks/hep-research/stats-reinforcement/phase0_repro.py` reproduced all eleven findings there and reproduces none
+after the changes. Final run `tasks/hep-research/check-runs/check-run-2026-10-03T044810Z.json` on `bb23947`: 14 checks
+pass / 0 fail / 0 skip; 1165 unit tests, 1115 pass, 0 fail, 50 skip (46 optional tools absent, 4 slow tests run
+separately below); profile suites 258, 9, 16 pass. `tools/check_relocation.py` passes (12 pass, 2 skip in the
+relocated copy), as do `check_routing_static.py` (56 cases), `measure_entrypoints.py --no-cli`, `check_layering.py`,
+`check_packaging.py` and `check_ams_optional.py`. Slow tests (`HEP_SLOW_TESTS=1`, the four new statistics test
+modules): 34 tests pass.
+
+| Task | Result | Evidence |
+|---|---|---|
+| S01 Li & Ma | pass; the test failed 8/10 before | `test_li_ma_significance.py`: at (4, 2, 0.25) asymptotic p 6.646e-3, toys 9.03e-3 ± 0.21e-3, exact conditional 0.01696 |
+| S02 core/stats guide | pass | `test_core_stats_guide.py`: every subcommand and option documented, exit-code table matches the scripts |
+| S03 interpolation | pass (pyhf) | `test_nuisance_interpolation.py`: CLs limit 2.1529 (code4) vs 2.1541 (code1); asymmetric 1.3/0.95: 2.1145 vs 2.0525 |
+| S04 nuisance diagnostics | pass (pyhf) | `test_pyhf_nuisance_diagnostics.py`: impacts equal independent refits within 1e-3 rel / 1e-4 abs |
+| S05 look-elsewhere | pass; slow test pass | Gross-Vitells vs 20,000 brute toys: (0.1, 0.110), (0.03, 0.0337), (0.01, 0.0111), (0.003, 0.00289), (0.001, 0.00127); <N(1)> = 1.955 |
+| S06 sensitivity and GoF | pass; slow test pass | Z_A(5, 20) = 1.07572; with σ_b = 2, 0.97554 equal to a numerical profile within 1e-6; KS D = 0.040, p = 0.708 over 300 datasets |
+| S07 Bayesian diagnostics | pass | `test_bayes_diagnostics.py`: offset chains R-hat 1.13; AR(1) bulk ESS 1082 vs 1053 expected; demo bound 2.957 ± 0.060 vs 2.9957 |
+| S08 sWeights | pass | `test_weighted_unbinned_fit.py` (300 toys, seed 20261003): pull width 1.020 (full sandwich), 1.013 (sum w² sandwich), 2.799 (naive Hessian); a mass-dependent background lifetime gives mean τ 0.575 instead of 1 |
+| S09 ML-assisted inference | pass (static) | `tests/routing/test_ml_inference_routing.py`; no ML inference is executed |
+| S10 likelihood publication | pass (pyhf) | `test_pyhf_publication.py`: patched background-only workspace reproduces best fit and CLs within 1e-6 (mu_hat 0.7949, CLs 0.4924) |
+| S11 contract 1.1.0 | pass; the test failed 4/7 before | `test_statistical_result_v11.py`; 25 example artifacts regenerated, only the contract version string changed |
+| S12 routing | pass (static) | 8 new cases, 3 in Traditional Chinese; no live routing run (paid, not approved) |

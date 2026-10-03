@@ -2,6 +2,8 @@
 
 > Method owner: [hep-statistics](../../../../../skills/hep-statistics/SKILL.md) defines the general method (limits, intervals, profile likelihood, template fits and toys); implementation in `core/stats`. This module records how AMS-02 analyses apply it. General statements here are snapshots carried from the legacy `ams-analysis` skill; where they differ from the owner, the owner's text applies.
 
+> Canonical generic guide: [core/stats guide](../../../../../skills/hep-statistics/references/core-stats-guide.md) (every subcommand, exit codes, decision rules, limits). Read it first; this module adds how AMS-02 analyses apply the tools.
+
 ## When to read this file
 
 Read only when a low-count or validation answer needs numbers that a rule alone cannot give: an exact Poisson upper limit or interval, the zero-count bound, a Feldman-Cousins or CLs limit, a profile-likelihood limit, interval or significance (single bin, multi-bin, or with shape and several nuisances, including profile Feldman-Cousins and CLs, non-Gaussian or correlated nuisance priors, and an approximate implementation of the Berger-Boos construction), a seeded coverage check, a boundary (s >= 0) significance check, a finite-template-statistics check (with Barlow-Beeston-lite and full per-template Barlow-Beeston fits, weighted MC and shape or normalization nuisances), a regularization scan or a regularization choice by L-curve, cross-validation or Poisson-exact cross-validation, a closure or pull test, a forward-folding (parametric or non-parametric, several smoothness priors) versus unfolding comparison, a response-statistics check, its analytic covariance (independent cells or multinomial with lost events, an efficiency systematic, or a measured response covariance or replicas), or a correlated-ratio check (declared or measured covariance). The decisions themselves (when Gaussian, Wilks or S/sqrt(B) fail, boundary and non-regular problems, limits versus discovery) are in [inference-and-unfolding](inference-and-unfolding.md#rare-and-low-count-inference); do not load this file for those.
@@ -17,7 +19,7 @@ Read only when a low-count or validation answer needs numbers that a rule alone 
 
 ## What the scripts do
 
-All five scripts are standard library only, label output [General method], and exit 0 (ok) or 2 (rejected input). Toy-based subcommands require `--seed` and echo it with the toy count.
+All five scripts are standard library only and label output [General method]. They exit 0 (ok) or 2 (rejected input), except `template_fit.py`, which exits 1 when a fit fails (infeasible model or no convergence). Toy-based subcommands require `--seed` and echo it with the toy count.
 
 `${CLAUDE_PLUGIN_ROOT}/core/stats/poisson_diagnostics.py` provides five subcommands (exact Poisson constructions, no toys except `coverage`):
 
@@ -92,8 +94,8 @@ Weights that vary within a bin in the toy MC, non-Gaussian or correlated priors 
 - Choosing a regularization strength or iteration count from a scan that used the same truth as its weights or prior; ignoring a strongly negative adjacent-bin correlation; letting a fitted index depend on the regularization without running `fold-compare`.
 - Ignoring finite MC statistics in a response or template (use `bb-fit` or `bb-toys` for several templates, not the one-parameter `template-bb`); quoting a naive-fit yield error when `bb-fit` shows it inflated; using a diagonal-only covariance for a ratio whose bins share systematics.
 - Treating a profile-construction interval or limit as having guaranteed coverage, or the finite-grid `neyman-limit` as a proof of coverage (check it with `neyman-coverage` at the true values that matter); choosing a Gaussian, log-normal or gamma nuisance prior by convenience instead of the origin of the uncertainty; using independent response cells for a column with a high efficiency (use the multinomial model); ignoring an efficiency systematic that scales whole response columns; comparing forward-fold priors by the ranking on one truth.
-- Treating a profile-construction interval or limit as having guaranteed coverage; picking a regularization by one criterion without a toy comparison; quoting a Laplace error of a penalized fit without checking it against toys.
-- Ignoring finite MC statistics in a response or template; assuming bins are independent when they share a systematic.
+- Picking a regularization by one criterion without a toy comparison; quoting a Laplace error of a penalized fit without checking it against toys.
+- Assuming bins are independent when they share a systematic.
 - Quoting a CLs limit without its expected band, or as a frequentist interval; reporting a marginalized-background result without varying `sigma_b`.
 - Quoting a boundary significance from naive Wilks; choosing an unfolding iteration count from a scan that used the same truth as its prior; assuming a ratio cancels a systematic without a stated correlation.
 - Using an exact interval for a count whose background is uncertain, as if the background were known.

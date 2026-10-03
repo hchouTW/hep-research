@@ -2,6 +2,8 @@
 
 > Method owner: [hep-statistics](../../../../../skills/hep-statistics/SKILL.md) defines the general method (likelihoods, covariance validation, unfolding, forward folding and low-count inference); implementation in `core/stats`. This module records how AMS-02 analyses apply it. General statements here are snapshots carried from the legacy `ams-analysis` skill; where they differ from the owner, the owner's text applies.
 
+> Canonical generic guide to the `core/stats` tools: [core/stats guide](../../../../../skills/hep-statistics/references/core-stats-guide.md).
+
 ## When to read this file
 
 Read when writing or reviewing a likelihood, a response/migration model, an unfolding, a forward-folded fit, an interval or limit, a covariance matrix, or a significance. Canonical home for the count/response model, covariance types, unfolding validation, and rare-event inference. Efficiency and background definitions are in [efficiency-acceptance-backgrounds](efficiency-acceptance-backgrounds.md).

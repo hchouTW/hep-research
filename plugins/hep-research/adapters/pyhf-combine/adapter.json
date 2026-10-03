@@ -1,8 +1,8 @@
 {
  "id": "adapter:pyhf-combine",
- "version": "0.4.1",
+ "version": "0.6.0",
  "status": "demonstrated-on-synthetic-data",
- "purpose": "Starting points for HistFactory-style likelihoods: a pyhf counting workspace and a CMS Combine datacard template",
+ "purpose": "Starting points for HistFactory-style likelihoods: a pyhf counting workspace, a shape workspace, post-fit nuisance diagnostics for pyhf, the background-only plus signal-patchset publication pattern, and a CMS Combine datacard template",
  "tools": [
   {
    "name": "pyhf",
@@ -23,11 +23,15 @@
  "assets": [
   "assets/pyhf-counting.json",
   "assets/pyhf-shape-synthetic.json",
+  "assets/pyhf_nuisance_diagnostics.py",
   "assets/combine_datacard_template.txt"
  ],
  "tests": [
   "../../tests/adapters/test_pyhf_counting.py",
   "../../tests/adapters/test_pyhf_shape.py",
+  "../../tests/adapters/test_nuisance_interpolation.py",
+  "../../tests/adapters/test_pyhf_nuisance_diagnostics.py",
+  "../../tests/adapters/test_pyhf_publication.py",
   "../../tests/examples/test_end_to_end_sample.py",
   "../../tests/adapters/test_combine_datacard_template.py"
  ],

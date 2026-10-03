@@ -1,5 +1,7 @@
 # Systematic Uncertainties and Nuisance Correlations
 
+This file covers the physical sources, their payloads and correlations. How each source then enters the likelihood (constraint form, interpolation code, one-sided and two-point variations, MC-statistics modifiers, pruning criteria) and the post-fit pulls, impacts and breakdowns are owned by hep-statistics: [nuisance modeling](../../hep-statistics/references/nuisance-modeling.md).
+
 ## Source inventory
 
 Use `${CLAUDE_PLUGIN_ROOT}/skills/hep-analysis/assets/systematics.csv` to record source, type, affected processes/eras/regions, correlation key, rate/shape behavior, payload, and validation. Nuisance names have statistical meaning: sharing a name often shares a parameter. Do not reuse names solely for convenience.

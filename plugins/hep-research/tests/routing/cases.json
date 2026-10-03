@@ -381,6 +381,91 @@
    }
   },
   {
+   "id": "st-impacts-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Show me the pulls, constraints and impacts of the nuisance parameters after my profile likelihood fit.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "nuisance parameters",
+    "profile likelihood"
+   ]
+  },
+  {
+   "id": "st-lee-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我在質量掃描中看到 3.5σ 的局部超出，請做 look-elsewhere effects 的修正並給出全域顯著性。",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "significance and look-elsewhere effects"
+   ]
+  },
+  {
+   "id": "st-sensitivity-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "What median discovery significance should I expect for 5 signal events over 20 background, using Asimov datasets?",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "toys and asimov datasets"
+   ]
+  },
+  {
+   "id": "st-gof-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我的 template fits 有很多 bin 只有幾個事件，goodness of fit 該怎麼算？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "goodness of fit",
+    "template fits"
+   ]
+  },
+  {
+   "id": "st-bayes-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My MCMC chains give R-hat 1.08; can I report these Bayesian posteriors?",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "bayesian posteriors (priors, samplers, convergence)"
+   ]
+  },
+  {
+   "id": "st-sweights-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Fit the decay-time distribution with sWeights from my mass fit and give an uncertainty that covers.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "unbinned fits"
+   ],
+   "not": "hep-analysis"
+  },
+  {
+   "id": "st-nsbi-1",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "我們用神經網路估計似然比（NSBI）做推論，最後區間的 coverage 要怎麼驗證？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "coverage"
+   ],
+   "not": "physics-ml"
+  },
+  {
+   "id": "st-publish-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Prepare our likelihoods for HEPData as a background-only workspace plus signal patches so others can reuse the fit.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "likelihoods"
+   ],
+   "not": "research-communication"
+  },
+  {
    "id": "j01",
    "lang": "en",
    "kind": "journey",

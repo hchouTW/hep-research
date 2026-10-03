@@ -57,7 +57,7 @@ Serialization (D6): JSON, stdlib-parseable. The strict-YAML subset reader is use
 
 ## 5. Versioning
 
-SemVer for plugin (`0.1.0`), contracts (`1.0.0`, `contracts.CONTRACTS_VERSION`), core (`1.0.0`, `core.CORE_VERSION`), each profile, and each evidence ledger. Breaking (major): removing or renaming fields, changing a convention default, changing numerical results beyond declared tolerance, renaming evidence IDs. Every artifact envelope records plugin, contract and profile versions. Legacy skills stay frozen snapshots at `3e995a4`.
+SemVer for plugin (`0.1.0`), contracts (`1.1.0`, `contracts.CONTRACTS_VERSION`), core (`1.0.0`, `core.CORE_VERSION`), each profile, and each evidence ledger. Breaking (major): removing or renaming fields, changing a convention default, changing numerical results beyond declared tolerance, renaming evidence IDs. Every artifact envelope records plugin, contract and profile versions. Legacy skills stay frozen snapshots at `3e995a4`.
 
 ## 6. Runtime mechanics
 

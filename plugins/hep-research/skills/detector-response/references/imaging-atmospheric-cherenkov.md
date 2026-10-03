@@ -94,7 +94,9 @@ negative otherwise. This is the field's standard test statistic for a claimed
 detection and is implemented in `${CLAUDE_PLUGIN_ROOT}/skills/hep-statistics/scripts/li_ma_significance.py`; because it is
 derived from a likelihood ratio under the Poisson ON/OFF model it is the appropriate
 replacement for a naive `(N_on - alpha*N_off)/sqrt(N_on + alpha^2*N_off)` significance
-at low counts, where the naive formula's Gaussian assumption breaks down. See
+at low counts, where the naive formula's Gaussian assumption breaks down. Its own
+normal p-value is still asymptotic (`S = sqrt(-2 ln lambda)`, Wilks), so at a few counts
+quote the script's `--toys` or `--exact-conditional` p-value as well. See
 [astroparticle statistics](../../hep-statistics/references/astroparticle-statistics.md) for the trials-factor
 correction required when this significance is evaluated at many trial positions in a
 blind sky scan rather than at one predetermined source position.

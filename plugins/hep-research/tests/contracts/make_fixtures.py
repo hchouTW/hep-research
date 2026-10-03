@@ -89,6 +89,18 @@ def statres(paradigm, **extra):
     return envelope("statistical-result", ext, "hep-statistics", status=("asimov", "unvalidated"))
 
 
+def statres_v11(paradigm, **extra):
+    """A statistical-result written under contracts 1.1.0 (optional significance, expected, breakdown, GoF fields)."""
+    d = statres(paradigm, **extra)
+    d["contract_version"] = "1.1.0"
+    d["versions"]["contracts"] = "1.1.0"
+    d["artifact_id"] = "fixture-synthetic-statistical-result-v1-1"
+    return d
+
+
+SCAN = {"local_p": 1.0e-3, "local_z": 3.09, "scan": {"parameters": ["mass"], "ranges": [[100.0, 200.0]]}}
+
+
 VALID = {
     "measurement_collider.json": measurement(),
     "measurement_exposure.json": measurement("exposure", observable=observable("exposure", level="detector", quantity="differential-flux", unit="m^-2 sr^-1 s^-1 GV^-1", variables=[{"name": "rigidity", "unit": "GV", "edges": [1, 2, 4]}])),
@@ -119,6 +131,16 @@ VALID = {
                                                          "correlations": [], "inference_assumptions": ["placeholder"]}, "hep-statistics"),
     "statres_frequentist.json": statres("frequentist"),
     "statres_bayesian.json": statres("bayesian"),
+    "statres_scan_global.json": statres_v11(
+        "frequentist", construction="toy-calibrated-profile",
+        significance={**SCAN, "global_p": 0.02, "global_z": 2.05, "trials_method": "gross-vitells"},
+        expected={"median": 1.2, "band_1sigma": [0.9, 1.7], "band_2sigma": [0.7, 2.4], "method": "asimov"},
+        uncertainty_breakdown={"method": "group-freeze", "order": ["theory", "detector"],
+                               "groups": [{"name": "theory", "value": 0.2}, {"name": "detector", "value": 0.1}],
+                               "closure": {"ratio_to_total": 0.99}},
+        goodness_of_fit={"statistic": "saturated-deviance", "p_value": 0.4, "calibration": "toys", "n_toys": 1000}),
+    "statres_bayesian_rhat_warning.json": statres_v11("bayesian", fit_status="converged-with-warnings",
+                                                      convergence={"rhat": {"mu": 1.05}, "ess_bulk": {"mu": 900}}),
     "ml_artifact.json": envelope("ml-artifact", {"task": "classification", "labels": ["sig", "bkg"], "features": ["x"],
                                                  "splits": {"grouping_key": "run_id"}, "training_domain": {"x": [0, 1]},
                                                  "preprocessing": [], "model_hash": "sha256:placeholder", "downstream_validation": []}, "physics-ml"),
@@ -147,13 +169,19 @@ d = statres("frequentist"); d["extension"]["priors"] = [{"parameter": "mu", "for
 d = prediction(); d["inputs"] = [{"ref": "x.json", "status": ["asimov"]}]; bad["status_not_propagated.json"] = (d, ["status.not_propagated"])
 d = copy.deepcopy(VALID["computational_run.json"]); d["extension"]["exit_status"] = 3; bad["run_failed_unlabeled.json"] = (d, ["status.failed_unlabeled"])
 d = copy.deepcopy(VALID["ml_artifact.json"]); d["extension"]["splits"] = {"grouping_key": ""}; bad["ml_no_grouping.json"] = (d, ["ml.no_grouping"])
+d = statres_v11("bayesian", convergence={"rhat": {"mu": 1.05}}); bad["statres_bayesian_rhat_mismatch.json"] = (d, ["stats.convergence_mismatch"])
+d = statres_v11("frequentist", significance={**SCAN, "global_p": 0.02, "trials_method": "look-elsewhere"}); bad["statres_trials_method_unknown.json"] = (d, ["schema.enum"])
 d = theory(); del d["status"]; bad["envelope_missing_status.json"] = (d, ["schema.required"])
 d = copy.deepcopy(VALID["response_parametrized.json"]); del d["extension"]["parametrization"]; bad["response_parametrized_missing.json"] = (d, ["response.parametrization_missing"])
 d = measurement(ratio={"numerator": "a", "denominator": "b", "cancellations": [{"effect": "exposure", "treatment": "cancels"}]}); bad["measurement_ratio_no_correlation_model.json"] = (d, ["schema.required"])
 
 
+# Valid (no error) but not usable as a final result: the validator reports these codes as `unresolved`.
+UNRESOLVED = {"statres_scan_no_global.json": (statres_v11("frequentist", significance=dict(SCAN)), ["stats.lee_missing"])}
+
+
 def main() -> None:
-    for sub in ("valid", "invalid"):
+    for sub in ("valid", "invalid", "unresolved"):
         (OUT / sub).mkdir(parents=True, exist_ok=True)
         for f in (OUT / sub).glob("*.json"):
             f.unlink()
@@ -163,8 +191,12 @@ def main() -> None:
     for name, (doc, codes) in bad.items():
         (OUT / "invalid" / name).write_text(json.dumps(doc, indent=1) + "\n")
         cases["invalid"][name] = codes
+    cases["unresolved"] = {}
+    for name, (doc, codes) in UNRESOLVED.items():
+        (OUT / "unresolved" / name).write_text(json.dumps(doc, indent=1) + "\n")
+        cases["unresolved"][name] = codes
     (OUT / "cases.json").write_text(json.dumps(cases, indent=1) + "\n")
-    print(f"{len(VALID)} valid, {len(bad)} invalid fixtures")
+    print(f"{len(VALID)} valid, {len(bad)} invalid, {len(UNRESOLVED)} unresolved fixtures")
 
 
 if __name__ == "__main__":
