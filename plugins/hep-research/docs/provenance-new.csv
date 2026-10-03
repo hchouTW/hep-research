@@ -1,5 +1,6 @@
 path,added_in_commit,milestone,origin
 .claude-plugin/plugin.json,e712c96,M1,new in hep-research (no legacy source)
+CHANGELOG.md,36b344c,audit,new in hep-research (no legacy source)
 README.md,ea3995c,M5,new in hep-research (no legacy source)
 VALIDATION.md,c126894,M1,new in hep-research (no legacy source)
 adapters/pyhf-combine/adapter.json,5deda65,M6,new in hep-research (no legacy source)
@@ -12,6 +13,7 @@ contracts/comparison/composition.py,1279f18,M4,new in hep-research (no legacy so
 contracts/comparison/conventions.py,e712c96,M1,new in hep-research (no legacy source)
 contracts/comparison/gate.py,1279f18,M4,new in hep-research (no legacy source)
 contracts/comparison/model_set.py,1279f18,M4,new in hep-research (no legacy source)
+contracts/dependencies.py,2dfe5ca,audit,new in hep-research (no legacy source)
 contracts/evidence.py,e712c96,M1,new in hep-research (no legacy source)
 contracts/fixtures/artifacts/cases.json,e712c96,M1,new in hep-research (no legacy source)
 contracts/fixtures/artifacts/invalid/dataset_binned_length.json,e712c96,M1,new in hep-research (no legacy source)
@@ -391,6 +393,7 @@ tests/contracts/make_fixtures.py,e712c96,M1,new in hep-research (no legacy sourc
 tests/contracts/make_registry_fixtures.py,e712c96,M1,new in hep-research (no legacy source)
 tests/contracts/test_comparison.py,1279f18,M4,new in hep-research (no legacy source)
 tests/contracts/test_contracts.py,e712c96,M1,new in hep-research (no legacy source)
+tests/contracts/test_dependencies.py,2dfe5ca,audit,new in hep-research (no legacy source)
 tests/contracts/test_robustness.py,5ced408,refactor,new in hep-research (no legacy source)
 tests/core/__init__.py,7111892,M0,new in hep-research (no legacy source)
 tests/core/test_blinding.py,d2211ce,M3,new in hep-research (no legacy source)
