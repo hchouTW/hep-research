@@ -9,6 +9,7 @@ import hashlib
 import io
 import importlib.util
 import json
+import math
 import sys
 import tempfile
 import unittest
@@ -62,6 +63,36 @@ class PathATests(unittest.TestCase):
         run(self.m, "--out", str(other))
         digest = [hashlib.sha256((d / "results.json").read_bytes()).hexdigest() for d in (self.out, other)]
         self.assertEqual(digest[0], digest[1])
+
+    def test_matches_committed_output(self):
+        """Deterministic values to rel 1e-9 / abs 1e-12. The toy-closure summary only to Monte Carlo precision (3
+        standard errors of a unit-width pull mean and width): on another platform a last-digit difference in a
+        Poisson or binomial rate can change how many uniforms one draw consumes, and every later toy then differs."""
+        committed = json.loads((SCRIPT.parent / "output" / "results.json").read_text())
+        n = committed["toys"]
+        tol = {"mean_per_bin": 3 / math.sqrt(n), "width_per_bin": 3 / math.sqrt(2 * (n - 1))}
+
+        def same(a, b, path="$"):
+            if isinstance(a, float) or isinstance(b, float):
+                self.assertTrue(math.isclose(a, b, rel_tol=1e-9, abs_tol=1e-12), f"{path}: {a} != {b}")
+            elif isinstance(a, dict) and isinstance(b, dict):
+                self.assertEqual(sorted(a), sorted(b), path)
+                for k in a:
+                    same(a[k], b[k], f"{path}.{k}")
+            elif isinstance(a, list) and isinstance(b, list):
+                self.assertEqual(len(a), len(b), path)
+                for i, (x, y) in enumerate(zip(a, b)):
+                    same(x, y, f"{path}[{i}]")
+            else:
+                self.assertEqual(a, b, path)
+
+        run_toys, ref_toys = self.results["toy_closure"], committed["toy_closure"]
+        same({k: v for k, v in self.results.items() if k != "toy_closure"}, {k: v for k, v in committed.items() if k != "toy_closure"})
+        self.assertEqual(sorted(run_toys), sorted(ref_toys))
+        for key in ref_toys:
+            for stat, t in tol.items():
+                for i, (x, y) in enumerate(zip(run_toys[key][stat], ref_toys[key][stat], strict=True)):
+                    self.assertLessEqual(abs(x - y), t, f"toy_closure.{key}.{stat}[{i}]: {x} vs {y}")
 
     def test_different_seed_changes_the_pseudo_data(self):
         other = Path(self.tmp.name) / "c"

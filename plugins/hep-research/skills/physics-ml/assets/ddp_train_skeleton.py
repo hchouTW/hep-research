@@ -4,6 +4,8 @@
 Replace `build_dataset`, `build_model`, and `run_train_step` with project code.
 Launch with:
     torchrun --nproc_per_node=4 ddp_train_skeleton.py
+On one machine whose host name may not resolve (laptops, home networks), keep the rendezvous on loopback:
+    torchrun --standalone --local-addr=127.0.0.1 --nproc_per_node=4 ddp_train_skeleton.py
 Uses NCCL on CUDA; without CUDA it falls back to CPU with the gloo backend (smoke tests only).
 """
 

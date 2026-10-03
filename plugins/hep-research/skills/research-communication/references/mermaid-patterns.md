@@ -3,7 +3,10 @@
 Best for editable, GitHub/README-rendered flowcharts, pipelines, sequence and state diagrams.
 Weak for: plates, precise layout control, Feynman diagrams, publication typography - use
 Graphviz/TikZ for those. Syntax below is standard Mermaid; verify with a renderer
-(`mmdc -i f.mmd -o f.svg`, or mermaid.live) since versions differ.
+(`mmdc -i f.mmd -o f.svg`, or mermaid.live) since versions differ. `mmdc` renders through a headless Chrome
+that some installs (Homebrew `mermaid-cli`, checked 2026-10-04 with 12.0.0) do not include. If every render fails
+with "Could not find chrome-headless-shell (ver. N)", install that version once:
+`npx @puppeteer/browsers install chrome-headless-shell@N --path ~/.cache/puppeteer`.
 
 ## Pipeline (LR) with groups and edge semantics
 

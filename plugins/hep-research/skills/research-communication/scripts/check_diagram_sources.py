@@ -7,7 +7,9 @@ What it does: extracts fenced ```dot, ```mermaid, ```plantuml, and ```svg blocks
 - dot: compiled with Graphviz `dot -Tsvg` when `dot` is on PATH (skipped with a notice otherwise).
 - mermaid: rendered with Mermaid CLI (`mmdc`) when it is on PATH; otherwise only a cheap
   structural lint (known diagram keyword on the first line, balanced brackets/parentheses/
-  braces/quotes outside of quoted labels) - NOT a real Mermaid parse.
+  braces/quotes outside of quoted labels) - NOT a real Mermaid parse. `mmdc` needs its headless
+  Chrome; a "Could not find chrome-headless-shell" error is a setup problem, not a source error
+  (see references/mermaid-patterns.md).
 - plantuml: rendered with `plantuml -pipe` when `plantuml` (and a Java runtime) is on PATH, else
   skipped with a notice. A fragment without `@startuml` is wrapped first, because PlantUML
   silently renders nothing (exit 0) for input that lacks the markers.
