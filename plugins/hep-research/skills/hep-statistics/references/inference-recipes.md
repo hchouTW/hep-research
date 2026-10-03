@@ -116,6 +116,40 @@ computes both forms (checked in `tests/skills/hep_statistics/test_sensitivity_an
 
 Specify priors and parameterization, and check posterior propriety. A flat prior in signal strength is not flat in its logarithm. For MCMC inspect multiple chains, R-hat, effective sample size, divergences, mixing, and tail sampling. State whether intervals are central or highest-posterior-density and assess prior sensitivity.
 
+- **Priors.** Reference and Jeffreys priors are conventions (invariance or information arguments), not "no
+  information"; they depend on the parameterization and the model, can be improper, and a Jeffreys prior for a
+  Poisson mean differs from a flat one. An improper prior needs a proof that the posterior is proper.
+- **Marginalization vs profiling.** A Bayesian result integrates nuisances over their priors; a frequentist profile
+  maximizes over them. They agree for near-Gaussian likelihoods and can differ at boundaries or with skewed
+  constraints; do not mix them in one result, and label which one was done.
+- **Wording.** A credible interval is a statement about the posterior; a confidence interval about the coverage of a
+  procedure. Do not call one the other ([inference reasoning](statistical-inference-for-physics.md)).
+- **Bayes factors** depend on the priors of the parameters not shared by the models (Lindley's paradox,
+  [Lindley 1957](https://doi.org/10.1093/biomet/44.1-2.187)); report a prior-sensitivity study with any Bayes factor.
+
+### Convergence and prior-sensitivity checks
+
+`${CLAUDE_PLUGIN_ROOT}/skills/hep-statistics/scripts/bayes_diagnostics.py` (needs NumPy) works on chains you supply:
+
+- `diagnose --input CHAINS`: rank-normalized split-R-hat (bulk and folded), bulk and tail ESS and the Monte Carlo
+  standard error of quantiles ([Vehtari et al. 2021](https://doi.org/10.1214/20-BA1221)). `converged` needs R-hat
+  below 1.01 and bulk and tail ESS of at least 100 per chain; fewer than 2 chains or 50 draws per chain is
+  `incomplete` (exit 3), and fewer than 4 chains is flagged. Seeded checks
+  (`tests/skills/hep_statistics/test_bayes_diagnostics.py`): four independent normal chains give R-hat below 1.01;
+  two chains offset by one standard deviation from the other two give R-hat above 1.1; an AR(1) chain with
+  `rho = 0.9` (4 x 5,000 draws) gives a bulk ESS within 15% of `N(1 - rho)/(1 + rho)`.
+- `reweight --input DRAWS`: importance-reweight draws to another prior and report the quantile shifts and the
+  weight ESS. Below 10% of the draws, or when the new prior has support the old one lacked, the answer is a rerun
+  with the new prior, not a reweighting.
+- `demo-sampler`: a seeded random-walk Metropolis sampler for `n ~ Pois(s + b)` with a flat prior, a demonstration
+  and test oracle only. For `n = 0`, `b = 0` (4 x 20,000 draws, seed 11) its 95% upper bound is 2.957 +- 0.060
+  against the exact `-ln 0.05 = 2.995732` of `counting_reference.py`; with `--artifact` it writes a
+  `statistical-result` that validates, and the validator refuses the same artifact if it claims `converged` with an
+  R-hat above 1.01 (`stats.convergence_mismatch`).
+
+No production sampler is shipped: run one (Stan, PyMC, emcee or a framework's own) and feed its chains to
+`diagnose`.
+
 ## Minimal cross-check
 
 `counting_reference.py` assumes nonnegative signal, exactly known background, and a flat prior in signal yield. Its credible bound is not expected to match CLs with background uncertainty. With zero observations and zero background, its 95% upper bound is `-log(0.05)≈2.995732`; this is a reference for that specific model.
