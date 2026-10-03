@@ -291,3 +291,38 @@ modules): 34 tests pass.
 | S10 likelihood publication | pass (pyhf) | `test_pyhf_publication.py`: patched background-only workspace reproduces best fit and CLs within 1e-6 (mu_hat 0.7949, CLs 0.4924) |
 | S11 contract 1.1.0 | pass; the test failed 4/7 before | `test_statistical_result_v11.py`; 25 example artifacts regenerated, only the contract version string changed |
 | S12 routing | pass (static) | 8 new cases, 3 in Traditional Chinese; no live routing run (paid, not approved) |
+
+## BATCH-RUN (2026-10-03, Slurm and HTCondor batch execution B01–B13)
+
+Work order `tasks/hep-research/batch-schedulers/TASK.md` (revision r2, checked against `main` at `ae2b4d2`).
+Environment: E1 core stack (Python 3.11.15, numpy 2.4.6, scipy 1.17.1, matplotlib 3.11.2, sympy 1.14.0) in
+`.venv-hep`; no Slurm or HTCondor command on `PATH`, and none installed (Q1: the user chose fake schedulers only).
+pyhf, PyTorch, ROOT, uproot/awkward, Combine and the diagram tools were not installed in this container, so their
+tests skip. Phase 0 on `ae2b4d2`: 1165 unit tests OK (76 skips), every aggregate check passes, T21 `results.json`
+sha256 `fd31c56c…997b` reproduced. Final run `tasks/hep-research/check-runs/check-run-2026-10-03T061357Z.json` on
+`6ad6228`: 13 checks pass, 0 fail, 1 skip (`ams_ledger_preservation`: legacy checkout not fetched); 1240 unit tests,
+1162 pass, 0 fail, 78 skip (the 76 of Phase 0: optional tools absent, slow tests, no legacy checkout; plus the 2 new real-scheduler tests);
+profile suites 258, 9, 16 pass. `tools/check_relocation.py` passes (12 pass, 2 skip). T21 output is still
+byte-identical. The fake-scheduler suite (`tests/core/test_partition*.py`, `tests/adapters/test_batch_*.py`, 74
+tests, 2 skipped) runs in 21 s.
+
+**Shim-only:** every Slurm and HTCondor result below comes from the fake schedulers in `tests/adapters/batch_shims/`,
+which implement the formats the backends parse. They show the adapter is internally consistent, not that it works
+with real Slurm or HTCondor; both tools stay `documented`, and the tool facts in
+`skills/hep-computing/references/batch-scheduling.md` are not yet checked against the tools' documentation.
+
+| Task | Result | Evidence |
+|---|---|---|
+| B01 core/partition | pass | `move(B01)` commit; `tests/core/test_partition.py` (9): local executor through the batch protocol equals a single run, prepare is pure, dry run starts nothing, old state rows read |
+| B02 remote protocol | pass | `test_partition_remote.py` (11): a double run is one duplicate and the merge equals the single run; a foreign-manifest output is quarantined and the merge stays incomplete until redone; `.tmp-` and truncated files are never collected |
+| B03 states and retries | pass | `test_partition_states.py` (13): every normalized state has its decision; the same exit code on two hosts stops the chunk; no `max_attempts` means zero resubmissions; out-of-memory needs changed resources, recorded |
+| B04 Slurm | pass (shim) | `test_batch_slurm.py` (9 + 1 skipped real-tool test): 12 native states map; golden array script for 10 chunks with throttle 3; dry run makes no call; missing partition and time refuse with exit 2 |
+| B05 HTCondor | pass (shim) | `test_batch_htcondor.py` (9 + 1 skipped): eviction then completion is one done chunk with two attempts; a held job blocks the merge and is never released; transfer mode remaps outputs (golden submit file); missing transfer choice refuses |
+| B06 watch | pass | `test_batch_watch.py` (7): a stuck chunk stops after exactly `max_polls`; no limits exits 2 with no poll; malformed output twice stops with the parse error text |
+| B07 config | pass | `test_batch_config.py` (7): each missing key, unknown key and non-positive resource refuses; the example validates only with `--example` |
+| B08 harness | pass | fake `sbatch`, `sacct`, `squeue`, `scancel`, `condor_submit`, `condor_q`, `condor_history`, `condor_rm`, `condor_version` with fault injection and a call log; real-tool tests skipped (not approved) |
+| B09 provenance | pass | `test_batch_provenance.py` (2): the artifact validates for both backends; a stopped chunk gives `failed`, and removing it triggers `status.failed_unlabeled` |
+| B10 reference | pass | `test_batch_reference.py`: every workflow command in the reference runs, in order, on the fake scheduler; layering passes |
+| B11 example | pass | `examples/batch-partition/run.py`: 10 criteria per backend pass; merged result equals the local single run exactly; output byte-identical on rerun (`tests/examples/test_batch_partition.py`) |
+| B12 privacy | pass | `test_batch_privacy.py` (4): a sealed value in job stdout is found; a planted account fails `check_packaging.py`; job files are scanned as text; no credentials handled |
+| B13 integration | pass (static) | `adapter.json` (`documented`, no tested versions), matrix rows match, six routing cases (two in Traditional Chinese), SKILL.md 7,114 B; no live routing run (paid, not approved) |
