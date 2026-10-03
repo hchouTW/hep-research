@@ -34,12 +34,8 @@ import math
 
 EARTH_RADIUS_CM = 6.371e8
 DEFAULT_DIPOLE_MOMENT_G_CM3 = 8.05e25
-PROTON_MASS_GEV = 0.938272
-
-NUCLEON_REST_MASS_GEV = {
-    'proton': 0.938272,
-    'per_nucleon_average': 0.9315,
-}
+PROTON_MASS_GEV = 0.938272  # PDG
+ATOMIC_MASS_UNIT_GEV = 0.9315  # nuclear mass ~ A * u for A > 1 (binding energy ignored)
 
 
 def _finite(value, name):
@@ -91,7 +87,7 @@ def cutoff_kinetic_energy_per_nucleon_gev(cutoff_rigidity_gv, charge, mass_numbe
         raise ValueError('cutoff_rigidity_gv must be nonnegative')
 
     momentum_gev = charge * cutoff_rigidity_gv
-    mass_gev = mass_number * NUCLEON_REST_MASS_GEV['per_nucleon_average']
+    mass_gev = PROTON_MASS_GEV if mass_number == 1 else mass_number * ATOMIC_MASS_UNIT_GEV
     total_energy_gev = math.sqrt(momentum_gev ** 2 + mass_gev ** 2)
     kinetic_energy_gev = total_energy_gev - mass_gev
     return kinetic_energy_gev / mass_number

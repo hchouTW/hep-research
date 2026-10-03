@@ -17,7 +17,7 @@ for _skill in ('hep-statistics', 'hep-analysis', 'detector-response'):
 from calorimeter_resolution import evaluate, fit_resolution
 from cherenkov_angle import cherenkov_angle, saturation_angle, threshold_momentum
 from cosmic_ray_flux import flux_from_counts, poisson_interval
-from geomagnetic_cutoff import stormer_cutoff_gv
+from geomagnetic_cutoff import cutoff_kinetic_energy_per_nucleon_gev, stormer_cutoff_gv
 from li_ma_significance import li_ma_significance
 from multiple_scattering import highland_angle
 from pid_separation_power import MASSES_GEV, bethe_bloch_mev_per_g_cm2, time_of_flight_ns
@@ -113,6 +113,13 @@ class PublishedValueTests(unittest.TestCase):
 
 
 class IndependentFormulaTests(unittest.TestCase):
+    def test_proton_cutoff_kinetic_energy_uses_the_proton_mass(self):
+        # A = 1 is a bare proton (PDG m_p = 0.938272 GeV), not A atomic mass units
+        m_p = 0.938272
+        for r in (0.5, 2.0, 10.0):
+            self.assertAlmostEqual(cutoff_kinetic_energy_per_nucleon_gev(r, charge=1, mass_number=1),
+                                   math.hypot(r, m_p) - m_p, places=12)
+
     def test_force_field_matches_gleeson_axford_by_hand(self):
         # Proton, T = 1 GeV, phi = 0.5 GV: J = J_LIS(1.5) * T(T+2m) / ((T+phi)(T+phi+2m)).
         m = 0.938272
