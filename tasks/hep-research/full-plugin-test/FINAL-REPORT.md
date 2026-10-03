@@ -92,7 +92,16 @@ Lighter alternative: `claude plugin disable hep-research@hep-research-dev`.
 ## Follow-up status (2026-10-03)
 
 Items 1–5 fixed in `0ab9cd8` (VALIDATION E2-FOLLOWUPS; check-run `check-run-2026-10-03T141301Z.json`: 13 pass,
-0 fail, 1 skip; unit tests 1241 run, 0 fail). Item 6 (r1 full test as a separate order) and item 7 (global
-`CLAUDE.md`) remain open. The installed plugin still runs the `3aa942c` clone; these fixes change no skill text, only
-tests, one example's output and one profile file, and reach the install after
-`claude plugin marketplace update hep-research-dev` and `claude plugin update hep-research@hep-research-dev`.
+0 fail, 1 skip; unit tests 1241 run, 0 fail), merged in PR #17.
+
+Item 7 closed on 2026-10-04: the global `~/.claude/CLAUDE.md` (outside this repository) now tells Claude to check
+the seven `hep-research:*` skills first and maps the legacy names to their owners per `docs/migration-map.csv`
+(academic-papers and academic-diagrams → research-communication; agile-development and task-authoring →
+hep-computing; deep-learning → physics-ml; hep-analysis and ams-analysis → hep-analysis).
+
+Item 6 (r1 full test as a separate order) remains open.
+
+Installed plugin, 2026-10-04: updated to `1dea804` (the merge of PR #17). `claude plugin update` reported "already
+at the latest version" because `plugin.json` is still 0.1.0, and kept the stale cache. The cache was refreshed with
+`claude plugin marketplace update hep-research-dev`, then uninstall and install at user scope; `settings.json`
+ended unchanged. Later updates without a version bump need the same reinstall.
