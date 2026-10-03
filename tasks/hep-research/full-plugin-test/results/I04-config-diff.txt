@@ -1,0 +1,34 @@
+28c28,29
+<     "code-simplifier@claude-plugins-official": true
+---
+>     "code-simplifier@claude-plugins-official": true,
+>     "hep-research@hep-research-dev": true
+35a37,42
+>     },
+>     "hep-research-dev": {
+>       "source": {
+>         "source": "github",
+>         "repo": "hchouTW/hep-research"
+>       }
+== installed_plugins.json
+111a112,121
+>     ],
+>     "hep-research@hep-research-dev": [
+>       {
+>         "scope": "user",
+>         "installPath": "/Users/hchou/.claude/plugins/cache/hep-research-dev/hep-research/0.1.0",
+>         "version": "0.1.0",
+>         "installedAt": "2026-10-03T13:53:12.247Z",
+>         "lastUpdated": "2026-10-03T13:53:12.247Z",
+>         "gitCommitSha": "3aa942c5fadc9a3a38c183c3e34ff49c1a7112f4"
+>       }
+== known_marketplaces.json
+8a9,16
+>   },
+>   "hep-research-dev": {
+>     "source": {
+>       "source": "github",
+>       "repo": "hchouTW/hep-research"
+>     },
+>     "installLocation": "/Users/hchou/.claude/plugins/marketplaces/hep-research-dev",
+>     "lastUpdated": "2026-10-03T13:53:01.832Z"

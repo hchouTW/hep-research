@@ -1,0 +1,26 @@
+hep-research 0.1.0
+  Description: Experimental and theoretical HEP research assistant (development build).
+  Source: hep-research@hep-research-dev
+
+Component inventory
+  Skills (7)  detector-response, hep-analysis, hep-computing, hep-statistics, hep-theory, physics-ml, research-communication
+  Agents (0)
+  Hooks (0)
+  MCP servers (0)
+  LSP servers (0)
+
+Projected token cost
+  Always-on:   ~2,142 tok   added to every session
+
+Per-component (rounded)
+  component               always-on  on-invoke
+  hep-analysis                 ~310      ~2.3k
+  hep-theory                   ~350      ~1.9k
+  physics-ml                   ~270      ~1.6k
+  detector-response            ~280      ~2.5k
+  hep-statistics               ~350      ~2.4k
+  research-communication       ~270      ~1.7k
+  hep-computing                ~320      ~2.2k
+
+  On-invoke cost is paid each time a skill or agent fires.
+  Token counts are estimates and may differ from actual usage.

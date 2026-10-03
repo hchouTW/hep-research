@@ -1,0 +1,448 @@
+{
+ "timestamp_utc": "2026-10-03T13:48:43Z",
+ "plugin_version": "0.1.0",
+ "environment": {
+  "python": "3.13.2",
+  "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+  "executable": "/Users/hchou/hep-research/plugins/hep-research/.venv-hep/bin/python"
+ },
+ "git_commit": "3aa942c5fadc9a3a38c183c3e34ff49c1a7112f4",
+ "counts": {
+  "pass": 12,
+  "fail": 1,
+  "skip": 1
+ },
+ "checks": [
+  {
+   "name": "unittest",
+   "command": "python3 -m unittest discover -s tests -t .",
+   "status": "fail",
+   "counts": {
+    "run": 1235,
+    "failures": 5,
+    "errors": 1,
+    "skipped": 70,
+    "passed": 1159
+   },
+   "failed": [
+    "test_file_transfer_mode_remaps_outputs_and_matches_golden (tests.adapters.test_batch_htcondor.HTCondorShimTests.test_file_transfer_mode_remaps_outputs_and_matches_golden)",
+    "test_planted_account_fails_the_packaging_check (tests.adapters.test_batch_privacy.PackagingTests.test_planted_account_fails_the_packaging_check)",
+    "test_golden_array_script_and_dry_run (tests.adapters.test_batch_slurm.SlurmShimTests.test_golden_array_script_and_dry_run)",
+    "test_passes_predeclared_criteria (tests.examples.test_theory_comparison.PathDTests.test_passes_predeclared_criteria)",
+    "test_reproduces_committed_output (tests.examples.test_theory_comparison.PathDTests.test_reproduces_committed_output)",
+    "setUpClass (tests.adapters.test_root_cpp_assets.RootCppAssetTests)"
+   ],
+   "skipped": [
+    "test_example_campaign_on_a_personal_pool (tests.adapters.test_batch_htcondor.RealHTCondorTests.test_example_campaign_on_a_personal_pool): real HTCondor not available (HEP_HTCONDOR_TEST=1 and condor_submit on PATH)",
+    "test_example_campaign_on_real_slurm (tests.adapters.test_batch_slurm.RealSlurmTests.test_example_campaign_on_real_slurm): real Slurm not available (HEP_SLURM_TEST=1 and sbatch on PATH)",
+    "test_limit_matches_pyhf (tests.adapters.test_combine_datacard_template.CombineRunTests.test_limit_matches_pyhf): Combine not available (set HEP_COMBINE_WRAPPER)",
+    "test_code0_linear_code4p_smooth (tests.adapters.test_nuisance_interpolation.HistosysInterpolation.test_code0_linear_code4p_smooth): pyhf not installed: histosys walkthrough unverified",
+    "test_asymmetric_variation_changes_the_limit (tests.adapters.test_nuisance_interpolation.NormsysInterpolation.test_asymmetric_variation_changes_the_limit): pyhf not installed: interpolation walkthrough unverified",
+    "test_default_model_uses_code4_and_code4p (tests.adapters.test_nuisance_interpolation.NormsysInterpolation.test_default_model_uses_code4_and_code4p): pyhf not installed: interpolation walkthrough unverified",
+    "test_symmetric_counting_card (tests.adapters.test_nuisance_interpolation.NormsysInterpolation.test_symmetric_counting_card): pyhf not installed: interpolation walkthrough unverified",
+    "test_asymptotic_cls_limit_matches_independent_implementation (tests.adapters.test_pyhf_counting.PyhfCountingTests.test_asymptotic_cls_limit_matches_independent_implementation): pyhf, numpy or scipy not installed",
+    "test_workspace_is_valid_and_synthetic_numbers_match_the_doc (tests.adapters.test_pyhf_counting.PyhfCountingTests.test_workspace_is_valid_and_synthetic_numbers_match_the_doc): pyhf, numpy or scipy not installed",
+    "test_bad_groups_rejected (tests.adapters.test_pyhf_nuisance_diagnostics.ConstructedWorkspaces.test_bad_groups_rejected): pyhf, numpy or scipy not installed: nuisance diagnostics unverified",
+    "test_degenerate_nuisances_flagged (tests.adapters.test_pyhf_nuisance_diagnostics.ConstructedWorkspaces.test_degenerate_nuisances_flagged): pyhf, numpy or scipy not installed: nuisance diagnostics unverified",
+    "test_inert_nuisance_has_zero_impact_and_unit_constraint (tests.adapters.test_pyhf_nuisance_diagnostics.ConstructedWorkspaces.test_inert_nuisance_has_zero_impact_and_unit_constraint): pyhf, numpy or scipy not installed: nuisance diagnostics unverified",
+    "test_breakdown_reports_order_and_closure (tests.adapters.test_pyhf_nuisance_diagnostics.ShapeWorkspace.test_breakdown_reports_order_and_closure): pyhf, numpy or scipy not installed: nuisance diagnostics unverified",
+    "test_impacts_match_independent_refits (tests.adapters.test_pyhf_nuisance_diagnostics.ShapeWorkspace.test_impacts_match_independent_refits): pyhf, numpy or scipy not installed: nuisance diagnostics unverified",
+    "test_pull_convention_and_ranking (tests.adapters.test_pyhf_nuisance_diagnostics.ShapeWorkspace.test_pull_convention_and_ranking): pyhf, numpy or scipy not installed: nuisance diagnostics unverified",
+    "test_status_and_echo (tests.adapters.test_pyhf_nuisance_diagnostics.ShapeWorkspace.test_status_and_echo): pyhf, numpy or scipy not installed: nuisance diagnostics unverified",
+    "test_background_only_has_no_signal (tests.adapters.test_pyhf_publication.PublicationPatchTests.test_background_only_has_no_signal): pyhf or numpy not installed: likelihood publication pattern unverified",
+    "test_digest_mismatch_is_refused (tests.adapters.test_pyhf_publication.PublicationPatchTests.test_digest_mismatch_is_refused): pyhf or numpy not installed: likelihood publication pattern unverified",
+    "test_patch_restores_the_workspace (tests.adapters.test_pyhf_publication.PublicationPatchTests.test_patch_restores_the_workspace): pyhf or numpy not installed: likelihood publication pattern unverified",
+    "test_patched_fit_and_cls_match (tests.adapters.test_pyhf_publication.PublicationPatchTests.test_patched_fit_and_cls_match): pyhf or numpy not installed: likelihood publication pattern unverified",
+    "test_asymptotic_cls_limit_matches_reference (tests.adapters.test_pyhf_shape.PyhfShapeTests.test_asymptotic_cls_limit_matches_reference): pyhf, numpy or scipy not installed",
+    "test_best_fit_matches_reference (tests.adapters.test_pyhf_shape.PyhfShapeTests.test_best_fit_matches_reference): pyhf, numpy or scipy not installed",
+    "test_logpdf_matches_reference_inside_and_outside_interpolation_region (tests.adapters.test_pyhf_shape.PyhfShapeTests.test_logpdf_matches_reference_inside_and_outside_interpolation_region): pyhf, numpy or scipy not installed",
+    "test_workspace_is_labeled_synthetic (tests.adapters.test_pyhf_shape.PyhfShapeTests.test_workspace_is_labeled_synthetic): pyhf, numpy or scipy not installed",
+    "test_histogram_contents_and_sumw2_match_independent_numpy (tests.adapters.test_uproot_awkward_asset.UprootAwkwardAssetTests.test_histogram_contents_and_sumw2_match_independent_numpy): uproot, awkward, numpy or PyYAML not installed",
+    "test_missing_branch_is_refused (tests.adapters.test_uproot_awkward_asset.UprootAwkwardAssetTests.test_missing_branch_is_refused): uproot, awkward, numpy or PyYAML not installed",
+    "test_runs_and_reports_selection (tests.adapters.test_uproot_awkward_asset.UprootAwkwardAssetTests.test_runs_and_reports_selection): uproot, awkward, numpy or PyYAML not installed",
+    "test_slow_coverage_scan_over_the_validated_range (tests.core.test_stats_likelihood_limits.BergerBoosApproximationAuditT07.test_slow_coverage_scan_over_the_validated_range): slow: set HEP_SLOW_TESTS=1",
+    "test_slow_grid_refinement_and_toy_precision (tests.core.test_stats_likelihood_limits.BergerBoosApproximationAuditT07.test_slow_grid_refinement_and_toy_precision): slow: set HEP_SLOW_TESTS=1",
+    "test_fit_recovers_injected_signal (tests.examples.test_end_to_end_sample.EndToEndTests.test_fit_recovers_injected_signal): numpy/pyhf not importable (set HEP_PYHF_PYTHON)",
+    "test_normalization_uses_full_signed_weight_sum (tests.examples.test_end_to_end_sample.EndToEndTests.test_normalization_uses_full_signed_weight_sum): numpy/pyhf not importable (set HEP_PYHF_PYTHON)",
+    "test_regions_are_orthogonal_and_complete (tests.examples.test_end_to_end_sample.EndToEndTests.test_regions_are_orthogonal_and_complete): numpy/pyhf not importable (set HEP_PYHF_PYTHON)",
+    "test_yield_table_printed_with_labelled_pseudo_data (tests.examples.test_end_to_end_sample.EndToEndTests.test_yield_table_printed_with_labelled_pseudo_data): numpy/pyhf not importable (set HEP_PYHF_PYTHON)",
+    "test_documented_pattern_picks_leading_jets_and_the_banned_one_does_not (tests.skills.detector_response.test_reference_values.SkillAwkwardLeadingObjectTest.test_documented_pattern_picks_leading_jets_and_the_banned_one_does_not): awkward not installed",
+    "test_every_example_task_lints_without_errors (tests.skills.hep_computing.test_lint_task.ShippedExamplesLintTests.test_every_example_task_lints_without_errors): legacy agentic-ai-skills checkout not present",
+    "test_check_systematic_variations (tests.skills.hep_computing.test_root_integration.RootIntegrationTests.test_check_systematic_variations): PyROOT not importable (set HEP_ROOT_PYTHON)",
+    "test_compare_histograms_sees_two_percent_shift (tests.skills.hep_computing.test_root_integration.RootIntegrationTests.test_compare_histograms_sees_two_percent_shift): PyROOT not importable (set HEP_ROOT_PYTHON)",
+    "test_inspect_reports_leaf_types (tests.skills.hep_computing.test_root_integration.RootIntegrationTests.test_inspect_reports_leaf_types): PyROOT not importable (set HEP_ROOT_PYTHON)",
+    "test_pyroot_rdataframe_asset_cutflow (tests.skills.hep_computing.test_root_integration.RootIntegrationTests.test_pyroot_rdataframe_asset_cutflow): PyROOT not importable (set HEP_ROOT_PYTHON)",
+    "test_pyroot_roofit_asset_recovers_peak (tests.skills.hep_computing.test_root_integration.RootIntegrationTests.test_pyroot_roofit_asset_recovers_peak): PyROOT not importable (set HEP_ROOT_PYTHON)",
+    "test_roofit_workspace_summary (tests.skills.hep_computing.test_root_integration.RootIntegrationTests.test_roofit_workspace_summary): PyROOT not importable (set HEP_ROOT_PYTHON)",
+    "test_summarize_histogram_statistics (tests.skills.hep_computing.test_root_integration.RootIntegrationTests.test_summarize_histogram_statistics): PyROOT not importable (set HEP_ROOT_PYTHON)",
+    "test_bad_arguments_are_rejected (tests.skills.hep_computing.test_synthetic_nanoaod.SyntheticNanoAODTests.test_bad_arguments_are_rejected): numpy, awkward and uproot are required",
+    "test_expectations_match_independent_awkward_recomputation (tests.skills.hep_computing.test_synthetic_nanoaod.SyntheticNanoAODTests.test_expectations_match_independent_awkward_recomputation): numpy, awkward and uproot are required",
+    "test_file_is_ttree_with_events_and_runs (tests.skills.hep_computing.test_synthetic_nanoaod.SyntheticNanoAODTests.test_file_is_ttree_with_events_and_runs): numpy, awkward and uproot are required",
+    "test_leading_pair_mass_matches_vectorised_calculation (tests.skills.hep_computing.test_synthetic_nanoaod.SyntheticNanoAODTests.test_leading_pair_mass_matches_vectorised_calculation): numpy, awkward and uproot are required",
+    "test_runs_tree_holds_full_sample_signed_totals (tests.skills.hep_computing.test_synthetic_nanoaod.SyntheticNanoAODTests.test_runs_tree_holds_full_sample_signed_totals): numpy, awkward and uproot are required",
+    "test_same_seed_same_file_and_numbers (tests.skills.hep_computing.test_synthetic_nanoaod.SyntheticNanoAODTests.test_same_seed_same_file_and_numbers): numpy, awkward and uproot are required",
+    "test_summary_is_labelled_synthetic (tests.skills.hep_computing.test_synthetic_nanoaod.SyntheticNanoAODTests.test_summary_is_labelled_synthetic): numpy, awkward and uproot are required",
+    "test_gross_vitells_agrees_with_brute_force (tests.skills.hep_statistics.test_look_elsewhere.LookElsewhere.test_gross_vitells_agrees_with_brute_force): slow: set HEP_SLOW_TESTS=1",
+    "test_toy_calibrated_p_values_are_uniform (tests.skills.hep_statistics.test_sensitivity_and_gof.GoodnessOfFit.test_toy_calibrated_p_values_are_uniform): slow: set HEP_SLOW_TESTS=1",
+    "test_dataset_template_length_check (tests.skills.physics_ml.test_assets_smoke.AssetSmokeTests.test_dataset_template_length_check): PyTorch not installed",
+    "test_ddp_skeleton_two_gloo_processes (tests.skills.physics_ml.test_assets_smoke.AssetSmokeTests.test_ddp_skeleton_two_gloo_processes): PyTorch not installed",
+    "test_inference_loads_weights_only_unless_opted_in (tests.skills.physics_ml.test_assets_smoke.AssetSmokeTests.test_inference_loads_weights_only_unless_opted_in): PyTorch not installed",
+    "test_lora_trains_only_adapters (tests.skills.physics_ml.test_assets_smoke.AssetSmokeTests.test_lora_trains_only_adapters): PyTorch not installed",
+    "test_models_and_metrics_shapes (tests.skills.physics_ml.test_assets_smoke.AssetSmokeTests.test_models_and_metrics_shapes): PyTorch not installed",
+    "test_train_classifier_then_inference (tests.skills.physics_ml.test_assets_smoke.AssetSmokeTests.test_train_classifier_then_inference): PyTorch not installed",
+    "test_transformer_classifier_forward_backward (tests.skills.physics_ml.test_assets_smoke.AssetSmokeTests.test_transformer_classifier_forward_backward): PyTorch not installed",
+    "test_vision_transfer_help (tests.skills.physics_ml.test_assets_smoke.AssetSmokeTests.test_vision_transfer_help): PyTorch not installed",
+    "test_vision_transfer_trains_on_synthetic_image_folder (tests.skills.physics_ml.test_assets_smoke.AssetSmokeTests.test_vision_transfer_trains_on_synthetic_image_folder): PyTorch not installed",
+    "test_contract_clean_dataset_exits_zero (tests.skills.physics_ml.test_physics_ml_skill.DataScriptExitCodeTests.test_contract_clean_dataset_exits_zero): PyTorch is required to build datasets",
+    "test_contract_ragged_samples_exit_with_message_not_traceback (tests.skills.physics_ml.test_physics_ml_skill.DataScriptExitCodeTests.test_contract_ragged_samples_exit_with_message_not_traceback): PyTorch is required to build datasets",
+    "test_find_nan_batches_exits_nonzero_on_nan (tests.skills.physics_ml.test_physics_ml_skill.DataScriptExitCodeTests.test_find_nan_batches_exits_nonzero_on_nan): PyTorch is required to build datasets",
+    "test_find_nan_batches_exits_zero_when_clean (tests.skills.physics_ml.test_physics_ml_skill.DataScriptExitCodeTests.test_find_nan_batches_exits_zero_when_clean): PyTorch is required to build datasets",
+    "test_weights_only_by_default_and_explicit_opt_in (tests.skills.physics_ml.test_physics_ml_skill.InspectCheckpointWeightsOnlyTests.test_weights_only_by_default_and_explicit_opt_in): PyTorch not installed",
+    "test_estimated_model_state_bytes_match_measurement (tests.skills.physics_ml.test_physics_ml_skill.MemoryEstimateAgainstTorchTests.test_estimated_model_state_bytes_match_measurement): PyTorch is required to measure real allocations",
+    "test_measured_bytes_per_parameter_match_the_table (tests.skills.physics_ml.test_physics_ml_skill.MemoryEstimateAgainstTorchTests.test_measured_bytes_per_parameter_match_the_table): PyTorch is required to measure real allocations",
+    "test_parameter_count_matches_a_real_model_exactly (tests.skills.physics_ml.test_physics_ml_skill.MemoryEstimateAgainstTorchTests.test_parameter_count_matches_a_real_model_exactly): PyTorch is required to measure real allocations",
+    "test_real_mmdc_rejects_bad_syntax (tests.skills.research_communication.test_diagrams.MermaidRender.test_real_mmdc_rejects_bad_syntax): Mermaid CLI not installed",
+    "test_real_plantuml_rejects_one_line_class_body (tests.skills.research_communication.test_diagrams.PlantUmlRender.test_real_plantuml_rejects_one_line_class_body): PlantUML not installed"
+   ]
+  },
+  {
+   "name": "profile-tests:experiment:ams-02",
+   "command": "(cd profiles/experiments/ams-02 && python3 -m unittest discover -s tests -t tests)",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "status": "pass",
+    "counts": {
+     "run": 258,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0,
+     "passed": 258
+    },
+    "failed": [],
+    "skipped": []
+   },
+   "counts": {
+    "run": 258,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 258
+   }
+  },
+  {
+   "name": "profile-tests:experiment:synthetic-collider",
+   "command": "(cd profiles/experiments/synthetic-collider && python3 -m unittest discover -s tests -t tests)",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "status": "pass",
+    "counts": {
+     "run": 9,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0,
+     "passed": 9
+    },
+    "failed": [],
+    "skipped": []
+   },
+   "counts": {
+    "run": 9,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 9
+   }
+  },
+  {
+   "name": "profile-tests:theory:qed-benchmark",
+   "command": "(cd profiles/theory/qed-benchmark && python3 -m unittest discover -s tests -t tests)",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "status": "pass",
+    "counts": {
+     "run": 16,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0,
+     "passed": 16
+    },
+    "failed": [],
+    "skipped": []
+   },
+   "counts": {
+    "run": 16,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 16
+   }
+  },
+  {
+   "name": "check_layering",
+   "command": "/Users/hchou/hep-research/plugins/hep-research/.venv-hep/bin/python tools/check_layering.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "ok": true,
+    "violations": []
+   }
+  },
+  {
+   "name": "stanza_consistency",
+   "command": "/Users/hchou/hep-research/plugins/hep-research/.venv-hep/bin/python tools/build_stanzas.py --check",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "ok": true,
+    "problems": []
+   }
+  },
+  {
+   "name": "registry",
+   "command": "/Users/hchou/hep-research/plugins/hep-research/.venv-hep/bin/python contracts/registry.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "ok": true,
+    "findings": [],
+    "profiles": [
+     "experiment:ams-02",
+     "experiment:synthetic-collider",
+     "theory:qed-benchmark"
+    ]
+   }
+  },
+  {
+   "name": "ams_ledger_preservation",
+   "command": "/Users/hchou/hep-research/plugins/hep-research/.venv-hep/bin/python tools/check_ams_ledger_preservation.py",
+   "exit_code": 3,
+   "status": "skip",
+   "detail": {
+    "status": "skip",
+    "reason": "legacy ledger not found at /Users/hchou/hep-research/.legacy/agentic-ai-skills/ams-analysis/data; run tasks/hep-research/scripts/fetch_legacy.sh"
+   },
+   "reason": "legacy ledger not found at /Users/hchou/hep-research/.legacy/agentic-ai-skills/ams-analysis/data; run tasks/hep-research/scripts/fetch_legacy.sh"
+  },
+  {
+   "name": "ams_optional",
+   "command": "/Users/hchou/hep-research/plugins/hep-research/.venv-hep/bin/python tools/check_ams_optional.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "ok": true,
+    "copy": "/var/folders/hx/8f9thc314n97_jdmzxyqy_mc0000gn/T/hep research no ams xn1fmd28/hep-research",
+    "checks": [
+     {
+      "name": "ams_profile_absent",
+      "status": "pass"
+     },
+     {
+      "name": "registry",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "path_b",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "path_c",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "tests_core",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "tests_contracts",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "tests_hep_statistics",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "tests_hep_computing",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "tests_paths_b_c",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "profile-tests:experiments/synthetic-collider",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "profile-tests:theory/qed-benchmark",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     }
+    ]
+   }
+  },
+  {
+   "name": "routing_static",
+   "command": "/Users/hchou/hep-research/plugins/hep-research/.venv-hep/bin/python tools/check_routing_static.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "cases": 62,
+    "failed": [],
+    "coverage_errors": [],
+    "dispatch_api_mentions": [],
+    "languages": [
+     "en",
+     "zh-Hant"
+    ],
+    "note": "static check only: descriptions cover the cases; a live routing run needs approval (paid model calls)",
+    "ok": true
+   }
+  },
+  {
+   "name": "packaging_scan",
+   "command": "/Users/hchou/hep-research/plugins/hep-research/.venv-hep/bin/python tools/check_packaging.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "files_scanned": 885,
+    "findings": [],
+    "ok": true
+   }
+  },
+  {
+   "name": "traceability",
+   "command": "/Users/hchou/hep-research/plugins/hep-research/.venv-hep/bin/python tools/check_traceability.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "ok": true,
+    "problems": [],
+    "skipped": [
+     "legacy coverage and untouched check: no --legacy checkout given"
+    ],
+    "map_rows": 949,
+    "legacy_tracked_files": null,
+    "plugin_files": 885,
+    "from_legacy": 375,
+    "registered_new": 510
+   }
+  },
+  {
+   "name": "measure_entrypoints",
+   "command": "/Users/hchou/hep-research/plugins/hep-research/.venv-hep/bin/python tools/measure_entrypoints.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "ok": true,
+    "budget": {
+     "skill_bytes": 8192,
+     "skill_lines_max": 180,
+     "description_chars": 1024,
+     "registry_bytes": 2048,
+     "index_bytes": 4096
+    },
+    "skills": [
+     {
+      "skill": "detector-response",
+      "lines": 58,
+      "bytes": 7809,
+      "description_chars": 814
+     },
+     {
+      "skill": "hep-analysis",
+      "lines": 63,
+      "bytes": 7471,
+      "description_chars": 921
+     },
+     {
+      "skill": "hep-computing",
+      "lines": 56,
+      "bytes": 7114,
+      "description_chars": 927
+     },
+     {
+      "skill": "hep-statistics",
+      "lines": 54,
+      "bytes": 7621,
+      "description_chars": 1014
+     },
+     {
+      "skill": "hep-theory",
+      "lines": 53,
+      "bytes": 6255,
+      "description_chars": 1022
+     },
+     {
+      "skill": "physics-ml",
+      "lines": 52,
+      "bytes": 5319,
+      "description_chars": 803
+     },
+     {
+      "skill": "research-communication",
+      "lines": 50,
+      "bytes": 5528,
+      "description_chars": 773
+     }
+    ],
+    "totals": {
+     "skill_bytes": 47117,
+     "description_chars": 6274
+    },
+    "registry_bytes": 690,
+    "profile_index_bytes": {
+     "experiment:ams-02": 2370,
+     "experiment:synthetic-collider": 956,
+     "theory:qed-benchmark": 896
+    },
+    "over_budget": [],
+    "exceptions": {},
+    "host_estimate": {
+     "status": "measured",
+     "always_on_tokens": 2142,
+     "per_skill_always_on": {
+      "hep-analysis": 310,
+      "hep-theory": 350,
+      "physics-ml": 270,
+      "detector-response": 280,
+      "hep-statistics": 350,
+      "research-communication": 270,
+      "hep-computing": 320
+     },
+     "source": "claude --plugin-dir <root> plugin details hep-research (host estimate)"
+    },
+    "note": "Line counts are informative: SKILL.md paragraphs are unwrapped, so bytes are the binding budget."
+   }
+  },
+  {
+   "name": "claude-plugin-validate",
+   "command": "claude plugin validate <plugin> --strict",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": "Validating plugin manifest: /Users/hchou/hep-research/plugins/hep-research/.claude-plugin/plugin.json\n\n\u2714 Validation passed"
+  }
+ ],
+ "caveat": "Software checks only; not physical validity, proof, statistical coverage, or authorization to unblind."
+}

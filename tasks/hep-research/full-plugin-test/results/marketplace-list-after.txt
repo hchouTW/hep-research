@@ -1,0 +1,15 @@
+Configured marketplaces:
+
+  ❯ anthropic-plugin-directory
+    Source: Built in (Anthropic Directory)
+
+  ❯ claude-plugins-official
+    Source: Git (https://github.com/anthropics/claude-plugins-official.git)
+
+  ❯ hep-research-dev
+    Source: GitHub (hchouTW/hep-research)
+
+From claude.ai:
+
+  ❯ (no CLI name) · listed as "Anthropic Directory" (browse on claude.ai)
+

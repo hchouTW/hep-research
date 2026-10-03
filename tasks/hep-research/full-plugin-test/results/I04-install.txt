@@ -1,0 +1,1 @@
+{"command":"install","outcome":"ok","plugin":"hep-research@hep-research-dev","pluginId":"hep-research@hep-research-dev","scope":"user","message":"Successfully installed plugin: hep-research@hep-research-dev (scope: user)"}

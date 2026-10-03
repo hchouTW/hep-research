@@ -326,3 +326,38 @@ with real Slurm or HTCondor; both tools stay `documented`, and the tool facts in
 | B11 example | pass | `examples/batch-partition/run.py`: 10 criteria per backend pass; merged result equals the local single run exactly; output byte-identical on rerun (`tests/examples/test_batch_partition.py`) |
 | B12 privacy | pass | `test_batch_privacy.py` (4): a sealed value in job stdout is found; a planted account fails `check_packaging.py`; job files are scanned as text; no credentials handled |
 | B13 integration | pass (static) | `adapter.json` (`documented`, no tested versions), matrix rows match, six routing cases (two in Traditional Chinese), SKILL.md 7,114 B; no live routing run (paid, not approved) |
+
+## INSTALL (2026-10-03, E2)
+
+Work order `tasks/hep-research/full-plugin-test/TASK.md` (revision r2) on `main` at `3aa942c`; results in
+`tasks/hep-research/full-plugin-test/results/`. Environment **E2**: macOS 26.5 (Darwin 25.5.0), arm64 Apple M3,
+Python 3.13.2 with numpy 2.5.3, scipy 1.18.1, matplotlib 3.11.2, sympy 1.14.0 in `.venv-hep`; Claude Code 2.1.288;
+headless model claude-opus-5-5. First install into a day-to-day configuration: the user's own `~/.claude`, user
+scope, from the GitHub marketplace `hchouTW/hep-research` (clone pinned at `3aa942c`, plugin loaded from the cache
+`~/.claude/plugins/cache/hep-research-dev/hep-research/0.1.0`). The plugin stays installed.
+
+Gate: `tools/run_all_checks.py` → `tasks/hep-research/check-runs/check-run-2026-10-03T134843Z.json`: 12 pass,
+**1 fail** (unittest), 1 skip (`ams_ledger_preservation`: legacy checkout not fetched). Unit tests 1235 run, 1159
+pass, 5 fail, 1 error, 70 skip; profile suites 258, 9, 16 pass; `claude plugin validate --strict` passes. The user
+chose to install despite the unit failures, which are all platform or environment causes on E2, not in the shipped
+skills or profiles:
+
+| Failing test | Cause on E2 |
+|---|---|
+| `test_batch_slurm` golden array script, `test_batch_htcondor` transfer-mode golden | macOS `/var/folders` is a symlink to `/private/var/folders`; the `<CAMPAIGN>` substitution leaves a `/private` prefix |
+| `test_batch_privacy` planted account | the test copies the plugin tree including the untracked `.venv-hep`; NumPy license e-mails trip the scanner. Passes with the venv outside the tree |
+| `test_root_cpp_assets` (setUpClass error) | `python3` on `PATH` (3.13) imports Homebrew ROOT 6.38.04 built for Python 3.14.4; `dlopen` fails instead of a clean ImportError, so the test does not skip |
+| `test_theory_comparison` PathD criteria and committed-output hash | `response_matches_path_b` uses exact `np.array_equal`; false on arm64 / numpy 2.5.3, so the output hash also differs |
+
+| Check | Result | Evidence |
+|---|---|---|
+| Install | pass | `claude plugin marketplace add hchouTW/hep-research --scope user`, `claude plugin install hep-research@hep-research-dev -s user`; `claude plugin list` shows 0.1.0 enabled, user scope; `details`: 7 skills, ~2,142 always-on tokens |
+| Existing configuration unchanged | pass | diff of `settings.json`, `installed_plugins.json`, `known_marketplaces.json` against backups: only the added `hep-research` / `hep-research-dev` entries; the ten existing plugins keep their state |
+| Discovery | pass | headless init lists the seven `hep-research:*` skills among 59; no short-name clash with them |
+| Namespaced invocation | pass | `/hep-research:hep-theory` (qed-benchmark conventions), success in 5 turns, $0.22 |
+| Profile access from install | pass | reads `profiles/registry.json`, `theory/qed-benchmark/index.md`, `conventions.json` under the cache path |
+| Interactive slash completion and `/plugin` | unverified | left to the user (I06) |
+| Live routing smoke test | not run | not approved (Q2); AC20 status unchanged |
+
+Nothing labeled E1 above was changed. Rollback: `claude plugin uninstall hep-research@hep-research-dev`, then
+`claude plugin marketplace remove hep-research-dev`.
