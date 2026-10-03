@@ -209,7 +209,7 @@ if it is not approved, do S04's pyhf-free parts, record the rest as blocked, and
 - [ ] For `(N_on, N_off, alpha) = (4, 2, 0.25)`:
   - `--exact-conditional` gives p = 0.01696 ± 1e-5.
   - `--toys 200000 --seed 1` gives a p-value within 3 Monte Carlo standard errors of an independent toy computation inside the test (different code path, same model).
-- [ ] At `(50, 100, 0.2)` the asymptotic and toy p-values agree within 3 Monte Carlo standard errors or 10% relative
+- [ ] (r2) At `(30, 100, 0.2)` (r1 said `(50, 100, 0.2)`, where S = 4.97 and p ≈ 3e-7 is out of reach of 2e5 toys) the asymptotic and toy p-values agree within 3 Monte Carlo standard errors or 10% relative
   `[Proposal]`. Large counts are where the asymptotic form is expected to hold.
 - [ ] Existing callers (`astroparticle-statistics.md` deliverables, detector-response references) still work.
 
@@ -702,6 +702,7 @@ in the Final Report.
 | R6 | S07: offset and AR(1) chain configurations fixed | r1 left them ambiguous; set before running |
 | R7 | S11: `stats.convergence_mismatch` is an error only for `contract_version` ≥ 1.1.0 | Minor-version rule in `docs/maintenance.md` and S11's own acceptance |
 | R8 | §7: citation lookups through WebFetch | Proxy refuses curl to INSPIRE and Crossref |
+| R9 | S01: large-count point `(30, 100, 0.2)` instead of `(50, 100, 0.2)` | At the r1 point S = 4.97 (p ≈ 3e-7), which 2e5 toys cannot calibrate; found when the test first ran (it returned a bound, not a p-value), and the new point was set from S alone before comparing |
 
 Findings F1–F11 were all re-read on `dbda2aa`; their evidence is unchanged (the F1 numbers were recomputed:
 asymptotic p 6.646e-3, exact conditional p 0.01696). The F4 "2.1529 with code 4" is recorded in the commit message

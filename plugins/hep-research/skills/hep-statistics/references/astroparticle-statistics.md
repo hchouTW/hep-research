@@ -43,8 +43,9 @@ recur in review of this statistic:
   preferred to the naive Gaussian formula `(N_on - alpha*N_off)/sqrt(N_on + alpha^2*N_off)`,
   which fails much sooner, but it is not exact at low counts. At `N_on = 4`, `N_off = 2`,
   `alpha = 0.25` the asymptotic p-value is 6.65e-3, the toy-calibrated value (plug-in
-  background, 200,000 toys, seed 1) about 9.0e-3, and the exact conditional (binomial)
-  value 1.70e-2 (`tests/skills/hep_statistics/test_li_ma_significance.py`). For a few
+  background) 9.03e-3 ± 0.21e-3, and the exact conditional (binomial) value 1.70e-2
+  (`li_ma_significance.py --on 4 --off 2 --alpha 0.25 --toys 200000 --seed 1
+  --exact-conditional`, checked in `tests/skills/hep_statistics/test_li_ma_significance.py`). For a few
   counts, quote a calibrated p-value: `--toys N --seed S` (background fitted under the
   null and plugged in, not a supremum over the background) or `--exact-conditional`
   (`N_on` given `N_on + N_off` is binomial with `alpha/(1+alpha)`; free of the background
