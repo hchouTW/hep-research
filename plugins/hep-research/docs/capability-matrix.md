@@ -14,7 +14,7 @@ SciPy 1.17.1, Matplotlib 3.11.2, SymPy 1.14.0, Claude Code CLI 2.1.287, 2026-10-
 |---|---|---|---|
 | Measurement specs, correlated ratios, time-dependent exposure | hep-analysis | tested (E1) | Path A, T10, T11 |
 | Systematic-variation classification (shape vs normalization) | hep-analysis | tested (E1) | T12 |
-| Blinding: masks, sealing, scans of plots, logs, CSV and caches | hep-analysis, core | tested (E1) | T18 |
+| Blinding: masks, sealing, scans of plots, logs, CSV and caches | hep-analysis, core | tested (E1) | T18; AUDIT T04: `.npy` caches read, scans report pass / fail / incomplete (an unreadable output is never a pass), strict publication mode with named exemptions. A pass cannot see transformed values |
 | Analysis-change review (tuning after unblinding flagged) | hep-analysis | tested (E1) | T19 |
 | Response objects, forward folding, double-counting checks | detector-response | tested (E1) | Path B, T07 |
 | Resolution and efficiency studies (detector level) | detector-response | tested (E1), synthetic detector | J2 example (`examples/detector-resolution/`) |
@@ -23,8 +23,12 @@ SciPy 1.17.1, Matplotlib 3.11.2, SymPy 1.14.0, Claude Code CLI 2.1.287, 2026-10-
 | Numerical checks and convergence studies | hep-theory, hep-computing | tested (E1) | T15 |
 | Competing models kept distinct; envelopes only by prescription | hep-theory | tested (E1) | T03 |
 | Recasting with parametrized response | hep-theory, detector-response, hep-statistics | tested (E1), synthetic, one signal region | J7 example (`examples/recasting/`); interchange formats still proposed |
-| Comparison gate (observable, units, level, binning, conventions, corrections) | hep-statistics, contracts | tested (E1) | Path D, T08, T25 |
+| Comparison gate (observable definition: process, species, phase space; units, level, every axis and its binning, conventions, corrections) | hep-statistics, contracts | tested (E1) | Path D, T08, T25; AUDIT T01: free-text definitions that differ are `unresolved` until a justified mapping is declared |
+| Artifact payload consistency (axes, units, representation, finite numbers) | contracts | tested (E1) | AUDIT T02 |
+| Project-level artifact dependencies (refs inside a project root, type/ID/version, sha256, upstream statuses) | contracts | tested (E1) | AUDIT T05 (`contracts/dependencies.py`); external refs stay `unresolved` |
 | Binned Poisson likelihoods with nuisance parameters, toys | hep-statistics | tested (E1) | Path D, low and zero counts |
+| Template fits with Barlow-Beeston (fit diagnostics; infeasible or unconverged fits reported failed) | hep-statistics, core | tested (E1) | AUDIT T03 |
+| Berger-Boos upper limit (single-bin background nuisance) | hep-statistics, core | tested (E1) as an approximation: coverage validated by a seeded 36-point scan in `BB_VALIDATED_RANGE` only | AUDIT T07; outside that range the implementation's coverage is unvalidated, and no global coverage guarantee is claimed |
 | Combinations (GLS) with declared correlations | hep-statistics | tested (E1), Gaussian only | T04, T05, T09 |
 | Comparison with published records, no detector modules | hep-statistics | tested (E1) | T24 (synthetic published-style record) |
 | Bayesian inference (samplers, priors, convergence) | hep-statistics | contract checks only | T28; no sampler run |
@@ -33,9 +37,10 @@ SciPy 1.17.1, Matplotlib 3.11.2, SymPy 1.14.0, Claude Code CLI 2.1.287, 2026-10-
 | uproot/awkward tools | hep-computing | demonstrated on synthetic data (E1 + uproot 5.7.6, awkward 2.14.0) | synthetic NanoAOD-like files written and read; `uproot_awkward_analysis.py` histogram and sum(w^2) match numpy (`tests/adapters/test_uproot_awkward_asset.py`) |
 | ROOT, PyROOT tools | hep-computing | demonstrated on synthetic data (ROOT 6.40.04, conda-forge) | PyROOT scripts and assets (inspection, histogram comparison, systematics, RooFit workspace and fit), C++ RDataFrame/fit assets built with root-config and CMake, batch macro; C++ cutflow equals the PyROOT cutflow (`tests/adapters/test_root_cpp_assets.py`, `test_root_integration.py`) |
 | Task files for coding agents (task authoring) | hep-computing | tested (E1) | bundle validator, lint_task tests |
-| Split integrity, surrogate domain, ML artifact checks | physics-ml | tested (E1) | T16 |
+| Split integrity, surrogate domain, ML artifact checks | physics-ml | tested (E1) | T16; AUDIT T06: group and timestamp coverage reported, missing metadata is `incomplete`, not a pass |
 | PyTorch training, inference, profiling assets | physics-ml | tested (E1 + PyTorch 2.14.1 and torchvision 0.29.1, CPU only) | asset smoke tests (training, inference, datasets, allocation measurement) and a 2-process DDP run on the gloo backend pass; `vision_transfer.py` trains one epoch on a synthetic ImageFolder with an untrained ResNet-18 (TORCHVISION-RUN); GPU, NCCL, mixed precision on GPU and the pretrained-weight download not tried |
 | Claims linked to results, status preserved in text | research-communication | tested (E1) | T20 |
+| Manuscript pre-submission check (citations, bibliography, labels) | research-communication | tested (E1) | AUDIT T08: citations with no bibliography fail; inline `thebibliography` and `.bbl` resolve; an external bibliography leaves keys `unresolved` |
 | Literature and citation verification online | research-communication | unverified | needs network; offline it marks citations unverified |
 | Diagram source checks (Graphviz, Mermaid, PlantUML) | research-communication | tested (Graphviz 14.1.2, PlantUML 1.2026.8, Mermaid CLI 12.0.0 with Chromium 141, project-local) | real `dot`, `mmdc` and `plantuml` accept valid and reject invalid sources; every shipped diagram source passes `check_diagram_sources.py` (`tests/skills/research_communication/test_diagrams.py`) |
 | Paper builds (tectonic) | research-communication | unverified | tectonic 0.17.0 installed, but the network policy blocks its TeX bundle host (relay.fullyjustified.net), so the skeleton compile test stays skipped (VALIDATION DIAGRAM-RUN) |
