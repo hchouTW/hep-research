@@ -54,7 +54,7 @@
     "energy_variable": "sqrt_s"
    }
   },
-  "theory_spec_ref": "examples/recasting/run_j7.py#MODEL (illustrative toy, not a physical model)",
+  "theory_spec_ref": "examples/recasting/run.py#MODEL (illustrative toy, not a physical model)",
   "parameter_point": {
    "sqrt_s": 500.0
   },

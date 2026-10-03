@@ -16,7 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from contracts.compat.conventions import compare_conventions  # noqa: E402
+from contracts.comparison.conventions import compare_conventions  # noqa: E402
 from contracts.evidence import validate_ledger  # noqa: E402
 from contracts.project import load_project, resolve_context  # noqa: E402
 from contracts.registry import validate_registry  # noqa: E402

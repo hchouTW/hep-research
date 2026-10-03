@@ -4,9 +4,9 @@
 weight[i] = data_pdf[i] / mc_pdf[i], where each input profile (a list of bin
 counts/weights over the same binning, e.g. number of true interactions) is
 normalized to a probability density before dividing. See
-${CLAUDE_PLUGIN_ROOT}/skills/detector-response/references/19-triggers-luminosity-pileup.md for the methodology and the failure
+${CLAUDE_PLUGIN_ROOT}/skills/detector-response/references/triggers-luminosity-pileup.md for the methodology and the failure
 modes this guards against. Standard library only.
-Run: python3 ${CLAUDE_PLUGIN_ROOT}/skills/detector-response/scripts/pileup_reweight.py ${CLAUDE_PLUGIN_ROOT}/skills/hep-analysis/templates/pileup_profiles.example.json
+Run: python3 ${CLAUDE_PLUGIN_ROOT}/skills/detector-response/scripts/pileup_reweight.py ${CLAUDE_PLUGIN_ROOT}/skills/detector-response/assets/pileup-profiles.example.json
 """
 import argparse
 import json

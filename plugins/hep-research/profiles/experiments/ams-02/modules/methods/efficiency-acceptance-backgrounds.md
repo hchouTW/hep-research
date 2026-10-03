@@ -4,7 +4,7 @@
 
 ## When to read this file
 
-Read when defining efficiencies, acceptance, exposure, MC generation, background ledgers, or when designing/reviewing a template fit. It is the canonical home for conditional efficiencies, the exposure/acceptance definitions, the background ledger, and the template-fit checklist. The count/response likelihood is in [inference-and-unfolding](../methods/inference-and-unfolding.md); calibrations and MC provenance in [calibration-mc-systematics](../methods/calibration-mc-systematics.md).
+Read when defining efficiencies, acceptance, exposure, MC generation, background ledgers, or when designing/reviewing a template fit. It is the canonical home for conditional efficiencies, the exposure/acceptance definitions, the background ledger, and the template-fit checklist. The count/response likelihood is in [inference-and-unfolding](inference-and-unfolding.md); calibrations and MC provenance in [calibration-mc-systematics](calibration-mc-systematics.md).
 
 ## Contents
 
@@ -28,7 +28,7 @@ Read when defining efficiencies, acceptance, exposure, MC generation, background
 | Efficiency `ε` | Conditional probability that an event in a named denominator passes a named numerator | dimensionless | Acceptance |
 | Purity | Fraction of selected events that are signal | dimensionless | Efficiency |
 
-If a response matrix "includes inefficiency", say so; then `A` and `ε` are already inside it and must not be applied again (see [inference-and-unfolding](../methods/inference-and-unfolding.md#count-and-response-model)).
+If a response matrix "includes inefficiency", say so; then `A` and `ε` are already inside it and must not be applied again (see [inference-and-unfolding](inference-and-unfolding.md#count-and-response-model)).
 
 ## Conditional efficiencies
 
@@ -58,18 +58,18 @@ Procedure to combine factors:
 **Procedure.**
 1. Define the fiducial phase space (truth-level) and the bin edges of the true variable.
 2. Compute `A_geo` from the generation record (`A_geo = π A_gen` for an isotropic flux through a planar surface of area `A_gen` when the solid-angle integral over the accepted hemisphere is used; verify the conventions and cut-offs for the actual generation).
-3. Obtain the effective acceptance by dividing the number passing selection and reconstruction by the number generated, per bin, per species, with the generated spectrum reweighted to the target spectrum **without circularity**: if the target spectrum is what you measure, iterate or use a response that does not depend on it (see [inference-and-unfolding](../methods/inference-and-unfolding.md#unfolding)).
+3. Obtain the effective acceptance by dividing the number passing selection and reconstruction by the number generated, per bin, per species, with the generated spectrum reweighted to the target spectrum **without circularity**: if the target spectrum is what you measure, iterate or use a response that does not depend on it (see [inference-and-unfolding](inference-and-unfolding.md#unfolding)).
 4. Combine with time-resolved livetime and geomagnetic transmission to form exposure: integrate over intervals so that the product is correct when acceptance and livetime vary simultaneously.
 5. Check bin centering: a differential flux quoted at a bin "center" needs a stated prescription (e.g. a spectral-shape-dependent correction to the position where the flux equals the bin average), not the arithmetic center by default.
 6. Check for prescale and dead-time effects, and for any time dependence of acceptance (e.g. after hardware changes).
 
 **Geomagnetic transmission.** Depends on the cutoff model, direction, position, time, and the safety factor applied to select "primary" cosmic rays. See [charged-cosmic-rays](../species/charged-cosmic-rays.md#geomagnetic-selection).
 
-**Material interactions.** Survival probability of the primary through upstream material and in-detector interactions is an efficiency/acceptance-type correction dependent on the interaction cross-section model; separate it from geometric acceptance and document the cross-section model variation (see [calibration-mc-systematics](../methods/calibration-mc-systematics.md#mc-provenance)).
+**Material interactions.** Survival probability of the primary through upstream material and in-detector interactions is an efficiency/acceptance-type correction dependent on the interaction cross-section model; separate it from geometric acceptance and document the cross-section model variation (see [calibration-mc-systematics](calibration-mc-systematics.md#mc-provenance)).
 
 ## MC generation record
 
-Record: generator or beam source, particle species, energy/rigidity spectrum, transport engine and physics list, geometry and material model, detector response and digitization, noise and dead channels, calibration constants applied, reconstruction version, production period, sample statistics (and weights). Validate before use (see [calibration-mc-systematics](../methods/calibration-mc-systematics.md#data-mc-validation)).
+Record: generator or beam source, particle species, energy/rigidity spectrum, transport engine and physics list, geometry and material model, detector response and digitization, noise and dead channels, calibration constants applied, reconstruction version, production period, sample statistics (and weights). Validate before use (see [calibration-mc-systematics](calibration-mc-systematics.md#data-mc-validation)).
 
 ## Background ledger
 

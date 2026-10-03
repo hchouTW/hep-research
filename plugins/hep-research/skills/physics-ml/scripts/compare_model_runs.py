@@ -17,7 +17,7 @@ assumed to be "higher is better" unless --lower-is-better is given. Paired mode
 requires equal-length arrays whose entries correspond to the same seed and split;
 unpaired mode is used automatically otherwise and is substantially less sensitive.
 The bootstrap is seeded, so results are reproducible.
-Run: python3 ${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/scripts/compare_model_runs.py ${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/assets/eval_runs.example.json
+Run: python3 ${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/scripts/compare_model_runs.py ${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/assets/eval-runs.example.json
 """
 
 import argparse

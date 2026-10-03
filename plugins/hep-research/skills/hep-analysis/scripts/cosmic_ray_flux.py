@@ -5,7 +5,7 @@ Purpose: the standard final step of any cosmic-ray counting measurement (ground
 array, IACT, neutrino telescope, or a space-based magnetic spectrometer) -
 turning selected event counts into a differential flux with a statistically correct
 uncertainty - rather than leaving the statistics implicit. See
-${CLAUDE_PLUGIN_ROOT}/skills/hep-statistics/references/37-astroparticle-statistics.md (exposure/forward-folding discipline) and
+${CLAUDE_PLUGIN_ROOT}/skills/hep-statistics/references/astroparticle-statistics.md (exposure/forward-folding discipline) and
 the bound experiment profile's instrument overview.
 
 What it does: for one or more energy/rigidity bins, given the observed count N,
@@ -35,10 +35,10 @@ clear error rather than a silently truncated interval if the true bound would ex
 adequate and this exact tool is unnecessary. This computes a flux point
 per bin from an already-known exposure - it does not itself compute effective area,
 acceptance, or livetime, which are instrument-specific (see
-${CLAUDE_PLUGIN_ROOT}/skills/detector-response/references/21-detector-systems-overview.md for acceptance/geometric-factor
+${CLAUDE_PLUGIN_ROOT}/skills/detector-response/references/detector-systems-overview.md for acceptance/geometric-factor
 definitions) and must be supplied. Does not itself forward-fold through an energy
-migration matrix; see ${CLAUDE_PLUGIN_ROOT}/skills/hep-analysis/references/10-measurements-unfolding.md and
-${CLAUDE_PLUGIN_ROOT}/skills/hep-statistics/references/37-astroparticle-statistics.md for why a steeply falling spectrum should
+migration matrix; see ${CLAUDE_PLUGIN_ROOT}/skills/hep-analysis/references/measurements-and-unfolding.md and
+${CLAUDE_PLUGIN_ROOT}/skills/hep-statistics/references/astroparticle-statistics.md for why a steeply falling spectrum should
 be compared via forward-folding rather than treating each bin's flux point as
 migration-free.
 Run: python3 ${CLAUDE_PLUGIN_ROOT}/skills/hep-analysis/scripts/cosmic_ray_flux.py --counts 42 --exposure 1.5e7 --bin-width 10

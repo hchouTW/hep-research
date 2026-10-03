@@ -4,7 +4,7 @@
 
 ## When to read this file
 
-Read when defining or reviewing reconstruction objects, matching, cut flows, run/event quality, time dependence, or the separation of training/tuning/control/measurement samples. It owns the **conditions model** and the **four-category distinction** (veto, calibration, efficiency, response). Subsystem physics is in [detector-and-observables](../subsystems/detector-and-observables.md); calibrations and MC provenance in [calibration-mc-systematics](../methods/calibration-mc-systematics.md).
+Read when defining or reviewing reconstruction objects, matching, cut flows, run/event quality, time dependence, or the separation of training/tuning/control/measurement samples. It owns the **conditions model** and the **four-category distinction** (veto, calibration, efficiency, response). Subsystem physics is in [detector-and-observables](../subsystems/detector-and-observables.md); calibrations and MC provenance in [calibration-mc-systematics](calibration-mc-systematics.md).
 
 ## Contents
 
@@ -19,7 +19,7 @@ Read when defining or reviewing reconstruction objects, matching, cut flows, run
 
 ## Reconstruction objects and matching
 
-**Purpose.** Decide what an "event" and "track" mean before any efficiency is defined. **Inputs.** Per-subsystem reconstructed objects (Tracker track and charge estimates, TOF hits and `β`, TRD track segment and discriminant, ECAL shower, RICH ring, ACC activity) and their software version. **Definitions.** Measurement-level objects are what the reconstruction returns; truth-level objects exist only in MC. A "matched" object is matched under a stated criterion (geometric residual, time, charge consistency); the criterion is part of the selection. **Procedure.** (1) Fix the primary particle definition (e.g. downward-going, single track, charge `|Z|` compatible); (2) list which subsystems must contribute and which are optional; (3) state matching criteria between Tracker and TOF/TRD/ECAL/RICH; (4) state the truth definition used in MC (see [efficiency-acceptance-backgrounds](../methods/efficiency-acceptance-backgrounds.md)). **Dependencies.** Reconstruction version, alignment, calibration interval, MC digitization. **Validation.** Matching-residual distributions in data and MC, efficiency of each match vs `R`, angle, region, time. **Output.** An object ledger: object, definition, subsystems, criteria, version.
+**Purpose.** Decide what an "event" and "track" mean before any efficiency is defined. **Inputs.** Per-subsystem reconstructed objects (Tracker track and charge estimates, TOF hits and `β`, TRD track segment and discriminant, ECAL shower, RICH ring, ACC activity) and their software version. **Definitions.** Measurement-level objects are what the reconstruction returns; truth-level objects exist only in MC. A "matched" object is matched under a stated criterion (geometric residual, time, charge consistency); the criterion is part of the selection. **Procedure.** (1) Fix the primary particle definition (e.g. downward-going, single track, charge `|Z|` compatible); (2) list which subsystems must contribute and which are optional; (3) state matching criteria between Tracker and TOF/TRD/ECAL/RICH; (4) state the truth definition used in MC (see [efficiency-acceptance-backgrounds](efficiency-acceptance-backgrounds.md)). **Dependencies.** Reconstruction version, alignment, calibration interval, MC digitization. **Validation.** Matching-residual distributions in data and MC, efficiency of each match vs `R`, angle, region, time. **Output.** An object ledger: object, definition, subsystems, criteria, version.
 
 Public AMS reconstruction algorithms exist only in publications; **do not assume internal pass names or algorithm parameters**. If the user names a pass or software version, treat it as user-supplied and flag that the skill cannot verify it.
 
@@ -41,7 +41,7 @@ selection:
   uncertainty: null
 ```
 
-**Ordering rule.** A cut flow is an ordered conditional chain; the efficiency of a later cut is conditional on all earlier ones. Reordering changes individual efficiencies but not the total; the total is what must close (see [efficiency-acceptance-backgrounds](../methods/efficiency-acceptance-backgrounds.md#conditional-efficiencies)).
+**Ordering rule.** A cut flow is an ordered conditional chain; the efficiency of a later cut is conditional on all earlier ones. Reordering changes individual efficiencies but not the total; the total is what must close (see [efficiency-acceptance-backgrounds](efficiency-acceptance-backgrounds.md#conditional-efficiencies)).
 
 **Numeric thresholds.** Give a threshold only when a source or the user supplies it. Otherwise describe: the optimization metric (e.g. background rejection at fixed efficiency on an independent sample), the optimization sample (not the measurement sample), and the validation (data/MC agreement of the discriminant, stability of the result when the cut varies).
 
@@ -72,7 +72,7 @@ Every time-dependent detector condition needs a row. Template (fill with user in
 
 **Temporal analyses.** Time-resolved fluxes, solar-cycle comparisons and periodicity searches add binning, per-bin exposure and correlation questions: see [time-dependent-analysis](../periods/time-dependent-analysis.md).
 
-**Version invalidation.** A change in reconstruction or calibration version changes reconstructed observables and hence efficiencies, response and templates; MC response products must be regenerated (or shown to be insensitive) for the new version. A results table mixing MC from one version with data from another is a defect (see [calibration-mc-systematics](../methods/calibration-mc-systematics.md#mc-provenance)).
+**Version invalidation.** A change in reconstruction or calibration version changes reconstructed observables and hence efficiencies, response and templates; MC response products must be regenerated (or shown to be insensitive) for the new version. A results table mixing MC from one version with data from another is a defect (see [calibration-mc-systematics](calibration-mc-systematics.md#mc-provenance)).
 
 **Hardware eras.** If the analysis spans a documented hardware configuration change, split by era or justify a combined treatment. Public documents describe some changes (e.g. a Tracker upgrade announced on the Collaboration site); verify date and scope in the primary source before citing.
 
@@ -85,7 +85,7 @@ Every time-dependent detector condition needs a row. Template (fill with user in
 | Efficiency correction | Changes normalization | Trigger or selection inefficiency | Measured as a conditional efficiency with named denominator |
 | Response uncertainty | Changes migration | Rigidity resolution tail | Enters the response matrix and its variations |
 
-**Anti-double-counting.** A single physical effect (e.g. a drifting TRD gain) must be treated in exactly one category; if a calibration removes it, a residual systematic covers only what remains, and the efficiency correction does not also include it. Record the category in the systematic ledger (see [calibration-mc-systematics](../methods/calibration-mc-systematics.md#systematic-ledger)).
+**Anti-double-counting.** A single physical effect (e.g. a drifting TRD gain) must be treated in exactly one category; if a calibration removes it, a residual systematic covers only what remains, and the efficiency correction does not also include it. Record the category in the systematic ledger (see [calibration-mc-systematics](calibration-mc-systematics.md#systematic-ledger)).
 
 ## Sample separation and leakage prevention
 

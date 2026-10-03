@@ -2,7 +2,7 @@
 """Validate a hep-research artifact: common envelope + typed extension + semantic rules.
 
 Usage: python3 contracts/validate.py ARTIFACT.json [--profiles-from PROJECT_CONFIG.json]
-Exit codes: 0 valid, 1 findings with errors, 2 unreadable input. Output: JSON report on stdout.
+Exit codes: 0 valid, 1 findings with errors, 2 unreadable input or bad usage. Output: JSON report on stdout.
 A valid artifact is self-consistent under the contract; that says nothing about physical validity.
 """
 from __future__ import annotations
@@ -29,6 +29,7 @@ EXTENSION_SCHEMAS = {
 STICKY_STATUSES = ["failed", "unvalidated", "preliminary", "synthetic", "asimov", "user-supplied"]
 NON_GAUSSIAN_KINDS = {"scale-envelope", "model-alternative", "truncation"}
 UPGRADED = {"observed", "validated-in-scope"}
+SHAPE_ERRORS = {"schema.type", "schema.any_of"}
 AUC_ONLY = re.compile(r"^\s*(roc[\s_-]*)?auc(\s*\(?roc\)?)?\s*$", re.I)
 
 
@@ -178,7 +179,9 @@ def validate_artifact(doc, vocab: Vocabulary | None = None) -> Report:
     ext = doc.get("extension")
     if ext_schema and isinstance(ext, dict):
         validate(ext, ext_schema, vocab, rep, "$.extension")
-        _rules(doc, ext, vocab, rep)
+        # Semantic rules assume the value types the schema guarantees; on a type error report that alone.
+        if not any(f.code in SHAPE_ERRORS for f in rep.errors):
+            _rules(doc, ext, vocab, rep)
     return rep
 
 
@@ -192,12 +195,24 @@ def main(argv=None) -> int:
     except (OSError, ValueError) as exc:
         print(json.dumps({"ok": False, "error": f"cannot read {args[0]}: {exc}"}))
         return 2
-    vocab = Vocabulary()
+    vocab, pre = Vocabulary(), Report()
     if "--profiles-from" in args:
         from contracts.project import load_project
-        proj = load_project(Path(args[args.index("--profiles-from") + 1]))
+        i = args.index("--profiles-from") + 1
+        if i >= len(args):
+            print(json.dumps({"ok": False, "error": "--profiles-from needs a project config path"}))
+            return 2
+        try:
+            proj = load_project(Path(args[i]))
+        except (OSError, ValueError) as exc:
+            print(json.dumps({"ok": False, "error": f"cannot read {args[i]}: {exc}"}))
+            return 2
         vocab = Vocabulary.with_profiles(proj.profiles)
+        pre.findings += proj.report.findings
+        for prob in vocab.problems:
+            pre.add("error", "config.profiles", "profile.vocab_namespace", prob)
     rep = validate_artifact(doc, vocab)
+    rep.findings[:0] = pre.findings
     print(json.dumps(rep.as_dict(), indent=1))
     return 0 if rep.ok else 1
 

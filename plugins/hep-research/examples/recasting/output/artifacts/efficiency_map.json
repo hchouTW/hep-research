@@ -38,13 +38,13 @@
    "luminosity"
   ],
   "conditions": "sqrt_s = 500.0 GeV (synthetic)",
-  "provenance": "invented in run_j7.py",
+  "provenance": "invented in run.py",
   "form": "parametrized",
   "parametrization": {
    "variables": [
     "m_X"
    ],
-   "function_ref": "run_j7.py#efficiency",
+   "function_ref": "run.py#efficiency",
    "function": "eps = 0.35 + 0.0004 (m_X - 300.0)",
    "validity_range": {
     "m_X": [

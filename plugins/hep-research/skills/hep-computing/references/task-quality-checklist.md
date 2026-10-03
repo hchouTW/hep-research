@@ -28,7 +28,7 @@ instead.
 ## Notes on Applying Each Check
 
 - **The relevant authoring reference was consulted** - this means actually
-  reading `templates/task-template.md` and, when the target repository
+  reading `assets/task-template.md` and, when the target repository
   defines its own authoring conventions, reading those too, not recalling
   the shape of a task from memory.
 - **The repository was inspected where repository access was available** -

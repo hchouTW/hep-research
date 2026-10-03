@@ -617,7 +617,7 @@
    "artifact": "synthetic-path-d-comparison",
    "type": "comparison-spec",
    "inputs": [
-    "../qed-benchmark/output/artifacts/prediction.json",
+    "../qed-prediction/output/artifacts/prediction.json",
     "artifacts/dataset_record.json",
     "../collider-angular/output/artifacts/response.json"
    ],
@@ -629,7 +629,7 @@
    "artifact": "synthetic-path-d-folded-expectation",
    "type": "prediction",
    "inputs": [
-    "../qed-benchmark/output/artifacts/prediction.json",
+    "../qed-prediction/output/artifacts/prediction.json",
     "../collider-angular/output/artifacts/response.json"
    ],
    "status": [

@@ -4,7 +4,7 @@
 
 ## When to read this file
 
-Read when linking conditions and calibrations to reconstructed quantities, validating MC against data, assembling a systematic ledger, or checking that a systematic is neither missing nor counted twice. The four correction categories are defined in [reconstruction-and-data-quality](../methods/reconstruction-and-data-quality.md#four-categories-of-correction); the likelihood treatment of nuisances in [inference-and-unfolding](../methods/inference-and-unfolding.md).
+Read when linking conditions and calibrations to reconstructed quantities, validating MC against data, assembling a systematic ledger, or checking that a systematic is neither missing nor counted twice. The four correction categories are defined in [reconstruction-and-data-quality](reconstruction-and-data-quality.md#four-categories-of-correction); the likelihood treatment of nuisances in [inference-and-unfolding](inference-and-unfolding.md).
 
 ## Contents
 
@@ -41,7 +41,7 @@ For each calibration: what reconstructed quantity it changes, its granularity, i
 
 Record every item; a result with any missing item is not reproducible.
 
-- Generator/source and species, generated spectrum, generation surface/volume and solid angle (see [efficiency-acceptance-backgrounds](../methods/efficiency-acceptance-backgrounds.md#mc-generation-record)).
+- Generator/source and species, generated spectrum, generation surface/volume and solid angle (see [efficiency-acceptance-backgrounds](efficiency-acceptance-backgrounds.md#mc-generation-record)).
 - Transport engine, physics list (hadronic and electromagnetic), geometry and material description, version.
 - Detector response model, digitization, noise/dead channels applied, calibration constants applied.
 - Reconstruction version; production period; statistics and weights.

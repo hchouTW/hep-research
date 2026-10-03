@@ -57,6 +57,9 @@ def check_profile_dir(pdir: Path, boundary: Path, rep: Report, where: str, expec
     except ValueError as exc:
         rep.add("error", where, "profile.unreadable", f"{pj}: {exc}")
         return None
+    if not isinstance(prof, dict):
+        rep.add("error", where, "profile.unreadable", f"{pj}: expected a JSON object")
+        return None
     pid = prof.get("id", "?")
     where = f"{where}<{pid}>"
     sub = validate(prof, "profile.json", Vocabulary())
@@ -105,7 +108,10 @@ def check_profile_dir(pdir: Path, boundary: Path, rep: Report, where: str, expec
                 rep.add("error", f"{where}.capabilities[{i}]", "profile.unbacked_capability",
                         f"capability '{cap.get('name')}' claims '{cap['status']}' without tests")
             for t in tests:
-                if not (pdir / t).exists():
+                # A test outside the profile folder may only be one of the plugin's own tests.
+                if not (_inside(pdir / t, pdir) or _inside(pdir / t, PLUGIN_ROOT / "tests")):
+                    rep.add("error", f"{where}.capabilities[{i}]", "profile.path_escapes", f"test '{t}' escapes the profile folder and the plugin tests")
+                elif not (pdir / t).exists():
                     rep.add("error", f"{where}.capabilities[{i}]", "profile.unbacked_capability", f"test '{t}' does not exist")
     prof["_dir"] = str(pdir)
     return prof
@@ -152,8 +158,8 @@ def validate_registry(registry_path: Path | None = None, local_dirs=(), package_
     entries += [(None, Path(d), Path(d), f"local[{i}]") for i, d in enumerate(local_dirs)]
     for expect, pdir, boundary, where in entries:
         prof = check_profile_dir(pdir, boundary, rep, where, expect)
-        if prof is None:
-            continue
+        if prof is None or not isinstance(prof.get("id"), str):
+            continue    # a missing or malformed id is already a schema finding
         if prof["id"] in loaded:
             rep.add("error", where, "registry.duplicate_id", f"duplicate profile id '{prof['id']}' (also at {loaded[prof['id']]['_dir']})")
             continue

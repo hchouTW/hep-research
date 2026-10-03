@@ -28,7 +28,7 @@ Classify: (i) publications: no peer-reviewed AMS antihelium paper located in INS
 
 ### Example 5: four-iteration Bayesian unfolding
 
-A count of "four iterations" is not a criterion (published AMS flux analyses stop the iteration when successive fluxes agree within 0.1%, S06/S08). Require: nominal and reweighted closure; prior dependence (unfold with several priors); bias-variance versus iteration count on ensembles containing stress-test spectra; toy-based covariance including response fluctuations; boundary/under/overflow treatment; a declared selection criterion determined without optimizing on the final unfolded spectrum. See [inference-and-unfolding](../methods/inference-and-unfolding.md#unfolding).
+A count of "four iterations" is not a criterion (published AMS flux analyses stop the iteration when successive fluxes agree within 0.1%, S06/S08). Require: nominal and reweighted closure; prior dependence (unfold with several priors); bias-variance versus iteration count on ensembles containing stress-test spectra; toy-based covariance including response fluctuations; boundary/under/overflow treatment; a declared selection criterion determined without optimizing on the final unfolded spectrum. See [inference-and-unfolding](inference-and-unfolding.md#unfolding).
 
 ### Example 6: antiproton template likelihood
 
@@ -36,7 +36,7 @@ Symbolic. Reconstructed bins `i` (signed-rigidity-sensitive discriminant per `|R
 
 ### Example 7: multiplying cut efficiencies
 
-`ε_total ≠ ε_A ε_B ε_C` unless independent. Write each factor with its conditional denominator (`ε_B|A` is the fraction passing B among events passing A). Correlations: shared Tracker information, shared ECAL energy, rigidity dependence. Ordering: totals must match under reordering. Validation: data/MC scale factors per factor, joint efficiency measured directly and compared to the product, combined-efficiency closure in MC per bin. See [efficiency-acceptance-backgrounds](../methods/efficiency-acceptance-backgrounds.md#conditional-efficiencies).
+`ε_total ≠ ε_A ε_B ε_C` unless independent. Write each factor with its conditional denominator (`ε_B|A` is the fraction passing B among events passing A). Correlations: shared Tracker information, shared ECAL energy, rigidity dependence. Ordering: totals must match under reordering. Validation: data/MC scale factors per factor, joint efficiency measured directly and compared to the product, combined-efficiency closure in MC per bin. See [efficiency-acceptance-backgrounds](efficiency-acceptance-backgrounds.md#conditional-efficiencies).
 
 ### Example 8: invalid helium `E/R = 1` premise
 

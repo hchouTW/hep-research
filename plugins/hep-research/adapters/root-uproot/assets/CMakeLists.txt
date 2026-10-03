@@ -6,6 +6,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(ROOT REQUIRED COMPONENTS RIO Tree Hist Graf Graf3d Gpad ROOTDataFrame)
 
-add_executable(analysis rdf_analysis.cpp)
+add_executable(analysis rdf_histogram_branch.cpp)
 target_include_directories(analysis PRIVATE ${ROOT_INCLUDE_DIRS})
 target_link_libraries(analysis PRIVATE ${ROOT_LIBRARIES})

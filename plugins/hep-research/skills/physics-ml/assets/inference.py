@@ -24,12 +24,15 @@ def main() -> None:
     parser.add_argument("--input-dim", type=int, required=True)
     parser.add_argument("--hidden-dim", type=int, default=128)
     parser.add_argument("--num-classes", type=int, required=True)
+    parser.add_argument("--unsafe-full-unpickle", action="store_true",
+                        help="load with weights_only=False (full pickle, can run arbitrary code); only for files you trust")
     args = parser.parse_args()
 
     device = get_device()
     model = MLPClassifier(args.input_dim, args.hidden_dim, args.num_classes).to(device)
 
-    ckpt = torch.load(args.checkpoint, map_location=device)
+    # weights_only=True loads tensors and plain containers only; a full unpickle can run arbitrary code.
+    ckpt = torch.load(args.checkpoint, map_location=device, weights_only=not args.unsafe_full_unpickle)
     state_dict = ckpt.get("model_state_dict", ckpt)
     model.load_state_dict(state_dict)
     model.eval()

@@ -15,6 +15,7 @@ class Vocabulary:
         data = json.loads(CORE_FILE.read_text(encoding="utf-8"))
         self._core = {k: set(v) for k, v in data["vocabularies"].items()}
         self._ext: dict[str, set[str]] = {k: set() for k in self._core}
+        self.problems: list[str] = []    # extension problems collected by with_profiles
 
     def core(self, name: str) -> set[str]:
         return set(self._core[name])
@@ -44,12 +45,14 @@ class Vocabulary:
 
     @classmethod
     def with_profiles(cls, profiles) -> "Vocabulary":
-        """Build a vocabulary extended by loaded profile.json dicts (see contracts.registry)."""
+        """Build a vocabulary extended by loaded profile.json dicts (see contracts.registry).
+
+        Rejected extensions are listed in the returned vocabulary's `problems`."""
         v = cls()
         for p in profiles:
             ns = declared_namespaces(p)
             for name, terms in (p.get("vocabulary_extensions") or {}).items():
-                v.extend(name, terms, ns)
+                v.problems += [f"{p.get('id', '?')}: {x}" for x in v.extend(name, terms, ns)]
         return v
 
 

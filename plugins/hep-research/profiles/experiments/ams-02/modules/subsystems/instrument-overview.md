@@ -1,9 +1,9 @@
 # AMS-02 Case Study: A Long-Duration Space-Based Spectrometer
 
 Short overview of how the generic detector references
-([21-detector-systems-overview.md](../../../../../skills/detector-response/references/21-detector-systems-overview.md) through
-[particle identification](../../../../../skills/detector-response/references/24-particle-identification.md)) and
-[space-based direct detection](../../../../../skills/detector-response/references/35-space-based-direct-detection.md) combine in one real
+([detector-systems-overview.md](../../../../../skills/detector-response/references/detector-systems-overview.md) through
+[particle identification](../../../../../skills/detector-response/references/particle-identification.md)) and
+[space-based direct detection](../../../../../skills/detector-response/references/space-based-direct-detection.md) combine in one real
 instrument, the Alpha Magnetic Spectrometer (AMS-02) on the International Space
 Station. **For AMS-specific design, review, or "what did AMS publish / latest result"
 work, use the rest of this profile ([index](../../index.md))**: it holds the
@@ -11,7 +11,7 @@ source-traced facts (selections, templates, unfolding, isotope methods, cutoff f
 data periods) and the public-evidence boundary. This file deliberately keeps no AMS
 numbers, publication lists, or hardware-history dates so there is one place, not two, to
 keep correct; anything AMS-specific must be checked against the collaboration's
-publications (see [13-sources.md](../../../../../skills/research-communication/references/13-sources.md)).
+publications (see [primary-sources-and-version-checks.md](../../../../../skills/research-communication/references/primary-sources-and-version-checks.md)).
 
 ## Subsystem stack (roles only)
 
@@ -24,7 +24,7 @@ and shower shape. The lessons that generalize:
 
 - Each subsystem answers a different question, and a rare-species measurement combines
   several of them. Correlated inputs (a shared track, shared calorimeter energy) must not
-  be summed as independent evidence - see [particle identification](../../../../../skills/detector-response/references/24-particle-identification.md).
+  be summed as independent evidence - see [particle identification](../../../../../skills/detector-response/references/particle-identification.md).
 - A veto or direction requirement removes events before any charge or rigidity
   measurement is trusted; it is an exposure/efficiency question, not a downstream
   correction.
@@ -36,17 +36,17 @@ and shower shape. The lessons that generalize:
 - **No routine servicing, so conditions change over time.** Alignment, gains, and
   detector configuration must be tracked per data-taking period, and an analysis spanning
   a documented hardware change must treat the eras separately or justify combining them
-  - see [calibration and alignment](../../../../../skills/detector-response/references/29-calibration-and-alignment.md). Verify any specific
+  - see [calibration and alignment](../../../../../skills/detector-response/references/calibration-and-alignment.md). Verify any specific
   servicing or upgrade date and scope in a primary source before citing it. As of
   2026-10-01, the Layer-0 tracker upgrade (an extra silicon layer on top, quoted ~300%
   acceptance gain) was not yet installed. A CERN news item of 2026-08-21 plans launch to
   the ISS in April 2027 with connections completed by May 2027 (planned dates, may have
-  slipped), which will create a new detector era (see [sources](../../../../../skills/research-communication/references/13-sources.md)).
+  slipped), which will create a new detector era (see [sources](../../../../../skills/research-communication/references/primary-sources-and-version-checks.md)).
 - **Orbital environment.** The orbit sweeps a wide range of geomagnetic latitudes, so the
   cutoff is a per-event (or per-time-bin) quantity from spacecraft position and pointing,
   not one number; a "primary" selection uses a safety factor above it and varies that
   factor as a systematic - see
-  [space-based direct detection](../../../../../skills/detector-response/references/35-space-based-direct-detection.md),
+  [space-based direct detection](../../../../../skills/detector-response/references/space-based-direct-detection.md),
   `${CLAUDE_PLUGIN_ROOT}/skills/hep-analysis/scripts/geomagnetic_cutoff.py` and `${CLAUDE_PLUGIN_ROOT}/skills/hep-analysis/scripts/orbit_averaged_geomagnetic_cutoff.py`
   (planning-level estimates, not field-model backtracing). Periodic thermal cycling and
   high-background regions likewise call for binning or exclusion, not averaging.
@@ -63,21 +63,21 @@ Positron fraction, antiproton/proton ratio, and antinucleus searches share a str
    acceptance/exposure systematics; cancellation must be shown per effect, not assumed.
    `${CLAUDE_PLUGIN_ROOT}/skills/hep-analysis/scripts/particle_ratio_with_uncertainty.py` gives the two-yield first-order
    propagation, including a correlation term (see
-   [04-histograms-efficiencies.md](../../../../../skills/hep-analysis/references/04-histograms-efficiencies.md)).
+   [histograms-efficiencies.md](../../../../../skills/hep-analysis/references/histograms-efficiencies.md)).
 2. **The background for the rarer species is the far more abundant one mis-identified**
    (or, for charge-sign measurements, charge-confused), so the working point is chosen for
    rejection power, and the residual contamination is modeled by a template fit or
    control-region estimate rather than assumed negligible - see
-   [particle identification](../../../../../skills/detector-response/references/24-particle-identification.md).
+   [particle identification](../../../../../skills/detector-response/references/particle-identification.md).
 3. **A null result is reported as an exposure-normalized limit** with the Poisson or
-   likelihood machinery in [08-inference.md](../../../../../skills/hep-statistics/references/08-inference.md) and
-   [37-astroparticle-statistics.md](../../../../../skills/hep-statistics/references/37-astroparticle-statistics.md), and
+   likelihood machinery in [inference-recipes.md](../../../../../skills/hep-statistics/references/inference-recipes.md) and
+   [astroparticle-statistics.md](../../../../../skills/hep-statistics/references/astroparticle-statistics.md), and
    `${CLAUDE_PLUGIN_ROOT}/skills/hep-analysis/scripts/cosmic_ray_flux.py` for flux from counts, exposure and bin width.
 
 ## Composition ratios as a propagation diagnostic
 
 A secondary-to-primary ratio versus rigidity is the generic propagation diagnostic in
-[cosmic-ray spectrum and composition](../../../../../skills/detector-response/references/30-cosmic-ray-spectrum-and-composition.md#propagation).
+[cosmic-ray spectrum and composition](../../../../../skills/detector-response/references/cosmic-ray-spectrum-and-composition.md#propagation).
 Sort a species into primary, secondary, or mixed before interpreting its rigidity
 dependence, and treat the physical interpretation as a model step beyond the measurement.
 Which species AMS has measured, and with what result, is a profile-evidence / primary-paper

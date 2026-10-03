@@ -1,4 +1,4 @@
-"""Smoke test for examples/end-to-end-sample/end_to_end_sample_analysis.py (ntuple -> cutflow -> pyhf -> yields).
+"""Smoke test for examples/end-to-end-sample/run.py (ntuple -> cutflow -> pyhf -> yields).
 
 Skipped unless a Python with numpy and pyhf is available: $HEP_PYHF_PYTHON if set,
 else the interpreter running the tests.
@@ -30,7 +30,7 @@ class EndToEndTests(unittest.TestCase):
     def setUpClass(cls):
         cls._tmp = tempfile.TemporaryDirectory()
         cls.out = Path(cls._tmp.name)
-        cls.proc = subprocess.run([PYTHON, str(ROOT_DIR / 'examples/end-to-end-sample/end_to_end_sample_analysis.py'),
+        cls.proc = subprocess.run([PYTHON, str(ROOT_DIR / 'examples/end-to-end-sample/run.py'),
                                    '--outdir', str(cls.out), '--seed', '1'],
                                   capture_output=True, text=True)
 

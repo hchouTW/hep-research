@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Check the diagram sources embedded in this skill's markdown files.
 
-Purpose: keep the DOT/Mermaid snippets in references/, templates/, and examples/ from rotting.
+Purpose: keep the DOT/Mermaid snippets in references/, assets/diagrams/, and examples/ from rotting.
 
 What it does: extracts fenced ```dot, ```mermaid, ```plantuml, and ```svg blocks from markdown files.
 - dot: compiled with Graphviz `dot -Tsvg` when `dot` is on PATH (skipped with a notice otherwise).
@@ -19,6 +19,7 @@ Exit status 1 if any checked block fails. Standard library only.
 """
 from __future__ import annotations
 
+import argparse
 import re
 import shutil
 import subprocess
@@ -113,8 +114,10 @@ def check_svg(source: str) -> str | None:
 
 
 def main(argv: list[str]) -> int:
+    ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    ap.add_argument("paths", nargs="*", type=Path, help="markdown files to check (default: every .md in the skill)")
     root = Path(__file__).resolve().parents[1]
-    paths = [Path(a) for a in argv] or sorted(root.rglob("*.md"))
+    paths = ap.parse_args(argv).paths or sorted(root.rglob("*.md"))
     have_dot = shutil.which("dot") is not None
     if not have_dot:
         print("note: Graphviz `dot` not found; skipping DOT compilation")

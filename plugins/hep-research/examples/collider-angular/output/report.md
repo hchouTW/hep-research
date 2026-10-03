@@ -2,7 +2,7 @@
 
 **Status: synthetic.** Profile `experiment:synthetic-collider` is illustrative: its generator, efficiency, resolution and luminosity are invented (`profiles/experiments/synthetic-collider/benchmarks/path-b.json`). Nothing here describes a real detector or measurement, and the generator's shape and cross section are inputs, not predictions. Only this profile is loaded.
 
-Reproduce: `python3 examples/collider-angular/run_path_b.py --toys 400 --seed 20261003` (from the plugin root, D5 environment).
+Reproduce: `python3 examples/collider-angular/run.py --toys 400 --seed 20261003` (from the plugin root, D5 environment).
 
 ## Pre-declared criteria and outcome
 

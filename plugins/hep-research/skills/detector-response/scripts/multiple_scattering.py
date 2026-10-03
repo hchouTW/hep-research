@@ -8,21 +8,21 @@ cross, and the maximum detectable rigidity (MDR).
 
 What it does: sums x/X0 over the layers of a JSON stack description, evaluates the PDG
 Highland formula, and combines the multiple-scattering and intrinsic (Gluckstern)
-contributions to sigma(R)/R. See ${CLAUDE_PLUGIN_ROOT}/skills/detector-response/references/21-detector-systems-overview.md and
-${CLAUDE_PLUGIN_ROOT}/skills/detector-response/references/22-tracking-and-vertexing.md for the physics.
+contributions to sigma(R)/R. See ${CLAUDE_PLUGIN_ROOT}/skills/detector-response/references/detector-systems-overview.md and
+${CLAUDE_PLUGIN_ROOT}/skills/detector-response/references/tracking-and-vertexing.md for the physics.
 
 Usage notes / assumptions: standard library only. Rigidity/momentum in GV or GeV/c,
 field in tesla, lengths in metres, point resolution in micrometres. The Gluckstern
 term assumes equally spaced measuring layers and a uniform field over the lever arm;
 it is a design-level estimate, not a substitute for a full track fit. beta defaults to
 1 (relativistic); pass --beta for slow particles, where the scattering term grows.
-Run: python3 ${CLAUDE_PLUGIN_ROOT}/skills/detector-response/scripts/multiple_scattering.py ${CLAUDE_PLUGIN_ROOT}/skills/hep-analysis/templates/detector_stack.example.json --rigidity 100
+Run: python3 ${CLAUDE_PLUGIN_ROOT}/skills/detector-response/scripts/multiple_scattering.py ${CLAUDE_PLUGIN_ROOT}/skills/detector-response/assets/detector-stack.example.json --rigidity 100
 """
 import argparse
 import json
 import math
 
-# PDG Highland constant, in GeV; see ${CLAUDE_PLUGIN_ROOT}/skills/research-communication/references/13-sources.md.
+# PDG Highland constant, in GeV; see ${CLAUDE_PLUGIN_ROOT}/skills/research-communication/references/primary-sources-and-version-checks.md.
 HIGHLAND_MEV = 13.6
 HIGHLAND_GEV = HIGHLAND_MEV / 1000.0
 # p[GeV/c] = 0.299792458 * B[T] * r[m] for unit charge.
@@ -175,7 +175,7 @@ def summarize(stack, rigidity_gv, beta=1.0, charge=1):
 def main():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('stack', help='JSON stack description (see ${CLAUDE_PLUGIN_ROOT}/skills/hep-analysis/templates/detector_stack.example.json)')
+    parser.add_argument('stack', help='JSON stack description (see ${CLAUDE_PLUGIN_ROOT}/skills/detector-response/assets/detector-stack.example.json)')
     parser.add_argument('--rigidity', type=float, default=100.0,
                         help='rigidity in GV at which to evaluate the resolution (default 100)')
     parser.add_argument('--beta', type=float, default=1.0, help='particle beta (default 1)')

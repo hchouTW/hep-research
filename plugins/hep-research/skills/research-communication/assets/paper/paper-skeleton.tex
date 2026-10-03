@@ -1,0 +1,111 @@
+% Generic, venue-agnostic starting skeleton.
+%
+% This intentionally uses the plain `article` class rather than a journal's
+% own class or package (REVTeX, jheppub, sn-jnl, ...): those are maintained and
+% distributed by the publisher/society and should be pulled fresh from the
+% journal's site once the target venue is fixed -- see
+% ../../references/latex-venue-setup.md for where to get each one and a
+% ready-to-adapt skeleton in that venue's actual class.
+%
+% This file is meant as an early, venue-agnostic draft starting point, or
+% for internal notes / theses / arXiv-only preprints that don't need a
+% specific journal class.
+
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[colorlinks=true, citecolor=blue, linkcolor=blue, urlcolor=blue]{hyperref}
+
+\title{Title States the Result, Not the Method}
+\author{First Author$^{1}$, Second Author$^{2}$ \\[4pt]
+  \small $^1$Institution A, City, Country \\
+  \small $^2$Institution B, City, Country}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+  One sentence of context. One to two sentences on the dataset/method used.
+  One sentence stating the headline result with its uncertainty. One
+  sentence on significance and comparison to prior work or theory. Write
+  this section last, after every number below is final.
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+
+State the physics motivation, summarize prior measurements with citations
+(e.g.~\cite{example:key}), and state explicitly what this paper adds.
+
+\section{Dataset and Method}
+\label{sec:dataset}
+
+Describe the data source / theoretical framework in enough detail for an
+expert reader to judge adequacy, not to re-derive the setup from scratch.
+
+\section{Analysis}
+\label{sec:analysis}
+
+Describe the selection / calculation as a narrative, with a cutflow table
+(Table~\ref{tab:cutflow}) if useful.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Example cutflow table. Replace with real numbers; delete if not
+    applicable.}
+  \label{tab:cutflow}
+  \begin{tabular}{lrr}
+    \toprule
+    Selection & Events & Efficiency [\%] \\
+    \midrule
+    Preselection & 000{,}000 & 100.0 \\
+    Trigger      & 000{,}000 &  00.0 \\
+    Final        & 000{,}000 &  00.0 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\section{Systematic Uncertainties}
+\label{sec:systematics}
+
+Organize by source; summarize in a table (source, size, correlation)
+alongside supporting text on how each was evaluated.
+
+\section{Results}
+\label{sec:results}
+
+State the headline number plainly, with statistical and systematic
+uncertainty distinguished, e.g.\ $125.3 \pm 0.4~\mathrm{(stat)} \pm
+0.6~\mathrm{(syst)}$~GeV, and compare explicitly to theory or prior
+measurements (Fig.~\ref{fig:result}).
+
+\begin{figure}[htbp]
+  \centering
+  % \includegraphics[width=0.9\linewidth]{figures/result.pdf}
+  \caption{Replace with the actual result figure. Caption should state what
+    is shown, briefly how it was made, and the one-sentence takeaway.}
+  \label{fig:result}
+\end{figure}
+
+\section{Summary}
+\label{sec:summary}
+
+Restate the result in one or two sentences, note implications, and
+optionally outlook -- no new numbers not already given in
+Sec.~\ref{sec:results}.
+
+\section*{Acknowledgments}
+
+Funding agencies and collaboration boilerplate go here; confirm current
+wording with the collaboration's publications committee rather than reusing
+an old paper's text verbatim.
+
+\bibliographystyle{plain} % swap for the venue's required style, e.g. apsrev4-2 or JHEP
+\bibliography{references}
+
+\end{document}

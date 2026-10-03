@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Audit the documented one-dimensional JSON histogram bundle without mutation.
 
-Run: python3 ${CLAUDE_PLUGIN_ROOT}/skills/hep-computing/scripts/audit_histograms.py ${CLAUDE_PLUGIN_ROOT}/skills/hep-analysis/templates/histograms.example.json
+Run: python3 ${CLAUDE_PLUGIN_ROOT}/skills/hep-computing/scripts/audit_histograms.py ${CLAUDE_PLUGIN_ROOT}/skills/hep-computing/assets/histograms.example.json
 Standard library only. Input excludes flow bins; sumw2 is MC variance bookkeeping,
 not a general covariance matrix. Exit 1 for invalid content, 0 for warnings only.
 """

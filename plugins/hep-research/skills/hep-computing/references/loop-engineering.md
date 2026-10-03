@@ -98,7 +98,7 @@ or invent a plausible-sounding number.
 ## What This Looks Like in the Task Template
 
 This reference does not add a section to
-[task-template.md](../templates/task-template.md) - that section contract is
+[task-template.md](../assets/task-template.md) - that section contract is
 fixed. Write the loop's shape and guardrails into the existing sections
 instead:
 

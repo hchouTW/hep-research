@@ -87,7 +87,7 @@ both appear whenever the request says a component splits, dispatches or calls ot
 edges in a second style with a legend entry, never omit them, and list unstated triggers as open
 questions. Add no node the request did not name; list extra steps as open questions instead.
 
-## Publication Standards (summary; detail in `academic-figure-style.md`)
+## Publication Standards (summary; detail in `diagram-figure-style.md`)
 
 - Clarity over decoration; short labels (<= ~4 words), math in LaTeX syntax. In Mermaid, single-`$` math does not render;
   use `$$...$$` (renderer-dependent) or plain Unicode (θ, α) in labels.
@@ -102,31 +102,31 @@ questions. Add no node the request did not name; list extra steps as open questi
 Generic: arrows meaningful? causality implied wrongly? input/output direction consistent?
 loops explicit? hidden vs observed distinct? training vs inference separate? measurement
 vs prediction? control flow vs data flow? uncertainty shown appropriately?
-Domain checklists: [HEP](high-energy-physics.md),
-[statistics](probability-statistics.md),
-[computer science](computer-science.md).
+Domain checklists: [HEP](diagrams-hep.md),
+[statistics](diagrams-statistics.md),
+[computer science](diagrams-computer-science.md).
 
 ## Specializations - load only the one needed
 
-- HEP -> [high-energy-physics.md](high-energy-physics.md)
-- Probability/statistics -> [probability-statistics.md](probability-statistics.md)
-- Computer science / ML / agents -> [computer-science.md](computer-science.md)
+- HEP -> [diagrams-hep.md](diagrams-hep.md)
+- Probability/statistics -> [diagrams-statistics.md](diagrams-statistics.md)
+- Computer science / ML / agents -> [diagrams-computer-science.md](diagrams-computer-science.md)
 
 ## Reference Routing
 
 - Layout, abstraction levels, decomposition, refactoring, type transformations ->
   [general-diagram-principles.md](general-diagram-principles.md)
 - Typography, color, column widths, style spec, multi-figure consistency ->
-  [academic-figure-style.md](academic-figure-style.md)
+  [diagram-figure-style.md](diagram-figure-style.md)
 - Mermaid / Graphviz / PlantUML / TikZ syntax patterns and pitfalls ->
   [mermaid-patterns.md](mermaid-patterns.md),
   [graphviz-patterns.md](graphviz-patterns.md),
   [plantuml-patterns.md](plantuml-patterns.md),
-  [tikz-patterns.md](tikz-patterns.md); SVG spec -> `../templates/svg-spec.md`
-- Captions and in-text references -> [figure-captions.md](figure-captions.md)
+  [tikz-patterns.md](tikz-patterns.md); SVG spec -> `../assets/diagrams/svg-spec.md`
+- Captions and in-text references -> [diagram-captions.md](diagram-captions.md)
 - Legends, multi-panel figures, posters/theses, Beamer overlays, equation placement, symbol table, export
   (SVG/PDF/PNG) -> [legends-panels-and-export.md](legends-panels-and-export.md)
-- Starting skeletons -> `../templates/` (research-workflow, algorithm-flowchart,
+- Starting skeletons -> `../assets/diagrams/` (research-workflow, algorithm-flowchart,
   system-architecture, hep-analysis-pipeline, probabilistic-graphical-model,
   agentic-ai-architecture, ml-pipeline, bayesian-model, svg-spec)
 - Rough sketch or photo -> spec: [general-diagram-principles.md](general-diagram-principles.md) section 11
@@ -150,8 +150,8 @@ Domain checklists: [HEP](high-energy-physics.md),
   read them before drawing an architecture; do not infer from filenames alone.
 - Numbers in labels (file counts, section counts, layer sizes, thresholds) are facts: measure or copy
   them from the source (`ls | wc -l`, the code, the text) or leave them out. Count the things
-  themselves, not mentions of them: two validation runs (different models) labeled a `references/`
-  folder "33 topic files" because `SKILL.md` links 33 paths (two pointing at other skills), while the folder holds 31.
+  themselves, not mentions of them: counting the links in a `SKILL.md` over-counts a `references/` folder
+  when some links point into other folders.
 - Do not add generator, detector, or method details the source does not give (e.g. "parton shower +
   hadronization" for a plain "simulation"); leave the box generic and ask.
 
@@ -169,18 +169,8 @@ Domain checklists: [HEP](high-energy-physics.md),
 
 ## Shared Figure Style
 
-For multi-figure papers, fix one style spec up front and reuse it:
-
-```yaml
-figure_style:
-  orientation: left-to-right
-  typography: academic
-  color_policy: grayscale-safe
-  edge_style: semantic
-  math_format: latex
-  abstraction: paper
-  output: svg
-```
+For multi-figure papers, fix one `figure_style` block up front and reuse it; the block and its fields are in
+[diagram-figure-style.md](diagram-figure-style.md#panels-and-multi-figure-consistency).
 
 ## Quick Checklist
 

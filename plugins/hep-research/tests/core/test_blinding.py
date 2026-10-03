@@ -101,6 +101,19 @@ class ScanTests(unittest.TestCase):
         leaks = bl.scan_paths([self.out], self.sealed)["leaks"]
         self.assertTrue(any(lk.get("array") == "raw" for lk in leaks))
 
+    def test_leak_through_cumulative_sum(self):
+        # integrated yield above 125: the last three bins, one of them blinded
+        (self.out / "integral.txt").write_text(f"N(m > 125) = {1180.25 + 431.0 + 389.0:.2f}\n")
+        self.assertFalse(bl.scan_paths([self.out], self.sealed)["ok"])
+
+    def test_leak_with_thousands_separator(self):
+        (self.out / "table.md").write_text("| SR bin | 1,234.57 |\n")
+        self.assertFalse(bl.scan_paths([self.out], self.sealed)["ok"])
+
+    def test_seal_refuses_masked_values(self):
+        with self.assertRaises(ValueError):
+            bl.seal(EDGES, bl.mask_binned(EDGES, DATA, SR)["values"], SR)
+
     def test_short_numbers_are_not_false_positives(self):
         (self.out / "x.txt").write_text("bins 12 epochs 1.2 seed 7\n")
         self.assertTrue(bl.scan_paths([self.out], self.sealed)["ok"])

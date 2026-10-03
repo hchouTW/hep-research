@@ -64,7 +64,7 @@
    "status": "tested-in-declared-environment",
    "scope": "Path C (examples/qed-benchmark): theory spec, derivation record and prediction artifacts with zero experiment resources read (recorded per run)",
    "tests": [
-    "../../../tests/examples/test_path_c.py"
+    "../../../tests/examples/test_qed_prediction.py"
    ]
   }
  ]

@@ -1,21 +1,6 @@
 {
  "admission_rule": "A module enters core/ only when code is used by more than one top-level component (skills/*/scripts, profiles/*, adapters/*, contracts/). Experiment- or theory-domain specifics never enter core/.",
  "modules": {
-  "bootstrap": {
-   "steward": "hep-computing",
-   "status": "implemented",
-   "purpose": "Plugin-root resolution from __file__"
-  },
-  "units": {
-   "steward": "hep-theory",
-   "status": "planned-M2",
-   "purpose": "Unit registry and conversions with provenance"
-  },
-  "constants": {
-   "steward": "hep-theory",
-   "status": "planned-M2",
-   "purpose": "Physical constants with source and edition"
-  },
   "kinematics": {
    "steward": "hep-theory",
    "status": "implemented-M2",
@@ -24,11 +9,6 @@
     "relativistic"
    ],
    "source": "agentic-ai-skills@3e995a4 ams-analysis/scripts/ams_kinematics.py (moved whole: all conversions are generic; no constants embedded, masses are caller-supplied)"
-  },
-  "binned": {
-   "steward": "hep-computing",
-   "status": "planned-M2",
-   "purpose": "Binned-data representation and JSON I/O"
   },
   "stats": {
    "steward": "hep-statistics",

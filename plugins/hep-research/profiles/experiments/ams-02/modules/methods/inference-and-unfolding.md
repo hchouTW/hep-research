@@ -4,7 +4,7 @@
 
 ## When to read this file
 
-Read when writing or reviewing a likelihood, a response/migration model, an unfolding, a forward-folded fit, an interval or limit, a covariance matrix, or a significance. Canonical home for the count/response model, covariance types, unfolding validation, and rare-event inference. Efficiency and background definitions are in [efficiency-acceptance-backgrounds](../methods/efficiency-acceptance-backgrounds.md).
+Read when writing or reviewing a likelihood, a response/migration model, an unfolding, a forward-folded fit, an interval or limit, a covariance matrix, or a significance. Canonical home for the count/response model, covariance types, unfolding validation, and rare-event inference. Efficiency and background definitions are in [efficiency-acceptance-backgrounds](efficiency-acceptance-backgrounds.md).
 
 ## Contents
 
@@ -59,7 +59,7 @@ For any published or used covariance matrix record: bin ordering, units, absolut
 2. Numerical only: clip negative eigenvalues (or take the nearest PSD matrix), record the change, and confirm the fit or χ² result is unchanged within tolerance.
 3. Construction error: do not clip. Check mixed conventions (absolute vs relative, bin ordering, units), rounded or guessed correlation tables, subtracted terms with an implausible correlation, components added twice, and unfolding-induced anticorrelation from an under-regularized inversion. Rebuild from coherent variations so each block is PSD by construction, and propagate through the full unfolding with toys (the sample covariance of the toys is PSD).
 4. Never repair by dropping correlations or by quadrature-combining components whose correlations are unknown.
-5. `${CLAUDE_PLUGIN_ROOT}/core/stats/validate_covariance.py` performs the diagnosis in step 1 and can show the effect of a clip as a labeled [Proposal] without changing the matrix (see [analysis-artifacts](../methods/analysis-artifacts.md#checker-scripts)).
+5. `${CLAUDE_PLUGIN_ROOT}/core/stats/validate_covariance.py` performs the diagnosis in step 1 and can show the effect of a clip as a labeled [Proposal] without changing the matrix (see [analysis-artifacts](analysis-artifacts.md#checker-scripts)).
 
 ## Method selection
 
@@ -103,7 +103,7 @@ Map a truth-level model through acceptance, efficiency, and response into recons
 
 ## Template likelihood
 
-Define discriminant bins, component yields, normalized vs unnormalized shapes, finite-template treatment, degeneracy/shape-interpolation/empty-bin/smoothing/control-sample reweighting checks (details in [efficiency-acceptance-backgrounds](../methods/efficiency-acceptance-backgrounds.md#template-fits)). If a classifier defines the discriminant: independent training sample, input-variable audit, overtraining test, domain-shift validation, stability vs kinematics and time. Report convergence, pulls and constraints, correlations of fit parameters, goodness of fit, coverage/calibration, and robustness to alternate templates.
+Define discriminant bins, component yields, normalized vs unnormalized shapes, finite-template treatment, degeneracy/shape-interpolation/empty-bin/smoothing/control-sample reweighting checks (details in [efficiency-acceptance-backgrounds](efficiency-acceptance-backgrounds.md#template-fits)). If a classifier defines the discriminant: independent training sample, input-variable audit, overtraining test, domain-shift validation, stability vs kinematics and time. Report convergence, pulls and constraints, correlations of fit parameters, goodness of fit, coverage/calibration, and robustness to alternate templates.
 
 ## Intervals, limits, significance
 

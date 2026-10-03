@@ -6,7 +6,7 @@ evaluate the number of charged particles N(X) at any atmospheric slant depth, th
 shower age parameter, and the depths at which the profile falls to a given fraction
 of its maximum on either side of X_max - the standard way to characterize a
 longitudinal profile's width, not just its peak. See
-${CLAUDE_PLUGIN_ROOT}/skills/detector-response/references/31-extensive-air-showers.md. This is an evaluator for a given or
+${CLAUDE_PLUGIN_ROOT}/skills/detector-response/references/extensive-air-showers.md. This is an evaluator for a given or
 externally fitted parameter set, not a nonlinear curve fitter: extracting these four
 parameters from raw simulated or measured (X, N) samples requires a nonlinear least-
 squares fit, which is outside the closed-form, no-minimizer scope this skill's
@@ -18,7 +18,7 @@ What it does: evaluates
 at one or more depths, confirms N(X_max) == N_max as a self-consistency check, and
 computes the shower age s(X) = 3*(X - X0) / ((X - X0) + 2*(X_max - X0)), which is 1 at
 X = X_max by construction and is the variable shower-universality parameterizations
-(${CLAUDE_PLUGIN_ROOT}/skills/detector-response/references/31-extensive-air-showers.md) use to compare showers of different energy
+(${CLAUDE_PLUGIN_ROOT}/skills/detector-response/references/extensive-air-showers.md) use to compare showers of different energy
 and mass on a common footing.
 
 Usage notes / assumptions: standard library only. Depths in g/cm^2. Requires

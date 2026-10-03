@@ -4,7 +4,7 @@
 
 ## When to read this file
 
-Read only when the request is to design or write down an AMS measurement as a structured specification, generate a measurement brief or any ledger/registry (selection, background, systematic, response, evidence), run or interpret the deterministic checkers in `scripts/`, or write a formal verdict-first analysis review. Do not load it for a conceptual question or a quick conversion. Field semantics for selections, backgrounds and systematics stay in their canonical homes: [reconstruction-and-data-quality](../methods/reconstruction-and-data-quality.md#cut-flow-ledger), [efficiency-acceptance-backgrounds](../methods/efficiency-acceptance-backgrounds.md#background-ledger), [calibration-mc-systematics](../methods/calibration-mc-systematics.md#systematic-ledger). Evidence rules are in [source-policy](../sources/source-policy.md).
+Read only when the request is to design or write down an AMS measurement as a structured specification, generate a measurement brief or any ledger/registry (selection, background, systematic, response, evidence), run or interpret the deterministic checkers in `scripts/`, or write a formal verdict-first analysis review. Do not load it for a conceptual question or a quick conversion. Field semantics for selections, backgrounds and systematics stay in their canonical homes: [reconstruction-and-data-quality](reconstruction-and-data-quality.md#cut-flow-ledger), [efficiency-acceptance-backgrounds](efficiency-acceptance-backgrounds.md#background-ledger), [calibration-mc-systematics](calibration-mc-systematics.md#systematic-ledger). Evidence rules are in [source-policy](../sources/source-policy.md).
 
 ## Contents
 
@@ -19,7 +19,7 @@ Read only when the request is to design or write down an AMS measurement as a st
 
 ## Format and provenance rules
 
-- Specifications are **JSON**, or **YAML in a strict subset** read by `${CLAUDE_PLUGIN_ROOT}/contracts/legacy/yaml_subset.py` (standard library only; the subset and the features it rejects are listed at the end of this section). YAML blocks in other modules are display sketches of the same keys and may use syntax outside the subset (for example `a | b` alternatives); they are not specifications.
+- Specifications are **JSON**, or **YAML in a strict subset** read by `${CLAUDE_PLUGIN_ROOT}/profiles/experiments/ams-02/scripts/yaml_subset.py` (standard library only; the subset and the features it rejects are listed at the end of this section). YAML blocks in other modules are display sketches of the same keys and may use syntax outside the subset (for example `a | b` alternatives); they are not specifications.
 - `abs_Z` is the absolute charge number `|Z|`; the sign of the charge is a separate field `charge_sign` (`+1`, `-1`, or `"both"`). Rigidity is in GV, momentum and energies in GeV (momentum in GeV/c), kinetic energy per nucleon in GeV/n.
 - Every number that describes AMS (a cut value, a resolution, an efficiency, a systematic size, a cutoff factor) is an entry in `parameters` with a `provenance` of `documented` (needs `claim_ids` in `${CLAUDE_PLUGIN_ROOT}/profiles/experiments/ams-02/evidence/claims.json`), `general_method`, `proposal`, `user_supplied` or `unknown`. A `documented` entry whose claim is scoped to another species, range, period or analysis is a scope violation, not documentation.
 - `unresolved_inputs` lists what the analysis still needs; the auditor reports it as `unresolved`, never as an error.
@@ -93,7 +93,7 @@ Run from the skill directory. Exit codes: 0 no errors, 1 diagnostics reported er
 | `${CLAUDE_PLUGIN_ROOT}/core/evidence/ledger.py` | IDs, references, states, supersession, over-strong claims, stale verification |
 | `${CLAUDE_PLUGIN_ROOT}/core/evidence/render_index.py` | Render or check the tables in `evidence/index.md` from the JSON ledger |
 | `${CLAUDE_PLUGIN_ROOT}/profiles/experiments/ams-02/scripts/audit_analysis_spec.py` | Audit a specification (JSON, or YAML by `.yaml`/`.yml` suffix); classify findings as error, warning, proposal, or unresolved; optional verdict-first markdown |
-| `${CLAUDE_PLUGIN_ROOT}/contracts/legacy/yaml_subset.py` | Strict YAML-subset reader used for YAML specifications (`${CLAUDE_PLUGIN_ROOT}/profiles/experiments/ams-02/tests/fixtures/spec_valid.yaml` is the worked example); `python3 ${CLAUDE_PLUGIN_ROOT}/contracts/legacy/yaml_subset.py FILE.yaml` prints the parsed JSON |
+| `${CLAUDE_PLUGIN_ROOT}/profiles/experiments/ams-02/scripts/yaml_subset.py` | Strict YAML-subset reader used for YAML specifications (`${CLAUDE_PLUGIN_ROOT}/profiles/experiments/ams-02/tests/fixtures/spec_valid.yaml` is the worked example); `python3 ${CLAUDE_PLUGIN_ROOT}/profiles/experiments/ams-02/scripts/yaml_subset.py FILE.yaml` prints the parsed JSON |
 
 A YAML specification is read with a strict subset: mappings, lists, quoted or plain scalars, comments, one-line `[ ]` and `{ }`, and `|`/`>` block scalars. Anchors, aliases, tags, multiple documents, multi-line flow or quoted scalars, tab indentation and duplicate keys are rejected with a line number (exit 2), never guessed; dates stay strings and `yes`/`no` stay strings, so write booleans as `true`/`false` and quote any plain text containing `: `.
 

@@ -7,7 +7,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]  # the ams-02 profile folder
 sys.path.insert(0, str(ROOT.parents[2]))  # plugin root
-from contracts.legacy import yaml_subset as ys  # noqa: E402
+sys.path.insert(0, str(ROOT / "scripts"))
+import yaml_subset as ys  # noqa: E402
 from core.evidence import ledger as vel  # noqa: E402
 
 ARTIFACTS = (ROOT / "modules" / "methods" / "analysis-artifacts.md").read_text(encoding="utf-8")

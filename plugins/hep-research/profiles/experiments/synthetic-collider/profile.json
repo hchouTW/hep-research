@@ -63,7 +63,7 @@
    "status": "demonstrated-on-synthetic-data",
    "scope": "Path B (examples/collider-angular): luminosity-normalized, efficiency- and resolution-corrected d sigma / d cos theta and fiducial cross section with covariance; Asimov and seeded-toy closure against independent analytic expected values. Synthetic and illustrative only",
    "tests": [
-    "../../../tests/examples/test_path_b.py"
+    "../../../tests/examples/test_collider_angular.py"
    ]
   },
   {
@@ -71,7 +71,7 @@
    "status": "demonstrated-on-synthetic-data",
    "scope": "J2 (examples/detector-resolution): per-bin cos theta resolution and efficiency at detector level with a constant-width fit and replicate pulls. Synthetic and illustrative only",
    "tests": [
-    "../../../tests/examples/test_journeys_j2_j7.py"
+    "../../../tests/examples/test_detector_resolution_and_recasting.py"
    ]
   }
  ]

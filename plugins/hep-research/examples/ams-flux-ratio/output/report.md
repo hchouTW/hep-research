@@ -2,7 +2,7 @@
 
 **Status: synthetic.** All inputs are invented (see `results.json` → `synthetic_inputs`). Nothing here is an AMS-02 measurement, performance figure or result. The profile supplies conventions (rigidity R = pc/(Ze) in GV, flux at the top of the instrument, exposure normalization) and one documented practice: R > 1.2 × maximum cutoff, documented for the proton flux analysis [Documented, ams02:C31] and applied to helium here as a [Proposal].
 
-Reproduce: `python3 examples/ams-flux-ratio/run_path_a.py --toys 400 --seed 20261002` (from the plugin root, D5 environment).
+Reproduce: `python3 examples/ams-flux-ratio/run.py --toys 400 --seed 20261002` (from the plugin root, D5 environment).
 
 ## Pre-declared criteria and outcome
 

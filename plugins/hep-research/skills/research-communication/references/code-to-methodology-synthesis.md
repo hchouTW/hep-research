@@ -81,7 +81,7 @@ formulation with no owner is still unverified, not implicitly checked.
      from the codebase's actual imports/lockfile/build config, not assumed;
      a minimal runnable quickstart snippet built from the code's own entry
      point, not invented usage.
-   - `../assets/templates/code_to_methodology_manual_template.md` gives the
+   - `../assets/paper/code-to-methodology-manual-template.md` gives the
      fill-in-the-blank output shape for both parts.
 
 ## Working within this skill's existing discipline

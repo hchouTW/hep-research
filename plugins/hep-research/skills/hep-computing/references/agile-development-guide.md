@@ -35,7 +35,7 @@ done, reported honestly.
 8. **Review your own diff** for scope, clarity, security, privacy, compatibility, and
    accidental changes - see [references/risk-and-quality.md](risk-and-quality.md).
 9. **Report honestly**: what changed, what passed, what wasn't run and why,
-   assumptions made, and remaining risk - see [references/communication.md](communication.md).
+   assumptions made, and remaining risk - see [references/status-updates-and-completion.md](status-updates-and-completion.md).
 
 ## Decision Rules
 
@@ -89,7 +89,7 @@ report rather than adding one to a trivial diff.
 - **Risk areas**: API/interface changes, data & persistence, security & privacy,
   dependencies, config, observability, performance, accessibility ->
   [references/risk-and-quality.md](risk-and-quality.md)
-- **Status updates and completion summaries** -> [references/communication.md](communication.md)
+- **Status updates and completion summaries** -> [references/status-updates-and-completion.md](status-updates-and-completion.md)
 - **C++ design - load only when designing C++ code** (classes vs. structs vs. free functions, ownership, RAII, composition
   vs. inheritance, error handling) -> [references/cpp-balanced-design-guidelines.md](cpp-balanced-design-guidelines.md)
 - **Python design - load only when designing Python code** (classes vs. dataclasses vs. free functions, context managers,

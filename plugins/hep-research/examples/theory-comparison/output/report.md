@@ -2,7 +2,7 @@
 
 **Status: synthetic.** The data come from the illustrative `experiment:synthetic-collider` generator with sigma_gen = mu x sigma_pred and mu = 1 injected; the harness passes sigma_pred from the Path C artifact to the generator. The fit therefore tests the comparison chain, not physics. No statement about new physics is made or possible.
 
-Reproduce: `python3 examples/theory-comparison/run_path_d.py --toys 200 --seed 20261004` (from the plugin root, after Paths B and C; D5 environment). Profiles loaded: `experiment:synthetic-collider`, `theory:qed-benchmark`.
+Reproduce: `python3 examples/theory-comparison/run.py --toys 200 --seed 20261004` (from the plugin root, after Paths B and C; D5 environment). Profiles loaded: `experiment:synthetic-collider`, `theory:qed-benchmark`.
 
 ## Contract trace
 
@@ -56,4 +56,4 @@ sigma_pred = 868.0 pb (Path C). 17521 events generated; measured luminosity 19.7
 - The response uses the predicted shape inside each bin; a different shape hypothesis needs its own response.
 - The data are synthetic and generated from the same shape, so agreement is expected by construction.
 
-Figure: `path_d.png`. Artifacts: `artifacts/*.json`.
+Figure: `folded_comparison.png`. Artifacts: `artifacts/*.json`.

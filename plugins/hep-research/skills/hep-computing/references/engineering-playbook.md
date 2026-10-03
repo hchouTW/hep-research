@@ -124,7 +124,7 @@ Do not add comments that merely repeat the code. Prefer clearer names and simple
    that trade by default.
 3. Communicate on a fixed cadence (even "no update yet, still investigating" on
    schedule beats silence) to whoever depends on the service being restored -
-   see [communication.md](communication.md) for tone and structure;
+   see [status-updates-and-completion.md](status-updates-and-completion.md) for tone and structure;
    incident updates are terser and more frequent than a normal status update.
 4. Once mitigated, find the actual root cause with the same rigor as a bug fix
    (see Bug Fix above) rather than stopping at the first plausible explanation -

@@ -17,7 +17,7 @@ JSON object mapping split names to ID lists, optionally with "groups" (ID -> gro
 "timestamps" (ID -> comparable number). IDs must be exact - this does not detect
 near-duplicates, which need a modality-appropriate similarity check (see
 ${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/references/data-strategy.md).
-Run: python3 ${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/scripts/check_split_integrity.py ${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/assets/dataset_splits.example.json
+Run: python3 ${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/scripts/check_split_integrity.py ${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/assets/dataset-splits.example.json
 """
 
 import argparse

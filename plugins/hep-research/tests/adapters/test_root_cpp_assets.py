@@ -1,6 +1,6 @@
 """adapters/root-uproot: the C++ assets build against ROOT and run on the SYNTHETIC ROOT fixtures.
 
-- cpp_rdataframe_analysis.cpp, fit_histogram.cpp and rdf_analysis.cpp compile with `root-config --cxx --cflags --libs`;
+- rdf_cutflow_analysis.cpp, fit_histogram.cpp and rdf_histogram_branch.cpp compile with `root-config --cxx --cflags --libs`;
 - the C++ RDataFrame cutflow equals the PyROOT asset's cutflow on the same file (two implementations, one selection);
 - CMakeLists.txt configures and builds its `analysis` target;
 - plot_branch.C runs as a batch macro.
@@ -18,7 +18,7 @@ from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
 ASSETS = ROOT_DIR / "adapters" / "root-uproot" / "assets"
-FIXTURES = ROOT_DIR / "tests" / "skills" / "hep_computing" / "hep_analysis_make_root_fixtures.py"
+FIXTURES = ROOT_DIR / "tests" / "skills" / "hep_computing" / "make_root_fixtures.py"
 
 
 def _root_config():
@@ -63,7 +63,7 @@ class RootCppAssetTests(unittest.TestCase):
         cls.flags = _rc("--cflags", "--libs")
         libdir = _rc("--libdir")[0]
         cls.binaries = {}
-        for name in ("cpp_rdataframe_analysis", "fit_histogram", "rdf_analysis"):
+        for name in ("rdf_cutflow_analysis", "fit_histogram", "rdf_histogram_branch"):
             out = cls.dir / name
             proc = subprocess.run([cls.cxx, str(ASSETS / f"{name}.cpp"), "-o", str(out), *cls.flags, f"-Wl,-rpath,{libdir}"],
                                   capture_output=True, text=True, env=_env())
@@ -81,9 +81,9 @@ class RootCppAssetTests(unittest.TestCase):
         return proc.stdout + proc.stderr
 
     def test_cpp_cutflow_equals_pyroot_cutflow(self):
-        cpp = _cutflow(self.run_bin("cpp_rdataframe_analysis", "--input", "events.root", "--tree", "Events",
+        cpp = _cutflow(self.run_bin("rdf_cutflow_analysis", "--input", "events.root", "--tree", "Events",
                                     "--output", "cpp_rdf.root"))
-        py = subprocess.run([self.python, str(ASSETS / "pyroot_rdataframe_analysis.py"), "--input", "events.root",
+        py = subprocess.run([self.python, str(ASSETS / "pyroot_rdf_cutflow_analysis.py"), "--input", "events.root",
                              "--output", "py_rdf.root"], capture_output=True, text=True, cwd=self.dir, env=_env())
         self.assertEqual(py.returncode, 0, py.stderr[-2000:])
         self.assertEqual(len(cpp), 3)
@@ -96,8 +96,8 @@ class RootCppAssetTests(unittest.TestCase):
         self.assertIn("chi2/ndf", out)
         self.assertTrue((self.dir / "fit.pdf").exists())
 
-    def test_rdf_analysis_histograms_a_branch(self):
-        out = self.run_bin("rdf_analysis", "events.root", "rdf_out.root", "Events", "Muon_pt")
+    def test_rdf_histogram_branch_histograms_a_branch(self):
+        out = self.run_bin("rdf_histogram_branch", "events.root", "rdf_out.root", "Events", "Muon_pt")
         self.assertIn("Events: 5000", out)
         self.assertTrue((self.dir / "rdf_out.root").exists())
 

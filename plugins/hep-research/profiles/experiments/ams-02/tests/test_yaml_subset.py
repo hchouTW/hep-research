@@ -19,7 +19,7 @@ sys.path.insert(0, str(ROOT.parents[2]))  # plugin root: core/, contracts/
 FIX = ROOT / "tests" / "fixtures"
 sys.path.insert(0, str(ROOT / "scripts"))
 import audit_analysis_spec as aas  # noqa: E402
-from contracts.legacy import yaml_subset as ys  # noqa: E402
+import yaml_subset as ys  # noqa: E402
 
 
 def L(text):

@@ -67,7 +67,7 @@ substitutions:
 
 ## Journals and venues
 
-In addition to the collider-physics venues in `latex-and-formatting.md` (sources and
+In addition to the collider-physics venues in `latex-venue-setup.md` (sources and
 last-verified dates are in its final section; rows marked "Not checked" were not verified):
 
 | Venue | Class file | Typical length | Notes |
@@ -86,7 +86,7 @@ version numbers with formatting-relevant changes (author lists, table environmen
 arXiv category: `astro-ph.HE` (high-energy astrophysical phenomena) is the primary
 category for most cosmic-ray/gamma-ray/neutrino result papers; cross-list `hep-ex` if
 the result also has direct particle-physics relevance (e.g. an AMS-02 antimatter/dark
-matter search). See `latex-and-formatting.md`'s arXiv-specific-rules section for the
+matter search). See `latex-venue-setup.md`'s arXiv-specific-rules section for the
 general category-selection guidance.
 <!-- /example -->
 

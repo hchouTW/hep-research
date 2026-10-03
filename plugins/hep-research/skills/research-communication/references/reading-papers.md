@@ -162,7 +162,7 @@ For staying current rather than deep-reading one paper:
 
 ## Taking notes
 
-Use `../assets/templates/reading_notes_template.md` as a starting shape for structured
+Use `../assets/paper/reading-notes-template.md` as a starting shape for structured
 notes on a single paper: claim, method, evidence, limitations, and relevance to the
 user's own work. Notes taken in this shape during pass 2/3 are directly reusable
 later — as the raw material for a literature-review comparison matrix

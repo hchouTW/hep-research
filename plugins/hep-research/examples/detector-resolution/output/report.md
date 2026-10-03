@@ -12,4 +12,4 @@ Criteria: width_closure pass, width_constant_model pass, efficiency_vs_model pas
 
 Limits: the detector is invented and Gaussian; the large-sample width uncertainty is checked by replicates only for this sample size; bins stop at |cos theta| = 0.9 so the acceptance edge does not truncate the residuals. This shows the J2 chain and its contracts, not any detector's performance.
 
-Reproduce: `python3 examples/detector-resolution/run_j2.py --replicates 200 --seed 20261005`
+Reproduce: `python3 examples/detector-resolution/run.py --replicates 200 --seed 20261005`

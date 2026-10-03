@@ -1,21 +1,22 @@
 Nine worked Task Markdown outputs: one per category (feature, bug, performance,
 research) from the original authoring workflow this skill was built from, three
-added on 2026-10-02 (migration, agentic loop, data/ML), plus two `hep-analysis`
-requests. Each follows
-[../templates/task-template.md](../templates/task-template.md) exactly and
-each demonstrates the Confirmed / Inferred / Unresolved distinction from
-`SKILL.md`'s Core Workflow with a non-trivial Open Questions section - none
-of them mark an unknown as resolved just to look complete. `tests/` checks that
-every `*-task.md` here carries the 12 required sections in order.
+added on 2026-10-02 (migration, agentic loop, data/ML), plus two analysis
+requests. Each follows [../assets/task-template.md](../assets/task-template.md)
+exactly and demonstrates the Confirmed / Inferred / Unresolved distinction from
+the [task authoring guide](../references/task-authoring-guide.md) with a
+non-trivial Open Questions section; none of them mark an unknown as resolved just
+to look complete. The tests check that every `*-task.md` here carries the 12
+required sections in order.
 
 <!-- example: experiment-specific illustration -->
-All of them target this repository (`agentic-ai-skills`) itself as the inspected
-repository, so every Repository Context claim was a real, verified fact about it
-when written rather than an invented one. The feature, bug and research examples
-were rewritten on 2026-10-02 against the repository as it is now (seven skills,
-no `academic-papers/examples/`, no byte-identical reference files). The
-performance, CMS and AMS examples were written in September 2026; those that
-went stale carry a dated "Snapshot note" under their title.
+**These are historical snapshots.** All of them were written against the legacy
+skills repository (`agentic-ai-skills` at the pinned commit `3e995a4`, seven
+standalone skills) as the inspected repository, so every Repository Context claim
+was a real, verified fact about that repository when written. Paths they cite
+(for example `academic-papers/...`, `deep-learning/...`, `task-authoring/...`)
+refer to that repository, not to this plugin; `lint_task.py` resolves them against
+a legacy checkout (`tasks/hep-research/scripts/fetch_legacy.sh`). Read them for
+their structure, not their paths.
 <!-- /example -->
 
 | Example | Category | Scenario | Open Questions highlight |

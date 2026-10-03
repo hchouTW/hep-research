@@ -50,13 +50,5 @@ Avoid expensive end-to-end coverage when a faster lower-level test proves the be
 
 ## Definition of Done
 
-The checkable version is [assets/definition-of-done.md](../assets/definition-of-done.md); agile-development-guide.md's "Before Reporting
-Done" is the short form. Keep the three in step.
-
-- Requested observable behavior is implemented.
-- Acceptance criteria are met or deviations are documented.
-- Relevant automated tests are added or updated where feasible.
-- Appropriate validation checks pass, or failures are accurately disclosed.
-- Security, privacy, accessibility, compatibility, and data concerns were considered.
-- Documentation and examples are updated when behavior requires it.
-- The final summary states changes, verification, assumptions, and remaining risk.
+The checklist is [assets/definition-of-done.md](../assets/definition-of-done.md); the "Before Reporting Done" list in
+[agile-development-guide.md](agile-development-guide.md) is its short form. Keep the two in step.

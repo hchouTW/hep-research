@@ -3,7 +3,7 @@
 
 Computes efficiency = pass / total for one or more (pass, total) bins and an exact
 Clopper-Pearson confidence interval (not a Gaussian/Wald approximation, which is
-unreliable near 0 or 1). See ${CLAUDE_PLUGIN_ROOT}/skills/detector-response/references/19-triggers-luminosity-pileup.md for the
+unreliable near 0 or 1). See ${CLAUDE_PLUGIN_ROOT}/skills/detector-response/references/triggers-luminosity-pileup.md for the
 tag-and-probe methodology this supports. Standard library only; intentionally
 limited to 0 <= total <= 200000 per bin (see module docstring in this file for why).
 Run: python3 ${CLAUDE_PLUGIN_ROOT}/skills/detector-response/scripts/tag_and_probe_efficiency.py --pass-count 92 --total 100

@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+case "${1:-}" in
+  -h|--help)
+    echo "Usage: $(basename "$0")"
+    echo "Check that the CERN ROOT C++ toolchain (root, root-config) is on PATH and print its versions and flags."
+    exit 0 ;;
+esac
+
 printf 'Checking CERN ROOT C++ environment...\n'
 
 if ! command -v root >/dev/null 2>&1; then

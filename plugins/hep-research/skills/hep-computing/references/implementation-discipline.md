@@ -50,7 +50,7 @@ Two related habits, independent of which branch applies:
   decision the requester would have made differently.
 - **Push back when a simpler approach exists.** Say so in a sentence, then proceed with
   what was asked unless told otherwise. Raising it once is useful; relitigating after a
-  decision is not - see [communication.md](communication.md).
+  decision is not - see [status-updates-and-completion.md](status-updates-and-completion.md).
 
 Do not hide confusion. If the request cannot be interpreted well enough to act on,
 naming exactly what is unclear is faster than producing something plausible and wrong.

@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+usage() {
+  echo "Usage: $(basename "$0") [PROJECT_NAME]"
+  echo "Create a minimal CMake + ROOT RDataFrame C++ project in ./PROJECT_NAME (default: root_cpp_analysis)."
+}
+
+case "${1:-}" in
+  -h|--help) usage; exit 0 ;;
+  -*) echo "ERROR: project name must not start with '-': $1" >&2; usage >&2; exit 2 ;;
+esac
+
 PROJECT_NAME="${1:-root_cpp_analysis}"
 mkdir -p "$PROJECT_NAME/src"
 

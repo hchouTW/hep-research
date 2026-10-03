@@ -25,11 +25,20 @@ def main(argv=None) -> int:
     ap.add_argument("--reference", type=Path)
     ap.add_argument("--out", type=Path)
     args = ap.parse_args(argv)
-    h = json.loads(args.hist.read_text(encoding="utf-8"))
-    out = mask_binned(h["edges"], h["values"], {"low": args.low, "high": args.high})
-    if args.reference:
-        ref = json.loads(args.reference.read_text(encoding="utf-8"))["values"]
-        out["ratio_to_reference"] = mask_ratio(h["values"], ref, out["blinded_bins"])
+    if not args.low < args.high:
+        ap.error(f"blinded range needs --low < --high (got {args.low} >= {args.high})")
+    try:
+        h = json.loads(args.hist.read_text(encoding="utf-8"))
+        out = mask_binned(h["edges"], h["values"], {"low": args.low, "high": args.high})
+        if args.reference:
+            ref = json.loads(args.reference.read_text(encoding="utf-8"))["values"]
+            out["ratio_to_reference"] = mask_ratio(h["values"], ref, out["blinded_bins"])
+    except KeyError as exc:
+        print(f"error: histogram JSON is missing key {exc} (expected {{\"edges\": [...], \"values\": [...]}})", file=sys.stderr)
+        return 2
+    except (OSError, ValueError, TypeError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
     text = json.dumps(out, indent=1)
     if args.out:
         args.out.write_text(text + "\n", encoding="utf-8")

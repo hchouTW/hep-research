@@ -18,7 +18,7 @@ for s in ("physics-ml", "hep-analysis"):
 import check_split_integrity  # noqa: E402
 import check_surrogate_domain  # noqa: E402
 import review_analysis_change  # noqa: E402
-from contracts.compat.gate import gate  # noqa: E402
+from contracts.comparison.gate import gate  # noqa: E402
 from contracts.project import load_project  # noqa: E402
 from contracts.validate import required_statuses, validate_artifact  # noqa: E402
 from contracts.vocab import Vocabulary  # noqa: E402

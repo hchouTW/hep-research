@@ -1,6 +1,6 @@
 # General 5: Repository inspection -> architecture
 
-**Request:** "Draw the architecture of this repository." The repository is the skills collection this skill lives in (`~/.agentic_ai_skills`). Source files were read first; only components found in them are drawn.
+**Request:** "Draw the architecture of this repository." The repository is the standalone skills collection this skill came from (`agentic-ai-skills` at `3e995a4`, installed as `~/.agentic_ai_skills`), before it became the `hep-research` plugin; the example is kept for its workflow, not as a description of the plugin. Source files were read first; only components found in them are drawn.
 **Diagram type:** component / dependency diagram, technical level. Solid arrow = "is installed into / is read from", dashed = "is validated against". This is a structural diagram of files, not a runtime data flow.
 
 **Workflow shown:** inspect -> component and connection tables with evidence -> diagram -> caption.

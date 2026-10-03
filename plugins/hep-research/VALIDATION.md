@@ -6,22 +6,22 @@ Software checks establish contract consistency only: not physical validity, proo
 
 | AC | Result | Evidence | Remaining |
 |---|---|---|---|
-| AC01 | pass | `tools/check_traceability.py --legacy .legacy/agentic-ai-skills`: all 949 files tracked at `3e995a4` have a row in `docs/migration-map.csv` with source commit; 380 plugin files are concrete migration destinations, 415 are registered as new in `docs/provenance-new.csv` (commit and milestone from git history); every exclusion (`retain-outside`, `retire`) has a rationale; the legacy checkout is at the pin with no local change. Scientific changes are `sci-fix:` commits with regressions (AC22); 26 vague M1 destinations and 26 directory-valued destinations were made concrete in M6 | — |
+| AC01 | pass | `tools/check_traceability.py --legacy .legacy/agentic-ai-skills`: all 949 files tracked at `3e995a4` have a row in `docs/migration-map.csv` with source commit; 375 plugin files are concrete migration destinations, 439 are registered as new in `docs/provenance-new.csv` (commit and milestone from git history); every exclusion (`retain-outside`, `retire`) has a rationale; the legacy checkout is at the pin with no local change. Scientific changes are `sci-fix:` commits with regressions (AC22); 26 vague M1 destinations and 26 directory-valued destinations were made concrete in M6 | — |
 | AC02 | pass | Seven SKILL.md with uses, exclusions, owned artifacts, handoffs; host validator `--strict` passes; no profile adds a skill; native discovery lists the seven `hep-research:*` skills (G5, `tasks/hep-research/m5/g5/G5-REPORT.md`) | — |
 | AC03 | pass | `check_layering.py` 0 violations (re-run in M5, `check-run-2026-10-02T162614Z.json`); experiment passages in moved text inside example blocks; profile paths rejected in skill/core/contract text | — |
 | AC04 | pass (budgets and traces) | `tasks/hep-research/m5/budgets.json`: SKILL.md 50–63 lines, 5.2–7.0 KiB (≤ 8 KiB), descriptions ≤ 921 chars, always-on ≈2,005 tokens, registry 690 B, profile indexes ≤ 2,370 B; no exceptions (M5-02). Host loading traces from 48 headless runs: no theory or computing case read an experiment profile (G5 run 2); invocation of `hep-theory` read only the registry and the theory profile (`tasks/hep-research/m5/g5/G5-REPORT.md`) | A run-1 trace (host env leaked in) shows one computing case reading the synthetic-collider generator; recorded, not counted |
 | AC05 | pass | One definition and one implementation owner per method: `core/OWNERS.json` (stewards), migration map owner columns; each AMS method module now opens with a `Method owner:` line naming the owning skill and states that its general passages are legacy snapshots the owner overrides (`MethodOwnerTests` in the AMS profile suite); legacy skills documented as frozen snapshots (`docs/migration.md`) | Generic passages inside AMS modules were marked, not deleted (DECISIONS M6-02) |
 | AC06 | pass | Registry negatives: duplicate ID, incompatible version, missing resource, template violation, escaping path (incl. symlink), cycle, missing dependency, unbacked capability, bad namespace, registry mismatch (`RegistryTests`) | — |
-| AC07 | pass | 0/1/many × 0/1/many configs, local profile, conflict diagnostics, overrides need provenance (`ProjectConfigTests`); composition diagnostics for several profiles (`contracts/compat/compose.py`, `ComposeTests`); Path D binds two profiles; project config read by the installed plugin (J11 live case, G5 run 3) | — |
+| AC07 | pass | 0/1/many × 0/1/many configs, local profile, conflict diagnostics, overrides need provenance (`ProjectConfigTests`); composition diagnostics for several profiles (`contracts/comparison/composition.py`, `ComposeTests`); Path D binds two profiles; project config read by the installed plugin (J11 live case, G5 run 3) | — |
 | AC08 | pass | 60 sources / 183 claims as `ams02:` IDs; `check_ams_ledger_preservation.py` passes; index regenerated and in sync; modules for species, subsystems, methods, periods, sources; 7 metadata-only dataset records. Live load traces (G5 run 3): J1 read the registry, `ams-02/index.md` and two modules; J2 read the index and one subsystem module ({G}) | — |
 | AC09 | pass | `tools/check_ams_optional.py`: plugin without the AMS profile passes registry, Paths B and C, core/contract/generic tests and the other profile suites. Live traces: theory, computing and AMS-computing cases read no experiment profile; AMS cases read only `ams-02` files ({G}) | — |
 | AC10 | pass | `experiment:synthetic-collider` (illustrative) added with no change to skills, `core/`, `contracts/`, validators or algorithms: `tasks/hep-research/m3/ac10-diff.txt` lists only the profile, `profiles/registry.json`, `examples/`, `tests/examples/`; generator imports no theory code | — |
-| AC11 | pass (benchmark scope) | `theory:qed-benchmark`: conventions, tree order, validity, `analytic-derivation` status (SymPy traces, 8 checks), PDG eqs. 51.2/51.3 read at page level (`qedbench:S01`, C01, C02), independent checks (Simpson, quad, trapezoid order 2.00), theory_spec and prediction artifacts (`examples/qed-benchmark/output/`) | Competing models T03 in M4 |
+| AC11 | pass (benchmark scope) | `theory:qed-benchmark`: conventions, tree order, validity, `analytic-derivation` status (SymPy traces, 8 checks), PDG eqs. 51.2/51.3 read at page level (`qedbench:S01`, C01, C02), independent checks (Simpson, quad, trapezoid order 2.00), theory_spec and prediction artifacts (`examples/qed-prediction/output/`) | Competing models T03 in M4 |
 | AC12 | pass | Path C reads zero experiment-profile files (audit hook), artifacts carry no detector/data/blinding fields, SymPy/NumPy only, no GPU; numerical agreement recorded as corroboration, derivation status kept separate | — |
 | AC13 | pass | 16 valid / 18 invalid artifact fixtures; legacy AMS spec converter with valid, invalid, incomplete and legacy-form tests (`test_convert_legacy_spec.py`), lossless round trip, explicit refusal codes | — |
-| AC14 | pass | `contracts/compat/gate.py`: quantity, units, variables and binning, phase space, frame, conventions, level, normalization kind, corrections, parameter point, validity range and uncertainty objects checked; transformations recorded with before/after state; double counting blocked (`tests/contracts/test_compat.py` GateTests, 17 tests); Path D rejects 9 mismatched variants, each naming the field and a resolution; a failing gate stops the dependent fit (`test_gate_failure_stops_the_fit`) | — |
-| AC15 | pass | `contracts/compat/combine.py` + `skills/hep-statistics/scripts/combine_measurements.py`: independence never assumed (needs a scoped assumption), shared auxiliary measurements need a declared correlation, missing covariance stays missing, scale/model/truncation objects never enter a Gaussian matrix; positive (GLS = textbook BLUE, = whitened least squares) and negative fixtures (`CombinationTests`, `GlsTests`); model envelopes need a hep-theory prescription and stay non-Gaussian (`ModelSetTests`) | Real multi-experiment inputs are outside v1 |
-| AC16 | pass | Path A reproducible: `examples/ams-flux-ratio/run_path_a.py --toys 400 --seed 20261002` gives byte-identical `results.json` on rerun; report, figures, 6 contract-valid artifacts, all labeled synthetic (`tests/examples/test_path_a.py`, 11 tests); Path B (`examples/collider-angular/run_path_b.py`): fiducial σ 745.65 ± 6.63 (stat) ± 14.9 (lumi) pb vs 745.81 pb expected, χ² 10.4/10, byte-identical rerun (`tests/examples/test_path_b.py`, 8 tests); Path C reproducible (`tests/examples/test_path_c.py`, 4 tests) ; Path D (`examples/theory-comparison/run_path_d.py`, `tests/examples/test_path_d.py`, byte-identical to the committed output); T24 (`examples/published-comparison/run_t24.py`); J2 and J7 examples reproduce byte for byte (`tests/examples/test_journeys_j2_j7.py`) | — |
+| AC14 | pass | `contracts/comparison/gate.py`: quantity, units, variables and binning, phase space, frame, conventions, level, normalization kind, corrections, parameter point, validity range and uncertainty objects checked; transformations recorded with before/after state; double counting blocked (`tests/contracts/test_comparison.py` GateTests, 17 tests); Path D rejects 9 mismatched variants, each naming the field and a resolution; a failing gate stops the dependent fit (`test_gate_failure_stops_the_fit`) | — |
+| AC15 | pass | `contracts/comparison/combination.py` + `skills/hep-statistics/scripts/combine_measurements.py`: independence never assumed (needs a scoped assumption), shared auxiliary measurements need a declared correlation, missing covariance stays missing, scale/model/truncation objects never enter a Gaussian matrix; positive (GLS = textbook BLUE, = whitened least squares) and negative fixtures (`CombinationTests`, `GlsTests`); model envelopes need a hep-theory prescription and stay non-Gaussian (`ModelSetTests`) | Real multi-experiment inputs are outside v1 |
+| AC16 | pass | Path A reproducible: `examples/ams-flux-ratio/run.py --toys 400 --seed 20261002` gives byte-identical `results.json` on rerun; report, figures, 6 contract-valid artifacts, all labeled synthetic (`tests/examples/test_ams_flux_ratio.py`, 11 tests); Path B (`examples/collider-angular/run.py`): fiducial σ 745.65 ± 6.63 (stat) ± 14.9 (lumi) pb vs 745.81 pb expected, χ² 10.4/10, byte-identical rerun (`tests/examples/test_collider_angular.py`, 8 tests); Path C reproducible (`tests/examples/test_qed_prediction.py`, 4 tests) ; Path D (`examples/theory-comparison/run.py`, `tests/examples/test_theory_comparison.py`, byte-identical to the committed output); T24 (`examples/published-comparison/run.py`); J2 and J7 examples reproduce byte for byte (`tests/examples/test_detector_resolution_and_recasting.py`) | — |
 | AC17 | pass | Correlated ratio and time-dependent exposure (Path A, T10/T11); unchanged integral with changed shape (T12); theory conventions and checks (T13–T15, M3) ; response inefficiency and double-counted efficiency (T07), ML group leakage and surrogate domain (T16), low and zero counts in the Path D Poisson likelihood (`LowCountTests`) | — |
 | AC18 | pass | Ported original tests pass where tools exist (skips listed above are unverified); algorithm fixes only in `sci-fix:` commits, moves in `move:` commits; seeds and tolerances in each example's `results.json` | — |
 | AC19 | pass | Failure statuses propagate (T20: missing tool, solver failure, `failed` required downstream and in communication claims); bounded recovery in `local_partition.py`: no retries without configuration, `max_attempts` limit, stop after two identical failures with state kept, explicit reset with a reason (T21, `tests/skills/hep_computing/test_local_partition.py`) | — |
@@ -35,7 +35,7 @@ Software checks establish contract consistency only: not physical validity, proo
 | AC26 | pass | Guides: `docs/profile-authoring.md`, `docs/adapter-authoring.md`, `docs/maintenance.md` (porting fixes, rerunning comparisons, ledgers, schema migration, versioning, traceability, routing), `docs/migration.md` (coexistence, disabling legacy skills, rollback). Reproducible checks: `run_all_checks.py`, `check_relocation.py`, `check_traceability.py`, ledger and registry validators; adapter declarations tested so no untested tool is advertised | — |
 | AC28 | pass | This file, `tasks/hep-research/PROGRESS.md` (handover state, resume checklist), `DECISIONS.md`, the G5 report and the limitations section below; unresolved external conditions and their effect listed there | — |
 | AC29 | pass | Layering directions, no-hard-coded-profile rule (names, IDs, namespaces, paths), steward check enforced and re-run in M5; one documented whitelist entry | — |
-| AC30 | pass | J1–J12 traced (`docs/researcher-journeys.md`); every journey is executed or answered: J1 Path A, J2 `examples/detector-resolution/run_j2.py`, J3 Path B, J4 Path C, J5 Path D, J6 T24, J7 `examples/recasting/run_j7.py`, J8 T15, J9 T16, J10 T20, J11 T27 (all synthetic); one live routing case per journey (G5 run 3); J12 gives the limited-support notice. J2 and J7 tests: `tests/examples/test_journeys_j2_j7.py` (13 tests, byte-identical reruns) | — |
+| AC30 | pass | J1–J12 traced (`docs/researcher-journeys.md`); every journey is executed or answered: J1 Path A, J2 `examples/detector-resolution/run.py`, J3 Path B, J4 Path C, J5 Path D, J6 T24, J7 `examples/recasting/run.py`, J8 T15, J9 T16, J10 T20, J11 T27 (all synthetic); one live routing case per journey (G5 run 3); J12 gives the limited-support notice. J2 and J7 tests: `tests/examples/test_detector_resolution_and_recasting.py` (13 tests, byte-identical reruns) | — |
 | AC31 | pass | Vocabularies extensible by namespaced profile terms; non-collider normalization validates (T26); conventions gate T25 ; published-style record compared without detector modules (T24, load trace) | — |
 
 ## Tests (Section 11)
@@ -53,14 +53,14 @@ Software checks establish contract consistency only: not physical validity, proo
 | T04 | pass | `GlsTests`: two illustrative datasets with a declared shared normalization; GLS equals the textbook one-bin BLUE and a whitened least-squares reference to 1e-12 |
 | T05 | pass | `CombinationTests.test_T05_overlapping_auxiliary_requires_joint_treatment`: a shared auxiliary measurement without a declared correlation refuses combination ("comparison-only"); declared independence that contradicts the overlap is reported |
 | T06 | pass | `ComposeTests`: `ams02:C01` and `beta:C01` stay distinct; a correlation between them needs evidence or a scoped assumption |
-| T07 | pass | Validator `response.double_counted`; gate rejects efficiency applied before folding with a response that includes it, and folding a detector-level prediction (`test_handoffs.py`, `test_compat.py`) |
-| T08 | pass | Wrong level, units, binning rejected; documented conversions (unit conversion, exact rebinning, fiducial restriction with level identification) accepted, and the restricted prediction integrates to the theory profile's own fiducial cross section (`test_t24.py`) |
+| T07 | pass | Validator `response.double_counted`; gate rejects efficiency applied before folding with a response that includes it, and folding a detector-level prediction (`test_handoffs.py`, `test_comparison.py`) |
+| T08 | pass | Wrong level, units, binning rejected; documented conversions (unit conversion, exact rebinning, fiducial restriction with level identification) accepted, and the restricted prediction integrates to the theory profile's own fiducial cross section (`test_published_comparison.py`) |
 | T09 | pass | Missing covariance reported and kept missing by the gate and the combination plan; a scale envelope is marked not Gaussian and not quantified |
 | T16 | pass | Group leakage found by `check_split_integrity.py`; `check_surrogate_domain.py` flags outside and sparse queries; AUC-only validation is a contract error |
 | T19 | pass | `review_analysis_change.py`: control-sample calibration accepted with provenance; change after looking at signal-region data flagged (not refused); missing provenance asked for |
 | T20 | pass | Missing tool and solver failure give `failed` artifacts; consumers without `failed` fail validation; communication cannot drop or upgrade statuses |
-| T21 | pass | `examples/local-partition/run_partition.py` (10 criteria): no retry without config, missing work detected, finished chunks not rerun, transient failure recovered, repeated identical failure stops with state kept, completion after a reset, merged = single run (counts exact, floating sum within 1e-9), stray duplicate and foreign chunks excluded |
-| T24 | pass | `examples/published-comparison/run_t24.py`: gate and GLS fit on a synthetic published-style record; load trace shows no `profiles/experiments/` file; GLS bias for multiplicative covariance reported as a limitation |
+| T21 | pass | `examples/local-partition/run.py` (10 criteria): no retry without config, missing work detected, finished chunks not rerun, transient failure recovered, repeated identical failure stops with state kept, completion after a reset, merged = single run (counts exact, floating sum within 1e-9), stray duplicate and foreign chunks excluded |
+| T24 | pass | `examples/published-comparison/run.py`: gate and GLS fit on a synthetic published-style record; load trace shows no `profiles/experiments/` file; GLS bias for multiplicative covariance reported as a limitation |
 | T27 | pass | `PrivateLocalProfileT27`: local profile in a project path with spaces validates, extends the vocabulary only when loaded, and its namespace appears nowhere in the plugin |
 | T28 | pass | Bayesian needs priors, sampler and convergence; frequentist needs construction and coverage; mislabeled results rejected (`ParadigmsT28` and M1 fixtures) |
 | T18 | pass | `tests/core/test_blinding.py` (15 tests, synthetic): masked JSON/log/CSV/npz and a masked plot pass; detected leaks: SR value in a log, a rounded value (`1234.6`, `1.235e+03`) in a CSV, a raw npz cache, a data/MC ratio and a total including the SR, SR points in a main or ratio panel and in bar charts; CLI exit 0/1/2 |
@@ -113,7 +113,7 @@ registering the new test file.
 
 | Item | Result | Evidence |
 |---|---|---|
-| Previously skipped uproot/awkward tests (synthetic NanoAOD generator, awkward reference values) | pass, 8 tests no longer skipped | `tests/skills/hep_computing/test_hep_analysis_synthetic_nanoaod.py`, `tests/skills/detector_response/test_hep_analysis_reference_values.py` |
+| Previously skipped uproot/awkward tests (synthetic NanoAOD generator, awkward reference values) | pass, 8 tests no longer skipped | `tests/skills/hep_computing/test_synthetic_nanoaod.py`, `tests/skills/detector_response/test_reference_values.py` |
 | `adapters/root-uproot/assets/uproot_awkward_analysis.py` on a SYNTHETIC file (4000 events, 0–4 muons, 15% negative weights) | pass | `tests/adapters/test_uproot_awkward_asset.py` (3 tests): TH1D bin contents and sum(w^2) equal an independent numpy computation; selected-event count matches; a missing branch is refused |
 | PyROOT / RDataFrame / RooFit assets | skip (ROOT not installed) | unverified |
 
@@ -126,7 +126,7 @@ no GPU, so all runs are CPU, 4 threads); full list in `tasks/hep-research/m6/pyt
 
 | Item | Result | Evidence |
 |---|---|---|
-| physics-ml tests needing PyTorch (allocation measurement, dataset building, asset smoke tests: training, inference, metrics, datasets) | pass, 13 tests no longer skipped | `tests/skills/physics_ml/test_deep_learning_deep_learning_skill.py`, `test_deep_learning_assets_smoke.py` |
+| physics-ml tests needing PyTorch (allocation measurement, dataset building, asset smoke tests: training, inference, metrics, datasets) | pass, 13 tests no longer skipped | `tests/skills/physics_ml/test_physics_ml_skill.py`, `test_assets_smoke.py` |
 | `ddp_train_skeleton.py` with `torchrun --nproc_per_node=2` (gloo backend) | pass | `test_ddp_skeleton_two_gloo_processes`; the test now finds `torchrun` next to the interpreter, not only on PATH |
 | Clean degradation without PyTorch | pass under the system Python 3.11 (no torch), skipped in `.venv-hep` | `CleanDegradationWithoutTorchTests` (2 tests) |
 | `vision_transfer.py` | skip (torchvision not installed, not approved); verified later in TORCHVISION-RUN | unverified in this run |
@@ -142,8 +142,8 @@ profile suites unchanged; traceability passed after registering the new test fil
 
 | Item | Result | Evidence |
 |---|---|---|
-| PyROOT scripts and assets (inspection, histogram comparison, systematic variations, histogram statistics, RooFit workspace summary, RDataFrame cutflow, RooFit peak fit recovers mean 91 within 0.5) | pass, 7 tests no longer skipped | `tests/skills/hep_computing/test_hep_analysis_root_integration.py` |
-| C++ assets `cpp_rdataframe_analysis.cpp`, `fit_histogram.cpp`, `rdf_analysis.cpp` built with `root-config`; CMake `analysis` target; `plot_branch.C` in batch | pass, 5 new tests | `tests/adapters/test_root_cpp_assets.py`; the C++ cutflow (3044, 2718, 2223 of 5000 synthetic events) equals the PyROOT asset's |
+| PyROOT scripts and assets (inspection, histogram comparison, systematic variations, histogram statistics, RooFit workspace summary, RDataFrame cutflow, RooFit peak fit recovers mean 91 within 0.5) | pass, 7 tests no longer skipped | `tests/skills/hep_computing/test_root_integration.py` |
+| C++ assets `rdf_cutflow_analysis.cpp`, `fit_histogram.cpp`, `rdf_histogram_branch.cpp` built with `root-config`; CMake `analysis` target; `plot_branch.C` in batch | pass, 5 new tests | `tests/adapters/test_root_cpp_assets.py`; the C++ cutflow (3044, 2718, 2223 of 5000 synthetic events) equals the PyROOT asset's |
 | CMS Combine run of the datacard template | skip (Combine not installed); verified later in COMBINE-RUN | unverified in this run |
 
 ## DIAGRAM-RUN (2026-10-02, after the merge of PR #5)
@@ -160,7 +160,7 @@ plugins/hep-research/tools/run_all_checks.py --out tasks/hep-research/check-runs
 
 | Item | Result | Evidence |
 |---|---|---|
-| Graphviz `dot` accepts a valid graph and rejects an invalid one | pass, 2 tests no longer skipped | `tests/skills/research_communication/test_academic_diagrams_academic_diagrams_skill.py` (DotCompile) |
+| Graphviz `dot` accepts a valid graph and rejects an invalid one | pass, 2 tests no longer skipped | `tests/skills/research_communication/test_diagrams.py` (DotCompile) |
 | Mermaid CLI rejects bad flowchart syntax | pass, no longer skipped | same file, `test_real_mmdc_rejects_bad_syntax` |
 | PlantUML rejects a one-line class body | pass, no longer skipped | same file, `test_real_plantuml_rejects_one_line_class_body` |
 | Every shipped diagram source passes `check_diagram_sources.py` with the real tools present | pass | same file, `test_shipped_diagram_sources_pass` |
@@ -175,7 +175,7 @@ clean); list in `tasks/hep-research/m6/torchvision/pip-freeze-torchvision.txt`. 
 
 | Item | Result | Evidence |
 |---|---|---|
-| `vision_transfer.py --help` | pass, no longer skipped | `tests/skills/physics_ml/test_deep_learning_assets_smoke.py`, `test_vision_transfer_help` |
+| `vision_transfer.py --help` | pass, no longer skipped | `tests/skills/physics_ml/test_assets_smoke.py`, `test_vision_transfer_help` |
 | `vision_transfer.py` trains one epoch on a SYNTHETIC ImageFolder (random 32x32 images, 2 classes, 8 train and 4 val) with a frozen backbone and saves a checkpoint with the right classes and a 2x512 head | pass, new test | same file, `test_vision_transfer_trains_on_synthetic_image_folder`; the test builds ResNet-18 with `weights=None` |
 | `vision_transfer.py` with its pretrained ResNet-18 weights | unverified | the weights download from download.pytorch.org, which the network policy blocks; accuracy on real images is not assessed |
 
@@ -190,7 +190,7 @@ environment's `bin` first on PATH. Command: as in DIAGRAM-RUN with `HEP_COMBINE_
 
 | Item | Result | Evidence |
 |---|---|---|
-| Combine datacard template filled with the SYNTHETIC counting model (s=5, b=20, n=20, 10% background lnN), `text2workspace.py` then `combine -M AsymptoticLimits --rMax 10` | pass, no longer skipped: observed 2.1565, expected 1.1118 / 1.5116 / 2.1562 / 3.1275 / 4.3733 (2.5% to 97.5%); pyhf 0.7.6 gives 2.153 (test tolerance 2%) | `tests/skills/hep_statistics/test_hep_analysis_combine_template.py`, `test_limit_matches_pyhf` |
+| Combine datacard template filled with the SYNTHETIC counting model (s=5, b=20, n=20, 10% background lnN), `text2workspace.py` then `combine -M AsymptoticLimits --rMax 10` | pass, no longer skipped: observed 2.1565, expected 1.1118 / 1.5116 / 2.1562 / 3.1275 / 4.3733 (2.5% to 97.5%); pyhf 0.7.6 gives 2.153 (test tolerance 2%) | `tests/adapters/test_combine_datacard_template.py`, `test_limit_matches_pyhf` |
 | `adapters/pyhf-combine` | `demonstrated-on-synthetic-data` (was `proposed`); version 0.4.0 | `adapter.json`, `AdapterDeclarationTests` |
 | Combine 11.1.0 built against ROOT 6.40.04 (the conda-forge default) | fail, not used: `AsymptoticLimits` prints no limit and logs `Caught exception Value 26.4507 is outside the default range [0, 14.5482] of the variable "r"!` (the same with no `--rMax` or `--rMax 50`); recorded in `tasks/hep-research/m6/combine/conda-explicit-combine-root640.txt`; cause found later (COMBINE-ROOT640) | verified with `--strictBounds` in COMBINE-ROOT640 |
 
@@ -218,4 +218,20 @@ source.
 
 The two observed values without and with `--strictBounds` (2.1565, 2.1518) differ by 0.2%, inside Combine's default
 `--rRelAcc` of 2%. The `hep-statistics` statistical-tools reference now gives this workaround.
+
+## REFACTOR-RUN (2026-10-03, plugin-wide refactor)
+
+Environment: E1 plus pyhf 0.7.6, uproot 5.7.6, awkward 2.14.0 and PyYAML 6.0.3 in `.venv-hep`; ROOT 6.40.04 recreated in
+`.venv-hep-root/env` from `tasks/hep-research/m6/root/conda-explicit-root.txt`; legacy checkout present. Command:
+`HEP_ROOT_PYTHON=.venv-hep-root/env/bin/python .venv-hep/bin/python plugins/hep-research/tools/run_all_checks.py --out
+tasks/hep-research/check-runs`, run `check-run-2026-10-03T010542Z.json`: 14 checks pass / 0 fail / 0 skip; 1031 unit
+tests, 1008 pass, 0 fail, 23 skip; profile suites unchanged (258, 9, 16 pass). `tools/check_relocation.py` passes.
+
+| Item | Result | Evidence |
+|---|---|---|
+| Renames keep every reference valid | pass | traceability with `--legacy` (949 legacy files mapped; 375 destinations, 439 registered new); registry, layering, stanza, skill-resource and adapter-declaration checks |
+| Examples after renaming their runners | pass, byte-identical | every example rerun with its documented seed reproduces the committed `output/` exactly |
+| Renamed ROOT C++ assets (`rdf_cutflow_analysis.cpp`, `rdf_histogram_branch.cpp`) and PyROOT asset | pass, 12 ROOT tests | `tests/adapters/test_root_cpp_assets.py`, `tests/skills/hep_computing/test_root_integration.py` |
+| New regression tests for the 20 fixes and the `sci-fix` | pass (each failed on the previous code) | `tests/contracts/test_robustness.py`, `tests/core/test_blinding.py`, `tests/skills/**` |
+| PyTorch, Graphviz, Mermaid, PlantUML, Combine, tectonic tests | skip, not re-run in this environment (unverified for this change) | the `checkpoint weights_only` change in `physics-ml` is covered by tests that skip without PyTorch |
 
