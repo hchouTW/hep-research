@@ -13,7 +13,7 @@ not a restatement of general HEP statistics.
 
 For the flux and interval of a few-count spectral bin (why `sqrt(N)` is wrong, units,
 resolution spillover, background), read
-[35, low-count, high-rigidity bins](../../detector-response/references/space-based-direct-detection.md#low-count-high-rigidity-bins).
+[low-count, high-rigidity bins](../../detector-response/references/space-based-direct-detection.md#low-count-high-rigidity-bins).
 
 ## The ON/OFF counting problem and Li & Ma significance
 
@@ -32,15 +32,23 @@ background-only hypotheses under this model, is
         )
 
 signed positive for an excess (`N_on > alpha * N_off`) and negative for a deficit.
-`${CLAUDE_PLUGIN_ROOT}/skills/hep-statistics/scripts/li_ma_significance.py` implements this exactly, including the boundary
+`${CLAUDE_PLUGIN_ROOT}/skills/hep-statistics/scripts/li_ma_significance.py` computes this statistic, including the boundary
 cases `N_on = 0` and `N_off = 0` where one logarithm's argument vanishes. Two points
 recur in review of this statistic:
 
-- It is asymptotically equivalent to `Z = sqrt(2) * sqrt(-2 ln(lambda))` under Wilks'
-  theorem for large counts, but - unlike the naive Gaussian formula
-  `(N_on - alpha*N_off)/sqrt(N_on + alpha^2*N_off)` - remains well-behaved and does not
-  require large counts, which is why it is the field standard rather than a Gaussian
-  approximation at the low counts typical of a faint source or a short exposure.
+- It is the likelihood-ratio statistic itself, `S = sqrt(-2 ln lambda)` with the sign of
+  the excess (Li & Ma 1983, eq. 17); the `sqrt(2)` above sits in front of the log sum, not
+  outside `sqrt(-2 ln lambda)`. Reading `S` as a standard-normal deviate is asymptotic
+  (Wilks' theorem), and its accuracy degrades for small `N_on` and `N_off`. It is still
+  preferred to the naive Gaussian formula `(N_on - alpha*N_off)/sqrt(N_on + alpha^2*N_off)`,
+  which fails much sooner, but it is not exact at low counts. At `N_on = 4`, `N_off = 2`,
+  `alpha = 0.25` the asymptotic p-value is 6.65e-3, the toy-calibrated value (plug-in
+  background, 200,000 toys, seed 1) about 9.0e-3, and the exact conditional (binomial)
+  value 1.70e-2 (`tests/skills/hep_statistics/test_li_ma_significance.py`). For a few
+  counts, quote a calibrated p-value: `--toys N --seed S` (background fitted under the
+  null and plugged in, not a supremum over the background) or `--exact-conditional`
+  (`N_on` given `N_on + N_off` is binomial with `alpha/(1+alpha)`; free of the background
+  nuisance and conservative for discrete data). Name the method next to the number.
 - `alpha` must be measured or modeled correctly for the exposure/acceptance actually
   achieved by each region (see the background-estimation discussion in
   [imaging Cherenkov](../../detector-response/references/imaging-atmospheric-cherenkov.md) and
@@ -102,7 +110,8 @@ spectrum shifts the effective exposure (and hence the limit) systematically.
 - The counting method (Li & Ma or an equivalent likelihood-based statistic, not a
   Gaussian approximation) and the exact `N_on`, `N_off`, and `alpha` used.
 - The computed local significance and p-value (run `${CLAUDE_PLUGIN_ROOT}/skills/hep-statistics/scripts/li_ma_significance.py`;
-  do not estimate it by eye), and, for a scan, the post-trials p-value with a plain
+  do not estimate it by eye), with the p-value method named (asymptotic, toys with seed
+  and count, or exact conditional; at low counts not the asymptotic one alone), and, for a scan, the post-trials p-value with a plain
   verdict (e.g. "not a detection").
 - The number of independent trials (positions, energy bins, time windows, source
   catalogs) and the method used to estimate it (analytic count, or scrambled/

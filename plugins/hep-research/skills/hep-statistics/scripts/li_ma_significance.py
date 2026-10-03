@@ -3,16 +3,19 @@
 
 Purpose: the field-standard significance for ON-source vs. OFF-source (background)
 Poisson counting, used throughout gamma-ray (IACT) and neutrino-astronomy point-source
-analyses. Unlike the naive Gaussian formula
-(N_on - alpha*N_off) / sqrt(N_on + alpha^2*N_off), it remains valid at low counts
-because it is derived from the likelihood ratio between the signal-plus-background and
-background-only hypotheses, not from a Gaussian approximation. See
+analyses. It is the signed likelihood-ratio statistic S = sqrt(-2 ln lambda) of
+signal-plus-background against background only (Li & Ma 1983, eq. 17), unlike the naive
+Gaussian formula (N_on - alpha*N_off) / sqrt(N_on + alpha^2*N_off). Reading S as a
+standard-normal deviate is asymptotic (Wilks): at small N_on or N_off the normal p-value
+can be several times too small, so calibrate it with toys or an exact conditional test.
+See
 ${CLAUDE_PLUGIN_ROOT}/skills/hep-statistics/references/astroparticle-statistics.md and
 ${CLAUDE_PLUGIN_ROOT}/skills/detector-response/references/imaging-atmospheric-cherenkov.md.
 
 What it does: computes the signed Li & Ma significance
     S = sqrt(2) * sqrt(N_on * ln[((1+alpha)/alpha) * N_on/(N_on+N_off)]
                        + N_off * ln[(1+alpha) * N_off/(N_on+N_off)])
+      = sqrt(-2 ln lambda)
 sign(N_on - alpha*N_off), handling the N_on = 0 and N_off = 0 boundary terms (where a
 0*ln(0) term is defined as 0) explicitly rather than raising a math domain error.
 
