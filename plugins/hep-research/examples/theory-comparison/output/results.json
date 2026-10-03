@@ -50,6 +50,7 @@
  },
  "gate": {
   "comparable": true,
+  "status": "comparable",
   "mismatches": [],
   "notes": [
    {
@@ -164,6 +165,18 @@
      "bin_semantics": "bin-integrated",
      "fiducial": false
     }
+   }
+  ],
+  "definition_mappings_applied": [
+   {
+    "field": "process",
+    "action": "equivalent",
+    "justification": "the synthetic generator samples the same one-photon tree-level e+e- -> mu+mu- matrix element (no Z, no radiation) that the prediction computes"
+   },
+   {
+    "field": "phase_space",
+    "action": "equivalent",
+    "justification": "the prediction covers the full truth range cos theta in [-1, 1]; the response maps it to the reco range [-1, 1] and carries the selection efficiency, so the folded prediction describes the selected events"
    }
   ],
   "final_prediction_state": {
@@ -470,6 +483,19 @@
      "field": "conventions.angle_definition",
      "reason": "values differ; declare a transform mapping or use a variant",
      "resolve": "declare a justified mapping, or use a variant"
+    }
+   ]
+  },
+  {
+   "name": "process definitions without a declared mapping",
+   "expected_field": "process",
+   "rejected": true,
+   "expected_field_reported": true,
+   "mismatches": [
+    {
+     "field": "process",
+     "reason": "process differs and free-text equality cannot be established",
+     "resolve": "state the process on both sides, or declare a mapping {'field': 'process', 'action': 'equivalent', 'justification': ...}"
     }
    ]
   },

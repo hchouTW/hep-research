@@ -190,7 +190,8 @@
     "prediction": "efficiency",
     "measurement": null,
     "reason": "'efficiency' already applied before folding; the response includes it too",
-    "resolve": "drop the separate correction"
+    "resolve": "drop the separate correction",
+    "kind": "mismatch"
    }
   ]
  },

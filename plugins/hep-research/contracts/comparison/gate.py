@@ -1,15 +1,26 @@
 #!/usr/bin/env python3
 """Comparison gate (task 7.11): decides whether a prediction can meet a measurement, before any mixed inference.
 
-Both sides are checked for quantity, units, variables and binning, phase space / fiducial selection, frame,
+Both sides are checked for quantity, process, species, units, every variable axis and its binning, phase space
+(the fiducial flag, structured cuts when both sides give them, otherwise the written definition), frame,
 conventions, level, normalization kind, included corrections, parameter point, validity range and uncertainty
 representation. Declared transformations are applied in order to a description of the prediction (never to
 numbers), each is recorded with the state before and after, and double counting is blocked. Nothing is inferred:
 a transformation, mapping or assumption the caller does not declare does not exist.
 
+Process, species and phase-space definitions are free text unless the phase space lists structured "cuts"
+([{"variable", "unit", "low", "high"}], null for an open side). Text that is equal after case and whitespace
+normalization matches; anything else cannot be judged equal and is 'unresolved' until the plan declares a named
+mapping {"field": "process" | "species" | "phase_space", "action": "equivalent", "justification": "..."}.
+A mismatch carries "kind": "mismatch" (decided) or "unresolved" (equivalence not established); the result's
+"status" is "comparable", "not-comparable" (any decided mismatch) or "unresolved" (only unresolved items).
+Multi-dimensional observables are compared axis by axis; transformations that act on an axis (fiducial
+restriction, rebin, variable change, forward folding) are rejected for them rather than applied to the first axis.
+
 Usage: python3 contracts/comparison/gate.py PREDICTION.json MEASUREMENT.json [--plan PLAN.json]
   PREDICTION.json: a prediction artifact. MEASUREMENT.json: a dataset-record or measurement-spec artifact.
-  PLAN.json: {"transformations": [...], "mappings": [...], "measurement_conditions": {...}}
+  PLAN.json: {"transformations": [...], "mappings": [...], "measurement_conditions": {...}}; a mapping with "key" is a
+  conventions mapping, one with "field" a definition mapping (process, species, phase_space).
 Exit 0 comparable, 1 not comparable, 2 unreadable or malformed input. Output: JSON gate result.
 
 Transformation kinds (each {"kind", "owner", "justification", ...}):
@@ -43,6 +54,8 @@ STICKY = ["failed", "unvalidated", "preliminary", "synthetic", "asimov", "user-s
 QUANTITY_AFTER_INTEGRATION = {"differential-cross-section": "cross-section", "differential-flux": "flux"}
 EDGE_TOL = 1e-12
 # Fields a transformation must declare before it can be applied (see the kinds in the module docstring).
+AXIS_KINDS = {"fiducial-restriction", "rebin", "variable-change", "forward-fold"}
+DEFINITION_FIELDS = ("process", "species", "phase_space")
 NEEDS = {"level-identification": ("from", "to"), "fiducial-restriction": ("variable", "range"), "rebin": ("edges",),
          "variable-change": ("from", "to"), "unit-conversion": ("from", "to")}
 
@@ -74,9 +87,27 @@ def side_from_artifact(doc: dict) -> dict:
     return side
 
 
+def _norm_text(x):
+    return " ".join(str(x).lower().split()) if x is not None else None
+
+
+def _cuts(ps):
+    cuts = (ps or {}).get("cuts")
+    if not isinstance(cuts, list):
+        return None
+    return sorted((_norm_text(c.get("variable")), _norm_text(c.get("unit")), c.get("low"), c.get("high"))
+                  for c in cuts if isinstance(c, dict))
+
+
 def _state(obs: dict) -> dict:
     var = (obs.get("variables") or [{}])[0]
-    return {"quantity": obs.get("quantity"), "unit": obs.get("unit"), "level": obs.get("level"),
+    ps = obs.get("phase_space") or {}
+    species = obs.get("species")
+    return {"process": _norm_text(obs.get("process")),
+            "species": sorted(_norm_text(s.get("name")) for s in species if isinstance(s, dict)) if isinstance(species, list) else None,
+            "phase_space_definition": _norm_text(ps.get("definition")), "cuts": _cuts(ps),
+            "extra_axes": [dict(v) for v in (obs.get("variables") or [])[1:]],
+            "quantity": obs.get("quantity"), "unit": obs.get("unit"), "level": obs.get("level"),
             "variable": var.get("name"), "variable_unit": var.get("unit"),
             "edges": list(var["edges"]) if "edges" in var else None, "points": var.get("points"),
             "bin_semantics": obs.get("bin_semantics"), "fiducial": bool(obs.get("phase_space", {}).get("fiducial", False)),
@@ -85,8 +116,8 @@ def _state(obs: dict) -> dict:
             "corrections": list(obs.get("included_corrections", [])), "n_variables": len(obs.get("variables", []))}
 
 
-def _mm(out, field, pred, meas, reason, resolve):
-    out.append({"field": field, "prediction": pred, "measurement": meas, "reason": reason, "resolve": resolve})
+def _mm(out, field, pred, meas, reason, resolve, kind="mismatch"):
+    out.append({"field": field, "prediction": pred, "measurement": meas, "reason": reason, "resolve": resolve, "kind": kind})
 
 
 def _apply(st: dict, t: dict, i: int, mism: list) -> None:
@@ -103,6 +134,10 @@ def _apply(st: dict, t: dict, i: int, mism: list) -> None:
     if k == "fiducial-restriction" and not missing and not (isinstance(rng, list) and len(rng) == 2
                                                            and all(isinstance(x, (int, float)) for x in rng)):
         missing = ["range"]
+    if k in AXIS_KINDS and st["n_variables"] > 1:
+        _mm(mism, where, k, st["n_variables"], f"'{k}' acts on one axis; it is not supported for a multi-dimensional observable",
+            "project or integrate to one dimension explicitly, or provide the prediction in the measurement's binning")
+        return
     if missing:
         _mm(mism, where, k, None, f"'{k}' is incomplete: needs {', '.join(repr(f) for f in missing)}",
             "declare every field of the transformation (see the gate's transformation kinds)")
@@ -123,6 +158,9 @@ def _apply(st: dict, t: dict, i: int, mism: list) -> None:
             return
         st["edges"] = [e for e in st["edges"] if lo - EDGE_TOL <= e <= hi + EDGE_TOL]
         st["fiducial"], st["fiducial_range"] = True, [lo, hi]
+        # the written definition no longer describes the restricted prediction; only structured cuts do
+        st["cuts"] = sorted((st["cuts"] or []) + [(_norm_text(st["variable"]), _norm_text(st["variable_unit"]), lo, hi)])
+        st["phase_space_definition"] = None
     elif k == "rebin":
         if st["edges"] is None or not _subset(t.get("edges", []), st["edges"]):
             _mm(mism, where, st["edges"], t.get("edges"), "rebinning target edges are not a subset of the current edges",
@@ -222,11 +260,48 @@ def gate(prediction: dict, measurement: dict, transformations=(), mappings=(), m
 
     m_obs = measurement["observable"]
     ms = _state(m_obs)
+    def_maps = {m.get("field"): m for m in mappings if isinstance(m, dict) and "field" in m}
+    conv_maps = [m for m in mappings if not (isinstance(m, dict) and "field" in m)]
+    applied_defs = []
+    for f in DEFINITION_FIELDS:
+        dm = def_maps.get(f)
+        if f in def_maps and not (dm.get("justification") and dm.get("action") == "equivalent"):
+            _mm(mism, f"mappings.{f}", dm, None, "a definition mapping needs action 'equivalent' and a written justification",
+                "state why the two definitions describe the same physics", "unresolved")
+            dm = None
+        if f == "phase_space" and st["cuts"] is not None and ms["cuts"] is not None:
+            if st["cuts"] != ms["cuts"]:
+                _mm(mism, "phase_space.cuts", st["cuts"], ms["cuts"], "the structured phase-space cuts differ",
+                    "restrict the prediction to the measurement's cuts, or compute it in the measurement's phase space")
+            continue
+        a, b = (st["phase_space_definition"], ms["phase_space_definition"]) if f == "phase_space" else (st[f], ms[f])
+        if a == b:
+            continue
+        if dm:
+            applied_defs.append(dm)
+            continue
+        one = a is None or b is None
+        _mm(mism, f, a, b, (f"{f} is stated on one side only" if one else f"{f} differs and free-text equality cannot be established"),
+            f"state the {f} on both sides{', give structured cuts' if f == 'phase_space' else ''}, or declare a mapping "
+            f"{{'field': '{f}', 'action': 'equivalent', 'justification': ...}}", "unresolved")
     for f in ("quantity", "unit", "frame", "bin_semantics", "variable", "variable_unit"):
         if st[f] != ms[f]:
             _mm(mism, f, st[f], ms[f], f"{f} differs after the declared transformations", f"declare a transformation that gives the measurement's {f}")
     if st["n_variables"] != ms["n_variables"]:
         _mm(mism, "variables", st["n_variables"], ms["n_variables"], "different number of variables", "project or integrate explicitly")
+    else:
+        for i, (pa, ma) in enumerate(zip(st["extra_axes"], ms["extra_axes"]), start=1):
+            for key, label in (("name", "name"), ("unit", "unit")):
+                if pa.get(key) != ma.get(key):
+                    _mm(mism, f"variables[{i}].{label}", pa.get(key), ma.get(key), f"axis {i} {label} differs",
+                        "give both sides the same axes in the same order")
+            if "edges" in pa or "edges" in ma:
+                if not _edges_equal(pa.get("edges"), ma.get("edges")):
+                    _mm(mism, f"variables[{i}].binning", pa.get("edges"), ma.get("edges"), f"axis {i} bin edges differ",
+                        "recompute the prediction in the measurement bins")
+            elif pa.get("points") != ma.get("points"):
+                _mm(mism, f"variables[{i}].points", pa.get("points"), ma.get("points"), f"axis {i} evaluation points differ",
+                    "evaluate the prediction at the measurement points")
     if st["level"] != ms["level"]:
         pair = {st["level"], ms["level"]}
         reason = ("unfolded and detector-level (raw) quantities are not equivalent" if pair == {"unfolded", "detector"}
@@ -250,7 +325,7 @@ def gate(prediction: dict, measurement: dict, transformations=(), mappings=(), m
             _mm(mism, "corrections", eff, eff, f"'{eff}' was corrected in the measurement and applied to the prediction too",
                 "apply each correction on one side only")
 
-    conv = compare_conventions(prediction["observable"].get("conventions", {}), m_obs.get("conventions", {}), list(mappings), vocab)
+    conv = compare_conventions(prediction["observable"].get("conventions", {}), m_obs.get("conventions", {}), conv_maps, vocab)
     for x in conv["mismatches"]:
         _mm(mism, f"conventions.{x['key']}", x.get("a"), x.get("b"), x["reason"], "declare a justified mapping, or use a variant")
     notes += [{"field": f"conventions.{n['key']}", "note": n["reason"]} for n in conv["notes"]]
@@ -267,12 +342,15 @@ def gate(prediction: dict, measurement: dict, transformations=(), mappings=(), m
             _mm(mism, f"parameter_point.{key}", val, cond[key], "prediction computed at a different parameter point", "recompute the prediction")
 
     vr = prediction["observable"].get("validity_range") or {}
-    if ms["edges"]:
-        rng = vr.get(ms["variable"]) if isinstance(vr, dict) else None
+    axes = [(ms["variable"], ms["edges"])] + [(a.get("name"), a.get("edges")) for a in ms["extra_axes"]]
+    for name, edges in axes:
+        if not edges:
+            continue
+        rng = vr.get(name) if isinstance(vr, dict) else None
         if rng is None:
-            notes.append({"field": "validity_range", "note": "the prediction declares no validity range; coverage of the measured range is not checked"})
-        elif ms["edges"][0] < rng[0] or ms["edges"][-1] > rng[1]:
-            _mm(mism, "validity_range", rng, [ms["edges"][0], ms["edges"][-1]], "the measured range lies outside the prediction's validity range",
+            notes.append({"field": "validity_range", "note": f"the prediction declares no validity range for '{name}'; coverage of the measured range is not checked"})
+        elif edges[0] < rng[0] or edges[-1] > rng[1]:
+            _mm(mism, "validity_range", rng, [edges[0], edges[-1]], f"the measured range of '{name}' lies outside the prediction's validity range",
                 "restrict the comparison, or extend the prediction")
 
     unc = {"prediction": [], "measurement": []}
@@ -287,7 +365,9 @@ def gate(prediction: dict, measurement: dict, transformations=(), mappings=(), m
     if cov in ("absent", "partial"):
         notes.append({"field": "covariance", "note": f"measurement covariance is {cov}: it stays {cov}; inference must not assume a diagonal matrix"})
     statuses = sorted({s for side in (prediction, measurement) for s in side.get("status", []) if s in STICKY})
-    return {"comparable": not mism, "mismatches": mism, "notes": notes, "transformations": record,
+    status = "comparable" if not mism else ("unresolved" if all(x["kind"] == "unresolved" for x in mism) else "not-comparable")
+    return {"comparable": not mism, "status": status, "mismatches": mism, "notes": notes, "transformations": record,
+            "definition_mappings_applied": applied_defs,
             "final_prediction_state": {k: st[k] for k in ("quantity", "unit", "level", "edges", "bin_semantics", "fiducial", "corrections")},
             "conventions": conv, "uncertainty_objects": unc, "measurement_covariance": cov, "carried_statuses": statuses}
 

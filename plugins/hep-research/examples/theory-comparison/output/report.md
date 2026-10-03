@@ -46,6 +46,7 @@ sigma_pred = 868.0 pb (Path C). 17521 events generated; measured luminosity 19.7
 | point values compared with bins without a mapping | yes | `transformations[0]`: point values cannot be compared with bins without a defined mapping |
 | efficiency applied before folding with a response that includes it | yes | `transformations[3]`: 'efficiency' already applied before folding; the response includes it too |
 | angle definitions without a declared mapping | yes | `conventions.angle_definition`: values differ; declare a transform mapping or use a variant |
+| process definitions without a declared mapping | yes | `process`: process differs and free-text equality cannot be established |
 | measurement normalized to exposure | yes | `normalization.kind`: normalization kinds differ |
 | folded prediction against the unfolded (Path B) result | yes | `level`: levels differ after the declared transformations |
 | inclusive prediction against the fiducial unfolded result | yes | `phase_space.fiducial`: fiducial and inclusive phase spaces are not equivalent |
