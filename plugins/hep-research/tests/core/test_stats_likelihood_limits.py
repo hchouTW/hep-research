@@ -7,6 +7,7 @@ import contextlib
 import io
 import json
 import math
+import os
 import sys
 import tempfile
 import unittest
@@ -284,6 +285,76 @@ class NeymanTests(unittest.TestCase):
                      lambda: ll.neyman_coverage(2.0, 3.0, 1.0, 0.95, 0.06, 100, 100, 1)):
             with self.assertRaises(ll.LikelihoodError):
                 call()
+
+
+SLOW = os.environ.get("HEP_SLOW_TESTS") == "1"
+
+
+class BergerBoosApproximationAuditT07(unittest.TestCase):
+    """Audit T07: the finite-grid, finite-toy Berger-Boos implementation is labeled an approximation, reports its
+    Monte Carlo uncertainties and validated range, and generates the auxiliary measurement from the likelihood's model."""
+
+    def text(self, out):
+        return (out["method"] + " " + out["note"]).lower()
+
+    def test_no_guaranteed_coverage_claim(self):
+        for out in (ll.neyman_limit(3, 3.0, 2.0, 0.95, 0.01, 200, 1, 5), ll.neyman_coverage(2.0, 3.0, 1.0, 0.95, 0.01, 60, 60, 1, 5)):
+            self.assertNotRegex(self.text(out), r"(?<!not )guarantee(d|s)? coverage|with guaranteed|this guarantees")
+            self.assertIn("approximat", self.text(out))
+            self.assertEqual(out["coverage_claim"]["implementation"], "approximate")
+        src = (ROOT / "core" / "stats" / "likelihood_limits.py").read_text()
+        self.assertNotIn("upper limit with guaranteed coverage", src)
+
+    def test_monte_carlo_uncertainties_and_range_reported(self):
+        out = ll.neyman_limit(3, 3.0, 2.0, 0.95, 0.01, 400, 1, 5)
+        self.assertGreater(out["toy_p_value_error_at_threshold"], 0.0)
+        self.assertIn("within_validated_range", out)
+        cov = ll.neyman_coverage(2.0, 3.0, 1.0, 0.95, 0.01, 60, 100, 1, 5)
+        self.assertGreater(cov["inner_toy_p_value_error_at_threshold"], 0.0)
+        self.assertGreater(cov["binomial_error_berger_boos"], 0.0)
+        self.assertEqual(cov["validated_range"], ll.BB_VALIDATED_RANGE)
+
+    def test_validated_range_flag(self):
+        r = ll.BB_VALIDATED_RANGE
+        inside = ll.neyman_limit(3, r["b"][0], r["sigma_b"][0], r["cl"][0], 0.01, 200, 1, 5)
+        self.assertTrue(inside["within_validated_range"])
+        outside = ll.neyman_limit(3, 20.0, 5.0, 0.95, 0.01, 200, 1, 5)
+        self.assertFalse(outside["within_validated_range"])
+
+    def test_auxiliary_generation_uses_the_likelihood_model(self):
+        # the constraint term is Normal(b0 | b, sigma_b) on the real line: toys must not truncate b0 at zero
+        self.assertEqual(ll._aux_draw(0.5, 2.0, -1.0), -1.5)
+        # and the statistic must use the constrained maximum (s >= 0, b >= 0) when b0 < 0
+        n, b0, sig, s = 2, -0.7, 1.0, 3.0  # s above the best fit s_hat = 2: q-tilde is not clipped to zero
+        grid = [(i * 0.01, j * 0.01) for i in range(0, 801) for j in range(0, 301)]
+        ll_max = max(ll._ll1(n, a, b, b0, sig) for a, b in grid)
+        ll_s = max(ll._ll1(n, s, b, b0, sig) for b in (j * 0.001 for j in range(0, 3001)))
+        self.assertAlmostEqual(ll._q1(n, b0, sig, s), 2.0 * (ll_max - ll_s), delta=2e-3)
+
+    def test_small_coverage_scan_reports_mc_errors(self):
+        rows = ll.neyman_coverage_scan([(1.0, 2.0, 1.0)], 0.9, 0.01, 60, 60, 3, 5)
+        self.assertEqual(len(rows["points"]), 1)
+        pt = rows["points"][0]
+        for key in ("coverage_berger_boos", "binomial_error_berger_boos", "inner_toy_p_value_error_at_threshold"):
+            self.assertIn(key, pt)
+
+    @unittest.skipUnless(SLOW, "slow: set HEP_SLOW_TESTS=1")
+    def test_slow_grid_refinement_and_toy_precision(self):
+        coarse = ll.neyman_limit(3, 3.0, 2.0, 0.95, 0.01, 2000, 1, 9)
+        fine = ll.neyman_limit(3, 3.0, 2.0, 0.95, 0.01, 2000, 1, 33)
+        self.assertLess(abs(fine["berger_boos_upper_limit"] - coarse["berger_boos_upper_limit"]), 0.05 * fine["berger_boos_upper_limit"])
+        many = ll.neyman_limit(3, 3.0, 2.0, 0.95, 0.01, 8000, 2, 9)
+        self.assertLess(abs(many["berger_boos_upper_limit"] - coarse["berger_boos_upper_limit"]), 0.08 * many["berger_boos_upper_limit"])
+
+    @unittest.skipUnless(SLOW, "slow: set HEP_SLOW_TESTS=1")
+    def test_slow_coverage_scan_over_the_validated_range(self):
+        r = ll.BB_VALIDATED_RANGE
+        pts = [(s, b, sg) for s in r["s"] for b in r["b"] for sg in r["sigma_b"]]
+        for cl in r["cl"]:
+            res = ll.neyman_coverage_scan(pts, cl, r["beta"], r["outer"], r["inner"], 7, r["points"])
+            for pt in res["points"]:
+                tol = 3.0 * math.hypot(pt["binomial_error_berger_boos"], pt["inner_toy_p_value_error_at_threshold"])
+                self.assertGreaterEqual(pt["coverage_berger_boos"], cl - tol, pt)
 
 
 class CliTests(unittest.TestCase):

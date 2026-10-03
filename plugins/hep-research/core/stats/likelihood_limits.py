@@ -32,11 +32,14 @@ Subcommands:
                         unit constraint; asymptotic observed and Asimov expected limits, optional
                         seeded-toy calibration at the asymptotic limit.
 
-  neyman-limit          upper limit with guaranteed coverage over the background nuisance (Berger-Boos
-                        supremum over a confidence set of the nuisance, with a seeded-toy p-value at each
-                        point), compared with the plug-in profile limit.
+  neyman-limit          upper limit from the Berger-Boos construction over the background nuisance
+                        (supremum over a confidence set of the nuisance, with a seeded-toy p-value at each
+                        point), compared with the plug-in profile limit. The construction guarantees coverage
+                        in theory; this implementation (finite nuisance grid, finite toys) approximates it,
+                        and its coverage is validated only by seeded scans in BB_VALIDATED_RANGE.
   neyman-coverage       seeded coverage check at a true signal and background: the plug-in profile
-                        construction versus the Berger-Boos supremum, per pseudo-experiment.
+                        construction versus the Berger-Boos supremum, per pseudo-experiment, with the outer
+                        binomial and inner toy errors (neyman_coverage_scan runs it over several true points).
 
 shape-limit input: {"bins": [{"n": 5, "b": 3.2, "s": 1.0}, ...], "cl": 0.95, "nuisances": [
   {"name": "bkg_norm", "kind": "background_norm", "sigma": 0.2},
@@ -63,7 +66,8 @@ Usage (from the skill directory):
   python3 core/stats/likelihood_limits.py neyman-limit --n 3 --b 3 --sigma-b 2 --cl 0.95 --beta 0.01 --toys 1000 --seed 1
   python3 core/stats/likelihood_limits.py neyman-coverage --s 2 --b 3 --sigma-b 2 --cl 0.95 --outer 300 --inner 200 --seed 1
 Exit codes: 0 ok; 2 rejected input. Standard library only.
-Importable: profile_limit, profile_significance, multibin_limit, profile_fc, profile_cls, shape_limit, neyman_limit, neyman_coverage.
+Importable: profile_limit, profile_significance, multibin_limit, profile_fc, profile_cls, shape_limit, neyman_limit, neyman_coverage,
+neyman_coverage_scan.
 """
 from __future__ import annotations
 
@@ -145,8 +149,10 @@ def _ll1(n: float, s: float, b: float, b0: float, sig: float) -> float:
 
 
 def _q1(n: float, b0: float, sig: float, s: float) -> float:
-    """One-sided boundary statistic q-tilde_s (0 when the best-fit signal exceeds s)."""
-    s_hat = n - b0 if n >= b0 else 0.0
+    """One-sided boundary statistic q-tilde_s (0 when the best-fit signal exceeds s). The maximum is over s >= 0 and
+    b >= 0, so an auxiliary observation b0 < 0 (possible under its Gaussian model) gives s_hat = n, b_hat = 0."""
+    b_pos = max(b0, 0.0)
+    s_hat = n - b_pos if n >= b_pos else 0.0
     if s_hat > s:
         return 0.0
     ll_max = _ll1(n, s_hat, _b_hat(n, s_hat, b0, sig), b0, sig)
@@ -788,14 +794,39 @@ def shape_limit(doc: dict, cl: float, toys: int, seed: int) -> dict:
     return out
 
 
-# ------------------------------------------------------------ guaranteed-coverage (Berger-Boos)
+# ------------------------------------------------------------ Berger-Boos construction (approximate implementation)
+# Seeded coverage scans that passed (tests/core/test_stats_likelihood_limits.py, HEP_SLOW_TESTS=1; VALIDATION.md):
+# every combination of these true values, with the outer/inner toy counts and grid points given here.
+BB_VALIDATED_RANGE = {"s": [0.0, 2.0, 5.0], "b": [1.0, 3.0, 8.0], "sigma_b": [0.5, 2.0], "cl": [0.9, 0.95], "beta": 0.01,
+                      "outer": 600, "inner": 300, "points": 9}
+
+
+def _in_validated_range(b, sig, cl, s=None) -> bool:
+    r = BB_VALIDATED_RANGE
+    ok = min(r["b"]) <= b <= max(r["b"]) and min(r["sigma_b"]) <= sig <= max(r["sigma_b"]) and cl in r["cl"]
+    return ok and (s is None or min(r["s"]) <= s <= max(r["s"]))
+
+
+def _coverage_claim(within: bool) -> dict:
+    return {"construction": "Berger-Boos: coverage >= cl for every true background if the supremum is exact",
+            "implementation": "approximate",
+            "reason": "the supremum is taken over a finite grid of the nuisance and each p-value is estimated with finite toys",
+            "validated": ("seeded coverage scan passed in BB_VALIDATED_RANGE" if within else
+                          "outside BB_VALIDATED_RANGE: coverage of this implementation is not validated here; run neyman-coverage")}
+
+
+def _aux_draw(b: float, sig: float, z: float) -> float:
+    """Auxiliary measurement drawn from the constraint term of the likelihood, Normal(b0 | b, sig) on the real line
+    (no truncation at zero: the likelihood and _q1 accept b0 < 0)."""
+    return b + sig * z if sig > 0 else b
+
+
 def _p_at(n_obs, b0_obs, sig, s, b_true, uniforms, gauss) -> float:
     q_obs = _q1(n_obs, b0_obs, sig, s)
     hits = 0
     for u, z in zip(uniforms, gauss):
         nn = _ppf(u, s + b_true)
-        bb = max(b_true + sig * z, 0.0) if sig > 0 else b_true
-        hits += _q1(nn, bb, sig, s) >= q_obs - 1e-12
+        hits += _q1(nn, _aux_draw(b_true, sig, z), sig, s) >= q_obs - 1e-12
     return hits / len(uniforms)
 
 
@@ -803,7 +834,9 @@ def _bb_grid(b0, sig, beta, points):
     if sig == 0.0:
         return [b0], 0.0
     zb = NormalDist().inv_cdf(1.0 - beta / 2.0)
-    lo, hi = max(b0 - zb * sig, 0.0), b0 + zb * sig
+    lo, hi = max(b0 - zb * sig, 0.0), max(b0 + zb * sig, 0.0)
+    if hi <= lo:  # the confidence set lies below b = 0 (b0 far below zero): only the boundary is allowed
+        return [lo], beta
     return [lo + (hi - lo) * k / (points - 1) for k in range(points)], beta
 
 
@@ -840,18 +873,25 @@ def neyman_limit(n: int, b: float, sigma_b: float, cl: float, beta: float, toys:
         lo, hi = (mid, hi) if _p_sup(n, b, sig, mid, grid, uniforms, gauss) > target else (lo, mid)
     s_bb = 0.5 * (lo + hi)
     s_plug = profile_limit(n, b, sig, cl, toys, seed)["toy_calibrated_upper_limit"]
-    out = {"label": LABEL, "method": "upper limit with guaranteed coverage over the background nuisance (Berger-Boos supremum), seeded toys",
+    within = _in_validated_range(b, sig, cl)
+    out = {"label": LABEL, "method": ("upper limit from the Berger-Boos construction over the background nuisance, approximated "
+                                      "with a finite nuisance grid and seeded toys"),
            "n_obs": n, "b": b, "sigma_b": sig, "cl": cl, "beta": used_beta, "toys": toys, "seed": seed,
            "nuisance_grid_points": len(grid), "nuisance_range": [min(grid), max(grid)],
            "berger_boos_upper_limit": s_bb, "plug_in_profile_upper_limit": s_plug,
            "ratio_berger_boos_over_plug_in": s_bb / s_plug if s_plug > 0 else None,
+           "toy_p_value_error_at_threshold": math.sqrt(max(target * (1.0 - target), 0.0) / toys),
+           "bisection_width": hi - lo,
+           "coverage_claim": _coverage_claim(within), "within_validated_range": within, "validated_range": BB_VALIDATED_RANGE,
            "note": ("a signal s is excluded when sup over b in the (1 - beta) confidence set of the background of the "
-                    "toy p-value of the one-sided profile statistic, plus beta, is at most 1 - cl; this guarantees "
-                    "coverage of at least cl for every true background (Berger and Boos 1994) up to toy noise and the "
-                    "grid, at the price of over-coverage (a longer limit than the plug-in profile); the toy p-values use "
-                    "common random numbers, 16 bisection steps and a grid over the nuisance, so the result is "
-                    "toy-noise limited; the constraint on the background is a symmetric Gaussian, and the construction "
-                    "has no CLs protection against a downward fluctuation (report the expected sensitivity)")}
+                    "toy p-value of the one-sided profile statistic, plus beta, is at most 1 - cl; with an exact "
+                    "supremum and exact p-values the construction covers at least cl for every true background (Berger "
+                    "and Boos 1994); this implementation approximates both (a grid over the nuisance, toy p-values with "
+                    "the binomial error toy_p_value_error_at_threshold, common random numbers, 16 bisection steps), so "
+                    "its coverage is an approximation, checked by seeded scans only within validated_range; it "
+                    "over-covers in those scans (a longer limit than the plug-in profile); the auxiliary measurement "
+                    "in the toys is drawn from the same Gaussian constraint as the likelihood (not truncated at zero); "
+                    "the construction has no CLs protection against a downward fluctuation (report the expected sensitivity)")}
     return out
 
 
@@ -880,24 +920,46 @@ def neyman_coverage(s_true: float, b_true: float, sigma_b: float, cl: float, bet
     rej_plug = rej_bb = 0
     for _ in range(outer):
         n = _ppf(rng.random(), s_true + b_true)
-        b0 = max(b_true + sig * rng.gauss(0.0, 1.0), 0.0) if sig > 0 else b_true
+        b0 = _aux_draw(b_true, sig, rng.gauss(0.0, 1.0))
         bh = _b_hat(n, s_true, b0, sig)
         rej_plug += _p_at(n, b0, sig, s_true, bh, uniforms, gauss) <= alpha
         grid, ub = _bb_grid(b0, sig, beta, points)
         rej_bb += _p_sup(n, b0, sig, s_true, grid, uniforms, gauss) + ub <= alpha
     cov = lambda r: 1.0 - r / outer
     err = lambda r: math.sqrt(max((r / outer) * (1 - r / outer), 0.0) / outer)
-    return {"label": LABEL, "method": "coverage of an upper limit at a true (s, b): plug-in profile versus Berger-Boos supremum, seeded toys",
+    within = _in_validated_range(b_true, sig, cl, s_true)
+    return {"label": LABEL, "method": ("coverage of an upper limit at a true (s, b): plug-in profile versus the approximate "
+                                       "Berger-Boos supremum (finite grid, seeded toys)"),
             "true_signal": s_true, "true_background": b_true, "sigma_b": sig, "cl": cl, "beta": beta if sig > 0 else 0.0,
             "outer_pseudo_experiments": outer, "inner_toys": inner, "seed": seed,
             "coverage_plug_in_profile": cov(rej_plug), "binomial_error_plug_in": err(rej_plug),
             "coverage_berger_boos": cov(rej_bb), "binomial_error_berger_boos": err(rej_bb),
+            "inner_toy_p_value_error_at_threshold": math.sqrt(alpha * (1.0 - alpha) / inner),
+            "grid_points": points, "coverage_claim": _coverage_claim(within), "within_validated_range": within,
+            "validated_range": BB_VALIDATED_RANGE,
             "note": ("coverage here is the probability that the true signal is not excluded, that is that the upper limit is "
                      "at least the true signal; a plug-in profile construction may fall below the nominal cl for some "
-                     "(s, b, sigma_b) and above it for others, so scan the true values you care about; the Berger-Boos "
-                     "supremum should stay at or above cl up to the statistical error shown (binomial error of the outer "
-                     "count, plus the inner-toy noise); this is a check at one point, not a proof over the whole parameter "
-                     "space")}
+                     "(s, b, sigma_b) and above it for others, so scan the true values you care about; the approximate "
+                     "Berger-Boos supremum is expected at or above cl within the Monte Carlo errors shown (binomial error "
+                     "of the outer count; inner_toy_p_value_error_at_threshold is the toy error of each p-value near the "
+                     "exclusion threshold); this is a check at one point, not a proof over the parameter space")}
+
+
+def neyman_coverage_scan(true_points, cl: float, beta: float, outer: int, inner: int, seed: int, points: int = 9) -> dict:
+    """neyman_coverage at each (s, b, sigma_b) in true_points (seed + index per point); rows keep the MC errors."""
+    if not isinstance(true_points, (list, tuple)) or not 1 <= len(true_points) <= 200:
+        raise LikelihoodError("true_points must list 1 to 200 (s, b, sigma_b) triples")
+    rows = []
+    for i, pt in enumerate(true_points):
+        if not isinstance(pt, (list, tuple)) or len(pt) != 3:
+            raise LikelihoodError("each true point is (s, b, sigma_b)")
+        r = neyman_coverage(pt[0], pt[1], pt[2], cl, beta, outer, inner, None if seed is None else seed + i, points)
+        rows.append({k: r[k] for k in ("true_signal", "true_background", "sigma_b", "coverage_plug_in_profile", "binomial_error_plug_in",
+                                       "coverage_berger_boos", "binomial_error_berger_boos", "inner_toy_p_value_error_at_threshold",
+                                       "within_validated_range", "seed")})
+    return {"label": LABEL, "method": "coverage scan over true (s, b, sigma_b): plug-in profile versus approximate Berger-Boos",
+            "cl": cl, "beta": beta, "outer_pseudo_experiments": outer, "inner_toys": inner, "grid_points": points, "points": rows,
+            "note": "each row is a seeded check at one true point with its Monte Carlo errors; the scan validates only the points listed"}
 
 
 # -------------------------------------------------------------------------- CLI
@@ -938,7 +1000,7 @@ def build_parser() -> argparse.ArgumentParser:
     k.add_argument("--cl", type=float, default=0.95)
     k.add_argument("--expected-toys", type=int, default=60, help="background-only pseudo-experiments for the expected band (0 to skip)")
     common(k, 1000)
-    ny = sub.add_parser("neyman-limit", help="Berger-Boos guaranteed-coverage upper limit")
+    ny = sub.add_parser("neyman-limit", help="Berger-Boos upper limit (finite-grid, seeded-toy approximation)")
     ny.add_argument("--n", type=int, required=True)
     ny.add_argument("--b", type=float, required=True)
     ny.add_argument("--sigma-b", type=float, default=0.0)
