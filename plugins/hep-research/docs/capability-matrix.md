@@ -96,5 +96,5 @@ results; they are listed in "E2 results" at the end. Evidence: VALIDATION FULLTE
 | Diagram source checks | tested (E2: Graphviz 16.1.0, PlantUML 1.2026.8, Mermaid CLI 12.0.0 with chrome-headless-shell 154) | Homebrew `mermaid-cli` needs a separate `chrome-headless-shell` install |
 | Batch campaigns | protocol tested (E2) against fake schedulers; real Slurm/HTCondor unverified | no `sbatch`, no `condor_submit` |
 | Relocation (AC24) | tested (E2) | copy of the git-listed files at a path with spaces passes, also with an ignored venv in the tree; the 2 legacy checks and 1 legacy-dependent unit test skip in the copy |
-| Claude Code (plugin, isolated config) | tested (E2, CLI 2.1.288): install, discovery, removal; namespaced invocation unverified (isolated config not logged in) | invocation passed in the user configuration (VALIDATION INSTALL) |
+| Claude Code (plugin, isolated config) | tested (E2, CLI 2.1.288): install, discovery, namespaced invocation, profile access, removal | invocation run once the isolated config was logged in (FULLTEST-E2-ROUTING follow-ups) |
 | Live routing | tested (E2, claude-sonnet-5-5, plugin only, 62 cases): 56/62 | 3 quick questions answered without a skill; 1 case without inputs; 2 neighbor-skill choices (fold-and-fit, SMEFT out of v1); 0 loading violations (FULLTEST-E2-ROUTING) |
