@@ -4,7 +4,7 @@
 Purpose: extract a spectral index (and, for a segmented fit, per-segment indices and
 a break energy) from measured (energy, flux) points, and propagate the flux's
 statistical uncertainty into the index's uncertainty. See
-${CLAUDE_PLUGIN_ROOT}/skills/detector-response/references/30-cosmic-ray-spectrum-and-composition.md for why an energy-scale
+${CLAUDE_PLUGIN_ROOT}/skills/detector-response/references/cosmic-ray-spectrum-and-composition.md for why an energy-scale
 uncertainty on a steeply falling spectrum matters more than it looks: this script
 fits the index only, and does not itself convert an index uncertainty into an
 energy-scale systematic - that conversion (`gamma * delta`) is done by hand from the
@@ -25,9 +25,9 @@ otherwise unweighted (ordinary least squares - reported uncertainties are then o
 as good as the assumption of comparable per-point scatter). This is a spectral-index
 fit only - it does not itself account for detector energy resolution/migration, so it
 should not be used as a substitute for forward-folding a spectral hypothesis through
-an instrument response (see ${CLAUDE_PLUGIN_ROOT}/skills/hep-analysis/references/10-measurements-unfolding.md).
-Run: python3 ${CLAUDE_PLUGIN_ROOT}/skills/hep-analysis/scripts/cr_spectrum_powerlaw_fit.py --input ${CLAUDE_PLUGIN_ROOT}/skills/hep-analysis/templates/cosmic_ray_spectrum.example.json
-     python3 ${CLAUDE_PLUGIN_ROOT}/skills/hep-analysis/scripts/cr_spectrum_powerlaw_fit.py --input ${CLAUDE_PLUGIN_ROOT}/skills/hep-analysis/templates/cosmic_ray_spectrum.example.json --break-energy 4.5e15
+an instrument response (see ${CLAUDE_PLUGIN_ROOT}/skills/hep-analysis/references/measurements-and-unfolding.md).
+Run: python3 ${CLAUDE_PLUGIN_ROOT}/skills/hep-analysis/scripts/cr_spectrum_powerlaw_fit.py --input ${CLAUDE_PLUGIN_ROOT}/skills/hep-analysis/assets/cosmic-ray-spectrum.example.json
+     python3 ${CLAUDE_PLUGIN_ROOT}/skills/hep-analysis/scripts/cr_spectrum_powerlaw_fit.py --input ${CLAUDE_PLUGIN_ROOT}/skills/hep-analysis/assets/cosmic-ray-spectrum.example.json --break-energy 4.5e15
 """
 import argparse
 import json

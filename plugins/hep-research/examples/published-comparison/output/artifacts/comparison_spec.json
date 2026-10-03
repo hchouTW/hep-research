@@ -24,7 +24,7 @@
  "artifact_type": "comparison-spec",
  "inputs": [
   {
-   "ref": "../qed-benchmark/output/artifacts/prediction.json",
+   "ref": "../qed-prediction/output/artifacts/prediction.json",
    "artifact_type": "prediction",
    "status": [
     "validated-in-scope"

@@ -2,7 +2,7 @@
 
 ## When to read this file
 
-Read for proton, helium, heavier-nuclei flux analyses and secondary-to-primary or species ratios (e.g. B/C-type). Owns the **flux blueprint**, the **ratio/fraction blueprint**, geomagnetic primary selection, and rigidity ↔ kinetic-energy-per-nucleon conversion. Elemental/isotopic identification is in [nuclei-and-isotopes](../species/nuclei-and-isotopes.md); leptons and antimatter in [antimatter-and-leptons](../species/antimatter-and-leptons.md).
+Read for proton, helium, heavier-nuclei flux analyses and secondary-to-primary or species ratios (e.g. B/C-type). Owns the **flux blueprint**, the **ratio/fraction blueprint**, geomagnetic primary selection, and rigidity ↔ kinetic-energy-per-nucleon conversion. Elemental/isotopic identification is in [nuclei-and-isotopes](nuclei-and-isotopes.md); leptons and antimatter in [antimatter-and-leptons](antimatter-and-leptons.md).
 
 ## Contents
 
@@ -81,7 +81,7 @@ Classify each nuisance as **fully correlated** (cancels or shifts both), **parti
 For isotope of mass number `A`, charge `Z`, rest energy `m c²`:
 - `p c = |Z| |R|` (GeV, with `R` in GV).
 - `E = sqrt((pc)² + (mc²)²)`, `T = E - mc²`, `T/A = T / A`.
-- **Elemental flux conversion** to `T/A` requires an assumed `A` or an isotope-composition model; the conversion and its uncertainty are part of the result. For protons `A = 1`; helium with `⁴He` dominance is an assumption that carries an uncertainty and needs evidence (see [nuclei-and-isotopes](../species/nuclei-and-isotopes.md)).
+- **Elemental flux conversion** to `T/A` requires an assumed `A` or an isotope-composition model; the conversion and its uncertainty are part of the result. For protons `A = 1`; helium with `⁴He` dominance is an assumption that carries an uncertainty and needs evidence (see [nuclei-and-isotopes](nuclei-and-isotopes.md)).
 - **Reference rest energies** (General method; nuclear masses, check against PDG before high-precision use): p 0.9383 GeV, d 1.8756, ³He 2.8084, ⁴He 3.7274, ¹²C about 11.175 GeV (integer-`A` nuclei in this list are only approximately `A` times the nucleon mass, and the difference matters for `T/A`).
 - Flux Jacobian: `Φ(T/A) = Φ(R) · dR/d(T/A)`; the conversion of a binned flux requires the Jacobian and treatment of bin edges (not only relabeling).
 - Always report which variable the bins and the flux are in.
@@ -89,7 +89,7 @@ For isotope of mass number `A`, charge `Z`, rest energy `m c²`:
 
 ## Dominant backgrounds and effects
 
-Charge confusion (wrong sign or wrong `|Z|`), fragmentation/charge-changing interactions in upstream material and detector, adjacent-element leakage in the charge estimator, secondary particles/delta rays affecting track reconstruction, albedo/upward-going particles at low `R`, bin migration from finite rigidity resolution with tails, trigger inefficiency dependence on `R`, and time-dependent acceptance/livetime. See [nuclei-and-isotopes](../species/nuclei-and-isotopes.md) for charge-ladder and fragmentation methods.
+Charge confusion (wrong sign or wrong `|Z|`), fragmentation/charge-changing interactions in upstream material and detector, adjacent-element leakage in the charge estimator, secondary particles/delta rays affecting track reconstruction, albedo/upward-going particles at low `R`, bin migration from finite rigidity resolution with tails, trigger inefficiency dependence on `R`, and time-dependent acceptance/livetime. See [nuclei-and-isotopes](nuclei-and-isotopes.md) for charge-ladder and fragmentation methods.
 
 ## Subsystems used
 

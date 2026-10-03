@@ -17,11 +17,10 @@ Core skill ownership and contested-topic resolution are exactly task Sections 7.
 
 | core module | Steward | Status |
 |---|---|---|
-| bootstrap | hep-computing | implemented |
-| units, constants, kinematics | hep-theory | planned M2 |
-| binned, blinding | hep-computing | planned M2 |
-| stats | hep-statistics | planned M2 |
-| evidence | research-communication | planned M2 |
+| kinematics | hep-theory | implemented |
+| stats | hep-statistics | implemented |
+| blinding | hep-computing | implemented |
+| evidence | research-communication | implemented |
 
 Admission rule: code enters `core/` only when more than one top-level component uses it; experiment and theory-domain specifics never do.
 
@@ -51,10 +50,10 @@ Enforced by `tools/check_layering.py` (AST imports + text scan + schema scan + s
 | Registry and profiles | `contracts/registry.py`, `schemas/registry.json`, `schemas/profile.json` | Two-tier registry, templates, compatibility, escape and cycle checks |
 | Project config | `contracts/project.py`, `schemas/project_config.json` | Resolution order, local profiles, pins, overrides with provenance |
 | Evidence | `contracts/evidence.py`, `schemas/evidence_*.json` | Profile-qualified IDs; verification date distinct from publication and current dates |
-| Gate | `contracts/compat/` | Conventions comparison now (T25); full gate in M4 |
+| Comparison gate | `contracts/comparison/` | `gate.py` (observable, level, unit, convention and transformation checks), `conventions.py`, `composition.py`, `combination.py`, `model_set.py` |
 | Context stanza | `contracts/stanzas/context-resolution.md` | Inserted into each SKILL.md by `tools/build_stanzas.py`; drift fails the checks |
 
-Serialization (D6): JSON, stdlib-parseable. The legacy strict-YAML subset is read only by the legacy converter (M2).
+Serialization (D6): JSON, stdlib-parseable. The strict-YAML subset reader is used only by the AMS-02 profile (`profiles/experiments/ams-02/scripts/yaml_subset.py`).
 
 ## 5. Versioning
 
@@ -63,7 +62,7 @@ SemVer for plugin (`0.1.0`), contracts (`1.0.0`, `contracts.CONTRACTS_VERSION`),
 ## 6. Runtime mechanics
 
 - Skills reference shared files as `${CLAUDE_PLUGIN_ROOT}/...` (resolved inline in skill content, host fact 4).
-- Scripts locate the root from `__file__` (`core/bootstrap.py` idiom), never from cwd; outputs go to an explicit directory outside the plugin.
+- Scripts locate the plugin root from `__file__` (`Path(__file__).resolve().parents[N]`), never from cwd; outputs go to an explicit directory outside the plugin.
 - Project state lives in the researcher's project (`hep-research.project.json`, `artifacts_dir`); `contracts/project.py` rejects local profiles or artifacts inside the plugin.
 
 ## 7. Loading budget (measured)

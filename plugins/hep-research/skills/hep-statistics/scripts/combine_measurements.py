@@ -22,7 +22,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-from contracts.compat.combine import plan_combination  # noqa: E402
+from contracts.comparison.combination import plan_combination  # noqa: E402
 
 
 def gls(values_list, cov):

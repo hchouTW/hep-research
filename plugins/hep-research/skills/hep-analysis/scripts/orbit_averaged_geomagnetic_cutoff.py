@@ -7,7 +7,7 @@ cutoff (${CLAUDE_PLUGIN_ROOT}/skills/hep-analysis/scripts/geomagnetic_cutoff.py)
 exposure. This script samples the vertical Stormer cutoff over the geomagnetic
 latitude range an orbit of given inclination reaches, and reports the minimum,
 maximum, and a time-weighted average. See
-the bound experiment profile's instrument overview and ${CLAUDE_PLUGIN_ROOT}/skills/detector-response/references/35-space-based-direct-detection.md.
+the bound experiment profile's instrument overview and ${CLAUDE_PLUGIN_ROOT}/skills/detector-response/references/space-based-direct-detection.md.
 
 What it does: for an orbit of inclination `i` (degrees) the satellite's geographic
 (here treated as equal to geomagnetic, for this order-of-magnitude planning estimate -

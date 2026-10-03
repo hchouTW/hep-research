@@ -9,7 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT.parents[2]))  # plugin root
-from contracts.compat.conventions import compare_conventions  # noqa: E402
+from contracts.comparison.conventions import compare_conventions  # noqa: E402
 
 CONV = json.loads((ROOT / "conventions.json").read_text(encoding="utf-8"))
 M_MU_GEV = 0.1057  # rounded muon mass, used only to size the effect in this test

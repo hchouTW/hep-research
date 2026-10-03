@@ -2,7 +2,7 @@
 
 ## When to read this file
 
-Read for elemental charge identification (`Z` ladders), fragmentation and survival, and isotope (mass) measurements such as `D/p`, `³He/⁴He`, Li isotopes. Owns the **nuclei blueprint** and the mass-from-`R`-`Z`-`β` procedure. Observable definitions and mass-error propagation are in [detector-and-observables](../subsystems/detector-and-observables.md#core-observables-and-conventions); the flux blueprint in [charged-cosmic-rays](../species/charged-cosmic-rays.md#flux-blueprint).
+Read for elemental charge identification (`Z` ladders), fragmentation and survival, and isotope (mass) measurements such as `D/p`, `³He/⁴He`, Li isotopes. Owns the **nuclei blueprint** and the mass-from-`R`-`Z`-`β` procedure. Observable definitions and mass-error propagation are in [detector-and-observables](../subsystems/detector-and-observables.md#core-observables-and-conventions); the flux blueprint in [charged-cosmic-rays](charged-cosmic-rays.md#flux-blueprint).
 
 ## Contents
 
@@ -51,7 +51,7 @@ Symbolic; uses the flux blueprint with these additions.
 2. **Elemental selection at multiple depths** (above): conditional efficiency per depth; charge-selection efficiency measured per `Z` and per rigidity.
 3. **Fragmentation feed-down/up.** Feed-down from heavier nuclei (background of the target element) and loss of target nuclei to lighter charges (survival probability `P_surv(Z, R)`): both enter the response/efficiency; they depend on cross-section models and material.
 4. **Isotope templates** where relevant (see below); otherwise state the isotope composition assumption.
-5. **Rigidity ↔ kinetic energy per nucleon conversion.** Requires an explicit `A` assumption or isotope composition model for an elemental flux; propagate its uncertainty; do not convert without it (see [charged-cosmic-rays](../species/charged-cosmic-rays.md#variable-conversion)).
+5. **Rigidity ↔ kinetic energy per nucleon conversion.** Requires an explicit `A` assumption or isotope composition model for an elemental flux; propagate its uncertainty; do not convert without it (see [charged-cosmic-rays](charged-cosmic-rays.md#variable-conversion)).
 6. **Response and unfolding** as in [inference-and-unfolding](../methods/inference-and-unfolding.md) including a charge migration matrix.
 7. **Systematics** by family (see [calibration-mc-systematics](../methods/calibration-mc-systematics.md#required-systematic-families)) with emphasis on interaction cross-sections/material, charge-estimator tails, and template statistics for small samples.
 8. **Closure and cross-checks** below.
@@ -77,7 +77,7 @@ Symbolic; uses the flux blueprint with these additions.
 
 ## Ratios
 
-Isotope and element ratios (e.g. `D/p`, `³He/⁴He`, `B/C`) share acceptance and material effects only partially; the survival probabilities differ by species. Do not claim efficiency cancellation without evidence (see the ratio blueprint in [charged-cosmic-rays](../species/charged-cosmic-rays.md#ratio-or-fraction-blueprint)). A measured ratio's rigidity dependence (e.g. a power law at high rigidity) is an empirical description; the physical interpretation (propagation, source) is a model step (see [source-policy](../sources/source-policy.md#result-interpretation)).
+Isotope and element ratios (e.g. `D/p`, `³He/⁴He`, `B/C`) share acceptance and material effects only partially; the survival probabilities differ by species. Do not claim efficiency cancellation without evidence (see the ratio blueprint in [charged-cosmic-rays](charged-cosmic-rays.md#ratio-or-fraction-blueprint)). A measured ratio's rigidity dependence (e.g. a power law at high rigidity) is an empirical description; the physical interpretation (propagation, source) is a model step (see [source-policy](../sources/source-policy.md#result-interpretation)).
 
 ## Cross-checks
 

@@ -22,7 +22,7 @@ to the matching reference under "When to Load References".
    yet.
 2. **Identify the relevant authoring reference.** Locate the authoring
    reference that best matches the request - this skill's own
-   [templates/task-template.md](../templates/task-template.md) and
+   [assets/task-template.md](../assets/task-template.md) and
    [references/](./) first, and any repository-defined authoring
    instructions the target repo itself carries (a `CONTRIBUTING.md`, an
    existing task-template file, a sibling skill's own conventions). Prefer
@@ -33,7 +33,7 @@ to the matching reference under "When to Load References".
    acceptance-criteria style, required technical context, and any examples of
    strong and weak tasks it carries. Do not assume the authoring format from
    memory when a reference is available - see
-   [templates/task-template.md](../templates/task-template.md) and
+   [assets/task-template.md](../assets/task-template.md) and
    [references/acceptance-criteria.md](acceptance-criteria.md).
 4. **Inspect the target repository.** Before introducing any project-specific
    implementation detail, look at READMEs, source code, configuration files,
@@ -82,7 +82,7 @@ task:
 
 - **Output contract for the generated document** (exact section list, order,
   one-line placeholder guidance) ->
-  [templates/task-template.md](../templates/task-template.md)
+  [assets/task-template.md](../assets/task-template.md)
 - **Acceptance-criteria style** (what makes a criterion verifiable vs. vague)
   -> [references/acceptance-criteria.md](acceptance-criteria.md)
 - **Final quality gate before writing the task** ->
@@ -170,7 +170,7 @@ task:
   such a loop - its pattern, error handling, and guardrails - is in scope;
   see [references/loop-engineering.md](loop-engineering.md).
 - If the user explicitly supplies their own task template or format, follow
-  it instead of [templates/task-template.md](../templates/task-template.md) -
+  it instead of [assets/task-template.md](../assets/task-template.md) -
   user instructions take precedence over this skill's default structure.
 
 ## Example Prompts This Skill Handles Well

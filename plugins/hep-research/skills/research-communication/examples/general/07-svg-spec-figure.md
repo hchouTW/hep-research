@@ -3,7 +3,7 @@
 **Request:** "Give me an editable SVG of the train/validation/test workflow that I can polish in Inkscape."
 **Diagram type:** workflow, paper level, left-to-right, as a hand-placed SVG (custom coordinates because the branch layout is small and fixed). Solid arrow = data flow; dashed arrow = hyperparameter tuning; thick outline = the selected model; gray fill = data not used for fitting.
 
-**Spec (from `../../templates/svg-spec.md`):**
+**Spec (from `../../assets/diagrams/svg-spec.md`):**
 
 | item | value |
 |---|---|

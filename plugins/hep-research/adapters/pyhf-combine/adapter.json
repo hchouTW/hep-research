@@ -29,7 +29,7 @@
   "../../tests/adapters/test_pyhf_counting.py",
   "../../tests/adapters/test_pyhf_shape.py",
   "../../tests/examples/test_end_to_end_sample.py",
-  "../../tests/skills/hep_statistics/test_hep_analysis_combine_template.py"
+  "../../tests/adapters/test_combine_datacard_template.py"
  ],
  "owner_skill": "hep-statistics",
  "status_rule": "the adapter status is the lowest of its tools' statuses; each tool's own status is in tools[]"

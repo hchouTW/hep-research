@@ -2,7 +2,7 @@
 
 Cross-cutting LaTeX mechanics that apply regardless of which venue's class
 file is in use — notation, tables, accessibility, diffing, build tooling,
-and document structuring. See `latex-and-formatting.md` for venue-specific
+and document structuring. See `latex-venue-setup.md` for venue-specific
 class files, skeletons, arXiv rules, and length-limit tactics; this file is
 everything that applies once the venue-specific setup is already done.
 
@@ -129,7 +129,7 @@ pdflatex diff.tex   # compile diff.tex like any other .tex file
 ## Build automation (latexmk)
 
 The "run bibtex/biber, then pdflatex twice more" four-pass compile
-(`latex-and-formatting.md`'s common-compile-errors table) is exactly what
+(`latex-venue-setup.md`'s common-compile-errors table) is exactly what
 `latexmk` automates — use it instead of remembering the pass order by hand:
 
 ```

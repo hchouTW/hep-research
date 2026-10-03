@@ -3,7 +3,7 @@
 
 Purpose: the common building block behind positron-fraction and antiproton/proton-
 ratio-style measurements (see the bound experiment profile's instrument overview and
-${CLAUDE_PLUGIN_ROOT}/skills/hep-statistics/references/37-astroparticle-statistics.md): two yields from independent template
+${CLAUDE_PLUGIN_ROOT}/skills/hep-statistics/references/astroparticle-statistics.md): two yields from independent template
 fits or counts, each with its own uncertainty, combined into a ratio N1/N2 or a
 fraction N1/(N1+N2). Unlike ${CLAUDE_PLUGIN_ROOT}/skills/detector-response/scripts/tag_and_probe_efficiency.py (a single binomial
 pass/total count with a shared denominator), this is for two genuinely independent

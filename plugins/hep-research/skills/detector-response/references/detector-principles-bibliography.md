@@ -1,6 +1,6 @@
 # References (Annotated, by Detector Family and Topic)
 
-Companion to `high_energy_detector_principles.md`. Citation format used throughout:
+Annotated sources for the detector-response references. Citation format used throughout:
 author(s), title, venue volume (year) pages, then a persistent identifier: a DOI
 (resolve at `https://doi.org/<DOI>`) or, where none exists, a stable URL.
 
@@ -25,7 +25,7 @@ the textbooks are for principles.
   *Statistics* (<https://pdg.lbl.gov/2025/reviews/rpp2025-rev-statistics.pdf>). Standard
   reference for Bethe-Bloch, Highland, radiation and interaction lengths, Cherenkov and
   transition radiation, detector resolution parameterizations, and statistical
-  terminology (Chapters 2-3, 6, 9-11, 17). Particle masses and properties for PID
+  terminology ([core detector equations](core-detector-equations.md), [signal formation and readout](signal-formation-and-readout.md), [tracking and vertexing](tracking-and-vertexing.md), [particle identification](particle-identification.md), [cherenkov imaging variants and photosensors](cherenkov-imaging-variants-and-photosensors.md), [calorimetry ecal hcal](calorimetry-ecal-hcal.md), [performance metrics and residual diagnostics](performance-metrics-and-residual-diagnostics.md)). Particle masses and properties for PID
   calculations come from the PDG listings.
 - W. R. Leo, *Techniques for Nuclear and Particle Physics Experiments*, 2nd ed.
   (Springer, 1994), DOI 10.1007/978-3-642-57920-2. Textbook: interaction with matter, signal formation, electronics.
@@ -34,7 +34,7 @@ the textbooks are for principles.
 - F. Sauli, *Gaseous Radiation Detectors: Fundamentals and Applications* (Cambridge
   University Press, 2014), DOI 10.1017/CBO9781107337701. Gas detectors, drift, diffusion, gain, micro-pattern devices.
 
-## Signal formation, energy loss, fluctuations (Chapter 3)
+## Signal formation, energy loss, fluctuations ([signal formation and readout](signal-formation-and-readout.md))
 
 - H. Bichsel, "Straggling in thin silicon detectors", Rev. Mod. Phys. 60 (1988) 663-699, DOI 10.1103/RevModPhys.60.663.
   Landau/Vavilov-type fluctuations in thin layers.
@@ -43,7 +43,7 @@ the textbooks are for principles.
   Coulomb scattering", Nucl. Instrum. Methods B58 (1991) 6-10, DOI 10.1016/0168-583X(91)95671-Y. Origin of the Highland
   approximation; the PDG review gives the current form.
 
-## Tracking, vertexing, alignment (Chapters 5-7, 12)
+## Tracking, vertexing, alignment ([calibration and alignment](calibration-and-alignment.md), [tracking and vertexing](tracking-and-vertexing.md), [gaseous and specialized tracking technologies](gaseous-and-specialized-tracking-technologies.md), [muon systems](muon-systems.md))
 
 - R. Fruhwirth, "Application of Kalman filtering to track and vertex fitting", Nucl.
   Instrum. Methods A262 (1987) 444-450, DOI 10.1016/0168-9002(87)90887-4. The Kalman track/vertex fit.
@@ -62,7 +62,7 @@ the textbooks are for principles.
   multigap RPC", Nucl. Instrum. Methods A374 (1996) 132-135,
   DOI 10.1016/0168-9002(96)00158-1.
 
-## Timing detectors (Chapter 8)
+## Timing detectors ([timing detectors](timing-detectors.md))
 
 - G. Pellegrini et al., "Technology developments and first measurements of Low Gain
   Avalanche Detectors (LGAD) for high energy physics applications", Nucl. Instrum.
@@ -72,7 +72,7 @@ the textbooks are for principles.
   Ultra-fast silicon and timing
   in trackers, including radiation effects.
 
-## Cherenkov, RICH, DIRC/TOP, TRD, ionization PID, photosensors (Chapters 9-10)
+## Cherenkov, RICH, DIRC/TOP, TRD, ionization PID, photosensors ([particle identification](particle-identification.md), [cherenkov imaging variants and photosensors](cherenkov-imaging-variants-and-photosensors.md))
 
 - T. Ypsilantis and J. Seguinot, "Theory of ring imaging Cherenkov counters", Nucl.
   Instrum. Methods A343 (1994) 30-51, DOI 10.1016/0168-9002(94)90532-0. RICH principles, resolution terms.
@@ -90,7 +90,7 @@ the textbooks are for principles.
   simulating SiPMs", Nucl. Instrum. Methods A926 (2019) 16-35, DOI 10.1016/j.nima.2018.11.118. SiPM dark counts, crosstalk,
   afterpulsing.
 
-## Calorimetry (Chapter 11)
+## Calorimetry ([calorimetry ecal hcal](calorimetry-ecal-hcal.md))
 
 - C. W. Fabjan and F. Gianotti, "Calorimetry for particle physics", Rev. Mod. Phys. 75
   (2003) 1243-1286, DOI 10.1103/RevModPhys.75.1243. Sampling and homogeneous calorimeters, resolution terms, hadronic
@@ -100,7 +100,7 @@ the textbooks are for principles.
 - M. A. Thomson, "Particle flow calorimetry and the PandoraPFA algorithm", Nucl.
   Instrum. Methods A611 (2009) 25-40, DOI 10.1016/j.nima.2009.09.009. Particle flow, confusion term.
 
-## Noble-liquid, neutrino, rare-event detectors (Chapter 13)
+## Noble-liquid, neutrino, rare-event detectors ([noble liquid neutrino and rare event detectors](noble-liquid-neutrino-and-rare-event-detectors.md))
 
 - E. Aprile and T. Doke, "Liquid xenon detectors for particle physics and
   astrophysics", Rev. Mod. Phys. 82 (2010) 2053-2097, DOI 10.1103/RevModPhys.82.2053. Scintillation, ionization,
@@ -108,7 +108,7 @@ the textbooks are for principles.
 - The PDG non-accelerator detector review above covers neutrino, dark-matter, and
   cryogenic detectors at the level used here.
 
-## Astroparticle systems (Chapter 13)
+## Astroparticle systems ([extensive air showers](extensive-air-showers.md), [ground based detection arrays](ground-based-detection-arrays.md), [imaging atmospheric cherenkov](imaging-atmospheric-cherenkov.md), [neutrino astronomy](neutrino-astronomy.md), [space based direct detection](space-based-direct-detection.md))
 
 - T. K. Gaisser, R. Engel and E. Resconi, *Cosmic Rays and Particle Physics*, 2nd ed.
   (Cambridge University Press, 2016), DOI 10.1017/CBO9781139192194. Air showers, atmospheric and detection techniques.
@@ -117,13 +117,13 @@ the textbooks are for principles.
 - T.-P. Li and Y.-Q. Ma, "Analysis methods for results in gamma-ray astronomy",
   Astrophys. J. 272 (1983) 317-324, DOI 10.1086/161295. ON/OFF significance.
 
-## Simulation and reconstruction (Chapters 14-15)
+## Simulation and reconstruction ([event reconstruction](event-reconstruction.md), [detector simulation](detector-simulation.md))
 
 - S. Agostinelli et al. (GEANT4), "GEANT4: a simulation toolkit", Nucl. Instrum.
   Methods A506 (2003) 250-303, DOI 10.1016/S0168-9002(03)01368-8. Documentation: <https://geant4.web.cern.ch/support/user_documentation>
   (Physics Reference Manual for physics lists, production cuts, model validity ranges).
 
-## Statistics, performance measurement, and uncertainties (Chapters 16-18)
+## Statistics, performance measurement, and uncertainties ([reconstruction performance and truth matching](reconstruction-performance-and-truth-matching.md), [performance metrics and residual diagnostics](performance-metrics-and-residual-diagnostics.md), [data mc validation and detector systematics](data-mc-validation-and-detector-systematics.md))
 
 - G. Cowan, K. Cranmer, E. Gross and O. Vitells, "Asymptotic formulae for
   likelihood-based tests of new physics", Eur. Phys. J. C71 (2011) 1554, DOI 10.1140/epjc/s10052-011-1554-0,

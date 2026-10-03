@@ -22,4 +22,4 @@ Criteria: gate_comparable_all_masses pass, gate_rejects_double_efficiency pass, 
 
 Limits: one signal region, so shapes and correlations between regions are not exercised; the efficiency map has no uncertainty of its own; the toy model is not physics. This shows the J7 chain and its contracts.
 
-Reproduce: `python3 examples/recasting/run_j7.py --toys 20000 --seed 20261006`
+Reproduce: `python3 examples/recasting/run.py --toys 20000 --seed 20261006`

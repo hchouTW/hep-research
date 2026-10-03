@@ -39,7 +39,7 @@ description: "Use when the deliverable is a machine-learning model or study for 
 
 ## Resources
 
-Start with [the PyTorch engineering guide](references/deep-learning-guide.md). Physics-facing references: [multivariate analysis](references/20-multivariate-analysis-bdt-nn.md), [ML in analyses](references/11-ml-analysis.md), [scientific ML](references/scientific-machine-learning.md), data strategy, evaluation, uncertainty and calibration, robustness and distribution shift, reproducibility; engineering references cover training, scaling, debugging and deployment, all under `references/`.
+Start with [the PyTorch engineering guide](references/deep-learning-guide.md). Physics-facing references: [multivariate analysis](references/multivariate-analysis-bdt-nn.md), [ML in analyses](references/ml-analysis.md), [scientific ML](references/scientific-machine-learning.md), data strategy, evaluation, uncertainty and calibration, robustness and distribution shift, reproducibility; engineering references cover training, scaling, debugging and deployment, all under `references/`.
 
 Scripts in `${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/scripts/` (read `--help` first): `check_split_integrity.py` (group leakage), `check_surrogate_domain.py` (surrogate queries outside or in sparse parts of the training domain), `check_dataset_contract.py`, `compare_model_runs.py`, `find_nan_batches.py`, `inspect_checkpoint.py`, `check_pytorch_env.py`, and budget estimators. Code starting points are in `assets/`.
 

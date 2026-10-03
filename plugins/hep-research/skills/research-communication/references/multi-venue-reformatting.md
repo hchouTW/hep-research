@@ -5,7 +5,7 @@ class files or length limits — a conference paper extended into a journal
 submission, a journal letter expanded into a full-length companion paper, or
 the same result reformatted for a second venue (e.g. a NeurIPS paper into a
 JMLR submission, or a PRL letter into an accompanying PRD). Use
-`latex-and-formatting.md` for the mechanics of any single class file, and
+`latex-venue-setup.md` for the mechanics of any single class file, and
 `paper-structure.md` for what belongs in each section; this file is about
 reconciling *two* versions of the same content.
 

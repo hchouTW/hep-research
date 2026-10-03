@@ -43,13 +43,13 @@ def main(argv=None) -> int:
         {"name": "ams_profile_absent", "status": "pass" if not (dst / "profiles" / "experiments" / "ams-02").exists()
          and AMS not in (dst / "profiles" / "registry.json").read_text() else "fail"},
         run("registry", [py, "contracts/registry.py"], dst),
-        run("path_b", [py, "examples/collider-angular/run_path_b.py", "--out", str(out / "b")], dst),
-        run("path_c", [py, "examples/qed-benchmark/run_path_c.py", "--out", str(out / "c")], dst),
+        run("path_b", [py, "examples/collider-angular/run.py", "--out", str(out / "b")], dst),
+        run("path_c", [py, "examples/qed-prediction/run.py", "--out", str(out / "c")], dst),
         run("tests_core", [py, "-m", "unittest", "discover", "-s", "tests/core", "-t", "."], dst),
         run("tests_contracts", [py, "-m", "unittest", "discover", "-s", "tests/contracts", "-t", "."], dst),
         run("tests_hep_statistics", [py, "-m", "unittest", "discover", "-s", "tests/skills/hep_statistics", "-t", "."], dst),
         run("tests_hep_computing", [py, "-m", "unittest", "discover", "-s", "tests/skills/hep_computing", "-t", "."], dst),
-        run("tests_paths_b_c", [py, "-m", "unittest", "tests.examples.test_path_b", "tests.examples.test_path_c"], dst),
+        run("tests_paths_b_c", [py, "-m", "unittest", "tests.examples.test_collider_angular", "tests.examples.test_qed_prediction"], dst),
     ]
     for prof in ("experiments/synthetic-collider", "theory/qed-benchmark"):
         checks.append(run(f"profile-tests:{prof}", [py, "-m", "unittest", "discover", "-s", "tests", "-t", "tests"], dst / "profiles" / prof))

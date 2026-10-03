@@ -4,7 +4,7 @@
 Purpose: first-order estimate of the minimum rigidity a charged cosmic ray must have
 to reach a given geomagnetic latitude and altitude, for a pure dipole field arriving
 from the vertical (zenith) direction. See
-${CLAUDE_PLUGIN_ROOT}/skills/detector-response/references/35-space-based-direct-detection.md.
+${CLAUDE_PLUGIN_ROOT}/skills/detector-response/references/space-based-direct-detection.md.
 
 What it does: evaluates the vertical (zenith angle 0) case of the Stormer formula
     R_c = C * cos^4(lambda_m) / (r^2 * (1 + sqrt(1 - sin(eps) sin(xi) cos^3(lambda_m)))^2),

@@ -6,7 +6,7 @@ Purpose: let a specification written for the legacy ams-analysis skill enter the
 without losing anything and without inventing anything.
 
 What it does:
-  1. Reads the spec (JSON, or the strict YAML subset of contracts/legacy/yaml_subset.py).
+  1. Reads the spec (JSON, or the strict YAML subset of scripts/yaml_subset.py).
   2. Runs the legacy audit (scripts/audit_analysis_spec.py). Audit errors stop the conversion:
      a spec the legacy rules block must be fixed first, not converted.
   3. Maps the generic fields onto the measurement-spec extension (observable, period, selections,

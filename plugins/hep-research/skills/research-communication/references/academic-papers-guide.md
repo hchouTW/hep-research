@@ -77,7 +77,7 @@ are stated here in full.
 8. **Venue rules from the table below, not memory.** PRL abstracts are ≤ 600
    characters; JHEP/JCAP are `article` + `jheppub`/`jcappub` with `\flushbottom`
    after `\maketitle`. Before converting between classes, read
-   `latex-and-formatting.md`.
+   `latex-venue-setup.md`.
 <!-- example: experiment-specific illustration -->
 9. **One INSPIRE record under two keys.** When two `.bib` entries share an `eprint`, they are one paper: keep the current key, update every `\cite` to it, and delete the other. For a collaboration paper the collaboration key (`ATLAS:2012yve`) is the current one and the first-author key (`Aad:2012tfa`) is the older export; say so, and tell the user to confirm on INSPIRE. A `.bib` year taken from arXiv may be the latest-version year, not the publication year.
 <!-- /example -->
@@ -156,7 +156,7 @@ a figure caption, or a formatted document of your own.
    evidence is a figure, see `interpreting-scientific-graphics.md` for
    reading it correctly rather than taking its visual impression at face value.
 3. **Take structured notes as you read**, not after — use
-   `../assets/templates/reading_notes_template.md` as a starting shape (claim / method /
+   `../assets/paper/reading-notes-template.md` as a starting shape (claim / method /
    evidence / limitations / relevance-to-my-work). Notes taken during reading are far
    more reusable later than a memory of "a paper that showed something like this."
 4. **When reading multiple papers toward a literature review**, build a comparison
@@ -234,7 +234,7 @@ Use these when requested or needed to substantiate claims — not for an ordinar
    gets forgotten. See `citations-and-bibliography.md`.
 6. **Typeset in the target class file** from early on if the venue is known (REVTeX,
    JHEP, etc.) — page/length limits interact with formatting in ways that are painful
-   to discover after the fact. See `latex-and-formatting.md`.
+   to discover after the fact. See `latex-venue-setup.md`.
 7. **Run a pre-submission pass.** Use `${CLAUDE_PLUGIN_ROOT}/skills/research-communication/scripts/check_manuscript.py` to catch undefined
    references, duplicate labels and `.bib` keys, leftover TODOs, cited keys missing from the `.bib`, and unused `.bib` entries
    before the user sends the draft anywhere. Then do a human read-aloud pass for prose
@@ -287,18 +287,18 @@ rebuttals) is in `paper-genre-variants.md`,
 | Statistics journals (JASA, Annals of Statistics, ...) | Usually plain `article`-based | Not verified | Journal-specific reference style; theorem/proof structure for theory papers |
 | arXiv preprint | Whatever the target journal uses, or `article` | Match target venue | arXiv runs BibTeX/biber itself; upload any `.sty`/`.cls` not in TeX Live; don't mix PS and PDF figures |
 
-Sources and per-row dates are in `latex-and-formatting.md` ("Venue rules:
+Sources and per-row dates are in `latex-venue-setup.md` ("Venue rules:
 sources and last-verified dates"). A row older than a year, or for a different
 conference year, must be re-checked before it is quoted as a hard limit.
 
 Details, obtaining the right class file, and common compile errors are in
-`latex-and-formatting.md`; astroparticle-specific venues and author-list
+`latex-venue-setup.md`; astroparticle-specific venues and author-list
 conventions are in `astroparticle-and-cosmic-ray-papers.md`;
 statistics/ML-specific venues, reproducibility checklists, and rebuttal mechanics
 are in `statistics-and-ml-papers.md`. A generic starting skeleton (not
 tied to any journal's copyrighted class file) is in
-`../assets/templates/paper_skeleton.tex`, paired with an example INSPIRE-HEP-formatted
-entry in `../assets/templates/references.bib` — copy the actual class file from the
+`../assets/paper/paper-skeleton.tex`, paired with an example INSPIRE-HEP-formatted
+entry in `../assets/paper/references.bib` — copy the actual class file from the
 journal/APS/SISSA/Springer/AAS/Elsevier/conference site once the venue is fixed.
 
 ## Reference files
@@ -357,7 +357,7 @@ review. Grouped by function; within a group, order roughly follows the workflow.
   ICML/ICLR/AAAI/ACL-family/JMLR/TMLR/statistics-journal venue landscape,
   arXiv-first citation culture (DBLP, ACL Anthology, Semantic Scholar), and
   single-shot OpenReview rebuttals vs. a journal's multi-round revision
-- `latex-and-formatting.md` — REVTeX/JHEP/Springer/JCAP/AASTeX/
+- `latex-venue-setup.md` — REVTeX/JHEP/Springer/JCAP/AASTeX/
   Elsevier/NeurIPS/ICML/ICLR/ACL/JMLR venue-specific setup and skeletons,
   arXiv-specific rules, units/equation conventions, common compile errors,
   length-limit tricks
@@ -428,7 +428,7 @@ review. Grouped by function; within a group, order roughly follows the workflow.
   Manual document: codebase dissection, math/algorithm reconstruction,
   two-part synthesis; delegates correctness verification to
   `hep-analysis`/`physics-ml` where applicable; template skeleton in
-  `../assets/templates/code_to_methodology_manual_template.md`
+  `../assets/paper/code-to-methodology-manual-template.md`
 
 ## Bundled scripts
 

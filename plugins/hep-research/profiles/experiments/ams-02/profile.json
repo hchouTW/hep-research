@@ -97,7 +97,7 @@
    "status": "demonstrated-on-synthetic-data",
    "scope": "Path A: synthetic two-period proton and helium fluxes with exposure normalization, unfolding, efficiency covariance, correlated He/p ratio and exposure-weighted period average; Asimov and seeded-toy closure (examples/ams-flux-ratio). Synthetic inputs only; says nothing about the real detector",
    "tests": [
-    "../../../tests/examples/test_path_a.py"
+    "../../../tests/examples/test_ams_flux_ratio.py"
    ]
   }
  ]

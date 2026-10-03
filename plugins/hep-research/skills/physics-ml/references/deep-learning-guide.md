@@ -239,11 +239,11 @@ Starting points to copy and adapt:
   sequence classification.
 - `${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/assets/lora_finetune.py` - LoRA adapter wrapper and a fine-tuning loop that
   trains only the adapter parameters against a frozen base model.
-- `${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/assets/scaling_plan.example.json` - synthetic 7B-class training plan for
+- `${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/assets/scaling-plan.example.json` - synthetic 7B-class training plan for
   `${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/scripts/estimate_training_memory.py`.
-- `${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/assets/eval_runs.example.json` - synthetic per-seed scores for
+- `${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/assets/eval-runs.example.json` - synthetic per-seed scores for
   `${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/scripts/compare_model_runs.py`.
-- `${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/assets/dataset_splits.example.json` - synthetic split manifest, deliberately
+- `${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/assets/dataset-splits.example.json` - synthetic split manifest, deliberately
   containing a group leak and a temporal violation, for
   `${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/scripts/check_split_integrity.py`.
 

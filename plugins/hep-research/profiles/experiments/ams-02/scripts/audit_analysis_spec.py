@@ -40,7 +40,8 @@ from pathlib import Path as _Path
 _PLUGIN_ROOT = _Path(__file__).resolve().parents[4]
 if str(_PLUGIN_ROOT) not in _sys.path:  # make core/ and contracts/ importable when run as a script
     _sys.path.insert(0, str(_PLUGIN_ROOT))
-from contracts.legacy import yaml_subset  # noqa: E402  (strict YAML subset, standard library only)
+_sys.path.insert(0, str(_Path(__file__).resolve().parent))
+import yaml_subset  # noqa: E402  (strict YAML subset, standard library only)
 
 ROOT = Path(__file__).resolve().parents[1]  # the ams-02 profile folder
 VARIABLES = {"rigidity": "GV", "momentum": "GeV/c", "total_energy": "GeV", "kinetic_energy": "GeV",

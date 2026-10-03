@@ -5,7 +5,7 @@ description: "Use when the deliverable is working, reproducible scientific softw
 
 # hep-computing: scientific software and execution
 
-**Owns:** scientific software, symbolic and numerical execution, builds, I/O, debugging, performance, manifests, partition/merge/recovery, reproducibility, blinding enforcement in outputs, logs and caches, research-task authoring; stewardship of `core/bootstrap`, `core/binned`, `core/blinding`.
+**Owns:** scientific software, symbolic and numerical execution, builds, I/O, debugging, performance, manifests, partition/merge/recovery, reproducibility, blinding enforcement in outputs, logs and caches, research-task authoring; stewardship of `core/blinding`.
 **Typical artifacts:** code, `computational-run` (inputs with checksums, tool versions, commands, environment, seeds, tolerances, exit status, output hashes), output audits.
 **Never:** treat a successful run as scientific validity; install software system-wide or fetch from the network without the user's approval.
 
@@ -39,7 +39,7 @@ description: "Use when the deliverable is working, reproducible scientific softw
 
 ## Resources
 
-Guides under `references/`: [engineering playbook](references/engineering-playbook.md) and [agile delivery](references/agile-development-guide.md); [research task authoring](references/task-authoring-guide.md) with `templates/task-template.md` and worked tasks in `examples/`; ROOT design, CMake, ROOT debugging and Python HEP coding (`14`-`17`); [numerical and computational methods](references/numerical-and-computational-methods.md); language design guidelines (Python, C++, Bash); validation and definition of done.
+Guides under `references/`: [engineering playbook](references/engineering-playbook.md) and [agile delivery](references/agile-development-guide.md); [research task authoring](references/task-authoring-guide.md) with `assets/task-template.md` and worked tasks in `examples/`; [ROOT design](references/root-balanced-design-guidelines.md), [CMake](references/cmake-and-build.md), [ROOT debugging](references/root-debugging.md) and [Python HEP coding](references/python-hep-coding-patterns.md); [numerical and computational methods](references/numerical-and-computational-methods.md); language design guidelines ([Python](references/python-balanced-design-guidelines.md), [C++](references/cpp-balanced-design-guidelines.md), [Bash](references/bash-balanced-design-guidelines.md)); [validation and definition of done](references/validation-and-done.md).
 
 Scripts in `${CLAUDE_PLUGIN_ROOT}/skills/hep-computing/scripts/` (read `--help` first): ROOT file inspection and comparison (`inspect_root_file.py`, `compare_root_histograms.py`, `summarize_histogram_statistics.py`, `roofit_workspace_summary.py`, `audit_histograms.py`), environment and project checks (`check_root_cpp_env.sh`, `new_root_cpp_project.sh`), `make_synthetic_nanoaod.py`, task checks (`lint_task.py`), local partition with bounded resubmission and duplicate-safe merge (`local_partition.py`), and blinding enforcement (`audit_blinded_outputs.py`: seal the blinded numbers into a file kept outside the outputs, then scan outputs, logs and caches for them; check figures with `core.blinding.check_figure`). ROOT and uproot starting points are in `${CLAUDE_PLUGIN_ROOT}/adapters/root-uproot/assets/`.
 

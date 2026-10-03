@@ -2,7 +2,7 @@
 
 The record (`synthetic-published-record.json`) is synthetic: its values and covariance are copied from the Path B output. Only the record and its covariance file are used; no detector module, response or experiment-profile file is read.
 
-Reproduce: `python3 examples/published-comparison/run_t24.py` (from the plugin root).
+Reproduce: `python3 examples/published-comparison/run.py` (from the plugin root).
 
 Gate: comparable after level-identification, fiducial-restriction (both justified), with declared convention mappings.
 
@@ -18,4 +18,4 @@ Limitation: the record's luminosity block is built from the measured values (ful
 | no_detector_files_read | pass |
 | contracts | pass |
 
-Files read: `contracts/schemas/common.json`, `contracts/schemas/envelope.json`, `contracts/schemas/ext_comparison_spec.json`, `contracts/schemas/ext_statistical_result.json`, `contracts/vocab/core.json`, `examples/published-comparison/synthetic-published-covariance.json`, `examples/published-comparison/synthetic-published-record.json`, `examples/qed-benchmark/output/artifacts/prediction.json`
+Files read: `contracts/schemas/common.json`, `contracts/schemas/envelope.json`, `contracts/schemas/ext_comparison_spec.json`, `contracts/schemas/ext_statistical_result.json`, `contracts/vocab/core.json`, `examples/published-comparison/synthetic-published-covariance.json`, `examples/published-comparison/synthetic-published-record.json`, `examples/qed-prediction/output/artifacts/prediction.json`

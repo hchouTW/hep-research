@@ -16,7 +16,7 @@ uses the figure-of-merit form N = N0 * L * sin^2(theta_c), with N0 in cm^-1 fold
 photon-detection efficiency and the accepted wavelength band - it is a design estimate,
 not a simulation. Chromatic dispersion is represented only through the single-photon
 angular resolution supplied by the user; n is treated as a single number. See
-${CLAUDE_PLUGIN_ROOT}/skills/detector-response/references/24-particle-identification.md.
+${CLAUDE_PLUGIN_ROOT}/skills/detector-response/references/particle-identification.md.
 Run: python3 ${CLAUDE_PLUGIN_ROOT}/skills/detector-response/scripts/cherenkov_angle.py --index 1.05 --species pi K --momentum 10
 """
 import argparse

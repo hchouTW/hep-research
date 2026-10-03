@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Check the diagram sources embedded in this skill's markdown files.
 
-Purpose: keep the DOT/Mermaid snippets in references/, templates/, and examples/ from rotting.
+Purpose: keep the DOT/Mermaid snippets in references/, assets/diagrams/, and examples/ from rotting.
 
 What it does: extracts fenced ```dot, ```mermaid, ```plantuml, and ```svg blocks from markdown files.
 - dot: compiled with Graphviz `dot -Tsvg` when `dot` is on PATH (skipped with a notice otherwise).

@@ -1,0 +1,51 @@
+# Analysis template: fill null fields from authoritative inputs before production.
+analysis_name: null
+purpose: null
+collision_system: null
+sqrt_s_TeV: null
+eras: []
+inputs:
+  manifest: null
+  format: null
+  tree: null
+  event_key: []
+  quality_mask: null
+normalization:
+  luminosity_fb_inverse: null
+  cross_section_unit: pb
+  generator_sumw_source: null
+  included_factors: []
+objects:
+  definitions_file: null
+  corrections_manifest: null
+  sorting_policy: null
+triggers:
+  menu_source: null
+  prescale_policy: null
+  efficiency_source: null
+regions:
+  definitions_file: null
+  overlap_policy: null
+histograms:
+  definitions_file: null
+  flow_policy: null
+statistics:
+  backend: null
+  poi: null
+  poi_bounds: null
+  observation_kind: null
+  nuisance_table: ${CLAUDE_PLUGIN_ROOT}/skills/hep-analysis/assets/systematics.csv
+  inference_method: null
+  confidence_level: null
+blinding:
+  state: blinded
+  mask_definition: null
+  unblinding_authorization: null
+validation:
+  reference_outputs: null
+  tolerances: null
+  closure_plan: null
+reproducibility:
+  git_commit: null
+  environment_lock: null
+  seed_strategy: null

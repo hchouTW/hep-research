@@ -1,12 +1,12 @@
 """Starting template: dimuon-style selection with uproot + awkward, written to a ROOT TH1D.
 
 Reads `inputs`, `branches.required`, and `output` from a config such as
-`${CLAUDE_PLUGIN_ROOT}/skills/hep-analysis/templates/analysis_config.yaml`. The selection and histogram binning are hard-coded
-below to mirror `cpp_rdataframe_analysis.cpp` (nMuon >= 2, leading pT > 25,
+`${CLAUDE_PLUGIN_ROOT}/adapters/root-uproot/assets/analysis-config.example.yaml`. The selection and histogram binning are hard-coded
+below to mirror `rdf_cutflow_analysis.cpp` (nMuon >= 2, leading pT > 25,
 |eta| < 2.4); the config's `selection` and `histograms` blocks are descriptive only.
 The output histogram keeps sum(w^2), so errors are correct with negative weights.
 
-Usage: python3 uproot_awkward_analysis.py --config analysis_config.yaml
+Usage: python3 uproot_awkward_analysis.py --config analysis-config.example.yaml
 Requires: uproot, awkward, numpy, PyYAML (no ROOT installation needed).
 """
 from __future__ import annotations

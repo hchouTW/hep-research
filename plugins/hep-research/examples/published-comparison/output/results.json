@@ -65,7 +65,7 @@
   "contracts/vocab/core.json",
   "examples/published-comparison/synthetic-published-covariance.json",
   "examples/published-comparison/synthetic-published-record.json",
-  "examples/qed-benchmark/output/artifacts/prediction.json"
+  "examples/qed-prediction/output/artifacts/prediction.json"
  ],
  "detector_files_read": [],
  "contract_validation": {

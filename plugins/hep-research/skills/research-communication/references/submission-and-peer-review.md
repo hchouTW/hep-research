@@ -101,7 +101,7 @@ publication committee or spokesperson signs off. When helping at this stage:
   is a common, easily-avoided error).
 - Choose categories carefully (primary + cross-lists) — this affects who sees
   the paper and which moderators review it; see
-  `latex-and-formatting.md#arxiv-specific-rules`.
+  `latex-venue-setup.md#arxiv-specific-rules`.
 - For collaboration papers, follow the collaboration's internal approval
   process before arXiv submission — arXiv submission is often the public
   step *after* internal review, not a substitute for it.

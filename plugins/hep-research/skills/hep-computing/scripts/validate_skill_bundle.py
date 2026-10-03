@@ -3,14 +3,14 @@
 
 Purpose: catch accidental deletions or truncations of files this skill's SKILL.md
 depends on, and confirm the generated-task output contract
-(templates/task-template.md) still carries exactly the sections the authoring
+(assets/task-template.md) still carries exactly the sections the authoring
 reference specifies - no more, no fewer.
 
 What it does: checks that every task-authoring file inside the hep-research plugin's
 hep-computing skill (SKILL.md, references, host notes, templates, examples, scripts) exists
 and is non-empty, that SKILL.md has YAML frontmatter with name/description (description at
 most 1024 characters), and that
-templates/task-template.md's heading structure exactly matches the section
+assets/task-template.md's heading structure exactly matches the section
 contract (one top-level title, then the fixed list of ## / ### sections in order).
 
 Usage: run with no arguments from anywhere; it resolves paths relative to its own
@@ -23,7 +23,7 @@ from pathlib import Path
 
 REQUIRED_PATHS = [
     "SKILL.md",
-    "templates/task-template.md",
+    "assets/task-template.md",
     "references/task-authoring-guide.md",
     "references/acceptance-criteria.md",
     "references/task-quality-checklist.md",
@@ -135,17 +135,17 @@ def main() -> None:
         print(f"SKILL.md description is {len(match.group(1))} characters; limit is {DESCRIPTION_LIMIT}")
         raise SystemExit(1)
 
-    template = (root / "templates/task-template.md").read_text(encoding="utf-8")
+    template = (root / "assets/task-template.md").read_text(encoding="utf-8")
     template_problems = check_template_sections(template)
     if template_problems:
-        print("templates/task-template.md section contract violated:")
+        print("assets/task-template.md section contract violated:")
         for problem in template_problems:
             print(f"  {problem}")
         raise SystemExit(1)
 
     print(
         f"Bundle OK: {len(REQUIRED_PATHS)} files present and non-empty, "
-        f"templates/task-template.md carries all {len(REQUIRED_TEMPLATE_SECTIONS)} "
+        f"assets/task-template.md carries all {len(REQUIRED_TEMPLATE_SECTIONS)} "
         "required sections in order."
     )
 
