@@ -3,6 +3,17 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased (installed on a macOS workstation, 2026-10-03)
+
+Work order `tasks/hep-research/full-plugin-test/TASK.md` (r2); evidence in VALIDATION INSTALL. No change to plugin
+behavior.
+
+- **Installed** at user scope into a day-to-day Claude Code 2.1.288 configuration on macOS (E2) from the GitHub
+  marketplace `hchouTW/hep-research` at `3aa942c`: seven `hep-research:*` skills discovered, namespaced invocation
+  and profile reads from the installed cache path pass; existing plugins and settings unchanged.
+- **Known on E2** (follow-ups, not fixed): five unit failures and one error from macOS path symlinks, a venv inside
+  the plugin tree, a mismatched Homebrew ROOT/Python pair, and an exact float comparison in `theory-comparison`.
+
 ## Unreleased (Slurm and HTCondor batch execution, 2026-10-03)
 
 Work order `tasks/hep-research/batch-schedulers/TASK.md` (r2); evidence in VALIDATION BATCH-RUN.

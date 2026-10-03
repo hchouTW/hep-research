@@ -1,0 +1,57 @@
+Installed plugins:
+
+  ❯ code-review@claude-plugins-official
+    Version: ab024cdcfa7c
+    Scope: user
+    Status: ✔ enabled
+
+  ❯ code-simplifier@claude-plugins-official
+    Version: 1.0.0
+    Scope: user
+    Status: ✔ enabled
+
+  ❯ commit-commands@claude-plugins-official
+    Version: ab024cdcfa7c
+    Scope: user
+    Status: ✔ enabled
+
+  ❯ feature-dev@claude-plugins-official
+    Version: ab024cdcfa7c
+    Scope: user
+    Status: ✔ enabled
+
+  ❯ github@claude-plugins-official
+    Version: ab024cdcfa7c
+    Scope: user
+    Status: ✔ enabled
+
+  ❯ github@claude-plugins-official
+    Version: ab024cdcfa7c
+    Scope: project
+    Status: ✔ enabled
+
+  ❯ plugin-dev@claude-plugins-official
+    Version: ab024cdcfa7c
+    Scope: user
+    Status: ✔ enabled
+
+  ❯ pr-review-toolkit@claude-plugins-official
+    Version: ab024cdcfa7c
+    Scope: user
+    Status: ✔ enabled
+
+  ❯ pyright-lsp@claude-plugins-official
+    Version: 1.0.0
+    Scope: user
+    Status: ✔ enabled
+
+  ❯ skill-creator@claude-plugins-official
+    Version: ab024cdcfa7c
+    Scope: user
+    Status: ✔ enabled
+
+  ❯ superpowers@claude-plugins-official
+    Version: 6.4.1
+    Scope: user
+    Status: ✔ enabled
+
