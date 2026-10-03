@@ -3,14 +3,17 @@
 with no symlinks, then run every check from there with a different working directory.
 
 Usage: python3 tools/check_relocation.py [--out DIR] [--keep]
-Copies only what a package would contain (no __pycache__, *.pyc, .pytest_cache); fails if the copy contains a
-symlink or if any file in it names the source checkout's absolute path. Runs tools/run_all_checks.py inside the
-copy with cwd set to an unrelated temporary directory and records the summary.
+Copies only what a package would contain: in a git checkout the files git lists (tracked, plus untracked files that
+are not ignored, so a local venv or cache is never copied), else the tree; in both cases no __pycache__, *.pyc,
+.pytest_cache or output-* directories. Fails if the copy contains a symlink or if any file in it names the source
+checkout's absolute path. Runs tools/run_all_checks.py inside the copy with cwd set to an unrelated temporary
+directory and records the summary.
 Exit 0 when the relocated run passes, 1 otherwise.
 """
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import json
 import shutil
 import subprocess
@@ -19,7 +22,27 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-IGNORE = shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache", "output-*")
+PATTERNS = ("__pycache__", "*.pyc", ".pytest_cache", "output-*")
+IGNORE = shutil.ignore_patterns(*PATTERNS)
+
+
+def copy_package(dest: Path) -> None:
+    """Copy the git-listed files (the scanner's view in a checkout); fall back to the whole tree outside git."""
+    try:
+        out = subprocess.run(["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard", "--", "."], cwd=ROOT,
+                             capture_output=True, text=True, check=True).stdout
+        listed = [f for f in out.split("\0") if f]
+    except (OSError, subprocess.CalledProcessError):
+        listed = []
+    if not listed:
+        shutil.copytree(ROOT, dest, symlinks=False, ignore=IGNORE)
+        return
+    for rel in listed:
+        src = ROOT / rel
+        if not src.is_file() or any(fnmatch.fnmatch(part, pat) for part in Path(rel).parts for pat in PATTERNS):
+            continue
+        (dest / rel).parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dest / rel)
 
 
 def main(argv=None) -> int:
@@ -29,7 +52,7 @@ def main(argv=None) -> int:
     args = ap.parse_args(argv)
     base = Path(tempfile.mkdtemp(prefix="hep research relocated "))
     dest = base / "plugin copy" / "hep-research"
-    shutil.copytree(ROOT, dest, symlinks=False, ignore=IGNORE)
+    copy_package(dest)
     links = [str(p.relative_to(dest)) for p in dest.rglob("*") if p.is_symlink()]
     repo = str(ROOT.parents[1])
     leaks = [str(p.relative_to(dest)) for p in dest.rglob("*") if p.is_file() and p.suffix in (".py", ".json", ".md", ".csv", ".txt")

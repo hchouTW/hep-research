@@ -110,7 +110,9 @@ class AssetSmokeTests(unittest.TestCase):
 
     @unittest.skipUnless(TORCHRUN, "torchrun not found next to the interpreter or on PATH")
     def test_ddp_skeleton_two_gloo_processes(self):
-        result = run([TORCHRUN, "--nproc_per_node=2", str(ASSETS / "ddp_train_skeleton.py")], self.dir, timeout=300)
+        # single node on loopback: the default rendezvous advertises the host name, which may not resolve (E2)
+        result = run([TORCHRUN, "--standalone", "--local-addr=127.0.0.1", "--nproc_per_node=2", str(ASSETS / "ddp_train_skeleton.py")],
+                     self.dir, timeout=300)
         self.assertEqual(result.returncode, 0, result.stderr[-2000:])
         self.assertIn("epoch=5", result.stdout)
         self.assertTrue((self.dir / "ddp_model.pt").exists())

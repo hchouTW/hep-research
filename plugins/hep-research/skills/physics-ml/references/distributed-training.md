@@ -8,6 +8,10 @@ Prefer `DistributedDataParallel` over `DataParallel`.
 torchrun --nproc_per_node=4 train_ddp.py
 ```
 
+On a single machine, add `--standalone --local-addr=127.0.0.1`. The default rendezvous advertises the host name, and
+if that does not resolve (common on laptops and home networks) the processes wait forever with
+"network addresses of (<host>, <port>) cannot be retrieved".
+
 ## Essentials
 
 - Read `LOCAL_RANK`, `RANK`, and `WORLD_SIZE` from environment variables.
