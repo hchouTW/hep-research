@@ -78,6 +78,12 @@ density/posterior, not a ground-truth one - it inherits every concern in
   surrogates above, applied to the region of parameter space actually queried at
   inference time.
 
+Whether the resulting interval, limit or posterior is statistically valid (ratio
+calibration, closure, toy coverage, simulation-based calibration, systematics through the
+network) is `hep-statistics` work: see its
+[ml-assisted-inference.md](../../hep-statistics/references/ml-assisted-inference.md).
+This file covers training and the ML-side checks only.
+
 ## Deliverables
 
 - For each physical constraint used: the six-question walkthrough above, and the
