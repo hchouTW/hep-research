@@ -76,3 +76,15 @@ HTCondor `documented`, `tested_versions` empty); `docs/adapter-authoring.md`; RE
 - Real-tool tests (B04/B05/B08 real parts): not done by user choice; both tools stay `documented`.
 - No live routing run for the six new cases (paid, not approved).
 - C01–C05 not done. `auto_resubmit` (Q5) not implemented by default decision.
+
+## Addendum (2026-10-03): tool facts checked against the documentation
+
+The user gave the documentation sites. Every row of the reference's "Tool facts" table was checked against Slurm 26.05
+(sbatch, sacct, squeue, scancel, job arrays) and HTCondor Manual 25.13.2 / 25.14.1 (condor_submit, Job Description
+Language, job event log codes, job ClassAd attributes, condor_q, condor_history, condor_rm, condor_version). Result:
+no backend format contradicted the documentation. One gap was fixed: the Slurm state map lacked RESV_DEL_HOLD,
+SIGNALING, DEADLINE, REVOKED, SUSPENDED and STOPPED (they already fell to `unknown`; now mapped explicitly, with
+SUSPENDED and STOPPED kept `unknown` like HTCondor's suspend). Not stated in the documentation, to confirm on a real
+run: the sacct pending-range JobID layout, `sbatch --version`, the exact `condor_submit -terse` layout, the event-log
+`...` separator and termination/memory/hold-code line texts, and `container_image`. Real-tool tests remain not done
+(user's choice). Full suite after the change: 1240 run, 0 failures, 78 skipped; aggregate checks 13 pass, 1 skip.

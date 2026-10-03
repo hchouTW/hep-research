@@ -309,7 +309,7 @@ tests, 2 skipped) runs in 21 s.
 **Shim-only:** every Slurm and HTCondor result below comes from the fake schedulers in `tests/adapters/batch_shims/`,
 which implement the formats the backends parse. They show the adapter is internally consistent, not that it works
 with real Slurm or HTCondor; both tools stay `documented`, and the tool facts in
-`skills/hep-computing/references/batch-scheduling.md` are not yet checked against the tools' documentation.
+`skills/hep-computing/references/batch-scheduling.md` were checked on 2026-10-03 against the Slurm 26.05 and HTCondor 25.13 documentation (a few formats are not stated there and stay to be confirmed on a real run).
 
 | Task | Result | Evidence |
 |---|---|---|

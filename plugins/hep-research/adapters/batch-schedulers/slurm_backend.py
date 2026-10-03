@@ -29,7 +29,12 @@ STATES = {  # native State (first word; "CANCELLED by 123" -> CANCELLED) -> norm
     "RUNNING": "running", "COMPLETING": "running", "STAGE_OUT": "running", "RESIZING": "running",
     "COMPLETED": "done", "FAILED": "failed", "TIMEOUT": "timeout", "OUT_OF_MEMORY": "out-of-memory",
     "CANCELLED": "cancelled", "NODE_FAIL": "node-failure", "BOOT_FAIL": "node-failure", "PREEMPTED": "preempted-or-evicted",
-    "REQUEUE_HOLD": "held", "SPECIAL_EXIT": "held",
+    "REQUEUE_HOLD": "held", "SPECIAL_EXIT": "held", "RESV_DEL_HOLD": "held",
+    "SIGNALING": "running",
+    # suspended or stopped: as for HTCondor's suspend event, the plugin has no rule for it, a person decides
+    "SUSPENDED": "unknown", "STOPPED": "unknown",
+    # DEADLINE: ended by a --deadline the adapter never sets; REVOKED: a federation sibling removed
+    "DEADLINE": "failed", "REVOKED": "cancelled",
 }
 TASK = re.compile(r"^(\d+)_(\d+)$")
 PENDING_RANGE = re.compile(r"^(\d+)_\[(.+)\]$")
