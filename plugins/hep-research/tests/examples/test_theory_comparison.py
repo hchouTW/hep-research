@@ -1,12 +1,14 @@
 """Path D (journey J5) regression tests: QED prediction vs SYNTHETIC reconstructed data, normalization fit.
 
-One run with the default seed and toys; it must reproduce the committed output byte for byte, pass every
+One run with the default seed and toys; it must rerun byte for byte on the same machine, match the committed output
+(floats to rel 1e-9 / abs 1e-12, since another platform's floating point differs in the last digits), pass every
 pre-declared criterion, reject each mismatched variant, and keep the synthetic status along the contract trace."""
 import contextlib
 import hashlib
 import importlib.util
 import io
 import json
+import math
 import sys
 import tempfile
 import unittest
@@ -46,9 +48,28 @@ class PathDTests(unittest.TestCase):
     def test_passes_predeclared_criteria(self):
         self.assertEqual(self.code, 0, self.r["pass"])
 
-    def test_reproduces_committed_output(self):
-        h = [hashlib.sha256(p.read_bytes()).hexdigest() for p in (self.out / "results.json", COMMITTED)]
+    def test_rerun_is_byte_identical(self):
+        other = Path(self.tmp.name) / "d2"
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.m.main(["--out", str(other)])
+        h = [hashlib.sha256(p.read_bytes()).hexdigest() for p in (self.out / "results.json", other / "results.json")]
         self.assertEqual(h[0], h[1])
+
+    def test_reproduces_committed_output(self):
+        def same(a, b, path="$"):
+            if isinstance(a, float) or isinstance(b, float):
+                self.assertTrue(math.isclose(a, b, rel_tol=1e-9, abs_tol=1e-12), f"{path}: {a} != {b}")
+            elif isinstance(a, dict) and isinstance(b, dict):
+                self.assertEqual(sorted(a), sorted(b), path)
+                for k in a:
+                    same(a[k], b[k], f"{path}.{k}")
+            elif isinstance(a, list) and isinstance(b, list):
+                self.assertEqual(len(a), len(b), path)
+                for i, (x, y) in enumerate(zip(a, b)):
+                    same(x, y, f"{path}[{i}]")
+            else:
+                self.assertEqual(a, b, path)
+        same(self.r, json.loads(COMMITTED.read_text()))
 
     def test_both_profiles_and_nothing_else(self):
         self.assertEqual(sorted(self.r["profiles_loaded"]), ["experiment:synthetic-collider", "theory:qed-benchmark"])

@@ -26,7 +26,7 @@ class Harness:
 
     def __init__(self, backend: str, items=10, chunk=1, extra=None, worker_print=""):
         self.tmp = tempfile.TemporaryDirectory(prefix="hepbatch")
-        self.dir = Path(self.tmp.name)
+        self.dir = Path(self.tmp.name).resolve()  # macOS: /var/folders is a symlink to /private/var/folders
         self.log = self.dir / "shim-calls.jsonl"
         self.faults = self.dir / "faults.json"
         self.faults.write_text("{}")

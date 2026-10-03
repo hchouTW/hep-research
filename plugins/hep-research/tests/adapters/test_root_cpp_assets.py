@@ -12,6 +12,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -35,6 +36,27 @@ ROOT_CONFIG = _root_config()
 BIN = Path(ROOT_CONFIG).parent if ROOT_CONFIG else None
 
 
+def _pyroot_python():
+    """First interpreter that can `import ROOT`: $HEP_ROOT_PYTHON, python next to root-config, the Python ROOT was
+    built for (`root-config --python-version`), this interpreter, python3. None if none can (e.g. Homebrew ROOT
+    built for 3.14 while python3 is 3.13, where the import fails at dlopen)."""
+    cands = [os.environ.get("HEP_ROOT_PYTHON"), str(BIN / "python") if BIN else None]
+    if ROOT_CONFIG:
+        try:
+            ver = subprocess.run([ROOT_CONFIG, "--python-version"], capture_output=True, text=True, timeout=60).stdout.strip()
+            cands.append(shutil.which("python" + ".".join(ver.split(".")[:2])) if ver else None)
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+    cands += [sys.executable, shutil.which("python3")]
+    for py in dict.fromkeys(c for c in cands if c and Path(c).exists()):
+        try:
+            if subprocess.run([py, "-c", "import ROOT"], capture_output=True, timeout=120, env=_env()).returncode == 0:
+                return py
+        except (OSError, subprocess.TimeoutExpired):
+            continue
+    return None
+
+
 def _env():
     env = dict(os.environ)
     env["PATH"] = f"{BIN}{os.pathsep}{env.get('PATH', '')}"
@@ -54,9 +76,11 @@ def _cutflow(text):
 class RootCppAssetTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        python = _pyroot_python()
+        if python is None:
+            raise unittest.SkipTest("root-config found but no Python can import ROOT (set HEP_ROOT_PYTHON)")
         cls._tmp = tempfile.TemporaryDirectory()
         cls.dir = Path(cls._tmp.name)
-        python = str(BIN / "python") if (BIN / "python").exists() else os.environ.get("HEP_ROOT_PYTHON", "python3")
         cls.python = python
         subprocess.run([python, str(FIXTURES), str(cls.dir)], check=True, capture_output=True, env=_env())
         cls.cxx = _rc("--cxx")[0]

@@ -56,7 +56,7 @@ PLUGIN_VERSION = json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_tex
 TE, RE = np.array(CFG["truth_edges"]), np.array(CFG["reco_edges"])
 LUMI, LUMI_REL = CFG["integrated_luminosity_pb"], CFG["luminosity_rel_uncertainty"]
 MU_INJECT = (1.0, 0.8)
-CRITERIA = {"fold_vs_quadrature_max_rel_dev": 1e-6, "asimov_mu_abs_dev": 1e-8, "observed_pull_abs": 3.0,
+CRITERIA = {"response_vs_path_b_max_rel_dev": 1e-12, "fold_vs_quadrature_max_rel_dev": 1e-6, "asimov_mu_abs_dev": 1e-8, "observed_pull_abs": 3.0,
             "toy_mean_pull_abs": 0.2, "toy_pull_width": (0.85, 1.15), "coverage_sigma": 3.0}
 
 
@@ -378,7 +378,7 @@ def main(argv=None) -> int:
     passes = {
         "composition": comp["ok"],
         "gate_comparable": g["comparable"],
-        "response_matches_path_b": bool(np.array_equal(m, path_b_m)),
+        "response_matches_path_b": bool(np.allclose(m, path_b_m, rtol=CRITERIA["response_vs_path_b_max_rel_dev"], atol=0.0)),
         "fold_vs_quadrature": fold_dev < CRITERIA["fold_vs_quadrature_max_rel_dev"],
         "asimov_injection": all(abs(a["mu_hat"] - float(k)) < CRITERIA["asimov_mu_abs_dev"] for k, a in asimov.items()),
         "identifiable_only_with_constraint": q_free < 1e-6,
@@ -442,7 +442,7 @@ def write_report(out: Path, r: dict) -> None:
         "| Check | Criterion | Result |", "|---|---|---|",
         f"| Composition of both profiles | namespaces disjoint, ids qualified | {yes('composition')} |",
         f"| Comparison gate | comparable after declared transformations | {yes('gate_comparable')} |",
-        f"| Response | identical to the Path B response matrix | {yes('response_matches_path_b')} |",
+        f"| Response | equal to the Path B response matrix within 1e-12 relative | {yes('response_matches_path_b')} |",
         f"| Folded expectation vs independent quadrature | max relative deviation < {r['criteria']['fold_vs_quadrature_max_rel_dev']} | {yes('fold_vs_quadrature')} ({r['fold_max_rel_dev']:.1e}) |",
         f"| Asimov injection at mu = 1 and 1.25 | abs(mu_hat - mu) < {r['criteria']['asimov_mu_abs_dev']} | {yes('asimov_injection')} |",
         f"| Identifiability | without the luminosity constraint q(1.15) ≈ 0 (mu x L is what the counts fix) | {yes('identifiable_only_with_constraint')} |",

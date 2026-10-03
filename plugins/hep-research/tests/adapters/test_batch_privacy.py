@@ -45,7 +45,15 @@ class PackagingTests(unittest.TestCase):
     def test_planted_account_fails_the_packaging_check(self):
         with tempfile.TemporaryDirectory() as td:
             copy = Path(td) / "plugin"
-            shutil.copytree(ROOT, copy, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+            # copy what the scanner sees in the checkout (git-listed files), not ignored local files such as a venv
+            listed = subprocess.run(["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard", "--", "."], cwd=ROOT,
+                                    capture_output=True, text=True).stdout.split("\0")
+            if not any(listed):
+                shutil.copytree(ROOT, copy, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+            for rel in filter(None, listed):
+                if (ROOT / rel).is_file():
+                    (copy / rel).parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(ROOT / rel, copy / rel)
             run = lambda: subprocess.run([sys.executable, str(copy / "tools" / "check_packaging.py"), "--root", str(copy)],
                                          capture_output=True, text=True)
             first = run()
