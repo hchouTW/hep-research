@@ -5,7 +5,12 @@ check_manuscript.py -- read-only pre-submission checker for a LaTeX manuscript.
 Scans a directory of .tex and .bib files and reports, without modifying
 anything:
   - citation keys (\\cite, \\citep/\\citet/\\citeauthor/..., biblatex \\parencite/
-    \\textcite/\\autocite/..., \\nocite) that do not resolve to any .bib entry
+    \\textcite/\\autocite/..., \\nocite) that do not resolve to any bibliography
+    entry: a .bib file, an inline thebibliography (\\bibitem), or a built .bbl.
+    Citations with no bibliography at all are missing, not skipped. A
+    bibliography produced by an external build step is declared with
+    --external-bib; keys found nowhere locally are then reported as unresolved
+    (exit code 3), never as verified
   - .bib entries that are never cited (\\nocite{*} marks all as cited)
   - .bib keys defined more than once (BibTeX "Repeated entry"; case-insensitive)
   - \\label{...} keys defined more than once
@@ -32,7 +37,8 @@ Usage:
     python3 check_manuscript.py <path-to-manuscript-dir> [--strict]
 
 Exit code is 0 if no issues are found, 1 otherwise (useful in CI / pre-commit
-hooks). --strict also treats "unused .bib entry" as an issue for exit-code
+hooks), and 3 when the only findings are citations left unresolved by a
+declared external bibliography. --strict also treats "unused .bib entry" as an issue for exit-code
 purposes (by default it is reported but does not affect the exit code, since
 a shared/collaboration .bib file legitimately contains more entries than any
 single paper cites).
@@ -53,6 +59,8 @@ LABEL_RE = re.compile(r"\\label\{([^}]+)\}")
 REF_RE = re.compile(r"\\(ref|eqref|autoref|pageref|nameref|vref|Vref|cref|Cref|cpageref|Cpageref|labelcref)\*?\{([^}]+)\}")
 MULTI_REF_CMDS = {"cref", "Cref", "cpageref", "Cpageref", "labelcref", "vref", "Vref"}
 BIBENTRY_RE = re.compile(r"@(\w+)\s*[{(]\s*([^,\s]+)\s*,")
+BIBITEM_RE = re.compile(r"\\bibitem\s*(?:\[[^\]]*\]\s*)?\{([^}]+)\}")
+BBL_ENTRY_RE = re.compile(r"\\entry\{([^}]+)\}")  # biblatex .bbl
 NON_ENTRY_TYPES = {"string", "comment", "preamble"}
 COMMENT_RE = re.compile(r"(?<!\\)%.*")
 # Upper-case TODO/FIXME/XXX only: lower-case "xxx" is a common template placeholder
@@ -96,8 +104,10 @@ def find_tex_and_bib(root: Path):
     return tex_files, bib_files
 
 
-def scan(root: Path):
+def scan(root: Path, external_bib: str | None = None):
     tex_files, bib_files = find_tex_and_bib(root)
+    bbl_files = sorted(root.rglob("*.bbl"))
+    inline_entries = set()
 
     cite_keys = defaultdict(list)   # key -> [(file, line)]
     label_defs = defaultdict(list)  # label -> [(file, line)]
@@ -108,6 +118,7 @@ def scan(root: Path):
     for tex in tex_files:
         text = tex.read_text(encoding="utf-8", errors="replace")
         code = strip_comments(text)
+        inline_entries.update(m.group(1).strip() for m in BIBITEM_RE.finditer(code))
         for m in CITE_RE.finditer(code):
             for key in split_keys(m.group(1)):
                 cite_keys[key].append((tex, line_of(code, m.start())))
@@ -142,9 +153,17 @@ def scan(root: Path):
     duplicate_bib = {locs[0][2]: [(f, ln) for f, ln, _ in locs]
                      for locs in bib_defs.values() if len(locs) > 1}
 
+    for bbl in bbl_files:
+        text = bbl.read_text(encoding="utf-8", errors="replace")
+        inline_entries.update(m.group(1).strip() for m in BIBITEM_RE.finditer(text))
+        inline_entries.update(m.group(1).strip() for m in BBL_ENTRY_RE.finditer(text))
     cite_all = "*" in cite_keys  # \nocite{*}
     cite_keys.pop("*", None)
-    missing_bib = {k: v for k, v in cite_keys.items() if bib_files and k not in bib_entries}
+    known = bib_entries | inline_entries
+    unresolved = {k: v for k, v in cite_keys.items() if k not in known}
+    no_bibliography = bool(cite_keys) and not (bib_files or inline_entries)
+    # With no bibliography at all every citation is missing; only a declared external bibliography defers them.
+    missing_bib, unresolved_citations = ({}, unresolved) if external_bib else (unresolved, {})
     cited_lower = {k.lower() for k in cite_keys}
     unused_bib = [] if cite_all or not bib_files else sorted(
         locs[0][2] for lower, locs in bib_defs.items() if lower not in cited_lower)
@@ -155,6 +174,10 @@ def scan(root: Path):
         "tex_files": tex_files,
         "bib_files": bib_files,
         "missing_bib": missing_bib,
+        "no_bibliography": no_bibliography and not external_bib,
+        "unresolved_citations": unresolved_citations,
+        "external_bib": external_bib,
+        "inline_entries": sorted(inline_entries),
         "unused_bib": unused_bib,
         "duplicate_bib": duplicate_bib,
         "duplicate_labels": duplicate_labels,
@@ -203,9 +226,12 @@ def report(results, strict: bool) -> int:
 
     issues = 0
 
+    if results.get("no_bibliography"):
+        print("[NO BIBLIOGRAPHY] citations found, but no .bib file, thebibliography or .bbl; every citation is "
+              "missing (declare an externally built bibliography with --external-bib):")
     if results["missing_bib"]:
         issues += len(results["missing_bib"])
-        print(f"[MISSING BIB ENTRY] {len(results['missing_bib'])} cite key(s) not found in any .bib file:")
+        print(f"[MISSING BIB ENTRY] {len(results['missing_bib'])} cite key(s) not found in any bibliography:")
         for key, locs in sorted(results["missing_bib"].items()):
             print(f"  - {key}  ({fmt_locs(locs)})")
         print()
@@ -259,18 +285,31 @@ def report(results, strict: bool) -> int:
             issues += len(results["unused_bib"])
         print()
 
-    if issues == 0:
+    unresolved = results.get("unresolved_citations") or {}
+    if unresolved:
+        print(f"[UNRESOLVED] {len(unresolved)} cite key(s) not found locally; they can only resolve in the declared "
+              f"external bibliography ({results['external_bib']}), so they are not verified here:")
+        for key, locs in sorted(unresolved.items())[:40]:
+            print(f"  - {key}  ({fmt_locs(locs)})")
+        print()
+
+    if issues == 0 and not unresolved:
         print("No issues found.")
+    elif issues == 0:
+        print("No issues found locally; citations unresolved (see above).")
     else:
         print(f"Total issues: {issues}")
 
-    return 1 if issues > 0 else 0
+    return 1 if issues > 0 else (3 if unresolved else 0)
 
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("path", type=Path, help="Directory containing the manuscript's .tex/.bib files")
     parser.add_argument("--strict", action="store_true", help="Treat unused .bib entries as issues for exit code purposes")
+    parser.add_argument("--external-bib", metavar="DESCRIPTION",
+                        help="the bibliography is built outside this directory (name the source); keys not found "
+                             "locally are reported as unresolved (exit 3) instead of missing")
     parser.add_argument("--style", action="store_true",
                         help="Also report advisory typography checks (ref ties, number-unit spacing); exit code unaffected")
     args = parser.parse_args(argv)
@@ -279,7 +318,7 @@ def main(argv=None) -> int:
         print(f"error: {args.path} is not a directory", file=sys.stderr)
         return 2
 
-    results = scan(args.path)
+    results = scan(args.path, external_bib=args.external_bib)
     if args.style:
         report_style(style_scan(args.path))
     return report(results, strict=args.strict)

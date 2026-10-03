@@ -228,5 +228,64 @@ class TestCheckManuscript(unittest.TestCase):
         self.assertEqual(code, 1)
 
 
+
+class TestCitationsWithoutBibliographyAuditT08(unittest.TestCase):
+    """Audit T08: citations with no resolvable bibliography must not pass."""
+
+    def setUp(self):
+        self.tmpdir = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.tmpdir, ignore_errors=True)
+
+    def _write(self, rel_path: str, content: str) -> Path:
+        p = self.tmpdir / rel_path
+        p.write_text(content, encoding="utf-8")
+        return p
+
+    def _main(self, *extra):
+        buf = io.StringIO()
+        with mock.patch("sys.stdout", buf):
+            code = cm.main([str(self.tmpdir), *extra])
+        return code, buf.getvalue()
+
+    def test_citation_without_any_bibliography_fails(self):
+        self._write("main.tex", "A claim \\cite{Nonexistent}.\n")
+        results = cm.scan(self.tmpdir)
+        self.assertIn("Nonexistent", results["missing_bib"])
+        self.assertTrue(results["no_bibliography"])
+        code, out = self._main()
+        self.assertEqual(code, 1)
+        self.assertNotIn("No issues found", out)
+        self.assertIn("no bibliography", out.lower())
+
+    def test_valid_bibliography_passes(self):
+        self._write("main.tex", "A claim \\cite{Known}.\n")
+        self._write("refs.bib", "@article{Known,\n  title={x},\n}\n")
+        self.assertEqual(self._main()[0], 0)
+
+    def test_document_without_citations_passes(self):
+        self._write("main.tex", "No citations here.\n")
+        code, out = self._main()
+        self.assertEqual(code, 0)
+        self.assertIn("No issues found", out)
+
+    def test_inline_thebibliography_resolves(self):
+        self._write("main.tex", "A \\cite{Inline,Other}.\n\\begin{thebibliography}{9}\n\\bibitem{Inline} A. Author.\n"
+                                "\\bibitem[Oth(2020)]{Other} B. Author.\n\\end{thebibliography}\n")
+        results = cm.scan(self.tmpdir)
+        self.assertEqual(results["missing_bib"], {})
+        self.assertEqual(self._main()[0], 0)
+        self._write("main.tex", "A \\cite{Missing}.\n\\begin{thebibliography}{9}\n\\bibitem{Inline} A.\n\\end{thebibliography}\n")
+        self.assertIn("Missing", cm.scan(self.tmpdir)["missing_bib"])
+
+    def test_declared_external_bibliography_is_unresolved_not_missing(self):
+        self._write("main.tex", "A claim \\cite{CollabDB:2026}.\n")
+        results = cm.scan(self.tmpdir, external_bib="collaboration database export at build time")
+        self.assertEqual(results["missing_bib"], {})
+        self.assertIn("CollabDB:2026", results["unresolved_citations"])
+        code, out = self._main("--external-bib", "collaboration database export at build time")
+        self.assertEqual(code, 3)
+        self.assertIn("UNRESOLVED", out)
+
+
 if __name__ == "__main__":
     unittest.main()
