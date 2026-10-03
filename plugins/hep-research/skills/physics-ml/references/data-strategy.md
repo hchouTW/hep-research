@@ -6,7 +6,8 @@ downstream. For `Dataset`/`DataLoader` implementation see
 [evaluation-strategy.md](evaluation-strategy.md).
 
 Use `${CLAUDE_PLUGIN_ROOT}/skills/physics-ml/scripts/check_split_integrity.py` to check splits for overlap, duplication, and
-group leakage.
+group leakage. It reports how many IDs carry group (and timestamp) metadata; missing metadata gives `incomplete`, which is
+not a pass, and `--strict` makes it a failure for a split that feeds a result.
 
 ## Data quality beats model choice
 
