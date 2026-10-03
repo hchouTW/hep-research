@@ -11,7 +11,7 @@ poll     the job event log first (it outlives the queue): submit 000, execute 00
          004, terminated 005 (return value or signal), shadow exception 007, aborted 009, held 012 (reason, Code,
          Subcode), released 013. A job the log still shows as queued or running is checked against condor_q and
          condor_history (-json); absent from both, it is 'lost'. Without a readable log, condor_q / condor_history
-         JobStatus is used (1 idle, 2 running, 3 removed, 4 completed, 5 held, 6 transferring output, 7 suspended).
+         JobStatus is used (1 idle, 2 running, 3 removing, 4 completed, 5 held, 6 transferring output, 7 suspended).
          A held job is reported with its reason and code and never released here.
 cancel   condor_rm <cluster>.<proc>
 Paths containing whitespace are refused (htcondor.path_whitespace): submit-description values are not quoted.
@@ -37,7 +37,7 @@ ABNORMAL = re.compile(r"Abnormal termination \(signal (\d+)\)")
 HOLD_CODE = re.compile(r"Code (\d+) Subcode (\d+)")
 MEMORY = re.compile(r"^\s*Memory \(MB\)\s*:\s*(\d+)")
 KNOWN_EVENTS = {f"{i:03d}" for i in range(0, 45)}
-JOB_STATUS = {1: "queued", 2: "running", 3: "cancelled", 5: "held", 6: "running"}
+JOB_STATUS = {1: "queued", 2: "running", 3: "cancelled", 5: "held", 6: "running", 7: "unknown"}
 ATTRS = "ClusterId,ProcId,JobStatus,HoldReason,HoldReasonCode,HoldReasonSubCode,ExitCode,ExitBySignal,ExitSignal,NumJobStarts"
 
 

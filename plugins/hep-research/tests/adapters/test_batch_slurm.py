@@ -46,6 +46,11 @@ class SlurmShimTests(unittest.TestCase):
                 self.assertEqual(rep["chunks"]["c0001"]["status"], "done")
                 self.assertEqual(code, 0 if normalized == "done" else 1)
         self.assertEqual(sb.mapped("SOMETHING_NEW"), "unknown")
+        # states from the squeue/sacct 26.05 state code tables that the fault shims do not produce
+        for native, normalized in (("RESV_DEL_HOLD", "held"), ("SIGNALING", "running"), ("SUSPENDED", "unknown"),
+                                   ("STOPPED", "unknown"), ("DEADLINE", "failed"), ("REVOKED", "cancelled"),
+                                   ("CANCELLED+", "cancelled")):
+            self.assertEqual(sb.mapped(native), normalized, native)
 
     def test_exit_code_and_signal_are_parsed(self):
         self.assertEqual(sb.parse_exit("0:125"), (0, 125))

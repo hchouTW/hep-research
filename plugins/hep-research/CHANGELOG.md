@@ -19,7 +19,10 @@ Work order `tasks/hep-research/batch-schedulers/TASK.md` (r2); evidence in VALID
   campaign CLI `batch_campaign.py` whose state-changing commands are dry runs without `--submit` /
   `--approve-cancel`, a config validator that takes site facts only from the user, a bounded `watch`, and a
   `computational-run` report (incomplete campaigns are `failed`). Tested only against fake schedulers; no real
-  Slurm or HTCondor has run it, and its tool facts are not yet checked against the tools' documentation.
+  Slurm or HTCondor has run it; its tool facts were checked on 2026-10-03 against the Slurm 26.05 and HTCondor 25.13 documentation (a few formats are not stated there and stay to be confirmed on a real run).
+- **Fixed** after the documentation check: the Slurm state map now covers RESV_DEL_HOLD (held), SIGNALING
+  (running), DEADLINE (failed), REVOKED (cancelled), and SUSPENDED/STOPPED (unknown, as HTCondor's suspend); before,
+  all of these already fell to `unknown`.
 - **New reference** `skills/hep-computing/references/batch-scheduling.md` and example `examples/batch-partition/`
   (the T21 job on both fake schedulers with injected faults; byte-reproducible).
 - **Blinding scan** (`core/blinding`): `.out`, `.err`, `.sh`, `.sbatch` and `.sub` files are now read as text, so

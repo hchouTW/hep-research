@@ -7,8 +7,8 @@ duplicate ever summed, bounded and explicit retries, a merge that needs every ch
 Code: `core/partition/` (engine, campaign, worker-side runner, normalized states) and the optional adapter
 `adapters/batch-schedulers/` (`batch_campaign.py` CLI, `slurm_backend.py`, `htcondor_backend.py`, `batch_config.py`,
 templates in `assets/`). Status: **documented**. Both backends are tested only against fake schedulers
-(`tests/adapters/batch_shims/`); no real Slurm or HTCondor has run them, and the tool facts below are not yet checked
-against the tools' documentation (see "Tool facts"). Treat the first real run on your site as a pilot.
+(`tests/adapters/batch_shims/`); no real Slurm or HTCondor has run them, and the tool facts below were
+checked against the tools' documentation only (see "Tool facts"; a few formats are not stated there). Treat the first real run on your site as a pilot.
 
 ## When to batch, and when not
 
@@ -123,23 +123,28 @@ validates with status `synthetic, unvalidated`; the logs pass the blinding audit
 
 ## Tool facts
 
-Every option, field, state code and output format the backends emit or parse. **Status: not yet checked** against
-the tools' documentation: the documentation pages could not be read when this was written, and no real Slurm or
-HTCondor was run. The fake schedulers implement the formats as listed, so the shim tests show the adapter is
-internally consistent, not that it agrees with the real tools. Check each row against the documentation of the
-version you use (record version and date here) or a real run before relying on it.
+Every option, field, state code and output format the backends emit or parse, checked on 2026-10-03 against the
+official documentation: Slurm 26.05 (slurm.schedmd.com: sbatch, sacct, squeue, scancel, job arrays) and HTCondor
+Manual 25.13.2 (htcondor.readthedocs.io: condor_submit, Job Description Language, job event log codes, job ClassAd
+attributes, condor_q, condor_history, managing a job). No real Slurm or HTCondor was run; the fake schedulers follow
+these formats. "Documented" means the page states it; "not stated" means the page does not say it either way, so
+confirm it on a real run of the version you use before relying on it.
 
-| Fact used | Where | Source to check |
+| Fact used | Where | Status (2026-10-03) |
 |---|---|---|
-| `sbatch --parsable` prints `jobid[;cluster]` | Slurm submit | sbatch man page |
-| `--array=A-B%M` (throttle `%M`), `--no-requeue`, `--output`/`--error` with `%A` (array job ID) and `%a` (task index), `--partition`, `--account`, `--qos`, `--constraint`, `--gres`, `--time`, `--cpus-per-task`, `--mem=<n>M`, `--gpus`, `--tmp`, `--job-name`; `SLURM_ARRAY_TASK_ID` in the job | Slurm template | sbatch man page; job array guide |
-| `sacct --jobs=<ids> --duplicates --parsable2 --noheader --format=JobID,State,ExitCode,Elapsed,MaxRSS,NodeList`; array tasks as `<job>_<task>`, steps as `<job>_<task>.batch`, pending ranges as `<job>_[a-b%m]`; `ExitCode` as `exit:signal`; `CANCELLED by <uid>`; Elapsed `[D-]HH:MM:SS` | Slurm poll | sacct man page |
-| State codes PENDING, CONFIGURING, REQUEUED, REQUEUE_FED, RUNNING, COMPLETING, STAGE_OUT, RESIZING, COMPLETED, FAILED, TIMEOUT, OUT_OF_MEMORY, CANCELLED, NODE_FAIL, BOOT_FAIL, PREEMPTED, REQUEUE_HOLD, SPECIAL_EXIT | Slurm state map | sacct / squeue job state codes |
-| `squeue --jobs=<ids> --array --noheader --format=%i\|%T` | Slurm fallback | squeue man page |
-| `scancel <job>_<task>` | Slurm cancel | scancel man page |
-| Submit description: `universe` (vanilla, container), `container_image`, `executable`, `transfer_executable`, `arguments = "..."`, `log`, `output`, `error`, `should_transfer_files`, `when_to_transfer_output = ON_EXIT`, `transfer_input_files`, `transfer_output_remaps = "a = b; c = d"`, `request_cpus`, `request_memory`/`request_disk` with an `MB` suffix, `request_gpus`, `requirements`, `max_materialize`, `queue a, b from file`; macros `$(name)` | HTCondor template | condor_submit man page; file transfer section |
-| Default exit handling (no `max_retries`, `on_exit_remove`, `periodic_release`) means no automatic retry | HTCondor template | condor_submit man page |
-| `condor_submit -terse` prints `<cluster>.<first> - <cluster>.<last>` | HTCondor submit | condor_submit man page |
-| Job event log: header `NNN (cluster.proc.subproc) date time text`, events separated by `...`; codes 000, 001, 002, 004, 005 (`(1) Normal termination (return value N)` / `(0) Abnormal termination (signal N)`, `Memory (MB) : usage`), 007, 009, 010, 011, 012 (reason line, `Code N Subcode M`), 013 | HTCondor poll | job event log codes |
-| `condor_q` / `condor_history <cluster> -json -attributes ...`; JobStatus 1 idle, 2 running, 3 removed, 4 completed, 5 held, 6 transferring output, 7 suspended; ExitCode, ExitBySignal, ExitSignal, HoldReason, HoldReasonCode, HoldReasonSubCode, NumJobStarts | HTCondor fallback | condor_q, condor_history man pages; job ClassAd attributes |
-| `condor_rm <cluster>.<proc>`; `condor_version`; `sbatch --version` | cancel; provenance | man pages |
+| `sbatch --parsable` prints `jobid[;cluster]` | Slurm submit | documented (job ID and cluster name, separated by a semicolon) |
+| `--array=A-B%M` (throttle `%M`), `--no-requeue`, `--output`/`--error` with `%A` and `%a`, `--partition`, `--account`, `--qos`, `--constraint`, `--gres`, `--time`, `--cpus-per-task`, `--mem=<n>M`, `--gpus`, `--tmp`, `--job-name`; `SLURM_ARRAY_TASK_ID` in the job | Slurm template | documented (`--mem` default unit MiB, suffix K/M/G/T) |
+| `sacct --duplicates --parsable2 --noheader --format=JobID,State,ExitCode,Elapsed,MaxRSS,NodeList`; array tasks `<job>_<task>`; `.batch` step; `ExitCode` as `exit:signal`; Elapsed `[DD-[HH:]]MM:SS`; MaxRSS with an optional unit letter; State followed by `+` when truncated (for example who cancelled) | Slurm poll | documented; the parser accepts both `MM:SS` and `D-HH:MM:SS` |
+| Pending array ranges shown as `<job>_[a-b%m]` in sacct | Slurm poll | not stated (squeue documents a combined line "using a regular expression"); parsed if present |
+| State codes: the adapter maps PENDING, CONFIGURING, REQUEUED, REQUEUE_FED, RUNNING, COMPLETING, STAGE_OUT, RESIZING, SIGNALING, COMPLETED, FAILED, TIMEOUT, OUT_OF_MEMORY, CANCELLED, NODE_FAIL, BOOT_FAIL, PREEMPTED, REQUEUE_HOLD, SPECIAL_EXIT, RESV_DEL_HOLD, DEADLINE, REVOKED; SUSPENDED and STOPPED map to `unknown` (a person decides) | Slurm state map | documented (squeue 26.05 table); RESV_DEL_HOLD, SIGNALING, DEADLINE, REVOKED, SUSPENDED and STOPPED were added after this check |
+| `squeue --jobs=<ids> --array --noheader --format=%i\|%T` | Slurm fallback | documented (`%i` is `<base_job_id>_<index>` for arrays, `%T` the long state) |
+| `scancel <job>_<task>`; `scancel --version` | Slurm cancel | documented |
+| `sbatch --version` | Slurm provenance | not stated on the sbatch page (scancel documents `-V, --version`) |
+| Submit description: `universe` (vanilla, container), `executable`, `transfer_executable`, `arguments`, `log`, `output`, `error`, `should_transfer_files`, `when_to_transfer_output = ON_EXIT`, `transfer_input_files`, `transfer_output_remaps = "a = b; c = d"`, `request_cpus`, `request_memory`/`request_disk` with an `MB` suffix, `request_gpus`, `max_materialize`, `queue a, b from file` (each line split on commas and/or spaces); macros `$(name)` | HTCondor template | documented (`request_disk` default unit is KiB, so the explicit `MB` suffix matters) |
+| `container_image` | HTCondor template | not stated in the page excerpt read (the container universe is documented) |
+| No automatic retry by default (`max_retries` unset, `on_exit_remove` default True, `periodic_release` default False) | HTCondor template | documented; an evicted job still restarts, which `NumJobStarts` counts |
+| `condor_submit -terse` prints `<cluster>.<first> - <cluster>.<last>` | HTCondor submit | partly: "display JobId ranges only"; the exact layout is not stated |
+| Job event log: three-digit code, `(cluster.proc.subproc)`, date and time, text; codes 000 submit, 001 execute, 002 executable error, 004 evicted, 005 terminated, 007 shadow exception, 009 aborted, 010 suspended, 011 unsuspended, 012 held, 013 released | HTCondor poll | documented |
+| Event separator `...`; termination lines `(1) Normal termination (return value N)` / `(0) Abnormal termination (signal N)`; `Memory (MB)` usage line; held event `Code N Subcode M` | HTCondor poll | not stated verbatim (the pages say the log records termination type, return value or signal, resource usage and hold codes) |
+| `condor_q` / `condor_history <cluster> -json -attributes ...`; JobStatus 1 idle, 2 running, 3 removing, 4 completed, 5 held, 6 transferring output (marked "not used"), 7 suspended (mapped to `unknown`); ExitCode, ExitBySignal, ExitSignal, HoldReason, HoldReasonCode, HoldReasonSubCode, NumJobStarts | HTCondor fallback | documented |
+| `condor_rm <cluster>.<proc>`; `condor_version` | HTCondor cancel; provenance | documented (condor_rm page 25.14.1) |
