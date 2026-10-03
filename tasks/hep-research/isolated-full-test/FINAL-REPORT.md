@@ -102,3 +102,21 @@ the rendezvous; `--standalone --local-addr=127.0.0.1` passes and is what the tes
 
 Items 5 (live routing on E2, needs a budget) and 6 (log in to an isolated config to close the F07 invocation)
 remain open. The installed plugin in `~/.claude` was reinstalled at `e54707d`.
+
+## Follow-up 5: live routing on E2 (2026-10-04)
+
+Done (VALIDATION FULLTEST-E2-ROUTING): 62 cases, claude-sonnet-5-5, isolated config logged in by the user, $5.85.
+56/62 pass (en 37/42, zh-Hant 19/20), 0 loading violations; on the 48 cases shared with run 4, 44/48 (run 4: 43/48).
+`~/.claude` unchanged.
+
+New follow-ups from this run:
+
+7. Quick questions answered without a skill: `co-direct-1` (ROOT leak; `hep-computing`), `co-neighbor-1` and
+   `st-sensitivity-1`. Decide whether description changes are worth a routing round. Each change is paid and
+   needs repeats for variance.
+8. `st-impacts-1` has no input files; add a synthetic post-fit input (as `tests/routing/inputs.py` does for other
+   cases) so the case measures routing rather than the empty project.
+9. `out-of-v1-2` (SMEFT global fit) expects `hep-statistics`, but `hep-theory`'s description claims "EFT global
+   fits" outside v1. Pick one owner and align the case with the descriptions.
+
+Item 6 (isolated-config invocation for F07) can now be closed cheaply: the routing config is logged in.
