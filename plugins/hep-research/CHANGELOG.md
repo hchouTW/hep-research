@@ -3,6 +3,17 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased (full test on E2, 2026-10-04)
+
+Work order `tasks/hep-research/isolated-full-test/TASK.md` (r1); evidence in VALIDATION FULLTEST-E2. No change to
+plugin behavior.
+
+- **Tested on macOS arm64 (E2)** with pyhf, uproot/awkward, ROOT 6.38.04, PyTorch (CPU), Graphviz, PlantUML and
+  Mermaid: legacy traceability, example reruns, relocation and an isolated Claude Code install pass.
+- **Known on E2** (follow-ups, not fixed): the 2-process DDP smoke test hangs when the host name does not resolve;
+  `ams-flux-ratio` toy-closure numbers differ from the committed output across platforms; relocation copies ignored
+  local files such as a venv inside the plugin tree.
+
 ## Unreleased (E2 follow-ups, 2026-10-03)
 
 Evidence in VALIDATION E2-FOLLOWUPS.

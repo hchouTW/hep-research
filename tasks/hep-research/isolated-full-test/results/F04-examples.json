@@ -1,0 +1,173 @@
+[
+ {
+  "example": "ams-flux-ratio",
+  "command": "python examples/ams-flux-ratio/run.py --out <dir>",
+  "run1_exit": 0,
+  "run1_seconds": 2.0,
+  "run2_exit": 0,
+  "run2_seconds": 2.0,
+  "rerun_identical": true,
+  "rerun_differing_files": [],
+  "committed_identical": false,
+  "committed_differing_files": [
+   "artifacts/dataset_synthetic-period-1.json",
+   "artifacts/dataset_synthetic-period-2.json",
+   "flux_per_period.png",
+   "ratio_per_period.png",
+   "report.md",
+   "results.json"
+  ],
+  "results_json_numeric_equal": false,
+  "results_json_diffs": [
+   "$.toy_closure.helium/synthetic-period-1.mean_per_bin[0]: -0.0115 != -0.0104",
+   "$.toy_closure.helium/synthetic-period-1.mean_per_bin[1]: -0.1012 != -0.1102",
+   "$.toy_closure.helium/synthetic-period-1.mean_per_bin[2]: 0.0215 != 0.0269",
+   "$.toy_closure.helium/synthetic-period-1.mean_per_bin[3]: -0.0005 != 0.0012",
+   "$.toy_closure.helium/synthetic-period-1.mean_per_bin[4]: -0.1118 != -0.1096",
+   "$.toy_closure.helium/synthetic-period-1.mean_per_bin[5]: 0.0489 != 0.0418",
+   "$.toy_closure.helium/synthetic-period-1.mean_per_bin[6]: -0.017 != -0.0266",
+   "$.toy_closure.helium/synthetic-period-1.mean_per_bin[7]: -0.0574 != -0.0581",
+   "$.toy_closure.helium/synthetic-period-1.mean_per_bin[8]: -0.0321 != -0.0265",
+   "$.toy_closure.helium/synthetic-period-1.width_per_bin[0]: 0.9555 != 0.9513",
+   "$.toy_closure.helium/synthetic-period-1.width_per_bin[1]: 1.0423 != 1.0378",
+   "$.toy_closure.helium/synthetic-period-1.width_per_bin[2]: 1.0194 != 1.0277",
+   "$.toy_closure.helium/synthetic-period-1.width_per_bin[3]: 0.9975 != 1.0055",
+   "$.toy_closure.helium/synthetic-period-1.width_per_bin[4]: 1.0091 != 1.0087",
+   "$.toy_closure.helium/synthetic-period-1.width_per_bin[5]: 1.0305 != 1.0197",
+   "$.toy_closure.helium/synthetic-period-1.width_per_bin[6]: 1.0273 != 1.0284",
+   "$.toy_closure.helium/synthetic-period-1.width_per_bin[7]: 1.0545 != 1.0413",
+   "$.toy_closure.helium/synthetic-period-1.width_per_bin[8]: 0.9685 != 0.9833",
+   "$.toy_closure.helium/synthetic-period-2.mean_per_bin[0]: 0.009 != 0.0042",
+   "$.toy_closure.helium/synthetic-period-2.mean_per_bin[1]: -0.0181 != -0.0173"
+  ]
+ },
+ {
+  "example": "batch-partition",
+  "command": "python examples/batch-partition/run.py --out <dir>",
+  "run1_exit": 0,
+  "run1_seconds": 3.5,
+  "run2_exit": 0,
+  "run2_seconds": 4.5,
+  "rerun_identical": true,
+  "rerun_differing_files": [],
+  "committed_identical": true,
+  "committed_differing_files": []
+ },
+ {
+  "example": "collider-angular",
+  "command": "python examples/collider-angular/run.py --out <dir>",
+  "run1_exit": 0,
+  "run1_seconds": 1.1,
+  "run2_exit": 0,
+  "run2_seconds": 1.0,
+  "rerun_identical": true,
+  "rerun_differing_files": [],
+  "committed_identical": false,
+  "committed_differing_files": [
+   "artifacts/dataset_record.json",
+   "dsigma_dcos.png",
+   "report.md",
+   "results.json"
+  ],
+  "results_json_numeric_equal": true,
+  "results_json_diffs": []
+ },
+ {
+  "example": "detector-resolution",
+  "command": "python examples/detector-resolution/run.py --out <dir>",
+  "run1_exit": 0,
+  "run1_seconds": 0.9,
+  "run2_exit": 0,
+  "run2_seconds": 0.6,
+  "rerun_identical": true,
+  "rerun_differing_files": [],
+  "committed_identical": false,
+  "committed_differing_files": [
+   "resolution_efficiency.png"
+  ]
+ },
+ {
+  "example": "local-partition",
+  "command": "python examples/local-partition/run.py --out <dir>",
+  "run1_exit": 0,
+  "run1_seconds": 0.1,
+  "run2_exit": 0,
+  "run2_seconds": 0.1,
+  "rerun_identical": true,
+  "rerun_differing_files": [],
+  "committed_identical": true,
+  "committed_differing_files": []
+ },
+ {
+  "example": "published-comparison",
+  "command": "python examples/published-comparison/run.py --out <dir>",
+  "run1_exit": 0,
+  "run1_seconds": 0.6,
+  "run2_exit": 0,
+  "run2_seconds": 0.6,
+  "rerun_identical": true,
+  "rerun_differing_files": [],
+  "committed_identical": false,
+  "committed_differing_files": [
+   "artifacts/result.json",
+   "report.md",
+   "results.json"
+  ],
+  "results_json_numeric_equal": true,
+  "results_json_diffs": []
+ },
+ {
+  "example": "qed-prediction",
+  "command": "python examples/qed-prediction/run.py --out <dir>",
+  "run1_exit": 0,
+  "run1_seconds": 1.2,
+  "run2_exit": 0,
+  "run2_seconds": 1.4,
+  "rerun_identical": true,
+  "rerun_differing_files": [],
+  "committed_identical": false,
+  "committed_differing_files": [
+   "artifacts/prediction.json",
+   "artifacts/theory_spec.json",
+   "dsigma_dcos_prediction.png",
+   "results.json"
+  ],
+  "results_json_numeric_equal": true,
+  "results_json_diffs": []
+ },
+ {
+  "example": "recasting",
+  "command": "python examples/recasting/run.py --out <dir>",
+  "run1_exit": 0,
+  "run1_seconds": 2.1,
+  "run2_exit": 0,
+  "run2_seconds": 2.1,
+  "rerun_identical": true,
+  "rerun_differing_files": [],
+  "committed_identical": true,
+  "committed_differing_files": []
+ },
+ {
+  "example": "theory-comparison",
+  "command": "python examples/theory-comparison/run.py --out <dir>",
+  "run1_exit": 0,
+  "run1_seconds": 37.8,
+  "run2_exit": 0,
+  "run2_seconds": 38.4,
+  "rerun_identical": true,
+  "rerun_differing_files": [],
+  "committed_identical": true,
+  "committed_differing_files": []
+ },
+ {
+  "example": "end-to-end-sample",
+  "command": "python examples/end-to-end-sample/run.py --seed 1 --outdir <dir>",
+  "run1_exit": 0,
+  "run1_seconds": 12.7,
+  "run2_exit": 0,
+  "run2_seconds": 14.4,
+  "rerun_identical": true,
+  "rerun_differing_files": [],
+  "committed_identical": null
+ }
+]

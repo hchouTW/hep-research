@@ -378,3 +378,31 @@ profile suites 258, 9, 16 pass.
 | 5 qed-benchmark `scales` | done | explicit not-applicable entry in `conventions.json` |
 
 The ROOT C++ asset rows are the first ROOT run on E2; they do not change any E1 row.
+
+## FULLTEST-E2 (2026-10-04, E2)
+
+Work order `tasks/hep-research/isolated-full-test/TASK.md` (r1) on `main` at `dd9b940`; results in
+`tasks/hep-research/isolated-full-test/results/`. Environment **E2**: macOS 26.5 arm64 (Apple M3), Python 3.13.2 in
+`~/.venvs/hep-research-e2` (outside the plugin tree) with numpy 2.5.3, scipy 1.18.1, matplotlib 3.11.2, sympy
+1.14.0, pyhf 0.7.6, uproot 5.7.6, awkward 2.14.0, torch 2.14.1, torchvision 0.29.1 (CPU); Homebrew ROOT 6.38.04
+(PyROOT via `python3.14`), Graphviz 16.1.0, PlantUML 1.2026.8, Mermaid CLI 12.0.0, tectonic 0.17.0, cmake 4.3.2;
+Claude Code 2.1.288. Absent: CMS Combine, Docker, Slurm, HTCondor. Legacy checkout fetched at `3e995a4`. Live
+routing not run (not approved).
+
+Aggregate (F02): `tasks/hep-research/check-runs/check-run-2026-10-03T193110Z.json`: 13 pass, **1 fail**
+(unittest), 0 skip; `ams_ledger_preservation` and traceability now run and pass. Unit tests 1241 run, 1230 pass,
+1 fail, 1 error, 9 skip (3 missing tool: real Slurm, real HTCondor, Combine; 4 slow by design; 2 meaningful only
+without PyTorch); profile suites 258, 9, 16 pass. The fail was Mermaid: Homebrew `mermaid-cli` ships without its
+headless Chrome. After installing `chrome-headless-shell` 154.0.8037.57, all 22 diagram tests pass, and the final
+rerun (scratch) gives 1241 run, 1231 pass, 0 fail, 1 error, 9 skip.
+
+| Step | Result | Evidence |
+|---|---|---|
+| F03 traceability with legacy | pass | 949 of 949 legacy files mapped; 885 plugin files (375 from legacy, 510 registered new); legacy checkout unmodified |
+| F04 examples | pass (reruns); 1 cross-platform difference | all ten rerun byte-identically on E2; batch-partition, local-partition, recasting, theory-comparison byte-identical to the committed output; collider-angular, published-comparison, qed-prediction numerically equal; detector-resolution `results.json` identical (figure differs); **ams-flux-ratio toy-closure summary differs** (106 values; observed counts and all pass criteria agree) |
+| F05 adapters | pass except DDP; Combine unverified | pyhf 0.7.6, uproot 5.7.6 / awkward 2.14.0, ROOT 6.38.04 tested here; fake Slurm/HTCondor pass; `test_ddp_skeleton_two_gloo_processes` **error**: torchrun rendezvous hangs because the host name does not resolve on this network |
+| F06 relocation | pass apart from the DDP error | path with spaces, outside the repository, no symlinks, no source-path references. The first run failed the packaging scan because a leftover `.venv-hep` (from INSTALL) was copied with the tree; with it moved out, packaging passes. Legacy-dependent checks skip in the copy (2 checks, 1 unit test) |
+| F07 isolated host | pass (install, discovery, removal); invocation unverified | isolated `CLAUDE_CONFIG_DIR`, marketplace from a `git archive` copy at a path with spaces: seven `hep-research:*` skills, plugin path inside the copy; uninstall leaves no plugins and empty settings entries; `~/.claude` checksums and listings identical before and after. The invocation needs a login in the isolated config (not done; it passed in the user configuration under INSTALL) |
+| F08 live routing | not run | not approved; AC20 unchanged |
+
+No E1 entry was edited.
