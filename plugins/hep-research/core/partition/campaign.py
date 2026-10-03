@@ -201,7 +201,7 @@ def resubmit(campaign_dir, executor, config: dict, approved: bool = False, clock
 
 
 def reset(campaign_dir, chunk_ids, reason: str) -> dict:
-    """After a person fixed the cause: clear the failure history so the chunk may be resubmitted once more."""
+    """After a person fixed the cause: allow the chunk to be resubmitted, with the reason recorded in 'resets'."""
     if not reason or not reason.strip():
         raise CampaignError("reset.reason_missing", "a reset needs a reason")
     cdir = Path(campaign_dir)
@@ -212,7 +212,8 @@ def reset(campaign_dir, chunk_ids, reason: str) -> dict:
             raise CampaignError("reset.unknown_chunk", cid)
         row = _row(state, cid)
         state["resets"].append({"chunk": cid, "reason": reason, "errors": row["errors"], "attempts": row["attempts"]})
-        row.update(errors=[], attempts_since_reset=0, reset_reason=reason)
+        # the failure history is kept: a reset allows one more attempt, and the same failure again still stops the chunk
+        row.update(attempts_since_reset=0, reset_reason=reason)
     _save(cdir, state)
     return {"reset": list(chunk_ids), "reason": reason}
 
