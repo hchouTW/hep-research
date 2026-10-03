@@ -171,6 +171,104 @@ def profile(pid, ns, deps=()):
     return {"id": pid, "kind": "experiment", "version": "1.0.0", "vocabulary_namespaces": [ns], "depends_on": list(deps)}
 
 
+class GateDefinitionAuditT01(unittest.TestCase):
+    """Audit T01: the gate compares the physical definition (process, species, phase space) and every axis.
+
+    Regression tests: each variant below was reported comparable before the fix."""
+
+    def same(self, **kw):
+        p, m = pred(**copy.deepcopy(kw)), meas(**copy.deepcopy(kw))
+        p["parameter_point"] = {}
+        return p, m
+
+    def fields(self, res):
+        return [x["field"] for x in res["mismatches"]]
+
+    def test_identical_definitions_still_comparable(self):
+        p, m = self.same(process="synthetic e+ e- -> mu+ mu-", species=[{"name": "muon"}],
+                         phase_space={"definition": "synthetic fiducial region", "fiducial": True})
+        self.assertTrue(gate(p, m, [], [], {})["comparable"])
+
+    def test_a_process_change_not_comparable(self):
+        p, m = self.same(process="synthetic e+ e- -> mu+ mu-")
+        m["observable"]["process"] = "synthetic e+ e- -> tau+ tau-"
+        r = gate(p, m, [], [], {})
+        self.assertFalse(r["comparable"])
+        self.assertIn("process", self.fields(r))
+        self.assertEqual(r["status"], "unresolved")
+        self.assertTrue(all(x["resolve"] for x in r["mismatches"]))
+
+    def test_process_on_one_side_only_unresolved(self):
+        p, m = self.same(process="synthetic e+ e- -> mu+ mu-")
+        del m["observable"]["process"]
+        self.assertIn("process", self.fields(gate(p, m, [], [], {})))
+
+    def test_b_species_change_not_comparable(self):
+        p, m = self.same(species=[{"name": "muon"}])
+        m["observable"]["species"] = [{"name": "tau"}]
+        r = gate(p, m, [], [], {})
+        self.assertFalse(r["comparable"])
+        self.assertIn("species", self.fields(r))
+
+    def test_c_phase_space_change_not_comparable(self):
+        p, m = self.same(phase_space={"definition": "synthetic fiducial region", "fiducial": True})
+        m["observable"]["phase_space"] = {"definition": "|cos theta| < 0.5 and pT > 20 GeV", "fiducial": True}
+        r = gate(p, m, [], [], {})
+        self.assertFalse(r["comparable"])
+        self.assertIn("phase_space", self.fields(r))
+
+    def test_structured_phase_space_cuts_compared(self):
+        cuts = [{"variable": "pT", "unit": "GeV", "low": 20.0, "high": None}]
+        p, m = self.same(phase_space={"definition": "a", "fiducial": True, "cuts": cuts})
+        m["observable"]["phase_space"] = {"definition": "b", "fiducial": True, "cuts": copy.deepcopy(cuts)}
+        self.assertTrue(gate(p, m, [], [], {})["comparable"], "equal structured cuts decide, whatever the free text")
+        m["observable"]["phase_space"]["cuts"][0]["low"] = 25.0
+        r = gate(p, m, [], [], {})
+        self.assertIn("phase_space.cuts", self.fields(r))
+        self.assertEqual(r["status"], "not-comparable")
+
+    def test_named_mapping_with_justification_resolves(self):
+        p, m = self.same(process="e+e- -> mu+mu- (one photon)")
+        m["observable"]["process"] = "e+e- -> mu+mu- (generator)"
+        bare = [{"field": "process", "action": "equivalent"}]
+        self.assertFalse(gate(p, m, [], bare, {})["comparable"], "a mapping without a justification is not evidence")
+        mapped = [{"field": "process", "action": "equivalent", "justification": "same final state; the generator has no Z"}]
+        r = gate(p, m, [], mapped, {})
+        self.assertTrue(r["comparable"], r["mismatches"])
+        self.assertEqual(r["definition_mappings_applied"], mapped)
+
+    def test_d_second_axis_compared(self):
+        two = [{"name": "x", "unit": "1", "edges": list(EDGES)}, {"name": "sqrt_s", "unit": "GeV", "edges": [80.0, 90.0, 100.0]}]
+        p, m = self.same(variables=copy.deepcopy(two))
+        self.assertTrue(gate(p, m, [], [], {})["comparable"])
+        m["observable"]["variables"][1] = {"name": "pT", "unit": "TeV", "edges": [0.0, 1.0, 5.0]}
+        r = gate(p, m, [], [], {})
+        self.assertFalse(r["comparable"])
+        self.assertTrue({"variables[1].name", "variables[1].unit", "variables[1].binning"} <= set(self.fields(r)), self.fields(r))
+
+    def test_axis_transformations_on_multi_dimensional_rejected(self):
+        two = [{"name": "x", "unit": "1", "edges": list(EDGES)}, {"name": "y", "unit": "1", "edges": [0.0, 1.0, 2.0]}]
+        p, m = self.same(variables=copy.deepcopy(two), bin_semantics="bin-integrated", quantity="cross-section")
+        m["observable"]["variables"][0]["edges"] = [-1.0, 0.0, 1.0]
+        r = gate(p, m, [{"kind": "rebin", "owner": "hep-theory", "edges": [-1.0, 0.0, 1.0]}], [], {})
+        self.assertFalse(r["comparable"])
+        self.assertIn("multi-dimensional", r["mismatches"][0]["reason"])
+
+    def test_fiducial_restriction_needs_matching_measurement_definition(self):
+        cuts = [{"variable": "x", "unit": "1", "low": -0.5, "high": 0.5}]
+        p = pred()
+        p["parameter_point"] = {}
+        m = meas(phase_space={"definition": "|x| < 0.5", "fiducial": True, "cuts": cuts},
+                 variables=[{"name": "x", "unit": "1", "edges": [-0.5, 0.0, 0.5]}])
+        t = [{"kind": "fiducial-restriction", "owner": "hep-theory", "variable": "x", "range": [-0.5, 0.5]}]
+        r = gate(p, m, t, [], {})
+        self.assertTrue(r["comparable"], r["mismatches"])
+        m["observable"]["phase_space"] = {"definition": "|x| < 0.5", "fiducial": True}
+        r = gate(p, m, t, [], {})
+        self.assertEqual(r["status"], "unresolved")
+        self.assertIn("phase_space", self.fields(r))
+
+
 class ComposeTests(unittest.TestCase):
     def test_disjoint_namespaces_ok(self):
         r = compose([profile("experiment:a", "alpha"), profile("experiment:b", "beta")], ids=["alpha:D1", "beta:D2"])

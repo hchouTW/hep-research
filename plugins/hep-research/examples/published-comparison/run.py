@@ -50,7 +50,12 @@ MAPPINGS = [
     {"key": "angle_definition", "action": "equivalent",
      "justification": "both define theta between the incoming e- (beam) and the outgoing mu- in the c.m. frame"},
     {"key": "synthcol:fiducial_definition", "action": "transform", "transformation": "fiducial-restriction to |cos theta| < 0.9",
-     "justification": "the record's fiducial cut is on the binned variable; prediction edges align at +-0.9"}]
+     "justification": "the record's fiducial cut is on the binned variable; prediction edges align at +-0.9"},
+    {"field": "process", "action": "equivalent",
+     "justification": "the synthetic record was generated from the same one-photon tree-level e+e- -> mu+mu- model (make_record.py)"},
+    {"field": "phase_space", "action": "equivalent",
+     "justification": "after the restriction to |cos theta| < 0.9 the prediction covers the record's fiducial region at the "
+                      "record's sqrt(s) = 10 GeV (checked by the parameter point)"}]
 PEELLE = ("the record's luminosity block is built from the measured values (fully correlated, proportional to the data); "
           "a Gaussian GLS normalization fit with such a matrix is known to be biased low for multiplicative uncertainties "
           "(Peelle's pertinent puzzle), so mu here can differ from the ratio of fiducial cross sections")

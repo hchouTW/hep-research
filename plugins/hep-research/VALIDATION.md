@@ -85,6 +85,8 @@ Software checks establish contract consistency only: not physical validity, proo
 | AMS module generic passages kept as marked snapshots | the owner skill's text applies where they differ (AC05) |
 | Hosts other than Claude Code | not tested; notes say so |
 | Old branch in agentic-ai-skills (M1-12) | left for the owner to delete; no effect on the plugin |
+| Blinding scan cannot see transformed values | a `pass` means the sealed numbers were not found at the precisions tested; rescaled, shifted or fitted numbers are not detected (AUDIT-RUN T04) |
+| Berger-Boos implementation validated in a finite range | coverage checked by a seeded scan at 36 true points only (`BB_VALIDATED_RANGE`); outside it, run `neyman-coverage` at the values that matter. The profile-limit toys (`_toy_p1`) still truncate the auxiliary observation at zero (out of the audit's scope) |
 
 ## PYHF-RUN (2026-10-02, after the handover run)
 
@@ -235,3 +237,28 @@ tests, 1008 pass, 0 fail, 23 skip; profile suites unchanged (258, 9, 16 pass). `
 | New regression tests for the 20 fixes and the `sci-fix` | pass (each failed on the previous code) | `tests/contracts/test_robustness.py`, `tests/core/test_blinding.py`, `tests/skills/**` |
 | PyTorch, Graphviz, Mermaid, PlantUML, Combine, tectonic tests | skip, not re-run in this environment (unverified for this change) | the `checkpoint weights_only` change in `physics-ml` is covered by tests that skip without PyTorch |
 
+
+## AUDIT-RUN (2026-10-03, validation-gap audit T01–T08)
+
+Work order `tasks/hep-research/audit/TASK.md` (revision r2, checked against `main` at `8f2b3da`). Environment: E1
+core stack only (numpy 2.4.6, scipy 1.17.1, matplotlib 3.11.2, sympy 1.14.0 in `.venv-hep`); no optional tools.
+Phase 0 baseline on `8f2b3da`: 1031 unit tests OK with 57 skips (all optional tools), 0 errors; contracts 83, AMS-02
+258; five tool checks pass. `tasks/hep-research/audit/phase0_repro.py` reproduced all eight findings on `8f2b3da` and
+reproduces none after the fixes. Final run `tasks/hep-research/check-runs/check-run-2026-10-03T022907Z.json`: 13 checks
+pass / 0 fail / 1 skip (AMS ledger preservation: no legacy checkout); 1094 unit tests, 1035 pass, 0 fail, 59 skip (57
+optional tools, 2 slow tests run separately below); profile suites 258, 9, 16 pass.
+
+| Task | Result | Evidence |
+|---|---|---|
+| T01 comparison gate | pass; each regression test failed before the fix | `GateDefinitionAuditT01` (process, species, phase space, second axis, structured cuts, named mappings, multi-dimensional transformations). Examples that compared different wording of one process now declare a justified mapping; `theory-comparison` and `recasting` outputs regenerated (new `status`, `kind`, `definition_mappings_applied` fields and one negative variant) |
+| T02 artifact consistency | pass | `ArtifactConsistencyAuditT02` (edges, unit, traceable conversion, payload per representation, NaN and ±Infinity, metadata-only record, multi-dimensional `axes`) |
+| T03 template-fit status | pass; feasible fits unchanged (byte-identical `bb-fit`, `bb-toys`, `wbb-fit`, `wbb-toys` results on the test inputs) | `FitStatusAuditT03`; `test_solver_failure_recorded` runs with SciPy and passes |
+| T04 blinding scans | pass | `ScanCompletenessAuditT04` (`.npy` leak and clean scan, unsupported-only is `incomplete`, strict mode, exemptions, manifest, CLI exit codes) |
+| T05 dependency validation | pass | `tests/contracts/test_dependencies.py` (valid chain, missing, hash mismatch, substitution, type/ID/version mismatch, undeclared failed upstream, external unresolved, out-of-root paths including a symlink, never opened) |
+| T06 split grouping | pass | `SplitGroupingCompletenessAuditT06` |
+| T08 citations without bibliography | pass | `TestCitationsWithoutBibliographyAuditT08` (no bibliography, valid `.bib`, no citations, inline `thebibliography`, declared external bibliography) |
+| T07 Berger-Boos | pass (label, auxiliary model, MC errors); coverage scan pass in range only | `BergerBoosApproximationAuditT07`; with `HEP_SLOW_TESTS=1` grid refinement (9 vs 33 points), toy precision (2000 vs 8000 toys) and a 36-point coverage scan pass (129 s). Scan: s ∈ {0, 2, 5}, b ∈ {1, 3, 8}, σ_b ∈ {0.5, 2}, cl ∈ {0.90, 0.95}, β = 0.01, 600 outer × 300 inner, 9 grid points, seed 7: Berger-Boos coverage ≥ cl − 3σ_MC at every point (lowest 0.8967 ± 0.0124 at cl 0.90, s = 5, b = 8, σ_b = 0.5); s = 0 points cover trivially. Results: `tasks/hep-research/audit/bb-coverage-scan.json`. This validates the listed points, not a global guarantee |
+
+Not demonstrated: undercoverage of the Berger-Boos implementation (none was found in the scan). The plug-in profile limit
+fell below nominal at some scan points (lowest 0.8717 ± 0.0137 at cl 0.90, s = 2, b = 8, σ_b = 0.5, about 2σ), which
+supports using the Berger-Boos construction when coverage matters; this is one seeded scan, not a characterization.

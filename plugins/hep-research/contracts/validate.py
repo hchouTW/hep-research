@@ -8,6 +8,7 @@ A valid artifact is self-consistent under the contract; that says nothing about 
 from __future__ import annotations
 
 import json
+import math
 import re
 import sys
 from pathlib import Path
@@ -48,12 +49,58 @@ def check_conventions(conv: dict, vocab: Vocabulary, rep: Report, path: str) -> 
                     "the comparison gate will report it as not comparable unless a mapping is declared")
 
 
-def check_binned(b: dict, rep: Report, path: str) -> None:
+EDGE_TOL = 1e-12
+
+
+def check_finite(value, rep: Report, path: str = "$") -> None:
+    """NaN and +-Infinity are not numbers a contract can carry (JSON itself has no such values)."""
+    if isinstance(value, float) and not math.isfinite(value):
+        rep.add("error", path, "number.non_finite", f"{value!r} is not a finite number")
+    elif isinstance(value, dict):
+        for k, v in value.items():
+            check_finite(v, rep, f"{path}.{k}")
+    elif isinstance(value, list):
+        for i, v in enumerate(value):
+            check_finite(v, rep, f"{path}[{i}]")
+
+
+def _same_edges(a, b) -> bool:
+    return len(a) == len(b) and all(abs(x - y) <= EDGE_TOL * max(1.0, abs(y)) for x, y in zip(a, b))
+
+
+def check_binned(b: dict, rep: Report, path: str, obs: dict | None = None) -> None:
+    """Binned payload checks. With the observable: the payload's axes, shape and unit must be the observable's.
+    One axis: `edges` equal the variable's edges. Several axes: `axes` lists the variable names in the observable's
+    order, `values` is flattened row-major (last axis fastest) with one entry per cell, and `edges` repeats the first
+    axis. A unit other than the observable's needs `unit_conversion` {from: observable unit, to, factor, justification}."""
     edges, values = b.get("edges", []), b.get("values", [])
     if any(e2 <= e1 for e1, e2 in zip(edges, edges[1:])):
         rep.add("error", f"{path}.edges", "binned.edges_not_increasing", "bin edges must be strictly increasing")
-    if len(values) != max(len(edges) - 1, 0):
-        rep.add("error", f"{path}.values", "binned.length", f"{len(values)} values for {len(edges) - 1} bins")
+    variables = (obs or {}).get("variables") or []
+    n_cells = max(len(edges) - 1, 0)
+    if len(variables) > 1:
+        names = [v.get("name") for v in variables]
+        if "axes" not in b:
+            rep.add("error", f"{path}.axes", "binned.axes_missing",
+                    f"a {len(variables)}-dimensional observable needs 'axes' naming the payload's axis order {names}")
+        elif b["axes"] != names:
+            rep.add("error", f"{path}.axes", "binned.axes_mismatch", f"axes {b['axes']} differ from the observable's variables {names}")
+        if all("edges" in v for v in variables):
+            n_cells = math.prod(len(v["edges"]) - 1 for v in variables)
+    if variables and "edges" in variables[0] and not _same_edges(edges, variables[0]["edges"]):
+        rep.add("error", f"{path}.edges", "binned.edges_mismatch",
+                f"payload edges {edges} differ from the observable's '{variables[0].get('name')}' edges {variables[0]['edges']}")
+    if len(values) != n_cells:
+        rep.add("error", f"{path}.values", "binned.length", f"{len(values)} values for {n_cells} bins")
+    if obs is not None and "unit" in b and b["unit"] != obs.get("unit"):
+        conv = b.get("unit_conversion") or {}
+        f = conv.get("factor")
+        traced = (conv.get("from") == obs.get("unit") and conv.get("to") == b["unit"] and conv.get("justification")
+                  and isinstance(f, (int, float)) and not isinstance(f, bool) and math.isfinite(f) and f > 0)
+        if not traced:
+            rep.add("error", f"{path}.unit", "binned.unit_mismatch",
+                    f"payload unit '{b['unit']}' differs from the observable unit '{obs.get('unit')}' without a traceable "
+                    "unit_conversion {from, to, factor, justification}")
     for i, u in enumerate(b.get("uncertainties", [])):
         if "values" in u and len(u["values"]) != len(values):
             rep.add("error", f"{path}.uncertainties[{i}]", "binned.uncertainty_length",
@@ -118,10 +165,15 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:
                 rep.add("error", f"$.extension.uncertainties[{i}]", "uncertainty.auto_gaussian",
                         f"'{u['kind']}' must not be treated as Gaussian without a hep-theory prescription")
         if isinstance(ext.get("values"), dict):
-            check_binned(ext["values"], rep, "$.extension.values")
+            check_binned(ext["values"], rep, "$.extension.values", ext.get("observable"))
+        rp = ext.get("representation")
+        need = {"numerical": "values", "grid": "values", "symbolic": "expression"}.get(rp)
+        if need and not ext.get(need):
+            rep.add("error", f"$.extension.{need}", "prediction.payload_missing",
+                    f"a {rp} prediction needs '{need}' (numbers kept elsewhere: reference them and use a metadata record)")
     elif t == "dataset-record":
         if isinstance(ext.get("data"), dict):
-            check_binned(ext["data"], rep, "$.extension.data")
+            check_binned(ext["data"], rep, "$.extension.data", ext.get("observable"))
             if ext.get("status") in ("published", "preliminary") and not ext.get("source_evidence_ids"):
                 rep.add("error", "$.extension.source_evidence_ids", "dataset.values_without_provenance",
                         "published/preliminary values need source evidence IDs")
@@ -173,6 +225,7 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:
 def validate_artifact(doc, vocab: Vocabulary | None = None) -> Report:
     vocab = vocab or Vocabulary()
     rep = validate(doc, "envelope.json", vocab)
+    check_finite(doc, rep)
     if not isinstance(doc, dict):
         return rep
     ext_schema = EXTENSION_SCHEMAS.get(doc.get("artifact_type"))

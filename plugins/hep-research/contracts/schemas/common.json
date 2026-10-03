@@ -41,7 +41,10 @@
         "species": {"type": "array", "items": {"type": "object", "required": ["name"]}},
         "variables": {"type": "array", "items": {"$ref": "#/$defs/variable"}, "minItems": 1},
         "phase_space": {"type": "object", "required": ["definition"],
-                        "properties": {"definition": {"type": "string"}, "fiducial": {"type": "boolean"}}},
+                        "properties": {"definition": {"type": "string"}, "fiducial": {"type": "boolean"},
+                                       "cuts": {"type": "array", "$comment": "structured selection; the comparison gate compares cuts exactly when both sides give them, otherwise the free-text definition", "items": {"type": "object", "required": ["variable", "unit", "low", "high"],
+                                                "properties": {"variable": {"$ref": "#/$defs/nonempty"}, "unit": {"type": "string"},
+                                                               "low": {"type": ["number", "null"]}, "high": {"type": ["number", "null"]}}}}}},
         "level": {"type": "string", "x-vocab": "levels"},
         "frame": {"type": "string"},
         "normalization": {"$ref": "#/$defs/normalization"},
@@ -73,7 +76,12 @@
         "values": {"type": "array", "items": {"type": "number"}},
         "unit": {"type": "string"},
         "uncertainties": {"type": "array", "items": {"$ref": "#/$defs/uncertainty_component"}},
-        "covariance_refs": {"type": "array", "items": {"type": "string"}}
+        "covariance_refs": {"type": "array", "items": {"type": "string"}},
+        "axes": {"type": "array", "items": {"type": "string"}, "$comment": "multi-dimensional payloads: variable names in the observable's order; values flattened row-major (last axis fastest)"},
+        "unit_conversion": {"type": "object", "required": ["from", "to", "factor", "justification"],
+                            "$comment": "a payload in a unit other than the observable's records the conversion that was performed",
+                            "properties": {"from": {"type": "string"}, "to": {"type": "string"}, "factor": {"type": "number", "exclusiveMinimum": 0},
+                                           "justification": {"$ref": "#/$defs/nonempty"}}}
       }
     },
     "binding": {

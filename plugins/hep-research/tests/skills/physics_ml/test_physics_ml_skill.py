@@ -15,6 +15,7 @@ import json
 import math
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -955,6 +956,57 @@ class SplitIntegrityTests(unittest.TestCase):
              "does-not-exist.json"], capture_output=True, text=True)
         self.assertNotEqual(result.returncode, 0)
         self.assertNotIn("Traceback", result.stderr)
+
+
+class SplitGroupingCompletenessAuditT06(unittest.TestCase):
+    """Audit T06: a split passes only when every sample's grouping (and, for a chronological split, timestamp)
+    metadata was there to check; missing metadata and leakage are different outcomes."""
+
+    def test_no_groups_is_incomplete_not_passed(self):
+        rep = check({"train": ["a"], "test": ["b"]})
+        self.assertEqual(rep["status"], "incomplete")
+        self.assertFalse(rep["passed"])
+        self.assertFalse(rep["groups_checked"])
+        self.assertEqual(rep["group_coverage"]["missing_ids"], ["a", "b"])
+
+    def test_partial_groups_not_checked_and_listed(self):
+        rep = check({"train": ["a"], "test": ["b"], "groups": {"a": "run1"}})
+        self.assertEqual(rep["status"], "incomplete")
+        self.assertFalse(rep["passed"])
+        self.assertFalse(rep["groups_checked"])
+        self.assertEqual(rep["group_coverage"], {"covered": 1, "total": 2, "fraction": 0.5, "missing_ids": ["b"]})
+
+    def test_strict_mode_fails_on_missing_metadata(self):
+        rep = check({"train": ["a"], "test": ["b"], "groups": {"a": "run1"}}, strict=True)
+        self.assertEqual((rep["status"], rep["failure_kind"]), ("failed", ["missing-metadata"]))
+
+    def test_complete_leak_free_split_passes(self):
+        rep = check({"train": ["a", "b"], "test": ["c"], "groups": {"a": "g1", "b": "g1", "c": "g2"}}, strict=True)
+        self.assertEqual((rep["status"], rep["passed"], rep["groups_checked"]), ("passed", True, True))
+
+    def test_leakage_and_missing_metadata_are_distinct(self):
+        leak = check({"train": ["a"], "test": ["b"], "groups": {"a": "g1", "b": "g1"}})
+        self.assertEqual((leak["status"], leak["failure_kind"]), ("failed", ["leakage"]))
+        both = check({"train": ["a", "x"], "test": ["b"], "groups": {"a": "g1", "b": "g1"}})
+        self.assertEqual(both["status"], "failed")
+        self.assertEqual(both["failure_kind"], ["leakage", "missing-metadata"])
+
+    def test_timestamp_coverage_reported(self):
+        rep = check({"train": ["a", "b"], "test": ["c"], "groups": {"a": "g1", "b": "g2", "c": "g3"},
+                     "timestamps": {"a": 1, "c": 5}, "temporal_order": ["train", "test"]})
+        self.assertEqual(rep["status"], "incomplete")
+        self.assertFalse(rep["timestamps_checked"])
+        self.assertEqual(rep["timestamp_coverage"]["missing_ids"], ["b"])
+
+    def test_cli_exit_codes(self):
+        with tempfile.TemporaryDirectory() as td:
+            f = Path(td) / "s.json"
+            f.write_text(json.dumps({"train": ["a"], "test": ["b"]}))
+            run = lambda *a: subprocess.run([sys.executable, str(ROOT / "scripts/check_split_integrity.py"), *a, str(f)],
+                                            capture_output=True, text=True)
+            self.assertEqual(run().returncode, 3)
+            self.assertIn("INCOMPLETE", run().stdout)
+            self.assertEqual(run("--strict").returncode, 1)
 
 
 @unittest.skipUnless(TORCH_AVAILABLE, "PyTorch is required to build datasets")

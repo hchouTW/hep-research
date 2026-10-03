@@ -38,6 +38,92 @@ def codes(report):
     return {f.code for f in report.errors}
 
 
+class ArtifactConsistencyAuditT02(unittest.TestCase):
+    """Audit T02: binned payloads must match the observable's axes and unit, carry the payload their
+    representation needs, and contain only finite numbers. Each variant validated before the fix."""
+
+    def pred(self):
+        return load(ART / "valid" / "prediction.json")
+
+    def errs(self, doc):
+        return codes(validate_artifact(doc))
+
+    def test_valid_fixture_still_valid(self):
+        self.assertTrue(validate_artifact(self.pred()).ok)
+
+    def test_a_edges_must_match_the_observable(self):
+        d = self.pred()
+        d["extension"]["values"]["edges"] = [-1.0, -0.4, 0.0, 0.5, 1.0]
+        self.assertIn("binned.edges_mismatch", self.errs(d))
+
+    def test_b_unit_must_match_the_observable(self):
+        d = self.pred()
+        d["extension"]["values"]["unit"] = "fb"
+        self.assertIn("binned.unit_mismatch", self.errs(d))
+
+    def test_b_traceable_unit_conversion_accepted(self):
+        d = self.pred()
+        d["extension"]["values"]["unit"] = "fb"
+        d["extension"]["values"]["values"] = [1000.0] * 4
+        d["extension"]["values"]["unit_conversion"] = {"from": "pb", "to": "fb", "factor": 1000.0, "justification": "1 pb = 1000 fb"}
+        self.assertTrue(validate_artifact(d).ok, validate_artifact(d).as_dict())
+        d["extension"]["values"]["unit_conversion"]["from"] = "nb"
+        self.assertIn("binned.unit_mismatch", self.errs(d))
+
+    def test_c_numerical_prediction_needs_values(self):
+        d = self.pred()
+        del d["extension"]["values"]
+        self.assertIn("prediction.payload_missing", self.errs(d))
+        d["extension"]["representation"] = "grid"
+        self.assertIn("prediction.payload_missing", self.errs(d))
+
+    def test_symbolic_prediction_needs_an_expression(self):
+        d = self.pred()
+        del d["extension"]["values"]
+        d["extension"]["representation"] = "symbolic"
+        self.assertIn("prediction.payload_missing", self.errs(d))
+        d["extension"]["expression"] = "d sigma / d cos theta = (pi alpha^2 / 2 s) (1 + cos^2 theta)"
+        self.assertTrue(validate_artifact(d).ok)
+
+    def test_d_non_finite_numbers_rejected(self):
+        for bad in (float("nan"), float("inf"), float("-inf")):
+            d = self.pred()
+            d["extension"]["values"]["values"][0] = bad
+            self.assertIn("number.non_finite", self.errs(d), bad)
+        d = self.pred()
+        d["extension"]["values"]["edges"][1] = float("nan")
+        self.assertIn("number.non_finite", self.errs(d))
+        d = self.pred()
+        d["extension"]["values"]["uncertainties"] = [{"name": "stat", "kind": "statistical", "correlation": "uncorrelated",
+                                                       "values": [0.1, float("inf"), 0.1, 0.1]}]
+        self.assertIn("number.non_finite", self.errs(d))
+
+    def test_dataset_data_checked_against_its_observable(self):
+        d = load(ART / "valid" / "dataset_record.json")
+        self.assertTrue(validate_artifact(d).ok)
+        d["extension"]["data"]["unit"] = "nb"
+        self.assertIn("binned.unit_mismatch", self.errs(d))
+
+    def test_metadata_only_dataset_still_valid(self):
+        d = load(ART / "valid" / "dataset_record.json")
+        del d["extension"]["data"]
+        self.assertTrue(validate_artifact(d).ok)
+
+    def test_multidimensional_payload_needs_axes_order_and_shape(self):
+        d = self.pred()
+        obs = d["extension"]["observable"]
+        obs["variables"].append({"name": "sqrt_s", "unit": "GeV", "edges": [9.0, 10.0, 11.0]})
+        v = d["extension"]["values"]
+        v["values"] = [1.0] * 8
+        self.assertIn("binned.axes_missing", self.errs(d))
+        v["axes"] = ["sqrt_s", "cos_theta"]
+        self.assertIn("binned.axes_mismatch", self.errs(d))
+        v["axes"] = ["cos_theta", "sqrt_s"]
+        self.assertTrue(validate_artifact(d).ok, validate_artifact(d).as_dict())
+        v["values"] = [1.0] * 4
+        self.assertIn("binned.length", self.errs(d))
+
+
 class ArtifactFixtureTests(unittest.TestCase):
     cases = load(ART / "cases.json")
 

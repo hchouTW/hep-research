@@ -1,5 +1,5 @@
 {
-  "$comment": "Common envelope for every durable artifact and cross-skill handoff (task 7.10).",
+  "$comment": "Common envelope for every durable artifact and cross-skill handoff (task 7.10). Input refs are checked against the files they name only by contracts/dependencies.py (project level); this schema never reads them.",
   "type": "object",
   "required": ["contract_version", "artifact_id", "artifact_type", "objective", "versions", "provenance", "status", "unresolved_inputs", "extension"],
   "properties": {
@@ -21,6 +21,8 @@
       "evidence_ids": {"type": "array", "items": {"$ref": "common.json#/$defs/namespaced_id"}}}},
     "inputs": {"type": "array", "items": {"type": "object", "required": ["ref"], "properties": {
       "ref": {"type": "string"}, "artifact_type": {"type": "string"}, "sha256": {"type": "string"},
+      "artifact_id": {"type": "string"}, "version": {"type": "string", "$comment": "the source's contract_version"},
+      "external": {"type": "boolean", "$comment": "not materialized in the project (e.g. a HEPData record): contracts/dependencies.py reports it unresolved"},
       "status": {"type": "array", "items": {"type": "string", "x-vocab": "artifact_statuses"}}}}},
     "outputs": {"type": "array", "items": {"type": "object", "required": ["ref"]}},
     "status": {"type": "array", "items": {"type": "string", "x-vocab": "artifact_statuses"}, "minItems": 1},

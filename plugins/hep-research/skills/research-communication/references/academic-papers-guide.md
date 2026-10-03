@@ -443,10 +443,12 @@ review. Grouped by function; within a group, order roughly follows the workflow.
 
 - `${CLAUDE_PLUGIN_ROOT}/skills/research-communication/scripts/check_manuscript.py` — scans a directory of `.tex`/`.bib` files and reports:
   undefined `\ref`/`\cref`/`\pageref` targets, duplicate `\label`s, citation keys
-  (natbib, biblatex and `\nocite`) missing from any `.bib` file, duplicate `.bib` keys,
-  unused `.bib` entries, and leftover TODO/FIXME/placeholder markers. Comments are
-  ignored. With no `.bib` (only a `.bbl` or inline `\bibitem`s) the citation checks are
-  skipped. `--style` adds two advisory typography checks (label word + plain space
+  (natbib, biblatex and `\nocite`) missing from every bibliography (`.bib`, inline
+  `\bibitem`s, or a built `.bbl`), duplicate `.bib` keys, unused `.bib` entries, and
+  leftover TODO/FIXME/placeholder markers. Comments are ignored. Citations with no
+  bibliography at all are reported as missing; for a bibliography built elsewhere, name it
+  with `--external-bib`, and keys not found locally are reported as unresolved (exit 3),
+  not as checked. `--style` adds two advisory typography checks (label word + plain space
   before `\ref`; number and unit joined by a plain space) that never change the exit
   code. Read-only; standard library only. Run it near the end of a drafting session, not
   after every sentence.

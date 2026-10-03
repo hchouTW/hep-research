@@ -85,7 +85,14 @@ def plan(response_includes) -> dict:
                               "the response is built with the in-bin weighting 1 + cos^2 theta, the predicted shape"}],
         "mappings": [{"key": "angle_definition", "action": "equivalent",
                       "justification": "both define theta as the angle between the incoming e- (beam) and the outgoing mu- in the "
-                                       "c.m. frame; the wording differs only"}],
+                                       "c.m. frame; the wording differs only"},
+                     {"field": "process", "action": "equivalent",
+                      "justification": "the synthetic generator samples the same one-photon tree-level e+e- -> mu+mu- matrix element "
+                                       "(no Z, no radiation) that the prediction computes"},
+                     {"field": "phase_space", "action": "equivalent",
+                      "justification": "the prediction covers the full truth range cos theta in [-1, 1]; the response maps it to "
+                                       "the reco range [-1, 1] and carries the selection efficiency, so the folded prediction "
+                                       "describes the selected events"}],
         "measurement_conditions": {"sqrt_s_gev": CFG["sqrt_s_gev"]},
     }
 
@@ -113,7 +120,10 @@ def negative_variants(pred_side: dict, meas_side: dict, base_plan: dict, unfolde
                  "justification": "deliberate double counting for the negative test"})
     add("efficiency applied before folding with a response that includes it", "transformations[3]",
         p=dict(copy.deepcopy(pred_side), allowed_transformations=None), transformations=t)
-    add("angle definitions without a declared mapping", "conventions.angle_definition", mappings=[])
+    add("angle definitions without a declared mapping", "conventions.angle_definition",
+        mappings=[m for m in base_plan["mappings"] if m.get("key") != "angle_definition"])
+    add("process definitions without a declared mapping", "process",
+        mappings=[m for m in base_plan["mappings"] if m.get("field") != "process"])
     m = copy.deepcopy(meas_side); m["observable"]["normalization"]["kind"] = "exposure"
     add("measurement normalized to exposure", "normalization.kind", m=m)
     add("folded prediction against the unfolded (Path B) result", "level", m=unfolded_side)
@@ -128,7 +138,10 @@ def positive_conversion(pred_side, unfolded_side, base_plan) -> dict:
     t = [{"kind": "level-identification", "owner": "hep-theory", "from": "parton", "to": "particle-fiducial",
           "justification": "tree level without radiation: the outgoing muon is the stable final-state particle"},
          {"kind": "fiducial-restriction", "owner": "hep-theory", "variable": "cos_theta", "range": [-0.9, 0.9]}]
-    maps = base_plan["mappings"] + [{"key": "synthcol:fiducial_definition", "action": "transform",
+    maps = [m for m in base_plan["mappings"] if m.get("field") != "phase_space"] + [
+        {"field": "phase_space", "action": "equivalent",
+         "justification": "after the restriction to |cos theta| < 0.9 the prediction covers the unfolded result's fiducial region"},
+        {"key": "synthcol:fiducial_definition", "action": "transform",
                                      "transformation": "fiducial-restriction to |cos theta| < 0.9",
                                      "justification": "the cut is on the binned variable and edges align at +-0.9"}]
     return gate(pred_side, unfolded_side, t, maps, base_plan["measurement_conditions"])
