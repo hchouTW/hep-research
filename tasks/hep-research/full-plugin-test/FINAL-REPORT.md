@@ -88,3 +88,11 @@ Lighter alternative: `claude plugin disable hep-research@hep-research-dev`.
    routing).
 7. Q3: update global `CLAUDE.md` to name the `hep-research:*` skills instead of legacy skills that are not
    installed here.
+
+## Follow-up status (2026-10-03)
+
+Items 1–5 fixed in `0ab9cd8` (VALIDATION E2-FOLLOWUPS; check-run `check-run-2026-10-03T141301Z.json`: 13 pass,
+0 fail, 1 skip; unit tests 1241 run, 0 fail). Item 6 (r1 full test as a separate order) and item 7 (global
+`CLAUDE.md`) remain open. The installed plugin still runs the `3aa942c` clone; these fixes change no skill text, only
+tests, one example's output and one profile file, and reach the install after
+`claude plugin marketplace update hep-research-dev` and `claude plugin update hep-research@hep-research-dev`.

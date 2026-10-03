@@ -361,3 +361,20 @@ skills or profiles:
 
 Nothing labeled E1 above was changed. Rollback: `claude plugin uninstall hep-research@hep-research-dev`, then
 `claude plugin marketplace remove hep-research-dev`.
+
+## E2-FOLLOWUPS (2026-10-03, E2)
+
+Follow-ups 1–5 of `tasks/hep-research/full-plugin-test/FINAL-REPORT.md`, fixed in `0ab9cd8`. Same E2 environment as
+INSTALL. Check-run `tasks/hep-research/check-runs/check-run-2026-10-03T141301Z.json` on `0ab9cd8`: 13 pass, 0 fail,
+1 skip (`ams_ledger_preservation`: legacy checkout not fetched); unit tests 1241 run, 1171 pass, 0 fail, 70 skip;
+profile suites 258, 9, 16 pass.
+
+| Follow-up | Result | Evidence |
+|---|---|---|
+| 1 batch goldens on macOS | pass | `batch_harness.py` resolves the temporary project dir; Slurm and HTCondor golden tests pass |
+| 2 privacy scan copy | pass | the scan copy is built from git-listed files; passes with `.venv-hep` inside the plugin tree |
+| 3 ROOT C++ assets | pass (E2, ROOT 6.38.04 via Homebrew `python3.14`) | the test picks an interpreter that can import ROOT; all 5 tests run and pass here, and the class skips cleanly when no interpreter can (checked with a stripped `PATH`) |
+| 4 theory-comparison response check | pass | `response_matches_path_b` within 1e-12 relative (largest E2 difference 1.1e-16, 8 of 144 entries); the E1 committed floats matched E2 to rel 1e-9 / abs 1e-12; output regenerated on E2 and checked byte-identical on rerun |
+| 5 qed-benchmark `scales` | done | explicit not-applicable entry in `conventions.json` |
+
+The ROOT C++ asset rows are the first ROOT run on E2; they do not change any E1 row.
