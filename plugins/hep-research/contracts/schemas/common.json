@@ -76,7 +76,12 @@
         "values": {"type": "array", "items": {"type": "number"}},
         "unit": {"type": "string"},
         "uncertainties": {"type": "array", "items": {"$ref": "#/$defs/uncertainty_component"}},
-        "covariance_refs": {"type": "array", "items": {"type": "string"}}
+        "covariance_refs": {"type": "array", "items": {"type": "string"}},
+        "axes": {"type": "array", "items": {"type": "string"}, "$comment": "multi-dimensional payloads: variable names in the observable's order; values flattened row-major (last axis fastest)"},
+        "unit_conversion": {"type": "object", "required": ["from", "to", "factor", "justification"],
+                            "$comment": "a payload in a unit other than the observable's records the conversion that was performed",
+                            "properties": {"from": {"type": "string"}, "to": {"type": "string"}, "factor": {"type": "number", "exclusiveMinimum": 0},
+                                           "justification": {"$ref": "#/$defs/nonempty"}}}
       }
     },
     "binding": {
