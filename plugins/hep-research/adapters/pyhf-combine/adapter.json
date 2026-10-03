@@ -1,6 +1,6 @@
 {
  "id": "adapter:pyhf-combine",
- "version": "0.4.1",
+ "version": "0.5.0",
  "status": "demonstrated-on-synthetic-data",
  "purpose": "Starting points for HistFactory-style likelihoods: a pyhf counting workspace and a CMS Combine datacard template",
  "tools": [
@@ -28,6 +28,7 @@
  "tests": [
   "../../tests/adapters/test_pyhf_counting.py",
   "../../tests/adapters/test_pyhf_shape.py",
+  "../../tests/adapters/test_nuisance_interpolation.py",
   "../../tests/examples/test_end_to_end_sample.py",
   "../../tests/adapters/test_combine_datacard_template.py"
  ],

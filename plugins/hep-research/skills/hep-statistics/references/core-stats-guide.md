@@ -111,7 +111,7 @@ and use common random numbers across a scan.
   (factor `1 + sigma theta`), `lognormal` (`exp(sigma theta)`) or `gamma` (`1 + sigma theta` with a Poisson auxiliary
   measurement of `tau = 1/sigma^2`); an optional correlation matrix correlates the Gaussian-type nuisances (gamma ones
   cannot be correlated). Choose the constraint from the origin of the uncertainty
-  (see the likelihood-fitting reference), not by convenience. Slow for many nuisances.
+  ([nuisance modeling](nuisance-modeling.md)), not by convenience. Slow for many nuisances.
 - `neyman-limit --n --b --sigma-b [--cl --beta --points --toys --seed]`: an approximation of the Berger-Boos
   construction over the background nuisance (finite nuisance grid, seeded toys): a signal is excluded only if the
   supremum of the toy p-value over the `(1 - beta)` confidence set of the background, plus `beta`, is at most
@@ -183,7 +183,7 @@ boundary). A bin with data and no template support makes the model infeasible. I
 
 Decision rule: use `bb-fit`/`bb-toys` instead of the one-parameter `template-bb` whenever there are several templates,
 and quote the full-fit error when `bb-fit` shows it inflated. Use either Barlow-Beeston or a per-bin `staterror`-type
-nuisance for one statistical source, never both (see the likelihood-fitting reference).
+nuisance for one statistical source, never both ([nuisance modeling](nuisance-modeling.md)).
 
 ## `unfolding_diagnostics.py`: regularization, closure, folding
 

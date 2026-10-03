@@ -42,7 +42,7 @@ A common workflow creates a workspace and runs fit diagnostics, asymptotic limit
 
 With Combine 11.1.0 built against ROOT 6.40, `combine -M AsymptoticLimits` can stop with `Value ... is outside the default range ... of the variable "r"` and print no observed limit: its observed-limit search tries an r above the POI range, which older ROOT silently clipped and ROOT 6.40 rejects. Pass `--strictBounds` with an `--rMax` well above the expected limit, and check that the limit is not at `--rMax` (seen on the synthetic counting card; VALIDATION COMBINE-ROOT640).
 
-Check the naming, correlations, positivity, interpolation, and bounds of rate, shape, normalization, and MC-statistical constraints. Translating textual fields between tools does not necessarily create equivalent likelihoods.
+Check the naming, correlations, positivity, interpolation, and bounds of rate, shape, normalization, and MC-statistical constraints. Interpolation codes (pyhf `code1`/`code4`, `code0`/`code4p`; Combine `lnN`, `shape`, `shapeN`), constraint forms and the correlation-by-name rule are in [nuisance modeling](nuisance-modeling.md). Translating textual fields between tools does not necessarily create equivalent likelihoods.
 
 ## Worked walkthrough: a pyhf workflow end to end (verified 2026-09-24)
 
