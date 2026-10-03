@@ -92,7 +92,7 @@ task:
   empty sections, placeholders, cited paths that do not exist, loop limits)
 - **How a specific agent environment discovers or loads this skill** (Claude
   Code, Codex, Antigravity, or an unlisted generic agent) ->
-  [claude-code.md](claude-code.md), [codex.md](codex.md), [antigravity.md](antigravity.md), [generic-agent.md](generic-agent.md) - discovery notes only, they do
+  [host-notes.md](host-notes.md) - discovery notes only, they do
   not restate any rule above.
 - **Worked examples per task category** (feature, bug, performance, research,
   migration, agentic loop, data/ML)

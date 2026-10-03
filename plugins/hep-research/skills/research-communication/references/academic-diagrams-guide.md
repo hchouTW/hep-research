@@ -150,8 +150,8 @@ Domain checklists: [HEP](diagrams-hep.md),
   read them before drawing an architecture; do not infer from filenames alone.
 - Numbers in labels (file counts, section counts, layer sizes, thresholds) are facts: measure or copy
   them from the source (`ls | wc -l`, the code, the text) or leave them out. Count the things
-  themselves, not mentions of them: two validation runs (different models) labeled a `references/`
-  folder "33 topic files" because `SKILL.md` links 33 paths (two pointing at other skills), while the folder holds 31.
+  themselves, not mentions of them: counting the links in a `SKILL.md` over-counts a `references/` folder
+  when some links point into other folders.
 - Do not add generator, detector, or method details the source does not give (e.g. "parton shower +
   hadronization" for a plain "simulation"); leave the box generic and ask.
 
@@ -169,18 +169,8 @@ Domain checklists: [HEP](diagrams-hep.md),
 
 ## Shared Figure Style
 
-For multi-figure papers, fix one style spec up front and reuse it:
-
-```yaml
-figure_style:
-  orientation: left-to-right
-  typography: academic
-  color_policy: grayscale-safe
-  edge_style: semantic
-  math_format: latex
-  abstraction: paper
-  output: svg
-```
+For multi-figure papers, fix one `figure_style` block up front and reuse it; the block and its fields are in
+[diagram-figure-style.md](diagram-figure-style.md#panels-and-multi-figure-consistency).
 
 ## Quick Checklist
 

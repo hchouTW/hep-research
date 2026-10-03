@@ -21,23 +21,8 @@ Use this reference for concise Agile collaboration, status updates, and completi
 
 ## Completion Summary
 
-Use this structure when it fits the task:
-
-```md
-## Summary
-- Implemented: <user-visible behavior or maintenance outcome>
-- Changed: <key files or components>
-
-## Verification
-- Passed: `<command>`
-- Not run: `<command>` - <reason>
-
-## Notes
-- Assumption: <only when material>
-- Follow-up: <only when relevant and outside scope>
-```
-
-For small tasks, collapse this into one or two short paragraphs plus a verification line.
+Use [assets/completion-summary.md](../assets/completion-summary.md) (summary, verification, notes) when it fits the task.
+For small tasks, collapse it into one or two short paragraphs plus a verification line.
 
 ## Useful Phrases
 

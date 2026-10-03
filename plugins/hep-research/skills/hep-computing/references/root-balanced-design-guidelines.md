@@ -632,104 +632,11 @@ using Shape = std::variant<Circle, Rectangle>;
 
 ## Member Functions vs Free Functions
 
-Prefer member functions for operations that are part of the object's essential
-behavior. Good member functions usually preserve invariants, mutate internal
-state intentionally, depend on private representation, or represent core
-behavior of the abstraction.
-
-Prefer free functions for operations that are external algorithms. Good free
-functions usually do not need private access, are broadly reusable, are easy to
-test independently, keep the type smaller, and express a clear computation or
-transformation.
-
-```cpp
-class Polygon {
- public:
-  static std::optional<Polygon> Create(std::vector<Point> points) {
-    if (points.size() < 3) {
-      return std::nullopt;
-    }
-    return Polygon(std::move(points));
-  }
-
-  const std::vector<Point>& points() const { return points_; }
-
- private:
-  explicit Polygon(std::vector<Point> points) : points_(std::move(points)) {}
-
-  std::vector<Point> points_;
-};
-
-double Perimeter(const Polygon& polygon) {
-  const auto& points = polygon.points();
-
-  double result = 0.0;
-  for (size_t i = 0; i < points.size(); ++i) {
-    const auto& current = points[i];
-    const auto& next = points[(i + 1) % points.size()];
-    result += Distance(current, next);
-  }
-
-  return result;
-}
-```
-
-In this example, `Polygon` protects the invariant that it has at least three
-points. `Perimeter` is a free function because it is an algorithm over the public
-interface.
-
----
+The rules are the same as for general C++; see [Member Functions vs Free Functions](cpp-balanced-design-guidelines.md#member-functions-vs-free-functions). ROOT adds nothing here beyond the ownership rules above.
 
 ## Encapsulation Guidelines
 
-Encapsulation should protect meaningful invariants, not create unnecessary
-boilerplate. Use private data when the data must stay valid according to rules,
-changes must go through validation, representation may change later, ownership
-must be controlled, or thread-safety/synchronization is involved. Public data is
-acceptable when the type is simple passive data, there are no invariants, the
-fields are naturally part of the type's meaning, or the type is used as a value
-object/data transfer object.
-
-Avoid writing trivial getters and setters just to imitate other languages. Prefer
-direct public fields for simple data:
-
-```cpp
-struct Color {
-  int red;
-  int green;
-  int blue;
-};
-```
-
-Prefer validation when the values must be constrained:
-
-```cpp
-class Color {
- public:
-  static std::optional<Color> Create(int red, int green, int blue) {
-    if (!IsChannelValid(red) || !IsChannelValid(green) ||
-        !IsChannelValid(blue)) {
-      return std::nullopt;
-    }
-    return Color(red, green, blue);
-  }
-
-  int red() const { return red_; }
-  int green() const { return green_; }
-  int blue() const { return blue_; }
-
- private:
-  Color(int red, int green, int blue) : red_(red), green_(green), blue_(blue) {}
-
-  static bool IsChannelValid(int value) { return value >= 0 && value <= 255; }
-
-  int red_;
-  int green_;
-  int blue_;
-};
-```
-
----
+The rules are the same as for general C++; see [Encapsulation Guidelines](cpp-balanced-design-guidelines.md#encapsulation-guidelines). ROOT adds nothing here beyond the ownership rules above.
 
 ## State Management and Global State
 

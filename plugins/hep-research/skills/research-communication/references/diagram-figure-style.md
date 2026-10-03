@@ -81,24 +81,10 @@ figure_style:
 
 - Keep a symbol table (figure label <-> paper symbol) to guarantee the figure matches the text.
 
-## Equations inside diagrams
+## Equations, talks, posters and export
 
-Put short equations on nodes/edges only when they are the point (`$p(\theta \mid x)$`). Long
-equations belong in the text; reference them ("Eq. 3") only if the paper's numbering is known -
-do not invent numbers.
-
-## Talks, posters, theses
-
-- Talk: 3-7 nodes, one idea per slide, build progressively (reveal stages), large labels.
-- Poster: one dominant flow, minimal prose, high contrast.
-- Thesis: may use paper level in the body and the detailed technical version in an appendix.
-- Beamer: TikZ overlays (`\onslide<2->`) or Mermaid/SVG exported per step.
-
-## Export
-
-Prefer vector: SVG -> PDF (Inkscape/`rsvg-convert`), Graphviz `dot -Tsvg|pdf`, Mermaid
-`mmdc -o fig.svg`, TikZ compile natively (or `standalone` class for a cropped PDF). State any
-external tool needed; do not assume it is installed.
+Equation placement, poster/thesis/talk variants (including Beamer overlays) and export recipes are in
+[legends-panels-and-export.md](legends-panels-and-export.md) (sections 3, 4, 5 and 7).
 
 ## Final readability check
 

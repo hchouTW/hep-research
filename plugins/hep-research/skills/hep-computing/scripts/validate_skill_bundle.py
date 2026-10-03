@@ -30,10 +30,7 @@ REQUIRED_PATHS = [
     "references/example-authoring.md",
     "references/prompt-engineering-and-token-optimization.md",
     "references/loop-engineering.md",
-    "references/claude-code.md",
-    "references/codex.md",
-    "references/antigravity.md",
-    "references/generic-agent.md",
+    "references/host-notes.md",
     "examples/README.md",
     "examples/feature-task.md",
     "examples/bug-task.md",
@@ -50,7 +47,7 @@ REQUIRED_PATHS = [
 ]
 
 # The exact, ordered section contract from "Task Generation Requirements" in
-# AI_Agent_Agnostic_Task_Authoring_Workflow.md: Title (a single top-level
+# references/task-authoring-guide.md: Title (a single top-level
 # heading, checked separately), then these ## / ### sections in order.
 DESCRIPTION_LIMIT = 1024  # characters; the sibling skills stay under it
 
