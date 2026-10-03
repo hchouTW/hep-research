@@ -7,6 +7,25 @@ Software checks establish contract consistency only, not physical validity.
 
 Work order `tasks/hep-research/stats-reinforcement/TASK.md` (r2); evidence in VALIDATION STATS-REINFORCEMENT-RUN.
 
+- **Li & Ma significance** (`skills/hep-statistics/scripts/li_ma_significance.py`, scientific fix): the docstring
+  and references now call the statistic `sqrt(-2 ln lambda)` and its normal reading asymptotic. New `--toys N --seed S`
+  (plug-in background toys) and `--exact-conditional` (binomial test) report p-values under `p_values`; default output
+  keys are unchanged. The astroparticle reference quotes the low-count p-values from the committed command.
+- **New scripts** in `skills/hep-statistics/scripts/`: `look_elsewhere.py` (local scan, brute-force toys,
+  Gross-Vitells bound; one-dimensional scans), `sensitivity_and_gof.py` (Asimov discovery significance with and
+  without a background uncertainty; toy-calibrated saturated-deviance goodness of fit that withholds chi2 at low
+  counts), `bayes_diagnostics.py` (rank-normalized split R-hat, bulk and tail ESS, quantile MCSE; prior reweighting
+  that asks for a rerun when the weights degenerate; a demonstration Metropolis sampler). Exit codes fail closed.
+- **New pyhf asset** `adapters/pyhf-combine/assets/pyhf_nuisance_diagnostics.py`: pulls, constraints, pre- and
+  post-fit impacts, grouped breakdowns (freeze-one and sequential, with closure) and correlations; adapter 0.6.0.
+- **New references**: `core-stats-guide.md` (every core/stats subcommand, exit codes, choosing table),
+  `nuisance-modeling.md` (constraints, interpolation codes with a verified pyhf walkthrough, pruning, correlation
+  schemes), `ml-assisted-inference.md` (classifier observables, NSBI calibration and coverage, SBC; physics-ml keeps
+  training). New sections: look-elsewhere, expected sensitivity, goodness of fit, model comparison and Bayesian
+  convergence in `inference-recipes.md`; sWeights and weighted unbinned fits in `likelihood-fitting.md`; publishing
+  likelihoods in `statistical-tools.md`. Every number in them comes from a committed test or command.
+- **Routing**: eight new cases (three in Traditional Chinese) for impacts, global significance, sensitivity, goodness
+  of fit, Bayesian convergence, sWeights, NSBI validity and likelihood publication; the skill description is unchanged.
 - **Contracts 1.1.0** (minor; every new field optional). `statistical-result` gains `significance` (`local_p`,
   `local_z`, `global_p`, `global_z`, `trials_method` in none-needed / toys / gross-vitells / analytic-bound, `scan`
   with `parameters` and `ranges`), `expected` (`median`, `band_1sigma`, `band_2sigma`, `method`),
