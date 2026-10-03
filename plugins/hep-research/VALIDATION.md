@@ -6,7 +6,7 @@ Software checks establish contract consistency only: not physical validity, proo
 
 | AC | Result | Evidence | Remaining |
 |---|---|---|---|
-| AC01 | pass | `tools/check_traceability.py --legacy .legacy/agentic-ai-skills`: all 949 files tracked at `3e995a4` have a row in `docs/migration-map.csv` with source commit; 380 plugin files are concrete migration destinations, 415 are registered as new in `docs/provenance-new.csv` (commit and milestone from git history); every exclusion (`retain-outside`, `retire`) has a rationale; the legacy checkout is at the pin with no local change. Scientific changes are `sci-fix:` commits with regressions (AC22); 26 vague M1 destinations and 26 directory-valued destinations were made concrete in M6 | — |
+| AC01 | pass | `tools/check_traceability.py --legacy .legacy/agentic-ai-skills`: all 949 files tracked at `3e995a4` have a row in `docs/migration-map.csv` with source commit; 375 plugin files are concrete migration destinations, 439 are registered as new in `docs/provenance-new.csv` (commit and milestone from git history); every exclusion (`retain-outside`, `retire`) has a rationale; the legacy checkout is at the pin with no local change. Scientific changes are `sci-fix:` commits with regressions (AC22); 26 vague M1 destinations and 26 directory-valued destinations were made concrete in M6 | — |
 | AC02 | pass | Seven SKILL.md with uses, exclusions, owned artifacts, handoffs; host validator `--strict` passes; no profile adds a skill; native discovery lists the seven `hep-research:*` skills (G5, `tasks/hep-research/m5/g5/G5-REPORT.md`) | — |
 | AC03 | pass | `check_layering.py` 0 violations (re-run in M5, `check-run-2026-10-02T162614Z.json`); experiment passages in moved text inside example blocks; profile paths rejected in skill/core/contract text | — |
 | AC04 | pass (budgets and traces) | `tasks/hep-research/m5/budgets.json`: SKILL.md 50–63 lines, 5.2–7.0 KiB (≤ 8 KiB), descriptions ≤ 921 chars, always-on ≈2,005 tokens, registry 690 B, profile indexes ≤ 2,370 B; no exceptions (M5-02). Host loading traces from 48 headless runs: no theory or computing case read an experiment profile (G5 run 2); invocation of `hep-theory` read only the registry and the theory profile (`tasks/hep-research/m5/g5/G5-REPORT.md`) | A run-1 trace (host env leaked in) shows one computing case reading the synthetic-collider generator; recorded, not counted |
@@ -218,4 +218,20 @@ source.
 
 The two observed values without and with `--strictBounds` (2.1565, 2.1518) differ by 0.2%, inside Combine's default
 `--rRelAcc` of 2%. The `hep-statistics` statistical-tools reference now gives this workaround.
+
+## REFACTOR-RUN (2026-10-03, plugin-wide refactor)
+
+Environment: E1 plus pyhf 0.7.6, uproot 5.7.6, awkward 2.14.0 and PyYAML 6.0.3 in `.venv-hep`; ROOT 6.40.04 recreated in
+`.venv-hep-root/env` from `tasks/hep-research/m6/root/conda-explicit-root.txt`; legacy checkout present. Command:
+`HEP_ROOT_PYTHON=.venv-hep-root/env/bin/python .venv-hep/bin/python plugins/hep-research/tools/run_all_checks.py --out
+tasks/hep-research/check-runs`, run `check-run-2026-10-03T010542Z.json`: 14 checks pass / 0 fail / 0 skip; 1031 unit
+tests, 1008 pass, 0 fail, 23 skip; profile suites unchanged (258, 9, 16 pass). `tools/check_relocation.py` passes.
+
+| Item | Result | Evidence |
+|---|---|---|
+| Renames keep every reference valid | pass | traceability with `--legacy` (949 legacy files mapped; 375 destinations, 439 registered new); registry, layering, stanza, skill-resource and adapter-declaration checks |
+| Examples after renaming their runners | pass, byte-identical | every example rerun with its documented seed reproduces the committed `output/` exactly |
+| Renamed ROOT C++ assets (`rdf_cutflow_analysis.cpp`, `rdf_histogram_branch.cpp`) and PyROOT asset | pass, 12 ROOT tests | `tests/adapters/test_root_cpp_assets.py`, `tests/skills/hep_computing/test_root_integration.py` |
+| New regression tests for the 20 fixes and the `sci-fix` | pass (each failed on the previous code) | `tests/contracts/test_robustness.py`, `tests/core/test_blinding.py`, `tests/skills/**` |
+| PyTorch, Graphviz, Mermaid, PlantUML, Combine, tectonic tests | skip, not re-run in this environment (unverified for this change) | the `checkpoint weights_only` change in `physics-ml` is covered by tests that skip without PyTorch |
 

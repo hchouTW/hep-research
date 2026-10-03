@@ -121,6 +121,7 @@ M4 exit checks: Path D and T24 pass; every negative composition/compatibility fi
 - [x] CMS Combine 11.1.0 installed from conda-forge (user approved) in `.venv-hep-combine/env-root636` (ROOT 6.36.14; the ROOT 6.40.04 build fails in AsymptoticLimits): datacard limit 2.1565 vs pyhf 2.153; `adapters/pyhf-combine` demonstrated-on-synthetic-data; VALIDATION COMBINE-RUN
 - [x] PR #8 and PR #9 merged (`be2839d`, `6f2c0ce`)
 - [x] Combine under ROOT 6.40.04 debugged: the observed search sets r above its range, which ROOT 6.40 rejects; `--strictBounds` fixes it and gives 2.1518 in both ROOT builds; the test and the wrapper now use the ROOT 6.40 build; VALIDATION COMBINE-ROOT640
+- [x] Plugin-wide refactor (user request 2026-10-03): legacy number prefixes dropped from all skill references, files moved to the skill that owns them, `contracts/compat` -> `contracts/comparison`, one `run.py` per example (`examples/qed-benchmark` -> `examples/qed-prediction`), duplicated references removed, 20 robustness bugs and one `sci-fix` fixed with regression tests; VALIDATION REFACTOR-RUN. File names in older records (this file's M2-M6 notes, DECISIONS, check-runs, G5) are the names at that time; `docs/maintenance.md` maps example folders to Path A-D, T24, J2, J7
 
 ## Blockers / needs user
 
