@@ -38,7 +38,13 @@ Usage (from the skill directory):
   python3 core/stats/template_fit.py bb-toys --input fit.json --toys 200 --seed 1
   python3 core/stats/template_fit.py wbb-fit --input weighted.json
   python3 core/stats/template_fit.py wbb-toys --input weighted.json --toys 100 --seed 1
-Exit codes: 0 ok; 2 rejected input. Standard library only.
+Fit outcome: every fit reports "diagnostics" (minimizer convergence and termination reason, whether the objective
+is finite at the optimum, covariance quality, yields at the boundary) and an "outcome": converged,
+converged-at-boundary, covariance-warning, not-converged or infeasible (a bin with data and no template support:
+no yields can describe it). The result "status" is "failed" when any fit is not converged or infeasible;
+"artifact_fit_status" (converged, converged-with-warnings, failed) and "artifact_status_labels" are what a
+statistical-result artifact built from it must carry, so a failed fit stops inference downstream.
+Exit codes: 0 ok; 1 fit failed (infeasible model or no convergence); 2 rejected input. Standard library only.
 Importable: bb_fit, bb_toys, fit_yields, wbb_fit, wbb_toys.
 """
 from __future__ import annotations
@@ -66,14 +72,17 @@ MAX_TEMPLATES, MAX_BINS = 6, 60
 
 
 # --------------------------------------------------------------------------- minimizer
-def _nelder_mead(f, x0, steps, max_iter: int = 600, tol: float = 1e-10):
+def _nelder_mead(f, x0, steps, max_iter: int = 600, tol: float = 1e-10, info: dict | None = None):
+    """Minimize f; returns (x, f(x)). When `info` is a dict it receives converged, termination and iterations."""
     n = len(x0)
+    converged, it = False, 0
     pts = [list(x0)] + [[x0[j] + (steps[j] if j == i else 0.0) for j in range(n)] for i in range(n)]
     vals = [f(p) for p in pts]
-    for _ in range(max_iter):
+    for it in range(max_iter):
         order = sorted(range(n + 1), key=lambda i: vals[i])
         pts, vals = [pts[i] for i in order], [vals[i] for i in order]
         if abs(vals[-1] - vals[0]) < tol * (1.0 + abs(vals[0])):
+            converged = True
             break
         cen = [sum(p[j] for p in pts[:-1]) / n for j in range(n)]
         refl = [cen[j] + (cen[j] - pts[-1][j]) for j in range(n)]
@@ -93,6 +102,8 @@ def _nelder_mead(f, x0, steps, max_iter: int = 600, tol: float = 1e-10):
                 pts = [pts[0]] + [[pts[0][j] + 0.5 * (p[j] - pts[0][j]) for j in range(n)] for p in pts[1:]]
                 vals = [vals[0]] + [f(p) for p in pts[1:]]
     best = min(range(n + 1), key=lambda i: vals[i])
+    if info is not None:
+        info.update(converged=converged, termination="tolerance" if converged else "max-iterations", iterations=it + 1)
     return pts[best], vals[best]
 
 
@@ -161,8 +172,48 @@ def _hessian_cov(ll, y):
     return inv
 
 
-def fit_yields(data, m, mc, kind: str, start=None):
-    """(yields, covariance or None, ll_max) for kind 'naive' or 'bb'."""
+def _unsupported_bins(data, m) -> list[int]:
+    """Bins with data but no template support: no choice of yields can give them a positive mean."""
+    return [i for i, n in enumerate(data) if n > 0 and all(row[i] <= 0 for row in m)]
+
+
+def _covariance_quality(cov) -> str:
+    if cov is None:
+        return "singular"
+    k = len(cov)
+    if any(not math.isfinite(cov[i][j]) for i in range(k) for j in range(k)) or any(cov[i][i] <= 0 for i in range(k)):
+        return "not-positive-definite"
+    for i in range(k):
+        for j in range(i + 1, k):
+            if abs(cov[i][j]) / math.sqrt(cov[i][i] * cov[j][j]) > 1.0 - 1e-6:
+                return "ill-conditioned"
+    return "ok"
+
+
+def _diagnostics(infos, ll_max, cov, y, unsupported) -> dict:
+    converged = all(i.get("converged", False) for i in infos)
+    valid = math.isfinite(ll_max) and ll_max > NEG / 2 and not unsupported
+    covq = _covariance_quality(cov)
+    boundary = [j for j, v in enumerate(y) if v <= 1e-6]
+    if not valid:
+        outcome = "infeasible"
+    elif not converged:
+        outcome = "not-converged"
+    elif covq != "ok":
+        outcome = "covariance-warning"
+    elif boundary:
+        outcome = "converged-at-boundary"
+    else:
+        outcome = "converged"
+    return {"outcome": outcome, "converged": converged, "termination": [i.get("termination") for i in infos],
+            "objective_valid": valid, "covariance": covq, "boundary_yields": boundary, "unsupported_bins": unsupported}
+
+
+FAILED_OUTCOMES = {"infeasible", "not-converged"}
+
+
+def _fit_yields_full(data, m, mc, kind: str, start=None):
+    """(yields, covariance or None, ll_max, diagnostics) for kind 'naive' or 'bb'."""
     k = len(m)
     ll_fn = _ll_naive if kind == "naive" else _ll_bb
     total = max(sum(data), 1.0)
@@ -172,11 +223,17 @@ def fit_yields(data, m, mc, kind: str, start=None):
     def neg(x):
         y = [max(v, 1e-9) for v in x]
         return -ll_fn(data, m, mc, y)
-    x, val = _nelder_mead(neg, x0, steps)
-    x, val = _nelder_mead(neg, x, [0.05 * max(v, 1.0) for v in x])
+    i1, i2 = {}, {}
+    x, val = _nelder_mead(neg, x0, steps, info=i1)
+    x, val = _nelder_mead(neg, x, [0.05 * max(v, 1.0) for v in x], info=i2)
     y = [max(v, 1e-9) for v in x]
     cov = _hessian_cov(lambda z: ll_fn(data, m, mc, [max(v, 1e-9) for v in z]), y)
-    return y, cov, -val
+    return y, cov, -val, _diagnostics([i1, i2], -val, cov, y, _unsupported_bins(data, m))
+
+
+def fit_yields(data, m, mc, kind: str, start=None):
+    """(yields, covariance or None, ll_max) for kind 'naive' or 'bb'; _fit_yields_full adds the diagnostics."""
+    return _fit_yields_full(data, m, mc, kind, start)[:3]
 
 
 # ----------------------------------------------------------------------------- input
@@ -208,28 +265,54 @@ def _load(doc):
     return names, data, m, mc
 
 
-def _report(names, y, cov):
+def _report(names, y, cov, diag=None):
     out = {}
     for j, nme in enumerate(names):
         err = math.sqrt(cov[j][j]) if cov is not None and cov[j][j] > 0 else None
         out[nme] = {"yield": y[j], "error": err, "at_boundary": y[j] <= 1e-6}
+    if diag is not None:
+        out["diagnostics"] = dict(diag, boundary_yields=[names[j] for j in diag["boundary_yields"]])
     return out
+
+
+def _overall(result: dict, diags) -> dict:
+    """Overall status of a fit result and the fit status a statistical-result artifact must carry."""
+    outcomes = [d["outcome"] for d in diags]
+    if any(o in FAILED_OUTCOMES for o in outcomes):
+        result["status"], result["artifact_fit_status"], result["artifact_status_labels"] = "failed", "failed", ["failed"]
+        why = []
+        for d in diags:
+            if d["outcome"] == "infeasible" and d["unsupported_bins"]:
+                why.append("bins " + ", ".join(f"bin {i + 1}" for i in d["unsupported_bins"])
+                           + " have data but no template support (infeasible model)")
+            elif d["outcome"] == "infeasible":
+                why.append("the likelihood is not finite at the optimum (infeasible model)")
+            elif d["outcome"] == "not-converged":
+                why.append(f"the minimizer stopped without converging ({', '.join(map(str, d['termination']))})")
+        result["error"] = "; ".join(dict.fromkeys(why))
+        result["note"] = "FIT FAILED: the yields and errors below are not a result and must not be used for inference. " + result.get("note", "")
+    else:
+        warn = any(o != "converged" for o in outcomes)
+        result["status"] = "ok"
+        result["artifact_fit_status"] = "converged-with-warnings" if warn else "converged"
+        result["artifact_status_labels"] = []
+    return result
 
 
 def bb_fit(doc: dict) -> dict:
     names, data, m, mc = _load(doc)
-    yn, cn, lln = fit_yields(data, m, mc, "naive")
-    yb, cb, llb = fit_yields(data, m, mc, "bb", yn)
-    rn, rb = _report(names, yn, cn), _report(names, yb, cb)
+    yn, cn, lln, dn = _fit_yields_full(data, m, mc, "naive")
+    yb, cb, llb, db = _fit_yields_full(data, m, mc, "bb", yn)
+    rn, rb = _report(names, yn, cn, dn), _report(names, yb, cb, db)
     infl = {nme: (rb[nme]["error"] / rn[nme]["error"] if rb[nme]["error"] and rn[nme]["error"] else None) for nme in names}
-    return {"label": LABEL, "method": "multi-template extended Poisson fit: naive versus full Barlow-Beeston",
+    return _overall({"label": LABEL, "method": "multi-template extended Poisson fit: naive versus full Barlow-Beeston",
             "bins": len(data), "templates": names, "naive": rn, "barlow_beeston": rb, "error_inflation_bb_over_naive": infl,
             "note": ("the naive fit treats the MC templates as exact; the Barlow-Beeston fit profiles one nuisance per bin "
                      "and template with a Poisson constraint from the MC count, so its errors include the template "
                      "statistics and are larger; errors are from a numerical Hessian (symmetric, unreliable at a boundary: "
                      "see at_boundary); templates are unweighted Poisson counts, a bin with no MC in any active template "
                      "cannot absorb data and makes that yield combination impossible, and the likelihood values of the two "
-                     "fits are not comparable")}
+                     "fits are not comparable")}, [dn, db])
 
 
 def _mad_width(v):
@@ -253,15 +336,18 @@ def bb_toys(doc: dict, toys: int, seed: int) -> dict:
     p = [[m[j][i] / mc[j] for i in range(b)] for j in range(k)]
     rng = random.Random(seed)
     res = {kind: [{"fits": [], "pulls": [], "cov": []} for _ in range(k)] for kind in ("naive", "barlow_beeston")}
-    skipped = 0
+    skipped = failed = 0
     for _ in range(toys):
         mt = [[poisson_draw(rng, mc[j] * p[j][i]) for i in range(b)] for j in range(k)]
         dt = [poisson_draw(rng, sum(y_true[j] * p[j][i] for j in range(k))) for i in range(b)]
         if any(sum(row) == 0 for row in mt) or sum(dt) == 0:
             skipped += 1
             continue
-        yn, cn, _ = fit_yields(dt, mt, mc, "naive")
-        yb, cb, _ = fit_yields(dt, mt, mc, "bb", yn)
+        yn, cn, _, dn = _fit_yields_full(dt, mt, mc, "naive")
+        yb, cb, _, db = _fit_yields_full(dt, mt, mc, "bb", yn)
+        if dn["outcome"] in FAILED_OUTCOMES or db["outcome"] in FAILED_OUTCOMES:
+            failed += 1
+            continue
         for kind, y, c in (("naive", yn, cn), ("barlow_beeston", yb, cb)):
             for j in range(k):
                 res[kind][j]["fits"].append(y[j])
@@ -281,7 +367,7 @@ def bb_toys(doc: dict, toys: int, seed: int) -> dict:
                      for j, r in enumerate(rows)}
     return {"label": LABEL, "method": "multi-template fit toys: naive versus full Barlow-Beeston", "bins": b,
             "templates": names, "true_yields": dict(zip(names, y_true)), "toys_used": used, "toys_skipped_empty": skipped,
-            "seed": seed, "fits": out,
+            "toys_failed_fit": failed, "seed": seed, "fits": out,
             "note": ("the supplied MC counts are taken as the true templates and redrawn each toy; a naive pull width above "
                      "1 with coverage below 0.68 and a Barlow-Beeston width and coverage near 1 and 0.68 are the evidence "
                      "that template statistics must be in the likelihood; pulls use the Hessian error, which is symmetric "
@@ -289,8 +375,9 @@ def bb_toys(doc: dict, toys: int, seed: int) -> dict:
 
 
 # ------------------------------------------------------- weighted MC and nuisances
-def _bfgs_min(f, x0, scales, max_iter: int = 200):
-    """BFGS with numerical central gradients in scaled variables u = x / scale; returns (x, f)."""
+def _bfgs_min(f, x0, scales, max_iter: int = 200, info: dict | None = None):
+    """BFGS with numerical central gradients in scaled variables u = x / scale; returns (x, f). When `info` is a
+    dict it receives converged and termination (gradient, function-change, line-search-failed, max-iterations)."""
     n = len(x0)
     sc = list(scales)
     u = [x0[i] / sc[i] for i in range(n)]
@@ -308,8 +395,10 @@ def _bfgs_min(f, x0, scales, max_iter: int = 200):
             g.append((fu(a) - fu(b)) / (2 * h))
         return g
     g = grad(u)
+    term = "max-iterations"
     for _ in range(max_iter):
         if math.sqrt(sum(x * x for x in g)) < 1e-7:
+            term = "gradient"
             break
         p = [-sum(hinv[i][j] * g[j] for j in range(n)) for i in range(n)]
         if sum(a * b for a, b in zip(p, g)) >= 0:
@@ -326,6 +415,7 @@ def _bfgs_min(f, x0, scales, max_iter: int = 200):
                     break
             step *= 0.5
         if not ok:
+            term = "line-search-failed"
             break
         s_ = [cand[i] - u[i] for i in range(n)]
         y_ = [gn[i] - g[i] for i in range(n)]
@@ -337,7 +427,17 @@ def _bfgs_min(f, x0, scales, max_iter: int = 200):
         done = abs(val - fc) < 1e-12 * (1.0 + abs(val))
         u, val, g = cand, fc, gn
         if done:
+            term = "function-change"
             break
+    if info is not None:
+        ok = term in ("gradient", "function-change")
+        if term == "line-search-failed":
+            # the likelihood has kinks (piecewise-linear shape interpolation at theta = 0), where the line search stops at
+            # a minimum with a non-zero one-sided gradient: accept it only if no coordinate step lowers the objective
+            tol = 1e-9 * (1.0 + abs(val))
+            ok = all(fu(u[:i] + [u[i] + d] + u[i + 1:]) >= val - tol for i in range(n) for d in (1e-4, -1e-4, 1e-2, -1e-2))
+            term = "no-descent-direction" if ok else term
+        info.update(converged=ok, termination=term)
     return [u[i] * sc[i] for i in range(n)], val
 
 
@@ -475,33 +575,45 @@ def _load_w(doc):
 
 
 def _fit_w(data, w, t_tot, c, nuis, kind, start=None):
+    """(yields, nuisance values, yield covariance or None, ll); _fit_w_full adds the diagnostics."""
+    return _fit_w_full(data, w, t_tot, c, nuis, kind, start)[:4]
+
+
+def _fit_w_full(data, w, t_tot, c, nuis, kind, start=None):
     k, nth = len(w), len(nuis)
     # nominal start: Nelder-Mead on the yields with the nuisances fixed at zero
     total = max(sum(data), 1.0)
     x0 = list(start) if start else [total / k] * k
     neg = lambda x: -_ll_w(data, w, t_tot, c, nuis, [max(v, 1e-9) for v in x] + [0.0] * nth, kind)
-    x, _ = _nelder_mead(neg, x0, [0.3 * max(v, 1.0) for v in x0])
-    x, _ = _nelder_mead(neg, x, [0.05 * max(v, 1.0) for v in x])
+    i1, i2, i3 = {}, {}, {}
+    x, _ = _nelder_mead(neg, x0, [0.3 * max(v, 1.0) for v in x0], info=i1)
+    x, _ = _nelder_mead(neg, x, [0.05 * max(v, 1.0) for v in x], info=i2)
     y0 = [max(v, 1e-9) for v in x]
     full0 = y0 + [0.0] * nth
+    infos = [i1, i2]
     if nth:
         fneg = lambda x: -_ll_w(data, w, t_tot, c, nuis, x, kind) if min(x[:k]) > 0 else 1e300
-        full, _ = _bfgs_min(fneg, full0, [max(abs(v), 1.0) for v in y0] + [1.0] * nth)
+        full, _ = _bfgs_min(fneg, full0, [max(abs(v), 1.0) for v in y0] + [1.0] * nth, info=i3)
+        # the yields-only search is a start for the joint fit; only the joint fit's convergence counts
+        infos = [i3]
     else:
         full = full0
     ll = lambda z: _ll_w(data, w, t_tot, c, nuis, z, kind)
     inv = _hessian_cov(ll, full)
     cov = [row[:k] for row in inv[:k]] if inv is not None else None
-    return full[:k], full[k:], cov, ll(full)
+    llv = ll(full)
+    unsupported = [i for i, n in enumerate(data) if n > 0 and all(row[i] <= 0 for row in w)
+                   and not any(d["kind"] == "shape" and d["up"][i] + d["down"][i] > 0 for d in nuis)]
+    return full[:k], full[k:], cov, llv, _diagnostics(infos, llv, cov, full[:k], unsupported)
 
 
 def wbb_fit(doc: dict) -> dict:
     names, data, w, c, t_tot, nuis = _load_w(doc)
-    yn, thn, cn, _ = _fit_w(data, w, t_tot, c, nuis, "naive")
-    yb, thb, cb, _ = _fit_w(data, w, t_tot, c, nuis, "bb", yn)
-    rn, rb = _report(names, yn, cn), _report(names, yb, cb)
+    yn, thn, cn, _, dn = _fit_w_full(data, w, t_tot, c, nuis, "naive")
+    yb, thb, cb, _, db = _fit_w_full(data, w, t_tot, c, nuis, "bb", yn)
+    rn, rb = _report(names, yn, cn, dn), _report(names, yb, cb, db)
     infl = {nme: (rb[nme]["error"] / rn[nme]["error"] if rb[nme]["error"] and rn[nme]["error"] else None) for nme in names}
-    return {"label": LABEL, "method": "weighted-MC extended Poisson fit with shape and normalization nuisances: naive versus full Barlow-Beeston",
+    return _overall({"label": LABEL, "method": "weighted-MC extended Poisson fit with shape and normalization nuisances: naive versus full Barlow-Beeston",
             "bins": len(data), "templates": names, "nuisances": [d["name"] for d in nuis],
             "naive": rn, "barlow_beeston": rb, "error_inflation_bb_over_naive": infl,
             "nuisance_values_naive": dict(zip([d["name"] for d in nuis], thn)),
@@ -512,7 +624,7 @@ def wbb_fit(doc: dict) -> dict:
                      "sums linearly between the down, nominal and up templates with the squared-weight sums held at nominal; "
                      "normalization nuisances scale a template's yield per unit weight linearly; all nuisances have a unit "
                      "Gaussian constraint and are profiled with the yields; errors are the yield block of the inverse "
-                     "numerical Hessian of the full parameter vector (symmetric, unreliable near a boundary)")}
+                     "numerical Hessian of the full parameter vector (symmetric, unreliable near a boundary)")}, [dn, db])
 
 
 def wbb_toys(doc: dict, toys: int, seed: int) -> dict:
@@ -530,7 +642,7 @@ def wbb_toys(doc: dict, toys: int, seed: int) -> dict:
     p = [[w[j][i] / t_tot[j] for i in range(b)] for j in range(k)]
     rng = random.Random(seed)
     res = {kind: [{"fits": [], "pulls": []} for _ in range(k)] for kind in ("naive", "barlow_beeston")}
-    skipped = 0
+    skipped = failed = 0
     for _ in range(toys):
         mt = [[c[j][i] * poisson_draw(rng, eff[j][i]) for i in range(b)] for j in range(k)]
         dt = [poisson_draw(rng, sum(y_true[j] * p[j][i] for j in range(k))) for i in range(b)]
@@ -540,8 +652,11 @@ def wbb_toys(doc: dict, toys: int, seed: int) -> dict:
         w2 = [[c[j][i] * mt[j][i] for i in range(b)] for j in range(k)]  # sum of squared weights = c * sumw
         # the toy MC keeps the nominal c, so sumw2 / sumw = c and the total weight T is unchanged
         wt = mt
-        yn, _, cn, _ = _fit_w(dt, wt, t_tot, c, nuis, "naive")
-        yb, _, cb, _ = _fit_w(dt, wt, t_tot, c, nuis, "bb", yn)
+        yn, _, cn, _, dn = _fit_w_full(dt, wt, t_tot, c, nuis, "naive")
+        yb, _, cb, _, db = _fit_w_full(dt, wt, t_tot, c, nuis, "bb", yn)
+        if dn["outcome"] in FAILED_OUTCOMES or db["outcome"] in FAILED_OUTCOMES:
+            failed += 1
+            continue
         for kind, y, cv in (("naive", yn, cn), ("barlow_beeston", yb, cb)):
             for j in range(k):
                 res[kind][j]["fits"].append(y[j])
@@ -559,7 +674,7 @@ def wbb_toys(doc: dict, toys: int, seed: int) -> dict:
                      for j, r in enumerate(rows)}
     return {"label": LABEL, "method": "weighted-MC fit toys with nuisances: naive versus full Barlow-Beeston", "bins": b,
             "templates": names, "nuisances": [d["name"] for d in nuis], "true_yields": dict(zip(names, y_true)),
-            "toys_used": used, "toys_skipped_empty": skipped, "seed": seed, "fits": out,
+            "toys_used": used, "toys_skipped_empty": skipped, "toys_failed_fit": failed, "seed": seed, "fits": out,
             "note": ("toy MC is redrawn as scaled Poisson counts: the effective count of each bin and template is Poisson and "
                      "the scale c = sum w^2 / sum w is kept at its nominal value (so weight fluctuations inside a bin are not "
                      "simulated); data are drawn at the true yields with every nuisance at zero, so a pull width above 1 for "
@@ -602,9 +717,9 @@ def main(argv: list[str] | None = None) -> int:
     except ToyError as exc:
         print(json.dumps({"label": LABEL, "status": "rejected", "error": str(exc)}, indent=2))
         return 2
-    result["status"] = "ok"
+    result.setdefault("status", "ok")  # the fits set ok or failed; toy studies report failed toys as a count
     print(json.dumps(result, indent=2))
-    return 0
+    return 1 if result["status"] == "failed" else 0
 
 
 if __name__ == "__main__":

@@ -216,6 +216,83 @@ class WeightedFitTests(unittest.TestCase):
             tf.wbb_toys(good, 50, None)
 
 
+class FitStatusAuditT03(unittest.TestCase):
+    """Audit T03: infeasible models and solver failures are never reported as a successful fit."""
+    INFEASIBLE = {"data": [10, 10], "templates": {"sig": [10, 0]}}
+
+    def run_cli(self, *argv):
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            code = tf.main(list(argv))
+        return code, json.loads(buf.getvalue())
+
+    def test_infeasible_cli_fails_with_nonzero_exit(self):
+        for cmd in ("bb-fit", "wbb-fit"):
+            with tempfile.TemporaryDirectory() as tmp:
+                path = Path(tmp) / "f.json"
+                path.write_text(json.dumps(self.INFEASIBLE))
+                code, out = self.run_cli(cmd, "--input", str(path))
+            self.assertNotEqual(code, 0, cmd)
+            self.assertEqual(out["status"], "failed", cmd)
+            self.assertEqual(out["artifact_fit_status"], "failed", cmd)
+            self.assertEqual(out["barlow_beeston"]["diagnostics"]["outcome"], "infeasible", cmd)
+            self.assertFalse(out["barlow_beeston"]["diagnostics"]["objective_valid"], cmd)
+            self.assertTrue(out["error"], cmd)
+
+    def test_infeasible_api_result_failed(self):
+        res = tf.bb_fit(self.INFEASIBLE)
+        self.assertEqual(res["status"], "failed")
+        self.assertIn("bin 2", res["error"])
+
+    def test_feasible_fit_unchanged_and_ok(self):
+        doc = make_doc(bins=5)
+        doc["templates"].pop("oth")
+        res = tf.bb_fit(doc)
+        names, data, m, mc = tf._load(doc)
+        y, cov, _ = tf.fit_yields(data, m, mc, "naive")
+        self.assertEqual([res["naive"][n]["yield"] for n in names], y)
+        self.assertEqual(res["status"], "ok")
+        self.assertEqual(res["artifact_fit_status"], "converged")
+        for kind in ("naive", "barlow_beeston"):
+            d = res[kind]["diagnostics"]
+            self.assertEqual((d["outcome"], d["converged"], d["objective_valid"], d["covariance"]), ("converged", True, True, "ok"), kind)
+
+    def test_minimizer_reports_non_convergence(self):
+        info = {}
+        tf._nelder_mead(lambda p: (p[0] - 3.0) ** 2 + 2 * (p[1] + 1.0) ** 2, [0.0, 0.0], [1.0, 1.0], max_iter=2, info=info)
+        self.assertEqual((info["converged"], info["termination"]), (False, "max-iterations"))
+        tf._nelder_mead(lambda p: (p[0] - 3.0) ** 2 + 2 * (p[1] + 1.0) ** 2, [0.0, 0.0], [1.0, 1.0], info=info)
+        self.assertEqual((info["converged"], info["termination"]), (True, "tolerance"))
+        tf._bfgs_min(lambda p: (p[0] - 3.0) ** 2 + 4 * (p[1] + 1.0) ** 2, [0.0, 0.0], [1.0, 1.0], max_iter=1, info=info)
+        self.assertFalse(info["converged"])
+
+    def test_boundary_and_covariance_warnings_distinguished(self):
+        boundary = {"data": [50, 40, 0, 0], "templates": {"sig": [0, 0, 30, 30], "bkg": [60, 50, 10, 5]}}
+        res = tf.bb_fit(boundary)
+        self.assertEqual(res["naive"]["diagnostics"]["outcome"], "converged-at-boundary")
+        self.assertEqual((res["status"], res["artifact_fit_status"]), ("ok", "converged-with-warnings"))
+        twins = {"data": [20, 30, 40], "templates": {"a": [10, 20, 30], "b": [10, 20, 30]}}
+        res = tf.bb_fit(twins)
+        self.assertIn(res["naive"]["diagnostics"]["covariance"], ("singular", "not-positive-definite"))
+        self.assertEqual(res["naive"]["diagnostics"]["outcome"], "covariance-warning")
+        self.assertEqual(res["artifact_fit_status"], "converged-with-warnings")
+
+    def test_failed_fit_status_propagates_to_artifacts(self):
+        sys.path.insert(0, str(ROOT))
+        from contracts.validate import validate_artifact
+        res = tf.bb_fit(self.INFEASIBLE)
+        env = {"contract_version": "1.0.0", "artifact_id": "fit", "objective": "synthetic", "versions": {"plugin": "0.1.0", "contracts": "1.0.0"},
+               "provenance": {"producer_skill": "hep-statistics", "created": "2026-10-03"}, "unresolved_inputs": []}
+        stat = dict(env, artifact_type="statistical-result", status=["synthetic"] + res["artifact_status_labels"],
+                    extension={"paradigm": "likelihood-only", "likelihood": {"form": "extended Poisson, Barlow-Beeston"},
+                               "parameters_of_interest": ["sig"], "nuisances": [], "fit_status": res["artifact_fit_status"]})
+        self.assertTrue(validate_artifact(stat).ok, validate_artifact(stat).as_dict())
+        comm = dict(env, artifact_type="communication", status=["synthetic"], provenance={"producer_skill": "research-communication", "created": "2026-10-03"},
+                    inputs=[{"ref": "fit.json", "artifact_type": "statistical-result", "status": stat["status"]}],
+                    extension={"claims": [{"text": "sig yield", "result_ref": "fit.json", "status": ["synthetic"]}], "sources_read": [], "limitations": []})
+        self.assertFalse(validate_artifact(comm).ok, "a claim from a failed fit must carry 'failed'")
+
+
 class CliTests(unittest.TestCase):
     def run_cli(self, *argv):
         buf = io.StringIO()
