@@ -3,6 +3,18 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased (E2 follow-ups, 2026-10-03)
+
+Evidence in VALIDATION E2-FOLLOWUPS.
+
+- **`examples/theory-comparison`**: the Path B response check now uses a stated relative tolerance of 1e-12
+  (new criterion `response_vs_path_b_max_rel_dev`) instead of exact equality, which failed on macOS arm64 by one
+  rounding unit. Committed output regenerated; its test compares reruns byte for byte and the committed output
+  numerically.
+- **`qed-benchmark` profile**: `conventions.json` states `scales` (not applicable at fixed-alpha tree level).
+- **Tests**: the batch, privacy and ROOT C++ asset tests now pass or skip correctly on macOS (temporary-path
+  symlinks, ignored local files, a ROOT build for another Python).
+
 ## Unreleased (installed on a macOS workstation, 2026-10-03)
 
 Work order `tasks/hep-research/full-plugin-test/TASK.md` (r2); evidence in VALIDATION INSTALL. No change to plugin

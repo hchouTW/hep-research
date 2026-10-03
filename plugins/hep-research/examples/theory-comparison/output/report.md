@@ -16,7 +16,7 @@ Gate transformations, in order: bin-integrate (owner hep-theory); multiply-by-no
 |---|---|---|
 | Composition of both profiles | namespaces disjoint, ids qualified | pass |
 | Comparison gate | comparable after declared transformations | pass |
-| Response | identical to the Path B response matrix | pass |
+| Response | equal to the Path B response matrix within 1e-12 relative | pass |
 | Folded expectation vs independent quadrature | max relative deviation < 1e-06 | pass (5.6e-08) |
 | Asimov injection at mu = 1 and 1.25 | abs(mu_hat - mu) < 1e-08 | pass |
 | Identifiability | without the luminosity constraint q(1.15) ≈ 0 (mu x L is what the counts fix) | pass |

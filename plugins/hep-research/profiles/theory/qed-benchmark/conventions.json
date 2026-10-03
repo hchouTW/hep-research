@@ -4,6 +4,7 @@
  "metric_signature": "+--- (used in the amplitude derivation)",
  "coupling_normalization": "alpha = e^2 / (4 pi), Heaviside-Lorentz units",
  "renormalization_scheme": "not-applicable at tree level; alpha is a fixed input (its value enters only through the reference constant below)",
+ "scales": "not-applicable at tree level with fixed alpha: no renormalization or factorization scale enters and alpha is not run to sqrt(s), so there is no scale variation or scale uncertainty",
  "energy_variable": "sqrt_s",
  "frame": "center-of-mass",
  "angle_definition": "theta between the incoming e- and the outgoing mu- in the c.m. frame",
