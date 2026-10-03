@@ -3,6 +3,31 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased (Slurm and HTCondor batch execution, 2026-10-03)
+
+Work order `tasks/hep-research/batch-schedulers/TASK.md` (r2); evidence in VALIDATION BATCH-RUN.
+
+- **`core/partition`** (new, steward hep-computing): the T21 engine moved unchanged from `local_partition.py`
+  (still its CLI; `examples/local-partition` output byte-identical), plus an executor interface
+  (prepare / submit / poll / cancel / version), a local executor, an asynchronous campaign (submit, poll, collect,
+  resubmit, reset, cancel, merge, watch) and a worker-side runner. Collection ingests the first valid output per
+  chunk and records every other one as a duplicate, never summed; invalid outputs are quarantined with a reason.
+  Resubmission is explicit, within `max_attempts`, with resource changes for timeouts and out-of-memory and a reset
+  for failed, held, cancelled or unknown chunks; two identical failures stop a chunk.
+- **New adapter `adapters/batch-schedulers`** (`documented`): Slurm job arrays (`--no-requeue`, accounting with a
+  queue fallback) and HTCondor clusters (item-data queues, job event log, shared file system or file transfer), a
+  campaign CLI `batch_campaign.py` whose state-changing commands are dry runs without `--submit` /
+  `--approve-cancel`, a config validator that takes site facts only from the user, a bounded `watch`, and a
+  `computational-run` report (incomplete campaigns are `failed`). Tested only against fake schedulers; no real
+  Slurm or HTCondor has run it, and its tool facts are not yet checked against the tools' documentation.
+- **New reference** `skills/hep-computing/references/batch-scheduling.md` and example `examples/batch-partition/`
+  (the T21 job on both fake schedulers with injected faults; byte-reproducible).
+- **Blinding scan** (`core/blinding`): `.out`, `.err`, `.sh`, `.sbatch` and `.sub` files are now read as text, so
+  scanning a campaign directory is no longer `incomplete` because of job logs and job descriptions.
+- **Packaging check**: `--root`, and the `batch-site-fact` rule for shipped batch configs.
+- **Routing**: six new cases (two in Traditional Chinese); the `hep-computing` description now names Slurm and
+  HTCondor job arrays, held or evicted jobs and pilot sizing.
+
 ## Unreleased (hep-statistics reinforcement, 2026-10-03)
 
 Work order `tasks/hep-research/stats-reinforcement/TASK.md` (r2); evidence in VALIDATION STATS-REINFORCEMENT-RUN.
