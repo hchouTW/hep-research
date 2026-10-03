@@ -61,6 +61,17 @@ limit of 1.19; with mu injected = 0 it gives an observed limit of 0.25, inside t
 band [0.17, 0.56]. Reuse the pattern: keep regions orthogonal, take the MC-stat error from
 sumw2 and not from sqrt(N), and label pseudo-data and Asimov data as what they are.
 
+## Publishing likelihoods for reinterpretation
+
+A published full likelihood lets others reuse the analysis without re-deriving it (Cranmer et al., "Publishing statistical models: getting the most out of particle physics experiments", SciPost Phys. 12 (2022) 037).
+
+- **Full likelihood.** Publish the pyhf JSON as a background-only workspace plus a signal patchset (one JSON-patch per signal hypothesis, with the workspace digest and the grid labels) on HEPData. The patch adds the signal samples, and the measurement keeps the POI. Before publishing, apply each patch and check that it reproduces the internal workspace's best fit and CLs. `tests/adapters/test_pyhf_publication.py` does this on the SYNTHETIC shape workspace (`pyhf-shape-synthetic.json`, verified 2026-10-03 with pyhf 0.7.6). After the patch, the best fit and the observed and expected CLs at mu = 1 agree with the original to 1e-6 (mu_hat = 0.7949, observed CLs 0.4924), and a patch applied to a workspace with a different digest is refused.
+- **Translation between tools.** A likelihood converted between formats (Combine datacard, RooFit workspace, pyhf JSON) is not equivalent because the text converts. Interpolation codes, constraint shapes, MC-statistics treatment and bounds can all differ. Verify it as in "Cross-backend verification" below before publishing the translated version.
+- **Simplified likelihoods** (Buckley et al., JHEP 04 (2019) 064). These keep only the background expectations per bin with a covariance, plus optionally a skew (third-moment) term. They suit many bins with large counts and approximately Gaussian background uncertainties. They fail for few-count bins, strongly non-Gaussian or one-sided systematics, and nuisance effects that do not act linearly on the yields. State which form was published and over what range it was validated against the full likelihood.
+- **Producer checklist.** Publish the bin-to-bin correlations, or the full model rather than per-bin uncertainties. Say whether signal regions overlap and which ones may be combined. Give both expected and observed results. Record the model and tool versions, with the schema version for pyhf JSON. Label the data as observed, Asimov or synthetic.
+
+Recasting a published likelihood for a new model (generating its signal, applying efficiencies) is `hep-theory` work. This section covers only what the producer publishes and how it is checked.
+
 ## Cross-backend verification
 
 First compare main expected counts and auxiliary terms at identical parameter points. Then compare delta-NLL, fitted parameters, and profile curves before comparing limits. Absolute NLL values may differ by constants. Align statistics, bounds, constraint parameterizations, global observations, interpolation, and optimizer tolerances. Agreement of a final limit alone is insufficient evidence of equivalence.
