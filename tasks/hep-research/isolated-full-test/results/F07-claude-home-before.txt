@@ -1,0 +1,47 @@
+# ~/.claude before F07 (2026-10-03T19:34:11Z)
+eaa6d865be96151c033e6677829c0f0a8c82f0f5e6041c064d20a61bbaa77485  ~/.claude/settings.json
+86e92ef559274b7de46943b4c126abafc34e98d42877a7d5ca9ec2cfa66e0262  ~/.claude/plugins/installed_plugins.json
+5a5f5c547a4340a5010ff236b189563bccef358a687cb0297f2dd1e710ba10bb  ~/.claude/plugins/known_marketplaces.json
+~/.claude/plugins:
+cache
+data
+installed_plugins.json
+known_marketplaces.json
+marketplaces
+plugin-catalog-cache.json
+plugin-directory-cache-v2.json
+store
+synced
+
+~/.claude/plugins/cache:
+claude-plugins-official
+hep-research-dev
+temp_git_1789547732940_5n3zmb
+temp_git_1790376621740_dp8zco
+temp_git_1790521840724_2aud7u
+temp_git_1790522453568_dg2z48
+temp_git_1790522477535_u8ebib
+temp_git_1790539537722_svrlh4
+temp_git_1790539676716_ud7zpb
+temp_git_1790539689328_4dg90h
+temp_git_1790561527683_g6jkjk
+temp_git_1790561605480_lroo4l
+temp_git_1790561653365_1ommai
+temp_git_1790827867155_x0stlj
+temp_git_1790835966023_pub981
+temp_git_1790849081714_fi3csl
+temp_git_1790849094238_g83ksz
+temp_git_1790849206679_1crvcg
+temp_git_1790864707112_71hrdo
+temp_git_1790865048885_s55unk
+temp_git_1790867667872_o4zv74
+temp_git_1790870654859_6ie488
+temp_git_1790871027726_rci1d5
+temp_git_1790874752699_z8nla9
+temp_git_1790904198854_3y70n2
+temp_git_1790905465458_g6a5sy
+temp_git_1790909754974_gqzwik
+
+~/.claude/plugins/marketplaces:
+claude-plugins-official
+hep-research-dev

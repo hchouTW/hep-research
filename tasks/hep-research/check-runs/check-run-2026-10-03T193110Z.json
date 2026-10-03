@@ -1,0 +1,388 @@
+{
+ "timestamp_utc": "2026-10-03T19:31:10Z",
+ "plugin_version": "0.1.0",
+ "environment": {
+  "python": "3.13.2",
+  "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+  "executable": "/Users/hchou/.venvs/hep-research-e2/bin/python"
+ },
+ "git_commit": "dd9b9405facbdce37acb183947dc7493c4bdf5bc",
+ "counts": {
+  "pass": 13,
+  "fail": 1,
+  "skip": 0
+ },
+ "checks": [
+  {
+   "name": "unittest",
+   "command": "python3 -m unittest discover -s tests -t .",
+   "status": "fail",
+   "counts": {
+    "run": 1241,
+    "failures": 1,
+    "errors": 1,
+    "skipped": 9,
+    "passed": 1230
+   },
+   "failed": [
+    "test_shipped_diagram_sources_pass (tests.skills.research_communication.test_diagrams.RealBundle.test_shipped_diagram_sources_pass)",
+    "test_ddp_skeleton_two_gloo_processes (tests.skills.physics_ml.test_assets_smoke.AssetSmokeTests.test_ddp_skeleton_two_gloo_processes)"
+   ],
+   "skipped": [
+    "test_example_campaign_on_a_personal_pool (tests.adapters.test_batch_htcondor.RealHTCondorTests.test_example_campaign_on_a_personal_pool): real HTCondor not available (HEP_HTCONDOR_TEST=1 and condor_submit on PATH)",
+    "test_example_campaign_on_real_slurm (tests.adapters.test_batch_slurm.RealSlurmTests.test_example_campaign_on_real_slurm): real Slurm not available (HEP_SLURM_TEST=1 and sbatch on PATH)",
+    "test_limit_matches_pyhf (tests.adapters.test_combine_datacard_template.CombineRunTests.test_limit_matches_pyhf): Combine not available (set HEP_COMBINE_WRAPPER)",
+    "test_slow_coverage_scan_over_the_validated_range (tests.core.test_stats_likelihood_limits.BergerBoosApproximationAuditT07.test_slow_coverage_scan_over_the_validated_range): slow: set HEP_SLOW_TESTS=1",
+    "test_slow_grid_refinement_and_toy_precision (tests.core.test_stats_likelihood_limits.BergerBoosApproximationAuditT07.test_slow_grid_refinement_and_toy_precision): slow: set HEP_SLOW_TESTS=1",
+    "test_gross_vitells_agrees_with_brute_force (tests.skills.hep_statistics.test_look_elsewhere.LookElsewhere.test_gross_vitells_agrees_with_brute_force): slow: set HEP_SLOW_TESTS=1",
+    "test_toy_calibrated_p_values_are_uniform (tests.skills.hep_statistics.test_sensitivity_and_gof.GoodnessOfFit.test_toy_calibrated_p_values_are_uniform): slow: set HEP_SLOW_TESTS=1",
+    "test_check_pytorch_env_reports_missing_torch_cleanly (tests.skills.physics_ml.test_physics_ml_skill.CleanDegradationWithoutTorchTests.test_check_pytorch_env_reports_missing_torch_cleanly): only meaningful when PyTorch is not installed",
+    "test_exits_with_clear_message_not_traceback (tests.skills.physics_ml.test_physics_ml_skill.CleanDegradationWithoutTorchTests.test_exits_with_clear_message_not_traceback): only meaningful when PyTorch is not installed"
+   ]
+  },
+  {
+   "name": "profile-tests:experiment:ams-02",
+   "command": "(cd profiles/experiments/ams-02 && python3 -m unittest discover -s tests -t tests)",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "status": "pass",
+    "counts": {
+     "run": 258,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0,
+     "passed": 258
+    },
+    "failed": [],
+    "skipped": []
+   },
+   "counts": {
+    "run": 258,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 258
+   }
+  },
+  {
+   "name": "profile-tests:experiment:synthetic-collider",
+   "command": "(cd profiles/experiments/synthetic-collider && python3 -m unittest discover -s tests -t tests)",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "status": "pass",
+    "counts": {
+     "run": 9,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0,
+     "passed": 9
+    },
+    "failed": [],
+    "skipped": []
+   },
+   "counts": {
+    "run": 9,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 9
+   }
+  },
+  {
+   "name": "profile-tests:theory:qed-benchmark",
+   "command": "(cd profiles/theory/qed-benchmark && python3 -m unittest discover -s tests -t tests)",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "status": "pass",
+    "counts": {
+     "run": 16,
+     "failures": 0,
+     "errors": 0,
+     "skipped": 0,
+     "passed": 16
+    },
+    "failed": [],
+    "skipped": []
+   },
+   "counts": {
+    "run": 16,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 16
+   }
+  },
+  {
+   "name": "check_layering",
+   "command": "/Users/hchou/.venvs/hep-research-e2/bin/python tools/check_layering.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "ok": true,
+    "violations": []
+   }
+  },
+  {
+   "name": "stanza_consistency",
+   "command": "/Users/hchou/.venvs/hep-research-e2/bin/python tools/build_stanzas.py --check",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "ok": true,
+    "problems": []
+   }
+  },
+  {
+   "name": "registry",
+   "command": "/Users/hchou/.venvs/hep-research-e2/bin/python contracts/registry.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "ok": true,
+    "findings": [],
+    "profiles": [
+     "experiment:ams-02",
+     "experiment:synthetic-collider",
+     "theory:qed-benchmark"
+    ]
+   }
+  },
+  {
+   "name": "ams_ledger_preservation",
+   "command": "/Users/hchou/.venvs/hep-research-e2/bin/python tools/check_ams_ledger_preservation.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "status": "pass",
+    "legacy": "/Users/hchou/hep-research/.legacy/agentic-ai-skills/ams-analysis/data",
+    "pinned_commit": "3e995a49a89fad8e0e9d52130ee1fd93a3a0f4f9",
+    "counts": {
+     "legacy_sources": 60,
+     "legacy_claims": 183,
+     "sources": 60,
+     "claims": 183
+    },
+    "differences": []
+   }
+  },
+  {
+   "name": "ams_optional",
+   "command": "/Users/hchou/.venvs/hep-research-e2/bin/python tools/check_ams_optional.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "ok": true,
+    "copy": "/var/folders/hx/8f9thc314n97_jdmzxyqy_mc0000gn/T/hep research no ams xr7lbbne/hep-research",
+    "checks": [
+     {
+      "name": "ams_profile_absent",
+      "status": "pass"
+     },
+     {
+      "name": "registry",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "path_b",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "path_c",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "tests_core",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "tests_contracts",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "tests_hep_statistics",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "tests_hep_computing",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "tests_paths_b_c",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "profile-tests:experiments/synthetic-collider",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     },
+     {
+      "name": "profile-tests:theory/qed-benchmark",
+      "exit_code": 0,
+      "status": "pass",
+      "tail": ""
+     }
+    ]
+   }
+  },
+  {
+   "name": "routing_static",
+   "command": "/Users/hchou/.venvs/hep-research-e2/bin/python tools/check_routing_static.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "cases": 62,
+    "failed": [],
+    "coverage_errors": [],
+    "dispatch_api_mentions": [],
+    "languages": [
+     "en",
+     "zh-Hant"
+    ],
+    "note": "static check only: descriptions cover the cases; a live routing run needs approval (paid model calls)",
+    "ok": true
+   }
+  },
+  {
+   "name": "packaging_scan",
+   "command": "/Users/hchou/.venvs/hep-research-e2/bin/python tools/check_packaging.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "files_scanned": 885,
+    "findings": [],
+    "ok": true
+   }
+  },
+  {
+   "name": "traceability",
+   "command": "/Users/hchou/.venvs/hep-research-e2/bin/python tools/check_traceability.py --legacy /Users/hchou/hep-research/.legacy/agentic-ai-skills",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "ok": true,
+    "problems": [],
+    "skipped": [],
+    "map_rows": 949,
+    "legacy_tracked_files": 949,
+    "plugin_files": 885,
+    "from_legacy": 375,
+    "registered_new": 510
+   }
+  },
+  {
+   "name": "measure_entrypoints",
+   "command": "/Users/hchou/.venvs/hep-research-e2/bin/python tools/measure_entrypoints.py",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": {
+    "ok": true,
+    "budget": {
+     "skill_bytes": 8192,
+     "skill_lines_max": 180,
+     "description_chars": 1024,
+     "registry_bytes": 2048,
+     "index_bytes": 4096
+    },
+    "skills": [
+     {
+      "skill": "detector-response",
+      "lines": 58,
+      "bytes": 7809,
+      "description_chars": 814
+     },
+     {
+      "skill": "hep-analysis",
+      "lines": 63,
+      "bytes": 7471,
+      "description_chars": 921
+     },
+     {
+      "skill": "hep-computing",
+      "lines": 56,
+      "bytes": 7114,
+      "description_chars": 927
+     },
+     {
+      "skill": "hep-statistics",
+      "lines": 54,
+      "bytes": 7621,
+      "description_chars": 1014
+     },
+     {
+      "skill": "hep-theory",
+      "lines": 53,
+      "bytes": 6255,
+      "description_chars": 1022
+     },
+     {
+      "skill": "physics-ml",
+      "lines": 52,
+      "bytes": 5319,
+      "description_chars": 803
+     },
+     {
+      "skill": "research-communication",
+      "lines": 50,
+      "bytes": 5528,
+      "description_chars": 773
+     }
+    ],
+    "totals": {
+     "skill_bytes": 47117,
+     "description_chars": 6274
+    },
+    "registry_bytes": 690,
+    "profile_index_bytes": {
+     "experiment:ams-02": 2370,
+     "experiment:synthetic-collider": 956,
+     "theory:qed-benchmark": 896
+    },
+    "over_budget": [],
+    "exceptions": {},
+    "host_estimate": {
+     "status": "measured",
+     "always_on_tokens": 2142,
+     "per_skill_always_on": {
+      "hep-analysis": 310,
+      "hep-theory": 350,
+      "physics-ml": 270,
+      "detector-response": 280,
+      "hep-statistics": 350,
+      "research-communication": 270,
+      "hep-computing": 320
+     },
+     "source": "claude --plugin-dir <root> plugin details hep-research (host estimate)"
+    },
+    "note": "Line counts are informative: SKILL.md paragraphs are unwrapped, so bytes are the binding budget."
+   }
+  },
+  {
+   "name": "claude-plugin-validate",
+   "command": "claude plugin validate <plugin> --strict",
+   "exit_code": 0,
+   "status": "pass",
+   "detail": "Validating plugin manifest: /Users/hchou/hep-research/plugins/hep-research/.claude-plugin/plugin.json\n\n\u2714 Validation passed"
+  }
+ ],
+ "caveat": "Software checks only; not physical validity, proof, statistical coverage, or authorization to unblind."
+}

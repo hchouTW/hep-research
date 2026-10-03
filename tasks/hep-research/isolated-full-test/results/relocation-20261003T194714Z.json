@@ -1,0 +1,115 @@
+{
+ "relocated_to": "/var/folders/hx/8f9thc314n97_jdmzxyqy_mc0000gn/T/hep research relocated eki055n8/plugin copy/hep-research",
+ "path_has_spaces": true,
+ "outside_repository": true,
+ "symlinks": [],
+ "files_naming_source_path": [],
+ "cwd": "/var/folders/hx/8f9thc314n97_jdmzxyqy_mc0000gn/T/unrelated cwd 1l7_ge53",
+ "exit_code": 1,
+ "summary": {
+  "counts": {
+   "pass": 10,
+   "fail": 2,
+   "skip": 2
+  },
+  "timestamp_utc": "2026-10-03T19:47:14Z"
+ },
+ "checks": [
+  {
+   "name": "unittest",
+   "status": "fail",
+   "counts": {
+    "run": 1241,
+    "failures": 1,
+    "errors": 1,
+    "skipped": 10,
+    "passed": 1229
+   }
+  },
+  {
+   "name": "profile-tests:experiment:ams-02",
+   "status": "pass",
+   "counts": {
+    "run": 258,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 258
+   }
+  },
+  {
+   "name": "profile-tests:experiment:synthetic-collider",
+   "status": "pass",
+   "counts": {
+    "run": 9,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 9
+   }
+  },
+  {
+   "name": "profile-tests:theory:qed-benchmark",
+   "status": "pass",
+   "counts": {
+    "run": 16,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "passed": 16
+   }
+  },
+  {
+   "name": "check_layering",
+   "status": "pass",
+   "counts": null
+  },
+  {
+   "name": "stanza_consistency",
+   "status": "pass",
+   "counts": null
+  },
+  {
+   "name": "registry",
+   "status": "pass",
+   "counts": null
+  },
+  {
+   "name": "ams_ledger_preservation",
+   "status": "skip",
+   "counts": null
+  },
+  {
+   "name": "ams_optional",
+   "status": "pass",
+   "counts": null
+  },
+  {
+   "name": "routing_static",
+   "status": "pass",
+   "counts": null
+  },
+  {
+   "name": "packaging_scan",
+   "status": "fail",
+   "counts": null
+  },
+  {
+   "name": "traceability",
+   "status": "skip",
+   "counts": null
+  },
+  {
+   "name": "measure_entrypoints",
+   "status": "pass",
+   "counts": null
+  },
+  {
+   "name": "claude-plugin-validate",
+   "status": "pass",
+   "counts": null
+  }
+ ],
+ "stderr_tail": "error: /var/folders/hx/8f9thc314n97_jdmzxyqy_mc0000gn/T/tmph3w6902x/does_not_exist.csv is not a file\nerror: --sort-by 'not_a_column' is not a column in /var/folders/hx/8f9thc314n97_jdmzxyqy_mc0000gn/T/tmprvhxdh_7/notes.csv (columns: key, year)\n",
+ "pass": false
+}

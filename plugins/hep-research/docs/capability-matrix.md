@@ -8,6 +8,10 @@ software consistency only, not physical validity, proof, statistical coverage, o
 Environment E1 (all "tested" rows): Claude Code cloud container, Linux 6.18 x86_64, Python 3.11.15, NumPy 2.4.6,
 SciPy 1.17.1, Matplotlib 3.11.2, SymPy 1.14.0, Claude Code CLI 2.1.287, 2026-10-02. Evidence: [VALIDATION.md](../VALIDATION.md).
 
+Environment E2 (rows marked "E2" below): macOS 26.5 arm64 (Apple M3), Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1,
+Matplotlib 3.11.2, SymPy 1.14.0, Claude Code CLI 2.1.288, 2026-10-04 at `dd9b940`. E2 results do not replace E1
+results; they are listed in "E2 results" at the end. Evidence: VALIDATION FULLTEST-E2.
+
 ## Capabilities
 
 | Capability | Owner | Status | Evidence or reason |
@@ -78,3 +82,19 @@ SciPy 1.17.1, Matplotlib 3.11.2, SymPy 1.14.0, Claude Code CLI 2.1.287, 2026-10-
 |---|---|---|
 | Claude Code (plugin, development marketplace) | tested (E1, CLI 2.1.287) | install, discovery, namespaced invocation, profile access, removal, legacy coexistence (G5); routing quality not yet established |
 | Codex, Antigravity, other agents | not tested | see `skills/hep-computing/references/{codex,antigravity,generic-agent}.md` |
+
+## E2 results (FULLTEST-E2, 2026-10-04)
+
+| Capability or tool | E2 status | Evidence or reason |
+|---|---|---|
+| Core checks, profile suites, examples | tested (E2) | 13 of 14 aggregate checks pass (unittest fails only on the DDP row below); all ten examples rerun byte-identically on E2; committed output equal or numerically equal except `ams-flux-ratio` toy closure (stream divergence across platforms) |
+| pyhf workflows | tested (E2 + pyhf 0.7.6) | adapter and statistics tests pass |
+| uproot/awkward tools | tested (E2 + uproot 5.7.6, awkward 2.14.0) | `test_uproot_awkward_asset` passes |
+| ROOT, PyROOT tools | tested (E2 + ROOT 6.38.04, Homebrew, PyROOT under Python 3.14) | ROOT C++ assets, PyROOT integration and scripts pass; older than the E1 version 6.40.04 |
+| CMS Combine | unverified (E2) | no `combine`, no Docker |
+| PyTorch assets | tested (E2 + PyTorch 2.14.1, torchvision 0.29.1, CPU) except DDP | the 2-process gloo DDP run hangs when the host name does not resolve (network-dependent) |
+| Diagram source checks | tested (E2: Graphviz 16.1.0, PlantUML 1.2026.8, Mermaid CLI 12.0.0 with chrome-headless-shell 154) | Homebrew `mermaid-cli` needs a separate `chrome-headless-shell` install |
+| Batch campaigns | protocol tested (E2) against fake schedulers; real Slurm/HTCondor unverified | no `sbatch`, no `condor_submit` |
+| Relocation (AC24) | tested (E2) apart from the DDP row | copy at a path with spaces: same results as in place; the 2 legacy checks and 1 legacy-dependent unit test skip in the copy |
+| Claude Code (plugin, isolated config) | tested (E2, CLI 2.1.288): install, discovery, removal; namespaced invocation unverified (isolated config not logged in) | invocation passed in the user configuration (VALIDATION INSTALL) |
+| Live routing | not run (E2) | not approved |

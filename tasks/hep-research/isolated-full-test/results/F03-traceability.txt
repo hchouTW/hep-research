@@ -1,0 +1,10 @@
+{
+ "ok": true,
+ "problems": [],
+ "skipped": [],
+ "map_rows": 949,
+ "legacy_tracked_files": 949,
+ "plugin_files": 885,
+ "from_legacy": 375,
+ "registered_new": 510
+}

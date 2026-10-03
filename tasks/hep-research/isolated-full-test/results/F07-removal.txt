@@ -1,0 +1,5 @@
+✔ Successfully uninstalled plugin: hep-research (scope: user)
+✔ Successfully removed marketplace: hep-research-dev
+--- list after removal
+No plugins installed. Use `claude plugin install` to install a plugin.
+enabledPlugins {} extraKnownMarketplaces {}
