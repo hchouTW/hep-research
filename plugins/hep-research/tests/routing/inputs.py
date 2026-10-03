@@ -47,4 +47,7 @@ INPUTS = {
           "private-profile/calibration.csv": _csv("channel,gain", ["0,1.02", "1,0.98"])},
  "ams-computing-1": {"reco_ntuple.py": f"# {TAG}\nimport ctypes\nbuf = (ctypes.c_float * 10)()\nfor i in range(100):\n    buf[i] = 0.0  # writes past the buffer\n"},
  "ams-computing-2": {"merge.sh": f"# {TAG}\ncat out/job_*.txt out/job_*_retry.txt > merged.txt\n"},
+ "co-batch-sbatch-1": {"toy_fit.py": f"# {TAG}\nimport sys, json, random\nstart, stop, seed = map(int, sys.argv[1:4])\nrandom.seed(seed)\nprint(json.dumps({{'n': stop - start}}))\n"},
+ "co-batch-held-1": {"events.log": f"# {TAG}\n012 (1234.007.000) 2026-10-03 10:00:00 Job was held.\n\tJob exceeded its memory request (synthetic)\n\tCode 34 Subcode 0\n...\n"},
+ "co-batch-evicted-1": {"merge.sh": f"# {TAG}\ncat out/*.json > merged.json\n"},
 }

@@ -1,0 +1,8 @@
+{
+ "backend": "htcondor",
+ "campaign_dir": "campaign",
+ "resources": {"cpus": 1, "memory_mb": 1000, "disk_mb": 500},
+ "htcondor": {"universe": "vanilla", "file_transfer": "shared-filesystem"},
+ "throttle": 3,
+ "job_name": "synthetic-batch-partition"
+}

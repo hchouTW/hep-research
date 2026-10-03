@@ -37,6 +37,7 @@ from the plugin root (each takes `--help`; the seeds are in each `output/report.
 | `examples/published-comparison/` | T24 | J6 |
 | `examples/recasting/` | J7 | J7 |
 | `examples/local-partition/` | T21 | - |
+| `examples/batch-partition/` (fake Slurm and HTCondor schedulers) | B11 | - |
 | `examples/end-to-end-sample/` | (pyhf smoke test) | - |
 
 `tests/examples/` compares a fresh run with the

@@ -7,7 +7,10 @@ Scans the files a package would contain (git-tracked files when run in a checkou
 - no project data: no hep-research-artifacts/ folder; project configs only as test fixtures
 - no private paths (home directories, mounted project folders, temp session folders) or credentials
 - no e-mail addresses other than the commit trailer address; no file over 2 MiB
-Usage: python3 tools/check_packaging.py   Exit 0 clean, 1 findings. Output: JSON.
+- no site facts in shipped batch-scheduler configs (JSON under adapters/ or examples/ with a slurm or htcondor
+  backend or section): partition, account, QoS, constraint, gres, requirements and container image must be
+  placeholders ("<...>") or start with "synthetic"; campaign_dir must not be an absolute path
+Usage: python3 tools/check_packaging.py [--root PLUGIN_ROOT]   Exit 0 clean, 1 findings. Output: JSON.
 """
 from __future__ import annotations
 
@@ -18,6 +21,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+SITE_KEYS = ("partition", "account", "qos", "constraint", "gres", "requirements", "container_image")
 MAX_BYTES = 2 * 1024 * 1024
 CACHE = re.compile(r"(^|/)(__pycache__|\.pytest_cache)(/|$)|\.pyc$|(^|/)\.DS_Store$")
 TRANSCRIPT = re.compile(r"\.jsonl$|transcript", re.I)
@@ -41,7 +45,29 @@ def files() -> list[Path]:
     return [p for p in ROOT.rglob("*") if (p.is_file() or p.is_symlink()) and not CACHE.search(p.relative_to(ROOT).as_posix())]
 
 
-def main() -> int:
+def batch_site_facts(obj) -> list[str]:
+    """Site keys in a batch config that hold neither a placeholder nor a synthetic value."""
+    if not isinstance(obj, dict) or not (obj.get("backend") in ("slurm", "htcondor") or "slurm" in obj or "htcondor" in obj):
+        return []
+    bad = []
+    for scope in (obj, obj.get("slurm"), obj.get("htcondor")):
+        if not isinstance(scope, dict):
+            continue
+        for k in SITE_KEYS:
+            v = scope.get(k)
+            if isinstance(v, str) and not (v.startswith("<") and v.endswith(">")) and not v.lower().startswith("synthetic"):
+                bad.append(f"{k}={v}")
+        cd = scope.get("campaign_dir")
+        if isinstance(cd, str) and cd.startswith(("/", "~")):
+            bad.append(f"campaign_dir={cd}")  # an absolute path names someone's file system
+    return bad
+
+
+def main(argv=None) -> int:
+    global ROOT
+    args = list(sys.argv[1:] if argv is None else argv)
+    if "--root" in args:
+        ROOT = Path(args[args.index("--root") + 1]).resolve()
     findings = []
 
     def add(path, rule, detail=""):
@@ -72,6 +98,13 @@ def main() -> int:
                 m = rx.search(text)
                 if m and not (rule == "private-path" and rel == "tools/check_packaging.py"):
                     add(rel, rule, m.group(0)[:60])
+            if p.suffix == ".json" and rel.startswith(("adapters/", "examples/")):
+                try:
+                    bad = batch_site_facts(json.loads(text))
+                except ValueError:
+                    bad = []
+                if bad:
+                    add(rel, "batch-site-fact", ", ".join(bad)[:120])
             for m in EMAIL.finditer(text):
                 local = m.group(0).split("@")[0].lower()
                 if m.group(0) not in EMAIL_OK and local not in PLACEHOLDER_LOCAL and not m.group(0).endswith((".example", "@example.com", "@example.org")):

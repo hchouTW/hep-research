@@ -1,0 +1,21 @@
+{
+ "backend": "<slurm or htcondor>",
+ "campaign_dir": "<campaign directory on a file system the jobs can write>",
+ "resources": {
+  "cpus": "<CPUs per job>",
+  "memory_mb": "<memory per job in MB, from a pilot>",
+  "time_limit": "<walltime as HH:MM:SS, from a pilot (Slurm only)>",
+  "gpus": "<GPUs per job, 0 if none>"
+ },
+ "slurm": {
+  "partition": "<partition name from your site documentation>",
+  "account": "<account or project to charge, if your site needs one>",
+  "qos": "<quality of service, if your site needs one>"
+ },
+ "throttle": "<most jobs running at once>",
+ "max_attempts": "<attempts per chunk; leave the key out for no resubmission>",
+ "monitor": {
+  "poll_interval_s": "<seconds between polls, at least 60>",
+  "max_polls": "<polls before watch gives up>"
+ }
+}

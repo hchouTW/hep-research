@@ -47,6 +47,23 @@
     "render_index"
    ],
    "source": "agentic-ai-skills@3e995a4 ams-analysis/scripts/{validate_evidence_ledger,render_source_index}.py (moved; explicit paths, optional ID namespace, verification_date with access_date fallback, generic messages)"
+  },
+  "partition": {
+   "steward": "hep-computing",
+   "status": "implemented-batch-schedulers",
+   "purpose": "Manifest-based partition, write-once chunk outputs, bounded resubmission and complete merge; executor interface and remote chunk protocol for batch schedulers",
+   "files": [
+    "engine",
+    "campaign",
+    "executors",
+    "runner",
+    "states"
+   ],
+   "consumers": [
+    "skills/hep-computing/scripts/local_partition.py",
+    "adapters/batch-schedulers"
+   ],
+   "source": "moved from skills/hep-computing/scripts/local_partition.py (T21) in batch-schedulers B01; behavior unchanged"
   }
  }
 }
