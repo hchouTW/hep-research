@@ -6,10 +6,11 @@ imports). It never chooses a seed or a chunk on its own: the chunk comes from th
 from the submission map written at submit time (--map MAP --index N, where N is the scheduler's array index), and the
 seed, start and stop come from the manifest inside the spec.
 
-  runner.py --spec SPEC --out-dir DIR (--chunk ID --attempt ATTEMPT | --map MAP --index N)
+  runner.py --spec SPEC (--out-dir DIR | --out-root ROOT) (--chunk ID --attempt ATTEMPT | --map MAP --index N)
 
 SPEC is JSON {"manifest": {...}, "cmd": "... {start} {stop} {seed} {out} {id} ...", "container_image": optional}.
-The command writes a JSON result to {out}; exit 0 means success. The runner then writes
+The command writes a JSON result to {out}; exit 0 means success. With --out-root, DIR is ROOT/<chunk ID>. The runner
+then writes
   DIR/<attempt>.json       {"chunk_id", "manifest_hash", "attempt_id", "start", "stop", "seed", "result"}
   DIR/<attempt>.meta.json  {"chunk_id", "manifest_hash", "attempt_id", "host", "start_time", "end_time", "exit_code",
                             "signal", "python", "container_image", "run_file", "runner_error"}
@@ -71,13 +72,16 @@ def resolve(args) -> tuple[str, str]:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--spec", required=True)
-    ap.add_argument("--out-dir", required=True)
+    ap.add_argument("--out-dir")
+    ap.add_argument("--out-root")
     ap.add_argument("--chunk")
     ap.add_argument("--attempt")
     ap.add_argument("--map")
     ap.add_argument("--index", type=int)
     args = ap.parse_args(argv)
     try:
+        if (args.out_dir is None) == (args.out_root is None):
+            raise ValueError("give exactly one of --out-dir and --out-root")
         if (args.map is None) == (args.chunk is None) or (args.chunk and not args.attempt) or (args.map and args.index is None):
             raise ValueError("give either --chunk and --attempt, or --map and --index")
         spec = json.loads(Path(args.spec).read_text(encoding="utf-8"))
@@ -89,7 +93,7 @@ def main(argv=None) -> int:
     except (OSError, ValueError, KeyError) as exc:
         print(json.dumps({"error": str(exc)}), file=sys.stderr)
         return 2
-    out_dir = Path(args.out_dir)
+    out_dir = Path(args.out_dir) if args.out_dir else Path(args.out_root) / cid
     out_dir.mkdir(parents=True, exist_ok=True)
     meta = {"chunk_id": cid, "manifest_hash": manifest["manifest_hash"], "attempt_id": aid, "host": socket.gethostname(),
             "start_time": _now(), "python": platform.python_version(),

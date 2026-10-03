@@ -167,7 +167,7 @@ def submit(campaign_dir, executor, config: dict, chunk_ids=None, approved: bool 
             change = {"after": prev["final_state"], "from": prev.get("resources"), "to": config.get("resources")}
         row["attempt_records"].append({
             "attempt_id": r["attempt_id"], "chunk_id": r["chunk_id"], "backend": executor.name, "job_id": job_of.get(r["attempt_id"]),
-            "submission": sid, "submission_dir": str(sub_dir), "submit_time": clock(), "origin": _origin, "state": "queued",
+            "submission": sid, "submission_dir": str(sub_dir), "outputs_dir": str(cdir / "outputs" / r["chunk_id"]), "submit_time": clock(), "origin": _origin, "state": "queued",
             "final_state": None, "native_state": None, "exit_code": None, "signal": None, "hold_reason": None, "hold_code": None,
             "host": None, "elapsed_s": None, "max_rss_mb": None, "evidence": None, "restarts_seen": 0,
             "resources": config.get("resources"), "resources_hash": rh, "resource_change": change})

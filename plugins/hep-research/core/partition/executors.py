@@ -32,6 +32,10 @@ class PollError(Exception):
         self.signature, self.text = signature, text
 
 
+class SubmitError(PollError):
+    """A submit command that failed or printed no job ID; the campaign records no attempt for it."""
+
+
 class Executor:
     name = "abstract"
 
