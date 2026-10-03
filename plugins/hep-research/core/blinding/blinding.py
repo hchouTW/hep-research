@@ -32,7 +32,8 @@ import re
 from pathlib import Path
 
 NUMBER = re.compile(r"[-+]?(?:\d+\.\d*|\.\d+|\d+)(?:[eE][-+]?\d+)?")
-TEXT_SUFFIXES = {".json", ".txt", ".log", ".csv", ".tsv", ".md", ".svg", ".yaml", ".yml", ".tex", ".html"}
+TEXT_SUFFIXES = {".json", ".txt", ".log", ".csv", ".tsv", ".md", ".svg", ".yaml", ".yml", ".tex", ".html",
+                 ".out", ".err", ".sh", ".sbatch", ".sub"}  # the last five: batch job logs and job descriptions
 
 
 def blinded_mask(edges, region: dict) -> list[bool]:

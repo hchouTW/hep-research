@@ -31,6 +31,16 @@ class BlindedLogTests(unittest.TestCase):
         self.assertIn(".stdout.log", leaks)
 
 
+    def test_job_files_and_scheduler_logs_are_read_as_text(self):
+        from core.blinding import blinding as bl
+        with tempfile.TemporaryDirectory() as td:
+            for name in ("slurm-1_2.out", "slurm-1_2.err", "job.sbatch", "job.sub", "wrap.sh"):
+                (Path(td) / name).write_text("value 1234.5678\n")
+            rep = bl.scan_paths([td], [1234.5678])
+            self.assertEqual(rep["unscanned"], [])
+            self.assertEqual(len(rep["leaks"]), 5)
+
+
 class PackagingTests(unittest.TestCase):
     def test_planted_account_fails_the_packaging_check(self):
         with tempfile.TemporaryDirectory() as td:

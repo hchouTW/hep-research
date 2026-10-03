@@ -8,8 +8,8 @@ Scans the files a package would contain (git-tracked files when run in a checkou
 - no private paths (home directories, mounted project folders, temp session folders) or credentials
 - no e-mail addresses other than the commit trailer address; no file over 2 MiB
 - no site facts in shipped batch-scheduler configs (JSON under adapters/ or examples/ with a slurm or htcondor
-  backend or section): partition, account, QoS, constraint, gres, requirements, container image and campaign
-  directory must be placeholders ("<...>") or start with "synthetic"
+  backend or section): partition, account, QoS, constraint, gres, requirements and container image must be
+  placeholders ("<...>") or start with "synthetic"; campaign_dir must not be an absolute path
 Usage: python3 tools/check_packaging.py [--root PLUGIN_ROOT]   Exit 0 clean, 1 findings. Output: JSON.
 """
 from __future__ import annotations
@@ -21,7 +21,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SITE_KEYS = ("partition", "account", "qos", "constraint", "gres", "requirements", "container_image", "campaign_dir")
+SITE_KEYS = ("partition", "account", "qos", "constraint", "gres", "requirements", "container_image")
 MAX_BYTES = 2 * 1024 * 1024
 CACHE = re.compile(r"(^|/)(__pycache__|\.pytest_cache)(/|$)|\.pyc$|(^|/)\.DS_Store$")
 TRANSCRIPT = re.compile(r"\.jsonl$|transcript", re.I)
@@ -57,6 +57,9 @@ def batch_site_facts(obj) -> list[str]:
             v = scope.get(k)
             if isinstance(v, str) and not (v.startswith("<") and v.endswith(">")) and not v.lower().startswith("synthetic"):
                 bad.append(f"{k}={v}")
+        cd = scope.get("campaign_dir")
+        if isinstance(cd, str) and cd.startswith(("/", "~")):
+            bad.append(f"campaign_dir={cd}")  # an absolute path names someone's file system
     return bad
 
 
