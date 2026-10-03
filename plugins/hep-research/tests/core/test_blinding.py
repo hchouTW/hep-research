@@ -134,6 +134,80 @@ class ScanTests(unittest.TestCase):
             self.assertEqual(audit.main(["scan", "--sealed", str(private / "sealed.json"), str(private)]), 2)
 
 
+@unittest.skipUnless(HAVE, "numpy required")
+class ScanCompletenessAuditT04(unittest.TestCase):
+    """Audit T04: .npy caches are read, and a scan that could not read every output is not a pass."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.out = Path(self.tmp.name)
+        self.sealed = bl.seal(EDGES, DATA, SR, [MC])
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_sealed_value_in_npy_detected(self):
+        np.save(self.out / "cache.npy", np.array(DATA))
+        rep = bl.scan_paths([self.out / "cache.npy"], self.sealed)
+        self.assertEqual(rep["status"], "fail")
+        self.assertFalse(rep["ok"])
+        self.assertTrue(any(lk["sealed_value"] == 1234.567 for lk in rep["leaks"]))
+
+    def test_clean_npy_scans_to_completion(self):
+        m = bl.mask_binned(EDGES, DATA, SR)["values"]
+        np.save(self.out / "cache.npy", np.array([v if v is not None else np.nan for v in m]))
+        rep = bl.scan_paths([self.out / "cache.npy"], self.sealed)
+        self.assertEqual((rep["status"], rep["ok"], rep["unscanned"]), ("pass", True, []))
+        self.assertEqual(len(rep["scanned"]), 1)
+
+    def test_unsupported_only_is_incomplete_not_ok(self):
+        (self.out / "hist.root").write_bytes(b"root")
+        rep = bl.scan_paths([self.out / "hist.root"], self.sealed)
+        self.assertEqual(rep["status"], "incomplete")
+        self.assertFalse(rep["ok"])
+        strict = bl.scan_paths([self.out / "hist.root"], self.sealed, strict=True)
+        self.assertEqual(strict["status"], "fail")
+        self.assertIn("incomplete", " ".join(strict["reasons"]))
+
+    def test_named_exemption_with_reason(self):
+        (self.out / "table.csv").write_text("bin,data\n0,812\n")
+        (self.out / "plot.png").write_bytes(b"png")
+        ex = {str(self.out / "plot.png"): "drawn from masked data; checked with check_figure in make_plots.py"}
+        rep = bl.scan_paths([self.out], self.sealed, strict=True, exemptions=ex)
+        self.assertEqual(rep["status"], "pass", rep)
+        self.assertEqual([e["file"] for e in rep["exempted"]], [str(self.out / "plot.png")])
+        rep = bl.scan_paths([self.out], self.sealed, strict=True, exemptions={str(self.out / "plot.png"): ""})
+        self.assertEqual(rep["status"], "fail", "an exemption needs a reason")
+
+    def test_exemption_cannot_hide_a_scannable_leak(self):
+        (self.out / "run.log").write_text("SR 1234.567\n")
+        rep = bl.scan_paths([self.out], self.sealed, strict=True, exemptions={str(self.out / "run.log"): "trust me"})
+        self.assertEqual(rep["status"], "fail")
+        self.assertTrue(rep["leaks"])
+
+    def test_publication_manifest_needs_a_record_for_every_output(self):
+        (self.out / "table.csv").write_text("bin,data\n0,812\n")
+        missing = str(self.out / "fit.json")
+        rep = bl.scan_paths([self.out], self.sealed, strict=True, outputs=[str(self.out / "table.csv"), missing])
+        self.assertEqual(rep["status"], "fail")
+        self.assertEqual(rep["outputs_without_record"], [missing])
+
+    def test_cli_exit_codes(self):
+        import audit_blinded_outputs as audit
+        private = Path(self.tmp.name) / "private"
+        private.mkdir()
+        (private / "sealed.json").write_text(json.dumps({"sealed": self.sealed}))
+        outd = self.out / "outputs"
+        outd.mkdir()
+        (outd / "a.csv").write_text("x\n812\n")
+        (outd / "b.root").write_bytes(b"x")
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(audit.main(["scan", "--sealed", str(private / "sealed.json"), str(outd)]), 3)
+            self.assertEqual(audit.main(["scan", "--strict", "--sealed", str(private / "sealed.json"), str(outd)]), 1)
+            self.assertEqual(audit.main(["scan", "--strict", "--exempt", f"{outd / 'b.root'}=made from masked arrays by make_hist.py",
+                                         "--sealed", str(private / "sealed.json"), str(outd)]), 0)
+
+
 @unittest.skipUnless(HAVE, "numpy and matplotlib required")
 class FigureTests(unittest.TestCase):
     def centers(self):

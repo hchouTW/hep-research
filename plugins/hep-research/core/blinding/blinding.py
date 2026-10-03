@@ -14,8 +14,15 @@ A region is {"variable": name, "low": x0, "high": x1}; a bin is blinded when it 
                                              printed precision
 - check_figure(fig, region)               -> data points drawn inside the blinded range of the x axis
 
+Scan status: "pass" (every output was read and none contains a sealed number), "fail" (a sealed number was found)
+or "incomplete" (some output could not be read: a binary format, or nothing was scanned). Only "pass" sets ok.
+Strict publication mode (strict=True) also fails an incomplete scan, requires a written reason for every exemption,
+and, given the list of outputs to publish, requires a scan record or a named exemption for each of them. An
+exemption never hides a file the scanner can read: such files are scanned anyway.
+
 Passing these checks shows that the listed outputs do not contain the sealed numbers at the precisions tested.
-It is not an authorization to unblind, and it cannot see values that were transformed in ways not sealed.
+It is not an authorization to unblind, and it cannot see values that were transformed in ways not sealed
+(rescaled, shifted, smoothed, fitted or otherwise derived numbers): that limitation stays whatever the status.
 """
 from __future__ import annotations
 
@@ -129,30 +136,66 @@ def scan_file(path: Path, sealed, rtol: float = 1e-9) -> list[dict]:
     suf = path.suffix.lower()
     if suf in (".npy", ".npz"):
         import numpy as np
+        if suf == ".npy":  # np.load returns a plain ndarray (no file handle stays open)
+            arrays = {"": np.load(path, allow_pickle=False)}
+        else:  # NpzFile keeps the archive open until closed
+            with np.load(path, allow_pickle=False) as data:
+                arrays = {k: data[k] for k in data.files}
         hits = []
-        with np.load(path, allow_pickle=False) as data:
-            arrays = {k: data[k] for k in data.files} if suf == ".npz" else {"": data}
-            for k, arr in arrays.items():
-                hits += [dict(h, array=k) for h in _scan_array(arr, sealed, rtol)]
+        for k, arr in arrays.items():
+            hits += [dict(h, array=k) for h in _scan_array(arr, sealed, rtol)]
         return hits
     if suf in TEXT_SUFFIXES or suf == "":
         return scan_text(path.read_text(encoding="utf-8", errors="replace"), sealed, rtol)
     return [{"unscanned": True, "reason": f"binary format '{suf}' is not scanned; produce it from masked data and check it with check_figure or a dedicated reader"}]
 
 
-def scan_paths(paths, sealed, rtol: float = 1e-9) -> dict:
-    report = {"leaks": [], "unscanned": [], "scanned": []}
+LIMITATION = ("a pass means the sealed numbers were not found at the precisions tested; values transformed in ways "
+              "that were not sealed cannot be detected")
+
+
+def scan_paths(paths, sealed, rtol: float = 1e-9, strict: bool = False, exemptions: dict | None = None,
+               outputs=None) -> dict:
+    """Scan files and directories. exemptions: {path: reason} for outputs the scanner cannot read (checked another
+    way); outputs: in strict mode, every output that will be published (each needs a scan record or an exemption)."""
+    ex = {str(Path(k).resolve()): str(v or "").strip() for k, v in (exemptions or {}).items()}
+    report = {"leaks": [], "unscanned": [], "scanned": [], "exempted": [], "reasons": [], "strict": strict,
+              "limitation": LIMITATION}
     for p in paths:
         p = Path(p)
         files = sorted(x for x in p.rglob("*") if x.is_file()) if p.is_dir() else [p]
         for f in files:
             res = scan_file(f, sealed, rtol)
             if res and res[0].get("unscanned"):
-                report["unscanned"].append({"file": str(f), "reason": res[0]["reason"]})
+                why = ex.get(str(f.resolve()))
+                if why:
+                    report["exempted"].append({"file": str(f), "reason": why})
+                else:
+                    report["unscanned"].append({"file": str(f), "reason": res[0]["reason"]})
+                    if strict and str(f.resolve()) in ex:
+                        report["reasons"].append(f"exemption for {f} has no reason")
                 continue
             report["scanned"].append(str(f))
             report["leaks"] += [dict(h, file=str(f)) for h in res]
-    report["ok"] = not report["leaks"]
+    if strict and outputs is not None:
+        recorded = {str(Path(x).resolve()) for x in report["scanned"]} | {str(Path(e["file"]).resolve()) for e in report["exempted"]}
+        report["outputs_without_record"] = [str(o) for o in outputs if str(Path(o).resolve()) not in recorded]
+    incomplete = []
+    if report["unscanned"]:
+        incomplete.append(f"{len(report['unscanned'])} output(s) not scanned: " + ", ".join(u["file"] for u in report["unscanned"][:5]))
+    if not report["scanned"]:
+        incomplete.append("no output was scanned")
+    if report.get("outputs_without_record"):
+        incomplete.append("outputs with no scan record or exemption: " + ", ".join(report["outputs_without_record"][:5]))
+    if report["leaks"]:
+        report["status"] = "fail"
+        report["reasons"].insert(0, f"{len(report['leaks'])} sealed value(s) found")
+    elif incomplete:
+        report["status"] = "fail" if strict else "incomplete"
+        report["reasons"] += [f"incomplete: {x}" for x in incomplete]
+    else:
+        report["status"] = "fail" if report["reasons"] else "pass"
+    report["ok"] = report["status"] == "pass"
     return report
 
 

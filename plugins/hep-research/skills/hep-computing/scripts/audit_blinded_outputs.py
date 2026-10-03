@@ -5,9 +5,14 @@ Two steps, so the blinded numbers never sit inside the audited outputs:
   seal:  python3 audit_blinded_outputs.py seal --hist hist.json --low 120 --high 130 [--reference mc.json] --out /private/sealed.json
          hist.json / mc.json: {"edges": [...], "values": [...]}. Writes the numbers no output may contain.
   scan:  python3 audit_blinded_outputs.py scan --sealed /private/sealed.json OUTPUT_DIR_OR_FILES... [--rtol 1e-9]
+                [--strict] [--exempt PATH=REASON ...] [--outputs MANIFEST.json]
          Scans text outputs (JSON, CSV, logs, Markdown, SVG, ...) at full and printed precision, and .npy/.npz caches.
-         Binary images are listed as unscanned: check figures in code with core.blinding.check_figure.
-Exit codes: 0 no leak found, 1 leak found, 2 usage or input error. A clean scan is not an authorization to unblind.
+         Binary images are listed as unscanned (status "incomplete"): check figures in code with
+         core.blinding.check_figure and name each such file with --exempt and the reason.
+         --strict (publication): an incomplete scan fails, every exemption needs a reason, and with --outputs (a JSON
+         list of the files to publish) every listed output needs a scan record or an exemption.
+Exit codes: 0 pass (every output read, no leak found), 1 leak found or strict failure, 2 usage or input error,
+3 incomplete (no leak found, but not every output was read). A clean scan is not an authorization to unblind.
 """
 from __future__ import annotations
 
@@ -32,6 +37,10 @@ def main(argv=None) -> int:
     c = sub.add_parser("scan")
     c.add_argument("--sealed", type=Path, required=True)
     c.add_argument("--rtol", type=float, default=1e-9)
+    c.add_argument("--strict", action="store_true", help="publication mode: incomplete scans fail")
+    c.add_argument("--exempt", action="append", default=[], metavar="PATH=REASON",
+                   help="an output checked another way (for example a figure checked with check_figure), with the reason")
+    c.add_argument("--outputs", type=Path, help="strict mode: JSON list of every output to publish")
     c.add_argument("paths", nargs="+", type=Path)
     args = ap.parse_args(argv)
     try:
@@ -47,9 +56,17 @@ def main(argv=None) -> int:
         if any(sealed_path == p.resolve() or p.resolve() in sealed_path.parents for p in args.paths):
             print(json.dumps({"error": "the sealed file lies inside the audited outputs"}))
             return 2
-        rep = scan_paths(args.paths, sealed, args.rtol)
-        print(json.dumps({k: rep[k] for k in ("ok", "leaks", "unscanned")} | {"scanned_files": len(rep["scanned"])}, indent=1))
-        return 0 if rep["ok"] else 1
+        exemptions = {}
+        for item in args.exempt:
+            path, sep, reason = item.partition("=")
+            if not sep:
+                raise ValueError(f"--exempt needs PATH=REASON, got {item!r}")
+            exemptions[path] = reason
+        outputs = json.loads(args.outputs.read_text(encoding="utf-8")) if args.outputs else None
+        rep = scan_paths(args.paths, sealed, args.rtol, strict=args.strict, exemptions=exemptions, outputs=outputs)
+        keys = ("status", "ok", "reasons", "leaks", "unscanned", "exempted", "outputs_without_record", "limitation")
+        print(json.dumps({k: rep[k] for k in keys if k in rep} | {"scanned_files": len(rep["scanned"])}, indent=1))
+        return {"pass": 0, "fail": 1, "incomplete": 3}[rep["status"]]
     except (OSError, ValueError, KeyError) as exc:
         print(json.dumps({"error": str(exc)}))
         return 2
