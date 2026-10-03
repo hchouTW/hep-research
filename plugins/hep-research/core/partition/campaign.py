@@ -163,8 +163,8 @@ def submit(campaign_dir, executor, config: dict, chunk_ids=None, approved: bool 
         row = _row(state, r["chunk_id"])
         prev = row["attempt_records"][-1] if row["attempt_records"] else None
         change = None
-        if prev and prev.get("final_state") in ("timeout", "out-of-memory"):
-            change = {"after": prev["final_state"], "from": prev.get("resources"), "to": config.get("resources")}
+        if prev and prev.get("resources_hash") not in (None, rh):  # recorded whenever the request changed
+            change = {"after": prev.get("final_state"), "from": prev.get("resources"), "to": config.get("resources")}
         row["attempt_records"].append({
             "attempt_id": r["attempt_id"], "chunk_id": r["chunk_id"], "backend": executor.name, "job_id": job_of.get(r["attempt_id"]),
             "submission": sid, "submission_dir": str(sub_dir), "outputs_dir": str(cdir / "outputs" / r["chunk_id"]), "submit_time": clock(), "origin": _origin, "state": "queued",
