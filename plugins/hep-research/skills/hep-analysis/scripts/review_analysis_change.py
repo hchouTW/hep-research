@@ -28,7 +28,7 @@ import sys
 
 OUTCOME_SEEN = re.compile(r"signal[- ]region data|unblinded|observed result|fit result|outcome|significance|p-value", re.I)
 OUTCOME_MOTIVE = re.compile(r"(to|so that).{0,40}(agree|match|improve|increase|reduce|remove).{0,40}"
-                            r"(excess|deficit|significance|signal|result|limit|tension)|(excess|tension|significance)", re.I)
+                            r"(excess|deficit|significance|signal(?![- ]to[- ]background)|result|limit|tension)|(excess|tension|significance)", re.I)
 
 
 def review(change: dict) -> dict:
@@ -55,7 +55,10 @@ def review(change: dict) -> dict:
 
 def main(argv=None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
-    if len(args) != 1 or args[0] in ("-h", "--help"):
+    if args and args[0] in ("-h", "--help"):
+        print(__doc__)
+        return 0
+    if len(args) != 1:
         print(__doc__)
         return 2
     try:
@@ -63,6 +66,9 @@ def main(argv=None) -> int:
             changes = json.load(fh)["changes"]
     except (OSError, ValueError, KeyError) as exc:
         print(json.dumps({"error": str(exc)}))
+        return 2
+    if not isinstance(changes, list) or not all(isinstance(c, dict) for c in changes):
+        print(json.dumps({"error": "'changes' must be a list of objects"}))
         return 2
     rows = [review(c) for c in changes]
     print(json.dumps({"changes": rows, "flagged": sum(r["decision"] == "flag" for r in rows)}, indent=1))

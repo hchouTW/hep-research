@@ -10,7 +10,7 @@ a transformation, mapping or assumption the caller does not declare does not exi
 Usage: python3 contracts/comparison/gate.py PREDICTION.json MEASUREMENT.json [--plan PLAN.json]
   PREDICTION.json: a prediction artifact. MEASUREMENT.json: a dataset-record or measurement-spec artifact.
   PLAN.json: {"transformations": [...], "mappings": [...], "measurement_conditions": {...}}
-Exit 0 comparable, 1 not comparable, 2 unreadable input. Output: JSON gate result.
+Exit 0 comparable, 1 not comparable, 2 unreadable or malformed input. Output: JSON gate result.
 
 Transformation kinds (each {"kind", "owner", "justification", ...}):
   level-identification       {"from", "to"}: two levels treated as the same for this observable (justify why)
@@ -42,6 +42,9 @@ NON_GAUSSIAN = {"scale-envelope", "model-alternative", "truncation"}
 STICKY = ["failed", "unvalidated", "preliminary", "synthetic", "asimov", "user-supplied"]
 QUANTITY_AFTER_INTEGRATION = {"differential-cross-section": "cross-section", "differential-flux": "flux"}
 EDGE_TOL = 1e-12
+# Fields a transformation must declare before it can be applied (see the kinds in the module docstring).
+NEEDS = {"level-identification": ("from", "to"), "fiducial-restriction": ("variable", "range"), "rebin": ("edges",),
+         "variable-change": ("from", "to"), "unit-conversion": ("from", "to")}
 
 
 def _edges_equal(a, b) -> bool:
@@ -95,6 +98,15 @@ def _apply(st: dict, t: dict, i: int, mism: list) -> None:
         _mm(mism, where, k, None, "transformation without an owning skill", "name the skill that owns it (contracts 7.10)")
     if k in ("level-identification", "variable-change", "unit-conversion", "apply-correction") and not t.get("justification"):
         _mm(mism, where, k, None, f"'{k}' needs a written justification", "state why it is valid for this observable")
+    missing = [f for f in NEEDS.get(k, ()) if t.get(f) in (None, "", [])]
+    rng = t.get("range")
+    if k == "fiducial-restriction" and not missing and not (isinstance(rng, list) and len(rng) == 2
+                                                           and all(isinstance(x, (int, float)) for x in rng)):
+        missing = ["range"]
+    if missing:
+        _mm(mism, where, k, None, f"'{k}' is incomplete: needs {', '.join(repr(f) for f in missing)}",
+            "declare every field of the transformation (see the gate's transformation kinds)")
+        return
     if k == "level-identification":
         if st["level"] != t.get("from"):
             _mm(mism, where, st["level"], t.get("from"), "level identification starts from a different level", "fix 'from'")
@@ -294,8 +306,12 @@ def main(argv=None) -> int:
     except (OSError, ValueError, IndexError) as exc:
         print(json.dumps({"error": str(exc)}))
         return 2
-    res = gate(side_from_artifact(pred), side_from_artifact(meas), plan.get("transformations", []), plan.get("mappings", []),
-               plan.get("measurement_conditions"))
+    try:
+        res = gate(side_from_artifact(pred), side_from_artifact(meas), plan.get("transformations", []), plan.get("mappings", []),
+                   plan.get("measurement_conditions"))
+    except (AttributeError, KeyError, TypeError, ValueError) as exc:
+        print(json.dumps({"error": f"malformed input: {exc!r}"}))
+        return 2
     print(json.dumps(res, indent=1))
     return 0 if res["comparable"] else 1
 

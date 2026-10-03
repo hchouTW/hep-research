@@ -56,6 +56,13 @@ class YieldTableTests(unittest.TestCase):
         proc = run('region,sample,yield\nSR,ttbar,abc\n')
         self.assertNotEqual(proc.returncode, 0)
 
+    def test_errors_are_reported_without_traceback(self):
+        for proc in (run(path=Path('/nonexistent/yields.csv')), run(''), run('region,sample\nSR,ttbar\n'),
+                     run('region,sample,yield\nSR,ttbar,abc\n')):
+            self.assertNotEqual(proc.returncode, 0)
+            self.assertNotIn('Traceback', proc.stderr)
+            self.assertTrue(proc.stderr.startswith('error: '), proc.stderr)
+
 
 if __name__ == '__main__':
     unittest.main()

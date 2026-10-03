@@ -101,6 +101,13 @@ class BundleInPluginTests(unittest.TestCase):
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
         self.assertIn("Bundle OK", proc.stdout)
 
+    def test_help_prints_usage_without_validating(self) -> None:
+        proc = subprocess.run([sys.executable, str(ROOT / "scripts" / "validate_skill_bundle.py"), "--help"],
+                              capture_output=True, text=True)
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        self.assertIn("usage:", proc.stdout)
+        self.assertNotIn("Bundle OK", proc.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

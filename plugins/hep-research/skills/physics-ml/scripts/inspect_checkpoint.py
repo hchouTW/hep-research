@@ -2,6 +2,7 @@
 """Inspect a PyTorch checkpoint without loading it onto GPU."""
 
 import argparse
+import pickle
 import sys
 from collections.abc import Mapping
 
@@ -32,14 +33,20 @@ def describe_value(value, indent=0):
 
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("checkpoint")
+    parser.add_argument("--unsafe-full-unpickle", action="store_true",
+                        help="load with weights_only=False (full pickle, can run arbitrary code); only for files you trust")
     args = parser.parse_args()
 
     if torch is None:
         sys.exit(f"PyTorch is required to run this script but could not be imported: {_TORCH_IMPORT_ERROR}")
 
-    ckpt = torch.load(args.checkpoint, map_location="cpu")
+    try:
+        ckpt = torch.load(args.checkpoint, map_location="cpu", weights_only=not args.unsafe_full_unpickle)
+    except pickle.UnpicklingError as exc:
+        sys.exit(f"Refused to load {args.checkpoint} with weights_only=True: {exc}\n"
+                 "Re-run with --unsafe-full-unpickle only if you trust this file.")
     describe_value(ckpt)
 
 

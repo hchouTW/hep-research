@@ -18,6 +18,7 @@ location. `python3 ${CLAUDE_PLUGIN_ROOT}/skills/hep-computing/scripts/validate_s
 """
 from __future__ import annotations
 
+import argparse
 import re
 from pathlib import Path
 
@@ -97,7 +98,9 @@ def check_template_sections(text: str) -> list[str]:
     return problems
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
+    argparse.ArgumentParser(description=__doc__.split("\n\n")[0],
+                            epilog="Takes no arguments; paths resolve relative to this script.").parse_args(argv)
     root = Path(__file__).resolve().parents[1]
     missing = [path for path in REQUIRED_PATHS if not (root / path).exists()]
     empty = [

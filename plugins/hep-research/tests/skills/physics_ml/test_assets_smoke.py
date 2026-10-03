@@ -54,6 +54,26 @@ class AssetSmokeTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("prediction:", result.stdout)
 
+    def test_inference_loads_weights_only_unless_opted_in(self):
+        import torch
+
+        sys.path.insert(0, str(ASSETS))
+        try:
+            from models import MLPClassifier
+        finally:
+            sys.path.remove(str(ASSETS))
+        ckpt = self.dir / "probe.pt"
+        torch.save({"model_state_dict": MLPClassifier(8, 16, 3).state_dict(), "probe": _UnpickleProbe()}, ckpt)
+        cmd = [sys.executable, str(ASSETS / "inference.py"), str(ckpt), "--input-dim", "8", "--hidden-dim", "16",
+               "--num-classes", "3"]
+        safe = run(cmd, self.dir)
+        self.assertNotEqual(safe.returncode, 0)
+        self.assertNotIn("UNPICKLE-EXECUTED", safe.stdout)
+        unsafe = run(cmd + ["--unsafe-full-unpickle"], self.dir)
+        self.assertEqual(unsafe.returncode, 0, unsafe.stderr)
+        self.assertIn("UNPICKLE-EXECUTED", unsafe.stdout)
+        self.assertIn("prediction:", unsafe.stdout)
+
     def test_transformer_classifier_forward_backward(self):
         result = run([sys.executable, str(ASSETS / "transformer_classifier.py")], self.dir)
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -131,6 +151,13 @@ class AssetSmokeTests(unittest.TestCase):
         saved = torch_load(self.dir / "best.pt")
         self.assertEqual(saved["classes"], ["synthetic_a", "synthetic_b"])
         self.assertEqual(tuple(saved["model_state_dict"]["fc.weight"].shape), (2, 512))
+
+
+class _UnpickleProbe:
+    """Pickles to a call of print(); a full unpickle executes it, weights_only=True refuses it."""
+
+    def __reduce__(self):
+        return (print, ("UNPICKLE-EXECUTED",))
 
 
 def torch_load(path: Path):

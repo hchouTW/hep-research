@@ -32,7 +32,23 @@ import json
 import math
 import sys
 
-import numpy as np
+try:
+    import numpy as np
+except ImportError:  # --help works without numpy; main() reports the missing package
+    np = None
+
+
+def require_packages():
+    """Exit with a clear message when numpy, awkward or uproot is not installed."""
+    missing = []
+    for name in ("numpy", "awkward", "uproot"):
+        try:
+            __import__(name)
+        except ImportError:
+            missing.append(name)
+    if missing:
+        sys.exit(f"error: missing required package(s): {', '.join(missing)}. "
+                 "Install them with: pip install numpy awkward 'uproot>=5'")
 
 
 def generate(n_events=400, seed=1, neg_frac=0.2):
@@ -106,6 +122,7 @@ def main(argv=None):
     args = ap.parse_args(argv)
     if args.events < 1 or not 0.0 <= args.neg_frac <= 1.0:
         ap.error("--events must be >= 1 and --neg-frac in [0, 1]")
+    require_packages()
     pt, eta, phi, mass, weight = generate(args.events, args.seed, args.neg_frac)
     write_file(args.out, pt, eta, phi, mass, weight)
     summary = {"file": args.out, "synthetic": True, "events": args.events, "seed": args.seed,

@@ -132,6 +132,22 @@ class RealBundle(unittest.TestCase):
         result = self.run_script("check_diagram_sources.py")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
+    def test_help_prints_usage_and_exits_zero(self):
+        result = subprocess.run([sys.executable, str(ROOT / "scripts" / "check_diagram_sources.py"), "--help"],
+                                capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("usage:", result.stdout)
+        self.assertNotIn("Traceback", result.stderr)
+
+    def test_explicit_file_argument_still_checked(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            md = Path(tmp) / "bad.md"
+            md.write_text("```mermaid\nflowchart LR\n  A[open --> B\n```\n", encoding="utf-8")
+            result = subprocess.run([sys.executable, str(ROOT / "scripts" / "check_diagram_sources.py"), str(md)],
+                                    capture_output=True, text=True)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("Checked 1 block(s)", result.stdout)
+
     def test_every_example_has_caption_and_source(self):
         for path in sorted((ROOT / "examples").rglob("[0-9]*.md")):
             text = path.read_text(encoding="utf-8")

@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 """Check the local PyTorch environment."""
 
+import argparse
 import platform
 import sys
+
+argparse.ArgumentParser(
+    description="Check the local PyTorch environment: versions, CUDA/MPS availability and a CPU autograd smoke test.",
+    epilog="Exit codes: 0 OK, 1 torch cannot be imported, 2 smoke test failed.",
+).parse_args()
 
 try:
     import torch

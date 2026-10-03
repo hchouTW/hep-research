@@ -19,6 +19,7 @@ Exit status 1 if any checked block fails. Standard library only.
 """
 from __future__ import annotations
 
+import argparse
 import re
 import shutil
 import subprocess
@@ -113,8 +114,10 @@ def check_svg(source: str) -> str | None:
 
 
 def main(argv: list[str]) -> int:
+    ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    ap.add_argument("paths", nargs="*", type=Path, help="markdown files to check (default: every .md in the skill)")
     root = Path(__file__).resolve().parents[1]
-    paths = [Path(a) for a in argv] or sorted(root.rglob("*.md"))
+    paths = ap.parse_args(argv).paths or sorted(root.rglob("*.md"))
     have_dot = shutil.which("dot") is not None
     if not have_dot:
         print("note: Graphviz `dot` not found; skipping DOT compilation")

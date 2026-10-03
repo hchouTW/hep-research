@@ -6,8 +6,9 @@ A region is {"variable": name, "low": x0, "high": x1}; a bin is blinded when it 
 - mask_binned(edges, values, region)      -> values with blinded bins replaced by None, plus the mask
 - mask_ratio(num, den, mask)              -> ratio with every blinded bin masked (a ratio reveals its numerator)
 - seal(edges, values, region, references) -> the numbers an output must never contain: each blinded bin value,
-                                             the blinded-region sum, every total that includes a blinded bin, and
-                                             ratios and differences to reference predictions in blinded bins
+                                             the blinded-region sum, the grand total, every cumulative sum (from
+                                             either end) that includes a blinded bin, and ratios and differences
+                                             to reference predictions in blinded bins
 - scan_text / scan_file / scan_paths      -> find sealed numbers in text (logs, CSV, Markdown, JSON, SVG) and
                                              numeric caches (.npy/.npz), within a relative tolerance and at the
                                              printed precision
@@ -47,14 +48,27 @@ def mask_ratio(num, den, mask) -> list:
 
 
 def seal(edges, values, region: dict, references=()) -> list[float]:
-    """Numbers that would reveal blinded content: blinded bin values, their sum, every total containing them, and
+    """Numbers that would reveal blinded content: blinded bin values, their sum, the grand total, every cumulative
+    sum from either end that includes a blinded bin (integrated yields above or below a threshold, CDF tables), and
     for each reference array (for example an MC prediction drawn next to data) the ratio and difference in each
-    blinded bin and of the blinded-region sums."""
+    blinded bin and of the blinded-region sums. Sums over other bin ranges are not sealed."""
     m = blinded_mask(edges, region)
-    blind = [float(v) for v, b in zip(values, m) if b]
+    if len(values) != len(m):
+        raise ValueError("values need one entry per bin")
+    if any(v is None for v in values):
+        raise ValueError("seal needs the unmasked values (got None entries)")
+    vals = [float(v) for v in values]
+    blind = [v for v, b in zip(vals, m) if b]
     if not blind:
         return []
-    out = blind + [sum(blind), float(sum(values))]
+    out = blind + [sum(blind), sum(vals)]
+    for order in (range(len(vals)), range(len(vals) - 1, -1, -1)):
+        acc, seen = 0.0, False
+        for i in order:
+            acc += vals[i]
+            seen = seen or m[i]
+            if seen:
+                out.append(acc)
     for ref in references:
         rb = [float(r) for r, b in zip(ref, m) if b]
         out += [v / r for v, r in zip(blind, rb) if r] + [v - r for v, r in zip(blind, rb)]
@@ -80,14 +94,18 @@ def _printed_match(token: str, target: float) -> bool:
     return abs(float(token) - target) <= 0.5 * step * (1 + 1e-9)
 
 
+GROUPED = re.compile(r"[-+]?\d{1,3}(?:,\d{3})+(?:\.\d*)?(?:[eE][-+]?\d+)?")  # thousands separators: 1,234.5
+
+
 def scan_text(text: str, sealed, rtol: float = 1e-9) -> list[dict]:
     hits = []
-    for mt in NUMBER.finditer(text):
-        tok = mt.group(0)
+    tokens = [(mt.start(), mt.group(0)) for mt in NUMBER.finditer(text)]
+    tokens += [(mt.start(), mt.group(0).replace(",", "")) for mt in GROUPED.finditer(text)]
+    for start, tok in tokens:
         x = float(tok)
         for t in sealed:
             if _close(x, t, rtol) or _printed_match(tok, t):
-                line = text.count("\n", 0, mt.start()) + 1
+                line = text.count("\n", 0, start) + 1
                 hits.append({"line": line, "token": tok, "sealed_value": t})
                 break
     return hits

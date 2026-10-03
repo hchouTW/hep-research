@@ -54,6 +54,56 @@ class HelpAlwaysWorksTests(unittest.TestCase):
                 self.assertIn("usage:", result.stdout)
 
 
+class HelpWithoutTorchTests(unittest.TestCase):
+    def test_check_pytorch_env_help_exits_zero(self):
+        result = subprocess.run([sys.executable, str(SCRIPTS / "check_pytorch_env.py"), "--help"],
+                                capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("usage:", result.stdout)
+        self.assertNotIn("Could not import torch", result.stdout)
+
+    def test_inspect_checkpoint_documents_unsafe_opt_in(self):
+        result = subprocess.run([sys.executable, str(SCRIPTS / "inspect_checkpoint.py"), "--help"],
+                                capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("--unsafe-full-unpickle", result.stdout)
+        self.assertIn("trust", result.stdout)
+
+
+class _UnpickleProbe:
+    """Pickles to a call of print(); a full unpickle executes it, weights_only=True refuses it."""
+
+    def __reduce__(self):
+        return (print, ("UNPICKLE-EXECUTED",))
+
+
+@unittest.skipUnless(TORCH_AVAILABLE, "PyTorch not installed")
+class InspectCheckpointWeightsOnlyTests(unittest.TestCase):
+    def test_weights_only_by_default_and_explicit_opt_in(self):
+        import tempfile
+
+        import torch
+
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "ckpt.pt"
+            torch.save({"w": torch.zeros(2), "probe": _UnpickleProbe()}, path)
+            cmd = [sys.executable, str(SCRIPTS / "inspect_checkpoint.py"), str(path)]
+            safe = subprocess.run(cmd, capture_output=True, text=True)
+            self.assertNotEqual(safe.returncode, 0)
+            self.assertNotIn("UNPICKLE-EXECUTED", safe.stdout)
+            self.assertIn("--unsafe-full-unpickle", safe.stderr)
+            self.assertNotIn("Traceback", safe.stderr)
+            unsafe = subprocess.run(cmd + ["--unsafe-full-unpickle"], capture_output=True, text=True)
+            self.assertEqual(unsafe.returncode, 0, unsafe.stderr)
+            self.assertIn("UNPICKLE-EXECUTED", unsafe.stdout)
+            plain = Path(tmp) / "plain.pt"
+            torch.save({"w": torch.zeros(2)}, plain)
+            ok = subprocess.run([sys.executable, str(SCRIPTS / "inspect_checkpoint.py"), str(plain)],
+                                capture_output=True, text=True)
+            self.assertEqual(ok.returncode, 0, ok.stderr)
+            self.assertIn("Tensor shape=(2,)", ok.stdout)
+
+
 class ImportGuardStateTests(unittest.TestCase):
     """The guarded `import torch` sets consistent module-level state either way."""
 

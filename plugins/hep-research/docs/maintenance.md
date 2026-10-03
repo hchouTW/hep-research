@@ -24,10 +24,22 @@ separately; a skipped test (missing tool) is unverified, never passing.
 
 ## Rerunning comparisons and examples
 
-Each example writes byte-reproducible output with its seed and tolerances:
-`examples/ams-flux-ratio/run.py`, `examples/collider-angular/run.py`, `examples/qed-prediction/run.py`,
-`examples/theory-comparison/run.py`, `examples/published-comparison/run.py`,
-`examples/local-partition/run.py`, `examples/detector-resolution/run.py`, `examples/recasting/run.py` (each takes `--help`). `tests/examples/` compares a fresh run with the
+Each example writes byte-reproducible output with its seed and tolerances; run `python3 examples/<name>/run.py`
+from the plugin root (each takes `--help`; the seeds are in each `output/report.md`). The task file's names for them:
+
+| Example | Task name | Journey |
+|---|---|---|
+| `examples/ams-flux-ratio/` | Path A | J1 |
+| `examples/detector-resolution/` | J2 | J2 |
+| `examples/collider-angular/` | Path B | J3 |
+| `examples/qed-prediction/` | Path C | J4 |
+| `examples/theory-comparison/` (run after B and C) | Path D | J5 |
+| `examples/published-comparison/` | T24 | J6 |
+| `examples/recasting/` | J7 | J7 |
+| `examples/local-partition/` | T21 | - |
+| `examples/end-to-end-sample/` | (pyhf smoke test) | - |
+
+`tests/examples/` compares a fresh run with the
 committed output. When a change alters a committed number, explain why in the commit, regenerate the output, and
 record the old and new values; a change beyond the declared tolerance is a breaking change.
 

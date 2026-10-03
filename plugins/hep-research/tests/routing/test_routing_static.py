@@ -16,9 +16,10 @@ class StaticRoutingTests(unittest.TestCase):
         self.assertGreaterEqual(rep["cases"], 7 * 3 + 12)
 
     def test_cases_file_is_generated_from_the_table(self):
-        before = (ROOT / "tests" / "routing" / "cases.json").read_bytes()
-        subprocess.run([sys.executable, str(ROOT / "tests" / "routing" / "make_cases.py")], check=True)
-        self.assertEqual(before, (ROOT / "tests" / "routing" / "cases.json").read_bytes())
+        # compare without rewriting the tracked file, so a hand edit to cases.json fails every run
+        generated = subprocess.run([sys.executable, str(ROOT / "tests" / "routing" / "make_cases.py"), "--stdout"],
+                                   check=True, capture_output=True).stdout
+        self.assertEqual((ROOT / "tests" / "routing" / "cases.json").read_bytes(), generated)
 
 
 if __name__ == "__main__":

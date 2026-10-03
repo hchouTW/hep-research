@@ -27,7 +27,7 @@ SECRET = re.compile(r"BEGIN [A-Z ]*PRIVATE KEY|ghp_[A-Za-z0-9]{20,}|sk-ant-[A-Za
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 EMAIL_OK = {"noreply@anthropic.com"}
 PLACEHOLDER_LOCAL = {"author", "name", "user", "you", "your.name", "first.last", "someone"}  # template placeholders
-TEXT = {".py", ".md", ".json", ".csv", ".txt", ".yaml", ".yml", ".sh", ".C", ".toml", ".cfg", ".tex", ".bib"}
+TEXT = {".py", ".md", ".json", ".csv", ".txt", ".yaml", ".yml", ".sh", ".C", ".cpp", ".h", ".hpp", ".toml", ".cfg", ".tex", ".bib"}
 
 
 def files() -> list[Path]:

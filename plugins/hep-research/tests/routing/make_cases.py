@@ -1,4 +1,4 @@
-"""Writes tests/routing/cases.json (routing cases for task M5.3). Edit the table here, then rerun."""
+"""Writes tests/routing/cases.json (routing cases for task M5.3). Edit the table here, then rerun (--stdout prints instead)."""
 import json
 import sys
 from pathlib import Path
@@ -78,7 +78,12 @@ for cid, lang, kind, prompt, exp, trig, notsk, journey, extra in C:
     if cid in INPUTS:
         d["inputs"] = INPUTS[cid]
     cases.append(d)
-out = Path(__file__).resolve().parent / "cases.json"
-out.write_text(json.dumps({"note": "Routing cases (task M5.3). Static check: tools/check_routing_static.py. "
-                                   "A live check needs approval for paid model calls.", "cases": cases}, indent=1, ensure_ascii=False) + "\n",
-               encoding="utf-8")
+TEXT = json.dumps({"note": "Routing cases (task M5.3). Static check: tools/check_routing_static.py. "
+                           "A live check needs approval for paid model calls.", "cases": cases}, indent=1, ensure_ascii=False) + "\n"
+
+if __name__ == "__main__":
+    # --stdout prints the generated file instead of writing it (used by the tests)
+    if "--stdout" in sys.argv[1:]:
+        sys.stdout.write(TEXT)
+    else:
+        (Path(__file__).resolve().parent / "cases.json").write_text(TEXT, encoding="utf-8")

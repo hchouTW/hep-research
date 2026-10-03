@@ -27,6 +27,8 @@ def satisfies(version: str, spec: str) -> bool:
 
 
 def valid_spec(spec: str) -> bool:
+    if not str(spec).replace(",", "").strip():
+        return False    # an empty range would accept every version
     try:
         satisfies("0.0.0", spec)
         return True

@@ -100,5 +100,36 @@ class SyntheticNanoAODTests(unittest.TestCase):
         self.assertNotEqual(proc.returncode, 0)
 
 
+BLOCK = ("import runpy, sys\n"
+         "for name in sys.argv[2].split(','):\n"
+         "    sys.modules[name] = None\n"
+         "sys.argv = [sys.argv[1]] + sys.argv[3:]\n"
+         "runpy.run_path(sys.argv[0], run_name='__main__')\n")
+
+
+class MissingPackagesTests(unittest.TestCase):
+    """Runs the script with numpy/uproot made unimportable; needs no third-party package itself."""
+
+    def run_blocked(self, blocked, *args):
+        return subprocess.run([sys.executable, '-c', BLOCK, str(SCRIPT), blocked, *args], capture_output=True, text=True)
+
+    def test_help_works_without_numpy(self):
+        proc = self.run_blocked('numpy', '--help')
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertIn('usage:', proc.stdout)
+
+    def test_missing_packages_give_clear_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            for blocked in ('numpy', 'uproot', 'numpy,uproot'):
+                out = Path(tmp) / 'sample.root'
+                proc = self.run_blocked(blocked, '--out', str(out))
+                self.assertNotEqual(proc.returncode, 0)
+                self.assertNotIn('Traceback', proc.stderr)
+                self.assertIn('missing required package(s)', proc.stderr)
+                for name in blocked.split(','):
+                    self.assertIn(name, proc.stderr)
+                self.assertFalse(out.exists())
+
+
 if __name__ == '__main__':
     unittest.main()
