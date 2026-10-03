@@ -767,6 +767,84 @@
    "prompt": "比較這兩個實驗的結果。",
    "expected_primary": "ask",
    "trigger_terms": []
+  },
+  {
+   "id": "co-batch-sbatch-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Write an sbatch job array that runs my 500 toy fits in chunks with reproducible seeds, and merge the outputs without double counting.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "Slurm and HTCondor job arrays",
+    "batch submission, merging and recovery"
+   ],
+   "inputs": {
+    "toy_fit.py": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nimport sys, json, random\nstart, stop, seed = map(int, sys.argv[1:4])\nrandom.seed(seed)\nprint(json.dumps({'n': stop - start}))\n"
+   }
+  },
+  {
+   "id": "co-batch-held-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我的 HTCondor 工作被 hold 住了，原因寫超過記憶體上限，該怎麼處理後再重新提交？",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "held or evicted jobs"
+   ],
+   "inputs": {
+    "events.log": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\n012 (1234.007.000) 2026-10-03 10:00:00 Job was held.\n\tJob exceeded its memory request (synthetic)\n\tCode 34 Subcode 0\n...\n"
+   }
+  },
+  {
+   "id": "co-batch-evicted-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Some of my HTCondor jobs were evicted and restarted, and now the merged histogram seems to count those chunks twice.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "held or evicted jobs",
+    "batch submission, merging and recovery"
+   ],
+   "inputs": {
+    "merge.sh": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\ncat out/*.json > merged.json\n"
+   }
+  },
+  {
+   "id": "co-batch-pilot-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我要在 Slurm 上跑 2000 個 chunk，記憶體和 walltime 要怎麼設定？要先跑一個 pilot 嗎？",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "pilot sizing"
+   ]
+  },
+  {
+   "id": "co-batch-gpu-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Submit my classifier training as single-node GPU jobs on our Slurm cluster, one job per learning rate, and collect the results.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "Slurm and HTCondor job arrays"
+   ],
+   "chain": [
+    "hep-computing",
+    "physics-ml"
+   ],
+   "note": "submission is hep-computing; the model, training and validation hand to physics-ml"
+  },
+  {
+   "id": "co-batch-negative-1",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "My 2000 toy pseudo-experiments finished on the batch cluster. Does my 95% CL Feldman-Cousins interval have the right coverage?",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "Feldman-Cousins",
+    "coverage"
+   ],
+   "not": "hep-computing"
   }
  ]
 }

@@ -53,7 +53,11 @@
    "status": "implemented-batch-schedulers",
    "purpose": "Manifest-based partition, write-once chunk outputs, bounded resubmission and complete merge; executor interface and remote chunk protocol for batch schedulers",
    "files": [
-    "engine"
+    "engine",
+    "campaign",
+    "executors",
+    "runner",
+    "states"
    ],
    "consumers": [
     "skills/hep-computing/scripts/local_partition.py",

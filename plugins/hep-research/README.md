@@ -93,7 +93,8 @@ the config's `local_profile_paths`; check the config with
 - **Optional (skipped in the v1 handover run; each was installed and verified afterwards, see the `*-RUN` sections of
   `VALIDATION.md`, except the tectonic paper build):** PyTorch (`physics-ml` assets), ROOT/PyROOT, uproot and awkward (`hep-computing`
   ROOT tools, `adapters/root-uproot`), pyhf and CMS Combine (`adapters/pyhf-combine`, the end-to-end sample),
-  Graphviz, Mermaid, PlantUML and tectonic (diagrams and papers). Scripts that need them report the missing tool
+  Graphviz, Mermaid, PlantUML and tectonic (diagrams and papers). Slurm and HTCondor (`adapters/batch-schedulers`)
+  have not been run for real: that adapter is `documented` and tested against fake schedulers only. Scripts that need them report the missing tool
   and stop with a `failed` status; tests that need them are skipped and counted as unverified.
 
 ## Offline behavior
