@@ -1,0 +1,55 @@
+{
+ "prompt": "/hep-research:hep-theory Using the theory:qed-benchmark profile, list the conventions it fixes for e+e- -> mu+mu- and name the profile files you read.",
+ "exit_code": 0,
+ "skills_invoked": [],
+ "files_read": [
+  "/private/tmp/claude-501/-Users-hchou-hep-research/6a3c6ab9-a147-409e-b756-331ee9934cf0/scratchpad/routing-e2/market place copy/plugins/hep-research/profiles/registry.json",
+  "/private/tmp/claude-501/-Users-hchou-hep-research/6a3c6ab9-a147-409e-b756-331ee9934cf0/scratchpad/routing-e2/market place copy/plugins/hep-research/profiles/theory/qed-benchmark/index.md",
+  "/private/tmp/claude-501/-Users-hchou-hep-research/6a3c6ab9-a147-409e-b756-331ee9934cf0/scratchpad/routing-e2/market place copy/plugins/hep-research/profiles/theory/qed-benchmark/conventions.json"
+ ],
+ "globs": [
+  {
+   "pattern": "**/*",
+   "path": "/private/tmp/claude-501/-Users-hchou-hep-research/6a3c6ab9-a147-409e-b756-331ee9934cf0/scratchpad/routing-e2/market place copy/plugins/hep-research/profiles/theory/qed-benchmark"
+  }
+ ],
+ "plugin_path": "/private/tmp/claude-501/-Users-hchou-hep-research/6a3c6ab9-a147-409e-b756-331ee9934cf0/scratchpad/routing-e2/market place copy/plugins/hep-research",
+ "model": "claude-opus-5-5",
+ "result": "I used the `theory:qed-benchmark` profile (v1.0.0), which covers tree-level e+e- → μ+μ- through one s-channel photon. It fixes the following conventions:\n\n| Field | Convention fixed by the profile |\n|---|---|\n| Unit system | Natural HEP units: energies in GeV, s in GeV². Cross sections are given in pb (1 nb = 1000 pb). |\n| ħ = c = 1 | Yes |\n| Metric signature | (+,−,−,−), used in the amplitude derivation |\n| Coupling normalization | α = e²/(4π), Heaviside–Lorentz units |\n| Renormalization scheme | `not-applicable` at tree level. α is a fixed input. |\n| Scales | `not-applicable`. There is no renormalization or factorization scale, and α is not run to √s, so there is no scale variation or scale uncertainty. |\n| Energy variable | `sqrt_s` |\n| Frame | Center-of-mass |\n| Angle definition | θ is the angle between the incoming e⁻ and the outgoing μ⁻ in the c.m. frame. |\n| Spin treatment | Unpolarized beams: average over the 4 initial spin states and sum over final spins. |\n| Mass approximation | Electrons are massless. The muon mass is kept in the derivation but set to zero (β → 1) in the numerical prediction. |\n| Reference constant (`qedbench:reference_constant`) | 4πα²/3 = 86.8 nb GeV², to three significant figures, taken from PDG eq. (51.3) (claim `qedbench:C02`) |\n\nTwo points to keep in mind:\n- **Muon mass:** the derivation and the stored numerical prediction use different mass treatments, so any comparison must say which one it uses.\n- **Theory uncertainty:** fixing α removes scale uncertainty only. A truncation uncertainty for missing higher orders still exists, but it is a separate uncertainty object and this file does not quantify it.\n\n**Profile files I read** (paths relative to `plugins/hep-research/profiles/`):\n1. `registry.json`, to find the profile and its path\n2. `theory/qed-benchmark/index.md`, the profile's routing map\n3. `theory/qed-benchmark/conventions.json`, where the conventions above come from\n\nI also listed the directory contents without opening any other files. I didn't need the model description (`models/tree-level-photon-exchange.md`), the derivation record (`derivations/derivation-record.md`), the evidence files (`evidence/sources.json`, `evidence/claims.json`) or the benchmark settings (`benchmarks/path-c.json`). They hold the validity domain, the derivation status, the source behind `qedbench:C02` and the benchmark settings. I can read them if you want any of those.",
+ "cost_usd": 0.18122520000000003,
+ "permission_denials": [],
+ "stderr_tail": "",
+ "host_version": "2.1.288",
+ "memory_paths": {
+  "auto": "/private/tmp/claude-501/-Users-hchou-hep-research/6a3c6ab9-a147-409e-b756-331ee9934cf0/scratchpad/routing-e2/config/projects/-private-tmp-claude-501--Users-hchou-hep-research-6a3c6ab9-a147-409e-b756-331ee9934cf0-scratchpad-routing-e2-invoke-project/memory/"
+ },
+ "mcp_tools": [
+  "mcp__claude_ai_Claude_Docs__batch",
+  "mcp__claude_ai_Claude_Docs__create",
+  "mcp__claude_ai_Claude_Docs__delete",
+  "mcp__claude_ai_Claude_Docs__export",
+  "mcp__claude_ai_Claude_Docs__guide",
+  "mcp__claude_ai_Claude_Docs__query",
+  "mcp__claude_ai_Claude_Docs__read",
+  "mcp__claude_ai_Claude_Docs__update"
+ ],
+ "subtype": "success",
+ "num_turns": 5,
+ "files_read_detail": [
+  {
+   "path": "/private/tmp/claude-501/-Users-hchou-hep-research/6a3c6ab9-a147-409e-b756-331ee9934cf0/scratchpad/routing-e2/market place copy/plugins/hep-research/profiles/registry.json",
+   "inside_plugin": true,
+   "experiment_profile": false
+  },
+  {
+   "path": "/private/tmp/claude-501/-Users-hchou-hep-research/6a3c6ab9-a147-409e-b756-331ee9934cf0/scratchpad/routing-e2/market place copy/plugins/hep-research/profiles/theory/qed-benchmark/index.md",
+   "inside_plugin": true,
+   "experiment_profile": false
+  },
+  {
+   "path": "/private/tmp/claude-501/-Users-hchou-hep-research/6a3c6ab9-a147-409e-b756-331ee9934cf0/scratchpad/routing-e2/market place copy/plugins/hep-research/profiles/theory/qed-benchmark/conventions.json",
+   "inside_plugin": true,
+   "experiment_profile": false
+  }
+ ]
+}

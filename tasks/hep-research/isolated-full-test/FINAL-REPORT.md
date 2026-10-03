@@ -120,3 +120,14 @@ New follow-ups from this run:
    fits" outside v1. Pick one owner and align the case with the descriptions.
 
 Item 6 (isolated-config invocation for F07) can now be closed cheaply: the routing config is logged in.
+
+## Follow-up status, items 6–9 (2026-10-04)
+
+- 6: closed. The isolated-config invocation passes (`results/F07-invoke-hep-theory-loggedin.json`, $0.18).
+- 7: closed as an accepted limitation (user decision): quick questions are sometimes answered without the owning
+  skill; descriptions unchanged.
+- 8: closed. `st-impacts-1` has synthetic pyhf inputs.
+- 9: closed. `out-of-v1-2` expects `hep-theory`.
+
+All follow-ups of this report are now closed. The changed routing cases have not been rerun live.
+

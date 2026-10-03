@@ -445,3 +445,16 @@ Against run 4 on the 48 shared cases: 44/48 (run 4: 43/48). Newly passing: `j08`
 longer passing: `co-direct-1` (no skill) and `out-of-v1-2` (`hep-theory`). Of the 14 cases added since run 4, 12
 pass. One run per case; no repeats for variance.
 
+## FULLTEST-E2-ROUTING follow-ups (2026-10-04, E2)
+
+Follow-ups 6–9 of `tasks/hep-research/isolated-full-test/FINAL-REPORT.md`.
+
+| Follow-up | Result | Evidence |
+|---|---|---|
+| 6 isolated-config invocation (F07) | pass | `/hep-research:hep-theory` in the logged-in isolated config (plugin from the `85329b9` archive copy): exit 0, 5 turns, $0.18, host default model claude-opus-5-5; reads `profiles/registry.json`, `theory/qed-benchmark/index.md`, `conventions.json` inside the copy (`results/F07-invoke-hep-theory-loggedin.json`) |
+| 7 quick questions answered without a skill | accepted (user decision) | `co-direct-1`, `co-neighbor-1`, `st-sensitivity-1` stay known misses. The `hep-theory` and `hep-statistics` descriptions are at 1,022 and 1,014 of 1,024 characters. No description change, no paid round |
+| 8 `st-impacts-1` inputs | done | `tests/routing/inputs.py`: synthetic two-bin pyhf workspace (normfactor, normsys, histosys) and a `fit_result.json` whose best fit and Hessian uncertainties were computed from that workspace (pyhf 0.7.6) |
+| 9 `out-of-v1-2` owner | done | expected owner `hep-theory`, whose description claims EFT global fits outside v1 (`hep-statistics` claims cosmic-ray propagation fits, case `out-of-v1-1`); `check_routing_static.py` ok, 62 cases |
+
+The changed cases were not rerun live; the next routing round will measure them.
+

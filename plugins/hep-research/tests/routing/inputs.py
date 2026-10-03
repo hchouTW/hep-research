@@ -3,6 +3,8 @@
 Each case that says "this", "my" or "these" gets small files in a fresh project directory, so a live run tests
 routing instead of stopping for missing inputs. Every file is SYNTHETIC and says so; none is real data.
 """
+import json
+
 TAG = "SYNTHETIC routing fixture: invented values, not data from any experiment."
 
 def _csv(header, rows):
@@ -50,4 +52,16 @@ INPUTS = {
  "co-batch-sbatch-1": {"toy_fit.py": f"# {TAG}\nimport sys, json, random\nstart, stop, seed = map(int, sys.argv[1:4])\nrandom.seed(seed)\nprint(json.dumps({{'n': stop - start}}))\n"},
  "co-batch-held-1": {"events.log": f"# {TAG}\n012 (1234.007.000) 2026-10-03 10:00:00 Job was held.\n\tJob exceeded its memory request (synthetic)\n\tCode 34 Subcode 0\n...\n"},
  "co-batch-evicted-1": {"merge.sh": f"# {TAG}\ncat out/*.json > merged.json\n"},
+ # a two-bin pyhf workspace with a normalization and a shape nuisance, and the profile likelihood fit already done
+ "st-impacts-1": {
+  "workspace.json": json.dumps({"_note": TAG, "version": "1.0.0",
+                                "channels": [{"name": "sr", "samples": [
+                                    {"name": "signal", "data": [3.0, 5.0], "modifiers": [{"name": "mu", "type": "normfactor", "data": None}]},
+                                    {"name": "background", "data": [20.0, 12.0], "modifiers": [
+                                        {"name": "bkg_norm", "type": "normsys", "data": {"hi": 1.1, "lo": 0.9}},
+                                        {"name": "jes", "type": "histosys", "data": {"hi_data": [21.5, 12.4], "lo_data": [18.6, 11.7]}}]}]}],
+                                "observations": [{"name": "sr", "data": [25.0, 18.0]}],
+                                "measurements": [{"name": "meas", "config": {"poi": "mu", "parameters": []}}]}, indent=1) + "\n",
+  "fit_result.json": json.dumps({"_note": TAG, "fit": "maximum likelihood on workspace.json (pyhf 0.7.6), observed data", "bestfit": {"mu": 1.275, "bkg_norm": 0.053, "jes": 0.052},
+                                 "uncertainty": {"mu": 0.845, "bkg_norm": 0.972, "jes": 0.977}}, indent=1) + "\n"},
 }

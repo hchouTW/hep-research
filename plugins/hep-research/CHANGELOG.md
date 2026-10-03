@@ -3,6 +3,13 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased (routing follow-ups, 2026-10-04)
+
+Evidence in VALIDATION "FULLTEST-E2-ROUTING follow-ups". No change to skill text.
+
+- **Routing cases**: `out-of-v1-2` (SMEFT global fit) now expects `hep-theory`, which its description claims;
+  `st-impacts-1` gets a synthetic pyhf workspace and fit result, so a live run has the fit the prompt refers to.
+
 ## Unreleased (FULLTEST-E2 follow-ups, 2026-10-04)
 
 Evidence in VALIDATION FULLTEST-E2-FOLLOWUPS.
