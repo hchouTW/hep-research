@@ -152,4 +152,49 @@ for an asymmetric one by 3%. The difference grows with the asymmetry and with ho
 
 ## Post-fit nuisance diagnostics
 
-Filled in with the executable diagnostics (task S04).
+Run after every fit that is used for a result, and after each pruning, smoothing or symmetrization step.
+
+- **Pulls and constraints.** Pull `(theta_hat - theta_0)/sigma_prefit`; constraint `sigma_postfit/sigma_prefit`. A
+  pull far from 0 is a tension between the data and the auxiliary measurement; a constraint well below 1 means the
+  data measure the nuisance better than its auxiliary measurement did, which needs a physical explanation (and often
+  a finer decomposition), not acceptance. The Gaussian pull scale is only an approximation for Poisson- or
+  gamma-constrained nuisances.
+- **Impacts.** Fix one nuisance at `theta_hat +- sigma` and refit everything else; the POI shift, with its sign, is the
+  impact. Pre-fit impacts use `sigma_prefit` (what the nuisance could do), post-fit impacts `sigma_postfit` (what it
+  does after the fit). Correlated impacts are not independent errors: never add them in quadrature into a total.
+- **Ranking** by post-fit impact shows what drives the result; it is not a pruning criterion on its own.
+- **Grouped breakdown.** Freeze a group at its best-fit values and quote `sqrt(sigma_total^2 - sigma_frozen^2)`. The
+  result depends on the method (freeze one group, or freeze sequentially) and on the order; report the method, the
+  order and the closure of the quadrature sum against the total.
+- **Correlations.** List nuisance pairs with large `|rho|` (a stated threshold); `|rho|` near 1 means two nuisances
+  describe the same direction and only their combination is measured.
+- A refit that fails is a `failed` entry, never a silently missing row.
+
+`${CLAUDE_PLUGIN_ROOT}/adapters/pyhf-combine/assets/pyhf_nuisance_diagnostics.py` does all of this for a pyhf
+workspace (needs pyhf; exit 1 when the nominal fit or a refit fails, 2 for rejected input or no pyhf). Its impacts
+agree with independent refits of a HistFactory likelihood written without pyhf to 1e-3 relative or 1e-4 absolute
+(`tests/adapters/test_pyhf_nuisance_diagnostics.py`).
+
+### Verified walkthrough: the synthetic shape workspace (2026-10-03, pyhf 0.7.6)
+
+```bash
+python3 ${CLAUDE_PLUGIN_ROOT}/adapters/pyhf-combine/assets/pyhf_nuisance_diagnostics.py \
+    ${CLAUDE_PLUGIN_ROOT}/adapters/pyhf-combine/assets/pyhf-shape-synthetic.json --groups groups.json --json diag.json
+# groups.json: {"theory_like": ["bkg_xsec"], "detector": ["jes"], "mc_stat": ["staterror_synthetic_sr", "cr_shape"]}
+```
+
+`mu = 0.795 +- 0.865` (Hessian). `bkg_xsec` ranks first (post-fit impact `-0.210/+0.210`, pre-fit `-0.329/+0.318`)
+with a constraint of 0.65: the control region measures the background normalization better than its 1-sigma
+auxiliary term, which is why its pre- and post-fit impacts differ. The breakdown gives, freezing one group at a time,
+0.208 (theory-like), 0.198 (detector) and 0.285 (MC statistics), with 0.753 statistical (all nuisances frozen); in
+quadrature 0.854 against the total 0.865 (closure 0.987). Sequentially, the detector group gives 0.259 in the given
+order and 0.194 in the reversed one: the same group, two numbers, which is why the order is part of the result.
+These are synthetic numbers for checking the tool, not a physics result.
+
+Combine equivalents (documentation for v11.1.0, read 2026-10-03; not run in this plugin):
+`combine -M FitDiagnostics` writes `fit_b`, `fit_s` and `nuisances_prefit` (with `--plots` the covariance matrices,
+with `--saveShapes` the pre- and post-fit shapes), and `diffNuisances.py` prints pulls. Impacts come from
+`combineTool.py -M Impacts` (`--doInitialFit --robustFit 1`, then `--doFits`, then `-o impacts.json`) and
+`plotImpacts.py`; Combine defines the impact with the nuisance at its **post-fit** `+-1 sigma` and plots
+the post-fit minus pre-fit value over the uncertainty, `(theta - theta_0)/Delta theta`, with the post-fit/pre-fit width ratio
+([non-standard usage](https://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/latest/part3/nonstandard/)).
