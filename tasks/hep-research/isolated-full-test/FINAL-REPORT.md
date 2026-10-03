@@ -90,3 +90,15 @@ With the optional tools present, 61 tests that skipped before now run, and all b
 - The old `plugins/hep-research/.venv-hep` was moved to the session scratch directory (`.../scratchpad/venv-hep-parked`);
   it is no longer used and can be deleted.
 - The user's `~/.claude` is unchanged; the installed plugin there is still `1dea804`.
+
+## Follow-up status (2026-10-04)
+
+Items 1–4 fixed in `7f8249c` (PR #21, merge `e54707d`); VALIDATION FULLTEST-E2-FOLLOWUPS. Check-run
+`check-run-2026-10-03T202224Z.json`: 14 pass, 0 fail, 0 skip; unit tests 1242 run, 0 fail, 9 skip. Relocation
+`results/relocation-20261003T202224Z.json` passes with an ignored venv planted in the tree.
+
+Correction to item 1: `--standalone` alone does not fix the hang. With an unresolvable host name it still waits in
+the rendezvous; `--standalone --local-addr=127.0.0.1` passes and is what the test and the guidance now use.
+
+Items 5 (live routing on E2, needs a budget) and 6 (log in to an isolated config to close the F07 invocation)
+remain open. The installed plugin in `~/.claude` was reinstalled at `e54707d`.

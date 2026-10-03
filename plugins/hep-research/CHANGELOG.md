@@ -3,6 +3,18 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased (FULLTEST-E2 follow-ups, 2026-10-04)
+
+Evidence in VALIDATION FULLTEST-E2-FOLLOWUPS.
+
+- **physics-ml**: the DDP asset and the distributed-training reference advise
+  `torchrun --standalone --local-addr=127.0.0.1` on a single machine, where an unresolvable host name otherwise
+  makes the rendezvous hang. The smoke test uses it.
+- **research-communication**: the Mermaid reference and the diagram checker say that `mmdc` needs its headless
+  Chrome, and how to install it.
+- **Tests and tools**: `ams-flux-ratio` output is now compared with the committed output (toy summary at Monte
+  Carlo precision); `tools/check_relocation.py` copies only git-listed files.
+
 ## Unreleased (full test on E2, 2026-10-04)
 
 Work order `tasks/hep-research/isolated-full-test/TASK.md` (r1); evidence in VALIDATION FULLTEST-E2. No change to
