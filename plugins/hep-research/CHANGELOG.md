@@ -3,6 +3,21 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased (hep-statistics reinforcement, 2026-10-03)
+
+Work order `tasks/hep-research/stats-reinforcement/TASK.md` (r2); evidence in VALIDATION STATS-REINFORCEMENT-RUN.
+
+- **Contracts 1.1.0** (minor; every new field optional). `statistical-result` gains `significance` (`local_p`,
+  `local_z`, `global_p`, `global_z`, `trials_method` in none-needed / toys / gross-vitells / analytic-bound, `scan`
+  with `parameters` and `ranges`), `expected` (`median`, `band_1sigma`, `band_2sigma`, `method`),
+  `uncertainty_breakdown` (`method` in group-freeze / impacts / other, `order`, `groups`, `closure`) and
+  `goodness_of_fit` (`statistic`, `p_value`, `calibration` asymptotic / toys, `n_toys`); `construction` gains
+  `berger-boos`, `cousins-highland` and `toy-calibrated-profile`. New rules: a result with `significance.scan` and
+  no `global_p` is `unresolved` (`stats.lee_missing`); a Bayesian result declaring an R-hat above 1.01 with
+  `fit_status: converged` is an error (`stats.convergence_mismatch`) for artifacts written under 1.1.0 and a warning
+  for 1.0.0 artifacts, which therefore validate as before. Example artifacts now record contract 1.1.0; nothing else
+  in them changed.
+
 ## Unreleased (validation-gap audit, 2026-10-03)
 
 Fixes from the validation-gap audit (work order `tasks/hep-research/audit/TASK.md`, evidence VALIDATION AUDIT-RUN).

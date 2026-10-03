@@ -15,7 +15,9 @@
   "response.json",
   "response_parametrized.json",
   "statres_bayesian.json",
+  "statres_bayesian_rhat_warning.json",
   "statres_frequentist.json",
+  "statres_scan_global.json",
   "theory_spec.json"
  ],
  "invalid": {
@@ -64,6 +66,12 @@
   "ml_no_grouping.json": [
    "ml.no_grouping"
   ],
+  "statres_bayesian_rhat_mismatch.json": [
+   "stats.convergence_mismatch"
+  ],
+  "statres_trials_method_unknown.json": [
+   "schema.enum"
+  ],
   "envelope_missing_status.json": [
    "schema.required"
   ],
@@ -72,6 +80,11 @@
   ],
   "measurement_ratio_no_correlation_model.json": [
    "schema.required"
+  ]
+ },
+ "unresolved": {
+  "statres_scan_no_global.json": [
+   "stats.lee_missing"
   ]
  }
 }

@@ -17,6 +17,7 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from contracts.schema import Report, validate  # noqa: E402
+from contracts.semver import parse  # noqa: E402
 from contracts.vocab import NAMESPACED, Vocabulary  # noqa: E402
 
 EXTENSION_SCHEMAS = {
@@ -197,6 +198,17 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:
                 rep.add("error", f"$.extension.{k}", "stats.paradigm_mislabeled", f"'{k}' does not belong to a {p} result")
         if ext.get("fit_status") == "failed" and "failed" not in status:
             rep.add("error", "$.status", "status.failed_unlabeled", "failed fit must carry the 'failed' status")
+        sig = ext.get("significance")
+        if isinstance(sig, dict) and isinstance(sig.get("scan"), dict) and sig.get("global_p") is None:
+            rep.add("unresolved", "$.extension.significance.global_p", "stats.lee_missing",
+                    "a scan reports a local significance only: add the global p-value and its trials_method")
+        rhat = _max_rhat(ext.get("convergence"))
+        if p == "bayesian" and rhat is not None and rhat > RHAT_MAX and ext.get("fit_status") == "converged":
+            # an error from contract 1.1.0 on; a 1.0.0 artifact keeps its old outcome and gets a warning
+            level = "error" if _at_least(doc.get("contract_version"), "1.1.0") else "warning"
+            rep.add(level, "$.extension.fit_status", "stats.convergence_mismatch",
+                    f"declared R-hat {rhat:g} exceeds {RHAT_MAX} but fit_status is 'converged'; use "
+                    "'converged-with-warnings' or 'failed'")
     elif t == "computational-run":
         if ext.get("exit_status", 0) != 0 and "failed" not in status:
             rep.add("error", "$.status", "status.failed_unlabeled", "non-zero exit status must carry 'failed'")
@@ -220,6 +232,30 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:
             if missing or (cs & UPGRADED and inherited & set(STICKY_STATUSES)):
                 rep.add("error", f"$.extension.claims[{i}].status", "communication.status_upgraded",
                         f"a claim must keep its inputs' statuses {missing or sorted(inherited & set(STICKY_STATUSES))}; communication never upgrades status")
+
+
+RHAT_MAX = 1.01  # [Proposal] threshold for stats.convergence_mismatch
+
+
+def _max_rhat(conv):
+    """Largest numeric R-hat declared in a convergence block (rhat, rhat_max: a number or a map), else None."""
+    if not isinstance(conv, dict):
+        return None
+    vals = []
+    for key in ("rhat", "rhat_max", "r_hat"):
+        v = conv.get(key)
+        if isinstance(v, (int, float)) and not isinstance(v, bool):
+            vals.append(float(v))
+        elif isinstance(v, dict):
+            vals += [float(x) for x in v.values() if isinstance(x, (int, float)) and not isinstance(x, bool)]
+    return max(vals) if vals else None
+
+
+def _at_least(version, minimum) -> bool:
+    try:
+        return parse(str(version)) >= parse(minimum)
+    except (TypeError, ValueError):
+        return False
 
 
 def validate_artifact(doc, vocab: Vocabulary | None = None) -> Report:
