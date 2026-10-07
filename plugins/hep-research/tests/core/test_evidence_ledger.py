@@ -52,6 +52,24 @@ class LedgerTests(unittest.TestCase):
         self.assertIn(("claim.bad_field_type", "fx:C01.verification_strength"), found)
         self.assertIn(("claim.malformed", "claims[2]"), found)
 
+    def test_load_ledger_and_render_tables(self):
+        import json
+        import tempfile
+        from pathlib import Path
+        with tempfile.TemporaryDirectory() as td:
+            sp, cp_ = Path(td) / "sources.json", Path(td) / "claims.json"
+            sp.write_text(json.dumps(self.s), encoding="utf-8")
+            cp_.write_text(json.dumps(self.c), encoding="utf-8")
+            sources, claims = vel.load_ledger(sp, cp_)
+        self.assertEqual((sources, claims), (self.s, self.c))
+        tables = rsi.render_tables(sources, claims)
+        self.assertEqual(set(tables), {"source-table", "claim-ledger"})
+        src = tables["source-table"].splitlines()
+        self.assertTrue(src[0].startswith("| ID | Title |"))
+        self.assertIn("| fx:S01 | Synthetic source (fixture, not a real paper) |", src[2])
+        clm = tables["claim-ledger"].splitlines()
+        self.assertIn("| fx:C01 | Synthetic claim used only by tests | published_result | fx:S01 |", clm[2])
+
     def test_namespace_enforced_only_when_given(self):
         self.s[0]["id"], self.c[0]["source_ids"] = "S01", ["S01"]
         self.c[0]["id"] = "C01"

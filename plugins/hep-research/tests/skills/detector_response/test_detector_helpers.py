@@ -1,4 +1,4 @@
-"""Behavioral tests for histogram failures and analytic Poisson reference cases.
+"""Behavioral tests for the detector-response helper scripts.
 
 Run from the skill directory with python3 -m unittest discover -s tests -v.
 Uses synthetic data and standard library only; no experiment files are needed.
@@ -15,10 +15,8 @@ from pathlib import Path
 
 PLUGIN = Path(__file__).resolve().parents[3]  # plugin root (tests/skills/<skill>/<this file>)
 ROOT = PLUGIN
-for _skill in ('hep-computing', 'hep-analysis', 'detector-response'):
+for _skill in ('detector-response',):
     sys.path.insert(0, str(PLUGIN / 'skills' / _skill / 'scripts'))
-from audit_histograms import audit
-from counting_reference import bayesian_upper, poisson_upper_tail
 from tag_and_probe_efficiency import clopper_pearson, efficiency_bin
 from pileup_reweight import compute_weights, normalize, profile_mean, reweighted_mean
 from calorimeter_resolution import crossover_energies, evaluate, fit_resolution
@@ -33,80 +31,6 @@ from multiple_scattering import (crossover_rigidity, highland_angle,
                                 intrinsic_resolution_slope, load_stack,
                                 maximum_detectable_rigidity, resolution_at,
                                 scattering_resolution_term, summarize)
-
-
-class HistogramTests(unittest.TestCase):
-    def setUp(self):
-        self.bundle = json.loads((ROOT / 'skills/hep-computing/assets/histograms.example.json').read_text())
-        self.hist = self.bundle['histograms']['synthetic_background']
-
-    def test_good_input_not_mutated(self):
-        previous = copy.deepcopy(self.bundle)
-        self.assertEqual(audit(self.bundle), ([], []))
-        self.assertEqual(previous, self.bundle)
-
-    def test_signed_mc_not_poisson(self):
-        self.hist['sumw'][0] = -2
-        self.assertFalse(audit(self.bundle)[0])
-        self.assertTrue(audit(self.bundle)[1])
-        self.bundle['kind'] = 'poisson_expectation'
-        self.assertTrue(audit(self.bundle)[0])
-
-    def test_missing_and_mismatched_variation(self):
-        del self.hist['variations']['scaleDown']
-        self.hist['variations']['scaleUp']['edges'][1] = 40
-        self.assertEqual(len(audit(self.bundle)[0]), 2)
-
-    def test_nonfinite_variance_and_dimensions(self):
-        for field, value in [('sumw', [float('nan'), 8]), ('sumw2', [-1, 10]), ('sumw2', [1]), ('edges', [0, 0, 100])]:
-            with self.subTest(field=field, value=value):
-                bundle = copy.deepcopy(self.bundle)
-                bundle['histograms']['synthetic_background'][field] = value
-                self.assertTrue(audit(bundle)[0])
-
-    def test_malformed_types(self):
-        for bundle in (None, [], {}, {'schema_version':1,'kind':'mc','histograms':{'bad':None}}):
-            self.assertTrue(audit(bundle)[0])
-
-    def test_bool_not_numeric(self):
-        self.hist['sumw'][0] = True
-        self.assertTrue(audit(self.bundle)[0])
-
-    def test_identical_variation_warns(self):
-        self.hist['variations']['scaleUp'] = {k: self.hist[k][:] for k in ('edges','sumw','sumw2')}
-        self.assertFalse(audit(self.bundle)[0])
-        self.assertTrue(audit(self.bundle)[1])
-
-    def test_cli_success(self):
-        result = subprocess.run([sys.executable, str(ROOT/'skills/hep-computing/scripts/audit_histograms.py'), str(ROOT/'skills/hep-computing/assets/histograms.example.json')], capture_output=True, text=True)
-        self.assertEqual(result.returncode, 0)
-        self.assertTrue(json.loads(result.stdout)['ok'])
-
-
-class CountingTests(unittest.TestCase):
-    def test_zero_count_analytic(self):
-        for b in (0, 3, 100, 500):
-            self.assertAlmostEqual(bayesian_upper(0, b), -math.log(.05), places=10)
-
-    def test_one_count_known_bound(self):
-        self.assertAlmostEqual(bayesian_upper(1, 0), 4.743864518390578, places=10)
-
-    def test_tail_exact_cases(self):
-        self.assertEqual(poisson_upper_tail(0, 0), 1)
-        self.assertEqual(poisson_upper_tail(2, 0), 0)
-        self.assertAlmostEqual(poisson_upper_tail(1, 2), 1-math.exp(-2), places=14)
-        self.assertAlmostEqual(poisson_upper_tail(2, 2), 1-3*math.exp(-2), places=14)
-        self.assertAlmostEqual(poisson_upper_tail(10, 1), 1.114254783387207e-7, delta=1e-20)
-
-    def test_monotonic_confidence(self):
-        self.assertLess(bayesian_upper(5, 2, .9), bayesian_upper(5, 2, .95))
-
-    def test_invalid_input_rejected(self):
-        for n,b in ((-1,0),(1.5,0),(True,0),(1,-1),(1,float('nan')),(501,0)):
-            with self.assertRaises(ValueError):
-                bayesian_upper(n,b)
-        with self.assertRaises(ValueError):
-            bayesian_upper(0,0,1)
 
 
 class TagAndProbeTests(unittest.TestCase):

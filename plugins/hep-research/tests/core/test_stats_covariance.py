@@ -44,6 +44,29 @@ class EigenSolverTests(unittest.TestCase):
                 self.assertAlmostEqual(rebuilt, a[i][j], places=10)
 
 
+class ClipDemoTests(unittest.TestCase):
+    def test_clips_negative_eigenvalues_without_touching_the_input(self):
+        m = [[1.0, 0.9, 0.9], [0.9, 1.0, -0.9], [0.9, -0.9, 1.0]]  # indefinite: smallest eigenvalue -0.8
+        before = copy.deepcopy(m)
+        out = vc.clip_demo(m, None)
+        self.assertEqual(m, before)
+        self.assertTrue(out["label"].startswith("[Proposal]"))
+        self.assertEqual(out["eigenvalues_clipped"], 1)
+        self.assertAlmostEqual(min(out["eigenvalues_before"]), -0.8, places=9)
+        self.assertGreaterEqual(min(out["eigenvalues_after"]), 0.0)
+        self.assertAlmostEqual(out["max_abs_eigenvalue_change"], 0.8, places=9)
+        self.assertGreater(out["max_relative_diagonal_change"], 0.0)
+        self.assertEqual(out["total_uncertainty_weights"], "all ones (sum over all bins)")
+
+    def test_a_valid_matrix_is_unchanged_and_weights_are_used(self):
+        m = [[4.0, 1.0], [1.0, 9.0]]
+        out = vc.clip_demo(m, [1.0, 0.0])
+        self.assertEqual(out["eigenvalues_clipped"], 0)
+        self.assertAlmostEqual(out["total_variance_before"], 4.0, places=12)
+        self.assertAlmostEqual(out["total_uncertainty_relative_change"], 0.0, places=12)
+        self.assertEqual(out["total_uncertainty_weights"], "supplied")
+
+
 class ValidMatrixTests(unittest.TestCase):
     def test_valid_fixture_passes_with_no_findings(self):
         result = vc.validate_covariance(load("cov_valid.json"))

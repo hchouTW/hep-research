@@ -19,6 +19,23 @@ def chunk(final, n=1, errors=(), reset=None, rh="h0"):
     return {"attempt_records": recs, "errors": list(errors), "attempts_since_reset": n, "reset_reason": reset}
 
 
+class ChunkStatusTests(unittest.TestCase):
+    def test_chunk_status_reads_outputs_records_and_repeats(self):
+        with tempfile.TemporaryDirectory() as td:
+            cdir = Path(td)
+            (cdir / "chunks").mkdir()
+            state = {"chunks": {}}
+            self.assertEqual(cp.chunk_status(cdir, state, "c0000"), "planned")
+            state["chunks"]["c0000"] = {"attempt_records": [{"attempt_id": "a1", "final_state": None, "state": "running"}]}
+            self.assertEqual(cp.chunk_status(cdir, state, "c0000"), "running")
+            state["chunks"]["c0000"] = chunk("timeout", 2, errors=["TimeoutError: x", "TimeoutError: x"])
+            self.assertEqual(cp.chunk_status(cdir, state, "c0000"), "stopped-repeated-failure")
+            state["chunks"]["c0000"]["reset_reason"] = "raised the time limit"
+            self.assertEqual(cp.chunk_status(cdir, state, "c0000"), "timeout")
+            (cdir / "chunks" / "c0000.json").write_text("{}")
+            self.assertEqual(cp.chunk_status(cdir, state, "c0000"), "done")  # an output wins over any record
+
+
 class DecisionTableTests(unittest.TestCase):
     def test_every_normalized_state_has_a_decision(self):
         for st in states.NORMALIZED_STATES:

@@ -66,8 +66,8 @@ def main(argv=None) -> int:
     try:
         with open(args.path, encoding="utf-8") as fh:
             rep = check(json.load(fh), args.factor)
-    except (OSError, ValueError, KeyError, IndexError) as exc:
-        print(json.dumps({"error": str(exc)}))
+    except (OSError, ValueError, KeyError, IndexError, TypeError) as exc:  # malformed input is a JSON error, not a traceback
+        print(json.dumps({"error": f"{type(exc).__name__}: {exc}"}))
         return 2
     print(json.dumps(rep, indent=1))
     return 0 if rep["passed"] else 1

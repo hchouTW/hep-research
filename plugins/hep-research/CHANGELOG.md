@@ -57,6 +57,14 @@ Software checks establish contract consistency only, not physical validity.
   `pcolormesh` meshes and `imshow` images, and, given the sealed numbers (`check_figure(fig, region, sealed)`), text
   artists, titles and figure texts; a "blinded" label inside the region is not a leak. What it still cannot see
   (tick labels, legends, colorbars, values carried only by colors, transformed values) is stated in the module.
+- **Tests for public functions no test reached (T11).** Direct tests for `scan_file`, `load_project_blinding`,
+  `clip_demo`, `campaign.chunk_status`, `load_ledger`, `render_tables`, the contract helpers (`check_conventions`,
+  `check_finite`, `check_binned`, `check_observable`, `load_schema`, `side_from_artifact`, `find_cycles`,
+  `check_profile_dir`, `declared_namespaces`, `namespace_of`) and round trips of every kinematic conversion. New CLI
+  tests for `check_surrogate_domain.py`, which printed a traceback for a non-list `features` field and now reports
+  it as a JSON error with exit 2. `counting_reference.py` has its own test file (its flat-prior bound at b = 0 checked
+  against PDG Table 40.3, its tail against `core/stats`); the `audit_histograms.py` tests moved to hep-computing;
+  `examples/published-comparison/make_record.py` is checked to reproduce its committed record.
 - **Edge cases in every public `core/stats` entry point (T10).** `tests/core/test_stats_edge_cases.py` feeds NaN,
   +inf and -inf to each numeric argument of 20 scalar entry points and to numeric leaves of 9 document entry points,
   plus empty lists and empty documents; each must raise its module's named error (the two validators must fail

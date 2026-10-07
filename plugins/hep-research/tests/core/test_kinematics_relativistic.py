@@ -19,6 +19,48 @@ from core.kinematics.relativistic import KinematicsError, Species  # noqa: E402
 M_P, M_HE4 = 0.9383, 3.7274  # GeV, user-stated masses for these tests
 
 
+class RoundTripTests(unittest.TestCase):
+    """Every public conversion against its inverse, and the Jacobian against a finite difference (T11)."""
+    SPECIES = (Species(Z=1, A=1, mass=M_P), Species(Z=2, A=4, mass=M_HE4))
+    MOMENTA = (0.05, 0.9, 1.0, 7.3, 250.0, 4.0e4)
+
+    def test_from_and_to_momentum_for_every_variable(self):
+        for sp in self.SPECIES:
+            for var in kin.VARIABLES:
+                for p in self.MOMENTA:
+                    with self.subTest(Z=sp.Z, variable=var, p=p):
+                        v = kin.from_momentum(p, var, sp)
+                        self.assertAlmostEqual(kin.to_momentum(v, var, sp) / p, 1.0, delta=1e-12)
+
+    def test_named_inverse_pairs(self):
+        for sp in self.SPECIES:
+            for p in self.MOMENTA:
+                self.assertAlmostEqual(kin.rigidity_to_momentum(kin.momentum_to_rigidity(p, sp.Z), sp.Z), p, delta=1e-12 * p)
+                t = kin.kinetic_energy(p, sp.mass)
+                self.assertAlmostEqual(kin.momentum_from_kinetic_energy(t, sp.mass) / p, 1.0, delta=1e-9)
+                b = kin.beta(p, sp.mass)
+                if b < 1.0 - 1e-9:  # near beta = 1 the inverse is ill-conditioned by construction
+                    self.assertAlmostEqual(kin.momentum_from_beta(b, sp.mass) / p, 1.0, delta=1e-6)
+                self.assertAlmostEqual(kin.momentum_from_total_energy(kin.total_energy(p, sp.mass), sp.mass) / p, 1.0, delta=1e-9)
+        self.assertEqual(kin.momentum_to_rigidity(4.0, 2), 2.0)
+
+    def test_dvar_dp_matches_a_finite_difference(self):
+        for sp in self.SPECIES:
+            for var in kin.VARIABLES:
+                for p in (0.3, 2.0, 40.0):
+                    h = 1e-6 * p
+                    fd = (kin.from_momentum(p + h, var, sp) - kin.from_momentum(p - h, var, sp)) / (2 * h)
+                    with self.subTest(Z=sp.Z, variable=var, p=p):
+                        self.assertAlmostEqual(kin.dvar_dp(var, p, sp) / fd, 1.0, delta=1e-6)
+                        self.assertGreater(kin.dvar_dp(var, p, sp), 0.0)
+
+    def test_check_beta(self):
+        self.assertEqual(kin.check_beta(0.5), 0.5)
+        for bad in (0.0, 1.0, -0.1, 1.2, float("nan"), float("inf")):
+            with self.assertRaises(KinematicsError):
+                kin.check_beta(bad)
+
+
 class ConversionTests(unittest.TestCase):
     def test_proton_rigidity_is_momentum_numerically(self):
         sp = Species(Z=1, A=1, mass=M_P)

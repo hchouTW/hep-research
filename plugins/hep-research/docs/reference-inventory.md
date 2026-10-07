@@ -113,7 +113,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `analysis-validation.md` | hep-analysis | 4.4 | yes | 6 | detector-response, hep-computing | 0205a9c 2026-10-06 |
 | `backgrounds.md` | hep-analysis | 2.7 | yes | 16 | detector-response | 119450c 2026-10-04 |
 | `data-pipelines.md` | hep-analysis | 4.5 | yes | 4 | hep-computing | 119450c 2026-10-04 |
-| `hep-analysis-guide.md` | hep-analysis | 40.8 | yes | 4 | detector-response | 6caf06f 2026-10-07 |
+| `hep-analysis-guide.md` | hep-analysis | 41.0 | yes | 4 | detector-response | 6caf06f 2026-10-07 |
 | `histograms-efficiencies.md` | hep-analysis | 3.0 | yes | 8 | detector-response, hep-computing | 119450c 2026-10-04 |
 | `measurements-and-unfolding.md` | hep-analysis | 2.7 | yes | 9 | detector-response, hep-statistics | 0fb0531 2026-10-07 |
 | `systematics.md` | hep-analysis | 4.8 | yes | 25 | detector-response, hep-statistics, hep-theory, physics-ml | 281eb2d 2026-10-04 |
