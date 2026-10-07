@@ -5,6 +5,10 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **MC statistics in limits (T22).** A bin of `likelihood_limits.py multibin-limit` or `shape-limit` may give
+  `mc_stat`, the MC-statistics uncertainty of its background. It enters as a Barlow-Beeston-lite factor (as
+  HistFactory `staterror`): a Gaussian-constrained multiplier per bin, profiled in closed form, redrawn in toys. In a
+  coverage study with 20% MC uncertainty per bin it brings the coverage back to nominal, where ignoring it under-covers.
 - **Smooth nuisance interpolation (T22).** `shape-limit` shape nuisances accept `"interpolation": "code4p"` (polynomial
   inside |θ| < 1, linear outside, no kink at 0), and normalization nuisances accept asymmetric `hi`/`lo` factors with
   code4 (default), code1 or code0 interpolation, as in HistFactory and pyhf. The default shape interpolation stays the

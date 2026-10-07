@@ -59,6 +59,11 @@ A normalization nuisance may carry "prior": "gaussian" (default, factor 1 + sigm
 auxiliary measurement of tau = 1/sigma^2, a gamma prior of mean 1 and relative width sigma). An optional
 "correlation": [[1, rho, ...], ...] (K x K, unit diagonal, positive definite) correlates the Gaussian and
 lognormal nuisances' unit-normal constraints; gamma nuisances cannot be correlated.
+MC statistics (Barlow-Beeston-lite, as HistFactory staterror): a bin of shape-limit or multibin-limit may give
+"mc_stat", the absolute uncertainty of its background from MC statistics (sqrt of the sum of squared weights). The
+bin's background is multiplied by a factor gamma_i with a Gaussian constraint of relative width mc_stat / b, observed
+at 1, profiled in closed form bin by bin; toys redraw its auxiliary measurement. In multibin-limit it adds in
+quadrature to an independent per-bin sigma (or becomes one when the kind is none) and multiplies a common scale.
 multibin-limit input: {"bins": [{"n": 5, "b": 3.2, "s": 1.0}, ...], "cl": 0.95,
   "background_uncertainty": {"kind": "none" | "independent" | "common_scale", "sigma": [per-bin
   absolute sigma_b] (independent) | fractional scalar (common_scale)}}; "s" is the signal
@@ -324,14 +329,37 @@ def _asymptotic_cls_results(q_obs, q_asimov, cl: float, hi: float) -> dict:
 
 # --------------------------------------------------------------------- multibin
 class _Model:
-    def __init__(self, bins, kind, sigma):
+    def __init__(self, bins, kind, sigma, mc=None):
         self.n_bins = len(bins)
         self.s = [x["s"] for x in bins]
         self.b = [x["b"] for x in bins]
+        self.mc_rel = None
+        if mc is not None and kind == "none":  # Barlow-Beeston-lite alone: a Gaussian nuisance per bin
+            kind, sigma = "independent", list(mc)
+        elif mc is not None and kind == "independent":  # two additive Gaussian errors on b_i profile as one
+            sigma = [math.sqrt(a * a + c * c) for a, c in zip(sigma, mc)]
+        elif mc is not None:  # common scale t times a per-bin MC-statistics factor gamma_i
+            self.mc_rel = [c / b if b > 0 else 0.0 for c, b in zip(mc, self.b)]
         self.kind, self.sigma = kind, sigma
 
     def aux_obs(self):
-        return list(self.b) if self.kind == "independent" else ([1.0] if self.kind == "common_scale" else [])
+        if self.kind == "common_scale":
+            return [1.0] + ([1.0] * self.n_bins if self.mc_rel else [])
+        return list(self.b) if self.kind == "independent" else []
+
+    def _common_mc(self, ns, aux, mu, t):
+        """Profiled lnL over the per-bin MC factors gamma_i at a fixed common scale t, and the gamma_i values."""
+        tot, gam = 0.0, []
+        for n, s, b, g0, d in zip(ns, self.s, self.b, aux[1:], self.mc_rel):
+            if d <= 0.0 or b <= 0.0:
+                tot += _lnl(n, mu * s + t * b)
+                gam.append(1.0)
+                continue
+            b0, sg = t * g0 * b, t * d * b
+            bh = _b_hat(n, mu * s, b0, sg) if sg > 0 else b0
+            tot += _ll1(n, mu * s, bh, b0, sg) if sg > 0 else _lnl(n, mu * s + b0)
+            gam.append(bh / (t * b) if t > 0 else g0)
+        return tot, gam
 
     def _prof_nu(self, ns, aux, mu):
         """Profiled lnL at fixed mu, and the profiled nuisance values."""
@@ -345,6 +373,23 @@ class _Model:
                 tot += _ll1(n, mu * s, bh, b0, sg)
             return tot, hats
         sg, th0 = self.sigma, aux[0]
+        if self.mc_rel:
+            g = (math.sqrt(5) - 1) / 2
+            f = lambda t: self._common_mc(ns, aux, mu, t)[0] - (t - th0) ** 2 / (2 * sg * sg)
+            lo, hi = 1e-9, max(th0, 0.0) + 12.0 * sg + 5.0
+            x1, x2 = hi - g * (hi - lo), lo + g * (hi - lo)
+            f1, f2 = f(x1), f(x2)
+            for _ in range(80):
+                if f1 < f2:
+                    lo, x1, f1 = x1, x2, f2
+                    x2 = lo + g * (hi - lo)
+                    f2 = f(x2)
+                else:
+                    hi, x2, f2 = x2, x1, f1
+                    x1 = hi - g * (hi - lo)
+                    f1 = f(x1)
+            t = 0.5 * (lo + hi)
+            return f(t), [t] + self._common_mc(ns, aux, mu, t)[1]
 
         def deriv(t):
             return sum((n * b / (mu * s + t * b) - b) if (mu * s + t * b) > 0 else (-b if n == 0 else 1e12)
@@ -406,6 +451,9 @@ def _load_model(doc):
         raise LikelihoodError("at least one bin needs a positive signal expectation s")
     if sum(x["n"] for x in bins) > 400:
         raise LikelihoodError("total counts above 400 are outside this script's range")
+    mc = None
+    if any("mc_stat" in x for x in raw):
+        mc = [_num(x.get("mc_stat", 0.0), f"bin {i} mc_stat", 0.0, 100.0) for i, x in enumerate(raw)]
     unc = doc.get("background_uncertainty", {"kind": "none"})
     kind = unc.get("kind") if isinstance(unc, dict) else None
     if kind not in ("none", "independent", "common_scale"):
@@ -418,7 +466,7 @@ def _load_model(doc):
         sigma = [_num(v, "sigma", 0.0, 100.0) for v in sg]
     elif kind == "common_scale":
         sigma = _num(unc.get("sigma"), "sigma", 0.0, 2.0, strict_low=True)
-    return bins, kind, sigma
+    return bins, kind, sigma, mc
 
 
 def _limit_model(model, ns, aux, z):
@@ -428,12 +476,13 @@ def _limit_model(model, ns, aux, z):
 
 
 def multibin_limit(doc: dict, cl: float, toys: int, seed: int) -> dict:
-    bins, kind, sigma = _load_model(doc)
+    bins, kind, sigma, mc = _load_model(doc)
     cl = _num(doc.get("cl", cl), "cl", 0.0, 1.0, strict_low=True)
     if cl >= 1.0:
         raise LikelihoodError("cl must lie strictly between 0 and 1")
     toys, seed = _seed_toys(toys, seed, allow_zero=True)
-    model = _Model(bins, kind, sigma)
+    model = _Model(bins, kind, sigma, mc)
+    kind, sigma = model.kind, model.sigma
     ns = [x["n"] for x in bins]
     aux = model.aux_obs()
     z = NormalDist().inv_cdf(cl)
@@ -443,7 +492,8 @@ def multibin_limit(doc: dict, cl: float, toys: int, seed: int) -> dict:
     asimov_ns = [x["b"] for x in bins]
     fit_a = model.fit(asimov_ns, aux)
     out = {"label": LABEL, "method": "multi-bin profile-likelihood upper limit on mu, shared signal strength",
-           "bins": len(bins), "background_uncertainty": kind, "cl": cl, "seed": seed, "toys": toys,
+           "bins": len(bins), "background_uncertainty": doc.get("background_uncertainty", {"kind": "none"}).get("kind"),
+           "mc_statistics": "barlow-beeston-lite" if mc is not None else "none", "cl": cl, "seed": seed, "toys": toys,
            "best_fit_mu": mu_hat, "asymptotic_observed_upper_limit": obs,
            "asymptotic_asimov_median_expected_limit": asimov}
     out.update(_asymptotic_cls_results(lambda m: model.q(ns, aux, m, fit_obs), lambda m: model.q(asimov_ns, aux, m, fit_a),
@@ -460,6 +510,9 @@ def multibin_limit(doc: dict, cl: float, toys: int, seed: int) -> dict:
             elif kind == "independent":
                 means = [obs * s + c for s, c in zip(model.s, cond)]
                 a = [max(c + sg * rng.gauss(0, 1), 0.0) for c, sg in zip(cond, sigma)]
+            elif model.mc_rel:
+                means = [obs * s + cond[0] * g * b for s, g, b in zip(model.s, cond[1:], model.b)]
+                a = [max(cond[0] + sigma * rng.gauss(0, 1), 0.0)] + [g + d * rng.gauss(0, 1) for g, d in zip(cond[1:], model.mc_rel)]
             else:
                 means = [obs * s + cond[0] * b for s, b in zip(model.s, model.b)]
                 a = [max(cond[0] + sigma * rng.gauss(0, 1), 0.0)]
@@ -731,6 +784,11 @@ def _load_shape(doc):
         if any(d.get("prior") == "gamma" for d in parsed):
             raise LikelihoodError("gamma nuisances cannot be correlated; remove the correlation or the gamma prior")
         corr_chol = _chol_pd(corr)
+    if any("mc_stat" in x for x in raw):
+        for i, (x, bn) in enumerate(zip(raw, bins)):
+            bn["mc_stat"] = _num(x.get("mc_stat", 0.0), f"bin {i} mc_stat", 0.0, 100.0)
+            if bn["mc_stat"] > 0 and bn["b"] <= 0:
+                raise LikelihoodError(f"bin {i}: mc_stat needs a positive background b")
     return bins, parsed, corr_chol
 
 
@@ -748,9 +806,13 @@ class _ShapeModel:
         self.chol = corr_chol
         self.gamma = [d["kind"].endswith("_norm") and d.get("prior") == "gamma" for d in nuis]
         self.tau = [1.0 / d["sigma"] ** 2 if g else 0.0 for d, g in zip(nuis, self.gamma)]
+        # Barlow-Beeston-lite: per-bin factor gamma_i on the background, Gaussian constraint of relative width
+        # mc_stat_i / b_i, observed at 1 (aux[k + i]); profiled in closed form inside nll
+        self.mc_rel = [x.get("mc_stat", 0.0) / x["b"] if x.get("mc_stat", 0.0) > 0 else 0.0 for x in bins] \
+            if any(x.get("mc_stat", 0.0) > 0 for x in bins) else None
 
     def aux_obs(self):
-        return [t if g else 0.0 for g, t in zip(self.gamma, self.tau)]
+        return [t if g else 0.0 for g, t in zip(self.gamma, self.tau)] + ([1.0] * len(self.b) if self.mc_rel else [])
 
     def _factor(self, d, t):
         if "hi" in d:
@@ -781,7 +843,27 @@ class _ShapeModel:
                 total -= aux[i] * math.log(f) - self.tau[i] * f
         return total
 
+    def parts(self, mu, th):
+        """Signal (times mu) and background per bin at the nuisance values th, before the MC-statistics factors."""
+        ss, bs = self._parts(th)
+        return [mu * a for a in ss], bs
+
     def expected(self, mu, th):
+        ss, bs = self.parts(mu, th)
+        return [a + c for a, c in zip(ss, bs)]
+
+    def mc_gammas(self, mu, th, ns, aux):
+        """Profiled MC-statistics factors gamma_i at (mu, th) (all 1 without mc_stat)."""
+        if not self.mc_rel:
+            return [1.0] * len(self.b)
+        ss, bs = self.parts(mu, th)
+        out = []
+        for i, (n, sv, bv, d) in enumerate(zip(ns, ss, bs, self.mc_rel)):
+            g0 = aux[self.k + i]
+            out.append(_b_hat(n, sv, g0 * bv, d * bv) / bv if d > 0 and bv > 0 else 1.0)
+        return out
+
+    def _parts(self, th):
         bs, ss = list(self.b), list(self.s)
         for t, d in zip(th, self.nuis):
             if d["kind"].endswith("_shape"):
@@ -796,12 +878,24 @@ class _ShapeModel:
             elif d["kind"] == "signal_norm":
                 f = self._factor(d, t)
                 ss = [v * f for v in ss]
-        return [mu * a + c for a, c in zip(ss, bs)]
+        return ss, bs
 
     def nll(self, mu, th, ns, aux):
         total = 0.0
         if any(d["kind"].endswith("_norm") and self._factor(d, t) <= 0.0 for t, d in zip(th, self.nuis)):
             return -NEG
+        if self.mc_rel:
+            ss, bs = self.parts(mu, th)
+            for i, (n, sv, bv, d) in enumerate(zip(ns, ss, bs, self.mc_rel)):
+                if d > 0 and bv > 0:
+                    b0, sg = aux[self.k + i] * bv, d * bv
+                    v = _ll1(n, sv, _b_hat(n, sv, b0, sg), b0, sg)
+                else:
+                    v = _lnl(n, sv + bv)
+                if v <= NEG / 2:
+                    return -NEG
+                total -= v
+            return total + self.constraint(th, aux)
         for n, nu in zip(ns, self.expected(mu, th)):
             if nu <= 0.0:
                 if n > 0:
@@ -832,8 +926,9 @@ class _ShapeModel:
         return max(0.0, 2.0 * (self.cond(mu, ns, aux)[1] - val))
 
 
-def _draw_aux(model, th_c, rng):
-    """Auxiliary measurements at the conditional nuisance values: correlated normals, Poisson counts for gamma priors."""
+def _draw_aux(model, th_c, rng, gam_c=None):
+    """Auxiliary measurements at the conditional nuisance values: correlated normals, Poisson counts for gamma priors,
+    and normals of width mc_stat / b around the conditional MC-statistics factors gam_c."""
     z = [rng.gauss(0.0, 1.0) for _ in range(model.k)]
     if model.chol is not None:
         z = [sum(model.chol[i][j] * z[j] for j in range(i + 1)) for i in range(model.k)]
@@ -843,6 +938,8 @@ def _draw_aux(model, th_c, rng):
             aux.append(float(_ppf(rng.random(), model.tau[i] * model._factor(model.nuis[i], th_c[i]))))
         else:
             aux.append(th_c[i] + z[i])
+    if model.mc_rel:
+        aux += [g + d * rng.gauss(0.0, 1.0) for g, d in zip(gam_c, model.mc_rel)]
     return aux
 
 
@@ -872,18 +969,21 @@ def shape_limit(doc: dict, cl: float, toys: int, seed: int) -> dict:
     if toys:
         q_obs = model.q(obs, model.n, aux0, g_obs)
         th_c, _ = model.cond(obs, model.n, aux0)
-        mean = model.expected(obs, th_c)
+        gam_c = model.mc_gammas(obs, th_c, model.n, aux0)
+        ss_c, bs_c = model.parts(obs, th_c)
+        mean = [a + g * c for a, g, c in zip(ss_c, gam_c, bs_c)]
         rng = random.Random(seed)
         hits = 0
         for _ in range(toys):
             ns = [_ppf(rng.random(), m) for m in mean]
-            aux = _draw_aux(model, th_c, rng)
+            aux = _draw_aux(model, th_c, rng, gam_c)
             hits += model.q(obs, ns, aux) >= q_obs - 1e-12
         p = hits / toys
         out.update({"toy_p_value_at_asymptotic_limit": p, "binomial_error_on_p": math.sqrt(max(p * (1 - p), 0.0) / toys),
                     "target_p_value": 1.0 - cl})
     out["priors"] = {d["name"]: d.get("prior", "gaussian") for d in nuis}
     out["interpolation"] = {d["name"]: d["interpolation"] for d in nuis if "interpolation" in d}
+    out["mc_statistics"] = "barlow-beeston-lite" if model.mc_rel else "none"
     out["correlated_nuisances"] = corr_chol is not None
     out["note"] = ("every nuisance has a unit-width constraint on its parameter theta observed at 0 (Gaussian by default; a "
                    "normalization may be log-normal or gamma with a Poisson auxiliary measurement, and Gaussian-type "

@@ -120,7 +120,9 @@ and use common random numbers across a scan.
   one common multiplicative background nuisance; asymptotic observed limit (CLs+b-type) and asymptotic CLs limit, expected median and 1/2-sigma limits for both
   from the Asimov data set,
   and a seeded-toy p-value at the asymptotic limit as the calibration check (it should be near `1 - cl`; if not, use a
-  toy-calibrated construction). Shapes and other nuisances are not modeled.
+  toy-calibrated construction). Shapes and other nuisances are not modeled. A per-bin `mc_stat` (MC-statistics
+  uncertainty of the background, in both `multibin-limit` and `shape-limit`) adds a Barlow-Beeston-lite factor per
+  bin; leave it out only when the templates' MC statistics are negligible.
 - `shape-limit --input FILE [--cl --toys --seed]`: multi-bin limit with several nuisances: background and signal
   normalization, background and signal shape by vertical interpolation (piecewise linear `code0` by default, or the
   smooth `code4p`; asymmetric normalization factors `hi`/`lo` with `code4`, `code1` or `code0`, as in pyhf), a damped
