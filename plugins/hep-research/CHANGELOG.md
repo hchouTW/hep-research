@@ -36,6 +36,18 @@ Software checks establish contract consistency only, not physical validity.
   500 and 1e5), from a new private `core/stats/_poisson.py` whose distribution, tail and quantile are summed in log
   space and stay accurate to that limit (checked against SciPy and decimal arithmetic). `fc-interval` keeps a
   separate, stated limit of 500 on the total mean, since it scans a fine grid.
+- **Malformed input gives findings, not tracebacks (sci-fix).** The comparison gate sorted structured cuts with
+  `null` (open) bounds by comparing `None` with numbers, and read an explicit `"phase_space": null` or
+  `"normalization": null` as an object; both raised on schema-valid input. `validate_artifact` raised "unhashable
+  type" when `artifact_type` was a list or an object. The evidence ledger raised on a non-object record, a string
+  `year`, a string `data_taking_period`, list-valued ids and a dated source without an `id`. Now the gate CLI goes
+  through a new `check()` that refuses an artifact whose fields have the wrong JSON type, or a plan that is not an
+  object (`"status": "refused"`, exit 2, findings with a field path and a code), and a malformed plan entry is a
+  mismatch of kind `malformed` that is never applied. The ledger reports `source.bad_field_type` and
+  `claim.bad_field_type` at `<id>.<field>` and checks the rest of the record. A seeded mutation fuzz (30,000
+  mutations of the valid artifact fixtures, gate plans and the shipped ledgers) raises nothing. The ledger's
+  `claim.no_limitations` warning is removed: it could fire only when `scope.text` was missing, which is already an
+  error. The shipped ledgers give the same findings as before.
 
 ## 0.3.0 (2026-10-07): first public release
 

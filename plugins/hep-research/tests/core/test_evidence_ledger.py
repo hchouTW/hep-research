@@ -36,6 +36,22 @@ class LedgerTests(unittest.TestCase):
         r = run(self.s, self.c)
         self.assertEqual(r["status"], "pass", r["errors"])
 
+    def test_malformed_records_are_findings_with_field_paths(self):
+        bad_source = dict(self.s[0], id="fx:S02", year="2020", data_taking_period="2019-2020")
+        undated = {k: v for k, v in self.s[0].items() if k != "id"}
+        undated["verification_date"] = "2020-01-01"  # old enough to be stale: used to raise on the missing id
+        claim = dict(self.c[0], source_ids=[["fx:S01"]], claim_types="published_result", verification_strength=["full-text"])
+        r = run(self.s + [bad_source, "not a record", undated], self.c + [claim, 7])
+        found = {(e["code"], e["where"]) for e in r["errors"]}
+        self.assertIn(("source.bad_field_type", "fx:S02.year"), found)
+        self.assertIn(("source.bad_field_type", "fx:S02.data_taking_period"), found)
+        self.assertIn(("source.malformed", "sources[2]"), found)
+        self.assertIn(("source.missing_field", "sources[3]"), found)
+        self.assertIn(("claim.bad_field_type", "fx:C01.source_ids"), found)
+        self.assertIn(("claim.bad_field_type", "fx:C01.claim_types"), found)
+        self.assertIn(("claim.bad_field_type", "fx:C01.verification_strength"), found)
+        self.assertIn(("claim.malformed", "claims[2]"), found)
+
     def test_namespace_enforced_only_when_given(self):
         self.s[0]["id"], self.c[0]["source_ids"] = "S01", ["S01"]
         self.c[0]["id"] = "C01"

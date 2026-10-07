@@ -97,6 +97,93 @@ class GateIncompleteTransformationTests(unittest.TestCase):
         self.assertFalse(out["comparable"])
 
 
+class GateMalformedInputTests(unittest.TestCase):
+    """Schema-valid or malformed input gives findings with a field path and a code, never a traceback (T05)."""
+
+    def pair(self):
+        return load(VALID / "prediction.json"), load(VALID / "dataset_record.json")
+
+    def test_one_sided_cuts_with_null_bounds(self):
+        pred, meas = self.pair()
+        cuts = [{"variable": "pt", "unit": "GeV", "low": 20.0, "high": None},
+                {"variable": "pt", "unit": "GeV", "low": None, "high": 100.0}]
+        for doc in (pred, meas):
+            doc["extension"]["observable"]["phase_space"] = {"definition": "x", "fiducial": True, "cuts": copy.deepcopy(cuts)}
+            self.assertTrue(validate_artifact(doc).ok, validate_artifact(doc).as_dict())
+        res = gate_cli.check(pred, meas, {})
+        self.assertNotIn("phase_space", {m["field"] for m in res["mismatches"]})
+        meas["extension"]["observable"]["phase_space"]["cuts"][1]["high"] = 90.0
+        res = gate_cli.check(pred, meas, {})
+        self.assertIn("phase_space.cuts", {m["field"] for m in res["mismatches"]})
+
+    def test_explicit_null_phase_space_and_normalization(self):
+        pred, meas = self.pair()
+        pred["extension"]["observable"]["phase_space"] = None
+        pred["extension"]["observable"]["normalization"] = None
+        self.assertEqual(gate_cli.check(pred, meas, {})["status"], "refused")  # the schema types both as objects
+        res = gate(gate_cli.side_from_artifact(pred), gate_cli.side_from_artifact(meas))  # combination and model sets
+        self.assertIn("phase_space.fiducial", {m["field"] for m in res["mismatches"]})
+        self.assertIn("normalization.kind", {m["field"] for m in res["mismatches"]})
+
+    def test_wrongly_typed_artifact_is_refused_with_paths(self):
+        pred, meas = self.pair()
+        meas["extension"]["observable"] = ["not", "an", "object"]
+        pred["artifact_type"] = ["prediction"]
+        res = gate_cli.check(pred, meas, {})
+        self.assertEqual(res["status"], "refused")
+        paths = {f["path"] for f in res["findings"]}
+        self.assertIn("measurement:$.extension.observable", paths)
+        self.assertIn("prediction:$.artifact_type", paths)
+        with tempfile.TemporaryDirectory() as td:
+            (Path(td) / "p.json").write_text(json.dumps(pred), encoding="utf-8")
+            (Path(td) / "m.json").write_text(json.dumps(meas), encoding="utf-8")
+            rc, out = run(gate_cli.main, [str(Path(td) / "p.json"), str(Path(td) / "m.json")])
+        self.assertEqual(rc, 2)
+        self.assertEqual(out["refusal"], "invalid-input")
+
+    def test_malformed_plan_entries_are_findings_and_not_applied(self):
+        pred, meas = self.pair()
+        plan = {"transformations": ["rebin", {"kind": "rebin", "owner": "x", "edges": [0, "a"]}],
+                "mappings": [{"action": "equivalent"}], "measurement_conditions": [1, 2]}
+        res = gate_cli.check(pred, meas, plan)
+        malformed = {m["field"] for m in res["mismatches"] if m["kind"] == "malformed"}
+        self.assertEqual(malformed, {"transformations[0]", "transformations[1].edges", "mappings[0]", "measurement_conditions"})
+        self.assertEqual(res["transformations"], [])
+        self.assertEqual(gate_cli.check(pred, meas, ["not a plan"])["status"], "refused")
+
+    def test_artifact_type_of_the_wrong_json_type(self):
+        for bad in (["prediction"], {"a": 1}, 3):
+            doc = load(VALID / "prediction.json")
+            doc["artifact_type"] = bad
+            rep = validate_artifact(doc)
+            self.assertFalse(rep.ok)
+            self.assertIn("$.artifact_type", {f.path for f in rep.errors})
+
+    def test_seeded_mutations_never_raise(self):
+        """A small seeded mutation fuzz of every valid fixture (the slow tier runs more)."""
+        import random
+        rng = random.Random(20261007)
+        docs = [load(p) for p in sorted(VALID.glob("*.json"))]
+        pred, meas = self.pair()
+        repl = [None, 0, -1.5, float("nan"), "", "x", [], [None], {}, {"a": 1}, True, [1, 2]]
+        for _ in range(300):
+            doc = copy.deepcopy(rng.choice(docs))
+            node = doc
+            for _ in range(rng.randint(1, 4)):
+                keys = list(node) if isinstance(node, dict) else list(range(len(node)))
+                if not keys:
+                    break
+                key = rng.choice(keys)
+                if isinstance(node[key], (dict, list)) and node[key] and rng.random() < 0.7:
+                    node = node[key]
+                    continue
+                node[key] = copy.deepcopy(rng.choice(repl))
+                break
+            validate_artifact(doc)
+            gate_cli.check(doc, meas, {})
+            gate_cli.check(pred, doc, {})
+
+
 class RegistryRobustnessTests(unittest.TestCase):
     def test_local_profile_without_id_reported(self):
         with tempfile.TemporaryDirectory() as td:
