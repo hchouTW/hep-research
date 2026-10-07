@@ -57,6 +57,11 @@ Software checks establish contract consistency only, not physical validity.
   `pcolormesh` meshes and `imshow` images, and, given the sealed numbers (`check_figure(fig, region, sealed)`), text
   artists, titles and figure texts; a "blinded" label inside the region is not a leak. What it still cannot see
   (tick labels, legends, colorbars, values carried only by colors, transformed values) is stated in the module.
+- **Faster covariance and response validation (T17).** The validators' eigenvalue step used pure-Python Jacobi
+  rotations, cubic in the matrix size (1.6 s at n = 120 here, 6.9 s in the review's container). They now use
+  `numpy.linalg.eigh` when NumPy is installed (0.011 s at n = 120) and keep the rotations otherwise, so the checks stay
+  standard-library only; `HEP_STATS_PURE_PYTHON=1` forces the rotations, and the report records `eigen_solver`. The
+  two solvers agree to 1e-12 relative; a slow-tier benchmark (`tests/core/test_benchmarks.py`) holds the time budgets.
 - **One owner for each numerical helper (T16).** Two Jacobi eigensolvers, the Gauss-Jordan solve, the Cholesky solve,
   bisection, the golden-section minimizers and the matrix products now live once in `core/stats/_linalg.py`; the
   number, seed and toy-count checks in a new `core/stats/_validate.py` (each takes the caller's error class); the

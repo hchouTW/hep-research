@@ -14,6 +14,7 @@ caller accepts a semi-definite matrix, and then the shift applied to that pivot 
 from __future__ import annotations
 
 import math
+import os
 
 
 class LinAlgError(ValueError):
@@ -216,3 +217,27 @@ def scan_then_golden(f, lo, hi, points=25):
     grid = [lo + (hi - lo) * k / (points - 1) for k in range(points)]
     k = min(range(points), key=lambda i: f(grid[i]))
     return golden_min(f, grid[max(k - 1, 0)], grid[min(k + 1, points - 1)])
+
+
+def eigh(matrix, *, info: dict | None = None) -> tuple[list[float], list[list[float]]]:
+    """Eigenvalues ascending and eigenvector columns of a real symmetric matrix, by numpy.linalg.eigh when NumPy is
+    installed (fast at any size) and otherwise by Jacobi rotations (standard library only, cubic cost).
+    HEP_STATS_PURE_PYTHON=1 forces the Jacobi path. info receives the method and whether it converged."""
+    if os.environ.get("HEP_STATS_PURE_PYTHON") != "1":
+        try:
+            import numpy as np
+        except ImportError:
+            np = None
+        if np is not None and matrix:
+            try:
+                values, vectors = np.linalg.eigh(np.asarray(matrix, dtype=float))
+            except np.linalg.LinAlgError:
+                pass  # did not converge: fall back to the rotations, which say so in info
+            else:
+                if info is not None:
+                    info.update(method="numpy.linalg.eigh", converged=True)
+                return [float(x) for x in values], [[float(x) for x in row] for row in vectors]
+    values, vectors = jacobi_eigh(matrix, criterion="frobenius", info=info)
+    if info is not None:
+        info["method"] = "jacobi"
+    return values, vectors

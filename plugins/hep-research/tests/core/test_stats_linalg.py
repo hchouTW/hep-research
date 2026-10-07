@@ -99,15 +99,38 @@ class SharedHelperTests(unittest.TestCase):
         from core.stats.validate_covariance import _check_matrix, Report, DEFAULT_TOL
         with self.assertRaisesRegex(ud.ToyError, "did not converge"):
             ud._jacobi(self.DENSE, sweeps=1)
-        import core.stats.validate_covariance as vc
-        original = vc.jacobi_eigh
-        vc.jacobi_eigh = lambda m, max_sweeps=100, info=None: original(m, 1, info=info)
+        import os
+        original = _linalg.jacobi_eigh
+        _linalg.jacobi_eigh = lambda m, max_sweeps=100, **kw: original(m, 1, **kw)  # one sweep: cannot converge
+        os.environ["HEP_STATS_PURE_PYTHON"] = "1"
         try:
             rep = Report()
-            _check_matrix("m", self.DENSE, DEFAULT_TOL, rep, "")
+            metrics = _check_matrix("m", self.DENSE, DEFAULT_TOL, rep, "")
         finally:
-            vc.jacobi_eigh = original
+            _linalg.jacobi_eigh = original
+            del os.environ["HEP_STATS_PURE_PYTHON"]
         self.assertIn("eigen_not_converged", {w["code"] for w in rep.warnings})
+        self.assertEqual(metrics["eigen_solver"], "jacobi")
+
+    def test_numpy_and_rotation_eigenvalues_agree(self):
+        import os
+        import random
+        rng = random.Random(4)
+        n = 12
+        a = [[rng.gauss(0, 1) for _ in range(n)] for _ in range(n)]
+        c = [[sum(a[i][k] * a[j][k] for k in range(n)) - (3.0 if i == j else 0.0) for j in range(n)] for i in range(n)]
+        info = {}
+        fast, _ = _linalg.eigh(c, info=info)
+        os.environ["HEP_STATS_PURE_PYTHON"] = "1"
+        try:
+            slow_info = {}
+            slow, _ = _linalg.eigh(c, info=slow_info)
+        finally:
+            del os.environ["HEP_STATS_PURE_PYTHON"]
+        self.assertEqual(slow_info["method"], "jacobi")
+        top = max(abs(x) for x in slow)
+        for x, y in zip(fast, slow):
+            self.assertAlmostEqual(x, y, delta=1e-12 * top)
 
     def test_solve_reports_how_close_to_singular(self):
         info = {}

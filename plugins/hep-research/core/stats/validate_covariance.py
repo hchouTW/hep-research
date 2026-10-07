@@ -27,7 +27,8 @@ psd and rank to the largest eigenvalue.
 
 Usage: python3 core/stats/validate_covariance.py FILE.json [--strict] [--demo-psd-clip]
 Exit codes: 0 pass (or warn without --strict); 1 errors (or warnings with --strict);
-2 file unreadable or not JSON. Standard library only.
+2 file unreadable or not JSON. Standard library only; NumPy, when installed, computes the eigenvalues
+(numpy.linalg.eigh, much faster for large matrices; HEP_STATS_PURE_PYTHON=1 keeps the standard-library rotations).
 """
 from __future__ import annotations
 
@@ -128,7 +129,8 @@ def _check_matrix(name: str, m: list[list[float]], tol: dict, report: Report, pr
     if any(not math.isfinite(x) for x in diag):
         return metrics
     solver: dict = {}
-    values, _ = jacobi_eigh(s, info=solver)
+    values, _ = _linalg.eigh(s, info=solver)
+    metrics["eigen_solver"] = solver["method"]
     if not solver["converged"]:
         report.warn(f"{prefix}eigen_not_converged", f"{name}: the eigenvalue rotations did not converge in {solver['sweeps']} "
                     f"sweeps (off-diagonal norm {solver['off_diagonal']:.3e}); the eigenvalue checks are approximate")
@@ -158,7 +160,7 @@ def clip_demo(m: list[list[float]], weights: list[float] | None) -> dict:
     """[Proposal] diagnostic: clip negative eigenvalues; report the changes. Input is not modified."""
     n = len(m)
     s = [[(m[i][j] + m[j][i]) / 2.0 for j in range(n)] for i in range(n)]
-    values, vec = jacobi_eigh(s)
+    values, vec = _linalg.eigh(s)
     clipped = [max(x, 0.0) for x in values]
     c = [[sum(vec[i][k] * clipped[k] * vec[j][k] for k in range(n)) for j in range(n)] for i in range(n)]
 

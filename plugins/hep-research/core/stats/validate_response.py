@@ -37,7 +37,7 @@ Normalization meanings (sums are over reco bins, plus explicit under/overflow, p
 
 Usage: python3 core/stats/validate_response.py FILE.json [--strict]
 Exit codes: 0 pass (or warn without --strict); 1 errors; 2 unreadable or not JSON.
-Standard library only.
+Standard library only; NumPy, when installed, computes the eigenvalues (HEP_STATS_PURE_PYTHON=1 to avoid it).
 """
 from __future__ import annotations
 
@@ -53,7 +53,8 @@ import math
 import sys
 from pathlib import Path
 
-from core.stats.validate_covariance import Report, jacobi_eigh
+from core.stats import _linalg
+from core.stats.validate_covariance import Report
 
 DEFAULT_TOL = {"normalization": 1e-6, "rank": 1e-12, "condition_warn": 1e4,
                "min_efficiency": 1e-3, "pull_warn": 3.0}
@@ -139,7 +140,7 @@ def _rank_and_condition(m: list[list[float]], tol: dict, report: Report, n_reco:
     """Identifiability from the singular values of the reco-by-truth matrix m[i][j] (via M^T M)."""
     gram = [[sum(m[k][i] * m[k][j] for k in range(n_reco)) for j in range(n_truth)] for i in range(n_truth)]
     solver: dict = {}
-    values, _ = jacobi_eigh(gram, info=solver)
+    values, _ = _linalg.eigh(gram, info=solver)
     if not solver["converged"]:
         report.warn("identifiability.eigen_not_converged", f"the eigenvalue rotations did not converge in {solver['sweeps']} "
                     "sweeps; the rank and condition number are approximate")
