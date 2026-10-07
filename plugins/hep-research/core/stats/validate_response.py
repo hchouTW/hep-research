@@ -163,9 +163,10 @@ def _closure(doc: dict, m: list[list[float]], n_reco: int, n_truth: int, norm: s
     c = doc.get("closure")
     if c is None:
         return None
-    truth, reco, sig = c.get("truth"), c.get("reco"), c.get("reco_sigma")
+    truth, reco, sig = (c.get("truth"), c.get("reco"), c.get("reco_sigma")) if isinstance(c, dict) else (None, None, None)
     if (not isinstance(truth, list) or len(truth) != n_truth or not isinstance(reco, list) or len(reco) != n_reco
-            or not all(_num(x) for x in truth + reco) or (sig is not None and (len(sig) != n_reco or not all(_num(x) and x > 0 for x in sig)))):
+            or not all(_num(x) for x in truth + reco)
+            or (sig is not None and (not isinstance(sig, list) or len(sig) != n_reco or not all(_num(x) and x > 0 for x in sig)))):
         report.error("closure.malformed", f"closure needs truth ({n_truth}), reco ({n_reco}) and optionally positive reco_sigma ({n_reco}) numbers")
         return None
     pred = [sum(m[i][j] * truth[j] for j in range(n_truth)) for i in range(n_reco)]
@@ -193,8 +194,17 @@ def validate_response(doc: dict) -> dict:
     """Validate a response document (see module docstring). Returns the report dict."""
     report = Report()
     tol = dict(DEFAULT_TOL)
+    if not isinstance(doc, dict):
+        report.error("document.malformed", f"the document must be a JSON object, got {type(doc).__name__}")
+        return {"status": report.status(), "errors": report.errors, "warnings": report.warnings, "metrics": {}}
     if isinstance(doc.get("tolerances"), dict):
-        tol.update({k: float(v) for k, v in doc["tolerances"].items() if k in tol})
+        for k, v in doc["tolerances"].items():
+            if k not in tol:
+                continue
+            if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) or v < 0:
+                report.error("tolerances.malformed", f"tolerance '{k}' must be a finite non-negative number, got {v!r}")
+            else:
+                tol[k] = float(v)
     report.metrics["tolerances"] = tol
     meta = doc.get("metadata")
     result = {"physical_validity": "not_assessed", "input_modified": False,

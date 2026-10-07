@@ -57,6 +57,17 @@ Software checks establish contract consistency only, not physical validity.
   `pcolormesh` meshes and `imshow` images, and, given the sealed numbers (`check_figure(fig, region, sealed)`), text
   artists, titles and figure texts; a "blinded" label inside the region is not a leak. What it still cannot see
   (tick labels, legends, colorbars, values carried only by colors, transformed values) is stated in the module.
+- **Property-based tests (T08).** `tests/core/test_properties.py` (with `hypothesis`, a test-only dependency in the
+  new `requirements-test.txt`; skipped without it) checks that upper limits are non-decreasing in n and
+  non-increasing in b, that intervals are nested in the confidence level, that covariance tools give the same
+  verdict at 1e-12 and 1e12 scale, that a GLS fit does not depend on input order, that a partitioned merge does not
+  depend on chunking or finish order, and that validators never raise on arbitrary JSON. That last property found
+  that `validate_covariance` and `validate_response` raised on a document that was not an object, a non-list
+  `labels` or `closure`, and non-numeric `tolerances`; they now report `document.malformed`,
+  `tolerances.malformed` and the existing shape codes.
+- **Published-table tests (T07).** `tests/core/test_published_tables.py` checks Feldman-Cousins Tables IV and VI,
+  PDG 2024 Tables 40.3 (one-sided Poisson limits, the Garwood ends) and 40.4 (unified intervals), each transcribed by
+  script with its source, and Li & Ma eq. 17 against an independent transcription (the paper prints no table).
 
 ## 0.3.0 (2026-10-07): first public release
 

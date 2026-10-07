@@ -214,8 +214,17 @@ def validate_covariance(doc: dict, demo_clip: bool = False) -> dict:
     """Validate a covariance document (see module docstring). Returns the report dict."""
     report = Report()
     tol = dict(DEFAULT_TOL)
+    if not isinstance(doc, dict):
+        report.error("document.malformed", f"the document must be a JSON object, got {type(doc).__name__}")
+        return {"status": report.status(), "errors": report.errors, "warnings": report.warnings, "metrics": {}}
     if isinstance(doc.get("tolerances"), dict):
-        tol.update({k: float(v) for k, v in doc["tolerances"].items() if k in tol})
+        for k, v in doc["tolerances"].items():
+            if k not in tol:
+                continue
+            if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) or v < 0:
+                report.error("tolerances.malformed", f"tolerance '{k}' must be a finite non-negative number, got {v!r}")
+            else:
+                tol[k] = float(v)
     report.metrics["tolerances"] = tol
     if doc.get("kind") not in ("absolute", "relative"):
         report.error("metadata.kind", "kind must be 'absolute' or 'relative'")
@@ -226,7 +235,8 @@ def validate_covariance(doc: dict, demo_clip: bool = False) -> dict:
     if matrix is not None:
         n = len(matrix)
         if not isinstance(labels, list) or len(labels) != n:
-            report.error("labels.dimension", f"labels must be a list of {n} entries matching the matrix, got {None if labels is None else len(labels)}")
+            got = len(labels) if isinstance(labels, list) else (None if labels is None else type(labels).__name__)
+            report.error("labels.dimension", f"labels must be a list of {n} entries matching the matrix, got {got}")
         elif len(set(map(str, labels))) != n:
             report.error("labels.duplicate", "labels are not unique")
     elif not isinstance(labels, list):
