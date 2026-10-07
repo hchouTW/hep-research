@@ -5,6 +5,11 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Systematics table for papers (T26).** `skills/hep-analysis/scripts/systematics_table_tex.py` renders the
+  systematics registry (the `assets/systematics.csv` format, plus any impact columns) as a booktabs LaTeX table. It
+  refuses a table without a status (`--status` or a per-row `status` column), names synthetic, asimov, preliminary or
+  unvalidated content in the caption, records every status in a comment, and escapes LaTeX; tested by compiling the
+  output with pdflatex.
 - **Missing skill handoffs (T25).** The Handoffs tables gain hep-statistics → physics-ml (simulation-based
   inference, neural likelihoods), physics-ml → detector-response (fast-simulation validation) and → research-
   communication, research-communication → hep-analysis, detector-response and hep-computing, and detector-response and

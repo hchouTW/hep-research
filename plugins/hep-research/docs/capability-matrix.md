@@ -68,6 +68,7 @@ results; they are listed in "E3 results" at the end. Evidence: VALIDATION FULLTE
 | Paper builds (tectonic) | research-communication | unverified | tectonic 0.17.0 installed, but the network policy blocks its TeX bundle host (relay.fullyjustified.net), so the skeleton compile test stays skipped (VALIDATION DIAGRAM-RUN) |
 | Lattice QCD, EFT global fits, cosmic-ray propagation, other domains | none | not in v1 | limited-support response (J12) |
 | Cosmic-ray propagation (model families, inputs, degeneracies) | hep-theory | guidance only; fits not in v1 | `skills/hep-theory/references/cosmic-ray-propagation.md`; no propagation code (GALPROP, DRAGON, USINE) installed or run, nothing tested |
+| Systematics table as booktabs LaTeX | hep-analysis | tested (E2, 2026-10-08) | `systematics_table_tex.py`: status label required and carried into the caption; output compiled with pdflatex (`tests/skills/hep_analysis/test_systematics_table_tex.py`) |
 
 ## Profiles
 
