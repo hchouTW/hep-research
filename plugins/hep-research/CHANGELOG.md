@@ -48,6 +48,15 @@ Software checks establish contract consistency only, not physical validity.
   mutations of the valid artifact fixtures, gate plans and the shipped ledgers) raises nothing. The ledger's
   `claim.no_limitations` warning is removed: it could fire only when `scope.text` was missing, which is already an
   error. The shipped ledgers give the same findings as before.
+- **Blinding scanner: fewer false alarms, no silent passes (sci-fix).** A sealed low count such as 0 or 3 matched
+  every "0" or "3" in a log, including `run_3`, `v3.0.1`, `3rd` and dates (8 hits on one unrelated line); a sealed
+  value with fewer than 3 significant digits now matches only a standalone number, and such hits are marked
+  `weak`. Logs were read as UTF-8 with replacement characters, so a UTF-16 log containing a sealed value passed;
+  text is now decoded from its byte-order mark, a UTF-16 byte pattern, UTF-8 or Latin-1, and a file that cannot be
+  decoded is `incomplete`. `check_figure` also inspects `fill_between` and other filled areas, `hist2d` and
+  `pcolormesh` meshes and `imshow` images, and, given the sealed numbers (`check_figure(fig, region, sealed)`), text
+  artists, titles and figure texts; a "blinded" label inside the region is not a leak. What it still cannot see
+  (tick labels, legends, colorbars, values carried only by colors, transformed values) is stated in the module.
 
 ## 0.3.0 (2026-10-07): first public release
 
