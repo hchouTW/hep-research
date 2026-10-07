@@ -31,6 +31,8 @@ Subcommands:
                         background and signal shape by vertical interpolation), all Gaussian with
                         unit constraint; asymptotic observed and Asimov expected limits, optional
                         seeded-toy calibration at the asymptotic limit.
+                        With --cls-toys N, also a toy-based CLs limit and expected 1/2-sigma limits on a grid of
+                        mu (N toys per hypothesis and grid point; common random numbers across the grid).
   multibin-limit and shape-limit also give the asymptotic CLs limit and the expected median and 1/2-sigma limits
   (CLs and CLs+b) from the background-only Asimov data set (Cowan, Cranmer, Gross, Vitells 2011, sec. 4.3).
 
@@ -76,6 +78,7 @@ Usage (from the skill directory):
   python3 core/stats/likelihood_limits.py profile-fc --n 3 --b 3 --sigma-b 1 --cl 0.90 --toys 1000 --seed 1
   python3 core/stats/likelihood_limits.py profile-cls --n 3 --b 3 --sigma-b 1 --toys 1000 --expected-toys 60 --seed 1
   python3 core/stats/likelihood_limits.py shape-limit --input shapes.json --toys 100 --seed 1
+  python3 core/stats/likelihood_limits.py shape-limit --input shapes.json --cls-toys 500 --seed 1
   python3 core/stats/likelihood_limits.py neyman-limit --n 3 --b 3 --sigma-b 2 --cl 0.95 --beta 0.01 --toys 1000 --seed 1
   python3 core/stats/likelihood_limits.py neyman-coverage --s 2 --b 3 --sigma-b 2 --cl 0.95 --outer 300 --inner 200 --seed 1
 Exit codes: 0 ok; 2 rejected input. Standard library only.
@@ -943,12 +946,72 @@ def _draw_aux(model, th_c, rng, gam_c=None):
     return aux
 
 
-def shape_limit(doc: dict, cl: float, toys: int, seed: int) -> dict:
+def _toy_cls(model, aux0, g_obs, cl: float, toys: int, seed: int, hi: float, points: int) -> dict:
+    """Toy-based CLs on a grid of mu in (0, hi]: at each mu, q-tilde_mu of the data against seeded toys generated at
+    (mu, nuisances profiled on the data at mu) for CLs+b and at (0, nuisances profiled at mu = 0) for CLb, with the
+    auxiliary measurements redrawn. The same toy seeds are used at every mu (common random numbers). Expected limits
+    come from the same toys: for band N the b-only quantile q_N with P(q >= q_N | b) = Phi(N) replaces the observed q.
+    Each limit is the first crossing of CLs = 1 - cl, interpolated linearly in log CLs between grid points."""
+    nd, alpha = NormalDist(), 1.0 - cl
+    grid = [hi * (i + 1) / points for i in range(points)]
+    base = random.Random(seed)
+    seeds_sb = [base.getrandbits(63) for _ in range(toys)]
+    seeds_b = [base.getrandbits(63) for _ in range(toys)]
+    th0, _ = model.cond(0.0, model.n, aux0)
+    gam0 = model.mc_gammas(0.0, th0, model.n, aux0)
+    curves: dict[str, list[float]] = {"observed": [], **{name: [] for name, _ in BANDS}}
+    for mu in grid:
+        q_obs = model.q(mu, model.n, aux0, g_obs)
+        th_mu, _ = model.cond(mu, model.n, aux0)
+        gam_mu = model.mc_gammas(mu, th_mu, model.n, aux0)
+        dist = {}
+        for key, m_gen, th_c, gam_c, seeds in (("sb", mu, th_mu, gam_mu, seeds_sb), ("b", 0.0, th0, gam0, seeds_b)):
+            ss, bs = model.parts(m_gen, th_c)
+            mean = [a + g * c for a, g, c in zip(ss, gam_c, bs)]
+            qs = []
+            for sd in seeds:
+                rng = random.Random(sd)
+                ns = [_ppf(rng.random(), m) for m in mean]
+                qs.append(model.q(mu, ns, _draw_aux(model, th_c, rng, gam_c)))
+            dist[key] = sorted(qs)
+
+        def frac_ge(values, q):
+            return sum(v >= q - 1e-12 for v in values) / len(values)
+
+        def cls_at(q):
+            return frac_ge(dist["sb"], q) / max(frac_ge(dist["b"], q), 1.0 / toys)
+        curves["observed"].append(cls_at(q_obs))
+        for name, k in BANDS:
+            idx = min(toys - 1, max(0, int(math.floor((1.0 - nd.cdf(k)) * toys))))
+            curves[name].append(cls_at(dist["b"][idx]))
+
+    def crossing(values):
+        prev_mu, prev = 0.0, 1.0
+        for mu, v in zip(grid, values):
+            if v < alpha:
+                lp, lv = math.log(max(prev, 1e-300)), math.log(max(v, 1e-300))
+                return prev_mu + (mu - prev_mu) * (lp - math.log(alpha)) / (lp - lv) if lp != lv else mu
+            prev_mu, prev = mu, v
+        return None
+    limits = {name: crossing(vals) for name, vals in curves.items()}
+    out = {"observed_upper_limit": limits["observed"], "expected": {name: limits[name] for name, _ in BANDS},
+           "toys_per_hypothesis": toys, "seed": seed, "grid": grid, "cls_observed_on_grid": curves["observed"],
+           "binomial_error_on_cls_plus_b_at_alpha": math.sqrt(alpha * (1 - alpha) / toys)}
+    missing = [name for name, v in limits.items() if v is None]
+    if missing:
+        out["not_reached"] = f"CLs stays above {alpha:g} up to mu = {hi:g} for: {', '.join(missing)} (raise the scan range)"
+    return out
+
+
+def shape_limit(doc: dict, cl: float, toys: int, seed: int, cls_toys: int = 0, cls_points: int = 16) -> dict:
     bins, nuis, corr_chol = _load_shape(doc)
     cl = _num(doc.get("cl", cl), "cl", 0.0, 1.0, strict_low=True)
     if cl >= 1.0:
         raise LikelihoodError("cl must lie strictly between 0 and 1")
     toys, seed = _seed_toys(toys, seed, allow_zero=True)
+    cls_toys = _seed_toys(cls_toys, seed, allow_zero=True)[0]
+    if isinstance(cls_points, bool) or not isinstance(cls_points, int) or not 8 <= cls_points <= 60:
+        raise LikelihoodError("cls_points must be an integer in [8, 60]")
     model = _ShapeModel(bins, nuis, corr_chol)
     z = NormalDist().inv_cdf(cl)
     aux0 = model.aux_obs()
@@ -984,6 +1047,9 @@ def shape_limit(doc: dict, cl: float, toys: int, seed: int) -> dict:
     out["priors"] = {d["name"]: d.get("prior", "gaussian") for d in nuis}
     out["interpolation"] = {d["name"]: d["interpolation"] for d in nuis if "interpolation" in d}
     out["mc_statistics"] = "barlow-beeston-lite" if model.mc_rel else "none"
+    if cls_toys:
+        hi = 1.3 * max(out["asymptotic_observed_cls_upper_limit"], out["asymptotic_expected_limits"]["cls"]["+2sigma"])
+        out["toy_cls"] = _toy_cls(model, aux0, g_obs, cl, cls_toys, seed, hi, cls_points)
     out["correlated_nuisances"] = corr_chol is not None
     out["note"] = ("every nuisance has a unit-width constraint on its parameter theta observed at 0 (Gaussian by default; a "
                    "normalization may be log-normal or gamma with a Poisson auxiliary measurement, and Gaussian-type "
@@ -1229,6 +1295,8 @@ def build_parser() -> argparse.ArgumentParser:
     h = sub.add_parser("shape-limit", help="multi-bin limit with shape and normalization nuisances")
     h.add_argument("--input", required=True)
     h.add_argument("--cl", type=float, default=0.95, help="used when the file has no cl")
+    h.add_argument("--cls-toys", type=int, default=0, help="toys per hypothesis and grid point for toy-based CLs (0: none)")
+    h.add_argument("--cls-points", type=int, default=16, help="grid points in mu for toy-based CLs")
     common(h, 0)
     return parser
 
@@ -1249,7 +1317,7 @@ def main(argv: list[str] | None = None) -> int:
                 doc = json.loads(Path(args.input).read_text())
             except (OSError, json.JSONDecodeError) as exc:
                 raise LikelihoodError(f"cannot read {args.input}: {exc}") from None
-            result = shape_limit(doc, args.cl, args.toys, args.seed)
+            result = shape_limit(doc, args.cl, args.toys, args.seed, args.cls_toys, args.cls_points)
         elif args.command == "profile-limit":
             result = profile_limit(args.n, args.b, args.sigma_b, args.cl, args.toys, args.seed)
         elif args.command == "profile-significance":

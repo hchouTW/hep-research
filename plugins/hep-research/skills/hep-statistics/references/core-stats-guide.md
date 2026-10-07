@@ -127,7 +127,9 @@ and use common random numbers across a scan.
   normalization, background and signal shape by vertical interpolation (piecewise linear `code0` by default, or the
   smooth `code4p`; asymmetric normalization factors `hi`/`lo` with `code4`, `code1` or `code0`, as in pyhf), a damped
   Newton profile, asymptotic observed
-  and Asimov expected limits with the same asymptotic CLs limit and bands, and an optional toy p-value at the limit. A normalization nuisance may be `gaussian`
+  and Asimov expected limits with the same asymptotic CLs limit and bands, an optional toy p-value at the limit, and
+  with `--cls-toys N` a toy-based CLs limit and expected 1/2-sigma limits on a grid of `mu` (use it at low counts,
+  where the asymptotic bands are too wide; cost grows as toys x grid points x two fits). A normalization nuisance may be `gaussian`
   (factor `1 + sigma theta`), `lognormal` (`exp(sigma theta)`) or `gamma` (`1 + sigma theta` with a Poisson auxiliary
   measurement of `tau = 1/sigma^2`); an optional correlation matrix correlates the Gaussian-type nuisances (gamma ones
   cannot be correlated). Choose the constraint from the origin of the uncertainty
