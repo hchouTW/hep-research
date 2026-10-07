@@ -44,6 +44,7 @@ MISSING_FILE_ARGS = {
     "skills/hep-computing/scripts/validate_agile_notes.py": [M],
     "skills/hep-computing/scripts/validate_skill_example.py": [M],
     "skills/hep-statistics/scripts/bayes_diagnostics.py": ["diagnose", "--input", M],
+    "skills/hep-statistics/scripts/combine_asymmetric.py": ["measurements", "--input", M],
     "skills/hep-statistics/scripts/combine_measurements.py": [M],
     "skills/hep-statistics/scripts/look_elsewhere.py": ["brute", "--input", M, "--seed", "1"],
     "skills/hep-statistics/scripts/sensitivity_and_gof.py": ["gof", "--input", M, "--seed", "1"],

@@ -20,7 +20,7 @@
   },
   "hep-statistics": {
    "references": 9,
-   "bytes": 100329,
+   "bytes": 102755,
    "uncited": 0
   },
   "hep-theory": {
@@ -1404,8 +1404,8 @@
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 25395,
-   "lines": 300,
+   "bytes": 26731,
+   "lines": 312,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/inference-and-unfolding.md",
@@ -1481,8 +1481,8 @@
   {
    "path": "skills/hep-statistics/references/nuisance-modeling.md",
    "owner": "hep-statistics",
-   "bytes": 14972,
-   "lines": 201,
+   "bytes": 16062,
+   "lines": 211,
    "linked_from_skill_md": true,
    "cited_by": [
     "adapters/pyhf-combine/assets/pyhf_nuisance_diagnostics.py",

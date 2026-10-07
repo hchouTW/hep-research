@@ -11,7 +11,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. shallow clone: last_co
 | detector-response | 33 | 345 | 0 |
 | hep-analysis | 9 | 72 | 0 |
 | hep-computing | 26 | 285 | 0 |
-| hep-statistics | 9 | 100 | 0 |
+| hep-statistics | 9 | 103 | 0 |
 | hep-theory | 8 | 42 | 0 |
 | physics-ml | 34 | 181 | 0 |
 | research-communication | 52 | 358 | 0 |
@@ -145,11 +145,11 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `task-quality-checklist.md` | hep-computing | 3.0 | no | 4 | - | 119450c 2026-10-04 |
 | `validation-and-done.md` | hep-computing | 3.7 | yes | 4 | - | 0205a9c 2026-10-06 |
 | `astroparticle-statistics.md` | hep-statistics | 8.6 | yes | 12 | detector-response, hep-analysis | 0fb0531 2026-10-07 |
-| `core-stats-guide.md` | hep-statistics | 25.4 | yes | 7 | - | fefa389 2026-10-05 |
+| `core-stats-guide.md` | hep-statistics | 26.7 | yes | 7 | - | fefa389 2026-10-05 |
 | `inference-recipes.md` | hep-statistics | 13.6 | yes | 7 | detector-response, hep-analysis | 281eb2d 2026-10-04 |
 | `likelihood-fitting.md` | hep-statistics | 8.1 | yes | 7 | detector-response, hep-analysis, hep-computing | 281eb2d 2026-10-04 |
 | `ml-assisted-inference.md` | hep-statistics | 5.8 | yes | 3 | physics-ml | 119450c 2026-10-04 |
-| `nuisance-modeling.md` | hep-statistics | 15.0 | yes | 6 | hep-analysis | 281eb2d 2026-10-04 |
+| `nuisance-modeling.md` | hep-statistics | 16.1 | yes | 6 | hep-analysis | 281eb2d 2026-10-04 |
 | `statistical-inference-for-physics.md` | hep-statistics | 12.7 | yes | 8 | hep-computing, hep-theory, research-communication | 281eb2d 2026-10-04 |
 | `statistical-tools.md` | hep-statistics | 8.2 | yes | 5 | hep-analysis, physics-ml | 6caf06f 2026-10-07 |
 | `unfolding.md` | hep-statistics | 2.9 | yes | 22 | detector-response, hep-analysis | 0fb0531 2026-10-07 |

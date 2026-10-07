@@ -117,23 +117,23 @@ and use common random numbers across a scan.
   statistic, with observed and (with `--expected-toys`) median and 1/2-sigma expected limits; it reproduces the exact
   `cls-limit` for a known background within toy noise.
 - `multibin-limit --input FILE [--cl --toys --seed]`: bins sharing one `mu` with no, independent per-bin (Gaussian) or
-  one common multiplicative background nuisance; asymptotic observed limit (CLs+b-type) and asymptotic CLs limit, expected median and 1/2-sigma limits for both
-  from the Asimov data set,
-  and a seeded-toy p-value at the asymptotic limit as the calibration check (it should be near `1 - cl`; if not, use a
-  toy-calibrated construction). Shapes and other nuisances are not modeled. A per-bin `mc_stat` (MC-statistics
-  uncertainty of the background, in both `multibin-limit` and `shape-limit`) adds a Barlow-Beeston-lite factor per
-  bin; leave it out only when the templates' MC statistics are negligible.
-- `shape-limit --input FILE [--cl --toys --seed]`: multi-bin limit with several nuisances: background and signal
-  normalization, background and signal shape by vertical interpolation (piecewise linear `code0` by default, or the
-  smooth `code4p`; asymmetric normalization factors `hi`/`lo` with `code4`, `code1` or `code0`, as in pyhf), a damped
-  Newton profile, asymptotic observed
-  and Asimov expected limits with the same asymptotic CLs limit and bands, an optional toy p-value at the limit, and
-  with `--cls-toys N` a toy-based CLs limit and expected 1/2-sigma limits on a grid of `mu` (use it at low counts,
-  where the asymptotic bands are too wide; cost grows as toys x grid points x two fits). A normalization nuisance may be `gaussian`
-  (factor `1 + sigma theta`), `lognormal` (`exp(sigma theta)`) or `gamma` (`1 + sigma theta` with a Poisson auxiliary
-  measurement of `tau = 1/sigma^2`); an optional correlation matrix correlates the Gaussian-type nuisances (gamma ones
-  cannot be correlated). Choose the constraint from the origin of the uncertainty
-  ([nuisance modeling](nuisance-modeling.md)), not by convenience. Slow for many nuisances.
+  one common multiplicative background nuisance; the asymptotic observed limit (CLs+b-type, `q-tilde = z^2`) and the
+  asymptotic CLs limit, the expected median and 1/2-sigma limits for both from the Asimov data set, and a seeded-toy
+  p-value at the asymptotic limit as the calibration check (it should be near `1 - cl`; if not, use a toy-calibrated
+  construction). Shapes and other nuisances are not modeled. A per-bin `mc_stat` (MC-statistics uncertainty of the
+  background, also in `shape-limit` and `contour`) adds a Barlow-Beeston-lite factor per bin; leave it out only when
+  the templates' MC statistics are negligible.
+- `shape-limit --input FILE [--cl --toys --seed --cls-toys --cls-points]`: multi-bin limit with several nuisances:
+  background and signal normalization, background and signal shape by vertical interpolation (piecewise linear
+  `code0` by default, or the smooth `code4p`; asymmetric normalization factors `hi`/`lo` with `code4`, `code1` or
+  `code0`, as in pyhf), a damped Newton profile, the same asymptotic limits and bands as `multibin-limit`, and an
+  optional toy p-value at the limit. With `--cls-toys N` it adds a toy-based CLs limit and expected 1/2-sigma limits on
+  a grid of `--cls-points` values of `mu` (use it at low counts, where the asymptotic bands are too wide; the cost grows
+  as toys x grid points x two fits). A normalization nuisance may be `gaussian` (factor `1 + sigma theta`), `lognormal`
+  (`exp(sigma theta)`) or `gamma` (`1 + sigma theta` with a Poisson auxiliary measurement of `tau = 1/sigma^2`); an
+  optional correlation matrix correlates the Gaussian-type nuisances (gamma ones cannot be correlated). Choose the
+  constraint from the origin of the uncertainty ([nuisance modeling](nuisance-modeling.md)), not by convenience. Slow
+  for many nuisances.
 - `contour --input FILE [--cl 0.6827,0.95 --rays 36]`: two signal strengths (bins with `s1` and `s2`; the shape-limit
   nuisances except signal shapes; `mc_stat`): best fit, Hessian covariance and profile-likelihood contours at the
   chi-square 2-dof levels. Wilks coverage was checked with toys at about 50 events per bin; at low counts, check it

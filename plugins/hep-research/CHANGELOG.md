@@ -5,6 +5,10 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Asymmetric uncertainties (T22).** `skills/hep-statistics/scripts/combine_asymmetric.py` combines measurements with
+  asymmetric errors by Barlow's linear-variance or linear-σ likelihoods, and adds several asymmetric uncertainty
+  sources on one result by matching cumulants (quadratic or piecewise model, with the central value moved so the mean
+  is kept). Closure against the exact pooled likelihood of lifetime measurements and against a Monte Carlo sum.
 - **Two-POI contours (T22).** `likelihood_limits.py contour` fits two signal strengths (bins with `s1` and `s2`, the
   shape-limit nuisances and `mc_stat`) and traces the profile-likelihood contours at the chi-square 2-dof levels along
   rays from the best fit, with the Hessian covariance. Toys at the true point confirm the Wilks coverage.
