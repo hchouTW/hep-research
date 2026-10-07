@@ -37,7 +37,7 @@ SKIP = "hypothesis not installed (test-only dependency: pip install hypothesis)"
 
 
 def fast(n=40):
-    return settings(max_examples=n, deadline=None, derandomize=True,
+    return settings(max_examples=n, deadline=None, derandomize=True, database=None,  # no .hypothesis/ folder
                     suppress_health_check=[HealthCheck.too_slow, HealthCheck.data_too_large])
 
 

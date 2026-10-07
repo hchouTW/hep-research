@@ -102,6 +102,7 @@ jobs:
           python3 -m pip install --break-system-packages --ignore-installed -r requirements-ci.lock
       - name: Unit tests with PyROOT available
         run: |
+          if command -v git >/dev/null; then git config --global --add safe.directory "$GITHUB_WORKSPACE"; fi  # checkout owned by another user
           python3 -c "import ROOT; print('ROOT', ROOT.gROOT.GetVersion())"
           python3 -m unittest discover -s tests -t .
 

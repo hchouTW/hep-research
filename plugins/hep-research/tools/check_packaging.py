@@ -27,7 +27,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SITE_KEYS = ("partition", "account", "qos", "constraint", "gres", "requirements", "container_image")
 MAX_BYTES = 2 * 1024 * 1024
-CACHE = re.compile(r"(^|/)(__pycache__|\.pytest_cache)(/|$)|\.pyc$|(^|/)\.DS_Store$")
+CACHE = re.compile(r"(^|/)(__pycache__|\.pytest_cache|\.hypothesis)(/|$)|\.pyc$|(^|/)\.DS_Store$")
 TRANSCRIPT = re.compile(r"\.jsonl$|transcript", re.I)
 RUBRIC = re.compile(r"rubric|answer[-_]?key|grading|prompts_eval|routing_eval", re.I)
 PRIVATE = re.compile(r"/home/[a-z_][a-z0-9_-]*/|/Users/[A-Za-z0-9_.-]+/|C:\\\\Users\\\\|/mnt/project-files|/tmp/claude|\.claude/projects/")
