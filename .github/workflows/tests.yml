@@ -74,6 +74,8 @@ jobs:
             install: "'pyhf>=0.7.6,<0.8'"
           - extra: root-uproot
             install: "'uproot>=5.7,<6' 'awkward>=2.14,<3' 'PyYAML>=6'"
+          - extra: columnar
+            install: "'coffea>=2026.9' 'pyarrow>=20' 'uproot>=5.7,<6' 'awkward>=2.14,<3'"
           - extra: hepdata
             install: "hepdata_lib hepdata-validator PyYAML"
           - extra: torch-cpu

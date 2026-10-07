@@ -66,6 +66,8 @@ MISSING_FILE_ARGS = {
     "adapters/root-uproot/assets/pyroot_roofit_signal_background.py": ["--input", M, "--hist", "h", "--output", OUT,
                                                                       "--min", "0", "--max", "1"],
     "adapters/root-uproot/assets/uproot_awkward_analysis.py": ["--config", M],
+    "adapters/root-uproot/assets/coffea_dijet_processor.py": [M],
+    "adapters/root-uproot/assets/root_to_parquet.py": ["--input", M, "--out", OUT],
     "adapters/unbinned-fit/assets/unbinned_fit.py": ["fit", "--data", M, "--config", M],
 }
 NO_INPUT_FILE = {  # script: why the missing-file check does not apply

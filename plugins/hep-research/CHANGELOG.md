@@ -5,6 +5,12 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Columnar analysis starting points (T24).** `adapters/root-uproot/assets/coffea_dijet_processor.py` is a coffea
+  processor template (jet selection, signed generator weights, leading-pair mass and its weighted histogram) and
+  `root_to_parquet.py` converts a TTree to Parquet in bounded steps, keeping jagged branches, with a manifest of
+  checksums and entry counts that must add up. Both are tested on the synthetic NanoAOD-like file from
+  `make_synthetic_nanoaod.py`: the processor reproduces the generator's independently computed answers for any chunk
+  size, and every entry is written once. A `columnar` extra and an optional CI job cover them.
 - **HEPData export (T21).** `adapters/hepdata/assets/hepdata_export.py` writes a dataset-record or a binned prediction
   as a HEPData submission: `submission.yaml`, the table (bins, values, qualifiers from the observable, each uncertainty
   component as a labelled symmetric or asymmetric error) and, when the artifact has one, its covariance table. The
