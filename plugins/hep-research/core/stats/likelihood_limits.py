@@ -332,7 +332,7 @@ def _load_model(doc):
         if not isinstance(x, dict):
             raise LikelihoodError(f"bin {i} must be an object with n, b, s")
         n = x.get("n")
-        if isinstance(n, bool) or not isinstance(n, (int, float)) or n < 0 or n != int(n):
+        if isinstance(n, bool) or not isinstance(n, (int, float)) or not math.isfinite(n) or n < 0 or n != int(n):
             raise LikelihoodError(f"bin {i}: n must be a non-negative integer")
         bins.append({"n": int(n), "b": _num(x.get("b"), f"bin {i} b", 0.0, 200.0), "s": _num(x.get("s"), f"bin {i} s", 0.0, 1e6)})
     if sum(x["s"] for x in bins) <= 0:
@@ -573,7 +573,7 @@ def _load_shape(doc):
         if not isinstance(x, dict):
             raise LikelihoodError(f"bin {i} must be an object with n, b, s")
         n = x.get("n")
-        if isinstance(n, bool) or not isinstance(n, (int, float)) or n < 0 or n != int(n):
+        if isinstance(n, bool) or not isinstance(n, (int, float)) or not math.isfinite(n) or n < 0 or n != int(n):
             raise LikelihoodError(f"bin {i}: n must be a non-negative integer")
         bins.append({"n": int(n), "b": _num(x.get("b"), f"bin {i} b", 0.0, 200.0), "s": _num(x.get("s"), f"bin {i} s", 0.0, 1e6)})
     if sum(x["s"] for x in bins) <= 0:

@@ -57,6 +57,13 @@ Software checks establish contract consistency only, not physical validity.
   `pcolormesh` meshes and `imshow` images, and, given the sealed numbers (`check_figure(fig, region, sealed)`), text
   artists, titles and figure texts; a "blinded" label inside the region is not a leak. What it still cannot see
   (tick labels, legends, colorbars, values carried only by colors, transformed values) is stated in the module.
+- **Edge cases in every public `core/stats` entry point (T10).** `tests/core/test_stats_edge_cases.py` feeds NaN,
+  +inf and -inf to each numeric argument of 20 scalar entry points and to numeric leaves of 9 document entry points,
+  plus empty lists and empty documents; each must raise its module's named error (the two validators must fail
+  instead), from a baseline that is checked to be valid. It also covers p-values far below 1e-10, the mean limit and
+  zero or low counts in blinded bins. Defects it found, now fixed: `chi2_sf` returned 1.0 for a NaN or infinite
+  chi2 or ndf (an infinite chi2 now gives 0, the rest raise); a bin count of inf or NaN in `multibin-limit` and
+  `shape-limit` raised `OverflowError` or a bare `ValueError`; `z_from_log_p(nan)` returned NaN.
 - **Schema mutation fuzzing and a keyword meta-test (T09).** `tests/contracts/test_robustness.py` mutates every node
   of every valid artifact fixture, a full gate plan and a ledger record four ways (null, type swap, list wrap,
   deletion) in the fast tier, and runs 10,000 seeded random multi-mutations through the validator, the gate and the

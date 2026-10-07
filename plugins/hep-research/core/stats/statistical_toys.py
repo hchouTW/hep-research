@@ -651,6 +651,13 @@ def _gammaq(a: float, x: float) -> float:
 
 
 def chi2_sf(chi2: float, ndf: int) -> float:
+    """P(chi2_ndf > chi2); chi2 must be >= 0 (an infinite value gives 0) and ndf a positive integer."""
+    if isinstance(ndf, bool) or not isinstance(ndf, int) or ndf < 1:
+        raise ToyError(f"ndf must be a positive integer, got {ndf!r}")
+    if isinstance(chi2, bool) or not isinstance(chi2, (int, float)) or math.isnan(chi2) or chi2 < 0:
+        raise ToyError(f"chi2 must be a non-negative number, got {chi2!r}")
+    if math.isinf(chi2):
+        return 0.0
     return _gammaq(ndf / 2.0, chi2 / 2.0)
 
 
@@ -740,10 +747,10 @@ def ratio_measured(doc: dict, toys: int, seed: int) -> dict:
             "toy_16_84_percentile": [[srt[i][int(0.16 * m)], srt[i][min(int(0.84 * m), m - 1)]] for i in range(n)],
             "ratio_correlation_matrix_linear": corr,
             "constant_ratio_fit_full_covariance": {"value": mean_g, "sigma": sig_g, "chi2": chi2_g, "ndf": n - 1,
-                                                    "p_value_chi2": chi2_sf(chi2_g, n - 1), "p_value_toys": hits / toys,
+                                                    "p_value_chi2": chi2_sf(max(chi2_g, 0.0), n - 1), "p_value_toys": hits / toys,
                                                     "binomial_error_on_p_toys": math.sqrt(max(hits / toys * (1 - hits / toys), 0) / toys)},
             "constant_ratio_fit_diagonal_only": {"value": mean_d, "sigma": sig_d, "chi2": chi2_d, "ndf": n - 1,
-                                                  "p_value_chi2": chi2_sf(chi2_d, n - 1)},
+                                                  "p_value_chi2": chi2_sf(max(chi2_d, 0.0), n - 1)},
             "sigma_ratio_diagonal_over_full": sig_d / sig_g,
             "note": ("the covariance is a user-supplied measured joint covariance of the numerator then denominator vector "
                      "(for example from a published or internal analysis), not something this script can check beyond "

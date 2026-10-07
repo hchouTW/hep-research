@@ -106,9 +106,14 @@ def poisson_sf(n: int, mu: float) -> float:
 
 
 def z_from_log_p(log_p: float) -> float | None:
-    """One-sided significance Z with P(Normal > Z) = exp(log_p), without forming 1 - p; None when p = 1."""
-    if log_p >= 0.0:
+    """One-sided significance Z with P(Normal > Z) = exp(log_p), without forming 1 - p; None when p = 1, infinite
+    when p = 0 (log_p = -inf)."""
+    if isinstance(log_p, bool) or not isinstance(log_p, (int, float)) or math.isnan(log_p) or log_p > 0.0:
+        raise DiagnosticsError(f"log_p must be a number <= 0, got {log_p!r}")
+    if log_p == 0.0:
         return None
+    if log_p == -math.inf:
+        return math.inf
     if log_p > -700.0:
         return -NormalDist().inv_cdf(math.exp(log_p))
     z = math.sqrt(-2.0 * log_p)
