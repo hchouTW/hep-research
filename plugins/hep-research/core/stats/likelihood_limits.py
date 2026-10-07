@@ -31,6 +31,8 @@ Subcommands:
                         background and signal shape by vertical interpolation), all Gaussian with
                         unit constraint; asymptotic observed and Asimov expected limits, optional
                         seeded-toy calibration at the asymptotic limit.
+  multibin-limit and shape-limit also give the asymptotic CLs limit and the expected median and 1/2-sigma limits
+  (CLs and CLs+b) from the background-only Asimov data set (Cowan, Cranmer, Gross, Vitells 2011, sec. 4.3).
 
   neyman-limit          upper limit from the Berger-Boos construction over the background nuisance
                         (supremum over a confidence set of the nuisance, with a seeded-toy p-value at each
@@ -247,6 +249,73 @@ def profile_significance(n: int, b: float, sigma_b: float, toys: int, seed: int)
     return out
 
 
+# ------------------------------------------------------------- asymptotic CLs and expected bands
+BANDS = (("-2sigma", -2), ("-1sigma", -1), ("median", 0), ("+1sigma", 1), ("+2sigma", 2))
+
+
+def _cls_asymptotic(q: float, qa: float) -> float:
+    """Asymptotic CLs = p_mu / (1 - p_b) for the one-sided q-tilde (Cowan, Cranmer, Gross, Vitells 2011, eqs. 65-66):
+    q is q-tilde on the data, qa on the background-only Asimov data set."""
+    nd = NormalDist()
+    if qa <= 0.0:
+        return 1.0
+    ra = math.sqrt(qa)
+    if q <= qa:
+        r = math.sqrt(max(q, 0.0))
+        p_mu, one_minus_pb = 1.0 - nd.cdf(r), nd.cdf(ra - r)
+    else:
+        p_mu, one_minus_pb = 1.0 - nd.cdf((q + qa) / (2.0 * ra)), 1.0 - nd.cdf((q - qa) / (2.0 * ra))
+    return p_mu / one_minus_pb if one_minus_pb > 0.0 else 1.0
+
+
+def _root_increasing(f, lo: float, hi: float, tol: float = 1e-7, max_iter: int = 100) -> float:
+    """Root of an increasing f with f(lo) < 0 by the Illinois method; hi is doubled until f(hi) > 0 (at most 20 times)."""
+    flo, fhi = f(lo), f(hi)
+    for _ in range(20):
+        if fhi > 0.0:
+            break
+        lo, flo, hi = hi, fhi, 2.0 * hi
+        fhi = f(hi)
+    else:
+        raise LikelihoodError("the expected limit lies beyond the scan range")
+    side = 0
+    for _ in range(max_iter):
+        x = hi - fhi * (hi - lo) / (fhi - flo)
+        fx = f(x)
+        if abs(fx) < 1e-12 or (hi - lo) < tol * max(1.0, abs(x)):
+            return x
+        if fx > 0.0:
+            hi, fhi = x, fx
+            if side == 1:
+                flo *= 0.5
+            side = 1
+        else:
+            lo, flo = x, fx
+            if side == -1:
+                fhi *= 0.5
+            side = -1
+    return 0.5 * (lo + hi)
+
+
+def _asymptotic_cls_results(q_obs, q_asimov, cl: float, hi: float) -> dict:
+    """Observed asymptotic CLs limit and the expected limits under background only from the Asimov data set.
+    q_obs(mu) and q_asimov(mu) give q-tilde at mu on the data and on the Asimov data. The expected limit of band N
+    solves sqrt(q_asimov(mu)) = Phi^-1(1 - alpha Phi(N)) + N for CLs (Cowan et al. 2011, sec. 4.3, with
+    sigma = mu / sqrt(q_asimov(mu)) taken at the band's own mu). For CLs+b with q-tilde it is z + N for N >= 0 and, below
+    the median, where the band's mu-hat = N sigma is negative and q-tilde = (mu^2 - 2 mu mu-hat) / sigma^2 (their eq. 16),
+    N + sqrt(N^2 + z^2) with z = Phi^-1(cl); the plain z + N would reach 0, which a q-tilde limit never does. For CLs
+    the q-tilde and q forms agree for every N."""
+    nd, alpha = NormalDist(), 1.0 - cl
+    obs = _root_increasing(lambda m: alpha - _cls_asymptotic(q_obs(m), q_asimov(m)), 0.0, hi)
+    bands: dict[str, dict[str, float]] = {"cls": {}, "clsb": {}}
+    for name, k in BANDS:
+        z = nd.inv_cdf(cl)
+        for kind, target in (("cls", nd.inv_cdf(1.0 - alpha * nd.cdf(k)) + k),
+                             ("clsb", z + k if k >= 0 else k + math.sqrt(k * k + z * z))):
+            bands[kind][name] = _root_increasing(lambda m: math.sqrt(q_asimov(m)) - target, 0.0, hi)
+    return {"asymptotic_observed_cls_upper_limit": obs, "asymptotic_expected_limits": bands}
+
+
 # --------------------------------------------------------------------- multibin
 class _Model:
     def __init__(self, bins, kind, sigma):
@@ -364,11 +433,15 @@ def multibin_limit(doc: dict, cl: float, toys: int, seed: int) -> dict:
     z = NormalDist().inv_cdf(cl)
     obs = _limit_model(model, ns, aux, z)
     asimov = _limit_model(model, [x["b"] for x in bins], aux, z)
-    mu_hat, _ = model.fit(ns, aux)
+    mu_hat, _ = fit_obs = model.fit(ns, aux)
+    asimov_ns = [x["b"] for x in bins]
+    fit_a = model.fit(asimov_ns, aux)
     out = {"label": LABEL, "method": "multi-bin profile-likelihood upper limit on mu, shared signal strength",
            "bins": len(bins), "background_uncertainty": kind, "cl": cl, "seed": seed, "toys": toys,
            "best_fit_mu": mu_hat, "asymptotic_observed_upper_limit": obs,
            "asymptotic_asimov_median_expected_limit": asimov}
+    out.update(_asymptotic_cls_results(lambda m: model.q(ns, aux, m, fit_obs), lambda m: model.q(asimov_ns, aux, m, fit_a),
+                                       cl, max(obs, asimov, 1e-6) * 2.0))
     if toys:
         q_obs = model.q(ns, aux, obs)
         _, cond = model._prof_nu(ns, aux, obs)
@@ -392,8 +465,9 @@ def multibin_limit(doc: dict, cl: float, toys: int, seed: int) -> dict:
         out["target_p_value"] = 1.0 - cl
     out["note"] = ("asymptotic results rely on q-tilde ~ half-chi2; the toy p-value at the asymptotic limit is the "
                    "calibration check (it should be near 1 - cl; a p-value far from it means the asymptotic limit "
-                   "is mis-calibrated here); the Asimov median is the expected limit under background only, with no "
-                   "1/2-sigma bands; the Gaussian nuisances are symmetric, a common-scale nuisance multiplies the "
+                   "is mis-calibrated here); asymptotic_observed_upper_limit is the CLs+b-type limit (q-tilde = z^2) and "
+                   "asymptotic_observed_cls_upper_limit the asymptotic CLs limit; asymptotic_expected_limits gives the "
+                   "median and 1/2-sigma expected limits under background only for both, from the Asimov data set; the Gaussian nuisances are symmetric, a common-scale nuisance multiplies the "
                    "nominal backgrounds, bins are independent Poisson, and shape uncertainties are not modeled")
     return out
 
@@ -734,11 +808,14 @@ def shape_limit(doc: dict, cl: float, toys: int, seed: int) -> dict:
         hi = g[0] + 30.0 * (math.sqrt(sum(ns) + 1.0) + 1.0) / max(sum(model.s), 1e-12) + 20.0 / max(sum(model.s), 1e-12)
         return _bisect(lambda m: model.q(m, ns, aux0, g) - z * z, g[0], hi, 45), g
     obs, g_obs = limit(model.n)
-    asimov = limit([float(v) for v in model.b])[0]
+    asimov_ns = [float(v) for v in model.b]
+    asimov, g_a = limit(asimov_ns)
     out = {"label": LABEL, "method": "multi-bin profile-likelihood upper limit with normalization and shape nuisances",
            "bins": len(bins), "nuisances": [d["name"] for d in nuis], "cl": cl, "seed": seed, "toys": toys,
            "best_fit_mu": g_obs[0], "best_fit_nuisances": dict(zip([d["name"] for d in nuis], g_obs[1])),
            "asymptotic_observed_upper_limit": obs, "asymptotic_asimov_median_expected_limit": asimov}
+    out.update(_asymptotic_cls_results(lambda m: model.q(m, model.n, aux0, g_obs), lambda m: model.q(m, asimov_ns, aux0, g_a),
+                                       cl, max(obs, asimov, 1e-6) * 2.0))
     if toys:
         q_obs = model.q(obs, model.n, aux0, g_obs)
         th_c, _ = model.cond(obs, model.n, aux0)
@@ -761,8 +838,10 @@ def shape_limit(doc: dict, cl: float, toys: int, seed: int) -> dict:
                    "shapes use vertical piecewise-linear interpolation between the down, nominal and up templates (no "
                    "bin-to-bin correlation beyond what the templates carry), normalizations are linear (1 + sigma theta), "
                    "and shape and normalization effects are applied additively then multiplicatively; the asymptotic result "
-                   "relies on q-tilde ~ half-chi2, so check the toy p-value at the limit (it should be near 1 - cl); the "
-                   "Asimov median is the expected limit under background only with no 1/2-sigma bands; the profile is a "
+                   "relies on q-tilde ~ half-chi2, so check the toy p-value at the limit (it should be near 1 - cl); "
+                   "asymptotic_observed_upper_limit is the CLs+b-type limit and asymptotic_observed_cls_upper_limit the "
+                   "asymptotic CLs limit, with median and 1/2-sigma expected limits for both from the Asimov data set "
+                   "(asymptotic_expected_limits); the profile is a "
                    "damped Newton search with numerical derivatives and is slow for many nuisances (toys cost a global "
                    "and a conditional fit each)")
     return out

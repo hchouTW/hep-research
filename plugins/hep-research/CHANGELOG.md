@@ -5,6 +5,10 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Expected-limit bands (T22).** `likelihood_limits.py multibin-limit` and `shape-limit` now give the asymptotic CLs
+  limit and the median and 1/2-sigma expected limits under background only, for CLs and for CLs+b, from the Asimov data
+  set (Cowan, Cranmer, Gross and Vitells 2011), with σ taken at each band's own signal strength and the q̃ form of the
+  CLs+b bands below the median. Checked against the closed form for one bin and against background-only toys.
 - **Barlow-Beeston fits with empty MC bins (T22).** A bin where a template has no MC count no longer makes the
   Barlow-Beeston likelihood infinite: the template's true content there stays a nuisance, observed as zero, and takes a
   share of the data when the Barlow and Beeston (1993) special case applies (unweighted and weighted fits; an empty bin

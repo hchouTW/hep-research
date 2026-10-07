@@ -117,12 +117,13 @@ and use common random numbers across a scan.
   statistic, with observed and (with `--expected-toys`) median and 1/2-sigma expected limits; it reproduces the exact
   `cls-limit` for a known background within toy noise.
 - `multibin-limit --input FILE [--cl --toys --seed]`: bins sharing one `mu` with no, independent per-bin (Gaussian) or
-  one common multiplicative background nuisance; asymptotic observed limit, Asimov median expected limit (no bands),
+  one common multiplicative background nuisance; asymptotic observed limit (CLs+b-type) and asymptotic CLs limit, expected median and 1/2-sigma limits for both
+  from the Asimov data set,
   and a seeded-toy p-value at the asymptotic limit as the calibration check (it should be near `1 - cl`; if not, use a
   toy-calibrated construction). Shapes and other nuisances are not modeled.
 - `shape-limit --input FILE [--cl --toys --seed]`: multi-bin limit with several nuisances: background and signal
   normalization, background and signal shape by vertical interpolation, a damped Newton profile, asymptotic observed
-  and Asimov expected limits, and an optional toy p-value at the limit. A normalization nuisance may be `gaussian`
+  and Asimov expected limits with the same asymptotic CLs limit and bands, and an optional toy p-value at the limit. A normalization nuisance may be `gaussian`
   (factor `1 + sigma theta`), `lognormal` (`exp(sigma theta)`) or `gamma` (`1 + sigma theta` with a Poisson auxiliary
   measurement of `tau = 1/sigma^2`); an optional correlation matrix correlates the Gaussian-type nuisances (gamma ones
   cannot be correlated). Choose the constraint from the origin of the uncertainty
