@@ -1,4 +1,4 @@
-# Capability matrix (v0.2.0)
+# Capability matrix (v0.3.0)
 
 Status words: **tested** = exercised by a check that passed in the environment named below; **unverified** = code or
 guidance exists but its tool was not installed, so it was not run; **proposed** = a starting point or design, not
@@ -98,7 +98,7 @@ results; they are listed in "E3 results" at the end. Evidence: VALIDATION FULLTE
 | Claude Code (plugin, development marketplace) | tested (E1, CLI 2.1.287) | install, discovery, namespaced invocation, profile access, removal, coexistence with standalone skills (G5); routing quality not yet established |
 | Claude Code × macOS (E2, CLI 2.1.288) | tested | install, discovery, namespaced invocation, profile access through `<plugin root>` (no host variable), removal (MULTIHOST M05) |
 | Codex CLI × macOS (E2, CLI 0.160.0) | tested | `.codex-plugin/plugin.json` and `.agents/plugins/marketplace.json`: install, discovery, invocation by name, profile access through `<plugin root>`, removal; with and without `~/.agents/skills` (MULTIHOST M05) |
-| Codex CLI routing × macOS (E2, CLI 0.160.0, gpt-6.1-sol, plugin only) | tested: 61/62 | all 62 cases (en 41/42, zh-Hant 20/20); the one miss is fold-and-fit (`j05`) going to hep-statistics; 0 loading violations (MULTIHOST M08) |
+| Codex CLI routing × macOS (E2, CLI 0.160.0, gpt-6.1-sol, plugin only) | tested: 61/62 | all 62 cases of the 2026-10-04 set (118 cases since 2026-10-07; not rerun on Codex) (en 41/42, zh-Hant 20/20); the one miss is fold-and-fit (`j05`) going to hep-statistics; 0 loading violations (MULTIHOST M08) |
 | Claude Code × Linux at 0.2.0, Codex CLI × Linux | not tested | Linux cells deferred (MULTIHOST Q3); Claude Code on Linux was tested at 0.1.0 (E1 row above) |
 | Claude apps: Chat and Cowork | documented, not tested | install by marketplace (`hchouTW/hep-research`) or `.zip` upload, from Anthropic's documentation (README "Install and remove"); Chat has no local project access |
 | ChatGPT | documented, not tested | not in the public plugin directory; admin marketplace import unverified; per-skill `.zip` upload loses the shared plugin folders (README "Install and remove") |
@@ -118,7 +118,7 @@ results; they are listed in "E3 results" at the end. Evidence: VALIDATION FULLTE
 | Batch campaigns | protocol tested (E2) against fake schedulers; real Slurm/HTCondor unverified | no `sbatch`, no `condor_submit` |
 | Relocation (AC24) | tested (E2) | copy of the git-listed files at a path with spaces passes, also with an ignored venv in the tree; the Codex check that needs the repository skips in the copy |
 | Claude Code (plugin, isolated config) | tested (E2, CLI 2.1.288): install, discovery, namespaced invocation, profile access, removal | invocation run once the isolated config was logged in (FULLTEST-E2-ROUTING follow-ups) |
-| Live routing | tested (E2, claude-sonnet-5-5, plugin only, 62 cases): 56/62 | 3 quick questions answered without a skill; 1 case without inputs; 2 neighbor-skill choices (fold-and-fit, SMEFT out of v1); 0 loading violations (FULLTEST-E2-ROUTING) |
+| Live routing | tested (E2, claude-sonnet-5-5, plugin only, the 62 cases of 2026-10-04): 56/62; superseded by the 118-case row below | 3 quick questions answered without a skill; 1 case without inputs; 2 neighbor-skill choices (fold-and-fit, SMEFT out of v1); 0 loading violations (FULLTEST-E2-ROUTING) |
 
 ## E3 results (FULLTEST-E3, 2026-10-05)
 

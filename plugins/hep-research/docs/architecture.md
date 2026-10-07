@@ -67,7 +67,7 @@ SemVer for plugin (`0.1.0`), contracts (`1.1.0`, `contracts.CONTRACTS_VERSION`),
 
 ## 7. Loading budget (measured)
 
-`tools/measure_entrypoints.py` on 2026-10-02: seven SKILL.md files 4.4–6.0 KiB each (budget 8 KiB), descriptions 773–919 characters (working budget 1,024), registry 47 B, host estimate **~2,005 always-on tokens** for all seven descriptions (`claude --plugin-dir ... plugin details hep-research`). SKILL.md line counts (47–60) are below the 100–180 guide because paragraphs are unwrapped; bytes are the binding budget. Drafts will grow in M2 when references are routed.
+`tools/measure_entrypoints.py` on 2026-10-08 (0.3.0): seven SKILL.md files 5,602–8,185 bytes each (budget 8,192), descriptions 765–990 characters (working budget 1,024), registry 1,240 B, host estimate **~2,205 always-on tokens** for all seven descriptions (`claude --plugin-dir ... plugin details hep-research`, CLI 2.1.292). SKILL.md line counts (52–65) are below the 100–180 guide because paragraphs are unwrapped; bytes are the binding budget. At M1 (2026-10-02) the files were 4.4–6.0 KiB with descriptions of 773–919 characters and ~2,005 always-on tokens.
 
 ## 8. Risk register
 

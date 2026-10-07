@@ -5,6 +5,13 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Documentation brought up to date (T27).** The capability matrix header names 0.3.0; `VALIDATION.md` no longer
+  points at the removed `DECISIONS.md` as a current file; `docs/maintenance.md` no longer lists the traceability check
+  removed in 0.3.0; the entry-point sizes in `docs/architecture.md` and `docs/architecture-review.md` are remeasured
+  (5,602–8,185 bytes, descriptions 765–990 characters, about 2,205 always-on tokens); routing results name the case
+  set they used (48, 62, or the current 118 cases); the README says `ams02-research` is listed, access-restricted, in
+  both marketplace manifests. The AMS example artifacts now record profile `experiment:ams-02` 2.0.0, as shipped in
+  0.3.0 (they still said 1.0.0).
 - **Feldman-Cousins upper ends now follow the published construction (sci-fix).** `poisson_diagnostics.py
   fc-interval` forces the upper end to be non-increasing in the background, as Feldman and Cousins (1998, Sec. IV.B)
   did for their tables. It now reproduces every `n0 = 0..10`, `b = 0..5` entry of their Tables IV (90%) and VI (95%)
