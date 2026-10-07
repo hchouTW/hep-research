@@ -69,8 +69,11 @@ available only as a Cousins-Highland marginalization (`--sigma-b`).
 - `interval --n N --cl CL`: Garwood central interval on a Poisson mean; conservative (coverage at least `CL`).
 - `fc-interval --n N --b B --cl CL [--step X]`: Feldman-Cousins unified interval on `s >= 0` with a known background,
   by a deterministic grid scan (default step 0.005; the step bounds the accuracy and discreteness makes it slightly
-  conservative). It reproduces the published table (`N = 0`, `B = 0`, 90%: upper 2.44; `N = 0`, `B = 2`: 1.08,
-  `tests/core/test_stats_poisson.py`). A lower bound of 0 at small `N` is expected, not a failure. With
+  conservative). The upper end is forced non-increasing in `B`, as Feldman and Cousins did for their tables; this
+  reproduces their Tables IV and VI (90% and 95%, `N = 0..10`, `B = 0..5`) within 0.01, for example `N = 0`, `B = 2`,
+  90%: upper 1.26 (`tests/core/test_stats_poisson.py`). `--plain-construction` gives the unadjusted interval at this
+  `B` alone (1.08 there); the output names the construction in `construction`. A lower bound of 0 at small `N` is
+  expected, not a failure. With
   `--sigma-b S [--nodes K]` the background is marginalized over a truncated normal prior (default step 0.02); it
   converges to the known-background interval as `S -> 0`. That is not a profile treatment and its coverage at the true
   background is not guaranteed.

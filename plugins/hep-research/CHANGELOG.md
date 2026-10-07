@@ -3,6 +3,16 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **Feldman-Cousins upper ends now follow the published construction (sci-fix).** `poisson_diagnostics.py
+  fc-interval` forces the upper end to be non-increasing in the background, as Feldman and Cousins (1998, Sec. IV.B)
+  did for their tables. It now reproduces every `n0 = 0..10`, `b = 0..5` entry of their Tables IV (90%) and VI (95%)
+  within 0.01; before, it returned the plain construction, for example 1.08 instead of 1.26 at `n0 = 0`, `b = 2`, 90%,
+  and the unit test's reference value was the plain one. `--plain-construction` (`monotone=False`) keeps the old
+  interval; the output records `construction`, `upper_plain` and the searched background range. The
+  `--sigma-b` (marginalized) interval is unchanged and labelled plain.
+
 ## 0.3.0 (2026-10-07): first public release
 
 The plugin is published under the Apache License 2.0 (`LICENSE` at the repository root and inside the plugin folder,
