@@ -37,6 +37,14 @@ class BoundaryTests(unittest.TestCase):
         self.assertAlmostEqual(out["p_value_naive_wilks_chi2_1dof"], 2 * out["p_value_half_chi2_asymptotic"], places=12)
         self.assertAlmostEqual(out["fraction_toys_with_q0_zero"], 0.5925, delta=0.012)  # P(N <= 8 | 8)
 
+    def test_exact_p_value_does_not_underflow(self):
+        out = st.boundary(60, 5.0, 200, 1)
+        self.assertAlmostEqual(out["p_value_exact_poisson"] / 7.649610081149393e-43, 1.0, delta=1e-6)  # sf(59, 5)
+        self.assertTrue(math.isfinite(out["significance_exact_poisson_z"]))
+        far = st.boundary(1000, 5.0, 200, 1)
+        self.assertTrue(math.isfinite(far["log_p_value_exact_poisson"]))
+        self.assertGreater(far["significance_exact_poisson_z"], 90.0)
+
     def test_underfluctuation_has_q0_zero_and_unit_p(self):
         out = st.boundary(3, 8.0, 500, 2)
         self.assertEqual(out["q0_observed"], 0.0)

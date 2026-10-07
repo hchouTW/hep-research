@@ -250,11 +250,11 @@ def profile_significance(n: int, b: float, sigma_b: float, toys: int, seed: int)
            "p_value_naive_wilks_chi2_1dof": math.erfc(z / math.sqrt(2.0)) if q_obs > 0 else 1.0,
            "fraction_toys_with_q0_zero": zero / toys}
     if sig == 0.0:
-        term = cum = math.exp(-b)
-        for k in range(1, n):
-            term *= b / k
-            cum += term
-        out["p_value_exact_poisson"] = 1.0 if n == 0 else 1.0 - cum
+        from core.stats.poisson_diagnostics import log_poisson_sf, z_from_log_p
+        log_p = log_poisson_sf(n, b)  # summed in the tail: 1 - P(N <= n - 1) cancels to 0 below about 1e-16
+        out["p_value_exact_poisson"] = math.exp(log_p)
+        out["log_p_value_exact_poisson"] = log_p
+        out["significance_exact_poisson_z"] = z_from_log_p(log_p)
     out["note"] = ("toys are generated at s = 0 with the profiled background and a Gaussian auxiliary measurement; the "
                    "p-value is local, with no trial factor; a significance quoted from naive Wilks is wrong near the "
                    "boundary; the Gaussian constraint treats the background uncertainty as symmetric and unbounded, "

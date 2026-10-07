@@ -12,6 +12,12 @@ Software checks establish contract consistency only, not physical validity.
   and the unit test's reference value was the plain one. `--plain-construction` (`monotone=False`) keeps the old
   interval; the output records `construction`, `upper_plain` and the searched background range. The
   `--sigma-b` (marginalized) interval is unchanged and labelled plain.
+- **Exact Poisson p-values no longer underflow (sci-fix).** `likelihood_limits.py profile-significance` and
+  `statistical_toys.py boundary` computed `P(N >= n | b)` as `1 - P(N <= n - 1 | b)`, which returned 0 below about
+  1e-16 (n = 60, b = 5 gave 0 instead of 7.65e-43). The tail is now summed directly (`poisson_sf`,
+  `log_poisson_sf` in `poisson_diagnostics.py`), and both outputs add `log_p_value_exact_poisson` and
+  `significance_exact_poisson_z`, computed from the log p-value so they stay finite beyond the smallest double.
+  The Garwood lower end uses the same tail.
 
 ## 0.3.0 (2026-10-07): first public release
 

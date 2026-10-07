@@ -163,15 +163,14 @@ def boundary(n: int, b: float, toys: int, seed: int) -> dict:
     draws = [poisson_draw(rng, b) for _ in range(toys)]
     q = [_q0(d, b) for d in draws]
     p_toy = sum(v >= q_obs - 1e-12 for v in q) / toys
-    term = cum = math.exp(-b)  # exact P(N >= n | b) = 1 - P(N <= n - 1 | b)
-    for k in range(1, n):
-        term *= b / k
-        cum += term
-    p_exact = 1.0 if n == 0 else 1.0 - cum
+    from core.stats.poisson_diagnostics import log_poisson_sf, z_from_log_p
+    log_p = log_poisson_sf(n, b)  # exact P(N >= n | b), summed in the tail rather than as 1 - P(N <= n - 1 | b)
+    p_exact = math.exp(log_p)
     z = math.sqrt(q_obs)
     return {"label": LABEL, "method": "q0 at the s >= 0 boundary, known background, seeded toys", "n_obs": n, "b": b,
             "toys": toys, "seed": seed, "q0_observed": q_obs,
-            "p_value_exact_poisson": p_exact, "p_value_toys": p_toy,
+            "p_value_exact_poisson": p_exact, "log_p_value_exact_poisson": log_p,
+            "significance_exact_poisson_z": z_from_log_p(log_p), "p_value_toys": p_toy,
             "binomial_error_on_p_toys": math.sqrt(max(p_toy * (1 - p_toy), 0.0) / toys),
             "p_value_half_chi2_asymptotic": _sf_normal(z) if q_obs > 0 else 0.5,
             "p_value_naive_wilks_chi2_1dof": 2.0 * _sf_normal(z) if q_obs > 0 else 1.0,

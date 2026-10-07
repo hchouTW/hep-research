@@ -32,7 +32,7 @@ Usage (from the skill directory):
   python3 core/stats/poisson_diagnostics.py cls-limit --n 3 --b 3 --sigma-b 0.5 --cl 0.95
   python3 core/stats/poisson_diagnostics.py coverage --mu 2.5 --cl 0.6827 --toys 20000 --seed 1
 Exit codes: 0 ok; 2 rejected input. Standard library only.
-Importable: poisson_cdf, upper_limit, central_interval, coverage, fc_interval, cls_limit.
+Importable: poisson_cdf, poisson_sf, log_poisson_sf, z_from_log_p, upper_limit, central_interval, coverage, fc_interval, cls_limit.
 """
 from __future__ import annotations
 
@@ -90,6 +90,50 @@ def poisson_cdf(n: int, mu: float) -> float:
     return min(total, 1.0)
 
 
+def log_poisson_sf(n: int, mu: float) -> float:
+    """ln P(N >= n) for a Poisson mean mu, finite far into the tail.
+
+    Above the mean the tail is summed upward from P(N = n) in log space, never as 1 - P(N <= n - 1), which cancels
+    to 0 once the tail falls below about 1e-16.
+    """
+    n, mu = _count(n), _mean(mu)
+    if n == 0:
+        return 0.0
+    if mu == 0.0:
+        return -math.inf
+    if n - 1 < mu:  # the tail holds at least about half the probability: the complement is accurate
+        return math.log(1.0 - poisson_cdf(n - 1, mu))
+    term = total = 1.0
+    k = n
+    while term > 1e-17 * total:
+        k += 1
+        term *= mu / k
+        total += term
+    return n * math.log(mu) - mu - math.lgamma(n + 1) + math.log(total)
+
+
+def poisson_sf(n: int, mu: float) -> float:
+    """P(N >= n) for a Poisson mean mu; underflows to 0 only below the smallest float (use log_poisson_sf)."""
+    return math.exp(log_poisson_sf(n, mu))
+
+
+def z_from_log_p(log_p: float) -> float | None:
+    """One-sided significance Z with P(Normal > Z) = exp(log_p), without forming 1 - p; None when p = 1."""
+    if log_p >= 0.0:
+        return None
+    if log_p > -700.0:
+        return -NormalDist().inv_cdf(math.exp(log_p))
+    z = math.sqrt(-2.0 * log_p)
+    for _ in range(100):  # Newton on the asymptotic ln P(Normal > z), accurate to double precision for z > 37
+        series = 1.0 - 1.0 / z ** 2 + 3.0 / z ** 4 - 15.0 / z ** 6 + 105.0 / z ** 8
+        f = -0.5 * z * z - math.log(z) - 0.5 * math.log(2.0 * math.pi) + math.log(series) - log_p
+        dz = f / (z + 1.0 / z)
+        z += dz
+        if abs(dz) < 1e-13 * z:
+            break
+    return z
+
+
 def _solve(f, lo: float, hi: float) -> float:
     """Root of a decreasing f on [lo, hi] by bisection."""
     for _ in range(200):
@@ -128,7 +172,7 @@ def central_interval(n: int, cl: float = 0.6827) -> dict:
         lo, hi = 0.0, MAX_MEAN
         for _ in range(200):
             mid = 0.5 * (lo + hi)
-            if 1.0 - poisson_cdf(n - 1, mid) < tail:
+            if poisson_sf(n, mid) < tail:
                 lo = mid
             else:
                 hi = mid

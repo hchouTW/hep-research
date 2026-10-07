@@ -94,6 +94,52 @@ class CoverageTests(unittest.TestCase):
         self.assertAlmostEqual(var, 4.0, delta=0.15)
 
 
+def decimal_sf(n, mu, digits=120):
+    """Independent reference: P(N >= n | mu) = 1 - sum_{k < n} P(k), in decimal arithmetic with `digits` digits."""
+    from decimal import Decimal, localcontext
+    with localcontext() as ctx:
+        ctx.prec = digits
+        m = Decimal(repr(mu))
+        term, cum = (-m).exp(), Decimal(0)
+        for k in range(n):
+            cum += term
+            term = term * m / (k + 1)
+        return 1 - cum
+
+
+class UpperTailTests(unittest.TestCase):
+    """P(N >= n) far into the tail: 1 - P(N <= n - 1) in double precision cancels to 0 below about 1e-16."""
+
+    def test_matches_high_precision_reference(self):
+        for n, mu in ((60, 5.0), (1, 5.0), (5, 5.0), (6, 5.0), (20, 5.0), (40, 0.5), (600, 500.0), (499, 500.0)):
+            ref = decimal_sf(n, mu)
+            self.assertAlmostEqual(pd.poisson_sf(n, mu) / float(ref), 1.0, delta=1e-10, msg=(n, mu))
+            self.assertAlmostEqual(pd.log_poisson_sf(n, mu), float(ref.ln()), delta=1e-10, msg=(n, mu))
+
+    def test_log_tail_and_significance_stay_finite_to_n_1000(self):
+        last = 0.0
+        for n in range(1, 1001):
+            lp = pd.log_poisson_sf(n, 5.0)
+            self.assertTrue(math.isfinite(lp), msg=n)
+            self.assertLess(lp, last, msg=n)
+            last = lp
+            if lp > -745.0:  # representable as a double: never reported as exactly 0
+                self.assertGreater(pd.poisson_sf(n, 5.0), 0.0, msg=n)
+        ref = decimal_sf(1000, 5.0, digits=2000)
+        self.assertAlmostEqual(pd.log_poisson_sf(1000, 5.0), float(ref.ln()), delta=1e-9)
+        self.assertTrue(math.isfinite(pd.z_from_log_p(pd.log_poisson_sf(1000, 5.0))))
+
+    def test_significance_from_log_p(self):
+        for z in (0.5, 3.0, 5.0, 8.0, 20.0, 30.0):  # erfc, not NormalDist.cdf: 0.5 * (1 + erf) cancels by z = 8
+            log_p = math.log(0.5 * math.erfc(z / math.sqrt(2.0)))
+            self.assertAlmostEqual(pd.z_from_log_p(log_p), z, delta=1e-9 * z, msg=z)
+        # beyond the smallest double: ln P(Z > 40) = -804.60844201375 from the 12-term asymptotic series
+        self.assertAlmostEqual(pd.z_from_log_p(-804.6084420137538), 40.0, delta=1e-8)
+        self.assertIsNone(pd.z_from_log_p(0.0))
+        self.assertEqual(pd.poisson_sf(0, 3.0), 1.0)
+        self.assertEqual(pd.poisson_sf(2, 0.0), 0.0)
+
+
 class FeldmanCousinsTests(unittest.TestCase):
     """Reference values: Feldman and Cousins (1998), Table IV (90% CL, b = 0 to 5) and Table VI (95% CL, b = 0 to 5),
     transcribed into fixtures/fc1998_tables.json. The published upper ends are forced non-increasing in b (Sec. IV.B);
