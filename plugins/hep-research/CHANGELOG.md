@@ -3,7 +3,7 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.4.0 (2026-10-08)
 
 - **Live routing harness and new routing cases (T19).** `evals/routing/run_routing_eval.py` (repository level, outside
   the plugin) runs the routing cases through headless `claude -p` (Codex commands are built and parsed, not yet run),

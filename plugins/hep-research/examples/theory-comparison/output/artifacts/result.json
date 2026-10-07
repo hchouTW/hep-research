@@ -15,7 +15,7 @@
   ]
  },
  "versions": {
-  "plugin": "0.3.0",
+  "plugin": "0.4.0",
   "contracts": "2.0.0",
   "profiles": {
    "experiment:synthetic-collider": "1.0.0",

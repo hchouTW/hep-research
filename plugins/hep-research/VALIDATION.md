@@ -502,3 +502,11 @@ comparison fit only, and failure propagation is tested with a non-converging min
 
 Unverified here: any Codex routing run; the recasting and environment templates on a
 real installation; the optional CI jobs for hepdata and columnar (GitHub only).
+
+## 0.4.0 release check (2026-10-08, E2)
+
+Version 0.3.0 → 0.4.0 in both plugin manifests, `pyproject.toml`, the README and the capability matrix; the CHANGELOG
+"Unreleased" section became 0.4.0. Examples rerun with the E2 venv: only the embedded version changed (the
+unfolding-coverage example, which embeds no version, showed its known 1e-14 round-off and was left as committed).
+`run_all_checks.py --jobs 4` with the E2 venv: 19 pass, 0 fail, 0 skip, including `claude plugin validate` and the
+Codex load check.

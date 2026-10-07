@@ -1,6 +1,6 @@
 # General 5: Repository inspection -> architecture
 
-**Request:** "Draw the architecture of this repository." The repository is the `hep-research` plugin itself (`plugins/hep-research/`, version 0.3.0). Source files were read first; only components found in them are drawn.
+**Request:** "Draw the architecture of this repository." The repository is the `hep-research` plugin itself (`plugins/hep-research/`, version 0.4.0). Source files were read first; only components found in them are drawn.
 **Diagram type:** component / dependency diagram, technical level. Solid arrow = "reads from / imports", dashed = "is checked by". This is a structural diagram of files and allowed dependencies, not a runtime data flow.
 
 **Workflow shown:** inspect -> component and connection tables with evidence -> diagram -> caption.
