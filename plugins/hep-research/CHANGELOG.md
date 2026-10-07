@@ -5,6 +5,13 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **HEPData export (T21).** `adapters/hepdata/assets/hepdata_export.py` writes a dataset-record or a binned prediction
+  as a HEPData submission: `submission.yaml`, the table (bins, values, qualifiers from the observable, each uncertainty
+  component as a labelled symmetric or asymmetric error) and, when the artifact has one, its covariance table. The
+  status label is kept in the submission comment, each description and a `phrases` keyword. A plain standard-library
+  writer is the default; `--engine hepdata_lib` uses hepdata_lib. hepdata-validator 0.3.6 accepts both, and
+  `hepdata_record.py` reads the export back with the same values and covariance. A new `hepdata` extra and an optional
+  CI job run the validator.
 - **Systematics table for papers (T26).** `skills/hep-analysis/scripts/systematics_table_tex.py` renders the
   systematics registry (the `assets/systematics.csv` format, plus any impact columns) as a booktabs LaTeX table. It
   refuses a table without a status (`--status` or a per-row `status` column), names synthetic, asimov, preliminary or

@@ -1,8 +1,8 @@
 {
  "id": "adapter:hepdata",
- "version": "0.1.0",
+ "version": "0.2.0",
  "status": "demonstrated-on-synthetic-data",
- "purpose": "Turn a HEPData table (and its covariance or correlation table) into a dataset-record with its HEPData identifiers, without retyping numbers",
+ "purpose": "Turn a HEPData table (and its covariance or correlation table) into a dataset-record with its HEPData identifiers, and write a binned dataset-record or prediction back out as a HEPData submission, without retyping numbers",
  "tools": [
   {
    "name": "HEPData submission table format (JSON; YAML with PyYAML)",
@@ -10,14 +10,23 @@
    "tested_versions": [
     "synthetic tables in the HEPData independent_variables / dependent_variables layout (no real record fetched: hepdata.net is not reachable from E4)"
    ]
+  },
+  {
+   "name": "HEPData submission writer (submission.yaml and table YAML; hepdata_lib engine optional)",
+   "status": "demonstrated-on-synthetic-data",
+   "tested_versions": [
+    "hepdata-validator 0.3.6 accepts the output of both engines; hepdata_lib 0.21.0; synthetic records only, read back by hepdata_record.py with the same numbers"
+   ]
   }
  ],
- "environment": "E4 (docs/capability-matrix.md): Python 3.13.16, standard library only for JSON input",
+ "environment": "E4 and E2 (docs/capability-matrix.md): Python 3.13, standard library only for JSON input and the plain writer; PyYAML for YAML input; hepdata_lib 0.21.0 and hepdata-validator 0.3.6 for the optional engine and check",
  "assets": [
-  "assets/hepdata_record.py"
+  "assets/hepdata_record.py",
+  "assets/hepdata_export.py"
  ],
  "tests": [
-  "../../tests/adapters/test_hepdata_record.py"
+  "../../tests/adapters/test_hepdata_record.py",
+  "../../tests/adapters/test_hepdata_export.py"
  ],
  "owner_skill": "hep-theory",
  "status_rule": "the adapter status is the lowest of its tools' statuses; it stays demonstrated-on-synthetic-data until a real HEPData export is read and its numbers checked against the paper"

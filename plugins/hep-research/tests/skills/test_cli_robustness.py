@@ -56,6 +56,7 @@ MISSING_FILE_ARGS = {
     "skills/research-communication/scripts/build_lit_matrix.py": [M],
     "skills/research-communication/scripts/check_diagram_sources.py": [M],
     "skills/research-communication/scripts/check_manuscript.py": [M],
+    "adapters/hepdata/assets/hepdata_export.py": ["--artifact", M, "--out", OUT],
     "adapters/hepdata/assets/hepdata_record.py": ["--table", M, "--observable", M, "--record", "r", "--table-name", "t",
                                                   "--out", OUT],
     "adapters/pyhf-combine/assets/pyhf_nuisance_diagnostics.py": [M],

@@ -2,7 +2,7 @@
 #   checks     unit tests (fast tier), profile suites and the static checks, on Python 3.11, 3.12 and 3.13 with the
 #              pinned set (plugins/hep-research/requirements-ci.lock); required
 #   lint       ruff and mypy on core/ and contracts/; required
-#   optional-* the same unit tests with pyhf, uproot + awkward, PyTorch (CPU) or ROOT installed; they may fail without
+#   optional-* the same unit tests with pyhf, uproot + awkward, hepdata_lib + hepdata-validator, PyTorch (CPU) or ROOT; they may fail without
 #              blocking a merge for now, but their results are shown on the run
 #   latest     weekly and on demand: the latest releases (no lock) and the slow tier (HEP_SLOW_TESTS=1)
 # Actions are pinned to commit SHAs; the comment names the release.
@@ -74,6 +74,8 @@ jobs:
             install: "'pyhf>=0.7.6,<0.8'"
           - extra: root-uproot
             install: "'uproot>=5.7,<6' 'awkward>=2.14,<3' 'PyYAML>=6'"
+          - extra: hepdata
+            install: "hepdata_lib hepdata-validator PyYAML"
           - extra: torch-cpu
             install: "torch torchvision --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple"
     steps:

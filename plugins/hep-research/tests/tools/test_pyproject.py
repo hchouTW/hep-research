@@ -27,7 +27,7 @@ class PyprojectTests(unittest.TestCase):
 
     def test_extras(self):
         extras = PYPROJECT["project"]["optional-dependencies"]
-        self.assertEqual(set(extras), {"core", "pyhf", "root-uproot", "torch", "diagrams", "test", "lint"})
+        self.assertEqual(set(extras), {"core", "pyhf", "root-uproot", "hepdata", "torch", "diagrams", "test", "lint"})
         self.assertEqual(sorted(extras["core"]), sorted(requirement_lines(ROOT / "requirements-core.txt")))
         self.assertEqual(sorted(extras["test"]), sorted(requirement_lines(ROOT / "requirements-test.txt")))
 
