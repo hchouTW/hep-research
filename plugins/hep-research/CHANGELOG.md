@@ -65,6 +65,10 @@ Software checks establish contract consistency only, not physical validity.
   commit and the fast test tier on push; the repository's git hooks call it when `pre-commit` is installed.
   `docs/maintenance.md` records the plan to trim `detector-response` and `hep-statistics` (8,185 and 8,138 of 8,192
   bytes) by at least 10%.
+- **Continuous integration for the tests (T13).** A new workflow `tests.yml` runs the unit tests, profile suites and
+  static checks on Python 3.11, 3.12 and 3.13 with the pinned set, and ruff and mypy, on every push and pull request.
+  Optional jobs repeat the unit tests with pyhf, uproot and awkward, PyTorch (CPU) or ROOT (container) installed and
+  do not block a merge yet; a weekly run uses the latest releases and the slow tier. Actions are pinned to commit SHAs.
 - **Faster covariance and response validation (T17).** The validators' eigenvalue step used pure-Python Jacobi
   rotations, cubic in the matrix size (1.6 s at n = 120 here, 6.9 s in the review's container). They now use
   `numpy.linalg.eigh` when NumPy is installed (0.011 s at n = 120) and keep the rotations otherwise, so the checks stay

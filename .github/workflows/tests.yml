@@ -1,0 +1,125 @@
+# tests: the hep-research test suite (T13). Runs on every push and pull request, and weekly against the latest releases.
+#   checks     unit tests (fast tier), profile suites and the static checks, on Python 3.11, 3.12 and 3.13 with the
+#              pinned set (plugins/hep-research/requirements-ci.lock); required
+#   lint       ruff and mypy on core/ and contracts/; required
+#   optional-* the same unit tests with pyhf, uproot + awkward, PyTorch (CPU) or ROOT installed; they may fail without
+#              blocking a merge for now, but their results are shown on the run
+#   latest     weekly and on demand: the latest releases (no lock) and the slow tier (HEP_SLOW_TESTS=1)
+# Actions are pinned to commit SHAs; the comment names the release.
+name: tests
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "17 5 * * 1"  # Mondays 05:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: plugins/hep-research
+
+jobs:
+  checks:
+    name: checks (Python ${{ matrix.python }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install the pinned set
+        run: python -m pip install -r requirements-ci.lock
+      - name: Unit tests, profile suites and static checks
+        run: python tools/run_all_checks.py --no-cli --jobs 4 --out ../../check-runs
+      - name: Keep the check-run record
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: check-run-py${{ matrix.python }}
+          path: check-runs/
+
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.13"
+      - name: Install ruff and mypy
+        run: python -m pip install "ruff==0.16.10" "mypy==2.4.0" -r requirements-ci.lock
+      - name: ruff
+        run: ruff check core contracts
+      - name: mypy
+        run: mypy
+
+  optional-python:
+    name: optional (${{ matrix.extra }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - extra: pyhf
+            install: "pyhf>=0.7.6,<0.8"
+          - extra: root-uproot
+            install: "uproot>=5.7,<6 awkward>=2.14,<3 PyYAML>=6"
+          - extra: torch-cpu
+            install: "torch torchvision --index-url https://download.pytorch.org/whl/cpu --extra-index-url https://pypi.org/simple"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.13"
+      - name: Install the pinned set and ${{ matrix.extra }}
+        run: |
+          python -m pip install -r requirements-ci.lock
+          python -m pip install ${{ matrix.install }}
+      - name: Unit tests with ${{ matrix.extra }} available
+        run: python -m unittest discover -s tests -t .
+
+  optional-root:
+    name: optional (ROOT)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    continue-on-error: true
+    container: rootproject/root:6.38.00-ubuntu25.10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - name: Install the pinned set next to ROOT
+        run: python3 -m pip install --break-system-packages -r requirements-ci.lock
+      - name: Unit tests with PyROOT available
+        run: |
+          python3 -c "import ROOT; print('ROOT', ROOT.gROOT.GetVersion())"
+          python3 -m unittest discover -s tests -t .
+
+  latest:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.13"
+      - name: Install the latest releases (no lock)
+        run: python -m pip install --upgrade numpy scipy matplotlib sympy hypothesis
+      - name: Unit tests including the slow tier
+        env:
+          HEP_SLOW_TESTS: "1"
+        run: python tools/run_all_checks.py --no-cli --jobs 4 --out ../../check-runs
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        if: always()
+        with:
+          name: check-run-latest
+          path: check-runs/
