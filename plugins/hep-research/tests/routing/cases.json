@@ -1514,6 +1514,431 @@
    ],
    "not": "hep-analysis",
    "set": "T3"
+  },
+  {
+   "id": "t19-zhs-1",
+   "lang": "zh-Hans",
+   "kind": "direct",
+   "prompt": "请用 tag-and-probe 测量 muon 触发效率，并给出每个 bin 的不确定度。",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "tag-and-probe"
+   ],
+   "set": "T19"
+  },
+  {
+   "id": "t19-zhs-2",
+   "lang": "zh-Hans",
+   "kind": "direct",
+   "prompt": "我想对这个能谱做 unfolding，并检查 coverage。",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "unfolding",
+    "coverage"
+   ],
+   "set": "T19"
+  },
+  {
+   "id": "t19-zhs-3",
+   "lang": "zh-Hans",
+   "kind": "direct",
+   "prompt": "请推导 e+e- → μ+μ- 的树图截面（cross sections），并写清楚 conventions。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "cross sections",
+    "conventions"
+   ],
+   "set": "T19"
+  },
+  {
+   "id": "t19-zhs-4",
+   "lang": "zh-Hans",
+   "kind": "direct",
+   "prompt": "我的 ROOT 宏在处理 10^6 个事件后出现 memory leaks，帮我找原因。",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "memory leaks"
+   ],
+   "set": "T19"
+  },
+  {
+   "id": "t19-zhs-5",
+   "lang": "zh-Hans",
+   "kind": "direct",
+   "prompt": "请帮我改写论文的摘要（abstracts）和图注（captions）。",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "abstracts",
+    "captions"
+   ],
+   "set": "T19"
+  },
+  {
+   "id": "t19-ja-1",
+   "lang": "ja",
+   "kind": "direct",
+   "prompt": "tag-and-probe でミューオン・トリガー効率を測定し、ビンごとの不確かさを出してください。",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "tag-and-probe"
+   ],
+   "set": "T19"
+  },
+  {
+   "id": "t19-ja-2",
+   "lang": "ja",
+   "kind": "direct",
+   "prompt": "観測事象 0、バックグラウンド 0.8 での Feldman-Cousins 区間を求めてください。",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "Feldman-Cousins",
+    "low or zero counts"
+   ],
+   "set": "T19"
+  },
+  {
+   "id": "t19-ja-3",
+   "lang": "ja",
+   "kind": "direct",
+   "prompt": "コントロール領域（control regions）を使って、ダイレプトン測定のバックグラウンド推定（background estimation）を設計してください。",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "control regions",
+    "background estimation"
+   ],
+   "set": "T19"
+  },
+  {
+   "id": "t19-ja-4",
+   "lang": "ja",
+   "kind": "direct",
+   "prompt": "PyTorch でジェット分類器を学習し、run ごとに分けた grouped train/validation/test splits でリークを防いでください。",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "grouped train/validation/test splits and leakage checks"
+   ],
+   "set": "T19"
+  },
+  {
+   "id": "t19-ja-5",
+   "lang": "ja",
+   "kind": "direct",
+   "prompt": "この NLO 計算の scale envelopes から理論誤差をどう出すか説明してください。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "scale envelopes"
+   ],
+   "set": "T19"
+  },
+  {
+   "id": "t19-de-1",
+   "lang": "de",
+   "kind": "direct",
+   "prompt": "Miss die Myon-Triggereffizienz mit tag-and-probe und gib die Unsicherheit pro Bin an.",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "tag-and-probe"
+   ],
+   "set": "T19"
+  },
+  {
+   "id": "t19-de-2",
+   "lang": "de",
+   "kind": "direct",
+   "prompt": "Setze eine obere CLs-Grenze auf die Signalstärke aus diesen Ereigniszahlen: 12 beobachtet, 9,5 erwartet.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "CLs"
+   ],
+   "set": "T19"
+  },
+  {
+   "id": "t19-de-3",
+   "lang": "de",
+   "kind": "direct",
+   "prompt": "Mein ROOT-Makro stürzt beim Einlesen ab (crashes); bitte hilf mir beim Debuggen.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "crashes"
+   ],
+   "set": "T19"
+  },
+  {
+   "id": "t19-de-4",
+   "lang": "de",
+   "kind": "direct",
+   "prompt": "Leite den Wirkungsquerschnitt (cross sections) für e+e- → μ+μ- auf Baumniveau her, mit expliziten Konventionen (conventions).",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "cross sections",
+    "conventions"
+   ],
+   "set": "T19"
+  },
+  {
+   "id": "t19-de-5",
+   "lang": "de",
+   "kind": "direct",
+   "prompt": "Prüfe, ob dieses INSPIRE-Zitat (citations) die 2,1 % in meinem Entwurf wirklich stützt.",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "citations",
+    "INSPIRE-HEP"
+   ],
+   "set": "T19"
+  },
+  {
+   "id": "t19-adv-1",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "Using PyTorch, compute a Feldman-Cousins interval for 2 observed events over a background of 0.5.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "Feldman-Cousins",
+    "low or zero counts"
+   ],
+   "not": "physics-ml",
+   "set": "T19",
+   "variant": "adversarial"
+  },
+  {
+   "id": "t19-adv-2",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "In ROOT, decide which control regions and ABCD regions should estimate the multijet background in my search.",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "control regions",
+    "ABCD",
+    "background estimation"
+   ],
+   "not": "hep-computing",
+   "set": "T19",
+   "variant": "adversarial"
+  },
+  {
+   "id": "t19-adv-3",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "I have pyhf installed, but first derive the tree-level cross section of my Z' model with explicit conventions.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "cross sections",
+    "conventions"
+   ],
+   "not": "hep-statistics",
+   "set": "T19",
+   "variant": "adversarial"
+  },
+  {
+   "id": "t19-adv-4",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "With uproot already reading my ntuples, measure the electron reconstruction efficiency with tag-and-probe and the data/MC agreement.",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "tag-and-probe",
+    "data/MC agreement"
+   ],
+   "not": "hep-computing",
+   "set": "T19",
+   "variant": "adversarial"
+  },
+  {
+   "id": "t19-adv-5",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "Using the MadGraph samples I already generated, set a 95% CL CLs limit on the coupling from 12 observed over 9.5 expected.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "CLs"
+   ],
+   "not": "hep-theory",
+   "set": "T19",
+   "variant": "adversarial"
+  },
+  {
+   "id": "t19-adv-6",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "In LaTeX, decide which systematic uncertainties my W cross-section measurement must evaluate and how.",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "systematic uncertainties",
+    "evaluation plan"
+   ],
+   "not": "research-communication",
+   "set": "T19",
+   "variant": "adversarial"
+  },
+  {
+   "id": "t19-quick-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Quick: Feldman-Cousins or CLs for zero events?",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "Feldman-Cousins",
+    "low or zero counts"
+   ],
+   "set": "T19",
+   "variant": "quick"
+  },
+  {
+   "id": "t19-quick-2",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Quick one: why does my PyROOT script crash on TFile.Open?",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "crashes",
+    "ROOT/PyROOT"
+   ],
+   "set": "T19",
+   "variant": "quick"
+  },
+  {
+   "id": "t19-quick-3",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Quick: what's the denominator in tag-and-probe?",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "tag-and-probe"
+   ],
+   "set": "T19",
+   "variant": "quick"
+  },
+  {
+   "id": "t19-quick-4",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Quick question: should my signal region stay blinded? What blinding policy?",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "blinding policy"
+   ],
+   "set": "T19",
+   "variant": "quick"
+  },
+  {
+   "id": "t19-quick-5",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Quick: does arXiv:2405.01234 really exist?",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "whether a paper exists"
+   ],
+   "set": "T19",
+   "variant": "quick"
+  },
+  {
+   "id": "t19-quick-6",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Quick: is e+e- -> mu+mu- through a photon allowed at tree level?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "process or Feynman diagram is allowed"
+   ],
+   "set": "T19",
+   "variant": "quick"
+  },
+  {
+   "id": "t19-quick-7",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Quick: NaN loss after a few PyTorch steps, where do I look?",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "debugging NaNs and shapes"
+   ],
+   "set": "T19",
+   "variant": "quick"
+  },
+  {
+   "id": "t19-turns-1",
+   "lang": "en",
+   "kind": "multi-turn",
+   "prompt": "I have truth and reconstructed energies from my calorimeter simulation; build the response matrix and state its orientation and normalization.",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "response matrices"
+   ],
+   "set": "T19",
+   "turns": [
+    {
+     "prompt": "Now unfold the measured spectrum with that matrix and check the coverage.",
+     "expected": "hep-statistics",
+     "trigger_terms": [
+      "unfolding",
+      "coverage"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "t19-turns-2",
+   "lang": "en",
+   "kind": "multi-turn",
+   "prompt": "Derive the tree-level production cross section of my Z' model with explicit conventions.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "cross sections",
+    "conventions"
+   ],
+   "set": "T19",
+   "turns": [
+    {
+     "prompt": "Now set a 95% CL CLs limit on its coupling from 12 observed over 9.5 expected.",
+     "expected": "hep-statistics",
+     "trigger_terms": [
+      "CLs"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "t19-turns-3",
+   "lang": "en",
+   "kind": "multi-turn",
+   "prompt": "Fit the signal and background template yields in these histograms with Barlow-Beeston template fits.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "template fits"
+   ],
+   "set": "T19",
+   "turns": [
+    {
+     "prompt": "Write the results paragraph for the paper from that fit, keeping its status labels.",
+     "expected": "research-communication",
+     "trigger_terms": [
+      "drafting or revising paper sections"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "t19-turns-4",
+   "lang": "zh-Hant",
+   "kind": "multi-turn",
+   "prompt": "用 PyTorch 訓練我的訊號分類器，依 run 做 grouped train/validation/test splits。",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "grouped train/validation/test splits and leakage checks"
+   ],
+   "set": "T19",
+   "turns": [
+    {
+     "prompt": "接著把分類器輸出加進事件選擇（event/candidate selection），並用 control regions 估計背景。",
+     "expected": "hep-analysis",
+     "trigger_terms": [
+      "event/candidate selection",
+      "control regions"
+     ]
+    }
+   ]
   }
  ]
 }

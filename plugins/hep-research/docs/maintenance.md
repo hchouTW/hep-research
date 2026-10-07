@@ -4,11 +4,11 @@ Run everything from the plugin root. The aggregate check is the gate for any cha
 
 ```bash
 python3 tools/run_all_checks.py --out <dir>      # layering, stanzas, registry, ledger, AMS-optional, routing (static),
-                                                 # packaging, traceability, budgets, host validator, unit and profile tests
+                                                 # packaging, budgets, host validator, unit and profile tests
 python3 tools/check_relocation.py --out <dir>    # the same from a copy at a path with spaces and another cwd
 ```
 
-For a subset of the unit tests name the modules (`python3 -m unittest tests.tools.test_check_traceability`) or
+For a subset of the unit tests name the modules (`python3 -m unittest tests.tools.test_check_packaging_size`) or
 use `python3 -m unittest discover -s tests/tools -t .`; naming only the package (`python3 -m unittest tests.tools`)
 runs 0 tests, because the test packages have empty `__init__.py` files.
 

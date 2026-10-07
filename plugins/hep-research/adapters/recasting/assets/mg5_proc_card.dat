@@ -1,0 +1,18 @@
+# MadGraph5_aMC@NLO process card: STARTING TEMPLATE for a recast signal sample (status: documented, not run here).
+# Run: <MG5_DIR>/bin/mg5_aMC mg5_proc_card.dat
+# Replace every <...>. Record the MG5 version, the model and its version, the PDF set, the seed and the scale choice
+# with the sample (a computational-run artifact); a recast without them cannot be reproduced.
+import model <MODEL>                    # for example sm, or a UFO model directory; note its version
+define p = g u c d s u~ c~ d~ s~        # 4-flavour proton; use the convention of the analysis you recast
+generate p p > <SIGNAL_PROCESS>         # for example p p > zp > mu+ mu-
+output <OUTPUT_DIR>
+launch <OUTPUT_DIR>
+  shower=Pythia8                        # parton shower and hadronization; OFF keeps parton-level events
+  detector=OFF                          # detector response comes from Delphes or a published efficiency map
+  analysis=OFF
+  set nevents <N_EVENTS>
+  set iseed <SEED>
+  set ebeam1 <BEAM_ENERGY_GEV>          # per beam, for example 6800.0 at 13.6 TeV
+  set ebeam2 <BEAM_ENERGY_GEV>
+  set param_card mass <PDG_ID> <MASS_GEV>
+  done

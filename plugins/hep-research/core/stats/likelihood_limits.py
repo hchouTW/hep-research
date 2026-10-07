@@ -31,6 +31,17 @@ Subcommands:
                         background and signal shape by vertical interpolation), all Gaussian with
                         unit constraint; asymptotic observed and Asimov expected limits, optional
                         seeded-toy calibration at the asymptotic limit.
+                        With --cls-toys N, also a toy-based CLs limit and expected 1/2-sigma limits on a grid of
+                        mu (N toys per hypothesis and grid point; common random numbers across the grid).
+  multibin-limit and shape-limit also give the asymptotic CLs limit and the expected median and 1/2-sigma limits
+  (CLs and CLs+b) from the background-only Asimov data set (Cowan, Cranmer, Gross, Vitells 2011, sec. 4.3).
+
+  shape-gof             saturated-model goodness of fit of a shape-limit model (Poisson bins and constraint
+                        terms; mu fitted or fixed with --mu), calibrated by seeded toys from the fitted model, with
+                        the chi-square reference (bins - 1 or bins degrees of freedom) labeled approximate.
+  contour               two signal strengths (bins with s1 and s2, the shape-limit nuisances except signal shapes,
+                        optional mc_stat): best fit, Hessian covariance and profile-likelihood contours at the
+                        chi-square 2-dof levels (default 68.27% and 95%), traced along rays from the best fit.
 
   neyman-limit          upper limit from the Berger-Boos construction over the background nuisance
                         (supremum over a confidence set of the nuisance, with a seeded-toy p-value at each
@@ -46,11 +57,22 @@ shape-limit input: {"bins": [{"n": 5, "b": 3.2, "s": 1.0}, ...], "cl": 0.95, "nu
   {"name": "sig_norm", "kind": "signal_norm", "sigma": 0.1},
   {"name": "bkg_shape", "kind": "background_shape", "up": [per-bin b at +1 sigma], "down": [...]},
   {"name": "sig_shape", "kind": "signal_shape", "up": [per-bin s at +1 sigma], "down": [...]}]}.
+Interpolation (HistFactory codes, as in pyhf): a shape nuisance may carry "interpolation": "code0" (default,
+piecewise linear, with a kink at theta = 0) or "code4p" (a sixth-order polynomial for |theta| < 1 that matches the
+linear extrapolation in value, slope and curvature at |theta| = 1, smooth at 0). A normalization nuisance may give
+asymmetric factors {"hi": 1.12, "lo": 0.92} (at theta = +1 and -1) instead of "sigma", with "interpolation": "code4"
+(default: polynomial inside |theta| < 1, exponential hi^theta / lo^-theta outside, smooth everywhere), "code1"
+(piecewise exponential, kinked at 0) or "code0" (piecewise linear); such a nuisance has the Gaussian constraint.
 A normalization nuisance may carry "prior": "gaussian" (default, factor 1 + sigma theta), "lognormal"
 (factor exp(sigma theta), theta unit normal) or "gamma" (factor f = 1 + sigma theta with a Poisson
 auxiliary measurement of tau = 1/sigma^2, a gamma prior of mean 1 and relative width sigma). An optional
 "correlation": [[1, rho, ...], ...] (K x K, unit diagonal, positive definite) correlates the Gaussian and
 lognormal nuisances' unit-normal constraints; gamma nuisances cannot be correlated.
+MC statistics (Barlow-Beeston-lite, as HistFactory staterror): a bin of shape-limit or multibin-limit may give
+"mc_stat", the absolute uncertainty of its background from MC statistics (sqrt of the sum of squared weights). The
+bin's background is multiplied by a factor gamma_i with a Gaussian constraint of relative width mc_stat / b, observed
+at 1, profiled in closed form bin by bin; toys redraw its auxiliary measurement. In multibin-limit it adds in
+quadrature to an independent per-bin sigma (or becomes one when the kind is none) and multiplies a common scale.
 multibin-limit input: {"bins": [{"n": 5, "b": 3.2, "s": 1.0}, ...], "cl": 0.95,
   "background_uncertainty": {"kind": "none" | "independent" | "common_scale", "sigma": [per-bin
   absolute sigma_b] (independent) | fractional scalar (common_scale)}}; "s" is the signal
@@ -63,10 +85,14 @@ Usage (from the skill directory):
   python3 core/stats/likelihood_limits.py profile-fc --n 3 --b 3 --sigma-b 1 --cl 0.90 --toys 1000 --seed 1
   python3 core/stats/likelihood_limits.py profile-cls --n 3 --b 3 --sigma-b 1 --toys 1000 --expected-toys 60 --seed 1
   python3 core/stats/likelihood_limits.py shape-limit --input shapes.json --toys 100 --seed 1
+  python3 core/stats/likelihood_limits.py shape-limit --input shapes.json --cls-toys 500 --seed 1
+  python3 core/stats/likelihood_limits.py contour --input two_poi.json --cl 0.6827,0.95
+  python3 core/stats/likelihood_limits.py shape-gof --input shapes.json --toys 500 --seed 1
   python3 core/stats/likelihood_limits.py neyman-limit --n 3 --b 3 --sigma-b 2 --cl 0.95 --beta 0.01 --toys 1000 --seed 1
   python3 core/stats/likelihood_limits.py neyman-coverage --s 2 --b 3 --sigma-b 2 --cl 0.95 --outer 300 --inner 200 --seed 1
 Exit codes: 0 ok; 2 rejected input. Standard library only.
-Importable: profile_limit, profile_significance, multibin_limit, profile_fc, profile_cls, shape_limit, neyman_limit, neyman_coverage,
+Importable: profile_limit, profile_significance, multibin_limit, profile_fc, profile_cls, shape_limit, profile_contour,
+shape_gof, neyman_limit, neyman_coverage,
 neyman_coverage_scan.
 """
 from __future__ import annotations
@@ -247,16 +273,106 @@ def profile_significance(n: int, b: float, sigma_b: float, toys: int, seed: int)
     return out
 
 
+# ------------------------------------------------------------- asymptotic CLs and expected bands
+BANDS = (("-2sigma", -2), ("-1sigma", -1), ("median", 0), ("+1sigma", 1), ("+2sigma", 2))
+
+
+def _cls_asymptotic(q: float, qa: float) -> float:
+    """Asymptotic CLs = p_mu / (1 - p_b) for the one-sided q-tilde (Cowan, Cranmer, Gross, Vitells 2011, eqs. 65-66):
+    q is q-tilde on the data, qa on the background-only Asimov data set."""
+    nd = NormalDist()
+    if qa <= 0.0:
+        return 1.0
+    ra = math.sqrt(qa)
+    if q <= qa:
+        r = math.sqrt(max(q, 0.0))
+        p_mu, one_minus_pb = 1.0 - nd.cdf(r), nd.cdf(ra - r)
+    else:
+        p_mu, one_minus_pb = 1.0 - nd.cdf((q + qa) / (2.0 * ra)), 1.0 - nd.cdf((q - qa) / (2.0 * ra))
+    return p_mu / one_minus_pb if one_minus_pb > 0.0 else 1.0
+
+
+def _root_increasing(f, lo: float, hi: float, tol: float = 1e-7, max_iter: int = 100) -> float:
+    """Root of an increasing f with f(lo) < 0 by the Illinois method; hi is doubled until f(hi) > 0 (at most 20 times)."""
+    flo, fhi = f(lo), f(hi)
+    for _ in range(20):
+        if fhi > 0.0:
+            break
+        lo, flo, hi = hi, fhi, 2.0 * hi
+        fhi = f(hi)
+    else:
+        raise LikelihoodError("the expected limit lies beyond the scan range")
+    side = 0
+    for _ in range(max_iter):
+        x = hi - fhi * (hi - lo) / (fhi - flo)
+        fx = f(x)
+        if abs(fx) < 1e-12 or (hi - lo) < tol * max(1.0, abs(x)):
+            return x
+        if fx > 0.0:
+            hi, fhi = x, fx
+            if side == 1:
+                flo *= 0.5
+            side = 1
+        else:
+            lo, flo = x, fx
+            if side == -1:
+                fhi *= 0.5
+            side = -1
+    return 0.5 * (lo + hi)
+
+
+def _asymptotic_cls_results(q_obs, q_asimov, cl: float, hi: float) -> dict:
+    """Observed asymptotic CLs limit and the expected limits under background only from the Asimov data set.
+    q_obs(mu) and q_asimov(mu) give q-tilde at mu on the data and on the Asimov data. The expected limit of band N
+    solves sqrt(q_asimov(mu)) = Phi^-1(1 - alpha Phi(N)) + N for CLs (Cowan et al. 2011, sec. 4.3, with
+    sigma = mu / sqrt(q_asimov(mu)) taken at the band's own mu). For CLs+b with q-tilde it is z + N for N >= 0 and, below
+    the median, where the band's mu-hat = N sigma is negative and q-tilde = (mu^2 - 2 mu mu-hat) / sigma^2 (their eq. 16),
+    N + sqrt(N^2 + z^2) with z = Phi^-1(cl); the plain z + N would reach 0, which a q-tilde limit never does. For CLs
+    the q-tilde and q forms agree for every N."""
+    nd, alpha = NormalDist(), 1.0 - cl
+    obs = _root_increasing(lambda m: alpha - _cls_asymptotic(q_obs(m), q_asimov(m)), 0.0, hi)
+    bands: dict[str, dict[str, float]] = {"cls": {}, "clsb": {}}
+    for name, k in BANDS:
+        z = nd.inv_cdf(cl)
+        for kind, target in (("cls", nd.inv_cdf(1.0 - alpha * nd.cdf(k)) + k),
+                             ("clsb", z + k if k >= 0 else k + math.sqrt(k * k + z * z))):
+            bands[kind][name] = _root_increasing(lambda m: math.sqrt(q_asimov(m)) - target, 0.0, hi)
+    return {"asymptotic_observed_cls_upper_limit": obs, "asymptotic_expected_limits": bands}
+
+
 # --------------------------------------------------------------------- multibin
 class _Model:
-    def __init__(self, bins, kind, sigma):
+    def __init__(self, bins, kind, sigma, mc=None):
         self.n_bins = len(bins)
         self.s = [x["s"] for x in bins]
         self.b = [x["b"] for x in bins]
+        self.mc_rel = None
+        if mc is not None and kind == "none":  # Barlow-Beeston-lite alone: a Gaussian nuisance per bin
+            kind, sigma = "independent", list(mc)
+        elif mc is not None and kind == "independent":  # two additive Gaussian errors on b_i profile as one
+            sigma = [math.sqrt(a * a + c * c) for a, c in zip(sigma, mc)]
+        elif mc is not None:  # common scale t times a per-bin MC-statistics factor gamma_i
+            self.mc_rel = [c / b if b > 0 else 0.0 for c, b in zip(mc, self.b)]
         self.kind, self.sigma = kind, sigma
 
     def aux_obs(self):
-        return list(self.b) if self.kind == "independent" else ([1.0] if self.kind == "common_scale" else [])
+        if self.kind == "common_scale":
+            return [1.0] + ([1.0] * self.n_bins if self.mc_rel else [])
+        return list(self.b) if self.kind == "independent" else []
+
+    def _common_mc(self, ns, aux, mu, t):
+        """Profiled lnL over the per-bin MC factors gamma_i at a fixed common scale t, and the gamma_i values."""
+        tot, gam = 0.0, []
+        for n, s, b, g0, d in zip(ns, self.s, self.b, aux[1:], self.mc_rel):
+            if d <= 0.0 or b <= 0.0:
+                tot += _lnl(n, mu * s + t * b)
+                gam.append(1.0)
+                continue
+            b0, sg = t * g0 * b, t * d * b
+            bh = _b_hat(n, mu * s, b0, sg) if sg > 0 else b0
+            tot += _ll1(n, mu * s, bh, b0, sg) if sg > 0 else _lnl(n, mu * s + b0)
+            gam.append(bh / (t * b) if t > 0 else g0)
+        return tot, gam
 
     def _prof_nu(self, ns, aux, mu):
         """Profiled lnL at fixed mu, and the profiled nuisance values."""
@@ -270,6 +386,23 @@ class _Model:
                 tot += _ll1(n, mu * s, bh, b0, sg)
             return tot, hats
         sg, th0 = self.sigma, aux[0]
+        if self.mc_rel:
+            g = (math.sqrt(5) - 1) / 2
+            f = lambda t: self._common_mc(ns, aux, mu, t)[0] - (t - th0) ** 2 / (2 * sg * sg)
+            lo, hi = 1e-9, max(th0, 0.0) + 12.0 * sg + 5.0
+            x1, x2 = hi - g * (hi - lo), lo + g * (hi - lo)
+            f1, f2 = f(x1), f(x2)
+            for _ in range(80):
+                if f1 < f2:
+                    lo, x1, f1 = x1, x2, f2
+                    x2 = lo + g * (hi - lo)
+                    f2 = f(x2)
+                else:
+                    hi, x2, f2 = x2, x1, f1
+                    x1 = hi - g * (hi - lo)
+                    f1 = f(x1)
+            t = 0.5 * (lo + hi)
+            return f(t), [t] + self._common_mc(ns, aux, mu, t)[1]
 
         def deriv(t):
             return sum((n * b / (mu * s + t * b) - b) if (mu * s + t * b) > 0 else (-b if n == 0 else 1e12)
@@ -331,6 +464,9 @@ def _load_model(doc):
         raise LikelihoodError("at least one bin needs a positive signal expectation s")
     if sum(x["n"] for x in bins) > 400:
         raise LikelihoodError("total counts above 400 are outside this script's range")
+    mc = None
+    if any("mc_stat" in x for x in raw):
+        mc = [_num(x.get("mc_stat", 0.0), f"bin {i} mc_stat", 0.0, 100.0) for i, x in enumerate(raw)]
     unc = doc.get("background_uncertainty", {"kind": "none"})
     kind = unc.get("kind") if isinstance(unc, dict) else None
     if kind not in ("none", "independent", "common_scale"):
@@ -343,7 +479,7 @@ def _load_model(doc):
         sigma = [_num(v, "sigma", 0.0, 100.0) for v in sg]
     elif kind == "common_scale":
         sigma = _num(unc.get("sigma"), "sigma", 0.0, 2.0, strict_low=True)
-    return bins, kind, sigma
+    return bins, kind, sigma, mc
 
 
 def _limit_model(model, ns, aux, z):
@@ -353,22 +489,28 @@ def _limit_model(model, ns, aux, z):
 
 
 def multibin_limit(doc: dict, cl: float, toys: int, seed: int) -> dict:
-    bins, kind, sigma = _load_model(doc)
+    bins, kind, sigma, mc = _load_model(doc)
     cl = _num(doc.get("cl", cl), "cl", 0.0, 1.0, strict_low=True)
     if cl >= 1.0:
         raise LikelihoodError("cl must lie strictly between 0 and 1")
     toys, seed = _seed_toys(toys, seed, allow_zero=True)
-    model = _Model(bins, kind, sigma)
+    model = _Model(bins, kind, sigma, mc)
+    kind, sigma = model.kind, model.sigma
     ns = [x["n"] for x in bins]
     aux = model.aux_obs()
     z = NormalDist().inv_cdf(cl)
     obs = _limit_model(model, ns, aux, z)
     asimov = _limit_model(model, [x["b"] for x in bins], aux, z)
-    mu_hat, _ = model.fit(ns, aux)
+    mu_hat, _ = fit_obs = model.fit(ns, aux)
+    asimov_ns = [x["b"] for x in bins]
+    fit_a = model.fit(asimov_ns, aux)
     out = {"label": LABEL, "method": "multi-bin profile-likelihood upper limit on mu, shared signal strength",
-           "bins": len(bins), "background_uncertainty": kind, "cl": cl, "seed": seed, "toys": toys,
+           "bins": len(bins), "background_uncertainty": doc.get("background_uncertainty", {"kind": "none"}).get("kind"),
+           "mc_statistics": "barlow-beeston-lite" if mc is not None else "none", "cl": cl, "seed": seed, "toys": toys,
            "best_fit_mu": mu_hat, "asymptotic_observed_upper_limit": obs,
            "asymptotic_asimov_median_expected_limit": asimov}
+    out.update(_asymptotic_cls_results(lambda m: model.q(ns, aux, m, fit_obs), lambda m: model.q(asimov_ns, aux, m, fit_a),
+                                       cl, max(obs, asimov, 1e-6) * 2.0))
     if toys:
         q_obs = model.q(ns, aux, obs)
         _, cond = model._prof_nu(ns, aux, obs)
@@ -381,6 +523,9 @@ def multibin_limit(doc: dict, cl: float, toys: int, seed: int) -> dict:
             elif kind == "independent":
                 means = [obs * s + c for s, c in zip(model.s, cond)]
                 a = [max(c + sg * rng.gauss(0, 1), 0.0) for c, sg in zip(cond, sigma)]
+            elif model.mc_rel:
+                means = [obs * s + cond[0] * g * b for s, g, b in zip(model.s, cond[1:], model.b)]
+                a = [max(cond[0] + sigma * rng.gauss(0, 1), 0.0)] + [g + d * rng.gauss(0, 1) for g, d in zip(cond[1:], model.mc_rel)]
             else:
                 means = [obs * s + cond[0] * b for s, b in zip(model.s, model.b)]
                 a = [max(cond[0] + sigma * rng.gauss(0, 1), 0.0)]
@@ -392,8 +537,9 @@ def multibin_limit(doc: dict, cl: float, toys: int, seed: int) -> dict:
         out["target_p_value"] = 1.0 - cl
     out["note"] = ("asymptotic results rely on q-tilde ~ half-chi2; the toy p-value at the asymptotic limit is the "
                    "calibration check (it should be near 1 - cl; a p-value far from it means the asymptotic limit "
-                   "is mis-calibrated here); the Asimov median is the expected limit under background only, with no "
-                   "1/2-sigma bands; the Gaussian nuisances are symmetric, a common-scale nuisance multiplies the "
+                   "is mis-calibrated here); asymptotic_observed_upper_limit is the CLs+b-type limit (q-tilde = z^2) and "
+                   "asymptotic_observed_cls_upper_limit the asymptotic CLs limit; asymptotic_expected_limits gives the "
+                   "median and 1/2-sigma expected limits under background only for both, from the Asimov data set; the Gaussian nuisances are symmetric, a common-scale nuisance multiplies the "
                    "nominal backgrounds, bins are independent Poisson, and shape uncertainties are not modeled")
     return out
 
@@ -554,6 +700,36 @@ def _newton_min(f, x0, fixed_first: bool = False, max_iter: int = 60):
     return x, fx
 
 
+def _code4_coefficients(hi: float, lo: float) -> list[float]:
+    """a_1..a_6 of f(theta) = 1 + sum a_i theta^i, matching hi^theta and lo^-theta with their first and second
+    derivatives at theta = +1 and -1 (HistFactory interpolation code 4)."""
+    lh, ll_ = math.log(hi), math.log(lo)
+    rows = [[1.0] * 6, [(-1.0) ** i for i in range(1, 7)], [float(i) for i in range(1, 7)],
+            [i * (-1.0) ** (i - 1) for i in range(1, 7)], [float(i * (i - 1)) for i in range(1, 7)],
+            [i * (i - 1) * (-1.0) ** (i - 2) for i in range(1, 7)]]
+    rhs = [hi - 1.0, lo - 1.0, hi * lh, -lo * ll_, hi * lh * lh, lo * ll_ * ll_]
+    return [r[0] for r in _solve(rows, [[v] for v in rhs])]
+
+
+def _interp_norm(theta: float, d: dict) -> float:
+    """Normalization factor at theta for asymmetric factors hi (theta = +1) and lo (theta = -1)."""
+    hi, lo, code = d["hi"], d["lo"], d["interpolation"]
+    if code == "code0":
+        return 1.0 + theta * ((hi - 1.0) if theta >= 0 else (1.0 - lo))
+    if code == "code1" or abs(theta) >= 1.0:
+        return hi ** theta if theta >= 0 else lo ** (-theta)
+    return 1.0 + sum(a * theta ** (i + 1) for i, a in enumerate(d["c4"]))
+
+
+def _interp_shape(theta: float, nom: float, up: float, down: float, code: str) -> float:
+    """Additive shift of one bin at theta (code0: piecewise linear; code4p: polynomial inside |theta| < 1)."""
+    if code == "code4p" and abs(theta) < 1.0:
+        s, a = 0.5 * ((up - nom) + (nom - down)), 0.0625 * ((up - nom) - (nom - down))
+        t2 = theta * theta
+        return theta * s + t2 * (t2 * (3.0 * t2 - 10.0) + 15.0) * a
+    return theta * ((up - nom) if theta >= 0 else (nom - down))
+
+
 def _load_shape(doc):
     if not isinstance(doc, dict):
         raise LikelihoodError("input must be a JSON object")
@@ -579,16 +755,31 @@ def _load_shape(doc):
     for k, d in enumerate(nuis):
         if not isinstance(d, dict) or d.get("kind") not in ("background_norm", "signal_norm", "background_shape", "signal_shape"):
             raise LikelihoodError(f"nuisance {k}: kind must be background_norm, signal_norm, background_shape or signal_shape")
-        if d["kind"].endswith("_norm"):
+        if d["kind"].endswith("_norm") and ("hi" in d or "lo" in d):
+            code = d.get("interpolation", "code4")
+            if code not in ("code0", "code1", "code4"):
+                raise LikelihoodError(f"nuisance {k}: interpolation of hi/lo factors must be code0, code1 or code4")
+            if d.get("prior", "gaussian") != "gaussian" or "sigma" in d:
+                raise LikelihoodError(f"nuisance {k}: hi/lo factors take the Gaussian constraint and no sigma")
+            hi, lo = _num(d.get("hi"), "hi", 0.0, 10.0, strict_low=True), _num(d.get("lo"), "lo", 0.0, 10.0, strict_low=True)
+            parsed.append({"kind": d["kind"], "prior": "gaussian", "hi": hi, "lo": lo, "interpolation": code,
+                           "c4": _code4_coefficients(hi, lo)})
+        elif d["kind"].endswith("_norm"):
             prior = d.get("prior", "gaussian")
             if prior not in ("gaussian", "lognormal", "gamma"):
                 raise LikelihoodError(f"nuisance {k}: prior must be gaussian, lognormal or gamma")
+            if "interpolation" in d:
+                raise LikelihoodError(f"nuisance {k}: interpolation applies to hi/lo factors, not to sigma")
             parsed.append({"kind": d["kind"], "prior": prior, "sigma": _num(d.get("sigma"), "sigma", 0.0, 0.9, strict_low=True)})
         else:
             up, dn = d.get("up"), d.get("down")
             if not isinstance(up, list) or not isinstance(dn, list) or len(up) != len(bins) or len(dn) != len(bins):
                 raise LikelihoodError(f"nuisance {k}: up and down must list {len(bins)} per-bin values")
-            parsed.append({"kind": d["kind"], "up": [_num(v, "up", 0.0, 1e6) for v in up], "down": [_num(v, "down", 0.0, 1e6) for v in dn]})
+            code = d.get("interpolation", "code0")
+            if code not in ("code0", "code4p"):
+                raise LikelihoodError(f"nuisance {k}: shape interpolation must be code0 or code4p")
+            parsed.append({"kind": d["kind"], "up": [_num(v, "up", 0.0, 1e6) for v in up], "down": [_num(v, "down", 0.0, 1e6) for v in dn],
+                           "interpolation": code})
         parsed[-1]["name"] = str(d.get("name", f"nuisance{k}"))
     corr = doc.get("correlation")
     corr_chol = None
@@ -606,6 +797,11 @@ def _load_shape(doc):
         if any(d.get("prior") == "gamma" for d in parsed):
             raise LikelihoodError("gamma nuisances cannot be correlated; remove the correlation or the gamma prior")
         corr_chol = _chol_pd(corr)
+    if any("mc_stat" in x for x in raw):
+        for i, (x, bn) in enumerate(zip(raw, bins)):
+            bn["mc_stat"] = _num(x.get("mc_stat", 0.0), f"bin {i} mc_stat", 0.0, 100.0)
+            if bn["mc_stat"] > 0 and bn["b"] <= 0:
+                raise LikelihoodError(f"bin {i}: mc_stat needs a positive background b")
     return bins, parsed, corr_chol
 
 
@@ -623,11 +819,17 @@ class _ShapeModel:
         self.chol = corr_chol
         self.gamma = [d["kind"].endswith("_norm") and d.get("prior") == "gamma" for d in nuis]
         self.tau = [1.0 / d["sigma"] ** 2 if g else 0.0 for d, g in zip(nuis, self.gamma)]
+        # Barlow-Beeston-lite: per-bin factor gamma_i on the background, Gaussian constraint of relative width
+        # mc_stat_i / b_i, observed at 1 (aux[k + i]); profiled in closed form inside nll
+        self.mc_rel = [x.get("mc_stat", 0.0) / x["b"] if x.get("mc_stat", 0.0) > 0 else 0.0 for x in bins] \
+            if any(x.get("mc_stat", 0.0) > 0 for x in bins) else None
 
     def aux_obs(self):
-        return [t if g else 0.0 for g, t in zip(self.gamma, self.tau)]
+        return [t if g else 0.0 for g, t in zip(self.gamma, self.tau)] + ([1.0] * len(self.b) if self.mc_rel else [])
 
     def _factor(self, d, t):
+        if "hi" in d:
+            return _interp_norm(t, d)
         if d["kind"].endswith("_norm") and d.get("prior") == "lognormal":
             return math.exp(d["sigma"] * t)
         return 1.0 + d["sigma"] * t
@@ -654,14 +856,34 @@ class _ShapeModel:
                 total -= aux[i] * math.log(f) - self.tau[i] * f
         return total
 
+    def parts(self, mu, th):
+        """Signal (times mu) and background per bin at the nuisance values th, before the MC-statistics factors."""
+        ss, bs = self._parts(th)
+        return [mu * a for a in ss], bs
+
     def expected(self, mu, th):
+        ss, bs = self.parts(mu, th)
+        return [a + c for a, c in zip(ss, bs)]
+
+    def mc_gammas(self, mu, th, ns, aux):
+        """Profiled MC-statistics factors gamma_i at (mu, th) (all 1 without mc_stat)."""
+        if not self.mc_rel:
+            return [1.0] * len(self.b)
+        ss, bs = self.parts(mu, th)
+        out = []
+        for i, (n, sv, bv, d) in enumerate(zip(ns, ss, bs, self.mc_rel)):
+            g0 = aux[self.k + i]
+            out.append(_b_hat(n, sv, g0 * bv, d * bv) / bv if d > 0 and bv > 0 else 1.0)
+        return out
+
+    def _parts(self, th):
         bs, ss = list(self.b), list(self.s)
         for t, d in zip(th, self.nuis):
             if d["kind"].endswith("_shape"):
                 base = self.b if d["kind"] == "background_shape" else self.s
                 tgt = bs if d["kind"] == "background_shape" else ss
                 for i in range(len(base)):
-                    tgt[i] += t * (d["up"][i] - base[i]) if t >= 0 else (-t) * (d["down"][i] - base[i])
+                    tgt[i] += _interp_shape(t, base[i], d["up"][i], d["down"][i], d["interpolation"])
         for t, d in zip(th, self.nuis):
             if d["kind"] == "background_norm":
                 f = self._factor(d, t)
@@ -669,12 +891,24 @@ class _ShapeModel:
             elif d["kind"] == "signal_norm":
                 f = self._factor(d, t)
                 ss = [v * f for v in ss]
-        return [mu * a + c for a, c in zip(ss, bs)]
+        return ss, bs
 
     def nll(self, mu, th, ns, aux):
         total = 0.0
         if any(d["kind"].endswith("_norm") and self._factor(d, t) <= 0.0 for t, d in zip(th, self.nuis)):
             return -NEG
+        if self.mc_rel:
+            ss, bs = self.parts(mu, th)
+            for i, (n, sv, bv, d) in enumerate(zip(ns, ss, bs, self.mc_rel)):
+                if d > 0 and bv > 0:
+                    b0, sg = aux[self.k + i] * bv, d * bv
+                    v = _ll1(n, sv, _b_hat(n, sv, b0, sg), b0, sg)
+                else:
+                    v = _lnl(n, sv + bv)
+                if v <= NEG / 2:
+                    return -NEG
+                total -= v
+            return total + self.constraint(th, aux)
         for n, nu in zip(ns, self.expected(mu, th)):
             if nu <= 0.0:
                 if n > 0:
@@ -705,8 +939,9 @@ class _ShapeModel:
         return max(0.0, 2.0 * (self.cond(mu, ns, aux)[1] - val))
 
 
-def _draw_aux(model, th_c, rng):
-    """Auxiliary measurements at the conditional nuisance values: correlated normals, Poisson counts for gamma priors."""
+def _draw_aux(model, th_c, rng, gam_c=None):
+    """Auxiliary measurements at the conditional nuisance values: correlated normals, Poisson counts for gamma priors,
+    and normals of width mc_stat / b around the conditional MC-statistics factors gam_c."""
     z = [rng.gauss(0.0, 1.0) for _ in range(model.k)]
     if model.chol is not None:
         z = [sum(model.chol[i][j] * z[j] for j in range(i + 1)) for i in range(model.k)]
@@ -716,15 +951,77 @@ def _draw_aux(model, th_c, rng):
             aux.append(float(_ppf(rng.random(), model.tau[i] * model._factor(model.nuis[i], th_c[i]))))
         else:
             aux.append(th_c[i] + z[i])
+    if model.mc_rel:
+        aux += [g + d * rng.gauss(0.0, 1.0) for g, d in zip(gam_c, model.mc_rel)]
     return aux
 
 
-def shape_limit(doc: dict, cl: float, toys: int, seed: int) -> dict:
+def _toy_cls(model, aux0, g_obs, cl: float, toys: int, seed: int, hi: float, points: int) -> dict:
+    """Toy-based CLs on a grid of mu in (0, hi]: at each mu, q-tilde_mu of the data against seeded toys generated at
+    (mu, nuisances profiled on the data at mu) for CLs+b and at (0, nuisances profiled at mu = 0) for CLb, with the
+    auxiliary measurements redrawn. The same toy seeds are used at every mu (common random numbers). Expected limits
+    come from the same toys: for band N the b-only quantile q_N with P(q >= q_N | b) = Phi(N) replaces the observed q.
+    Each limit is the first crossing of CLs = 1 - cl, interpolated linearly in log CLs between grid points."""
+    nd, alpha = NormalDist(), 1.0 - cl
+    grid = [hi * (i + 1) / points for i in range(points)]
+    base = random.Random(seed)
+    seeds_sb = [base.getrandbits(63) for _ in range(toys)]
+    seeds_b = [base.getrandbits(63) for _ in range(toys)]
+    th0, _ = model.cond(0.0, model.n, aux0)
+    gam0 = model.mc_gammas(0.0, th0, model.n, aux0)
+    curves: dict[str, list[float]] = {"observed": [], **{name: [] for name, _ in BANDS}}
+    for mu in grid:
+        q_obs = model.q(mu, model.n, aux0, g_obs)
+        th_mu, _ = model.cond(mu, model.n, aux0)
+        gam_mu = model.mc_gammas(mu, th_mu, model.n, aux0)
+        dist = {}
+        for key, m_gen, th_c, gam_c, seeds in (("sb", mu, th_mu, gam_mu, seeds_sb), ("b", 0.0, th0, gam0, seeds_b)):
+            ss, bs = model.parts(m_gen, th_c)
+            mean = [a + g * c for a, g, c in zip(ss, gam_c, bs)]
+            qs = []
+            for sd in seeds:
+                rng = random.Random(sd)
+                ns = [_ppf(rng.random(), m) for m in mean]
+                qs.append(model.q(mu, ns, _draw_aux(model, th_c, rng, gam_c)))
+            dist[key] = sorted(qs)
+
+        def frac_ge(values, q):
+            return sum(v >= q - 1e-12 for v in values) / len(values)
+
+        def cls_at(q):
+            return frac_ge(dist["sb"], q) / max(frac_ge(dist["b"], q), 1.0 / toys)
+        curves["observed"].append(cls_at(q_obs))
+        for name, k in BANDS:
+            idx = min(toys - 1, max(0, int(math.floor((1.0 - nd.cdf(k)) * toys))))
+            curves[name].append(cls_at(dist["b"][idx]))
+
+    def crossing(values):
+        prev_mu, prev = 0.0, 1.0
+        for mu, v in zip(grid, values):
+            if v < alpha:
+                lp, lv = math.log(max(prev, 1e-300)), math.log(max(v, 1e-300))
+                return prev_mu + (mu - prev_mu) * (lp - math.log(alpha)) / (lp - lv) if lp != lv else mu
+            prev_mu, prev = mu, v
+        return None
+    limits = {name: crossing(vals) for name, vals in curves.items()}
+    out = {"observed_upper_limit": limits["observed"], "expected": {name: limits[name] for name, _ in BANDS},
+           "toys_per_hypothesis": toys, "seed": seed, "grid": grid, "cls_observed_on_grid": curves["observed"],
+           "binomial_error_on_cls_plus_b_at_alpha": math.sqrt(alpha * (1 - alpha) / toys)}
+    missing = [name for name, v in limits.items() if v is None]
+    if missing:
+        out["not_reached"] = f"CLs stays above {alpha:g} up to mu = {hi:g} for: {', '.join(missing)} (raise the scan range)"
+    return out
+
+
+def shape_limit(doc: dict, cl: float, toys: int, seed: int, cls_toys: int = 0, cls_points: int = 16) -> dict:
     bins, nuis, corr_chol = _load_shape(doc)
     cl = _num(doc.get("cl", cl), "cl", 0.0, 1.0, strict_low=True)
     if cl >= 1.0:
         raise LikelihoodError("cl must lie strictly between 0 and 1")
     toys, seed = _seed_toys(toys, seed, allow_zero=True)
+    cls_toys = _seed_toys(cls_toys, seed, allow_zero=True)[0]
+    if isinstance(cls_points, bool) or not isinstance(cls_points, int) or not 8 <= cls_points <= 60:
+        raise LikelihoodError("cls_points must be an integer in [8, 60]")
     model = _ShapeModel(bins, nuis, corr_chol)
     z = NormalDist().inv_cdf(cl)
     aux0 = model.aux_obs()
@@ -734,37 +1031,236 @@ def shape_limit(doc: dict, cl: float, toys: int, seed: int) -> dict:
         hi = g[0] + 30.0 * (math.sqrt(sum(ns) + 1.0) + 1.0) / max(sum(model.s), 1e-12) + 20.0 / max(sum(model.s), 1e-12)
         return _bisect(lambda m: model.q(m, ns, aux0, g) - z * z, g[0], hi, 45), g
     obs, g_obs = limit(model.n)
-    asimov = limit([float(v) for v in model.b])[0]
+    asimov_ns = [float(v) for v in model.b]
+    asimov, g_a = limit(asimov_ns)
     out = {"label": LABEL, "method": "multi-bin profile-likelihood upper limit with normalization and shape nuisances",
            "bins": len(bins), "nuisances": [d["name"] for d in nuis], "cl": cl, "seed": seed, "toys": toys,
            "best_fit_mu": g_obs[0], "best_fit_nuisances": dict(zip([d["name"] for d in nuis], g_obs[1])),
            "asymptotic_observed_upper_limit": obs, "asymptotic_asimov_median_expected_limit": asimov}
+    out.update(_asymptotic_cls_results(lambda m: model.q(m, model.n, aux0, g_obs), lambda m: model.q(m, asimov_ns, aux0, g_a),
+                                       cl, max(obs, asimov, 1e-6) * 2.0))
     if toys:
         q_obs = model.q(obs, model.n, aux0, g_obs)
         th_c, _ = model.cond(obs, model.n, aux0)
-        mean = model.expected(obs, th_c)
+        gam_c = model.mc_gammas(obs, th_c, model.n, aux0)
+        ss_c, bs_c = model.parts(obs, th_c)
+        mean = [a + g * c for a, g, c in zip(ss_c, gam_c, bs_c)]
         rng = random.Random(seed)
         hits = 0
         for _ in range(toys):
             ns = [_ppf(rng.random(), m) for m in mean]
-            aux = _draw_aux(model, th_c, rng)
+            aux = _draw_aux(model, th_c, rng, gam_c)
             hits += model.q(obs, ns, aux) >= q_obs - 1e-12
         p = hits / toys
         out.update({"toy_p_value_at_asymptotic_limit": p, "binomial_error_on_p": math.sqrt(max(p * (1 - p), 0.0) / toys),
                     "target_p_value": 1.0 - cl})
     out["priors"] = {d["name"]: d.get("prior", "gaussian") for d in nuis}
+    out["interpolation"] = {d["name"]: d["interpolation"] for d in nuis if "interpolation" in d}
+    out["mc_statistics"] = "barlow-beeston-lite" if model.mc_rel else "none"
+    if cls_toys:
+        hi = 1.3 * max(out["asymptotic_observed_cls_upper_limit"], out["asymptotic_expected_limits"]["cls"]["+2sigma"])
+        out["toy_cls"] = _toy_cls(model, aux0, g_obs, cl, cls_toys, seed, hi, cls_points)
     out["correlated_nuisances"] = corr_chol is not None
     out["note"] = ("every nuisance has a unit-width constraint on its parameter theta observed at 0 (Gaussian by default; a "
                    "normalization may be log-normal or gamma with a Poisson auxiliary measurement, and Gaussian-type "
                    "nuisances may carry a correlation matrix; toys redraw the auxiliary measurements, correlated for the "
                    "Gaussian ones and Poisson for gamma), "
-                   "shapes use vertical piecewise-linear interpolation between the down, nominal and up templates (no "
-                   "bin-to-bin correlation beyond what the templates carry), normalizations are linear (1 + sigma theta), "
+                   "shapes use vertical interpolation between the down, nominal and up templates (piecewise linear by default, "
+                   "smooth code4p on request; no bin-to-bin correlation beyond what the templates carry), normalizations "
+                   "are linear (1 + sigma theta) unless log-normal, gamma or given as hi/lo factors (code4 by default), "
                    "and shape and normalization effects are applied additively then multiplicatively; the asymptotic result "
-                   "relies on q-tilde ~ half-chi2, so check the toy p-value at the limit (it should be near 1 - cl); the "
-                   "Asimov median is the expected limit under background only with no 1/2-sigma bands; the profile is a "
+                   "relies on q-tilde ~ half-chi2, so check the toy p-value at the limit (it should be near 1 - cl); "
+                   "asymptotic_observed_upper_limit is the CLs+b-type limit and asymptotic_observed_cls_upper_limit the "
+                   "asymptotic CLs limit, with median and 1/2-sigma expected limits for both from the Asimov data set "
+                   "(asymptotic_expected_limits); the profile is a "
                    "damped Newton search with numerical derivatives and is slow for many nuisances (toys cost a global "
                    "and a conditional fit each)")
+    return out
+
+
+# ---------------------------------------------------------------------- saturated-model goodness of fit
+def _nll_saturated(model, ns, aux) -> float:
+    """nll of the saturated model in the same conventions as _ShapeModel.nll: every bin mean equal to its count and
+    every constraint at its own maximum (Gaussian terms 0; a gamma term at f = aux / tau; MC factors absorbed)."""
+    total = -sum(n * math.log(n) - n for n in ns if n > 0)
+    for i in range(model.k):
+        if model.gamma[i] and aux[i] > 0:
+            total -= aux[i] * math.log(aux[i] / model.tau[i]) - aux[i]
+    return total
+
+
+def _gof_stat(model, ns, aux, mu_fixed):
+    """Saturated-model statistic t = 2 (nll at the best fit - nll saturated), and the fit (mu, theta)."""
+    if mu_fixed is None:
+        mu, th, val = model.glob(ns, aux)
+    else:
+        mu = mu_fixed
+        th, val = model.cond(mu_fixed, ns, aux)
+    return max(0.0, 2.0 * (val - _nll_saturated(model, ns, aux))), mu, th
+
+
+def shape_gof(doc: dict, toys: int, seed: int, mu: float | None = None) -> dict:
+    """Saturated-model goodness of fit of the shape-limit model, with mu fitted (mu >= 0) or fixed, calibrated by
+    seeded toys drawn from the fitted model with the auxiliary measurements redrawn and every toy refitted."""
+    from core.stats.statistical_toys import chi2_sf
+    bins, nuis, corr_chol = _load_shape(doc)
+    toys, seed = _seed_toys(toys, seed, allow_zero=True)
+    if mu is not None:
+        mu = _num(mu, "mu", 0.0, 1e6)
+    model = _ShapeModel(bins, nuis, corr_chol)
+    aux0 = model.aux_obs()
+    t_obs, mu_hat, th_hat = _gof_stat(model, model.n, aux0, mu)
+    ndf = len(bins) - (1 if mu is None else 0)
+    out = {"label": LABEL, "method": "saturated-model goodness of fit (Poisson bins and constraint terms), toy-calibrated",
+           "bins": len(bins), "nuisances": [d["name"] for d in nuis], "mu": "fitted" if mu is None else mu,
+           "best_fit_mu": mu_hat, "best_fit_nuisances": dict(zip([d["name"] for d in nuis], th_hat)),
+           "statistic": t_obs, "seed": seed, "toys": toys}
+    if ndf >= 1:
+        out["asymptotic_chi2_reference"] = {"ndf": ndf, "p_value": chi2_sf(t_obs, ndf),
+                                            "note": "approximate: needs several events in every bin"}
+    if toys:
+        gam = model.mc_gammas(mu_hat, th_hat, model.n, aux0)
+        ss, bs = model.parts(mu_hat, th_hat)
+        mean = [a + g * c for a, g, c in zip(ss, gam, bs)]
+        rng = random.Random(seed)
+        hits = 0
+        values = []
+        for _ in range(toys):
+            ns = [_ppf(rng.random(), m) for m in mean]
+            tv = _gof_stat(model, ns, _draw_aux(model, th_hat, rng, gam), mu)[0]
+            values.append(tv)
+            hits += tv >= t_obs - 1e-12
+        p = hits / toys
+        out["toy_p_value"] = p
+        out["binomial_error_on_p"] = math.sqrt(max(p * (1 - p), 0.0) / toys)
+        if hits == 0:
+            out["p_value_95_upper_bound"] = 1.0 - 0.05 ** (1.0 / toys)
+        values.sort()
+        out["toy_statistic_median"] = values[len(values) // 2]
+    out["note"] = ("t = 2 (nll at the best fit - nll of the saturated model), where the saturated model sets every bin "
+                   "mean to its count and every constraint term to its maximum, so pulled nuisances add to t; toys are "
+                   "drawn from the fitted model with the auxiliary measurements redrawn and refitted one by one; the "
+                   "chi-square reference with bins - 1 (mu fitted) or bins (mu fixed) degrees of freedom is an "
+                   "approximation that fails at low counts; a good p-value does not show the absence of bias")
+    return out
+
+
+# ------------------------------------------------------------------ two parameters of interest
+class _TwoPoiModel:
+    """nu_i = mu1 S1_i(theta) + mu2 S2_i(theta) + B_i(theta), with the shape-limit nuisances (a signal_norm scales both
+    signals; signal shapes are not supported) and optional per-bin MC-statistics factors on B."""
+
+    def __init__(self, bins1, bins2, nuis, chol):
+        self.m1, self.m2 = _ShapeModel(bins1, nuis, chol), _ShapeModel(bins2, nuis, chol)
+        self.n, self.k = self.m1.n, self.m1.k
+
+    def means(self, mu1, mu2, th):
+        s1, b = self.m1._parts(th)
+        s2, _ = self.m2._parts(th)
+        return [mu1 * a + mu2 * c for a, c in zip(s1, s2)], b
+
+    def nll(self, mu1, mu2, th, ns, aux):
+        m = self.m1
+        if any(d["kind"].endswith("_norm") and m._factor(d, x) <= 0.0 for x, d in zip(th, m.nuis)):
+            return -NEG
+        sig, bkg = self.means(mu1, mu2, th)
+        total = 0.0
+        for i, (n, sv, bv) in enumerate(zip(ns, sig, bkg)):
+            d = m.mc_rel[i] if m.mc_rel else 0.0
+            if d > 0 and bv > 0:
+                b0, sg = aux[self.k + i] * bv, d * bv
+                v = _ll1(n, sv, _b_hat(n, sv, b0, sg), b0, sg) if sv + b0 > -10 * sg else NEG
+            else:
+                v = _lnl(n, sv + bv)
+            if v <= NEG / 2:
+                return -NEG
+            total -= v
+        return total + m.constraint(th, aux)
+
+    def cond(self, mu1, mu2, ns, aux, start=None):
+        if self.k == 0:
+            return [], self.nll(mu1, mu2, [], ns, aux)
+        return _newton_min(lambda x: self.nll(mu1, mu2, x, ns, aux), list(start) if start else [0.0] * self.k)
+
+    def glob(self, ns, aux, start=None):
+        x0 = list(start) if start else [1.0, 1.0] + [0.0] * self.k
+        x, val = _newton_min(lambda v: self.nll(v[0], v[1], v[2:], ns, aux), x0)
+        return x[0], x[1], x[2:], val
+
+    def q(self, mu1, mu2, ns, aux, g=None):
+        g = g if g else self.glob(ns, aux)
+        return max(0.0, 2.0 * (self.cond(mu1, mu2, ns, aux, g[2])[1] - g[3]))
+
+
+def _load_two_poi(doc):
+    if not isinstance(doc, dict) or not isinstance(doc.get("bins"), list):
+        raise LikelihoodError("input must be a JSON object with bins")
+    for i, x in enumerate(doc["bins"]):
+        if not isinstance(x, dict) or "s1" not in x or "s2" not in x:
+            raise LikelihoodError(f"bin {i} must give n, b, s1 and s2")
+    if any(isinstance(d, dict) and d.get("kind") == "signal_shape" for d in doc.get("nuisances", []) or []):
+        raise LikelihoodError("signal_shape nuisances are not supported with two parameters of interest")
+    parts = []
+    for key in ("s1", "s2"):
+        sub = dict(doc, bins=[{**{k: v for k, v in x.items() if k not in ("s1", "s2")}, "s": x[key]} for x in doc["bins"]])
+        parts.append(_load_shape(sub))
+    (bins1, nuis, chol), (bins2, _, _) = parts
+    if len(bins1) < 2:
+        raise LikelihoodError("two parameters of interest need at least two bins")
+    return bins1, bins2, nuis, chol
+
+
+def profile_contour(doc: dict, cls=(0.6827, 0.95), rays: int = 36) -> dict:
+    """Best fit of (mu1, mu2) and the profile-likelihood contours q(mu1, mu2) = 2 (min_theta nll - min nll) = level,
+    with level the chi-square quantile for 2 degrees of freedom (Wilks), traced along rays from the best fit."""
+    bins1, bins2, nuis, chol = _load_two_poi(doc)
+    cls = [_num(c, "cl", 0.0, 1.0, strict_low=True) for c in cls]
+    if any(c >= 1.0 for c in cls) or not cls:
+        raise LikelihoodError("each contour cl must lie strictly between 0 and 1")
+    if isinstance(rays, bool) or not isinstance(rays, int) or not 8 <= rays <= 360:
+        raise LikelihoodError("rays must be an integer in [8, 360]")
+    model = _TwoPoiModel(bins1, bins2, nuis, chol)
+    aux0 = model.m1.aux_obs()
+    g = model.glob(model.n, aux0)
+    m1h, m2h = g[0], g[1]
+    if not math.isfinite(g[3]) or g[3] >= -NEG / 2:
+        raise LikelihoodError("the global fit failed (no finite likelihood)")
+    # local covariance of (mu1, mu2) from the numerical Hessian of q / 2 at the best fit
+    s1, s2 = (max(sum(model.m1.s), 1e-12), max(sum(model.m2.s), 1e-12))
+    h1, h2 = 0.05 * math.sqrt(sum(model.n) + 1.0) / s1, 0.05 * math.sqrt(sum(model.n) + 1.0) / s2
+    f = lambda a, b: 0.5 * model.q(a, b, model.n, aux0, g)
+    f11 = (f(m1h + h1, m2h) + f(m1h - h1, m2h)) / h1 ** 2
+    f22 = (f(m1h, m2h + h2) + f(m1h, m2h - h2)) / h2 ** 2
+    f12 = (f(m1h + h1, m2h + h2) - f(m1h + h1, m2h - h2) - f(m1h - h1, m2h + h2) + f(m1h - h1, m2h - h2)) / (4 * h1 * h2)
+    det = f11 * f22 - f12 * f12
+    cov = [[f22 / det, -f12 / det], [-f12 / det, f11 / det]] if det > 0 else None
+    sd = (math.sqrt(cov[0][0]), math.sqrt(cov[1][1])) if cov and cov[0][0] > 0 and cov[1][1] > 0 else (1.0 / s1, 1.0 / s2)
+    contours, failures = {}, []
+    for c in cls:
+        level = -2.0 * math.log(1.0 - c)
+        pts = []
+        for j in range(rays):
+            phi = 2.0 * math.pi * j / rays
+            u1, u2 = math.cos(phi) * sd[0], math.sin(phi) * sd[1]
+            try:
+                r = _root_increasing(lambda r_: model.q(m1h + r_ * u1, m2h + r_ * u2, model.n, aux0, g) - level,
+                                     0.0, 2.0 * math.sqrt(level), tol=1e-6)
+                pts.append([m1h + r * u1, m2h + r * u2])
+            except LikelihoodError:
+                failures.append({"cl": c, "angle_deg": 360.0 * j / rays})
+        contours[f"{c:g}"] = {"q_level": level, "points": pts}
+    out = {"label": LABEL, "method": "profile-likelihood contours of two signal strengths (Wilks, 2 degrees of freedom)",
+           "bins": len(bins1), "nuisances": [d["name"] for d in nuis], "best_fit": {"mu1": m1h, "mu2": m2h},
+           "best_fit_nuisances": dict(zip([d["name"] for d in nuis], g[2])), "covariance_from_hessian": cov,
+           "contours": contours, "rays": rays}
+    if failures:
+        out["rays_not_closed"] = failures
+    out["note"] = ("each contour point is where the profile statistic q(mu1, mu2), minimized over every nuisance, reaches "
+                   "the chi-square 2-dof quantile of the stated cl, found along a ray from the best fit (scaled by the "
+                   "Hessian errors), so a non-star-shaped region is not traced; Wilks coverage needs enough events per "
+                   "bin and the parameters away from a boundary (the POIs are not bounded here, but every bin's mean "
+                   "must stay positive): check it with toys at the true point when counts are low; a ray that does not "
+                   "reach the level is listed in rays_not_closed")
     return out
 
 
@@ -992,9 +1488,19 @@ def build_parser() -> argparse.ArgumentParser:
     nc.add_argument("--inner", type=int, default=200, help="toys per p-value")
     nc.add_argument("--points", type=int, default=9)
     nc.add_argument("--seed", type=int, required=True, help="required: every toy study records its seed")
+    gf = sub.add_parser("shape-gof", help="saturated-model goodness of fit of a shape-limit model")
+    gf.add_argument("--input", required=True)
+    gf.add_argument("--mu", type=float, default=None, help="fix mu (default: fitted, mu >= 0)")
+    common(gf, 500)
+    ct = sub.add_parser("contour", help="profile-likelihood contours of two signal strengths")
+    ct.add_argument("--input", required=True)
+    ct.add_argument("--cl", default="0.6827,0.95", help="comma-separated confidence levels of the contours")
+    ct.add_argument("--rays", type=int, default=36)
     h = sub.add_parser("shape-limit", help="multi-bin limit with shape and normalization nuisances")
     h.add_argument("--input", required=True)
     h.add_argument("--cl", type=float, default=0.95, help="used when the file has no cl")
+    h.add_argument("--cls-toys", type=int, default=0, help="toys per hypothesis and grid point for toy-based CLs (0: none)")
+    h.add_argument("--cls-points", type=int, default=16, help="grid points in mu for toy-based CLs")
     common(h, 0)
     return parser
 
@@ -1015,7 +1521,20 @@ def main(argv: list[str] | None = None) -> int:
                 doc = json.loads(Path(args.input).read_text())
             except (OSError, json.JSONDecodeError) as exc:
                 raise LikelihoodError(f"cannot read {args.input}: {exc}") from None
-            result = shape_limit(doc, args.cl, args.toys, args.seed)
+            result = shape_limit(doc, args.cl, args.toys, args.seed, args.cls_toys, args.cls_points)
+        elif args.command == "shape-gof":
+            try:
+                doc = json.loads(Path(args.input).read_text())
+            except (OSError, json.JSONDecodeError) as exc:
+                raise LikelihoodError(f"cannot read {args.input}: {exc}") from None
+            result = shape_gof(doc, args.toys, args.seed, args.mu)
+        elif args.command == "contour":
+            try:
+                doc = json.loads(Path(args.input).read_text())
+                cls = [float(c) for c in args.cl.split(",") if c.strip()]
+            except (OSError, json.JSONDecodeError, ValueError) as exc:
+                raise LikelihoodError(f"cannot read {args.input} or --cl: {exc}") from None
+            result = profile_contour(doc, cls, args.rays)
         elif args.command == "profile-limit":
             result = profile_limit(args.n, args.b, args.sigma_b, args.cl, args.toys, args.seed)
         elif args.command == "profile-significance":

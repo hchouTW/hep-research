@@ -23,6 +23,10 @@ core = ["numpy>=2.4,<3", "scipy>=1.17,<2", "matplotlib>=3.11,<4", "sympy>=1.14,<
 pyhf = ["pyhf>=0.7.6,<0.8"]
 # adapters/root-uproot and the ROOT-file helpers in skills/hep-computing (ROOT itself comes from conda-forge or LCG)
 root-uproot = ["uproot>=5.7,<6", "awkward>=2.14,<3", "PyYAML>=6"]
+# adapters/root-uproot columnar assets: the coffea template and the ROOT-to-Parquet converter
+columnar = ["coffea>=2026.9", "pyarrow>=20", "uproot>=5.7,<6", "awkward>=2.14,<3"]
+# adapters/hepdata: the optional hepdata_lib engine and the submission check
+hepdata = ["hepdata_lib>=0.21", "hepdata-validator>=0.3.6", "PyYAML>=6"]
 # skills/physics-ml scripts and assets (CPU wheels are enough for the tests)
 torch = ["torch>=2.4"]
 # diagram checks need system tools, not Python packages: Graphviz `dot`, the Mermaid CLI `mmdc` (npm) and PlantUML

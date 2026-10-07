@@ -54,12 +54,12 @@ afterwards (OPTIONAL-TOOLS). Criteria about the deleted traceability and convers
 | AC17 | pass | T10/T11, T12, T13–T15, T07, T16; low and zero counts in the Path D Poisson likelihood (`LowCountTests`) |
 | AC18 | pass | Unit tests pass where tools exist (skips unverified); algorithm fixes only in `sci-fix:` commits with regressions |
 | AC19 | pass | Failure statuses propagate (T20); bounded recovery in `local_partition.py` (T21) |
-| AC20 | pass (noted misses) | Static: 48 cases pass `check_routing_static.py`. Live (Claude Code 2.1.287, claude-sonnet-5-5, plugin only, synthetic inputs): 41/48 route to the expected owner or ask (en 27/33, zh-Hant 14/15); 2 to a neighboring plugin skill (J5 → detector-response, J12 → hep-computing with the limited-support notice); 5 load no skill; no profile loaded by theory or computing cases. Round 2 with tuned `hep-theory`/`hep-statistics` descriptions: 43/48. *Later rounds below; short theory questions answered directly remain unreliable* |
+| AC20 | pass (noted misses) | Static: 48 cases pass `check_routing_static.py` (the case set on 2026-10-02; 62 from 2026-10-04, 118 since 2026-10-07). Live (Claude Code 2.1.287, claude-sonnet-5-5, plugin only, synthetic inputs): 41/48 route to the expected owner or ask (en 27/33, zh-Hant 14/15); 2 to a neighboring plugin skill (J5 → detector-response, J12 → hep-computing with the limited-support notice); 5 load no skill; no profile loaded by theory or computing cases. Round 2 with tuned `hep-theory`/`hep-statistics` descriptions: 43/48. *Later rounds below; short theory questions answered directly remain unreliable* |
 | AC21 | pass | No values invented in dataset records; newer or inaccessible citations classed unverified (T17); private local profile usable through project config and absent from the tree (T27); `tools/check_packaging.py` finds no private paths, credentials, transcripts, rubrics, caches or project artifacts |
 | AC22 | pass | Five scientific corrections as `sci-fix:` commits with regressions (YAML subset docs, unverified citations, dates, T12, theory routing); blinding (T18); signed weights pass unclipped, normalization by `sum(signed weights)` stated (T26); `observed` cannot combine with `synthetic` or `asimov`; Path D keeps Asimov and synthetic-observed apart |
 | AC23 | pass | No adapter claims more than its least-tested tool: `pyhf-combine` and `root-uproot` are `demonstrated-on-synthetic-data` (pyhf 0.7.6; Combine 11.1.0 with ROOT 6.40.04 and 6.36.14; uproot 5.7.6, awkward 2.14.0; ROOT 6.40.04); the lowest-status rule is enforced by `AdapterDeclarationTests`. *Combine on one synthetic counting card; adapters not run on real experiment files* |
 | AC24 | pass | Relocation check (12 pass, 2 skip since removed); native Claude Code 2.1.287 install, discovery, namespaced invocation, profile access from the installed path (with spaces), removal |
-| AC26–AC28 | pass | Authoring and maintenance guides in `docs/`; `docs/capability-matrix.md` per capability, profile, adapter and host (tested / unverified / proposed / not-in-v1), rows matching `adapter.json`; this file, `DECISIONS.md`, the limitations section below |
+| AC26–AC28 | pass | Authoring and maintenance guides in `docs/`; `docs/capability-matrix.md` per capability, profile, adapter and host (tested / unverified / proposed / not-in-v1), rows matching `adapter.json`; this file and the limitations section below (the `DECISIONS.md` record named here then was removed with the other pre-release records in 0.3.0) |
 | AC29 | pass | Layering directions, no-hard-coded-profile rule (names, IDs, namespaces, paths), steward check; one documented whitelist entry (`tools/layering_whitelist.json`) |
 | AC30 | pass | J1–J12 traced (`docs/researcher-journeys.md`), each executed or answered on synthetic inputs; one live routing case per journey; J12 gives the limited-support notice |
 | AC31 | pass | Vocabularies extensible by namespaced profile terms (T25, T26); published-style record compared without detector modules (T24) |
@@ -466,3 +466,39 @@ the dev tools (hypothesis 6.168.5, ruff 0.16.10, mypy 2.4.0, pre-commit 4.6.2, p
 Unverified here: the optional CI jobs (pyhf, uproot, PyTorch, ROOT container) run only on GitHub; a host where
 Chromium cannot start (the Mermaid hang is covered by a fake renderer, not a real one); the SKILL.md trims planned in
 `docs/maintenance.md` (not applied).
+
+## HARDENING-P2 (2026-10-08, E2, version 0.3.0 + unreleased): features T19–T27
+
+Same work order, items T19–T27, on `feat/hardening-p2`. E2 as above; hepdata_lib 0.21.0, hepdata-validator 0.3.6,
+coffea 2026.9.0 and pyarrow 25.0.1 in the dev venv; pyhf 0.7.6 read from the E2 venv for one comparison (nothing
+installed there).
+
+`run_all_checks.py --no-cli --jobs 4`: 17 pass, 0 fail, 2 skip (host CLI checks off); 1,543 unit tests in 117 modules,
+79 skipped (optional tools, slow tier). Harness tests: `python3 -m unittest discover -s evals/routing/tests` (10 tests).
+
+| Item | Result | Evidence |
+|---|---|---|
+| T19 routing harness | harness tested with a fake CLI; live cost probe 5/5 strict (claude-sonnet-5-5, CLI 2.1.293, setting-sources isolation), $0.455 for 6 prompt turns; full 150-case run not done (estimate about $11.7) | `evals/routing/` (outside the plugin), `results/probe-20261008-sonnet.json`; 32 new cases (zh-Hans, ja, de, adversarial, quick, multi-turn) pass `check_routing_static.py` (150 cases) |
+| T20 recasting templates | documented: none of MadGraph5_aMC@NLO, Rivet, Delphes, SModelS, MadAnalysis 5 installed | `tests/adapters/test_recasting_templates.py` (structure only) |
+| T21 HEPData export | pass: hepdata-validator accepts the plain and the hepdata_lib engine; the importer reads the export back | `tests/adapters/test_hepdata_export.py` |
+| T22 statistics extensions | pass, eight items, each with a closure or coverage test | `tests/core/test_stats_template_fit.py` (`ZeroMcBinTests`), `test_stats_asymptotic_bands.py`, `test_stats_interpolation.py`, `test_stats_mc_statistics.py`, `test_stats_toy_cls.py`, `test_stats_two_poi.py`, `test_stats_saturated_gof.py`, `tests/skills/hep_statistics/test_combine_asymmetric.py` |
+| T23 environments | manifest script tested; LCG-view and Apptainer templates documented (no CVMFS or Apptainer on E2) | `tests/skills/hep_computing/test_environment_manifest.py` |
+| T24 columnar | pass on the synthetic NanoAOD-like file: the coffea processor reproduces the generator's answers for any chunking; the Parquet conversion writes every entry once | `tests/adapters/test_columnar_assets.py` |
+| T25 handoffs | pass: rows added, routing static check and budgets green | `tools/check_routing_static.py`, `tools/measure_entrypoints.py` |
+| T26 systematics table | pass: status required and carried into the caption; output compiles with pdflatex | `tests/skills/hep_analysis/test_systematics_table_tex.py` |
+| T27 documentation drift | fixed: version headers, removed files, measured sizes and dated routing counts | `docs/` diffs in the T27 commit |
+
+T22 numbers: the zero-MC Barlow-Beeston bin equals a brute-force maximum for five configurations, and 300 sparse-MC
+toys give no failed fit (the naive fit is infeasible in about one in five); the Asimov bands match the quantiles of
+300–400 background-only toys within 12–14%; the interpolation codes match pyhf 0.7.6 to 1e-9; with 20% MC
+statistics per bin the Barlow-Beeston-lite limit covers at 0.95 ± 0.025 against below 0.92 without it; toy CLs
+reproduces the exact Poisson CLs limit (40-seed mean 5.412 ± 0.046 against 5.395); two-POI regions cover within 0.035
+(68%) and 0.015 (95%) over 2,000 toys; the asymmetric combination stays within 0.05 errors of the exact pooled
+lifetime likelihood; toy GoF p-values are uniform at 1–4 events per bin, where the chi-square reference is not.
+
+Also found and fixed: a `submission.tar.gz` written by hepdata_lib had been committed with T21 (removed; the export now
+writes none, and the packaging scan refuses archives); the T03 audit's "infeasible" fixture now applies to the naive
+comparison fit only, and failure propagation is tested with a non-converging minimizer.
+
+Unverified here: the full live routing run and any Codex routing run; the recasting and environment templates on a
+real installation; the optional CI jobs for hepdata and columnar (GitHub only).

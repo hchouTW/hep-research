@@ -13,10 +13,12 @@ claude plugin marketplace add hchouTW/hep-research
 claude plugin install hep-research@hep-research-dev
 ```
 
-The marketplace also lists `ams02-research`, an access-restricted companion plugin for AMS Collaboration members. It
-lives in a separate private repository; without access its install fails and nothing else is affected.
+Both marketplace manifests (Claude Code's and Codex's) also list `ams02-research`, an access-restricted companion
+plugin for AMS Collaboration members. It lives in a separate private repository; without access its install fails and nothing else is affected.
 
 Checks: `python3 plugins/hep-research/tools/run_all_checks.py`
+
+Live routing evaluation (paid model calls, outside the plugin): [`evals/routing/`](evals/routing/README.md).
 
 ## Contributing
 

@@ -1,0 +1,17 @@
+# Rivet metadata for rivet_template_analysis.cc (STARTING TEMPLATE; replace every <...>).
+Name: TEMPLATE_ANALYSIS
+Year: <YEAR>
+Summary: <ONE-LINE SUMMARY OF THE RECAST SELECTION>
+Experiment: <EXPERIMENT>
+Collider: <COLLIDER>
+InspireID: <INSPIRE_ID>
+Status: UNVALIDATED
+Authors:
+ - <AUTHOR> <EMAIL>
+References:
+ - <ARXIV_ID>
+RunInfo: <BEAMS, ENERGY AND GENERATOR SETTINGS THE ANALYSIS EXPECTS>
+Beams: [p+, p+]
+Energies: [<SQRT_S_GEV>]
+Description:
+  '<WHAT IS SELECTED, AT PARTICLE LEVEL, AND HOW IT WAS CHECKED AGAINST THE PUBLISHED CUTFLOW>'

@@ -1,0 +1,47 @@
+{
+ "id": "adapter:recasting",
+ "version": "0.1.0",
+ "status": "documented",
+ "purpose": "Starting templates for recasting a published search with external tools: MadGraph5_aMC@NLO cards, a Rivet analysis, a Delphes efficiency override, SModelS and MadAnalysis 5 configurations",
+ "tools": [
+  {
+   "name": "MadGraph5_aMC@NLO process and launch card",
+   "status": "documented",
+   "tested_versions": []
+  },
+  {
+   "name": "Rivet analysis skeleton and metadata",
+   "status": "documented",
+   "tested_versions": []
+  },
+  {
+   "name": "Delphes efficiency-module override",
+   "status": "documented",
+   "tested_versions": []
+  },
+  {
+   "name": "SModelS parameters file",
+   "status": "documented",
+   "tested_versions": []
+  },
+  {
+   "name": "MadAnalysis 5 recast script (Public Analysis Database)",
+   "status": "documented",
+   "tested_versions": []
+  }
+ ],
+ "environment": "none declared: MadGraph5_aMC@NLO, Rivet, Delphes, SModelS and MadAnalysis 5 were not installed where these templates were written (E2, 2026-10-08)",
+ "assets": [
+  "assets/mg5_proc_card.dat",
+  "assets/rivet_template_analysis.cc",
+  "assets/delphes_efficiency_override.tcl",
+  "assets/smodels_parameters.ini",
+  "assets/ma5_recast.ma5",
+  "assets/rivet_template_analysis.info"
+ ],
+ "tests": [
+  "../../tests/adapters/test_recasting_templates.py"
+ ],
+ "owner_skill": "hep-theory",
+ "status_rule": "the adapter status is the lowest of its tools' statuses; each template stays documented until its tool runs it in a declared environment and a test checks the result against a published cutflow or limit"
+}

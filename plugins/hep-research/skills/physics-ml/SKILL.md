@@ -52,3 +52,5 @@ Scripts in `<plugin root>/skills/physics-ml/scripts/` (read `--help` first): `ch
 | Physics assumptions or validity domain of a surrogate | hep-theory | `prediction` |
 | Inference using the model (coverage, systematics) | hep-statistics | `ml-artifact` |
 | Pipeline, I/O, batch training jobs | hep-computing | `computational-run` |
+| Fast-simulation validation against full simulation | detector-response | `ml-artifact` |
+| Writing up results and figures | research-communication | `ml-artifact` |

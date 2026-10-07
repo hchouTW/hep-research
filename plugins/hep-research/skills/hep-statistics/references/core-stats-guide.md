@@ -117,16 +117,32 @@ and use common random numbers across a scan.
   statistic, with observed and (with `--expected-toys`) median and 1/2-sigma expected limits; it reproduces the exact
   `cls-limit` for a known background within toy noise.
 - `multibin-limit --input FILE [--cl --toys --seed]`: bins sharing one `mu` with no, independent per-bin (Gaussian) or
-  one common multiplicative background nuisance; asymptotic observed limit, Asimov median expected limit (no bands),
-  and a seeded-toy p-value at the asymptotic limit as the calibration check (it should be near `1 - cl`; if not, use a
-  toy-calibrated construction). Shapes and other nuisances are not modeled.
-- `shape-limit --input FILE [--cl --toys --seed]`: multi-bin limit with several nuisances: background and signal
-  normalization, background and signal shape by vertical interpolation, a damped Newton profile, asymptotic observed
-  and Asimov expected limits, and an optional toy p-value at the limit. A normalization nuisance may be `gaussian`
-  (factor `1 + sigma theta`), `lognormal` (`exp(sigma theta)`) or `gamma` (`1 + sigma theta` with a Poisson auxiliary
-  measurement of `tau = 1/sigma^2`); an optional correlation matrix correlates the Gaussian-type nuisances (gamma ones
-  cannot be correlated). Choose the constraint from the origin of the uncertainty
-  ([nuisance modeling](nuisance-modeling.md)), not by convenience. Slow for many nuisances.
+  one common multiplicative background nuisance; the asymptotic observed limit (CLs+b-type, `q-tilde = z^2`) and the
+  asymptotic CLs limit, the expected median and 1/2-sigma limits for both from the Asimov data set, and a seeded-toy
+  p-value at the asymptotic limit as the calibration check (it should be near `1 - cl`; if not, use a toy-calibrated
+  construction). Shapes and other nuisances are not modeled. A per-bin `mc_stat` (MC-statistics uncertainty of the
+  background, also in `shape-limit` and `contour`) adds a Barlow-Beeston-lite factor per bin; leave it out only when
+  the templates' MC statistics are negligible.
+- `shape-limit --input FILE [--cl --toys --seed --cls-toys --cls-points]`: multi-bin limit with several nuisances:
+  background and signal normalization, background and signal shape by vertical interpolation (piecewise linear
+  `code0` by default, or the smooth `code4p`; asymmetric normalization factors `hi`/`lo` with `code4`, `code1` or
+  `code0`, as in pyhf), a damped Newton profile, the same asymptotic limits and bands as `multibin-limit`, and an
+  optional toy p-value at the limit. With `--cls-toys N` it adds a toy-based CLs limit and expected 1/2-sigma limits on
+  a grid of `--cls-points` values of `mu` (use it at low counts, where the asymptotic bands are too wide; the cost grows
+  as toys x grid points x two fits). A normalization nuisance may be `gaussian` (factor `1 + sigma theta`), `lognormal`
+  (`exp(sigma theta)`) or `gamma` (`1 + sigma theta` with a Poisson auxiliary measurement of `tau = 1/sigma^2`); an
+  optional correlation matrix correlates the Gaussian-type nuisances (gamma ones cannot be correlated). Choose the
+  constraint from the origin of the uncertainty ([nuisance modeling](nuisance-modeling.md)), not by convenience. Slow
+  for many nuisances.
+- `shape-gof --input FILE [--mu --toys --seed]`: saturated-model goodness of fit of a `shape-limit` model (Poisson
+  bins plus constraint terms, so pulled nuisances count), `mu` fitted (`mu >= 0`) or fixed, calibrated by toys from
+  the fitted model; the chi-square reference (bins - 1 or bins degrees of freedom) is approximate and
+  anti-conservative at a few events per bin. For template yields without nuisances use
+  `sensitivity_and_gof.py gof`.
+- `contour --input FILE [--cl 0.6827,0.95 --rays 36]`: two signal strengths (bins with `s1` and `s2`; the shape-limit
+  nuisances except signal shapes; `mc_stat`): best fit, Hessian covariance and profile-likelihood contours at the
+  chi-square 2-dof levels. Wilks coverage was checked with toys at about 50 events per bin; at low counts, check it
+  with toys at the true point before quoting a region.
 - `neyman-limit --n --b --sigma-b [--cl --beta --points --toys --seed]`: an approximation of the Berger-Boos
   construction over the background nuisance (finite nuisance grid, seeded toys): a signal is excluded only if the
   supremum of the toy p-value over the `(1 - beta)` confidence set of the background, plus `beta`, is at most
@@ -193,8 +209,9 @@ Barlow-Beeston multiplier; yields by Nelder-Mead and errors from a numerical Hes
 
 Limits: up to 6 templates, 8 nuisances and 60 bins; Hessian errors are unreliable for a yield near zero. Every fit
 reports its diagnostics (minimizer convergence, a finite likelihood at the optimum, covariance quality, yields at the
-boundary). A bin with data and no template support makes the model infeasible. Infeasible or unconverged fits are
-`failed` with **exit code 1**.
+boundary). A bin with data and no MC in any template makes the naive fit infeasible (reported in `naive_fit_failed`);
+the Barlow-Beeston fit keeps each template's true content in such a bin as a nuisance and describes it. The status
+follows the Barlow-Beeston fit: unconverged (or infeasible) means `failed` with **exit code 1**.
 
 Decision rule: use `bb-fit`/`bb-toys` instead of the one-parameter `template-bb` whenever there are several templates,
 and quote the full-fit error when `bb-fit` shows it inflated. Use either Barlow-Beeston or a per-bin `staterror`-type

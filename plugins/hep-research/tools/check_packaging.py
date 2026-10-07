@@ -4,6 +4,7 @@
 Scans the files a package would contain (git-tracked files when run in a checkout, else every file except caches):
 - no symlinks, caches (__pycache__, *.pyc, .pytest_cache, .DS_Store) or editor/OS debris
 - no model transcripts or session logs (*.jsonl, files named *transcript*), no grading rubrics or eval answer keys
+- no archives (.tar.gz, .zip, ...): they are build or tool outputs, such as the submission.tar.gz hepdata_lib writes
 - no project data: no hep-research-artifacts/ folder; project configs only as test fixtures
 - no private paths (home directories, mounted project folders, temp session folders) or credentials
 - no e-mail addresses other than the commit trailer address; no file over 2 MiB
@@ -29,6 +30,7 @@ SITE_KEYS = ("partition", "account", "qos", "constraint", "gres", "requirements"
 MAX_BYTES = 2 * 1024 * 1024
 CACHE = re.compile(r"(^|/)(__pycache__|\.pytest_cache|\.hypothesis)(/|$)|\.pyc$|(^|/)\.DS_Store$")
 TRANSCRIPT = re.compile(r"\.jsonl$|transcript", re.I)
+ARCHIVE = re.compile(r"\.(tar|tgz|tar\.gz|tar\.bz2|tar\.xz|zip|7z|rar)$", re.I)  # build or tool outputs, never shipped
 RUBRIC = re.compile(r"rubric|answer[-_]?key|grading|prompts_eval|routing_eval", re.I)
 PRIVATE = re.compile(r"/home/[a-z_][a-z0-9_-]*/|/Users/[A-Za-z0-9_.-]+/|C:\\\\Users\\\\|/mnt/project-files|/tmp/claude|\.claude/projects/")
 SECRET = re.compile(r"BEGIN [A-Z ]*PRIVATE KEY|ghp_[A-Za-z0-9]{20,}|sk-ant-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|(api[_-]?key|token|password)\s*[:=]\s*['\"][^'\"\s]{8,}", re.I)
@@ -39,7 +41,8 @@ LEGACY = re.compile(r"agentic[-_]ai[-_]skills|3e995a4|\.legacy/|legacy_id|\bport
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 EMAIL_OK = {"noreply@anthropic.com"}
 PLACEHOLDER_LOCAL = {"author", "name", "user", "you", "your.name", "first.last", "someone"}  # template placeholders
-TEXT = {".py", ".md", ".json", ".csv", ".txt", ".yaml", ".yml", ".sh", ".C", ".cpp", ".h", ".hpp", ".toml", ".cfg", ".tex", ".bib"}
+TEXT = {".py", ".md", ".json", ".csv", ".txt", ".yaml", ".yml", ".sh", ".C", ".cpp", ".cc", ".h", ".hpp", ".toml", ".cfg", ".ini",
+        ".tex", ".bib", ".dat", ".tcl", ".ma5", ".info", ".template", ".sub", ".sbatch", ".lock"}  # every shipped text format
 
 
 def files() -> list[Path]:
@@ -113,6 +116,8 @@ def main(argv=None) -> int:
             add(rel, "cache")
         if TRANSCRIPT.search(rel):
             add(rel, "transcript-or-log")
+        if ARCHIVE.search(rel):
+            add(rel, "archive")
         if RUBRIC.search(rel):
             add(rel, "rubric-or-eval-key")
         if "hep-research-artifacts/" in rel:

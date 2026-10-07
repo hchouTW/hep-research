@@ -4,7 +4,7 @@
   "experiments": [
    {
     "profile": "experiment:ams-02",
-    "version": "1.0.0"
+    "version": "2.0.0"
    }
   ],
   "theory": []
@@ -13,7 +13,7 @@
   "plugin": "0.3.0",
   "contracts": "2.0.0",
   "profiles": {
-   "experiment:ams-02": "1.0.0"
+   "experiment:ams-02": "2.0.0"
   }
  },
  "inputs": [],

@@ -56,8 +56,10 @@ pyhf 0.7.6 (read from the installed source, `pyhf/interpolators/`, 2026-10-03):
 | `histosys` | `code4p` (Model default) | `theta S + theta^2 (3 theta^4 - 10 theta^2 + 15) A` with `S = (d+ + d-)/2`, `A = (d+ - d-)/16` | linear |
 
 `pyhf.Model` uses `code4`/`code4p` unless `modifier_settings` says otherwise; the modifier classes alone default to
-`code1`/`code0`. A cross-check against another implementation must use the same code, or it compares different
-likelihoods: an independent HistFactory reference with exponential normsys first disagreed with pyhf for exactly
+`code1`/`code0`. `core/stats/likelihood_limits.py shape-limit` implements the same codes (`hi`/`lo` normalization
+factors with `code4` by default; shapes `code0` by default, `code4p` on request) and matches pyhf 0.7.6 on a grid
+(`tests/core/test_stats_interpolation.py`). A cross-check against another implementation must use the same code,
+or it compares different likelihoods: an independent HistFactory reference with exponential normsys first disagreed with pyhf for exactly
 this reason (repository history of the pyhf shape cross-check).
 
 Combine (documentation for the recommended tag v11.1.0, read 2026-10-03; not executed in this plugin):
@@ -100,6 +102,12 @@ for an asymmetric one by 3%. The difference grows with the asymmetry and with ho
 - **Symmetrization** (`(up - down)/2` around the nominal, or the larger shift both ways) changes the curvature and the
   center of the nuisance. It is a modeling choice: quantify its effect on the POI (fit with and without) and record it.
 - "Max of up and down" applied per bin mixes directions bin by bin and destroys the correlation across bins: never.
+- **Quoting a total with asymmetric errors** outside a likelihood (several asymmetric sources on one number, or
+  several results with asymmetric errors): adding the up and down shifts in quadrature separately has no justification.
+  `<plugin root>/skills/hep-statistics/scripts/combine_asymmetric.py` follows Barlow: `sources` adds cumulants under a
+  stated model (quadratic or piecewise) and moves the central value so the mean is kept; `measurements` combines
+  results through the linear-variance or linear-sigma approximate likelihood. State the model; a fit with the sources
+  as nuisances is better when the likelihood is available.
 
 ## Envelopes and alternative models
 
@@ -120,7 +128,9 @@ for an asymmetric one by 3%. The difference grows with the asymmetry and with ho
   with a supplied absolute uncertainty. The full Barlow-Beeston likelihood ([Barlow & Beeston 1993](https://doi.org/10.1016/0010-4655(93)90005-W)) has one nuisance
   per bin and template.
 - The trade-off is tested in `core/stats`: `statistical_toys.py template-bb` (per-bin lite against true templates) and
-  `template_fit.py bb-fit`/`bb-toys` (full per-template) ([core/stats guide](core-stats-guide.md)). Use the lite form
+  `template_fit.py bb-fit`/`bb-toys` (full per-template; a template with no MC in a bin keeps its true content there as
+  a nuisance) ([core/stats guide](core-stats-guide.md)). In `likelihood_limits.py` a bin's `mc_stat` adds the lite
+  factor to `multibin-limit`, `shape-limit` and `contour`. Use the lite form
   when one template dominates each bin; when several small-statistics templates share a bin, check the full form.
 - One statistical source gets one treatment: never `staterror` and `shapesys` (or a Barlow-Beeston term) on the same
   MC sample. Bins with zero nominal yield and non-zero MC uncertainty need an explicit convention (pyhf does not

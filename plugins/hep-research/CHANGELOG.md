@@ -5,6 +5,91 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Live routing harness and new routing cases (T19).** `evals/routing/run_routing_eval.py` (repository level, outside
+  the plugin) runs the routing cases through headless `claude -p` (Codex commands are built and parsed, not yet run),
+  one pass per case, in a fresh folder with read-only tools, a pinned model, per-case and total budgets and a check
+  that no other plugin loaded; it records the skills loaded and profile files read, scores strict and lenient routing,
+  and compares with a committed baseline per CLI, CLI version and model. Scored summaries are committed; raw transcripts
+  are not. The case set grows from 118 to 150: Simplified Chinese, Japanese and German cases, adversarial cases (a tool
+  is named but the deliverable belongs to another skill), quick questions and two-turn handoffs, all covered by the
+  static check.
+- **Saturated-model goodness of fit (T22).** `likelihood_limits.py shape-gof` tests a shape-limit model (with its
+  nuisances, constraint terms and `mc_stat`) against the saturated model, with μ fitted or fixed, and calibrates the
+  statistic with toys from the fitted model; the χ² reference is reported and labeled approximate. Toy p-values are
+  uniform under the null at low counts, where the χ² reference is not.
+- **Asymmetric uncertainties (T22).** `skills/hep-statistics/scripts/combine_asymmetric.py` combines measurements with
+  asymmetric errors by Barlow's linear-variance or linear-σ likelihoods, and adds several asymmetric uncertainty
+  sources on one result by matching cumulants (quadratic or piecewise model, with the central value moved so the mean
+  is kept). Closure against the exact pooled likelihood of lifetime measurements and against a Monte Carlo sum.
+- **Two-POI contours (T22).** `likelihood_limits.py contour` fits two signal strengths (bins with `s1` and `s2`, the
+  shape-limit nuisances and `mc_stat`) and traces the profile-likelihood contours at the chi-square 2-dof levels along
+  rays from the best fit, with the Hessian covariance. Toys at the true point confirm the Wilks coverage.
+- **Toy CLs for shape-limit (T22).** `likelihood_limits.py shape-limit --cls-toys N` computes CLs from seeded toys on
+  a grid of signal strengths (common random numbers across the grid; nuisances profiled on the data at each μ for
+  CLs+b and at μ = 0 for CLb, auxiliary measurements redrawn) and gives the observed and the expected median and
+  1/2-sigma limits from the same toys. It reproduces the exact Poisson CLs limit for one bin.
+- **MC statistics in limits (T22).** A bin of `likelihood_limits.py multibin-limit` or `shape-limit` may give
+  `mc_stat`, the MC-statistics uncertainty of its background. It enters as a Barlow-Beeston-lite factor (as
+  HistFactory `staterror`): a Gaussian-constrained multiplier per bin, profiled in closed form, redrawn in toys. In a
+  coverage study with 20% MC uncertainty per bin it brings the coverage back to nominal, where ignoring it under-covers.
+- **Smooth nuisance interpolation (T22).** `shape-limit` shape nuisances accept `"interpolation": "code4p"` (polynomial
+  inside |θ| < 1, linear outside, no kink at 0), and normalization nuisances accept asymmetric `hi`/`lo` factors with
+  code4 (default), code1 or code0 interpolation, as in HistFactory and pyhf. The default shape interpolation stays the
+  piecewise-linear code0, so existing inputs give the same results. Checked against pyhf 0.7.6.
+- **Expected-limit bands (T22).** `likelihood_limits.py multibin-limit` and `shape-limit` now give the asymptotic CLs
+  limit and the median and 1/2-sigma expected limits under background only, for CLs and for CLs+b, from the Asimov data
+  set (Cowan, Cranmer, Gross and Vitells 2011), with σ taken at each band's own signal strength and the q̃ form of the
+  CLs+b bands below the median. Checked against the closed form for one bin and against background-only toys.
+- **Barlow-Beeston fits with empty MC bins (T22).** A bin where a template has no MC count no longer makes the
+  Barlow-Beeston likelihood infinite: the template's true content there stays a nuisance, observed as zero, and takes a
+  share of the data when the Barlow and Beeston (1993) special case applies (unweighted and weighted fits; an empty bin
+  of a weighted template uses the template's mean weight scale). Only the naive fit can now be infeasible; the result's
+  status follows the Barlow-Beeston fit and a failed naive comparison is reported in `naive_fit_failed`. The toy
+  studies score each fit on its own successful toys instead of dropping a toy when either fit fails.
+- **Environments and reproducibility (T23).** `skills/hep-computing/scripts/environment_manifest.py` records the
+  environment of a run as the `environment` object and `tools` list of a `computational-run` artifact (Python,
+  platform, whether it comes from an LCG view, a container, conda or a venv, package versions, a fixed list of
+  variables such as `LCG_VERSION` and `BINARY_TAG`, never other variables, and the git commit and dirty state), and
+  `check` lists every drift against a saved manifest. A new `adapters/environments` (status `documented`) holds an LCG
+  view setup template and an Apptainer definition built on `requirements-ci.lock`; the new reference
+  `environments-and-containers.md` says which route pins what and what to record.
+- **Recasting toolchain templates (T20).** A new `adapters/recasting` (status `documented`: none of the tools is
+  installed where it was written) holds starting templates for a MadGraph5_aMC@NLO process and launch card, a Rivet
+  analysis with its metadata, a Delphes efficiency-module override, a SModelS parameters file and a MadAnalysis 5 recast
+  script. `skills/hep-theory/references/recasting-toolchain.md` says which route fits which search, what every recast
+  records, and the cutflow and limit checks a template must pass before its status is raised. The packaging scan now
+  reads every shipped text format, including these.
+- **Columnar analysis starting points (T24).** `adapters/root-uproot/assets/coffea_dijet_processor.py` is a coffea
+  processor template (jet selection, signed generator weights, leading-pair mass and its weighted histogram) and
+  `root_to_parquet.py` converts a TTree to Parquet in bounded steps, keeping jagged branches, with a manifest of
+  checksums and entry counts that must add up. Both are tested on the synthetic NanoAOD-like file from
+  `make_synthetic_nanoaod.py`: the processor reproduces the generator's independently computed answers for any chunk
+  size, and every entry is written once. A `columnar` extra and an optional CI job cover them.
+- **HEPData export (T21).** `adapters/hepdata/assets/hepdata_export.py` writes a dataset-record or a binned prediction
+  as a HEPData submission: `submission.yaml`, the table (bins, values, qualifiers from the observable, each uncertainty
+  component as a labelled symmetric or asymmetric error) and, when the artifact has one, its covariance table. The
+  status label is kept in the submission comment, each description and a `phrases` keyword. A plain standard-library
+  writer is the default; `--engine hepdata_lib` uses hepdata_lib. hepdata-validator 0.3.6 accepts both, and
+  `hepdata_record.py` reads the export back with the same values and covariance. A new `hepdata` extra and an optional
+  CI job run the validator.
+- **Systematics table for papers (T26).** `skills/hep-analysis/scripts/systematics_table_tex.py` renders the
+  systematics registry (the `assets/systematics.csv` format, plus any impact columns) as a booktabs LaTeX table. It
+  refuses a table without a status (`--status` or a per-row `status` column), names synthetic, asimov, preliminary or
+  unvalidated content in the caption, records every status in a comment, and escapes LaTeX; tested by compiling the
+  output with pdflatex.
+- **Missing skill handoffs (T25).** The Handoffs tables gain hep-statistics → physics-ml (simulation-based
+  inference, neural likelihoods), physics-ml → detector-response (fast-simulation validation) and → research-
+  communication, research-communication → hep-analysis, detector-response and hep-computing, and detector-response and
+  hep-computing → research-communication. To stay within the 8,192-byte budget, a few words of existing handoff rows and
+  one routing example in `detector-response` and `hep-statistics` were shortened; routing (static), ownership and
+  entry-point checks pass.
+- **Documentation brought up to date (T27).** The capability matrix header names 0.3.0; `VALIDATION.md` no longer
+  points at the removed `DECISIONS.md` as a current file; `docs/maintenance.md` no longer lists the traceability check
+  removed in 0.3.0; the entry-point sizes in `docs/architecture.md` and `docs/architecture-review.md` are remeasured
+  (5,602–8,185 bytes, descriptions 765–990 characters, about 2,205 always-on tokens); routing results name the case
+  set they used (48, 62, or the current 118 cases); the README says `ams02-research` is listed, access-restricted, in
+  both marketplace manifests. The AMS example artifacts now record profile `experiment:ams-02` 2.0.0, as shipped in
+  0.3.0 (they still said 1.0.0).
 - **Feldman-Cousins upper ends now follow the published construction (sci-fix).** `poisson_diagnostics.py
   fc-interval` forces the upper end to be non-increasing in the background, as Feldman and Cousins (1998, Sec. IV.B)
   did for their tables. It now reproduces every `n0 = 0..10`, `b = 0..5` entry of their Tables IV (90%) and VI (95%)
