@@ -499,6 +499,7 @@ def choose_regularization(doc: dict, method: str, values, toys: int, seed: int) 
     mats = [linear_matrix(method, v, r, mu) for v in settings]
     data = doc.get("data")
     rng = random.Random(seed)
+    counts: list[float]
     if data is None:
         counts, data_kind = [poisson_draw(rng, m) for m in mu], "seeded pseudo-dataset drawn from the truth"
     else:
@@ -522,9 +523,9 @@ def choose_regularization(doc: dict, method: str, values, toys: int, seed: int) 
         analytic.append(math.sqrt(_rms([(est[j] - truth[j]) / truth[j] for j in used]) ** 2 +
                                   _rms([math.sqrt(max(cov[j][j], 0)) / truth[j] for j in used]) ** 2))
     best_fixed = min(range(len(settings)), key=lambda k: analytic[k])
-    chosen = {name: [] for name in picks}
-    errs = {name: [] for name in picks}
-    fixed_errs = [[] for _ in mats]
+    chosen: dict[str, list[int]] = {name: [] for name in picks}
+    errs: dict[str, list[float]] = {name: [] for name in picks}
+    fixed_errs: list[list[float]] = [[] for _ in mats]
     for _ in range(toys):
         cnt = [poisson_draw(rng, m) for m in mu]
         for k, a_k in enumerate(mats):
@@ -977,6 +978,7 @@ def choose_penalty_poisson(doc: dict, prior: str, taus, toys: int, seed: int) ->
     mu = _mu(r, truth)
     rng = random.Random(seed)
     data = doc.get("data")
+    counts: list[float]
     if data is None:
         counts, data_kind = [poisson_draw(rng, m) for m in mu], "seeded pseudo-dataset drawn from the truth"
     else:
@@ -1013,7 +1015,7 @@ def choose_penalty_poisson(doc: dict, prior: str, taus, toys: int, seed: int) ->
     scores = [cv_score(counts, tau, t) for tau, t in zip(taus, fulls)]
     err_of = lambda t: _rms([(t[j] - truth[j]) / truth[j] for j in used])
     chosen_idx, chosen_err = [], []
-    fixed_err = [[] for _ in taus]
+    fixed_err: list[list[float]] = [[] for _ in taus]
     for _ in range(toys):
         cnt = [poisson_draw(rng, m) for m in mu]
         if sum(cnt) == 0:

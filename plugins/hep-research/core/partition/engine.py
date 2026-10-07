@@ -21,6 +21,7 @@ import math
 import os
 import tempfile
 from pathlib import Path
+from typing import Any
 
 
 def _hash(obj) -> str:
@@ -146,7 +147,9 @@ def _nonfinite(x, path="result") -> str | None:
 def merge(manifest: dict, state_dir, combine=None) -> dict:
     """Merge chunk outputs; combine(list_of_results) defaults to key-by-key summation."""
     combine = combine or (lambda rs: _reduce(rs))
-    problems, seen, results = [], {}, []
+    problems: list[dict[str, Any]] = []
+    seen: dict[str, str] = {}
+    results = []
     wanted = {c["id"]: c for c in manifest["chunks"]}
     for f in sorted((Path(state_dir) / "chunks").glob("*.json")):
         try:

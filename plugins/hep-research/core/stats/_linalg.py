@@ -92,7 +92,7 @@ def jacobi_eigh(matrix, max_sweeps: int = 100, *, criterion: str = "frobenius", 
     eps = 2.220446049250313e-16
     scale = sum(x * x for row in a for x in row) or 1.0
     converged, sweeps, off = False, 0, 0.0
-    for sweeps in range(1, max_sweeps + 1):
+    for sweeps in range(1, max_sweeps + 1):  # noqa: B007 - read after the loop, for info
         off = sum(a[i][j] ** 2 for i in range(n) for j in range(i + 1, n))
         if criterion == "frobenius":
             done = off <= (eps ** 2) * scale * 1e-4
@@ -227,16 +227,16 @@ def eigh(matrix, *, info: dict | None = None) -> tuple[list[float], list[list[fl
         try:
             import numpy as np
         except ImportError:
-            np = None
+            np = None  # type: ignore[assignment]  # optional dependency: None marks it absent
         if np is not None and matrix:
             try:
-                values, vectors = np.linalg.eigh(np.asarray(matrix, dtype=float))
+                np_values, np_vectors = np.linalg.eigh(np.asarray(matrix, dtype=float))
             except np.linalg.LinAlgError:
                 pass  # did not converge: fall back to the rotations, which say so in info
             else:
                 if info is not None:
                     info.update(method="numpy.linalg.eigh", converged=True)
-                return [float(x) for x in values], [[float(x) for x in row] for row in vectors]
+                return [float(x) for x in np_values], [[float(x) for x in row] for row in np_vectors]
     values, vectors = jacobi_eigh(matrix, criterion="frobenius", info=info)
     if info is not None:
         info["method"] = "jacobi"

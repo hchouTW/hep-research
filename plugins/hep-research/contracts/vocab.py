@@ -44,7 +44,7 @@ class Vocabulary:
         return term in self._core.get(name, ()) or term in self._ext.get(name, ())
 
     @classmethod
-    def with_profiles(cls, profiles) -> "Vocabulary":
+    def with_profiles(cls, profiles) -> Vocabulary:
         """Build a vocabulary extended by loaded profile.json dicts (see contracts.registry).
 
         Rejected extensions are listed in the returned vocabulary's `problems`."""

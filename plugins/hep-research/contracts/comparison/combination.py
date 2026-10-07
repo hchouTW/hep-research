@@ -17,6 +17,7 @@ Gaussian covariance.
 from __future__ import annotations
 
 from itertools import combinations
+from typing import Any
 
 from contracts.comparison.composition import compose
 from contracts.comparison.gate import NON_GAUSSIAN, gate
@@ -54,7 +55,7 @@ def plan_combination(datasets, correlations=(), profiles=()) -> dict:
                                  "message": f"{d['id']}: '{u.get('name')}' is a {u['kind']}; it is not put into a Gaussian covariance "
                                             "without a hep-theory prescription"})
 
-    declared = {}
+    declared: dict[tuple[Any, ...], list[Any]] = {}
     for c in correlations:
         pair = tuple(sorted(c.get("between", [])))
         if len(pair) != 2 or any(p not in ids for p in pair):

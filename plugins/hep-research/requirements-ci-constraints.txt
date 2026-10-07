@@ -1,0 +1,7 @@
+# Upper bounds that keep requirements-ci.lock installable on Python 3.11, the oldest version CI tests.
+# NumPy 2.5 and SciPy 1.18 need Python 3.12; contourpy 1.4 and hypothesis 6.156 dropped 3.11.
+# The weekly CI job installs the latest releases instead, to catch upstream breakage.
+numpy<2.5
+scipy<1.18
+contourpy<1.4
+hypothesis<6.156

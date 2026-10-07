@@ -63,7 +63,7 @@ class CampaignError(ValueError):
 
 
 def _now() -> str:
-    return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def resources_hash(config: dict) -> str:
@@ -132,7 +132,7 @@ def campaign_lock(campaign_dir, operation: str):
             fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
         except ImportError:  # Windows
             import msvcrt
-            msvcrt.locking(fh.fileno(), msvcrt.LK_NBLCK, 1)
+            msvcrt.locking(fh.fileno(), msvcrt.LK_NBLCK, 1)  # type: ignore[attr-defined]  # Windows-only API, absent from non-win32 stubs
     except OSError:
         fh.seek(0)
         holder = fh.read().strip() or "another process"
@@ -446,8 +446,8 @@ def _apply(row: dict, rec: dict, obs: dict) -> None:
         if obs.get(k) is not None or k in ("hold_reason", "hold_code"):
             rec[k] = obs.get(k)
     new_restarts = int(obs.get("restarts") or 0) - rec.get("restarts_seen", 0)
-    for k in range(new_restarts):  # scheduler-side restarts (eviction, requeue) count as attempts
-        n = rec.get("restarts_seen", 0) + k + 1
+    for j in range(new_restarts):  # scheduler-side restarts (eviction, requeue) count as attempts
+        n = rec.get("restarts_seen", 0) + j + 1
         restart = {"attempt_id": f"{rec['attempt_id']}.restart-{n}", "chunk_id": rec["chunk_id"], "backend": rec["backend"],
                    "job_id": rec["job_id"], "submission": rec["submission"], "origin": "scheduler-restart",
                    "final_state": "preempted-or-evicted", "native_state": "restarted by the scheduler", "exit_code": None,

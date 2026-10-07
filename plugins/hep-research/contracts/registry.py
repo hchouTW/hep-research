@@ -14,6 +14,7 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -25,7 +26,7 @@ from contracts.vocab import Vocabulary, declared_namespaces  # noqa: E402
 from core import CORE_VERSION  # noqa: E402
 
 PLUGIN_ROOT = Path(__file__).resolve().parents[1]
-TEMPLATES = {
+TEMPLATES: dict[Any, dict[str, list[str]]] = {
     "experiment": {"required": ["profile.json", "index.md", "conventions.json", "modules", "datasets", "evidence", "benchmarks", "tests"],
                    "optional": ["scripts", "README.md"]},
     "theory-domain": {"required": ["profile.json", "index.md", "conventions.json", "models", "derivations", "predictions", "benchmarks", "evidence", "tests"],
@@ -148,7 +149,8 @@ def validate_registry(registry_path: Path | None = None, local_dirs=(), package_
     """Validate the registry plus optional local profile folders. Returns (report, {id: profile})."""
     registry_path = Path(registry_path or PLUGIN_ROOT / "profiles" / "registry.json")
     package_root = Path(package_root or registry_path.parent.parent)
-    rep, loaded = Report(), {}
+    rep = Report()
+    loaded: dict[str, Any] = {}
     reg = json.loads(registry_path.read_text(encoding="utf-8"))
     validate(reg, "registry.json", None, rep, "registry")
     if registry_path.stat().st_size > REGISTRY_BUDGET:

@@ -57,6 +57,14 @@ Software checks establish contract consistency only, not physical validity.
   `pcolormesh` meshes and `imshow` images, and, given the sealed numbers (`check_figure(fig, region, sealed)`), text
   artists, titles and figure texts; a "blinded" label inside the region is not a leak. What it still cannot see
   (tick labels, legends, colorbars, values carried only by colors, transformed values) is stated in the module.
+- **Dependencies, lint and type checks (T18).** A `pyproject.toml` declares the Python dependencies as extras (`core`,
+  `pyhf`, `root-uproot`, `torch`, `diagrams`, `test`, `lint`; the plugin itself is not an installable package) and
+  configures ruff and mypy for `core/` and `contracts/`, which both pass. `requirements-ci.lock` pins the `core` and
+  `test` extras at the newest versions that still install on Python 3.11 (`requirements-ci-constraints.txt` says
+  why), checked to install on 3.11, 3.12 and 3.13. `.pre-commit-config.yaml` runs the path allowlist and ruff on
+  commit and the fast test tier on push; the repository's git hooks call it when `pre-commit` is installed.
+  `docs/maintenance.md` records the plan to trim `detector-response` and `hep-statistics` (8,185 and 8,138 of 8,192
+  bytes) by at least 10%.
 - **Faster covariance and response validation (T17).** The validators' eigenvalue step used pure-Python Jacobi
   rotations, cubic in the matrix size (1.6 s at n = 120 here, 6.9 s in the review's container). They now use
   `numpy.linalg.eigh` when NumPy is installed (0.011 s at n = 120) and keep the rotations otherwise, so the checks stay

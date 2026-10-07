@@ -15,6 +15,7 @@ import json
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -69,7 +70,8 @@ def load_project(path: Path, registry_path: Path | None = None, extra_local: lis
     reg_rep, loaded = validate_registry(registry_path, local_dirs)
     rep.findings.extend(reg_rep.findings)
 
-    profiles, seen = [], {}
+    profiles = []
+    seen: dict[str, Any] = {}
     for axis in ("experiments", "theory"):
         want_kind = "experiment" if axis == "experiments" else "theory-domain"
         for i, b in enumerate(cfg.get(axis, [])):

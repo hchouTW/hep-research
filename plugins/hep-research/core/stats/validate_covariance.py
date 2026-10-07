@@ -43,6 +43,7 @@ import json
 import math
 import sys
 from pathlib import Path
+from typing import Any
 
 from core.stats import _linalg
 
@@ -99,7 +100,7 @@ def _check_matrix(name: str, m: list[list[float]], tol: dict, report: Report, pr
     n = len(m)
     scale = _max_abs(m) or 1.0
     asym = max((abs(m[i][j] - m[j][i]) for i in range(n) for j in range(i)), default=0.0)
-    metrics = {"n": n, "max_abs_entry": scale, "max_asymmetry": asym}
+    metrics: dict[str, Any] = {"n": n, "max_abs_entry": scale, "max_asymmetry": asym}
     if asym > tol["symmetry"] * scale:
         report.error(f"{prefix}symmetry", f"{name}: max |C_ij - C_ji| = {asym:.3e} exceeds {tol['symmetry']:.1e} x max|entry|")
     s = [[(m[i][j] + m[j][i]) / 2.0 for j in range(n)] for i in range(n)]

@@ -84,6 +84,7 @@ import random
 import sys
 from pathlib import Path
 from statistics import NormalDist
+from typing import Any
 
 from core.stats import _validate
 from core.stats._linalg import bisect, cholesky, solve
@@ -770,7 +771,7 @@ def shape_limit(doc: dict, cl: float, toys: int, seed: int) -> dict:
 # ------------------------------------------------------------ Berger-Boos construction (approximate implementation)
 # Seeded coverage scans that passed (tests/core/test_stats_likelihood_limits.py, HEP_SLOW_TESTS=1; VALIDATION.md):
 # every combination of these true values, with the outer/inner toy counts and grid points given here.
-BB_VALIDATED_RANGE = {"s": [0.0, 2.0, 5.0], "b": [1.0, 3.0, 8.0], "sigma_b": [0.5, 2.0], "cl": [0.9, 0.95], "beta": 0.01,
+BB_VALIDATED_RANGE: dict[str, Any] = {"s": [0.0, 2.0, 5.0], "b": [1.0, 3.0, 8.0], "sigma_b": [0.5, 2.0], "cl": [0.9, 0.95], "beta": 0.01,
                       "outer": 600, "inner": 300, "points": 9}
 
 

@@ -247,7 +247,7 @@ def _fc_upper_monotone(n: int, b: float, cl: float, step: float) -> tuple[float,
     if best is None:
         raise DiagnosticsError("no signal value in the scan range accepts this n; check inputs")
     arg, width = b, FC_MONOTONE_COARSE
-    coarse = [(b, best)]
+    coarse: list[tuple[float, float | None]] = [(b, best)]
     for j in range(1, int(round(FC_MONOTONE_WINDOW / width)) + 1):
         coarse.append((b + j * width, _fc_upper_plain(n, b + j * width, cl, step)))
         if coarse[-1][1] is not None and coarse[-1][1] > best:
@@ -262,6 +262,7 @@ def _fc_upper_monotone(n: int, b: float, cl: float, step: float) -> tuple[float,
             top, at = u, bi
             if u is not None and prev is not None and u > prev:  # a jump inside this fine cell: bisect to its edge
                 left, right = bi - width / fine, bi
+                assert top is not None  # top is u here
                 for _ in range(12):
                     mid = 0.5 * (left + right)
                     um = _fc_upper_plain(n, mid, cl, step)
@@ -408,7 +409,7 @@ def cls_limit(n: int, b: float, cl: float = 0.95, sigma_b: float = 0.0, nodes: i
     weights = [_marg_pmf(m, 0.0, bk) for m in range(n_cap + 1)]
     cum, expected, targets = 0.0, {}, [("-2sigma", 0.025), ("-1sigma", 0.16), ("median", 0.5),
                                        ("+1sigma", 0.84), ("+2sigma", 0.975)]
-    cache = {}
+    cache: dict[int, float] = {}
     for m, w in enumerate(weights):
         cum += w
         for name, q in targets:

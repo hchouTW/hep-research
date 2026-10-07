@@ -52,6 +52,7 @@ import json
 import math
 import sys
 from pathlib import Path
+from typing import Any
 
 from core.stats import _linalg
 from core.stats.validate_covariance import Report
@@ -185,8 +186,8 @@ def _closure(doc: dict, m: list[list[float]], n_reco: int, n_truth: int, norm: s
     interp = {"conditional_on_selected": "truth = selected-event truth (efficiency and acceptance already applied by the caller)",
               "includes_efficiency": "truth = generated events in the fiducial phase space",
               "counts": "truth = generated event counts matching the matrix counts"}[norm]
-    out = {"truth_interpretation": interp, "predicted_reco": pred, "residuals": [r - p for r, p in zip(reco, pred)],
-           "sigma_source": "supplied reco_sigma" if sig else "Poisson sqrt(predicted)", "skipped_bins_zero_sigma": skipped}
+    out: dict[str, Any] = {"truth_interpretation": interp, "predicted_reco": pred, "residuals": [r - p for r, p in zip(reco, pred)],
+                           "sigma_source": "supplied reco_sigma" if sig else "Poisson sqrt(predicted)", "skipped_bins_zero_sigma": skipped}
     if pulls:
         out.update({"chi2": sum(p * p for p in pulls), "ndof": len(pulls), "mean_pull": sum(pulls) / len(pulls),
                     "rms_pull": math.sqrt(sum(p * p for p in pulls) / len(pulls)), "max_abs_pull": max(abs(p) for p in pulls)})

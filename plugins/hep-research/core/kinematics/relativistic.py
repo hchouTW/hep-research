@@ -280,6 +280,7 @@ def _run(args: argparse.Namespace) -> dict:
         return _envelope({"assumptions": {"Z": sp.Z, "A": sp.A, "mass_GeV": sp.mass},
                           "from_variable": args.src, "to_variable": args.dst,
                           "to_unit": UNITS[args.dst], **out})
+    raise AssertionError(f"unknown command {args.command!r}")  # unreachable: the subcommand is required
 
 
 def build_parser() -> argparse.ArgumentParser:

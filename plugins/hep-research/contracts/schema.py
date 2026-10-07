@@ -15,10 +15,11 @@ import json
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 SCHEMA_DIR = Path(__file__).resolve().parent / "schemas"
 
-_TYPES = {
+_TYPES: dict[str, Any] = {
     "object": dict, "array": list, "string": str, "boolean": bool,
     "integer": int, "number": (int, float), "null": type(None),
 }

@@ -21,6 +21,22 @@ subprocess call in the tests and tools has a timeout (`tests/tools/test_subproce
 Software checks show contract consistency only, not physical validity. Report pass, fail, skip and unverified
 separately; a skipped test (missing tool) is unverified, never passing.
 
+## SKILL.md size budget
+
+Every `SKILL.md` must stay at or under 8,192 bytes (`tools/measure_entrypoints.py`, run by `run_all_checks.py`).
+Two are close: `detector-response` (8,185 B) and `hep-statistics` (8,138 B). Plan to cut each by at least 10%
+(to about 7,360 and 7,320 B) before adding anything to them. Byte counts below were measured on 2026-10-08:
+
+- `detector-response`: move the seven astroparticle reference links (461 B) and the four lookup references
+  (glossary, bibliography, comparison tables, case studies) into an index in `detector-principles-summary.md`,
+  keeping one link to it (saves about 600 B); tighten the Invariants and Workflow wording (about 250 B).
+- `hep-statistics`: the script paragraph under Resources is 1,419 B; keep the script names and move what each one does
+  to `references/core-stats-guide.md`, which already documents `core/stats` (saves about 770 B); tighten the reference
+  list (about 100 B).
+
+Both cuts change what the model reads before it acts, so they need the routing checks (`check_routing_static.py`,
+`check_ownership.py`) and a rerun of the answer evaluations that measured these skills before they are merged.
+
 ## Porting a fix
 
 1. Reproduce the defect with a failing test first.

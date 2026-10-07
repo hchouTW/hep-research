@@ -12,12 +12,14 @@ compose(profiles, correlations=(), ids=()) -> {"ok", "errors", "notes", "namespa
 """
 from __future__ import annotations
 
+from typing import Any
+
 from contracts.vocab import NAMESPACED, declared_namespaces
 
 
 def compose(profiles, correlations=(), ids=()) -> dict:
     errors, notes = [], []
-    owner = {}
+    owner: dict[str, Any] = {}
     for p in profiles:
         for ns in declared_namespaces(p):
             if ns in owner and owner[ns] != p["id"]:
@@ -34,7 +36,7 @@ def compose(profiles, correlations=(), ids=()) -> dict:
         m = NAMESPACED.match(i or "")
         return m.group(1) if m else None
 
-    by_local = {}
+    by_local: dict[str, set[str]] = {}
     for i in ids:
         ns = ns_of(i)
         if ns is None:
@@ -60,7 +62,7 @@ def compose(profiles, correlations=(), ids=()) -> dict:
         elif ns_of(pair[0]) != ns_of(pair[1]):
             notes.append({"code": "compose.cross_profile_correlation",
                           "message": f"cross-profile correlation {pair} accepted on {'evidence' if c.get('evidence_ids') else 'a scoped assumption'}"})
-    kinds = {}
+    kinds: dict[str, list[Any]] = {}
     for p in profiles:
         kinds.setdefault(p["kind"], []).append(p["id"])
     return {"ok": not errors, "errors": errors, "notes": notes, "namespaces": owner, "kinds": kinds}

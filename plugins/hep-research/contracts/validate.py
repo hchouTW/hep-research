@@ -12,6 +12,7 @@ import math
 import re
 import sys
 from pathlib import Path
+from typing import Any
 
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -167,7 +168,7 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:
                         f"'{u['kind']}' must not be treated as Gaussian without a hep-theory prescription")
         if isinstance(ext.get("values"), dict):
             check_binned(ext["values"], rep, "$.extension.values", ext.get("observable"))
-        rp = ext.get("representation")
+        rp: Any = ext.get("representation")
         need = {"numerical": "values", "grid": "values", "symbolic": "expression"}.get(rp)
         if need and not ext.get(need):
             rep.add("error", f"$.extension.{need}", "prediction.payload_missing",
@@ -186,10 +187,10 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:
         if ext.get("covariance", {}).get("status") == "present" and not ext["covariance"].get("ref"):
             rep.add("error", "$.extension.covariance", "dataset.covariance_ref", "covariance marked present needs a ref")
     elif t == "statistical-result":
-        p = ext.get("paradigm")
-        need = {"frequentist": ["test_statistic", "construction", "coverage"],
+        p: Any = ext.get("paradigm")
+        needed = {"frequentist": ["test_statistic", "construction", "coverage"],
                 "bayesian": ["priors", "sampler", "convergence"]}.get(p, [])
-        for k in need:
+        for k in needed:
             if not ext.get(k):
                 rep.add("error", f"$.extension.{k}", "stats.paradigm_incomplete", f"{p} result requires '{k}'")
         wrong = {"frequentist": ["priors", "sampler"], "bayesian": ["construction", "test_statistic"]}.get(p, [])

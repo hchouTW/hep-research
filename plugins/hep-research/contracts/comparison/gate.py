@@ -43,6 +43,7 @@ import copy
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -302,7 +303,8 @@ def _apply(st: dict, t: dict, i: int, mism: list) -> None:
 def gate(prediction: dict, measurement: dict, transformations=(), mappings=(), measurement_conditions=None,
          vocab: Vocabulary | None = None) -> dict:
     """prediction / measurement: sides from side_from_artifact (or dicts of the same shape)."""
-    mism, notes, record = [], [], []
+    mism: list[Any] = []
+    notes, record = [], []
     problems = _plan_problems(transformations, mappings, measurement_conditions)
     bad = {path.split(".")[0] for path, _ in problems}
     for path, problem in problems:
@@ -327,11 +329,11 @@ def gate(prediction: dict, measurement: dict, transformations=(), mappings=(), m
 
     m_obs = measurement["observable"]
     ms = _state(m_obs)
-    def_maps = {m.get("field"): m for m in mappings if isinstance(m, dict) and "field" in m}
+    def_maps: dict[Any, Any] = {m.get("field"): m for m in mappings if isinstance(m, dict) and "field" in m}
     conv_maps = [m for m in mappings if not (isinstance(m, dict) and "field" in m)]
     applied_defs = []
     for f in DEFINITION_FIELDS:
-        dm = def_maps.get(f)
+        dm: Any = def_maps.get(f)
         if f in def_maps and not (dm.get("justification") and dm.get("action") == "equivalent"):
             _mm(mism, f"mappings.{f}", dm, None, "a definition mapping needs action 'equivalent' and a written justification",
                 "state why the two definitions describe the same physics", "unresolved")
@@ -422,7 +424,7 @@ def gate(prediction: dict, measurement: dict, transformations=(), mappings=(), m
             _mm(mism, "validity_range", rng, [edges[0], edges[-1]], f"the measured range of '{name}' lies outside the prediction's validity range",
                 "restrict the comparison, or extend the prediction")
 
-    unc = {"prediction": [], "measurement": []}
+    unc: dict[str, list[Any]] = {"prediction": [], "measurement": []}
     for side, items in (("prediction", prediction.get("uncertainties", [])), ("measurement", measurement.get("uncertainties", []))):
         for u in items:
             entry = {"name": u.get("name"), "kind": u.get("kind"), "correlation": u.get("correlation"),

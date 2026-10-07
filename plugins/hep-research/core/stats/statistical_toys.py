@@ -68,6 +68,7 @@ import random
 import statistics
 import sys
 from pathlib import Path
+from typing import Any
 
 from core.stats import _poisson, _validate
 from core.stats._linalg import chol_solve, cholesky, golden_min, scan_then_golden
@@ -286,7 +287,7 @@ def unfold_scan(doc: dict, toys: int, seed: int) -> dict:
     start = [v * scale for v in start]  # normalize the starting shape to the truth total
     mu = [sum(m[i][j] * truth[j] for j in range(n_truth)) for i in range(n_reco)]
     rng = random.Random(seed)
-    per_iter = [[[] for _ in range(n_truth)] for _ in range(iters)]
+    per_iter: list[list[list[float]]] = [[[] for _ in range(n_truth)] for _ in range(iters)]
     for _ in range(toys):
         counts = [poisson_draw(rng, x) for x in mu]
         for k, vec in enumerate(_unfold(counts, m, eff, start, iters)):
@@ -395,7 +396,7 @@ def _fit_with_error(ll, tol_up: float = 0.5):
     """(f_hat, f_lo, f_hi) of a likelihood on [0, 1]; the bounds are None where the interval hits 0 or 1."""
     f_hat = _scan_then_golden(lambda f: -ll(f), 0.0, 1.0)
     top = ll(f_hat)
-    out = []
+    out: list[float | None] = []
     for edge, sign in ((0.0, -1), (1.0, 1)):
         if top - ll(edge) < tol_up:
             out.append(None)
@@ -423,7 +424,7 @@ def template_bb(sig, bkg, n_data: float, f: float, mc_sig: float, mc_bkg: float,
     k = len(s_true)
     rng = random.Random(seed)
     names = ("true_templates", "naive_finite_templates", "barlow_beeston_lite")
-    res = {n: {"fits": [], "pulls": [], "covered": [], "no_pull": 0} for n in names}
+    res: dict[str, dict[str, Any]] = {n: {"fits": [], "pulls": [], "covered": [], "no_pull": 0} for n in names}
     skipped = 0
     for _ in range(toys):
         counts = [poisson_draw(rng, n_data * (f * s_true[i] + (1.0 - f) * b_true[i])) for i in range(k)]
@@ -737,6 +738,7 @@ def build_parser() -> argparse.ArgumentParser:
     t.add_argument("--mc-bkg", type=float, required=True, help="MC events behind the background template")
     common(t, 2000)
     bb = sub.add_parser("template-bb", help="finite-template fit with a Barlow-Beeston-lite nuisance")
+    kw: Any
     for name, kw in (("--sig", {"required": True}), ("--bkg", {"required": True})):
         bb.add_argument(name, **kw)
     bb.add_argument("--n-data", type=float, required=True)

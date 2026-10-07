@@ -1,0 +1,57 @@
+# hep-research is a plugin, not an installable package: this file declares its Python dependencies as extras and
+# configures the tools. Install what a task needs into a project virtual environment, for example
+#   pip install -r requirements-ci.lock                 (the pinned set CI tests with: core + test)
+#   pip install ".[core,test]"                          (ranges, as below)
+# The plugin version here matches .claude-plugin/plugin.json (tests/tools/test_pyproject.py checks it).
+
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hep-research"
+version = "0.3.0"
+description = "Research assistant skills for experimental and theoretical high-energy physics (Claude Code and Codex plugin)"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+dependencies = []  # contracts, core checks and most scripts are standard library only
+
+[project.optional-dependencies]
+# the scientific stack for scripts, examples and tests (also requirements-core.txt)
+core = ["numpy>=2.4,<3", "scipy>=1.17,<2", "matplotlib>=3.11,<4", "sympy>=1.14,<2"]
+# adapters/pyhf-combine
+pyhf = ["pyhf>=0.7.6,<0.8"]
+# adapters/root-uproot and the ROOT-file helpers in skills/hep-computing (ROOT itself comes from conda-forge or LCG)
+root-uproot = ["uproot>=5.7,<6", "awkward>=2.14,<3", "PyYAML>=6"]
+# skills/physics-ml scripts and assets (CPU wheels are enough for the tests)
+torch = ["torch>=2.4"]
+# diagram checks need system tools, not Python packages: Graphviz `dot`, the Mermaid CLI `mmdc` (npm) and PlantUML
+diagrams = []
+# the property-based tests (also requirements-test.txt)
+test = ["hypothesis>=6.100,<7"]
+# lint and type checks (ruff and mypy on core/ and contracts/), and the pre-commit hooks
+lint = ["ruff>=0.16,<0.17", "mypy>=2.4,<3", "pre-commit>=4,<5"]
+
+[tool.setuptools]
+packages = []  # nothing to install: the plugin runs from its folder
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+extend-exclude = ["profiles", "examples/*/output"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "UP"]
+ignore = [
+  "E501",  # long lines are the house style (tables of fields, messages); not worth a mass rewrap
+  "E731",  # small named lambdas are used deliberately
+  "E741",  # `l` is the Cholesky factor L, as in the formulas
+  "B905",  # zip() over equal-length vectors; strict= would change no result
+  "B023",  # closures here are called within the same loop iteration (scans, root finding)
+]
+
+[tool.mypy]
+python_version = "3.11"
+files = ["core", "contracts"]
+ignore_missing_imports = true
+explicit_package_bases = true
