@@ -35,11 +35,19 @@ pyhf/Combine adapter ([statistical tools](statistical-tools.md)). Run any script
 
 | Script | 0 | 1 | 2 |
 |---|---|---|---|
-| `poisson_diagnostics.py`, `likelihood_limits.py`, `statistical_toys.py`, `unfolding_diagnostics.py` | ok | — | rejected input |
+| `poisson_diagnostics.py` | ok | `failed`: a limit or interval end not bracketed below the mean limit (1e5) | rejected input |
+| `likelihood_limits.py`, `statistical_toys.py`, `unfolding_diagnostics.py` | ok | — | rejected input |
 | `template_fit.py` | ok | fit `failed` (infeasible model or no convergence) | rejected input |
 | `validate_covariance.py` | pass (or warnings without `--strict`) | errors (or warnings with `--strict`) | unreadable or not JSON |
 | `validate_response.py` | pass (or warnings without `--strict`) | errors | unreadable or not JSON |
 
+- **Poisson means** are limited to 1e5 in every module (`_poisson.py`, private: log-space distribution, tail and
+  quantile, accurate to that limit). A limit that cannot be bracketed below it is reported `failed`, never
+  clipped to the limit. `fc-interval` alone scans a grid and is limited to total means of 500.
+- **Covariance and correlation matrices** go through one strict Cholesky (`_linalg.py`, private, no CLI). It works
+  on the matrix scaled to a unit diagonal, so units never change the verdict. A pivot below -1e-10 is an error
+  that names the matrix, a fit refuses a singular matrix, and toy sampling accepts a semi-definite one and records
+  the shift in `regularization`. Nothing is repaired silently.
 - A `failed` fit never feeds an inference or a `statistical-result` except one whose `fit_status` is `failed`.
 - Toy tails: a tail estimate `k/N` carries its binomial Monte Carlo error; zero exceedances give a bound, not zero.
 
@@ -69,8 +77,11 @@ available only as a Cousins-Highland marginalization (`--sigma-b`).
 - `interval --n N --cl CL`: Garwood central interval on a Poisson mean; conservative (coverage at least `CL`).
 - `fc-interval --n N --b B --cl CL [--step X]`: Feldman-Cousins unified interval on `s >= 0` with a known background,
   by a deterministic grid scan (default step 0.005; the step bounds the accuracy and discreteness makes it slightly
-  conservative). It reproduces the published table (`N = 0`, `B = 0`, 90%: upper 2.44; `N = 0`, `B = 2`: 1.08,
-  `tests/core/test_stats_poisson.py`). A lower bound of 0 at small `N` is expected, not a failure. With
+  conservative). The upper end is forced non-increasing in `B`, as Feldman and Cousins did for their tables; this
+  reproduces their Tables IV and VI (90% and 95%, `N = 0..10`, `B = 0..5`) within 0.01, for example `N = 0`, `B = 2`,
+  90%: upper 1.26 (`tests/core/test_stats_poisson.py`). `--plain-construction` gives the unadjusted interval at this
+  `B` alone (1.08 there); the output names the construction in `construction`. A lower bound of 0 at small `N` is
+  expected, not a failure. With
   `--sigma-b S [--nodes K]` the background is marginalized over a truncated normal prior (default step 0.02); it
   converges to the known-background interval as `S -> 0`. That is not a profile treatment and its coverage at the true
   background is not guaranteed.
@@ -83,8 +94,8 @@ available only as a Cousins-Highland marginalization (`--sigma-b`).
   before claiming coverage.
 
 Decision rule: a known background, one bin, no nuisance: use this module. Anything with an uncertain background,
-nuisance parameters or a template fit needs `likelihood_limits.py` or a toy construction. Means above 500 are outside
-the validated range.
+nuisance parameters or a template fit needs `likelihood_limits.py` or a toy construction. Means above 1e5 (500 for
+`fc-interval`) are outside the validated range.
 
 ## `likelihood_limits.py`: profile-likelihood constructions
 
@@ -282,5 +293,6 @@ convergence live outside `core/stats` (see the SKILL.md resources).
   on one truth.
 - Using a diagonal-only covariance for a ratio or fit whose bins share systematics; assuming a ratio cancels a
   systematic without a stated correlation.
-- Feeding a `failed` template fit into an inference, or applying a script outside its stated range (means above 500,
-  more than 60 bins, more than 6 templates or 8 nuisances) without a validated approximation.
+- Feeding a `failed` template fit into an inference, or applying a script outside its stated range (means above 1e5,
+  or 500 for `fc-interval`; more than 60 bins, more than 6 templates or 8 nuisances) without a validated
+  approximation.

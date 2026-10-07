@@ -14,7 +14,8 @@ unphysical there and a Feldman-Cousins or CLs construction with toys is needed.
 `coverage`: fraction of seeded pseudo-experiments whose interval contains the true mean.
 (4) `fc-interval`: Feldman-Cousins unified interval on a signal mean for n observed events
 and a KNOWN background, by a deterministic grid scan (no toys); the grid step bounds its
-accuracy and discreteness makes the result slightly conservative. (5) `cls-limit`:
+accuracy and discreteness makes the result slightly conservative. The upper end is made non-increasing in b as
+Feldman and Cousins did for their tables (`--plain-construction` skips that; the output names the construction). (5) `cls-limit`:
 CLs upper limit on a signal mean (observed, plus the median and 1/2-sigma expected limits
 under background only). `fc-interval` and `cls-limit` accept `--sigma-b`: a background
 uncertainty treated by Cousins-Highland marginalization over a truncated normal prior on b
@@ -30,8 +31,9 @@ Usage (from the skill directory):
   python3 core/stats/poisson_diagnostics.py fc-interval --n 3 --b 3 --sigma-b 1 --cl 0.90
   python3 core/stats/poisson_diagnostics.py cls-limit --n 3 --b 3 --sigma-b 0.5 --cl 0.95
   python3 core/stats/poisson_diagnostics.py coverage --mu 2.5 --cl 0.6827 --toys 20000 --seed 1
-Exit codes: 0 ok; 2 rejected input. Standard library only.
-Importable: poisson_cdf, upper_limit, central_interval, coverage, fc_interval, cls_limit.
+Exit codes: 0 ok; 1 failed (a limit could not be bracketed below the mean limit, 1e5); 2 rejected input.
+Standard library only.
+Importable: poisson_cdf, poisson_sf, log_poisson_sf, z_from_log_p, upper_limit, central_interval, coverage, fc_interval, cls_limit.
 """
 from __future__ import annotations
 
@@ -48,12 +50,19 @@ import random
 import sys
 from statistics import NormalDist
 
+from core.stats import _poisson
+from core.stats._poisson import MAX_MEAN  # one limit for core/stats; the numerics below stay accurate up to it
+
 LABEL = "[General method]"
-MAX_MEAN = 500.0  # inversion sampling and exp(-mu) stay accurate below this
+FC_MAX_TOTAL_MEAN = 500.0  # fc-interval scans a 0.005 grid in s and sums from exp(-mu): a small-count method
 
 
 class DiagnosticsError(ValueError):
     """Raised for invalid counts, backgrounds, confidence levels or means."""
+
+
+class SolveFailed(DiagnosticsError):
+    """A limit or interval end could not be bracketed within MAX_MEAN: the result is `failed`, not a number."""
 
 
 def _count(n) -> int:
@@ -78,19 +87,46 @@ def _mean(mu, name="mean", allow_zero=True) -> float:
 
 
 def poisson_cdf(n: int, mu: float) -> float:
-    """P(N <= n) for a Poisson mean mu, by direct summation."""
-    n, mu = _count(n), _mean(mu)
-    if mu == 0.0:
-        return 1.0
-    term = total = math.exp(-mu)
-    for k in range(1, n + 1):
-        term *= mu / k
-        total += term
-    return min(total, 1.0)
+    """P(N <= n) for a Poisson mean mu, summed in log space (accurate up to MAX_MEAN)."""
+    return math.exp(_poisson.log_cdf(_count(n), _mean(mu)))
 
 
-def _solve(f, lo: float, hi: float) -> float:
-    """Root of a decreasing f on [lo, hi] by bisection."""
+def log_poisson_sf(n: int, mu: float) -> float:
+    """ln P(N >= n) for a Poisson mean mu, finite far into the tail.
+
+    Above the mean the tail is summed upward from P(N = n) in log space, never as 1 - P(N <= n - 1), which cancels
+    to 0 once the tail falls below about 1e-16.
+    """
+    return _poisson.log_sf(_count(n), _mean(mu))
+
+
+def poisson_sf(n: int, mu: float) -> float:
+    """P(N >= n) for a Poisson mean mu; underflows to 0 only below the smallest float (use log_poisson_sf)."""
+    return math.exp(log_poisson_sf(n, mu))
+
+
+def z_from_log_p(log_p: float) -> float | None:
+    """One-sided significance Z with P(Normal > Z) = exp(log_p), without forming 1 - p; None when p = 1."""
+    if log_p >= 0.0:
+        return None
+    if log_p > -700.0:
+        return -NormalDist().inv_cdf(math.exp(log_p))
+    z = math.sqrt(-2.0 * log_p)
+    for _ in range(100):  # Newton on the asymptotic ln P(Normal > z), accurate to double precision for z > 37
+        series = 1.0 - 1.0 / z ** 2 + 3.0 / z ** 4 - 15.0 / z ** 6 + 105.0 / z ** 8
+        f = -0.5 * z * z - math.log(z) - 0.5 * math.log(2.0 * math.pi) + math.log(series) - log_p
+        dz = f / (z + 1.0 / z)
+        z += dz
+        if abs(dz) < 1e-13 * z:
+            break
+    return z
+
+
+def _solve(f, lo: float, hi: float, what: str = "the root") -> float:
+    """Root of a decreasing f on [lo, hi] by bisection; SolveFailed when [lo, hi] does not bracket it."""
+    if not f(lo) > 0 or f(hi) > 0:
+        raise SolveFailed(f"{what} is not bracketed in [{lo:g}, {hi:g}] (means are limited to {MAX_MEAN:g}): "
+                          "no value is reported")
     for _ in range(200):
         mid = 0.5 * (lo + hi)
         if f(mid) > 0:
@@ -100,11 +136,16 @@ def _solve(f, lo: float, hi: float) -> float:
     return 0.5 * (lo + hi)
 
 
+def _search_top(n: int, floor: float = 0.0) -> float:
+    """Upper end of a root search on a Poisson mean for n counts: far beyond any quantile used here, <= MAX_MEAN."""
+    return min(MAX_MEAN, floor + n + 40.0 * math.sqrt(n + 1.0) + 60.0)
+
+
 def upper_limit(n: int, b: float, cl: float = 0.95) -> dict:
     """Classical one-sided upper limit on the signal mean s: P(N <= n | s + b) = 1 - cl."""
     n, b, cl = _count(n), _mean(b, "b"), _cl(cl)
     alpha = 1.0 - cl
-    total = _solve(lambda mu: poisson_cdf(n, mu) - alpha, 0.0, MAX_MEAN)  # limit on s + b
+    total = _solve(lambda mu: poisson_cdf(n, mu) - alpha, 0.0, _search_top(n), "the upper limit")  # on s + b
     s_ul = total - b
     out = {"label": LABEL, "method": "classical Poisson upper limit, known background", "n_obs": n, "b": b, "cl": cl,
            "upper_limit_on_total_mean": total, "upper_limit_on_signal": s_ul}
@@ -124,15 +165,8 @@ def central_interval(n: int, cl: float = 0.6827) -> dict:
     tail = (1.0 - cl) / 2.0
     lower = 0.0
     if n > 0:  # P(N >= n | mu) increases with mu; find mu with P(N >= n | mu) = tail
-        lo, hi = 0.0, MAX_MEAN
-        for _ in range(200):
-            mid = 0.5 * (lo + hi)
-            if 1.0 - poisson_cdf(n - 1, mid) < tail:
-                lo = mid
-            else:
-                hi = mid
-        lower = 0.5 * (lo + hi)
-    upper = _solve(lambda mu: poisson_cdf(n, mu) - tail, 0.0, MAX_MEAN)
+        lower = _solve(lambda mu: tail - poisson_sf(n, mu), 0.0, _search_top(n), "the lower end")
+    upper = _solve(lambda mu: poisson_cdf(n, mu) - tail, 0.0, _search_top(n), "the upper end")
     return {"label": LABEL, "method": "Garwood central interval (conservative)", "n_obs": n, "cl": cl,
             "lower": lower, "upper": upper}
 
@@ -143,29 +177,129 @@ def _pmf(n: int, mu: float) -> float:
     return math.exp(n * math.log(mu) - mu - math.lgamma(n + 1))
 
 
-def _fc_accepts(n_obs: int, s: float, b: float, cl: float) -> bool:
-    """True if n_obs is in the Feldman-Cousins acceptance region for signal mean s."""
+def _fc_range(s: float, b: float, cl: float) -> tuple[int, int]:
+    """Feldman-Cousins acceptance region [n1, n2] for signal mean s and known background b.
+
+    The likelihood ratio P(n | s + b) / P(n | best) is unimodal in n, so the region is contiguous: grow it from the
+    mode, always adding the neighbor with the larger ratio (the larger n on a tie), until it holds at least cl.
+    """
     mu = s + b
     n_max = int(mu + 10 * math.sqrt(mu + 1.0) + 20)
-    ranked = []
-    for n in range(n_max + 1):
-        best = max(0.0, n - b) + b  # best-fit total mean for this n, with s >= 0
-        ranked.append((_pmf(n, mu) / _pmf(n, best), n))
-    ranked.sort(reverse=True)
-    total = 0.0
-    for _, n in ranked:
-        total += _pmf(n, mu)
-        if n == n_obs:
-            return True
-        if total >= cl:
-            return False
-    return False
+    p = [math.exp(-mu)] + [0.0] * n_max
+    for n in range(1, n_max + 1):
+        p[n] = p[n - 1] * mu / n
+
+    def ratio(n: int) -> float:
+        best = max(float(n), b)  # best-fit total mean for this n, with s >= 0
+        if mu == 0.0 or best == 0.0:
+            return math.exp(-mu) if n == 0 else 0.0
+        return math.exp(n * math.log(mu / best) - mu + best)
+
+    lo = hi = max(range(n_max + 1), key=ratio)
+    total = p[lo]
+    while total < cl:
+        left = ratio(lo - 1) if lo > 0 else -1.0
+        right = ratio(hi + 1) if hi < n_max else -1.0
+        if left < 0 and right < 0:
+            break
+        if right >= left:
+            hi += 1
+            total += p[hi]
+        else:
+            lo -= 1
+            total += p[lo]
+    return lo, hi
+
+
+def _fc_accepts(n_obs: int, s: float, b: float, cl: float) -> bool:
+    """True if n_obs is in the Feldman-Cousins acceptance region for signal mean s."""
+    lo, hi = _fc_range(s, b, cl)
+    return lo <= n_obs <= hi
+
+
+def _fc_s_max(n: int) -> float:
+    return max(n, 1) + 10.0 * math.sqrt(max(n, 1)) + 10.0
+
+
+def _fc_upper_plain(n: int, b: float, cl: float, step: float) -> float | None:
+    """Top-most accepted signal value on the grid (the upper end of the plain construction)."""
+    k, stride = int(_fc_s_max(n) / step), max(1, int(0.25 / step))
+    while k - stride > 0 and _fc_range((k - stride) * step, b, cl)[0] > n + 2:  # far above the belt: skip ahead
+        k -= stride
+    while k >= 0:
+        if _fc_accepts(n, k * step, b, cl):
+            return k * step
+        k -= 1
+    return None
+
+
+FC_MONOTONE_WINDOW = 6.0  # b' searched in [b, b + 6]; covers every published 90%/95% entry with n0 <= 20, b <= 15
+FC_MONOTONE_COARSE = 0.05
+
+
+def _fc_upper_monotone(n: int, b: float, cl: float, step: float) -> tuple[float, float]:
+    """Upper end forced non-increasing in b: the supremum of the plain upper end over b' in [b, b + window].
+
+    Feldman and Cousins (1998), Sec. IV.B: "we force the function to be non-increasing, by lengthening selected
+    confidence intervals as necessary". Between its jumps the plain upper end falls with b' at a slope no steeper
+    than -1, so a coarse scan bounds any jump inside a coarse cell by the cell's right end plus the cell width; only
+    cells that could beat the running maximum are rescanned at the signal grid step, and each jump found there is
+    located by bisection so the value just after it is not missed. Returns (upper, b_at_maximum).
+    """
+    best = _fc_upper_plain(n, b, cl, step)
+    if best is None:
+        raise DiagnosticsError("no signal value in the scan range accepts this n; check inputs")
+    arg, width = b, FC_MONOTONE_COARSE
+    coarse = [(b, best)]
+    for j in range(1, int(round(FC_MONOTONE_WINDOW / width)) + 1):
+        coarse.append((b + j * width, _fc_upper_plain(n, b + j * width, cl, step)))
+        if coarse[-1][1] is not None and coarse[-1][1] > best:
+            best, arg = coarse[-1][1], coarse[-1][0]
+    fine = max(1, int(round(width / step)))
+    for (b_left, prev), (b_right, v) in zip(coarse, coarse[1:]):
+        if v is None or v + width < best:
+            continue
+        for i in range(1, fine + 1):
+            bi = b_right if i == fine else b_left + i * width / fine
+            u = v if i == fine else _fc_upper_plain(n, bi, cl, step)
+            top, at = u, bi
+            if u is not None and prev is not None and u > prev:  # a jump inside this fine cell: bisect to its edge
+                left, right = bi - width / fine, bi
+                for _ in range(12):
+                    mid = 0.5 * (left + right)
+                    um = _fc_upper_plain(n, mid, cl, step)
+                    if um is not None and um >= top:
+                        right, top, at = mid, um, mid
+                    else:
+                        left = mid
+            if top is not None and top > best:
+                best, arg = top, at
+            prev = u
+    if arg > b:  # a new top segment starts narrower than the signal grid: look just before the jump on finer grids
+        fine_s = step / 5.0
+        for i in range(40):
+            bi = arg - i * 0.0005
+            if bi <= b:
+                break
+            for j in range(5, 0, -1):
+                if _fc_accepts(n, best + j * fine_s, bi, cl):
+                    best = best + j * fine_s
+                    break
+    return best, arg
 
 
 def fc_interval(n: int, b: float, cl: float = 0.90, step: float | None = None, sigma_b: float = 0.0,
-                nodes: int = 40) -> dict:
-    """Feldman-Cousins interval on s >= 0 for n observed events, known background b (grid scan)."""
+                nodes: int = 40, monotone: bool = True) -> dict:
+    """Feldman-Cousins interval on s >= 0 for n observed events, known background b (grid scan).
+
+    By default the upper end is made non-increasing in b as in Feldman and Cousins (1998), which reproduces their
+    published tables; monotone=False gives the plain construction at this b alone (its upper end can dip, for example
+    1.08 instead of the published 1.26 at n = 0, b = 2, 90% CL).
+    """
     n, b, cl = _count(n), _mean(b, "b"), _cl(cl)
+    if b + 3.0 * (sigma_b if isinstance(sigma_b, (int, float)) else 0.0) + _fc_s_max(n) + FC_MONOTONE_WINDOW > FC_MAX_TOTAL_MEAN:
+        raise DiagnosticsError(f"fc-interval scans a grid in s and is limited to total means up to {FC_MAX_TOTAL_MEAN:g}; "
+                               "at these counts use likelihood_limits.py profile-fc or an asymptotic construction")
     step = (0.005 if not sigma_b else 0.02) if step is None else step
     if isinstance(step, bool) or not isinstance(step, (int, float)) or not 0 < step <= 0.1:
         raise DiagnosticsError("step must lie in (0, 0.1]")
@@ -175,21 +309,35 @@ def fc_interval(n: int, b: float, cl: float = 0.90, step: float | None = None, s
                                            "over a truncated normal prior (Cousins-Highland), grid scan"),
                 "n_obs": n, "b": b, "sigma_b": sigma_b, "cl": cl, "grid_step": step, "lower": iv["lower"],
                 "upper": iv["upper"], "lower_is_zero": iv["lower"] == 0.0,
+                "construction": "plain (the monotonicity adjustment in b is not applied to the marginalized belt)",
                 "note": ("approximation: coverage is not guaranteed for the true background value, only on average "
                          "over the prior, and is not a profile-likelihood result; accuracy is about one grid step; "
                          "compare with sigma_b = 0 and with a larger sigma_b to see the sensitivity")}
-    s_max = max(n, 1) + 10.0 * math.sqrt(max(n, 1)) + 10.0
-    accepted = [k * step for k in range(int(s_max / step) + 1) if _fc_accepts(n, k * step + 0.0, b, cl)]
-    if not accepted:
+    if not isinstance(monotone, bool):
+        raise DiagnosticsError("monotone must be true or false")
+    top = int(_fc_s_max(n) / step)
+    lo = next((k * step for k in range(top + 1) if _fc_accepts(n, k * step, b, cl)), None)
+    plain = _fc_upper_plain(n, b, cl, step)
+    if lo is None or plain is None:
         raise DiagnosticsError("no signal value in the scan range accepts this n; check inputs")
-    lo, hi = accepted[0], accepted[-1]
-    return {"label": LABEL, "method": "Feldman-Cousins interval on s >= 0, known background, grid scan", "n_obs": n,
-            "b": b, "cl": cl, "grid_step": step, "lower": lo, "upper": hi,
-            "lower_is_zero": lo == 0.0,
-            "note": ("accuracy is about one grid step; the construction is slightly conservative for discrete counts; "
-                     "the background is treated as exactly known, so an uncertain background needs a profile-likelihood "
-                     "or toy construction; a lower limit of 0 is the expected unified-interval behavior, not a "
-                     "failure; this is not CLs and gives no expected sensitivity")}
+    out = {"label": LABEL, "method": "Feldman-Cousins interval on s >= 0, known background, grid scan", "n_obs": n,
+           "b": b, "cl": cl, "grid_step": step, "lower": lo}
+    if monotone:
+        hi, b_at = _fc_upper_monotone(n, b, cl, step)
+        out.update({"upper": hi, "construction": "monotone-in-b (Feldman-Cousins 1998, Sec. IV.B)",
+                    "upper_plain": plain, "upper_lengthened": hi > plain,
+                    "monotonicity_search": {"b_range": [b, b + FC_MONOTONE_WINDOW], "coarse_step": FC_MONOTONE_COARSE,
+                                            "upper_attained_at_b": b_at}})
+    else:
+        out.update({"upper": plain, "construction": "plain (no monotonicity adjustment; can differ from the "
+                                                    "published tables)"})
+    out["lower_is_zero"] = lo == 0.0
+    out["note"] = ("accuracy is about one grid step; the construction is slightly conservative for discrete counts, "
+                   "and the monotone construction lengthens some upper ends further; the background is treated as "
+                   "exactly known, so an uncertain background needs a profile-likelihood or toy construction; a lower "
+                   "limit of 0 is the expected unified-interval behavior, not a failure; this is not CLs and gives no "
+                   "expected sensitivity")
+    return out
 
 
 def _b_nodes(b: float, sigma_b: float, nodes: int) -> list[float]:
@@ -257,7 +405,7 @@ def cls_limit(n: int, b: float, cl: float = 0.95, sigma_b: float = 0.0, nodes: i
 
     def limit(m: int) -> float:
         clb = _marg_cdf(m, 0.0, bk)
-        return _solve(lambda s: _marg_cdf(m, s, bk) / clb - alpha, 0.0, hi)
+        return _solve(lambda s: _marg_cdf(m, s, bk) / clb - alpha, 0.0, min(hi, _search_top(m)), "the CLs limit")
 
     n_cap = int(b + 5.0 * sigma_b + 10.0 * math.sqrt(b + 1.0) + 20)
     weights = [_marg_pmf(m, 0.0, bk) for m in range(n_cap + 1)]
@@ -282,14 +430,8 @@ def cls_limit(n: int, b: float, cl: float = 0.95, sigma_b: float = 0.0, nodes: i
 
 
 def _draw(rng: random.Random, mu: float) -> int:
-    """Poisson variate by inversion of the CDF (exact for mu <= MAX_MEAN)."""
-    u, k = rng.random(), 0
-    term = total = math.exp(-mu)
-    while u > total and k < 10 * int(mu + 10):
-        k += 1
-        term *= mu / k
-        total += term
-    return k
+    """Poisson variate by inversion of the CDF (one uniform per draw; exact up to MAX_MEAN)."""
+    return _poisson.ppf(rng.random(), mu)
 
 
 def coverage(mu: float, cl: float, toys: int, seed: int) -> dict:
@@ -331,6 +473,8 @@ def build_parser() -> argparse.ArgumentParser:
     f.add_argument("--step", type=float, default=None, help="signal grid step (default 0.005, or 0.02 with --sigma-b)")
     f.add_argument("--sigma-b", type=float, default=0.0, help="background uncertainty (Cousins-Highland marginalization)")
     f.add_argument("--nodes", type=int, default=40, help="prior quantile nodes used with --sigma-b")
+    f.add_argument("--plain-construction", action="store_true",
+                   help="skip the monotonicity adjustment in b (the published tables use it)")
     k = sub.add_parser("cls-limit", help="CLs upper limit with expected band")
     k.add_argument("--n", type=int, required=True)
     k.add_argument("--b", type=float, required=True, help="background mean (0 if none)")
@@ -351,13 +495,17 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "upper-limit":
             result = upper_limit(args.n, args.b, args.cl)
         elif args.command == "fc-interval":
-            result = fc_interval(args.n, args.b, args.cl, args.step, args.sigma_b, args.nodes)
+            result = fc_interval(args.n, args.b, args.cl, args.step, args.sigma_b, args.nodes,
+                                 not args.plain_construction)
         elif args.command == "cls-limit":
             result = cls_limit(args.n, args.b, args.cl, args.sigma_b, args.nodes)
         elif args.command == "interval":
             result = central_interval(args.n, args.cl)
         else:
             result = coverage(args.mu, args.cl, args.toys, args.seed)
+    except SolveFailed as exc:
+        print(json.dumps({"label": LABEL, "status": "failed", "error": str(exc)}, indent=2))
+        return 1
     except DiagnosticsError as exc:
         print(json.dumps({"label": LABEL, "status": "rejected", "error": str(exc)}, indent=2))
         return 2

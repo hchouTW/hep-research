@@ -85,10 +85,11 @@ import sys
 from pathlib import Path
 from statistics import NormalDist
 
+from core.stats._linalg import cholesky
+from core.stats._poisson import MAX_MEAN, ppf
 from core.stats.unfolding_diagnostics import _solve
 
 LABEL = "[General method]"
-MAX_MEAN = 500.0
 NEG = -1e300
 
 
@@ -116,16 +117,8 @@ def _seed_toys(toys, seed, allow_zero=False) -> tuple[int, int]:
 
 
 def _ppf(u: float, mu: float) -> int:
-    """Poisson quantile by cumulative summation (mu <= MAX_MEAN)."""
-    if mu <= 0.0:
-        return 0
-    term = cum = math.exp(-mu)
-    k = 0
-    while u > cum and k < 20 * int(mu + 20):
-        k += 1
-        term *= mu / k
-        cum += term
-    return k
+    """Poisson quantile (inversion of one uniform; exact up to MAX_MEAN)."""
+    return ppf(u, mu)
 
 
 def _lnl(n: float, mu: float) -> float:
@@ -203,7 +196,7 @@ def profile_limit(n: int, b: float, sigma_b: float, cl: float, toys: int, seed: 
     s_hat = max(n - b, 0.0)
     hi = s_hat + 20.0 * (math.sqrt(n + 1.0) + sig) + 20.0
     if hi + b + 6.0 * sig > MAX_MEAN:
-        raise LikelihoodError("inputs reach a mean above the script's range (500)")
+        raise LikelihoodError(f"inputs reach a mean above the script's range ({MAX_MEAN:g})")
     s_asym = _bisect(lambda s: _q1(n, b, sig, s) - z * z, s_hat, hi)
     rng = random.Random(seed)
     uniforms = [rng.random() for _ in range(toys)]
@@ -250,11 +243,11 @@ def profile_significance(n: int, b: float, sigma_b: float, toys: int, seed: int)
            "p_value_naive_wilks_chi2_1dof": math.erfc(z / math.sqrt(2.0)) if q_obs > 0 else 1.0,
            "fraction_toys_with_q0_zero": zero / toys}
     if sig == 0.0:
-        term = cum = math.exp(-b)
-        for k in range(1, n):
-            term *= b / k
-            cum += term
-        out["p_value_exact_poisson"] = 1.0 if n == 0 else 1.0 - cum
+        from core.stats.poisson_diagnostics import log_poisson_sf, z_from_log_p
+        log_p = log_poisson_sf(n, b)  # summed in the tail: 1 - P(N <= n - 1) cancels to 0 below about 1e-16
+        out["p_value_exact_poisson"] = math.exp(log_p)
+        out["log_p_value_exact_poisson"] = log_p
+        out["significance_exact_poisson_z"] = z_from_log_p(log_p)
     out["note"] = ("toys are generated at s = 0 with the profiled background and a Gaussian auxiliary measurement; the "
                    "p-value is local, with no trial factor; a significance quoted from naive Wilks is wrong near the "
                    "boundary; the Gaussian constraint treats the background uncertainty as symmetric and unbounded, "
@@ -434,7 +427,7 @@ def profile_fc(n: int, b: float, sigma_b: float, cl: float, toys: int, seed: int
     s_max = max(n - b, 0.0) + 6.0 * (math.sqrt(n + 1.0) + sig) + 8.0
     step = max(s_max / 150.0, 0.02) if step is None else _num(step, "step", 0.0, 5.0, strict_low=True)
     if s_max + b + 6.0 * sig > MAX_MEAN:
-        raise LikelihoodError("inputs reach a mean above the script's range (500)")
+        raise LikelihoodError(f"inputs reach a mean above the script's range ({MAX_MEAN:g})")
     rng = random.Random(seed)
     uniforms, gauss = _draws(rng, toys)
     idx = min(toys - 1, int(math.ceil(cl * toys)) - 1)
@@ -491,7 +484,7 @@ def profile_cls(n: int, b: float, sigma_b: float, cl: float, toys: int, expected
         raise LikelihoodError("expected_toys must be 0 or an integer in [10, 2000]")
     hi = max(n - b, 0.0) + 8.0 * (math.sqrt(n + 1.0) + sig) + 10.0
     if hi + b + 6.0 * sig > MAX_MEAN:
-        raise LikelihoodError("inputs reach a mean above the script's range (500)")
+        raise LikelihoodError(f"inputs reach a mean above the script's range ({MAX_MEAN:g})")
     rng = random.Random(seed)
     u1, g1 = _draws(rng, toys)
     u2, g2 = _draws(rng, toys)
@@ -625,18 +618,7 @@ def _load_shape(doc):
 
 
 def _chol_pd(c):
-    n = len(c)
-    l = [[0.0] * n for _ in range(n)]
-    for i in range(n):
-        for j in range(i + 1):
-            v = c[i][j] - sum(l[i][m] * l[j][m] for m in range(j))
-            if i == j:
-                if v <= 1e-12:
-                    raise LikelihoodError("correlation matrix is not positive definite")
-                l[i][i] = math.sqrt(v)
-            else:
-                l[i][j] = v / l[j][j]
-    return l
+    return cholesky(c, "correlation matrix of the nuisances", error=LikelihoodError)[0]
 
 
 class _ShapeModel:
@@ -866,7 +848,7 @@ def neyman_limit(n: int, b: float, sigma_b: float, cl: float, beta: float, toys:
     alpha = 1.0 - cl
     lo, hi = max(n - b, 0.0), max(n - b, 0.0) + 8.0 * (math.sqrt(n + 1.0) + sig) + 10.0
     if hi + max(grid) + 6.0 * sig > MAX_MEAN:
-        raise LikelihoodError("inputs reach a mean above the script's range (500)")
+        raise LikelihoodError(f"inputs reach a mean above the script's range ({MAX_MEAN:g})")
     target = alpha - used_beta
     for _ in range(16):
         mid = 0.5 * (lo + hi)
@@ -913,7 +895,7 @@ def neyman_coverage(s_true: float, b_true: float, sigma_b: float, cl: float, bet
             raise LikelihoodError(f"{name} must be an integer in [{lo_}, {hi_}]")
     _, seed = _seed_toys(100, seed)
     if s_true + b_true + 6.0 * sig > MAX_MEAN:
-        raise LikelihoodError("inputs reach a mean above the script's range (500)")
+        raise LikelihoodError(f"inputs reach a mean above the script's range ({MAX_MEAN:g})")
     rng = random.Random(seed)
     uniforms, gauss = _draws(rng, inner)
     alpha = 1.0 - cl

@@ -21,7 +21,10 @@ Usage: python3 contracts/comparison/gate.py PREDICTION.json MEASUREMENT.json [--
   PREDICTION.json: a prediction artifact. MEASUREMENT.json: a dataset-record or measurement-spec artifact.
   PLAN.json: {"transformations": [...], "mappings": [...], "measurement_conditions": {...}}; a mapping with "key" is a
   conventions mapping, one with "field" a definition mapping (process, species, phase_space).
-Exit 0 comparable, 1 not comparable, 2 unreadable or malformed input. Output: JSON gate result.
+Exit 0 comparable, 1 not comparable, 2 unreadable or refused input. Output: JSON gate result.
+Both artifacts are validated first; one whose fields have the wrong JSON type, or a plan that is not an object, is
+refused ("status": "refused") with findings that name the field path and a code. A malformed plan entry inside a valid plan is a mismatch of kind "malformed" and is
+never applied.
 
 Transformation kinds (each {"kind", "owner", "justification", ...}):
   level-identification       {"from", "to"}: two levels treated as the same for this observable (justify why)
@@ -45,6 +48,7 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from contracts.comparison.conventions import compare_conventions  # noqa: E402
+from contracts.validate import SHAPE_ERRORS, validate_artifact  # noqa: E402
 from contracts.vocab import Vocabulary  # noqa: E402
 
 KINDS = ("level-identification", "fiducial-restriction", "rebin", "variable-change", "unit-conversion",
@@ -70,19 +74,19 @@ def _subset(target, edges) -> bool:
 
 def side_from_artifact(doc: dict) -> dict:
     """Reduce a prediction, dataset-record or measurement-spec artifact to what the gate compares."""
-    ext = doc.get("extension", {})
-    obs = ext.get("observable", {})
+    ext = doc.get("extension") or {}
+    obs = ext.get("observable") or {}
     side = {"artifact_type": doc.get("artifact_type"), "artifact_id": doc.get("artifact_id"),
-            "observable": obs, "status": list(doc.get("status", [])), "uncertainties": [], "covariance": None,
-            "parameter_point": ext.get("parameter_point", {}), "allowed_transformations": ext.get("allowed_transformations")}
+            "observable": obs, "status": list(doc.get("status") or []), "uncertainties": [], "covariance": None,
+            "parameter_point": ext.get("parameter_point") or {}, "allowed_transformations": ext.get("allowed_transformations")}
     if doc.get("artifact_type") == "prediction":
         side["uncertainties"] = list(ext.get("uncertainties", [])) + list((ext.get("values") or {}).get("uncertainties", []))
     elif doc.get("artifact_type") == "dataset-record":
         side["uncertainties"] = list((ext.get("data") or {}).get("uncertainties", []))
         side["covariance"] = ext.get("covariance", {}).get("status")
-        side["corrections"] = [c.get("effect_id") for c in ext.get("corrections", [])]
+        side["corrections"] = [c.get("effect_id") for c in ext.get("corrections") or [] if isinstance(c, dict)]
     elif doc.get("artifact_type") == "measurement-spec":
-        side["corrections"] = [c.get("effect_id") for c in ext.get("corrections", [])]
+        side["corrections"] = [c.get("effect_id") for c in ext.get("corrections") or [] if isinstance(c, dict)]
     side.setdefault("corrections", [])
     return side
 
@@ -95,13 +99,18 @@ def _cuts(ps):
     cuts = (ps or {}).get("cuts")
     if not isinstance(cuts, list):
         return None
-    return sorted((_norm_text(c.get("variable")), _norm_text(c.get("unit")), c.get("low"), c.get("high"))
-                  for c in cuts if isinstance(c, dict))
+    return sorted(((_norm_text(c.get("variable")), _norm_text(c.get("unit")), c.get("low"), c.get("high"))
+                   for c in cuts if isinstance(c, dict)), key=_cut_key)
+
+
+def _cut_key(cut) -> str:
+    """A total order for cuts whose bounds may be null (an open side): None never meets < against a number."""
+    return json.dumps(cut, default=str)
 
 
 def _state(obs: dict) -> dict:
     var = (obs.get("variables") or [{}])[0]
-    ps = obs.get("phase_space") or {}
+    ps = obs.get("phase_space") or {}  # an explicit null is the same as no phase-space block
     species = obs.get("species")
     return {"process": _norm_text(obs.get("process")),
             "species": sorted(_norm_text(s.get("name")) for s in species if isinstance(s, dict)) if isinstance(species, list) else None,
@@ -110,14 +119,62 @@ def _state(obs: dict) -> dict:
             "quantity": obs.get("quantity"), "unit": obs.get("unit"), "level": obs.get("level"),
             "variable": var.get("name"), "variable_unit": var.get("unit"),
             "edges": list(var["edges"]) if "edges" in var else None, "points": var.get("points"),
-            "bin_semantics": obs.get("bin_semantics"), "fiducial": bool(obs.get("phase_space", {}).get("fiducial", False)),
+            "bin_semantics": obs.get("bin_semantics"), "fiducial": bool(ps.get("fiducial", False)),
             "fiducial_range": None, "frame": obs.get("frame"),
-            "normalization_kind": obs.get("normalization", {}).get("kind"),
-            "corrections": list(obs.get("included_corrections", [])), "n_variables": len(obs.get("variables", []))}
+            "normalization_kind": (obs.get("normalization") or {}).get("kind"),
+            "corrections": list(obs.get("included_corrections") or []), "n_variables": len(obs.get("variables") or [])}
 
 
 def _mm(out, field, pred, meas, reason, resolve, kind="mismatch"):
     out.append({"field": field, "prediction": pred, "measurement": meas, "reason": reason, "resolve": resolve, "kind": kind})
+
+
+# JSON types of the plan fields the gate reads; anything else in a transformation is recorded, not read.
+_T_STR = ("kind", "owner", "justification", "from", "to", "variable", "unit", "method", "effect", "normalization_kind",
+          "unit_in", "unit_out", "truth_level")
+_T_NUMLIST = ("range", "edges", "truth_edges", "reco_edges")
+_T_NUM = ("factor", "value")
+
+
+def _is_num(x) -> bool:
+    return isinstance(x, (int, float)) and not isinstance(x, bool)
+
+
+def _plan_problems(transformations, mappings, conditions) -> list[tuple[str, str]]:
+    """(field path, problem) for every plan entry the gate cannot read; such entries are refused, never guessed."""
+    out = []
+    for name, value in (("transformations", transformations), ("mappings", mappings)):
+        if not isinstance(value, (list, tuple)):
+            out.append((name, f"must be a list, got {type(value).__name__}"))
+    if conditions is not None and not isinstance(conditions, dict):
+        out.append(("measurement_conditions", f"must be an object, got {type(conditions).__name__}"))
+    for i, t in enumerate(transformations if isinstance(transformations, (list, tuple)) else []):
+        where = f"transformations[{i}]"
+        if not isinstance(t, dict):
+            out.append((where, "must be an object"))
+            continue
+        for k in _T_STR:
+            if t.get(k) is not None and not isinstance(t[k], str):
+                out.append((f"{where}.{k}", "must be a string"))
+        for k in _T_NUMLIST:
+            if t.get(k) is not None and not (isinstance(t[k], list) and all(_is_num(x) for x in t[k])):
+                out.append((f"{where}.{k}", "must be a list of numbers"))
+        for k in _T_NUM:
+            if t.get(k) is not None and not _is_num(t[k]):
+                out.append((f"{where}.{k}", "must be a number"))
+        if t.get("includes") is not None and not (isinstance(t["includes"], list) and all(isinstance(x, str) for x in t["includes"])):
+            out.append((f"{where}.includes", "must be a list of strings"))
+    for i, m in enumerate(mappings if isinstance(mappings, (list, tuple)) else []):
+        where = f"mappings[{i}]"
+        if not isinstance(m, dict):
+            out.append((where, "must be an object"))
+            continue
+        if not isinstance(m.get("field"), str) and not isinstance(m.get("key"), str):
+            out.append((where, "needs a string 'field' (definition mapping) or 'key' (conventions mapping)"))
+        for k in ("action", "justification"):
+            if m.get(k) is not None and not isinstance(m[k], str):
+                out.append((f"{where}.{k}", "must be a string"))
+    return out
 
 
 def _apply(st: dict, t: dict, i: int, mism: list) -> None:
@@ -159,7 +216,8 @@ def _apply(st: dict, t: dict, i: int, mism: list) -> None:
         st["edges"] = [e for e in st["edges"] if lo - EDGE_TOL <= e <= hi + EDGE_TOL]
         st["fiducial"], st["fiducial_range"] = True, [lo, hi]
         # the written definition no longer describes the restricted prediction; only structured cuts do
-        st["cuts"] = sorted((st["cuts"] or []) + [(_norm_text(st["variable"]), _norm_text(st["variable_unit"]), lo, hi)])
+        st["cuts"] = sorted((st["cuts"] or []) + [(_norm_text(st["variable"]), _norm_text(st["variable_unit"]), lo, hi)],
+                            key=_cut_key)
         st["phase_space_definition"] = None
     elif k == "rebin":
         if st["edges"] is None or not _subset(t.get("edges", []), st["edges"]):
@@ -245,6 +303,15 @@ def gate(prediction: dict, measurement: dict, transformations=(), mappings=(), m
          vocab: Vocabulary | None = None) -> dict:
     """prediction / measurement: sides from side_from_artifact (or dicts of the same shape)."""
     mism, notes, record = [], [], []
+    problems = _plan_problems(transformations, mappings, measurement_conditions)
+    bad = {path.split(".")[0] for path, _ in problems}
+    for path, problem in problems:
+        _mm(mism, path, None, None, f"malformed plan entry: {problem}", "fix the plan entry; it was not applied", "malformed")
+    transformations = [t for i, t in enumerate(transformations if isinstance(transformations, (list, tuple)) else [])
+                       if f"transformations[{i}]" not in bad]
+    mappings = [m for i, m in enumerate(mappings if isinstance(mappings, (list, tuple)) else []) if f"mappings[{i}]" not in bad]
+    if "measurement_conditions" in bad:
+        measurement_conditions = None
     st = _state(prediction["observable"])
     allowed = prediction.get("allowed_transformations")
     for i, t in enumerate(transformations):
@@ -319,8 +386,10 @@ def gate(prediction: dict, measurement: dict, transformations=(), mappings=(), m
         _mm(mism, "normalization.kind", st["normalization_kind"], ms["normalization_kind"], "normalization kinds differ",
             "use a profile-declared conversion; kinds are never assumed equivalent")
 
-    applied = set(st["corrections"])
-    for eff in measurement.get("corrections", []):
+    applied = {c for c in st["corrections"] if isinstance(c, str)}
+    for eff in measurement.get("corrections") or []:
+        if not isinstance(eff, str):
+            continue
         if ms["level"] in ("unfolded", "particle-fiducial", "parton") and eff in applied and eff != "normalization":
             _mm(mism, "corrections", eff, eff, f"'{eff}' was corrected in the measurement and applied to the prediction too",
                 "apply each correction on one side only")
@@ -372,12 +441,46 @@ def gate(prediction: dict, measurement: dict, transformations=(), mappings=(), m
             "conventions": conv, "uncertainty_objects": unc, "measurement_covariance": cov, "carried_statuses": statuses}
 
 
+PREDICTION_TYPES = {"prediction"}
+MEASUREMENT_TYPES = {"dataset-record", "measurement-spec"}
+
+
+def check(prediction_doc, measurement_doc, plan=None, vocab: Vocabulary | None = None) -> dict:
+    """Check that the gate can read both artifacts and the plan, then run it; unreadable input is refused.
+
+    The artifacts are validated, and a type or shape error (a field the gate reads having the wrong JSON type) refuses
+    the comparison; a missing field does not, since the gate reports what it cannot compare. A refusal is {"comparable": false, "status": "refused", "refusal": "invalid-input", "findings": [{"path",
+    "code", "message"}]}: the path names the side ("prediction:$...", "measurement:$...", "plan...") and the code is
+    the validator's own code or a gate.* code. No artifact or plan, however malformed, raises.
+    """
+    vocab = vocab or Vocabulary()
+    findings = []
+    for side, doc, allowed in (("prediction", prediction_doc, PREDICTION_TYPES),
+                               ("measurement", measurement_doc, MEASUREMENT_TYPES)):
+        if not isinstance(doc, dict):
+            findings.append({"path": f"{side}:$", "code": "gate.not_an_object", "message": "an artifact must be a JSON object"})
+            continue
+        for f in validate_artifact(doc, vocab).errors:
+            if f.code in SHAPE_ERRORS:
+                findings.append({"path": f"{side}:{f.path}", "code": f.code, "message": f.message})
+        if doc.get("artifact_type") not in allowed if isinstance(doc.get("artifact_type"), str) else True:
+            findings.append({"path": f"{side}:$.artifact_type", "code": "gate.wrong_artifact_type",
+                             "message": f"the {side} side must be one of {sorted(allowed)}"})
+    plan = {} if plan is None else plan
+    if not isinstance(plan, dict):
+        findings.append({"path": "plan", "code": "gate.malformed_plan", "message": "a plan must be a JSON object"})
+    if findings:
+        return {"comparable": False, "status": "refused", "refusal": "invalid-input", "findings": findings, "mismatches": []}
+    return gate(side_from_artifact(prediction_doc), side_from_artifact(measurement_doc), plan.get("transformations", []),
+                plan.get("mappings", []), plan.get("measurement_conditions"), vocab)
+
+
 def main(argv=None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if len(args) < 2:
         print(__doc__)
         return 2
-    plan = {}
+    plan = None
     try:
         pred = json.loads(Path(args[0]).read_text(encoding="utf-8"))
         meas = json.loads(Path(args[1]).read_text(encoding="utf-8"))
@@ -386,13 +489,10 @@ def main(argv=None) -> int:
     except (OSError, ValueError, IndexError) as exc:
         print(json.dumps({"error": str(exc)}))
         return 2
-    try:
-        res = gate(side_from_artifact(pred), side_from_artifact(meas), plan.get("transformations", []), plan.get("mappings", []),
-                   plan.get("measurement_conditions"))
-    except (AttributeError, KeyError, TypeError, ValueError) as exc:
-        print(json.dumps({"error": f"malformed input: {exc!r}"}))
-        return 2
+    res = check(pred, meas, plan)
     print(json.dumps(res, indent=1))
+    if res["status"] == "refused":
+        return 2
     return 0 if res["comparable"] else 1
 
 

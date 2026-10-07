@@ -80,7 +80,8 @@ import random
 import sys
 from pathlib import Path
 
-from core.stats.statistical_toys import (ToyError, _cholesky, _load_response, _num, _scan_then_golden, _seed, _std, _toys, _unfold,
+from core.stats._linalg import cholesky
+from core.stats.statistical_toys import (ToyError, _load_response, _num, _scan_then_golden, _seed, _std, _toys, _unfold,
                               poisson_draw)
 
 LABEL = "[General method]"
@@ -760,7 +761,7 @@ def response_measured(doc: dict, method: str, param) -> dict:
     cov_in, reps = doc.get("response_covariance"), doc.get("response_replicas")
     if (cov_in is None) == (reps is None):
         raise ToyError("give exactly one of response_covariance (cells x cells) or response_replicas (a list of response matrices)")
-    replica_x = None
+    replica_x, reg = None, None
     if reps is not None:
         if not isinstance(reps, list) or not 10 <= len(reps) <= 2000:
             raise ToyError("response_replicas must list 10 to 2000 response matrices")
@@ -785,7 +786,7 @@ def response_measured(doc: dict, method: str, param) -> dict:
             for d in range(c):
                 if abs(cov_cells[c][d] - cov_cells[d][c]) > 1e-8 * math.sqrt(max(cov_cells[c][c] * cov_cells[d][d], 1e-300)) + 1e-14:
                     raise ToyError("response_covariance must be symmetric")
-        _cholesky([[cov_cells[c][d] + (1e-14 if c == d else 0.0) for d in range(n_cells)] for c in range(n_cells)])
+        reg = cholesky(cov_cells, "response_covariance", semidefinite=True, error=ToyError)[1]
         source = "supplied covariance"
     jac = _numeric_jacobian(lambda v: est_from_R(v, [float(m) for m in mu]), flat, 1e-3, 1e-3)
     cov_resp = _quad(jac, cov_cells, n_truth)
@@ -802,6 +803,9 @@ def response_measured(doc: dict, method: str, param) -> dict:
            "rms_relative_data": _rms(d_a), "rms_relative_response": _rms(r_a), "rms_relative_total": _rms(rel(tot)),
            "response_share_of_total_variance": _rms(r_a) ** 2 / _rms(rel(tot)) ** 2 if _rms(rel(tot)) > 0 else None,
            "response_covariance_correlation": corr}
+    if reg:  # checked only, never factorized here: say it is singular, not that it was shifted
+        out["response_covariance_check"] = {"positive_semi_definite": True, "singular_directions": reg["pivots_shifted"],
+                                            "rel_tol": reg["rel_tol"]}
     if replica_x is not None:
         n_rep = len(replica_x)
         spread = [_std([x[j] for x in replica_x]) / truth[j] for j in used]

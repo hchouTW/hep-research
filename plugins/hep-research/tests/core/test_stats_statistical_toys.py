@@ -37,6 +37,14 @@ class BoundaryTests(unittest.TestCase):
         self.assertAlmostEqual(out["p_value_naive_wilks_chi2_1dof"], 2 * out["p_value_half_chi2_asymptotic"], places=12)
         self.assertAlmostEqual(out["fraction_toys_with_q0_zero"], 0.5925, delta=0.012)  # P(N <= 8 | 8)
 
+    def test_exact_p_value_does_not_underflow(self):
+        out = st.boundary(60, 5.0, 200, 1)
+        self.assertAlmostEqual(out["p_value_exact_poisson"] / 7.649610081149393e-43, 1.0, delta=1e-6)  # sf(59, 5)
+        self.assertTrue(math.isfinite(out["significance_exact_poisson_z"]))
+        far = st.boundary(1000, 5.0, 200, 1)
+        self.assertTrue(math.isfinite(far["log_p_value_exact_poisson"]))
+        self.assertGreater(far["significance_exact_poisson_z"], 90.0)
+
     def test_underfluctuation_has_q0_zero_and_unit_p(self):
         out = st.boundary(3, 8.0, 500, 2)
         self.assertEqual(out["q0_observed"], 0.0)
@@ -161,9 +169,51 @@ class RatioMeasuredTests(unittest.TestCase):
             self.assertAlmostEqual(v, 1.0, delta=0.03)
 
     def test_correlated_covariance_changes_the_fitted_sigma(self):
-        out = st.ratio_measured(self.doc(rho_x=0.8, rho_y=0.8, cross=0.5), 3000, 1)
+        # cross = 0.3 keeps the matrix positive definite (smallest correlation eigenvalue 0.05); the earlier fixture
+        # used cross = 0.5 (eigenvalue -0.05), which only ran because the old Cholesky added jitter silently
+        out = st.ratio_measured(self.doc(rho_x=0.8, rho_y=0.8, cross=0.3), 3000, 1)
         self.assertGreater(abs(out["sigma_ratio_diagonal_over_full"] - 1.0), 0.1)
         self.assertGreater(out["ratio_correlation_matrix_linear"][0][1], 0.3)
+
+    def test_indefinite_covariance_is_rejected_and_named(self):
+        with self.assertRaisesRegex(st.ToyError, "covariance is not positive semi-definite"):
+            st.ratio_measured(self.doc(rho_x=0.8, rho_y=0.8, cross=0.5), 300, 1)
+
+    def test_results_do_not_depend_on_the_units_of_the_covariance(self):
+        base = self.doc(rho_x=0.8, rho_y=0.8, cross=0.3)
+        ref = st.ratio_measured(base, 300, 2)
+        for k in (1e-6, 1e6):  # numerator and denominator in other units: covariance scales by k^2 = 1e-12, 1e12
+            doc = {"numerator": [v * k for v in base["numerator"]], "denominator": [v * k for v in base["denominator"]],
+                   "covariance": [[v * k * k for v in row] for row in base["covariance"]]}
+            out = st.ratio_measured(doc, 300, 2)
+            for key in ("value", "sigma", "chi2"):
+                a, b = out["constant_ratio_fit_full_covariance"][key], ref["constant_ratio_fit_full_covariance"][key]
+                self.assertAlmostEqual(a, b, delta=1e-12 * max(1.0, abs(b)), msg=(k, key))
+            self.assertNotIn("regularization", out)
+
+    def test_semidefinite_covariance_is_sampled_with_the_shift_recorded(self):
+        out = st.ratio_measured(self.doc(rho_y=1.0), 300, 1)  # denominators fully correlated: singular, still valid
+        reg = out["regularization"][0]
+        self.assertEqual(reg["matrix"], "covariance")
+        self.assertGreaterEqual(reg["pivots_shifted"], 3)
+        self.assertLessEqual(reg["max_shift_relative_to_unit_diagonal"], 1e-10)
+        doc = self.doc()
+        n = 4
+        for i in range(n):  # numerator and denominator of each bin fully correlated: the ratio has no variance
+            sx, sy = doc["covariance"][i][i] ** 0.5, doc["covariance"][n + i][n + i] ** 0.5
+            doc["covariance"][i][n + i] = doc["covariance"][n + i][i] = sx * sy
+        with self.assertRaisesRegex(st.ToyError, "linearized ratio covariance"):
+            st.ratio_measured(doc, 300, 1)  # the constant fit needs an inverse; sampling alone would be fine
+
+    def test_gls_constant_rejects_an_impossible_correlation(self):
+        with self.assertRaisesRegex(st.ToyError, "not positive semi-definite"):
+            st._gls_constant([1.0, 1.2], [[1.0, 2.0], [2.0, 1.0]])  # correlation 2 gave chi2 = 9e13 before
+        mean, sigma, chi2 = st._gls_constant([1.0, 1.2], [[1.0, 0.5], [0.5, 1.0]])
+        for k in (1e-12, 1e12):
+            m2, s2, c2 = st._gls_constant([1.0, 1.2], [[k, 0.5 * k], [0.5 * k, k]])
+            self.assertAlmostEqual(m2, mean, delta=1e-12)
+            self.assertAlmostEqual(s2 / (sigma * k ** 0.5), 1.0, delta=1e-12)
+            self.assertAlmostEqual(c2 * k / chi2, 1.0, delta=1e-12)
 
     def test_poorly_measured_denominator_shows_nonlinearity(self):
         out = st.ratio_measured(self.doc(rel=0.25), 6000, 1)

@@ -6,6 +6,7 @@ import contextlib
 import io
 import json
 import math
+import os
 import sys
 import unittest
 from pathlib import Path
@@ -13,6 +14,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from core.stats import poisson_diagnostics as pd  # noqa: E402
+
+SLOW = os.environ.get("HEP_SLOW_TESTS") == "1"
 
 
 class ExactValueTests(unittest.TestCase):
@@ -91,15 +94,144 @@ class CoverageTests(unittest.TestCase):
         self.assertAlmostEqual(var, 4.0, delta=0.15)
 
 
+def decimal_sf(n, mu, digits=120):
+    """Independent reference: P(N >= n | mu) = 1 - sum_{k < n} P(k), in decimal arithmetic with `digits` digits."""
+    from decimal import Decimal, localcontext
+    with localcontext() as ctx:
+        ctx.prec = digits
+        m = Decimal(repr(mu))
+        term, cum = (-m).exp(), Decimal(0)
+        for k in range(n):
+            cum += term
+            term = term * m / (k + 1)
+        return 1 - cum
+
+
+class MeanLimitTests(unittest.TestCase):
+    """Results near and above the old 500 limit (SciPy 1.18 chi2 values recorded): never clipped at a range end."""
+
+    def test_garwood_and_classical_limit_beyond_500(self):
+        iv = pd.central_interval(490)
+        self.assertAlmostEqual(iv["upper"], 513.1515084417051, delta=1e-6)  # chi2.ppf(1 - a, 982) / 2; 500.0 before
+        self.assertAlmostEqual(iv["lower"], 467.87113507097774, delta=1e-6)
+        ul = pd.upper_limit(495, 0.0)
+        self.assertAlmostEqual(ul["upper_limit_on_total_mean"], 533.1922730038418, delta=1e-6)  # 500 before
+        iv = pd.central_interval(5000)
+        self.assertAlmostEqual(iv["upper"], 5071.716943473817, delta=1e-5)
+        self.assertAlmostEqual(iv["lower"], 4929.290159543603, delta=1e-5)
+
+    def test_unbracketed_limit_fails_instead_of_returning_the_range_end(self):
+        with self.assertRaises(pd.SolveFailed):
+            pd.upper_limit(99990, 0.0)
+        with self.assertRaises(pd.SolveFailed):
+            pd.central_interval(99990)
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            code = pd.main(["upper-limit", "--n", "99990", "--b", "0"])
+        self.assertEqual(code, 1)
+        out = json.loads(buf.getvalue())
+        self.assertEqual(out["status"], "failed")
+        self.assertNotIn("upper_limit_on_total_mean", out)
+
+    def test_fc_scan_keeps_its_own_documented_limit(self):
+        with self.assertRaisesRegex(pd.DiagnosticsError, "limited to total means up to 500"):
+            pd.fc_interval(0, 480.0)
+
+
+class UpperTailTests(unittest.TestCase):
+    """P(N >= n) far into the tail: 1 - P(N <= n - 1) in double precision cancels to 0 below about 1e-16."""
+
+    def test_matches_high_precision_reference(self):
+        for n, mu in ((60, 5.0), (1, 5.0), (5, 5.0), (6, 5.0), (20, 5.0), (40, 0.5), (600, 500.0), (499, 500.0)):
+            ref = decimal_sf(n, mu)
+            self.assertAlmostEqual(pd.poisson_sf(n, mu) / float(ref), 1.0, delta=1e-10, msg=(n, mu))
+            self.assertAlmostEqual(pd.log_poisson_sf(n, mu), float(ref.ln()), delta=1e-10, msg=(n, mu))
+
+    def test_log_tail_and_significance_stay_finite_to_n_1000(self):
+        last = 0.0
+        for n in range(1, 1001):
+            lp = pd.log_poisson_sf(n, 5.0)
+            self.assertTrue(math.isfinite(lp), msg=n)
+            self.assertLess(lp, last, msg=n)
+            last = lp
+            if lp > -745.0:  # representable as a double: never reported as exactly 0
+                self.assertGreater(pd.poisson_sf(n, 5.0), 0.0, msg=n)
+        ref = decimal_sf(1000, 5.0, digits=2000)
+        self.assertAlmostEqual(pd.log_poisson_sf(1000, 5.0), float(ref.ln()), delta=1e-9)
+        self.assertTrue(math.isfinite(pd.z_from_log_p(pd.log_poisson_sf(1000, 5.0))))
+
+    def test_significance_from_log_p(self):
+        for z in (0.5, 3.0, 5.0, 8.0, 20.0, 30.0):  # erfc, not NormalDist.cdf: 0.5 * (1 + erf) cancels by z = 8
+            log_p = math.log(0.5 * math.erfc(z / math.sqrt(2.0)))
+            self.assertAlmostEqual(pd.z_from_log_p(log_p), z, delta=1e-9 * z, msg=z)
+        # beyond the smallest double: ln P(Z > 40) = -804.60844201375 from the 12-term asymptotic series
+        self.assertAlmostEqual(pd.z_from_log_p(-804.6084420137538), 40.0, delta=1e-8)
+        self.assertIsNone(pd.z_from_log_p(0.0))
+        self.assertEqual(pd.poisson_sf(0, 3.0), 1.0)
+        self.assertEqual(pd.poisson_sf(2, 0.0), 0.0)
+
+
 class FeldmanCousinsTests(unittest.TestCase):
-    """Reference values: Feldman and Cousins (1998) Table II (b=0) and the b=0.5, 1, 2 rows, 90% CL."""
+    """Reference values: Feldman and Cousins (1998), Table IV (90% CL, b = 0 to 5) and Table VI (95% CL, b = 0 to 5),
+    transcribed into fixtures/fc1998_tables.json. The published upper ends are forced non-increasing in b (Sec. IV.B);
+    the plain construction at a single b dips below them, for example 1.08 instead of 1.26 at n0 = 0, b = 2, 90% CL."""
 
     def test_published_values(self):
         for n, b, lo, hi in ((0, 0.0, 0.0, 2.44), (1, 0.0, 0.11, 4.36), (3, 0.0, 1.10, 7.42),
-                             (0, 0.5, 0.0, 1.94), (0, 1.0, 0.0, 1.61), (0, 2.0, 0.0, 1.08)):
+                             (0, 0.5, 0.0, 1.94), (0, 1.0, 0.0, 1.61), (0, 2.0, 0.0, 1.26)):
             iv = pd.fc_interval(n, b, 0.90)
             self.assertAlmostEqual(iv["lower"], lo, delta=0.015, msg=(n, b))
             self.assertAlmostEqual(iv["upper"], hi, delta=0.015, msg=(n, b))
+
+    def test_monotone_construction_matches_entries_where_the_plain_one_dips(self):
+        # every n0 <= 10, b <= 5 entry of Tables IV and VI that the plain construction misses by more than 0.015
+        cases = ((0.90, 0, 2.0, 1.26, 1.08), (0.90, 0, 3.0, 1.08, 0.95), (0.90, 0, 4.0, 1.01, 0.85),
+                 (0.90, 0, 5.0, 0.98, 0.77), (0.90, 1, 4.0, 1.39, 1.33), (0.90, 1, 5.0, 1.22, 1.195),
+                 (0.95, 0, 2.5, 1.78, 1.52), (0.95, 0, 3.5, 1.63, 1.38), (0.95, 0, 4.0, 1.57, 1.485),
+                 (0.95, 0, 5.0, 1.54, 1.375), (0.95, 1, 4.0, 2.08, 2.04), (0.95, 2, 5.0, 2.49, 2.47))
+        for cl, n, b, published, plain in cases:
+            iv = pd.fc_interval(n, b, cl)
+            self.assertAlmostEqual(iv["upper"], published, delta=0.01, msg=(cl, n, b))
+            self.assertAlmostEqual(iv["upper_plain"], plain, delta=0.006, msg=(cl, n, b))
+            self.assertTrue(iv["upper_lengthened"])
+            self.assertTrue(iv["construction"].startswith("monotone"))
+
+    def test_plain_construction_is_labelled_and_never_longer(self):
+        plain = pd.fc_interval(0, 2.0, 0.90, monotone=False)
+        self.assertAlmostEqual(plain["upper"], 1.08, delta=0.006)
+        self.assertTrue(plain["construction"].startswith("plain"))
+        self.assertNotIn("upper_plain", plain)
+        adjusted = pd.fc_interval(0, 2.0, 0.90)
+        self.assertEqual(adjusted["upper_plain"], plain["upper"])
+        self.assertEqual(adjusted["lower"], plain["lower"])
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            code = pd.main(["fc-interval", "--n", "0", "--b", "2", "--plain-construction"])
+        self.assertEqual(code, 0)
+        self.assertAlmostEqual(json.loads(buf.getvalue())["upper"], 1.08, delta=0.006)
+        with self.assertRaises(pd.DiagnosticsError):
+            pd.fc_interval(0, 2.0, 0.90, monotone="yes")
+
+    def test_upper_end_is_non_increasing_in_b(self):
+        """Non-increasing within the stated accuracy of one grid step (the plain upper end jumps up by 0.1 to 0.3)."""
+        for n in (0, 1):
+            uppers = [pd.fc_interval(n, 0.4 * k, 0.90, step=0.01)["upper"] for k in range(0, 13)]
+            for k in range(1, len(uppers)):
+                self.assertLessEqual(uppers[k], uppers[k - 1] + 0.01, msg=(n, 0.4 * k))
+            plain = [pd.fc_interval(n, 0.4 * k, 0.90, step=0.01, monotone=False)["upper"] for k in range(0, 13)]
+            self.assertTrue(any(plain[k] > plain[k - 1] + 0.05 for k in range(1, len(plain))), msg=n)
+
+    @unittest.skipUnless(SLOW, "slow: set HEP_SLOW_TESTS=1")
+    def test_full_published_tables(self):
+        """Every n0 = 0 to 10, b = 0 to 5 entry of Tables IV and VI within 0.01, lower and upper ends."""
+        tables = json.loads((Path(__file__).parent / "fixtures" / "fc1998_tables.json").read_text())["tables"]
+        for table in tables:
+            for n0 in range(0, 11):
+                for b, (lo, hi, _italic) in zip(table["b"], table["rows"][str(n0)]):
+                    iv = pd.fc_interval(n0, b, table["cl"])
+                    msg = (table["table"], n0, b)
+                    self.assertAlmostEqual(iv["lower"], lo, delta=0.01, msg=msg)
+                    self.assertAlmostEqual(iv["upper"], hi, delta=0.01, msg=msg)
 
     def test_deterministic_and_no_empty_interval_below_background(self):
         a, b = pd.fc_interval(0, 3.0, 0.90), pd.fc_interval(0, 3.0, 0.90)

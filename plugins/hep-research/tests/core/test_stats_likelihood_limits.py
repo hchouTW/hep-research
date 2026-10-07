@@ -37,6 +37,12 @@ class SingleBinTests(unittest.TestCase):
         self.assertLess(a, b)
         self.assertLess(b, c)
 
+    def test_exact_p_value_does_not_underflow(self):
+        out = ll.profile_significance(60, 5.0, 0.0, 200, 1)
+        self.assertAlmostEqual(out["p_value_exact_poisson"] / 7.649610081149393e-43, 1.0, delta=1e-6)  # sf(59, 5)
+        self.assertAlmostEqual(out["log_p_value_exact_poisson"], math.log(7.649610081149393e-43), delta=1e-6)
+        self.assertGreater(out["significance_exact_poisson_z"], 13.0)
+
     def test_significance_toys_match_exact_tail_and_wilks_doubles(self):
         out = ll.profile_significance(15, 8.0, 0.0, 20000, 1)
         self.assertGreater(out["q0_observed"], 4.0)
@@ -228,6 +234,10 @@ class PriorTests(unittest.TestCase):
         th = [0.7, -0.4]
         cinv_form = (th[0] ** 2 - 2 * 0.6 * th[0] * th[1] + th[1] ** 2) / (1 - 0.36)
         self.assertAlmostEqual(m.constraint(th, [0.0, 0.0]), 0.5 * cinv_form, places=10)
+
+    def test_a_singular_correlation_is_rejected(self):
+        with self.assertRaisesRegex(ll.LikelihoodError, "correlation matrix of the nuisances is singular"):
+            ll._load_shape(with_priors(None, [[1.0, 1.0], [1.0, 1.0]]))
 
     def test_gamma_constraint_has_its_mode_at_zero_and_the_right_curvature(self):
         bins, nuis, chol = ll._load_shape(with_priors("gamma"))

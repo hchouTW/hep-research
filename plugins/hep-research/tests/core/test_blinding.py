@@ -208,6 +208,45 @@ class ScanCompletenessAuditT04(unittest.TestCase):
                                          "--sealed", str(private / "sealed.json"), str(outd)]), 0)
 
 
+class LowCountAndEncodingTests(unittest.TestCase):
+    """Sealed low counts match only standalone numbers; logs in other encodings are read or reported (T06)."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.out = Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_low_counts_need_a_standalone_token(self):
+        sealed = [0.0, 3.0]
+        unrelated = ("run_3 finished on 2023-10-03 with v3.0.1, 3rd attempt, file h3.root, 1-3 GeV, "
+                     "x3 /data/3/ 0x1f item_0\n")
+        self.assertEqual(bl.scan_text(unrelated, sealed), [])
+        hits = bl.scan_text("events in signal region: 3\nerrors: 0\n", sealed)
+        self.assertEqual([(h["line"], h["sealed_value"], h.get("weak")) for h in hits], [(1, 3.0, True), (2, 0.0, True)])
+        long_value = bl.scan_text("yield_1234.567", [1234.567])  # a value with 3+ digits still matches inside text
+        self.assertEqual(len(long_value), 1)
+        self.assertNotIn("weak", long_value[0])
+
+    def test_utf16_and_latin1_logs_are_read(self):
+        sealed = [1234.567]
+        (self.out / "a.log").write_bytes("caf\u00e9 yield 1234.567\n".encode("utf-16"))  # with a BOM
+        (self.out / "b.log").write_bytes("yield 1234.567\n".encode("utf-16-le"))  # no BOM
+        (self.out / "c.log").write_bytes("r\u00e9sum\u00e9 1234.567\n".encode("latin-1"))
+        rep = bl.scan_paths([self.out], sealed)
+        self.assertEqual(rep["status"], "fail")
+        self.assertEqual(sorted((Path(h["file"]).name, h["encoding"]) for h in rep["leaks"]),
+                         [("a.log", "utf-16"), ("b.log", "utf-16-le"), ("c.log", "latin-1")])
+
+    def test_undecodable_text_is_incomplete_never_pass(self):
+        (self.out / "d.log").write_bytes(b"\x00\x01\x02 1234.567 \x00\xff\x00")
+        rep = bl.scan_paths([self.out], [1234.567])
+        self.assertEqual(rep["status"], "incomplete")
+        self.assertFalse(rep["ok"])
+        self.assertIn("cannot be decoded", rep["unscanned"][0]["reason"])
+
+
 @unittest.skipUnless(HAVE, "numpy and matplotlib required")
 class FigureTests(unittest.TestCase):
     def centers(self):
@@ -234,6 +273,34 @@ class FigureTests(unittest.TestCase):
         plt.close(fig)
         self.assertTrue(any(f["axes"] == 0 for f in found))
         self.assertTrue(any(f["axes"] == 1 and f["label"] == "data/MC" for f in found))
+
+    def test_fill_between_hist2d_imshow_and_text_are_caught(self):
+        sealed = bl.seal(EDGES, DATA, SR)
+        x = np.array(self.centers())
+        for draw, artist in ((lambda ax: ax.fill_between(x, np.array(DATA) - 10, np.array(DATA) + 10), "area"),
+                             (lambda ax: ax.hist2d(np.repeat(x, 3), np.tile([1.0, 2.0, 3.0], len(x)), bins=[EDGES, 3]), "mesh"),
+                             (lambda ax: ax.imshow(np.ones((3, 8)), extent=(EDGES[0], EDGES[-1], 0, 3), aspect="auto"), "image"),
+                             (lambda ax: ax.text(102.0, 1.0, f"N(SR) = {DATA[4]}"), "text")):
+            fig, ax = plt.subplots()
+            draw(ax)
+            found = bl.check_figure(fig, SR, sealed)
+            plt.close(fig)
+            self.assertIn(artist, {f["artist"] for f in found}, artist)
+
+    def test_masked_areas_images_and_a_blinded_label_pass(self):
+        m = bl.mask_binned(EDGES, DATA, SR)
+        y = np.array([np.nan if v is None else v for v in m["values"]])
+        x = np.array(self.centers())
+        img = np.ones((3, 8))
+        img[:, 4:6] = np.nan  # the blinded columns are not drawn
+        fig, ax = plt.subplots()
+        ax.fill_between(x, y - 10, y + 10, where=np.isfinite(y))
+        ax.imshow(img, extent=(EDGES[0], EDGES[-1], 0, 3), aspect="auto")
+        ax.text(125.0, 1.0, "blinded")  # a label inside the region is not a leak
+        ax.set_title(f"total outside the SR: {sum(v for v in m['values'] if v is not None):.1f}")
+        found = bl.check_figure(fig, SR, bl.seal(EDGES, DATA, SR))
+        plt.close(fig)
+        self.assertEqual(found, [])
 
     def test_bar_chart_caught(self):
         fig, ax = plt.subplots()

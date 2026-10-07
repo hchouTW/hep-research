@@ -7,8 +7,11 @@ Two steps, so the blinded numbers never sit inside the audited outputs:
   scan:  python3 audit_blinded_outputs.py scan --sealed /private/sealed.json OUTPUT_DIR_OR_FILES... [--rtol 1e-9]
                 [--strict] [--exempt PATH=REASON ...] [--outputs MANIFEST.json]
          Scans text outputs (JSON, CSV, logs, Markdown, SVG, ...) at full and printed precision, and .npy/.npz caches.
+         Text in UTF-8, UTF-16 (with or without a byte-order mark) or another 8-bit encoding is read; a file that
+         cannot be decoded is unscanned. A sealed value with fewer than 3 significant digits (a low count) matches
+         only a standalone number and its hits are marked "weak".
          Binary images are listed as unscanned (status "incomplete"): check figures in code with
-         core.blinding.check_figure and name each such file with --exempt and the reason.
+         core.blinding.check_figure(fig, region, sealed) and name each such file with --exempt and the reason.
          --strict (publication): an incomplete scan fails, every exemption needs a reason, and with --outputs (a JSON
          list of the files to publish) every listed output needs a scan record or an exemption.
 Exit codes: 0 pass (every output read, no leak found), 1 leak found or strict failure, 2 usage or input error,

@@ -227,7 +227,7 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:
     elif t == "communication":
         for i, c in enumerate(ext.get("claims", [])):
             cs = c.get("status")
-            cs = set(cs) if isinstance(cs, list) else {cs}
+            cs = {x for x in cs if isinstance(x, str)} if isinstance(cs, list) else ({cs} if isinstance(cs, str) else set())
             missing = sorted(set(required_statuses(doc.get("inputs", []))) - cs)
             if missing or (cs & UPGRADED and inherited & set(STICKY_STATUSES)):
                 rep.add("error", f"$.extension.claims[{i}].status", "communication.status_upgraded",
@@ -264,7 +264,8 @@ def validate_artifact(doc, vocab: Vocabulary | None = None) -> Report:
     check_finite(doc, rep)
     if not isinstance(doc, dict):
         return rep
-    ext_schema = EXTENSION_SCHEMAS.get(doc.get("artifact_type"))
+    at = doc.get("artifact_type")
+    ext_schema = EXTENSION_SCHEMAS.get(at) if isinstance(at, str) else None  # a wrong type is already a finding
     ext = doc.get("extension")
     if ext_schema and isinstance(ext, dict):
         validate(ext, ext_schema, vocab, rep, "$.extension")
