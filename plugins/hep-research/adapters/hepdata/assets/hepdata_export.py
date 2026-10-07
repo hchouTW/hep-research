@@ -18,7 +18,8 @@ Status labels are never dropped: a synthetic, asimov, preliminary or unvalidated
 comment, every table description and a `phrases` keyword ("status: synthetic").
 
 With --engine hepdata_lib (when the package is installed) the files are written by hepdata_lib instead of the
-standard-library writer (YAML written as JSON documents, which YAML reads). Check the result with hepdata-validator.
+standard-library writer (YAML written as JSON documents, which YAML reads). Check the result with hepdata-validator;
+to upload, archive the folder's files (tar czf submission.tar.gz -C DIR .).
 
 Usage: hepdata_export.py --artifact RECORD.json --out DIR [--table-name "Table 1"] [--description TEXT]
        [--engine plain|hepdata_lib]
@@ -28,10 +29,12 @@ Standard library only for the plain engine.
 from __future__ import annotations
 
 import argparse
+import contextlib
 import json
 import math
 import re
 import sys
+import tempfile
 from pathlib import Path
 
 PLUGIN = Path(__file__).resolve().parents[3]
@@ -195,7 +198,11 @@ def write_hepdata_lib(out: Path, comment: str, entries) -> list[str]:
                 v.add_uncertainty(u)
             t.add_variable(v)
         sub.add_table(t)
-    sub.create_files(str(out), validate=False, remove_old=True)
+    out = out.resolve()
+    # hepdata_lib also writes submission.tar.gz into the working directory; run it in a scratch directory and drop
+    # the archive (the validator refuses unreferenced files in the folder; archive the folder when uploading)
+    with tempfile.TemporaryDirectory() as scratch, contextlib.chdir(scratch):
+        sub.create_files(str(out), validate=False, remove_old=True)
     return sorted(p.name for p in out.iterdir() if p.suffix == ".yaml")
 
 
