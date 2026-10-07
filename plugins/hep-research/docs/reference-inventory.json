@@ -24,8 +24,8 @@
    "uncited": 0
   },
   "hep-theory": {
-   "references": 7,
-   "bytes": 38366,
+   "references": 8,
+   "bytes": 41644,
    "uncited": 0
   },
   "physics-ml": {
@@ -1652,6 +1652,19 @@
    ],
    "cited_by_other_skills": [],
    "last_commit": "557b34a 2026-10-07"
+  },
+  {
+   "path": "skills/hep-theory/references/recasting-toolchain.md",
+   "owner": "hep-theory",
+   "bytes": 3278,
+   "lines": 47,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-theory/SKILL.md",
+    "tests/adapters/test_recasting_templates.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-theory/references/smeft-and-eft.md",

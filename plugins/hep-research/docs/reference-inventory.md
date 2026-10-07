@@ -12,7 +12,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. shallow clone: last_co
 | hep-analysis | 9 | 72 | 0 |
 | hep-computing | 25 | 281 | 0 |
 | hep-statistics | 9 | 100 | 0 |
-| hep-theory | 7 | 38 | 0 |
+| hep-theory | 8 | 42 | 0 |
 | physics-ml | 34 | 181 | 0 |
 | research-communication | 52 | 358 | 0 |
 
@@ -158,6 +158,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `higher-order-predictions.md` | hep-theory | 4.2 | yes | 1 | - | 557b34a 2026-10-07 |
 | `mathematical-reasoning-and-proof.md` | hep-theory | 9.0 | yes | 6 | hep-statistics, research-communication | 119450c 2026-10-04 |
 | `pdfs-and-lhapdf.md` | hep-theory | 3.2 | yes | 2 | - | 557b34a 2026-10-07 |
+| `recasting-toolchain.md` | hep-theory | 3.3 | yes | 2 | - | untracked |
 | `smeft-and-eft.md` | hep-theory | 2.8 | yes | 2 | - | 557b34a 2026-10-07 |
 | `ablation-and-design-review.md` | physics-ml | 5.2 | no | 12 | research-communication | 281eb2d 2026-10-04 |
 | `architecture-selection.md` | physics-ml | 6.7 | no | 3 | - | 281eb2d 2026-10-04 |

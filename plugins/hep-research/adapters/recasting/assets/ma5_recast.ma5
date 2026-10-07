@@ -1,0 +1,9 @@
+# MadAnalysis 5 recast script: STARTING TEMPLATE (status: documented, not run here).
+# Needs the Public Analysis Database: inside ma5, run `install PAD` once. Run: <MA5_DIR>/bin/ma5 -R -s ma5_recast.ma5
+# Select the analyses to recast in the recasting card that ma5 writes (recasting_card.dat) before submitting; record
+# the MA5 and PAD versions, the analyses and the signal cross section used.
+set main.recast = on
+set main.recast.store_root = False
+import <SIGNAL_EVENTS>.hepmc.gz as signal
+set signal.xsection = <SIGNAL_CROSS_SECTION_PB>
+submit <OUTPUT_DIR>

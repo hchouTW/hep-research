@@ -39,7 +39,8 @@ LEGACY = re.compile(r"agentic[-_]ai[-_]skills|3e995a4|\.legacy/|legacy_id|\bport
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 EMAIL_OK = {"noreply@anthropic.com"}
 PLACEHOLDER_LOCAL = {"author", "name", "user", "you", "your.name", "first.last", "someone"}  # template placeholders
-TEXT = {".py", ".md", ".json", ".csv", ".txt", ".yaml", ".yml", ".sh", ".C", ".cpp", ".h", ".hpp", ".toml", ".cfg", ".tex", ".bib"}
+TEXT = {".py", ".md", ".json", ".csv", ".txt", ".yaml", ".yml", ".sh", ".C", ".cpp", ".cc", ".h", ".hpp", ".toml", ".cfg", ".ini",
+        ".tex", ".bib", ".dat", ".tcl", ".ma5", ".info", ".template", ".sub", ".sbatch", ".lock"}  # every shipped text format
 
 
 def files() -> list[Path]:

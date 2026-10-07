@@ -5,6 +5,12 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Recasting toolchain templates (T20).** A new `adapters/recasting` (status `documented`: none of the tools is
+  installed where it was written) holds starting templates for a MadGraph5_aMC@NLO process and launch card, a Rivet
+  analysis with its metadata, a Delphes efficiency-module override, a SModelS parameters file and a MadAnalysis 5 recast
+  script. `skills/hep-theory/references/recasting-toolchain.md` says which route fits which search, what every recast
+  records, and the cutflow and limit checks a template must pass before its status is raised. The packaging scan now
+  reads every shipped text format, including these.
 - **Columnar analysis starting points (T24).** `adapters/root-uproot/assets/coffea_dijet_processor.py` is a coffea
   processor template (jet selection, signed generator weights, leading-pair mass and its weighted histogram) and
   `root_to_parquet.py` converts a TTree to Parquet in bounded steps, keeping jagged branches, with a manifest of
