@@ -332,7 +332,7 @@ def check_figure(fig, region: dict, sealed=None, rtol: float = 1e-9) -> list[dic
                     found.append({"axes": ax_i, "artist": "segment", "label": coll.get_label(), "points": 1})
                     break
         for img in ax.images:  # imshow: image columns overlapping the range with a drawn value
-            arr = np.ma.masked_invalid(np.ma.asarray(img.get_array(), float))
+            arr: Any = np.ma.masked_invalid(np.ma.asarray(img.get_array(), float))
             if arr.ndim < 2 or not arr.size:
                 continue
             x0, x1 = img.get_extent()[:2]
