@@ -18,6 +18,16 @@ Software checks establish contract consistency only, not physical validity.
   `log_poisson_sf` in `poisson_diagnostics.py`), and both outputs add `log_p_value_exact_poisson` and
   `significance_exact_poisson_z`, computed from the log p-value so they stay finite beyond the smallest double.
   The Garwood lower end uses the same tail.
+- **Covariance matrices are no longer repaired silently (sci-fix).** A new private `core/stats/_linalg.py` holds the
+  one Cholesky factorization used by `statistical_toys.py`, `unfolding_diagnostics.py` and `likelihood_limits.py`.
+  It works on the matrix scaled to a unit diagonal, so its verdict does not depend on units, and it never adds jitter
+  quietly. Before, `ratio-measured`, `ratio-cov` and the constant-ratio fit added an absolute jitter of 1e-10 up to
+  1.0 until the factorization succeeded: a covariance with correlation 2 gave chi2 = 9e13 and no error, and
+  `response-measured` added 1e-14 to every variance. Now a matrix with a pivot below -1e-10 (relative) raises an
+  error that names it; a fit refuses a singular matrix; and sampling accepts a semi-definite matrix and reports the
+  shift in `regularization` (`response_covariance_check` for `response-measured`, which only checks). The unit test
+  of a correlated ratio covariance used an indefinite matrix (smallest correlation eigenvalue -0.05) and now uses a
+  valid one.
 
 ## 0.3.0 (2026-10-07): first public release
 

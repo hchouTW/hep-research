@@ -21,7 +21,8 @@
     "template_fit",
     "poisson_diagnostics",
     "validate_covariance",
-    "validate_response"
+    "validate_response",
+    "_linalg"
    ],
    "source": "experiment-neutral implementations; imports packaged"
   },

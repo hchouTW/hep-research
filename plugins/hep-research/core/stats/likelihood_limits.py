@@ -85,6 +85,7 @@ import sys
 from pathlib import Path
 from statistics import NormalDist
 
+from core.stats._linalg import cholesky
 from core.stats.unfolding_diagnostics import _solve
 
 LABEL = "[General method]"
@@ -625,18 +626,7 @@ def _load_shape(doc):
 
 
 def _chol_pd(c):
-    n = len(c)
-    l = [[0.0] * n for _ in range(n)]
-    for i in range(n):
-        for j in range(i + 1):
-            v = c[i][j] - sum(l[i][m] * l[j][m] for m in range(j))
-            if i == j:
-                if v <= 1e-12:
-                    raise LikelihoodError("correlation matrix is not positive definite")
-                l[i][i] = math.sqrt(v)
-            else:
-                l[i][j] = v / l[j][j]
-    return l
+    return cholesky(c, "correlation matrix of the nuisances", error=LikelihoodError)[0]
 
 
 class _ShapeModel:

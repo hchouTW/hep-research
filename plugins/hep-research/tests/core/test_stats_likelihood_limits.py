@@ -235,6 +235,10 @@ class PriorTests(unittest.TestCase):
         cinv_form = (th[0] ** 2 - 2 * 0.6 * th[0] * th[1] + th[1] ** 2) / (1 - 0.36)
         self.assertAlmostEqual(m.constraint(th, [0.0, 0.0]), 0.5 * cinv_form, places=10)
 
+    def test_a_singular_correlation_is_rejected(self):
+        with self.assertRaisesRegex(ll.LikelihoodError, "correlation matrix of the nuisances is singular"):
+            ll._load_shape(with_priors(None, [[1.0, 1.0], [1.0, 1.0]]))
+
     def test_gamma_constraint_has_its_mode_at_zero_and_the_right_curvature(self):
         bins, nuis, chol = ll._load_shape(with_priors("gamma"))
         m = ll._ShapeModel(bins, nuis, chol)

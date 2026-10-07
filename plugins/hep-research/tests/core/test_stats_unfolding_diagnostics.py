@@ -419,6 +419,14 @@ class ResponseMeasuredTests(unittest.TestCase):
         self.assertAlmostEqual(meas["rms_relative_data"], ref["rms_relative_data"], places=9)
         self.assertNotIn("replica_check", meas)
 
+    def test_a_singular_supplied_covariance_is_accepted_and_reported(self):
+        d = make_doc(gen=3000)
+        cov = multinomial_cell_covariance(d)
+        n = len(cov)
+        dup = [[cov[0 if i == 1 else i][0 if j == 1 else j] for j in range(n)] for i in range(n)]  # cell 1 copies cell 0
+        out = ud.response_measured(dict(d, response_covariance=dup), "tikhonov", 1e-3)
+        self.assertEqual(out["response_covariance_check"]["singular_directions"], 1)
+
     def test_replicas_agree_with_first_order_propagation(self):
         d = make_doc(gen=3000)
         out = ud.response_measured(dict(d, response_replicas=multinomial_replicas(d)), "dagostini", 4)
@@ -440,6 +448,11 @@ class ResponseMeasuredTests(unittest.TestCase):
                     dict(d, response_replicas=reps[:5]), dict(d, response_replicas=[[[1.0]]] * 12)):
             with self.assertRaises(ud.ToyError):
                 ud.response_measured(bad, "tikhonov", 1e-3)
+        with self.assertRaisesRegex(ud.ToyError, "response_covariance is not positive semi-definite"):
+            ud.response_measured(dict(d, response_covariance=notpsd), "tikhonov", 1e-3)
+        tiny = [[v * 1e-12 for v in row] for row in notpsd]  # no absolute jitter: the verdict does not depend on units
+        with self.assertRaisesRegex(ud.ToyError, "not positive semi-definite"):
+            ud.response_measured(dict(d, response_covariance=tiny), "tikhonov", 1e-3)
 
 
 class CliTests(unittest.TestCase):

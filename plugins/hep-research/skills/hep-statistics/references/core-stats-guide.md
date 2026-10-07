@@ -40,6 +40,10 @@ pyhf/Combine adapter ([statistical tools](statistical-tools.md)). Run any script
 | `validate_covariance.py` | pass (or warnings without `--strict`) | errors (or warnings with `--strict`) | unreadable or not JSON |
 | `validate_response.py` | pass (or warnings without `--strict`) | errors | unreadable or not JSON |
 
+- **Covariance and correlation matrices** go through one strict Cholesky (`_linalg.py`, private, no CLI). It works
+  on the matrix scaled to a unit diagonal, so units never change the verdict. A pivot below -1e-10 is an error
+  that names the matrix, a fit refuses a singular matrix, and toy sampling accepts a semi-definite one and records
+  the shift in `regularization`. Nothing is repaired silently.
 - A `failed` fit never feeds an inference or a `statistical-result` except one whose `fit_status` is `failed`.
 - Toy tails: a tail estimate `k/N` carries its binomial Monte Carlo error; zero exceedances give a bound, not zero.
 

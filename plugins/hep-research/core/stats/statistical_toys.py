@@ -69,6 +69,8 @@ import statistics
 import sys
 from pathlib import Path
 
+from core.stats._linalg import cholesky
+
 LABEL = "[General method]"
 MAX_TOYS = 200000
 MAX_MEAN = 1e5  # per-draw mean; a draw costs O(mean) so larger values are rejected
@@ -517,27 +519,6 @@ def template_bb(sig, bkg, n_data: float, f: float, mc_sig: float, mc_bkg: float,
 
 
 # ------------------------------------------------------------------------------- ratio-cov
-def _cholesky(c):
-    n = len(c)
-    jitter = 0.0
-    for _ in range(12):
-        l = [[0.0] * n for _ in range(n)]
-        try:
-            for i in range(n):
-                for j in range(i + 1):
-                    v = c[i][j] + (jitter if i == j else 0.0) - sum(l[i][m] * l[j][m] for m in range(j))
-                    if i == j:
-                        if v <= 0:
-                            raise ValueError
-                        l[i][i] = math.sqrt(v)
-                    else:
-                        l[i][j] = v / l[j][j]
-            return l
-        except ValueError:
-            jitter = max(jitter * 10, 1e-10)
-    raise ToyError("bin-correlation matrix is not positive semi-definite")
-
-
 def _vec(x, n, name) -> list[float]:
     if isinstance(x, (int, float)) and not isinstance(x, bool):
         x = [x] * n
@@ -556,7 +537,7 @@ def ratio_cov(doc: dict, toys: int, seed: int) -> dict:
     den = [_num(v, "denominator", 0.0, MAX_MEAN, strict_low=True) for v in den]
     n = len(num)
     toys, seed = _toys(toys), _seed(seed)
-    specs = []
+    specs, regularized = [], []
     for d in doc.get("systematics", []):
         if not isinstance(d, dict) or "name" not in d:
             raise ToyError("each systematic needs a name")
@@ -568,7 +549,10 @@ def ratio_cov(doc: dict, toys: int, seed: int) -> dict:
         chol = None
         if kind == "exponential":
             length = _num(bc.get("length"), "bin_correlation.length", 0.0, 1000.0, strict_low=True)
-            chol = _cholesky([[math.exp(-abs(i - j) / length) for j in range(n)] for i in range(n)])
+            chol, reg = cholesky([[math.exp(-abs(i - j) / length) for j in range(n)] for i in range(n)],
+                                 f"bin-correlation matrix of systematic {d['name']}", semidefinite=True, error=ToyError)
+            if reg:
+                regularized.append(reg)
         specs.append({"name": d["name"], "sn": _vec(d.get("sigma_num", 0.0), n, "sigma_num"),
                       "sd": _vec(d.get("sigma_den", 0.0), n, "sigma_den"), "rho": rho, "kind": kind, "chol": chol})
     rng = random.Random(seed)
@@ -613,7 +597,7 @@ def ratio_cov(doc: dict, toys: int, seed: int) -> dict:
     tot, sta = _std(mean_of(full)) / rbar, _std(mean_of(stat_only)) / rbar
     sys_only = _std(mean_of([[nominal[i] * math.exp(row[i]) for i in range(n)] for row in log_sys])) / rbar
     naive = math.sqrt(sum((w[i] * nominal[i] * sys_spread[i]) ** 2 for i in range(n))) / rbar
-    return {"label": LABEL, "method": "ratio per bin with systematics correlated across bins and between numerator and denominator, seeded toys",
+    out = {"label": LABEL, "method": "ratio per bin with systematics correlated across bins and between numerator and denominator, seeded toys",
             "bins": n, "toys": toys, "toys_lost_zero_denominator": lost, "seed": seed, "nominal_ratio": nominal,
             "fractional_spread_per_bin_systematic_only": sys_spread,
             "fractional_spread_per_bin_statistical_only": [_std([row[i] for row in stat_only]) / nominal[i] for i in range(n)],
@@ -629,6 +613,9 @@ def ratio_cov(doc: dict, toys: int, seed: int) -> dict:
                      "determine; the underestimate factor shows what is lost by treating bins as independent when they "
                      "share a systematic; rigidity- or time-dependent shapes beyond these three structures are not "
                      "modeled")}
+    if regularized:
+        out["regularization"] = regularized
+    return out
 
 
 # ------------------------------------------------------------------------- ratio-measured
@@ -678,9 +665,10 @@ def _chol_solve(l, b):
     return x
 
 
-def _gls_constant(r, cov):
-    """(mean, sigma, chi2) of a constant fitted to r with covariance cov (Cholesky)."""
-    l = _cholesky(cov)
+def _gls_constant(r, cov, name="ratio covariance", l=None):
+    """(mean, sigma, chi2) of a constant fitted to r with covariance cov (Cholesky; pass l to reuse a factor)."""
+    if l is None:
+        l = cholesky(cov, name, error=ToyError)[0]  # strict: a fit needs a positive-definite matrix
     ones = [1.0] * len(r)
     ci1 = _chol_solve(l, ones)
     ci_r = _chol_solve(l, r)
@@ -710,7 +698,7 @@ def ratio_measured(doc: dict, toys: int, seed: int) -> dict:
             if abs(c[i][j] - c[j][i]) > 1e-8 * math.sqrt(c[i][i] * c[j][j]):
                 raise ToyError("covariance must be symmetric")
     toys, seed = _toys(toys), _seed(seed)
-    chol = _cholesky(c)  # raises if not positive semi-definite
+    chol, reg = cholesky(c, "covariance", semidefinite=True, error=ToyError)  # raises if not positive semi-definite
     r0 = [x[i] / y[i] for i in range(n)]
     jac = [[(1.0 / y[i] if k == i else 0.0) if k < n else (-x[i] / y[i] ** 2 if k - n == i else 0.0) for k in range(2 * n)] for i in range(n)]
     cr = [[sum(jac[a][k] * c[k][m] * jac[b][m] for k in range(2 * n) for m in range(2 * n)) for b in range(n)] for a in range(n)]
@@ -731,9 +719,10 @@ def ratio_measured(doc: dict, toys: int, seed: int) -> dict:
     sd = [_std([d[i] for d in draws]) for i in range(n)]
     srt = [sorted(d[i] for d in draws) for i in range(n)]
     lin = [math.sqrt(max(cr[i][i], 0.0)) for i in range(n)]
-    mean_g, sig_g, chi2_g = _gls_constant(r0, cr)
+    l_cr = cholesky(cr, "linearized ratio covariance", error=ToyError)[0]
+    mean_g, sig_g, chi2_g = _gls_constant(r0, cr, l=l_cr)
     diag = [[cr[i][j] if i == j else 0.0 for j in range(n)] for i in range(n)]
-    mean_d, sig_d, chi2_d = _gls_constant(r0, diag)
+    mean_d, sig_d, chi2_d = _gls_constant(r0, diag, "diagonal of the linearized ratio covariance")
     null = [mean_g * y[i] for i in range(n)]
     hits = 0
     for _ in range(toys):
@@ -742,9 +731,9 @@ def ratio_measured(doc: dict, toys: int, seed: int) -> dict:
         if min(v[n:]) <= 0:
             continue
         r = [v[i] / v[n + i] for i in range(n)]
-        hits += _gls_constant(r, cr)[2] >= chi2_g - 1e-12
+        hits += _gls_constant(r, cr, l=l_cr)[2] >= chi2_g - 1e-12
     corr = [[cr[i][j] / math.sqrt(cr[i][i] * cr[j][j]) if cr[i][i] > 0 and cr[j][j] > 0 else None for j in range(n)] for i in range(n)]
-    return {"label": LABEL, "method": "per-bin ratios with a supplied joint covariance, linear and seeded-toy propagation",
+    out = {"label": LABEL, "method": "per-bin ratios with a supplied joint covariance, linear and seeded-toy propagation",
             "bins": n, "toys": toys, "toys_discarded_nonpositive_denominator": bad, "seed": seed, "ratio": r0,
             "linear_sigma": lin, "toy_sigma": sd, "toy_over_linear_sigma": [sd[i] / lin[i] if lin[i] > 0 else None for i in range(n)],
             "toy_fractional_bias_of_mean": [means[i] / r0[i] - 1.0 if r0[i] != 0 else None for i in range(n)],
@@ -765,6 +754,9 @@ def ratio_measured(doc: dict, toys: int, seed: int) -> dict:
                      "well-measured quantities; a diagonal-only treatment of a correlated covariance mis-states the "
                      "fitted sigma and the chi2 (see sigma_ratio_diagonal_over_full) and is the wrong way to compare a "
                      "model with the ratio; supplying only uncertainties is not enough, the correlations are the point")}
+    if reg:
+        out["regularization"] = [reg]
+    return out
 
 
 # ---------------------------------------------------------------------------------- CLI

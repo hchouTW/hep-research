@@ -36,12 +36,14 @@ class CoreStatsGuide(unittest.TestCase):
         return self.text[start:nxt if nxt > 0 else None]
 
     def test_every_module_has_a_section(self):
-        found = sorted(p.stem for p in (PLUGIN / "core" / "stats").glob("*.py") if p.stem != "__init__")
+        # private helpers (a leading underscore) have no subcommands; the guide describes them under the conventions
+        found = sorted(p.stem for p in (PLUGIN / "core" / "stats").glob("*.py") if not p.stem.startswith("_"))
         self.assertEqual(found, sorted(SUBCOMMAND_MODULES + VALIDATORS), "update the guide and this test together")
         for m in SUBCOMMAND_MODULES:
             self.assertIn(f"## `{m}.py`", self.text)
         for m in VALIDATORS:
             self.assertIn(f"`{m}.py", self.text)
+        self.assertIn("`_linalg.py`", self.text)
 
     def test_every_subcommand_and_option_documented(self):
         for module in SUBCOMMAND_MODULES:
