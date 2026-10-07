@@ -57,6 +57,12 @@ Software checks establish contract consistency only, not physical validity.
   `pcolormesh` meshes and `imshow` images, and, given the sealed numbers (`check_figure(fig, region, sealed)`), text
   artists, titles and figure texts; a "blinded" label inside the region is not a leak. What it still cannot see
   (tick labels, legends, colorbars, values carried only by colors, transformed values) is stated in the module.
+- **Schema mutation fuzzing and a keyword meta-test (T09).** `tests/contracts/test_robustness.py` mutates every node
+  of every valid artifact fixture, a full gate plan and a ledger record four ways (null, type swap, list wrap,
+  deletion) in the fast tier, and runs 10,000 seeded random multi-mutations through the validator, the gate and the
+  ledger in the slow tier; none raises. `tests/contracts/test_schema_keywords.py` checks that every keyword in
+  `contracts/schemas/` is one `contracts/schema.py` implements (`SUPPORTED_KEYWORDS`) or reads as an annotation, so a
+  schema cannot promise a check (for example `oneOf` or `maxItems`) that never runs, and that every `$ref` resolves.
 - **Property-based tests (T08).** `tests/core/test_properties.py` (with `hypothesis`, a test-only dependency in the
   new `requirements-test.txt`; skipped without it) checks that upper limits are non-decreasing in n and
   non-increasing in b, that intervals are nested in the confidence level, that covariance tools give the same

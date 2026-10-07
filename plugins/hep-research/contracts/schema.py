@@ -54,6 +54,14 @@ class Report:
         return {"ok": self.ok, "findings": [f.as_dict() for f in self.findings]}
 
 
+# Keywords validate() implements, and keywords it reads only as annotations or as $ref targets. A schema keyword outside
+# both sets would be ignored silently (for example oneOf or maxItems); tests/contracts/test_schema_keywords.py checks
+# every schema under contracts/schemas/ against them.
+SUPPORTED_KEYWORDS = frozenset({"$ref", "anyOf", "type", "const", "enum", "minLength", "pattern", "minimum",
+                                "exclusiveMinimum", "x-vocab", "required", "properties", "additionalProperties",
+                                "minItems", "items"})
+ANNOTATION_KEYWORDS = frozenset({"$schema", "$id", "$comment", "$defs", "title", "description", "examples", "default"})
+
 _cache: dict[str, dict] = {}
 
 
