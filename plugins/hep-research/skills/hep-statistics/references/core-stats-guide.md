@@ -193,8 +193,9 @@ Barlow-Beeston multiplier; yields by Nelder-Mead and errors from a numerical Hes
 
 Limits: up to 6 templates, 8 nuisances and 60 bins; Hessian errors are unreliable for a yield near zero. Every fit
 reports its diagnostics (minimizer convergence, a finite likelihood at the optimum, covariance quality, yields at the
-boundary). A bin with data and no template support makes the model infeasible. Infeasible or unconverged fits are
-`failed` with **exit code 1**.
+boundary). A bin with data and no MC in any template makes the naive fit infeasible (reported in `naive_fit_failed`);
+the Barlow-Beeston fit keeps each template's true content in such a bin as a nuisance and describes it. The status
+follows the Barlow-Beeston fit: unconverged (or infeasible) means `failed` with **exit code 1**.
 
 Decision rule: use `bb-fit`/`bb-toys` instead of the one-parameter `template-bb` whenever there are several templates,
 and quote the full-fit error when `bb-fit` shows it inflated. Use either Barlow-Beeston or a per-bin `staterror`-type

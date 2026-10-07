@@ -40,8 +40,11 @@ Usage (from the skill directory):
   python3 core/stats/template_fit.py wbb-toys --input weighted.json --toys 100 --seed 1
 Fit outcome: every fit reports "diagnostics" (minimizer convergence and termination reason, whether the objective
 is finite at the optimum, covariance quality, yields at the boundary) and an "outcome": converged,
-converged-at-boundary, covariance-warning, not-converged or infeasible (a bin with data and no template support:
-no yields can describe it). The result "status" is "failed" when any fit is not converged or infeasible;
+converged-at-boundary, covariance-warning, not-converged or infeasible (naive fit only: a bin with data and no MC in
+any template, which no yields can describe). A template with no MC count in a bin keeps its true content there as a
+Barlow-Beeston nuisance (Barlow and Beeston 1993, sec. 3.3), so the Barlow-Beeston fit describes such bins. The result
+"status" follows the Barlow-Beeston fit: "failed" when it is not converged or infeasible; a failed naive comparison is
+reported in "naive_fit_failed";
 "artifact_fit_status" (converged, converged-with-warnings, failed) and "artifact_status_labels" are what a
 statistical-result artifact built from it must carry, so a failed fit stops inference downstream.
 Exit codes: 0 ok; 1 fit failed (infeasible model or no convergence); 2 rejected input. Standard library only.
@@ -126,30 +129,18 @@ def _ll_naive(data, m, mc, y) -> float:
 
 
 def _ll_bb(data, m, mc, y) -> float:
-    total = 0.0
+    """Profiled Barlow-Beeston log-likelihood (unit weights: the weighted per-bin form with c = 1).
+    A template with no MC count in a bin keeps its nuisance there (Barlow and Beeston 1993, sec. 3.3)."""
     k = len(y)
+    total = 0.0
     for i, n in enumerate(data):
-        act = [j for j in range(k) if m[j][i] > 0 and y[j] > 0]
-        if not act:
-            if n > 0:
-                return NEG
-            continue
-        a = [y[j] / mc[j] for j in act]
-        mm = [m[j][i] for j in act]
-        lo, hi = -1.0 / max(a) + 1e-12, 1.0
-        for _ in range(60):
-            t = 0.5 * (lo + hi)
-            g = (1.0 - t) * sum(aj * mj / (1.0 + aj * t) for aj, mj in zip(a, mm)) - n
-            lo, hi = (t, hi) if g > 0 else (lo, t)
-        t = 0.5 * (lo + hi)
-        nuis = [mj / (1.0 + aj * t) for aj, mj in zip(a, mm)]
-        nu = sum(aj * x for aj, x in zip(a, nuis))
-        if nu <= 0.0:
-            if n > 0:
-                return NEG
-            continue
-        total += (n * math.log(nu) if n > 0 else 0.0) - nu
-        total += sum(mj * math.log(x) - x for mj, x in zip(mm, nuis) if x > 0)
+        p = [y[j] / mc[j] for j in range(k)]
+        act = [j for j in range(k) if m[j][i] > 0 and p[j] > 0]
+        empty = [(p[j], 1.0) for j in range(k) if m[j][i] <= 0 and p[j] > 0]
+        val = _bb_bin_w(n, [p[j] for j in act], [m[j][i] for j in act], [1.0] * len(act), 0.0, empty)
+        if val <= NEG / 2:
+            return NEG
+        total += val
     return total
 
 
@@ -234,7 +225,8 @@ def _fit_yields_full(data, m, mc, kind: str, start=None):
     x, val = _nelder_mead(neg, x, [0.05 * max(v, 1.0) for v in x], info=i2)
     y = [max(v, 1e-9) for v in x]
     cov = _hessian_cov(lambda z: ll_fn(data, m, mc, [max(v, 1e-9) for v in z]), y)
-    return y, cov, -val, _diagnostics([i1, i2], -val, cov, y, _unsupported_bins(data, m))
+    # only the naive fit can be infeasible: Barlow-Beeston lets a template's true content be positive where its MC has none
+    return y, cov, -val, _diagnostics([i1, i2], -val, cov, y, _unsupported_bins(data, m) if kind == "naive" else [])
 
 
 def fit_yields(data, m, mc, kind: str, start=None):
@@ -281,8 +273,15 @@ def _report(names, y, cov, diag=None):
     return out
 
 
-def _overall(result: dict, diags) -> dict:
-    """Overall status of a fit result and the fit status a statistical-result artifact must carry."""
+def _overall(result: dict, diags, comparison=None) -> dict:
+    """Overall status of a fit result and the fit status a statistical-result artifact must carry. `comparison` is the
+    naive fit's diagnostics: it is reported but does not decide the status, because a bin with data and no MC makes the
+    naive fit infeasible while the Barlow-Beeston fit, which is the result, describes it."""
+    if comparison is not None and comparison["outcome"] in FAILED_OUTCOMES:
+        result["naive_fit_failed"] = (f"the naive fit is {comparison['outcome']}"
+                                      + (f" (bins {', '.join(str(i + 1) for i in comparison['unsupported_bins'])} have data "
+                                         "and no MC)" if comparison["unsupported_bins"] else "")
+                                      + "; it is a comparison only and its numbers are not a result")
     outcomes = [d["outcome"] for d in diags]
     if any(o in FAILED_OUTCOMES for o in outcomes):
         result["status"], result["artifact_fit_status"], result["artifact_status_labels"] = "failed", "failed", ["failed"]
@@ -317,8 +316,9 @@ def bb_fit(doc: dict) -> dict:
                      "and template with a Poisson constraint from the MC count, so its errors include the template "
                      "statistics and are larger; errors are from a numerical Hessian (symmetric, unreliable at a boundary: "
                      "see at_boundary); templates are unweighted Poisson counts, a bin with no MC in any active template "
-                     "cannot absorb data and makes that yield combination impossible, and the likelihood values of the two "
-                     "fits are not comparable")}, [dn, db])
+                     "cannot absorb data in the naive fit (infeasible there), while the Barlow-Beeston fit keeps a nuisance for the "
+                     "true content of every template in every bin, so it describes such bins; the likelihood values of the "
+                     "two fits are not comparable")}, [db], dn)
 
 
 def _mad_width(v):
@@ -342,7 +342,7 @@ def bb_toys(doc: dict, toys: int, seed: int) -> dict:
     p = [[m[j][i] / mc[j] for i in range(b)] for j in range(k)]
     rng = random.Random(seed)
     res: dict[str, list[dict[str, list[Any]]]] = {kind: [{"fits": [], "pulls": [], "cov": []} for _ in range(k)] for kind in ("naive", "barlow_beeston")}
-    skipped = failed = 0
+    skipped, failed = 0, {"naive": 0, "barlow_beeston": 0}
     for _ in range(toys):
         mt = [[poisson_draw(rng, mc[j] * p[j][i]) for i in range(b)] for j in range(k)]
         dt = [poisson_draw(rng, sum(y_true[j] * p[j][i] for j in range(k))) for i in range(b)]
@@ -351,19 +351,24 @@ def bb_toys(doc: dict, toys: int, seed: int) -> dict:
             continue
         yn, cn, _, dn = _fit_yields_full(dt, mt, mc, "naive")
         yb, cb, _, db = _fit_yields_full(dt, mt, mc, "bb", yn)
-        if dn["outcome"] in FAILED_OUTCOMES or db["outcome"] in FAILED_OUTCOMES:
-            failed += 1
-            continue
-        for kind, y, c in (("naive", yn, cn), ("barlow_beeston", yb, cb)):
+        # each fit is scored on the toys where it succeeded: a naive fit that is infeasible (data in a bin without MC)
+        # must not remove the toy from the Barlow-Beeston sample, or the toys that need Barlow-Beeston most are dropped
+        for kind, y, c, dg in (("naive", yn, cn, dn), ("barlow_beeston", yb, cb, db)):
+            if dg["outcome"] in FAILED_OUTCOMES:
+                failed[kind] += 1
+                continue
             for j in range(k):
                 res[kind][j]["fits"].append(y[j])
                 if c is not None and c[j][j] > 0:
                     res[kind][j]["pulls"].append((y[j] - y_true[j]) / math.sqrt(c[j][j]))
-    used = len(res["naive"][0]["fits"])
+    used = len(res["barlow_beeston"][0]["fits"])
     if used < 10:
         raise ToyError("too few usable toys; increase the MC sizes or the data")
-    out = {}
+    out: dict[str, dict[str, Any] | None] = {}
     for kind, rows in res.items():
+        if not rows[0]["fits"]:
+            out[kind] = None  # every fit of this kind failed
+            continue
         out[kind] = {names[j]: {"bias": statistics.fmean(r["fits"]) - y_true[j], "spread": _std(r["fits"]),
                                 "mean_pull": statistics.fmean(r["pulls"]) if r["pulls"] else None,
                                 "pull_width": _std(r["pulls"]) if len(r["pulls"]) > 1 else None,
@@ -372,8 +377,8 @@ def bb_toys(doc: dict, toys: int, seed: int) -> dict:
                                 "coverage_1sigma": (sum(abs(x) <= 1.0 for x in r["pulls"]) / len(r["pulls"])) if r["pulls"] else None}
                      for j, r in enumerate(rows)}
     return {"label": LABEL, "method": "multi-template fit toys: naive versus full Barlow-Beeston", "bins": b,
-            "templates": names, "true_yields": dict(zip(names, y_true)), "toys_used": used, "toys_skipped_empty": skipped,
-            "toys_failed_fit": failed, "seed": seed, "fits": out,
+            "templates": names, "true_yields": dict(zip(names, y_true)), "toys_used": used, "toys_used_naive": len(res["naive"][0]["fits"]), "toys_skipped_empty": skipped,
+            "toys_failed_fit": failed["barlow_beeston"], "toys_failed_fit_naive": failed["naive"], "seed": seed, "fits": out,
             "note": ("the supplied MC counts are taken as the true templates and redrawn each toy; a naive pull width above "
                      "1 with coverage below 0.68 and a Barlow-Beeston width and coverage near 1 and 0.68 are the evidence "
                      "that template statistics must be in the likelihood; pulls use the Hessian error, which is symmetric "
@@ -447,10 +452,24 @@ def _bfgs_min(f, x0, scales, max_iter: int = 200, info: dict | None = None):
     return [u[i] * sc[i] for i in range(n)], val
 
 
-def _bb_bin_w(n, a, w, c, d=0.0):
+def _bb_bin_w(n, a, w, c, d=0.0, empty=()):
     """Profiled per-bin log-likelihood of the weighted Barlow-Beeston model (constants dropped).
     nu = d + sum_j a_j * at_j with the profiled true weight sums at_j = w_j / (1 + c_j a_j t); d is the
-    deterministic shape shift sum_j a_j * delta_j."""
+    deterministic shape shift sum_j a_j * delta_j. `empty` lists (a_k, c_k) for the templates with no MC in this bin:
+    their true sums are nuisances too, observed as zero (Barlow and Beeston 1993, sec. 3.3). When the empty template
+    with the largest c_k a_k exceeds every filled one, the stationary point may sit at t = -1/(c_k a_k), where that
+    template takes the share nu - d - sum_j a_j at_j of nu = n c_k a_k / (1 + c_k a_k); it is used when that share is
+    positive. Otherwise every empty template's true sum is zero and the usual root in t applies."""
+    if empty and n > 0:
+        ca_k, a_k, c_k = max((ck * ak, ak, ck) for ak, ck in empty)
+        if not a or ca_k > max(c[j] * a[j] for j in range(len(a))) * (1.0 + 1e-12):
+            t = -1.0 / ca_k
+            nuis = [w[j] / (1.0 + c[j] * a[j] * t) for j in range(len(a))]
+            nu = n * ca_k / (1.0 + ca_k)
+            share = nu - d - sum(a[j] * nuis[j] for j in range(len(a)))
+            if share > 0.0:
+                ll = n * math.log(nu) - nu - share / a_k / c_k
+                return ll + sum((w[j] * math.log(nuis[j]) - nuis[j]) / c[j] for j in range(len(a)) if nuis[j] > 0)
     if not a:
         if d <= 0.0:
             return NEG if n > 0 else 0.0
@@ -515,7 +534,8 @@ def _ll_w(data, w, t_tot, c, nuis, x, kind):
             total += (n * math.log(nu) if n > 0 else 0.0) - nu
         else:
             act = [j for j in range(k) if w[j][i] > 0 and a[j] > 0]
-            val = _bb_bin_w(n, [a[j] for j in act], [w[j][i] for j in act], [c[j][i] for j in act], d)
+            empty = [(a[j], c[j][i]) for j in range(k) if w[j][i] <= 0 and a[j] > 0]
+            val = _bb_bin_w(n, [a[j] for j in act], [w[j][i] for j in act], [c[j][i] for j in act], d, empty)
             if val <= NEG / 2:
                 return NEG
             total += val
@@ -551,7 +571,7 @@ def _load_w(doc):
         if sum(sw) <= 0:
             raise ToyError(f"template {nme} is empty")
         w.append(sw)
-        c.append([(b_ / a_) if a_ > 0 else 1.0 for a_, b_ in zip(sw, sw2)])
+        c.append([(b_ / a_) if a_ > 0 else sum(sw2) / sum(sw) for a_, b_ in zip(sw, sw2)])  # empty bin: the template's mean scale
     mce = doc.get("mc_events", {})
     t_tot = []
     for nme, row in zip(names, w):
@@ -609,7 +629,7 @@ def _fit_w_full(data, w, t_tot, c, nuis, kind, start=None):
     cov = [row[:k] for row in inv[:k]] if inv is not None else None
     llv = ll(full)
     unsupported = [i for i, n in enumerate(data) if n > 0 and all(row[i] <= 0 for row in w)
-                   and not any(d["kind"] == "shape" and d["up"][i] + d["down"][i] > 0 for d in nuis)]
+                   and not any(d["kind"] == "shape" and d["up"][i] + d["down"][i] > 0 for d in nuis)] if kind == "naive" else []
     return full[:k], full[k:], cov, llv, _diagnostics(infos, llv, cov, full[:k], unsupported)
 
 
@@ -630,7 +650,7 @@ def wbb_fit(doc: dict) -> dict:
                      "sums linearly between the down, nominal and up templates with the squared-weight sums held at nominal; "
                      "normalization nuisances scale a template's yield per unit weight linearly; all nuisances have a unit "
                      "Gaussian constraint and are profiled with the yields; errors are the yield block of the inverse "
-                     "numerical Hessian of the full parameter vector (symmetric, unreliable near a boundary)")}, [dn, db])
+                     "numerical Hessian of the full parameter vector (symmetric, unreliable near a boundary)")}, [db], dn)
 
 
 def wbb_toys(doc: dict, toys: int, seed: int) -> dict:
@@ -648,7 +668,7 @@ def wbb_toys(doc: dict, toys: int, seed: int) -> dict:
     p = [[w[j][i] / t_tot[j] for i in range(b)] for j in range(k)]
     rng = random.Random(seed)
     res: dict[str, list[dict[str, list[Any]]]] = {kind: [{"fits": [], "pulls": []} for _ in range(k)] for kind in ("naive", "barlow_beeston")}
-    skipped = failed = 0
+    skipped, failed = 0, {"naive": 0, "barlow_beeston": 0}
     for _ in range(toys):
         mt = [[c[j][i] * poisson_draw(rng, eff[j][i]) for i in range(b)] for j in range(k)]
         dt = [poisson_draw(rng, sum(y_true[j] * p[j][i] for j in range(k))) for i in range(b)]
@@ -659,19 +679,24 @@ def wbb_toys(doc: dict, toys: int, seed: int) -> dict:
         wt = mt
         yn, _, cn, _, dn = _fit_w_full(dt, wt, t_tot, c, nuis, "naive")
         yb, _, cb, _, db = _fit_w_full(dt, wt, t_tot, c, nuis, "bb", yn)
-        if dn["outcome"] in FAILED_OUTCOMES or db["outcome"] in FAILED_OUTCOMES:
-            failed += 1
-            continue
-        for kind, y, cv in (("naive", yn, cn), ("barlow_beeston", yb, cb)):
+        # each fit is scored on the toys where it succeeded: a naive fit that is infeasible (data in a bin without MC)
+        # must not remove the toy from the Barlow-Beeston sample, or the toys that need Barlow-Beeston most are dropped
+        for kind, y, cv, dg in (("naive", yn, cn, dn), ("barlow_beeston", yb, cb, db)):
+            if dg["outcome"] in FAILED_OUTCOMES:
+                failed[kind] += 1
+                continue
             for j in range(k):
                 res[kind][j]["fits"].append(y[j])
                 if cv is not None and cv[j][j] > 0:
                     res[kind][j]["pulls"].append((y[j] - y_true[j]) / math.sqrt(cv[j][j]))
-    used = len(res["naive"][0]["fits"])
+    used = len(res["barlow_beeston"][0]["fits"])
     if used < 10:
         raise ToyError("too few usable toys; increase the MC sizes or the data")
-    out = {}
+    out: dict[str, dict[str, Any] | None] = {}
     for kind, rows in res.items():
+        if not rows[0]["fits"]:
+            out[kind] = None  # every fit of this kind failed
+            continue
         out[kind] = {names[j]: {"bias": statistics.fmean(r["fits"]) - y_true[j], "spread": _std(r["fits"]),
                                 "mean_pull": statistics.fmean(r["pulls"]) if r["pulls"] else None,
                                 "pull_width_robust_mad": _mad_width(r["pulls"]),
@@ -679,7 +704,7 @@ def wbb_toys(doc: dict, toys: int, seed: int) -> dict:
                      for j, r in enumerate(rows)}
     return {"label": LABEL, "method": "weighted-MC fit toys with nuisances: naive versus full Barlow-Beeston", "bins": b,
             "templates": names, "nuisances": [d["name"] for d in nuis], "true_yields": dict(zip(names, y_true)),
-            "toys_used": used, "toys_skipped_empty": skipped, "toys_failed_fit": failed, "seed": seed, "fits": out,
+            "toys_used": used, "toys_used_naive": len(res["naive"][0]["fits"]), "toys_skipped_empty": skipped, "toys_failed_fit": failed["barlow_beeston"], "toys_failed_fit_naive": failed["naive"], "seed": seed, "fits": out,
             "note": ("toy MC is redrawn as scaled Poisson counts: the effective count of each bin and template is Poisson and "
                      "the scale c = sum w^2 / sum w is kept at its nominal value (so weight fluctuations inside a bin are not "
                      "simulated); data are drawn at the true yields with every nuisance at zero, so a pull width above 1 for "

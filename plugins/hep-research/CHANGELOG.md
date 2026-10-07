@@ -5,6 +5,12 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Barlow-Beeston fits with empty MC bins (T22).** A bin where a template has no MC count no longer makes the
+  Barlow-Beeston likelihood infinite: the template's true content there stays a nuisance, observed as zero, and takes a
+  share of the data when the Barlow and Beeston (1993) special case applies (unweighted and weighted fits; an empty bin
+  of a weighted template uses the template's mean weight scale). Only the naive fit can now be infeasible; the result's
+  status follows the Barlow-Beeston fit and a failed naive comparison is reported in `naive_fit_failed`. The toy
+  studies score each fit on its own successful toys instead of dropping a toy when either fit fails.
 - **Environments and reproducibility (T23).** `skills/hep-computing/scripts/environment_manifest.py` records the
   environment of a run as the `environment` object and `tools` list of a `computational-run` artifact (Python,
   platform, whether it comes from an LCG view, a container, conda or a venv, package versions, a fixed list of

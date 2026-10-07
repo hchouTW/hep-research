@@ -12,6 +12,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -226,23 +227,35 @@ class FitStatusAuditT03(unittest.TestCase):
             code = tf.main(list(argv))
         return code, json.loads(buf.getvalue())
 
-    def test_infeasible_cli_fails_with_nonzero_exit(self):
+    def not_converging(self):
+        """The minimizer capped at two iterations: every fit stops without converging."""
+        real = tf._nelder_mead
+        return mock.patch.object(tf, "_nelder_mead", lambda f, x0, steps, max_iter=600, tol=1e-10, info=None:
+                                 real(f, x0, steps, max_iter=2, tol=tol, info=info))
+
+    def test_failed_fit_cli_fails_with_nonzero_exit(self):
+        doc = make_doc(bins=5)
         for cmd in ("bb-fit", "wbb-fit"):
-            with tempfile.TemporaryDirectory() as tmp:
+            with tempfile.TemporaryDirectory() as tmp, self.not_converging():
                 path = Path(tmp) / "f.json"
-                path.write_text(json.dumps(self.INFEASIBLE))
+                path.write_text(json.dumps(doc))
                 code, out = self.run_cli(cmd, "--input", str(path))
             self.assertNotEqual(code, 0, cmd)
             self.assertEqual(out["status"], "failed", cmd)
             self.assertEqual(out["artifact_fit_status"], "failed", cmd)
-            self.assertEqual(out["barlow_beeston"]["diagnostics"]["outcome"], "infeasible", cmd)
-            self.assertFalse(out["barlow_beeston"]["diagnostics"]["objective_valid"], cmd)
+            self.assertEqual(out["barlow_beeston"]["diagnostics"]["outcome"], "not-converged", cmd)
             self.assertTrue(out["error"], cmd)
 
-    def test_infeasible_api_result_failed(self):
-        res = tf.bb_fit(self.INFEASIBLE)
-        self.assertEqual(res["status"], "failed")
-        self.assertIn("bin 2", res["error"])
+    def test_infeasible_naive_fit_is_reported_but_barlow_beeston_describes_the_bin(self):
+        # T22: data in a bin with no MC make the naive fit infeasible; Barlow-Beeston keeps the template's true content
+        # there as a nuisance, so it fits (yield = all the data) with a larger error than Poisson alone
+        for fit in (tf.bb_fit, tf.wbb_fit):
+            res = fit(self.INFEASIBLE)
+            self.assertEqual(res["naive"]["diagnostics"]["outcome"], "infeasible")
+            self.assertIn("bins 2", res["naive_fit_failed"])
+            self.assertEqual((res["status"], res["barlow_beeston"]["diagnostics"]["outcome"]), ("ok", "converged"))
+            self.assertAlmostEqual(res["barlow_beeston"]["sig"]["yield"], 20.0, delta=1e-3)
+            self.assertGreater(res["barlow_beeston"]["sig"]["error"], math.sqrt(20.0))
 
     def test_feasible_fit_unchanged_and_ok(self):
         doc = make_doc(bins=5)
@@ -280,7 +293,9 @@ class FitStatusAuditT03(unittest.TestCase):
     def test_failed_fit_status_propagates_to_artifacts(self):
         sys.path.insert(0, str(ROOT))
         from contracts.validate import validate_artifact
-        res = tf.bb_fit(self.INFEASIBLE)
+        with self.not_converging():
+            res = tf.bb_fit(make_doc(bins=5))
+        self.assertEqual(res["status"], "failed")
         env = {"contract_version": "1.0.0", "artifact_id": "fit", "objective": "synthetic", "versions": {"plugin": "0.1.0", "contracts": "1.0.0"},
                "provenance": {"producer_skill": "hep-statistics", "created": "2026-10-03"}, "unresolved_inputs": []}
         stat = dict(env, artifact_type="statistical-result", status=["synthetic"] + res["artifact_status_labels"],
@@ -325,3 +340,63 @@ class CliTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def _golden_max(f, lo, hi, iters=120):
+    g = (math.sqrt(5) - 1) / 2
+    a, b = lo, hi
+    for _ in range(iters):
+        x1, x2 = b - g * (b - a), a + g * (b - a)
+        a, b = (x1, b) if f(x1) < f(x2) else (a, x2)
+    return f(0.5 * (a + b))
+
+
+class ZeroMcBinTests(unittest.TestCase):
+    """T22: a bin where a template has no MC count keeps that template's true content as a nuisance."""
+
+    def brute(self, n, p, m):
+        """max over the true MC contents A_j >= 0 of the unprofiled per-bin log-likelihood, by nested golden sections."""
+        def ll(a):
+            nu = sum(pj * aj for pj, aj in zip(p, a))
+            if nu <= 0:
+                return -1e300 if n > 0 else 0.0
+            return n * math.log(nu) - nu + sum((mj * math.log(aj) if mj > 0 else 0.0) - aj for mj, aj in zip(m, a))
+        hi = [3.0 * (mj + n / pj) + 5.0 for mj, pj in zip(m, p)]
+        inner = lambda a0: _golden_max(lambda a1: ll([max(a0, 1e-300), max(a1, 1e-300)]), 0.0, hi[1])
+        return _golden_max(inner, 0.0, hi[0])
+
+    def test_profiled_bin_equals_the_brute_force_maximum(self):
+        # (n, p, m): an empty template with the largest p takes a share; an empty one with a smaller p does not;
+        # every template empty; nothing observed
+        for n, p, m in ((12, [0.5, 2.0], [6, 0]), (12, [2.0, 0.5], [6, 0]), (7, [0.4, 1.5], [0, 0]),
+                        (0, [0.5, 2.0], [6, 0]), (3, [1.0, 1.0], [4, 2])):
+            got = tf._ll_bb([n], [[m[0]], [m[1]]], [1.0, 1.0], p)
+            self.assertAlmostEqual(got, self.brute(n, p, m), delta=1e-6, msg=(n, p, m))
+
+    def test_empty_bin_with_data_no_longer_breaks_the_likelihood(self):
+        self.assertGreater(tf._ll_bb([10, 10], [[10, 0]], [10.0], [20.0]), tf.NEG / 2)
+        self.assertEqual(tf._ll_naive([10, 10], [[10, 0]], [10.0], [20.0]), tf.NEG)
+
+    def test_sparse_templates_toy_coverage(self):
+        # MC samples of ~60 and ~85 events spread over 8 bins: the tail bins are often empty, so about one toy in five
+        # has data in a bin without MC for some template. Every Barlow-Beeston fit must succeed (before T22 those toys
+        # failed as infeasible) and the pulls must stay near unit width; Hessian errors with so little MC under-cover
+        # somewhat, which the bounds allow.
+        sig = [0.9, 3.0, 9.0, 18.0, 18.0, 9.0, 3.0, 0.9]
+        bkg = [0.9, 1.8, 4.5, 9.0, 12.0, 15.0, 18.0, 24.0]
+        doc = {"data": [0] * 8, "templates": {"sig": sig, "bkg": bkg}, "mc_events": {"sig": sum(sig), "bkg": sum(bkg)},
+               "true_yields": {"sig": 150.0, "bkg": 200.0}}
+        r = tf.bb_toys(doc, 300, 1)
+        self.assertEqual((r["toys_used"], r["toys_failed_fit"]), (300, 0))
+        self.assertGreater(r["toys_failed_fit_naive"], 20)
+        for name in ("sig", "bkg"):
+            bb = r["fits"]["barlow_beeston"][name]
+            self.assertLess(abs(bb["bias"]), 3 * bb["spread"] / math.sqrt(300) + 3.0, name)
+            self.assertGreater(bb["coverage_1sigma"], 0.56, name)
+            self.assertLess(bb["pull_width_robust_mad"], 1.3, name)
+            self.assertGreater(bb["coverage_1sigma"], r["fits"]["naive"][name]["coverage_1sigma"] + 0.1, name)
+
+    def test_weighted_empty_bin_uses_the_template_mean_scale(self):
+        doc = {"data": [10, 10], "templates": {"sig": {"sumw": [10.0, 0.0], "sumw2": [20.0, 0.0]}}}
+        _, _, _, c, _, _ = tf._load_w(doc)
+        self.assertEqual(c[0], [2.0, 2.0])
