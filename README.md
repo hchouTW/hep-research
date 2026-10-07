@@ -18,6 +18,8 @@ plugin for AMS Collaboration members. It lives in a separate private repository;
 
 Checks: `python3 plugins/hep-research/tools/run_all_checks.py`
 
+Live routing evaluation (paid model calls, outside the plugin): [`evals/routing/`](evals/routing/README.md).
+
 ## Contributing
 
 Commits are checked by `.githooks/` (path allowlist) and by the `guard` workflow (path allowlist over the whole

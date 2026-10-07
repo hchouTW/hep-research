@@ -16,3 +16,5 @@ venv/
 *~
 *.root
 dist/
+# raw transcripts of live routing runs (scored summaries in evals/routing/results/ are committed)
+evals/routing/runs/

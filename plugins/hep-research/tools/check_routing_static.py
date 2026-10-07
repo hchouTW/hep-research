@@ -9,8 +9,11 @@ For each case in tests/routing/cases.json:
   carries the "no validated domain profile" notice, and so does every skill in its optional "also_accept" list;
 - handoff chains use real skills, end, and contain at most one round trip between two skills.
 Coverage: at least one direct, one neighboring and one negative case per skill (direct and negative counted for
-the skill the case is about), one case per journey J1-J12, English and Traditional Chinese, and the special
-categories (AMS-mentioning computing, theory without experiment, recasting, out-of-v1, underspecified).
+the skill the case is about), one case per journey J1-J12, English, Traditional and Simplified Chinese, Japanese and
+German, the special categories (AMS-mentioning computing, theory without experiment, recasting, out-of-v1,
+underspecified, multi-turn) and the variants (adversarial: a tool is named but the deliverable belongs to another
+skill; quick: a short quick question). A multi-turn case lists later turns, each with its own expected skill and
+trigger terms, checked the same way.
 Also checks that no SKILL.md mentions a dispatch API. This is a static check of descriptions, not a live routing run.
 
 Usage: python3 tools/check_routing_static.py   Exit 0 all pass, 1 otherwise. Output: JSON.
@@ -24,7 +27,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = sorted(p.parent.name for p in (ROOT / "skills").glob("*/SKILL.md"))
-CATEGORIES = ["ams-computing", "theory-no-experiment", "recasting", "out-of-v1", "underspecified"]
+CATEGORIES = ["ams-computing", "theory-no-experiment", "recasting", "out-of-v1", "underspecified", "multi-turn"]
+LANGS = ("en", "zh-Hant", "zh-Hans", "ja", "de")
+VARIANTS = ("adversarial", "quick")  # a tool named for another skill's deliverable; a short quick question
 LIMITED = re.compile(r"no validated domain profile|domain without a validated profile", re.I)
 DISPATCH = re.compile(r"\b(dispatch|invoke_skill|call_skill|route_to)\s*\(", re.I)
 
@@ -85,6 +90,20 @@ def main() -> int:
                 errs.append("neighboring/negative case must name the skill it must not go to")
             elif exp not in d[ns]["not_for"]:
                 errs.append(f"the {ns} description does not route this to {exp} in its 'Not for' part")
+        if c["kind"] == "multi-turn":
+            turns = c.get("turns")
+            if not isinstance(turns, list) or not turns:
+                errs.append("a multi-turn case needs later turns")
+            for k, turn in enumerate(turns or [], 2):
+                te = turn.get("expected")
+                if te not in SKILLS:
+                    errs.append(f"turn {k}: unknown expected skill {te}")
+                    continue
+                if not turn.get("prompt") or not turn.get("trigger_terms"):
+                    errs.append(f"turn {k}: needs a prompt and trigger terms")
+                for tt in turn.get("trigger_terms", []):
+                    if tt.lower() not in d[te]["use"]:
+                        errs.append(f"turn {k}: trigger '{tt}' not in the {te} description")
         if c.get("chain"):
             errs += chain_ok(c["chain"])
             if c["chain"][0] != exp:
@@ -100,7 +119,8 @@ def main() -> int:
     coverage_errors += [f"no case for J{i}" for i in range(1, 13) if f"J{i}" not in journeys]
     coverage_errors += [f"no {k} case" for k in CATEGORIES if not any(c["kind"] == k for c in cases)]
     langs = {c["lang"] for c in cases}
-    coverage_errors += [f"no {lang} cases" for lang in ("en", "zh-Hant") if lang not in langs]
+    coverage_errors += [f"no {lang} cases" for lang in LANGS if lang not in langs]
+    coverage_errors += [f"no {v} case" for v in VARIANTS if not any(c.get("variant") == v for c in cases)]
     dispatch = [s for s in SKILLS if DISPATCH.search(d[s]["body"])]
     rep = {"cases": len(cases), "failed": [r for r in results if not r["ok"]], "coverage_errors": coverage_errors,
            "dispatch_api_mentions": dispatch, "languages": sorted(langs),

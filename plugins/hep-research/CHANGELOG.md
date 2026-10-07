@@ -5,6 +5,14 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Live routing harness and new routing cases (T19).** `evals/routing/run_routing_eval.py` (repository level, outside
+  the plugin) runs the routing cases through headless `claude -p` (Codex commands are built and parsed, not yet run),
+  one pass per case, in a fresh folder with read-only tools, a pinned model, per-case and total budgets and a check
+  that no other plugin loaded; it records the skills loaded and profile files read, scores strict and lenient routing,
+  and compares with a committed baseline per CLI, CLI version and model. Scored summaries are committed; raw transcripts
+  are not. The case set grows from 118 to 150: Simplified Chinese, Japanese and German cases, adversarial cases (a tool
+  is named but the deliverable belongs to another skill), quick questions and two-turn handoffs, all covered by the
+  static check.
 - **Saturated-model goodness of fit (T22).** `likelihood_limits.py shape-gof` tests a shape-limit model (with its
   nuisances, constraint terms and `mc_stat`) against the saturated model, with μ fitted or fixed, and calibrates the
   statistic with toys from the fitted model; the χ² reference is reported and labeled approximate. Toy p-values are
