@@ -478,7 +478,7 @@ installed there).
 
 | Item | Result | Evidence |
 |---|---|---|
-| T19 routing harness | harness tested with a fake CLI; live cost probe 5/5 strict (claude-sonnet-5-5, CLI 2.1.293, setting-sources isolation), $0.455 for 6 prompt turns; full 150-case run not done (estimate about $11.7) | `evals/routing/` (outside the plugin), `results/probe-20261008-sonnet.json`; 32 new cases (zh-Hans, ja, de, adversarial, quick, multi-turn) pass `check_routing_static.py` (150 cases) |
+| T19 routing harness | harness tested with a fake CLI; live cost probe 5/5 strict (claude-sonnet-5-5, CLI 2.1.293, setting-sources isolation), $0.455 for 6 prompt turns; full 150-case run 2026-10-08: 143/150 strict, $11.67, 0 loading violations (misses: 2 quick questions, 1 proposal request, 2 handoff second turns without a skill, 2 underspecified cases); baseline `evals/routing/baselines/claude-2.1.293-claude-sonnet-5-5.json` | `evals/routing/` (outside the plugin), `results/probe-20261008-sonnet.json`; 32 new cases (zh-Hans, ja, de, adversarial, quick, multi-turn) pass `check_routing_static.py` (150 cases) |
 | T20 recasting templates | documented: none of MadGraph5_aMC@NLO, Rivet, Delphes, SModelS, MadAnalysis 5 installed | `tests/adapters/test_recasting_templates.py` (structure only) |
 | T21 HEPData export | pass: hepdata-validator accepts the plain and the hepdata_lib engine; the importer reads the export back | `tests/adapters/test_hepdata_export.py` |
 | T22 statistics extensions | pass, eight items, each with a closure or coverage test | `tests/core/test_stats_template_fit.py` (`ZeroMcBinTests`), `test_stats_asymptotic_bands.py`, `test_stats_interpolation.py`, `test_stats_mc_statistics.py`, `test_stats_toy_cls.py`, `test_stats_two_poi.py`, `test_stats_saturated_gof.py`, `tests/skills/hep_statistics/test_combine_asymmetric.py` |
@@ -500,5 +500,5 @@ Also found and fixed: a `submission.tar.gz` written by hepdata_lib had been comm
 writes none, and the packaging scan refuses archives); the T03 audit's "infeasible" fixture now applies to the naive
 comparison fit only, and failure propagation is tested with a non-converging minimizer.
 
-Unverified here: the full live routing run and any Codex routing run; the recasting and environment templates on a
+Unverified here: any Codex routing run; the recasting and environment templates on a
 real installation; the optional CI jobs for hepdata and columnar (GitHub only).
