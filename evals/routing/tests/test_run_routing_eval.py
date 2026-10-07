@@ -13,7 +13,8 @@ import run_routing_eval as rre
 
 FAKE = HERE / "fake_claude.py"
 CASES = {"note": "test", "cases": [
-    {"id": "a", "lang": "en", "kind": "direct", "prompt": "ALPHA tag-and-probe", "expected_primary": "detector-response", "trigger_terms": []},
+    {"id": "a", "lang": "en", "kind": "direct", "prompt": "ALPHA tag-and-probe", "expected_primary": "detector-response", "trigger_terms": [],
+     "inputs": {"sub/dir/in.csv": "x,y\n"}},
     {"id": "b", "lang": "de", "kind": "negative", "prompt": "BETA limits", "expected_primary": "hep-statistics", "not": "hep-theory", "trigger_terms": []},
     {"id": "c", "lang": "en", "kind": "direct", "variant": "quick", "prompt": "GAMMA quick", "expected_primary": "hep-theory", "trigger_terms": []},
     {"id": "d", "lang": "en", "kind": "underspecified", "prompt": "DELTA compare", "expected_primary": "ask", "trigger_terms": []},
@@ -93,6 +94,14 @@ class HarnessTests(unittest.TestCase):
         for _, answer in ROUTES.values():
             self.assertNotIn(answer, text)
         self.assertTrue((self.dir / "runs" / "r1" / "raw" / "a.jsonl").is_file())
+
+    def test_reuse_raw_calls_nothing_and_scores_the_same(self):
+        _, first = self.run_eval()
+        before = (self.dir / "calls.log").read_text()
+        _, again = self.run_eval("--reuse-raw")
+        self.assertEqual((self.dir / "calls.log").read_text(), before)
+        self.assertEqual(first["summary"]["overall"], again["summary"]["overall"])
+        self.assertEqual(first["summary"]["cost_usd"], again["summary"]["cost_usd"])
 
     def test_budget_stops_new_cases(self):
         os.environ["FAKE_COST"] = "1.0"

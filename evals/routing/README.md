@@ -68,3 +68,4 @@ parser is tested on a synthetic event stream only).
 | Run | Cases | Strict | Cost | Note |
 |---|---|---|---|---|
 | `probe-20261008-sonnet` | 5 (6 prompt turns): quick, ja, adversarial, multi-turn, de | 5/5 | $0.455 ($0.076 per prompt turn) | cost probe; the full 150-case set (154 prompt turns) is estimated at about $11.7 on claude-sonnet-5-5 |
+| `full-20261008-sonnet` | 150 (154 prompt turns) | 143/150 | $11.67 ($0.078 per case) | baseline `claude-2.1.293-claude-sonnet-5-5`; misses: 2 quick questions and 1 thesis-proposal request answered without a skill, 2 second turns of handoffs without a skill, 2 underspecified cases (one loaded detector-response instead of asking, one did not ask); 0 loading violations. Resumed once with `--reuse-raw` after a harness crash on an input in a subfolder (fixed) |

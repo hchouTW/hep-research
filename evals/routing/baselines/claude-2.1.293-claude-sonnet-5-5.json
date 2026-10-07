@@ -1,0 +1,775 @@
+{
+ "meta": {
+  "run_id": "full-20261008-sonnet",
+  "date": "2026-10-07",
+  "cli": "claude",
+  "cli_version": "2.1.293",
+  "model": "claude-sonnet-5-5",
+  "models_reported": [
+   "claude-sonnet-5-5"
+  ],
+  "isolation": "setting-sources",
+  "plugin_commit": "7a0dabcfa3f17c1d5d6f4c7425fc96da708a8435",
+  "plugin_dirty": false,
+  "cases_file_sha256": "0d2c9a0113e554b072c92872afb0fbbad78447798cd911809044bfad98688fc1",
+  "selected": 150,
+  "completed": 150,
+  "full_set": true,
+  "max_turns": 6,
+  "case_budget_usd": 0.5,
+  "budget_usd": 15.0,
+  "stopped_early": false
+ },
+ "cases": {
+  "ams-computing-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "ams-computing-2": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "an-direct-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "an-direct-2": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "an-negative-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "an-neighbor-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "an-t3-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "an-t3-2": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "an-t3-3": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "an-t3-4": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "an-t3-5": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "an-t3-6": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "an-t3-7": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "an-t3-8": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "an-t3-neg": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "co-batch-evicted-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "co-batch-gpu-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "co-batch-held-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "co-batch-negative-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "co-batch-pilot-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "co-batch-sbatch-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "co-direct-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "co-direct-2": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "co-negative-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "co-neighbor-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "co-t3-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "co-t3-2": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "co-t3-3": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "co-t3-neg": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "dr-direct-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "dr-direct-2": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "dr-negative-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "dr-neighbor-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "dr-t3-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "dr-t3-2": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "dr-t3-3": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "dr-t3-4": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "dr-t3-5": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "dr-t3-6": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "dr-t3-7": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "dr-t3-8": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "dr-t3-9": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "dr-t3-neg": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "eic-dis-theory-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "eic-facility-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "eic-underspec-1": {
+   "strict": false,
+   "lenient": false,
+   "outcome": "skill-instead-of-question"
+  },
+  "epic-detector-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "j01": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "j02": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "j03": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "j04": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "j05": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "j06": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "j07": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "j08": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "j09": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "j10": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "j11": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "j12": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "ml-direct-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "ml-direct-2": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "ml-negative-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "ml-neighbor-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "ml-t3-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "ml-t3-10": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "ml-t3-11": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "ml-t3-12": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "ml-t3-2": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "ml-t3-3": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "ml-t3-4": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "ml-t3-5": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "ml-t3-6": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "ml-t3-7": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "ml-t3-8": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "ml-t3-9": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "ml-t3-neg": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "out-of-v1-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "out-of-v1-2": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "rc-ams-exists-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "rc-ams-latest-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "rc-ams-latest-2": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "rc-ams-paper-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "rc-ams-support-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "rc-direct-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "rc-direct-2": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "rc-negative-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "rc-neighbor-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "rc-t3-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "rc-t3-2": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "rc-t3-3": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "rc-t3-4": {
+   "strict": false,
+   "lenient": false,
+   "outcome": "no-skill"
+  },
+  "rc-t3-5": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "rc-t3-6": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "rc-t3-neg": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "recast-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "st-bayes-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "st-direct-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "st-direct-2": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "st-gof-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "st-impacts-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "st-lee-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "st-negative-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "st-neighbor-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "st-nsbi-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "st-publish-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "st-sensitivity-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "st-sweights-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "st-t3-neg": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-adv-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-adv-2": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-adv-3": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-adv-4": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-adv-5": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-adv-6": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-de-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-de-2": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-de-3": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-de-4": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-de-5": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-ja-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-ja-2": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-ja-3": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-ja-4": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-ja-5": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-quick-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-quick-2": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-quick-3": {
+   "strict": false,
+   "lenient": false,
+   "outcome": "no-skill"
+  },
+  "t19-quick-4": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-quick-5": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-quick-6": {
+   "strict": false,
+   "lenient": false,
+   "outcome": "no-skill"
+  },
+  "t19-quick-7": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-turns-1": {
+   "strict": false,
+   "lenient": false,
+   "outcome": "no-skill"
+  },
+  "t19-turns-2": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-turns-3": {
+   "strict": false,
+   "lenient": false,
+   "outcome": "no-skill"
+  },
+  "t19-turns-4": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-zhs-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-zhs-2": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-zhs-3": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-zhs-4": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "t19-zhs-5": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "th-direct-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "th-direct-2": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "th-negative-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "th-neighbor-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "th-t3-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "th-t3-2": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "th-t3-neg": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "theory-no-exp-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "underspec-1": {
+   "strict": true,
+   "lenient": true,
+   "outcome": "pass"
+  },
+  "underspec-2": {
+   "strict": false,
+   "lenient": false,
+   "outcome": "no-question"
+  }
+ }
+}

@@ -264,6 +264,7 @@ def run_case(case: dict, args, raw_dir: Path) -> dict:
     with tempfile.TemporaryDirectory(prefix="hep-routing-") as tmp:
         cwd = Path(tmp)
         for name, text in (case.get("inputs") or {}).items():
+            (cwd / name).parent.mkdir(parents=True, exist_ok=True)
             (cwd / name).write_text(text, encoding="utf-8")
         prior: list[str] = []
         sdir = session_dir(args, cwd)
@@ -273,13 +274,24 @@ def run_case(case: dict, args, raw_dir: Path) -> dict:
                    else codex_cmd(args.cli_path, turn["prompt"], args, cwd, session))
             if args.cli == "claude" and len(turns_of(case)) == 1:
                 cmd.append("--no-session-persistence")
+            suffix = "" if k == 1 else f".turn{k}"
+            saved = raw_dir / f"{case['id']}{suffix}.jsonl"
+            if args.reuse_raw and saved.is_file() and saved.stat().st_size:
+                # resuming a run: score the stream already recorded instead of paying for it again
+                facts = parse(saved.read_text(encoding="utf-8").splitlines())
+                facts_all.append(facts)
+                session = facts["session_id"] or session
+                cost += facts["cost_usd"]
+                n_turns += facts["turns"]
+                turn_rows.append(dict(score_turn(turn["expected"], facts, case, prior), exit_code=0, reused=True))
+                prior += facts["skills"]
+                continue
             try:
                 proc = subprocess.run(cmd, cwd=cwd, env=env, capture_output=True, text=True, timeout=args.case_timeout, check=False)
                 stream, err, code = proc.stdout, proc.stderr, proc.returncode
             except subprocess.TimeoutExpired as exc:
                 stream, err, code = (exc.stdout or b"").decode() if isinstance(exc.stdout, bytes) else (exc.stdout or ""), "timeout", -1
-            suffix = "" if k == 1 else f".turn{k}"
-            (raw_dir / f"{case['id']}{suffix}.jsonl").write_text(stream, encoding="utf-8")
+            saved.write_text(stream, encoding="utf-8")
             if err.strip():
                 (raw_dir / f"{case['id']}{suffix}.stderr.txt").write_text(err, encoding="utf-8")
             facts = parse(stream.splitlines())
@@ -341,7 +353,14 @@ def cmd_run(args) -> int:
             if spent[0] >= args.budget_usd:
                 stop.set()
                 return None
-        row = run_case(case, args, raw_dir)
+        try:
+            row = run_case(case, args, raw_dir)
+        except (OSError, ValueError, KeyError, subprocess.SubprocessError) as exc:  # one broken case is recorded, not fatal
+            row = {k: case.get(k) for k in ("id", "lang", "kind", "variant", "set", "expected_primary")}
+            row.update({"turns": [], "outcome": "harness-error", "strict": False, "lenient": False, "profile_reads": [],
+                        "other_skills": [], "plugins_reported": [], "builtin_plugins": [], "cli_version": None,
+                        "model_reported": None, "cost_usd": 0.0, "n_turns": 0, "loading_violation": False,
+                        "harness_error": f"{type(exc).__name__}: {exc}"})
         with lock:
             spent[0] += row["cost_usd"]
             why = contaminated(row)
@@ -464,6 +483,7 @@ def main(argv=None) -> int:
     r.add_argument("--results", type=Path, default=HERE / "results")
     r.add_argument("--run-id")
     r.add_argument("--dry-run", action="store_true")
+    r.add_argument("--reuse-raw", action="store_true", help="resume a run: score raw streams already in runs/<run_id>/raw/")
     c = sub.add_parser("compare")
     c.add_argument("result", type=Path)
     c.add_argument("--baseline", type=Path)
