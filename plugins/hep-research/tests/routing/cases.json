@@ -1,0 +1,1519 @@
+{
+ "note": "Routing cases. Static check: tools/check_routing_static.py. A live check needs approval for paid model calls.",
+ "cases": [
+  {
+   "id": "dr-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Measure the muon trigger efficiency with tag-and-probe and give me the per-bin uncertainty.",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "tag-and-probe"
+   ],
+   "inputs": {
+    "tnp_counts.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\npt_lo,pt_hi,probes,passing_probes\n20,30,1200,1104\n30,50,2400,2280\n50,100,900,873\n"
+   }
+  },
+  {
+   "id": "dr-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請幫我建立這個量能器的響應矩陣，並檢查 data/MC agreement。",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "response matrices",
+    "data/MC agreement"
+   ],
+   "inputs": {
+    "calo_scan.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nbeam_energy_GeV,mean_reco_GeV,sigma_reco_GeV,data_or_mc\n10,9.6,0.62,data\n10,9.7,0.58,mc\n50,48.9,1.71,data\n50,49.2,1.60,mc\n"
+   }
+  },
+  {
+   "id": "dr-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Unfold this measured spectrum with the response matrix I already have.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "unfolding"
+   ],
+   "not": "detector-response",
+   "inputs": {
+    "measured_spectrum.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nbin,lo,hi,counts\n0,0,10,520\n1,10,20,310\n2,20,40,140\n",
+    "response_matrix.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nreco_bin,true0,true1,true2\n0,0.80,0.12,0.01\n1,0.15,0.75,0.10\n2,0.01,0.10,0.82\n"
+   }
+  },
+  {
+   "id": "dr-negative-1",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "Design the background estimate for my dilepton measurement using control regions.",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "background estimation",
+    "control regions"
+   ],
+   "not": "detector-response",
+   "inputs": {
+    "analysis_note.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\n# Dilepton measurement (draft)\nSignal region: two opposite-sign muons, m_ll in 200-1000 GeV.\nMain backgrounds: Drell-Yan, ttbar, fakes. No background method chosen yet.\n"
+   }
+  },
+  {
+   "id": "an-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Review this measurement spec: is the estimand clear and are the systematic uncertainties complete?",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "estimand",
+    "systematic uncertainties",
+    "measurement review"
+   ],
+   "inputs": {
+    "measurement_spec.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\n# Measurement spec\nObservable: number of events with two jets above 30 GeV.\nResult: 'the rate'.\nSystematics: jet energy scale.\n"
+   }
+  },
+  {
+   "id": "an-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我要設計一個中微子截面量測的事件選擇與 cutflows，還有 blinding policy。",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "cutflows",
+    "blinding policy"
+   ]
+  },
+  {
+   "id": "an-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Set a CLs upper limit on the signal strength from these yields.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "CLs"
+   ],
+   "not": "hep-analysis",
+   "inputs": {
+    "yields.json": "{\"_note\": \"SYNTHETIC routing fixture: invented values, not data from any experiment.\", \"observed\": 7, \"background\": 4.2, \"background_unc\": 0.9, \"signal_mu1\": 3.1}\n"
+   }
+  },
+  {
+   "id": "an-negative-1",
+   "lang": "zh-Hant",
+   "kind": "negative",
+   "prompt": "我的分析程式在讀取 ROOT 檔時 crashes，請幫我除錯。",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "crashes",
+    "ROOT/PyROOT"
+   ],
+   "not": "hep-analysis",
+   "inputs": {
+    "read_tree.py": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nimport ROOT\nf = ROOT.TFile.Open('events.root')\nt = f.Get('Events')\nfor ev in t:\n    print(ev.Muon_pt[0])  # crashes on events with no muon\n"
+   }
+  },
+  {
+   "id": "co-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My ROOT macro has a memory leak after 10^6 events; find it.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "memory leaks",
+    "ROOT/PyROOT"
+   ],
+   "inputs": {
+    "loop.C": "// SYNTHETIC routing fixture: invented values, not data from any experiment.\nvoid loop() {\n  for (int i = 0; i < 1000000; ++i) {\n    TH1F* h = new TH1F(Form(\"h%d\", i), \"\", 10, 0, 1);\n    h->Fill(0.5);\n  }\n}\n"
+   }
+  },
+  {
+   "id": "co-direct-2",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Split this event generation into chunks for batch submission, with resubmission and a merge that does not double count.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "batch submission, merging and recovery"
+   ],
+   "inputs": {
+    "generate.py": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nimport sys, json, random\nn = int(sys.argv[1]); random.seed(int(sys.argv[2]))\nprint(json.dumps({'n': n, 'sum': sum(random.random() for _ in range(n))}))\n"
+   }
+  },
+  {
+   "id": "co-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Is this extracted cross section physically consistent with the tree-level prediction?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "cross sections"
+   ],
+   "not": "hep-computing",
+   "inputs": {
+    "result.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\nExtracted sigma(e+e- -> mu+mu-) at sqrt(s) = 10 GeV: 0.92 +- 0.03 nb.\nTree-level QED expectation quoted by the student: 0.87 nb.\n"
+   }
+  },
+  {
+   "id": "co-negative-1",
+   "lang": "zh-Hant",
+   "kind": "negative",
+   "prompt": "請幫我推導這個衰變寬度的解析式，並說明近似的適用範圍。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "decay rates",
+    "validity domains"
+   ],
+   "not": "hep-computing",
+   "inputs": {
+    "process.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\n過程：純量粒子 S（質量 M）衰變為一對狄拉克費米子，Yukawa 耦合 y。\n"
+   }
+  },
+  {
+   "id": "st-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Give me a Feldman-Cousins interval for zero observed events with background 0.8.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "Feldman-Cousins",
+    "low or zero counts"
+   ]
+  },
+  {
+   "id": "st-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "兩個實驗量測同一觀測量，有共同的系統誤差，請做 combinations across datasets。",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "combinations across datasets or experiments"
+   ]
+  },
+  {
+   "id": "st-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Which selection cuts should define my signal region?",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "event/candidate selection"
+   ],
+   "not": "hep-statistics",
+   "inputs": {
+    "analysis_summary.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\nSearch for a 1 TeV resonance decaying to two b-jets. Available variables: m_jj, b-tag score, delta_eta_jj, jet pT.\n"
+   }
+  },
+  {
+   "id": "st-negative-1",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "Derive the prediction for this new-physics coupling so I can fit it later.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "predictions"
+   ],
+   "not": "hep-statistics",
+   "inputs": {
+    "model.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\nModel: a new vector boson Z' with mass 2 TeV coupling to muons with strength g'. Observable: dimuon mass spectrum.\n"
+   }
+  },
+  {
+   "id": "th-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Derive the tree-level e+e- -> mu+mu- cross section with explicit conventions and check the limits.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "cross sections",
+    "conventions"
+   ]
+  },
+  {
+   "id": "th-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請說明這個 NLO 計算的 scale envelopes 該如何給出理論誤差。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "scale envelopes"
+   ]
+  },
+  {
+   "id": "th-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Fit the coupling of my model to these published data points with their covariance.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "fits"
+   ],
+   "not": "hep-theory",
+   "inputs": {
+    "published_points.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nx,y,stat,syst_corr\n1,10.2,0.5,0.3\n2,8.1,0.4,0.25\n3,6.3,0.4,0.2\n",
+    "covariance.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\ni,j,cov\n0,0,0.34\n1,1,0.2225\n2,2,0.2\n0,1,0.075\n1,2,0.05\n0,2,0.06\n",
+    "model.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\nPrediction y(x; g) = g^2 * 12 / (1 + 0.2 x).\n"
+   }
+  },
+  {
+   "id": "th-negative-1",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "Write the results section of the paper from these fit outputs.",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "drafting or revising paper sections"
+   ],
+   "not": "hep-theory",
+   "inputs": {
+    "fit_outputs.json": "{\"_note\": \"SYNTHETIC routing fixture: invented values, not data from any experiment.\", \"status\": [\"synthetic\"], \"mu\": 1.02, \"mu_err\": [0.11, 0.12], \"chi2\": 9.8, \"ndf\": 9}\n"
+   }
+  },
+  {
+   "id": "ml-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Train a jet classifier in PyTorch with grouped splits by run so nothing leaks.",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "grouped train/validation/test splits and leakage checks"
+   ],
+   "inputs": {
+    "jets.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nrun,event,pt,eta,n_constituents,label\n1001,1,45.2,0.3,23,1\n1001,2,38.1,-1.2,17,0\n1002,1,52.7,2.0,31,1\n"
+   }
+  },
+  {
+   "id": "ml-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我的模擬太慢，想用 PyTorch 做 surrogates，並檢查 domain shift。",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "surrogates",
+    "domain shift"
+   ]
+  },
+  {
+   "id": "ml-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Is the likelihood-free inference built on my network statistically valid, with coverage?",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "coverage"
+   ],
+   "not": "physics-ml",
+   "inputs": {
+    "lfi_notes.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\nA neural ratio estimator trained on 1e5 simulated samples gives a 68% interval for theta of [0.8, 1.3]. No coverage test yet.\n"
+   }
+  },
+  {
+   "id": "ml-negative-1",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "My C++ CMake build fails to link ROOT libraries.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "CMake builds"
+   ],
+   "not": "physics-ml",
+   "inputs": {
+    "CMakeLists.txt": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\ncmake_minimum_required(VERSION 3.16)\nproject(ana CXX)\nadd_executable(ana main.cpp)\n"
+   }
+  },
+  {
+   "id": "rc-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Check whether this INSPIRE citation really supports the 2.1% number in my draft.",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "citations",
+    "INSPIRE-HEP"
+   ],
+   "inputs": {
+    "draft.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\nThe trigger efficiency uncertainty is 2.1% [INSPIRE: Example:2020abc].\n"
+   }
+  },
+  {
+   "id": "rc-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請幫我回覆審稿人的 referee reports，並修改摘要。",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "referee reports",
+    "abstracts"
+   ],
+   "inputs": {
+    "referee_report.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\n審稿人一：摘要沒有說明系統誤差的主要來源。審稿人二：圖三缺少誤差帶。\n"
+   }
+  },
+  {
+   "id": "rc-ams-paper-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "What data period and rigidity range does the AMS-02 nitrogen flux paper report?",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "what a paper states"
+   ],
+   "profiles": [
+    "experiment:ams-02"
+   ],
+   "note": "publication-record question"
+  },
+  {
+   "id": "rc-ams-exists-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "A colleague cites an AMS-02 paper observing antihelium-4. Is that paper real?",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "whether a paper exists"
+   ],
+   "profiles": [
+    "experiment:ams-02"
+   ],
+   "note": "publication-record question"
+  },
+  {
+   "id": "rc-ams-latest-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "What has AMS-02 published most recently on cosmic-ray nuclei?",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "what a named experiment published"
+   ],
+   "profiles": [
+    "experiment:ams-02"
+   ],
+   "note": "publication-record question"
+  },
+  {
+   "id": "rc-ams-latest-2",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Is the 2016 AMS-02 boron-to-carbon ratio paper still the latest result I should cite?",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "which result is the latest"
+   ],
+   "profiles": [
+    "experiment:ams-02"
+   ],
+   "note": "currency question (T33 shape)"
+  },
+  {
+   "id": "rc-ams-support-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Does the AMS-02 hardening of the proton and helium spectra prove a second source population?",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "whether a result supports a claim or interpretation"
+   ],
+   "profiles": [
+    "experiment:ams-02"
+   ],
+   "note": "claim-support question (T40 shape)"
+  },
+  {
+   "id": "rc-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Is this Feynman diagram physically allowed at tree level?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "amplitudes"
+   ],
+   "not": "research-communication",
+   "inputs": {
+    "diagram.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\nDiagram: e- e+ annihilate into a photon, which produces a single muon (no antimuon) at tree level.\n"
+   }
+  },
+  {
+   "id": "rc-negative-1",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "Run the template fit for the paper's main result.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "template fits"
+   ],
+   "not": "research-communication",
+   "inputs": {
+    "fit_config.json": "{\"_note\": \"SYNTHETIC routing fixture: invented values, not data from any experiment.\", \"templates\": [\"signal.csv\", \"background.csv\"], \"data\": \"data.csv\", \"poi\": \"mu\"}\n",
+    "signal.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nbin,count\n0,3\n1,8\n2,4\n",
+    "background.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nbin,count\n0,40\n1,30\n2,20\n",
+    "data.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nbin,count\n0,45\n1,37\n2,25\n"
+   }
+  },
+  {
+   "id": "st-impacts-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Show me the pulls, constraints and impacts of the nuisance parameters after my profile likelihood fit.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "nuisance parameters",
+    "profile likelihood"
+   ],
+   "inputs": {
+    "workspace.json": "{\n \"_note\": \"SYNTHETIC routing fixture: invented values, not data from any experiment.\",\n \"version\": \"1.0.0\",\n \"channels\": [\n  {\n   \"name\": \"sr\",\n   \"samples\": [\n    {\n     \"name\": \"signal\",\n     \"data\": [\n      3.0,\n      5.0\n     ],\n     \"modifiers\": [\n      {\n       \"name\": \"mu\",\n       \"type\": \"normfactor\",\n       \"data\": null\n      }\n     ]\n    },\n    {\n     \"name\": \"background\",\n     \"data\": [\n      20.0,\n      12.0\n     ],\n     \"modifiers\": [\n      {\n       \"name\": \"bkg_norm\",\n       \"type\": \"normsys\",\n       \"data\": {\n        \"hi\": 1.1,\n        \"lo\": 0.9\n       }\n      },\n      {\n       \"name\": \"jes\",\n       \"type\": \"histosys\",\n       \"data\": {\n        \"hi_data\": [\n         21.5,\n         12.4\n        ],\n        \"lo_data\": [\n         18.6,\n         11.7\n        ]\n       }\n      }\n     ]\n    }\n   ]\n  }\n ],\n \"observations\": [\n  {\n   \"name\": \"sr\",\n   \"data\": [\n    25.0,\n    18.0\n   ]\n  }\n ],\n \"measurements\": [\n  {\n   \"name\": \"meas\",\n   \"config\": {\n    \"poi\": \"mu\",\n    \"parameters\": []\n   }\n  }\n ]\n}\n",
+    "fit_result.json": "{\n \"_note\": \"SYNTHETIC routing fixture: invented values, not data from any experiment.\",\n \"fit\": \"maximum likelihood on workspace.json (pyhf 0.7.6), observed data\",\n \"bestfit\": {\n  \"mu\": 1.275,\n  \"bkg_norm\": 0.053,\n  \"jes\": 0.052\n },\n \"uncertainty\": {\n  \"mu\": 0.845,\n  \"bkg_norm\": 0.972,\n  \"jes\": 0.977\n }\n}\n"
+   }
+  },
+  {
+   "id": "st-lee-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我在質量掃描中看到 3.5σ 的局部超出，請做 look-elsewhere effects 的修正並給出全域顯著性。",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "significance and look-elsewhere effects"
+   ]
+  },
+  {
+   "id": "st-sensitivity-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "What median discovery significance should I expect for 5 signal events over 20 background, using Asimov datasets?",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "toys and asimov datasets"
+   ]
+  },
+  {
+   "id": "st-gof-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我的 template fits 有很多 bin 只有幾個事件，goodness of fit 該怎麼算？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "goodness of fit",
+    "template fits"
+   ]
+  },
+  {
+   "id": "st-bayes-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My MCMC chains give R-hat 1.08; can I report these Bayesian posteriors?",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "bayesian posteriors (priors, samplers, convergence)"
+   ]
+  },
+  {
+   "id": "st-sweights-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Fit the decay-time distribution with sWeights from my mass fit and give an uncertainty that covers.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "unbinned fits"
+   ],
+   "not": "hep-analysis"
+  },
+  {
+   "id": "st-nsbi-1",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "我們用神經網路估計似然比（NSBI）做推論，最後區間的 coverage 要怎麼驗證？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "coverage"
+   ],
+   "not": "physics-ml"
+  },
+  {
+   "id": "st-publish-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Prepare our likelihoods for HEPData as a background-only workspace plus signal patches so others can reuse the fit.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "likelihoods"
+   ],
+   "not": "research-communication"
+  },
+  {
+   "id": "co-batch-sbatch-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Write an sbatch job array that runs my 500 toy fits in chunks with reproducible seeds, and merge the outputs without double counting.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "Slurm and HTCondor job arrays",
+    "batch submission, merging and recovery"
+   ],
+   "inputs": {
+    "toy_fit.py": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nimport sys, json, random\nstart, stop, seed = map(int, sys.argv[1:4])\nrandom.seed(seed)\nprint(json.dumps({'n': stop - start}))\n"
+   }
+  },
+  {
+   "id": "co-batch-held-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我的 HTCondor 工作被 hold 住了，原因寫超過記憶體上限，該怎麼處理後再重新提交？",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "held or evicted jobs"
+   ],
+   "inputs": {
+    "events.log": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\n012 (1234.007.000) 2026-10-03 10:00:00 Job was held.\n\tJob exceeded its memory request (synthetic)\n\tCode 34 Subcode 0\n...\n"
+   }
+  },
+  {
+   "id": "co-batch-evicted-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Some of my HTCondor jobs were evicted and restarted, and now the merged histogram seems to count those chunks twice.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "held or evicted jobs",
+    "batch submission, merging and recovery"
+   ],
+   "inputs": {
+    "merge.sh": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\ncat out/*.json > merged.json\n"
+   }
+  },
+  {
+   "id": "co-batch-pilot-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我要在 Slurm 上跑 2000 個 chunk，記憶體和 walltime 要怎麼設定？要先跑一個 pilot 嗎？",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "pilot sizing"
+   ]
+  },
+  {
+   "id": "co-batch-gpu-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Submit my classifier training as single-node GPU jobs on our Slurm cluster, one job per learning rate, and collect the results.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "Slurm and HTCondor job arrays"
+   ],
+   "chain": [
+    "hep-computing",
+    "physics-ml"
+   ],
+   "note": "submission is hep-computing; the model, training and validation hand to physics-ml"
+  },
+  {
+   "id": "co-batch-negative-1",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "My 2000 toy pseudo-experiments finished on the batch cluster. Does my 95% CL Feldman-Cousins interval have the right coverage?",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "Feldman-Cousins",
+    "coverage"
+   ],
+   "not": "hep-computing"
+  },
+  {
+   "id": "j01",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Plan the time-dependent helium flux and He/p ratio measurement for AMS-02 across two periods.",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "exposure"
+   ],
+   "journey": "J1",
+   "profiles": [
+    "experiment:ams-02"
+   ],
+   "chain": [
+    "hep-analysis",
+    "detector-response",
+    "hep-statistics",
+    "research-communication"
+   ]
+  },
+  {
+   "id": "j02",
+   "lang": "zh-Hant",
+   "kind": "journey",
+   "prompt": "研究 AMS-02 RICH 的速度解析度隨電荷的變化。",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "Cherenkov/RICH",
+    "resolution"
+   ],
+   "journey": "J2",
+   "profiles": [
+    "experiment:ams-02"
+   ],
+   "chain": [
+    "detector-response",
+    "hep-statistics"
+   ]
+  },
+  {
+   "id": "j03",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Measure the corrected angular distribution at my e+e- collider with its own luminosity and response.",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "luminosity"
+   ],
+   "journey": "J3",
+   "chain": [
+    "hep-analysis",
+    "detector-response",
+    "hep-statistics"
+   ]
+  },
+  {
+   "id": "j04",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Compute the tree-level cross section with all conventions stated and check it numerically.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "cross sections",
+    "consistency checks"
+   ],
+   "journey": "J4",
+   "profiles": [],
+   "chain": [
+    "hep-theory",
+    "hep-computing",
+    "hep-theory"
+   ],
+   "inputs": {
+    "process.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\nProcess: e+ e- -> mu+ mu- through one photon at sqrt(s) = 10 GeV, unpolarized beams.\n"
+   }
+  },
+  {
+   "id": "j05",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Fold my prediction through the detector response and fit a normalization scale.",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "folding a prediction through the response"
+   ],
+   "journey": "J5",
+   "chain": [
+    "detector-response",
+    "hep-statistics",
+    "research-communication"
+   ],
+   "note": "T1: the prediction exists, so the chain starts at the fold (routing-contract ownership table)",
+   "inputs": {
+    "prediction.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nbin,lo,hi,sigma_pb\n0,-1,0,370\n1,0,1,375\n",
+    "response.json": "{\"_note\": \"SYNTHETIC routing fixture: invented values, not data from any experiment.\", \"level_in\": \"particle\", \"level_out\": \"detector\", \"matrix\": [[0.9,0.05],[0.05,0.9]], \"efficiency_included\": true}\n",
+    "observed.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nbin,counts\n0,3410\n1,3460\n"
+   }
+  },
+  {
+   "id": "j06",
+   "lang": "zh-Hant",
+   "kind": "journey",
+   "prompt": "用已發表的資料比較我的模型（comparing a model with published data），不需要偵測器細節。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "comparing a model with an experiment's published data"
+   ],
+   "journey": "J6",
+   "chain": [
+    "hep-theory",
+    "hep-statistics"
+   ],
+   "loads": "dataset records only"
+  },
+  {
+   "id": "j07",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Recast the published search with its efficiency maps to constrain my model.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "recasting a published analysis"
+   ],
+   "journey": "J7",
+   "chain": [
+    "hep-theory",
+    "detector-response",
+    "hep-statistics"
+   ]
+  },
+  {
+   "id": "j08",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Run a convergence study of this integral and cross-check the symbolic result numerically.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "convergence and tolerance studies"
+   ],
+   "journey": "J8",
+   "chain": [
+    "hep-computing",
+    "hep-theory"
+   ],
+   "inputs": {
+    "integral.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\nI(a) = integral_0^1 x^a log(x) dx, symbolic result -1/(a+1)^2. Check at a = 0.5 and a = 3.\n"
+   }
+  },
+  {
+   "id": "j09",
+   "lang": "zh-Hant",
+   "kind": "journey",
+   "prompt": "訓練一個分類器並宣告 surrogates 的有效範圍，之後用於推論。",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "surrogates"
+   ],
+   "journey": "J9",
+   "chain": [
+    "physics-ml",
+    "hep-statistics"
+   ]
+  },
+  {
+   "id": "j10",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Draft the paper section and figures with claim-to-result links and honest status.",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "claim-to-result links"
+   ],
+   "journey": "J10",
+   "chain": [
+    "research-communication"
+   ],
+   "inputs": {
+    "results.json": "{\"_note\": \"SYNTHETIC routing fixture: invented values, not data from any experiment.\", \"status\": [\"synthetic\"], \"sigma_pb\": 745.6, \"stat\": 6.6, \"syst\": 14.9}\n"
+   }
+  },
+  {
+   "id": "j11",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Use our collaboration's private calibration constants from my local profile in the efficiency study.",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "calibration"
+   ],
+   "journey": "J11",
+   "chain": [
+    "detector-response"
+   ],
+   "note": "local profile via project config; nothing enters the plugin",
+   "inputs": {
+    "hep-research.project.json": "{\n \"schema_version\": \"1.0.0\",\n \"plugin_version\": \">=0.1,<1.0\",\n \"local_profile_paths\": [\"private-profile\"]\n}\n",
+    "private-profile/README.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\nLocal profile with calibration constants (invented).\n",
+    "private-profile/calibration.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nchannel,gain\n0,1.02\n1,0.98\n"
+   }
+  },
+  {
+   "id": "j12",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Set up a lattice QCD global analysis of form factors.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "journey": "J12",
+   "chain": [
+    "hep-theory",
+    "hep-statistics"
+   ],
+   "limited_support": true
+  },
+  {
+   "id": "ams-computing-1",
+   "lang": "en",
+   "kind": "ams-computing",
+   "prompt": "My AMS-02 reconstruction script segfaults when reading the ntuple.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "crashes"
+   ],
+   "not": "hep-analysis",
+   "note": "experiment name does not route; the code problem does",
+   "inputs": {
+    "reco_ntuple.py": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nimport ctypes\nbuf = (ctypes.c_float * 10)()\nfor i in range(100):\n    buf[i] = 0.0  # writes past the buffer\n"
+   }
+  },
+  {
+   "id": "ams-computing-2",
+   "lang": "zh-Hant",
+   "kind": "ams-computing",
+   "prompt": "AMS 的資料處理程式在 batch submission 後合併結果重複計算。",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "batch submission, merging and recovery"
+   ],
+   "not": "hep-analysis",
+   "inputs": {
+    "merge.sh": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\ncat out/job_*.txt out/job_*_retry.txt > merged.txt\n"
+   }
+  },
+  {
+   "id": "theory-no-exp-1",
+   "lang": "en",
+   "kind": "theory-no-experiment",
+   "prompt": "Derive the decay rate of a scalar to two fermions; no experiment involved.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "decay rates"
+   ],
+   "profiles": []
+  },
+  {
+   "id": "recast-1",
+   "lang": "zh-Hant",
+   "kind": "recasting",
+   "prompt": "請重新詮釋（recasting a published analysis）這個 LHC 搜尋結果以限制我的模型。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "recasting a published analysis"
+   ],
+   "chain": [
+    "hep-theory",
+    "detector-response",
+    "hep-statistics"
+   ]
+  },
+  {
+   "id": "out-of-v1-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "prompt": "Fit cosmic-ray propagation parameters with GALPROP across all species.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [],
+   "limited_support": true
+  },
+  {
+   "id": "out-of-v1-2",
+   "lang": "zh-Hant",
+   "kind": "out-of-v1",
+   "prompt": "幫我做 SMEFT 全域擬合。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "limited_support": true,
+   "also_accept": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "id": "underspec-1",
+   "lang": "en",
+   "kind": "underspecified",
+   "prompt": "Compare the two experiments.",
+   "expected_primary": "ask",
+   "trigger_terms": [],
+   "note": "ask which datasets and observables; never pick experiments"
+  },
+  {
+   "id": "underspec-2",
+   "lang": "zh-Hant",
+   "kind": "underspecified",
+   "prompt": "比較這兩個實驗的結果。",
+   "expected_primary": "ask",
+   "trigger_terms": []
+  },
+  {
+   "id": "eic-facility-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Which beam species and polarizations does the EIC provide, and where are its design energies specified? I am planning a measurement there.",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "measurement"
+   ],
+   "profiles": [
+    "experiment:eic"
+   ],
+   "note": "facility module of the eic profile; design targets only, no number is shipped"
+  },
+  {
+   "id": "epic-detector-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請說明 EIC 的 ePIC 偵測器概念：磁鐵、tracking、calorimetry、particle identification 與資料擷取。",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "tracking",
+    "calorimetry",
+    "particle identification"
+   ],
+   "profiles": [
+    "experiment:eic"
+   ],
+   "note": "ePIC-scoped detector module only"
+  },
+  {
+   "id": "eic-dis-theory-1",
+   "lang": "en",
+   "kind": "theory-no-experiment",
+   "prompt": "Write down the DIS variables x, y and Q^2 from the lepton and hadron four-momenta and the identity that links them to sqrt(s).",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "derivations",
+    "conventions"
+   ],
+   "profiles": [],
+   "note": "generic DIS kinematics; reading any experiment profile is a loading violation"
+  },
+  {
+   "id": "eic-underspec-1",
+   "lang": "en",
+   "kind": "underspecified",
+   "prompt": "What is the tracking resolution at the EIC?",
+   "expected_primary": "ask",
+   "trigger_terms": [],
+   "note": "must ask which detector concept, geometry release and configuration, and whether a projection or a measurement is meant"
+  },
+  {
+   "id": "dr-t3-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "How should I align the silicon tracker with cosmic-ray and collision tracks, and check that the alignment did not bias the momentum scale?",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "calibration and alignment"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "dr-t3-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "TOF 的時間解析度要怎麼從資料中量測？請分開核心和尾巴。",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "TOF",
+    "timing"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "dr-t3-3",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Set up a Geant4 detector simulation of a lead-glass calorimeter test beam and compare it with the beam data.",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "detector simulation (Geant4)"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "dr-t3-4",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "如何用 truth matching 評估 tracking 的效率與假徑跡率？",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "truth matching",
+    "tracking"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "dr-t3-5",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Which conditions tag and calibration version produced my reconstructed sample, and how do I record that provenance?",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "conditions and their provenance"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "dr-t3-6",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "TRD 的電子與質子分離能力（particle identification）要怎麼評估？",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "TRD",
+    "particle identification"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "dr-t3-7",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Explain signal formation and readout in a silicon strip sensor, including charge sharing between strips.",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "signal formation and readout"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "dr-t3-8",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請說明 muon systems 的觸發與重建，以及 muon 動量解析度如何量測。",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "muon systems"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "dr-t3-9",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Give me a parametrized electron efficiency and smearing so a theorist can recast our search.",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "parametrized response for recasting"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "an-t3-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Set up an ABCD background estimate for the multijet background in my search and say which closure checks it needs.",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "background estimation",
+    "ABCD"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "an-t3-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我的宇宙線通量量測要怎麼計算 exposure 與 live time？",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "exposure",
+    "live time"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "an-t3-3",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Which systematic uncertainties should my W cross-section measurement evaluate, and how should each one be evaluated?",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "systematic uncertainties",
+    "evaluation plan"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "an-t3-4",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請幫我定義 Z→ee 量測的 estimand 與 observable definition。",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "estimand",
+    "observable definition"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "an-t3-5",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Use mass sidebands to estimate the combinatorial background under my peak.",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "sidebands",
+    "background estimation"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "an-t3-6",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我們要在解盲前先定 blinding policy，哪些區域要保持盲化？",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "blinding policy"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "an-t3-7",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Lay out the correction chain from raw counts to a fiducial cross section: efficiency, acceptance and luminosity.",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "correction chains",
+    "acceptance"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "an-t3-8",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Give me a verdict-first measurement review of a plan in which the analyst who tunes the selection also sees the blinded offset.",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "measurement review"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "co-t3-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "用 uproot/awkward 讀取巢狀的 jagged arrays 很慢，怎麼改善 performance？",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "uproot/awkward",
+    "performance"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "co-t3-2",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Write a run manifest that records the environment, inputs and seeds for this production.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "environment and run manifests"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "co-t3-3",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Port my event loop to RDataFrame and check that the outputs are identical.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "RDataFrame"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "th-t3-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Which PDF set and alpha_s value should my NLO Drell-Yan prediction use, and how do I quote the PDF uncertainty?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "PDFs",
+    "theory uncertainties"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "th-t3-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請說明 SMEFT 的運算子基底與正規化慣例（SMEFT conventions）。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "SMEFT conventions"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "ml-t3-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Build a generative model for fast simulation of calorimeter showers in PyTorch.",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "generative models and fast simulation"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "ml-t3-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我的 PyTorch 訓練在第 3 個 epoch 出現 NaN，請幫我 debugging NaNs and shapes。",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "debugging NaNs and shapes"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "ml-t3-3",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Set up distributed training across four GPUs for my particle-flow network in PyTorch.",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "distributed training"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "ml-t3-4",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "分類器輸出的機率沒有校準，該怎麼做 calibration of model outputs？",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "calibration of model outputs"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "ml-t3-5",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Train a regressor in PyTorch that predicts the jet energy correction from the jet constituents.",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "classifiers and regressors"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "ml-t3-6",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Export my trained PyTorch tagger to ONNX and make sure the checkpoint reloads identically.",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "checkpoints",
+    "export"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "ml-t3-7",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我的 DataLoader 很慢，GPU 一直在等資料，PyTorch 的 data loading 該怎麼優化？",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "data loading"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "ml-t3-8",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Turn on mixed precision for my transformer jet tagger without breaking the loss.",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "mixed precision"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "ml-t3-9",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "神經網路回歸的 uncertainty estimation 要用 ensemble 還是 MC dropout？",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "uncertainty estimation"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "ml-t3-10",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Set up simulation-based inference with a neural posterior estimator for my model parameters in PyTorch.",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "ML-assisted or simulation-based inference"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "ml-t3-11",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "PyTorch 的 training loops 要怎麼寫才能完全重現？",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "training loops"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "ml-t3-12",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My classifier trained on simulation underperforms on data; measure the domain shift and suggest a fix.",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "domain shift"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "rc-t3-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Build a literature matrix of recent W mass measurements with their methods and uncertainties.",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "literature matrices and reviews"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "rc-t3-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請幫我把分析流程畫成 diagrams，輸出可編輯的原始檔。",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "diagrams"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "rc-t3-3",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Turn my thesis results into a 15-minute conference talk and a poster version.",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "talks and posters"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "rc-t3-4",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "幫我寫研究計畫書（proposals）的動機與方法章節。",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "proposals"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "rc-t3-5",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Write handover notes for the student who takes over my analysis next month.",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "handover notes"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "rc-t3-6",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Improve the captions and layout of the figures and tables in chapter 4 of my thesis.",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "captions",
+    "figures and tables"
+   ],
+   "set": "T3"
+  },
+  {
+   "id": "dr-t3-neg",
+   "lang": "zh-Hant",
+   "kind": "negative",
+   "prompt": "我已有驗證過的響應矩陣，請選擇 unfolding 的正則化強度並檢查 coverage。",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "unfolding",
+    "coverage"
+   ],
+   "not": "detector-response",
+   "set": "T3"
+  },
+  {
+   "id": "st-t3-neg",
+   "lang": "zh-Hant",
+   "kind": "negative",
+   "prompt": "請推導這個 Z' 模型在 LHC 的截面 predictions，之後再拿去擬合。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "predictions",
+    "cross sections"
+   ],
+   "not": "hep-statistics",
+   "set": "T3"
+  },
+  {
+   "id": "th-t3-neg",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "Set a 95% CL CLs limit on my model's coupling from published yields of 12 observed over 9.5 expected.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "CLs"
+   ],
+   "not": "hep-theory",
+   "set": "T3"
+  },
+  {
+   "id": "ml-t3-neg",
+   "lang": "zh-Hant",
+   "kind": "negative",
+   "prompt": "我的 CMake builds 在連結 ROOT 函式庫時失敗，與機器學習無關。",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "CMake builds"
+   ],
+   "not": "physics-ml",
+   "set": "T3"
+  },
+  {
+   "id": "rc-t3-neg",
+   "lang": "zh-Hant",
+   "kind": "negative",
+   "prompt": "這張 Feynman 圖在樹圖階是否物理上允許？",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "Feynman diagram is allowed"
+   ],
+   "not": "research-communication",
+   "set": "T3"
+  },
+  {
+   "id": "co-t3-neg",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "My code runs fine; which event selection cuts should define the signal region of my dimuon search?",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "event/candidate selection"
+   ],
+   "not": "hep-computing",
+   "set": "T3"
+  },
+  {
+   "id": "an-t3-neg",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "Train a PyTorch classifier for my signal selection with grouped train/validation/test splits by run.",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "grouped train/validation/test splits and leakage checks"
+   ],
+   "not": "hep-analysis",
+   "set": "T3"
+  }
+ ]
+}

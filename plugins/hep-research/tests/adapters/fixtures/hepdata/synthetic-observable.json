@@ -1,0 +1,22 @@
+{
+ "quantity": "differential-cross-section",
+ "process": "e+e- -> mu+mu- (synthetic)",
+ "level": "particle-fiducial",
+ "frame": "center-of-mass",
+ "normalization": {
+  "kind": "integrated-luminosity",
+  "value": "not-provided"
+ },
+ "bin_semantics": "bin-averaged",
+ "unit": "pb",
+ "phase_space": {
+  "definition": "SYNTHETIC: |cos theta| < 0.9",
+  "fiducial": true
+ },
+ "variables": [
+  {
+   "name": "cos_theta",
+   "unit": "1"
+  }
+ ]
+}

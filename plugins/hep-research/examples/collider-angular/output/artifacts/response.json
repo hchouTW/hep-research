@@ -1,0 +1,88 @@
+{
+ "contract_version": "2.0.0",
+ "bindings": {
+  "experiments": [
+   {
+    "profile": "experiment:synthetic-collider",
+    "version": "1.0.0"
+   }
+  ],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.3.0",
+  "contracts": "2.0.0",
+  "profiles": {
+   "experiment:synthetic-collider": "1.0.0"
+  }
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "artifact_id": "synthetic-path-b-response",
+ "artifact_type": "response",
+ "objective": "SYNTHETIC cos theta response including the efficiency",
+ "status": [
+  "synthetic"
+ ],
+ "provenance": {
+  "producer_skill": "detector-response",
+  "created": "2026-10-02"
+ },
+ "extension": {
+  "truth_axis": {
+   "name": "cos_theta",
+   "unit": "1",
+   "edges": [
+    -1.0,
+    -0.9,
+    -0.72,
+    -0.54,
+    -0.36,
+    -0.18,
+    0.0,
+    0.18,
+    0.36,
+    0.54,
+    0.72,
+    0.9,
+    1.0
+   ]
+  },
+  "reco_axis": {
+   "name": "cos_theta",
+   "unit": "1",
+   "edges": [
+    -1.0,
+    -0.9,
+    -0.72,
+    -0.54,
+    -0.36,
+    -0.18,
+    0.0,
+    0.18,
+    0.36,
+    0.54,
+    0.72,
+    0.9,
+    1.0
+   ]
+  },
+  "orientation": "rows_reco_cols_truth",
+  "normalization": "conditional_on_generated",
+  "inefficiency": "inside_matrix",
+  "acceptance": "inside_matrix",
+  "includes": [
+   "migration",
+   "efficiency"
+  ],
+  "applied_separately": [
+   "luminosity"
+  ],
+  "underflow_overflow": "reco outside [-1, 1] is lost; outer truth bins are buffers",
+  "conditions": "single synthetic run",
+  "provenance": "analytic integration of the synthetic detector model",
+  "matrix_ref": "results.json#response",
+  "form": "matrix"
+ }
+}

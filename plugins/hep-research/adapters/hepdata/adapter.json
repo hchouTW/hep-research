@@ -1,0 +1,24 @@
+{
+ "id": "adapter:hepdata",
+ "version": "0.1.0",
+ "status": "demonstrated-on-synthetic-data",
+ "purpose": "Turn a HEPData table (and its covariance or correlation table) into a dataset-record with its HEPData identifiers, without retyping numbers",
+ "tools": [
+  {
+   "name": "HEPData submission table format (JSON; YAML with PyYAML)",
+   "status": "demonstrated-on-synthetic-data",
+   "tested_versions": [
+    "synthetic tables in the HEPData independent_variables / dependent_variables layout (no real record fetched: hepdata.net is not reachable from E4)"
+   ]
+  }
+ ],
+ "environment": "E4 (docs/capability-matrix.md): Python 3.13.16, standard library only for JSON input",
+ "assets": [
+  "assets/hepdata_record.py"
+ ],
+ "tests": [
+  "../../tests/adapters/test_hepdata_record.py"
+ ],
+ "owner_skill": "hep-theory",
+ "status_rule": "the adapter status is the lowest of its tools' statuses; it stays demonstrated-on-synthetic-data until a real HEPData export is read and its numbers checked against the paper"
+}

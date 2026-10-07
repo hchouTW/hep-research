@@ -1,0 +1,9 @@
+#!/bin/sh
+# pre-push: check every path in every commit about to be pushed, including paths added and later deleted.
+z=0000000000000000000000000000000000000000
+while read -r lref lsha rref rsha; do
+  [ "$lsha" = "$z" ] && continue                       # branch deletion
+  if [ "$rsha" = "$z" ]; then range="$lsha --not --remotes"; else range="$rsha..$lsha"; fi
+  git log --name-only --format= $range | grep -v '^$' \
+    | "$(git rev-parse --show-toplevel)/.githooks/check-paths.sh" || exit 1
+done

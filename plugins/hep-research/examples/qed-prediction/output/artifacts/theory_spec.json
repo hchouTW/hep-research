@@ -1,0 +1,176 @@
+{
+ "contract_version": "2.0.0",
+ "bindings": {
+  "experiments": [],
+  "theory": [
+   {
+    "profile": "theory:qed-benchmark",
+    "version": "1.0.0"
+   }
+  ]
+ },
+ "versions": {
+  "plugin": "0.3.0",
+  "contracts": "2.0.0",
+  "profiles": {
+   "theory:qed-benchmark": "1.0.0"
+  }
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "artifact_id": "qedbench-path-c-theory-spec",
+ "artifact_type": "theory-spec",
+ "objective": "Tree-level e+e- -> mu+mu- via one photon: differential and integrated cross section",
+ "provenance": {
+  "producer_skill": "hep-theory",
+  "created": "2026-10-02",
+  "evidence_ids": [
+   "qedbench:C01",
+   "qedbench:C02"
+  ]
+ },
+ "status": [
+  "validated-in-scope"
+ ],
+ "extension": {
+  "model": {
+   "id": "qed-tree-level-photon-exchange",
+   "description": "e+e- -> mu+mu- through one s-channel photon, lowest order"
+  },
+  "domain_profile": "theory:qed-benchmark",
+  "assumptions": [
+   "one s-channel photon, tree level (order alpha^2 in the cross section)",
+   "massless electrons, muon mass m kept",
+   "unpolarized beams: average over the 4 initial spin states, sum over final spins",
+   "alpha = e^2 / (4 pi), hbar = c = 1",
+   "point-like fermions, no Z exchange, no radiative corrections"
+  ],
+  "conventions": {
+   "unit_system": "natural-HEP: GeV for energies, s in GeV^2; cross sections quoted in pb (1 nb = 1000 pb)",
+   "hbar_c_one": true,
+   "metric_signature": "+--- (used in the amplitude derivation)",
+   "coupling_normalization": "alpha = e^2 / (4 pi), Heaviside-Lorentz units",
+   "renormalization_scheme": "not-applicable at tree level; alpha is a fixed input (its value enters only through the reference constant below)",
+   "scales": "not-applicable at tree level with fixed alpha: no renormalization or factorization scale enters and alpha is not run to sqrt(s), so there is no scale variation or scale uncertainty",
+   "energy_variable": "sqrt_s",
+   "frame": "center-of-mass",
+   "angle_definition": "theta between the incoming e- and the outgoing mu- in the c.m. frame",
+   "spin_treatment": "unpolarized beams: average over the four initial spin states, sum over final spins",
+   "mass_approximation": "electrons massless; muon mass kept in the derivation, massless (beta -> 1) in the numerical prediction",
+   "qedbench:reference_constant": "4 pi alpha^2 / 3 converted to nb GeV^2 is taken as 86.8 nb GeV^2 from PDG eq. (51.3) [qedbench:C02], three significant figures"
+  },
+  "order": "tree level, O(alpha^2) in the cross section",
+  "parameters": {
+   "sqrt_s_gev": 10.0,
+   "reference_constant_nb_gev2": 86.8,
+   "muon_mass": "symbolic m in the derivation; 0 in the numerical prediction"
+  },
+  "scales": "not-applicable",
+  "derivation_status": "analytic-derivation",
+  "validity_domain": {
+   "sqrt_s": "well above 2 m_mu and well below m_Z [Proposal: benchmark point 10 GeV]",
+   "excluded_effects": [
+    "Z exchange",
+    "radiative corrections",
+    "running alpha",
+    "beam polarization"
+   ],
+   "quantified": false
+  },
+  "checks_run": [
+   {
+    "name": "squared_amplitude_massless_equals_e4_1_plus_c2",
+    "result": "pass"
+   },
+   {
+    "name": "dsigma_domega_equals_ref_eq_51_2",
+    "result": "pass"
+   },
+   {
+    "name": "sigma_beta_to_1_equals_ref_eq_51_3",
+    "result": "pass"
+   },
+   {
+    "name": "sigma_general_beta_equals_beta_3_minus_beta2_over_2",
+    "result": "pass"
+   },
+   {
+    "name": "shape_normalized_equals_3_8_1_plus_c2",
+    "result": "pass"
+   },
+   {
+    "name": "forward_backward_asymmetry_zero",
+    "result": "pass"
+   },
+   {
+    "name": "dsigma_dcos_even_in_c",
+    "result": "pass"
+   },
+   {
+    "name": "threshold_sigma_vanishes_linearly_in_beta",
+    "result": "pass"
+   },
+   {
+    "name": "integral_over_full_range_equals_sigma",
+    "result": "pass"
+   },
+   {
+    "name": "bins_sum_to_sigma",
+    "result": "pass"
+   },
+   {
+    "name": "even_in_cos_theta",
+    "result": "pass"
+   },
+   {
+    "name": "positive",
+    "result": "pass"
+   },
+   {
+    "name": "forward_to_central_ratio_is_2",
+    "result": "pass"
+   },
+   {
+    "name": "scales_as_1_over_s",
+    "result": "pass"
+   },
+   {
+    "name": "trapezoid_second_order",
+    "result": "pass"
+   },
+   {
+    "name": "simpson_exact_for_quadratic",
+    "result": "pass"
+   },
+   {
+    "name": "quad_agrees",
+    "result": "pass"
+   }
+  ],
+  "checks_not_run": [
+   "independent value of 4 pi alpha^2 / 3 in nb GeV^2 from separately read alpha and (hbar c)^2",
+   "quantitative Z-exchange and gamma-Z interference size at the benchmark point",
+   "QED radiative corrections and running of alpha",
+   "numerical muon-mass correction (no cited muon mass)",
+   "formal proof (SymPy steps trusted, not verified)"
+  ],
+  "references_read": [
+   {
+    "citation": "Cross-Section Formulae for Specific Processes (Review of Particle Physics, section 51); H. Baer and R.N. Cahn (revised August 2019); in F. Takahashi et al. (Particle Data Group), Int. J. Mod. Phys. A 41, 2630011 (2026)",
+    "location": "section 51.2, eqs. (51.2), (51.3); https://pdg.lbl.gov/2026/reviews/rpp2026-rev-cross-section-formulae.pdf; read 2026-10-02 at level 'page'"
+   }
+  ],
+  "derivation_record": "profiles/theory/qed-benchmark/derivations/derivation-record.md",
+  "inapplicable": [
+   "detector",
+   "data",
+   "blinding",
+   "luminosity",
+   "experiment bindings",
+   "PDFs",
+   "factorization scale",
+   "parton shower"
+  ]
+ }
+}

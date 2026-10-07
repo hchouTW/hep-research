@@ -1,0 +1,18 @@
+{
+  "name": "synthetic magnetic spectrometer (illustrative, not any real experiment)",
+  "field_tesla": 0.8,
+  "lever_arm_m": 1.0,
+  "point_resolution_um": 10.0,
+  "layers": [
+    {"name": "beam-pipe / entrance window", "material": "beryllium", "x_over_x0": 0.0011, "measuring": false},
+    {"name": "tracker layer 1", "material": "silicon", "x_over_x0": 0.0032, "measuring": true},
+    {"name": "tracker layer 2", "material": "silicon", "x_over_x0": 0.0032, "measuring": true},
+    {"name": "support structure", "material": "carbon fibre", "x_over_x0": 0.0090, "measuring": false},
+    {"name": "tracker layer 3", "material": "silicon", "x_over_x0": 0.0032, "measuring": true},
+    {"name": "tracker layer 4", "material": "silicon", "x_over_x0": 0.0032, "measuring": true},
+    {"name": "tracker layer 5", "material": "silicon", "x_over_x0": 0.0032, "measuring": true},
+    {"name": "tracker layer 6", "material": "silicon", "x_over_x0": 0.0032, "measuring": true},
+    {"name": "tracker layer 7", "material": "silicon", "x_over_x0": 0.0032, "measuring": true},
+    {"name": "tracker layer 8", "material": "silicon", "x_over_x0": 0.0032, "measuring": true}
+  ]
+}

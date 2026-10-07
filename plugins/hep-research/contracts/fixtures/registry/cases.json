@@ -1,0 +1,33 @@
+{
+ "valid": [],
+ "duplicate_id": [
+  "registry.duplicate_id"
+ ],
+ "incompatible_version": [
+  "profile.incompatible_version"
+ ],
+ "missing_resource": [
+  "profile.missing_resource"
+ ],
+ "template_violation": [
+  "profile.template_violation"
+ ],
+ "escaping_path": [
+  "profile.path_escapes"
+ ],
+ "cycle": [
+  "profile.dependency_cycle"
+ ],
+ "missing_dependency": [
+  "profile.missing_dependency"
+ ],
+ "unbacked_capability": [
+  "profile.unbacked_capability"
+ ],
+ "bad_vocab_namespace": [
+  "profile.vocab_namespace"
+ ],
+ "registry_mismatch": [
+  "registry.mismatch"
+ ]
+}

@@ -1,0 +1,233 @@
+[
+ {
+  "id": "eic:C01",
+  "claim": "The ePIC Collaboration was formed to design, build and operate the first experiment at the Electron-Ion Collider",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "identity of facility versus experiment",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S01"
+  ],
+  "location": "page body",
+  "scope": {
+   "text": "ePIC: experiment identity as stated by the host laboratory; design-phase statement",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Web page; 'first' describes the project plan, not a statement about later experiments",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-04",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C02",
+  "claim": "ePIC is designed to study collisions of electrons with protons or other nuclei",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": null,
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S01"
+  ],
+  "location": "page body",
+  "scope": {
+   "text": "ePIC: collision species as described qualitatively; design-phase statement; no energies or polarizations on the page",
+   "species": [
+    "electron",
+    "proton",
+    "nuclei"
+   ],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Qualitative; which ion species and which energies are not stated on this page",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-04",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C03",
+  "claim": "The ePIC detector design includes a 1.7 tesla superconducting magnet",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "design value, not a field measurement",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S01"
+  ],
+  "location": "page body, detector description",
+  "scope": {
+   "text": "ePIC: magnet design value on a laboratory web page; design, not a measured field map",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Design value from an undated web page; the page does not say which design release it describes",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-04",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C04",
+  "claim": "The ePIC design uses silicon detectors for tracking, calorimeters for electromagnetic energy, particle-identification technologies, dense calorimetry for jets, and silicon detectors placed in the beam pipe and inside one of the EIC collider magnets plus calorimetry for photons and neutrons in the far-forward direction",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "subsystem list, qualitative",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S01"
+  ],
+  "location": "page body, detector description",
+  "scope": {
+   "text": "ePIC: subsystem choices as described qualitatively on a laboratory web page; design-phase statement",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "No technology names beyond 'silicon', no dimensions, acceptances or performance values",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-04",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C05",
+  "claim": "ePIC plans a streaming data acquisition system without a traditional hardware trigger, with machine learning and AI described as key for data processing and analysis",
+  "claim_types": [
+   "detector_fact",
+   "analysis_method"
+  ],
+  "claim_type_note": "readout and processing plan",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S01"
+  ],
+  "location": "page body, data section",
+  "scope": {
+   "text": "ePIC: data-acquisition plan as stated on a laboratory web page; design-phase statement",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Plan, not an implemented or tested system; no rates or data volumes stated",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-04",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C06",
+  "claim": "The EIC Yellow Report describes the physics case, the resulting detector requirements and the evolving detector concepts for the EIC experimental program; the studies behind it were commissioned and organized by the EIC User Group",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "facility-level design literature, predating ePIC",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S02"
+  ],
+  "location": "abstract",
+  "scope": {
+   "text": "EIC facility: design-requirement literature; concepts in it are not ePIC facts",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Abstract only; the requirement numbers in the body were not read and are not quoted",
+  "verification_strength": "abstract+metadata",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-04",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C07",
+  "claim": "The EIC Conceptual Design Report is described on its OSTI record as the technical reference design for the EIC, demonstrating the capability to meet the performance goals of the recommended scientific program; this profile has not read its body and quotes none of its design parameters",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": "pointer claim: where the design parameters live, not the parameters",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S03"
+  ],
+  "location": "OSTI record page (abstract and metadata)",
+  "scope": {
+   "text": "EIC facility: location of the design reference; nothing transcribed",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Abstract and metadata only; a reader needing a value must open the report and add a claim at the level read",
+  "verification_strength": "abstract+metadata",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-04",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C08",
+  "claim": "The ePIC software is developed in the public eic GitHub organization, with the detector geometry in the epic repository (DD4hep), reconstruction in EICrecon, the collaboration data model in EDM4eic on top of EDM4hep, and eic-shell as the container environment",
+  "claim_types": [
+   "detector_fact",
+   "analysis_method"
+  ],
+  "claim_type_note": "software entry points; no release",
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S04"
+  ],
+  "location": "organization page listing (epic, EICrecon) and repository pages of EDM4eic, eic-shell and epic",
+  "scope": {
+   "text": "ePIC: software entry points as named on the collaboration's public pages; no release, tag or format version read",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Repository purposes read from their description lines and the README excerpts returned by the fetch tool; no build, run or schema was read or executed; names can change; the eic.github.io landing page does not itself name these packages",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-04",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C09",
+  "claim": "The ePIC single software stack for simulation and reconstruction combines non-experiment-specific packages including ACTS, DD4hep, JANA2 and PODIO, as described in the collaboration's CHEP 2023 proceedings abstract",
+  "claim_types": [
+   "analysis_method"
+  ],
+  "claim_type_note": "collaboration-author proceedings, Tier 3: context, not collaboration-approved practice",
+  "support_kind": "third_party_context",
+  "source_ids": [
+   "eic:S05"
+  ],
+  "location": "abstract (OSTI record)",
+  "scope": {
+   "text": "ePIC: software stack components as named in a proceedings abstract; Tier 3 context, no release named",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Abstract only; package versions, release and build instructions were not read; C08 (S04) is the primary pointer for the repositories",
+  "verification_strength": "abstract+metadata",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-04",
+  "evidence_status": "public-fact"
+ }
+]

@@ -1,0 +1,69 @@
+{
+ "admission_rule": "A module enters core/ only when code is used by more than one top-level component (skills/*/scripts, profiles/*, adapters/*, contracts/). Experiment- or theory-domain specifics never enter core/.",
+ "modules": {
+  "kinematics": {
+   "steward": "hep-theory",
+   "status": "implemented-M2",
+   "purpose": "Generic relativistic kinematics (rigidity/momentum/energy, Jacobians)",
+   "files": [
+    "relativistic"
+   ],
+   "source": "all conversions are generic; no constants embedded, masses are caller-supplied"
+  },
+  "stats": {
+   "steward": "hep-statistics",
+   "status": "implemented-M2",
+   "purpose": "Likelihoods, limits, template fits, unfolding diagnostics, toys, covariance/response checks",
+   "files": [
+    "statistical_toys",
+    "unfolding_diagnostics",
+    "likelihood_limits",
+    "template_fit",
+    "poisson_diagnostics",
+    "validate_covariance",
+    "validate_response"
+   ],
+   "source": "experiment-neutral implementations; imports packaged"
+  },
+  "blinding": {
+   "steward": "hep-computing",
+   "status": "implemented-M3",
+   "purpose": "Masking of blinded values in outputs, logs, caches",
+   "files": [
+    "blinding"
+   ],
+   "consumers": [
+    "skills/hep-computing/scripts/audit_blinded_outputs.py",
+    "skills/hep-analysis/scripts/mask_blinded_bins.py"
+   ],
+   "source": "new in this plugin"
+  },
+  "evidence": {
+   "steward": "research-communication",
+   "status": "implemented-M2",
+   "purpose": "Evidence-ledger validation and index rendering",
+   "files": [
+    "ledger",
+    "render_index"
+   ],
+   "source": "explicit paths, optional ID namespace, verification_date with access_date fallback, generic messages"
+  },
+  "partition": {
+   "steward": "hep-computing",
+   "status": "implemented-batch-schedulers",
+   "purpose": "Manifest-based partition, write-once chunk outputs, bounded resubmission and complete merge; executor interface and remote chunk protocol for batch schedulers",
+   "files": [
+    "engine",
+    "campaign",
+    "executors",
+    "runner",
+    "states"
+   ],
+   "consumers": [
+    "skills/hep-computing/scripts/local_partition.py",
+    "adapters/batch-schedulers"
+   ],
+   "source": "moved from skills/hep-computing/scripts/local_partition.py; behavior unchanged"
+  }
+ }
+}

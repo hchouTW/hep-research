@@ -1,0 +1,51 @@
+{
+ "contract_version": "1.0.0",
+ "artifact_id": "fixture-synthetic-computational-run",
+ "artifact_type": "computational-run",
+ "objective": "SYNTHETIC structural fixture; values are placeholders, not physics",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.1.0",
+  "contracts": "1.0.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-computing",
+  "created": "2026-10-02",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "input_manifest": [
+   {
+    "path": "in.json",
+    "sha256": "placeholder"
+   }
+  ],
+  "tools": [
+   {
+    "name": "python",
+    "version": "3.11"
+   }
+  ],
+  "commands": [
+   "placeholder"
+  ],
+  "environment": {},
+  "seeds": {
+   "toys": 1
+  },
+  "tolerances": {},
+  "exit_status": 0,
+  "output_hashes": {}
+ }
+}

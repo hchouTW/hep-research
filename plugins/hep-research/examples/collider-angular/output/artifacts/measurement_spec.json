@@ -1,0 +1,112 @@
+{
+ "contract_version": "2.0.0",
+ "bindings": {
+  "experiments": [
+   {
+    "profile": "experiment:synthetic-collider",
+    "version": "1.0.0"
+   }
+  ],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.3.0",
+  "contracts": "2.0.0",
+  "profiles": {
+   "experiment:synthetic-collider": "1.0.0"
+  }
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "artifact_id": "synthetic-path-b-measurement-spec",
+ "artifact_type": "measurement-spec",
+ "objective": "SYNTHETIC Path B: corrected d sigma / d cos theta in the fiducial region (illustrative profile)",
+ "provenance": {
+  "producer_skill": "hep-analysis",
+  "created": "2026-10-02"
+ },
+ "status": [
+  "synthetic"
+ ],
+ "extension": {
+  "observable": {
+   "quantity": "differential-cross-section",
+   "process": "e+e- -> mu+mu- (synthetic generator)",
+   "variables": [
+    {
+     "name": "cos_theta",
+     "unit": "1",
+     "edges": [
+      -0.9,
+      -0.72,
+      -0.54,
+      -0.36,
+      -0.18,
+      0.0,
+      0.18,
+      0.36,
+      0.54,
+      0.72,
+      0.9
+     ]
+    }
+   ],
+   "phase_space": {
+    "definition": "SYNTHETIC: |cos theta| < 0.9 at particle level, fixed sqrt(s) = 10 GeV",
+    "fiducial": true
+   },
+   "level": "particle-fiducial",
+   "frame": "center-of-mass",
+   "normalization": {
+    "kind": "integrated-luminosity",
+    "value": 20.0,
+    "unit": "pb^-1",
+    "convention": "unfolded truth counts / (integrated luminosity x bin width)"
+   },
+   "bin_semantics": "bin-averaged",
+   "unit": "pb",
+   "conventions": {
+    "energy_variable": "sqrt_s",
+    "angle_definition": "theta between the incoming e- beam and the outgoing mu-",
+    "synthcol:fiducial_definition": "|cos theta| < 0.9 at particle level"
+   }
+  },
+  "species_or_process": "e+e- -> mu+mu- (synthetic)",
+  "period": "not-applicable",
+  "selections": [
+   {
+    "name": "synthetic event selection",
+    "definition": "efficiency e0 - e1 cos^4 theta (invented)",
+    "conditional_denominator": "generated events in the truth bin"
+   }
+  ],
+  "backgrounds": [],
+  "corrections": [
+   {
+    "effect_id": "efficiency_and_migration",
+    "category": "response",
+    "applied_in": "response_matrix"
+   },
+   {
+    "effect_id": "luminosity",
+    "category": "normalization",
+    "applied_in": "estimator"
+   }
+  ],
+  "systematics": [
+   {
+    "name": "luminosity",
+    "source": "synthetic 2% assumption",
+    "effect": "normalization",
+    "applied_via": "covariance (fully correlated across bins)"
+   }
+  ],
+  "blinding": {
+   "blinded": false
+  },
+  "experiment_fields": {
+   "synthcol:note": "ILLUSTRATIVE and SYNTHETIC; every number is invented"
+  }
+ }
+}

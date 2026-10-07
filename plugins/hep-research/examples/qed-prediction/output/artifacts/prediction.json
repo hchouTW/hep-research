@@ -1,0 +1,191 @@
+{
+ "contract_version": "2.0.0",
+ "bindings": {
+  "experiments": [],
+  "theory": [
+   {
+    "profile": "theory:qed-benchmark",
+    "version": "1.0.0"
+   }
+  ]
+ },
+ "versions": {
+  "plugin": "0.3.0",
+  "contracts": "2.0.0",
+  "profiles": {
+   "theory:qed-benchmark": "1.0.0"
+  }
+ },
+ "inputs": [
+  {
+   "ref": "artifacts/theory_spec.json",
+   "artifact_type": "theory-spec",
+   "status": [
+    "validated-in-scope"
+   ]
+  }
+ ],
+ "outputs": [],
+ "unresolved_inputs": [
+  "higher-order (truncation) and Z-exchange uncertainties are not quantified; see the theory spec"
+ ],
+ "artifact_id": "qedbench-path-c-prediction",
+ "artifact_type": "prediction",
+ "objective": "d sigma / d cos theta at sqrt(s) = 10.0 GeV, tree-level QED",
+ "provenance": {
+  "producer_skill": "hep-theory",
+  "created": "2026-10-02",
+  "evidence_ids": [
+   "qedbench:C02"
+  ]
+ },
+ "status": [
+  "validated-in-scope"
+ ],
+ "extension": {
+  "observable": {
+   "quantity": "differential-cross-section",
+   "process": "e+e- -> mu+mu- (one photon, tree level)",
+   "variables": [
+    {
+     "name": "cos_theta",
+     "unit": "1",
+     "edges": [
+      -1.0,
+      -0.9,
+      -0.72,
+      -0.54,
+      -0.36,
+      -0.18,
+      0.0,
+      0.18,
+      0.36,
+      0.54,
+      0.72,
+      0.9,
+      1.0
+     ]
+    }
+   ],
+   "phase_space": {
+    "definition": "full angular range at sqrt(s) = 10.0 GeV; no cuts",
+    "fiducial": false
+   },
+   "level": "parton",
+   "frame": "center-of-mass",
+   "normalization": {
+    "kind": "integrated-luminosity",
+    "value": "not-applicable",
+    "convention": "absolute cross section; a comparison multiplies by the measurement's integrated luminosity"
+   },
+   "bin_semantics": "bin-averaged",
+   "unit": "pb",
+   "validity_range": {
+    "cos_theta": [
+     -1.0,
+     1.0
+    ]
+   },
+   "conventions": {
+    "energy_variable": "sqrt_s",
+    "angle_definition": "theta between the incoming e- and the outgoing mu- in the c.m. frame",
+    "spin_treatment": "unpolarized beams: average over the four initial spin states, sum over final spins",
+    "mass_approximation": "massless final state (beta -> 1)"
+   }
+  },
+  "theory_spec_ref": "artifacts/theory_spec.json",
+  "parameter_point": {
+   "sqrt_s_gev": 10.0
+  },
+  "representation": "numerical",
+  "expression": "d sigma / d cos theta = (3/8) (86.8 nb GeV^2 / s) (1 + cos^2 theta)",
+  "values": {
+   "edges": [
+    -1.0,
+    -0.9,
+    -0.72,
+    -0.54,
+    -0.36,
+    -0.18,
+    0.0,
+    0.18,
+    0.36,
+    0.54,
+    0.72,
+    0.9,
+    1.0
+   ],
+   "values": [
+    619.5349999999999,
+    539.9394,
+    455.56980000000004,
+    392.2925999999999,
+    350.1078,
+    329.0154,
+    329.0154,
+    350.1078,
+    392.2925999999999,
+    455.56980000000004,
+    539.9394,
+    619.5349999999999
+   ],
+   "unit": "pb",
+   "uncertainties": [
+    {
+     "name": "reference rounding of 86.8 nb GeV^2",
+     "kind": "parametric",
+     "values": [
+      0.35687499999999994,
+      0.311025,
+      0.262425,
+      0.22597499999999993,
+      0.201675,
+      0.189525,
+      0.189525,
+      0.201675,
+      0.22597499999999993,
+      0.262425,
+      0.311025,
+      0.35687499999999994
+     ],
+     "correlation": "fully-correlated"
+    },
+    {
+     "name": "numerical integration",
+     "kind": "numerical",
+     "values": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "correlation": "unknown"
+    }
+   ]
+  },
+  "uncertainties": [
+   {
+    "name": "missing higher orders and Z exchange",
+    "kind": "truncation",
+    "correlation": "unknown"
+   }
+  ],
+  "allowed_transformations": [
+   "bin-integrate",
+   "rebin",
+   "fiducial-restriction",
+   "unit-conversion",
+   "multiply-by-normalization",
+   "level-identification",
+   "forward-fold"
+  ]
+ }
+}

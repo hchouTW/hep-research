@@ -1,0 +1,35 @@
+{
+ "id": "theory:fixture-th-a",
+ "kind": "theory-domain",
+ "version": "1.0.0",
+ "scope": "structural fixture",
+ "exclusions": [],
+ "compatible": {
+  "core": ">=1.0,<2.0",
+  "contracts": ">=2.0,<3.0"
+ },
+ "related_skills": [
+  "hep-theory"
+ ],
+ "resources": {
+  "index": "index.md",
+  "conventions": "conventions.json"
+ },
+ "vocabulary_extensions": {},
+ "adapters": {
+  "required": [],
+  "optional": []
+ },
+ "depends_on": [
+  "theory:fixture-absent"
+ ],
+ "evidence_namespace": "fta",
+ "maintainer": "fixture",
+ "capabilities": [
+  {
+   "name": "structure-only",
+   "status": "proposed",
+   "scope": "fixture"
+  }
+ ]
+}

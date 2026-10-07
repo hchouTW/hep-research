@@ -1,0 +1,17 @@
+{
+  "name": "hep-research",
+  "version": "0.3.0",
+  "description": "Research assistant for experimental and theoretical high-energy physics: seven core skills with optional experiment and theory-domain profiles. Not endorsed by AMS or any collaboration.",
+  "author": {
+    "name": "hchouTW"
+  },
+  "license": "Apache-2.0",
+  "repository": "https://github.com/hchouTW/hep-research",
+  "keywords": [
+    "physics",
+    "hep",
+    "statistics",
+    "theory",
+    "ams-02"
+  ]
+}

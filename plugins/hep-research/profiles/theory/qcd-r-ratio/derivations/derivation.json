@@ -1,0 +1,33 @@
+{
+ "label": "theory:qcd-r-ratio scale-dependent coefficients (SymPy 1.14.0)",
+ "status": "perturbative-argument",
+ "order": "delta_QCD through a^4 (alpha_s^4), MS-bar, massless quarks, photon exchange only",
+ "assumptions": [
+  "a = alpha_s/pi in the MS-bar scheme with n_f active massless flavours",
+  "R(Q) = R_EW (1 + delta_QCD(Q)), R_EW = N_c sum e_q^2 (photon exchange only)",
+  "c_1..c_4 at mu_R = Q from PDG eq. (9.9); beta function through b_2 (PDG eq. 9.3)",
+  "no quark-mass, Z-exchange or QED corrections; n_f fixed (no threshold crossed)"
+ ],
+ "results": {
+  "d_n(L), L = ln(mu^2/Q^2)": [
+   "1",
+   "-L*n_f/6 + 11*L/4 - 72*n_f/625 + 19857/10000",
+   "L**2*n_f**2/36 - 11*L**2*n_f/12 + 121*L**2/16 + 24*L*n_f**2/625 - 12523*L*n_f/6000 + 345927*L/20000 - 31*eta/25 - 259*n_f**2/50000 - 120013*n_f/100000 - 331847/50000",
+   "-L**3*n_f**3/216 + 11*L**3*n_f**2/48 - 121*L**3*n_f/32 + 1331*L**3/64 - 6*L**2*n_f**3/625 + 292369*L**2*n_f**2/360000 - 485197*L**2*n_f/30000 + 14220591*L**2/160000 + 31*L*eta*n_f/50 - 1023*L*eta/100 + 259*L*n_f**3/100000 + 9004709*L*n_f**2/10800000 - 3501979*L*n_f/225000 - 2846707*L/400000 + 23*eta*n_f/40 - 4457*eta/250 + 43*n_f**3/2000 - 3987*n_f**2/5000 + 751*n_f/40 - 15661/100"
+  ],
+  "c_n(n_f = 5, eta = 1/33)": [
+   1.0,
+   1.4097,
+   -12.804665757575757,
+   -80.4356212121212
+  ]
+ },
+ "checks": {
+  "d_n_at_L0_equal_c_n": true,
+  "truncated_series_mu_independent_to_its_order": true,
+  "d2_equals_c2_plus_beta0_L": true,
+  "nf5_c2_is_1_409": true,
+  "nf5_c3_nonsinglet_is_minus_12_77": true,
+  "nf5_c4_nonsinglet_is_minus_79_98": true
+ }
+}

@@ -1,0 +1,19 @@
+{
+ "registry_version": "1.0.0",
+ "profiles": [
+  {
+   "id": "theory:fixture-th-a",
+   "kind": "theory-domain",
+   "version": "1.0.0",
+   "scope": "fixture",
+   "path": "theory/a"
+  },
+  {
+   "id": "theory:fixture-th-b",
+   "kind": "theory-domain",
+   "version": "1.0.0",
+   "scope": "fixture",
+   "path": "theory/b"
+  }
+ ]
+}

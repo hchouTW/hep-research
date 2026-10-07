@@ -1,0 +1,15 @@
+# guard: runs on every push and pull request, on every branch.
+# 1. Path allowlist over the whole history (.githooks/check-paths.sh).
+# 2. Secret scan with gitleaks (.gitleaks.toml carries the known false positives).
+name: guard
+on: [push, pull_request]
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - name: Path allowlist over the whole history
+        run: git log --all --name-only --format= | grep -v '^$' | sh .githooks/check-paths.sh
+      - uses: gitleaks/gitleaks-action@v2
+        env: {GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"}

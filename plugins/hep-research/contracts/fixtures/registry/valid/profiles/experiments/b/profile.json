@@ -1,0 +1,33 @@
+{
+ "id": "experiment:fixture-exp-b",
+ "kind": "experiment",
+ "version": "1.0.0",
+ "scope": "structural fixture",
+ "exclusions": [],
+ "compatible": {
+  "core": ">=1.0,<2.0",
+  "contracts": ">=2.0,<3.0"
+ },
+ "related_skills": [
+  "hep-analysis"
+ ],
+ "resources": {
+  "index": "index.md",
+  "conventions": "conventions.json"
+ },
+ "vocabulary_extensions": {},
+ "adapters": {
+  "required": [],
+  "optional": []
+ },
+ "depends_on": [],
+ "evidence_namespace": "fxb",
+ "maintainer": "fixture",
+ "capabilities": [
+  {
+   "name": "structure-only",
+   "status": "proposed",
+   "scope": "fixture"
+  }
+ ]
+}

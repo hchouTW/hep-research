@@ -1,0 +1,40 @@
+{
+ "registry_version": "1.0.0",
+ "profiles": [
+  {
+   "id": "experiment:ams-02",
+   "kind": "experiment",
+   "version": "2.0.0",
+   "scope": "AMS-02 on the ISS: charged cosmic rays, public evidence ledger, public-domain methods (access-controlled content lives in the companion plugin ams02-research)",
+   "path": "experiments/ams-02"
+  },
+  {
+   "id": "experiment:eic",
+   "kind": "experiment",
+   "version": "0.1.0",
+   "scope": "Electron-Ion Collider facility context and the ePIC experiment, public documents only",
+   "path": "experiments/eic"
+  },
+  {
+   "id": "experiment:synthetic-collider",
+   "kind": "experiment",
+   "version": "1.0.0",
+   "scope": "ILLUSTRATIVE synthetic e+e- collider (invented detector) for Path B",
+   "path": "experiments/synthetic-collider"
+  },
+  {
+   "id": "theory:qed-benchmark",
+   "kind": "theory-domain",
+   "version": "1.0.0",
+   "scope": "Tree-level e+e- -> mu+mu- via one photon: derivation, predictions, checks",
+   "path": "theory/qed-benchmark"
+  },
+  {
+   "id": "theory:qcd-r-ratio",
+   "kind": "theory-domain",
+   "version": "1.0.0",
+   "scope": "R(e+e- -> hadrons) with massless QCD corrections to alpha_s^4: scale dependence, envelope, truncation",
+   "path": "theory/qcd-r-ratio"
+  }
+ ]
+}

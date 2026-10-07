@@ -1,0 +1,109 @@
+{
+ "_comment": "SYNTHETIC correlation table of the 'stat' errors of synthetic-table.json, in the HEPData layout; invented values.",
+ "independent_variables": [
+  {
+   "header": {
+    "name": "bin i"
+   },
+   "values": [
+    {
+     "value": 0
+    },
+    {
+     "value": 0
+    },
+    {
+     "value": 0
+    },
+    {
+     "value": 1
+    },
+    {
+     "value": 1
+    },
+    {
+     "value": 1
+    },
+    {
+     "value": 2
+    },
+    {
+     "value": 2
+    },
+    {
+     "value": 2
+    }
+   ]
+  },
+  {
+   "header": {
+    "name": "bin j"
+   },
+   "values": [
+    {
+     "value": 0
+    },
+    {
+     "value": 1
+    },
+    {
+     "value": 2
+    },
+    {
+     "value": 0
+    },
+    {
+     "value": 1
+    },
+    {
+     "value": 2
+    },
+    {
+     "value": 0
+    },
+    {
+     "value": 1
+    },
+    {
+     "value": 2
+    }
+   ]
+  }
+ ],
+ "dependent_variables": [
+  {
+   "header": {
+    "name": "Statistical correlation"
+   },
+   "values": [
+    {
+     "value": 1
+    },
+    {
+     "value": 0.2
+    },
+    {
+     "value": 0.1
+    },
+    {
+     "value": 0.2
+    },
+    {
+     "value": 1
+    },
+    {
+     "value": 0.2
+    },
+    {
+     "value": 0.1
+    },
+    {
+     "value": 0.2
+    },
+    {
+     "value": 1
+    }
+   ]
+  }
+ ]
+}

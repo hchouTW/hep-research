@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.DS_Store
+.pytest_cache/
+.venv/
+venv/
+.claude/
+.worktrees/
+.venv-hep/
+.venv-hep-root/
+.venv-hep-diagrams/
+.venv-hep-combine/
+*.swp
+*.swo
+*~
+*.root
+dist/

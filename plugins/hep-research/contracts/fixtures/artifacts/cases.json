@@ -1,0 +1,90 @@
+{
+ "note": "SYNTHETIC structural fixture; values are placeholders, not physics",
+ "valid": [
+  "communication.json",
+  "comparison_spec.json",
+  "computational_run.json",
+  "dataset_record.json",
+  "measurement_collider.json",
+  "measurement_exposure.json",
+  "measurement_protons_on_target.json",
+  "measurement_ratio.json",
+  "measurement_target_exposure.json",
+  "ml_artifact.json",
+  "prediction.json",
+  "response.json",
+  "response_parametrized.json",
+  "statres_bayesian.json",
+  "statres_bayesian_rhat_warning.json",
+  "statres_frequentist.json",
+  "statres_scan_global.json",
+  "theory_spec.json"
+ ],
+ "invalid": {
+  "theory_experiment_field.json": [
+   "theory.experiment_field"
+  ],
+  "theory_experiment_binding.json": [
+   "theory.experiment_binding"
+  ],
+  "measurement_duplicate_correction.json": [
+   "measurement.duplicate_correction"
+  ],
+  "measurement_unknown_normalization.json": [
+   "vocab.unknown_term"
+  ],
+  "measurement_unnamespaced_level.json": [
+   "vocab.unknown_term"
+  ],
+  "response_double_counted.json": [
+   "response.double_counted"
+  ],
+  "prediction_gaussian_envelope.json": [
+   "uncertainty.auto_gaussian"
+  ],
+  "dataset_published_no_evidence.json": [
+   "dataset.values_without_provenance"
+  ],
+  "dataset_synthetic_unlabeled.json": [
+   "dataset.synthetic_unlabeled"
+  ],
+  "dataset_binned_length.json": [
+   "binned.length"
+  ],
+  "statres_bayesian_no_priors.json": [
+   "stats.paradigm_incomplete"
+  ],
+  "statres_frequentist_with_priors.json": [
+   "stats.paradigm_mislabeled"
+  ],
+  "status_not_propagated.json": [
+   "status.not_propagated"
+  ],
+  "run_failed_unlabeled.json": [
+   "status.failed_unlabeled"
+  ],
+  "ml_no_grouping.json": [
+   "ml.no_grouping"
+  ],
+  "statres_bayesian_rhat_mismatch.json": [
+   "stats.convergence_mismatch"
+  ],
+  "statres_trials_method_unknown.json": [
+   "schema.enum"
+  ],
+  "envelope_missing_status.json": [
+   "schema.required"
+  ],
+  "response_parametrized_missing.json": [
+   "response.parametrization_missing"
+  ],
+  "measurement_ratio_no_correlation_model.json": [
+   "schema.required"
+  ]
+ },
+ "unresolved": {
+  "statres_scan_no_global.json": [
+   "stats.lee_missing"
+  ]
+ }
+}

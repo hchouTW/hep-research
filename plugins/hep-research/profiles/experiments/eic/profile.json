@@ -1,0 +1,84 @@
+{
+ "id": "experiment:eic",
+ "kind": "experiment",
+ "version": "0.1.0",
+ "scope": "Electron-Ion Collider (EIC) facility context and the ePIC experiment, from public documents only. Facility material (beam species, polarization, collision configurations as design targets, interaction region) and experiment material (ePIC detector concept, software and data-format entry points) are kept in separate modules with separate scopes. Documentation only: no performance numbers beyond the cited claims, no datasets, no calibration constants, no runnable experiment software.",
+ "exclusions": [
+  "Other EIC detector concepts and proposals (a second-IR detector, earlier proposals) unless a module names them with a source",
+  "ePIC internal documents, unpublished performance numbers, calibration constants, production campaigns, analysis cuts and generated samples: project configuration or a local profile, never this profile",
+  "Any specific ePIC software release or data-format version not named in the evidence ledger; no executable support is claimed",
+  "Measured EIC beam or detector performance: every beam number here is a design target and every detector number a design value unless its claim says otherwise",
+  "Datasets: no EIC data exist to record; HERA or other collider practice is never presented as EIC or ePIC practice"
+ ],
+ "compatible": {
+  "core": ">=1.0,<2.0",
+  "contracts": ">=2.0,<3.0"
+ },
+ "related_skills": [
+  "hep-analysis",
+  "detector-response",
+  "hep-theory",
+  "hep-computing"
+ ],
+ "resources": {
+  "index": "index.md",
+  "conventions": "conventions.json",
+  "working_rules": "modules/working-rules.md",
+  "placement_inventory": "modules/placement-inventory.md",
+  "facility": "modules/facility/eic-facility-context.md",
+  "detector": "modules/detector/epic-detector-context.md",
+  "software": "modules/detector/epic-software-entry-points.md",
+  "source_policy": "modules/sources/source-policy.md",
+  "evidence": "evidence/",
+  "evidence_index": "evidence/index.md",
+  "routing_scenarios": "benchmarks/routing-scenarios.json",
+  "datasets": "datasets/"
+ },
+ "vocabulary_namespaces": [
+  "eic"
+ ],
+ "vocabulary_extensions": {
+  "conventions": [
+   "eic:beam_energy_configuration",
+   "eic:hadron_beam_direction",
+   "eic:polarization_sign",
+   "eic:ion_energy_normalization"
+  ]
+ },
+ "adapters": {
+  "required": [],
+  "optional": []
+ },
+ "depends_on": [],
+ "evidence_namespace": "eic",
+ "maintainer": "hchouTW (public-document profile; not endorsed by the EIC project, BNL, Jefferson Lab or the ePIC Collaboration)",
+ "capabilities": [
+  {
+   "name": "facility-and-detector-context",
+   "status": "documented",
+   "scope": "Text modules for EIC facility context and the ePIC detector concept, every factual bullet tied to a ledger claim; guidance, not executable checks and not detector performance"
+  },
+  {
+   "name": "evidence-ledger",
+   "status": "tested-in-declared-environment",
+   "scope": "Structural validity of the eic ledger (ids, levels, dates, claim-to-source strength, index sync, module citations); not the truth of any claim",
+   "tests": [
+    "tests/test_evidence_ledger.py"
+   ]
+  },
+  {
+   "name": "routing-scenarios",
+   "status": "tested-in-declared-environment",
+   "scope": "Generic-DIS, EIC-facility, ePIC-detector, ambiguous-detector and unrelated-experiment requests resolve to the expected decision and resource files through contracts/project.py and index.md; static, no model call",
+   "tests": [
+    "tests/test_routing_scenarios.py",
+    "../../../tests/examples/test_eic_profile_routing.py"
+   ]
+  },
+  {
+   "name": "software-execution",
+   "status": "unavailable",
+   "scope": "No ePIC software (eic-shell, EICrecon, the epic geometry, EDM4eic) is installed, built or run by this plugin; the software module documents entry points only, with no release pinned"
+  }
+ ]
+}

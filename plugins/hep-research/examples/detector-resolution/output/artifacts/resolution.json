@@ -1,0 +1,109 @@
+{
+ "contract_version": "2.0.0",
+ "bindings": {
+  "experiments": [
+   {
+    "profile": "experiment:synthetic-collider",
+    "version": "1.0.0"
+   }
+  ],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.3.0",
+  "contracts": "2.0.0",
+  "profiles": {
+   "experiment:synthetic-collider": "1.0.0"
+  }
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "artifact_id": "synthetic-j2-resolution",
+ "artifact_type": "dataset-record",
+ "objective": "SYNTHETIC J2: cos theta resolution per |cos theta| bin (illustrative detector)",
+ "provenance": {
+  "producer_skill": "detector-response",
+  "created": "2026-10-02"
+ },
+ "extension": {
+  "dataset_id": "synthcol:synthetic-j2-resolution",
+  "source_evidence_ids": [],
+  "observable": {
+   "quantity": "resolution",
+   "process": "e+e- -> mu+mu- (synthetic generator)",
+   "variables": [
+    {
+     "name": "abs_cos_theta_truth",
+     "unit": "1",
+     "edges": [
+      0.0,
+      0.18,
+      0.36,
+      0.54,
+      0.72,
+      0.9
+     ]
+    }
+   ],
+   "phase_space": {
+    "definition": "SYNTHETIC: selected events, |cos theta| < 0.9 at truth level, fixed sqrt(s) = 10 GeV",
+    "fiducial": true
+   },
+   "level": "detector",
+   "frame": "center-of-mass",
+   "normalization": {
+    "kind": "shape-only",
+    "convention": "Gaussian width of reco - truth cos theta for selected events; not a rate"
+   },
+   "bin_semantics": "bin-averaged",
+   "unit": "1",
+   "conventions": {
+    "angle_definition": "theta between the incoming e- beam and the outgoing mu-"
+   }
+  },
+  "data": {
+   "edges": [
+    0.0,
+    0.18,
+    0.36,
+    0.54,
+    0.72,
+    0.9
+   ],
+   "values": [
+    0.019511426434547233,
+    0.019769537915606303,
+    0.01969182236241797,
+    0.020024818200986876,
+    0.019668694617265278
+   ],
+   "unit": "1",
+   "uncertainties": [
+    {
+     "name": "statistical",
+     "kind": "statistical",
+     "correlation": "uncorrelated",
+     "values": [
+      0.0002961038888885321,
+      0.0002880009216246761,
+      0.00027370880942286966,
+      0.00025990919002424515,
+      0.00025438856297951146
+     ]
+    }
+   ]
+  },
+  "covariance": {
+   "status": "present",
+   "ref": "results.json#per_bin/width_err",
+   "note": "diagonal: bins hold disjoint events, so the per-bin errors are the whole covariance"
+  },
+  "period": "not-applicable",
+  "status": "synthetic",
+  "experiment_profile": "experiment:synthetic-collider"
+ }
+}

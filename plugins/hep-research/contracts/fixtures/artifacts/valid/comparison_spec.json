@@ -1,0 +1,49 @@
+{
+ "contract_version": "1.0.0",
+ "artifact_id": "fixture-synthetic-comparison-spec",
+ "artifact_type": "comparison-spec",
+ "objective": "SYNTHETIC structural fixture; values are placeholders, not physics",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.1.0",
+  "contracts": "1.0.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-statistics",
+  "created": "2026-10-02",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "dataset_bindings": [
+   "synthetic-collider:synthetic-angular-1"
+  ],
+  "prediction_bindings": [
+   "fixture-synthetic-prediction"
+  ],
+  "gate_result": {
+   "comparable": true,
+   "mismatches": []
+  },
+  "transformations": [
+   {
+    "kind": "forward-fold",
+    "owner": "detector-response"
+   }
+  ],
+  "correlations": [],
+  "inference_assumptions": [
+   "placeholder"
+  ]
+ }
+}

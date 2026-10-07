@@ -1,0 +1,9 @@
+{
+ "unit_system": "natural-HEP: GeV for beam energies and sqrt(s); luminosity in cm^-2 s^-1 as the facility documents quote it; polarization as a fraction or percent, stated per claim",
+ "energy_variable": "beam energies E_e x E_h per named collision configuration (GeV; per nucleon for ions) with sqrt(s) derived and stated alongside; never a single implicit energy",
+ "frame": "laboratory frame with asymmetric beams: the lab and center-of-mass frames differ, and every boost or crossing-angle correction is stated per configuration from its source",
+ "eic:beam_energy_configuration": "a named pair (E_e, E_h) with species and polarization, taken from the cited source and release; this profile does not fix a default configuration",
+ "eic:hadron_beam_direction": "the sign of the z axis relative to the hadron beam is not fixed by this profile: take it from the ePIC geometry release the analysis uses and record it; unknown until then",
+ "eic:polarization_sign": "helicity and transverse-polarization sign conventions follow the cited analysis or facility document; this profile does not fix them; unknown until stated",
+ "eic:ion_energy_normalization": "ion beam energies are per nucleon unless a claim says whole-ion; every conversion states A and Z"
+}

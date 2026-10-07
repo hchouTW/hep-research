@@ -1,0 +1,40 @@
+{
+ "id": "experiment:fixture-exp-a",
+ "kind": "experiment",
+ "version": "1.0.0",
+ "scope": "structural fixture",
+ "exclusions": [],
+ "compatible": {
+  "core": ">=2.0,<3.0",
+  "contracts": ">=2.0,<3.0"
+ },
+ "related_skills": [
+  "hep-analysis"
+ ],
+ "resources": {
+  "index": "index.md",
+  "conventions": "conventions.json"
+ },
+ "vocabulary_extensions": {
+  "levels": [
+   "fxa:instrument"
+  ],
+  "normalization_kinds": [
+   "fxa:per-orbit"
+  ]
+ },
+ "adapters": {
+  "required": [],
+  "optional": []
+ },
+ "depends_on": [],
+ "evidence_namespace": "fxa",
+ "maintainer": "fixture",
+ "capabilities": [
+  {
+   "name": "structure-only",
+   "status": "proposed",
+   "scope": "fixture"
+  }
+ ]
+}

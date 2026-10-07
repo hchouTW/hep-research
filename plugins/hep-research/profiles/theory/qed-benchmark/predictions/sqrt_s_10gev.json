@@ -1,0 +1,98 @@
+{
+ "sqrt_s_gev": 10.0,
+ "s_gev2": 100.0,
+ "reference_constant_nb_gev2": 86.8,
+ "sigma_total_pb": 868.0,
+ "sigma_fiducial_pb": 744.093,
+ "fiducial_abs_cos_max": 0.9,
+ "edges": [
+  -1.0,
+  -0.9,
+  -0.72,
+  -0.54,
+  -0.36,
+  -0.18,
+  0.0,
+  0.18,
+  0.36,
+  0.54,
+  0.72,
+  0.9,
+  1.0
+ ],
+ "dsigma_dcos_bin_averaged_pb": [
+  619.5349999999999,
+  539.9394,
+  455.56980000000004,
+  392.2925999999999,
+  350.1078,
+  329.0154,
+  329.0154,
+  350.1078,
+  392.2925999999999,
+  455.56980000000004,
+  539.9394,
+  619.5349999999999
+ ],
+ "relative_uncertainty_reference_rounding": 0.000576036866359447,
+ "convergence": {
+  "interval": [
+   -1.0,
+   1.0
+  ],
+  "exact_pb": 868.0,
+  "points": [
+   3,
+   5,
+   9,
+   17,
+   33,
+   65,
+   129,
+   257
+  ],
+  "trapezoid_abs_error": [
+   108.5,
+   27.125,
+   6.78125,
+   1.6953125,
+   0.423828125,
+   0.10595703125,
+   0.0264892578125,
+   0.006622314453125
+  ],
+  "simpson_abs_error": [
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ],
+  "trapezoid_observed_order": [
+   2.0,
+   2.0,
+   2.0,
+   2.0,
+   2.0,
+   2.0,
+   2.0
+  ],
+  "quad_value_pb": 868.0000000000001,
+  "quad_reported_error": 9.63673585374636e-12,
+  "quad_abs_error": 1.1368683772161603e-13
+ },
+ "checks": {
+  "integral_over_full_range_equals_sigma": true,
+  "bins_sum_to_sigma": true,
+  "even_in_cos_theta": true,
+  "positive": true,
+  "forward_to_central_ratio_is_2": true,
+  "scales_as_1_over_s": true,
+  "trapezoid_second_order": true,
+  "simpson_exact_for_quadratic": true,
+  "quad_agrees": true
+ }
+}

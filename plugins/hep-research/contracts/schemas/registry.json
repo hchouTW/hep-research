@@ -1,0 +1,8 @@
+{"$comment": "profiles/registry.json: light index only (id, kind, version, one-line scope, path). Budget 2 KiB.",
+ "type": "object", "required": ["registry_version", "profiles"], "additionalProperties": false,
+ "properties": {
+  "registry_version": {"$ref": "common.json#/$defs/version"},
+  "profiles": {"type": "array", "items": {"type": "object", "required": ["id", "kind", "version", "scope", "path"], "additionalProperties": false,
+    "properties": {"id": {"$ref": "common.json#/$defs/profile_id"}, "kind": {"type": "string", "enum": ["experiment", "theory-domain"]},
+                   "version": {"$ref": "common.json#/$defs/version"}, "scope": {"type": "string", "minLength": 1}, "path": {"type": "string", "minLength": 1}}}}
+ }}

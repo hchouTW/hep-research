@@ -1,0 +1,38 @@
+[
+ {
+  "id": "qcdr:S01",
+  "title": "Quantum Chromodynamics (Review of Particle Physics, section 9)",
+  "authors": "J. Huston, K. Rabbertz and G. Zanderighi (revised August 2025); in F. Takahashi et al. (Particle Data Group), Int. J. Mod. Phys. A 41, 2630011 (2026)",
+  "year": 2026,
+  "identifiers": {"dois": [], "arxiv_ids": [], "inspire_record_id": null,
+                  "url": "https://pdg.lbl.gov/2026/reviews/rpp2026-rev-qcd.pdf"},
+  "tier": 1,
+  "verification_level": "page",
+  "verification_date": "2026-10-07",
+  "publication_date": "2026",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "Particle Data Group",
+  "notes": "Read on 2026-10-07 through a fetch tool that extracted the text of the PDF (subsection 9.1.1 'Running coupling', eq. 9.3; subsection 9.2.1 'Fully inclusive cross sections', eqs. 9.7-9.9; first-page revision line). The tool returned about 80,600 characters, not the whole review: the alpha_s determinations section was not in the extract. The coefficients were also compared with their known nf = 5 values (c_2 = 1.409, non-singlet c_3 = -12.767, c_4 = -79.98) in derive.py."
+ },
+ {
+  "id": "qcdr:S02",
+  "title": "Physical Constants (Review of Particle Physics, Table 1.1)",
+  "authors": "D. Robinson and P.A. Zyla (revised May 2026); in F. Takahashi et al. (Particle Data Group), Int. J. Mod. Phys. A 41, 2630011 (2026)",
+  "year": 2026,
+  "identifiers": {"dois": [], "arxiv_ids": [], "inspire_record_id": null,
+                  "url": "https://pdg.lbl.gov/2026/reviews/rpp2026-rev-phys-constants.pdf"},
+  "tier": 1,
+  "verification_level": "page",
+  "verification_date": "2026-10-07",
+  "publication_date": "2026",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "Particle Data Group",
+  "notes": "Read on 2026-10-07 through a text-extraction fetch: Table 1.1 rows 'strong coupling constant alpha_s(m_Z) 0.1180(9)' and 'Z0 boson mass m_Z 91.1879(20) GeV/c^2'."
+ }
+]

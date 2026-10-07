@@ -1,0 +1,24 @@
+{
+ "id": "adapter:unbinned-fit",
+ "version": "0.1.0",
+ "status": "demonstrated-on-synthetic-data",
+ "purpose": "Extended unbinned maximum-likelihood fit (Gaussian peak + exponential background) with Hessian and profile-likelihood intervals and a seeded toy coverage check",
+ "tools": [
+  {
+   "name": "SciPy (optimize, special)",
+   "status": "demonstrated-on-synthetic-data",
+   "tested_versions": [
+    "1.18.1"
+   ]
+  }
+ ],
+ "environment": "E4 (docs/capability-matrix.md): Python 3.13.16, numpy 2.5.3, scipy 1.18.1; iminuit not used",
+ "assets": [
+  "assets/unbinned_fit.py"
+ ],
+ "tests": [
+  "../../tests/adapters/test_unbinned_fit.py"
+ ],
+ "owner_skill": "hep-statistics",
+ "status_rule": "the adapter status is the lowest of its tools' statuses; only synthetic toys have been fitted"
+}

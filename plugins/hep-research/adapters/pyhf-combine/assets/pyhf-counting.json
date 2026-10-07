@@ -1,0 +1,69 @@
+{
+  "channels": [
+    {
+      "name": "synthetic_region",
+      "samples": [
+        {
+          "name": "signal",
+          "data": [
+            5.0
+          ],
+          "modifiers": [
+            {
+              "name": "mu",
+              "type": "normfactor",
+              "data": null
+            }
+          ]
+        },
+        {
+          "name": "background",
+          "data": [
+            20.0
+          ],
+          "modifiers": [
+            {
+              "name": "bkg_norm",
+              "type": "normsys",
+              "data": {
+                "hi": 1.1,
+                "lo": 0.9
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "observations": [
+    {
+      "name": "synthetic_region",
+      "data": [
+        20
+      ]
+    }
+  ],
+  "measurements": [
+    {
+      "name": "synthetic_example",
+      "config": {
+        "poi": "mu",
+        "parameters": [
+          {
+            "name": "mu",
+            "bounds": [
+              [
+                0,
+                10
+              ]
+            ],
+            "inits": [
+              1
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "version": "1.0.0"
+}

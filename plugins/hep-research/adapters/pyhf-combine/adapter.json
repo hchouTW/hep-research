@@ -1,0 +1,42 @@
+{
+ "id": "adapter:pyhf-combine",
+ "version": "0.7.0",
+ "status": "demonstrated-on-synthetic-data",
+ "purpose": "Starting points for HistFactory-style likelihoods: a pyhf counting workspace, a shape workspace, post-fit nuisance diagnostics for pyhf, the background-only plus signal-patchset publication pattern, a script that compares a released likelihood's best fit and CLs with published values, and a CMS Combine datacard template",
+ "tools": [
+  {
+   "name": "pyhf",
+   "status": "demonstrated-on-synthetic-data",
+   "tested_versions": [
+    "0.7.6"
+   ]
+  },
+  {
+   "name": "CMS Combine",
+   "status": "demonstrated-on-synthetic-data",
+   "tested_versions": [
+    "11.1.0"
+   ]
+  }
+ ],
+ "environment": "E1 (docs/capability-matrix.md) plus pyhf 0.7.6 (numpy backend, scipy optimizer); CMS Combine 11.1.0 from conda-forge, checked with its ROOT 6.40.04 and ROOT 6.36.14 builds, run through $HEP_COMBINE_WRAPPER; AsymptoticLimits needs --strictBounds with ROOT 6.40 (VALIDATION COMBINE-ROOT640)",
+ "assets": [
+  "assets/pyhf-counting.json",
+  "assets/pyhf-shape-synthetic.json",
+  "assets/pyhf_nuisance_diagnostics.py",
+  "assets/combine_datacard_template.txt",
+  "assets/reproduce_published_likelihood.py"
+ ],
+ "tests": [
+  "../../tests/adapters/test_pyhf_counting.py",
+  "../../tests/adapters/test_pyhf_shape.py",
+  "../../tests/adapters/test_nuisance_interpolation.py",
+  "../../tests/adapters/test_pyhf_nuisance_diagnostics.py",
+  "../../tests/adapters/test_pyhf_publication.py",
+  "../../tests/examples/test_end_to_end_sample.py",
+  "../../tests/adapters/test_combine_datacard_template.py",
+  "../../tests/adapters/test_pyhf_published_reproduction.py"
+ ],
+ "owner_skill": "hep-statistics",
+ "status_rule": "the adapter status is the lowest of its tools' statuses; each tool's own status is in tools[]"
+}

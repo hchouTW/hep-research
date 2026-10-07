@@ -1,0 +1,98 @@
+{
+ "plugin_version": "0.3.0",
+ "profile": {
+  "id": "experiment:eic",
+  "version": "0.1.0"
+ },
+ "project_config": {
+  "experiments": [
+   {
+    "profile": "experiment:eic",
+    "version": "0.1.0"
+   }
+  ],
+  "theory": []
+ },
+ "project_valid": true,
+ "bound_profiles": [
+  "experiment:eic"
+ ],
+ "wrong_pin_rejected": true,
+ "project_config_selection": {
+  "decision": "use",
+  "source": "project-config",
+  "experiments": [
+   "experiment:eic"
+  ]
+ },
+ "scenarios": [
+  {
+   "id": "generic-dis",
+   "request": "Write down the DIS variables x, y and Q^2 from the lepton and hadron four-momenta and the identity linking them to sqrt(s).",
+   "decision": "none",
+   "source": "none",
+   "files_read": [],
+   "expected_files": [],
+   "pass": true
+  },
+  {
+   "id": "eic-facility",
+   "request": "Which beam species and polarizations does the EIC provide, and where are its design energies specified?",
+   "decision": "use",
+   "source": "request",
+   "files_read": [
+    "modules/facility/eic-facility-context.md"
+   ],
+   "expected_files": [
+    "modules/facility/eic-facility-context.md"
+   ],
+   "pass": true
+  },
+  {
+   "id": "epic-detector",
+   "request": "Describe the ePIC detector concept: magnet, tracking, calorimetry, PID and data acquisition.",
+   "decision": "use",
+   "source": "request",
+   "files_read": [
+    "modules/detector/epic-detector-context.md"
+   ],
+   "expected_files": [
+    "modules/detector/epic-detector-context.md"
+   ],
+   "pass": true
+  },
+  {
+   "id": "ambiguous-detector",
+   "request": "What is the tracking resolution at the EIC?",
+   "decision": "ask",
+   "source": "none",
+   "files_read": [],
+   "expected_files": [],
+   "pass": true
+  },
+  {
+   "id": "unrelated-experiment",
+   "request": "Rigidity resolution of the AMS-02 tracker.",
+   "decision": "use",
+   "source": "request",
+   "files_read": [],
+   "expected_files": [],
+   "pass": true
+  }
+ ],
+ "profile_files_read": [
+  "profiles/experiments/ams-02/profile.json",
+  "profiles/experiments/eic/benchmarks/routing-scenarios.json",
+  "profiles/experiments/eic/index.md",
+  "profiles/experiments/eic/modules/detector/epic-detector-context.md",
+  "profiles/experiments/eic/modules/facility/eic-facility-context.md",
+  "profiles/experiments/eic/profile.json",
+  "profiles/experiments/synthetic-collider/profile.json",
+  "profiles/registry.json",
+  "profiles/theory/qcd-r-ratio/profile.json",
+  "profiles/theory/qed-benchmark/profile.json"
+ ],
+ "foreign_profile_files_read": [],
+ "pass": true,
+ "caveat": "Shows profile selection and selective loading only; asserts nothing about the EIC or ePIC."
+}

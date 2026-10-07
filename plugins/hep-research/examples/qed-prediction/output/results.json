@@ -1,0 +1,161 @@
+{
+ "label": "theory only; no experiment resource; no synthetic data",
+ "profiles_loaded": [
+  "theory:qed-benchmark"
+ ],
+ "profile_files_read": [
+  "profiles/theory/qed-benchmark/benchmarks/path-c.json",
+  "profiles/theory/qed-benchmark/conventions.json",
+  "profiles/theory/qed-benchmark/evidence/claims.json",
+  "profiles/theory/qed-benchmark/evidence/sources.json",
+  "profiles/theory/qed-benchmark/profile.json",
+  "profiles/theory/qed-benchmark/scripts/derive.py",
+  "profiles/theory/qed-benchmark/scripts/predict.py"
+ ],
+ "pass": {
+  "derivation_checks": true,
+  "prediction_checks": true,
+  "contracts": true,
+  "no_experiment_resources": true
+ },
+ "derivation": {
+  "label": "theory:qed-benchmark tree-level derivation (SymPy 1.14.0)",
+  "assumptions": [
+   "one s-channel photon, tree level (order alpha^2 in the cross section)",
+   "massless electrons, muon mass m kept",
+   "unpolarized beams: average over the 4 initial spin states, sum over final spins",
+   "alpha = e^2 / (4 pi), hbar = c = 1",
+   "point-like fermions, no Z exchange, no radiative corrections"
+  ],
+  "results": {
+   "spin_averaged_squared_amplitude": "16*pi**2*alpha**2*(-4*c**2*m**2 + c**2*s + 4*m**2 + s)/s",
+   "dsigma_domega": "alpha**2*sqrt(-4*m**2 + s)*(-c**2*m**2 + c**2*s/4 + m**2 + s/4)/s**(5/2)",
+   "dsigma_dcos_theta": "pi*alpha**2*sqrt(-4*m**2 + s)*(-4*c**2*m**2 + c**2*s + 4*m**2 + s)/(2*s**(5/2))",
+   "sigma_total": "2*pi*alpha**2*beta*(3 - beta**2)/(3*s)",
+   "sigma_total_massless": "4*pi*alpha**2/(3*s)",
+   "dsigma_dcos_theta_massless": "pi*alpha**2*(c**2 + 1)/(2*s)",
+   "normalized_shape_massless": "3*c**2/8 + 3/8",
+   "forward_backward_asymmetry_massless": "0"
+  },
+  "checks": {
+   "squared_amplitude_massless_equals_e4_1_plus_c2": true,
+   "dsigma_domega_equals_ref_eq_51_2": true,
+   "sigma_beta_to_1_equals_ref_eq_51_3": true,
+   "sigma_general_beta_equals_beta_3_minus_beta2_over_2": true,
+   "shape_normalized_equals_3_8_1_plus_c2": true,
+   "forward_backward_asymmetry_zero": true,
+   "dsigma_dcos_even_in_c": true,
+   "threshold_sigma_vanishes_linearly_in_beta": true
+  },
+  "derivation_status": "analytic-derivation",
+  "status_note": "Exact at tree level under the listed assumptions; SymPy steps are trusted, not formally verified. Not a formal proof."
+ },
+ "prediction": {
+  "sqrt_s_gev": 10.0,
+  "s_gev2": 100.0,
+  "reference_constant_nb_gev2": 86.8,
+  "sigma_total_pb": 868.0,
+  "sigma_fiducial_pb": 744.093,
+  "fiducial_abs_cos_max": 0.9,
+  "edges": [
+   -1.0,
+   -0.9,
+   -0.72,
+   -0.54,
+   -0.36,
+   -0.18,
+   0.0,
+   0.18,
+   0.36,
+   0.54,
+   0.72,
+   0.9,
+   1.0
+  ],
+  "dsigma_dcos_bin_averaged_pb": [
+   619.5349999999999,
+   539.9394,
+   455.56980000000004,
+   392.2925999999999,
+   350.1078,
+   329.0154,
+   329.0154,
+   350.1078,
+   392.2925999999999,
+   455.56980000000004,
+   539.9394,
+   619.5349999999999
+  ],
+  "relative_uncertainty_reference_rounding": 0.000576036866359447,
+  "convergence": {
+   "interval": [
+    -1.0,
+    1.0
+   ],
+   "exact_pb": 868.0,
+   "points": [
+    3,
+    5,
+    9,
+    17,
+    33,
+    65,
+    129,
+    257
+   ],
+   "trapezoid_abs_error": [
+    108.5,
+    27.125,
+    6.78125,
+    1.6953125,
+    0.423828125,
+    0.10595703125,
+    0.0264892578125,
+    0.006622314453125
+   ],
+   "simpson_abs_error": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "trapezoid_observed_order": [
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0,
+    2.0
+   ],
+   "quad_value_pb": 868.0,
+   "quad_reported_error": 9.636735853746359e-12,
+   "quad_abs_error": 0.0
+  },
+  "checks": {
+   "integral_over_full_range_equals_sigma": true,
+   "bins_sum_to_sigma": true,
+   "even_in_cos_theta": true,
+   "positive": true,
+   "forward_to_central_ratio_is_2": true,
+   "scales_as_1_over_s": true,
+   "trapezoid_second_order": true,
+   "simpson_exact_for_quadratic": true,
+   "quad_agrees": true
+  }
+ },
+ "contract_validation": {
+  "theory_spec": {
+   "ok": true,
+   "errors": []
+  },
+  "prediction": {
+   "ok": true,
+   "errors": []
+  }
+ }
+}

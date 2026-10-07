@@ -1,0 +1,152 @@
+{
+ "q_gev": 15.0,
+ "n_f": 5,
+ "R_EW": 3.666666666666666,
+ "eta": 0.030303030303030307,
+ "alpha_s_at_Q": 0.16275843109292384,
+ "alpha_s_running": "three-loop, fixed n_f, from alpha_s(m_Z)",
+ "orders": [
+  {
+   "order_in_alpha_s": 0,
+   "R_central_mu_eq_Q": 3.666666666666666,
+   "scale_envelope": {
+    "prescription": "min and max over mu in [Q/2, 2Q] (log scan)",
+    "min": 3.666666666666666,
+    "max": 3.666666666666666,
+    "three_point": {
+     "0.5": 3.666666666666666,
+     "1.0": 3.666666666666666,
+     "2.0": 3.666666666666666
+    },
+    "gaussian": false
+   },
+   "truncation_estimate": {
+    "prescription": "absolute size of the last included term at mu = Q",
+    "value": 0.0,
+    "gaussian": false
+   },
+   "parametric_alpha_s": {
+    "up": 0.0,
+    "down": 0.0,
+    "source": "alpha_s(m_Z) +- PDG uncertainty"
+   }
+  },
+  {
+   "order_in_alpha_s": 1,
+   "R_central_mu_eq_Q": 3.856627931481016,
+   "scale_envelope": {
+    "prescription": "min and max over mu in [Q/2, 2Q] (log scan)",
+    "min": 3.832351490878761,
+    "max": 3.889632577974516,
+    "three_point": {
+     "0.5": 3.889632577974516,
+     "1.0": 3.856627931481016,
+     "2.0": 3.832351490878761
+    },
+    "gaussian": false
+   },
+   "truncation_estimate": {
+    "prescription": "absolute size of the last included term at mu = Q",
+    "value": 0.18996126481434983,
+    "gaussian": false
+   },
+   "parametric_alpha_s": {
+    "up": 0.002042892305133659,
+    "down": -0.002029567948921951,
+    "source": "alpha_s(m_Z) +- PDG uncertainty"
+   }
+  },
+  {
+   "order_in_alpha_s": 2,
+   "R_central_mu_eq_Q": 3.870501410267873,
+   "scale_envelope": {
+    "prescription": "min and max over mu in [Q/2, 2Q] (log scan)",
+    "min": 3.8627983868365665,
+    "max": 3.8730515615938295,
+    "three_point": {
+     "0.5": 3.872720429523102,
+     "1.0": 3.870501410267873,
+     "2.0": 3.8627983868365665
+    },
+    "gaussian": false
+   },
+   "truncation_estimate": {
+    "prescription": "absolute size of the last included term at mu = Q",
+    "value": 0.013873478786857074,
+    "gaussian": false
+   },
+   "parametric_alpha_s": {
+    "up": 0.0023428947481587414,
+    "down": -0.0023244359653791236,
+    "source": "alpha_s(m_Z) +- PDG uncertainty"
+   }
+  },
+  {
+   "order_in_alpha_s": 3,
+   "R_central_mu_eq_Q": 3.863972803012476,
+   "scale_envelope": {
+    "prescription": "min and max over mu in [Q/2, 2Q] (log scan)",
+    "min": 3.859045666530666,
+    "max": 3.8647387136154445,
+    "three_point": {
+     "0.5": 3.859045666530666,
+     "1.0": 3.863972803012476,
+     "2.0": 3.864522668669241
+    },
+    "gaussian": false
+   },
+   "truncation_estimate": {
+    "prescription": "absolute size of the last included term at mu = Q",
+    "value": 0.006528607255396945,
+    "gaussian": false
+   },
+   "parametric_alpha_s": {
+    "up": 0.0021299904831786343,
+    "down": -0.002117406563729496,
+    "source": "alpha_s(m_Z) +- PDG uncertainty"
+   }
+  },
+  {
+   "order_in_alpha_s": 4,
+   "R_central_mu_eq_Q": 3.861848119052614,
+   "scale_envelope": {
+    "prescription": "min and max over mu in [Q/2, 2Q] (log scan)",
+    "min": 3.86105570079274,
+    "max": 3.863020445116159,
+    "three_point": {
+     "0.5": 3.8611323543268576,
+     "1.0": 3.861848119052614,
+     "2.0": 3.863020445116159
+    },
+    "gaussian": false
+   },
+   "truncation_estimate": {
+    "prescription": "absolute size of the last included term at mu = Q",
+    "value": 0.0021246839598618728,
+    "gaussian": false
+   },
+   "parametric_alpha_s": {
+    "up": 0.0020371079231185085,
+    "down": -0.0020280499575346944,
+    "source": "alpha_s(m_Z) +- PDG uncertainty"
+   }
+  }
+ ],
+ "scale_envelope_widths": [
+  0.0,
+  0.05728108709575519,
+  0.01025317475726295,
+  0.005693047084778691,
+  0.0019647443234189765
+ ],
+ "checks": {
+  "R_EW_is_11_over_3_for_udscb": true,
+  "eta_is_1_over_33_for_udscb": true,
+  "alpha_s_grows_toward_low_scale": true,
+  "leading_correction_is_alpha_s_over_pi": true,
+  "order_0_has_no_scale_dependence": true,
+  "scale_envelope_shrinks_from_NLO_to_N3LO": true,
+  "central_inside_its_envelope": true
+ },
+ "status": "perturbative-argument; prediction, not a measurement; no Z exchange, no quark masses"
+}

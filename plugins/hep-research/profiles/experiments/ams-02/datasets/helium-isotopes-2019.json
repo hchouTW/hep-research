@@ -1,0 +1,95 @@
+{
+ "contract_version": "1.0.0",
+ "artifact_id": "ams02-dataset-helium-isotopes-2019",
+ "artifact_type": "dataset-record",
+ "objective": "Metadata record of a published AMS-02 result (Properties of Cosmic Helium Isotopes, PRL 123, 181102); no data values are transcribed",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.1.0",
+  "contracts": "1.0.0",
+  "profiles": {
+   "experiment:ams-02": "1.0.0"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-analysis",
+  "created": "2026-10-02",
+  "evidence_ids": [
+   "ams02:S12",
+   "ams02:C09",
+   "ams02:C28"
+  ]
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "unvalidated"
+ ],
+ "unresolved_inputs": [
+  "data values, uncertainties and covariance: transcribe from the paper or its Supplemental Material with a new claim before use",
+  "bin semantics: not recorded in the ledger"
+ ],
+ "extension": {
+  "dataset_id": "ams02:helium-isotopes-2019",
+  "source_evidence_ids": [
+   "ams02:S12"
+  ],
+  "observable": {
+   "quantity": "differential-flux",
+   "process": "primary cosmic rays at the detector location",
+   "species": [
+    {
+     "name": "3He"
+    },
+    {
+     "name": "4He"
+    }
+   ],
+   "variables": [
+    {
+     "name": "rigidity",
+     "unit": "GV"
+    }
+   ],
+   "phase_space": {
+    "definition": "as defined in the source paper (not transcribed here)",
+    "fiducial": true
+   },
+   "level": "crflux:top-of-instrument",
+   "frame": "detector location",
+   "normalization": {
+    "kind": "exposure",
+    "value": "not-provided",
+    "convention": "flux = counts / (exposure x bin width); exposure values are not public here"
+   },
+   "bin_semantics": "unknown",
+   "unit": "m^-2 sr^-1 s^-1 GV^-1",
+   "conventions": {
+    "energy_variable": "rigidity",
+    "ams02:rigidity_definition": "R = pc/(Ze) in GV; p = |Z|R/c; rigidity is not momentum"
+   }
+  },
+  "covariance": {
+   "status": "absent",
+   "note": "not transcribed; the paper's own uncertainty breakdown governs"
+  },
+  "period": {
+   "start": "2011-05",
+   "end": "2017-11",
+   "evidence": "claims C09, C28"
+  },
+  "status": "published",
+  "experiment_profile": "experiment:ams-02",
+  "conditions": "ranges differ by isotope: 4He 2.1-21 GV, 3He 1.9-15 GV (C09); the record holds both",
+  "ams02:method_module": {
+   "module": "modules/species/nuclei-and-isotopes.md",
+   "claims": [
+    "ams02:C28"
+   ],
+   "note": "the same module documents the deuteron method of the companion paper S13 (C27); do not transfer it to this record"
+  }
+ }
+}

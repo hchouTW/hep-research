@@ -1,0 +1,16 @@
+{
+ "_comment": "SYNTHETIC test input in the HEPData submission-table layout (independent_variables / dependent_variables); invented values, not a HEPData record.",
+ "independent_variables": [
+  {"header": {"name": "cos(theta)", "units": ""},
+   "values": [{"low": -0.9, "high": -0.3}, {"low": -0.3, "high": 0.3}, {"low": 0.3, "high": 0.9}]}
+ ],
+ "dependent_variables": [
+  {"header": {"name": "d(sigma)/d(cos(theta))", "units": "pb"},
+   "qualifiers": [{"name": "SQRT(S)", "units": "GeV", "value": 10}],
+   "values": [
+    {"value": 420.0, "errors": [{"symerror": 12.0, "label": "stat"}, {"symerror": "2%", "label": "sys,lumi"}]},
+    {"value": 330.0, "errors": [{"symerror": 10.0, "label": "stat"}, {"symerror": "2%", "label": "sys,lumi"}]},
+    {"value": 430.0, "errors": [{"symerror": 12.5, "label": "stat"}, {"asymerror": {"plus": 9.0, "minus": -7.0}, "label": "sys,model"}]}
+   ]}
+ ]
+}

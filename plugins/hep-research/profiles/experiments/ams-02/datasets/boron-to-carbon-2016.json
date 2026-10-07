@@ -1,0 +1,100 @@
+{
+ "contract_version": "1.0.0",
+ "artifact_id": "ams02-dataset-boron-to-carbon-2016",
+ "artifact_type": "dataset-record",
+ "objective": "Metadata record of a published AMS-02 result (Precision Measurement of the Boron to Carbon Flux Ratio, 1.9 GV-2.6 TV, PRL 117, 231102); no data values are transcribed",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.1.0",
+  "contracts": "1.0.0",
+  "profiles": {
+   "experiment:ams-02": "1.0.0"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-analysis",
+  "created": "2026-10-02",
+  "evidence_ids": [
+   "ams02:S10",
+   "ams02:C08",
+   "ams02:C32"
+  ]
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "unvalidated"
+ ],
+ "unresolved_inputs": [
+  "data values, uncertainties and covariance: transcribe from the paper or its Supplemental Material with a new claim before use",
+  "bin semantics: not recorded in the ledger"
+ ],
+ "extension": {
+  "dataset_id": "ams02:boron-to-carbon-2016",
+  "source_evidence_ids": [
+   "ams02:S10"
+  ],
+  "observable": {
+   "quantity": "ratio",
+   "process": "primary cosmic rays at the detector location",
+   "species": [
+    {
+     "name": "boron"
+    },
+    {
+     "name": "carbon"
+    }
+   ],
+   "variables": [
+    {
+     "name": "rigidity",
+     "unit": "GV"
+    }
+   ],
+   "phase_space": {
+    "definition": "as defined in the source paper (not transcribed here)",
+    "fiducial": true
+   },
+   "level": "crflux:top-of-instrument",
+   "frame": "detector location",
+   "normalization": {
+    "kind": "exposure",
+    "value": "not-applicable",
+    "convention": "ratio of exposure-normalized quantities; normalization enters through the numerator and denominator"
+   },
+   "bin_semantics": "unknown",
+   "unit": "1",
+   "conventions": {
+    "energy_variable": "rigidity",
+    "ams02:rigidity_definition": "R = pc/(Ze) in GV; p = |Z|R/c; rigidity is not momentum"
+   },
+   "validity_range": {
+    "variable": "rigidity",
+    "min": 1.9,
+    "max": 2600,
+    "unit": "GV",
+    "evidence": "ams02:C08"
+   }
+  },
+  "covariance": {
+   "status": "absent",
+   "note": "not transcribed; the paper's own uncertainty breakdown governs"
+  },
+  "period": {
+   "start": "2011-05-19",
+   "end": "2016-05-26",
+   "evidence": "claim C32; the abstract says first 5 years"
+  },
+  "status": "published",
+  "experiment_profile": "experiment:ams-02",
+  "conditions": "source read only for its data period; range and statistics are abstract-level (C08)",
+  "ams02:method_module": {
+   "module": "modules/species/charged-cosmic-rays.md",
+   "claims": [],
+   "note": "the ledger holds no analysis-method claim for S10; the module gives a general flux-ratio design, not this paper's method"
+  }
+ }
+}

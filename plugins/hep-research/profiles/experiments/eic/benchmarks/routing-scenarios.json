@@ -1,0 +1,61 @@
+{
+ "note": "Static routing scenarios for experiment:eic. Decisions are what contracts/project.py returns for the explicit request with no project config; files are what index.md names. No model is called; a live routing run is a separate, paid step.",
+ "scenarios": [
+  {
+   "id": "generic-dis",
+   "request": "Write down the DIS variables x, y and Q^2 from the lepton and hadron four-momenta and the identity linking them to sqrt(s).",
+   "explicit_profiles": [],
+   "needs_profile": false,
+   "expected_decision": "none",
+   "expected_owner": "hep-theory",
+   "triggers": ["derivations", "conventions"],
+   "index_row_keyword": "Generic DIS",
+   "expected_eic_files": []
+  },
+  {
+   "id": "eic-facility",
+   "request": "Which beam species and polarizations does the EIC provide, and where are its design energies specified?",
+   "explicit_profiles": ["experiment:eic"],
+   "needs_profile": true,
+   "expected_decision": "use",
+   "expected_owner": "hep-analysis",
+   "triggers": ["measurement", "correction chains"],
+   "index_row_keyword": "Beam species",
+   "expected_eic_files": ["modules/facility/eic-facility-context.md"]
+  },
+  {
+   "id": "epic-detector",
+   "request": "Describe the ePIC detector concept: magnet, tracking, calorimetry, PID and data acquisition.",
+   "explicit_profiles": ["experiment:eic"],
+   "needs_profile": true,
+   "expected_decision": "use",
+   "expected_owner": "detector-response",
+   "triggers": ["tracking", "calorimetry", "particle identification"],
+   "index_row_keyword": "ePIC detector concept",
+   "expected_eic_files": ["modules/detector/epic-detector-context.md"]
+  },
+  {
+   "id": "ambiguous-detector",
+   "request": "What is the tracking resolution at the EIC?",
+   "explicit_profiles": [],
+   "needs_profile": true,
+   "expected_decision": "ask",
+   "expected_owner": "detector-response",
+   "triggers": ["resolution"],
+   "index_row_keyword": "Detector performance",
+   "expected_eic_files": [],
+   "ask_for": "detector concept, geometry release, configuration (species, E_e x E_h), projection or measurement"
+  },
+  {
+   "id": "unrelated-experiment",
+   "request": "Rigidity resolution of the AMS-02 tracker.",
+   "explicit_profiles": ["experiment:ams-02"],
+   "needs_profile": true,
+   "expected_decision": "use",
+   "expected_owner": "detector-response",
+   "triggers": ["resolution"],
+   "index_row_keyword": "",
+   "expected_eic_files": []
+  }
+ ]
+}

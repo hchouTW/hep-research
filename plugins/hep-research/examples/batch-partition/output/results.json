@@ -1,0 +1,211 @@
+{
+ "label": "SYNTHETIC job on FAKE schedulers (tests/adapters/batch_shims); injected faults; not real Slurm or HTCondor",
+ "log": {
+  "htcondor": {
+   "1_dry_run_calls": 0,
+   "2_duplicates": 1,
+   "2_first_status": {
+    "c0003": "held",
+    "c0004": "failed"
+   },
+   "3_no_max_attempts": {
+    "blocked": {
+     "c0003": "needs-reset",
+     "c0004": "needs-reset"
+    },
+    "resubmitted": []
+   },
+   "4_c0003_resource_change": {
+    "after": "held",
+    "from": {
+     "cpus": 1,
+     "disk_mb": 500,
+     "memory_mb": 1000
+    },
+    "to": {
+     "cpus": 1,
+     "disk_mb": 500,
+     "memory_mb": 2000
+    }
+   },
+   "4_resubmit": {
+    "again": {
+     "c0004": "stopped-repeated-failure",
+     "resubmitted": []
+    },
+    "c0004_after": "stopped-repeated-failure",
+    "c0004_attempts": 2,
+    "resubmitted": [
+     "c0003",
+     "c0004"
+    ]
+   },
+   "5_after_fix": {
+    "complete": true,
+    "exit": 0,
+    "resubmitted": [
+     "c0004"
+    ]
+   },
+   "artifact_status": [
+    "synthetic",
+    "unvalidated"
+   ],
+   "attempts": {
+    "c0001": [
+     "preempted-or-evicted",
+     "done"
+    ],
+    "c0003": [
+     "held",
+     "done"
+    ],
+    "c0004": [
+     "failed",
+     "failed",
+     "done"
+    ]
+   },
+   "chunks_merged": 10,
+   "merge_status": "complete",
+   "scheduler_calls": {
+    "condor_submit": 3,
+    "condor_version": 1
+   },
+   "scheduler_tool": {
+    "name": "htcondor",
+    "version": "$CondorVersion: 0.0.0-shim (fake scheduler for tests) $"
+   }
+  },
+  "slurm": {
+   "1_dry_run_calls": 0,
+   "2_duplicates": 1,
+   "2_first_status": {
+    "c0003": "out-of-memory",
+    "c0004": "failed"
+   },
+   "3_no_max_attempts": {
+    "blocked": {
+     "c0003": "no-retries-configured",
+     "c0004": "needs-reset"
+    },
+    "resubmitted": []
+   },
+   "4_c0003_resource_change": {
+    "after": "out-of-memory",
+    "from": {
+     "cpus": 1,
+     "memory_mb": 1000,
+     "time_limit": "00:10:00"
+    },
+    "to": {
+     "cpus": 1,
+     "memory_mb": 2000,
+     "time_limit": "00:10:00"
+    }
+   },
+   "4_resubmit": {
+    "again": {
+     "c0004": "stopped-repeated-failure",
+     "resubmitted": []
+    },
+    "c0004_after": "stopped-repeated-failure",
+    "c0004_attempts": 2,
+    "resubmitted": [
+     "c0003",
+     "c0004"
+    ]
+   },
+   "5_after_fix": {
+    "complete": true,
+    "exit": 0,
+    "resubmitted": [
+     "c0004"
+    ]
+   },
+   "artifact_status": [
+    "synthetic",
+    "unvalidated"
+   ],
+   "attempts": {
+    "c0001": [
+     "preempted-or-evicted",
+     "done"
+    ],
+    "c0003": [
+     "out-of-memory",
+     "done"
+    ],
+    "c0004": [
+     "failed",
+     "failed",
+     "done"
+    ]
+   },
+   "chunks_merged": 10,
+   "merge_status": "complete",
+   "scheduler_calls": {
+    "sacct": 3,
+    "sbatch": 4
+   },
+   "scheduler_tool": {
+    "name": "slurm",
+    "version": "slurm 0.0.0-shim"
+   }
+  }
+ },
+ "manifest": {
+  "chunk_size": 20000,
+  "job_id": "synthetic-angular-histogram",
+  "manifest_hash": "4379bcf1f00c45fd0bca8b8718b9e665ebaa7b58b7f1e714359bf235b777e41e",
+  "n_items": 200000,
+  "seed": 20261005
+ },
+ "merged_local": {
+  "counts": [
+   23134,
+   19670,
+   16649,
+   14619,
+   13405,
+   12566,
+   12571,
+   13394,
+   14772,
+   16835,
+   19496,
+   22889
+  ],
+  "n": 200000,
+  "sum_cos": -202.23230211395256
+ },
+ "pass": {
+  "htcondor": {
+   "artifact_validates_and_is_labeled_synthetic": true,
+   "completes_after_fix_and_reset": true,
+   "dry_run_makes_no_scheduler_call": true,
+   "duplicate_recorded_not_summed": true,
+   "faults_seen_on_first_poll": true,
+   "job_logs_pass_the_blinding_audit": true,
+   "memory_failure_resubmitted_with_resource_change": true,
+   "merged_equals_local_exactly": true,
+   "no_resubmission_without_max_attempts": true,
+   "repeated_identical_failure_stops": true
+  },
+  "slurm": {
+   "artifact_validates_and_is_labeled_synthetic": true,
+   "completes_after_fix_and_reset": true,
+   "dry_run_makes_no_scheduler_call": true,
+   "duplicate_recorded_not_summed": true,
+   "faults_seen_on_first_poll": true,
+   "job_logs_pass_the_blinding_audit": true,
+   "memory_failure_resubmitted_with_resource_change": true,
+   "merged_equals_local_exactly": true,
+   "no_resubmission_without_max_attempts": true,
+   "repeated_identical_failure_stops": true
+  }
+ },
+ "tolerance": {
+  "merge": "exact equality with the local single-run merge"
+ }
+}

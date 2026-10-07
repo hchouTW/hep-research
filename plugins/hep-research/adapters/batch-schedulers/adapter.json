@@ -1,0 +1,40 @@
+{
+ "id": "adapter:batch-schedulers",
+ "version": "0.1.0",
+ "status": "documented",
+ "purpose": "Run manifest-partitioned work as Slurm job arrays or HTCondor clusters with duplicate-safe collection, bounded explicit resubmission and provenance",
+ "tools": [
+  {
+   "name": "Slurm",
+   "status": "documented",
+   "tested_versions": []
+  },
+  {
+   "name": "HTCondor",
+   "status": "documented",
+   "tested_versions": []
+  }
+ ],
+ "environment": "none declared: no real Slurm or HTCondor has run these backends; tests run them against fake schedulers (tests/adapters/batch_shims) in E1 (Python 3.11.15, standard library); real-tool tests need HEP_SLURM_TEST=1 or HEP_HTCONDOR_TEST=1 and an approved installation",
+ "assets": [
+  "assets/slurm-array.sbatch.template",
+  "assets/htcondor-chunks.sub.template",
+  "assets/batch-config.example.json",
+  "batch_campaign.py",
+  "batch_config.py",
+  "slurm_backend.py",
+  "htcondor_backend.py"
+ ],
+ "tests": [
+  "../../tests/adapters/test_batch_config.py",
+  "../../tests/adapters/test_batch_slurm.py",
+  "../../tests/adapters/test_batch_htcondor.py",
+  "../../tests/adapters/test_batch_watch.py",
+  "../../tests/adapters/test_batch_provenance.py",
+  "../../tests/adapters/test_batch_privacy.py",
+  "../../tests/adapters/test_batch_reference.py",
+  "../../tests/examples/test_batch_partition.py"
+ ],
+ "owner_skill": "hep-computing",
+ "status_rule": "the adapter status is the lowest of its tools' statuses; each tool's own status is in tools[]; fake-scheduler tests never raise a tool above documented"
+}

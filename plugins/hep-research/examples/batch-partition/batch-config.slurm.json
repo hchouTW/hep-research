@@ -1,0 +1,8 @@
+{
+ "backend": "slurm",
+ "campaign_dir": "campaign",
+ "resources": {"cpus": 1, "memory_mb": 1000, "time_limit": "00:10:00"},
+ "slurm": {"partition": "synthetic-partition", "account": "synthetic-account"},
+ "throttle": 3,
+ "job_name": "synthetic-batch-partition"
+}

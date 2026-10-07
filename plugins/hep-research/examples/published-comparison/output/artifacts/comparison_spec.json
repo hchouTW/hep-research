@@ -1,0 +1,106 @@
+{
+ "contract_version": "2.0.0",
+ "bindings": {
+  "experiments": [],
+  "theory": [
+   {
+    "profile": "theory:qed-benchmark",
+    "version": "1.0.0"
+   }
+  ]
+ },
+ "versions": {
+  "plugin": "0.3.0",
+  "contracts": "2.0.0",
+  "profiles": {
+   "theory:qed-benchmark": "1.0.0"
+  }
+ },
+ "outputs": [],
+ "unresolved_inputs": [
+  "truncation (higher orders, Z exchange) not quantified in the prediction"
+ ],
+ "artifact_id": "synthetic-t24-comparison",
+ "artifact_type": "comparison-spec",
+ "inputs": [
+  {
+   "ref": "../qed-prediction/output/artifacts/prediction.json",
+   "artifact_type": "prediction",
+   "status": [
+    "validated-in-scope"
+   ]
+  },
+  {
+   "ref": "synthetic-published-record.json",
+   "artifact_type": "dataset-record",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "status": [
+  "synthetic"
+ ],
+ "objective": "QED prediction vs SYNTHETIC published-style record",
+ "provenance": {
+  "producer_skill": "hep-statistics",
+  "created": "2026-10-02"
+ },
+ "extension": {
+  "dataset_bindings": [
+   "synthcol:synthetic-published-dsigma"
+  ],
+  "prediction_bindings": [
+   "qedbench-path-c-prediction"
+  ],
+  "gate_result": {
+   "comparable": true,
+   "mismatches": [],
+   "notes": [
+    {
+     "field": "conventions.mass_approximation",
+     "note": "core key only on side a; confirm it does not affect the comparison"
+    },
+    {
+     "field": "conventions.spin_treatment",
+     "note": "core key only on side a; confirm it does not affect the comparison"
+    }
+   ]
+  },
+  "transformations": [
+   {
+    "kind": "level-identification",
+    "owner": "hep-theory",
+    "from": "parton",
+    "to": "particle-fiducial",
+    "justification": "tree-level prediction without radiation: the outgoing muon is the stable final-state particle",
+    "ok": true
+   },
+   {
+    "kind": "fiducial-restriction",
+    "owner": "hep-theory",
+    "variable": "cos_theta",
+    "range": [
+     -0.9,
+     0.9
+    ],
+    "ok": true
+   }
+  ],
+  "correlations": [
+   {
+    "source": "record covariance",
+    "kind": "full matrix as published (synthetic)"
+   }
+  ],
+  "inference_assumptions": [
+   "Gaussian likelihood with the record's full covariance",
+   "luminosity part of the covariance used as given (fully correlated)"
+  ],
+  "limits": [
+   "synthetic record",
+   "no detector information used or needed",
+   "the record's luminosity block is built from the measured values (fully correlated, proportional to the data); a Gaussian GLS normalization fit with such a matrix is known to be biased low for multiplicative uncertainties (Peelle's pertinent puzzle), so mu here can differ from the ratio of fiducial cross sections"
+  ]
+ }
+}

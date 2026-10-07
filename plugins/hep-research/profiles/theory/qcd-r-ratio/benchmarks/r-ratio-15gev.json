@@ -1,0 +1,13 @@
+{
+ "label": "Benchmark settings for theory:qcd-r-ratio (theory only; no experiment resource)",
+ "q_gev": 15.0,
+ "n_f": 5,
+ "quark_charges": [0.6666666666666666, -0.3333333333333333, -0.3333333333333333, 0.6666666666666666, -0.3333333333333333],
+ "n_c": 3,
+ "alpha_s_mz": 0.1180,
+ "alpha_s_mz_uncertainty": 0.0009,
+ "m_z_gev": 91.1879,
+ "scale_factors": [0.5, 1.0, 2.0],
+ "scale_scan_points": 41,
+ "lowest_scale_gev": 5.0
+}

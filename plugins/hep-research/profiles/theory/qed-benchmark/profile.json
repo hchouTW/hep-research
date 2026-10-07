@@ -1,0 +1,71 @@
+{
+ "id": "theory:qed-benchmark",
+ "kind": "theory-domain",
+ "version": "1.0.0",
+ "scope": "Benchmark theory domain: tree-level e+e- -> mu+mu- through one s-channel photon (point-like fermions, unpolarized beams, alpha = e^2/(4 pi)), differential and integrated cross sections with a SymPy derivation from Dirac matrices and a reference read from the PDG review (eqs. 51.2, 51.3). Validity: sqrt(s) well above the muon mass and well below the Z mass; no radiative corrections.",
+ "exclusions": [
+  "Z exchange and gamma-Z interference",
+  "QED radiative corrections, running of alpha, beam polarization",
+  "Any experiment, detector, data or blinding field",
+  "Claims of formal proof: the derivation is an analytic derivation checked with SymPy"
+ ],
+ "compatible": {
+  "core": ">=1.0,<2.0",
+  "contracts": ">=2.0,<3.0"
+ },
+ "related_skills": [
+  "hep-theory",
+  "hep-computing",
+  "hep-statistics"
+ ],
+ "resources": {
+  "index": "index.md",
+  "conventions": "conventions.json",
+  "model": "models/tree-level-photon-exchange.md",
+  "derivation": "derivations/derivation-record.md",
+  "predictions": "predictions/",
+  "benchmarks": "benchmarks/",
+  "evidence": "evidence/"
+ },
+ "vocabulary_namespaces": [
+  "qedbench"
+ ],
+ "vocabulary_extensions": {
+  "conventions": [
+   "qedbench:reference_constant"
+  ]
+ },
+ "adapters": {
+  "required": [],
+  "optional": []
+ },
+ "depends_on": [],
+ "evidence_namespace": "qedbench",
+ "maintainer": "hchouTW",
+ "capabilities": [
+  {
+   "name": "symbolic-derivation",
+   "status": "tested-in-declared-environment",
+   "scope": "SymPy derivation of the spin-averaged squared amplitude, d sigma / d Omega, d sigma / d cos theta and sigma(beta) from explicit Dirac matrices; agreement with PDG eqs. 51.2 and 51.3 (analytic derivation, not formal proof)",
+   "tests": [
+    "tests/test_derivation.py"
+   ]
+  },
+  {
+   "name": "numerical-prediction",
+   "status": "tested-in-declared-environment",
+   "scope": "Bin-averaged d sigma / d cos theta and integrated cross sections at a given sqrt(s) with an integration convergence study",
+   "tests": [
+    "tests/test_prediction.py"
+   ]
+  },
+  {
+   "name": "standalone-theory-path",
+   "status": "tested-in-declared-environment",
+   "scope": "Path C (examples/qed-benchmark): theory spec, derivation record and prediction artifacts with zero experiment resources read (recorded per run)",
+   "tests": [
+    "../../../tests/examples/test_qed_prediction.py"
+   ]
+  }
+ ]
+}

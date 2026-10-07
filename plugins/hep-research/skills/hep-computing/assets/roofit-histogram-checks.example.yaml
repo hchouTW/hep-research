@@ -1,0 +1,29 @@
+# Template configuration for histogram statistics and RooFit checks.
+
+inputs:
+  root_file: histograms.root
+  histograms:
+    - h_leading_muon_pt
+
+histogram_checks:
+  include_flow: true
+  report_negative_bins: true
+  report_empty_bins: true
+  min_nonzero_bins_for_fit: 5
+  normalization: raw_weighted_yield
+
+comparison:
+  reference_file: reference.root
+  candidate_file: candidate.root
+  max_relative_difference_warning: 0.001
+
+roofit:
+  input_file: fit.root
+  workspace: workspace
+  observable: mass
+  model: model
+  data: data
+  fit_range: signal_region
+  save_fit_result: true
+  required_status: 0
+  minimum_covariance_quality: 2

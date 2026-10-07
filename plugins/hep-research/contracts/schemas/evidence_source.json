@@ -1,0 +1,131 @@
+{
+ "$comment": "Shared evidence schema, source record. IDs are profile-qualified ('<ns>:S01'). Current date != verification date != publication date.",
+ "type": "object",
+ "required": [
+  "id",
+  "title",
+  "authors",
+  "tier",
+  "verification_level",
+  "verification_date",
+  "formal_status",
+  "supersedes",
+  "superseded_by"
+ ],
+ "properties": {
+  "id": {
+   "type": "string",
+   "pattern": "^[a-z][a-z0-9-]*:S[0-9A-Za-z_.-]+$"
+  },
+  "title": {
+   "type": "string",
+   "minLength": 1
+  },
+  "authors": {
+   "type": "string"
+  },
+  "year": {
+   "anyOf": [
+    {
+     "type": "integer"
+    },
+    {
+     "type": "null"
+    },
+    {
+     "$ref": "common.json#/$defs/missing"
+    }
+   ]
+  },
+  "identifiers": {
+   "type": "object",
+   "properties": {
+    "dois": {
+     "type": "array"
+    },
+    "arxiv_ids": {
+     "type": "array"
+    },
+    "inspire_record_id": {
+     "type": [
+      "string",
+      "integer",
+      "null"
+     ]
+    },
+    "url": {
+     "type": [
+      "string",
+      "null"
+     ]
+    }
+   }
+  },
+  "tier": {
+   "type": "integer",
+   "minimum": 1
+  },
+  "verification_level": {
+   "type": "string",
+   "x-vocab": "verification_levels"
+  },
+  "verification_date": {
+   "anyOf": [
+    {
+     "type": "string",
+     "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    {
+     "$ref": "common.json#/$defs/missing"
+    }
+   ]
+  },
+  "publication_date": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "data_taking_period": {
+   "type": [
+    "string",
+    "object",
+    "null"
+   ]
+  },
+  "formal_status": {
+   "type": "string",
+   "enum": [
+    "published",
+    "official-document",
+    "preliminary",
+    "reference",
+    "other-experiment",
+    "secondary",
+    "conference",
+    "thesis",
+    "database",
+    "user-supplied-internal",
+    "unknown"
+   ]
+  },
+  "supersedes": {
+   "type": "array"
+  },
+  "superseded_by": {
+   "type": "array"
+  },
+  "attribution": {
+   "type": [
+    "string",
+    "null"
+   ]
+  },
+  "notes": {
+   "type": [
+    "string",
+    "null"
+   ]
+  }
+ }
+}

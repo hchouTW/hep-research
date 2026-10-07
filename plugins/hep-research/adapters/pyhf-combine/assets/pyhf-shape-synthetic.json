@@ -1,0 +1,51 @@
+{
+  "channels": [
+    {
+      "name": "synthetic_sr",
+      "samples": [
+        {
+          "name": "signal",
+          "data": [2.0, 4.0, 3.0],
+          "modifiers": [
+            {"name": "mu", "type": "normfactor", "data": null},
+            {"name": "jes", "type": "histosys", "data": {"hi_data": [2.2, 4.3, 3.1], "lo_data": [1.8, 3.8, 2.8]}}
+          ]
+        },
+        {
+          "name": "background",
+          "data": [20.0, 15.0, 10.0],
+          "modifiers": [
+            {"name": "bkg_xsec", "type": "normsys", "data": {"hi": 1.1, "lo": 0.9}},
+            {"name": "jes", "type": "histosys", "data": {"hi_data": [21.0, 16.0, 10.5], "lo_data": [19.0, 14.2, 9.6]}},
+            {"name": "staterror_synthetic_sr", "type": "staterror", "data": [2.0, 1.5, 1.2]}
+          ]
+        }
+      ]
+    },
+    {
+      "name": "synthetic_cr",
+      "samples": [
+        {
+          "name": "background",
+          "data": [100.0, 80.0],
+          "modifiers": [
+            {"name": "bkg_xsec", "type": "normsys", "data": {"hi": 1.1, "lo": 0.9}},
+            {"name": "jes", "type": "histosys", "data": {"hi_data": [103.0, 82.0], "lo_data": [98.0, 77.5]}},
+            {"name": "cr_shape", "type": "shapesys", "data": [5.0, 4.0]}
+          ]
+        }
+      ]
+    }
+  ],
+  "observations": [
+    {"name": "synthetic_sr", "data": [24, 18, 12]},
+    {"name": "synthetic_cr", "data": [102, 79]}
+  ],
+  "measurements": [
+    {
+      "name": "synthetic_shape",
+      "config": {"poi": "mu", "parameters": [{"name": "mu", "bounds": [[0, 10]], "inits": [1]}]}
+    }
+  ],
+  "version": "1.0.0"
+}

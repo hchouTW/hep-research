@@ -1,0 +1,32 @@
+{
+ "name": "hep-research-dev",
+ "interface": {
+  "displayName": "hep-research"
+ },
+ "plugins": [
+  {
+   "name": "hep-research",
+   "source": {
+    "source": "local",
+    "path": "./plugins/hep-research"
+   },
+   "policy": {
+    "installation": "AVAILABLE",
+    "authentication": "ON_INSTALL"
+   },
+   "category": "Research"
+  },
+  {
+   "name": "ams02-research",
+   "source": {
+    "source": "url",
+    "url": "https://github.com/hchouTW/ams02-research.git"
+   },
+   "policy": {
+    "installation": "AVAILABLE",
+    "authentication": "ON_INSTALL"
+   },
+   "category": "Research"
+  }
+ ]
+}

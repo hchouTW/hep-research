@@ -1,0 +1,60 @@
+{
+ "contract_version": "2.0.0",
+ "bindings": {
+  "experiments": [
+   {
+    "profile": "experiment:synthetic-collider",
+    "version": "1.0.0"
+   }
+  ],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.3.0",
+  "contracts": "2.0.0",
+  "profiles": {
+   "experiment:synthetic-collider": "1.0.0"
+  }
+ },
+ "inputs": [
+  {
+   "ref": "artifacts/resolution.json",
+   "artifact_type": "dataset-record",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "artifact_id": "synthetic-j2-width-fit",
+ "artifact_type": "statistical-result",
+ "objective": "SYNTHETIC J2: constant-width fit of the per-bin resolution",
+ "provenance": {
+  "producer_skill": "hep-statistics",
+  "created": "2026-10-02"
+ },
+ "extension": {
+  "paradigm": "frequentist",
+  "likelihood": {
+   "form": "Gaussian per bin with the large-sample width uncertainty (weighted least squares)"
+  },
+  "parameters_of_interest": [
+   "constant cos theta resolution"
+  ],
+  "nuisances": [],
+  "test_statistic": "chi2 of the constant model",
+  "construction": "other",
+  "coverage": {
+   "method": "seeded replicate samples; pull mean and width",
+   "result_ref": "results.json#replicates"
+  },
+  "fit_status": "converged",
+  "results": {
+   "ref": "results.json#width_fit"
+  }
+ }
+}

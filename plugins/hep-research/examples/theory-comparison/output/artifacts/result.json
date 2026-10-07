@@ -1,0 +1,115 @@
+{
+ "contract_version": "2.0.0",
+ "bindings": {
+  "experiments": [
+   {
+    "profile": "experiment:synthetic-collider",
+    "version": "1.0.0"
+   }
+  ],
+  "theory": [
+   {
+    "profile": "theory:qed-benchmark",
+    "version": "1.0.0"
+   }
+  ]
+ },
+ "versions": {
+  "plugin": "0.3.0",
+  "contracts": "2.0.0",
+  "profiles": {
+   "experiment:synthetic-collider": "1.0.0",
+   "theory:qed-benchmark": "1.0.0"
+  }
+ },
+ "outputs": [],
+ "unresolved_inputs": [],
+ "artifact_id": "synthetic-path-d-mu-fit",
+ "artifact_type": "statistical-result",
+ "inputs": [
+  {
+   "ref": "artifacts/comparison_spec.json",
+   "artifact_type": "comparison-spec",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "artifacts/folded_expectation.json",
+   "artifact_type": "prediction",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "artifacts/dataset_record.json",
+   "artifact_type": "dataset-record",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "objective": "Normalization scale mu of the QED prediction on SYNTHETIC data",
+ "provenance": {
+  "producer_skill": "hep-statistics",
+  "created": "2026-10-02"
+ },
+ "status": [
+  "synthetic"
+ ],
+ "extension": {
+  "paradigm": "frequentist",
+  "likelihood": {
+   "form": "product of Poisson terms over reconstructed bins x Gaussian luminosity constraint",
+   "expected": "mu x kappa x (1 + 0.02 theta) x L_obs x (R sigma)_k"
+  },
+  "parameters_of_interest": [
+   "mu"
+  ],
+  "nuisances": [
+   "theta (luminosity, Gaussian constraint)",
+   "kappa (reference rounding, flat in +-5.8e-04)"
+  ],
+  "constraints": [
+   {
+    "parameter": "theta",
+    "form": "normal(0, 1)"
+   },
+   {
+    "parameter": "kappa",
+    "form": "uniform[0.999424, 1.000576]"
+   }
+  ],
+  "test_statistic": "profile likelihood ratio q(mu) = 2 [NLL(mu, profiled) - NLL_min]",
+  "construction": "profile-likelihood-wilks",
+  "coverage": {
+   "method": "seeded toys from the synthetic generator with a fluctuated luminosity measurement",
+   "result": {
+    "1": {
+     "toys": 200,
+     "mean_pull": -0.0195,
+     "pull_width": 0.9671,
+     "coverage_68": 0.71
+    },
+    "0.8": {
+     "toys": 200,
+     "mean_pull": -0.0405,
+     "pull_width": 1.015,
+     "coverage_68": 0.655
+    }
+   }
+  },
+  "fit_status": "converged",
+  "results": {
+   "mu_hat": 1.0232543754600867,
+   "interval_68": [
+    1.000961742995907,
+    1.04639873031836
+   ],
+   "plateau_from_kappa": [
+    1.0226652825553888,
+    1.0238441474344153
+   ]
+  }
+ }
+}

@@ -1,0 +1,58 @@
+[
+ {
+  "id": "qcdr:C01",
+  "claim": "sigma(e+e- -> hadrons, Q) / sigma(e+e- -> mu+mu-, Q) = R(Q) = R_EW(Q) (1 + delta_QCD(Q)); at energies where only photon exchange matters R_EW = N_c sum_q e_q^2",
+  "claim_types": ["formula"],
+  "support_kind": "reference formula",
+  "evidence_status": "public-fact",
+  "source_ids": ["qcdr:S01"],
+  "location": "section 9.2.1 'Fully inclusive cross sections', eq. (9.7)",
+  "scope": {"text": "massless quarks; photon exchange only for the R_EW = N_c sum e_q^2 form"},
+  "limitations": "the extract states R_EW = N_c sum e_q^2 next to eq. (9.7); Z exchange and quark-mass corrections are outside this profile",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-07"
+ },
+ {
+  "id": "qcdr:C02",
+  "claim": "delta_QCD(Q) = sum_n c_n (alpha_s(Q^2)/pi)^n with c_1 = 1, c_2 = 1.9857 - 0.1152 n_f, c_3 = -6.63694 - 1.20013 n_f - 0.00518 n_f^2 - 1.240 eta, c_4 = -156.61 + 18.775 n_f - 0.7974 n_f^2 + 0.0215 n_f^3 - (17.828 - 0.575 n_f) eta, with eta = (sum e_q)^2 / (N_c sum e_q^2) and N_c = 3, in the MS-bar scheme with mu_R = Q",
+  "claim_types": ["formula", "numeric"],
+  "support_kind": "reference formula",
+  "evidence_status": "public-fact",
+  "source_ids": ["qcdr:S01"],
+  "location": "section 9.2.1, eqs. (9.8) and (9.9)",
+  "scope": {"text": "massless quarks, n_f active flavours; eta multiplies the singlet (light-by-light) terms"},
+  "limitations": "coefficients quoted to the digits of the review; the renormalization-scale statement (mu_R = Q) is taken from the fetch tool's summary of the passage",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-07"
+ },
+ {
+  "id": "qcdr:C03",
+  "claim": "mu_R^2 d alpha_s / d mu_R^2 = beta(alpha_s) = -(b_0 alpha_s^2 + b_1 alpha_s^3 + b_2 alpha_s^4 + ...), with b_0 = (33 - 2 n_f)/(12 pi), b_1 = (153 - 19 n_f)/(24 pi^2), b_2 = (2857 - 5033/9 n_f + 325/27 n_f^2)/(128 pi^3); b_2 and beyond are scheme dependent and given in MS-bar",
+  "claim_types": ["formula"],
+  "support_kind": "reference formula",
+  "evidence_status": "public-fact",
+  "source_ids": ["qcdr:S01"],
+  "location": "subsection 9.1.1 'Running coupling', eq. (9.3)",
+  "scope": {"text": "fixed number of active flavours n_f"},
+  "limitations": "flavour-threshold matching is not in the extract read; the profile never crosses a threshold",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-07"
+ },
+ {
+  "id": "qcdr:C04",
+  "claim": "alpha_s(m_Z) = 0.1180(9); m_Z = 91.1879(20) GeV",
+  "claim_types": ["numeric"],
+  "support_kind": "reference value",
+  "evidence_status": "public-fact",
+  "source_ids": ["qcdr:S02"],
+  "location": "Table 1.1 (Physical constants), rows 'strong coupling constant' and 'Z0 boson mass'",
+  "scope": {"text": "MS-bar, n_f = 5 at the scale m_Z"},
+  "limitations": "the table gives the value and uncertainty only; how the average is built is in the QCD review, not read here",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-07"
+ }
+]

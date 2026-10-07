@@ -1,0 +1,22 @@
+{
+  "name": "hep-research-dev",
+  "owner": {
+    "name": "hchouTW"
+  },
+  "plugins": [
+    {
+      "name": "hep-research",
+      "source": "./plugins/hep-research",
+      "description": "Experimental and theoretical HEP research assistant."
+    },
+    {
+      "name": "ams02-research",
+      "source": {
+        "source": "github",
+        "repo": "hchouTW/ams02-research",
+        "sha": "615b48e39a6e737fdb4a32950a99f2549e885d65"
+      },
+      "description": "Private companion profile for hep-research; access restricted."
+    }
+  ]
+}

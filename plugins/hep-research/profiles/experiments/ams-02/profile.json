@@ -1,0 +1,97 @@
+{
+ "id": "experiment:ams-02",
+ "kind": "experiment",
+ "version": "2.0.0",
+ "scope": "Alpha Magnetic Spectrometer (AMS-02) on the ISS: subsystems and observables, charged cosmic-ray fluxes and ratios, leptons, antimatter searches, isotopes, time-dependent analyses, and the public-evidence ledger (60 sources, 184 claims; last full verification 2026-09-20, some rows 2026-10-02 and 2026-10-05). Public-domain reasoning only: no AMS internal data, software or production listings. Access-controlled AMS-02 software and data knowledge is not part of this profile; it is supplied by the separate, access-restricted companion plugin ams02-research as profile experiment:ams-02-private, which depends on this one.",
+ "exclusions": [
+  "AMS Collaboration internal data, notes, calibration constants, conditions databases, pass names, trigger bits, good-run rules and cuts, unless the user supplies them (then labelled user-supplied, never invented or completed from memory)",
+  "AMS Offline software usage, library maps, production catalogues and ntuple kits: not in this profile; available only to authorized members through the companion profile experiment:ams-02-private",
+  "Measured detector performance numbers not in the evidence ledger with their context",
+  "Collaboration review, blinding decisions and peer review",
+  "Other experiments' methods presented as AMS practice"
+ ],
+ "compatible": {
+  "core": ">=1.0,<2.0",
+  "contracts": ">=2.0,<3.0"
+ },
+ "related_skills": [
+  "hep-analysis",
+  "detector-response",
+  "hep-statistics",
+  "hep-theory",
+  "research-communication",
+  "hep-computing"
+ ],
+ "resources": {
+  "index": "index.md",
+  "conventions": "conventions.json",
+  "working_rules": "modules/working-rules.md",
+  "evidence": "evidence/",
+  "evidence_index": "evidence/index.md",
+  "datasets": "datasets/"
+ },
+ "vocabulary_namespaces": [
+  "ams02",
+  "crflux"
+ ],
+ "vocabulary_extensions": {
+  "levels": [
+   "crflux:top-of-instrument",
+   "crflux:local-interstellar"
+  ],
+  "conventions": [
+   "ams02:rigidity_definition",
+   "ams02:rigidity_sign",
+   "ams02:charge_sign_source",
+   "ams02:mass_number_assumption"
+  ]
+ },
+ "adapters": {
+  "required": [],
+  "optional": []
+ },
+ "depends_on": [],
+ "evidence_namespace": "ams02",
+ "maintainer": "hchouTW",
+ "capabilities": [
+  {
+   "name": "domain-modules",
+   "status": "documented",
+   "scope": "Reference modules (species, subsystems, methods, periods, sources) and working rules; text guidance, not executable checks"
+  },
+  {
+   "name": "evidence-ledger",
+   "status": "tested-in-declared-environment",
+   "scope": "Structural validity of the ams02 ledger, verification-strength ordering and index sync; not the truth of any claim",
+   "tests": [
+    "tests/test_evidence_ledger.py"
+   ]
+  },
+  {
+   "name": "analysis-spec-audit",
+   "status": "tested-in-declared-environment",
+   "scope": "Internal completeness and consistency of a JSON or strict-YAML AMS analysis specification; a clean audit is not physical validity",
+   "tests": [
+    "tests/test_analysis_spec.py",
+    "tests/test_yaml_subset.py"
+   ]
+  },
+  {
+   "name": "papers-manifest-and-crdb-query",
+   "status": "tested-in-declared-environment",
+   "scope": "Offline subcommands only (manifest check, URL building, CSV summary); networked fetches are opt-in, need user approval and are not exercised by the tests",
+   "tests": [
+    "tests/test_fetch_papers.py",
+    "tests/test_crdb_query.py"
+   ]
+  },
+  {
+   "name": "flux-ratio-synthetic",
+   "status": "demonstrated-on-synthetic-data",
+   "scope": "Path A: synthetic two-period proton and helium fluxes with exposure normalization, unfolding, efficiency covariance, correlated He/p ratio and exposure-weighted period average; Asimov and seeded-toy closure (examples/ams-flux-ratio). Synthetic inputs only; says nothing about the real detector",
+   "tests": [
+    "../../../tests/examples/test_ams_flux_ratio.py"
+   ]
+  }
+ ]
+}

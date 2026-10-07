@@ -1,0 +1,52 @@
+{
+ "contract_version": "1.0.0",
+ "artifact_id": "fixture-synthetic-theory-spec",
+ "artifact_type": "theory-spec",
+ "objective": "SYNTHETIC structural fixture; values are placeholders, not physics",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.1.0",
+  "contracts": "1.0.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-theory",
+  "created": "2026-10-02",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "model": {
+   "id": "synthetic-model",
+   "description": "structural fixture"
+  },
+  "assumptions": [
+   "placeholder assumption"
+  ],
+  "conventions": {
+   "hbar_c_one": true,
+   "metric_signature": "+---"
+  },
+  "order": "tree-level",
+  "parameters": {
+   "p": "placeholder"
+  },
+  "scales": "not-applicable",
+  "derivation_status": "not-derived",
+  "validity_domain": {
+   "note": "placeholder"
+  },
+  "checks_run": [],
+  "checks_not_run": [
+   "all (fixture)"
+  ]
+ }
+}

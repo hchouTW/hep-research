@@ -1,0 +1,32 @@
+{"$comment": "Owner: hep-statistics. Paradigm-specific requirements are enforced in contracts.validate.",
+ "type": "object",
+ "required": ["paradigm", "likelihood", "parameters_of_interest", "nuisances", "fit_status"],
+ "properties": {
+  "paradigm": {"type": "string", "enum": ["frequentist", "bayesian", "likelihood-only"]},
+  "likelihood": {"type": "object"}, "parameters_of_interest": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+  "nuisances": {"type": "array"}, "constraints": {"type": "array"},
+  "test_statistic": {"type": "string"},
+  "construction": {"type": "string", "enum": ["neyman", "feldman-cousins", "cls", "asymptotic", "profile-likelihood-wilks", "berger-boos", "cousins-highland", "toy-calibrated-profile", "other"]},
+  "significance": {"type": "object", "$comment": "since 1.1.0; a scan without global_p is unresolved (stats.lee_missing)",
+   "properties": {
+    "local_p": {"type": "number", "minimum": 0}, "local_z": {"type": "number"},
+    "global_p": {"type": "number", "minimum": 0}, "global_z": {"type": "number"},
+    "trials_method": {"type": "string", "enum": ["none-needed", "toys", "gross-vitells", "analytic-bound"]},
+    "scan": {"type": "object", "required": ["parameters"], "properties": {
+     "parameters": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+     "ranges": {"type": "array", "items": {"type": "array", "items": {"type": "number"}}}}}}},
+  "expected": {"type": "object", "$comment": "since 1.1.0", "properties": {
+   "median": {"type": "number"}, "band_1sigma": {"type": "array", "items": {"type": "number"}},
+   "band_2sigma": {"type": "array", "items": {"type": "number"}}, "method": {"type": "string"}}},
+  "uncertainty_breakdown": {"type": "object", "$comment": "since 1.1.0", "required": ["method"], "properties": {
+   "method": {"type": "string", "enum": ["group-freeze", "impacts", "other"]}, "order": {"type": "array", "items": {"type": "string"}},
+   "groups": {"type": "array", "items": {"type": "object", "required": ["name"]}}, "closure": {"type": "object"}}},
+  "goodness_of_fit": {"type": "object", "$comment": "since 1.1.0", "required": ["statistic"], "properties": {
+   "statistic": {"type": "string"}, "p_value": {"type": "number", "minimum": 0},
+   "calibration": {"type": "string", "enum": ["asymptotic", "toys"]}, "n_toys": {"type": "integer", "minimum": 1}}},
+  "coverage": {"type": "object"},
+  "priors": {"type": "array", "items": {"type": "object", "required": ["parameter", "form"]}},
+  "sampler": {"type": "object"}, "convergence": {"type": "object"},
+  "fit_status": {"type": "string", "enum": ["converged", "failed", "not-run", "converged-with-warnings"]},
+  "results": {"type": "object"}
+ }}

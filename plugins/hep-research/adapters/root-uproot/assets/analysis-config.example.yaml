@@ -1,0 +1,52 @@
+# Template analysis configuration for <plugin root>/skills/hep-analysis/references/hep-analysis-guide.md workflows.
+#
+# Copy this file and replace placeholder values before running an analysis.
+
+analysis:
+  name: example_hep_analysis
+  era: "2022"
+  luminosity_fb: 35.9
+  collision_energy_tev: 13.6
+
+inputs:
+  tree: Events
+  files:
+    - input.root
+
+output:
+  directory: output
+  root_file: histograms.root
+  plot_directory: plots
+
+branches:
+  required:
+    - nMuon
+    - Muon_pt
+    - Muon_eta
+    - event_weight
+
+# The `selection` and `histograms` blocks document the analysis; the shipped templates
+# (uproot_awkward_analysis.py, *_rdataframe_analysis.*) hard-code the same cuts and binning
+# and do NOT read these blocks. Keep them in sync by hand, or extend the template to read them.
+selection:
+  cuts:
+    - name: at_least_two_muons
+      expression: nMuon >= 2
+    - name: leading_muon_pt
+      expression: Muon_pt[:, 0] > 25.0
+    - name: leading_muon_eta
+      expression: abs(Muon_eta[:, 0]) < 2.4
+
+weights:
+  nominal: event_weight
+  systematics: []
+
+histograms:
+  - name: h_leading_muon_pt
+    title: "Leading muon pT"
+    branch: Muon_pt
+    expression: Muon_pt[:, 0]
+    bins: 50
+    range: [0.0, 200.0]
+    x_label: "Leading muon pT [GeV]"
+    y_label: "Events"

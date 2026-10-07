@@ -1,0 +1,15 @@
+{
+ "unit_system": "natural-HEP: GeV for energies and scales; R is dimensionless",
+ "hbar_c_one": true,
+ "metric_signature": "not-applicable (no amplitude is computed in this profile)",
+ "coupling_normalization": "expansion parameter a = alpha_s / pi, alpha_s = g_s^2 / (4 pi)",
+ "renormalization_scheme": "MS-bar with n_f active massless flavours (PDG eqs. 9.3, 9.9)",
+ "scales": "renormalization scale mu; coefficients c_n given at mu = Q; scale-dependent d_n(L), L = ln(mu^2 / Q^2); central mu = Q, envelope over mu in [Q/2, 2Q]",
+ "energy_variable": "Q = sqrt(s), the e+e- centre-of-mass energy",
+ "frame": "center-of-mass",
+ "angle_definition": "not-applicable (fully inclusive ratio)",
+ "spin_treatment": "unpolarized beams",
+ "mass_approximation": "all n_f active quarks massless; heavier quarks decoupled; no threshold crossed between m_Z and the lowest scale used",
+ "qcdr:observable": "R = sigma(e+e- -> hadrons) / sigma(e+e- -> mu+mu-), photon exchange only, R_EW = N_c sum e_q^2 [qcdr:C01]",
+ "qcdr:alpha_s_input": "alpha_s(m_Z) = 0.1180 +- 0.0009 [qcdr:C04], run with the three-loop beta function at fixed n_f = 5"
+}

@@ -1,0 +1,17 @@
+# gitleaks configuration for hep-research: the default rules plus allowlists for known false positives.
+title = "hep-research"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Known false positives: DOIs and hash identifiers in the evidence ledgers and reference files, checksum tables"
+regexes = [
+  '''10\.\d{4,9}[/_][^\s"']+''',        # DOIs, and DOI-derived file keys (10.1103_PhysRevLett...)
+  '''sha256[:=]?\s*[0-9a-f]{64}''',    # checksum tables
+  '''PhysRevLett\.\d+\.\d+''',         # journal article keys in the papers manifest and its tests
+  '''inspire-\d+''',                    # INSPIRE record keys
+]
+paths = [
+  '''checksums-.*\.txt$''',
+]

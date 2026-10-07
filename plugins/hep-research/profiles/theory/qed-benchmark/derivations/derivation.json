@@ -1,0 +1,32 @@
+{
+ "label": "theory:qed-benchmark tree-level derivation (SymPy 1.14.0)",
+ "assumptions": [
+  "one s-channel photon, tree level (order alpha^2 in the cross section)",
+  "massless electrons, muon mass m kept",
+  "unpolarized beams: average over the 4 initial spin states, sum over final spins",
+  "alpha = e^2 / (4 pi), hbar = c = 1",
+  "point-like fermions, no Z exchange, no radiative corrections"
+ ],
+ "results": {
+  "spin_averaged_squared_amplitude": "16*pi**2*alpha**2*(-4*c**2*m**2 + c**2*s + 4*m**2 + s)/s",
+  "dsigma_domega": "alpha**2*sqrt(-4*m**2 + s)*(-c**2*m**2 + c**2*s/4 + m**2 + s/4)/s**(5/2)",
+  "dsigma_dcos_theta": "pi*alpha**2*sqrt(-4*m**2 + s)*(-4*c**2*m**2 + c**2*s + 4*m**2 + s)/(2*s**(5/2))",
+  "sigma_total": "2*pi*alpha**2*beta*(3 - beta**2)/(3*s)",
+  "sigma_total_massless": "4*pi*alpha**2/(3*s)",
+  "dsigma_dcos_theta_massless": "pi*alpha**2*(c**2 + 1)/(2*s)",
+  "normalized_shape_massless": "3*c**2/8 + 3/8",
+  "forward_backward_asymmetry_massless": "0"
+ },
+ "checks": {
+  "squared_amplitude_massless_equals_e4_1_plus_c2": true,
+  "dsigma_domega_equals_ref_eq_51_2": true,
+  "sigma_beta_to_1_equals_ref_eq_51_3": true,
+  "sigma_general_beta_equals_beta_3_minus_beta2_over_2": true,
+  "shape_normalized_equals_3_8_1_plus_c2": true,
+  "forward_backward_asymmetry_zero": true,
+  "dsigma_dcos_even_in_c": true,
+  "threshold_sigma_vanishes_linearly_in_beta": true
+ },
+ "derivation_status": "analytic-derivation",
+ "status_note": "Exact at tree level under the listed assumptions; SymPy steps are trusted, not formally verified. Not a formal proof."
+}

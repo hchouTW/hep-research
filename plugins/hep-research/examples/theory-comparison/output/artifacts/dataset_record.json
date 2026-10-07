@@ -1,0 +1,132 @@
+{
+ "contract_version": "2.0.0",
+ "bindings": {
+  "experiments": [
+   {
+    "profile": "experiment:synthetic-collider",
+    "version": "1.0.0"
+   }
+  ],
+  "theory": [
+   {
+    "profile": "theory:qed-benchmark",
+    "version": "1.0.0"
+   }
+  ]
+ },
+ "versions": {
+  "plugin": "0.3.0",
+  "contracts": "2.0.0",
+  "profiles": {
+   "experiment:synthetic-collider": "1.0.0",
+   "theory:qed-benchmark": "1.0.0"
+  }
+ },
+ "outputs": [],
+ "unresolved_inputs": [],
+ "artifact_id": "synthetic-path-d-reco-counts",
+ "artifact_type": "dataset-record",
+ "inputs": [],
+ "objective": "SYNTHETIC reconstructed cos theta counts generated at mu = 1 (sigma_gen = sigma_pred)",
+ "provenance": {
+  "producer_skill": "hep-analysis",
+  "created": "2026-10-02"
+ },
+ "status": [
+  "synthetic"
+ ],
+ "extension": {
+  "dataset_id": "synthcol:synthetic-path-d-reco-counts",
+  "source_evidence_ids": [],
+  "observable": {
+   "quantity": "event-count",
+   "process": "e+e- -> mu+mu- (synthetic generator)",
+   "variables": [
+    {
+     "name": "cos_theta",
+     "unit": "1",
+     "edges": [
+      -1.0,
+      -0.9,
+      -0.72,
+      -0.54,
+      -0.36,
+      -0.18,
+      0.0,
+      0.18,
+      0.36,
+      0.54,
+      0.72,
+      0.9,
+      1.0
+     ]
+    }
+   ],
+   "phase_space": {
+    "definition": "SYNTHETIC: all selected events with reconstructed cos theta in [-1, 1]",
+    "fiducial": false
+   },
+   "level": "detector",
+   "frame": "center-of-mass",
+   "normalization": {
+    "kind": "integrated-luminosity",
+    "value": 20.0,
+    "unit": "pb^-1",
+    "convention": "expected counts = integrated luminosity x folded bin-integrated cross section"
+   },
+   "bin_semantics": "bin-integrated",
+   "unit": "1",
+   "conventions": {
+    "energy_variable": "sqrt_s",
+    "angle_definition": "theta between the incoming e- beam and the outgoing mu-"
+   }
+  },
+  "data": {
+   "edges": [
+    -1.0,
+    -0.9,
+    -0.72,
+    -0.54,
+    -0.36,
+    -0.18,
+    0.0,
+    0.18,
+    0.36,
+    0.54,
+    0.72,
+    0.9,
+    1.0
+   ],
+   "values": [
+    857.0,
+    1618.0,
+    1430.0,
+    1266.0,
+    1102.0,
+    1114.0,
+    1162.0,
+    1172.0,
+    1230.0,
+    1516.0,
+    1557.0,
+    827.0
+   ],
+   "unit": "1",
+   "uncertainties": [
+    {
+     "name": "Poisson counts",
+     "kind": "statistical",
+     "correlation": "uncorrelated"
+    }
+   ]
+  },
+  "covariance": {
+   "status": "absent",
+   "note": "Poisson counts: the likelihood carries the statistical model"
+  },
+  "period": "not-applicable",
+  "status": "synthetic",
+  "experiment_profile": "experiment:synthetic-collider",
+  "conditions": "sqrt_s_gev = 10.0"
+ }
+}

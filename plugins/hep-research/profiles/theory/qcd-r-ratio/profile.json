@@ -1,0 +1,65 @@
+{
+ "id": "theory:qcd-r-ratio",
+ "kind": "theory-domain",
+ "version": "1.0.0",
+ "scope": "Second theory domain beyond tree level: R(e+e- -> hadrons) with massless QCD corrections through alpha_s^4 (PDG eqs. 9.7-9.9), the renormalization-scale dependence derived from the RGE (PDG eq. 9.3), alpha_s(m_Z) from PDG Table 1.1, and three separate uncertainty objects (scale envelope, truncation estimate, parametric alpha_s). Validity: photon exchange only, n_f = 5 massless quarks, Q well above the b threshold and well below m_Z.",
+ "exclusions": [
+  "Z exchange, gamma-Z interference and QED corrections",
+  "Quark-mass and non-perturbative corrections; flavour-threshold matching",
+  "Any experiment, detector, data or blinding field; no comparison with measured R",
+  "Claims of formal proof or of coverage of the scale envelope"
+ ],
+ "compatible": {
+  "core": ">=1.0,<2.0",
+  "contracts": ">=2.0,<3.0"
+ },
+ "related_skills": [
+  "hep-theory",
+  "hep-computing",
+  "hep-statistics"
+ ],
+ "resources": {
+  "index": "index.md",
+  "conventions": "conventions.json",
+  "model": "models/massless-r-ratio.md",
+  "derivation": "derivations/derivation-record.md",
+  "predictions": "predictions/",
+  "benchmarks": "benchmarks/",
+  "evidence": "evidence/"
+ },
+ "vocabulary_namespaces": [
+  "qcdr"
+ ],
+ "vocabulary_extensions": {
+  "conventions": [
+   "qcdr:observable",
+   "qcdr:alpha_s_input"
+  ]
+ },
+ "adapters": {
+  "required": [],
+  "optional": []
+ },
+ "depends_on": [],
+ "evidence_namespace": "qcdr",
+ "maintainer": "hchouTW",
+ "capabilities": [
+  {
+   "name": "scale-dependent-coefficients",
+   "status": "tested-in-declared-environment",
+   "scope": "SymPy derivation of d_n(L) from c_1..c_4 and the RGE; d_n(0) = c_n; truncated series mu-independent through its order; nf = 5 values of c_2, c_3, c_4 (perturbative argument, not formal proof)",
+   "tests": [
+    "tests/test_derivation.py"
+   ]
+  },
+  {
+   "name": "higher-order-prediction",
+   "status": "tested-in-declared-environment",
+   "scope": "R(Q) at orders alpha_s^0..alpha_s^4 with the scale envelope, truncation estimate and parametric alpha_s variation reported separately",
+   "tests": [
+    "tests/test_prediction.py",
+    "tests/test_convention_mismatch.py"
+   ]
+  }
+ ]
+}

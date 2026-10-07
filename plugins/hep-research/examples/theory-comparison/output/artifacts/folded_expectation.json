@@ -1,0 +1,164 @@
+{
+ "contract_version": "2.0.0",
+ "bindings": {
+  "experiments": [
+   {
+    "profile": "experiment:synthetic-collider",
+    "version": "1.0.0"
+   }
+  ],
+  "theory": [
+   {
+    "profile": "theory:qed-benchmark",
+    "version": "1.0.0"
+   }
+  ]
+ },
+ "versions": {
+  "plugin": "0.3.0",
+  "contracts": "2.0.0",
+  "profiles": {
+   "experiment:synthetic-collider": "1.0.0",
+   "theory:qed-benchmark": "1.0.0"
+  }
+ },
+ "outputs": [],
+ "unresolved_inputs": [],
+ "artifact_id": "synthetic-path-d-folded-expectation",
+ "artifact_type": "prediction",
+ "inputs": [
+  {
+   "ref": "../qed-prediction/output/artifacts/prediction.json",
+   "artifact_type": "prediction",
+   "status": [
+    "validated-in-scope"
+   ]
+  },
+  {
+   "ref": "../collider-angular/output/artifacts/response.json",
+   "artifact_type": "response",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "objective": "QED prediction folded to reconstructed cos theta counts at mu = 1",
+ "provenance": {
+  "producer_skill": "hep-statistics",
+  "created": "2026-10-02"
+ },
+ "status": [
+  "synthetic"
+ ],
+ "extension": {
+  "observable": {
+   "quantity": "event-count",
+   "process": "e+e- -> mu+mu- (tree-level QED, folded)",
+   "variables": [
+    {
+     "name": "cos_theta",
+     "unit": "1",
+     "edges": [
+      -1.0,
+      -0.9,
+      -0.72,
+      -0.54,
+      -0.36,
+      -0.18,
+      0.0,
+      0.18,
+      0.36,
+      0.54,
+      0.72,
+      0.9,
+      1.0
+     ]
+    }
+   ],
+   "phase_space": {
+    "definition": "SYNTHETIC: all selected events with reconstructed cos theta in [-1, 1]",
+    "fiducial": false
+   },
+   "level": "detector",
+   "frame": "center-of-mass",
+   "normalization": {
+    "kind": "integrated-luminosity",
+    "value": 20.0,
+    "unit": "pb^-1",
+    "convention": "expected counts = integrated luminosity x folded bin-integrated cross section"
+   },
+   "bin_semantics": "bin-integrated",
+   "unit": "1",
+   "conventions": {
+    "energy_variable": "sqrt_s",
+    "angle_definition": "theta between the incoming e- beam and the outgoing mu-"
+   }
+  },
+  "parameter_point": {
+   "sqrt_s_gev": 10.0,
+   "mu": 1.0
+  },
+  "representation": "numerical",
+  "values": {
+   "edges": [
+    -1.0,
+    -0.9,
+    -0.72,
+    -0.54,
+    -0.36,
+    -0.18,
+    0.0,
+    0.18,
+    0.36,
+    0.54,
+    0.72,
+    0.9,
+    1.0
+   ],
+   "values": [
+    815.3281676132225,
+    1570.364584569334,
+    1440.4643280974449,
+    1283.5731486160855,
+    1157.835919474472,
+    1090.059170924501,
+    1090.059170924501,
+    1157.835919474472,
+    1283.5731486160853,
+    1440.4643280974453,
+    1570.364584569334,
+    815.3281676132225
+   ],
+   "unit": "1",
+   "uncertainties": [
+    {
+     "name": "reference rounding",
+     "kind": "parametric",
+     "values": [
+      0.46965908272651063,
+      0.904587894337174,
+      0.8297605576598185,
+      0.7393854542719387,
+      0.6669561748124838,
+      0.6279142689657263,
+      0.6279142689657263,
+      0.6669561748124838,
+      0.7393854542719386,
+      0.8297605576598187,
+      0.904587894337174,
+      0.46965908272651063
+     ],
+     "correlation": "fully-correlated"
+    }
+   ]
+  },
+  "uncertainties": [
+   {
+    "name": "missing higher orders and Z exchange",
+    "kind": "truncation",
+    "correlation": "unknown"
+   }
+  ],
+  "allowed_transformations": []
+ }
+}

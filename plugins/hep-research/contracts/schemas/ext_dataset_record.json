@@ -1,0 +1,15 @@
+{"$comment": "Owner: contracts layer. Stands alone; may reference an experiment profile by id without loading it (J6). Values only with provenance.",
+ "type": "object",
+ "required": ["dataset_id", "source_evidence_ids", "observable", "covariance", "status"],
+ "properties": {
+  "dataset_id": {"$ref": "common.json#/$defs/namespaced_id"},
+  "source_evidence_ids": {"type": "array", "items": {"$ref": "common.json#/$defs/namespaced_id"}},
+  "observable": {"$ref": "common.json#/$defs/observable_spec"},
+  "data": {"$ref": "common.json#/$defs/binned_data"},
+  "covariance": {"type": "object", "required": ["status"], "properties": {
+     "status": {"type": "string", "enum": ["present", "absent", "partial"]}, "ref": {"type": "string"}, "note": {"type": "string"}}},
+  "period": {"anyOf": [{"type": "object"}, {"$ref": "common.json#/$defs/missing"}]},
+  "conditions": {"type": "string"},
+  "status": {"type": "string", "x-vocab": "dataset_statuses"},
+  "experiment_profile": {"$ref": "common.json#/$defs/profile_id"}
+ }}

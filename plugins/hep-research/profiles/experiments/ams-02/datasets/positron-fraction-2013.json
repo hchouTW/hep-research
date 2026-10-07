@@ -1,0 +1,100 @@
+{
+ "contract_version": "1.0.0",
+ "artifact_id": "ams02-dataset-positron-fraction-2013",
+ "artifact_type": "dataset-record",
+ "objective": "Metadata record of a published AMS-02 result (First Result from AMS on the ISS: Precision Measurement of the Positron Fraction in Primary Cosmic Rays of 0.5-350 GeV, PRL 110, 141102); no data values are transcribed",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.1.0",
+  "contracts": "1.0.0",
+  "profiles": {
+   "experiment:ams-02": "1.0.0"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-analysis",
+  "created": "2026-10-02",
+  "evidence_ids": [
+   "ams02:S02",
+   "ams02:C03"
+  ]
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "unvalidated"
+ ],
+ "unresolved_inputs": [
+  "data values, uncertainties and covariance: transcribe from the paper or its Supplemental Material with a new claim before use",
+  "bin semantics: not recorded in the ledger"
+ ],
+ "extension": {
+  "dataset_id": "ams02:positron-fraction-2013",
+  "source_evidence_ids": [
+   "ams02:S02"
+  ],
+  "observable": {
+   "quantity": "fraction",
+   "process": "primary cosmic rays at the detector location",
+   "species": [
+    {
+     "name": "e+"
+    },
+    {
+     "name": "e-"
+    }
+   ],
+   "variables": [
+    {
+     "name": "energy",
+     "unit": "GeV"
+    }
+   ],
+   "phase_space": {
+    "definition": "as defined in the source paper (not transcribed here)",
+    "fiducial": true
+   },
+   "level": "crflux:top-of-instrument",
+   "frame": "detector location",
+   "normalization": {
+    "kind": "exposure",
+    "value": "not-applicable",
+    "convention": "ratio of exposure-normalized quantities; normalization enters through the numerator and denominator"
+   },
+   "bin_semantics": "unknown",
+   "unit": "1",
+   "conventions": {
+    "energy_variable": "energy"
+   },
+   "validity_range": {
+    "variable": "energy",
+    "min": 0.5,
+    "max": 350,
+    "unit": "GeV",
+    "evidence": "ams02:C03"
+   }
+  },
+  "covariance": {
+   "status": "absent",
+   "note": "not transcribed; the paper's own uncertainty breakdown governs"
+  },
+  "period": {
+   "start": "2011-05-19",
+   "end": "2012-12-10",
+   "evidence": "main text; first 18 months of ISS operation"
+  },
+  "status": "published",
+  "experiment_profile": "experiment:ams-02",
+  "conditions": "superseded by ams02:S03 (more data, extended range); kept because the two answer different questions",
+  "ams02:method_module": {
+   "module": "modules/species/antimatter-and-leptons.md",
+   "claims": [
+    "ams02:C107",
+    "ams02:C108"
+   ]
+  }
+ }
+}

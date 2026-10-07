@@ -1,0 +1,697 @@
+{
+ "label": "SYNTHETIC: data generated at mu = 1 from the illustrative synthetic-collider profile; not a physics result",
+ "profiles_loaded": [
+  "experiment:synthetic-collider",
+  "theory:qed-benchmark"
+ ],
+ "seed": 20261004,
+ "toys": 200,
+ "criteria": {
+  "response_vs_path_b_max_rel_dev": 1e-12,
+  "fold_vs_quadrature_max_rel_dev": 1e-06,
+  "asimov_mu_abs_dev": 1e-08,
+  "observed_pull_abs": 3.0,
+  "toy_mean_pull_abs": 0.2,
+  "toy_pull_width": [
+   0.85,
+   1.15
+  ],
+  "coverage_sigma": 3.0
+ },
+ "pass": {
+  "composition": true,
+  "gate_comparable": true,
+  "response_matches_path_b": true,
+  "fold_vs_quadrature": true,
+  "asimov_injection": true,
+  "identifiable_only_with_constraint": true,
+  "observed_consistent_with_injected": true,
+  "toy_pulls": true,
+  "toy_coverage": true,
+  "negative_variants_rejected": true,
+  "documented_conversion_accepted": true,
+  "contracts": true
+ },
+ "composition": {
+  "ok": true,
+  "errors": [],
+  "notes": [],
+  "namespaces": {
+   "synthcol": "experiment:synthetic-collider",
+   "qedbench": "theory:qed-benchmark"
+  },
+  "kinds": {
+   "experiment": [
+    "experiment:synthetic-collider"
+   ],
+   "theory-domain": [
+    "theory:qed-benchmark"
+   ]
+  }
+ },
+ "gate": {
+  "comparable": true,
+  "status": "comparable",
+  "mismatches": [],
+  "notes": [
+   {
+    "field": "conventions.mass_approximation",
+    "note": "core key only on side a; confirm it does not affect the comparison"
+   },
+   {
+    "field": "conventions.spin_treatment",
+    "note": "core key only on side a; confirm it does not affect the comparison"
+   },
+   {
+    "field": "covariance",
+    "note": "measurement covariance is absent: it stays absent; inference must not assume a diagonal matrix"
+   }
+  ],
+  "transformations": [
+   {
+    "kind": "bin-integrate",
+    "owner": "hep-theory",
+    "note": "bin-averaged d sigma / d cos theta x bin width",
+    "ok": true,
+    "before": {
+     "quantity": "differential-cross-section",
+     "unit": "pb",
+     "level": "parton",
+     "bin_semantics": "bin-averaged",
+     "fiducial": false
+    },
+    "after": {
+     "quantity": "cross-section",
+     "unit": "pb",
+     "level": "parton",
+     "bin_semantics": "bin-integrated",
+     "fiducial": false
+    }
+   },
+   {
+    "kind": "multiply-by-normalization",
+    "owner": "hep-statistics",
+    "normalization_kind": "integrated-luminosity",
+    "value": 20.0,
+    "value_unit": "pb^-1",
+    "unit_in": "pb",
+    "unit_out": "1",
+    "ok": true,
+    "before": {
+     "quantity": "cross-section",
+     "unit": "pb",
+     "level": "parton",
+     "bin_semantics": "bin-integrated",
+     "fiducial": false
+    },
+    "after": {
+     "quantity": "event-count",
+     "unit": "1",
+     "level": "parton",
+     "bin_semantics": "bin-integrated",
+     "fiducial": false
+    }
+   },
+   {
+    "kind": "forward-fold",
+    "owner": "hep-statistics",
+    "truth_edges": [
+     -1.0,
+     -0.9,
+     -0.72,
+     -0.54,
+     -0.36,
+     -0.18,
+     0.0,
+     0.18,
+     0.36,
+     0.54,
+     0.72,
+     0.9,
+     1.0
+    ],
+    "reco_edges": [
+     -1.0,
+     -0.9,
+     -0.72,
+     -0.54,
+     -0.36,
+     -0.18,
+     0.0,
+     0.18,
+     0.36,
+     0.54,
+     0.72,
+     0.9,
+     1.0
+    ],
+    "truth_level": "parton",
+    "includes": [
+     "migration",
+     "efficiency"
+    ],
+    "justification": "the synthetic generator has no QED radiation, so its truth muons are the hard-process leptons; the response is built with the in-bin weighting 1 + cos^2 theta, the predicted shape",
+    "ok": true,
+    "before": {
+     "quantity": "event-count",
+     "unit": "1",
+     "level": "parton",
+     "bin_semantics": "bin-integrated",
+     "fiducial": false
+    },
+    "after": {
+     "quantity": "event-count",
+     "unit": "1",
+     "level": "detector",
+     "bin_semantics": "bin-integrated",
+     "fiducial": false
+    }
+   }
+  ],
+  "definition_mappings_applied": [
+   {
+    "field": "process",
+    "action": "equivalent",
+    "justification": "the synthetic generator samples the same one-photon tree-level e+e- -> mu+mu- matrix element (no Z, no radiation) that the prediction computes"
+   },
+   {
+    "field": "phase_space",
+    "action": "equivalent",
+    "justification": "the prediction covers the full truth range cos theta in [-1, 1]; the response maps it to the reco range [-1, 1] and carries the selection efficiency, so the folded prediction describes the selected events"
+   }
+  ],
+  "final_prediction_state": {
+   "quantity": "event-count",
+   "unit": "1",
+   "level": "detector",
+   "edges": [
+    -1.0,
+    -0.9,
+    -0.72,
+    -0.54,
+    -0.36,
+    -0.18,
+    0.0,
+    0.18,
+    0.36,
+    0.54,
+    0.72,
+    0.9,
+    1.0
+   ],
+   "bin_semantics": "bin-integrated",
+   "fiducial": false,
+   "corrections": [
+    "normalization",
+    "migration",
+    "efficiency"
+   ]
+  },
+  "uncertainty_objects": {
+   "prediction": [
+    {
+     "name": "missing higher orders and Z exchange",
+     "kind": "truncation",
+     "correlation": "unknown",
+     "quantified": false,
+     "gaussian_allowed": false
+    },
+    {
+     "name": "reference rounding of 86.8 nb GeV^2",
+     "kind": "parametric",
+     "correlation": "fully-correlated",
+     "quantified": true
+    },
+    {
+     "name": "numerical integration",
+     "kind": "numerical",
+     "correlation": "unknown",
+     "quantified": true
+    }
+   ],
+   "measurement": []
+  },
+  "measurement_covariance": "absent",
+  "carried_statuses": [
+   "synthetic"
+  ],
+  "conventions": {
+   "comparable": true,
+   "mismatches": [],
+   "notes": [
+    {
+     "key": "mass_approximation",
+     "reason": "core key only on side a; confirm it does not affect the comparison"
+    },
+    {
+     "key": "spin_treatment",
+     "reason": "core key only on side a; confirm it does not affect the comparison"
+    }
+   ],
+   "mappings_applied": [
+    {
+     "key": "angle_definition",
+     "action": "equivalent",
+     "justification": "both define theta as the angle between the incoming e- (beam) and the outgoing mu- in the c.m. frame; the wording differs only"
+    }
+   ]
+  }
+ },
+ "sigma_pred_total_pb": 867.9999999999999,
+ "reference_rounding_rel": 0.000576036866359447,
+ "folded_expectation": [
+  815.3281676132225,
+  1570.364584569334,
+  1440.4643280974449,
+  1283.5731486160855,
+  1157.835919474472,
+  1090.059170924501,
+  1090.059170924501,
+  1157.835919474472,
+  1283.5731486160853,
+  1440.4643280974453,
+  1570.364584569334,
+  815.3281676132225
+ ],
+ "quadrature_reference": [
+  815.3281215514035,
+  1570.3646686716077,
+  1440.4643294859638,
+  1283.5731500516163,
+  1157.8359209243326,
+  1090.059172376371,
+  1090.059172376371,
+  1157.8359209243326,
+  1283.5731500516163,
+  1440.4643294859638,
+  1570.3646686716077,
+  815.3281215514036
+ ],
+ "fold_max_rel_dev": 5.649482437419806e-08,
+ "asimov": {
+  "1": {
+   "mu_hat": 1.0,
+   "interval_68": [
+    0.9781996894935335,
+    1.0226328043119959
+   ]
+  },
+  "1.25": {
+   "mu_hat": 1.2500000000000002,
+   "interval_68": [
+    1.2231435467161333,
+    1.277893811945668
+   ]
+  }
+ },
+ "q_without_luminosity_constraint_at_mu_1.15": 0.0,
+ "observed_synthetic": {
+  "n_generated": 17521,
+  "reco_counts": [
+   857.0,
+   1618.0,
+   1430.0,
+   1266.0,
+   1102.0,
+   1114.0,
+   1162.0,
+   1172.0,
+   1230.0,
+   1516.0,
+   1557.0,
+   827.0
+  ],
+  "luminosity_measured_pb": 19.72579065387665,
+  "mu_hat": 1.0232543754600867,
+  "interval_68": [
+   1.000961742995907,
+   1.04639873031836
+  ],
+  "plateau_from_kappa": [
+   1.0226652825553888,
+   1.0238441474344153
+  ],
+  "pull_vs_injected": 1.0431417418939806
+ },
+ "toy_results": {
+  "1": {
+   "toys": 200,
+   "mean_pull": -0.0195,
+   "pull_width": 0.9671,
+   "coverage_68": 0.71
+  },
+  "0.8": {
+   "toys": 200,
+   "mean_pull": -0.0405,
+   "pull_width": 1.015,
+   "coverage_68": 0.655
+  }
+ },
+ "coverage_tolerance": 0.09873161575706134,
+ "negative_variants": [
+  {
+   "name": "prediction at a different sqrt(s)",
+   "expected_field": "parameter_point.sqrt_s_gev",
+   "rejected": true,
+   "expected_field_reported": true,
+   "mismatches": [
+    {
+     "field": "parameter_point.sqrt_s_gev",
+     "reason": "prediction computed at a different parameter point",
+     "resolve": "recompute the prediction"
+    }
+   ]
+  },
+  {
+   "name": "prediction in nb without a unit conversion",
+   "expected_field": "transformations[1]",
+   "rejected": true,
+   "expected_field_reported": true,
+   "mismatches": [
+    {
+     "field": "transformations[1]",
+     "reason": "the normalization value expects a different unit for the cross section",
+     "resolve": "convert units first (unit-conversion), then normalize"
+    },
+    {
+     "field": "transformations[2]",
+     "reason": "the response acts on expected truth counts",
+     "resolve": "bin-integrate and multiply by the normalization first"
+    },
+    {
+     "field": "quantity",
+     "reason": "quantity differs after the declared transformations",
+     "resolve": "declare a transformation that gives the measurement's quantity"
+    },
+    {
+     "field": "unit",
+     "reason": "unit differs after the declared transformations",
+     "resolve": "declare a transformation that gives the measurement's unit"
+    },
+    {
+     "field": "level",
+     "reason": "levels differ after the declared transformations",
+     "resolve": "forward-fold to detector level, or compare at a common declared level"
+    }
+   ]
+  },
+  {
+   "name": "prediction bins differ from the response truth bins",
+   "expected_field": "transformations[2]",
+   "rejected": true,
+   "expected_field_reported": true,
+   "mismatches": [
+    {
+     "field": "transformations[2]",
+     "reason": "prediction bins differ from the response truth bins",
+     "resolve": "integrate the prediction in the response truth bins"
+    },
+    {
+     "field": "level",
+     "reason": "levels differ after the declared transformations",
+     "resolve": "forward-fold to detector level, or compare at a common declared level"
+    },
+    {
+     "field": "binning",
+     "reason": "bin edges differ",
+     "resolve": "rebin exactly, restrict, or recompute the prediction in the measurement bins"
+    }
+   ]
+  },
+  {
+   "name": "point values compared with bins without a mapping",
+   "expected_field": "transformations[0]",
+   "rejected": true,
+   "expected_field_reported": true,
+   "mismatches": [
+    {
+     "field": "transformations[0]",
+     "reason": "point values cannot be compared with bins without a defined mapping",
+     "resolve": "integrate the prediction function over each bin and name the method"
+    },
+    {
+     "field": "transformations[1]",
+     "reason": "expected counts need bin-integrated values",
+     "resolve": "bin-integrate first"
+    },
+    {
+     "field": "transformations[2]",
+     "reason": "the response acts on expected truth counts",
+     "resolve": "bin-integrate and multiply by the normalization first"
+    },
+    {
+     "field": "quantity",
+     "reason": "quantity differs after the declared transformations",
+     "resolve": "declare a transformation that gives the measurement's quantity"
+    },
+    {
+     "field": "unit",
+     "reason": "unit differs after the declared transformations",
+     "resolve": "declare a transformation that gives the measurement's unit"
+    },
+    {
+     "field": "bin_semantics",
+     "reason": "bin_semantics differs after the declared transformations",
+     "resolve": "declare a transformation that gives the measurement's bin_semantics"
+    },
+    {
+     "field": "level",
+     "reason": "levels differ after the declared transformations",
+     "resolve": "forward-fold to detector level, or compare at a common declared level"
+    }
+   ]
+  },
+  {
+   "name": "efficiency applied before folding with a response that includes it",
+   "expected_field": "transformations[3]",
+   "rejected": true,
+   "expected_field_reported": true,
+   "mismatches": [
+    {
+     "field": "transformations[3]",
+     "reason": "'efficiency' already applied before folding; the response includes it too",
+     "resolve": "drop the separate correction"
+    }
+   ]
+  },
+  {
+   "name": "angle definitions without a declared mapping",
+   "expected_field": "conventions.angle_definition",
+   "rejected": true,
+   "expected_field_reported": true,
+   "mismatches": [
+    {
+     "field": "conventions.angle_definition",
+     "reason": "values differ; declare a transform mapping or use a variant",
+     "resolve": "declare a justified mapping, or use a variant"
+    }
+   ]
+  },
+  {
+   "name": "process definitions without a declared mapping",
+   "expected_field": "process",
+   "rejected": true,
+   "expected_field_reported": true,
+   "mismatches": [
+    {
+     "field": "process",
+     "reason": "process differs and free-text equality cannot be established",
+     "resolve": "state the process on both sides, or declare a mapping {'field': 'process', 'action': 'equivalent', 'justification': ...}"
+    }
+   ]
+  },
+  {
+   "name": "measurement normalized to exposure",
+   "expected_field": "normalization.kind",
+   "rejected": true,
+   "expected_field_reported": true,
+   "mismatches": [
+    {
+     "field": "normalization.kind",
+     "reason": "normalization kinds differ",
+     "resolve": "use a profile-declared conversion; kinds are never assumed equivalent"
+    }
+   ]
+  },
+  {
+   "name": "folded prediction against the unfolded (Path B) result",
+   "expected_field": "level",
+   "rejected": true,
+   "expected_field_reported": true,
+   "mismatches": [
+    {
+     "field": "quantity",
+     "reason": "quantity differs after the declared transformations",
+     "resolve": "declare a transformation that gives the measurement's quantity"
+    },
+    {
+     "field": "unit",
+     "reason": "unit differs after the declared transformations",
+     "resolve": "declare a transformation that gives the measurement's unit"
+    },
+    {
+     "field": "bin_semantics",
+     "reason": "bin_semantics differs after the declared transformations",
+     "resolve": "declare a transformation that gives the measurement's bin_semantics"
+    },
+    {
+     "field": "level",
+     "reason": "levels differ after the declared transformations",
+     "resolve": "forward-fold to detector level, or compare at a common declared level"
+    },
+    {
+     "field": "phase_space.fiducial",
+     "reason": "fiducial and inclusive phase spaces are not equivalent",
+     "resolve": "restrict the prediction to the measurement's fiducial region (fiducial-restriction) or use an inclusive measurement"
+    },
+    {
+     "field": "binning",
+     "reason": "bin edges differ",
+     "resolve": "rebin exactly, restrict, or recompute the prediction in the measurement bins"
+    },
+    {
+     "field": "conventions.synthcol:fiducial_definition",
+     "reason": "namespaced key only on side b; not comparable without a declared mapping",
+     "resolve": "declare a justified mapping, or use a variant"
+    }
+   ]
+  },
+  {
+   "name": "inclusive prediction against the fiducial unfolded result",
+   "expected_field": "phase_space.fiducial",
+   "rejected": true,
+   "expected_field_reported": true,
+   "mismatches": [
+    {
+     "field": "level",
+     "reason": "levels differ after the declared transformations",
+     "resolve": "forward-fold to detector level, or compare at a common declared level"
+    },
+    {
+     "field": "phase_space.fiducial",
+     "reason": "fiducial and inclusive phase spaces are not equivalent",
+     "resolve": "restrict the prediction to the measurement's fiducial region (fiducial-restriction) or use an inclusive measurement"
+    },
+    {
+     "field": "binning",
+     "reason": "bin edges differ",
+     "resolve": "rebin exactly, restrict, or recompute the prediction in the measurement bins"
+    }
+   ]
+  }
+ ],
+ "documented_conversion": {
+  "comparable": true,
+  "transformations": [
+   {
+    "kind": "level-identification",
+    "owner": "hep-theory",
+    "from": "parton",
+    "to": "particle-fiducial",
+    "justification": "tree level without radiation: the outgoing muon is the stable final-state particle",
+    "ok": true,
+    "before": {
+     "quantity": "differential-cross-section",
+     "unit": "pb",
+     "level": "parton",
+     "bin_semantics": "bin-averaged",
+     "fiducial": false
+    },
+    "after": {
+     "quantity": "differential-cross-section",
+     "unit": "pb",
+     "level": "particle-fiducial",
+     "bin_semantics": "bin-averaged",
+     "fiducial": false
+    }
+   },
+   {
+    "kind": "fiducial-restriction",
+    "owner": "hep-theory",
+    "variable": "cos_theta",
+    "range": [
+     -0.9,
+     0.9
+    ],
+    "ok": true,
+    "before": {
+     "quantity": "differential-cross-section",
+     "unit": "pb",
+     "level": "particle-fiducial",
+     "bin_semantics": "bin-averaged",
+     "fiducial": false
+    },
+    "after": {
+     "quantity": "differential-cross-section",
+     "unit": "pb",
+     "level": "particle-fiducial",
+     "bin_semantics": "bin-averaged",
+     "fiducial": true
+    }
+   }
+  ]
+ },
+ "contract_trace": [
+  {
+   "artifact": "synthetic-path-d-reco-counts",
+   "type": "dataset-record",
+   "inputs": [],
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "artifact": "synthetic-path-d-comparison",
+   "type": "comparison-spec",
+   "inputs": [
+    "../qed-prediction/output/artifacts/prediction.json",
+    "artifacts/dataset_record.json",
+    "../collider-angular/output/artifacts/response.json"
+   ],
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "artifact": "synthetic-path-d-folded-expectation",
+   "type": "prediction",
+   "inputs": [
+    "../qed-prediction/output/artifacts/prediction.json",
+    "../collider-angular/output/artifacts/response.json"
+   ],
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "artifact": "synthetic-path-d-mu-fit",
+   "type": "statistical-result",
+   "inputs": [
+    "artifacts/comparison_spec.json",
+    "artifacts/folded_expectation.json",
+    "artifacts/dataset_record.json"
+   ],
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "contract_validation": {
+  "dataset_record": {
+   "ok": true,
+   "errors": []
+  },
+  "comparison_spec": {
+   "ok": true,
+   "errors": []
+  },
+  "folded_expectation": {
+   "ok": true,
+   "errors": []
+  },
+  "result": {
+   "ok": true,
+   "errors": []
+  }
+ }
+}

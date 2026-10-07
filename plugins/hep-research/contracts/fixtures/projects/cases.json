@@ -1,0 +1,75 @@
+{
+ "registry": "../registry/valid/profiles/registry.json",
+ "cases": {
+  "exp0_th0": {
+   "errors": [],
+   "profiles": 0
+  },
+  "exp0_th1": {
+   "errors": [],
+   "profiles": 1
+  },
+  "exp0_thmany": {
+   "errors": [],
+   "profiles": 2
+  },
+  "exp1_th0": {
+   "errors": [],
+   "profiles": 1
+  },
+  "exp1_th1": {
+   "errors": [],
+   "profiles": 2
+  },
+  "exp1_thmany": {
+   "errors": [],
+   "profiles": 3
+  },
+  "expmany_th0": {
+   "errors": [],
+   "profiles": 2
+  },
+  "expmany_th1": {
+   "errors": [],
+   "profiles": 3
+  },
+  "expmany_thmany": {
+   "errors": [],
+   "profiles": 4
+  },
+  "local_profile": {
+   "errors": [],
+   "profiles": 1
+  },
+  "unknown_profile": {
+   "errors": [
+    "project.unknown_profile"
+   ]
+  },
+  "version_pin_mismatch": {
+   "errors": [
+    "project.version_pin_mismatch"
+   ]
+  },
+  "conflicting_pins": {
+   "errors": [
+    "project.conflicting_pins"
+   ]
+  },
+  "wrong_axis": {
+   "errors": [
+    "project.wrong_axis"
+   ]
+  },
+  "override_without_provenance": {
+   "errors": [
+    "schema.required"
+   ]
+  },
+  "incompatible_plugin": {
+   "errors": [
+    "project.incompatible_plugin"
+   ]
+  }
+ }
+}

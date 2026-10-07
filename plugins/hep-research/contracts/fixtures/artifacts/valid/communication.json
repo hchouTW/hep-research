@@ -1,0 +1,45 @@
+{
+ "contract_version": "1.0.0",
+ "artifact_id": "fixture-synthetic-communication",
+ "artifact_type": "communication",
+ "objective": "SYNTHETIC structural fixture; values are placeholders, not physics",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.1.0",
+  "contracts": "1.0.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "research-communication",
+  "created": "2026-10-02",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "claims": [
+   {
+    "text": "placeholder",
+    "result_ref": "x.json",
+    "status": "synthetic"
+   }
+  ],
+  "sources_read": [
+   {
+    "id": "user:S1",
+    "level": "full-text"
+   }
+  ],
+  "limitations": [
+   "fixture"
+  ]
+ }
+}
