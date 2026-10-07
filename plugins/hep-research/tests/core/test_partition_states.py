@@ -11,6 +11,7 @@ EXPECTED = {  # final state -> decision with max_attempts=3, attempts left, reso
     "preempted-or-evicted": "resubmit", "node-failure": "resubmit", "lost": "resubmit",
     "timeout": "needs-resource-change", "out-of-memory": "needs-resource-change",
     "failed": "needs-reset", "held": "needs-reset", "cancelled": "needs-reset", "unknown": "needs-reset",
+    "not-submitted": "needs-reset",
 }
 
 
@@ -40,7 +41,7 @@ class DecisionTableTests(unittest.TestCase):
     def test_every_normalized_state_has_a_decision(self):
         for st in states.NORMALIZED_STATES:
             with self.subTest(state=st):
-                if st in ("planned", "queued", "running"):
+                if st in ("planned", "queued", "running", "submitting"):
                     self.assertEqual(states.decide({"attempt_records": [{"attempt_id": "a", "final_state": None, "state": st}]}, 3, "h0")["decision"], "wait")
                 elif st == "done":
                     self.assertNotIn(st, states.RETRY_CLASS)  # a done chunk is never decided on

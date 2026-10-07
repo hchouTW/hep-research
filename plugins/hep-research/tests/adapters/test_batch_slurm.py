@@ -158,3 +158,39 @@ class RealSlurmTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class InterruptedSubmitCliTests(unittest.TestCase):
+    """confirm and abandon on the command line (T15): an interrupted submit is recovered by a person, never guessed."""
+
+    def setUp(self):
+        self.h = Harness("slurm", items=2, chunk=1)
+        self.h.plan()
+
+    def tearDown(self):
+        self.h.cleanup()
+
+    def interrupt(self):
+        import core.partition.campaign as cp
+        from tests.core.partition_helpers import ScriptedExecutor
+
+        class Stop(BaseException):
+            pass
+
+        class Interrupting(ScriptedExecutor):
+            def submit(self, plan):
+                raise Stop()
+        with self.assertRaises(Stop):
+            cp.submit(self.h.cdir, Interrupting({}), self.h.cfg, approved=True)
+        return self.h.state()["submissions"][-1]["id"]
+
+    def test_confirm_and_abandon(self):
+        code, rep = self.h.cli("confirm", "--submission", "s001", "--jobs", "c0000-a01=1")
+        self.assertEqual((code, rep["code"]), (2, "confirm.not_unconfirmed"))
+        sid = self.interrupt()
+        code, rep = self.h.cli("submit", "--submit")
+        self.assertEqual((code, rep["code"]), (2, "submit.unconfirmed"))
+        self.assertEqual(self.h.cli("confirm", "--submission", sid, "--jobs", "nonsense")[0], 2)
+        code, rep = self.h.cli("abandon", "--submission", sid, "--reason", "squeue lists no job of this submission")
+        self.assertEqual(code, 0, rep)
+        self.assertEqual(self.h.state()["submissions"][-1]["status"], "not-submitted")

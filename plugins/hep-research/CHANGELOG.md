@@ -57,6 +57,15 @@ Software checks establish contract consistency only, not physical validity.
   `pcolormesh` meshes and `imshow` images, and, given the sealed numbers (`check_figure(fig, region, sealed)`), text
   artists, titles and figure texts; a "blinded" label inside the region is not a leak. What it still cannot see
   (tick labels, legends, colorbars, values carried only by colors, transformed values) is stated in the module.
+- **Batch campaigns survive interruptions and concurrent commands (sci-fix, T15).** `campaign.submit` called the
+  scheduler before saving its attempts, so a kill in between left jobs running that the campaign did not know about,
+  and a second submit could send them again; submission IDs came from a count with no lock. Now every command that
+  changes a campaign holds a lock on `<campaign_dir>/.lock` (a second one is refused with `campaign.locked`), and
+  `submit` saves its attempts as `submitting` before the scheduler call and confirms them after. An interrupted
+  submission blocks further submits until a person runs `batch_campaign.py confirm` with the job IDs the scheduler
+  lists or `abandon` with a reason; a refused submission is recorded as `not-submitted`. The default merge no longer
+  concatenates string results (it reports `merge.combine_failed`; pass a combine function), and `engine.merge`
+  refuses non-finite chunk results and a non-finite merged value (`merge.non_finite`).
 - **The test suite is bounded and tiered (T14).** Every subprocess call in the tests and tools has a timeout
   (`tests/tools/test_subprocess_timeouts.py` keeps it so). `check_diagram_sources.py` fails a block whose
   renderer does not finish within `HEP_RENDER_TIMEOUT` (default 60 s) and stops calling Mermaid's `mmdc` after one

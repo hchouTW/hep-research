@@ -40,6 +40,12 @@ python3 batch_campaign.py report   --config batch-config.json --out artifacts/to
 
 The script is `<plugin root>/adapters/batch-schedulers/batch_campaign.py`. Exit codes: 0 done, 1 incomplete
 or blocked, 2 refused. `submit` and `resubmit` are dry runs without `--submit`; `cancel` needs `--approve-cancel`.
+
+Only one command changes a campaign at a time: each holds a lock on `<campaign_dir>/.lock`, and a second one is refused
+(`campaign.locked`) instead of racing it. `submit` records its attempts before it calls the scheduler. If it is
+interrupted after that (a kill, a lost connection), the submission stays unconfirmed and nothing is submitted again
+until you look at the scheduler: `confirm --submission S --jobs ATTEMPT=JOB ...` with the jobs it lists, or
+`abandon --submission S --reason TEXT` when it has none (those chunks then need `reset` before `resubmit`).
 Ask the user before every command that submits, cancels or writes to a shared area, each time.
 
 ## Configuration: site facts come from the user

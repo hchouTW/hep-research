@@ -15,6 +15,8 @@ cancel needs --approve-cancel. Nothing here releases a held job, raises a resour
   resubmit --config C [--submit]                         only chunks whose decision allows it (max_attempts, changed
                                                          resources after timeout or out-of-memory)
   reset    --config C --chunks ID ... --reason TEXT      after a person fixed the cause
+  confirm  --config C --submission S --jobs ATTEMPT=JOB ...   after an interrupted submit: the jobs the scheduler has
+  abandon  --config C --submission S --reason TEXT       after an interrupted submit: the scheduler has none of them
   cancel   --config C [--chunks ID ...] [--approve-cancel]
   merge    --config C                                    requires every chunk exactly once
   report   --config C --out ARTIFACT.json [--label synthetic ...] [--objective TEXT]
@@ -112,7 +114,8 @@ def build_artifact(cdir: Path, cfg: dict, executor, labels: list[str], objective
 def main(argv=None, env=None, sleep=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
-    for name in ("check-config", "plan", "submit", "status", "watch", "resubmit", "reset", "cancel", "merge", "report"):
+    for name in ("check-config", "plan", "submit", "status", "watch", "resubmit", "reset", "confirm", "abandon", "cancel",
+                 "merge", "report"):
         s = sub.add_parser(name)
         s.add_argument("--config", type=Path, required=True)
         if name == "check-config":
@@ -131,8 +134,13 @@ def main(argv=None, env=None, sleep=None) -> int:
             s.add_argument("--pilot", action="store_true")
         if name in ("submit", "cancel", "reset"):
             s.add_argument("--chunks", nargs="+", required=name == "reset")
-        if name == "reset":
+        if name in ("reset", "abandon"):
             s.add_argument("--reason", required=True)
+        if name in ("confirm", "abandon"):
+            s.add_argument("--submission", required=True, help="the unconfirmed submission, for example s003")
+        if name == "confirm":
+            s.add_argument("--jobs", nargs="+", required=True, metavar="ATTEMPT=JOB",
+                           help="every attempt of the submission with the job ID the scheduler shows for it")
         if name == "cancel":
             s.add_argument("--approve-cancel", action="store_true")
         if name == "report":
@@ -173,6 +181,13 @@ def main(argv=None, env=None, sleep=None) -> int:
             return emit(rep, 1 if rep["blocked"] else 0)
         if args.cmd == "reset":
             return emit(cp.reset(cdir, args.chunks, args.reason), 0)
+        if args.cmd == "confirm":
+            pairs = dict(item.split("=", 1) for item in args.jobs if "=" in item)
+            if len(pairs) != len(args.jobs):
+                return emit({"error": "--jobs takes ATTEMPT=JOB pairs"}, 2)
+            return emit(cp.confirm_submission(cdir, args.submission, pairs), 0)
+        if args.cmd == "abandon":
+            return emit(cp.abandon_submission(cdir, args.submission, args.reason), 0)
         if args.cmd == "cancel":
             return emit(cp.cancel(cdir, ex, args.chunks, approved=args.approve_cancel), 0)
         if args.cmd == "merge":
