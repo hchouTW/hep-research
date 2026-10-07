@@ -48,3 +48,11 @@ class SizeStatementTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ArchiveRuleTests(unittest.TestCase):
+    def test_archives_are_refused(self):
+        for name in ("submission.tar.gz", "x.zip", "a/b.tgz"):
+            self.assertTrue(cp.ARCHIVE.search(name), name)
+        for name in ("tar_reader.py", "zipped.md", "notes.txt"):
+            self.assertFalse(cp.ARCHIVE.search(name), name)
