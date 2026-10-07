@@ -35,6 +35,7 @@ MISSING_FILE_ARGS = {
     "skills/hep-computing/scripts/audit_histograms.py": [M],
     "skills/hep-computing/scripts/check_example_diversity.py": [M],
     "skills/hep-computing/scripts/compare_root_histograms.py": ["--reference", M, "--candidate", M, "--hist", "h"],
+    "skills/hep-computing/scripts/environment_manifest.py": ["check", "--manifest", M],
     "skills/hep-computing/scripts/inspect_root_file.py": ["--input", M],
     "skills/hep-computing/scripts/lint_task.py": [M],
     "skills/hep-computing/scripts/local_partition.py": ["status", "--manifest", M, "--state", OUT],

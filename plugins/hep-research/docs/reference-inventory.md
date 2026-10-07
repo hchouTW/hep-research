@@ -10,7 +10,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. shallow clone: last_co
 |---|---|---|---|
 | detector-response | 33 | 345 | 0 |
 | hep-analysis | 9 | 72 | 0 |
-| hep-computing | 25 | 281 | 0 |
+| hep-computing | 26 | 285 | 0 |
 | hep-statistics | 9 | 100 | 0 |
 | hep-theory | 8 | 42 | 0 |
 | physics-ml | 34 | 181 | 0 |
@@ -126,6 +126,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `cpp-balanced-design-guidelines.md` | hep-computing | 26.0 | yes | 6 | physics-ml | 119450c 2026-10-04 |
 | `design-and-estimation.md` | hep-computing | 7.5 | no | 3 | - | 119450c 2026-10-04 |
 | `engineering-playbook.md` | hep-computing | 8.8 | yes | 3 | - | 119450c 2026-10-04 |
+| `environments-and-containers.md` | hep-computing | 3.5 | yes | 1 | - | 576c2c4 2026-10-08 |
 | `example-authoring.md` | hep-computing | 20.0 | no | 8 | hep-analysis, physics-ml | 281eb2d 2026-10-04 |
 | `host-notes.md` | hep-computing | 5.1 | no | 2 | - | 6caf06f 2026-10-07 |
 | `implementation-discipline.md` | hep-computing | 7.6 | no | 3 | - | 281eb2d 2026-10-04 |

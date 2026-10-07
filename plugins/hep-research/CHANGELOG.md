@@ -5,6 +5,13 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Environments and reproducibility (T23).** `skills/hep-computing/scripts/environment_manifest.py` records the
+  environment of a run as the `environment` object and `tools` list of a `computational-run` artifact (Python,
+  platform, whether it comes from an LCG view, a container, conda or a venv, package versions, a fixed list of
+  variables such as `LCG_VERSION` and `BINARY_TAG`, never other variables, and the git commit and dirty state), and
+  `check` lists every drift against a saved manifest. A new `adapters/environments` (status `documented`) holds an LCG
+  view setup template and an Apptainer definition built on `requirements-ci.lock`; the new reference
+  `environments-and-containers.md` says which route pins what and what to record.
 - **Recasting toolchain templates (T20).** A new `adapters/recasting` (status `documented`: none of the tools is
   installed where it was written) holds starting templates for a MadGraph5_aMC@NLO process and launch card, a Rivet
   analysis with its metadata, a Delphes efficiency-module override, a SModelS parameters file and a MadAnalysis 5 recast

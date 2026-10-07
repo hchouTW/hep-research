@@ -14,8 +14,8 @@
    "uncited": 0
   },
   "hep-computing": {
-   "references": 25,
-   "bytes": 281022,
+   "references": 26,
+   "bytes": 284524,
    "uncited": 0
   },
   "hep-statistics": {
@@ -1095,6 +1095,18 @@
    ],
    "cited_by_other_skills": [],
    "last_commit": "119450c 2026-10-04"
+  },
+  {
+   "path": "skills/hep-computing/references/environments-and-containers.md",
+   "owner": "hep-computing",
+   "bytes": 3502,
+   "lines": 53,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-computing/SKILL.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "576c2c4 2026-10-08"
   },
   {
    "path": "skills/hep-computing/references/example-authoring.md",

@@ -1,0 +1,28 @@
+{
+ "id": "adapter:environments",
+ "version": "0.1.0",
+ "status": "documented",
+ "purpose": "Reproducible software environments: an LCG view on CVMFS and an Apptainer definition, recorded with skills/hep-computing/scripts/environment_manifest.py",
+ "tools": [
+  {
+   "name": "LCG views on CVMFS",
+   "status": "documented",
+   "tested_versions": []
+  },
+  {
+   "name": "Apptainer",
+   "status": "documented",
+   "tested_versions": []
+  }
+ ],
+ "environment": "none declared: CVMFS and Apptainer were not available where these templates were written (E2, 2026-10-08); the manifest script they point to is tested on E2",
+ "assets": [
+  "assets/lcg_view_setup.sh",
+  "assets/hep-research.def"
+ ],
+ "tests": [
+  "../../tests/skills/hep_computing/test_environment_manifest.py"
+ ],
+ "owner_skill": "hep-computing",
+ "status_rule": "the adapter status is the lowest of its tools' statuses; a template is raised only after it is built or sourced on a real cluster and its manifest recorded"
+}

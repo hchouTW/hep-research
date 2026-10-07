@@ -1,0 +1,24 @@
+# Apptainer definition: STARTING TEMPLATE (status: documented, not built here: no Apptainer on the machine it was
+# written on). Build: apptainer build hep-research.sif hep-research.def
+# Run:   apptainer exec hep-research.sif python3 tools/run_all_checks.py --no-cli
+# The base image pins ROOT and Python; requirements-ci.lock pins the Python packages. Record the image digest
+# (apptainer inspect) and the manifest written inside the container with every run.
+Bootstrap: docker
+From: rootproject/root:<ROOT_IMAGE_TAG>
+
+%files
+    requirements-ci.lock /opt/hep-research/requirements-ci.lock
+
+%post
+    apt-get update -qq && apt-get install -y -qq python3-pip git && rm -rf /var/lib/apt/lists/*
+    python3 -m pip install --no-cache-dir --break-system-packages --ignore-installed -r /opt/hep-research/requirements-ci.lock
+
+%environment
+    export HEP_CONTAINER_IMAGE="rootproject/root:<ROOT_IMAGE_TAG> + requirements-ci.lock"
+
+%labels
+    Purpose hep-research analysis environment
+    Status documented (template; not built by the plugin)
+
+%runscript
+    exec python3 "$@"
