@@ -39,7 +39,10 @@ Isolation, recorded in every summary:
   so no user instructions, other plugins or MCP servers load. Log in once in a terminal:
   `CLAUDE_CONFIG_DIR=DIR claude auth login`.
 - `--isolation setting-sources` (default, Claude only): the user's login with `--setting-sources project,local` and
-  `--strict-mcp-config`. The run stops at the first session that reports a plugin other than `hep-research`.
+  `--strict-mcp-config`. The run stops at the first session that reports a plugin other than `hep-research`
+  (plugins built into the CLI, reported with `path: builtin`, are recorded but are not contamination). The CLI
+  keeps a folder per working directory under `~/.claude/projects/`; the harness removes the one each case's
+  throwaway folder created.
 
 ## Scoring
 
@@ -59,3 +62,9 @@ and report the cost per case and per prompt turn.
 `--cli codex` builds `codex exec --json` commands, reads skills from `SKILL.md` reads in the command events, and
 needs `--config-dir` pointing at a `CODEX_HOME` with only this plugin installed. Status: documented; not run (the
 parser is tested on a synthetic event stream only).
+
+## Runs so far
+
+| Run | Cases | Strict | Cost | Note |
+|---|---|---|---|---|
+| `probe-20261008-sonnet` | 5 (6 prompt turns): quick, ja, adversarial, multi-turn, de | 5/5 | $0.455 ($0.076 per prompt turn) | cost probe; the full 150-case set (154 prompt turns) is estimated at about $11.7 on claude-sonnet-5-5 |

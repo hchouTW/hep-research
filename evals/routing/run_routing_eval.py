@@ -112,7 +112,10 @@ def parse_claude(lines) -> dict:
             out["session_id"] = ev.get("session_id")
             out["cli_version"] = ev.get("claude_code_version")
             out["model"] = ev.get("model")
-            out["plugins"] = sorted({(p.get("name") if isinstance(p, dict) else str(p)) for p in ev.get("plugins", [])})
+            # plugins built into the CLI ("path": "builtin", source "...@builtin") are part of the CLI, not user installs
+            builtin = lambda p: isinstance(p, dict) and (p.get("path") == "builtin" or str(p.get("source", "")).endswith("@builtin"))
+            out["plugins"] = sorted({(p.get("name") if isinstance(p, dict) else str(p)) for p in ev.get("plugins", []) if not builtin(p)})
+            out["builtin_plugins"] = sorted({p.get("name") for p in ev.get("plugins", []) if builtin(p)})
         elif ev.get("type") == "assistant":
             for block in (ev.get("message") or {}).get("content") or []:
                 if not isinstance(block, dict) or block.get("type") != "tool_use":
@@ -243,6 +246,14 @@ def codex_cmd(cli_path, prompt, args, cwd, session=None):
     return [cli_path, "exec", "--json", "--skip-git-repo-check", "--sandbox", "read-only", "-m", args.model, "-C", str(cwd), prompt]
 
 
+def session_dir(args, cwd: Path) -> Path | None:
+    """The folder the Claude CLI keeps for a working directory (sessions, auto memory), or None for Codex."""
+    if args.cli != "claude":
+        return None
+    root = Path(args.config_dir) if args.config_dir else Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude")
+    return root / "projects" / re.sub(r"[^A-Za-z0-9]", "-", str(cwd.resolve()))
+
+
 def run_case(case: dict, args, raw_dir: Path) -> dict:
     env = dict(os.environ)
     if args.config_dir:
@@ -255,6 +266,8 @@ def run_case(case: dict, args, raw_dir: Path) -> dict:
         for name, text in (case.get("inputs") or {}).items():
             (cwd / name).write_text(text, encoding="utf-8")
         prior: list[str] = []
+        sdir = session_dir(args, cwd)
+        sdir_existed = sdir is not None and sdir.exists()
         for k, turn in enumerate(turns_of(case), 1):
             cmd = (claude_cmd(args.cli_path, turn["prompt"], args, session) if args.cli == "claude"
                    else codex_cmd(args.cli_path, turn["prompt"], args, cwd, session))
@@ -278,13 +291,17 @@ def run_case(case: dict, args, raw_dir: Path) -> dict:
             n_turns += facts["turns"]
             turn_rows.append(dict(score_turn(turn["expected"], facts, case, prior), exit_code=code))
             prior += facts["skills"]
+        # the CLI keeps a folder per working directory; remove the one this case's throwaway folder created
+        if sdir is not None and not sdir_existed and "hep-routing-" in sdir.name and sdir.is_dir():
+            shutil.rmtree(sdir, ignore_errors=True)
     first = facts_all[0]
     row.update({"turns": turn_rows, "outcome": "pass" if all(t["strict"] for t in turn_rows) else
                 next(t["outcome"] for t in turn_rows if not t["strict"]),
                 "strict": all(t["strict"] for t in turn_rows), "lenient": all(t["lenient"] for t in turn_rows),
                 "profile_reads": sorted({r for f in facts_all for r in f["profile_reads"]}),
                 "other_skills": sorted({s for f in facts_all for s in f["other_skills"]}),
-                "plugins_reported": first["plugins"], "cli_version": first["cli_version"], "model_reported": first["model"],
+                "plugins_reported": first["plugins"], "builtin_plugins": first.get("builtin_plugins", []),
+                "cli_version": first["cli_version"], "model_reported": first["model"],
                 "cost_usd": round(cost, 6), "n_turns": n_turns})
     row["loading_violation"] = loading_violation(case, row["profile_reads"])
     return row

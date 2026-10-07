@@ -21,6 +21,7 @@ for key, (sk, tx) in routes.items():
         skills, text = sk, tx
         break
 plugins = [{"name": p, "path": "/x"} for p in os.environ.get("FAKE_PLUGINS", "hep-research").split(",") if p]
+plugins.append({"name": "cc-plugin-telemetry", "path": "builtin", "source": "cc-plugin-telemetry@builtin"})  # as the real CLI
 print(json.dumps({"type": "system", "subtype": "init", "session_id": session, "model": argv[argv.index("--model") + 1],
                   "claude_code_version": "9.9.9", "plugins": plugins, "tools": ["Skill", "Read"]}))
 for s in skills:

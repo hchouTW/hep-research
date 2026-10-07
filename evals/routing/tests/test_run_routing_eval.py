@@ -68,6 +68,8 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual(res["summary"]["loading_violations"], ["f"])
         self.assertEqual(res["summary"]["overall"], {"cases": 6, "strict_pass": 4, "lenient_pass": 5})
         self.assertEqual(res["meta"]["cli_version"], "9.9.9")
+        self.assertEqual((rows["a"]["plugins_reported"], rows["a"]["builtin_plugins"]), (["hep-research"], ["cc-plugin-telemetry"]))
+        self.assertEqual(res["contaminated"], [])  # built-in CLI plugins are not contamination
         self.assertAlmostEqual(res["summary"]["cost_usd"]["total"], 0.35, places=6)  # 7 calls: case e has two turns
 
     def test_commands_are_isolated_and_read_only(self):
@@ -151,3 +153,14 @@ class HarnessTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SessionDirTests(unittest.TestCase):
+    def test_session_dir_is_the_cli_encoding_of_the_working_directory(self):
+        class A:
+            cli, config_dir = "claude", Path("/cfg")
+        d = rre.session_dir(A, Path("/tmp"))
+        self.assertEqual(d.parent, Path("/cfg/projects"))
+        self.assertNotIn("/", d.name)
+        A.cli = "codex"
+        self.assertIsNone(rre.session_dir(A, Path("/tmp")))
