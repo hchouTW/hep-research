@@ -5,6 +5,10 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Smooth nuisance interpolation (T22).** `shape-limit` shape nuisances accept `"interpolation": "code4p"` (polynomial
+  inside |θ| < 1, linear outside, no kink at 0), and normalization nuisances accept asymmetric `hi`/`lo` factors with
+  code4 (default), code1 or code0 interpolation, as in HistFactory and pyhf. The default shape interpolation stays the
+  piecewise-linear code0, so existing inputs give the same results. Checked against pyhf 0.7.6.
 - **Expected-limit bands (T22).** `likelihood_limits.py multibin-limit` and `shape-limit` now give the asymptotic CLs
   limit and the median and 1/2-sigma expected limits under background only, for CLs and for CLs+b, from the Asimov data
   set (Cowan, Cranmer, Gross and Vitells 2011), with σ taken at each band's own signal strength and the q̃ form of the

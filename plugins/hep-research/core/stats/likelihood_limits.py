@@ -48,6 +48,12 @@ shape-limit input: {"bins": [{"n": 5, "b": 3.2, "s": 1.0}, ...], "cl": 0.95, "nu
   {"name": "sig_norm", "kind": "signal_norm", "sigma": 0.1},
   {"name": "bkg_shape", "kind": "background_shape", "up": [per-bin b at +1 sigma], "down": [...]},
   {"name": "sig_shape", "kind": "signal_shape", "up": [per-bin s at +1 sigma], "down": [...]}]}.
+Interpolation (HistFactory codes, as in pyhf): a shape nuisance may carry "interpolation": "code0" (default,
+piecewise linear, with a kink at theta = 0) or "code4p" (a sixth-order polynomial for |theta| < 1 that matches the
+linear extrapolation in value, slope and curvature at |theta| = 1, smooth at 0). A normalization nuisance may give
+asymmetric factors {"hi": 1.12, "lo": 0.92} (at theta = +1 and -1) instead of "sigma", with "interpolation": "code4"
+(default: polynomial inside |theta| < 1, exponential hi^theta / lo^-theta outside, smooth everywhere), "code1"
+(piecewise exponential, kinked at 0) or "code0" (piecewise linear); such a nuisance has the Gaussian constraint.
 A normalization nuisance may carry "prior": "gaussian" (default, factor 1 + sigma theta), "lognormal"
 (factor exp(sigma theta), theta unit normal) or "gamma" (factor f = 1 + sigma theta with a Poisson
 auxiliary measurement of tau = 1/sigma^2, a gamma prior of mean 1 and relative width sigma). An optional
@@ -628,6 +634,36 @@ def _newton_min(f, x0, fixed_first: bool = False, max_iter: int = 60):
     return x, fx
 
 
+def _code4_coefficients(hi: float, lo: float) -> list[float]:
+    """a_1..a_6 of f(theta) = 1 + sum a_i theta^i, matching hi^theta and lo^-theta with their first and second
+    derivatives at theta = +1 and -1 (HistFactory interpolation code 4)."""
+    lh, ll_ = math.log(hi), math.log(lo)
+    rows = [[1.0] * 6, [(-1.0) ** i for i in range(1, 7)], [float(i) for i in range(1, 7)],
+            [i * (-1.0) ** (i - 1) for i in range(1, 7)], [float(i * (i - 1)) for i in range(1, 7)],
+            [i * (i - 1) * (-1.0) ** (i - 2) for i in range(1, 7)]]
+    rhs = [hi - 1.0, lo - 1.0, hi * lh, -lo * ll_, hi * lh * lh, lo * ll_ * ll_]
+    return [r[0] for r in _solve(rows, [[v] for v in rhs])]
+
+
+def _interp_norm(theta: float, d: dict) -> float:
+    """Normalization factor at theta for asymmetric factors hi (theta = +1) and lo (theta = -1)."""
+    hi, lo, code = d["hi"], d["lo"], d["interpolation"]
+    if code == "code0":
+        return 1.0 + theta * ((hi - 1.0) if theta >= 0 else (1.0 - lo))
+    if code == "code1" or abs(theta) >= 1.0:
+        return hi ** theta if theta >= 0 else lo ** (-theta)
+    return 1.0 + sum(a * theta ** (i + 1) for i, a in enumerate(d["c4"]))
+
+
+def _interp_shape(theta: float, nom: float, up: float, down: float, code: str) -> float:
+    """Additive shift of one bin at theta (code0: piecewise linear; code4p: polynomial inside |theta| < 1)."""
+    if code == "code4p" and abs(theta) < 1.0:
+        s, a = 0.5 * ((up - nom) + (nom - down)), 0.0625 * ((up - nom) - (nom - down))
+        t2 = theta * theta
+        return theta * s + t2 * (t2 * (3.0 * t2 - 10.0) + 15.0) * a
+    return theta * ((up - nom) if theta >= 0 else (nom - down))
+
+
 def _load_shape(doc):
     if not isinstance(doc, dict):
         raise LikelihoodError("input must be a JSON object")
@@ -653,16 +689,31 @@ def _load_shape(doc):
     for k, d in enumerate(nuis):
         if not isinstance(d, dict) or d.get("kind") not in ("background_norm", "signal_norm", "background_shape", "signal_shape"):
             raise LikelihoodError(f"nuisance {k}: kind must be background_norm, signal_norm, background_shape or signal_shape")
-        if d["kind"].endswith("_norm"):
+        if d["kind"].endswith("_norm") and ("hi" in d or "lo" in d):
+            code = d.get("interpolation", "code4")
+            if code not in ("code0", "code1", "code4"):
+                raise LikelihoodError(f"nuisance {k}: interpolation of hi/lo factors must be code0, code1 or code4")
+            if d.get("prior", "gaussian") != "gaussian" or "sigma" in d:
+                raise LikelihoodError(f"nuisance {k}: hi/lo factors take the Gaussian constraint and no sigma")
+            hi, lo = _num(d.get("hi"), "hi", 0.0, 10.0, strict_low=True), _num(d.get("lo"), "lo", 0.0, 10.0, strict_low=True)
+            parsed.append({"kind": d["kind"], "prior": "gaussian", "hi": hi, "lo": lo, "interpolation": code,
+                           "c4": _code4_coefficients(hi, lo)})
+        elif d["kind"].endswith("_norm"):
             prior = d.get("prior", "gaussian")
             if prior not in ("gaussian", "lognormal", "gamma"):
                 raise LikelihoodError(f"nuisance {k}: prior must be gaussian, lognormal or gamma")
+            if "interpolation" in d:
+                raise LikelihoodError(f"nuisance {k}: interpolation applies to hi/lo factors, not to sigma")
             parsed.append({"kind": d["kind"], "prior": prior, "sigma": _num(d.get("sigma"), "sigma", 0.0, 0.9, strict_low=True)})
         else:
             up, dn = d.get("up"), d.get("down")
             if not isinstance(up, list) or not isinstance(dn, list) or len(up) != len(bins) or len(dn) != len(bins):
                 raise LikelihoodError(f"nuisance {k}: up and down must list {len(bins)} per-bin values")
-            parsed.append({"kind": d["kind"], "up": [_num(v, "up", 0.0, 1e6) for v in up], "down": [_num(v, "down", 0.0, 1e6) for v in dn]})
+            code = d.get("interpolation", "code0")
+            if code not in ("code0", "code4p"):
+                raise LikelihoodError(f"nuisance {k}: shape interpolation must be code0 or code4p")
+            parsed.append({"kind": d["kind"], "up": [_num(v, "up", 0.0, 1e6) for v in up], "down": [_num(v, "down", 0.0, 1e6) for v in dn],
+                           "interpolation": code})
         parsed[-1]["name"] = str(d.get("name", f"nuisance{k}"))
     corr = doc.get("correlation")
     corr_chol = None
@@ -702,6 +753,8 @@ class _ShapeModel:
         return [t if g else 0.0 for g, t in zip(self.gamma, self.tau)]
 
     def _factor(self, d, t):
+        if "hi" in d:
+            return _interp_norm(t, d)
         if d["kind"].endswith("_norm") and d.get("prior") == "lognormal":
             return math.exp(d["sigma"] * t)
         return 1.0 + d["sigma"] * t
@@ -735,7 +788,7 @@ class _ShapeModel:
                 base = self.b if d["kind"] == "background_shape" else self.s
                 tgt = bs if d["kind"] == "background_shape" else ss
                 for i in range(len(base)):
-                    tgt[i] += t * (d["up"][i] - base[i]) if t >= 0 else (-t) * (d["down"][i] - base[i])
+                    tgt[i] += _interp_shape(t, base[i], d["up"][i], d["down"][i], d["interpolation"])
         for t, d in zip(th, self.nuis):
             if d["kind"] == "background_norm":
                 f = self._factor(d, t)
@@ -830,13 +883,15 @@ def shape_limit(doc: dict, cl: float, toys: int, seed: int) -> dict:
         out.update({"toy_p_value_at_asymptotic_limit": p, "binomial_error_on_p": math.sqrt(max(p * (1 - p), 0.0) / toys),
                     "target_p_value": 1.0 - cl})
     out["priors"] = {d["name"]: d.get("prior", "gaussian") for d in nuis}
+    out["interpolation"] = {d["name"]: d["interpolation"] for d in nuis if "interpolation" in d}
     out["correlated_nuisances"] = corr_chol is not None
     out["note"] = ("every nuisance has a unit-width constraint on its parameter theta observed at 0 (Gaussian by default; a "
                    "normalization may be log-normal or gamma with a Poisson auxiliary measurement, and Gaussian-type "
                    "nuisances may carry a correlation matrix; toys redraw the auxiliary measurements, correlated for the "
                    "Gaussian ones and Poisson for gamma), "
-                   "shapes use vertical piecewise-linear interpolation between the down, nominal and up templates (no "
-                   "bin-to-bin correlation beyond what the templates carry), normalizations are linear (1 + sigma theta), "
+                   "shapes use vertical interpolation between the down, nominal and up templates (piecewise linear by default, "
+                   "smooth code4p on request; no bin-to-bin correlation beyond what the templates carry), normalizations "
+                   "are linear (1 + sigma theta) unless log-normal, gamma or given as hi/lo factors (code4 by default), "
                    "and shape and normalization effects are applied additively then multiplicatively; the asymptotic result "
                    "relies on q-tilde ~ half-chi2, so check the toy p-value at the limit (it should be near 1 - cl); "
                    "asymptotic_observed_upper_limit is the CLs+b-type limit and asymptotic_observed_cls_upper_limit the "

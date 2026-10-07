@@ -122,7 +122,9 @@ and use common random numbers across a scan.
   and a seeded-toy p-value at the asymptotic limit as the calibration check (it should be near `1 - cl`; if not, use a
   toy-calibrated construction). Shapes and other nuisances are not modeled.
 - `shape-limit --input FILE [--cl --toys --seed]`: multi-bin limit with several nuisances: background and signal
-  normalization, background and signal shape by vertical interpolation, a damped Newton profile, asymptotic observed
+  normalization, background and signal shape by vertical interpolation (piecewise linear `code0` by default, or the
+  smooth `code4p`; asymmetric normalization factors `hi`/`lo` with `code4`, `code1` or `code0`, as in pyhf), a damped
+  Newton profile, asymptotic observed
   and Asimov expected limits with the same asymptotic CLs limit and bands, and an optional toy p-value at the limit. A normalization nuisance may be `gaussian`
   (factor `1 + sigma theta`), `lognormal` (`exp(sigma theta)`) or `gamma` (`1 + sigma theta` with a Poisson auxiliary
   measurement of `tau = 1/sigma^2`); an optional correlation matrix correlates the Gaussian-type nuisances (gamma ones

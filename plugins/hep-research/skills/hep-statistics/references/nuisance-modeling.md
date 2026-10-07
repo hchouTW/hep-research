@@ -56,8 +56,10 @@ pyhf 0.7.6 (read from the installed source, `pyhf/interpolators/`, 2026-10-03):
 | `histosys` | `code4p` (Model default) | `theta S + theta^2 (3 theta^4 - 10 theta^2 + 15) A` with `S = (d+ + d-)/2`, `A = (d+ - d-)/16` | linear |
 
 `pyhf.Model` uses `code4`/`code4p` unless `modifier_settings` says otherwise; the modifier classes alone default to
-`code1`/`code0`. A cross-check against another implementation must use the same code, or it compares different
-likelihoods: an independent HistFactory reference with exponential normsys first disagreed with pyhf for exactly
+`code1`/`code0`. `core/stats/likelihood_limits.py shape-limit` implements the same codes (`hi`/`lo` normalization
+factors with `code4` by default; shapes `code0` by default, `code4p` on request) and matches pyhf 0.7.6 on a grid
+(`tests/core/test_stats_interpolation.py`). A cross-check against another implementation must use the same code,
+or it compares different likelihoods: an independent HistFactory reference with exponential normsys first disagreed with pyhf for exactly
 this reason (repository history of the pyhf shape cross-check).
 
 Combine (documentation for the recommended tag v11.1.0, read 2026-10-03; not executed in this plugin):
