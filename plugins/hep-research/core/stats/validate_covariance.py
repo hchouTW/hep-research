@@ -43,42 +43,17 @@ import math
 import sys
 from pathlib import Path
 
+from core.stats import _linalg
+
 DEFAULT_TOL = {"symmetry": 1e-8, "psd": 1e-8, "correlation": 1e-8,
                "condition_warn": 1e10, "rank": 1e-12, "block_sum": 1e-8}
 EPS = sys.float_info.epsilon
 
 
-def jacobi_eigh(matrix: list[list[float]], max_sweeps: int = 100) -> tuple[list[float], list[list[float]]]:
-    """Eigen-decomposition of a real symmetric matrix by cyclic Jacobi rotations.
-    Returns (eigenvalues ascending, eigenvectors as columns in matching order)."""
-    n = len(matrix)
-    a = [row[:] for row in matrix]
-    v = [[1.0 if i == j else 0.0 for j in range(n)] for i in range(n)]
-    scale = sum(x * x for row in a for x in row) or 1.0
-    for _ in range(max_sweeps):
-        off = sum(a[i][j] ** 2 for i in range(n) for j in range(i + 1, n))
-        if off <= (EPS ** 2) * scale * 1e-4:
-            break
-        for p in range(n - 1):
-            for q in range(p + 1, n):
-                apq = a[p][q]
-                if apq == 0.0:
-                    continue
-                theta = (a[q][q] - a[p][p]) / (2.0 * apq)
-                t = math.copysign(1.0, theta) / (abs(theta) + math.sqrt(theta * theta + 1.0))
-                c = 1.0 / math.sqrt(t * t + 1.0)
-                s = t * c
-                for k in range(n):
-                    akp, akq = a[k][p], a[k][q]
-                    a[k][p], a[k][q] = c * akp - s * akq, s * akp + c * akq
-                for k in range(n):
-                    apk, aqk = a[p][k], a[q][k]
-                    a[p][k], a[q][k] = c * apk - s * aqk, s * apk + c * aqk
-                for k in range(n):
-                    vkp, vkq = v[k][p], v[k][q]
-                    v[k][p], v[k][q] = c * vkp - s * vkq, s * vkp + c * vkq
-    order = sorted(range(n), key=lambda i: a[i][i])
-    return [a[i][i] for i in order], [[v[k][i] for i in order] for k in range(n)]
+def jacobi_eigh(matrix: list[list[float]], max_sweeps: int = 100, info: dict | None = None) -> tuple[list[float], list[list[float]]]:
+    """Eigen-decomposition of a real symmetric matrix by cyclic Jacobi rotations (core/stats/_linalg.py).
+    Returns (eigenvalues ascending, eigenvectors as columns in matching order); info receives whether it converged."""
+    return _linalg.jacobi_eigh(matrix, max_sweeps, criterion="frobenius", info=info)
 
 
 class Report:
@@ -152,7 +127,11 @@ def _check_matrix(name: str, m: list[list[float]], tol: dict, report: Report, pr
         report.error(f"{prefix}correlation_bound", f"{name}: {len(bad_rho)} correlation(s) outside [-1, 1]; first rho[{j},{i}] = {rho:.6f}")
     if any(not math.isfinite(x) for x in diag):
         return metrics
-    values, _ = jacobi_eigh(s)
+    solver: dict = {}
+    values, _ = jacobi_eigh(s, info=solver)
+    if not solver["converged"]:
+        report.warn(f"{prefix}eigen_not_converged", f"{name}: the eigenvalue rotations did not converge in {solver['sweeps']} "
+                    f"sweeps (off-diagonal norm {solver['off_diagonal']:.3e}); the eigenvalue checks are approximate")
     lmax, lmin = values[-1], values[0]
     noise = 10.0 * n * EPS * max(abs(lmax), abs(lmin))
     metrics.update({"eigenvalue_min": lmin, "eigenvalue_max": lmax, "roundoff_level": noise})

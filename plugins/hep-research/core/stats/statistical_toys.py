@@ -69,7 +69,8 @@ import statistics
 import sys
 from pathlib import Path
 
-from core.stats._linalg import cholesky
+from core.stats import _poisson, _validate
+from core.stats._linalg import chol_solve, cholesky, golden_min, scan_then_golden
 from core.stats._poisson import MAX_MEAN  # per-draw mean; a draw costs O(mean)
 
 LABEL = "[General method]"
@@ -81,64 +82,23 @@ class ToyError(ValueError):
 
 
 def _seed(seed) -> int:
-    if isinstance(seed, bool) or not isinstance(seed, int):
-        raise ToyError("seed must be an integer and must be recorded")
-    return seed
+    return _validate.seed(seed, error=ToyError)
 
 
 def _toys(toys, low: int = 100) -> int:
-    if isinstance(toys, bool) or not isinstance(toys, int) or not low <= toys <= MAX_TOYS:
-        raise ToyError(f"toys must be an integer in [{low}, {MAX_TOYS}]")
-    return toys
+    return _validate.toy_count(toys, low, MAX_TOYS, error=ToyError)
 
 
 def _num(x, name, low=None, high=None, strict_low=False) -> float:
-    ok = isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x)
-    if not ok:
-        raise ToyError(f"{name} must be a finite number, got {x!r}")
-    if low is not None and (x < low or (strict_low and x == low)):
-        raise ToyError(f"{name} must be {'>' if strict_low else '>='} {low}, got {x!r}")
-    if high is not None and x > high:
-        raise ToyError(f"{name} must be <= {high}, got {x!r}")
-    return float(x)
+    return _validate.number(x, name, low, high, strict_low, error=ToyError)
 
 
 def poisson_draw(rng: random.Random, mu: float) -> int:
     """Exact Poisson variate: sum of Poisson draws with mean <= 50 each (inversion); cost O(mu)."""
-    mu = _num(mu, "mean", 0.0, MAX_MEAN)
-    total = 0
-    while mu > 0:
-        part, mu = min(mu, 50.0), mu - min(mu, 50.0)
-        u, k = rng.random(), 0
-        term = cum = math.exp(-part)
-        while u > cum and k < 1000:
-            k += 1
-            term *= part / k
-            cum += term
-        total += k
-    return total
+    return _poisson.draw_chunked(rng, _num(mu, "mean", 0.0, MAX_MEAN))
 
 
-def _golden_min(f, lo, hi, iters=60):
-    g = (math.sqrt(5) - 1) / 2
-    x1, x2 = hi - g * (hi - lo), lo + g * (hi - lo)
-    f1, f2 = f(x1), f(x2)
-    for _ in range(iters):
-        if f1 > f2:
-            lo, x1, f1 = x1, x2, f2
-            x2 = lo + g * (hi - lo)
-            f2 = f(x2)
-        else:
-            hi, x2, f2 = x2, x1, f1
-            x1 = hi - g * (hi - lo)
-            f1 = f(x1)
-    return 0.5 * (lo + hi)
-
-
-def _scan_then_golden(f, lo, hi, points=25):
-    grid = [lo + (hi - lo) * k / (points - 1) for k in range(points)]
-    k = min(range(points), key=lambda i: f(grid[i]))
-    return _golden_min(f, grid[max(k - 1, 0)], grid[min(k + 1, points - 1)])
+_golden_min, _scan_then_golden, _chol_solve = golden_min, scan_then_golden, chol_solve
 
 
 def _std(values) -> float:
@@ -659,17 +619,6 @@ def chi2_sf(chi2: float, ndf: int) -> float:
     if math.isinf(chi2):
         return 0.0
     return _gammaq(ndf / 2.0, chi2 / 2.0)
-
-
-def _chol_solve(l, b):
-    n = len(l)
-    y = [0.0] * n
-    for i in range(n):
-        y[i] = (b[i] - sum(l[i][j] * y[j] for j in range(i))) / l[i][i]
-    x = [0.0] * n
-    for i in reversed(range(n)):
-        x[i] = (y[i] - sum(l[j][i] * x[j] for j in range(i + 1, n))) / l[i][i]
-    return x
 
 
 def _gls_constant(r, cov, name="ratio covariance", l=None):

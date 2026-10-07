@@ -51,6 +51,7 @@ import sys
 from statistics import NormalDist
 
 from core.stats import _poisson
+from core.stats._linalg import bisect
 from core.stats._poisson import MAX_MEAN  # one limit for core/stats; the numerics below stay accurate up to it
 
 LABEL = "[General method]"
@@ -129,16 +130,7 @@ def z_from_log_p(log_p: float) -> float | None:
 
 def _solve(f, lo: float, hi: float, what: str = "the root") -> float:
     """Root of a decreasing f on [lo, hi] by bisection; SolveFailed when [lo, hi] does not bracket it."""
-    if not f(lo) > 0 or f(hi) > 0:
-        raise SolveFailed(f"{what} is not bracketed in [{lo:g}, {hi:g}] (means are limited to {MAX_MEAN:g}): "
-                          "no value is reported")
-    for _ in range(200):
-        mid = 0.5 * (lo + hi)
-        if f(mid) > 0:
-            lo = mid
-        else:
-            hi = mid
-    return 0.5 * (lo + hi)
+    return bisect(f, lo, hi, 200, increasing=False, error=SolveFailed, what=f"{what} (means are limited to {MAX_MEAN:g})")
 
 
 def _search_top(n: int, floor: float = 0.0) -> float:

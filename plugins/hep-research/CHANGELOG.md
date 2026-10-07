@@ -57,6 +57,15 @@ Software checks establish contract consistency only, not physical validity.
   `pcolormesh` meshes and `imshow` images, and, given the sealed numbers (`check_figure(fig, region, sealed)`), text
   artists, titles and figure texts; a "blinded" label inside the region is not a leak. What it still cannot see
   (tick labels, legends, colorbars, values carried only by colors, transformed values) is stated in the module.
+- **One owner for each numerical helper (T16).** Two Jacobi eigensolvers, the Gauss-Jordan solve, the Cholesky solve,
+  bisection, the golden-section minimizers and the matrix products now live once in `core/stats/_linalg.py`; the
+  number, seed and toy-count checks in a new `core/stats/_validate.py` (each takes the caller's error class); the
+  chunked Poisson sampler joins the others in `_poisson.py`. The modules keep thin aliases, numbers are unchanged
+  (the examples reproduce bit for bit), and the helpers now say when they did not do their job: the eigensolver
+  reports non-convergence (a warning in the covariance and response validators, an error in TSVD unfolding), a
+  bisection whose interval does not bracket the limit is refused instead of returning the interval's end, and a
+  singular matrix in a profile fit raises `LikelihoodError` (it raised the unfolding module's `ToyError`, which the
+  `likelihood_limits.py` command line did not catch).
 - **Batch campaigns survive interruptions and concurrent commands (sci-fix, T15).** `campaign.submit` called the
   scheduler before saving its attempts, so a kill in between left jobs running that the campaign did not know about,
   and a second submit could send them again; submission IDs came from a count with no lock. Now every command that

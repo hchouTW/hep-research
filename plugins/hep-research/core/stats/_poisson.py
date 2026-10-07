@@ -93,3 +93,19 @@ def ppf(u: float, mu: float) -> int:
         c -= math.exp(log_pmf(k, mu))
         k -= 1
     return k
+
+
+def draw_chunked(rng, mu: float) -> int:
+    """Exact Poisson variate as a sum of draws with mean <= 50 each, by inversion (one uniform per part); cost O(mu).
+    The statistical_toys sampler: its seeded streams differ from ppf(), so both are kept."""
+    total = 0
+    while mu > 0:
+        part, mu = min(mu, 50.0), mu - min(mu, 50.0)
+        u, k = rng.random(), 0
+        term = cum = math.exp(-part)
+        while u > cum and k < 1000:
+            k += 1
+            term *= part / k
+            cum += term
+        total += k
+    return total

@@ -63,8 +63,12 @@ import statistics
 import sys
 from pathlib import Path
 
+from core.stats._linalg import solve
 from core.stats.statistical_toys import ToyError, _num, _seed, _std, _toys, poisson_draw
-from core.stats.unfolding_diagnostics import _solve
+
+
+def _solve(a, b):
+    return solve(a, b, error=ToyError, what="Hessian in the template fit")
 
 LABEL = "[General method]"
 NEG = -1e300

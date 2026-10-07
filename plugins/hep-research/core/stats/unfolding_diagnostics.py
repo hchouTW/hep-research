@@ -80,7 +80,7 @@ import random
 import sys
 from pathlib import Path
 
-from core.stats._linalg import cholesky
+from core.stats._linalg import cholesky, jacobi_eigh, matmul, solve, transpose
 from core.stats.statistical_toys import (ToyError, _load_response, _num, _scan_then_golden, _seed, _std, _toys, _unfold,
                               poisson_draw)
 
@@ -88,61 +88,22 @@ LABEL = "[General method]"
 METHODS = ("dagostini", "tikhonov", "tsvd")
 
 
-# ------------------------------------------------------------------ small linear algebra
-def _matmul(a, b):
-    bt = list(zip(*b))
-    return [[sum(x * y for x, y in zip(row, col)) for col in bt] for row in a]
-
-
-def _transpose(a):
-    return [list(r) for r in zip(*a)]
+# ------------------------------------------------------------------ small linear algebra (core/stats/_linalg.py)
+_matmul, _transpose = matmul, transpose
 
 
 def _solve(a, b):
-    """Solve a X = b (square a, matrix b) by Gaussian elimination with partial pivoting."""
-    n = len(a)
-    m = [list(a[i]) + list(b[i]) for i in range(n)]
-    for c in range(n):
-        piv = max(range(c, n), key=lambda r: abs(m[r][c]))
-        if abs(m[piv][c]) < 1e-300:
-            raise ToyError("singular matrix in the regularized solve; use a larger strength or fewer singular values")
-        m[c], m[piv] = m[piv], m[c]
-        pv = m[c][c]
-        m[c] = [v / pv for v in m[c]]
-        for r in range(n):
-            if r != c and m[r][c] != 0.0:
-                f = m[r][c]
-                m[r] = [x - f * y for x, y in zip(m[r], m[c])]
-    return [row[n:] for row in m]
+    return solve(a, b, error=ToyError, what="matrix in the regularized solve")
 
 
 def _jacobi(a, sweeps: int = 80):
-    """Eigen-decomposition of a symmetric matrix by cyclic Jacobi rotations: (eigenvalues, eigenvector columns)."""
-    n = len(a)
-    a = [list(r) for r in a]
-    v = [[1.0 if i == j else 0.0 for j in range(n)] for i in range(n)]
-    for _ in range(sweeps):
-        off = sum(a[i][j] ** 2 for i in range(n) for j in range(i + 1, n))
-        if off < 1e-24 * max(sum(a[i][i] ** 2 for i in range(n)), 1e-300):
-            break
-        for p in range(n - 1):
-            for q in range(p + 1, n):
-                if abs(a[p][q]) < 1e-300:
-                    continue
-                theta = (a[q][q] - a[p][p]) / (2.0 * a[p][q])
-                t = (1.0 if theta >= 0 else -1.0) / (abs(theta) + math.sqrt(theta * theta + 1.0))
-                c = 1.0 / math.sqrt(t * t + 1.0)
-                s = t * c
-                for k in range(n):
-                    akp, akq = a[k][p], a[k][q]
-                    a[k][p], a[k][q] = c * akp - s * akq, s * akp + c * akq
-                for k in range(n):
-                    apk, aqk = a[p][k], a[q][k]
-                    a[p][k], a[q][k] = c * apk - s * aqk, s * apk + c * aqk
-                for k in range(n):
-                    vkp, vkq = v[k][p], v[k][q]
-                    v[k][p], v[k][q] = c * vkp - s * vkq, s * vkp + c * vkq
-    return [a[i][i] for i in range(n)], v
+    """Eigen-decomposition of a symmetric matrix: (eigenvalues, eigenvector columns); refuses an unconverged one."""
+    info: dict = {}
+    vals, vecs = jacobi_eigh(a, sweeps, criterion="diagonal", sort=False, info=info)
+    if not info["converged"]:
+        raise ToyError(f"the eigen-decomposition did not converge in {sweeps} sweeps (off-diagonal norm "
+                       f"{info['off_diagonal']:.3e}); the singular values would be wrong")
+    return vals, vecs
 
 
 # -------------------------------------------------------------------------------- methods

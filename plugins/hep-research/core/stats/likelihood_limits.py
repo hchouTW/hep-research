@@ -85,9 +85,9 @@ import sys
 from pathlib import Path
 from statistics import NormalDist
 
-from core.stats._linalg import cholesky
+from core.stats import _validate
+from core.stats._linalg import bisect, cholesky, solve
 from core.stats._poisson import MAX_MEAN, ppf
-from core.stats.unfolding_diagnostics import _solve
 
 LABEL = "[General method]"
 NEG = -1e300
@@ -98,22 +98,16 @@ class LikelihoodError(ValueError):
 
 
 def _num(x, name, low=None, high=None, strict_low=False) -> float:
-    ok = isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x)
-    if not ok:
-        raise LikelihoodError(f"{name} must be a finite number, got {x!r}")
-    if low is not None and (x < low or (strict_low and x == low)):
-        raise LikelihoodError(f"{name} must be {'>' if strict_low else '>='} {low}, got {x!r}")
-    if high is not None and x > high:
-        raise LikelihoodError(f"{name} must be <= {high}, got {x!r}")
-    return float(x)
+    return _validate.number(x, name, low, high, strict_low, error=LikelihoodError)
+
+
+def _solve(a, b):
+    return solve(a, b, error=LikelihoodError, what="matrix in the profile fit")
 
 
 def _seed_toys(toys, seed, allow_zero=False) -> tuple[int, int]:
-    if isinstance(seed, bool) or not isinstance(seed, int):
-        raise LikelihoodError("seed must be an integer and must be recorded")
-    if isinstance(toys, bool) or not isinstance(toys, int) or not ((allow_zero and toys == 0) or 100 <= toys <= 100000):
-        raise LikelihoodError("toys must be an integer in [100, 100000]" + (" or 0" if allow_zero else ""))
-    return toys, seed
+    seed = _validate.seed(seed, error=LikelihoodError)
+    return _validate.toy_count(toys, 100, 100000, error=LikelihoodError, allow_zero=allow_zero), seed
 
 
 def _ppf(u: float, mu: float) -> int:
@@ -168,11 +162,8 @@ def _inputs1(n, b, sigma_b):
 
 
 def _bisect(f, lo: float, hi: float, iters: int = 80) -> float:
-    """Root of an increasing f on [lo, hi]."""
-    for _ in range(iters):
-        mid = 0.5 * (lo + hi)
-        lo, hi = (mid, hi) if f(mid) < 0 else (lo, mid)
-    return 0.5 * (lo + hi)
+    """Root of an increasing f on [lo, hi]; a root beyond hi is refused, not reported as hi."""
+    return bisect(f, lo, hi, iters, increasing=True, error=LikelihoodError, what="the limit")
 
 
 def _toy_p1(n_obs, b0, sig, s, uniforms, gauss) -> float:

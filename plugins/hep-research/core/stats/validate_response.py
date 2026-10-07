@@ -138,7 +138,11 @@ def _bookkeeping(meta: dict, report: Report) -> None:
 def _rank_and_condition(m: list[list[float]], tol: dict, report: Report, n_reco: int, n_truth: int) -> dict:
     """Identifiability from the singular values of the reco-by-truth matrix m[i][j] (via M^T M)."""
     gram = [[sum(m[k][i] * m[k][j] for k in range(n_reco)) for j in range(n_truth)] for i in range(n_truth)]
-    values, _ = jacobi_eigh(gram)
+    solver: dict = {}
+    values, _ = jacobi_eigh(gram, info=solver)
+    if not solver["converged"]:
+        report.warn("identifiability.eigen_not_converged", f"the eigenvalue rotations did not converge in {solver['sweeps']} "
+                    "sweeps; the rank and condition number are approximate")
     lmax = max(values[-1], 0.0)
     metrics: dict = {}
     if lmax <= 0:
