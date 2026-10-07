@@ -36,6 +36,9 @@ Subcommands:
   multibin-limit and shape-limit also give the asymptotic CLs limit and the expected median and 1/2-sigma limits
   (CLs and CLs+b) from the background-only Asimov data set (Cowan, Cranmer, Gross, Vitells 2011, sec. 4.3).
 
+  shape-gof             saturated-model goodness of fit of a shape-limit model (Poisson bins and constraint
+                        terms; mu fitted or fixed with --mu), calibrated by seeded toys from the fitted model, with
+                        the chi-square reference (bins - 1 or bins degrees of freedom) labeled approximate.
   contour               two signal strengths (bins with s1 and s2, the shape-limit nuisances except signal shapes,
                         optional mc_stat): best fit, Hessian covariance and profile-likelihood contours at the
                         chi-square 2-dof levels (default 68.27% and 95%), traced along rays from the best fit.
@@ -84,11 +87,12 @@ Usage (from the skill directory):
   python3 core/stats/likelihood_limits.py shape-limit --input shapes.json --toys 100 --seed 1
   python3 core/stats/likelihood_limits.py shape-limit --input shapes.json --cls-toys 500 --seed 1
   python3 core/stats/likelihood_limits.py contour --input two_poi.json --cl 0.6827,0.95
+  python3 core/stats/likelihood_limits.py shape-gof --input shapes.json --toys 500 --seed 1
   python3 core/stats/likelihood_limits.py neyman-limit --n 3 --b 3 --sigma-b 2 --cl 0.95 --beta 0.01 --toys 1000 --seed 1
   python3 core/stats/likelihood_limits.py neyman-coverage --s 2 --b 3 --sigma-b 2 --cl 0.95 --outer 300 --inner 200 --seed 1
 Exit codes: 0 ok; 2 rejected input. Standard library only.
 Importable: profile_limit, profile_significance, multibin_limit, profile_fc, profile_cls, shape_limit, profile_contour,
-neyman_limit, neyman_coverage,
+shape_gof, neyman_limit, neyman_coverage,
 neyman_coverage_scan.
 """
 from __future__ import annotations
@@ -1074,6 +1078,73 @@ def shape_limit(doc: dict, cl: float, toys: int, seed: int, cls_toys: int = 0, c
     return out
 
 
+# ---------------------------------------------------------------------- saturated-model goodness of fit
+def _nll_saturated(model, ns, aux) -> float:
+    """nll of the saturated model in the same conventions as _ShapeModel.nll: every bin mean equal to its count and
+    every constraint at its own maximum (Gaussian terms 0; a gamma term at f = aux / tau; MC factors absorbed)."""
+    total = -sum(n * math.log(n) - n for n in ns if n > 0)
+    for i in range(model.k):
+        if model.gamma[i] and aux[i] > 0:
+            total -= aux[i] * math.log(aux[i] / model.tau[i]) - aux[i]
+    return total
+
+
+def _gof_stat(model, ns, aux, mu_fixed):
+    """Saturated-model statistic t = 2 (nll at the best fit - nll saturated), and the fit (mu, theta)."""
+    if mu_fixed is None:
+        mu, th, val = model.glob(ns, aux)
+    else:
+        mu = mu_fixed
+        th, val = model.cond(mu_fixed, ns, aux)
+    return max(0.0, 2.0 * (val - _nll_saturated(model, ns, aux))), mu, th
+
+
+def shape_gof(doc: dict, toys: int, seed: int, mu: float | None = None) -> dict:
+    """Saturated-model goodness of fit of the shape-limit model, with mu fitted (mu >= 0) or fixed, calibrated by
+    seeded toys drawn from the fitted model with the auxiliary measurements redrawn and every toy refitted."""
+    from core.stats.statistical_toys import chi2_sf
+    bins, nuis, corr_chol = _load_shape(doc)
+    toys, seed = _seed_toys(toys, seed, allow_zero=True)
+    if mu is not None:
+        mu = _num(mu, "mu", 0.0, 1e6)
+    model = _ShapeModel(bins, nuis, corr_chol)
+    aux0 = model.aux_obs()
+    t_obs, mu_hat, th_hat = _gof_stat(model, model.n, aux0, mu)
+    ndf = len(bins) - (1 if mu is None else 0)
+    out = {"label": LABEL, "method": "saturated-model goodness of fit (Poisson bins and constraint terms), toy-calibrated",
+           "bins": len(bins), "nuisances": [d["name"] for d in nuis], "mu": "fitted" if mu is None else mu,
+           "best_fit_mu": mu_hat, "best_fit_nuisances": dict(zip([d["name"] for d in nuis], th_hat)),
+           "statistic": t_obs, "seed": seed, "toys": toys}
+    if ndf >= 1:
+        out["asymptotic_chi2_reference"] = {"ndf": ndf, "p_value": chi2_sf(t_obs, ndf),
+                                            "note": "approximate: needs several events in every bin"}
+    if toys:
+        gam = model.mc_gammas(mu_hat, th_hat, model.n, aux0)
+        ss, bs = model.parts(mu_hat, th_hat)
+        mean = [a + g * c for a, g, c in zip(ss, gam, bs)]
+        rng = random.Random(seed)
+        hits = 0
+        values = []
+        for _ in range(toys):
+            ns = [_ppf(rng.random(), m) for m in mean]
+            tv = _gof_stat(model, ns, _draw_aux(model, th_hat, rng, gam), mu)[0]
+            values.append(tv)
+            hits += tv >= t_obs - 1e-12
+        p = hits / toys
+        out["toy_p_value"] = p
+        out["binomial_error_on_p"] = math.sqrt(max(p * (1 - p), 0.0) / toys)
+        if hits == 0:
+            out["p_value_95_upper_bound"] = 1.0 - 0.05 ** (1.0 / toys)
+        values.sort()
+        out["toy_statistic_median"] = values[len(values) // 2]
+    out["note"] = ("t = 2 (nll at the best fit - nll of the saturated model), where the saturated model sets every bin "
+                   "mean to its count and every constraint term to its maximum, so pulled nuisances add to t; toys are "
+                   "drawn from the fitted model with the auxiliary measurements redrawn and refitted one by one; the "
+                   "chi-square reference with bins - 1 (mu fitted) or bins (mu fixed) degrees of freedom is an "
+                   "approximation that fails at low counts; a good p-value does not show the absence of bias")
+    return out
+
+
 # ------------------------------------------------------------------ two parameters of interest
 class _TwoPoiModel:
     """nu_i = mu1 S1_i(theta) + mu2 S2_i(theta) + B_i(theta), with the shape-limit nuisances (a signal_norm scales both
@@ -1417,6 +1488,10 @@ def build_parser() -> argparse.ArgumentParser:
     nc.add_argument("--inner", type=int, default=200, help="toys per p-value")
     nc.add_argument("--points", type=int, default=9)
     nc.add_argument("--seed", type=int, required=True, help="required: every toy study records its seed")
+    gf = sub.add_parser("shape-gof", help="saturated-model goodness of fit of a shape-limit model")
+    gf.add_argument("--input", required=True)
+    gf.add_argument("--mu", type=float, default=None, help="fix mu (default: fitted, mu >= 0)")
+    common(gf, 500)
     ct = sub.add_parser("contour", help="profile-likelihood contours of two signal strengths")
     ct.add_argument("--input", required=True)
     ct.add_argument("--cl", default="0.6827,0.95", help="comma-separated confidence levels of the contours")
@@ -1447,6 +1522,12 @@ def main(argv: list[str] | None = None) -> int:
             except (OSError, json.JSONDecodeError) as exc:
                 raise LikelihoodError(f"cannot read {args.input}: {exc}") from None
             result = shape_limit(doc, args.cl, args.toys, args.seed, args.cls_toys, args.cls_points)
+        elif args.command == "shape-gof":
+            try:
+                doc = json.loads(Path(args.input).read_text())
+            except (OSError, json.JSONDecodeError) as exc:
+                raise LikelihoodError(f"cannot read {args.input}: {exc}") from None
+            result = shape_gof(doc, args.toys, args.seed, args.mu)
         elif args.command == "contour":
             try:
                 doc = json.loads(Path(args.input).read_text())

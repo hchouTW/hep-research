@@ -134,6 +134,11 @@ and use common random numbers across a scan.
   optional correlation matrix correlates the Gaussian-type nuisances (gamma ones cannot be correlated). Choose the
   constraint from the origin of the uncertainty ([nuisance modeling](nuisance-modeling.md)), not by convenience. Slow
   for many nuisances.
+- `shape-gof --input FILE [--mu --toys --seed]`: saturated-model goodness of fit of a `shape-limit` model (Poisson
+  bins plus constraint terms, so pulled nuisances count), `mu` fitted (`mu >= 0`) or fixed, calibrated by toys from
+  the fitted model; the chi-square reference (bins - 1 or bins degrees of freedom) is approximate and
+  anti-conservative at a few events per bin. For template yields without nuisances use
+  `sensitivity_and_gof.py gof`.
 - `contour --input FILE [--cl 0.6827,0.95 --rays 36]`: two signal strengths (bins with `s1` and `s2`; the shape-limit
   nuisances except signal shapes; `mc_stat`): best fit, Hessian covariance and profile-likelihood contours at the
   chi-square 2-dof levels. Wilks coverage was checked with toys at about 50 events per bin; at low counts, check it

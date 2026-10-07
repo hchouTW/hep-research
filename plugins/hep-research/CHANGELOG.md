@@ -5,6 +5,10 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Saturated-model goodness of fit (T22).** `likelihood_limits.py shape-gof` tests a shape-limit model (with its
+  nuisances, constraint terms and `mc_stat`) against the saturated model, with μ fitted or fixed, and calibrates the
+  statistic with toys from the fitted model; the χ² reference is reported and labeled approximate. Toy p-values are
+  uniform under the null at low counts, where the χ² reference is not.
 - **Asymmetric uncertainties (T22).** `skills/hep-statistics/scripts/combine_asymmetric.py` combines measurements with
   asymmetric errors by Barlow's linear-variance or linear-σ likelihoods, and adds several asymmetric uncertainty
   sources on one result by matching cumulants (quadratic or piecewise model, with the central value moved so the mean
