@@ -47,8 +47,11 @@ Run: python3 <plugin root>/skills/hep-analysis/scripts/cosmic_ray_flux.py --coun
 import argparse
 import json
 import math
+import sys
+from pathlib import Path
 
-from counting_reference import poisson_upper_tail
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # the sibling script, also under python3 -I
+from counting_reference import poisson_upper_tail  # noqa: E402
 
 MAX_POISSON_INPUT = 500
 

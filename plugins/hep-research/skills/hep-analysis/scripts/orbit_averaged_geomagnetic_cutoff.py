@@ -31,8 +31,11 @@ Run: python3 <plugin root>/skills/hep-analysis/scripts/orbit_averaged_geomagneti
 import argparse
 import json
 import math
+import sys
+from pathlib import Path
 
-from geomagnetic_cutoff import DEFAULT_DIPOLE_MOMENT_G_CM3, stormer_cutoff_gv
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # the sibling script, also under python3 -I
+from geomagnetic_cutoff import DEFAULT_DIPOLE_MOMENT_G_CM3, stormer_cutoff_gv  # noqa: E402
 
 
 def _finite(value, name, positive=False):

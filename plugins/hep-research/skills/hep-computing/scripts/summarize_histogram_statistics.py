@@ -65,4 +65,9 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    import sys as _sys
+    try:
+        main()
+    except OSError as _exc:  # a missing or unreadable input: one line, no traceback
+        print(f"summarize_histogram_statistics.py: error: {_exc}", file=_sys.stderr)
+        raise SystemExit(2)

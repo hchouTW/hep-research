@@ -212,7 +212,7 @@ def main(argv=None) -> int:
     opts = ap.parse_args(argv)
     try:
         doc, cov = build(opts)
-    except (ValueError, KeyError, IndexError) as exc:
+    except (OSError, ValueError, KeyError, IndexError) as exc:  # a missing input file too
         print(json.dumps({"status": "failed", "reason": f"{type(exc).__name__}: {exc}"}))
         return 1
     rep = validate_artifact(doc)

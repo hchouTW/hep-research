@@ -155,4 +155,9 @@ def main(argv: list[str]) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1:]))
+    import sys as _sys
+    try:
+        raise SystemExit(main(sys.argv[1:]))
+    except OSError as _exc:  # a missing or unreadable input: one line, no traceback
+        print(f"check_diagram_sources.py: error: {_exc}", file=_sys.stderr)
+        raise SystemExit(2)
