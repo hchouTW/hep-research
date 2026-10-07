@@ -6,7 +6,6 @@ import contextlib
 import io
 import json
 import math
-import os
 import sys
 import unittest
 from pathlib import Path
@@ -15,7 +14,6 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from core.stats import poisson_diagnostics as pd  # noqa: E402
 
-SLOW = os.environ.get("HEP_SLOW_TESTS") == "1"
 
 
 class ExactValueTests(unittest.TestCase):
@@ -173,8 +171,9 @@ class UpperTailTests(unittest.TestCase):
 
 class FeldmanCousinsTests(unittest.TestCase):
     """Reference values: Feldman and Cousins (1998), Table IV (90% CL, b = 0 to 5) and Table VI (95% CL, b = 0 to 5),
-    transcribed into fixtures/fc1998_tables.json. The published upper ends are forced non-increasing in b (Sec. IV.B);
-    the plain construction at a single b dips below them, for example 1.08 instead of 1.26 at n0 = 0, b = 2, 90% CL."""
+    transcribed into fixtures/fc1998_tables.json (the full grid is in test_published_tables.py). The published upper
+    ends are forced non-increasing in b (Sec. IV.B); the plain construction at a single b dips below them, for
+    example 1.08 instead of 1.26 at n0 = 0, b = 2, 90% CL."""
 
     def test_published_values(self):
         for n, b, lo, hi in ((0, 0.0, 0.0, 2.44), (1, 0.0, 0.11, 4.36), (3, 0.0, 1.10, 7.42),
@@ -220,18 +219,6 @@ class FeldmanCousinsTests(unittest.TestCase):
                 self.assertLessEqual(uppers[k], uppers[k - 1] + 0.01, msg=(n, 0.4 * k))
             plain = [pd.fc_interval(n, 0.4 * k, 0.90, step=0.01, monotone=False)["upper"] for k in range(0, 13)]
             self.assertTrue(any(plain[k] > plain[k - 1] + 0.05 for k in range(1, len(plain))), msg=n)
-
-    @unittest.skipUnless(SLOW, "slow: set HEP_SLOW_TESTS=1")
-    def test_full_published_tables(self):
-        """Every n0 = 0 to 10, b = 0 to 5 entry of Tables IV and VI within 0.01, lower and upper ends."""
-        tables = json.loads((Path(__file__).parent / "fixtures" / "fc1998_tables.json").read_text())["tables"]
-        for table in tables:
-            for n0 in range(0, 11):
-                for b, (lo, hi, _italic) in zip(table["b"], table["rows"][str(n0)]):
-                    iv = pd.fc_interval(n0, b, table["cl"])
-                    msg = (table["table"], n0, b)
-                    self.assertAlmostEqual(iv["lower"], lo, delta=0.01, msg=msg)
-                    self.assertAlmostEqual(iv["upper"], hi, delta=0.01, msg=msg)
 
     def test_deterministic_and_no_empty_interval_below_background(self):
         a, b = pd.fc_interval(0, 3.0, 0.90), pd.fc_interval(0, 3.0, 0.90)
