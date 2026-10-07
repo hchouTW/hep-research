@@ -11,6 +11,7 @@ EXPECTED = {  # final state -> decision with max_attempts=3, attempts left, reso
     "preempted-or-evicted": "resubmit", "node-failure": "resubmit", "lost": "resubmit",
     "timeout": "needs-resource-change", "out-of-memory": "needs-resource-change",
     "failed": "needs-reset", "held": "needs-reset", "cancelled": "needs-reset", "unknown": "needs-reset",
+    "not-submitted": "needs-reset",
 }
 
 
@@ -19,11 +20,28 @@ def chunk(final, n=1, errors=(), reset=None, rh="h0"):
     return {"attempt_records": recs, "errors": list(errors), "attempts_since_reset": n, "reset_reason": reset}
 
 
+class ChunkStatusTests(unittest.TestCase):
+    def test_chunk_status_reads_outputs_records_and_repeats(self):
+        with tempfile.TemporaryDirectory() as td:
+            cdir = Path(td)
+            (cdir / "chunks").mkdir()
+            state = {"chunks": {}}
+            self.assertEqual(cp.chunk_status(cdir, state, "c0000"), "planned")
+            state["chunks"]["c0000"] = {"attempt_records": [{"attempt_id": "a1", "final_state": None, "state": "running"}]}
+            self.assertEqual(cp.chunk_status(cdir, state, "c0000"), "running")
+            state["chunks"]["c0000"] = chunk("timeout", 2, errors=["TimeoutError: x", "TimeoutError: x"])
+            self.assertEqual(cp.chunk_status(cdir, state, "c0000"), "stopped-repeated-failure")
+            state["chunks"]["c0000"]["reset_reason"] = "raised the time limit"
+            self.assertEqual(cp.chunk_status(cdir, state, "c0000"), "timeout")
+            (cdir / "chunks" / "c0000.json").write_text("{}")
+            self.assertEqual(cp.chunk_status(cdir, state, "c0000"), "done")  # an output wins over any record
+
+
 class DecisionTableTests(unittest.TestCase):
     def test_every_normalized_state_has_a_decision(self):
         for st in states.NORMALIZED_STATES:
             with self.subTest(state=st):
-                if st in ("planned", "queued", "running"):
+                if st in ("planned", "queued", "running", "submitting"):
                     self.assertEqual(states.decide({"attempt_records": [{"attempt_id": "a", "final_state": None, "state": st}]}, 3, "h0")["decision"], "wait")
                 elif st == "done":
                     self.assertNotIn(st, states.RETRY_CLASS)  # a done chunk is never decided on

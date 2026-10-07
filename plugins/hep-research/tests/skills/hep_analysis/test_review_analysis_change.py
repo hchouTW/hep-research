@@ -15,7 +15,7 @@ CONTROL = {"control_sample": "Z->ee control sample (synthetic)", "independent_of
 
 
 def run(*args):
-    return subprocess.run([sys.executable, str(SCRIPT), *args], capture_output=True, text=True)
+    return subprocess.run([sys.executable, str(SCRIPT), *args], capture_output=True, text=True, timeout=600)
 
 
 def run_json(doc):

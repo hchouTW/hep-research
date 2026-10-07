@@ -32,7 +32,11 @@ import sys
 from pathlib import Path
 
 import numpy as np
-import pyhf
+
+try:
+    import pyhf
+except ImportError:  # reported by main(), so --help works without pyhf
+    pyhf = None
 
 
 def reproduce(bkg_doc, patchset_doc, patch):
@@ -102,6 +106,9 @@ def main(argv=None) -> int:
     ap.add_argument("--patch", help="patch name (default: the published file's \"patch\")")
     ap.add_argument("--out", type=Path, required=True)
     opts = ap.parse_args(argv)
+    if pyhf is None:
+        print(json.dumps({"status": "failed", "reason": "pyhf is not installed: pip install 'pyhf>=0.7'"}))
+        return 2
     published = json.loads(opts.published.read_text(encoding="utf-8"))
     try:
         got = reproduce(json.loads(opts.bkgonly.read_text(encoding="utf-8")),
@@ -122,4 +129,9 @@ def main(argv=None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    import sys as _sys
+    try:
+        sys.exit(main())
+    except OSError as _exc:  # a missing or unreadable input: one line, no traceback
+        print(f"reproduce_published_likelihood.py: error: {_exc}", file=_sys.stderr)
+        raise SystemExit(2)

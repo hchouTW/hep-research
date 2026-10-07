@@ -62,9 +62,14 @@ import random
 import statistics
 import sys
 from pathlib import Path
+from typing import Any
 
+from core.stats._linalg import solve
 from core.stats.statistical_toys import ToyError, _num, _seed, _std, _toys, poisson_draw
-from core.stats.unfolding_diagnostics import _solve
+
+
+def _solve(a, b):
+    return solve(a, b, error=ToyError, what="Hessian in the template fit")
 
 LABEL = "[General method]"
 NEG = -1e300
@@ -78,7 +83,7 @@ def _nelder_mead(f, x0, steps, max_iter: int = 600, tol: float = 1e-10, info: di
     converged, it = False, 0
     pts = [list(x0)] + [[x0[j] + (steps[j] if j == i else 0.0) for j in range(n)] for i in range(n)]
     vals = [f(p) for p in pts]
-    for it in range(max_iter):
+    for it in range(max_iter):  # noqa: B007 - read after the loop, for info
         order = sorted(range(n + 1), key=lambda i: vals[i])
         pts, vals = [pts[i] for i in order], [vals[i] for i in order]
         if abs(vals[-1] - vals[0]) < tol * (1.0 + abs(vals[0])):
@@ -223,7 +228,8 @@ def _fit_yields_full(data, m, mc, kind: str, start=None):
     def neg(x):
         y = [max(v, 1e-9) for v in x]
         return -ll_fn(data, m, mc, y)
-    i1, i2 = {}, {}
+    i1: dict[str, Any] = {}
+    i2: dict[str, Any] = {}
     x, val = _nelder_mead(neg, x0, steps, info=i1)
     x, val = _nelder_mead(neg, x, [0.05 * max(v, 1.0) for v in x], info=i2)
     y = [max(v, 1e-9) for v in x]
@@ -335,7 +341,7 @@ def bb_toys(doc: dict, toys: int, seed: int) -> dict:
     k, b = len(names), len(data)
     p = [[m[j][i] / mc[j] for i in range(b)] for j in range(k)]
     rng = random.Random(seed)
-    res = {kind: [{"fits": [], "pulls": [], "cov": []} for _ in range(k)] for kind in ("naive", "barlow_beeston")}
+    res: dict[str, list[dict[str, list[Any]]]] = {kind: [{"fits": [], "pulls": [], "cov": []} for _ in range(k)] for kind in ("naive", "barlow_beeston")}
     skipped = failed = 0
     for _ in range(toys):
         mt = [[poisson_draw(rng, mc[j] * p[j][i]) for i in range(b)] for j in range(k)]
@@ -481,7 +487,7 @@ def _ll_w(data, w, t_tot, c, nuis, x, kind):
     """x = yields then nuisance values; kind 'naive' (templates exact) or 'bb' (finite-MC nuisances).
     The observed MC is the nominal sample w; a shape nuisance adds the deterministic shift
     theta * (up - w) (theta >= 0) or -theta * (down - w) (theta < 0) to the expected weight sum."""
-    k, nth = len(w), len(nuis)
+    k = len(w)
     y, th = x[:k], x[k:]
     if any(v <= 0 for v in y):
         return NEG
@@ -641,7 +647,7 @@ def wbb_toys(doc: dict, toys: int, seed: int) -> dict:
     eff = [[(w[j][i] / c[j][i]) if w[j][i] > 0 else 0.0 for i in range(b)] for j in range(k)]
     p = [[w[j][i] / t_tot[j] for i in range(b)] for j in range(k)]
     rng = random.Random(seed)
-    res = {kind: [{"fits": [], "pulls": []} for _ in range(k)] for kind in ("naive", "barlow_beeston")}
+    res: dict[str, list[dict[str, list[Any]]]] = {kind: [{"fits": [], "pulls": []} for _ in range(k)] for kind in ("naive", "barlow_beeston")}
     skipped = failed = 0
     for _ in range(toys):
         mt = [[c[j][i] * poisson_draw(rng, eff[j][i]) for i in range(b)] for j in range(k)]
@@ -649,8 +655,7 @@ def wbb_toys(doc: dict, toys: int, seed: int) -> dict:
         if any(sum(row) == 0 for row in mt) or sum(dt) == 0:
             skipped += 1
             continue
-        w2 = [[c[j][i] * mt[j][i] for i in range(b)] for j in range(k)]  # sum of squared weights = c * sumw
-        # the toy MC keeps the nominal c, so sumw2 / sumw = c and the total weight T is unchanged
+        # sum of squared weights = c * sumw: the toy MC keeps the nominal c, so sumw2 / sumw = c and T is unchanged
         wt = mt
         yn, _, cn, _, dn = _fit_w_full(dt, wt, t_tot, c, nuis, "naive")
         yb, _, cb, _, db = _fit_w_full(dt, wt, t_tot, c, nuis, "bb", yn)

@@ -23,16 +23,25 @@ Rules (the T21 rules, carried to remote and asynchronous execution):
   configured: no resubmission); timeouts and out-of-memory need changed resources; failed, held, cancelled and
   unknown chunks need reset() with a reason; two identical failure signatures in a row stop the chunk.
 - submit(), resubmit() and cancel() are dry runs unless approved=True.
+- Every call that changes the campaign holds an exclusive lock on <campaign>/.lock; a second process or thread gets
+  CampaignError("campaign.locked") at once instead of racing it for submission IDs or state.
+- submit() records its attempts (state 'submitting', no job ID) in state.json before calling the scheduler and
+  confirms them afterwards. If it is interrupted in between, the submission stays 'unconfirmed': nothing is submitted
+  again until a person checks the scheduler and calls confirm_submission() with the job IDs it lists, or
+  abandon_submission() with a reason.
 Standard library only.
 """
 from __future__ import annotations
 
+import contextlib
 import datetime
+import functools
 import hashlib
 import json
 import math
 import os
 import shutil
+from threading import local as _thread_state  # the packaging scan reads '.local' as a host name
 import time
 from pathlib import Path
 
@@ -54,7 +63,7 @@ class CampaignError(ValueError):
 
 
 def _now() -> str:
-    return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 def resources_hash(config: dict) -> str:
@@ -98,6 +107,64 @@ def _save(cdir: Path, state: dict) -> None:
     engine._write_atomic(cdir / "state.json", state)
 
 
+_HELD = _thread_state()  # campaign directories this thread holds the lock of, with a depth (calls nest)
+
+
+@contextlib.contextmanager
+def campaign_lock(campaign_dir, operation: str):
+    """Exclusive lock on <campaign>/.lock for one operation; nested calls in the same thread reuse it."""
+    cdir = Path(campaign_dir).resolve()
+    held = getattr(_HELD, "dirs", None)
+    if held is None:
+        held = _HELD.dirs = {}
+    if held.get(cdir):
+        held[cdir] += 1
+        try:
+            yield
+        finally:
+            held[cdir] -= 1
+        return
+    cdir.mkdir(parents=True, exist_ok=True)
+    fh = open(cdir / ".lock", "a+", encoding="utf-8")
+    try:
+        try:
+            import fcntl
+            fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except ImportError:  # Windows
+            import msvcrt
+            msvcrt.locking(fh.fileno(), msvcrt.LK_NBLCK, 1)  # type: ignore[attr-defined]  # Windows-only API, absent from non-win32 stubs
+    except OSError:
+        fh.seek(0)
+        holder = fh.read().strip() or "another process"
+        fh.close()
+        raise CampaignError("campaign.locked", f"{cdir} is in use ({holder}); wait for it to finish") from None
+    try:
+        fh.seek(0)
+        fh.truncate()
+        fh.write(f"{operation} by pid {os.getpid()} since {_now()}")
+        fh.flush()
+        held[cdir] = 1
+        yield
+    finally:
+        held.pop(cdir, None)
+        fh.close()  # closing the file releases the lock
+
+
+def _locked(operation: str):
+    def wrap(fn):
+        @functools.wraps(fn)
+        def inner(campaign_dir, *args, **kwargs):
+            with campaign_lock(campaign_dir, operation):
+                return fn(campaign_dir, *args, **kwargs)
+        return inner
+    return wrap
+
+
+def unconfirmed(state: dict) -> list[dict]:
+    """Submissions recorded before the scheduler call and never confirmed (an interrupted submit)."""
+    return [s for s in state["submissions"] if s.get("status") == "intent"]
+
+
 def chunk_status(cdir: Path, state: dict, cid: str) -> str:
     if (cdir / "chunks" / f"{cid}.json").exists():
         return "done"
@@ -114,11 +181,17 @@ def chunk_status(cdir: Path, state: dict, cid: str) -> str:
 
 # ---------------------------------------------------------------- submission
 
+@_locked("submit")
 def submit(campaign_dir, executor, config: dict, chunk_ids=None, approved: bool = False, pilot: bool = False,
            _origin: str = "submit", clock=_now) -> dict:
     """Submit chunks that were never submitted (all of them, the given ones, or with pilot=True the first one)."""
     cdir = Path(campaign_dir)
     manifest, state = load(cdir)
+    pending = unconfirmed(state)
+    if pending:
+        raise CampaignError("submit.unconfirmed", f"submission {pending[0]['id']} was recorded but never confirmed (an "
+                            "interrupted submit): check the scheduler for its jobs, then confirm_submission() with their "
+                            "IDs or abandon_submission() with a reason")
     ids = [c["id"] for c in manifest["chunks"]]
     if chunk_ids is not None:
         unknown = sorted(set(chunk_ids) - set(ids))
@@ -156,18 +229,16 @@ def submit(campaign_dir, executor, config: dict, chunk_ids=None, approved: bool 
         (cdir / "outputs" / cid).mkdir(parents=True, exist_ok=True)
     for name, text in plan["files"].items():
         (sub_dir / name).write_text(text, encoding="utf-8")
-    jobs = executor.submit(plan)
-    job_of = {j["attempt_id"]: j["job_id"] for j in jobs}
     rh = resources_hash(config)
-    for r in rows:
+    for r in rows:  # the intent: on disk before the scheduler sees anything
         row = _row(state, r["chunk_id"])
         prev = row["attempt_records"][-1] if row["attempt_records"] else None
         change = None
         if prev and prev.get("resources_hash") not in (None, rh):  # recorded whenever the request changed
             change = {"after": prev.get("final_state"), "from": prev.get("resources"), "to": config.get("resources")}
         row["attempt_records"].append({
-            "attempt_id": r["attempt_id"], "chunk_id": r["chunk_id"], "backend": executor.name, "job_id": job_of.get(r["attempt_id"]),
-            "submission": sid, "submission_dir": str(sub_dir), "outputs_dir": str(cdir / "outputs" / r["chunk_id"]), "submit_time": clock(), "origin": _origin, "state": "queued",
+            "attempt_id": r["attempt_id"], "chunk_id": r["chunk_id"], "backend": executor.name, "job_id": None,
+            "submission": sid, "submission_dir": str(sub_dir), "outputs_dir": str(cdir / "outputs" / r["chunk_id"]), "submit_time": clock(), "origin": _origin, "state": "submitting",
             "final_state": None, "native_state": None, "exit_code": None, "signal": None, "hold_reason": None, "hold_code": None,
             "host": None, "elapsed_s": None, "max_rss_mb": None, "evidence": None, "restarts_seen": 0,
             "resources": config.get("resources"), "resources_hash": rh, "resource_change": change})
@@ -175,11 +246,65 @@ def submit(campaign_dir, executor, config: dict, chunk_ids=None, approved: bool 
         row["attempts_since_reset"] += 1
         row["reset_reason"] = None
     state["submissions"].append({"id": sid, "backend": executor.name, "command": plan["submit_argv"], "chunks": ids,
-                                 "origin": _origin, "pilot": pilot, "time": clock()})
+                                 "origin": _origin, "pilot": pilot, "time": clock(), "status": "intent"})
     _save(cdir, state)
+    try:
+        jobs = executor.submit(plan)
+    except Exception as exc:  # the scheduler refused: nothing was submitted, and the record says so
+        _settle(cdir, sid, None, f"submit failed: {type(exc).__name__}: {exc}")
+        raise
+    _settle(cdir, sid, {j["attempt_id"]: j["job_id"] for j in jobs})
     return {"dry_run": False, "submission_id": sid, "chunks": ids, "command": plan["submit_argv"], "jobs": jobs}
 
 
+def _settle(cdir: Path, sid: str, job_of: dict | None, reason: str | None = None) -> None:
+    """Confirm a recorded submission with its job IDs, or (job_of None) mark its attempts as never submitted."""
+    _, state = load(cdir)
+    sub = next(x for x in state["submissions"] if x["id"] == sid)
+    for row in state["chunks"].values():
+        for rec in row["attempt_records"]:
+            if rec.get("submission") == sid and rec.get("state") == "submitting":
+                if job_of is None:
+                    rec.update(state="not-submitted", final_state="not-submitted", note=reason)
+                else:
+                    rec.update(state="queued", job_id=job_of.get(rec["attempt_id"]))
+    sub["status"] = "submitted" if job_of is not None else "not-submitted"
+    if reason:
+        sub["reason"] = reason
+    _save(cdir, state)
+
+
+@_locked("confirm")
+def confirm_submission(campaign_dir, submission_id: str, job_ids: dict) -> dict:
+    """After an interrupted submit: the person found the jobs at the scheduler; record {attempt_id: job_id}."""
+    cdir = Path(campaign_dir)
+    _, state = load(cdir)
+    sub = next((x for x in unconfirmed(state) if x["id"] == submission_id), None)
+    if sub is None:
+        raise CampaignError("confirm.not_unconfirmed", f"{submission_id} is not an unconfirmed submission")
+    attempts = {rec["attempt_id"] for row in state["chunks"].values() for rec in row["attempt_records"]
+                if rec.get("submission") == submission_id}
+    if set(job_ids) != attempts:
+        raise CampaignError("confirm.attempts_mismatch", f"give a job ID for exactly these attempts: {sorted(attempts)}")
+    _settle(cdir, submission_id, dict(job_ids), "confirmed by a person after an interrupted submit")
+    return {"confirmed": submission_id, "jobs": dict(job_ids)}
+
+
+@_locked("abandon")
+def abandon_submission(campaign_dir, submission_id: str, reason: str) -> dict:
+    """After an interrupted submit: the person found no jobs at the scheduler. The attempts become 'not-submitted'
+    (their chunks need a reset to run again); an output that still appears for them is collected as usual."""
+    if not reason or not reason.strip():
+        raise CampaignError("abandon.reason_missing", "abandoning a submission needs a reason")
+    cdir = Path(campaign_dir)
+    _, state = load(cdir)
+    if not any(x["id"] == submission_id for x in unconfirmed(state)):
+        raise CampaignError("abandon.not_unconfirmed", f"{submission_id} is not an unconfirmed submission")
+    _settle(cdir, submission_id, None, f"abandoned: {reason}")
+    return {"abandoned": submission_id, "reason": reason}
+
+
+@_locked("resubmit")
 def resubmit(campaign_dir, executor, config: dict, approved: bool = False, clock=_now) -> dict:
     """Resubmit the chunks whose decision is 'resubmit'; report every other not-done chunk with its decision."""
     cdir = Path(campaign_dir)
@@ -200,6 +325,7 @@ def resubmit(campaign_dir, executor, config: dict, approved: bool = False, clock
     return rep
 
 
+@_locked("reset")
 def reset(campaign_dir, chunk_ids, reason: str) -> dict:
     """After a person fixed the cause: allow the chunk to be resubmitted, with the reason recorded in 'resets'."""
     if not reason or not reason.strip():
@@ -218,6 +344,7 @@ def reset(campaign_dir, chunk_ids, reason: str) -> dict:
     return {"reset": list(chunk_ids), "reason": reason}
 
 
+@_locked("cancel")
 def cancel(campaign_dir, executor, chunk_ids=None, approved: bool = False) -> dict:
     cdir = Path(campaign_dir)
     _, state = load(cdir)
@@ -263,6 +390,7 @@ def _check(doc, manifest: dict, cid: str, attempt: str, known_attempts: set) -> 
     return None
 
 
+@_locked("collect")
 def collect(campaign_dir) -> dict:
     cdir = Path(campaign_dir)
     manifest, state = load(cdir)
@@ -318,8 +446,8 @@ def _apply(row: dict, rec: dict, obs: dict) -> None:
         if obs.get(k) is not None or k in ("hold_reason", "hold_code"):
             rec[k] = obs.get(k)
     new_restarts = int(obs.get("restarts") or 0) - rec.get("restarts_seen", 0)
-    for k in range(new_restarts):  # scheduler-side restarts (eviction, requeue) count as attempts
-        n = rec.get("restarts_seen", 0) + k + 1
+    for j in range(new_restarts):  # scheduler-side restarts (eviction, requeue) count as attempts
+        n = rec.get("restarts_seen", 0) + j + 1
         restart = {"attempt_id": f"{rec['attempt_id']}.restart-{n}", "chunk_id": rec["chunk_id"], "backend": rec["backend"],
                    "job_id": rec["job_id"], "submission": rec["submission"], "origin": "scheduler-restart",
                    "final_state": "preempted-or-evicted", "native_state": "restarted by the scheduler", "exit_code": None,
@@ -335,12 +463,13 @@ def _apply(row: dict, rec: dict, obs: dict) -> None:
         rec.update(state=state, final_state=state)
 
 
+@_locked("poll")
 def poll(campaign_dir, executor) -> dict:
     """One observation round: exactly one executor poll, then collection, then a decision per chunk."""
     cdir = Path(campaign_dir)
     manifest, state = load(cdir)
     active = [r for row in state["chunks"].values() for r in row.get("attempt_records", [])
-              if r.get("final_state") in POLL_AGAIN and r.get("origin") != "scheduler-restart"]
+              if r.get("final_state") in POLL_AGAIN and r.get("origin") != "scheduler-restart" and r.get("state") != "submitting"]
     state["polls"] += 1
     _save(cdir, state)
     obs = executor.poll(active) if active else {}
@@ -392,6 +521,7 @@ def merge(campaign_dir, combine=None) -> dict:
 
 # ---------------------------------------------------------------- monitoring loop
 
+@_locked("watch")
 def watch(campaign_dir, executor, config: dict, sleep=time.sleep, clock=time.monotonic) -> dict:
     """Observe -> decide -> collect, repeated within the configured limits. It never resubmits, releases or cancels.
 

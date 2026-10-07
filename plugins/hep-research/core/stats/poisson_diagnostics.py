@@ -51,6 +51,7 @@ import sys
 from statistics import NormalDist
 
 from core.stats import _poisson
+from core.stats._linalg import bisect
 from core.stats._poisson import MAX_MEAN  # one limit for core/stats; the numerics below stay accurate up to it
 
 LABEL = "[General method]"
@@ -106,9 +107,14 @@ def poisson_sf(n: int, mu: float) -> float:
 
 
 def z_from_log_p(log_p: float) -> float | None:
-    """One-sided significance Z with P(Normal > Z) = exp(log_p), without forming 1 - p; None when p = 1."""
-    if log_p >= 0.0:
+    """One-sided significance Z with P(Normal > Z) = exp(log_p), without forming 1 - p; None when p = 1, infinite
+    when p = 0 (log_p = -inf)."""
+    if isinstance(log_p, bool) or not isinstance(log_p, (int, float)) or math.isnan(log_p) or log_p > 0.0:
+        raise DiagnosticsError(f"log_p must be a number <= 0, got {log_p!r}")
+    if log_p == 0.0:
         return None
+    if log_p == -math.inf:
+        return math.inf
     if log_p > -700.0:
         return -NormalDist().inv_cdf(math.exp(log_p))
     z = math.sqrt(-2.0 * log_p)
@@ -124,16 +130,7 @@ def z_from_log_p(log_p: float) -> float | None:
 
 def _solve(f, lo: float, hi: float, what: str = "the root") -> float:
     """Root of a decreasing f on [lo, hi] by bisection; SolveFailed when [lo, hi] does not bracket it."""
-    if not f(lo) > 0 or f(hi) > 0:
-        raise SolveFailed(f"{what} is not bracketed in [{lo:g}, {hi:g}] (means are limited to {MAX_MEAN:g}): "
-                          "no value is reported")
-    for _ in range(200):
-        mid = 0.5 * (lo + hi)
-        if f(mid) > 0:
-            lo = mid
-        else:
-            hi = mid
-    return 0.5 * (lo + hi)
+    return bisect(f, lo, hi, 200, increasing=False, error=SolveFailed, what=f"{what} (means are limited to {MAX_MEAN:g})")
 
 
 def _search_top(n: int, floor: float = 0.0) -> float:
@@ -250,7 +247,7 @@ def _fc_upper_monotone(n: int, b: float, cl: float, step: float) -> tuple[float,
     if best is None:
         raise DiagnosticsError("no signal value in the scan range accepts this n; check inputs")
     arg, width = b, FC_MONOTONE_COARSE
-    coarse = [(b, best)]
+    coarse: list[tuple[float, float | None]] = [(b, best)]
     for j in range(1, int(round(FC_MONOTONE_WINDOW / width)) + 1):
         coarse.append((b + j * width, _fc_upper_plain(n, b + j * width, cl, step)))
         if coarse[-1][1] is not None and coarse[-1][1] > best:
@@ -265,6 +262,7 @@ def _fc_upper_monotone(n: int, b: float, cl: float, step: float) -> tuple[float,
             top, at = u, bi
             if u is not None and prev is not None and u > prev:  # a jump inside this fine cell: bisect to its edge
                 left, right = bi - width / fine, bi
+                assert top is not None  # top is u here
                 for _ in range(12):
                     mid = 0.5 * (left + right)
                     um = _fc_upper_plain(n, mid, cl, step)
@@ -411,7 +409,7 @@ def cls_limit(n: int, b: float, cl: float = 0.95, sigma_b: float = 0.0, nodes: i
     weights = [_marg_pmf(m, 0.0, bk) for m in range(n_cap + 1)]
     cum, expected, targets = 0.0, {}, [("-2sigma", 0.025), ("-1sigma", 0.16), ("median", 0.5),
                                        ("+1sigma", 0.84), ("+2sigma", 0.975)]
-    cache = {}
+    cache: dict[int, float] = {}
     for m, w in enumerate(weights):
         cum += w
         for name, q in targets:

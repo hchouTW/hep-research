@@ -100,7 +100,7 @@ def _record_label(rec, kind: str, idx: int) -> str:
     return rid if isinstance(rid, str) and rid else f"{kind}[{idx}]"
 
 
-def _typed(rec: dict, types: dict, prefix: str, where: str, f: "Findings") -> dict:
+def _typed(rec: dict, types: dict, prefix: str, where: str, f: Findings) -> dict:
     """A copy of rec without the fields whose JSON type is wrong; each one is reported with its field path."""
     clean = dict(rec)
     for key, kind in types.items():

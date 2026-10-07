@@ -26,6 +26,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from typing import Any
 
 BLOCK = re.compile(r"(<!-- BEGIN GENERATED: (?P<name>[\w-]+)[^>]*-->\n)(?P<body>.*?)(<!-- END GENERATED: (?P=name) -->)", re.S)
 
@@ -42,7 +43,7 @@ def _level(source: dict) -> str:
 def _compress(ids: list[str]) -> str:
     """Join IDs; runs of four or more consecutive ascending IDs collapse to 'S30-S37'."""
     parsed = [re.fullmatch(r"((?:[a-z][a-z0-9-]*:)?S)(\d+)", i) for i in ids]
-    nums = [(m.group(1), int(m.group(2))) if m else None for m in parsed]
+    nums: list[Any] = [(m.group(1), int(m.group(2))) if m else None for m in parsed]
     parts, i = [], 0
     while i < len(ids):
         j = i

@@ -57,6 +57,90 @@ Software checks establish contract consistency only, not physical validity.
   `pcolormesh` meshes and `imshow` images, and, given the sealed numbers (`check_figure(fig, region, sealed)`), text
   artists, titles and figure texts; a "blinded" label inside the region is not a leak. What it still cannot see
   (tick labels, legends, colorbars, values carried only by colors, transformed values) is stated in the module.
+- **Dependencies, lint and type checks (T18).** A `pyproject.toml` declares the Python dependencies as extras (`core`,
+  `pyhf`, `root-uproot`, `torch`, `diagrams`, `test`, `lint`; the plugin itself is not an installable package) and
+  configures ruff and mypy for `core/` and `contracts/`, which both pass. `requirements-ci.lock` pins the `core` and
+  `test` extras at the newest versions that still install on Python 3.11 (`requirements-ci-constraints.txt` says
+  why), checked to install on 3.11, 3.12 and 3.13. `.pre-commit-config.yaml` runs the path allowlist and ruff on
+  commit and the fast test tier on push; the repository's git hooks call it when `pre-commit` is installed.
+  `docs/maintenance.md` records the plan to trim `detector-response` and `hep-statistics` (8,185 and 8,138 of 8,192
+  bytes) by at least 10%.
+- **Continuous integration for the tests (T13).** A new workflow `tests.yml` runs the unit tests, profile suites and
+  static checks on Python 3.11, 3.12 and 3.13 with the pinned set, and ruff and mypy, on every push and pull request.
+  Optional jobs repeat the unit tests with pyhf, uproot and awkward, PyTorch (CPU) or ROOT (container) installed and
+  do not block a merge yet; a weekly run uses the latest releases and the slow tier. Actions are pinned to commit SHAs.
+- **Faster covariance and response validation (T17).** The validators' eigenvalue step used pure-Python Jacobi
+  rotations, cubic in the matrix size (1.6 s at n = 120 here, 6.9 s in the review's container). They now use
+  `numpy.linalg.eigh` when NumPy is installed (0.011 s at n = 120) and keep the rotations otherwise, so the checks stay
+  standard-library only; `HEP_STATS_PURE_PYTHON=1` forces the rotations, and the report records `eigen_solver`. The
+  two solvers agree to 1e-12 relative; a slow-tier benchmark (`tests/core/test_benchmarks.py`) holds the time budgets.
+- **One owner for each numerical helper (T16).** Two Jacobi eigensolvers, the Gauss-Jordan solve, the Cholesky solve,
+  bisection, the golden-section minimizers and the matrix products now live once in `core/stats/_linalg.py`; the
+  number, seed and toy-count checks in a new `core/stats/_validate.py` (each takes the caller's error class); the
+  chunked Poisson sampler joins the others in `_poisson.py`. The modules keep thin aliases, numbers are unchanged
+  (the examples reproduce bit for bit), and the helpers now say when they did not do their job: the eigensolver
+  reports non-convergence (a warning in the covariance and response validators, an error in TSVD unfolding), a
+  bisection whose interval does not bracket the limit is refused instead of returning the interval's end, and a
+  singular matrix in a profile fit raises `LikelihoodError` (it raised the unfolding module's `ToyError`, which the
+  `likelihood_limits.py` command line did not catch).
+- **Batch campaigns survive interruptions and concurrent commands (sci-fix, T15).** `campaign.submit` called the
+  scheduler before saving its attempts, so a kill in between left jobs running that the campaign did not know about,
+  and a second submit could send them again; submission IDs came from a count with no lock. Now every command that
+  changes a campaign holds a lock on `<campaign_dir>/.lock` (a second one is refused with `campaign.locked`), and
+  `submit` saves its attempts as `submitting` before the scheduler call and confirms them after. An interrupted
+  submission blocks further submits until a person runs `batch_campaign.py confirm` with the job IDs the scheduler
+  lists or `abandon` with a reason; a refused submission is recorded as `not-submitted`. The default merge no longer
+  concatenates string results (it reports `merge.combine_failed`; pass a combine function), and `engine.merge`
+  refuses non-finite chunk results and a non-finite merged value (`merge.non_finite`).
+- **The test suite is bounded and tiered (T14).** Every subprocess call in the tests and tools has a timeout
+  (`tests/tools/test_subprocess_timeouts.py` keeps it so). `check_diagram_sources.py` fails a block whose
+  renderer does not finish within `HEP_RENDER_TIMEOUT` (default 60 s) and stops calling Mermaid's `mmdc` after one
+  timeout, so a host where Chromium cannot start no longer hangs the suite. `run_all_checks.py` runs each test
+  module in its own process with a time limit (`--module-timeout`, default 600 s; `--jobs` for parallel modules) and
+  records every module's duration and the modules over 60 s. The full theory-comparison example test (70 to 350 s)
+  moved to the slow tier (`HEP_SLOW_TESTS=1`).
+- **Every script behaves as a command-line tool (T12).** `tests/skills/test_cli_robustness.py` runs all 64 scripts
+  under `skills/*/scripts/` and `adapters/*/assets/` with `python3 -I`: `--help` must exit 0 without a traceback, and
+  a missing input file must give a short error (or a JSON error report) with a non-zero exit. A table names each
+  script's input arguments or why it reads none, so a new script must be added. Fixed: tracebacks on a missing file
+  in 15 scripts (`eft_truncation.py`, `event_weights.py`, `pdf_uncertainty.py`, `check_example_diversity.py`,
+  `check_diagram_sources.py`, the four ROOT-file helpers, `check_systematic_variations.py`, `inspect_checkpoint.py`,
+  `unbinned_fit.py`, `uproot_awkward_analysis.py`, `reproduce_published_likelihood.py`, `hepdata_record.py`); sibling
+  imports that failed under `-I` in `cosmic_ray_flux.py` and `orbit_averaged_geomagnetic_cutoff.py`; and module-level
+  imports of pyhf (`reproduce_published_likelihood.py`) and uproot/awkward/PyYAML (`uproot_awkward_analysis.py`)
+  that broke `--help`; they now name the package to install when the script runs.
+- **Tests for public functions no test reached (T11).** Direct tests for `scan_file`, `load_project_blinding`,
+  `clip_demo`, `campaign.chunk_status`, `load_ledger`, `render_tables`, the contract helpers (`check_conventions`,
+  `check_finite`, `check_binned`, `check_observable`, `load_schema`, `side_from_artifact`, `find_cycles`,
+  `check_profile_dir`, `declared_namespaces`, `namespace_of`) and round trips of every kinematic conversion. New CLI
+  tests for `check_surrogate_domain.py`, which printed a traceback for a non-list `features` field and now reports
+  it as a JSON error with exit 2. `counting_reference.py` has its own test file (its flat-prior bound at b = 0 checked
+  against PDG Table 40.3, its tail against `core/stats`); the `audit_histograms.py` tests moved to hep-computing;
+  `examples/published-comparison/make_record.py` is checked to reproduce its committed record.
+- **Edge cases in every public `core/stats` entry point (T10).** `tests/core/test_stats_edge_cases.py` feeds NaN,
+  +inf and -inf to each numeric argument of 20 scalar entry points and to numeric leaves of 9 document entry points,
+  plus empty lists and empty documents; each must raise its module's named error (the two validators must fail
+  instead), from a baseline that is checked to be valid. It also covers p-values far below 1e-10, the mean limit and
+  zero or low counts in blinded bins. Defects it found, now fixed: `chi2_sf` returned 1.0 for a NaN or infinite
+  chi2 or ndf (an infinite chi2 now gives 0, the rest raise); a bin count of inf or NaN in `multibin-limit` and
+  `shape-limit` raised `OverflowError` or a bare `ValueError`; `z_from_log_p(nan)` returned NaN.
+- **Schema mutation fuzzing and a keyword meta-test (T09).** `tests/contracts/test_robustness.py` mutates every node
+  of every valid artifact fixture, a full gate plan and a ledger record four ways (null, type swap, list wrap,
+  deletion) in the fast tier, and runs 10,000 seeded random multi-mutations through the validator, the gate and the
+  ledger in the slow tier; none raises. `tests/contracts/test_schema_keywords.py` checks that every keyword in
+  `contracts/schemas/` is one `contracts/schema.py` implements (`SUPPORTED_KEYWORDS`) or reads as an annotation, so a
+  schema cannot promise a check (for example `oneOf` or `maxItems`) that never runs, and that every `$ref` resolves.
+- **Property-based tests (T08).** `tests/core/test_properties.py` (with `hypothesis`, a test-only dependency in the
+  new `requirements-test.txt`; skipped without it) checks that upper limits are non-decreasing in n and
+  non-increasing in b, that intervals are nested in the confidence level, that covariance tools give the same
+  verdict at 1e-12 and 1e12 scale, that a GLS fit does not depend on input order, that a partitioned merge does not
+  depend on chunking or finish order, and that validators never raise on arbitrary JSON. That last property found
+  that `validate_covariance` and `validate_response` raised on a document that was not an object, a non-list
+  `labels` or `closure`, and non-numeric `tolerances`; they now report `document.malformed`,
+  `tolerances.malformed` and the existing shape codes.
+- **Published-table tests (T07).** `tests/core/test_published_tables.py` checks Feldman-Cousins Tables IV and VI,
+  PDG 2024 Tables 40.3 (one-sided Poisson limits, the Garwood ends) and 40.4 (unified intervals), each transcribed by
+  script with its source, and Li & Ma eq. 17 against an independent transcription (the paper prints no table).
 
 ## 0.3.0 (2026-10-07): first public release
 

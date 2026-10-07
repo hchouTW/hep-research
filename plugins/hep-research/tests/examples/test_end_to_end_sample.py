@@ -32,7 +32,7 @@ class EndToEndTests(unittest.TestCase):
         cls.out = Path(cls._tmp.name)
         cls.proc = subprocess.run([PYTHON, str(ROOT_DIR / 'examples/end-to-end-sample/run.py'),
                                    '--outdir', str(cls.out), '--seed', '1'],
-                                  capture_output=True, text=True)
+                                  capture_output=True, text=True, timeout=1200)
 
     @classmethod
     def tearDownClass(cls):

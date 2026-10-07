@@ -1,0 +1,30 @@
+{
+ "source": "Particle Data Group, Review of Particle Physics 2024, review 40 'Statistics', Tables 40.3 and 40.4; transcribed by script from https://pdg.lbl.gov/2024/reviews/rpp2024-rev-statistics.pdf",
+ "note": "values are strings exactly as printed, so the printed precision sets the test tolerance; null is a dash (no lower limit for n = 0)",
+ "table_40_3": {"title": "one-sided lower and upper limits for a Poisson mean, no background", "columns": ["n", "lo_90", "up_90", "lo_95", "up_95"], "rows": [
+  [0, null, "2.30", null, "3.00"],
+  [1, "0.105", "3.89", "0.051", "4.74"],
+  [2, "0.532", "5.32", "0.355", "6.30"],
+  [3, "1.10", "6.68", "0.818", "7.75"],
+  [4, "1.74", "7.99", "1.37", "9.15"],
+  [5, "2.43", "9.27", "1.97", "10.51"],
+  [6, "3.15", "10.53", "2.61", "11.84"],
+  [7, "3.89", "11.77", "3.29", "13.15"],
+  [8, "4.66", "12.99", "3.98", "14.43"],
+  [9, "5.43", "14.21", "4.70", "15.71"],
+  [10, "6.22", "15.41", "5.43", "16.96"]
+ ]},
+ "table_40_4": {"title": "unified (Feldman-Cousins) intervals for a Poisson mean, no background", "columns": ["n", "mu1_90", "mu2_90", "mu1_95", "mu2_95"], "rows": [
+  [0, "0.00", "2.44", "0.00", "3.09"],
+  [1, "0.11", "4.36", "0.05", "5.14"],
+  [2, "0.53", "5.91", "0.36", "6.72"],
+  [3, "1.10", "7.42", "0.82", "8.25"],
+  [4, "1.47", "8.60", "1.37", "9.76"],
+  [5, "1.84", "9.99", "1.84", "11.26"],
+  [6, "2.21", "11.47", "2.21", "12.75"],
+  [7, "3.56", "12.53", "2.58", "13.81"],
+  [8, "3.96", "13.99", "2.94", "15.29"],
+  [9, "4.36", "15.30", "4.36", "16.77"],
+  [10, "5.50", "16.50", "4.75", "17.82"]
+ ]}
+}

@@ -38,7 +38,7 @@ def single_run(manifest, cmd_root: Path):
 
 def run_runner(cdir: Path, cid: str, aid: str) -> int:
     return subprocess.run([sys.executable, str(cdir / "runner.py"), "--spec", str(cdir / "spec.json"), "--out-dir",
-                           str(cdir / "outputs" / cid), "--chunk", cid, "--attempt", aid], capture_output=True).returncode
+                           str(cdir / "outputs" / cid), "--chunk", cid, "--attempt", aid], capture_output=True, timeout=600).returncode
 
 
 class ScriptedExecutor(Executor):

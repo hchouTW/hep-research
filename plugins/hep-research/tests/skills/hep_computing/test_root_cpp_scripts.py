@@ -11,7 +11,7 @@ SCRIPTS = Path(__file__).resolve().parents[3] / 'skills' / 'hep-computing' / 'sc
 @unittest.skipUnless(shutil.which('bash'), 'bash not available')
 class RootCppScriptArgsTests(unittest.TestCase):
     def run_in(self, cwd, script, *args):
-        return subprocess.run(['bash', str(SCRIPTS / script), *args], cwd=cwd, capture_output=True, text=True)
+        return subprocess.run(['bash', str(SCRIPTS / script), *args], cwd=cwd, capture_output=True, text=True, timeout=600)
 
     def test_new_project_help_prints_usage_and_creates_nothing(self):
         for flag in ('-h', '--help'):

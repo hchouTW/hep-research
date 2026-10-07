@@ -17,11 +17,14 @@ What it does: extracts fenced ```dot, ```mermaid, ```plantuml, and ```svg blocks
 LaTeX/TikZ blocks are never compiled here.
 
 Usage: `python3 <plugin root>/skills/research-communication/scripts/check_diagram_sources.py [path ...]` (default: the whole bundle).
+A renderer that does not finish within HEP_RENDER_TIMEOUT seconds (default 60) fails that block; Mermaid's
+`mmdc` starts Chromium, which can hang where Chromium cannot start.
 Exit status 1 if any checked block fails. Standard library only.
 """
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import shutil
 import subprocess
@@ -73,11 +76,27 @@ def lint_mermaid(source: str) -> list[str]:
     return problems
 
 
+RENDER_TIMEOUT = float(os.environ.get("HEP_RENDER_TIMEOUT", "60"))  # seconds per diagram and renderer
+
+
+class RenderTimeout(Exception):
+    """A renderer did not finish within RENDER_TIMEOUT; the diagram counts as failed, never as checked."""
+
+
+def _run(cmd: list[str], **kwargs) -> subprocess.CompletedProcess:
+    try:
+        return subprocess.run(cmd, text=True, capture_output=True, timeout=RENDER_TIMEOUT, **kwargs)
+    except subprocess.TimeoutExpired as exc:
+        hint = " (mmdc starts Chromium: check that it can run here)" if "mmdc" in Path(cmd[0]).name else ""
+        raise RenderTimeout(f"{Path(cmd[0]).name} did not finish within {RENDER_TIMEOUT:g} s{hint}") from exc
+
+
 def check_dot(source: str) -> str | None:
     """Return an error string if `dot` rejects the source, else None."""
-    result = subprocess.run(
-        ["dot", "-Tsvg", "-o", "/dev/null"], input=source, text=True, capture_output=True
-    )
+    try:
+        result = _run(["dot", "-Tsvg", "-o", "/dev/null"], input=source)
+    except RenderTimeout as exc:
+        return str(exc)
     return result.stderr.strip() or "dot failed" if result.returncode else None
 
 
@@ -86,9 +105,10 @@ def check_mermaid(source: str, mmdc: str = "mmdc") -> str | None:
     with tempfile.TemporaryDirectory() as tmp:
         src, out = Path(tmp) / "in.mmd", Path(tmp) / "out.svg"
         src.write_text(source, encoding="utf-8")
-        result = subprocess.run(
-            [mmdc, "-q", "-i", str(src), "-o", str(out)], text=True, capture_output=True
-        )
+        try:
+            result = _run([mmdc, "-q", "-i", str(src), "-o", str(out)])
+        except RenderTimeout as exc:
+            return str(exc)
         if result.returncode or not out.exists():
             return (result.stderr.strip() or result.stdout.strip() or "mmdc failed")[:500]
     return None
@@ -98,9 +118,10 @@ def check_plantuml(source: str, plantuml: str = "plantuml") -> str | None:
     """Return an error string if PlantUML cannot render the source, else None."""
     if "@startuml" not in source:
         source = f"@startuml\n{source}@enduml\n"
-    result = subprocess.run(
-        [plantuml, "-tsvg", "-pipe"], input=source, text=True, capture_output=True
-    )
+    try:
+        result = _run([plantuml, "-tsvg", "-pipe"], input=source)
+    except RenderTimeout as exc:
+        return str(exc)
     if result.returncode:
         return (result.stderr.strip() or "plantuml failed").replace("\n", " ")[:500]
     return None
@@ -147,6 +168,9 @@ def main(argv: list[str]) -> int:
                 if mmdc and not problems:
                     error = check_mermaid(source, mmdc)
                     problems = [error] if error else []
+                    if error and "did not finish within" in error:  # one timeout is enough: stop calling it
+                        print("note: Mermaid CLI timed out; remaining Mermaid blocks get the structural lint only")
+                        mmdc = None
             for problem in problems:
                 failures += 1
                 print(f"{path}: {lang}: {problem}")
@@ -155,4 +179,9 @@ def main(argv: list[str]) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1:]))
+    import sys as _sys
+    try:
+        raise SystemExit(main(sys.argv[1:]))
+    except OSError as _exc:  # a missing or unreadable input: one line, no traceback
+        print(f"check_diagram_sources.py: error: {_exc}", file=_sys.stderr)
+        raise SystemExit(2)

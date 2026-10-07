@@ -37,7 +37,7 @@ Normalization meanings (sums are over reco bins, plus explicit under/overflow, p
 
 Usage: python3 core/stats/validate_response.py FILE.json [--strict]
 Exit codes: 0 pass (or warn without --strict); 1 errors; 2 unreadable or not JSON.
-Standard library only.
+Standard library only; NumPy, when installed, computes the eigenvalues (HEP_STATS_PURE_PYTHON=1 to avoid it).
 """
 from __future__ import annotations
 
@@ -52,8 +52,10 @@ import json
 import math
 import sys
 from pathlib import Path
+from typing import Any
 
-from core.stats.validate_covariance import Report, jacobi_eigh
+from core.stats import _linalg
+from core.stats.validate_covariance import Report
 
 DEFAULT_TOL = {"normalization": 1e-6, "rank": 1e-12, "condition_warn": 1e4,
                "min_efficiency": 1e-3, "pull_warn": 3.0}
@@ -138,7 +140,11 @@ def _bookkeeping(meta: dict, report: Report) -> None:
 def _rank_and_condition(m: list[list[float]], tol: dict, report: Report, n_reco: int, n_truth: int) -> dict:
     """Identifiability from the singular values of the reco-by-truth matrix m[i][j] (via M^T M)."""
     gram = [[sum(m[k][i] * m[k][j] for k in range(n_reco)) for j in range(n_truth)] for i in range(n_truth)]
-    values, _ = jacobi_eigh(gram)
+    solver: dict = {}
+    values, _ = _linalg.eigh(gram, info=solver)
+    if not solver["converged"]:
+        report.warn("identifiability.eigen_not_converged", f"the eigenvalue rotations did not converge in {solver['sweeps']} "
+                    "sweeps; the rank and condition number are approximate")
     lmax = max(values[-1], 0.0)
     metrics: dict = {}
     if lmax <= 0:
@@ -163,9 +169,10 @@ def _closure(doc: dict, m: list[list[float]], n_reco: int, n_truth: int, norm: s
     c = doc.get("closure")
     if c is None:
         return None
-    truth, reco, sig = c.get("truth"), c.get("reco"), c.get("reco_sigma")
+    truth, reco, sig = (c.get("truth"), c.get("reco"), c.get("reco_sigma")) if isinstance(c, dict) else (None, None, None)
     if (not isinstance(truth, list) or len(truth) != n_truth or not isinstance(reco, list) or len(reco) != n_reco
-            or not all(_num(x) for x in truth + reco) or (sig is not None and (len(sig) != n_reco or not all(_num(x) and x > 0 for x in sig)))):
+            or not all(_num(x) for x in truth + reco)
+            or (sig is not None and (not isinstance(sig, list) or len(sig) != n_reco or not all(_num(x) and x > 0 for x in sig)))):
         report.error("closure.malformed", f"closure needs truth ({n_truth}), reco ({n_reco}) and optionally positive reco_sigma ({n_reco}) numbers")
         return None
     pred = [sum(m[i][j] * truth[j] for j in range(n_truth)) for i in range(n_reco)]
@@ -179,8 +186,8 @@ def _closure(doc: dict, m: list[list[float]], n_reco: int, n_truth: int, norm: s
     interp = {"conditional_on_selected": "truth = selected-event truth (efficiency and acceptance already applied by the caller)",
               "includes_efficiency": "truth = generated events in the fiducial phase space",
               "counts": "truth = generated event counts matching the matrix counts"}[norm]
-    out = {"truth_interpretation": interp, "predicted_reco": pred, "residuals": [r - p for r, p in zip(reco, pred)],
-           "sigma_source": "supplied reco_sigma" if sig else "Poisson sqrt(predicted)", "skipped_bins_zero_sigma": skipped}
+    out: dict[str, Any] = {"truth_interpretation": interp, "predicted_reco": pred, "residuals": [r - p for r, p in zip(reco, pred)],
+                           "sigma_source": "supplied reco_sigma" if sig else "Poisson sqrt(predicted)", "skipped_bins_zero_sigma": skipped}
     if pulls:
         out.update({"chi2": sum(p * p for p in pulls), "ndof": len(pulls), "mean_pull": sum(pulls) / len(pulls),
                     "rms_pull": math.sqrt(sum(p * p for p in pulls) / len(pulls)), "max_abs_pull": max(abs(p) for p in pulls)})
@@ -193,8 +200,17 @@ def validate_response(doc: dict) -> dict:
     """Validate a response document (see module docstring). Returns the report dict."""
     report = Report()
     tol = dict(DEFAULT_TOL)
+    if not isinstance(doc, dict):
+        report.error("document.malformed", f"the document must be a JSON object, got {type(doc).__name__}")
+        return {"status": report.status(), "errors": report.errors, "warnings": report.warnings, "metrics": {}}
     if isinstance(doc.get("tolerances"), dict):
-        tol.update({k: float(v) for k, v in doc["tolerances"].items() if k in tol})
+        for k, v in doc["tolerances"].items():
+            if k not in tol:
+                continue
+            if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) or v < 0:
+                report.error("tolerances.malformed", f"tolerance '{k}' must be a finite non-negative number, got {v!r}")
+            else:
+                tol[k] = float(v)
     report.metrics["tolerances"] = tol
     meta = doc.get("metadata")
     result = {"physical_validity": "not_assessed", "input_modified": False,

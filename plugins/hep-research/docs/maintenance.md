@@ -12,8 +12,30 @@ For a subset of the unit tests name the modules (`python3 -m unittest tests.tool
 use `python3 -m unittest discover -s tests/tools -t .`; naming only the package (`python3 -m unittest tests.tools`)
 runs 0 tests, because the test packages have empty `__init__.py` files.
 
+Tests come in two tiers. The fast tier is the default. `HEP_SLOW_TESTS=1` adds the slow tier (for example the full
+Feldman-Cousins tables, the 10,000-mutation contract fuzz and the full theory-comparison example). `run_all_checks.py`
+runs each test module in its own process with a time limit (`--module-timeout`, default 600 s) and records every
+module's duration; a fast-tier module listed under `slow_modules` (over 60 s) belongs in the slow tier. Every
+subprocess call in the tests and tools has a timeout (`tests/tools/test_subprocess_timeouts.py`).
+
 Software checks show contract consistency only, not physical validity. Report pass, fail, skip and unverified
 separately; a skipped test (missing tool) is unverified, never passing.
+
+## SKILL.md size budget
+
+Every `SKILL.md` must stay at or under 8,192 bytes (`tools/measure_entrypoints.py`, run by `run_all_checks.py`).
+Two are close: `detector-response` (8,185 B) and `hep-statistics` (8,138 B). Plan to cut each by at least 10%
+(to about 7,360 and 7,320 B) before adding anything to them. Byte counts below were measured on 2026-10-08:
+
+- `detector-response`: move the seven astroparticle reference links (461 B) and the four lookup references
+  (glossary, bibliography, comparison tables, case studies) into an index in `detector-principles-summary.md`,
+  keeping one link to it (saves about 600 B); tighten the Invariants and Workflow wording (about 250 B).
+- `hep-statistics`: the script paragraph under Resources is 1,419 B; keep the script names and move what each one does
+  to `references/core-stats-guide.md`, which already documents `core/stats` (saves about 770 B); tighten the reference
+  list (about 100 B).
+
+Both cuts change what the model reads before it acts, so they need the routing checks (`check_routing_static.py`,
+`check_ownership.py`) and a rerun of the answer evaluations that measured these skills before they are merged.
 
 ## Porting a fix
 

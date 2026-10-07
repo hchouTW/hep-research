@@ -15,10 +15,14 @@ import argparse
 from pathlib import Path
 from typing import Any
 
-import awkward as ak
-import numpy as np
-import uproot
-import yaml
+try:
+    import awkward as ak
+    import numpy as np
+    import uproot
+    import yaml
+    MISSING = None
+except ImportError as _exc:  # reported by main(), so --help works without the optional stack
+    MISSING = _exc.name
 
 
 def parse_args() -> argparse.Namespace:
@@ -79,6 +83,9 @@ def weighted_th1(
 
 def main() -> None:
     args = parse_args()
+    if MISSING:
+        raise SystemExit(f"uproot_awkward_analysis.py: error: {MISSING} is not installed: "
+                         "pip install uproot awkward numpy PyYAML")
     config = load_config(args.config)
 
     tree_name = config["inputs"]["tree"]
@@ -131,4 +138,9 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    import sys as _sys
+    try:
+        main()
+    except OSError as _exc:  # a missing or unreadable input: one line, no traceback
+        print(f"uproot_awkward_analysis.py: error: {_exc}", file=_sys.stderr)
+        raise SystemExit(2)

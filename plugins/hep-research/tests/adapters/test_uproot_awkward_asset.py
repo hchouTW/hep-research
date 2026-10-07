@@ -46,7 +46,7 @@ class UprootAwkwardAssetTests(unittest.TestCase):
                   "output": {"directory": str(tmp / "out"), "root_file": "synthetic_hist.root"}}
         (tmp / "config.yaml").write_text(json.dumps(config), encoding="utf-8")  # JSON is valid YAML
         cls.proc = subprocess.run([sys.executable, str(ASSET), "--config", str(tmp / "config.yaml")],
-                                  capture_output=True, text=True)
+                                  capture_output=True, text=True, timeout=600)
         cls.out = tmp / "out" / "synthetic_hist.root"
 
     @classmethod
@@ -83,7 +83,7 @@ class UprootAwkwardAssetTests(unittest.TestCase):
         bad = json.loads((tmp / "config.yaml").read_text())
         bad["branches"]["required"].append("Muon_charge")
         (tmp / "bad.yaml").write_text(json.dumps(bad), encoding="utf-8")
-        proc = subprocess.run([sys.executable, str(ASSET), "--config", str(tmp / "bad.yaml")], capture_output=True, text=True)
+        proc = subprocess.run([sys.executable, str(ASSET), "--config", str(tmp / "bad.yaml")], capture_output=True, text=True, timeout=600)
         self.assertNotEqual(proc.returncode, 0)
         self.assertIn("Missing required branches: Muon_charge", proc.stderr)
 

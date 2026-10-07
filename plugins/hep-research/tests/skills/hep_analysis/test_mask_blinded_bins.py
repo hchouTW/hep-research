@@ -22,7 +22,7 @@ class MaskBlindedBinsCliTests(unittest.TestCase):
                 r.write_text(json.dumps(reference), encoding="utf-8")
                 extra = ["--reference", str(r)]
             return subprocess.run([sys.executable, str(SCRIPT), "--hist", str(h), "--low", str(low), "--high", str(high), *extra],
-                                  capture_output=True, text=True)
+                                  capture_output=True, text=True, timeout=600)
 
     def assertCleanError(self, proc, text):
         self.assertNotEqual(proc.returncode, 0)

@@ -1,3 +1,7 @@
 #!/bin/sh
 # pre-commit: check the staged paths against the allowlist.
 git diff --cached --name-only --diff-filter=ACMR | "$(git rev-parse --show-toplevel)/.githooks/check-paths.sh"
+# when pre-commit is installed, also lint the staged Python files (the allowlist ran above)
+if command -v pre-commit >/dev/null 2>&1; then
+  SKIP=path-allowlist pre-commit run --config plugins/hep-research/.pre-commit-config.yaml --hook-stage pre-commit || exit 1
+fi

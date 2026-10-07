@@ -65,7 +65,7 @@ class OrbitAveragedCutoffTests(unittest.TestCase):
         proc = subprocess.run(
             [sys.executable, str(ROOT / 'skills/hep-analysis/scripts/orbit_averaged_geomagnetic_cutoff.py'),
              '--inclination', '51.6', '--altitude-re', '1.0627'],
-            capture_output=True, text=True, check=True)
+            capture_output=True, text=True, check=True, timeout=600)
         payload = json.loads(proc.stdout)
         expected = orbit_cutoff_profile(51.6, altitude_re=1.0627)
         self.assertAlmostEqual(payload['time_weighted_mean_cutoff_gv'],
@@ -116,7 +116,7 @@ class SolarModulationForceFieldTests(unittest.TestCase):
             [sys.executable, str(ROOT / 'skills/hep-analysis/scripts/solar_modulation_force_field.py'),
              '--modulate', '--energy', '1.0', '--mass', str(self.MASS_PROTON_GEV),
              '--charge', '1', '--phi', '0.5', '--lis-normalization', '1e4', '--lis-index', '2.7'],
-            capture_output=True, text=True, check=True)
+            capture_output=True, text=True, check=True, timeout=600)
         payload = json.loads(proc.stdout)
         expected = modulate(1.0, self.MASS_PROTON_GEV, 1, 0.5, lambda e: power_law_lis(e, 1e4, 2.7))
         self.assertAlmostEqual(payload['flux_toa'], expected['flux_toa'], places=8)
@@ -126,7 +126,7 @@ class SolarModulationForceFieldTests(unittest.TestCase):
             [sys.executable, str(ROOT / 'skills/hep-analysis/scripts/solar_modulation_force_field.py'),
              '--modulate', '--energy', '1.0', '--mass', str(self.MASS_PROTON_GEV),
              '--charge', '1', '--phi', '0.5'],
-            capture_output=True, text=True)
+            capture_output=True, text=True, timeout=600)
         self.assertNotEqual(proc.returncode, 0)
         self.assertNotIn('Traceback', proc.stderr)
 
@@ -174,7 +174,7 @@ class ParticleRatioTests(unittest.TestCase):
         proc = subprocess.run(
             [sys.executable, str(ROOT / 'skills/hep-analysis/scripts/particle_ratio_with_uncertainty.py'),
              '--n1', '1200', '--sigma1', '40', '--n2', '85000', '--sigma2', '300'],
-            capture_output=True, text=True, check=True)
+            capture_output=True, text=True, check=True, timeout=600)
         payload = json.loads(proc.stdout)
         expected = ratio_and_fraction(1200, 40, 85000, 300)
         self.assertAlmostEqual(payload['sigma_fraction'], expected['sigma_fraction'], places=10)
@@ -238,7 +238,7 @@ class CosmicRayFluxTests(unittest.TestCase):
         proc = subprocess.run(
             [sys.executable, str(ROOT / 'skills/hep-analysis/scripts/cosmic_ray_flux.py'),
              '--counts', '42', '--exposure', '1.5e7', '--bin-width', '10'],
-            capture_output=True, text=True, check=True)
+            capture_output=True, text=True, check=True, timeout=600)
         payload = json.loads(proc.stdout)
         expected = flux_from_counts(42, exposure=1.5e7, bin_width=10.0)
         self.assertAlmostEqual(payload['flux'], expected['flux'], places=15)
@@ -248,7 +248,7 @@ class CosmicRayFluxTests(unittest.TestCase):
         proc = subprocess.run(
             [sys.executable, str(ROOT / 'skills/hep-analysis/scripts/cosmic_ray_flux.py'),
              '--counts', '-1', '--exposure', '1e6', '--bin-width', '1'],
-            capture_output=True, text=True)
+            capture_output=True, text=True, timeout=600)
         self.assertNotEqual(proc.returncode, 0)
         self.assertNotIn('Traceback', proc.stderr)
 

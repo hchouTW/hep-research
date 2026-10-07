@@ -84,10 +84,11 @@ import random
 import sys
 from pathlib import Path
 from statistics import NormalDist
+from typing import Any
 
-from core.stats._linalg import cholesky
+from core.stats import _validate
+from core.stats._linalg import bisect, cholesky, solve
 from core.stats._poisson import MAX_MEAN, ppf
-from core.stats.unfolding_diagnostics import _solve
 
 LABEL = "[General method]"
 NEG = -1e300
@@ -98,22 +99,16 @@ class LikelihoodError(ValueError):
 
 
 def _num(x, name, low=None, high=None, strict_low=False) -> float:
-    ok = isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x)
-    if not ok:
-        raise LikelihoodError(f"{name} must be a finite number, got {x!r}")
-    if low is not None and (x < low or (strict_low and x == low)):
-        raise LikelihoodError(f"{name} must be {'>' if strict_low else '>='} {low}, got {x!r}")
-    if high is not None and x > high:
-        raise LikelihoodError(f"{name} must be <= {high}, got {x!r}")
-    return float(x)
+    return _validate.number(x, name, low, high, strict_low, error=LikelihoodError)
+
+
+def _solve(a, b):
+    return solve(a, b, error=LikelihoodError, what="matrix in the profile fit")
 
 
 def _seed_toys(toys, seed, allow_zero=False) -> tuple[int, int]:
-    if isinstance(seed, bool) or not isinstance(seed, int):
-        raise LikelihoodError("seed must be an integer and must be recorded")
-    if isinstance(toys, bool) or not isinstance(toys, int) or not ((allow_zero and toys == 0) or 100 <= toys <= 100000):
-        raise LikelihoodError("toys must be an integer in [100, 100000]" + (" or 0" if allow_zero else ""))
-    return toys, seed
+    seed = _validate.seed(seed, error=LikelihoodError)
+    return _validate.toy_count(toys, 100, 100000, error=LikelihoodError, allow_zero=allow_zero), seed
 
 
 def _ppf(u: float, mu: float) -> int:
@@ -168,11 +163,8 @@ def _inputs1(n, b, sigma_b):
 
 
 def _bisect(f, lo: float, hi: float, iters: int = 80) -> float:
-    """Root of an increasing f on [lo, hi]."""
-    for _ in range(iters):
-        mid = 0.5 * (lo + hi)
-        lo, hi = (mid, hi) if f(mid) < 0 else (lo, mid)
-    return 0.5 * (lo + hi)
+    """Root of an increasing f on [lo, hi]; a root beyond hi is refused, not reported as hi."""
+    return bisect(f, lo, hi, iters, increasing=True, error=LikelihoodError, what="the limit")
 
 
 def _toy_p1(n_obs, b0, sig, s, uniforms, gauss) -> float:
@@ -332,7 +324,7 @@ def _load_model(doc):
         if not isinstance(x, dict):
             raise LikelihoodError(f"bin {i} must be an object with n, b, s")
         n = x.get("n")
-        if isinstance(n, bool) or not isinstance(n, (int, float)) or n < 0 or n != int(n):
+        if isinstance(n, bool) or not isinstance(n, (int, float)) or not math.isfinite(n) or n < 0 or n != int(n):
             raise LikelihoodError(f"bin {i}: n must be a non-negative integer")
         bins.append({"n": int(n), "b": _num(x.get("b"), f"bin {i} b", 0.0, 200.0), "s": _num(x.get("s"), f"bin {i} s", 0.0, 1e6)})
     if sum(x["s"] for x in bins) <= 0:
@@ -573,7 +565,7 @@ def _load_shape(doc):
         if not isinstance(x, dict):
             raise LikelihoodError(f"bin {i} must be an object with n, b, s")
         n = x.get("n")
-        if isinstance(n, bool) or not isinstance(n, (int, float)) or n < 0 or n != int(n):
+        if isinstance(n, bool) or not isinstance(n, (int, float)) or not math.isfinite(n) or n < 0 or n != int(n):
             raise LikelihoodError(f"bin {i}: n must be a non-negative integer")
         bins.append({"n": int(n), "b": _num(x.get("b"), f"bin {i} b", 0.0, 200.0), "s": _num(x.get("s"), f"bin {i} s", 0.0, 1e6)})
     if sum(x["s"] for x in bins) <= 0:
@@ -779,7 +771,7 @@ def shape_limit(doc: dict, cl: float, toys: int, seed: int) -> dict:
 # ------------------------------------------------------------ Berger-Boos construction (approximate implementation)
 # Seeded coverage scans that passed (tests/core/test_stats_likelihood_limits.py, HEP_SLOW_TESTS=1; VALIDATION.md):
 # every combination of these true values, with the outer/inner toy counts and grid points given here.
-BB_VALIDATED_RANGE = {"s": [0.0, 2.0, 5.0], "b": [1.0, 3.0, 8.0], "sigma_b": [0.5, 2.0], "cl": [0.9, 0.95], "beta": 0.01,
+BB_VALIDATED_RANGE: dict[str, Any] = {"s": [0.0, 2.0, 5.0], "b": [1.0, 3.0, 8.0], "sigma_b": [0.5, 2.0], "cl": [0.9, 0.95], "beta": 0.01,
                       "outer": 600, "inner": 300, "points": 9}
 
 

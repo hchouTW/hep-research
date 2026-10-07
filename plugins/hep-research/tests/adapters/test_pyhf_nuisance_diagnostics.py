@@ -57,7 +57,7 @@ def ref_fit_fixed(ref, fixed):
 
 class NoPyhf(unittest.TestCase):
     def test_exits_2_without_pyhf(self):
-        p = subprocess.run([sys.executable, "-c", NO_PYHF, str(SCRIPT), str(WS)], capture_output=True, text=True)
+        p = subprocess.run([sys.executable, "-c", NO_PYHF, str(SCRIPT), str(WS)], capture_output=True, text=True, timeout=600)
         self.assertEqual(p.returncode, 2, p.stderr)
         self.assertIn("pyhf not installed", p.stdout)
 
@@ -151,7 +151,7 @@ class ConstructedWorkspaces(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             g = Path(tmp) / "groups.json"
             g.write_text(json.dumps({"x": ["no_such_parameter"]}))
-            p = subprocess.run([sys.executable, str(SCRIPT), str(WS), "--groups", str(g)], capture_output=True, text=True)
+            p = subprocess.run([sys.executable, str(SCRIPT), str(WS), "--groups", str(g)], capture_output=True, text=True, timeout=600)
             self.assertEqual(p.returncode, 2, p.stdout + p.stderr)
             self.assertIn("unknown parameter", p.stdout)
 

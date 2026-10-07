@@ -1,0 +1,29 @@
+# Hooks for working on this repository (T18). The repository's own git hooks (.githooks/, core.hooksPath) already
+# check the path allowlist; when `pre-commit` is on PATH they also run this file, so ruff runs on commit and the
+# fast test tier on push. To run it by hand from the repository root:
+#   pre-commit run --config plugins/hep-research/.pre-commit-config.yaml --all-files
+#   pre-commit run --config plugins/hep-research/.pre-commit-config.yaml --hook-stage pre-push --all-files
+# Install the tools with: pip install "plugins/hep-research[lint,test,core]" (or requirements-ci.lock plus ruff).
+default_install_hook_types: [pre-commit, pre-push]
+repos:
+  - repo: local
+    hooks:
+      - id: path-allowlist
+        name: path allowlist (.githooks/check-paths.sh)
+        language: system
+        entry: sh -c 'printf "%s\n" "$@" | sh .githooks/check-paths.sh' --
+        stages: [pre-commit]
+      - id: ruff
+        name: ruff (core/ and contracts/)
+        language: system
+        entry: ruff check --config plugins/hep-research/pyproject.toml
+        types: [python]
+        files: ^plugins/hep-research/(core|contracts)/
+        stages: [pre-commit]
+      - id: fast-tests
+        name: fast test tier (unit tests without HEP_SLOW_TESTS)
+        language: system
+        entry: sh -c 'cd plugins/hep-research && python3 -m unittest discover -s tests -t . -q'
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]

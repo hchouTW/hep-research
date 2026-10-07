@@ -71,7 +71,7 @@ class LiMaSignificanceTests(unittest.TestCase):
         proc = subprocess.run(
             [sys.executable, str(ROOT / 'skills/hep-statistics/scripts/li_ma_significance.py'),
              '--on', '15', '--off', '5', '--alpha', '0.5'],
-            capture_output=True, text=True, check=True)
+            capture_output=True, text=True, check=True, timeout=600)
         payload = json.loads(proc.stdout)
         expected = li_ma_significance(15, 5, 0.5)
         self.assertAlmostEqual(payload['significance'], expected['significance'], places=10)
@@ -80,7 +80,7 @@ class LiMaSignificanceTests(unittest.TestCase):
         proc = subprocess.run(
             [sys.executable, str(ROOT / 'skills/hep-statistics/scripts/li_ma_significance.py'),
              '--on', '10', '--off', '5', '--alpha', '-1'],
-            capture_output=True, text=True)
+            capture_output=True, text=True, timeout=600)
         self.assertNotEqual(proc.returncode, 0)
         self.assertNotIn('Traceback', proc.stderr)
 
@@ -141,7 +141,7 @@ class GeomagneticCutoffTests(unittest.TestCase):
     def test_cli_matches_library_result(self):
         proc = subprocess.run(
             [sys.executable, str(ROOT / 'skills/hep-analysis/scripts/geomagnetic_cutoff.py'), '--latitude', '41.5'],
-            capture_output=True, text=True, check=True)
+            capture_output=True, text=True, check=True, timeout=600)
         payload = json.loads(proc.stdout)
         expected = stormer_cutoff_gv(41.5)
         self.assertAlmostEqual(payload['vertical_cutoff_rigidity_gv'], expected, places=10)
@@ -211,7 +211,7 @@ class SpectrumPowerLawFitTests(unittest.TestCase):
             [sys.executable, str(ROOT / 'skills/hep-analysis/scripts/cr_spectrum_powerlaw_fit.py'),
              '--input', str(ROOT / 'skills/hep-analysis/assets/cosmic-ray-spectrum.example.json'),
              '--break-energy', '4.0e15'],
-            capture_output=True, text=True, check=True)
+            capture_output=True, text=True, check=True, timeout=600)
         payload = json.loads(proc.stdout)
         self.assertAlmostEqual(payload['below_break']['index'], self.gamma1, places=6)
         self.assertAlmostEqual(payload['above_break']['index'], self.gamma2, places=6)
@@ -220,7 +220,7 @@ class SpectrumPowerLawFitTests(unittest.TestCase):
         proc = subprocess.run(
             [sys.executable, str(ROOT / 'skills/hep-analysis/scripts/cr_spectrum_powerlaw_fit.py'),
              '--input', str(ROOT / 'skills/hep-analysis/assets/does_not_exist.json')],
-            capture_output=True, text=True)
+            capture_output=True, text=True, timeout=600)
         self.assertNotEqual(proc.returncode, 0)
         self.assertNotIn('Traceback', proc.stderr)
 
@@ -274,7 +274,7 @@ class GaisserHillasTests(unittest.TestCase):
              '--n-max', str(self.n_max), '--x-max', str(self.x_max),
              '--x0', str(self.x0), '--lambda-param', str(self.lam),
              '--depths', '400,750,900'],
-            capture_output=True, text=True, check=True)
+            capture_output=True, text=True, check=True, timeout=600)
         payload = json.loads(proc.stdout)
         self.assertAlmostEqual(payload['n_at_x_max_check'], self.n_max, delta=self.n_max * 1e-6)
         middle_entry = next(p for p in payload['profile'] if p['depth'] == 750.0)
@@ -284,7 +284,7 @@ class GaisserHillasTests(unittest.TestCase):
         proc = subprocess.run(
             [sys.executable, str(ROOT / 'skills/detector-response/scripts/xmax_gaisser_hillas.py'),
              '--n-max', '1e7', '--x-max', '100', '--x0', '200', '--lambda-param', '60'],
-            capture_output=True, text=True)
+            capture_output=True, text=True, timeout=600)
         self.assertNotEqual(proc.returncode, 0)
         self.assertNotIn('Traceback', proc.stderr)
 

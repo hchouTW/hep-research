@@ -10,7 +10,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. shallow clone: last_co
 |---|---|---|---|
 | detector-response | 33 | 345 | 0 |
 | hep-analysis | 9 | 72 | 0 |
-| hep-computing | 25 | 280 | 0 |
+| hep-computing | 25 | 281 | 0 |
 | hep-statistics | 9 | 100 | 0 |
 | hep-theory | 7 | 38 | 0 |
 | physics-ml | 34 | 181 | 0 |
@@ -113,7 +113,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `analysis-validation.md` | hep-analysis | 4.4 | yes | 6 | detector-response, hep-computing | 0205a9c 2026-10-06 |
 | `backgrounds.md` | hep-analysis | 2.7 | yes | 16 | detector-response | 119450c 2026-10-04 |
 | `data-pipelines.md` | hep-analysis | 4.5 | yes | 4 | hep-computing | 119450c 2026-10-04 |
-| `hep-analysis-guide.md` | hep-analysis | 40.8 | yes | 4 | detector-response | 6caf06f 2026-10-07 |
+| `hep-analysis-guide.md` | hep-analysis | 41.0 | yes | 4 | detector-response | 6caf06f 2026-10-07 |
 | `histograms-efficiencies.md` | hep-analysis | 3.0 | yes | 8 | detector-response, hep-computing | 119450c 2026-10-04 |
 | `measurements-and-unfolding.md` | hep-analysis | 2.7 | yes | 9 | detector-response, hep-statistics | 0fb0531 2026-10-07 |
 | `systematics.md` | hep-analysis | 4.8 | yes | 25 | detector-response, hep-statistics, hep-theory, physics-ml | 281eb2d 2026-10-04 |
@@ -121,7 +121,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `acceptance-criteria.md` | hep-computing | 3.7 | no | 3 | - | 119450c 2026-10-04 |
 | `agile-development-guide.md` | hep-computing | 10.7 | yes | 8 | physics-ml | 6caf06f 2026-10-07 |
 | `bash-balanced-design-guidelines.md` | hep-computing | 24.8 | yes | 2 | - | 119450c 2026-10-04 |
-| `batch-scheduling.md` | hep-computing | 14.9 | yes | 5 | - | 0984f86 2026-10-05 |
+| `batch-scheduling.md` | hep-computing | 15.5 | yes | 5 | - | 0984f86 2026-10-05 |
 | `cmake-and-build.md` | hep-computing | 2.1 | yes | 4 | hep-analysis | 0205a9c 2026-10-06 |
 | `cpp-balanced-design-guidelines.md` | hep-computing | 26.0 | yes | 6 | physics-ml | 119450c 2026-10-04 |
 | `design-and-estimation.md` | hep-computing | 7.5 | no | 3 | - | 119450c 2026-10-04 |
@@ -144,7 +144,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `task-quality-checklist.md` | hep-computing | 3.0 | no | 4 | - | 119450c 2026-10-04 |
 | `validation-and-done.md` | hep-computing | 3.7 | yes | 4 | - | 0205a9c 2026-10-06 |
 | `astroparticle-statistics.md` | hep-statistics | 8.6 | yes | 12 | detector-response, hep-analysis | 0fb0531 2026-10-07 |
-| `core-stats-guide.md` | hep-statistics | 25.3 | yes | 7 | - | fefa389 2026-10-05 |
+| `core-stats-guide.md` | hep-statistics | 25.4 | yes | 7 | - | fefa389 2026-10-05 |
 | `inference-recipes.md` | hep-statistics | 13.6 | yes | 7 | detector-response, hep-analysis | 281eb2d 2026-10-04 |
 | `likelihood-fitting.md` | hep-statistics | 8.1 | yes | 7 | detector-response, hep-analysis, hep-computing | 281eb2d 2026-10-04 |
 | `ml-assisted-inference.md` | hep-statistics | 5.8 | yes | 3 | physics-ml | 119450c 2026-10-04 |

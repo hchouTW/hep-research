@@ -10,6 +10,7 @@ import importlib.util
 import io
 import json
 import math
+import os
 import re
 import sys
 import tempfile
@@ -74,7 +75,11 @@ except ImportError:
     HAVE_DEPS = False
 
 
+SLOW = os.environ.get("HEP_SLOW_TESTS") == "1"
+
+
 @unittest.skipUnless(HAVE_DEPS, "numpy, scipy and matplotlib are required (D5 environment)")
+@unittest.skipUnless(SLOW, "slow (70 to 350 s, the full Path D example run): set HEP_SLOW_TESTS=1")
 class PathDTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

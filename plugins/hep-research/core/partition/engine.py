@@ -17,9 +17,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import os
 import tempfile
 from pathlib import Path
+from typing import Any
 
 
 def _hash(obj) -> str:
@@ -125,13 +127,29 @@ def _sum(a, b):
         if set(a) != set(b):
             raise ValueError("chunk results have different keys")
         return {k: _sum(a[k], b[k]) for k in a}
+    if isinstance(a, bool) or isinstance(b, bool) or not isinstance(a, (int, float)) or not isinstance(b, (int, float)):
+        raise ValueError(f"the default merge adds numbers only, got {type(a).__name__} and {type(b).__name__}; "
+                         "pass a combine function for other results")
     return a + b
+
+
+def _nonfinite(x, path="result") -> str | None:
+    """Path of the first NaN or infinity in a chunk result, else None."""
+    if isinstance(x, float) and not math.isfinite(x):
+        return path
+    if isinstance(x, dict):
+        return next((p for k, v in x.items() if (p := _nonfinite(v, f"{path}.{k}"))), None)
+    if isinstance(x, list):
+        return next((p for i, v in enumerate(x) if (p := _nonfinite(v, f"{path}[{i}]"))), None)
+    return None
 
 
 def merge(manifest: dict, state_dir, combine=None) -> dict:
     """Merge chunk outputs; combine(list_of_results) defaults to key-by-key summation."""
     combine = combine or (lambda rs: _reduce(rs))
-    problems, seen, results = [], {}, []
+    problems: list[dict[str, Any]] = []
+    seen: dict[str, str] = {}
+    results = []
     wanted = {c["id"]: c for c in manifest["chunks"]}
     for f in sorted((Path(state_dir) / "chunks").glob("*.json")):
         try:
@@ -153,6 +171,10 @@ def merge(manifest: dict, state_dir, combine=None) -> dict:
         if (doc["start"], doc["stop"]) != (c["start"], c["stop"]):
             problems.append({"code": "merge.range_mismatch", "file": f.name})
             continue
+        bad = _nonfinite(doc["result"])
+        if bad:
+            problems.append({"code": "merge.non_finite", "file": f.name, "message": f"{bad} is not finite"})
+            continue
         seen[cid] = f.name
         results.append((c["start"], doc["result"]))
     missing = sorted(set(wanted) - set(seen))
@@ -168,8 +190,21 @@ def merge(manifest: dict, state_dir, combine=None) -> dict:
         problems.append({"code": "merge.incomplete_range", "covered_to": pos})
     # stray files (duplicates, other manifests, unknown ids, unreadable copies) are excluded and reported; the merge is
     # still complete when every manifest chunk was found exactly once and the ranges tile the job
-    hard = [p for p in problems if p["code"] in ("merge.missing_chunks", "merge.range_mismatch", "merge.gap_or_overlap", "merge.incomplete_range")]
-    merged = combine([r for _, r in sorted(results, key=lambda t: t[0])]) if results and not hard else None
+    hard = [p for p in problems if p["code"] in ("merge.missing_chunks", "merge.range_mismatch", "merge.gap_or_overlap",
+                                                 "merge.incomplete_range", "merge.non_finite")]
+    merged = None
+    if results and not hard:
+        try:
+            merged = combine([r for _, r in sorted(results, key=lambda t: t[0])])
+        except (TypeError, ValueError) as exc:  # results the combine function cannot add: no merged value
+            problems.append({"code": "merge.combine_failed", "message": str(exc)})
+            hard.append(problems[-1])
+        else:
+            bad = _nonfinite(merged, "merged")
+            if bad:
+                problems.append({"code": "merge.non_finite", "message": f"{bad} is not finite after combining"})
+                hard.append(problems[-1])
+                merged = None
     return {"status": "complete" if not hard else "incomplete", "merged": merged, "problems": problems,
             "chunks_merged": len(seen), "chunks_expected": len(wanted)}
 

@@ -49,7 +49,7 @@ class HelpAlwaysWorksTests(unittest.TestCase):
                 result = subprocess.run(
                     [sys.executable, str(SCRIPTS / f"{name}.py"), "--help"],
                     capture_output=True,
-                    text=True,
+                    text=True, timeout=600
                 )
                 self.assertEqual(result.returncode, 0)
                 self.assertIn("usage:", result.stdout)
@@ -58,14 +58,14 @@ class HelpAlwaysWorksTests(unittest.TestCase):
 class HelpWithoutTorchTests(unittest.TestCase):
     def test_check_pytorch_env_help_exits_zero(self):
         result = subprocess.run([sys.executable, str(SCRIPTS / "check_pytorch_env.py"), "--help"],
-                                capture_output=True, text=True)
+                                capture_output=True, text=True, timeout=600)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("usage:", result.stdout)
         self.assertNotIn("Could not import torch", result.stdout)
 
     def test_inspect_checkpoint_documents_unsafe_opt_in(self):
         result = subprocess.run([sys.executable, str(SCRIPTS / "inspect_checkpoint.py"), "--help"],
-                                capture_output=True, text=True)
+                                capture_output=True, text=True, timeout=600)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("--unsafe-full-unpickle", result.stdout)
         self.assertIn("trust", result.stdout)
@@ -89,18 +89,18 @@ class InspectCheckpointWeightsOnlyTests(unittest.TestCase):
             path = Path(tmp) / "ckpt.pt"
             torch.save({"w": torch.zeros(2), "probe": _UnpickleProbe()}, path)
             cmd = [sys.executable, str(SCRIPTS / "inspect_checkpoint.py"), str(path)]
-            safe = subprocess.run(cmd, capture_output=True, text=True)
+            safe = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
             self.assertNotEqual(safe.returncode, 0)
             self.assertNotIn("UNPICKLE-EXECUTED", safe.stdout)
             self.assertIn("--unsafe-full-unpickle", safe.stderr)
             self.assertNotIn("Traceback", safe.stderr)
-            unsafe = subprocess.run(cmd + ["--unsafe-full-unpickle"], capture_output=True, text=True)
+            unsafe = subprocess.run(cmd + ["--unsafe-full-unpickle"], capture_output=True, text=True, timeout=600)
             self.assertEqual(unsafe.returncode, 0, unsafe.stderr)
             self.assertIn("UNPICKLE-EXECUTED", unsafe.stdout)
             plain = Path(tmp) / "plain.pt"
             torch.save({"w": torch.zeros(2)}, plain)
             ok = subprocess.run([sys.executable, str(SCRIPTS / "inspect_checkpoint.py"), str(plain)],
-                                capture_output=True, text=True)
+                                capture_output=True, text=True, timeout=600)
             self.assertEqual(ok.returncode, 0, ok.stderr)
             self.assertIn("Tensor shape=(2,)", ok.stdout)
 
@@ -130,7 +130,7 @@ class CleanDegradationWithoutTorchTests(unittest.TestCase):
                 result = subprocess.run(
                     [sys.executable, str(SCRIPTS / f"{name}.py"), *extra_args],
                     capture_output=True,
-                    text=True,
+                    text=True, timeout=600
                 )
                 self.assertEqual(result.returncode, 1)
                 self.assertIn("PyTorch is required", result.stdout + result.stderr)
@@ -140,7 +140,7 @@ class CleanDegradationWithoutTorchTests(unittest.TestCase):
         result = subprocess.run(
             [sys.executable, str(SCRIPTS / "check_pytorch_env.py")],
             capture_output=True,
-            text=True,
+            text=True, timeout=600
         )
         self.assertEqual(result.returncode, 1)
         self.assertIn("ERROR: Could not import torch", result.stdout)
@@ -399,7 +399,7 @@ class MemoryEstimateCliTests(unittest.TestCase):
     def test_runs_on_shipped_plan(self):
         result = subprocess.run(
             [sys.executable, self.SCRIPT, str(ROOT / "assets/scaling-plan.example.json"),
-             "--json"], capture_output=True, text=True)
+             "--json"], capture_output=True, text=True, timeout=600)
         self.assertEqual(result.returncode, 0, result.stderr)
         payload = json.loads(result.stdout)
         self.assertAlmostEqual(payload["parameters_total"],
@@ -409,28 +409,28 @@ class MemoryEstimateCliTests(unittest.TestCase):
     def test_text_report_names_the_binding_term(self):
         result = subprocess.run(
             [sys.executable, self.SCRIPT, "--params", "7e9", "--gpus", "8"],
-            capture_output=True, text=True)
+            capture_output=True, text=True, timeout=600)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("Binding term:", result.stdout)
 
     def test_flags_override_the_plan_file(self):
         result = subprocess.run(
             [sys.executable, self.SCRIPT, str(ROOT / "assets/scaling-plan.example.json"),
-             "--zero-stage", "3", "--json"], capture_output=True, text=True)
+             "--zero-stage", "3", "--json"], capture_output=True, text=True, timeout=600)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(json.loads(result.stdout)["zero_stage"], 3)
 
     def test_bad_factorization_exits_cleanly(self):
         result = subprocess.run(
             [sys.executable, self.SCRIPT, "--params", "7e9", "--gpus", "8",
-             "--tensor-parallel", "3"], capture_output=True, text=True)
+             "--tensor-parallel", "3"], capture_output=True, text=True, timeout=600)
         self.assertNotEqual(result.returncode, 0)
         self.assertNotIn("Traceback", result.stderr)
         self.assertIn("world size", result.stderr)
 
     def test_missing_size_information_exits_cleanly(self):
         result = subprocess.run([sys.executable, self.SCRIPT, "--gpus", "8"],
-                                capture_output=True, text=True)
+                                capture_output=True, text=True, timeout=600)
         self.assertNotEqual(result.returncode, 0)
         self.assertNotIn("Traceback", result.stderr)
 
@@ -626,7 +626,7 @@ class ComputeBudgetTests(unittest.TestCase):
         result = subprocess.run(
             [sys.executable, str(ROOT / "scripts/estimate_compute_budget.py"),
              "--params", "175e9", "--tokens", "300e9", "--gpus", "1024"],
-            capture_output=True, text=True)
+            capture_output=True, text=True, timeout=600)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("undertrained", result.stdout)
 
@@ -634,7 +634,7 @@ class ComputeBudgetTests(unittest.TestCase):
         result = subprocess.run(
             [sys.executable, str(ROOT / "scripts/estimate_compute_budget.py"),
              "--params", "1e9", "--tokens", "1e9", "--mfu", "2.0"],
-            capture_output=True, text=True)
+            capture_output=True, text=True, timeout=600)
         self.assertNotEqual(result.returncode, 0)
         self.assertNotIn("Traceback", result.stderr)
 
@@ -759,7 +759,7 @@ class CompareModelRunsTests(unittest.TestCase):
         result = subprocess.run(
             [sys.executable, str(ROOT / "scripts/compare_model_runs.py"),
              str(ROOT / "assets/eval-runs.example.json"), "--json"],
-            capture_output=True, text=True)
+            capture_output=True, text=True, timeout=600)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertTrue(json.loads(result.stdout)["paired"])
 
@@ -866,7 +866,7 @@ class ServingCapacityTests(unittest.TestCase):
         result = subprocess.run(
             [sys.executable, str(ROOT / "scripts/serving_capacity.py"),
              "--qps", "500", "--batch-size", "16", "--batch-latency-ms", "40",
-             "--latency-budget-ms", "250"], capture_output=True, text=True)
+             "--latency-budget-ms", "250"], capture_output=True, text=True, timeout=600)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("Estimated p99 latency", result.stdout)
 
@@ -945,7 +945,7 @@ class SplitIntegrityTests(unittest.TestCase):
         result = subprocess.run(
             [sys.executable, str(ROOT / "scripts/check_split_integrity.py"),
              str(ROOT / "assets/dataset-splits.example.json")],
-            capture_output=True, text=True)
+            capture_output=True, text=True, timeout=600)
         self.assertEqual(result.returncode, 1)
         self.assertIn("FAILED", result.stdout)
         self.assertIn("group leakage", result.stdout)
@@ -953,7 +953,7 @@ class SplitIntegrityTests(unittest.TestCase):
     def test_cli_reports_bad_input_cleanly(self):
         result = subprocess.run(
             [sys.executable, str(ROOT / "scripts/check_split_integrity.py"),
-             "does-not-exist.json"], capture_output=True, text=True)
+             "does-not-exist.json"], capture_output=True, text=True, timeout=600)
         self.assertNotEqual(result.returncode, 0)
         self.assertNotIn("Traceback", result.stderr)
 
@@ -1003,7 +1003,7 @@ class SplitGroupingCompletenessAuditT06(unittest.TestCase):
             f = Path(td) / "s.json"
             f.write_text(json.dumps({"train": ["a"], "test": ["b"]}))
             run = lambda *a: subprocess.run([sys.executable, str(ROOT / "scripts/check_split_integrity.py"), *a, str(f)],
-                                            capture_output=True, text=True)
+                                            capture_output=True, text=True, timeout=600)
             self.assertEqual(run().returncode, 3)
             self.assertIn("INCOMPLETE", run().stdout)
             self.assertEqual(run("--strict").returncode, 1)

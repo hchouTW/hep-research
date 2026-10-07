@@ -26,7 +26,7 @@ except ImportError:
 
 
 def run(*args):
-    p = subprocess.run([sys.executable, str(SCRIPT), *args], capture_output=True, text=True)
+    p = subprocess.run([sys.executable, str(SCRIPT), *args], capture_output=True, text=True, timeout=600)
     return p.returncode, json.loads(p.stdout)
 
 
@@ -65,7 +65,7 @@ class AsimovSignificance(unittest.TestCase):
         self.assertAlmostEqual(out["z_asimov"], z_num, delta=1e-6)
 
     def test_rejects_bad_input(self):
-        p = subprocess.run([sys.executable, str(SCRIPT), "asimov-z", "--s", "5", "--b", "0"], capture_output=True, text=True)
+        p = subprocess.run([sys.executable, str(SCRIPT), "asimov-z", "--s", "5", "--b", "0"], capture_output=True, text=True, timeout=600)
         self.assertEqual(p.returncode, 2)
 
 
@@ -88,7 +88,7 @@ class GoodnessOfFit(unittest.TestCase):
             f = Path(tmp) / "gof.json"
             f.write_text(json.dumps({"observed": n.tolist(), "templates": {"bkg": bkg.tolist(), "sig": sig.tolist()}}))
             p = subprocess.run([sys.executable, str(SCRIPT), "gof", "--input", str(f), "--toys", "300", "--seed", "4"],
-                               capture_output=True, text=True)
+                               capture_output=True, text=True, timeout=600)
         self.assertEqual(p.returncode, 0, p.stderr)
         out = json.loads(p.stdout)
         self.assertEqual((out["toys"], out["seed"], out["ndof"]), (300, 4, 18))

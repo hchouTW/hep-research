@@ -30,7 +30,7 @@ def copy_package(dest: Path) -> None:
     """Copy the git-listed files (the scanner's view in a checkout); fall back to the whole tree outside git."""
     try:
         out = subprocess.run(["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard", "--", "."], cwd=ROOT,
-                             capture_output=True, text=True, check=True).stdout
+                             capture_output=True, text=True, check=True, timeout=120).stdout
         listed = [f for f in out.split("\0") if f]
     except (OSError, subprocess.CalledProcessError):
         listed = []
@@ -60,7 +60,7 @@ def main(argv=None) -> int:
     cwd = Path(tempfile.mkdtemp(prefix="unrelated cwd "))
     out_dir = base / "runs"
     proc = subprocess.run([sys.executable, str(dest / "tools" / "run_all_checks.py"), "--out", str(out_dir)],
-                          cwd=cwd, capture_output=True, text=True)
+                          cwd=cwd, capture_output=True, text=True, timeout=4 * 3600)  # each module has its own limit
     runs = sorted(out_dir.glob("check-run-*.json"))
     summary = json.loads(runs[-1].read_text()) if runs else None
     result = {"relocated_to": str(dest), "path_has_spaces": " " in str(dest), "outside_repository": repo not in str(dest),

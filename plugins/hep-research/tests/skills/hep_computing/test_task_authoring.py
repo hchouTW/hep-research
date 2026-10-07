@@ -97,13 +97,13 @@ class ShippedExamplesTests(unittest.TestCase):
 class BundleInPluginTests(unittest.TestCase):
     def test_validator_passes_on_the_plugin_layout(self) -> None:
         proc = subprocess.run([sys.executable, str(ROOT / "scripts" / "validate_skill_bundle.py")],
-                              capture_output=True, text=True)
+                              capture_output=True, text=True, timeout=600)
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
         self.assertIn("Bundle OK", proc.stdout)
 
     def test_help_prints_usage_without_validating(self) -> None:
         proc = subprocess.run([sys.executable, str(ROOT / "scripts" / "validate_skill_bundle.py"), "--help"],
-                              capture_output=True, text=True)
+                              capture_output=True, text=True, timeout=600)
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
         self.assertIn("usage:", proc.stdout)
         self.assertNotIn("Bundle OK", proc.stdout)

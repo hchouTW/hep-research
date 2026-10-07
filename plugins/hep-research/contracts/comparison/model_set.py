@@ -9,13 +9,15 @@ envelope(model_set_result, values_by_id, prescription=None) -> {"ok", ...}
 from __future__ import annotations
 
 from itertools import combinations
+from typing import Any
 
 from contracts.comparison.gate import gate, side_from_artifact
 
 
 def model_set(prediction_docs) -> dict:
     problems, alts = [], []
-    seen_ids, seen_specs = set(), {}
+    seen_ids = set()
+    seen_specs: dict[Any, Any] = {}
     for d in prediction_docs:
         if d.get("artifact_type") != "prediction":
             problems.append({"code": "models.not_prediction", "message": f"{d.get('artifact_id')} is a {d.get('artifact_type')}"})

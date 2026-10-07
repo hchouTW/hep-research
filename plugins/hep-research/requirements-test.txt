@@ -1,0 +1,3 @@
+# Test-only dependencies (optional): the property-based tests in tests/core/test_properties.py are skipped without them.
+-r requirements-core.txt
+hypothesis>=6.100,<7

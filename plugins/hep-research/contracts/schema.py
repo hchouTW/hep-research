@@ -15,10 +15,11 @@ import json
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 SCHEMA_DIR = Path(__file__).resolve().parent / "schemas"
 
-_TYPES = {
+_TYPES: dict[str, Any] = {
     "object": dict, "array": list, "string": str, "boolean": bool,
     "integer": int, "number": (int, float), "null": type(None),
 }
@@ -53,6 +54,14 @@ class Report:
     def as_dict(self) -> dict:
         return {"ok": self.ok, "findings": [f.as_dict() for f in self.findings]}
 
+
+# Keywords validate() implements, and keywords it reads only as annotations or as $ref targets. A schema keyword outside
+# both sets would be ignored silently (for example oneOf or maxItems); tests/contracts/test_schema_keywords.py checks
+# every schema under contracts/schemas/ against them.
+SUPPORTED_KEYWORDS = frozenset({"$ref", "anyOf", "type", "const", "enum", "minLength", "pattern", "minimum",
+                                "exclusiveMinimum", "x-vocab", "required", "properties", "additionalProperties",
+                                "minItems", "items"})
+ANNOTATION_KEYWORDS = frozenset({"$schema", "$id", "$comment", "$defs", "title", "description", "examples", "default"})
 
 _cache: dict[str, dict] = {}
 

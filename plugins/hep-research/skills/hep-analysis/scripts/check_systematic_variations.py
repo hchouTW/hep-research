@@ -187,4 +187,9 @@ def main(argv=None) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    import sys as _sys
+    try:
+        raise SystemExit(main())
+    except OSError as _exc:  # a missing or unreadable input: one line, no traceback
+        print(f"check_systematic_variations.py: error: {_exc}", file=_sys.stderr)
+        raise SystemExit(2)

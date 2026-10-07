@@ -18,7 +18,7 @@ def run(csv_text=None, path=None, *extra):
             path = Path(tmp) / 'yields.csv'
             path.write_text(csv_text, encoding='utf-8')
         return subprocess.run([sys.executable, str(SCRIPT), '--input', str(path), *extra],
-                              capture_output=True, text=True)
+                              capture_output=True, text=True, timeout=600)
 
 
 class YieldTableTests(unittest.TestCase):

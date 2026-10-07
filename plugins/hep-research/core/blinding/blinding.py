@@ -41,6 +41,7 @@ import json
 import math
 import re
 from pathlib import Path
+from typing import Any
 
 NUMBER = re.compile(r"[-+]?(?:\d+\.\d*|\.\d+|\d+)(?:[eE][-+]?\d+)?")
 TEXT_SUFFIXES = {".json", ".txt", ".log", ".csv", ".tsv", ".md", ".svg", ".yaml", ".yml", ".tex", ".html",
@@ -130,8 +131,8 @@ def _standalone(text: str, start: int, end: int) -> bool:
 def _printed_match(token: str, target: float) -> bool:
     """True when the token equals the target rounded at the token's own last printed digit (for example
     '1234.6' or '1.235e+03' for 1234.567). Tokens with fewer than 3 significant digits are not matched."""
-    mant, _, exp = token.lower().partition("e")
-    exp = int(exp) if exp else 0
+    mant, _, exp_text = token.lower().partition("e")
+    exp = int(exp_text) if exp_text else 0
     decimals = len(mant.split(".")[1]) if "." in mant else 0
     digits = mant.lstrip("+-").replace(".", "").lstrip("0")
     if len(digits) < 3:
@@ -236,8 +237,8 @@ def scan_paths(paths, sealed, rtol: float = 1e-9, strict: bool = False, exemptio
     """Scan files and directories. exemptions: {path: reason} for outputs the scanner cannot read (checked another
     way); outputs: in strict mode, every output that will be published (each needs a scan record or an exemption)."""
     ex = {str(Path(k).resolve()): str(v or "").strip() for k, v in (exemptions or {}).items()}
-    report = {"leaks": [], "unscanned": [], "scanned": [], "exempted": [], "reasons": [], "strict": strict,
-              "limitation": LIMITATION}
+    report: dict[str, Any] = {"leaks": [], "unscanned": [], "scanned": [], "exempted": [], "reasons": [], "strict": strict,
+                              "limitation": LIMITATION}
     for p in paths:
         p = Path(p)
         files = sorted(x for x in p.rglob("*") if x.is_file()) if p.is_dir() else [p]
@@ -331,7 +332,7 @@ def check_figure(fig, region: dict, sealed=None, rtol: float = 1e-9) -> list[dic
                     found.append({"axes": ax_i, "artist": "segment", "label": coll.get_label(), "points": 1})
                     break
         for img in ax.images:  # imshow: image columns overlapping the range with a drawn value
-            arr = np.ma.masked_invalid(np.ma.asarray(img.get_array(), float))
+            arr: Any = np.ma.masked_invalid(np.ma.asarray(img.get_array(), float))
             if arr.ndim < 2 or not arr.size:
                 continue
             x0, x1 = img.get_extent()[:2]

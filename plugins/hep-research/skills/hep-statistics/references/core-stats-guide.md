@@ -24,7 +24,8 @@ pyhf/Combine adapter ([statistical tools](statistical-tools.md)). Run any script
 
 ## Common conventions
 
-- **Dependencies.** Standard library only; output is JSON labeled `[General method]`. Nothing in the output is the
+- **Dependencies.** Standard library only (the covariance and response validators use NumPy for their eigenvalues
+  when it is installed, and record which solver ran in `eigen_solver`); output is JSON labeled `[General method]`. Nothing in the output is the
   performance of any experiment.
 - **Run, do not hand-compute.** When a shell is available, run the matching subcommand for an exact limit or
   interval and quote its JSON output; a value worked by hand (no shell, or a quick check) is labeled as such and is

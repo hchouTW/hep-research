@@ -33,5 +33,23 @@ class CommandLineTests(unittest.TestCase):
             self.assertEqual(list(Path(td).iterdir()), [])
 
 
+class ModuleTimeoutTests(unittest.TestCase):
+    """A module that does not finish is a failure with its reason, not a hang (T14)."""
+
+    def test_a_hanging_module_fails_with_a_reason(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("run_all_checks", TOOL)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        row = mod.run_module("tests.tools.sleeping_module_fixture", timeout=2)
+        self.assertEqual(row["status"], "fail")
+        self.assertEqual(row["reason"], "timed out after 2 s")
+        self.assertLess(row["seconds"], 20)
+        ok = mod.run_module("tests.tools.test_reference_inventory", timeout=120)
+        self.assertEqual(ok["status"], "pass")
+        self.assertGreater(ok["counts"]["run"], 0)
+        self.assertNotIn("tests.tools.sleeping_module_fixture", mod.test_modules())
+
+
 if __name__ == "__main__":
     unittest.main()

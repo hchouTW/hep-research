@@ -118,7 +118,7 @@ class EftTruncationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             p = Path(td) / "in.json"
             p.write_text(json.dumps({k: v for k, v in self.DOC.items() if k != "basis"}))
-            r = subprocess.run([sys.executable, str(SCRIPTS / "eft_truncation.py"), str(p)], capture_output=True, text=True)
+            r = subprocess.run([sys.executable, str(SCRIPTS / "eft_truncation.py"), str(p)], capture_output=True, text=True, timeout=600)
             self.assertEqual(r.returncode, 1)
             self.assertEqual(json.loads(r.stdout)["status"], "failed")
 

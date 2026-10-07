@@ -27,7 +27,8 @@ psd and rank to the largest eigenvalue.
 
 Usage: python3 core/stats/validate_covariance.py FILE.json [--strict] [--demo-psd-clip]
 Exit codes: 0 pass (or warn without --strict); 1 errors (or warnings with --strict);
-2 file unreadable or not JSON. Standard library only.
+2 file unreadable or not JSON. Standard library only; NumPy, when installed, computes the eigenvalues
+(numpy.linalg.eigh, much faster for large matrices; HEP_STATS_PURE_PYTHON=1 keeps the standard-library rotations).
 """
 from __future__ import annotations
 
@@ -42,43 +43,19 @@ import json
 import math
 import sys
 from pathlib import Path
+from typing import Any
+
+from core.stats import _linalg
 
 DEFAULT_TOL = {"symmetry": 1e-8, "psd": 1e-8, "correlation": 1e-8,
                "condition_warn": 1e10, "rank": 1e-12, "block_sum": 1e-8}
 EPS = sys.float_info.epsilon
 
 
-def jacobi_eigh(matrix: list[list[float]], max_sweeps: int = 100) -> tuple[list[float], list[list[float]]]:
-    """Eigen-decomposition of a real symmetric matrix by cyclic Jacobi rotations.
-    Returns (eigenvalues ascending, eigenvectors as columns in matching order)."""
-    n = len(matrix)
-    a = [row[:] for row in matrix]
-    v = [[1.0 if i == j else 0.0 for j in range(n)] for i in range(n)]
-    scale = sum(x * x for row in a for x in row) or 1.0
-    for _ in range(max_sweeps):
-        off = sum(a[i][j] ** 2 for i in range(n) for j in range(i + 1, n))
-        if off <= (EPS ** 2) * scale * 1e-4:
-            break
-        for p in range(n - 1):
-            for q in range(p + 1, n):
-                apq = a[p][q]
-                if apq == 0.0:
-                    continue
-                theta = (a[q][q] - a[p][p]) / (2.0 * apq)
-                t = math.copysign(1.0, theta) / (abs(theta) + math.sqrt(theta * theta + 1.0))
-                c = 1.0 / math.sqrt(t * t + 1.0)
-                s = t * c
-                for k in range(n):
-                    akp, akq = a[k][p], a[k][q]
-                    a[k][p], a[k][q] = c * akp - s * akq, s * akp + c * akq
-                for k in range(n):
-                    apk, aqk = a[p][k], a[q][k]
-                    a[p][k], a[q][k] = c * apk - s * aqk, s * apk + c * aqk
-                for k in range(n):
-                    vkp, vkq = v[k][p], v[k][q]
-                    v[k][p], v[k][q] = c * vkp - s * vkq, s * vkp + c * vkq
-    order = sorted(range(n), key=lambda i: a[i][i])
-    return [a[i][i] for i in order], [[v[k][i] for i in order] for k in range(n)]
+def jacobi_eigh(matrix: list[list[float]], max_sweeps: int = 100, info: dict | None = None) -> tuple[list[float], list[list[float]]]:
+    """Eigen-decomposition of a real symmetric matrix by cyclic Jacobi rotations (core/stats/_linalg.py).
+    Returns (eigenvalues ascending, eigenvectors as columns in matching order); info receives whether it converged."""
+    return _linalg.jacobi_eigh(matrix, max_sweeps, criterion="frobenius", info=info)
 
 
 class Report:
@@ -123,7 +100,7 @@ def _check_matrix(name: str, m: list[list[float]], tol: dict, report: Report, pr
     n = len(m)
     scale = _max_abs(m) or 1.0
     asym = max((abs(m[i][j] - m[j][i]) for i in range(n) for j in range(i)), default=0.0)
-    metrics = {"n": n, "max_abs_entry": scale, "max_asymmetry": asym}
+    metrics: dict[str, Any] = {"n": n, "max_abs_entry": scale, "max_asymmetry": asym}
     if asym > tol["symmetry"] * scale:
         report.error(f"{prefix}symmetry", f"{name}: max |C_ij - C_ji| = {asym:.3e} exceeds {tol['symmetry']:.1e} x max|entry|")
     s = [[(m[i][j] + m[j][i]) / 2.0 for j in range(n)] for i in range(n)]
@@ -152,7 +129,12 @@ def _check_matrix(name: str, m: list[list[float]], tol: dict, report: Report, pr
         report.error(f"{prefix}correlation_bound", f"{name}: {len(bad_rho)} correlation(s) outside [-1, 1]; first rho[{j},{i}] = {rho:.6f}")
     if any(not math.isfinite(x) for x in diag):
         return metrics
-    values, _ = jacobi_eigh(s)
+    solver: dict = {}
+    values, _ = _linalg.eigh(s, info=solver)
+    metrics["eigen_solver"] = solver["method"]
+    if not solver["converged"]:
+        report.warn(f"{prefix}eigen_not_converged", f"{name}: the eigenvalue rotations did not converge in {solver['sweeps']} "
+                    f"sweeps (off-diagonal norm {solver['off_diagonal']:.3e}); the eigenvalue checks are approximate")
     lmax, lmin = values[-1], values[0]
     noise = 10.0 * n * EPS * max(abs(lmax), abs(lmin))
     metrics.update({"eigenvalue_min": lmin, "eigenvalue_max": lmax, "roundoff_level": noise})
@@ -179,7 +161,7 @@ def clip_demo(m: list[list[float]], weights: list[float] | None) -> dict:
     """[Proposal] diagnostic: clip negative eigenvalues; report the changes. Input is not modified."""
     n = len(m)
     s = [[(m[i][j] + m[j][i]) / 2.0 for j in range(n)] for i in range(n)]
-    values, vec = jacobi_eigh(s)
+    values, vec = _linalg.eigh(s)
     clipped = [max(x, 0.0) for x in values]
     c = [[sum(vec[i][k] * clipped[k] * vec[j][k] for k in range(n)) for j in range(n)] for i in range(n)]
 
@@ -214,8 +196,17 @@ def validate_covariance(doc: dict, demo_clip: bool = False) -> dict:
     """Validate a covariance document (see module docstring). Returns the report dict."""
     report = Report()
     tol = dict(DEFAULT_TOL)
+    if not isinstance(doc, dict):
+        report.error("document.malformed", f"the document must be a JSON object, got {type(doc).__name__}")
+        return {"status": report.status(), "errors": report.errors, "warnings": report.warnings, "metrics": {}}
     if isinstance(doc.get("tolerances"), dict):
-        tol.update({k: float(v) for k, v in doc["tolerances"].items() if k in tol})
+        for k, v in doc["tolerances"].items():
+            if k not in tol:
+                continue
+            if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) or v < 0:
+                report.error("tolerances.malformed", f"tolerance '{k}' must be a finite non-negative number, got {v!r}")
+            else:
+                tol[k] = float(v)
     report.metrics["tolerances"] = tol
     if doc.get("kind") not in ("absolute", "relative"):
         report.error("metadata.kind", "kind must be 'absolute' or 'relative'")
@@ -226,7 +217,8 @@ def validate_covariance(doc: dict, demo_clip: bool = False) -> dict:
     if matrix is not None:
         n = len(matrix)
         if not isinstance(labels, list) or len(labels) != n:
-            report.error("labels.dimension", f"labels must be a list of {n} entries matching the matrix, got {None if labels is None else len(labels)}")
+            got = len(labels) if isinstance(labels, list) else (None if labels is None else type(labels).__name__)
+            report.error("labels.dimension", f"labels must be a list of {n} entries matching the matrix, got {got}")
         elif len(set(map(str, labels))) != n:
             report.error("labels.duplicate", "labels are not unique")
     elif not isinstance(labels, list):

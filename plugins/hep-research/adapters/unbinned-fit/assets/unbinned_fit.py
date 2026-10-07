@@ -268,4 +268,9 @@ def main(argv=None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    import sys as _sys
+    try:
+        sys.exit(main())
+    except OSError as _exc:  # a missing or unreadable input: one line, no traceback
+        print(f"unbinned_fit.py: error: {_exc}", file=_sys.stderr)
+        raise SystemExit(2)

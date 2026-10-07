@@ -103,11 +103,11 @@ class ConfigTests(unittest.TestCase):
 
     def test_cli_refuses_with_exit_2_and_names_the_keys(self):
         p = subprocess.run([sys.executable, str(ADAPTER / "batch_campaign.py"), "check-config", "--config", "/dev/stdin"],
-                           input=json.dumps(without(SLURM, "slurm", "partition")), capture_output=True, text=True)
+                           input=json.dumps(without(SLURM, "slurm", "partition")), capture_output=True, text=True, timeout=600)
         self.assertEqual(p.returncode, 2, p.stdout + p.stderr)
         self.assertIn("slurm.partition", p.stdout)
         ex = ADAPTER / "assets" / "batch-config.example.json"
-        run = lambda *a: subprocess.run([sys.executable, str(ADAPTER / "batch_campaign.py"), "check-config", "--config", str(ex), *a], capture_output=True, text=True)
+        run = lambda *a: subprocess.run([sys.executable, str(ADAPTER / "batch_campaign.py"), "check-config", "--config", str(ex), *a], capture_output=True, text=True, timeout=600)
         self.assertEqual(run("--example").returncode, 0)
         self.assertEqual(run().returncode, 2)
 

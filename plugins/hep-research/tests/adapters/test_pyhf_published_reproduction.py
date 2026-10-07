@@ -55,7 +55,7 @@ class PublishedReproductionTests(unittest.TestCase):
         out = self.tmp / ("out-" + published.stem)
         proc = subprocess.run([sys.executable, str(SCRIPT), "--bkgonly", str(self.tmp / "BkgOnly.json"), "--patchset",
                                str(self.tmp / patchset), "--published", str(published), "--out", str(out)],
-                              capture_output=True, text=True)
+                              capture_output=True, text=True, timeout=600)
         return proc, out
 
     def test_reproduces_the_original_workspace(self):

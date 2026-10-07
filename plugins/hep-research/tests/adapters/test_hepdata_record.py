@@ -29,7 +29,7 @@ class HepdataRecordTests(unittest.TestCase):
         cmd = [sys.executable, str(SCRIPT), "--table", str(table), "--observable", str(FIX / "synthetic-observable.json"),
                "--record", "synthetic", "--table-name", "Table 1", "--status", status, "--created", "2026-10-07",
                "--out", str(out), *extra]
-        proc = subprocess.run(cmd, capture_output=True, text=True)
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
         return proc, out
 
     def write(self, name, doc):

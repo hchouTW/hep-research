@@ -27,7 +27,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SITE_KEYS = ("partition", "account", "qos", "constraint", "gres", "requirements", "container_image")
 MAX_BYTES = 2 * 1024 * 1024
-CACHE = re.compile(r"(^|/)(__pycache__|\.pytest_cache)(/|$)|\.pyc$|(^|/)\.DS_Store$")
+CACHE = re.compile(r"(^|/)(__pycache__|\.pytest_cache|\.hypothesis)(/|$)|\.pyc$|(^|/)\.DS_Store$")
 TRANSCRIPT = re.compile(r"\.jsonl$|transcript", re.I)
 RUBRIC = re.compile(r"rubric|answer[-_]?key|grading|prompts_eval|routing_eval", re.I)
 PRIVATE = re.compile(r"/home/[a-z_][a-z0-9_-]*/|/Users/[A-Za-z0-9_.-]+/|C:\\\\Users\\\\|/mnt/project-files|/tmp/claude|\.claude/projects/")
@@ -44,7 +44,7 @@ TEXT = {".py", ".md", ".json", ".csv", ".txt", ".yaml", ".yml", ".sh", ".C", ".c
 
 def files() -> list[Path]:
     try:
-        out = subprocess.run(["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard", "--", "."], cwd=ROOT, capture_output=True, text=True, check=True).stdout
+        out = subprocess.run(["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard", "--", "."], cwd=ROOT, capture_output=True, text=True, check=True, timeout=120).stdout
         tracked = [ROOT / f for f in out.split("\0") if f and ((ROOT / f).exists() or (ROOT / f).is_symlink())]  # not deleted in the worktree
         if tracked:
             return tracked

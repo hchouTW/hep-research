@@ -20,7 +20,7 @@ class PartitionExampleTests(unittest.TestCase):
     def test_every_criterion_passes(self):
         with tempfile.TemporaryDirectory() as td:
             p = subprocess.run([sys.executable, str(PLUGIN / "examples" / "local-partition" / "run.py"), "--out", td],
-                               capture_output=True, text=True)
+                               capture_output=True, text=True, timeout=1200)
             r = json.loads((Path(td) / "results.json").read_text())
         self.assertEqual(p.returncode, 0, r["pass"])
         self.assertTrue(all(v is True for v in r["pass"].values()), r["pass"])

@@ -23,7 +23,8 @@
     "validate_covariance",
     "validate_response",
     "_linalg",
-    "_poisson"
+    "_poisson",
+    "_validate"
    ],
    "source": "experiment-neutral implementations; imports packaged"
   },

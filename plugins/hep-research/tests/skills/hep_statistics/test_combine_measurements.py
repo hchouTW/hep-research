@@ -36,12 +36,12 @@ def doc(cov, correlation):
 
 class CliTests(unittest.TestCase):
     def test_help_exits_zero(self):
-        proc = subprocess.run([sys.executable, str(SCRIPT), "--help"], capture_output=True, text=True)
+        proc = subprocess.run([sys.executable, str(SCRIPT), "--help"], capture_output=True, text=True, timeout=600)
         self.assertEqual(proc.returncode, 0, proc.stderr)
         self.assertIn("generalized least squares", proc.stdout)
 
     def test_help_works_without_numpy(self):
-        proc = subprocess.run([sys.executable, "-c", NO_NUMPY, str(SCRIPT), "--help"], capture_output=True, text=True)
+        proc = subprocess.run([sys.executable, "-c", NO_NUMPY, str(SCRIPT), "--help"], capture_output=True, text=True, timeout=600)
         self.assertEqual(proc.returncode, 0, proc.stderr)
         self.assertIn("generalized least squares", proc.stdout)
 
@@ -49,7 +49,7 @@ class CliTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             p = Path(tmp) / "in.json"
             p.write_text(json.dumps(doc([[1.0, 0.0], [0.0, 1.0]], {"independent": True})), encoding="utf-8")
-            proc = subprocess.run([sys.executable, "-c", NO_NUMPY, str(SCRIPT), str(p)], capture_output=True, text=True)
+            proc = subprocess.run([sys.executable, "-c", NO_NUMPY, str(SCRIPT), str(p)], capture_output=True, text=True, timeout=600)
         self.assertEqual(proc.returncode, 2, proc.stderr)
         self.assertNotIn("Traceback", proc.stderr)
         self.assertIn("numpy is required", json.loads(proc.stdout)["error"])

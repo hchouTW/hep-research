@@ -208,6 +208,34 @@ class ScanCompletenessAuditT04(unittest.TestCase):
                                          "--sealed", str(private / "sealed.json"), str(outd)]), 0)
 
 
+class FileAndConfigTests(unittest.TestCase):
+    def test_scan_file_text_cache_and_binary(self):
+        sealed = [1234.567]
+        with tempfile.TemporaryDirectory() as td:
+            d = Path(td)
+            (d / "a.csv").write_text("bin,count\n4,1234.567\n")
+            self.assertEqual([(h["line"], h["sealed_value"]) for h in bl.scan_file(d / "a.csv", sealed)], [(2, 1234.567)])
+            (d / "clean.txt").write_text("nothing here 12\n")
+            self.assertEqual(bl.scan_file(d / "clean.txt", sealed), [])
+            (d / "fig.png").write_bytes(b"\x89PNG\r\n")
+            res = bl.scan_file(d / "fig.png", sealed)
+            self.assertTrue(res[0]["unscanned"])
+            self.assertIn("binary format '.png'", res[0]["reason"])
+            if HAVE:
+                np.save(d / "c.npy", np.array([1.0, 1234.567, 3.0]))
+                self.assertEqual(bl.scan_file(d / "c.npy", sealed)[0]["index"], 1)
+
+    def test_load_project_blinding(self):
+        with tempfile.TemporaryDirectory() as td:
+            cfg = Path(td) / "hep-research.project.json"
+            block = {"blinded": ["sr-mass"], "allowed_outputs": ["sidebands.json"],
+                     "regions": [{"variable": "mass", "low": 120, "high": 130}]}
+            cfg.write_text(json.dumps({"blinding": block}))
+            self.assertEqual(bl.load_project_blinding(cfg), block)
+            cfg.write_text(json.dumps({"profiles": []}))
+            self.assertEqual(bl.load_project_blinding(cfg), {"blinded": [], "allowed_outputs": []})
+
+
 class LowCountAndEncodingTests(unittest.TestCase):
     """Sealed low counts match only standalone numbers; logs in other encodings are read or reported (T06)."""
 

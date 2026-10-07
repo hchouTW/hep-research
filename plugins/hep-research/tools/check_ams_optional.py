@@ -18,8 +18,11 @@ ROOT = Path(__file__).resolve().parents[1]
 AMS = "experiment:ams-02"
 
 
-def run(name, cmd, cwd):
-    p = subprocess.run(cmd, cwd=str(cwd), capture_output=True, text=True)
+def run(name, cmd, cwd, timeout=1800):
+    try:
+        p = subprocess.run(cmd, cwd=str(cwd), capture_output=True, text=True, timeout=timeout)
+    except subprocess.TimeoutExpired:
+        return {"name": name, "exit_code": None, "status": "fail", "tail": f"timed out after {timeout} s"}
     return {"name": name, "exit_code": p.returncode, "status": "pass" if p.returncode == 0 else "fail",
             "tail": (p.stdout + p.stderr)[-1200:] if p.returncode else ""}
 

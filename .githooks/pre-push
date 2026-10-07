@@ -7,3 +7,7 @@ while read -r lref lsha rref rsha; do
   git log --name-only --format= $range | grep -v '^$' \
     | "$(git rev-parse --show-toplevel)/.githooks/check-paths.sh" || exit 1
 done
+# when pre-commit is installed, also run the fast test tier before pushing
+if command -v pre-commit >/dev/null 2>&1; then
+  pre-commit run --config plugins/hep-research/.pre-commit-config.yaml --hook-stage pre-push --all-files || exit 1
+fi

@@ -7,6 +7,8 @@ import contextlib
 import copy
 import io
 import json
+import os
+import random
 import shutil
 import sys
 import tempfile
@@ -23,10 +25,13 @@ from contracts.semver import valid_spec  # noqa: E402
 from contracts import validate as validate_cli  # noqa: E402
 from contracts.validate import validate_artifact  # noqa: E402
 from contracts.vocab import Vocabulary  # noqa: E402
+from core.evidence.ledger import check_ledger  # noqa: E402
+from tests.contracts.mutations import random_mutation, single_mutations  # noqa: E402
 
 FIX = ROOT / "contracts" / "fixtures"
 VALID = FIX / "artifacts" / "valid"
 REG = FIX / "registry"
+SLOW = os.environ.get("HEP_SLOW_TESTS") == "1"
 
 
 def load(p: Path):
@@ -159,29 +164,80 @@ class GateMalformedInputTests(unittest.TestCase):
             self.assertFalse(rep.ok)
             self.assertIn("$.artifact_type", {f.path for f in rep.errors})
 
-    def test_seeded_mutations_never_raise(self):
-        """A small seeded mutation fuzz of every valid fixture (the slow tier runs more)."""
-        import random
+
+class MutationFuzzTests(unittest.TestCase):
+    """Seeded mutation fuzzing of every valid artifact fixture, a gate plan and the ledgers (T09): no input raises.
+
+    Fast tier: every node of every fixture mutated four ways (null, type swap, list wrap, deletion), one at a time.
+    Slow tier: 10,000 random multi-mutations through the validator, the gate and the ledger checker."""
+
+    PLAN = {"transformations": [
+        {"kind": "level-identification", "owner": "hep-theory", "justification": "j", "from": "parton", "to": "particle-fiducial"},
+        {"kind": "fiducial-restriction", "owner": "hep-theory", "variable": "cos_theta", "range": [-0.5, 0.5]},
+        {"kind": "rebin", "owner": "hep-theory", "edges": [-1.0, 0.0, 1.0]},
+        {"kind": "unit-conversion", "owner": "hep-theory", "justification": "j", "from": "pb", "to": "fb", "factor": 1000.0},
+        {"kind": "bin-integrate", "owner": "hep-theory"},
+        {"kind": "multiply-by-normalization", "owner": "hep-analysis", "normalization_kind": "integrated-luminosity",
+         "value": 1.0, "unit_in": "fb", "unit_out": "1"},
+        {"kind": "forward-fold", "owner": "detector-response", "truth_edges": [-1.0, 0.0, 1.0], "reco_edges": [-1.0, 1.0],
+         "truth_level": "particle-fiducial", "includes": ["efficiency"]},
+        {"kind": "apply-correction", "owner": "hep-analysis", "justification": "j", "effect": "acceptance"}],
+        "mappings": [{"field": "process", "action": "equivalent", "justification": "j"},
+                     {"key": "x:y", "action": "irrelevant", "justification": "j"}],
+        "measurement_conditions": {"sqrt_s": 91.2}}
+
+    @classmethod
+    def setUpClass(cls):
+        cls.docs = {p.name: load(p) for p in sorted(VALID.glob("*.json"))}
+        cls.pred, cls.meas = load(VALID / "prediction.json"), load(VALID / "dataset_record.json")
+        cls.ledgers = [(load(d / "sources.json"), load(d / "claims.json")) for d in sorted((ROOT / "profiles").glob("*/*/evidence"))]
+
+    def test_every_single_mutation_of_every_fixture(self):
+        n = 0
+        for name, doc in self.docs.items():
+            for what, mutated in single_mutations(doc):
+                n += 1
+                try:
+                    validate_artifact(mutated)
+                    gate_cli.check(mutated, self.meas, {})
+                    gate_cli.check(self.pred, mutated, {})
+                except Exception as exc:  # noqa: BLE001 - the point is to report any exception with its input
+                    self.fail(f"{name}: {what}: {type(exc).__name__}: {exc}")
+        self.assertGreater(n, 1000)
+
+    def test_every_single_mutation_of_the_plan_and_a_ledger_record(self):
+        for what, plan in single_mutations(self.PLAN):
+            try:
+                gate_cli.check(self.pred, self.meas, plan)
+            except Exception as exc:  # noqa: BLE001
+                self.fail(f"plan {what}: {type(exc).__name__}: {exc}")
+        sources, claims = self.ledgers[0]
+        for what, rec in single_mutations({"source": sources[0], "claim": claims[0]}):
+            try:
+                check_ledger([rec.get("source")] + sources[1:], [rec.get("claim")] + claims[1:])
+            except Exception as exc:  # noqa: BLE001
+                self.fail(f"ledger {what}: {type(exc).__name__}: {exc}")
+
+    @unittest.skipUnless(SLOW, "slow: set HEP_SLOW_TESTS=1")
+    def test_ten_thousand_random_mutations(self):
         rng = random.Random(20261007)
-        docs = [load(p) for p in sorted(VALID.glob("*.json"))]
-        pred, meas = self.pair()
-        repl = [None, 0, -1.5, float("nan"), "", "x", [], [None], {}, {"a": 1}, True, [1, 2]]
-        for _ in range(300):
-            doc = copy.deepcopy(rng.choice(docs))
-            node = doc
-            for _ in range(rng.randint(1, 4)):
-                keys = list(node) if isinstance(node, dict) else list(range(len(node)))
-                if not keys:
-                    break
-                key = rng.choice(keys)
-                if isinstance(node[key], (dict, list)) and node[key] and rng.random() < 0.7:
-                    node = node[key]
-                    continue
-                node[key] = copy.deepcopy(rng.choice(repl))
-                break
-            validate_artifact(doc)
-            gate_cli.check(doc, meas, {})
-            gate_cli.check(pred, doc, {})
+        docs = list(self.docs.values())
+        for i in range(10000):
+            k = rng.choice((1, 1, 2, 3))
+            doc = random_mutation(rng.choice(docs), rng, k)
+            plan = self.PLAN if rng.random() < 0.5 else random_mutation(self.PLAN, rng, k)
+            sources, claims = rng.choice(self.ledgers)
+            if rng.random() < 0.5:
+                sources = random_mutation(sources, rng, k)
+            else:
+                claims = random_mutation(claims, rng, k)
+            try:
+                validate_artifact(doc)
+                gate_cli.check(doc, self.meas, plan)
+                gate_cli.check(self.pred, doc, plan)
+                check_ledger(sources, claims)
+            except Exception as exc:  # noqa: BLE001
+                self.fail(f"mutation {i}: {type(exc).__name__}: {exc}")
 
 
 class RegistryRobustnessTests(unittest.TestCase):

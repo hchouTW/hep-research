@@ -64,7 +64,7 @@ class CreateStoryCardTests(unittest.TestCase):
                 "--outcome", "download active users",
             ],
             capture_output=True,
-            text=True,
+            text=True, timeout=600
         )
         self.assertEqual(result.returncode, 0)
         self.assertIn("# Story Card", result.stdout)
@@ -73,7 +73,7 @@ class CreateStoryCardTests(unittest.TestCase):
         result = subprocess.run(
             [sys.executable, str(ROOT / "scripts/create_story_card.py"), "--actor", "user"],
             capture_output=True,
-            text=True,
+            text=True, timeout=600
         )
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("usage:", result.stderr)
@@ -114,7 +114,7 @@ class ValidateAgileNotesTests(unittest.TestCase):
         result = subprocess.run(
             [sys.executable, str(ROOT / "scripts/validate_agile_notes.py"), str(ROOT / "assets/story-card.md")],
             capture_output=True,
-            text=True,
+            text=True, timeout=600
         )
         self.assertEqual(result.returncode, 0)
         self.assertIn(": ok", result.stdout)
@@ -123,7 +123,7 @@ class ValidateAgileNotesTests(unittest.TestCase):
         result = subprocess.run(
             [sys.executable, str(ROOT / "scripts/validate_agile_notes.py"), str(TESTS_DIR / "does-not-exist.md")],
             capture_output=True,
-            text=True,
+            text=True, timeout=600
         )
         self.assertEqual(result.returncode, 2)
         self.assertIn("file not found", result.stdout)
@@ -172,7 +172,7 @@ class EdgeCaseRegressionTests(unittest.TestCase):
         result = subprocess.run(
             [sys.executable, str(ROOT / "scripts/create_story_card.py"),
              "--actor", "", "--capability", "x", "--outcome", "y"],
-            capture_output=True, text=True)
+            capture_output=True, text=True, timeout=600)
         self.assertEqual(result.returncode, 2)
         self.assertNotIn("Traceback", result.stderr)
 
@@ -303,7 +303,7 @@ class ValidateNotesCliOptInTests(unittest.TestCase):
 
     def _run(self, path, *flags):
         return subprocess.run([sys.executable, self.SCRIPT, path, *flags],
-                              capture_output=True, text=True)
+                              capture_output=True, text=True, timeout=600)
 
     def test_default_run_ignores_an_unverified_plan(self):
         # The regression gate: a note that fails the new check must still pass by default.
