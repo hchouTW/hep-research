@@ -447,3 +447,22 @@ the split, the decoupling and the rewrites of this release; all software checks 
 
 Not run in E1: the Codex load check, live routing, and the companion-skill loading cases on the installed plugins (to be
 run on a workstation with both hosts after the repositories are created).
+
+## HARDENING-P0-P1 (2026-10-07 to 2026-10-08, E2, version 0.3.0 + unreleased): statistical fixes, tests, CI
+
+Work order "Harden hep-research 0.3.0", items T01–T18 (P0 merged as PR #2, P1 on `feat/hardening-p1`). E2 as above;
+the dev tools (hypothesis 6.168.5, ruff 0.16.10, mypy 2.4.0, pre-commit 4.6.2, pip-tools 7.6.2) in a separate venv.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 4` | 17 pass, 0 fail, 2 skip (host CLI checks off); 1,469 unit tests in 105 modules, 43 skipped (optional tools, slow tier); 3 min 35 s |
+| Slow tier (`HEP_SLOW_TESTS=1`) | Feldman-Cousins Tables IV and VI (220 entries) and PDG Table 40.4 within 0.01; 10,000 contract mutations raise nothing; validator time budgets met |
+| Published references | Feldman and Cousins (1998) Tables IV and VI; PDG 2024 Tables 40.3 and 40.4; SciPy 1.18 for Garwood ends, tails and limits; Li and Ma eq. 17 checked against an independent transcription (the paper prints no table) |
+| Fuzzing | 30,000 seeded mutations over artifacts, gate plans and ledgers, and 15,000 over the covariance and response fixtures: no exception |
+| ruff and mypy on `core/`, `contracts/` | pass |
+| Examples | rerun with E2: outputs unchanged by this work; two differences appear at b373418 as well (ams-02 profile version 1.0.0 in the AMS artifacts; round-off in an exactly-zero unfolding bias) |
+| CI (`tests.yml`) | Python 3.11–3.13 with `requirements-ci.lock`; results attached to the pull request |
+
+Unverified here: the optional CI jobs (pyhf, uproot, PyTorch, ROOT container) run only on GitHub; a host where
+Chromium cannot start (the Mermaid hang is covered by a fake renderer, not a real one); the SKILL.md trims planned in
+`docs/maintenance.md` (not applied).
