@@ -28,7 +28,7 @@ except ImportError:
 
 def run(out, *extra):
     proc = subprocess.run([sys.executable, str(SCRIPT), '--out', str(out), *extra],
-                          capture_output=True, text=True, check=True)
+                          capture_output=True, text=True, check=True, timeout=600)
     return json.loads(proc.stdout)
 
 
@@ -96,7 +96,7 @@ class SyntheticNanoAODTests(unittest.TestCase):
 
     def test_bad_arguments_are_rejected(self):
         proc = subprocess.run([sys.executable, str(SCRIPT), '--out', str(self.path), '--events', '0'],
-                              capture_output=True, text=True)
+                              capture_output=True, text=True, timeout=600)
         self.assertNotEqual(proc.returncode, 0)
 
 
@@ -111,7 +111,7 @@ class MissingPackagesTests(unittest.TestCase):
     """Runs the script with numpy/uproot made unimportable; needs no third-party package itself."""
 
     def run_blocked(self, blocked, *args):
-        return subprocess.run([sys.executable, '-c', BLOCK, str(SCRIPT), blocked, *args], capture_output=True, text=True)
+        return subprocess.run([sys.executable, '-c', BLOCK, str(SCRIPT), blocked, *args], capture_output=True, text=True, timeout=600)
 
     def test_help_works_without_numpy(self):
         proc = self.run_blocked('numpy', '--help')

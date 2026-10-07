@@ -34,7 +34,7 @@ class LocalPartitionCliTests(unittest.TestCase):
         self.cmd = f"{q(sys.executable)} {q(str(self.d / 'worker.py'))} --start {{start}} --stop {{stop}} --out {{out}} --id {{id}} --fail-flag {q(str(self.flag))}"
 
     def cli(self, *a):
-        p = subprocess.run([sys.executable, str(ROOT / "local_partition.py"), *a], capture_output=True, text=True)
+        p = subprocess.run([sys.executable, str(ROOT / "local_partition.py"), *a], capture_output=True, text=True, timeout=600)
         return p.returncode, (json.loads(p.stdout) if p.stdout.strip().startswith("{") else p.stdout)
 
     def test_full_cycle(self):

@@ -57,7 +57,7 @@ class CheckSurrogateDomainCliTests(unittest.TestCase):
                 self.assertIn("error", rep)
 
     def test_missing_file_through_the_command_line(self):
-        res = subprocess.run([sys.executable, "-I", str(SCRIPT), "/nonexistent/domain.json"], capture_output=True, text=True)
+        res = subprocess.run([sys.executable, "-I", str(SCRIPT), "/nonexistent/domain.json"], capture_output=True, text=True, timeout=600)
         self.assertEqual(res.returncode, 2)
         self.assertIn("error", json.loads(res.stdout))
         self.assertNotIn("Traceback", res.stderr)

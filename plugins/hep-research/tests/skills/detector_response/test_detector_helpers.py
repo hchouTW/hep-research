@@ -83,7 +83,7 @@ class TagAndProbeTests(unittest.TestCase):
         result = subprocess.run(
             [sys.executable, str(ROOT / 'skills/detector-response/scripts/tag_and_probe_efficiency.py'),
              '--pass-count', '92', '--total', '100'],
-            capture_output=True, text=True,
+            capture_output=True, text=True, timeout=600
         )
         self.assertEqual(result.returncode, 0)
         payload = json.loads(result.stdout)
@@ -95,7 +95,7 @@ class TagAndProbeTests(unittest.TestCase):
         result = subprocess.run(
             [sys.executable, str(ROOT / 'skills/detector-response/scripts/tag_and_probe_efficiency.py'),
              '--pass-count', '11', '--total', '10'],
-            capture_output=True, text=True,
+            capture_output=True, text=True, timeout=600
         )
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('pass_count must be', result.stderr)
@@ -147,7 +147,7 @@ class PileupReweightTests(unittest.TestCase):
         result = subprocess.run(
             [sys.executable, str(ROOT / 'skills/detector-response/scripts/pileup_reweight.py'),
              str(ROOT / 'skills/detector-response/assets/pileup-profiles.example.json')],
-            capture_output=True, text=True,
+            capture_output=True, text=True, timeout=600
         )
         self.assertEqual(result.returncode, 0)
         payload = json.loads(result.stdout)
@@ -161,7 +161,7 @@ class PileupReweightTests(unittest.TestCase):
         try:
             result = subprocess.run(
                 [sys.executable, str(ROOT / 'skills/detector-response/scripts/pileup_reweight.py'), path],
-                capture_output=True, text=True,
+                capture_output=True, text=True, timeout=600
             )
         finally:
             os.unlink(path)
@@ -173,7 +173,7 @@ class PileupReweightTests(unittest.TestCase):
     def test_cli_missing_file_fails_cleanly(self):
         result = subprocess.run(
             [sys.executable, str(ROOT / 'skills/detector-response/scripts/pileup_reweight.py'), '/tmp/does-not-exist-pileup-bundle.json'],
-            capture_output=True, text=True,
+            capture_output=True, text=True, timeout=600
         )
         self.assertEqual(result.returncode, 1)
         payload = json.loads(result.stdout)
@@ -308,7 +308,7 @@ class MultipleScatteringTests(unittest.TestCase):
         try:
             proc = subprocess.run(
                 [sys.executable, str(ROOT / 'skills/detector-response/scripts/multiple_scattering.py'), path],
-                capture_output=True, text=True)
+                capture_output=True, text=True, timeout=600)
             self.assertNotEqual(proc.returncode, 0)
             self.assertNotIn('Traceback', proc.stderr)
             self.assertIn('point_resolution_um', proc.stderr)
@@ -319,7 +319,7 @@ class MultipleScatteringTests(unittest.TestCase):
         proc = subprocess.run(
             [sys.executable, str(ROOT / 'skills/detector-response/scripts/multiple_scattering.py'),
              str(ROOT / 'skills/detector-response/assets/detector-stack.example.json'), '--rigidity', '100'],
-            capture_output=True, text=True)
+            capture_output=True, text=True, timeout=600)
         self.assertEqual(proc.returncode, 0, proc.stderr)
         payload = json.loads(proc.stdout)
         self.assertAlmostEqual(payload['total_x_over_x0'], 0.0357, places=12)
@@ -430,7 +430,7 @@ class CalorimeterResolutionTests(unittest.TestCase):
         proc = subprocess.run(
             [sys.executable, str(ROOT / 'skills/detector-response/scripts/calorimeter_resolution.py'),
              '--fit', str(ROOT / 'skills/detector-response/assets/calorimeter-response.example.json')],
-            capture_output=True, text=True)
+            capture_output=True, text=True, timeout=600)
         self.assertEqual(proc.returncode, 0, proc.stderr)
         payload = json.loads(proc.stdout)
         self.assertAlmostEqual(payload['stochastic'], 0.10, places=10)
@@ -442,7 +442,7 @@ class CalorimeterResolutionTests(unittest.TestCase):
         try:
             proc = subprocess.run(
                 [sys.executable, str(ROOT / 'skills/detector-response/scripts/calorimeter_resolution.py'), '--fit', path],
-                capture_output=True, text=True)
+                capture_output=True, text=True, timeout=600)
             self.assertNotEqual(proc.returncode, 0)
             self.assertNotIn('Traceback', proc.stderr)
             self.assertIn('three distinct energies', proc.stderr)
@@ -585,7 +585,7 @@ class PidSeparationTests(unittest.TestCase):
             [sys.executable, str(ROOT / 'skills/detector-response/scripts/pid_separation_power.py'),
              '--mode', 'tof', '--species', 'pi', 'K', '--momentum', '2.0',
              '--path', '1.2', '--time-resolution', '60'],
-            capture_output=True, text=True)
+            capture_output=True, text=True, timeout=600)
         self.assertEqual(proc.returncode, 0, proc.stderr)
         payload = json.loads(proc.stdout)
         self.assertGreater(payload['n_sigma'], 0.0)
@@ -595,7 +595,7 @@ class PidSeparationTests(unittest.TestCase):
         proc = subprocess.run(
             [sys.executable, str(ROOT / 'skills/detector-response/scripts/pid_separation_power.py'),
              '--mode', 'tof', '--species', 'pi', 'pi'],
-            capture_output=True, text=True)
+            capture_output=True, text=True, timeout=600)
         self.assertNotEqual(proc.returncode, 0)
         self.assertNotIn('Traceback', proc.stderr)
 
@@ -670,7 +670,7 @@ class CherenkovTests(unittest.TestCase):
         proc = subprocess.run(
             [sys.executable, str(ROOT / 'skills/detector-response/scripts/cherenkov_angle.py'),
              '--index', '1.05', '--species', 'pi', 'K', '--momentum', '10'],
-            capture_output=True, text=True)
+            capture_output=True, text=True, timeout=600)
         self.assertEqual(proc.returncode, 0, proc.stderr)
         payload = json.loads(proc.stdout)
         self.assertGreater(payload['n_sigma'], 0.0)
@@ -681,6 +681,6 @@ class CherenkovTests(unittest.TestCase):
         proc = subprocess.run(
             [sys.executable, str(ROOT / 'skills/detector-response/scripts/cherenkov_angle.py'),
              '--index', '0.9', '--species', 'pi', 'K'],
-            capture_output=True, text=True)
+            capture_output=True, text=True, timeout=600)
         self.assertNotEqual(proc.returncode, 0)
         self.assertNotIn('Traceback', proc.stderr)

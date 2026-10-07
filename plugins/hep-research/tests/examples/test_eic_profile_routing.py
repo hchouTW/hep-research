@@ -17,7 +17,7 @@ class EicRoutingExampleTests(unittest.TestCase):
     def setUpClass(cls):
         cls.tmp = tempfile.TemporaryDirectory()
         cls.out = Path(cls.tmp.name)
-        cls.proc = subprocess.run([sys.executable, str(SCRIPT), "--out", str(cls.out)], capture_output=True, text=True)
+        cls.proc = subprocess.run([sys.executable, str(SCRIPT), "--out", str(cls.out)], capture_output=True, text=True, timeout=1200)
         cls.r = json.loads((cls.out / "results.json").read_text(encoding="utf-8"))
 
     @classmethod

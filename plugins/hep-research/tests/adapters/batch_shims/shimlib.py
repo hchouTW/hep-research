@@ -123,7 +123,7 @@ def sbatch(argv: list) -> int:
             out = str(opts.get("--output", "slurm-%A_%a.out")).replace("%A", str(jid)).replace("%a", str(idx))
             err = str(opts.get("--error", out)).replace("%A", str(jid)).replace("%a", str(idx))
             with open(out, "a") as o, open(err, "a") as e:
-                return subprocess.run(["bash", str(script)], stdout=o, stderr=e, env=env).returncode
+                return subprocess.run(["bash", str(script)], stdout=o, stderr=e, env=env, timeout=600).returncode
 
         def rec(state, code="0:0", ran=True):
             task["records"].append({"state": state, "exit": code, "elapsed": "00:00:01", "rss": "20480K" if ran else "", "nodes": node, "ran": ran})
@@ -267,7 +267,7 @@ def condor_submit(argv: list) -> int:
             Path(out).parent.mkdir(parents=True, exist_ok=True)
             if not transfer:
                 with open(out, "a") as o, open(err, "a") as e:
-                    return subprocess.run([exe, *args], cwd=iwd, stdout=o, stderr=e).returncode
+                    return subprocess.run([exe, *args], cwd=iwd, stdout=o, stderr=e, timeout=600).returncode
             with tempfile.TemporaryDirectory(prefix="shim-scratch-") as scratch:
                 scratch = Path(scratch)
                 inputs = [s.strip() for s in sub(kv.get("transfer_input_files", "")).split(",") if s.strip()]
@@ -279,7 +279,7 @@ def condor_submit(argv: list) -> int:
                     exe = f"./{Path(exe).name}"
                 before = {p.name for p in scratch.iterdir()}
                 with open(out, "a") as o, open(err, "a") as e:
-                    code = subprocess.run([exe, *args], cwd=scratch, stdout=o, stderr=e).returncode
+                    code = subprocess.run([exe, *args], cwd=scratch, stdout=o, stderr=e, timeout=600).returncode
                 remaps = {}
                 for pair in sub(kv.get("transfer_output_remaps", "").strip('"')).split(";"):
                     if "=" in pair:

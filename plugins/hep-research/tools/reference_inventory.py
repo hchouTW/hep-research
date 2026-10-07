@@ -70,7 +70,7 @@ def git_last(root: Path, rel: str) -> str:
 
 def shallow(root: Path) -> bool:
     try:
-        r = subprocess.run(["git", "rev-parse", "--is-shallow-repository"], cwd=root, capture_output=True, text=True)
+        r = subprocess.run(["git", "rev-parse", "--is-shallow-repository"], cwd=root, capture_output=True, text=True, timeout=120)
         return r.stdout.strip() == "true"
     except OSError:
         return False

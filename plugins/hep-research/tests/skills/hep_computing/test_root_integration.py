@@ -30,7 +30,7 @@ class RootIntegrationTests(unittest.TestCase):
         cls._tmp = tempfile.TemporaryDirectory()
         cls.fx = Path(cls._tmp.name)
         subprocess.run([PYTHON, str(ROOT_DIR / 'tests/skills/hep_computing/make_root_fixtures.py'), str(cls.fx)],
-                       check=True, capture_output=True)
+                       check=True, capture_output=True, timeout=600)
 
     @classmethod
     def tearDownClass(cls):
@@ -38,7 +38,7 @@ class RootIntegrationTests(unittest.TestCase):
 
     def run_script(self, relative, *args):
         proc = subprocess.run([PYTHON, str(ROOT_DIR / relative), *map(str, args)],
-                              capture_output=True, text=True, cwd=self.fx)
+                              capture_output=True, text=True, cwd=self.fx, timeout=600)
         self.assertEqual(proc.returncode, 0, proc.stderr[-2000:])
         return proc.stdout
 
@@ -82,7 +82,7 @@ class RootIntegrationTests(unittest.TestCase):
         check = subprocess.run([PYTHON, '-c', (
             'import ROOT,sys; r=ROOT.TFile.Open(sys.argv[1]).Get("fit_result");'
             'print(r.floatParsFinal().find("mean").getVal())'), str(self.fx / 'fit.root')],
-            capture_output=True, text=True, check=True)
+            capture_output=True, text=True, check=True, timeout=600)
         self.assertAlmostEqual(float(check.stdout.split()[-1]), 91.0, delta=0.5)
 
 

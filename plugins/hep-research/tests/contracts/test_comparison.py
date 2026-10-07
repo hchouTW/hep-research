@@ -159,7 +159,7 @@ class GateTests(unittest.TestCase):
             pa.write_text(json.dumps({"artifact_type": "prediction", "status": [], "extension": {"observable": obs(), "parameter_point": {}}}))
             ma.write_text(json.dumps({"artifact_type": "dataset-record", "status": ["synthetic"],
                                       "extension": {"observable": obs(unit="nb"), "covariance": {"status": "present"}}}))
-            run = lambda *a: subprocess.run([sys.executable, str(PLUGIN / "contracts" / "comparison" / "gate.py"), *a], capture_output=True, text=True)  # noqa: E731
+            run = lambda *a: subprocess.run([sys.executable, str(PLUGIN / "contracts" / "comparison" / "gate.py"), *a], capture_output=True, text=True, timeout=600)  # noqa: E731
             self.assertEqual(run(str(pa), str(ma)).returncode, 1)
             ma.write_text(json.dumps({"artifact_type": "dataset-record", "status": ["synthetic"],
                                       "extension": {"observable": obs(), "covariance": {"status": "present"}}}))

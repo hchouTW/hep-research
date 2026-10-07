@@ -55,7 +55,7 @@ class HistogramTests(unittest.TestCase):
         self.assertTrue(audit(self.bundle)[1])
 
     def test_cli_success(self):
-        result = subprocess.run([sys.executable, str(ROOT/'skills/hep-computing/scripts/audit_histograms.py'), str(ROOT/'skills/hep-computing/assets/histograms.example.json')], capture_output=True, text=True)
+        result = subprocess.run([sys.executable, str(ROOT/'skills/hep-computing/scripts/audit_histograms.py'), str(ROOT/'skills/hep-computing/assets/histograms.example.json')], capture_output=True, text=True, timeout=600)
         self.assertEqual(result.returncode, 0)
         self.assertTrue(json.loads(result.stdout)['ok'])
 

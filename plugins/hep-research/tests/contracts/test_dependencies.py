@@ -129,7 +129,7 @@ class DependencyAuditT05(unittest.TestCase):
     def test_cli_exit_codes(self):
         self.assertIsNotNone(validate_dependencies)
         run = lambda p: subprocess.run([sys.executable, str(PLUGIN / "contracts" / "dependencies.py"), str(p), "--root", str(self.root)],
-                                       capture_output=True, text=True)
+                                       capture_output=True, text=True, timeout=600)
         self.assertEqual(run(self.consumer()).returncode, 0)
         self.assertEqual(run(self.consumer(sha256="0" * 64)).returncode, 1)
         self.assertEqual(run(self.consumer(ref="hepdata:x", external=True, sha256=None)).returncode, 3)

@@ -34,7 +34,7 @@ TEXT = {".md", ".py", ".sh", ".json", ".yaml", ".yml", ".txt", ".toml", ".cfg", 
 def files() -> list[str]:
     try:
         out = subprocess.run(["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard", "--", "."], cwd=ROOT,
-                             capture_output=True, text=True, check=True).stdout
+                             capture_output=True, text=True, check=True, timeout=120).stdout
         listed = [f for f in out.split("\0") if f]
         if listed:
             return listed

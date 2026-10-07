@@ -18,7 +18,7 @@ class RunnerTests(unittest.TestCase):
 
     def runner(self, *a):
         return subprocess.run([sys.executable, str(self.cdir / "runner.py"), "--spec", str(self.cdir / "spec.json"), *a],
-                              capture_output=True, text=True)
+                              capture_output=True, text=True, timeout=600)
 
     def test_seed_comes_from_the_manifest_via_the_map(self):
         m = self.cdir / "map.json"

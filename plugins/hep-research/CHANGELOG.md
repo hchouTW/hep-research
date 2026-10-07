@@ -57,6 +57,13 @@ Software checks establish contract consistency only, not physical validity.
   `pcolormesh` meshes and `imshow` images, and, given the sealed numbers (`check_figure(fig, region, sealed)`), text
   artists, titles and figure texts; a "blinded" label inside the region is not a leak. What it still cannot see
   (tick labels, legends, colorbars, values carried only by colors, transformed values) is stated in the module.
+- **The test suite is bounded and tiered (T14).** Every subprocess call in the tests and tools has a timeout
+  (`tests/tools/test_subprocess_timeouts.py` keeps it so). `check_diagram_sources.py` fails a block whose
+  renderer does not finish within `HEP_RENDER_TIMEOUT` (default 60 s) and stops calling Mermaid's `mmdc` after one
+  timeout, so a host where Chromium cannot start no longer hangs the suite. `run_all_checks.py` runs each test
+  module in its own process with a time limit (`--module-timeout`, default 600 s; `--jobs` for parallel modules) and
+  records every module's duration and the modules over 60 s. The full theory-comparison example test (70 to 350 s)
+  moved to the slow tier (`HEP_SLOW_TESTS=1`).
 - **Every script behaves as a command-line tool (T12).** `tests/skills/test_cli_robustness.py` runs all 64 scripts
   under `skills/*/scripts/` and `adapters/*/assets/` with `python3 -I`: `--help` must exit 0 without a traceback, and
   a missing input file must give a short error (or a JSON error report) with a non-zero exit. A table names each

@@ -124,16 +124,39 @@ class PlantUmlRender(unittest.TestCase):
 class RealBundle(unittest.TestCase):
     def run_script(self, name):
         return subprocess.run(
-            [sys.executable, str(ROOT / "scripts" / name)], capture_output=True, text=True
+            [sys.executable, str(ROOT / "scripts" / name)], capture_output=True, text=True, timeout=600
         )
 
     def test_shipped_diagram_sources_pass(self):
         result = self.run_script("check_diagram_sources.py")
+        if "did not finish within" in result.stdout:  # a renderer that cannot run here is not a defect in the sources
+            self.skipTest("a diagram renderer timed out on this host: " + next(
+                line for line in result.stdout.splitlines() if "did not finish within" in line))
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_a_hanging_renderer_fails_the_block_within_the_timeout(self):
+        """Mermaid's mmdc launches Chromium, which can hang where Chromium cannot start (T14)."""
+        import os
+        import time
+        with tempfile.TemporaryDirectory() as tmp:
+            fake = Path(tmp) / "mmdc"
+            fake.write_text("#!/bin/sh\nsleep 30\n")
+            fake.chmod(0o755)
+            md = Path(tmp) / "two.md"
+            md.write_text("```mermaid\nflowchart LR\n  A --> B\n```\n\n```mermaid\nflowchart LR\n  C --> D\n```\n")
+            env = dict(os.environ, PATH=f"{tmp}{os.pathsep}{os.environ.get('PATH', '')}", HEP_RENDER_TIMEOUT="1")
+            start = time.monotonic()
+            result = subprocess.run([sys.executable, str(ROOT / "scripts" / "check_diagram_sources.py"), str(md)],
+                                    capture_output=True, text=True, env=env, timeout=60)
+            elapsed = time.monotonic() - start
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("did not finish within 1 s", result.stdout)
+        self.assertIn("structural lint only", result.stdout)  # the second block did not wait again
+        self.assertLess(elapsed, 20)
 
     def test_help_prints_usage_and_exits_zero(self):
         result = subprocess.run([sys.executable, str(ROOT / "scripts" / "check_diagram_sources.py"), "--help"],
-                                capture_output=True, text=True)
+                                capture_output=True, text=True, timeout=600)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("usage:", result.stdout)
         self.assertNotIn("Traceback", result.stderr)
@@ -143,7 +166,7 @@ class RealBundle(unittest.TestCase):
             md = Path(tmp) / "bad.md"
             md.write_text("```mermaid\nflowchart LR\n  A[open --> B\n```\n", encoding="utf-8")
             result = subprocess.run([sys.executable, str(ROOT / "scripts" / "check_diagram_sources.py"), str(md)],
-                                    capture_output=True, text=True)
+                                    capture_output=True, text=True, timeout=600)
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("Checked 1 block(s)", result.stdout)
 

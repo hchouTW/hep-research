@@ -130,7 +130,7 @@ class LintTests(unittest.TestCase):
 class LintCliTests(unittest.TestCase):
     def run_cli(self, *args):
         return subprocess.run(
-            [sys.executable, str(ROOT / "scripts/lint_task.py"), *args], capture_output=True, text=True
+            [sys.executable, str(ROOT / "scripts/lint_task.py"), *args], capture_output=True, text=True, timeout=600
         )
 
     def test_exit_0_on_clean_task(self):

@@ -36,7 +36,7 @@ def run(cmd, doc, *extra):
     with tempfile.TemporaryDirectory() as tmp:
         f = Path(tmp) / "scan.json"
         f.write_text(json.dumps(doc))
-        p = subprocess.run([sys.executable, str(SCRIPT), cmd, "--input", str(f), *extra], capture_output=True, text=True)
+        p = subprocess.run([sys.executable, str(SCRIPT), cmd, "--input", str(f), *extra], capture_output=True, text=True, timeout=600)
     return p.returncode, json.loads(p.stdout) if p.stdout.strip().startswith("{") else p.stdout
 
 

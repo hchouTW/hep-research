@@ -12,6 +12,12 @@ For a subset of the unit tests name the modules (`python3 -m unittest tests.tool
 use `python3 -m unittest discover -s tests/tools -t .`; naming only the package (`python3 -m unittest tests.tools`)
 runs 0 tests, because the test packages have empty `__init__.py` files.
 
+Tests come in two tiers. The fast tier is the default. `HEP_SLOW_TESTS=1` adds the slow tier (for example the full
+Feldman-Cousins tables, the 10,000-mutation contract fuzz and the full theory-comparison example). `run_all_checks.py`
+runs each test module in its own process with a time limit (`--module-timeout`, default 600 s) and records every
+module's duration; a fast-tier module listed under `slow_modules` (over 60 s) belongs in the slow tier. Every
+subprocess call in the tests and tools has a timeout (`tests/tools/test_subprocess_timeouts.py`).
+
 Software checks show contract consistency only, not physical validity. Report pass, fail, skip and unverified
 separately; a skipped test (missing tool) is unverified, never passing.
 

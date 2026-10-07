@@ -71,13 +71,13 @@ class UnbinnedFitTests(unittest.TestCase):
             cfg.write_text(json.dumps(CFG))
             data.write_text(json.dumps([1.0, 12.0]))
             p = subprocess.run([sys.executable, str(SCRIPT), "fit", "--data", str(data), "--config", str(cfg)],
-                               capture_output=True, text=True)
+                               capture_output=True, text=True, timeout=600)
             self.assertEqual(p.returncode, 1)
             self.assertIn("inside the range", p.stdout)
             bad = dict(CFG, truth=dict(CFG["truth"], sigma=-1))
             cfg.write_text(json.dumps(bad))
             p = subprocess.run([sys.executable, str(SCRIPT), "coverage", "--config", str(cfg), "--toys", "10"],
-                               capture_output=True, text=True)
+                               capture_output=True, text=True, timeout=600)
             self.assertEqual(p.returncode, 1)
 
 

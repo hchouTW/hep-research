@@ -64,7 +64,7 @@ def _env():
 
 
 def _rc(*args):
-    return subprocess.run([ROOT_CONFIG, *args], capture_output=True, text=True, check=True, env=_env()).stdout.split()
+    return subprocess.run([ROOT_CONFIG, *args], capture_output=True, text=True, check=True, env=_env(), timeout=600).stdout.split()
 
 
 def _cutflow(text):
@@ -82,7 +82,7 @@ class RootCppAssetTests(unittest.TestCase):
         cls._tmp = tempfile.TemporaryDirectory()
         cls.dir = Path(cls._tmp.name)
         cls.python = python
-        subprocess.run([python, str(FIXTURES), str(cls.dir)], check=True, capture_output=True, env=_env())
+        subprocess.run([python, str(FIXTURES), str(cls.dir)], check=True, capture_output=True, env=_env(), timeout=600)
         cls.cxx = _rc("--cxx")[0]
         cls.flags = _rc("--cflags", "--libs")
         libdir = _rc("--libdir")[0]
@@ -90,7 +90,7 @@ class RootCppAssetTests(unittest.TestCase):
         for name in ("rdf_cutflow_analysis", "fit_histogram", "rdf_histogram_branch"):
             out = cls.dir / name
             proc = subprocess.run([cls.cxx, str(ASSETS / f"{name}.cpp"), "-o", str(out), *cls.flags, f"-Wl,-rpath,{libdir}"],
-                                  capture_output=True, text=True, env=_env())
+                                  capture_output=True, text=True, env=_env(), timeout=600)
             cls.binaries[name] = (proc.returncode, proc.stderr[-2000:], out)
 
     @classmethod
@@ -100,7 +100,7 @@ class RootCppAssetTests(unittest.TestCase):
     def run_bin(self, name, *args):
         rc, err, exe = self.binaries[name]
         self.assertEqual(rc, 0, f"build failed: {err}")
-        proc = subprocess.run([str(exe), *map(str, args)], capture_output=True, text=True, cwd=self.dir, env=_env())
+        proc = subprocess.run([str(exe), *map(str, args)], capture_output=True, text=True, cwd=self.dir, env=_env(), timeout=600)
         self.assertEqual(proc.returncode, 0, proc.stderr[-2000:])
         return proc.stdout + proc.stderr
 
@@ -108,7 +108,7 @@ class RootCppAssetTests(unittest.TestCase):
         cpp = _cutflow(self.run_bin("rdf_cutflow_analysis", "--input", "events.root", "--tree", "Events",
                                     "--output", "cpp_rdf.root"))
         py = subprocess.run([self.python, str(ASSETS / "pyroot_rdf_cutflow_analysis.py"), "--input", "events.root",
-                             "--output", "py_rdf.root"], capture_output=True, text=True, cwd=self.dir, env=_env())
+                             "--output", "py_rdf.root"], capture_output=True, text=True, cwd=self.dir, env=_env(), timeout=600)
         self.assertEqual(py.returncode, 0, py.stderr[-2000:])
         self.assertEqual(len(cpp), 3)
         self.assertEqual(cpp, _cutflow(py.stdout + py.stderr))
@@ -129,7 +129,7 @@ class RootCppAssetTests(unittest.TestCase):
         root = BIN / "root"
         self.assertTrue(root.exists(), "root executable not next to root-config")
         macro = f'{ASSETS / "plot_branch.C"}("events.root","Events","Muon_pt","macro.root")'
-        proc = subprocess.run([str(root), "-b", "-q", "-l", macro], capture_output=True, text=True, cwd=self.dir, env=_env())
+        proc = subprocess.run([str(root), "-b", "-q", "-l", macro], capture_output=True, text=True, cwd=self.dir, env=_env(), timeout=600)
         self.assertEqual(proc.returncode, 0, proc.stderr[-2000:])
         self.assertTrue((self.dir / "macro.root").exists())
 
@@ -138,9 +138,9 @@ class RootCppAssetTests(unittest.TestCase):
         build = self.dir / "cmake-build"
         prefix = str(BIN.parent)
         cfg = subprocess.run(["cmake", "-S", str(ASSETS), "-B", str(build), f"-DCMAKE_CXX_COMPILER={self.cxx}",
-                              f"-DCMAKE_PREFIX_PATH={prefix}"], capture_output=True, text=True, env=_env())
+                              f"-DCMAKE_PREFIX_PATH={prefix}"], capture_output=True, text=True, env=_env(), timeout=600)
         self.assertEqual(cfg.returncode, 0, cfg.stderr[-2000:])
-        b = subprocess.run(["cmake", "--build", str(build)], capture_output=True, text=True, env=_env())
+        b = subprocess.run(["cmake", "--build", str(build)], capture_output=True, text=True, env=_env(), timeout=600)
         self.assertEqual(b.returncode, 0, (b.stdout + b.stderr)[-2000:])
         self.assertTrue((build / "analysis").exists())
 

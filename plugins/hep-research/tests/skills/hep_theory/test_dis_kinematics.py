@@ -21,7 +21,7 @@ TOL = 1e-9
 
 
 def run(*args):
-    p = subprocess.run([sys.executable, str(SCRIPT), *args], capture_output=True, text=True)
+    p = subprocess.run([sys.executable, str(SCRIPT), *args], capture_output=True, text=True, timeout=600)
     return p.returncode, p.stdout, p.stderr
 
 

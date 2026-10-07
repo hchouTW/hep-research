@@ -26,7 +26,7 @@ from contracts.validate import validate_artifact  # noqa: E402
 
 
 def run(*args):
-    p = subprocess.run([sys.executable, str(SCRIPT), *args], capture_output=True, text=True)
+    p = subprocess.run([sys.executable, str(SCRIPT), *args], capture_output=True, text=True, timeout=600)
     return p.returncode, json.loads(p.stdout)
 
 

@@ -531,7 +531,7 @@ class GenerateSkillExampleTests(unittest.TestCase):
             [sys.executable, str(ROOT / "scripts/generate_skill_example.py"),
              "--archetype", "contrast", "--skill", "agile-development", "--role", "X",
              "--use-case", "Y", "--takeaways", "10"],
-            capture_output=True, text=True,
+            capture_output=True, text=True, timeout=600
         )
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("--takeaways must be between", result.stderr)
@@ -541,7 +541,7 @@ class GenerateSkillExampleTests(unittest.TestCase):
             [sys.executable, str(ROOT / "scripts/generate_skill_example.py"),
              "--archetype", "trajectory", "--skill", "agile-development", "--role", "X",
              "--problem-input", "Y", "--takeaways", "4"],
-            capture_output=True, text=True,
+            capture_output=True, text=True, timeout=600
         )
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("--takeaways is only valid with --archetype contrast", result.stderr)
@@ -549,7 +549,7 @@ class GenerateSkillExampleTests(unittest.TestCase):
     def test_cli_missing_required_flag_fails_with_usage(self):
         result = subprocess.run(
             [sys.executable, str(ROOT / "scripts/generate_skill_example.py"), "--skill", "x"],
-            capture_output=True, text=True,
+            capture_output=True, text=True, timeout=600
         )
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("usage:", result.stderr)
@@ -558,7 +558,7 @@ class GenerateSkillExampleTests(unittest.TestCase):
         result = subprocess.run(
             [sys.executable, str(ROOT / "scripts/generate_skill_example.py"),
              "--archetype", "decision-tree", "--skill", "agile-development", "--role", "X"],
-            capture_output=True, text=True,
+            capture_output=True, text=True, timeout=600
         )
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("--archetype decision-tree requires --scenario", result.stderr)
@@ -568,7 +568,7 @@ class GenerateSkillExampleTests(unittest.TestCase):
             [sys.executable, str(ROOT / "scripts/generate_skill_example.py"),
              "--archetype", "contrast", "--skill", "agile-development", "--role", "X",
              "--use-case", "Y", "--scenario", "Z"],
-            capture_output=True, text=True,
+            capture_output=True, text=True, timeout=600
         )
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("--scenario is only valid with --archetype decision-tree", result.stderr)
@@ -580,7 +580,7 @@ class GenerateSkillExampleTests(unittest.TestCase):
                 [sys.executable, str(ROOT / "scripts/generate_skill_example.py"),
                  "--archetype", "contrast", "--skill", "agile-development", "--role", "X",
                  "--use-case", "Y", "--output", str(out_path)],
-                capture_output=True, text=True,
+                capture_output=True, text=True, timeout=600
             )
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertTrue(out_path.exists())
@@ -674,7 +674,7 @@ class ValidateContrastTests(unittest.TestCase):
         try:
             result = subprocess.run(
                 [sys.executable, str(ROOT / "scripts/validate_skill_example.py"), str(path)],
-                capture_output=True, text=True,
+                capture_output=True, text=True, timeout=600
             )
             self.assertEqual(result.returncode, 0, result.stdout)
             self.assertIn(": ok", result.stdout)
@@ -685,7 +685,7 @@ class ValidateContrastTests(unittest.TestCase):
         result = subprocess.run(
             [sys.executable, str(ROOT / "scripts/validate_skill_example.py"),
              str(TESTS_DIR / "does-not-exist.md")],
-            capture_output=True, text=True,
+            capture_output=True, text=True, timeout=600
         )
         self.assertEqual(result.returncode, 2)
         self.assertIn("file not found", result.stdout)
@@ -988,7 +988,7 @@ class DiversityCheckerTests(unittest.TestCase):
             )
             result = subprocess.run(
                 [sys.executable, str(ROOT / "scripts/check_example_diversity.py"), str(a), str(b)],
-                capture_output=True, text=True,
+                capture_output=True, text=True, timeout=600
             )
             self.assertEqual(result.returncode, 0, result.stdout)
             self.assertIn("ok: no diversity violations", result.stdout)
@@ -1002,7 +1002,7 @@ class DiversityCheckerTests(unittest.TestCase):
             b = self._write(tmp_path, "b.md", GOOD_ADVERSARIAL_AUDIT)
             result = subprocess.run(
                 [sys.executable, str(ROOT / "scripts/check_example_diversity.py"), str(a), str(b)],
-                capture_output=True, text=True,
+                capture_output=True, text=True, timeout=600
             )
             self.assertEqual(result.returncode, 1)
             self.assertIn("diversity violation(s) found", result.stdout)

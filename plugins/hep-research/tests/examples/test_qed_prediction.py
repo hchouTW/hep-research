@@ -30,7 +30,7 @@ class PathCTests(unittest.TestCase):
         cls.tmp = tempfile.TemporaryDirectory()
         cls.out = Path(cls.tmp.name)
         # a fresh interpreter, so the record of opened files covers the whole run
-        cls.proc = subprocess.run([sys.executable, str(SCRIPT), "--out", str(cls.out)], capture_output=True, text=True)
+        cls.proc = subprocess.run([sys.executable, str(SCRIPT), "--out", str(cls.out)], capture_output=True, text=True, timeout=1200)
         cls.r = json.loads((cls.out / "results.json").read_text())
 
     @classmethod
@@ -89,7 +89,7 @@ def cold_and_warm(script, key):
     with tempfile.TemporaryDirectory() as td, tempfile.TemporaryDirectory(dir=PLUGIN / "profiles", prefix=".pyc-test-") as cache:
         env = dict(os.environ, PYTHONPYCACHEPREFIX=cache)
         for run in ("cold", "warm"):
-            p = subprocess.run([sys.executable, str(script), "--out", str(Path(td) / run)], capture_output=True, text=True, env=env)
+            p = subprocess.run([sys.executable, str(script), "--out", str(Path(td) / run)], capture_output=True, text=True, env=env, timeout=1200)
             if p.returncode:
                 raise AssertionError(p.stdout[-1000:] + p.stderr[-2000:])
             got.append(json.loads((Path(td) / run / "results.json").read_text())[key])

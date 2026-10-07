@@ -24,7 +24,7 @@ class BlindedLogTests(unittest.TestCase):
         sealed.parent.mkdir()
         sealed.write_text(json.dumps({"sealed": [1234.5678], "region": {"low": 0, "high": 1}}))
         p = subprocess.run([sys.executable, str(AUDIT), "scan", "--sealed", str(sealed), str(h.cdir / "submissions")],
-                           capture_output=True, text=True)
+                           capture_output=True, text=True, timeout=600)
         self.assertEqual(p.returncode, 1, p.stdout)
         rep = json.loads(p.stdout)
         leaks = json.dumps(rep)
@@ -47,7 +47,7 @@ class PackagingTests(unittest.TestCase):
             copy = Path(td) / "plugin"
             # copy what the scanner sees in the checkout (git-listed files), not ignored local files such as a venv
             listed = subprocess.run(["git", "ls-files", "-z", "--cached", "--others", "--exclude-standard", "--", "."], cwd=ROOT,
-                                    capture_output=True, text=True).stdout.split("\0")
+                                    capture_output=True, text=True, timeout=600).stdout.split("\0")
             if not any(listed):
                 shutil.copytree(ROOT, copy, ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
             for rel in filter(None, listed):
@@ -55,7 +55,7 @@ class PackagingTests(unittest.TestCase):
                     (copy / rel).parent.mkdir(parents=True, exist_ok=True)
                     shutil.copy2(ROOT / rel, copy / rel)
             run = lambda: subprocess.run([sys.executable, str(copy / "tools" / "check_packaging.py"), "--root", str(copy)],
-                                         capture_output=True, text=True)
+                                         capture_output=True, text=True, timeout=600)
             first = run()
             self.assertEqual(first.returncode, 0, first.stdout[-2000:])
             ex = copy / "adapters" / "batch-schedulers" / "assets" / "batch-config.example.json"

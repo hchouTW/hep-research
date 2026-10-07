@@ -62,7 +62,7 @@ class CountingTests(unittest.TestCase):
 
 class CountingCliTests(unittest.TestCase):
     def run_cli(self, *args):
-        return subprocess.run([sys.executable, "-I", str(SCRIPT), *args], capture_output=True, text=True)
+        return subprocess.run([sys.executable, "-I", str(SCRIPT), *args], capture_output=True, text=True, timeout=600)
 
     def test_json_output(self):
         res = self.run_cli("--observed", "3", "--background", "1.5", "--level", "0.9")
