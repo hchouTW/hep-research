@@ -5,6 +5,9 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Two-POI contours (T22).** `likelihood_limits.py contour` fits two signal strengths (bins with `s1` and `s2`, the
+  shape-limit nuisances and `mc_stat`) and traces the profile-likelihood contours at the chi-square 2-dof levels along
+  rays from the best fit, with the Hessian covariance. Toys at the true point confirm the Wilks coverage.
 - **Toy CLs for shape-limit (T22).** `likelihood_limits.py shape-limit --cls-toys N` computes CLs from seeded toys on
   a grid of signal strengths (common random numbers across the grid; nuisances profiled on the data at each μ for
   CLs+b and at μ = 0 for CLb, auxiliary measurements redrawn) and gives the observed and the expected median and

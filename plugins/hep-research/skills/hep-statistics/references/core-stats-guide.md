@@ -134,6 +134,10 @@ and use common random numbers across a scan.
   measurement of `tau = 1/sigma^2`); an optional correlation matrix correlates the Gaussian-type nuisances (gamma ones
   cannot be correlated). Choose the constraint from the origin of the uncertainty
   ([nuisance modeling](nuisance-modeling.md)), not by convenience. Slow for many nuisances.
+- `contour --input FILE [--cl 0.6827,0.95 --rays 36]`: two signal strengths (bins with `s1` and `s2`; the shape-limit
+  nuisances except signal shapes; `mc_stat`): best fit, Hessian covariance and profile-likelihood contours at the
+  chi-square 2-dof levels. Wilks coverage was checked with toys at about 50 events per bin; at low counts, check it
+  with toys at the true point before quoting a region.
 - `neyman-limit --n --b --sigma-b [--cl --beta --points --toys --seed]`: an approximation of the Berger-Boos
   construction over the background nuisance (finite nuisance grid, seeded toys): a signal is excluded only if the
   supremum of the toy p-value over the `(1 - beta)` confidence set of the background, plus `beta`, is at most

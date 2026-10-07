@@ -36,6 +36,10 @@ Subcommands:
   multibin-limit and shape-limit also give the asymptotic CLs limit and the expected median and 1/2-sigma limits
   (CLs and CLs+b) from the background-only Asimov data set (Cowan, Cranmer, Gross, Vitells 2011, sec. 4.3).
 
+  contour               two signal strengths (bins with s1 and s2, the shape-limit nuisances except signal shapes,
+                        optional mc_stat): best fit, Hessian covariance and profile-likelihood contours at the
+                        chi-square 2-dof levels (default 68.27% and 95%), traced along rays from the best fit.
+
   neyman-limit          upper limit from the Berger-Boos construction over the background nuisance
                         (supremum over a confidence set of the nuisance, with a seeded-toy p-value at each
                         point), compared with the plug-in profile limit. The construction guarantees coverage
@@ -79,10 +83,12 @@ Usage (from the skill directory):
   python3 core/stats/likelihood_limits.py profile-cls --n 3 --b 3 --sigma-b 1 --toys 1000 --expected-toys 60 --seed 1
   python3 core/stats/likelihood_limits.py shape-limit --input shapes.json --toys 100 --seed 1
   python3 core/stats/likelihood_limits.py shape-limit --input shapes.json --cls-toys 500 --seed 1
+  python3 core/stats/likelihood_limits.py contour --input two_poi.json --cl 0.6827,0.95
   python3 core/stats/likelihood_limits.py neyman-limit --n 3 --b 3 --sigma-b 2 --cl 0.95 --beta 0.01 --toys 1000 --seed 1
   python3 core/stats/likelihood_limits.py neyman-coverage --s 2 --b 3 --sigma-b 2 --cl 0.95 --outer 300 --inner 200 --seed 1
 Exit codes: 0 ok; 2 rejected input. Standard library only.
-Importable: profile_limit, profile_significance, multibin_limit, profile_fc, profile_cls, shape_limit, neyman_limit, neyman_coverage,
+Importable: profile_limit, profile_significance, multibin_limit, profile_fc, profile_cls, shape_limit, profile_contour,
+neyman_limit, neyman_coverage,
 neyman_coverage_scan.
 """
 from __future__ import annotations
@@ -1068,6 +1074,125 @@ def shape_limit(doc: dict, cl: float, toys: int, seed: int, cls_toys: int = 0, c
     return out
 
 
+# ------------------------------------------------------------------ two parameters of interest
+class _TwoPoiModel:
+    """nu_i = mu1 S1_i(theta) + mu2 S2_i(theta) + B_i(theta), with the shape-limit nuisances (a signal_norm scales both
+    signals; signal shapes are not supported) and optional per-bin MC-statistics factors on B."""
+
+    def __init__(self, bins1, bins2, nuis, chol):
+        self.m1, self.m2 = _ShapeModel(bins1, nuis, chol), _ShapeModel(bins2, nuis, chol)
+        self.n, self.k = self.m1.n, self.m1.k
+
+    def means(self, mu1, mu2, th):
+        s1, b = self.m1._parts(th)
+        s2, _ = self.m2._parts(th)
+        return [mu1 * a + mu2 * c for a, c in zip(s1, s2)], b
+
+    def nll(self, mu1, mu2, th, ns, aux):
+        m = self.m1
+        if any(d["kind"].endswith("_norm") and m._factor(d, x) <= 0.0 for x, d in zip(th, m.nuis)):
+            return -NEG
+        sig, bkg = self.means(mu1, mu2, th)
+        total = 0.0
+        for i, (n, sv, bv) in enumerate(zip(ns, sig, bkg)):
+            d = m.mc_rel[i] if m.mc_rel else 0.0
+            if d > 0 and bv > 0:
+                b0, sg = aux[self.k + i] * bv, d * bv
+                v = _ll1(n, sv, _b_hat(n, sv, b0, sg), b0, sg) if sv + b0 > -10 * sg else NEG
+            else:
+                v = _lnl(n, sv + bv)
+            if v <= NEG / 2:
+                return -NEG
+            total -= v
+        return total + m.constraint(th, aux)
+
+    def cond(self, mu1, mu2, ns, aux, start=None):
+        if self.k == 0:
+            return [], self.nll(mu1, mu2, [], ns, aux)
+        return _newton_min(lambda x: self.nll(mu1, mu2, x, ns, aux), list(start) if start else [0.0] * self.k)
+
+    def glob(self, ns, aux, start=None):
+        x0 = list(start) if start else [1.0, 1.0] + [0.0] * self.k
+        x, val = _newton_min(lambda v: self.nll(v[0], v[1], v[2:], ns, aux), x0)
+        return x[0], x[1], x[2:], val
+
+    def q(self, mu1, mu2, ns, aux, g=None):
+        g = g if g else self.glob(ns, aux)
+        return max(0.0, 2.0 * (self.cond(mu1, mu2, ns, aux, g[2])[1] - g[3]))
+
+
+def _load_two_poi(doc):
+    if not isinstance(doc, dict) or not isinstance(doc.get("bins"), list):
+        raise LikelihoodError("input must be a JSON object with bins")
+    for i, x in enumerate(doc["bins"]):
+        if not isinstance(x, dict) or "s1" not in x or "s2" not in x:
+            raise LikelihoodError(f"bin {i} must give n, b, s1 and s2")
+    if any(isinstance(d, dict) and d.get("kind") == "signal_shape" for d in doc.get("nuisances", []) or []):
+        raise LikelihoodError("signal_shape nuisances are not supported with two parameters of interest")
+    parts = []
+    for key in ("s1", "s2"):
+        sub = dict(doc, bins=[{**{k: v for k, v in x.items() if k not in ("s1", "s2")}, "s": x[key]} for x in doc["bins"]])
+        parts.append(_load_shape(sub))
+    (bins1, nuis, chol), (bins2, _, _) = parts
+    if len(bins1) < 2:
+        raise LikelihoodError("two parameters of interest need at least two bins")
+    return bins1, bins2, nuis, chol
+
+
+def profile_contour(doc: dict, cls=(0.6827, 0.95), rays: int = 36) -> dict:
+    """Best fit of (mu1, mu2) and the profile-likelihood contours q(mu1, mu2) = 2 (min_theta nll - min nll) = level,
+    with level the chi-square quantile for 2 degrees of freedom (Wilks), traced along rays from the best fit."""
+    bins1, bins2, nuis, chol = _load_two_poi(doc)
+    cls = [_num(c, "cl", 0.0, 1.0, strict_low=True) for c in cls]
+    if any(c >= 1.0 for c in cls) or not cls:
+        raise LikelihoodError("each contour cl must lie strictly between 0 and 1")
+    if isinstance(rays, bool) or not isinstance(rays, int) or not 8 <= rays <= 360:
+        raise LikelihoodError("rays must be an integer in [8, 360]")
+    model = _TwoPoiModel(bins1, bins2, nuis, chol)
+    aux0 = model.m1.aux_obs()
+    g = model.glob(model.n, aux0)
+    m1h, m2h = g[0], g[1]
+    if not math.isfinite(g[3]) or g[3] >= -NEG / 2:
+        raise LikelihoodError("the global fit failed (no finite likelihood)")
+    # local covariance of (mu1, mu2) from the numerical Hessian of q / 2 at the best fit
+    s1, s2 = (max(sum(model.m1.s), 1e-12), max(sum(model.m2.s), 1e-12))
+    h1, h2 = 0.05 * math.sqrt(sum(model.n) + 1.0) / s1, 0.05 * math.sqrt(sum(model.n) + 1.0) / s2
+    f = lambda a, b: 0.5 * model.q(a, b, model.n, aux0, g)
+    f11 = (f(m1h + h1, m2h) + f(m1h - h1, m2h)) / h1 ** 2
+    f22 = (f(m1h, m2h + h2) + f(m1h, m2h - h2)) / h2 ** 2
+    f12 = (f(m1h + h1, m2h + h2) - f(m1h + h1, m2h - h2) - f(m1h - h1, m2h + h2) + f(m1h - h1, m2h - h2)) / (4 * h1 * h2)
+    det = f11 * f22 - f12 * f12
+    cov = [[f22 / det, -f12 / det], [-f12 / det, f11 / det]] if det > 0 else None
+    sd = (math.sqrt(cov[0][0]), math.sqrt(cov[1][1])) if cov and cov[0][0] > 0 and cov[1][1] > 0 else (1.0 / s1, 1.0 / s2)
+    contours, failures = {}, []
+    for c in cls:
+        level = -2.0 * math.log(1.0 - c)
+        pts = []
+        for j in range(rays):
+            phi = 2.0 * math.pi * j / rays
+            u1, u2 = math.cos(phi) * sd[0], math.sin(phi) * sd[1]
+            try:
+                r = _root_increasing(lambda r_: model.q(m1h + r_ * u1, m2h + r_ * u2, model.n, aux0, g) - level,
+                                     0.0, 2.0 * math.sqrt(level), tol=1e-6)
+                pts.append([m1h + r * u1, m2h + r * u2])
+            except LikelihoodError:
+                failures.append({"cl": c, "angle_deg": 360.0 * j / rays})
+        contours[f"{c:g}"] = {"q_level": level, "points": pts}
+    out = {"label": LABEL, "method": "profile-likelihood contours of two signal strengths (Wilks, 2 degrees of freedom)",
+           "bins": len(bins1), "nuisances": [d["name"] for d in nuis], "best_fit": {"mu1": m1h, "mu2": m2h},
+           "best_fit_nuisances": dict(zip([d["name"] for d in nuis], g[2])), "covariance_from_hessian": cov,
+           "contours": contours, "rays": rays}
+    if failures:
+        out["rays_not_closed"] = failures
+    out["note"] = ("each contour point is where the profile statistic q(mu1, mu2), minimized over every nuisance, reaches "
+                   "the chi-square 2-dof quantile of the stated cl, found along a ray from the best fit (scaled by the "
+                   "Hessian errors), so a non-star-shaped region is not traced; Wilks coverage needs enough events per "
+                   "bin and the parameters away from a boundary (the POIs are not bounded here, but every bin's mean "
+                   "must stay positive): check it with toys at the true point when counts are low; a ray that does not "
+                   "reach the level is listed in rays_not_closed")
+    return out
+
+
 # ------------------------------------------------------------ Berger-Boos construction (approximate implementation)
 # Seeded coverage scans that passed (tests/core/test_stats_likelihood_limits.py, HEP_SLOW_TESTS=1; VALIDATION.md):
 # every combination of these true values, with the outer/inner toy counts and grid points given here.
@@ -1292,6 +1417,10 @@ def build_parser() -> argparse.ArgumentParser:
     nc.add_argument("--inner", type=int, default=200, help="toys per p-value")
     nc.add_argument("--points", type=int, default=9)
     nc.add_argument("--seed", type=int, required=True, help="required: every toy study records its seed")
+    ct = sub.add_parser("contour", help="profile-likelihood contours of two signal strengths")
+    ct.add_argument("--input", required=True)
+    ct.add_argument("--cl", default="0.6827,0.95", help="comma-separated confidence levels of the contours")
+    ct.add_argument("--rays", type=int, default=36)
     h = sub.add_parser("shape-limit", help="multi-bin limit with shape and normalization nuisances")
     h.add_argument("--input", required=True)
     h.add_argument("--cl", type=float, default=0.95, help="used when the file has no cl")
@@ -1318,6 +1447,13 @@ def main(argv: list[str] | None = None) -> int:
             except (OSError, json.JSONDecodeError) as exc:
                 raise LikelihoodError(f"cannot read {args.input}: {exc}") from None
             result = shape_limit(doc, args.cl, args.toys, args.seed, args.cls_toys, args.cls_points)
+        elif args.command == "contour":
+            try:
+                doc = json.loads(Path(args.input).read_text())
+                cls = [float(c) for c in args.cl.split(",") if c.strip()]
+            except (OSError, json.JSONDecodeError, ValueError) as exc:
+                raise LikelihoodError(f"cannot read {args.input} or --cl: {exc}") from None
+            result = profile_contour(doc, cls, args.rays)
         elif args.command == "profile-limit":
             result = profile_limit(args.n, args.b, args.sigma_b, args.cl, args.toys, args.seed)
         elif args.command == "profile-significance":
