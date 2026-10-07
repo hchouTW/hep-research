@@ -107,6 +107,37 @@ def decimal_sf(n, mu, digits=120):
         return 1 - cum
 
 
+class MeanLimitTests(unittest.TestCase):
+    """Results near and above the old 500 limit (SciPy 1.18 chi2 values recorded): never clipped at a range end."""
+
+    def test_garwood_and_classical_limit_beyond_500(self):
+        iv = pd.central_interval(490)
+        self.assertAlmostEqual(iv["upper"], 513.1515084417051, delta=1e-6)  # chi2.ppf(1 - a, 982) / 2; 500.0 before
+        self.assertAlmostEqual(iv["lower"], 467.87113507097774, delta=1e-6)
+        ul = pd.upper_limit(495, 0.0)
+        self.assertAlmostEqual(ul["upper_limit_on_total_mean"], 533.1922730038418, delta=1e-6)  # 500 before
+        iv = pd.central_interval(5000)
+        self.assertAlmostEqual(iv["upper"], 5071.716943473817, delta=1e-5)
+        self.assertAlmostEqual(iv["lower"], 4929.290159543603, delta=1e-5)
+
+    def test_unbracketed_limit_fails_instead_of_returning_the_range_end(self):
+        with self.assertRaises(pd.SolveFailed):
+            pd.upper_limit(99990, 0.0)
+        with self.assertRaises(pd.SolveFailed):
+            pd.central_interval(99990)
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            code = pd.main(["upper-limit", "--n", "99990", "--b", "0"])
+        self.assertEqual(code, 1)
+        out = json.loads(buf.getvalue())
+        self.assertEqual(out["status"], "failed")
+        self.assertNotIn("upper_limit_on_total_mean", out)
+
+    def test_fc_scan_keeps_its_own_documented_limit(self):
+        with self.assertRaisesRegex(pd.DiagnosticsError, "limited to total means up to 500"):
+            pd.fc_interval(0, 480.0)
+
+
 class UpperTailTests(unittest.TestCase):
     """P(N >= n) far into the tail: 1 - P(N <= n - 1) in double precision cancels to 0 below about 1e-16."""
 

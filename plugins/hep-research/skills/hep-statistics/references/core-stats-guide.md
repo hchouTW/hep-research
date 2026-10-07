@@ -35,11 +35,15 @@ pyhf/Combine adapter ([statistical tools](statistical-tools.md)). Run any script
 
 | Script | 0 | 1 | 2 |
 |---|---|---|---|
-| `poisson_diagnostics.py`, `likelihood_limits.py`, `statistical_toys.py`, `unfolding_diagnostics.py` | ok | — | rejected input |
+| `poisson_diagnostics.py` | ok | `failed`: a limit or interval end not bracketed below the mean limit (1e5) | rejected input |
+| `likelihood_limits.py`, `statistical_toys.py`, `unfolding_diagnostics.py` | ok | — | rejected input |
 | `template_fit.py` | ok | fit `failed` (infeasible model or no convergence) | rejected input |
 | `validate_covariance.py` | pass (or warnings without `--strict`) | errors (or warnings with `--strict`) | unreadable or not JSON |
 | `validate_response.py` | pass (or warnings without `--strict`) | errors | unreadable or not JSON |
 
+- **Poisson means** are limited to 1e5 in every module (`_poisson.py`, private: log-space distribution, tail and
+  quantile, accurate to that limit). A limit that cannot be bracketed below it is reported `failed`, never
+  clipped to the limit. `fc-interval` alone scans a grid and is limited to total means of 500.
 - **Covariance and correlation matrices** go through one strict Cholesky (`_linalg.py`, private, no CLI). It works
   on the matrix scaled to a unit diagonal, so units never change the verdict. A pivot below -1e-10 is an error
   that names the matrix, a fit refuses a singular matrix, and toy sampling accepts a semi-definite one and records
@@ -90,8 +94,8 @@ available only as a Cousins-Highland marginalization (`--sigma-b`).
   before claiming coverage.
 
 Decision rule: a known background, one bin, no nuisance: use this module. Anything with an uncertain background,
-nuisance parameters or a template fit needs `likelihood_limits.py` or a toy construction. Means above 500 are outside
-the validated range.
+nuisance parameters or a template fit needs `likelihood_limits.py` or a toy construction. Means above 1e5 (500 for
+`fc-interval`) are outside the validated range.
 
 ## `likelihood_limits.py`: profile-likelihood constructions
 
@@ -289,5 +293,6 @@ convergence live outside `core/stats` (see the SKILL.md resources).
   on one truth.
 - Using a diagonal-only covariance for a ratio or fit whose bins share systematics; assuming a ratio cancels a
   systematic without a stated correlation.
-- Feeding a `failed` template fit into an inference, or applying a script outside its stated range (means above 500,
-  more than 60 bins, more than 6 templates or 8 nuisances) without a validated approximation.
+- Feeding a `failed` template fit into an inference, or applying a script outside its stated range (means above 1e5,
+  or 500 for `fc-interval`; more than 60 bins, more than 6 templates or 8 nuisances) without a validated
+  approximation.

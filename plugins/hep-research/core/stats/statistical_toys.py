@@ -70,10 +70,10 @@ import sys
 from pathlib import Path
 
 from core.stats._linalg import cholesky
+from core.stats._poisson import MAX_MEAN  # per-draw mean; a draw costs O(mean)
 
 LABEL = "[General method]"
 MAX_TOYS = 200000
-MAX_MEAN = 1e5  # per-draw mean; a draw costs O(mean) so larger values are rejected
 
 
 class ToyError(ValueError):
@@ -158,7 +158,7 @@ def boundary(n: int, b: float, toys: int, seed: int) -> dict:
     """q0 at the s >= 0 boundary for N ~ Poisson(s + b), known b > 0, testing s = 0."""
     if isinstance(n, bool) or not isinstance(n, int) or n < 0:
         raise ToyError(f"n must be a non-negative integer, got {n!r}")
-    b = _num(b, "b", 0.0, 500.0, strict_low=True)
+    b = _num(b, "b", 0.0, MAX_MEAN, strict_low=True)
     toys, seed = _toys(toys), _seed(seed)
     rng = random.Random(seed)
     q_obs = _q0(n, b)

@@ -31,7 +31,8 @@ Usage (from the skill directory):
   python3 core/stats/poisson_diagnostics.py fc-interval --n 3 --b 3 --sigma-b 1 --cl 0.90
   python3 core/stats/poisson_diagnostics.py cls-limit --n 3 --b 3 --sigma-b 0.5 --cl 0.95
   python3 core/stats/poisson_diagnostics.py coverage --mu 2.5 --cl 0.6827 --toys 20000 --seed 1
-Exit codes: 0 ok; 2 rejected input. Standard library only.
+Exit codes: 0 ok; 1 failed (a limit could not be bracketed below the mean limit, 1e5); 2 rejected input.
+Standard library only.
 Importable: poisson_cdf, poisson_sf, log_poisson_sf, z_from_log_p, upper_limit, central_interval, coverage, fc_interval, cls_limit.
 """
 from __future__ import annotations
@@ -49,12 +50,19 @@ import random
 import sys
 from statistics import NormalDist
 
+from core.stats import _poisson
+from core.stats._poisson import MAX_MEAN  # one limit for core/stats; the numerics below stay accurate up to it
+
 LABEL = "[General method]"
-MAX_MEAN = 500.0  # inversion sampling and exp(-mu) stay accurate below this
+FC_MAX_TOTAL_MEAN = 500.0  # fc-interval scans a 0.005 grid in s and sums from exp(-mu): a small-count method
 
 
 class DiagnosticsError(ValueError):
     """Raised for invalid counts, backgrounds, confidence levels or means."""
+
+
+class SolveFailed(DiagnosticsError):
+    """A limit or interval end could not be bracketed within MAX_MEAN: the result is `failed`, not a number."""
 
 
 def _count(n) -> int:
@@ -79,15 +87,8 @@ def _mean(mu, name="mean", allow_zero=True) -> float:
 
 
 def poisson_cdf(n: int, mu: float) -> float:
-    """P(N <= n) for a Poisson mean mu, by direct summation."""
-    n, mu = _count(n), _mean(mu)
-    if mu == 0.0:
-        return 1.0
-    term = total = math.exp(-mu)
-    for k in range(1, n + 1):
-        term *= mu / k
-        total += term
-    return min(total, 1.0)
+    """P(N <= n) for a Poisson mean mu, summed in log space (accurate up to MAX_MEAN)."""
+    return math.exp(_poisson.log_cdf(_count(n), _mean(mu)))
 
 
 def log_poisson_sf(n: int, mu: float) -> float:
@@ -96,20 +97,7 @@ def log_poisson_sf(n: int, mu: float) -> float:
     Above the mean the tail is summed upward from P(N = n) in log space, never as 1 - P(N <= n - 1), which cancels
     to 0 once the tail falls below about 1e-16.
     """
-    n, mu = _count(n), _mean(mu)
-    if n == 0:
-        return 0.0
-    if mu == 0.0:
-        return -math.inf
-    if n - 1 < mu:  # the tail holds at least about half the probability: the complement is accurate
-        return math.log(1.0 - poisson_cdf(n - 1, mu))
-    term = total = 1.0
-    k = n
-    while term > 1e-17 * total:
-        k += 1
-        term *= mu / k
-        total += term
-    return n * math.log(mu) - mu - math.lgamma(n + 1) + math.log(total)
+    return _poisson.log_sf(_count(n), _mean(mu))
 
 
 def poisson_sf(n: int, mu: float) -> float:
@@ -134,8 +122,11 @@ def z_from_log_p(log_p: float) -> float | None:
     return z
 
 
-def _solve(f, lo: float, hi: float) -> float:
-    """Root of a decreasing f on [lo, hi] by bisection."""
+def _solve(f, lo: float, hi: float, what: str = "the root") -> float:
+    """Root of a decreasing f on [lo, hi] by bisection; SolveFailed when [lo, hi] does not bracket it."""
+    if not f(lo) > 0 or f(hi) > 0:
+        raise SolveFailed(f"{what} is not bracketed in [{lo:g}, {hi:g}] (means are limited to {MAX_MEAN:g}): "
+                          "no value is reported")
     for _ in range(200):
         mid = 0.5 * (lo + hi)
         if f(mid) > 0:
@@ -145,11 +136,16 @@ def _solve(f, lo: float, hi: float) -> float:
     return 0.5 * (lo + hi)
 
 
+def _search_top(n: int, floor: float = 0.0) -> float:
+    """Upper end of a root search on a Poisson mean for n counts: far beyond any quantile used here, <= MAX_MEAN."""
+    return min(MAX_MEAN, floor + n + 40.0 * math.sqrt(n + 1.0) + 60.0)
+
+
 def upper_limit(n: int, b: float, cl: float = 0.95) -> dict:
     """Classical one-sided upper limit on the signal mean s: P(N <= n | s + b) = 1 - cl."""
     n, b, cl = _count(n), _mean(b, "b"), _cl(cl)
     alpha = 1.0 - cl
-    total = _solve(lambda mu: poisson_cdf(n, mu) - alpha, 0.0, MAX_MEAN)  # limit on s + b
+    total = _solve(lambda mu: poisson_cdf(n, mu) - alpha, 0.0, _search_top(n), "the upper limit")  # on s + b
     s_ul = total - b
     out = {"label": LABEL, "method": "classical Poisson upper limit, known background", "n_obs": n, "b": b, "cl": cl,
            "upper_limit_on_total_mean": total, "upper_limit_on_signal": s_ul}
@@ -169,15 +165,8 @@ def central_interval(n: int, cl: float = 0.6827) -> dict:
     tail = (1.0 - cl) / 2.0
     lower = 0.0
     if n > 0:  # P(N >= n | mu) increases with mu; find mu with P(N >= n | mu) = tail
-        lo, hi = 0.0, MAX_MEAN
-        for _ in range(200):
-            mid = 0.5 * (lo + hi)
-            if poisson_sf(n, mid) < tail:
-                lo = mid
-            else:
-                hi = mid
-        lower = 0.5 * (lo + hi)
-    upper = _solve(lambda mu: poisson_cdf(n, mu) - tail, 0.0, MAX_MEAN)
+        lower = _solve(lambda mu: tail - poisson_sf(n, mu), 0.0, _search_top(n), "the lower end")
+    upper = _solve(lambda mu: poisson_cdf(n, mu) - tail, 0.0, _search_top(n), "the upper end")
     return {"label": LABEL, "method": "Garwood central interval (conservative)", "n_obs": n, "cl": cl,
             "lower": lower, "upper": upper}
 
@@ -308,6 +297,9 @@ def fc_interval(n: int, b: float, cl: float = 0.90, step: float | None = None, s
     1.08 instead of the published 1.26 at n = 0, b = 2, 90% CL).
     """
     n, b, cl = _count(n), _mean(b, "b"), _cl(cl)
+    if b + 3.0 * (sigma_b if isinstance(sigma_b, (int, float)) else 0.0) + _fc_s_max(n) + FC_MONOTONE_WINDOW > FC_MAX_TOTAL_MEAN:
+        raise DiagnosticsError(f"fc-interval scans a grid in s and is limited to total means up to {FC_MAX_TOTAL_MEAN:g}; "
+                               "at these counts use likelihood_limits.py profile-fc or an asymptotic construction")
     step = (0.005 if not sigma_b else 0.02) if step is None else step
     if isinstance(step, bool) or not isinstance(step, (int, float)) or not 0 < step <= 0.1:
         raise DiagnosticsError("step must lie in (0, 0.1]")
@@ -413,7 +405,7 @@ def cls_limit(n: int, b: float, cl: float = 0.95, sigma_b: float = 0.0, nodes: i
 
     def limit(m: int) -> float:
         clb = _marg_cdf(m, 0.0, bk)
-        return _solve(lambda s: _marg_cdf(m, s, bk) / clb - alpha, 0.0, hi)
+        return _solve(lambda s: _marg_cdf(m, s, bk) / clb - alpha, 0.0, min(hi, _search_top(m)), "the CLs limit")
 
     n_cap = int(b + 5.0 * sigma_b + 10.0 * math.sqrt(b + 1.0) + 20)
     weights = [_marg_pmf(m, 0.0, bk) for m in range(n_cap + 1)]
@@ -438,14 +430,8 @@ def cls_limit(n: int, b: float, cl: float = 0.95, sigma_b: float = 0.0, nodes: i
 
 
 def _draw(rng: random.Random, mu: float) -> int:
-    """Poisson variate by inversion of the CDF (exact for mu <= MAX_MEAN)."""
-    u, k = rng.random(), 0
-    term = total = math.exp(-mu)
-    while u > total and k < 10 * int(mu + 10):
-        k += 1
-        term *= mu / k
-        total += term
-    return k
+    """Poisson variate by inversion of the CDF (one uniform per draw; exact up to MAX_MEAN)."""
+    return _poisson.ppf(rng.random(), mu)
 
 
 def coverage(mu: float, cl: float, toys: int, seed: int) -> dict:
@@ -517,6 +503,9 @@ def main(argv: list[str] | None = None) -> int:
             result = central_interval(args.n, args.cl)
         else:
             result = coverage(args.mu, args.cl, args.toys, args.seed)
+    except SolveFailed as exc:
+        print(json.dumps({"label": LABEL, "status": "failed", "error": str(exc)}, indent=2))
+        return 1
     except DiagnosticsError as exc:
         print(json.dumps({"label": LABEL, "status": "rejected", "error": str(exc)}, indent=2))
         return 2

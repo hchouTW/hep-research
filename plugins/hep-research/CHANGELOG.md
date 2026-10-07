@@ -28,6 +28,14 @@ Software checks establish contract consistency only, not physical validity.
   shift in `regularization` (`response_covariance_check` for `response-measured`, which only checks). The unit test
   of a correlated ratio covariance used an indefinite matrix (smallest correlation eigenvalue -0.05) and now uses a
   valid one.
+- **Poisson limits and intervals are no longer clipped at 500 (sci-fix).** `upper-limit` and `interval` searched for
+  their root in [0, 500] and returned 500 when it lay beyond (`central_interval(490)` gave an upper end of 500.0
+  instead of 513.15, `upper_limit(495, 0)` 500 instead of 533.19). The search range now follows the count, and a root
+  that cannot be bracketed below the mean limit is reported `failed` (exit 1), never as the range end. One mean
+  limit, 1e5, now holds in `poisson_diagnostics.py`, `likelihood_limits.py` and `statistical_toys.py` (it was 500,
+  500 and 1e5), from a new private `core/stats/_poisson.py` whose distribution, tail and quantile are summed in log
+  space and stay accurate to that limit (checked against SciPy and decimal arithmetic). `fc-interval` keeps a
+  separate, stated limit of 500 on the total mean, since it scans a fine grid.
 
 ## 0.3.0 (2026-10-07): first public release
 

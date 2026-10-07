@@ -86,10 +86,10 @@ from pathlib import Path
 from statistics import NormalDist
 
 from core.stats._linalg import cholesky
+from core.stats._poisson import MAX_MEAN, ppf
 from core.stats.unfolding_diagnostics import _solve
 
 LABEL = "[General method]"
-MAX_MEAN = 500.0
 NEG = -1e300
 
 
@@ -117,16 +117,8 @@ def _seed_toys(toys, seed, allow_zero=False) -> tuple[int, int]:
 
 
 def _ppf(u: float, mu: float) -> int:
-    """Poisson quantile by cumulative summation (mu <= MAX_MEAN)."""
-    if mu <= 0.0:
-        return 0
-    term = cum = math.exp(-mu)
-    k = 0
-    while u > cum and k < 20 * int(mu + 20):
-        k += 1
-        term *= mu / k
-        cum += term
-    return k
+    """Poisson quantile (inversion of one uniform; exact up to MAX_MEAN)."""
+    return ppf(u, mu)
 
 
 def _lnl(n: float, mu: float) -> float:
@@ -204,7 +196,7 @@ def profile_limit(n: int, b: float, sigma_b: float, cl: float, toys: int, seed: 
     s_hat = max(n - b, 0.0)
     hi = s_hat + 20.0 * (math.sqrt(n + 1.0) + sig) + 20.0
     if hi + b + 6.0 * sig > MAX_MEAN:
-        raise LikelihoodError("inputs reach a mean above the script's range (500)")
+        raise LikelihoodError(f"inputs reach a mean above the script's range ({MAX_MEAN:g})")
     s_asym = _bisect(lambda s: _q1(n, b, sig, s) - z * z, s_hat, hi)
     rng = random.Random(seed)
     uniforms = [rng.random() for _ in range(toys)]
@@ -435,7 +427,7 @@ def profile_fc(n: int, b: float, sigma_b: float, cl: float, toys: int, seed: int
     s_max = max(n - b, 0.0) + 6.0 * (math.sqrt(n + 1.0) + sig) + 8.0
     step = max(s_max / 150.0, 0.02) if step is None else _num(step, "step", 0.0, 5.0, strict_low=True)
     if s_max + b + 6.0 * sig > MAX_MEAN:
-        raise LikelihoodError("inputs reach a mean above the script's range (500)")
+        raise LikelihoodError(f"inputs reach a mean above the script's range ({MAX_MEAN:g})")
     rng = random.Random(seed)
     uniforms, gauss = _draws(rng, toys)
     idx = min(toys - 1, int(math.ceil(cl * toys)) - 1)
@@ -492,7 +484,7 @@ def profile_cls(n: int, b: float, sigma_b: float, cl: float, toys: int, expected
         raise LikelihoodError("expected_toys must be 0 or an integer in [10, 2000]")
     hi = max(n - b, 0.0) + 8.0 * (math.sqrt(n + 1.0) + sig) + 10.0
     if hi + b + 6.0 * sig > MAX_MEAN:
-        raise LikelihoodError("inputs reach a mean above the script's range (500)")
+        raise LikelihoodError(f"inputs reach a mean above the script's range ({MAX_MEAN:g})")
     rng = random.Random(seed)
     u1, g1 = _draws(rng, toys)
     u2, g2 = _draws(rng, toys)
@@ -856,7 +848,7 @@ def neyman_limit(n: int, b: float, sigma_b: float, cl: float, beta: float, toys:
     alpha = 1.0 - cl
     lo, hi = max(n - b, 0.0), max(n - b, 0.0) + 8.0 * (math.sqrt(n + 1.0) + sig) + 10.0
     if hi + max(grid) + 6.0 * sig > MAX_MEAN:
-        raise LikelihoodError("inputs reach a mean above the script's range (500)")
+        raise LikelihoodError(f"inputs reach a mean above the script's range ({MAX_MEAN:g})")
     target = alpha - used_beta
     for _ in range(16):
         mid = 0.5 * (lo + hi)
@@ -903,7 +895,7 @@ def neyman_coverage(s_true: float, b_true: float, sigma_b: float, cl: float, bet
             raise LikelihoodError(f"{name} must be an integer in [{lo_}, {hi_}]")
     _, seed = _seed_toys(100, seed)
     if s_true + b_true + 6.0 * sig > MAX_MEAN:
-        raise LikelihoodError("inputs reach a mean above the script's range (500)")
+        raise LikelihoodError(f"inputs reach a mean above the script's range ({MAX_MEAN:g})")
     rng = random.Random(seed)
     uniforms, gauss = _draws(rng, inner)
     alpha = 1.0 - cl

@@ -44,6 +44,7 @@ class CoreStatsGuide(unittest.TestCase):
         for m in VALIDATORS:
             self.assertIn(f"`{m}.py", self.text)
         self.assertIn("`_linalg.py`", self.text)
+        self.assertIn("`_poisson.py`", self.text)
 
     def test_every_subcommand_and_option_documented(self):
         for module in SUBCOMMAND_MODULES:
