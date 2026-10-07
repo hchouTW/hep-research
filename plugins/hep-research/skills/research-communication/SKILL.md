@@ -50,3 +50,6 @@ Scripts in `<plugin root>/skills/research-communication/scripts/` (read `--help`
 | A missing or unclear result | the producing skill | request in `unresolved_inputs` |
 | Physics correctness of a diagram or equation | hep-theory | `theory-spec` |
 | Statistical wording of a claim | hep-statistics | `statistical-result` |
+| Measurement design or selection behind a claim | hep-analysis | request in `unresolved_inputs` |
+| Detector performance numbers | detector-response | `response` |
+| Code or scripts behind a figure or table | hep-computing | `computational-run` |

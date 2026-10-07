@@ -5,6 +5,12 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Missing skill handoffs (T25).** The Handoffs tables gain hep-statistics → physics-ml (simulation-based
+  inference, neural likelihoods), physics-ml → detector-response (fast-simulation validation) and → research-
+  communication, research-communication → hep-analysis, detector-response and hep-computing, and detector-response and
+  hep-computing → research-communication. To stay within the 8,192-byte budget, a few words of existing handoff rows and
+  one routing example in `detector-response` and `hep-statistics` were shortened; routing (static), ownership and
+  entry-point checks pass.
 - **Documentation brought up to date (T27).** The capability matrix header names 0.3.0; `VALIDATION.md` no longer
   points at the removed `DECISIONS.md` as a current file; `docs/maintenance.md` no longer lists the traceability check
   removed in 0.3.0; the entry-point sizes in `docs/architecture.md` and `docs/architecture-review.md` are remeasured

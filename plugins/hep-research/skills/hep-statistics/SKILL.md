@@ -50,7 +50,8 @@ Executable checks live in `<plugin root>/core/stats/` (likelihood limits, templa
 
 | Need | Hand to | Artifact |
 |---|---|---|
-| Missing physical systematic or correlation evidence | hep-analysis / detector-response | request in `unresolved_inputs` |
+| Missing systematic or correlation evidence | hep-analysis / detector-response | request in `unresolved_inputs` |
 | Theory-uncertainty prescription | hep-theory | `prediction` |
 | Large toy campaigns, batch partitioning | hep-computing | `computational-run` |
 | Reporting the result | research-communication | `statistical-result` |
+| SBI, neural likelihoods | physics-ml | `ml-artifact` |
