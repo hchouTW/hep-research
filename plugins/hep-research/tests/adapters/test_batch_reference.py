@@ -6,7 +6,7 @@ import unittest
 from tests.adapters.batch_harness import ROOT, Harness
 
 REF = ROOT / "skills" / "hep-computing" / "references" / "batch-scheduling.md"
-EXPECTED_EXIT = {"check-config": 0, "plan": 0, "submit": 0, "status": 1, "watch": 1, "resubmit": 0, "reset": 0, "merge": 0, "report": 0}
+EXPECTED_EXIT = {"check-config": 0, "plan": 0, "freeze": 0, "submit": 0, "status": 1, "watch": 1, "resubmit": 0, "reset": 0, "merge": 0, "report": 0}
 
 
 def workflow_commands():
@@ -19,7 +19,7 @@ def workflow_commands():
 class ReferenceWorkflowTests(unittest.TestCase):
     def test_documented_workflow_runs_on_the_fake_scheduler(self):
         cmds = workflow_commands()
-        self.assertEqual([c[0] for c in cmds], ["check-config", "plan", "submit", "submit", "status", "submit", "watch",
+        self.assertEqual([c[0] for c in cmds], ["check-config", "plan", "freeze", "submit", "submit", "status", "submit", "watch",
                                                  "resubmit", "reset", "merge", "report"])
         h = Harness("slurm", extra={"monitor": {"poll_interval_s": 60, "max_polls": 2}})
         self.addCleanup(h.cleanup)
@@ -30,6 +30,8 @@ class ReferenceWorkflowTests(unittest.TestCase):
             del args[i:i + 2]
             if args[0] == "plan":  # same flags, smaller job so the fake scheduler stays fast
                 args = ["plan", "--job", "toys", "--items", "10", "--chunk-size", "1", "--seed", "42", "--cmd", h.cmd]
+            if args[0] == "freeze":  # the harness's worker script sits in the project folder
+                args[args.index("--worker-root") + 1] = str(h.dir)
             if args[0] == "reset":
                 args[args.index("--chunks") + 1] = "c0004"
             if args[0] == "report":
