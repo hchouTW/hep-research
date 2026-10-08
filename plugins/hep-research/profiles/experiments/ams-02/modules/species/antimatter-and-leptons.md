@@ -81,7 +81,7 @@ Both are direct measurements; the physical interpretation (dark matter, pulsars,
 For antideuteron, antihelium, or any rare event class. All steps are **proposals** unless a primary source states them.
 
 1. **Define signal topology and region.** Charge `|Z|`, sign, mass hypothesis region in the `(R, β, |Z|)` space; state which observables carry the discriminating power (sign: Tracker; `|Z|`: multiple subsystems; mass: `R` and `β`).
-2. **Blinded or masked region.** Define before examining data; mask the signal region in plots, logs, and optimization; state who may unblind and when.
+2. **Blinded or masked region.** Define before examining data; mask the signal region in plots, logs, and optimization; state who may unblind and when; that person unblinds outside the agent session.
 3. **Misidentification paths.** Charge-sign confusion of the abundant same-`|Z|` matter (e.g. `He → anti-He`) via Tracker tails and bad hit assignment; `|Z|` confusion from fragmentation and charge-changing interactions; secondary tracks; wrong mass from `β` errors; interactions producing antiparticles.
 4. **Redundant signed-rigidity fits and hit-pattern checks.** Compare independent partial fits (e.g. different layer subsets or upper/lower segments) for sign consistency; require consistency on data and MC.
 5. **Subsystem charge consistency** before and after the magnet and material traversal; TOF, Tracker, and RICH `|Z|` estimators agree within validated tails.

@@ -2,7 +2,7 @@
 
 Status words: **tested** = exercised by a check that passed in the environment named below; **unverified** = code or
 guidance exists but its tool was not installed, so it was not run; **proposed** = a starting point or design, not
-executed; **not in v1** = outside scope, handled by the limited-support response. "Tested" means contract and
+executed; **not in v1** = outside scope, handled by the limited-support response. "Tested" never means qualified for private or blinded data: no host configuration is (Qualified: no, for every row). "Tested" means contract and
 software consistency only, not physical validity, proof, statistical coverage, or authorization to unblind.
 
 Environment E1 (all "tested" rows): Claude Code cloud container, Linux 6.18 x86_64, Python 3.11.15, NumPy 2.4.6,
@@ -22,7 +22,7 @@ results; they are listed in "E3 results" at the end. Evidence: VALIDATION FULLTE
 |---|---|---|---|
 | Measurement specs, correlated ratios, time-dependent exposure | hep-analysis | tested (E1) | Path A, T10, T11 |
 | Systematic-variation classification (shape vs normalization) | hep-analysis | tested (E1) | T12 |
-| Blinding: masks, sealing, scans of plots, logs, CSV and caches | hep-analysis, core | tested (E1) | T18; AUDIT T04: `.npy` caches read, scans report pass / fail / incomplete (an unreadable output is never a pass), strict publication mode with named exemptions. A pass cannot see transformed values |
+| Blinding: masks, sealing, scans of plots, logs, CSV and caches (advisory checks, synthetic sentinels only; not enforcement) | hep-analysis, core | tested (E1) | T18; AUDIT T04: `.npy` caches read, scans report pass / fail / incomplete (an unreadable output is never a pass), strict publication mode with named exemptions. A pass cannot see transformed values |
 | Analysis-change review (tuning after unblinding flagged) | hep-analysis | tested (E1) | T19 |
 | Response objects, forward folding, double-counting checks | detector-response | tested (E1) | Path B, T07 |
 | Resolution and efficiency studies (detector level) | detector-response | tested (E1), synthetic detector | J2 example (`examples/detector-resolution/`) |

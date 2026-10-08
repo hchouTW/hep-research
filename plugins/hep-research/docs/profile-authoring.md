@@ -18,6 +18,8 @@ profiles/<experiments|theory>/<name>/
 
 Private profiles use the same layout but live in the researcher's project and are named in
 `hep-research.project.json` under `local_profile_paths`. Never copy one into the plugin; `contracts/project.py` rejects that.
+Keep local profiles read-only to the agent (the host loads them as instructions), and put non-public content in one
+only for use under a project `agent_policy` that allows it on a qualified host configuration (none is qualified yet).
 
 ## profile.json
 
@@ -84,7 +86,8 @@ plugin or the user's project. Such a companion plugin has:
 
 Resolution: when a project binds a profile that is neither registered nor in `local_profile_paths`, the context stanza
 of every skill loads the installed `<plugin>:profile` skill that names it and treats the folder it gives as a local
-profile; if none is installed the skill says the profile is unavailable and does not answer its topics from memory.
+profile, but only when the project's `agent_policy` allows its content on this host and destination; otherwise, or if
+none is installed, the skill says the profile is unavailable and does not answer its topics from memory.
 Validate the setup with `python3 contracts/project.py <project-dir> --local <companion plugin root>/profile`; the profile may
 `depends_on` a registered profile (for example `experiment:ams-02`) and must satisfy the same schema and version checks.
 The companion profile's modules must not link into this plugin's files by relative path; name the public profile and

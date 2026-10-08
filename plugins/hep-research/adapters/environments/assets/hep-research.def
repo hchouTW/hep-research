@@ -3,6 +3,8 @@
 # Run:   apptainer exec hep-research.sif python3 tools/run_all_checks.py --no-cli
 # The base image pins ROOT and Python; requirements-ci.lock pins the Python packages. Record the image digest
 # (apptainer inspect) and the manifest written inside the container with every run.
+# The build downloads the base image (Docker Hub), apt packages and PyPI packages: build where that is allowed,
+# outside the agent session, and pin the base image by digest.
 Bootstrap: docker
 From: rootproject/root:<ROOT_IMAGE_TAG>
 

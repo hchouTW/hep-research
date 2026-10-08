@@ -26,4 +26,4 @@ Use appropriate count intervals for data. Label MC bands as statistical-only, to
 
 Define pull denominators. Data and a fitted prediction are not necessarily independent, so a simple residual divided by the square root of combined variances is a diagnostic under specific assumptions, not a universally standard-normal pull. Do not hide negative bins on a log scale; provide a signed-value view or explicit diagnostics.
 
-Label observable units, bin-width conventions, luminosity, collision energy, region, channel, and data/simulation status. Do not attach collaboration approval labels without actual approval. Mask blinded bins in the main panel, ratio, and pull alike.
+Label observable units, bin-width conventions, luminosity, collision energy, region, channel, and data/simulation status. Do not attach collaboration approval labels without actual approval. Mask blinded bins in the main panel, ratio, and pull alike. Real inputs arrive already blinded; uncertainties, ratios and pulls are computed on the transformed data or withheld, never from the unblinded values.

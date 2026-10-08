@@ -33,7 +33,7 @@ both hosts, for example `hep-research:hep-statistics`.
 
 ```bash
 claude plugin marketplace add ./hep-research          # path to the repository clone, or hchouTW/hep-research
-claude plugin install hep-research@hep-research-dev   # add --scope project or --scope local if preferred
+claude plugin install hep-research@hep-research-dev   # user scope; --scope project/local only for development
 ```
 
 Start a new Claude Code session. `/plugin` lists the plugin; skills are invoked by request or by name, for example
@@ -45,7 +45,9 @@ claude plugin marketplace remove hep-research-dev
 ```
 
 With a local-directory marketplace, Claude Code loads the plugin in place from that directory, so keep it at a
-stable path. A GitHub marketplace is cloned and cached. `claude plugin update` only picks up a new version number.
+stable path. That in-place loading is for development only: the agent can edit a checkout in its working tree, and the
+host would then load the edited code. For other use, install from the GitHub marketplace (cloned and cached) or keep the
+plugin outside every agent-writable path and deny writes there. `claude plugin update` only picks up a new version number.
 
 ### Codex CLI
 
@@ -90,9 +92,10 @@ What to expect, read from the documentation and the plugin's design (untested):
   `hep-research.project.json`, private profiles or data, and scripts run only in Anthropic's code-execution sandbox
   (turn on code execution in **Settings**), with that sandbox's network limits. Whether the files outside `skills/`
   (`core/`, `contracts/`, `profiles/`, `adapters/`) are reachable there is not verified; skills that need them may
-  stop and say so. Upload the files a request needs, and download the artifacts it produces.
+  stop and say so. Upload only public or synthetic files a request needs, and download the artifacts it produces.
 - **Cowork** works on a folder you choose on your computer, so project configuration, local profiles and the
-  `artifacts_dir` should work as in Claude Code. Python and the packages in `requirements-core.txt` must be
+  `artifacts_dir` should work as in Claude Code, for public and synthetic projects only: Cowork has not been checked for
+  any enforcement of data boundaries. Python and the packages in `requirements-core.txt` must be
   available where Cowork runs the scripts.
 - Plugins added in the apps are separate from plugins installed with `claude plugin install`, which stay on that
   machine. If you have both, Claude Code may load two copies; keep one of them.
@@ -130,6 +133,10 @@ discovery, invocation, profile access and removal (VALIDATION.md, MULTIHOST). Cl
 (E1, CLI 2.1.287). Codex also installs from the GitHub marketplace (`hchouTW/hep-research`). Codex on Linux and
 other hosts are not tested.
 
+"Tested" means install, discovery and invocation only. **No host configuration is qualified for private or blinded
+data**: use the plugin with public or synthetic data only. Unblinding is never done in an agent session, and every check
+the agent runs (contracts, dependencies, blinding scans) is advisory, not enforcement or authorization.
+
 ## Quick start: example prompts
 
 | Who you are | Try |
@@ -144,7 +151,7 @@ other hosts are not tested.
 | Computational theorist (J8) | "Run a convergence study of this integral and cross-check the symbolic result numerically." |
 | Physics-ML researcher (J9) | "Train a classifier and declare the valid domain of its surrogate before using it in inference." |
 | Writing up (J10) | "Draft the paper section and figures with claim-to-result links and honest status." |
-| Collaboration member (J11) | "Use our collaboration's private calibration constants from my local profile in the efficiency study." |
+| Collaboration member (J11) | "Set up a local profile for my experiment from its public detector paper and use it in the efficiency study." Private content needs a qualified host configuration (none yet) and your collaboration's approval to send it to a model service. |
 | Outside v1 (J12) | "Set up a lattice QCD global analysis of form factors." The skill says there is no validated profile and applies general methods. |
 
 Requests in Traditional Chinese are routed the same way, and answers come in the language you write in.
@@ -180,14 +187,17 @@ its topics from memory. Validate such a setup with
 `python3 "<plugin root>/contracts/project.py" <project-dir> --local <companion plugin root>/profile`.
 
 The first companion plugin is `ams02-research` (access-restricted; listed in the same marketplace), which provides
-`experiment:ams-02-private` for AMS Collaboration members and depends on this plugin. See
+`experiment:ams-02-private` for AMS Collaboration members and depends on this plugin. Load a companion profile only on
+a host configuration qualified for its content and with the collaboration's approval to send that content to the model
+service (no configuration is qualified yet), and install it where the agent cannot write. See
 [docs/profile-authoring.md](docs/profile-authoring.md) for writing one.
 
 ## Environments
 
 - **Core (needed by most scripts and all examples):** Python 3.11 or newer with the packages in
-  [requirements-core.txt](requirements-core.txt) (NumPy, SciPy, Matplotlib, SymPy). Install them in a project
-  virtual environment, for example `python3 -m venv .venv-hep && .venv-hep/bin/pip install -r requirements-core.txt`.
+  [requirements-core.txt](requirements-core.txt) (NumPy, SciPy, Matplotlib, SymPy). Install them in a virtual
+  environment, for example `python3 -m venv ~/.venvs/hep && ~/.venvs/hep/bin/pip install -r requirements-core.txt`;
+  an interpreter used by anything that runs outside the agent sandbox must live outside agent-writable paths.
   Contract, registry and blinding checks need only the standard library.
 - **Which interpreter:** before SymPy work the skills run `skills/hep-computing/scripts/find_python.py`, which picks
   the first Python >= 3.11 that has the packages from `--python`, the `HEP_RESEARCH_PYTHON` environment variable, the
@@ -205,8 +215,10 @@ The first companion plugin is `ams02-research` (access-restricted; listed in the
 
 Everything mandatory works offline: skills, references, profiles, contracts, core library, scripts and examples
 read only files inside the plugin and your project. Literature searches (INSPIRE-HEP, ADS, arXiv) and package
-installs need network access, which the host asks you to approve. Without it, citations are marked unverified
-rather than guessed, and nothing is downloaded silently.
+installs need network access, which the host asks you to approve; in a protected session only the destinations its
+egress policy allows may be reached, uncovered calls are denied, and queries never carry unpublished numbers or
+internal names. Without network access, citations are marked unverified rather than guessed, and nothing is downloaded
+silently.
 
 ## Checks for maintainers
 

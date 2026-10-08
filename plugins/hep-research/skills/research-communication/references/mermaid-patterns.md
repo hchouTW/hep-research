@@ -6,7 +6,9 @@ Graphviz/TikZ for those. Syntax below is standard Mermaid; verify with a rendere
 (`mmdc -i f.mmd -o f.svg`, or mermaid.live) since versions differ. `mmdc` renders through a headless Chrome
 that some installs (Homebrew `mermaid-cli`, checked 2026-10-04 with 12.0.0) do not include. If every render fails
 with "Could not find chrome-headless-shell (ver. N)", install that version once:
-`npx @puppeteer/browsers install chrome-headless-shell@N --path ~/.cache/puppeteer`.
+`npx @puppeteer/browsers install chrome-headless-shell@N --path ~/.cache/puppeteer`. This downloads a browser from the
+npm registry and Google's download host: do it only where network access is allowed, preferably pre-provisioned
+outside the agent session, never in a protected session.
 
 ## Pipeline (LR) with groups and edge semantics
 

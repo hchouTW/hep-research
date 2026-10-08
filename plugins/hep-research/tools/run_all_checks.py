@@ -188,6 +188,7 @@ def main(argv=None) -> int:
         run_script("reference_inventory", [py, "tools/reference_inventory.py", "--check"]),
         run_script("packaging_scan", [py, "tools/check_packaging.py"]),
         run_script("host_neutral", [py, "tools/check_host_neutral.py"]),
+        run_script("instruction_text", [py, "tools/check_instruction_text.py"]),
         run_script("host_manifests", [py, "tools/check_host_manifests.py"]),
         run_script("measure_entrypoints", [py, "tools/measure_entrypoints.py"] + (["--no-cli"] if opts.no_cli else [])),
         host_validate() if not opts.no_cli else {"name": "claude-plugin-validate", "status": "skip", "reason": "--no-cli"},

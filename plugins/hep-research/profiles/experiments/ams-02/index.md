@@ -23,4 +23,4 @@ Access-controlled software and data are in `experiment:ams-02-private`, provided
 
 Evidence: `evidence/sources.json`, `evidence/claims.json` (IDs `ams02:S01`, `ams02:C01`), `evidence/index.md` (generated). Quote an AMS number only from a claim whose species, range, period and selection cover the statement. What AMS published, a paper's numbers or a supplement's contents are answered from these files at the reading level each row records; a missing PDF is no reason to decline.
 
-Conventions: `conventions.json`. Datasets: `datasets/` (metadata records; `ams02:method_module` names the method module and claims). Networked scripts (`scripts/fetch_papers.py`, `scripts/crdb_query.py`) run only with the user's approval.
+Conventions: `conventions.json`. Datasets: `datasets/` (metadata records; `ams02:method_module` names the method module and claims). Networked scripts (`scripts/fetch_papers.py`, `scripts/crdb_query.py`) are maintainer tools: they run only with the user's approval, over https, to the destinations named in `README.md`, and never in protected sessions.

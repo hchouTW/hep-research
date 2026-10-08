@@ -2,7 +2,8 @@
 """Worker-side chunk runner: runs one chunk of a manifest on a batch node and writes its output once.
 
 The campaign copies this file next to its spec, so it must stay self-contained (standard library only, no plugin
-imports). It never chooses a seed or a chunk on its own: the chunk comes from the explicit --chunk/--attempt pair or
+imports). That copy is agent-writable: with protected data a trusted submitter must verify its full digest (and the
+spec's) before a job runs it. It never chooses a seed or a chunk on its own: the chunk comes from the explicit --chunk/--attempt pair or
 from the submission map written at submit time (--map MAP --index N, where N is the scheduler's array index), and the
 seed, start and stop come from the manifest inside the spec.
 

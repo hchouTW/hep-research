@@ -22,9 +22,9 @@ Choose binning using resolution, MC statistics, background stability, systematic
 
 ## Blinding
 
-Implement a mask based on region, observable interval, and category. The mask must remove observed values before they reach any output. Filter at read time, or set blinded bins to NaN before plotting, ratio or pull computation. Drawing a shaded box over plotted data does not blind it, so check the rendered output shows no observed points in the region. Apply it to plots, yield tables, ratios, pulls, debug output, caches, and notebook displays. Store Asimov/expected results separately from observed results. Do not use the actual SR count to optimize the supposedly blinded model.
+Define the mask by region, observable interval, and category. Real data arrive as a released blinded derivative, prepared by the data custodian outside the agent session; the agent never reads the unblinded values. In-code masks are defence in depth on such inputs, and the method for synthetic data: filter at read time, or set blinded bins to NaN before plotting, ratio or pull computation. Drawing a shaded box over plotted data does not blind it, so check the rendered output shows no observed points in the region. Apply it to plots, yield tables, ratios, pulls, debug output, caches, and notebook displays. Store Asimov/expected results separately from observed results. Do not use the actual SR count to optimize the supposedly blinded model.
 
-Under applicable collaboration rules, record the frozen commit, model, diagnostics, and unblinding conditions. Unblind only when the user has authorized it and applicable requirements are satisfied; do not invent approval requirements for unrelated routine work. Receiving an unblinded input does not justify optimizing against it.
+Under applicable collaboration rules, record the frozen commit, model, diagnostics, and unblinding conditions. Never unblind in the agent session: an authorized person does it outside the session once the applicable requirements are satisfied; do not invent approval requirements for unrelated routine work. If an unblinded input reaches the session, stop, report it, and do not use or optimize against it.
 
 ## Completion criteria
 

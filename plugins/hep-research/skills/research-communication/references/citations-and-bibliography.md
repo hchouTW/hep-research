@@ -3,6 +3,9 @@
 Where to source BibTeX entries, how to keep a `.bib` file clean as a paper evolves,
 and venue-specific citation-style expectations.
 
+> Network use: query only services the session's egress policy allows; queries never contain unpublished numbers,
+> internal names or other unpublished content; do not put API tokens into the agent environment of a protected session.
+
 ## Table of contents
 - [INSPIRE-HEP workflow](#inspire-hep-workflow)
 - [ADS for astroparticle/astronomy-facing venues](#ads-for-astroparticleastronomy-facing-venues)
