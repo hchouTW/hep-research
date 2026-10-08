@@ -21,7 +21,7 @@
    "source": {
     "source": "url",
     "url": "https://github.com/hchouTW/ams02-research.git",
-    "sha": "615b48e39a6e737fdb4a32950a99f2549e885d65"
+    "sha": "1c3f590af7d5cd11490c0132e096f0e4060da7c1"
    },
    "policy": {
     "installation": "AVAILABLE",
