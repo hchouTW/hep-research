@@ -25,10 +25,14 @@ Rules (the T21 rules, carried to remote and asynchronous execution):
 - submit(), resubmit() and cancel() are dry runs unless approved=True.
 - Every call that changes the campaign holds an exclusive lock on <campaign>/.lock; a second process or thread gets
   CampaignError("campaign.locked") at once instead of racing it for submission IDs or state.
-- submit() records its attempts (state 'submitting', no job ID) in state.json before calling the scheduler and
-  confirms them afterwards. If it is interrupted in between, the submission stays 'unconfirmed': nothing is submitted
-  again until a person checks the scheduler and calls confirm_submission() with the job IDs it lists, or
-  abandon_submission() with a reason.
+- submit() records its attempts (state 'submitting', no job ID) and a campaign-unique tag (hepr-<campaign_uid>-<sid>,
+  the job name) in state.json before calling the scheduler and confirms them afterwards. Only a client that could not
+  start (SubmitRefused) settles them as 'not-submitted'. If the call is interrupted, times out, or ends without job IDs
+  (SubmitAmbiguous), the submission stays 'unconfirmed': nothing is submitted again until a person runs reconcile()
+  (the scheduler's jobs under the tag) and calls confirm_submission() with job IDs from those candidates, or
+  abandon_submission() with a reason ('abandoned', which does not prove the scheduler never accepted the jobs).
+- Collection never follows symbolic links and reads regular files up to MAX_OUTPUT_BYTES; merge() uses only chunk
+  files whose digest matches the collection record of a submitted attempt.
 Standard library only.
 """
 from __future__ import annotations
@@ -41,15 +45,19 @@ import json
 import math
 import os
 import shutil
+import stat
 from threading import local as _thread_state  # the packaging scan reads '.local' as a host name
 import time
+import uuid
 from pathlib import Path
+from typing import Any
 
 from core.partition import engine
-from core.partition.executors import PollError
+from core.partition.executors import PollError, SubmitRefused
 from core.partition.states import ACTIVE, NEEDS_PERSON, decide, normalize, repeated, same_resources, signature
 
 MIN_POLL_INTERVAL_S = 60
+MAX_OUTPUT_BYTES = 64 * 1024 * 1024  # a runner output larger than this is quarantined unread
 POLL_AGAIN = (None, "held", "unknown")  # a held or unknown job may still change; keep asking
 RUNNER = Path(__file__).resolve().parent / "runner.py"
 
@@ -72,7 +80,8 @@ def resources_hash(config: dict) -> str:
     return hashlib.sha256(json.dumps(config.get("resources", {}), sort_keys=True).encode()).hexdigest()
 
 
-def init(campaign_dir, manifest: dict, cmd: str, container_image: str | None = None) -> Path:
+def init(campaign_dir, manifest: dict, cmd: str, container_image: str | None = None,
+         worker_timeout_s: int | None = None) -> Path:
     """Create (or reopen) a campaign. The manifest and the command template are checked first
     (engine.validate_manifest, engine.check_template): an invalid one is refused before anything is written."""
     try:
@@ -92,11 +101,12 @@ def init(campaign_dir, manifest: dict, cmd: str, container_image: str | None = N
     for sub in ("submissions", "outputs", "chunks", "quarantine"):
         (cdir / sub).mkdir(parents=True, exist_ok=True)
     engine._write_atomic(cdir / "manifest.json", manifest)
-    engine._write_atomic(cdir / "spec.json", {"manifest": manifest, "cmd": cmd, "container_image": container_image})
+    engine._write_atomic(cdir / "spec.json", {"manifest": manifest, "cmd": cmd, "container_image": container_image,
+                                              "worker_timeout_s": worker_timeout_s})
     shutil.copyfile(RUNNER, cdir / "runner.py")
     os.chmod(cdir / "runner.py", 0o755)
-    state = {"manifest_hash": manifest["manifest_hash"], "chunks": {}, "submissions": [], "resets": [], "duplicates": [],
-             "quarantine": [], "seen": [], "polls": 0}
+    state = {"manifest_hash": manifest["manifest_hash"], "campaign_uid": uuid.uuid4().hex[:16], "chunks": {},
+             "submissions": [], "resets": [], "duplicates": [], "quarantine": [], "seen": [], "polls": 0, "collected": {}}
     engine._write_atomic(cdir / "state.json", state)
     return cdir
 
@@ -195,7 +205,7 @@ def chunk_status(cdir: Path, state: dict, cid: str) -> str:
 
 @_locked("submit")
 def submit(campaign_dir, executor, config: dict, chunk_ids=None, approved: bool = False, pilot: bool = False,
-           _origin: str = "submit", clock=_now) -> dict:
+           _origin: str = "submit", clock=_now, expected_plan_digest: str | None = None) -> dict:
     """Submit chunks that were never submitted (all of them, the given ones, or with pilot=True the first one)."""
     cdir = Path(campaign_dir)
     manifest, state = load(cdir)
@@ -219,22 +229,31 @@ def submit(campaign_dir, executor, config: dict, chunk_ids=None, approved: bool 
         ids = ids[:1]
     if not ids:
         return {"submitted": [], "dry_run": not approved, "message": "nothing to submit"}
+    if not state.get("campaign_uid"):  # a campaign created before tags: fix its uid once, so dry runs are reproducible
+        state["campaign_uid"] = uuid.uuid4().hex[:16]
+        _save(cdir, state)
     sid = f"s{len(state['submissions']) + 1:03d}"
     sub_dir = cdir / "submissions" / sid
     rows = []
     for i, cid in enumerate(ids):
         n = sum(1 for r in _row(state, cid)["attempt_records"] if r.get("origin") != "scheduler-restart") + 1
         rows.append({"index": i, "chunk_id": cid, "attempt_id": f"{cid}-a{n:02d}"})
+    tag = submission_tag(state, sid)
     ctx = {"campaign_dir": cdir, "submission_id": sid, "submission_dir": sub_dir, "rows": rows, "config": config,
-           "spec": cdir / "spec.json", "runner": cdir / "runner.py", "outputs_dir": cdir / "outputs"}
+           "spec": cdir / "spec.json", "runner": cdir / "runner.py", "outputs_dir": cdir / "outputs", "tag": tag}
     plan = executor.prepare(ctx)
+    digest = plan_digest(plan)
+    if approved and expected_plan_digest is not None and expected_plan_digest != digest:
+        raise CampaignError("submit.plan_changed", f"the job files differ from the reviewed dry run ({expected_plan_digest[:12]}"
+                            f" -> {digest[:12]}): review the new dry run before submitting")
     if not approved:
         preview = cdir / "dry-run" / sid
         preview.mkdir(parents=True, exist_ok=True)
         for name, text in plan["files"].items():
             (preview / name).write_text(text, encoding="utf-8")
-        return {"dry_run": True, "submission_id": sid, "chunks": ids, "would_run": plan["submit_argv"],
-                "files": sorted(str(preview / n) for n in plan["files"]), "message": "dry run: no scheduler call; pass the submit flag to submit"}
+        return {"dry_run": True, "submission_id": sid, "chunks": ids, "would_run": plan["submit_argv"], "plan_digest": digest,
+                "files": sorted(str(preview / n) for n in plan["files"]),
+                "message": "dry run: no scheduler call; pass the submit flag (and this plan_digest) to submit exactly these files"}
     sub_dir.mkdir(parents=True, exist_ok=True)
     (sub_dir / "logs").mkdir(exist_ok=True)
     for cid in ids:
@@ -258,42 +277,90 @@ def submit(campaign_dir, executor, config: dict, chunk_ids=None, approved: bool 
         row["attempts_since_reset"] += 1
         row["reset_reason"] = None
     state["submissions"].append({"id": sid, "backend": executor.name, "command": plan["submit_argv"], "chunks": ids,
-                                 "origin": _origin, "pilot": pilot, "time": clock(), "status": "intent"})
+                                 "origin": _origin, "pilot": pilot, "time": clock(), "status": "intent", "tag": tag,
+                                 "plan_digest": digest})
     _save(cdir, state)
     try:
         jobs = executor.submit(plan)
-    except Exception as exc:  # the scheduler refused: nothing was submitted, and the record says so
-        _settle(cdir, sid, None, f"submit failed: {type(exc).__name__}: {exc}")
+    except SubmitRefused as exc:  # the client never started: certainly nothing was submitted, and the record says so
+        _settle(cdir, sid, None, f"submit refused: {exc}")
+        raise
+    except BaseException as exc:  # the scheduler may have accepted the jobs: keep the intent for a person to reconcile
+        _note_ambiguous(cdir, sid, f"{type(exc).__name__}: {exc}")
         raise
     _settle(cdir, sid, {j["attempt_id"]: j["job_id"] for j in jobs})
     return {"dry_run": False, "submission_id": sid, "chunks": ids, "command": plan["submit_argv"], "jobs": jobs}
 
 
-def _settle(cdir: Path, sid: str, job_of: dict | None, reason: str | None = None) -> None:
-    """Confirm a recorded submission with its job IDs, or (job_of None) mark its attempts as never submitted."""
+def submission_tag(state: dict, sid: str) -> str:
+    """hepr-<campaign_uid>-<sid>: the job name the scheduler keeps, so reconcile() can find the jobs of a submission."""
+    if not state.get("campaign_uid"):  # a campaign created before tags: give it one now (saved with the intent)
+        state["campaign_uid"] = uuid.uuid4().hex[:16]
+    return f"hepr-{state['campaign_uid']}-{sid}"
+
+
+def plan_digest(plan: dict) -> str:
+    """SHA-256 of what a submission would run: the rendered files and the submit command (X15)."""
+    body = {"files": plan["files"], "submit_argv": [str(a) for a in plan["submit_argv"]]}
+    return hashlib.sha256(json.dumps(body, sort_keys=True).encode()).hexdigest()
+
+
+def _note_ambiguous(cdir: Path, sid: str, reason: str) -> None:
+    _, state = load(cdir)
+    sub = next(x for x in state["submissions"] if x["id"] == sid)
+    sub["ambiguous"] = reason  # status stays 'intent': unconfirmed until reconciled
+    _save(cdir, state)
+
+
+def _settle(cdir: Path, sid: str, job_of: dict | None, reason: str | None = None, outcome: str = "not-submitted") -> None:
+    """Confirm a recorded submission with its job IDs, or (job_of None) settle its attempts as never submitted
+    (outcome 'not-submitted': the client never started) or abandoned by a person ('abandoned')."""
     _, state = load(cdir)
     sub = next(x for x in state["submissions"] if x["id"] == sid)
     for row in state["chunks"].values():
         for rec in row["attempt_records"]:
             if rec.get("submission") == sid and rec.get("state") == "submitting":
                 if job_of is None:
-                    rec.update(state="not-submitted", final_state="not-submitted", note=reason)
+                    rec.update(state=outcome, final_state=outcome, note=reason)
                 else:
                     rec.update(state="queued", job_id=job_of.get(rec["attempt_id"]))
-    sub["status"] = "submitted" if job_of is not None else "not-submitted"
+    sub["status"] = "submitted" if job_of is not None else outcome
     if reason:
         sub["reason"] = reason
     _save(cdir, state)
 
 
+def reconcile(campaign_dir, executor, submission_id: str) -> dict:
+    """Read-only: the jobs the scheduler knows under an unconfirmed submission's tag, for a person to decide."""
+    cdir = Path(campaign_dir)
+    _, state = load(cdir)
+    sub = next((x for x in unconfirmed(state) if x["id"] == submission_id), None)
+    if sub is None:
+        raise CampaignError("reconcile.not_unconfirmed", f"{submission_id} is not an unconfirmed submission")
+    if not sub.get("tag"):
+        raise CampaignError("reconcile.no_tag", f"{submission_id} was recorded before submission tags; check the scheduler by hand")
+    attempts = sorted(rec["attempt_id"] for row in state["chunks"].values() for rec in row["attempt_records"]
+                      if rec.get("submission") == submission_id)
+    return {"submission": submission_id, "tag": sub["tag"], "attempts": attempts,
+            "candidates": executor.find(sub["tag"], sub.get("time")), "ambiguous": sub.get("ambiguous")}
+
+
 @_locked("confirm")
-def confirm_submission(campaign_dir, submission_id: str, job_ids: dict) -> dict:
-    """After an interrupted submit: the person found the jobs at the scheduler; record {attempt_id: job_id}."""
+def confirm_submission(campaign_dir, submission_id: str, job_ids: dict, executor=None) -> dict:
+    """After an ambiguous or interrupted submit: a person found the jobs at the scheduler; record {attempt_id: job_id}.
+    Every job ID must be one that reconcile() lists for the submission's tag (fabricated IDs are refused, X07)."""
     cdir = Path(campaign_dir)
     _, state = load(cdir)
     sub = next((x for x in unconfirmed(state) if x["id"] == submission_id), None)
     if sub is None:
         raise CampaignError("confirm.not_unconfirmed", f"{submission_id} is not an unconfirmed submission")
+    if executor is None or not sub.get("tag"):
+        raise CampaignError("confirm.no_reconcile", "confirm needs the scheduler's candidates for the submission tag "
+                            "(an executor, and a submission recorded with a tag)")
+    found = {c["job_id"] for c in executor.find(sub["tag"], sub.get("time"))}
+    unknown = sorted(j for j in job_ids.values() if j not in found)
+    if unknown:
+        raise CampaignError("confirm.unknown_jobs", f"not found at the scheduler under tag {sub['tag']}: {unknown}")
     attempts = {rec["attempt_id"] for row in state["chunks"].values() for rec in row["attempt_records"]
                 if rec.get("submission") == submission_id}
     if set(job_ids) != attempts:
@@ -304,15 +371,16 @@ def confirm_submission(campaign_dir, submission_id: str, job_ids: dict) -> dict:
 
 @_locked("abandon")
 def abandon_submission(campaign_dir, submission_id: str, reason: str) -> dict:
-    """After an interrupted submit: the person found no jobs at the scheduler. The attempts become 'not-submitted'
-    (their chunks need a reset to run again); an output that still appears for them is collected as usual."""
+    """After an ambiguous or interrupted submit: the person found no jobs at the scheduler. The attempts become
+    'abandoned' (not proof that nothing runs; their chunks need a reset to run again); an output that still appears
+    for them is collected as usual."""
     if not reason or not reason.strip():
         raise CampaignError("abandon.reason_missing", "abandoning a submission needs a reason")
     cdir = Path(campaign_dir)
     _, state = load(cdir)
     if not any(x["id"] == submission_id for x in unconfirmed(state)):
         raise CampaignError("abandon.not_unconfirmed", f"{submission_id} is not an unconfirmed submission")
-    _settle(cdir, submission_id, None, f"abandoned: {reason}")
+    _settle(cdir, submission_id, None, f"abandoned: {reason}", outcome="abandoned")
     return {"abandoned": submission_id, "reason": reason}
 
 
@@ -364,10 +432,11 @@ def cancel(campaign_dir, executor, chunk_ids=None, approved: bool = False) -> di
             for r in row.get("attempt_records", []) if r.get("final_state") in POLL_AGAIN and r.get("job_id")]
     if not approved:
         return {"dry_run": True, "would_cancel": [r["job_id"] for r in recs], "message": "dry run: pass the cancel approval flag to cancel"}
-    cmds = executor.cancel(recs)
+    cmds = executor.cancel(recs)  # [{argv, exit}]: a cancel request, not proof of termination (a later poll says)
     state.setdefault("cancels", []).append({"jobs": [r["job_id"] for r in recs], "commands": cmds, "time": _now()})
     _save(cdir, state)
-    return {"dry_run": False, "cancelled": [r["job_id"] for r in recs], "commands": cmds}
+    return {"dry_run": False, "requested": [r["job_id"] for r in recs], "commands": cmds,
+            "note": "cancel requested; a job is cancelled only when a later poll observes it"}
 
 
 # ---------------------------------------------------------------- collection
@@ -408,8 +477,15 @@ def collect(campaign_dir) -> dict:
     manifest, state = load(cdir)
     seen = set(state["seen"])
     ingested, dups, quarantined = [], [], []
-    for cdir_chunk in sorted(p for p in (cdir / "outputs").iterdir() if p.is_dir()):
+    collected = state.get("collected")  # None for a campaign created before collection records: stays unchecked
+    for cdir_chunk in sorted((cdir / "outputs").iterdir()):
         cid = cdir_chunk.name
+        if cdir_chunk.is_symlink() or not cdir_chunk.is_dir():  # never follow a link out of the campaign (X03)
+            rel = f"outputs/{cid}"
+            if cdir_chunk.is_symlink() and rel not in seen:
+                seen.add(rel)
+                quarantined.append({"file": rel, "moved_to": None, "reason": "symbolic link: not followed, not collected"})
+            continue
         known = {r["attempt_id"] for r in _row(state, cid)["attempt_records"]} if cid in state["chunks"] else set()
         order = {a: i for i, a in enumerate(r["attempt_id"] for r in state["chunks"].get(cid, {}).get("attempt_records", []))}
         cands = []
@@ -418,11 +494,19 @@ def collect(campaign_dir) -> dict:
             if f.name.startswith(".") or f.name.endswith(".meta.json") or rel in seen:
                 continue
             base, _, rerun = f.name[:-5].partition(".rerun-")
-            try:
-                doc = json.loads(f.read_text(encoding="utf-8"))
-                problem = _check(doc, manifest, cid, base, known)
-            except ValueError as exc:
-                doc, problem = None, f"unreadable: {exc}"
+            st = os.lstat(f)
+            doc: Any = None
+            problem: str | None
+            if stat.S_ISLNK(st.st_mode) or not stat.S_ISREG(st.st_mode):
+                doc, problem = None, "not a regular file (a link is never followed)"
+            elif st.st_size > MAX_OUTPUT_BYTES:
+                doc, problem = None, f"larger than {MAX_OUTPUT_BYTES} bytes; not read"
+            else:
+                try:
+                    doc = json.loads(f.read_text(encoding="utf-8"))
+                    problem = _check(doc, manifest, cid, base, known)
+                except ValueError as exc:
+                    doc, problem = None, f"unreadable: {exc}"
             seen.add(rel)
             if problem:
                 dest = cdir / "quarantine" / cid / f.name
@@ -435,11 +519,19 @@ def collect(campaign_dir) -> dict:
         for _, rel, doc in sorted(cands, key=lambda t: t[0]):
             if not target.exists():
                 tmp = cdir / "chunks" / f".tmp-{cid}.json"
-                tmp.write_text(json.dumps(doc, sort_keys=True), encoding="utf-8")
+                body = json.dumps(doc, sort_keys=True)
+                tmp.write_text(body, encoding="utf-8")
                 try:
                     os.link(tmp, target)  # write-once: never replaces an existing collected output
                 finally:
                     tmp.unlink()
+                # the provenance merge() checks: which attempt and which bytes were collected (X04)
+                if collected is not None:
+                    collected[cid] = {"attempt_id": doc["attempt_id"], "file": rel,
+                                      "sha256": hashlib.sha256(body.encode("utf-8")).hexdigest()}
+                for rec in _row(state, cid)["attempt_records"]:
+                    if rec["attempt_id"] == doc["attempt_id"] and rec.get("final_state") in ("not-submitted", "abandoned"):
+                        rec["orphan_output_collected"] = True  # the record said not submitted; a job ran anyway (X11)
                 ingested.append({"chunk": cid, "file": rel})
                 continue
             kept = json.loads(target.read_text(encoding="utf-8"))
@@ -526,9 +618,43 @@ def report(campaign_dir, collected: dict | None = None) -> dict:
 
 
 def merge(campaign_dir, combine=None) -> dict:
+    """engine.merge after a provenance check: every chunk file must be the one collect() recorded (same digest) for an
+    attempt of a submission the scheduler accepted. A forged or replaced chunk file fails the merge (X04). This check
+    reads agent-writable state: it catches mistakes and forged chunk files, not a forged state.json (that needs the
+    trusted submitter)."""
     cdir = Path(campaign_dir)
-    manifest, _ = load(cdir)
-    return engine.merge(manifest, cdir, combine)
+    manifest, state = load(cdir)
+    problems, warnings = provenance_check(cdir, state)
+    if problems:
+        return {"status": "refused", "problems": problems, "provenance_warnings": warnings, "result": None}
+    return dict(engine.merge(manifest, cdir, combine), provenance_warnings=warnings)
+
+
+def provenance_check(cdir: Path, state: dict) -> tuple[list[dict], list[dict]]:
+    """(problems, warnings). Problems: a chunk file collect() did not write, bytes changed since collection, an
+    attempt that was never recorded. Warning: an orphan's output (its submission was abandoned or never confirmed
+    as submitted) was collected (X11), and campaigns created before collection records are not checked."""
+    if "collected" not in state:
+        return [], [{"code": "merge.provenance_unrecorded", "message": "campaign created before collection records"}]
+    accepted = {s["id"] for s in state["submissions"] if s.get("status") == "submitted"}
+    attempts = {r["attempt_id"]: r for row in state["chunks"].values() for r in row["attempt_records"]}
+    problems, warnings = [], []
+    for f in sorted((cdir / "chunks").glob("*.json")):
+        cid = f.stem
+        rec = state["collected"].get(cid)
+        if rec is None:
+            problems.append({"code": "merge.uncollected_chunk", "chunk": cid, "message": "not written by collect()"})
+            continue
+        if hashlib.sha256(f.read_bytes()).hexdigest() != rec["sha256"]:
+            problems.append({"code": "merge.chunk_changed", "chunk": cid, "message": "differs from the collected bytes"})
+        att = attempts.get(rec["attempt_id"])
+        if att is None:
+            problems.append({"code": "merge.unknown_attempt", "chunk": cid, "message": f"attempt {rec['attempt_id']} was never recorded"})
+        elif att.get("submission") not in accepted:
+            warnings.append({"code": "merge.orphan_output", "chunk": cid,
+                             "message": f"output of attempt {rec['attempt_id']}, whose submission is {att.get('state')}: "
+                                        "the scheduler ran a job the record did not confirm"})
+    return problems, warnings
 
 
 # ---------------------------------------------------------------- monitoring loop

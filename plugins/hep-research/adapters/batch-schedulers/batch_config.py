@@ -13,22 +13,38 @@ One JSON file per campaign, kept in the user's project (never in the plugin):
   throttle        positive integer: most array tasks / jobs running at once         optional
   max_attempts    positive integer; absent means no resubmission                    optional
   monitor         {"poll_interval_s" (>= 60), "max_polls", "deadline_s"}            optional; watch needs it
-  worker_python   interpreter the job uses to start the runner (default "python3")  optional
-  job_name        optional
+  worker_python   absolute path of the interpreter the job uses to start the runner  optional (default python3
+                  on the job's PATH, which --export=NONE / getenv = false keep minimal)
+  job_name        ignored for the scheduler job name, which is the submission tag  optional
+  scheduler_timeout_s  seconds before a scheduler client call is abandoned (default 120)  optional
+  worker_timeout_s     seconds before the runner stops the worker command (default none)  optional
+  env_passthrough list of environment variable names passed to scheduler clients besides the allow-list
+                  (core.partition.executors.ENV_ALLOW); never credentials                optional
 
 Unknown keys are errors, not ignored. A value written as a placeholder ("<...>") is accepted only when validating
-the shipped example with example=True. Refusals carry a named code: config.missing_key, config.unknown_key,
-config.bad_value, config.placeholder. Standard library only.
+the shipped example with example=True. Strings are rendered into job files, so they must be single-line without
+template braces, and names (partition, account, qos, job_name, universe, gres) use a strict character set (X01).
+worker_python and transfer_input_files must be absolute paths without '..' (X13). Refusals carry a named code:
+config.missing_key, config.unknown_key, config.bad_value, config.placeholder. Standard library only.
 """
 from __future__ import annotations
 
 import hashlib
 import json
 import re
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from core.partition.executors import passthrough_problems  # noqa: E402
 
 PLACEHOLDER = re.compile(r"^<[^<>]+>$")
 TIME = re.compile(r"^(\d+-)?\d{1,2}:\d{2}:\d{2}$")
-TOP = {"backend", "campaign_dir", "resources", "slurm", "htcondor", "throttle", "max_attempts", "monitor", "worker_python", "job_name"}
+TOP = {"backend", "campaign_dir", "resources", "slurm", "htcondor", "throttle", "max_attempts", "monitor", "worker_python", "job_name",
+       "scheduler_timeout_s", "worker_timeout_s", "env_passthrough"}
+NAME = re.compile(r"^[A-Za-z0-9_.:+@-]{1,128}$")  # partition, account, qos, job name, gres
+UNSAFE = re.compile(r"[\x00-\x1f\x7f]|\{\{|\}\}")  # control characters (a newline adds a job-file line) or template braces
+CONSTRAINT = re.compile(r"^[A-Za-z0-9_.:+@&|!()\[\]*,-]{1,256}$")  # no whitespace: one #SBATCH line holds one option
 RESOURCES = {"cpus", "memory_mb", "disk_mb", "gpus", "time_limit"}
 SLURM = {"partition", "account", "qos", "constraint", "gres"}
 HTCONDOR = {"universe", "container_image", "file_transfer", "requirements", "transfer_input_files"}
@@ -65,9 +81,20 @@ def validate(cfg, example: bool = False) -> list[dict]:
         if isinstance(v, bool) or not isinstance(v, int) or v < minimum:
             add("config.bad_value", where + k, f"must be an integer >= {minimum}, got {v!r}")
 
-    def text(obj, k, where):
-        if k in obj and not placeholder(obj[k], where + k) and (not isinstance(obj[k], str) or not obj[k].strip()):
+    def text(obj, k, where, pattern=None):
+        if k not in obj or placeholder(obj[k], where + k):
+            return
+        v = obj[k]
+        if not isinstance(v, str) or not v.strip():
             add("config.bad_value", where + k, "must be a non-empty string")
+        elif UNSAFE.search(v):
+            add("config.bad_value", where + k, "must be one line without control characters or '{{' '}}' (it is rendered into a job file)")
+        elif pattern is not None and not pattern.match(v):
+            add("config.bad_value", where + k, f"must match {pattern.pattern}")
+
+    def abs_path(v, key):
+        if not isinstance(v, str) or not v.startswith("/") or ".." in v.split("/") or UNSAFE.search(v) or "," in v:
+            add("config.bad_value", key, "must be an absolute path without '..', commas or control characters")
 
     if not isinstance(cfg, dict):
         return [{"code": "config.bad_value", "key": "", "message": "the configuration must be a JSON object"}]
@@ -91,8 +118,14 @@ def validate(cfg, example: bool = False) -> list[dict]:
         add("config.bad_value", "resources.time_limit", "must be [D-]HH:MM:SS")
     for k in ("throttle", "max_attempts"):
         pos_int(cfg, k, "")
-    for k in ("worker_python", "job_name"):
-        text(cfg, k, "")
+    text(cfg, "job_name", "", NAME)
+    if "worker_python" in cfg and not placeholder(cfg["worker_python"], "worker_python"):
+        abs_path(cfg["worker_python"], "worker_python")
+    pos_int(cfg, "scheduler_timeout_s", "")
+    pos_int(cfg, "worker_timeout_s", "")
+    if "env_passthrough" in cfg:
+        for prob in passthrough_problems(cfg["env_passthrough"]):
+            add("config.bad_value", "env_passthrough", prob)
     mon = cfg.get("monitor", {})
     if not isinstance(mon, dict):
         add("config.bad_value", "monitor", "must be an object")
@@ -113,7 +146,7 @@ def validate(cfg, example: bool = False) -> list[dict]:
         if "partition" not in s:
             add("config.missing_key", "slurm.partition", "required: the site's partition name")
         for k in SLURM:
-            text(s, k, "slurm.")
+            text(s, k, "slurm.", CONSTRAINT if k == "constraint" else NAME)
         if "time_limit" not in res:
             add("config.missing_key", "resources.time_limit", "required for slurm: the walltime, sized from a pilot")
     if backend == "htcondor":
@@ -134,6 +167,10 @@ def validate(cfg, example: bool = False) -> list[dict]:
         tif = h.get("transfer_input_files", [])
         if not isinstance(tif, list) or not all(isinstance(x, str) and x for x in tif):
             add("config.bad_value", "htcondor.transfer_input_files", "must be a list of paths")
+        else:
+            for i, x in enumerate(tif):
+                if not is_placeholder(x):
+                    abs_path(x, f"htcondor.transfer_input_files[{i}]")
         if "time_limit" in res:
             add("config.unknown_key", "resources.time_limit", "not used by the htcondor backend; enforce walltime with your site's policy")
     return errs

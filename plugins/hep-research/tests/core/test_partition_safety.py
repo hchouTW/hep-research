@@ -10,6 +10,7 @@ from pathlib import Path
 
 from core.partition import campaign as cp
 from core.partition import engine
+from core.partition.executors import SubmitAmbiguous, SubmitRefused
 from tests.core.partition_helpers import ScriptedExecutor, make_campaign, single_run
 
 CONFIG = {"max_attempts": 2, "resources": {"time": "00:10:00"}}
@@ -26,8 +27,14 @@ class InterruptingExecutor(ScriptedExecutor):
 
 
 class RefusingExecutor(ScriptedExecutor):
-    def submit(self, plan):
-        raise RuntimeError("sbatch: error: invalid partition")
+    def submit(self, plan):  # the client could not start: certainly nothing was submitted
+        raise SubmitRefused("scripted.submit.not_started", "sbatch: No such file or directory")
+
+
+class AmbiguousExecutor(ScriptedExecutor):
+    def submit(self, plan):  # the scheduler queued the jobs, then the client failed (or timed out)
+        self.accepted = super().submit(plan)
+        raise SubmitAmbiguous("scripted.submit.failed", "exit 1: sbatch: error: Socket timed out")
 
 
 class SlowExecutor(ScriptedExecutor):
@@ -65,8 +72,16 @@ class SafetyTests(unittest.TestCase):
         self.assertEqual(ex.calls, [("submit", [c["id"] for c in self.manifest["chunks"]])])
         # the person finds the jobs at the scheduler and confirms them; the campaign then completes normally
         with self.assertRaises(cp.CampaignError):
-            cp.confirm_submission(self.cdir, sub["id"], {"c0000-a01": "x"})  # every attempt needs its job
-        cp.confirm_submission(self.cdir, sub["id"], {j["attempt_id"]: j["job_id"] for j in ex.accepted})
+            cp.confirm_submission(self.cdir, sub["id"], {"c0000-a01": "x"}, ex)  # every attempt needs its job
+        rec = cp.reconcile(self.cdir, ex, sub["id"])
+        self.assertEqual(sorted(c["job_id"] for c in rec["candidates"]), sorted(j["job_id"] for j in ex.accepted))
+        fabricated = {j["attempt_id"]: "99999" for j in ex.accepted}
+        with self.assertRaises(cp.CampaignError) as err:  # IDs the scheduler does not list under the tag (X07)
+            cp.confirm_submission(self.cdir, sub["id"], fabricated, ex)
+        self.assertEqual(err.exception.code, "confirm.unknown_jobs")
+        with self.assertRaises(cp.CampaignError):  # no executor: no candidates to check against
+            cp.confirm_submission(self.cdir, sub["id"], {j["attempt_id"]: j["job_id"] for j in ex.accepted})
+        cp.confirm_submission(self.cdir, sub["id"], {j["attempt_id"]: j["job_id"] for j in ex.accepted}, ex)
         rep = cp.poll(self.cdir, ex)
         self.assertTrue(rep["complete"], rep["not_done"])
         merged = cp.merge(self.cdir)
@@ -80,7 +95,7 @@ class SafetyTests(unittest.TestCase):
             cp.abandon_submission(self.cdir, sid, " ")
         cp.abandon_submission(self.cdir, sid, "no jobs from this submission at the scheduler")
         statuses = {c["status"] for c in cp.report(self.cdir)["chunks"].values()}
-        self.assertEqual(statuses, {"not-submitted"})
+        self.assertEqual(statuses, {"abandoned"})  # not proof that the scheduler never accepted them
         ids = [c["id"] for c in self.manifest["chunks"]]
         cp.reset(self.cdir, ids, "abandoned after an interrupted submit")
         ex = ScriptedExecutor({})
@@ -89,12 +104,27 @@ class SafetyTests(unittest.TestCase):
         self.assertTrue(cp.poll(self.cdir, ex)["complete"])
 
     def test_a_refused_submission_is_recorded_as_not_submitted(self):
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(SubmitRefused):
             cp.submit(self.cdir, RefusingExecutor({}), CONFIG, approved=True)
         state = self.state()
         self.assertEqual(state["submissions"][-1]["status"], "not-submitted")
-        self.assertIn("invalid partition", state["submissions"][-1]["reason"])
+        self.assertIn("No such file", state["submissions"][-1]["reason"])
         self.assertEqual({c["status"] for c in cp.report(self.cdir)["chunks"].values()}, {"not-submitted"})
+
+    def test_an_ambiguous_submission_stays_unconfirmed(self):
+        # a lost response is never recorded as not submitted (N08, U09): it waits for a person to reconcile it
+        ex = AmbiguousExecutor({})
+        with self.assertRaises(SubmitAmbiguous):
+            cp.submit(self.cdir, ex, CONFIG, approved=True)
+        sub = self.state()["submissions"][-1]
+        self.assertEqual(sub["status"], "intent")
+        self.assertIn("Socket timed out", sub["ambiguous"])
+        with self.assertRaises(cp.CampaignError) as err:
+            cp.submit(self.cdir, ScriptedExecutor({}), CONFIG, approved=True)
+        self.assertEqual(err.exception.code, "submit.unconfirmed")
+        cp.confirm_submission(self.cdir, sub["id"], {j["attempt_id"]: j["job_id"] for j in ex.accepted}, ex)
+        self.assertTrue(cp.poll(self.cdir, ex)["complete"])
+        self.assertEqual(sum(1 for c in ex.calls if c[0] == "submit"), 1)
 
     def test_concurrent_submits_cannot_both_run(self):
         results, errors = [], []

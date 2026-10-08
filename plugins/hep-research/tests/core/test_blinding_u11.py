@@ -148,6 +148,12 @@ class RenderingsN12(unittest.TestCase):
         self.assertIn("OUT_OF_SCOPE_RENDERINGS", rep["limitation"])
         self.assertEqual(bl.agent_view(rep)["out_of_scope_renderings"], list(bl.OUT_OF_SCOPE_RENDERINGS))
 
+    def test_hex_like_tokens_do_not_crash_the_scan(self):
+        # a random submission tag such as hepr-91e333...-s001 holds '91e333', whose exponent overflows a float
+        for text in ("job hepr-91e333aa0f-s001", "x 1e999 y", "1E-999", "4e308%"):
+            with self.subTest(text=text):
+                self.assertFalse(bl.scan_text(text, self.SEALED))
+
     def test_unrelated_numbers_still_pass(self):
         self.assertFalse(self.found("bins 12 epoch 37 seed 4730 lr 0.25"))
 

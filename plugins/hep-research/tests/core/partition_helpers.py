@@ -52,16 +52,21 @@ class ScriptedExecutor(Executor):
 
     def __init__(self, script):
         super().__init__()
-        self.script, self.polls, self.calls = script, {}, []
+        self.script, self.polls, self.calls, self.by_tag = script, {}, [], {}
 
     def prepare(self, ctx):
         return {"backend": self.name, "submission_id": ctx["submission_id"], "files": {"plan.json": json.dumps(ctx["rows"])},
-                "submit_argv": ["scripted-submit"], "rows": ctx["rows"], "cdir": str(ctx["campaign_dir"])}
+                "submit_argv": ["scripted-submit"], "rows": ctx["rows"], "cdir": str(ctx["campaign_dir"]), "tag": ctx.get("tag")}
 
     def submit(self, plan):
         self.calls.append(("submit", [r["chunk_id"] for r in plan["rows"]]))
         self.cdir = Path(plan["cdir"])
-        return [{"attempt_id": r["attempt_id"], "job_id": f"j-{r['attempt_id']}"} for r in plan["rows"]]
+        jobs = [{"attempt_id": r["attempt_id"], "job_id": f"j-{r['attempt_id']}"} for r in plan["rows"]]
+        self.by_tag.setdefault(plan.get("tag"), []).extend({"job_id": j["job_id"]} for j in jobs)
+        return jobs
+
+    def find(self, tag, since=None):
+        return list(self.by_tag.get(tag, []))
 
     def poll(self, records):
         self.calls.append(("poll", len(records)))

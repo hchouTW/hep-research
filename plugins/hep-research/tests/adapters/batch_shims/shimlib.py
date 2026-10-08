@@ -115,7 +115,7 @@ def sbatch(argv: list) -> int:
         kind = fault.get("kind")
         node = fault.get("node", "shim-node-1")
         key = f"{jid}_{idx}"
-        task = {"records": [], "queue": None}
+        task = {"records": [], "queue": None, "name": opts.get("--job-name")}
         store["slurm"][key] = task
 
         def run_once():
@@ -164,6 +164,13 @@ def sacct(argv: list) -> int:
         return 1
     if mode == "malformed":
         print("this is not sacct output")
+        return 0
+    name = next((a.split("=", 1)[1] for a in argv if a.startswith("--name=")), None)
+    if name is not None:  # reconciliation: tasks by job name
+        for key, task in sorted(load()["slurm"].items()):
+            if task.get("name") == name:
+                state = task["queue"] or (task["records"][-1]["state"] if task["records"] else "PENDING")
+                print(f"{key}|{name}|{state}")
         return 0
     jobs = next(a.split("=", 1)[1] for a in argv if a.startswith("--jobs=")).split(",")
     dup = "--duplicates" in argv
@@ -243,7 +250,7 @@ def condor_submit(argv: list) -> int:
     store["next_id"] += 1
     iwd = Path.cwd()
     log = Path(kv["log"])
-    cl = store["condor"][str(cluster)] = {"log": str(log), "procs": {}}
+    cl = store["condor"][str(cluster)] = {"log": str(log), "procs": {}, "tag": kv.get("+hepresearchtag", "").strip('"')}
     for proc, values in enumerate(items):
         macros = dict(zip(names, values), Cluster=str(cluster), Process=str(proc), ClusterId=str(cluster), ProcId=str(proc))
         sub = lambda s: re.sub(r"\$\((\w+)\)", lambda m: macros[m.group(1)], s)
@@ -332,9 +339,15 @@ def condor_submit(argv: list) -> int:
 def _ads(argv: list, statuses: set) -> int:
     clusters = [a for a in argv if a.isdigit()]
     attrs = argv[argv.index("-attributes") + 1].split(",") if "-attributes" in argv else None
+    want = None
+    if "-constraint" in argv:
+        m = re.match(r'^HepResearchTag == "([^"]*)"$', argv[argv.index("-constraint") + 1])
+        want = m.group(1) if m else "\0no-match"
     ads = []
     for c, cl in sorted(load()["condor"].items()):
         if clusters and c not in clusters:
+            continue
+        if want is not None and cl.get("tag") != want:
             continue
         for p, st in sorted(cl["procs"].items(), key=lambda t: int(t[0])):
             if st["JobStatus"] in statuses:

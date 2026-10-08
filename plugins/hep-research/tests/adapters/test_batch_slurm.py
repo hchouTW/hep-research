@@ -1,6 +1,7 @@
 """B04/B08: Slurm backend against the fake scheduler (tests/adapters/batch_shims); real Slurm only with HEP_SLURM_TEST=1."""
 import json
 import os
+import re
 import shutil
 import unittest
 from pathlib import Path
@@ -70,13 +71,16 @@ class SlurmShimTests(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertTrue(rep["dry_run"])
         self.assertEqual(h.calls(), [], "a dry run must not call the scheduler")
-        script = (h.cdir / "dry-run" / "s001" / "job.sbatch").read_text().replace(str(h.cdir), "<CAMPAIGN>")
+        script = re.sub(r"hepr-[0-9a-f]{16}-", "hepr-<UID>-",
+                        (h.cdir / "dry-run" / "s001" / "job.sbatch").read_text().replace(str(h.cdir), "<CAMPAIGN>"))
         if os.environ.get("HEP_UPDATE_GOLDEN"):
             GOLDEN.parent.mkdir(exist_ok=True)
             GOLDEN.write_text(script)
         self.assertEqual(script, GOLDEN.read_text())
         self.assertIn("#SBATCH --array=0-9%3", script)
         self.assertIn("#SBATCH --no-requeue", script)
+        self.assertIn("#SBATCH --export=NONE", script)  # the submitter's environment never reaches the job (X06)
+        self.assertIn("#SBATCH --job-name=hepr-<UID>-s001", script)
         code, rep = h.cli("submit", "--submit")
         self.assertEqual([c["tool"] for c in h.calls()], ["sbatch"])
         self.assertEqual(len(h.state()["submissions"]), 1)
@@ -137,7 +141,8 @@ class SlurmShimTests(unittest.TestCase):
         self.assertTrue(rep["dry_run"])
         self.assertEqual(len(self.h.calls()), n)
         code, rep = self.h.cli("cancel", "--approve-cancel")
-        self.assertEqual(rep["cancelled"], ["1000_0"])
+        self.assertEqual(rep["requested"], ["1000_0"])
+        self.assertEqual([c["exit"] for c in rep["commands"]], [0])
         self.assertEqual(self.h.cli("status")[1]["chunks"]["c0000"]["status"], "cancelled")
 
     def test_pilot_submits_one_chunk_and_reports_its_size(self):
@@ -191,6 +196,10 @@ class InterruptedSubmitCliTests(unittest.TestCase):
         code, rep = self.h.cli("submit", "--submit")
         self.assertEqual((code, rep["code"]), (2, "submit.unconfirmed"))
         self.assertEqual(self.h.cli("confirm", "--submission", sid, "--jobs", "nonsense")[0], 2)
+        code, rep = self.h.cli("reconcile", "--submission", sid)
+        self.assertEqual((code, rep["candidates"]), (0, []))  # the scheduler has no job under the tag
+        code, rep = self.h.cli("confirm", "--submission", sid, "--jobs", "c0000-a01=1000_0")
+        self.assertEqual((code, rep["code"]), (2, "confirm.unknown_jobs"))  # a fabricated job ID is refused (X07)
         code, rep = self.h.cli("abandon", "--submission", sid, "--reason", "squeue lists no job of this submission")
         self.assertEqual(code, 0, rep)
-        self.assertEqual(self.h.state()["submissions"][-1]["status"], "not-submitted")
+        self.assertEqual(self.h.state()["submissions"][-1]["status"], "abandoned")

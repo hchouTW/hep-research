@@ -49,10 +49,22 @@ The script is `<plugin root>/adapters/batch-schedulers/batch_campaign.py`. Exit 
 or blocked, 2 refused. `submit` and `resubmit` are dry runs without `--submit`; `cancel` needs `--approve-cancel`.
 
 Only one command changes a campaign at a time: each holds a lock on `<campaign_dir>/.lock`, and a second one is refused
-(`campaign.locked`) instead of racing it. `submit` records its attempts before it calls the scheduler. If it is
-interrupted after that (a kill, a lost connection), the submission stays unconfirmed and nothing is submitted again
-until you look at the scheduler: `confirm --submission S --jobs ATTEMPT=JOB ...` with the jobs it lists, or
-`abandon --submission S --reason TEXT` when it has none (those chunks then need `reset` before `resubmit`).
+(`campaign.locked`) instead of racing it. `submit` records its attempts and a submission tag (the job name,
+`hepr-<campaign uid>-<submission>`) before it calls the scheduler. Every scheduler call has a timeout
+(`scheduler_timeout_s`, default 120 s). Only a client that could not start is recorded as `not-submitted`. If the call
+is interrupted, times out, or ends without job IDs, the scheduler may have accepted the jobs: the submission stays
+unconfirmed and nothing is submitted again until a person runs `reconcile --submission S` (the jobs listed under the
+tag) and then `confirm --submission S --jobs ATTEMPT=JOB ...` with job IDs from that list (others are refused), or
+`abandon --submission S --reason TEXT` when it lists none (recorded as `abandoned`, which does not prove nothing runs;
+those chunks then need `reset` before `resubmit`). `cancel` records each command's exit; a job counts as cancelled only
+when a later `status` observes it. Review a dry run, then pass its `plan_digest` with `--plan-digest` so the submission
+runs exactly the reviewed job files.
+
+Scheduler clients and jobs get an allow-listed environment (PATH, HOME, user, locale, TMPDIR, SLURM_CONF,
+CONDOR_CONFIG, plus names in `env_passthrough`, never credentials); Slurm jobs use `--export=NONE` and HTCondor jobs
+`getenv = false`, so set `worker_python` to an absolute interpreter path. Configuration strings are single-line and
+names use a strict character set; collection never follows symbolic links; `merge` refuses chunk files that
+`collect` did not record.
 Ask the user before every command that submits, cancels or writes to a shared area, each time; approval does not make
 submission sandboxed (see above).
 
