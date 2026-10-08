@@ -23,12 +23,13 @@ class BlindedLogTests(unittest.TestCase):
         sealed = h.dir / "private" / "sealed.json"
         sealed.parent.mkdir()
         sealed.write_text(json.dumps({"sealed": [1234.5678], "region": {"low": 0, "high": 1}}))
-        p = subprocess.run([sys.executable, str(AUDIT), "scan", "--sealed", str(sealed), str(h.cdir / "submissions")],
-                           capture_output=True, text=True, timeout=600)
+        report = h.dir / "private" / "report.json"
+        p = subprocess.run([sys.executable, str(AUDIT), "scan", "--sealed", str(sealed), "--report", str(report),
+                            str(h.cdir / "submissions")], capture_output=True, text=True, timeout=600)
         self.assertEqual(p.returncode, 1, p.stdout)
-        rep = json.loads(p.stdout)
-        leaks = json.dumps(rep)
-        self.assertIn(".stdout.log", leaks)
+        self.assertNotIn(".stdout.log", p.stdout)  # the agent-visible status names no file (N09)
+        self.assertNotIn("1234.5678", p.stdout)
+        self.assertIn(".stdout.log", report.read_text())
 
 
     def test_job_files_and_scheduler_logs_are_read_as_text(self):
