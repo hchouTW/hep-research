@@ -15,7 +15,8 @@ cancel needs --approve-cancel. Nothing here releases a held job, raises a resour
                                                          monitor.max_polls / monitor.deadline_s; refuses without them
   resubmit --config C [--submit]                         only chunks whose decision allows it (max_attempts, changed
                                                          resources after timeout or out-of-memory)
-  reset    --config C --chunks ID ... --reason TEXT      after a person fixed the cause
+  reset    --config C --chunks ID ... --reason TEXT      after a person fixed the cause (refused beyond
+                                                         limits.max_resets_per_chunk)
   reconcile --config C --submission S                   read-only: the jobs the scheduler lists under the
                                                          submission's tag (after an interrupted or ambiguous submit)
   confirm  --config C --submission S --jobs ATTEMPT=JOB ...   a person records the jobs; every job ID must be one
@@ -24,7 +25,13 @@ cancel needs --approve-cancel. Nothing here releases a held job, raises a resour
 Submission runs outside the agent sandbox: only in a disposable test environment with synthetic data, each submission
 approved by the user, until a trusted submitter is qualified. Scheduler clients get an allow-listed environment and a
 timeout; a submit whose outcome is unknown stays unconfirmed, never 'not-submitted'.
-  cancel   --config C [--chunks ID ...] [--approve-cancel]
+  cancel   --config C [--chunks ID ...] [--approve-cancel]   also jobs found under the tag of unconfirmed or
+                                                         abandoned submissions; records each exit; a request is not
+                                                         termination (a later status poll observes that)
+  clear-orphans --config C --submission S --reason TEXT   a person: the submission's unknown or abandoned jobs
+                                                         stop counting as running, only if every job the scheduler
+                                                         lists under its tag has ended
+A configured 'limits' section stops a submission or reset that would exceed it (core/partition/limits.py).
   merge    --config C                                    requires every chunk exactly once
   report   --config C --out ARTIFACT.json [--label synthetic ...] [--objective TEXT]
            writes a computational-run artifact (status 'failed' unless the merge is complete)
@@ -49,6 +56,7 @@ from contracts import CONTRACTS_VERSION  # noqa: E402
 from contracts.identity import plugin_release  # noqa: E402
 from core.partition import campaign as cp  # noqa: E402
 from core.partition import engine  # noqa: E402
+from core.partition import limits  # noqa: E402
 from core.partition.executors import PollError  # noqa: E402
 
 
@@ -87,8 +95,9 @@ def build_artifact(cdir: Path, cfg: dict, executor, labels: list[str], objective
     complete = merged["status"] == "complete"
     chunk_hashes = {f"chunks/{p.name}": _sha(p) for p in sorted((cdir / "chunks").glob("*.json"))}
     merged_hash = hashlib.sha256(json.dumps(merged["merged"], sort_keys=True).encode()).hexdigest() if complete else None
-    attempts = {cid: [{k: r.get(k) for k in ("attempt_id", "job_id", "origin", "host", "final_state", "native_state",
-                                             "exit_code", "signal", "hold_code", "hold_reason", "resource_change")}
+    attempts = {cid: [{k: r.get(k) for k in ("attempt_id", "global_attempt_id", "job_id", "origin", "host", "final_state", "native_state",
+                                             "exit_code", "signal", "hold_code", "hold_reason", "resource_change",
+                                             "cancel_requests", "termination_observed")}
                       for r in row.get("attempt_records", [])] for cid, row in sorted(state["chunks"].items())}
     resources = {r["attempt_id"]: {"elapsed_s": r.get("elapsed_s"), "max_rss_mb": r.get("max_rss_mb")}
                  for row in state["chunks"].values() for r in row.get("attempt_records", [])
@@ -112,7 +121,10 @@ def build_artifact(cdir: Path, cfg: dict, executor, labels: list[str], objective
                             "container_image": json.loads((cdir / "spec.json").read_text()).get("container_image"),
                             "execution": {"campaign_status": "complete" if complete else "incomplete", "attempts": attempts,
                                           "duplicates": state["duplicates"], "quarantine": state["quarantine"],
-                                          "resets": state["resets"], "merge_problems": merged["problems"]}},
+                                          "resets": state["resets"], "merge_problems": merged["problems"],
+                                          "campaign_uid": state.get("campaign_uid"), "cancels": state.get("cancels", []),
+                                          "resource_risk": state.get("resource_risk", []),
+                                          "limits": {"configured": cfg.get("limits"), "usage": limits.usage(state)}}},
             "seeds": {"manifest_seed": manifest["seed"], "chunk_seeds": {c["id"]: c["seed"] for c in manifest["chunks"]}},
             "tolerances": {"merge": "exact: every chunk exactly once, item ranges tile [0, n); results summed key by key"},
             "resources": resources,
@@ -125,7 +137,7 @@ def main(argv=None, env=None, sleep=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
     for name in ("check-config", "plan", "submit", "status", "watch", "resubmit", "reset", "reconcile", "confirm", "abandon",
-                 "cancel", "merge", "report"):
+                 "cancel", "merge", "report", "clear-orphans"):
         s = sub.add_parser(name)
         s.add_argument("--config", type=Path, required=True)
         if name == "check-config":
@@ -145,9 +157,9 @@ def main(argv=None, env=None, sleep=None) -> int:
             s.add_argument("--plan-digest", help="the plan_digest of the reviewed dry run: refuse if the job files changed")
         if name in ("submit", "cancel", "reset"):
             s.add_argument("--chunks", nargs="+", required=name == "reset")
-        if name in ("reset", "abandon"):
+        if name in ("reset", "abandon", "clear-orphans"):
             s.add_argument("--reason", required=True)
-        if name in ("reconcile", "confirm", "abandon"):
+        if name in ("reconcile", "confirm", "abandon", "clear-orphans"):
             s.add_argument("--submission", required=True, help="the unconfirmed submission, for example s003")
         if name == "confirm":
             s.add_argument("--jobs", nargs="+", required=True, metavar="ATTEMPT=JOB",
@@ -192,7 +204,7 @@ def main(argv=None, env=None, sleep=None) -> int:
             rep = cp.resubmit(cdir, ex, cfg, approved=args.submit)
             return emit(rep, 1 if rep["blocked"] else 0)
         if args.cmd == "reset":
-            return emit(cp.reset(cdir, args.chunks, args.reason), 0)
+            return emit(cp.reset(cdir, args.chunks, args.reason, cfg), 0)
         if args.cmd == "confirm":
             pairs = dict(item.split("=", 1) for item in args.jobs if "=" in item)
             if len(pairs) != len(args.jobs):
@@ -200,6 +212,8 @@ def main(argv=None, env=None, sleep=None) -> int:
             return emit(cp.confirm_submission(cdir, args.submission, pairs, ex), 0)
         if args.cmd == "reconcile":
             return emit(cp.reconcile(cdir, ex, args.submission), 0)
+        if args.cmd == "clear-orphans":
+            return emit(cp.clear_orphan_risk(cdir, ex, args.submission, args.reason), 0)
         if args.cmd == "abandon":
             return emit(cp.abandon_submission(cdir, args.submission, args.reason), 0)
         if args.cmd == "cancel":

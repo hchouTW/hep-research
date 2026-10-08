@@ -15,7 +15,7 @@
   },
   "hep-computing": {
    "references": 26,
-   "bytes": 287176,
+   "bytes": 288144,
    "uncited": 0
   },
   "hep-statistics": {
@@ -1019,8 +1019,8 @@
   {
    "path": "skills/hep-computing/references/batch-scheduling.md",
    "owner": "hep-computing",
-   "bytes": 17828,
-   "lines": 183,
+   "bytes": 18796,
+   "lines": 191,
    "linked_from_skill_md": true,
    "cited_by": [
     "adapters/batch-schedulers/htcondor_backend.py",
@@ -1031,7 +1031,7 @@
     "tools/check_instruction_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9546574 2026-10-08"
+   "last_commit": "4f856f1 2026-10-08"
   },
   {
    "path": "skills/hep-computing/references/cmake-and-build.md",
