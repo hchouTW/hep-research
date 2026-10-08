@@ -84,6 +84,12 @@ class DataExposureTests(unittest.TestCase):
             self.assertEqual(r["data_exposure"]["state"], "unknown", entry)
             self.assertNotEqual(r["decision"], "accept", entry)
 
+    def test_grammar_accepts_plain_control_entries(self):
+        for entry in ("control-region data", "Control region events only", "validation sample", "sidebands",
+                      "sideband (low mass) plots", "simulation", "MC samples", "Monte-Carlo distributions", "test beam data",
+                      "cosmic-ray calibration runs", "calibration data"):
+            self.assertTrue(rac.control_only(entry), entry)
+
     def test_recognized_legacy_text_is_unexposed(self):
         r = rac.review(self.change(looked_at=["control-region data", "simulation", "sideband (low mass)"]))
         self.assertEqual(r["data_exposure"], {"state": "unexposed", "basis": "legacy-text"})
@@ -98,7 +104,11 @@ class DataExposureTests(unittest.TestCase):
                       "simulation tuned to the signal region", "MC compared with SR counts",
                       "control region plus the signal window", "calibration after unblinding",
                       "control region and the full data spectrum", "simulation and data in the search region",
-                      "Monte Carlo vs data, all bins", "control-region data; signal-region data"):
+                      "Monte Carlo vs data, all bins", "control-region data; signal-region data",
+                      "data-MC distributions", "data-MC plots", "data mc distributions", "Monte Carlo data plots",
+                      "simulation data events", "MC (data)", "test data", "test sample", "test events",
+                      "sidebands high mass region data", "calibration data high mass region", "high mass data",
+                      "control region data simulation", "contr\u043el region data"):
             r = rac.review(self.change(looked_at=[entry]))
             self.assertNotEqual(r["data_exposure"]["state"], "unexposed", entry)
             self.assertNotEqual(r["decision"], "accept", entry)

@@ -41,12 +41,16 @@ import sys
 OUTCOME_SEEN = re.compile(r"signal[- ]region data|unblinded|observed result|fit result|outcome|significance|p-value", re.I)
 OUTCOME_MOTIVE = re.compile(r"(to|so that).{0,40}(agree|match|improve|increase|reduce|remove).{0,40}"
                             r"(excess|deficit|significance|signal(?![- ]to[- ]background)|result|limit|tension)|(excess|tension|significance)", re.I)
-# A legacy looked_at entry is read as unexposed only if every word is in this closed vocabulary and it names one of
-# the anchors: one kind of data a blinded analysis may see, with plain qualifiers. Any other word ("full", "all",
-# "search", "and", "vs", ...) makes the entry unknown (K06): the list fails closed, never open.
-ANCHORS = {"control", "sideband", "sidebands", "validation", "simulation", "simulated", "monte", "mc", "calibration", "test"}
-VOCAB = ANCHORS | {"region", "regions", "sample", "samples", "carlo", "beam", "data", "events", "distributions", "plots",
-                   "low", "high", "mass", "only", "cosmic", "ray"}
+# A legacy looked_at entry is read as unexposed only if the whole entry (lower case, hyphens as spaces) matches this
+# closed grammar: one kind of data a blinded analysis may see. Simulation entries never mention data; any other
+# wording ("data-MC distributions", "test sample", "full data", "search region", "and", "vs") is unknown (K06).
+_SHOWN = r"( (data|events|distributions|plots))?( only)?"
+CONTROL_ONLY = re.compile(
+    r"^(?:(control|validation) (region|regions|sample|samples)" + _SHOWN +
+    r"|sidebands?( \((low|high) mass\))?" + _SHOWN +
+    r"|(simulation|simulated (samples?|events)|monte carlo|mc)( (samples?|events|distributions|plots))?( only)?"
+    r"|test beam( data)?"
+    r"|(cosmic ray )?calibration( (data|samples?|runs?))?( only)?)$")
 EXPOSURE_STATES = ("unexposed", "exposed", "unknown", "incomplete")
 RANK = {"unexposed": 0, "unknown": 1, "incomplete": 1, "exposed": 2}
 
@@ -56,11 +60,10 @@ class BadExposure(ValueError):
 
 
 def control_only(entry) -> bool:
-    """True only for a legacy entry made entirely of VOCAB words that names an anchor, e.g. 'control-region data'."""
+    """True only for a legacy entry the CONTROL_ONLY grammar matches whole, e.g. 'control-region data'."""
     if not isinstance(entry, str):
         return False
-    words = re.findall(r"[a-z0-9]+", entry.lower())
-    return bool(words) and set(words) <= VOCAB and bool(set(words) & ANCHORS) and not re.search(r"[^\w\s()-]", entry)
+    return bool(CONTROL_ONLY.match(" ".join(entry.lower().replace("-", " ").split())))
 
 
 def exposure(change: dict) -> tuple[dict, list]:

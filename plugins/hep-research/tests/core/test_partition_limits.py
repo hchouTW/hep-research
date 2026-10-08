@@ -9,6 +9,7 @@ from pathlib import Path
 
 from core.partition import campaign as cp
 from core.partition import limits as lim
+from core.partition.executors import LocalExecutor
 from core.partition.states import decide
 from tests.core.partition_helpers import ScriptedExecutor, make_campaign
 
@@ -160,6 +161,10 @@ class ClearOrphanTests(Base):
         self.assertEqual((use["concurrent_jobs"], use["total_jobs"], use["orphan_risk_jobs"]), (0, 1, 1))
         self.assertEqual([r["kind"] for r in self.state()["resource_risk"]], ["abandoned", "orphan-cleared"])
         self.refused("clear.nothing", cp.clear_orphan_risk, self.cdir, ex, sid, "again")
+
+    def test_an_executor_without_tag_lookup_gives_no_evidence(self):
+        _, sid = self.abandoned()
+        self.refused("clear.no_evidence", cp.clear_orphan_risk, self.cdir, LocalExecutor(), sid, "nothing listed")
 
 
 class RestartTests(Base):

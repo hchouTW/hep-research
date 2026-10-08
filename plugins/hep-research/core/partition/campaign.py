@@ -60,7 +60,7 @@ from typing import Any
 
 from core.partition import engine
 from core.partition import limits as lim
-from core.partition.executors import PollError, SubmitRefused
+from core.partition.executors import Executor, PollError, SubmitRefused
 from core.partition.states import ACTIVE, NEEDS_PERSON, decide, normalize, repeated, same_resources, signature
 
 MIN_POLL_INTERVAL_S = 60
@@ -545,6 +545,8 @@ def clear_orphan_risk(campaign_dir, executor, submission_id: str, reason: str) -
             if r.get("submission") == submission_id and r.get("final_state") in lim.ORPHAN_RISK and not r.get("orphan_cleared")]
     if not recs:
         raise CampaignError("clear.nothing", f"{submission_id} has no unknown or abandoned attempt to clear")
+    if type(executor).find is Executor.find:  # the base find() lists nothing: that is no evidence
+        raise CampaignError("clear.no_evidence", f"{executor.name} cannot list jobs by tag")
     cands = executor.find(sub["tag"], sub.get("time"))  # a PollError propagates: no evidence, nothing cleared
     live = [c for c in cands if normalize(c.get("state")) in ACTIVE or normalize(c.get("state")) in ("held", "unknown")]
     if live:

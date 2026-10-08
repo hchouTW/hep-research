@@ -15,7 +15,7 @@
   },
   "hep-computing": {
    "references": 26,
-   "bytes": 288107,
+   "bytes": 288144,
    "uncited": 0
   },
   "hep-statistics": {
@@ -1019,7 +1019,7 @@
   {
    "path": "skills/hep-computing/references/batch-scheduling.md",
    "owner": "hep-computing",
-   "bytes": 18759,
+   "bytes": 18796,
    "lines": 191,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -1031,7 +1031,7 @@
     "tools/check_instruction_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "500d462 2026-10-08"
+   "last_commit": "4f856f1 2026-10-08"
   },
   {
    "path": "skills/hep-computing/references/cmake-and-build.md",
