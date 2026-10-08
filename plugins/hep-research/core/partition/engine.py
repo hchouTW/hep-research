@@ -9,7 +9,7 @@ Rules this enforces:
 - Merging checks that every manifest chunk is present exactly once, belongs to this manifest, and that the item
   ranges tile [0, n) with no gap or overlap; a missing chunk makes the merge 'incomplete', never a silent partial sum.
 
-API: make_manifest(job_id, n_items, chunk_size, seed) -> dict; run(manifest, state_dir, worker, config=None) -> dict
+API: make_manifest(job_id, n_items, chunk_size, seed) -> dict; validate_manifest(manifest); check_template(cmd); run(manifest, state_dir, worker, config=None) -> dict
 (synchronous, in-process); status(manifest, state_dir); reset(state_dir, chunk_ids, reason); merge(manifest,
 state_dir, combine=None). Standard library only.
 """
@@ -19,6 +19,9 @@ import hashlib
 import json
 import math
 import os
+import re
+import shlex
+import string
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -26,6 +29,77 @@ from typing import Any
 
 def _hash(obj) -> str:
     return hashlib.sha256(json.dumps(obj, sort_keys=True).encode()).hexdigest()
+
+
+CHUNK_ID = re.compile(r"^[A-Za-z0-9_-]{1,64}$")  # chunk IDs name output paths: no separators, dots or spaces
+JOB_ID = re.compile(r"^[A-Za-z0-9_.-]{1,128}$")
+PLACEHOLDERS = ("start", "stop", "seed", "out", "id")
+
+
+def validate_manifest(manifest) -> dict:
+    """The manifest unchanged, or ValueError: a job ID and chunk IDs from a safe charset (a chunk ID builds output
+    paths, so '../x' would write outside the campaign), integer ranges that tile [0, n_items) in order, integer seeds,
+    and a manifest_hash that matches the content."""
+    if not isinstance(manifest, dict):
+        raise ValueError("the manifest must be a JSON object")
+    body = {k: v for k, v in manifest.items() if k != "manifest_hash"}
+    if manifest.get("manifest_hash") != _hash(body):
+        raise ValueError("manifest_hash does not match the manifest content")
+    if not isinstance(manifest.get("job_id"), str) or not JOB_ID.match(manifest["job_id"]):
+        raise ValueError(f"job_id must match {JOB_ID.pattern}")
+    n = manifest.get("n_items")
+    chunks = manifest.get("chunks")
+    if not _is_int(n) or n <= 0 or not isinstance(chunks, list) or not chunks:
+        raise ValueError("the manifest needs a positive integer n_items and a non-empty chunk list")
+    seen, pos = set(), 0
+    for ch in chunks:
+        cid = ch.get("id") if isinstance(ch, dict) else None
+        if not isinstance(cid, str) or not CHUNK_ID.match(cid):
+            raise ValueError(f"chunk id {cid!r} must match {CHUNK_ID.pattern}")
+        if cid in seen:
+            raise ValueError(f"duplicate chunk id {cid}")
+        seen.add(cid)
+        if not all(_is_int(ch.get(k)) for k in ("start", "stop", "seed")):
+            raise ValueError(f"chunk {cid}: start, stop and seed must be integers")
+        if ch["start"] != pos or ch["stop"] <= ch["start"]:
+            raise ValueError(f"chunk {cid}: ranges must tile [0, n_items) in order without gaps or overlaps")
+        pos = ch["stop"]
+    if pos != n:
+        raise ValueError(f"the chunk ranges end at {pos}, not at n_items = {n}")
+    return manifest
+
+
+def _is_int(x) -> bool:
+    return isinstance(x, int) and not isinstance(x, bool)
+
+
+def check_template(cmd) -> list[str]:
+    """The command template split into arguments, or ValueError. Only the fields {start} {stop} {seed} {out} {id} are
+    allowed, with no conversion or format spec; {out} is required; literal braces must be doubled ({{ }}). The
+    template is trial-rendered, so a template that passes cannot fail to fill in the runner."""
+    if not isinstance(cmd, str) or not cmd.strip():
+        raise ValueError("the command template is empty")
+    try:
+        args = shlex.split(cmd)
+    except ValueError as exc:
+        raise ValueError(f"the command template cannot be split into arguments: {exc}") from None
+    used = set()
+    for arg in args:
+        try:
+            fields = list(string.Formatter().parse(arg))
+        except ValueError as exc:
+            raise ValueError(f"argument {arg!r}: {exc}; write literal braces as {{{{ and }}}}") from None
+        for _, name, spec, conv in fields:
+            if name is None:
+                continue
+            if name not in PLACEHOLDERS or spec or conv:
+                raise ValueError(f"argument {arg!r}: only {{start}} {{stop}} {{seed}} {{out}} {{id}} are allowed, without "
+                                 "conversions or format specs; write literal braces as {{ and }}")
+            used.add(name)
+    if "out" not in used:
+        raise ValueError("the command template must write its result to {out}")
+    sample = {"start": 0, "stop": 1, "seed": 0, "out": "/tmp/out.json", "id": "c0000"}
+    return [a.format(**sample) for a in args]
 
 
 def make_manifest(job_id: str, n_items: int, chunk_size: int, seed: int) -> dict:

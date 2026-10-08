@@ -71,6 +71,16 @@ def resources_hash(config: dict) -> str:
 
 
 def init(campaign_dir, manifest: dict, cmd: str, container_image: str | None = None) -> Path:
+    """Create (or reopen) a campaign. The manifest and the command template are checked first
+    (engine.validate_manifest, engine.check_template): an invalid one is refused before anything is written."""
+    try:
+        engine.validate_manifest(manifest)
+    except ValueError as exc:
+        raise CampaignError("campaign.bad_manifest", str(exc)) from None
+    try:
+        engine.check_template(cmd)
+    except ValueError as exc:
+        raise CampaignError("campaign.bad_template", str(exc)) from None
     cdir = Path(campaign_dir)
     if (cdir / "state.json").exists():
         old = json.loads((cdir / "manifest.json").read_text(encoding="utf-8"))

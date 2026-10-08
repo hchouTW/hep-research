@@ -35,8 +35,8 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-from core.partition.engine import (_hash, _load_state, _reduce, _sum, _write_atomic, make_manifest, merge,  # noqa: E402,F401
-                                   reset, run, status)
+from core.partition.engine import (_hash, _load_state, _reduce, _sum, _write_atomic, check_template, make_manifest, merge,  # noqa: E402,F401,E501
+                                   reset, run, status, validate_manifest)
 
 
 def _cmd_worker(template: str, state_dir: Path):
@@ -78,6 +78,8 @@ def main(argv=None) -> int:
             return 0
         manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
         if args.cmd == "run":
+            validate_manifest(manifest)
+            check_template(args.template)
             cfg = json.loads(args.config.read_text(encoding="utf-8")) if args.config else None
             args.state.mkdir(parents=True, exist_ok=True)
             res = run(manifest, args.state, _cmd_worker(args.template, args.state), cfg)
