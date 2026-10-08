@@ -149,15 +149,25 @@ def flux_from_counts(counts, exposure, bin_width, background=0.0, background_sig
     bin_width = _positive_finite(bin_width, 'bin_width')
     background = _nonnegative_finite(background, 'background')
     background_sigma = _nonnegative_finite(background_sigma, 'background_sigma')
+    if isinstance(level, bool) or not isinstance(level, (int, float)) or not 0 < level < 1:
+        raise ValueError('level must be a confidence level strictly between 0 and 1')
 
     lower, upper = poisson_interval(counts, level)
     net_counts = counts - background
     # Net-count uncertainty: exact Poisson width on the raw count (asymmetric),
     # combined with the (Gaussian) background uncertainty in quadrature on each side.
-    lower_net = net_counts - math.sqrt((counts - lower) ** 2 + background_sigma ** 2)
-    upper_net = net_counts + math.sqrt((upper - counts) ** 2 + background_sigma ** 2)
+    try:
+        lower_net = net_counts - math.sqrt((counts - lower) ** 2 + background_sigma ** 2)
+        upper_net = net_counts + math.sqrt((upper - counts) ** 2 + background_sigma ** 2)
+    except OverflowError:
+        raise ValueError('the background uncertainty is too large to combine (overflow)') from None
 
     denom = exposure * bin_width
+    if not (math.isfinite(denom) and denom > 0):
+        raise ValueError('exposure * bin_width must be finite and greater than zero (it under- or overflows)')
+    flux = (net_counts / denom, lower_net / denom, upper_net / denom)
+    if not all(math.isfinite(f) for f in flux):
+        raise ValueError('the flux is not finite for this exposure and bin width')
     return {
         'counts': counts,
         'background': background,
@@ -168,9 +178,9 @@ def flux_from_counts(counts, exposure, bin_width, background=0.0, background_sig
         'poisson_interval_level': level,
         'raw_count_interval': [lower, upper],
         'net_count_interval': [lower_net, upper_net],
-        'flux': net_counts / denom,
-        'flux_lower': lower_net / denom,
-        'flux_upper': upper_net / denom,
+        'flux': flux[0],
+        'flux_lower': flux[1],
+        'flux_upper': flux[2],
     }
 
 

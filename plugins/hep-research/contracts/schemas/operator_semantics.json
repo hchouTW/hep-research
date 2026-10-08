@@ -1,0 +1,35 @@
+{"$comment": "Operator-semantics table for a bounded recipe family (AGENTIC-R5 T4.6, F04): a sidecar with its own table_version, not an artifact envelope type. It fixes, for each operator, the quantity kind it consumes and produces (each kind has one unit), the effects (corrections, normalizations) it applies, the effects that must already be applied (ordering) and those that must not be (incompatibility). contracts/recipe_semantics.py checks recipes against it; a general Recipe IR is a later extension. A passing check is software consistency only, not scientific review (HC-12).",
+ "type": "object",
+ "required": ["table_version", "table_id", "scope", "quantities", "effects", "operators", "estimands"],
+ "additionalProperties": false,
+ "properties": {
+  "table_version": {"type": "string", "const": "1.0.0"},
+  "table_id": {"$ref": "#/$defs/id"},
+  "scope": {"$comment": "the bounded family of recipes the table covers; anything outside it is not covered", "type": "string", "minLength": 1},
+  "quantities": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["kind", "unit", "meaning"],
+    "additionalProperties": false, "properties": {
+    "kind": {"$ref": "#/$defs/id"},
+    "unit": {"$comment": "'1' for a count or a dimensionless number; {X} is a unit the caller binds", "type": "string", "minLength": 1},
+    "meaning": {"type": "string", "minLength": 1}}}},
+  "effects": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["effect_id", "meaning"],
+    "additionalProperties": false, "properties": {
+    "effect_id": {"$ref": "#/$defs/id"},
+    "meaning": {"type": "string", "minLength": 1}}}},
+  "operators": {"type": "array", "minItems": 1, "items": {"type": "object",
+    "required": ["operator_id", "input_kind", "output_kind", "applies", "requires", "forbids_after", "meaning"],
+    "additionalProperties": false, "properties": {
+    "operator_id": {"$ref": "#/$defs/id"},
+    "input_kind": {"$ref": "#/$defs/id"},
+    "output_kind": {"$ref": "#/$defs/id"},
+    "applies": {"$comment": "effects this operator applies; applying one already applied is a repeated correction", "type": "array", "minItems": 1, "items": {"$ref": "#/$defs/id"}},
+    "requires": {"$comment": "effects that must already be applied (ordering)", "type": "array", "items": {"$ref": "#/$defs/id"}},
+    "forbids_after": {"$comment": "effects that must not yet be applied (the operator is defined only before them)", "type": "array", "items": {"$ref": "#/$defs/id"}},
+    "meaning": {"type": "string", "minLength": 1}}}},
+  "estimands": {"$comment": "result kinds a recipe may end in, and the effects every such result must carry",
+    "type": "array", "minItems": 1, "items": {"type": "object", "required": ["kind", "required_effects"],
+    "additionalProperties": false, "properties": {
+    "kind": {"$ref": "#/$defs/id"},
+    "required_effects": {"type": "array", "items": {"$ref": "#/$defs/id"}}}}}
+ },
+ "$defs": {"id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$"}}
+}

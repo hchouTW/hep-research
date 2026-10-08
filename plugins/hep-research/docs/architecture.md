@@ -50,6 +50,9 @@ Enforced by `tools/check_layering.py` (AST imports + text scan + schema scan + s
 | Registry and profiles | `contracts/registry.py`, `schemas/registry.json`, `schemas/profile.json` | Two-tier registry, templates, compatibility, escape and cycle checks |
 | Project config | `contracts/project.py`, `schemas/project_config.json` | Resolution order, local profiles, pins, overrides with provenance |
 | Data release manifest | `contracts/release_manifest.py`, `schemas/release_manifest.json` | Sidecar (own `manifest_version`); custodian-side checks of content bytes, approval binding, release-ID reuse, revocation freshness and destinations; passing releases nothing |
+| Attestation | `contracts/attestation.py`, `schemas/attestation.json` | Sidecar (T4.5); capability, review and lifecycle axes reported separately; reviews bind the bundle, scope and evidence digests; no combined verdict, nothing authorized |
+| Recipe semantics | `contracts/recipe_semantics.py`, `schemas/operator_semantics.json`, `schemas/recipe.json`, `semantics/` | Operator-semantics tables for bounded recipes (T4.6); kind chaining, ordering, repeated corrections across steps and upstream artifacts, completeness, table digest binding |
+| Tool contracts | `contracts/tool_contract.py`, `schemas/tool_contract.json`, `tool_contracts/` | Machine-readable inputs, outputs, units, failure states, capabilities and purposes per tool operation (T4.7), compared with the tool's command line; scope coverage |
 | Evidence | `contracts/evidence.py`, `schemas/evidence_*.json` | Profile-qualified IDs; verification date distinct from publication and current dates |
 | Comparison gate | `contracts/comparison/` | `gate.py` (observable, level, unit, convention and transformation checks), `conventions.py`, `composition.py`, `combination.py`, `model_set.py` |
 | Context stanza | `contracts/stanzas/context-resolution.md` | Inserted into each SKILL.md by `tools/build_stanzas.py`; drift fails the checks |

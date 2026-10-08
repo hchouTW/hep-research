@@ -5,6 +5,44 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Tool contracts (AGENTIC-R5 T4.7, F14, F16).** New sidecar schema `contracts/schemas/tool_contract.json`
+  (`contract_version` 1.0.0) and `contracts/tool_contract.py`: per operation, every command-line option mapped to one
+  input, inputs and outputs with quantity kind and unit (caller-bound unit symbols such as `{X}` must come from an
+  input), failure states by exit code (one meaning per code), required capabilities (only ones this reader implements),
+  purposes (exploration, fixed execution, validation; never formal analysis), operators from an operator-semantics table,
+  and side effects (no network). The checker runs `--help` and compares the usage line with the declared options in both
+  directions, required ones included; `--scope` checks that every operation of an enabled scope has a passing contract
+  that declares the scope's purpose. First contract: `contracts/tool_contracts/cosmic_ray_flux.json`; tests also run the
+  tool and check the declared outputs and failure exits. `cosmic_ray_flux.py` now refuses a confidence level outside
+  (0, 1), and an exposure times bin width or a flux that under- or overflows (exit 2); before, it accepted the levels
+  and crashed or printed `Infinity` on the others. A contract authorizes nothing. Tests in
+  `tests/contracts/test_tool_contract.py`.
+- **Operator semantics for bounded recipes (AGENTIC-R5 T4.6, F04, P05).** New sidecar schemas
+  `contracts/schemas/operator_semantics.json` and `recipe.json`, the table `contracts/semantics/tables/differential_flux.json`
+  (counts to differential flux: background subtraction, unfolding with or without efficiency in the response,
+  efficiency correction, plain or effective exposure, bin width) and the recipe
+  `contracts/semantics/recipes/flux_from_counts.json`, bound to the table by canonical SHA-256. `contracts/recipe_semantics.py`
+  checks that quantity kinds (and so units) chain from input to estimand, that each step's required effects are already
+  applied and its forbidden ones not, that no effect is applied twice, counting effects recorded by upstream artifacts
+  (`--upstream`: `included_corrections`, `corrections[].effect_id`; a name outside the table fails closed), that the
+  result carries the effects the estimand requires, and that every other effect of the table is applied or listed in
+  `not_applied` with a reason (the shipped recipe declares that it does not unfold), and that a step's named tool has a
+  passing contract listing its operator. Effects the recipe claims as already applied upstream must be recorded by an
+  `--upstream` artifact (without one they are reported as unverified), and an upstream artifact with no such record
+  fails. A changed table no longer matches the recipe. A general Recipe IR is not part of this. Tests in
+  `tests/contracts/test_recipe_semantics.py`.
+- **Attestations with separate axes (AGENTIC-R5 T4.5, F11).** New sidecar schema `contracts/schemas/attestation.json`
+  (`attestation_version` 1.0.0) and `contracts/attestation.py`. The subject is a frozen bundle digest and a scope
+  (observable, data, recipe digest, calibrations, assumptions, purposes). Three axes are reported separately and never
+  combined: capability (`supported`/`unsupported` by this reader), review (each review binds the bundle digest, the
+  scope digest and its evidence files' SHA-256, re-hashed under `--evidence-root` without following links; states
+  `absent`, `unbound`, `rejected`, `bindings-unchecked` without `--bundle` and `--recipe`, `evidence-unverified`,
+  `roles-unchecked`, `roles-incomplete`, `out-of-scope` for a `--use` beyond the reviewed scope, `accepted-as-recorded`:
+  the reviewer's identity and the protected record are not verified here) and lifecycle (revocation and expiry from a fresh status source; states
+  `unknown`, `draft`, `withdrawn`, `superseded`, `not-yet-effective`, `expired`, `revoked`, `active`). `--bundle` and
+  `--recipe` must match the subject; a mismatched or malformed attestation gets no axis states at all, and a status
+  age above one day is refused. The exit code says only whether the attestation was evaluated; whether a use may
+  proceed is the trusted gate's decision (T4.1). Tests in `tests/contracts/test_attestation.py`.
 - **Data release manifest schema and checker (AGENTIC-R5 T1.2, plan basis §7.3).** New sidecar schema
   `contracts/schemas/release_manifest.json` (`manifest_version` 1.0.0, within the schema engine's keyword set) and
   `contracts/release_manifest.py`, meant to run on the custodian side from protected copies. A pass needs every input

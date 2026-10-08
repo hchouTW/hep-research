@@ -1,0 +1,33 @@
+{"contract_version": "1.0.0",
+ "tool_id": "cosmic-ray-flux",
+ "entry": "skills/hep-analysis/scripts/cosmic_ray_flux.py",
+ "operations": [{
+  "operation_id": "flux",
+  "summary": "Differential flux of one bin: (counts - background) / (exposure * bin_width), with an exact Poisson interval on the raw count and the background uncertainty combined in quadrature",
+  "invocation": {"kind": "cli", "output": "json-stdout", "options": [
+   {"flag": "--counts", "input": "counts"},
+   {"flag": "--exposure", "input": "exposure"},
+   {"flag": "--bin-width", "input": "bin_width"},
+   {"flag": "--background", "input": "background"},
+   {"flag": "--background-sigma", "input": "background_sigma"},
+   {"flag": "--level", "input": "level"}]},
+  "inputs": [
+   {"name": "counts", "kind": "counts", "unit": "1", "required": true, "constraint": "integer, 0 <= counts <= 500 (exact Poisson range)"},
+   {"name": "exposure", "kind": "exposure", "unit": "{X}", "required": true, "constraint": "finite, > 0; geometric factor or effective area times live time times solid angle, one number per bin. Whether it contains the efficiency is the caller's statement (recipe operator divide_exposure or divide_effective_exposure); the tool cannot tell"},
+   {"name": "bin_width", "kind": "bin_width", "unit": "{E}", "required": true, "constraint": "finite, > 0; in the unit the flux is differential in"},
+   {"name": "background", "kind": "background_counts", "unit": "1", "required": false, "constraint": "finite, >= 0", "default": 0.0},
+   {"name": "background_sigma", "kind": "background_counts", "unit": "1", "required": false, "constraint": "finite, >= 0", "default": 0.0},
+   {"name": "level", "kind": "parameter", "unit": "1", "required": false, "constraint": "confidence level in (0, 1)", "default": 0.6827}],
+  "outputs": [
+   {"name": "net_counts", "kind": "counts", "unit": "1"},
+   {"name": "raw_count_interval", "kind": "counts", "unit": "1"},
+   {"name": "net_count_interval", "kind": "counts", "unit": "1"},
+   {"name": "flux", "kind": "differential_flux", "unit": "1/({X} {E})"},
+   {"name": "flux_lower", "kind": "differential_flux", "unit": "1/({X} {E})"},
+   {"name": "flux_upper", "kind": "differential_flux", "unit": "1/({X} {E})"}],
+  "failure_states": [
+   {"exit_code": 2, "status": "invalid-input", "meaning": "an argument is missing, malformed or out of range, or the exact interval needs a rate above 500; the reason is on stderr and nothing is printed on stdout"}],
+  "required_capabilities": [],
+  "purposes": ["exploration", "fixed-execution", "validation"],
+  "operators": ["subtract_background", "divide_exposure", "divide_effective_exposure", "divide_bin_width"],
+  "side_effects": {"writes_files": false, "network": false, "subprocess": false}}]}
