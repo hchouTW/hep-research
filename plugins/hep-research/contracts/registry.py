@@ -157,7 +157,8 @@ def validate_registry(registry_path: Path | None = None, local_dirs=(), package_
         rep.add("warning", "registry", "budget.registry", f"registry is {registry_path.stat().st_size} B > {REGISTRY_BUDGET} B budget")
     entries = [(e, registry_path.parent / e.get("path", ""), package_root, f"registry[{i}]")
                for i, e in enumerate(reg.get("profiles", []) if isinstance(reg, dict) else [])]
-    entries += [(None, Path(d), Path(d), f"local[{i}]") for i, d in enumerate(local_dirs)]
+    unique = list(dict.fromkeys(Path(d).resolve() for d in local_dirs))  # one folder given twice is one profile
+    entries += [(None, d, d, f"local[{i}]") for i, d in enumerate(unique)]
     for expect, pdir, boundary, where in entries:
         prof = check_profile_dir(pdir, boundary, rep, where, expect)
         if prof is None or not isinstance(prof.get("id"), str):
@@ -175,12 +176,18 @@ def validate_registry(registry_path: Path | None = None, local_dirs=(), package_
     return rep, loaded
 
 
+def option_values(args: list[str], flag: str) -> list[str]:
+    """Every value given after `flag`; ValueError when the flag ends the command line (a usage error, exit 2)."""
+    if args and args[-1] == flag:
+        raise ValueError(f"{flag} needs a value")
+    return [args[i + 1] for i, a in enumerate(args) if a == flag]
+
+
 def main(argv=None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
-    reg = Path(args[args.index("--registry") + 1]) if "--registry" in args else None
-    local = [args[i + 1] for i, a in enumerate(args) if a == "--local"]
     try:
-        rep, loaded = validate_registry(reg, local)
+        reg = next((Path(v) for v in option_values(args, "--registry")), None)
+        rep, loaded = validate_registry(reg, option_values(args, "--local"))
     except (OSError, ValueError) as exc:
         print(json.dumps({"ok": False, "error": str(exc)}))
         return 2

@@ -186,17 +186,40 @@ compares it with an authoritative copy, and none is qualified yet.
 ### Companion plugins
 
 A profile can also be shipped by a separate plugin that only authorized people can install. Such a plugin provides one
-skill, `<plugin>:profile`, whose text states where its profile folder is. When a project binds a profile that is
-neither registered here nor in `local_profile_paths`, the skills load that companion skill and use the folder it
-names as a local profile; if no companion plugin is installed, they say the profile is unavailable and do not answer
-its topics from memory. Validate such a setup with
+skill, `<plugin>:profile`, whose text states where its profile folder is and which preflight to run. When a task needs
+a profile that is neither registered here nor a plain local profile (or whose `local_profile_paths` entry is known to be
+the companion's folder), the skills load that companion skill, run its preflight, and use the folder it names as a
+local profile; if no companion plugin is installed or its preflight fails, they say the profile is unavailable, do not
+answer its topics from memory, and go on with other work. Nothing else triggers it: hep-research never scans for
+companions. Validate the profile itself with
+`python3 "<plugin root>/contracts/registry.py" --local <companion plugin root>/profile`, or a project and its pins with
 `python3 "<plugin root>/contracts/project.py" <project-dir> --local <companion plugin root>/profile`.
 
-The first companion plugin is `ams02-research` (access-restricted; listed in the same marketplace), which provides
-`experiment:ams-02-private` for AMS Collaboration members and depends on this plugin. Load a companion profile only on
+hep-research installs, updates and runs without any companion. A companion must not declare a host dependency on
+this plugin; it owns its compatibility check, so installing or updating hep-research does not wait for it. The first companion plugin
+is `ams02-research` (access-restricted; listed in the same marketplace and installed separately), which provides
+`experiment:ams-02-private` for AMS Collaboration members. Load a companion profile only on
 a host configuration qualified for its content and with the collaboration's approval to send that content to the model
 service (no configuration is qualified yet), and install it where the agent cannot write. See
 [docs/profile-authoring.md](docs/profile-authoring.md) for writing one.
+
+Migration from `ams02-research` 1.1.0 and earlier: those releases declare `hep-research ^0.4.0` in their Claude Code
+manifest, and an installed copy keeps holding hep-research inside that range (Claude Code skips newer hep-research
+updates) until `ams02-research` is updated to a release without the declaration, or uninstalled, through the host's own
+plugin commands. This marketplace pins `ams02-research` 1.2.1 (commit `32d538a`), which has no such declaration, so
+update the companion first and hep-research second:
+
+```bash
+claude plugin marketplace update hep-research-dev
+claude plugin update ams02-research@hep-research-dev
+claude plugin update hep-research@hep-research-dev
+```
+
+Before running `claude plugin prune`, follow the companion's own update notes so hep-research is not removed as an
+auto-installed dependency. Do not edit the plugin cache by hand. A marketplace refresh can still read every catalog entry,
+including the companion's; what hep-research guarantees is that its own install, update and checks never read a
+companion's package manifest or need access to a private repository. Behaviour on a live host is checked separately
+(see the changelog).
 
 ## Environments
 

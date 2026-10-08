@@ -38,6 +38,7 @@ C = [
  ("ml-direct-2", "zh-Hant", "direct", "我的模擬太慢，想用 PyTorch 做 surrogates，並檢查 domain shift。", "physics-ml", ["surrogates", "domain shift"], None, None, {}),
  ("ml-neighbor-1", "en", "neighboring", "Is the likelihood-free inference built on my network statistically valid, with coverage?", "hep-statistics", ["coverage"], "physics-ml", None, {}),
  ("ml-negative-1", "en", "negative", "My C++ CMake build fails to link ROOT libraries.", "hep-computing", ["CMake builds"], "physics-ml", None, {}),
+ ("co-companion-ws-1", "en", "direct", "This CMakeLists.txt does not find ROOT when I configure the build; fix it.", "hep-computing", ["CMake builds"], None, None, {"profiles": [], "note": "ordinary work in a project that binds a companion profile through local_profile_paths: no companion preflight and no profile read"}),
  # research-communication
  ("rc-direct-1", "en", "direct", "Check whether this INSPIRE citation really supports the 2.1% number in my draft.", "research-communication", ["citations", "INSPIRE-HEP"], None, None, {}),
  ("rc-direct-2", "zh-Hant", "direct", "請幫我回覆審稿人的 referee reports，並修改摘要。", "research-communication", ["referee reports", "abstracts"], None, None, {}),

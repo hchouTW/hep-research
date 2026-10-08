@@ -3,6 +3,29 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **Independent of companion plugins.** hep-research installs, updates and runs without `ams02-research`; a companion
+  owns its compatibility check (its preflight) and declares no host dependency on hep-research.
+  - `tools/check_host_manifests.py` parses `dependencies` (bare name, `name@marketplace`, object) in both plugin
+    manifests and both repository catalogs and fails on an edge between hep-research and another listed plugin, in
+    either direction; unrelated dependencies are left alone. No such edge exists today; the test
+    (`tests/tools/test_companion_independence.py`) is protective.
+  - Context stanza: a companion's profile, including a `local_profile_paths` entry known to be the companion's folder,
+    is used only through its `<plugin>:profile` skill after that skill's preflight; nothing scans for companions; a
+    failed preflight makes that profile unavailable and other work goes on. `docs/profile-authoring.md` replaces the
+    advice to declare `"dependencies": [{"name": "hep-research", "version": "^0.3"}]` with the preflight, and states
+    that package compatibility and profile validation are separate.
+  - `contracts/registry.py` and `contracts/project.py`: `--local` or `--registry` without a value is a usage error
+    (exit 2, JSON `error`) instead of a traceback with exit 1, which a caller would read as a validation failure, or a
+    silently ignored flag; the same local folder given twice (for example in `local_profile_paths` and through
+    `--local`, or twice in the config) is one profile instead of a `registry.duplicate_id` error. Folders with the same
+    profile ID still fail. `tests/contracts/test_companion_validation_cli.py` covers the CLI cases a companion checker
+    relies on.
+  - The marketplace catalogs pin `ams02-research` 1.2.1 (commit `32d538a`, was 1.0.1 at `1c3f590`): the companion
+    release without a host dependency on hep-research; its own check accepts hep-research `>=0.4.0,<0.6.0`. An
+    installed 1.1.0 or earlier still holds hep-research at 0.4.x until the companion is updated first (README).
+
 ## 0.5.0 (2026-10-08)
 
 - **Agent-run checks are advisory, blinding tools fail closed (AGENTIC-R5 WP0′).** Built from the R5.4 agentic planning

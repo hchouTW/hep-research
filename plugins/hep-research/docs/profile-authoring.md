@@ -74,21 +74,57 @@ change belongs in a reviewed core or contract release first (AC10 records the ch
 
 A profile whose content only some people may read (for example access-controlled experiment software or data
 listings) ships as its own plugin in a private repository, listed in the same marketplace, instead of inside this
-plugin or the user's project. Such a companion plugin has:
+plugin or the user's project. Listing both plugins in one marketplace is distribution only, not a dependency. Such a
+companion plugin has:
 
 - a plugin root that holds `profile/` (a complete profile in the layout above; it is also a valid local profile for
   `local_profile_paths`) and one skill, `skills/profile/SKILL.md`, named `<plugin>:profile`;
-- a Claude Code manifest with `"dependencies": [{"name": "hep-research", "version": "^0.3"}]`, and a Codex manifest
-  without dependencies (Codex installs both plugins separately);
-- a `SKILL.md` whose description says it is a companion and never an entry point, and whose body states the profile's
-  location as "the `profile/` folder under the folder two levels above this `SKILL.md`" (the companion plugin's root); both
-  hosts tell the model the real path of the loaded `SKILL.md`, so no install path is written anywhere.
+- no host-native dependency on hep-research in either host manifest or in a marketplace entry (no
+  `"dependencies"` edge, bare, `name@marketplace` or with a version range): such an edge makes every host update of
+  hep-research wait for the companion. hep-research is installed separately; `tools/check_host_manifests.py` fails on
+  such an edge in the catalogs this repository owns;
+- its own compatibility check (its preflight): the companion declares which hep-research versions it supports, in its
+  own repository, and checks the hep-research root it is given before its profile is used. hep-research never reads a
+  companion's package manifest or computes its supported range;
+- a `SKILL.md` whose description says it is a companion and never an entry point, whose body states the preflight to
+  run, and which states the profile's location as "the `profile/` folder under the folder two levels above this
+  `SKILL.md`" (the companion plugin's root); both hosts tell the model the real path of the loaded `SKILL.md`, so no
+  install path is written anywhere.
 
-Resolution: when a project binds a profile that is neither registered nor in `local_profile_paths`, the context stanza
-of every skill loads the installed `<plugin>:profile` skill that names it and treats the folder it gives as a local
-profile, but only when the project's `agent_policy` allows its content on this host and destination; otherwise, or if
-none is installed, the skill says the profile is unavailable and does not answer its topics from memory.
-Validate the setup with `python3 contracts/project.py <project-dir> --local <companion plugin root>/profile`; the profile may
-`depends_on` a registered profile (for example `experiment:ams-02`) and must satisfy the same schema and version checks.
+When the preflight runs: only when the current task uses the companion's profile, including a project whose
+`local_profile_paths` entry is known to be that companion's folder (such a path is still routed through the companion
+skill, so its preflight is not bypassed). Installing the companion, or doing unrelated hep-research work in a project
+that contains its files, never triggers it, and hep-research never scans for companions at startup. A failed preflight
+makes that profile unavailable; it does not stop other hep-research work. An ordinary user-written local profile that
+no companion manages is validated generically and needs no preflight.
+
+Resolution: when a project binds a profile that is neither registered nor a plain local profile, the context stanza
+of every skill loads the installed `<plugin>:profile` skill that names it, runs that skill's preflight, and treats the
+folder it gives as a local profile, but only when the project's `agent_policy` allows its content on this host and
+destination; otherwise, or if none is installed or the preflight fails, the skill says the profile is unavailable and
+does not answer its topics from memory. The companion's checker finds hep-research from the root it is handed; it does
+not invoke skill discovery again.
+
+Package compatibility and profile validation are separate checks. The companion's preflight decides whether its
+package supports this hep-research release. The existing validators check the profile itself and need no new
+interface:
+
+```bash
+# No research project is being checked.
+python3 "<hep-research root>/contracts/registry.py" --local "<companion root>/profile"
+# An explicitly selected project and its pins as well.
+python3 "<hep-research root>/contracts/project.py" "<project-dir>" --local "<companion root>/profile"
+```
+
+Both print JSON with `ok` and exit 0 when valid and 1 with findings; an unreadable input, or an option given without
+its value, exits 2 with an `error` object. A caller must still treat a crash or output that is not JSON as a failure.
+The registry validator checks the whole registry plus the given folders, and the project validator the whole project:
+a finding unrelated to the companion (for example the project's `plugin_version` range) keeps its own path and code
+and must be reported as itself, not as a companion version mismatch. The same folder given twice (through
+`local_profile_paths` and `--local`, or through a symbolic link) is one profile; two folders with one profile ID are
+a `registry.duplicate_id` error. A profile may `depends_on` a registered profile (for example `experiment:ams-02`) and
+must satisfy the same schema and version checks. Running these validators by hand checks a profile; it does not
+certify a companion package or run its preflight.
+
 The companion profile's modules must not link into this plugin's files by relative path; name the public profile and
 module in prose instead. The first companion plugin is `ams02-research` (`experiment:ams-02-private`).
