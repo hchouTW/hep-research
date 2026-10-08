@@ -4,7 +4,7 @@
  "version": "2.0.0",
  "scope": "Alpha Magnetic Spectrometer (AMS-02) on the ISS: subsystems and observables, charged cosmic-ray fluxes and ratios, leptons, antimatter searches, isotopes, time-dependent analyses, and the public-evidence ledger (60 sources, 184 claims; last full verification 2026-09-20, some rows 2026-10-02 and 2026-10-05). Public-domain reasoning only: no AMS internal data, software or production listings. Access-controlled AMS-02 software and data knowledge is not part of this profile; it is supplied by the separate, access-restricted companion plugin ams02-research as profile experiment:ams-02-private, which depends on this one.",
  "exclusions": [
-  "AMS Collaboration internal data, notes, calibration constants, conditions databases, pass names, trigger bits, good-run rules and cuts, unless the user supplies them (then labelled user-supplied, never invented or completed from memory)",
+  "AMS Collaboration internal data, notes, calibration constants, conditions databases, pass names, trigger bits, good-run rules and cuts, never invented or completed from memory, and not accepted from the user unless the project's agent_policy allows that content on this host and destination (no configuration is qualified for it yet)",
   "AMS Offline software usage, library maps, production catalogues and ntuple kits: not in this profile; available only to authorized members through the companion profile experiment:ams-02-private",
   "Measured detector performance numbers not in the evidence ledger with their context",
   "Collaboration review, blinding decisions and peer review",

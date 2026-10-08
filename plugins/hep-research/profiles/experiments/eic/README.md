@@ -25,7 +25,8 @@ experiment, and every beam number here is a design target, not a measured value.
 
 It holds no performance numbers beyond the cited claims, no datasets (`datasets/README.md` explains why), no
 calibration constants and no runnable experiment software. ePIC internal documents, cuts and samples belong in your
-project or a local profile.
+project or a local profile, and reach the agent only under a project `agent_policy` that allows them on a qualified host
+configuration (none is qualified yet).
 
 ## Layout
 

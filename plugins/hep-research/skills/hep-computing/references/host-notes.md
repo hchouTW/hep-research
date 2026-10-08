@@ -1,6 +1,7 @@
 # Host notes
 
-Discovery and install notes only. The task-authoring rules live in
+Discovery and install notes only. "Tested" below means install, discovery and invocation only: no host configuration
+is qualified for private or blinded data. The task-authoring rules live in
 [task-authoring-guide.md](task-authoring-guide.md) and the other references of this skill.
 
 ## Claude Code (tested)

@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 """Mask the bins of a histogram that overlap a blinded region before it is plotted, tabulated or shared.
 
+Synthetic data and tests only when the agent runs it: the input is the unmasked histogram, which an agent must never
+hold for real data. For real data this is the data custodian's preparation step, run outside the agent session, and
+the agent reads only the released, masked output.
+
 Usage: python3 mask_blinded_bins.py --hist hist.json --low 120 --high 130 [--reference mc.json] [--out masked.json]
 hist.json / mc.json: {"edges": [...], "values": [...]}. Writes the masked histogram (blinded bins = null) and,
 with --reference, the data/reference ratio with the same bins masked (a ratio reveals its numerator).
-The blinded region comes from the analysis policy (hep-analysis) or the project config `blinding` block.
+Bin edges must be finite and strictly increasing; otherwise nothing is written and the exit code is 2.
+The blinded region comes from the collaboration's blinding policy, recorded in the project config `blinding` block.
 """
 from __future__ import annotations
 

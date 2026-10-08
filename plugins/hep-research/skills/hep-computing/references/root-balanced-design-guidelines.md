@@ -1145,7 +1145,7 @@ c.SaveAs("plot.pdf");
 ```
 
 Include luminosity, sqrt(s), and region/channel labels; use ratio panels for
-data/MC; mask blinded data in both the main panel and any ratio (see
+data/MC; mask blinded data in both the main panel and any ratio (real inputs arrive already blinded; see
 [Analysis design](../../hep-analysis/references/analysis-design.md) for blinding rules and
 [Histograms and uncertainties](../../hep-analysis/references/histograms-efficiencies.md) for ratio/pull
 statistics).

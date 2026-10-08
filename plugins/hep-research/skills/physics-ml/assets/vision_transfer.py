@@ -29,6 +29,8 @@ def get_device() -> torch.device:
 
 
 def build_model(num_classes: int, freeze_backbone: bool) -> nn.Module:
+    # downloads pretrained weights from download.pytorch.org on first use (cached afterwards): run where that network
+    # access is allowed, or pre-provision the cache outside the agent session
     model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
     if freeze_backbone:
         for param in model.parameters():

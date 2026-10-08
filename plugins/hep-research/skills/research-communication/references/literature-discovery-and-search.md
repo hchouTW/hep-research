@@ -1,5 +1,8 @@
 # Literature discovery and search
 
+> Network use: query only services the session's egress policy allows; queries never contain unpublished numbers,
+> internal names or other unpublished content; do not put API tokens into the agent environment of a protected session.
+
 Use when the task is finding relevant papers on a topic — before there is
 anything to triage or read yet. This precedes `reading-papers.md` (which
 assumes you already have papers in hand) and is narrower than the searching

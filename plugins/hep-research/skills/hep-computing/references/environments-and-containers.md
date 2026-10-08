@@ -12,7 +12,7 @@ without CVMFS or Apptainer at hand; raise the status only after building or sour
 | LCG view on CVMFS (`lcg_view_setup.sh`) | ROOT, Python, compilers and the scientific stack as one release (`LCG_<n>`) for one platform tag (`x86_64-el9-gcc13-opt`) | on lxplus, a WLCG site or any node with `/cvmfs/sft.cern.ch` |
 | Container (`hep-research.def`, Apptainer) | the operating system, ROOT from the base image, Python packages from `requirements-ci.lock` | batch nodes without CVMFS, or when the OS itself must be fixed; record the image digest |
 | Experiment release (profile software modules) | the experiment's framework and its externals | analysis code that links against the framework; follow the bound profile, not this page |
-| Virtual environment plus lock file | Python packages only, on the host's Python and system libraries | local development and unit tests; not enough for a published result that depends on ROOT or compilers |
+| Virtual environment plus lock file | Python packages only, on the host's Python and system libraries | local development and unit tests; not enough for a published result that depends on ROOT or compilers. An interpreter that anything outside the agent sandbox runs (hooks, batch jobs) lives outside agent-writable paths |
 
 Mixing routes (a venv on top of an LCG view, `pip install --user` inside a container) is where environments silently
 diverge: record both layers or avoid the mix.

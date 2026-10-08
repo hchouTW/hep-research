@@ -5,6 +5,35 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Agent-run checks are advisory, blinding tools fail closed (AGENTIC-R5 WP0′).** Built from the R5.4 agentic planning
+  basis; no host configuration is qualified by these changes, and the interim rules still hold: public or synthetic
+  data only, and no real sealed values in an agent session.
+  - The verified R5 patch is applied: a newer contract major version is rejected (`contract.unsupported_major`);
+    `dependencies.py --revocations` marks revoked artifacts without changing their bytes; `contracts/verify_run.py`
+    recomputes a run's input and output hashes; float32 caches, Latin-1-decodable binary and `hist(histtype='step')`
+    are caught; a bad runner template writes meta and exits 2. Follow-ups: numeric dumps that decode as UTF-16 are
+    unscanned instead of passing, and float copies match exactly (no float16 false positives).
+  - `dependencies.py` reports `dependency_consistency_ok`; `formal_use_allowed` is always `false` (formal use is decided
+    only by a trusted gate). The analysis contract's `unblinding_authorization` is now `unblinding_record_ref`, never
+    filled by the agent.
+  - `audit_blinded_outputs.py scan` prints a fixed status only (no sealed value, token, file, line or count); details go
+    to `--report`. The tolerance comes from the sealed file; `seal` prints no count and seals more derived quantities
+    (difference of sums, square roots, fractions, (N-B)/sqrt(B)). Signs, the Unicode minus and percentages are matched;
+    unreadable arrays and symlinked directories are incomplete; invalid bin edges stop `seal` and `mask_blinded_bins`;
+    `check_figure` reads every figure text, contour fills and sealed y values, and `check_figure_report` lists what it
+    cannot check.
+  - Campaigns and local runs refuse invalid command templates and manifests before writing (only `{start}` `{stop}`
+    `{seed}` `{out}` `{id}`; safe chunk IDs, so `../` cannot escape the campaign).
+  - Instruction texts: unblinding is done by a person outside the agent session; real data arrive as released blinded
+    derivatives; sealing and scanning with real values belong to the data custodian; batch submission is unsandboxed
+    execution, limited to synthetic test environments; private local and companion profiles are read only when the
+    project's `agent_policy` allows them on a qualified host (none is yet); "tested" hosts are not qualified for private
+    data. `tools/check_instruction_text.py` (run by `run_all_checks.py`) guards these texts.
+  - Code release identity: `tools/release_manifest.py` writes the manifest of a release bundle (git-listed files,
+    full SHA-256, size and mode, sorted, no symlinks) and its digest, verifies a tree against it, and, in CI
+    (`release-manifests` job), checks that every recorded `release-manifests/<version>.json` matches its published tag
+    and that recorded manifests are only ever added.
+
 - **Choosing a SymPy interpreter (SYMPY).** `skills/hep-computing/scripts/find_python.py` finds a Python >= 3.11 that
   imports the packages a task needs (default SymPy). It tries, in order, `--python`, `HEP_RESEARCH_PYTHON`, the
   calling interpreter and `python3` on PATH, and scans nothing else. It reports the chosen path with its Python and

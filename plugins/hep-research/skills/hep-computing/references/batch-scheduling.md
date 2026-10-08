@@ -10,6 +10,13 @@ templates in `assets/`). Status: **documented**. Both backends are tested only a
 (`tests/adapters/batch_shims/`); no real Slurm or HTCondor has run them, and the tool facts below were
 checked against the tools' documentation only (see "Tool facts"; a few formats are not stated there). Treat the first real run on your site as a pilot.
 
+**Submission is unsandboxed execution.** The scheduler client runs outside the agent sandbox, and the job script runs
+on worker nodes with the user's permissions, so submitting runs code the agent just wrote outside every boundary the
+sandbox gives. Until a trusted submitter is qualified (one that runs only frozen bundles verified by full digest), use
+`submit` and `resubmit` only in a disposable test environment, on synthetic data, with each submission explicitly
+approved by the user from a configuration the user has reviewed. With protected data the agent prepares a bundle and a
+trusted submitter outside the agent's reach submits it; `confirm`, `abandon` and `cancel` are then not agent commands.
+
 ## When to batch, and when not
 
 Batch it when the work splits into independent chunks whose results add up: event generation, filling histograms
@@ -46,7 +53,8 @@ Only one command changes a campaign at a time: each holds a lock on `<campaign_d
 interrupted after that (a kill, a lost connection), the submission stays unconfirmed and nothing is submitted again
 until you look at the scheduler: `confirm --submission S --jobs ATTEMPT=JOB ...` with the jobs it lists, or
 `abandon --submission S --reason TEXT` when it has none (those chunks then need `reset` before `resubmit`).
-Ask the user before every command that submits, cancels or writes to a shared area, each time.
+Ask the user before every command that submits, cancels or writes to a shared area, each time; approval does not make
+submission sandboxed (see above).
 
 ## Configuration: site facts come from the user
 
@@ -103,10 +111,14 @@ node-failure, held, cancelled, lost, unknown`. A native state the adapter does n
   `monitor.max_polls` or `monitor.deadline_s`; it stops when everything is done or settled, early on problems or on
   the same poll error twice, and at its limit it reports `incomplete`. It never resubmits.
 - **Logs are outputs.** Job stdout and stderr (`*.stdout.log`, `*.stderr.log`), event logs and job files live under
-  `campaign_dir/submissions/`; scan them with `scripts/audit_blinded_outputs.py scan` before sharing anything from a
-  blinded analysis.
-- **No credentials.** The adapter reads, stores and passes no passwords, tokens or grid proxies; authentication is
-  the user's environment.
+  `campaign_dir/submissions/`. From a blinded analysis they return through the same release and scanning rules as
+  every other output: scanning against real sealed values is done by the data custodian or by a person outside the
+  agent session (an agent runs `scripts/audit_blinded_outputs.py scan` only with synthetic sentinels), and a passing
+  scan never authorizes sharing.
+- **No credentials.** The adapter reads, stores and passes no passwords, tokens or grid proxies. Scheduler CLIs and
+  jobs still inherit the user's environment today, so keep tokens and agent sockets out of it; with protected data,
+  scheduler credentials must be unreachable from the sandbox and the trusted submitter verifies full digests of the
+  runner and spec (the campaign copies are agent-writable).
 - **Provenance:** `report` writes a `computational-run` artifact with input hashes, the queried scheduler version,
   the exact submit commands, the config and its hash, per-attempt records in `environment.execution`, seeds,
   per-chunk and merged output hashes, and per-attempt elapsed time and peak memory. An incomplete campaign is labeled

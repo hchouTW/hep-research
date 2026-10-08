@@ -19,7 +19,8 @@ This README is for people. The skills route through [index.md](index.md); the ru
 - **Scripts** (`scripts/`): analysis-spec audit, paper-manifest and CRDB helpers.
 
 It does not hold AMS internal data, notes, calibration constants, pass names, trigger bits, good-run rules or cuts.
-If you supply them, they are labelled user-supplied and live in your project, not here.
+Do not give them to the agent unless your project's `agent_policy` allows that content on a qualified host configuration
+(none is qualified yet); public material you supply is labelled user-supplied and lives in your project, not here.
 
 Access-controlled AMS-02 software and data knowledge (Offline library usage, EOS production listings, ntuple kits) is
 not part of this profile. Authorized members get it from the separate companion plugin `ams02-research`, which
@@ -49,7 +50,9 @@ Name AMS-02 in a request, or pin the profile in `hep-research.project.json` at y
  "experiments": [{"profile": "experiment:ams-02", "version": "2.0.0"}]}
 ```
 
-Networked scripts (`scripts/fetch_papers.py`, `scripts/crdb_query.py`) run only with your approval.
+Networked scripts (`scripts/fetch_papers.py`: INSPIRE-HEP, arXiv, OpenAlex and the publisher or repository hosts its PDF
+links name; `scripts/crdb_query.py`: CRDB at `lpsc.in2p3.fr`) run only with your approval, over https, and only where the
+session's egress policy allows those destinations. They are maintainer tools, not for protected sessions.
 
 ## Tests
 

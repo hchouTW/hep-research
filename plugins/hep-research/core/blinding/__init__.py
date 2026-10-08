@@ -1,1 +1,1 @@
-"""Blinding enforcement in outputs (steward: hep-computing). See blinding.py."""
+"""Advisory blinding checks of outputs (steward: hep-computing); not enforcement. See blinding.py."""

@@ -2,7 +2,8 @@
 """Worker-side chunk runner: runs one chunk of a manifest on a batch node and writes its output once.
 
 The campaign copies this file next to its spec, so it must stay self-contained (standard library only, no plugin
-imports). It never chooses a seed or a chunk on its own: the chunk comes from the explicit --chunk/--attempt pair or
+imports). That copy is agent-writable: with protected data a trusted submitter must verify its full digest (and the
+spec's) before a job runs it. It never chooses a seed or a chunk on its own: the chunk comes from the explicit --chunk/--attempt pair or
 from the submission map written at submit time (--map MAP --index N, where N is the scheduler's array index), and the
 seed, start and stop come from the manifest inside the spec.
 
@@ -18,7 +19,8 @@ Both are written to a temporary file in DIR and then linked into place without o
 the same attempt (an eviction or a requeue that ran the job again) writes <attempt>.rerun-<k>.json instead, which
 collection records as a duplicate and never sums. A failed command leaves only the meta file.
 Exit codes: the command's exit code (128 + N when it died from signal N); 70 when the command succeeded but its result
-was missing or not JSON; 2 for bad arguments or a chunk not in the manifest.
+was missing or not JSON; 2 for bad arguments or a chunk not in the manifest, and for a command template that cannot be
+filled (then the meta file records the reason, so the attempt is 'failed', never 'lost').
 """
 from __future__ import annotations
 
@@ -101,13 +103,21 @@ def main(argv=None) -> int:
             "signal": None, "runner_error": None, "run_file": None}
     with tempfile.TemporaryDirectory(prefix=".run-", dir=out_dir) as td:
         out = Path(td) / "out.json"
-        cmd = [a.format(start=chunk["start"], stop=chunk["stop"], seed=chunk["seed"], out=out, id=cid) for a in shlex.split(spec["cmd"])]
-        sys.stdout.flush()
-        proc = subprocess.run(cmd)
-        code = proc.returncode
-        if code < 0:
-            meta["signal"], code = -code, 128 - code
         result = None
+        try:
+            cmd = [a.format(start=chunk["start"], stop=chunk["stop"], seed=chunk["seed"], out=out, id=cid)
+                   for a in shlex.split(spec["cmd"])]
+        except (KeyError, IndexError, ValueError, AttributeError) as exc:
+            # a literal brace in the template (a dict or f-string inside 'python -c ...') must be doubled: {{ }}
+            meta["runner_error"] = (f"command template could not be filled ({type(exc).__name__}: {exc}); "
+                                    "write literal braces as {{ and }}")
+            cmd, code = None, 2
+        if cmd is not None:
+            sys.stdout.flush()
+            proc = subprocess.run(cmd)
+            code = proc.returncode
+            if code < 0:
+                meta["signal"], code = -code, 128 - code
         if code == 0:
             try:
                 result = json.loads(out.read_text(encoding="utf-8"))
