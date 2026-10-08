@@ -47,12 +47,16 @@ def _imported_profile_code() -> set[str]:
     return found
 
 
-sys.addaudithook(_audit)
 sys.path.insert(0, str(PLUGIN))
+from contracts.identity import plugin_release  # noqa: E402
+
+# Verifying the release identity hashes every plugin file: do it before file reads are traced, so the
+# trace shows only what the example itself reads.
+PLUGIN_RELEASE = plugin_release()
+sys.addaudithook(_audit)
 import numpy as np  # noqa: E402
 
 from contracts import CONTRACTS_VERSION  # noqa: E402
-from contracts.identity import plugin_release  # noqa: E402
 from contracts.comparison.gate import gate, side_from_artifact  # noqa: E402
 from contracts.validate import validate_artifact  # noqa: E402
 from contracts.vocab import Vocabulary  # noqa: E402
@@ -121,7 +125,7 @@ def main(argv=None) -> int:
     detector_reads = sorted(f for f in OPENED | _imported_profile_code() if f.startswith("profiles/experiments/"))
 
     base = {"contract_version": CONTRACTS_VERSION, "bindings": {"experiments": [], "theory": pred_doc["bindings"]["theory"]},
-            "versions": {"plugin": pred_doc["versions"]["plugin"], "contracts": CONTRACTS_VERSION, "plugin_release": plugin_release(), "profiles": pred_doc["versions"]["profiles"]},
+            "versions": {"plugin": pred_doc["versions"]["plugin"], "contracts": CONTRACTS_VERSION, "plugin_release": PLUGIN_RELEASE, "profiles": pred_doc["versions"]["profiles"]},
             "outputs": [], "unresolved_inputs": ["truncation (higher orders, Z exchange) not quantified in the prediction"]}
     ins = [{"ref": "../qed-prediction/output/artifacts/prediction.json", "artifact_type": "prediction", "status": pred_doc["status"]},
            {"ref": "synthetic-published-record.json", "artifact_type": "dataset-record", "status": ["synthetic"]}]

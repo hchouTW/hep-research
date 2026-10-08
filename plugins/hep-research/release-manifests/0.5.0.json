@@ -5,7 +5,7 @@
  "hash_algorithm": "sha256",
  "path_order": "UTF-8 bytes, ascending",
  "file_count": 1033,
- "digest": "e86b8ca5c15443630c82f3a8fb15885a90e28d73a5cb0a3f58a44a53149caab3",
+ "digest": "6b793584a1b300da6618665ff07cc4b1216d0249827c20eff30e81f3379a1db1",
  "files": [
   {
    "path": ".claude-plugin/plugin.json",
@@ -2235,20 +2235,20 @@
   },
   {
    "path": "examples/published-comparison/output/report.md",
-   "sha256": "bfe0db9788fdaeaea174274562f237fbd238d3f3b434d56afa6592e5d5104f8c",
-   "size": 1617,
+   "sha256": "5a7eeda793c53b58f9ca20127dd7933d1520e775d5f52b8351fdeaf3391819c8",
+   "size": 1555,
    "mode": "100644"
   },
   {
    "path": "examples/published-comparison/output/results.json",
-   "sha256": "5705dd60ded1ebf92051ff562c61ddbd53585b991a0b21f8e1b70ab65d5c9abe",
-   "size": 1868,
+   "sha256": "5d5c6255333b5d1fc3ea333ea86b61be625bfd20b3842eb5efdeca657606c5e2",
+   "size": 1802,
    "mode": "100644"
   },
   {
    "path": "examples/published-comparison/run.py",
-   "sha256": "71f5409109bec32ae3ffaa89a6c18944fcbe301603cc55596fe856aa59f7c255",
-   "size": 11995,
+   "sha256": "af28d8ef1cac2fbb7f51ca0bed5a0b7ac0786fe62108d80b3c1da747ebc8b2cf",
+   "size": 12180,
    "mode": "100644"
   },
   {
@@ -2295,8 +2295,8 @@
   },
   {
    "path": "examples/qed-prediction/run.py",
-   "sha256": "d11add48548c66573092c66079a1e785878f999ee03efafea6f2dd62dad8bd71",
-   "size": 14822,
+   "sha256": "caae4ddce85297181e74dfbff7e16710b5efcdb878ac0c632ab9547db2992cfc",
+   "size": 15007,
    "mode": "100644"
   },
   {
@@ -6189,8 +6189,8 @@
   },
   {
    "path": "tools/reference_inventory.py",
-   "sha256": "331e4ca16f80af986f1cb1988906ee5e2951f05e1f73b25c83467fb467d63e73",
-   "size": 9874,
+   "sha256": "33c44c482c2809e52835a2f350a27fa28a9b60ffde1484f3f93d52594c664102",
+   "size": 9958,
    "mode": "100644"
   },
   {

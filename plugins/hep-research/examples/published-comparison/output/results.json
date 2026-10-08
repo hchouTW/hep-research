@@ -58,7 +58,6 @@
   }
  ],
  "files_read": [
-  ".claude-plugin/plugin.json",
   "contracts/schemas/common.json",
   "contracts/schemas/envelope.json",
   "contracts/schemas/ext_comparison_spec.json",
@@ -66,8 +65,7 @@
   "contracts/vocab/core.json",
   "examples/published-comparison/synthetic-published-covariance.json",
   "examples/published-comparison/synthetic-published-record.json",
-  "examples/qed-prediction/output/artifacts/prediction.json",
-  "release-manifests/0.5.0.json"
+  "examples/qed-prediction/output/artifacts/prediction.json"
  ],
  "detector_files_read": [],
  "contract_validation": {

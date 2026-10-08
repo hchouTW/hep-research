@@ -49,9 +49,10 @@ def corpus(root: Path) -> dict[str, str]:
     out = {}
     for p in root.rglob("*"):
         rel = p.relative_to(root)
-        # docs/ (the inventory itself, maintenance maps) and the change records are not citations
-        if (p.is_file() and p.suffix in (".md", ".json", ".py") and "__pycache__" not in p.parts and rel.parts[0] != "docs"
-                and rel.as_posix() not in RECORDS):
+        # docs/ (the inventory itself, maintenance maps), the change records and the release manifests (which list
+        # every file) are not citations
+        if (p.is_file() and p.suffix in (".md", ".json", ".py") and "__pycache__" not in p.parts
+                and rel.parts[0] not in ("docs", "release-manifests") and rel.as_posix() not in RECORDS):
             try:
                 out[p.relative_to(root).as_posix()] = p.read_text(encoding="utf-8")
             except UnicodeDecodeError:

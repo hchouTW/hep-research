@@ -18,4 +18,4 @@ Limitation: the record's luminosity block is built from the measured values (ful
 | no_detector_files_read | pass |
 | contracts | pass |
 
-Files read: `.claude-plugin/plugin.json`, `contracts/schemas/common.json`, `contracts/schemas/envelope.json`, `contracts/schemas/ext_comparison_spec.json`, `contracts/schemas/ext_statistical_result.json`, `contracts/vocab/core.json`, `examples/published-comparison/synthetic-published-covariance.json`, `examples/published-comparison/synthetic-published-record.json`, `examples/qed-prediction/output/artifacts/prediction.json`, `release-manifests/0.5.0.json`
+Files read: `contracts/schemas/common.json`, `contracts/schemas/envelope.json`, `contracts/schemas/ext_comparison_spec.json`, `contracts/schemas/ext_statistical_result.json`, `contracts/vocab/core.json`, `examples/published-comparison/synthetic-published-covariance.json`, `examples/published-comparison/synthetic-published-record.json`, `examples/qed-prediction/output/artifacts/prediction.json`

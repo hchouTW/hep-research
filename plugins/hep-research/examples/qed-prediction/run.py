@@ -65,15 +65,19 @@ if __name__ == "__main__" and (_MISSING := _missing_packages()):  # explain inst
                               "numpy --require scipy --require sympy --require matplotlib), or install requirements-core.txt"}))
     sys.exit(2)
 
-sys.addaudithook(_audit)
 sys.path.insert(0, str(PLUGIN))
+from contracts.identity import plugin_release  # noqa: E402
+
+# Verifying the release identity hashes every plugin file: do it before file reads are traced, so the
+# trace shows only what the example itself reads.
+PLUGIN_RELEASE = plugin_release()
+sys.addaudithook(_audit)
 sys.path.insert(0, str(PROFILE_DIR / "scripts"))
 import numpy as np  # noqa: E402
 
 import derive  # noqa: E402
 import predict  # noqa: E402
 from contracts import CONTRACTS_VERSION  # noqa: E402
-from contracts.identity import plugin_release  # noqa: E402
 from contracts.validate import validate_artifact  # noqa: E402
 from contracts.vocab import Vocabulary  # noqa: E402
 
@@ -88,7 +92,7 @@ PLUGIN_VERSION = json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_tex
 def artifacts(der: dict, pred: dict, created: str):
     vocab = Vocabulary.with_profiles([PROFILE])
     base = {"contract_version": CONTRACTS_VERSION, "bindings": {"experiments": [], "theory": [{"profile": PROFILE["id"], "version": PROFILE["version"]}]},
-            "versions": {"plugin": PLUGIN_VERSION, "contracts": CONTRACTS_VERSION, "plugin_release": plugin_release(), "profiles": {PROFILE["id"]: PROFILE["version"]}},
+            "versions": {"plugin": PLUGIN_VERSION, "contracts": CONTRACTS_VERSION, "plugin_release": PLUGIN_RELEASE, "profiles": {PROFILE["id"]: PROFILE["version"]}},
             "inputs": [], "outputs": [], "unresolved_inputs": []}
     src = SOURCES[0]
     spec = dict(base, artifact_id="qedbench-path-c-theory-spec", artifact_type="theory-spec",
