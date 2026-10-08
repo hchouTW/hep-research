@@ -1,0 +1,77 @@
+{"$comment": "Data release manifest (AGENTIC-R5 T1.2, plan basis §7.3): a sidecar with its own manifest_version, not an artifact envelope type. It describes one approved release of derived data to an agent session. Schema validation is not approval: release_id non-reuse, artifact bytes, approval binding, destinations and revocation freshness are semantic checks in contracts/release_manifest.py, run on the custodian side from a protected copy.",
+ "type": "object",
+ "required": ["manifest_version", "release_id", "source", "artifacts", "artifact_rules", "transform", "protected", "retained",
+              "review", "approval_ref", "purposes", "destinations", "validity", "related_releases"],
+ "additionalProperties": false,
+ "properties": {
+  "manifest_version": {"type": "string", "const": "1.0.0"},
+  "release_id": {"$comment": "never reused for different content (checked against the custodian's ledger)",
+    "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"},
+  "source": {"$comment": "trusted identity of the original snapshot; sensitive paths and metadata stay on the restricted side",
+    "type": "object", "required": ["snapshot_id", "sha256"], "additionalProperties": false, "properties": {
+    "snapshot_id": {"type": "string", "minLength": 1},
+    "sha256": {"$ref": "#/$defs/sha256"}}},
+  "artifacts": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["path", "sha256", "size", "format"],
+    "additionalProperties": false, "properties": {
+    "path": {"$ref": "#/$defs/relpath"},
+    "sha256": {"$ref": "#/$defs/sha256"},
+    "size": {"type": "integer", "minimum": 0},
+    "format": {"type": "string", "minLength": 1}}}},
+  "artifact_rules": {"$comment": "how a release directory is read: listed regular files only; links and unlisted files are refused",
+    "type": "object", "required": ["symlinks", "unlisted_files"], "additionalProperties": false, "properties": {
+    "symlinks": {"type": "string", "const": "refused"},
+    "unlisted_files": {"type": "string", "const": "refused"}}},
+  "transform": {"$comment": "transform code digest and parameters; keys and secret offsets are never recorded here",
+    "type": "object", "required": ["code_sha256", "parameters", "keys_recorded"], "additionalProperties": false, "properties": {
+    "code_sha256": {"$ref": "#/$defs/sha256"},
+    "parameters": {"type": "object"},
+    "keys_recorded": {"type": "boolean", "const": false}}},
+  "protected": {"$comment": "estimands or features the release conceals",
+    "type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+  "retained": {"$comment": "information the release explicitly keeps (differences, ratios, shapes, ...); empty means none",
+    "type": "array", "items": {"type": "string", "minLength": 1}},
+  "review": {"type": "object", "required": ["reviewer", "date", "scope"], "additionalProperties": false, "properties": {
+    "reviewer": {"type": "string", "minLength": 1},
+    "date": {"$ref": "#/$defs/date"},
+    "scope": {"type": "string", "minLength": 1}}},
+  "approval_ref": {"$comment": "identifier of a protected approval record; writing an approved string here is not approval. Left out of the manifest digest the approval binds",
+    "type": "string", "minLength": 1},
+  "purposes": {"$comment": "formal analysis is not a purpose here: it needs a separate use gate",
+    "type": "array", "minItems": 1, "items": {"type": "string", "enum": ["exploration", "fixed-execution", "validation"]}},
+  "destinations": {"$comment": "comparable with the effective configuration; model scope covers every model that can receive session content (main, subagent, background/compaction, hook-called, fallback)",
+    "type": "object", "required": ["services", "tools", "network", "recipients", "logging"], "additionalProperties": false, "properties": {
+    "services": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["service", "tenant", "region", "model_families", "data_handling"],
+      "additionalProperties": false, "properties": {
+      "service": {"type": "string", "minLength": 1},
+      "tenant": {"type": "string", "minLength": 1},
+      "region": {"type": "string", "minLength": 1},
+      "model_families": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+      "models": {"$comment": "exact models, when named: an unrequested change is a destination change", "type": "array", "items": {"type": "string", "minLength": 1}},
+      "data_handling": {"type": "string", "minLength": 1}}}},
+    "tools": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "network": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "recipients": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "logging": {"type": "object", "required": ["transcripts", "telemetry"], "additionalProperties": false, "properties": {
+      "transcripts": {"type": "string", "minLength": 1},
+      "telemetry": {"type": "string", "minLength": 1}}}}},
+  "validity": {"type": "object", "required": ["effective", "expires", "revocation_ref", "status_source", "max_status_age_s"],
+    "additionalProperties": false, "properties": {
+    "effective": {"$ref": "#/$defs/timestamp"},
+    "expires": {"$ref": "#/$defs/timestamp"},
+    "revocation_ref": {"type": "string", "minLength": 1},
+    "status_source": {"type": "string", "minLength": 1},
+    "max_status_age_s": {"$comment": "revocation status older than this cannot establish validity", "type": "integer", "minimum": 1}}},
+  "related_releases": {"$comment": "earlier releases for the same analysis and source; non-empty requires composition_review",
+    "type": "array", "items": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$"}},
+  "composition_review": {"type": "object", "required": ["reviewer", "date", "conclusion"], "additionalProperties": false, "properties": {
+    "reviewer": {"type": "string", "minLength": 1},
+    "date": {"$ref": "#/$defs/date"},
+    "conclusion": {"type": "string", "minLength": 1}}}
+ },
+ "$defs": {
+  "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+  "relpath": {"type": "string", "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$))(?!.*\\\\)[^\\x00-\\x1f]+$"},
+  "date": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
+  "timestamp": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"}
+ }
+}

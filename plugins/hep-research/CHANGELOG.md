@@ -5,6 +5,17 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Data release manifest schema and checker (AGENTIC-R5 T1.2, plan basis §7.3).** New sidecar schema
+  `contracts/schemas/release_manifest.json` (`manifest_version` 1.0.0, within the schema engine's keyword set) and
+  `contracts/release_manifest.py`, meant to run on the custodian side from protected copies. A pass needs every input
+  (fail closed): the release directory holds exactly the listed regular files with their sizes and SHA-256 (links and
+  unlisted files refused); the approval record names `approval_ref`, binds the manifest digest (without
+  `approval_ref`), its purposes, destinations digest and validity period, and is valid now (approver authority checked
+  against an optional list); the release ledger shows no reuse of `release_id` for other content; revocation status
+  comes from `status_source`, is fresher than `max_status_age_s` and does not list the release; every effective
+  destination (service, tenant, region, model family, exact model when named, tools, network, recipients, logging) is
+  allowed. Formal analysis is not a release purpose. The checker verifies bindings, not the trust anchor (Q-06);
+  passing releases nothing (T1.8). Tests in `tests/contracts/test_release_manifest.py`.
 - **Execution-bundle freezing (AGENTIC-R5 T4.2 freezing tool, F06, X05, X14).** New `core/partition/bundle.py` and
   `batch_campaign.py freeze` / `verify-bundle`: a write-once `bundles/<digest>.json` lists, with full SHA-256, size
   and mode, the campaign files, the worker tree, the interpreter (resolved through links and re-checked), an
