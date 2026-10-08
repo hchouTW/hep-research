@@ -15,19 +15,6 @@
     "authentication": "ON_INSTALL"
    },
    "category": "Research"
-  },
-  {
-   "name": "ams02-research",
-   "source": {
-    "source": "url",
-    "url": "https://github.com/hchouTW/ams02-research.git",
-    "sha": "32d538a91a94dc54ccc5427a9bcaebc2399a10c8"
-   },
-   "policy": {
-    "installation": "AVAILABLE",
-    "authentication": "ON_INSTALL"
-   },
-   "category": "Research"
   }
  ]
 }

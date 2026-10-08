@@ -8,15 +8,6 @@
       "name": "hep-research",
       "source": "./plugins/hep-research",
       "description": "Experimental and theoretical HEP research assistant."
-    },
-    {
-      "name": "ams02-research",
-      "source": {
-        "source": "github",
-        "repo": "hchouTW/ams02-research",
-        "sha": "32d538a91a94dc54ccc5427a9bcaebc2399a10c8"
-      },
-      "description": "Private companion profile for hep-research; access restricted."
     }
   ]
 }
