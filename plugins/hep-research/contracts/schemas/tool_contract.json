@@ -1,0 +1,62 @@
+{"$comment": "Machine-readable tool contract (AGENTIC-R5 T4.7, F14, F16): a sidecar with its own contract_version, not an artifact envelope type. One file per plugin tool under contracts/tool_contracts/; it states each operation's inputs and outputs with units, its failure states (exit codes), the reader capabilities it needs, the purposes it may serve and its side effects. Help text is not the contract. contracts/tool_contract.py checks a contract against the tool's command line; a valid contract authorizes nothing (HC-05), and formal analysis is not a purpose here: it needs the separate use gate.",
+ "type": "object",
+ "required": ["contract_version", "tool_id", "entry", "operations"],
+ "additionalProperties": false,
+ "properties": {
+  "contract_version": {"type": "string", "const": "1.0.0"},
+  "tool_id": {"$ref": "#/$defs/id"},
+  "entry": {"$comment": "the script, relative to the plugin root; a regular file, never a link",
+    "type": "string", "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$))(?!.*\\\\)[A-Za-z0-9_./-]+\\.py$"},
+  "operations": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/operation"}}
+ },
+ "$defs": {
+  "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$"},
+  "flag": {"type": "string", "pattern": "^--[a-z0-9][a-z0-9-]*$"},
+  "unit": {"$comment": "a unit string; '1' for a dimensionless number or a count, 'n/a' for a value without a unit (a label, a path)",
+    "type": "string", "minLength": 1},
+  "operation": {"type": "object",
+    "required": ["operation_id", "summary", "invocation", "inputs", "outputs", "failure_states", "required_capabilities",
+                 "purposes", "side_effects"],
+    "additionalProperties": false,
+    "properties": {
+     "operation_id": {"$ref": "#/$defs/id"},
+     "summary": {"type": "string", "minLength": 1},
+     "invocation": {"$comment": "every command-line option the tool accepts, each mapped to one input; the checker compares this list with the tool's --help in both directions",
+       "type": "object", "required": ["kind", "options", "output"], "additionalProperties": false, "properties": {
+       "kind": {"type": "string", "const": "cli"},
+       "options": {"type": "array", "items": {"type": "object", "required": ["flag", "input"], "additionalProperties": false,
+         "properties": {"flag": {"$ref": "#/$defs/flag"}, "input": {"$ref": "#/$defs/id"}}}},
+       "output": {"type": "string", "enum": ["json-stdout"]}}},
+     "inputs": {"type": "array", "items": {"type": "object", "required": ["name", "kind", "unit", "required", "constraint"],
+       "additionalProperties": false, "properties": {
+       "name": {"$ref": "#/$defs/id"},
+       "kind": {"$comment": "a quantity kind (as in an operator-semantics table) or 'parameter' for a setting such as a confidence level",
+         "type": "string", "minLength": 1},
+       "unit": {"$ref": "#/$defs/unit"},
+       "required": {"type": "boolean"},
+       "constraint": {"type": "string", "minLength": 1},
+       "default": {"type": ["number", "string", "boolean"]}}}},
+     "outputs": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["name", "kind", "unit"],
+       "additionalProperties": false, "properties": {
+       "name": {"type": "string", "minLength": 1},
+       "kind": {"type": "string", "minLength": 1},
+       "unit": {"$ref": "#/$defs/unit"}}}},
+     "failure_states": {"$comment": "every non-zero exit the tool can end with, and what it means; exit 0 is success",
+       "type": "array", "minItems": 1, "items": {"type": "object", "required": ["exit_code", "status", "meaning"],
+       "additionalProperties": false, "properties": {
+       "exit_code": {"type": "integer", "minimum": 1},
+       "status": {"type": "string", "enum": ["invalid-input", "unsupported-range", "failed", "incomplete", "unreadable"]},
+       "meaning": {"type": "string", "minLength": 1}}}},
+     "required_capabilities": {"$comment": "reader capabilities (contracts.KNOWN_CAPABILITIES) the operation relies on; an unknown one is refused",
+       "type": "array", "items": {"type": "string", "minLength": 1}},
+     "purposes": {"$comment": "the uses the operation is declared for; formal analysis is not one (separate use gate)",
+       "type": "array", "minItems": 1, "items": {"type": "string", "enum": ["exploration", "fixed-execution", "validation"]}},
+     "operators": {"$comment": "operator ids of operator-semantics tables this operation can implement (which one depends on the inputs; a recipe step names the operator it uses)",
+       "type": "array", "items": {"$ref": "#/$defs/id"}},
+     "side_effects": {"type": "object", "required": ["writes_files", "network", "subprocess"], "additionalProperties": false,
+       "properties": {
+       "writes_files": {"type": "boolean"},
+       "network": {"$comment": "plugin tools open no network connection", "type": "boolean", "const": false},
+       "subprocess": {"type": "boolean"}}}}}
+ }
+}

@@ -1,0 +1,36 @@
+{
+ "recipe_version": "1.0.0",
+ "recipe_id": "flux-from-counts",
+ "semantics": {
+  "table_id": "differential-flux",
+  "sha256": "126407076c775268589c65501c05cda08ef623923b70a458325e33fbbd911a49"
+ },
+ "input": {
+  "kind": "counts",
+  "applied_effects": []
+ },
+ "estimand_kind": "differential_flux",
+ "steps": [
+  {
+   "step_id": "background",
+   "operator": "subtract_background",
+   "tool": "cosmic-ray-flux:flux"
+  },
+  {
+   "step_id": "exposure",
+   "operator": "divide_effective_exposure",
+   "tool": "cosmic-ray-flux:flux"
+  },
+  {
+   "step_id": "bin-width",
+   "operator": "divide_bin_width",
+   "tool": "cosmic-ray-flux:flux"
+  }
+ ],
+ "not_applied": [
+  {
+   "effect_id": "migration",
+   "reason": "bin migration is not unfolded: each flux point is migration-uncorrected and is compared with a model by forward-folding through the response, not as a true-bin value"
+  }
+ ]
+}
