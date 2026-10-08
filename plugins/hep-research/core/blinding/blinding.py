@@ -466,8 +466,8 @@ def _check_figure(fig, region, sealed, rtol, unchecked: list) -> list[dict]:
                     found.append({"axes": ax_i, "artist": "outline", "label": patch.get_label(), "points": 1})
         for coll in ax.collections:
             if isinstance(coll, ContourSet):  # contour, contourf: any drawn level inside the range
-                if any(((np.asarray(pth.vertices, float)[:, 0] >= lo) & (np.asarray(pth.vertices, float)[:, 0] < hi)).any()
-                       for pth in coll.get_paths() if len(pth.vertices)):
+                xs = [np.asarray(pth.vertices, float)[:, 0] for pth in coll.get_paths()]
+                if any(((x >= lo) & (x < hi)).any() for x in xs if x.size):
                     found.append({"axes": ax_i, "artist": "contour", "label": coll.get_label(), "points": 1})
                 continue
             if isinstance(coll, QuadMesh):  # hist2d, pcolormesh: cells overlapping the range with a drawn value
@@ -516,7 +516,7 @@ def _check_figure(fig, region, sealed, rtol, unchecked: list) -> list[dict]:
             fig.draw_without_rendering()  # tick labels get their text only when the figure is drawn
         except Exception:  # noqa: BLE001 - a figure that cannot be drawn still has its explicit texts checked
             unchecked.append("tick labels: the figure could not be drawn, so tick label text was not generated")
-        axes_of = {}
+        axes_of: dict[int, int] = {}
         for ax_i, ax in enumerate(fig.axes):
             for t in ax.findobj(Text):
                 axes_of.setdefault(id(t), ax_i)

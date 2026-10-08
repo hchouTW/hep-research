@@ -43,7 +43,8 @@ def _inside(path: Path, root: Path) -> bool:
 
 def load_revocations(path) -> tuple[dict, list[str]]:
     """{subject_sha256: event} from a JSON Lines file, plus the problems found (each problem is reported as an error)."""
-    revoked, problems = {}, []
+    revoked: dict[str, dict] = {}
+    problems: list = []
     try:
         lines = Path(path).read_text(encoding="utf-8").splitlines()
     except (OSError, UnicodeDecodeError) as exc:

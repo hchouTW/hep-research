@@ -49,7 +49,7 @@ def validate_manifest(manifest) -> dict:
         raise ValueError(f"job_id must match {JOB_ID.pattern}")
     n = manifest.get("n_items")
     chunks = manifest.get("chunks")
-    if not _is_int(n) or n <= 0 or not isinstance(chunks, list) or not chunks:
+    if not isinstance(n, int) or isinstance(n, bool) or n <= 0 or not isinstance(chunks, list) or not chunks:
         raise ValueError("the manifest needs a positive integer n_items and a non-empty chunk list")
     seen, pos = set(), 0
     for ch in chunks:
