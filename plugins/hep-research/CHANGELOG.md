@@ -22,8 +22,9 @@ Software checks establish contract consistency only, not physical validity.
     `--local`, or twice in the config) is one profile instead of a `registry.duplicate_id` error. Folders with the same
     profile ID still fail. `tests/contracts/test_companion_validation_cli.py` covers the CLI cases a companion checker
     relies on.
-  - The marketplace catalogs still pin `ams02-research` 1.0.1 (commit `1c3f590`), whose manifest requires
-    `hep-research ^0.4.0`; that pin moves when the companion release without the declaration is merged.
+  - The marketplace catalogs pin `ams02-research` 1.2.1 (commit `32d538a`, was 1.0.1 at `1c3f590`): the companion
+    release without a host dependency on hep-research; its own check accepts hep-research `>=0.4.0,<0.6.0`. An
+    installed 1.1.0 or earlier still holds hep-research at 0.4.x until the companion is updated first (README).
 
 ## 0.5.0 (2026-10-08)
 
