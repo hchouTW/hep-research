@@ -5,6 +5,34 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Data release manifest schema and checker (AGENTIC-R5 T1.2, plan basis §7.3).** New sidecar schema
+  `contracts/schemas/release_manifest.json` (`manifest_version` 1.0.0, within the schema engine's keyword set) and
+  `contracts/release_manifest.py`, meant to run on the custodian side from protected copies. A pass needs every input
+  (fail closed): the release directory holds exactly the listed regular files with their sizes and SHA-256 (links and
+  unlisted files refused); the approval record names `approval_ref`, binds the manifest digest (without
+  `approval_ref`), its purposes, destinations digest and validity period, and is valid now (authority `data-release`,
+  held by the approver in the required approver list); the release ledger shows no reuse of `release_id` for other
+  content; revocation status comes from `status_source`, is fresher than `max_status_age_s` and does not list the
+  release; every effective destination (service, tenant, region, model family, exact model when named, tools, network,
+  recipients, logging) is allowed, and an absent tool, network or recipient list is a failure, as is a directory the
+  check cannot list or a malformed approver list, ledger entry or revocation entry. Formal analysis is not a release
+  purpose. The checker verifies bindings, not the trust anchor (Q-06); passing releases nothing (T1.8). Tests in
+  `tests/contracts/test_release_manifest.py`.
+- **Execution-bundle freezing (AGENTIC-R5 T4.2 freezing tool, F06, X05, X14).** New `core/partition/bundle.py` and
+  `batch_campaign.py freeze` / `verify-bundle`: a write-once `bundles/<digest>.json` lists, with full SHA-256, size
+  and mode, the campaign files, the worker tree, the interpreter (resolved through links and re-checked), an
+  environment lock and the container image, which must be pinned by digest (a sourceless `.pyc` counts as code); the
+  digest also binds the campaign uid, manifest hash and the data exposure recorded at freezing. The command follows a
+  closed grammar: an absolute interpreter, an absolute bundled worker script, then only flags, `--name=value`, single
+  placeholders, numbers, plain ASCII words and absolute paths to bundled worker files without braces, each re-resolved
+  by `verify` (a repointed link is a change); the template is checked again at freezing, a worker's `#!` line must be
+  one absolute interpreter without arguments (read as the kernel reads it) and is hashed; launchers (`env`, `nice`,
+  `nohup`, ...; judged by the resolved name) and `#!` scripts are refused as interpreters; the worker root may not
+  contain the campaign. A bundle frozen for another campaign (directory, uid, manifest) is refused. The file carries
+  an approval request (bundle digest, config hash, limits, scope) and approves nothing. `submit`/`resubmit --bundle`
+  re-hash it and refuse a changed campaign (`bundle.changed`); the submission records the digest and the artifact
+  lists it. Verification of approved bytes at execution stays with the trusted submitter (T3.5). Tests in
+  `tests/core/test_partition_bundle.py`, `tests/adapters/test_batch_bundle.py`.
 - **Marketplace lists hep-research only.** Both catalogs (`.claude-plugin/marketplace.json`,
   `.agents/plugins/marketplace.json`) no longer list `ams02-research`; the READMEs say so and how an installed copy is
   handled. hep-research never depended on it; companion profile support is unchanged.

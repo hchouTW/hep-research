@@ -49,6 +49,7 @@ Enforced by `tools/check_layering.py` (AST imports + text scan + schema scan + s
 | Validator | `contracts/validate.py` | Schema subset engine (`contracts/schema.py`) + semantic rules (status propagation, double-counted corrections, auto-Gaussianized envelopes, paradigm completeness, synthetic labelling, theory independence) |
 | Registry and profiles | `contracts/registry.py`, `schemas/registry.json`, `schemas/profile.json` | Two-tier registry, templates, compatibility, escape and cycle checks |
 | Project config | `contracts/project.py`, `schemas/project_config.json` | Resolution order, local profiles, pins, overrides with provenance |
+| Data release manifest | `contracts/release_manifest.py`, `schemas/release_manifest.json` | Sidecar (own `manifest_version`); custodian-side checks of content bytes, approval binding, release-ID reuse, revocation freshness and destinations; passing releases nothing |
 | Evidence | `contracts/evidence.py`, `schemas/evidence_*.json` | Profile-qualified IDs; verification date distinct from publication and current dates |
 | Comparison gate | `contracts/comparison/` | `gate.py` (observable, level, unit, convention and transformation checks), `conventions.py`, `composition.py`, `combination.py`, `model_set.py` |
 | Context stanza | `contracts/stanzas/context-resolution.md` | Inserted into each SKILL.md by `tools/build_stanzas.py`; drift fails the checks |

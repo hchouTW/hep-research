@@ -33,7 +33,8 @@ configuration. Do not use this for:
 ```
 python3 batch_campaign.py check-config --config batch-config.json
 python3 batch_campaign.py plan     --config batch-config.json --job toys --items 100000 --chunk-size 1000 --seed 42 \
-        --cmd "python3 toy.py --start {start} --stop {stop} --seed {seed} --out {out}"
+        --cmd "$(command -v python3) $PWD/worker/toy.py --start {start} --stop {stop} --seed {seed} --out {out}"
+python3 batch_campaign.py freeze   --config batch-config.json --worker-root ./worker   # bundle digest + approval request
 python3 batch_campaign.py submit   --config batch-config.json --pilot            # dry run: shows the job files
 python3 batch_campaign.py submit   --config batch-config.json --pilot --submit   # one chunk, to size the rest
 python3 batch_campaign.py status   --config batch-config.json                    # one poll: elapsed, peak memory
@@ -125,6 +126,18 @@ node-failure, held, cancelled, lost, unknown`. A native state the adapter does n
   TEXT`, which succeeds only when every job the scheduler lists under the submission's tag has ended (a lost job may
   wait in the queue for any time, so a walltime does not bound it). Without `time_limit` core-hours are unbounded, so
   `max_core_hours` refuses. Every attempt has a global identity `<campaign_uid>:<attempt_id>`.
+- **Frozen bundles:** `freeze` lists, with full SHA-256, the campaign's manifest, spec and runner, every file under
+  `--worker-root`, the interpreter the command names, an `--env-lock` file and the container image (pinned by digest;
+  a tag is refused), with the data exposure known then, and writes an approval request. It approves nothing. The
+  command follows a closed grammar: an absolute interpreter, then the absolute path of a bundled worker script (no
+  `-m` or `-c`; no launcher such as `env`, `nice` or `nohup` as the interpreter, also through a link), then only
+  flags, `--name=value`, single placeholders, numbers, plain ASCII words (no `/`, `.`, `~`, `$` or braces) and
+  absolute paths to bundled worker files (not links, no braces); a worker's `#!` line must name one absolute
+  interpreter without arguments, which is hashed too; an interpreter may not itself be a `#!` script; keep the worker
+  code in its own folder, outside the campaign directory. A named path that later resolves elsewhere is a change.
+  `submit --bundle DIGEST` (and `resubmit`) re-hashes the bundle and is refused when anything changed since freezing
+  or the bundle belongs to another campaign; freeze again and have the new bundle approved. The files stay editable;
+  running approved bytes is the trusted submitter's job.
 - **A scheduler's success is not a result:** a job reported complete without a valid output is `lost`.
 - **Held jobs need a person.** `watch` stops early on held, unknown or stopped chunks.
 - **Polling etiquette:** `status` polls once. `watch` needs `monitor.poll_interval_s` (at least 60) and

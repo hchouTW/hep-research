@@ -7,8 +7,13 @@ cancel needs --approve-cancel. Nothing here releases a held job, raises a resour
   check-config --config C [--example]
   plan     --config C (--manifest M | --job ID --items N --chunk-size K --seed S) --cmd "worker ... {start} {stop} {seed} {out}"
            [--container-image IMAGE]                     writes the manifest and the runner spec into campaign_dir
-  submit   --config C [--submit] [--pilot] [--chunks ID ...] [--plan-digest D]   --pilot: one chunk, to size time
-           and memory; --plan-digest: the dry run's plan_digest, refuses if the job files changed since the review
+  freeze   --config C [--worker-root DIR] [--env-lock FILE] [--scope TEXT] [--exposure JSON]
+           writes bundles/<digest>.json: manifest, spec, runner, worker tree, interpreter, environment lock and the
+           container image (pinned by digest) with full SHA-256, and an approval request; it approves nothing
+  verify-bundle --config C --bundle DIGEST               re-hashes the bundled files: identical or the differences
+  submit   --config C [--submit] [--pilot] [--chunks ID ...] [--plan-digest D] [--bundle DIGEST]   --pilot: one chunk,
+           to size time and memory; --plan-digest: the dry run's plan_digest, refuses if the job files changed since
+           the review; --bundle: refuses if anything bundled changed since freezing (also for resubmit)
   status   --config C                                    exactly one poll, then collection; per-chunk state,
                                                          elapsed time and peak memory where the scheduler reports them
   watch    --config C                                    repeated status within monitor.poll_interval_s (>= 60) and
@@ -54,6 +59,7 @@ sys.path.insert(0, str(PLUGIN))
 import batch_config  # noqa: E402
 from contracts import CONTRACTS_VERSION  # noqa: E402
 from contracts.identity import plugin_release  # noqa: E402
+from core.partition import bundle as bundles  # noqa: E402
 from core.partition import campaign as cp  # noqa: E402
 from core.partition import engine  # noqa: E402
 from core.partition import limits  # noqa: E402
@@ -124,6 +130,7 @@ def build_artifact(cdir: Path, cfg: dict, executor, labels: list[str], objective
                                           "resets": state["resets"], "merge_problems": merged["problems"],
                                           "campaign_uid": state.get("campaign_uid"), "cancels": state.get("cancels", []),
                                           "resource_risk": state.get("resource_risk", []),
+                                          "bundles": {s["id"]: s.get("bundle_digest") for s in state["submissions"]},
                                           "limits": {"configured": cfg.get("limits"), "usage": limits.usage(state)}}},
             "seeds": {"manifest_seed": manifest["seed"], "chunk_seeds": {c["id"]: c["seed"] for c in manifest["chunks"]}},
             "tolerances": {"merge": "exact: every chunk exactly once, item ranges tile [0, n); results summed key by key"},
@@ -137,7 +144,7 @@ def main(argv=None, env=None, sleep=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
     for name in ("check-config", "plan", "submit", "status", "watch", "resubmit", "reset", "reconcile", "confirm", "abandon",
-                 "cancel", "merge", "report", "clear-orphans"):
+                 "cancel", "merge", "report", "clear-orphans", "freeze", "verify-bundle"):
         s = sub.add_parser(name)
         s.add_argument("--config", type=Path, required=True)
         if name == "check-config":
@@ -152,6 +159,14 @@ def main(argv=None, env=None, sleep=None) -> int:
             s.add_argument("--container-image")
         if name in ("submit", "resubmit"):
             s.add_argument("--submit", action="store_true", help="really submit (default: dry run, no scheduler call)")
+            s.add_argument("--bundle", help="full digest of a frozen bundle: refuse if anything bundled changed since")
+        if name == "verify-bundle":
+            s.add_argument("--bundle", required=True)
+        if name == "freeze":
+            s.add_argument("--worker-root", type=Path)
+            s.add_argument("--env-lock", type=Path)
+            s.add_argument("--scope")
+            s.add_argument("--exposure", type=json.loads, help='structured data exposure, e.g. {"state": "unknown", "basis": "none"}')
         if name == "submit":
             s.add_argument("--pilot", action="store_true")
             s.add_argument("--plan-digest", help="the plan_digest of the reviewed dry run: refuse if the job files changed")
@@ -192,7 +207,7 @@ def main(argv=None, env=None, sleep=None) -> int:
             return emit({"campaign_dir": str(cdir), "chunks": len(manifest["chunks"]), "manifest_hash": manifest["manifest_hash"]}, 0)
         if args.cmd == "submit":
             rep = cp.submit(cdir, ex, cfg, chunk_ids=args.chunks, approved=args.submit, pilot=args.pilot,
-                            expected_plan_digest=args.plan_digest)
+                            expected_plan_digest=args.plan_digest, bundle_digest=args.bundle)
             return emit(rep, 0)
         if args.cmd == "status":
             rep = cp.poll(cdir, ex)
@@ -201,7 +216,7 @@ def main(argv=None, env=None, sleep=None) -> int:
             rep = cp.watch(cdir, ex, cfg, **({"sleep": sleep} if sleep else {}))
             return emit(rep, 0 if rep["complete"] else 1)
         if args.cmd == "resubmit":
-            rep = cp.resubmit(cdir, ex, cfg, approved=args.submit)
+            rep = cp.resubmit(cdir, ex, cfg, approved=args.submit, bundle_digest=args.bundle)
             return emit(rep, 1 if rep["blocked"] else 0)
         if args.cmd == "reset":
             return emit(cp.reset(cdir, args.chunks, args.reason, cfg), 0)
@@ -212,6 +227,17 @@ def main(argv=None, env=None, sleep=None) -> int:
             return emit(cp.confirm_submission(cdir, args.submission, pairs, ex), 0)
         if args.cmd == "reconcile":
             return emit(cp.reconcile(cdir, ex, args.submission), 0)
+        if args.cmd == "freeze":
+            doc = bundles.freeze(cdir, args.worker_root, args.env_lock, args.exposure, cfg, args.scope, batch_config.config_hash(cfg))
+            return emit({"bundle_digest": doc["bundle_digest"], "path": doc["path"], "reused": doc["reused"],
+                         "files": len(doc["files"]), "approval_request": doc["approval_request"]}, 0)
+        if args.cmd == "verify-bundle":
+            doc = bundles.load(cdir, args.bundle)
+            rep = bundles.verify(doc)
+            other = bundles.check_campaign(doc, cdir)
+            if other:
+                rep = dict(rep, status="different", differences=rep["differences"] + [{"change": "campaign", "message": m} for m in other])
+            return emit(rep, 0 if rep["status"] == "identical" else 1)
         if args.cmd == "clear-orphans":
             return emit(cp.clear_orphan_risk(cdir, ex, args.submission, args.reason), 0)
         if args.cmd == "abandon":
@@ -228,7 +254,7 @@ def main(argv=None, env=None, sleep=None) -> int:
                     art["extension"]["exit_status"])
     except RefusedConfig as exc:
         return emit({"error": "configuration refused", "errors": exc.errors}, 2)
-    except cp.CampaignError as exc:
+    except (cp.CampaignError, bundles.BundleError) as exc:
         return emit({"error": str(exc), "code": exc.code}, 2)
     except PollError as exc:
         return emit({"error": exc.text, "code": exc.signature}, 1)

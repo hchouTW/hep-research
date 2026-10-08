@@ -60,7 +60,9 @@
     "campaign",
     "executors",
     "runner",
-    "states"
+    "states",
+    "limits",
+    "bundle"
    ],
    "consumers": [
     "skills/hep-computing/scripts/local_partition.py",
