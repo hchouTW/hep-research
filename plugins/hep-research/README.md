@@ -206,7 +206,8 @@ service (no configuration is qualified yet), and install it where the agent cann
 Migration from `ams02-research` 1.1.0 and earlier: those releases declare `hep-research ^0.4.0` in their Claude Code
 manifest, and an installed copy keeps holding hep-research inside that range (Claude Code skips newer hep-research
 updates) until `ams02-research` is updated to a release without the declaration, or uninstalled, through the host's own
-plugin commands. Do not edit the plugin cache by hand. A marketplace refresh can still read every catalog entry,
+plugin commands. This marketplace still pins `ams02-research` 1.0.1 (commit `1c3f590`) until that release is merged, so
+for now only uninstalling it releases hep-research. Do not edit the plugin cache by hand. A marketplace refresh can still read every catalog entry,
 including the companion's; what hep-research guarantees is that its own install, update and checks never read a
 companion's package manifest or need access to a private repository. Behaviour on a live host is checked separately
 (see the changelog).

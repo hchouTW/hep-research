@@ -130,8 +130,9 @@ class InstructionText(unittest.TestCase):
     STANZA = (ROOT / "contracts" / "stanzas" / "context-resolution.md").read_text(encoding="utf-8")
 
     def test_stanza_routes_companion_profiles_through_their_preflight(self):
-        for phrase in ("`<plugin>:profile` skill, after its preflight", "a local path known to be its",
-                       "never scan for companions", "the preflight fails", "other work goes on"):
+        for phrase in ("in neither place", "`<plugin>:profile` skill that names it", "after its preflight",
+                       "a local path known to be a companion's", "never scan for companions", "the preflight fails",
+                       "say it is unavailable", "other work"):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, self.STANZA)
 
@@ -147,6 +148,15 @@ class InstructionText(unittest.TestCase):
             with self.subTest(file=rel):
                 self.assertIsNone(dep.search((ROOT / rel).read_text(encoding="utf-8")))
         self.assertIn("preflight", (ROOT / "docs" / "profile-authoring.md").read_text(encoding="utf-8"))
+
+    @unittest.skipUnless(IN_REPO, "relocated copy: no repository README")
+    def test_readmes_state_the_current_pin(self):
+        """Until the catalogs pin a companion release without the declaration, the READMEs must say it still holds."""
+        for path in (REPO / "README.md", ROOT / "README.md"):
+            with self.subTest(file=str(path.relative_to(REPO))):
+                text = path.read_text(encoding="utf-8")
+                self.assertIn("1c3f590", text)
+                self.assertIn("uninstall", text)
 
 if __name__ == "__main__":
     unittest.main()

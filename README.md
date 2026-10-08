@@ -15,9 +15,12 @@ claude plugin install hep-research@hep-research-dev
 
 Both marketplace manifests (Claude Code's and Codex's) also list `ams02-research`, an access-restricted companion
 plugin for AMS Collaboration members. It lives in a separate private repository; without access its install fails and nothing else is affected.
-hep-research does not depend on it: install and update each plugin separately. The companion checks its own
-compatibility with the installed hep-research when its profile is used (see
-[companion plugins](plugins/hep-research/docs/profile-authoring.md#companion-plugin)).
+hep-research itself does not depend on it, and the design is that each plugin is installed and updated separately,
+with the companion checking its own compatibility when its profile is used (see
+[companion plugins](plugins/hep-research/docs/profile-authoring.md#companion-plugin)). Until the catalogs move their
+`ams02-research` pin (commit `1c3f590`, version 1.0.1) to a release without a host dependency, an installed
+`ams02-research` still declares `hep-research ^0.4.0` and holds hep-research at 0.4.x; uninstall it to update
+hep-research before then.
 
 Checks: `python3 plugins/hep-research/tools/run_all_checks.py`
 
