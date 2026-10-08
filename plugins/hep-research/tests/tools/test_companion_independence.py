@@ -122,5 +122,31 @@ class RepositoryFiles(unittest.TestCase):
                     self.assertIsNone(re.search(rf"\b{re.escape(name)}\b", text))
 
 
+
+class InstructionText(unittest.TestCase):
+    """Text checks only: they show what the instructions say, not that a model follows them (that needs a live
+    routing run; tests/routing case co-companion-ws-1 is the ordinary-work case)."""
+
+    STANZA = (ROOT / "contracts" / "stanzas" / "context-resolution.md").read_text(encoding="utf-8")
+
+    def test_stanza_routes_companion_profiles_through_their_preflight(self):
+        for phrase in ("`<plugin>:profile` skill, after its preflight", "a local path known to be its",
+                       "never scan for companions", "the preflight fails", "other work goes on"):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, self.STANZA)
+
+    def test_stanza_is_generic(self):
+        """No companion name, package range, dependency declaration or host cache layout in the shared stanza."""
+        for pattern in (r"ams", r"\^\d", r"[<>]=?\s*\d+\.\d", r"dependencies", r"plugins/cache", r"\.claude/", r"\.codex/"):
+            with self.subTest(pattern=pattern):
+                self.assertIsNone(re.search(pattern, self.STANZA, re.I))
+
+    def test_docs_do_not_recommend_a_host_dependency(self):
+        dep = re.compile(r'"dependencies"\s*:\s*\[\s*(\{\s*"name"\s*:\s*)?"hep-research')
+        for rel in ("docs/profile-authoring.md", "README.md", "skills/hep-computing/SKILL.md"):
+            with self.subTest(file=rel):
+                self.assertIsNone(dep.search((ROOT / rel).read_text(encoding="utf-8")))
+        self.assertIn("preflight", (ROOT / "docs" / "profile-authoring.md").read_text(encoding="utf-8"))
+
 if __name__ == "__main__":
     unittest.main()

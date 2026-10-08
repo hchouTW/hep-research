@@ -21,7 +21,7 @@ from typing import Any
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from contracts.registry import PLUGIN_ROOT, validate_registry  # noqa: E402
+from contracts.registry import PLUGIN_ROOT, option_values, validate_registry  # noqa: E402
 from contracts.schema import Report, validate  # noqa: E402
 from contracts.semver import parse, satisfies, valid_spec  # noqa: E402
 
@@ -195,9 +195,9 @@ def main(argv=None) -> int:
     if not args:
         print(__doc__)
         return 2
-    reg = Path(args[args.index("--registry") + 1]) if "--registry" in args else None
-    extra = [Path(args[i + 1]) for i, a in enumerate(args) if a == "--local" and i + 1 < len(args)]
     try:
+        reg = next((Path(v) for v in option_values(args, "--registry")), None)
+        extra = [Path(v) for v in option_values(args, "--local")]
         p = load_project(Path(args[0]), reg, extra)
     except (OSError, ValueError) as exc:
         print(json.dumps({"ok": False, "error": str(exc)}))

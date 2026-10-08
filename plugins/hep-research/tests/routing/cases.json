@@ -322,6 +322,24 @@
    }
   },
   {
+   "id": "co-companion-ws-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "This CMakeLists.txt does not find ROOT when I configure the build; fix it.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "CMake builds"
+   ],
+   "profiles": [],
+   "note": "ordinary work in a project that binds a companion profile through local_profile_paths: no companion preflight and no profile read",
+   "inputs": {
+    "CMakeLists.txt": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\ncmake_minimum_required(VERSION 3.20)\nproject(histtool CXX)\nadd_executable(histtool main.cpp)\ntarget_link_libraries(histtool ROOT::Hist)\n",
+    "main.cpp": "// SYNTHETIC routing fixture: invented values, not data from any experiment.\n#include <TH1D.h>\nint main() { TH1D h(\"h\", \"h\", 10, 0, 1); h.Fill(0.5); return 0; }\n",
+    "hep-research.project.json": "{\n \"schema_version\": \"1.0.0\",\n \"plugin_version\": \">=0.5\",\n \"local_profile_paths\": [\n  \"./profiles/ams-02-private\"\n ],\n \"experiments\": [\n  {\n   \"profile\": \"experiment:ams-02-private\",\n   \"version\": \"1.1.0\"\n  }\n ],\n \"theory\": []\n}\n",
+    "profiles/ams-02-private/profile.json": "{\n \"_note\": \"SYNTHETIC routing fixture: invented values, not data from any experiment. A stand-in for a companion-managed local profile; no companion content.\",\n \"id\": \"experiment:ams-02-private\",\n \"kind\": \"experiment\",\n \"version\": \"1.1.0\"\n}\n"
+   }
+  },
+  {
    "id": "rc-direct-1",
    "lang": "en",
    "kind": "direct",

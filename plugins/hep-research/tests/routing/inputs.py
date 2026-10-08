@@ -11,6 +11,13 @@ def _csv(header, rows):
     return f"# {TAG}\n{header}\n" + "\n".join(rows) + "\n"
 
 INPUTS = {
+ "co-companion-ws-1": {
+  "CMakeLists.txt": f"# {TAG}\ncmake_minimum_required(VERSION 3.20)\nproject(histtool CXX)\nadd_executable(histtool main.cpp)\ntarget_link_libraries(histtool ROOT::Hist)\n",
+  "main.cpp": f"// {TAG}\n#include <TH1D.h>\nint main() {{ TH1D h(\"h\", \"h\", 10, 0, 1); h.Fill(0.5); return 0; }}\n",
+  "hep-research.project.json": json.dumps({"schema_version": "1.0.0", "plugin_version": ">=0.5", "local_profile_paths": ["./profiles/ams-02-private"],
+                                           "experiments": [{"profile": "experiment:ams-02-private", "version": "1.1.0"}], "theory": []}, indent=1) + "\n",
+  "profiles/ams-02-private/profile.json": json.dumps({"_note": TAG + " A stand-in for a companion-managed local profile; no companion content.",
+                                                      "id": "experiment:ams-02-private", "kind": "experiment", "version": "1.1.0"}, indent=1) + "\n"},
  "dr-direct-1": {"tnp_counts.csv": _csv("pt_lo,pt_hi,probes,passing_probes", ["20,30,1200,1104", "30,50,2400,2280", "50,100,900,873"])},
  "dr-direct-2": {"calo_scan.csv": _csv("beam_energy_GeV,mean_reco_GeV,sigma_reco_GeV,data_or_mc", ["10,9.6,0.62,data", "10,9.7,0.58,mc", "50,48.9,1.71,data", "50,49.2,1.60,mc"])},
  "dr-neighbor-1": {"measured_spectrum.csv": _csv("bin,lo,hi,counts", ["0,0,10,520", "1,10,20,310", "2,20,40,140"]),
