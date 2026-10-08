@@ -57,7 +57,7 @@ Serialization (D6): JSON, stdlib-parseable. The strict-YAML subset reader is use
 
 ## 5. Versioning
 
-SemVer for plugin (`0.1.0`), contracts (`1.1.0`, `contracts.CONTRACTS_VERSION`), core (`1.0.0`, `core.CORE_VERSION`), each profile, and each evidence ledger. Breaking (major): removing or renaming fields, changing a convention default, changing numerical results beyond declared tolerance, renaming evidence IDs. Every artifact envelope records plugin, contract and profile versions.
+SemVer for plugin (`.claude-plugin/plugin.json`), contracts (`contracts.CONTRACTS_VERSION`, one version for every schema family; `contracts/vocab/core.json` repeats it), core (`core.CORE_VERSION`), the project config (its own `schema_version`), each profile, and each evidence ledger. Breaking (major): removing or renaming fields, changing a convention default, changing numerical results beyond declared tolerance, renaming evidence IDs. Every artifact envelope records plugin, contract and profile versions.
 
 ## 6. Runtime mechanics
 

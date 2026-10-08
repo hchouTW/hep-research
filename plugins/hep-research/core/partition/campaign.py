@@ -47,7 +47,7 @@ from pathlib import Path
 
 from core.partition import engine
 from core.partition.executors import PollError
-from core.partition.states import ACTIVE, NEEDS_PERSON, decide, normalize, repeated, signature
+from core.partition.states import ACTIVE, NEEDS_PERSON, decide, normalize, repeated, same_resources, signature
 
 MIN_POLL_INTERVAL_S = 60
 POLL_AGAIN = (None, "held", "unknown")  # a held or unknown job may still change; keep asking
@@ -67,7 +67,9 @@ def _now() -> str:
 
 
 def resources_hash(config: dict) -> str:
-    return hashlib.sha256(json.dumps(config.get("resources", {}), sort_keys=True).encode()).hexdigest()[:16]
+    """Full SHA-256 of the resource request (K07: never truncated; older campaigns recorded 16 hex digits, compared
+    by prefix in states.same_resources)."""
+    return hashlib.sha256(json.dumps(config.get("resources", {}), sort_keys=True).encode()).hexdigest()
 
 
 def init(campaign_dir, manifest: dict, cmd: str, container_image: str | None = None) -> Path:
@@ -244,7 +246,7 @@ def submit(campaign_dir, executor, config: dict, chunk_ids=None, approved: bool 
         row = _row(state, r["chunk_id"])
         prev = row["attempt_records"][-1] if row["attempt_records"] else None
         change = None
-        if prev and prev.get("resources_hash") not in (None, rh):  # recorded whenever the request changed
+        if prev and prev.get("resources_hash") is not None and not same_resources(prev["resources_hash"], rh):
             change = {"after": prev.get("final_state"), "from": prev.get("resources"), "to": config.get("resources")}
         row["attempt_records"].append({
             "attempt_id": r["attempt_id"], "chunk_id": r["chunk_id"], "backend": executor.name, "job_id": None,

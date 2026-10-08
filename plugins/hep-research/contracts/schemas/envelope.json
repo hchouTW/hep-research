@@ -13,6 +13,10 @@
       "theory": {"type": "array", "items": {"$ref": "common.json#/$defs/binding"}}}},
     "versions": {"type": "object", "required": ["plugin", "contracts"], "properties": {
       "plugin": {"$ref": "common.json#/$defs/version"}, "contracts": {"$ref": "common.json#/$defs/version"},
+      "plugin_release": {"$comment": "2.1.0: code identity from contracts/identity.py; absent in older artifacts (identity unknown, never qualifies)",
+        "type": "object", "required": ["release", "digest"], "additionalProperties": false, "properties": {
+        "release": {"anyOf": [{"$ref": "common.json#/$defs/version"}, {"type": "string", "enum": ["unreleased"]}]},
+        "digest": {"type": "string", "pattern": "^([0-9a-f]{64}|unknown)$"}}},
       "profiles": {"type": "object", "additionalProperties": {"$ref": "common.json#/$defs/version"}}}},
     "provenance": {"type": "object", "required": ["producer_skill", "created"], "properties": {
       "producer_skill": {"type": "string", "enum": ["hep-analysis", "detector-response", "hep-theory", "hep-statistics",
@@ -21,7 +25,7 @@
       "evidence_ids": {"type": "array", "items": {"$ref": "common.json#/$defs/namespaced_id"}}}},
     "inputs": {"type": "array", "items": {"type": "object", "required": ["ref"], "properties": {
       "ref": {"type": "string"}, "artifact_type": {"type": "string"}, "sha256": {"type": "string"},
-      "artifact_id": {"type": "string"}, "version": {"type": "string", "$comment": "the source's contract_version"},
+      "artifact_id": {"type": "string"}, "version": {"$ref": "common.json#/$defs/version", "$comment": "the source's contract_version"},
       "external": {"type": "boolean", "$comment": "not materialized in the project (e.g. a HEPData record): contracts/dependencies.py reports it unresolved"},
       "status": {"type": "array", "items": {"type": "string", "x-vocab": "artifact_statuses"}}}}},
     "outputs": {"type": "array", "items": {"type": "object", "required": ["ref"]}},
@@ -29,6 +33,13 @@
     "handoff": {"type": "object", "required": ["to_skill", "artifact_path"], "properties": {
       "to_skill": {"type": "string"}, "artifact_path": {"type": "string"}, "reason": {"type": "string"}}},
     "unresolved_inputs": {"type": "array", "items": {"type": "string"}},
+    "required_capabilities": {"$comment": "2.1.0: capabilities a reader must implement to use this artifact; a reader that does not know one rejects it",
+      "type": "array", "items": {"$ref": "common.json#/$defs/namespaced_id"}},
+    "data_exposure": {"$comment": "2.1.0: whether data were seen before the decisions this artifact records (F05); legacy free text maps to unknown, never unexposed",
+      "type": "object", "required": ["state", "basis"], "additionalProperties": false, "properties": {
+      "state": {"type": "string", "enum": ["unexposed", "exposed", "unknown", "incomplete"]},
+      "basis": {"type": "string", "enum": ["structured-record", "legacy-text", "none"]},
+      "record_ref": {"type": "string"}}},
     "extension": {"type": "object"}
   }
 }

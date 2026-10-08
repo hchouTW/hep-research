@@ -2,7 +2,6 @@
 published release bundle cannot change (synthetic git repositories only)."""
 from __future__ import annotations
 
-import importlib.util
 import json
 import os
 import shutil
@@ -14,9 +13,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 TOOL = ROOT / "tools" / "release_manifest.py"
-spec = importlib.util.spec_from_file_location("release_manifest", TOOL)
-rm = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(rm)
+sys.path.insert(0, str(ROOT))
+from contracts import identity as rm  # noqa: E402
 HAVE_GIT = shutil.which("git") is not None
 
 
@@ -96,6 +94,9 @@ class PublishedImmutabilityC10(unittest.TestCase):
         make_tree(self.plugin)
         (self.plugin / "tools").mkdir()
         shutil.copy2(TOOL, self.plugin / "tools" / "release_manifest.py")
+        (self.plugin / "contracts").mkdir()
+        for name in ("__init__.py", "identity.py"):
+            shutil.copy2(ROOT / "contracts" / name, self.plugin / "contracts" / name)
         git(self.repo, "init", "-q")
         git(self.repo, "add", "-A")
         git(self.repo, "commit", "-qm", "release 9.9.9")

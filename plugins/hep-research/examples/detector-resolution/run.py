@@ -38,6 +38,7 @@ sys.path.insert(0, str(PROFILE_DIR / "scripts"))
 import detector  # noqa: E402
 import generate_events  # noqa: E402
 from contracts import CONTRACTS_VERSION  # noqa: E402
+from contracts.identity import plugin_release  # noqa: E402
 from contracts.validate import validate_artifact  # noqa: E402
 from contracts.vocab import Vocabulary  # noqa: E402
 from core.stats.statistical_toys import chi2_sf  # noqa: E402
@@ -105,7 +106,7 @@ def artifacts(m, fit, exp_eff, created):
     vocab = Vocabulary.with_profiles([PROFILE])
     base = {"contract_version": CONTRACTS_VERSION,
             "bindings": {"experiments": [{"profile": PROFILE["id"], "version": PROFILE["version"]}], "theory": []},
-            "versions": {"plugin": PLUGIN_VERSION, "contracts": CONTRACTS_VERSION, "profiles": {PROFILE["id"]: PROFILE["version"]}},
+            "versions": {"plugin": PLUGIN_VERSION, "contracts": CONTRACTS_VERSION, "plugin_release": plugin_release(), "profiles": {PROFILE["id"]: PROFILE["version"]}},
             "inputs": [], "outputs": [], "unresolved_inputs": [], "status": ["synthetic"]}
     var = [{"name": "abs_cos_theta_truth", "unit": "1", "edges": EDGES.tolist()}]
     ps = {"definition": "SYNTHETIC: selected events, |cos theta| < 0.9 at truth level, fixed sqrt(s) = 10 GeV", "fiducial": True}

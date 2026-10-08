@@ -11,6 +11,7 @@ profile and none is determinable) -> proceed with no profile. Never guess an exp
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
 from dataclasses import dataclass, field
@@ -22,9 +23,10 @@ if __package__ in (None, ""):
 
 from contracts.registry import PLUGIN_ROOT, validate_registry  # noqa: E402
 from contracts.schema import Report, validate  # noqa: E402
-from contracts.semver import satisfies, valid_spec  # noqa: E402
+from contracts.semver import parse, satisfies, valid_spec  # noqa: E402
 
 CONFIG_NAME = "hep-research.project.json"
+SCHEMA_VERSION = "1.1.0"  # the project-config schema this reader implements (1.1.0: agent_policy, closed blinding)
 DEFAULT_ARTIFACTS_DIR = "./hep-research-artifacts/"
 
 
@@ -49,6 +51,9 @@ def load_project(path: Path, registry_path: Path | None = None, extra_local: lis
     rep = validate(cfg, "project_config.json", None, Report(), "config")
     if not rep.ok:
         return Project(cfg_path, cfg, rep)
+    check_schema_version(cfg, rep)
+    check_blinding_block(cfg, rep)
+    check_agent_policy(cfg, proj_dir, rep)
     pv = cfg["plugin_version"]
     if not valid_spec(pv):
         rep.add("error", "config.plugin_version", "project.bad_version_range", f"cannot parse {pv!r}")
@@ -99,6 +104,77 @@ def load_project(path: Path, registry_path: Path | None = None, extra_local: lis
     return Project(cfg_path, cfg, rep, profiles, art)
 
 
+def check_schema_version(cfg: dict, rep: Report) -> None:
+    """The config's schema_version must be one this reader implements (same major, not a newer minor: the schema is
+    closed, so newer fields would otherwise be refused one by one); agent_policy needs 1.1.0 or later."""
+    have, want = parse(cfg["schema_version"]), parse(SCHEMA_VERSION)
+    if have[0] != want[0] or have[1] > want[1]:
+        rep.add("error", "config.schema_version", "project.unsupported_schema",
+                f"schema_version {cfg['schema_version']} is not supported by this reader (schema {SCHEMA_VERSION})")
+    elif "agent_policy" in cfg and have < (1, 1, 0):
+        rep.add("error", "config.agent_policy", "project.policy_needs_schema",
+                "agent_policy needs schema_version 1.1.0 or later")
+
+
+BLINDING_KEYS = {"blinded", "allowed_outputs", "regions"}
+
+
+def check_blinding_block(cfg: dict, rep: Report) -> None:
+    """From schema 1.1.0 the blinding block is closed (an unknown key would be silently ignored by every reader); with
+    agent_policy present the block is required, so a missing block can never read as 'nothing blinded'."""
+    block = cfg.get("blinding")
+    if block is None:
+        if "agent_policy" in cfg:
+            rep.add("error", "config.blinding", "project.blinding_missing",
+                    "a project with agent_policy must declare its blinding block (an empty list if nothing is blinded)")
+        return
+    if parse(cfg["schema_version"]) >= (1, 1, 0):
+        for key in sorted(set(block) - BLINDING_KEYS):
+            rep.add("error", f"config.blinding.{key}", "project.blinding_unknown_key", f"'{key}' is not a blinding field")
+    for i, r in enumerate(block.get("regions", [])):
+        if not r["low"] < r["high"]:
+            rep.add("error", f"config.blinding.regions[{i}]", "project.bad_region", "a blinded region needs low < high")
+
+
+def _relative_inside(rel: str) -> bool:
+    p = Path(rel)
+    return not p.is_absolute() and ".." not in p.parts and not rel.startswith("~")
+
+
+def check_agent_policy(cfg: dict, proj_dir: Path, rep: Report) -> None:
+    """Path rules and manifest digests of agent_policy. Advisory: the result never authorizes access; a launcher
+    outside the agent's reach compares this copy with authoritative_copy by digest."""
+    pol = cfg.get("agent_policy")
+    if pol is None:
+        return
+    for i, rel in enumerate(pol.get("protected_paths", [])):
+        if not _relative_inside(rel):
+            rep.add("error", f"config.agent_policy.protected_paths[{i}]", "project.policy_bad_path",
+                    f"{rel!r}: protected paths are relative to the project, without '..'")
+    for i, m in enumerate(pol.get("release_manifests", [])):
+        where = f"config.agent_policy.release_manifests[{i}]"
+        if not _relative_inside(m["ref"]):
+            rep.add("error", where, "project.policy_bad_path", f"{m['ref']!r}: manifest refs are relative, without '..'")
+            continue
+        path = proj_dir / m["ref"]
+        try:
+            digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        except OSError:
+            rep.add("error", where, "project.policy_manifest_missing", f"{m['ref']!r} cannot be read")
+            continue
+        if digest != m["sha256"]:
+            rep.add("error", where, "project.policy_manifest_mismatch", f"{m['ref']!r} has sha256 {digest}, the policy declares {m['sha256']}")
+
+
+def load_blinding(path: Path) -> dict:
+    """The validated blinding block of a project; ValueError when the config is invalid. A project without the block
+    and without agent_policy has nothing blinded; with agent_policy the block is required (check_blinding_block)."""
+    proj = load_project(path)
+    if not proj.report.ok:
+        raise ValueError("invalid project config: " + "; ".join(f"{f.code}: {f.message}" for f in proj.report.errors))
+    return proj.config.get("blinding") or {"blinded": [], "allowed_outputs": []}
+
+
 def resolve_context(request: dict, project: Project | None, needs_profile: bool) -> dict:
     """Decide which profiles a task uses. `request` holds only IDs the user stated explicitly:
     {"experiments": [...], "theory": [...]}. Returns {"decision", "source", "experiments", "theory"}."""
@@ -126,7 +202,8 @@ def main(argv=None) -> int:
     except (OSError, ValueError) as exc:
         print(json.dumps({"ok": False, "error": str(exc)}))
         return 2
-    out = {**p.report.as_dict(), "profiles": [x["id"] for x in p.profiles], "artifacts_dir": str(p.artifacts_dir)}
+    out = {**p.report.as_dict(), "profiles": [x["id"] for x in p.profiles], "artifacts_dir": str(p.artifacts_dir),
+           "note": "advisory check: a valid config, including agent_policy, does not enforce or authorize anything"}
     print(json.dumps(out, indent=1))
     return 0 if p.report.ok else 1
 
