@@ -17,7 +17,7 @@ Usage:
   python3 tools/release_manifest.py check-published [--base REF]          CI immutability rule (C10)
 check-published: every recorded manifest `release-manifests/<version>.json` must match the bundle exported from its
 published tag `hep-research--v<version>` (git archive); a manifest whose tag is not pushed yet (the release commit
-itself) is listed as pending; with --base, recorded manifests may only be added since REF, never changed or deleted. The working tree (Unreleased) is not checked. Tags without a recorded manifest (releases
+itself) is listed as pending; with --base, the recorded manifest of a published tag may not change or disappear since REF. The working tree (Unreleased) is not checked. Tags without a recorded manifest (releases
 before this tool) are listed as unrecorded.
 Exit codes: 0 ok (verify: identical), 1 verify found differences or a published bundle changed, 2 unreadable input
 or a refused file.
@@ -79,7 +79,8 @@ def check_published(base: str | None = None) -> dict:
         diff = _git("diff", "--name-status", "--no-renames", base, "HEAD", "--", RECORDS, text=True, check=True).stdout
         for line in filter(None, diff.splitlines()):
             status, path = line.split("\t", 1)
-            if status != "A":
+            published = TAG_PREFIX + Path(path).stem in tags  # an unpublished manifest may still be regenerated
+            if status != "A" and published:
                 problems.append(f"{path}: a recorded release manifest was {'deleted' if status == 'D' else 'changed'}")
     unrecorded = sorted(t for t in tags if not (rec_dir / f"{t[len(TAG_PREFIX):]}.json").exists())
     return {"status": "fail" if problems else "pass", "checked": checked, "pending_tags": pending,

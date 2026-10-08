@@ -5,7 +5,7 @@
  "hash_algorithm": "sha256",
  "path_order": "UTF-8 bytes, ascending",
  "file_count": 1033,
- "digest": "6b793584a1b300da6618665ff07cc4b1216d0249827c20eff30e81f3379a1db1",
+ "digest": "2f020ebaa4839efcbb102b9825056fcd779d2b71318b87658a05274134ef567c",
  "files": [
   {
    "path": ".claude-plugin/plugin.json",
@@ -6099,8 +6099,8 @@
   },
   {
    "path": "tests/tools/test_release_manifest.py",
-   "sha256": "ec3dc3941aeac913a957547c641ab5e96cff57732dbe11d4129ac11eba538f04",
-   "size": 6504,
+   "sha256": "07a7468c0e38fb19c8869905e6d6f876e6a06341652c722f377d80e9e29fa53c",
+   "size": 7125,
    "mode": "100644"
   },
   {
@@ -6195,8 +6195,8 @@
   },
   {
    "path": "tools/release_manifest.py",
-   "sha256": "7fa85e9ec3eb29a462416af4bfd3ca1658525cc0a9a03ce29b3124fe5e598859",
-   "size": 6811,
+   "sha256": "7d6847ccb343849e65eb5057aea1fda1e455d768a062196c1f5470d89ccd80a2",
+   "size": 6944,
    "mode": "100644"
   },
   {

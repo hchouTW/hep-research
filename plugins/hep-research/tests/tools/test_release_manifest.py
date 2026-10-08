@@ -130,6 +130,18 @@ class PublishedImmutabilityC10(unittest.TestCase):
         code, rep = self.check("--base", self.base)
         self.assertEqual((code, rep["pending_tags"]), (0, ["hep-research--v9.9.10"]))
 
+    def test_unpublished_manifest_may_be_regenerated(self):
+        path = self.plugin / "release-manifests" / "9.9.10.json"
+        path.write_text(json.dumps(rm.generate(self.plugin)))
+        git(self.repo, "add", "-A")
+        git(self.repo, "commit", "-qm", "release 9.9.10")
+        base = git(self.repo, "rev-parse", "HEAD").stdout.strip()
+        (self.plugin / "core" / "a.py").write_text("x = 5\n")
+        path.write_text(json.dumps(rm.generate(self.plugin)))
+        git(self.repo, "commit", "-qam", "fix before tagging")
+        code, rep = self.check("--base", base)
+        self.assertEqual(code, 0, rep)
+
     def test_moved_tag_fails(self):
         (self.plugin / "core" / "a.py").write_text("x = 4\n")
         git(self.repo, "commit", "-qam", "change")
