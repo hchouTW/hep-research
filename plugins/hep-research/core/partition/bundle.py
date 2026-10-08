@@ -7,6 +7,7 @@ freeze() writes <campaign>/bundles/<bundle_digest>.json (write-once) listing, wi
                 are refused, caches skipped)
   interpreter   the command's first token when it is an absolute path outside the worker root: the file it resolves
                 to (virtual environments use links) is hashed, and verify() checks the path still resolves there
+  shebang       the interpreter a bundled worker's '#!' line names (one absolute path, no arguments), in either form
   environment   an environment lock file, when given (pip freeze, conda lock, container build record, ...)
 
 plus the container image, which must be pinned by digest (name@sha256:<64 hex>; a tag can move, X14), the campaign's
