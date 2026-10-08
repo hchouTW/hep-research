@@ -552,3 +552,24 @@ packages), including `claude plugin validate`, the Codex load check and the new 
 release manifest `release-manifests/0.5.0.json` (`tools/release_manifest.py generate`) is recorded in the release commit;
 the tag `hep-research--v0.5.0` points at the commit on main whose tree it describes. Software checks establish
 consistency only; no host configuration is qualified for private or blinded data by this release.
+
+## COMPANION-INDEPENDENCE (2026-10-08, system Python 3.13.2, version 0.5.0 + unreleased)
+
+Source tests: `tests/tools/test_companion_independence.py` (parsed host dependencies in both plugin manifests and both
+repository catalogs; no edge exists, so the tests are protective; CI files fetch no companion; stanza and docs text) and
+`tests/contracts/test_companion_validation_cli.py` (registry and project CLIs with synthetic public profiles: no
+project, pin mismatch, core/contracts incompatibility, missing dependency, unreadable inputs, dangling options, the same
+folder twice, two folders with one ID, an unrelated project finding kept as itself). Two CLI bugs were reproduced first
+and fixed (dangling `--local`/`--registry`; one folder listed twice reported as a duplicate ID).
+`run_all_checks.py --jobs 4`: 20 pass, 0 fail, 0 skip (1699 unit tests, 79 skipped for optional packages), including
+`ams_optional` (the plugin without the AMS-02 profile), `claude plugin validate` and the Codex load check (Codex CLI
+0.160.0, temporary `CODEX_HOME`). `check_relocation.py`: the relocated package (both manifests, validators, no
+repository catalogs) passes 19 of 20, Codex load skipped there (no repository marketplace).
+Host (Claude Code 2.1.293, temporary `CLAUDE_CONFIG_DIR`, a local clone as the marketplace, no `ams02-research`):
+`claude plugin marketplace add <clone>` and `claude plugin install hep-research@hep-research-dev` at the 0.4.0 release
+commit `f4245fb`, then the clone moved to this branch, `claude plugin marketplace update hep-research-dev` and
+`claude plugin update hep-research@hep-research-dev`: updated 0.4.0 → 0.5.0. On a configuration with `ams02-research`
+1.0.1 installed, `claude plugin update hep-research@hep-research-dev` was skipped with `Requires
+"hep-research@hep-research-dev" ^0.4.0, installed 0.5.0`: the old companion manifest holds hep-research until the
+companion is updated. Not run: a live routing run (paid; companion local-path routing is checked as text only),
+the real GitHub marketplace after merge, and a Codex Git-marketplace update.
