@@ -573,3 +573,10 @@ commit `f4245fb`, then the clone moved to this branch, `claude plugin marketplac
 "hep-research@hep-research-dev" ^0.4.0, installed 0.5.0`: the old companion manifest holds hep-research until the
 companion is updated. Not run: a live routing run (paid; companion local-path routing is checked as text only),
 the real GitHub marketplace after merge, and a Codex Git-marketplace update.
+Catalog pin moved to `ams02-research` 1.2.1 (`32d538a`; no host dependency, its own check accepts hep-research
+`>=0.4.0,<0.6.0`). Migration on an isolated Claude Code 2.1.293 host (temporary `CLAUDE_CONFIG_DIR`, a local clone as
+the marketplace, starting from hep-research 0.4.0 `f4245fb` with the AMS pin set to 1.0.1 `1c3f590` in a scratch
+commit): both installed (0.4.0, 1.0.1); after moving the clone to this branch, `marketplace update`, then
+`plugin update ams02-research` (1.0.1 → 1.2.1), then `plugin update hep-research` (0.4.0 → 0.5.0). The installed
+companion's `tools/check_compatibility.py --hep-root <installed hep-research 0.5.0>` reported `compatible`, with
+`contracts/registry.py --local <companion>/profile` exit 0. Not run: `claude plugin prune` after migration.
