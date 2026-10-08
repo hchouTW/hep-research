@@ -10,6 +10,7 @@ is of higher order than the truncation (symbolic); the nf = 5 numbers of c_2, c_
 argument at fixed order (N3LO in delta_QCD), SymPy algebra; not a formal proof.
 
 Usage: python3 derive.py [--out ../derivations/derivation.json]
+Exit 0 all checks pass, 1 a check fails, 2 SymPy is missing (JSON failed status on stdout).
 """
 from __future__ import annotations
 
@@ -18,7 +19,18 @@ import json
 import sys
 from pathlib import Path
 
-import sympy as sp
+try:
+    import sympy as sp
+except ImportError as exc:  # run as a script: explain the missing package; imported: the caller sees the error
+    if __name__ != "__main__":
+        raise
+    if {"-h", "--help"} & set(sys.argv[1:]):
+        print(__doc__)
+        sys.exit(0)
+    print(json.dumps({"status": "failed", "error": f"missing required package: {exc.name or 'sympy'}",
+                      "hint": "run with a Python that has SymPy (skills/hep-computing/scripts/find_python.py "
+                              "finds one), or install requirements-core.txt"}))
+    sys.exit(2)
 
 HERE = Path(__file__).resolve().parent
 a, L, nf, eta = sp.symbols("a L n_f eta")

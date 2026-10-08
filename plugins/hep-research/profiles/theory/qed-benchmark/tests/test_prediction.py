@@ -2,17 +2,22 @@
 import json
 import sys
 import unittest
+from importlib.util import find_spec
 from pathlib import Path
-
-import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-import predict  # noqa: E402
+
+HAVE_NUMPY = find_spec("numpy") is not None
+if HAVE_NUMPY:
+    import numpy as np
+
+    import predict
 
 CFG = json.loads((ROOT / "benchmarks" / "path-c.json").read_text(encoding="utf-8"))
 
 
+@unittest.skipUnless(HAVE_NUMPY, "numpy is required (requirements-core.txt)")
 class PredictionTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

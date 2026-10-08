@@ -81,6 +81,28 @@ class PathCTests(unittest.TestCase):
         self.assertEqual(self.r["profile_files_read"], committed)
 
 
+class MissingSympyTests(unittest.TestCase):
+    """Without SymPy, run.py explains itself (JSON failed status, exit 2, no traceback) and --help still works."""
+
+    def run_without_sympy(self, *args):
+        code = ("import runpy, sys; sys.modules['sympy'] = None; "
+                f"sys.argv = [{str(SCRIPT)!r}, *{list(args)!r}]; runpy.run_path(sys.argv[0], run_name='__main__')")
+        return subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, timeout=300)
+
+    def test_run_reports_failed_status(self):
+        proc = self.run_without_sympy("--out", tempfile.gettempdir())
+        self.assertEqual(proc.returncode, 2, proc.stderr)
+        self.assertNotIn("Traceback", proc.stderr)
+        out = json.loads(proc.stdout)
+        self.assertEqual(out["status"], "failed")
+        self.assertIn("sympy", out["missing"])
+
+    def test_help_works(self):
+        proc = self.run_without_sympy("--help")
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertIn("Usage", proc.stdout)
+
+
 def cold_and_warm(script, key):
     """Run `script` twice against a fresh bytecode cache: cold (sources compiled), then warm (cached .pyc read). The
     cache sits inside the plugin's profiles/ folder, where a cold in-tree cache writes its temporary .pyc.<id> files

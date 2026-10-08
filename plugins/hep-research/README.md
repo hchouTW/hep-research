@@ -189,6 +189,11 @@ The first companion plugin is `ams02-research` (access-restricted; listed in the
   [requirements-core.txt](requirements-core.txt) (NumPy, SciPy, Matplotlib, SymPy). Install them in a project
   virtual environment, for example `python3 -m venv .venv-hep && .venv-hep/bin/pip install -r requirements-core.txt`.
   Contract, registry and blinding checks need only the standard library.
+- **Which interpreter:** before SymPy work the skills run `skills/hep-computing/scripts/find_python.py`, which picks
+  the first Python >= 3.11 that has the packages from `--python`, the `HEP_RESEARCH_PYTHON` environment variable, the
+  calling interpreter, then `python3` on PATH. To use a dedicated environment, set the variable, for example
+  `export HEP_RESEARCH_PYTHON=~/miniconda3/envs/sympy-py313/bin/python`. Nothing else is searched, and nothing is
+  installed: if no candidate qualifies, the script reports a `failed` status.
 - **Optional (skipped in the v1 handover run; each was installed and verified afterwards, see the `*-RUN` sections of
   `VALIDATION.md`, except the tectonic paper build):** PyTorch (`physics-ml` assets), ROOT/PyROOT, uproot and awkward (`hep-computing`
   ROOT tools, `adapters/root-uproot`), pyhf and CMS Combine (`adapters/pyhf-combine`, the end-to-end sample),

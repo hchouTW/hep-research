@@ -510,3 +510,34 @@ Version 0.3.0 → 0.4.0 in both plugin manifests, `pyproject.toml`, the README a
 unfolding-coverage example, which embeds no version, showed its known 1e-14 round-off and was left as committed).
 `run_all_checks.py --jobs 4` with the E2 venv: 19 pass, 0 fail, 0 skip, including `claude plugin validate` and the
 Codex load check.
+
+## SYMPY (2026-10-08, E2 + three conda SymPy environments, version 0.4.0 + unreleased): choosing a SymPy interpreter
+
+Three conda-forge environments on the E2 Mac, each with SymPy only (no NumPy, SciPy or Matplotlib): `sympy-py311`
+(Python 3.11.17), `sympy-py312` (3.12.15), `sympy-py313` (3.13.16), all SymPy 1.14.0, mpmath 1.4.1, gmpy2 2.3.2.
+Nothing was installed into them for this run (`conda list --export` identical before and after).
+
+| Check, run in each environment | 3.11.17 | 3.12.15 | 3.13.16 |
+|---|---|---|---|
+| `profiles/theory/qcd-r-ratio/scripts/derive.py`: exit, checks, output vs committed `derivations/derivation.json` | 0, 6/6, identical | 0, 6/6, identical | 0, 6/6, identical |
+| `profiles/theory/qed-benchmark/scripts/derive.py`: exit, checks, output vs committed `derivations/derivation.json` | 0, 8/8, identical | 0, 8/8, identical | 0, 8/8, identical |
+| qcd-r-ratio profile tests (21) | pass, 9 skipped (SciPy) | pass, 9 skipped | pass, 9 skipped |
+| qed-benchmark profile tests (18) | pass, 6 skipped (NumPy) | pass, 6 skipped | pass, 6 skipped |
+| `find_python.py` with `HEP_RESEARCH_PYTHON` set to the environment | found, SymPy 1.14.0 | found | found |
+
+Before this change the same profile tests errored in `sympy-py312` (qcd-r-ratio: 2 errors on SciPy; qed-benchmark:
+1 error on NumPy), and `derive.py` without SymPy stopped with a `ModuleNotFoundError` traceback. Now it prints a
+JSON `failed` status and exits 2 (tested by hiding SymPy in a subprocess, and with `/usr/bin/python3` 3.9.6, which
+has no SymPy). `find_python.py` on E2 picks the calling interpreter (miniconda base 3.13.2, SymPy 1.14.0). It rejects
+`/usr/bin/python3` as `Python 3.9.6 < 3.11` and falls through to the next candidate.
+
+`run_all_checks.py --jobs 4` with the E2 venv: 19 pass, 0 fail, 0 skip (unit tests: 1,555 run, 0 failures, 47
+skipped for optional tools); `check_relocation.py`: pass.
+
+Finding, not changed: the `theory-spec` extension has no field for tool versions. The skill text records the
+interpreter and the SymPy version in a `computational-run` (`tools`, `environment`) instead.
+
+CI on the PR (Linux): the `checks` jobs on Python 3.11, 3.12 and 3.13 and every optional job pass.
+
+Unverified here: Windows interpreters for `find_python.py` (its tests use POSIX shell stand-ins and skip there); a
+live agent session using the new step.

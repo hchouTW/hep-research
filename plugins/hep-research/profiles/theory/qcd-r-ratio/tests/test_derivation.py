@@ -1,16 +1,21 @@
 """theory:qcd-r-ratio derivation tests: the SymPy result, its checks, and a negative test of the mu-independence check."""
 import sys
 import unittest
+from importlib.util import find_spec
 from pathlib import Path
-
-import sympy as sp
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-import derive  # noqa: E402
 import predict  # noqa: E402
 
+HAVE_SYMPY = find_spec("sympy") is not None
+if HAVE_SYMPY:
+    import sympy as sp
 
+    import derive
+
+
+@unittest.skipUnless(HAVE_SYMPY, "sympy is required (requirements-core.txt)")
 class DerivationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

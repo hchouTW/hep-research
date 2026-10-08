@@ -11,6 +11,7 @@ and 51.3; see evidence/). Status of what this shows: an analytic derivation unde
 formal proof; SymPy simplification is trusted as a tool.
 
 Usage: python3 derive.py [--out derivation.json]
+Exit 0 all checks pass, 1 a check fails, 2 SymPy is missing (JSON failed status on stdout).
 """
 from __future__ import annotations
 
@@ -18,8 +19,19 @@ import argparse
 import json
 import sys
 
-import sympy as sp
-from sympy.physics.matrices import mgamma
+try:
+    import sympy as sp
+    from sympy.physics.matrices import mgamma
+except ImportError as exc:  # run as a script: explain the missing package; imported: the caller sees the error
+    if __name__ != "__main__":
+        raise
+    if {"-h", "--help"} & set(sys.argv[1:]):
+        print(__doc__)
+        sys.exit(0)
+    print(json.dumps({"status": "failed", "error": f"missing required package: {exc.name or 'sympy'}",
+                      "hint": "run with a Python that has SymPy (skills/hep-computing/scripts/find_python.py "
+                              "finds one), or install requirements-core.txt"}))
+    sys.exit(2)
 
 s, m, alpha = sp.symbols("s m alpha", positive=True)
 c = sp.symbols("c", real=True)  # cos theta
