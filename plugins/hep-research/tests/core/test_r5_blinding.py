@@ -47,6 +47,27 @@ class ScanTests(unittest.TestCase):
         (self.d / "log.txt").write_bytes(f"r\xe9sultat {WEIGHTED[4]}\n".encode("latin-1"))
         self.assertEqual(bl.scan_paths([self.d / "log.txt"], self.sealed)["status"], "fail")
 
+    def test_numeric_dumps_on_the_utf16_path_are_unscanned_not_pass(self):
+        # float64, float32 and int32 dumps with many zero bytes decode as UTF-16; they must not pass (N03 follow-up)
+        sealed = [4731.3712, 4731.0]
+        for dtype, vals in (("<f8", [1.0, 2.0, 4731.3712, 3.0, 0.0]), ("<f4", [1.0, 2.0, 4731.3712, 3.0, 0.0]),
+                            ("<i4", [1, 2, 4731, 3, 0])):
+            p = self.d / f"dump_{dtype[1:]}"
+            np.asarray(vals * 20, dtype=dtype).tofile(p)
+            with self.subTest(dtype=dtype):
+                self.assertEqual(bl.scan_paths([p], sealed)["status"], "incomplete")
+
+    def test_utf16_text_is_still_read(self):
+        (self.d / "log16.txt").write_bytes(f"yield {WEIGHTED[4]}\n".encode("utf-16-le"))
+        self.assertEqual(bl.scan_paths([self.d / "log16.txt"], self.sealed)["status"], "fail")
+
+    def test_float16_copy_is_found_but_neighbours_are_not(self):
+        # the float16 copy of 4731.3712 is 4732; 4745 and 4728 are unrelated values (N17)
+        np.save(self.d / "h.npy", np.asarray([4731.3712], dtype=np.float16))
+        self.assertEqual(bl.scan_paths([self.d / "h.npy"], [4731.3712])["status"], "fail")
+        np.save(self.d / "n.npy", np.asarray([4745.0, 4728.0], dtype=np.float16))
+        self.assertEqual(bl.scan_paths([self.d / "n.npy"], [4731.3712])["status"], "pass")
+
 
 @unittest.skipUnless(HAVE, "numpy and matplotlib are needed")
 class StepOutlineTests(unittest.TestCase):

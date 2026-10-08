@@ -40,6 +40,7 @@ from __future__ import annotations
 import json
 import math
 import re
+import unicodedata
 from pathlib import Path
 from typing import Any
 
@@ -174,13 +175,15 @@ def _scan_array(arr, sealed, rtol) -> list[dict]:
     if a.dtype.kind not in "fiu":
         return []
     flat = a.ravel().astype(float)
-    if a.dtype.kind == "f":
-        # a float32 or float16 copy of a sealed value differs from it by up to half a unit in the last place of the
-        # stored type, far more than the default rtol: compare at the precision the array can hold
-        rtol = max(rtol, 4 * float(np.finfo(a.dtype).eps))
     hits = []
     for t in sealed:
-        idx = np.nonzero(np.isclose(flat, t, rtol=rtol, atol=0.0))[0]
+        near = np.isclose(flat, t, rtol=rtol, atol=0.0)
+        if a.dtype.kind == "f":
+            # a float32 or float16 copy of a sealed value is the sealed value rounded to the stored type, which can
+            # differ from it by far more than rtol. Match that rounded copy exactly rather than widening rtol: a
+            # dtype-wide tolerance flags unrelated neighbours (float16 spacing near 4731 is 4)
+            near |= a.ravel() == np.asarray(t).astype(a.dtype)
+        idx = np.nonzero(near)[0]
         hits += [{"index": int(i), "sealed_value": t} for i in idx[:5]]
     return hits
 
@@ -200,9 +203,17 @@ def decode_text(raw: bytes) -> tuple[str | None, str]:
         for enc, zeros in (("utf-16-le", odd), ("utf-16-be", even)):
             if len(raw) % 2 == 0 and zeros and zeros.count(0) >= 0.3 * len(zeros):
                 try:
-                    return raw.decode(enc), enc
+                    text = raw.decode(enc)
                 except UnicodeDecodeError:
-                    pass
+                    continue
+                # numeric dumps (float64, float32, int32 written with tofile()) have enough zero bytes to decode
+                # as UTF-16, but as control, surrogate or unassigned code points; real UTF-16 text has few
+                odd_chars = sum(1 for ch in text if ch not in "\t\n\r\f"
+                                and unicodedata.category(ch) in ("Cc", "Cs", "Co", "Cn"))
+                if odd_chars > 0.05 * len(text):
+                    return None, f"binary content ({odd_chars} of {len(text)} UTF-16 code units are control or " \
+                                 "unassigned), not text"
+                return text, enc
         return None, "contains NUL bytes and is not UTF-16 text"
     try:
         return raw.decode("utf-8"), "utf-8"
