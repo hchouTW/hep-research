@@ -33,6 +33,9 @@ Software checks establish contract consistency only, not physical validity.
   re-hash it and refuse a changed campaign (`bundle.changed`); the submission records the digest and the artifact
   lists it. Verification of approved bytes at execution stays with the trusted submitter (T3.5). Tests in
   `tests/core/test_partition_bundle.py`, `tests/adapters/test_batch_bundle.py`.
+- **Marketplace lists hep-research only.** Both catalogs (`.claude-plugin/marketplace.json`,
+  `.agents/plugins/marketplace.json`) no longer list `ams02-research`; the READMEs say so and how an installed copy is
+  handled. hep-research never depended on it; companion profile support is unchanged.
 - **Campaign limits, attempt identity and confirmed cancellation (AGENTIC-R5 T3.4, X08, X09).** New
   `core/partition/limits.py`: an optional `limits` configuration section (`max_submissions`, `max_total_jobs`,
   `max_concurrent_jobs`, `max_core_hours`, `max_resets_per_chunk`; values are the site's, none are defaulted) stops a

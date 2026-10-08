@@ -150,18 +150,21 @@ class InstructionText(unittest.TestCase):
         self.assertIn("preflight", (ROOT / "docs" / "profile-authoring.md").read_text(encoding="utf-8"))
 
     @unittest.skipUnless(IN_REPO, "relocated copy: no repository README")
-    def test_readmes_name_the_pinned_companion_commit(self):
-        """Both catalogs pin one companion commit, and the READMEs' migration notes name that commit, so a pin
-        move cannot leave the notes describing another release."""
+    def test_readmes_name_every_pinned_companion_commit(self):
+        """Every companion commit the catalogs pin is named in the READMEs' notes, so a pin move cannot leave the notes
+        describing another release. With no companion listed, the READMEs say none is."""
         cats = [json.loads((REPO / ".claude-plugin" / "marketplace.json").read_text()),
                 json.loads((REPO / ".agents" / "plugins" / "marketplace.json").read_text())]
         pins = {e["source"].get("sha") for c in cats for e in c["plugins"]
                 if e["name"] != "hep-research" and isinstance(e.get("source"), dict)}
-        self.assertEqual(len(pins), 1, pins)
-        short = pins.pop()[:7]
         for path in (REPO / "README.md", ROOT / "README.md"):
+            text = path.read_text(encoding="utf-8")
             with self.subTest(file=str(path.relative_to(REPO))):
-                self.assertIn(short, path.read_text(encoding="utf-8"))
+                for sha in pins:
+                    self.assertIn(sha[:7], text)
+                if not pins:
+                    self.assertIn("not listed", text)
+
 
 if __name__ == "__main__":
     unittest.main()

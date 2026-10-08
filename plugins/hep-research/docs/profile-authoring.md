@@ -73,9 +73,9 @@ change belongs in a reviewed core or contract release first (AC10 records the ch
 ## Companion plugin
 
 A profile whose content only some people may read (for example access-controlled experiment software or data
-listings) ships as its own plugin in a private repository, listed in the same marketplace, instead of inside this
-plugin or the user's project. Listing both plugins in one marketplace is distribution only, not a dependency. Such a
-companion plugin has:
+listings) ships as its own plugin in a private repository, distributed from its own source rather than this
+marketplace, instead of inside this plugin or the user's project. Where a marketplace lists both, that is distribution
+only, not a dependency. Such a companion plugin has:
 
 - a plugin root that holds `profile/` (a complete profile in the layout above; it is also a valid local profile for
   `local_profile_paths`) and one skill, `skills/profile/SKILL.md`, named `<plugin>:profile`;
