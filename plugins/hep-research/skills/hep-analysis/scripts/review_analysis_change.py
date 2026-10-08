@@ -14,9 +14,10 @@ Input JSON: {"changes": [{"id", "parameter", "old", "new", "motivation",
               "after_unblinding": bool}]}
 Data exposure (F05, K06): each row reports {"state", "basis"} as in the envelope's data_exposure. A structured record
 (basis structured-record) is used as given; looked_at is legacy free text (basis legacy-text). A looked_at entry
-that names signal-region data or a result makes the change exposed; every entry naming only control regions,
-sidebands, simulation, calibration or validation samples makes it unexposed; any other entry, a looked_at that is not
-a list, or none at all (basis none) makes the exposure unknown, never unexposed. With both, the more exposed wins.
+that names signal-region data or a result makes the change exposed; a non-empty list whose every entry names only
+control regions, sidebands, simulation, calibration or validation samples (and mentions no signal, yield, window,
+result, fit, limit or blinding) makes it unexposed; any other entry, an empty list, a looked_at that is not a list,
+or none at all (basis none) makes the exposure unknown, never unexposed. With both, the more exposed wins.
 Decision per change:
   accept            independent provenance (control sample or evidence ids, independent of the signal region) and
                     data exposure 'unexposed'
@@ -42,6 +43,8 @@ OUTCOME_MOTIVE = re.compile(r"(to|so that).{0,40}(agree|match|improve|increase|r
 # legacy looked_at entries that name only data a blinded analysis may see; anything else is unknown (K06)
 NOT_OUTCOME = re.compile(r"^\s*(control[- ]region|control[- ]sample|sideband|validation[- ]region|simulation|simulated|"
                          r"monte[- ]carlo|MC|calibration|test[- ]beam|cosmic[- ]ray calibration)\b[\w\s,()/.-]*$", re.I)
+# a legacy entry mentioning any of these is never read as unexposed, whatever it starts with
+SUSPECT = re.compile(r"signal|\bSR\b|blind|excess|observ|yield|window|result|limit|fit|tension|discover|unmask", re.I)
 EXPOSURE_STATES = ("unexposed", "exposed", "unknown", "incomplete")
 RANK = {"unexposed": 0, "unknown": 1, "incomplete": 1, "exposed": 2}
 
@@ -66,7 +69,7 @@ def exposure(change: dict) -> tuple[dict, list]:
         legacy = None
     elif isinstance(raw, list):
         seen = [x for x in raw if OUTCOME_SEEN.search(str(x))]
-        known = all(isinstance(x, str) and NOT_OUTCOME.match(x) for x in raw)
+        known = bool(raw) and all(isinstance(x, str) and NOT_OUTCOME.match(x) and not SUSPECT.search(x) for x in raw)
         legacy = {"state": "exposed" if seen else "unexposed" if known else "unknown", "basis": "legacy-text"}
     else:  # a string is never read character by character as an empty look
         seen = [raw] if OUTCOME_SEEN.search(str(raw)) else []

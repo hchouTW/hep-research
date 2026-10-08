@@ -513,7 +513,8 @@ def cancel(campaign_dir, executor, chunk_ids=None, approved: bool = False, clock
             if rec.get("job_id") in by_job and rec.get("final_state") in POLL_AGAIN:
                 j = by_job[rec["job_id"]]
                 rec.setdefault("cancel_requests", []).append({"time": now, "status": j["status"], "exit": j["exit"]})
-                rec.update(cancel_requested=True)
+                if j["status"] == "requested":  # a failed or unreported request does not make a later end a cancellation
+                    rec.update(cancel_requested=True)
                 if rec.get("global_attempt_id") is None:
                     rec["global_attempt_id"] = lim.global_attempt_id(state.get("campaign_uid"), rec["attempt_id"])
                 j["global_attempt_id"] = rec["global_attempt_id"]

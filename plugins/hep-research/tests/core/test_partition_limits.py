@@ -141,6 +141,17 @@ class LimitTests(Base):
         self.assertEqual(sorted(e["code"] for e in errs), ["config.bad_value", "config.unknown_key"])
 
 
+class RestartTests(Base):
+    def test_scheduler_restarts_do_not_make_core_hours_unbounded(self):
+        cfg = {"resources": TL, "limits": {"max_core_hours": 10}}
+        ex = ScriptedExecutor({"c0000": [{"state": "done", "restarts": 1, "elapsed_s": 1800}]})
+        cp.submit(self.cdir, ex, cfg, pilot=True, approved=True)
+        cp.poll(self.cdir, ex)
+        use = lim.usage(self.state())
+        self.assertEqual((use["total_jobs"], use["core_hours"]), (1, 1.0))  # the restart is inside the job's elapsed time
+        self.assertEqual(len(cp.submit(self.cdir, ex, cfg, approved=True)["chunks"]), 2)
+
+
 class ResetCapTests(Base):
     def test_resets_are_capped_x08(self):
         # R5.3 X08: five resubmissions with max_attempts=1 through resets. With a cap, the second reset is refused.
@@ -184,6 +195,11 @@ class CancelTests(Base):
         rec = self.state()["chunks"]["c0000"]["attempt_records"][-1]
         self.assertEqual(rec["termination_observed"]["final_state"], "cancelled")
         self.assertNotIn("termination_observed", self.state()["chunks"]["c0001"]["attempt_records"][-1])
+        ex.script["c0001"] = [{"state": "done"}]  # the job whose cancel failed ends on its own: not a cancellation
+        cp.poll(self.cdir, ex)
+        rec = self.state()["chunks"]["c0001"]["attempt_records"][-1]
+        self.assertEqual(rec["cancel_requests"][0]["status"], "request-failed")
+        self.assertNotIn("termination_observed", rec)
 
     def test_orphans_found_through_the_tag(self):
         ex = InterruptingExecutor({})

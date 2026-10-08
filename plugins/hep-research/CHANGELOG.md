@@ -19,10 +19,11 @@ Software checks establish contract consistency only, not physical validity.
   Limit values and a real pilot remain open (Q-07, T3.3).
 - **Structured data exposure in change review (AGENTIC-R5 T4.4, K06).** `review_analysis_change.py` reports a
   `data_exposure` (`state`, `basis`, as in the 2.1.0 envelope) per change and accepts a structured record. A missing
-  `looked_at` (basis `none`), a string, or an entry it does not recognize as control-region, sideband, simulation,
-  calibration or validation data is `unknown`, never unexposed; such a change gets the new decision
-  `exposure-unknown` instead of `accept`. A malformed structured record is an input error (exit 2). Legacy text can
-  only raise a structured state. Tests in `tests/skills/hep_analysis/test_review_analysis_change.py`.
+  `looked_at` (basis `none`), an empty list, a string, or an entry it does not recognize as control-region, sideband,
+  simulation, calibration or validation data (or that mentions signal, yields, results or blinding) is `unknown`,
+  never unexposed; such a change gets the new decision `exposure-unknown` instead of `accept`. A malformed structured
+  record is an input error (exit 2). Legacy text can only raise a structured state. Tests in
+  `tests/skills/hep_analysis/test_review_analysis_change.py`.
 - **Independent of companion plugins.** hep-research installs, updates and runs without `ams02-research`; a companion
   owns its compatibility check (its preflight) and declares no host dependency on hep-research.
   - `tools/check_host_manifests.py` parses `dependencies` (bare name, `name@marketplace`, object) in both plugin

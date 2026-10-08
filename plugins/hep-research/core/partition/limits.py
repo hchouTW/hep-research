@@ -93,7 +93,7 @@ def _may_still_run(rec: dict, now: datetime.datetime) -> bool:
 def _core_hours(rec: dict) -> float | None:
     cpus = _cpus(rec.get("resources"))
     fs = rec.get("final_state")
-    if rec.get("origin") == "scheduler-restart" or fs is None or fs in ORPHAN_RISK or fs == "held" or rec.get("elapsed_s") is None:
+    if fs is None or fs in ORPHAN_RISK or fs == "held" or rec.get("elapsed_s") is None:
         wall = walltime_s(rec.get("resources"))
         return None if wall is None else cpus * wall / 3600
     return cpus * float(rec["elapsed_s"]) / 3600
@@ -103,7 +103,7 @@ def usage(state: dict, now: datetime.datetime | None = None) -> dict:
     now = now or datetime.datetime.now(datetime.UTC)
     recs = [r for row in state.get("chunks", {}).values() for r in row.get("attempt_records", [])]
     counted = [r for r in recs if _counted(r)]
-    hours = [_core_hours(r) for r in recs if r.get("final_state") != "not-submitted"]
+    hours = [_core_hours(r) for r in counted]  # a scheduler restart is inside its job's elapsed time or walltime
     resets: dict = {}
     for r in state.get("resets", []):
         resets[r["chunk"]] = resets.get(r["chunk"], 0) + 1

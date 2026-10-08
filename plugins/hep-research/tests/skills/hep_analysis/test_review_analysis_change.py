@@ -85,12 +85,21 @@ class DataExposureTests(unittest.TestCase):
             self.assertNotEqual(r["decision"], "accept", entry)
 
     def test_recognized_legacy_text_is_unexposed(self):
-        r = rac.review(self.change(looked_at=["control-region data", "simulation", "sideband fits (low mass)"]))
+        r = rac.review(self.change(looked_at=["control-region data", "simulation", "sideband (low mass)"]))
         self.assertEqual(r["data_exposure"], {"state": "unexposed", "basis": "legacy-text"})
         self.assertEqual(r["decision"], "accept")
 
-    def test_empty_list_is_an_explicit_record_of_nothing_seen(self):
-        self.assertEqual(rac.review(self.change(looked_at=[]))["data_exposure"]["state"], "unexposed")
+    def test_empty_list_is_unknown(self):
+        r = rac.review(self.change(looked_at=[]))
+        self.assertEqual((r["data_exposure"]["state"], r["decision"]), ("unknown", "exposure-unknown"))
+
+    def test_control_words_followed_by_signal_region_are_not_unexposed(self):
+        for entry in ("control region, then signal region yields", "sideband and signal region events",
+                      "simulation tuned to the signal region", "MC compared with SR counts",
+                      "control region plus the signal window", "calibration after unblinding"):
+            r = rac.review(self.change(looked_at=[entry]))
+            self.assertNotEqual(r["data_exposure"]["state"], "unexposed", entry)
+            self.assertNotEqual(r["decision"], "accept", entry)
 
     def test_structured_record_used_and_legacy_can_only_raise_it(self):
         rec = {"state": "unexposed", "basis": "structured-record", "record_ref": "exposure/c.json"}
