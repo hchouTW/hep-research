@@ -85,7 +85,8 @@ class ConfigTests(unittest.TestCase):
         site = {"backend": None, "campaign_dir": "camp", "cpus": 1, "memory_mb": 1000, "time_limit": "00:10:00", "gpus": 0,
                 "partition": "synthetic-partition", "account": "synthetic-account", "qos": "synthetic-qos",
                 "universe": "vanilla", "file_transfer": "transfer", "requirements": '(OpSysAndVer == "SyntheticOS")',
-                "throttle": 2, "max_attempts": 2, "poll_interval_s": 60, "max_polls": 10}
+                "throttle": 2, "max_attempts": 2, "poll_interval_s": 60, "max_polls": 10,
+                "max_total_jobs": 100, "max_core_hours": 50, "max_resets_per_chunk": 1}
 
         def fill(obj):
             return {k: fill(v) if isinstance(v, dict) else site[k] for k, v in obj.items()}

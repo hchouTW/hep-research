@@ -19,6 +19,11 @@
  },
  "throttle": "<most jobs running at once>",
  "max_attempts": "<attempts per chunk; leave the key out for no resubmission>",
+ "limits": {
+  "max_total_jobs": "<most job attempts this campaign may use, from your site and allocation>",
+  "max_core_hours": "<most core-hours this campaign may use; needs resources.time_limit>",
+  "max_resets_per_chunk": "<most resets per chunk, 0 for none>"
+ },
  "monitor": {
   "poll_interval_s": "<seconds between polls, at least 60>",
   "max_polls": "<polls before watch gives up>"

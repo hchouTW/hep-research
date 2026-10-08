@@ -20,6 +20,9 @@ One JSON file per campaign, kept in the user's project (never in the plugin):
   worker_timeout_s     seconds before the runner stops the worker command (default none)  optional
   env_passthrough list of environment variable names passed to scheduler clients besides the allow-list
                   (core.partition.executors.ENV_ALLOW); never credentials                optional
+  limits          {"max_submissions", "max_total_jobs", "max_concurrent_jobs", "max_core_hours",
+                   "max_resets_per_chunk"}: site values (core.partition.limits); a submission or reset that
+                  would exceed one is refused; unknown and orphan-risk jobs count as used   optional
 
 Unknown keys are errors, not ignored. A value written as a placeholder ("<...>") is accepted only when validating
 the shipped example with example=True. Strings are rendered into job files, so they must be single-line without
@@ -37,11 +40,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from core.partition.executors import passthrough_problems  # noqa: E402
+from core.partition.limits import problems as limits_problems  # noqa: E402
 
 PLACEHOLDER = re.compile(r"^<[^<>]+>$")
 TIME = re.compile(r"^(\d+-)?\d{1,2}:\d{2}:\d{2}$")
 TOP = {"backend", "campaign_dir", "resources", "slurm", "htcondor", "throttle", "max_attempts", "monitor", "worker_python", "job_name",
-       "scheduler_timeout_s", "worker_timeout_s", "env_passthrough"}
+       "scheduler_timeout_s", "worker_timeout_s", "env_passthrough", "limits"}
 NAME = re.compile(r"^[A-Za-z0-9_.:+@-]{1,128}$")  # partition, account, qos, job name, gres
 UNSAFE = re.compile(r"[\x00-\x1f\x7f]|\{\{|\}\}")  # control characters (a newline adds a job-file line) or template braces
 CONSTRAINT = re.compile(r"^[A-Za-z0-9_.:+@&|!()\[\]*,-]{1,256}$")  # no whitespace: one #SBATCH line holds one option
@@ -126,6 +130,12 @@ def validate(cfg, example: bool = False) -> list[dict]:
     if "env_passthrough" in cfg:
         for prob in passthrough_problems(cfg["env_passthrough"]):
             add("config.bad_value", "env_passthrough", prob)
+    if "limits" in cfg and not placeholder(cfg["limits"], "limits"):
+        lims = cfg["limits"]
+        if isinstance(lims, dict):
+            lims = {k: v for k, v in lims.items() if not placeholder(v, f"limits.{k}")}
+        for prob in limits_problems(lims):
+            add("config.unknown_key" if prob.startswith("unknown key") else "config.bad_value", "limits", prob)
     mon = cfg.get("monitor", {})
     if not isinstance(mon, dict):
         add("config.bad_value", "monitor", "must be an object")

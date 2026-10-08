@@ -56,8 +56,9 @@ is interrupted, times out, or ends without job IDs, the scheduler may have accep
 unconfirmed and nothing is submitted again until a person runs `reconcile --submission S` (the jobs listed under the
 tag) and then `confirm --submission S --jobs ATTEMPT=JOB ...` with job IDs from that list (others are refused), or
 `abandon --submission S --reason TEXT` when it lists none (recorded as `abandoned`, which does not prove nothing runs;
-those chunks then need `reset` before `resubmit`). `cancel` records each command's exit; a job counts as cancelled only
-when a later `status` observes it. Review a dry run, then pass its `plan_digest` with `--plan-digest` so the submission
+those chunks then need `reset` before `resubmit`). `cancel` records each command's exit and also targets jobs found
+under the tag of unconfirmed or abandoned submissions; a job counts as cancelled only when a later `status` observes
+it (`termination_observed`), and an orphan job stays in `resource_risk` until a person checks the scheduler. Review a dry run, then pass its `plan_digest` with `--plan-digest` so the submission
 runs exactly the reviewed job files.
 
 Scheduler clients and jobs get an allow-listed environment (PATH, HOME, user, locale, TMPDIR, SLURM_CONF,
@@ -117,6 +118,11 @@ node-failure, held, cancelled, lost, unknown`. A native state the adapter does n
   resubmitted within it; timeouts and out-of-memory only after the resource request changed (the change is recorded
   in the attempt); failed, held, cancelled and unknown chunks only after `reset` with a reason. Two identical failure
   signatures (state, exit code, signal, hold code; never host or time) in a row stop the chunk, across resets.
+- **Limits:** an optional `limits` section (`max_submissions`, `max_total_jobs`, `max_concurrent_jobs`,
+  `max_core_hours`, `max_resets_per_chunk`) holds the site's and allocation's values; ask for them, never assume.
+  A submission or reset that would exceed one is refused; unknown and abandoned jobs count as used (as running until
+  their walltime has passed; without `time_limit` core-hours are unbounded, so `max_core_hours` refuses). Every
+  attempt has a global identity `<campaign_uid>:<attempt_id>`.
 - **A scheduler's success is not a result:** a job reported complete without a valid output is `lost`.
 - **Held jobs need a person.** `watch` stops early on held, unknown or stopped chunks.
 - **Polling etiquette:** `status` polls once. `watch` needs `monitor.poll_interval_s` (at least 60) and

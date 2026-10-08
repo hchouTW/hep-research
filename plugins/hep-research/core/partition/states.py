@@ -55,11 +55,13 @@ def same_resources(a: str | None, b: str | None) -> bool:
     return short == full if len(short) != 16 else full.startswith(short)
 
 
-def decide(chunk: dict, max_attempts: int | None, resources_hash: str | None) -> dict:
+def decide(chunk: dict, max_attempts: int | None, resources_hash: str | None, resets_used: int = 0,
+           max_resets: int | None = None) -> dict:
     """Decision for one chunk that has no collected output, from its last attempt record.
 
     Returns {"decision": ..., "reason": ...}. Decisions: 'wait' (still active), 'not-submitted', 'resubmit',
-    'no-retries-configured', 'attempts-exhausted', 'needs-resource-change', 'needs-reset', 'stopped-repeated-failure'.
+    'no-retries-configured', 'attempts-exhausted', 'needs-resource-change', 'needs-reset', 'stopped-repeated-failure',
+    'resets-exhausted' (more resets than limits.max_resets_per_chunk: a reset no longer bypasses the limits, X08).
     """
     recs = chunk.get("attempt_records", [])
     if not recs:
@@ -69,6 +71,8 @@ def decide(chunk: dict, max_attempts: int | None, resources_hash: str | None) ->
     if state is None:
         return {"decision": "wait", "reason": f"last attempt {last['attempt_id']} is {last.get('state', 'queued')}"}
     if chunk.get("reset_reason"):
+        if max_resets is not None and resets_used > max_resets:
+            return {"decision": "resets-exhausted", "reason": f"{resets_used} resets, limit {max_resets}"}
         return {"decision": "resubmit", "reason": f"reset: {chunk['reset_reason']}"}
     if repeated(chunk.get("errors", [])):
         return {"decision": "stopped-repeated-failure", "reason": f"last two attempts failed identically: {chunk['errors'][-1]}"}

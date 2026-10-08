@@ -5,6 +5,18 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Campaign limits, attempt identity and confirmed cancellation (AGENTIC-R5 T3.4, X08, X09).** New
+  `core/partition/limits.py`: an optional `limits` configuration section (`max_submissions`, `max_total_jobs`,
+  `max_concurrent_jobs`, `max_core_hours`, `max_resets_per_chunk`; values are the site's, none are defaulted) stops a
+  submission or reset that would exceed it before anything is written (`limits.exceeded`); unknown and abandoned
+  attempts count as used, as running until their walltime has passed, and without a walltime core-hours are
+  unbounded, so `max_core_hours` refuses. `states.decide` caps resets (`resets-exhausted`), so a reset no longer
+  bypasses the limits. Attempts record `global_attempt_id` (`<campaign_uid>:<attempt_id>`). `cancel` records each
+  command's exit per job (`requested`, `request-failed`, `request-unconfirmed`), also targets jobs found under the tag
+  of unconfirmed or abandoned submissions, and an attempt is `termination_observed` only when a later poll sees a final
+  state. Unknown, abandoned and orphan jobs leave append-only `resource_risk` records, carried into the campaign
+  artifact with the usage. `batch_config.validate` checks the section. Tests in `tests/core/test_partition_limits.py`.
+  Limit values and a real pilot remain open (Q-07, T3.3).
 - **Structured data exposure in change review (AGENTIC-R5 T4.4, K06).** `review_analysis_change.py` reports a
   `data_exposure` (`state`, `basis`, as in the 2.1.0 envelope) per change and accepts a structured record. A missing
   `looked_at` (basis `none`), a string, or an entry it does not recognize as control-region, sideband, simulation,
