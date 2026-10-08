@@ -4,6 +4,7 @@
 #   lint       ruff and mypy on core/ and contracts/; required
 #   optional-* the same unit tests with pyhf, uproot + awkward, hepdata_lib + hepdata-validator, PyTorch (CPU) or ROOT; they may fail without
 #              blocking a merge for now, but their results are shown on the run
+#   release-manifests  published release bundles unchanged (C10); required
 #   latest     weekly and on demand: the latest releases (no lock) and the slow tier (HEP_SLOW_TESTS=1)
 # Actions are pinned to commit SHAs; the comment names the release.
 name: tests
@@ -63,6 +64,30 @@ jobs:
         run: ruff check core contracts
       - name: mypy
         run: mypy
+
+  release-manifests:
+    # C10: a published release bundle never changes. Each recorded manifest (release-manifests/<version>.json) must
+    # match the bundle exported from tag hep-research--v<version>, and recorded manifests are append-only. The
+    # Unreleased working tree is not checked.
+    name: published releases unchanged
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.13"
+      - name: Recorded release manifests match their tags and are append-only
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [ -n "$BASE" ] && ! printf '%s' "$BASE" | grep -qE '^0+$' && git cat-file -e "$BASE^{commit}" 2>/dev/null; then
+            python tools/release_manifest.py check-published --base "$BASE"
+          else
+            python tools/release_manifest.py check-published
+          fi
 
   optional-python:
     name: optional (${{ matrix.extra }})

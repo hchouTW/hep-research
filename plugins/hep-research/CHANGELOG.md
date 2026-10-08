@@ -29,6 +29,10 @@ Software checks establish contract consistency only, not physical validity.
     execution, limited to synthetic test environments; private local and companion profiles are read only when the
     project's `agent_policy` allows them on a qualified host (none is yet); "tested" hosts are not qualified for private
     data. `tools/check_instruction_text.py` (run by `run_all_checks.py`) guards these texts.
+  - Code release identity: `tools/release_manifest.py` writes the manifest of a release bundle (git-listed files,
+    full SHA-256, size and mode, sorted, no symlinks) and its digest, verifies a tree against it, and, in CI
+    (`release-manifests` job), checks that every recorded `release-manifests/<version>.json` matches its published tag
+    and that recorded manifests are only ever added.
 
 - **Choosing a SymPy interpreter (SYMPY).** `skills/hep-computing/scripts/find_python.py` finds a Python >= 3.11 that
   imports the packages a task needs (default SymPy). It tries, in order, `--python`, `HEP_RESEARCH_PYTHON`, the
