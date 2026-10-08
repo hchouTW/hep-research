@@ -58,6 +58,7 @@ import uuid
 from pathlib import Path
 from typing import Any
 
+from core.partition import bundle as bundles
 from core.partition import engine
 from core.partition import limits as lim
 from core.partition.executors import Executor, PollError, SubmitRefused
@@ -224,8 +225,11 @@ def chunk_status(cdir: Path, state: dict, cid: str) -> str:
 
 @_locked("submit")
 def submit(campaign_dir, executor, config: dict, chunk_ids=None, approved: bool = False, pilot: bool = False,
-           _origin: str = "submit", clock=_now, expected_plan_digest: str | None = None) -> dict:
-    """Submit chunks that were never submitted (all of them, the given ones, or with pilot=True the first one)."""
+           _origin: str = "submit", clock=_now, expected_plan_digest: str | None = None,
+           bundle_digest: str | None = None) -> dict:
+    """Submit chunks that were never submitted (all of them, the given ones, or with pilot=True the first one).
+    With bundle_digest (a bundle frozen by core.partition.bundle.freeze), the bundled files are re-hashed first and a
+    change since freezing refuses the submission (bundle.changed); the digest is recorded with the submission."""
     cdir = Path(campaign_dir)
     manifest, state = load(cdir)
     pending = unconfirmed(state)
@@ -255,6 +259,14 @@ def submit(campaign_dir, executor, config: dict, chunk_ids=None, approved: bool 
     if over:  # stops new submissions; work already submitted is not touched
         raise CampaignError("limits.exceeded", "; ".join(over))
     limits_report = {"configured": config.get("limits") or None, "usage_before": usage}
+    if bundle_digest is not None:
+        try:
+            check = bundles.verify(bundles.load(cdir, bundle_digest))
+        except bundles.BundleError as exc:
+            raise CampaignError(exc.code, str(exc)) from None
+        if check["status"] != "identical":
+            raise CampaignError("bundle.changed", f"the campaign differs from bundle {bundle_digest[:12]} frozen for approval: "
+                                f"{check['differences'][:5]}; freeze again and have the new bundle approved")
     if not state.get("campaign_uid"):  # a campaign created before tags: fix its uid once, so dry runs are reproducible
         state["campaign_uid"] = uuid.uuid4().hex[:16]
         _save(cdir, state)
@@ -278,6 +290,7 @@ def submit(campaign_dir, executor, config: dict, chunk_ids=None, approved: bool 
         for name, text in plan["files"].items():
             (preview / name).write_text(text, encoding="utf-8")
         return {"dry_run": True, "submission_id": sid, "chunks": ids, "would_run": plan["submit_argv"], "plan_digest": digest,
+                "bundle_digest": bundle_digest,
                 "files": sorted(str(preview / n) for n in plan["files"]), "limits": limits_report,
                 "message": "dry run: no scheduler call; pass the submit flag (and this plan_digest) to submit exactly these files"}
     sub_dir.mkdir(parents=True, exist_ok=True)
@@ -305,7 +318,7 @@ def submit(campaign_dir, executor, config: dict, chunk_ids=None, approved: bool 
         row["reset_reason"] = None
     state["submissions"].append({"id": sid, "backend": executor.name, "command": plan["submit_argv"], "chunks": ids,
                                  "origin": _origin, "pilot": pilot, "time": clock(), "status": "intent", "tag": tag,
-                                 "plan_digest": digest})
+                                 "plan_digest": digest, "bundle_digest": bundle_digest})
     _save(cdir, state)
     try:
         jobs = executor.submit(plan)
@@ -415,7 +428,7 @@ def abandon_submission(campaign_dir, submission_id: str, reason: str) -> dict:
 
 
 @_locked("resubmit")
-def resubmit(campaign_dir, executor, config: dict, approved: bool = False, clock=_now) -> dict:
+def resubmit(campaign_dir, executor, config: dict, approved: bool = False, clock=_now, bundle_digest: str | None = None) -> dict:
     """Resubmit the chunks whose decision is 'resubmit'; report every other not-done chunk with its decision."""
     cdir = Path(campaign_dir)
     collect(cdir)
@@ -432,7 +445,8 @@ def resubmit(campaign_dir, executor, config: dict, approved: bool = False, clock
     blocked = {c: d for c, d in decisions.items() if d["decision"] not in ("resubmit", "wait", "not-submitted")}
     rep = {"decisions": decisions, "eligible": eligible, "blocked": blocked, "max_attempts": max_attempts}
     if eligible:
-        rep["submission"] = submit(cdir, executor, config, eligible, approved=approved, _origin="resubmit", clock=clock)
+        rep["submission"] = submit(cdir, executor, config, eligible, approved=approved, _origin="resubmit", clock=clock,
+                                   bundle_digest=bundle_digest)
     rep["resubmitted"] = eligible if eligible and approved else []
     return rep
 

@@ -5,6 +5,15 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Execution-bundle freezing (AGENTIC-R5 T4.2 freezing tool, F06, X05, X14).** New `core/partition/bundle.py` and
+  `batch_campaign.py freeze` / `verify-bundle`: a write-once `bundles/<digest>.json` lists, with full SHA-256, size
+  and mode, the campaign files, the worker tree, the interpreter (resolved through links and re-checked), an
+  environment lock and the container image, which must be pinned by digest; the digest also binds the campaign uid,
+  manifest hash and the data exposure recorded at freezing. Any other absolute path in the command is refused. The
+  file carries an approval request (bundle digest, config hash, limits, scope) and approves nothing.
+  `submit`/`resubmit --bundle` re-hash it and refuse a changed campaign (`bundle.changed`); the submission records the
+  digest and the artifact lists it. Verification of approved bytes at execution stays with the trusted submitter
+  (T3.5). Tests in `tests/core/test_partition_bundle.py`, `tests/adapters/test_batch_bundle.py`.
 - **Campaign limits, attempt identity and confirmed cancellation (AGENTIC-R5 T3.4, X08, X09).** New
   `core/partition/limits.py`: an optional `limits` configuration section (`max_submissions`, `max_total_jobs`,
   `max_concurrent_jobs`, `max_core_hours`, `max_resets_per_chunk`; values are the site's, none are defaulted) stops a
