@@ -1,4 +1,4 @@
-# Capability matrix (v0.5.0)
+# Capability matrix (v0.6.0)
 
 Status words: **tested** = exercised by a check that passed in the environment named below; **unverified** = code or
 guidance exists but its tool was not installed, so it was not run; **proposed** = a starting point or design, not
