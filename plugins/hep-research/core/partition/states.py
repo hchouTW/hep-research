@@ -5,25 +5,26 @@ Each backend maps its native states onto NORMALIZED_STATES; a native state it do
 
   retryable                 preempted-or-evicted, node-failure, lost (only after collection found no valid output)
   needs-resource-change     timeout, out-of-memory: resubmitted only when the resources differ from the failed attempt
-  needs-reset               failed, held, cancelled, unknown, not-submitted: a person fixes the cause and resets with
-                            a reason
+  needs-reset               failed, held, cancelled, unknown, not-submitted, abandoned: a person fixes the cause and
+                            resets with a reason
 
 Two states come from the campaign itself, never from a backend: 'submitting' (recorded before the scheduler call; seen
-by a later call it means that submit was interrupted, and a person must confirm or abandon it) and 'not-submitted' (the
-scheduler refused the submission, or a person abandoned it).
+by a later call it means that submit was interrupted or its outcome is unknown, and a person must reconcile it),
+'not-submitted' (the scheduler client could not even start: certainly nothing was submitted) and 'abandoned' (a person
+found no jobs for an unconfirmed submission; this does not prove the scheduler never accepted them).
 
 Nothing here resubmits anything; it only classifies. Standard library only.
 """
 from __future__ import annotations
 
 NORMALIZED_STATES = ("planned", "queued", "running", "done", "failed", "timeout", "out-of-memory", "preempted-or-evicted",
-                     "node-failure", "held", "cancelled", "lost", "unknown", "submitting", "not-submitted")
+                     "node-failure", "held", "cancelled", "lost", "unknown", "submitting", "not-submitted", "abandoned")
 ACTIVE = frozenset({"planned", "queued", "running"})
 RETRY_CLASS = {
     "preempted-or-evicted": "retryable", "node-failure": "retryable", "lost": "retryable",
     "timeout": "needs-resource-change", "out-of-memory": "needs-resource-change",
     "failed": "needs-reset", "held": "needs-reset", "cancelled": "needs-reset", "unknown": "needs-reset",
-    "not-submitted": "needs-reset",
+    "not-submitted": "needs-reset", "abandoned": "needs-reset",
 }
 # a chunk in one of these states stops a watch loop early: a person has to look at it
 NEEDS_PERSON = frozenset({"held", "unknown", "submitting"})

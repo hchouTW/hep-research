@@ -10,7 +10,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 |---|---|---|---|
 | detector-response | 33 | 345 | 0 |
 | hep-analysis | 9 | 73 | 0 |
-| hep-computing | 26 | 286 | 0 |
+| hep-computing | 26 | 287 | 0 |
 | hep-statistics | 9 | 103 | 0 |
 | hep-theory | 8 | 42 | 0 |
 | physics-ml | 34 | 181 | 0 |
@@ -109,26 +109,26 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `timing-detectors.md` | detector-response | 8.1 | yes | 7 | hep-analysis | 351029c 2026-10-07 |
 | `tracking-and-vertexing.md` | detector-response | 11.9 | yes | 15 | hep-analysis, research-communication | 351029c 2026-10-07 |
 | `triggers-luminosity-pileup.md` | detector-response | 7.4 | yes | 12 | hep-analysis | 351029c 2026-10-07 |
-| `analysis-design.md` | hep-analysis | 3.9 | yes | 7 | detector-response, hep-computing | 351029c 2026-10-07 |
+| `analysis-design.md` | hep-analysis | 3.9 | yes | 7 | detector-response, hep-computing | 9546574 2026-10-08 |
 | `analysis-validation.md` | hep-analysis | 4.4 | yes | 6 | detector-response, hep-computing | 351029c 2026-10-07 |
 | `backgrounds.md` | hep-analysis | 2.7 | yes | 16 | detector-response | 351029c 2026-10-07 |
 | `data-pipelines.md` | hep-analysis | 4.5 | yes | 4 | hep-computing | 351029c 2026-10-07 |
-| `hep-analysis-guide.md` | hep-analysis | 41.2 | yes | 4 | detector-response | 051665e 2026-10-07 |
-| `histograms-efficiencies.md` | hep-analysis | 3.2 | yes | 8 | detector-response, hep-computing | 351029c 2026-10-07 |
+| `hep-analysis-guide.md` | hep-analysis | 41.2 | yes | 4 | detector-response | 9546574 2026-10-08 |
+| `histograms-efficiencies.md` | hep-analysis | 3.2 | yes | 8 | detector-response, hep-computing | 9546574 2026-10-08 |
 | `measurements-and-unfolding.md` | hep-analysis | 2.7 | yes | 9 | detector-response, hep-statistics | 351029c 2026-10-07 |
 | `systematics.md` | hep-analysis | 5.0 | yes | 25 | detector-response, hep-statistics, hep-theory, physics-ml | e33254f 2026-10-08 |
 | `weights-normalization.md` | hep-analysis | 5.1 | yes | 6 | detector-response, hep-theory, physics-ml | 351029c 2026-10-07 |
 | `acceptance-criteria.md` | hep-computing | 3.7 | no | 3 | - | 351029c 2026-10-07 |
 | `agile-development-guide.md` | hep-computing | 10.7 | yes | 8 | physics-ml | 351029c 2026-10-07 |
 | `bash-balanced-design-guidelines.md` | hep-computing | 24.8 | yes | 2 | - | 351029c 2026-10-07 |
-| `batch-scheduling.md` | hep-computing | 16.7 | yes | 6 | - | f7b677c 2026-10-08 |
+| `batch-scheduling.md` | hep-computing | 17.8 | yes | 6 | - | 9546574 2026-10-08 |
 | `cmake-and-build.md` | hep-computing | 2.1 | yes | 4 | hep-analysis | 351029c 2026-10-07 |
 | `cpp-balanced-design-guidelines.md` | hep-computing | 26.0 | yes | 6 | physics-ml | 351029c 2026-10-07 |
 | `design-and-estimation.md` | hep-computing | 7.5 | no | 3 | - | 351029c 2026-10-07 |
 | `engineering-playbook.md` | hep-computing | 8.8 | yes | 3 | - | 351029c 2026-10-07 |
-| `environments-and-containers.md` | hep-computing | 3.6 | yes | 1 | - | d951f2c 2026-10-08 |
+| `environments-and-containers.md` | hep-computing | 3.6 | yes | 1 | - | 9546574 2026-10-08 |
 | `example-authoring.md` | hep-computing | 20.0 | no | 8 | hep-analysis, physics-ml | 351029c 2026-10-07 |
-| `host-notes.md` | hep-computing | 5.2 | no | 2 | - | 351029c 2026-10-07 |
+| `host-notes.md` | hep-computing | 5.2 | no | 2 | - | 9546574 2026-10-08 |
 | `implementation-discipline.md` | hep-computing | 7.6 | no | 3 | - | 351029c 2026-10-07 |
 | `loop-engineering.md` | hep-computing | 6.7 | no | 7 | - | 351029c 2026-10-07 |
 | `numerical-and-computational-methods.md` | hep-computing | 8.3 | yes | 5 | hep-theory, research-communication | 351029c 2026-10-07 |
@@ -137,7 +137,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `python-balanced-design-guidelines.md` | hep-computing | 31.1 | yes | 3 | - | 351029c 2026-10-07 |
 | `python-hep-coding-patterns.md` | hep-computing | 3.1 | yes | 3 | hep-analysis | 351029c 2026-10-07 |
 | `risk-and-quality.md` | hep-computing | 7.7 | no | 3 | - | 351029c 2026-10-07 |
-| `root-balanced-design-guidelines.md` | hep-computing | 48.1 | yes | 3 | hep-analysis | 351029c 2026-10-07 |
+| `root-balanced-design-guidelines.md` | hep-computing | 48.1 | yes | 3 | hep-analysis | 9546574 2026-10-08 |
 | `root-debugging.md` | hep-computing | 3.3 | yes | 4 | hep-analysis | 351029c 2026-10-07 |
 | `software-architecture.md` | hep-computing | 7.8 | no | 4 | - | 351029c 2026-10-07 |
 | `status-updates-and-completion.md` | hep-computing | 2.0 | no | 3 | - | 351029c 2026-10-07 |
@@ -200,7 +200,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `artifact-packaging-for-release.md` | research-communication | 2.8 | no | 3 | - | 351029c 2026-10-07 |
 | `astroparticle-and-cosmic-ray-papers.md` | research-communication | 19.5 | no | 10 | - | 351029c 2026-10-07 |
 | `citation-verification.md` | research-communication | 2.7 | yes | 6 | - | 351029c 2026-10-07 |
-| `citations-and-bibliography.md` | research-communication | 18.1 | yes | 11 | - | 351029c 2026-10-07 |
+| `citations-and-bibliography.md` | research-communication | 18.1 | yes | 11 | - | 9546574 2026-10-08 |
 | `claim-evidence-mapping.md` | research-communication | 3.3 | yes | 8 | hep-statistics, hep-theory | 351029c 2026-10-07 |
 | `code-review-report.md` | research-communication | 4.4 | no | 2 | - | 351029c 2026-10-07 |
 | `code-to-methodology-synthesis.md` | research-communication | 5.6 | no | 2 | - | 351029c 2026-10-07 |
@@ -221,11 +221,11 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `latex-mechanics-and-tooling.md` | research-communication | 13.3 | no | 7 | - | 351029c 2026-10-07 |
 | `latex-venue-setup.md` | research-communication | 21.6 | no | 5 | - | 351029c 2026-10-07 |
 | `legends-panels-and-export.md` | research-communication | 8.2 | no | 2 | - | 351029c 2026-10-07 |
-| `literature-discovery-and-search.md` | research-communication | 3.9 | no | 1 | - | 351029c 2026-10-07 |
+| `literature-discovery-and-search.md` | research-communication | 3.9 | no | 1 | - | 9546574 2026-10-08 |
 | `literature-review.md` | research-communication | 7.7 | no | 5 | - | 351029c 2026-10-07 |
 | `logical-consistency-and-argument-uniformity.md` | research-communication | 4.8 | no | 5 | hep-theory | 351029c 2026-10-07 |
 | `manuscript-consistency-auditing.md` | research-communication | 3.5 | no | 4 | - | 351029c 2026-10-07 |
-| `mermaid-patterns.md` | research-communication | 4.2 | no | 3 | - | 351029c 2026-10-07 |
+| `mermaid-patterns.md` | research-communication | 4.2 | no | 3 | - | 9546574 2026-10-08 |
 | `multi-venue-reformatting.md` | research-communication | 2.9 | no | 1 | - | 351029c 2026-10-07 |
 | `outreach-and-public-facing-summaries.md` | research-communication | 4.7 | no | 5 | - | 351029c 2026-10-07 |
 | `paper-genre-variants.md` | research-communication | 4.3 | no | 4 | - | 351029c 2026-10-07 |

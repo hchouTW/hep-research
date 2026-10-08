@@ -2,6 +2,11 @@
 # Submission {{submission_id}}: each process takes its chunk and attempt IDs from the item list, never from $(Process).
 # No max_retries and no on_exit_remove / periodic_release: a failed or held job is reported, never retried here.
 universe = {{universe}}
+# The submission tag names the batch and a job attribute, so reconcile can find the jobs; getenv = false keeps the
+# submitter's environment (tokens, agent sockets) out of the job.
+batch_name = {{tag}}
++HepResearchTag = "{{tag}}"
+getenv = false
 {{container_line}}executable = {{executable}}
 transfer_executable = {{transfer_executable}}
 arguments = "{{arguments}}"

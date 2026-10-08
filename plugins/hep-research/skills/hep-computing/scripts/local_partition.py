@@ -16,6 +16,7 @@ Python API: make_manifest(job_id, n_items, chunk_size, seed) -> dict; run(manife
 CLI:
   plan  --job ID --items N --chunk-size K --seed S --out manifest.json
   run   --manifest manifest.json --state DIR --cmd "python3 worker.py --start {start} --stop {stop} --seed {seed} --out {out}"
+        [--timeout S] [--env-passthrough NAME ...]   the worker gets PATH, HOME, locale and TMPDIR only, plus named variables
         [--config run-config.json]   (the command writes JSON to {out}; exit 0 means success)
   status --manifest manifest.json --state DIR
   merge --manifest manifest.json --state DIR   (sums numeric lists/values key by key)
@@ -37,14 +38,22 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from core.partition.engine import (_hash, _load_state, _reduce, _sum, _write_atomic, check_template, make_manifest, merge,  # noqa: E402,F401,E501
                                    reset, run, status, validate_manifest)
+from core.partition.executors import allowed_env  # noqa: E402
 
 
-def _cmd_worker(template: str, state_dir: Path):
+def _cmd_worker(template: str, state_dir: Path, timeout: float | None = None, passthrough=()):
+    """The worker runs with an allow-listed environment (core.partition.executors.ENV_ALLOW plus passthrough names)
+    and an optional timeout, the same rules as batch jobs (X16)."""
+    env = allowed_env(None, passthrough)
+
     def worker(ch):
         with tempfile.TemporaryDirectory(dir=state_dir) as td:
             out = Path(td) / "out.json"
             cmd = [a.format(start=ch["start"], stop=ch["stop"], seed=ch["seed"], out=out, id=ch["id"]) for a in shlex.split(template)]
-            proc = subprocess.run(cmd, capture_output=True, text=True)
+            try:
+                proc = subprocess.run(cmd, capture_output=True, text=True, env=env, timeout=timeout)
+            except subprocess.TimeoutExpired:
+                raise RuntimeError(f"timeout after {timeout} s") from None
             if proc.returncode != 0:
                 raise RuntimeError(f"exit {proc.returncode}: {proc.stderr.strip()[-300:]}")
             return json.loads(out.read_text(encoding="utf-8"))
@@ -67,6 +76,9 @@ def main(argv=None) -> int:
         if name == "run":
             s.add_argument("--cmd", dest="template", required=True)
             s.add_argument("--config", type=Path)
+            s.add_argument("--timeout", type=float, help="seconds before a chunk's command is stopped (counts as a failure)")
+            s.add_argument("--env-passthrough", nargs="*", default=[], metavar="NAME",
+                           help="environment variables passed to the worker besides PATH, HOME, locale and TMPDIR")
         if name == "reset":
             s.add_argument("--chunks", nargs="+", required=True)
             s.add_argument("--reason", required=True)
@@ -82,7 +94,7 @@ def main(argv=None) -> int:
             check_template(args.template)
             cfg = json.loads(args.config.read_text(encoding="utf-8")) if args.config else None
             args.state.mkdir(parents=True, exist_ok=True)
-            res = run(manifest, args.state, _cmd_worker(args.template, args.state), cfg)
+            res = run(manifest, args.state, _cmd_worker(args.template, args.state, args.timeout, args.env_passthrough), cfg)
             print(json.dumps(res, indent=1))
             return 0 if res["complete"] else 1
         if args.cmd == "status":

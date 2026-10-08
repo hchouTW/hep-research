@@ -15,7 +15,7 @@
   },
   "hep-computing": {
    "references": 26,
-   "bytes": 286074,
+   "bytes": 287176,
    "uncited": 0
   },
   "hep-statistics": {
@@ -776,7 +776,7 @@
     "detector-response",
     "hep-computing"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "9546574 2026-10-08"
   },
   {
    "path": "skills/hep-analysis/references/analysis-validation.md",
@@ -859,7 +859,7 @@
    "cited_by_other_skills": [
     "detector-response"
    ],
-   "last_commit": "051665e 2026-10-07"
+   "last_commit": "9546574 2026-10-08"
   },
   {
    "path": "skills/hep-analysis/references/histograms-efficiencies.md",
@@ -881,7 +881,7 @@
     "detector-response",
     "hep-computing"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "9546574 2026-10-08"
   },
   {
    "path": "skills/hep-analysis/references/measurements-and-unfolding.md",
@@ -1019,8 +1019,8 @@
   {
    "path": "skills/hep-computing/references/batch-scheduling.md",
    "owner": "hep-computing",
-   "bytes": 16726,
-   "lines": 171,
+   "bytes": 17828,
+   "lines": 183,
    "linked_from_skill_md": true,
    "cited_by": [
     "adapters/batch-schedulers/htcondor_backend.py",
@@ -1031,7 +1031,7 @@
     "tools/check_instruction_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "f7b677c 2026-10-08"
+   "last_commit": "9546574 2026-10-08"
   },
   {
    "path": "skills/hep-computing/references/cmake-and-build.md",
@@ -1107,7 +1107,7 @@
     "skills/hep-computing/SKILL.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "d951f2c 2026-10-08"
+   "last_commit": "9546574 2026-10-08"
   },
   {
    "path": "skills/hep-computing/references/example-authoring.md",
@@ -1142,7 +1142,7 @@
     "skills/hep-computing/scripts/validate_skill_bundle.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "9546574 2026-10-08"
   },
   {
    "path": "skills/hep-computing/references/implementation-discipline.md",
@@ -1281,7 +1281,7 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "9546574 2026-10-08"
   },
   {
    "path": "skills/hep-computing/references/root-debugging.md",
@@ -2339,7 +2339,7 @@
     "skills/research-communication/references/statistics-and-ml-papers.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "9546574 2026-10-08"
   },
   {
    "path": "skills/research-communication/references/claim-evidence-mapping.md",
@@ -2637,7 +2637,7 @@
     "skills/research-communication/references/academic-papers-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "9546574 2026-10-08"
   },
   {
    "path": "skills/research-communication/references/literature-review.md",
@@ -2700,7 +2700,7 @@
     "skills/research-communication/scripts/check_diagram_sources.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "9546574 2026-10-08"
   },
   {
    "path": "skills/research-communication/references/multi-venue-reformatting.md",

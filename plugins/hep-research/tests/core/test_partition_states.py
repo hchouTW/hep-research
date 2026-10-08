@@ -11,7 +11,7 @@ EXPECTED = {  # final state -> decision with max_attempts=3, attempts left, reso
     "preempted-or-evicted": "resubmit", "node-failure": "resubmit", "lost": "resubmit",
     "timeout": "needs-resource-change", "out-of-memory": "needs-resource-change",
     "failed": "needs-reset", "held": "needs-reset", "cancelled": "needs-reset", "unknown": "needs-reset",
-    "not-submitted": "needs-reset",
+    "not-submitted": "needs-reset", "abandoned": "needs-reset",
 }
 
 
@@ -162,7 +162,7 @@ class CampaignRetryTests(unittest.TestCase):
         cp.poll(self.cdir, ex)
         self.assertTrue(cp.cancel(self.cdir, ex, ["c0000"])["dry_run"])
         self.assertFalse(any(c[0] == "cancel" for c in ex.calls))
-        self.assertEqual(cp.cancel(self.cdir, ex, ["c0000"], approved=True)["cancelled"], ["j-c0000-a01"])
+        self.assertEqual(cp.cancel(self.cdir, ex, ["c0000"], approved=True)["requested"], ["j-c0000-a01"])
 
 
 if __name__ == "__main__":

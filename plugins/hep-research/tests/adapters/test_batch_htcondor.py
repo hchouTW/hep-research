@@ -1,6 +1,7 @@
 """B05/B08: HTCondor backend against the fake scheduler; real HTCondor only with HEP_HTCONDOR_TEST=1."""
 import json
 import os
+import re
 import shutil
 import unittest
 from pathlib import Path
@@ -95,7 +96,9 @@ class HTCondorShimTests(unittest.TestCase):
         h.plan()
         self.assertTrue(h.cli("submit")[1]["dry_run"])
         self.assertEqual(h.calls(), [])
-        sub = (h.cdir / "dry-run" / "s001" / "job.sub").read_text().replace(str(h.cdir), "<CAMPAIGN>")
+        sub = re.sub(r"hepr-[0-9a-f]{16}-", "hepr-<UID>-",
+                     (h.cdir / "dry-run" / "s001" / "job.sub").read_text().replace(str(h.cdir), "<CAMPAIGN>"))
+        self.assertIn("getenv = false", sub)  # the submitter's environment never reaches the job (X06)
         if os.environ.get("HEP_UPDATE_GOLDEN"):
             GOLDEN.write_text(sub)
         self.assertEqual(sub, GOLDEN.read_text())

@@ -47,6 +47,18 @@ Software checks establish contract consistency only, not physical validity.
     block from 1.1.0, adds `blinding.regions`, and requires the block when `agent_policy` is present.
     `contracts.project.load_blinding` reads it validated; `core.blinding.load_project_blinding` refuses a policy without
     a blinding block instead of reporting nothing blinded.
+  - **Batch execution hardening (WP3′).** Every scheduler call has a timeout (`scheduler_timeout_s`, default 120 s) and
+    an allow-listed environment (`env_passthrough` adds names; credential-like names are refused); Slurm jobs use
+    `--export=NONE`, HTCondor jobs `getenv = false`. Only a client that could not start records `not-submitted`; a
+    timeout, exit 0 without a job ID or a failure after the call keeps the submission unconfirmed. Each submission has a
+    tag (`hepr-<campaign uid>-<submission>`, the job name / `batch_name` and `HepResearchTag`); new `reconcile` lists
+    the scheduler's jobs under it, and `confirm` refuses job IDs not in that list. `abandon` records `abandoned`.
+    `cancel` records each command's exit and reports requests, not terminations. Configuration strings are single-line
+    with strict names; `worker_python` and `transfer_input_files` are absolute. Collection never follows symbolic links
+    and caps output size; `merge` refuses chunk files `collect` did not record and warns about collected orphan outputs.
+    `submit --plan-digest` binds a submission to its reviewed dry run. The runner (`worker_timeout_s`), the local
+    executor and `local_partition.py run` (`--timeout`, `--env-passthrough`) apply the same timeout and environment
+    rules.
 
 - **Choosing a SymPy interpreter (SYMPY).** `skills/hep-computing/scripts/find_python.py` finds a Python >= 3.11 that
   imports the packages a task needs (default SymPy). It tries, in order, `--python`, `HEP_RESEARCH_PYTHON`, the

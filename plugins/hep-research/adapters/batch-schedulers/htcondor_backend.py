@@ -30,7 +30,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from core.partition.campaign import CampaignError  # noqa: E402
-from core.partition.executors import Executor, PollError, SubmitError, _blank  # noqa: E402
+from core.partition.executors import Executor, PollError, SubmitAmbiguous, _blank  # noqa: E402
 
 TEMPLATE = Path(__file__).resolve().parent / "assets" / "htcondor-chunks.sub.template"
 HEADER = re.compile(r"^(\d{3}) \((\d+)\.(\d+)\.(\d+)\) (\S+ \S+) ?(.*)$")
@@ -106,7 +106,7 @@ class HTCondorExecutor(Executor):
     name = "htcondor"
 
     def __init__(self, config: dict, env: dict | None = None):
-        super().__init__(env)
+        super().__init__(env, config)
         self.config = config
 
     def prepare(self, ctx: dict) -> dict:
@@ -135,7 +135,7 @@ class HTCondorExecutor(Executor):
             ("request_disk", f"{res['disk_mb']}MB" if "disk_mb" in res else None),
             ("request_gpus", res.get("gpus") or None)) if v is not None)
         values = {
-            "submission_id": ctx["submission_id"], "universe": site["universe"],
+            "submission_id": ctx["submission_id"], "universe": site["universe"], "tag": ctx.get("tag") or ctx["submission_id"],
             "container_line": f"container_image = {site['container_image']}\n" if site.get("container_image") else "",
             "executable": executable,
             "transfer_executable": "true" if transfer and not cfg.get("worker_python") else "false",
@@ -154,15 +154,15 @@ class HTCondorExecutor(Executor):
                 "submit_argv": ["condor_submit", "-terse", str(sub / "job.sub")], "rows": ctx["rows"]}
 
     def submit(self, plan: dict) -> list[dict]:
-        p = self.run(plan["submit_argv"], cwd=plan["submission_dir"])
+        p = self.run_submit(plan["submit_argv"], cwd=plan["submission_dir"])
         m = re.match(r"^(\d+)\.(\d+) - (\d+)\.(\d+)\s*$", (p.stdout.strip().splitlines() or [""])[-1])
-        if p.returncode != 0 or not m:
-            raise SubmitError("htcondor.submit.failed", f"exit {p.returncode}: {(p.stderr or p.stdout).strip()[-500:]}")
+        if p.returncode != 0 or not m:  # condor_submit ran: the schedd may still have queued the cluster
+            raise SubmitAmbiguous("htcondor.submit.failed", f"exit {p.returncode}: {(p.stderr or p.stdout).strip()[-500:]}")
         cluster, first = int(m.group(1)), int(m.group(2))
         return [{"attempt_id": r["attempt_id"], "job_id": f"{cluster}.{first + r['index']}"} for r in plan["rows"]]
 
     def _ads(self, tool: str, clusters: list[str]) -> dict:
-        p = self.run([tool, *clusters, "-json", "-attributes", ATTRS])
+        p = self.run_poll([tool, *clusters, "-json", "-attributes", ATTRS])
         if p.returncode != 0:
             raise PollError(f"htcondor.{tool}.failed", f"exit {p.returncode}: {p.stderr.strip()[-300:]}")
         text = p.stdout.strip()
@@ -227,12 +227,39 @@ class HTCondorExecutor(Executor):
                                                     evidence="in neither the queue nor the history")
         return out
 
-    def cancel(self, records: list[dict]) -> list[list[str]]:
-        cmds = [["condor_rm", r["job_id"]] for r in records]
-        for c in cmds:
-            self.run(c)
-        return cmds
+    def find(self, tag: str, since: str | None = None) -> list[dict]:
+        """Read-only: jobs in the queue or the history whose HepResearchTag is the submission tag (reconciliation)."""
+        if not re.match(r"^[A-Za-z0-9_.-]+$", tag):
+            raise PollError("htcondor.bad_tag", f"refusing to build a constraint from {tag!r}")
+        out, seen = [], set()
+        for tool in ("condor_q", "condor_history"):
+            p = self.run_poll([tool, "-constraint", f'HepResearchTag == "{tag}"', "-json", "-attributes", ATTRS])
+            if p.returncode != 0:
+                raise PollError(f"htcondor.{tool}.failed", f"exit {p.returncode}: {p.stderr.strip()[-300:]}")
+            try:
+                ads = json.loads(p.stdout.strip() or "[]")
+            except ValueError as exc:
+                raise PollError(f"htcondor.{tool}.unparsable", str(exc)) from None
+            for ad in ads if isinstance(ads, list) else []:
+                jid = f"{ad.get('ClusterId')}.{ad.get('ProcId')}"
+                if jid not in seen:
+                    seen.add(jid)
+                    out.append({"job_id": jid, "state": self._from_ad(ad, tool)["state"]})
+        return out
+
+    def cancel(self, records: list[dict]) -> list[dict]:
+        out = []
+        for r in records:
+            argv = ["condor_rm", r["job_id"]]
+            try:
+                out.append({"argv": argv, "exit": self.run_poll(argv).returncode})
+            except PollError as exc:  # a hung or missing client: recorded, the other jobs are still cancelled
+                out.append({"argv": argv, "exit": None, "error": exc.signature})
+        return out
 
     def version(self) -> str:
-        p = self.run(["condor_version"])
+        try:
+            p = self.run_poll(["condor_version"])
+        except PollError as exc:
+            return f"unknown ({exc.signature})"
         return p.stdout.strip().splitlines()[0] if p.returncode == 0 and p.stdout.strip() else f"unknown (condor_version exit {p.returncode})"

@@ -7,7 +7,8 @@ cancel needs --approve-cancel. Nothing here releases a held job, raises a resour
   check-config --config C [--example]
   plan     --config C (--manifest M | --job ID --items N --chunk-size K --seed S) --cmd "worker ... {start} {stop} {seed} {out}"
            [--container-image IMAGE]                     writes the manifest and the runner spec into campaign_dir
-  submit   --config C [--submit] [--pilot] [--chunks ID ...]   --pilot: one chunk, to size time and memory
+  submit   --config C [--submit] [--pilot] [--chunks ID ...] [--plan-digest D]   --pilot: one chunk, to size time
+           and memory; --plan-digest: the dry run's plan_digest, refuses if the job files changed since the review
   status   --config C                                    exactly one poll, then collection; per-chunk state,
                                                          elapsed time and peak memory where the scheduler reports them
   watch    --config C                                    repeated status within monitor.poll_interval_s (>= 60) and
@@ -15,8 +16,14 @@ cancel needs --approve-cancel. Nothing here releases a held job, raises a resour
   resubmit --config C [--submit]                         only chunks whose decision allows it (max_attempts, changed
                                                          resources after timeout or out-of-memory)
   reset    --config C --chunks ID ... --reason TEXT      after a person fixed the cause
-  confirm  --config C --submission S --jobs ATTEMPT=JOB ...   after an interrupted submit: the jobs the scheduler has
-  abandon  --config C --submission S --reason TEXT       after an interrupted submit: the scheduler has none of them
+  reconcile --config C --submission S                   read-only: the jobs the scheduler lists under the
+                                                         submission's tag (after an interrupted or ambiguous submit)
+  confirm  --config C --submission S --jobs ATTEMPT=JOB ...   a person records the jobs; every job ID must be one
+                                                         reconcile lists (fabricated IDs are refused)
+  abandon  --config C --submission S --reason TEXT       a person found none of them; recorded as 'abandoned'
+Submission runs outside the agent sandbox: only in a disposable test environment with synthetic data, each submission
+approved by the user, until a trusted submitter is qualified. Scheduler clients get an allow-listed environment and a
+timeout; a submit whose outcome is unknown stays unconfirmed, never 'not-submitted'.
   cancel   --config C [--chunks ID ...] [--approve-cancel]
   merge    --config C                                    requires every chunk exactly once
   report   --config C --out ARTIFACT.json [--label synthetic ...] [--objective TEXT]
@@ -117,8 +124,8 @@ def build_artifact(cdir: Path, cfg: dict, executor, labels: list[str], objective
 def main(argv=None, env=None, sleep=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
-    for name in ("check-config", "plan", "submit", "status", "watch", "resubmit", "reset", "confirm", "abandon", "cancel",
-                 "merge", "report"):
+    for name in ("check-config", "plan", "submit", "status", "watch", "resubmit", "reset", "reconcile", "confirm", "abandon",
+                 "cancel", "merge", "report"):
         s = sub.add_parser(name)
         s.add_argument("--config", type=Path, required=True)
         if name == "check-config":
@@ -135,11 +142,12 @@ def main(argv=None, env=None, sleep=None) -> int:
             s.add_argument("--submit", action="store_true", help="really submit (default: dry run, no scheduler call)")
         if name == "submit":
             s.add_argument("--pilot", action="store_true")
+            s.add_argument("--plan-digest", help="the plan_digest of the reviewed dry run: refuse if the job files changed")
         if name in ("submit", "cancel", "reset"):
             s.add_argument("--chunks", nargs="+", required=name == "reset")
         if name in ("reset", "abandon"):
             s.add_argument("--reason", required=True)
-        if name in ("confirm", "abandon"):
+        if name in ("reconcile", "confirm", "abandon"):
             s.add_argument("--submission", required=True, help="the unconfirmed submission, for example s003")
         if name == "confirm":
             s.add_argument("--jobs", nargs="+", required=True, metavar="ATTEMPT=JOB",
@@ -168,10 +176,11 @@ def main(argv=None, env=None, sleep=None) -> int:
                 return emit({"error": "plan needs --manifest or all of --job --items --chunk-size --seed"}, 2)
             else:
                 manifest = engine.make_manifest(args.job, args.items, args.chunk_size, args.seed)
-            cp.init(cdir, manifest, args.template, args.container_image)
+            cp.init(cdir, manifest, args.template, args.container_image, cfg.get("worker_timeout_s"))
             return emit({"campaign_dir": str(cdir), "chunks": len(manifest["chunks"]), "manifest_hash": manifest["manifest_hash"]}, 0)
         if args.cmd == "submit":
-            rep = cp.submit(cdir, ex, cfg, chunk_ids=args.chunks, approved=args.submit, pilot=args.pilot)
+            rep = cp.submit(cdir, ex, cfg, chunk_ids=args.chunks, approved=args.submit, pilot=args.pilot,
+                            expected_plan_digest=args.plan_digest)
             return emit(rep, 0)
         if args.cmd == "status":
             rep = cp.poll(cdir, ex)
@@ -188,7 +197,9 @@ def main(argv=None, env=None, sleep=None) -> int:
             pairs = dict(item.split("=", 1) for item in args.jobs if "=" in item)
             if len(pairs) != len(args.jobs):
                 return emit({"error": "--jobs takes ATTEMPT=JOB pairs"}, 2)
-            return emit(cp.confirm_submission(cdir, args.submission, pairs), 0)
+            return emit(cp.confirm_submission(cdir, args.submission, pairs, ex), 0)
+        if args.cmd == "reconcile":
+            return emit(cp.reconcile(cdir, ex, args.submission), 0)
         if args.cmd == "abandon":
             return emit(cp.abandon_submission(cdir, args.submission, args.reason), 0)
         if args.cmd == "cancel":

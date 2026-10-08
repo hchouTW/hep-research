@@ -114,10 +114,13 @@ def main(argv=None) -> int:
             cmd, code = None, 2
         if cmd is not None:
             sys.stdout.flush()
-            proc = subprocess.run(cmd)
-            code = proc.returncode
-            if code < 0:
-                meta["signal"], code = -code, 128 - code
+            try:
+                proc = subprocess.run(cmd, timeout=spec.get("worker_timeout_s"))  # None: no limit
+                code = proc.returncode
+                if code < 0:
+                    meta["signal"], code = -code, 128 - code
+            except subprocess.TimeoutExpired:
+                meta["runner_error"], code = f"worker command exceeded worker_timeout_s={spec['worker_timeout_s']}", 124
         if code == 0:
             try:
                 result = json.loads(out.read_text(encoding="utf-8"))

@@ -20,7 +20,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from core.partition.executors import Executor, PollError, SubmitError, _blank  # noqa: E402
+from core.partition.executors import Executor, PollError, SubmitAmbiguous, _blank  # noqa: E402
 
 TEMPLATE = Path(__file__).resolve().parent / "assets" / "slurm-array.sbatch.template"
 SACCT_FIELDS = "JobID,State,ExitCode,Elapsed,MaxRSS,NodeList"
@@ -83,7 +83,7 @@ class SlurmExecutor(Executor):
     name = "slurm"
 
     def __init__(self, config: dict, env: dict | None = None):
-        super().__init__(env)
+        super().__init__(env, config)
         self.config = config
 
     def prepare(self, ctx: dict) -> dict:
@@ -105,8 +105,11 @@ class SlurmExecutor(Executor):
             lines.append(f"#SBATCH --tmp={res['disk_mb']}M")
         sub = Path(ctx["submission_dir"])
         q = shlex.quote
-        values = {"submission_id": ctx["submission_id"], "job_name": cfg.get("job_name", "hep-partition"), "array": array,
-                  "resource_lines": "\n".join(lines), "worker_python": q(cfg.get("worker_python", "python3")),
+        wp = cfg.get("worker_python")
+        path_line = f"export PATH={q(str(Path(wp).parent))}:/usr/bin:/bin\n" if wp else ""
+        values = {"submission_id": ctx["submission_id"], "job_name": ctx.get("tag") or cfg.get("job_name", "hep-partition"),
+                  "array": array, "path_line": path_line,
+                  "resource_lines": "\n".join(lines), "worker_python": q(wp or "python3"),
                   "runner": q(str(ctx["runner"])), "spec": q(str(ctx["spec"])), "map": q(str(sub / "map.json")),
                   "outputs": q(str(ctx["outputs_dir"]))}
         text = TEMPLATE.read_text(encoding="utf-8")
@@ -119,16 +122,16 @@ class SlurmExecutor(Executor):
                 "submit_argv": argv, "rows": ctx["rows"]}
 
     def submit(self, plan: dict) -> list[dict]:
-        p = self.run(plan["submit_argv"], cwd=plan["submission_dir"])
+        p = self.run_submit(plan["submit_argv"], cwd=plan["submission_dir"])
         first = (p.stdout.strip().splitlines() or [""])[0]
         job = first.split(";")[0]
-        if p.returncode != 0 or not job.isdigit():
-            raise SubmitError("slurm.sbatch.failed", f"exit {p.returncode}: {(p.stderr or p.stdout).strip()[-500:]}")
+        if p.returncode != 0 or not job.isdigit():  # sbatch ran: the scheduler may still have queued the array
+            raise SubmitAmbiguous("slurm.sbatch.failed", f"exit {p.returncode}: {(p.stderr or p.stdout).strip()[-500:]}")
         return [{"attempt_id": r["attempt_id"], "job_id": f"{job}_{r['index']}"} for r in plan["rows"]]
 
     def poll(self, records: list[dict]) -> dict:
         jobs = sorted({r["job_id"].split("_")[0] for r in records})
-        p = self.run(["sacct", f"--jobs={','.join(jobs)}", "--duplicates", "--parsable2", "--noheader", f"--format={SACCT_FIELDS}"])
+        p = self.run_poll(["sacct", f"--jobs={','.join(jobs)}", "--duplicates", "--parsable2", "--noheader", f"--format={SACCT_FIELDS}"])
         if p.returncode != 0:
             return self._poll_queue(records, f"sacct exit {p.returncode}: {p.stderr.strip()[-300:]}")
         tasks: dict[str, list[dict]] = {}
@@ -173,7 +176,7 @@ class SlurmExecutor(Executor):
 
     def _poll_queue(self, records: list[dict], why: str) -> dict:
         jobs = sorted({r["job_id"].split("_")[0] for r in records})
-        p = self.run(["squeue", f"--jobs={','.join(jobs)}", "--array", "--noheader", "--format=%i|%T"])
+        p = self.run_poll(["squeue", f"--jobs={','.join(jobs)}", "--array", "--noheader", "--format=%i|%T"])
         if p.returncode != 0:
             raise PollError("slurm.no_accounting_no_queue", f"{why}; squeue exit {p.returncode}: {p.stderr.strip()[-300:]}")
         queued = {}
@@ -201,12 +204,39 @@ class SlurmExecutor(Executor):
                 out[rec["attempt_id"]] = _blank(state="lost", native_state="not in queue, no runner record", evidence=ev)
         return out
 
-    def cancel(self, records: list[dict]) -> list[list[str]]:
-        cmds = [["scancel", r["job_id"]] for r in records]
-        for c in cmds:
-            self.run(c)
-        return cmds
+    def find(self, tag: str, since: str | None = None) -> list[dict]:
+        """Read-only: array tasks the accounting lists under the job name tag (reconciliation)."""
+        start = (since or "now-7days").rstrip("Z")
+        p = self.run_poll(["sacct", f"--name={tag}", f"--starttime={start}", "--array", "-X", "--parsable2", "--noheader",
+                           "--format=JobID,JobName,State"])
+        if p.returncode != 0:
+            raise PollError("slurm.sacct.failed", f"exit {p.returncode}: {p.stderr.strip()[-300:]}")
+        out = []
+        for line in p.stdout.splitlines():
+            f = line.strip().split("|")
+            if len(f) != 3:
+                continue
+            jid, name, state = f
+            m, pr = TASK.match(jid), PENDING_RANGE.match(jid)
+            if name != tag or not (m or pr):
+                continue
+            ids = [jid] if m else [f"{pr.group(1)}_{i}" for i in expand_range(pr.group(2))]
+            out += [{"job_id": t, "state": mapped(state), "native_state": state} for t in ids]
+        return out
+
+    def cancel(self, records: list[dict]) -> list[dict]:
+        out = []
+        for r in records:
+            argv = ["scancel", r["job_id"]]
+            try:
+                out.append({"argv": argv, "exit": self.run_poll(argv).returncode})
+            except PollError as exc:  # a hung or missing client: recorded, the other jobs are still cancelled
+                out.append({"argv": argv, "exit": None, "error": exc.signature})
+        return out
 
     def version(self) -> str:
-        p = self.run(["sbatch", "--version"])
+        try:
+            p = self.run_poll(["sbatch", "--version"])
+        except PollError as exc:
+            return f"unknown ({exc.signature})"
         return p.stdout.strip() if p.returncode == 0 and p.stdout.strip() else f"unknown (sbatch --version exit {p.returncode})"
