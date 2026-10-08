@@ -1,6 +1,8 @@
-"""Blinding enforcement for binned outputs, ratios, figures, logs and caches (core module, steward hep-computing).
+"""Blinding helpers for binned outputs, ratios, figures, logs and caches (core module, steward hep-computing).
 
-Policy (which regions are blinded) belongs to hep-analysis and the project config; this module only enforces it.
+Advisory when the agent runs them, a safety net when a custodian runs them; never enforcement. Enforcement is input
+blinding (the agent reads only released blinded derivatives) plus OS access control outside the agent. Policy (which
+regions are blinded) belongs to the collaboration, recorded through hep-analysis and the project config.
 A region is {"variable": name, "low": x0, "high": x1}; a bin is blinded when it overlaps [low, high).
 
 - mask_binned(edges, values, region)      -> values with blinded bins replaced by None, plus the mask

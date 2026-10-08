@@ -53,8 +53,7 @@ class RevocationTests(unittest.TestCase):
 
     def test_no_revocation_file_keeps_old_behaviour(self):
         rep = validate_dependencies(self.down, self.root)
-        self.assertTrue(rep["formal_use_allowed"])
-        self.assertEqual(rep["dependency_consistency_ok"], rep["formal_use_allowed"])
+        self.assertTrue(rep["dependency_consistency_ok"])
         self.assertFalse(rep["revocations_checked"])
 
     def test_revoked_upstream_blocks_without_changing_its_bytes(self):
@@ -65,8 +64,7 @@ class RevocationTests(unittest.TestCase):
         codes = {f["code"] for f in rep["findings"]}
         self.assertIn("dependency.revoked", codes)
         self.assertNotIn("dependency.hash_mismatch", codes)  # history intact: the cited bytes still verify
-        self.assertFalse(rep["formal_use_allowed"])
-        self.assertEqual(rep["dependency_consistency_ok"], rep["formal_use_allowed"])
+        self.assertFalse(rep["dependency_consistency_ok"])
         self.assertTrue(rep["revocations_checked"])
         self.assertEqual(sha(self.up), before)
 
@@ -83,7 +81,7 @@ class RevocationTests(unittest.TestCase):
 
     def test_missing_revocation_file_fails_closed(self):
         rep = validate_dependencies(self.down, self.root, revocations=self.root / "absent.jsonl")
-        self.assertFalse(rep["formal_use_allowed"])
+        self.assertFalse(rep["dependency_consistency_ok"])
 
 
 class VerifyRunTests(unittest.TestCase):

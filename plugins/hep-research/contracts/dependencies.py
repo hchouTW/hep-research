@@ -10,8 +10,10 @@ project root) and checks, recursively through the sources' own inputs:
   - sha256 is 64 hex digits and equals the file's digest (no hash: unresolved, a substitution cannot be detected);
   - the sticky statuses the source really carries are declared on the input and carried by the consumer.
 An input with "external": true, or a ref with a scheme ('hepdata:...', 'https://...'), is not materialized in the
-project: it is reported 'unresolved', never read. Any error or unresolved finding sets formal_use_allowed false: the
-artifact may be explored, but not used for a formal result, until its dependencies resolve.
+project: it is reported 'unresolved', never read. Any error or unresolved finding sets dependency_consistency_ok
+false. The report is advisory: it never authorizes formal use. formal_use_allowed is always false, because formal use
+is decided only by a trusted gate outside the agent-run code (an artifact with no inputs, or '{}', is consistent but
+is not thereby allowed).
 
 Usage: python3 contracts/dependencies.py ARTIFACT.json --root PROJECT_ROOT [--base DIR] [--revocations FILE]
 Exit codes: 0 ok, 1 errors, 3 unresolved only, 2 unreadable input or bad usage. Output: JSON report on stdout.
@@ -176,7 +178,8 @@ def validate_dependencies(artifact_path, project_root, base=None, revocations=No
     sev = {f["severity"] for f in chk.findings}
     status = "error" if "error" in sev else ("unresolved" if "unresolved" in sev else "ok")
     consistent = status == "ok" and not chk.failed_upstream
-    return {"status": status, "formal_use_allowed": consistent, "dependency_consistency_ok": consistent,
+    return {"status": status, "dependency_consistency_ok": consistent,
+            "formal_use_allowed": False, "formal_use": "decided only by the trusted gate, never by this advisory check",
             "revocations_checked": bool(revocations),
             "failed_upstream": chk.failed_upstream, "checked": chk.checked, "findings": chk.findings,
             "note": "dependency consistency only: a resolved chain says nothing about the physical validity of any artifact"}

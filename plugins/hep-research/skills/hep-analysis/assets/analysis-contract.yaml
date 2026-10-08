@@ -40,7 +40,7 @@ statistics:
 blinding:
   state: blinded
   mask_definition: null
-  unblinding_authorization: null
+  unblinding_record_ref: null  # reference to a human unblinding record kept outside the agent session; the agent never fills it
 validation:
   reference_outputs: null
   tolerances: null

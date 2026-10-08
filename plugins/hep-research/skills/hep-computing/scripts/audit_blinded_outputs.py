@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Audit output files for blinded values (enforcement side of blinding; policy is hep-analysis and the project config).
+"""Audit output files for blinded values: an advisory check, not enforcement and not authorization.
+
+With real data, seal and scan only as the data custodian or a person outside the agent session; agents use synthetic
+sentinels only. Enforcement is input blinding plus OS access control; policy is the collaboration's.
 
 Two steps, so the blinded numbers never sit inside the audited outputs:
   seal:  python3 audit_blinded_outputs.py seal --hist hist.json --low 120 --high 130 [--reference mc.json] --out /private/sealed.json

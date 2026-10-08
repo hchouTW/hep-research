@@ -65,12 +65,12 @@ class DependencyAuditT05(unittest.TestCase):
         self.assertEqual(rep["status"], "error")
         self.assertIn("dependency.missing", self.codes(rep, "error"))
         self.assertIn("dependency.bad_hash_format", self.codes(rep, "error"))
-        self.assertFalse(rep["formal_use_allowed"])
+        self.assertFalse(rep["dependency_consistency_ok"])
 
     def test_valid_chain(self):
         rep = self.check(self.consumer())
         self.assertEqual(rep["status"], "ok", rep["findings"])
-        self.assertTrue(rep["formal_use_allowed"])
+        self.assertTrue(rep["dependency_consistency_ok"])
 
     def test_missing_file(self):
         self.assertIn("dependency.missing", self.codes(self.check(self.consumer(ref="artifacts/gone.json"))))
@@ -98,13 +98,13 @@ class DependencyAuditT05(unittest.TestCase):
         rep = self.check(self.consumer(sha256=sha(self.src)))  # the manifest still declares the old statuses
         self.assertIn("dependency.status_undeclared", self.codes(rep, "error"))
         self.assertIn("dependency.status_not_propagated", self.codes(rep, "error"))
-        self.assertFalse(rep["formal_use_allowed"])
+        self.assertFalse(rep["dependency_consistency_ok"])
 
     def test_external_ref_is_unresolved(self):
         rep = self.check(self.consumer(ref="hepdata:ins0000000/t1", external=True, sha256=None))
         self.assertEqual(rep["status"], "unresolved")
         self.assertIn("dependency.external_unresolved", self.codes(rep, "unresolved"))
-        self.assertFalse(rep["formal_use_allowed"])
+        self.assertFalse(rep["dependency_consistency_ok"])
 
     def test_out_of_root_paths_never_read(self):
         outside = Path(self.tmp.name) / "secret.json"
