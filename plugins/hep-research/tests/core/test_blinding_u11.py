@@ -246,3 +246,48 @@ class FigureCoverageN16(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+@unittest.skipUnless(HAVE, "numpy and matplotlib are needed")
+class ReviewFollowUps(unittest.TestCase):
+    """Cases found in review of the T0.6 branch."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.d = Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_unscanned_list_does_not_depend_on_where_the_leak_is(self):
+        views = []
+        for leak_in_npz in (True, False):
+            out = self.d / f"out{leak_in_npz}"
+            out.mkdir()
+            np.savez(out / "a.npz", c=np.array([1 + 1j]), f=np.array([4731.3712 if leak_in_npz else 1.0]))
+            (out / "b.txt").write_text("4731.3712\n" if not leak_in_npz else "clean\n")
+            rep = bl.scan_paths([out], [4731.3712])
+            views.append((rep["status"], [Path(u["file"]).name for u in rep["unscanned"]], len(rep["scanned"])))
+        self.assertEqual(views[0], views[1])
+        self.assertEqual(views[0][0], "fail")
+
+    def test_numeric_dump_behind_a_byte_order_mark_is_unscanned(self):
+        np.array([-257, 4731, 7] * 10, "<i4").tofile(self.d / "counts")
+        self.assertEqual(bl.scan_paths([self.d / "counts"], [4731.0])["status"], "incomplete")
+
+    def test_weak_negative_value_keeps_its_sign(self):
+        s = bl.seal([0, 1, 2], [10, 20], {"low": 1, "high": 2}, [[10, 23]])
+        self.assertIn(-3.0, s)
+        self.assertFalse([h for h in bl.scan_text("step 3 done", s) if h["sealed_value"] == -3.0])
+        self.assertTrue(bl.scan_text("diff -3 here", [-3.0]))
+
+    def test_inf_in_a_float16_cache_is_not_a_large_sealed_value(self):
+        np.save(self.d / "h.npy", np.array([np.inf], np.float16))
+        self.assertEqual(bl.scan_paths([self.d / "h.npy"], [1e6])["status"], "pass")
+
+
+class ManifestJobIdFollowUp(unittest.TestCase):
+    def test_make_manifest_refuses_an_id_that_run_would_refuse(self):
+        from core.partition import engine
+        with self.assertRaises(ValueError):
+            engine.make_manifest("my run", 4, 2, 1)

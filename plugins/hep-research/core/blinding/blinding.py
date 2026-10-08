@@ -199,9 +199,12 @@ OUT_OF_SCOPE_RENDERINGS = ("fewer than 3 significant digits (1.2e3)", "unit-scal
 MINUS_SIGNS = str.maketrans({"\u2212": "-", "\u2012": "-", "\u2013": "-", "\ufe63": "-", "\uff0d": "-"})
 
 
-def _token_matches(tok: str, x: float, t: float, rtol: float, percent: bool) -> bool:
+def _token_matches(tok: str, x: float, t: float, rtol: float, percent: bool, weak: bool = False) -> bool:
     """The token, with its sign ignored (a dropped or flipped sign), equals t at full or printed precision; a token
-    followed by '%' is also compared as a percentage of t (37.12% for 0.3712)."""
+    followed by '%' is also compared as a percentage of t (37.12% for 0.3712). A weak (short) sealed value keeps its
+    sign: a sealed -3 would otherwise match every standalone 3."""
+    if weak:
+        return _close(x, t, rtol)
     bare = tok.lstrip("+-")
     if _close(abs(x), abs(t), rtol) or _printed_match(bare, abs(t)):
         return True
@@ -221,7 +224,7 @@ def scan_text(text: str, sealed, rtol: float = 1e-9) -> list[dict]:
         alone = None
         percent = text[end:end + 1] == "%" or text[end:end + 2] == " %"
         for t in sealed:
-            if not _token_matches(tok, x, t, rtol, percent):
+            if not _token_matches(tok, x, t, rtol, percent, weak[t]):
                 continue
             if weak[t]:
                 alone = _standalone(text, start, end) if alone is None else alone
@@ -253,10 +256,19 @@ def _scan_array(arr, sealed, rtol) -> list[dict]:
             # a float32 or float16 copy of a sealed value is the sealed value rounded to the stored type, which can
             # differ from it by far more than rtol. Match that rounded copy exactly rather than widening rtol: a
             # dtype-wide tolerance flags unrelated neighbours (float16 spacing near 4731 is 4)
-            near |= a.ravel() == np.asarray(t).astype(a.dtype)
+            with np.errstate(over="ignore"):
+                rounded = np.asarray(t).astype(a.dtype)
+            if np.isfinite(rounded):  # a sealed value beyond the dtype's range has no rounded copy (not inf)
+                near |= a.ravel() == rounded
         idx = np.nonzero(near)[0]
         hits += [{"index": int(i), "sealed_value": t} for i in idx[:5]]
     return hits
+
+
+def _mostly_binary(text: str) -> bool:
+    """More than 5% control, surrogate, private-use or unassigned code points: numeric dumps decoded as UTF-16/32."""
+    odd = sum(1 for ch in text if ch not in "\t\n\r\f" and unicodedata.category(ch) in ("Cc", "Cs", "Co", "Cn"))
+    return odd > 0.05 * len(text)
 
 
 def decode_text(raw: bytes) -> tuple[str | None, str]:
@@ -266,9 +278,12 @@ def decode_text(raw: bytes) -> tuple[str | None, str]:
                      (b"\xff\xfe", "utf-16"), (b"\xfe\xff", "utf-16")):
         if raw.startswith(bom):
             try:
-                return raw.decode(enc), enc
+                text = raw.decode(enc)
             except UnicodeDecodeError:
                 return None, f"starts with a {enc} byte-order mark but does not decode as {enc}"
+            if enc != "utf-8-sig" and _mostly_binary(text):  # an int32 dump can start with ff fe
+                return None, f"binary content behind a {enc} byte-order mark, not text"
+            return text, enc
     if b"\x00" in raw:
         even, odd = raw[0::2], raw[1::2]
         for enc, zeros in (("utf-16-le", odd), ("utf-16-be", even)):
@@ -279,11 +294,8 @@ def decode_text(raw: bytes) -> tuple[str | None, str]:
                     continue
                 # numeric dumps (float64, float32, int32 written with tofile()) have enough zero bytes to decode
                 # as UTF-16, but as control, surrogate or unassigned code points; real UTF-16 text has few
-                odd_chars = sum(1 for ch in text if ch not in "\t\n\r\f"
-                                and unicodedata.category(ch) in ("Cc", "Cs", "Co", "Cn"))
-                if odd_chars > 0.05 * len(text):
-                    return None, f"binary content ({odd_chars} of {len(text)} UTF-16 code units are control or " \
-                                 "unassigned), not text"
+                if _mostly_binary(text):
+                    return None, "binary content (UTF-16 code units are mostly control or unassigned), not text"
                 return text, enc
         return None, "contains NUL bytes and is not UTF-16 text"
     try:
@@ -316,8 +328,8 @@ def scan_file(path: Path, sealed, rtol: float = 1e-9) -> list[dict]:
                 unscanned.append(f"{k or 'array'}: {res[0]['reason']}")
             else:
                 hits += [dict(h, array=k) for h in res]
-        if unscanned and not hits:
-            return [{"unscanned": True, "reason": "; ".join(unscanned)}]
+        if unscanned:  # recorded whatever the hits, so the unscanned list never depends on the sealed values
+            return [{"unscanned": True, "reason": "; ".join(unscanned)}] + hits
         return hits
     if suf in TEXT_SUFFIXES or suf == "":
         text, enc = decode_text(path.read_bytes())
@@ -371,6 +383,7 @@ def scan_paths(paths, sealed, rtol: float = 1e-9, strict: bool = False, exemptio
             report["unscanned"].append({"file": str(link), "reason": "symbolic link to a directory is not followed"})
         for f in files:
             res = scan_file(f, sealed, rtol)
+            report["leaks"] += [dict(h, file=str(f)) for h in res if not h.get("unscanned")]
             if res and res[0].get("unscanned"):
                 why = ex.get(str(f.resolve()))
                 if why:
@@ -381,7 +394,6 @@ def scan_paths(paths, sealed, rtol: float = 1e-9, strict: bool = False, exemptio
                         report["reasons"].append(f"exemption for {f} has no reason")
                 continue
             report["scanned"].append(str(f))
-            report["leaks"] += [dict(h, file=str(f)) for h in res]
     if strict and outputs is not None:
         recorded = {str(Path(x).resolve()) for x in report["scanned"]} | {str(Path(e["file"]).resolve()) for e in report["exempted"]}
         report["outputs_without_record"] = [str(o) for o in outputs if str(Path(o).resolve()) not in recorded]

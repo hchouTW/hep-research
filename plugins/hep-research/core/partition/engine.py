@@ -105,6 +105,8 @@ def check_template(cmd) -> list[str]:
 def make_manifest(job_id: str, n_items: int, chunk_size: int, seed: int) -> dict:
     if n_items <= 0 or chunk_size <= 0:
         raise ValueError("n_items and chunk_size must be positive")
+    if not isinstance(job_id, str) or not JOB_ID.match(job_id):
+        raise ValueError(f"job_id must match {JOB_ID.pattern}")
     chunks = [{"id": f"c{k:04d}", "start": s, "stop": min(s + chunk_size, n_items), "seed": seed * 100003 + k}
               for k, s in enumerate(range(0, n_items, chunk_size))]
     body = {"job_id": job_id, "n_items": n_items, "chunk_size": chunk_size, "seed": seed, "chunks": chunks}
