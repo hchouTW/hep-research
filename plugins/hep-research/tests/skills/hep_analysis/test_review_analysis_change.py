@@ -60,5 +60,64 @@ class OutcomeMotiveTests(unittest.TestCase):
             self.assertEqual(self.review(m)["decision"], "flag", m)
 
 
+class DataExposureTests(unittest.TestCase):
+    """T4.4 / K06: a missing, string or unrecognized looked_at is unknown exposure, never unexposed."""
+
+    def change(self, **kw):
+        return dict({"id": "c", "parameter": "p", "motivation": "new calibration from the control sample", "evidence": CONTROL}, **kw)
+
+    def test_missing_looked_at_is_unknown_not_accepted(self):
+        r = rac.review(self.change())
+        self.assertEqual(r["data_exposure"], {"state": "unknown", "basis": "none"})
+        self.assertEqual(r["decision"], "exposure-unknown")
+
+    def test_string_looked_at_is_not_read_as_unexposed(self):
+        r = rac.review(self.change(looked_at="control-region data"))
+        self.assertEqual(r["data_exposure"], {"state": "unknown", "basis": "legacy-text"})
+        self.assertEqual(r["decision"], "exposure-unknown")
+        r = rac.review(self.change(looked_at="signal-region data"))
+        self.assertEqual((r["data_exposure"]["state"], r["decision"]), ("exposed", "flag"))
+
+    def test_unrecognized_legacy_text_is_unknown(self):
+        for entry in ("the plots", "everything in the notebook", "", 3):
+            r = rac.review(self.change(looked_at=["simulation", entry]))
+            self.assertEqual(r["data_exposure"]["state"], "unknown", entry)
+            self.assertNotEqual(r["decision"], "accept", entry)
+
+    def test_recognized_legacy_text_is_unexposed(self):
+        r = rac.review(self.change(looked_at=["control-region data", "simulation", "sideband fits (low mass)"]))
+        self.assertEqual(r["data_exposure"], {"state": "unexposed", "basis": "legacy-text"})
+        self.assertEqual(r["decision"], "accept")
+
+    def test_empty_list_is_an_explicit_record_of_nothing_seen(self):
+        self.assertEqual(rac.review(self.change(looked_at=[]))["data_exposure"]["state"], "unexposed")
+
+    def test_structured_record_used_and_legacy_can_only_raise_it(self):
+        rec = {"state": "unexposed", "basis": "structured-record", "record_ref": "exposure/c.json"}
+        r = rac.review(self.change(data_exposure=rec))
+        self.assertEqual((r["data_exposure"], r["decision"]), (rec, "accept"))
+        r = rac.review(self.change(data_exposure=rec, looked_at=["unblinded result"]))
+        self.assertEqual((r["data_exposure"]["state"], r["decision"]), ("exposed", "flag"))
+        r = rac.review(self.change(data_exposure=dict(rec, state="exposed"), looked_at=["simulation"]))
+        self.assertEqual(r["decision"], "flag")
+        r = rac.review(self.change(data_exposure=dict(rec, state="incomplete")))
+        self.assertEqual(r["decision"], "exposure-unknown")
+
+    def test_malformed_structured_record_is_input_error(self):
+        for bad in ({"state": "probably-not", "basis": "structured-record"}, {"state": "unexposed", "basis": "legacy-text"},
+                    {"state": "unexposed"}, "unexposed", {"state": "unexposed", "basis": "structured-record", "x": 1}):
+            with self.assertRaises(rac.BadExposure):
+                rac.review(self.change(data_exposure=bad))
+            proc = run_json({"changes": [self.change(data_exposure=bad)]})
+            self.assertEqual(proc.returncode, 2, proc.stdout)
+            self.assertIn("data_exposure", json.loads(proc.stdout)["error"])
+
+    def test_cli_counts_unknown_exposure_without_flagging(self):
+        proc = run_json({"changes": [self.change()]})
+        self.assertEqual(proc.returncode, 0, proc.stdout)
+        out = json.loads(proc.stdout)
+        self.assertEqual((out["flagged"], out["exposure_unknown"]), (0, 1))
+
+
 if __name__ == "__main__":
     unittest.main()
