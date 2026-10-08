@@ -261,9 +261,13 @@ def submit(campaign_dir, executor, config: dict, chunk_ids=None, approved: bool 
     limits_report = {"configured": config.get("limits") or None, "usage_before": usage}
     if bundle_digest is not None:
         try:
-            check = bundles.verify(bundles.load(cdir, bundle_digest))
+            doc = bundles.load(cdir, bundle_digest)
+            check = bundles.verify(doc)
         except bundles.BundleError as exc:
             raise CampaignError(exc.code, str(exc)) from None
+        other = bundles.check_campaign(doc, cdir)
+        if other:
+            raise CampaignError("bundle.other_campaign", f"bundle {bundle_digest[:12]} belongs to another campaign: {other}")
         if check["status"] != "identical":
             raise CampaignError("bundle.changed", f"the campaign differs from bundle {bundle_digest[:12]} frozen for approval: "
                                 f"{check['differences'][:5]}; freeze again and have the new bundle approved")

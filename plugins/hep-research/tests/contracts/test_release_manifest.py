@@ -74,9 +74,10 @@ class ReleaseManifestTests(unittest.TestCase):
                            ("effective", "release.destinations_unchecked")):
             with self.subTest(missing=name):
                 self.assertIn(code, codes(self.run_check(**{name: None})))
-        out = self.run_check(approvers=None)
-        self.assertEqual(out["status"], "pass")
-        self.assertIn("release.authority_unchecked", {f["code"] for f in out["findings"]})
+        self.assertIn("release.authority_unchecked", codes(self.run_check(approvers=None)))
+        for key in ("tools", "network", "recipients"):
+            eff = {k: v for k, v in self.inputs["effective"].items() if k != key}
+            self.assertIn("release.destinations_unchecked", codes(self.run_check(effective=eff)), key)
 
     def test_missing_fields_and_schema_rules(self):
         for key in ("release_id", "artifacts", "approval_ref", "destinations", "validity", "protected"):
@@ -106,7 +107,8 @@ class ReleaseManifestTests(unittest.TestCase):
                                  ("purposes", ["validation"], "release.purpose_unapproved"),
                                  ("destinations_sha256", "4" * 64, "release.destinations_unapproved"),
                                  ("valid_until", "2026-10-08T06:00:00Z", "release.approval_expired"),
-                                 ("authority", "anything", "release.authority_unknown"),
+                                 ("authority", "anything", "release.authority_wrong"),
+                                 ("approver", "someone-else", "release.authority_unknown"),
                                  ("approver", "", "release.approval_incomplete")):
             with self.subTest(key=key):
                 self.assertIn(code, codes(self.run_check(approval=dict(self.approval, **{key: value}))))
@@ -128,6 +130,18 @@ class ReleaseManifestTests(unittest.TestCase):
         self.setUp()
         (self.root / "hists" / "shape.json").unlink()
         self.assertIn("release.missing_file", codes(self.run_check()))
+        self.tearDown()
+        self.setUp()
+        hidden = self.root / "hidden"
+        hidden.mkdir()
+        (hidden / "extra.bin").write_bytes(b"x")
+        os.chmod(hidden, 0)
+        try:
+            if os.access(hidden, os.R_OK):  # running as root: permissions do not hide anything
+                self.skipTest("directory permissions are not enforced for this user")
+            self.assertIn("release.content_unchecked", codes(self.run_check()))
+        finally:
+            os.chmod(hidden, 0o755)
 
     def test_destination_mismatch(self):
         for mutate in (lambda e: e["services"][0].update(region="other-region"),

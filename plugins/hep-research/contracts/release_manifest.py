@@ -3,8 +3,8 @@
 express. It is meant to run on the custodian side, from a protected copy of every input; run by an agent it is
 advisory only, and passing it never releases data (the trusted release gate does, T1.8).
 
-Usage: python3 contracts/release_manifest.py MANIFEST --root DIR --approval FILE --ledger FILE --revocations FILE
-           --effective FILE [--approvers FILE] [--now YYYY-MM-DDTHH:MM:SSZ]
+Usage: python3 contracts/release_manifest.py MANIFEST --root DIR --approval FILE --approvers FILE --ledger FILE
+           --revocations FILE --effective FILE [--now YYYY-MM-DDTHH:MM:SSZ]
 Every input is required for a pass: a check that cannot run is a failure (fail closed), never a skip.
 
   manifest     the release manifest (contracts/schemas/release_manifest.json)
@@ -12,16 +12,16 @@ Every input is required for a pass: a check that cannot run is a failure (fail c
   --approval   the protected approval record: {"approval_id", "manifest_sha256", "approver", "authority", "purposes",
                "destinations_sha256", "valid_from", "valid_until"}. It must bind this manifest's digest (canonical JSON
                without approval_ref), cover its purposes, its destinations (digest) and its validity period
-  --approvers  optional {approver: [authorities]}: the approver must hold the recorded authority (without it, a
-               warning says the authority was not checked). Where the approval record lives and who may write it is
-               the trust anchor (Q-06); this checker verifies the binding, not the anchor
+  --approvers  {approver: [authorities]}: the approval's authority must be RELEASE_AUTHORITY ('data-release') and
+               the approver must hold it. Where the approval record and this list live and who may write them is the
+               trust anchor (Q-06); this checker verifies the binding, not the anchor
   --ledger     the custodian's release ledger: [{"release_id", "manifest_sha256"}]; a release_id recorded for other
                content is reuse
   --revocations {"as_of", "source", "revoked": [{"ref", "time", "reason"}]}: from validity.status_source and no older
                than validity.max_status_age_s; the release_id or revocation_ref listed means revoked
   --effective  the effective destinations of the session: {"services": [{"service", "tenant", "region",
                "model_family", "model"}], "tools", "network", "recipients", "logging": {"transcripts", "telemetry"}};
-               every one must be allowed by the manifest
+               every key must be present (an absent list is not "none used") and every entry allowed by the manifest
 Output: JSON {"status": "pass"|"fail", "manifest_sha256", "findings", "note"}. Exit 0 pass, 1 fail, 2 unreadable input.
 Rejection details are for the custodian; what an agent sees of a refusal is a fixed status (HC-08).
 """
@@ -41,6 +41,7 @@ if __package__ in (None, ""):
 
 from contracts.schema import Report, validate  # noqa: E402
 
+RELEASE_AUTHORITY = "data-release"
 NOTE = ("advisory unless run by the custodian from protected copies; passing does not release data, and the approval "
         "trust anchor (who may write approval records) is outside this check")
 
@@ -76,7 +77,10 @@ def check_content(m: dict, root: Path | None, rep: Report) -> None:
         return
     listed = {a["path"]: a for a in m["artifacts"]}
     found = set()
-    for parent, dirs, names in os.walk(root, followlinks=False):
+    def unreadable(exc: OSError) -> None:
+        rep.add("error", f"root/{exc.filename}", "release.content_unchecked", f"cannot list: {exc.strerror}")
+
+    for parent, dirs, names in os.walk(root, followlinks=False, onerror=unreadable):
         for name in dirs + names:
             p = Path(parent) / name
             rel = p.relative_to(root).as_posix()
@@ -124,10 +128,12 @@ def check_approval(m: dict, approval: dict | None, approvers: dict | None, now: 
             rep.add("error", "approval", "release.validity_unapproved", "the manifest's validity period exceeds the approval's")
         if not (vf <= now < vu):
             rep.add("error", "approval", "release.approval_expired", "the approval is not valid now")
-    if approvers is None:
-        rep.add("warning", "approval.authority", "release.authority_unchecked", "no approver list given: authority not checked")
-    elif approval["authority"] not in approvers.get(approval["approver"], []):
-        rep.add("error", "approval.authority", "release.authority_unknown", "the approver does not hold this authority")
+    if approval["authority"] != RELEASE_AUTHORITY:
+        rep.add("error", "approval.authority", "release.authority_wrong", f"a release needs the {RELEASE_AUTHORITY!r} authority")
+    if not isinstance(approvers, dict):
+        rep.add("error", "approvers", "release.authority_unchecked", "no approver list: the approver's authority cannot be checked")
+    elif RELEASE_AUTHORITY not in (approvers.get(approval["approver"]) or []):
+        rep.add("error", "approval.authority", "release.authority_unknown", f"the approver does not hold {RELEASE_AUTHORITY!r}")
 
 
 def check_validity(m: dict, revocations: dict | None, now: datetime.datetime, rep: Report) -> None:
@@ -174,7 +180,10 @@ def check_destinations(m: dict, eff: dict | None, rep: Report) -> None:
     if not eff.get("services"):
         rep.add("error", "effective.services", "release.destinations_unchecked", "no model services listed")
     for key in ("tools", "network", "recipients"):
-        extra = sorted(set(eff.get(key) or []) - set(allowed[key]))
+        if not isinstance(eff.get(key), list):
+            rep.add("error", f"effective.{key}", "release.destinations_unchecked", "absent: an unlisted kind is not 'none used'")
+            continue
+        extra = sorted(set(eff[key]) - set(allowed[key]))
         if extra:
             rep.add("error", f"effective.{key}", "release.destination_mismatch", f"not allowed: {extra}")
     if eff.get("logging") != allowed["logging"]:

@@ -100,6 +100,40 @@ class BundleTests(unittest.TestCase):
             bd.build(self.cdir, self.worker)
         self.assertEqual(err.exception.code, "bundle.not_regular")
 
+    def test_command_words_that_may_name_files(self):
+        root = Path(self.tmp.name)
+        q = shlex.quote
+        work = q(str(self.worker / "work.py"))
+        bad = {f"python3 {work} --out {{out}}": "bundle.relative_path",
+               f"{q(sys.executable)} work.py --out {{out}}": "bundle.relative_path",
+               f"{q(sys.executable)} {work} --calib=/etc/hosts --out {{out}}": "bundle.path_outside",
+               f"{q(sys.executable)} {work} --calib ../outside.json --out {{out}}": "bundle.relative_path",
+               f"{q(sys.executable)} {work} --calib ~/x.json --out {{out}}": "bundle.relative_path",
+               f"{q(sys.executable)} {work} --calib lib/defaults.json --out {{out}}": "bundle.relative_path"}
+        for i, (cmd, code) in enumerate(bad.items()):
+            cdir = cp.init(root / f"c{i}", self.manifest, cmd + " --start {start} --stop {stop} --seed {seed} --id {id}")
+            with self.subTest(cmd=cmd):
+                with self.assertRaises(bd.BundleError) as err:
+                    bd.build(cdir, self.worker)
+                self.assertEqual(err.exception.code, code)
+        ok = (f"{q(sys.executable)} {work} --calib={q(str(self.worker / 'lib' / 'defaults.json'))} --scale 1.5 --mode fast "
+              "--start {start} --stop {stop} --seed {seed} --out {out} --id {id}")
+        self.assertTrue(bd.build(cp.init(root / "ok", self.manifest, ok), self.worker)["bundle_digest"])
+
+    def test_sourceless_pyc_is_bundled(self):
+        doc = self.freeze()
+        (self.worker / "helper.pyc").write_bytes(b"\x00compiled")
+        self.assertEqual(bd.verify(doc)["differences"], [{"role": "worker", "path": "helper.pyc", "change": "added"}])
+
+    def test_a_bundle_of_another_campaign_is_refused(self):
+        doc = self.freeze()
+        other = cp.init(Path(self.tmp.name) / "other", self.manifest, self.cmd.replace("--id {id}", "--id {id} --evil 1"))
+        (other / "bundles").mkdir()
+        (other / "bundles" / f"{doc['bundle_digest']}.json").write_text(Path(doc["path"]).read_text())
+        with self.assertRaises(cp.CampaignError) as err:
+            cp.submit(other, ScriptedExecutor({}), {}, bundle_digest=doc["bundle_digest"])
+        self.assertEqual(err.exception.code, "bundle.other_campaign")
+
     def test_submit_bound_to_a_bundle_refuses_a_changed_campaign(self):
         doc = self.freeze()
         ex = ScriptedExecutor({})

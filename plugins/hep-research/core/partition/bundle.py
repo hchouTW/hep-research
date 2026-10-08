@@ -17,8 +17,13 @@ except the approval request and the creation time, so a change of code, defaults
 exposure gives a different digest.
 
 The file also carries an approval request (bundle_digest, config_hash, limits, scope) for a human decision through the
-trusted gate (T4.1). Nothing here approves anything, and the files stay agent-writable: verify() detects changes, and
-execution from approved bytes is the trusted submitter's job (T3.5). Standard library only.
+trusted gate (T4.1). Nothing here approves anything, and the files stay agent-writable: verify() detects changes,
+check_campaign() refuses a bundle frozen for another campaign, and execution from approved bytes is the trusted
+submitter's job (T3.5).
+
+Command words: the first must be an absolute interpreter path; any word that may name a file (it contains '/', starts
+with '~', or has a dot and is not a number, also after '--opt=') must be an absolute path to a bundled worker file. Bare
+words, numbers, flags and the runner's placeholders pass. Standard library only.
 """
 from __future__ import annotations
 
@@ -75,7 +80,7 @@ def _tree(root: Path) -> list[str]:
                 raise BundleError("bundle.not_regular", f"worker:{(Path(parent) / d).relative_to(root).as_posix()}: "
                                   "a symbolic link to a directory is never followed")
         dirs[:] = sorted(d for d in dirs if d not in CACHE_DIRS)
-        out += [(Path(parent) / n).relative_to(root).as_posix() for n in names if not n.endswith(".pyc")]
+        out += [(Path(parent) / n).relative_to(root).as_posix() for n in names]  # a .pyc outside __pycache__ is code
     return sorted(out, key=lambda p: p.encode("utf-8"))
 
 
@@ -85,6 +90,17 @@ def _inside(path: str, root: Path) -> bool:
         return True
     except ValueError:
         return False
+
+
+NUMBER = re.compile(r"^[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?$")
+
+
+def _path_like(value: str) -> bool:
+    """A command word that may name a file: it contains '/', starts with '~', or has a dot and is not a number.
+    Placeholders ({out}, ...) and flags are filled or read by the runner and the worker, not looked up here."""
+    if not value or value.startswith("{") or (value.startswith("-") and "=" not in value and "/" not in value):
+        return False
+    return "/" in value or value.startswith("~") or ("." in value and not NUMBER.match(value))
 
 
 def check_exposure(rec) -> dict:
@@ -110,6 +126,9 @@ def build(campaign_dir, worker_root=None, env_lock=None, data_exposure=None) -> 
     spec = json.loads((cdir / "spec.json").read_text(encoding="utf-8"))
     state = json.loads((cdir / "state.json").read_text(encoding="utf-8"))
     image = spec.get("container_image")
+    if not state.get("campaign_uid"):
+        raise BundleError("bundle.no_uid", "the campaign has no campaign_uid yet (created before tags): run a submit dry "
+                          "run once, then freeze")
     if image is not None and not IMAGE_PINNED.match(str(image)):
         raise BundleError("bundle.image_unpinned", f"container image {image!r} is not pinned by digest (name@sha256:<64 hex>)")
     files = [_entry("campaign", cdir, n) for n in CAMPAIGN_FILES]
@@ -127,16 +146,22 @@ def build(campaign_dir, worker_root=None, env_lock=None, data_exposure=None) -> 
     except ValueError as exc:
         raise BundleError("bundle.bad_command", str(exc)) from None
     for i, tok in enumerate(tokens):
-        if not tok.startswith("/"):
+        value = tok.split("=", 1)[1] if tok.startswith("-") and "=" in tok else tok  # --opt=/path names a path too
+        if i == 0 and not value.startswith("/"):
+            raise BundleError("bundle.relative_path", f"{tok}: the interpreter must be an absolute path, so the bundle can hash it")
+        if not _path_like(value):
             continue
-        if wroot is not None and _inside(os.path.realpath(tok), wroot):  # resolved, as wroot is (/var -> /private/var)
-            rel = Path(os.path.realpath(tok)).relative_to(wroot).as_posix()
+        if not value.startswith("/"):
+            raise BundleError("bundle.relative_path", f"{tok}: a relative path resolves wherever the job starts; give an "
+                              "absolute path inside the worker root")
+        if wroot is not None and _inside(os.path.realpath(value), wroot):  # resolved, as wroot is (/var -> /private/var)
+            rel = Path(os.path.realpath(value)).relative_to(wroot).as_posix()
             if not any(f["role"] == "worker" and f["path"] == rel for f in files):
                 raise BundleError("bundle.path_outside", f"{tok}: named by the command but not a bundled worker file")
         elif i == 0:
-            real = Path(os.path.realpath(tok))
+            real = Path(os.path.realpath(value))
             roots["interpreter"] = str(real.parent)
-            files.append(dict(_entry("interpreter", real.parent, real.name), named_as=tok))
+            files.append(dict(_entry("interpreter", real.parent, real.name), named_as=value))
         else:
             raise BundleError("bundle.path_outside", f"{tok}: the command may refer only to paths inside the bundle "
                               "(give --worker-root for the worker code)")
@@ -205,6 +230,20 @@ def freeze(campaign_dir, worker_root=None, env_lock=None, data_exposure=None, co
     os.link(tmp, out)  # write-once
     tmp.unlink()
     return dict(doc, path=str(out), reused=False)
+
+
+def check_campaign(doc: dict, campaign_dir) -> list[str]:
+    """Why this bundle does not belong to this campaign (root, uid, manifest hash); empty when it does."""
+    cdir = Path(campaign_dir).resolve()
+    state = json.loads((cdir / "state.json").read_text(encoding="utf-8"))
+    out = []
+    if doc.get("roots", {}).get("campaign") != str(cdir):
+        out.append(f"frozen for campaign directory {doc.get('roots', {}).get('campaign')}, not {cdir}")
+    if doc.get("campaign_uid") != state.get("campaign_uid"):
+        out.append("another campaign_uid")
+    if doc.get("manifest_hash") != state.get("manifest_hash"):
+        out.append("another manifest")
+    return out
 
 
 def load(campaign_dir, digest: str) -> dict:

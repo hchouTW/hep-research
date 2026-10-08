@@ -232,7 +232,11 @@ def main(argv=None, env=None, sleep=None) -> int:
             return emit({"bundle_digest": doc["bundle_digest"], "path": doc["path"], "reused": doc["reused"],
                          "files": len(doc["files"]), "approval_request": doc["approval_request"]}, 0)
         if args.cmd == "verify-bundle":
-            rep = bundles.verify(bundles.load(cdir, args.bundle))
+            doc = bundles.load(cdir, args.bundle)
+            rep = bundles.verify(doc)
+            other = bundles.check_campaign(doc, cdir)
+            if other:
+                rep = dict(rep, status="different", differences=rep["differences"] + [{"change": "campaign", "message": m} for m in other])
             return emit(rep, 0 if rep["status"] == "identical" else 1)
         if args.cmd == "clear-orphans":
             return emit(cp.clear_orphan_risk(cdir, ex, args.submission, args.reason), 0)
