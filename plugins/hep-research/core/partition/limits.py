@@ -6,7 +6,7 @@ the person running the campaign (Q-07), never from a default here:
   max_submissions        submissions recorded (an intent counts; a refused client that never started does not)
   max_total_jobs         job attempts recorded, under the same rule
   max_concurrent_jobs    attempts that may still be running: queued, running, held, submitting, and unknown or
-                         abandoned attempts (orphan risk) until a poll observes their end or a person clears them
+                         abandoned attempts (orphan risk): an unknown one until a poll sees it end, either until a person clears it
                          with evidence from the scheduler (campaign.clear_orphan_risk); a walltime does not bound
                          them, since a lost job may wait in the queue for any time before it starts
   max_core_hours         cpus x elapsed time of finished attempts, cpus x walltime limit for every attempt whose end

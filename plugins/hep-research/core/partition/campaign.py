@@ -38,7 +38,7 @@ Rules (the T21 rules, carried to remote and asynchronous execution):
 - cancel() records each command's exit per job and targets, through the submission tag, jobs of unconfirmed or
   abandoned submissions too. A cancel request is not termination: an attempt is 'termination_observed' only when a
   later poll sees it in a final state. Unknown, abandoned and orphan jobs leave append-only 'resource_risk' records
-  and count as running until a poll ends them or clear_orphan_risk() records the scheduler's evidence.
+  and count as running (an unknown one until a poll sees it end) until clear_orphan_risk() records the scheduler's evidence.
 Standard library only.
 """
 from __future__ import annotations

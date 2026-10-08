@@ -15,7 +15,7 @@ Input JSON: {"changes": [{"id", "parameter", "old", "new", "motivation",
 Data exposure (F05, K06): each row reports {"state", "basis"} as in the envelope's data_exposure. A structured record
 (basis structured-record) is used as given; looked_at is legacy free text (basis legacy-text). A looked_at entry
 that names signal-region data or a result makes the change exposed; a non-empty list whose every entry is one kind
-of control-region, sideband, simulation, calibration or validation data, written only with a closed vocabulary (for
+of control-region, sideband, simulation, calibration or validation data, matching a closed grammar as a whole (for
 example "control-region data", "simulation", "sideband (low mass)"), makes it unexposed; any other wording ("full
 data", "search region", "simulation and data"), an empty list, a looked_at that is not a list, or none at all (basis
 none) makes the exposure unknown, never unexposed. Give one entry per kind of data. With both, the more exposed wins.
