@@ -129,11 +129,13 @@ node-failure, held, cancelled, lost, unknown`. A native state the adapter does n
 - **Frozen bundles:** `freeze` lists, with full SHA-256, the campaign's manifest, spec and runner, every file under
   `--worker-root`, the interpreter the command names, an `--env-lock` file and the container image (pinned by digest;
   a tag is refused), with the data exposure known then, and writes an approval request. It approves nothing. The
-  command's first word must be an absolute interpreter path, and every word that may name a file (a `/`, a leading
-  `~`, or a dot in a non-number, also after `--opt=`) must be an absolute path to a bundled worker file. `submit
-  --bundle DIGEST` (and `resubmit`) re-hashes the bundle and is refused when anything changed since freezing or the
-  bundle belongs to another campaign; freeze again and have the new bundle approved. The files stay editable; running
-  approved bytes is the trusted submitter's job.
+  command follows a closed grammar: an absolute interpreter, then the absolute path of a bundled worker script (no
+  `-m`, `-c` or `env`), then only flags, `--name=value`, single placeholders, numbers, plain ASCII words (no `/`, `.`,
+  `~`, `$` or braces) and absolute paths to bundled worker files (not links); keep the worker code in its own folder,
+  outside the campaign directory. A named path that later resolves elsewhere is a change. `submit --bundle DIGEST`
+  (and `resubmit`) re-hashes the bundle and is refused when anything changed since freezing or the bundle belongs to
+  another campaign; freeze again and have the new bundle approved. The files stay editable; running approved bytes is
+  the trusted submitter's job.
 - **A scheduler's success is not a result:** a job reported complete without a valid output is `lost`.
 - **Held jobs need a person.** `watch` stops early on held, unknown or stopped chunks.
 - **Polling etiquette:** `status` polls once. `watch` needs `monitor.poll_interval_s` (at least 60) and

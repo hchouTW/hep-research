@@ -21,9 +21,12 @@ trusted gate (T4.1). Nothing here approves anything, and the files stay agent-wr
 check_campaign() refuses a bundle frozen for another campaign, and execution from approved bytes is the trusted
 submitter's job (T3.5).
 
-Command words: the first must be an absolute interpreter path; any word that may name a file (it contains '/', starts
-with '~', or has a dot and is not a number, also after '--opt=') must be an absolute path to a bundled worker file. Bare
-words, numbers, flags and the runner's placeholders pass. Standard library only.
+Command grammar (closed): '<absolute interpreter> <absolute bundled worker script> [words]', or a bundled executable
+worker first. Each further word is a flag (-x, --name), --name=<value>, or a value: exactly one placeholder ({start},
+{stop}, {seed}, {out}, {id}), a number, a plain ASCII word without '/', '.', '~', '$' or braces, or an absolute path
+to a bundled worker file. Every named path is recorded with its target and re-resolved by verify(), so repointing a link
+is a change. There is no -m, -c or PATH lookup; what the bundled worker does with a plain word is reviewed code.
+Standard library only.
 """
 from __future__ import annotations
 
@@ -93,14 +96,9 @@ def _inside(path: str, root: Path) -> bool:
 
 
 NUMBER = re.compile(r"^[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?$")
-
-
-def _path_like(value: str) -> bool:
-    """A command word that may name a file: it contains '/', starts with '~', or has a dot and is not a number.
-    Placeholders ({out}, ...) and flags are filled or read by the runner and the worker, not looked up here."""
-    if not value or value.startswith("{") or (value.startswith("-") and "=" not in value and "/" not in value):
-        return False
-    return "/" in value or value.startswith("~") or ("." in value and not NUMBER.match(value))
+FLAG = re.compile(r"^--?[A-Za-z][A-Za-z0-9_-]*$")
+PLACEHOLDER_WORD = re.compile(r"^\{(start|stop|seed|out|id)\}$")
+BARE = re.compile(r"^[A-Za-z0-9_+:-]+$")  # no '/', '.', '~', '$', '{', '\\' or non-ASCII: never a path
 
 
 def check_exposure(rec) -> dict:
@@ -116,7 +114,8 @@ def check_exposure(rec) -> dict:
 
 
 def digest_of(doc: dict) -> str:
-    body = {k: doc[k] for k in ("format", "campaign_uid", "manifest_hash", "container_image", "data_exposure", "roots", "files")}
+    body = {k: doc.get(k) for k in ("format", "campaign_uid", "manifest_hash", "container_image", "data_exposure", "roots",
+                                    "files", "named")}
     return hashlib.sha256(json.dumps(body, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")).hexdigest()
 
 
@@ -139,38 +138,65 @@ def build(campaign_dir, worker_root=None, env_lock=None, data_exposure=None) -> 
         if wroot.is_symlink() or not wroot.is_dir():
             raise BundleError("bundle.bad_worker_root", f"{worker_root}: not a directory (a link is never followed)")
         wroot = wroot.resolve()
+        if _inside(str(cdir), wroot):
+            raise BundleError("bundle.bad_worker_root", f"{wroot} contains the campaign directory, whose state changes as it "
+                              "runs: keep the worker code in its own folder")
         roots["worker"] = str(wroot)
         files += [_entry("worker", wroot, rel) for rel in _tree(wroot)]
     try:
         tokens = shlex.split(spec["cmd"])
     except ValueError as exc:
         raise BundleError("bundle.bad_command", str(exc)) from None
-    for i, tok in enumerate(tokens):
-        value = tok.split("=", 1)[1] if tok.startswith("-") and "=" in tok else tok  # --opt=/path names a path too
-        if i == 0 and not value.startswith("/"):
-            raise BundleError("bundle.relative_path", f"{tok}: the interpreter must be an absolute path, so the bundle can hash it")
-        if not _path_like(value):
+    if len(tokens) < 2:
+        raise BundleError("bundle.bad_command", "the command is '<absolute interpreter> <absolute worker script> [arguments]'")
+    named = []
+
+    def worker_path(word: str, tok: str) -> None:
+        """An absolute path to a bundled worker file; recorded with its target and re-resolved by verify()."""
+        if wroot is None or not word.startswith("/") or not _inside(os.path.realpath(word), wroot):
+            raise BundleError("bundle.path_outside", f"{tok}: the command may name only bundled worker files by absolute "
+                              "path (give --worker-root for the worker code)")
+        if os.path.islink(word):
+            raise BundleError("bundle.path_outside", f"{tok}: a link to a worker file; name the bundled file itself")
+        rel = Path(os.path.realpath(word)).relative_to(wroot).as_posix()
+        if not any(f["role"] == "worker" and f["path"] == rel for f in files):
+            raise BundleError("bundle.path_outside", f"{tok}: named by the command but not a bundled worker file")
+        named.append({"word": word, "path": rel})
+
+    interp = tokens[0]
+    if not interp.startswith("/"):
+        raise BundleError("bundle.relative_path", f"{interp}: the interpreter must be an absolute path, so the bundle can hash it")
+    if wroot is not None and _inside(os.path.realpath(interp), wroot):
+        worker_path(interp, interp)  # a bundled executable worker runs directly
+        rest = tokens[1:]
+    else:
+        real = Path(os.path.realpath(interp))
+        roots["interpreter"] = str(real.parent)
+        files.append(dict(_entry("interpreter", real.parent, real.name), named_as=interp))
+        worker_path(tokens[1], tokens[1])  # the interpreter runs a bundled script: no -m, -c or PATH lookup
+        rest = tokens[2:]
+    for tok in rest:
+        if NUMBER.match(tok):
             continue
-        if not value.startswith("/"):
-            raise BundleError("bundle.relative_path", f"{tok}: a relative path resolves wherever the job starts; give an "
-                              "absolute path inside the worker root")
-        if wroot is not None and _inside(os.path.realpath(value), wroot):  # resolved, as wroot is (/var -> /private/var)
-            rel = Path(os.path.realpath(value)).relative_to(wroot).as_posix()
-            if not any(f["role"] == "worker" and f["path"] == rel for f in files):
-                raise BundleError("bundle.path_outside", f"{tok}: named by the command but not a bundled worker file")
-        elif i == 0:
-            real = Path(os.path.realpath(value))
-            roots["interpreter"] = str(real.parent)
-            files.append(dict(_entry("interpreter", real.parent, real.name), named_as=value))
-        else:
-            raise BundleError("bundle.path_outside", f"{tok}: the command may refer only to paths inside the bundle "
-                              "(give --worker-root for the worker code)")
+        flag, eq, value = tok.partition("=") if tok.startswith("-") else ("", "", tok)
+        if flag and not FLAG.match(flag):
+            raise BundleError("bundle.bad_word", f"{tok}: flags are -x or --name with letters, digits, '_' and '-'")
+        if flag and not eq:
+            continue  # a plain flag
+        if PLACEHOLDER_WORD.match(value) or NUMBER.match(value) or BARE.match(value):
+            continue
+        if value.startswith("/"):
+            worker_path(value, tok)
+            continue
+        raise BundleError("bundle.bad_word", f"{tok}: a command word is a flag, one placeholder, a number, a plain word "
+                          "(ASCII letters, digits, '_', '+', ':', '-') or an absolute path to a bundled worker file")
     if env_lock is not None:
         p = Path(env_lock)
         roots["environment"] = str(p.parent.resolve())
         files.append(_entry("environment", p.parent.resolve(), p.name))
     doc = {"format": FORMAT, "campaign_uid": state.get("campaign_uid"), "manifest_hash": state["manifest_hash"],
-           "container_image": image, "data_exposure": check_exposure(data_exposure), "roots": roots, "files": files}
+           "container_image": image, "data_exposure": check_exposure(data_exposure), "roots": roots, "files": files,
+           "named": named}
     doc["bundle_digest"] = digest_of(doc)
     return doc
 
@@ -197,6 +223,9 @@ def verify(doc: dict) -> dict:
             now["named_as"] = f["named_as"]
         if now != f:
             diffs.append({"role": f["role"], "path": f["path"], "change": "content" if now["sha256"] != f["sha256"] else "mode"})
+    for n in doc.get("named", []):  # a word that resolved into the worker root must still resolve to the same file
+        if os.path.realpath(n["word"]) != str(Path(doc["roots"].get("worker", "")) / n["path"]):
+            diffs.append({"role": "worker", "path": n["word"], "change": "resolves elsewhere"})
     if "worker" in doc["roots"]:
         wroot = Path(doc["roots"]["worker"])
         listed = {f["path"] for f in doc["files"] if f["role"] == "worker"}

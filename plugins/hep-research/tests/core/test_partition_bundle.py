@@ -100,25 +100,51 @@ class BundleTests(unittest.TestCase):
             bd.build(self.cdir, self.worker)
         self.assertEqual(err.exception.code, "bundle.not_regular")
 
-    def test_command_words_that_may_name_files(self):
+    def test_command_grammar_is_closed(self):
         root = Path(self.tmp.name)
         q = shlex.quote
-        work = q(str(self.worker / "work.py"))
-        bad = {f"python3 {work} --out {{out}}": "bundle.relative_path",
-               f"{q(sys.executable)} work.py --out {{out}}": "bundle.relative_path",
-               f"{q(sys.executable)} {work} --calib=/etc/hosts --out {{out}}": "bundle.path_outside",
-               f"{q(sys.executable)} {work} --calib ../outside.json --out {{out}}": "bundle.relative_path",
-               f"{q(sys.executable)} {work} --calib ~/x.json --out {{out}}": "bundle.relative_path",
-               f"{q(sys.executable)} {work} --calib lib/defaults.json --out {{out}}": "bundle.relative_path"}
-        for i, (cmd, code) in enumerate(bad.items()):
-            cdir = cp.init(root / f"c{i}", self.manifest, cmd + " --start {start} --stop {stop} --seed {seed} --id {id}")
+        py, work = q(sys.executable), q(str(self.worker / "work.py"))
+        tail = " --start {start} --stop {stop} --seed {seed} --id {id}"
+        link = root / "alias.py"
+        os.symlink(self.worker / "work.py", link)
+        bad = [f"python3 {work} --out {{out}}", f"{py} work.py --out {{out}}", f"/usr/bin/env python3 {work} --out {{out}}",
+               f"{py} -m evilmod --out {{out}}", f"{py} -c 'import evil' {work} --out {{out}}",
+               f"{py} {work} --calib=/etc/hosts --out {{out}}", f"{py} {work} --calib ../outside.json --out {{out}}",
+               f"{py} {work} --calib ~/x.json --out {{out}}", f"{py} {work} --calib lib/defaults.json --out {{out}}",
+               f"{py} {work} calib=/etc/hosts --out {{out}}", f"{py} {work} -c/etc/hosts --out {{out}}",
+               f"{py} {work} '$HOME/x' --out {{out}}", f"{py} {work} --calib={{out}}/../../etc/hosts --out {{out}}",
+               f"{py} {work} {{id}}.py --out {{out}}", f"{py} {work} /etc/{{id}} --out {{out}}",
+               f"{py} {work} 'C:\\x\\calib' --out {{out}}", f"{py} {work} \u2215etc\u2215hosts --out {{out}}",
+               f"{py} {work} calib.json --out {{out}}", f"{py} {q(str(link))} --out {{out}}"]
+        for i, cmd in enumerate(bad):
+            cdir = cp.init(root / f"c{i}", self.manifest, cmd + tail)
             with self.subTest(cmd=cmd):
-                with self.assertRaises(bd.BundleError) as err:
+                with self.assertRaises(bd.BundleError):
                     bd.build(cdir, self.worker)
-                self.assertEqual(err.exception.code, code)
-        ok = (f"{q(sys.executable)} {work} --calib={q(str(self.worker / 'lib' / 'defaults.json'))} --scale 1.5 --mode fast "
-              "--start {start} --stop {stop} --seed {seed} --out {out} --id {id}")
-        self.assertTrue(bd.build(cp.init(root / "ok", self.manifest, ok), self.worker)["bundle_digest"])
+        ok = (f"{py} {work} --calib={q(str(self.worker / 'lib' / 'defaults.json'))} --scale 1.5 --shift -2 --mode fast "
+              "-v --out={out}" + tail)
+        doc = bd.build(cp.init(root / "ok", self.manifest, ok), self.worker)
+        self.assertEqual([n["path"] for n in doc["named"]], ["work.py", "lib/defaults.json"])
+
+    def test_repointing_a_named_directory_link_is_a_change(self):
+        root = Path(self.tmp.name)
+        os.symlink(self.worker, root / "current")
+        other = root / "other"
+        other.mkdir()
+        (other / "work.py").write_text(WORKER + "# other code\n")
+        cmd = (f"{shlex.quote(sys.executable)} {shlex.quote(str(root / 'current' / 'work.py'))} --start {{start}} "
+               "--stop {stop} --seed {seed} --out {out} --id {id}")
+        cdir = cp.init(root / "linked", self.manifest, cmd)
+        doc = bd.freeze(cdir, self.worker)
+        self.assertEqual(bd.verify(doc)["status"], "identical")
+        os.unlink(root / "current")
+        os.symlink(other, root / "current")
+        self.assertIn("resolves elsewhere", [d["change"] for d in bd.verify(doc)["differences"]])
+
+    def test_worker_root_may_not_contain_the_campaign(self):
+        with self.assertRaises(bd.BundleError) as err:
+            bd.build(self.cdir, Path(self.tmp.name))
+        self.assertEqual(err.exception.code, "bundle.bad_worker_root")
 
     def test_sourceless_pyc_is_bundled(self):
         doc = self.freeze()

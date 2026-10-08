@@ -132,6 +132,8 @@ def check_approval(m: dict, approval: dict | None, approvers: dict | None, now: 
         rep.add("error", "approval.authority", "release.authority_wrong", f"a release needs the {RELEASE_AUTHORITY!r} authority")
     if not isinstance(approvers, dict):
         rep.add("error", "approvers", "release.authority_unchecked", "no approver list: the approver's authority cannot be checked")
+    elif not all(isinstance(v, list) and all(isinstance(a, str) for a in v) for v in approvers.values()):
+        rep.add("error", "approvers", "release.approvers_malformed", "each approver maps to a list of authority strings")
     elif RELEASE_AUTHORITY not in (approvers.get(approval["approver"]) or []):
         rep.add("error", "approval.authority", "release.authority_unknown", f"the approver does not hold {RELEASE_AUTHORITY!r}")
 
@@ -152,6 +154,8 @@ def check_validity(m: dict, revocations: dict | None, now: datetime.datetime, re
     revoked = revocations.get("revoked")
     if not isinstance(revoked, list):
         rep.add("error", "revocations.revoked", "release.status_unknown", "the revoked list is missing")
+    elif not all(isinstance(r, dict) and isinstance(r.get("ref"), str) for r in revoked):
+        rep.add("error", "revocations.revoked", "release.status_unknown", "an entry is not {'ref': ..., ...}: status unreadable")
     elif any(isinstance(r, dict) and r.get("ref") in (v["revocation_ref"], m["release_id"]) for r in revoked):
         rep.add("error", "revocations", "release.revoked", "this release is revoked")
 
@@ -161,6 +165,10 @@ def check_ledger(m: dict, ledger, rep: Report) -> None:
         rep.add("error", "ledger", "release.ledger_missing", "no release ledger: release_id reuse cannot be excluded")
         return
     digest = manifest_digest(m)
+    if not all(isinstance(e, dict) and isinstance(e.get("release_id"), str) and isinstance(e.get("manifest_sha256"), str)
+               for e in ledger):
+        rep.add("error", "ledger", "release.ledger_malformed", "an entry is not {'release_id', 'manifest_sha256'}: reuse cannot be excluded")
+        return
     for i, e in enumerate(ledger):
         if isinstance(e, dict) and e.get("release_id") == m["release_id"] and e.get("manifest_sha256") != digest:
             rep.add("error", f"ledger[{i}]", "release.id_reused", "this release_id was recorded for other content")

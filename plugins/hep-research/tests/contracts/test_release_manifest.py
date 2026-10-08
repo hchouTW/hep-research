@@ -75,6 +75,10 @@ class ReleaseManifestTests(unittest.TestCase):
             with self.subTest(missing=name):
                 self.assertIn(code, codes(self.run_check(**{name: None})))
         self.assertIn("release.authority_unchecked", codes(self.run_check(approvers=None)))
+        self.assertIn("release.approvers_malformed", codes(self.run_check(approvers={"custodian-a": "data-release-readonly"})))
+        self.assertIn("release.status_unknown", codes(self.run_check(
+            revocations=dict(self.inputs["revocations"], revoked=["synthetic-release-001"]))))
+        self.assertIn("release.ledger_malformed", codes(self.run_check(ledger=[["synthetic-release-001", "5" * 64]])))
         for key in ("tools", "network", "recipients"):
             eff = {k: v for k, v in self.inputs["effective"].items() if k != key}
             self.assertIn("release.destinations_unchecked", codes(self.run_check(effective=eff)), key)

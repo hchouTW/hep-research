@@ -28,10 +28,13 @@ class ReferenceWorkflowTests(unittest.TestCase):
             args = [a for a in c]
             i = args.index("--config")
             del args[i:i + 2]
-            if args[0] == "plan":  # same flags, smaller job so the fake scheduler stays fast
-                args = ["plan", "--job", "toys", "--items", "10", "--chunk-size", "1", "--seed", "42", "--cmd", h.cmd]
-            if args[0] == "freeze":  # the harness's worker script sits in the project folder
-                args[args.index("--worker-root") + 1] = str(h.dir)
+            if args[0] == "plan":  # same flags, smaller job so the fake scheduler stays fast; the worker in its own folder
+                (h.dir / "worker").mkdir()
+                (h.dir / "worker" / "toy.py").write_text((h.dir / "worker.py").read_text())
+                cmd = h.cmd.replace(str(h.dir / "worker.py"), str(h.dir / "worker" / "toy.py"))
+                args = ["plan", "--job", "toys", "--items", "10", "--chunk-size", "1", "--seed", "42", "--cmd", cmd]
+            if args[0] == "freeze":
+                args[args.index("--worker-root") + 1] = str(h.dir / "worker")
             if args[0] == "reset":
                 args[args.index("--chunks") + 1] = "c0004"
             if args[0] == "report":
