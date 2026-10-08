@@ -3,6 +3,7 @@ import json
 import math
 import sys
 import unittest
+from importlib.util import find_spec
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -12,6 +13,7 @@ import predict  # noqa: E402
 CFG = json.loads((ROOT / "benchmarks" / "r-ratio-15gev.json").read_text(encoding="utf-8"))
 
 
+@unittest.skipUnless(find_spec("scipy"), "scipy is required for predict.predict (requirements-core.txt)")
 class PredictionTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

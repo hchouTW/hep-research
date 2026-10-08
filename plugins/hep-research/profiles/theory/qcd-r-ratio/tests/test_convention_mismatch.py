@@ -5,6 +5,7 @@ The variant conventions below are constructed test inputs, not sourced results.
 import json
 import sys
 import unittest
+from importlib.util import find_spec
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -41,6 +42,7 @@ class ConventionMismatchTests(unittest.TestCase):
         self.assertFalse(r["comparable"])
         self.assertEqual(r["mismatches"][0]["key"], "renormalization_scheme")
 
+    @unittest.skipUnless(find_spec("scipy"), "scipy is required for predict.predict (requirements-core.txt)")
     def test_scale_choice_mismatch_reported_even_when_numerically_small(self):
         other = variant(scales="renormalization scale mu = 2Q; no envelope")
         r = compare_conventions(CONV, other)
