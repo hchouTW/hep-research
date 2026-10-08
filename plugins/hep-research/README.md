@@ -197,28 +197,20 @@ companions. Validate the profile itself with
 
 hep-research installs, updates and runs without any companion. A companion must not declare a host dependency on
 this plugin; it owns its compatibility check, so installing or updating hep-research does not wait for it. The first companion plugin
-is `ams02-research` (access-restricted; listed in the same marketplace and installed separately), which provides
+is `ams02-research` (access-restricted; not listed in this marketplace, installed separately), which provides
 `experiment:ams-02-private` for AMS Collaboration members. Load a companion profile only on
 a host configuration qualified for its content and with the collaboration's approval to send that content to the model
 service (no configuration is qualified yet), and install it where the agent cannot write. See
 [docs/profile-authoring.md](docs/profile-authoring.md) for writing one.
 
-Migration from `ams02-research` 1.1.0 and earlier: those releases declare `hep-research ^0.4.0` in their Claude Code
-manifest, and an installed copy keeps holding hep-research inside that range (Claude Code skips newer hep-research
-updates) until `ams02-research` is updated to a release without the declaration, or uninstalled, through the host's own
-plugin commands. This marketplace pins `ams02-research` 1.2.1 (commit `32d538a`), which has no such declaration, so
-update the companion first and hep-research second:
-
-```bash
-claude plugin marketplace update hep-research-dev
-claude plugin update ams02-research@hep-research-dev
-claude plugin update hep-research@hep-research-dev
-```
+`ams02-research` is no longer listed in this marketplace. A copy installed from it stays installed but receives no
+updates through it; reinstall it from its own source if you still need it, or uninstall it with the host's plugin
+commands. Releases 1.1.0 and earlier declare `hep-research ^0.4.0` and hold hep-research at 0.4.x while installed;
+update or remove that copy before updating hep-research.
 
 Before running `claude plugin prune`, follow the companion's own update notes so hep-research is not removed as an
-auto-installed dependency. Do not edit the plugin cache by hand. A marketplace refresh can still read every catalog entry,
-including the companion's; what hep-research guarantees is that its own install, update and checks never read a
-companion's package manifest or need access to a private repository. Behaviour on a live host is checked separately
+auto-installed dependency. Do not edit the plugin cache by hand. hep-research's own install, update and checks never
+read a companion's package manifest or need access to a private repository. Behaviour on a live host is checked separately
 (see the changelog).
 
 ## Environments
