@@ -196,6 +196,11 @@ class ReleaseManifestTests(unittest.TestCase):
         self.assertEqual(json.loads(p.stdout)["status"], "pass")
         p = run([a for a in argv if a not in ("--effective", str(files["effective"]))])
         self.assertEqual(p.returncode, 1)
+        files["effective"].write_text(json.dumps({"services": ["not-an-object"], "tools": [], "network": [], "recipients": [],
+                                                  "logging": {}}))
+        p = run(argv)
+        self.assertEqual(p.returncode, 2, p.stdout + p.stderr)
+        self.assertNotIn("Traceback", p.stderr)
         files["approval"].write_text("{not json")
         self.assertEqual(run(argv).returncode, 2)
 

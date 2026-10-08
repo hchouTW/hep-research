@@ -24,8 +24,10 @@ submitter's job (T3.5).
 Command grammar (closed): '<absolute interpreter> <absolute bundled worker script> [words]', or a bundled executable
 worker first. Each further word is a flag (-x, --name), --name=<value>, or a value: exactly one placeholder ({start},
 {stop}, {seed}, {out}, {id}), a number, a plain ASCII word without '/', '.', '~', '$' or braces, or an absolute path
-to a bundled worker file. Every named path is recorded with its target and re-resolved by verify(), so repointing a link
-is a change. There is no -m, -c or PATH lookup; what the bundled worker does with a plain word is reviewed code.
+to a bundled worker file; paths carry no braces (the runner formats every word). Every named path is recorded with its
+target and re-resolved by verify(), so repointing a link is a change. The interpreter of a '#!' worker or interpreter
+script is hashed too ('#!/usr/bin/env' is refused). There is no -m, -c or PATH lookup; what the bundled worker does
+with a plain word is reviewed code.
 Standard library only.
 """
 from __future__ import annotations
@@ -38,6 +40,8 @@ import re
 import shlex
 import stat
 from pathlib import Path
+
+from core.partition import engine
 
 FORMAT = "hep-research-execution-bundle/1"
 IMAGE_PINNED = re.compile(r"^[^\s@]+@sha256:[0-9a-f]{64}$")
@@ -101,6 +105,24 @@ PLACEHOLDER_WORD = re.compile(r"^\{(start|stop|seed|out|id)\}$")
 BARE = re.compile(r"^[A-Za-z0-9_+:-]+$")  # no '/', '.', '~', '$', '{', '\\' or non-ASCII: never a path
 
 
+def _shebang(path: Path) -> str | None:
+    """The interpreter a '#!' file names (its first word), or None for a file without one. 'env' is refused: it looks
+    the real interpreter up on PATH at run time."""
+    try:
+        with open(path, "rb") as fh:
+            head = fh.readline(4096)
+    except OSError:
+        return None
+    if not head.startswith(b"#!"):
+        return None
+    words = head[2:].decode("utf-8", "replace").split()
+    if not words:
+        raise BundleError("bundle.bad_command", f"{path}: an empty '#!' line")
+    if os.path.basename(words[0]) == "env":
+        raise BundleError("bundle.relative_path", f"{path}: '#!{words[0]}' looks the interpreter up on PATH; name it by absolute path")
+    return words[0]
+
+
 def check_exposure(rec) -> dict:
     if rec is None:
         return {"state": "unknown", "basis": "none"}
@@ -128,7 +150,7 @@ def build(campaign_dir, worker_root=None, env_lock=None, data_exposure=None) -> 
     if not state.get("campaign_uid"):
         raise BundleError("bundle.no_uid", "the campaign has no campaign_uid yet (created before tags): run a submit dry "
                           "run once, then freeze")
-    if image is not None and not IMAGE_PINNED.match(str(image)):
+    if image is not None and not IMAGE_PINNED.fullmatch(str(image)):
         raise BundleError("bundle.image_unpinned", f"container image {image!r} is not pinned by digest (name@sha256:<64 hex>)")
     files = [_entry("campaign", cdir, n) for n in CAMPAIGN_FILES]
     roots = {"campaign": str(cdir)}
@@ -144,6 +166,7 @@ def build(campaign_dir, worker_root=None, env_lock=None, data_exposure=None) -> 
         roots["worker"] = str(wroot)
         files += [_entry("worker", wroot, rel) for rel in _tree(wroot)]
     try:
+        engine.check_template(spec["cmd"])  # spec.json may have changed since init checked it
         tokens = shlex.split(spec["cmd"])
     except ValueError as exc:
         raise BundleError("bundle.bad_command", str(exc)) from None
@@ -152,7 +175,10 @@ def build(campaign_dir, worker_root=None, env_lock=None, data_exposure=None) -> 
     named = []
 
     def worker_path(word: str, tok: str) -> None:
-        """An absolute path to a bundled worker file; recorded with its target and re-resolved by verify()."""
+        """An absolute path to a bundled worker file; recorded with its target and re-resolved by verify(). No braces:
+        the runner formats every word, so a path with a field would run another path than the one checked."""
+        if "{" in word or "}" in word:
+            raise BundleError("bundle.bad_word", f"{tok}: a path may not contain braces (it is formatted before it runs)")
         if wroot is None or not word.startswith("/") or not _inside(os.path.realpath(word), wroot):
             raise BundleError("bundle.path_outside", f"{tok}: the command may name only bundled worker files by absolute "
                               "path (give --worker-root for the worker code)")
@@ -163,27 +189,45 @@ def build(campaign_dir, worker_root=None, env_lock=None, data_exposure=None) -> 
             raise BundleError("bundle.path_outside", f"{tok}: named by the command but not a bundled worker file")
         named.append({"word": word, "path": rel})
 
+    def interpreter(path: str, via: str) -> None:
+        """Hash an interpreter outside the worker root; a '#!' script's own interpreter is hashed too, and must be an
+        absolute path that is not 'env' (no PATH lookup)."""
+        if not path.startswith("/") or "{" in path or "}" in path:
+            raise BundleError("bundle.relative_path", f"{path} ({via}): the interpreter must be an absolute path without "
+                              "braces, so the bundle can hash what runs")
+        if any(f["role"] == "interpreter" for f in files):
+            if "interpreter-2" in roots:
+                raise BundleError("bundle.bad_command", f"{path} ({via}): a chain of '#!' scripts is not bundled")
+            role = "interpreter-2"
+        else:
+            role = "interpreter"
+        real = Path(os.path.realpath(path))
+        roots[role] = str(real.parent)
+        files.append(dict(_entry(role, real.parent, real.name), named_as=path))
+        nxt = _shebang(real)
+        if nxt is not None:
+            interpreter(nxt, f"'#!' line of {path}")
+
     interp = tokens[0]
-    if not interp.startswith("/"):
-        raise BundleError("bundle.relative_path", f"{interp}: the interpreter must be an absolute path, so the bundle can hash it")
-    if wroot is not None and _inside(os.path.realpath(interp), wroot):
-        worker_path(interp, interp)  # a bundled executable worker runs directly
+    if wroot is not None and interp.startswith("/") and _inside(os.path.realpath(interp), wroot):
+        worker_path(interp, interp)  # a bundled executable worker runs directly; its '#!' interpreter is hashed
+        nxt = _shebang(Path(os.path.realpath(interp)))
+        if nxt is not None:
+            interpreter(nxt, f"'#!' line of {interp}")
         rest = tokens[1:]
     else:
-        real = Path(os.path.realpath(interp))
-        roots["interpreter"] = str(real.parent)
-        files.append(dict(_entry("interpreter", real.parent, real.name), named_as=interp))
+        interpreter(interp, "first word")
         worker_path(tokens[1], tokens[1])  # the interpreter runs a bundled script: no -m, -c or PATH lookup
         rest = tokens[2:]
     for tok in rest:
-        if NUMBER.match(tok):
+        if NUMBER.fullmatch(tok):
             continue
         flag, eq, value = tok.partition("=") if tok.startswith("-") else ("", "", tok)
-        if flag and not FLAG.match(flag):
+        if flag and not FLAG.fullmatch(flag):
             raise BundleError("bundle.bad_word", f"{tok}: flags are -x or --name with letters, digits, '_' and '-'")
         if flag and not eq:
             continue  # a plain flag
-        if PLACEHOLDER_WORD.match(value) or NUMBER.match(value) or BARE.match(value):
+        if PLACEHOLDER_WORD.fullmatch(value) or NUMBER.fullmatch(value) or BARE.fullmatch(value):
             continue
         if value.startswith("/"):
             worker_path(value, tok)

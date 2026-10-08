@@ -141,6 +141,40 @@ class BundleTests(unittest.TestCase):
         os.symlink(other, root / "current")
         self.assertIn("resolves elsewhere", [d["change"] for d in bd.verify(doc)["differences"]])
 
+    def test_format_fields_in_paths_and_edited_specs(self):
+        root = Path(self.tmp.name)
+        cdir = cp.init(root / "edited", self.manifest, self.cmd)
+        spec = json.loads((cdir / "spec.json").read_text())
+        decoy = self.worker / "{id:.>2.0}" / "etc"
+        decoy.mkdir(parents=True)
+        (decoy / "hosts").write_text("decoy")
+        for cmd in (self.cmd + f" --calib={self.worker}/{{id:.>2.0}}/etc/hosts",  # renders to <W>/../etc/hosts
+                    self.cmd + " --x={out!r}", self.cmd.replace("--id {id}", "--id {id.real}")):
+            spec["cmd"] = cmd
+            (cdir / "spec.json").write_text(json.dumps(spec))  # edited after init: freeze checks the template again
+            with self.subTest(cmd=cmd[-40:]):
+                with self.assertRaises(bd.BundleError):
+                    bd.build(cdir, self.worker)
+
+    def test_shebang_interpreters_are_hashed_and_env_is_refused(self):
+        root = Path(self.tmp.name)
+        tail = " --start {start} --stop {stop} --seed {seed} --out {out} --id {id}"
+        exe = self.worker / "run.py"
+        exe.write_text(f"#!/usr/bin/env python3\n{WORKER}")
+        os.chmod(exe, 0o755)
+        with self.assertRaises(bd.BundleError) as err:
+            bd.build(cp.init(root / "env", self.manifest, shlex.quote(str(exe)) + tail), self.worker)
+        self.assertEqual(err.exception.code, "bundle.relative_path")
+        exe.write_text(f"#!{os.path.realpath(sys.executable)}\n{WORKER}")
+        doc = bd.build(cp.init(root / "abs", self.manifest, shlex.quote(str(exe)) + tail), self.worker)
+        self.assertEqual([f["named_as"] for f in doc["files"] if f["role"] == "interpreter"], [os.path.realpath(sys.executable)])
+        wrapper = root / "wrapper.sh"
+        wrapper.write_text(f"#!/bin/sh\nexec {sys.executable} \"$@\"\n")
+        os.chmod(wrapper, 0o755)
+        doc = bd.build(cp.init(root / "wrap", self.manifest, f"{shlex.quote(str(wrapper))} {shlex.quote(str(self.worker / 'work.py'))}" + tail),
+                       self.worker)
+        self.assertEqual(sorted(f["role"] for f in doc["files"] if f["role"].startswith("interpreter")), ["interpreter", "interpreter-2"])
+
     def test_worker_root_may_not_contain_the_campaign(self):
         with self.assertRaises(bd.BundleError) as err:
             bd.build(self.cdir, Path(self.tmp.name))

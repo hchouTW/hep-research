@@ -131,9 +131,10 @@ node-failure, held, cancelled, lost, unknown`. A native state the adapter does n
   a tag is refused), with the data exposure known then, and writes an approval request. It approves nothing. The
   command follows a closed grammar: an absolute interpreter, then the absolute path of a bundled worker script (no
   `-m`, `-c` or `env`), then only flags, `--name=value`, single placeholders, numbers, plain ASCII words (no `/`, `.`,
-  `~`, `$` or braces) and absolute paths to bundled worker files (not links); keep the worker code in its own folder,
-  outside the campaign directory. A named path that later resolves elsewhere is a change. `submit --bundle DIGEST`
-  (and `resubmit`) re-hashes the bundle and is refused when anything changed since freezing or the bundle belongs to
+  `~`, `$` or braces) and absolute paths to bundled worker files (not links, no braces); the interpreter of a `#!`
+  worker or wrapper is hashed too, and `#!/usr/bin/env` is refused; keep the worker code in its own folder, outside
+  the campaign directory. A named path that later resolves elsewhere is a change. `submit --bundle DIGEST` (and
+  `resubmit`) re-hashes the bundle and is refused when anything changed since freezing or the bundle belongs to
   another campaign; freeze again and have the new bundle approved. The files stay editable; running approved bytes is
   the trusted submitter's job.
 - **A scheduler's success is not a result:** a job reported complete without a valid output is `lost`.

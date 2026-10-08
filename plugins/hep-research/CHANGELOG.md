@@ -24,12 +24,13 @@ Software checks establish contract consistency only, not physical validity.
   environment lock and the container image, which must be pinned by digest (a sourceless `.pyc` counts as code); the
   digest also binds the campaign uid, manifest hash and the data exposure recorded at freezing. The command follows a
   closed grammar: an absolute interpreter, an absolute bundled worker script, then only flags, `--name=value`, single
-  placeholders, numbers, plain ASCII words and absolute paths to bundled worker files, each re-resolved by `verify` (a
-  repointed link is a change); the worker root may not contain the campaign. A bundle frozen for another campaign
-  (directory, uid, manifest) is refused. The file carries an approval request (bundle digest, config hash, limits,
-  scope) and approves nothing. `submit`/`resubmit --bundle` re-hash it and refuse a changed campaign
-  (`bundle.changed`); the submission records the digest and the artifact lists it. Verification of approved bytes at
-  execution stays with the trusted submitter (T3.5). Tests in `tests/core/test_partition_bundle.py`,
+  placeholders, numbers, plain ASCII words and absolute paths to bundled worker files without braces, each re-resolved
+  by `verify` (a repointed link is a change); the template is checked again at freezing, and the interpreter of a `#!`
+  worker or wrapper is hashed (`#!/usr/bin/env` refused); the worker root may not contain the campaign. A bundle
+  frozen for another campaign (directory, uid, manifest) is refused. The file carries an approval request (bundle
+  digest, config hash, limits, scope) and approves nothing. `submit`/`resubmit --bundle` re-hash it and refuse a
+  changed campaign (`bundle.changed`); the submission records the digest and the artifact lists it. Verification of
+  approved bytes at execution stays with the trusted submitter (T3.5). Tests in `tests/core/test_partition_bundle.py`,
   `tests/adapters/test_batch_bundle.py`.
 - **Campaign limits, attempt identity and confirmed cancellation (AGENTIC-R5 T3.4, X08, X09).** New
   `core/partition/limits.py`: an optional `limits` configuration section (`max_submissions`, `max_total_jobs`,

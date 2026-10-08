@@ -238,8 +238,12 @@ def main(argv=None) -> int:
     if args.root is not None and (args.root.is_symlink() or not args.root.is_dir()):
         print(json.dumps({"status": "unreadable", "error": f"{args.root}: not a directory (a link is never followed)"}))
         return 2
-    out = check(docs["manifest"], args.root, docs["approval"], docs["approvers"], docs["ledger"], docs["revocations"],
-                docs["effective"], now)
+    try:
+        out = check(docs["manifest"], args.root, docs["approval"], docs["approvers"], docs["ledger"], docs["revocations"],
+                    docs["effective"], now)
+    except (AttributeError, KeyError, TypeError, ValueError) as exc:  # an input of the wrong shape: never a pass
+        print(json.dumps({"status": "unreadable", "error": f"malformed input: {type(exc).__name__}: {exc}"}))
+        return 2
     print(json.dumps(out, indent=1))
     return 0 if out["status"] == "pass" else 1
 
