@@ -177,6 +177,12 @@ the config's `local_profile_paths`; check the config with
 `python3 "<plugin root>/contracts/project.py" <project-dir>`, where `<plugin root>` is the folder that holds this README
 (in an install, the host's copy of the plugin). Nothing private is copied into the plugin.
 
+Schema 1.1.0 adds `agent_policy`: which content may reach the model (`public`, `synthetic`, `collaboration-internal`,
+`blinded-derivative:approved-manifest`), protected paths, data release manifests with their SHA-256, and
+`"unblinding": "outside-agent-session"`; a project with it must declare its `blinding` block. The copy in the project
+is agent-writable, so `contracts/project.py` only checks it (advisory); enforcement needs a host configuration that
+compares it with an authoritative copy, and none is qualified yet.
+
 ### Companion plugins
 
 A profile can also be shipped by a separate plugin that only authorized people can install. Such a plugin provides one

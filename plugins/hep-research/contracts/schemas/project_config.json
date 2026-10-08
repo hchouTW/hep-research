@@ -12,7 +12,20 @@
      "models": {"type": "array", "items": {"type": "string"}}, "parameter_points": {"type": "array", "items": {"type": "object"}}}}},
   "local_profile_paths": {"type": "array", "items": {"type": "string"}},
   "local_adapters": {"type": "array", "items": {"type": "string"}},
-  "blinding": {"type": "object", "properties": {"blinded": {"type": "array", "items": {"type": "string"}}, "allowed_outputs": {"type": "array", "items": {"type": "string"}}}},
+  "blinding": {"$comment": "closed from schema 1.1.0 (contracts/project.py). blinded lists the IDs of blinded observables; a measurement-spec's blinding.blinded (boolean) is true exactly when its observable is listed here",
+     "type": "object", "properties": {"blinded": {"type": "array", "items": {"type": "string"}}, "allowed_outputs": {"type": "array", "items": {"type": "string"}},
+       "regions": {"type": "array", "items": {"type": "object", "required": ["variable", "low", "high"], "properties": {
+         "variable": {"type": "string", "minLength": 1}, "low": {"type": "number"}, "high": {"type": "number"}}}}}},
+  "agent_policy": {"$comment": "schema 1.1.0 (AGENTIC-R5 T1.3). A policy declaration only: this copy lives in the agent-writable project, so it is advisory; a launcher compares it by digest with authoritative_copy",
+     "type": "object", "required": ["policy_version", "model_context_allowed", "unblinding"], "additionalProperties": false, "properties": {
+     "policy_version": {"$ref": "common.json#/$defs/version"},
+     "model_context_allowed": {"type": "array", "items": {"type": "string", "enum": ["public", "synthetic", "collaboration-internal", "blinded-derivative:approved-manifest"]}},
+     "protected_paths": {"type": "array", "items": {"type": "string", "minLength": 1}},
+     "release_manifests": {"type": "array", "items": {"type": "object", "required": ["ref", "sha256"], "additionalProperties": false, "properties": {
+        "ref": {"type": "string", "minLength": 1}, "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}}},
+     "unblinding": {"type": "string", "enum": ["outside-agent-session"]},
+     "authoritative_copy": {"type": "object", "required": ["location", "sha256"], "additionalProperties": false, "properties": {
+        "location": {"type": "string", "minLength": 1}, "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}}}},
   "private_evidence": {"type": "array", "items": {"type": "string"}},
   "overrides": {"type": "array", "items": {"type": "object", "required": ["target", "value", "provenance"], "properties": {
      "target": {"type": "string"}, "provenance": {"type": "string", "minLength": 1}, "variant_of": {"type": "string"}}}},

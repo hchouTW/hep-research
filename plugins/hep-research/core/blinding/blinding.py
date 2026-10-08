@@ -566,6 +566,11 @@ def _outline_inside(verts, lo: float, hi: float) -> bool:
 
 
 def load_project_blinding(config_path) -> dict:
-    """The `blinding` block of a project config (hep-research.project.json): blinded IDs, allowed outputs, regions."""
+    """The `blinding` block of a project config (hep-research.project.json): blinded IDs, allowed outputs, regions.
+    Unvalidated (core cannot import contracts): use contracts.project.load_blinding for a validated read. Fails
+    closed in the one case that matters here: with agent_policy present, a missing block is an error, never
+    'nothing blinded'."""
     cfg = json.loads(Path(config_path).read_text(encoding="utf-8"))
+    if "agent_policy" in cfg and not isinstance(cfg.get("blinding"), dict):
+        raise ValueError("the project declares agent_policy but no blinding block")
     return cfg.get("blinding") or {"blinded": [], "allowed_outputs": []}

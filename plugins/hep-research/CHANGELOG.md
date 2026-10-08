@@ -41,6 +41,12 @@ Software checks establish contract consistency only, not physical validity.
     warns on unknown top-level keys; `dependencies.py` validates every source as a contract artifact. The batch
     computational-run records the runner hash and resource-request hash in full (older 16-digit hashes still match),
     plus the full manifest hash. Example outputs are regenerated for 2.1.0.
+  - **Project config schema 1.1.0.** `agent_policy` (policy version, allowed model-context classes, protected paths
+    without `..`, data release manifests checked by SHA-256, unblinding outside the agent session, authoritative copy);
+    `contracts/project.py` checks `schema_version` (a newer minor or another major is refused), closes the `blinding`
+    block from 1.1.0, adds `blinding.regions`, and requires the block when `agent_policy` is present.
+    `contracts.project.load_blinding` reads it validated; `core.blinding.load_project_blinding` refuses a policy without
+    a blinding block instead of reporting nothing blinded.
 
 - **Choosing a SymPy interpreter (SYMPY).** `skills/hep-computing/scripts/find_python.py` finds a Python >= 3.11 that
   imports the packages a task needs (default SymPy). It tries, in order, `--python`, `HEP_RESEARCH_PYTHON`, the
