@@ -537,6 +537,7 @@ skipped for optional tools); `check_relocation.py`: pass.
 Finding, not changed: the `theory-spec` extension has no field for tool versions. The skill text records the
 interpreter and the SymPy version in a `computational-run` (`tools`, `environment`) instead.
 
-Unverified here: CI on Python 3.12 (CI runs 3.11 from the lock and 3.13 in the `latest` job); Linux and Windows
-interpreters for `find_python.py` (its tests use POSIX shell stand-ins and skip elsewhere); a live agent session using
-the new step.
+CI on the PR (Linux): the `checks` jobs on Python 3.11, 3.12 and 3.13 and every optional job pass.
+
+Unverified here: Windows interpreters for `find_python.py` (its tests use POSIX shell stand-ins and skip there); a
+live agent session using the new step.
