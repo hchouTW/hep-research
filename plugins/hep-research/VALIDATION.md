@@ -580,3 +580,16 @@ commit): both installed (0.4.0, 1.0.1); after moving the clone to this branch, `
 `plugin update ams02-research` (1.0.1 → 1.2.1), then `plugin update hep-research` (0.4.0 → 0.5.0). The installed
 companion's `tools/check_compatibility.py --hep-root <installed hep-research 0.5.0>` reported `compatible`, with
 `contracts/registry.py --local <companion>/profile` exit 0. Not run: `claude plugin prune` after migration.
+
+## 0.6.0 release check (2026-10-09, E2)
+
+Version 0.5.0 → 0.6.0 in both plugin manifests, `pyproject.toml`, the README and the capability matrix; the CHANGELOG
+"Unreleased" section became 0.6.0 (AGENTIC-R5 rounds 4–6: T4.4 structured data exposure, T3.4 campaign limits, T4.2
+bundle freezing, T1.2 data release manifest checker, T4.5 attestations, T4.6 operator semantics, T4.7 tool contracts;
+catalogs list hep-research only). Contracts stay 2.1.0. Examples rerun with the E2 venv: only the embedded plugin
+version changed (unfolding-coverage left as committed). `run_all_checks.py --jobs 6` with the E2 venv: 20 pass, 0 fail,
+0 skip (1821 unit tests, 47 skipped for optional packages). The code release manifest `release-manifests/0.6.0.json`
+is recorded in the release commit; the tag `hep-research--v0.6.0` points at the commit on main whose tree it describes.
+The companion ams02-research 1.3.1 declares hep-research `>=0.4.0,<0.6.0`, so its preflight refuses this release until
+the companion widens its range. Software checks establish consistency only; no host configuration is qualified for
+private or blinded data by this release.

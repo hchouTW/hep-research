@@ -3,7 +3,7 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.6.0 (2026-10-09)
 
 - **Tool contracts (AGENTIC-R5 T4.7, F14, F16).** New sidecar schema `contracts/schemas/tool_contract.json`
   (`contract_version` 1.0.0) and `contracts/tool_contract.py`: per operation, every command-line option mapped to one

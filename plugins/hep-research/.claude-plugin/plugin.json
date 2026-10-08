@@ -1,6 +1,6 @@
 {
   "name": "hep-research",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Research assistant for experimental and theoretical high-energy physics: seven core skills with optional experiment and theory-domain profiles. Not endorsed by AMS or any collaboration.",
   "author": {
     "name": "hchouTW"
