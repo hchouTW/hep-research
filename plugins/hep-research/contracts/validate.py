@@ -259,12 +259,30 @@ def _at_least(version, minimum) -> bool:
         return False
 
 
+def check_contract_version(doc: dict, rep: Report) -> None:
+    """An artifact written under a newer contract major may carry rules this validator does not know: judging it by
+    the older rules would report 'valid' for something never checked, so it is an error (fail closed). Older majors
+    keep their outcome; rules that changed between versions branch on contract_version (see _at_least)."""
+    from contracts import CONTRACTS_VERSION
+    cv = doc.get("contract_version")
+    try:
+        major = parse(str(cv))[0]
+    except (TypeError, ValueError):
+        return  # the envelope schema reports a malformed version
+    supported = parse(CONTRACTS_VERSION)[0]
+    if major > supported:
+        rep.add("error", "$.contract_version", "contract.unsupported_major",
+                f"contract_version {cv} is newer than this validator's contracts {CONTRACTS_VERSION}; "
+                "validate it with a plugin that implements that contract")
+
+
 def validate_artifact(doc, vocab: Vocabulary | None = None) -> Report:
     vocab = vocab or Vocabulary()
     rep = validate(doc, "envelope.json", vocab)
     check_finite(doc, rep)
     if not isinstance(doc, dict):
         return rep
+    check_contract_version(doc, rep)
     at = doc.get("artifact_type")
     ext_schema = EXTENSION_SCHEMAS.get(at) if isinstance(at, str) else None  # a wrong type is already a finding
     ext = doc.get("extension")

@@ -13,7 +13,7 @@ An input with "external": true, or a ref with a scheme ('hepdata:...', 'https://
 project: it is reported 'unresolved', never read. Any error or unresolved finding sets formal_use_allowed false: the
 artifact may be explored, but not used for a formal result, until its dependencies resolve.
 
-Usage: python3 contracts/dependencies.py ARTIFACT.json --root PROJECT_ROOT [--base DIR]
+Usage: python3 contracts/dependencies.py ARTIFACT.json --root PROJECT_ROOT [--base DIR] [--revocations FILE]
 Exit codes: 0 ok, 1 errors, 3 unresolved only, 2 unreadable input or bad usage. Output: JSON report on stdout.
 """
 from __future__ import annotations
@@ -39,9 +39,33 @@ def _inside(path: Path, root: Path) -> bool:
     return path == root or root in path.parents
 
 
+def load_revocations(path) -> tuple[dict, list[str]]:
+    """{subject_sha256: event} from a JSON Lines file, plus the problems found (each problem is reported as an error)."""
+    revoked, problems = {}, []
+    try:
+        lines = Path(path).read_text(encoding="utf-8").splitlines()
+    except (OSError, UnicodeDecodeError) as exc:
+        return {}, [f"cannot read revocations {path}: {exc}"]
+    for n, line in enumerate(lines, 1):
+        if not line.strip():
+            continue
+        try:
+            ev = json.loads(line)
+        except ValueError as exc:
+            problems.append(f"line {n}: not JSON ({exc})")
+            continue
+        dig = ev.get("subject_sha256") if isinstance(ev, dict) else None
+        if not (isinstance(dig, str) and HEX64.match(dig)) or not str(ev.get("reason") or "").strip():
+            problems.append(f"line {n}: needs subject_sha256 (64 lower-case hex) and a reason")
+            continue
+        revoked.setdefault(dig, ev)
+    return revoked, problems
+
+
 class _Checker:
-    def __init__(self, root: Path, base: Path):
+    def __init__(self, root: Path, base: Path, revoked: dict | None = None):
         self.root, self.base = root, base
+        self.revoked = revoked or {}
         self.findings: list[dict] = []
         self.checked: list[str] = []
         self.failed_upstream = False
@@ -87,6 +111,10 @@ class _Checker:
                 self.add("unresolved", where, "dependency.no_hash", f"{ref!r} has no sha256: a substituted source cannot be detected")
             elif HEX64.match(str(sha)) and sha != digest:
                 self.add("error", where, "dependency.hash_mismatch", f"{ref!r} has sha256 {digest}, the input declares {sha}")
+            if digest in self.revoked:
+                ev = self.revoked[digest]
+                self.add("error", where, "dependency.revoked",
+                         f"{ref!r} (sha256 {digest[:12]}...) was revoked {ev.get('issued', '')}: {ev.get('reason')}")
             try:
                 sdoc = json.loads(data.decode("utf-8"))
             except (UnicodeDecodeError, ValueError) as exc:
@@ -118,11 +146,14 @@ class _Checker:
                 self.artifact(src, sdoc, trail + (src,))
 
 
-def validate_dependencies(artifact_path, project_root, base=None) -> dict:
+def validate_dependencies(artifact_path, project_root, base=None, revocations=None) -> dict:
     root = Path(project_root).resolve()
     path = Path(artifact_path)
     path = (path if path.is_absolute() else Path.cwd() / path).resolve()
-    chk = _Checker(root, Path(base).resolve() if base else root)
+    revoked, rproblems = load_revocations(revocations) if revocations else ({}, [])
+    chk = _Checker(root, Path(base).resolve() if base else root, revoked)
+    for prob in rproblems:
+        chk.add("error", "$revocations", "dependency.revocations_unreadable", prob)
     if not root.is_dir():
         chk.add("error", "$", "dependency.bad_root", f"project root {project_root} is not a directory")
     elif not _inside(path, root):
@@ -135,13 +166,18 @@ def validate_dependencies(artifact_path, project_root, base=None) -> dict:
         except (OSError, ValueError) as exc:
             chk.add("error", "$", "dependency.unreadable", f"cannot read {artifact_path}: {exc}")
         else:
+            own = hashlib.sha256(path.read_bytes()).hexdigest()
+            if own in chk.revoked:
+                chk.add("error", "$", "dependency.revoked", f"this artifact was revoked: {chk.revoked[own].get('reason')}")
             if isinstance(doc, dict):
                 chk.artifact(path, doc, (path,))
             else:
                 chk.add("error", "$", "dependency.unreadable", f"{artifact_path} is not a JSON object")
     sev = {f["severity"] for f in chk.findings}
     status = "error" if "error" in sev else ("unresolved" if "unresolved" in sev else "ok")
-    return {"status": status, "formal_use_allowed": status == "ok" and not chk.failed_upstream,
+    consistent = status == "ok" and not chk.failed_upstream
+    return {"status": status, "formal_use_allowed": consistent, "dependency_consistency_ok": consistent,
+            "revocations_checked": bool(revocations),
             "failed_upstream": chk.failed_upstream, "checked": chk.checked, "findings": chk.findings,
             "note": "dependency consistency only: a resolved chain says nothing about the physical validity of any artifact"}
 
@@ -151,11 +187,12 @@ def main(argv=None) -> int:
     ap.add_argument("artifact", type=Path)
     ap.add_argument("--root", type=Path, required=True, help="project root: no file outside it is read")
     ap.add_argument("--base", type=Path, help="directory that refs are relative to (default: the project root)")
+    ap.add_argument("--revocations", type=Path, help="JSON Lines revocation events (append-only history)")
     try:
         args = ap.parse_args(argv)
     except SystemExit as exc:
         return 2 if exc.code else 0
-    rep = validate_dependencies(args.artifact, args.root, args.base)
+    rep = validate_dependencies(args.artifact, args.root, args.base, args.revocations)
     print(json.dumps(rep, indent=1))
     if any(f["code"] in ("dependency.bad_root",) for f in rep["findings"]) or \
             (rep["findings"] and rep["findings"][0]["path"] == "$" and rep["findings"][0]["code"] == "dependency.unreadable"):

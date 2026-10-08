@@ -18,7 +18,7 @@ A region is {"variable": name, "low": x0, "high": x1}; a bin is blinded when it 
                                              or Latin-1 for other 8-bit text; a file that cannot be decoded is
                                              unscanned (incomplete), never a pass
 - check_figure(fig, region, sealed=None)  -> artists drawn inside the blinded range of the x axis (lines,
-                                             markers, error bars, bars, steps, filled areas such as fill_between,
+                                             markers, error bars, bars, steps, histogram step outlines, filled areas such as fill_between,
                                              2D histograms and images), and, given the sealed numbers, text
                                              artists (ax.text, annotations, titles) that print one
 
@@ -174,6 +174,10 @@ def _scan_array(arr, sealed, rtol) -> list[dict]:
     if a.dtype.kind not in "fiu":
         return []
     flat = a.ravel().astype(float)
+    if a.dtype.kind == "f":
+        # a float32 or float16 copy of a sealed value differs from it by up to half a unit in the last place of the
+        # stored type, far more than the default rtol: compare at the precision the array can hold
+        rtol = max(rtol, 4 * float(np.finfo(a.dtype).eps))
     hits = []
     for t in sealed:
         idx = np.nonzero(np.isclose(flat, t, rtol=rtol, atol=0.0))[0]
@@ -203,7 +207,14 @@ def decode_text(raw: bytes) -> tuple[str | None, str]:
     try:
         return raw.decode("utf-8"), "utf-8"
     except UnicodeDecodeError:
-        return raw.decode("latin-1"), "latin-1"  # any 8-bit text: digits, signs and separators are ASCII in all of them
+        pass
+    # any 8-bit text: digits, signs and separators are ASCII in all of them. Raw binary (an array written with
+    # tofile(), a pickle, a ROOT file without its suffix) also decodes as Latin-1, but as control characters; it must
+    # be unscanned, never a pass
+    ctrl = sum(1 for b in raw if (b < 32 and b not in (9, 10, 12, 13)) or 127 <= b < 160)
+    if ctrl > 0.05 * len(raw):
+        return None, f"binary content ({ctrl} of {len(raw)} bytes are control codes), not text"
+    return raw.decode("latin-1"), "latin-1"
 
 
 def scan_file(path: Path, sealed, rtol: float = 1e-9) -> list[dict]:
@@ -302,6 +313,11 @@ def check_figure(fig, region: dict, sealed=None, rtol: float = 1e-9) -> list[dic
                 x0, w = patch.get_x(), patch.get_width()
                 if x0 + w > lo and x0 < hi:
                     found.append({"axes": ax_i, "artist": "bar", "label": patch.get_label(), "points": 1})
+            elif kind in ("Polygon", "PathPatch") and patch.get_transform().contains_branch(ax.transData):
+                # hist(histtype='step' or 'stepfilled') draws one Polygon outline per dataset
+                verts = patch.get_xy() if kind == "Polygon" else patch.get_path().vertices
+                if _outline_inside(verts, lo, hi):
+                    found.append({"axes": ax_i, "artist": "outline", "label": patch.get_label(), "points": 1})
         for coll in ax.collections:
             if isinstance(coll, QuadMesh):  # hist2d, pcolormesh: cells overlapping the range with a drawn value
                 xy = np.asarray(coll.get_coordinates(), float)
@@ -356,6 +372,24 @@ def check_figure(fig, region: dict, sealed=None, rtol: float = 1e-9) -> list[dic
                 found.append({"axes": None, "artist": "text", "label": t.get_text()[:60], "points": len(hits),
                               "sealed_values": sorted({h["sealed_value"] for h in hits})})
     return found
+
+
+def _outline_inside(verts, lo: float, hi: float) -> bool:
+    """A polygon outline drawn inside the blinded x range at a non-zero height: a vertex strictly inside the range, or
+    a segment spanning the whole range (a one-bin window). Vertices on the range edges belong to the neighbouring bins,
+    and zero-height baselines carry no content."""
+    import numpy as np
+    v = np.asarray(verts, float)
+    if v.ndim != 2 or len(v) == 0:
+        return False
+    v = v[np.isfinite(v[:, 0]) & np.isfinite(v[:, 1])]
+    if len(v) == 0:
+        return False
+    x, y = v[:, 0], v[:, 1]
+    if ((x > lo) & (x < hi) & (y != 0)).any():
+        return True
+    xa, xb, ya, yb = x[:-1], x[1:], y[:-1], y[1:]
+    return bool(((np.minimum(xa, xb) <= lo) & (np.maximum(xa, xb) >= hi) & (ya != 0) & (yb != 0)).any())
 
 
 def load_project_blinding(config_path) -> dict:
