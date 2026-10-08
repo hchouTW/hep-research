@@ -23,7 +23,7 @@ description: "Use when the deliverable is a theoretical or phenomenological resu
 
 1. First read `hep-research.project.json` if present and any profile it binds (stanza below). Load a theory-domain profile only if one is named or configured.
 2. Write the theory spec: model, assumptions, conventions, order, parameters, scales, validity domain.
-3. Derive (symbolically where useful), recording status and each check. Use hep-computing for heavy numerics.
+3. Derive (symbolically where useful), recording status and each check. Before SymPy work, run `python3 "<plugin root>/skills/hep-computing/scripts/find_python.py"` and use the interpreter it returns; if it reports `failed`, say so and never install anything without approval. Record that interpreter and its Python and SymPy versions with the derivation (`tools` and `environment` of a `computational-run`). Use hep-computing for heavy numerics.
 4. Produce the prediction in the observable space it will be compared in, with uncertainties by type and allowed transformations.
 5. For comparisons with data, state the dataset record and hand the inference to hep-statistics.
 
