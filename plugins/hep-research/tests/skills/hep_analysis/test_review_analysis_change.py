@@ -96,7 +96,9 @@ class DataExposureTests(unittest.TestCase):
     def test_control_words_followed_by_signal_region_are_not_unexposed(self):
         for entry in ("control region, then signal region yields", "sideband and signal region events",
                       "simulation tuned to the signal region", "MC compared with SR counts",
-                      "control region plus the signal window", "calibration after unblinding"):
+                      "control region plus the signal window", "calibration after unblinding",
+                      "control region and the full data spectrum", "simulation and data in the search region",
+                      "Monte Carlo vs data, all bins", "control-region data; signal-region data"):
             r = rac.review(self.change(looked_at=[entry]))
             self.assertNotEqual(r["data_exposure"]["state"], "unexposed", entry)
             self.assertNotEqual(r["decision"], "accept", entry)

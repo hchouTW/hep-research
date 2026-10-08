@@ -37,7 +37,8 @@ Rules (the T21 rules, carried to remote and asynchronous execution):
   stops a submission or reset that would exceed it, counting unknown and orphan-risk attempts as used.
 - cancel() records each command's exit per job and targets, through the submission tag, jobs of unconfirmed or
   abandoned submissions too. A cancel request is not termination: an attempt is 'termination_observed' only when a
-  later poll sees it in a final state. Unknown, abandoned and orphan jobs leave append-only 'resource_risk' records.
+  later poll sees it in a final state. Unknown, abandoned and orphan jobs leave append-only 'resource_risk' records
+  and count as running until a poll ends them or clear_orphan_risk() records the scheduler's evidence.
 Standard library only.
 """
 from __future__ import annotations
@@ -526,6 +527,36 @@ def cancel(campaign_dir, executor, chunk_ids=None, approved: bool = False, clock
     return {"dry_run": False, "requested": [j["job_id"] for j in jobs], "jobs": jobs,
             "find_errors": find_errors, "commands": cmds,
             "note": "cancel requested; a job is terminated only when a later poll observes it in a final state"}
+
+
+@_locked("clear")
+def clear_orphan_risk(campaign_dir, executor, submission_id: str, reason: str) -> dict:
+    """A person, with the scheduler's evidence, stops counting a submission's unknown or abandoned attempts as running
+    (limits.max_concurrent_jobs). Refused unless every job the scheduler lists under the submission's tag is in a final
+    state. The attempts keep their state and their resource_risk records; they still count as jobs and core-hours."""
+    if not reason or not reason.strip():
+        raise CampaignError("clear.reason_missing", "clearing orphan risk needs a reason")
+    cdir = Path(campaign_dir)
+    _, state = load(cdir)
+    sub = next((x for x in state["submissions"] if x["id"] == submission_id), None)
+    if sub is None or not sub.get("tag"):
+        raise CampaignError("clear.no_tag", f"{submission_id} is unknown or was recorded before submission tags")
+    recs = [r for row in state["chunks"].values() for r in row["attempt_records"]
+            if r.get("submission") == submission_id and r.get("final_state") in lim.ORPHAN_RISK and not r.get("orphan_cleared")]
+    if not recs:
+        raise CampaignError("clear.nothing", f"{submission_id} has no unknown or abandoned attempt to clear")
+    cands = executor.find(sub["tag"], sub.get("time"))  # a PollError propagates: no evidence, nothing cleared
+    live = [c for c in cands if normalize(c.get("state")) in ACTIVE or normalize(c.get("state")) in ("held", "unknown")]
+    if live:
+        raise CampaignError("clear.jobs_active", f"the scheduler lists jobs under {sub['tag']} that may still run: "
+                            f"{sorted(c.get('job_id') for c in live)}")
+    now = _now()
+    evidence = {"time": now, "reason": reason, "tag": sub["tag"], "candidates": cands}
+    for r in recs:
+        r["orphan_cleared"] = evidence
+        _risk(state, "orphan-cleared", f"cleared by a person: {reason}", r, tag=sub["tag"])
+    _save(cdir, state)
+    return {"cleared": sorted(r["attempt_id"] for r in recs), "evidence": evidence}
 
 
 # ---------------------------------------------------------------- collection

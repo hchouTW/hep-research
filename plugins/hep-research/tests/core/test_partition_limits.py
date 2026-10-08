@@ -1,7 +1,6 @@
 """T3.4: global attempt identity, campaign limits (unknown and orphan-risk jobs count as used), reset caps (X08), and
 cancellation that records exits, targets orphans through the submission tag and confirms termination only by a poll
 (X09). Scripted fake scheduler only; nothing reaches a real scheduler."""
-import datetime
 import json
 import sys
 import tempfile
@@ -101,9 +100,7 @@ class LimitTests(Base):
         cp.abandon_submission(self.cdir, sid, "no jobs found at the scheduler")
         use = lim.usage(self.state())
         self.assertEqual((use["submissions"], use["total_jobs"], use["orphan_risk_jobs"]), (1, 3, 3))
-        self.assertEqual(use["concurrent_jobs"], 3)  # within their walltime abandoned jobs may still run
-        later = datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=2)
-        self.assertEqual(lim.usage(self.state(), later)["concurrent_jobs"], 0)
+        self.assertEqual(use["concurrent_jobs"], 3)  # abandoned jobs may still run: queue time has no bound
         self.assertEqual(use["core_hours"], 3 * 2 * 1.0)  # worst case: cpus x walltime per orphan-risk job
         risks = self.state()["resource_risk"]
         self.assertEqual(sorted(r["kind"] for r in risks), ["abandoned"] * 3)
@@ -118,7 +115,7 @@ class LimitTests(Base):
         ex = ScriptedExecutor({"c0000": [{"state": "unknown"}]})
         cp.submit(self.cdir, ex, {}, ["c0000"], approved=True)
         cp.poll(self.cdir, ex)
-        use = lim.usage(self.state(), datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=30))
+        use = lim.usage(self.state())
         self.assertEqual((use["concurrent_jobs"], use["orphan_risk_jobs"], use["core_hours"]), (1, 1, None))
         self.assertEqual([r["kind"] for r in self.state()["resource_risk"]], ["unknown"])
         self.refused("limits.exceeded", cp.submit, self.cdir, ex, {"limits": {"max_concurrent_jobs": 1}}, ["c0001"])
@@ -139,6 +136,30 @@ class LimitTests(Base):
         self.assertEqual(bc.validate(dict(base, limits={"max_total_jobs": 10, "max_core_hours": 2.5, "max_resets_per_chunk": 0})), [])
         errs = bc.validate(dict(base, limits={"max_total_jobs": 0, "max_cpus": 1}))
         self.assertEqual(sorted(e["code"] for e in errs), ["config.bad_value", "config.unknown_key"])
+
+
+class ClearOrphanTests(Base):
+    def abandoned(self):
+        ex = InterruptingExecutor({})
+        with self.assertRaises(Interrupted):
+            cp.submit(self.cdir, ex, {"resources": TL}, ["c0000"], approved=True)
+        sid = self.state()["submissions"][-1]["id"]
+        cp.abandon_submission(self.cdir, sid, "no confirmation")
+        return ex, sid
+
+    def test_queued_past_walltime_still_counts_until_cleared_with_evidence(self):
+        ex, sid = self.abandoned()
+        self.assertEqual(lim.usage(self.state())["concurrent_jobs"], 1)
+        ex.by_tag[self.state()["submissions"][-1]["tag"]] = [{"job_id": "j-c0000-a01", "state": "queued"}]
+        self.refused("clear.jobs_active", cp.clear_orphan_risk, self.cdir, ex, sid, "checked the queue")
+        self.refused("clear.reason_missing", cp.clear_orphan_risk, self.cdir, ex, sid, " ")
+        ex.by_tag[self.state()["submissions"][-1]["tag"]] = [{"job_id": "j-c0000-a01", "state": "cancelled"}]
+        rep = cp.clear_orphan_risk(self.cdir, ex, sid, "sacct shows the job cancelled")
+        self.assertEqual(rep["cleared"], ["c0000-a01"])
+        use = lim.usage(self.state())
+        self.assertEqual((use["concurrent_jobs"], use["total_jobs"], use["orphan_risk_jobs"]), (0, 1, 1))
+        self.assertEqual([r["kind"] for r in self.state()["resource_risk"]], ["abandoned", "orphan-cleared"])
+        self.refused("clear.nothing", cp.clear_orphan_risk, self.cdir, ex, sid, "again")
 
 
 class RestartTests(Base):

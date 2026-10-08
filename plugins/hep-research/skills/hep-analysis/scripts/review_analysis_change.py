@@ -14,10 +14,11 @@ Input JSON: {"changes": [{"id", "parameter", "old", "new", "motivation",
               "after_unblinding": bool}]}
 Data exposure (F05, K06): each row reports {"state", "basis"} as in the envelope's data_exposure. A structured record
 (basis structured-record) is used as given; looked_at is legacy free text (basis legacy-text). A looked_at entry
-that names signal-region data or a result makes the change exposed; a non-empty list whose every entry names only
-control regions, sidebands, simulation, calibration or validation samples (and mentions no signal, yield, window,
-result, fit, limit or blinding) makes it unexposed; any other entry, an empty list, a looked_at that is not a list,
-or none at all (basis none) makes the exposure unknown, never unexposed. With both, the more exposed wins.
+that names signal-region data or a result makes the change exposed; a non-empty list whose every entry is one kind
+of control-region, sideband, simulation, calibration or validation data, written only with a closed vocabulary (for
+example "control-region data", "simulation", "sideband (low mass)"), makes it unexposed; any other wording ("full
+data", "search region", "simulation and data"), an empty list, a looked_at that is not a list, or none at all (basis
+none) makes the exposure unknown, never unexposed. Give one entry per kind of data. With both, the more exposed wins.
 Decision per change:
   accept            independent provenance (control sample or evidence ids, independent of the signal region) and
                     data exposure 'unexposed'
@@ -40,17 +41,26 @@ import sys
 OUTCOME_SEEN = re.compile(r"signal[- ]region data|unblinded|observed result|fit result|outcome|significance|p-value", re.I)
 OUTCOME_MOTIVE = re.compile(r"(to|so that).{0,40}(agree|match|improve|increase|reduce|remove).{0,40}"
                             r"(excess|deficit|significance|signal(?![- ]to[- ]background)|result|limit|tension)|(excess|tension|significance)", re.I)
-# legacy looked_at entries that name only data a blinded analysis may see; anything else is unknown (K06)
-NOT_OUTCOME = re.compile(r"^\s*(control[- ]region|control[- ]sample|sideband|validation[- ]region|simulation|simulated|"
-                         r"monte[- ]carlo|MC|calibration|test[- ]beam|cosmic[- ]ray calibration)\b[\w\s,()/.-]*$", re.I)
-# a legacy entry mentioning any of these is never read as unexposed, whatever it starts with
-SUSPECT = re.compile(r"signal|\bSR\b|blind|excess|observ|yield|window|result|limit|fit|tension|discover|unmask", re.I)
+# A legacy looked_at entry is read as unexposed only if every word is in this closed vocabulary and it names one of
+# the anchors: one kind of data a blinded analysis may see, with plain qualifiers. Any other word ("full", "all",
+# "search", "and", "vs", ...) makes the entry unknown (K06): the list fails closed, never open.
+ANCHORS = {"control", "sideband", "sidebands", "validation", "simulation", "simulated", "monte", "mc", "calibration", "test"}
+VOCAB = ANCHORS | {"region", "regions", "sample", "samples", "carlo", "beam", "data", "events", "distributions", "plots",
+                   "low", "high", "mass", "only", "cosmic", "ray"}
 EXPOSURE_STATES = ("unexposed", "exposed", "unknown", "incomplete")
 RANK = {"unexposed": 0, "unknown": 1, "incomplete": 1, "exposed": 2}
 
 
 class BadExposure(ValueError):
     pass
+
+
+def control_only(entry) -> bool:
+    """True only for a legacy entry made entirely of VOCAB words that names an anchor, e.g. 'control-region data'."""
+    if not isinstance(entry, str):
+        return False
+    words = re.findall(r"[a-z0-9]+", entry.lower())
+    return bool(words) and set(words) <= VOCAB and bool(set(words) & ANCHORS) and not re.search(r"[^\w\s()-]", entry)
 
 
 def exposure(change: dict) -> tuple[dict, list]:
@@ -69,7 +79,7 @@ def exposure(change: dict) -> tuple[dict, list]:
         legacy = None
     elif isinstance(raw, list):
         seen = [x for x in raw if OUTCOME_SEEN.search(str(x))]
-        known = bool(raw) and all(isinstance(x, str) and NOT_OUTCOME.match(x) and not SUSPECT.search(x) for x in raw)
+        known = bool(raw) and all(control_only(x) for x in raw)
         legacy = {"state": "exposed" if seen else "unexposed" if known else "unknown", "basis": "legacy-text"}
     else:  # a string is never read character by character as an empty look
         seen = [raw] if OUTCOME_SEEN.search(str(raw)) else []

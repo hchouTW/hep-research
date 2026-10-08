@@ -120,8 +120,10 @@ node-failure, held, cancelled, lost, unknown`. A native state the adapter does n
   signatures (state, exit code, signal, hold code; never host or time) in a row stop the chunk, across resets.
 - **Limits:** an optional `limits` section (`max_submissions`, `max_total_jobs`, `max_concurrent_jobs`,
   `max_core_hours`, `max_resets_per_chunk`) holds the site's and allocation's values; ask for them, never assume.
-  A submission or reset that would exceed one is refused; unknown and abandoned jobs count as used (as running until
-  their walltime has passed; without `time_limit` core-hours are unbounded, so `max_core_hours` refuses). Every
+  A submission or reset that would exceed one is refused; unknown and abandoned jobs count as used, and as running
+  until a poll ends them or a person runs `clear-orphans --submission S --reason TEXT`, which succeeds only when every
+  job the scheduler lists under the submission's tag has ended (a lost job may wait in the queue for any time, so a
+  walltime does not bound it). Without `time_limit` core-hours are unbounded, so `max_core_hours` refuses. Every
   attempt has a global identity `<campaign_uid>:<attempt_id>`.
 - **A scheduler's success is not a result:** a job reported complete without a valid output is `lost`.
 - **Held jobs need a person.** `watch` stops early on held, unknown or stopped chunks.

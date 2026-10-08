@@ -28,6 +28,9 @@ timeout; a submit whose outcome is unknown stays unconfirmed, never 'not-submitt
   cancel   --config C [--chunks ID ...] [--approve-cancel]   also jobs found under the tag of unconfirmed or
                                                          abandoned submissions; records each exit; a request is not
                                                          termination (a later status poll observes that)
+  clear-orphans --config C --submission S --reason TEXT   a person: the submission's unknown or abandoned jobs
+                                                         stop counting as running, only if every job the scheduler
+                                                         lists under its tag has ended
 A configured 'limits' section stops a submission or reset that would exceed it (core/partition/limits.py).
   merge    --config C                                    requires every chunk exactly once
   report   --config C --out ARTIFACT.json [--label synthetic ...] [--objective TEXT]
@@ -134,7 +137,7 @@ def main(argv=None, env=None, sleep=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
     for name in ("check-config", "plan", "submit", "status", "watch", "resubmit", "reset", "reconcile", "confirm", "abandon",
-                 "cancel", "merge", "report"):
+                 "cancel", "merge", "report", "clear-orphans"):
         s = sub.add_parser(name)
         s.add_argument("--config", type=Path, required=True)
         if name == "check-config":
@@ -154,9 +157,9 @@ def main(argv=None, env=None, sleep=None) -> int:
             s.add_argument("--plan-digest", help="the plan_digest of the reviewed dry run: refuse if the job files changed")
         if name in ("submit", "cancel", "reset"):
             s.add_argument("--chunks", nargs="+", required=name == "reset")
-        if name in ("reset", "abandon"):
+        if name in ("reset", "abandon", "clear-orphans"):
             s.add_argument("--reason", required=True)
-        if name in ("reconcile", "confirm", "abandon"):
+        if name in ("reconcile", "confirm", "abandon", "clear-orphans"):
             s.add_argument("--submission", required=True, help="the unconfirmed submission, for example s003")
         if name == "confirm":
             s.add_argument("--jobs", nargs="+", required=True, metavar="ATTEMPT=JOB",
@@ -209,6 +212,8 @@ def main(argv=None, env=None, sleep=None) -> int:
             return emit(cp.confirm_submission(cdir, args.submission, pairs, ex), 0)
         if args.cmd == "reconcile":
             return emit(cp.reconcile(cdir, ex, args.submission), 0)
+        if args.cmd == "clear-orphans":
+            return emit(cp.clear_orphan_risk(cdir, ex, args.submission, args.reason), 0)
         if args.cmd == "abandon":
             return emit(cp.abandon_submission(cdir, args.submission, args.reason), 0)
         if args.cmd == "cancel":

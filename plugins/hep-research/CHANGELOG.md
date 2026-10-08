@@ -9,18 +9,19 @@ Software checks establish contract consistency only, not physical validity.
   `core/partition/limits.py`: an optional `limits` configuration section (`max_submissions`, `max_total_jobs`,
   `max_concurrent_jobs`, `max_core_hours`, `max_resets_per_chunk`; values are the site's, none are defaulted) stops a
   submission or reset that would exceed it before anything is written (`limits.exceeded`); unknown and abandoned
-  attempts count as used, as running until their walltime has passed, and without a walltime core-hours are
+  attempts count as used, and as running until a poll ends them or `clear_orphan_risk` (CLI `clear-orphans`) records
+  that every job the scheduler lists under the submission's tag has ended; without a walltime core-hours are
   unbounded, so `max_core_hours` refuses. `states.decide` caps resets (`resets-exhausted`), so a reset no longer
   bypasses the limits. Attempts record `global_attempt_id` (`<campaign_uid>:<attempt_id>`). `cancel` records each
   command's exit per job (`requested`, `request-failed`, `request-unconfirmed`), also targets jobs found under the tag
-  of unconfirmed or abandoned submissions, and an attempt is `termination_observed` only when a later poll sees a final
-  state. Unknown, abandoned and orphan jobs leave append-only `resource_risk` records, carried into the campaign
+  of unconfirmed or abandoned submissions, and an attempt is `termination_observed` only when a later poll sees a
+  final state. Unknown, abandoned and orphan jobs leave append-only `resource_risk` records, carried into the campaign
   artifact with the usage. `batch_config.validate` checks the section. Tests in `tests/core/test_partition_limits.py`.
   Limit values and a real pilot remain open (Q-07, T3.3).
 - **Structured data exposure in change review (AGENTIC-R5 T4.4, K06).** `review_analysis_change.py` reports a
   `data_exposure` (`state`, `basis`, as in the 2.1.0 envelope) per change and accepts a structured record. A missing
   `looked_at` (basis `none`), an empty list, a string, or an entry it does not recognize as control-region, sideband,
-  simulation, calibration or validation data (or that mentions signal, yields, results or blinding) is `unknown`,
+  simulation, calibration or validation data written in a closed vocabulary (one kind of data per entry) is `unknown`,
   never unexposed; such a change gets the new decision `exposure-unknown` instead of `accept`. A malformed structured
   record is an input error (exit 2). Legacy text can only raise a structured state. Tests in
   `tests/skills/hep_analysis/test_review_analysis_change.py`.

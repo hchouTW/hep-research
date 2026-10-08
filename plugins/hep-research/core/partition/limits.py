@@ -6,7 +6,9 @@ the person running the campaign (Q-07), never from a default here:
   max_submissions        submissions recorded (an intent counts; a refused client that never started does not)
   max_total_jobs         job attempts recorded, under the same rule
   max_concurrent_jobs    attempts that may still be running: queued, running, held, submitting, and unknown or
-                         abandoned attempts until their worst-case walltime has passed (orphan risk)
+                         abandoned attempts (orphan risk) until a poll observes their end or a person clears them
+                         with evidence from the scheduler (campaign.clear_orphan_risk); a walltime does not bound
+                         them, since a lost job may wait in the queue for any time before it starts
   max_core_hours         cpus x elapsed time of finished attempts, cpus x walltime limit for every attempt whose end
                          is not observed; with no walltime limit (htcondor) the use is unbounded and the limit refuses
   max_resets_per_chunk   reset() calls per chunk
@@ -21,7 +23,6 @@ Standard library only.
 """
 from __future__ import annotations
 
-import datetime
 import re
 
 LIMIT_KEYS = ("max_submissions", "max_total_jobs", "max_concurrent_jobs", "max_core_hours", "max_resets_per_chunk")
@@ -48,13 +49,6 @@ def _cpus(resources: dict | None) -> int:
     return c if isinstance(c, int) and not isinstance(c, bool) and c > 0 else 1
 
 
-def _ts(text: str | None) -> datetime.datetime | None:
-    try:
-        return datetime.datetime.fromisoformat(str(text).replace("Z", "+00:00"))
-    except ValueError:
-        return None
-
-
 def problems(limits) -> list[str]:
     """Why a 'limits' section is malformed (also checked by batch_config.validate)."""
     if limits is None:
@@ -78,16 +72,11 @@ def _counted(rec: dict) -> bool:
     return rec.get("origin") != "scheduler-restart" and rec.get("final_state") != "not-submitted"
 
 
-def _may_still_run(rec: dict, now: datetime.datetime) -> bool:
+def _may_still_run(rec: dict) -> bool:
     fs = rec.get("final_state")
     if fs is None or fs == "held":
         return True
-    if fs not in ORPHAN_RISK:
-        return False
-    wall, start = walltime_s(rec.get("resources")), _ts(rec.get("submit_time"))
-    if wall is None or start is None:
-        return True  # no bound on when it ends: it counts as running
-    return now < start + datetime.timedelta(seconds=wall)
+    return fs in ORPHAN_RISK and not rec.get("orphan_cleared")
 
 
 def _core_hours(rec: dict) -> float | None:
@@ -99,8 +88,7 @@ def _core_hours(rec: dict) -> float | None:
     return cpus * float(rec["elapsed_s"]) / 3600
 
 
-def usage(state: dict, now: datetime.datetime | None = None) -> dict:
-    now = now or datetime.datetime.now(datetime.UTC)
+def usage(state: dict) -> dict:
     recs = [r for row in state.get("chunks", {}).values() for r in row.get("attempt_records", [])]
     counted = [r for r in recs if _counted(r)]
     hours = [_core_hours(r) for r in counted]  # a scheduler restart is inside its job's elapsed time or walltime
@@ -109,16 +97,16 @@ def usage(state: dict, now: datetime.datetime | None = None) -> dict:
         resets[r["chunk"]] = resets.get(r["chunk"], 0) + 1
     return {"submissions": sum(1 for s in state.get("submissions", []) if s.get("status") != "not-submitted"),
             "total_jobs": len(counted),
-            "concurrent_jobs": sum(1 for r in counted if _may_still_run(r, now)),
+            "concurrent_jobs": sum(1 for r in counted if _may_still_run(r)),
             "core_hours": None if any(h is None for h in hours) else round(sum(h for h in hours if h is not None), 6),
             "orphan_risk_jobs": sum(1 for r in counted if r.get("final_state") in ORPHAN_RISK),
             "resets_per_chunk": resets}
 
 
-def check_submission(state: dict, config: dict, n_jobs: int, now: datetime.datetime | None = None) -> tuple[dict, list[str]]:
+def check_submission(state: dict, config: dict, n_jobs: int) -> tuple[dict, list[str]]:
     """(usage, violations) for a new submission of n_jobs attempts under config['limits']."""
     lim = config.get("limits") or {}
-    use = usage(state, now)
+    use = usage(state)
     out = []
     for key, used, add in (("max_submissions", use["submissions"], 1), ("max_total_jobs", use["total_jobs"], n_jobs),
                            ("max_concurrent_jobs", use["concurrent_jobs"], n_jobs)):
