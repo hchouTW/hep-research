@@ -183,8 +183,11 @@ def _printed_match(token: str, target: float) -> bool:
     digits = mant.lstrip("+-").replace(".", "").lstrip("0")
     if len(digits) < 3:
         return False
-    step = 10.0 ** (exp - decimals)
-    return abs(float(token) - target) <= 0.5 * step * (1 + 1e-9)
+    try:  # a hex-like token ('91e333' in a job ID or tag) is not a printed number: its exponent overflows
+        step = 10.0 ** (exp - decimals)
+        return abs(float(token) - target) <= 0.5 * step * (1 + 1e-9)
+    except OverflowError:
+        return False
 
 
 GROUPED = re.compile(r"[-+]?\d{1,3}(?:,\d{3})+(?:\.\d*)?(?:[eE][-+]?\d+)?")  # thousands separators: 1,234.5
