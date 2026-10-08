@@ -84,6 +84,7 @@ NO_INPUT_FILE = {  # script: why the missing-file check does not apply
     "skills/hep-analysis/scripts/particle_ratio_with_uncertainty.py": "numbers on the command line",
     "skills/hep-analysis/scripts/solar_modulation_force_field.py": "numbers on the command line",
     "skills/hep-computing/scripts/create_story_card.py": "text on the command line",
+    "skills/hep-computing/scripts/find_python.py": "interpreter paths and package names on the command line",
     "skills/hep-computing/scripts/generate_skill_example.py": "text on the command line",
     "skills/hep-computing/scripts/make_synthetic_nanoaod.py": "writes a file, reads none",
     "skills/hep-computing/scripts/validate_skill_bundle.py": "reads the plugin's own files",
