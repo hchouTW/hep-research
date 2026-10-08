@@ -3,6 +3,17 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **Choosing a SymPy interpreter (SYMPY).** `skills/hep-computing/scripts/find_python.py` finds a Python >= 3.11 that
+  imports the packages a task needs (default SymPy). It tries, in order, `--python`, `HEP_RESEARCH_PYTHON`, the
+  calling interpreter and `python3` on PATH, and scans nothing else. It reports the chosen path with its Python and
+  package versions, or a `failed` status with every candidate's reason. hep-theory runs it before SymPy work and
+  records the interpreter and versions in a `computational-run`.
+- **Missing SymPy explained.** The theory-profile `derive.py` scripts and `examples/qed-prediction/run.py` print a JSON
+  `failed` status naming the missing package and exit 2, instead of a traceback; `--help` works without them.
+  Theory-profile tests skip, rather than error, when SymPy, NumPy or SciPy is missing.
+
 ## 0.4.0 (2026-10-08)
 
 - **Live routing harness and new routing cases (T19).** `evals/routing/run_routing_eval.py` (repository level, outside
