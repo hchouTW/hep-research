@@ -46,6 +46,25 @@ def _imported_profile_code() -> set[str]:
     return found
 
 
+def _missing_packages() -> list[str]:
+    missing = []
+    for name in ("numpy", "scipy", "sympy", "matplotlib"):
+        try:
+            __import__(name)
+        except ImportError:
+            missing.append(name)
+    return missing
+
+
+if __name__ == "__main__" and (_MISSING := _missing_packages()):  # explain instead of a traceback; --help still works
+    if {"-h", "--help"} & set(sys.argv[1:]):
+        print(__doc__)
+        sys.exit(0)
+    print(json.dumps({"status": "failed", "missing": _MISSING,
+                      "hint": "run with a Python that has them (skills/hep-computing/scripts/find_python.py --require "
+                              "numpy --require scipy --require sympy --require matplotlib), or install requirements-core.txt"}))
+    sys.exit(2)
+
 sys.addaudithook(_audit)
 sys.path.insert(0, str(PLUGIN))
 sys.path.insert(0, str(PROFILE_DIR / "scripts"))
