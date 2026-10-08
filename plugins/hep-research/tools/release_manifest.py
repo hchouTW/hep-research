@@ -16,8 +16,8 @@ Usage:
   python3 tools/release_manifest.py verify   --manifest FILE [--root DIR] compare a tree with a recorded manifest
   python3 tools/release_manifest.py check-published [--base REF]          CI immutability rule (C10)
 check-published: every recorded manifest `release-manifests/<version>.json` must match the bundle exported from its
-published tag `hep-research--v<version>` (git archive); with --base, recorded manifests may only be added since REF,
-never changed or deleted. The working tree (Unreleased) is not checked. Tags without a recorded manifest (releases
+published tag `hep-research--v<version>` (git archive); a manifest whose tag is not pushed yet (the release commit
+itself) is listed as pending; with --base, recorded manifests may only be added since REF, never changed or deleted. The working tree (Unreleased) is not checked. Tags without a recorded manifest (releases
 before this tool) are listed as unrecorded.
 Exit codes: 0 ok (verify: identical), 1 verify found differences or a published bundle changed, 2 unreadable input
 or a refused file.
@@ -53,15 +53,15 @@ def check_published(base: str | None = None) -> dict:
     import tempfile
     prefix = _git("rev-parse", "--show-prefix", text=True, check=True).stdout.strip()
     top = Path(_git("rev-parse", "--show-toplevel", text=True, check=True).stdout.strip())
-    problems, checked = [], []
+    problems, checked, pending = [], [], []
     rec_dir = ROOT / RECORDS
     recorded = sorted(rec_dir.glob("*.json")) if rec_dir.is_dir() else []
     tags = set(_git("tag", "--list", TAG_PREFIX + "*", text=True, check=True).stdout.split())
     for man_path in recorded:
         version = man_path.stem
         tag = TAG_PREFIX + version
-        if tag not in tags:
-            problems.append(f"{RECORDS}{man_path.name}: no published tag {tag}")
+        if tag not in tags:  # recorded in the release commit; the tag is pushed once that commit is on main
+            pending.append(tag)
             continue
         # the plugin subtree at the archive root; run from the top level, since a subdirectory cwd filters the archive
         archive = _git("archive", "--format=tar", f"{tag}:{prefix}" if prefix else tag, cwd=top)
@@ -82,8 +82,8 @@ def check_published(base: str | None = None) -> dict:
             if status != "A":
                 problems.append(f"{path}: a recorded release manifest was {'deleted' if status == 'D' else 'changed'}")
     unrecorded = sorted(t for t in tags if not (rec_dir / f"{t[len(TAG_PREFIX):]}.json").exists())
-    return {"status": "fail" if problems else "pass", "checked": checked, "unrecorded_tags": unrecorded,
-            "problems": problems}
+    return {"status": "fail" if problems else "pass", "checked": checked, "pending_tags": pending,
+            "unrecorded_tags": unrecorded, "problems": problems}
 
 
 def main(argv=None) -> int:

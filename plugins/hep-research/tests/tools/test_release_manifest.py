@@ -123,6 +123,13 @@ class PublishedImmutabilityC10(unittest.TestCase):
         self.assertEqual((code, rep["status"]), (0, "pass"), json.dumps(rep)[:1500])
         self.assertEqual([c["status"] for c in rep["checked"]], ["identical"])
 
+    def test_manifest_before_its_tag_is_pending(self):
+        (self.plugin / "release-manifests" / "9.9.10.json").write_text(json.dumps(rm.generate(self.plugin)))
+        git(self.repo, "add", "-A")
+        git(self.repo, "commit", "-qm", "release 9.9.10")
+        code, rep = self.check("--base", self.base)
+        self.assertEqual((code, rep["pending_tags"]), (0, ["hep-research--v9.9.10"]))
+
     def test_moved_tag_fails(self):
         (self.plugin / "core" / "a.py").write_text("x = 4\n")
         git(self.repo, "commit", "-qam", "change")

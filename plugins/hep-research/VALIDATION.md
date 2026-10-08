@@ -541,3 +541,14 @@ CI on the PR (Linux): the `checks` jobs on Python 3.11, 3.12 and 3.13 and every 
 
 Unverified here: Windows interpreters for `find_python.py` (its tests use POSIX shell stand-ins and skip there); a
 live agent session using the new step.
+
+## 0.5.0 release check (2026-10-08, E2)
+
+Version 0.4.0 → 0.5.0 in both plugin manifests, `pyproject.toml`, the README and the capability matrix; the CHANGELOG
+"Unreleased" section became 0.5.0 (AGENTIC-R5 WP0′, contracts 2.1.0, project config 1.1.0, batch hardening). Examples
+rerun with the E2 venv: only the embedded plugin version changed (unfolding-coverage left as committed, as in 0.4.0).
+`run_all_checks.py --jobs 6` with the E2 venv: 20 pass, 0 fail, 0 skip (1668 unit tests, 47 skipped for optional
+packages), including `claude plugin validate`, the Codex load check and the new `instruction_text` check. The code
+release manifest `release-manifests/0.5.0.json` (`tools/release_manifest.py generate`) is recorded in the release commit;
+the tag `hep-research--v0.5.0` points at the commit on main whose tree it describes. Software checks establish
+consistency only; no host configuration is qualified for private or blinded data by this release.
