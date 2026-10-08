@@ -73,6 +73,7 @@ import numpy as np  # noqa: E402
 import derive  # noqa: E402
 import predict  # noqa: E402
 from contracts import CONTRACTS_VERSION  # noqa: E402
+from contracts.identity import plugin_release  # noqa: E402
 from contracts.validate import validate_artifact  # noqa: E402
 from contracts.vocab import Vocabulary  # noqa: E402
 
@@ -87,7 +88,7 @@ PLUGIN_VERSION = json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_tex
 def artifacts(der: dict, pred: dict, created: str):
     vocab = Vocabulary.with_profiles([PROFILE])
     base = {"contract_version": CONTRACTS_VERSION, "bindings": {"experiments": [], "theory": [{"profile": PROFILE["id"], "version": PROFILE["version"]}]},
-            "versions": {"plugin": PLUGIN_VERSION, "contracts": CONTRACTS_VERSION, "profiles": {PROFILE["id"]: PROFILE["version"]}},
+            "versions": {"plugin": PLUGIN_VERSION, "contracts": CONTRACTS_VERSION, "plugin_release": plugin_release(), "profiles": {PROFILE["id"]: PROFILE["version"]}},
             "inputs": [], "outputs": [], "unresolved_inputs": []}
     src = SOURCES[0]
     spec = dict(base, artifact_id="qedbench-path-c-theory-spec", artifact_type="theory-spec",

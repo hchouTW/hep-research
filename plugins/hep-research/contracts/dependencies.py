@@ -15,7 +15,10 @@ false. The report is advisory: it never authorizes formal use. formal_use_allowe
 is decided only by a trusted gate outside the agent-run code (an artifact with no inputs, or '{}', is consistent but
 is not thereby allowed).
 
-Usage: python3 contracts/dependencies.py ARTIFACT.json --root PROJECT_ROOT [--base DIR] [--revocations FILE]
+Every source is also validated as a contract artifact (contracts/validate.py); --protected applies the stricter version
+policy for protected use.
+
+Usage: python3 contracts/dependencies.py ARTIFACT.json --root PROJECT_ROOT [--base DIR] [--revocations FILE] [--protected]
 Exit codes: 0 ok, 1 errors, 3 unresolved only, 2 unreadable input or bad usage. Output: JSON report on stdout.
 """
 from __future__ import annotations
@@ -30,7 +33,7 @@ from pathlib import Path
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from contracts.validate import STICKY_STATUSES  # noqa: E402
+from contracts.validate import STICKY_STATUSES, validate_artifact  # noqa: E402
 
 SCHEME = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
@@ -66,8 +69,8 @@ def load_revocations(path) -> tuple[dict, list[str]]:
 
 
 class _Checker:
-    def __init__(self, root: Path, base: Path, revoked: dict | None = None):
-        self.root, self.base = root, base
+    def __init__(self, root: Path, base: Path, revoked: dict | None = None, protected: bool = False):
+        self.root, self.base, self.protected = root, base, protected
         self.revoked = revoked or {}
         self.findings: list[dict] = []
         self.checked: list[str] = []
@@ -126,6 +129,15 @@ class _Checker:
             if not isinstance(sdoc, dict):
                 self.add("error", where, "dependency.unreadable", f"{ref!r} is not a JSON object")
                 continue
+            # every source is itself a contract artifact: an invalid one, an unknown type or required capability, or
+            # a newer contract version this reader cannot judge is not a dependency it can vouch for (K02, F08)
+            srep = validate_artifact(sdoc, protected=self.protected)
+            bad = sorted({f.code for f in srep.errors})
+            if bad:
+                self.add("error", where, "dependency.source_invalid", f"{ref!r} fails contract validation: {', '.join(bad)}")
+            elif any(f.code == "contract.newer_minor" for f in srep.findings):
+                self.add("warning", where, "dependency.source_newer_minor",
+                         f"{ref!r} uses contract {sdoc.get('contract_version')}, newer than this reader")
             for key, skey, code in (("artifact_type", "artifact_type", "dependency.type_mismatch"),
                                     ("artifact_id", "artifact_id", "dependency.id_mismatch"),
                                     ("version", "contract_version", "dependency.version_mismatch")):
@@ -149,12 +161,12 @@ class _Checker:
                 self.artifact(src, sdoc, trail + (src,))
 
 
-def validate_dependencies(artifact_path, project_root, base=None, revocations=None) -> dict:
+def validate_dependencies(artifact_path, project_root, base=None, revocations=None, protected: bool = False) -> dict:
     root = Path(project_root).resolve()
     path = Path(artifact_path)
     path = (path if path.is_absolute() else Path.cwd() / path).resolve()
     revoked, rproblems = load_revocations(revocations) if revocations else ({}, [])
-    chk = _Checker(root, Path(base).resolve() if base else root, revoked)
+    chk = _Checker(root, Path(base).resolve() if base else root, revoked, protected)
     for prob in rproblems:
         chk.add("error", "$revocations", "dependency.revocations_unreadable", prob)
     if not root.is_dir():
@@ -165,11 +177,12 @@ def validate_dependencies(artifact_path, project_root, base=None, revocations=No
         chk.add("error", "$", "dependency.outside_root", "the ref base directory lies outside the project root")
     else:
         try:
-            doc = json.loads(path.read_text(encoding="utf-8"))
+            raw = path.read_bytes()  # read once: the hash and the parsed content come from the same bytes (K09)
+            doc = json.loads(raw.decode("utf-8"))
         except (OSError, ValueError) as exc:
             chk.add("error", "$", "dependency.unreadable", f"cannot read {artifact_path}: {exc}")
         else:
-            own = hashlib.sha256(path.read_bytes()).hexdigest()
+            own = hashlib.sha256(raw).hexdigest()
             if own in chk.revoked:
                 chk.add("error", "$", "dependency.revoked", f"this artifact was revoked: {chk.revoked[own].get('reason')}")
             if isinstance(doc, dict):
@@ -192,11 +205,12 @@ def main(argv=None) -> int:
     ap.add_argument("--root", type=Path, required=True, help="project root: no file outside it is read")
     ap.add_argument("--base", type=Path, help="directory that refs are relative to (default: the project root)")
     ap.add_argument("--revocations", type=Path, help="JSON Lines revocation events (append-only history)")
+    ap.add_argument("--protected", action="store_true", help="stricter version policy: a newer minor contract is an error")
     try:
         args = ap.parse_args(argv)
     except SystemExit as exc:
         return 2 if exc.code else 0
-    rep = validate_dependencies(args.artifact, args.root, args.base, args.revocations)
+    rep = validate_dependencies(args.artifact, args.root, args.base, args.revocations, args.protected)
     print(json.dumps(rep, indent=1))
     if any(f["code"] in ("dependency.bad_root",) for f in rep["findings"]) or \
             (rep["findings"] and rep["findings"][0]["path"] == "$" and rep["findings"][0]["code"] == "dependency.unreadable"):

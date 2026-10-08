@@ -39,6 +39,7 @@ sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(PLUGIN))
 import batch_config  # noqa: E402
 from contracts import CONTRACTS_VERSION  # noqa: E402
+from contracts.identity import plugin_release  # noqa: E402
 from core.partition import campaign as cp  # noqa: E402
 from core.partition import engine  # noqa: E402
 from core.partition.executors import PollError  # noqa: E402
@@ -89,16 +90,18 @@ def build_artifact(cdir: Path, cfg: dict, executor, labels: list[str], objective
     return {
         "contract_version": CONTRACTS_VERSION, "artifact_id": f"batch-campaign-{manifest['job_id']}-{manifest['manifest_hash'][:12]}",
         "artifact_type": "computational-run", "objective": objective,
-        "versions": {"plugin": json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_text())["version"], "contracts": CONTRACTS_VERSION},
+        "versions": {"plugin": json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_text())["version"], "contracts": CONTRACTS_VERSION,
+                     "plugin_release": plugin_release()},
         "provenance": {"producer_skill": "hep-computing", "created": datetime.date.today().isoformat()},
         "inputs": [], "outputs": [], "status": status, "unresolved_inputs": [],
         "extension": {
             "input_manifest": [{"path": "manifest.json", "sha256": _sha(cdir / "manifest.json")},
                                {"path": "spec.json", "sha256": _sha(cdir / "spec.json")}],
             "tools": [{"name": cfg["backend"], "version": executor.version()},
-                      {"name": "hep-research core/partition runner", "version": _sha(cdir / "runner.py")[:12]}],
+                      {"name": "hep-research core/partition runner", "version": _sha(cdir / "runner.py")}],
             "commands": [" ".join(map(str, s["command"])) for s in state["submissions"]],
             "environment": {"backend": cfg["backend"], "config_sha256": batch_config.config_hash(cfg), "config": cfg,
+                            "manifest_hash": manifest["manifest_hash"],  # in full; artifact_id shows 12 digits only
                             "container_image": json.loads((cdir / "spec.json").read_text()).get("container_image"),
                             "execution": {"campaign_status": "complete" if complete else "incomplete", "attempts": attempts,
                                           "duplicates": state["duplicates"], "quarantine": state["quarantine"],

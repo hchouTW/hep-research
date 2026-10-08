@@ -34,6 +34,7 @@ sys.path.insert(0, str(PROFILE_DIR / "scripts"))
 import detector  # noqa: E402
 import generate_events  # noqa: E402
 from contracts import CONTRACTS_VERSION  # noqa: E402
+from contracts.identity import plugin_release  # noqa: E402
 from contracts.validate import validate_artifact  # noqa: E402
 from contracts.vocab import Vocabulary  # noqa: E402
 from core.stats.unfolding_diagnostics import linear_matrix  # noqa: E402
@@ -113,7 +114,7 @@ def artifacts(res, resp, created):
     edges = TE[REP.start:REP.stop + 1].tolist()
     base = {"contract_version": CONTRACTS_VERSION,
             "bindings": {"experiments": [{"profile": PROFILE["id"], "version": PROFILE["version"]}], "theory": []},
-            "versions": {"plugin": PLUGIN_VERSION, "contracts": CONTRACTS_VERSION, "profiles": {PROFILE["id"]: PROFILE["version"]}},
+            "versions": {"plugin": PLUGIN_VERSION, "contracts": CONTRACTS_VERSION, "plugin_release": plugin_release(), "profiles": {PROFILE["id"]: PROFILE["version"]}},
             "inputs": [], "outputs": [], "unresolved_inputs": []}
     obs = {"quantity": "differential-cross-section", "process": "e+e- -> mu+mu- (synthetic generator)",
            "variables": [{"name": "cos_theta", "unit": "1", "edges": edges}],

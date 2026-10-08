@@ -37,6 +37,7 @@ from pathlib import Path
 PLUGIN = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PLUGIN))
 from contracts import CONTRACTS_VERSION  # noqa: E402
+from contracts.identity import plugin_release  # noqa: E402
 from contracts.comparison.gate import gate, side_from_artifact  # noqa: E402
 from contracts.validate import validate_artifact  # noqa: E402
 from core.stats.likelihood_limits import profile_cls  # noqa: E402
@@ -88,7 +89,7 @@ def closed_form_cls(n, b, cl):
 
 def base(created, producer):
     return {"contract_version": CONTRACTS_VERSION, "bindings": {"experiments": [], "theory": []},
-            "versions": {"plugin": PLUGIN_VERSION, "contracts": CONTRACTS_VERSION, "profiles": {}},
+            "versions": {"plugin": PLUGIN_VERSION, "contracts": CONTRACTS_VERSION, "plugin_release": plugin_release(), "profiles": {}},
             "provenance": {"producer_skill": producer, "created": created, "evidence_ids": []},
             "inputs": [], "outputs": [], "unresolved_inputs": [], "status": ["synthetic"]}
 

@@ -1,5 +1,5 @@
 {
- "contracts_version": "1.0.0",
+ "contracts_version": "2.1.0",
  "note": "Core vocabularies. Profiles extend them only with namespaced terms '<namespace>:<term>' declared in profile.json vocabulary_extensions. Unknown un-namespaced terms are rejected.",
  "vocabularies": {
   "levels": {

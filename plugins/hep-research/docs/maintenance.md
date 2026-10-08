@@ -83,6 +83,12 @@ renaming a field, changing a default convention, or tightening a rule so old art
 needs: a converter that rewrites old artifacts with explicit refusal codes for what it cannot convert, valid and invalid
 fixtures in `contracts/fixtures/`, and an entry in the changelog of the release.
 
+Readers apply a version policy (`contracts/validate.py`, since 2.1.0): a newer major is an error; a newer minor is a
+warning, or an error with `--protected`; `versions.contracts` must equal `contract_version`; an unknown entry in
+`required_capabilities` is an error (add new capabilities to `contracts.KNOWN_CAPABILITIES` when a reader implements
+them). `contracts/dependencies.py` validates every source the same way. Artifacts record the code identity in
+`versions.plugin_release` through `contracts/identity.py`; older artifacts lack it and their identity is unknown.
+
 ## Versioning
 
 SemVer for the plugin (`.claude-plugin/plugin.json`), contracts, core (`core/__init__.py`), each profile and each

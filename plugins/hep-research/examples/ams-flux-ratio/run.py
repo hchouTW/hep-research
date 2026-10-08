@@ -34,6 +34,7 @@ import numpy as np
 PLUGIN = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PLUGIN))
 from contracts import CONTRACTS_VERSION  # noqa: E402
+from contracts.identity import plugin_release  # noqa: E402
 from contracts.validate import validate_artifact  # noqa: E402
 from contracts.vocab import Vocabulary  # noqa: E402
 from core.stats.statistical_toys import ratio_measured  # noqa: E402
@@ -268,7 +269,7 @@ def artifacts(world, res, created):
     vocab = Vocabulary.with_profiles([PROFILE])
     edges = EDGES[1:-1].tolist()
     base = {"contract_version": CONTRACTS_VERSION, "bindings": {"experiments": [{"profile": PROFILE["id"], "version": PROFILE["version"]}], "theory": []},
-            "versions": {"plugin": PLUGIN_VERSION, "contracts": CONTRACTS_VERSION, "profiles": {PROFILE["id"]: PROFILE["version"]}},
+            "versions": {"plugin": PLUGIN_VERSION, "contracts": CONTRACTS_VERSION, "plugin_release": plugin_release(), "profiles": {PROFILE["id"]: PROFILE["version"]}},
             "inputs": [], "outputs": [], "unresolved_inputs": []}
     periods = [{"start": p, "end": p} for p in PERIODS]
     obs = {"quantity": "ratio", "species": [{"name": "helium", "abs_Z": 2, "A": 4}, {"name": "proton", "abs_Z": 1, "A": 1}],

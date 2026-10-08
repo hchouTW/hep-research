@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Validate a hep-research artifact: common envelope + typed extension + semantic rules.
 
-Usage: python3 contracts/validate.py ARTIFACT.json [--profiles-from PROJECT_CONFIG.json]
+Usage: python3 contracts/validate.py ARTIFACT.json [--profiles-from PROJECT_CONFIG.json] [--protected]
 Exit codes: 0 valid, 1 findings with errors, 2 unreadable input or bad usage. Output: JSON report on stdout.
-A valid artifact is self-consistent under the contract; that says nothing about physical validity.
+A valid artifact is self-consistent under the contract; that says nothing about physical validity, and this check is
+advisory: it never authorizes a use. --protected applies the stricter version policy for protected use (a newer
+minor contract version is an error, not a warning).
 """
 from __future__ import annotations
 
@@ -259,30 +261,59 @@ def _at_least(version, minimum) -> bool:
         return False
 
 
-def check_contract_version(doc: dict, rep: Report) -> None:
-    """An artifact written under a newer contract major may carry rules this validator does not know: judging it by
-    the older rules would report 'valid' for something never checked, so it is an error (fail closed). Older majors
-    keep their outcome; rules that changed between versions branch on contract_version (see _at_least)."""
-    from contracts import CONTRACTS_VERSION
+def check_contract_version(doc: dict, rep: Report, protected: bool = False) -> None:
+    """Version policy (F08, K02). A newer major may carry rules this validator does not know: judging it by the older
+    rules would report 'valid' for something never checked, so it is an error (fail closed). A newer minor adds only
+    optional fields, so it is a warning, or an error for protected use. versions.contracts must equal
+    contract_version (an error from 2.1.0 on, a warning before). Every required capability must be one this reader
+    implements. Older versions keep their outcome; rules that changed branch on contract_version (see _at_least)."""
+    from contracts import CONTRACTS_VERSION, KNOWN_CAPABILITIES
     cv = doc.get("contract_version")
     try:
-        major = parse(str(cv))[0]
+        version = parse(str(cv))
     except (TypeError, ValueError):
         return  # the envelope schema reports a malformed version
-    supported = parse(CONTRACTS_VERSION)[0]
-    if major > supported:
+    supported = parse(CONTRACTS_VERSION)
+    if version[0] > supported[0]:
         rep.add("error", "$.contract_version", "contract.unsupported_major",
                 f"contract_version {cv} is newer than this validator's contracts {CONTRACTS_VERSION}; "
                 "validate it with a plugin that implements that contract")
+    elif version[0] == supported[0] and version[1] > supported[1]:
+        rep.add("error" if protected else "warning", "$.contract_version", "contract.newer_minor",
+                f"contract_version {cv} is newer than this validator's contracts {CONTRACTS_VERSION}: fields it adds "
+                "are not checked" + ("; protected use needs a reader that implements it" if protected else ""))
+    declared = (doc.get("versions") or {}).get("contracts") if isinstance(doc.get("versions"), dict) else None
+    if declared is not None and declared != cv:
+        rep.add("error" if _at_least(cv, "2.1.0") else "warning", "$.versions.contracts", "contract.version_mismatch",
+                f"versions.contracts {declared} differs from contract_version {cv}")
+    caps = doc.get("required_capabilities")
+    if isinstance(caps, list):
+        for k, cap in enumerate(caps):
+            if isinstance(cap, str) and cap not in KNOWN_CAPABILITIES:
+                rep.add("error", f"$.required_capabilities[{k}]", "contract.unknown_capability",
+                        f"required capability '{cap}' is not implemented by this reader (contracts {CONTRACTS_VERSION})")
 
 
-def validate_artifact(doc, vocab: Vocabulary | None = None) -> Report:
+ENVELOPE_KEYS = {"contract_version", "artifact_id", "artifact_type", "objective", "bindings", "versions", "provenance",
+                 "inputs", "outputs", "status", "handoff", "unresolved_inputs", "extension", "required_capabilities",
+                 "data_exposure"}
+
+
+def check_unknown_keys(doc: dict, rep: Report) -> None:
+    """Unknown top-level keys are accepted but not propagated by any consumer: say so (P02, K03)."""
+    for key in sorted(set(doc) - ENVELOPE_KEYS):
+        rep.add("warning", f"$.{key}", "envelope.unknown_key",
+                f"'{key}' is not an envelope field: no consumer reads or propagates it")
+
+
+def validate_artifact(doc, vocab: Vocabulary | None = None, protected: bool = False) -> Report:
     vocab = vocab or Vocabulary()
     rep = validate(doc, "envelope.json", vocab)
     check_finite(doc, rep)
     if not isinstance(doc, dict):
         return rep
-    check_contract_version(doc, rep)
+    check_contract_version(doc, rep, protected)
+    check_unknown_keys(doc, rep)
     at = doc.get("artifact_type")
     ext_schema = EXTENSION_SCHEMAS.get(at) if isinstance(at, str) else None  # a wrong type is already a finding
     ext = doc.get("extension")
@@ -320,7 +351,7 @@ def main(argv=None) -> int:
         pre.findings += proj.report.findings
         for prob in vocab.problems:
             pre.add("error", "config.profiles", "profile.vocab_namespace", prob)
-    rep = validate_artifact(doc, vocab)
+    rep = validate_artifact(doc, vocab, protected="--protected" in args)
     rep.findings[:0] = pre.findings
     print(json.dumps(rep.as_dict(), indent=1))
     return 0 if rep.ok else 1

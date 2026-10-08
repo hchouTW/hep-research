@@ -1,12 +1,16 @@
 {
- "contract_version": "2.0.0",
+ "contract_version": "2.1.0",
  "bindings": {
   "experiments": [],
   "theory": []
  },
  "versions": {
   "plugin": "0.4.0",
-  "contracts": "2.0.0",
+  "contracts": "2.1.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  },
   "profiles": {}
  },
  "provenance": {

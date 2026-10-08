@@ -46,6 +46,14 @@ def repeated(errors: list) -> bool:
     return len(errors) >= 2 and errors[-1] == errors[-2]
 
 
+def same_resources(a: str | None, b: str | None) -> bool:
+    """Equal resource-request hashes; a 16-hex hash recorded by an older campaign matches the full hash it begins."""
+    if a is None or b is None:
+        return a == b
+    short, full = sorted((a, b), key=len)
+    return short == full if len(short) != 16 else full.startswith(short)
+
+
 def decide(chunk: dict, max_attempts: int | None, resources_hash: str | None) -> dict:
     """Decision for one chunk that has no collected output, from its last attempt record.
 
@@ -70,6 +78,6 @@ def decide(chunk: dict, max_attempts: int | None, resources_hash: str | None) ->
         return {"decision": "no-retries-configured", "reason": "no max_attempts in the configuration"}
     if chunk.get("attempts_since_reset", 0) >= max_attempts:
         return {"decision": "attempts-exhausted", "reason": f"{chunk.get('attempts_since_reset', 0)} of {max_attempts} attempts used"}
-    if cls == "needs-resource-change" and resources_hash == last.get("resources_hash"):
+    if cls == "needs-resource-change" and same_resources(resources_hash, last.get("resources_hash")):
         return {"decision": "needs-resource-change", "reason": f"{state}: change the resources in the configuration before resubmitting"}
     return {"decision": "resubmit", "reason": f"{state} is {cls}"}

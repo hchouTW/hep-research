@@ -37,6 +37,7 @@ from pathlib import Path
 PLUGIN = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(PLUGIN))
 from contracts import CONTRACTS_VERSION  # noqa: E402
+from contracts.identity import plugin_release  # noqa: E402
 from contracts.validate import validate_artifact  # noqa: E402
 
 
@@ -184,7 +185,7 @@ def build(opts) -> tuple[dict, dict | None]:
                        "tool": "adapters/hepdata/assets/hepdata_record.py"},
         "status": [status_label], "bindings": {"experiments": [], "theory": []},
         "versions": {"plugin": json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_text())["version"],
-                     "contracts": CONTRACTS_VERSION, "profiles": {}},
+                     "contracts": CONTRACTS_VERSION, "profiles": {}, "plugin_release": plugin_release()},
         "inputs": [], "outputs": [], "unresolved_inputs": [],
         "extension": {"dataset_id": dataset_id, "source_evidence_ids": [opts.evidence_id] if opts.evidence_id else [],
                       "observable": observable,

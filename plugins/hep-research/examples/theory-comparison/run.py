@@ -42,6 +42,7 @@ sys.path.insert(0, str(EXP_DIR / "scripts"))
 import detector  # noqa: E402
 import generate_events  # noqa: E402
 from contracts import CONTRACTS_VERSION  # noqa: E402
+from contracts.identity import plugin_release  # noqa: E402
 from contracts.comparison.composition import compose  # noqa: E402
 from contracts.comparison.gate import gate, side_from_artifact  # noqa: E402
 from contracts.validate import validate_artifact  # noqa: E402
@@ -232,7 +233,7 @@ def artifacts(pred_doc, gate_res, fold_counts, r, counts, obs_fit, toy_res, crea
     base = {"contract_version": CONTRACTS_VERSION,
             "bindings": {"experiments": [{"profile": EXP["id"], "version": EXP["version"]}],
                          "theory": [{"profile": TH["id"], "version": TH["version"]}]},
-            "versions": {"plugin": PLUGIN_VERSION, "contracts": CONTRACTS_VERSION,
+            "versions": {"plugin": PLUGIN_VERSION, "contracts": CONTRACTS_VERSION, "plugin_release": plugin_release(),
                          "profiles": {EXP["id"]: EXP["version"], TH["id"]: TH["version"]}},
             "outputs": [], "unresolved_inputs": []}
     pred_in = {"ref": "../qed-prediction/output/artifacts/prediction.json", "artifact_type": "prediction", "status": pred_doc["status"]}

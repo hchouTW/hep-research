@@ -33,6 +33,14 @@ Software checks establish contract consistency only, not physical validity.
     full SHA-256, size and mode, sorted, no symlinks) and its digest, verifies a tree against it, and, in CI
     (`release-manifests` job), checks that every recorded `release-manifests/<version>.json` matches its published tag
     and that recorded manifests are only ever added.
+  - **Contracts 2.1.0 (minor).** New optional envelope fields: `versions.plugin_release` (`{release, digest}` from
+    `contracts/identity.py`: the full digest when the installed tree matches its own recorded release manifest,
+    otherwise `unreleased`/`unknown`), `required_capabilities` (a reader rejects one it does not implement) and a
+    structured `data_exposure` (`state`, `basis`). `inputs[].version` must be a version. The validator now warns on a
+    newer minor contract (an error with `--protected`), checks `versions.contracts` against `contract_version`, and
+    warns on unknown top-level keys; `dependencies.py` validates every source as a contract artifact. The batch
+    computational-run records the runner hash and resource-request hash in full (older 16-digit hashes still match),
+    plus the full manifest hash. Example outputs are regenerated for 2.1.0.
 
 - **Choosing a SymPy interpreter (SYMPY).** `skills/hep-computing/scripts/find_python.py` finds a Python >= 3.11 that
   imports the packages a task needs (default SymPy). It tries, in order, `--python`, `HEP_RESEARCH_PYTHON`, the

@@ -28,7 +28,7 @@ def codes(rep, severity=None):
 
 class StatisticalResultV11(unittest.TestCase):
     def test_version_is_minor_bump(self):
-        self.assertEqual(CONTRACTS_VERSION, "2.0.0")
+        self.assertEqual(CONTRACTS_VERSION, "2.1.0")  # 2.1.0: plugin_release, required_capabilities, data_exposure (AGENTIC-R5 Q-04)
 
     def test_unresolved_fixtures(self):
         cases = load(ART / "cases.json")["unresolved"]

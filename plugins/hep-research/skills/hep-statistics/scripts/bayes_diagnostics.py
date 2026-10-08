@@ -357,6 +357,7 @@ def _artifact(res, q, code):
     from datetime import date
     sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
     from contracts import CONTRACTS_VERSION
+    from contracts.identity import plugin_release
     plugin = json.loads((Path(__file__).resolve().parents[3] / ".claude-plugin" / "plugin.json").read_text())["version"]
     status = ["synthetic", "unvalidated"] + (["failed"] if code == 1 else [])
     return {
@@ -364,7 +365,7 @@ def _artifact(res, q, code):
         "artifact_type": "statistical-result",
         "objective": "SYNTHETIC demonstration of the Bayesian path: flat-prior upper bound for a counting model",
         "bindings": {"experiments": [], "theory": []},
-        "versions": {"plugin": plugin, "contracts": CONTRACTS_VERSION, "profiles": {}},
+        "versions": {"plugin": plugin, "contracts": CONTRACTS_VERSION, "profiles": {}, "plugin_release": plugin_release()},
         "provenance": {"producer_skill": "hep-statistics", "created": date.today().isoformat(), "evidence_ids": []},
         "inputs": [], "outputs": [], "status": status, "unresolved_inputs": [],
         "extension": {
