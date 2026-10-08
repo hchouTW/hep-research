@@ -217,3 +217,65 @@ class LocalRulesX16(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReviewFollowUpsWP3(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.d = Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def legacy(self):
+        cdir, manifest, _ = make_campaign(self.d)
+        state = json.loads((cdir / "state.json").read_text())
+        for k in ("campaign_uid", "collected"):
+            state.pop(k)
+        (cdir / "state.json").write_text(json.dumps(state))
+        return cdir
+
+    def test_a_campaign_from_before_collection_records_still_merges(self):
+        cdir = self.legacy()
+        ex = ScriptedExecutor({})
+        cp.submit(cdir, ex, {}, approved=True)
+        self.assertTrue(cp.poll(cdir, ex)["complete"])
+        cp.poll(cdir, ex)
+        rep = cp.merge(cdir)
+        self.assertEqual(rep["status"], "complete", rep)
+        self.assertIn("merge.provenance_unrecorded", {w["code"] for w in rep["provenance_warnings"]})
+
+    def test_dry_runs_of_an_older_campaign_have_one_digest(self):
+        cdir = self.legacy()
+        ex = ScriptedExecutor({})
+        a = cp.submit(cdir, ex, {}, approved=False)["plan_digest"]
+        b = cp.submit(cdir, ex, {}, approved=False)["plan_digest"]
+        self.assertEqual(a, b)
+        self.assertFalse(cp.submit(cdir, ex, {}, approved=True, expected_plan_digest=a)["dry_run"])
+
+    def test_constraint_cannot_add_sbatch_options(self):
+        bad = dict(BASE, slurm={"partition": "p1", "constraint": "cpu --export=ALL"})
+        self.assertIn(("config.bad_value", "slurm.constraint"), codes(bad))
+        self.assertEqual(codes(dict(BASE, slurm={"partition": "p1", "constraint": "(haswell|skylake)&ib"})), set())
+
+    def test_local_passthrough_refuses_credentials(self):
+        with self.assertRaises(ValueError):
+            allowed_env({}, ["GITHUB_TOKEN"])
+        script = ROOT / "skills" / "hep-computing" / "scripts" / "local_partition.py"
+        subprocess.run([sys.executable, str(script), "plan", "--job", "t", "--items", "1", "--chunk-size", "1", "--seed", "1",
+                        "--out", str(self.d / "m.json")], capture_output=True, timeout=60, check=True)
+        p = subprocess.run([sys.executable, str(script), "run", "--manifest", str(self.d / "m.json"), "--state",
+                            str(self.d / "s"), "--cmd", "true {out}", "--env-passthrough", "AWS_SECRET_ACCESS_KEY"],
+                           capture_output=True, text=True, timeout=60)
+        self.assertEqual(p.returncode, 2, p.stdout)
+
+    def test_reconcile_start_time_is_local_with_a_margin(self):
+        bin_ = self.d / "bin"
+        bin_.mkdir()
+        log = self.d / "argv"
+        fake_tool(bin_, "sacct", f'echo "$@" > {log}')
+        SlurmExecutor(BASE, {"PATH": str(bin_)}).find("hepr-x-s001", "2026-10-08T12:00:00Z")
+        import datetime
+        want = (datetime.datetime(2026, 10, 8, 11, 0, tzinfo=datetime.timezone.utc).astimezone()
+                .strftime("%Y-%m-%dT%H:%M:%S"))
+        self.assertIn(f"--starttime={want}", log.read_text())

@@ -32,6 +32,11 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from core.partition.executors import passthrough_problems  # noqa: E402
 
 PLACEHOLDER = re.compile(r"^<[^<>]+>$")
 TIME = re.compile(r"^(\d+-)?\d{1,2}:\d{2}:\d{2}$")
@@ -39,8 +44,7 @@ TOP = {"backend", "campaign_dir", "resources", "slurm", "htcondor", "throttle", 
        "scheduler_timeout_s", "worker_timeout_s", "env_passthrough"}
 NAME = re.compile(r"^[A-Za-z0-9_.:+@-]{1,128}$")  # partition, account, qos, job name, gres
 UNSAFE = re.compile(r"[\x00-\x1f\x7f]|\{\{|\}\}")  # control characters (a newline adds a job-file line) or template braces
-ENV_NAME = re.compile(r"^[A-Z_][A-Z0-9_]{0,63}$")
-SECRET_LIKE = re.compile(r"TOKEN|SECRET|PASSW|PROXY|KEY|CRED|COOKIE|SSH_AUTH|KRB5|AUTH", re.I)
+CONSTRAINT = re.compile(r"^[A-Za-z0-9_.:+@&|!()\[\]*,-]{1,256}$")  # no whitespace: one #SBATCH line holds one option
 RESOURCES = {"cpus", "memory_mb", "disk_mb", "gpus", "time_limit"}
 SLURM = {"partition", "account", "qos", "constraint", "gres"}
 HTCONDOR = {"universe", "container_image", "file_transfer", "requirements", "transfer_input_files"}
@@ -120,13 +124,8 @@ def validate(cfg, example: bool = False) -> list[dict]:
     pos_int(cfg, "scheduler_timeout_s", "")
     pos_int(cfg, "worker_timeout_s", "")
     if "env_passthrough" in cfg:
-        ep = cfg["env_passthrough"]
-        if not isinstance(ep, list) or not all(isinstance(x, str) and ENV_NAME.match(x) for x in ep):
-            add("config.bad_value", "env_passthrough", "must be a list of environment variable names")
-        else:
-            for x in ep:
-                if SECRET_LIKE.search(x):
-                    add("config.bad_value", "env_passthrough", f"{x!r} looks like a credential; credentials never reach scheduler clients or jobs")
+        for prob in passthrough_problems(cfg["env_passthrough"]):
+            add("config.bad_value", "env_passthrough", prob)
     mon = cfg.get("monitor", {})
     if not isinstance(mon, dict):
         add("config.bad_value", "monitor", "must be an object")
@@ -147,7 +146,7 @@ def validate(cfg, example: bool = False) -> list[dict]:
         if "partition" not in s:
             add("config.missing_key", "slurm.partition", "required: the site's partition name")
         for k in SLURM:
-            text(s, k, "slurm.", NAME if k in ("partition", "account", "qos", "gres") else None)
+            text(s, k, "slurm.", CONSTRAINT if k == "constraint" else NAME)
         if "time_limit" not in res:
             add("config.missing_key", "resources.time_limit", "required for slurm: the walltime, sized from a pilot")
     if backend == "htcondor":

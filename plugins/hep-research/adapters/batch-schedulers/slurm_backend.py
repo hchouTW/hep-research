@@ -13,6 +13,7 @@ skills/hep-computing/references/batch-scheduling.md (tool facts table).
 """
 from __future__ import annotations
 
+import datetime
 import json
 import re
 import shlex
@@ -206,7 +207,13 @@ class SlurmExecutor(Executor):
 
     def find(self, tag: str, since: str | None = None) -> list[dict]:
         """Read-only: array tasks the accounting lists under the job name tag (reconciliation)."""
-        start = (since or "now-7days").rstrip("Z")
+        start = "now-7days"
+        if since:  # recorded in UTC; sacct reads --starttime in the cluster's local time, so convert, with an hour's margin
+            try:
+                t = datetime.datetime.fromisoformat(since.replace("Z", "+00:00")) - datetime.timedelta(hours=1)
+                start = t.astimezone().strftime("%Y-%m-%dT%H:%M:%S")
+            except ValueError:
+                pass
         p = self.run_poll(["sacct", f"--name={tag}", f"--starttime={start}", "--array", "-X", "--parsable2", "--noheader",
                            "--format=JobID,JobName,State"])
         if p.returncode != 0:

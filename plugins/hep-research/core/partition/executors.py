@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -55,8 +56,30 @@ DEFAULT_TIMEOUT_S = 120
 ENV_ALLOW = ("PATH", "HOME", "USER", "LOGNAME", "LANG", "LC_ALL", "LC_CTYPE", "TZ", "TMPDIR", "SLURM_CONF", "CONDOR_CONFIG")
 
 
+ENV_NAME = re.compile(r"^[A-Z_][A-Z0-9_]{0,63}$")
+SECRET_LIKE = re.compile(r"TOKEN|SECRET|PASSW|PROXY|KEY|CRED|COOKIE|SSH_AUTH|KRB5|AUTH", re.I)
+
+
+def passthrough_problems(names) -> list[str]:
+    """Why these passthrough names are refused: not variable names, or credential-like (credentials never reach
+    scheduler clients, jobs or local workers)."""
+    if not isinstance(names, (list, tuple)):
+        return ["must be a list of environment variable names"]
+    out = []
+    for x in names:
+        if not isinstance(x, str) or not ENV_NAME.match(x):
+            out.append(f"{x!r} is not an environment variable name")
+        elif SECRET_LIKE.search(x):
+            out.append(f"{x!r} looks like a credential; credentials never reach scheduler clients or jobs")
+    return out
+
+
 def allowed_env(env: dict | None = None, passthrough=()) -> dict:
-    """The allow-listed subset of env (default os.environ): ENV_ALLOW plus the configured passthrough names."""
+    """The allow-listed subset of env (default os.environ): ENV_ALLOW plus the passthrough names, which must pass
+    passthrough_problems (ValueError otherwise)."""
+    problems = passthrough_problems(list(passthrough or ()))
+    if problems:
+        raise ValueError("env passthrough refused: " + "; ".join(problems))
     src = os.environ if env is None else env
     keep = set(ENV_ALLOW) | set(passthrough or ())
     return {k: v for k, v in src.items() if k in keep}

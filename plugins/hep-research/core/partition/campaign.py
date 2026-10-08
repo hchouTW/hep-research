@@ -229,6 +229,9 @@ def submit(campaign_dir, executor, config: dict, chunk_ids=None, approved: bool 
         ids = ids[:1]
     if not ids:
         return {"submitted": [], "dry_run": not approved, "message": "nothing to submit"}
+    if not state.get("campaign_uid"):  # a campaign created before tags: fix its uid once, so dry runs are reproducible
+        state["campaign_uid"] = uuid.uuid4().hex[:16]
+        _save(cdir, state)
     sid = f"s{len(state['submissions']) + 1:03d}"
     sub_dir = cdir / "submissions" / sid
     rows = []
@@ -474,7 +477,7 @@ def collect(campaign_dir) -> dict:
     manifest, state = load(cdir)
     seen = set(state["seen"])
     ingested, dups, quarantined = [], [], []
-    collected = state.setdefault("collected", {})
+    collected = state.get("collected")  # None for a campaign created before collection records: stays unchecked
     for cdir_chunk in sorted((cdir / "outputs").iterdir()):
         cid = cdir_chunk.name
         if cdir_chunk.is_symlink() or not cdir_chunk.is_dir():  # never follow a link out of the campaign (X03)
@@ -523,8 +526,9 @@ def collect(campaign_dir) -> dict:
                 finally:
                     tmp.unlink()
                 # the provenance merge() checks: which attempt and which bytes were collected (X04)
-                collected[cid] = {"attempt_id": doc["attempt_id"], "file": rel,
-                                  "sha256": hashlib.sha256(body.encode("utf-8")).hexdigest()}
+                if collected is not None:
+                    collected[cid] = {"attempt_id": doc["attempt_id"], "file": rel,
+                                      "sha256": hashlib.sha256(body.encode("utf-8")).hexdigest()}
                 for rec in _row(state, cid)["attempt_records"]:
                     if rec["attempt_id"] == doc["attempt_id"] and rec.get("final_state") in ("not-submitted", "abandoned"):
                         rec["orphan_output_collected"] = True  # the record said not submitted; a job ran anyway (X11)
