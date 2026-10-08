@@ -156,24 +156,44 @@ class BundleTests(unittest.TestCase):
                 with self.assertRaises(bd.BundleError):
                     bd.build(cdir, self.worker)
 
-    def test_shebang_interpreters_are_hashed_and_env_is_refused(self):
+    def test_shebang_interpreters_are_hashed_and_launchers_refused(self):
         root = Path(self.tmp.name)
         tail = " --start {start} --stop {stop} --seed {seed} --out {out} --id {id}"
+        py = os.path.realpath(sys.executable)
         exe = self.worker / "run.py"
-        exe.write_text(f"#!/usr/bin/env python3\n{WORKER}")
-        os.chmod(exe, 0o755)
-        with self.assertRaises(bd.BundleError) as err:
-            bd.build(cp.init(root / "env", self.manifest, shlex.quote(str(exe)) + tail), self.worker)
-        self.assertEqual(err.exception.code, "bundle.relative_path")
-        exe.write_text(f"#!{os.path.realpath(sys.executable)}\n{WORKER}")
+        os.chmod(self.worker, 0o755)
+        bin_dir = root / "bin"
+        bin_dir.mkdir()
+        os.symlink("/usr/bin/env", bin_dir / "myenv")
+        bad = {"#!/usr/bin/env python3": "bundle.bad_shebang", f"#!{bin_dir / 'myenv'}": "bundle.launcher",
+               "#!/bin/sh /tmp/evil.sh": "bundle.bad_shebang", f"#!{py} -mpkg": "bundle.bad_shebang",
+               f"#!{py}\r": "bundle.bad_shebang", f"#!{py}\x0cb": "bundle.bad_shebang", "#!python3": "bundle.relative_path"}
+        for i, (line, code) in enumerate(bad.items()):
+            exe.write_text(f"{line}\n{WORKER}")
+            os.chmod(exe, 0o755)
+            with self.subTest(line=line):
+                with self.assertRaises(bd.BundleError) as err:
+                    bd.build(cp.init(root / f"s{i}", self.manifest, shlex.quote(str(exe)) + tail), self.worker)
+                self.assertEqual(err.exception.code, code)
+        exe.write_text(f"#!{py}\n{WORKER}")
         doc = bd.build(cp.init(root / "abs", self.manifest, shlex.quote(str(exe)) + tail), self.worker)
-        self.assertEqual([f["named_as"] for f in doc["files"] if f["role"] == "interpreter"], [os.path.realpath(sys.executable)])
+        self.assertEqual([f["named_as"] for f in doc["files"] if f["role"] == "shebang"], [py])
+        # a launcher as the first word is refused, also through a link; the worker's '#!' is read in the interpreter form too
+        for first in ("/usr/bin/env", str(bin_dir / "myenv"), "/usr/bin/nice"):
+            with self.subTest(first=first):
+                with self.assertRaises(bd.BundleError) as err:
+                    bd.build(cp.init(root / f"l{first.replace('/', '_')}", self.manifest, f"{first} {shlex.quote(str(exe))}" + tail), self.worker)
+                self.assertEqual(err.exception.code, "bundle.launcher")
+        exe.write_text(f"#!/bin/sh /tmp/evil.sh\n{WORKER}")
+        with self.assertRaises(bd.BundleError):
+            bd.build(cp.init(root / "pyform", self.manifest, f"{shlex.quote(sys.executable)} {shlex.quote(str(exe))}" + tail), self.worker)
         wrapper = root / "wrapper.sh"
         wrapper.write_text(f"#!/bin/sh\nexec {sys.executable} \"$@\"\n")
         os.chmod(wrapper, 0o755)
-        doc = bd.build(cp.init(root / "wrap", self.manifest, f"{shlex.quote(str(wrapper))} {shlex.quote(str(self.worker / 'work.py'))}" + tail),
-                       self.worker)
-        self.assertEqual(sorted(f["role"] for f in doc["files"] if f["role"].startswith("interpreter")), ["interpreter", "interpreter-2"])
+        with self.assertRaises(bd.BundleError) as err:  # an interpreter that is a '#!' script: no chains
+            bd.build(cp.init(root / "wrap", self.manifest, f"{shlex.quote(str(wrapper))} {shlex.quote(str(self.worker / 'work.py'))}" + tail),
+                     self.worker)
+        self.assertEqual(err.exception.code, "bundle.bad_shebang")
 
     def test_worker_root_may_not_contain_the_campaign(self):
         with self.assertRaises(bd.BundleError) as err:

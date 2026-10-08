@@ -25,9 +25,11 @@ Command grammar (closed): '<absolute interpreter> <absolute bundled worker scrip
 worker first. Each further word is a flag (-x, --name), --name=<value>, or a value: exactly one placeholder ({start},
 {stop}, {seed}, {out}, {id}), a number, a plain ASCII word without '/', '.', '~', '$' or braces, or an absolute path
 to a bundled worker file; paths carry no braces (the runner formats every word). Every named path is recorded with its
-target and re-resolved by verify(), so repointing a link is a change. The interpreter of a '#!' worker or interpreter
-script is hashed too ('#!/usr/bin/env' is refused). There is no -m, -c or PATH lookup; what the bundled worker does
-with a plain word is reviewed code.
+target and re-resolved by verify(), so repointing a link is a change. A bundled worker's '#!' line must name one
+absolute interpreter with no arguments, and that interpreter is hashed too. Interpreters may not be launchers (env,
+nice, nohup, xargs, timeout, sudo, ...; judged by the resolved name) or '#!' scripts themselves. So no -m, -c or PATH
+lookup; what the bundled worker does with a plain word is reviewed code, and enforcing approved bytes at run time is
+the trusted submitter's job.
 Standard library only.
 """
 from __future__ import annotations
@@ -105,9 +107,14 @@ PLACEHOLDER_WORD = re.compile(r"^\{(start|stop|seed|out|id)\}$")
 BARE = re.compile(r"^[A-Za-z0-9_+:-]+$")  # no '/', '.', '~', '$', '{', '\\' or non-ASCII: never a path
 
 
+# programs that run their arguments as another program: as an interpreter they would run what the bundle does not name
+LAUNCHERS = frozenset({"env", "xargs", "nice", "nohup", "time", "timeout", "sudo", "doas", "su", "stdbuf", "chroot",
+                       "setsid", "ionice", "taskset", "numactl", "exec", "command", "busybox", "flock", "watch", "unshare"})
+
+
 def _shebang(path: Path) -> str | None:
-    """The interpreter a '#!' file names (its first word), or None for a file without one. 'env' is refused: it looks
-    the real interpreter up on PATH at run time."""
+    """The interpreter a '#!' line names, read as the kernel reads it, or None without one. Only a single absolute path
+    in plain ASCII is accepted: arguments (a second program, -m, -c), other whitespace or control bytes are refused."""
     try:
         with open(path, "rb") as fh:
             head = fh.readline(4096)
@@ -115,12 +122,16 @@ def _shebang(path: Path) -> str | None:
         return None
     if not head.startswith(b"#!"):
         return None
-    words = head[2:].decode("utf-8", "replace").split()
-    if not words:
-        raise BundleError("bundle.bad_command", f"{path}: an empty '#!' line")
-    if os.path.basename(words[0]) == "env":
-        raise BundleError("bundle.relative_path", f"{path}: '#!{words[0]}' looks the interpreter up on PATH; name it by absolute path")
-    return words[0]
+    line = head[2:].rstrip(b"\n").strip(b" \t")
+    if not line or any(b < 0x21 and b not in (0x20, 0x09) or b > 0x7e for b in line) or not head.endswith(b"\n"):
+        raise BundleError("bundle.bad_shebang", f"{path}: the '#!' line must be one absolute path in plain ASCII")
+    if b" " in line or b"\t" in line:
+        raise BundleError("bundle.bad_shebang", f"{path}: '#!' arguments are not bundled; name one interpreter only")
+    return line.decode("ascii")
+
+
+def _launcher(path: str) -> bool:
+    return os.path.basename(os.path.realpath(path)) in LAUNCHERS or os.path.basename(path) in LAUNCHERS
 
 
 def check_exposure(rec) -> dict:
@@ -189,35 +200,35 @@ def build(campaign_dir, worker_root=None, env_lock=None, data_exposure=None) -> 
             raise BundleError("bundle.path_outside", f"{tok}: named by the command but not a bundled worker file")
         named.append({"word": word, "path": rel})
 
-    def interpreter(path: str, via: str) -> None:
-        """Hash an interpreter outside the worker root; a '#!' script's own interpreter is hashed too, and must be an
-        absolute path that is not 'env' (no PATH lookup)."""
+    def interpreter(path: str, role: str, via: str) -> None:
+        """Hash an interpreter outside the worker root: an absolute, brace-free path to a program that is neither a
+        launcher (env, nice, ...; also through a link) nor a '#!' script itself (no chains)."""
         if not path.startswith("/") or "{" in path or "}" in path:
             raise BundleError("bundle.relative_path", f"{path} ({via}): the interpreter must be an absolute path without "
                               "braces, so the bundle can hash what runs")
-        if any(f["role"] == "interpreter" for f in files):
-            if "interpreter-2" in roots:
-                raise BundleError("bundle.bad_command", f"{path} ({via}): a chain of '#!' scripts is not bundled")
-            role = "interpreter-2"
-        else:
-            role = "interpreter"
+        if _launcher(path):
+            raise BundleError("bundle.launcher", f"{path} ({via}): a launcher runs another program the bundle does not name")
         real = Path(os.path.realpath(path))
+        if _shebang(real) is not None:
+            raise BundleError("bundle.bad_shebang", f"{path} ({via}): an interpreter that is itself a '#!' script is not bundled")
         roots[role] = str(real.parent)
         files.append(dict(_entry(role, real.parent, real.name), named_as=path))
-        nxt = _shebang(real)
+
+    def script_shebang(word: str) -> None:
+        """A bundled worker's own '#!' interpreter is hashed whether or not the first word uses it."""
+        nxt = _shebang(Path(os.path.realpath(word)))
         if nxt is not None:
-            interpreter(nxt, f"'#!' line of {path}")
+            interpreter(nxt, "shebang", f"'#!' line of {word}")
 
     interp = tokens[0]
     if wroot is not None and interp.startswith("/") and _inside(os.path.realpath(interp), wroot):
-        worker_path(interp, interp)  # a bundled executable worker runs directly; its '#!' interpreter is hashed
-        nxt = _shebang(Path(os.path.realpath(interp)))
-        if nxt is not None:
-            interpreter(nxt, f"'#!' line of {interp}")
+        worker_path(interp, interp)  # a bundled executable worker runs directly through its '#!' interpreter
+        script_shebang(interp)
         rest = tokens[1:]
     else:
-        interpreter(interp, "first word")
+        interpreter(interp, "interpreter", "first word")
         worker_path(tokens[1], tokens[1])  # the interpreter runs a bundled script: no -m, -c or PATH lookup
+        script_shebang(tokens[1])
         rest = tokens[2:]
     for tok in rest:
         if NUMBER.fullmatch(tok):
