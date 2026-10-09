@@ -4,7 +4,7 @@ A Claude Code plugin for experimental and theoretical high-energy and astroparti
 core skills, a shared library (`core/`), artifact contracts (`contracts/`), optional experiment and theory-domain
 profiles (`profiles/`) and tool adapters (`adapters/`).
 
-Version 0.6.1, licensed under Apache-2.0 (see [LICENSE](LICENSE)). Not endorsed by AMS or any collaboration. Example data shipped with the plugin is synthetic and is
+Version 0.6.2, licensed under Apache-2.0 (see [LICENSE](LICENSE)). Not endorsed by AMS or any collaboration. Example data shipped with the plugin is synthetic and is
 labeled synthetic in file names and metadata. What is and is not validated is listed in
 [docs/capability-matrix.md](docs/capability-matrix.md); test evidence is in [VALIDATION.md](VALIDATION.md).
 
@@ -77,7 +77,7 @@ They have not been run with this plugin. Plugins need a paid plan (Pro, Max, Tea
 3. Find `hep-research` under **Discover** and select **Add** (or **Install**).
 4. Alternatively, **Add > Upload plugin** accepts a `.zip` of this folder; the archive must hold exactly one
    `.claude-plugin/plugin.json`. Build it from a clean checkout so it carries no caches:
-   `git archive --format=zip -o hep-research.zip HEAD:plugins/hep-research`. The plugin (about 1060 files, 6.9 MB
+   `git archive --format=zip -o hep-research.zip HEAD:plugins/hep-research`. The plugin (about 1060 files, 7.7 MB
    uncompressed) is inside the documented limits (5,000 files, 200 MB). An uploaded plugin does not update from GitHub.
 
 The plugin is saved to your account, so it is then available in Chat, in Cowork, and in Claude Code sessions signed
