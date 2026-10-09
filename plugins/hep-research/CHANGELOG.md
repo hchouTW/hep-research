@@ -3,7 +3,7 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.6.2 (2026-10-09)
 
 - **research-communication: identifiers missing from a ledger.** An arXiv number, DOI or INSPIRE record that a ledger
   row lacks is looked up at a primary source the session may reach (INSPIRE-HEP, arXiv, doi.org) and reported as

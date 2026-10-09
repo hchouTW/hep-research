@@ -10,7 +10,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hep-research"
-version = "0.6.1"
+version = "0.6.2"
 description = "Research assistant skills for experimental and theoretical high-energy physics (Claude Code and Codex plugin)"
 requires-python = ">=3.11"
 license = "Apache-2.0"
