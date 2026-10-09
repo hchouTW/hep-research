@@ -3,7 +3,7 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.6.1 (2026-10-09)
 
 - **Validation hint for profile vocabulary.** `contracts/validate.py` (through `contracts/schema.py`): an unknown
   vocabulary term with a profile prefix (for example `crflux:top-of-instrument`) now says that the prefix comes from a

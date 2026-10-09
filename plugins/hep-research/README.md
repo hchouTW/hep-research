@@ -4,7 +4,7 @@ A Claude Code plugin for experimental and theoretical high-energy and astroparti
 core skills, a shared library (`core/`), artifact contracts (`contracts/`), optional experiment and theory-domain
 profiles (`profiles/`) and tool adapters (`adapters/`).
 
-Version 0.6.0, licensed under Apache-2.0 (see [LICENSE](LICENSE)). Not endorsed by AMS or any collaboration. Example data shipped with the plugin is synthetic and is
+Version 0.6.1, licensed under Apache-2.0 (see [LICENSE](LICENSE)). Not endorsed by AMS or any collaboration. Example data shipped with the plugin is synthetic and is
 labeled synthetic in file names and metadata. What is and is not validated is listed in
 [docs/capability-matrix.md](docs/capability-matrix.md); test evidence is in [VALIDATION.md](VALIDATION.md).
 
