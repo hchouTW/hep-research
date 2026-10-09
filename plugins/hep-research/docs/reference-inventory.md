@@ -9,9 +9,9 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | Skill | References | KB | Cited nowhere |
 |---|---|---|---|
 | detector-response | 33 | 345 | 0 |
-| hep-analysis | 9 | 73 | 0 |
+| hep-analysis | 9 | 74 | 0 |
 | hep-computing | 26 | 290 | 0 |
-| hep-statistics | 9 | 103 | 0 |
+| hep-statistics | 9 | 104 | 0 |
 | hep-theory | 8 | 42 | 0 |
 | physics-ml | 34 | 181 | 0 |
 | research-communication | 52 | 359 | 0 |
@@ -116,19 +116,19 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `hep-analysis-guide.md` | hep-analysis | 41.2 | yes | 4 | detector-response | 9546574 2026-10-08 |
 | `histograms-efficiencies.md` | hep-analysis | 3.2 | yes | 8 | detector-response, hep-computing | 9546574 2026-10-08 |
 | `measurements-and-unfolding.md` | hep-analysis | 2.7 | yes | 9 | detector-response, hep-statistics | 351029c 2026-10-07 |
-| `systematics.md` | hep-analysis | 5.0 | yes | 25 | detector-response, hep-statistics, hep-theory, physics-ml | e33254f 2026-10-08 |
+| `systematics.md` | hep-analysis | 5.9 | yes | 25 | detector-response, hep-statistics, hep-theory, physics-ml | e33254f 2026-10-08 |
 | `weights-normalization.md` | hep-analysis | 5.1 | yes | 6 | detector-response, hep-theory, physics-ml | 351029c 2026-10-07 |
 | `acceptance-criteria.md` | hep-computing | 3.7 | no | 3 | - | 351029c 2026-10-07 |
 | `agile-development-guide.md` | hep-computing | 10.7 | yes | 8 | physics-ml | 351029c 2026-10-07 |
 | `bash-balanced-design-guidelines.md` | hep-computing | 24.8 | yes | 2 | - | 351029c 2026-10-07 |
-| `batch-scheduling.md` | hep-computing | 20.3 | yes | 6 | - | 260aab6 2026-10-08 |
+| `batch-scheduling.md` | hep-computing | 20.3 | yes | 6 | - | 6111161 2026-10-08 |
 | `cmake-and-build.md` | hep-computing | 2.1 | yes | 4 | hep-analysis | 351029c 2026-10-07 |
 | `cpp-balanced-design-guidelines.md` | hep-computing | 26.0 | yes | 6 | physics-ml | 351029c 2026-10-07 |
 | `design-and-estimation.md` | hep-computing | 7.5 | no | 3 | - | 351029c 2026-10-07 |
 | `engineering-playbook.md` | hep-computing | 8.8 | yes | 3 | - | 351029c 2026-10-07 |
 | `environments-and-containers.md` | hep-computing | 3.6 | yes | 1 | - | 9546574 2026-10-08 |
 | `example-authoring.md` | hep-computing | 20.0 | no | 8 | hep-analysis, physics-ml | 351029c 2026-10-07 |
-| `host-notes.md` | hep-computing | 5.2 | no | 2 | - | 9546574 2026-10-08 |
+| `host-notes.md` | hep-computing | 5.6 | no | 2 | - | 9546574 2026-10-08 |
 | `implementation-discipline.md` | hep-computing | 7.6 | no | 3 | - | 351029c 2026-10-07 |
 | `loop-engineering.md` | hep-computing | 6.7 | no | 7 | - | 351029c 2026-10-07 |
 | `numerical-and-computational-methods.md` | hep-computing | 8.3 | yes | 5 | hep-theory, research-communication | 351029c 2026-10-07 |
@@ -146,7 +146,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `validation-and-done.md` | hep-computing | 3.7 | yes | 4 | - | 351029c 2026-10-07 |
 | `astroparticle-statistics.md` | hep-statistics | 8.6 | yes | 12 | detector-response, hep-analysis | 351029c 2026-10-07 |
 | `core-stats-guide.md` | hep-statistics | 27.2 | yes | 7 | - | c93e4fe 2026-10-08 |
-| `inference-recipes.md` | hep-statistics | 13.6 | yes | 7 | detector-response, hep-analysis | 351029c 2026-10-07 |
+| `inference-recipes.md` | hep-statistics | 14.3 | yes | 7 | detector-response, hep-analysis | 351029c 2026-10-07 |
 | `likelihood-fitting.md` | hep-statistics | 8.1 | yes | 7 | detector-response, hep-analysis, hep-computing | 351029c 2026-10-07 |
 | `ml-assisted-inference.md` | hep-statistics | 5.8 | yes | 3 | physics-ml | 351029c 2026-10-07 |
 | `nuisance-modeling.md` | hep-statistics | 16.1 | yes | 6 | hep-analysis | b0f03ac 2026-10-08 |

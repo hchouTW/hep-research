@@ -10,17 +10,17 @@
   },
   "hep-analysis": {
    "references": 9,
-   "bytes": 72637,
+   "bytes": 73555,
    "uncited": 0
   },
   "hep-computing": {
    "references": 26,
-   "bytes": 289610,
+   "bytes": 290031,
    "uncited": 0
   },
   "hep-statistics": {
    "references": 9,
-   "bytes": 103207,
+   "bytes": 103868,
    "uncited": 0
   },
   "hep-theory": {
@@ -909,8 +909,8 @@
   {
    "path": "skills/hep-analysis/references/systematics.md",
    "owner": "hep-analysis",
-   "bytes": 4954,
-   "lines": 48,
+   "bytes": 5872,
+   "lines": 59,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/index.md",
@@ -1031,7 +1031,7 @@
     "tools/check_instruction_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "260aab6 2026-10-08"
+   "last_commit": "6111161 2026-10-08"
   },
   {
    "path": "skills/hep-computing/references/cmake-and-build.md",
@@ -1134,8 +1134,8 @@
   {
    "path": "skills/hep-computing/references/host-notes.md",
    "owner": "hep-computing",
-   "bytes": 5227,
-   "lines": 72,
+   "bytes": 5648,
+   "lines": 76,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-computing/references/task-authoring-guide.md",
@@ -1423,8 +1423,8 @@
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
    "owner": "hep-statistics",
-   "bytes": 13630,
-   "lines": 156,
+   "bytes": 14291,
+   "lines": 163,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",

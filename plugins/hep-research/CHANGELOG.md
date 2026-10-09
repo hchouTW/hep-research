@@ -3,6 +3,22 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **Validation hint for profile vocabulary.** `contracts/validate.py` (through `contracts/schema.py`): an unknown
+  vocabulary term with a profile prefix (for example `crflux:top-of-instrument`) now says that the prefix comes from a
+  profile's vocabulary and that the artifact must be validated with `--profiles-from <project config>`. Before, the
+  plugin's own AMS example artifacts failed without a hint. New test: all shipped AMS example artifacts validate with
+  the profile bound.
+- **Guidance from a synthetic-twin study** (B/C ratio, run in a sandboxed configuration):
+  hep-statistics `inference-recipes.md` gives a measured case where `-2 log lambda <= 1` covered 0.57-0.79 instead of
+  0.683 at low counts and a toy-calibrated Neyman construction restored it, and asks for yield-scaled backgrounds
+  inside the likelihood; hep-analysis `systematics.md` adds how to test whether a variation's shift is significant
+  (Barlow's subset approximation for data plus a paired bootstrap for the simulation); the AMS ratio blueprint
+  (`charged-cosmic-rays.md`) states that cross-species fragmentation backgrounds scale with the other yield and are
+  solved jointly; hep-computing `host-notes.md` warns against hard-coding the plugin cache path in project scripts.
+  Reference inventory regenerated.
+
 ## 0.6.0 (2026-10-09)
 
 - **Tool contracts (AGENTIC-R5 T4.7, F14, F16).** New sidecar schema `contracts/schemas/tool_contract.json`

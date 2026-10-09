@@ -34,6 +34,17 @@ objects across thresholds, are both common bugs); write output objects using the
 naming the downstream datacard or plotting tool expects; and record skipped variations
 with a reason instead of silently dropping them.
 
+## Is a variation's shift significant?
+
+A varied selection shares most events with the nominal one, so the statistical spread of the shift is the
+uncorrelated part only. For the data, Barlow's subset/superset approximation `sigma_diff^2 ~ |sigma_var^2 -
+sigma_nom^2|` is a common estimate. The simulation is overlapping too: rebuild nominal and varied corrections on the
+same bootstrap replicas of the simulated sample (paired bootstrap) and take the spread of their difference. Leaving the
+simulation part out can make a stable variation look significant: in a synthetic test where simulation and data
+statistics were comparable, a data-only test flagged 8 of 22 bins of one variation, and the paired test 3 of 99 bins
+over all variations, the rate expected by chance at 2 sigma. A shift beyond these statistics is an effect to explain
+before it is quoted; one within them is not evidence that the source is absent.
+
 ## Template validation
 
 Check edges, flow handling, finite values, variance bookkeeping, required sources, and units. Identical variations are an investigation flag, not proof of a bug. Migration may lower a bin for an Up variation; integral ordering cannot establish whether labels are reversed. Inspect payloads and generation code to establish direction.
