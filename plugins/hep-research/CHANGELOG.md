@@ -3,6 +3,15 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **research-communication: identifiers missing from a ledger.** An arXiv number, DOI or INSPIRE record that a ledger
+  row lacks is looked up at a primary source the session may reach (INSPIRE-HEP, arXiv, doi.org) and reported as
+  looked up there with source and date, not as a ledger claim, and never supplied from memory (`SKILL.md` invariant;
+  AMS `source-policy.md` rule with matching against title, journal reference and date). Before, the skill correctly
+  refused to quote from memory but did not try an allowed source. Live check in a sandboxed configuration: the B/C
+  paper (PRL 117, 231102) was looked up at INSPIRE (record found, no arXiv e-print attached) and arXiv, and reported so.
+
 ## 0.6.1 (2026-10-09)
 
 - **Validation hint for profile vocabulary.** `contracts/validate.py` (through `contracts/schema.py`): an unknown
