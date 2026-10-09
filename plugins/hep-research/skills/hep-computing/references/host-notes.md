@@ -16,6 +16,10 @@ is qualified for private or blinded data. The task-authoring rules live in
 - Claude Code reads each skill's `name` and `description` at session start and loads the full `SKILL.md` when a
   request matches. Plugin skills are namespaced, for example `/hep-research:hep-computing`.
 - Paths to plugin files use `<plugin root>`; never rely on the current directory or a repository checkout.
+- Do not hard-code the plugin cache (`~/.claude/plugins/...`) in project scripts that call a plugin tool: a sandboxed
+  or launcher-fixed configuration may deny reads under `~/.claude` and load the plugin from elsewhere. Resolve the tool
+  from an environment variable or the plugin root of the running session, try the known install locations in order,
+  and treat an unreadable tool as unavailable rather than failing.
 - General mechanism: [Claude Code plugins](https://code.claude.com/docs/en/plugins) and
   [skills](https://code.claude.com/docs/en/skills).
 

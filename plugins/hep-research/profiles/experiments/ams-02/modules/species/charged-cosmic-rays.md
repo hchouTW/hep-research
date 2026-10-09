@@ -66,6 +66,12 @@ Classify each nuisance as **fully correlated** (cancels or shifts both), **parti
 | Charge confusion | Species-specific | Charge-sign migration validation |
 | Livetime/exposure | Common if same period; geomagnetic transmission differs with charge sign at low rigidity | Identical intervals; per-sign cutoff treatment |
 
+**Cross-species backgrounds scale with the other yield.** [General method] In a secondary-to-primary ratio the
+heavier species fragmenting upstream of the charge measurement enters the numerator selection with a rate proportional
+to the denominator's yield; when the ratio is small this can be a large fraction of the numerator candidates. Solve the
+species yields jointly (a species response matrix per bin, or both yields in one likelihood), not by subtracting a
+background fixed before the fit; at low counts a fixed subtraction biases the interval.
+
 **Same fiducial, not same selection.** For different species (e.g. He/O) share the time interval, variable, bins, geometry, track configuration and cutoff treatment, but keep every `|Z|`-dependent element species-specific: charge-estimator windows, adjacent-element leakage, charge-migration matrix, trigger and selection efficiencies, and survival/fragmentation.
 
 **Cancellation depends on compatible fiducial definitions and response conventions**; ratio bins must use the same variable (`R` for both, or the same energy/nucleon assumption). Do not assume complete cancellation: propagate the combined covariance `Var(N/D) ≈ f² [ (σ_N/N)² + (σ_D/D)² - 2 ρ σ_N σ_D /(N D) ]` (first-order delta method; valid when relative uncertainties are small and Gaussian; use toys otherwise). The `hep-analysis` script `particle_ratio_with_uncertainty.py` implements the two-yield delta method. For a **secondary-to-primary** ratio, the physics (propagation) interpretation is a model step beyond the measurement (see result interpretation in [source-policy](../sources/source-policy.md)).

@@ -137,9 +137,13 @@ def validate(value, schema: dict | str, vocab=None, report: Report | None = None
     if "x-vocab" in schema and vocab is not None:
         for item in (value if isinstance(value, list) else [value]):
             if isinstance(item, str) and not vocab.has(schema["x-vocab"], item):
+                hint = ""
+                if ":" in item and not item.startswith(":"):
+                    hint = (f"; '{item.split(':', 1)[0]}:' terms come from a profile's vocabulary: validate with"
+                            " --profiles-from <hep-research.project.json that binds that profile>")
                 report.add("error", path, "vocab.unknown_term",
                            f"'{item}' is not a core {schema['x-vocab']} term or a registered profile extension"
-                           f" (core: {sorted(vocab.core(schema['x-vocab']))})")
+                           f" (core: {sorted(vocab.core(schema['x-vocab']))}){hint}")
 
     if isinstance(value, dict):
         for key in schema.get("required", []):

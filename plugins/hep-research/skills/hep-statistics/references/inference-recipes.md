@@ -10,6 +10,13 @@ Define `lambda(mu)=L(mu,theta_hat_hat_mu)/L(mu_hat,theta_hat)`. The usual two-si
 
 Wilks/Wald/Asimov approximations have regularity requirements. Sparse bins, weak identifiability, boundaries, discrete models, and strongly nonlinear nuisances may require toy calibration or other checks. A fixed rule such as five entries per bin does not guarantee validity. See the [original Cowan et al. paper](https://arxiv.org/abs/1007.1727).
 
+Measured example (synthetic ratio of two Poisson yields with known leakage backgrounds, nuisance profiled): the
+interval `-2 log lambda <= 1` covered 0.57 to 0.79 instead of 0.683 for a few to about 50 events per bin. A Neyman
+construction with the threshold calibrated by toys at each tested value (nuisance at its profiled value, common random
+numbers across the scan) restored 0.67-0.71 (nested toys, about ±0.03). Measure coverage before quoting a Wilks
+interval at such counts, and put every background that scales with a fitted yield (for example a species leaking into
+the other selection of a ratio) inside the likelihood, not as a fixed subtraction.
+
 ## CLs and upper limits
 
 Fix a convention in which larger q_mu is less compatible with the tested strength. Define `p_mu=P(q_mu>=q_obs | mu)` and `p_b_tail=P(q_mu>=q_obs | 0)`. A common convention is then `CLs=p_mu/p_b_tail`. Sources defining p_b through the opposite tail write the denominator as `1-p_b`. Verify a backend's definition instead of inferring it from the symbol alone.
