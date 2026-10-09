@@ -13,6 +13,7 @@ description: "Use when the deliverable is scientific communication or literature
 
 - Every quantitative claim links to a result artifact or a source; every source records the level at which it was actually read (metadata, abstract, page, full text). A cached file is not evidence that it was read.
 - The current date, the publication or data-taking date, and the verification date are distinct. A paper newer than a ledger's verification date is unverified, not nonexistent; prefer a primary-source check.
+- An identifier the ledger lacks (arXiv number, DOI, INSPIRE record) is looked up at a primary source the session may reach (INSPIRE-HEP, arXiv, doi.org) when fetching is available, and reported as looked up there (source, date), not as a ledger claim; never supplied from memory. If no source can be reached, say so.
 - Status survives writing: preliminary, synthetic, Asimov, failed and unvalidated results say so in text and captions; a perturbative or numerical result is not called a proof.
 - Physics correctness of a diagram (for example a Feynman diagram) is hep-theory's; rendering and captions are this skill's.
 - Collaboration-internal information is never presented as public, and nothing implies endorsement by any collaboration or institution.
