@@ -5,6 +5,10 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **CI: the `lint` job passes again.** ruff 0.16 (UP017) asks for the Python 3.11 UTC alias in
+  `core/partition/runner.py`; the runner keeps `datetime.timezone.utc` because it runs under the batch workers'
+  Python 3.9 (work order T03), now with `# noqa: UP017` and a comment. No runtime change.
+
 - **Tests: the batch-partition example's committed output is compared up to float rounding.** `sum_cos` is a numpy
   reduction whose last digits differ between hosts and numpy builds (lxplus with numpy 1.23.5 against the committed
   file: `…253` vs `…256`), which failed the byte comparison; counts, states, digests and labels stay exact, floats are
