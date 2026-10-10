@@ -2,13 +2,19 @@
 
 prepare  renders assets/htcondor-chunks.sub.template: `queue chunk_id, attempt_id from items.txt`, so each process
          gets its chunk and attempt IDs directly; request_cpus / request_memory / request_disk / request_gpus,
-         universe, container image, requirements and file-transfer mode only from the configuration; a job event log;
-         no max_retries, no exit-handling overrides. Shared file system: the runner writes into the campaign's
+         universe, container image, requirements, site attributes ("+Name = value", for example a site's run-time
+         flavour) and file-transfer mode only from the configuration; a job event log; no max_retries, no
+         exit-handling overrides. A configured schedd (a name, or the caller's _condor_SCHEDD_HOST) is written to
+         schedd.txt next to the job file, and every condor_submit, condor_q, condor_history and condor_rm of that
+         submission passes it as -name, so a campaign stays on its schedd when the site mapping changes later. Shared file system: the runner writes into the campaign's
          outputs/. File transfer: the runner writes into the job's scratch directory and transfer_output_remaps puts
          <attempt>.json and <attempt>.meta.json into outputs/<chunk>/ (the staging area collection reads).
-submit   condor_submit -terse job.sub   (prints "<cluster>.<first proc> - <cluster>.<last proc>"), run in the submission
-         folder, which the relative items.txt needs; a dry run's copy is checked the same way, in dry-run/<id>/:
-         condor_submit -dry-run - job.sub
+submit   condor_submit [-name S] -terse job.sub   (prints "<cluster>.<first proc> - <cluster>.<last proc>"), run in
+         the submission folder, which the relative items.txt needs; a dry run's copy is checked the same way, in
+         dry-run/<id>/: condor_submit -dry-run - job.sub. Two failure texts are refusals (no cluster exists, the
+         attempts become not-submitted): the credential step ("Failed to process job credential requests ... BAILING
+         OUT") and a rejected transaction ("Failed to commit job submission into the queue"); any other failure is
+         ambiguous until a person reconciles.
 poll     the job event log first (it outlives the queue): submit 000, execute 001, executable error 002, evicted
          004, terminated 005 (return value or signal), shadow exception 007, aborted 009, held 012 (reason, Code,
          Subcode), released 013. A job the log still shows as queued or running is checked against condor_q and
@@ -24,16 +30,30 @@ from __future__ import annotations
 
 import datetime
 import json
+import os
 import re
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from core.partition.campaign import CampaignError  # noqa: E402
-from core.partition.executors import Executor, PollError, SubmitAmbiguous, _blank  # noqa: E402
+from core.partition.executors import Executor, PollError, SubmitAmbiguous, SubmitRefused, _blank  # noqa: E402
+
+# condor_submit texts that end the call before a cluster exists (observed on HTCondor 24.12.16, CERN, 2026-10-10):
+# the credential step failed (retry later), or the schedd rejected the transaction (fix the submit file).
+REFUSED_BEFORE_QUEUE = (("Failed to process job credential requests", "htcondor.submit.credential"),
+                        ("BAILING OUT", "htcondor.submit.credential"),
+                        ("Failed to commit job submission into the queue", "htcondor.submit.rejected"))
+
+
+def _classad(v) -> str:
+    """A configured site attribute as ClassAd text: booleans unquoted, integers bare, strings double-quoted."""
+    if isinstance(v, bool):
+        return "true" if v else "false"
+    return str(v) if isinstance(v, int) else f'"{v}"'
 
 TEMPLATE = Path(__file__).resolve().parent / "assets" / "htcondor-chunks.sub.template"
-HEADER = re.compile(r"^(\d{3}) \((\d+)\.(\d+)\.(\d+)\) (\S+ \S+) ?(.*)$")
+HEADER = re.compile(r"^(\d{3}) \((\d+)\.(-?\d+)\.(\d+)\) (\S+ \S+) ?(.*)$")  # proc -1: a cluster-level event (035, 036)
 NORMAL = re.compile(r"Normal termination \(return value (\d+)\)")
 ABNORMAL = re.compile(r"Abnormal termination \(signal (\d+)\)")
 HOLD_CODE = re.compile(r"Code (\d+) Subcode (\d+)")
@@ -66,7 +86,9 @@ def parse_event_log(text: str) -> dict:
         if not m or m.group(1) not in KNOWN_EVENTS:
             raise PollError("htcondor.eventlog.unparsable", f"unexpected event header {lines[0][:200]!r}")
         code, key, when, detail = m.group(1), (int(m.group(2)), int(m.group(3))), _time(m.group(5)), lines[1:]
-        o = procs.setdefault(key, {"state": "queued", "starts": 0, "native": [], "exit_code": None, "signal": None,
+        if key[1] < 0:  # "Cluster submitted" / "Cluster removed" (HTCondor 24.12): no process, nothing to observe
+            continue
+        o = procs.setdefault(key,{"state": "queued", "starts": 0, "native": [], "exit_code": None, "signal": None,
                                    "hold_reason": None, "hold_code": None, "host": None, "t_exec": None, "elapsed": None, "mem": None})
         o["native"].append(code)
         if code == "001":
@@ -108,9 +130,26 @@ class HTCondorExecutor(Executor):
     def __init__(self, config: dict, env: dict | None = None):
         super().__init__(env, config)
         self.config = config
+        want = config.get("htcondor", {}).get("schedd")
+        caller = os.environ if env is None else env  # read before the allow-list: the name, never the variable, is kept
+        self.schedd = caller.get("_condor_SCHEDD_HOST") if want == "caller" else want
+        self._schedd_unresolved = want == "caller" and not self.schedd
+
+    @staticmethod
+    def _name(schedd: str | None) -> list[str]:
+        return ["-name", schedd] if schedd else []
+
+    def _schedd_of(self, rec: dict) -> str | None:
+        """The schedd recorded with the record's submission; a campaign stays bound to it after a mapping change."""
+        try:
+            return (Path(rec["submission_dir"]) / "schedd.txt").read_text(encoding="utf-8").strip() or None
+        except OSError:
+            return self.schedd
 
     def prepare(self, ctx: dict) -> dict:
         cfg, res, site = self.config, self.config.get("resources", {}), self.config.get("htcondor", {})
+        if self._schedd_unresolved:
+            raise CampaignError("htcondor.schedd.unresolved", "htcondor.schedd is 'caller' but _condor_SCHEDD_HOST is not set in the caller's environment")
         sub, cdir, outputs = Path(ctx["submission_dir"]), Path(ctx["campaign_dir"]), Path(ctx["outputs_dir"])
         for p in (cdir, sub, outputs):
             if re.search(r"\s", str(p)):
@@ -134,6 +173,7 @@ class HTCondorExecutor(Executor):
             ("request_cpus", res.get("cpus")), ("request_memory", f"{res['memory_mb']}MB" if "memory_mb" in res else None),
             ("request_disk", f"{res['disk_mb']}MB" if "disk_mb" in res else None),
             ("request_gpus", res.get("gpus") or None)) if v is not None)
+        site_lines = "".join(f"+{k} = {_classad(v)}\n" for k, v in (site.get("site_attributes") or {}).items())
         values = {
             "submission_id": ctx["submission_id"], "universe": site["universe"], "tag": ctx.get("tag") or ctx["submission_id"],
             "container_line": f"container_image = {site['container_image']}\n" if site.get("container_image") else "",
@@ -141,6 +181,7 @@ class HTCondorExecutor(Executor):
             "transfer_executable": "true" if transfer and not cfg.get("worker_python") else "false",
             "arguments": " ".join(args), "event_log": str(sub / "events.log"), "log_dir": str(sub / "logs"),
             "should_transfer_files": "YES" if transfer else "NO", "transfer_lines": transfer_lines, "resource_lines": res_lines,
+            "site_lines": site_lines,
             "requirements_line": f"requirements = {site['requirements']}\n" if site.get("requirements") else "",
             "throttle_line": f"max_materialize = {cfg['throttle']}\n" if cfg.get("throttle") else "",
             # relative: condor_submit runs in the submission folder, and the dry-run copy can be checked in its own
@@ -149,20 +190,28 @@ class HTCondorExecutor(Executor):
         for k, v in values.items():
             text = text.replace("{{" + k + "}}", str(v))
         items = "".join(f"{r['chunk_id']} {r['attempt_id']}\n" for r in ctx["rows"])
-        return {"backend": self.name, "submission_id": ctx["submission_id"], "submission_dir": str(sub),
-                "files": {"job.sub": text, "items.txt": items, "map.json": json.dumps(ctx["rows"], indent=1) + "\n"},
-                "submit_argv": ["condor_submit", "-terse", str(sub / "job.sub")], "rows": ctx["rows"]}
+        files = {"job.sub": text, "items.txt": items, "map.json": json.dumps(ctx["rows"], indent=1) + "\n"}
+        if self.schedd:  # recorded with the submission: every later query of these jobs goes to the same schedd
+            files["schedd.txt"] = self.schedd + "\n"
+        return {"backend": self.name, "submission_id": ctx["submission_id"], "submission_dir": str(sub), "files": files,
+                "submit_argv": ["condor_submit", *self._name(self.schedd), "-terse", str(sub / "job.sub")], "rows": ctx["rows"]}
 
     def submit(self, plan: dict) -> list[dict]:
         p = self.run_submit(plan["submit_argv"], cwd=plan["submission_dir"])
         m = re.match(r"^(\d+)\.(\d+) - (\d+)\.(\d+)\s*$", (p.stdout.strip().splitlines() or [""])[-1])
+        if p.returncode != 0:
+            text = ((p.stderr or "") + (p.stdout or "")).strip()
+            for marker, code in REFUSED_BEFORE_QUEUE:  # texts the client prints before any cluster exists
+                if marker in text:
+                    raise SubmitRefused(code, f"exit {p.returncode}: {text[-500:]}")
         if p.returncode != 0 or not m:  # condor_submit ran: the schedd may still have queued the cluster
             raise SubmitAmbiguous("htcondor.submit.failed", f"exit {p.returncode}: {(p.stderr or p.stdout).strip()[-500:]}")
         cluster, first = int(m.group(1)), int(m.group(2))
         return [{"attempt_id": r["attempt_id"], "job_id": f"{cluster}.{first + r['index']}"} for r in plan["rows"]]
 
-    def _ads(self, tool: str, clusters: list[str]) -> dict:
-        p = self.run_poll([tool, *clusters, "-json", "-attributes", ATTRS])
+    def _ads(self, tool: str, clusters: list[str], schedd: str | None = None, match: int | None = None) -> dict:
+        # condor_history reads the schedd's whole history file, newest first; -match N stops after the N ads wanted
+        p = self.run_poll([tool, *self._name(schedd), *clusters, *(["-match", str(match)] if match else []), "-json", "-attributes", ATTRS])
         if p.returncode != 0:
             raise PollError(f"htcondor.{tool}.failed", f"exit {p.returncode}: {p.stderr.strip()[-300:]}")
         text = p.stdout.strip()
@@ -210,12 +259,15 @@ class HTCondorExecutor(Executor):
                 max_rss_mb=o["mem"], restarts=max(o["starts"] - 1, 0), evidence="job event log")
             if o["state"] in ("queued", "running"):
                 unresolved.append(rec)  # confirm the job still exists
-        if unresolved:
-            clusters = sorted({r["job_id"].split(".")[0] for r in unresolved})
-            queue = self._ads("condor_q", clusters)
-            missing = [r for r in unresolved if r["job_id"] not in queue]
-            history = self._ads("condor_history", clusters) if missing else {}
-            for rec in unresolved:
+        by_schedd: dict = {}
+        for rec in unresolved:
+            by_schedd.setdefault(self._schedd_of(rec), []).append(rec)
+        for schedd, recs in by_schedd.items():
+            clusters = sorted({r["job_id"].split(".")[0] for r in recs})
+            queue = self._ads("condor_q", clusters, schedd)
+            missing = [r for r in recs if r["job_id"] not in queue]
+            history = self._ads("condor_history", clusters, schedd, match=len(missing)) if missing else {}
+            for rec in recs:
                 ad = queue.get(rec["job_id"]) or history.get(rec["job_id"])
                 if rec["attempt_id"] in out and ad is not None:
                     continue  # the event log already describes it and the job exists
@@ -233,7 +285,7 @@ class HTCondorExecutor(Executor):
             raise PollError("htcondor.bad_tag", f"refusing to build a constraint from {tag!r}")
         out, seen = [], set()
         for tool in ("condor_q", "condor_history"):
-            p = self.run_poll([tool, "-constraint", f'HepResearchTag == "{tag}"', "-json", "-attributes", ATTRS])
+            p = self.run_poll([tool, *self._name(self.schedd), "-constraint", f'HepResearchTag == "{tag}"', "-json", "-attributes", ATTRS])
             if p.returncode != 0:
                 raise PollError(f"htcondor.{tool}.failed", f"exit {p.returncode}: {p.stderr.strip()[-300:]}")
             try:
@@ -250,7 +302,7 @@ class HTCondorExecutor(Executor):
     def cancel(self, records: list[dict]) -> list[dict]:
         out = []
         for r in records:
-            argv = ["condor_rm", r["job_id"]]
+            argv = ["condor_rm", *self._name(self._schedd_of(r)), r["job_id"]]
             try:
                 out.append({"argv": argv, "exit": self.run_poll(argv).returncode})
             except PollError as exc:  # a hung or missing client: recorded, the other jobs are still cancelled

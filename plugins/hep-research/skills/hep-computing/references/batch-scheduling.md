@@ -78,8 +78,15 @@ One JSON file per campaign, in the user's project (never in the plugin). Require
 Never fill in a partition, account, QoS, pool requirement, memory or time limit, GPU type or file-system path the
 user did not give: ask, or point them to their site's documentation. The shipped example
 (`assets/batch-config.example.json`) holds only placeholders and validates only with `--example`; it has a `slurm`
-and an `htcondor` section: keep the chosen backend's section, delete the other (and `resources.time_limit` for
-HTCondor), and replace every placeholder.
+and an `htcondor` section: keep the chosen backend's section, delete the other, and replace every placeholder.
+For HTCondor `resources.time_limit` is optional: it sizes `limits.max_core_hours` and must agree with a `MaxRuntime`
+site attribute; the scheduler's own limit comes from `htcondor.site_attributes` (a map of ClassAd attribute to
+string, integer or boolean, written as `+Name = value` lines: at CERN `JobFlavour`, `MaxRuntime`, `WantOS`).
+`htcondor.schedd` binds the campaign to one schedd (a host name, or `caller` for the shell's `_condor_SCHEDD_HOST`,
+which the allow-listed environment would otherwise drop): the name is recorded with each submission and passed as
+`-name` to every later `condor_q`, `condor_history` and `condor_rm`, so a later change of the site's mapping (for
+example CERN's `myschedd bump`) cannot make the campaign's jobs look lost. Pick the schedd adaptively before
+submitting if your site offers it; the adapter never chooses one itself.
 
 ## Slurm and HTCondor side by side
 
@@ -91,7 +98,8 @@ HTCondor), and replace every placeholder.
 | Observing | accounting (`sacct`), else queue (`squeue`) plus the runner's meta files, marked `queue+outputs` | the job event log (survives the queue), confirmed with `condor_q` / `condor_history -json` |
 | Held jobs | `REQUEUE_HOLD` maps to held | event 012 with reason and code; never released by the plugin |
 | Exit status | `ExitCode` as `exit:signal` | terminated event: return value or signal |
-| Resources | `--cpus-per-task`, `--mem=<n>M`, `--time`, `--gpus`, `--tmp`, `--constraint`, `--gres` | `request_cpus`, `request_memory = <n>MB`, `request_disk = <n>MB`, `request_gpus`, `requirements` |
+| Resources | `--cpus-per-task`, `--mem=<n>M`, `--time`, `--gpus`, `--tmp`, `--constraint`, `--gres` | `request_cpus`, `request_memory = <n>MB`, `request_disk = <n>MB`, `request_gpus`, `requirements`, `+Name = value` from `site_attributes` (the run-time limit lives here) |
+| Scheduler instance | the cluster's controller | `-name <schedd>` on every call when `htcondor.schedd` is set, recorded per submission in `schedd.txt` |
 | Containers | run the container inside your command | `universe = container`, `container_image` |
 | Throttle | `%M` in the array range | `max_materialize` |
 
@@ -196,8 +204,10 @@ confirm it on a real run of the version you use before relying on it.
 | Submit description: `universe` (vanilla, container), `executable`, `transfer_executable`, `arguments`, `log`, `output`, `error`, `should_transfer_files`, `when_to_transfer_output = ON_EXIT`, `transfer_input_files`, `transfer_output_remaps = "a = b; c = d"`, `request_cpus`, `request_memory`/`request_disk` with an `MB` suffix, `request_gpus`, `max_materialize`, `queue a, b from file` (each line split on commas and/or spaces); macros `$(name)` | HTCondor template | documented (`request_disk` default unit is KiB, so the explicit `MB` suffix matters) |
 | `container_image` | HTCondor template | not stated in the page excerpt read (the container universe is documented) |
 | No automatic retry by default (`max_retries` unset, `on_exit_remove` default True, `periodic_release` default False) | HTCondor template | documented; an evicted job still restarts, which `NumJobStarts` counts |
-| `condor_submit -terse` prints `<cluster>.<first> - <cluster>.<last>` | HTCondor submit | partly: "display JobId ranges only"; the exact layout is not stated |
+| `condor_submit -terse` prints `<cluster>.<first> - <cluster>.<last>` | HTCondor submit | partly: "display JobId ranges only"; observed on HTCondor 24.12.16 (CERN, 2026-10-10): `15004467.0 - 15004467.9`, one line |
+| `condor_submit` exit 1 with "Failed to process job credential requests ... BAILING OUT" (credential step) or "ERROR: Failed to commit job submission into the queue." (rejected transaction): no cluster was created | HTCondor submit (refusal) | observed on HTCondor 24.12.16 (CERN, 2026-10-10): both before any cluster ID; a later `condor_submit` succeeded |
+| `-name <schedd>` selects the schedd for `condor_submit`, `condor_q`, `condor_history`, `condor_rm` | HTCondor, all calls | documented (condor_q, condor_history, condor_rm pages); `condor_submit -name` documented |
 | Job event log: three-digit code, `(cluster.proc.subproc)`, date and time, text; codes 000 submit, 001 execute, 002 executable error, 004 evicted, 005 terminated, 007 shadow exception, 009 aborted, 010 suspended, 011 unsuspended, 012 held, 013 released | HTCondor poll | documented |
-| Event separator `...`; termination lines `(1) Normal termination (return value N)` / `(0) Abnormal termination (signal N)`; `Memory (MB)` usage line; held event `Code N Subcode M` | HTCondor poll | not stated verbatim (the pages say the log records termination type, return value or signal, resource usage and hold codes) |
+| Event separator `...`; termination lines `(1) Normal termination (return value N)` / `(0) Abnormal termination (signal N)`; `Memory (MB)` usage line; held event `Code N Subcode M` | HTCondor poll | observed on HTCondor 24.12.16 (CERN, 2026-10-10): separator `...`; `005 Job terminated.` then `(1) Normal termination (return value 3)`; `012 Job was held.` with the reason line then `Code 12 Subcode 2`; `009 Job was aborted.` with `via condor_rm (by user ...)` or `Job removed by SYSTEM_PERIODIC_REMOVE due to wall time exceeded allowed max.`; `004 Job was evicted. Code 1008 Subcode 0` after `022`/`024` disconnect events; `Memory (MB)` appears in the `Partitionable Resources` table |
 | `condor_q` / `condor_history <cluster> -json -attributes ...`; JobStatus 1 idle, 2 running, 3 removing, 4 completed, 5 held, 6 transferring output (marked "not used"), 7 suspended (mapped to `unknown`); ExitCode, ExitBySignal, ExitSignal, HoldReason, HoldReasonCode, HoldReasonSubCode, NumJobStarts | HTCondor fallback | documented |
 | `condor_rm <cluster>.<proc>`; `condor_version` | HTCondor cancel; provenance | documented (condor_rm page 25.14.1) |

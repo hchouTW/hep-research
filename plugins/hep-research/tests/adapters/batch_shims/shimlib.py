@@ -242,6 +242,15 @@ def _event(log: Path, code: str, cluster: int, proc: int, text: str, detail: lis
 
 
 def condor_submit(argv: list) -> int:
+    mode = global_mode("condor_submit")  # texts observed on the CERN pool, HTCondor 24.12.16, 2026-10-10 (T03 H2)
+    if mode == "credmon-timeout":
+        print("Failed to process job credential requests (1): 'ERROR: store_cred of Kerberos credential failed - "
+              "The credmon did not process credentials within the timeout period\n'; BAILING OUT.", file=sys.stderr)
+        return 1
+    if mode == "rejected":
+        print("\nERROR: Failed to commit job submission into the queue.\nERROR: CentOS 7 has been decommissioned: "
+              "https://example.invalid/outage", file=sys.stderr)
+        return 1
     path = Path(argv[-1])
     kv, (names, items_path) = _parse_submit(path.read_text())
     items = [l.split() for l in Path(items_path).read_text().splitlines() if l.strip()]
@@ -337,7 +346,8 @@ def condor_submit(argv: list) -> int:
 
 
 def _ads(argv: list, statuses: set) -> int:
-    clusters = [a for a in argv if a.isdigit()]
+    clusters = [a for i, a in enumerate(argv) if a.isdigit() and not (i and argv[i - 1] in ("-match", "-limit"))]
+    limit = int(argv[argv.index("-match") + 1]) if "-match" in argv else None  # condor_history -match N: stop after N ads
     attrs = argv[argv.index("-attributes") + 1].split(",") if "-attributes" in argv else None
     want = None
     if "-constraint" in argv:
@@ -353,6 +363,8 @@ def _ads(argv: list, statuses: set) -> int:
             if st["JobStatus"] in statuses:
                 ad = dict(st, ClusterId=int(c), ProcId=int(p))
                 ads.append({k: v for k, v in ad.items() if attrs is None or k in attrs})
+    if limit is not None:
+        ads = ads[:limit]
     if ads:
         print(json.dumps(ads, indent=2))
     return 0

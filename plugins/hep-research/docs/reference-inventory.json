@@ -15,7 +15,7 @@
   },
   "hep-computing": {
    "references": 26,
-   "bytes": 290031,
+   "bytes": 292070,
    "uncited": 0
   },
   "hep-statistics": {
@@ -945,7 +945,7 @@
     "hep-theory",
     "physics-ml"
    ],
-   "last_commit": "e33254f 2026-10-08"
+   "last_commit": "364918e 2026-10-09"
   },
   {
    "path": "skills/hep-analysis/references/weights-normalization.md",
@@ -1019,8 +1019,8 @@
   {
    "path": "skills/hep-computing/references/batch-scheduling.md",
    "owner": "hep-computing",
-   "bytes": 20262,
-   "lines": 204,
+   "bytes": 22301,
+   "lines": 214,
    "linked_from_skill_md": true,
    "cited_by": [
     "adapters/batch-schedulers/htcondor_backend.py",
@@ -1142,7 +1142,7 @@
     "skills/hep-computing/scripts/validate_skill_bundle.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9546574 2026-10-08"
+   "last_commit": "364918e 2026-10-09"
   },
   {
    "path": "skills/hep-computing/references/implementation-discipline.md",
@@ -1439,7 +1439,7 @@
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "364918e 2026-10-09"
   },
   {
    "path": "skills/hep-statistics/references/likelihood-fitting.md",
