@@ -5,6 +5,17 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **hep-computing: CERN EOS storage note (work order T06).** New reference
+  `skills/hep-computing/references/storage-cern-eos.md`: what EOS is, how to address an instance, copying with
+  checksums, the mounted file system versus `root://`, versions, recycle bin, quota, ACLs, tokens, and remote
+  reading from ROOT and uproot. Every row cites the EOS project site or the EOS 5 documentation (read 2026-10-10) or an
+  observation on lxplus with synthetic files. Observations the documentation does not state: overwriting a file
+  through the mount keeps no version (an `xrdcp -f` overwrite does); a normal user cannot purge the recycle bin;
+  `eos whoami` through the `eosuser` redirector shows nobody; an interrupted upload leaves nothing under the target
+  name. Linked from `SKILL.md` (Resources trimmed to stay within the 8,192 B budget), from the HTCondor site note's
+  EOS row, and from a new "Remote files (XRootD)" section in `python-hep-coding-patterns.md`. Reference inventory
+  regenerated. No code change.
+
 - **CI: the `lint` job passes again.** ruff 0.16 (UP017) asks for the Python 3.11 UTC alias in
   `core/partition/runner.py`; the runner keeps `datetime.timezone.utc` because it runs under the batch workers'
   Python 3.9 (work order T03), now with `# noqa: UP017` and a comment. No runtime change.

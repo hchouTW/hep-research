@@ -280,6 +280,35 @@ venv on local disk (Python 3.11.13 with `requirements-core.txt`: numpy 2.4.6, sc
 pyhf, uproot/awkward and the real-scheduler gates); profile suites ams-02 238, eic 43, synthetic-collider 9,
 qed-benchmark 18, qcd-r-ratio 21 pass.
 
+## CERN-EOS-STORAGE (2026-10-10, E3, work order T06: CERN EOS storage note)
+
+E3 (lxplus, AlmaLinux 9; `eos` client and `eosxd` 5.4.9, xrootd 5.9.7, ROOT 6.40.04; a node-local venv with Python
+3.11.13, `requirements-core.txt`, uproot 5.7.7, awkward 2.14.0, fsspec-xrootd 0.5.5 and the XRootD Python bindings
+6.2.0). Sources read 2026-10-10: the EOS project site (its content catalogue) and the EOS 5 documentation pages
+introduction, architecture, using, interfaces and protocols ("last updated Oct 08, 2026"). Records: the user's task
+folder (`T06-eos/runs/`, `T06-eos/sources/` with sha256 sums), not this repository.
+
+**Synthetic checks on the user instance** (`root://eosuser.cern.ch` named in every command; never the instance the
+login shell exports; one test directory in the user's home; random bytes and one synthetic NanoAOD-like file):
+checksums from `xrdadler32`, `eos fileinfo` and `xrdfs query checksum` agree for 1 MB and 100 MB files, also from a
+second node; a new directory inherits versioning 10, adler32, 2 replicas and atomic upload; `xrdcp -f` overwrites
+keep versions, overwrites through the mount keep none; grabbing a version and restoring a deleted file from the
+recycle bin give the original checksums; an upload killed after 0.7 s leaves nothing under the target name; a
+user token for one file is refused, a directory-tree token works without Kerberos for reading and refuses writing;
+`TFile::Open` and `uproot.open` read the file over `root://`; 200 small files cost about 25–40 ms each (single runs,
+indicative). The HTCondor check (E2f) was not run.
+
+**Not as planned.** The test directory was removed, but a normal user cannot purge recycle entries on this instance
+("cannot purge your recycle bin without being a sudo or having an admin role"), so its 207 entries expire after the
+42-day lifetime; the user's quota returned to its earlier value. First attempts of three checks were inconclusive
+because of the test sequence (mixed overwrite methods, an upload that finished before the kill, a file token) and
+were repeated in isolation; the records keep both.
+
+**Gate.** `check_packaging.py`, `measure_entrypoints.py` (hep-computing `SKILL.md` 8,190 of 8,192 B),
+`reference_inventory.py --check` and a link check of the changed files (26 links) pass. The first full
+`run_all_checks.py` run failed `check_layering` and its unit test: "CTA" (CERN Tape Archive) in the new note matched
+an experiment name; the note now spells it out. Rerun on the final tree: **20 pass / 0 fail / 0 skip**; 1,840 unit tests, 1,741 pass, 0 fail, 99 skipped (8 fewer skips than the 915617d baseline because uproot and awkward were installed); profile suites ams-02 238, eic 43, synthetic-collider 9, qed-benchmark 18, qcd-r-ratio 21 pass.
+
 ## E2-INSTALL-FULLTEST (2026-10-03 to 2026-10-04, E2, version 0.1.0): INSTALL, FULLTEST-E2 and follow-ups
 
 **INSTALL.** First install into a day-to-day configuration: the user's own `~/.claude`, user scope, from the GitHub

@@ -50,6 +50,18 @@ for arrays in uproot.iterate(files, expressions=["Muon_pt", "Muon_eta", "event_w
     weights = arrays["event_weight"][mask]
 ```
 
+## Remote files (XRootD)
+
+- Open `root://<instance>/<path>` URLs directly: `ROOT.TFile.Open(url)` in PyROOT, `uproot.open(url)` or
+  `uproot.iterate([url, ...])` in uproot. uproot needs the `fsspec-xrootd` package and the XRootD Python bindings
+  (`xrootd`); explain their absence like any missing optional dependency.
+- Copy whole files with `xrdcp` and verify the checksum when the file is read many times or the transfer must be
+  complete; read remotely when only some branches are needed.
+- Credentials (a Kerberos ticket, a token) come from the environment; never put a token into a URL that is logged,
+  printed or committed.
+- CERN EOS specifics (instances, checksums, versions, the recycle bin, the mounted file system):
+  [CERN EOS storage](storage-cern-eos.md).
+
 ## Plotting
 
 - Use `mplhep` for experiment-style Python plots with matplotlib used explicitly (no
