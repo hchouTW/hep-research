@@ -10,7 +10,7 @@
   "theory": []
  },
  "versions": {
-  "plugin": "0.6.4",
+  "plugin": "0.6.5",
   "contracts": "2.1.0",
   "plugin_release": {
    "release": "unreleased",
