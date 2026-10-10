@@ -4,6 +4,9 @@ How to run manifest-partitioned work (event generation, histogram filling, toys,
 or HTCondor cluster with the same guarantees as the local engine: seeds from the manifest, write-once outputs, no
 duplicate ever summed, bounded and explicit retries, a merge that needs every chunk exactly once.
 
+Site notes: [CERN HTCondor from lxplus](batch-site-cern-htcondor.md) (documented facts and what HTCondor 24.12.16 did on
+2026-10-10).
+
 Code: `core/partition/` (engine, campaign, worker-side runner, normalized states) and the optional adapter
 `adapters/batch-schedulers/` (`batch_campaign.py` CLI, `slurm_backend.py`, `htcondor_backend.py`, `batch_config.py`,
 templates in `assets/`). Status: **documented**. Both backends are tested only against fake schedulers

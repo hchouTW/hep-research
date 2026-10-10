@@ -232,6 +232,49 @@ that the adapter works with real Slurm or HTCondor; both stay `documented`. The 
 | B11 example | pass | `examples/batch-partition/run.py`: 10 criteria per backend; merged result equals the local single run exactly; byte-identical rerun |
 | B12 privacy; B13 integration | pass | `test_batch_privacy.py` (4): a sealed value in job stdout is found; a planted account fails `check_packaging.py`. `adapter.json` `documented` with no tested versions; matrix rows match; six routing cases (two in Traditional Chinese) |
 
+## CERN-HTCONDOR-RUN (2026-10-10, E3, work order T03: first real HTCondor runs of the batch adapter)
+
+E3 (lxplus923, AlmaLinux 9, HTCondor 24.12.16 client, schedd bigbird13; adapter driven by `/usr/bin/python3.11`,
+workers `/usr/bin/python3` 3.9.25; campaigns on AFS). Submission approved per phase by the user; 31 synthetic jobs in
+all, every one espresso or `MaxRuntime 60`. Records: the user's task folder (`T03-htcondor/runs/h2-*`, `h4-*`), not
+this repository.
+
+**Found before any job ran.** The fake-scheduler suite failed on this host (10 of 10 HTCondor shim tests): the
+worker-side `runner.py` used `datetime.UTC` (Python 3.11+) and `python3` on the job's PATH was 3.8/3.9, so every job
+died before the worker started. Fixed (`datetime.timezone.utc`); `tests/core/test_r5_runner.py` now runs the runner
+under `/usr/bin/python3` when it is older than 3.11.
+
+**Plain submit files (H2, 21 jobs, 5 refused at submission).** Default flavour espresso (`MaxRuntime 1200`,
+`JobFlavour` undefined); a run-time overrun is removed by `SYSTEM_PERIODIC_REMOVE` with `ExitCode 0` and no stdout
+back; a missing `output` directory is accepted at submission and held after the run (`Code 12 Subcode 2`, `ExitCode
+0`); `getenv = false` keeps Kerberos and AFS tokens; `request_cpus 2` gives 6000 MB; `OpSysAndVer AlmaLinux9` also
+matches RHEL 9.8 hosts; `CentOS7` is refused at submission; an unknown OS value idles forever; sandbox files return
+to the submit cwd; the first four `condor_submit` calls of the session failed on the credmon timeout and later ones
+succeeded; two jobs were evicted (code 1008) before executing and rescheduled. The `-terse` line, the event-log
+separator and the termination, held and aborted lines match the parser (tool-facts rows now say "observed").
+
+**Adapter (H3, test-first).** `htcondor.site_attributes`, `resources.time_limit` for HTCondor, `htcondor.schedd`
+(recorded per submission, `-name` on every later call), the two refusal texts → `not-submitted`, `-match N` on
+`condor_history`, cluster-level events (proc −1) skipped. 76 batch-adapter tests pass; the old golden file is
+byte-identical; new golden `htcondor-chunks-site-attributes.sub`.
+
+**Real campaigns (H4, 12 jobs).** Two synthetic 5-chunk toy campaigns (2,000 items per chunk, seeds 42 and 43),
+`shared-filesystem` then `transfer` mode, pilot first: both merges equal the local single run in every field
+(`n`, `sum`, `sum_cos`, a seeded weighted sum, `seed_sum`); both reports validate with status `synthetic,
+unvalidated`. `RealHTCondorTests` (two chunks, `HEP_HTCONDOR_TEST=1`, `HEP_HTCONDOR_CONFIG` naming a user-reviewed
+configuration) passed in 61 s. `adapter.json`: HTCondor `demonstrated-on-synthetic-data`, `tested_versions
+["24.12.16"]`; the adapter stays `documented` (Slurm has not run). Found on the pool and recorded in
+`skills/hep-computing/references/batch-site-cern-htcondor.md`: the 035/036 cluster events (fixed), history records
+appearing minutes after completion (fresh `condor_history` queries exceeded 120 s and 300 s; `-match N` added; a
+re-read of the event log before the fallback is recommended, not implemented), `watch` not stopping on a partially
+submitted campaign while holding the lock, `freeze` refusing a changed configuration with an unchanged file set
+(`bundle.request_differs`).
+
+**Gate on this host.** `run_all_checks.py` 18 pass / 2 fail: `tests.examples.test_batch_partition` differs in the
+last two digits of `sum_cos` (numpy 1.23.5 here; the same on unmodified `main`, the committed file is from another
+host) and `ams_optional` (no matplotlib and sympy for `/usr/bin/python3.11` on this host); `tests.tools.test_subprocess_timeouts`
+failed once on a new test's unbounded call and was fixed in the same branch.
+
 ## E2-INSTALL-FULLTEST (2026-10-03 to 2026-10-04, E2, version 0.1.0): INSTALL, FULLTEST-E2 and follow-ups
 
 **INSTALL.** First install into a day-to-day configuration: the user's own `~/.claude`, user scope, from the GitHub

@@ -10,7 +10,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 |---|---|---|---|
 | detector-response | 33 | 345 | 0 |
 | hep-analysis | 9 | 74 | 0 |
-| hep-computing | 26 | 292 | 0 |
+| hep-computing | 27 | 303 | 0 |
 | hep-statistics | 9 | 104 | 0 |
 | hep-theory | 8 | 42 | 0 |
 | physics-ml | 34 | 181 | 0 |
@@ -34,6 +34,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 - **authoring**: `example-authoring.md`, `task-authoring-guide.md`
 - **balanced**: `bash-balanced-design-guidelines.md`, `cpp-balanced-design-guidelines.md`, `python-balanced-design-guidelines.md`, `root-balanced-design-guidelines.md`
 - **based**: `ground-based-detection-arrays.md`, `space-based-direct-detection.md`
+- **batch**: `batch-scheduling.md`, `batch-site-cern-htcondor.md`
 - **cherenkov**: `cherenkov-imaging-variants-and-photosensors.md`, `imaging-atmospheric-cherenkov.md`
 - **citation**: `citation-verification.md`, `citations-and-bibliography.md`
 - **code**: `code-review-report.md`, `code-to-methodology-synthesis.md`
@@ -121,7 +122,8 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `acceptance-criteria.md` | hep-computing | 3.7 | no | 3 | - | 351029c 2026-10-07 |
 | `agile-development-guide.md` | hep-computing | 10.7 | yes | 8 | physics-ml | 351029c 2026-10-07 |
 | `bash-balanced-design-guidelines.md` | hep-computing | 24.8 | yes | 2 | - | 351029c 2026-10-07 |
-| `batch-scheduling.md` | hep-computing | 22.3 | yes | 6 | - | 6111161 2026-10-08 |
+| `batch-scheduling.md` | hep-computing | 22.4 | yes | 7 | - | 5f9ba3f 2026-10-10 |
+| `batch-site-cern-htcondor.md` | hep-computing | 10.3 | no | 1 | - | untracked |
 | `cmake-and-build.md` | hep-computing | 2.1 | yes | 4 | hep-analysis | 351029c 2026-10-07 |
 | `cpp-balanced-design-guidelines.md` | hep-computing | 26.0 | yes | 6 | physics-ml | 351029c 2026-10-07 |
 | `design-and-estimation.md` | hep-computing | 7.5 | no | 3 | - | 351029c 2026-10-07 |
