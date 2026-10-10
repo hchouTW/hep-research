@@ -7,8 +7,8 @@ Software checks establish contract consistency only, not physical validity.
 
 - **CI: each pull-request commit runs the workflows once.** `tests` ran on both `push` and `pull_request`, so every
   commit of a PR branch ran the whole suite twice; it now runs on pushes to `main`, on pull requests, weekly and on
-  demand. `guard` (path allowlist, secret scan) keeps running on every push to every branch and drops the duplicate
-  `pull_request` trigger. No plugin change.
+  demand. `guard` (path allowlist, secret scan) is unchanged: it still runs on every push and every pull request,
+  including pull requests from forks. No plugin change.
 
 ## 0.6.6 (2026-10-10)
 

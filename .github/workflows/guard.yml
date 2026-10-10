@@ -1,9 +1,8 @@
-# guard: runs on every push, on every branch (also branches without a pull request). A pull request from this
-# repository is covered by the push run of its commits, so there is no separate pull_request trigger.
+# guard: runs on every push and pull request, on every branch.
 # 1. Path allowlist over the whole history (.githooks/check-paths.sh).
 # 2. Secret scan with gitleaks (.gitleaks.toml carries the known false positives).
 name: guard
-on: [push]
+on: [push, pull_request]
 jobs:
   guard:
     runs-on: ubuntu-latest
