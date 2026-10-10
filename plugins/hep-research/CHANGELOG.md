@@ -3,6 +3,13 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **hep-computing: EOS rows of the CERN HTCondor site note observed (work order T06, E2f).** One espresso job
+  read a synthetic file from EOS with `xrdcp` and returned outputs through `output_destination`: credentials and the
+  EOS mount are present in the job, checksums match, and `output`/`error` are sent to the destination as well (only
+  the user log stays on AFS). Documentation only.
+
 ## 0.6.5 (2026-10-10)
 
 - **hep-computing: CERN EOS storage note (work order T06).** New reference

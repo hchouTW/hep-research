@@ -296,7 +296,11 @@ keep versions, overwrites through the mount keep none; grabbing a version and re
 recycle bin give the original checksums; an upload killed after 0.7 s leaves nothing under the target name; a
 user token for one file is refused, a directory-tree token works without Kerberos for reading and refuses writing;
 `TFile::Open` and `uproot.open` read the file over `root://`; 200 small files cost about 25–40 ms each (single runs,
-indicative). The HTCondor check (E2f) was not run.
+indicative). HTCondor check (E2f, run later the same day on the user's go): one espresso job (HTCondor 24.12.16,
+RHEL 9.8 worker, `getenv = false`) had Kerberos and AFS credentials and the EOS mount, read a 5 MB synthetic file
+with `xrdcp` (adler32 equal to the EOS checksum) and returned two files through `output_destination` with
+`MY.XRDCP_CREATE_DIR`; `output` and `error` were sent to the destination too, only the user log stayed on AFS.
+The site note's two EOS rows now carry these observations; the test folder was removed.
 
 **Not as planned.** The test directory was removed, but a normal user cannot purge recycle entries on this instance
 ("cannot purge your recycle bin without being a sudo or having an admin role"), so its 207 entries expire after the
