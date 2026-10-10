@@ -5,13 +5,15 @@ or HTCondor cluster with the same guarantees as the local engine: seeds from the
 duplicate ever summed, bounded and explicit retries, a merge that needs every chunk exactly once.
 
 Site notes: [CERN HTCondor from lxplus](batch-site-cern-htcondor.md) (documented facts and what HTCondor 24.12.16 did on
-2026-10-10).
+2026-10-10); [NSTCCore Slurm](batch-site-nstccore-slurm.md) (documented facts and what Slurm 24.05.1 did on 2026-10-10).
 
 Code: `core/partition/` (engine, campaign, worker-side runner, normalized states) and the optional adapter
 `adapters/batch-schedulers/` (`batch_campaign.py` CLI, `slurm_backend.py`, `htcondor_backend.py`, `batch_config.py`,
-templates in `assets/`). Status: **documented**. Both backends are tested only against fake schedulers
-(`tests/adapters/batch_shims/`); no real Slurm or HTCondor has run them, and the tool facts below were
-checked against the tools' documentation only (see "Tool facts"; a few formats are not stated there). Treat the first real run on your site as a pilot.
+templates in `assets/`). Status: **documented**. Both backends are tested against fake schedulers
+(`tests/adapters/batch_shims/`); beyond that, each has run synthetic campaigns on one real site only (HTCondor
+24.12.16 at CERN, Slurm 24.05.1 at NSTCCore, both 2026-10-10; see the site notes), and the tool facts below were
+checked against the tools' documentation, with the rows those runs confirmed marked "observed" (see "Tool facts"; a
+few formats are not stated there). Treat the first real run on your site as a pilot.
 
 **Submission is unsandboxed execution.** The scheduler client runs outside the agent sandbox, and the job script runs
 on worker nodes with the user's permissions, so submitting runs code the agent just wrote outside every boundary the
@@ -194,20 +196,20 @@ validates with status `synthetic, unvalidated`; the logs pass the blinding audit
 Every option, field, state code and output format the backends emit or parse, checked on 2026-10-03 against the
 official documentation: Slurm 26.05 (slurm.schedmd.com: sbatch, sacct, squeue, scancel, job arrays) and HTCondor
 Manual 25.13.2 (htcondor.readthedocs.io: condor_submit, Job Description Language, job event log codes, job ClassAd
-attributes, condor_q, condor_history, managing a job). No real Slurm or HTCondor was run; the fake schedulers follow
-these formats. "Documented" means the page states it; "not stated" means the page does not say it either way, so
+attributes, condor_q, condor_history, managing a job). The fake schedulers follow these formats; rows marked
+"observed" were later confirmed on a real HTCondor 24.12.16 or Slurm 24.05.1 run (2026-10-10). "Documented" means the page states it; "not stated" means the page does not say it either way, so
 confirm it on a real run of the version you use before relying on it.
 
 | Fact used | Where | Status (2026-10-03) |
 |---|---|---|
-| `sbatch --parsable` prints `jobid[;cluster]` | Slurm submit | documented (job ID and cluster name, separated by a semicolon) |
-| `--array=A-B%M` (throttle `%M`), `--no-requeue`, `--output`/`--error` with `%A` and `%a`, `--partition`, `--account`, `--qos`, `--constraint`, `--gres`, `--time`, `--cpus-per-task`, `--mem=<n>M`, `--gpus`, `--tmp`, `--job-name`; `SLURM_ARRAY_TASK_ID` in the job | Slurm template | documented (`--mem` default unit MiB, suffix K/M/G/T) |
-| `sacct --duplicates --parsable2 --noheader --format=JobID,State,ExitCode,Elapsed,MaxRSS,NodeList`; array tasks `<job>_<task>`; `.batch` step; `ExitCode` as `exit:signal`; Elapsed `[DD-[HH:]]MM:SS`; MaxRSS with an optional unit letter; State followed by `+` when truncated (for example who cancelled) | Slurm poll | documented; the parser accepts both `MM:SS` and `D-HH:MM:SS` |
+| `sbatch --parsable` prints `jobid[;cluster]` | Slurm submit | documented (job ID and cluster name, separated by a semicolon); observed on Slurm 24.05.1 (NSTCCore, 2026-10-10): the job ID alone on a single cluster |
+| `--array=A-B%M` (throttle `%M`), `--no-requeue`, `--output`/`--error` with `%A` and `%a`, `--partition`, `--account`, `--qos`, `--constraint`, `--gres`, `--time`, `--cpus-per-task`, `--mem=<n>M`, `--gpus`, `--tmp`, `--job-name`; `SLURM_ARRAY_TASK_ID` in the job | Slurm template | documented (`--mem` default unit MiB, suffix K/M/G/T); observed on Slurm 24.05.1 (NSTCCore, 2026-10-10): the rendered script with `--array=0-8%4`, `--no-requeue`, `--export=NONE`, `--partition`, `--account`, `--time`, `--cpus-per-task`, `--mem=200M` and `%A_%a` log names was accepted and ran; at most 4 tasks ran at once |
+| `sacct --duplicates --parsable2 --noheader --format=JobID,State,ExitCode,Elapsed,MaxRSS,NodeList`; array tasks `<job>_<task>`; `.batch` step; `ExitCode` as `exit:signal`; Elapsed `[DD-[HH:]]MM:SS`; MaxRSS with an optional unit letter; State followed by `+` when truncated (for example who cancelled) | Slurm poll | documented; the parser accepts both `MM:SS` and `D-HH:MM:SS`; observed on Slurm 24.05.1 (NSTCCore, 2026-10-10): `<job>_<task>` and `.batch` rows, `0:0`, `00:00:05`, MaxRSS such as `18760K`, `CANCELLED by <uid>`; MaxRSS is sampled (`JobAcctGatherFrequency`), so a job shorter than the interval reports far below its peak |
 | Pending array ranges shown as `<job>_[a-b%m]` in sacct | Slurm poll | not stated (squeue documents a combined line "using a regular expression"); parsed if present |
 | State codes: the adapter maps PENDING, CONFIGURING, REQUEUED, REQUEUE_FED, RUNNING, COMPLETING, STAGE_OUT, RESIZING, SIGNALING, COMPLETED, FAILED, TIMEOUT, OUT_OF_MEMORY, CANCELLED, NODE_FAIL, BOOT_FAIL, PREEMPTED, REQUEUE_HOLD, SPECIAL_EXIT, RESV_DEL_HOLD, DEADLINE, REVOKED; SUSPENDED and STOPPED map to `unknown` (a person decides) | Slurm state map | documented (squeue 26.05 table); RESV_DEL_HOLD, SIGNALING, DEADLINE, REVOKED, SUSPENDED and STOPPED were added after this check |
 | `squeue --jobs=<ids> --array --noheader --format=%i\|%T` | Slurm fallback | documented (`%i` is `<base_job_id>_<index>` for arrays, `%T` the long state) |
 | `scancel <job>_<task>`; `scancel --version` | Slurm cancel | documented |
-| `sbatch --version` | Slurm provenance | not stated on the sbatch page (scancel documents `-V, --version`) |
+| `sbatch --version` | Slurm provenance | not stated on the sbatch page (scancel documents `-V, --version`); observed on Slurm 24.05.1: prints `slurm 24.05.1` |
 | Submit description: `universe` (vanilla, container), `executable`, `transfer_executable`, `arguments`, `log`, `output`, `error`, `should_transfer_files`, `when_to_transfer_output = ON_EXIT`, `transfer_input_files`, `transfer_output_remaps = "a = b; c = d"`, `request_cpus`, `request_memory`/`request_disk` with an `MB` suffix, `request_gpus`, `max_materialize`, `queue a, b from file` (each line split on commas and/or spaces); macros `$(name)` | HTCondor template | documented (`request_disk` default unit is KiB, so the explicit `MB` suffix matters) |
 | `container_image` | HTCondor template | not stated in the page excerpt read (the container universe is documented) |
 | No automatic retry by default (`max_retries` unset, `on_exit_remove` default True, `periodic_release` default False) | HTCondor template | documented; an evicted job still restarts, which `NumJobStarts` counts |

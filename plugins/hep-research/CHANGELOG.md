@@ -5,6 +5,15 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **hep-computing: NSTCCore Slurm site note.** New reference
+  `skills/hep-computing/references/batch-site-nstccore-slurm.md`: what Slurm 24.05.1 did on the NSTCCore (TWGrid)
+  cluster on 2026-10-10, each fact with its site-guide or SchedMD 24.05.1 page or the observation (partition tiers
+  that starve the default partition, memory requests that add billed CPUs, over-memory jobs that swap instead of
+  failing, `--export=NONE` rebuilding the login environment, `DerivedExitCode`, sampled `MaxRSS`, Fair Tree priority),
+  and how to configure the adapter there. `batch-scheduling.md` links it, and its Slurm tool-facts rows confirmed by
+  the first real Slurm campaign (synthetic, 10 chunks, merged equal to a local recompute) now say "observed".
+  `adapter.json` keeps Slurm `documented`. Documentation only; evidence in VALIDATION.md (NSTCCORE-SLURM-RUN).
+
 - **CI: each pull-request commit runs the workflows once.** `tests` ran on both `push` and `pull_request`, so every
   commit of a PR branch ran the whole suite twice; it now runs on pushes to `main`, on pull requests, weekly and on
   demand. `guard` (path allowlist, secret scan) is unchanged: it still runs on every push and every pull request,
