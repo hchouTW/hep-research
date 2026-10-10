@@ -93,6 +93,37 @@ which the allow-listed environment would otherwise drop): the name is recorded w
 example CERN's `myschedd bump`) cannot make the campaign's jobs look lost. Pick the schedd adaptively before
 submitting if your site offers it; the adapter never chooses one itself.
 
+## Checking what a Slurm cluster can give you
+
+Before the user chooses `slurm.partition` and the resources, look at the cluster as it is now, with read-only
+commands on the login node, and show them the picture with its time stamp: it holds for minutes, not days (partitions,
+priority tiers and node states change), so record the commands, never the numbers. The plugin never picks a
+partition itself. The pitfalls below were each met on Slurm 24.05.1 ([NSTCCore](batch-site-nstccore-slurm.md)).
+
+1. **Capacity per partition:** `sinfo -o "%P %a %l %D %C"` (`%C` = CPUs allocated/idle/other/total). Partitions
+   often share one set of nodes with different time limits and priority tiers: never add their idle CPUs together;
+   group them by node set (`sinfo -o "%P %N"`).
+2. **Queue pressure:** `squeue -h -t PD -p <partition> -o %r | sort | uniq -c`. `Priority`: jobs ahead of yours;
+   `Resources`: waiting for nodes; "reserved for jobs in higher priority partitions": a lower-tier partition on shared
+   nodes is starved. Pending counts are no wait estimate either: a long queue may belong to one or two users with
+   lower priority than yours, or to requests that do not fit where yours does.
+3. **GPUs you can actually use:** a free GPU needs free CPUs and memory on the same node. Per node compare
+   `gres/gpu` in `AllocTRES` with `CfgTRES`, and `CPUAlloc` with `CPUTot` (`scontrol show node <node>`): a node with
+   free GPUs but no free core gives you none. Where allocation is per core on hyper-threaded nodes, each CPU you
+   ask for costs a whole core.
+4. **Access and limits:** `scontrol show partition <p>` (`AllowAccounts`, `AllowGroups`, `AllowQos`, the partition
+   `QoS`, `MaxTime`) and `sacctmgr show qos <q> format=Name,MinTRESPerJob,MaxTRESPerJob,MaxTRESPerUser,MaxWall,Flags`.
+   An idle partition is often reserved for other accounts, or has a minimum or maximum GPU count per job. The
+   partition QoS imposes its limits, but the job's own QoS (`sacct` `QOS`) stays the association's.
+5. **Is the request admissible:** `sbatch --test-only <script>` checks access and limits without submitting ("Invalid
+   account or account/partition combination specified" is an immediate refusal). Its start time is not a wait
+   estimate: it can predict an immediate start on a partition whose free cores are held for a higher priority tier.
+6. **Your standing:** `sshare -u $USER -U -l` (`FairShare`, `LevelFS`) and `sprio -w` (weights). Where fair share
+   dominates priority (Fair Tree), any usage at all moves a new user from the top rank down among users with usage.
+7. **Confirm with one tiny job** on the chosen partition, approved like any submission: the hardware, the driver,
+   and what the job is actually given (`SLURM_CPUS_ON_NODE`, `SLURM_MEM_PER_CPU`, `CUDA_VISIBLE_DEVICES`). For a GPU,
+   compile and run a small kernel rather than trusting `nvidia-smi -L` alone. Then the pilot chunk sizes the rest.
+
 ## Slurm and HTCondor side by side
 
 | Topic | Slurm (adapter behavior) | HTCondor (adapter behavior) |
@@ -116,6 +147,9 @@ node-failure, held, cancelled, lost, unknown`. A native state the adapter does n
 - Submit a pilot chunk first; `status` reports its elapsed time and peak memory. Set `time_limit` and `memory_mb`
   from it with headroom you can justify (for example the pilot value plus the spread you expect between chunks).
   The plugin never raises a request on its own.
+- Peak memory from Slurm accounting (`MaxRSS`) is sampled every `JobAcctGatherFrequency` seconds: a pilot shorter
+  than that interval under-reports it (observed: 44 K for 3 s tasks at a 15 s interval). Let the pilot run well past
+  the interval, or measure the peak inside the worker.
 - Chunk count: keep each chunk long enough that scheduling overhead is small, and the array or queue within your
   site's limits (maximum array size, jobs per user): these are site facts; ask, never assume.
 - Throttle so the shared file system and the scheduler are not flooded.
