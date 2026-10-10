@@ -157,8 +157,68 @@ class SlurmShimTests(unittest.TestCase):
 
 @unittest.skipUnless(os.environ.get("HEP_SLURM_TEST") == "1" and shutil.which("sbatch"), "real Slurm not available (HEP_SLURM_TEST=1 and sbatch on PATH)")
 class RealSlurmTests(unittest.TestCase):
-    def test_example_campaign_on_real_slurm(self):
-        raise unittest.SkipTest("no approved Slurm installation in the declared environment (TASK Q1)")
+    """A real cluster, never a fake: HEP_SLURM_TEST=1, sbatch on PATH, and HEP_SLURM_CONFIG naming a batch configuration
+    the user reviewed (site facts never live in the plugin; its campaign_dir must be on a file system the jobs can write,
+    and the test makes a fresh campaign folder beside it). Setting the variables is the approval to submit two short
+    synthetic jobs. First run: NSTCCore, Slurm 24.05.1, 2026-10-10."""
+
+    DEADLINE_S = 1200
+
+    def test_two_synthetic_chunks_merge_like_a_single_run(self):
+        cfg_path = os.environ.get("HEP_SLURM_CONFIG")
+        if not cfg_path:
+            self.skipTest("HEP_SLURM_CONFIG not set: no reviewed site configuration to submit with")
+        import contextlib
+        import io
+        import sys
+        import time
+        import batch_campaign
+        base = json.loads(Path(cfg_path).read_text(encoding="utf-8"))
+        stamp = time.strftime("%Y%m%dT%H%M%S")
+        root = Path(base["campaign_dir"]).resolve().parent / f"realtest-{stamp}"
+        (root / "worker").mkdir(parents=True)
+        worker = root / "worker" / "toy.py"
+        worker.write_text("#!/usr/bin/env python3\nimport json, sys\na = dict(zip(sys.argv[1::2], sys.argv[2::2]))\n"
+                          "start, stop = int(a['--start']), int(a['--stop'])\n"
+                          "json.dump({'n': stop - start, 'sum': sum(range(start, stop)), 'seed_sum': int(a['--seed'])}, open(a['--out'], 'w'))\n")
+        cfg = dict(base, campaign_dir=str(root / "campaign"))
+        config = root / "batch-config.json"
+        config.write_text(json.dumps(cfg))
+        python = cfg.get("worker_python") or sys.executable
+
+        def cli(*args):
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                code = batch_campaign.main([args[0], "--config", str(config), *args[1:]], env=dict(os.environ))
+            return code, json.loads(buf.getvalue())
+
+        self.assertEqual(cli("check-config")[0], 0)
+        self.assertEqual(cli("plan", "--job", "real-slurm-test", "--items", "200", "--chunk-size", "100", "--seed", "7",
+                             "--cmd", f"{python} {worker} --start {{start}} --stop {{stop}} --seed {{seed}} --out {{out}}")[0], 0)
+        code, dry = cli("submit")
+        self.assertTrue(dry["dry_run"])
+        code, sub = cli("submit", "--submit", "--plan-digest", dry["plan_digest"])
+        self.assertEqual(code, 0, sub)
+        self.assertEqual(len(sub["jobs"]), 2)
+        self.assertTrue(all(re.fullmatch(r"\d+_[01]", j["job_id"]) for j in sub["jobs"]), sub["jobs"])
+        t0 = time.time()
+        while True:
+            code, rep = cli("status")
+            states = {c: v["status"] for c, v in rep.get("chunks", {}).items()} if "chunks" in rep else {}
+            if states and all(s == "done" for s in states.values()):
+                break
+            if any(s in ("failed", "held", "lost", "cancelled", "unknown", "timeout", "out-of-memory") for s in states.values()):
+                self.fail(f"chunk not done: {rep}")
+            if time.time() - t0 > self.DEADLINE_S:
+                self.fail(f"not done within {self.DEADLINE_S} s (jobs {[j['job_id'] for j in sub['jobs']]} may still be queued): {rep}")
+            time.sleep(30)
+        self.assertEqual({v["native_state"] for v in rep["chunks"].values()}, {"COMPLETED"})
+        code, merged = cli("merge")
+        self.assertEqual((code, merged["status"]), (0, "complete"), merged)
+        self.assertEqual(merged["merged"]["n"], 200)
+        self.assertEqual(merged["merged"]["sum"], sum(range(200)))
+        code, rep = cli("report", "--out", str(root / "report.json"), "--label", "synthetic")
+        self.assertEqual(code, 0, rep)
 
 
 if __name__ == "__main__":

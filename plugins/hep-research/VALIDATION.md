@@ -313,6 +313,36 @@ were repeated in isolation; the records keep both.
 `run_all_checks.py` run failed `check_layering` and its unit test: "CTA" (CERN Tape Archive) in the new note matched
 an experiment name; the note now spells it out. Rerun on the final tree: **20 pass / 0 fail / 0 skip**; 1,840 unit tests, 1,741 pass, 0 fail, 99 skipped (8 fewer skips than the 915617d baseline because uproot and awkward were installed); profile suites ams-02 238, eic 43, synthetic-collider 9, qed-benchmark 18, qcd-r-ratio 21 pass.
 
+## NSTCCORE-SLURM-RUN (2026-10-10, NSTCCore login node: first real Slurm runs of the batch adapter)
+
+NSTCCore (ASGC/TWGrid), login node `slurm-ui-asiop.twgrid.org`, AlmaLinux 9, Slurm 24.05.1 (cluster `slurm-ctrl01`);
+adapter driven by the login node's Python 3, workers the site's `anaconda3` Python 3.12.7; campaign in Ceph group space.
+Each submission approved by the user. Records: the user's exercise folder (site notes, evidence per job), not this
+repository. Plugin code changed only in the gated test (`RealSlurmTests`).
+
+**Plain Slurm exercises (31 jobs, 0.15 CPU-hours, all `short`/`devel` partitions, at most 4 CPUs, 1 GPU, 10 min).**
+Batch, failure, time-limit, over-memory, array, dependency, CPU and GPU layout, export-mode and priority behaviour,
+recorded in `skills/hep-computing/references/batch-site-nstccore-slurm.md`. Findings that touch the adapter: an
+over-`--mem` job swaps instead of reaching `OUT_OF_MEMORY` (no swap constraint); `--export=NONE` rebuilds the login
+environment and empties `srun` steps unless `SLURM_EXPORT_ENV=ALL` (the template's `exec` in the batch step avoids
+this); `DerivedExitCode` ignores the `.batch` step; `MaxRSS` is sampled every 15 s.
+
+**Adapter (10 jobs).** `check-config` ok; `freeze`; `verify-bundle` identical; pilot `submit --pilot --submit` pinned to
+the bundle and the reviewed `plan_digest` (one chunk, `COMPLETED 0:0`, 5 s); then the nine remaining chunks as one
+array with throttle 4 (all `COMPLETED 0:0`, 3–8 s, at most 4 running). `status` complete, 0 duplicates, 0
+quarantined, one attempt per chunk; `merge` 10/10 equals recomputing every chunk from the manifest seeds (`n` 1000,
+`sum` identical to the last digit); `report --label synthetic` validates (`synthetic, unvalidated`). The `sbatch
+--parsable`, template-option, `sacct` and `--version` rows of the tool facts are now marked observed.
+
+**Gated test (2 jobs).** `RealSlurmTests` replaces its placeholder skip with the counterpart of `RealHTCondorTests`:
+`HEP_SLURM_TEST=1`, `sbatch` on PATH and `HEP_SLURM_CONFIG` naming a user-reviewed configuration; a fresh campaign
+beside its `campaign_dir`, two 100-item chunks with a worker that returns only additive fields, dry run, submission
+pinned to the dry run's `plan_digest`, poll every 30 s (deadline 1200 s), merge equal to `sum(range(200))`, report.
+It skips without the variables (checked both ways) and passed on NSTCCore in 31 s (array of two tasks, `COMPLETED
+0:0`, 3 s each). `adapter.json`: Slurm `demonstrated-on-synthetic-data`, `tested_versions ["24.05.1"]`, so the
+adapter, whose status is its least-tested tool's, is now `demonstrated-on-synthetic-data`; capability matrix,
+adapter-authoring guide and README follow.
+
 ## E2-INSTALL-FULLTEST (2026-10-03 to 2026-10-04, E2, version 0.1.0): INSTALL, FULLTEST-E2 and follow-ups
 
 **INSTALL.** First install into a day-to-day configuration: the user's own `~/.claude`, user scope, from the GitHub
