@@ -1045,7 +1045,7 @@
     "skills/hep-computing/references/storage-cern-eos.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "7c2827a 2026-10-10"
+   "last_commit": "b0dce7a 2026-10-10"
   },
   {
    "path": "skills/hep-computing/references/cmake-and-build.md",
@@ -1266,7 +1266,7 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b0dce7a 2026-10-10"
   },
   {
    "path": "skills/hep-computing/references/risk-and-quality.md",
@@ -1356,7 +1356,7 @@
     "skills/hep-computing/references/python-hep-coding-patterns.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "b0dce7a 2026-10-10"
   },
   {
    "path": "skills/hep-computing/references/task-authoring-guide.md",
