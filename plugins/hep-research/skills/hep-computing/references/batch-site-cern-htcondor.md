@@ -33,8 +33,8 @@ xfer = `local/file_xfer_plugin.html` (2025-11-17), myschedd = `local/myschedd.ht
 | Many jobs, throttle | `queue N`; `max_materialize = M`; `next_job_start_delay` is rejected | submit, common | `queue 10` → ProcIds 0–9 once each, one `log` with `$(ClusterId)` holds all events |
 | Environment | "Do not use getenv=True" | pitfalls | — |
 | AFS | 16,000–25,000 entries per directory ("(errno 27) File too large"); separate `log/ output/ error/` folders; one `log` per submission named with `$(ClusterId)` only; a new folder per submission; avoid AFS for many jobs | afs, pitfalls | — |
-| EOS | `/eos/` paths are refused in `executable`, `log`, `input`, `output`, `error`, `initialdir`, `transfer_input_files`; inside the job use `xrdcp root://...` or `eos`, not the FUSE mount ("fragile") | eos, pitfalls | — |
-| xrootd transfer plugin | `output_destination = root://eosuser.cern.ch//eos/user/...//`, `MY.XRDCP_CREATE_DIR = True`, `transfer_output_files = f1, f2`; `transfer_input_files` with `root://` URLs to files only; `executable` and `initialdir` cannot be `root://`; the user log stays on AFS unless `-spool` | xfer | — |
+| EOS | paths on the EOS mount are refused in `executable`, `log`, `input`, `output`, `error`, `initialdir`, `transfer_input_files`; inside the job use `xrdcp root://...` or `eos`, not the FUSE mount ("fragile") | eos, pitfalls | — |
+| xrootd transfer plugin | `output_destination = root://eosuser.cern.ch/<EOS path of a directory>/`, `MY.XRDCP_CREATE_DIR = True`, `transfer_output_files = f1, f2`; `transfer_input_files` with `root://` URLs to files only; `executable` and `initialdir` cannot be `root://`; the user log stays on AFS unless `-spool` | xfer | — |
 | Output transfer | `transfer_output_files = ""` → only log, stdout and stderr come back | ex2b, pitfalls | — |
 | Spool, EosSubmit | `condor_submit -spool` after `module load lxbatch/spool` (100 jobs per submission, 500 per owner, 1024 MB); EosSubmit schedds (`module load lxbatch/eossubmit`): every path in EOS, one log per cluster | spool, eossubmit | — |
 | Service limits | no submission limit; 10,000 running jobs per schedd; held jobs removed after 24 h; jobs restarted more than 10 times removed | limits | — |
@@ -47,7 +47,7 @@ xfer = `local/file_xfer_plugin.html` (2025-11-17), myschedd = `local/myschedd.ht
 
 ## Running the batch adapter here
 
-- `campaign_dir` on AFS, never under `/eos/` (the `log`, `output`, `error` and `transfer_input_files` of the
+- `campaign_dir` on AFS, never on the EOS mount (the `log`, `output`, `error` and `transfer_input_files` of the
   rendered submit file all point into it); keep a submission below about 8,000 attempts (two log files per attempt
   in one `logs/` folder, AFS entry limit).
 - `htcondor.site_attributes`: `{"JobFlavour": "espresso"}` (or `MaxRuntime`), otherwise every job gets 20 minutes;
