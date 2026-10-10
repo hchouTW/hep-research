@@ -261,7 +261,7 @@ def submit(campaign_dir, executor, config: dict, chunk_ids=None, approved: bool 
     limits_report = {"configured": config.get("limits") or None, "usage_before": usage}
     if bundle_digest is not None:
         try:
-            doc = bundles.load(cdir, bundle_digest)
+            doc = bundles.load(cdir, bundle_digest, config_hash=bundles.config_hash(config))
             check = bundles.verify(doc)
         except bundles.BundleError as exc:
             raise CampaignError(exc.code, str(exc)) from None
@@ -810,8 +810,9 @@ def watch(campaign_dir, executor, config: dict, sleep=time.sleep, clock=time.mon
     """Observe -> decide -> collect, repeated within the configured limits. It never resubmits, releases or cancels.
 
     Needs monitor.poll_interval_s (at least MIN_POLL_INTERVAL_S) and monitor.max_polls and/or monitor.deadline_s.
-    Stops when every chunk is done (complete) or settled; early on a held, unknown or stopped chunk, on the same poll
-    error twice in a row, or at the deadline; and at max_polls, reported as incomplete.
+    Stops when every chunk is done (complete), when nothing is queued or running (settled, or planned chunks never
+    submitted: 'nothing-active'); early on a held, unknown or stopped chunk, on the same poll error twice in a row, or
+    at the deadline; and at max_polls, reported as incomplete.
     """
     mon = config.get("monitor") or {}
     interval, max_polls, deadline = mon.get("poll_interval_s"), mon.get("max_polls"), mon.get("deadline_s")
@@ -835,8 +836,10 @@ def watch(campaign_dir, executor, config: dict, sleep=time.sleep, clock=time.mon
             elif person:
                 stop = "needs-person"
                 entry["needs_person"] = person
-            elif not any(s in ACTIVE for s in statuses.values()):
-                stop = "settled-incomplete"
+            elif not any(s in ("queued", "running") for s in statuses.values()):
+                # nothing is at the scheduler: chunks never submitted (planned) are not waited for (T03 H4: a pilot
+                # watch polled on for ten minutes and held the lock), and settled chunks need a person or a resubmit
+                stop = "nothing-active" if any(s == "planned" for s in statuses.values()) else "settled-incomplete"
         except PollError as exc:
             log.append({"poll": n, "poll_error": exc.signature, "text": exc.text})
             if last_err == exc.signature:

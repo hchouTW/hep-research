@@ -161,6 +161,23 @@ class HTCondorShimTests(unittest.TestCase):
         self.assertEqual(len(hist), 1)
         self.assertEqual(hist[0][hist[0].index("-match") + 1], "1", hist[0])  # one job was missing from the queue
 
+    def test_lagging_event_log_is_read_again_before_the_history_fallback(self):
+        """T03 H4 (CERN pool, 2026-10-10): right after a job finished, the AFS copy of the event log still showed it
+        queued while condor_q no longer listed it, so poll went to condor_history, whose records appear minutes later
+        and whose scan then exceeded the timeout. When the queue says gone, the log is read once more before the
+        history is asked; a terminal event that arrived meanwhile settles the job without any history call."""
+        self.h.plan()
+        self.h.set_faults({"_global": {"eventlog": "lagged"}})  # terminal events reach the log only after the next condor_q
+        self.h.cli("submit", "--submit")
+        code, rep = self.h.cli("status")
+        self.assertEqual(code, 0, rep)
+        self.assertEqual({c: v["status"] for c, v in rep["chunks"].items()}, {"c0000": "done", "c0001": "done"})
+        tools = [c["tool"] for c in self.h.calls()]
+        self.assertIn("condor_q", tools)
+        self.assertNotIn("condor_history", tools, "the re-read log settled the jobs; no history scan was needed")
+        recs = self.h.state()["chunks"]["c0000"]["attempt_records"]
+        self.assertEqual(recs[0]["evidence"], "job event log")
+
     def test_missing_event_log_falls_back_to_queue_and_history(self):
         self.h.plan()
         self.h.set_faults({"c0000": [{"kind": "stuck"}], "_global": {"eventlog": "missing"}})

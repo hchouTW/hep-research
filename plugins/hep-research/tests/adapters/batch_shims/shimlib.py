@@ -227,10 +227,23 @@ def _parse_submit(text: str) -> tuple[dict, tuple]:
     return kv, queue
 
 
+def _flush_lagged_events(store: dict) -> None:
+    """'lagged' event logs: terminal events wait in <log>.lagged until the next condor_q (a shared-file-system copy of
+    the log that trails the queue, as seen on AFS at CERN)."""
+    for cl in store.get("condor", {}).values():
+        pending = Path(cl["log"] + ".lagged")
+        if pending.exists():
+            with open(cl["log"], "a") as fh:
+                fh.write(pending.read_text())
+            pending.unlink()
+
+
 def _event(log: Path, code: str, cluster: int, proc: int, text: str, detail: list[str] = ()) -> None:
     mode = global_mode("eventlog")
     if mode == "missing":
         return
+    if mode == "lagged" and code in ("005", "009", "012"):
+        log = Path(str(log) + ".lagged")
     with open(log, "a") as fh:
         if mode == "malformed":
             fh.write("this is not an event\n...\n")
@@ -374,7 +387,9 @@ def condor_q(argv: list) -> int:
     if global_mode("condor_q") == "malformed":
         print("[ { not json")
         return 0
-    return _ads(argv, {1, 2, 5, 6, 7})
+    rc = _ads(argv, {1, 2, 5, 6, 7})
+    _flush_lagged_events(load())  # the log catches up after the queue was asked
+    return rc
 
 
 def condor_history(argv: list) -> int:

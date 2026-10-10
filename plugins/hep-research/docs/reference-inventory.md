@@ -122,8 +122,8 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `acceptance-criteria.md` | hep-computing | 3.7 | no | 3 | - | 351029c 2026-10-07 |
 | `agile-development-guide.md` | hep-computing | 10.7 | yes | 8 | physics-ml | 351029c 2026-10-07 |
 | `bash-balanced-design-guidelines.md` | hep-computing | 24.8 | yes | 2 | - | 351029c 2026-10-07 |
-| `batch-scheduling.md` | hep-computing | 22.4 | yes | 7 | - | 69da1eb 2026-10-10 |
-| `batch-site-cern-htcondor.md` | hep-computing | 10.4 | no | 1 | - | 69da1eb 2026-10-10 |
+| `batch-scheduling.md` | hep-computing | 22.9 | yes | 7 | - | 69da1eb 2026-10-10 |
+| `batch-site-cern-htcondor.md` | hep-computing | 10.6 | no | 1 | - | beb40b4 2026-10-10 |
 | `cmake-and-build.md` | hep-computing | 2.1 | yes | 4 | hep-analysis | 351029c 2026-10-07 |
 | `cpp-balanced-design-guidelines.md` | hep-computing | 26.0 | yes | 6 | physics-ml | 351029c 2026-10-07 |
 | `design-and-estimation.md` | hep-computing | 7.5 | no | 3 | - | 351029c 2026-10-07 |

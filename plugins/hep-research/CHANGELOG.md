@@ -3,6 +3,17 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **batch-schedulers: three follow-ups from the first real HTCondor runs (work order T03).** `watch` stops as soon
+  as nothing is queued or running (`nothing-active` when planned chunks were never submitted; before, a pilot watch
+  polled to `max_polls` and held the campaign lock); the HTCondor backend reads the event log once more when the
+  queue no longer lists a job before falling back to `condor_history` (on AFS the log trailed the queue by seconds
+  and the history record came minutes later); a changed configuration with the same files freezes as its own
+  request file under the same digest and `submit --bundle` chooses by the configuration hash (before,
+  `bundle.request_differs` left no way forward but a new campaign directory). `core.partition.bundle.config_hash`
+  is the one formula both sides use. Shim: a `lagged` event-log mode. Tests: watch, HTCondor backend, bundle.
+
 ## 0.6.3 (2026-10-10)
 
 - **batch-schedulers: first real HTCondor runs (CERN local pool from lxplus, HTCondor 24.12.16, work order T03).**

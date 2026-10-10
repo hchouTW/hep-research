@@ -147,12 +147,16 @@ node-failure, held, cancelled, lost, unknown`. A native state the adapter does n
   interpreter without arguments, which is hashed too; an interpreter may not itself be a `#!` script; keep the worker
   code in its own folder, outside the campaign directory. A named path that later resolves elsewhere is a change.
   `submit --bundle DIGEST` (and `resubmit`) re-hashes the bundle and is refused when anything changed since freezing
-  or the bundle belongs to another campaign; freeze again and have the new bundle approved. The files stay editable;
+  or the bundle belongs to another campaign; freeze again and have the new bundle approved. A changed configuration
+with the same files is a new approval request under the same digest: `freeze` writes it as its own write-once file
+(`<digest>-<request id>.json`, never overwriting the earlier request) and `submit --bundle` picks the request frozen
+with the configuration in force (refused as `bundle.request_differs` when none was). The files stay editable;
   running approved bytes is the trusted submitter's job.
 - **A scheduler's success is not a result:** a job reported complete without a valid output is `lost`.
-- **Held jobs need a person.** `watch` stops early on held, unknown or stopped chunks.
+- **Held jobs need a person.** `watch` stops early on held, unknown or stopped chunks, and as soon as nothing is
+  queued or running (`nothing-active` when planned chunks were never submitted, as after a pilot).
 - **Polling etiquette:** `status` polls once. `watch` needs `monitor.poll_interval_s` (at least 60) and
-  `monitor.max_polls` or `monitor.deadline_s`; it stops when everything is done or settled, early on problems or on
+  `monitor.max_polls` or `monitor.deadline_s`; it stops when everything is done, when nothing is queued or running, early on problems or on
   the same poll error twice, and at its limit it reports `incomplete`. It never resubmits.
 - **Logs are outputs.** Job stdout and stderr (`*.stdout.log`, `*.stderr.log`), event logs and job files live under
   `campaign_dir/submissions/`. From a blinded analysis they return through the same release and scanning rules as

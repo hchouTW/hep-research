@@ -308,8 +308,14 @@ def freeze(campaign_dir, worker_root=None, env_lock=None, data_exposure=None, co
         old = json.loads(out.read_text(encoding="utf-8"))
         if old.get("approval_request") == doc["approval_request"]:
             return dict(old, path=str(out), reused=True)
-        raise BundleError("bundle.request_differs", f"{out.name} was frozen with another approval request; "
-                          "freeze the changed configuration as a new bundle")
+        # the same files under another request (a changed configuration): never overwritten; the new request gets its
+        # own write-once file under the same digest, and load() tells them apart by the configuration hash
+        out = out.with_name(f"{doc['bundle_digest']}-{request_id(doc['approval_request'])}.json")
+        if out.exists():
+            old = json.loads(out.read_text(encoding="utf-8"))
+            if old.get("approval_request") == doc["approval_request"]:
+                return dict(old, path=str(out), reused=True)
+            raise BundleError("bundle.request_differs", f"{out.name} was frozen with another approval request")
     tmp = out.with_name(f".tmp-{out.name}")
     tmp.write_text(json.dumps(doc, indent=1, sort_keys=True) + "\n", encoding="utf-8")
     os.link(tmp, out)  # write-once
@@ -331,11 +337,39 @@ def check_campaign(doc: dict, campaign_dir) -> list[str]:
     return out
 
 
-def load(campaign_dir, digest: str) -> dict:
+def config_hash(cfg: dict) -> str:
+    """SHA-256 of the configuration as sorted JSON: the key an approval request and a submission share."""
+    return hashlib.sha256(json.dumps(cfg, sort_keys=True).encode()).hexdigest()
+
+
+def request_id(request: dict) -> str:
+    return hashlib.sha256(json.dumps(request, sort_keys=True).encode()).hexdigest()[:12]
+
+
+def load(campaign_dir, digest: str, config_hash: str | None = None) -> dict:
+    """The bundle document frozen for digest; with several requests under one digest (see freeze), the one whose
+    approval request names config_hash. Refused: bundle.ambiguous (several, no hash given), bundle.request_differs
+    (none frozen with this configuration), bundle.unreadable."""
     if not re.fullmatch(r"[0-9a-f]{64}", digest or ""):
         raise BundleError("bundle.bad_digest", f"{digest!r} is not a full SHA-256")
-    path = Path(campaign_dir) / "bundles" / f"{digest}.json"
-    try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, ValueError) as exc:
-        raise BundleError("bundle.unreadable", f"{path.name}: {exc}") from None
+    folder = Path(campaign_dir) / "bundles"
+    paths = sorted(folder.glob(f"{digest}.json")) + sorted(folder.glob(f"{digest}-*.json"))
+    if not paths:
+        raise BundleError("bundle.unreadable", f"{digest}.json: no bundle frozen with this digest")
+    docs = []
+    for path in paths:
+        try:
+            docs.append(json.loads(path.read_text(encoding="utf-8")))
+        except (OSError, ValueError) as exc:
+            raise BundleError("bundle.unreadable", f"{path.name}: {exc}") from None
+    if config_hash is None:
+        if len(docs) == 1:
+            return docs[0]
+        raise BundleError("bundle.ambiguous", f"{len(docs)} approval requests were frozen for {digest[:12]}; load with the configuration")
+    for doc in docs:
+        if (doc.get("approval_request") or {}).get("config_hash") == config_hash:
+            return doc
+    if len(docs) == 1 and (docs[0].get("approval_request") or {}).get("config_hash") is None:
+        return docs[0]  # frozen without a configuration hash (core-only use): bound to no configuration
+    raise BundleError("bundle.request_differs", f"no bundle with digest {digest[:12]} was frozen with this configuration "
+                      f"(hash {config_hash[:12]}); freeze it, and have the new request approved")

@@ -232,7 +232,7 @@ def main(argv=None, env=None, sleep=None) -> int:
             return emit({"bundle_digest": doc["bundle_digest"], "path": doc["path"], "reused": doc["reused"],
                          "files": len(doc["files"]), "approval_request": doc["approval_request"]}, 0)
         if args.cmd == "verify-bundle":
-            doc = bundles.load(cdir, args.bundle)
+            doc = bundles.load(cdir, args.bundle, config_hash=batch_config.config_hash(cfg))
             rep = bundles.verify(doc)
             other = bundles.check_campaign(doc, cdir)
             if other:
