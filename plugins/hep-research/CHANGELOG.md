@@ -3,7 +3,7 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.6.5 (2026-10-10)
 
 - **hep-computing: CERN EOS storage note (work order T06).** New reference
   `skills/hep-computing/references/storage-cern-eos.md`: what EOS is, how to address an instance, copying with
