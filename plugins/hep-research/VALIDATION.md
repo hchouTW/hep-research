@@ -273,7 +273,12 @@ submitted campaign while holding the lock, `freeze` refusing a changed configura
 **Gate on this host.** `run_all_checks.py` 18 pass / 2 fail: `tests.examples.test_batch_partition` differs in the
 last two digits of `sum_cos` (numpy 1.23.5 here; the same on unmodified `main`, the committed file is from another
 host) and `ams_optional` (no matplotlib and sympy for `/usr/bin/python3.11` on this host); `tests.tools.test_subprocess_timeouts`
-failed once on a new test's unbounded call and was fixed in the same branch.
+failed once on a new test's unbounded call and was fixed in the same branch. Both failures were environmental:
+after 0.6.4 and the float-rounding comparison of the example output, `run_all_checks.py` on `main` (`915617d`) in a
+venv on local disk (Python 3.11.13 with `requirements-core.txt`: numpy 2.4.6, scipy 1.17.1, sympy 1.14.0, matplotlib
+3.11.2) gave **20 pass / 0 fail / 0 skip**: 1,840 unit tests, 1,733 pass, 0 fail, 107 skipped (PyTorch, PyROOT,
+pyhf, uproot/awkward and the real-scheduler gates); profile suites ams-02 238, eic 43, synthetic-collider 9,
+qed-benchmark 18, qcd-r-ratio 21 pass.
 
 ## E2-INSTALL-FULLTEST (2026-10-03 to 2026-10-04, E2, version 0.1.0): INSTALL, FULLTEST-E2 and follow-ups
 
