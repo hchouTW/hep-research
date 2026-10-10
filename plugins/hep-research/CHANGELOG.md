@@ -3,6 +3,13 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **CI: each pull-request commit runs the workflows once.** `tests` ran on both `push` and `pull_request`, so every
+  commit of a PR branch ran the whole suite twice; it now runs on pushes to `main`, on pull requests, weekly and on
+  demand. `guard` (path allowlist, secret scan) is unchanged: it still runs on every push and every pull request,
+  including pull requests from forks. No plugin change.
+
 ## 0.6.6 (2026-10-10)
 
 - **README: package size statement updated** to about 1,070 files and 8.6 MB (the release manifests add about

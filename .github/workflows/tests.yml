@@ -1,4 +1,5 @@
-# tests: the hep-research test suite (T13). Runs on every push and pull request, and weekly against the latest releases.
+# tests: the hep-research test suite (T13). Runs on pushes to main, on pull requests, and weekly against the latest
+# releases. Branch pushes are tested through their pull request only, so each PR commit runs once, not twice.
 #   checks     unit tests (fast tier), profile suites and the static checks, on Python 3.11, 3.12 and 3.13 with the
 #              pinned set (plugins/hep-research/requirements-ci.lock); required
 #   lint       ruff and mypy on core/ and contracts/; required
@@ -10,6 +11,7 @@
 name: tests
 on:
   push:
+    branches: [main]
   pull_request:
   schedule:
     - cron: "17 5 * * 1"  # Mondays 05:17 UTC
