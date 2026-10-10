@@ -3,6 +3,13 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **Tests: the batch-partition example's committed output is compared up to float rounding.** `sum_cos` is a numpy
+  reduction whose last digits differ between hosts and numpy builds (lxplus with numpy 1.23.5 against the committed
+  file: `…253` vs `…256`), which failed the byte comparison; counts, states, digests and labels stay exact, floats are
+  compared at a relative 1e-9, and the helper has its own test. No runtime change.
+
 ## 0.6.4 (2026-10-10)
 
 - **batch-schedulers: three follow-ups from the first real HTCondor runs (work order T03).** `watch` stops as soon
