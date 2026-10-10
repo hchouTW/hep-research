@@ -266,6 +266,24 @@ class HTCondorExecutor(Executor):
             clusters = sorted({r["job_id"].split(".")[0] for r in recs})
             queue = self._ads("condor_q", clusters, schedd)
             missing = [r for r in recs if r["job_id"] not in queue]
+            # gone from the queue: read the log once more before the history. On a shared file system the log can
+            # trail the queue by seconds, and a history record appears minutes later (T03 H4: the scan then timed out)
+            reread: dict = {}
+            for rec in list(missing):
+                log = Path(rec["submission_dir"]) / "events.log"
+                if str(log) not in reread:
+                    try:
+                        reread[str(log)] = parse_event_log(log.read_text(encoding="utf-8", errors="replace"))
+                    except OSError:
+                        reread[str(log)] = {}
+                o = reread[str(log)].get(tuple(int(x) for x in rec["job_id"].split(".")))
+                if o is not None and o["state"] not in ("queued", "running"):
+                    out[rec["attempt_id"]] = _blank(
+                        state=o["state"], native_state="event " + o["native"][-1], exit_code=o["exit_code"], signal=o["signal"],
+                        hold_reason=o["hold_reason"], hold_code=o["hold_code"], host=o["host"], elapsed_s=o["elapsed"],
+                        max_rss_mb=o["mem"], restarts=max(o["starts"] - 1, 0), evidence="job event log")
+                    missing.remove(rec)
+                    recs = [r for r in recs if r is not rec]
             history = self._ads("condor_history", clusters, schedd, match=len(missing)) if missing else {}
             for rec in recs:
                 ad = queue.get(rec["job_id"]) or history.get(rec["job_id"])

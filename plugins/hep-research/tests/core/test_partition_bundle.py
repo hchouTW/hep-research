@@ -59,8 +59,20 @@ class BundleTests(unittest.TestCase):
         self.assertEqual(bd.verify(bd.load(self.cdir, doc["bundle_digest"]))["status"], "identical")
         again = self.freeze(scope="synthetic test", config={"limits": {"max_total_jobs": 4}}, config_hash="c" * 64)
         self.assertTrue(again["reused"])
-        with self.assertRaises(bd.BundleError) as err:  # same content, another request: refused, not overwritten
-            self.freeze(scope="another scope")
+        # same content, another request (T03 H4: a changed configuration with the same files): never overwritten, the
+        # new request gets its own file under the same digest, and load() picks the file by the configuration hash
+        other = self.freeze(scope="another scope", config={"limits": {"max_total_jobs": 2}}, config_hash="d" * 64)
+        self.assertFalse(other["reused"])
+        self.assertNotEqual(other["path"], doc["path"])
+        self.assertEqual(other["bundle_digest"], doc["bundle_digest"])
+        self.assertEqual(json.loads(Path(doc["path"]).read_text())["approval_request"]["config_hash"], "c" * 64)
+        self.assertEqual(bd.load(self.cdir, doc["bundle_digest"], config_hash="d" * 64)["approval_request"]["limits"], {"max_total_jobs": 2})
+        self.assertEqual(bd.load(self.cdir, doc["bundle_digest"], config_hash="c" * 64)["approval_request"]["limits"], {"max_total_jobs": 4})
+        with self.assertRaises(bd.BundleError) as err:  # two requests, no configuration to choose by
+            bd.load(self.cdir, doc["bundle_digest"])
+        self.assertEqual(err.exception.code, "bundle.ambiguous")
+        with self.assertRaises(bd.BundleError) as err:  # a configuration neither request was frozen with
+            bd.load(self.cdir, doc["bundle_digest"], config_hash="e" * 64)
         self.assertEqual(err.exception.code, "bundle.request_differs")
 
     def test_changes_after_freezing_are_detected(self):

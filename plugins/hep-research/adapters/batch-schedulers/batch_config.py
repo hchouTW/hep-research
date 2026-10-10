@@ -45,6 +45,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from core.partition.executors import passthrough_problems  # noqa: E402
+from core.partition.bundle import config_hash as bundle_config_hash  # noqa: E402
 from core.partition.limits import problems as limits_problems, walltime_s  # noqa: E402
 
 PLACEHOLDER = re.compile(r"^<[^<>]+>$")
@@ -214,4 +215,4 @@ def validate(cfg, example: bool = False) -> list[dict]:
 
 
 def config_hash(cfg: dict) -> str:
-    return hashlib.sha256(json.dumps(cfg, sort_keys=True).encode()).hexdigest()
+    return bundle_config_hash(cfg)  # one formula: the bundle's approval request and the submission share it

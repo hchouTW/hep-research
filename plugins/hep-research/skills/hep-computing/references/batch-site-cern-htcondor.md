@@ -60,8 +60,10 @@ xfer = `local/file_xfer_plugin.html` (2025-11-17), myschedd = `local/myschedd.ht
 - `throttle` is `max_materialize`, the throttle CERN asks for.
 - A session's first `condor_submit` can fail on the credential step (above): the adapter records the attempts as
   `not-submitted`; `reset` with a reason and `resubmit` once a later `condor_submit` works.
-- A poll right after completion can hit `htcondor.timeout` on `condor_history` (records lag); poll again a few
-  minutes later. `watch` does not stop while planned chunks are unsubmitted: use `status` for a pilot.
+- Right after a job completes, the AFS copy of the event log can trail the queue and the history record appears
+  minutes later: the adapter reads the log once more when the queue says gone, and asks the history only for what
+  the log still cannot settle (with `-match N`); a poll in that window may still report `htcondor.timeout`, so poll
+  again a few minutes later. `watch` stops once nothing is queued or running, so a pilot can be watched.
 - Held jobs vanish from the queue after 24 h and jobs restarted more than 10 times are removed: keep `max_attempts`
   below 10 and act on a held chunk within a day.
 - First real campaigns: two synthetic 5-chunk toy campaigns (shared-filesystem and transfer modes) merged equal to

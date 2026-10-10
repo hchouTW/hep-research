@@ -76,6 +76,21 @@ class WatchTests(unittest.TestCase):
         rep = cp.watch(h.cdir, batch_campaign.executor_for(cfg, h.env), cfg, sleep=lambda s: None, clock=lambda: next(clock))
         self.assertEqual((rep["stop_reason"], rep["polls"]), ("deadline", 2))
 
+    def test_pilot_campaign_stops_when_nothing_is_active(self):
+        """T03 H4 (CERN pool, 2026-10-10): with one of five chunks submitted as a pilot, watch kept polling after the
+        pilot was done (planned chunks are not 'settled') and held the campaign lock for ten minutes. Chunks that were
+        never submitted are nothing to wait for: the loop stops as soon as no attempt is queued or running."""
+        h = Harness("htcondor", items=3, chunk=1, extra={"monitor": {"poll_interval_s": 60, "max_polls": 10}})
+        self.addCleanup(h.cleanup)
+        h.plan()
+        h.cli("submit", "--pilot", "--submit")
+        self.sleeps = []
+        code, rep = self.watch(h)
+        self.assertEqual((code, rep["stop_reason"], rep["polls"]), (1, "nothing-active", 1), rep)
+        self.assertEqual(rep["chunks"]["c0000"]["status"], "done")
+        self.assertEqual(sorted(rep["not_done"]), ["c0001", "c0002"])
+        self.assertEqual(self.sleeps, [])
+
     def test_complete_campaign_stops_at_once(self):
         h = self.make(monitor={"poll_interval_s": 60, "max_polls": 5})
         code, rep = self.watch(h)
