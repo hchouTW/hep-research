@@ -3,8 +3,10 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.6.6 (2026-10-10)
 
+- **README: package size statement updated** to about 1,070 files and 8.6 MB (the release manifests add about
+  0.2 MB each; `check_packaging` flags a statement more than 10 % off).
 - **hep-computing: EOS rows of the CERN HTCondor site note observed (work order T06, E2f).** One espresso job
   read a synthetic file from EOS with `xrdcp` and returned outputs through `output_destination`: credentials and the
   EOS mount are present in the job, checksums match, and `output`/`error` are sent to the destination as well (only
