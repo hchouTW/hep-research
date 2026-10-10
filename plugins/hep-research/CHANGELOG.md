@@ -3,7 +3,7 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.6.3 (2026-10-10)
 
 - **batch-schedulers: first real HTCondor runs (CERN local pool from lxplus, HTCondor 24.12.16, work order T03).**
   The HTCondor backend takes `htcondor.site_attributes` (a map of ClassAd attribute to string, integer or boolean,
