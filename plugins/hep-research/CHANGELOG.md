@@ -3,6 +3,19 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **hep-computing: checking what a Slurm cluster can give you.** `batch-scheduling.md` gains a read-only procedure
+  for the picture the user chooses a partition from: capacity per partition without double-counting shared nodes,
+  pending reasons, GPUs that are usable only with free cores beside them, access and QoS limits, what
+  `--test-only` does and does not tell, fair-share standing, and one tiny confirming job. Sizing notes that sampled
+  `MaxRSS` under-reports short pilots. Learned from a full resource check on NSTCCore (Slurm 24.05.1, 2026-10-10).
+- **hep-computing: NSTCCore site note.** The QoS row is corrected (the partition QoS imposes its limits; the job's
+  own QoS stays `normal`, it is not replaced); new rows for the RTX PRO 6000 Blackwell node (`b6000-al9_devel`,
+  checked with a CUDA kernel) and for partition access and QoS limits. Snapshot values (queue counts, idle
+  resources, one user's fair-share figures) are removed from the note: they change by the hour; the note keeps
+  configuration and behaviour.
+
 ## 0.6.7 (2026-10-10)
 
 - **hep-computing: NSTCCore Slurm site note.** New reference
