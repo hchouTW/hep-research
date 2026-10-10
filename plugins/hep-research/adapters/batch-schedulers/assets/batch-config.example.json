@@ -4,7 +4,7 @@
  "resources": {
   "cpus": "<CPUs per job>",
   "memory_mb": "<memory per job in MB, from a pilot>",
-  "time_limit": "<walltime as HH:MM:SS, from a pilot (Slurm only)>",
+  "time_limit": "<walltime as HH:MM:SS, from a pilot (required for Slurm; for HTCondor it only sizes limits.max_core_hours)>",
   "gpus": "<GPUs per job, 0 if none>"
  },
  "slurm": {
@@ -15,7 +15,9 @@
  "htcondor": {
   "universe": "<vanilla or container>",
   "file_transfer": "<shared-filesystem or transfer: whether jobs see campaign_dir>",
-  "requirements": "<pool requirement expression, if your site needs one>"
+  "requirements": "<pool requirement expression, if your site needs one>",
+  "schedd": "<schedd host name to bind the campaign to, or caller for the shell's _condor_SCHEDD_HOST; omit for the site mapping>",
+  "site_attributes": "<object of ClassAd attribute to string, integer or boolean, written as +Name = value (for example JobFlavour, MaxRuntime, WantOS at CERN)>"
  },
  "throttle": "<most jobs running at once>",
  "max_attempts": "<attempts per chunk; leave the key out for no resubmission>",

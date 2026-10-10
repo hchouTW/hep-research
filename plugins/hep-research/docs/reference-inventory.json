@@ -14,8 +14,8 @@
    "uncited": 0
   },
   "hep-computing": {
-   "references": 26,
-   "bytes": 290031,
+   "references": 27,
+   "bytes": 302547,
    "uncited": 0
   },
   "hep-statistics": {
@@ -945,7 +945,7 @@
     "hep-theory",
     "physics-ml"
    ],
-   "last_commit": "e33254f 2026-10-08"
+   "last_commit": "364918e 2026-10-09"
   },
   {
    "path": "skills/hep-analysis/references/weights-normalization.md",
@@ -1019,19 +1019,32 @@
   {
    "path": "skills/hep-computing/references/batch-scheduling.md",
    "owner": "hep-computing",
-   "bytes": 20262,
-   "lines": 204,
+   "bytes": 22436,
+   "lines": 217,
    "linked_from_skill_md": true,
    "cited_by": [
     "adapters/batch-schedulers/htcondor_backend.py",
     "adapters/batch-schedulers/slurm_backend.py",
     "skills/hep-computing/SKILL.md",
+    "skills/hep-computing/references/batch-site-cern-htcondor.md",
     "tests/adapters/batch_shims/shimlib.py",
     "tests/adapters/test_batch_reference.py",
     "tools/check_instruction_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "6111161 2026-10-08"
+   "last_commit": "5f9ba3f 2026-10-10"
+  },
+  {
+   "path": "skills/hep-computing/references/batch-site-cern-htcondor.md",
+   "owner": "hep-computing",
+   "bytes": 10342,
+   "lines": 70,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-computing/references/batch-scheduling.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-computing/references/cmake-and-build.md",
@@ -1142,7 +1155,7 @@
     "skills/hep-computing/scripts/validate_skill_bundle.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9546574 2026-10-08"
+   "last_commit": "364918e 2026-10-09"
   },
   {
    "path": "skills/hep-computing/references/implementation-discipline.md",
@@ -1439,7 +1452,7 @@
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "364918e 2026-10-09"
   },
   {
    "path": "skills/hep-statistics/references/likelihood-fitting.md",
@@ -3092,6 +3105,10 @@
   "based": [
    "skills/detector-response/references/ground-based-detection-arrays.md",
    "skills/detector-response/references/space-based-direct-detection.md"
+  ],
+  "batch": [
+   "skills/hep-computing/references/batch-scheduling.md",
+   "skills/hep-computing/references/batch-site-cern-htcondor.md"
   ],
   "cherenkov": [
    "skills/detector-response/references/cherenkov-imaging-variants-and-photosensors.md",

@@ -11,11 +11,13 @@
   },
   {
    "name": "HTCondor",
-   "status": "documented",
-   "tested_versions": []
+   "status": "demonstrated-on-synthetic-data",
+   "tested_versions": [
+    "24.12.16"
+   ]
   }
  ],
- "environment": "none declared: no real Slurm or HTCondor has run these backends; tests run them against fake schedulers (tests/adapters/batch_shims) in E1 (Python 3.11.15, standard library); real-tool tests need HEP_SLURM_TEST=1 or HEP_HTCONDOR_TEST=1 and an approved installation",
+ "environment": "HTCondor: lxplus (AlmaLinux 9, x86_64), CERN local pool, HTCondor 24.12.16 client and schedd (bigbird13), campaign on AFS, workers EL9 with /usr/bin/python3 3.9.25 as worker_python, adapter driven by Python 3.11; two synthetic 5-chunk campaigns (shared-filesystem and transfer modes) merged equal to a local single run on 2026-10-10 (T03 H4), and RealHTCondorTests with HEP_HTCONDOR_TEST=1 and HEP_HTCONDOR_CONFIG. Slurm: no real Slurm has run this backend (no environment to declare); tests run both backends against fake schedulers (tests/adapters/batch_shims) in E1 (Python 3.11.15, standard library); real-tool tests need HEP_SLURM_TEST=1 / HEP_HTCONDOR_TEST=1",
  "assets": [
   "assets/slurm-array.sbatch.template",
   "assets/htcondor-chunks.sub.template",

@@ -3,6 +3,25 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **batch-schedulers: first real HTCondor runs (CERN local pool from lxplus, HTCondor 24.12.16, work order T03).**
+  The HTCondor backend takes `htcondor.site_attributes` (a map of ClassAd attribute to string, integer or boolean,
+  written as `+Name = value`: CERN's `JobFlavour`, `MaxRuntime`, `WantOS`), accepts `resources.time_limit` (which
+  sizes `limits.max_core_hours` and must agree with a `MaxRuntime` attribute), and `htcondor.schedd` (a host name, or
+  `caller` for the shell's `_condor_SCHEDD_HOST`): the schedd is recorded with each submission and passed as `-name`
+  to every later `condor_q`, `condor_history` and `condor_rm`, so a campaign stays on its schedd when the site's
+  mapping changes. Two `condor_submit` failure texts observed on the pool (credential step, rejected transaction)
+  settle the attempts as `not-submitted` instead of leaving the submission unconfirmed; `condor_history` is called
+  with `-match N`; the cluster-level events `035`/`036` (proc −1, HTCondor 24.12) no longer make the event log
+  unparsable. `core/partition/runner.py` no longer uses `datetime.UTC` (3.11+): on workers with Python 3.9 every job
+  died before the worker started. `RealHTCondorTests` runs a two-chunk synthetic campaign with `HEP_HTCONDOR_TEST=1`
+  and `HEP_HTCONDOR_CONFIG`; it passed on lxplus, and two synthetic 5-chunk campaigns (shared-filesystem and transfer
+  modes) merged equal to a local single run. `adapter.json`: HTCondor `demonstrated-on-synthetic-data`,
+  `tested_versions ["24.12.16"]`. New reference `hep-computing/references/batch-site-cern-htcondor.md` (CERN batch
+  documentation facts with dates, what 24.12.16 did, and how to configure the adapter there); tool-facts rows of
+  `batch-scheduling.md` updated to "observed". Evidence: VALIDATION.md, CERN-HTCONDOR-RUN.
+
 ## 0.6.2 (2026-10-09)
 
 - **research-communication: identifiers missing from a ledger.** An arXiv number, DOI or INSPIRE record that a ledger

@@ -85,6 +85,7 @@ class ConfigTests(unittest.TestCase):
         site = {"backend": None, "campaign_dir": "camp", "cpus": 1, "memory_mb": 1000, "time_limit": "00:10:00", "gpus": 0,
                 "partition": "synthetic-partition", "account": "synthetic-account", "qos": "synthetic-qos",
                 "universe": "vanilla", "file_transfer": "transfer", "requirements": '(OpSysAndVer == "SyntheticOS")',
+                "schedd": "schedd.example", "site_attributes": {"JobFlavour": "espresso", "MaxRuntime": 600},
                 "throttle": 2, "max_attempts": 2, "poll_interval_s": 60, "max_polls": 10,
                 "max_total_jobs": 100, "max_core_hours": 50, "max_resets_per_chunk": 1}
 
@@ -101,6 +102,51 @@ class ConfigTests(unittest.TestCase):
                     cfg["htcondor"].pop("container_image", None)  # vanilla universe
                 site["backend"] = backend
                 self.assertEqual(codes(fill(cfg)), [])
+
+    def test_htcondor_accepts_a_time_limit_for_core_hour_accounting(self):
+        """T03 H3: a walltime is a site fact the user gives; with it, limits.max_core_hours works for HTCondor too."""
+        c = copy.deepcopy(CONDOR)
+        c["resources"]["time_limit"] = "00:20:00"
+        c["limits"] = {"max_core_hours": 2}
+        self.assertEqual(codes(c), [])
+
+    def test_htcondor_site_attributes_are_a_closed_vocabulary_of_classad_values(self):
+        """T03 H3: +Name = value lines (CERN: JobFlavour, MaxRuntime, WantOS) come only from the configuration."""
+        c = copy.deepcopy(CONDOR)
+        c["htcondor"]["site_attributes"] = {"JobFlavour": "espresso", "MaxRuntime": 1200, "WantOS": "el9", "Flag": True}
+        self.assertEqual(codes(c), [])
+        for name, value in (("Job Flavour", "x"), ("1st", "x"), ("JobFlavour", {"nested": 1}), ("JobFlavour", 1.5),
+                            ("JobFlavour", ""), ("JobFlavour", "two\nlines"), ("JobFlavour", 'say "hi"')):
+            c = copy.deepcopy(CONDOR)
+            c["htcondor"]["site_attributes"] = {name: value}
+            with self.subTest(name=name, value=value):
+                self.assertIn(("config.bad_value", f"htcondor.site_attributes.{name}"), codes(c))
+        c = copy.deepcopy(CONDOR)
+        c["htcondor"]["site_attributes"] = ["JobFlavour"]
+        self.assertIn(("config.bad_value", "htcondor.site_attributes"), codes(c))
+
+    def test_htcondor_maxruntime_attribute_must_agree_with_the_time_limit(self):
+        c = copy.deepcopy(CONDOR)
+        c["resources"]["time_limit"] = "00:20:00"
+        c["htcondor"]["site_attributes"] = {"MaxRuntime": 1200}
+        self.assertEqual(codes(c), [])
+        c["htcondor"]["site_attributes"] = {"MaxRuntime": 600}
+        self.assertIn(("config.bad_value", "htcondor.site_attributes.MaxRuntime"), codes(c))
+        c["htcondor"]["site_attributes"] = {"MaxRuntime": "1200"}
+        self.assertIn(("config.bad_value", "htcondor.site_attributes.MaxRuntime"), codes(c))
+
+    def test_htcondor_schedd_is_a_host_name_or_caller(self):
+        """T03 H3: a campaign binds to one schedd; the name comes from the user or from the caller's environment."""
+        for good in ("bigbird13.cern.ch", "caller"):
+            c = copy.deepcopy(CONDOR)
+            c["htcondor"]["schedd"] = good
+            with self.subTest(schedd=good):
+                self.assertEqual(codes(c), [])
+        for bad in ("", "two hosts", "host;rm", 13, "a{{b}}"):
+            c = copy.deepcopy(CONDOR)
+            c["htcondor"]["schedd"] = bad
+            with self.subTest(schedd=bad):
+                self.assertIn(("config.bad_value", "htcondor.schedd"), codes(c))
 
     def test_cli_refuses_with_exit_2_and_names_the_keys(self):
         p = subprocess.run([sys.executable, str(ADAPTER / "batch_campaign.py"), "check-config", "--config", "/dev/stdin"],

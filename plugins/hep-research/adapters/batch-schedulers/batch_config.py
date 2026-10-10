@@ -5,11 +5,16 @@ One JSON file per campaign, kept in the user's project (never in the plugin):
   backend         "slurm" | "htcondor"                                              required
   campaign_dir    directory for state, job files, logs and outputs                   required
   resources       {"cpus", "memory_mb", "disk_mb", "gpus", "time_limit"}            required object; time_limit
-                  ("[D-]HH:MM:SS") required for slurm; other keys optional (omitted means the site default applies)
+                  ("[D-]HH:MM:SS") required for slurm, optional for htcondor (there it only sizes
+                  limits.max_core_hours and must agree with a MaxRuntime site attribute); other keys optional
+                  (omitted means the site default applies)
   slurm           {"partition" (required), "account", "qos", "constraint", "gres"}  required for slurm
   htcondor        {"universe" ("vanilla" | "container", required), "container_image" (required for container),
                    "file_transfer" ("shared-filesystem" | "transfer", required), "requirements",
-                   "transfer_input_files"}                                          required for htcondor
+                   "transfer_input_files", "schedd" (a host name, or "caller" for the shell's
+                   _condor_SCHEDD_HOST; omitted: the site's mapping), "site_attributes" ({ClassAd attribute:
+                   string | integer | boolean}, written as "+Name = value" lines, e.g. CERN's JobFlavour,
+                   MaxRuntime, WantOS)}                                             required for htcondor
   throttle        positive integer: most array tasks / jobs running at once         optional
   max_attempts    positive integer; absent means no resubmission                    optional
   monitor         {"poll_interval_s" (>= 60), "max_polls", "deadline_s"}            optional; watch needs it
@@ -40,7 +45,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from core.partition.executors import passthrough_problems  # noqa: E402
-from core.partition.limits import problems as limits_problems  # noqa: E402
+from core.partition.limits import problems as limits_problems, walltime_s  # noqa: E402
 
 PLACEHOLDER = re.compile(r"^<[^<>]+>$")
 TIME = re.compile(r"^(\d+-)?\d{1,2}:\d{2}:\d{2}$")
@@ -51,10 +56,12 @@ UNSAFE = re.compile(r"[\x00-\x1f\x7f]|\{\{|\}\}")  # control characters (a newli
 CONSTRAINT = re.compile(r"^[A-Za-z0-9_.:+@&|!()\[\]*,-]{1,256}$")  # no whitespace: one #SBATCH line holds one option
 RESOURCES = {"cpus", "memory_mb", "disk_mb", "gpus", "time_limit"}
 SLURM = {"partition", "account", "qos", "constraint", "gres"}
-HTCONDOR = {"universe", "container_image", "file_transfer", "requirements", "transfer_input_files"}
+HTCONDOR = {"universe", "container_image", "file_transfer", "requirements", "transfer_input_files", "schedd", "site_attributes"}
+SCHEDD = re.compile(r"^(caller|[A-Za-z0-9][A-Za-z0-9.-]{0,253})$")  # one host name, or the caller's _condor_SCHEDD_HOST
+ATTR = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")  # a ClassAd attribute name, rendered as "+Name = value"
 MONITOR = {"poll_interval_s", "max_polls", "deadline_s"}
 # keys that name a site resource; checked by tools/check_packaging.py in shipped configs
-SITE_KEYS = ("partition", "account", "qos", "constraint", "gres", "requirements", "container_image", "campaign_dir")
+SITE_KEYS = ("partition", "account", "qos", "constraint", "gres", "requirements", "container_image", "campaign_dir", "schedd")
 
 
 def is_placeholder(v) -> bool:
@@ -181,8 +188,28 @@ def validate(cfg, example: bool = False) -> list[dict]:
             for i, x in enumerate(tif):
                 if not is_placeholder(x):
                     abs_path(x, f"htcondor.transfer_input_files[{i}]")
-        if "time_limit" in res:
-            add("config.unknown_key", "resources.time_limit", "not used by the htcondor backend; enforce walltime with your site's policy")
+        text(h, "schedd", "htcondor.", SCHEDD)
+        sa = h.get("site_attributes")
+        if "site_attributes" in h and not placeholder(sa, "htcondor.site_attributes"):
+            if not isinstance(sa, dict):
+                add("config.bad_value", "htcondor.site_attributes", "must be an object {ClassAd attribute name: string, integer or boolean}")
+                sa = {}
+            for name, v in sa.items():
+                key = f"htcondor.site_attributes.{name}"
+                if not isinstance(name, str) or not ATTR.match(name):
+                    add("config.bad_value", key, "attribute names match [A-Za-z_][A-Za-z0-9_]*")
+                elif isinstance(v, bool) or isinstance(v, int):
+                    continue
+                elif isinstance(v, str):
+                    if not v.strip() or UNSAFE.search(v) or '"' in v:
+                        add("config.bad_value", key, "a string value is one line without control characters, '{{' '}}' or double quotes")
+                else:
+                    add("config.bad_value", key, "must be a string, an integer or a boolean")
+            secs = walltime_s(res) if "time_limit" in res and not is_placeholder(res["time_limit"]) else None
+            if isinstance(sa, dict) and "MaxRuntime" in sa and secs is not None:
+                v = sa["MaxRuntime"]
+                if isinstance(v, bool) or not isinstance(v, int) or v != secs:
+                    add("config.bad_value", "htcondor.site_attributes.MaxRuntime", f"must equal resources.time_limit in seconds ({secs})")
     return errs
 
 
