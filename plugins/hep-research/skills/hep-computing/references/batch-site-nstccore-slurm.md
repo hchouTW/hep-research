@@ -50,4 +50,6 @@ priority_multifactor. Site support: the contact block at the end of the guide.
   fields (seed, item range) in the result come out as meaningless sums.
 - First real campaign: one synthetic 10-chunk toy campaign on 2026-10-10 (pilot, then nine chunks as one array with
   throttle 4), all `COMPLETED`, merged equal to recomputing every chunk from the manifest seeds; the report validates
-  with status `synthetic, unvalidated`. `RealSlurmTests` is still a skip; Slurm stays `documented` in `adapter.json`.
+  with status `synthetic, unvalidated`. `RealSlurmTests` (two chunks, `HEP_SLURM_TEST=1`, `HEP_SLURM_CONFIG` naming a
+  user-reviewed configuration) passed in 31 s; Slurm is `demonstrated-on-synthetic-data` with `tested_versions
+  ["24.05.1"]`.

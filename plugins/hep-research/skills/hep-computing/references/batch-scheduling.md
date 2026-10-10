@@ -9,7 +9,7 @@ Site notes: [CERN HTCondor from lxplus](batch-site-cern-htcondor.md) (documented
 
 Code: `core/partition/` (engine, campaign, worker-side runner, normalized states) and the optional adapter
 `adapters/batch-schedulers/` (`batch_campaign.py` CLI, `slurm_backend.py`, `htcondor_backend.py`, `batch_config.py`,
-templates in `assets/`). Status: **documented**. Both backends are tested against fake schedulers
+templates in `assets/`). Status: **demonstrated on synthetic data**. Both backends are tested against fake schedulers
 (`tests/adapters/batch_shims/`); beyond that, each has run synthetic campaigns on one real site only (HTCondor
 24.12.16 at CERN, Slurm 24.05.1 at NSTCCore, both 2026-10-10; see the site notes), and the tool facts below were
 checked against the tools' documentation, with the rows those runs confirmed marked "observed" (see "Tool facts"; a

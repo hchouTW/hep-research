@@ -46,6 +46,7 @@ tolerance is a breaking change.
 Combine 11.1.0 (conda-forge, ROOT 6.40.04 and 6.36.14 builds), which the Combine test reaches through `HEP_COMBINE_WRAPPER`. `adapters/root-uproot` is `demonstrated-on-synthetic-data`
 (ROOT 6.40.04, uproot 5.7.6, awkward 2.14.0); its ROOT tests find ROOT through `HEP_ROOT_PYTHON` or `HEP_ROOT_CONFIG`.
 
-`adapters/batch-schedulers` is `documented`: its Slurm and HTCondor backends run only against the fake schedulers in
-`tests/adapters/batch_shims/`, which cannot raise a tool above `documented`; real-tool tests are gated by
-`HEP_SLURM_TEST=1` / `HEP_HTCONDOR_TEST=1`. Python code in an adapter may import only `core` and `contracts`.
+`adapters/batch-schedulers` is `demonstrated-on-synthetic-data`: HTCondor 24.12.16 (CERN) and Slurm 24.05.1 (NSTCCore)
+each ran synthetic campaigns; the fake schedulers in `tests/adapters/batch_shims/` alone cannot raise a tool above
+`documented`; real-tool tests are gated by `HEP_SLURM_TEST=1` / `HEP_HTCONDOR_TEST=1` plus `HEP_SLURM_CONFIG` /
+`HEP_HTCONDOR_CONFIG` naming a user-reviewed configuration. Python code in an adapter may import only `core` and `contracts`.

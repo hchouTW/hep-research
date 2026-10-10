@@ -229,7 +229,8 @@ read a companion's package manifest or need access to a private repository. Beha
   `VALIDATION.md`, except the tectonic paper build):** PyTorch (`physics-ml` assets), ROOT/PyROOT, uproot and awkward (`hep-computing`
   ROOT tools, `adapters/root-uproot`), pyhf and CMS Combine (`adapters/pyhf-combine`, the end-to-end sample),
   Graphviz, Mermaid, PlantUML and tectonic (diagrams and papers). Slurm and HTCondor (`adapters/batch-schedulers`)
-  have not been run for real: that adapter is `documented` and tested against fake schedulers only. Scripts that need them report the missing tool
+  have each run synthetic campaigns on one site (Slurm 24.05.1 at NSTCCore, HTCondor 24.12.16 at CERN): that adapter is
+  `demonstrated-on-synthetic-data`. Scripts that need them report the missing tool
   and stop with a `failed` status; tests that need them are skipped and counted as unverified.
 
 ## Offline behavior

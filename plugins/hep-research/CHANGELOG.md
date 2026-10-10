@@ -12,7 +12,11 @@ Software checks establish contract consistency only, not physical validity.
   failing, `--export=NONE` rebuilding the login environment, `DerivedExitCode`, sampled `MaxRSS`, Fair Tree priority),
   and how to configure the adapter there. `batch-scheduling.md` links it, and its Slurm tool-facts rows confirmed by
   the first real Slurm campaign (synthetic, 10 chunks, merged equal to a local recompute) now say "observed".
-  `adapter.json` keeps Slurm `documented`. Documentation only; evidence in VALIDATION.md (NSTCCORE-SLURM-RUN).
+- **batch-schedulers: Slurm demonstrated on synthetic data.** `RealSlurmTests` is now a real gated test
+  (`HEP_SLURM_TEST=1` plus `HEP_SLURM_CONFIG` naming a reviewed configuration: two synthetic chunks submitted,
+  polled, merged and reported) instead of a placeholder skip; it passed on Slurm 24.05.1. `adapter.json` lists Slurm
+  `demonstrated-on-synthetic-data` with `tested_versions ["24.05.1"]`, which raises the adapter to
+  `demonstrated-on-synthetic-data`. Evidence in VALIDATION.md (NSTCCORE-SLURM-RUN).
 
 - **CI: each pull-request commit runs the workflows once.** `tests` ran on both `push` and `pull_request`, so every
   commit of a PR branch ran the whole suite twice; it now runs on pushes to `main`, on pull requests, weekly and on
