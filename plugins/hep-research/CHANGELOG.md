@@ -3,7 +3,7 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.6.4 (2026-10-10)
 
 - **batch-schedulers: three follow-ups from the first real HTCondor runs (work order T03).** `watch` stops as soon
   as nothing is queued or running (`nothing-active` when planned chunks were never submitted; before, a pilot watch
