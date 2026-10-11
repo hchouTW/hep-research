@@ -3,7 +3,7 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.6.8 (2026-10-11)
 
 - **physics-ml: first GPU runs.** The assets ran on V100 and RTX PRO 6000 Blackwell GPUs through Slurm (torch 2.14.1,
   CUDA 12.6 and 13.0 builds): CUDA training with and without AMP agrees with CPU, inference, the transformer with fp16
