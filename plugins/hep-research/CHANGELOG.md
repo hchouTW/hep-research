@@ -3,7 +3,7 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.6.9 (2026-10-11)
 
 - **docs/maintenance.md: real-hardware checks.** The three gated test modules (`HEP_TORCH_GPU_TEST`,
   `HEP_SLURM_TEST`, `HEP_HTCONDOR_TEST`), when to run them before a release, and how to report a GPU run on a pull
