@@ -5,6 +5,10 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **docs/maintenance.md: real-hardware checks.** The three gated test modules (`HEP_TORCH_GPU_TEST`,
+  `HEP_SLURM_TEST`, `HEP_HTCONDOR_TEST`), when to run them before a release, and how to report a GPU run on a pull
+  request as a `gpu-tests` commit status (same-repository PRs by maintainers only; site tooling kept outside the
+  plugin). First used on PR #41.
 - **physics-ml: `check_pytorch_env.py` checks the build against each GPU.** It prints the build's compiled
   architectures and, per visible GPU, whether its compute capability is supported (NVIDIA's binary compatibility
   rules: same major and newer minor for cubins, exact for arch-specific cubins, any newer capability for PTX), and
