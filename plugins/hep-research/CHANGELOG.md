@@ -5,6 +5,15 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **physics-ml: first GPU runs.** The assets ran on V100 and RTX PRO 6000 Blackwell GPUs through Slurm (torch 2.14.1,
+  CUDA 12.6 and 13.0 builds): CUDA training with and without AMP agrees with CPU, inference, the transformer with fp16
+  autocast and 2-GPU NCCL DDP pass; no GPU-only bug found. New opt-in GPU tests `tests/skills/physics_ml/test_gpu_real.py`
+  (`HEP_TORCH_GPU_TEST=1`). `test_ddp_skeleton_two_gloo_processes` now hides the GPUs from its child processes: on a
+  host with one visible GPU it failed ("invalid device ordinal"), and with two it silently tested NCCL instead of gloo.
+  `deep-learning-guide.md` gains "GPU Builds, Clusters and DDP" (compiled architectures per build and how to read them
+  without a GPU, emulated bf16, GPUs per DDP rank, AMP not always faster). Evidence in VALIDATION.md (TORCH-GPU-RUN).
+- **VALIDATION known limitations:** the batch-adapter row is corrected (it still said fake schedulers only after the
+  real Slurm and HTCondor campaigns).
 - **hep-computing: checking what a Slurm cluster can give you.** `batch-scheduling.md` gains a read-only procedure
   for the picture the user chooses a partition from: capacity per partition without double-counting shared nodes,
   pending reasons, GPUs that are usable only with free cores beside them, access and QoS limits, what

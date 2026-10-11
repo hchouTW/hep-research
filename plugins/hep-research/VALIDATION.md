@@ -106,10 +106,10 @@ Results at the 0.1.0 handover (E1); every listed test is in the 0.3.0 tree.
 | tectonic 0.17.0 unusable in the cloud containers: the network policy blocks its TeX bundle host (relay.fullyjustified.net, proxy CONNECT 403) | the paper-skeleton compile test skips when tectonic is off `PATH`; the paper-build capability row is `unverified`. On E2 tectonic was present and the test ran |
 | `vision_transfer.py` pretrained ResNet-18 weights download from download.pytorch.org, blocked by the network policy | the training test builds ResNet-18 with `weights=None`; accuracy on real images not assessed |
 | hepdata.net not reachable from the cloud environment | `adapters/hepdata` tested on synthetic HEPData-layout tables only; `reproduce_published_likelihood.py` ran on a synthetic BkgOnly + patchset split only. No capability row reaches "reproduces a published result"; both unverified on real records (IMPROVEMENT-PLAN T6) |
-| PyTorch verified on CPU only | GPU, NCCL and GPU mixed precision not tried; the CPU-only wheel index is blocked in the cloud container |
+| PyTorch on GPU verified on two GPU types only (V100 with the CUDA 12.6 build, RTX PRO 6000 Blackwell with the CUDA 13.0 build; torch 2.14.1; TORCH-GPU-RUN) | other GPU types, multi-node DDP and FSDP not tried; GPU tests run only where `HEP_TORCH_GPU_TEST=1` is set on a GPU host (no GPU in CI) |
 | pyhf demonstrated on two synthetic workspaces, asymptotic only | toy-based CLs, lumi/shapefactor modifiers and non-default interpolation codes not tried |
 | CMS Combine checked on one synthetic counting card (E1 only); needs `HEP_COMBINE_WRAPPER`, and with ROOT 6.40 `--strictBounds` | the observed-limit search throws out of range under ROOT 6.40.04 without `--strictBounds` (OPTIONAL-TOOLS) |
-| Slurm and HTCondor exercised through fake schedulers only (`tests/adapters/batch_shims/`); on E3 one `condor_submit -dry-run` parsed, nothing queued | `adapters/batch-schedulers` stays `documented`; a few formats are not stated in the Slurm 26.05 / HTCondor 25.13 documentation and stay to be confirmed on a real run |
+| Slurm and HTCondor each run on one real site with synthetic campaigns only (Slurm 24.05.1 at NSTCCore, HTCondor 24.12.16 at CERN; NSTCCORE-SLURM-RUN, CERN-HTCONDOR-RUN) | `adapters/batch-schedulers` is `demonstrated-on-synthetic-data`; other versions and sites, and real-data campaigns, not tried; tool-fact rows not observed on those runs stay documentation-only |
 | Live routing measured on claude-sonnet-5-5 (113/118, E4, 0.2.6), claude-haiku-4-5 (37/118) and Codex `gpt-6.1-sol` (61/62 on the 0.2.0 cases, macOS); Codex live routing not run on Linux | misses in IMPROVEMENT-PLAN T3; quick questions answered without a skill remain accepted misses; not re-measured on 0.3.0 before the release check |
 | J2 and J7 run on synthetic inputs only | J2 uses an invented Gaussian detector; J7 has one signal region, an efficiency map without its own uncertainty, a toy model; recasting frameworks stay `proposed` |
 | Combination is Gaussian (GLS) only | non-Gaussian components are refused, not combined; Peelle's-puzzle bias for multiplicative covariance documented in T24 |
@@ -342,6 +342,39 @@ It skips without the variables (checked both ways) and passed on NSTCCore in 31 
 0:0`, 3 s each). `adapter.json`: Slurm `demonstrated-on-synthetic-data`, `tested_versions ["24.05.1"]`, so the
 adapter, whose status is its least-tested tool's, is now `demonstrated-on-synthetic-data`; capability matrix,
 adapter-authoring guide and README follow.
+
+## TORCH-GPU-RUN (2026-10-11, NSTCCore GPU nodes through Slurm: first GPU runs of the physics-ml assets)
+
+NSTCCore (Slurm 24.05.1), each job approved by the user: `b6000-al9_devel` (NVIDIA RTX PRO 6000 Blackwell Server
+Edition, compute capability 12.0, driver 590.48.01) and `v100-al9_short` (Tesla V100-SXM2-32GB, 7.0, driver
+575.51.03). Python 3.12.7 venvs with torch 2.14.1 and torchvision 0.29.1 plus `requirements-test.txt`: the CUDA 13.0
+build for Blackwell, the CUDA 12.6 build for V100. No single build covers both: the 12.6 build is compiled for
+sm_50–sm_90, the 13.0 build for sm_75–sm_120 (the 12.8 index tops out at torch 2.11.0, sm_75–sm_120). 11 jobs (10 ran),
+0.31 GPU-hours. Records: the user's `torch-gpu` folder (job scripts, evidence per job, `results.md`), not this repository.
+
+**Existing tests on GPU nodes, unchanged.** With two visible GPUs all 130 physics-ml tests pass on both types. With
+one visible GPU `test_ddp_skeleton_two_gloo_processes` fails on both: the skeleton picks NCCL whenever CUDA is
+available and rank 1 fails at `torch.cuda.set_device(1)` with `torch.AcceleratorError: CUDA error: invalid device
+ordinal`; with two GPUs the test passes but runs NCCL, not the gloo it is named for. Fixed: the test hides the GPUs
+from its child processes (`CUDA_VISIBLE_DEVICES=""`), so it tests gloo everywhere (passes on a 1-GPU node).
+
+**GPU paths (1 GPU, both types).** `train_classifier.py` on CUDA with and without `--use-amp`, then `inference.py`
+on the checkpoint; `benchmark_model.py` with and without `--amp`; `lora_finetune.py`; `TransformerClassifier` on CUDA
+with fp16 autocast (its own `__main__` smoke test has no CUDA path); `vision_transfer.py` on a synthetic ImageFolder
+with `weights=None`. All exit 0. Tolerance for CPU vs CUDA training with the same seed, fixed before the V100
+comparison: final validation loss within 5 % relative; observed −0.07 % (CUDA) and −0.20 % (AMP), the same on both
+GPU types. AMP was slower than fp32 for the tiny benchmark MLP (casts dominate). `torch.cuda.is_bf16_supported()` is
+True on V100, which has no native bf16 (emulation counted). No GPU-only bug found in the assets.
+
+**NCCL DDP (2 GPUs, both types).** `ddp_train_skeleton.py` through `torchrun --nproc_per_node=2`: `epoch=5`, checkpoint
+written; NCCL 2.29.3 over SHM on V100 (GPUs on different NUMA nodes), NCCL 2.30.7 over P2P on Blackwell.
+
+**Gated test.** New `tests/skills/physics_ml/test_gpu_real.py` (`HEP_TORCH_GPU_TEST=1` and CUDA available): CPU vs
+CUDA training with and without AMP within the tolerance, inference on a CUDA checkpoint, transformer forward/backward
+with fp16 autocast, and NCCL DDP when two GPUs are visible (asserts NCCL in the log). Skips without the variable,
+without CUDA and without torch (checked all three on the login node); passed on 1 Blackwell GPU (NCCL test skipped)
+and on 2 V100 GPUs (all pass). The capability matrix and the known-limitation rows follow; the stale batch-adapter
+limitation row is corrected as well.
 
 ## E2-INSTALL-FULLTEST (2026-10-03 to 2026-10-04, E2, version 0.1.0): INSTALL, FULLTEST-E2 and follow-ups
 
