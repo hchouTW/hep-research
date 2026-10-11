@@ -13,7 +13,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-computing | 29 | 333 | 0 |
 | hep-statistics | 9 | 104 | 0 |
 | hep-theory | 8 | 42 | 0 |
-| physics-ml | 34 | 181 | 0 |
+| physics-ml | 34 | 183 | 0 |
 | research-communication | 52 | 359 | 0 |
 
 ## Overlapping pairs
@@ -124,9 +124,9 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `acceptance-criteria.md` | hep-computing | 3.7 | no | 3 | - | 351029c 2026-10-07 |
 | `agile-development-guide.md` | hep-computing | 10.7 | yes | 8 | physics-ml | 351029c 2026-10-07 |
 | `bash-balanced-design-guidelines.md` | hep-computing | 24.8 | yes | 2 | - | 351029c 2026-10-07 |
-| `batch-scheduling.md` | hep-computing | 27.2 | yes | 8 | - | 4a3f222 2026-10-10 |
+| `batch-scheduling.md` | hep-computing | 27.2 | yes | 8 | - | f8a63d2 2026-10-10 |
 | `batch-site-cern-htcondor.md` | hep-computing | 11.2 | no | 2 | - | 6815df4 2026-10-10 |
-| `batch-site-nstccore-slurm.md` | hep-computing | 10.9 | no | 1 | - | 4a3f222 2026-10-10 |
+| `batch-site-nstccore-slurm.md` | hep-computing | 10.9 | no | 1 | - | f8a63d2 2026-10-10 |
 | `cmake-and-build.md` | hep-computing | 2.1 | yes | 4 | hep-analysis | 351029c 2026-10-07 |
 | `cpp-balanced-design-guidelines.md` | hep-computing | 26.0 | yes | 6 | physics-ml | 351029c 2026-10-07 |
 | `design-and-estimation.md` | hep-computing | 7.5 | no | 3 | - | 351029c 2026-10-07 |
@@ -174,7 +174,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `data-loading.md` | physics-ml | 0.9 | no | 3 | - | 351029c 2026-10-07 |
 | `data-strategy.md` | physics-ml | 5.8 | no | 5 | - | 351029c 2026-10-07 |
 | `debugging-pytorch.md` | physics-ml | 1.1 | no | 5 | - | 351029c 2026-10-07 |
-| `deep-learning-guide.md` | physics-ml | 21.3 | yes | 8 | hep-computing | 351029c 2026-10-07 |
+| `deep-learning-guide.md` | physics-ml | 23.1 | yes | 8 | hep-computing | 351029c 2026-10-07 |
 | `distributed-training.md` | physics-ml | 0.9 | no | 2 | - | 351029c 2026-10-07 |
 | `efficient-finetuning.md` | physics-ml | 6.2 | no | 7 | - | 351029c 2026-10-07 |
 | `evaluation-metrics.md` | physics-ml | 1.7 | no | 6 | - | 351029c 2026-10-07 |

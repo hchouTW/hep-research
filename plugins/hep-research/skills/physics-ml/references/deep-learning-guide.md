@@ -105,6 +105,28 @@ inputs = inputs.to(device, non_blocking=True)
 targets = targets.to(device, non_blocking=True)
 ```
 
+
+## GPU Builds, Clusters and DDP
+
+- **A torch CUDA build runs only on the compute capabilities it was compiled for.** Before submitting GPU jobs,
+  compare the build's list with the GPU (`nvidia-smi --query-gpu=name,compute_cap,driver_version --format=csv`).
+  Read the list with `torch._C._cuda_getArchFlags()`: it works without a GPU, whereas `torch.cuda.get_arch_list()`
+  returns `[]` wherever CUDA is unavailable (a login node). Old and new GPUs may need different builds of the same
+  torch version (observed with 2.14.1: the CUDA 12.6 build stops at sm_90, the CUDA 13.0 build starts at sm_75, so
+  V100 and Blackwell need one each). The driver must also support the build's CUDA version.
+- **`torch.cuda.is_bf16_supported()` counts emulation** and is True even on GPUs without native bf16 (compute
+  capability below 8.0, such as V100); check the capability before choosing bf16 for speed.
+- **DDP with `torchrun`:** code that calls `torch.cuda.set_device(LOCAL_RANK)` needs at least `--nproc_per_node`
+  visible GPUs; with fewer, the extra ranks fail with "invalid device ordinal". To run such a script as a CPU/gloo
+  smoke test on a GPU host, hide the GPUs (`CUDA_VISIBLE_DEVICES=""`). With `NCCL_DEBUG=INFO` the log shows the
+  transport chosen (P2P, SHM or network).
+- **Mixed precision is not always faster:** for very small models the casts dominate; measure with
+  `scripts/benchmark_model.py --amp` before turning it on for speed.
+- On a batch cluster, ask for CPUs and memory next to each GPU deliberately (data loading needs cores), and keep the
+  environment in a venv run with `PYTHONNOUSERSITE=1` so packages in `~/.local` cannot leak in.
+- GPU tests for these assets: `tests/skills/physics_ml/test_gpu_real.py`, opt-in with `HEP_TORCH_GPU_TEST=1` on a
+  GPU host (NCCL DDP needs two visible GPUs).
+
 ## Task -> Loss/Output Conventions
 
 | Task | Output shape | Target | Loss | Notes |

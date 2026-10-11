@@ -8,6 +8,7 @@ skeleton runs as 2 gloo processes through torchrun.
 from __future__ import annotations
 
 import importlib.util
+import os
 import shutil
 import subprocess
 import sys
@@ -25,8 +26,8 @@ TORCHVISION = TORCH and importlib.util.find_spec("torchvision") is not None
 TORCHRUN = shutil.which("torchrun", path=str(Path(sys.executable).parent)) or shutil.which("torchrun")
 
 
-def run(args: list[str], cwd: Path, timeout: int = 180) -> subprocess.CompletedProcess:
-    return subprocess.run(args, cwd=cwd, capture_output=True, text=True, timeout=timeout)
+def run(args: list[str], cwd: Path, timeout: int = 180, env: dict[str, str] | None = None) -> subprocess.CompletedProcess:
+    return subprocess.run(args, cwd=cwd, capture_output=True, text=True, timeout=timeout, env=env)
 
 
 @unittest.skipUnless(TORCH, "PyTorch not installed")
@@ -110,9 +111,12 @@ class AssetSmokeTests(unittest.TestCase):
 
     @unittest.skipUnless(TORCHRUN, "torchrun not found next to the interpreter or on PATH")
     def test_ddp_skeleton_two_gloo_processes(self):
-        # single node on loopback: the default rendezvous advertises the host name, which may not resolve (E2)
+        # single node on loopback: the default rendezvous advertises the host name, which may not resolve (E2).
+        # GPUs hidden: the skeleton switches to NCCL whenever CUDA is available, and with one visible GPU rank 1
+        # fails at set_device(1) ("invalid device ordinal", TORCH-GPU-RUN); NCCL is test_gpu_real's job.
+        env = dict(os.environ, CUDA_VISIBLE_DEVICES="")
         result = run([TORCHRUN, "--standalone", "--local-addr=127.0.0.1", "--nproc_per_node=2", str(ASSETS / "ddp_train_skeleton.py")],
-                     self.dir, timeout=300)
+                     self.dir, timeout=300, env=env)
         self.assertEqual(result.returncode, 0, result.stderr[-2000:])
         self.assertIn("epoch=5", result.stdout)
         self.assertTrue((self.dir / "ddp_model.pt").exists())
