@@ -89,7 +89,7 @@ def _alloc_cpus(rec: dict) -> int | None:
 
 def _alloc_cpu_factor(recs: list[dict]) -> float:
     """Largest allocated/requested cpu ratio observed (never below 1): how far requests under-state use here."""
-    return max([1.0] + [_alloc_cpus(r) / _cpus(r.get("resources")) for r in recs if _alloc_cpus(r)])
+    return max([1.0] + [a / _cpus(r.get("resources")) for r in recs if (a := _alloc_cpus(r))])
 
 
 def _core_hours(rec: dict) -> float | None:
