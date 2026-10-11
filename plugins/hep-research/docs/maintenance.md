@@ -21,6 +21,31 @@ subprocess call in the tests and tools has a timeout (`tests/tools/test_subproce
 Software checks show contract consistency only, not physical validity. Report pass, fail, skip and unverified
 separately; a skipped test (missing tool) is unverified, never passing.
 
+## Real-hardware checks
+
+CI has no GPU and no batch scheduler, so three test modules are gated and run only where a maintainer turns them on,
+on hardware the maintainer may use:
+
+| Variable | Test | Needs |
+|---|---|---|
+| `HEP_TORCH_GPU_TEST=1` | `tests/skills/physics_ml/test_gpu_real.py` | a CUDA GPU; two visible GPUs for the NCCL test |
+| `HEP_SLURM_TEST=1` + `HEP_SLURM_CONFIG` | `RealSlurmTests` in `tests/adapters/test_batch_slurm.py` | `sbatch`, a reviewed batch configuration |
+| `HEP_HTCONDOR_TEST=1` + `HEP_HTCONDOR_CONFIG` | `RealHTCondorTests` in `tests/adapters/test_batch_htcondor.py` | `condor_submit`, a reviewed batch configuration |
+
+Setting a variable is the approval to use that hardware or account. Without it the tests skip, and a skip is
+unverified, never passing.
+
+- **Before a release that changes `physics-ml` GPU paths** (assets, `scripts/check_pytorch_env.py`,
+  `test_gpu_real.py`): run `check_pytorch_env.py` and the physics-ml test modules with `HEP_TORCH_GPU_TEST=1` on
+  every GPU type claimed in the capability matrix (each with a torch build compiled for it; the script exits 3 when
+  the build cannot use the GPU), one job with two GPUs. Before a release that changes the batch adapter, run the
+  matching scheduler test. Record the result in `VALIDATION.md`; a type not rerun stays at its last recorded date.
+- **On a pull request**, report the GPU run as a commit status with context `gpu-tests` on the PR's head commit
+  (`gh api repos/<owner>/<repo>/statuses/<sha> -f state=... -f context=gpu-tests -f description=...`), with a
+  comment giving the GPUs, torch builds and test counts; a new commit needs a new run. Run it only for
+  same-repository pull requests by maintainers: code from a fork never runs on a maintainer's cluster account.
+  Keep the tooling that submits the jobs outside the plugin, since it holds site facts (partitions, environments).
+
 ## SKILL.md size budget
 
 Every `SKILL.md` must stay at or under 8,192 bytes (`tools/measure_entrypoints.py`, run by `run_all_checks.py`).
