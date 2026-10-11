@@ -3,6 +3,15 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **batch-schedulers: first GPU campaign (documentation and evidence).** Two synthetic GPU chunks on NSTCCore V100
+  through the adapter with `resources.gpus`, merged equal to a CPU recompute (GPU-CAMPAIGN-RUN). `batch-scheduling.md`
+  now states that `max_core_hours` counts requested CPUs only (under-counting where a site allocates more, 2× on
+  hyper-threaded GPU nodes) and that GPU-hours are not tracked, how `resources.gpus` renders and when to use
+  `slurm.gres` instead, and to give GPU chunk results an additive device counter so the merge proves where chunks
+  ran. NSTCCore site note, known limitations, capability matrix and `adapter.json` environment updated. No code change.
+
 ## 0.6.9 (2026-10-11)
 
 - **docs/maintenance.md: real-hardware checks.** The three gated test modules (`HEP_TORCH_GPU_TEST`,

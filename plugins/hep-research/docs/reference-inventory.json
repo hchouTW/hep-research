@@ -15,7 +15,7 @@
   },
   "hep-computing": {
    "references": 29,
-   "bytes": 332984,
+   "bytes": 334187,
    "uncited": 0
   },
   "hep-statistics": {
@@ -1019,8 +1019,8 @@
   {
    "path": "skills/hep-computing/references/batch-scheduling.md",
    "owner": "hep-computing",
-   "bytes": 27174,
-   "lines": 257,
+   "bytes": 28028,
+   "lines": 264,
    "linked_from_skill_md": true,
    "cited_by": [
     "adapters/batch-schedulers/htcondor_backend.py",
@@ -1051,8 +1051,8 @@
   {
    "path": "skills/hep-computing/references/batch-site-nstccore-slurm.md",
    "owner": "hep-computing",
-   "bytes": 10863,
-   "lines": 58,
+   "bytes": 11212,
+   "lines": 61,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-computing/references/batch-scheduling.md"
@@ -1867,7 +1867,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "db660c1 2026-10-11"
+   "last_commit": "03929e2 2026-10-11"
   },
   {
    "path": "skills/physics-ml/references/distributed-training.md",
@@ -2024,7 +2024,7 @@
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "03929e2 2026-10-11"
   },
   {
    "path": "skills/physics-ml/references/monitoring-and-lifecycle.md",
@@ -2114,7 +2114,7 @@
     "skills/physics-ml/references/training-at-scale.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "03929e2 2026-10-11"
   },
   {
    "path": "skills/physics-ml/references/robustness-and-distribution-shift.md",

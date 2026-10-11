@@ -46,6 +46,9 @@ priority_multifactor. Site support: the contact block at the end of the guide.
   (3.12.7). The template's `--export=NONE` and `exec` of that interpreter in the batch step (no `srun`) ran without
   any environment problem; a worker that needs ROOT must apply the `libxxhash` workaround itself.
 - `campaign_dir` in group space; the adapter records it under `/ceph/sharedfs/work/...` (the link target).
+- GPU chunks: `resources.gpus` (`--gpus=N`) works on `v100-al9_short` like `--gres=gpu:N`; give `worker_python` the
+  torch build for that GPU type (CUDA 12.6 build for V100: its driver supports CUDA 12.9 at most; CUDA 13.0 build for
+  the Blackwell node). Each requested CPU is allocated and billed as 2 there, which `max_core_hours` does not see.
 - `resources.memory_mb`: size from a pilot that runs well past 15 s, or measure the peak inside the worker; an
   undersized value does not fail, it swaps. On GPU partitions ask for CPUs in pairs.
 - A chunk worker should return only additive quantities: `merge` sums every key of a chunk result, so bookkeeping
