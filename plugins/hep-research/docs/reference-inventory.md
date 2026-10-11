@@ -13,7 +13,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-computing | 29 | 333 | 0 |
 | hep-statistics | 9 | 104 | 0 |
 | hep-theory | 8 | 42 | 0 |
-| physics-ml | 34 | 183 | 0 |
+| physics-ml | 34 | 184 | 0 |
 | research-communication | 52 | 359 | 0 |
 
 ## Overlapping pairs
@@ -174,7 +174,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `data-loading.md` | physics-ml | 0.9 | no | 3 | - | 351029c 2026-10-07 |
 | `data-strategy.md` | physics-ml | 5.8 | no | 5 | - | 351029c 2026-10-07 |
 | `debugging-pytorch.md` | physics-ml | 1.1 | no | 5 | - | 351029c 2026-10-07 |
-| `deep-learning-guide.md` | physics-ml | 23.1 | yes | 8 | hep-computing | 351029c 2026-10-07 |
+| `deep-learning-guide.md` | physics-ml | 23.3 | yes | 8 | hep-computing | db660c1 2026-10-11 |
 | `distributed-training.md` | physics-ml | 0.9 | no | 2 | - | 351029c 2026-10-07 |
 | `efficient-finetuning.md` | physics-ml | 6.2 | no | 7 | - | 351029c 2026-10-07 |
 | `evaluation-metrics.md` | physics-ml | 1.7 | no | 6 | - | 351029c 2026-10-07 |
@@ -184,13 +184,13 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `geometric-and-equivariant-learning.md` | physics-ml | 4.7 | no | 3 | - | 351029c 2026-10-07 |
 | `interpretability-and-explainability.md` | physics-ml | 6.5 | no | 3 | - | 351029c 2026-10-07 |
 | `mixed-precision.md` | physics-ml | 0.6 | no | 2 | - | 351029c 2026-10-07 |
-| `ml-analysis.md` | physics-ml | 2.3 | yes | 4 | detector-response, hep-analysis | 351029c 2026-10-07 |
+| `ml-analysis.md` | physics-ml | 2.9 | yes | 4 | detector-response, hep-analysis | 351029c 2026-10-07 |
 | `monitoring-and-lifecycle.md` | physics-ml | 5.6 | no | 3 | - | 351029c 2026-10-07 |
 | `multivariate-analysis-bdt-nn.md` | physics-ml | 16.1 | yes | 5 | detector-response, hep-analysis | 351029c 2026-10-07 |
 | `optimization-and-training-dynamics.md` | physics-ml | 8.7 | no | 2 | - | 351029c 2026-10-07 |
 | `parallelism-strategy.md` | physics-ml | 6.5 | no | 3 | - | 351029c 2026-10-07 |
 | `performance-memory.md` | physics-ml | 1.9 | no | 5 | - | 351029c 2026-10-07 |
-| `reproducibility.md` | physics-ml | 5.7 | no | 3 | - | 351029c 2026-10-07 |
+| `reproducibility.md` | physics-ml | 6.3 | no | 3 | - | 351029c 2026-10-07 |
 | `robustness-and-distribution-shift.md` | physics-ml | 4.3 | no | 6 | - | 351029c 2026-10-07 |
 | `scientific-machine-learning.md` | physics-ml | 6.1 | yes | 7 | hep-statistics, hep-theory | 351029c 2026-10-07 |
 | `sequence-models.md` | physics-ml | 5.4 | no | 4 | - | 351029c 2026-10-07 |

@@ -13,6 +13,7 @@ from __future__ import annotations
 import importlib
 import json
 import math
+import os
 import subprocess
 import sys
 import tempfile
@@ -147,6 +148,45 @@ class CleanDegradationWithoutTorchTests(unittest.TestCase):
         self.assertNotIn("Traceback", result.stderr)
 
 
+
+class CudaArchSupportTests(unittest.TestCase):
+    """Build-vs-GPU check of check_pytorch_env.py, against the compiled lists measured in TORCH-GPU-RUN."""
+
+    CU126 = "sm_50 sm_60 sm_70 sm_75 sm_80 sm_86 sm_90".split()  # torch 2.14.1+cu126
+    CU130 = "sm_75 sm_80 sm_86 sm_90 sm_100 sm_120".split()  # torch 2.14.1+cu130
+
+    def test_measured_builds_on_the_measured_gpus(self):
+        self.assertTrue(cuda_arch_supports((7, 0), self.CU126))  # V100 with the CUDA 12.6 build: ran
+        self.assertTrue(cuda_arch_supports((12, 0), self.CU130))  # Blackwell with the CUDA 13.0 build: ran
+        self.assertFalse(cuda_arch_supports((7, 0), self.CU130))  # V100 with the CUDA 13.0 build
+        self.assertFalse(cuda_arch_supports((12, 0), self.CU126))  # Blackwell with the CUDA 12.6 build
+
+    def test_cubins_run_on_newer_minors_of_the_same_major_only(self):
+        self.assertTrue(cuda_arch_supports((8, 9), ["sm_80"]))
+        self.assertFalse(cuda_arch_supports((8, 0), ["sm_86"]))
+        self.assertFalse(cuda_arch_supports((9, 0), ["sm_80", "sm_86"]))
+
+    def test_arch_specific_cubins_need_an_exact_match(self):
+        self.assertTrue(cuda_arch_supports((9, 0), ["sm_90a"]))
+        self.assertFalse(cuda_arch_supports((10, 0), ["sm_90a"]))
+
+    def test_ptx_runs_on_any_newer_capability(self):
+        self.assertTrue(cuda_arch_supports((12, 0), ["sm_80", "compute_90"]))
+        self.assertFalse(cuda_arch_supports((8, 0), ["compute_90"]))
+
+    def test_empty_or_unparsable_lists_support_nothing(self):
+        self.assertFalse(cuda_arch_supports((8, 0), []))
+        self.assertFalse(cuda_arch_supports((8, 0), ["gfx90a", "sm_"]))
+
+    def test_no_visible_gpus_when_hidden_or_without_nvidia_smi(self):
+        from unittest import mock
+
+        with mock.patch.dict(os.environ, {"CUDA_VISIBLE_DEVICES": ""}):
+            self.assertEqual(visible_nvidia_gpus(), 0)
+        with mock.patch.dict(os.environ, {"PATH": ""}), mock.patch("shutil.which", return_value=None):
+            self.assertEqual(visible_nvidia_gpus(), 0)
+
+
 if __name__ == "__main__":
     unittest.main()
 
@@ -155,6 +195,7 @@ from check_split_integrity import (check, find_duplicates, find_group_leakage,
                                    find_overlaps, find_temporal_violations)
 from compare_model_runs import (bootstrap_interval, compare, minimum_detectable_effect,
                                 summarize_arm)
+from check_pytorch_env import cuda_arch_supports, visible_nvidia_gpus
 from estimate_compute_budget import budget, mfu_from_throughput, training_flops
 from serving_capacity import (P99_CONSTANT, batching_wait_ms, plan, replica_capacity_qps,
                               replicas_for, sojourn_p99_ms)
