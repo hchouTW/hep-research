@@ -3,9 +3,11 @@ import json
 import os
 import re
 import shutil
+import subprocess
 import unittest
 from pathlib import Path
 
+from core.partition import limits as lim
 from tests.adapters.batch_harness import ADAPTER, Harness
 
 GOLDEN = Path(__file__).resolve().parent / "golden" / "slurm-array-10x3.sbatch"
@@ -111,6 +113,26 @@ class SlurmShimTests(unittest.TestCase):
         self.assertEqual(recs[0]["evidence"], "accounting (sacct)")
         self.assertAlmostEqual(recs[0]["max_rss_mb"], 20.0)
         self.assertEqual(recs[0]["elapsed_s"], 1.0)
+
+    def test_allocated_cpus_are_recorded_and_counted(self):
+        """GPU-CAMPAIGN-RUN: 1 CPU requested, 2 allocated (a whole core on a hyper-threaded node); sacct AllocCPUS."""
+        self.h.plan()
+        self.h.set_faults({"c0000": [{"alloc_cpus": 2}]})
+        self.h.cli("submit", "--submit")
+        self.h.cli("status")
+        state = self.h.state()
+        self.assertEqual(state["chunks"]["c0000"]["attempt_records"][0]["alloc_cpus"], 2)
+        self.assertEqual(state["chunks"]["c0001"]["attempt_records"][0]["alloc_cpus"], 1)
+        self.assertEqual(lim.usage(state)["alloc_cpu_factor"], 2.0)
+
+    def test_poll_parses_real_sacct_alloc_cpus(self):
+        """sacct output recorded on NSTCCore (Slurm 24.05.1, 2026-10-11): a 1-CPU V100 job allocated 2 CPUs."""
+        out = ("7050788_0|COMPLETED|0:0|00:00:04||hp-teslav06|2\n"
+               "7050788_0.batch|COMPLETED|0:0|00:00:04|68K|hp-teslav06|2\n")
+        ex = sb.SlurmExecutor({"resources": {"cpus": 1}})
+        ex.run_poll = lambda argv, cwd=None: subprocess.CompletedProcess(argv, 0, out, "")
+        obs = ex.poll([{"attempt_id": "a1", "job_id": "7050788_0"}])["a1"]
+        self.assertEqual((obs["state"], obs["alloc_cpus"], obs["elapsed_s"], obs["host"]), ("done", 2, 4.0, "hp-teslav06"))
 
     def test_accounting_unavailable_falls_back_to_queue_and_runner_records(self):
         self.h.plan()

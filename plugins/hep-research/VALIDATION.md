@@ -106,7 +106,7 @@ Results at the 0.1.0 handover (E1); every listed test is in the 0.3.0 tree.
 | tectonic 0.17.0 unusable in the cloud containers: the network policy blocks its TeX bundle host (relay.fullyjustified.net, proxy CONNECT 403) | the paper-skeleton compile test skips when tectonic is off `PATH`; the paper-build capability row is `unverified`. On E2 tectonic was present and the test ran |
 | `vision_transfer.py` pretrained ResNet-18 weights download from download.pytorch.org, blocked by the network policy | the training test builds ResNet-18 with `weights=None`; accuracy on real images not assessed |
 | hepdata.net not reachable from the cloud environment | `adapters/hepdata` tested on synthetic HEPData-layout tables only; `reproduce_published_likelihood.py` ran on a synthetic BkgOnly + patchset split only. No capability row reaches "reproduces a published result"; both unverified on real records (IMPROVEMENT-PLAN T6) |
-| Batch adapter limits count requested CPUs × time only (GPU-CAMPAIGN-RUN) | where a site allocates or bills more CPUs than requested (2× on hyper-threaded GPU nodes) `max_core_hours` under-counts by that factor; GPU-hours are not tracked or limited |
+| Batch adapter limits count CPUs × time only (GPU-CAMPAIGN-RUN) | GPU-hours are not tracked or limited; on Slurm allocated CPUs count once polled, but the first submission of a campaign is projected at requested CPUs (2× low on hyper-threaded GPU nodes); HTCondor counts requested CPUs |
 | PyTorch on GPU verified on two GPU types only (V100 with the CUDA 12.6 build, RTX PRO 6000 Blackwell with the CUDA 13.0 build; torch 2.14.1; TORCH-GPU-RUN) | other GPU types, multi-node DDP and FSDP not tried; GPU tests run only where `HEP_TORCH_GPU_TEST=1` is set on a GPU host (no GPU in CI) |
 | pyhf demonstrated on two synthetic workspaces, asymptotic only | toy-based CLs, lumi/shapefactor modifiers and non-default interpolation codes not tried |
 | CMS Combine checked on one synthetic counting card (E1 only); needs `HEP_COMBINE_WRAPPER`, and with ROOT 6.40 `--strictBounds` | the observed-limit search throws out of range under ROOT 6.40.04 without `--strictBounds` (OPTIONAL-TOOLS) |
@@ -402,8 +402,10 @@ Records: the user's `torch-gpu/gpu-campaign` folder.
   identical to a CPU recompute from the manifest seeds. The report validates (`synthetic, unvalidated`).
 - **Limit accounting:** 1 CPU requested, 2 allocated and billed (whole cores on hyper-threaded GPU nodes), while the
   adapter's usage counted requested CPUs × elapsed time (0.001111 core-hours for a 4 s chunk): `max_core_hours`
-  under-counts by 2× here, and GPU-hours are neither tracked nor limited. Documented in `batch-scheduling.md`; not
-  changed in code (a known limitation below).
+  under-counts by 2× here, and GPU-hours are neither tracked nor limited. **Follow-up (Unreleased):** the Slurm poll
+  now reads `AllocCPUS` and the limit counts allocated CPUs, projecting new jobs at the observed factor; `sacct` on
+  these two jobs reports `AllocCPUS` 2 (1 for the CPU campaign's jobs), and that output is a parser test
+  (`test_poll_parses_real_sacct_alloc_cpus`). GPU-hours remain a known limitation below.
 - `MaxRSS` of a 4 s chunk is 0.07 MB (accounting samples every 15 s), as in the CPU campaign. `freeze` refuses a
   `#!/usr/bin/env python3` worker ("name one interpreter only").
 

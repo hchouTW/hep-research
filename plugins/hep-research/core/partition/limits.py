@@ -10,7 +10,10 @@ the person running the campaign (Q-07), never from a default here:
                          with evidence from the scheduler (campaign.clear_orphan_risk); a walltime does not bound
                          them, since a lost job may wait in the queue for any time before it starts
   max_core_hours         cpus x elapsed time of finished attempts, cpus x walltime limit for every attempt whose end
-                         is not observed; with no walltime limit (htcondor) the use is unbounded and the limit refuses
+                         is not observed; with no walltime limit (htcondor) the use is unbounded and the limit refuses.
+                         cpus is what the scheduler allocated when it reports it (alloc_cpus: a site may round a
+                         request up, 2x on hyper-threaded GPU nodes), else what was requested; new jobs are projected
+                         at the largest allocated/requested factor seen so far in the campaign (alloc_cpu_factor)
   max_resets_per_chunk   reset() calls per chunk
 
 A limit that would be exceeded stops the new submission (or reset) before anything is written; it never cancels or
@@ -79,8 +82,18 @@ def _may_still_run(rec: dict) -> bool:
     return fs in ORPHAN_RISK and not rec.get("orphan_cleared")
 
 
+def _alloc_cpus(rec: dict) -> int | None:
+    a = rec.get("alloc_cpus")
+    return a if isinstance(a, int) and not isinstance(a, bool) and a > 0 else None
+
+
+def _alloc_cpu_factor(recs: list[dict]) -> float:
+    """Largest allocated/requested cpu ratio observed (never below 1): how far requests under-state use here."""
+    return max([1.0] + [_alloc_cpus(r) / _cpus(r.get("resources")) for r in recs if _alloc_cpus(r)])
+
+
 def _core_hours(rec: dict) -> float | None:
-    cpus = _cpus(rec.get("resources"))
+    cpus = _alloc_cpus(rec) or _cpus(rec.get("resources"))
     fs = rec.get("final_state")
     if fs is None or fs in ORPHAN_RISK or fs == "held" or rec.get("elapsed_s") is None:
         wall = walltime_s(rec.get("resources"))
@@ -99,6 +112,7 @@ def usage(state: dict) -> dict:
             "total_jobs": len(counted),
             "concurrent_jobs": sum(1 for r in counted if _may_still_run(r)),
             "core_hours": None if any(h is None for h in hours) else round(sum(h for h in hours if h is not None), 6),
+            "alloc_cpu_factor": _alloc_cpu_factor(counted),
             "orphan_risk_jobs": sum(1 for r in counted if r.get("final_state") in ORPHAN_RISK),
             "resets_per_chunk": resets}
 
@@ -118,9 +132,10 @@ def check_submission(state: dict, config: dict, n_jobs: int) -> tuple[dict, list
             out.append("max_core_hours: core-hours are unbounded (an attempt without a walltime limit and an unobserved end, "
                        "or no resources.time_limit for the new jobs), so the limit cannot be shown to hold")
         else:
-            new = n_jobs * _cpus(config.get("resources")) * wall / 3600
+            new = n_jobs * _cpus(config.get("resources")) * wall / 3600 * use["alloc_cpu_factor"]
             if use["core_hours"] + new > lim["max_core_hours"]:
-                out.append(f"max_core_hours: {use['core_hours']:.3f} used + {new:.3f} requested > {lim['max_core_hours']}")
+                scaled = f" (x{use['alloc_cpu_factor']:g} allocated per requested cpu so far)" if use["alloc_cpu_factor"] > 1 else ""
+                out.append(f"max_core_hours: {use['core_hours']:.3f} used + {new:.3f} requested{scaled} > {lim['max_core_hours']}")
     return use, out
 
 

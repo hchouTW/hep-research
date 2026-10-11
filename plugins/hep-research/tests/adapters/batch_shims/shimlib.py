@@ -11,7 +11,8 @@ Chunk faults (Slurm): exit (code), timeout, oom, node-failure, preempt, cancelle
 the first record REQUEUED), vanish (no record anywhere), stuck (PENDING forever), native (state: any text).
 Chunk faults (HTCondor): exit (code), signal (signal), evict (evicted before output, then rerun), evict-after-output
 (ran, evicted, ran again: a duplicate), hold (reason, code, subcode), remove, stuck (idle forever), vanish.
-Any fault may carry "node" (the execution host reported). Global modes: sacct unavailable|malformed, squeue
+Any fault may carry "node" (the execution host reported) and, for Slurm, "alloc_cpus" (AllocCPUS reported; default
+the requested --cpus-per-task, else 1). Global modes: sacct unavailable|malformed, squeue
 malformed, eventlog missing|malformed, condor_q malformed.
 
 Output formats are those the backends parse; each emitter names the documentation it follows (see the tool facts
@@ -114,6 +115,7 @@ def sbatch(argv: list) -> int:
         fault = take_fault(chunk)
         kind = fault.get("kind")
         node = fault.get("node", "shim-node-1")
+        alloc = str(fault.get("alloc_cpus", opts.get("--cpus-per-task", 1)))
         key = f"{jid}_{idx}"
         task = {"records": [], "queue": None, "name": opts.get("--job-name")}
         store["slurm"][key] = task
@@ -126,7 +128,8 @@ def sbatch(argv: list) -> int:
                 return subprocess.run(["bash", str(script)], stdout=o, stderr=e, env=env, timeout=600).returncode
 
         def rec(state, code="0:0", ran=True):
-            task["records"].append({"state": state, "exit": code, "elapsed": "00:00:01", "rss": "20480K" if ran else "", "nodes": node, "ran": ran})
+            task["records"].append({"state": state, "exit": code, "elapsed": "00:00:01", "rss": "20480K" if ran else "", "nodes": node, "ran": ran,
+                                    "alloc": alloc})
 
         if kind == "vanish":
             del store["slurm"][key]
@@ -180,11 +183,12 @@ def sacct(argv: list) -> int:
             continue
         recs = task["records"] if dup else task["records"][-1:]
         if task["queue"] and not recs:
-            print(f"{key}|{task['queue']}|0:0|00:00:00||None assigned")
+            print(f"{key}|{task['queue']}|0:0|00:00:00||None assigned|0")
         for r in recs:
-            print(f"{key}|{r['state']}|{r['exit']}|{r['elapsed']}||{r['nodes']}")
+            alloc = r.get("alloc", "1")
+            print(f"{key}|{r['state']}|{r['exit']}|{r['elapsed']}||{r['nodes']}|{alloc}")
             if r["ran"]:
-                print(f"{key}.batch|{r['state'].split()[0]}|{r['exit']}|{r['elapsed']}|{r['rss']}|{r['nodes']}")
+                print(f"{key}.batch|{r['state'].split()[0]}|{r['exit']}|{r['elapsed']}|{r['rss']}|{r['nodes']}|{alloc}")
     return 0
 
 
@@ -205,7 +209,8 @@ def scancel(argv: list) -> int:
         task = store["slurm"].get(key)
         if task and task["queue"]:
             task["queue"] = None
-            task["records"].append({"state": "CANCELLED by 0", "exit": "0:0", "elapsed": "00:00:00", "rss": "", "nodes": "None assigned", "ran": False})
+            task["records"].append({"state": "CANCELLED by 0", "exit": "0:0", "elapsed": "00:00:00", "rss": "", "nodes": "None assigned", "ran": False,
+                                    "alloc": "0"})
     save(store)
     return 0
 

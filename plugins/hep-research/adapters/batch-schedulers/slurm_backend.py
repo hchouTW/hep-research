@@ -4,8 +4,10 @@ prepare  renders assets/slurm-array.sbatch.template: --array=0-(n-1)[%throttle],
          keys only from the configuration; the job runs the campaign's runner with the array index, which the
          runner maps to a chunk through the submission map (map.json) written with the script.
 submit   sbatch --parsable --output=<logs>/%A_%a.stdout.log --error=<logs>/%A_%a.stderr.log job.sbatch
-poll     sacct --jobs=<ids> --duplicates --parsable2 --noheader --format=JobID,State,ExitCode,Elapsed,MaxRSS,NodeList
-         (ExitCode is "exit:signal"; MaxRSS is taken from the job steps). If sacct fails, squeue plus the runner's
+poll     sacct --jobs=<ids> --duplicates --parsable2 --noheader
+         --format=JobID,State,ExitCode,Elapsed,MaxRSS,NodeList,AllocCPUS
+         (ExitCode is "exit:signal"; MaxRSS is taken from the job steps; AllocCPUS, 0 while pending, feeds the
+         core-hour limit). If sacct fails, squeue plus the runner's
          meta files are used and the evidence is marked 'queue+outputs'; a task in neither is 'lost'.
 cancel   scancel <job>_<index>
 Every option, field and state code here is listed with its documentation source in
@@ -24,7 +26,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from core.partition.executors import Executor, PollError, SubmitAmbiguous, _blank  # noqa: E402
 
 TEMPLATE = Path(__file__).resolve().parent / "assets" / "slurm-array.sbatch.template"
-SACCT_FIELDS = "JobID,State,ExitCode,Elapsed,MaxRSS,NodeList"
+SACCT_FIELDS = "JobID,State,ExitCode,Elapsed,MaxRSS,NodeList,AllocCPUS"
 STATES = {  # native State (first word; "CANCELLED by 123" -> CANCELLED) -> normalized
     "PENDING": "queued", "CONFIGURING": "queued", "REQUEUED": "queued", "REQUEUE_FED": "queued",
     "RUNNING": "running", "COMPLETING": "running", "STAGE_OUT": "running", "RESIZING": "running",
@@ -141,9 +143,9 @@ class SlurmExecutor(Executor):
             if not line.strip():
                 continue
             f = line.split("|")
-            if len(f) != 6:
-                raise PollError("slurm.sacct.unparsable", f"expected 6 '|' fields: {line[:200]!r}")
-            jid, state, exitc, elapsed, rss, nodes = f
+            if len(f) != 7:
+                raise PollError("slurm.sacct.unparsable", f"expected 7 '|' fields: {line[:200]!r}")
+            jid, state, exitc, elapsed, rss, nodes, alloc = f
             base, _, step = jid.partition(".")
             m, pr = TASK.match(base), PENDING_RANGE.match(base)
             if not (m or pr) or (pr and step):
@@ -157,7 +159,8 @@ class SlurmExecutor(Executor):
                 raise PollError("slurm.sacct.unparsable", str(exc)) from None
             ids = [base] if m else [f"{pr.group(1)}_{i}" for i in expand_range(pr.group(2))]
             for t in ids:
-                tasks.setdefault(t, []).append({"state": state, "code": code, "sig": sig, "elapsed": elapsed, "nodes": nodes})
+                tasks.setdefault(t, []).append({"state": state, "code": code, "sig": sig, "elapsed": elapsed, "nodes": nodes,
+                                                "alloc": int(alloc) if alloc.isdigit() and int(alloc) > 0 else None})
         out, missing = {}, []
         for rec in records:
             hist = tasks.get(rec["job_id"])
@@ -170,7 +173,7 @@ class SlurmExecutor(Executor):
             out[rec["attempt_id"]] = _blank(
                 state=mapped(last["state"]), native_state=last["state"], exit_code=last["code"], signal=last["sig"],
                 host=last["nodes"] or None, elapsed_s=parse_elapsed(last["elapsed"]), max_rss_mb=max(rss) if rss else None,
-                restarts=len(hist) - 1, evidence="accounting (sacct)")
+                alloc_cpus=last["alloc"], restarts=len(hist) - 1, evidence="accounting (sacct)")
         if missing:  # not in accounting (yet): ask the queue, then the runner's records, before calling it lost
             out.update(self._poll_queue(missing, "no accounting record for this array task"))
         return out

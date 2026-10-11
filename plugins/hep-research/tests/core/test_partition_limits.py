@@ -132,6 +132,33 @@ class LimitTests(Base):
         self.assertAlmostEqual(lim.usage(self.state())["core_hours"], 0.5)  # observed: 2 cpus x 15 min
         self.assertEqual(len(cp.submit(self.cdir, ex, cfg, approved=True)["chunks"]), 2)  # 0.5 + 4 <= 5
 
+    def test_core_hours_count_allocated_cpus(self):
+        """GPU-CAMPAIGN-RUN: a site may allocate (and bill) more CPUs than requested; usage counts what it allocated."""
+        cfg = {"resources": TL, "limits": {"max_core_hours": 6}}
+        ex = ScriptedExecutor({"c0000": [{"state": "done", "elapsed_s": 900, "alloc_cpus": 4}]})
+        cp.submit(self.cdir, ex, cfg, pilot=True, approved=True)
+        cp.poll(self.cdir, ex)
+        self.assertEqual(self.state()["chunks"]["c0000"]["attempt_records"][0]["alloc_cpus"], 4)
+        use = lim.usage(self.state())
+        self.assertAlmostEqual(use["core_hours"], 1.0)  # 4 allocated cpus x 15 min, not 2 requested
+        self.assertEqual(use["alloc_cpu_factor"], 2.0)
+        # the 2 new jobs are projected at the observed factor: 1 + 2 jobs x 2 cpus x 1 h x 2 = 9 > 6
+        err = self.refused("limits.exceeded", cp.submit, self.cdir, ex, cfg)
+        self.assertIn("8.000 requested", str(err))
+
+    def test_unfinished_attempt_counts_allocated_cpus_times_walltime(self):
+        ex = ScriptedExecutor({"c0000": [{"state": "running", "alloc_cpus": 4}]})
+        cp.submit(self.cdir, ex, {"resources": TL}, pilot=True, approved=True)
+        cp.poll(self.cdir, ex)
+        self.assertEqual(lim.usage(self.state())["core_hours"], 4.0)  # 4 allocated cpus x 1 h walltime
+
+    def test_without_allocation_facts_requested_cpus_count(self):
+        ex = ScriptedExecutor({"c0000": [{"state": "done", "elapsed_s": 900}]})
+        cp.submit(self.cdir, ex, {"resources": TL}, pilot=True, approved=True)
+        cp.poll(self.cdir, ex)
+        use = lim.usage(self.state())
+        self.assertEqual((use["core_hours"], use["alloc_cpu_factor"]), (0.5, 1.0))
+
     def test_batch_config_validates_limits(self):
         base = {"backend": "slurm", "campaign_dir": "c", "resources": {"time_limit": "00:10:00"}, "slurm": {"partition": "p"}}
         self.assertEqual(bc.validate(dict(base, limits={"max_total_jobs": 10, "max_core_hours": 2.5, "max_resets_per_chunk": 0})), [])

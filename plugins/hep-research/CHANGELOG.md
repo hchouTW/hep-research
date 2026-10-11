@@ -5,6 +5,11 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **batch-schedulers: `max_core_hours` counts allocated CPUs.** The Slurm poll reads `AllocCPUS`; each attempt
+  records `alloc_cpus`, core-hours use it when present (requested CPUs otherwise, as for HTCondor), and new
+  submissions are projected at the largest allocated/requested factor seen in the campaign (`alloc_cpu_factor` in the
+  usage). Fixes the 2× under-count on hyper-threaded GPU nodes found in GPU-CAMPAIGN-RUN once a pilot has been
+  polled. GPU-hours are still not tracked.
 - **batch-schedulers: first GPU campaign (documentation and evidence).** Two synthetic GPU chunks on NSTCCore V100
   through the adapter with `resources.gpus`, merged equal to a CPU recompute (GPU-CAMPAIGN-RUN). `batch-scheduling.md`
   now states that `max_core_hours` counts requested CPUs only (under-counting where a site allocates more, 2× on
