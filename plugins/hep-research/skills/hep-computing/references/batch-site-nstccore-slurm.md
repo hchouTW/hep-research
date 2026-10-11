@@ -48,8 +48,9 @@ priority_multifactor. Site support: the contact block at the end of the guide.
 - `campaign_dir` in group space; the adapter records it under `/ceph/sharedfs/work/...` (the link target).
 - GPU chunks: `resources.gpus` (`--gpus=N`) works on `v100-al9_short` like `--gres=gpu:N`; give `worker_python` the
   torch build for that GPU type (CUDA 12.6 build for V100: its driver supports CUDA 12.9 at most; CUDA 13.0 build for
-  the Blackwell node). Each requested CPU is allocated and billed as 2 there; `max_core_hours` counts the allocated CPUs (`AllocCPUS`)
-  once a job is polled, so run the pilot before the rest.
+  the Blackwell node). Each requested CPU is allocated and billed as 2 there; set `limits.alloc_cpu_factor: 2` for GPU
+  partitions (1 or unset on CPU partitions) so `max_core_hours` holds from the first submission; once a job is polled
+  the allocated CPUs (`AllocCPUS`) count.
 - `resources.memory_mb`: size from a pilot that runs well past 15 s, or measure the peak inside the worker; an
   undersized value does not fail, it swaps. On GPU partitions ask for CPUs in pairs.
 - A chunk worker should return only additive quantities: `merge` sums every key of a chunk result, so bookkeeping

@@ -12,8 +12,13 @@ the person running the campaign (Q-07), never from a default here:
   max_core_hours         cpus x elapsed time of finished attempts, cpus x walltime limit for every attempt whose end
                          is not observed; with no walltime limit (htcondor) the use is unbounded and the limit refuses.
                          cpus is what the scheduler allocated when it reports it (alloc_cpus: a site may round a
-                         request up, 2x on hyper-threaded GPU nodes), else what was requested; new jobs are projected
-                         at the largest allocated/requested factor seen so far in the campaign (alloc_cpu_factor)
+                         request up, 2x on hyper-threaded GPU nodes), else what was requested times alloc_cpu_factor;
+                         new jobs are projected at alloc_cpu_factor too
+  alloc_cpu_factor       not a limit: allocated CPUs per requested CPU that the site declares (>= 1, e.g. 2 on
+                         hyper-threaded GPU nodes), so max_core_hours holds before any allocation is observed. The
+                         factor used is the larger of this and the largest allocated/requested ratio seen so far in
+                         the campaign; without either it is 1. It scales new jobs and attempts with no alloc_cpus yet
+                         (a queued Slurm task reports none)
   max_resets_per_chunk   reset() calls per chunk
 
 A limit that would be exceeded stops the new submission (or reset) before anything is written; it never cancels or
@@ -28,7 +33,8 @@ from __future__ import annotations
 
 import re
 
-LIMIT_KEYS = ("max_submissions", "max_total_jobs", "max_concurrent_jobs", "max_core_hours", "max_resets_per_chunk")
+LIMIT_KEYS = ("max_submissions", "max_total_jobs", "max_concurrent_jobs", "max_core_hours", "max_resets_per_chunk",
+              "alloc_cpu_factor")
 WALLTIME = re.compile(r"^(?:(\d+)-)?(\d{1,2}):(\d{2}):(\d{2})$")
 # states in which a job may run without the record knowing it (orphan risk)
 ORPHAN_RISK = frozenset({"unknown", "abandoned"})
@@ -63,10 +69,16 @@ def problems(limits) -> list[str]:
         if k not in limits:
             continue
         v = limits[k]
-        ok = (isinstance(v, (int, float)) and not isinstance(v, bool) and v > 0) if k == "max_core_hours" else \
-             (isinstance(v, int) and not isinstance(v, bool) and v >= (0 if k == "max_resets_per_chunk" else 1))
+        number = isinstance(v, (int, float)) and not isinstance(v, bool)
+        if k == "max_core_hours":
+            ok, want = number and v > 0, "positive number"
+        elif k == "alloc_cpu_factor":
+            ok, want = number and v >= 1, "number >= 1"
+        else:
+            ok = isinstance(v, int) and not isinstance(v, bool) and v >= (0 if k == "max_resets_per_chunk" else 1)
+            want = "non-negative integer" if k == "max_resets_per_chunk" else "positive integer"
         if not ok:
-            out.append(f"limits.{k} must be a {'positive number' if k == 'max_core_hours' else 'non-negative integer' if k == 'max_resets_per_chunk' else 'positive integer'}, got {v!r}")
+            out.append(f"limits.{k} must be a {want}, got {v!r}")
     return out
 
 
@@ -92,8 +104,8 @@ def _alloc_cpu_factor(recs: list[dict]) -> float:
     return max([1.0] + [a / _cpus(r.get("resources")) for r in recs if (a := _alloc_cpus(r))])
 
 
-def _core_hours(rec: dict) -> float | None:
-    cpus = _alloc_cpus(rec) or _cpus(rec.get("resources"))
+def _core_hours(rec: dict, factor: float) -> float | None:
+    cpus = _alloc_cpus(rec) or _cpus(rec.get("resources")) * factor
     fs = rec.get("final_state")
     if fs is None or fs in ORPHAN_RISK or fs == "held" or rec.get("elapsed_s") is None:
         wall = walltime_s(rec.get("resources"))
@@ -101,10 +113,13 @@ def _core_hours(rec: dict) -> float | None:
     return cpus * float(rec["elapsed_s"]) / 3600
 
 
-def usage(state: dict) -> dict:
+def usage(state: dict, limits: dict | None = None) -> dict:
+    """What the campaign has used; limits supplies alloc_cpu_factor, the only key that changes a count."""
     recs = [r for row in state.get("chunks", {}).values() for r in row.get("attempt_records", [])]
     counted = [r for r in recs if _counted(r)]
-    hours = [_core_hours(r) for r in counted]  # a scheduler restart is inside its job's elapsed time or walltime
+    observed = _alloc_cpu_factor(counted)
+    factor = max(observed, float((limits or {}).get("alloc_cpu_factor") or 1))
+    hours = [_core_hours(r, factor) for r in counted]  # a scheduler restart is inside its job's elapsed time or walltime
     resets: dict = {}
     for r in state.get("resets", []):
         resets[r["chunk"]] = resets.get(r["chunk"], 0) + 1
@@ -112,7 +127,8 @@ def usage(state: dict) -> dict:
             "total_jobs": len(counted),
             "concurrent_jobs": sum(1 for r in counted if _may_still_run(r)),
             "core_hours": None if any(h is None for h in hours) else round(sum(h for h in hours if h is not None), 6),
-            "alloc_cpu_factor": _alloc_cpu_factor(counted),
+            "alloc_cpu_factor": factor,
+            "alloc_cpu_factor_observed": observed,
             "orphan_risk_jobs": sum(1 for r in counted if r.get("final_state") in ORPHAN_RISK),
             "resets_per_chunk": resets}
 
@@ -120,7 +136,7 @@ def usage(state: dict) -> dict:
 def check_submission(state: dict, config: dict, n_jobs: int) -> tuple[dict, list[str]]:
     """(usage, violations) for a new submission of n_jobs attempts under config['limits']."""
     lim = config.get("limits") or {}
-    use = usage(state)
+    use = usage(state, lim)
     out = []
     for key, used, add in (("max_submissions", use["submissions"], 1), ("max_total_jobs", use["total_jobs"], n_jobs),
                            ("max_concurrent_jobs", use["concurrent_jobs"], n_jobs)):
@@ -134,7 +150,8 @@ def check_submission(state: dict, config: dict, n_jobs: int) -> tuple[dict, list
         else:
             new = n_jobs * _cpus(config.get("resources")) * wall / 3600 * use["alloc_cpu_factor"]
             if use["core_hours"] + new > lim["max_core_hours"]:
-                scaled = f" (x{use['alloc_cpu_factor']:g} allocated per requested cpu so far)" if use["alloc_cpu_factor"] > 1 else ""
+                source = "observed" if use["alloc_cpu_factor_observed"] >= use["alloc_cpu_factor"] else "configured"
+                scaled = f" (x{use['alloc_cpu_factor']:g} allocated per requested cpu, {source})" if use["alloc_cpu_factor"] > 1 else ""
                 out.append(f"max_core_hours: {use['core_hours']:.3f} used + {new:.3f} requested{scaled} > {lim['max_core_hours']}")
     return use, out
 
