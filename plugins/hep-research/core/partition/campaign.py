@@ -315,7 +315,7 @@ def submit(campaign_dir, executor, config: dict, chunk_ids=None, approved: bool 
             "chunk_id": r["chunk_id"], "backend": executor.name, "job_id": None,
             "submission": sid, "submission_dir": str(sub_dir), "outputs_dir": str(cdir / "outputs" / r["chunk_id"]), "submit_time": clock(), "origin": _origin, "state": "submitting",
             "final_state": None, "native_state": None, "exit_code": None, "signal": None, "hold_reason": None, "hold_code": None,
-            "host": None, "elapsed_s": None, "max_rss_mb": None, "evidence": None, "restarts_seen": 0,
+            "host": None, "elapsed_s": None, "max_rss_mb": None, "alloc_cpus": None, "evidence": None, "restarts_seen": 0,
             "resources": config.get("resources"), "resources_hash": rh, "resource_change": change})
         row["attempts"] += 1
         row["attempts_since_reset"] += 1
@@ -688,7 +688,8 @@ def collect(campaign_dir) -> dict:
 # ---------------------------------------------------------------- observation
 
 def _apply(row: dict, rec: dict, obs: dict) -> None:
-    for k in ("native_state", "exit_code", "signal", "hold_reason", "hold_code", "host", "elapsed_s", "max_rss_mb", "evidence"):
+    for k in ("native_state", "exit_code", "signal", "hold_reason", "hold_code", "host", "elapsed_s", "max_rss_mb", "alloc_cpus",
+              "evidence"):
         if obs.get(k) is not None or k in ("hold_reason", "hold_code"):
             rec[k] = obs.get(k)
     new_restarts = int(obs.get("restarts") or 0) - rec.get("restarts_seen", 0)

@@ -15,7 +15,7 @@
   },
   "hep-computing": {
    "references": 29,
-   "bytes": 334187,
+   "bytes": 334639,
    "uncited": 0
   },
   "hep-statistics": {
@@ -1019,8 +1019,8 @@
   {
    "path": "skills/hep-computing/references/batch-scheduling.md",
    "owner": "hep-computing",
-   "bytes": 28028,
-   "lines": 264,
+   "bytes": 28402,
+   "lines": 267,
    "linked_from_skill_md": true,
    "cited_by": [
     "adapters/batch-schedulers/htcondor_backend.py",
@@ -1033,7 +1033,7 @@
     "tools/check_instruction_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "f8a63d2 2026-10-10"
+   "last_commit": "a695f2c 2026-10-11"
   },
   {
    "path": "skills/hep-computing/references/batch-site-cern-htcondor.md",
@@ -1051,14 +1051,14 @@
   {
    "path": "skills/hep-computing/references/batch-site-nstccore-slurm.md",
    "owner": "hep-computing",
-   "bytes": 11212,
-   "lines": 61,
+   "bytes": 11290,
+   "lines": 62,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-computing/references/batch-scheduling.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "f8a63d2 2026-10-10"
+   "last_commit": "a695f2c 2026-10-11"
   },
   {
    "path": "skills/hep-computing/references/cmake-and-build.md",
