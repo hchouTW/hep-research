@@ -382,7 +382,10 @@ mismatch is a driver one before it is an architecture one, and the script used t
 exit 0. It now exits 3 with torch's reason when `nvidia-smi` sees GPUs that the build cannot use, and exits 3 when a
 visible GPU's compute capability is outside the build's compiled list; with `CUDA_VISIBLE_DEVICES=''` it still exits 0.
 Verified on `hp-teslav06` (job record in the user's `torch-gpu` folder): CUDA 12.6 build exit 0 ("supported"),
-CUDA 13.0 build exit 3, hidden GPUs exit 0.
+CUDA 13.0 build exit 3, hidden GPUs exit 0. Release check for 0.6.9 (docs/maintenance.md, "Real-hardware checks"): the `gpu-tests` run on
+PR #41's head commit `03929e2` (B6000 with the CUDA 13.0 build, 1 GPU; V100 with the CUDA 12.6 build, 2 GPUs; 140
+tests each, all pass, NCCL test run on 2 GPUs); no `physics-ml` code or test changed between that commit and the
+release.
 
 ## E2-INSTALL-FULLTEST (2026-10-03 to 2026-10-04, E2, version 0.1.0): INSTALL, FULLTEST-E2 and follow-ups
 
