@@ -5,6 +5,11 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **batch-schedulers: `limits.alloc_cpu_factor`.** A site-declared allocated-per-requested CPU factor (>= 1) sizes
+  `max_core_hours` before any allocation is observed: new jobs and attempts without `alloc_cpus` (queued Slurm
+  tasks) count requested CPUs times the larger of this and the observed factor. Closes the first-submission
+  under-count left open by the previous entry; usage reports `alloc_cpu_factor` (used) and
+  `alloc_cpu_factor_observed`.
 - **batch-schedulers: `max_core_hours` counts allocated CPUs.** The Slurm poll reads `AllocCPUS`; each attempt
   records `alloc_cpus`, core-hours use it when present (requested CPUs otherwise, as for HTCondor), and new
   submissions are projected at the largest allocated/requested factor seen in the campaign (`alloc_cpu_factor` in the

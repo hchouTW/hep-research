@@ -131,7 +131,7 @@ def build_artifact(cdir: Path, cfg: dict, executor, labels: list[str], objective
                                           "campaign_uid": state.get("campaign_uid"), "cancels": state.get("cancels", []),
                                           "resource_risk": state.get("resource_risk", []),
                                           "bundles": {s["id"]: s.get("bundle_digest") for s in state["submissions"]},
-                                          "limits": {"configured": cfg.get("limits"), "usage": limits.usage(state)}}},
+                                          "limits": {"configured": cfg.get("limits"), "usage": limits.usage(state, cfg.get("limits"))}}},
             "seeds": {"manifest_seed": manifest["seed"], "chunk_seeds": {c["id"]: c["seed"] for c in manifest["chunks"]}},
             "tolerances": {"merge": "exact: every chunk exactly once, item ranges tile [0, n); results summed key by key"},
             "resources": resources,

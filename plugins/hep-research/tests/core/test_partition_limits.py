@@ -159,6 +159,39 @@ class LimitTests(Base):
         use = lim.usage(self.state())
         self.assertEqual((use["core_hours"], use["alloc_cpu_factor"]), (0.5, 1.0))
 
+    def test_configured_factor_bounds_the_first_submission(self):
+        """Before any allocation is observed, a site-declared factor (2 on hyper-threaded GPU nodes) sizes the projection."""
+        cfg = {"resources": TL, "limits": {"max_core_hours": 7}}  # 3 jobs x 2 cpus x 1 h = 6 <= 7
+        self.assertEqual(lim.check_submission(self.state(), cfg, 3)[1], [])
+        cfg = {"resources": TL, "limits": {"max_core_hours": 7, "alloc_cpu_factor": 2}}  # 3 x 2 x 1 h x 2 = 12 > 7
+        err = self.refused("limits.exceeded", cp.submit, self.cdir, ScriptedExecutor({}), cfg)
+        self.assertIn("12.000 requested (x2 allocated per requested cpu, configured)", str(err))
+
+    def test_unobserved_attempts_count_at_the_factor(self):
+        """A queued Slurm task reports AllocCPUS 0, so its walltime bound is scaled by the factor too."""
+        ex = ScriptedExecutor({"c0000": [{"state": "queued"}]})
+        cp.submit(self.cdir, ex, {"resources": TL}, pilot=True, approved=True)
+        cp.poll(self.cdir, ex)
+        self.assertEqual(lim.usage(self.state())["core_hours"], 2.0)  # unchanged without the key
+        use = lim.usage(self.state(), {"alloc_cpu_factor": 2})
+        self.assertEqual((use["core_hours"], use["alloc_cpu_factor"]), (4.0, 2.0))  # 2 cpus x 1 h x 2
+
+    def test_observed_allocation_beats_the_configured_factor(self):
+        ex = ScriptedExecutor({"c0000": [{"state": "running", "alloc_cpus": 4}]})
+        cp.submit(self.cdir, ex, {"resources": TL}, pilot=True, approved=True)
+        cp.poll(self.cdir, ex)
+        use = lim.usage(self.state(), {"alloc_cpu_factor": 3})
+        self.assertEqual(use["core_hours"], 4.0)  # the observed 4 cpus, not 2 x 3
+        self.assertEqual((use["alloc_cpu_factor"], use["alloc_cpu_factor_observed"]), (3.0, 2.0))
+        use = lim.usage(self.state(), {"alloc_cpu_factor": 1.5})
+        self.assertEqual(use["alloc_cpu_factor"], 2.0)  # the larger of configured and observed
+
+    def test_alloc_cpu_factor_is_validated(self):
+        for bad in (0.5, 0, True, "2", None):
+            self.assertTrue(lim.problems({"alloc_cpu_factor": bad}), bad)
+        self.assertEqual(lim.problems({"alloc_cpu_factor": 1}), [])
+        self.assertEqual(lim.problems({"alloc_cpu_factor": 2.0, "max_core_hours": 10}), [])
+
     def test_batch_config_validates_limits(self):
         base = {"backend": "slurm", "campaign_dir": "c", "resources": {"time_limit": "00:10:00"}, "slurm": {"partition": "p"}}
         self.assertEqual(bc.validate(dict(base, limits={"max_total_jobs": 10, "max_core_hours": 2.5, "max_resets_per_chunk": 0})), [])

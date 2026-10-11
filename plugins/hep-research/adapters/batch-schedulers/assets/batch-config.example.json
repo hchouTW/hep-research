@@ -24,7 +24,8 @@
  "limits": {
   "max_total_jobs": "<most job attempts this campaign may use, from your site and allocation>",
   "max_core_hours": "<most core-hours this campaign may use; needs resources.time_limit>",
-  "max_resets_per_chunk": "<most resets per chunk, 0 for none>"
+  "max_resets_per_chunk": "<most resets per chunk, 0 for none>",
+  "alloc_cpu_factor": "<CPUs the site allocates per requested CPU, e.g. 2 on hyper-threaded GPU nodes; leave out if 1>"
  },
  "monitor": {
   "poll_interval_s": "<seconds between polls, at least 60>",

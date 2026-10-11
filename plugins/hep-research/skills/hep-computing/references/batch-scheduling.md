@@ -167,7 +167,7 @@ node-failure, held, cancelled, lost, unknown`. A native state the adapter does n
   in the attempt); failed, held, cancelled and unknown chunks only after `reset` with a reason. Two identical failure
   signatures (state, exit code, signal, hold code; never host or time) in a row stop the chunk, across resets.
 - **Limits:** an optional `limits` section (`max_submissions`, `max_total_jobs`, `max_concurrent_jobs`,
-  `max_core_hours`, `max_resets_per_chunk`) holds the site's and allocation's values; ask for them, never assume. A
+  `max_core_hours`, `max_resets_per_chunk`, `alloc_cpu_factor`) holds the site's and allocation's values; ask for them, never assume. A
   submission or reset that would exceed one is refused. Unknown and abandoned jobs count as used and as running: an
   unknown job until a poll sees it end, and either kind until a person runs `clear-orphans --submission S --reason
   TEXT`, which succeeds only when every job the scheduler lists under the submission's tag has ended (a lost job may
@@ -175,10 +175,12 @@ node-failure, held, cancelled, lost, unknown`. A native state the adapter does n
   `max_core_hours` refuses. Every attempt has a global identity `<campaign_uid>:<attempt_id>`. Core-hours are CPUs times
   elapsed time (or the walltime limit while the end is unobserved). On Slurm the CPUs are those the scheduler
   allocated (`AllocCPUS`): where a site allocates and bills more than requested (whole cores on hyper-threaded GPU
-  nodes: 1 CPU became 2, observed on Slurm 24.05.1) the usage shows it, and new jobs are projected at the largest
-  allocated/requested factor seen so far in the campaign (`alloc_cpu_factor` in the usage). The first submission
-  has seen nothing yet and is projected at the requested CPUs, so run the pilot first. HTCondor attempts count
-  requested CPUs. GPU-hours are not tracked or limited.
+  nodes: 1 CPU became 2, observed on Slurm 24.05.1) the usage shows it. New jobs, and attempts with no allocation
+  seen yet (a queued Slurm task reports none), count requested CPUs times `alloc_cpu_factor`: the larger of
+  `limits.alloc_cpu_factor`, which the site's documentation gives (allocated per requested CPU, at least 1), and the
+  largest allocated/requested ratio seen so far in the campaign; 1 without either. Set it for such partitions, or the
+  first submission is projected at the requested CPUs. HTCondor attempts count requested CPUs times the configured
+  factor. GPU-hours are not tracked or limited.
 - **Frozen bundles:** `freeze` lists, with full SHA-256, the campaign's manifest, spec and runner, every file under
   `--worker-root`, the interpreter the command names, an `--env-lock` file and the container image (pinned by digest;
   a tag is refused), with the data exposure known then, and writes an approval request. It approves nothing. The

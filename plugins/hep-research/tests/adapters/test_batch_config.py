@@ -87,7 +87,7 @@ class ConfigTests(unittest.TestCase):
                 "universe": "vanilla", "file_transfer": "transfer", "requirements": '(OpSysAndVer == "SyntheticOS")',
                 "schedd": "schedd.example", "site_attributes": {"JobFlavour": "espresso", "MaxRuntime": 600},
                 "throttle": 2, "max_attempts": 2, "poll_interval_s": 60, "max_polls": 10,
-                "max_total_jobs": 100, "max_core_hours": 50, "max_resets_per_chunk": 1}
+                "max_total_jobs": 100, "max_core_hours": 50, "max_resets_per_chunk": 1, "alloc_cpu_factor": 2}
 
         def fill(obj):
             return {k: fill(v) if isinstance(v, dict) else site[k] for k, v in obj.items()}
