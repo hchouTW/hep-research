@@ -106,6 +106,7 @@ Results at the 0.1.0 handover (E1); every listed test is in the 0.3.0 tree.
 | tectonic 0.17.0 unusable in the cloud containers: the network policy blocks its TeX bundle host (relay.fullyjustified.net, proxy CONNECT 403) | the paper-skeleton compile test skips when tectonic is off `PATH`; the paper-build capability row is `unverified`. On E2 tectonic was present and the test ran |
 | `vision_transfer.py` pretrained ResNet-18 weights download from download.pytorch.org, blocked by the network policy | the training test builds ResNet-18 with `weights=None`; accuracy on real images not assessed |
 | hepdata.net not reachable from the cloud environment | `adapters/hepdata` tested on synthetic HEPData-layout tables only; `reproduce_published_likelihood.py` ran on a synthetic BkgOnly + patchset split only. No capability row reaches "reproduces a published result"; both unverified on real records (IMPROVEMENT-PLAN T6) |
+| Batch adapter limits count requested CPUs × time only (GPU-CAMPAIGN-RUN) | where a site allocates or bills more CPUs than requested (2× on hyper-threaded GPU nodes) `max_core_hours` under-counts by that factor; GPU-hours are not tracked or limited |
 | PyTorch on GPU verified on two GPU types only (V100 with the CUDA 12.6 build, RTX PRO 6000 Blackwell with the CUDA 13.0 build; torch 2.14.1; TORCH-GPU-RUN) | other GPU types, multi-node DDP and FSDP not tried; GPU tests run only where `HEP_TORCH_GPU_TEST=1` is set on a GPU host (no GPU in CI) |
 | pyhf demonstrated on two synthetic workspaces, asymptotic only | toy-based CLs, lumi/shapefactor modifiers and non-default interpolation codes not tried |
 | CMS Combine checked on one synthetic counting card (E1 only); needs `HEP_COMBINE_WRAPPER`, and with ROOT 6.40 `--strictBounds` | the observed-limit search throws out of range under ROOT 6.40.04 without `--strictBounds` (OPTIONAL-TOOLS) |
@@ -386,6 +387,25 @@ CUDA 13.0 build exit 3, hidden GPUs exit 0. Release check for 0.6.9 (docs/mainte
 PR #41's head commit `03929e2` (B6000 with the CUDA 13.0 build, 1 GPU; V100 with the CUDA 12.6 build, 2 GPUs; 140
 tests each, all pass, NCCL test run on 2 GPUs); no `physics-ml` code or test changed between that commit and the
 release.
+
+## GPU-CAMPAIGN-RUN (2026-10-11, NSTCCore V100: first GPU campaign of the batch adapter)
+
+Slurm 24.05.1, `v100-al9_short`, `resources {cpus 1, gpus 1, memory_mb 8000, time_limit 00:10:00}`, `worker_python` a
+venv with torch 2.14.1 (CUDA 12.6 build). Synthetic worker: points drawn on the CPU from the manifest seed and
+counted on the GPU in integer arithmetic, additive keys only, including `on_cuda`. 2 chunks; `check-config`,
+`freeze`, reviewed dry runs, pilot then the rest, `status`, `merge`, `report`; each submission approved by the user.
+Records: the user's `torch-gpu/gpu-campaign` folder.
+
+- `#SBATCH --gpus=1` (from `resources.gpus`) is accepted and recorded as `gres/gpu=1`, the same as `--gres=gpu:1`;
+  the job keeps QoS `normal`.
+- Both chunks `COMPLETED 0:0`, one attempt each, no duplicate; merged `on_cuda` 2; merged `n_points` and `inside`
+  identical to a CPU recompute from the manifest seeds. The report validates (`synthetic, unvalidated`).
+- **Limit accounting:** 1 CPU requested, 2 allocated and billed (whole cores on hyper-threaded GPU nodes), while the
+  adapter's usage counted requested CPUs × elapsed time (0.001111 core-hours for a 4 s chunk): `max_core_hours`
+  under-counts by 2× here, and GPU-hours are neither tracked nor limited. Documented in `batch-scheduling.md`; not
+  changed in code (a known limitation below).
+- `MaxRSS` of a 4 s chunk is 0.07 MB (accounting samples every 15 s), as in the CPU campaign. `freeze` refuses a
+  `#!/usr/bin/env python3` worker ("name one interpreter only").
 
 ## E2-INSTALL-FULLTEST (2026-10-03 to 2026-10-04, E2, version 0.1.0): INSTALL, FULLTEST-E2 and follow-ups
 

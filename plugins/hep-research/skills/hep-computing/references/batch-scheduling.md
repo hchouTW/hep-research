@@ -172,7 +172,10 @@ node-failure, held, cancelled, lost, unknown`. A native state the adapter does n
   unknown job until a poll sees it end, and either kind until a person runs `clear-orphans --submission S --reason
   TEXT`, which succeeds only when every job the scheduler lists under the submission's tag has ended (a lost job may
   wait in the queue for any time, so a walltime does not bound it). Without `time_limit` core-hours are unbounded, so
-  `max_core_hours` refuses. Every attempt has a global identity `<campaign_uid>:<attempt_id>`.
+  `max_core_hours` refuses. Every attempt has a global identity `<campaign_uid>:<attempt_id>`. Core-hours are the
+  *requested* `resources.cpus` times elapsed time (or the walltime limit): where the site allocates and bills more
+  than requested (whole cores on hyper-threaded GPU nodes: 1 CPU became 2, observed on Slurm 24.05.1), the guard
+  under-counts by that factor, so set `max_core_hours` with it in mind; GPU-hours are not tracked or limited.
 - **Frozen bundles:** `freeze` lists, with full SHA-256, the campaign's manifest, spec and runner, every file under
   `--worker-root`, the interpreter the command names, an `--env-lock` file and the container image (pinned by digest;
   a tag is refused), with the data exposure known then, and writes an approval request. It approves nothing. The
@@ -213,7 +216,11 @@ with the configuration in force (refused as `bundle.request_differs` when none w
 - `hep-statistics` toy campaigns: a dropped chunk can bias a coverage study the same way dropped failed fits do. Merge
   only complete campaigns, or report the missing chunks with the result; never rescale a partial merge silently.
 - `physics-ml` single-node GPU training: one job per configuration with `gpus` in the resources; the model, its
-  training and its validation stay with `physics-ml`.
+  training and its validation stay with `physics-ml`. `resources.gpus` renders `#SBATCH --gpus=N` (accepted as
+  `gres/gpu=N` on Slurm 24.05.1); a site that requires another form takes it in `slurm.gres` instead. Use a
+  `worker_python` with a torch build compiled for the partition's GPUs (`check_pytorch_env.py` exits 3 otherwise),
+  and give the chunk result an additive device counter (for example `on_cuda: 1`): the merged value then proves how
+  many chunks really ran on a GPU, since a worker that silently falls back to the CPU still exits 0.
 
 ## Worked walkthrough (reproduced by `examples/batch-partition/`)
 
