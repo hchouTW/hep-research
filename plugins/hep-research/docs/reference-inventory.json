@@ -30,7 +30,7 @@
   },
   "physics-ml": {
    "references": 34,
-   "bytes": 183046,
+   "bytes": 184459,
    "uncited": 0
   },
   "research-communication": {
@@ -1851,8 +1851,8 @@
   {
    "path": "skills/physics-ml/references/deep-learning-guide.md",
    "owner": "physics-ml",
-   "bytes": 23080,
-   "lines": 334,
+   "bytes": 23261,
+   "lines": 336,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/examples/data-ml-task.md",
@@ -1867,7 +1867,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "db660c1 2026-10-11"
   },
   {
    "path": "skills/physics-ml/references/distributed-training.md",
@@ -2011,8 +2011,8 @@
   {
    "path": "skills/physics-ml/references/ml-analysis.md",
    "owner": "physics-ml",
-   "bytes": 2333,
-   "lines": 22,
+   "bytes": 2930,
+   "lines": 24,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/detector-response/references/imaging-atmospheric-cherenkov.md",
@@ -2105,8 +2105,8 @@
   {
    "path": "skills/physics-ml/references/reproducibility.md",
    "owner": "physics-ml",
-   "bytes": 5679,
-   "lines": 139,
+   "bytes": 6314,
+   "lines": 146,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/physics-ml/references/deep-learning-guide.md",

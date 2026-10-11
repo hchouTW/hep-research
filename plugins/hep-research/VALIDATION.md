@@ -376,6 +376,14 @@ without CUDA and without torch (checked all three on the login node); passed on 
 and on 2 V100 GPUs (all pass). The capability matrix and the known-limitation rows follow; the stale batch-adapter
 limitation row is corrected as well.
 
+**Follow-up (after 0.6.8): `check_pytorch_env.py`.** On a V100 node the CUDA 13.0 build reports CUDA unavailable —
+"The NVIDIA driver on your system is too old (found version 12090)": the driver supports CUDA 12.9 at most — so the
+mismatch is a driver one before it is an architecture one, and the script used to print "CUDA available: False" and
+exit 0. It now exits 3 with torch's reason when `nvidia-smi` sees GPUs that the build cannot use, and exits 3 when a
+visible GPU's compute capability is outside the build's compiled list; with `CUDA_VISIBLE_DEVICES=''` it still exits 0.
+Verified on `hp-teslav06` (job record in the user's `torch-gpu` folder): CUDA 12.6 build exit 0 ("supported"),
+CUDA 13.0 build exit 3, hidden GPUs exit 0.
+
 ## E2-INSTALL-FULLTEST (2026-10-03 to 2026-10-04, E2, version 0.1.0): INSTALL, FULLTEST-E2 and follow-ups
 
 **INSTALL.** First install into a day-to-day configuration: the user's own `~/.claude`, user scope, from the GitHub

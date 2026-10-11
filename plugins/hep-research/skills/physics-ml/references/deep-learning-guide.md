@@ -114,6 +114,8 @@ targets = targets.to(device, non_blocking=True)
   returns `[]` wherever CUDA is unavailable (a login node). Old and new GPUs may need different builds of the same
   torch version (observed with 2.14.1: the CUDA 12.6 build stops at sm_90, the CUDA 13.0 build starts at sm_75, so
   V100 and Blackwell need one each). The driver must also support the build's CUDA version.
+  `scripts/check_pytorch_env.py` does this comparison on a GPU host and exits 3 when a visible GPU is not supported
+  by the installed build; run it as the first step of a GPU job.
 - **`torch.cuda.is_bf16_supported()` counts emulation** and is True even on GPUs without native bf16 (compute
   capability below 8.0, such as V100); check the capability before choosing bf16 for speed.
 - **DDP with `torchrun`:** code that calls `torch.cuda.set_device(LOCAL_RANK)` needs at least `--nproc_per_node`

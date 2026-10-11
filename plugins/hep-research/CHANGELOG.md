@@ -3,6 +3,21 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **physics-ml: `check_pytorch_env.py` checks the build against each GPU.** It prints the build's compiled
+  architectures and, per visible GPU, whether its compute capability is supported (NVIDIA's binary compatibility
+  rules: same major and newer minor for cubins, exact for arch-specific cubins, any newer capability for PTX), and
+  exits 3 when one is not. It also exits 3, printing torch's own reason, when `nvidia-smi` sees GPUs but the build
+  cannot use them at all (observed: the CUDA 13.0 build on V100 nodes whose driver supports CUDA 12.9 at most, where
+  it previously printed "CUDA available: False" and exited 0). Without CUDA it prints the compiled list via
+  `torch._C._cuda_getArchFlags()`. Unit tests cover the measured builds; verified on a V100 with both builds and with
+  the GPUs hidden.
+- **physics-ml guidance:** `ml-analysis.md` treats device and precision as a source of category migration for
+  scores that are cut on (evaluate where validated, or measure the migration as a systematic); `reproducibility.md`
+  lists the GPU details to record and says to link a `computational-run` artifact from the `ml-artifact`'s `inputs`,
+  since the `ml-artifact` has no environment fields.
+
 ## 0.6.8 (2026-10-11)
 
 - **physics-ml: first GPU runs.** The assets ran on V100 and RTX PRO 6000 Blackwell GPUs through Slurm (torch 2.14.1,

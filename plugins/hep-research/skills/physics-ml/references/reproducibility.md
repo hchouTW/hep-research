@@ -57,8 +57,15 @@ Save enough information to reproduce or compare runs:
 - Config and command-line arguments.
 - Git commit or code version when available.
 - PyTorch, CUDA, cuDNN, Python, and platform versions.
+- For GPU runs: the torch build's CUDA variant (for example `2.14.1+cu126`), GPU model and compute capability,
+  driver version, precision (fp32, or AMP with its dtype) and the determinism settings actually used
+  (`cudnn.deterministic`, `torch.use_deterministic_algorithms`). `scripts/check_pytorch_env.py` prints most of these.
 - Dataset version and split identifiers.
 - Checkpoint with model, optimizer, scheduler, epoch, best metric, and config.
+
+In this plugin the `ml-artifact` has no environment fields: record the training run as a `computational-run`
+artifact (its `environment`, `tools`, `seeds` and `resources`, with the GPU) and list that artifact in the
+`ml-artifact`'s `inputs`, so the model hash leads to the environment it was trained in.
 
 ## Reproducibility levels
 
