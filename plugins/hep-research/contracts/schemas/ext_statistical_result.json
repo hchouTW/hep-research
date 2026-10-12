@@ -9,7 +9,8 @@
  "properties": {
   "paradigm": {"type": "string", "enum": ["frequentist", "bayesian", "likelihood-only"]},
   "likelihood": {"type": "object", "properties": {"backend": {"type": "string", "$comment": "since 2.2.0"},
-   "backend_version": {"type": "string"}, "model_ref": {"type": "string"}, "model_sha256": {"type": "string"}}},
+   "backend_version": {"type": "string"}, "model_ref": {"type": "string"}, "model_sha256": {"type": "string"},
+   "model_card": {"$ref": "statistical_model.json"}}},
   "parameters_of_interest": {"type": "array", "items": {"type": "string"}, "minItems": 1},
   "nuisances": {"type": "array"}, "constraints": {"type": "array"},
   "test_statistic": {"type": "string"},

@@ -305,10 +305,54 @@ def _stat_semantics(doc: dict, ext: dict, rep: Report, strict: bool) -> None:
     if isinstance(sig.get("scan"), dict) and ("global_p" in sig or "global_p_bound" in sig) and not sig.get("trials_method"):
         rep.add("unresolved", "$.extension.significance.trials_method", "stats.trials_method_missing",
                 "a global p-value without its trials_method is not an established global significance")
+    lik: Any = ext.get("likelihood")
+    if isinstance(lik, dict) and isinstance(lik.get("model_card"), dict):
+        _model_card_rules(lik["model_card"], ext.get("paradigm"), rep)
     fd: Any = ext.get("fit_diagnostics")
     if isinstance(fd, dict) and fd.get("status") == "failed" and ext.get("fit_status") in ("converged", "converged-with-warnings"):
         rep.add("error", "$.extension.fit_status", "stats.fit_status_mismatch",
                 "fit_diagnostics.status is failed but fit_status says converged")
+
+
+def check_model_card(card: dict, paradigm: str | None, rep: Report, path: str = "$.extension.likelihood.model_card") -> None:
+    """Semantic rules of a statistical model card (contracts/schemas/statistical_model.json), audit T15."""
+    seen: dict[str, str] = {}
+    for i, c in enumerate(card.get("constraints", [])):
+        aux, par = c.get("aux_id"), c.get("parameter")
+        if aux in seen and seen[aux] != par:
+            rep.add("error", f"{path}.constraints[{i}]", "stats.duplicate_auxiliary",
+                    f"auxiliary measurement '{aux}' constrains both '{seen[aux]}' and '{par}': one measurement enters the "
+                    "likelihood once; share one parameter between the samples or channels it affects")
+        elif aux in seen:
+            rep.add("error", f"{path}.constraints[{i}]", "stats.duplicate_auxiliary",
+                    f"auxiliary measurement '{aux}' appears twice for '{par}': it would be counted twice")
+        seen.setdefault(aux, par)
+        if paradigm == "frequentist" and c.get("kind") == "prior":
+            rep.add("error", f"{path}.constraints[{i}]", "stats.prior_in_frequentist_model",
+                    f"'{par}' has a prior in a frequentist model; a constraint must come from an auxiliary measurement")
+    channels = {ch.get("name") for ch in card.get("channels", [])}
+    params = {c.get("parameter") for c in card.get("constraints", [])}
+    for i, smp in enumerate(card.get("samples", [])):
+        if smp.get("channel") not in channels:
+            rep.add("error", f"{path}.samples[{i}].channel", "stats.model_unknown_channel", f"channel '{smp.get('channel')}' is not defined")
+        for m in smp.get("modifiers", []):
+            if m.get("type") == "constrained-normalization" and m.get("parameter") not in params:
+                rep.add("error", f"{path}.samples[{i}]", "stats.model_unconstrained_parameter",
+                        f"constrained parameter '{m.get('parameter')}' has no constraint term")
+            if m.get("type") == "poi" and m.get("parameter") != card.get("poi"):
+                rep.add("error", f"{path}.samples[{i}]", "stats.model_poi_mismatch", f"'{m.get('parameter')}' is not the poi")
+    roles = {ch.get("name"): ch.get("role") for ch in card.get("channels", [])}
+    cr_signal = any(roles.get(s.get("channel")) == "control-region" and any(m.get("type") == "poi" for m in s.get("modifiers", []))
+                    for s in card.get("samples", []))
+    if card.get("signal_contamination") == "modeled" and not cr_signal:
+        rep.add("error", f"{path}.signal_contamination", "stats.contamination_not_in_model",
+                "signal_contamination says modeled but no control-region sample carries the poi")
+    if card.get("signal_contamination") == "not-modeled":
+        rep.add("unresolved", f"{path}.signal_contamination", "stats.contamination_not_modeled",
+                "signal in the control regions is not modeled: show it is negligible (an injection test) or model it")
+
+
+_model_card_rules = check_model_card
 
 
 def _check_bands(exp: dict, rep: Report) -> None:

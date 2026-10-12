@@ -64,6 +64,8 @@ MISSING_FILE_ARGS = {
     "adapters/hepdata/assets/hepdata_export.py": ["--artifact", M, "--out", OUT],
     "adapters/hepdata/assets/hepdata_record.py": ["--table", M, "--observable", M, "--record", "r", "--table-name", "t",
                                                   "--out", OUT],
+    "adapters/pyhf-combine/assets/backend_comparison.py": ["--model", M],
+    "adapters/pyhf-combine/assets/model_card.py": ["--card", M],
     "adapters/pyhf-combine/assets/pyhf_nuisance_diagnostics.py": [M],
     "adapters/pyhf-combine/assets/reproduce_published_likelihood.py": ["--bkgonly", M, "--patchset", M, "--published", M,
                                                                        "--out", OUT],

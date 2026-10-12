@@ -1,0 +1,20 @@
+{"$comment": "Owner: hep-statistics. Since 2.2.0: a statistical model card, nested in a statistical-result as likelihood.model_card (not an artifact type). It states what the likelihood is built from, so a reader can check it: channels and their observed counts, samples with their modifiers, every constraint with the auxiliary measurement it encodes, the parameter of interest and the toy ensemble. Semantic rules in contracts.validate._model_card_rules: one auxiliary measurement enters the likelihood once (a parameter shared by several samples or channels refers to it once); a frequentist model carries constraints from auxiliary measurements, not priors; every modifier parameter is defined.",
+ "type": "object",
+ "required": ["poi", "channels", "samples", "constraints", "ensemble"],
+ "properties": {
+  "poi": {"type": "string", "minLength": 1},
+  "ensemble": {"type": "string", "enum": ["conditional-fluctuated-aux", "conditional-fixed-aux", "unconditional-prior", "plug-in"]},
+  "channels": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["name", "observed", "role"],
+   "properties": {"name": {"type": "string", "minLength": 1}, "role": {"type": "string", "enum": ["signal-region", "control-region", "validation-region"]},
+    "observed": {"type": "array", "items": {"type": "number", "minimum": 0}, "minItems": 1}}}},
+  "samples": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["name", "channel", "yields", "modifiers"],
+   "properties": {"name": {"type": "string"}, "channel": {"type": "string"}, "yields": {"type": "array", "items": {"type": "number", "minimum": 0}, "minItems": 1},
+    "modifiers": {"type": "array", "items": {"type": "object", "required": ["type", "parameter"],
+     "properties": {"type": {"type": "string", "enum": ["poi", "free-normalization", "constrained-normalization"]},
+      "parameter": {"type": "string"}, "hi": {"type": "number"}, "lo": {"type": "number"}}}}}}},
+  "constraints": {"type": "array", "items": {"type": "object", "required": ["parameter", "kind", "aux_id", "form"],
+   "properties": {"parameter": {"type": "string"}, "kind": {"type": "string", "enum": ["auxiliary-measurement", "prior"]},
+    "aux_id": {"type": "string", "minLength": 1}, "form": {"type": "string", "enum": ["gaussian", "poisson", "lognormal"]},
+    "width": {"type": "number", "exclusiveMinimum": 0}}}},
+  "signal_contamination": {"type": "string", "enum": ["modeled", "negligible-checked", "not-modeled"]}
+ }}
