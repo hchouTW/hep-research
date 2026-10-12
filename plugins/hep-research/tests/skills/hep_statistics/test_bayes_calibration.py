@@ -5,7 +5,6 @@ the Jacobian passes; unconverged chains are not-run, not pass. SBC passes for th
 narrow or too wide, keeps its false-alarm rate near alpha = 0.01, and reports its power (at least 0.9 against a width
 factor 0.7) as fixed before the run. Contract: NUTS metadata, divergences and E-BFMI under fit_status converged,
 improper priors, SBC reported as coverage."""
-import copy
 import json
 import math
 import sys

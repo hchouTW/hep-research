@@ -102,15 +102,15 @@ class T10AsymptoticForms(unittest.TestCase):
                 s_hat = max(n - b, 0.0)
                 if s_hat > s:
                     ref = 0.0
-                elif n >= b:          # interior best fit: Cowan et al. eq. 14 with mu-hat >= 0
+                elif n >= b:          # interior best fit (arXiv:1007.1727v3 eqs. (14), (16): 0 <= mu-hat <= mu)
                     ref = 2.0 * (n * math.log(n / (s + b)) - n + s + b)
-                else:                 # best fit on the boundary s = 0 (eq. 16, the q-tilde case)
+                else:                 # best fit on the boundary s = 0 (eq. (16), the q-tilde case)
                     ref = 2.0 * (s - n * math.log1p(s / b))
                 self.assertAlmostEqual(ll._q1(n, b, 0.0, s), ref, places=10, msg=(n, s))
 
     def test_asimov_statistics(self):
         for s, b in ((1.0, 0.5), (5.0, 10.0), (20.0, 100.0)):
-            z_a = math.sqrt(2.0 * ((s + b) * math.log1p(s / b) - s))       # Cowan et al. eq. 97
+            z_a = math.sqrt(2.0 * ((s + b) * math.log1p(s / b) - s))       # arXiv:1007.1727v3 eq. (101)
             self.assertAlmostEqual(math.sqrt(ll._q0(s + b, b, 0.0)), z_a, places=10)
         bins = [{"n": 0, "b": 3.0, "s": 1.0}, {"n": 0, "b": 1.0, "s": 2.0}, {"n": 0, "b": 0.5, "s": 0.5}]
         m = ll._Model(bins, "none", None)

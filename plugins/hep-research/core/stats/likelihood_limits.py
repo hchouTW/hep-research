@@ -63,7 +63,8 @@ linear extrapolation in value, slope and curvature at |theta| = 1, smooth at 0).
 asymmetric factors {"hi": 1.12, "lo": 0.92} (at theta = +1 and -1) instead of "sigma", with "interpolation": "code4"
 (default: polynomial inside |theta| < 1, exponential hi^theta / lo^-theta outside, smooth everywhere), "code1"
 (piecewise exponential, kinked at 0) or "code0" (piecewise linear); such a nuisance has the Gaussian constraint.
-A normalization nuisance may carry "prior": "gaussian" (default, factor 1 + sigma theta), "lognormal"
+A normalization nuisance may carry "constraint" (legacy alias "prior"; in this frequentist model it names the constraint
+term and its auxiliary measurement, not a Bayesian prior): "gaussian" (default, factor 1 + sigma theta), "lognormal"
 (factor exp(sigma theta), theta unit normal) or "gamma" (factor f = 1 + sigma theta with a Poisson
 auxiliary measurement of tau = 1/sigma^2, a gamma prior of mean 1 and relative width sigma). An optional
 "correlation": [[1, rho, ...], ...] (K x K, unit diagonal, positive definite) correlates the Gaussian and
@@ -289,7 +290,8 @@ BANDS = (("-2sigma", -2), ("-1sigma", -1), ("median", 0), ("+1sigma", 1), ("+2si
 
 
 def _cls_asymptotic(q: float, qa: float) -> float:
-    """Asymptotic CLs = p_mu / (1 - p_b) for the one-sided q-tilde (Cowan, Cranmer, Gross, Vitells 2011, eqs. 65-66):
+    """Asymptotic CLs = p_mu / (1 - p_b) for the one-sided q-tilde (Cowan, Cranmer, Gross, Vitells 2011; the
+    distribution of q-tilde under mu and under mu' = 0 is arXiv:1007.1727v3 eqs. (69)-(70)):
     q is q-tilde on the data, qa on the background-only Asimov data set."""
     nd = NormalDist()
     if qa <= 0.0:
@@ -337,7 +339,7 @@ def _asymptotic_cls_results(q_obs, q_asimov, cl: float, hi: float) -> dict:
     q_obs(mu) and q_asimov(mu) give q-tilde at mu on the data and on the Asimov data. The expected limit of band N
     solves sqrt(q_asimov(mu)) = Phi^-1(1 - alpha Phi(N)) + N for CLs (Cowan et al. 2011, sec. 4.3, with
     sigma = mu / sqrt(q_asimov(mu)) taken at the band's own mu). For CLs+b with q-tilde it is z + N for N >= 0 and, below
-    the median, where the band's mu-hat = N sigma is negative and q-tilde = (mu^2 - 2 mu mu-hat) / sigma^2 (their eq. 16),
+    the median, where the band's mu-hat = N sigma is negative and q-tilde = (mu^2 - 2 mu mu-hat) / sigma^2 (arXiv:1007.1727v3 eq. (64)),
     N + sqrt(N^2 + z^2) with z = Phi^-1(cl); the plain z + N would reach 0, which a q-tilde limit never does. For CLs
     the q-tilde and q forms agree for every N."""
     nd, alpha = NormalDist(), 1.0 - cl
@@ -735,15 +737,15 @@ def _load_shape(doc):
             code = d.get("interpolation", "code4")
             if code not in ("code0", "code1", "code4"):
                 raise LikelihoodError(f"nuisance {k}: interpolation of hi/lo factors must be code0, code1 or code4")
-            if d.get("prior", "gaussian") != "gaussian" or "sigma" in d:
+            if _constraint(d, k) != "gaussian" or "sigma" in d:
                 raise LikelihoodError(f"nuisance {k}: hi/lo factors take the Gaussian constraint and no sigma")
             hi, lo = _num(d.get("hi"), "hi", 0.0, 10.0, strict_low=True), _num(d.get("lo"), "lo", 0.0, 10.0, strict_low=True)
             parsed.append({"kind": d["kind"], "prior": "gaussian", "hi": hi, "lo": lo, "interpolation": code,
                            "c4": _code4_coefficients(hi, lo)})
         elif d["kind"].endswith("_norm"):
-            prior = d.get("prior", "gaussian")
+            prior = _constraint(d, k)
             if prior not in ("gaussian", "lognormal", "gamma"):
-                raise LikelihoodError(f"nuisance {k}: prior must be gaussian, lognormal or gamma")
+                raise LikelihoodError(f"nuisance {k}: constraint (or prior) must be gaussian, lognormal or gamma")
             if "interpolation" in d:
                 raise LikelihoodError(f"nuisance {k}: interpolation applies to hi/lo factors, not to sigma")
             parsed.append({"kind": d["kind"], "prior": prior, "sigma": _num(d.get("sigma"), "sigma", 0.0, 0.9, strict_low=True)})
@@ -779,6 +781,15 @@ def _load_shape(doc):
             if bn["mc_stat"] > 0 and bn["b"] <= 0:
                 raise LikelihoodError(f"bin {i}: mc_stat needs a positive background b")
     return bins, parsed, corr_chol
+
+
+def _constraint(d: dict, k: int) -> str:
+    """The constraint term of a normalization nuisance: "constraint", or its legacy alias "prior" (same meaning here: the
+    auxiliary-measurement term of the likelihood, not a Bayesian prior); both given and different is an error."""
+    c, p = d.get("constraint"), d.get("prior")
+    if c is not None and p is not None and c != p:
+        raise LikelihoodError(f"nuisance {k}: constraint {c!r} and its legacy alias prior {p!r} disagree")
+    return c if c is not None else (p if p is not None else "gaussian")
 
 
 def _chol_pd(c):
@@ -1210,7 +1221,8 @@ def shape_limit(doc: dict, cl: float, toys: int, seed: int, cls_toys: int = 0, c
         toy_fails += out["toy_cls"]["toys_with_a_failed_fit"]
     out["fit_diagnostics"] = _fit_summary(model.log, toys + (out["toy_cls"]["toys_run"] if cls_toys else 0), toy_fails)
     out["status"] = out["fit_diagnostics"]["status"]
-    out["priors"] = {d["name"]: d.get("prior", "gaussian") for d in nuis}
+    out["constraints"] = {d["name"]: d.get("prior", "gaussian") for d in nuis}
+    out["priors"] = out["constraints"]  # legacy key: the frequentist constraint terms, kept for older readers
     out["interpolation"] = {d["name"]: d["interpolation"] for d in nuis if "interpolation" in d}
     out["mc_statistics"] = "barlow-beeston-lite" if model.mc_rel else "none"
     out["correlated_nuisances"] = corr_chol is not None

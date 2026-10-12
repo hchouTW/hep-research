@@ -23,6 +23,19 @@ print(model.config.par_order, pars, cls)
 
 Production inference additionally requires convergence diagnostics, bounds, scans, version records, and assessment of coverage conditions. A successful function call does not establish validation.
 
+## Comparing backends and reproducing published likelihoods
+
+Compare backends only after aligning the model: `<plugin root>/adapters/pyhf-combine/assets/backend_comparison.py` maps a
+core shape model to pyhf where the parametrizations are the same function and compares Delta NLL pointwise (floating
+point) and the profiled q-tilde; limits from different Asimov constructions are reported, not used as an oracle.
+Reproducing a published likelihood means a full limit scan with bands, the best fit and fit diagnostics against
+reference values with stated precision, not CLs at mu = 1:
+`<plugin root>/examples/stats-benchmarks/published-likelihood-sbottom/` does this for ATLAS-SUSY-2018-31 (HEPData
+ins1748602) with a checksum-pinned pallet and preregistered tolerances. Versions: pyhf 0.7.6 is required in CI
+(`stats-backends`); Combine is checked only at release (`statistics-validation.yml`), so a pull request does not
+guarantee it. pyhf 0.7.6's toy-based expected bands call NumPy's removed `percentile(interpolation=...)` and fail with
+NumPy 2.4 or later; the benchmark computes them from pyhf's toy distributions instead.
+
 ## Combine
 
 Follow project datacards and the installed release. Check alignment of bin/process/rate columns, process IDs, shape-file and object patterns, observations, nuisance rows, rateParam, and autoMCStats. Interpret the relationship between template integrals and card rates before applying normalization again.

@@ -3,6 +3,7 @@
 #   checks     unit tests (fast tier), profile suites and the static checks, on Python 3.11, 3.12 and 3.13 with the
 #              pinned set (plugins/hep-research/requirements-ci.lock); required
 #   lint       ruff and mypy on core/ and contracts/; required
+#   stats-backends  the statistics tests with pyhf 0.7.6 and ArviZ 0.23.4 required: a skip for either fails; required
 #   optional-* the same unit tests with pyhf, uproot + awkward, hepdata_lib + hepdata-validator, PyTorch (CPU) or ROOT; they may fail without
 #              blocking a merge for now, but their results are shown on the run
 #   release-manifests  published release bundles unchanged (C10); required
@@ -50,6 +51,30 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: check-run-py${{ matrix.python }}
+          path: check-runs/
+
+  stats-backends:
+    # hep-statistics audit (CI gate 1): the backends the statistics tests promise (pyhf 0.7.6, ArviZ 0.23.4) are
+    # required here; a test skipped for a missing one fails the job instead of passing silently
+    # (tools/run_required_backends.py). Required.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.13"
+      - name: Install the pinned set with pyhf and ArviZ
+        run: python -m pip install -r requirements-ci.lock "pyhf==0.7.6" "arviz==0.23.4"
+      - name: Statistics and backend tests, no skip allowed for a required backend
+        run: |
+          mkdir -p ../../check-runs
+          python tools/run_required_backends.py --require pyhf==0.7.6,arviz==0.23.4 --out ../../check-runs/required-backends.json
+      - name: Keep the report
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: required-backends
           path: check-runs/
 
   lint:

@@ -6,6 +6,10 @@ object, forward folding of a prediction and the double-counting checks belong to
 measurement should be unfolded at all, and at which level it is published, is a design question for hep-analysis
 ([measurement definitions](../../hep-analysis/references/measurements-and-unfolding.md)).
 
+Executable validation: `<plugin root>/core/stats/unfolding_diagnostics.py outer-coverage` repeats data, MC response and
+efficiency draws and the regularization choice inside every outer toy and reports bias, marginal and simultaneous
+coverage; a pull width measured on the ensemble that tuned the regularization is not independent evidence.
+
 ## Choosing a method
 
 Choose forward-folded likelihoods, matrix methods, regularized inversion, or iterative Bayesian unfolding according to

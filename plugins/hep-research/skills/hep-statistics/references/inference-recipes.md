@@ -31,7 +31,7 @@ Record seeds, toy counts, generating parameters, auxiliary-observation fluctuati
 
 For a tail estimate k/N, report Monte Carlo uncertainty. Zero exceedances do not establish p=0; use a binomial bound. Small toy ensembles cannot directly calibrate five-sigma tails. Coverage studies repeat the full procedure at multiple POI/nuisance truth points and report coverage, failure rates, and failure handling. Dropping failed fits can bias results.
 
-Searching across masses, channels, or cuts creates a look-elsewhere effect. Obtain a global p-value from the full search procedure or a validated approximation; a single-point local p-value is not global.
+Searching across masses, channels, or cuts creates a look-elsewhere effect. Obtain a global p-value from the full search procedure or a validated approximation; a single-point local p-value is not global. `<plugin root>/skills/hep-statistics/scripts/global_significance.py` repeats the whole procedure (1D or 2D scan, refitted background normalization, choice among nested selections) in every toy. Toy studies record their ensemble, partition seeds and every failure (`core/stats/toy_ensemble.py`); coverage reports C/N, (C+F)/N and C/(N-F) under a failure policy fixed in advance.
 
 ## Look-elsewhere: global significance of a scan
 

@@ -117,8 +117,10 @@ available only as a Cousins-Highland marginalization (`--sigma-b`).
   converges to the known-background interval as `S -> 0`. That is not a profile treatment and its coverage at the true
   background is not guaranteed.
 - `cls-limit --n N --b B --cl CL [--sigma-b S] [--nodes K]`: CLs upper limit (`CLs = CLs+b / CLb`) with the median and
-  1- and 2-sigma expected limits under background only. CLs over-covers by design; it is not a frequentist interval
-  and a Feldman-Cousins interval is not a CLs limit: never label one as the other. With `--sigma-b`, vary `sigma_b`
+  1- and 2-sigma expected limits under background only. CLs is a modified frequentist exclusion prescription (PDG,
+  Statistics review): it over-covers by design and is not an exact nominal-coverage Neyman or Feldman-Cousins
+  confidence belt, nor a Bayesian credible bound; a toy or plug-in implementation of it does not guarantee its
+  coverage either. A Feldman-Cousins interval is not a CLs limit: never label one as the other. With `--sigma-b`, vary `sigma_b`
   and check the result moves little.
 - `coverage --mu MU --cl CL --toys T --seed S`: fraction of seeded pseudo-experiments whose Garwood interval contains
   `MU`. Coverage of a discrete distribution oscillates with the true mean: one number is a diagnostic, scan the mean
@@ -189,8 +191,10 @@ fit becomes `fit_status: failed` with the `failed` label) and writes a toy p-val
 bound; check a result before calling it validated with `contracts/validate.py RESULT.json --gate publication`.
 
 Decision rule: with an uncertain background prefer `profile-limit`, `profile-significance` or `multibin-limit` to a
-marginalized result, and compare the two: a difference is itself a systematic on the method. A profile limit is not a
-CLs limit (no CLs protection). Always report the expected sensitivity next to an observed limit. Near a boundary
+marginalized result, and compare the two: the profile and the marginalized (Cousins-Highland) treatments answer
+different questions, so a difference between them is information about the nuisance treatment, not an uncertainty to
+add to the result; only a model or method uncertainty prescribed before the result (with its owner) is quantified and
+combined. A profile limit is not a CLs limit (no CLs protection). Always report the expected sensitivity next to an observed limit. Near a boundary
 or at small counts quote the toy value, not the asymptotic one.
 
 ## `statistical_toys.py`: narrow toy studies
@@ -328,6 +332,30 @@ Single-command validators that never modify their input (no subcommands).
 Run both before an unfolding, a forward fold or a fit that uses a supplied matrix. A column sum below one has two
 readings (inefficiency, or migration outside the tabulated range); the declared metadata decides which.
 
+## Validation tools outside `core/stats`
+
+Added by the hep-statistics audit (2026-10-12). Each tool states its validity domain and has a test with an
+independent oracle and a negative baseline; the ones marked EXPERIMENTAL are controlled examples, not general support.
+Scripts are in `<plugin root>/skills/hep-statistics/scripts/` unless an adapter path is given; run `--help` first.
+
+| Tool | Question | Oracle and negative baseline (test) |
+|---|---|---|
+| `result_artifact.py` | write a `statistical-result` that keeps a CLI's status | failed fit -> `failed` label; zero-exceedance bound typed (`test_result_artifact.py`) |
+| `covariance_fit.py` | fits with a declared covariance: constrained spectra, C(theta) with ln det, multiplicative (Peelle) | closed forms; diagonal approximation and data-scaled covariance detected (`test_covariance_fit.py`) |
+| `sweighted_fit.py` | sWeighted fits: naive, SumW2, sandwich, asymptotic, bootstrap; sPlot independence check | RooFit AsymptoticError, toys and bootstrap; broken factorization flagged invalid (`test_sweighted_fit.py`) |
+| `bayes_calibration.py` | posterior quantiles vs a conjugate posterior; SBC with stated power (not PPC, not coverage) | missing Jacobian and mis-scaled posteriors fail (`test_bayes_calibration.py`); `bayes_diagnostics.py` matches ArviZ 0.23.4 (`test_bayes_arviz_oracle.py`) |
+| `eft_scan.py` (EXPERIMENTAL) | quadratic (EFT-like) models: disconnected sets, joint vs profiled, toy belt | closed-form boundaries; hull never reported (`test_eft_scan.py`) |
+| `discrete_profile.py` (EXPERIMENTAL) | envelope over background forms fixed in advance, reselected in every toy | truths inside and outside the family; a single form as baseline (`examples/stats-benchmarks/discrete-profile/`) |
+| `global_significance.py` (EXPERIMENTAL) | global p of the complete procedure: 1D/2D scans, refitted normalization, selection variants | look_elsewhere brute force; Gross-Vitells flagged where not validated (`test_global_significance.py`) |
+| `pcl_efficiency_ratio.py` (EXPERIMENTAL) | PCL with a stated power threshold; Clopper-Pearson vs Beta credible; Fieller sets | exact coverage sums; delta method fails (`test_pcl_efficiency_ratio.py`) |
+| `ratio_estimation.py` (EXPERIMENTAL) | classifier likelihood ratio on a calibratable Gaussian model | exact ratio; domain shift and wrong nuisance rejected with stated power (`test_ratio_estimation.py`) |
+| `adapters/pyhf-combine/assets/backend_comparison.py` | the same likelihood in core and pyhf: pointwise and profiled | 1e-15 / 1e-11; wrong interpolation code caught (`test_backend_likelihood_equivalence.py`) |
+| `adapters/pyhf-combine/assets/model_card.py` | SR/CR fits from a model card: shared auxiliary measurements, contamination | closed form; omitted contamination biases by the analytic amount (`test_sr_cr_model_card.py`) |
+| `examples/stats-benchmarks/published-likelihood-sbottom/` | a published likelihood (ATLAS-SUSY-2018-31, HEPData ins1748602) against preregistered paper values | full CLs scans and bands; a fit without the control region fails |
+
+Contract side: `contracts/validate.py --strict` and `--gate publication`, `contracts/migrate_statistical_result.py`, and
+`tools/run_required_backends.py` (a required backend missing fails, never skips).
+
 ## Not implemented
 
 Weights that vary within a bin in the toy MC; non-Gaussian or correlated priors in the template fit; a Berger-Boos
@@ -341,7 +369,8 @@ convergence live outside `core/stats` (see the SKILL.md resources).
 ## Failure modes
 
 - Quoting the classical limit when it is zero or negative; reading a Feldman-Cousins lower bound of 0 as a failure or
-  as evidence for zero signal; quoting a CLs limit without its expected band or as a frequentist interval.
+  as evidence for zero signal; quoting a CLs limit without its expected band, or as an exact-coverage confidence
+  interval or a Bayesian bound.
 - Quoting an asymptotic limit or significance at small counts without the toy calibration; a boundary significance
   from naive Wilks; reporting a profile limit as CLs.
 - Treating a profile-construction interval or limit as having guaranteed coverage, or the finite-grid `neyman-limit` as

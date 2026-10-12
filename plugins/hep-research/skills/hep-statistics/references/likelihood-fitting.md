@@ -24,6 +24,14 @@ A covariance correction for weighted unbinned fits does not automatically guaran
 
 **Background subtraction** (sideband or sWeight subtraction) does not produce Poisson-distributed pure-signal data; do not fit the subtracted counts as if it did.
 
+The tool `<plugin root>/skills/hep-statistics/scripts/sweighted_fit.py` runs this chain on supplied events and reports the
+naive, SumW2, sandwich (equal to RooFit's AsymptoticError) and asymptotically correct uncertainties with a bootstrap of
+the whole chain, and marks the result invalid when a predeclared sideband test rejects the m-t independence sPlot
+needs. `covariance_fit.py` fits binned measurements with a declared covariance (constraints, C(theta), multiplicative
+normalizations). Signed-weight templates do not belong in an effective-count Barlow-Beeston likelihood
+(`template_fit.py` refuses them); use a Gaussian MC-statistics term (`shape-limit` `mc_stat`), validated with 20%
+negative weights in `tests/core/test_stats_weighted_mc.py`.
+
 ### Verified walkthrough: sWeighted lifetime fit (verified 2026-10-03)
 
 `tests/skills/hep_statistics/test_weighted_unbinned_fit.py` (SYNTHETIC, seed 20261003, 300 toys): a Gaussian mass peak (mean 0.5, width 0.05) with Poisson(1000) signal events on a flat background with Poisson(2000) events in m in [0, 1]; signal decay times exponential with tau = 1, background with tau = 3. Per toy, an extended fit of the two yields in m, sWeights, and the weighted fit of the signal lifetime. Pull widths of the lifetime:

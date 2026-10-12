@@ -218,5 +218,20 @@ class T05GlobalVersusConditional(unittest.TestCase):
         self.assertGreaterEqual(m.log.events.get("boundary_kkt_ok", 0), 1)
 
 
+class ConstraintNaming(unittest.TestCase):
+    """Audit wording fix: a frequentist normalization nuisance names its constraint term ("constraint"); "prior" stays
+    a legacy alias with the same meaning, and the two may not disagree."""
+
+    def test_alias_and_conflict(self):
+        base = {"bins": [{"n": 5, "b": 3.0, "s": 1.0}, {"n": 2, "b": 1.0, "s": 0.5}]}
+        a = ll.shape_limit(dict(base, nuisances=[{"name": "n", "kind": "background_norm", "sigma": 0.3, "constraint": "gamma"}]), 0.95, 0, 1)
+        b = ll.shape_limit(dict(base, nuisances=[{"name": "n", "kind": "background_norm", "sigma": 0.3, "prior": "gamma"}]), 0.95, 0, 1)
+        self.assertEqual(a["asymptotic_observed_upper_limit"], b["asymptotic_observed_upper_limit"])
+        self.assertEqual(a["constraints"], {"n": "gamma"})
+        with self.assertRaises(ll.LikelihoodError):
+            ll.shape_limit(dict(base, nuisances=[{"name": "n", "kind": "background_norm", "sigma": 0.3, "constraint": "gamma",
+                                                  "prior": "lognormal"}]), 0.95, 0, 1)
+
+
 if __name__ == "__main__":
     unittest.main()

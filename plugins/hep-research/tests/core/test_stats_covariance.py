@@ -6,7 +6,6 @@ import contextlib
 import copy
 import io
 import json
-import math
 import sys
 import tempfile
 import unittest
@@ -204,7 +203,7 @@ class BlockTests(unittest.TestCase):
         self.assertIn("blocks.component_exceeds_total", codes(self.mutate(edit)))
 
 
-class ClipDemoTests(unittest.TestCase):
+class ClipDemoReportTests(unittest.TestCase):
     def test_demo_is_labelled_proposal_and_quantifies_changes(self):
         doc = load("cov_indefinite.json")
         doc["weights"] = [1.0, 0.0, 0.0]

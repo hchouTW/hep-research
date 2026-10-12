@@ -47,6 +47,48 @@ STATS-AUDIT). Batch A (P0, T01–T08):
   closure and pull checks, not interval coverage; `theory-comparison` `toys`; `published-comparison` `analytic`).
   Outputs regenerated for contracts 2.2.0 (only the version strings and `check` changed).
 
+Batch B (P1, T09-T17, T22-T23):
+
+- **Exact counting and asymptotic oracles (T09, T10).** Tests against SciPy roots, an independent Feldman-Cousins
+  ordering and the closed forms of Cowan et al. (arXiv:1007.1727v3). New asymptotic calibration gate in
+  `likelihood_limits.py` (`asymptotic_calibration`: the asymptotic p inside the toys' 99% exact interval, else
+  inapplicable).
+- **Toy CLs (T11).** `shape-limit --cls-toys` keeps the CLs+b and CLb exceedance counts per grid point, an exact-interval
+  range for the limit (`observed_limit_mc_range`) and reports a limit decided by a floored denominator as unresolved.
+- **Toy ensembles and coverage accounting (T12, T13).** New `core/stats/toy_ensemble.py`: explicit ensemble (no
+  default), seeds from (seed, toy index), disjoint partitions, one outcome per toy, coverage C/N, (C+F)/N and C/(N-F)
+  under a predeclared failure policy, a pass/fail/insufficient-precision coverage gate; no automatic retries.
+- **Coverage grid (T14).** `examples/stats-benchmarks/coverage-grid/`: exact coverage of the classical, CLs and FC belts
+  and 20,000-toy coverage of the asymptotic profile limit; a negative control (sigma_b ignored) is rejected.
+- **SR/CR model card and backend equivalence (T15, T16).** `contracts/schemas/statistical_model.json` (nested as
+  `likelihood.model_card`), `adapters/pyhf-combine/assets/model_card.py` and `backend_comparison.py`.
+- **Published likelihood (T17).** `examples/stats-benchmarks/published-likelihood-sbottom/`: ATLAS-SUSY-2018-31 SRB from
+  the HEPData pallet (checksum pinned) against preregistered paper values, with full CLs scans and bands.
+- **Unfolding (T22, T23).** `unfolding_diagnostics.py outer-coverage`; `response-stat` accounts for every toy.
+
+Batch C (P1, T18-T21, T24-T25): `skills/hep-statistics/scripts/covariance_fit.py`, `sweighted_fit.py`,
+`bayes_calibration.py`; sci-fix of `bayes_diagnostics.py` (ties, constant chains, ESS and MCSE as Vehtari et al.);
+`template_fit.py` refuses signed-weight templates; Bayesian contract rules (NUTS metadata, divergences, E-BFMI,
+improper priors).
+
+Batch D (P2, T26-T30, all EXPERIMENTAL): `eft_scan.py`, `discrete_profile.py`, `global_significance.py`,
+`pcl_efficiency_ratio.py`, `ratio_estimation.py`.
+
+CI, documentation and evidence:
+
+- **CI.** New required job `stats-backends` (`tests.yml`): the statistics tests with pyhf 0.7.6 and ArviZ 0.23.4, where
+  a skip for a required backend fails (`tools/run_required_backends.py`). New workflow `statistics-validation.yml`
+  (weekly, on demand, on release tags): full-budget campaigns, the published-likelihood reproduction (not-run fails)
+  and a Combine 11.1.0 release gate. These workflows were written and their YAML checked here; they have not run on
+  GitHub yet.
+- **Wording.** CLs is described as a modified frequentist exclusion prescription (not "not a frequentist interval");
+  a profile-versus-marginalized difference is no longer called a method systematic to add; frequentist constraint
+  terms are `"constraint"` in `shape-limit` (`"prior"` kept as an alias; results carry `constraints` and the legacy
+  `priors`); the Combine execution scope in `nuisance-modeling.md` matches VALIDATION; equation numbers of Cowan et al.
+  are cited for arXiv v3 (one wrong number corrected).
+- **Evidence.** `docs/evidence/statistics/` holds a source and claim ledger (checked by `core/evidence/ledger.py`) and
+  a capability ledger with statuses supported, experimental or unvalidated, each with its tests and CI gate.
+
 ## 0.6.10 (2026-10-12)
 
 - **batch-schedulers: `limits.max_gpu_hours`.** The Slurm poll reads `AllocTRES`; each attempt records
