@@ -16,16 +16,20 @@ shower's Cherenkov light pool in the atmosphere.
 
 A charged shower particle traveling faster than the local speed of light in air emits
 Cherenkov light, which for a full electromagnetic cascade sums into a light pool
-roughly 120-150 m in radius (~250 m across) on the ground, lasting a few nanoseconds, peaking in the
+roughly 120-150 m in radius (about 240-300 m across) on the ground, lasting a few nanoseconds, peaking in the
 near-UV/blue. An **imaging atmospheric Cherenkov telescope** (IACT) - a large
 segmented mirror focusing this light onto a fast, finely pixelated camera - within the
 light pool's footprint records a two-dimensional image of the shower's angular
 development as seen from that vantage point, elongated along the shower axis
-projected onto the sky. Because the technique depends on the shower reaching well
-above the ground before its Cherenkov emission is intercepted, it requires clear,
-dark, moonless conditions, giving it a duty cycle comparable to fluorescence detection
-(see [ground-based detection arrays](ground-based-detection-arrays.md)) - typically
-around 10-15%, the dominant limitation on exposure for any IACT source measurement.
+projected onto the sky. Because the faint, few-nanosecond flash must stand out
+against the night-sky background light, and the atmosphere is the detector medium
+whose transparency sets the light yield, the technique requires clear night skies;
+dark, moonless time gives the lowest threshold, and current IACTs also observe in
+moderate moonlight (with reduced gain or a higher threshold), which extends the
+duty cycle. Dark time alone gives a duty cycle comparable to fluorescence detection
+(see [ground-based detection arrays](ground-based-detection-arrays.md)), typically
+around 10-15%, and observing time is the main limitation on exposure for any IACT
+source measurement.
 
 **Hillas parameters** are the classical image-shape description: the ellipse's
 length and width, its orientation, and its distance from the assumed source position
@@ -46,7 +50,8 @@ shower from different ground positions intersects each telescope's image axis to
 reconstruct the shower's true (not just camera-projected) arrival direction and
 impact point, dramatically improving angular resolution and background rejection
 relative to a single telescope - the reason all current-generation instruments
-(H.E.S.S., MAGIC, VERITAS, and the planned CTA) are arrays rather than single
+(H.E.S.S., MAGIC, VERITAS, and CTAO, which is under construction with its first
+Large-Sized Telescope, LST-1, already operating) are arrays rather than single
 telescopes.
 <!-- /example -->
 

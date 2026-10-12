@@ -21,7 +21,7 @@ inverse problem; *inefficiency/fakes* lists the dominant loss and fake mechanism
 | Drift chamber/tube | ionization in gas | drift time | radius, position | `t0`, `r(t)`, gain | wire position, sag | drift circle, segment | left-right | diffusion, ionization statistics | cell edges, delta rays | residual vs distance | `t0`, `v_d`, alignment |
 | TPC | ionization in gas/liquid | 3D charge + time | 3D track, `dE/dx` | `v_d`, gain, lifetime | field map | cluster, track | `t_0` | diffusion, MS | distortions, merging | laser, cross-detector | distortion map |
 | MWPC/straw | gas avalanche | wire hit / time | position | gain, `t0` | wire pos. | hit, straw circle | left-right | pitch, drift | edges, streamer | plateau scan | efficiency vs rate |
-| RPC/MRPC | gas gap streamer | strip time | position, time | `t0`, HV plateau | strip alignment | hit cluster | multi-hit | gap, rate | rate-dependent | cosmics | rate |
+| RPC/MRPC | gas gap avalanche (streamer in older RPCs) | strip time | position, time | `t0`, HV plateau | strip alignment | hit cluster | multi-hit | gap, rate | rate-dependent | cosmics | rate |
 | GEM/Micromegas | micropattern gas | pad/strip charge | position, angle | gain map | alignment | cluster | angle | pitch, diffusion | discharges | test beam, cosmics | gain, rate |
 | Scintillating fiber | scintillation | amplitude | position | gain, attenuation | mapping | hit | stereo ghosts | pitch, sharing | crosstalk, dark counts | MIPs | attenuation, dose |
 | Emulsion | grains | grain positions | track/vertex | scanning | layer alignment | base-track | no timing | grain size | overlap | through tracks | fading, distortion |
@@ -29,7 +29,7 @@ inverse problem; *inefficiency/fakes* lists the dominant loss and fake mechanism
 | LGAD / MCP | gain in Si / channels | time | time | gain, walk | fluence | hit time | multi-hit | Landau, jitter | fill factor | MIPs | dose |
 | RICH / DIRC / TOP | Cherenkov light | photon hits (+ time) | `beta`, species | index, mirror, gain | alignment, `T/P` | ring / arc | photon-path | emission, chromatic | low `N_pe`, background | kinematic PID | index, aging |
 | Threshold / differential Cherenkov | Cherenkov light | photon counts | species (thresholds) | index, gain | `T/P` | counter response | near threshold | photostat | dark counts | known-species | index stability |
-| TRD | transition radiation | X-ray + `dE/dx` in gas | `e/h` | gain, pressure | alignment | layer likelihood | overlap of `dE/dx` and TR | absorption stat | high `p` | `e`/`h` samples | gas, gain |
+| TRD | transition radiation | X-ray + `dE/dx` in gas | `e/pi` | gain, pressure | alignment | layer likelihood | overlap of `dE/dx` and TR | absorption stat | high `p` | `e`/`pi` samples | gas, gain |
 | `dE/dx` | ionization | charge samples | species | gain, path | field | truncated mean | band overlap | Landau, samples | saturation | tag samples | gain drift |
 | ECAL (crystal/sampling) | EM shower | charge/light | `E`, position | intercalibration, scale | geometry, material | cell, cluster | overlap | stoch., noise, const. | leakage, conversions | `Z->ee`, `pi^0`, `E/p` | scale, material |
 | HCAL | hadron shower | charge/light | `E`, position | EM scale, response | geometry | cluster | `e/h` | stoch., leakage | leakage | single hadron, jets | JES |
@@ -75,7 +75,7 @@ inverse problem; *inefficiency/fakes* lists the dominant loss and fake mechanism
 | TOF | `beta` | low `p` (`~1/p^2`) | `t_0`, path | clock, path | late tails |
 | RICH / Cherenkov | Cherenkov angle | mid to high `p` | saturation | index, alignment | low `N_pe` |
 | DIRC / TOP | angle + time | mid `p` | photon-path | optics | multi-path |
-| TRD | transition radiation | `e/h` at high `gamma` | `dE/dx` overlap | gas, gain | tail |
+| TRD | transition radiation | `e/pi` at high `gamma` | `dE/dx` overlap | gas, gain | tail |
 | Calorimetry | `E/p`, shower shape | `e/gamma`, hadrons | overlap | scale, material | shape tails |
 | Muon system | penetration | mid to high `p` | punch-through | alignment | charge tail |
 
@@ -87,7 +87,7 @@ inverse problem; *inefficiency/fakes* lists the dominant loss and fake mechanism
 | Sampling (Pb/scintillator, LAr, Si, gas) | absorber + active | sampling fluctuation | compact, granular, depth segmentation | worse resolution | sampling fraction, calibration |
 | Scintillator-tile HCAL | iron/steel + tile | sampling + `e/h` | robust | non-compensation | leakage, `e/h` |
 | Liquid-argon | absorber + LAr | sampling | stable, uniform | cryogenics, signal shaping | lifetime/purity |
-| Compensating | tuned `e/h ≈ 1` | reduced invisible | linear | complexity | tuning |
+| Compensating | tuned `e/h ≈ 1` | EM-fraction and invisible-energy fluctuations (compensated by equal e and h response, not removed) | linear | complexity | tuning |
 | Dual readout | scintillation + Cherenkov | separates EM/nonEM | corrects EM fraction | light sharing | calibration of both channels |
 | Digital / semi-digital / imaging | binary/multi-threshold cells | count of cells | particle-flow ready | saturation at high density | threshold |
 | Preshower / shower-max | fine sampling | | position, `pi^0` separation | material | alignment |

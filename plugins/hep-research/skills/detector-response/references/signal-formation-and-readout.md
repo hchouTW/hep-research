@@ -79,8 +79,9 @@ clusters in the waveform (rate, diffusion, and electronics limits).
 **Cherenkov radiation (exact kinematics; approximate yield)**: emission when
 `beta > 1/n` with `cos theta_C = 1/(n beta)`; threshold `p_th = m c/sqrt(n^2 - 1)`;
 number of photons per unit path per energy `d^2N/(dx dE) ≈ 370 sin^2 theta_C  eV^-1 cm^-1`
-(before detection efficiency). Yield is small (tens of detected photons at most for
-practical radiators), so `N_pe` is the dominant performance limit
+(before detection efficiency). In gas and aerogel RICH radiators the yield is small (of order
+tens of detected photons per track), so `N_pe` is the dominant performance limit there;
+thicker or denser radiators (water Cherenkov, lead glass, quartz bars) give more
 ([particle identification](particle-identification.md), [cherenkov imaging variants and photosensors](cherenkov-imaging-variants-and-photosensors.md)).
 
 **Transition radiation.** Emitted when a relativistic particle crosses interfaces
@@ -114,7 +115,8 @@ position reconstruction and calibrated with tracks ([tracking and vertexing](tra
 
 **Avalanche gain.** In proportional gas, `G = exp(int alpha dx)` (Townsend `alpha`);
 gain fluctuates with a Polya (approximately exponential) distribution; gain depends
-exponentially on voltage and, through the density `T/P`, on temperature and pressure
+exponentially on voltage and, through the gas density (proportional to `P/T`; the
+gain follows the reduced field `E/N`, proportional to `E*T/P`), on temperature and pressure
 (the sensitivity is gas- and voltage-specific and must be measured) - hence
 pressure/temperature corrections in every gaseous detector. Beyond the proportional regime: Geiger,
 streamer, discharge; space charge from ion backflow modulates the effective field.

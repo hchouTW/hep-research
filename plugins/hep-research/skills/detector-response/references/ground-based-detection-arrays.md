@@ -25,9 +25,11 @@ energy, since the shower footprint grows with energy). Each station records a si
   centered on the shower axis); timing resolution per station directly sets angular
   resolution.
 - **Energy** comes from the signal size at a species- and zenith-angle-independent
-  *reference distance* from the reconstructed shower core - typically chosen (from
-  simulation) to be the distance at which shower-to-shower fluctuations in the
-  lateral distribution are minimized, so that the density-to-energy conversion is as
+  *reference distance* from the reconstructed shower core - chosen (from simulation)
+  as the distance at which the signal interpolated by the lateral-distribution fit is
+  least sensitive to the assumed lateral-distribution shape; that distance is set
+  mainly by the array spacing (station geometry), with shower-to-shower fluctuations
+  a secondary consideration, so that the density-to-energy conversion is as
   model-independent as practical. This is a direct application of shower
   universality (see [extensive-air-showers.md](extensive-air-showers.md)):
   the conversion still carries residual hadronic-model and composition dependence,

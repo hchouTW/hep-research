@@ -104,13 +104,29 @@ spectrometer's relative rigidity resolution combines an intrinsic-resolution ter
 that grows linearly with rigidity and a multiple-scattering term that is roughly
 constant in rigidity (falling as `1/(beta p)` in angle, which translates to an
 approximately rigidity-independent contribution to `sigma(R)/R` in the relativistic
-regime). Added in quadrature they give a curve with a minimum at the crossover
-rigidity, degrading in both directions.
+regime). The **crossover** rigidity is where the two terms are equal; it is not the
+minimum of their quadrature sum. If the scattering term were exactly constant the
+sum would rise monotonically with rigidity; the minimum exists only because the
+scattering term rises as `1/beta` at low rigidity, so it lies below the crossover and
+depends on the particle mass. For the model `sigma(R)/R = sqrt((c/beta)^2 + (a*R)^2)`
+with `1/beta^2 = 1 + (m/(z*R))^2` the minimum is at `R_min = sqrt(c*m/(z*a))`: with
+`c = 0.01`, `a = 1e-3 /GV` and a proton, `R_min` is about 3.06 GV while the crossover
+`c/a` is 10 GV. Resolution degrades on both sides of `R_min`.
 
-The intrinsic term scales with the sensor resolution, inversely with the field
-integral, and inversely with the square of the lever arm, which is why lever arm is
-the most valuable quantity in a spectrometer design and why tracks that fail to reach
-the outermost layer have sharply worse resolution. Selections requiring a full-span
+The intrinsic term scales as `sigma_x * R / (B * L^2)`, i.e. with the sensor resolution
+and inversely with the product of the field integral (`~ B*L`) and the lever arm `L`.
+For `N` equally spaced points in a uniform field the Gluckstern estimates (approximate;
+PDG Review of Particle Physics, "Particle detectors at accelerators", momentum
+measurement) are, with `p_T` in GeV/c, `B` in T and lengths in m, for unit charge:
+
+    measurement: sigma(p_T)/p_T ~= sigma_x * p_T / (0.3 * B * L^2) * sqrt(720/(N+4))
+    scattering:  sigma(p_T)/p_T ~= 0.016 / (0.3 * beta * B * L) * sqrt(L/X0)
+
+The scattering coefficient 0.016 GeV/c is the PDG value for this fit term; it differs
+from the Highland 13.6 MeV coefficient (without its log factor) that
+`multiple_scattering.py` uses for its scattering term. The `1/L^2` dependence is why
+lever arm is the most valuable quantity in a spectrometer design and why tracks that
+fail to reach the outermost layer have sharply worse resolution. Selections requiring a full-span
 track are therefore selecting on resolution, which correlates with the physics being
 measured and must be accounted for in the efficiency correction.
 

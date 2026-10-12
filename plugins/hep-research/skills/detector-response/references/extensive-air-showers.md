@@ -73,8 +73,8 @@ component that broadens a nucleus-initiated shower's fluctuations.
 proton-initiated shower's depth of first interaction fluctuates with the full
 proton-air cross section's interaction-length distribution, while a nucleus's
 superposition of `A` sub-showers averages fluctuations down by roughly `1/sqrt(A)`.
-Measuring only `<X_max>(E)` (the "elongation rate") and not its shower-to-shower
-spread discards a composition-sensitive observable and, worse, can mask a mixed
+Measuring only `<X_max>(E)` and its slope, the elongation rate
+`D_10 = d<X_max>/d log10(E)`, and not its shower-to-shower spread discards a composition-sensitive observable and, worse, can mask a mixed
 composition that happens to produce the same mean as a single pure species.
 
 ## Shower universality

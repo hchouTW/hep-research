@@ -16,8 +16,9 @@ evidence of association - the question is always "how often would an unrelated
 background produce a coincidence at least this good by chance", which requires a
 well-defined background rate for the messenger providing the counterpart, not just for
 the primary detection. Coincidence significance is not the product of the two
-individual-messenger p-values (that double-counts the information and is a common,
-serious error): the correct approach evaluates a joint likelihood or a single test
+individual-messenger p-values: under the null the product of independent uniform
+p-values is not uniformly distributed (it is stochastically smaller), so reading it
+directly as a p-value overstates the significance - a common, serious error. The correct approach evaluates a joint likelihood or a single test
 statistic built from both messengers' data together, or, when the two analyses are
 genuinely independent, combines them with a method (Fisher's combined-probability
 test is standard) that has known statistical properties under the null - see

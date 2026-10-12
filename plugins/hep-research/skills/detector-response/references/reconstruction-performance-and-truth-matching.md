@@ -38,16 +38,20 @@ duplication problem entirely.
 ## Efficiency, fake rate, and purity
 
 These three are computed over different denominators, and mixing them up is a common
-error:
+error. The full definitions, including the mis-ID category and the two duplicate-rate
+conventions, are in [performance metrics](performance-metrics-and-residual-diagnostics.md); in the tracking case:
 
-- **Efficiency** = matched reconstructed objects / generated particles in the
-  fiducial region. Denominator is *generated*.
+- **Efficiency** = generated particles in the fiducial region with at least one
+  matched reconstructed object / generated particles in the fiducial region.
+  Denominator is *generated*; counting matched reconstructed objects instead
+  double-counts under many-to-one matching.
 - **Fake (or ghost) rate** = unmatched reconstructed objects / all reconstructed
   objects. Denominator is *reconstructed*.
-- **Purity** = matched reconstructed objects / all reconstructed objects. The
-  complement of the fake rate over the same denominator.
-- **Duplicate rate** = reconstructed objects beyond the first matched to the same
-  generated particle / generated particles.
+- **Purity** = matched reconstructed objects / all reconstructed objects. Here, with no
+  identity category, it is the complement of the fake rate; with a mis-ID category it
+  is not (see the linked definition).
+- **Duplicate rate** = generated particles matched by two or more reconstructed
+  objects / matched generated particles (state the convention if another is used).
 
 State the fiducial region defining "should have been reconstructed". An efficiency
 quoted without it is not interpretable, because it silently includes or excludes
@@ -69,8 +73,9 @@ dependence and does not transfer to a different sample.
 
 ## Simulation-derived versus data-derived performance
 
-Efficiency measured in simulation is exact by construction (truth is known) but only
-as good as the simulation. Efficiency measured in data has no truth, so it uses a
+Efficiency measured in simulation has known truth, but it still carries the
+finite-sample statistical error of the simulated sample and depends on the matching
+definition, and it is only as good as the simulation. Efficiency measured in data has no truth, so it uses a
 data-driven proxy - tag-and-probe, or the fraction of an independently-identified
 sample that is reconstructed.
 
@@ -130,8 +135,11 @@ where they share a common source - see
 Performance numbers deserve the same scrutiny as physics results:
 
 - **Closure test.** Apply the derived correction back to an independent simulated
-  sample and confirm it recovers the truth within uncertainty. A non-closure is a
-  systematic that must be quoted, not tuned away.
+  sample and confirm it recovers the truth within uncertainty. A non-closure is not
+  tuned away; first diagnose it: a statistical fluctuation (check against the
+  closure-sample uncertainty and with another independent sample), a code bug, a
+  failure of the method in that regime, or a residual model bias. Fix the bug or
+  method; what remains as residual bias is quoted as a systematic.
 - **Independent samples.** Derive corrections and validate them on statistically
   independent samples; deriving and validating on the same events understates the
   uncertainty.
@@ -165,5 +173,6 @@ Performance numbers deserve the same scrutiny as physics results:
   fraction, not a Gaussian core alone.
 - Whether the analysis corrects the data or folds the prediction, applied consistently
   across all regions.
-- A closure test on an independent sample, with any non-closure quoted as a systematic.
+- A closure test on an independent sample, with any non-closure diagnosed (statistics,
+  bug, method failure, residual model bias) and the residual bias quoted as a systematic.
 - A matching-criterion sensitivity check on the headline performance number.

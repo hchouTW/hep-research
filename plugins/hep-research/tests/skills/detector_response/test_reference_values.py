@@ -185,6 +185,65 @@ class SkillUnitsAndScriptRulesTest(unittest.TestCase):
         self.assertAlmostEqual(r['flux_upper'], 5.4799e-7, delta=1e-10)
 
 
+class ReferenceStatementNumbersTest(unittest.TestCase):
+    """WP4 numbers quoted in skills/detector-response/references, checked independently."""
+
+    def test_tracking_resolution_minimum_is_not_at_the_crossover(self):
+        # sigma_R/R = sqrt((c/beta)^2 + (a R)^2), proton (z = 1, p = R), c = 0.01, a = 1e-3/GV.
+        # The terms are equal at c/a = 10 GV (beta ~ 1); the minimum comes from the 1/beta
+        # rise of the scattering term and sits at R^4 = (c m / a)^2, i.e. ~3.06 GV.
+        c, a, m = 0.01, 1e-3, 0.938272
+
+        def rel(r):
+            return math.hypot(c * math.sqrt(1.0 + (m / r) ** 2), a * r)
+
+        grid = [0.1 * 1.001 ** k for k in range(int(math.log(1000.0) / math.log(1.001)))]
+        r_min = min(grid, key=rel)
+        self.assertAlmostEqual(r_min, 3.05, delta=0.05)
+        self.assertAlmostEqual(r_min, math.sqrt(c * m / a), delta=0.01)
+        crossover = c / a
+        self.assertAlmostEqual(crossover, 10.0, places=12)
+        self.assertGreater(abs(r_min - crossover), 5.0)
+        self.assertLess(rel(r_min), rel(crossover))
+
+    def test_energy_scale_shift_of_a_power_law_flux(self):
+        # Steeply falling flux E^-gamma per unit E: a scale error E' = (1 + delta) E shifts
+        # the flux at fixed measured E by (1 + delta)^(gamma - 1) - 1 ~ (gamma - 1) delta.
+        gamma, delta = 2.7, 0.03
+        exact = (1.0 + delta) ** (gamma - 1.0) - 1.0
+        self.assertAlmostEqual(exact, 0.0515, delta=0.001)
+        self.assertAlmostEqual((gamma - 1.0) * delta, 0.051, places=12)
+        self.assertLess(abs(exact - (gamma - 1.0) * delta), 0.001)
+        self.assertGreater(abs(exact - gamma * delta), 0.02)  # gamma*delta = 0.081 is wrong
+
+
+class ReferenceForbiddenPhrasesTest(unittest.TestCase):
+    """WP4: statements confirmed wrong in the detector-response review must stay out of the references."""
+
+    FORBIDDEN = (
+        'minimum at the crossover',
+        'gamma * delta',
+        'gamma*delta',
+        'exact by construction',
+        'd. grupen',
+        'time-averaged mask',
+        'time-averaged dead-channel mask',
+        'more generations of hadronic',
+    )
+
+    def test_forbidden_phrases_are_gone(self):
+        refs = ROOT / 'skills/detector-response/references'
+        hits = []
+        for path in sorted(refs.glob('*.md')):
+            text = ' '.join(path.read_text().lower().split())
+            hits += [f'{path.name}: {phrase!r}' for phrase in self.FORBIDDEN if phrase in text]
+        self.assertEqual(hits, [])
+
+    def test_energy_scale_rule_uses_gamma_minus_one(self):
+        text = (ROOT / 'skills/detector-response/references/cosmic-ray-spectrum-and-composition.md').read_text()
+        self.assertTrue('(gamma - 1) * delta' in text, 'energy-scale rule must read (gamma - 1) * delta')
+
+
 class SkillAwkwardLeadingObjectTest(unittest.TestCase):
     """SKILL.md must carry the leading-object rule that Haiku (which skips references) needs."""
 

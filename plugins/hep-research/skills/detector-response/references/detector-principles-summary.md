@@ -60,7 +60,7 @@ defect bias a final physics result?
 | # | Relation | Meaning, units, validity |
 |---|---|---|
 | 1 | `y = f(x;theta) + epsilon` | Forward model (approximate if `epsilon` is taken Gaussian; Poisson and Landau-like noise violate it) |
-| 2 | `pT ≈ 0.3 |q| B R` | `pT` in GeV/c, `B` in T, bending radius `R` in m (exact in a uniform field, conventional HEP units); rigidity `R = p/q` is what a spectrometer measures |
+| 2 | `pT ≈ 0.3 |q| B rho` | `pT` in GeV/c, `B` in T, bending radius `rho` in m (exact in a uniform field, conventional HEP units); rigidity `R = p/q` is what a spectrometer measures |
 | 3 | `chi^2 = r^T V^{-1} r` | Least-squares objective; `V` must be the covariance of the residual vector |
 | 4 | `theta_0 = (13.6 MeV/(beta c p)) z sqrt(x/X_0) [1 + 0.038 ln(x z^2/(X_0 beta^2))]` | Highland multiple scattering (approximate, ~11% for `1e-3 < x/X_0 < 100`); sets the low-momentum resolution floor |
 | 5 | Bethe-Bloch: `-<dE/dx> = K z^2 (Z/A)(1/beta^2)[0.5 ln(2 m_e c^2 beta^2 gamma^2 W_max/I^2) - beta^2 - delta/2]`, `K = 0.307 MeV mol^-1 cm^2` | Mean loss for heavy charged particles at intermediate energy (approximate). Fluctuations: Landau/Vavilov (asymmetric, long tail) for thin absorbers (`kappa = xi/W_max << 1`), Gaussian for thick ones |
@@ -74,7 +74,7 @@ defect bias a final physics result?
 | 13 | `SF = eps_data/eps_MC` | Efficiency scale factor |
 | 14 | `V_f ≃ J V_x J^T` | First-order propagation; fails for thresholds, migration, strong nonlinearity, asymmetric errors |
 | 15 | `n_i^reco = sum_j R_ij n_j^truth + b_i` | Response matrix: resolution (off-diagonal), inefficiency (column sums < 1), background `b_i`, model dependence via the truth spectrum |
-| 16 | `N_sigma = |mu_1-mu_2|/sqrt(sigma_1^2+sigma_2^2)` | PID separation; Gaussian approximation, unreliable with tails or few photons |
+| 16 | `N_sigma` | PID separation; two conventions (single-measurement, quadrature; a factor `sqrt(2)` apart for equal widths) defined in [performance metrics](performance-metrics-and-residual-diagnostics.md); Gaussian approximation, unreliable with tails or few photons |
 | 17 | Binomial/Poisson intervals | Efficiencies: exact Clopper-Pearson or Wilson, not Gaussian near 0 or 1; counts: Poisson |
 
 ## 4. Detector families at a glance
@@ -92,7 +92,7 @@ defect bias a final physics result?
 | TOF / LGAD / MCP timing | pulse time | `beta`, time | multi-hit, `t_0`, wrong bunch | time residual vs species/amplitude/run |
 | RICH / DIRC / TOP | Cherenkov photons | `beta`, species | photon path; emission/chromatic terms | photon-angle residual vs momentum |
 | Threshold/differential Cherenkov | photon count | species by threshold | near-threshold Poisson | turn-on curve vs momentum |
-| TRD | transition X-rays + `dE/dx` | `e/h` | `dE/dx` overlap | rejection at fixed efficiency vs momentum |
+| TRD | transition X-rays + `dE/dx` | `e/pi` | `dE/dx` overlap | rejection at fixed efficiency vs momentum |
 | `dE/dx` / cluster counting | ionization samples | species | band crossings, saturation | band position vs `beta gamma` |
 | ECAL | EM shower | energy, position | overlap, conversions | `E/p`, resonance mass vs `eta` and `E` |
 | HCAL / jets | hadron shower | energy | `e/h`, leakage | response vs `pT`, flavor |
@@ -112,18 +112,21 @@ the atmosphere or medium optics as the largest nuisance, and exposure replaces a
 ## 5. Performance metrics
 
 Every metric needs: an equation, numerator, denominator, conditioning population,
-matching rule, phase space, object- or event-level, estimator, and uncertainty.
+matching rule, phase space, object- or event-level, estimator, and uncertainty. The
+definitions (purity, fake, duplicate rate, `N_sigma`, width estimators) are in
+[performance metrics](performance-metrics-and-residual-diagnostics.md); this is a summary.
 
 - **Acceptance** `A = N(truth in fiducial)/N(generated)`: truth only.
 - **Efficiency** `eps = N(successful)/N(eligible)`: conditional; name the eligible set
   (reconstruction, ID, trigger, and selection efficiencies have different denominators).
-- **Purity** `P = N(matched true)/N(selected)`.
+- **Purity** `P = N(matched true, correct identity)/N(selected)`.
 - **Fake rate**: selected objects with no valid truth match. **Mis-ID**: a real particle
-  assigned the wrong species. **Duplicate**: one truth matched by several objects.
+  assigned the wrong species. **Duplicate rate**: truths matched by several objects,
+  over matched truths (say which convention).
   `1 - P` = fakes + mis-ID + duplicates, so fake rate is not universally `1 - P`.
 - **Response/scale/bias**: central offset, binned in *truth*. **Resolution**: width
   of `x_reco - x_true` with an explicit estimator (core `sigma`, `sigma_68`,
-  `1.4826 MAD`, RMS), quoted with the **tail fraction**.
+  `IQR/1.349`, `1.4826 MAD`, RMS or std), quoted with the **tail fraction**.
 - **Selection sculpts resolution**: a cut on a reconstructed variable removes one side of
   the residual distribution, improving apparent resolution and creating a conditional bias.
 - **Object vs event level**: with `k` independent objects, "at least one" is `1-(1-p)^k`;

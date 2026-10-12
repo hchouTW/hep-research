@@ -24,7 +24,9 @@ recoil discrimination.
   tails); pairing `S1`-`S2` in the presence of pileup.
 - **3D position**: `xy` from the light pattern (dual phase) or charge pattern; `z` from
   the `S1`-`S2` drift time (`z = v_d Delta t`). In single-phase detectors the
-  charge-arrival time and wire/pad readout provide 3D directly.
+  wire/pad readout and the charge-arrival time give 3D once the interaction time `t0`
+  is known (from scintillation light, a beam spill or an external trigger); without
+  `t0` the drift coordinate is undetermined.
 - **Corrections**: electron lifetime (`exp(-t/tau_e)`, purity monitored and updated),
   position-dependent light collection and charge (nonuniformity), field distortions,
   recombination model, and electron-equivalent vs nuclear-recoil energy scales.

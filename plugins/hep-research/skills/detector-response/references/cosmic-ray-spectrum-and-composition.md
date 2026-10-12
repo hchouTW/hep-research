@@ -53,9 +53,12 @@ cosmic-ray review (revised March 2026); see the latest-results policy in
   catalogs and magnetic-deflection modeling, not redshift.
 
 Because the spectrum falls so steeply, small systematic shifts in the reconstructed
-energy scale move a large number of events across any fixed threshold. An energy-scale
-uncertainty of `delta` propagates into a flux uncertainty of roughly `gamma * delta`
-at fixed measured energy - report the absolute energy-scale uncertainty explicitly
+energy scale move a large number of events across any fixed threshold. For a flux
+`dN/dE ~ E^-gamma` and an energy-scale error `delta` (measured energy `(1 + delta)`
+times the true one), the flux at fixed measured energy shifts by
+`(1 + delta)^(gamma - 1) - 1`, roughly `(gamma - 1) * delta` (one power of `1 + delta`
+is returned by the stretched bin width): about 5% for `gamma = 2.7` and `delta = 3%`.
+Report the absolute energy-scale uncertainty explicitly
 whenever a spectral index or a feature location (knee, ankle, cutoff energy) is
 quoted, and prefer forward-folding the assumed spectrum through the resolution rather
 than unfolding a steeply falling flux bin-by-bin (see
@@ -69,17 +72,22 @@ beyond) as a function of energy, and every ground-based technique infers it
 indirectly through the depth of shower maximum, `X_max` (see
 [extensive air showers](extensive-air-showers.md)) or through the ratio of muon
 to electromagnetic shower content - never through direct nuclear charge measurement,
-which only space-based detectors provide. Two composition observables recur:
+which only direct measurements above most of the atmosphere provide (space-based
+detectors and long-duration balloon-borne instruments). Two composition observables recur:
 
-- **`<X_max>` and its energy dependence** (the "elongation rate"): a proton-dominated
+- **`<X_max>` and its energy dependence**, summarized by the elongation rate
+  `D_10 = d<X_max>/d log10(E)` (the slope, not `<X_max>(E)` itself): a proton-dominated
   composition produces showers that penetrate deeper on average (larger `X_max`) with
   larger shower-to-shower fluctuations than an iron-dominated one, because a heavier
   nucleus behaves approximately as `A` independent nucleon-energy sub-showers
   (superposition model) that average out fluctuations and start higher in the
   atmosphere.
 - **Muon content relative to a proton-shower reference**: heavier primaries produce
-  more muons per unit energy than protons do, because more generations of hadronic
-  sub-showers each feed the muon channel. Every hadronic-interaction model used to
+  more muons per unit energy than protons do. In the superposition model a nucleus of
+  mass number `A` acts as `A` showers of energy `E0/A`, and since muon number grows
+  sublinearly with shower energy (`N_mu ~ E0^beta`, `beta` about 0.9), the sum
+  `A * (E0/A)^beta = A^(1-beta) * E0^beta` exceeds the proton value (see
+  [extensive air showers](extensive-air-showers.md)). Every hadronic-interaction model used to
   predict this ratio is extrapolated far beyond its accelerator-calibrated energy
   range, and current models under-predict the observed muon content at the highest
   energies relative to what a pure-composition explanation would require (the

@@ -43,8 +43,10 @@ is part of the analysis's reproducibility record - see
 
 Two failure modes recur. **Dead and noisy channel maps must match between data and
 simulation**, or simulated events see a detector that does not exist; when the masks
-are time-dependent, the simulation must reproduce the time-averaged mask weighted by
-the luminosity actually collected. And **zero suppression and thresholds discard
+are time-dependent, simulated events must be assigned to runs or periods in
+proportion to the luminosity actually collected, each with that period's mask (or
+per-period simulation combined with exposure weights); an averaged mask is not a
+substitute, since `sum_t w_t R(theta_t) != R(sum_t w_t theta_t)` in general. And **zero suppression and thresholds discard
 information irreversibly** at the readout, so a signal below threshold is not merely
 noisy, it is absent - which produces an efficiency turn-on that must be modeled rather
 than assumed flat.

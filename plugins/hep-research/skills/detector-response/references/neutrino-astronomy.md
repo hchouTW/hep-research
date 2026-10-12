@@ -103,8 +103,10 @@ each candidate position (or over an all-sky scan), is standard - see
 correction this requires when many positions, an all-sky scan, or many source
 catalogs are tested. A diffuse-flux measurement instead fits the aggregate energy and
 zenith-angle distribution of all events above some containment/quality selection
-against a mixture of the (fixed, from independent air-shower measurements)
-atmospheric components plus a free astrophysical power law.
+against a mixture of the atmospheric components (conventional, prompt, and muon
+backgrounds, with normalizations and spectral shapes as nuisance parameters profiled
+in the fit, constrained by priors from independent air-shower and flux calculations)
+plus a free astrophysical power law.
 
 ## Deliverables
 

@@ -25,6 +25,13 @@ quote for any PID system. Propagating `dm/m` from `dbeta/beta` gives
 
     dm/m = gamma^2 * (dbeta/beta)   (at fixed momentum)
 
+and, including the momentum error (approximate: first-order propagation of
+`m = p/(beta*gamma)` with uncorrelated `p` and `beta` errors; the standard TOF mass
+resolution, cf. PDG Review of Particle Physics, "Particle detectors at accelerators",
+particle identification),
+
+    (dm/m)^2 = (dp/p)^2 + (gamma^2 * dbeta/beta)^2
+
 - the `gamma^2` factor is why velocity-based identification degrades so quickly with
 momentum, and why different technologies are needed in different momentum bands.
 `<plugin root>/skills/detector-response/scripts/pid_separation_power.py` evaluates this for time-of-flight and ionization
@@ -90,8 +97,11 @@ layers, and why quoting "dE/dx resolution" without stating the number of samples
 the truncation fraction is meaningless.
 
 The relativistic rise gives some separation power above the minimum-ionizing region,
-but it is weak - a few percent difference in mean loss against a resolution of similar
-size - so dE/dx alone rarely separates species cleanly at high momentum. Its real
+and its size depends on the medium. In gases (for example argon-based mixtures) the
+truncated mean rises by roughly 50-60% above the minimum before the Fermi plateau, so
+a detector with many samples can separate species in the rise region; in dense media
+such as silicon the density effect limits the rise to a few percent, comparable to
+the resolution, so dE/dx there rarely separates species at high momentum. Its real
 strength is at low momentum, below the minimum, where the `1/beta^2` rise is steep, and
 in charge determination at all momenta.
 
@@ -116,9 +126,13 @@ signature in any single layer. That has two direct consequences:
   per-layer response distributions are the calibration, and they must be measured from
   data control samples, not taken from simulation alone.
 - **Performance is quoted as a rejection factor at a fixed efficiency**, and it is
-  strongly `gamma`-dependent. A TRD separates electrons from protons over the momentum
-  band where their `gamma` values differ greatly (because of the ~1836 mass ratio) and
-  loses power once the heavier species also becomes ultra-relativistic. State the
+  strongly `gamma`-dependent. Transition-radiation yield turns on near `gamma ~ 10^3`
+  (the exact onset and saturation depend on the radiator). A TRD separates electrons
+  from a heavier species - pions (`e/pi`, the usual collider figure) or protons (the
+  usual cosmic-ray case, helped by the ~1836 mass ratio) - over the momentum band where
+  the electron is above the onset and the heavier species is below it, and loses power
+  once the heavier species' `gamma` also crosses the onset (roughly 100 GeV/c for
+  pions, about 1 TeV/c for protons). State the
   momentum band, the working-point efficiency, and the rejection factor together - one
   without the others is uninterpretable.
 

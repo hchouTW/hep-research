@@ -9,7 +9,9 @@ Where communities differ, one convention is adopted here and stated.
 | Symbol | Meaning | Units |
 |---|---|---|
 | `x`, `y`, `theta`, `epsilon` | latent properties, observables, nuisance parameters, noise | - |
-| `p`, `q`, `R = p/q` | momentum, charge, rigidity | GeV/c, e, GV |
+| `p`, `q`, `R = p/q` | momentum, charge, rigidity (`R` is used for rigidity only) | GeV/c, e, GV |
+| `rho` | bending radius of a track in a magnetic field | m |
+| `z`; `Z`, `A` | projectile charge number; atomic number and mass number of the traversed material (cosmic-ray texts also write a nucleus's own charge as `Z`; then `z = Z` of the projectile, so say which is meant) | e; -, g/mol |
 | `pT`, `eta`, `phi` | transverse momentum, pseudorapidity, azimuth | GeV/c, -, rad |
 | `B`, `E` | magnetic, electric field | T, V/cm |
 | `X_0`, `lambda_I`, `R_M`, `E_c` | radiation length, interaction length, Moliere radius, critical energy | g/cm^2 or cm, MeV |
@@ -18,12 +20,14 @@ Where communities differ, one convention is adopted here and stated.
 | `v_d`, `D`, `C_D`, `tau_e` | drift velocity, diffusion, diffusion coefficient, electron lifetime | cm/us, cm^2/s, um/sqrt(cm), us |
 | `theta_L` | Lorentz angle | rad |
 | `N_pe`, `F`, `QE` | photoelectrons, excess-noise factor, quantum efficiency | -, -, - |
-| `A`, `eps`, `P` | acceptance, efficiency, purity | - |
+| `A`, `eps`, `P` | acceptance, efficiency, purity (`A` alone, in metric context) | - |
+| `e/h` | calorimeter compensation ratio: response to the electromagnetic over the non-electromagnetic hadronic component | - |
+| `e/pi` | electron-pion separation (TRD, calorimeter PID), quoted as pion rejection at fixed electron efficiency | - |
 | `r`, `p` (pull), `V_r`, `chi^2` | residual, pull, residual covariance, `chi^2` | as measured |
 | `SF` | efficiency scale factor `eps_data/eps_MC` | - |
 | `J`, `V_x`, `V_f` | Jacobian, input covariance, propagated covariance | - |
 | `R_ij`, `n^reco`, `n^truth`, `b` | response matrix, reconstructed/truth spectra, background | - |
-| `N_sigma` | separation `|mu_1-mu_2|/sqrt(sigma_1^2+sigma_2^2)` | - |
+| `N_sigma` | separation of two species' means in resolution units; conventions in [performance metrics](performance-metrics-and-residual-diagnostics.md) | - |
 
 ## Acronyms
 
@@ -42,12 +46,14 @@ TPC time projection chamber; TRD transition radiation detector; WLS wavelength s
 ## Adopted conventions
 
 - **Resolution** = width of `x_reco - x_true` (or the relative form) for a population
-  binned in *truth*, with estimator (core `sigma`, `sigma_68`, robust MAD, RMS) stated,
-  and the tail fraction quoted separately.
+  binned in *truth*, with estimator (core `sigma`, `sigma_68`, `IQR/1.349`,
+  `1.4826 MAD`, RMS or std; defined in [performance metrics](performance-metrics-and-residual-diagnostics.md)) stated, and the
+  tail fraction quoted separately.
 - **Efficiency** = successes / eligible with the eligible population and matching rule
   named; **acceptance** is truth-only.
 - **Fake** = selected object with no truth match; **mis-ID** = real particle with the
-  wrong species; **duplicate** = truth matched by more than one object.
+  wrong species; **duplicate** = truth matched by more than one object (rates and
+  denominators in [performance metrics](performance-metrics-and-residual-diagnostics.md)).
 - **Response** = `<x_reco/x_true>` at fixed truth; **calibration** = the procedure that
   corrects it; **scale** = central offset (bias); **alignment** = element positions,
   distinct from timing/drift calibration.
