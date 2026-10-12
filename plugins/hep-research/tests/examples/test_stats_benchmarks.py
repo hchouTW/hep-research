@@ -151,7 +151,8 @@ class DiscreteProfile(unittest.TestCase):
 class PublishedLikelihood(unittest.TestCase):
     """T17: the committed reproduction of ATLAS-SUSY-2018-31 SRB (OBSERVED public likelihood). The asymptotic
     construction was preregistered as primary and reproduces every value; the toy construction is reported with its
-    own verdict (it does not reproduce the observed and -1 sigma limits); the fit without the control region fails."""
+    own verdict (it does not reproduce the observed and -1 sigma limits; a post-hoc diagnosis against the exact counting
+    construction explains why); the fit without the control region fails."""
 
     @classmethod
     def setUpClass(cls):
@@ -174,6 +175,58 @@ class PublishedLikelihood(unittest.TestCase):
         self.assertEqual(t["toys_per_point"], 5000)
         lo, hi = t["S95_obs_mc_range_95"]
         self.assertGreater(lo, 4.9 + 0.05)                                 # the toy limit is not the published one
+
+    def test_toy_difference_is_diagnosed_post_hoc(self):
+        """The preregistered toy verdict stays a fail; the post-hoc diagnosis explains it: the toys match exact Poisson
+        sums, the full-model toy limit contains the exact counting limit, and the asymptotic formulae fall short of
+        the exact limit on the bare one-bin model, while the published values follow the asymptotic construction."""
+        self.assertTrue(self.res["verdict"]["toy_difference_explained_post_hoc"])
+        d = self.res["toy_diagnosis"]
+        self.assertTrue(d["post_hoc"])
+        self.assertTrue(d["toy_machinery"]["pass"])
+        self.assertTrue(d["toy_obs_range_contains_exact_counting"])
+        exact, bare = d["exact_counting"], d["bare_asymptotic"]
+        self.assertEqual(exact["n_obs"], 3)
+        self.assertAlmostEqual(exact["S95_obs"], 5.2843, delta=1e-3)
+        self.assertGreater(bare["shortfall_vs_exact_obs"], 0.05)
+        published = self.mod.PREREGISTRATION["reference_values"]["S95_obs"]["value"]
+        self.assertLess(abs(self.res["asymptotic"]["values"]["S95_obs"] - published), 0.05)
+        self.assertGreater(exact["S95_obs"] - published, 0.3)               # the exact limit is not the published one
+
+    def test_crossing_interpolates_log_cls(self):
+        grid = [1.0, 2.0, 3.0]
+        vals = [math.exp(-1.5 * s) for s in grid]                           # exponential: log-linear is exact
+        self.assertAlmostEqual(self.mod._crossing(grid, vals), -math.log(0.05) / 1.5, places=12)
+        self.assertAlmostEqual(self.mod._crossing([1.0, 2.0], [0.1, 0.0]), 1.5)   # a zero falls back to linear
+        self.assertIsNone(self.mod._crossing(grid, [0.5, 0.4, 0.3]))            # not bracketed
+        self.assertIsNone(self.mod._crossing(grid, [0.5, None, 0.01]))
+
+    def test_exact_counting_limit(self):
+        try:
+            import scipy  # noqa: F401
+        except ImportError:
+            self.skipTest("SciPy not installed")
+        self.assertAlmostEqual(self.mod._counting_limit(0, 3.0), -math.log(0.05), places=8)  # independent of b at n = 0
+        self.assertAlmostEqual(self.mod._counting_limit(0, 0.5), -math.log(0.05), places=8)
+        s = self.mod._counting_limit(3, 3.232)
+        from scipy import stats
+        self.assertAlmostEqual(stats.poisson.cdf(3, s + 3.232) / stats.poisson.cdf(3, 3.232), 0.05, places=9)
+
+    def test_diagnosis_reruns_on_the_bare_model(self):
+        try:
+            import pyhf  # noqa: F401
+        except ImportError:
+            self.skipTest("pyhf not installed")
+        with contextlib.redirect_stdout(io.StringIO()):
+            d = self.mod.toy_diagnosis(3, self.res["asymptotic"]["values"]["postfit_SM_yield_SRB"], None)
+        self.assertNotIn("toy_obs_range_contains_exact_counting", d)
+        ref = self.res["toy_diagnosis"]
+        self.assertEqual(close(d["exact_counting"], ref["exact_counting"]), [])
+        self.assertAlmostEqual(d["bare_asymptotic"]["S95_obs"], ref["bare_asymptotic"]["S95_obs"], delta=1e-3)
+        self.assertTrue(d["toy_machinery"]["pass"])
+        for a, b in zip(d["toy_machinery"]["rows"], ref["toy_machinery"]["rows"]):   # fits may differ across platforms
+            for p in ("CLsb", "CLb"):
+                self.assertAlmostEqual(a[p]["toys"], b[p]["toys"], delta=0.005, msg=(a["S"], p))
 
     def test_artifacts_validate_and_the_gate_is_not_passed(self):
         self.assertTrue(self.val["computational_run"]["ok"])

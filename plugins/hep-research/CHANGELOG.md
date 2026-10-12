@@ -3,6 +3,16 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **T17 toy construction diagnosed.** The published-likelihood benchmark (ATLAS-SUSY-2018-31 SRB) adds a post-hoc
+  diagnosis, labelled as such: the exact counting CLs limit of the one-bin SRB (n = 3, b = 3.23) is 5.284, inside the
+  toy limit's MC range; pyhf's toys match exact Poisson sums on the bare one-bin model; the asymptotic formulae give
+  4.68 there, 12% below the exact limit. The toys are correct; the published 4.9 follows the asymptotic construction,
+  which understates the limit at three events. The preregistered toy-vs-paper verdict stays a fail.
+- **sci-fix: CLs crossings interpolate log CLs.** Linear interpolation of CLs between the 1.0-wide toy grid points put
+  every toy crossing 0.06-0.12 too high (observed 5.34 -> 5.28, -1 sigma 4.03 -> 3.94); no verdict changed.
+
 ## 0.6.12 (2026-10-12)
 
 - **Discrete profiling coverage established (T27).** A preregistered follow-up with 1,500 toys per envelope row
