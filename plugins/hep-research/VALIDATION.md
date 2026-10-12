@@ -458,6 +458,13 @@ Cowan et al. (one written in this work was wrong). An independent review of the 
 2.2 fields changing legacy outcomes, a permissive publication gate, the gate at q0 = 0, stale global fits, a
 `beta_ppf` underflow), all fixed with tests. pyhf 0.7.6's toy expected bands fail with NumPy ≥ 2.4 (upstream).
 
+## 0.6.12 release check (2026-10-12, E2)
+
+Version 0.6.12 (hep-statistics follow-ups, #51: T27 coverage at 1,500 toys, the Combine release gate, the campaigns
+job). Examples rerun with the E2 venv: only the plugin version string changed (the unfolding-coverage float drift was
+reverted as in earlier releases). `tools/run_all_checks.py` with the host CLIs: 20 of 20 checks pass; 2,008 unit tests,
+0 failures, 55 skipped. Release manifest `release-manifests/0.6.12.json`.
+
 ## 0.6.11 release check (2026-10-12, E2)
 
 Version 0.6.11 (the hep-statistics audit, contracts 2.2.0). Examples rerun with the E2 venv: only the plugin version
