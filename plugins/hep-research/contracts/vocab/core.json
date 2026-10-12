@@ -1,5 +1,5 @@
 {
- "contracts_version": "2.3.0",
+ "contracts_version": "2.4.0",
  "note": "Core vocabularies. Profiles extend them only with namespaced terms '<namespace>:<term>' declared in profile.json vocabulary_extensions. Unknown un-namespaced terms are rejected.",
  "vocabularies": {
   "levels": {
@@ -115,6 +115,20 @@
    "demonstrated-on-synthetic-data": "",
    "tested-in-declared-environment": "",
    "unavailable": ""
+  },
+  "response_corrections": {
+   "migration": "Bin-to-bin migration between truth and reco (the matrix itself)",
+   "efficiency": "Inefficiency of the whole selection; any '<x>_efficiency' term is in the same class",
+   "trigger_efficiency": "Trigger efficiency (efficiency class)",
+   "reconstruction_efficiency": "Reconstruction or tracking efficiency (efficiency class)",
+   "selection_efficiency": "Offline selection efficiency (efficiency class)",
+   "identification_efficiency": "Particle identification efficiency (efficiency class)",
+   "acceptance": "Geometric or kinematic acceptance",
+   "fiducial": "Out-of-fiducial truth events (truth outside the declared phase space)",
+   "fakes": "Reco events with no matching truth event (background-like, applied in reco space)",
+   "exposure": "Exposure (acceptance x live time) normalization",
+   "luminosity": "Integrated luminosity normalization",
+   "livetime": "Detector live time"
   }
  }
 }

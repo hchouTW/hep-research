@@ -75,9 +75,15 @@ class TagAndProbeTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             clopper_pearson(1, 10, level=1.0)
 
-    def test_efficiency_bin_zero_total_is_nan_not_error(self):
+    def test_efficiency_bin_zero_total_is_null_not_error(self):
+        # Rewritten (2026-10 review, section 3.1): this test used to require NaN, but NaN
+        # is not valid JSON, so the CLI output was unparseable by a strict consumer. Zero
+        # probes leave the efficiency undefined: null with a reason, not NaN and not an error.
         result = efficiency_bin(0, 0)
-        self.assertNotEqual(result['efficiency'], result['efficiency'])  # NaN
+        self.assertIsNone(result['efficiency'])
+        self.assertIsNone(result['lower_bound'])
+        self.assertIsNone(result['upper_bound'])
+        self.assertIn('reason', result)
 
     def test_cli_matches_library_result(self):
         result = subprocess.run(
@@ -88,8 +94,8 @@ class TagAndProbeTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0)
         payload = json.loads(result.stdout)
         expected_lo, expected_hi = clopper_pearson(92, 100)
-        self.assertAlmostEqual(payload['lower'], expected_lo, places=10)
-        self.assertAlmostEqual(payload['upper'], expected_hi, places=10)
+        self.assertAlmostEqual(payload['lower_bound'], expected_lo, places=10)
+        self.assertAlmostEqual(payload['upper_bound'], expected_hi, places=10)
 
     def test_cli_rejects_pass_greater_than_total(self):
         result = subprocess.run(

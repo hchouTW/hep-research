@@ -52,7 +52,8 @@ specific orbit and epoch requires particle backtracing through a full geomagneti
 field model and is not something the analytic formula replaces.
 
 **Selection rule for a flux.** Keep an event in a rigidity bin only if the bin's lower edge
-is above a safety factor (typically 1.2) times the maximum cutoff, where the cutoff is
+is above a safety factor times the maximum cutoff (1.2 is one experiment's convention,
+not a general standard; state the value used), where the cutoff is
 backtraced through a realistic field model (e.g. IGRF plus an external-field model) over the
 detector's acceptance cone at that second. Add that second's livetime to the exposure of the
 same bins, and only those bins. The Störmer value is a planning check and does not replace
@@ -163,18 +164,22 @@ PID chain in [particle-identification.md](particle-identification.md)),
 it gives an unambiguous species and isotope identification that no ground-based
 technique provides - the reason direct detection remains the reference measurement
 for composition, isotopic ratios, and antiparticle fluxes, even though its
-geometric-factor-limited exposure caps its reach well below the knee. The measured
-**positron fraction** (positron flux relative to positron-plus-electron flux) rising
-with energy above a few GeV, and a harder-than-secondary-production **antiproton**
-spectrum at high rigidity, are the most consequential such results: standard secondary
-production (cosmic-ray nuclei spallating on the interstellar medium, per
+geometric-factor-limited exposure caps its reach well below the knee. Two antiparticle
+results are often quoted together but differ in status. The measured **positron
+fraction** (positron flux relative to positron-plus-electron flux) rises with energy
+above a few GeV, whereas standard secondary production (cosmic-ray nuclei spallating
+on the interstellar medium, per
 [cosmic-ray spectrum and composition](cosmic-ray-spectrum-and-composition.md))
-predicts a falling positron fraction and a softer antiproton spectrum, so the excess
-is interpreted either as evidence of nearby primary sources (pulsars are the leading
-astrophysical candidate) or, more speculatively, as a signature of dark-matter
-annihilation or decay - distinguishing the two requires the spectral shape, an
-eventual high-energy cutoff or lack thereof, and consistency with other channels
-(gamma-ray, anisotropy), not the excess alone.
+predicts a falling fraction; this positron excess is interpreted either as nearby
+primary sources of `e+ e-` pairs (pulsars are the leading astrophysical candidate) or,
+more speculatively, as dark-matter annihilation or decay. Pulsars produce only `e+-`,
+not antiprotons. The **antiproton** spectrum at high rigidity is harder than some
+secondary-production predictions, but whether it exceeds the secondary expectation at
+all is still debated, because the prediction's uncertainties (production cross
+sections, propagation) are comparable to the difference. Distinguishing source
+hypotheses requires the spectral shape, an eventual high-energy cutoff or lack
+thereof, and consistency with other channels (gamma-ray, anisotropy), not an excess
+alone.
 
 ## Worked walkthrough: a proton flux point from counts (verified 2026-09-24)
 

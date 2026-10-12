@@ -15,20 +15,27 @@ three-term model is linear in its parameters and so is fit exactly).
 
 What it does: evaluates
     N(X) = N_max * ((X - X0)/(X_max - X0))^((X_max - X0)/lambda) * exp((X_max - X)/lambda)
-at one or more depths, confirms N(X_max) == N_max as a self-consistency check, and
-computes the shower age s(X) = 3*(X - X0) / ((X - X0) + 2*(X_max - X0)), which is 1 at
-X = X_max by construction and is the variable shower-universality parameterizations
-(<plugin root>/skills/detector-response/references/extensive-air-showers.md) use to compare showers of different energy
-and mass on a common footing.
+at one or more depths (in log space, so a small lambda cannot overflow), confirms
+N(X_max) == N_max as a self-consistency check, and computes two shower ages, both equal
+to 1 at X = X_max:
+  shower_age          s(X) = 3*(X - X0) / ((X - X0) + 2*(X_max - X0)), the version
+                      shifted by X0 (s = 0 at X = X0); internally consistent with the
+                      Gaisser-Hillas X0, but not the definition universality studies use.
+  shower_age_standard s(X) = 3X / (X + 2 X_max), the standard age that shower-universality
+                      parameterizations (<plugin root>/skills/detector-response/references/extensive-air-showers.md)
+                      use to compare showers of different energy and mass.
+For X=400, X_max=750, X0=-60 they give 0.663 and 0.632; quote which one is used.
 
 Usage notes / assumptions: standard library only. Depths in g/cm^2. Requires
 X_max > X0 and lambda > 0; N(X) is defined and evaluated only for X > X0 (the model is
-not defined at or before the extrapolated first-interaction depth).
+not defined at or before the extrapolated first-interaction depth; the CLI reports null
+there). Depths must be finite.
 Run: python3 <plugin root>/skills/detector-response/scripts/xmax_gaisser_hillas.py --n-max 2e7 --x-max 750 --x0 -60 --lambda-param 60 --depths 400,600,750,900,1100
 """
 import argparse
 import json
 import math
+import sys
 
 
 def _finite(value, name, positive=False):
@@ -40,21 +47,39 @@ def _finite(value, name, positive=False):
 
 
 def gaisser_hillas(depth, n_max, x_max, x0, lam):
-    """N(X) at a single depth; nan for depth <= x0 (model undefined there)."""
+    """N(X) at a single depth; nan for depth <= x0 (model undefined there).
+
+    Evaluated as N_max * exp(e * ln(base) + (X_max - X)/lambda) with e = (X_max - X0)/lambda:
+    the two factors can each overflow for small lambda although N(X) <= N_max always.
+    """
     if depth <= x0:
         return float('nan')
     if x_max <= x0:
         raise ValueError('x_max must be greater than x0')
     exponent = (x_max - x0) / lam
+    if not math.isfinite(exponent):
+        raise ValueError('(x_max - x0)/lambda is not representable; lambda is too small')
     base = (depth - x0) / (x_max - x0)
-    return n_max * (base ** exponent) * math.exp((x_max - depth) / lam)
+    return n_max * math.exp(exponent * math.log(base) + (x_max - depth) / lam)
 
 
 def shower_age(depth, x_max, x0):
-    """s(X) = 3*(X - X0) / ((X - X0) + 2*(X_max - X0)); s=1 at X=X_max, s=0 at X=X0."""
+    """s(X) = 3*(X - X0) / ((X - X0) + 2*(X_max - X0)); s=1 at X=X_max, s=0 at X=X0.
+
+    The X0-shifted age; see shower_age_standard for the universality definition.
+    """
     if x_max <= x0:
         raise ValueError('x_max must be greater than x0')
     return 3.0 * (depth - x0) / ((depth - x0) + 2.0 * (x_max - x0))
+
+
+def shower_age_standard(depth, x_max):
+    """s(X) = 3X / (X + 2 X_max), the age used by shower-universality studies; None for X < 0."""
+    if x_max <= 0:
+        raise ValueError('x_max must be greater than zero for the standard age')
+    if depth < 0:
+        return None
+    return 3.0 * depth / (depth + 2.0 * x_max)
 
 
 def half_max_depths(n_max, x_max, x0, lam, fraction=0.5, tolerance=1e-6, max_iterations=200):
@@ -99,6 +124,16 @@ def half_max_depths(n_max, x_max, x0, lam, fraction=0.5, tolerance=1e-6, max_ite
     return rising_depth, falling_depth
 
 
+def _fail(message):
+    print(json.dumps({'ok': False, 'error': message}, indent=2))
+    print(f'xmax_gaisser_hillas.py: error: {message}', file=sys.stderr)
+    return 1
+
+
+def _none_if_nan(value):
+    return None if value is None or math.isnan(value) else value
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -108,7 +143,7 @@ def main():
     parser.add_argument('--lambda-param', type=float, required=True, dest='lam',
                         help='shape/attenuation length, g/cm^2')
     parser.add_argument('--depths', type=str, default=None,
-                        help='comma-separated depths (g/cm^2) at which to evaluate N(X)')
+                        help='comma-separated finite depths (g/cm^2) at which to evaluate N(X)')
     args = parser.parse_args()
 
     try:
@@ -118,28 +153,49 @@ def main():
         lam = _finite(args.lam, 'lam', positive=True)
         if x_max <= x0:
             raise ValueError('x_max must be greater than x0')
+        if not math.isfinite((x_max - x0) / lam):
+            raise ValueError('(x_max - x0)/lambda is not representable; lambda is too small')
+        depths = []
+        if args.depths:
+            for text in args.depths.split(','):
+                try:
+                    depth = float(text)
+                except ValueError:
+                    raise ValueError(f'depth {text!r} is not a number') from None
+                depths.append(_finite(depth, 'each depth'))
+    except ValueError as exc:
+        parser.error(str(exc))
 
+    try:
         result = {
             'n_max': n_max, 'x_max': x_max, 'x0': x0, 'lambda_g_cm2': lam,
             'n_at_x_max_check': gaisser_hillas(x_max, n_max, x_max, x0, lam),
         }
-
-        if args.depths:
-            depths = [float(d) for d in args.depths.split(',')]
+        if depths:
             result['profile'] = [
-                {'depth': d, 'n': gaisser_hillas(d, n_max, x_max, x0, lam),
-                 'shower_age': shower_age(d, x_max, x0) if d > x0 else None}
+                {'depth': d, 'n': _none_if_nan(gaisser_hillas(d, n_max, x_max, x0, lam)),
+                 'shower_age': shower_age(d, x_max, x0) if d > x0 else None,
+                 'shower_age_standard': shower_age_standard(d, x_max) if x_max > 0 else None}
                 for d in depths
             ]
+            result['shower_age_definitions'] = {
+                'shower_age': '3(X - X0) / ((X - X0) + 2(X_max - X0)), shifted by X0',
+                'shower_age_standard': '3X / (X + 2 X_max), the universality definition',
+            }
 
         rising, falling = half_max_depths(n_max, x_max, x0, lam)
         result['half_maximum_depths'] = {'rising_edge': rising, 'falling_edge': falling,
                                          'full_width_half_maximum': falling - rising}
-    except ValueError as exc:
-        parser.error(str(exc))
-
-    print(json.dumps({'method': 'Gaisser-Hillas profile evaluation (closed-form, not a fit)', **result}, indent=2))
+        text = json.dumps({'method': 'Gaisser-Hillas profile evaluation (closed-form, not a fit)',
+                           **result}, indent=2, allow_nan=False)
+    except (ValueError, OverflowError, ZeroDivisionError) as exc:
+        message = str(exc)
+        if 'JSON compliant' in message:
+            message = 'result contains a non-finite number for these parameters'
+        return _fail(message)
+    print(text)
+    return 0
 
 
 if __name__ == '__main__':
-    main()
+    raise SystemExit(main())

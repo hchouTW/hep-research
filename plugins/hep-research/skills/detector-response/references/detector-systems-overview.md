@@ -68,9 +68,12 @@ analysis: measurement uncertainty is approximately Gaussian in curvature, not in
 rigidity or momentum. The relative rigidity resolution therefore grows roughly
 linearly with rigidity, `sigma(R)/R ~ R`, until it is no longer meaningful - at the
 **maximum detectable rigidity** (MDR), where `sigma(R)/R` reaches 100%, the sign of
-the curvature is no longer reliably determined. Above the MDR a spectrometer does not
-simply become imprecise; it begins to misassign charge sign, scattering
-high-rigidity particles of one sign into the other sign's sample. Any analysis
+the curvature is no longer reliably determined. Charge-sign misassignment does not
+switch on at the MDR: it grows continuously as `R` approaches the MDR (for a purely
+Gaussian curvature error it is already about 0.1% at `R = MDR/3`), and in practice it
+is dominated by the non-Gaussian tails of the curvature distribution, so it must be
+evaluated at every rigidity, not only near or above the MDR. It scatters particles
+of one sign into the other sign's sample. Any analysis
 sensitive to a charge ratio or to a rare oppositely-charged species must treat this
 **charge confusion** as a background, not as a resolution effect - see
 [tracking and vertexing](tracking-and-vertexing.md).
@@ -148,10 +151,11 @@ Terms that are frequently conflated, and are worth stating precisely in any writ
 - **Bias** - the mean of (reconstructed minus true). A resolution quoted without a
   bias check is incomplete; a small bias in a steeply falling spectrum can matter more
   than a large resolution.
-- **Response** - the mean reconstructed value as a function of true value, whose
-  deviation from unity slope is a calibration problem, not a resolution problem - see
-  [calibration and alignment](calibration-and-alignment.md).
-- **Linearity** - whether response is constant across the measured range.
+- **Response** - the mean reconstructed value as a function of true value,
+  `<x_reco>(x_true)`, whose deviation from unity slope is a calibration problem, not a
+  resolution problem - see [calibration and alignment](calibration-and-alignment.md).
+- **Linearity** - whether the response is a straight line through the origin, i.e.
+  whether the ratio `<x_reco>/x_true` is constant across the measured range.
 - **Occupancy** - the fraction of readout channels hit per event, which drives
   pattern-recognition difficulty and confusion, not resolution.
 

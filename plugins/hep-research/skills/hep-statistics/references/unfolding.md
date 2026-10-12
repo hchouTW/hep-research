@@ -41,6 +41,7 @@ spectrum that ignores those correlations is wrong.
 `<plugin root>/core/stats/unfolding_diagnostics.py` runs regularization scans, closure and pulls, forward-fold versus
 unfold-then-fit comparisons, response-statistics propagation and regularization-choice criteria on small matrices
 (see the [core/stats guide](core-stats-guide.md#unfolding_diagnosticspy-regularization-closure-folding)). Validate the
-response first with `<plugin root>/core/stats/validate_response.py`. These are diagnostics with independent Poisson data
+response first with `<plugin root>/core/stats/validate_response.py`, declaring `"intended_use": "unfolding"` so that
+rank deficiency and empty truth bins stay errors. These are diagnostics with independent Poisson data
 and no systematics, not an unfolding framework; label results `[General method]` and keep the input status
 (`synthetic`, `asimov`, `observed`) on every output.

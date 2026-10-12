@@ -28,6 +28,16 @@ production alternate, roughly doubling the number of particles every radiation l
 the **critical energy**, below which ionization loss overtakes radiative loss, and the
 remaining particles are absorbed.
 
+Approximate scales, with `Z`, `A` the absorber's atomic number and mass number (g/mol)
+(empirical fits from the PDG Review of Particle Physics, "Passage of particles through
+matter", radiation length and electromagnetic cascades; use the PDG tabulated material
+values when they exist):
+
+    X0    ~= 716.4 * A / (Z * (Z + 1) * ln(287 / sqrt(Z)))   g/cm^2
+    E_c   ~= 610 MeV / (Z + 1.24)    (solids and liquids; 710 MeV / (Z + 0.92) for gases)
+    R_M   ~= X0 * (21.2 MeV / E_c)
+    t_max ~= ln(E / E_c) + C   (in X0; C = -0.5 for electrons, +0.5 for photons)
+
 Two consequences matter for design and for analysis. Shower *depth* grows only
 logarithmically with energy - measured in `X0`, the depth of shower maximum scales as
 `ln(E)` - so a calorimeter deep enough for a given energy remains adequate over a wide
@@ -75,9 +85,12 @@ quadrature:
   contribution falls as `1/E`. It is the term that grows when pileup increases, and
   the reason optimal cluster size is pileup-dependent.
 - **`c`, the constant term** - calibration non-uniformity, channel-to-channel
-  intercalibration error, and energy leakage. It does not improve with energy and
-  therefore *sets the ultimate high-energy performance*. A calorimeter's high-energy
-  precision is a calibration achievement, not a detector-technology achievement.
+  intercalibration error, hardware non-uniformity (dead material, cracks, temperature
+  and light-collection variations), energy leakage, and in hadronic calorimeters the
+  fluctuations of the electromagnetic fraction when `e/h != 1` (non-compensation). It
+  does not improve with energy and therefore *sets the ultimate high-energy
+  performance*. A calorimeter's high-energy precision depends on calibration and
+  uniformity as much as on the detector technology.
 
 The most common analysis error here is quoting a stochastic term alone and
 extrapolating it to high energy, which predicts an arbitrarily good resolution that
@@ -94,7 +107,8 @@ quote the covariance, or at least the range fitted, alongside the values.
 ## Hadronic showers and non-compensation
 
 A hadronic shower develops through nuclear interactions over the interaction length
-`lambda_I`, which is much larger than `X0` in dense absorbers - so hadronic
+`lambda_I` (roughly `35 * A^(1/3)` g/cm^2, a rough empirical scaling; PDG tabulates
+the values per material), which is much larger than `X0` in dense absorbers - so hadronic
 calorimeters are far deeper than electromagnetic ones, and shower fluctuations are
 much larger.
 
@@ -107,8 +121,12 @@ on nuclear binding energy, slow neutrons, and nuclear fragments - and is not det
 If the calorimeter's response to the electromagnetic component differs from its
 response to the hadronic component (the ratio conventionally written `e/h` differs from
 1, the **non-compensating** case, which is the usual case), then the measured energy
-depends on the fluctuating electromagnetic fraction. This produces three effects
-simultaneously, and they are often confused:
+depends on the fluctuating electromagnetic fraction `f_em`. The pion-to-electron
+response ratio is (approximate; PDG Review of Particle Physics, "Calorimetry")
+
+    pi/e = f_em + (1 - f_em) * h/e
+
+This produces three effects simultaneously, and they are often confused:
 
 - **Degraded resolution**, because the electromagnetic fraction fluctuates.
 - **Non-linearity**, because the mean electromagnetic fraction rises with energy, so

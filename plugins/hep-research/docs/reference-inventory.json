@@ -5,12 +5,12 @@
  "by_skill": {
   "detector-response": {
    "references": 33,
-   "bytes": 346804,
+   "bytes": 363663,
    "uncited": 0
   },
   "hep-analysis": {
    "references": 9,
-   "bytes": 73555,
+   "bytes": 74120,
    "uncited": 0
   },
   "hep-computing": {
@@ -20,7 +20,7 @@
   },
   "hep-statistics": {
    "references": 9,
-   "bytes": 118868,
+   "bytes": 119464,
    "uncited": 0
   },
   "hep-theory": {
@@ -43,8 +43,8 @@
   {
    "path": "skills/detector-response/references/calibration-and-alignment.md",
    "owner": "detector-response",
-   "bytes": 8720,
-   "lines": 144,
+   "bytes": 9215,
+   "lines": 150,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -66,13 +66,13 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b944a23 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/calorimetry-ecal-hcal.md",
    "owner": "detector-response",
-   "bytes": 10520,
-   "lines": 174,
+   "bytes": 11542,
+   "lines": 192,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/calibration-and-alignment.md",
@@ -90,13 +90,13 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b944a23 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/cherenkov-imaging-variants-and-photosensors.md",
    "owner": "detector-response",
-   "bytes": 9246,
-   "lines": 138,
+   "bytes": 9984,
+   "lines": 147,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/detector-principles-bibliography.md",
@@ -112,12 +112,12 @@
     "hep-analysis",
     "research-communication"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b944a23 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/core-detector-equations.md",
    "owner": "detector-response",
-   "bytes": 5735,
+   "bytes": 5918,
    "lines": 41,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -125,13 +125,13 @@
     "skills/detector-response/references/detector-principles-summary.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b944a23 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/cosmic-ray-spectrum-and-composition.md",
    "owner": "detector-response",
-   "bytes": 10833,
-   "lines": 173,
+   "bytes": 11463,
+   "lines": 181,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -144,14 +144,15 @@
     "skills/hep-analysis/references/hep-analysis-guide.md",
     "skills/hep-analysis/scripts/cr_spectrum_powerlaw_fit.py",
     "skills/hep-statistics/references/astroparticle-statistics.md",
-    "skills/research-communication/references/primary-sources-and-version-checks.md"
+    "skills/research-communication/references/primary-sources-and-version-checks.md",
+    "tests/skills/detector_response/test_reference_values.py"
    ],
    "cited_by_other_skills": [
     "hep-analysis",
     "hep-statistics",
     "research-communication"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b944a23 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
@@ -177,8 +178,8 @@
   {
    "path": "skills/detector-response/references/detector-case-studies-and-checklists.md",
    "owner": "detector-response",
-   "bytes": 13815,
-   "lines": 207,
+   "bytes": 13882,
+   "lines": 208,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/detector-measurement-framework.md",
@@ -189,12 +190,12 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b944a23 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/detector-comparison-tables.md",
    "owner": "detector-response",
-   "bytes": 14411,
+   "bytes": 14521,
    "lines": 155,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -205,13 +206,13 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b944a23 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/detector-glossary.md",
    "owner": "detector-response",
-   "bytes": 3855,
-   "lines": 61,
+   "bytes": 4756,
+   "lines": 67,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/core-detector-equations.md",
@@ -222,7 +223,7 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b944a23 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/detector-measurement-framework.md",
@@ -250,20 +251,20 @@
   {
    "path": "skills/detector-response/references/detector-principles-bibliography.md",
    "owner": "detector-response",
-   "bytes": 11407,
-   "lines": 145,
+   "bytes": 11491,
+   "lines": 146,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/detector-principles-summary.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b944a23 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/detector-principles-summary.md",
    "owner": "detector-response",
-   "bytes": 20792,
-   "lines": 274,
+   "bytes": 22432,
+   "lines": 288,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/detector-response/README.md",
@@ -271,13 +272,13 @@
     "skills/detector-response/references/core-detector-equations.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "5db10d5 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/detector-simulation.md",
    "owner": "detector-response",
-   "bytes": 11837,
-   "lines": 199,
+   "bytes": 12161,
+   "lines": 202,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/calibration-and-alignment.md",
@@ -293,13 +294,13 @@
     "hep-analysis",
     "hep-theory"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b944a23 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/detector-systems-overview.md",
    "owner": "detector-response",
-   "bytes": 11852,
-   "lines": 183,
+   "bytes": 12196,
+   "lines": 187,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -320,13 +321,13 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b944a23 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/event-reconstruction.md",
    "owner": "detector-response",
-   "bytes": 10574,
-   "lines": 179,
+   "bytes": 10770,
+   "lines": 181,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/calibration-and-alignment.md",
@@ -340,12 +341,12 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b944a23 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/extensive-air-showers.md",
    "owner": "detector-response",
-   "bytes": 7928,
+   "bytes": 7969,
    "lines": 126,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -364,13 +365,13 @@
     "hep-analysis",
     "research-communication"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b944a23 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/gaseous-and-specialized-tracking-technologies.md",
    "owner": "detector-response",
-   "bytes": 15082,
-   "lines": 250,
+   "bytes": 15340,
+   "lines": 253,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/detector-principles-bibliography.md",
@@ -387,13 +388,13 @@
     "hep-analysis",
     "research-communication"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b944a23 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/ground-based-detection-arrays.md",
    "owner": "detector-response",
-   "bytes": 7871,
-   "lines": 121,
+   "bytes": 8038,
+   "lines": 123,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/cosmic-ray-spectrum-and-composition.md",
@@ -408,13 +409,13 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b944a23 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/imaging-atmospheric-cherenkov.md",
    "owner": "detector-response",
-   "bytes": 9933,
-   "lines": 151,
+   "bytes": 10279,
+   "lines": 156,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/cosmic-ray-spectrum-and-composition.md",
@@ -433,13 +434,13 @@
     "hep-statistics",
     "research-communication"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b944a23 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/multimessenger-analysis.md",
    "owner": "detector-response",
-   "bytes": 6451,
-   "lines": 103,
+   "bytes": 6594,
+   "lines": 104,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/detector-principles-summary.md",
@@ -449,13 +450,13 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b944a23 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/muon-systems.md",
    "owner": "detector-response",
-   "bytes": 7803,
-   "lines": 124,
+   "bytes": 8405,
+   "lines": 131,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/detector-case-studies-and-checklists.md",
@@ -471,13 +472,13 @@
     "hep-analysis",
     "research-communication"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b944a23 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/neutrino-astronomy.md",
    "owner": "detector-response",
-   "bytes": 8426,
-   "lines": 128,
+   "bytes": 8578,
+   "lines": 130,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/cherenkov-imaging-variants-and-photosensors.md",
@@ -493,13 +494,13 @@
     "hep-analysis",
     "hep-statistics"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b944a23 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/noble-liquid-neutrino-and-rare-event-detectors.md",
    "owner": "detector-response",
-   "bytes": 11478,
-   "lines": 179,
+   "bytes": 11629,
+   "lines": 181,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/detector-case-studies-and-checklists.md",
@@ -513,13 +514,13 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b944a23 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/particle-identification.md",
    "owner": "detector-response",
-   "bytes": 14827,
-   "lines": 242,
+   "bytes": 15707,
+   "lines": 256,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -547,27 +548,31 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b944a23 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/performance-metrics-and-residual-diagnostics.md",
    "owner": "detector-response",
-   "bytes": 14456,
-   "lines": 193,
+   "bytes": 16247,
+   "lines": 216,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/cherenkov-imaging-variants-and-photosensors.md",
+    "skills/detector-response/references/core-detector-equations.md",
     "skills/detector-response/references/detector-comparison-tables.md",
+    "skills/detector-response/references/detector-glossary.md",
     "skills/detector-response/references/detector-measurement-framework.md",
     "skills/detector-response/references/detector-principles-bibliography.md",
     "skills/detector-response/references/detector-principles-summary.md",
     "skills/detector-response/references/muon-systems.md",
+    "skills/detector-response/references/reconstruction-performance-and-truth-matching.md",
+    "skills/detector-response/references/timing-detectors.md",
     "skills/hep-analysis/references/hep-analysis-guide.md"
    ],
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b944a23 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/physics-objects-jets-btagging-met.md",
@@ -594,8 +599,8 @@
   {
    "path": "skills/detector-response/references/reconstruction-performance-and-truth-matching.md",
    "owner": "detector-response",
-   "bytes": 9604,
-   "lines": 170,
+   "bytes": 10514,
+   "lines": 179,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
@@ -611,13 +616,13 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b944a23 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/response-and-forward-folding.md",
    "owner": "detector-response",
-   "bytes": 2403,
-   "lines": 36,
+   "bytes": 5145,
+   "lines": 70,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
@@ -632,13 +637,13 @@
     "hep-analysis",
     "hep-statistics"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "24b8216 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/signal-formation-and-readout.md",
    "owner": "detector-response",
-   "bytes": 14228,
-   "lines": 213,
+   "bytes": 14430,
+   "lines": 215,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/cherenkov-imaging-variants-and-photosensors.md",
@@ -654,13 +659,13 @@
     "hep-analysis",
     "research-communication"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b944a23 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/space-based-direct-detection.md",
    "owner": "detector-response",
-   "bytes": 16402,
-   "lines": 242,
+   "bytes": 16722,
+   "lines": 247,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -681,13 +686,13 @@
     "hep-statistics",
     "research-communication"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b944a23 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/timing-detectors.md",
    "owner": "detector-response",
-   "bytes": 8113,
-   "lines": 135,
+   "bytes": 8324,
+   "lines": 136,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/cherenkov-imaging-variants-and-photosensors.md",
@@ -701,13 +706,13 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b944a23 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/tracking-and-vertexing.md",
    "owner": "detector-response",
-   "bytes": 11882,
-   "lines": 193,
+   "bytes": 13091,
+   "lines": 209,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/calibration-and-alignment.md",
@@ -730,7 +735,7 @@
     "hep-analysis",
     "research-communication"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b944a23 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/triggers-luminosity-pileup.md",
@@ -847,7 +852,7 @@
   {
    "path": "skills/hep-analysis/references/hep-analysis-guide.md",
    "owner": "hep-analysis",
-   "bytes": 41228,
+   "bytes": 41793,
    "lines": 220,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -860,7 +865,7 @@
    "cited_by_other_skills": [
     "detector-response"
    ],
-   "last_commit": "9546574 2026-10-08"
+   "last_commit": "ec79d3b 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/histograms-efficiencies.md",
@@ -1126,7 +1131,7 @@
     "skills/hep-computing/references/design-and-estimation.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "076eae1 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/environments-and-containers.md",
@@ -1455,8 +1460,8 @@
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 37903,
-   "lines": 409,
+   "bytes": 38401,
+   "lines": 414,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/inference-and-unfolding.md",
@@ -1469,7 +1474,7 @@
     "tests/skills/hep_statistics/test_core_stats_guide.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e375e7d 2026-10-12"
+   "last_commit": "24b8216 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
@@ -1595,8 +1600,8 @@
   {
    "path": "skills/hep-statistics/references/unfolding.md",
    "owner": "hep-statistics",
-   "bytes": 3282,
-   "lines": 47,
+   "bytes": 3380,
+   "lines": 48,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/index.md",
@@ -1626,7 +1631,7 @@
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "06b86c8 2026-10-12"
+   "last_commit": "24b8216 2026-10-13"
   },
   {
    "path": "skills/hep-theory/references/cosmic-ray-propagation.md",
@@ -3145,9 +3150,9 @@
   {
    "a": "skills/detector-response/references/core-detector-equations.md",
    "b": "skills/detector-response/references/detector-principles-summary.md",
-   "jaccard": 0.045,
-   "containment": 0.183,
-   "shared_shingles": 165
+   "jaccard": 0.042,
+   "containment": 0.176,
+   "shared_shingles": 162
   }
  ],
  "name_groups": {

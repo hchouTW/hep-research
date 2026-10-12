@@ -15,8 +15,9 @@ signature, (5) how data/MC or controls reveal it, (6) correction/model update,
 1. **Defect**: a global deformation (e.g. a sagitta/"curl" mode) that leaves track
    `chi^2` nearly unchanged ([tracking and vertexing](tracking-and-vertexing.md), [calibration and alignment](calibration-and-alignment.md)).
 2. **Low level**: hit residuals show a small coherent trend versus `phi`/`z`, invisible
-   per hit. 3. **Reconstruction**: `q/p` shifts by an amount proportional to `q * p`
-   (charge-dependent), mostly at high `p`. 4. **Signature**: dimuon mass versus `q*eta`
+   per hit. 3. **Reconstruction**: `q/p` shifts by a roughly constant offset `delta`, so the
+   relative momentum bias `delta p/p ~= -q * p * delta` grows with `p` and flips sign
+   with charge. 4. **Signature**: dimuon mass versus `q*eta`
    and `phi` shows opposite-sign shifts for `mu+` and `mu-`; cosmic-track split
    (upper/lower half) disagrees. 5. **Reveal**: resonance mass in `(q, eta, phi)` bins,
    split-track `Delta pT/pT`, `E/p` for electrons of each charge. 6. **Correction**:

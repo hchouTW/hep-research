@@ -1,5 +1,5 @@
 {
- "contract_version": "2.3.0",
+ "contract_version": "2.4.0",
  "bindings": {
   "experiments": [
    {
@@ -11,7 +11,7 @@
  },
  "versions": {
   "plugin": "0.6.14",
-  "contracts": "2.3.0",
+  "contracts": "2.4.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -83,9 +83,10 @@
   "applied_separately": [
    "luminosity"
   ],
-  "underflow_overflow": "reco outside [-1, 1] is lost; outer truth bins are buffers",
+  "underflow_overflow": "explicit_bins",
+  "intended_use": "unfolding",
   "conditions": "single synthetic run",
-  "provenance": "analytic integration of the synthetic detector model",
+  "provenance": "analytic integration of the synthetic detector model; reco outside [-1, 1] is kept in explicit underflow/overflow vectors; outer truth bins are buffers",
   "matrix_ref": "results.json#response",
   "form": "matrix"
  }

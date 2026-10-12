@@ -78,8 +78,11 @@ angle and versus amplitude reveal time walk and crossing-angle effects.
 - **Scaling**: single-hit resolution limited by diffusion (`~ sqrt(L)`), primary
   ionization statistics near the wire, electronics; efficiency drops near cell boundary
   and wire.
-- **Tails**: delta rays, late clusters from ionization far from the wire (`t` early ->
-  underestimated distance), out-of-time hits.
+- **Tails**: two mechanisms with opposite signs. Primary-cluster statistics: the
+  nearest cluster can lie farther from the wire than the track's closest approach, so
+  the time is late and the distance overestimated (largest near the wire). Delta rays:
+  a delta electron can deposit charge closer to the wire, so the time is early and the
+  distance underestimated. Also out-of-time hits.
 - **Dependence**: rate/occupancy (space charge, deadtime), `T`/`P`/gas composition
   (drift velocity), aging (Malter effect, deposits on wires).
 - **Data sample**: cosmic rays and collision tracks for `r(t)` self-calibration.

@@ -84,10 +84,14 @@ cycles and magnet ramps. Calibration constants are therefore time-dependent payl
 indexed by run or by a finer interval-of-validity, and this creates its own set of
 requirements:
 
-- **Simulation must reproduce the time-averaged conditions**, weighted by the
-  luminosity or exposure actually collected - not the conditions at any single moment.
-  A simulation using a single snapshot of the dead-channel map or the gain set is
-  systematically wrong for the dataset as a whole.
+- **Simulation must follow the conditions run by run or period by period**: assign
+  simulated events to runs or periods in proportion to the luminosity or exposure
+  actually collected, each with that period's conditions (or simulate each period
+  separately and combine them with exposure weights). Do not average the conditions
+  themselves: in general `sum_t w_t R(theta_t) != R(sum_t w_t theta_t)`, especially for
+  thresholds, dead channels and non-linear gain, and an averaged dead-channel mask
+  describes no real detector state. A simulation using a single snapshot of the
+  dead-channel map or the gain set is likewise wrong for the dataset as a whole.
 - **Analyses combining periods must confirm the constants were applied consistently**
   in each, and should check stability by repeating the measurement per period. A
   result that varies across periods beyond its statistical uncertainty has an
@@ -135,8 +139,10 @@ A calibration update is therefore not a local change:
   in-situ anchor point and the range over which it is extrapolated.
 - The alignment procedure, the weak modes considered, and the external constraint
   bounding a charge-antisymmetric rigidity bias, with its quoted limit.
-- Time dependence of the constants, and confirmation that simulation reproduces the
-  exposure-weighted average conditions rather than a snapshot.
+- Time dependence of the constants, and confirmation that simulation assigns events
+  to runs or periods with their own conditions in proportion to the exposure (or
+  combines per-period simulation with exposure weights), rather than using a snapshot
+  or averaged conditions.
 - A per-period stability check for any measurement combining data-taking periods.
 - For any calibration update: what was re-derived, what was re-validated, and a
   before/after comparison of the affected distributions.

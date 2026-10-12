@@ -143,6 +143,22 @@ def communication_rich(**extra):
 SCAN = {"local_p": 1.0e-3, "local_z": 3.09, "scan": {"parameters": ["mass"], "ranges": [[100.0, 200.0]]}}
 
 
+def response_v24(**extra):
+    """Response under the 2.4.0 rules (controlled correction vocabulary, inline matrix, declared use); converts with
+    contracts.response_adapter into core/stats/validate_response.py input."""
+    from contracts import CONTRACTS_VERSION
+    ext = {"truth_axis": {"name": "cos_theta", "unit": "1", "edges": [-1, 0, 1]},
+           "reco_axis": {"name": "cos_theta", "unit": "1", "edges": [-1, 0, 1]},
+           "orientation": "rows_reco_cols_truth", "normalization": "conditional_on_generated",
+           "inefficiency": "inside_matrix", "acceptance": "outside_matrix", "includes": ["migration", "efficiency"],
+           "applied_separately": ["acceptance", "luminosity"], "underflow_overflow": "not_represented",
+           "intended_use": "forward_folding", "matrix": [[0.7, 0.1], [0.1, 0.6]],
+           "conditions": "synthetic", "provenance": SYN, **extra}
+    ext = {k: x for k, x in ext.items() if x is not None}  # extra key=None removes the field
+    return envelope("response", ext, "detector-response", contract_version=CONTRACTS_VERSION,
+                    versions={"plugin": "0.6.14", "contracts": CONTRACTS_VERSION, "profiles": {}})
+
+
 VALID = {
     "measurement_collider.json": measurement(),
     "measurement_exposure.json": measurement("exposure", observable=observable("exposure", level="detector", quantity="differential-flux", unit="m^-2 sr^-1 s^-1 GV^-1", variables=[{"name": "rigidity", "unit": "GV", "edges": [1, 2, 4]}])),
@@ -194,6 +210,7 @@ VALID = {
                                                      "sources_read": [{"id": "user:S1", "level": "full-text"}],
                                                      "limitations": ["fixture"]}, "research-communication"),
     "communication_traceability.json": communication_rich(),
+    "response_v24.json": response_v24(),
 }
 
 bad = {}
@@ -203,6 +220,9 @@ d = measurement(); d["extension"]["corrections"].append({"effect_id": "trigger-e
 d = measurement(); d["extension"]["observable"]["normalization"]["kind"] = "luminosity"; bad["measurement_unknown_normalization.json"] = (d, ["vocab.unknown_term"])
 d = measurement(); d["extension"]["observable"]["level"] = "instrument"; bad["measurement_unnamespaced_level.json"] = (d, ["vocab.unknown_term"])
 d = copy.deepcopy(VALID["response.json"]); d["extension"]["applied_separately"] = ["efficiency"]; bad["response_double_counted.json"] = (d, ["response.double_counted"])
+bad["response_trigger_efficiency_twice.json"] = (response_v24(applied_separately=["trigger_efficiency"]), ["response.double_counted"])
+bad["response_matrix_missing.json"] = (response_v24(matrix=None), ["response.matrix_missing"])
+bad["response_joint_counts_inefficiency_inside.json"] = (response_v24(normalization="joint_counts"), ["response.normalization_inconsistent"])
 d = prediction(); d["extension"]["uncertainties"][0]["gaussian"] = True; bad["prediction_gaussian_envelope.json"] = (d, ["uncertainty.auto_gaussian"])
 d = dataset(status="published", did="synthetic-collider:synthetic-pubshape-1"); d["status"] = ["unvalidated"]; bad["dataset_published_no_evidence.json"] = (d, ["dataset.values_without_provenance"])
 d = dataset(did="synthetic-collider:angular-1"); d["status"] = ["unvalidated"]; bad["dataset_synthetic_unlabeled.json"] = (d, ["dataset.synthetic_unlabeled"])

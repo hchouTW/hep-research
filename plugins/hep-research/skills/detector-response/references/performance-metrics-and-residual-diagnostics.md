@@ -19,16 +19,16 @@ comparable.
 | Reconstruction efficiency `eps_R` | reconstructed and matched / eligible truth (in acceptance) | matching criterion stated | binomial | denominator not the fiducial one |
 | ID / selection efficiency `eps_S` | pass / reconstructed (matched) objects | stated matching and phase space | binomial | applying a probe-derived value to a different population |
 | Trigger efficiency | fired / offline-selected sample | independent reference trigger | binomial per bin (turn-on) | biased reference sample |
-| Purity `P` | matched true / selected | selected sample; matching rule | binomial or ratio of weighted counts | quoted as `1 - fake` when other categories exist |
-| Fake rate | selected objects with no truth match / selected (object-level) *or* / eligible candidates (per-candidate) | say which | ratio | confusing with mis-ID |
+| Purity `P` | matched true with correct identity / selected | selected sample; matching rule | binomial or ratio of weighted counts | quoted as `1 - fake` when other categories exist |
+| Fake rate | selected (or reconstructed) objects with no truth match / selected (object-level) *or* / eligible candidates (per-candidate) | say which | ratio | confusing with mis-ID |
 | Mis-ID rate `m_{a->b}` | true species `a` identified as `b` / eligible true `a` | truth species; all categories | binomial | confusing with fake; mixing denominators |
-| Duplicate rate | truth matched by `>= 2` objects / matched truth | one-to-many rule | ratio | not removed by ambiguity resolution |
+| Duplicate rate | truth matched by `>= 2` objects / matched truth (an alternative counts objects beyond the first per truth / generated truth; say which) | one-to-many rule | ratio | not removed by ambiguity resolution |
 | Response / scale | `<x_reco/x_true>` (or median) at fixed truth | binned in *truth*, not reco | mean/median, `+-` standard error | binning in reco (selection bias) |
 | Bias | `<x_reco - x_true>` | as above | as above | mixing bias with core width |
 | Resolution | width of `x_reco - x_true` (or `/x_true`, or `1/pT` form) | binned in truth; state definition | core Gaussian `sigma`, `RMS`, robust `1.4826*MAD`, `sigma_68`; `+-` statistical | quoting RMS of a heavy-tailed shape |
 | Tail / catastrophic fraction | `|r| > k*sigma_core` / population | `k` and definition stated | binomial | not reported next to core width |
 | PID efficiency & rejection | `epsilon_sig`, `1/epsilon_bkg` at a working point | truth species, phase space | binomial; ROC/AUC | quoting rejection without the signal efficiency |
-| Separation `N_sigma` | `|mu_1-mu_2| / sqrt(sigma_1^2+sigma_2^2)` | Gaussian shapes (approximate) | from fits | applied to non-Gaussian tails ([particle identification](particle-identification.md)) |
+| Separation `N_sigma` | `|mu_a-mu_b| / sigma_a` (single-measurement, default) or `|mu_a-mu_b| / sqrt(sigma_a^2+sigma_b^2)` (quadrature); see below | Gaussian shapes (approximate); convention stated | from fits | mixing conventions (a factor `sqrt(2)`); applied to non-Gaussian tails ([particle identification](particle-identification.md)) |
 | Confusion matrix | `M_{ab} = P(ID=b | true=a)` rows normalized by truth | eligible truth per row | counts | wrong normalization axis |
 | Effective area / volume, exposure, containment, PSF | `A_eff = A_gen N_pass/N_gen`, `exposure = A_eff * T_live * Omega` | as defined for astroparticle | ratio/MC | quoting without energy/angle dependence ([space based direct detection](space-based-direct-detection.md), [astroparticle statistics](../../hep-statistics/references/astroparticle-statistics.md)) |
 
@@ -36,6 +36,28 @@ Object-level versus event-level: a per-object probability `p` with `k` independe
 objects per event gives an event-level probability `1 - (1-p)^k` for "at least one";
 they are not interchangeable, and correlations (shared pileup, shared alignment)
 break independence, so measure the event-level quantity directly.
+
+**Separation `N_sigma`: two conventions.** This file is the single definition used by
+the detector-response references. *Single-measurement* (the default of the
+detector-response scripts and the usual TOF, RICH and `dE/dx` convention):
+`N_sigma = |mu_a - mu_b| / sigma_a`, the distance between the two hypotheses' means in
+units of the resolution of one measurement (`sigma_a`, or the common `sigma` when the
+widths are equal). *Quadrature*: `N_sigma = |mu_a - mu_b| / sqrt(sigma_a^2 + sigma_b^2)`.
+For equal widths the quadrature value is the single-measurement value divided by
+`sqrt(2)`. State which convention a number uses; both assume Gaussian shapes and say
+nothing about tails or few-photon distributions.
+
+**Width estimators.** For a residual distribution with `N` entries:
+- *RMS vs std*: `RMS = sqrt(<r^2>)` includes the bias; the standard deviation
+  `sqrt(<(r - <r>)^2>)` does not (`RMS^2 = std^2 + <r>^2`). Some tools label the
+  standard deviation "RMS"; say which. Both are dominated by tails.
+- *`sigma_68`*: half the width of the interval containing 68.27% of the entries
+  (central, or smallest; say which); equals `sigma` for a Gaussian.
+- *`IQR/1.349`*: interquartile range scaled to equal `sigma` for a Gaussian.
+- *`1.4826 * MAD`*: median absolute deviation from the median, scaled to equal `sigma`
+  for a Gaussian.
+The last three are robust to a small tail fraction but are not equal to each other for
+non-Gaussian shapes; quote the estimator with the number.
 
 **Why fake rate is not universally `1 - P`.** `P = N_matched/N_selected`, so
 `1 - P` = (unmatched + matched-but-wrong-identity) / selected. A *fake* is a selected
@@ -156,8 +178,9 @@ tail fraction, and coverage across phase space, not just the core width.
 
 ## Estimators and pitfalls
 
-- **Core vs full width**: Gaussian core fit, `sigma_68`, robust `1.4826 MAD`, and RMS
-  answer different questions; RMS is dominated by tails, core fit by the fit range.
+- **Core vs full width**: Gaussian core fit, `sigma_68`, `IQR/1.349`, robust
+  `1.4826 MAD`, and RMS (definitions above) answer different questions; RMS is
+  dominated by tails, core fit by the fit range.
 - **Binning on reconstructed values** sculpts the distribution; bin in truth.
 - **Weighted samples**: uncertainties via `sum w^2`; effective statistics.
 - **Detector resolution vs unfolding regularization.** Detector resolution is a property

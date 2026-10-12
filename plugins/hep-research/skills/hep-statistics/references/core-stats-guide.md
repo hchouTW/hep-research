@@ -327,7 +327,12 @@ Single-command validators that never modify their input (no subcommands).
   is fixed at its source.
 - `validate_response.py FILE.json [--strict]`: orientation, normalization against the declared convention, efficiency
   or acceptance counted twice or not at all, probability lost outside the axes, empty bins, phase-space holes, and with
-  `closure` spectra the folded residuals. A clean report says `"physical_validity": "not_assessed"`.
+  `closure` spectra the folded residuals (counts are divided by `generated_per_truth_bin`; without it the closure is
+  `not_assessable`). `metadata.intended_use` sets the identifiability verdict: rank deficiency, fewer reco than truth
+  bins and empty truth bins are errors for `unfolding` and when the use is undeclared (plus a warning to declare it),
+  warnings for `forward_folding` and `parametric_fit`. Declare `unfolding` before an unfolding. A clean report says
+  `"physical_validity": "not_assessed"`. A `response` artifact is converted to this input with
+  `contracts/response_adapter.py`.
 
 Run both before an unfolding, a forward fold or a fit that uses a supplied matrix. A column sum below one has two
 readings (inefficiency, or migration outside the tabulated range); the declared metadata decides which.

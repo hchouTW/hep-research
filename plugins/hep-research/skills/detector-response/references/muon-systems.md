@@ -9,8 +9,12 @@ alignment weak modes in [calibration and alignment](calibration-and-alignment.md
 
 ## Why muons are special
 
-Muons are minimum-ionizing, do not shower strongly, and traverse the calorimeters, so
-the outermost layers see them nearly free of other particles. A muon system therefore
+Muons are close to minimum-ionizing, rarely shower below a few hundred GeV, and
+traverse the calorimeters, so the outermost layers see them nearly free of other
+particles. At TeV energies radiative losses (bremsstrahlung, pair production,
+photonuclear) become comparable to ionization (the muon critical energy in iron is a
+few hundred GeV), so catastrophic energy losses and accompanying showers in the
+absorbers must be expected and modelled. A muon system therefore
 does two jobs: identification (it is the layer that survives absorbers) and an
 independent momentum measurement at large lever arm, often in its own field.
 
@@ -44,8 +48,8 @@ online track. Each type has its own efficiency, purity, and momentum resolution.
 - **Resolution**: at low `p`, multiple scattering in absorbers and calorimeters
   (energy-loss fluctuation before the muon system) dominates; at high `p`, spatial
   resolution and alignment of the muon stations limits the *sagitta*
-  `s ≈ L^2 B q/(8 p)`-like measurement (approximate, uniform field: momentum error
-  `∝ p^2 sigma_s`). High-momentum resolution is a **weak-mode/alignment** problem
+  `s ≈ 0.3 z B L^2/(8 p)`-like measurement (approximate, uniform field; `s` and `L`
+  in m, `B` in T, `p` in GeV/c, `z` the charge number; momentum error `∝ p^2 sigma_s`). High-momentum resolution is a **weak-mode/alignment** problem
   (see below).
 - **Efficiency**: geometric gaps (cracks, support structures, feet), chamber
   inefficiency, matching and reconstruction inefficiency, quoted **per type and versus
@@ -56,9 +60,12 @@ online track. Each type has its own efficiency, purity, and momentum resolution.
   limited by resistivity), GEM/Micromegas (high rate, discharge risk)
   ([gaseous and specialized tracking technologies](gaseous-and-specialized-tracking-technologies.md)).
 - **Charge sign**: from curvature direction; at high momentum the sagitta shrinks
-  toward the alignment/resolution floor and **charge misidentification** grows
-  (`~ Gaussian tail of sagitta/sigma`); a weak-mode misalignment gives a *momentum-charge
-  correlated bias*: `q/p` shifts charge-dependently, mimicking a charge asymmetry.
+  toward the alignment/resolution floor and **charge misidentification** grows; it is
+  measured from the non-Gaussian tail of the curvature distribution, since a Gaussian
+  extrapolation of the core underestimates it ([tracking and vertexing](tracking-and-vertexing.md),
+  charge confusion); a weak-mode misalignment gives a *momentum-charge
+  correlated bias*: `q/p` shifts by a constant offset, so `delta p/p` grows with `p` and
+  flips sign with charge, mimicking a charge asymmetry.
 
 ## Backgrounds and fakes
 

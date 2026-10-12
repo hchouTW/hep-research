@@ -5,8 +5,9 @@ author(s), title, venue volume (year) pages, then a persistent identifier: a DOI
 (resolve at `https://doi.org/<DOI>`) or, where none exists, a stable URL.
 
 **Verification status (2026-09-20).** Every journal article and book below was matched
-against the Crossref registry by title, first author, venue, volume, pages, and year,
+against the Crossref registry by title, first-author surname, venue, volume, pages, and year,
 and its DOI is given as returned by Crossref. Every URL was checked to return HTTP 200.
+One first-author initial (Grupen) was corrected on 2026-10-13 after review.
 Not verified: that each work supports the specific use noted in its annotation (this
 was written from knowledge of the works, not by re-reading them), and DOI/URL
 availability can change over time. The document makes no detector-specific performance
@@ -29,7 +30,7 @@ the textbooks are for principles.
   calculations come from the PDG listings.
 - W. R. Leo, *Techniques for Nuclear and Particle Physics Experiments*, 2nd ed.
   (Springer, 1994), DOI 10.1007/978-3-642-57920-2. Textbook: interaction with matter, signal formation, electronics.
-- D. Grupen and B. Shwartz, *Particle Detectors*, 2nd ed. (Cambridge University Press,
+- C. Grupen and B. Shwartz, *Particle Detectors*, 2nd ed. (Cambridge University Press,
   2008), DOI 10.1017/CBO9780511534966. Textbook covering nearly all detector families in this study.
 - F. Sauli, *Gaseous Radiation Detectors: Fundamentals and Applications* (Cambridge
   University Press, 2014), DOI 10.1017/CBO9781107337701. Gas detectors, drift, diffusion, gain, micro-pattern devices.

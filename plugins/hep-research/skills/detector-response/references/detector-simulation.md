@@ -38,8 +38,11 @@ The strongest data-driven handles on material are the reconstructed conversion a
 nuclear-interaction vertex maps, which image the material distribution directly (see
 [tracking and vertexing](tracking-and-vertexing.md)), and the momentum dependence of
 tracking efficiency. Material uncertainty is normally propagated by producing a
-simulation variant with the budget scaled in specific regions - it cannot be
-represented as a weight.
+simulation variant with the budget scaled in specific regions. A per-event weight
+covers only part of it: interaction-probability reweighting can change how often a
+given interaction (conversion, nuclear interaction) occurs in a volume, but not the
+continuous effects of the extra material (scattering, energy loss, changed
+secondaries and showers), which need the simulation variant.
 
 ## Physics lists and their validity
 
@@ -161,8 +164,8 @@ with the check that closes it.
    the Geant4 version. Run an alternative list (e.g. `QGSP_BIC`) for the model systematic,
    never to choose the list that agrees best with the data.
 3. **Production cuts and step limits.** Scan the range cut (for example 0.7 mm, 0.35 mm,
-   0.1 mm). Keep the smallest value beyond which the response and resolution stop changing
-   within statistics.
+   0.1 mm). Keep the coarsest cut at which the results have converged, i.e. finer cuts
+   no longer change the response and resolution within statistics.
 4. **Digitization.** Apply Birks saturation, photostatistics, noise, and the readout
    threshold. Validate each on its own control sample (MIPs, pedestals) before tuning
    anything else.

@@ -9,7 +9,9 @@ A valid artifact is self-consistent under the contract; that says nothing about 
 advisory: it never authorizes a use. --protected applies the stricter version policy for protected use (a newer
 minor contract version is an error, not a warning). --strict applies the statistical-result semantic rules of
 contracts 2.2.0 (p-values and confidence levels in range, ordered expected bands, typed coverage and global
-calibration) to artifacts written under older contracts, which otherwise keep their outcome. --gate publication adds
+calibration) and the response semantic rules of contracts 2.4.0 (controlled correction vocabulary, a matrix or
+matrix_ref, normalization consistent with what sits inside the matrix, one unit per variable) to artifacts written
+under older contracts, which otherwise keep their outcome. --gate publication adds
 the publication gate of a statistical-result (publication_gate): passed, unresolved or failed, with reasons; an
 archived artifact may be valid and still not pass it. Passing the gate is a contract-level prerequisite for
 reporting a result as validated, not evidence of scientific validity.
@@ -136,7 +138,7 @@ def check_observable(obs: dict, vocab: Vocabulary, rep: Report, path: str) -> No
                 f"normalization kind '{norm['kind']}' has no value or ref yet")
 
 
-def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:
+def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, strict: bool = False) -> None:
     t = doc.get("artifact_type")
     status = set(doc.get("status", []))
     inherited = {s for i in doc.get("inputs", []) for s in i.get("status", [])}
@@ -163,6 +165,8 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:
             rep.add("error", "$.extension", "response.axes_missing", "a response matrix needs truth and reco axes")
         if ext.get("inefficiency") == "inside_matrix" and "efficiency" in ext.get("applied_separately", []):
             rep.add("error", "$.extension", "response.double_counted", "inefficiency inside the matrix and efficiency applied separately")
+        if strict or _at_least(doc.get("contract_version"), RESPONSE_SEMANTICS_FROM):
+            _response_semantics(ext, vocab, rep)
     elif t == "theory-spec":
         if doc.get("bindings", {}).get("experiments"):
             rep.add("error", "$.bindings.experiments", "theory.experiment_binding",
@@ -240,6 +244,59 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:
 
 
 RHAT_MAX = 1.01  # [Proposal] threshold for stats.convergence_mismatch
+RESPONSE_SEMANTICS_FROM = "2.4.0"  # response semantic rules apply natively from this contract version
+
+
+def _correction_classes(terms) -> set[str]:
+    """Classes of response corrections: every '<x>_efficiency' (namespaced or not) counts as 'efficiency'."""
+    out = set()
+    for t in terms:
+        bare = t.split(":", 1)[-1]
+        out.add("efficiency" if bare == "efficiency" or bare.endswith("_efficiency") else bare)
+    return out
+
+
+def _response_semantics(ext: dict, vocab: Vocabulary, rep: Report) -> None:
+    """Response rules of contracts 2.4.0 (detector-response review 2026-10-12). Native for artifacts of contract 2.4.0
+    or later; an older artifact gets them only in strict mode, so its promised outcome is unchanged."""
+    includes, separate = ext.get("includes", []), ext.get("applied_separately", [])
+    for field, terms in (("includes", includes), ("applied_separately", separate)):
+        for t in terms:
+            if not (vocab.has("response_corrections", t) or NAMESPACED.match(t)
+                    or (isinstance(t, str) and re.fullmatch(r"[a-z][a-z0-9_]*_efficiency", t))):
+                rep.add("error", f"$.extension.{field}", "response.unknown_correction",
+                        f"'{t}' is not a response_corrections term, a '<x>_efficiency' term or a namespaced '<ns>:<term>'")
+    inside = _correction_classes(includes)
+    if ext.get("inefficiency") == "inside_matrix":
+        inside.add("efficiency")
+    if ext.get("acceptance") == "inside_matrix":
+        inside.add("acceptance")
+    for cls in sorted(inside & _correction_classes(separate)):
+        if cls == "efficiency" and "efficiency" in separate and ext.get("inefficiency") == "inside_matrix":
+            continue  # already reported by the literal check of every version
+        if cls in set(includes) & set(separate):
+            continue
+        rep.add("error", "$.extension", "response.double_counted",
+                f"'{cls}' (or a term of its class) is inside the matrix and also applied separately")
+    if ext.get("form", "matrix") == "matrix" and not (isinstance(ext.get("matrix"), list) or ext.get("matrix_ref")):
+        rep.add("error", "$.extension", "response.matrix_missing", "a response of form 'matrix' needs matrix or matrix_ref")
+    norm = ext.get("normalization")
+    if norm == "conditional_on_selected":
+        for effect in ("inefficiency", "acceptance"):
+            if ext.get(effect) == "inside_matrix":
+                rep.add("error", f"$.extension.{effect}", "response.normalization_inconsistent",
+                        f"'conditional_on_selected' puts {effect} outside the matrix, but it is declared inside")
+    if norm == "joint_counts" and ext.get("inefficiency") == "inside_matrix":
+        rep.add("error", "$.extension.inefficiency", "response.normalization_inconsistent",
+                "'joint_counts' hold selected events only, so the inefficiency cannot be inside them; use "
+                "'conditional_on_generated' or declare it outside")
+    t_ax, r_ax = ext.get("truth_axis"), ext.get("reco_axis")
+    if isinstance(t_ax, dict) and isinstance(r_ax, dict) and t_ax.get("name") == r_ax.get("name") \
+            and t_ax.get("unit") != r_ax.get("unit"):
+        rep.add("error", "$.extension.reco_axis.unit", "response.unit_mismatch",
+                f"'{t_ax.get('name')}' is in {t_ax.get('unit')!r} on the truth axis and {r_ax.get('unit')!r} on the reco axis")
+
+
 STAT_SEMANTICS_FROM = "2.2.0"  # statistical-result semantic rules apply natively from this contract version
 BAND_KEYS = ("band_1sigma", "band_2sigma")
 
@@ -587,7 +644,7 @@ def validate_artifact(doc, vocab: Vocabulary | None = None, protected: bool = Fa
         validate(ext, ext_schema, vocab, rep, "$.extension")
         # Semantic rules assume the value types the schema guarantees; on a type error report that alone.
         if not any(f.code in SHAPE_ERRORS for f in rep.errors):
-            _rules(doc, ext, vocab, rep)
+            _rules(doc, ext, vocab, rep, strict)
             if at == "statistical-result":
                 if strict or _at_least(doc.get("contract_version"), STAT_SEMANTICS_FROM):
                     validate(ext, "ext_statistical_result_v2_2.json", vocab, rep, "$.extension")
