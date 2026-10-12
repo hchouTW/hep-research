@@ -14,7 +14,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-statistics | 9 | 117 | 0 |
 | hep-theory | 8 | 42 | 0 |
 | physics-ml | 34 | 184 | 0 |
-| research-communication | 53 | 373 | 0 |
+| research-communication | 53 | 374 | 0 |
 
 ## Overlapping pairs
 
@@ -221,7 +221,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `diagrams-statistics.md` | research-communication | 6.2 | no | 2 | - | 351029c 2026-10-07 |
 | `equation-and-notation-auditing.md` | research-communication | 3.4 | no | 5 | hep-statistics, hep-theory | 351029c 2026-10-07 |
 | `erratum-and-corrigendum-drafting.md` | research-communication | 3.1 | no | 2 | - | 351029c 2026-10-07 |
-| `evidence-linked-writing.md` | research-communication | 4.7 | yes | 1 | - | untracked |
+| `evidence-linked-writing.md` | research-communication | 4.7 | yes | 2 | - | 0f2bb85 2026-10-12 |
 | `figures-and-tables.md` | research-communication | 9.2 | no | 7 | - | 351029c 2026-10-07 |
 | `general-diagram-principles.md` | research-communication | 7.7 | no | 2 | - | 351029c 2026-10-07 |
 | `grant-and-fellowship-proposal-writing.md` | research-communication | 3.0 | no | 1 | - | 351029c 2026-10-07 |
@@ -248,7 +248,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `reading-papers.md` | research-communication | 10.1 | no | 8 | hep-statistics | 351029c 2026-10-07 |
 | `reproducibility-auditing.md` | research-communication | 3.0 | no | 9 | hep-computing | 351029c 2026-10-07 |
 | `reviewer-style-assessment.md` | research-communication | 2.0 | no | 1 | - | 351029c 2026-10-07 |
-| `revision-impact-tracking.md` | research-communication | 3.1 | no | 10 | - | 351029c 2026-10-07 |
+| `revision-impact-tracking.md` | research-communication | 3.9 | no | 10 | - | 351029c 2026-10-07 |
 | `scientific-style.md` | research-communication | 9.6 | no | 9 | hep-statistics | d41501c 2026-10-12 |
 | `statistics-and-ml-papers.md` | research-communication | 14.0 | no | 8 | - | 351029c 2026-10-07 |
 | `submission-and-peer-review.md` | research-communication | 13.2 | no | 10 | - | d41501c 2026-10-12 |

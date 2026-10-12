@@ -29,6 +29,15 @@ from those inspected and confirmed unaffected. Do not regenerate an analysis
 simply because its result is mentioned; identify necessary reruns and route them
 to the relevant domain skill within the authorized scope.
 
+For a traceability record (`evidence-linked-writing.md`), run
+`<plugin root>/skills/research-communication/scripts/track_revision_impact.py BEFORE.json AFTER.json --project-root ROOT`:
+it compares the pinned identities, classifies each change (analysis rerun, source change, reference move,
+reassessment, content edit, status change), lists the recorded occurrences that went stale, reopens the claim's
+assessment and any verified revision item that depends on it, and reports where the content comparison is incomplete
+(a historical file overwritten without a snapshot is reported at identity level; its old value is not recovered from
+today's file). It covers recorded occurrences only and asks for a targeted read of paraphrases; it never edits either
+record.
+
 ## Maintain a compact change ledger
 
 For each change record: ID and trigger, old/new fact or decision, source/version,

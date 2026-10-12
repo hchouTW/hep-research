@@ -134,7 +134,7 @@ def base_parser(tool: str, doc: str) -> argparse.ArgumentParser:
     return ap
 
 
-def run(tool: str, doc: str, argv, build, *, add_args=None, all_checks=(), needs_context=lambda args: True) -> int:
+def run(tool: str, doc: str, argv, build, *, add_args=None, all_checks=(), needs_context=lambda args: True, extra_protected=None) -> int:
     """Common CLI driver: parse, read the record (exit 2 on failure), resolve the project context, call
     build(args, record, ctx) -> report, emit. Diagnostics go to stderr; JSON stdout stays parseable."""
     ap = base_parser(tool, doc)
@@ -174,9 +174,6 @@ def run(tool: str, doc: str, argv, build, *, add_args=None, all_checks=(), needs
     except ValueError as exc:
         return fail(str(exc))
     rep.setdefault("inputs", {})["record_sha256"] = hashlib.sha256(raw).hexdigest()
-    rep["scope"]["record"] = str(args.record)
-    if args.out is not None and output_aliases_input(args.out, protected_paths(args.record, ctx)):
-        print(f"error: --out {args.out} names an input of this run (same file or a symlink alias); a report must not overwrite "
-              "the evidence it audits", file=sys.stderr)
-        return 2
-    return emit(rep, args.format, args.out, protected_paths(args.record, ctx))
+    rep["scope"].setdefault("record", str(args.record))
+    protected = protected_paths(args.record, ctx) + (list(extra_protected(args, ctx)) if extra_protected else [])
+    return emit(rep, args.format, args.out, protected)

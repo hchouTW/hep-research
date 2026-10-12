@@ -35,7 +35,7 @@
   },
   "research-communication": {
    "references": 53,
-   "bytes": 372738,
+   "bytes": 373502,
    "uncited": 0
   }
  },
@@ -2564,10 +2564,11 @@
    "lines": 62,
    "linked_from_skill_md": true,
    "cited_by": [
-    "skills/research-communication/SKILL.md"
+    "skills/research-communication/SKILL.md",
+    "skills/research-communication/references/revision-impact-tracking.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "0f2bb85 2026-10-12"
   },
   {
    "path": "skills/research-communication/references/figures-and-tables.md",
@@ -2968,8 +2969,8 @@
   {
    "path": "skills/research-communication/references/revision-impact-tracking.md",
    "owner": "research-communication",
-   "bytes": 3147,
-   "lines": 57,
+   "bytes": 3911,
+   "lines": 66,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
