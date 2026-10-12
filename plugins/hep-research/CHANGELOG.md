@@ -3,7 +3,7 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.6.10 (2026-10-12)
 
 - **batch-schedulers: `limits.max_gpu_hours`.** The Slurm poll reads `AllocTRES`; each attempt records
   `alloc_gpus` (`gres/gpu=N`, 0 for a CPU job, unknown while pending). GPU-hours are GPUs times elapsed time (or the
@@ -19,13 +19,14 @@ Software checks establish contract consistency only, not physical validity.
   records `alloc_cpus`, core-hours use it when present (requested CPUs otherwise, as for HTCondor), and new
   submissions are projected at the largest allocated/requested factor seen in the campaign (`alloc_cpu_factor` in the
   usage). Fixes the 2× under-count on hyper-threaded GPU nodes found in GPU-CAMPAIGN-RUN once a pilot has been
-  polled. GPU-hours are still not tracked.
+  polled; the first submission and GPU-hours are covered by the two entries above.
 - **batch-schedulers: first GPU campaign (documentation and evidence).** Two synthetic GPU chunks on NSTCCore V100
   through the adapter with `resources.gpus`, merged equal to a CPU recompute (GPU-CAMPAIGN-RUN). `batch-scheduling.md`
   now states that `max_core_hours` counts requested CPUs only (under-counting where a site allocates more, 2× on
-  hyper-threaded GPU nodes) and that GPU-hours are not tracked, how `resources.gpus` renders and when to use
-  `slurm.gres` instead, and to give GPU chunk results an additive device counter so the merge proves where chunks
-  ran. NSTCCore site note, known limitations, capability matrix and `adapter.json` environment updated. No code change.
+  hyper-threaded GPU nodes) and that GPU-hours are not tracked (both lifted by the entries above), how
+  `resources.gpus` renders and when to use `slurm.gres` instead, and to give GPU chunk results an additive device
+  counter so the merge proves where chunks ran. NSTCCore site note, known limitations, capability matrix and
+  `adapter.json` environment updated. No code change.
 
 ## 0.6.9 (2026-10-11)
 

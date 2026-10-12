@@ -407,7 +407,12 @@ Records: the user's `torch-gpu/gpu-campaign` folder.
   these two jobs reports `AllocCPUS` 2 (1 for the CPU campaign's jobs), and that output is a parser test
   (now `test_poll_parses_real_sacct_alloc_cpus_and_gpus`). **Second follow-up (Unreleased):** `max_gpu_hours`;
   `sacct` on these jobs reports `AllocTRES` `gres/gpu=1` for the 1-GPU job and no `gres/gpu` for the CPU campaign's
-  job (read-only query, 2026-10-11), and both lines are in that parser test.
+  job (read-only query, 2026-10-11), and both lines are in that parser test. Release check for 0.6.10
+  (docs/maintenance.md, "Real-hardware checks"; the release changes the batch adapter): `RealSlurmTests` with
+  `HEP_SLURM_TEST=1` and the user's reviewed configuration on NSTCCore (Slurm 24.05.1, `edr1-al9_short_serial`,
+  2026-10-12, user-approved) on `main` at `9522ec0`: array 7061186, 2 synthetic CPU chunks COMPLETED on `hpa-wn06`,
+  merged equal to a single run, test OK in 34 s. Both attempts recorded `alloc_cpus` 1 and `alloc_gpus` 0 from the
+  8-field `sacct` (`AllocTRES` `billing=1,cpu=1,mem=200M,node=1`).
 - `MaxRSS` of a 4 s chunk is 0.07 MB (accounting samples every 15 s), as in the CPU campaign. `freeze` refuses a
   `#!/usr/bin/env python3` worker ("name one interpreter only").
 
