@@ -33,6 +33,15 @@ Software checks establish contract consistency only, not physical validity.
   and listing bodies are ignored. Directory mode is unchanged and labeled a repository-wide source scan, except that an
   empty directory is now a no-input error (exit 2) instead of "No issues found". `--format json` prints one report
   object (report_version 1.0.0: status, exit code, coverage, checks run and not run, findings with codes).
+- **Diagram verification coverage reported honestly (T3).** `check_diagram_sources.py` gives every block one outcome:
+  `rendered` (nonempty renderer output), `lint-only` (Mermaid structural lint without `mmdc`; SVG XML
+  well-formedness), `skipped` (DOT without `dot`, PlantUML without `plantuml`, TikZ/LaTeX, which it never compiles),
+  `source-error` or `environment-error` (not started, timed out, startup failure, exit without output). Each renderer
+  gets one preflight; one that fails it, or times out on a block, is not launched again. Counts reconcile with the
+  total; "Checked N block(s)" no longer counts linted or skipped blocks as verified, and rendering is reported apart
+  from visual inspection, which the checker never performs. Exit codes: 1 source error; 3 environment error, or with
+  `--require-render` any block that was not rendered; 0 otherwise (a timeout used to exit 1 as if the source were
+  wrong). `--format json` prints the per-block outcomes, renderer availability and versions.
 
 - **T17 toy construction diagnosed.** The published-likelihood benchmark (ATLAS-SUSY-2018-31 SRB) adds a post-hoc
   diagnosis, labelled as such: the exact counting CLs limit of the one-bin SRB (n = 3, b = 3.23) is 5.284, inside the
