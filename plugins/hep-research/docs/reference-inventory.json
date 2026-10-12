@@ -10,7 +10,7 @@
   },
   "hep-analysis": {
    "references": 9,
-   "bytes": 73555,
+   "bytes": 74120,
    "uncited": 0
   },
   "hep-computing": {
@@ -272,7 +272,7 @@
     "skills/detector-response/references/core-detector-equations.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "5db10d5 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/detector-simulation.md",
@@ -852,7 +852,7 @@
   {
    "path": "skills/hep-analysis/references/hep-analysis-guide.md",
    "owner": "hep-analysis",
-   "bytes": 41228,
+   "bytes": 41793,
    "lines": 220,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -865,7 +865,7 @@
    "cited_by_other_skills": [
     "detector-response"
    ],
-   "last_commit": "9546574 2026-10-08"
+   "last_commit": "ec79d3b 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/histograms-efficiencies.md",

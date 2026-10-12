@@ -92,7 +92,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `detector-glossary.md` | detector-response | 4.8 | no | 4 | hep-analysis | b944a23 2026-10-13 |
 | `detector-measurement-framework.md` | detector-response | 10.8 | no | 9 | hep-analysis, research-communication | 351029c 2026-10-07 |
 | `detector-principles-bibliography.md` | detector-response | 11.5 | no | 1 | - | b944a23 2026-10-13 |
-| `detector-principles-summary.md` | detector-response | 22.4 | yes | 3 | - | b944a23 2026-10-13 |
+| `detector-principles-summary.md` | detector-response | 22.4 | yes | 3 | - | 5db10d5 2026-10-13 |
 | `detector-simulation.md` | detector-response | 12.2 | no | 8 | hep-analysis, hep-theory | b944a23 2026-10-13 |
 | `detector-systems-overview.md` | detector-response | 12.2 | no | 14 | hep-analysis | b944a23 2026-10-13 |
 | `event-reconstruction.md` | detector-response | 10.8 | no | 7 | hep-analysis | b944a23 2026-10-13 |
@@ -118,7 +118,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `analysis-validation.md` | hep-analysis | 4.4 | yes | 6 | detector-response, hep-computing | 351029c 2026-10-07 |
 | `backgrounds.md` | hep-analysis | 2.7 | yes | 16 | detector-response | 351029c 2026-10-07 |
 | `data-pipelines.md` | hep-analysis | 4.5 | yes | 4 | hep-computing | 351029c 2026-10-07 |
-| `hep-analysis-guide.md` | hep-analysis | 41.2 | yes | 5 | detector-response | 9546574 2026-10-08 |
+| `hep-analysis-guide.md` | hep-analysis | 41.8 | yes | 5 | detector-response | ec79d3b 2026-10-13 |
 | `histograms-efficiencies.md` | hep-analysis | 3.2 | yes | 8 | detector-response, hep-computing | 9546574 2026-10-08 |
 | `measurements-and-unfolding.md` | hep-analysis | 2.7 | yes | 9 | detector-response, hep-statistics | 351029c 2026-10-07 |
 | `systematics.md` | hep-analysis | 5.9 | yes | 25 | detector-response, hep-statistics, hep-theory, physics-ml | 364918e 2026-10-09 |
