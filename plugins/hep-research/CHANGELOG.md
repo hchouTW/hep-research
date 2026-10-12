@@ -3,6 +3,13 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## 0.6.14 (2026-10-13)
+
+- **Lint-clean contracts.** No behavior change from 0.6.13: the communication contract modules satisfy ruff (B007)
+  and mypy as the CI lint job runs them (an unused loop index; four `isinstance` narrowings written so mypy sees
+  them), and the research-communication scripts drop three unused loop variables and chain one exception. The 0.6.13
+  tag failed the lint job on GitHub after its push; this release carries the fix.
+
 ## 0.6.13 (2026-10-12)
 
 Contracts 2.3.0 (minor: the capability `communication:traceability-v1` and its extension schema; every 2.2.0 artifact keeps its outcome). `contracts/migrate_statistical_result.py` now writes the current contracts version (2.3.0) instead of a literal 2.2.0; the 2.2.0 rules it applies are unchanged.

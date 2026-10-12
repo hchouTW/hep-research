@@ -495,6 +495,14 @@ host without Chromium (the preflight path is covered by fake renderers only); be
 new cases; Combine, ROOT and GPU paths (unchanged by this work). The branch kept contracts at 2.2.0; release 0.6.13 bumps them to 2.3.0 (minor) with the capability
 `communication:traceability-v1`.
 
+## 0.6.14 release check (2026-10-13, E2)
+
+Version 0.6.14 (lint-clean contracts after the 0.6.13 tag failed the GitHub lint job; no behavior change). ruff
+0.16.10 and mypy 2.4.0 with the CI pins pass on `core/` and `contracts/` (54 files); ruff with the project
+configuration also passes on the research-communication scripts. Examples rerun with the E2 venv: only the plugin
+version string changed (28 files, 28 lines). `tools/run_all_checks.py` with the host CLIs and the E2 venv: 20 of 20
+checks pass; 2,236 unit tests, 0 failures, 55 skipped. Release manifest `release-manifests/0.6.14.json`.
+
 ## 0.6.13 release check (2026-10-12, E2)
 
 Version 0.6.13 (research-communication reliability plan T0–T11 and its review fixes; contracts 2.3.0 with the
