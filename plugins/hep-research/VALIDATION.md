@@ -506,6 +506,20 @@ strict; against the 2.1.293 baseline one quick case regressed (`st-sensitivity-1
 tree: stochastic, and its routing description did not change), one improved, two second-turn misses as before, two
 cases newer than the baseline missed; 0 loading violations. Recorded in `evals/routing/README.md`.
 
+## 0.6.16 release check (2026-10-13, E2)
+
+Version 0.6.16 (detector-response front-end electronics and signal processing, PR #57: a new reference, the
+standard-library script `frontend_response.py` with 23 tests whose values were checked by numerical integration and
+Monte Carlo, ten corrected electronics statements, a dead-time and live-time section, and nine Crossref-checked
+electronics citations; no contracts change, no `core/` or `contracts/` change). The package's NumPy verification scripts
+were rerun with the E2 venv and reproduce the reference values. `frontend_response.py` is covered by the strict-JSON
+edge-case test of all nine subcommands. For the release the examples were rerun with the E2 venv and only the plugin
+version string changed (26 files, 26 lines; unfolding-coverage not rerun, as in earlier releases); the
+published-likelihood benchmark's two artifacts were rewritten with the new plugin version. `tools/run_all_checks.py`
+with the host CLIs and the E2 venv: 20 of 20 checks pass; 2,317 unit tests, 0 failures, 55 skipped. The CI lint job
+(ruff 0.16.10, mypy 2.4.0) passed on PR #57. The README size statement now reads about 1200 files,
+12.1 MB (the packaging check flagged 10.7 MB as drift). Release manifest `release-manifests/0.6.16.json`.
+
 ## 0.6.15 release check (2026-10-13, E2)
 
 Version 0.6.15 (detector-response review fixes WP1–WP5, PR #54; hep-computing SKILL.md interpreter order, PR #55;
