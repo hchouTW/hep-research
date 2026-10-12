@@ -270,7 +270,18 @@ Poisson-weighted response); `--param` sets the strength, iterations or truncatio
   against an unfold-then-chi2 fit with the unfolded covariance; bias and spread of each, with the true spectral form
   assumed known.
 - `response-stat --input --method --param [--response-model --toys --seed]`: the response redrawn from finite generated
-  counts; spread from data, from the response and from both, and the response share of the variance.
+  counts; spread from data, from the response and from both, and the response share of the variance. It records
+  `toys_generated`, `toys_used` and `toys_skipped` with the reason (a redrawn column with no event is never filled),
+  never renormalizes a column, and counts toys where the independent-cell model gives a column efficiency above 1
+  (use `--response-model multinomial` for high-efficiency columns).
+- `outer-coverage --input --method --values --criterion --toys --seed`: independent outer-toy validation (linear
+  methods). Every toy draws data from the generation truth (`test_truth` if given), redraws the MC response
+  (`mc_events_per_truth_bin`, multinomial) and the efficiency factors (`efficiency_uncertainty`) when declared,
+  chooses the regularization inside the toy (`gcv`, `loo_cv`, `l_curve_corner`; one value or `fixed`: none), and
+  builds that toy's covariance from its own counts and estimate. It reports the bias per bin, marginal and
+  simultaneous (chi-square, n_truth dof) coverage at 68.27%, the settings chosen and every toy's outcome (failures
+  count as not covering). `covariance_omits` drops a generated source from the covariance: a negative baseline that
+  must undercover. Pulls measured on the ensemble that tuned the regularization are not this evidence.
 - `response-covariance --input --method --param [--response-model --toys --seed]`: the finite-response effect
   propagated analytically at first order (numerical Jacobian of the estimator, also for D'Agostini) as a full
   covariance among truth bins, cross-checked against toys. `--response-model multinomial` uses the exact multinomial
