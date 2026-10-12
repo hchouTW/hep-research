@@ -267,6 +267,7 @@
    "lines": 263,
    "linked_from_skill_md": true,
    "cited_by": [
+    "skills/detector-response/README.md",
     "skills/detector-response/SKILL.md",
     "skills/detector-response/references/core-detector-equations.md"
    ],
@@ -852,6 +853,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
+    "skills/hep-analysis/README.md",
     "skills/hep-analysis/SKILL.md",
     "tests/skills/detector_response/test_reference_values.py",
     "tests/skills/hep_analysis/test_check_systematic_variations.py"
@@ -1025,6 +1027,7 @@
    "cited_by": [
     "adapters/batch-schedulers/htcondor_backend.py",
     "adapters/batch-schedulers/slurm_backend.py",
+    "skills/hep-computing/README.md",
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/references/batch-site-cern-htcondor.md",
     "skills/hep-computing/references/batch-site-nstccore-slurm.md",
@@ -1117,6 +1120,7 @@
    "lines": 166,
    "linked_from_skill_md": true,
    "cited_by": [
+    "skills/hep-computing/README.md",
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/references/agile-development-guide.md",
     "skills/hep-computing/references/design-and-estimation.md"
@@ -1131,6 +1135,7 @@
    "lines": 53,
    "linked_from_skill_md": true,
    "cited_by": [
+    "skills/hep-computing/README.md",
     "skills/hep-computing/SKILL.md"
    ],
    "cited_by_other_skills": [],
@@ -1378,6 +1383,7 @@
    "lines": 201,
    "linked_from_skill_md": true,
    "cited_by": [
+    "skills/hep-computing/README.md",
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/examples/README.md",
     "skills/hep-computing/references/acceptance-criteria.md",
@@ -1410,6 +1416,7 @@
    "lines": 69,
    "linked_from_skill_md": true,
    "cited_by": [
+    "skills/hep-computing/README.md",
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/references/agile-development-guide.md",
     "skills/hep-computing/references/implementation-discipline.md",
@@ -1453,6 +1460,7 @@
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/inference-and-unfolding.md",
     "profiles/experiments/ams-02/modules/methods/statistical-diagnostics.md",
+    "skills/hep-statistics/README.md",
     "skills/hep-statistics/SKILL.md",
     "skills/hep-statistics/references/inference-recipes.md",
     "skills/hep-statistics/references/nuisance-modeling.md",
@@ -1548,6 +1556,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/references/numerical-and-computational-methods.md",
+    "skills/hep-statistics/README.md",
     "skills/hep-statistics/SKILL.md",
     "skills/hep-statistics/references/inference-recipes.md",
     "skills/hep-theory/references/mathematical-reasoning-and-proof.md",
@@ -1683,6 +1692,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-statistics/references/statistical-inference-for-physics.md",
+    "skills/hep-theory/README.md",
     "skills/hep-theory/SKILL.md",
     "skills/research-communication/references/academic-papers-guide.md",
     "skills/research-communication/references/claim-evidence-mapping.md",
@@ -1856,6 +1866,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/examples/data-ml-task.md",
+    "skills/physics-ml/README.md",
     "skills/physics-ml/SKILL.md",
     "skills/physics-ml/references/architecture-selection.md",
     "skills/physics-ml/references/multivariate-analysis-bdt-nn.md",
@@ -2017,6 +2028,7 @@
    "cited_by": [
     "skills/detector-response/references/imaging-atmospheric-cherenkov.md",
     "skills/hep-analysis/references/hep-analysis-guide.md",
+    "skills/physics-ml/README.md",
     "skills/physics-ml/SKILL.md",
     "skills/physics-ml/references/multivariate-analysis-bdt-nn.md"
    ],
@@ -2051,6 +2063,7 @@
     "skills/detector-response/references/calorimetry-ecal-hcal.md",
     "skills/detector-response/references/physics-objects-jets-btagging-met.md",
     "skills/hep-analysis/references/hep-analysis-guide.md",
+    "skills/physics-ml/README.md",
     "skills/physics-ml/SKILL.md"
    ],
    "cited_by_other_skills": [
@@ -2142,6 +2155,7 @@
    "cited_by": [
     "skills/hep-statistics/references/ml-assisted-inference.md",
     "skills/hep-theory/SKILL.md",
+    "skills/physics-ml/README.md",
     "skills/physics-ml/SKILL.md",
     "skills/physics-ml/references/deep-learning-guide.md",
     "skills/physics-ml/references/geometric-and-equivariant-learning.md",
@@ -2285,6 +2299,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-analysis/references/hep-analysis-guide.md",
+    "skills/research-communication/README.md",
     "skills/research-communication/SKILL.md",
     "skills/research-communication/references/academic-papers-guide.md",
     "skills/research-communication/references/figures-and-tables.md"
@@ -2301,6 +2316,7 @@
    "lines": 495,
    "linked_from_skill_md": true,
    "cited_by": [
+    "skills/research-communication/README.md",
     "skills/research-communication/SKILL.md",
     "skills/research-communication/references/academic-diagrams-guide.md",
     "skills/research-communication/references/code-to-methodology-synthesis.md",
@@ -2353,6 +2369,7 @@
    "lines": 63,
    "linked_from_skill_md": true,
    "cited_by": [
+    "skills/research-communication/README.md",
     "skills/research-communication/SKILL.md",
     "skills/research-communication/references/academic-papers-guide.md",
     "skills/research-communication/references/astroparticle-and-cosmic-ray-papers.md",
@@ -2565,12 +2582,13 @@
    "lines": 67,
    "linked_from_skill_md": true,
    "cited_by": [
+    "skills/research-communication/README.md",
     "skills/research-communication/SKILL.md",
     "skills/research-communication/references/academic-papers-guide.md",
     "skills/research-communication/references/revision-impact-tracking.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0f2bb85 2026-10-12"
+   "last_commit": "4ab1794 2026-10-12"
   },
   {
    "path": "skills/research-communication/references/figures-and-tables.md",
@@ -2975,6 +2993,7 @@
    "lines": 66,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/research-communication/README.md",
     "skills/research-communication/references/academic-papers-guide.md",
     "skills/research-communication/references/erratum-and-corrigendum-drafting.md",
     "skills/research-communication/references/evidence-linked-writing.md",
