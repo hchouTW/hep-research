@@ -82,6 +82,9 @@ def _traceability_rules(doc: dict, ext: dict, rep: Report) -> None:
     for k, led in enumerate(ext.get("evidence_ledgers", []) or []):
         ns = led.get("namespace")
         namespaces[ns] = namespaces.get(ns, 0) + 1
+        if not led.get("bound") and not (led.get("sources_ref") and led.get("claims_ref")):
+            rep.add("error", f"$.extension.evidence_ledgers[{k}]", "communication.ledger_ref_missing",
+                    f"ledger '{ns}' is neither bound (bound: true) nor given by sources_ref and claims_ref")
         if namespaces[ns] == 2:
             rep.add("error", f"$.extension.evidence_ledgers[{k}]", "communication.ambiguous_namespace",
                     f"namespace '{ns}' is declared by more than one ledger: a source id in it names two records")

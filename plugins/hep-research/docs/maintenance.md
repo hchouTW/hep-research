@@ -115,6 +115,15 @@ warning, or an error with `--protected`; `versions.contracts` must equal `contra
 them). `contracts/dependencies.py` validates every source the same way. Artifacts record the code identity in
 `versions.plugin_release` through `contracts/identity.py`; older artifacts lack it and their identity is unknown.
 
+Communication records come in two formats. A legacy record (claims with `result_ref` and a status) stays valid and
+readable; project resolution (`contracts/communication_project.py`) reports it as *limited traceability*: only the
+envelope inputs resolve, no claim is linked to an evidence edge, an occurrence or an assessment, and the record is
+never called fully traced. The traceability format is selected by `required_capabilities:
+["communication:traceability-v1"]` with `traceability_version: "1.0.0"` in the extension; there is no automatic
+migration, because the ids, evidence locators, read events and verdicts it needs are facts a reader supplies, not
+values a converter may invent. A legacy record is migrated by writing a new record in the traceability format next to
+it, with deterministic local claim ids and every unknown mapping left in `unresolved_inputs`.
+
 ## Versioning
 
 SemVer for the plugin (`.claude-plugin/plugin.json`), contracts, core (`core/__init__.py`), each profile and each

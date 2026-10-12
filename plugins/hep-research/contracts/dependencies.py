@@ -69,8 +69,8 @@ def load_revocations(path) -> tuple[dict, list[str]]:
 
 
 class _Checker:
-    def __init__(self, root: Path, base: Path, revoked: dict | None = None, protected: bool = False):
-        self.root, self.base, self.protected = root, base, protected
+    def __init__(self, root: Path, base: Path, revoked: dict | None = None, protected: bool = False, vocab=None):
+        self.root, self.base, self.protected, self.vocab = root, base, protected, vocab
         self.revoked = revoked or {}
         self.findings: list[dict] = []
         self.checked: list[str] = []
@@ -131,7 +131,7 @@ class _Checker:
                 continue
             # every source is itself a contract artifact: an invalid one, an unknown type or required capability, or
             # a newer contract version this reader cannot judge is not a dependency it can vouch for (K02, F08)
-            srep = validate_artifact(sdoc, protected=self.protected)
+            srep = validate_artifact(sdoc, self.vocab, protected=self.protected)
             bad = sorted({f.code for f in srep.errors})
             if bad:
                 self.add("error", where, "dependency.source_invalid", f"{ref!r} fails contract validation: {', '.join(bad)}")
@@ -161,12 +161,14 @@ class _Checker:
                 self.artifact(src, sdoc, trail + (src,))
 
 
-def validate_dependencies(artifact_path, project_root, base=None, revocations=None, protected: bool = False) -> dict:
+def validate_dependencies(artifact_path, project_root, base=None, revocations=None, protected: bool = False, vocab=None) -> dict:
+    """See the module docstring. `vocab` (a contracts.vocab.Vocabulary, default the core vocabulary) lets sources that use
+    a bound profile's namespaced terms validate; it is additive and changes nothing when omitted."""
     root = Path(project_root).resolve()
     path = Path(artifact_path)
     path = (path if path.is_absolute() else Path.cwd() / path).resolve()
     revoked, rproblems = load_revocations(revocations) if revocations else ({}, [])
-    chk = _Checker(root, Path(base).resolve() if base else root, revoked, protected)
+    chk = _Checker(root, Path(base).resolve() if base else root, revoked, protected, vocab)
     for prob in rproblems:
         chk.add("error", "$revocations", "dependency.revocations_unreadable", prob)
     if not root.is_dir():

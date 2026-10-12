@@ -5,6 +5,25 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Communication traceability (research-communication reliability plan, T1).** Legacy `communication` claims are
+  typed: `text` and `result_ref` are non-empty strings and `status` a core status or an array of them (a numeric text,
+  a null reference or an object status used to pass). A new reader capability `communication:traceability-v1` selects
+  `contracts/schemas/ext_communication_traceability.json`: claims with stable ids, evidence edges (`artifact` targets
+  matched to `inputs[].ref`, `source` targets to a declared or bound evidence ledger; locator, role, `usage`),
+  document occurrences, read events and support assessments. `contracts/communication.py` applies the pure rules: a
+  claim inherits the sticky caveats of every `used-in-claim` edge whatever its role (a `contradicts` edge is no
+  escape), carries `observed` only with an observed or source edge, never `observed` with `synthetic`/`asimov`, and an
+  assessment is bound to a digest of the claim text and scope and to the input digests (a wording change or a changed
+  hash makes it stale and unresolved; `currency: current` on a stale assessment is an error). The envelope rules are
+  unchanged: the envelope keeps the sticky caveats only, so a mixed observed/synthetic document is representable. The
+  marker `traceability_version` without the capability, an unknown version, or the capability without the marker are
+  errors; a 2.2.0 reader without the capability refuses the record. `contracts/communication_project.py` resolves a
+  record inside a project root through `contracts/dependencies.py` (which gains an additive `vocab` parameter so
+  sources using a bound profile's terms validate), loads declared and bound-profile ledgers, resolves source ids and
+  document digests, and normalizes outcomes (`resolve_outcome`: input-error 2, fail 1, incomplete 3, pass 0;
+  unresolved findings or a failed upstream never read as complete). A legacy record is reported as limited
+  traceability. The contracts version is unchanged here; the release that ships the format bumps it as a minor change.
+
 - **T17 toy construction diagnosed.** The published-likelihood benchmark (ATLAS-SUSY-2018-31 SRB) adds a post-hoc
   diagnosis, labelled as such: the exact counting CLs limit of the one-bin SRB (n = 3, b = 3.23) is 5.284, inside the
   toy limit's MC range; pyhf's toys match exact Poisson sums on the bare one-bin model; the asymptotic formulae give
