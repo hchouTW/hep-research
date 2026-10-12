@@ -506,6 +506,18 @@ strict; against the 2.1.293 baseline one quick case regressed (`st-sensitivity-1
 tree: stochastic, and its routing description did not change), one improved, two second-turn misses as before, two
 cases newer than the baseline missed; 0 loading violations. Recorded in `evals/routing/README.md`.
 
+## 0.6.15 release check (2026-10-13, E2)
+
+Version 0.6.15 (detector-response review fixes WP1–WP5, PR #54; hep-computing SKILL.md interpreter order, PR #55;
+skill READMEs and SKILL.md trims; contracts 2.4.0 with the response semantic rules, minor: 2.3.0 artifacts keep their
+outcome and get the rules with `--strict`, no new capability). The contracts bump and the two examples' response
+artifacts (`explicit_bins`, `intended_use: unfolding`) were regenerated in PR #54; for the release the examples were
+rerun with the E2 venv and only the plugin version string changed (26 files, 26 lines; unfolding-coverage not rerun,
+as in earlier releases); the published-likelihood benchmark's two artifacts were rewritten with the new plugin version.
+ruff 0.16.10 and mypy 2.4.0 with the CI pins pass on `core/` and `contracts/`. `tools/run_all_checks.py` with the host
+CLIs and the E2 venv: 20 of 20 checks pass; 2,294 unit tests, 0 failures, 55 skipped. Release manifest
+`release-manifests/0.6.15.json`.
+
 ## 0.6.14 release check (2026-10-13, E2)
 
 Version 0.6.14 (lint-clean contracts after the 0.6.13 tag failed the GitHub lint job; no behavior change). ruff
