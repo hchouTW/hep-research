@@ -75,7 +75,8 @@ Batch C (P1, T18-T21, T24-T25): `skills/hep-statistics/scripts/covariance_fit.py
 improper priors).
 
 Batch D (P2, T26-T30, all EXPERIMENTAL): `eft_scan.py`, `discrete_profile.py`, `global_significance.py`,
-`pcl_efficiency_ratio.py`, `ratio_estimation.py`.
+`pcl_efficiency_ratio.py`, `ratio_estimation.py`. The discrete-profiling study (`examples/stats-benchmarks/discrete-profile/`) meets its
+bias criterion; its coverage is not established at 300 toys per point (insufficient precision).
 
 CI, documentation and evidence:
 

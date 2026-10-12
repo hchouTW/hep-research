@@ -201,7 +201,7 @@
    "tests": [
     "tests/examples/test_stats_benchmarks.py"
    ],
-   "scope": "one synthetic spectrum and four truths"
+   "scope": "one synthetic spectrum, four truths; bias criterion met; coverage not established at 300 toys per point (insufficient precision)"
   },
   {
    "id": "global-significance",

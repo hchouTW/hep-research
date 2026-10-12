@@ -416,6 +416,46 @@ Records: the user's `torch-gpu/gpu-campaign` folder.
 - `MaxRSS` of a 4 s chunk is 0.07 MB (accounting samples every 15 s), as in the CPU campaign. `freeze` refuses a
   `#!/usr/bin/env python3` worker ("name one interpreter only").
 
+## STATS-AUDIT (2026-10-12, E2 + pyhf 0.7.6, ArviZ 0.23.4, ROOT 6.38.04; version 0.6.10 + unreleased): hep-statistics audit T01–T30
+
+Work order: the hep-statistics audit handed over on 2026-10-10 (audit commit `b5c3a55`, findings F01–F04, checks
+T01–T30; the bundle is kept outside the repository). Branch `feat/stats-audit-p0` from `1d42271`. `git diff
+b5c3a55..1d42271` touches no statistics file, and the audit's reproduction program printed output identical to the
+audit's on `1d42271`: all four findings still held. ArviZ was installed in an isolated environment; pyhf from the E2
+venv; PyROOT from Homebrew's Python 3.14. Combine was not available: every Combine statement below is unverified in E2.
+Software checks: consistency and the stated oracles only, within the stated synthetic or public scope.
+
+| Item | Result | Evidence |
+|---|---|---|
+| F01–F03 (T01–T05) | pass; 8 of the 20 first regressions fail on the audited `likelihood_limits.py` (red), all pass after the fix | `tests/core/test_stats_p0_regressions.py` (now 25 tests) |
+| F04 (T06–T08) | pass; the audit's four mutations rejected or unresolved at contract 2.2.0 and with `--strict`; unresolved or failed at the publication gate; every legacy fixture keeps its outcome | `tests/contracts/test_statistical_semantics.py` (22 tests) |
+| T09 exact counting | pass: classical and CLs equal SciPy roots (n ≤ 8, five b, 90% and 95%); FC equals an independently written ordering within two grid steps | `test_stats_counting_asymptotic_oracles.py` |
+| T10 asymptotic forms and gate | pass: arXiv:1007.1727v3 eqs. (14), (16), (101) to 1e-10; gate consistent at n = 60, b = 45, inapplicable at n = 3, b = 0.3 (20,000 toys agree with the exact tail), not-applicable at q0 = 0 | same |
+| T11 toy CLs | pass: limits 4.12 / 4.27 / 4.28 (200 toys 12 points, 400 toys, 18 points) within the quadrature of the ranges plus half a grid step; doubling the toys narrows the range; a floored CLb is not a resolved limit | `test_stats_toy_ensemble.py` |
+| T12, T13 ensembles and accounting | pass: partitioned tasks merge to the single run; duplicates and gaps refused; with 5% injected fit failures plus empty, invalid, timeout and error outcomes, counts sum to N and C/N, (C+F)/N, C/(N−F) are kept | same |
+| T14 coverage grid | pass: exact coverage of the classical and FC belts ≥ 0.950 at 28 (s, b) points (CLs ≥ 0.9502, reported); the asymptotic profile limit at 8 points (20,000 toys each) 0.945–1.000, all pass the predeclared gate; toy calibration 0.98245 vs exact 0.98168; the negative control (sigma_b ignored) covers 0.873 and is rejected | `examples/stats-benchmarks/coverage-grid/` |
+| T15 SR/CR | pass: pyhf fit equals the closed form within 5e-5; Asimov closure unbiased; omitted CR contamination biases mu by −mu s_CR b_SR / (b_CR s_SR) and fails closure | `tests/adapters/test_sr_cr_model_card.py` |
+| T16 backends | core–pyhf pass: Delta NLL 1e-15, q-tilde 1e-11 on three models; a wrong interpolation code caught after tightening the pointwise tolerance to 1e-9; Combine **not run** | `test_backend_likelihood_equivalence.py` |
+| T17 published likelihood | asymptotic (primary, preregistered) **reproduces**: S95 obs 4.876 (4.9), exp 5.135 (5.1), −1/+1σ 3.431/7.910 (3.4/7.9), CLb 0.451 (0.45), p0 0.4997 (0.50), post-fit SM yield 3.232 (3.3); negative control (no CR) fails; toy-based (5,000 toys, 7 points) **does not reproduce** the observed (5.34, MC range 5.13–5.58) and −1σ (4.03) limits; median 5.27 and +1σ 7.70 agree | `examples/stats-benchmarks/published-likelihood-sbottom/`; download rerun checked |
+| T18, T19 covariance fits | pass; Peelle setup (1,000 toys): data-scaled bias −0.043 ± 0.007, C(theta) with ln det −0.039 ± 0.007, normalization nuisance −0.002 ± 0.007 | `test_covariance_fit.py` |
+| T20 signed weights | pass: Gaussian MC term covers 0.679 and 0.683 (5,000 toys, two seeds) with 20% negative weights; 0.526 without | `test_stats_weighted_mc.py` |
+| T21 sWeights | pass: asymptotic pull width in [0.9, 1.1], bootstrap within 10%; RooFit AsymptoticError equals the sandwich to 1e-4; RooFit SumW2Error 0.0444 vs 0.0389 here, unexplained; independence check size 4/400, power 100/100 | `test_sweighted_fit.py` |
+| T22, T23 unfolding | pass: inversion covers 0.68 per bin and jointly; omitting the efficiency or MC term undercovers (0.41–0.54); Tikhonov with per-toy GCV on another truth covers 0.43 jointly | `test_stats_unfolding_outer.py` |
+| T24 Bayesian diagnostics | pass: equal to ArviZ 0.23.4 to 1e-9 on six chain sets; constant chains undefined (ArviZ: ESS = draws) | `test_bayes_arviz_oracle.py` |
+| T25 Bayesian calibration | pass: conjugate quantiles within 4 MCSE; a missing Jacobian fails; SBC power 1.0 against a 0.7 width; false alarms ≤ 4/60 | `test_bayes_calibration.py` |
+| T26, T28, T29, T30 (EXPERIMENTAL) | pass within their controlled examples | `test_eft_scan.py`, `test_global_significance.py`, `test_pcl_efficiency_ratio.py`, `test_ratio_estimation.py` |
+| T27 (EXPERIMENTAL) | partial: 300 toys × 4 truths (one outside the family) × mu = 0, 1, selection redone per toy, 1 failed toy counted; the envelope meets the bias criterion everywhere (|bias| ≤ 0.18 of the spread), a single exp1 form fails it where its form is wrong (up to 0.49); envelope coverage 0.647–0.697 is **insufficient-precision** against the predeclared 0.633 bound (300 toys cannot decide it): coverage not established | `examples/stats-benchmarks/discrete-profile/` |
+| Required backends gate | 119 tests, 0 failures with pyhf 0.7.6 and ArviZ 0.23.4; fails naming ArviZ without it | `tools/run_required_backends.py` |
+| CI workflows | `stats-backends` job and `statistics-validation.yml` written and YAML-parsed; **not yet run on GitHub** | `.github/workflows/` |
+| Aggregate | pass: 18 checks pass, 2 CLI checks skipped (`--no-cli`); 2,007 unit tests, 0 failures, 0 errors, 55 skipped (slow tier, network, GPU, scheduler and optional tools); `tools/check_relocation.py` passes | `tools/run_all_checks.py --no-cli` |
+
+Found and fixed along the way: ties crashing and constant chains reported healthy in `bayes_diagnostics.py`; toys
+silently dropped in `statistical_toys.py ratio` and `unfolding_diagnostics.py response-stat`; signed-weight templates
+accepted by the effective-count likelihood; a duplicated test class hiding two covariance tests; citation numbers of
+Cowan et al. (one written in this work was wrong). An independent review of the branch found further defects (typed
+2.2 fields changing legacy outcomes, a permissive publication gate, the gate at q0 = 0, stale global fits, a
+`beta_ppf` underflow), all fixed with tests. pyhf 0.7.6's toy expected bands fail with NumPy ≥ 2.4 (upstream).
+
 ## E2-INSTALL-FULLTEST (2026-10-03 to 2026-10-04, E2, version 0.1.0): INSTALL, FULLTEST-E2 and follow-ups
 
 **INSTALL.** First install into a day-to-day configuration: the user's own `~/.claude`, user scope, from the GitHub
