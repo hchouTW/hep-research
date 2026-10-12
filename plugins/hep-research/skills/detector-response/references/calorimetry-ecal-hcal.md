@@ -83,7 +83,9 @@ quadrature:
 - **`b`, the noise term** - electronic noise and, at a collider, pileup energy inside
   the reconstruction cone. It enters as a fixed energy uncertainty, so its *relative*
   contribution falls as `1/E`. It is the term that grows when pileup increases, and
-  the reason optimal cluster size is pileup-dependent.
+  the reason optimal cluster size is pileup-dependent. Coherent noise makes the
+  cluster noise grow faster than `sqrt(N_cells)`, and the pileup part follows
+  Campbell's theorem ([front-end electronics and signal processing](front-end-electronics-and-signal-processing.md)).
 - **`c`, the constant term** - calibration non-uniformity, channel-to-channel
   intercalibration error, hardware non-uniformity (dead material, cracks, temperature
   and light-collection variations), energy leakage, and in hadronic calorimeters the

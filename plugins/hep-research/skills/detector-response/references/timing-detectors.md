@@ -17,8 +17,7 @@ beta = L / (c t)        m^2 = p^2 (1/beta^2 - 1)      Delta t = (L/c) [ (1/beta_
 `L` path length along the track (not straight-line distance; requires the track fit),
 `t` measured flight time (stop minus start), `p` momentum. The TOF separation of two
 species with the same `p` in the ultrarelativistic limit is
-`Delta t ≈ (L/(2 c p^2))(m_1^2 - m_2^2)` (approximate); separation in `N_sigma` (`Delta t / sigma_t`, the single-measurement convention of
-[performance metrics](performance-metrics-and-residual-diagnostics.md)) falls as
+`Delta t ≈ (L/(2 c p^2))(m_1^2 - m_2^2)` (approximate); separation in `N_sigma` falls as
 `1/p^2` and is lost above a momentum set by `L` and total time resolution.
 
 ## Pulse-time extraction
@@ -43,12 +42,12 @@ sigma_calib^2 + sigma_geom^2 + sigma_ref^2`
 | Term | Origin | Scaling / handle |
 |---|---|---|
 | Sensor / intrinsic | transit-time spread (PMT), Landau (silicon), drift (gas) | detector design; irreducible per hit |
-| Photostatistics | `~ tau/sqrt(N_pe)` (rise/decay time) | more photons |
-| Electronics | jitter (`noise/slope`), TDC bin `/sqrt(12)`, time walk | design, calibration |
-| Clock | distribution jitter and offsets | common to all channels: *not* averaged by combining channels |
+| Photostatistics | first-photon time `tau_d/N_pe` (negligible rise time); `k`-th photon `~ sqrt(k) tau_d/N_pe`; with rise time `~ sqrt(tau_r tau_d/N_pe)` (approximate) | more photons, faster rise and decay |
+| Electronics | jitter (`noise/slope`), TDC bin `/sqrt(12)` (rms over random phases; at a fixed phase it averages out only with >= 0.5 bin of noise), time walk | design, calibration ([front-end electronics](front-end-electronics-and-signal-processing.md)) |
+| Clock | distribution jitter and offsets | global part: common to all channels, not averaged, but cancels in time differences within one event; local part (per board/PLL): averages over independent boards |
 | Calibration | `t0` per channel, walk curve, cable/fiber delay | in-situ residual method |
 | Geometry | path length, position along the bar, `L` error | tracking quality |
-| Reference/start time | collision time, event-start time | often dominates in low-multiplicity events (few tracks constrain the event time); many tracks improve it |
+| Reference/start time | collision time, event-start time | improves as `1/sqrt(N_tracks)` when estimated from tracks; dominates in low-multiplicity events or when only the bunch-crossing spread is known |
 
 Keep four resolutions apart: **single-hit** (one channel), **per-track** (all hits on
 one track, after averaging the uncorrelated part), **event-time** (start time

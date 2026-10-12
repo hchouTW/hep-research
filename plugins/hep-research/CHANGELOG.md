@@ -3,6 +3,29 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **detector-response: front-end electronics and signal processing.** New reference
+  `front-end-electronics-and-signal-processing.md` models readout electronics as part of the response: signal
+  induction (Shockley-Ramo, ballistic deficit), shaping, noise (series, parallel, 1/f, leakage-current scaling,
+  correlated noise in sums, common mode), thresholds (S-curves, Rice noise-hit rate), optimal filtering and sampling,
+  ADC/TDC quantization and nonlinearity, time pickoff (jitter, walk, CFD modes), pileup (Campbell, bipolar baseline
+  transients), dead time and live fraction, SiPM and PMT readout, LAr TPC signal processing, radiation effects,
+  calibration and simulation of the electronics, with an explicit out-of-scope list (circuit, ASIC, FPGA design).
+  New script `frontend_response.py` (ENC with closed-form CR-(RC)^n integrals and the shaping optimum, noise-hit rate,
+  timing, quantization, pileup, SiPM, ballistic deficit, dead time, cluster noise), each result with a validity list;
+  23 tests against values checked by numerical integration and Monte Carlo. The bibliography gains an electronics
+  section of nine Crossref-checked citations (Shockley, Ramo, Radeka, Spieler, Cleland-Stern, Rice, Vinogradov,
+  MicroBooNE signal processing, Moll).
+- **detector-response: electronics statements corrected.** Shaping trades series against parallel noise (an optimum,
+  not "slower is quieter"); sub-Nyquist sampling with a known pulse shape is unbiased; optimal filter instead of
+  "template fit is best"; common-mode estimates exclude signal channels; dead-time formulas are exact for Poisson
+  arrivals and the paralyzable form is given; photostatistics timing `tau_d/N_pe` rather than `tau/sqrt(N_pe)`; clock
+  jitter split into global and local parts; the reference time dominates in low-multiplicity, not busy, events;
+  `LSB/sqrt(12)` needs dithering noise; dark counts add variance, not only an offset. `triggers-luminosity-pileup.md`
+  gains a dead-time and live-time section (the existing cross-reference had no target), and the effective luminosity
+  is summed per block with its live fraction.
+
 ## 0.6.15 (2026-10-13)
 
 Contracts 2.4.0 (minor: response semantics; every 2.3.0 artifact keeps its outcome and gets the new rules with

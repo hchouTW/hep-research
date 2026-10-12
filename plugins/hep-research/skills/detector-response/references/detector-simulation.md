@@ -85,6 +85,9 @@ reproduce: charge collection and sharing between channels, the response function
 its saturation, electronic noise with its real correlations, discriminator thresholds
 and zero suppression, time structure including any integration window that admits
 out-of-time signals, and the dead/noisy channel map for the period being simulated.
+The electronics relations it needs (noise correlations, pulse shape and phase,
+optimal-filter weights, quantization, gain switching) are in
+[front-end electronics and signal processing](front-end-electronics-and-signal-processing.md).
 
 Digitization is the most common place for a data-simulation mismatch that no
 calibration fixes, because it is the stage most often simplified. Specific things worth

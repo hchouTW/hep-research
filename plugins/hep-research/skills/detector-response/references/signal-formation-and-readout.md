@@ -2,7 +2,9 @@
 
 The first four arrows of the [chain](detector-measurement-framework.md): particle
 and interaction, detector response, signal formation and transport, electronics and
-raw data. Material-budget/multiple-scattering bookkeeping is in
+raw data. Electronics in quantitative detail (noise, shaping, thresholds, optimal
+filtering, digitization, timing pickoff, rate effects) is in
+[front-end electronics and signal processing](front-end-electronics-and-signal-processing.md). Material-budget/multiple-scattering bookkeeping is in
 [detector systems overview](detector-systems-overview.md); calibration of the constants introduced here is in
 [calibration and alignment](calibration-and-alignment.md). Every equation below states its validity; none
 is a substitute for a full simulation ([detector simulation](detector-simulation.md)).
@@ -150,16 +152,22 @@ buffer -> zero-suppression / trigger -> data. Each stage removes information; ke
 binary readout, coarse ADC) separate from **reconstruction loss** (information present
 in the raw data but not used by the algorithm).
 
-- **Pulse shaping and sampling.** A CR-RC shaper with peaking time `tau` trades noise
-  against pileup: slow shaping reduces series noise but increases pileup and dead time;
-  sampling a waveform at rate `f_s` needs `f_s` above twice the signal bandwidth
-  (Nyquist) or aliasing biases amplitude and time extraction. Amplitude and time from a
-  waveform: peak, matched filter, template fit (best; needs the pulse shape and its
-  variation with occupancy).
+- **Pulse shaping and sampling.** A CR-RC shaper with peaking time `t_p` balances
+  series noise (falls with `t_p`) against parallel, leakage-current noise (rises with
+  `t_p`), pileup and dead time (rise with `t_p`): there is an optimum `t_p`, and it moves
+  shorter as leakage current grows with dose. With a known pulse shape and a phase
+  locked to the clock, a few samples per pulse give unbiased amplitudes even below the
+  signal's Nyquist rate (an anti-alias filter on the noise and a stable phase are what
+  is required); Nyquist sampling matters when the waveform itself is unknown. Amplitude
+  and time from a waveform: peak, optimal filter (minimum variance when the noise
+  autocorrelation, including pileup, and the phase are known), template fit (biased at
+  low `S/N` with a free time). Details and numbers:
+  [front-end electronics and signal processing](front-end-electronics-and-signal-processing.md).
 - **Noise.** Equivalent noise charge (ENC, electrons) sets the threshold and the
   minimum measurable signal; signal-to-noise `S/N` of a minimum-ionizing particle in a
   thin sensor is the driver of both hit efficiency and position resolution. **Common-mode
-  noise** (coherent across channels) is subtracted event-by-event; **crosstalk**
+  noise** (coherent across channels) is subtracted event-by-event, excluding channels
+  with signal (otherwise the estimate absorbs signal at high occupancy); **crosstalk**
   (capacitive, inductive, or optical) creates ghost signals and biases charge sharing.
 - **Pedestal, zero suppression, dynamic range.** Pedestals are measured (dedicated
   runs, empty events) and drift with temperature; zero suppression removes noise
@@ -172,10 +180,12 @@ in the raw data but not used by the algorithm).
   timing, losing amplitude - fine position resolution then relies on geometry and
   cluster topology.
 - **Pileup and dead time.** Signals overlapping in time within the shaping/integration
-  window merge; a non-paralyzable dead time `tau` turns a true rate `n` into a
-  measured `m = n/(1 + n tau)` (approximate); a paralyzable one saturates and turns
-  over at high rate. The measured rate versus the true rate is a *response* needing a
-  correction ([triggers luminosity pileup](triggers-luminosity-pileup.md)).
+  window merge; for Poisson arrivals a non-paralyzable dead time `tau_d` turns a true
+  rate `n` into a measured `m = n/(1 + n tau_d)`, and a paralyzable one into
+  `m = n exp(-n tau_d)`, which turns over at `n = 1/tau_d`. Bunched beams and trigger
+  rules break the Poisson assumption. The measured rate versus the true rate is a
+  *response* needing a correction (live time in
+  [triggers luminosity pileup](triggers-luminosity-pileup.md)).
 - **Buffering and data loss.** Finite buffer depth and bandwidth drop events or hits
   under burst conditions; the loss is *rate- and topology-dependent* (large events
   lost more), so it can look like a physics-dependent efficiency.

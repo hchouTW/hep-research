@@ -4,8 +4,8 @@
  "threshold": 0.08,
  "by_skill": {
   "detector-response": {
-   "references": 33,
-   "bytes": 363663,
+   "references": 34,
+   "bytes": 394797,
    "uncited": 0
   },
   "hep-analysis": {
@@ -57,6 +57,7 @@
     "skills/detector-response/references/detector-simulation.md",
     "skills/detector-response/references/detector-systems-overview.md",
     "skills/detector-response/references/event-reconstruction.md",
+    "skills/detector-response/references/front-end-electronics-and-signal-processing.md",
     "skills/detector-response/references/gaseous-and-specialized-tracking-technologies.md",
     "skills/detector-response/references/muon-systems.md",
     "skills/detector-response/references/signal-formation-and-readout.md",
@@ -71,8 +72,8 @@
   {
    "path": "skills/detector-response/references/calorimetry-ecal-hcal.md",
    "owner": "detector-response",
-   "bytes": 11542,
-   "lines": 192,
+   "bytes": 11763,
+   "lines": 194,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/calibration-and-alignment.md",
@@ -90,17 +91,18 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "d8bec60 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/cherenkov-imaging-variants-and-photosensors.md",
    "owner": "detector-response",
-   "bytes": 9984,
-   "lines": 147,
+   "bytes": 10559,
+   "lines": 154,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/detector-principles-bibliography.md",
     "skills/detector-response/references/detector-principles-summary.md",
+    "skills/detector-response/references/front-end-electronics-and-signal-processing.md",
     "skills/detector-response/references/gaseous-and-specialized-tracking-technologies.md",
     "skills/detector-response/references/noble-liquid-neutrino-and-rare-event-detectors.md",
     "skills/detector-response/references/performance-metrics-and-residual-diagnostics.md",
@@ -112,7 +114,7 @@
     "hep-analysis",
     "research-communication"
    ],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "d8bec60 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/core-detector-equations.md",
@@ -228,8 +230,8 @@
   {
    "path": "skills/detector-response/references/detector-measurement-framework.md",
    "owner": "detector-response",
-   "bytes": 10810,
-   "lines": 187,
+   "bytes": 11002,
+   "lines": 189,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
@@ -237,6 +239,7 @@
     "skills/detector-response/references/detector-glossary.md",
     "skills/detector-response/references/detector-principles-summary.md",
     "skills/detector-response/references/detector-systems-overview.md",
+    "skills/detector-response/references/front-end-electronics-and-signal-processing.md",
     "skills/detector-response/references/noble-liquid-neutrino-and-rare-event-detectors.md",
     "skills/detector-response/references/signal-formation-and-readout.md",
     "skills/hep-analysis/references/hep-analysis-guide.md",
@@ -246,24 +249,25 @@
     "hep-analysis",
     "research-communication"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "d8bec60 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/detector-principles-bibliography.md",
    "owner": "detector-response",
-   "bytes": 11491,
-   "lines": 146,
+   "bytes": 13791,
+   "lines": 178,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/detector-response/references/detector-principles-summary.md"
+    "skills/detector-response/references/detector-principles-summary.md",
+    "skills/detector-response/references/front-end-electronics-and-signal-processing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "d8bec60 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/detector-principles-summary.md",
    "owner": "detector-response",
-   "bytes": 22432,
+   "bytes": 22527,
    "lines": 288,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -272,13 +276,13 @@
     "skills/detector-response/references/core-detector-equations.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "5db10d5 2026-10-13"
+   "last_commit": "d8bec60 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/detector-simulation.md",
    "owner": "detector-response",
-   "bytes": 12161,
-   "lines": 202,
+   "bytes": 12396,
+   "lines": 205,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/calibration-and-alignment.md",
@@ -286,6 +290,7 @@
     "skills/detector-response/references/detector-measurement-framework.md",
     "skills/detector-response/references/detector-principles-bibliography.md",
     "skills/detector-response/references/detector-principles-summary.md",
+    "skills/detector-response/references/front-end-electronics-and-signal-processing.md",
     "skills/detector-response/references/signal-formation-and-readout.md",
     "skills/hep-analysis/references/hep-analysis-guide.md",
     "skills/hep-theory/references/event-generation.md"
@@ -294,7 +299,7 @@
     "hep-analysis",
     "hep-theory"
    ],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "d8bec60 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/detector-systems-overview.md",
@@ -366,6 +371,27 @@
     "research-communication"
    ],
    "last_commit": "b944a23 2026-10-13"
+  },
+  {
+   "path": "skills/detector-response/references/front-end-electronics-and-signal-processing.md",
+   "owner": "detector-response",
+   "bytes": 24456,
+   "lines": 374,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/detector-response/references/calorimetry-ecal-hcal.md",
+    "skills/detector-response/references/cherenkov-imaging-variants-and-photosensors.md",
+    "skills/detector-response/references/detector-measurement-framework.md",
+    "skills/detector-response/references/detector-principles-bibliography.md",
+    "skills/detector-response/references/detector-principles-summary.md",
+    "skills/detector-response/references/detector-simulation.md",
+    "skills/detector-response/references/signal-formation-and-readout.md",
+    "skills/detector-response/references/timing-detectors.md",
+    "skills/detector-response/references/triggers-luminosity-pileup.md",
+    "skills/detector-response/scripts/frontend_response.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "d8bec60 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/gaseous-and-specialized-tracking-technologies.md",
@@ -507,6 +533,7 @@
     "skills/detector-response/references/detector-glossary.md",
     "skills/detector-response/references/detector-principles-bibliography.md",
     "skills/detector-response/references/detector-principles-summary.md",
+    "skills/detector-response/references/front-end-electronics-and-signal-processing.md",
     "skills/detector-response/references/gaseous-and-specialized-tracking-technologies.md",
     "skills/detector-response/references/signal-formation-and-readout.md",
     "skills/hep-analysis/references/hep-analysis-guide.md"
@@ -566,7 +593,6 @@
     "skills/detector-response/references/detector-principles-summary.md",
     "skills/detector-response/references/muon-systems.md",
     "skills/detector-response/references/reconstruction-performance-and-truth-matching.md",
-    "skills/detector-response/references/timing-detectors.md",
     "skills/hep-analysis/references/hep-analysis-guide.md"
    ],
    "cited_by_other_skills": [
@@ -642,14 +668,15 @@
   {
    "path": "skills/detector-response/references/signal-formation-and-readout.md",
    "owner": "detector-response",
-   "bytes": 14430,
-   "lines": 215,
+   "bytes": 15333,
+   "lines": 225,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/cherenkov-imaging-variants-and-photosensors.md",
     "skills/detector-response/references/detector-measurement-framework.md",
     "skills/detector-response/references/detector-principles-bibliography.md",
     "skills/detector-response/references/detector-principles-summary.md",
+    "skills/detector-response/references/front-end-electronics-and-signal-processing.md",
     "skills/detector-response/references/gaseous-and-specialized-tracking-technologies.md",
     "skills/detector-response/references/noble-liquid-neutrino-and-rare-event-detectors.md",
     "skills/hep-analysis/references/hep-analysis-guide.md",
@@ -659,7 +686,7 @@
     "hep-analysis",
     "research-communication"
    ],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "d8bec60 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/space-based-direct-detection.md",
@@ -691,14 +718,15 @@
   {
    "path": "skills/detector-response/references/timing-detectors.md",
    "owner": "detector-response",
-   "bytes": 8324,
-   "lines": 136,
+   "bytes": 8631,
+   "lines": 135,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/cherenkov-imaging-variants-and-photosensors.md",
     "skills/detector-response/references/detector-case-studies-and-checklists.md",
     "skills/detector-response/references/detector-principles-bibliography.md",
     "skills/detector-response/references/detector-principles-summary.md",
+    "skills/detector-response/references/front-end-electronics-and-signal-processing.md",
     "skills/detector-response/references/gaseous-and-specialized-tracking-technologies.md",
     "skills/detector-response/references/performance-metrics-and-residual-diagnostics.md",
     "skills/hep-analysis/references/hep-analysis-guide.md"
@@ -706,7 +734,7 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "d8bec60 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/tracking-and-vertexing.md",
@@ -740,8 +768,8 @@
   {
    "path": "skills/detector-response/references/triggers-luminosity-pileup.md",
    "owner": "detector-response",
-   "bytes": 7424,
-   "lines": 120,
+   "bytes": 9274,
+   "lines": 148,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
@@ -749,6 +777,7 @@
     "skills/detector-response/references/detector-principles-summary.md",
     "skills/detector-response/references/detector-simulation.md",
     "skills/detector-response/references/event-reconstruction.md",
+    "skills/detector-response/references/front-end-electronics-and-signal-processing.md",
     "skills/detector-response/references/muon-systems.md",
     "skills/detector-response/references/reconstruction-performance-and-truth-matching.md",
     "skills/detector-response/references/signal-formation-and-readout.md",
@@ -760,7 +789,7 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "d8bec60 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/analysis-design.md",
@@ -3318,6 +3347,10 @@
   "scientific": [
    "skills/research-communication/references/interpreting-scientific-graphics.md",
    "skills/research-communication/references/scientific-style.md"
+  ],
+  "signal": [
+   "skills/detector-response/references/front-end-electronics-and-signal-processing.md",
+   "skills/detector-response/references/signal-formation-and-readout.md"
   ],
   "site": [
    "skills/hep-computing/references/batch-site-cern-htcondor.md",

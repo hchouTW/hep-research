@@ -90,6 +90,7 @@ MISSING_FILE_ARGS = {
 }
 NO_INPUT_FILE = {  # script: why the missing-file check does not apply
     "skills/detector-response/scripts/cherenkov_angle.py": "numbers on the command line",
+    "skills/detector-response/scripts/frontend_response.py": "numbers on the command line",
     "skills/detector-response/scripts/pid_separation_power.py": "numbers on the command line",
     "skills/detector-response/scripts/tag_and_probe_efficiency.py": "counts on the command line",
     "skills/detector-response/scripts/xmax_gaisser_hillas.py": "numbers on the command line",
