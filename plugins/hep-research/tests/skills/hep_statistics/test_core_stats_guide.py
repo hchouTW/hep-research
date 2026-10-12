@@ -15,6 +15,7 @@ sys.path.insert(0, str(PLUGIN))
 SUBCOMMAND_MODULES = ("likelihood_limits", "poisson_diagnostics", "statistical_toys", "template_fit",
                       "unfolding_diagnostics")
 VALIDATORS = ("validate_covariance", "validate_response")
+HELPERS = ("fit_diagnostics", "tail_estimation")  # importable helpers without a CLI, documented under the conventions
 
 
 def subcommands(module):
@@ -38,7 +39,9 @@ class CoreStatsGuide(unittest.TestCase):
     def test_every_module_has_a_section(self):
         # private helpers (a leading underscore) have no subcommands; the guide describes them under the conventions
         found = sorted(p.stem for p in (PLUGIN / "core" / "stats").glob("*.py") if not p.stem.startswith("_"))
-        self.assertEqual(found, sorted(SUBCOMMAND_MODULES + VALIDATORS), "update the guide and this test together")
+        self.assertEqual(found, sorted(SUBCOMMAND_MODULES + VALIDATORS + HELPERS), "update the guide and this test together")
+        for m in HELPERS:
+            self.assertIn(f"`{m}.py`", self.text)
         for m in SUBCOMMAND_MODULES:
             self.assertIn(f"## `{m}.py`", self.text)
         for m in VALIDATORS:

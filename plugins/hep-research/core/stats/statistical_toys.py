@@ -111,6 +111,18 @@ def _q0(n: int, b: float) -> float:
     return 2.0 * (n * math.log(n / b) - n + b) if n > b else 0.0
 
 
+def _toy_gof_p(hits: int, skipped: int, toys: int) -> dict:
+    """Toy p-value with the tail record; toys that could not be evaluated (a non-positive denominator) are counted
+    and bound the p-value from both sides instead of being dropped."""
+    from core.stats.tail_estimation import toy_tail
+    tail = toy_tail(hits, toys)
+    out = {"p_value_toys": tail["estimate"], "binomial_error_on_p_toys": tail["binomial_error"], "toy_tail": tail,
+           "toys_not_evaluated": skipped}
+    if skipped:
+        out["p_value_toys_range_with_not_evaluated"] = [hits / toys, (hits + skipped) / toys]
+    return out
+
+
 def _sf_normal(z: float) -> float:
     return 0.5 * math.erfc(z / math.sqrt(2.0))
 
@@ -125,7 +137,8 @@ def boundary(n: int, b: float, toys: int, seed: int) -> dict:
     q_obs = _q0(n, b)
     draws = [poisson_draw(rng, b) for _ in range(toys)]
     q = [_q0(d, b) for d in draws]
-    p_toy = sum(v >= q_obs - 1e-12 for v in q) / toys
+    from core.stats.tail_estimation import toy_tail
+    tail = toy_tail(sum(v >= q_obs - 1e-12 for v in q), toys)  # k = 0 is a bound, not p = 0 (audit F02)
     from core.stats.poisson_diagnostics import log_poisson_sf, z_from_log_p
     log_p = log_poisson_sf(n, b)  # exact P(N >= n | b), summed in the tail rather than as 1 - P(N <= n - 1 | b)
     p_exact = math.exp(log_p)
@@ -133,8 +146,8 @@ def boundary(n: int, b: float, toys: int, seed: int) -> dict:
     return {"label": LABEL, "method": "q0 at the s >= 0 boundary, known background, seeded toys", "n_obs": n, "b": b,
             "toys": toys, "seed": seed, "q0_observed": q_obs,
             "p_value_exact_poisson": p_exact, "log_p_value_exact_poisson": log_p,
-            "significance_exact_poisson_z": z_from_log_p(log_p), "p_value_toys": p_toy,
-            "binomial_error_on_p_toys": math.sqrt(max(p_toy * (1 - p_toy), 0.0) / toys),
+            "significance_exact_poisson_z": z_from_log_p(log_p), "p_value_toys": tail["estimate"],
+            "binomial_error_on_p_toys": tail["binomial_error"], "toy_tail": tail,
             "p_value_half_chi2_asymptotic": _sf_normal(z) if q_obs > 0 else 0.5,
             "p_value_naive_wilks_chi2_1dof": 2.0 * _sf_normal(z) if q_obs > 0 else 1.0,
             "fraction_toys_with_q0_zero": sum(v == 0.0 for v in q) / toys,
@@ -681,11 +694,12 @@ def ratio_measured(doc: dict, toys: int, seed: int) -> dict:
     diag = [[cr[i][j] if i == j else 0.0 for j in range(n)] for i in range(n)]
     mean_d, sig_d, chi2_d = _gls_constant(r0, diag, "diagonal of the linearized ratio covariance")
     null = [mean_g * y[i] for i in range(n)]
-    hits = 0
+    hits = skipped = 0
     for _ in range(toys):
         z = [rng.gauss(0, 1) for _ in range(2 * n)]
         v = [(null + y)[i] + sum(chol[i][j] * z[j] for j in range(i + 1)) for i in range(2 * n)]
         if min(v[n:]) <= 0:
+            skipped += 1  # no ratio: counted, never silently read as a non-exceedance
             continue
         r = [v[i] / v[n + i] for i in range(n)]
         hits += _gls_constant(r, cr, l=l_cr)[2] >= chi2_g - 1e-12
@@ -697,8 +711,8 @@ def ratio_measured(doc: dict, toys: int, seed: int) -> dict:
             "toy_16_84_percentile": [[srt[i][int(0.16 * m)], srt[i][min(int(0.84 * m), m - 1)]] for i in range(n)],
             "ratio_correlation_matrix_linear": corr,
             "constant_ratio_fit_full_covariance": {"value": mean_g, "sigma": sig_g, "chi2": chi2_g, "ndf": n - 1,
-                                                    "p_value_chi2": chi2_sf(max(chi2_g, 0.0), n - 1), "p_value_toys": hits / toys,
-                                                    "binomial_error_on_p_toys": math.sqrt(max(hits / toys * (1 - hits / toys), 0) / toys)},
+                                                    "p_value_chi2": chi2_sf(max(chi2_g, 0.0), n - 1),
+                                                    **_toy_gof_p(hits, skipped, toys)},
             "constant_ratio_fit_diagonal_only": {"value": mean_d, "sigma": sig_d, "chi2": chi2_d, "ndf": n - 1,
                                                   "p_value_chi2": chi2_sf(max(chi2_d, 0.0), n - 1)},
             "sigma_ratio_diagonal_over_full": sig_d / sig_g,

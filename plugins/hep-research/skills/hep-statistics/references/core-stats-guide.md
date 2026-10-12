@@ -37,7 +37,8 @@ pyhf/Combine adapter ([statistical tools](statistical-tools.md)). Run any script
 | Script | 0 | 1 | 2 |
 |---|---|---|---|
 | `poisson_diagnostics.py` | ok | `failed`: a limit or interval end not bracketed below the mean limit (1e5) | rejected input |
-| `likelihood_limits.py`, `statistical_toys.py`, `unfolding_diagnostics.py` | ok | — | rejected input |
+| `likelihood_limits.py` | ok | `failed`: a fit on the observed or Asimov data did not converge (`fit_diagnostics` gives the reasons; the numbers are not results); exit 3 `incomplete`: only toy fits failed | rejected input |
+| `statistical_toys.py`, `unfolding_diagnostics.py` | ok | — | rejected input |
 | `template_fit.py` | ok | fit `failed` (infeasible model or no convergence) | rejected input |
 | `validate_covariance.py` | pass (or warnings without `--strict`) | errors (or warnings with `--strict`) | unreadable or not JSON |
 | `validate_response.py` | pass (or warnings without `--strict`) | errors | unreadable or not JSON |
@@ -45,6 +46,23 @@ pyhf/Combine adapter ([statistical tools](statistical-tools.md)). Run any script
 - **Poisson means** are limited to 1e5 in every module (`_poisson.py`, private: log-space distribution, tail and
   quantile, accurate to that limit). A limit that cannot be bracketed below it is reported `failed`, never
   clipped to the limit. `fc-interval` alone scans a grid and is limited to total means of 500.
+- **Fit verdicts** (`fit_diagnostics.py`, helper, no CLI). The damped Newton fits of `shape-limit`, `shape-gof` and
+  `contour` return a verdict: `converged` only with a finite NLL, a positive-definite Hessian and EDM = g^T H^-1 g / 2
+  at most 1e-5 (Minuit2's default threshold); otherwise `failed` with reasons (`invalid_domain`,
+  `hessian_not_positive_definite`, `gradient_not_small`, `max_iterations`, `line_search_stalled`). A best fit on the
+  boundary `mu = 0` is checked by the KKT condition (the profile rises into `mu > 0`), not by an interior Hessian. A
+  conditional NLL below the global one by more than 1e-4 triggers a global refit from the conditional point and, if
+  it remains, a recorded failure, never a silently clipped `q`. Results carry `fit_diagnostics` (fits, failures and
+  reasons for the observed data and for toys) and `status`: `failed` (exit 1) when a fit on the data failed,
+  `incomplete` (exit 3) when only toy fits failed; failed toys are counted, never dropped, and toy p-values then
+  carry the range `[k/N, (k+F)/N]`.
+- **Poisson domain.** A negative or non-finite Poisson mean is outside every likelihood here (NLL = +inf); a mean of
+  0 is allowed only for an empty bin. A shape template that interpolates below zero is therefore excluded by the fit
+  instead of being read as an empty bin.
+- **Toy tails** (`tail_estimation.py`, helper, no CLI). A toy p-value is k exceedances of N toys. Outputs carry
+  `toy_tail`: k, N, the estimate k/N (None at k = 0), the Clopper-Pearson interval at 68.27%, and at k = 0 a one-sided
+  95% upper bound `1 - 0.05^(1/N)` (0.0295 for N = 100); the legacy `p_value_toys` and binomial-error fields are None
+  where they would claim p = 0 or an error of 0. Exact Poisson tails stay in log space (`log_p_value_exact_poisson`).
 - **Covariance and correlation matrices** go through one strict Cholesky (`_linalg.py`, private, no CLI). It works
   on the matrix scaled to a unit diagonal, so units never change the verdict. A pivot below -1e-10 is an error
   that names the matrix, a fit refuses a singular matrix, and toy sampling accepts a semi-definite one and records
@@ -151,6 +169,12 @@ and use common random numbers across a scan.
 - `neyman-coverage --s --b --sigma-b [--cl --beta --outer --inner --points --seed]`: coverage at one true point of the
   plug-in profile construction against the supremum construction. Outside the validated range, run it at the true
   values that matter before relying on `neyman-limit`; a single point is not global coverage.
+
+Every toy p-value in this module carries `toy_tail` (see Common conventions); `shape-limit`, `shape-gof` and
+`contour` carry `fit_diagnostics` and a `status` that sets the exit code. Write a `statistical-result` from any of
+these outputs with `<plugin root>/skills/hep-statistics/scripts/result_artifact.py`, which keeps the status (a failed
+fit becomes `fit_status: failed` with the `failed` label) and writes a toy p-value with no exceedance as a typed
+bound; check a result before calling it validated with `contracts/validate.py RESULT.json --gate publication`.
 
 Decision rule: with an uncertain background prefer `profile-limit`, `profile-significance` or `multibin-limit` to a
 marginalized result, and compare the two: a difference is itself a systematic on the method. A profile limit is not a

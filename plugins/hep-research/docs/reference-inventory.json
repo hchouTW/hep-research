@@ -20,7 +20,7 @@
   },
   "hep-statistics": {
    "references": 9,
-   "bytes": 103868,
+   "bytes": 106434,
    "uncited": 0
   },
   "hep-theory": {
@@ -1033,7 +1033,7 @@
     "tools/check_instruction_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "3377632 2026-10-11"
+   "last_commit": "22ea71e 2026-10-12"
   },
   {
    "path": "skills/hep-computing/references/batch-site-cern-htcondor.md",
@@ -1058,7 +1058,7 @@
     "skills/hep-computing/references/batch-scheduling.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "3377632 2026-10-11"
+   "last_commit": "22ea71e 2026-10-12"
   },
   {
    "path": "skills/hep-computing/references/cmake-and-build.md",
@@ -1447,8 +1447,8 @@
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 27183,
-   "lines": 317,
+   "bytes": 29749,
+   "lines": 341,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/inference-and-unfolding.md",
