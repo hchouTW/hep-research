@@ -23,6 +23,16 @@ Software checks establish contract consistency only, not physical validity.
   document digests, and normalizes outcomes (`resolve_outcome`: input-error 2, fail 1, incomplete 3, pass 0;
   unresolved findings or a failed upstream never read as complete). A legacy record is reported as limited
   traceability. The contracts version is unchanged here; the release that ships the format bumps it as a minor change.
+- **Manuscript checks scoped to the selected document (T2).** `check_manuscript.py --main MAIN.tex` scans only the
+  files the main document reaches through literal `\input`, `\include`, `\subfile` and `\import`, resolved against
+  `--build-root` (default: the main file's folder) and bounded by `--project-root`; a label in an unincluded sibling no
+  longer satisfies a reference, and two documents in one folder may share labels. Only the bibliography the document
+  declares counts; a built `.bbl` counts only with `--bbl`, otherwise the citations it alone could resolve are
+  unresolved (exit 3). Macro-generated names, conditional includes, `\includeonly`, missing includes or `.bib`
+  files, out-of-root paths and include cycles are reported as incomplete coverage (exit 3), never guessed. Verbatim
+  and listing bodies are ignored. Directory mode is unchanged and labeled a repository-wide source scan, except that an
+  empty directory is now a no-input error (exit 2) instead of "No issues found". `--format json` prints one report
+  object (report_version 1.0.0: status, exit code, coverage, checks run and not run, findings with codes).
 
 - **T17 toy construction diagnosed.** The published-likelihood benchmark (ATLAS-SUSY-2018-31 SRB) adds a post-hoc
   diagnosis, labelled as such: the exact counting CLs limit of the one-bin SRB (n = 3, b = 3.23) is 5.284, inside the

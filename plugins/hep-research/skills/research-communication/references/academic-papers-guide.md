@@ -441,19 +441,27 @@ review. Grouped by function; within a group, order roughly follows the workflow.
   python3 <plugin root>/skills/research-communication/scripts/build_lit_matrix.py <notes.csv> [--sort-by year] [-o out.md]
   ```
 
-- `<plugin root>/skills/research-communication/scripts/check_manuscript.py` — scans a directory of `.tex`/`.bib` files and reports:
-  undefined `\ref`/`\cref`/`\pageref` targets, duplicate `\label`s, citation keys
-  (natbib, biblatex and `\nocite`) missing from every bibliography (`.bib`, inline
-  `\bibitem`s, or a built `.bbl`), duplicate `.bib` keys, unused `.bib` entries, and
-  leftover TODO/FIXME/placeholder markers. Comments are ignored. Citations with no
-  bibliography at all are reported as missing; for a bibliography built elsewhere, name it
-  with `--external-bib`, and keys not found locally are reported as unresolved (exit 3),
-  not as checked. `--style` adds two advisory typography checks (label word + plain space
-  before `\ref`; number and unit joined by a plain space) that never change the exit
-  code. Read-only; standard library only. Run it near the end of a drafting session, not
-  after every sentence.
+- `<plugin root>/skills/research-communication/scripts/check_manuscript.py` — reports undefined
+  `\ref`/`\cref`/`\pageref` targets, duplicate `\label`s, citation keys (natbib, biblatex and
+  `\nocite`) missing from the bibliography (`.bib`, inline `\bibitem`s, or a built `.bbl`),
+  duplicate `.bib` keys, unused `.bib` entries, and leftover TODO/FIXME/placeholder markers.
+  Comments and verbatim/listing bodies are ignored. Two modes: a directory (repository-wide
+  source scan: every file under it is merged, so a backup file can satisfy a reference) or
+  `--main MAIN.tex` (selected-document scan: only the files the main document reaches through
+  literal `\input`/`\include`/`\subfile`/`\import`, resolved against `--build-root` as TeX does,
+  bounded by `--project-root`; only the bibliography the document declares counts, and a built
+  `.bbl` only when associated with `--bbl`). Prefer `--main` for a submission check. Citations
+  with no bibliography at all are missing; a bibliography built elsewhere is named with
+  `--external-bib`, and keys not found locally are unresolved (exit 3), not checked. An include
+  the scanner cannot follow (macro-generated name, conditional, `\includeonly`, missing file,
+  outside the root, cycle) is reported as incomplete coverage (exit 3), never guessed. An empty
+  directory is a no-input error (exit 2), not a clean manuscript. `--style` adds two advisory
+  typography checks that never change the exit code; `--format json` prints one report object.
+  Neither mode compiles the document or checks its scientific content. Read-only; standard
+  library only. Run it near the end of a drafting session, not after every sentence.
 
   ```
+  python3 <plugin root>/skills/research-communication/scripts/check_manuscript.py --main paper/main.tex [--format json]
   python3 <plugin root>/skills/research-communication/scripts/check_manuscript.py <path-to-manuscript-dir>
   ```
 

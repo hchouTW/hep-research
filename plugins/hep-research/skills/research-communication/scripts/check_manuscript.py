@@ -30,22 +30,48 @@ LaTeX comments (unescaped % to end of line) are ignored, except that TODO
 markers are still reported inside comments. A command's argument may wrap
 onto the next line.
 
+Two modes, neither a compile nor a check of scientific content:
+  - directory mode (positional DIR): a repository-wide source scan that merges
+    every .tex, .bib and .bbl under DIR. A label in any file satisfies a
+    reference in any other, so a backup or an unused file can mask a missing
+    reference; use it for a quick sweep of one paper's folder.
+  - main mode (--main MAIN.tex): a selected-document scan. Only the files MAIN
+    reaches through literal \input, \include, \subfile and \import are scanned;
+    their names are resolved against --build-root (default: MAIN's folder), as
+    TeX does, never against the including file's folder, and nothing outside
+    --project-root (default: the build root) is opened. Only the bibliography
+    the document declares (\bibliography{...}, \addbibresource{...}, an inline
+    thebibliography) counts; a built .bbl counts only when associated with
+    --bbl, because a file name or a timestamp does not prove it was built from
+    this document. What the scanner cannot follow (a macro-generated file name,
+    an include inside a conditional, \includeonly, a missing include or .bib,
+    a file outside the root, an include cycle) is reported as incomplete
+    coverage, never guessed.
+
 Standard library only. Intended to be run near the end of a drafting session,
 not after every edit.
 
 Usage:
-    python3 check_manuscript.py <path-to-manuscript-dir> [--strict]
+    python3 check_manuscript.py <path-to-manuscript-dir> [--strict] [--format text|json]
+    python3 check_manuscript.py --main MAIN.tex [--build-root DIR] [--project-root DIR] [--bbl FILE.bbl]
+                                [--strict] [--format text|json]
 
-Exit code is 0 if no issues are found, 1 otherwise (useful in CI / pre-commit
-hooks), and 3 when the only findings are citations left unresolved by a
-declared external bibliography. --strict also treats "unused .bib entry" as an issue for exit-code
-purposes (by default it is reported but does not affect the exit code, since
-a shared/collaboration .bib file legitimately contains more entries than any
-single paper cites).
+Exit codes: 0 no issue found by the requested checks (no certificate of
+correctness); 1 at least one confirmed issue; 2 invalid invocation or no
+manuscript input (an empty directory is not a clean manuscript); 3 nothing
+confirmed wrong but a required check is incomplete: citations deferred to a
+declared external bibliography (--external-bib), citations that only a built
+or missing bibliography could resolve, or includes the scanner could not
+follow in main mode. --strict also treats "unused .bib entry" as an issue for
+exit-code purposes (by default it is reported but does not affect the exit
+code, since a shared/collaboration .bib file legitimately contains more
+entries than any single paper cites). --format json prints one report object
+(report_version 1.0.0) with findings, coverage and the checks run and not run.
 """
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 from collections import defaultdict
@@ -82,6 +108,155 @@ UNIT_NO_TIE_RE = re.compile(r"(?<![\w.\\{=\-])\d+(?:\.\d+)? ?" + UNITS + r"\b")
 LAYOUT_LINE_RE = re.compile(r"\\(?:[vh]space|[vh]skip|vertex|node|draw|includegraphics|setlength|addvspace)"
                             r"|(?:sep|width|height|distance)\s*=")
 DEFINITION_RE = re.compile(r"\\(?:(?:re|provide)?newcommand|DeclareRobustCommand|def)\b")
+# Main mode: literal include mechanisms the scanner follows, and the ones it only reports.
+INPUT_RE = re.compile(r"\\(input|include|subfile|InputIfFileExists)\s*\{([^}]*)\}")
+IMPORT_RE = re.compile(r"\\(?:sub)?import\s*\{([^}]*)\}\s*\{([^}]*)\}")
+INCLUDEONLY_RE = re.compile(r"\\includeonly\s*\{([^}]*)\}")
+BIBLIOGRAPHY_RE = re.compile(r"\\bibliography\s*\{([^}]*)\}")
+ADDBIBRESOURCE_RE = re.compile(r"\\addbibresource\s*(?:\[[^\]]*\])?\{([^}]*)\}")
+THEBIBLIOGRAPHY_RE = re.compile(r"\\begin\{thebibliography\}")
+COND_RE = re.compile(r"\\(newif\s*\\if[A-Za-z@]*|if[A-Za-z@]*|else\b|fi\b)")
+VERBATIM_RE = re.compile(r"\\begin\{(verbatim\*?|Verbatim|lstlisting|minted|alltt)\}.*?\\end\{\1\}", re.S)
+TEX_SUFFIXES = (".tex", ".ltx", ".latex")
+
+
+def strip_verbatim(text: str) -> str:
+    """Blank verbatim/listing bodies (their \\cite, \\label and \\input are typeset, not executed), keeping line count."""
+    return VERBATIM_RE.sub(lambda m: "\n" * m.group(0).count("\n"), text)
+
+
+def _inside(path: Path, root: Path) -> bool:
+    return path == root or root in path.parents
+
+
+def _tex_candidate(name: str, build_root: Path) -> Path:
+    cand = build_root / name
+    if not cand.suffix:
+        cand = cand.with_suffix(".tex")
+    return cand
+
+
+def discover_manuscript_files(main: Path, project_root: Path, build_root: Path) -> dict:
+    """The files a main document reaches through literal includes, resolved against the build root and bounded by
+    the project root. Returns {"main", "files": [Path, ...] in inclusion order, "unresolved": [{"file", "line",
+    "kind", "raw", "reason"}], "bib_files": [Path], "bib_declared": bool, "inline_bibliography": bool,
+    "coverage": "complete" | "incomplete"}. Kinds: macro-generated, conditional, includeonly, missing, outside-root,
+    cycle, missing-bib, outside-root-bib. A conditional include is scanned and flagged: the branch taken is unknown.
+    Nothing outside the project root is opened."""
+    main, project_root, build_root = Path(main).resolve(), Path(project_root).resolve(), Path(build_root).resolve()
+    files: list[Path] = []
+    unresolved: list[dict] = []
+    bib_files: list[Path] = []
+    state = {"bib_declared": False, "inline": False}
+
+    def add(file: Path, line: int, kind: str, raw: str, reason: str) -> None:
+        unresolved.append({"file": str(file), "line": line, "kind": kind, "raw": raw, "reason": reason})
+
+    def resolve(file: Path, line: int, raw: str, directory: str = "") -> Path | None:
+        name = (directory + raw).strip()
+        if "\\" in name or "#" in name:
+            add(file, line, "macro-generated", raw, "file name is produced by a macro; the scanner does not expand TeX")
+            return None
+        cand = _tex_candidate(name, build_root)
+        res = cand.resolve()
+        if not _inside(res, project_root):
+            add(file, line, "outside-root", raw, f"resolves outside the project root {project_root}; not opened")
+            return None
+        if not res.is_file():
+            return res if cand.suffix == ".tex" and (build_root / name).is_file() else (None if _missing(file, line, raw, res) else None)
+        return res
+
+    def _missing(file: Path, line: int, raw: str, res: Path) -> bool:
+        add(file, line, "missing", raw, f"{res} does not exist (resolved against the build root {build_root})")
+        return True
+
+    def visit(file: Path, stack: tuple) -> None:
+        files.append(file)
+        try:
+            text = file.read_text(encoding="utf-8", errors="replace")
+        except OSError as exc:
+            add(file, 0, "unreadable", str(file), str(exc))
+            return
+        code = strip_verbatim(strip_comments(text))
+        for m in INCLUDEONLY_RE.finditer(code):
+            add(file, line_of(code, m.start()), "includeonly", m.group(1), "\\includeonly restricts \\include; not applied")
+        cond = _conditional_depths(code)
+        for m in BIBLIOGRAPHY_RE.finditer(code):
+            state["bib_declared"] = True
+            for raw in split_keys(m.group(1)):
+                cand = build_root / raw
+                cand = cand if cand.suffix == ".bib" else cand.with_name(cand.name + ".bib")
+                res = cand.resolve()
+                if not _inside(res, project_root):
+                    add(file, line_of(code, m.start()), "outside-root-bib", raw, "bibliography resolves outside the project root; not opened")
+                elif not res.is_file():
+                    add(file, line_of(code, m.start()), "missing-bib", raw, f"{res} does not exist")
+                elif res not in bib_files:
+                    bib_files.append(res)
+        for m in ADDBIBRESOURCE_RE.finditer(code):
+            state["bib_declared"] = True
+            res = (build_root / m.group(1).strip()).resolve()
+            if not _inside(res, project_root):
+                add(file, line_of(code, m.start()), "outside-root-bib", m.group(1), "bibliography resolves outside the project root; not opened")
+            elif not res.is_file():
+                add(file, line_of(code, m.start()), "missing-bib", m.group(1), f"{res} does not exist")
+            elif res not in bib_files:
+                bib_files.append(res)
+        if THEBIBLIOGRAPHY_RE.search(code):
+            state["inline"] = True
+        includes = [(m.start(), m.group(1), m.group(2), "") for m in INPUT_RE.finditer(code)]
+        includes += [(m.start(), "import", m.group(2), m.group(1)) for m in IMPORT_RE.finditer(code)]
+        for pos, cmd, raw, directory in sorted(includes):
+            line = line_of(code, pos)
+            if cond(pos) > 0:
+                add(file, line, "conditional", raw, "include inside \\if...\\fi: the branch taken is unknown; scanned anyway")
+            if cmd == "InputIfFileExists":
+                cand = _tex_candidate((directory + raw).strip(), build_root).resolve()
+                if not cand.is_file() or not _inside(cand, project_root):
+                    continue  # optional by construction
+            res = resolve(file, line, raw, directory)
+            if res is None:
+                continue
+            if res in stack:
+                add(file, line, "cycle", raw, f"{res.name} is already being included: {[p.name for p in stack]}")
+                continue
+            if res in files:
+                continue  # included twice (a diamond): scanned once
+            visit(res, stack + (res,))
+
+    if not main.is_file():
+        add(main, 0, "missing", str(main), "main document does not exist")
+    elif not _inside(main, project_root):
+        add(main, 0, "outside-root", str(main), "main document lies outside the project root; not opened")
+    else:
+        visit(main, (main,))
+    return {"main": main, "files": files, "unresolved": unresolved, "bib_files": bib_files,
+            "bib_declared": state["bib_declared"], "inline_bibliography": state["inline"],
+            "coverage": "incomplete" if unresolved else "complete"}
+
+
+def _conditional_depths(code: str):
+    """A function giving the \\if...\\fi nesting depth at a character offset (\\newif declarations do not count)."""
+    events = []
+    depth = 0
+    for m in COND_RE.finditer(code):
+        tok = m.group(1)
+        if tok.startswith("newif"):
+            continue
+        if tok.startswith("if"):
+            depth += 1
+        elif tok.startswith("fi"):
+            depth = max(depth - 1, 0)
+        events.append((m.start(), depth))
+
+    def at(pos: int) -> int:
+        d = 0
+        for start, dep in events:
+            if start > pos:
+                break
+            d = dep
+        return d
+    return at
 
 
 def split_keys(raw: str):
@@ -105,8 +280,37 @@ def find_tex_and_bib(root: Path):
 
 
 def scan(root: Path, external_bib: str | None = None):
+    """Directory mode: every .tex, .bib and .bbl under root, merged (a repository-wide source scan)."""
     tex_files, bib_files = find_tex_and_bib(root)
     bbl_files = sorted(root.rglob("*.bbl"))
+    results = scan_files(tex_files, bib_files, bbl_files, external_bib)
+    results["mode"] = "directory"
+    return results
+
+
+def scan_main(main: Path, project_root: Path, build_root: Path, external_bib: str | None = None, bbl: Path | None = None):
+    """Main mode: the files the selected document includes (discover_manuscript_files), the bibliography it declares,
+    and a built .bbl only when explicitly associated. Unassociated .bbl files in the build root, a declared but missing
+    .bib, or an external bibliography leave citations unresolved rather than missing or verified."""
+    disc = discover_manuscript_files(main, project_root, build_root)
+    bbl_files = [Path(bbl).resolve()] if bbl else []
+    results = scan_files(disc["files"], disc["bib_files"], bbl_files, external_bib)
+    results["mode"] = "main"
+    results["discovery"] = disc
+    results["unassociated_bbl"] = sorted(p for p in Path(build_root).resolve().glob("*.bbl") if p not in bbl_files)
+    missing_bib_declared = any(u["kind"] in ("missing-bib", "outside-root-bib") for u in disc["unresolved"])
+    if results["missing_bib"] and (results["unassociated_bbl"] or missing_bib_declared):
+        reason = ("a built bibliography is present but not associated with this document (pass --bbl to use it)"
+                  if results["unassociated_bbl"] else "a declared bibliography file is missing or outside the root")
+        results["unresolved_citations"] = {**results["unresolved_citations"], **results["missing_bib"]}
+        results["missing_bib"] = {}
+        results["no_bibliography"] = False
+        results["unresolved_reason"] = reason
+    return results
+
+
+def scan_files(tex_files, bib_files, bbl_files=(), external_bib: str | None = None):
+    tex_files, bib_files, bbl_files = list(tex_files), list(bib_files), list(bbl_files)
     inline_entries = set()
 
     cite_keys = defaultdict(list)   # key -> [(file, line)]
@@ -117,7 +321,7 @@ def scan(root: Path, external_bib: str | None = None):
 
     for tex in tex_files:
         text = tex.read_text(encoding="utf-8", errors="replace")
-        code = strip_comments(text)
+        code = strip_verbatim(strip_comments(text))
         inline_entries.update(m.group(1).strip() for m in BIBITEM_RE.finditer(code))
         for m in CITE_RE.finditer(code):
             for key in split_keys(m.group(1)):
@@ -184,6 +388,7 @@ def scan(root: Path, external_bib: str | None = None):
         "undefined_refs": undefined_refs,
         "todos": todos,
         "placeholders": placeholders,
+        "unresolved_reason": f"declared external bibliography ({external_bib})" if external_bib else None,
     }
 
 
@@ -219,12 +424,31 @@ def report_style(findings) -> None:
     print()
 
 
+SCOPE_NOTE = {"directory": "repository-wide source scan: every .tex/.bib/.bbl under the directory is merged; "
+                           "not a compile or a check of scientific content",
+              "main": "selected-document scan: only the files the main document includes and the bibliography it "
+                      "declares; not a compile or a check of scientific content"}
+
+
 def report(results, strict: bool) -> int:
     n_tex = len(results["tex_files"])
     n_bib = len(results["bib_files"])
-    print(f"Scanned {n_tex} .tex file(s) and {n_bib} .bib file(s).\n")
+    mode = results.get("mode", "directory")
+    print(f"Scanned {n_tex} .tex file(s) and {n_bib} .bib file(s).")
+    print(f"({SCOPE_NOTE[mode]})\n")
 
     issues = 0
+    disc = results.get("discovery")
+    if disc and disc["unresolved"]:
+        print(f"[COVERAGE INCOMPLETE] {len(disc['unresolved'])} include(s) or bibliography declaration(s) the scanner "
+              "could not follow; files behind them were not checked:")
+        for u in disc["unresolved"]:
+            print(f"  - {Path(u['file']).name}:{u['line']}: {u['kind']}: {u['raw']}  ({u['reason']})")
+        print()
+    if results.get("unassociated_bbl") and results.get("unresolved_citations"):
+        print(f"[BUILT BIBLIOGRAPHY NOT ASSOCIATED] {', '.join(p.name for p in results['unassociated_bbl'])} in the build root "
+              "was not used: a built .bbl certifies citations only when it is associated with --bbl (its provenance is "
+              "the caller's assertion)\n")
 
     if results.get("no_bibliography"):
         print("[NO BIBLIOGRAPHY] citations found, but no .bib file, thebibliography or .bbl; every citation is "
@@ -287,40 +511,131 @@ def report(results, strict: bool) -> int:
 
     unresolved = results.get("unresolved_citations") or {}
     if unresolved:
-        print(f"[UNRESOLVED] {len(unresolved)} cite key(s) not found locally; they can only resolve in the declared "
-              f"external bibliography ({results['external_bib']}), so they are not verified here:")
+        print(f"[UNRESOLVED] {len(unresolved)} cite key(s) not found locally; they are not verified here "
+              f"({results.get('unresolved_reason') or 'no local bibliography resolves them'}):")
         for key, locs in sorted(unresolved.items())[:40]:
             print(f"  - {key}  ({fmt_locs(locs)})")
         print()
 
-    if issues == 0 and not unresolved:
+    incomplete = bool(disc and disc["unresolved"])
+    if issues == 0 and not unresolved and not incomplete:
         print("No issues found.")
     elif issues == 0:
-        print("No issues found locally; citations unresolved (see above).")
+        print("No issues found locally; " + ("citations unresolved" if unresolved else "coverage incomplete") + " (see above).")
     else:
         print(f"Total issues: {issues}")
 
-    return 1 if issues > 0 else (3 if unresolved else 0)
+    return 1 if issues > 0 else (3 if (unresolved or incomplete) else 0)
+
+
+FINDING_CODES = (("missing_bib", "manuscript.missing_bib_entry", "error", "add the entry to a declared bibliography or fix the key"),
+                 ("duplicate_bib", "manuscript.duplicate_bib_key", "error", "keep one entry per key"),
+                 ("duplicate_labels", "manuscript.duplicate_label", "error", "rename one label"),
+                 ("undefined_refs", "manuscript.undefined_ref", "error", "add the \\label or fix the \\ref target"))
+
+
+def json_report(results, strict: bool, exit_code: int, style_findings=None) -> dict:
+    """The same findings as the text report, as one object (report_version 1.0.0)."""
+    mode = results.get("mode", "directory")
+    findings = []
+    for key, code, severity, action in FINDING_CODES:
+        for name, locs in sorted(results[key].items()):
+            findings.append({"code": code, "severity": severity, "location": fmt_locs(locs), "message": f"{name}",
+                             "suggested_action": action})
+    for f, ln, line in results["todos"]:
+        findings.append({"code": "manuscript.todo_marker", "severity": "error", "location": f"{f.name}:{ln}", "message": line,
+                         "suggested_action": "resolve the marker before submission"})
+    for f, ln, line in results["placeholders"]:
+        findings.append({"code": "manuscript.placeholder", "severity": "error", "location": f"{f.name}:{ln}", "message": line,
+                         "suggested_action": "replace the placeholder text"})
+    if results.get("no_bibliography"):
+        findings.append({"code": "manuscript.no_bibliography", "severity": "error", "location": "-",
+                         "message": "citations found but no bibliography", "suggested_action": "declare a bibliography or --external-bib"})
+    for key in results["unused_bib"]:
+        findings.append({"code": "manuscript.unused_bib_entry", "severity": "error" if strict else "warning", "location": "-",
+                         "message": key, "suggested_action": "harmless in a shared .bib; check in a single-paper .bib"})
+    for key, locs in sorted((results.get("unresolved_citations") or {}).items()):
+        findings.append({"code": "manuscript.unresolved_citation", "severity": "unresolved", "location": fmt_locs(locs), "message": key,
+                         "suggested_action": results.get("unresolved_reason") or "provide the bibliography"})
+    disc = results.get("discovery")
+    for u in (disc["unresolved"] if disc else []):
+        findings.append({"code": "manuscript.include_unresolved", "severity": "unresolved", "location": f"{Path(u['file']).name}:{u['line']}",
+                         "message": f"{u['kind']}: {u['raw']} ({u['reason']})",
+                         "suggested_action": "make the include literal, pass --build-root/--project-root, or check the file by hand"})
+    for f, ln, kind, text in style_findings or []:
+        findings.append({"code": "manuscript.style", "severity": "warning", "location": f"{f.name}:{ln}", "message": f"{kind}: {text}",
+                         "suggested_action": "advisory typography; may be a false positive"})
+    status = {0: "pass", 1: "fail", 3: "incomplete", 2: "input-error"}[exit_code]
+    scope = {"mode": mode, "note": SCOPE_NOTE[mode], "files": [str(p) for p in results["tex_files"]],
+             "bib_files": [str(p) for p in results["bib_files"]], "strict": strict}
+    if disc:
+        scope["main"] = str(disc["main"])
+    checks_run = ["citations", "bibliography-keys", "labels", "references", "markers"] + (["include-discovery"] if disc else []) \
+        + (["style"] if style_findings is not None else [])
+    checks_not_run = [{"check": "compile", "reason": "not a compile; run the TeX engine", "required": False},
+                      {"check": "scientific-content", "reason": "wording, numbers and claims are not checked here", "required": False}]
+    if not disc:
+        checks_not_run.append({"check": "include-discovery", "reason": "directory mode merges every file; use --main", "required": False})
+    return {"report_version": "1.0.0", "tool": "check_manuscript", "scope": scope, "status": status, "exit_code": exit_code,
+            "coverage": (disc["coverage"] if disc else "repository-wide"), "checks_run": checks_run, "checks_not_run": checks_not_run,
+            "findings": findings, "counts": {"tex_files": len(results["tex_files"]), "bib_files": len(results["bib_files"]),
+                                             "findings": len(findings)}}
 
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("path", type=Path, help="Directory containing the manuscript's .tex/.bib files")
+    parser.add_argument("path", type=Path, nargs="?", help="Directory containing the manuscript's .tex/.bib files (directory mode)")
+    parser.add_argument("--main", type=Path, metavar="MAIN.tex", help="selected main document (main mode): scan only what it includes")
+    parser.add_argument("--build-root", type=Path, metavar="DIR", help="directory TeX runs in; include names resolve against it (default: MAIN's folder)")
+    parser.add_argument("--project-root", type=Path, metavar="DIR", help="boundary: no file outside it is opened (default: the build root)")
+    parser.add_argument("--bbl", type=Path, metavar="FILE.bbl", help="a built bibliography to associate with the main document (main mode)")
     parser.add_argument("--strict", action="store_true", help="Treat unused .bib entries as issues for exit code purposes")
     parser.add_argument("--external-bib", metavar="DESCRIPTION",
                         help="the bibliography is built outside this directory (name the source); keys not found "
                              "locally are reported as unresolved (exit 3) instead of missing")
     parser.add_argument("--style", action="store_true",
                         help="Also report advisory typography checks (ref ties, number-unit spacing); exit code unaffected")
-    args = parser.parse_args(argv)
+    parser.add_argument("--format", choices=("text", "json"), default="text", help="text (default) or one JSON report object")
+    try:
+        args = parser.parse_args(argv)
+    except SystemExit as exc:
+        return 2 if exc.code else 0
 
-    if not args.path.is_dir():
-        print(f"error: {args.path} is not a directory", file=sys.stderr)
+    def fail(msg: str) -> int:
+        if args.format == "json":
+            print(json.dumps({"report_version": "1.0.0", "tool": "check_manuscript", "status": "input-error", "exit_code": 2,
+                              "findings": [{"code": "manuscript.input_error", "severity": "error", "location": "-", "message": msg,
+                                            "suggested_action": "fix the invocation"}]}, indent=1))
+        print(f"error: {msg}", file=sys.stderr)
         return 2
-
-    results = scan(args.path, external_bib=args.external_bib)
+    if args.main is None and args.path is None:
+        return fail("give a manuscript directory or --main MAIN.tex")
+    if args.main is not None:
+        if not args.main.is_file():
+            return fail(f"{args.main} is not a file")
+        build_root = args.build_root or args.main.resolve().parent
+        project_root = args.project_root or build_root
+        if args.bbl is not None and not args.bbl.is_file():
+            return fail(f"--bbl {args.bbl} is not a file")
+        results = scan_main(args.main, project_root, build_root, external_bib=args.external_bib, bbl=args.bbl)
+        style_root = build_root
+    else:
+        if not args.path.is_dir():
+            return fail(f"{args.path} is not a directory")
+        results = scan(args.path, external_bib=args.external_bib)
+        if not results["tex_files"]:
+            return fail(f"no manuscript files (.tex) under {args.path}: nothing was checked")
+        style_root = args.path
+    style_findings = style_scan(style_root) if args.style else None
+    if args.format == "json":
+        import contextlib
+        import io
+        with contextlib.redirect_stdout(io.StringIO()):
+            code = report(results, strict=args.strict)
+        print(json.dumps(json_report(results, args.strict, code, style_findings), indent=1))
+        return code
     if args.style:
-        report_style(style_scan(args.path))
+        report_style(style_findings)
     return report(results, strict=args.strict)
 
 
