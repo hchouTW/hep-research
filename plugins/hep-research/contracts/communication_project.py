@@ -151,7 +151,7 @@ def _load_project(root: Path, r: _Resolver):
 
 def _inputs(doc: dict, r: _Resolver) -> dict:
     out: dict[str, dict] = {}
-    for i, inp in enumerate(doc.get("inputs", []) or []):
+    for inp in doc.get("inputs", []) or []:
         if not isinstance(inp, dict) or not isinstance(inp.get("ref"), str):
             continue
         ref = inp["ref"]
@@ -220,8 +220,8 @@ def _ledgers(ext: dict, proj, r: _Resolver) -> dict:
     for k, led in enumerate(ext.get("evidence_ledgers", []) or []):
         if not isinstance(led, dict):
             continue
-        ns, where = led.get("namespace"), f"$.extension.evidence_ledgers[{k}]"
-        entry = {"namespace": ns, "bound": bool(led.get("bound")), "sources_ref": led.get("sources_ref"), "claims_ref": led.get("claims_ref"),
+        ns, where = str(led.get("namespace")), f"$.extension.evidence_ledgers[{k}]"
+        entry: dict = {"namespace": ns, "bound": bool(led.get("bound")), "sources_ref": led.get("sources_ref"), "claims_ref": led.get("claims_ref"),
                  "loaded": False, "sources": {}, "claims": {}, "report": None, "sha256_checked": None}
         out[ns] = entry
         sources = claims = None
@@ -294,7 +294,7 @@ def _documents(ext: dict, r: _Resolver) -> dict:
         where = f"$.extension.documents[{k}]"
         entry = {"path": d.get("path"), "format": d.get("format"), "resolved": False, "resolved_path": None,
                  "sha256": None, "declared_sha256": d.get("sha256")}
-        out[d.get("id")] = entry
+        out[str(d.get("id"))] = entry
         path = r.resolve(str(d.get("path")), where)
         if path is None:
             continue
@@ -370,7 +370,8 @@ def resolve_context(artifact_path, project_root, *, vocab: Vocabulary | None = N
     ctx["dependencies"] = validate_dependencies(path, root, vocab=vocab)
     ctx["checks_run"].append("dependencies")
     ctx["inputs"] = _inputs(doc, r)
-    ext = doc.get("extension") if isinstance(doc.get("extension"), dict) else {}
+    raw_ext = doc.get("extension")
+    ext: dict = raw_ext if isinstance(raw_ext, dict) else {}
     if fmt != "traceability":
         not_run("ledgers", "documents", reason="legacy format declares no ledgers or documents")
         return ctx

@@ -237,7 +237,7 @@ def audit_claims(record: dict, context: dict, policy: dict) -> dict:
             fact.update(value=None if val is None else str(val), unit=str(node.get("unit")) if isinstance(node, dict) and "unit" in node else None,
                         uncertainty={k: str(node[k]) for k in ("stat", "syst") if isinstance(node, dict) and k in node},
                         source={"edge": e.get("id"), "target": e.get("target"), "locator": e.get("locator"), "identity": evidence_fingerprint(e, record)})
-            for k, o in enumerate(occ_by_claim.get(cid, [])):
+            for o in occ_by_claim.get(cid, []):
                 ov = o.get("value") if isinstance(o.get("value"), dict) else None
                 if ov is None or val is None:
                     continue

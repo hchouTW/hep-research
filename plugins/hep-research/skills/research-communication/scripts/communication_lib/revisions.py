@@ -225,7 +225,7 @@ def diff_communication(before: dict, after: dict, context: dict) -> dict:
                                       + (f", and {dropped} were dropped" if dropped else ""),
                                       "do a targeted read of the manuscript, talks and response letters for paraphrases and conceptual "
                                       "dependencies of this claim; map what you find", claim=cid, source="revisions"))
-    for cid, bc in b_claims.items():
+    for cid in b_claims:
         if cid not in a_claims:
             impacts.append({"claim_id": cid, "kind": "removed", "evidence_changed": [], "value_change": None, "assessment": "none",
                             "occurrences": [{"id": o.get("id"), "state": "orphaned"} for o in b_occ.get(cid, [])],

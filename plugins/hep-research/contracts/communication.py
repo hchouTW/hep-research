@@ -35,7 +35,8 @@ def _sticky():
 
 def format_of(doc: dict) -> str:
     """'traceability' when the capability is declared, else 'legacy'."""
-    caps = doc.get("required_capabilities") if isinstance(doc.get("required_capabilities"), list) else []
+    raw_caps = doc.get("required_capabilities")
+    caps: list = raw_caps if isinstance(raw_caps, list) else []
     return "traceability" if TRACEABILITY_CAPABILITY in caps else "legacy"
 
 
@@ -199,7 +200,8 @@ def _assessment_rules(c: dict, doc: dict, edges: dict, rep: Report, where: str) 
             stale.append("the claim text or scope changed since the assessment")
     else:
         stale.append("the assessment does not pin the claim text (claim_digest)")
-    fps = a.get("evidence_fingerprints") if isinstance(a.get("evidence_fingerprints"), dict) else {}
+    raw_fps = a.get("evidence_fingerprints")
+    fps: dict = raw_fps if isinstance(raw_fps, dict) else {}
     for eid in ids:
         if eid not in edges:
             continue
@@ -221,7 +223,8 @@ def _assessment_rules(c: dict, doc: dict, edges: dict, rep: Report, where: str) 
 
 def validate_extension(doc: dict, vocab: Vocabulary, report: Report) -> None:
     """Pure communication rules on an envelope whose extension already passed its schema (see validate_artifact)."""
-    ext = doc.get("extension") if isinstance(doc.get("extension"), dict) else {}
+    raw_ext = doc.get("extension")
+    ext: dict = raw_ext if isinstance(raw_ext, dict) else {}
     fmt = format_of(doc)
     tv = ext.get("traceability_version")
     if fmt == "legacy":

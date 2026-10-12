@@ -57,7 +57,7 @@ def _regions(text: str, fmt: str, locator: str) -> tuple[str, list[str], str | N
         if fmt == "latex":
             secs = [(m.start(), m.group(1), m.group(2)) for m in TEX_SECTION_RE.finditer(text)]
             out = []
-            for i, (pos, cmd, title) in enumerate(secs):
+            for i, (pos, _cmd, title) in enumerate(secs):
                 if normalize(title).lower() == arg.lower():
                     end = next((p for p, _, _ in secs[i + 1:]), len(text))
                     out.append(text[pos:end])
