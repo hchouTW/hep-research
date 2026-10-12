@@ -18,7 +18,7 @@ from communication_lib.documents import HEADING_RE, TEX_SECTION_RE, normalize, s
 from contracts.communication import format_of
 
 QUOTE_RE = re.compile(r"[\"“「『][^\"”」』]*[\"”」』]|so-called\s+\S+")
-ABBR_DEF_HEAD = r"([A-Za-z][A-Za-z\-\u4e00-\u9fff ]{2,60}?)\s*[\(\uff08]("
+ABBR_DEF_HEAD = r"([A-Za-z][A-Za-z\-\u4e00-\u9fff ]{2,80}?)\s*[\(\uff08]("
 ABBR_DEF_TAIL = r")[\)\uff09]"
 NOTE = ("deterministic detection limited to glossary rules, explicit definitions and declared scopes; ambiguous usage and the "
         "meaning of prose or equations are the reader's semantic review; nothing is replaced or translated")
@@ -139,9 +139,13 @@ def _abbreviations(did, lines, glossary, findings):
         for abbr in e.get("abbreviations") or []:
             rx = re.compile(ABBR_DEF_HEAD + re.escape(str(abbr)) + ABBR_DEF_TAIL)
             defs = []
+            n_words = max(1, sum(ch.isalpha() for ch in str(abbr)))
             for n, line in enumerate(lines, 1):
                 for m in rx.finditer(_unquoted(line)):
-                    defs.append((n, normalize(m.group(1)).lower(), m.group(1).strip()))
+                    raw = m.group(1).strip()
+                    spans = [w.start() for w in re.finditer(r"[^\s\-]+", raw)]
+                    expansion = raw[spans[-n_words]:] if len(spans) >= n_words else raw  # the last len(abbr) words before the parenthesis
+                    defs.append((n, normalize(expansion).lower(), expansion))
             distinct = {}
             for n, key, shown in defs:
                 distinct.setdefault(key, (n, shown))
@@ -167,7 +171,7 @@ def _notation(did, lines, sections, glossary, findings):
     for n in glossary.get("notation", []) or []:
         declared.setdefault(str(n["symbol"]), []).append(n)
     for sym, entries in declared.items():
-        rx = re.compile(r"(?<![A-Za-z\\])" + re.escape(sym) + r"(?![A-Za-z])\s*(?:denotes|is defined as|stands for|is the|be the|=|≡|:=)\s*(.+?)(?:[.;]|$)")
+        rx = re.compile(r"(?<![A-Za-z\\])" + re.escape(sym) + r"(?![A-Za-z])\s+(?:denotes|is defined as|stands for|is the|be the|denote)\s+(.+?)(?:[.;]|$)")
         found = []
         for ln, line in enumerate(lines, 1):
             for m in rx.finditer(_unquoted(line)):

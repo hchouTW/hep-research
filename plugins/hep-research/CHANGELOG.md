@@ -70,7 +70,11 @@ Software checks establish contract consistency only, not physical validity.
   supplied method metadata, never a chosen default: an expected limit does not imply Asimov, a Bayesian interval
   needs no frequentist construction). It emits a claim matrix, draft-ready facts and handoffs to the producing skill.
   Both print one JSON report (report_version 1.0.0; markdown is a view), refuse an output path that aliases an input,
-  and use the exit precedence input-error 2, fail 1, incomplete 3, pass 0. Reference: `evidence-linked-writing.md`.
+  and use the exit precedence input-error 2, fail 1, incomplete 3, pass 0. Every CLI consumes the full resolved
+  context (schema, resolution and dependency findings), so a missing or replaced evidence file never passes a claim
+  audit; an artifact locator that does not resolve is unresolved; read coverage matches whole locators (`Table 1`
+  does not cover `Table 12`); a claim waiting on declared inputs, a manuscript check without occurrences, and an
+  occurrence whose LaTeX region includes other files are unresolved, not pass or fail. Reference: `evidence-linked-writing.md`.
 - **Revision impact and stale assessments (T6).** `track_revision_impact.py BEFORE AFTER --project-root ROOT` compares
   a baseline and a revised record through their pinned identities (input digests, evidence fingerprints, claim
   digests) and classifies each changed claim: analysis rerun (value at the evidence locator changed), source change
@@ -82,8 +86,10 @@ Software checks establish contract consistency only, not physical validity.
   claim is reopened; one without completion evidence is an error; an edited item is not evidence that edits happened.
   The baseline is never modified and an old reference is never re-resolved against today's file: when the historical
   content is gone, the impact is reported at identity level with the baseline's own recorded display value, and the
-  content comparison is marked incomplete. Coverage is the recorded occurrences; the report asks for a targeted read
-  of paraphrases instead of claiming whole-manuscript coverage.
+  content comparison is marked incomplete. Each impact lists every change it carries (`changes`), so a rename plus
+  stronger wording still reopens the assessment; the revised record's own findings are part of the report; baseline
+  references are read only inside the project root and only with their pinned digest. Coverage is the recorded
+  occurrences; the report asks for a targeted read of paraphrases instead of claiming whole-manuscript coverage.
 - **Literature and citation lifecycle, offline (T7).** `manage_literature.py import INPUT.json --project-root ROOT
   --out OUTPUT.json [--into EXISTING.json]` imports evidence-ledger sources and claims, an explicit search log
   (database, interface, exact query, filters, date, coverage limits, export count, discovery route; template in

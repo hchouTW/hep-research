@@ -193,3 +193,24 @@ class Cli(Base):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReviewFixes(Base):
+    """Final review of the branch: I6, false confirmed errors on correct text."""
+
+    def test_abbreviation_expansion_takes_only_the_expansion_words(self):
+        rep = self.run_check("# Method\n\nWe train a boosted decision tree (BDT) on the sample. Later the boosted decision tree (BDT) output is cut.\n",
+                             glossary={"glossary_version": "1.0.0", "entries": [{"id": "term:bdt", "concept": "boosted decision tree", "preferred": {"en": "boosted decision tree"},
+                                                                                "aliases": {}, "definition": "x", "abbreviations": ["BDT"], "disallowed": []}]})
+        self.assertEqual(self.by_code(rep, "terminology.abbreviation_redefined"), [])
+        rep = self.run_check("# Method\n\nWe train a boosted decision tree (BDT). The binned data table (BDT) is separate.\n",
+                             glossary={"glossary_version": "1.0.0", "entries": [{"id": "term:bdt", "concept": "boosted decision tree", "preferred": {"en": "boosted decision tree"},
+                                                                                "aliases": {}, "definition": "x", "abbreviations": ["BDT"], "disallowed": []}]})
+        f = self.by_code(rep, "terminology.abbreviation_redefined")
+        self.assertEqual(len(f), 1)
+        self.assertIn("'boosted decision tree'", f[0]["message"])
+        self.assertIn("'binned data table'", f[0]["message"])
+
+    def test_assignments_are_not_definitions(self):
+        rep = self.run_check("# Results\n\nWe find R = 1.02 +/- 0.05. The illustration gives R = 0.98.\n")
+        self.assertEqual(self.by_code(rep, "terminology.conflicting_definitions"), [])

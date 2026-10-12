@@ -17,6 +17,7 @@ HEADING_RE = re.compile(r"^(#{1,6})\s+(.*?)\s*#*\s*$", re.M)
 TEX_SECTION_RE = re.compile(r"\\(part|chapter|section|subsection|subsubsection|paragraph)\*?\s*(?:\[[^\]]*\])?\{([^}]*)\}")
 TEX_COMMENT_RE = re.compile(r"(?<!\\)%.*")
 TEX_ENV_RE = r"\\begin\{%s\}(.*?)\\end\{%s\}"
+INCLUDE_RE = re.compile(r"\\(?:input|include|subfile|import|subimport)\s*\{")
 
 
 def normalize(text: str) -> str:
@@ -119,6 +120,10 @@ def check_occurrence(text: str, fmt: str, occ: dict) -> dict:
     passage = normalize(str(occ.get("passage", "")))
     if passage and passage in normalize(region):
         return {"outcome": "located", "reason": None, "current": passage}
+    if fmt == "latex" and INCLUDE_RE.search(region):
+        return {"outcome": "include", "current": None,
+                "reason": f"the region at {locator!r} includes other files ({INCLUDE_RE.search(region).group(0)}), which this check does not follow; "
+                          "the passage may live there"}
     sentences = _sentences(region)
     closest = max(sentences, key=lambda s: difflib.SequenceMatcher(None, s, passage).ratio(), default="")
     return {"outcome": "mismatch", "current": closest,

@@ -173,6 +173,8 @@ def run(tool: str, doc: str, argv, build, *, add_args=None, all_checks=(), needs
         rep = build(args, record, ctx)
     except ValueError as exc:
         return fail(str(exc))
+    except Exception as exc:  # a malformed record that the schema did not catch must not surface as a traceback with exit 1
+        return fail(f"{type(exc).__name__}: {exc} (the record could not be processed; validate it with contracts/validate.py)")
     rep.setdefault("inputs", {})["record_sha256"] = hashlib.sha256(raw).hexdigest()
     rep["scope"].setdefault("record", str(args.record))
     protected = protected_paths(args.record, ctx) + (list(extra_protected(args, ctx)) if extra_protected else [])

@@ -242,3 +242,45 @@ class Cli(Base):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReviewFixes(Base):
+    """Final review of the branch: I7 (negated completion wording; a completed state on stale evidence) and the
+    English-only status words that made a Traditional Chinese summary a false error."""
+
+    def items(self, *items):
+        self.doc["extension"]["reviewer_items"] = list(items)
+        self.doc["extension"].setdefault("revision_items", [])
+
+    def responses(self):
+        fx.write(self.p["record"], self.doc)
+        ctx = resolve_context(self.p["record"], self.p["root"])
+        return draft_responses(json.loads(self.p["record"].read_text()), ctx)
+
+    def test_negated_completion_wording_is_not_an_assertion(self):
+        self.items({"id": "rev:R8", "comment": "rerun", "requested_action": "rerun the fit", "claims": ["claim:C1"], "revision_items": ["rev:8"],
+                    "disposition": "pending", "response_draft": "We have not yet rerun the fit; it is pending."})
+        self.doc["extension"]["revision_items"].append({"id": "rev:8", "cause": "referee", "kind": "analysis-rerun", "impacted_claims": ["claim:C1"],
+                                                        "required_actions": ["rerun"], "state": "pending-evidence"})
+        rep = self.responses()
+        self.assertNotIn("response.asserts_uncompleted_work", self.codes(rep))
+
+    def test_verified_item_on_a_stale_version_is_not_completed(self):
+        self.items({"id": "rev:R9", "comment": "x", "requested_action": "state the uncertainty type", "claims": ["claim:C1"], "revision_items": ["rev:9"],
+                    "disposition": "changed"})
+        self.doc["extension"]["revision_items"].append({"id": "rev:9", "cause": "referee", "kind": "content-edit", "impacted_claims": ["claim:C1"],
+                                                        "impacted_occurrences": ["occ:body"], "required_actions": ["x"], "state": "verified",
+                                                        "completion_evidence": [{"check": "check_communication --checks manuscript", "version": "sha256:" + "0" * 64, "date": "2026-10-12"}]})
+        rep = self.responses()
+        self.assertEqual(rep["action_table"][0]["state"], "pending")
+        self.assertIn("response.evidence_not_current", self.codes(rep, "unresolved"))
+        self.assertNotIn("We have", rep["drafts"][0]["text"])
+
+    def test_chinese_status_words_count(self):
+        draft = "在合成樣本中，比值 R 為 1.02 +/- 0.05，僅含統計不確定度。0.98 為合成示意值，僅供參考。"
+        man = manifest(self.p["record"], statements=[{"id": "st:1", "text": "比值 R 為 1.02 +/- 0.05", "claim_ids": ["claim:C1"], "kind": "quantitative"},
+                                                     {"id": "st:2", "text": "0.98 為合成示意值", "claim_ids": ["claim:C2"], "kind": "context"}],
+                       indispensable_limitations=["統計不確定度", "合成"])
+        rep = self.check(draft=draft, man=man)
+        self.assertNotIn("adaptation.status_dropped", self.codes(rep))
+        self.assertEqual(rep["status"], "pass", rep["findings"])

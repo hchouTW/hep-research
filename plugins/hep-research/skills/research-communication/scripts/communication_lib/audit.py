@@ -79,6 +79,10 @@ def audit_communication(record: dict, context: dict | None, *, checks: str = "tr
         checks_run.append("manuscript")
         occ_rows, occ_findings = _manuscript(context, ext, fmt, occurrences, claims)
         findings += occ_findings
+        if not occurrences:
+            findings.append(R.finding("audit.no_occurrences", "unresolved", "$.extension.occurrences",
+                                      "manuscript check requested but the record declares no occurrence: nothing was compared with the documents",
+                                      "map where each claim appears before asking for manuscript coverage", source="manuscript"))
         counts = {k: sum(1 for o in occ_rows if o["outcome"] == v) for k, v in
                   (("located", "located"), ("mismatched", "mismatch"), ("ambiguous", "ambiguous"), ("unresolved", "unresolved"))}
         counts["unresolved"] += counts.pop("ambiguous")
@@ -127,6 +131,11 @@ def _manuscript(context: dict, ext: dict, fmt: str, occurrences: list, claims: l
             findings.append(R.finding("occurrence.passage_mismatch", "error", where,
                                       f"occurrence {occ.get('id')} of claim {occ.get('claim_id')}: {res['reason']}",
                                       "update the manuscript to the authoritative value, or re-map the occurrence; the manifest cannot stand in for the text",
+                                      claim=occ.get("claim_id"), source="manuscript"))
+        elif res["outcome"] == "include":
+            row["outcome"] = "unresolved"
+            findings.append(R.finding("occurrence.include_not_followed", "unresolved", where, res["reason"],
+                                      "point the occurrence at the included file as its own document, or make the passage literal in the main file",
                                       claim=occ.get("claim_id"), source="manuscript"))
         elif res["outcome"] == "ambiguous":
             findings.append(R.finding("occurrence.locator_ambiguous", "unresolved", where, res["reason"],

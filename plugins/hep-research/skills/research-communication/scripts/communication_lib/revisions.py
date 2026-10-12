@@ -19,6 +19,7 @@ from pathlib import Path
 from communication_lib import report as R
 from communication_lib.claims import _locate, _round, _same_number
 from contracts.communication import claim_digest, evidence_fingerprint, format_of
+from contracts.communication_project import normalize_dependency_report
 
 NOTE = ("impact from recorded identities and the recorded occurrences; a reopened assessment or item is stale, not wrong; "
         "whole-manuscript coverage is not claimed")
@@ -26,8 +27,12 @@ MATERIAL = ("analysis-rerun", "reassessment", "status-change", "removed")
 
 
 def _value_at(root: Path, ref: str, locator: str, expected_sha: str | None):
-    """(value, available) at a locator of a pinned artifact: read only when the file carries the pinned digest."""
-    path = root / ref
+    """(value, available) at a locator of a pinned artifact: read only when the file lies inside the project root and
+    carries the pinned digest; a ref without a digest is never read (its content cannot be shown to be the baseline's)."""
+    raw_path = Path(str(ref))
+    path = (raw_path if raw_path.is_absolute() else root / raw_path).resolve()
+    if not expected_sha or not (path == root or root in path.parents):
+        return None, False
     try:
         raw = path.read_bytes()
     except OSError:
@@ -59,10 +64,13 @@ def _occ_key(o: dict) -> tuple:
 
 
 def diff_communication(before: dict, after: dict, context: dict) -> dict:
-    root = Path(context["project_root"])
+    root = Path(context["project_root"]).resolve()
     b_ext = before.get("extension") if isinstance(before.get("extension"), dict) else {}
     a_ext = after.get("extension") if isinstance(after.get("extension"), dict) else {}
-    findings: list[dict] = []
+    findings: list[dict] = R.normalize(context.get("schema", {}).get("findings", []), "schema", "fix the revised record")
+    findings += R.normalize(context.get("findings", []), "resolution", "resolve the reference inside the project root")
+    if context.get("dependencies"):
+        findings += R.normalize(normalize_dependency_report(context["dependencies"]), "dependencies", "fix the input chain")
     notes: list[str] = []
     impacts: list[dict] = []
     unaffected: list[dict] = []
@@ -113,16 +121,17 @@ def diff_communication(before: dict, after: dict, context: dict) -> dict:
                 if ae.get("target_kind") == "artifact" and (be is None or id_before != id_after):
                     loc = str(ae.get("locator", ""))
                     b_in = b_inputs.get(be.get("target")) if be else None
-                    v_before, b_avail = _value_at(root, be.get("target"), str(be.get("locator", "")), (b_in or {}).get("sha256")) if be else (None, False)
+                    v_before, b_avail = (_value_at(root, str(be.get("target")), str(be.get("locator", "")), (b_in or {}).get("sha256"))
+                                         if be else (None, False))
                     a_in = context["inputs"].get(ae.get("target"), {})
                     v_after, a_avail = (_value_at(root, a_in["path"], loc, a_in.get("declared_sha256")) if a_in.get("resolved") and a_in.get("match") is not False
                                         else (None, False))
                     if not b_avail:
                         comparison = "incomplete"
                         findings.append(R.finding("revision.history_unavailable", "unresolved", f"{where}.evidence[{eid}]",
-                                                  f"the baseline file {be.get('target')!r} with digest {id_before} is not available: the old value is not "
-                                                  "recovered from today's file", "keep a snapshot of the baseline inputs; impact is reported at identity level",
-                                                  claim=cid, source="revisions"))
+                                                  (f"the baseline file {be.get('target')!r} with digest {id_before} is not available inside the root: the old "
+                                                   "value is not recovered from today's file") if be else f"edge {eid} is new: it has no baseline value",
+                                                  "keep a snapshot of the baseline inputs; impact is reported at identity level", claim=cid, source="revisions"))
                     if not a_avail:
                         comparison = "incomplete"
                         findings.append(R.finding("revision.evidence_unavailable", "unresolved", f"{where}.evidence[{eid}]",
@@ -149,54 +158,57 @@ def diff_communication(before: dict, after: dict, context: dict) -> dict:
         occ_edited = [oid for oid, o in a_o.items() if oid in b_o and _occ_key(o) != _occ_key(b_o[oid])] + [oid for oid in a_o if oid not in b_o]
         dropped = [oid for oid in b_o if oid not in a_o]
         identity_changed = any(e["identity_before"] != e["identity_after"] and e["to"] is not None for e in evidence_changed)
-        moved_only = evidence_changed and all(e["from"] != e["to"] and e["identity_before"] == e["identity_after"] for e in evidence_changed)
+        moved = any(e["from"] is not None and e["to"] is not None and e["from"] != e["to"] for e in evidence_changed)
+        changes = set()
         if isinstance(value_change, dict) and evidence_changed:
-            kind = "analysis-rerun"
+            changes.add("analysis-rerun")
         elif identity_changed:
-            kind = "source-change"
-        elif moved_only:
-            kind = "reference-move"
-        elif text_changed:
-            kind = "reassessment"
-        elif status_changed:
-            kind = "status-change"
-        elif occ_edited or dropped:
-            kind = "content-edit"
-        else:
+            changes.add("source-change")
+        if moved and not identity_changed:
+            changes.add("reference-move")
+        if text_changed:
+            changes.add("reassessment")
+        if status_changed:
+            changes.add("status-change")
+        if occ_edited or dropped:
+            changes.add("content-edit")
+        if not changes:
             unaffected.append({"id": cid, "provenance": sorted(ac.get("status", [])), "occurrences": sorted(a_o)})
             continue
+        kind = next(k for k in ("analysis-rerun", "source-change", "reassessment", "status-change", "reference-move", "content-edit") if k in changes)
         has_assessment = isinstance(ac.get("assessment"), dict)
+        reopen = changes & {"analysis-rerun", "reassessment", "status-change"}
         if not has_assessment:
             assessment = "none"
-        elif kind in ("analysis-rerun", "reassessment", "status-change"):
+        elif reopen:
             assessment = "reopened"
-        elif kind == "source-change":
+        elif "source-change" in changes:
             assessment = "reconcile-identity"
         else:
             assessment = "kept"
         occ_rows = []
         for oid, o in a_o.items():
-            state = "stale" if kind in ("analysis-rerun", "reassessment", "status-change") else ("edited" if oid in occ_edited else "unchanged")
+            state = "stale" if reopen else ("edited" if oid in occ_edited else "unchanged")
             stale_occurrences += state == "stale"
             occ_rows.append({"id": oid, "document_id": o.get("document_id"), "locator": o.get("locator"), "state": state})
         actions = []
         loc = (value_change or {}).get("locator") if isinstance(value_change, dict) else (a_edges and next(iter(a_edges.values())).get("locator"))
-        if kind == "analysis-rerun":
+        if "analysis-rerun" in changes:
             actions += [f"inspect the new evidence at {loc} and re-assess claim {cid}",
                         "update the occurrences " + ", ".join(sorted(a_o)) + " to the new value, then re-run check_communication --checks manuscript"]
-        elif kind == "reassessment":
-            actions += [f"inspect the new evidence at {loc}: re-assess claim {cid} against its new wording or scope (the sources are unchanged)"]
-        elif kind == "status-change":
+        if "reassessment" in changes:
+            actions += [f"inspect the evidence at {loc}: re-assess claim {cid} against its new wording or scope"]
+        if "status-change" in changes:
             actions += [f"re-assess claim {cid}: its provenance labels changed", "carry the new labels into every occurrence"]
-        elif kind == "source-change":
+        if "source-change" in changes:
             actions += ["reconcile the identity change: confirm the inspected passage or field is unchanged, then re-pin the assessment"]
-        elif kind == "reference-move":
-            actions += ["update the edge target to the new path; identity unchanged, no re-assessment needed"]
-        elif kind == "content-edit":
+        if "reference-move" in changes:
+            actions += ["update the edge target to the new path; identity unchanged"]
+        if "content-edit" in changes:
             actions += ["re-run check_communication --checks manuscript for the edited occurrences"]
         if dropped:
             actions.append("occurrences " + ", ".join(dropped) + " were dropped from the record: confirm the passages were removed or re-map them")
-        impacts.append({"claim_id": cid, "kind": kind, "evidence_changed": evidence_changed, "value_change": value_change,
+        impacts.append({"claim_id": cid, "kind": kind, "changes": sorted(changes), "evidence_changed": evidence_changed, "value_change": value_change,
                         "assessment": assessment, "occurrences": occ_rows, "required_actions": actions, "content_comparison": comparison})
         content_complete = content_complete and comparison == "complete"
         if assessment == "reopened":
@@ -208,7 +220,7 @@ def diff_communication(before: dict, after: dict, context: dict) -> dict:
                                       f"the evidence identity of {cid} changed: " + "; ".join(f"{e['edge']}: {e['identity_before']} -> {e['identity_after']}" for e in evidence_changed),
                                       "a changed hash is not proof of a changed conclusion: reconcile the identity and re-pin",
                                       claim=cid, source="revisions"))
-        if kind in MATERIAL or dropped or not a_o:
+        if (changes & set(MATERIAL)) or dropped or not a_o:
             findings.append(R.finding("revision.coverage_unmapped", "unresolved", f"{where}",
                                       f"claim {cid} changed ({kind}); only its recorded occurrences {sorted(a_o)} are listed"
                                       + (f", and {dropped} were dropped" if dropped else ""),
@@ -223,7 +235,7 @@ def diff_communication(before: dict, after: dict, context: dict) -> dict:
                                       f"claim {cid} was removed; its former occurrences {[o.get('id') for o in b_occ.get(cid, [])]} need a targeted read",
                                       "do a targeted read for its remaining traces", claim=cid, source="revisions"))
     changed_ids = {i["claim_id"] for i in impacts if i["kind"] != "added"}
-    material_ids = {i["claim_id"] for i in impacts if i["kind"] in MATERIAL}
+    material_ids = {i["claim_id"] for i in impacts if i["kind"] in MATERIAL or set(i.get("changes", [])) & set(MATERIAL)}
     items = _revision_items(a_ext, context, material_ids, changed_ids, findings)
     cov = {"claims": {"before": len(b_claims), "after": len(a_claims), "changed": len(changed_ids), "unaffected": len(unaffected)},
            "occurrences": {"before": sum(len(v) for v in b_occ.values()), "after": sum(len(v) for v in a_occ.values()), "stale": stale_occurrences},

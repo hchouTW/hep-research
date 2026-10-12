@@ -17,6 +17,7 @@ from pathlib import Path
 from communication_lib import report as R
 from communication_lib.reporting import check_reporting
 from contracts.communication import evidence_fingerprint, format_of
+from contracts.communication_project import normalize_dependency_report
 from contracts.evidence import STRENGTH
 
 NOTE = ("assessment recorded by its assessor and checked for consistency with the record; whether the evidence supports "
@@ -86,23 +87,31 @@ def _same_number(a: str, b: str) -> bool:
 
 
 def _covered(locator: str, event: dict) -> bool:
+    """A read event covers an edge locator when its level is full-text, or a recorded locator equals the edge locator
+    or is its whole leading part up to a non-alphanumeric boundary ('abstract' covers 'abstract, sentence 2'; 'Table 1'
+    does not cover 'Table 12')."""
     level = event.get("level")
     if STRENGTH.get(level, 0) >= 3:
         return True
     if STRENGTH.get(level, 0) < 2:
         return False
-    loc = locator.lower()
-    recorded = [str(x).lower() for x in event.get("locators", []) or []]
+    loc = re.sub(r"\s+", " ", locator.strip().lower())
+    recorded = [re.sub(r"\s+", " ", str(x).strip().lower()) for x in event.get("locators", []) or []]
     if level == "abstract+metadata" and not recorded:
         recorded = ["abstract"]
-    return any(loc.startswith(r) or r in loc for r in recorded if r)
+    return any(r and re.match(r"^" + re.escape(r) + r"(?![a-z0-9])", loc) for r in recorded)
 
 
 def audit_claims(record: dict, context: dict, policy: dict) -> dict:
     ext = record.get("extension") if isinstance(record.get("extension"), dict) else {}
     fmt = format_of(record)
     findings: list[dict] = R.normalize(context["schema"]["findings"], "schema", "fix the record")
+    findings += R.normalize(context.get("findings", []), "resolution", "resolve the reference inside the project root")
+    if context.get("dependencies"):
+        findings += R.normalize(normalize_dependency_report(context["dependencies"]), "dependencies", "fix the input chain")
     notes: list[str] = []
+    numbers_blocked = 0
+    numbers_ran = 0
     handoffs: list[dict] = []
     matrix: list[dict] = []
     facts: list[dict] = []
@@ -197,7 +206,14 @@ def audit_claims(record: dict, context: dict, policy: dict) -> dict:
             evidence_rows.append({"id": e.get("id"), "target_kind": e.get("target_kind"), "target": e.get("target"), "locator": e.get("locator"),
                                   "role": e.get("role"), "usage": e.get("usage") or "used-in-claim", "identity": identity,
                                   "resolved": bool(inp and inp.get("resolved"))})
-            if e.get("target_kind") == "artifact" and e.get("role") == "supports" and source_value is None and inp and inp.get("resolved"):
+            if e.get("target_kind") == "artifact" and e.get("role") == "supports" and source_value is None:
+                if not inp or not inp.get("resolved") or inp.get("match") is False:
+                    numbers_blocked += 1
+                    add("numbers.source_unavailable", "unresolved", f"{where}.evidence[{e.get('id')}]",
+                        f"the evidence artifact {e.get('target')!r} is missing, outside the root or does not carry its declared digest: "
+                        "the source value cannot be compared with the display values",
+                        "restore the artifact with its pinned digest, or re-pin the record after inspecting the new file")
+                    continue
                 key = e.get("target")
                 if key not in docs_cache:
                     try:
@@ -207,9 +223,15 @@ def audit_claims(record: dict, context: dict, policy: dict) -> dict:
                 node, ok = _locate(docs_cache[key], str(e.get("locator", ""))) if docs_cache[key] is not None else (None, False)
                 if ok:
                     source_value = (node, e)
+                else:
+                    numbers_blocked += 1
+                    add("evidence.locator_not_found", "unresolved", f"{where}.evidence[{e.get('id')}]",
+                        f"locator {e.get('locator')!r} does not resolve in {e.get('target')!r}: the source value cannot be read",
+                        "fix the locator to the field that holds the value")
         fact = {"claim_id": cid, "text": text, "claim_type": c.get("claim_type"), "status": sorted(status), "value": None, "unit": None,
                 "uncertainty": {}, "source": None, "limitations": limitations, "unresolved_inputs": list(c.get("unresolved_inputs", []) or [])}
         if source_value is not None:
+            numbers_ran += 1
             node, e = source_value
             val = node.get("value") if isinstance(node, dict) else node
             fact.update(value=None if val is None else str(val), unit=str(node.get("unit")) if isinstance(node, dict) and "unit" in node else None,
@@ -245,8 +267,10 @@ def audit_claims(record: dict, context: dict, policy: dict) -> dict:
         for req in c.get("unresolved_inputs", []) or []:
             handoffs.append({"to_skill": "the producing skill", "claim": cid, "request": req})
     reporting = None
-    checks_run = ["schema", "assessments", "sources", "wording", "numbers"]
+    checks_run = ["schema", "assessments", "sources", "wording"] + (["numbers"] if numbers_ran else [])
     not_run = []
+    if numbers_blocked:
+        not_run.append({"check": "numbers", "reason": f"the evidence artifact or its locator was unavailable for {numbers_blocked} claim(s)", "required": True})
     if rc is not None:
         reporting = check_reporting(rc, policy)
         findings += reporting["findings"]

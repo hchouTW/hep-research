@@ -35,7 +35,7 @@
   },
   "research-communication": {
    "references": 53,
-   "bytes": 377361,
+   "bytes": 377787,
    "uncited": 0
   }
  },
@@ -2309,7 +2309,7 @@
     "tests/skills/research_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "d41501c 2026-10-12"
+   "last_commit": "cd88e8f 2026-10-12"
   },
   {
    "path": "skills/research-communication/references/artifact-packaging-for-release.md",
@@ -2561,8 +2561,8 @@
   {
    "path": "skills/research-communication/references/evidence-linked-writing.md",
    "owner": "research-communication",
-   "bytes": 4742,
-   "lines": 62,
+   "bytes": 5168,
+   "lines": 67,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/research-communication/SKILL.md",

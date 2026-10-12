@@ -61,7 +61,7 @@
   }
  ],
  "inputs": {
-  "record_sha256": "bd9eae6aeee67fd0d84fb61a7667a31767f5b2508ab3dcc1121c624bb5170e2c"
+  "record_sha256": "aa83d797b5a594258b0854f1ab2d06921f1ae8fcc2782befba9ebe51f30af782"
  },
  "note": "wording generated from the recorded action state; a response asserts only what the revision ledger shows as completed and checked",
  "notes": [],

@@ -26,8 +26,10 @@ from communication_lib.documents import normalize
 from contracts.communication import format_of
 
 NUMBER_RE = re.compile(r"(?<![\w.])\d+(?:\.\d+)?(?![\w.])")
-STATUS_WORDS = {"synthetic": ("synthetic",), "asimov": ("asimov",), "preliminary": ("preliminary",), "failed": ("failed",),
-                "unvalidated": ("unvalidated", "not validated", "not yet validated"), "user-supplied": ("user-supplied", "supplied by the user")}
+STATUS_WORDS = {"synthetic": ("synthetic", "合成", "模擬", "示意"), "asimov": ("asimov",), "preliminary": ("preliminary", "初步"),
+                "failed": ("failed", "失敗"), "unvalidated": ("unvalidated", "not validated", "not yet validated", "未驗證", "未經驗證"),
+                "user-supplied": ("user-supplied", "supplied by the user", "使用者提供")}
+NEGATED_RE = re.compile(r"\b(not yet|have not|has not|had not|haven't|hasn't|not been|will|are being|is being)\b|尚未|還沒|未", re.I)
 COMPLETION_RE = re.compile(r"\bwe (have|performed|reran|re-ran|updated|changed|added|revised|rerun)\b", re.I)
 NOTE_ADAPT = ("mechanical consistency of a derived draft with its record; keyword overlap is not a semantic check: the recorded "
               "semantic review is the reader's judgment")
@@ -65,7 +67,7 @@ def _claim_numbers(claim: dict, record: dict, context: dict, occ: list) -> set[s
             continue
         node, ok = _locate(doc, str(e.get("locator", "")))
         if not ok:
-            continue
+            continue  # audit_claims reports evidence.locator_not_found; here the statement's numbers simply find no source value
         if isinstance(node, dict):
             for k in ("value", "stat", "syst"):
                 if node.get(k) is not None:
@@ -180,6 +182,8 @@ def draft_responses(record: dict, context: dict) -> dict:
     items = [it for it in (ext.get("reviewer_items") or []) if isinstance(it, dict)]
     revs = {r.get("id"): r for r in (ext.get("revision_items") or []) if isinstance(r, dict)}
     occ = {o.get("id"): o for o in (ext.get("occurrences") or []) if isinstance(o, dict)}
+    current = {d.get("sha256") for d in context.get("documents", {}).values()} | {i.get("sha256") for i in context.get("inputs", {}).values()}
+    current = {f"sha256:{s}" for s in current if s} | {s for s in current if s}
     table, drafts = [], []
     if not items:
         findings.append(R.finding("response.no_items", "unresolved", "$.extension.reviewer_items", "no reviewer items recorded",
@@ -187,7 +191,13 @@ def draft_responses(record: dict, context: dict) -> dict:
     for k, it in enumerate(items):
         where = f"$.extension.reviewer_items[{k}]"
         linked = [revs.get(rid, {"id": rid, "state": "unknown"}) for rid in (it.get("revision_items") or [])]
-        verified = [r for r in linked if r.get("state") == "verified" and r.get("completion_evidence")]
+        verified = [r for r in linked if r.get("state") == "verified" and r.get("completion_evidence")
+                    and all(ev.get("version") in current for ev in r["completion_evidence"] if isinstance(ev, dict))]
+        for r in linked:
+            if r.get("state") == "verified" and r.get("completion_evidence") and r not in verified:
+                findings.append(R.finding("response.evidence_not_current", "unresolved", where,
+                                          f"revision item {r.get('id')} was verified on a version that is not the current document or input",
+                                          "re-run the checks on the current versions before describing the change as done", source="responses"))
         locators = []
         for r in linked:
             for oid in r.get("impacted_occurrences") or []:
@@ -215,7 +225,8 @@ def draft_responses(record: dict, context: dict) -> dict:
                 findings.append(R.finding("response.changed_without_completion", "error", where,
                                           f"comment {it.get('id')} is marked {disposition} but its revision items are not all verified with evidence: {open_items}",
                                           "complete and verify the revision items first, or set the disposition to pending", source="responses"))
-        if state != "completed" and COMPLETION_RE.search(reason) and disposition != "declined":
+        asserted = any(COMPLETION_RE.search(s) and not NEGATED_RE.search(s) for s in re.split(r"(?<=[.;!?])\s+", reason))
+        if state != "completed" and asserted and disposition != "declined":
             findings.append(R.finding("response.asserts_uncompleted_work", "error", f"{where}.response_draft",
                                       f"the response draft asserts completed work while the change is {state}: {reason[:120]!r}",
                                       "describe the work as pending; use the generated wording", source="responses"))

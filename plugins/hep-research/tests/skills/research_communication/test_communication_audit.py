@@ -264,3 +264,43 @@ class Cli(Base):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReviewFixes(Base):
+    """Final review of the branch: I8 (declared-unresolved claim and an empty manuscript level passed) and I5 (an
+    occurrence behind a LaTeX include is unresolved, not a confirmed mismatch)."""
+
+    def test_claim_waiting_on_inputs_is_unresolved_not_pass(self):
+        doc = fx.clone(self.p["doc"])
+        c = doc["extension"]["claims"][1]
+        c["evidence"] = []
+        c["unresolved_inputs"] = ["the illustration artifact from hep-theory"]
+        del c["assessment"]
+        c["status"] = ["synthetic", "unvalidated"]
+        fx.write(self.p["record"], doc)
+        rep = self.audit()
+        self.assertEqual(rep["status"], "incomplete")
+        self.assertIn("communication.claim_pending_inputs", self.codes(rep, "unresolved"))
+
+    def test_manuscript_level_without_occurrences_is_not_vacuous_coverage(self):
+        doc = fx.clone(self.p["doc"])
+        doc["extension"]["occurrences"] = []
+        doc["extension"]["scope"]["occurrences"] = False
+        fx.write(self.p["record"], doc)
+        rep = self.audit(checks="manuscript")
+        self.assertEqual(rep["status"], "incomplete")
+        self.assertIn("audit.no_occurrences", self.codes(rep, "unresolved"))
+
+    def test_occurrence_behind_a_latex_include_is_unresolved_not_a_mismatch(self):
+        tex = "\\documentclass{article}\\begin{document}\n\\section{Results}\n\\input{sections/results}\n\\end{document}\n"
+        fx.write(self.p["root"] / "paper" / "main.tex", tex)
+        fx.write(self.p["root"] / "paper" / "sections" / "results.tex", fx.BODY + "\n")
+        doc = fx.clone(self.p["doc"])
+        doc["extension"]["documents"][0].update(path="paper/main.tex", format="latex")
+        doc["extension"]["occurrences"] = [o for o in doc["extension"]["occurrences"] if o["id"] == "occ:body"]
+        doc["extension"]["occurrences"][0]["locator"] = "section:Results"
+        fx.write(self.p["record"], doc)
+        rep = self.audit(checks="manuscript")
+        self.assertNotEqual(rep["status"], "fail")
+        self.assertIn("occurrence.include_not_followed", self.codes(rep, "unresolved"))
+        self.assertEqual(rep["occurrences"][0]["outcome"], "unresolved")

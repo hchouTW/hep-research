@@ -247,3 +247,36 @@ class Cli(Base):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReviewFixes(Base):
+    """Final review of the branch: findings C1, I3, I4 (false passes and over-matching) reproduced as regressions."""
+
+    def test_missing_or_changed_evidence_file_cannot_pass(self):
+        self.p["syn"].unlink()
+        rep = self.audit()
+        self.assertEqual(rep["status"], "fail", "a missing evidence artifact is a dependency error, not a pass")
+        self.assertIn("dependency.missing", self.codes(rep, "error"))
+        self.setUp()
+        changed = json.loads(self.p["obs"].read_text())
+        changed["status"] = ["failed", "observed"]
+        self.p["obs"].write_text(json.dumps(changed))  # replaced under the same filename; the record still pins the old digest
+        rep = self.audit()
+        self.assertNotEqual(rep["status"], "pass")
+        self.assertIn("dependency.hash_mismatch", self.codes(rep, "error"))
+        self.assertIn("numbers.source_unavailable", self.codes(rep, "unresolved"))
+
+    def test_artifact_locator_not_found_is_unresolved(self):
+        self.c1()["evidence"][0]["locator"] = "extension.results.ratoi"
+        rep = self.audit()
+        self.assertEqual(rep["status"], "incomplete")
+        self.assertIn("evidence.locator_not_found", self.codes(rep, "unresolved"))
+
+    def test_read_coverage_matches_whole_locators_not_prefixes(self):
+        from communication_lib.claims import _covered
+        self.assertFalse(_covered("Table 12", {"level": "page", "locators": ["Table 1"]}))
+        self.assertFalse(_covered("Sec. 10", {"level": "page", "locators": ["sec. 1"]}))
+        self.assertFalse(_covered("eq. 3", {"level": "page", "locators": ["3"]}))
+        self.assertTrue(_covered("Table 1", {"level": "page", "locators": ["table 1"]}))
+        self.assertTrue(_covered("abstract, sentence 2", {"level": "abstract+metadata", "locators": ["abstract"]}))
+        self.assertTrue(_covered("Table 3", {"level": "full-text", "locators": []}))

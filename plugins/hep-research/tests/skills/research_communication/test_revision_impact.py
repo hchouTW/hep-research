@@ -59,6 +59,7 @@ class Base(unittest.TestCase):
         obs2 = fx.write(self.p["root"] / "artifacts" / "obs_v2.json", fx.observed_result(value, unc))
         self.after["inputs"][0].update(ref="artifacts/obs_v2.json", sha256=fx.sha(obs2))
         self.c1()["evidence"][0]["target"] = "artifacts/obs_v2.json"
+        self.c1()["assessment"]["currency"] = "stale"  # the writer of the revised record acknowledges the pending re-inspection
         return obs2
 
 
@@ -250,3 +251,69 @@ class Cli(Base):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReviewFixes(Base):
+    """Final review of the branch: C2 (a rename plus stronger wording passed), I1 (a new edge crashed), I2 (the
+    baseline's refs were read outside the project root)."""
+
+    def test_rename_plus_stronger_wording_reopens_the_assessment(self):
+        moved = fx.write(self.p["root"] / "artifacts" / "renamed_obs.json", json.loads(self.p["obs"].read_text()))
+        self.after["inputs"][0].update(ref="artifacts/renamed_obs.json", sha256=fx.sha(moved))
+        self.c1()["evidence"][0]["target"] = "artifacts/renamed_obs.json"
+        self.c1()["text"] = "The ratio R establishes a new effect at 1.02 +/- 0.05 (synthetic fixture)."
+        rep = self.diff()
+        i = rep["impacts"][0]
+        self.assertEqual(i["assessment"], "reopened")
+        self.assertIn("reassessment", i["changes"])
+        self.assertIn("reference-move", i["changes"])
+        self.assertNotEqual(rep["status"], "pass")
+        self.assertIn("revision.assessment_stale", self.codes(rep, "unresolved"))
+        self.assertIn("communication.currency_mismatch", self.codes(rep, "error"), "the revised record's own schema findings are reported")
+
+    def test_identity_change_plus_status_change_reopens(self):
+        obs = json.loads(self.p["obs"].read_text())
+        obs["provenance"]["created"] = "2026-10-13"
+        self.p["obs"].write_text(json.dumps(obs))
+        self.after["inputs"][0]["sha256"] = fx.sha(self.p["obs"])
+        self.after["inputs"][0]["status"] = ["observed", "preliminary"]
+        self.after["status"] = ["preliminary", "synthetic", "unvalidated"]
+        self.c1()["status"] = ["observed", "preliminary"]
+        rep = self.diff()
+        self.assertEqual(rep["impacts"][0]["assessment"], "reopened")
+        self.assertIn("status-change", rep["impacts"][0]["changes"])
+
+    def test_new_edge_on_an_existing_claim_does_not_crash(self):
+        self.c1()["evidence"].append({"id": "ev:C1-b", "target_kind": "artifact", "target": "artifacts/syn.json",
+                                      "locator": "extension.results.ratio", "role": "qualifies", "usage": "used-in-claim"})
+        self.c1()["status"] = ["synthetic", "unvalidated"]
+        rep = self.diff()
+        self.assertIn(rep["status"], ("incomplete", "fail"))
+        self.assertEqual(rep["impacts"][0]["evidence_changed"][0]["edge"], "ev:C1-b")
+        self.assertIsNone(rep["impacts"][0]["evidence_changed"][0]["identity_before"])
+
+    def test_baseline_refs_outside_the_root_are_not_read(self):
+        outside = self.tmp / "outside" / "secret.json"
+        outside.parent.mkdir()
+        outside.write_text(json.dumps({"extension": {"results": {"ratio": {"value": "SECRET-42", "unit": "1"}}}}))
+        before = json.loads(self.baseline.read_text())
+        before["inputs"][0].update(ref="../outside/secret.json")
+        before["inputs"][0].pop("sha256", None)
+        before["extension"]["claims"][0]["evidence"][0]["target"] = "../outside/secret.json"
+        self.baseline.write_text(json.dumps(before))
+        self.baseline_bytes = self.baseline.read_bytes()
+        self.new_result()
+        rep = self.diff()
+        self.assertNotIn("SECRET-42", json.dumps(rep))
+        self.assertIn("revision.history_unavailable", self.codes(rep, "unresolved"))
+
+    def test_unexpected_exception_in_a_cli_is_an_input_error_not_a_traceback(self):
+        import io
+        from unittest import mock
+        fx.write(self.p["record"], self.after)
+        out, err = io.StringIO(), io.StringIO()
+        with mock.patch("sys.stdout", out), mock.patch("sys.stderr", err), \
+                mock.patch.object(cli, "diff_communication", side_effect=RuntimeError("boom")):
+            code = cli.main([str(self.baseline), str(self.p["record"]), "--project-root", str(self.p["root"])])
+        self.assertEqual(code, 2, err.getvalue()[-500:])
+        self.assertNotIn("Traceback", err.getvalue())

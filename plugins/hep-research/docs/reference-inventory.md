@@ -14,7 +14,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-statistics | 9 | 117 | 0 |
 | hep-theory | 8 | 42 | 0 |
 | physics-ml | 34 | 184 | 0 |
-| research-communication | 53 | 377 | 0 |
+| research-communication | 53 | 378 | 0 |
 
 ## Overlapping pairs
 
@@ -204,7 +204,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `transformer-architectures.md` | physics-ml | 7.0 | no | 5 | - | 351029c 2026-10-07 |
 | `uncertainty-and-calibration.md` | physics-ml | 6.3 | no | 6 | hep-statistics | 351029c 2026-10-07 |
 | `academic-diagrams-guide.md` | research-communication | 10.4 | yes | 4 | hep-analysis | 351029c 2026-10-07 |
-| `academic-papers-guide.md` | research-communication | 38.4 | yes | 6 | - | d41501c 2026-10-12 |
+| `academic-papers-guide.md` | research-communication | 38.4 | yes | 6 | - | cd88e8f 2026-10-12 |
 | `artifact-packaging-for-release.md` | research-communication | 2.8 | no | 3 | - | 351029c 2026-10-07 |
 | `astroparticle-and-cosmic-ray-papers.md` | research-communication | 19.5 | no | 10 | - | 351029c 2026-10-07 |
 | `citation-verification.md` | research-communication | 3.5 | yes | 9 | - | d41501c 2026-10-12 |
@@ -221,7 +221,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `diagrams-statistics.md` | research-communication | 6.2 | no | 2 | - | 351029c 2026-10-07 |
 | `equation-and-notation-auditing.md` | research-communication | 3.9 | no | 5 | hep-statistics, hep-theory | d3212bd 2026-10-12 |
 | `erratum-and-corrigendum-drafting.md` | research-communication | 3.1 | no | 2 | - | 351029c 2026-10-07 |
-| `evidence-linked-writing.md` | research-communication | 4.7 | yes | 3 | - | 0f2bb85 2026-10-12 |
+| `evidence-linked-writing.md` | research-communication | 5.2 | yes | 3 | - | 0f2bb85 2026-10-12 |
 | `figures-and-tables.md` | research-communication | 9.2 | no | 7 | - | 351029c 2026-10-07 |
 | `general-diagram-principles.md` | research-communication | 7.7 | no | 2 | - | 351029c 2026-10-07 |
 | `grant-and-fellowship-proposal-writing.md` | research-communication | 3.0 | no | 1 | - | 351029c 2026-10-07 |

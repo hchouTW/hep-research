@@ -53,6 +53,11 @@ cited passage not read, a missing reporting field, a legacy record); 2 bad input
 renders the same report (`--format markdown`, `--out`). Coverage is the declared occurrences only: paraphrases and
 conceptual dependencies elsewhere in the manuscript need a targeted read, which the report says it did not do.
 
+The manuscript check compares the recorded passage verbatim with the document source (whitespace normalized, `±` read as
+`+/-`): record the passage as it is written in the source, LaTeX markup included. It reads one file per document and
+does not follow `\input`/`\include`: a region that includes other files is reported as unresolved, so declare an
+included section file as its own document when its passages are checked.
+
 ## Write from the record
 
 `audit_claims.py` emits a claim matrix and draft-ready facts (value, unit, uncertainties, status, source locator,

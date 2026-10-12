@@ -34,6 +34,7 @@
    ],
    "exit_code": 3,
    "findings": [
+    "communication.assessment_stale",
     "revision.assessment_stale",
     "revision.coverage_unmapped",
     "revision.identity_changed",

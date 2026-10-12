@@ -102,7 +102,7 @@
      "evidence_fingerprints": {
       "ev:C1-a": "sha256:e2a25c204bc67102b8462957a1a20439b635b0634975a74d558481e8bda75db7"
      },
-     "currency": "current"
+     "currency": "stale"
     }
    },
    {

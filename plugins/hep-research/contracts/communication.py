@@ -161,6 +161,9 @@ def _traceability_rules(doc: dict, ext: dict, rep: Report) -> None:
             if not c.get("unresolved_inputs"):
                 rep.add("unresolved", f"{where}.evidence", "communication.claim_unmapped",
                         "no evidence edge and no unresolved input request: the claim is not traceable")
+            else:
+                rep.add("unresolved", f"{where}.unresolved_inputs", "communication.claim_pending_inputs",
+                        f"claim waits for {c.get('unresolved_inputs')}: no evidence edge yet")
         _assessment_rules(c, doc, {e.get("id"): e for e in edges}, rep, where)
     for k, o in enumerate(ext.get("occurrences", []) or []):
         where = f"$.extension.occurrences[{k}]"
