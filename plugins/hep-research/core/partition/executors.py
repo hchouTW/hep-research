@@ -16,8 +16,8 @@ An executor turns a submission context into a plan, submits it, polls it and can
 ctx: {"campaign_dir", "submission_id", "submission_dir", "rows": [{"index", "chunk_id", "attempt_id"}], "config",
 "spec", "runner", "outputs_dir"}. plan: {"backend", "submission_id", "files": {name: text}, "submit_argv": [...],
 "rows"}. An observation: {"state" (a normalized state), "native_state", "exit_code", "signal", "hold_reason",
-"hold_code", "host", "elapsed_s", "max_rss_mb", "alloc_cpus", "restarts", "evidence"}; missing facts are None, never
-guessed.
+"hold_code", "host", "elapsed_s", "max_rss_mb", "alloc_cpus", "alloc_gpus", "restarts", "evidence"}; missing facts are
+None, never guessed.
 Every tool call has a timeout (scheduler_timeout_s, default 120 s) and runs with an allow-listed environment
 (ENV_ALLOW plus the configured env_passthrough names), so tokens and agent sockets in the caller's environment do not
 reach scheduler clients or local workers. Standard library only.
@@ -141,8 +141,8 @@ class Executor:
 
 def _blank(**kw) -> dict:
     base = {"state": "unknown", "native_state": None, "exit_code": None, "signal": None, "hold_reason": None,
-            "hold_code": None, "host": None, "elapsed_s": None, "max_rss_mb": None, "alloc_cpus": None, "restarts": 0,
-            "evidence": None}
+            "hold_code": None, "host": None, "elapsed_s": None, "max_rss_mb": None, "alloc_cpus": None,
+            "alloc_gpus": None, "restarts": 0, "evidence": None}
     base.update(kw)
     return base
 

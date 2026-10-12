@@ -106,7 +106,7 @@ Results at the 0.1.0 handover (E1); every listed test is in the 0.3.0 tree.
 | tectonic 0.17.0 unusable in the cloud containers: the network policy blocks its TeX bundle host (relay.fullyjustified.net, proxy CONNECT 403) | the paper-skeleton compile test skips when tectonic is off `PATH`; the paper-build capability row is `unverified`. On E2 tectonic was present and the test ran |
 | `vision_transfer.py` pretrained ResNet-18 weights download from download.pytorch.org, blocked by the network policy | the training test builds ResNet-18 with `weights=None`; accuracy on real images not assessed |
 | hepdata.net not reachable from the cloud environment | `adapters/hepdata` tested on synthetic HEPData-layout tables only; `reproduce_published_likelihood.py` ran on a synthetic BkgOnly + patchset split only. No capability row reaches "reproduces a published result"; both unverified on real records (IMPROVEMENT-PLAN T6) |
-| Batch adapter limits count CPUs × time only (GPU-CAMPAIGN-RUN) | GPU-hours are not tracked or limited; on Slurm allocated CPUs count once polled; before that (the first submission, queued tasks) requested CPUs count times `limits.alloc_cpu_factor`, so without that key they are 2× low on hyper-threaded GPU nodes; HTCondor counts requested CPUs times that factor |
+| Batch adapter limits: allocation known only after a poll (GPU-CAMPAIGN-RUN) | GPU-hours count GPUs × time (`max_gpu_hours`), allocated GPUs once polled and requested before; HTCondor counts requested GPUs. On Slurm allocated CPUs count once polled; before that (the first submission, queued tasks) requested CPUs count times `limits.alloc_cpu_factor`, so without that key they are 2× low on hyper-threaded GPU nodes; HTCondor counts requested CPUs times that factor |
 | PyTorch on GPU verified on two GPU types only (V100 with the CUDA 12.6 build, RTX PRO 6000 Blackwell with the CUDA 13.0 build; torch 2.14.1; TORCH-GPU-RUN) | other GPU types, multi-node DDP and FSDP not tried; GPU tests run only where `HEP_TORCH_GPU_TEST=1` is set on a GPU host (no GPU in CI) |
 | pyhf demonstrated on two synthetic workspaces, asymptotic only | toy-based CLs, lumi/shapefactor modifiers and non-default interpolation codes not tried |
 | CMS Combine checked on one synthetic counting card (E1 only); needs `HEP_COMBINE_WRAPPER`, and with ROOT 6.40 `--strictBounds` | the observed-limit search throws out of range under ROOT 6.40.04 without `--strictBounds` (OPTIONAL-TOOLS) |
@@ -405,7 +405,9 @@ Records: the user's `torch-gpu/gpu-campaign` folder.
   under-counts by 2× here, and GPU-hours are neither tracked nor limited. **Follow-up (Unreleased):** the Slurm poll
   now reads `AllocCPUS` and the limit counts allocated CPUs, projecting new jobs at the observed factor; `sacct` on
   these two jobs reports `AllocCPUS` 2 (1 for the CPU campaign's jobs), and that output is a parser test
-  (`test_poll_parses_real_sacct_alloc_cpus`). GPU-hours remain a known limitation below.
+  (now `test_poll_parses_real_sacct_alloc_cpus_and_gpus`). **Second follow-up (Unreleased):** `max_gpu_hours`;
+  `sacct` on these jobs reports `AllocTRES` `gres/gpu=1` for the 1-GPU job and no `gres/gpu` for the CPU campaign's
+  job (read-only query, 2026-10-11), and both lines are in that parser test.
 - `MaxRSS` of a 4 s chunk is 0.07 MB (accounting samples every 15 s), as in the CPU campaign. `freeze` refuses a
   `#!/usr/bin/env python3` worker ("name one interpreter only").
 

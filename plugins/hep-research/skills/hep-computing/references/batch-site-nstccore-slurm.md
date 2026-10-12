@@ -50,7 +50,8 @@ priority_multifactor. Site support: the contact block at the end of the guide.
   torch build for that GPU type (CUDA 12.6 build for V100: its driver supports CUDA 12.9 at most; CUDA 13.0 build for
   the Blackwell node). Each requested CPU is allocated and billed as 2 there; set `limits.alloc_cpu_factor: 2` for GPU
   partitions (1 or unset on CPU partitions) so `max_core_hours` holds from the first submission; once a job is polled
-  the allocated CPUs (`AllocCPUS`) count.
+  the allocated CPUs (`AllocCPUS`) count. `limits.max_gpu_hours` counts the allocated GPUs (`gres/gpu` in
+  `AllocTRES`, 1 for a 1-GPU request) times the elapsed time, or the walltime limit until the job ends.
 - `resources.memory_mb`: size from a pilot that runs well past 15 s, or measure the peak inside the worker; an
   undersized value does not fail, it swaps. On GPU partitions ask for CPUs in pairs.
 - A chunk worker should return only additive quantities: `merge` sums every key of a chunk result, so bookkeeping

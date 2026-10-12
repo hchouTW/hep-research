@@ -167,7 +167,7 @@ node-failure, held, cancelled, lost, unknown`. A native state the adapter does n
   in the attempt); failed, held, cancelled and unknown chunks only after `reset` with a reason. Two identical failure
   signatures (state, exit code, signal, hold code; never host or time) in a row stop the chunk, across resets.
 - **Limits:** an optional `limits` section (`max_submissions`, `max_total_jobs`, `max_concurrent_jobs`,
-  `max_core_hours`, `max_resets_per_chunk`, `alloc_cpu_factor`) holds the site's and allocation's values; ask for them, never assume. A
+  `max_core_hours`, `max_gpu_hours`, `max_resets_per_chunk`, `alloc_cpu_factor`) holds the site's and allocation's values; ask for them, never assume. A
   submission or reset that would exceed one is refused. Unknown and abandoned jobs count as used and as running: an
   unknown job until a poll sees it end, and either kind until a person runs `clear-orphans --submission S --reason
   TEXT`, which succeeds only when every job the scheduler lists under the submission's tag has ended (a lost job may
@@ -180,7 +180,11 @@ node-failure, held, cancelled, lost, unknown`. A native state the adapter does n
   `limits.alloc_cpu_factor`, which the site's documentation gives (allocated per requested CPU, at least 1), and the
   largest allocated/requested ratio seen so far in the campaign; 1 without either. Set it for such partitions, or the
   first submission is projected at the requested CPUs. HTCondor attempts count requested CPUs times the configured
-  factor. GPU-hours are not tracked or limited.
+  factor. GPU-hours (`max_gpu_hours`) are GPUs times the same time: on Slurm the GPUs allocated (`gres/gpu` in
+  `AllocTRES`) once a job is polled, else `resources.gpus`; GPUs are allocated as requested (1 for 1 on Slurm
+  24.05.1), so there is no factor. An attempt without GPUs counts 0, so CPU-only work, even without `time_limit`, is
+  never refused by `max_gpu_hours`; with GPUs and no `time_limit` the use is unbounded and it refuses. HTCondor
+  attempts count requested GPUs.
 - **Frozen bundles:** `freeze` lists, with full SHA-256, the campaign's manifest, spec and runner, every file under
   `--worker-root`, the interpreter the command names, an `--env-lock` file and the container image (pinned by digest;
   a tag is refused), with the data exposure known then, and writes an approval request. It approves nothing. The
@@ -250,7 +254,7 @@ confirm it on a real run of the version you use before relying on it.
 |---|---|---|
 | `sbatch --parsable` prints `jobid[;cluster]` | Slurm submit | documented (job ID and cluster name, separated by a semicolon); observed on Slurm 24.05.1 (NSTCCore, 2026-10-10): the job ID alone on a single cluster |
 | `--array=A-B%M` (throttle `%M`), `--no-requeue`, `--output`/`--error` with `%A` and `%a`, `--partition`, `--account`, `--qos`, `--constraint`, `--gres`, `--time`, `--cpus-per-task`, `--mem=<n>M`, `--gpus`, `--tmp`, `--job-name`; `SLURM_ARRAY_TASK_ID` in the job | Slurm template | documented (`--mem` default unit MiB, suffix K/M/G/T); observed on Slurm 24.05.1 (NSTCCore, 2026-10-10): the rendered script with `--array=0-8%4`, `--no-requeue`, `--export=NONE`, `--partition`, `--account`, `--time`, `--cpus-per-task`, `--mem=200M` and `%A_%a` log names was accepted and ran; at most 4 tasks ran at once |
-| `sacct --duplicates --parsable2 --noheader --format=JobID,State,ExitCode,Elapsed,MaxRSS,NodeList,AllocCPUS`; array tasks `<job>_<task>`; `.batch` step; `ExitCode` as `exit:signal`; Elapsed `[DD-[HH:]]MM:SS`; MaxRSS with an optional unit letter; State followed by `+` when truncated (for example who cancelled) | Slurm poll | documented; the parser accepts both `MM:SS` and `D-HH:MM:SS`; observed on Slurm 24.05.1 (NSTCCore, 2026-10-10): `<job>_<task>` and `.batch` rows, `0:0`, `00:00:05`, MaxRSS such as `18760K`, `CANCELLED by <uid>`; MaxRSS is sampled (`JobAcctGatherFrequency`), so a job shorter than the interval reports far below its peak; `AllocCPUS` 2 for a 1-CPU job on a V100 node, 1 on a CPU node (2026-10-11) |
+| `sacct --duplicates --parsable2 --noheader --format=JobID,State,ExitCode,Elapsed,MaxRSS,NodeList,AllocCPUS,AllocTRES`; array tasks `<job>_<task>`; `.batch` step; `ExitCode` as `exit:signal`; Elapsed `[DD-[HH:]]MM:SS`; MaxRSS with an optional unit letter; State followed by `+` when truncated (for example who cancelled) | Slurm poll | documented; the parser accepts both `MM:SS` and `D-HH:MM:SS`; observed on Slurm 24.05.1 (NSTCCore, 2026-10-10): `<job>_<task>` and `.batch` rows, `0:0`, `00:00:05`, MaxRSS such as `18760K`, `CANCELLED by <uid>`; MaxRSS is sampled (`JobAcctGatherFrequency`), so a job shorter than the interval reports far below its peak; `AllocCPUS` 2 for a 1-CPU job on a V100 node, 1 on a CPU node (2026-10-11); `AllocTRES` `billing=2,cpu=2,gres/gpu=1,mem=8000M,node=1` for that 1-GPU job and no `gres/gpu` entry for the CPU job, empty while pending (typed `gres/gpu:<type>=N` entries repeat the count and are not added) |
 | Pending array ranges shown as `<job>_[a-b%m]` in sacct | Slurm poll | not stated (squeue documents a combined line "using a regular expression"); parsed if present |
 | State codes: the adapter maps PENDING, CONFIGURING, REQUEUED, REQUEUE_FED, RUNNING, COMPLETING, STAGE_OUT, RESIZING, SIGNALING, COMPLETED, FAILED, TIMEOUT, OUT_OF_MEMORY, CANCELLED, NODE_FAIL, BOOT_FAIL, PREEMPTED, REQUEUE_HOLD, SPECIAL_EXIT, RESV_DEL_HOLD, DEADLINE, REVOKED; SUSPENDED and STOPPED map to `unknown` (a person decides) | Slurm state map | documented (squeue 26.05 table); RESV_DEL_HOLD, SIGNALING, DEADLINE, REVOKED, SUSPENDED and STOPPED were added after this check |
 | `squeue --jobs=<ids> --array --noheader --format=%i\|%T` | Slurm fallback | documented (`%i` is `<base_job_id>_<index>` for arrays, `%T` the long state) |

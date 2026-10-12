@@ -19,6 +19,10 @@ the person running the campaign (Q-07), never from a default here:
                          factor used is the larger of this and the largest allocated/requested ratio seen so far in
                          the campaign; without either it is 1. It scales new jobs and attempts with no alloc_cpus yet
                          (a queued Slurm task reports none)
+  max_gpu_hours          GPUs x elapsed time, or x walltime limit while the end is unobserved, as for core-hours; GPUs
+                         are those the scheduler allocated when it reports them (alloc_gpus: Slurm AllocTRES
+                         gres/gpu), else resources.gpus (0 when absent). An attempt without GPUs counts 0 even with
+                         no walltime limit, so CPU-only work is never refused here
   max_resets_per_chunk   reset() calls per chunk
 
 A limit that would be exceeded stops the new submission (or reset) before anything is written; it never cancels or
@@ -33,8 +37,8 @@ from __future__ import annotations
 
 import re
 
-LIMIT_KEYS = ("max_submissions", "max_total_jobs", "max_concurrent_jobs", "max_core_hours", "max_resets_per_chunk",
-              "alloc_cpu_factor")
+LIMIT_KEYS = ("max_submissions", "max_total_jobs", "max_concurrent_jobs", "max_core_hours", "max_gpu_hours",
+              "max_resets_per_chunk", "alloc_cpu_factor")
 WALLTIME = re.compile(r"^(?:(\d+)-)?(\d{1,2}):(\d{2}):(\d{2})$")
 # states in which a job may run without the record knowing it (orphan risk)
 ORPHAN_RISK = frozenset({"unknown", "abandoned"})
@@ -70,7 +74,7 @@ def problems(limits) -> list[str]:
             continue
         v = limits[k]
         number = isinstance(v, (int, float)) and not isinstance(v, bool)
-        if k == "max_core_hours":
+        if k in ("max_core_hours", "max_gpu_hours"):
             ok, want = number and v > 0, "positive number"
         elif k == "alloc_cpu_factor":
             ok, want = number and v >= 1, "number >= 1"
@@ -104,13 +108,35 @@ def _alloc_cpu_factor(recs: list[dict]) -> float:
     return max([1.0] + [a / _cpus(r.get("resources")) for r in recs if (a := _alloc_cpus(r))])
 
 
-def _core_hours(rec: dict, factor: float) -> float | None:
-    cpus = _alloc_cpus(rec) or _cpus(rec.get("resources")) * factor
+def _gpus(rec: dict) -> int:
+    """GPUs the scheduler allocated when it reports them, else those requested (0 when none)."""
+    a = rec.get("alloc_gpus")
+    if isinstance(a, int) and not isinstance(a, bool) and a >= 0:
+        return a
+    g = (rec.get("resources") or {}).get("gpus")
+    return g if isinstance(g, int) and not isinstance(g, bool) and g > 0 else 0
+
+
+def _hours(rec: dict, units: float) -> float | None:
+    """units x elapsed time of a finished attempt, units x walltime limit while its end is unobserved (None: no bound)."""
     fs = rec.get("final_state")
     if fs is None or fs in ORPHAN_RISK or fs == "held" or rec.get("elapsed_s") is None:
         wall = walltime_s(rec.get("resources"))
-        return None if wall is None else cpus * wall / 3600
-    return cpus * float(rec["elapsed_s"]) / 3600
+        return None if wall is None else units * wall / 3600
+    return units * float(rec["elapsed_s"]) / 3600
+
+
+def _core_hours(rec: dict, factor: float) -> float | None:
+    return _hours(rec, _alloc_cpus(rec) or _cpus(rec.get("resources")) * factor)
+
+
+def _gpu_hours(rec: dict) -> float | None:
+    gpus = _gpus(rec)
+    return 0.0 if gpus == 0 else _hours(rec, gpus)
+
+
+def _total(hours: list) -> float | None:
+    return None if any(h is None for h in hours) else round(sum(h for h in hours if h is not None), 6)
 
 
 def usage(state: dict, limits: dict | None = None) -> dict:
@@ -126,7 +152,8 @@ def usage(state: dict, limits: dict | None = None) -> dict:
     return {"submissions": sum(1 for s in state.get("submissions", []) if s.get("status") != "not-submitted"),
             "total_jobs": len(counted),
             "concurrent_jobs": sum(1 for r in counted if _may_still_run(r)),
-            "core_hours": None if any(h is None for h in hours) else round(sum(h for h in hours if h is not None), 6),
+            "core_hours": _total(hours),
+            "gpu_hours": _total([_gpu_hours(r) for r in counted]),
             "alloc_cpu_factor": factor,
             "alloc_cpu_factor_observed": observed,
             "orphan_risk_jobs": sum(1 for r in counted if r.get("final_state") in ORPHAN_RISK),
@@ -153,6 +180,16 @@ def check_submission(state: dict, config: dict, n_jobs: int) -> tuple[dict, list
                 source = "observed" if use["alloc_cpu_factor_observed"] >= use["alloc_cpu_factor"] else "configured"
                 scaled = f" (x{use['alloc_cpu_factor']:g} allocated per requested cpu, {source})" if use["alloc_cpu_factor"] > 1 else ""
                 out.append(f"max_core_hours: {use['core_hours']:.3f} used + {new:.3f} requested{scaled} > {lim['max_core_hours']}")
+    if "max_gpu_hours" in lim:
+        gpus = _gpus({"resources": config.get("resources")})
+        wall = walltime_s(config.get("resources"))
+        if use["gpu_hours"] is None or (gpus and wall is None):
+            out.append("max_gpu_hours: GPU-hours are unbounded (an attempt with GPUs, no walltime limit and an unobserved "
+                       "end, or GPUs and no resources.time_limit for the new jobs), so the limit cannot be shown to hold")
+        else:
+            new = n_jobs * gpus * (wall or 0) / 3600
+            if use["gpu_hours"] + new > lim["max_gpu_hours"]:
+                out.append(f"max_gpu_hours: {use['gpu_hours']:.3f} used + {new:.3f} requested > {lim['max_gpu_hours']}")
     return use, out
 
 

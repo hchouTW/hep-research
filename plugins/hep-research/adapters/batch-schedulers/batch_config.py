@@ -26,7 +26,7 @@ One JSON file per campaign, kept in the user's project (never in the plugin):
   env_passthrough list of environment variable names passed to scheduler clients besides the allow-list
                   (core.partition.executors.ENV_ALLOW); never credentials                optional
   limits          {"max_submissions", "max_total_jobs", "max_concurrent_jobs", "max_core_hours",
-                   "max_resets_per_chunk", "alloc_cpu_factor"}: site values (core.partition.limits); a
+                   "max_gpu_hours", "max_resets_per_chunk", "alloc_cpu_factor"}: site values (core.partition.limits); a
                   submission or reset that would exceed one is refused; unknown and orphan-risk jobs count as
                   used; alloc_cpu_factor (>= 1) is the site's allocated CPUs per requested CPU   optional
 

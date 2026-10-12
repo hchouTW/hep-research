@@ -5,6 +5,11 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **batch-schedulers: `limits.max_gpu_hours`.** The Slurm poll reads `AllocTRES`; each attempt records
+  `alloc_gpus` (`gres/gpu=N`, 0 for a CPU job, unknown while pending). GPU-hours are GPUs times elapsed time (or the
+  walltime limit until the end is observed), allocated GPUs once polled and `resources.gpus` before that; usage
+  reports `gpu_hours`. Work without GPUs counts 0 and is never refused by this limit. HTCondor counts requested
+  GPUs.
 - **batch-schedulers: `limits.alloc_cpu_factor`.** A site-declared allocated-per-requested CPU factor (>= 1) sizes
   `max_core_hours` before any allocation is observed: new jobs and attempts without `alloc_cpus` (queued Slurm
   tasks) count requested CPUs times the larger of this and the observed factor. Closes the first-submission

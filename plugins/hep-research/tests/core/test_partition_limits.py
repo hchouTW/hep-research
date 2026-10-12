@@ -192,6 +192,36 @@ class LimitTests(Base):
         self.assertEqual(lim.problems({"alloc_cpu_factor": 1}), [])
         self.assertEqual(lim.problems({"alloc_cpu_factor": 2.0, "max_core_hours": 10}), [])
 
+    def test_gpu_hours_count_allocated_gpus_then_requested(self):
+        gl = dict(TL, gpus=1)
+        ex = ScriptedExecutor({"c0000": [{"state": "done", "elapsed_s": 900, "alloc_gpus": 2}],
+                               "c0001": [{"state": "queued"}]})
+        cp.submit(self.cdir, ex, {"resources": gl}, chunk_ids=["c0000", "c0001"], approved=True)
+        cp.poll(self.cdir, ex)
+        self.assertEqual(self.state()["chunks"]["c0000"]["attempt_records"][0]["alloc_gpus"], 2)
+        # 2 allocated GPUs x 15 min + 1 requested GPU x 1 h walltime (queued: nothing allocated yet)
+        self.assertAlmostEqual(lim.usage(self.state())["gpu_hours"], 1.5)
+
+    def test_gpu_hours_limit_refuses_the_projection(self):
+        cfg = {"resources": dict(TL, gpus=1), "limits": {"max_gpu_hours": 2}}  # 3 jobs x 1 GPU x 1 h = 3 > 2
+        err = self.refused("limits.exceeded", cp.submit, self.cdir, ScriptedExecutor({}), cfg)
+        self.assertIn("max_gpu_hours: 0.000 used + 3.000 requested > 2", str(err))
+        self.assertEqual(len(cp.submit(self.cdir, ScriptedExecutor({}), dict(cfg, limits={"max_gpu_hours": 3}),
+                                       approved=True)["chunks"]), 3)
+
+    def test_gpu_hours_need_a_walltime_only_when_gpus_are_used(self):
+        cpu_only = {"limits": {"max_gpu_hours": 1}}  # no time_limit: core-hours unbounded, GPU-hours 0
+        self.assertEqual(lim.check_submission(self.state(), cpu_only, 3)[1], [])
+        self.assertEqual(lim.usage(self.state())["gpu_hours"], 0)
+        err = self.refused("limits.exceeded", cp.submit, self.cdir, ScriptedExecutor({}),
+                           {"resources": {"gpus": 1}, "limits": {"max_gpu_hours": 10}})
+        self.assertIn("max_gpu_hours: GPU-hours are unbounded", str(err))
+
+    def test_max_gpu_hours_is_validated(self):
+        for bad in (0, -1, True, "2", None):
+            self.assertTrue(lim.problems({"max_gpu_hours": bad}), bad)
+        self.assertEqual(lim.problems({"max_gpu_hours": 2.5}), [])
+
     def test_batch_config_validates_limits(self):
         base = {"backend": "slurm", "campaign_dir": "c", "resources": {"time_limit": "00:10:00"}, "slurm": {"partition": "p"}}
         self.assertEqual(bc.validate(dict(base, limits={"max_total_jobs": 10, "max_core_hours": 2.5, "max_resets_per_chunk": 0})), [])
