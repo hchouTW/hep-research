@@ -30,7 +30,7 @@
   },
   "physics-ml": {
    "references": 38,
-   "bytes": 230615,
+   "bytes": 230630,
    "uncited": 0
   },
   "research-communication": {
@@ -2019,7 +2019,7 @@
     "skills/physics-ml/references/ml-analysis.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "1497349 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/generative-models.md",
@@ -2035,7 +2035,7 @@
     "skills/physics-ml/references/optimization-and-training-dynamics.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "1497349 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/geometric-and-equivariant-learning.md",
@@ -2100,7 +2100,7 @@
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "03929e2 2026-10-11"
+   "last_commit": "1497349 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/monitoring-and-lifecycle.md",
@@ -2135,7 +2135,7 @@
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "1497349 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/optimization-and-training-dynamics.md",
@@ -2167,7 +2167,7 @@
   {
    "path": "skills/physics-ml/references/particle-and-jet-architectures.md",
    "owner": "physics-ml",
-   "bytes": 7605,
+   "bytes": 7620,
    "lines": 126,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -2175,7 +2175,7 @@
     "skills/physics-ml/references/ml-analysis.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "1497349 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/performance-memory.md",
@@ -2237,7 +2237,7 @@
     "skills/physics-ml/references/ml-analysis.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "1497349 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/scientific-machine-learning.md",
@@ -2302,7 +2302,7 @@
     "skills/physics-ml/references/ml-analysis.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "1497349 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/tensor-shapes.md",

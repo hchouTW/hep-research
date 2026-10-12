@@ -184,25 +184,25 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `evaluation-metrics.md` | physics-ml | 1.7 | no | 6 | - | 351029c 2026-10-07 |
 | `evaluation-strategy.md` | physics-ml | 6.3 | no | 9 | research-communication | 351029c 2026-10-07 |
 | `export-and-deployment.md` | physics-ml | 6.8 | no | 4 | - | 351029c 2026-10-07 |
-| `fast-simulation-validation.md` | physics-ml | 6.0 | yes | 3 | - | untracked |
-| `generative-models.md` | physics-ml | 7.7 | yes | 5 | - | 351029c 2026-10-07 |
+| `fast-simulation-validation.md` | physics-ml | 6.0 | yes | 3 | - | 1497349 2026-10-13 |
+| `generative-models.md` | physics-ml | 7.7 | yes | 5 | - | 1497349 2026-10-13 |
 | `geometric-and-equivariant-learning.md` | physics-ml | 4.7 | no | 4 | - | 351029c 2026-10-07 |
 | `interpretability-and-explainability.md` | physics-ml | 6.5 | no | 3 | - | 351029c 2026-10-07 |
 | `mixed-precision.md` | physics-ml | 0.6 | no | 2 | - | 351029c 2026-10-07 |
-| `ml-analysis.md` | physics-ml | 21.6 | yes | 9 | detector-response, hep-analysis | 03929e2 2026-10-11 |
+| `ml-analysis.md` | physics-ml | 21.6 | yes | 9 | detector-response, hep-analysis | 1497349 2026-10-13 |
 | `monitoring-and-lifecycle.md` | physics-ml | 5.6 | no | 3 | - | 351029c 2026-10-07 |
-| `multivariate-analysis-bdt-nn.md` | physics-ml | 16.4 | yes | 7 | detector-response, hep-analysis | 351029c 2026-10-07 |
+| `multivariate-analysis-bdt-nn.md` | physics-ml | 16.4 | yes | 7 | detector-response, hep-analysis | 1497349 2026-10-13 |
 | `optimization-and-training-dynamics.md` | physics-ml | 8.7 | no | 2 | - | 351029c 2026-10-07 |
 | `parallelism-strategy.md` | physics-ml | 6.5 | no | 3 | - | 351029c 2026-10-07 |
-| `particle-and-jet-architectures.md` | physics-ml | 7.6 | yes | 2 | - | untracked |
+| `particle-and-jet-architectures.md` | physics-ml | 7.6 | yes | 2 | - | 1497349 2026-10-13 |
 | `performance-memory.md` | physics-ml | 1.9 | no | 5 | - | 351029c 2026-10-07 |
 | `reproducibility.md` | physics-ml | 6.3 | no | 3 | - | 03929e2 2026-10-11 |
 | `robustness-and-distribution-shift.md` | physics-ml | 4.3 | yes | 8 | - | 351029c 2026-10-07 |
-| `sbi-training.md` | physics-ml | 4.3 | yes | 2 | - | untracked |
+| `sbi-training.md` | physics-ml | 4.3 | yes | 2 | - | 1497349 2026-10-13 |
 | `scientific-machine-learning.md` | physics-ml | 6.1 | yes | 8 | hep-statistics, hep-theory | 351029c 2026-10-07 |
 | `sequence-models.md` | physics-ml | 5.4 | no | 4 | - | 351029c 2026-10-07 |
 | `serving-architecture.md` | physics-ml | 4.2 | no | 4 | - | 351029c 2026-10-07 |
-| `space-and-astroparticle-ml.md` | physics-ml | 8.6 | yes | 2 | - | untracked |
+| `space-and-astroparticle-ml.md` | physics-ml | 8.6 | yes | 2 | - | 1497349 2026-10-13 |
 | `tensor-shapes.md` | physics-ml | 1.9 | no | 1 | - | 351029c 2026-10-07 |
 | `training-at-scale.md` | physics-ml | 6.8 | no | 4 | - | 351029c 2026-10-07 |
 | `training-loop.md` | physics-ml | 1.1 | no | 5 | - | 351029c 2026-10-07 |
