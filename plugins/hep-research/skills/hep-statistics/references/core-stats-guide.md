@@ -351,7 +351,7 @@ Scripts are in `<plugin root>/skills/hep-statistics/scripts/` unless an adapter 
 | `ratio_estimation.py` (EXPERIMENTAL) | classifier likelihood ratio on a calibratable Gaussian model | exact ratio; domain shift and wrong nuisance rejected with stated power (`test_ratio_estimation.py`) |
 | `adapters/pyhf-combine/assets/backend_comparison.py` | the same likelihood in core and pyhf: pointwise and profiled | 1e-15 / 1e-11; wrong interpolation code caught (`test_backend_likelihood_equivalence.py`) |
 | `adapters/pyhf-combine/assets/model_card.py` | SR/CR fits from a model card: shared auxiliary measurements, contamination | closed form; omitted contamination biases by the analytic amount (`test_sr_cr_model_card.py`) |
-| `examples/stats-benchmarks/published-likelihood-sbottom/` | a published likelihood (ATLAS-SUSY-2018-31, HEPData ins1748602) against preregistered paper values | full CLs scans and bands; a fit without the control region fails |
+| `examples/stats-benchmarks/published-likelihood-sbottom/` | a public full likelihood (HEPData ins1748602) against preregistered paper values | full CLs scans and bands; a fit without the control region fails |
 
 Contract side: `contracts/validate.py --strict` and `--gate publication`, `contracts/migrate_statistical_result.py`, and
 `tools/run_required_backends.py` (a required backend missing fails, never skips).

@@ -82,6 +82,47 @@ class CoverageGrid(unittest.TestCase):
         self.assertEqual(close(res, self.committed), [])
 
 
+class DiscreteProfile(unittest.TestCase):
+    """T27 (EXPERIMENTAL): the committed discrete-profiling study (skills/hep-statistics/scripts/discrete_profile.py):
+    four true backgrounds (three in the candidate family, one outside), mu = 0 and 1, the envelope rebuilt in every
+    toy, a single fixed form as the baseline; criteria fixed in the script before the study."""
+
+    @classmethod
+    def setUpClass(cls):
+        import sys as _s
+        _s.path.insert(0, str(PLUGIN / "skills" / "hep-statistics" / "scripts"))
+        import discrete_profile
+        cls.dp = discrete_profile
+        cls.res = json.loads((BENCH / "discrete-profile" / "output" / "results.json").read_text())
+
+    def test_study_design_and_criteria(self):
+        r = self.res
+        self.assertEqual(r["criteria"], self.dp.CRITERIA)
+        truths = {row["truth"] for row in r["rows"]}
+        self.assertEqual(truths, set(self.dp.TRUTHS))
+        self.assertIn("outside_family", truths)
+        self.assertEqual({row["mu_true"] for row in r["rows"]}, {0.0, 1.0})
+        varied = False
+        for row in r["rows"]:
+            self.assertEqual(row["toys"], 300)
+            self.assertEqual(sum(row["forms_chosen"].values()) + row["failed"], 300)
+            varied |= row["procedure"] == "envelope" and len(row["forms_chosen"]) > 1
+        self.assertTrue(varied)                                          # the selection is redone per toy
+
+    def test_one_toy_envelope_is_at_least_as_wide_as_one_form(self):
+        import numpy as _np
+        n = _np.random.default_rng(1).poisson(self.dp.TRUTHS["outside_family"]())
+        _, _, lo_e, hi_e = self.dp.interval(n)
+        _, _, lo_1, hi_1 = self.dp.interval(n, ["exp1"])
+        self.assertLessEqual(lo_e, lo_1 + 1e-3)
+        self.assertGreaterEqual(hi_e, hi_1 - 1e-3)
+
+    @unittest.skipUnless(SLOW, "slow (about an hour, the 300-toy study): set HEP_SLOW_TESTS=1")
+    def test_study_reproduces(self):
+        new = self.dp.study(300, self.res["seed"])
+        self.assertEqual(close(new["rows"], self.res["rows"]), [])
+
+
 class PublishedLikelihood(unittest.TestCase):
     """T17: the committed reproduction of ATLAS-SUSY-2018-31 SRB (OBSERVED public likelihood). The asymptotic
     construction was preregistered as primary and reproduces every value; the toy construction is reported with its

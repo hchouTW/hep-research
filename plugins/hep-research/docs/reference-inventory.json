@@ -20,7 +20,7 @@
   },
   "hep-statistics": {
    "references": 9,
-   "bytes": 116984,
+   "bytes": 117038,
    "uncited": 0
   },
   "hep-theory": {
@@ -1447,7 +1447,7 @@
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 36091,
+   "bytes": 36073,
    "lines": 393,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -1460,7 +1460,7 @@
     "tests/skills/hep_statistics/test_core_stats_guide.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "bb0774f 2026-10-12"
+   "last_commit": "06b86c8 2026-10-12"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
@@ -1481,7 +1481,7 @@
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "364918e 2026-10-09"
+   "last_commit": "06b86c8 2026-10-12"
   },
   {
    "path": "skills/hep-statistics/references/likelihood-fitting.md",
@@ -1503,7 +1503,7 @@
     "hep-analysis",
     "hep-computing"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "06b86c8 2026-10-12"
   },
   {
    "path": "skills/hep-statistics/references/ml-assisted-inference.md",
@@ -1519,7 +1519,7 @@
    "cited_by_other_skills": [
     "physics-ml"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "06b86c8 2026-10-12"
   },
   {
    "path": "skills/hep-statistics/references/nuisance-modeling.md",
@@ -1538,7 +1538,7 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "b0f03ac 2026-10-08"
+   "last_commit": "06b86c8 2026-10-12"
   },
   {
    "path": "skills/hep-statistics/references/statistical-inference-for-physics.md",
@@ -1566,8 +1566,8 @@
   {
    "path": "skills/hep-statistics/references/statistical-tools.md",
    "owner": "hep-statistics",
-   "bytes": 9283,
-   "lines": 90,
+   "bytes": 9355,
+   "lines": 95,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-analysis/references/hep-analysis-guide.md",
@@ -1580,7 +1580,7 @@
     "hep-analysis",
     "physics-ml"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "06b86c8 2026-10-12"
   },
   {
    "path": "skills/hep-statistics/references/unfolding.md",
@@ -1616,7 +1616,7 @@
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "06b86c8 2026-10-12"
   },
   {
    "path": "skills/hep-theory/references/cosmic-ray-propagation.md",
