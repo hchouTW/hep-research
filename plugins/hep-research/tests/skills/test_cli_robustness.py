@@ -65,6 +65,7 @@ MISSING_FILE_ARGS = {
     "skills/physics-ml/scripts/inspect_checkpoint.py": [M],
     "skills/research-communication/scripts/audit_claims.py": [M, "--project-root", "/tmp"],
     "skills/research-communication/scripts/build_lit_matrix.py": [M],
+    "skills/research-communication/scripts/check_adaptation.py": [M, "--project-root", "/tmp", "--responses"],
     "skills/research-communication/scripts/check_communication.py": [M, "--project-root", "/tmp"],
     "skills/research-communication/scripts/check_diagram_sources.py": [M],
     "skills/research-communication/scripts/check_manuscript.py": [M],

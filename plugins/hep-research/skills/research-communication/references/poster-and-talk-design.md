@@ -1,5 +1,8 @@
 # Poster and talk design
 
+> Talk outlines and poster content derived from a communication record use the skeletons in
+> `../assets/paper/audience-adaptation-templates.md` with a companion manifest checked by `check_adaptation.py`.
+
 Use when converting a paper's content into a conference poster or an oral
 presentation's slide deck. This is downstream of the paper, not a
 replacement for it — use `figures-and-tables.md` for the publication-quality

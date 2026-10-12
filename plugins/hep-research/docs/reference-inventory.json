@@ -35,7 +35,7 @@
   },
   "research-communication": {
    "references": 53,
-   "bytes": 374476,
+   "bytes": 375262,
    "uncited": 0
   }
  },
@@ -2699,7 +2699,7 @@
     "skills/research-communication/references/academic-papers-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9546574 2026-10-08"
+   "last_commit": "d47080b 2026-10-12"
   },
   {
    "path": "skills/research-communication/references/literature-review.md",
@@ -2778,8 +2778,8 @@
   {
    "path": "skills/research-communication/references/outreach-and-public-facing-summaries.md",
    "owner": "research-communication",
-   "bytes": 4734,
-   "lines": 87,
+   "bytes": 5081,
+   "lines": 91,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -2854,8 +2854,8 @@
   {
    "path": "skills/research-communication/references/poster-and-talk-design.md",
    "owner": "research-communication",
-   "bytes": 3026,
-   "lines": 55,
+   "bytes": 3232,
+   "lines": 58,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md"
@@ -3032,8 +3032,8 @@
   {
    "path": "skills/research-communication/references/submission-and-peer-review.md",
    "owner": "research-communication",
-   "bytes": 13227,
-   "lines": 228,
+   "bytes": 13460,
+   "lines": 231,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",

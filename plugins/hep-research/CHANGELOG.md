@@ -96,6 +96,18 @@ Software checks establish contract consistency only, not physical validity.
   is a recheck flag, never an error; an inaccessible full text is an access limitation. Citation keys are preserved and
   collisions reported. The input is never edited; no lookup is performed, and the record says online verification was
   not performed. Quoted instructions inside a source's notes are data.
+- **Audience adaptation and evidence-backed reviewer responses (T8).** `check_adaptation.py RECORD --project-root
+  ROOT --manifest M --draft D` checks a derived draft (paragraph, abstract, talk outline, poster, public summary;
+  skeletons in `assets/paper/audience-adaptation-templates.md`) against its companion manifest
+  (`assets/paper/adaptation-manifest-template.json`: brief with audience, format, budget, central claim, record digest
+  and indispensable limitations; one statement per quantitative statement or conclusion with its claim ids; omissions;
+  unresolved inputs; semantic review): a statement missing from the draft or without a claim id, a number that matches
+  no recorded value, a dropped status label, a dropped indispensable limitation, or a universal wording whose claim
+  scope is narrower is an error; a stale record digest or a missing semantic review is unresolved (keyword overlap is
+  not a semantic check). `--responses` builds the reviewer action table (comment, claims, revision items and states,
+  locators, completion evidence) and generates response wording from the recorded state: past tense only for a
+  verified change with evidence, pending work explicit, a reasoned decline valid with its reason; a draft that asserts
+  uncompleted work is an error.
 - **T17 toy construction diagnosed.** The published-likelihood benchmark (ATLAS-SUSY-2018-31 SRB) adds a post-hoc
   diagnosis, labelled as such: the exact counting CLs limit of the one-bin SRB (n = 3, b = 3.23) is 5.284, inside the
   toy limit's MC range; pyhf's toys match exact Poisson sums on the bare one-bin model; the asymptotic formulae give

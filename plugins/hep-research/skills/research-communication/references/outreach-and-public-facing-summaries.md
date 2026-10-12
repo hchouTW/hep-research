@@ -1,5 +1,9 @@
 # Outreach and Public-Facing Summaries
 
+> A public summary derived from a communication record keeps its claim ids in a companion manifest and is
+> checked with `check_adaptation.py` (`../assets/paper/audience-adaptation-templates.md`): numbers, status labels, the
+> tested regime and the indispensable limitations survive the compression; the semantic review is recorded, not assumed.
+
 A different document from the paper itself: a plain-language summary for a
 collaboration or institution website, aimed at a general audience rather than
 referees. Read the relevant subsection rather than the whole file.

@@ -167,6 +167,9 @@ referee's report:
    substantial, so the editor doesn't have to reconstruct it from the
    point-by-point list.
 
+`check_adaptation.py RECORD --project-root ROOT --responses` builds the action table (comment, claims, revision items
+and their states, locators, completion evidence) and generates the wording from that state; edit tone, not facts.
+
 Write each assertion from the state of the change in the revision ledger
 (`revision-impact-tracking.md`): "We have changed/added/revised ..." only for a
 change completed and checked in the revised manuscript, with its locator; a rerun,
