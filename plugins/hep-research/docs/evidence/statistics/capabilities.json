@@ -105,13 +105,13 @@
   },
   {
    "id": "combine-equivalence",
-   "capability": "Combine against pyhf and core",
-   "status": "unvalidated",
+   "capability": "Combine 11.1.0 (cms-combine, ROOT 6.36.14) on the synthetic counting datacard against pyhf limits",
+   "status": "supported",
    "gate": "release",
    "tests": [
     "tests/adapters/test_combine_datacard_template.py"
    ],
-   "scope": "Combine not installed in E2; one synthetic card ran in E1; release gate only, pull requests do not guarantee it"
+   "scope": "one synthetic counting card, AsymptoticLimits within 2% of pyhf; run in the statistics-validation release gate (GitHub, 2026-10-12), not in pull requests; no NLL-level comparison with core"
   },
   {
    "id": "published-likelihood",
@@ -201,7 +201,7 @@
    "tests": [
     "tests/examples/test_stats_benchmarks.py"
    ],
-   "scope": "one synthetic spectrum, four truths; bias criterion met; coverage not established at 300 toys per point (insufficient precision)"
+   "scope": "one synthetic spectrum, four truths (one outside the family); bias and coverage criteria met for every truth at 1,500 toys per point (coverage was insufficient-precision at 300)"
   },
   {
    "id": "global-significance",

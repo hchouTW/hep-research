@@ -117,6 +117,18 @@ class DiscreteProfile(unittest.TestCase):
         self.assertLessEqual(lo_e, lo_1 + 1e-3)
         self.assertGreaterEqual(hi_e, hi_1 - 1e-3)
 
+    def test_envelope_coverage_established_at_1500_toys(self):
+        # preregistered follow-up (1,500 toys per envelope row, seed 20261013, criteria unchanged): the 300-toy study
+        # could not decide coverage; with 1,500 every envelope row passes bias and coverage
+        r = json.loads((BENCH / "discrete-profile" / "output" / "results-envelope-1500.json").read_text())
+        self.assertEqual(r["criteria"], self.dp.CRITERIA)
+        self.assertEqual(r["procedures"], ["envelope"])
+        self.assertEqual(len(r["rows"]), 8)
+        for row in r["rows"]:
+            self.assertEqual(row["toys"], 1500)
+            self.assertTrue(row["bias_ok"], row)
+            self.assertEqual(row["coverage_verdict"], "pass", row)
+
     @unittest.skipUnless(SLOW, "slow (about an hour, the 300-toy study): set HEP_SLOW_TESTS=1")
     def test_study_reproduces(self):
         new = self.dp.study(300, self.res["seed"])

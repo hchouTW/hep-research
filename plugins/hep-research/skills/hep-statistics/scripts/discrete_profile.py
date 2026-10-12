@@ -141,37 +141,57 @@ def classify(rows) -> None:
         r["pass"] = r["bias_ok"] and r["coverage_verdict"] == "pass"
 
 
-def study(toys: int, seed: int, mus=(0.0, 1.0), progress: Path | None = None) -> dict:
+PROCEDURES = {"envelope": None, "single_exp1": ["exp1"]}
+
+
+def _row(args) -> dict:
+    """One (truth, injected mu, procedure) row; its seeds depend only on (seed, truth index, mu, procedure), so rows
+    can run in any order or in parallel and reproduce the sequential study."""
+    t_idx, t_name, mu_true, label, toys, seed = args
     from core_tail import clopper_pearson
+    bkg, forms = TRUTHS[t_name](), PROCEDURES[label]
+    rng = np.random.default_rng([seed, t_idx, int(10 * mu_true), 0 if label == "envelope" else 1])
+    est, cov, chosen, failed = [], 0, {}, 0
+    for _ in range(toys):
+        n = rng.poisson(mu_true * SIG + bkg)
+        try:
+            m0, f0, lo, hi = interval(n, forms)
+        except IntervalFailure:
+            failed += 1          # counted as not covering (policy count-as-noncovering)
+            continue
+        est.append(m0)
+        cov += lo <= mu_true <= hi
+        chosen[f0] = chosen.get(f0, 0) + 1
+    e = np.array(est)
+    return {"truth": t_name, "mu_true": mu_true, "procedure": label, "toys": toys, "failed": failed,
+            "failure_policy": "count-as-noncovering",
+            "mean_mu_hat": float(e.mean()), "spread": float(e.std(ddof=1)),
+            "bias_over_spread": float((e.mean() - mu_true) / e.std(ddof=1)),
+            "coverage_68": cov / toys, "coverage_interval_95": list(clopper_pearson(cov, toys, 0.95)),
+            "forms_chosen": chosen}
+
+
+def study(toys: int, seed: int, mus=(0.0, 1.0), progress: Path | None = None,
+          procedures=("envelope", "single_exp1"), workers: int = 1) -> dict:
+    jobs = [(t_idx, t_name, mu_true, label, toys, seed) for t_idx, t_name in enumerate(TRUTHS)
+            for mu_true in mus for label in procedures]
     rows = []
-    for t_idx, (t_name, t_fn) in enumerate(TRUTHS.items()):
-        bkg = t_fn()
-        for mu_true in mus:
-            for label, forms in (("envelope", None), ("single_exp1", ["exp1"])):
-                rng = np.random.default_rng([seed, t_idx, int(10 * mu_true), 0 if label == "envelope" else 1])
-                est, cov, chosen, failed = [], 0, {}, 0
-                for _ in range(toys):
-                    n = rng.poisson(mu_true * SIG + bkg)
-                    try:
-                        m0, f0, lo, hi = interval(n, forms)
-                    except IntervalFailure:
-                        failed += 1          # counted as not covering (policy count-as-noncovering)
-                        continue
-                    est.append(m0)
-                    cov += lo <= mu_true <= hi
-                    chosen[f0] = chosen.get(f0, 0) + 1
-                est = np.array(est)
-                rows.append({"truth": t_name, "mu_true": mu_true, "procedure": label, "toys": toys, "failed": failed,
-                             "failure_policy": "count-as-noncovering",
-                             "mean_mu_hat": float(est.mean()), "spread": float(est.std(ddof=1)),
-                             "bias_over_spread": float((est.mean() - mu_true) / est.std(ddof=1)),
-                             "coverage_68": cov / toys, "coverage_interval_95": list(clopper_pearson(cov, toys, 0.95)),
-                             "forms_chosen": chosen})
+    if workers > 1:
+        from multiprocessing import get_context
+        with get_context("spawn").Pool(workers) as pool:
+            for r in pool.imap(_row, jobs):
+                rows.append(r)
                 if progress is not None:
                     progress.write_text(json.dumps(rows, indent=1) + "\n")
+    else:
+        for job in jobs:
+            rows.append(_row(job))
+            if progress is not None:
+                progress.write_text(json.dumps(rows, indent=1) + "\n")
     classify(rows)
     return {"label": LABEL, "criteria": CRITERIA, "candidates": {k: len(v[1]) for k, v in CANDIDATES.items()},
-            "penalty_per_parameter_m2lnl": PENALTY_PER_PARAMETER, "signal_total": S_TOTAL, "seed": seed, "rows": rows}
+            "penalty_per_parameter_m2lnl": PENALTY_PER_PARAMETER, "signal_total": S_TOTAL, "seed": seed,
+            "procedures": list(procedures), "rows": rows}
 
 
 def main(argv=None) -> int:
@@ -181,11 +201,18 @@ def main(argv=None) -> int:
     s.add_argument("--toys", type=int, default=200)
     s.add_argument("--seed", type=int, default=1)
     s.add_argument("--out")
+    s.add_argument("--procedures", default="envelope,single_exp1")
+    s.add_argument("--workers", type=int, default=1)
     a = ap.parse_args(argv)
     if a.toys < 10:
         print(json.dumps({"status": "rejected", "error": "--toys must be at least 10"}))
         return 2
-    out = study(a.toys, a.seed, progress=Path(a.out).with_suffix(".partial.json") if a.out else None)
+    procs = tuple(x for x in a.procedures.split(",") if x)
+    if not set(procs) <= set(PROCEDURES):
+        print(json.dumps({"status": "rejected", "error": f"--procedures must name {sorted(PROCEDURES)}"}))
+        return 2
+    out = study(a.toys, a.seed, progress=Path(a.out).with_suffix(".partial.json") if a.out else None,
+                procedures=procs, workers=a.workers)
     text = json.dumps(out, indent=1)
     if a.out:
         Path(a.out).write_text(text + "\n")

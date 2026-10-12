@@ -1,0 +1,239 @@
+{
+ "label": "[General method] EXPERIMENTAL SYNTHETIC",
+ "criteria": {
+  "max_abs_bias_over_spread": 0.2,
+  "coverage_nominal": 0.6827,
+  "max_coverage_deficit": 0.05,
+  "bound_cl": 0.95
+ },
+ "candidates": {
+  "exp1": 2,
+  "pow1": 2,
+  "exp2": 4,
+  "bern3": 4
+ },
+ "penalty_per_parameter_m2lnl": 1.0,
+ "signal_total": 30.0,
+ "seed": 20261013,
+ "procedures": [
+  "envelope"
+ ],
+ "rows": [
+  {
+   "truth": "exp1",
+   "mu_true": 0.0,
+   "procedure": "envelope",
+   "toys": 1500,
+   "failed": 0,
+   "failure_policy": "count-as-noncovering",
+   "mean_mu_hat": 0.01465276394776259,
+   "spread": 0.37278121382325063,
+   "bias_over_spread": 0.03930660506596775,
+   "coverage_68": 0.6726666666666666,
+   "coverage_interval_95": [
+    0.6482663528539656,
+    0.6963889827632332
+   ],
+   "forms_chosen": {
+    "exp1": 747,
+    "bern3": 405,
+    "exp2": 99,
+    "pow1": 249
+   },
+   "coverage_lower_bound": 0.6415826111320071,
+   "coverage_upper_bound": 0.7027023607324221,
+   "bias_ok": true,
+   "coverage_verdict": "pass",
+   "pass": true
+  },
+  {
+   "truth": "exp1",
+   "mu_true": 1.0,
+   "procedure": "envelope",
+   "toys": 1500,
+   "failed": 0,
+   "failure_policy": "count-as-noncovering",
+   "mean_mu_hat": 1.0201941341793348,
+   "spread": 0.4157424785998124,
+   "bias_over_spread": 0.04857366090505603,
+   "coverage_68": 0.6786666666666666,
+   "coverage_interval_95": [
+    0.6543682892317366,
+    0.7022634258002374
+   ],
+   "forms_chosen": {
+    "exp1": 762,
+    "pow1": 215,
+    "exp2": 119,
+    "bern3": 404
+   },
+   "coverage_lower_bound": 0.6477091998064242,
+   "coverage_upper_bound": 0.7085392663695822,
+   "bias_ok": true,
+   "coverage_verdict": "pass",
+   "pass": true
+  },
+  {
+   "truth": "pow1",
+   "mu_true": 0.0,
+   "procedure": "envelope",
+   "toys": 1500,
+   "failed": 4,
+   "failure_policy": "count-as-noncovering",
+   "mean_mu_hat": -0.02985297172152825,
+   "spread": 0.32773469373104136,
+   "bias_over_spread": -0.09108883585583215,
+   "coverage_68": 0.6873333333333334,
+   "coverage_interval_95": [
+    0.6631900898395029,
+    0.7107408270945736
+   ],
+   "forms_chosen": {
+    "bern3": 285,
+    "exp2": 337,
+    "pow1": 593,
+    "exp1": 281
+   },
+   "coverage_lower_bound": 0.6565687664558277,
+   "coverage_upper_bound": 0.7169602865937967,
+   "bias_ok": true,
+   "coverage_verdict": "pass",
+   "pass": true
+  },
+  {
+   "truth": "pow1",
+   "mu_true": 1.0,
+   "procedure": "envelope",
+   "toys": 1500,
+   "failed": 4,
+   "failure_policy": "count-as-noncovering",
+   "mean_mu_hat": 0.9770831460267252,
+   "spread": 0.3901882020691173,
+   "bias_over_spread": -0.05873282137119911,
+   "coverage_68": 0.694,
+   "coverage_interval_95": [
+    0.669982552723771,
+    0.7172554315628523
+   ],
+   "forms_chosen": {
+    "pow1": 602,
+    "bern3": 274,
+    "exp2": 355,
+    "exp1": 265
+   },
+   "coverage_lower_bound": 0.6633920463859961,
+   "coverage_upper_bound": 0.7234297519983282,
+   "bias_ok": true,
+   "coverage_verdict": "pass",
+   "pass": true
+  },
+  {
+   "truth": "bern3",
+   "mu_true": 0.0,
+   "procedure": "envelope",
+   "toys": 1500,
+   "failed": 3,
+   "failure_policy": "count-as-noncovering",
+   "mean_mu_hat": 0.032250158269797935,
+   "spread": 0.43602558631409305,
+   "bias_over_spread": 0.07396391239886181,
+   "coverage_68": 0.6653333333333333,
+   "coverage_interval_95": [
+    0.6408143956767571,
+    0.6892031337012812
+   ],
+   "forms_chosen": {
+    "bern3": 763,
+    "exp1": 651,
+    "pow1": 50,
+    "exp2": 33
+   },
+   "coverage_lower_bound": 0.634102153780504,
+   "coverage_upper_bound": 0.6955607580003507,
+   "bias_ok": true,
+   "coverage_verdict": "pass",
+   "pass": true
+  },
+  {
+   "truth": "bern3",
+   "mu_true": 1.0,
+   "procedure": "envelope",
+   "toys": 1500,
+   "failed": 0,
+   "failure_policy": "count-as-noncovering",
+   "mean_mu_hat": 1.0280556611995026,
+   "spread": 0.473886973583424,
+   "bias_over_spread": 0.059203275809318424,
+   "coverage_68": 0.6846666666666666,
+   "coverage_interval_95": [
+    0.660474686269167,
+    0.7081334009857367
+   ],
+   "forms_chosen": {
+    "exp1": 604,
+    "bern3": 823,
+    "exp2": 35,
+    "pow1": 38
+   },
+   "coverage_lower_bound": 0.6538414683262721,
+   "coverage_upper_bound": 0.7143704831652784,
+   "bias_ok": true,
+   "coverage_verdict": "pass",
+   "pass": true
+  },
+  {
+   "truth": "outside_family",
+   "mu_true": 0.0,
+   "procedure": "envelope",
+   "toys": 1500,
+   "failed": 0,
+   "failure_policy": "count-as-noncovering",
+   "mean_mu_hat": 0.030821767666337256,
+   "spread": 0.41860369525837493,
+   "bias_over_spread": 0.0736299464516507,
+   "coverage_68": 0.6666666666666666,
+   "coverage_interval_95": [
+    0.6421688134328767,
+    0.6905101359834493
+   ],
+   "forms_chosen": {
+    "bern3": 873,
+    "exp1": 552,
+    "pow1": 47,
+    "exp2": 28
+   },
+   "coverage_lower_bound": 0.6354616212176825,
+   "coverage_upper_bound": 0.6968598478454482,
+   "bias_ok": true,
+   "coverage_verdict": "pass",
+   "pass": true
+  },
+  {
+   "truth": "outside_family",
+   "mu_true": 1.0,
+   "procedure": "envelope",
+   "toys": 1500,
+   "failed": 0,
+   "failure_policy": "count-as-noncovering",
+   "mean_mu_hat": 1.039821078258664,
+   "spread": 0.45372219747226006,
+   "bias_over_spread": 0.08776532971168709,
+   "coverage_68": 0.6893333333333334,
+   "coverage_interval_95": [
+    0.6652272331794895,
+    0.7126958050026353
+   ],
+   "forms_chosen": {
+    "bern3": 872,
+    "exp1": 551,
+    "exp2": 38,
+    "pow1": 39
+   },
+   "coverage_lower_bound": 0.6586149921489941,
+   "coverage_upper_bound": 0.7189018858044143,
+   "bias_ok": true,
+   "coverage_verdict": "pass",
+   "pass": true
+  }
+ ]
+}
