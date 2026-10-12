@@ -125,14 +125,37 @@ class SlurmShimTests(unittest.TestCase):
         self.assertEqual(state["chunks"]["c0001"]["attempt_records"][0]["alloc_cpus"], 1)
         self.assertEqual(lim.usage(state)["alloc_cpu_factor"], 2.0)
 
-    def test_poll_parses_real_sacct_alloc_cpus(self):
-        """sacct output recorded on NSTCCore (Slurm 24.05.1, 2026-10-11): a 1-CPU V100 job allocated 2 CPUs."""
-        out = ("7050788_0|COMPLETED|0:0|00:00:04||hp-teslav06|2\n"
-               "7050788_0.batch|COMPLETED|0:0|00:00:04|68K|hp-teslav06|2\n")
+    def test_allocated_gpus_are_recorded(self):
+        self.h.plan()
+        self.h.set_faults({"c0000": [{"alloc_gpus": 1}]})
+        self.h.cli("submit", "--submit")
+        self.h.cli("status")
+        recs = {c: r["attempt_records"][0] for c, r in self.h.state()["chunks"].items()}
+        self.assertEqual((recs["c0000"]["alloc_gpus"], recs["c0001"]["alloc_gpus"]), (1, 0))
+
+    def _poll_real(self, out, job_id):
         ex = sb.SlurmExecutor({"resources": {"cpus": 1}})
         ex.run_poll = lambda argv, cwd=None: subprocess.CompletedProcess(argv, 0, out, "")
-        obs = ex.poll([{"attempt_id": "a1", "job_id": "7050788_0"}])["a1"]
-        self.assertEqual((obs["state"], obs["alloc_cpus"], obs["elapsed_s"], obs["host"]), ("done", 2, 4.0, "hp-teslav06"))
+        return ex.poll([{"attempt_id": "a1", "job_id": job_id}])["a1"]
+
+    def test_poll_parses_real_sacct_alloc_cpus_and_gpus(self):
+        """sacct output recorded on NSTCCore (Slurm 24.05.1, 2026-10-11): a 1-CPU 1-GPU V100 job allocated 2 CPUs and
+        1 GPU (AllocTRES gres/gpu=1); a CPU job's AllocTRES has no gres/gpu."""
+        obs = self._poll_real("7050788_0|COMPLETED|0:0|00:00:04||hp-teslav06|2|billing=2,cpu=2,gres/gpu=1,mem=8000M,node=1\n"
+                              "7050788_0.batch|COMPLETED|0:0|00:00:04|68K|hp-teslav06|2|cpu=2,gres/gpu=1,mem=8000M,node=1\n",
+                              "7050788_0")
+        self.assertEqual((obs["state"], obs["alloc_cpus"], obs["alloc_gpus"], obs["elapsed_s"], obs["host"]),
+                         ("done", 2, 1, 4.0, "hp-teslav06"))
+        obs = self._poll_real("7050429_0|COMPLETED|0:0|00:00:05||hpa-wn07|1|billing=1,cpu=1,mem=200M,node=1\n"
+                              "7050429_0.batch|COMPLETED|0:0|00:00:05|18760K|hpa-wn07|1|cpu=1,mem=200M,node=1\n",
+                              "7050429_0")
+        self.assertEqual((obs["alloc_cpus"], obs["alloc_gpus"]), (1, 0))
+
+    def test_alloc_tres_pending_and_typed_gpus(self):
+        obs = self._poll_real("7_0|PENDING|0:0|00:00:00||None assigned|0|\n", "7_0")
+        self.assertEqual((obs["state"], obs["alloc_gpus"]), ("queued", None))  # nothing allocated yet: unknown
+        obs = self._poll_real("7_0|RUNNING|0:0|00:00:09||n1|4|billing=4,cpu=4,gres/gpu:v100=2,gres/gpu=2,node=1\n", "7_0")
+        self.assertEqual(obs["alloc_gpus"], 2)  # the typed entry repeats the count; it is not added
 
     def test_accounting_unavailable_falls_back_to_queue_and_runner_records(self):
         self.h.plan()
