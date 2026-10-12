@@ -382,7 +382,7 @@ def validate_response(doc: dict) -> dict:
         if keep:
             report.metrics.update(_rank_and_condition([[m[i][j] for j in keep] for i in range(n_reco)], tol, Report(), n_reco, len(keep)))
     blocked = any(e["code"].startswith(CLOSURE_BLOCKING) for e in report.errors) or norm not in NORMALIZATIONS
-    closure = None if blocked else _closure(doc, m, n_reco, n_truth, norm, tol, report, gen_ok)
+    closure = None if blocked else _closure(doc, m, n_reco, n_truth, str(norm), tol, report, gen_ok)
     if closure is not None:
         report.metrics["closure"] = closure
     return {"status": report.status(), "errors": report.errors, "warnings": report.warnings, "metrics": report.metrics, **result}

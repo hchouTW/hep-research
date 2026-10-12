@@ -108,7 +108,7 @@ def to_validator_input(ext: dict, matrix=None, *, base_dir: Path | None = None, 
     separate = ext.get("applied_separately", [])
     meta: dict[str, Any] = {
         "truth_axis": truth_axis, "reco_axis": reco_axis, "orientation": ext.get("orientation"),
-        "normalization": NORMALIZATION[norm], "inefficiency": ext["inefficiency"], "acceptance": ext["acceptance"],
+        "normalization": NORMALIZATION[str(norm)], "inefficiency": ext["inefficiency"], "acceptance": ext["acceptance"],
         "underflow_overflow": flow,
         "efficiency_applied_separately": any(_is_efficiency(t) for t in separate),
         "acceptance_applied_separately": "acceptance" in [t.split(":", 1)[-1] for t in separate]}
