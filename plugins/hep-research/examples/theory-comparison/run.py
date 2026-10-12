@@ -273,7 +273,7 @@ def artifacts(pred_doc, gate_res, fold_counts, r, counts, obs_fit, toy_res, crea
                                                          "values": (fold_counts * r).tolist(), "correlation": "fully-correlated"}]},
                            "uncertainties": [{"name": "missing higher orders and Z exchange", "kind": "truncation", "correlation": "unknown"}],
                            "allowed_transformations": []})
-    stat = dict(base, artifact_id="synthetic-path-d-mu-fit", artifact_type="statistical-result",
+    stat = dict(base, artifact_id="synthetic-path-d-mu-fit", artifact_type="statistical-result", required_capabilities=["stats:result-semantics"],
                 inputs=[{"ref": "artifacts/comparison_spec.json", "artifact_type": "comparison-spec", "status": ["synthetic"]},
                         {"ref": "artifacts/folded_expectation.json", "artifact_type": "prediction", "status": ["synthetic"]}, data_in],
                 objective="Normalization scale mu of the QED prediction on SYNTHETIC data",
@@ -287,8 +287,8 @@ def artifacts(pred_doc, gate_res, fold_counts, r, counts, obs_fit, toy_res, crea
                                            {"parameter": "kappa", "form": f"uniform[{1 - r:.6f}, {1 + r:.6f}]"}],
                            "test_statistic": "profile likelihood ratio q(mu) = 2 [NLL(mu, profiled) - NLL_min]",
                            "construction": "profile-likelihood-wilks",
-                           "coverage": {"method": "seeded toys from the synthetic generator with a fluctuated luminosity measurement",
-                                        "result": toy_res},
+                           "coverage": {"check": "toys", "method": "seeded toys from the synthetic generator with a fluctuated luminosity measurement",
+                                        "n_toys": min(v["toys"] for v in toy_res.values()), "cl": 0.68, "result": toy_res},
                            "fit_status": "converged",
                            "results": {"mu_hat": obs_fit["mu_hat"], "interval_68": obs_fit["interval_68"], "plateau_from_kappa": obs_fit["plateau"]}})
     docs = {"dataset_record": data, "comparison_spec": comp, "folded_expectation": fold, "result": stat}

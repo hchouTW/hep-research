@@ -1,0 +1,223 @@
+[
+ {
+  "id": "hepstats:C01",
+  "claim": "The Asimov median discovery significance for a counting experiment with known background is sqrt(2((s+b) ln(1+s/b) - s)).",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "hepstats:S01"
+  ],
+  "location": "arXiv:1007.1727v3 eq. (101)",
+  "scope": {
+   "text": "single bin, known b"
+  },
+  "limitations": "known background only",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-12"
+ },
+ {
+  "id": "hepstats:C02",
+  "claim": "q-tilde_mu is -2 ln lambda(mu) for 0 <= mu-hat <= mu with the mu-hat < 0 branch evaluated at mu-hat = 0, and 0 for mu-hat > mu; its asymptotic form is (mu^2 - 2 mu mu-hat)/sigma^2 for mu-hat < 0.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "hepstats:S01"
+  ],
+  "location": "arXiv:1007.1727v3 eqs. (16), (64)",
+  "scope": {
+   "text": "one parameter of interest bounded at 0"
+  },
+  "limitations": "asymptotic regime",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-12"
+ },
+ {
+  "id": "hepstats:C03",
+  "claim": "CLs is a modified frequentist exclusion prescription; it over-covers and is neither an exact-coverage confidence belt nor a Bayesian bound.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "hepstats:S13"
+  ],
+  "location": "PDG Statistics review, sec. 40.4.2 (as read by the original audit)",
+  "scope": {
+   "text": "wording of the hep-statistics references"
+  },
+  "limitations": "carried from the original audit's reading",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-12"
+ },
+ {
+  "id": "hepstats:C04",
+  "claim": "Simulation-based calibration checks a posterior computation through the uniformity of prior ranks over the prior predictive; it is not fixed-parameter frequentist coverage.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "hepstats:S04"
+  ],
+  "location": "abstract",
+  "scope": {
+   "text": "bayes_calibration.py"
+  },
+  "limitations": "abstract-level reading",
+  "verification_strength": "abstract+metadata",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-12"
+ },
+ {
+  "id": "hepstats:C05",
+  "claim": "Power-constrained limits impose a minimum on the reported limit from a stated power threshold.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "hepstats:S02"
+  ],
+  "location": "abstract",
+  "scope": {
+   "text": "pcl_efficiency_ratio.py pcl"
+  },
+  "limitations": "abstract-level reading; the threshold value is an input",
+  "verification_strength": "abstract+metadata",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-12"
+ },
+ {
+  "id": "hepstats:C06",
+  "claim": "The discrete profiling (envelope) method treats the choice of background function as a discrete nuisance with a penalty per parameter.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "hepstats:S03"
+  ],
+  "location": "abstract",
+  "scope": {
+   "text": "discrete_profile.py"
+  },
+  "limitations": "penalty convention not checked against the full text",
+  "verification_strength": "abstract+metadata",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-12"
+ },
+ {
+  "id": "hepstats:C07",
+  "claim": "For sWeighted fits the inverse weighted Hessian is not a valid covariance, and the asymptotically correct covariance includes the uncertainty of the weights.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "hepstats:S05"
+  ],
+  "location": "abstract",
+  "scope": {
+   "text": "sweighted_fit.py"
+  },
+  "limitations": "abstract-level reading in this session",
+  "verification_strength": "abstract+metadata",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-12"
+ },
+ {
+  "id": "hepstats:C08",
+  "claim": "Rank-normalized split R-hat, bulk and tail ESS and quantile MCSE as implemented in bayes_diagnostics.py equal ArviZ 0.23.4 to 1e-9 on six synthetic chain sets.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "hepstats:S07",
+   "hepstats:S10"
+  ],
+  "location": "tests/skills/hep_statistics/test_bayes_arviz_oracle.py",
+  "scope": {
+   "text": "the six chain sets of the test"
+  },
+  "limitations": "constant chains differ deliberately (undefined here, ESS = draws in ArviZ)",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-12"
+ },
+ {
+  "id": "hepstats:C09",
+  "claim": "pyhf 0.7.6 toy-based expected CLs bands fail with NumPy 2.4 or later (numpy.percentile no longer accepts 'interpolation').",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "hepstats:S11"
+  ],
+  "location": "pyhf/infer/calculators.py ToyCalculator.expected_pvalues",
+  "scope": {
+   "text": "pyhf 0.7.6 with NumPy 2.5.3"
+  },
+  "limitations": "observed in E2 on 2026-10-12",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-12"
+ },
+ {
+  "id": "hepstats:C10",
+  "claim": "The SRB model-independent limits of ATLAS-SUSY-2018-31 are S95 obs 4.9 and exp 5.1 (+2.8, -1.7), CLb 0.45, p0 0.50 (truncated); the background-only fitted SM yield in SRB is 3.3.",
+  "claim_types": [
+   "published_result"
+  ],
+  "support_kind": "primary",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "hepstats:S09"
+  ],
+  "location": "Table 7 and Table 6 (HEPData v3)",
+  "scope": {
+   "text": "SRB only"
+  },
+  "limitations": "values rounded as published",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-12"
+ },
+ {
+  "id": "hepstats:C11",
+  "claim": "The Combine datacard template ran with Combine 11.1.0 against pyhf within 2% (one synthetic card); other Combine modes are documented, not executed.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "hepstats:S14"
+  ],
+  "location": "VALIDATION.md COMBINE-RUN",
+  "scope": {
+   "text": "one synthetic counting card"
+  },
+  "limitations": "execution record of E1, 2026-10-02",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-12"
+ }
+]

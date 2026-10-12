@@ -1,0 +1,237 @@
+{
+ "note": "hep-statistics capability ledger (audit 2026-10-12): status is supported (tested with an oracle and a negative baseline, within the stated scope), experimental (a controlled example; not general support) or unvalidated (not run in this environment). gate: pr (tests workflow), scheduled or release (statistics-validation workflow; a pull request does not run it).",
+ "environment": "E2: macOS 26.5 arm64, Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1, pyhf 0.7.6, ArviZ 0.23.4 (isolated venv), ROOT 6.38.04",
+ "capabilities": [
+  {
+   "id": "fit-verdicts",
+   "capability": "Fit verdicts (EDM, Hessian, KKT at the boundary, global-vs-conditional refit) and failed/incomplete status through CLI and artifacts",
+   "status": "supported",
+   "gate": "pr",
+   "tests": [
+    "tests/core/test_stats_p0_regressions.py",
+    "tests/skills/hep_statistics/test_result_artifact.py"
+   ],
+   "scope": "damped Newton fits of shape-limit, shape-gof and contour"
+  },
+  {
+   "id": "toy-tail-bounds",
+   "capability": "Toy p-values as exact intervals and one-sided bounds at zero exceedances; log-space exact tails",
+   "status": "supported",
+   "gate": "pr",
+   "tests": [
+    "tests/core/test_stats_p0_regressions.py"
+   ],
+   "scope": "Clopper-Pearson convention"
+  },
+  {
+   "id": "statistical-result-semantics",
+   "capability": "Contract 2.2.0 statistical-result rules, --strict for older artifacts, publication gate, migration",
+   "status": "supported",
+   "gate": "pr",
+   "tests": [
+    "tests/contracts/test_statistical_semantics.py"
+   ],
+   "scope": "contract-level prerequisites, not scientific validation"
+  },
+  {
+   "id": "asymptotic-calibration-gate",
+   "capability": "Asymptotic p-values checked against toys (99% Clopper-Pearson), inapplicable where they fail",
+   "status": "supported",
+   "gate": "pr",
+   "tests": [
+    "tests/core/test_stats_counting_asymptotic_oracles.py"
+   ],
+   "scope": "single-bin profile significance; multi-bin toy p at the asymptotic limit"
+  },
+  {
+   "id": "exact-counting-oracles",
+   "capability": "Classical, CLs and Feldman-Cousins counting limits against SciPy roots and an independent ordering",
+   "status": "supported",
+   "gate": "pr",
+   "tests": [
+    "tests/core/test_stats_counting_asymptotic_oracles.py"
+   ],
+   "scope": "known background"
+  },
+  {
+   "id": "toy-ensembles-coverage",
+   "capability": "Explicit toy ensembles, partition seeds, outcome accounting, coverage under a failure policy, coverage gate",
+   "status": "supported",
+   "gate": "pr",
+   "tests": [
+    "tests/core/test_stats_toy_ensemble.py"
+   ],
+   "scope": "no automatic retries"
+  },
+  {
+   "id": "toy-cls-ranges",
+   "capability": "Toy CLs with exceedance counts, a Monte Carlo range for the limit and unresolved floored denominators",
+   "status": "supported",
+   "gate": "pr",
+   "tests": [
+    "tests/core/test_stats_toy_ensemble.py"
+   ],
+   "scope": "shape-limit --cls-toys"
+  },
+  {
+   "id": "coverage-grid",
+   "capability": "Coverage grid of counting constructions (exact belts) and the asymptotic profile limit (20,000 toys per point)",
+   "status": "supported",
+   "gate": "scheduled",
+   "tests": [
+    "tests/examples/test_stats_benchmarks.py"
+   ],
+   "scope": "the grid points listed in the benchmark only"
+  },
+  {
+   "id": "sr-cr-model-card",
+   "capability": "SR/CR simultaneous fits from a model card with shared auxiliary measurements and contamination",
+   "status": "supported",
+   "gate": "pr",
+   "tests": [
+    "tests/adapters/test_sr_cr_model_card.py"
+   ],
+   "scope": "pyhf 0.7.6; Gaussian constraints only"
+  },
+  {
+   "id": "core-pyhf-equivalence",
+   "capability": "Same likelihood in core and pyhf: pointwise Delta NLL and profiled q-tilde",
+   "status": "supported",
+   "gate": "pr",
+   "tests": [
+    "tests/adapters/test_backend_likelihood_equivalence.py"
+   ],
+   "scope": "gaussian normalizations, code0/code1/code4/code4p, staterror"
+  },
+  {
+   "id": "combine-equivalence",
+   "capability": "Combine against pyhf and core",
+   "status": "unvalidated",
+   "gate": "release",
+   "tests": [
+    "tests/adapters/test_combine_datacard_template.py"
+   ],
+   "scope": "Combine not installed in E2; one synthetic card ran in E1; release gate only, pull requests do not guarantee it"
+  },
+  {
+   "id": "published-likelihood",
+   "capability": "Published likelihood reproduction (ATLAS-SUSY-2018-31 SRB, HEPData ins1748602): CLs scans, bands, CLb, p0, post-fit yield",
+   "status": "supported",
+   "gate": "scheduled",
+   "tests": [
+    "tests/examples/test_stats_benchmarks.py"
+   ],
+   "scope": "one region of one record; asymptotic construction primary"
+  },
+  {
+   "id": "unfolding-outer-coverage",
+   "capability": "Outer-toy unfolding validation with per-toy regularization choice and covariance; response-toy accounting",
+   "status": "supported",
+   "gate": "pr",
+   "tests": [
+    "tests/core/test_stats_unfolding_outer.py"
+   ],
+   "scope": "linear methods; first-order response and efficiency terms"
+  },
+  {
+   "id": "covariance-fits",
+   "capability": "Fits with declared constraints, C(theta) with ln det and multiplicative normalizations",
+   "status": "supported",
+   "gate": "pr",
+   "tests": [
+    "tests/skills/hep_statistics/test_covariance_fit.py"
+   ],
+   "scope": "data-scaled and C(theta) forms biased for a common normalization (measured); nuisance form recommended"
+  },
+  {
+   "id": "signed-weight-templates",
+   "capability": "Signed weights refused by effective-count Barlow-Beeston; Gaussian MC-statistics term validated with 20% negative weights",
+   "status": "supported",
+   "gate": "pr",
+   "tests": [
+    "tests/core/test_stats_weighted_mc.py"
+   ],
+   "scope": "Gaussian approximation; one synthetic spectrum"
+  },
+  {
+   "id": "sweighted-fits",
+   "capability": "sWeighted fits: naive, SumW2, sandwich, asymptotic and bootstrap uncertainties; independence check",
+   "status": "supported",
+   "gate": "pr",
+   "tests": [
+    "tests/skills/hep_statistics/test_sweighted_fit.py"
+   ],
+   "scope": "two-component model; RooFit SumW2Error difference unexplained"
+  },
+  {
+   "id": "bayes-diagnostics-arviz",
+   "capability": "R-hat, ESS and quantile MCSE equal to ArviZ 0.23.4; unhealthy chains never converged",
+   "status": "supported",
+   "gate": "pr",
+   "tests": [
+    "tests/skills/hep_statistics/test_bayes_arviz_oracle.py"
+   ],
+   "scope": "ArviZ required in the stats-backends CI job"
+  },
+  {
+   "id": "bayes-calibration",
+   "capability": "Posterior quantiles against conjugate posteriors; SBC with stated power; Bayesian contract rules",
+   "status": "supported",
+   "gate": "pr",
+   "tests": [
+    "tests/skills/hep_statistics/test_bayes_calibration.py"
+   ],
+   "scope": "conjugate models; no production sampler"
+  },
+  {
+   "id": "eft-scans",
+   "capability": "Quadratic (EFT-like) scans with disconnected sets and toy belts",
+   "status": "experimental",
+   "gate": "pr",
+   "tests": [
+    "tests/skills/hep_statistics/test_eft_scan.py"
+   ],
+   "scope": "one or two coefficients, Poisson bins, no nuisances; not EFT global fits"
+  },
+  {
+   "id": "discrete-profiling",
+   "capability": "Envelope over background forms fixed in advance, reselected per toy",
+   "status": "experimental",
+   "gate": "scheduled",
+   "tests": [
+    "tests/examples/test_stats_benchmarks.py"
+   ],
+   "scope": "one synthetic spectrum, four truths; bias criterion met; coverage not established at 300 toys per point (insufficient precision)"
+  },
+  {
+   "id": "global-significance",
+   "capability": "Global p of the complete procedure (1D/2D scans, refitted normalization, nested selections)",
+   "status": "experimental",
+   "gate": "pr",
+   "tests": [
+    "tests/skills/hep_statistics/test_global_significance.py"
+   ],
+   "scope": "Gaussian signal templates; Gross-Vitells only as a flagged check"
+  },
+  {
+   "id": "pcl-efficiency-ratio",
+   "capability": "PCL with a power threshold; Clopper-Pearson vs Beta credible; Fieller sets",
+   "status": "experimental",
+   "gate": "pr",
+   "tests": [
+    "tests/skills/hep_statistics/test_pcl_efficiency_ratio.py"
+   ],
+   "scope": "counting PCL with known background; independent Gaussian ratio"
+  },
+  {
+   "id": "ratio-estimation",
+   "capability": "Classifier likelihood ratio on a calibratable Gaussian model with calibration power",
+   "status": "experimental",
+   "gate": "pr",
+   "tests": [
+    "tests/skills/hep_statistics/test_ratio_estimation.py"
+   ],
+   "scope": "one analytic model; not a production SBI tool"
+  }
+ ]
+}

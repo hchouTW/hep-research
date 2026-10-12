@@ -133,7 +133,7 @@ def artifacts(m, fit, exp_eff, created):
     eff = record("synthetic-j2-efficiency", "efficiency", m["eff"], m["eff_err"], "1",
                  "selected / generated in the truth bin; acceptance and selection together",
                  "SYNTHETIC J2: selection efficiency per |cos theta| bin (illustrative detector)", "eff_err")
-    stat = dict(base, artifact_id="synthetic-j2-width-fit", artifact_type="statistical-result",
+    stat = dict(base, artifact_id="synthetic-j2-width-fit", artifact_type="statistical-result", required_capabilities=["stats:result-semantics"],
                 objective="SYNTHETIC J2: constant-width fit of the per-bin resolution",
                 provenance={"producer_skill": "hep-statistics", "created": created},
                 inputs=[{"ref": "artifacts/resolution.json", "artifact_type": "dataset-record", "status": ["synthetic"]}],
@@ -141,7 +141,7 @@ def artifacts(m, fit, exp_eff, created):
                            "likelihood": {"form": "Gaussian per bin with the large-sample width uncertainty (weighted least squares)"},
                            "parameters_of_interest": ["constant cos theta resolution"], "nuisances": [],
                            "test_statistic": "chi2 of the constant model", "construction": "other",
-                           "coverage": {"method": "seeded replicate samples; pull mean and width", "result_ref": "results.json#replicates"},
+                           "coverage": {"check": "not-checked", "method": "seeded replicate samples; pull mean and width (a calibration check, not interval coverage)", "result_ref": "results.json#replicates"},
                            "fit_status": "converged", "results": {"ref": "results.json#width_fit"}})
     docs = {"resolution": width, "efficiency": eff, "width_fit": stat}
     return docs, {k: {"ok": (r := validate_artifact(v, vocab)).ok, "errors": [f.message for f in r.errors]} for k, v in docs.items()}

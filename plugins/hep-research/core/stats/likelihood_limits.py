@@ -63,7 +63,8 @@ linear extrapolation in value, slope and curvature at |theta| = 1, smooth at 0).
 asymmetric factors {"hi": 1.12, "lo": 0.92} (at theta = +1 and -1) instead of "sigma", with "interpolation": "code4"
 (default: polynomial inside |theta| < 1, exponential hi^theta / lo^-theta outside, smooth everywhere), "code1"
 (piecewise exponential, kinked at 0) or "code0" (piecewise linear); such a nuisance has the Gaussian constraint.
-A normalization nuisance may carry "prior": "gaussian" (default, factor 1 + sigma theta), "lognormal"
+A normalization nuisance may carry "constraint" (legacy alias "prior"; in this frequentist model it names the constraint
+term and its auxiliary measurement, not a Bayesian prior): "gaussian" (default, factor 1 + sigma theta), "lognormal"
 (factor exp(sigma theta), theta unit normal) or "gamma" (factor f = 1 + sigma theta with a Poisson
 auxiliary measurement of tau = 1/sigma^2, a gamma prior of mean 1 and relative width sigma). An optional
 "correlation": [[1, rho, ...], ...] (K x K, unit diagonal, positive definite) correlates the Gaussian and
@@ -90,7 +91,9 @@ Usage (from the skill directory):
   python3 core/stats/likelihood_limits.py shape-gof --input shapes.json --toys 500 --seed 1
   python3 core/stats/likelihood_limits.py neyman-limit --n 3 --b 3 --sigma-b 2 --cl 0.95 --beta 0.01 --toys 1000 --seed 1
   python3 core/stats/likelihood_limits.py neyman-coverage --s 2 --b 3 --sigma-b 2 --cl 0.95 --outer 300 --inner 200 --seed 1
-Exit codes: 0 ok; 2 rejected input. Standard library only.
+Exit codes: 0 ok; 1 failed (a fit on the observed or Asimov data did not converge: status "failed", fit_diagnostics
+gives the reasons; its numbers are not results); 2 rejected input; 3 incomplete (only toy fits failed: status
+"incomplete", the toy quantities carry the failed count and a range). Standard library only.
 Importable: profile_limit, profile_significance, multibin_limit, profile_fc, profile_cls, shape_limit, profile_contour,
 shape_gof, neyman_limit, neyman_coverage,
 neyman_coverage_scan.
@@ -115,6 +118,8 @@ from typing import Any
 from core.stats import _validate
 from core.stats._linalg import bisect, cholesky, solve
 from core.stats._poisson import MAX_MEAN, ppf
+from core.stats.fit_diagnostics import DNLL_TOL, INVALID, FitLog, boundary_kkt, newton_fit
+from core.stats.tail_estimation import toy_tail
 
 LABEL = "[General method]"
 NEG = -1e300
@@ -143,19 +148,24 @@ def _ppf(u: float, mu: float) -> int:
 
 
 def _lnl(n: float, mu: float) -> float:
-    if mu <= 0.0:
+    """Poisson log-likelihood without the n! term. A mean of 0 is allowed only with n = 0; a negative or non-finite
+    mean is outside the model (NEG), never read as an empty bin."""
+    if not math.isfinite(mu) or mu < 0.0:
+        return NEG
+    if mu == 0.0:
         return 0.0 if n == 0 else NEG
     return (n * math.log(mu) if n > 0 else 0.0) - mu
 
 
 # ------------------------------------------------------------------- single bin
 def _b_hat(n: float, s: float, b0: float, sig: float) -> float:
-    """Profiled background for Poisson(n | s + b) x Normal(b0 | b, sig)."""
+    """Profiled background for Poisson(n | s + b) x Normal(b0 | b, sig), over b >= 0 and s + b >= 0 (a negative s,
+    possible in a two-POI fit, cannot make the Poisson mean negative)."""
     if sig == 0.0:
         return b0
     a = sig * sig + s - b0
     c = s * (sig * sig - b0) - n * sig * sig
-    return max((-a + math.sqrt(max(a * a - 4.0 * c, 0.0))) / 2.0, 0.0)
+    return max((-a + math.sqrt(max(a * a - 4.0 * c, 0.0))) / 2.0, 0.0, -s)
 
 
 def _ll1(n: float, s: float, b: float, b0: float, sig: float) -> float:
@@ -254,12 +264,15 @@ def profile_significance(n: int, b: float, sigma_b: float, toys: int, seed: int)
         hits += q >= q_obs - 1e-12
         zero += q == 0.0
     z = math.sqrt(q_obs)
+    tail = toy_tail(hits, toys)
     out = {"label": LABEL, "method": "profile-likelihood q0 with a Gaussian-constrained background, seeded toys",
            "n_obs": n, "b": b, "sigma_b": sig, "toys": toys, "seed": seed, "q0_observed": q_obs,
-           "p_value_toys": hits / toys, "binomial_error_on_p_toys": math.sqrt(max(hits / toys * (1 - hits / toys), 0) / toys),
+           "p_value_toys": tail["estimate"], "binomial_error_on_p_toys": tail["binomial_error"], "toy_tail": tail,
            "p_value_half_chi2_asymptotic": 0.5 * math.erfc(z / math.sqrt(2.0)) if q_obs > 0 else 0.5,
            "p_value_naive_wilks_chi2_1dof": math.erfc(z / math.sqrt(2.0)) if q_obs > 0 else 1.0,
            "fraction_toys_with_q0_zero": zero / toys}
+    out["asymptotic_calibration"] = _asymptotic_gate(hits, toys, out["p_value_half_chi2_asymptotic"], "half-chi2 p-value of q0",
+                                                     q_obs=q_obs)
     if sig == 0.0:
         from core.stats.poisson_diagnostics import log_poisson_sf, z_from_log_p
         log_p = log_poisson_sf(n, b)  # summed in the tail: 1 - P(N <= n - 1) cancels to 0 below about 1e-16
@@ -278,7 +291,8 @@ BANDS = (("-2sigma", -2), ("-1sigma", -1), ("median", 0), ("+1sigma", 1), ("+2si
 
 
 def _cls_asymptotic(q: float, qa: float) -> float:
-    """Asymptotic CLs = p_mu / (1 - p_b) for the one-sided q-tilde (Cowan, Cranmer, Gross, Vitells 2011, eqs. 65-66):
+    """Asymptotic CLs = p_mu / (1 - p_b) for the one-sided q-tilde (Cowan, Cranmer, Gross, Vitells 2011; the
+    distribution of q-tilde under mu and under mu' = 0 is arXiv:1007.1727v3 eqs. (69)-(70)):
     q is q-tilde on the data, qa on the background-only Asimov data set."""
     nd = NormalDist()
     if qa <= 0.0:
@@ -326,7 +340,7 @@ def _asymptotic_cls_results(q_obs, q_asimov, cl: float, hi: float) -> dict:
     q_obs(mu) and q_asimov(mu) give q-tilde at mu on the data and on the Asimov data. The expected limit of band N
     solves sqrt(q_asimov(mu)) = Phi^-1(1 - alpha Phi(N)) + N for CLs (Cowan et al. 2011, sec. 4.3, with
     sigma = mu / sqrt(q_asimov(mu)) taken at the band's own mu). For CLs+b with q-tilde it is z + N for N >= 0 and, below
-    the median, where the band's mu-hat = N sigma is negative and q-tilde = (mu^2 - 2 mu mu-hat) / sigma^2 (their eq. 16),
+    the median, where the band's mu-hat = N sigma is negative and q-tilde = (mu^2 - 2 mu mu-hat) / sigma^2 (arXiv:1007.1727v3 eq. (64)),
     N + sqrt(N^2 + z^2) with z = Phi^-1(cl); the plain z + N would reach 0, which a q-tilde limit never does. For CLs
     the q-tilde and q forms agree for every N."""
     nd, alpha = NormalDist(), 1.0 - cl
@@ -531,10 +545,12 @@ def multibin_limit(doc: dict, cl: float, toys: int, seed: int) -> dict:
                 a = [max(cond[0] + sigma * rng.gauss(0, 1), 0.0)]
             nn = [_ppf(rng.random(), m) for m in means]
             hits += model.q(nn, a, obs) >= q_obs - 1e-12
-        p = hits / toys
-        out["toy_p_value_at_asymptotic_limit"] = p
-        out["binomial_error_on_p"] = math.sqrt(max(p * (1 - p), 0.0) / toys)
+        tail = toy_tail(hits, toys)
+        out["toy_p_value_at_asymptotic_limit"] = tail["estimate"]
+        out["binomial_error_on_p"] = tail["binomial_error"]
+        out["toy_tail"] = tail
         out["target_p_value"] = 1.0 - cl
+        out["asymptotic_calibration"] = _asymptotic_gate(hits, toys, 1.0 - cl, "toy p-value at the asymptotic limit vs 1 - cl")
     out["note"] = ("asymptotic results rely on q-tilde ~ half-chi2; the toy p-value at the asymptotic limit is the "
                    "calibration check (it should be near 1 - cl; a p-value far from it means the asymptotic limit "
                    "is mis-calibrated here); asymptotic_observed_upper_limit is the CLs+b-type limit (q-tilde = z^2) and "
@@ -657,47 +673,10 @@ def profile_cls(n: int, b: float, sigma_b: float, cl: float, toys: int, expected
 
 # ------------------------------------------------------------- shape and multi-nuisance
 def _newton_min(f, x0, fixed_first: bool = False, max_iter: int = 60):
-    """Minimize f over x (damped Newton, numerical derivatives). With fixed_first the first coordinate is held."""
-    x = list(x0)
-    free = list(range(1 if fixed_first else 0, len(x)))
-    fx = f(x)
-    lam = 1e-3
-    for _ in range(max_iter):
-        h = {i: 1e-4 * max(1.0, abs(x[i])) for i in free}
-
-        def at(d):
-            z = list(x)
-            for i, v in d.items():
-                z[i] += v
-            return f(z)
-        g = [(at({i: h[i]}) - at({i: -h[i]})) / (2 * h[i]) for i in free]
-        hess = [[0.0] * len(free) for _ in free]
-        for a, i in enumerate(free):
-            hess[a][a] = (at({i: h[i]}) - 2 * fx + at({i: -h[i]})) / h[i] ** 2
-            for b2 in range(a + 1, len(free)):
-                j = free[b2]
-                v = (at({i: h[i], j: h[j]}) - at({i: h[i], j: -h[j]}) - at({i: -h[i], j: h[j]}) + at({i: -h[i], j: -h[j]})) / (4 * h[i] * h[j])
-                hess[a][b2] = hess[b2][a] = v
-        improved = False
-        for _try in range(12):
-            try:
-                step = _solve([[hess[a][c] + (lam * (1 + abs(hess[a][a])) if a == c else 0.0) for c in range(len(free))] for a in range(len(free))],
-                              [[-v] for v in g])
-            except Exception:
-                lam *= 10.0
-                continue
-            z = list(x)
-            for a, i in enumerate(free):
-                z[i] += step[a][0]
-            fz = f(z)
-            if fz < fx:
-                dx = max(abs(step[a][0]) for a in range(len(free)))
-                x, fx, lam, improved = z, fz, max(lam / 5.0, 1e-9), True
-                break
-            lam *= 10.0
-        if not improved or dx < 1e-9:
-            break
-    return x, fx
+    """Minimize f over x (damped Newton, numerical derivatives); returns (x, f(x)) only. Callers that report a result
+    use newton_fit, which also returns the convergence verdict (core/stats/fit_diagnostics.py)."""
+    r = newton_fit(f, x0, fixed_first, max_iter)
+    return r.x, r.fval
 
 
 def _code4_coefficients(hi: float, lo: float) -> list[float]:
@@ -759,15 +738,15 @@ def _load_shape(doc):
             code = d.get("interpolation", "code4")
             if code not in ("code0", "code1", "code4"):
                 raise LikelihoodError(f"nuisance {k}: interpolation of hi/lo factors must be code0, code1 or code4")
-            if d.get("prior", "gaussian") != "gaussian" or "sigma" in d:
+            if _constraint(d, k) != "gaussian" or "sigma" in d:
                 raise LikelihoodError(f"nuisance {k}: hi/lo factors take the Gaussian constraint and no sigma")
             hi, lo = _num(d.get("hi"), "hi", 0.0, 10.0, strict_low=True), _num(d.get("lo"), "lo", 0.0, 10.0, strict_low=True)
             parsed.append({"kind": d["kind"], "prior": "gaussian", "hi": hi, "lo": lo, "interpolation": code,
                            "c4": _code4_coefficients(hi, lo)})
         elif d["kind"].endswith("_norm"):
-            prior = d.get("prior", "gaussian")
+            prior = _constraint(d, k)
             if prior not in ("gaussian", "lognormal", "gamma"):
-                raise LikelihoodError(f"nuisance {k}: prior must be gaussian, lognormal or gamma")
+                raise LikelihoodError(f"nuisance {k}: constraint (or prior) must be gaussian, lognormal or gamma")
             if "interpolation" in d:
                 raise LikelihoodError(f"nuisance {k}: interpolation applies to hi/lo factors, not to sigma")
             parsed.append({"kind": d["kind"], "prior": prior, "sigma": _num(d.get("sigma"), "sigma", 0.0, 0.9, strict_low=True)})
@@ -805,6 +784,15 @@ def _load_shape(doc):
     return bins, parsed, corr_chol
 
 
+def _constraint(d: dict, k: int) -> str:
+    """The constraint term of a normalization nuisance: "constraint", or its legacy alias "prior" (same meaning here: the
+    auxiliary-measurement term of the likelihood, not a Bayesian prior); both given and different is an error."""
+    c, p = d.get("constraint"), d.get("prior")
+    if c is not None and p is not None and c != p:
+        raise LikelihoodError(f"nuisance {k}: constraint {c!r} and its legacy alias prior {p!r} disagree")
+    return c if c is not None else (p if p is not None else "gaussian")
+
+
 def _chol_pd(c):
     return cholesky(c, "correlation matrix of the nuisances", error=LikelihoodError)[0]
 
@@ -823,6 +811,8 @@ class _ShapeModel:
         # mc_stat_i / b_i, observed at 1 (aux[k + i]); profiled in closed form inside nll
         self.mc_rel = [x.get("mc_stat", 0.0) / x["b"] if x.get("mc_stat", 0.0) > 0 else 0.0 for x in bins] \
             if any(x.get("mc_stat", 0.0) > 0 for x in bins) else None
+        self.log = FitLog()  # every fit and its verdict, by context (observed data or toys)
+        self.better_global: dict = {}  # counts -> a global fit better than the one a caller passed to q
 
     def aux_obs(self):
         return [t if g else 0.0 for g, t in zip(self.gamma, self.tau)] + ([1.0] * len(self.b) if self.mc_rel else [])
@@ -851,8 +841,8 @@ class _ShapeModel:
         for i in range(self.k):
             if self.gamma[i]:
                 f = self._factor(self.nuis[i], th[i])
-                if f <= 0.0:
-                    return -NEG
+                if not f > 0.0:
+                    return INVALID
                 total -= aux[i] * math.log(f) - self.tau[i] * f
         return total
 
@@ -894,9 +884,13 @@ class _ShapeModel:
         return ss, bs
 
     def nll(self, mu, th, ns, aux):
+        """Negative log-likelihood; INVALID (+inf) outside the model's domain: a non-finite parameter, a normalization
+        factor <= 0, a negative or non-finite Poisson mean, or a zero mean with events (audit F01)."""
         total = 0.0
-        if any(d["kind"].endswith("_norm") and self._factor(d, t) <= 0.0 for t, d in zip(th, self.nuis)):
-            return -NEG
+        if not math.isfinite(mu) or not all(math.isfinite(t) for t in th):
+            return INVALID
+        if any(d["kind"].endswith("_norm") and not self._factor(d, t) > 0.0 for t, d in zip(th, self.nuis)):
+            return INVALID
         if self.mc_rel:
             ss, bs = self.parts(mu, th)
             for i, (n, sv, bv, d) in enumerate(zip(ns, ss, bs, self.mc_rel)):
@@ -906,13 +900,13 @@ class _ShapeModel:
                 else:
                     v = _lnl(n, sv + bv)
                 if v <= NEG / 2:
-                    return -NEG
+                    return INVALID
                 total -= v
             return total + self.constraint(th, aux)
         for n, nu in zip(ns, self.expected(mu, th)):
-            if nu <= 0.0:
-                if n > 0:
-                    return -NEG
+            if not math.isfinite(nu) or nu < 0.0 or (nu == 0.0 and n > 0):
+                return INVALID
+            if nu == 0.0:
                 continue
             total -= (n * math.log(nu) if n > 0 else 0.0) - nu
         return total + self.constraint(th, aux)
@@ -920,23 +914,110 @@ class _ShapeModel:
     def cond(self, mu, ns, aux, start=None):
         th0 = list(start) if start else [0.0] * self.k
         if self.k == 0:
-            return [], self.nll(mu, [], ns, aux)
-        th, val = _newton_min(lambda x: self.nll(mu, x, ns, aux), th0)
-        return th, val
+            val = self.nll(mu, [], ns, aux)
+            self.log.record(_verdict_no_free(val))
+            return [], val
+        r = self.log.record(newton_fit(lambda x: self.nll(mu, x, ns, aux), th0))
+        return r.x, r.fval
 
-    def glob(self, ns, aux):
-        mu0 = max((sum(ns) - sum(self.b)) / max(sum(self.s), 1e-12), 0.1)
-        x, val = _newton_min(lambda v: self.nll(v[0], v[1:], ns, aux), [mu0] + [0.0] * self.k)
-        if x[0] < 0.0:
-            th, val = self.cond(0.0, ns, aux, x[1:])
+    def _glob_from(self, ns, aux, x0):
+        """Global fit over mu >= 0 from x0 = [mu] + theta. An unconstrained optimum below 0 is replaced by the
+        conditional fit at the boundary mu = 0, which is checked by the KKT condition, not by an interior Hessian."""
+        r = newton_fit(lambda v: self.nll(v[0], v[1:], ns, aux), x0)
+        if r.x[0] < 0.0 or not math.isfinite(r.fval):
+            th, val = self.cond(0.0, ns, aux, r.x[1:] if math.isfinite(r.fval) else None)
+            ok, _ = boundary_kkt(lambda v: self.nll(v[0], v[1:], ns, aux), [0.0] + list(th), 0, 0.0,
+                                 scale=max(sum(self.s), 1e-12))
+            if ok:
+                self.log.events["boundary_kkt_ok"] += 1
+            else:
+                self.log.fail("boundary_kkt_violated")
             return 0.0, th, val
-        return x[0], x[1:], val
+        self.log.record(r)
+        return r.x[0], r.x[1:], r.fval
+
+    def glob(self, ns, aux, start=None):
+        mu0 = max((sum(ns) - sum(self.b)) / max(sum(self.s), 1e-12), 0.1)
+        return self._glob_from(ns, aux, list(start) if start else [mu0] + [0.0] * self.k)
 
     def q(self, mu, ns, aux, g=None):
+        """q-tilde_mu = 2 (conditional NLL at mu - global NLL), 0 when mu-hat > mu. A conditional minimum below the
+        global one by more than DNLL_TOL means the global fit missed its minimum (audit T05): the global fit is redone
+        from the conditional point and, if the violation remains, the failure is recorded instead of clipping q."""
         mu_hat, _, val = g if g else self.glob(ns, aux)
         if mu_hat > mu:
             return 0.0
-        return max(0.0, 2.0 * (self.cond(mu, ns, aux)[1] - val))
+        th_c, cval = self.cond(mu, ns, aux)
+        if cval < val - DNLL_TOL:
+            self.log.events["global_refit"] += 1
+            g2 = self._glob_from(ns, aux, [mu] + list(th_c))
+            if g2[2] < val - DNLL_TOL:          # a better global minimum: use it here and keep it for the caller
+                mu_hat, val = g2[0], g2[2]
+                key = tuple(ns)
+                if g is not None and (key not in self.better_global or g2[2] < self.better_global[key][2]):
+                    self.better_global[key] = g2
+            if cval < val - DNLL_TOL:
+                self.log.fail("global_above_conditional")
+            if mu_hat > mu:
+                return 0.0
+        return max(0.0, 2.0 * (cval - val))
+
+
+def _verdict_no_free(val):
+    from core.stats.fit_diagnostics import FitResult
+    return FitResult([], val, "converged" if math.isfinite(val) else "failed", [] if math.isfinite(val) else ["invalid_domain"])
+
+
+def _fit_summary(log: FitLog, toys_run: int = 0, toys_failed: int = 0) -> dict:
+    """fit_diagnostics block of a result, and the status it implies: failed when any fit on the observed data (or
+    its Asimov data) failed; incomplete when only toy fits failed (the toy quantities are then bounded, not
+    estimated); ok otherwise."""
+    s = log.summary()
+    status = "failed" if s["observed"]["failed"] else ("incomplete" if toys_failed else "ok")
+    out = {"status": status, "observed": s["observed"], "toy": s["toy"], "events": s["events"],
+           "criterion": "EDM <= 1e-5 with a positive-definite Hessian (interior), KKT at mu = 0 (boundary), "
+                        "global NLL <= conditional NLL + 1e-4 (core/stats/fit_diagnostics.py)"}
+    if toys_run:
+        out["toys_with_a_failed_fit"] = toys_failed
+        out["toys_run"] = toys_run
+    return out
+
+
+CALIBRATION_CL = 0.99  # the asymptotic gate's toy interval (T10): fixed before any comparison was made
+LIMIT_MC_CL = 0.95     # exact intervals on CLs+b and CLb propagated to the toy CLs limit (T11); the CLs range takes
+                       # the extremes of the two independent intervals, so it covers with probability >= 0.95^2 = 0.90
+
+
+def _asymptotic_gate(hits: int, toys: int, p_asymptotic: float, what: str, q_obs: float | None = None,
+                     failed: int = 0) -> dict:
+    """Calibration gate of an asymptotic p-value against seeded toys (audit T10). consistent: p_asymptotic lies in the
+    toys' central Clopper-Pearson interval at CALIBRATION_CL; inapplicable: it lies outside, so the asymptotic
+    approximation fails here and the toy value is the result; unresolved: no toy reached the observed value and
+    p_asymptotic is below the toys' upper bound (more toys needed). The gate says nothing about where it was not run."""
+    from core.stats.tail_estimation import clopper_pearson, one_sided_upper
+    lo, hi = clopper_pearson(hits, toys, CALIBRATION_CL)
+    if q_obs is not None and q_obs <= 0.0:
+        # no excess: the statistic sits on its point mass at 0 and every toy reaches it, while the half-chi2 form is
+        # quoted as 0.5 by convention; nothing about the approximation is tested here
+        verdict = "not-applicable"
+    elif failed:
+        verdict = "unresolved"      # failed toys could fall on either side: the comparison is not decided
+    elif hits == 0 and p_asymptotic <= one_sided_upper(0, toys, CALIBRATION_CL):
+        verdict = "unresolved"
+    else:
+        verdict = "consistent" if lo <= p_asymptotic <= hi else "inapplicable"
+    return {"verdict": verdict, "compared": what, "asymptotic_p": p_asymptotic, "toy_interval": [lo, hi],
+            "interval_cl": CALIBRATION_CL, "toys": toys, "failed_toys": failed,
+            "rule": "asymptotic p inside the toys' central Clopper-Pearson interval; otherwise use the toy result"}
+
+
+def _toy_p(hits: int, fails: int, toys: int) -> dict:
+    """Toy p-value fields: the tail record over all toys, and with failed toys the range [k/N, (k+F)/N] that
+    counts every failed toy as below, then as beyond the observed value (no failed toy is discarded)."""
+    out: dict[str, Any] = {"toy_tail": toy_tail(hits, toys)}
+    if fails:
+        out["toy_p_value_range_with_failures"] = [hits / toys, (hits + fails) / toys]
+    return out
 
 
 def _draw_aux(model, th_c, rng, gam_c=None):
@@ -956,6 +1037,67 @@ def _draw_aux(model, th_c, rng, gam_c=None):
     return aux
 
 
+def shape_toy_generator(model, aux_obs, mu: float, kind: str, theta=None):
+    """generate(rng, index) -> (counts, auxiliary measurements) for a toy_ensemble study of a _ShapeModel at signal
+    strength mu, for each ensemble kind of core/stats/toy_ensemble.py (the choice is explicit, there is no default):
+    conditional-* use the nuisances profiled on the model's observed counts at mu, with the auxiliary measurements
+    redrawn (fluctuated-aux) or fixed at aux_obs; unconditional-prior draws the nuisances from their constraints each
+    toy (Gaussian and log-normal: unit normal around aux_obs, correlated if declared; gamma: Gamma(tau, 1/tau);
+    MC-statistics factors: normal of width mc_stat / b, truncated at 0) with aux_obs fixed; plug-in fixes the
+    nuisances at theta (default nominal 0) with aux_obs fixed."""
+    from core.stats.toy_ensemble import ENSEMBLES, EnsembleError
+    if kind not in ENSEMBLES:
+        raise EnsembleError(f"ensemble kind must be one of {ENSEMBLES}")
+    if kind.startswith("conditional"):
+        th_c, _ = model.cond(mu, model.n, aux_obs)
+        gam_c = model.mc_gammas(mu, th_c, model.n, aux_obs)
+    elif kind == "plug-in":
+        th_c = list(theta) if theta is not None else [0.0] * model.k
+        gam_c = [1.0] * len(model.b)
+    else:
+        th_c, gam_c = None, None
+
+    def generate(rng, index):
+        if kind == "unconditional-prior":
+            z = [rng.gauss(0.0, 1.0) for _ in range(model.k)]
+            if model.chol is not None:
+                z = [sum(model.chol[i][j] * z[j] for j in range(i + 1)) for i in range(model.k)]
+            th = []
+            for i in range(model.k):
+                if model.gamma[i]:
+                    f = rng.gammavariate(model.tau[i], 1.0 / model.tau[i])
+                    th.append((f - 1.0) / model.nuis[i]["sigma"])
+                else:
+                    th.append(aux_obs[i] + z[i])
+            gam = [max(1.0 + d * rng.gauss(0.0, 1.0), 0.0) for d in model.mc_rel] if model.mc_rel else [1.0] * len(model.b)
+        else:
+            th, gam = th_c, gam_c
+        ss, bs = model.parts(mu, th)
+        ns = [_ppf(rng.random(), max(a + g * c, 0.0)) for a, g, c in zip(ss, gam, bs)]
+        aux = _draw_aux(model, th, rng, gam) if kind == "conditional-fluctuated-aux" else list(aux_obs)
+        return ns, aux
+    return generate
+
+
+def shape_q_evaluator(model, mu: float):
+    """evaluate((counts, aux), index) -> q-tilde_mu with a full global and conditional refit of the toy; a toy whose
+    fits fail raises ToyFailure("fit_failed") instead of returning a number."""
+    from core.stats.toy_ensemble import ToyFailure
+
+    def evaluate(data, index):
+        ns, aux = data
+        model.log.context = "toy"
+        before = model.log.failures("toy")
+        try:
+            q = model.q(mu, ns, aux)
+        finally:
+            model.log.context = "observed"
+        if model.log.failures("toy") > before:
+            raise ToyFailure("fit_failed")
+        return q
+    return evaluate
+
+
 def _toy_cls(model, aux0, g_obs, cl: float, toys: int, seed: int, hi: float, points: int) -> dict:
     """Toy-based CLs on a grid of mu in (0, hi]: at each mu, q-tilde_mu of the data against seeded toys generated at
     (mu, nuisances profiled on the data at mu) for CLs+b and at (0, nuisances profiled at mu = 0) for CLb, with the
@@ -970,6 +1112,9 @@ def _toy_cls(model, aux0, g_obs, cl: float, toys: int, seed: int, hi: float, poi
     th0, _ = model.cond(0.0, model.n, aux0)
     gam0 = model.mc_gammas(0.0, th0, model.n, aux0)
     curves: dict[str, list[float]] = {"observed": [], **{name: [] for name, _ in BANDS}}
+    failed_toys = 0
+    counts_rows, cls_lo, cls_hi = [], [], []
+    from core.stats.tail_estimation import clopper_pearson
     for mu in grid:
         q_obs = model.q(mu, model.n, aux0, g_obs)
         th_mu, _ = model.cond(mu, model.n, aux0)
@@ -979,10 +1124,14 @@ def _toy_cls(model, aux0, g_obs, cl: float, toys: int, seed: int, hi: float, poi
             ss, bs = model.parts(m_gen, th_c)
             mean = [a + g * c for a, g, c in zip(ss, gam_c, bs)]
             qs = []
+            model.log.context = "toy"
             for sd in seeds:
                 rng = random.Random(sd)
                 ns = [_ppf(rng.random(), m) for m in mean]
+                before = model.log.failures("toy")
                 qs.append(model.q(mu, ns, _draw_aux(model, th_c, rng, gam_c)))
+                failed_toys += model.log.failures("toy") > before
+            model.log.context = "observed"
             dist[key] = sorted(qs)
 
         def frac_ge(values, q):
@@ -991,6 +1140,14 @@ def _toy_cls(model, aux0, g_obs, cl: float, toys: int, seed: int, hi: float, poi
         def cls_at(q):
             return frac_ge(dist["sb"], q) / max(frac_ge(dist["b"], q), 1.0 / toys)
         curves["observed"].append(cls_at(q_obs))
+        k_sb = sum(v >= q_obs - 1e-12 for v in dist["sb"])
+        k_b = sum(v >= q_obs - 1e-12 for v in dist["b"])
+        lo_sb, hi_sb = clopper_pearson(k_sb, toys, LIMIT_MC_CL)
+        lo_b, hi_b = clopper_pearson(k_b, toys, LIMIT_MC_CL)
+        cls_lo.append(lo_sb / hi_b)
+        cls_hi.append(hi_sb / lo_b if lo_b > 0 else math.inf)
+        counts_rows.append({"mu": mu, "k_sb": k_sb, "k_b": k_b, "n": toys, "cls": k_sb / k_b if k_b else None,
+                            "denominator_floored": k_b == 0})
         for name, k in BANDS:
             idx = min(toys - 1, max(0, int(math.floor((1.0 - nd.cdf(k)) * toys))))
             curves[name].append(cls_at(dist["b"][idx]))
@@ -1004,9 +1161,17 @@ def _toy_cls(model, aux0, g_obs, cl: float, toys: int, seed: int, hi: float, poi
             prev_mu, prev = mu, v
         return None
     limits = {name: crossing(vals) for name, vals in curves.items()}
-    out = {"observed_upper_limit": limits["observed"], "expected": {name: limits[name] for name, _ in BANDS},
+    obs = limits["observed"]
+    range_lo, range_hi = crossing(cls_lo), crossing([min(v, 1e300) for v in cls_hi])
+    floored = [r["mu"] for r in counts_rows if r["denominator_floored"] and (obs is None or r["mu"] <= obs + hi / points)]
+    out = {"observed_upper_limit": obs, "expected": {name: limits[name] for name, _ in BANDS},
+           "observed_limit_mc_range": [range_lo, range_hi], "observed_limit_mc_range_cl": LIMIT_MC_CL,
+           "grid_step": hi / points, "exceedance_counts": counts_rows,
+           "cls_denominator_unresolved_at": floored,
+           "observed_limit_resolved": obs is not None and range_hi is not None and not floored,
            "toys_per_hypothesis": toys, "seed": seed, "grid": grid, "cls_observed_on_grid": curves["observed"],
-           "binomial_error_on_cls_plus_b_at_alpha": math.sqrt(alpha * (1 - alpha) / toys)}
+           "binomial_error_on_cls_plus_b_at_alpha": math.sqrt(alpha * (1 - alpha) / toys),
+           "toys_with_a_failed_fit": failed_toys, "toys_run": 2 * toys * len(grid)}
     missing = [name for name, v in limits.items() if v is None]
     if missing:
         out["not_reached"] = f"CLs stays above {alpha:g} up to mu = {hi:g} for: {', '.join(missing)} (raise the scan range)"
@@ -1028,8 +1193,15 @@ def shape_limit(doc: dict, cl: float, toys: int, seed: int, cls_toys: int = 0, c
 
     def limit(ns):
         g = model.glob(ns, aux0)
-        hi = g[0] + 30.0 * (math.sqrt(sum(ns) + 1.0) + 1.0) / max(sum(model.s), 1e-12) + 20.0 / max(sum(model.s), 1e-12)
-        return _bisect(lambda m: model.q(m, ns, aux0, g) - z * z, g[0], hi, 45), g
+        for _attempt in range(3):   # a refit that finds a better global minimum restarts the limit from it
+            hi = g[0] + 30.0 * (math.sqrt(sum(ns) + 1.0) + 1.0) / max(sum(model.s), 1e-12) + 20.0 / max(sum(model.s), 1e-12)
+            lim = _bisect(lambda m: model.q(m, ns, aux0, g) - z * z, g[0], hi, 45)
+            better = model.better_global.pop(tuple(ns), None)
+            if better is None:
+                return lim, g
+            g = better
+        model.log.fail("global_minimum_unstable")
+        return lim, g
     obs, g_obs = limit(model.n)
     asimov_ns = [float(v) for v in model.b]
     asimov, g_a = limit(asimov_ns)
@@ -1039,6 +1211,7 @@ def shape_limit(doc: dict, cl: float, toys: int, seed: int, cls_toys: int = 0, c
            "asymptotic_observed_upper_limit": obs, "asymptotic_asimov_median_expected_limit": asimov}
     out.update(_asymptotic_cls_results(lambda m: model.q(m, model.n, aux0, g_obs), lambda m: model.q(m, asimov_ns, aux0, g_a),
                                        cl, max(obs, asimov, 1e-6) * 2.0))
+    toy_fails = 0
     if toys:
         q_obs = model.q(obs, model.n, aux0, g_obs)
         th_c, _ = model.cond(obs, model.n, aux0)
@@ -1047,19 +1220,36 @@ def shape_limit(doc: dict, cl: float, toys: int, seed: int, cls_toys: int = 0, c
         mean = [a + g * c for a, g, c in zip(ss_c, gam_c, bs_c)]
         rng = random.Random(seed)
         hits = 0
+        model.log.context = "toy"
         for _ in range(toys):
             ns = [_ppf(rng.random(), m) for m in mean]
             aux = _draw_aux(model, th_c, rng, gam_c)
-            hits += model.q(obs, ns, aux) >= q_obs - 1e-12
+            before = model.log.failures("toy")
+            hit = model.q(obs, ns, aux) >= q_obs - 1e-12
+            if model.log.failures("toy") > before:
+                toy_fails += 1
+            else:
+                hits += hit
+        model.log.context = "observed"
         p = hits / toys
-        out.update({"toy_p_value_at_asymptotic_limit": p, "binomial_error_on_p": math.sqrt(max(p * (1 - p), 0.0) / toys),
-                    "target_p_value": 1.0 - cl})
-    out["priors"] = {d["name"]: d.get("prior", "gaussian") for d in nuis}
-    out["interpolation"] = {d["name"]: d["interpolation"] for d in nuis if "interpolation" in d}
-    out["mc_statistics"] = "barlow-beeston-lite" if model.mc_rel else "none"
+        out.update({"toy_p_value_at_asymptotic_limit": p if hits else None,
+                    "binomial_error_on_p": math.sqrt(max(p * (1 - p), 0.0) / toys) if 0 < hits < toys else None,
+                    "target_p_value": 1.0 - cl, **_toy_p(hits, toy_fails, toys),
+                    "asymptotic_calibration": _asymptotic_gate(hits, toys, 1.0 - cl, "toy p-value at the asymptotic limit vs 1 - cl",
+                                                               failed=toy_fails)})
     if cls_toys:
         hi = 1.3 * max(out["asymptotic_observed_cls_upper_limit"], out["asymptotic_expected_limits"]["cls"]["+2sigma"])
         out["toy_cls"] = _toy_cls(model, aux0, g_obs, cl, cls_toys, seed, hi, cls_points)
+        toy_fails += out["toy_cls"]["toys_with_a_failed_fit"]
+    for key in (tuple(model.n), tuple(asimov_ns)):
+        if key in model.better_global:   # a better global minimum appeared after the results that used the old one
+            model.log.fail("global_minimum_moved_after_use")
+    out["fit_diagnostics"] = _fit_summary(model.log, toys + (out["toy_cls"]["toys_run"] if cls_toys else 0), toy_fails)
+    out["status"] = out["fit_diagnostics"]["status"]
+    out["constraints"] = {d["name"]: d.get("prior", "gaussian") for d in nuis}
+    out["priors"] = out["constraints"]  # legacy key: the frequentist constraint terms, kept for older readers
+    out["interpolation"] = {d["name"]: d["interpolation"] for d in nuis if "interpolation" in d}
+    out["mc_statistics"] = "barlow-beeston-lite" if model.mc_rel else "none"
     out["correlated_nuisances"] = corr_chol is not None
     out["note"] = ("every nuisance has a unit-width constraint on its parameter theta observed at 0 (Gaussian by default; a "
                    "normalization may be log-normal or gamma with a Poisson auxiliary measurement, and Gaussian-type "
@@ -1115,6 +1305,7 @@ def shape_gof(doc: dict, toys: int, seed: int, mu: float | None = None) -> dict:
            "bins": len(bins), "nuisances": [d["name"] for d in nuis], "mu": "fitted" if mu is None else mu,
            "best_fit_mu": mu_hat, "best_fit_nuisances": dict(zip([d["name"] for d in nuis], th_hat)),
            "statistic": t_obs, "seed": seed, "toys": toys}
+    toy_fails = 0
     if ndf >= 1:
         out["asymptotic_chi2_reference"] = {"ndf": ndf, "p_value": chi2_sf(t_obs, ndf),
                                             "note": "approximate: needs several events in every bin"}
@@ -1125,23 +1316,32 @@ def shape_gof(doc: dict, toys: int, seed: int, mu: float | None = None) -> dict:
         rng = random.Random(seed)
         hits = 0
         values = []
+        model.log.context = "toy"
         for _ in range(toys):
             ns = [_ppf(rng.random(), m) for m in mean]
+            before = model.log.failures("toy")
             tv = _gof_stat(model, ns, _draw_aux(model, th_hat, rng, gam), mu)[0]
+            if model.log.failures("toy") > before:
+                toy_fails += 1
+                continue
             values.append(tv)
             hits += tv >= t_obs - 1e-12
+        model.log.context = "observed"
         p = hits / toys
-        out["toy_p_value"] = p
-        out["binomial_error_on_p"] = math.sqrt(max(p * (1 - p), 0.0) / toys)
+        out["toy_p_value"] = p if hits else None
+        out["binomial_error_on_p"] = math.sqrt(max(p * (1 - p), 0.0) / toys) if 0 < hits < toys else None
         if hits == 0:
             out["p_value_95_upper_bound"] = 1.0 - 0.05 ** (1.0 / toys)
+        out.update(_toy_p(hits, toy_fails, toys))
         values.sort()
-        out["toy_statistic_median"] = values[len(values) // 2]
+        out["toy_statistic_median"] = values[len(values) // 2] if values else None
     out["note"] = ("t = 2 (nll at the best fit - nll of the saturated model), where the saturated model sets every bin "
                    "mean to its count and every constraint term to its maximum, so pulled nuisances add to t; toys are "
                    "drawn from the fitted model with the auxiliary measurements redrawn and refitted one by one; the "
                    "chi-square reference with bins - 1 (mu fitted) or bins (mu fixed) degrees of freedom is an "
                    "approximation that fails at low counts; a good p-value does not show the absence of bias")
+    out["fit_diagnostics"] = _fit_summary(model.log, toys, toy_fails)
+    out["status"] = out["fit_diagnostics"]["status"]
     return out
 
 
@@ -1152,6 +1352,7 @@ class _TwoPoiModel:
 
     def __init__(self, bins1, bins2, nuis, chol):
         self.m1, self.m2 = _ShapeModel(bins1, nuis, chol), _ShapeModel(bins2, nuis, chol)
+        self.better = None
         self.n, self.k = self.m1.n, self.m1.k
 
     def means(self, mu1, mu2, th):
@@ -1161,8 +1362,10 @@ class _TwoPoiModel:
 
     def nll(self, mu1, mu2, th, ns, aux):
         m = self.m1
-        if any(d["kind"].endswith("_norm") and m._factor(d, x) <= 0.0 for x, d in zip(th, m.nuis)):
-            return -NEG
+        if not (math.isfinite(mu1) and math.isfinite(mu2) and all(math.isfinite(x) for x in th)):
+            return INVALID
+        if any(d["kind"].endswith("_norm") and not m._factor(d, x) > 0.0 for x, d in zip(th, m.nuis)):
+            return INVALID
         sig, bkg = self.means(mu1, mu2, th)
         total = 0.0
         for i, (n, sv, bv) in enumerate(zip(ns, sig, bkg)):
@@ -1173,23 +1376,41 @@ class _TwoPoiModel:
             else:
                 v = _lnl(n, sv + bv)
             if v <= NEG / 2:
-                return -NEG
+                return INVALID
             total -= v
         return total + m.constraint(th, aux)
 
+    @property
+    def log(self) -> FitLog:
+        return self.m1.log
+
     def cond(self, mu1, mu2, ns, aux, start=None):
         if self.k == 0:
-            return [], self.nll(mu1, mu2, [], ns, aux)
-        return _newton_min(lambda x: self.nll(mu1, mu2, x, ns, aux), list(start) if start else [0.0] * self.k)
+            val = self.nll(mu1, mu2, [], ns, aux)
+            self.log.record(_verdict_no_free(val))
+            return [], val
+        r = self.log.record(newton_fit(lambda x: self.nll(mu1, mu2, x, ns, aux), list(start) if start else [0.0] * self.k))
+        return r.x, r.fval
 
     def glob(self, ns, aux, start=None):
         x0 = list(start) if start else [1.0, 1.0] + [0.0] * self.k
-        x, val = _newton_min(lambda v: self.nll(v[0], v[1], v[2:], ns, aux), x0)
-        return x[0], x[1], x[2:], val
+        r = self.log.record(newton_fit(lambda v: self.nll(v[0], v[1], v[2:], ns, aux), x0))
+        return r.x[0], r.x[1], r.x[2:], r.fval
 
     def q(self, mu1, mu2, ns, aux, g=None):
+        """2 (conditional - global NLL); a conditional minimum below the global one beyond DNLL_TOL triggers a global
+        refit from the conditional point and, if it remains, a recorded failure (audit T05)."""
         g = g if g else self.glob(ns, aux)
-        return max(0.0, 2.0 * (self.cond(mu1, mu2, ns, aux, g[2])[1] - g[3]))
+        th_c, cval = self.cond(mu1, mu2, ns, aux, g[2])
+        if cval < g[3] - DNLL_TOL:
+            self.log.events["global_refit"] += 1
+            g2 = self.glob(ns, aux, [mu1, mu2] + list(th_c))
+            if g2[3] < g[3] - DNLL_TOL and (self.better is None or g2[3] < self.better[3]):
+                self.better = g2   # the caller's best fit is stale: profile_contour restarts from this one
+            if cval < min(g[3], g2[3]) - DNLL_TOL:
+                self.log.fail("global_above_conditional")
+            return max(0.0, 2.0 * (cval - min(g[3], g2[3])))
+        return max(0.0, 2.0 * (cval - g[3]))
 
 
 def _load_two_poi(doc):
@@ -1210,22 +1431,9 @@ def _load_two_poi(doc):
     return bins1, bins2, nuis, chol
 
 
-def profile_contour(doc: dict, cls=(0.6827, 0.95), rays: int = 36) -> dict:
-    """Best fit of (mu1, mu2) and the profile-likelihood contours q(mu1, mu2) = 2 (min_theta nll - min nll) = level,
-    with level the chi-square quantile for 2 degrees of freedom (Wilks), traced along rays from the best fit."""
-    bins1, bins2, nuis, chol = _load_two_poi(doc)
-    cls = [_num(c, "cl", 0.0, 1.0, strict_low=True) for c in cls]
-    if any(c >= 1.0 for c in cls) or not cls:
-        raise LikelihoodError("each contour cl must lie strictly between 0 and 1")
-    if isinstance(rays, bool) or not isinstance(rays, int) or not 8 <= rays <= 360:
-        raise LikelihoodError("rays must be an integer in [8, 360]")
-    model = _TwoPoiModel(bins1, bins2, nuis, chol)
-    aux0 = model.m1.aux_obs()
-    g = model.glob(model.n, aux0)
+def _trace_contours(model, aux0, g, cls, rays):
+    """Hessian covariance at the best fit g and contour points along rays (one pass of profile_contour)."""
     m1h, m2h = g[0], g[1]
-    if not math.isfinite(g[3]) or g[3] >= -NEG / 2:
-        raise LikelihoodError("the global fit failed (no finite likelihood)")
-    # local covariance of (mu1, mu2) from the numerical Hessian of q / 2 at the best fit
     s1, s2 = (max(sum(model.m1.s), 1e-12), max(sum(model.m2.s), 1e-12))
     h1, h2 = 0.05 * math.sqrt(sum(model.n) + 1.0) / s1, 0.05 * math.sqrt(sum(model.n) + 1.0) / s2
     f = lambda a, b: 0.5 * model.q(a, b, model.n, aux0, g)
@@ -1249,12 +1457,41 @@ def profile_contour(doc: dict, cls=(0.6827, 0.95), rays: int = 36) -> dict:
             except LikelihoodError:
                 failures.append({"cl": c, "angle_deg": 360.0 * j / rays})
         contours[f"{c:g}"] = {"q_level": level, "points": pts}
+    return m1h, m2h, cov, contours, failures
+
+
+def profile_contour(doc: dict, cls=(0.6827, 0.95), rays: int = 36) -> dict:
+    """Best fit of (mu1, mu2) and the profile-likelihood contours q(mu1, mu2) = 2 (min_theta nll - min nll) = level,
+    with level the chi-square quantile for 2 degrees of freedom (Wilks), traced along rays from the best fit."""
+    bins1, bins2, nuis, chol = _load_two_poi(doc)
+    cls = [_num(c, "cl", 0.0, 1.0, strict_low=True) for c in cls]
+    if any(c >= 1.0 for c in cls) or not cls:
+        raise LikelihoodError("each contour cl must lie strictly between 0 and 1")
+    if isinstance(rays, bool) or not isinstance(rays, int) or not 8 <= rays <= 360:
+        raise LikelihoodError("rays must be an integer in [8, 360]")
+    model = _TwoPoiModel(bins1, bins2, nuis, chol)
+    aux0 = model.m1.aux_obs()
+    g = model.glob(model.n, aux0)
+    if not math.isfinite(g[3]):
+        raise LikelihoodError("the global fit failed (no finite likelihood)")
+    for _attempt in range(3):   # a refit that finds a better global minimum restarts from it (best fit, Hessian, rays)
+        model.better = None
+        m1h, m2h, cov, contours, failures = _trace_contours(model, aux0, g, cls, rays)
+        if model.better is None:
+            break
+        g = model.better
+    else:
+        model.log.fail("global_minimum_unstable")
     out = {"label": LABEL, "method": "profile-likelihood contours of two signal strengths (Wilks, 2 degrees of freedom)",
            "bins": len(bins1), "nuisances": [d["name"] for d in nuis], "best_fit": {"mu1": m1h, "mu2": m2h},
            "best_fit_nuisances": dict(zip([d["name"] for d in nuis], g[2])), "covariance_from_hessian": cov,
            "contours": contours, "rays": rays}
+    fd = _fit_summary(model.log)
+    out["fit_diagnostics"], out["status"] = fd, fd["status"]
     if failures:
         out["rays_not_closed"] = failures
+        if out["status"] == "ok":
+            out["status"] = "incomplete"   # an open contour is not a region: exit 3, not ok
     out["note"] = ("each contour point is where the profile statistic q(mu1, mu2), minimized over every nuisance, reaches "
                    "the chi-square 2-dof quantile of the stated cl, found along a ray from the best fit (scaled by the "
                    "Hessian errors), so a non-star-shaped region is not traced; Wilks coverage needs enough events per "
@@ -1548,9 +1785,9 @@ def main(argv: list[str] | None = None) -> int:
     except LikelihoodError as exc:
         print(json.dumps({"label": LABEL, "status": "rejected", "error": str(exc)}, indent=2))
         return 2
-    result["status"] = "ok"
+    result.setdefault("status", "ok")
     print(json.dumps(result, indent=2))
-    return 0
+    return {"ok": 0, "failed": 1, "incomplete": 3}[result["status"]]
 
 
 if __name__ == "__main__":

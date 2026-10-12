@@ -37,7 +37,8 @@ pyhf/Combine adapter ([statistical tools](statistical-tools.md)). Run any script
 | Script | 0 | 1 | 2 |
 |---|---|---|---|
 | `poisson_diagnostics.py` | ok | `failed`: a limit or interval end not bracketed below the mean limit (1e5) | rejected input |
-| `likelihood_limits.py`, `statistical_toys.py`, `unfolding_diagnostics.py` | ok | — | rejected input |
+| `likelihood_limits.py` | ok | `failed`: a fit on the observed or Asimov data did not converge (`fit_diagnostics` gives the reasons; the numbers are not results); exit 3 `incomplete`: only toy fits failed | rejected input |
+| `statistical_toys.py`, `unfolding_diagnostics.py` | ok | — | rejected input |
 | `template_fit.py` | ok | fit `failed` (infeasible model or no convergence) | rejected input |
 | `validate_covariance.py` | pass (or warnings without `--strict`) | errors (or warnings with `--strict`) | unreadable or not JSON |
 | `validate_response.py` | pass (or warnings without `--strict`) | errors | unreadable or not JSON |
@@ -45,6 +46,35 @@ pyhf/Combine adapter ([statistical tools](statistical-tools.md)). Run any script
 - **Poisson means** are limited to 1e5 in every module (`_poisson.py`, private: log-space distribution, tail and
   quantile, accurate to that limit). A limit that cannot be bracketed below it is reported `failed`, never
   clipped to the limit. `fc-interval` alone scans a grid and is limited to total means of 500.
+- **Fit verdicts** (`fit_diagnostics.py`, helper, no CLI). The damped Newton fits of `shape-limit`, `shape-gof` and
+  `contour` return a verdict: `converged` only with a finite NLL, a positive-definite Hessian and EDM = g^T H^-1 g / 2
+  at most 1e-5 (Minuit2's default threshold); otherwise `failed` with reasons (`invalid_domain`,
+  `hessian_not_positive_definite`, `gradient_not_small`, `max_iterations`, `line_search_stalled`). A best fit on the
+  boundary `mu = 0` is checked by the KKT condition (the profile rises into `mu > 0`), not by an interior Hessian. A
+  conditional NLL below the global one by more than 1e-4 triggers a global refit from the conditional point and, if
+  it remains, a recorded failure, never a silently clipped `q`. Results carry `fit_diagnostics` (fits, failures and
+  reasons for the observed data and for toys) and `status`: `failed` (exit 1) when a fit on the data failed,
+  `incomplete` (exit 3) when only toy fits failed; failed toys are counted, never dropped, and toy p-values then
+  carry the range `[k/N, (k+F)/N]`.
+- **Poisson domain.** A negative or non-finite Poisson mean is outside every likelihood here (NLL = +inf); a mean of
+  0 is allowed only for an empty bin. A shape template that interpolates below zero is therefore excluded by the fit
+  instead of being read as an empty bin.
+- **Toy tails** (`tail_estimation.py`, helper, no CLI). A toy p-value is k exceedances of N toys. Outputs carry
+  `toy_tail`: k, N, the estimate k/N (None at k = 0), the Clopper-Pearson interval at 68.27%, and at k = 0 a one-sided
+  95% upper bound `1 - 0.05^(1/N)` (0.0295 for N = 100); the legacy `p_value_toys` and binomial-error fields are None
+  where they would claim p = 0 or an error of 0. Exact Poisson tails stay in log space (`log_p_value_exact_poisson`).
+- **Toy ensembles** (`toy_ensemble.py`, helper, no CLI). A toy study states its ensemble explicitly (no default):
+  `conditional-fluctuated-aux` (nuisances at the conditional fit, auxiliary measurements redrawn: the profile
+  construction), `conditional-fixed-aux`, `unconditional-prior` (nuisances drawn from their constraints: a
+  prior-predictive average, not coverage at a true nuisance) or `plug-in` (nuisances at a given point, as in a
+  coverage study at a true point). Toy i uses a seed derived from (seed, i), so partitioned tasks merge to the single
+  run and `merge` refuses duplicates and gaps. Every toy has one outcome (ok, fit_failed, invalid_data, empty_data,
+  timeout, error); `coverage` keeps C/N, (C+F)/N and C/(N-F) with exact intervals and takes the headline from a
+  predeclared failure policy; `coverage_gate` passes a point when the one-sided lower bound (Bonferroni over a
+  grid) is at least nominal - 0.01, fails it when the upper bound is below, and otherwise reports insufficient
+  precision. Results of different ensembles are never pooled; there are no automatic retries.
+  `likelihood_limits.shape_toy_generator` and `shape_q_evaluator` connect it to the shape model (every toy refitted).
+  Benchmarks: `<plugin root>/examples/stats-benchmarks/` (coverage grid of the counting constructions).
 - **Covariance and correlation matrices** go through one strict Cholesky (`_linalg.py`, private, no CLI). It works
   on the matrix scaled to a unit diagonal, so units never change the verdict. A pivot below -1e-10 is an error
   that names the matrix, a fit refuses a singular matrix, and toy sampling accepts a semi-definite one and records
@@ -87,8 +117,10 @@ available only as a Cousins-Highland marginalization (`--sigma-b`).
   converges to the known-background interval as `S -> 0`. That is not a profile treatment and its coverage at the true
   background is not guaranteed.
 - `cls-limit --n N --b B --cl CL [--sigma-b S] [--nodes K]`: CLs upper limit (`CLs = CLs+b / CLb`) with the median and
-  1- and 2-sigma expected limits under background only. CLs over-covers by design; it is not a frequentist interval
-  and a Feldman-Cousins interval is not a CLs limit: never label one as the other. With `--sigma-b`, vary `sigma_b`
+  1- and 2-sigma expected limits under background only. CLs is a modified frequentist exclusion prescription (PDG,
+  Statistics review): it over-covers by design and is not an exact nominal-coverage Neyman or Feldman-Cousins
+  confidence belt, nor a Bayesian credible bound; a toy or plug-in implementation of it does not guarantee its
+  coverage either. A Feldman-Cousins interval is not a CLs limit: never label one as the other. With `--sigma-b`, vary `sigma_b`
   and check the result moves little.
 - `coverage --mu MU --cl CL --toys T --seed S`: fraction of seeded pseudo-experiments whose Garwood interval contains
   `MU`. Coverage of a discrete distribution oscillates with the true mean: one number is a diagnostic, scan the mean
@@ -152,9 +184,17 @@ and use common random numbers across a scan.
   plug-in profile construction against the supremum construction. Outside the validated range, run it at the true
   values that matter before relying on `neyman-limit`; a single point is not global coverage.
 
+Every toy p-value in this module carries `toy_tail` (see Common conventions); `shape-limit`, `shape-gof` and
+`contour` carry `fit_diagnostics` and a `status` that sets the exit code. Write a `statistical-result` from any of
+these outputs with `<plugin root>/skills/hep-statistics/scripts/result_artifact.py`, which keeps the status (a failed
+fit becomes `fit_status: failed` with the `failed` label) and writes a toy p-value with no exceedance as a typed
+bound; check a result before calling it validated with `contracts/validate.py RESULT.json --gate publication`.
+
 Decision rule: with an uncertain background prefer `profile-limit`, `profile-significance` or `multibin-limit` to a
-marginalized result, and compare the two: a difference is itself a systematic on the method. A profile limit is not a
-CLs limit (no CLs protection). Always report the expected sensitivity next to an observed limit. Near a boundary
+marginalized result, and compare the two: the profile and the marginalized (Cousins-Highland) treatments answer
+different questions, so a difference between them is information about the nuisance treatment, not an uncertainty to
+add to the result; only a model or method uncertainty prescribed before the result (with its owner) is quantified and
+combined. A profile limit is not a CLs limit (no CLs protection). Always report the expected sensitivity next to an observed limit. Near a boundary
 or at small counts quote the toy value, not the asymptotic one.
 
 ## `statistical_toys.py`: narrow toy studies
@@ -234,7 +274,18 @@ Poisson-weighted response); `--param` sets the strength, iterations or truncatio
   against an unfold-then-chi2 fit with the unfolded covariance; bias and spread of each, with the true spectral form
   assumed known.
 - `response-stat --input --method --param [--response-model --toys --seed]`: the response redrawn from finite generated
-  counts; spread from data, from the response and from both, and the response share of the variance.
+  counts; spread from data, from the response and from both, and the response share of the variance. It records
+  `toys_generated`, `toys_used` and `toys_skipped` with the reason (a redrawn column with no event is never filled),
+  never renormalizes a column, and counts toys where the independent-cell model gives a column efficiency above 1
+  (use `--response-model multinomial` for high-efficiency columns).
+- `outer-coverage --input --method --values --criterion --toys --seed`: independent outer-toy validation (linear
+  methods). Every toy draws data from the generation truth (`test_truth` if given), redraws the MC response
+  (`mc_events_per_truth_bin`, multinomial) and the efficiency factors (`efficiency_uncertainty`) when declared,
+  chooses the regularization inside the toy (`gcv`, `loo_cv`, `l_curve_corner`; one value or `fixed`: none), and
+  builds that toy's covariance from its own counts and estimate. It reports the bias per bin, marginal and
+  simultaneous (chi-square, n_truth dof) coverage at 68.27%, the settings chosen and every toy's outcome (failures
+  count as not covering). `covariance_omits` drops a generated source from the covariance: a negative baseline that
+  must undercover. Pulls measured on the ensemble that tuned the regularization are not this evidence.
 - `response-covariance --input --method --param [--response-model --toys --seed]`: the finite-response effect
   propagated analytically at first order (numerical Jacobian of the estimator, also for D'Agostini) as a full
   covariance among truth bins, cross-checked against toys. `--response-model multinomial` uses the exact multinomial
@@ -281,6 +332,30 @@ Single-command validators that never modify their input (no subcommands).
 Run both before an unfolding, a forward fold or a fit that uses a supplied matrix. A column sum below one has two
 readings (inefficiency, or migration outside the tabulated range); the declared metadata decides which.
 
+## Validation tools outside `core/stats`
+
+Added by the hep-statistics audit (2026-10-12). Each tool states its validity domain and has a test with an
+independent oracle and a negative baseline; the ones marked EXPERIMENTAL are controlled examples, not general support.
+Scripts are in `<plugin root>/skills/hep-statistics/scripts/` unless an adapter path is given; run `--help` first.
+
+| Tool | Question | Oracle and negative baseline (test) |
+|---|---|---|
+| `result_artifact.py` | write a `statistical-result` that keeps a CLI's status | failed fit -> `failed` label; zero-exceedance bound typed (`test_result_artifact.py`) |
+| `covariance_fit.py` | fits with a declared covariance: constrained spectra, C(theta) with ln det, multiplicative (Peelle) | closed forms; diagonal approximation and data-scaled covariance detected (`test_covariance_fit.py`) |
+| `sweighted_fit.py` | sWeighted fits: naive, SumW2, sandwich, asymptotic, bootstrap; sPlot independence check | RooFit AsymptoticError, toys and bootstrap; broken factorization flagged invalid (`test_sweighted_fit.py`) |
+| `bayes_calibration.py` | posterior quantiles vs a conjugate posterior; SBC with stated power (not PPC, not coverage) | missing Jacobian and mis-scaled posteriors fail (`test_bayes_calibration.py`); `bayes_diagnostics.py` matches ArviZ 0.23.4 (`test_bayes_arviz_oracle.py`) |
+| `eft_scan.py` (EXPERIMENTAL) | quadratic (EFT-like) models: disconnected sets, joint vs profiled, toy belt | closed-form boundaries; hull never reported (`test_eft_scan.py`) |
+| `discrete_profile.py` (EXPERIMENTAL) | envelope over background forms fixed in advance, reselected in every toy | truths inside and outside the family; a single form as baseline (`examples/stats-benchmarks/discrete-profile/`) |
+| `global_significance.py` (EXPERIMENTAL) | global p of the complete procedure: 1D/2D scans, refitted normalization, selection variants | look_elsewhere brute force; Gross-Vitells flagged where not validated (`test_global_significance.py`) |
+| `pcl_efficiency_ratio.py` (EXPERIMENTAL) | PCL with a stated power threshold; Clopper-Pearson vs Beta credible; Fieller sets | exact coverage sums; delta method fails (`test_pcl_efficiency_ratio.py`) |
+| `ratio_estimation.py` (EXPERIMENTAL) | classifier likelihood ratio on a calibratable Gaussian model | exact ratio; domain shift and wrong nuisance rejected with stated power (`test_ratio_estimation.py`) |
+| `adapters/pyhf-combine/assets/backend_comparison.py` | the same likelihood in core and pyhf: pointwise and profiled | 1e-15 / 1e-11; wrong interpolation code caught (`test_backend_likelihood_equivalence.py`) |
+| `adapters/pyhf-combine/assets/model_card.py` | SR/CR fits from a model card: shared auxiliary measurements, contamination | closed form; omitted contamination biases by the analytic amount (`test_sr_cr_model_card.py`) |
+| `examples/stats-benchmarks/published-likelihood-sbottom/` | a public full likelihood (HEPData ins1748602) against preregistered paper values | full CLs scans and bands; a fit without the control region fails |
+
+Contract side: `contracts/validate.py --strict` and `--gate publication`, `contracts/migrate_statistical_result.py`, and
+`tools/run_required_backends.py` (a required backend missing fails, never skips).
+
 ## Not implemented
 
 Weights that vary within a bin in the toy MC; non-Gaussian or correlated priors in the template fit; a Berger-Boos
@@ -294,7 +369,8 @@ convergence live outside `core/stats` (see the SKILL.md resources).
 ## Failure modes
 
 - Quoting the classical limit when it is zero or negative; reading a Feldman-Cousins lower bound of 0 as a failure or
-  as evidence for zero signal; quoting a CLs limit without its expected band or as a frequentist interval.
+  as evidence for zero signal; quoting a CLs limit without its expected band, or as an exact-coverage confidence
+  interval or a Bayesian bound.
 - Quoting an asymptotic limit or significance at small counts without the toy calibration; a boundary significance
   from naive Wilks; reporting a profile limit as CLs.
 - Treating a profile-construction interval or limit as having guaranteed coverage, or the finite-grid `neyman-limit` as

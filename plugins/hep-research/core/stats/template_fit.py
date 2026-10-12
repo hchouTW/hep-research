@@ -29,7 +29,10 @@ Input JSON: {"data": [counts per bin], "templates": {"sig": [MC counts per bin],
 "mc_events": {"sig": M, "bkg": M} (optional; default the sum of the template counts),
 "true_yields": {"sig": Y, "bkg": Y} (bb-toys; default the Barlow-Beeston fit of the data)}.
 wbb-fit input: the same, with a template given either as counts or as {"sumw": [...], "sumw2": [...]}
-(sum of weights and sum of squared weights per bin; "mc_events" is then the total weight generated),
+(sum of weights and sum of squared weights per bin; "mc_events" is then the total weight generated; positive weights
+only: a template declared "weights": "signed", with a negative bin sum or with sumw2 > sumw^2 in a bin, which only
+signed weights produce, is refused, since the effective counts sumw^2/sumw2 are then not Poisson counts; mild signed
+cancellation cannot be detected from the sums, so declare it),
 and an optional "nuisances": [{"name": "jes", "kind": "shape", "template": "sig", "up": [sumw per bin
 at +1 sigma], "down": [...]}, {"name": "lumi", "kind": "norm", "template": "bkg", "sigma": 0.1}].
 
@@ -558,11 +561,23 @@ def _load_w(doc):
             sw, sw2 = row.get("sumw"), row.get("sumw2")
             if not isinstance(sw, list) or not isinstance(sw2, list) or len(sw) != len(data) or len(sw2) != len(data):
                 raise ToyError(f"template {nme}: sumw and sumw2 must each list {len(data)} values")
+            if row.get("weights", "positive") != "positive":
+                raise ToyError(f"template {nme}: weights '{row.get('weights')}' are not supported: the effective-count "
+                               "Barlow-Beeston likelihood treats sumw^2/sumw2 as Poisson counts, which signed weights are "
+                               "not; use a Gaussian MC-statistics term (likelihood_limits.py shape-limit, mc_stat = "
+                               "sqrt(sumw2)) or an event-level treatment")
+            if any(isinstance(v, (int, float)) and not isinstance(v, bool) and v < 0 for v in sw):
+                raise ToyError(f"template {nme}: a negative sum of weights in a bin is a signed-weight template, which the "
+                               "effective-count Barlow-Beeston likelihood does not support (see 'weights')")
             sw = [_num(v, f"{nme} sumw", 0.0, 1e9) for v in sw]
             sw2 = [_num(v, f"{nme} sumw2", 0.0, 1e12) for v in sw2]
             for a_, b_ in zip(sw, sw2):
                 if (a_ > 0) != (b_ > 0):
                     raise ToyError(f"template {nme}: sumw2 must be positive exactly where sumw is")
+                if b_ > a_ * a_ * (1.0 + 1e-9) + 1e-300:
+                    raise ToyError(f"template {nme}: sumw2 {b_:g} exceeds sumw^2 {a_ * a_:g} in a bin, which positive "
+                                   "weights cannot produce: the template has signed weights, not supported by the "
+                                   "effective-count Barlow-Beeston likelihood (see 'weights')")
         elif isinstance(row, list) and len(row) == len(data):
             sw = [_num(v, f"template {nme}", 0.0, 1e7) for v in row]
             sw2 = list(sw)

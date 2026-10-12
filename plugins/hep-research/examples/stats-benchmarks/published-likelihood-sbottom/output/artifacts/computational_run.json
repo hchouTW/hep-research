@@ -1,0 +1,71 @@
+{
+ "contract_version": "2.2.0",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.6.10",
+  "contracts": "2.2.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  },
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-statistics",
+  "created": "2026-10-12",
+  "evidence_ids": [
+   "hepstats:S09"
+  ]
+ },
+ "outputs": [],
+ "unresolved_inputs": [],
+ "artifact_id": "atlas-susy-2018-31-srb-reproduction-run",
+ "artifact_type": "computational-run",
+ "objective": "Reproduce the SRB model-independent limits of ATLAS-SUSY-2018-31 from the public likelihood",
+ "inputs": [],
+ "status": [
+  "observed"
+ ],
+ "extension": {
+  "input_manifest": [
+   {
+    "path": "HEPData resource 1935437 (RegionB/BkgOnly.json)",
+    "sha256": "c425e741d8ab0adfbf8611ae86a92f24d7071ccaeb7bf3b2937bcc75a5712fa8"
+   }
+  ],
+  "tools": [
+   {
+    "name": "python",
+    "version": "3.13.2"
+   },
+   {
+    "name": "pyhf",
+    "version": "0.7.6"
+   },
+   {
+    "name": "numpy",
+    "version": "2.5.3"
+   }
+  ],
+  "commands": [
+   "python3 examples/stats-benchmarks/published-likelihood-sbottom/run.py --pallet <HEPData resource 1935437> --toys 5000"
+  ],
+  "environment": {
+   "platform": "macOS-26.5-arm64-arm-64bit-Mach-O"
+  },
+  "seeds": {
+   "toys": 20261012
+  },
+  "tolerances": {
+   "relative": 0.05,
+   "CLb_absolute": 0.05
+  },
+  "exit_status": 0,
+  "output_hashes": {
+   "results.json": "f889afb915c2e0c014b77b30a0b3b9ffa37cf9583311f7503f3d29abb19c1612"
+  }
+ }
+}

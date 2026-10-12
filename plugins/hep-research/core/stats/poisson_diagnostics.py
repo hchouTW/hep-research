@@ -421,7 +421,8 @@ def cls_limit(n: int, b: float, cl: float = 0.95, sigma_b: float = 0.0, nodes: i
                                         ", known background")),
             "n_obs": n, "b": b, "sigma_b": sigma_b, "cl": cl,
             "observed_upper_limit": limit(n), "expected_under_background_only": expected,
-            "note": ("CLs is conservative by construction (it over-covers) and is not a frequentist interval; "
+            "note": ("CLs is a modified frequentist exclusion prescription: conservative by construction (it over-covers), "
+                     "not an exact-coverage confidence belt and not a Bayesian bound; "
                      "the expected band is the quantile of the limit over background-only counts, not a coverage "
                      "claim; with sigma_b the background is a prior-predictive average, so check the dependence on "
                      "sigma_b and use toys or a profile construction for a final result")}

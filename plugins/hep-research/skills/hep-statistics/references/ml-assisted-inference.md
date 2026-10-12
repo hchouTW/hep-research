@@ -21,6 +21,11 @@ When a network estimates a likelihood ratio or density ratio directly (neural si
 - **Coverage of the final intervals.** Run toy experiments from known parameter values (including nuisance-parameter shifts) through the complete pipeline and report the coverage of the quoted intervals. An asymptotic distribution for the test statistic is an assumption to check, not a given, when the ratio is estimated.
 - **Ensembles and estimator variance.** Retrain with different seeds or data subsets; the spread of the result is an uncertainty of the method and must be either propagated or shown negligible.
 
+A calibratable starting point: `<plugin root>/skills/hep-statistics/scripts/ratio_estimation.py` (EXPERIMENTAL) checks a
+classifier ratio against an exact Gaussian ratio on held-out data and seeds, tests the identities E0[r] = 1 and
+E1[1/r] = 1, and reports the power of that test against a domain shift and a wrong nuisance model; without a power
+estimate the result is inconclusive. One p-value above 0.05 is not evidence of calibration.
+
 <!-- example: NSBI validation in a published analysis -->
 An example of the validation a full NSBI analysis documents is the ATLAS implementation note (ATLAS Collaboration, Rep. Prog. Phys. 88 (2025) 067801, arXiv:2412.01600): calibration of the density-ratio estimates, closure tests, nuisance-parameter treatment, ensembles, and coverage studies with pseudo-experiments.
 <!-- /example -->

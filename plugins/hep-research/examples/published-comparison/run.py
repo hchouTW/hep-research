@@ -139,14 +139,14 @@ def main(argv=None) -> int:
                                                      "luminosity part of the covariance used as given (fully correlated)"],
                            "limits": ["synthetic record", "no detector information used or needed",
                                       PEELLE]})
-    stat = dict(base, artifact_id="synthetic-t24-mu", artifact_type="statistical-result", status=["synthetic"],
+    stat = dict(base, artifact_id="synthetic-t24-mu", artifact_type="statistical-result", required_capabilities=["stats:result-semantics"], status=["synthetic"],
                 inputs=[{"ref": "artifacts/comparison_spec.json", "artifact_type": "comparison-spec", "status": ["synthetic"]}],
                 objective="Normalization scale of the QED prediction on a SYNTHETIC published-style record",
                 provenance={"producer_skill": "hep-statistics", "created": "2026-10-02"},
                 extension={"paradigm": "frequentist", "likelihood": {"form": "multivariate Gaussian with the record covariance"},
                            "parameters_of_interest": ["mu"], "nuisances": [],
                            "test_statistic": "chi2(mu) = (d - mu p)^T C^-1 (d - mu p)", "construction": "asymptotic",
-                           "coverage": {"method": "not studied here; Gaussian, linear in mu, so exact if the covariance is right"},
+                           "coverage": {"check": "analytic", "method": "not studied by toys; Gaussian and linear in mu, so exact if the covariance is right"},
                            "fit_status": "converged", "results": {"mu_hat": mu, "sigma_mu": sigma_mu, "chi2": chi2, "ndf": ndf, "p_value": pval}})
     docs = {"comparison_spec": comp, "result": stat}
     contract = {k: {"ok": (rp := validate_artifact(v, Vocabulary())).ok, "errors": [f.message for f in rp.errors]} for k, v in docs.items()}

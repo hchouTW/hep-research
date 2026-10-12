@@ -149,7 +149,7 @@ def artifacts(res, resp, created):
                                    "underflow_overflow": "reco outside [-1, 1] is lost; outer truth bins are buffers",
                                    "conditions": "single synthetic run", "provenance": "analytic integration of the synthetic detector model",
                                    "matrix_ref": "results.json#response", "form": "matrix"})
-    stat = dict(base, artifact_id="synthetic-path-b-result", artifact_type="statistical-result",
+    stat = dict(base, artifact_id="synthetic-path-b-result", artifact_type="statistical-result", required_capabilities=["stats:result-semantics"],
                 objective="SYNTHETIC corrected angular distribution and fiducial cross section with covariance",
                 provenance={"producer_skill": "hep-statistics", "created": created}, status=["synthetic"],
                 inputs=[{"ref": "artifacts/measurement_spec.json", "artifact_type": "measurement-spec", "status": ["synthetic"]}],
@@ -158,7 +158,7 @@ def artifacts(res, resp, created):
                            "parameters_of_interest": ["d sigma / d cos theta per fiducial bin", "fiducial cross section"],
                            "nuisances": ["integrated luminosity"],
                            "test_statistic": "not-applicable (point estimates with linear covariance)", "construction": "other",
-                           "coverage": {"method": "seeded toys of counts and luminosity", "result_ref": "results.json#toy_closure"},
+                           "coverage": {"check": "not-checked", "method": "seeded toys of counts and luminosity (closure and pulls, not interval coverage)", "result_ref": "results.json#toy_closure"},
                            "fit_status": "converged", "results": {"ref": "results.json#dsigma"}})
     data = dict(base, artifact_id="synthetic-path-b-dsigma", artifact_type="dataset-record",
                 objective="SYNTHETIC corrected d sigma / d cos theta (illustrative)", status=["synthetic"],

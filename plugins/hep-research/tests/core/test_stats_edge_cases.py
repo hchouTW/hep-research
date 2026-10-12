@@ -230,7 +230,7 @@ class BlindedLowCounts(unittest.TestCase):
         sealed = [1234.567]
         with tempfile.TemporaryDirectory() as td:
             for name, enc in (("u8.log", "utf-8"), ("u16.log", "utf-16"), ("l1.log", "latin-1")):
-                (Path(td) / name).write_bytes(f"résultat 1234.567\n".encode(enc))
+                (Path(td) / name).write_bytes("résultat 1234.567\n".encode(enc))
             rep = bl.scan_paths([td], sealed)
         self.assertEqual(sorted(Path(h["file"]).name for h in rep["leaks"]), ["l1.log", "u16.log", "u8.log"])
 

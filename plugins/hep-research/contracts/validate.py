@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
 """Validate a hep-research artifact: common envelope + typed extension + semantic rules.
 
-Usage: python3 contracts/validate.py ARTIFACT.json [--profiles-from PROJECT_CONFIG.json] [--protected]
-Exit codes: 0 valid, 1 findings with errors, 2 unreadable input or bad usage. Output: JSON report on stdout.
+Usage: python3 contracts/validate.py ARTIFACT.json [--profiles-from PROJECT_CONFIG.json] [--protected] [--strict]
+                                    [--gate publication]
+Exit codes: 0 valid (and, with --gate, the gate passed), 1 findings with errors (or the gate failed or is unresolved),
+2 unreadable input or bad usage. Output: JSON report on stdout.
 A valid artifact is self-consistent under the contract; that says nothing about physical validity, and this check is
 advisory: it never authorizes a use. --protected applies the stricter version policy for protected use (a newer
-minor contract version is an error, not a warning).
+minor contract version is an error, not a warning). --strict applies the statistical-result semantic rules of
+contracts 2.2.0 (p-values and confidence levels in range, ordered expected bands, typed coverage and global
+calibration) to artifacts written under older contracts, which otherwise keep their outcome. --gate publication adds
+the publication gate of a statistical-result (publication_gate): passed, unresolved or failed, with reasons; an
+archived artifact may be valid and still not pass it. Passing the gate is a contract-level prerequisite for
+reporting a result as validated, not evidence of scientific validity.
 """
 from __future__ import annotations
 
@@ -238,6 +245,267 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:
 
 
 RHAT_MAX = 1.01  # [Proposal] threshold for stats.convergence_mismatch
+STAT_SEMANTICS_FROM = "2.2.0"  # statistical-result semantic rules apply natively from this contract version
+BAND_KEYS = ("band_1sigma", "band_2sigma")
+
+
+def _is_num(v) -> bool:
+    return isinstance(v, (int, float)) and not isinstance(v, bool)
+
+
+def _stat_semantics(doc: dict, ext: dict, rep: Report, strict: bool) -> None:
+    """Numerical and semantic invariants of a statistical-result (audit F04, T06, T07). They apply natively to
+    artifacts of contract 2.2.0 or later; an older artifact gets them only in strict mode, so its promised outcome
+    is unchanged (T08). Errors: a p-value or bound outside [0, 1], a confidence level outside (0, 1), a global
+    p-value below the local one, expected bands that are not [low, high] pairs ordered -2 <= -1 <= median <= +1 <= +2.
+    Unresolved (valid, not usable as a final result): untyped coverage, a scan's global p-value without its
+    trials_method, toy calibration without its toy count, a failed fit diagnostic under fit_status converged."""
+    if not (strict or _at_least(doc.get("contract_version"), STAT_SEMANTICS_FROM)):
+        return
+    sig: Any = ext.get("significance") if isinstance(ext.get("significance"), dict) else {}
+    for key in ("local_p", "global_p"):
+        v = sig.get(key)
+        if _is_num(v) and not 0.0 <= v <= 1.0:
+            rep.add("error", f"$.extension.significance.{key}", "stats.p_out_of_range", f"{key} = {v} lies outside [0, 1]")
+    for key in ("local_p_bound", "global_p_bound"):
+        b = sig.get(key)
+        if isinstance(b, dict):
+            if _is_num(b.get("value")) and not 0.0 <= b["value"] <= 1.0:
+                rep.add("error", f"$.extension.significance.{key}.value", "stats.p_out_of_range", f"{key} {b['value']} lies outside [0, 1]")
+            if _is_num(b.get("cl")) and not 0.0 < b["cl"] < 1.0:
+                rep.add("error", f"$.extension.significance.{key}.cl", "stats.cl_out_of_range", f"{key} cl {b['cl']} lies outside (0, 1)")
+            if key[:-6] in sig:
+                rep.add("error", f"$.extension.significance.{key}", "stats.p_value_and_bound",
+                        f"give {key[:-6]} (an estimate) or {key} (a bound), not both")
+    lp: Any = sig.get("local_p", (sig.get("local_p_bound") or {}).get("value") if isinstance(sig.get("local_p_bound"), dict) else None)
+    gp: Any = sig.get("global_p")
+    if _is_num(lp) and _is_num(gp) and gp < lp - 1e-12 and "local_p_bound" not in sig:
+        rep.add("error", "$.extension.significance.global_p", "stats.global_below_local",
+                f"global p {gp} is below local p {lp}: a trials correction cannot make a result more significant")
+    gof: Any = ext.get("goodness_of_fit")
+    if isinstance(gof, dict) and _is_num(gof.get("p_value")) and not 0.0 <= gof["p_value"] <= 1.0:
+        rep.add("error", "$.extension.goodness_of_fit.p_value", "stats.p_out_of_range", f"p_value {gof['p_value']} lies outside [0, 1]")
+    cov: Any = ext.get("coverage") if isinstance(ext.get("coverage"), dict) else None
+    levels: list[tuple[str, Any]] = [("$.extension.cl", ext.get("cl")), ("$.extension.coverage.cl", (cov or {}).get("cl")),
+                                     ("$.extension.results.cl", ext["results"].get("cl") if isinstance(ext.get("results"), dict) else None)]
+    for path, v in levels:
+        if _is_num(v) and not 0.0 < v < 1.0:
+            rep.add("error", path, "stats.cl_out_of_range", f"confidence level {v} lies outside (0, 1)")
+    if cov is not None and _is_num(cov.get("coverage")) and not 0.0 <= cov["coverage"] <= 1.0:
+        rep.add("error", "$.extension.coverage.coverage", "stats.p_out_of_range", f"coverage {cov['coverage']} lies outside [0, 1]")
+    exp: Any = ext.get("expected")
+    if isinstance(exp, dict):
+        _check_bands(exp, rep)
+    if ext.get("paradigm") == "frequentist" and cov is not None and cov and "check" not in cov:
+        rep.add("unresolved", "$.extension.coverage", "stats.coverage_untyped",
+                "coverage has no check: state toys (with n_toys and the result), exact-construction, analytic or "
+                "not-checked; a free-text method or note alone is not coverage evidence")
+    if cov is not None and cov.get("check") == "toys" and not (_is_num(cov.get("n_toys")) and cov["n_toys"] > 0):
+        rep.add("unresolved", "$.extension.coverage.n_toys", "stats.coverage_without_toys", "toy coverage needs its toy count")
+    if cov is not None and cov.get("check") == "toys" and not (_is_num(cov.get("coverage")) or cov.get("points")):
+        rep.add("unresolved", "$.extension.coverage.coverage", "stats.coverage_value_missing",
+                "toy coverage needs the measured coverage (coverage, or points with their values)")
+    if cov is not None and cov.get("check") in ("analytic", "exact-construction") and not cov.get("method"):
+        rep.add("unresolved", "$.extension.coverage.method", "stats.coverage_justification_missing",
+                f"coverage check '{cov.get('check')}' needs its justification in method")
+    if sig.get("trials_method") == "toys" and ("global_p" in sig or "global_p_bound" in sig) and not _is_num(sig.get("global_n_toys")):
+        rep.add("unresolved", "$.extension.significance.global_n_toys", "stats.global_toys_missing",
+                "a toy-calibrated global p-value needs its toy count (global_n_toys)")
+    gb: Any = sig.get("global_p_bound")
+    if isinstance(gb, dict) and gb.get("kind") == "upper" and _is_num(gb.get("value")) and _is_num(sig.get("local_p")) \
+            and gb["value"] < sig["local_p"] - 1e-12:
+        rep.add("error", "$.extension.significance.global_p_bound", "stats.global_below_local",
+                f"global p upper bound {gb['value']} is below local p {sig['local_p']}")
+    if isinstance(sig.get("scan"), dict) and ("global_p" in sig or "global_p_bound" in sig) and not sig.get("trials_method"):
+        rep.add("unresolved", "$.extension.significance.trials_method", "stats.trials_method_missing",
+                "a global p-value without its trials_method is not an established global significance")
+    if ext.get("paradigm") == "bayesian":
+        _bayesian_rules(ext, rep)
+    lik: Any = ext.get("likelihood")
+    if isinstance(lik, dict) and isinstance(lik.get("model_card"), dict):
+        _model_card_rules(lik["model_card"], ext.get("paradigm"), rep)
+    if _at_least(doc.get("contract_version"), STAT_SEMANTICS_FROM) and \
+            "stats:result-semantics" not in (doc.get("required_capabilities") or []):
+        rep.add("warning", "$.required_capabilities", "stats.capability_not_declared",
+                "a 2.2 statistical-result should require stats:result-semantics, so a 2.1 reader refuses it instead of "
+                "reading it under the older rules")
+    fd: Any = ext.get("fit_diagnostics")
+    if isinstance(fd, dict) and fd.get("status") == "failed" and ext.get("fit_status") in ("converged", "converged-with-warnings"):
+        rep.add("error", "$.extension.fit_status", "stats.fit_status_mismatch",
+                "fit_diagnostics.status is failed but fit_status says converged")
+
+
+GRADIENT_SAMPLERS = re.compile(r"\b(nuts|hmc|hamiltonian)\b", re.I)
+SAMPLER_METADATA = ("warmup", "chains", "draws", "divergences", "e_bfmi_min", "max_treedepth_hits")
+IMPROPER_FORMS = re.compile(r"^\s*(flat|improper|uniform\s*\(\s*-?inf|uniform\[\s*-?inf)", re.I)
+E_BFMI_MIN = 0.3  # Stan's warning threshold
+
+
+def _bayesian_rules(ext: dict, rep: Report) -> None:
+    """Bayesian results (audit T25): gradient-based samplers carry their warmup, chains, draws, divergences, E-BFMI and
+    tree-depth saturations; divergences or a low E-BFMI under fit_status converged are errors; an improper prior is
+    unresolved until the posterior's propriety is shown; SBC is calibration over the prior predictive, so it is not
+    reported as frequentist coverage."""
+    smp: Any = ext.get("sampler")
+    conv = ext.get("fit_status") == "converged"
+    if isinstance(smp, dict) and GRADIENT_SAMPLERS.search(str(smp.get("name", "")) + " " + str(smp.get("algorithm", ""))):
+        missing = [k for k in SAMPLER_METADATA if k not in smp]
+        if missing:
+            rep.add("unresolved", "$.extension.sampler", "stats.sampler_metadata_missing",
+                    f"a gradient-based sampler needs {', '.join(missing)}")
+        dv: Any = smp.get("divergences")
+        if _is_num(dv) and dv > 0 and conv:
+            rep.add("error", "$.extension.fit_status", "stats.divergences_unreported",
+                    f"{dv} divergent transitions but fit_status converged: use converged-with-warnings or failed")
+        eb: Any = smp.get("e_bfmi_min")
+        if _is_num(eb) and eb < E_BFMI_MIN and conv:
+            rep.add("error", "$.extension.fit_status", "stats.low_e_bfmi",
+                    f"E-BFMI {eb} below {E_BFMI_MIN} but fit_status converged")
+    for i, pr in enumerate(ext.get("priors", []) or []):
+        if isinstance(pr, dict) and IMPROPER_FORMS.search(str(pr.get("form", ""))) and not pr.get("propriety"):
+            rep.add("unresolved", f"$.extension.priors[{i}]", "stats.improper_prior",
+                    f"prior '{pr.get('form')}' on {pr.get('parameter')} is improper: state why the posterior is proper "
+                    "(priors[].propriety) or use a proper prior")
+    if "coverage" in ext:
+        rep.add("error", "$.extension.coverage", "stats.paradigm_mislabeled",
+                "a Bayesian result reports calibration (for example SBC) under checks, not frequentist coverage")
+
+
+def check_model_card(card: dict, paradigm: str | None, rep: Report, path: str = "$.extension.likelihood.model_card") -> None:
+    """Semantic rules of a statistical model card (contracts/schemas/statistical_model.json), audit T15."""
+    seen: dict[str, str] = {}
+    for i, c in enumerate(card.get("constraints", [])):
+        aux, par = c.get("aux_id"), c.get("parameter")
+        if aux in seen and seen[aux] != par:
+            rep.add("error", f"{path}.constraints[{i}]", "stats.duplicate_auxiliary",
+                    f"auxiliary measurement '{aux}' constrains both '{seen[aux]}' and '{par}': one measurement enters the "
+                    "likelihood once; share one parameter between the samples or channels it affects")
+        elif aux in seen:
+            rep.add("error", f"{path}.constraints[{i}]", "stats.duplicate_auxiliary",
+                    f"auxiliary measurement '{aux}' appears twice for '{par}': it would be counted twice")
+        seen.setdefault(aux, par)
+        if paradigm == "frequentist" and c.get("kind") == "prior":
+            rep.add("error", f"{path}.constraints[{i}]", "stats.prior_in_frequentist_model",
+                    f"'{par}' has a prior in a frequentist model; a constraint must come from an auxiliary measurement")
+    channels = {ch.get("name") for ch in card.get("channels", [])}
+    params = {c.get("parameter") for c in card.get("constraints", [])}
+    for i, smp in enumerate(card.get("samples", [])):
+        if smp.get("channel") not in channels:
+            rep.add("error", f"{path}.samples[{i}].channel", "stats.model_unknown_channel", f"channel '{smp.get('channel')}' is not defined")
+        for m in smp.get("modifiers", []):
+            if m.get("type") == "constrained-normalization" and m.get("parameter") not in params:
+                rep.add("error", f"{path}.samples[{i}]", "stats.model_unconstrained_parameter",
+                        f"constrained parameter '{m.get('parameter')}' has no constraint term")
+            if m.get("type") == "poi" and m.get("parameter") != card.get("poi"):
+                rep.add("error", f"{path}.samples[{i}]", "stats.model_poi_mismatch", f"'{m.get('parameter')}' is not the poi")
+    roles = {ch.get("name"): ch.get("role") for ch in card.get("channels", [])}
+    cr_signal = any(roles.get(s.get("channel")) == "control-region" and any(m.get("type") == "poi" for m in s.get("modifiers", []))
+                    for s in card.get("samples", []))
+    if card.get("signal_contamination") == "modeled" and not cr_signal:
+        rep.add("error", f"{path}.signal_contamination", "stats.contamination_not_in_model",
+                "signal_contamination says modeled but no control-region sample carries the poi")
+    if card.get("signal_contamination") == "not-modeled":
+        rep.add("unresolved", f"{path}.signal_contamination", "stats.contamination_not_modeled",
+                "signal in the control regions is not modeled: show it is negligible (an injection test) or model it")
+
+
+_model_card_rules = check_model_card
+
+
+def _check_bands(exp: dict, rep: Report) -> None:
+    bands = {}
+    for key in BAND_KEYS:
+        b = exp.get(key)
+        if b is None:
+            continue
+        if not (isinstance(b, list) and len(b) == 2 and all(_is_num(v) for v in b)):
+            rep.add("error", f"$.extension.expected.{key}", "stats.band_cardinality",
+                    f"{key} must be a [low, high] pair, got {b!r}")
+            continue
+        bands[key] = b
+    chain = []
+    if "band_2sigma" in bands:
+        chain.append(("-2sigma", bands["band_2sigma"][0]))
+    if "band_1sigma" in bands:
+        chain.append(("-1sigma", bands["band_1sigma"][0]))
+    if _is_num(exp.get("median")):
+        chain.append(("median", exp["median"]))
+    if "band_1sigma" in bands:
+        chain.append(("+1sigma", bands["band_1sigma"][1]))
+    if "band_2sigma" in bands:
+        chain.append(("+2sigma", bands["band_2sigma"][1]))
+    for (n1, v1), (n2, v2) in zip(chain, chain[1:]):
+        if v2 < v1:
+            rep.add("error", "$.extension.expected", "stats.bands_unordered",
+                    f"expected bands must satisfy -2sigma <= -1sigma <= median <= +1sigma <= +2sigma; {n1} = {v1} > {n2} = {v2}")
+
+
+def publication_gate(doc: dict, vocab: Vocabulary | None = None) -> dict:
+    """Publication gate of a statistical-result (T07): status passed, unresolved or failed, with reasons.
+
+    failed: the artifact has errors under strict validation, carries the 'failed' status, its fit failed or was not
+    run, or its fit diagnostics failed. unresolved: anything not yet established: an 'unvalidated' or 'preliminary'
+    label, unresolved inputs, fit_status converged-with-warnings, untyped or not-checked coverage (frequentist), a scan
+    without a global p-value and its trials_method, a Bayesian result without numeric R-hat and ESS, or no model and
+    backend provenance (likelihood.backend with likelihood.model_ref or model_sha256). Passing says the contract-level
+    prerequisites for reporting the result as validated are present; it is not a scientific validation."""
+    reasons: list[dict] = []
+
+    def add(level, code, msg):
+        reasons.append({"level": level, "code": code, "message": msg})
+    if not isinstance(doc, dict) or doc.get("artifact_type") != "statistical-result":
+        add("failed", "gate.not_statistical_result", "the publication gate applies to statistical-result artifacts")
+        return {"gate": "publication", "status": "failed", "reasons": reasons}
+    rep = validate_artifact(doc, vocab, strict=True)
+    for f in rep.findings:
+        if f.severity == "error":
+            add("failed", f.code, f.message)
+        elif f.severity == "unresolved":
+            add("unresolved", f.code, f.message)
+    ext: Any = doc.get("extension") if isinstance(doc.get("extension"), dict) else {}
+    status = set(doc.get("status", []))
+    if "failed" in status:
+        add("failed", "gate.failed_label", "the artifact carries the 'failed' status")
+    for s in ("unvalidated", "preliminary"):
+        if s in status:
+            add("unresolved", "gate.status_label", f"the artifact carries '{s}': an archival artifact, not a validated result")
+    if doc.get("unresolved_inputs"):
+        add("unresolved", "gate.unresolved_inputs", "unresolved inputs are listed")
+    fs = ext.get("fit_status")
+    if fs in ("failed", "not-run"):
+        add("failed", "gate.fit_not_converged", f"fit_status is {fs}")
+    elif fs == "converged-with-warnings":
+        add("unresolved", "gate.fit_warnings", "fit_status is converged-with-warnings")
+    fd: Any = ext.get("fit_diagnostics")
+    if isinstance(fd, dict) and fd.get("status") in ("failed", "incomplete"):
+        add("failed" if fd["status"] == "failed" else "unresolved", "gate.fit_diagnostics", f"fit_diagnostics.status is {fd['status']}")
+    if ext.get("paradigm") == "frequentist":
+        cov: Any = ext.get("coverage") if isinstance(ext.get("coverage"), dict) else {}
+        if cov.get("check") in (None, "not-checked"):
+            add("unresolved", "gate.coverage_not_established", "coverage is not established (check missing or not-checked)")
+        nominal: Any = cov.get("cl", (ext.get("results") or {}).get("cl") if isinstance(ext.get("results"), dict) else None)
+        value: Any = cov.get("coverage")
+        if cov.get("check") == "toys" and _is_num(value) and _is_num(nominal):
+            interval: Any = cov.get("interval")
+            upper = interval[1] if isinstance(interval, list) and len(interval) == 2 and _is_num(interval[1]) else value
+            if upper < nominal - 0.01:
+                add("failed", "gate.undercoverage", f"recorded coverage {value} (upper end {upper}) is below the nominal "
+                                                    f"{nominal} by more than 0.01")
+        elif cov.get("check") == "toys" and not _is_num(nominal):
+            add("unresolved", "gate.coverage_nominal_missing", "toy coverage needs the nominal level (coverage.cl)")
+    if ext.get("paradigm") == "bayesian":
+        conv: Any = ext.get("convergence") if isinstance(ext.get("convergence"), dict) else {}
+        if _max_rhat(conv) is None or not any(k.startswith("ess") for k in conv):
+            add("unresolved", "gate.convergence_not_established", "a Bayesian result needs numeric R-hat and ESS")
+    sig: Any = ext.get("significance") if isinstance(ext.get("significance"), dict) else {}
+    if isinstance(sig.get("scan"), dict) and not (("global_p" in sig or "global_p_bound" in sig) and sig.get("trials_method")):
+        add("unresolved", "gate.global_not_established", "a scan needs a global p-value (or bound) with its trials_method")
+    lik: Any = ext.get("likelihood") if isinstance(ext.get("likelihood"), dict) else {}
+    if not (lik.get("backend") and (lik.get("model_ref") or lik.get("model_sha256"))):
+        add("unresolved", "gate.model_provenance_missing", "likelihood.backend and a model_ref or model_sha256 are required")
+    levels = {r["level"] for r in reasons}
+    status_out = "failed" if "failed" in levels else ("unresolved" if levels else "passed")
+    return {"gate": "publication", "status": status_out, "reasons": reasons}
 
 
 def _max_rhat(conv):
@@ -306,7 +574,7 @@ def check_unknown_keys(doc: dict, rep: Report) -> None:
                 f"'{key}' is not an envelope field: no consumer reads or propagates it")
 
 
-def validate_artifact(doc, vocab: Vocabulary | None = None, protected: bool = False) -> Report:
+def validate_artifact(doc, vocab: Vocabulary | None = None, protected: bool = False, strict: bool = False) -> Report:
     vocab = vocab or Vocabulary()
     rep = validate(doc, "envelope.json", vocab)
     check_finite(doc, rep)
@@ -316,12 +584,17 @@ def validate_artifact(doc, vocab: Vocabulary | None = None, protected: bool = Fa
     check_unknown_keys(doc, rep)
     at = doc.get("artifact_type")
     ext_schema = EXTENSION_SCHEMAS.get(at) if isinstance(at, str) else None  # a wrong type is already a finding
-    ext = doc.get("extension")
+    ext: Any = doc.get("extension")
     if ext_schema and isinstance(ext, dict):
         validate(ext, ext_schema, vocab, rep, "$.extension")
         # Semantic rules assume the value types the schema guarantees; on a type error report that alone.
         if not any(f.code in SHAPE_ERRORS for f in rep.errors):
             _rules(doc, ext, vocab, rep)
+            if at == "statistical-result":
+                if strict or _at_least(doc.get("contract_version"), STAT_SEMANTICS_FROM):
+                    validate(ext, "ext_statistical_result_v2_2.json", vocab, rep, "$.extension")
+                if not any(f.code in SHAPE_ERRORS for f in rep.errors):
+                    _stat_semantics(doc, ext, rep, strict)
     return rep
 
 
@@ -351,10 +624,20 @@ def main(argv=None) -> int:
         pre.findings += proj.report.findings
         for prob in vocab.problems:
             pre.add("error", "config.profiles", "profile.vocab_namespace", prob)
-    rep = validate_artifact(doc, vocab, protected="--protected" in args)
+    gate = None
+    if "--gate" in args:
+        i = args.index("--gate") + 1
+        if i >= len(args) or args[i] != "publication":
+            print(json.dumps({"ok": False, "error": "--gate takes 'publication'"}))
+            return 2
+        gate = publication_gate(doc, vocab)
+    rep = validate_artifact(doc, vocab, protected="--protected" in args, strict="--strict" in args)
     rep.findings[:0] = pre.findings
-    print(json.dumps(rep.as_dict(), indent=1))
-    return 0 if rep.ok else 1
+    out = rep.as_dict()
+    if gate is not None:
+        out["gate"] = gate
+    print(json.dumps(out, indent=1))
+    return 0 if rep.ok and (gate is None or gate["status"] == "passed") else 1
 
 
 if __name__ == "__main__":

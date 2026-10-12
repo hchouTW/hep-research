@@ -50,7 +50,9 @@ class GofTests(unittest.TestCase):
         for i in range(200):
             ns = [ppf(rng.random(), x + y) for x, y in zip(b, s)]
             doc = {"bins": [{"n": n, "b": x, "s": y} for n, x, y in zip(ns, b, s)], "nuisances": NUIS[:1]}
-            ps.append(ll.shape_gof(doc, 150, 1000 + i)["toy_p_value"])
+            r = ll.shape_gof(doc, 150, 1000 + i)
+            # no exceedance: the toys bound p below 1 - 0.05^(1/150) = 0.02 instead of reporting p = 0 (audit F02)
+            ps.append(r["toy_p_value"] if r["toy_p_value"] is not None else r["toy_tail"]["upper_bound"]["value"])
         # binomial standard deviations for 200 data sets: 0.021 and 0.035
         self.assertLess(abs(sum(p <= 0.1 for p in ps) / len(ps) - 0.1), 0.06)
         self.assertLess(abs(sum(p <= 0.5 for p in ps) / len(ps) - 0.5), 0.1)

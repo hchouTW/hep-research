@@ -3,6 +3,96 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+Hep-statistics audit (audit commit b5c3a55, findings F01–F04, checks T01–T30; evidence in VALIDATION.md,
+STATS-AUDIT). Batch A (P0, T01–T08):
+
+- **sci-fix: Poisson domain in the likelihoods (F01, T01).** `likelihood_limits.py` read a negative Poisson mean in an
+  empty bin as an empty bin (a shape template interpolated below zero gave expected = -1 with a finite NLL). A
+  negative or non-finite mean, or a zero mean with events, is now outside every likelihood (NLL = +inf); a zero mean
+  with no events stays valid. `_lnl` and the profiled background `_b_hat` keep `s + b >= 0` (relevant for the
+  two-POI fit, where a signal may be negative). No committed example number changed.
+- **sci-fix: toy tails are bounds at zero exceedances (F02, T02, T03).** New `core/stats/tail_estimation.py`
+  (Clopper-Pearson intervals and one-sided bounds, incomplete beta in pure Python, log-space Poisson tails). Every
+  toy p-value of `likelihood_limits.py` and `statistical_toys.py` carries `toy_tail` {k, n, estimate,
+  interval (68.27%), upper_bound or lower_bound (95%), convention}. **Behavior change:** `p_value_toys`,
+  `toy_p_value_at_asymptotic_limit`, `toy_p_value` and their binomial errors are `null` where they used to report
+  p = 0 or an error of 0 (k = 0; the error also at k = n). `statistical_toys.py ratio` counts toys it cannot evaluate
+  (`toys_not_evaluated`) instead of reading them as non-exceedances.
+- **sci-fix: fit verdicts (F03, T04, T05).** New `core/stats/fit_diagnostics.py`: the damped Newton search is
+  unchanged, but every fit now returns `converged` or `failed` with reasons (finite NLL, positive-definite Hessian,
+  EDM <= 1e-5; `max_iterations`, `line_search_stalled`, `hessian_not_positive_definite`, `invalid_domain`, ...). A
+  best fit at `mu = 0` is checked by the KKT condition. A conditional NLL below the global one by more than 1e-4
+  triggers a global refit and, if it remains, a failure (it was clipped to `q = 0` before). `shape-limit`,
+  `shape-gof` and `contour` report `fit_diagnostics` and `status`; the CLI exits 1 (`failed`, a fit on the data) or
+  3 (`incomplete`, only toy fits failed, or an open contour) instead of always 0. Failed toys are counted and make the
+  result incomplete; toy p-values carry the range [k/N, (k+F)/N], while the toy CLs curves still include the q values of
+  failed toys, which is why such a result is never ok. A better global minimum found by a refit restarts the limit or
+  contour from it.
+- **Contracts 2.2.0 (minor): statistical-result semantics (F04, T06–T08).** New optional fields: typed p-value bounds
+  (`significance.local_p_bound`, `global_p_bound`), `global_n_toys`, `coverage.check` (`toys`, `exact-construction`,
+  `analytic`, `not-checked`) with `n_toys`, `coverage`, `interval`, `cl`, `ensemble`, `failure_policy`, `failures`;
+  `fit_diagnostics`; `likelihood.backend`, `model_ref`, `model_sha256`. New rules: a p-value or bound outside [0, 1],
+  a confidence level outside (0, 1), a global p-value below the local one, expected bands that are not ordered
+  `[low, high]` pairs, or `fit_diagnostics` failed under `fit_status: converged` are errors; untyped coverage, a
+  global p-value without `trials_method` and toy coverage without its toy count are unresolved. The rules apply to
+  artifacts of contract 2.2.0; older artifacts keep their outcome and get them with `validate.py --strict`. New
+  capability `stats:result-semantics`, so a 2.1 reader refuses a 2.2 result that relies on them. New publication
+  gate (`validate.py --gate publication`, `contracts.validate.publication_gate`): passed, unresolved or failed, with
+  reasons (strict validity, fit status and diagnostics, typed coverage, global calibration of a scan, Bayesian R-hat
+  and ESS, model and backend provenance, status labels). New converter `contracts/migrate_statistical_result.py`
+  (refuses an artifact that breaks a 2.2.0 rule, names the rule; never invents coverage or a trials method).
+- **hep-statistics: `scripts/result_artifact.py`.** Writes a `statistical-result` from a `core/stats` CLI output,
+  keeping its status (a failed fit becomes `fit_status: failed` with the `failed` label) and writing a zero-exceedance
+  toy p-value as a typed bound.
+- **Examples.** The six example statistical-results state `coverage.check` (five `not-checked`: their toy studies are
+  closure and pull checks, not interval coverage; `theory-comparison` `toys`; `published-comparison` `analytic`).
+  Outputs regenerated for contracts 2.2.0 (only the version strings and `check` changed).
+
+Batch B (P1, T09-T17, T22-T23):
+
+- **Exact counting and asymptotic oracles (T09, T10).** Tests against SciPy roots, an independent Feldman-Cousins
+  ordering and the closed forms of Cowan et al. (arXiv:1007.1727v3). New asymptotic calibration gate in
+  `likelihood_limits.py` (`asymptotic_calibration`: the asymptotic p inside the toys' 99% exact interval, else
+  inapplicable).
+- **Toy CLs (T11).** `shape-limit --cls-toys` keeps the CLs+b and CLb exceedance counts per grid point, an exact-interval
+  range for the limit (`observed_limit_mc_range`) and reports a limit decided by a floored denominator as unresolved.
+- **Toy ensembles and coverage accounting (T12, T13).** New `core/stats/toy_ensemble.py`: explicit ensemble (no
+  default), seeds from (seed, toy index), disjoint partitions, one outcome per toy, coverage C/N, (C+F)/N and C/(N-F)
+  under a predeclared failure policy, a pass/fail/insufficient-precision coverage gate; no automatic retries.
+- **Coverage grid (T14).** `examples/stats-benchmarks/coverage-grid/`: exact coverage of the classical, CLs and FC belts
+  and 20,000-toy coverage of the asymptotic profile limit; a negative control (sigma_b ignored) is rejected.
+- **SR/CR model card and backend equivalence (T15, T16).** `contracts/schemas/statistical_model.json` (nested as
+  `likelihood.model_card`), `adapters/pyhf-combine/assets/model_card.py` and `backend_comparison.py`.
+- **Published likelihood (T17).** `examples/stats-benchmarks/published-likelihood-sbottom/`: ATLAS-SUSY-2018-31 SRB from
+  the HEPData pallet (checksum pinned) against preregistered paper values, with full CLs scans and bands.
+- **Unfolding (T22, T23).** `unfolding_diagnostics.py outer-coverage`; `response-stat` accounts for every toy.
+
+Batch C (P1, T18-T21, T24-T25): `skills/hep-statistics/scripts/covariance_fit.py`, `sweighted_fit.py`,
+`bayes_calibration.py`; sci-fix of `bayes_diagnostics.py` (ties, constant chains, ESS and MCSE as Vehtari et al.);
+`template_fit.py` refuses signed-weight templates; Bayesian contract rules (NUTS metadata, divergences, E-BFMI,
+improper priors).
+
+Batch D (P2, T26-T30, all EXPERIMENTAL): `eft_scan.py`, `discrete_profile.py`, `global_significance.py`,
+`pcl_efficiency_ratio.py`, `ratio_estimation.py`. The discrete-profiling study (`examples/stats-benchmarks/discrete-profile/`) meets its
+bias criterion; its coverage is not established at 300 toys per point (insufficient precision).
+
+CI, documentation and evidence:
+
+- **CI.** New required job `stats-backends` (`tests.yml`): the statistics tests with pyhf 0.7.6 and ArviZ 0.23.4, where
+  a skip for a required backend fails (`tools/run_required_backends.py`). New workflow `statistics-validation.yml`
+  (weekly, on demand, on release tags): full-budget campaigns, the published-likelihood reproduction (not-run fails)
+  and a Combine 11.1.0 release gate. These workflows were written and their YAML checked here; they have not run on
+  GitHub yet.
+- **Wording.** CLs is described as a modified frequentist exclusion prescription (not "not a frequentist interval");
+  a profile-versus-marginalized difference is no longer called a method systematic to add; frequentist constraint
+  terms are `"constraint"` in `shape-limit` (`"prior"` kept as an alias; results carry `constraints` and the legacy
+  `priors`); the Combine execution scope in `nuisance-modeling.md` matches VALIDATION; equation numbers of Cowan et al.
+  are cited for arXiv v3 (one wrong number corrected).
+- **Evidence.** `docs/evidence/statistics/` holds a source and claim ledger (checked by `core/evidence/ledger.py`) and
+  a capability ledger with statuses supported, experimental or unvalidated, each with its tests and CI gate.
+
 ## 0.6.10 (2026-10-12)
 
 - **batch-schedulers: `limits.max_gpu_hours`.** The Slurm poll reads `AllocTRES`; each attempt records

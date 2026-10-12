@@ -192,7 +192,7 @@ def main(argv=None) -> int:
                       "g2_upper": s_up / per_g2, "g_upper": math.sqrt(s_up / per_g2)})
 
     docs = {"search_record": rec, "prediction_m300": prediction_doc(300.0, a.created), "efficiency_map": resp}
-    docs["result"] = dict(base(a.created, "hep-statistics"), artifact_id="synthetic-j7-coupling-limit", artifact_type="statistical-result",
+    docs["result"] = dict(base(a.created, "hep-statistics"), artifact_id="synthetic-j7-coupling-limit", artifact_type="statistical-result", required_capabilities=["stats:result-semantics"],
                           objective="SYNTHETIC 95% CLs upper limit on the toy-model coupling versus m_X (illustrative recast)",
                           inputs=[{"ref": "artifacts/search_record.json", "artifact_type": "dataset-record", "status": ["synthetic"]},
                                   {"ref": "artifacts/efficiency_map.json", "artifact_type": "response", "status": ["synthetic"]}],
@@ -200,7 +200,7 @@ def main(argv=None) -> int:
                                      "likelihood": {"form": "Poisson count with a Gaussian-constrained background (one signal region)"},
                                      "parameters_of_interest": ["signal count s", "toy coupling g^2 via s = g^2 L sigma_ref (m_ref/m_X)^4 eps(m_X)"],
                                      "nuisances": ["background"], "test_statistic": "one-sided profile likelihood ratio (q-tilde)",
-                                     "construction": "cls", "coverage": {"method": "CLs over-covers by design; not studied further here"},
+                                     "construction": "cls", "coverage": {"check": "not-checked", "method": "CLs over-covers by design; not studied further here"},
                                      "fit_status": "converged", "results": {"ref": "results.json#limits"}})
     contract = {k: {"ok": (r := validate_artifact(v)).ok, "errors": [f.message for f in r.errors]} for k, v in docs.items()}
     for k, v in docs.items():

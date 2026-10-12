@@ -1,5 +1,5 @@
 {
- "contract_version": "2.1.0",
+ "contract_version": "2.2.0",
  "bindings": {
   "experiments": [
    {
@@ -16,7 +16,7 @@
  },
  "versions": {
   "plugin": "0.6.10",
-  "contracts": "2.1.0",
+  "contracts": "2.2.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -30,6 +30,9 @@
  "unresolved_inputs": [],
  "artifact_id": "synthetic-path-d-mu-fit",
  "artifact_type": "statistical-result",
+ "required_capabilities": [
+  "stats:result-semantics"
+ ],
  "inputs": [
   {
    "ref": "artifacts/comparison_spec.json",
@@ -87,7 +90,10 @@
   "test_statistic": "profile likelihood ratio q(mu) = 2 [NLL(mu, profiled) - NLL_min]",
   "construction": "profile-likelihood-wilks",
   "coverage": {
+   "check": "toys",
    "method": "seeded toys from the synthetic generator with a fluctuated luminosity measurement",
+   "n_toys": 200,
+   "cl": 0.68,
    "result": {
     "1": {
      "toys": 200,

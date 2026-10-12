@@ -1,4 +1,4 @@
-{"$comment": "Owner: hep-statistics. Paradigm-specific requirements are enforced in contracts.validate.",
+{"$comment": "Owner: hep-statistics. Paradigm-specific requirements are enforced in contracts.validate. Typed fields added in 2.2.0 are in ext_statistical_result_v2_2.json, applied only to artifacts of contract 2.2.0 or later (and to older ones with --strict), so older artifacts keep their outcome.",
  "type": "object",
  "required": ["paradigm", "likelihood", "parameters_of_interest", "nuisances", "fit_status"],
  "properties": {

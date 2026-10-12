@@ -20,7 +20,7 @@
   },
   "hep-statistics": {
    "references": 9,
-   "bytes": 103868,
+   "bytes": 117038,
    "uncited": 0
   },
   "hep-theory": {
@@ -1033,7 +1033,7 @@
     "tools/check_instruction_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "3377632 2026-10-11"
+   "last_commit": "22ea71e 2026-10-12"
   },
   {
    "path": "skills/hep-computing/references/batch-site-cern-htcondor.md",
@@ -1058,7 +1058,7 @@
     "skills/hep-computing/references/batch-scheduling.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "3377632 2026-10-11"
+   "last_commit": "22ea71e 2026-10-12"
   },
   {
    "path": "skills/hep-computing/references/cmake-and-build.md",
@@ -1447,8 +1447,8 @@
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 27183,
-   "lines": 317,
+   "bytes": 36073,
+   "lines": 393,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/inference-and-unfolding.md",
@@ -1460,12 +1460,12 @@
     "tests/skills/hep_statistics/test_core_stats_guide.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "c93e4fe 2026-10-08"
+   "last_commit": "06b86c8 2026-10-12"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
    "owner": "hep-statistics",
-   "bytes": 14291,
+   "bytes": 14669,
    "lines": 163,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -1481,13 +1481,13 @@
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "364918e 2026-10-09"
+   "last_commit": "06b86c8 2026-10-12"
   },
   {
    "path": "skills/hep-statistics/references/likelihood-fitting.md",
    "owner": "hep-statistics",
-   "bytes": 8130,
-   "lines": 83,
+   "bytes": 8883,
+   "lines": 91,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
@@ -1503,13 +1503,13 @@
     "hep-analysis",
     "hep-computing"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "06b86c8 2026-10-12"
   },
   {
    "path": "skills/hep-statistics/references/ml-assisted-inference.md",
    "owner": "hep-statistics",
-   "bytes": 5750,
-   "lines": 46,
+   "bytes": 6191,
+   "lines": 51,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-statistics/SKILL.md",
@@ -1519,13 +1519,13 @@
    "cited_by_other_skills": [
     "physics-ml"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "06b86c8 2026-10-12"
   },
   {
    "path": "skills/hep-statistics/references/nuisance-modeling.md",
    "owner": "hep-statistics",
-   "bytes": 16062,
-   "lines": 211,
+   "bytes": 17227,
+   "lines": 223,
    "linked_from_skill_md": true,
    "cited_by": [
     "adapters/pyhf-combine/assets/pyhf_nuisance_diagnostics.py",
@@ -1538,7 +1538,7 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "b0f03ac 2026-10-08"
+   "last_commit": "06b86c8 2026-10-12"
   },
   {
    "path": "skills/hep-statistics/references/statistical-inference-for-physics.md",
@@ -1566,8 +1566,8 @@
   {
    "path": "skills/hep-statistics/references/statistical-tools.md",
    "owner": "hep-statistics",
-   "bytes": 8154,
-   "lines": 77,
+   "bytes": 9355,
+   "lines": 95,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-analysis/references/hep-analysis-guide.md",
@@ -1580,13 +1580,13 @@
     "hep-analysis",
     "physics-ml"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "06b86c8 2026-10-12"
   },
   {
    "path": "skills/hep-statistics/references/unfolding.md",
    "owner": "hep-statistics",
-   "bytes": 2940,
-   "lines": 43,
+   "bytes": 3282,
+   "lines": 47,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/index.md",
@@ -1616,7 +1616,7 @@
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "06b86c8 2026-10-12"
   },
   {
    "path": "skills/hep-theory/references/cosmic-ray-propagation.md",

@@ -36,6 +36,9 @@ Subcommands:
   choose-penalty-poisson
                     Poisson-exact leave-one-bin-out cross-validation of the forward-fold penalty
                     strength, with a toy comparison against the best fixed strength.
+  outer-coverage    independent outer toys: data (and, when declared, the MC response and the efficiency) redrawn,
+                    the regularization chosen inside every toy, the covariance built per toy; bias, marginal and
+                    simultaneous coverage, with every toy's outcome counted.
   nonparam-fold     non-parametric forward folding: penalized Poisson maximum likelihood of the
                     truth bins (log-curvature penalty) with a Laplace covariance, against a Tikhonov
                     unfolding.
@@ -61,9 +64,10 @@ Usage (from the skill directory):
   python3 core/stats/unfolding_diagnostics.py nonparam-fold --input u.json --tau 0.1 --prior entropy --toys 100 --seed 1
   python3 core/stats/unfolding_diagnostics.py compare-fold-priors --input u.json --priors log_curvature:0.1,entropy:0.01 --toys 100 --seed 1
   python3 core/stats/unfolding_diagnostics.py choose-penalty-poisson --input u.json --toys 40 --seed 1
+  python3 core/stats/unfolding_diagnostics.py outer-coverage --input u.json --method tikhonov --values 1e-4,1e-3,1e-2 --criterion gcv --toys 500 --seed 1
 Exit codes: 0 ok; 2 rejected input. Standard library only.
 Importable: regularized_scan, closure, fold_compare, response_stat, linear_matrix, choose_regularization,
-response_covariance, nonparam_fold, compare_fold_priors, choose_penalty_poisson, response_measured.
+response_covariance, nonparam_fold, compare_fold_priors, choose_penalty_poisson, response_measured, outer_coverage.
 """
 from __future__ import annotations
 
@@ -409,6 +413,8 @@ def response_stat(doc: dict, method: str, param, toys: int, seed: int, response_
     est0, _ = _estimator(method, p, r, mu, prior)
     rng = random.Random(seed)
     data_only, resp_only, both = [], [], []
+    skipped = {"empty_truth_column": 0}
+    eff_above_one = 0
     for _ in range(toys):
         r2 = [[0.0] * n_truth for _ in range(n_reco)]
         for j in range(n_truth):
@@ -420,21 +426,26 @@ def response_stat(doc: dict, method: str, param, toys: int, seed: int, response_
                 for i in range(n_reco):
                     r2[i][j] = poisson_draw(rng, gen[j] * r[i][j]) / gen[j]
         if any(sum(r2[i][j] for i in range(n_reco)) <= 0 for j in range(n_truth) if truth[j] > 0):
+            skipped["empty_truth_column"] += 1  # a column with no reconstructed MC event: not filled, the toy is counted
             continue
+        eff_above_one += any(sum(r2[i][j] for i in range(n_reco)) > 1.0 + 1e-12 for j in range(n_truth))
         est2, _ = _estimator(method, p, r2, mu, prior)
         n = [poisson_draw(rng, m) for m in mu]
         data_only.append(est0(n))
         resp_only.append(est2([float(m) for m in mu]))
         both.append(est2(n))
     if len(both) < 10:
-        raise ToyError("too few usable toys; increase mc_events_per_truth_bin")
+        raise ToyError(f"too few usable toys ({len(both)} used of {toys} generated; skipped {skipped}); increase "
+                       "mc_events_per_truth_bin")
     used = [j for j in range(n_truth) if truth[j] > 0]
 
     def rel(vs):
         return _rms([_std([v[j] for v in vs]) / truth[j] for j in used])
     d, rs, b = rel(data_only), rel(resp_only), rel(both)
     return {"label": LABEL, "method": f"finite response statistics in {method} unfolding (param {p}), {response_model} model, seeded toys",
-            "response_model": response_model, "toys_used": len(both), "seed": seed, "rms_relative_spread_data_only": d,
+            "response_model": response_model, "toys_generated": toys, "toys_used": len(both),
+            "toys_skipped": skipped, "toys_with_a_column_efficiency_above_one": eff_above_one,
+            "seed": seed, "rms_relative_spread_data_only": d,
             "rms_relative_spread_response_only": rs, "rms_relative_spread_both": b,
             "quadrature_of_data_and_response": math.sqrt(d * d + rs * rs),
             "response_share_of_total_variance": rs * rs / (b * b) if b > 0 else None,
@@ -442,7 +453,10 @@ def response_stat(doc: dict, method: str, param, toys: int, seed: int, response_
                      "cells (poisson_cells, an approximation) or as a multinomial over the reco cells and a lost-event class "
                      "(multinomial, exact in the sampling and a rounded normal approximation for a column above 2000 events), "
                      "the unfolding then uses the "
-                     "redrawn matrix as if it were exact; data-only and response-only spreads add in quadrature only "
+                     "redrawn matrix as if it were exact; toys whose redrawn response has an empty truth column are "
+                     "skipped and counted (never filled), and columns are never renormalized; under poisson_cells a "
+                     "high-efficiency column can exceed efficiency 1 (counted in toys_with_a_column_efficiency_above_one): "
+                     "the independent-cell model does not match the generation there, use multinomial; data-only and response-only spreads add in quadrature only "
                      "approximately because the two sources interact in the unfolding; a response share above a few "
                      "percent of the variance is the trigger to put response statistics in the uncertainty "
                      "(for example by repeating the unfolding with a bootstrap of the MC) or to enlarge the MC")}
@@ -565,6 +579,162 @@ def choose_regularization(doc: dict, method: str, values, toys: int, seed: int) 
                      "table but fair for the toy comparison of criteria on fresh data; weights are Gaussian (1/sqrt(mu)) "
                      "approximations to Poisson noise, and a criterion that systematically picks too weak a "
                      "regularization (large excess error, many negative bins) is the evidence to prefer another")}
+
+
+# ------------------------------------------------------------------ outer-coverage (audit T22)
+def _chi2_quantile(q: float, ndf: int) -> float:
+    from core.stats.statistical_toys import chi2_sf
+    lo, hi = 0.0, ndf + 20.0 * math.sqrt(ndf) + 20.0
+    for _ in range(200):
+        mid = 0.5 * (lo + hi)
+        lo, hi = (mid, hi) if 1.0 - chi2_sf(mid, ndf) < q else (lo, mid)
+    return 0.5 * (lo + hi)
+
+
+def outer_coverage(doc: dict, method: str, values, criterion: str, toys: int, seed: int, interval_cl: float = 0.6827) -> dict:
+    """Independent outer-toy validation of an unfolding procedure (audit T22): every toy draws data from the generation
+    truth (test_truth if given, else truth) through the true response, redraws the analyst's response from
+    mc_events_per_truth_bin (multinomial, when given) and the efficiency scale factors from efficiency_uncertainty (when
+    given), selects the regularization inside the toy with the criterion (gcv, loo_cv or l_curve_corner over values;
+    a single value means no selection), unfolds, and builds that toy's covariance from its own counts and estimate:
+    data A diag(n) A^T, plus the first-order response-statistics term sum_j x_j^2 A Cov(R_.j) A^T and the efficiency
+    term (A R diag(x)) S (A R diag(x))^T when those sources are declared. Coverage is then marginal (|x_j - t_j| <=
+    z sigma_j per bin) and simultaneous ((x - t)^T C^-1 (x - t) <= chi2 quantile, n_truth degrees of freedom), with
+    the bias per bin. A source left out of the covariance while present in the generation (declare it with
+    "covariance_omits": ["response", "efficiency"]) is the negative baseline: its undercoverage shows the check works.
+    Failures (a singular covariance, an unusable response) are outcomes of the toy and count as not covering."""
+    from core.stats.toy_ensemble import EnsembleSpec, ToyFailure, coverage, run
+    if method not in ("tikhonov", "tsvd"):
+        raise ToyError("outer-coverage supports the linear methods tikhonov and tsvd")
+    if criterion not in ("gcv", "loo_cv", "l_curve_corner", "fixed"):
+        raise ToyError("criterion must be gcv, loo_cv, l_curve_corner or fixed")
+    r, truth, prior, _ = _unpack(doc, method, 1.0 if method == "tikhonov" else 1)
+    n_truth, n_reco = len(truth), len(r)
+    if not isinstance(values, list) or not 1 <= len(values) <= 30:
+        raise ToyError("values must list 1 to 30 settings")
+    settings = [_check_method(method, v, n_truth) for v in values]
+    if len(settings) == 1:
+        criterion = "fixed"
+    gen_truth = doc.get("test_truth", truth)
+    if not isinstance(gen_truth, list) or len(gen_truth) != n_truth:
+        raise ToyError(f"test_truth must list {n_truth} values")
+    gen_truth = [_num(v, "test_truth", 0.0, 1e7) for v in gen_truth]
+    gen = doc.get("mc_events_per_truth_bin")
+    if gen is not None:
+        if not isinstance(gen, list) or len(gen) != n_truth:
+            raise ToyError(f"mc_events_per_truth_bin must list {n_truth} values")
+        gen = [int(round(_num(g, "mc_events", 1.0, 1e5))) for g in gen]
+    eff = doc.get("efficiency_uncertainty")
+    sig_e, chol_e = None, None
+    if eff is not None:
+        sg = eff.get("sigma") if isinstance(eff, dict) else None
+        sg = [sg] * n_truth if isinstance(sg, (int, float)) and not isinstance(sg, bool) else sg
+        if not isinstance(sg, list) or len(sg) != n_truth:
+            raise ToyError(f"efficiency_uncertainty.sigma must be a number or a list of {n_truth} values")
+        sig_e = [_num(v, "efficiency sigma", 0.0, 0.5) for v in sg]
+        rho = _corr_matrix(eff.get("correlation"), n_truth)
+        cov_e = [[sig_e[a] * sig_e[b] * rho[a][b] for b in range(n_truth)] for a in range(n_truth)]
+        chol_e = cholesky(cov_e, "efficiency covariance", semidefinite=True, error=ToyError)[0]
+    omits = doc.get("covariance_omits", [])
+    if not isinstance(omits, list) or not set(omits) <= {"response", "efficiency"}:
+        raise ToyError("covariance_omits lists response and/or efficiency")
+    toys, seed = _toys(toys, 20), _seed(seed)
+    z = math.sqrt(_chi2_quantile(interval_cl, 1))
+    q_sim = _chi2_quantile(interval_cl, n_truth)
+    mu_w = _mu(r, truth)
+
+    def generate(rng, i):
+        delta = [0.0] * n_truth
+        if chol_e is not None:
+            u = [rng.gauss(0.0, 1.0) for _ in range(n_truth)]
+            delta = [sum(chol_e[a][b] * u[b] for b in range(a + 1)) for a in range(n_truth)]
+        mu_true = [sum(r[i2][j] * (1.0 + delta[j]) * gen_truth[j] for j in range(n_truth)) for i2 in range(n_reco)]
+        counts = [float(poisson_draw(rng, max(m, 0.0))) for m in mu_true]
+        r_hat = r
+        if gen is not None:
+            r_hat = [[0.0] * n_truth for _ in range(n_reco)]
+            for j in range(n_truth):
+                ks = _multinomial_column(rng, gen[j], [r[i2][j] for i2 in range(n_reco)])
+                for i2 in range(n_reco):
+                    r_hat[i2][j] = ks[i2] / gen[j]
+            if any(sum(r_hat[i2][j] for i2 in range(n_reco)) <= 0 for j in range(n_truth)):
+                raise ToyFailure("invalid_data", "a redrawn response column is empty")
+        return counts, r_hat
+
+    def evaluate(data, i):
+        counts, r_hat = data
+        try:
+            mats = [linear_matrix(method, v, r_hat, mu_w) for v in settings]
+        except ToyError as exc:
+            raise ToyFailure("fit_failed", str(exc)) from None
+        if criterion == "fixed":
+            k = 0
+        else:
+            crit = [_criteria(a, r_hat, mu_w, counts) for a in mats]
+            if criterion == "gcv":
+                k = min(range(len(crit)), key=lambda c: crit[c][2])
+            elif criterion == "loo_cv":
+                k = min(range(len(crit)), key=lambda c: crit[c][3])
+            else:
+                cn = _corner(settings, [x[0] for x in crit], [x[1] for x in crit])
+                if cn is None:
+                    raise ToyFailure("fit_failed", "no L-curve corner")
+                k = cn
+        a = mats[k]
+        x = [sum(a[j][i2] * counts[i2] for i2 in range(n_reco)) for j in range(n_truth)]
+        cov = [[sum(a[j][i2] * a[m][i2] * counts[i2] for i2 in range(n_reco)) for m in range(n_truth)] for j in range(n_truth)]
+        if gen is not None and "response" not in omits:
+            for j in range(n_truth):
+                col = [r_hat[i2][j] for i2 in range(n_reco)]
+                cr = [[((col[i2] if i2 == k2 else 0.0) - col[i2] * col[k2]) / gen[j] for k2 in range(n_reco)] for i2 in range(n_reco)]
+                ac = [[sum(a[t][i2] * cr[i2][k2] for i2 in range(n_reco)) for k2 in range(n_reco)] for t in range(n_truth)]
+                for t in range(n_truth):
+                    for u in range(n_truth):
+                        cov[t][u] += x[j] * x[j] * sum(ac[t][k2] * a[u][k2] for k2 in range(n_reco))
+        if sig_e is not None and "efficiency" not in omits:
+            ar = [[sum(a[t][i2] * r_hat[i2][j] for i2 in range(n_reco)) * x[j] for j in range(n_truth)] for t in range(n_truth)]
+            for t in range(n_truth):
+                for u in range(n_truth):
+                    cov[t][u] += sum(ar[t][c] * sig_e[c] * sig_e[d] * (rho[c][d]) * ar[u][d]
+                                     for c in range(n_truth) for d in range(n_truth))
+        try:
+            dvec = [x[j] - gen_truth[j] for j in range(n_truth)]
+            sol = _solve(cov, [[v] for v in dvec])
+            chi2 = sum(dvec[j] * sol[j][0] for j in range(n_truth))
+        except ToyError:
+            raise ToyFailure("fit_failed", "singular covariance") from None
+        marg = [abs(dvec[j]) <= z * math.sqrt(max(cov[j][j], 0.0)) for j in range(n_truth)]
+        return {"x": x, "marginal": marg, "simultaneous": chi2 <= q_sim, "setting": settings[k]}
+
+    res = run(EnsembleSpec("plug-in", seed, toys), generate, evaluate)
+    ok_rows = [v for _, o, v in res["rows"] if o == "ok"]
+    per_bin = []
+    for j in range(n_truth):
+        c = coverage(res, lambda v, j=j: v["marginal"][j], interval_cl)
+        xs = [v["x"][j] for v in ok_rows]
+        mean = sum(xs) / len(xs) if xs else float("nan")
+        sd = _std(xs) if len(xs) > 1 else float("nan")
+        per_bin.append({"truth": gen_truth[j], "mean": mean, "bias": mean - gen_truth[j],
+                        "bias_standard_error": sd / math.sqrt(len(xs)) if xs else None,
+                        "coverage": c["headline"]["value"], "coverage_interval_95": c["headline"]["interval"]})
+    sim = coverage(res, lambda v: v["simultaneous"], interval_cl)
+    chosen: dict = {}
+    for v in ok_rows:
+        chosen[str(v["setting"])] = chosen.get(str(v["setting"]), 0) + 1
+    return {"label": LABEL, "method": f"outer-toy validation of {method} unfolding, regularization chosen per toy by {criterion}",
+            "ensemble": "plug-in at the generation truth", "toys": toys, "seed": seed, "outcomes": res["outcomes"],
+            "nominal": interval_cl, "settings": settings, "chosen_settings": chosen,
+            "generation_truth": "test_truth" if "test_truth" in doc else "truth",
+            "sources_generated": {"data": True, "response_statistics": gen is not None, "efficiency": sig_e is not None},
+            "sources_in_covariance": {"data": True, "response_statistics": gen is not None and "response" not in omits,
+                                      "efficiency": sig_e is not None and "efficiency" not in omits},
+            "per_bin": per_bin, "min_marginal_coverage": min(b["coverage"] for b in per_bin),
+            "simultaneous_coverage": sim["headline"]["value"], "simultaneous_interval_95": sim["headline"]["interval"],
+            "failures_count_as_not_covering": True,
+            "note": ("coverage from independent outer toys, each with its own covariance and its own regularization choice; "
+                     "a pull width near 1 measured on the same ensemble that tuned the regularization is not this evidence; "
+                     "regularized procedures are expected to undercover where the truth curves; the response and efficiency "
+                     "terms are first-order propagations")}
 
 
 # ------------------------------------------------------------------ response-covariance
@@ -1101,6 +1271,13 @@ def build_parser() -> argparse.ArgumentParser:
     cp.add_argument("--priors", required=True, help="comma-separated name:tau entries, e.g. log_curvature:0.1,entropy:0.01")
     cp.add_argument("--toys", type=int, default=100)
     cp.add_argument("--seed", type=int, required=True, help="required: every toy study records its seed")
+    oc = sub.add_parser("outer-coverage", help="outer-toy bias and marginal/simultaneous coverage, regularization chosen per toy")
+    oc.add_argument("--input", required=True)
+    oc.add_argument("--method", required=True, choices=("tikhonov", "tsvd"))
+    oc.add_argument("--values", required=True, help="comma-separated settings; one value means no selection")
+    oc.add_argument("--criterion", default="gcv", choices=("gcv", "loo_cv", "l_curve_corner", "fixed"))
+    oc.add_argument("--toys", type=int, default=500)
+    oc.add_argument("--seed", type=int, required=True)
     pc = sub.add_parser("choose-penalty-poisson", help="Poisson-exact leave-one-out CV of the forward-fold penalty")
     pc.add_argument("--input", required=True)
     pc.add_argument("--prior", choices=PRIORS, default="log_curvature")
@@ -1120,6 +1297,12 @@ def main(argv: list[str] | None = None) -> int:
             except ValueError:
                 raise ToyError("--values must be comma-separated numbers") from None
             result = choose_regularization(doc, args.method, values, args.toys, args.seed)
+        elif args.command == "outer-coverage":
+            try:
+                values = [float(v) for v in args.values.split(",")]
+            except ValueError:
+                raise ToyError("--values must be comma-separated numbers") from None
+            result = outer_coverage(doc, args.method, values, args.criterion, args.toys, args.seed)
         elif args.command == "response-covariance":
             result = response_covariance(doc, args.method, args.param, args.toys, args.seed, args.response_model)
         elif args.command == "response-measured":

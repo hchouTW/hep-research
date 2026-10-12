@@ -318,7 +318,7 @@ def artifacts(world, res, created):
                                       "conditions": "per synthetic period (spectral shape inside bins differs slightly)",
                                       "provenance": "computed analytically from the synthetic resolution model", "matrix_ref": "results.json",
                                       "form": "matrix"})
-    stat = dict(base, artifact_id="synthetic-path-a-ratio-result", artifact_type="statistical-result",
+    stat = dict(base, artifact_id="synthetic-path-a-ratio-result", artifact_type="statistical-result", required_capabilities=["stats:result-semantics"],
                 objective="SYNTHETIC He/p ratio per bin and period with covariance",
                 provenance={"producer_skill": "hep-statistics", "created": created}, status=["synthetic"],
                 inputs=[{"ref": "artifacts/measurement_spec.json", "artifact_type": "measurement-spec", "status": ["synthetic"]}],
@@ -326,7 +326,7 @@ def artifacts(world, res, created):
                            "parameters_of_interest": ["He/p ratio per rigidity bin and period"],
                            "nuisances": ["trigger efficiency per period", "selection efficiency per bin and species"],
                            "test_statistic": "not-applicable (point estimates with linear covariance)", "construction": "other",
-                           "coverage": {"method": "seeded toys of the full chain", "result_ref": "results.json#toy_closure"},
+                           "coverage": {"check": "not-checked", "method": "seeded toys of the full chain (closure and pulls, not interval coverage)", "result_ref": "results.json#toy_closure"},
                            "fit_status": "converged", "results": {"ref": "results.json#ratio"}})
     data = {}
     for pname in PERIODS:

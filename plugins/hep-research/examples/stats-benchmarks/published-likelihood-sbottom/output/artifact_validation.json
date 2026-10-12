@@ -1,0 +1,26 @@
+{
+ "computational_run": {
+  "ok": true,
+  "findings": []
+ },
+ "statistical_result": {
+  "ok": true,
+  "findings": []
+ },
+ "publication_gate": {
+  "gate": "publication",
+  "status": "unresolved",
+  "reasons": [
+   {
+    "level": "unresolved",
+    "code": "gate.status_label",
+    "message": "the artifact carries 'unvalidated': an archival artifact, not a validated result"
+   },
+   {
+    "level": "unresolved",
+    "code": "gate.coverage_not_established",
+    "message": "coverage is not established (check missing or not-checked)"
+   }
+  ]
+ }
+}

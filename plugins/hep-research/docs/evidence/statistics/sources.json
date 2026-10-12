@@ -1,0 +1,295 @@
+[
+ {
+  "id": "hepstats:S01",
+  "title": "Asymptotic formulae for likelihood-based tests of new physics",
+  "authors": "G. Cowan, K. Cranmer, E. Gross, O. Vitells",
+  "year": 2010,
+  "identifiers": {
+   "url": "https://arxiv.org/html/1007.1727v3",
+   "arxiv_ids": [
+    "1007.1727"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "page",
+  "verification_date": "2026-10-12",
+  "publication_date": "2010",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "G. Cowan, K. Cranmer, E. Gross, O. Vitells",
+  "notes": "Read 2026-10-12 in the arXiv v3 HTML: equations (14), (16), (64), (69)-(72), (97), (101) located and their text read; equation numbers are those of v3 (the journal version may number differently)."
+ },
+ {
+  "id": "hepstats:S02",
+  "title": "Power-Constrained Limits",
+  "authors": "G. Cowan, K. Cranmer, E. Gross, O. Vitells",
+  "year": 2011,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/1105.3166",
+   "arxiv_ids": [
+    "1105.3166"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-12",
+  "publication_date": "2011",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "G. Cowan, K. Cranmer, E. Gross, O. Vitells",
+  "notes": "arXiv abstract page and citation metadata read 2026-10-12; the full text was not read in this session."
+ },
+ {
+  "id": "hepstats:S03",
+  "title": "Handling uncertainties in background shapes: the discrete profiling method",
+  "authors": "P. D. Dauncey, M. Kenzie, N. Wardle, G. J. Davies",
+  "year": 2014,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/1408.6865",
+   "arxiv_ids": [
+    "1408.6865"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-12",
+  "publication_date": "2014",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "P. D. Dauncey, M. Kenzie, N. Wardle, G. J. Davies",
+  "notes": "arXiv abstract page and metadata read 2026-10-12; the penalty convention (1 per parameter in -2 ln L) used by discrete_profile.py was not checked against the full text."
+ },
+ {
+  "id": "hepstats:S04",
+  "title": "Validating Bayesian Inference Algorithms with Simulation-Based Calibration",
+  "authors": "S. Talts, M. Betancourt, D. Simpson, A. Vehtari, A. Gelman",
+  "year": 2018,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/1804.06788",
+   "arxiv_ids": [
+    "1804.06788"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-12",
+  "publication_date": "2018",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "S. Talts, M. Betancourt, D. Simpson, A. Vehtari, A. Gelman",
+  "notes": "arXiv abstract page and metadata read 2026-10-12."
+ },
+ {
+  "id": "hepstats:S05",
+  "title": "Parameter uncertainties in weighted unbinned maximum likelihood fits",
+  "authors": "C. Langenbruch",
+  "year": 2019,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/1911.01303",
+   "arxiv_ids": [
+    "1911.01303"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-12",
+  "publication_date": "2019",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "C. Langenbruch",
+  "notes": "arXiv abstract page and metadata read 2026-10-12; the original audit read relevant sections of v4 (2026-10-10, level page)."
+ },
+ {
+  "id": "hepstats:S06",
+  "title": "Trial factors for the look elsewhere effect in high energy physics",
+  "authors": "E. Gross, O. Vitells",
+  "year": 2010,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/1005.1891",
+   "arxiv_ids": [
+    "1005.1891"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-12",
+  "publication_date": "2010",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "E. Gross, O. Vitells",
+  "notes": "arXiv abstract page and metadata read 2026-10-12."
+ },
+ {
+  "id": "hepstats:S07",
+  "title": "Rank-normalization, folding, and localization: an improved R-hat for assessing convergence of MCMC",
+  "authors": "A. Vehtari, A. Gelman, D. Simpson, B. Carpenter, P.-C. Buerkner",
+  "year": 2019,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/1903.08008",
+   "arxiv_ids": [
+    "1903.08008"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-12",
+  "publication_date": "2019",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "A. Vehtari, A. Gelman, D. Simpson, B. Carpenter, P.-C. Buerkner",
+  "notes": "arXiv metadata read 2026-10-12; the ESS and quantile-MCSE algorithms used were checked against the ArviZ 0.23.4 implementation (hepstats:S10), not against the paper's text."
+ },
+ {
+  "id": "hepstats:S08",
+  "title": "Publishing statistical models: getting the most out of particle physics experiments",
+  "authors": "K. Cranmer, S. Kraml, H. B. Prosper, P. Bechtle, F. U. Bernlochner, et al.",
+  "year": 2021,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/2109.04981",
+   "arxiv_ids": [
+    "2109.04981"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-12",
+  "publication_date": "2021",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "K. Cranmer, S. Kraml, H. B. Prosper, P. Bechtle, F. U. Bernlochner, et al.",
+  "notes": "arXiv metadata read 2026-10-12."
+ },
+ {
+  "id": "hepstats:S09",
+  "title": "Search for bottom-squark pair production with the ATLAS detector in final states containing Higgs bosons, b-jets and missing transverse momentum",
+  "authors": "ATLAS Collaboration",
+  "year": 2019,
+  "identifiers": {
+   "url": "https://www.hepdata.net/record/ins1748602",
+   "arxiv_ids": [
+    "1908.03122"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "page",
+  "verification_date": "2026-10-12",
+  "publication_date": "2019",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "ATLAS Collaboration",
+  "notes": "JHEP 12 (2019) 060, arXiv:1908.03122. Read 2026-10-12: the TeX source of Sec. 8 (model-independent limits paragraph, Table 7 and its caption) and HEPData v3 tables Table7_paper_XsecLimits and Table6_paper_RegionsAB (CSV); the likelihood pallet (resource 1935437, sha256 c425e741...a5712fa8, CC0). The paper does not state whether Table 7 used asymptotics or pseudo-experiments."
+ },
+ {
+  "id": "hepstats:S10",
+  "title": "ArviZ 0.23.4 (arviz.stats.diagnostics)",
+  "authors": "ArviZ developers",
+  "year": 2026,
+  "identifiers": {
+   "url": "https://pypi.org/project/arviz/0.23.4/"
+  },
+  "tier": 2,
+  "verification_level": "full-text",
+  "verification_date": "2026-10-12",
+  "publication_date": "2026",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "ArviZ developers",
+  "notes": "Installed 2026-10-12 in an isolated environment; the source of _ess (Geyer initial positive and monotone sequences, improved last term) was read and used as the oracle for bayes_diagnostics.py."
+ },
+ {
+  "id": "hepstats:S11",
+  "title": "pyhf 0.7.6",
+  "authors": "L. Heinrich, M. Feickert, G. Stark",
+  "year": 2023,
+  "identifiers": {
+   "url": "https://pypi.org/project/pyhf/0.7.6/"
+  },
+  "tier": 2,
+  "verification_level": "full-text",
+  "verification_date": "2026-10-12",
+  "publication_date": "2023",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "L. Heinrich, M. Feickert, G. Stark",
+  "notes": "Installed; ToyCalculator.expected_pvalues source read 2026-10-12 (calls numpy.percentile with the removed 'interpolation' keyword)."
+ },
+ {
+  "id": "hepstats:S12",
+  "title": "ROOT 6.38.04 RooFit (SumW2Error, AsymptoticError)",
+  "authors": "ROOT team",
+  "year": 2026,
+  "identifiers": {
+   "url": "https://root.cern/"
+  },
+  "tier": 2,
+  "verification_level": "page",
+  "verification_date": "2026-10-12",
+  "publication_date": "2026",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "ROOT team",
+  "notes": "Executed 2026-10-12 (Homebrew build) on one sWeighted sample; documentation of the two options read through the fit's own warning text only."
+ },
+ {
+  "id": "hepstats:S13",
+  "title": "PDG Review of Particle Physics 2026, Statistics",
+  "authors": "Particle Data Group",
+  "year": 2026,
+  "identifiers": {
+   "url": "https://pdg.lbl.gov/2026/reviews/rpp2026-rev-statistics.pdf"
+  },
+  "tier": 1,
+  "verification_level": "page",
+  "verification_date": "2026-10-10",
+  "publication_date": "2026",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "Particle Data Group",
+  "notes": "Carried from the original audit's reference ledger (read there 2026-10-10 at page level: section 40.4.2, CLs definition, joint regions). Not re-read in this session."
+ },
+ {
+  "id": "hepstats:S14",
+  "title": "Combine documentation (v11.1.0)",
+  "authors": "CMS Collaboration",
+  "year": 2026,
+  "identifiers": {
+   "url": "https://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/latest/"
+  },
+  "tier": 2,
+  "verification_level": "page",
+  "verification_date": "2026-10-03",
+  "publication_date": "2026",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "CMS Collaboration",
+  "notes": "As recorded in nuisance-modeling.md (read 2026-10-03); not re-read in this session; Combine not executed here."
+ }
+]

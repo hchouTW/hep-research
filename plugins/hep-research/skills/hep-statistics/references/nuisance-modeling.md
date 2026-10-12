@@ -62,7 +62,18 @@ factors with `code4` by default; shapes `code0` by default, `code4p` on request)
 or it compares different likelihoods: an independent HistFactory reference with exponential normsys first disagreed with pyhf for exactly
 this reason (repository history of the pyhf shape cross-check).
 
-Combine (documentation for the recommended tag v11.1.0, read 2026-10-03; not executed in this plugin):
+Frequentist constraint terms are auxiliary measurements, not priors: `shape-limit` takes `"constraint"` (legacy alias
+`"prior"`, same meaning). One auxiliary measurement enters the likelihood once: a luminosity or transfer factor shared by
+channels is one parameter. A model card (`contracts/schemas/statistical_model.json`, nested in a statistical-result)
+records channels, samples, constraints with their `aux_id` and the toy ensemble; the contract refuses a duplicated
+auxiliary measurement, and `<plugin root>/adapters/pyhf-combine/assets/model_card.py` builds the pyhf workspace and runs
+Asimov closure (an omitted signal contamination of a control region is detected there).
+
+Combine (documentation for the recommended tag v11.1.0, read 2026-10-03). Execution scope: Combine 11.1.0 has run one
+synthetic counting datacard (`adapters/pyhf-combine/assets/combine_datacard_template.txt`, `AsymptoticLimits`, against
+pyhf within 2%; VALIDATION.md, COMBINE-RUN, E1); the statements below about other modes (shapes, `FitDiagnostics`,
+impacts) come from the documentation and were not executed here. The release gate in
+`.github/workflows/statistics-validation.yml` reruns the datacard check with a pinned Combine build.
 
 - `lnN` with one value `kappa` multiplies the yield by `kappa^theta`. The asymmetric form `kappa_down/kappa_up` gives
   the yield ratios at `-1` and `+1`; the effective `kappa` equals `kappa_up` for `theta >= 0.5`, `1/kappa_down` for
@@ -201,7 +212,8 @@ quadrature 0.854 against the total 0.865 (closure 0.987). Sequentially, the dete
 order and 0.194 in the reversed one: the same group, two numbers, which is why the order is part of the result.
 These are synthetic numbers for checking the tool, not a physics result.
 
-Combine equivalents (documentation for v11.1.0, read 2026-10-03; not run in this plugin):
+Combine equivalents (documentation for v11.1.0, read 2026-10-03; these modes were not run in this plugin, see the
+execution scope above):
 `combine -M FitDiagnostics` writes `fit_b`, `fit_s` and `nuisances_prefit` (with `--plots` the covariance matrices,
 with `--saveShapes` the pre- and post-fit shapes), and `diffNuisances.py` prints pulls. Impacts come from
 `combineTool.py -M Impacts` (`--doInitialFit --robustFit 1`, then `--doFits`, then `-o impacts.json`) and

@@ -24,7 +24,10 @@
     "validate_response",
     "_linalg",
     "_poisson",
-    "_validate"
+    "_validate",
+    "fit_diagnostics",
+    "tail_estimation",
+    "toy_ensemble"
    ],
    "source": "experiment-neutral implementations; imports packaged"
   },

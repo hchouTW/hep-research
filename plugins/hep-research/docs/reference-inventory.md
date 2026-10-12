@@ -11,7 +11,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | detector-response | 33 | 345 | 0 |
 | hep-analysis | 9 | 74 | 0 |
 | hep-computing | 29 | 336 | 0 |
-| hep-statistics | 9 | 104 | 0 |
+| hep-statistics | 9 | 117 | 0 |
 | hep-theory | 8 | 42 | 0 |
 | physics-ml | 34 | 184 | 0 |
 | research-communication | 52 | 359 | 0 |
@@ -124,9 +124,9 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `acceptance-criteria.md` | hep-computing | 3.7 | no | 3 | - | 351029c 2026-10-07 |
 | `agile-development-guide.md` | hep-computing | 10.7 | yes | 8 | physics-ml | 351029c 2026-10-07 |
 | `bash-balanced-design-guidelines.md` | hep-computing | 24.8 | yes | 2 | - | 351029c 2026-10-07 |
-| `batch-scheduling.md` | hep-computing | 29.3 | yes | 8 | - | 3377632 2026-10-11 |
+| `batch-scheduling.md` | hep-computing | 29.3 | yes | 8 | - | 22ea71e 2026-10-12 |
 | `batch-site-cern-htcondor.md` | hep-computing | 11.2 | no | 2 | - | 6815df4 2026-10-10 |
-| `batch-site-nstccore-slurm.md` | hep-computing | 11.5 | no | 1 | - | 3377632 2026-10-11 |
+| `batch-site-nstccore-slurm.md` | hep-computing | 11.5 | no | 1 | - | 22ea71e 2026-10-12 |
 | `cmake-and-build.md` | hep-computing | 2.1 | yes | 4 | hep-analysis | 351029c 2026-10-07 |
 | `cpp-balanced-design-guidelines.md` | hep-computing | 26.0 | yes | 6 | physics-ml | 351029c 2026-10-07 |
 | `design-and-estimation.md` | hep-computing | 7.5 | no | 3 | - | 351029c 2026-10-07 |
@@ -151,14 +151,14 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `task-quality-checklist.md` | hep-computing | 3.0 | no | 4 | - | 351029c 2026-10-07 |
 | `validation-and-done.md` | hep-computing | 3.7 | yes | 4 | - | 351029c 2026-10-07 |
 | `astroparticle-statistics.md` | hep-statistics | 8.6 | yes | 12 | detector-response, hep-analysis | 351029c 2026-10-07 |
-| `core-stats-guide.md` | hep-statistics | 27.2 | yes | 7 | - | c93e4fe 2026-10-08 |
-| `inference-recipes.md` | hep-statistics | 14.3 | yes | 7 | detector-response, hep-analysis | 364918e 2026-10-09 |
-| `likelihood-fitting.md` | hep-statistics | 8.1 | yes | 7 | detector-response, hep-analysis, hep-computing | 351029c 2026-10-07 |
-| `ml-assisted-inference.md` | hep-statistics | 5.8 | yes | 3 | physics-ml | 351029c 2026-10-07 |
-| `nuisance-modeling.md` | hep-statistics | 16.1 | yes | 6 | hep-analysis | b0f03ac 2026-10-08 |
+| `core-stats-guide.md` | hep-statistics | 36.1 | yes | 7 | - | 06b86c8 2026-10-12 |
+| `inference-recipes.md` | hep-statistics | 14.7 | yes | 7 | detector-response, hep-analysis | 06b86c8 2026-10-12 |
+| `likelihood-fitting.md` | hep-statistics | 8.9 | yes | 7 | detector-response, hep-analysis, hep-computing | 06b86c8 2026-10-12 |
+| `ml-assisted-inference.md` | hep-statistics | 6.2 | yes | 3 | physics-ml | 06b86c8 2026-10-12 |
+| `nuisance-modeling.md` | hep-statistics | 17.2 | yes | 6 | hep-analysis | 06b86c8 2026-10-12 |
 | `statistical-inference-for-physics.md` | hep-statistics | 12.7 | yes | 8 | hep-computing, hep-theory, research-communication | 351029c 2026-10-07 |
-| `statistical-tools.md` | hep-statistics | 8.2 | yes | 5 | hep-analysis, physics-ml | 351029c 2026-10-07 |
-| `unfolding.md` | hep-statistics | 2.9 | yes | 22 | detector-response, hep-analysis | 351029c 2026-10-07 |
+| `statistical-tools.md` | hep-statistics | 9.4 | yes | 5 | hep-analysis, physics-ml | 06b86c8 2026-10-12 |
+| `unfolding.md` | hep-statistics | 3.3 | yes | 22 | detector-response, hep-analysis | 06b86c8 2026-10-12 |
 | `cosmic-ray-propagation.md` | hep-theory | 5.2 | yes | 1 | - | 351029c 2026-10-07 |
 | `dis-kinematics.md` | hep-theory | 4.8 | yes | 4 | - | 351029c 2026-10-07 |
 | `event-generation.md` | hep-theory | 9.2 | yes | 4 | detector-response, hep-analysis | 351029c 2026-10-07 |
