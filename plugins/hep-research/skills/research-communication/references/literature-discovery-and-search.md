@@ -12,6 +12,15 @@ the novelty-assessment section of `literature-review.md`. Use
 `citations-and-bibliography.md` instead when the paper is already identified
 and the task is only pulling a clean BibTeX entry for it.
 
+0. **Log every search as it is run** (database, interface, exact query, filters, date, coverage limits, export
+   count, discovery route) in the format of `../assets/paper/search-log-template.json`, and import it with the
+   sources read into a literature record:
+   `python3 <plugin root>/skills/research-communication/scripts/manage_literature.py import INPUT.json --project-root ROOT --out literature.json`.
+   The import deduplicates only on identical stable identifiers (DOI, arXiv id, INSPIRE record; similar titles are
+   proposed, never merged), keeps arXiv version history and flags citing claims when a version changes, applies
+   correction, retraction and journal-version notices as flags on the dependent claims (never deletes a citation), and
+   marks an old verification date as "recheck", not as error. It never looks anything up: verifying a source at a
+   primary source stays the explicit workflow of `citation-verification.md`, recorded as a read event.
 1. **Pick the database(s) for the field**, not just whichever is habitual:
    - HEP/collider: INSPIRE-HEP first (citation graph, author disambiguation,
      collaboration-paper handling), arXiv hep-ex/hep-ph/hep-th listings.

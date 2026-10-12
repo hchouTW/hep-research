@@ -1,0 +1,25 @@
+{
+ "$comment": "SYNTHETIC template of a literature import for manage_literature.py import (research-communication). Every value is a placeholder. sources and claims follow the evidence-ledger format (core/evidence/ledger.py); search_log records each query exactly as run; notices record status changes with their provenance. The import never looks anything up.",
+ "sources": [
+  {"id": "user:S01", "title": "<title as printed>", "authors": "<first author et al.>", "year": 2026, "tier": 2,
+   "formal_status": "published", "verification_level": "abstract+metadata", "verification_date": "<YYYY-MM-DD>",
+   "locators": ["abstract"], "identifiers": {"dois": ["<doi>"], "arxiv_ids": ["<yymm.nnnnnvN>"], "inspire_record_id": null},
+   "citation_key": "<BibTeX key used in the manuscript>", "supersedes": [], "superseded_by": [],
+   "verification_limitations": "<what was not read and why>"}
+ ],
+ "claims": [
+  {"id": "user:C01", "claim": "<the statement the manuscript attributes to the source>", "claim_types": ["published_result"],
+   "source_ids": ["user:S01"], "location": "<abstract | Table 2 | Eq. (5) | Fig. 3>", "scope": {"text": "<conditions the statement holds for>"},
+   "verification_strength": "abstract+metadata", "numeric_quotation_allowed": true, "last_reviewed": "<YYYY-MM-DD>"}
+ ],
+ "search_log": [
+  {"database": "INSPIRE-HEP", "interface": "web | API", "query": "<exact query string>", "filters": {"date": "<range>", "type": "<article | all>"},
+   "date": "<YYYY-MM-DD>", "coverage_limits": ["<e.g. only the first 200 hits exported>"], "export_count": null,
+   "discovery_route": "keyword search | backward snowball from user:S01 | forward citations of user:S01"}
+ ],
+ "notices": [
+  {"source_id": "user:S01", "kind": "correction | retraction | journal-version | supersession", "affects": "part | whole",
+   "scope": "<Table 2, when affects is part>", "date": "<YYYY-MM-DD>", "provenance": "<where the notice was read, with the date>",
+   "new_source_id": "<id of the journal version, for journal-version or supersession>"}
+ ]
+}

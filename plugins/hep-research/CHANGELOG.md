@@ -43,6 +43,59 @@ Software checks establish contract consistency only, not physical validity.
   `--require-render` any block that was not rendered; 0 otherwise (a timeout used to exit 1 as if the source were
   wrong). `--format json` prints the per-block outcomes, renderer availability and versions.
 
+- **Handoffs and instruction semantics aligned (T4).** `code-review-report.md` and the papers guide now route by the
+  question asked, not by the library: implementation, I/O and performance to `hep-computing`, measurement design and
+  corrections to `hep-analysis`, statistical treatment to `hep-statistics` (also in ROOT or uproot code), ML rigor to
+  `physics-ml`, theory validity to `hep-theory`, detector response to `detector-response`; the old text sent
+  statistical treatment of ROOT/uproot code to `hep-analysis` and reruns to `hep-analysis`/`physics-ml`. The 3σ/5σ
+  significance table in `scientific-style.md` is scoped to a search's significance statement under the source's own
+  field convention; the everyday sense of "evidence" carries no threshold. `citation-verification.md` defines reuse
+  of previously verified records (dates, versions, read levels and locators kept; a recheck is a new read event
+  beside the old one, never a relabeling). `submission-and-peer-review.md` ties response wording to the revision
+  ledger: "we have changed" only for a completed, checked change; pending reruns stay explicit. Six routing cases
+  cover these handoffs (`tests/routing/cases.json`, 157 cases) and `test_handoff_text.py` pins the sentences.
+- **Results linked to claims; reporting completeness (T5).** Two new research-communication scripts.
+  `check_communication.py RECORD --project-root ROOT --checks schema|traceability|manuscript` validates the record,
+  resolves its inputs, ledgers, sources and documents, and with `manuscript` opens each declared document and
+  compares every declared occurrence with the current text at its locator (Markdown headings; LaTeX sections,
+  environments and labels), so a correct manifest cannot mask a wrong manuscript sentence; coverage counts
+  (declared, located, checked, mismatched, unresolved) are reported and whole-manuscript coverage is never claimed.
+  `audit_claims.py` checks recorded assessments (an unsupported verdict is a confirmed inconsistency), source read
+  coverage (a passage cited beyond what the read event covers is unresolved: an abstract value is citable with the
+  abstract locator, an unread table is not), advisory wording (status promotion, discovery wording without a global
+  significance, generalization beyond the recorded scope; quoted, negated and attributed sentences are skipped),
+  display values against exact source values under the occurrence's declared rounding (no invented tolerance; an
+  undeclared rounding is a review candidate, an unrecorded unit conversion unresolved), and reporting completeness
+  against `assets/reporting-policies.json` (measurement, search, limit, theory prediction, ML result; conditional on
+  supplied method metadata, never a chosen default: an expected limit does not imply Asimov, a Bayesian interval
+  needs no frequentist construction). It emits a claim matrix, draft-ready facts and handoffs to the producing skill.
+  Both print one JSON report (report_version 1.0.0; markdown is a view), refuse an output path that aliases an input,
+  and use the exit precedence input-error 2, fail 1, incomplete 3, pass 0. Reference: `evidence-linked-writing.md`.
+- **Revision impact and stale assessments (T6).** `track_revision_impact.py BEFORE AFTER --project-root ROOT` compares
+  a baseline and a revised record through their pinned identities (input digests, evidence fingerprints, claim
+  digests) and classifies each changed claim: analysis rerun (value at the evidence locator changed), source change
+  (identity changed, value not shown to differ: reconcile, not reopen), reference move (same identity, new path),
+  reassessment (wording or scope changed, sources unchanged), content edit (occurrence text or rounding only), status
+  change, added, removed. Every recorded occurrence of a changed claim is listed as stale or edited (abstract, body,
+  caption alike); the assessment is reopened where the evidence or wording changed and kept otherwise; a stale
+  assessment is reported as needing re-inspection, never as false. A verified revision item that depends on a changed
+  claim is reopened; one without completion evidence is an error; an edited item is not evidence that edits happened.
+  The baseline is never modified and an old reference is never re-resolved against today's file: when the historical
+  content is gone, the impact is reported at identity level with the baseline's own recorded display value, and the
+  content comparison is marked incomplete. Coverage is the recorded occurrences; the report asks for a targeted read
+  of paraphrases instead of claiming whole-manuscript coverage.
+- **Literature and citation lifecycle, offline (T7).** `manage_literature.py import INPUT.json --project-root ROOT
+  --out OUTPUT.json [--into EXISTING.json]` imports evidence-ledger sources and claims, an explicit search log
+  (database, interface, exact query, filters, date, coverage limits, export count, discovery route; template in
+  `assets/paper/search-log-template.json`) and status notices into a new literature record with provenance (input
+  path and digest, date). Records merge only on identical stable identifiers (DOI, arXiv id without version, INSPIRE
+  record) and only across the same formal status; similar titles are proposed merges, never performed; a report and
+  a study of one work stay related as same-work. An arXiv version change keeps the history and flags citing claims to
+  reassess. A correction or retraction flags dependent claims (reassess inside the notice's scope, check outside) and
+  deletes no citation; a journal-version notice records a supersession with its provenance. An old verification date
+  is a recheck flag, never an error; an inaccessible full text is an access limitation. Citation keys are preserved and
+  collisions reported. The input is never edited; no lookup is performed, and the record says online verification was
+  not performed. Quoted instructions inside a source's notes are data.
 - **T17 toy construction diagnosed.** The published-likelihood benchmark (ATLAS-SUSY-2018-31 SRB) adds a post-hoc
   diagnosis, labelled as such: the exact counting CLs limit of the one-bin SRB (n = 3, b = 3.23) is 5.284, inside the
   toy limit's MC range; pyhf's toys match exact Poisson sums on the bare one-bin model; the asymptotic formulae give

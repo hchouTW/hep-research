@@ -207,7 +207,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `academic-papers-guide.md` | research-communication | 36.8 | yes | 6 | - | d41501c 2026-10-12 |
 | `artifact-packaging-for-release.md` | research-communication | 2.8 | no | 3 | - | 351029c 2026-10-07 |
 | `astroparticle-and-cosmic-ray-papers.md` | research-communication | 19.5 | no | 10 | - | 351029c 2026-10-07 |
-| `citation-verification.md` | research-communication | 3.5 | yes | 8 | - | d41501c 2026-10-12 |
+| `citation-verification.md` | research-communication | 3.5 | yes | 9 | - | d41501c 2026-10-12 |
 | `citations-and-bibliography.md` | research-communication | 18.1 | yes | 11 | - | 9546574 2026-10-08 |
 | `claim-evidence-mapping.md` | research-communication | 3.3 | yes | 9 | hep-statistics, hep-theory | 351029c 2026-10-07 |
 | `code-review-report.md` | research-communication | 5.4 | no | 3 | - | d41501c 2026-10-12 |
@@ -230,7 +230,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `latex-mechanics-and-tooling.md` | research-communication | 13.3 | no | 7 | - | 351029c 2026-10-07 |
 | `latex-venue-setup.md` | research-communication | 21.6 | no | 5 | - | 351029c 2026-10-07 |
 | `legends-panels-and-export.md` | research-communication | 8.2 | no | 2 | - | 351029c 2026-10-07 |
-| `literature-discovery-and-search.md` | research-communication | 3.9 | no | 1 | - | 9546574 2026-10-08 |
+| `literature-discovery-and-search.md` | research-communication | 4.9 | no | 1 | - | 9546574 2026-10-08 |
 | `literature-review.md` | research-communication | 7.7 | no | 5 | - | 351029c 2026-10-07 |
 | `logical-consistency-and-argument-uniformity.md` | research-communication | 4.8 | no | 5 | hep-theory | 351029c 2026-10-07 |
 | `manuscript-consistency-auditing.md` | research-communication | 3.5 | no | 4 | - | 351029c 2026-10-07 |
@@ -248,7 +248,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `reading-papers.md` | research-communication | 10.1 | no | 8 | hep-statistics | 351029c 2026-10-07 |
 | `reproducibility-auditing.md` | research-communication | 3.0 | no | 9 | hep-computing | 351029c 2026-10-07 |
 | `reviewer-style-assessment.md` | research-communication | 2.0 | no | 1 | - | 351029c 2026-10-07 |
-| `revision-impact-tracking.md` | research-communication | 3.9 | no | 10 | - | 351029c 2026-10-07 |
+| `revision-impact-tracking.md` | research-communication | 3.9 | no | 10 | - | d9916e8 2026-10-12 |
 | `scientific-style.md` | research-communication | 9.6 | no | 9 | hep-statistics | d41501c 2026-10-12 |
 | `statistics-and-ml-papers.md` | research-communication | 14.0 | no | 8 | - | 351029c 2026-10-07 |
 | `submission-and-peer-review.md` | research-communication | 13.2 | no | 10 | - | d41501c 2026-10-12 |
