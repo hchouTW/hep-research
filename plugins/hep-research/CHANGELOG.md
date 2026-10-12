@@ -5,6 +5,53 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+Contracts 2.4.0 (minor: response semantics; every 2.3.0 artifact keeps its outcome and gets the new rules with
+`validate.py --strict`; no new capability).
+
+- **Response validation by intended use, and a correct counts closure (detector-response review WP1).**
+  `core/stats/validate_response.py` folds a `counts` closure through `M_ij / generated_j` (it multiplied the raw
+  counts, 100x off in the review case) and reports it `not_assessable` without `generated_per_truth_bin`. A new
+  `metadata.intended_use` (`forward_folding`, `unfolding`, `parametric_fit`) sets the identifiability verdict:
+  `underdetermined`, `rank_deficient` and `empty.truth_bin` stay errors for `unfolding` and when the use is undeclared
+  (with a new `metadata.intended_use_missing` warning), and are warnings for the other uses. Closure now runs unless
+  shape, entry, normalization or orientation errors block it; `conditional_on_selected` with acceptance inside the
+  matrix and negative closure truth are errors. Rewritten tests: `test_empty_truth_bin`,
+  `test_degenerate_truth_bins_are_not_identifiable` and `test_fewer_reco_than_truth_bins` declare `unfolding` and also
+  check the undeclared case.
+- **Response artifact semantics and adapter (Contracts 2.4.0).** For 2.4.0 artifacts (older ones with `--strict`),
+  `includes` / `applied_separately` use the `response_corrections` vocabulary (every `<x>_efficiency` counts as an
+  efficiency, so `trigger_efficiency` no longer bypasses `response.double_counted`); a matrix needs `matrix` or
+  `matrix_ref` (`response.matrix_missing`); `conditional_on_selected` with inefficiency or acceptance inside and
+  `joint_counts` with inefficiency inside are `response.normalization_inconsistent`; one variable in two units is
+  `response.unit_mismatch`; unknown terms are `response.unknown_correction`. Optional `matrix`,
+  `generated_per_truth_bin`, `intended_use` and `variable_conversion` fields. New `contracts/response_adapter.py`
+  converts a response artifact into validator input (explicit errors for unmappable values such as `unnormalized`) and
+  folds through it; the collider-angular and ams-flux-ratio examples use it instead of a second hand-written
+  declaration. The folding reference writes `nu = D_reco R D_truth x + b` with each correction's space and order.
+- **PID scripts guard their validity ranges (WP2).** `pid_separation_power.py` passes the species charge to
+  Bethe-Bloch (d/He4 at 2 GeV/c: 121.6 sigma, was 17.9), takes `--rigidity`, refuses beta*gamma < 0.1 instead of
+  returning a negative dE/dx, reports every `below_threshold_interval` (crossing dE/dx bands) with
+  `ceiling_is_lower_bound`, and labels `separation_convention` / `reference_species` (`--convention single|quadrature`).
+  `cherenkov_angle.py` reports `expected_photons`, `p_no_photon` and `photon_regime` and gives no Gaussian separation
+  with fewer than 5 expected photons; `--track-resolution` adds a term that does not shrink with N (default 0 keeps
+  the values); field `detected_photons` renamed `expected_photons`.
+- **Script outputs are valid and labelled (WP3).** Every detector-response CLI emits strict JSON or a JSON error
+  (no NaN, Infinity or traceback). `tag_and_probe_efficiency.py` keeps the 0.95 default but renames its fields
+  (`interval_level`, `lower_bound`/`upper_bound`, `distance_to_lower_bound`/`distance_to_upper_bound`) and returns
+  nulls with a reason for zero probes (rewritten test: `test_efficiency_bin_zero_total_is_null_not_error`).
+  `pileup_reweight.py` reports `n_eff` and `max_weight` with warnings and fails on non-finite weights; the calorimeter
+  fit takes per-point uncertainties, reports the covariance, an ndof warning and `extrapolated`; multiple scattering
+  warns outside the Highland range; Gaisser-Hillas adds the standard shower age and evaluates in log space.
+- **Reference corrections (WP4).** Sixteen review items in the detector-response references: the tracking resolution
+  minimum is not at the crossover, `1/(B L^2)` scaling with the Gluckstern terms, the energy-scale flux shift is
+  `(gamma - 1) * delta`, muon excess of heavy nuclei by sublinear superposition, per-period simulation instead of
+  time-averaged conditions, truth-matching efficiency is not exact, charge confusion is a tail property at every
+  rigidity, and others; N_sigma (both conventions), purity, fake and duplicate rates and width estimators are defined
+  once in the performance-metrics reference; new approximate formulas carry their PDG source.
+- **detector-response SKILL.md (WP5).** A stop rule when the inputs cannot determine the answer, the intended use in
+  every response declaration, handoffs for a hep-theory prediction to fold and for tag-and-probe fits and pileup
+  systematics to hep-statistics, and a task-routing table in the principles summary (SKILL.md 7266 B).
+
 - **Skill READMEs and trimmed entry points.** Every skill folder has a `README.md` (purpose, folder map, scripts,
   references, handoffs, tests) linked from the plugin README and from each `SKILL.md`. The detector-response,
   hep-statistics and hep-computing `SKILL.md` files, which sat at the 8 KiB budget, keep their rules and point to new
