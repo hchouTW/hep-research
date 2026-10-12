@@ -40,9 +40,9 @@ description: "Use when the deliverable is scientific communication or literature
 
 ## Resources
 
-Start with [the papers guide](references/academic-papers-guide.md) for reading, reviewing and writing, or [the diagrams guide](references/academic-diagrams-guide.md) for diagrams. Citation work: [citation verification](references/citation-verification.md), [citations and bibliography](references/citations-and-bibliography.md), [source list](references/primary-sources-and-version-checks.md). Claims: [claim-evidence mapping](references/claim-evidence-mapping.md). Field-specific paper patterns, figures, talks, reviews and venue formatting have their own files under `references/`; diagram skeletons are in `assets/diagrams/`, paper templates (LaTeX skeleton, BibTeX, reading notes, methodology manual) in `assets/paper/`, worked diagram examples in `examples/`.
+Start with [the papers guide](references/academic-papers-guide.md) for reading, reviewing and writing, or [the diagrams guide](references/academic-diagrams-guide.md) for diagrams. Citation work: [citation verification](references/citation-verification.md), [citations and bibliography](references/citations-and-bibliography.md), [source list](references/primary-sources-and-version-checks.md). Claims: [claim-evidence mapping](references/claim-evidence-mapping.md), [evidence-linked writing](references/evidence-linked-writing.md). Field-specific paper patterns, figures, talks, reviews and venue formatting have their own files under `references/`; diagram skeletons are in `assets/diagrams/`, paper templates (LaTeX skeleton, BibTeX, reading notes, methodology manual) in `assets/paper/`, worked diagram examples in `examples/`.
 
-Scripts in `<plugin root>/skills/research-communication/scripts/` (read `--help` first): `build_lit_matrix.py`, `check_manuscript.py`, `check_diagram_sources.py`.
+Scripts in `<plugin root>/skills/research-communication/scripts/` (read `--help` first): `build_lit_matrix.py`, `check_manuscript.py` (`--main` for one document), `check_diagram_sources.py`, and for evidence-linked writing ([guide](references/evidence-linked-writing.md)) `check_communication.py` (record, inputs, sources, manuscript occurrences) and `audit_claims.py` (assessments, wording, numbers, reporting completeness; claim matrix and draft facts).
 
 ## Handoffs
 

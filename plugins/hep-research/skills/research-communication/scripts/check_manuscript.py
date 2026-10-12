@@ -36,15 +36,15 @@ Two modes, neither a compile nor a check of scientific content:
     reference in any other, so a backup or an unused file can mask a missing
     reference; use it for a quick sweep of one paper's folder.
   - main mode (--main MAIN.tex): a selected-document scan. Only the files MAIN
-    reaches through literal \input, \include, \subfile and \import are scanned;
+    reaches through literal \\input, \\include, \\subfile and \\import are scanned;
     their names are resolved against --build-root (default: MAIN's folder), as
     TeX does, never against the including file's folder, and nothing outside
     --project-root (default: the build root) is opened. Only the bibliography
-    the document declares (\bibliography{...}, \addbibresource{...}, an inline
+    the document declares (\\bibliography{...}, \\addbibresource{...}, an inline
     thebibliography) counts; a built .bbl counts only when associated with
     --bbl, because a file name or a timestamp does not prove it was built from
     this document. What the scanner cannot follow (a macro-generated file name,
-    an include inside a conditional, \includeonly, a missing include or .bib,
+    an include inside a conditional, \\includeonly, a missing include or .bib,
     a file outside the root, an include cycle) is reported as incomplete
     coverage, never guessed.
 

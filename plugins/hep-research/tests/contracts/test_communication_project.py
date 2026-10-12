@@ -197,7 +197,7 @@ class ResolveContextTests(ProjectFixture):
         self.assertFalse(ctx["sources"]["lit:S99"]["resolved"])
         (self.root / "evidence" / "lit" / "sources.json").unlink()
         ctx = self.ctx()
-        self.assertIn("resolution.ledger_missing", self.codes(ctx, "error"))
+        self.assertIn("resolution.ledger_missing", self.codes(ctx, "unresolved"), "unavailable material is unresolved, not an error")
         self.assertIn("resolution.source_unavailable", self.codes(ctx, "unresolved"))
         self.assertNotIn("resolution.unknown_source", self.codes(ctx))
 

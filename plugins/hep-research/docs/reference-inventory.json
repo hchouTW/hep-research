@@ -34,8 +34,8 @@
    "uncited": 0
   },
   "research-communication": {
-   "references": 52,
-   "bytes": 367996,
+   "references": 53,
+   "bytes": 372738,
    "uncited": 0
   }
  },
@@ -2304,11 +2304,12 @@
     "skills/research-communication/SKILL.md",
     "skills/research-communication/references/academic-diagrams-guide.md",
     "skills/research-communication/references/code-to-methodology-synthesis.md",
+    "skills/research-communication/references/evidence-linked-writing.md",
     "skills/research-communication/references/submission-and-peer-review.md",
     "tests/skills/research_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "2261425 2026-10-12"
+   "last_commit": "d41501c 2026-10-12"
   },
   {
    "path": "skills/research-communication/references/artifact-packaging-for-release.md",
@@ -2356,12 +2357,13 @@
     "skills/research-communication/references/academic-papers-guide.md",
     "skills/research-communication/references/astroparticle-and-cosmic-ray-papers.md",
     "skills/research-communication/references/claim-evidence-mapping.md",
+    "skills/research-communication/references/evidence-linked-writing.md",
     "skills/research-communication/references/literature-review.md",
     "skills/research-communication/references/plagiarism-and-text-reuse-checking.md",
     "tests/skills/research_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "d41501c 2026-10-12"
   },
   {
    "path": "skills/research-communication/references/citations-and-bibliography.md",
@@ -2420,7 +2422,7 @@
     "tests/skills/research_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "d41501c 2026-10-12"
   },
   {
    "path": "skills/research-communication/references/code-to-methodology-synthesis.md",
@@ -2554,6 +2556,18 @@
    ],
    "cited_by_other_skills": [],
    "last_commit": "351029c 2026-10-07"
+  },
+  {
+   "path": "skills/research-communication/references/evidence-linked-writing.md",
+   "owner": "research-communication",
+   "bytes": 4742,
+   "lines": 62,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/research-communication/SKILL.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
   },
   {
    "path": "skills/research-communication/references/figures-and-tables.md",
@@ -2960,6 +2974,7 @@
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
     "skills/research-communication/references/erratum-and-corrigendum-drafting.md",
+    "skills/research-communication/references/evidence-linked-writing.md",
     "skills/research-communication/references/latex-mechanics-and-tooling.md",
     "skills/research-communication/references/multi-venue-reformatting.md",
     "skills/research-communication/references/preprint-to-journal-reconciliation.md",
@@ -2991,7 +3006,7 @@
    "cited_by_other_skills": [
     "hep-statistics"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "d41501c 2026-10-12"
   },
   {
    "path": "skills/research-communication/references/statistics-and-ml-papers.md",
@@ -3031,7 +3046,7 @@
     "tests/skills/research_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "d41501c 2026-10-12"
   },
   {
    "path": "skills/research-communication/references/supplementary-material-planning.md",
@@ -3187,6 +3202,10 @@
    "skills/detector-response/references/event-reconstruction.md",
    "skills/detector-response/references/noble-liquid-neutrino-and-rare-event-detectors.md"
   ],
+  "evidence": [
+   "skills/research-communication/references/claim-evidence-mapping.md",
+   "skills/research-communication/references/evidence-linked-writing.md"
+  ],
   "figure": [
    "skills/research-communication/references/diagram-figure-style.md",
    "skills/research-communication/references/figures-and-tables.md"
@@ -3315,6 +3334,10 @@
   "venue": [
    "skills/research-communication/references/latex-venue-setup.md",
    "skills/research-communication/references/multi-venue-reformatting.md"
+  ],
+  "writing": [
+   "skills/research-communication/references/evidence-linked-writing.md",
+   "skills/research-communication/references/grant-and-fellowship-proposal-writing.md"
   ]
  },
  "git_note": "full history"

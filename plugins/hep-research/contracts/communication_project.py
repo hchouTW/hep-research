@@ -186,7 +186,8 @@ def _ledger_file(r: _Resolver, ref: str, declared_sha, where: str, entry: dict):
     if path is None:
         return None
     if not path.is_file():
-        r.add("error", where, "resolution.ledger_missing", f"ledger file {ref!r} does not exist in the project")
+        r.add("unresolved", where, "resolution.ledger_missing",
+              f"ledger file {ref!r} does not exist in the project: its sources cannot be resolved (unavailable, not wrong)")
         return None
     raw, data = r.read_json(path, where, "resolution.ledger_unreadable")
     if raw is None:
@@ -319,7 +320,7 @@ def resolve_context(artifact_path, project_root, *, vocab: Vocabulary | None = N
     path = Path(artifact_path)
     path = (path if path.is_absolute() else Path.cwd() / path).resolve()
     r = _Resolver(root)
-    ctx: dict = {"artifact_path": None, "artifact_sha256": None, "artifact": None, "format": None, "traceability": "none",
+    ctx: dict = {"project_root": str(root), "artifact_path": None, "artifact_sha256": None, "artifact": None, "format": None, "traceability": "none",
                  "profiles": [], "schema": None, "dependencies": None, "inputs": {}, "ledgers": {}, "sources": {}, "documents": {},
                  "findings": r.findings, "checks_run": [], "checks_not_run": [], "note": NOTE}
 
