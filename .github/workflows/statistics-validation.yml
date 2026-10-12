@@ -7,7 +7,7 @@
 #   published         the open ATLAS-SUSY-2018-31 likelihood (HEPData ins1748602, checksum pinned) against the
 #                     preregistered paper values (asymptotic construction); an unavailable download is not-run and
 #                     fails the job, never a pass
-#   combine           CMS Combine 11.1.0 with ROOT 6.36.14 from conda-forge (the build recorded in VALIDATION.md):
+#   combine           CMS Combine 11.1.0 (conda-forge package cms-combine) with ROOT 6.36.14 (the build recorded in VALIDATION.md):
 #                     the datacard template against pyhf; Combine missing fails the job (no silent skip)
 name: statistics-validation
 on:
@@ -27,7 +27,7 @@ defaults:
 jobs:
   campaigns:
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
@@ -71,10 +71,9 @@ jobs:
         with:
           environment-name: combine
           create-args: >-
-            python=3.13 root=6.36.14 combine=11.1.0 pyhf=0.7.6 numpy scipy
+            python=3.13 root=6.36.14 cms-combine=11.1.0 pyhf=0.7.6 numpy scipy
           condarc: |
             channels: [conda-forge]
       - name: Combine datacard template against pyhf; Combine required
-        run: |
-          python -m pip install -r requirements-ci.lock
-          python tools/run_required_backends.py --require exe:combine,pyhf==0.7.6 --modules tests.adapters.test_combine_datacard_template
+        # no pip install of the lock here: it would replace conda's NumPy under ROOT; the test needs only NumPy and SciPy
+        run: python tools/run_required_backends.py --require exe:combine,pyhf==0.7.6 --modules tests.adapters.test_combine_datacard_template

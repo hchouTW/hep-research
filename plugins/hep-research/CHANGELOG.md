@@ -3,6 +3,20 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **Discrete profiling coverage established (T27).** A preregistered follow-up with 1,500 toys per envelope row
+  (seed 20261013, criteria unchanged) passes bias and coverage for all four truths and both injected signals
+  (coverage 0.665-0.694, lower bounds 0.634-0.663 against 0.633; 11 of 12,000 toys failed and count as not covering).
+  `discrete_profile.py` runs rows in parallel (`--workers`, `--procedures`); seeds per row are unchanged, so the
+  committed 300-toy study reproduces.
+- **CI: Combine release gate fixed.** The conda-forge package is `cms-combine`, not `combine` (the first
+  statistics-validation run could not solve); the job no longer pip-installs the lock over conda's NumPy. On GitHub it
+  now passes: Combine 11.1.0 with ROOT 6.36.14, the datacard template within 2% of pyhf, 0 skipped.
+- **CI: campaigns job.** The 300-toy discrete-profiling rerun runs its rows in parallel and compares per row with a
+  cross-platform tolerance (coverage 2 points, mean mu-hat 0.01, bias 0.05, failures 2, identical verdicts); timeout
+  180 min. First all-green statistics-validation run on GitHub: published, combine and campaigns pass.
+
 ## 0.6.11 (2026-10-12)
 
 Hep-statistics audit (audit commit b5c3a55, findings F01–F04, checks T01–T30; evidence in VALIDATION.md,
