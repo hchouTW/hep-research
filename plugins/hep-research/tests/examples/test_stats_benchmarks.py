@@ -129,10 +129,23 @@ class DiscreteProfile(unittest.TestCase):
             self.assertTrue(row["bias_ok"], row)
             self.assertEqual(row["coverage_verdict"], "pass", row)
 
-    @unittest.skipUnless(SLOW, "slow (about an hour, the 300-toy study): set HEP_SLOW_TESTS=1")
+    @unittest.skipUnless(SLOW, "slow (the 300-toy study: about 10 minutes on 8 cores, an hour on one): set HEP_SLOW_TESTS=1")
     def test_study_reproduces(self):
-        new = self.dp.study(300, self.res["seed"])
-        self.assertEqual(close(new["rows"], self.res["rows"]), [])
+        # the rows run in parallel (seeds depend on the row only). The fits are Nelder-Mead/BFGS, whose last digits
+        # differ between platforms and can flip a toy that sits on an interval edge, so the comparison is per row:
+        # coverage within 2 percentage points (6 of 300 toys), mean mu-hat within 0.01, bias within 0.05 of the
+        # spread, failures within 2, and every verdict identical. On the platform that wrote the output the numbers
+        # agree exactly.
+        new = self.dp.study(300, self.res["seed"], workers=max(1, min(8, os.cpu_count() or 1)))
+        self.assertEqual(len(new["rows"]), len(self.res["rows"]))
+        for a, b in zip(new["rows"], self.res["rows"]):
+            key = (b["truth"], b["mu_true"], b["procedure"])
+            self.assertEqual((a["truth"], a["mu_true"], a["procedure"]), key)
+            self.assertLessEqual(abs(a["coverage_68"] - b["coverage_68"]), 0.02, key)
+            self.assertLessEqual(abs(a["mean_mu_hat"] - b["mean_mu_hat"]), 0.01, key)
+            self.assertLessEqual(abs(a["bias_over_spread"] - b["bias_over_spread"]), 0.05, key)
+            self.assertLessEqual(abs(a["failed"] - b["failed"]), 2, key)
+            self.assertEqual((a["bias_ok"], a["coverage_verdict"]), (b["bias_ok"], b["coverage_verdict"]), key)
 
 
 class PublishedLikelihood(unittest.TestCase):
