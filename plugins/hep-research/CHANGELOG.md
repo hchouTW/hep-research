@@ -5,6 +5,12 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Skill READMEs and trimmed entry points.** Every skill folder has a `README.md` (purpose, folder map, scripts,
+  references, handoffs, tests) linked from the plugin README and from each `SKILL.md`. The detector-response,
+  hep-statistics and hep-computing `SKILL.md` files, which sat at the 8 KiB budget, keep their rules and point to new
+  index sections in the principles summary, the core/stats guide and the engineering playbook for the reference and
+  script lists; a live routing rerun of the 80 cases involving them scored 75 of 80 with no change attributable to the
+  trim (VALIDATION SKILL-TRIM).
 - **Live behavioral evaluation recorded.** `evals/research_communication/run_live_eval.py` runs the eleven cases through
   a headless `claude -p` with the routing harness's isolation; one run on claude-sonnet-5-5 at 0.6.14 (`f7709da`,
   $0.71) scored 6 pass, 4 fail (all routing: quick cases answered without a plugin skill) and 1 critical-fail (a

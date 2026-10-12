@@ -495,6 +495,17 @@ host without Chromium (the preflight path is covered by fake renderers only); be
 new cases; Combine, ROOT and GPU paths (unchanged by this work). The branch kept contracts at 2.2.0; release 0.6.13 bumps them to 2.3.0 (minor) with the capability
 `communication:traceability-v1`.
 
+## SKILL-TRIM (2026-10-13, E2, version 0.6.14 + unreleased): detector-response, hep-statistics, hep-computing
+
+The three `SKILL.md` files sat within 30 bytes of the 8 KiB budget. Their reference and script lists moved into index
+sections of `detector-principles-summary.md`, `core-stats-guide.md` and `engineering-playbook.md` (6566, 7545 and 7598
+bytes after; descriptions, Owns lines, invariants and handoffs unchanged; every skill now points to its folder README).
+Static routing (157 cases), ownership, layering, instruction-text, packaging and the reference inventory pass. Live
+routing rerun of the 80 cases that involve the three skills (claude-sonnet-5-5, Claude Code 2.1.296, $5.96): 75 of 80
+strict; against the 2.1.293 baseline one quick case regressed (`st-sensitivity-1`, 1 pass in 3 repeats on the trimmed
+tree: stochastic, and its routing description did not change), one improved, two second-turn misses as before, two
+cases newer than the baseline missed; 0 loading violations. Recorded in `evals/routing/README.md`.
+
 ## 0.6.14 release check (2026-10-13, E2)
 
 Version 0.6.14 (lint-clean contracts after the 0.6.13 tag failed the GitHub lint job; no behavior change). ruff
