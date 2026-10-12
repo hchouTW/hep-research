@@ -2,6 +2,7 @@
  "note": "SYNTHETIC structural fixture; values are placeholders, not physics",
  "valid": [
   "communication.json",
+  "communication_traceability.json",
   "comparison_spec.json",
   "computational_run.json",
   "dataset_record.json",
@@ -80,11 +81,27 @@
   ],
   "measurement_ratio_no_correlation_model.json": [
    "schema.required"
+  ],
+  "communication_bad_types.json": [
+   "schema.type"
+  ],
+  "communication_traceability_without_capability.json": [
+   "communication.capability_missing"
+  ],
+  "communication_claim_status_upgraded.json": [
+   "communication.status_upgraded"
+  ],
+  "communication_claim_status_conflict.json": [
+   "communication.claim_status_conflict"
   ]
  },
  "unresolved": {
   "statres_scan_no_global.json": [
    "stats.lee_missing"
+  ],
+  "communication_traceability_pending.json": [
+   "communication.assessment_stale",
+   "communication.assessment_missing"
   ]
  }
 }

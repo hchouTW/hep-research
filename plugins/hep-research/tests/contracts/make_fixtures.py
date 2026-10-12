@@ -8,9 +8,11 @@ from __future__ import annotations
 
 import copy
 import json
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
 OUT = ROOT / "contracts" / "fixtures" / "artifacts"
 SYN = "SYNTHETIC structural fixture; values are placeholders, not physics"
 
@@ -98,6 +100,46 @@ def statres_v11(paradigm, **extra):
     return d
 
 
+def communication_rich(**extra):
+    """Traceability format (communication:traceability-v1): observed claim C1 on input A, synthetic illustration C2 on
+    input B, comparison C3 on both; the envelope keeps the sticky caveats only, each claim its own provenance."""
+    from contracts import CONTRACTS_VERSION
+    from contracts.communication import claim_digest, evidence_fingerprint
+    inputs = [{"ref": "artifacts/obs.json", "artifact_type": "statistical-result", "artifact_id": "fixture-synthetic-obs",
+               "sha256": "a" * 64, "status": ["observed"]},
+              {"ref": "artifacts/syn.json", "artifact_type": "prediction", "artifact_id": "fixture-synthetic-syn",
+               "sha256": "b" * 64, "status": ["synthetic", "unvalidated"]}]
+
+    def edge(eid, target, role="supports", usage="used-in-claim"):
+        return {"id": eid, "target_kind": "artifact", "target": target, "locator": "extension.results (fixture)", "role": role, "usage": usage}
+
+    def claim(cid, text, ctype, status, edges):
+        return {"id": cid, "text": text, "claim_type": ctype, "scope": {"text": "synthetic fixture; no physics"},
+                "status": status, "evidence": edges, "unresolved_inputs": []}
+    claims = [claim("claim:C1", "The ratio is 1.02 +/- 0.05 (synthetic fixture).", "measurement", ["observed"],
+                    [edge("ev:C1-a", "artifacts/obs.json")]),
+              claim("claim:C2", "A synthetic illustration gives 0.98 (synthetic fixture).", "illustration", ["synthetic", "unvalidated"],
+                    [edge("ev:C2-b", "artifacts/syn.json")]),
+              claim("claim:C3", "The synthetic illustration is compatible with the ratio (synthetic fixture).", "comparison",
+                    ["synthetic", "unvalidated"], [edge("ev:C3-a", "artifacts/obs.json"), edge("ev:C3-b", "artifacts/syn.json", "qualifies")])]
+    doc = envelope("communication", {}, "research-communication", contract_version=CONTRACTS_VERSION,
+                   versions={"plugin": "0.6.12", "contracts": CONTRACTS_VERSION, "profiles": {}},
+                   required_capabilities=["communication:traceability-v1"], inputs=inputs)
+    for c in claims:
+        c["assessment"] = {"verdict": "supported", "rationale": "fixture: the value is read from the named artifact field",
+                           "evidence_ids": [e["id"] for e in c["evidence"]], "assessor": {"identity": "fixture", "role": "author"},
+                           "date": "2026-10-12", "claim_digest": claim_digest(c),
+                           "evidence_fingerprints": {e["id"]: evidence_fingerprint(e, doc) for e in c["evidence"]}, "currency": "current"}
+    doc["extension"] = {"traceability_version": "1.0.0", "scope": {"occurrences": True, "sources": False},
+                        "documents": [{"id": "doc:paper", "path": "paper/main.md", "format": "markdown", "audience": "fixture", "purpose": "main text"}],
+                        "claims": claims,
+                        "occurrences": [{"id": "occ:1", "claim_id": "claim:C1", "document_id": "doc:paper", "locator": "section:abstract",
+                                         "passage": "The ratio is 1.02 +/- 0.05.", "state": "mapped"}],
+                        "sources_read": [], "evidence_ledgers": [], "limitations": ["synthetic fixture"]}
+    doc["extension"].update(extra)
+    return doc
+
+
 SCAN = {"local_p": 1.0e-3, "local_z": 3.09, "scan": {"parameters": ["mass"], "ranges": [[100.0, 200.0]]}}
 
 
@@ -151,6 +193,7 @@ VALID = {
     "communication.json": envelope("communication", {"claims": [{"text": "placeholder", "result_ref": "x.json", "status": "synthetic"}],
                                                      "sources_read": [{"id": "user:S1", "level": "full-text"}],
                                                      "limitations": ["fixture"]}, "research-communication"),
+    "communication_traceability.json": communication_rich(),
 }
 
 bad = {}
@@ -174,10 +217,17 @@ d = statres_v11("frequentist", significance={**SCAN, "global_p": 0.02, "trials_m
 d = theory(); del d["status"]; bad["envelope_missing_status.json"] = (d, ["schema.required"])
 d = copy.deepcopy(VALID["response_parametrized.json"]); del d["extension"]["parametrization"]; bad["response_parametrized_missing.json"] = (d, ["response.parametrization_missing"])
 d = measurement(ratio={"numerator": "a", "denominator": "b", "cancellations": [{"effect": "exposure", "treatment": "cancels"}]}); bad["measurement_ratio_no_correlation_model.json"] = (d, ["schema.required"])
+d = copy.deepcopy(VALID["communication.json"]); d["extension"]["claims"] = [{"text": 42, "result_ref": None, "status": {"a": 1}}]; bad["communication_bad_types.json"] = (d, ["schema.type"])
+d = communication_rich(); d["required_capabilities"] = []; bad["communication_traceability_without_capability.json"] = (d, ["communication.capability_missing"])
+d = communication_rich(); d["extension"]["claims"][1]["status"] = ["observed"]; d["extension"]["claims"][1]["assessment"]["currency"] = "stale"; bad["communication_claim_status_upgraded.json"] = (d, ["communication.status_upgraded"])
+d = communication_rich(); d["extension"]["claims"][2]["status"] = ["observed", "synthetic", "unvalidated"]; d["extension"]["claims"][2]["assessment"]["currency"] = "stale"; bad["communication_claim_status_conflict.json"] = (d, ["communication.claim_status_conflict"])
 
 
 # Valid (no error) but not usable as a final result: the validator reports these codes as `unresolved`.
 UNRESOLVED = {"statres_scan_no_global.json": (statres_v11("frequentist", significance=dict(SCAN)), ["stats.lee_missing"])}
+d = communication_rich(); d["extension"]["claims"][0]["text"] = "The ratio establishes a deviation (synthetic fixture)."; d["extension"]["claims"][0]["assessment"]["currency"] = "stale"
+d["extension"]["claims"][1]["evidence"] = []; del d["extension"]["claims"][1]["assessment"]; d["extension"]["claims"][1]["unresolved_inputs"] = ["the illustration artifact is not yet written"]
+UNRESOLVED["communication_traceability_pending.json"] = (d, ["communication.assessment_stale", "communication.assessment_missing"])
 
 
 def main() -> None:

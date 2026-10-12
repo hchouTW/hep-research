@@ -1,9 +1,14 @@
-{"$comment": "Owner: research-communication. Never upgrades derivation or result status.",
+{"$comment": "Owner: research-communication. Legacy communication extension (claims with result_ref and a scalar or array status). Never upgrades derivation or result status. The richer traceability format is selected by the capability communication:traceability-v1 (ext_communication_traceability.json).",
  "type": "object",
  "required": ["claims", "sources_read", "limitations"],
  "properties": {
-  "claims": {"type": "array", "items": {"type": "object", "required": ["text", "result_ref", "status"]}},
+  "claims": {"type": "array", "items": {"type": "object", "required": ["text", "result_ref", "status"],
+      "properties": {"text": {"$ref": "common.json#/$defs/nonempty"},
+                     "result_ref": {"$ref": "common.json#/$defs/nonempty"},
+                     "status": {"anyOf": [{"type": "string", "x-vocab": "artifact_statuses"},
+                                          {"type": "array", "items": {"type": "string", "x-vocab": "artifact_statuses"}}]}}}},
   "sources_read": {"type": "array", "items": {"type": "object", "required": ["id", "level"],
-      "properties": {"level": {"type": "string", "x-vocab": "verification_levels"}}}},
+      "properties": {"id": {"$ref": "common.json#/$defs/namespaced_id"},
+                     "level": {"type": "string", "x-vocab": "verification_levels"}}}},
   "figure_inputs": {"type": "array"}, "limitations": {"type": "array", "items": {"type": "string"}}
  }}

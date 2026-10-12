@@ -235,13 +235,8 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:
         if ext.get("task") == "surrogate" and not ext.get("training_domain"):
             rep.add("error", "$.extension.training_domain", "ml.no_training_domain", "a surrogate needs its training domain to detect extrapolation")
     elif t == "communication":
-        for i, c in enumerate(ext.get("claims", [])):
-            cs = c.get("status")
-            cs = {x for x in cs if isinstance(x, str)} if isinstance(cs, list) else ({cs} if isinstance(cs, str) else set())
-            missing = sorted(set(required_statuses(doc.get("inputs", []))) - cs)
-            if missing or (cs & UPGRADED and inherited & set(STICKY_STATUSES)):
-                rep.add("error", f"$.extension.claims[{i}].status", "communication.status_upgraded",
-                        f"a claim must keep its inputs' statuses {missing or sorted(inherited & set(STICKY_STATUSES))}; communication never upgrades status")
+        from contracts.communication import validate_extension  # lazy: communication imports this module's constants
+        validate_extension(doc, vocab, rep)
 
 
 RHAT_MAX = 1.01  # [Proposal] threshold for stats.convergence_mismatch
@@ -584,6 +579,9 @@ def validate_artifact(doc, vocab: Vocabulary | None = None, protected: bool = Fa
     check_unknown_keys(doc, rep)
     at = doc.get("artifact_type")
     ext_schema = EXTENSION_SCHEMAS.get(at) if isinstance(at, str) else None  # a wrong type is already a finding
+    if at == "communication":
+        from contracts.communication import extension_schema  # the capability selects the legacy or traceability schema
+        ext_schema = extension_schema(doc)
     ext: Any = doc.get("extension")
     if ext_schema and isinstance(ext, dict):
         validate(ext, ext_schema, vocab, rep, "$.extension")

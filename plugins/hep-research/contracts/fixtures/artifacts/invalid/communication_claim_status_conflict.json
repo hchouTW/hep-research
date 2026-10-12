@@ -1,0 +1,213 @@
+{
+ "contract_version": "2.2.0",
+ "artifact_id": "fixture-synthetic-communication",
+ "artifact_type": "communication",
+ "objective": "SYNTHETIC structural fixture; values are placeholders, not physics",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.6.12",
+  "contracts": "2.2.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "research-communication",
+  "created": "2026-10-02",
+  "evidence_ids": []
+ },
+ "inputs": [
+  {
+   "ref": "artifacts/obs.json",
+   "artifact_type": "statistical-result",
+   "artifact_id": "fixture-synthetic-obs",
+   "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+   "status": [
+    "observed"
+   ]
+  },
+  {
+   "ref": "artifacts/syn.json",
+   "artifact_type": "prediction",
+   "artifact_id": "fixture-synthetic-syn",
+   "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+   "status": [
+    "synthetic",
+    "unvalidated"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "traceability_version": "1.0.0",
+  "scope": {
+   "occurrences": true,
+   "sources": false
+  },
+  "documents": [
+   {
+    "id": "doc:paper",
+    "path": "paper/main.md",
+    "format": "markdown",
+    "audience": "fixture",
+    "purpose": "main text"
+   }
+  ],
+  "claims": [
+   {
+    "id": "claim:C1",
+    "text": "The ratio is 1.02 +/- 0.05 (synthetic fixture).",
+    "claim_type": "measurement",
+    "scope": {
+     "text": "synthetic fixture; no physics"
+    },
+    "status": [
+     "observed"
+    ],
+    "evidence": [
+     {
+      "id": "ev:C1-a",
+      "target_kind": "artifact",
+      "target": "artifacts/obs.json",
+      "locator": "extension.results (fixture)",
+      "role": "supports",
+      "usage": "used-in-claim"
+     }
+    ],
+    "unresolved_inputs": [],
+    "assessment": {
+     "verdict": "supported",
+     "rationale": "fixture: the value is read from the named artifact field",
+     "evidence_ids": [
+      "ev:C1-a"
+     ],
+     "assessor": {
+      "identity": "fixture",
+      "role": "author"
+     },
+     "date": "2026-10-12",
+     "claim_digest": "c1b8d75a5115511935aafb5b240666b5c2e91fde2b33874b5fc0c0a9b9562278",
+     "evidence_fingerprints": {
+      "ev:C1-a": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+     },
+     "currency": "current"
+    }
+   },
+   {
+    "id": "claim:C2",
+    "text": "A synthetic illustration gives 0.98 (synthetic fixture).",
+    "claim_type": "illustration",
+    "scope": {
+     "text": "synthetic fixture; no physics"
+    },
+    "status": [
+     "synthetic",
+     "unvalidated"
+    ],
+    "evidence": [
+     {
+      "id": "ev:C2-b",
+      "target_kind": "artifact",
+      "target": "artifacts/syn.json",
+      "locator": "extension.results (fixture)",
+      "role": "supports",
+      "usage": "used-in-claim"
+     }
+    ],
+    "unresolved_inputs": [],
+    "assessment": {
+     "verdict": "supported",
+     "rationale": "fixture: the value is read from the named artifact field",
+     "evidence_ids": [
+      "ev:C2-b"
+     ],
+     "assessor": {
+      "identity": "fixture",
+      "role": "author"
+     },
+     "date": "2026-10-12",
+     "claim_digest": "ed5226ee9cde086f9b5769cbd3d9f8d2792e9fea75b7e5720bf1c04c95af36ce",
+     "evidence_fingerprints": {
+      "ev:C2-b": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+     },
+     "currency": "current"
+    }
+   },
+   {
+    "id": "claim:C3",
+    "text": "The synthetic illustration is compatible with the ratio (synthetic fixture).",
+    "claim_type": "comparison",
+    "scope": {
+     "text": "synthetic fixture; no physics"
+    },
+    "status": [
+     "observed",
+     "synthetic",
+     "unvalidated"
+    ],
+    "evidence": [
+     {
+      "id": "ev:C3-a",
+      "target_kind": "artifact",
+      "target": "artifacts/obs.json",
+      "locator": "extension.results (fixture)",
+      "role": "supports",
+      "usage": "used-in-claim"
+     },
+     {
+      "id": "ev:C3-b",
+      "target_kind": "artifact",
+      "target": "artifacts/syn.json",
+      "locator": "extension.results (fixture)",
+      "role": "qualifies",
+      "usage": "used-in-claim"
+     }
+    ],
+    "unresolved_inputs": [],
+    "assessment": {
+     "verdict": "supported",
+     "rationale": "fixture: the value is read from the named artifact field",
+     "evidence_ids": [
+      "ev:C3-a",
+      "ev:C3-b"
+     ],
+     "assessor": {
+      "identity": "fixture",
+      "role": "author"
+     },
+     "date": "2026-10-12",
+     "claim_digest": "76c3e0f4345c63f5c099980bc8496abaa7fb536c412bb663461143ac63a60ac8",
+     "evidence_fingerprints": {
+      "ev:C3-a": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "ev:C3-b": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+     },
+     "currency": "stale"
+    }
+   }
+  ],
+  "occurrences": [
+   {
+    "id": "occ:1",
+    "claim_id": "claim:C1",
+    "document_id": "doc:paper",
+    "locator": "section:abstract",
+    "passage": "The ratio is 1.02 +/- 0.05.",
+    "state": "mapped"
+   }
+  ],
+  "sources_read": [],
+  "evidence_ledgers": [],
+  "limitations": [
+   "synthetic fixture"
+  ]
+ },
+ "required_capabilities": [
+  "communication:traceability-v1"
+ ]
+}
