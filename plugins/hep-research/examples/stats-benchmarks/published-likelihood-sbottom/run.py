@@ -18,6 +18,11 @@ The comparison targets, tolerances, fit definition and negative control were fix
   nuisance parameters in the background-only fit;
 - negative control: the same fit without the control region CRtt_cuts must fail at least one tolerance.
 
+Post-hoc diagnosis (added after the 5,000-toy run, not preregistered; it changes no preregistered verdict): the toy
+construction does not reproduce the observed and -1 sigma limits, so it is checked against the exact counting
+construction of the one-bin SRB (toy_diagnosis), and pyhf's asymptotic formulae are run on the same bare model. The
+toys are correct; the asymptotic formulae understate the limit at n = 3, and the published values follow them.
+
 Usage (from the plugin root): python3 examples/stats-benchmarks/published-likelihood-sbottom/run.py
     --pallet PATH_TO_TGZ | --download CACHE_DIR   [--toys 5000] [--seed 20261012] [--out DIR]
 Without the pallet (no file, no network) the result is not-run (exit 4), never a pass.
@@ -30,6 +35,7 @@ import argparse
 import hashlib
 import io
 import json
+import math
 import sys
 import tarfile
 import urllib.request
@@ -151,6 +157,18 @@ def _toy_point(args):
             "CLs_obs_range_95": [lo_sb / hi_b, hi_sb / lo_b if lo_b > 0 else None], "CLs_exp": exp, "seed": seed}
 
 
+def _crossing(grid, vals, level=LEVEL):
+    """S where CLs falls through the level between two grid points, interpolating log CLs linearly (CLs falls about
+    exponentially in S; interpolating CLs itself put every crossing 0.06-0.12 too high on the 1.0-wide grid, a
+    defect found after the 5,000-toy run that changed no verdict). Linear in CLs when the lower value is 0."""
+    for (s0, v0), (s1, v1) in zip(zip(grid, vals), zip(grid[1:], vals[1:])):
+        if v0 is not None and v1 is not None and v0 >= level > v1:
+            if v1 > 0:
+                return float(s0 + (s1 - s0) * (math.log(v0) - math.log(level)) / (math.log(v0) - math.log(v1)))
+            return float(s0 + (s1 - s0) * (v0 - level) / (v0 - v1))
+    return None
+
+
 def toy_based(bkg, toys, seed, workers):
     from multiprocessing import get_context
     jobs = [(bkg, s, toys, seed + k) for k, s in enumerate(TOY_GRID)]
@@ -158,18 +176,80 @@ def toy_based(bkg, toys, seed, workers):
         rows = pool.map(_toy_point, jobs)
 
     def crossing(vals):
-        for (s0, v0), (s1, v1) in zip(zip(TOY_GRID, vals), zip(TOY_GRID[1:], vals[1:])):
-            if v0 is not None and v1 is not None and v0 >= LEVEL > v1:
-                return float(s0 + (s1 - s0) * (v0 - LEVEL) / (v0 - v1))
-        return None
+        return _crossing(TOY_GRID, vals)
     obs = crossing([r["CLs_obs"] for r in rows])
     rng = [crossing([r["CLs_obs_range_95"][0] for r in rows]), crossing([r["CLs_obs_range_95"][1] for r in rows])]
     exp = [crossing([r["CLs_exp"][k] for r in rows]) for k in range(5)]
     return {"toys_per_point": toys, "seed": seed, "grid": TOY_GRID, "rows": rows, "S95_obs": obs,
             "S95_obs_mc_range_95": rng, "S95_exp": exp, "CLb_at_S95_obs": None,
-            "note": ("crossings interpolate linearly between grid points (grid step 1.0 near the limit); the observed range "
+            "note": ("crossings interpolate log CLs linearly between grid points (grid step 1.0 near the limit); the observed range "
                      "propagates exact 95% intervals on CLs+b and CLb; CLb at the limit is reported by the asymptotic "
                      "construction only")}
+
+
+MACHINERY = {"S": [4.0, 5.0, 5.5], "toys": 4000, "seed": 7, "cl": 0.99}  # seeds 7, 8, 9; added after the toy run (post hoc)
+
+
+def _counting_limit(n: int, b: float) -> float:
+    """Exact CLs upper limit on S for one Poisson bin with a known background: P(N <= n | S + b) / P(N <= n | b) = LEVEL."""
+    from scipy import optimize, stats
+    return float(optimize.brentq(lambda s: stats.poisson.cdf(n, s + b) / stats.poisson.cdf(n, b) - LEVEL, 0.0, 100.0))
+
+
+def _bare_model(n: int, b: float):
+    import pyhf
+    spec = {"channels": [{"name": "SR", "samples": [
+                {"name": "unit_signal", "data": [1.0], "modifiers": [{"name": "S", "type": "normfactor", "data": None}]},
+                {"name": "background", "data": [b], "modifiers": []}]}],
+            "observations": [{"name": "SR", "data": [float(n)]}], "version": "1.0.0",
+            "measurements": [{"name": "bare", "config": {"poi": "S", "parameters": [{"name": "S", "bounds": [[0.0, 40.0]], "inits": [1.0]}]}}]}
+    ws = pyhf.Workspace(spec)
+    model = ws.model()
+    return model, ws.data(model)
+
+
+def toy_diagnosis(n_obs: int, b: float, toy: dict | None) -> dict:
+    """Post-hoc diagnosis of the toy construction (added after the 5,000-toy run; not preregistered, and it changes no
+    preregistered verdict). SRB is one bin with a handful of events, so the toy limits are compared with the exact
+    counting construction (b fixed at the background-only post-fit SRB yield, no systematics), pyhf's ToyCalculator is
+    checked against exact Poisson sums on that bare model, and pyhf's asymptotic formulae are run on the same bare
+    model: if they fall short of the exact limit there, the asymptotic-vs-toy difference is the approximation at low
+    counts, not the workspace or the toys."""
+    import numpy as np
+    import pyhf
+    from scipy import stats
+    from core.stats.tail_estimation import clopper_pearson
+    quantiles = [stats.norm.cdf(z) for z in (-2, -1, 0, 1, 2)]
+    n_q = [int(stats.poisson.ppf(q, b)) for q in quantiles]
+    exact = {"model": "one Poisson bin, background fixed at the post-fit SRB yield, no systematics", "n_obs": n_obs,
+             "b": b, "S95_obs": _counting_limit(n_obs, b), "S95_exp": [_counting_limit(k, b) for k in n_q],
+             "n_at_expected_quantiles": n_q,
+             "note": "expected limits are the exact limits at the background-only Poisson quantiles of the count"}
+    model, data = _bare_model(n_obs, b)
+    a_obs, a_exp = pyhf.infer.intervals.upper_limits.upper_limit(data, model, scan=None, level=LEVEL, rtol=1e-6)
+    bare_asym = {"S95_obs": float(a_obs), "S95_exp": [float(e) for e in a_exp],
+                 "shortfall_vs_exact_obs": 1 - float(a_obs) / exact["S95_obs"]}
+    rows, ok = [], True
+    for k, s in enumerate(MACHINERY["S"]):
+        np.random.seed(MACHINERY["seed"] + k)             # independent toys per point
+        calc = pyhf.infer.calculators.ToyCalculator(data, model, test_stat="qtilde", ntoys=MACHINERY["toys"], track_progress=False)
+        sb, bb = calc.distributions(float(s))
+        clsb, clb, _ = (float(x) for x in calc.pvalues(calc.teststatistic(float(s)), sb, bb))
+        row = {"S": s}
+        for name, toy_p, ref in (("CLsb", clsb, stats.poisson.cdf(n_obs, s + b)), ("CLb", clb, stats.poisson.cdf(n_obs, b))):
+            k = round(toy_p * MACHINERY["toys"])
+            lo, hi = clopper_pearson(k, MACHINERY["toys"], MACHINERY["cl"])
+            inside = bool(lo <= ref <= hi)
+            ok = ok and inside
+            row[name] = {"toys": toy_p, "exact": float(ref), "interval": [lo, hi], "inside": inside}
+        rows.append(row)
+    out = {"post_hoc": True, "exact_counting": exact, "bare_asymptotic": bare_asym,
+           "toy_machinery": {"settings": MACHINERY, "rows": rows, "pass": ok,
+                             "rule": "the exact CLs+b and CLb inside the 99% Clopper-Pearson interval of the toy counts at every S"}}
+    if toy is not None:
+        lo, hi = toy["S95_obs_mc_range_95"]
+        out["toy_obs_range_contains_exact_counting"] = bool(lo is not None and hi is not None and lo <= exact["S95_obs"] <= hi)
+    return out
 
 
 def compare(rep: dict) -> dict:
@@ -293,6 +373,20 @@ def main(argv=None) -> int:
         "asymptotic_reproduces": all(r["status"] == "pass" for r in res["asymptotic"]["comparison"].values()),
         "negative_control_fails": any(r["status"] == "fail" for r in res["negative_control_without_CR"]["comparison"].values()),
         "toy_based_reproduces": (all(r["status"] == "pass" for r in res["toy_based"]["comparison"].values()) if toys else None)}
+    n_obs = int(round(float(data[model.config.channel_slices["SR_cuts"]][0])))
+    diag = toy_diagnosis(n_obs, primary["postfit_SM_yield_SRB"], toys)
+    explained = (diag["toy_machinery"]["pass"] and diag["bare_asymptotic"]["S95_obs"] < diag["exact_counting"]["S95_obs"]
+                 and (toys is None or diag["toy_obs_range_contains_exact_counting"]))
+    diag["conclusion"] = (
+        ("The toy construction is correct: pyhf's toys match the exact Poisson sums on the bare one-bin model"
+         + (", and the full-model toy limit agrees with the exact counting limit" if toys else "")
+         + f". The asymptotic formulae understate the exact limit by {100 * diag['bare_asymptotic']['shortfall_vs_exact_obs']:.0f}% "
+         f"at n = {n_obs} on the same bare model, so the difference between the two constructions is the asymptotic "
+         "approximation at low counts. The published values agree with the asymptotic construction; that the paper used "
+         "the asymptotic formulae is an inference, as it does not state its construction.")
+        if explained else "Not explained: a diagnosis check failed; the toy-vs-paper difference is open.")
+    res["toy_diagnosis"] = diag
+    res["verdict"]["toy_difference_explained_post_hoc"] = explained
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     (out / "results.json").write_text(json.dumps(res, indent=1) + "\n")

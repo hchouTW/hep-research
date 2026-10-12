@@ -441,7 +441,7 @@
      "toys": 5000,
      "CLs_obs_range_95": [
       0.004366103618456111,
-      0.011940661196667984
+      0.011940661196667987
      ],
      "CLs_exp": [
       0.0,
@@ -462,7 +462,7 @@
      "toys": 5000,
      "CLs_obs_range_95": [
       0.0006175069752167818,
-      0.004682564159240853
+      0.004682564159240855
      ],
      "CLs_exp": [
       0.0,
@@ -474,43 +474,43 @@
      "seed": 20261018
     }
    ],
-   "S95_obs": 5.337070074338903,
+   "S95_obs": 5.276160536420868,
    "S95_obs_mc_range_95": [
-    5.128670287769565,
-    5.579209039511225
+    5.028537989428436,
+    5.55960322408587
    ],
    "S95_exp": [
-    3.325825844440347,
-    4.0310114381339375,
-    5.2659347945162,
-    7.70426960025086,
+    3.2218584576881546,
+    3.937534215904709,
+    5.1859498612376544,
+    7.588981313225318,
     null
    ],
    "CLb_at_S95_obs": null,
-   "note": "crossings interpolate linearly between grid points (grid step 1.0 near the limit); the observed range propagates exact 95% intervals on CLs+b and CLb; CLb at the limit is reported by the asymptotic construction only"
+   "note": "crossings interpolate log CLs linearly between grid points (grid step 1.0 near the limit); the observed range propagates exact 95% intervals on CLs+b and CLb; CLb at the limit is reported by the asymptotic construction only"
   },
   "comparison": {
    "S95_obs": {
     "reference": 4.9,
-    "reproduced": 5.337070074338903,
+    "reproduced": 5.276160536420868,
     "tolerance": 0.29500000000000004,
     "status": "fail"
    },
    "S95_exp_median": {
     "reference": 5.1,
-    "reproduced": 5.2659347945162,
+    "reproduced": 5.1859498612376544,
     "tolerance": 0.305,
     "status": "pass"
    },
    "S95_exp_plus1": {
     "reference": 7.9,
-    "reproduced": 7.70426960025086,
+    "reproduced": 7.588981313225318,
     "tolerance": 0.495,
     "status": "pass"
    },
    "S95_exp_minus1": {
     "reference": 3.4,
-    "reproduced": 4.0310114381339375,
+    "reproduced": 3.937534215904709,
     "tolerance": 0.27,
     "status": "fail"
    },
@@ -530,6 +530,123 @@
  "verdict": {
   "asymptotic_reproduces": true,
   "negative_control_fails": true,
-  "toy_based_reproduces": false
+  "toy_based_reproduces": false,
+  "toy_difference_explained_post_hoc": true
+ },
+ "toy_diagnosis": {
+  "post_hoc": true,
+  "exact_counting": {
+   "model": "one Poisson bin, background fixed at the post-fit SRB yield, no systematics",
+   "n_obs": 3,
+   "b": 3.2320678151930577,
+   "S95_obs": 5.284328367622238,
+   "S95_exp": [
+    2.9957322735539904,
+    3.6129158600075124,
+    5.284328367622238,
+    7.478430910048862,
+    9.950076617901793
+   ],
+   "n_at_expected_quantiles": [
+    0,
+    1,
+    3,
+    5,
+    7
+   ],
+   "note": "expected limits are the exact limits at the background-only Poisson quantiles of the count"
+  },
+  "bare_asymptotic": {
+   "S95_obs": 4.6759434804977955,
+   "S95_exp": [
+    2.2762224344527393,
+    3.242249734935911,
+    4.904871841613719,
+    7.6393006155834815,
+    11.609862294148748
+   ],
+   "shortfall_vs_exact_obs": 0.11513003068698291
+  },
+  "toy_machinery": {
+   "settings": {
+    "S": [
+     4.0,
+     5.0,
+     5.5
+    ],
+    "toys": 4000,
+    "seed": 7,
+    "cl": 0.99
+   },
+   "rows": [
+    {
+     "S": 4.0,
+     "CLsb": {
+      "toys": 0.0735,
+      "exact": 0.07044163073985787,
+      "interval": [
+       0.06326041689497183,
+       0.08476968307241126
+      ],
+      "inside": true
+     },
+     "CLb": {
+      "toys": 0.58475,
+      "exact": 0.595388421471166,
+      "interval": [
+       0.5644639274440078,
+       0.6048328880703155
+      ],
+      "inside": true
+     }
+    },
+    {
+     "S": 5.0,
+     "CLsb": {
+      "toys": 0.039,
+      "exact": 0.03619867827043897,
+      "interval": [
+       0.03154326004343574,
+       0.04757612009750252
+      ],
+      "inside": true
+     },
+     "CLb": {
+      "toys": 0.60225,
+      "exact": 0.595388421471166,
+      "interval": [
+       0.5820785078362187,
+       0.6221763381063536
+      ],
+      "inside": true
+     }
+    },
+    {
+     "S": 5.5,
+     "CLsb": {
+      "toys": 0.023,
+      "exact": 0.025623026528524034,
+      "interval": [
+       0.01734060612945018,
+       0.029824460341387582
+      ],
+      "inside": true
+     },
+     "CLb": {
+      "toys": 0.594,
+      "exact": 0.595388421471166,
+      "interval": [
+       0.5737712156441686,
+       0.6140034168882214
+      ],
+      "inside": true
+     }
+    }
+   ],
+   "pass": true,
+   "rule": "the exact CLs+b and CLb inside the 99% Clopper-Pearson interval of the toy counts at every S"
+  },
+  "toy_obs_range_contains_exact_counting": true,
+  "conclusion": "The toy construction is correct: pyhf's toys match the exact Poisson sums on the bare one-bin model, and the full-model toy limit agrees with the exact counting limit. The asymptotic formulae understate the exact limit by 12% at n = 3 on the same bare model, so the difference between the two constructions is the asymptotic approximation at low counts. The published values agree with the asymptotic construction; that the paper used the asymptotic formulae is an inference, as it does not state its construction."
  }
 }
