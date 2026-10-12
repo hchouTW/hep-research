@@ -13,6 +13,9 @@ Software checks establish contract consistency only, not physical validity.
 - **CI: Combine release gate fixed.** The conda-forge package is `cms-combine`, not `combine` (the first
   statistics-validation run could not solve); the job no longer pip-installs the lock over conda's NumPy. On GitHub it
   now passes: Combine 11.1.0 with ROOT 6.36.14, the datacard template within 2% of pyhf, 0 skipped.
+- **CI: campaigns job.** The 300-toy discrete-profiling rerun runs its rows in parallel and compares per row with a
+  cross-platform tolerance (coverage 2 points, mean mu-hat 0.01, bias 0.05, failures 2, identical verdicts); timeout
+  180 min. First all-green statistics-validation run on GitHub: published, combine and campaigns pass.
 
 ## 0.6.11 (2026-10-12)
 
