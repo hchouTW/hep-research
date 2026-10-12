@@ -129,11 +129,18 @@ def _inside(path: Path, root: Path) -> bool:
     return path == root or root in path.parents
 
 
-def _tex_candidate(name: str, build_root: Path) -> Path:
+def _tex_candidates(name: str, build_root: Path) -> list[Path]:
+    """The files TeX would try for \\input{name}: name.tex first (unless the name already ends in .tex), then name itself."""
     cand = build_root / name
-    if not cand.suffix:
-        cand = cand.with_suffix(".tex")
-    return cand
+    if name.endswith(".tex"):
+        return [cand]
+    return [cand.with_name(cand.name + ".tex"), cand]
+
+
+def _tex_candidate(name: str, build_root: Path) -> Path:
+    """The first existing candidate, else the .tex candidate (for the message)."""
+    cands = _tex_candidates(name, build_root)
+    return next((c for c in cands if c.is_file()), cands[0])
 
 
 def discover_manuscript_files(main: Path, project_root: Path, build_root: Path) -> dict:
@@ -163,7 +170,8 @@ def discover_manuscript_files(main: Path, project_root: Path, build_root: Path) 
             add(file, line, "outside-root", raw, f"resolves outside the project root {project_root}; not opened")
             return None
         if not res.is_file():
-            return res if cand.suffix == ".tex" and (build_root / name).is_file() else (None if _missing(file, line, raw, res) else None)
+            _missing(file, line, raw, res)
+            return None
         return res
 
     def _missing(file: Path, line: int, raw: str, res: Path) -> bool:
@@ -396,10 +404,11 @@ def fmt_locs(locs):
     return "; ".join(f"{f.name}:{ln}" for f, ln in locs[:5]) + (" ..." if len(locs) > 5 else "")
 
 
-def style_scan(root: Path):
-    """Advisory typography findings: (file, line, kind, text) tuples."""
+def style_scan(root_or_files):
+    """Advisory typography findings: (file, line, kind, text) tuples, over a directory or an explicit list of files."""
     findings = []
-    for tex in sorted(root.rglob("*.tex")):
+    files = sorted(Path(root_or_files).rglob("*.tex")) if isinstance(root_or_files, (str, Path)) else list(root_or_files)
+    for tex in files:
         code = strip_comments(tex.read_text(encoding="utf-8", errors="replace"))
         lines = code.split("\n")
         for regex, kind in ((REF_NO_TIE_RE, "ref without ~"), (UNIT_NO_TIE_RE, "number-unit spacing")):
@@ -618,7 +627,7 @@ def main(argv=None) -> int:
         if args.bbl is not None and not args.bbl.is_file():
             return fail(f"--bbl {args.bbl} is not a file")
         results = scan_main(args.main, project_root, build_root, external_bib=args.external_bib, bbl=args.bbl)
-        style_root = build_root
+        style_root = results["tex_files"]  # main mode: only the files the document includes
     else:
         if not args.path.is_dir():
             return fail(f"{args.path} is not a directory")

@@ -5,6 +5,17 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Research-communication review minors closed.** A ```latex fence counts as a diagram only when it holds a
+  `tikzpicture`, so `check_diagram_sources.py --require-render` can pass on a bundle of code examples; a changed
+  document digest is unresolved (not a warning) when any of its occurrences is marked inspected; a revision edge whose
+  value matches the recorded display never erases a value change found on another edge; revision and adaptation
+  reports are ordered independently of the hash seed (the worked example no longer pins `PYTHONHASHSEED`); the legacy
+  `sources_read[].id` is any non-empty string again (the traceability format keeps the namespaced id); a claim whose
+  edges are all context-only is held to the envelope statuses and reported as unmapped; `check_manuscript.py` tries
+  `name.tex` then `name` for an include and, in `--main` mode, `--style` scans only the included files; a literature
+  re-import with a different DOI or arXiv id for the same local id is an identifier conflict (the record keeps its
+  value) and an alias merge keeps the incoming arXiv version in the history; `score_replay.py` exits 3 when no output
+  matched a case.
 - **Communication traceability (research-communication reliability plan, T1).** Legacy `communication` claims are
   typed: `text` and `result_ref` are non-empty strings and `status` a core status or an array of them (a numeric text,
   a null reference or an object status used to pass). A new reader capability `communication:traceability-v1` selects

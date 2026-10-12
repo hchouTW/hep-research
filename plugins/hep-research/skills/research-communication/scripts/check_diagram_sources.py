@@ -4,7 +4,8 @@
 Purpose: keep the DOT/Mermaid/PlantUML/SVG snippets in references/, assets/diagrams/, and examples/ from rotting, and
 say exactly what was verified for each block.
 
-What it does: extracts fenced ```dot, ```mermaid, ```plantuml, ```svg, ```tikz and ```latex blocks from markdown files
+What it does: extracts fenced ```dot, ```mermaid, ```plantuml, ```svg, ```tikz and ```latex (only when the block holds a
+tikzpicture; a LaTeX code example is not a diagram) blocks from markdown files
 and gives every block one outcome:
   rendered          the renderer produced a nonempty SVG from the source;
   lint-only         structural check only (a Mermaid source when `mmdc` is absent: keyword and bracket lint, NOT a real
@@ -60,7 +61,7 @@ PREFLIGHT = {"dot": "digraph G { a -> b; }", "mmdc": "flowchart LR\n  A --> B\n"
 
 def extract_blocks(text: str) -> list[tuple[str, str]]:
     """Return (language, source) pairs for every dot/mermaid/plantuml/svg/tikz/latex fence in text."""
-    return [(m.group(1), m.group(2)) for m in FENCE_RE.finditer(text)]
+    return [(m.group(1), m.group(2)) for m in FENCE_RE.finditer(text) if m.group(1) != "latex" or "tikzpicture" in m.group(2)]
 
 
 def lint_mermaid(source: str) -> list[str]:

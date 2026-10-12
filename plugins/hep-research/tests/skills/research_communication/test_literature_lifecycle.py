@@ -234,3 +234,19 @@ class Cli(Base):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReviewMinors(Base):
+    def test_reimport_with_a_different_doi_is_a_conflict_not_an_overwrite(self):
+        existing, _ = self.run_import({"sources": [source("lit:S01", "Fixture", doi="10.0000/a")]})
+        record, rep = self.run_import({"sources": [source("lit:S01", "Fixture", doi="10.0000/b")]}, existing)
+        self.assertEqual(record["sources"]["lit:S01"]["identifiers"]["doi"], "10.0000/a")
+        self.assertIn("literature.identifier_conflict", self.codes(rep, "error"))
+        self.assertIn("10.0000/b", json.dumps(record["sources"]["lit:S01"].get("conflicting_identifiers")))
+
+    def test_alias_merge_keeps_the_incoming_arxiv_version(self):
+        a = source("lit:S01", "Fixture", doi="10.0000/x", arxiv="2401.00001v1")
+        b = source("lit:S02", "Fixture (v2 listing)", doi="10.0000/x", arxiv="2401.00001v2")
+        record, rep = self.run_import({"sources": [a, b]})
+        self.assertEqual([v["version"] for v in record["sources"]["lit:S01"]["versions"]], ["v1", "v2"])
+        self.assertIn("literature.version_changed", self.codes(rep, "unresolved"))

@@ -8,7 +8,7 @@
                      "status": {"anyOf": [{"type": "string", "x-vocab": "artifact_statuses"},
                                           {"type": "array", "items": {"type": "string", "x-vocab": "artifact_statuses"}}]}}}},
   "sources_read": {"type": "array", "items": {"type": "object", "required": ["id", "level"],
-      "properties": {"id": {"$ref": "common.json#/$defs/namespaced_id"},
+      "properties": {"id": {"$ref": "common.json#/$defs/nonempty", "$comment": "legacy: any non-empty id; the traceability format requires a namespaced id"},
                      "level": {"type": "string", "x-vocab": "verification_levels"}}}},
   "figure_inputs": {"type": "array"}, "limitations": {"type": "array", "items": {"type": "string"}}
  }}

@@ -370,3 +370,23 @@ class LayeringTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReviewMinors(unittest.TestCase):
+    def test_legacy_sources_read_id_need_not_be_namespaced(self):
+        d = legacy()
+        d["extension"]["sources_read"][0]["id"] = "S1"
+        self.assertTrue(validate_artifact(d).ok, [f.as_dict() for f in validate_artifact(d).errors])
+        d["extension"]["sources_read"][0]["id"] = ""
+        self.assertFalse(validate_artifact(d).ok)
+
+    def test_all_context_only_edges_count_as_no_used_evidence(self):
+        d = rich()
+        c = d["extension"]["claims"][0]
+        c["evidence"] = [edge("ev:C1-ctx", "artifacts/syn.json", role="background", usage="context-only", usage_reason="orientation only")]
+        rep = validate_artifact(d)
+        self.assertIn("communication.status_upgraded", codes(rep, "error"), "observed with no used evidence")
+        c["status"] = ["synthetic", "unvalidated"]
+        rep = validate_artifact(d)
+        self.assertTrue(rep.ok, [f.as_dict() for f in rep.errors])
+        self.assertIn("communication.claim_unmapped", codes(rep, "unresolved"))

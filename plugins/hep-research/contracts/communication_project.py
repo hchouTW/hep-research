@@ -287,6 +287,7 @@ def _sources(ext: dict, ledgers: dict, r: _Resolver) -> dict:
 
 def _documents(ext: dict, r: _Resolver) -> dict:
     out: dict[str, dict] = {}
+    inspected = {o.get("document_id") for o in ext.get("occurrences", []) or [] if isinstance(o, dict) and o.get("state") == "inspected"}
     for k, d in enumerate(ext.get("documents", []) or []):
         if not isinstance(d, dict):
             continue
@@ -307,7 +308,7 @@ def _documents(ext: dict, r: _Resolver) -> dict:
             continue
         entry.update(resolved=True, resolved_path=_rel(path, r.root), sha256=hashlib.sha256(data).hexdigest())
         if entry["declared_sha256"] and entry["declared_sha256"] != entry["sha256"]:
-            r.add("warning", where, "resolution.document_changed",
+            r.add("unresolved" if d.get("id") in inspected else "warning", where, "resolution.document_changed",
                   f"document {d.get('path')!r} has sha256 {entry['sha256']}, the record declares {entry['declared_sha256']}: "
                   "its occurrences must be re-inspected")
     return out

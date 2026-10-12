@@ -144,7 +144,8 @@ def _traceability_rules(doc: dict, ext: dict, rep: Report) -> None:
                             f"'{e.get('target')}' has no read event in sources_read: the cited passage is not recorded as inspected")
                 if usage == "used-in-claim":
                     used_observed = True  # a published result is a source of its own; the record carries no dataset label
-        if edges:
+        used_edges = [e for e in edges if (e.get("usage") or DEFAULT_USAGE.get(e.get("role"))) != "context-only"]
+        if used_edges:
             missing = sorted(used_sticky - status)
             if missing:
                 rep.add("error", f"{where}.status", "communication.status_upgraded",
@@ -160,7 +161,7 @@ def _traceability_rules(doc: dict, ext: dict, rep: Report) -> None:
                         f"{sorted(status & upgraded) or 'more'}; map its evidence to narrow this")
             if not c.get("unresolved_inputs"):
                 rep.add("unresolved", f"{where}.evidence", "communication.claim_unmapped",
-                        "no evidence edge and no unresolved input request: the claim is not traceable")
+                        ("only context-only evidence" if edges else "no evidence edge") + " and no unresolved input request: the claim is not traceable")
             else:
                 rep.add("unresolved", f"{where}.unresolved_inputs", "communication.claim_pending_inputs",
                         f"claim waits for {c.get('unresolved_inputs')}: no evidence edge yet")

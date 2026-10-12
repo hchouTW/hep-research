@@ -166,6 +166,15 @@ def _import_source(rec, s, inp, today, index, alias, findings, notes):
                 if v and not t["identifiers"].get(k):
                     t["identifiers"][k] = v
             t.setdefault("read_events", []).append(_read_event(s, inp))
+            old_v, new_v = t["identifiers"].get("arxiv_version"), ids.get("arxiv_version")
+            if ids.get("arxiv") and new_v and new_v != old_v:
+                t.setdefault("versions", []).append({"version": new_v, "date": s.get("verification_date"), "imported_from": inp.get("path")})
+                t["identifiers"]["arxiv_version"] = new_v
+                citing = sorted(cid for cid, c in rec["claims"].items() if target in (c.get("source_ids") or []))
+                rec["flags"].append({"source_id": target, "reason": f"arxiv version changed {old_v} -> {new_v} (via {sid})", "level": "reassess", "claims": citing})
+                findings.append(R.finding("literature.version_changed", "unresolved", f"sources.{target}",
+                                          f"{target}: arXiv version {old_v} -> {new_v} (imported as {sid}); claims {citing} cite the earlier version",
+                                          "reread the cited passages in the new version and record new read events; the old events stay", source="literature"))
             notes.append({"code": "literature.merged_by_identifier", "message": f"{sid} is {target} (same stable identifier); its read event is kept"})
             return
         basis = next(f"{k}:{v}" for k, v in keys if (k, v) in index and index[(k, v)] == target)
@@ -197,8 +206,16 @@ def _update_existing(rec, t, s, ids, inp, findings):
     new_v = ids.get("arxiv_version")
     t.setdefault("read_events", []).append(_read_event(s, inp))
     for k, v in ids.items():
-        if v and k != "arxiv_version":
-            t.setdefault("identifiers", {})[k] = v
+        if not v or k == "arxiv_version":
+            continue
+        have = t.setdefault("identifiers", {}).get(k)
+        if have and have != v:
+            t.setdefault("conflicting_identifiers", []).append({k: v, "imported_from": inp.get("path")})
+            findings.append(R.finding("literature.identifier_conflict", "error", f"sources.{s.get('id')}",
+                                      f"{s.get('id')}: {k} {v!r} differs from the recorded {have!r}; the record keeps {have!r}",
+                                      "one id, one work: fix the identifier or give the other work its own id", source="literature"))
+        elif not have:
+            t["identifiers"][k] = v
     if ids.get("arxiv") and new_v and new_v != old_v:
         t.setdefault("versions", []).append({"version": new_v, "date": s.get("verification_date"), "imported_from": inp.get("path")})
         t["identifiers"]["arxiv_version"] = new_v

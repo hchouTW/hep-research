@@ -282,3 +282,22 @@ class CliTests(Base):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReviewMinors(Base):
+    def test_input_without_tex_suffix_falls_back_to_the_bare_file(self):
+        main = self.w("main.tex", "\\input{notation}\n\\input{chap.v2}\n\\ref{n}\\ref{c}\n")
+        self.w("notation", "\\label{n}\n")
+        self.w("chap.v2.tex", "\\label{c}\n")
+        disc = self.discover(main)
+        self.assertEqual(self.names(disc), ["main.tex", "notation", "chap.v2.tex"])
+        self.assertEqual(disc["unresolved"], [])
+        self.assertEqual(self.run_main("--main", main)[0], 0)
+
+    def test_style_in_main_mode_scans_only_the_included_files(self):
+        main = self.w("main.tex", "\\input{a}\nSee Fig. \\ref{x}.\\label{x}\n")
+        self.w("a.tex", "at 125 GeV\n")
+        self.w("unused.tex", "at 999GeV and Fig. \\ref{x} and Table \\ref{x}\n")
+        code, out, _ = self.run_main("--main", main, "--style")
+        self.assertEqual(code, 0)
+        self.assertIn("[STYLE] 2 advisory", out)

@@ -15,7 +15,7 @@ model behavior stays unmeasured.
 Usage: score_replay.py CASES.json OUTPUTS.json [--out RESULTS.json]
 OUTPUTS.json: {"meta": {run, model, prompt_version, plugin_commit, tool_access, coverage, live?}, "outputs": [{case_id,
 skill_loaded, prose, structured, unresolved, judgments: {semantic: pass|fail|unjudged, by, date}}]}
-Exit codes: 0 no failure; 1 a failure or critical failure; 2 unreadable input. Standard library only.
+Exit codes: 0 no failure; 1 a failure or critical failure; 2 unreadable input; 3 no output matched a case. Standard library only.
 """
 from __future__ import annotations
 
@@ -183,7 +183,12 @@ def main(argv=None) -> int:
     if args.out:
         args.out.write_text(text + "\n", encoding="utf-8")
     print(text)
-    return 1 if summary["counts"]["fail"] or summary["counts"]["critical-fail"] else 0
+    if summary["counts"]["fail"] or summary["counts"]["critical-fail"]:
+        return 1
+    if not any(summary["counts"][k] for k in ("pass", "fail", "critical-fail", "unjudged")):
+        print("error: no output matched a case; nothing was scored", file=sys.stderr)
+        return 3
+    return 0
 
 
 if __name__ == "__main__":

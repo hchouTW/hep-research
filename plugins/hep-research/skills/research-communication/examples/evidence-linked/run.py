@@ -28,7 +28,7 @@ def main(argv=None) -> int:
     args = ap.parse_args(argv)
     args.out_dir.mkdir(parents=True, exist_ok=True)
     summary = {"note": "synthetic worked example; statuses are the tools' outcomes on placeholder data", "steps": {}}
-    env = dict(os.environ, PYTHONHASHSEED="0")
+    env = dict(os.environ)
     for name, script, cli in STEPS:
         run = subprocess.run([sys.executable, str(SCRIPTS / script), *cli], cwd=str(HERE / "project"), capture_output=True, text=True, env=env, timeout=300)
         try:

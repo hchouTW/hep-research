@@ -284,3 +284,19 @@ class ReviewFixes(Base):
         rep = self.check(draft=draft, man=man)
         self.assertNotIn("adaptation.status_dropped", self.codes(rep))
         self.assertEqual(rep["status"], "pass", rep["findings"])
+
+
+class ReviewMinors(Base):
+    def test_unmapped_number_findings_are_ordered_independently_of_the_hash_seed(self):
+        import os
+        import subprocess
+        fx.write(self.p["record"], self.doc)
+        man = fx.write(self.tmp / "manifest.json", manifest(self.p["record"]))
+        draft = fx.write(self.tmp / "summary.md", SUMMARY + " Counts: 77, 12, 9, 310, 4.")
+        outs = []
+        for seed in ("1", "2"):
+            run = subprocess.run([sys.executable, str(SCRIPTS / "check_adaptation.py"), str(self.p["record"]), "--project-root", str(self.p["root"]),
+                                  "--manifest", str(man), "--draft", str(draft)], capture_output=True, text=True, env=dict(os.environ, PYTHONHASHSEED=seed), timeout=120)
+            outs.append(run.stdout)
+        self.assertEqual(outs[0], outs[1])
+        self.assertIn("adaptation.unmapped_number", outs[0])

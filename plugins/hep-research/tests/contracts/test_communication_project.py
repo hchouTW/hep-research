@@ -354,3 +354,18 @@ class OutputAliasTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReviewMinors(ProjectFixture):
+    def test_changed_document_with_inspected_occurrences_is_unresolved(self):
+        write(self.root / "paper" / "main.md", "changed\n")
+        self.doc["extension"]["documents"][0]["sha256"] = "0" * 64
+        self.doc["extension"]["occurrences"][0]["state"] = "inspected"
+        self.save()
+        ctx = self.ctx()
+        self.assertIn("resolution.document_changed", self.codes(ctx, "unresolved"))
+        self.doc["extension"]["occurrences"][0]["state"] = "mapped"
+        self.save()
+        ctx = self.ctx()
+        self.assertIn("resolution.document_changed", self.codes(ctx, "warning"))
+        self.assertNotIn("resolution.document_changed", self.codes(ctx, "unresolved"))

@@ -145,11 +145,10 @@ def diff_communication(before: dict, after: dict, context: dict) -> dict:
                         same = shown is not None and (_same_number(shown[0], v_after) or _same_number(shown[0], _round(v_after, shown[1]) or ""))
                         if not same:
                             value_change = {"locator": loc, "before": None, "before_recorded_display": shown[0] if shown else None, "after": v_after}
-                        else:
-                            value_change = "none"
+                        # a later edge whose value matches the display never erases a value change found on an earlier edge
                     else:
                         value_change = {"locator": loc, "before": v_before if b_avail else None, "after": v_after if a_avail else None}
-        for eid in set(b_edges) - set(a_edges):
+        for eid in sorted(set(b_edges) - set(a_edges)):
             evidence_changed.append({"edge": eid, "from": b_edges[eid].get("target"), "to": None,
                                      "identity_before": evidence_fingerprint(b_edges[eid], before), "identity_after": None})
             value_change = value_change if isinstance(value_change, dict) else {"locator": b_edges[eid].get("locator"), "before": None, "after": None}

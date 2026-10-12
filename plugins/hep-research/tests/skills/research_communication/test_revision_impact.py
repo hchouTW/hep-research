@@ -317,3 +317,44 @@ class ReviewFixes(Base):
             code = cli.main([str(self.baseline), str(self.p["record"]), "--project-root", str(self.p["root"])])
         self.assertEqual(code, 2, err.getvalue()[-500:])
         self.assertNotIn("Traceback", err.getvalue())
+
+
+class ReviewMinors(Base):
+    def test_later_edge_whose_value_matches_the_display_does_not_erase_a_value_change(self):
+        # edge A: the result moved to obs_v2 (1.09); edge B: an auxiliary artifact replaced under its own name, value still 1.02
+        aux = fx.write(self.p["root"] / "artifacts" / "aux.json", fx.observed_result("1.02", "0.01"))
+        for doc in (self.before, self.after):
+            doc["inputs"].append({"ref": "artifacts/aux.json", "artifact_type": "statistical-result", "artifact_id": "fixture-synthetic-obs",
+                                  "sha256": fx.sha(aux), "status": ["observed"]})
+            doc["extension"]["claims"][0]["evidence"].append({"id": "ev:C1-aux", "target_kind": "artifact", "target": "artifacts/aux.json",
+                                                              "locator": "extension.results.ratio", "role": "qualifies", "usage": "used-in-claim"})
+        fx.refresh_assessments(self.before)
+        self.baseline.write_text(json.dumps(self.before))
+        self.baseline_bytes = self.baseline.read_bytes()
+        self.new_result()
+        aux.write_text(json.dumps(fx.observed_result("1.02", "0.02")))  # same filename, new digest, same value
+        self.after["inputs"][2]["sha256"] = fx.sha(aux)
+        rep = self.diff()
+        i = rep["impacts"][0]
+        self.assertEqual(i["kind"], "analysis-rerun")
+        self.assertEqual(i["value_change"]["after"], "1.09")
+
+    def test_report_is_independent_of_the_hash_seed(self):
+        import os
+        import subprocess
+        for e in ("ev:C1-z", "ev:C1-y", "ev:C1-x", "ev:C1-w"):
+            self.before["extension"]["claims"][0]["evidence"].append({"id": e, "target_kind": "artifact", "target": "artifacts/syn.json",
+                                                                       "locator": "extension.results.ratio", "role": "background", "usage": "context-only",
+                                                                       "usage_reason": "orientation"})
+        fx.refresh_assessments(self.before)
+        self.baseline.write_text(json.dumps(self.before))
+        self.baseline_bytes = self.baseline.read_bytes()
+        fx.write(self.p["record"], self.after)  # the four context-only edges are removed in the revision
+        outs = []
+        for seed in ("1", "2", "3"):
+            run = subprocess.run([sys.executable, str(SCRIPTS / "track_revision_impact.py"), str(self.baseline), str(self.p["record"]), "--project-root", str(self.p["root"])],
+                                 capture_output=True, text=True, env=dict(os.environ, PYTHONHASHSEED=seed), timeout=120)
+            outs.append(run.stdout)
+        self.assertEqual(outs[0], outs[1])
+        self.assertEqual(outs[1], outs[2])
+        self.assertIn("ev:C1-w", outs[0])

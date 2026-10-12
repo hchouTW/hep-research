@@ -292,3 +292,11 @@ class CoverageOutcomes(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class LatexFences(unittest.TestCase):
+    """Review minor: a ```latex code example is not a diagram; only tikz fences and latex fences holding a tikzpicture count."""
+
+    def test_plain_latex_fence_is_not_a_block(self):
+        text = "```latex\n\\section{Intro}\n```\n```latex\n\\begin{tikzpicture}\\node{a};\\end{tikzpicture}\n```\n```tikz\n\\node{b};\n```\n"
+        self.assertEqual([lang for lang, _ in sources.extract_blocks(text)], ["latex", "tikz"])

@@ -140,14 +140,14 @@ def check_adaptation(record: dict, context: dict, manifest: dict, draft: str) ->
                                           f"revise the wording to keep the tested regime: {(c.get('scope') or {}).get('text')!r}", claim=cid, source="adaptation"))
         if ids:
             allowed = set().union(*(number_cache.get(cid, set()) for cid in ids if cid in claims))
-            for n in _numbers(str(st.get("text", ""))):
+            for n in sorted(_numbers(str(st.get("text", ""))), key=lambda x: (len(x), x)):
                 if not any(_same(n, a) for a in allowed):
                     findings.append(R.finding("adaptation.number_mismatch", "error", where,
                                               f"number {n} in statement {st.get('id')} matches no value, uncertainty or display value of {ids}",
                                               "use the record's value (draft facts of audit_claims.py) or map the number to its claim", claim=ids[0],
                                               source="adaptation"))
     covered = " ".join(located_spans)
-    for n in _numbers(draft):
+    for n in sorted(_numbers(draft), key=lambda x: (len(x), x)):
         if not any(n in span for span in located_spans) and not any(_same(n, a) for a in _numbers(covered)):
             findings.append(R.finding("adaptation.unmapped_number", "warning", "draft", f"number {n} in the draft is outside every mapped statement",
                                       "map the sentence to a claim, or state why it carries no scientific content", source="adaptation"))

@@ -180,3 +180,15 @@ class Summary(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReviewMinors(unittest.TestCase):
+    def test_nothing_scored_is_not_success(self):
+        with tempfile.TemporaryDirectory() as td:
+            outs = Path(td) / "outputs.json"
+            outs.write_text(json.dumps({"meta": {"run": "x", "model": "none", "prompt_version": "none", "plugin_commit": "none", "tool_access": [], "coverage": "none"},
+                                        "outputs": [output("no-such-case", "text")]}))
+            run = subprocess.run([sys.executable, str(EVAL / "score_replay.py"), str(EVAL / "cases" / "cases.json"), str(outs)],
+                                 capture_output=True, text=True, timeout=120)
+            self.assertEqual(run.returncode, 3, run.stdout[-300:])
+            self.assertEqual(json.loads(run.stdout)["counts"]["not-run"], len(CASES["cases"]))
