@@ -200,7 +200,7 @@ def main(argv=None) -> int:
                                      "likelihood": {"form": "Poisson count with a Gaussian-constrained background (one signal region)"},
                                      "parameters_of_interest": ["signal count s", "toy coupling g^2 via s = g^2 L sigma_ref (m_ref/m_X)^4 eps(m_X)"],
                                      "nuisances": ["background"], "test_statistic": "one-sided profile likelihood ratio (q-tilde)",
-                                     "construction": "cls", "coverage": {"method": "CLs over-covers by design; not studied further here"},
+                                     "construction": "cls", "coverage": {"check": "not-checked", "method": "CLs over-covers by design; not studied further here"},
                                      "fit_status": "converged", "results": {"ref": "results.json#limits"}})
     contract = {k: {"ok": (r := validate_artifact(v)).ok, "errors": [f.message for f in r.errors]} for k, v in docs.items()}
     for k, v in docs.items():

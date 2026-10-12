@@ -141,7 +141,7 @@ def artifacts(m, fit, exp_eff, created):
                            "likelihood": {"form": "Gaussian per bin with the large-sample width uncertainty (weighted least squares)"},
                            "parameters_of_interest": ["constant cos theta resolution"], "nuisances": [],
                            "test_statistic": "chi2 of the constant model", "construction": "other",
-                           "coverage": {"method": "seeded replicate samples; pull mean and width", "result_ref": "results.json#replicates"},
+                           "coverage": {"check": "not-checked", "method": "seeded replicate samples; pull mean and width (a calibration check, not interval coverage)", "result_ref": "results.json#replicates"},
                            "fit_status": "converged", "results": {"ref": "results.json#width_fit"}})
     docs = {"resolution": width, "efficiency": eff, "width_fit": stat}
     return docs, {k: {"ok": (r := validate_artifact(v, vocab)).ok, "errors": [f.message for f in r.errors]} for k, v in docs.items()}

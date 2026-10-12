@@ -146,7 +146,7 @@ def main(argv=None) -> int:
                 extension={"paradigm": "frequentist", "likelihood": {"form": "multivariate Gaussian with the record covariance"},
                            "parameters_of_interest": ["mu"], "nuisances": [],
                            "test_statistic": "chi2(mu) = (d - mu p)^T C^-1 (d - mu p)", "construction": "asymptotic",
-                           "coverage": {"method": "not studied here; Gaussian, linear in mu, so exact if the covariance is right"},
+                           "coverage": {"check": "analytic", "method": "not studied by toys; Gaussian and linear in mu, so exact if the covariance is right"},
                            "fit_status": "converged", "results": {"mu_hat": mu, "sigma_mu": sigma_mu, "chi2": chi2, "ndf": ndf, "p_value": pval}})
     docs = {"comparison_spec": comp, "result": stat}
     contract = {k: {"ok": (rp := validate_artifact(v, Vocabulary())).ok, "errors": [f.message for f in rp.errors]} for k, v in docs.items()}

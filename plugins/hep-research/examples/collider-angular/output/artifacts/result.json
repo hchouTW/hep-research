@@ -1,5 +1,5 @@
 {
- "contract_version": "2.1.0",
+ "contract_version": "2.2.0",
  "bindings": {
   "experiments": [
    {
@@ -11,7 +11,7 @@
  },
  "versions": {
   "plugin": "0.6.10",
-  "contracts": "2.1.0",
+  "contracts": "2.2.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -56,7 +56,8 @@
   "test_statistic": "not-applicable (point estimates with linear covariance)",
   "construction": "other",
   "coverage": {
-   "method": "seeded toys of counts and luminosity",
+   "check": "not-checked",
+   "method": "seeded toys of counts and luminosity (closure and pulls, not interval coverage)",
    "result_ref": "results.json#toy_closure"
   },
   "fit_status": "converged",

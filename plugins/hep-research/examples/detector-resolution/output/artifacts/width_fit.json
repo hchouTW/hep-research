@@ -1,5 +1,5 @@
 {
- "contract_version": "2.1.0",
+ "contract_version": "2.2.0",
  "bindings": {
   "experiments": [
    {
@@ -11,7 +11,7 @@
  },
  "versions": {
   "plugin": "0.6.10",
-  "contracts": "2.1.0",
+  "contracts": "2.2.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -53,7 +53,8 @@
   "test_statistic": "chi2 of the constant model",
   "construction": "other",
   "coverage": {
-   "method": "seeded replicate samples; pull mean and width",
+   "check": "not-checked",
+   "method": "seeded replicate samples; pull mean and width (a calibration check, not interval coverage)",
    "result_ref": "results.json#replicates"
   },
   "fit_status": "converged",

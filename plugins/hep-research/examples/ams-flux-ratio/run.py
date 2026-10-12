@@ -326,7 +326,7 @@ def artifacts(world, res, created):
                            "parameters_of_interest": ["He/p ratio per rigidity bin and period"],
                            "nuisances": ["trigger efficiency per period", "selection efficiency per bin and species"],
                            "test_statistic": "not-applicable (point estimates with linear covariance)", "construction": "other",
-                           "coverage": {"method": "seeded toys of the full chain", "result_ref": "results.json#toy_closure"},
+                           "coverage": {"check": "not-checked", "method": "seeded toys of the full chain (closure and pulls, not interval coverage)", "result_ref": "results.json#toy_closure"},
                            "fit_status": "converged", "results": {"ref": "results.json#ratio"}})
     data = {}
     for pname in PERIODS:

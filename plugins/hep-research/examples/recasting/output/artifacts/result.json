@@ -1,12 +1,12 @@
 {
- "contract_version": "2.1.0",
+ "contract_version": "2.2.0",
  "bindings": {
   "experiments": [],
   "theory": []
  },
  "versions": {
   "plugin": "0.6.10",
-  "contracts": "2.1.0",
+  "contracts": "2.2.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -57,6 +57,7 @@
   "test_statistic": "one-sided profile likelihood ratio (q-tilde)",
   "construction": "cls",
   "coverage": {
+   "check": "not-checked",
    "method": "CLs over-covers by design; not studied further here"
   },
   "fit_status": "converged",

@@ -158,7 +158,7 @@ def artifacts(res, resp, created):
                            "parameters_of_interest": ["d sigma / d cos theta per fiducial bin", "fiducial cross section"],
                            "nuisances": ["integrated luminosity"],
                            "test_statistic": "not-applicable (point estimates with linear covariance)", "construction": "other",
-                           "coverage": {"method": "seeded toys of counts and luminosity", "result_ref": "results.json#toy_closure"},
+                           "coverage": {"check": "not-checked", "method": "seeded toys of counts and luminosity (closure and pulls, not interval coverage)", "result_ref": "results.json#toy_closure"},
                            "fit_status": "converged", "results": {"ref": "results.json#dsigma"}})
     data = dict(base, artifact_id="synthetic-path-b-dsigma", artifact_type="dataset-record",
                 objective="SYNTHETIC corrected d sigma / d cos theta (illustrative)", status=["synthetic"],

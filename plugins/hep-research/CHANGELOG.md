@@ -3,6 +3,50 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+Hep-statistics audit (audit commit b5c3a55, findings F01–F04, checks T01–T30; evidence in VALIDATION.md,
+STATS-AUDIT). Batch A (P0, T01–T08):
+
+- **sci-fix: Poisson domain in the likelihoods (F01, T01).** `likelihood_limits.py` read a negative Poisson mean in an
+  empty bin as an empty bin (a shape template interpolated below zero gave expected = -1 with a finite NLL). A
+  negative or non-finite mean, or a zero mean with events, is now outside every likelihood (NLL = +inf); a zero mean
+  with no events stays valid. `_lnl` and the profiled background `_b_hat` keep `s + b >= 0` (relevant for the
+  two-POI fit, where a signal may be negative). No committed example number changed.
+- **sci-fix: toy tails are bounds at zero exceedances (F02, T02, T03).** New `core/stats/tail_estimation.py`
+  (Clopper-Pearson intervals and one-sided bounds, incomplete beta in pure Python, log-space Poisson tails). Every
+  toy p-value of `likelihood_limits.py` and `statistical_toys.py` carries `toy_tail` {k, n, estimate,
+  interval (68.27%), upper_bound or lower_bound (95%), convention}. **Behavior change:** `p_value_toys`,
+  `toy_p_value_at_asymptotic_limit`, `toy_p_value` and their binomial errors are `null` where they used to report
+  p = 0 or an error of 0 (k = 0; the error also at k = n). `statistical_toys.py ratio` counts toys it cannot evaluate
+  (`toys_not_evaluated`) instead of reading them as non-exceedances.
+- **sci-fix: fit verdicts (F03, T04, T05).** New `core/stats/fit_diagnostics.py`: the damped Newton search is
+  unchanged, but every fit now returns `converged` or `failed` with reasons (finite NLL, positive-definite Hessian,
+  EDM <= 1e-5; `max_iterations`, `line_search_stalled`, `hessian_not_positive_definite`, `invalid_domain`, ...). A
+  best fit at `mu = 0` is checked by the KKT condition. A conditional NLL below the global one by more than 1e-4
+  triggers a global refit and, if it remains, a failure (it was clipped to `q = 0` before). `shape-limit`,
+  `shape-gof` and `contour` report `fit_diagnostics` and `status`; the CLI exits 1 (`failed`, a fit on the data) or
+  3 (`incomplete`, only toy fits failed) instead of always 0. Failed toys are counted, never dropped.
+- **Contracts 2.2.0 (minor): statistical-result semantics (F04, T06–T08).** New optional fields: typed p-value bounds
+  (`significance.local_p_bound`, `global_p_bound`), `global_n_toys`, `coverage.check` (`toys`, `exact-construction`,
+  `analytic`, `not-checked`) with `n_toys`, `coverage`, `interval`, `cl`, `ensemble`, `failure_policy`, `failures`;
+  `fit_diagnostics`; `likelihood.backend`, `model_ref`, `model_sha256`. New rules: a p-value or bound outside [0, 1],
+  a confidence level outside (0, 1), a global p-value below the local one, expected bands that are not ordered
+  `[low, high]` pairs, or `fit_diagnostics` failed under `fit_status: converged` are errors; untyped coverage, a
+  global p-value without `trials_method` and toy coverage without its toy count are unresolved. The rules apply to
+  artifacts of contract 2.2.0; older artifacts keep their outcome and get them with `validate.py --strict`. New
+  capability `stats:result-semantics`, so a 2.1 reader refuses a 2.2 result that relies on them. New publication
+  gate (`validate.py --gate publication`, `contracts.validate.publication_gate`): passed, unresolved or failed, with
+  reasons (strict validity, fit status and diagnostics, typed coverage, global calibration of a scan, Bayesian R-hat
+  and ESS, model and backend provenance, status labels). New converter `contracts/migrate_statistical_result.py`
+  (refuses an artifact that breaks a 2.2.0 rule, names the rule; never invents coverage or a trials method).
+- **hep-statistics: `scripts/result_artifact.py`.** Writes a `statistical-result` from a `core/stats` CLI output,
+  keeping its status (a failed fit becomes `fit_status: failed` with the `failed` label) and writing a zero-exceedance
+  toy p-value as a typed bound.
+- **Examples.** The six example statistical-results state `coverage.check` (five `not-checked`: their toy studies are
+  closure and pull checks, not interval coverage; `theory-comparison` `toys`; `published-comparison` `analytic`).
+  Outputs regenerated for contracts 2.2.0 (only the version strings and `check` changed).
+
 ## 0.6.10 (2026-10-12)
 
 - **batch-schedulers: `limits.max_gpu_hours`.** The Slurm poll reads `AllocTRES`; each attempt records
