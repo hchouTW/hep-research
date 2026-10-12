@@ -270,6 +270,7 @@ def profile_significance(n: int, b: float, sigma_b: float, toys: int, seed: int)
            "p_value_half_chi2_asymptotic": 0.5 * math.erfc(z / math.sqrt(2.0)) if q_obs > 0 else 0.5,
            "p_value_naive_wilks_chi2_1dof": math.erfc(z / math.sqrt(2.0)) if q_obs > 0 else 1.0,
            "fraction_toys_with_q0_zero": zero / toys}
+    out["asymptotic_calibration"] = _asymptotic_gate(hits, toys, out["p_value_half_chi2_asymptotic"], "half-chi2 p-value of q0")
     if sig == 0.0:
         from core.stats.poisson_diagnostics import log_poisson_sf, z_from_log_p
         log_p = log_poisson_sf(n, b)  # summed in the tail: 1 - P(N <= n - 1) cancels to 0 below about 1e-16
@@ -546,6 +547,7 @@ def multibin_limit(doc: dict, cl: float, toys: int, seed: int) -> dict:
         out["binomial_error_on_p"] = tail["binomial_error"]
         out["toy_tail"] = tail
         out["target_p_value"] = 1.0 - cl
+        out["asymptotic_calibration"] = _asymptotic_gate(hits, toys, 1.0 - cl, "toy p-value at the asymptotic limit vs 1 - cl")
     out["note"] = ("asymptotic results rely on q-tilde ~ half-chi2; the toy p-value at the asymptotic limit is the "
                    "calibration check (it should be near 1 - cl; a p-value far from it means the asymptotic limit "
                    "is mis-calibrated here); asymptotic_observed_upper_limit is the CLs+b-type limit (q-tilde = z^2) and "
@@ -964,6 +966,26 @@ def _fit_summary(log: FitLog, toys_run: int = 0, toys_failed: int = 0) -> dict:
     return out
 
 
+CALIBRATION_CL = 0.99  # the asymptotic gate's toy interval (T10): fixed before any comparison was made
+LIMIT_MC_CL = 0.95     # exact intervals on CLs+b and CLb propagated to the toy CLs limit (T11)
+
+
+def _asymptotic_gate(hits: int, toys: int, p_asymptotic: float, what: str) -> dict:
+    """Calibration gate of an asymptotic p-value against seeded toys (audit T10). consistent: p_asymptotic lies in the
+    toys' central Clopper-Pearson interval at CALIBRATION_CL; inapplicable: it lies outside, so the asymptotic
+    approximation fails here and the toy value is the result; unresolved: no toy reached the observed value and
+    p_asymptotic is below the toys' upper bound (more toys needed). The gate says nothing about where it was not run."""
+    from core.stats.tail_estimation import clopper_pearson, one_sided_upper
+    lo, hi = clopper_pearson(hits, toys, CALIBRATION_CL)
+    if hits == 0 and p_asymptotic <= one_sided_upper(0, toys, CALIBRATION_CL):
+        verdict = "unresolved"
+    else:
+        verdict = "consistent" if lo <= p_asymptotic <= hi else "inapplicable"
+    return {"verdict": verdict, "compared": what, "asymptotic_p": p_asymptotic, "toy_interval": [lo, hi],
+            "interval_cl": CALIBRATION_CL, "toys": toys,
+            "rule": "asymptotic p inside the toys' central Clopper-Pearson interval; otherwise use the toy result"}
+
+
 def _toy_p(hits: int, fails: int, toys: int) -> dict:
     """Toy p-value fields: the tail record over all toys, and with failed toys the range [k/N, (k+F)/N] that
     counts every failed toy as below, then as beyond the observed value (no failed toy is discarded)."""
@@ -990,6 +1012,67 @@ def _draw_aux(model, th_c, rng, gam_c=None):
     return aux
 
 
+def shape_toy_generator(model, aux_obs, mu: float, kind: str, theta=None):
+    """generate(rng, index) -> (counts, auxiliary measurements) for a toy_ensemble study of a _ShapeModel at signal
+    strength mu, for each ensemble kind of core/stats/toy_ensemble.py (the choice is explicit, there is no default):
+    conditional-* use the nuisances profiled on the model's observed counts at mu, with the auxiliary measurements
+    redrawn (fluctuated-aux) or fixed at aux_obs; unconditional-prior draws the nuisances from their constraints each
+    toy (Gaussian and log-normal: unit normal around aux_obs, correlated if declared; gamma: Gamma(tau, 1/tau);
+    MC-statistics factors: normal of width mc_stat / b, truncated at 0) with aux_obs fixed; plug-in fixes the
+    nuisances at theta (default nominal 0) with aux_obs fixed."""
+    from core.stats.toy_ensemble import ENSEMBLES, EnsembleError
+    if kind not in ENSEMBLES:
+        raise EnsembleError(f"ensemble kind must be one of {ENSEMBLES}")
+    if kind.startswith("conditional"):
+        th_c, _ = model.cond(mu, model.n, aux_obs)
+        gam_c = model.mc_gammas(mu, th_c, model.n, aux_obs)
+    elif kind == "plug-in":
+        th_c = list(theta) if theta is not None else [0.0] * model.k
+        gam_c = [1.0] * len(model.b)
+    else:
+        th_c, gam_c = None, None
+
+    def generate(rng, index):
+        if kind == "unconditional-prior":
+            z = [rng.gauss(0.0, 1.0) for _ in range(model.k)]
+            if model.chol is not None:
+                z = [sum(model.chol[i][j] * z[j] for j in range(i + 1)) for i in range(model.k)]
+            th = []
+            for i in range(model.k):
+                if model.gamma[i]:
+                    f = rng.gammavariate(model.tau[i], 1.0 / model.tau[i])
+                    th.append((f - 1.0) / model.nuis[i]["sigma"])
+                else:
+                    th.append(aux_obs[i] + z[i])
+            gam = [max(1.0 + d * rng.gauss(0.0, 1.0), 0.0) for d in model.mc_rel] if model.mc_rel else [1.0] * len(model.b)
+        else:
+            th, gam = th_c, gam_c
+        ss, bs = model.parts(mu, th)
+        ns = [_ppf(rng.random(), max(a + g * c, 0.0)) for a, g, c in zip(ss, gam, bs)]
+        aux = _draw_aux(model, th, rng, gam) if kind == "conditional-fluctuated-aux" else list(aux_obs)
+        return ns, aux
+    return generate
+
+
+def shape_q_evaluator(model, mu: float):
+    """evaluate((counts, aux), index) -> q-tilde_mu with a full global and conditional refit of the toy; a toy whose
+    fits fail raises ToyFailure("fit_failed") instead of returning a number."""
+    from core.stats.toy_ensemble import ToyFailure
+
+    def evaluate(data, index):
+        ns, aux = data
+        model.log.context = "toy"
+        before = model.log.failures("toy")
+        try:
+            q = model.q(mu, ns, aux)
+        finally:
+            model.log.context = "observed"
+        if model.log.failures("toy") > before:
+            raise ToyFailure("fit_failed")
+        return q
+    return evaluate
+
+
 def _toy_cls(model, aux0, g_obs, cl: float, toys: int, seed: int, hi: float, points: int) -> dict:
     """Toy-based CLs on a grid of mu in (0, hi]: at each mu, q-tilde_mu of the data against seeded toys generated at
     (mu, nuisances profiled on the data at mu) for CLs+b and at (0, nuisances profiled at mu = 0) for CLb, with the
@@ -1005,6 +1088,8 @@ def _toy_cls(model, aux0, g_obs, cl: float, toys: int, seed: int, hi: float, poi
     gam0 = model.mc_gammas(0.0, th0, model.n, aux0)
     curves: dict[str, list[float]] = {"observed": [], **{name: [] for name, _ in BANDS}}
     failed_toys = 0
+    counts_rows, cls_lo, cls_hi = [], [], []
+    from core.stats.tail_estimation import clopper_pearson
     for mu in grid:
         q_obs = model.q(mu, model.n, aux0, g_obs)
         th_mu, _ = model.cond(mu, model.n, aux0)
@@ -1030,6 +1115,14 @@ def _toy_cls(model, aux0, g_obs, cl: float, toys: int, seed: int, hi: float, poi
         def cls_at(q):
             return frac_ge(dist["sb"], q) / max(frac_ge(dist["b"], q), 1.0 / toys)
         curves["observed"].append(cls_at(q_obs))
+        k_sb = sum(v >= q_obs - 1e-12 for v in dist["sb"])
+        k_b = sum(v >= q_obs - 1e-12 for v in dist["b"])
+        lo_sb, hi_sb = clopper_pearson(k_sb, toys, LIMIT_MC_CL)
+        lo_b, hi_b = clopper_pearson(k_b, toys, LIMIT_MC_CL)
+        cls_lo.append(lo_sb / hi_b)
+        cls_hi.append(hi_sb / lo_b if lo_b > 0 else math.inf)
+        counts_rows.append({"mu": mu, "k_sb": k_sb, "k_b": k_b, "n": toys, "cls": k_sb / k_b if k_b else None,
+                            "denominator_floored": k_b == 0})
         for name, k in BANDS:
             idx = min(toys - 1, max(0, int(math.floor((1.0 - nd.cdf(k)) * toys))))
             curves[name].append(cls_at(dist["b"][idx]))
@@ -1043,7 +1136,14 @@ def _toy_cls(model, aux0, g_obs, cl: float, toys: int, seed: int, hi: float, poi
             prev_mu, prev = mu, v
         return None
     limits = {name: crossing(vals) for name, vals in curves.items()}
-    out = {"observed_upper_limit": limits["observed"], "expected": {name: limits[name] for name, _ in BANDS},
+    obs = limits["observed"]
+    range_lo, range_hi = crossing(cls_lo), crossing([min(v, 1e300) for v in cls_hi])
+    floored = [r["mu"] for r in counts_rows if r["denominator_floored"] and (obs is None or r["mu"] <= obs + hi / points)]
+    out = {"observed_upper_limit": obs, "expected": {name: limits[name] for name, _ in BANDS},
+           "observed_limit_mc_range": [range_lo, range_hi], "observed_limit_mc_range_cl": LIMIT_MC_CL,
+           "grid_step": hi / points, "exceedance_counts": counts_rows,
+           "cls_denominator_unresolved_at": floored,
+           "observed_limit_resolved": obs is not None and range_hi is not None and not floored,
            "toys_per_hypothesis": toys, "seed": seed, "grid": grid, "cls_observed_on_grid": curves["observed"],
            "binomial_error_on_cls_plus_b_at_alpha": math.sqrt(alpha * (1 - alpha) / toys),
            "toys_with_a_failed_fit": failed_toys, "toys_run": 2 * toys * len(grid)}
@@ -1102,7 +1202,8 @@ def shape_limit(doc: dict, cl: float, toys: int, seed: int, cls_toys: int = 0, c
         p = hits / toys
         out.update({"toy_p_value_at_asymptotic_limit": p if hits else None,
                     "binomial_error_on_p": math.sqrt(max(p * (1 - p), 0.0) / toys) if 0 < hits < toys else None,
-                    "target_p_value": 1.0 - cl, **_toy_p(hits, toy_fails, toys)})
+                    "target_p_value": 1.0 - cl, **_toy_p(hits, toy_fails, toys),
+                    "asymptotic_calibration": _asymptotic_gate(hits, toys, 1.0 - cl, "toy p-value at the asymptotic limit vs 1 - cl")})
     if cls_toys:
         hi = 1.3 * max(out["asymptotic_observed_cls_upper_limit"], out["asymptotic_expected_limits"]["cls"]["+2sigma"])
         out["toy_cls"] = _toy_cls(model, aux0, g_obs, cl, cls_toys, seed, hi, cls_points)

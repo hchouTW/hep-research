@@ -63,6 +63,18 @@ pyhf/Combine adapter ([statistical tools](statistical-tools.md)). Run any script
   `toy_tail`: k, N, the estimate k/N (None at k = 0), the Clopper-Pearson interval at 68.27%, and at k = 0 a one-sided
   95% upper bound `1 - 0.05^(1/N)` (0.0295 for N = 100); the legacy `p_value_toys` and binomial-error fields are None
   where they would claim p = 0 or an error of 0. Exact Poisson tails stay in log space (`log_p_value_exact_poisson`).
+- **Toy ensembles** (`toy_ensemble.py`, helper, no CLI). A toy study states its ensemble explicitly (no default):
+  `conditional-fluctuated-aux` (nuisances at the conditional fit, auxiliary measurements redrawn: the profile
+  construction), `conditional-fixed-aux`, `unconditional-prior` (nuisances drawn from their constraints: a
+  prior-predictive average, not coverage at a true nuisance) or `plug-in` (nuisances at a given point, as in a
+  coverage study at a true point). Toy i uses a seed derived from (seed, i), so partitioned tasks merge to the single
+  run and `merge` refuses duplicates and gaps. Every toy has one outcome (ok, fit_failed, invalid_data, empty_data,
+  timeout, error); `coverage` keeps C/N, (C+F)/N and C/(N-F) with exact intervals and takes the headline from a
+  predeclared failure policy; `coverage_gate` passes a point when the one-sided lower bound (Bonferroni over a
+  grid) is at least nominal - 0.01, fails it when the upper bound is below, and otherwise reports insufficient
+  precision. Results of different ensembles are never pooled; there are no automatic retries.
+  `likelihood_limits.shape_toy_generator` and `shape_q_evaluator` connect it to the shape model (every toy refitted).
+  Benchmarks: `<plugin root>/examples/stats-benchmarks/` (coverage grid of the counting constructions).
 - **Covariance and correlation matrices** go through one strict Cholesky (`_linalg.py`, private, no CLI). It works
   on the matrix scaled to a unit diagonal, so units never change the verdict. A pivot below -1e-10 is an error
   that names the matrix, a fit refuses a singular matrix, and toy sampling accepts a semi-definite one and records

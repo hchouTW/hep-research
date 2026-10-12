@@ -26,7 +26,8 @@
     "_poisson",
     "_validate",
     "fit_diagnostics",
-    "tail_estimation"
+    "tail_estimation",
+    "toy_ensemble"
    ],
    "source": "experiment-neutral implementations; imports packaged"
   },

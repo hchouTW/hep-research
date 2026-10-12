@@ -89,6 +89,7 @@ from the plugin root (each takes `--help`; the seeds are in each `output/report.
 | `examples/batch-partition/` (fake Slurm and HTCondor schedulers) | - |
 | `examples/end-to-end-sample/` | - |
 | `examples/unfolding-coverage/` | J3 |
+| `examples/stats-benchmarks/<name>/` (hep-statistics audit benchmarks: `coverage-grid`, ...; `--toys` sets the budget) | - |
 
 `tests/examples/` compares a fresh run with the
 committed output. When a change alters a committed number, explain why in the commit, regenerate the output, and

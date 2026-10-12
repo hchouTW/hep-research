@@ -1,0 +1,587 @@
+{
+ "label": "[General method] SYNTHETIC",
+ "gate": {
+  "nominal": 0.95,
+  "max_deficit": 0.01,
+  "gate_cl": 0.95,
+  "rule": "one-sided lower bound >= nominal - max_deficit, Bonferroni per procedure"
+ },
+ "cl": 0.95,
+ "toys": 20000,
+ "seed": 20261012,
+ "fc_grid_step": 0.01,
+ "exact": [
+  {
+   "s": 0.0,
+   "b": 0.0,
+   "classical": 1.0,
+   "cls": 1.0,
+   "feldman_cousins": 1.0,
+   "probability_beyond_sum": 0.0,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  },
+  {
+   "s": 0.5,
+   "b": 0.0,
+   "classical": 1.0,
+   "cls": 1.0,
+   "feldman_cousins": 0.9856123220330294,
+   "probability_beyond_sum": 0.0,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  },
+  {
+   "s": 1.0,
+   "b": 0.0,
+   "classical": 1.0,
+   "cls": 1.0,
+   "feldman_cousins": 0.9810118431238463,
+   "probability_beyond_sum": 0.0,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  },
+  {
+   "s": 2.0,
+   "b": 0.0,
+   "classical": 1.0000000000000002,
+   "cls": 1.0000000000000002,
+   "feldman_cousins": 0.9834363915193857,
+   "probability_beyond_sum": 0.0,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  },
+  {
+   "s": 3.0,
+   "b": 0.0,
+   "classical": 0.9502129316321365,
+   "cls": 0.9502129316321365,
+   "feldman_cousins": 0.9961970079383244,
+   "probability_beyond_sum": 0.0,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  },
+  {
+   "s": 5.0,
+   "b": 0.0,
+   "classical": 0.9595723180054868,
+   "cls": 0.9595723180054868,
+   "feldman_cousins": 0.9795667844025312,
+   "probability_beyond_sum": 3.3306690738754696e-16,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  },
+  {
+   "s": 8.0,
+   "b": 0.0,
+   "classical": 0.9576198880082346,
+   "cls": 0.9576198880082346,
+   "feldman_cousins": 0.9689890418580291,
+   "probability_beyond_sum": 8.149037000748649e-14,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  },
+  {
+   "s": 0.0,
+   "b": 0.5,
+   "classical": 1.0,
+   "cls": 1.0,
+   "feldman_cousins": 0.9856123220330294,
+   "probability_beyond_sum": 0.0,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  },
+  {
+   "s": 0.5,
+   "b": 0.5,
+   "classical": 1.0,
+   "cls": 1.0,
+   "feldman_cousins": 0.9810118431238463,
+   "probability_beyond_sum": 0.0,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  },
+  {
+   "s": 1.0,
+   "b": 0.5,
+   "classical": 1.0000000000000002,
+   "cls": 1.0000000000000002,
+   "feldman_cousins": 0.9814240637778595,
+   "probability_beyond_sum": 0.0,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  },
+  {
+   "s": 2.0,
+   "b": 0.5,
+   "classical": 1.0000000000000002,
+   "cls": 1.0000000000000002,
+   "feldman_cousins": 0.985812688009087,
+   "probability_beyond_sum": 0.0,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  },
+  {
+   "s": 3.0,
+   "b": 0.5,
+   "classical": 0.9698026165776819,
+   "cls": 0.9698026165776819,
+   "feldman_cousins": 0.9599289585215771,
+   "probability_beyond_sum": 0.0,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  },
+  {
+   "s": 5.0,
+   "b": 0.5,
+   "classical": 0.9734359856499839,
+   "cls": 0.9734359856499839,
+   "feldman_cousins": 0.9624478445913571,
+   "probability_beyond_sum": 0.0,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  },
+  {
+   "s": 8.0,
+   "b": 0.5,
+   "classical": 0.9698909203106763,
+   "cls": 0.9698909203106763,
+   "feldman_cousins": 0.9560574992811808,
+   "probability_beyond_sum": 1.0269562977782698e-13,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  },
+  {
+   "s": 0.0,
+   "b": 2.0,
+   "classical": 1.0000000000000002,
+   "cls": 1.0000000000000002,
+   "feldman_cousins": 0.9834363915193857,
+   "probability_beyond_sum": 0.0,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  },
+  {
+   "s": 0.5,
+   "b": 2.0,
+   "classical": 1.0000000000000002,
+   "cls": 1.0000000000000002,
+   "feldman_cousins": 0.9579789618046942,
+   "probability_beyond_sum": 0.0,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  },
+  {
+   "s": 1.0,
+   "b": 2.0,
+   "classical": 0.9502129316321365,
+   "cls": 1.0000000000000004,
+   "feldman_cousins": 0.9664914646911592,
+   "probability_beyond_sum": 0.0,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  },
+  {
+   "s": 2.0,
+   "b": 2.0,
+   "classical": 0.9816843611112658,
+   "cls": 0.9999999999999999,
+   "feldman_cousins": 0.9603209266232816,
+   "probability_beyond_sum": 1.1102230246251565e-16,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  },
+  {
+   "s": 3.0,
+   "b": 2.0,
+   "classical": 0.9595723180054868,
+   "cls": 0.9932620530009142,
+   "feldman_cousins": 0.9795667844025312,
+   "probability_beyond_sum": 3.3306690738754696e-16,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  },
+  {
+   "s": 5.0,
+   "b": 2.0,
+   "classical": 0.9703638361194777,
+   "cls": 0.9703638361194777,
+   "feldman_cousins": 0.9575524433160575,
+   "probability_beyond_sum": 5.551115123125783e-16,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  },
+  {
+   "s": 8.0,
+   "b": 2.0,
+   "classical": 0.970747311922864,
+   "cls": 0.970747311922864,
+   "feldman_cousins": 0.956469698325992,
+   "probability_beyond_sum": 1.7486012637846216e-13,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  },
+  {
+   "s": 0.0,
+   "b": 5.0,
+   "classical": 0.9595723180054868,
+   "cls": 0.9999999999999997,
+   "feldman_cousins": 0.9681719426937948,
+   "probability_beyond_sum": 3.3306690738754696e-16,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  },
+  {
+   "s": 0.5,
+   "b": 5.0,
+   "classical": 0.9734359856499839,
+   "cls": 1.0000000000000004,
+   "feldman_cousins": 0.9747487494554604,
+   "probability_beyond_sum": 0.0,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  },
+  {
+   "s": 1.0,
+   "b": 5.0,
+   "classical": 0.9826487347633355,
+   "cls": 1.0,
+   "feldman_cousins": 0.9573790764174619,
+   "probability_beyond_sum": 0.0,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  },
+  {
+   "s": 2.0,
+   "b": 5.0,
+   "classical": 0.9703638361194777,
+   "cls": 0.9999999999999994,
+   "feldman_cousins": 0.9657051708502946,
+   "probability_beyond_sum": 5.551115123125783e-16,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  },
+  {
+   "s": 3.0,
+   "b": 5.0,
+   "classical": 0.9576198880083145,
+   "cls": 0.999664537372096,
+   "feldman_cousins": 0.9520653304621763,
+   "probability_beyond_sum": 1.4432899320127035e-15,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  },
+  {
+   "s": 5.0,
+   "b": 5.0,
+   "classical": 0.9707473119230418,
+   "cls": 0.9896639493240771,
+   "feldman_cousins": 0.956469698325992,
+   "probability_beyond_sum": 0.0,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  },
+  {
+   "s": 8.0,
+   "b": 5.0,
+   "classical": 0.9741130845888946,
+   "cls": 0.9741130845888946,
+   "feldman_cousins": 0.9600317285110217,
+   "probability_beyond_sum": 2.703393064962256e-13,
+   "classical_pass": true,
+   "feldman_cousins_pass": true
+  }
+ ],
+ "asymptotic_profile": [
+  {
+   "s": 0.0,
+   "b": 3.0,
+   "sigma_b": 0.3,
+   "toys": 20000,
+   "seed": 20261012,
+   "coverage": 1.0,
+   "interval_95": [
+    0.9998155730360383,
+    1.0
+   ],
+   "outcomes": {
+    "ok": 20000,
+    "fit_failed": 0,
+    "invalid_data": 0,
+    "empty_data": 0,
+    "timeout": 0,
+    "error": 0
+   },
+   "gate": {
+    "pass": true,
+    "verdict": "pass",
+    "lower_bound": 0.9997462735032516,
+    "upper_bound": 1.0,
+    "threshold": 0.94,
+    "bound_cl": 0.99375,
+    "n_tests": 8,
+    "max_deficit": 0.01,
+    "rule": "pass: one-sided lower confidence bound on coverage >= nominal - max_deficit; fail: the upper bound is below it; otherwise insufficient-precision (more toys needed, not a failure of the method); Bonferroni over the grid"
+   }
+  },
+  {
+   "s": 1.0,
+   "b": 0.5,
+   "sigma_b": 0.25,
+   "toys": 20000,
+   "seed": 20261013,
+   "coverage": 1.0,
+   "interval_95": [
+    0.9998155730360383,
+    1.0
+   ],
+   "outcomes": {
+    "ok": 20000,
+    "fit_failed": 0,
+    "invalid_data": 0,
+    "empty_data": 0,
+    "timeout": 0,
+    "error": 0
+   },
+   "gate": {
+    "pass": true,
+    "verdict": "pass",
+    "lower_bound": 0.9997462735032516,
+    "upper_bound": 1.0,
+    "threshold": 0.94,
+    "bound_cl": 0.99375,
+    "n_tests": 8,
+    "max_deficit": 0.01,
+    "rule": "pass: one-sided lower confidence bound on coverage >= nominal - max_deficit; fail: the upper bound is below it; otherwise insufficient-precision (more toys needed, not a failure of the method); Bonferroni over the grid"
+   }
+  },
+  {
+   "s": 2.0,
+   "b": 3.0,
+   "sigma_b": 0.3,
+   "toys": 20000,
+   "seed": 20261014,
+   "coverage": 0.9597,
+   "interval_95": [
+    0.9568818138807229,
+    0.9623835331742998
+   ],
+   "outcomes": {
+    "ok": 20000,
+    "fit_failed": 0,
+    "invalid_data": 0,
+    "empty_data": 0,
+    "timeout": 0,
+    "error": 0
+   },
+   "gate": {
+    "pass": true,
+    "verdict": "pass",
+    "lower_bound": 0.9560968505454994,
+    "upper_bound": 0.9630946149251804,
+    "threshold": 0.94,
+    "bound_cl": 0.99375,
+    "n_tests": 8,
+    "max_deficit": 0.01,
+    "rule": "pass: one-sided lower confidence bound on coverage >= nominal - max_deficit; fail: the upper bound is below it; otherwise insufficient-precision (more toys needed, not a failure of the method); Bonferroni over the grid"
+   }
+  },
+  {
+   "s": 2.0,
+   "b": 3.0,
+   "sigma_b": 1.5,
+   "toys": 20000,
+   "seed": 20261015,
+   "coverage": 0.98135,
+   "interval_95": [
+    0.9793785427796882,
+    0.9831797034336631
+   ],
+   "outcomes": {
+    "ok": 20000,
+    "fit_failed": 0,
+    "invalid_data": 0,
+    "empty_data": 0,
+    "timeout": 0,
+    "error": 0
+   },
+   "gate": {
+    "pass": true,
+    "verdict": "pass",
+    "lower_bound": 0.9788248446105119,
+    "upper_bound": 0.9836558452840043,
+    "threshold": 0.94,
+    "bound_cl": 0.99375,
+    "n_tests": 8,
+    "max_deficit": 0.01,
+    "rule": "pass: one-sided lower confidence bound on coverage >= nominal - max_deficit; fail: the upper bound is below it; otherwise insufficient-precision (more toys needed, not a failure of the method); Bonferroni over the grid"
+   }
+  },
+  {
+   "s": 5.0,
+   "b": 10.0,
+   "sigma_b": 0.5,
+   "toys": 20000,
+   "seed": 20261016,
+   "coverage": 0.9458,
+   "interval_95": [
+    0.9425717587341627,
+    0.9488978641780375
+   ],
+   "outcomes": {
+    "ok": 20000,
+    "fit_failed": 0,
+    "invalid_data": 0,
+    "empty_data": 0,
+    "timeout": 0,
+    "error": 0
+   },
+   "gate": {
+    "pass": true,
+    "verdict": "pass",
+    "lower_bound": 0.9416749106075646,
+    "upper_bound": 0.9497231180903494,
+    "threshold": 0.94,
+    "bound_cl": 0.99375,
+    "n_tests": 8,
+    "max_deficit": 0.01,
+    "rule": "pass: one-sided lower confidence bound on coverage >= nominal - max_deficit; fail: the upper bound is below it; otherwise insufficient-precision (more toys needed, not a failure of the method); Bonferroni over the grid"
+   }
+  },
+  {
+   "s": 5.0,
+   "b": 10.0,
+   "sigma_b": 5.0,
+   "toys": 20000,
+   "seed": 20261017,
+   "coverage": 0.9838,
+   "interval_95": [
+    0.9819533300295831,
+    0.9855040201374703
+   ],
+   "outcomes": {
+    "ok": 20000,
+    "fit_failed": 0,
+    "invalid_data": 0,
+    "empty_data": 0,
+    "timeout": 0,
+    "error": 0
+   },
+   "gate": {
+    "pass": true,
+    "verdict": "pass",
+    "lower_bound": 0.9814337342642994,
+    "upper_bound": 0.9859456206723933,
+    "threshold": 0.94,
+    "bound_cl": 0.99375,
+    "n_tests": 8,
+    "max_deficit": 0.01,
+    "rule": "pass: one-sided lower confidence bound on coverage >= nominal - max_deficit; fail: the upper bound is below it; otherwise insufficient-precision (more toys needed, not a failure of the method); Bonferroni over the grid"
+   }
+  },
+  {
+   "s": 10.0,
+   "b": 50.0,
+   "sigma_b": 2.5,
+   "toys": 20000,
+   "seed": 20261018,
+   "coverage": 0.9537,
+   "interval_95": [
+    0.9506960868367154,
+    0.9565711191383783
+   ],
+   "outcomes": {
+    "ok": 20000,
+    "fit_failed": 0,
+    "invalid_data": 0,
+    "empty_data": 0,
+    "timeout": 0,
+    "error": 0
+   },
+   "gate": {
+    "pass": true,
+    "verdict": "pass",
+    "lower_bound": 0.9498604367227195,
+    "upper_bound": 0.9573338784298464,
+    "threshold": 0.94,
+    "bound_cl": 0.99375,
+    "n_tests": 8,
+    "max_deficit": 0.01,
+    "rule": "pass: one-sided lower confidence bound on coverage >= nominal - max_deficit; fail: the upper bound is below it; otherwise insufficient-precision (more toys needed, not a failure of the method); Bonferroni over the grid"
+   }
+  },
+  {
+   "s": 20.0,
+   "b": 100.0,
+   "sigma_b": 5.0,
+   "toys": 20000,
+   "seed": 20261019,
+   "coverage": 0.9454,
+   "interval_95": [
+    0.9421609308357126,
+    0.9485088137307687
+   ],
+   "outcomes": {
+    "ok": 20000,
+    "fit_failed": 0,
+    "invalid_data": 0,
+    "empty_data": 0,
+    "timeout": 0,
+    "error": 0
+   },
+   "gate": {
+    "pass": true,
+    "verdict": "pass",
+    "lower_bound": 0.941261129477476,
+    "upper_bound": 0.9493370863390191,
+    "threshold": 0.94,
+    "bound_cl": 0.99375,
+    "n_tests": 8,
+    "max_deficit": 0.01,
+    "rule": "pass: one-sided lower confidence bound on coverage >= nominal - max_deficit; fail: the upper bound is below it; otherwise insufficient-precision (more toys needed, not a failure of the method); Bonferroni over the grid"
+   }
+  }
+ ],
+ "calibration": {
+  "s": 3.0,
+  "b": 1.0,
+  "exact": 0.9816843611112305,
+  "toy": 0.98245,
+  "toy_interval_999": [
+   0.9791830897769953,
+   0.9853485096503032
+  ],
+  "agrees": true,
+  "toys": 20000,
+  "seed": 20262012
+ },
+ "negative_control": {
+  "procedure": "asymptotic limit ignoring sigma_b",
+  "s": 5.0,
+  "b": 10.0,
+  "sigma_b": 5.0,
+  "toys": 20000,
+  "seed": 20263012,
+  "coverage": 0.8733,
+  "gate": {
+   "pass": false,
+   "verdict": "fail",
+   "lower_bound": 0.8693659897619077,
+   "upper_bound": 0.8771535879402679,
+   "threshold": 0.94,
+   "bound_cl": 0.95,
+   "n_tests": 1,
+   "max_deficit": 0.01,
+   "rule": "pass: one-sided lower confidence bound on coverage >= nominal - max_deficit; fail: the upper bound is below it; otherwise insufficient-precision (more toys needed, not a failure of the method); Bonferroni over the grid"
+  },
+  "rejected": true
+ },
+ "summary": {
+  "exact_belts_pass": true,
+  "cls_min_coverage": 0.9502129316321365,
+  "asymptotic_points_failing": [],
+  "asymptotic_points_not_established": [],
+  "toy_calibration_agrees": true,
+  "negative_control_rejected": true
+ }
+}
