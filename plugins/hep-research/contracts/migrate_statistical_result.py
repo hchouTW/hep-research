@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Migrate a statistical-result written under contracts < 2.2.0 to 2.2.0, with explicit diagnostics (audit T08).
+"""Migrate a statistical-result written under contracts < 2.2.0 to the current contracts version (2.2.0 rules or later), with explicit diagnostics (audit T08).
 
 Contracts 2.2.0 apply semantic rules to statistical-result artifacts (contracts.validate._stat_semantics) that older
 artifacts were never checked against. Old artifacts stay valid under their own version; this converter is how one is
@@ -7,7 +7,7 @@ brought under the new rules. It never repairs a number: an artifact that breaks 
 unordered expected bands, a confidence level outside (0, 1), ...) is refused with the rule's code. What it does
 change, each with a diagnostic:
 
-- contract_version and versions.contracts become 2.2.0; required_capabilities gains stats:result-semantics, so a
+- contract_version and versions.contracts become the current contracts version (CONTRACTS_VERSION, 2.2.0 or later); required_capabilities gains stats:result-semantics, so a
   2.1 reader refuses the result instead of reading it under the weaker rules;
 - an untyped coverage object (no check) gains "check": "not-checked", its other fields kept; the converter never
   infers toys or an exact construction from free text;
@@ -28,6 +28,7 @@ from pathlib import Path
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from contracts import CONTRACTS_VERSION  # noqa: E402
 from contracts.validate import STAT_SEMANTICS_FROM, _at_least, validate_artifact  # noqa: E402
 
 CAPABILITY = "stats:result-semantics"
@@ -49,14 +50,14 @@ def migrate(doc: dict) -> tuple[dict | None, dict]:
             {"code": "migrate.invalid_source", "message": f"{f.code}: {f.message}"} for f in before.errors]}
     new = copy.deepcopy(doc)
     old_version = new.get("contract_version")
-    new["contract_version"] = STAT_SEMANTICS_FROM
+    new["contract_version"] = CONTRACTS_VERSION
     if isinstance(new.get("versions"), dict):
-        new["versions"]["contracts"] = STAT_SEMANTICS_FROM
+        new["versions"]["contracts"] = CONTRACTS_VERSION
     caps = list(new.get("required_capabilities") or [])
     if CAPABILITY not in caps:
         caps.append(CAPABILITY)
     new["required_capabilities"] = caps
-    diagnostics.append({"code": "migrate.version", "message": f"contract_version {old_version} -> {STAT_SEMANTICS_FROM}, "
+    diagnostics.append({"code": "migrate.version", "message": f"contract_version {old_version} -> {CONTRACTS_VERSION}, "
                                                               f"required capability {CAPABILITY} added"})
     ext = new.get("extension", {})
     cov = ext.get("coverage")

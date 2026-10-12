@@ -492,8 +492,18 @@ diagram test of the review (Chromium startup) did not reproduce on E2: every shi
 
 Not verified here: online literature verification (no lookup is performed by any new tool); rendering of diagrams on a
 host without Chromium (the preflight path is covered by fake renderers only); behavioral quality of any model on the
-new cases; Combine, ROOT and GPU paths (unchanged by this work). The contracts version stays 2.2.0 on the branch; the
-release that ships `communication:traceability-v1` bumps it as a minor change.
+new cases; Combine, ROOT and GPU paths (unchanged by this work). The branch kept contracts at 2.2.0; release 0.6.13 bumps them to 2.3.0 (minor) with the capability
+`communication:traceability-v1`.
+
+## 0.6.13 release check (2026-10-12, E2)
+
+Version 0.6.13 (research-communication reliability plan T0–T11 and its review fixes; contracts 2.3.0 with the
+capability `communication:traceability-v1`, additive). Examples rerun with the E2 venv: only the plugin and contracts
+version strings changed (28 files, 78 lines; the unfolding-coverage example was not rerun, as in earlier releases);
+the published-likelihood benchmark's two artifacts were rewritten with the new plugin version as in 0.6.11 and
+0.6.12. `contracts/migrate_statistical_result.py` writes the current contracts version. `tools/run_all_checks.py`
+with the host CLIs and the E2 venv: 20 of 20 checks pass; 2,236 unit tests, 0 failures, 55 skipped. Release manifest
+`release-manifests/0.6.13.json`.
 
 ## 0.6.12 release check (2026-10-12, E2)
 

@@ -30,7 +30,7 @@ class StatisticalResultV11(unittest.TestCase):
     def test_version_is_minor_bump(self):
         # 2.1.0: plugin_release, required_capabilities, data_exposure (AGENTIC-R5 Q-04); 2.2.0: statistical-result
         # semantics, p-value bounds, typed coverage, publication gate (tests/contracts/test_statistical_semantics.py)
-        self.assertEqual(CONTRACTS_VERSION, "2.2.0")
+        self.assertEqual(CONTRACTS_VERSION, "2.3.0")
 
     def test_unresolved_fixtures(self):
         cases = load(ART / "cases.json")["unresolved"]

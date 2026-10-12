@@ -70,7 +70,7 @@ PUBLISHABLE["extension"]["significance"]["global_n_toys"] = 10000
 
 class T06Semantics(unittest.TestCase):
     def test_contract_version_is_minor_bump(self):
-        self.assertEqual(CONTRACTS_VERSION, "2.2.0")
+        self.assertEqual(CONTRACTS_VERSION, "2.3.0")
 
     def test_audit_mutations_rejected_natively_at_2_2(self):
         for name, (_, level, code) in MUTATIONS.items():

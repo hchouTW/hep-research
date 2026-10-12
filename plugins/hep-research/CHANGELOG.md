@@ -3,7 +3,9 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.6.13 (2026-10-12)
+
+Contracts 2.3.0 (minor: the capability `communication:traceability-v1` and its extension schema; every 2.2.0 artifact keeps its outcome). `contracts/migrate_statistical_result.py` now writes the current contracts version (2.3.0) instead of a literal 2.2.0; the 2.2.0 rules it applies are unchanged.
 
 - **Research-communication review minors closed.** A ```latex fence counts as a diagram only when it holds a
   `tikzpicture`, so `check_diagram_sources.py --require-render` can pass on a bundle of code examples; a changed
@@ -33,7 +35,7 @@ Software checks establish contract consistency only, not physical validity.
   sources using a bound profile's terms validate), loads declared and bound-profile ledgers, resolves source ids and
   document digests, and normalizes outcomes (`resolve_outcome`: input-error 2, fail 1, incomplete 3, pass 0;
   unresolved findings or a failed upstream never read as complete). A legacy record is reported as limited
-  traceability. The contracts version is unchanged here; the release that ships the format bumps it as a minor change.
+  traceability. Contracts move to 2.3.0 with this release (additive: a new capability and schema; no field removed or tightened for 2.2.0 artifacts).
 - **Manuscript checks scoped to the selected document (T2).** `check_manuscript.py --main MAIN.tex` scans only the
   files the main document reaches through literal `\input`, `\include`, `\subfile` and `\import`, resolved against
   `--build-root` (default: the main file's folder) and bounded by `--project-root`; a label in an unincluded sibling no
