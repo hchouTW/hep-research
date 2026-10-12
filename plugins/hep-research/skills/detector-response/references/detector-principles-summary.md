@@ -274,3 +274,14 @@ One file per topic under `references/`; load only what the task needs.
 - Validation and conditions: [data/MC validation and detector systematics](data-mc-validation-and-detector-systematics.md), [detector simulation](detector-simulation.md), [calibration and alignment](calibration-and-alignment.md).
 - Lookup: [case studies and checklists](detector-case-studies-and-checklists.md), [comparison tables](detector-comparison-tables.md), [glossary](detector-glossary.md), [bibliography](detector-principles-bibliography.md).
 - Astroparticle instruments: [cosmic-ray spectrum and composition](cosmic-ray-spectrum-and-composition.md), [extensive air showers](extensive-air-showers.md), [ground-based arrays](ground-based-detection-arrays.md), [imaging atmospheric Cherenkov telescopes](imaging-atmospheric-cherenkov.md), [neutrino telescopes](neutrino-astronomy.md), [space-based direct detection](space-based-direct-detection.md), [multimessenger analysis](multimessenger-analysis.md).
+
+### Task routing: what to confirm first
+
+| Task | Confirm first | Start with |
+|---|---|---|
+| Concept explanation | whether experiment-specific facts are needed (then the profile, not memory) | the subsystem file |
+| Design estimate | approximations, validity range, neglected terms; script outputs carry their validity flags | [core equations](core-detector-equations.md), the scripts |
+| Performance measurement | data sample, denominator, matching definition, estimator, uncertainty (unweighted binomial counts only for a Clopper-Pearson interval) | [performance metrics](performance-metrics-and-residual-diagnostics.md), [truth matching](reconstruction-performance-and-truth-matching.md) |
+| Response construction | event mapping, weights, misses and fakes, binning, MC statistics, intended use; a mean and width alone do not determine a migration matrix | [response and forward folding](response-and-forward-folding.md) |
+| Calibration diagnosis | derivation and validation samples, conditions per period, weak modes | [calibration and alignment](calibration-and-alignment.md) |
+| Recasting | validity range of the published response and the extrapolation strategy | [response and forward folding](response-and-forward-folding.md) |

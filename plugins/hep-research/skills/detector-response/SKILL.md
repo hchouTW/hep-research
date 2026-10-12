@@ -6,13 +6,14 @@ description: "Use when the deliverable is about how a detector responds: signal 
 # detector-response: detector performance and response
 
 **Owns:** signal formation, reconstruction, calibration, alignment, efficiency and resolution, truth matching, detector simulation, data/MC comparison, parametrized response for recasting, response matrices, forward folding of predictions, double-counting checks.
-**Typical artifacts:** `response` (truth/reco axes, orientation, normalization, what sits inside the matrix), performance reports, conditions provenance.
+**Typical artifacts:** `response` (truth/reco axes, orientation, normalization, what sits inside the matrix, intended use), folded `prediction`, performance reports, conditions provenance.
 **Never:** invent detector facts; detector specifics come from an experiment profile, the user, or are `unknown`. Inference on top of a response belongs to hep-statistics.
 
 ## Invariants
 
-- Declare matrix orientation, normalization convention, where inefficiency and acceptance live (inside or outside the matrix), underflow/overflow handling, and which corrections are included. A correction inside the matrix is never applied again outside it.
-- Truth and reco variables are named with units; if they differ, the conversion and Jacobian are stated.
+- Declare matrix orientation, normalization convention, where inefficiency and acceptance live (inside or outside the matrix), underflow/overflow handling, which corrections are included, and the intended use (`forward_folding`, `unfolding`, `parametric_fit`). A correction inside the matrix is never applied again outside it.
+- Truth and reco variables are named with units; if they differ, the conversion is stated (a binned response is a conditional distribution; a Jacobian applies only to a continuous density).
+- Stop when the inputs cannot determine the answer: a mean and a width do not determine a migration matrix or its tails. Ask for matched events or distributions, or offer a parametrized response labelled as an assumption.
 - Efficiencies are conditional probabilities with a named denominator; resolution is reported with the core and the tails separately, and non-Gaussian tails are measured, not assumed.
 - Calibration is legitimate when it uses independent control samples with provenance; tuning toward the expected signal outcome is flagged.
 - Conditions are time-dependent until shown otherwise; record periods and versions.
@@ -20,7 +21,7 @@ description: "Use when the deliverable is about how a detector responds: signal 
 
 ## Workflow
 
-1. Resolve context (stanza below); then only needed subsystem modules.
+1. Resolve context (stanza below); then only needed subsystem modules. What to confirm first, by task type: [task routing](references/detector-principles-summary.md#task-routing-what-to-confirm-first).
 2. State the quantity (efficiency, resolution, scale, response matrix) and its conditioning.
 3. Choose the reference: truth matching in simulation, tag-and-probe or control sample in data, or both with a data/MC comparison.
 4. Report central value, statistical and systematic parts, validity range, and conditions.
@@ -49,7 +50,9 @@ Scripts in `<plugin root>/skills/detector-response/scripts/` (read `--help` firs
 
 | Need | Hand to | Artifact |
 |---|---|---|
+| Truth-level prediction to fold | from hep-theory | `prediction` |
 | Unfolding, fits on the response | hep-statistics | `response` |
+| Tag-and-probe pass/fail fit, pileup systematics | hep-statistics | performance report |
 | Measurement design using these numbers | hep-analysis | `response` / report |
 | Simulation production, conditions code | hep-computing | `computational-run` |
 | ML-based reconstruction or calibration | physics-ml | `ml-artifact` |
