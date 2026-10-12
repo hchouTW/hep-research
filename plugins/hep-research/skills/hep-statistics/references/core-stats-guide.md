@@ -356,6 +356,22 @@ Scripts are in `<plugin root>/skills/hep-statistics/scripts/` unless an adapter 
 Contract side: `contracts/validate.py --strict` and `--gate publication`, `contracts/migrate_statistical_result.py`, and
 `tools/run_required_backends.py` (a required backend missing fails, never skips).
 
+## Skill scripts
+
+Command-line helpers in `skills/hep-statistics/scripts/` (read `--help` first); they call the modules above and never
+replace them. When a shell is available, run the matching script and report its output; a value worked by hand is
+labeled as such.
+
+- `li_ma_significance.py`: ON/OFF significance, with toy or exact conditional p-values at low counts.
+- `look_elsewhere.py`: global significance of a one-dimensional scan (brute-force toys or upcrossings).
+- `global_significance.py`: toy-calibrated global significance for a recorded scan.
+- `sensitivity_and_gof.py`: Asimov discovery sensitivity and toy-calibrated goodness of fit.
+- `bayes_diagnostics.py`: R-hat, ESS and MCSE of supplied chains, prior reweighting; `bayes_calibration.py`: quantile and SBC calibration checks.
+- `combine_measurements.py` (needs NumPy): generalized least squares combination of one observable once the combination plan accepts the inputs (declared cross-dataset blocks, shared auxiliary measurements, no Gaussianized envelope); `combine_asymmetric.py`: Barlow's asymmetric errors.
+- `covariance_fit.py`: fits to published points with their covariance, with the Peelle diagnostics; `discrete_profile.py`: discrete profiling over a model family; `eft_scan.py`: EFT parameter scans; `pcl_efficiency_ratio.py`, `ratio_estimation.py`: ratio and efficiency intervals; `sweighted_fit.py`: sWeighted fits with covering uncertainties.
+- `result_artifact.py`: writes a `statistical-result` artifact from a tool's output, with its status label.
+- The Poisson counting reference is `skills/hep-analysis/scripts/counting_reference.py`. pyhf and Combine starting points: `adapters/pyhf-combine/assets/` (with `pyhf_nuisance_diagnostics.py` for pulls, constraints and impacts); unbinned fits: `adapters/unbinned-fit/assets/unbinned_fit.py`.
+
 ## Not implemented
 
 Weights that vary within a bin in the toy MC; non-Gaussian or correlated priors in the template fit; a Berger-Boos

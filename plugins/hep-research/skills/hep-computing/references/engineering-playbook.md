@@ -163,3 +163,17 @@ Do not add comments that merely repeat the code. Prefer clearer names and simple
    incremental validation.
 5. Once characterization tests exist, treat the area as any other tested code for
    the rest of this playbook's guidance (see Refactor, Bug Fix above).
+
+## Scripts of the hep-computing skill
+
+In `skills/hep-computing/scripts/`; read `--help` first. Each locates its files from its own path, takes an explicit
+output directory, emits an exit code plus a JSON status, and explains a missing optional dependency.
+
+- Interpreter choice for package-dependent work (SymPy): `find_python.py` (`--python`, then `HEP_RESEARCH_PYTHON`, the caller, `python3` on PATH).
+- ROOT file inspection and comparison: `inspect_root_file.py` (and the `inspect_root_file.C` macro), `compare_root_histograms.py`, `summarize_histogram_statistics.py`, `roofit_workspace_summary.py`, `audit_histograms.py`.
+- Environment and project checks: `check_root_cpp_env.sh`, `new_root_cpp_project.sh`, `environment_manifest.py` (record and check a run's environment); LCG views and containers in [environments and containers](environments-and-containers.md).
+- Synthetic inputs: `make_synthetic_nanoaod.py`.
+- Task authoring: `lint_task.py`, `validate_skill_bundle.py`, `validate_skill_example.py`, `validate_agile_notes.py`, `create_story_card.py`, `generate_skill_example.py`, `check_example_diversity.py` (see [task authoring](task-authoring-guide.md)).
+- Partitioned work: `local_partition.py`, bounded resubmission and a duplicate-safe merge (engine in `core/partition`); Slurm and HTCondor campaigns in [batch scheduling](batch-scheduling.md) with the optional CLI `adapters/batch-schedulers/batch_campaign.py` (documented; tested only against fake schedulers). Submission is unsandboxed execution: synthetic test environments only, each submission user-approved.
+- Advisory blinding checks: `audit_blinded_outputs.py` and `core.blinding.check_figure`, synthetic sentinels only; with real data, sealing and scanning belong to the data custodian.
+- ROOT and uproot starting points: `adapters/root-uproot/assets/`.

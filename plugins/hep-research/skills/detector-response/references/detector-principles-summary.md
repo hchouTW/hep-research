@@ -260,3 +260,14 @@ circularity; relative vs absolute and local vs global stated; intervals of valid
 monitored; weak modes tested with an independent constraint (resonance mass, cosmics,
 `E/p`); calibration-alignment coupling checked; the same constants applied in data and
 simulation.
+
+## 11. Reference index
+
+One file per topic under `references/`; load only what the task needs.
+
+- Framework and equations: [measurement framework](detector-measurement-framework.md), [core equations](core-detector-equations.md), [signal formation and readout](signal-formation-and-readout.md), [detector systems](detector-systems-overview.md).
+- Subsystems: [tracking](tracking-and-vertexing.md), [gaseous and specialized tracking](gaseous-and-specialized-tracking-technologies.md), [timing](timing-detectors.md), [calorimetry](calorimetry-ecal-hcal.md), [particle identification](particle-identification.md), [Cherenkov imaging and photosensors](cherenkov-imaging-variants-and-photosensors.md), [muon systems](muon-systems.md), [noble-liquid, neutrino and rare-event detectors](noble-liquid-neutrino-and-rare-event-detectors.md).
+- Reconstruction and performance: [physics objects](physics-objects-jets-btagging-met.md), [triggers, luminosity and pileup](triggers-luminosity-pileup.md), [event reconstruction](event-reconstruction.md), [truth matching](reconstruction-performance-and-truth-matching.md), [performance metrics](performance-metrics-and-residual-diagnostics.md), [response and forward folding](response-and-forward-folding.md).
+- Validation and conditions: [data/MC validation and detector systematics](data-mc-validation-and-detector-systematics.md), [detector simulation](detector-simulation.md), [calibration and alignment](calibration-and-alignment.md).
+- Lookup: [case studies and checklists](detector-case-studies-and-checklists.md), [comparison tables](detector-comparison-tables.md), [glossary](detector-glossary.md), [bibliography](detector-principles-bibliography.md).
+- Astroparticle instruments: [cosmic-ray spectrum and composition](cosmic-ray-spectrum-and-composition.md), [extensive air showers](extensive-air-showers.md), [ground-based arrays](ground-based-detection-arrays.md), [imaging atmospheric Cherenkov telescopes](imaging-atmospheric-cherenkov.md), [neutrino telescopes](neutrino-astronomy.md), [space-based direct detection](space-based-direct-detection.md), [multimessenger analysis](multimessenger-analysis.md).
