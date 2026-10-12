@@ -1,5 +1,5 @@
 {
-  "description": "Synthetic example pileup profiles (number of true interactions per event), for <plugin root>/skills/detector-response/scripts/pileup_reweight.py. Data centered near <mu>=38, MC generated assuming <mu>=30 (a deliberately mismatched assumption, as is typical before data-taking conditions are known).",
+  "description": "Synthetic example pileup profiles for <plugin root>/skills/detector-response/scripts/pileup_reweight.py. Each profile is the distribution of the number of interactions per event drawn from a Poisson with a single fixed mean (data mu=38, MC mu=30, a deliberately mismatched assumption, as is typical before data-taking conditions are known). This is the sampled count, not the distribution of the Poisson mean mu of interactions per bunch crossing that pileup reweighting at hadron colliders usually uses; real profiles of mu are broad. Illustrative only.",
   "bin_centers": [
     0,
     1,

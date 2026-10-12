@@ -1,11 +1,24 @@
 #!/usr/bin/env python3
 """Binomial efficiency and exact Clopper-Pearson interval for tag-and-probe counts.
 
-Computes efficiency = pass / total for one or more (pass, total) bins and an exact
+Computes efficiency = pass / total for one (pass, total) bin per call and an exact
 Clopper-Pearson confidence interval (not a Gaussian/Wald approximation, which is
 unreliable near 0 or 1). See <plugin root>/skills/detector-response/references/triggers-luminosity-pileup.md for the
-tag-and-probe methodology this supports. Standard library only; intentionally
-limited to 0 <= total <= 200000 per bin (see module docstring in this file for why).
+tag-and-probe methodology this supports. Standard library only.
+
+Scope: unweighted, independent Bernoulli trials (one probe = one trial, no background
+subtracted). It does not apply to background-subtracted pass/fail yields (fit the
+efficiency as a parameter of a simultaneous pass/fail fit - hep-statistics), weighted
+or signed-weight MC, or several correlated probes per event.
+
+Output: lower_bound and upper_bound are the interval's absolute ends at interval_level
+(default 0.95). At 0.95 they are not a +-1 sigma band; pass --level 0.6827 for a
+one-sigma-equivalent interval. total = 0 leaves the efficiency undefined: the fields
+are null with a reason, not NaN.
+
+total is capped at 200000 because the exact tail sum is evaluated term by term, so the
+cost grows linearly with total (about 9 s near efficiency 0.5 at the cap); for larger
+samples use a beta-quantile implementation (e.g. scipy.stats.beta.ppf).
 Run: python3 <plugin root>/skills/detector-response/scripts/tag_and_probe_efficiency.py --pass-count 92 --total 100
 """
 import argparse
@@ -89,13 +102,22 @@ def clopper_pearson(k, n, level=0.95):
 
 def efficiency_bin(k, n, level=0.95):
     validate_counts(k, n)
-    point = k / n if n > 0 else float('nan')
-    lower, upper = clopper_pearson(k, n, level) if n > 0 else (float('nan'), float('nan'))
+    validate_level(level)
+    if n == 0:
+        return {
+            'pass_count': k, 'total': n, 'efficiency': None, 'interval_level': level,
+            'lower_bound': None, 'upper_bound': None,
+            'distance_to_lower_bound': None, 'distance_to_upper_bound': None,
+            'reason': 'total is zero: no probes, so the efficiency is undefined',
+        }
+    point = k / n
+    lower, upper = clopper_pearson(k, n, level)
     return {
-        'pass_count': k, 'total': n, 'efficiency': point,
-        'level': level, 'lower': lower, 'upper': upper,
-        'lower_error': None if n == 0 else point - lower,
-        'upper_error': None if n == 0 else upper - point,
+        'pass_count': k, 'total': n, 'efficiency': point, 'interval_level': level,
+        'lower_bound': lower, 'upper_bound': upper,
+        # Distances from the point estimate to the interval ends, at interval_level.
+        'distance_to_lower_bound': point - lower,
+        'distance_to_upper_bound': upper - point,
     }
 
 
@@ -103,7 +125,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--pass-count', type=int, required=True, dest='pass_count')
     parser.add_argument('--total', type=int, required=True)
-    parser.add_argument('--level', type=float, default=0.95)
+    parser.add_argument('--level', type=float, default=0.95,
+                        help='coverage of the interval (default 0.95; 0.6827 for one-sigma)')
     args = parser.parse_args()
     try:
         result = efficiency_bin(args.pass_count, args.total, args.level)
@@ -112,7 +135,10 @@ def main():
     print(json.dumps({
         'method': 'Clopper-Pearson exact binomial interval',
         **result,
-        'note': 'Not a Gaussian/Wald interval; valid (if wide) near efficiency 0 or 1.',
+        'note': ('Not a Gaussian/Wald interval; valid (if wide) near efficiency 0 or 1. '
+                 'lower_bound/upper_bound are the interval ends at interval_level, not '
+                 '+-1 sigma. Only for unweighted, independent, non-background-subtracted '
+                 'counts.'),
     }, indent=2))
 
 

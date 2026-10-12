@@ -2,20 +2,33 @@
 """Ring-imaging Cherenkov kinematics: thresholds, angles, photon yield, and separation.
 
 Purpose: evaluate what a RICH radiator can actually do - which species emit at all at a
-given momentum, how well the ring angle determines velocity, and where the angle
-saturates and separation is lost.
+given momentum, how many photons they give, how well the ring angle determines velocity,
+and where the angle saturates and separation is lost.
 
 What it does: for a radiator of refractive index n it computes each species' threshold
-momentum, the Cherenkov angle and its saturation value, the detected photon yield, the
-per-track angular resolution, and the resulting velocity and mass resolution, plus the
-separation in sigma between two species and the momentum ceiling where it is lost.
+momentum, the Cherenkov angle and its saturation value, the expected photon yield, the
+probability of no photon at all, the per-track angular resolution, and the resulting
+velocity and mass resolution, plus the separation in sigma between two species at one
+momentum. It does not scan momentum; for a separation ceiling pass the
+relative_beta_resolution to <plugin root>/skills/detector-response/scripts/pid_separation_power.py --mode velocity.
+
+Photon regimes (per species, from the expected photon number N): none for N < 0.5, few
+for 0.5 <= N < 5, gaussian for N >= 5 (provisional thresholds). Only when both species
+are gaussian is an angular n_sigma given; otherwise identification rests on the presence
+or absence of photons and the output gives threshold_discrimination (the probability of
+at least one photon per species) instead of a Gaussian separation, and no
+relative_beta_resolution for the few-photon species.
 
 Usage notes / assumptions: standard library only. Momenta in GeV/c, masses in GeV/c^2,
 radiator length in cm, angles reported in both radians and milliradians. Photon yield
 uses the figure-of-merit form N = N0 * L * sin^2(theta_c), with N0 in cm^-1 folding in
 photon-detection efficiency and the accepted wavelength band - it is a design estimate,
-not a simulation. Chromatic dispersion is represented only through the single-photon
-angular resolution supplied by the user; n is treated as a single number. See
+not a simulation. Per-track resolution is sqrt(sigma_photon^2/N + sigma_track^2); the
+track term (--track-resolution, default 0) covers track direction and other errors that
+do not average down with N. Chromatic dispersion is represented only through the
+single-photon angular resolution supplied by the user; n is treated as a single number.
+Separation convention (--convention): single (default) divides by species A's per-track
+resolution; quadrature by sqrt(sigma_A^2 + sigma_B^2), symmetric in the species. See
 <plugin root>/skills/detector-response/references/particle-identification.md.
 Run: python3 <plugin root>/skills/detector-response/scripts/cherenkov_angle.py --index 1.05 --species pi K --momentum 10
 """
@@ -28,6 +41,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from pid_separation_power import MASSES_GEV, kinematics, resolve_mass  # noqa: E402
+
+# Expected-photon thresholds between the none / few / gaussian regimes (provisional).
+FEW_PHOTONS = 0.5
+GAUSSIAN_PHOTONS = 5.0
+CONVENTIONS = ('single', 'quadrature')
 
 
 def _positive(value, name):
@@ -78,12 +96,27 @@ def photon_yield(angle_rad, radiator_length_cm, figure_of_merit_per_cm):
     return figure_of_merit_per_cm * radiator_length_cm * math.sin(angle_rad) ** 2
 
 
-def track_angular_resolution(single_photon_sigma_rad, photons):
-    """Per-track resolution improves as 1/sqrt(N) over the detected photons."""
+def photon_regime(photons):
+    """'none' (N < 0.5), 'few' (0.5 <= N < 5) or 'gaussian' (N >= 5) expected photons."""
+    if photons < FEW_PHOTONS:
+        return 'none'
+    if photons < GAUSSIAN_PHOTONS:
+        return 'few'
+    return 'gaussian'
+
+
+def track_angular_resolution(single_photon_sigma_rad, photons, track_sigma_rad=0.0):
+    """Per-track resolution sqrt(sigma_photon^2 / N + sigma_track^2).
+
+    The photon term improves as 1/sqrt(N); the track term does not.
+    """
     single_photon_sigma_rad = _positive(single_photon_sigma_rad, 'single_photon_resolution')
+    if isinstance(track_sigma_rad, bool) or not isinstance(track_sigma_rad, (int, float)) \
+            or not math.isfinite(track_sigma_rad) or track_sigma_rad < 0:
+        raise ValueError('track_resolution must be finite and nonnegative')
     if photons <= 0:
         return None
-    return single_photon_sigma_rad / math.sqrt(photons)
+    return math.hypot(single_photon_sigma_rad / math.sqrt(photons), track_sigma_rad)
 
 
 def beta_resolution_from_angle(angle_rad, sigma_angle_rad):
@@ -95,7 +128,7 @@ def beta_resolution_from_angle(angle_rad, sigma_angle_rad):
 
 
 def describe_species(momentum_gev, mass_gev, index, radiator_length_cm,
-                     figure_of_merit_per_cm, single_photon_sigma_rad):
+                     figure_of_merit_per_cm, single_photon_sigma_rad, track_sigma_rad=0.0):
     """Full per-species RICH response at one momentum."""
     kin = kinematics(momentum_gev, mass_gev)
     threshold = threshold_momentum(mass_gev, index)
@@ -105,26 +138,43 @@ def describe_species(momentum_gev, mass_gev, index, radiator_length_cm,
         'beta': kin['beta'],
         'gamma': kin['gamma'],
         'threshold_momentum_gev': threshold,
+        # Kinematic threshold only; whether a ring is seen depends on photon_regime.
         'above_threshold': angle is not None,
     }
     if angle is None:
-        record['note'] = 'below Cherenkov threshold in this radiator; no ring is produced'
+        record.update({'expected_photons': 0.0, 'p_no_photon': 1.0, 'photon_regime': 'none',
+                       'note': 'below Cherenkov threshold in this radiator; no ring is produced'})
         return record
 
     photons = photon_yield(angle, radiator_length_cm, figure_of_merit_per_cm)
-    sigma_angle = track_angular_resolution(single_photon_sigma_rad, photons)
-    relative_beta = beta_resolution_from_angle(angle, sigma_angle)
+    regime = photon_regime(photons)
     record.update({
         'cherenkov_angle_rad': angle,
         'cherenkov_angle_mrad': angle * 1000.0,
         'saturation_angle_mrad': saturation_angle(index) * 1000.0,
         'fraction_of_saturation': angle / saturation_angle(index),
-        'detected_photons': photons,
+        'expected_photons': photons,
+        'p_no_photon': math.exp(-photons),
+        'photon_regime': regime,
+    })
+    if regime != 'gaussian':
+        record['note'] = ('too few expected photons for a Gaussian angle measurement; the '
+                          'species is identified (if at all) by the presence of photons')
+        return record
+    sigma_angle = track_angular_resolution(single_photon_sigma_rad, photons, track_sigma_rad)
+    relative_beta = beta_resolution_from_angle(angle, sigma_angle)
+    record.update({
         'track_angular_resolution_mrad': sigma_angle * 1000.0,
         'relative_beta_resolution': relative_beta,
         'relative_mass_resolution': kin['gamma'] ** 2 * relative_beta,
     })
     return record
+
+
+def _fail(message):
+    print(json.dumps({'ok': False, 'error': message}, indent=2))
+    print(f'cherenkov_angle.py: error: {message}', file=sys.stderr)
+    return 1
 
 
 def main():
@@ -143,6 +193,13 @@ def main():
     parser.add_argument('--single-photon-resolution', type=float, default=5.0,
                         dest='single_photon_resolution',
                         help='single-photon angular resolution in mrad (default 5)')
+    parser.add_argument('--track-resolution', type=float, default=0.0,
+                        dest='track_resolution',
+                        help='per-track angular term in mrad that does not shrink with N '
+                             '(default 0)')
+    parser.add_argument('--convention', choices=CONVENTIONS, default='single',
+                        help='single: delta/sigma of species A (default); quadrature: '
+                             'delta/sqrt(sigma_A^2 + sigma_B^2)')
     args = parser.parse_args()
 
     try:
@@ -153,32 +210,58 @@ def main():
             raise ValueError('the two species must have different masses')
         sigma_photon = _positive(args.single_photon_resolution,
                                  'single_photon_resolution') / 1000.0
-        common = (index, args.radiator_length, args.figure_of_merit, sigma_photon)
+        if not math.isfinite(args.track_resolution) or args.track_resolution < 0:
+            raise ValueError('track_resolution must be finite and nonnegative')
+        common = (index, args.radiator_length, args.figure_of_merit, sigma_photon,
+                  args.track_resolution / 1000.0)
         record_a = describe_species(args.momentum, mass_a, *common)
         record_b = describe_species(args.momentum, mass_b, *common)
-        record_a['name'], record_b['name'] = args.species
-
-        payload = {
-            'refractive_index': index,
-            'momentum_gev': args.momentum,
-            'saturation_angle_mrad': saturation_angle(index) * 1000.0,
-            'species_a': record_a,
-            'species_b': record_b,
-        }
-        if record_a['above_threshold'] and record_b['above_threshold']:
-            difference = abs(record_a['cherenkov_angle_rad'] - record_b['cherenkov_angle_rad'])
-            payload['angle_difference_mrad'] = difference * 1000.0
-            payload['n_sigma'] = difference / (record_a['track_angular_resolution_mrad'] / 1000.0)
-        else:
-            payload['n_sigma'] = None
-            payload['note'] = ('At least one species is below threshold: identification here '
-                               'rests on the presence or absence of a ring, and depends on '
-                               'the ring-finding efficiency.')
     except ValueError as exc:
         parser.error(str(exc))
 
-    print(json.dumps(payload, indent=2))
+    record_a['name'], record_b['name'] = args.species
+    if args.convention == 'quadrature':
+        convention, reference = 'delta_over_quadrature_sum_of_both_sigmas', None
+    else:
+        convention, reference = 'delta_over_sigma_of_species_a', args.species[0]
+    payload = {
+        'refractive_index': index,
+        'momentum_gev': args.momentum,
+        'saturation_angle_mrad': saturation_angle(index) * 1000.0,
+        'species_a': record_a,
+        'species_b': record_b,
+        'separation_convention': convention,
+        'reference_species': reference,
+    }
+    gaussian = (record_a['photon_regime'] == 'gaussian'
+                and record_b['photon_regime'] == 'gaussian')
+    if gaussian:
+        difference = abs(record_a['cherenkov_angle_rad'] - record_b['cherenkov_angle_rad'])
+        sigma_a = record_a['track_angular_resolution_mrad'] / 1000.0
+        sigma_b = record_b['track_angular_resolution_mrad'] / 1000.0
+        sigma = sigma_a if args.convention == 'single' else math.hypot(sigma_a, sigma_b)
+        payload['angle_difference_mrad'] = difference * 1000.0
+        payload['n_sigma'] = difference / sigma
+    else:
+        payload['n_sigma'] = None
+        payload['threshold_discrimination'] = {
+            'probability_of_at_least_one_photon': {
+                'species_a': 1.0 - record_a['p_no_photon'],
+                'species_b': 1.0 - record_b['p_no_photon'],
+            },
+            'note': ('Identification here rests on the presence or absence of photons, not '
+                     'on the ring angle. A ring finder usually needs several photons, so '
+                     'these are upper bounds on the ring-finding probability.'),
+        }
+        payload['note'] = ('At least one species has too few expected photons (photon_regime '
+                           'none or few) for a Gaussian angular separation.')
+    try:
+        text = json.dumps(payload, indent=2, allow_nan=False)
+    except ValueError:
+        return _fail('result contains a non-finite number; the inputs are out of range')
+    print(text)
+    return 0
 
 
 if __name__ == '__main__':
-    main()
+    raise SystemExit(main())

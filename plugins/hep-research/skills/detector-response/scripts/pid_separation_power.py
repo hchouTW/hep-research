@@ -6,26 +6,40 @@ what momentum can these two species actually be told apart, and by how many sigm
 given momentum. The dominant effect is that mass resolution degrades as gamma^2 times
 the velocity resolution, so every velocity-based technique has a momentum ceiling.
 
-What it does: for two species at a given momentum it reports beta, gamma, the mass
-resolution implied by the measurement, and the separation in sigma, then scans momentum
-to locate the ceiling where separation falls below a requested threshold. Three modes:
+What it does: for two species at a given momentum (or rigidity) it reports beta, gamma,
+the mass resolution implied by the measurement, and the separation in sigma, then scans
+momentum to find every interval where separation falls below a requested threshold.
+Three modes:
   tof      - separation from the flight-time difference over a known path
   dedx     - separation from mean Bethe-Bloch ionization loss in a named material
   velocity - separation from a directly supplied relative velocity resolution
              (use this for a RICH; <plugin root>/skills/detector-response/scripts/cherenkov_angle.py derives that input)
 
-Usage notes / assumptions: standard library only. Momenta in GeV/c, masses in GeV/c^2,
-flight path in metres, timing resolution in picoseconds. Separation is quoted as
-|difference of means| / sigma of the single measurement (not divided by sqrt(2)); state
-the convention when comparing against another source. The Bethe-Bloch evaluation omits
-the density-effect correction, which suppresses the relativistic rise - dedx-mode
-numbers above the ionization minimum are therefore optimistic and are flagged as such.
+Usage notes / assumptions: standard library only. Momenta in GeV/c, rigidities in GV,
+masses in GeV/c^2, flight path in metres, timing resolution in picoseconds. A species is
+a name (He3 and He4 carry z=2), a mass, or mass:charge (e.g. 3.727:2). --rigidity R sets
+p = |z| R for each species, which is what a magnetic spectrometer measures for nuclei.
+Separation conventions (--convention, stated in the output as separation_convention and
+reference_species): single (default) is |difference of means| / sigma of one measurement
+of the reference species A (for tof, the common timing sigma); quadrature is
+|difference| / sqrt(sigma_A^2 + sigma_B^2), symmetric in the species and a factor
+sqrt(2) smaller when the widths are equal. State the convention when comparing.
+dE/dx: the charge enters as z^2. The Bethe-Bloch evaluation is refused below
+beta*gamma = 0.1 (shell corrections and charge exchange dominate; the formula can go
+negative there): validity is then "outside" and no n_sigma is given. It also omits the
+density-effect correction, which suppresses the relativistic rise, so numbers with either
+species above beta*gamma = 4 are optimistic and flagged (n_sigma_optimistic). The dE/dx
+bands of two species can cross, so separation is not monotonic in momentum: the scan
+reports below_threshold_intervals, the ceiling is the end of the first separated range,
+highest_separated is the top of the last separated range, and ceiling_is_lower_bound is
+true when the scan limit is reached still separated (the true end lies beyond it).
 See <plugin root>/skills/detector-response/references/particle-identification.md.
 Run: python3 <plugin root>/skills/detector-response/scripts/pid_separation_power.py --mode tof --species pi K --momentum 2.0 --path 1.2 --time-resolution 60
 """
 import argparse
 import json
 import math
+import sys
 
 # Masses in GeV/c^2 (PDG); see <plugin root>/skills/research-communication/references/primary-sources-and-version-checks.md.
 MASSES_GEV = {
@@ -38,6 +52,18 @@ MASSES_GEV = {
     'He3': 2.80839160,
     'He4': 3.72737940,
 }
+
+# Charge numbers |z| of the named species; anything else defaults to 1.
+CHARGES = {'He3': 2, 'He4': 2}
+
+# Bethe-Bloch is not evaluated below this beta*gamma (provisional limit; see docstring).
+BETHE_MIN_BETA_GAMMA = 0.1
+# Scan range and density (points per decade) for the separation scan.
+SCAN_LOW = 0.05
+SCAN_HIGH = 1000.0
+SCAN_POINTS_PER_DECADE = 200
+
+CONVENTIONS = ('single', 'quadrature')
 
 C_M_PER_S = 299792458.0
 ELECTRON_MASS_MEV = 0.51099895
@@ -71,6 +97,20 @@ def resolve_mass(name):
     except ValueError:
         raise ValueError(
             f'unknown species {name!r}; use one of {sorted(MASSES_GEV)} or a mass in GeV/c^2')
+
+
+def resolve_species(name):
+    """(mass in GeV/c^2, charge number) from a name, a mass, or 'mass:charge'."""
+    if ':' in name:
+        mass_text, charge_text = name.split(':', 1)
+        try:
+            charge = int(charge_text)
+        except ValueError:
+            raise ValueError(f'charge in {name!r} must be a positive integer') from None
+        if charge < 1:
+            raise ValueError(f'charge in {name!r} must be a positive integer')
+        return resolve_mass(mass_text), charge
+    return resolve_mass(name), CHARGES.get(name, 1)
 
 
 def kinematics(momentum_gev, mass_gev):
@@ -130,7 +170,9 @@ def bethe_bloch_mev_per_g_cm2(momentum_gev, mass_gev, material='silicon', charge
     -<dE/dx> = K z^2 (Z/A) (1/beta^2) [ 0.5 ln(2 m_e c^2 beta^2 gamma^2 T_max / I^2)
                                         - beta^2 ]
     Omitting the density effect makes the relativistic rise too steep; the returned
-    dict flags when the evaluation is in that region.
+    dict flags when the evaluation is in that region. Below beta*gamma = 0.1 the formula
+    is outside its validity (it can turn negative): the loss is then None and validity
+    is 'outside'. A negative loss is never returned.
     """
     if material not in MATERIALS:
         raise ValueError(f'unknown material {material!r}; use one of {sorted(MATERIALS)}')
@@ -139,6 +181,18 @@ def bethe_bloch_mev_per_g_cm2(momentum_gev, mass_gev, material='silicon', charge
     z_over_a, excitation_ev = MATERIALS[material]
     kin = kinematics(momentum_gev, mass_gev)
     beta, gamma = kin['beta'], kin['gamma']
+    record = {
+        'mev_per_g_cm2': None,
+        'beta_gamma': kin['beta_gamma'],
+        'density_effect_omitted': True,
+        'in_relativistic_rise': kin['beta_gamma'] > 4.0,
+        'validity': 'outside',
+    }
+    if kin['beta_gamma'] < BETHE_MIN_BETA_GAMMA:
+        record['validity_reason'] = (
+            f'beta*gamma = {kin["beta_gamma"]:.3g} is below {BETHE_MIN_BETA_GAMMA}, where '
+            'shell corrections and charge exchange dominate')
+        return record
     mass_mev = mass_gev * 1000.0
     mass_ratio = ELECTRON_MASS_MEV / mass_mev
     t_max_mev = (2.0 * ELECTRON_MASS_MEV * beta * beta * gamma * gamma
@@ -148,87 +202,209 @@ def bethe_bloch_mev_per_g_cm2(momentum_gev, mass_gev, material='silicon', charge
                         * t_max_mev / (excitation_mev * excitation_mev))
     loss = (BETHE_K * charge * charge * z_over_a / (beta * beta)
             * (0.5 * log_term - beta * beta))
-    return {
-        'mev_per_g_cm2': loss,
-        'beta_gamma': kin['beta_gamma'],
-        'density_effect_omitted': True,
-        'in_relativistic_rise': kin['beta_gamma'] > 4.0,
-    }
+    if not math.isfinite(loss) or loss <= 0.0:
+        record['validity_reason'] = 'the Bethe-Bloch bracket is not positive here'
+        return record
+    record['mev_per_g_cm2'] = loss
+    record['validity'] = 'inside'
+    return record
 
 
-def separation(mode, mass_a, mass_b, momentum_gev, **options):
-    """Separation in sigma between two species at one momentum, for the chosen mode."""
-    kin_a = kinematics(momentum_gev, mass_a)
-    kin_b = kinematics(momentum_gev, mass_b)
+def _momenta(value, charge_a, charge_b, input_variable):
+    """Per-species momenta: the value itself, or |z| times a rigidity."""
+    value = _positive(value, input_variable)
+    if input_variable == 'momentum':
+        return value, value
+    if input_variable == 'rigidity':
+        return charge_a * value, charge_b * value
+    raise ValueError("input_variable must be 'momentum' or 'rigidity'")
+
+
+def _convention_labels(mode, convention):
+    if convention == 'quadrature':
+        return 'delta_over_quadrature_sum_of_both_sigmas', None
+    if mode == 'tof':
+        # The timing resolution is common to both species, so the choice of A is moot.
+        return 'delta_over_common_time_sigma', None
+    return 'delta_over_sigma_of_species_a', 'a'
+
+
+def separation(mode, mass_a, mass_b, momentum_gev, charge_a=1, charge_b=1,
+               input_variable='momentum', convention='single', **options):
+    """Separation in sigma between two species at one momentum (or rigidity).
+
+    momentum_gev is a rigidity in GV when input_variable is 'rigidity'; each species then
+    has p = |z| R. convention 'single' divides by one measurement's sigma (species A's,
+    or the common timing sigma for tof); 'quadrature' by sqrt(sigma_A^2 + sigma_B^2).
+    """
+    if convention not in CONVENTIONS:
+        raise ValueError(f'convention must be one of {CONVENTIONS}')
+    momentum_a, momentum_b = _momenta(momentum_gev, charge_a, charge_b, input_variable)
+    kin_a = kinematics(momentum_a, mass_a)
+    kin_b = kinematics(momentum_b, mass_b)
+    validity = None
 
     if mode == 'tof':
         path_m = options['path_m']
         time_resolution_ps = _positive(options['time_resolution_ps'], 'time_resolution')
-        time_a = time_of_flight_ns(momentum_gev, mass_a, path_m)
-        time_b = time_of_flight_ns(momentum_gev, mass_b, path_m)
+        time_a = time_of_flight_ns(momentum_a, mass_a, path_m)
+        time_b = time_of_flight_ns(momentum_b, mass_b, path_m)
         difference_ps = abs(time_a - time_b) * 1000.0
-        n_sigma = difference_ps / time_resolution_ps
+        sigma = (time_resolution_ps if convention == 'single'
+                 else math.sqrt(2.0) * time_resolution_ps)
+        n_sigma = difference_ps / sigma
         observable = {'time_a_ns': time_a, 'time_b_ns': time_b,
                       'time_difference_ps': difference_ps}
-        beta_resolution = tof_beta_resolution(momentum_gev, mass_a, path_m,
+        beta_resolution = tof_beta_resolution(momentum_a, mass_a, path_m,
                                               time_resolution_ps)
     elif mode == 'dedx':
         material = options.get('material', 'silicon')
         relative = _positive(options['relative_resolution'], 'relative_resolution')
-        loss_a = bethe_bloch_mev_per_g_cm2(momentum_gev, mass_a, material)
-        loss_b = bethe_bloch_mev_per_g_cm2(momentum_gev, mass_b, material)
-        sigma = relative * loss_a['mev_per_g_cm2']
-        n_sigma = abs(loss_a['mev_per_g_cm2'] - loss_b['mev_per_g_cm2']) / sigma
+        loss_a = bethe_bloch_mev_per_g_cm2(momentum_a, mass_a, material, charge_a)
+        loss_b = bethe_bloch_mev_per_g_cm2(momentum_b, mass_b, material, charge_b)
+        rise = loss_a['in_relativistic_rise'] or loss_b['in_relativistic_rise']
         observable = {'dedx_a_mev_per_g_cm2': loss_a['mev_per_g_cm2'],
                       'dedx_b_mev_per_g_cm2': loss_b['mev_per_g_cm2'],
                       'material': material,
                       'density_effect_omitted': True,
-                      'in_relativistic_rise': loss_a['in_relativistic_rise']}
+                      'in_relativistic_rise': rise,
+                      'in_relativistic_rise_a': loss_a['in_relativistic_rise'],
+                      'in_relativistic_rise_b': loss_b['in_relativistic_rise'],
+                      # Without the density effect the rise is too steep, so a separation
+                      # with either species in the rise is overestimated.
+                      'n_sigma_optimistic': rise}
+        if loss_a['validity'] == 'inside' and loss_b['validity'] == 'inside':
+            validity = 'inside'
+            value_a, value_b = loss_a['mev_per_g_cm2'], loss_b['mev_per_g_cm2']
+            sigma = (relative * value_a if convention == 'single'
+                     else relative * math.hypot(value_a, value_b))
+            n_sigma = abs(value_a - value_b) / sigma
+        else:
+            validity = 'outside'
+            n_sigma = None
+            observable['validity_reason'] = '; '.join(
+                f'species {label}: {loss["validity_reason"]}'
+                for label, loss in (('a', loss_a), ('b', loss_b))
+                if loss['validity'] != 'inside')
         beta_resolution = None
     elif mode == 'velocity':
         beta_resolution = _positive(options['relative_beta_resolution'],
                                     'relative_beta_resolution')
         sigma_beta = beta_resolution * kin_a['beta']
+        if convention == 'quadrature':
+            sigma_beta = beta_resolution * math.hypot(kin_a['beta'], kin_b['beta'])
         n_sigma = abs(kin_a['beta'] - kin_b['beta']) / sigma_beta
         observable = {'beta_difference': abs(kin_a['beta'] - kin_b['beta']),
                       'sigma_beta': sigma_beta}
     else:
         raise ValueError("mode must be one of 'tof', 'dedx', 'velocity'")
 
+    label, reference = _convention_labels(mode, convention)
     result = {
         'mode': mode,
-        'momentum_gev': momentum_gev,
-        'species_a': {'mass_gev': mass_a, **kin_a},
-        'species_b': {'mass_gev': mass_b, **kin_b},
+        'input_variable': input_variable,
+        f'{input_variable}_{"gev" if input_variable == "momentum" else "gv"}': momentum_gev,
+        'species_a': {'mass_gev': mass_a, 'charge': charge_a, 'momentum_gev': momentum_a, **kin_a},
+        'species_b': {'mass_gev': mass_b, 'charge': charge_b, 'momentum_gev': momentum_b, **kin_b},
         'observable': observable,
         'n_sigma': n_sigma,
+        'separation_convention': label,
+        'reference_species': reference,
     }
+    if validity is not None:
+        result['validity'] = validity
     if beta_resolution is not None:
         result['relative_beta_resolution'] = beta_resolution
         result['species_a']['mass_resolution'] = mass_resolution(
-            momentum_gev, mass_a, beta_resolution)
+            momentum_a, mass_a, beta_resolution)
     return result
 
 
-def separation_ceiling(mode, mass_a, mass_b, threshold_sigma=3.0,
-                       low_gev=0.05, high_gev=1000.0, **options):
-    """Highest momentum at which separation still reaches threshold_sigma.
+def _separated(mode, mass_a, mass_b, value, threshold_sigma, options):
+    """True/False against the threshold, or None where the model is not evaluable."""
+    n_sigma = separation(mode, mass_a, mass_b, value, **options)['n_sigma']
+    return None if n_sigma is None else n_sigma >= threshold_sigma
 
-    Separation is monotonically falling in momentum for these modes above the
-    ionization minimum, so a bisection is valid once the bracket is confirmed.
+
+def _refine(mode, mass_a, mass_b, threshold_sigma, options, low, high):
+    """Geometric bisection for the boundary between grid points low and high."""
+    state_low = _separated(mode, mass_a, mass_b, low, threshold_sigma, options)
+    for _ in range(200):
+        mid = math.sqrt(low * high)
+        if mid in (low, high):
+            break
+        if _separated(mode, mass_a, mass_b, mid, threshold_sigma, options) == state_low:
+            low = mid
+        else:
+            high = mid
+    return low
+
+
+def separation_scan(mode, mass_a, mass_b, threshold_sigma=3.0,
+                    low_gev=SCAN_LOW, high_gev=SCAN_HIGH, **options):
+    """Scan separation over a log grid and report where it is below threshold.
+
+    Separation is not assumed monotonic (dE/dx bands cross). Returns the intervals
+    below threshold, the intervals where the model is not evaluable, the ceiling (end of
+    the separated range that starts at the first evaluable point; None if that point is
+    already below threshold), the upper end of the highest separated range, and
+    ceiling_is_lower_bound: true when the scan ends still separated, so the upper end of
+    separation lies beyond the scan (and so does the ceiling when nothing is below).
+    Boundaries are refined by bisection; features narrower than the grid step
+    (1/SCAN_POINTS_PER_DECADE of a decade) can be missed.
     """
     threshold_sigma = _positive(threshold_sigma, 'threshold_sigma')
-    if separation(mode, mass_a, mass_b, low_gev, **options)['n_sigma'] < threshold_sigma:
-        return None
-    if separation(mode, mass_a, mass_b, high_gev, **options)['n_sigma'] >= threshold_sigma:
-        return high_gev
-    for _ in range(200):
-        mid = math.sqrt(low_gev * high_gev)
-        if separation(mode, mass_a, mass_b, mid, **options)['n_sigma'] >= threshold_sigma:
-            low_gev = mid
-        else:
-            high_gev = mid
-    return low_gev
+    low_gev = _positive(low_gev, 'scan low edge')
+    high_gev = _positive(high_gev, 'scan high edge')
+    steps = max(2, int(math.ceil(math.log10(high_gev / low_gev) * SCAN_POINTS_PER_DECADE)))
+    grid = [low_gev * (high_gev / low_gev) ** (i / steps) for i in range(steps + 1)]
+    grid[-1] = high_gev
+    states = [_separated(mode, mass_a, mass_b, v, threshold_sigma, options) for v in grid]
+
+    def runs(target):
+        intervals, start = [], None
+        for i, state in enumerate(states):
+            if state is target and start is None:
+                start = grid[0] if i == 0 else _refine(
+                    mode, mass_a, mass_b, threshold_sigma, options, grid[i - 1], grid[i])
+            elif state is not target and start is not None:
+                intervals.append([start, _refine(
+                    mode, mass_a, mass_b, threshold_sigma, options, grid[i - 1], grid[i])])
+                start = None
+        if start is not None:
+            intervals.append([start, grid[-1]])
+        return intervals
+
+    below = runs(False)
+    not_evaluable = runs(None)
+    evaluable = [i for i, state in enumerate(states) if state is not None]
+    ceiling = None
+    if evaluable and states[evaluable[0]]:
+        first = evaluable[0]
+        end = next((i for i in range(first, len(states)) if not states[i]), None)
+        ceiling = grid[-1] if end is None else _refine(
+            mode, mass_a, mass_b, threshold_sigma, options, grid[end - 1], grid[end])
+    separated = runs(True)
+    return {'below_threshold_intervals': below, 'not_evaluable_intervals': not_evaluable,
+            'ceiling': ceiling, 'highest_separated': separated[-1][1] if separated else None,
+            'ceiling_is_lower_bound': bool(states[-1]),
+            'scan_range': [low_gev, high_gev]}
+
+
+def separation_ceiling(mode, mass_a, mass_b, threshold_sigma=3.0,
+                       low_gev=SCAN_LOW, high_gev=SCAN_HIGH, **options):
+    """Highest momentum of the separated range that starts at low_gev (see separation_scan).
+
+    Returns high_gev when the whole scan stays separated - then only a lower bound.
+    """
+    return separation_scan(mode, mass_a, mass_b, threshold_sigma, low_gev, high_gev,
+                           **options)['ceiling']
+
+
+def _fail(message):
+    print(json.dumps({'ok': False, 'error': message}, indent=2))
+    print(f'pid_separation_power.py: error: {message}', file=sys.stderr)
+    return 1
 
 
 def main():
@@ -236,8 +412,11 @@ def main():
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--mode', choices=('tof', 'dedx', 'velocity'), required=True)
     parser.add_argument('--species', nargs=2, required=True, metavar=('A', 'B'),
-                        help=f'two of {sorted(MASSES_GEV)}, or masses in GeV/c^2')
-    parser.add_argument('--momentum', type=float, default=2.0, help='GeV/c (default 2)')
+                        help=f'two of {sorted(MASSES_GEV)}, masses in GeV/c^2, or mass:charge')
+    given = parser.add_mutually_exclusive_group()
+    given.add_argument('--momentum', type=float, default=None, help='GeV/c (default 2)')
+    given.add_argument('--rigidity', type=float, default=None,
+                       help='GV; each species then has p = |z| * R')
     parser.add_argument('--path', type=float, default=1.0, help='tof: flight path in m')
     parser.add_argument('--time-resolution', type=float, default=60.0,
                         dest='time_resolution', help='tof: timing resolution in ps')
@@ -248,33 +427,61 @@ def main():
     parser.add_argument('--beta-resolution', type=float, default=1e-3,
                         dest='beta_resolution', help='velocity: relative dbeta/beta')
     parser.add_argument('--threshold', type=float, default=3.0,
-                        help='separation in sigma required at the ceiling (default 3)')
+                        help='separation in sigma that counts as separated (default 3)')
+    parser.add_argument('--convention', choices=CONVENTIONS, default='single',
+                        help='single: delta/sigma of species A (default); quadrature: '
+                             'delta/sqrt(sigma_A^2 + sigma_B^2)')
     args = parser.parse_args()
 
-    options = {'path_m': args.path, 'time_resolution_ps': args.time_resolution,
-               'material': args.material, 'relative_resolution': args.relative_resolution,
-               'relative_beta_resolution': args.beta_resolution}
+    input_variable = 'rigidity' if args.rigidity is not None else 'momentum'
+    value = args.rigidity if args.rigidity is not None else (
+        args.momentum if args.momentum is not None else 2.0)
     try:
-        mass_a = resolve_mass(args.species[0])
-        mass_b = resolve_mass(args.species[1])
-        if mass_a == mass_b:
-            raise ValueError('the two species must have different masses')
-        result = separation(args.mode, mass_a, mass_b, args.momentum, **options)
-        result['species_a']['name'] = args.species[0]
-        result['species_b']['name'] = args.species[1]
-        result['threshold_sigma'] = args.threshold
-        result['separation_ceiling_gev'] = separation_ceiling(
-            args.mode, mass_a, mass_b, args.threshold, **options)
+        mass_a, charge_a = resolve_species(args.species[0])
+        mass_b, charge_b = resolve_species(args.species[1])
+        if (mass_a, charge_a) == (mass_b, charge_b):
+            raise ValueError('the two species must differ in mass or charge')
+        _positive(args.threshold, 'threshold')
+        options = {'path_m': args.path, 'time_resolution_ps': args.time_resolution,
+                   'material': args.material, 'relative_resolution': args.relative_resolution,
+                   'relative_beta_resolution': args.beta_resolution,
+                   'charge_a': charge_a, 'charge_b': charge_b,
+                   'input_variable': input_variable, 'convention': args.convention}
+        result = separation(args.mode, mass_a, mass_b, value, **options)
     except (ValueError, KeyError) as exc:
         parser.error(str(exc))
 
-    print(json.dumps({
-        **result,
-        'note': ('Separation is |difference of means| / sigma of one measurement. '
-                 'Above the ceiling the two species are not resolved by this technique '
-                 'alone.'),
-    }, indent=2))
+    try:
+        result['species_a']['name'] = args.species[0]
+        result['species_b']['name'] = args.species[1]
+        if result['reference_species'] == 'a':
+            result['reference_species'] = args.species[0]
+        result['threshold_sigma'] = args.threshold
+        scan = separation_scan(args.mode, mass_a, mass_b, args.threshold, **options)
+        unit = 'gev' if input_variable == 'momentum' else 'gv'
+        result['scan_variable'] = input_variable
+        result['scan_range'] = scan['scan_range']
+        result[f'separation_ceiling_{unit}'] = scan['ceiling']
+        result[f'highest_separated_{unit}'] = scan['highest_separated']
+        result['ceiling_is_lower_bound'] = scan['ceiling_is_lower_bound']
+        result['below_threshold_intervals'] = scan['below_threshold_intervals']
+        result['not_evaluable_intervals'] = scan['not_evaluable_intervals']
+        text = json.dumps({
+            **result,
+            'note': ('n_sigma follows separation_convention (single: one measurement of the '
+                     'reference species; quadrature: both widths). The ceiling is the end of '
+                     'the first separated range; separation can recover above it (see '
+                     'below_threshold_intervals). dE/dx omits the density effect, so values '
+                     'in the relativistic rise are optimistic.'),
+        }, indent=2, allow_nan=False)
+    except (ValueError, OverflowError, ZeroDivisionError) as exc:
+        message = str(exc)
+        if 'JSON compliant' in message:
+            message = 'result contains a non-finite number; the inputs are out of range'
+        return _fail(message)
+    print(text)
+    return 0
 
 
 if __name__ == '__main__':
-    main()
+    raise SystemExit(main())
