@@ -93,7 +93,7 @@ def _rhat(x):
     w = x.var(axis=1, ddof=1).mean()
     b = n * x.mean(axis=1).var(ddof=1)
     if w <= 0:
-        return math.inf if b > 0 else 1.0
+        return math.inf if b > 0 else float("nan")   # constant chains: R-hat is undefined, never 1.0
     return math.sqrt(((n - 1) / n * w + b / n) / w)
 
 
@@ -105,30 +105,45 @@ def _autocov(chain):
 
 
 def _ess(x):
-    """ESS of chains x (m, n) with Geyer's initial monotone sequence on the multi-chain autocorrelation."""
+    """ESS of chains x (m, n): Geyer's initial positive sequence, the improved last term and the initial monotone
+    sequence by pair averaging, as in Vehtari et al. (2021) and Stan (and ArviZ 0.23, checked to 1e-9 in
+    tests/skills/hep_statistics/test_bayes_arviz_oracle.py)."""
     m, n = x.shape
     if n < 4:
         return float("nan")
     acov = np.array([_autocov(c) for c in x])
-    chain_var = acov[:, 0] * n / (n - 1)
-    w = chain_var.mean()
-    var_plus = w * (n - 1) / n + (x.mean(axis=1).var(ddof=1) if m > 1 else 0.0)
+    mean_var = acov[:, 0].mean() * n / (n - 1)
+    var_plus = mean_var * (n - 1) / n + (x.mean(axis=1).var(ddof=1) if m > 1 else 0.0)
     if var_plus <= 0:
         return float("nan")
-    rho = 1 - (w - acov.mean(axis=0)) / var_plus
-    rho[0] = 1.0
-    t, total, prev = 0, 0.0, math.inf
-    while t + 1 < n:
-        pair = rho[t] + rho[t + 1]
-        if pair < 0:
-            break
-        pair = min(pair, prev)               # monotone
-        total += pair
-        prev = pair
+    rho = np.zeros(n)
+    rho_even, rho[0] = 1.0, 1.0
+    rho_odd = 1.0 - (mean_var - acov[:, 1].mean()) / var_plus
+    rho[1] = rho_odd
+    t = 1
+    while t < n - 3 and rho_even + rho_odd > 0.0:
+        rho_even = 1.0 - (mean_var - acov[:, t + 1].mean()) / var_plus
+        rho_odd = 1.0 - (mean_var - acov[:, t + 2].mean()) / var_plus
+        if rho_even + rho_odd >= 0:
+            rho[t + 1], rho[t + 2] = rho_even, rho_odd
         t += 2
-    tau = -1 + 2 * total
+    max_t = t - 2
+    if rho_even > 0:
+        rho[max_t + 1] = rho_even
+    t = 1
+    while t <= max_t - 2:
+        if rho[t + 1] + rho[t + 2] > rho[t - 1] + rho[t]:
+            rho[t + 1] = rho[t + 2] = (rho[t - 1] + rho[t]) / 2.0
+        t += 2
+    tau = -1.0 + 2.0 * rho[: max_t + 1].sum() + rho[max_t + 1: max_t + 2].sum()
     tau = max(tau, 1 / math.log10(m * n))
     return m * n / tau
+
+
+def _beta_ppf(q, a, b):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+    from core.stats.tail_estimation import beta_ppf
+    return beta_ppf(q, a, b)
 
 
 def diagnose_param(x, quantiles=(0.05, 0.5, 0.95)):
@@ -142,6 +157,12 @@ def diagnose_param(x, quantiles=(0.05, 0.5, 0.95)):
                 "flags": flags + [f"needs >= {MIN_CHAINS} chains and >= {MIN_DRAWS} draws per chain"]}
     if not np.all(np.isfinite(x)):
         return {"chains": m, "draws_per_chain": n, "status": "incomplete", "flags": flags + ["non-finite draws"]}
+    if np.any(x.std(axis=1) == 0):
+        const = int(np.sum(x.std(axis=1) == 0))
+        return {"chains": m, "draws_per_chain": n, "rhat": float("nan"), "ess_bulk": float("nan"), "ess_tail": float("nan"),
+                "quantiles": {}, "constant_chains": const,
+                "flags": flags + [f"{const} chain(s) never move: the diagnostics are undefined and say nothing about "
+                                  "convergence (a stuck sampler, a fixed parameter or a bug)"]}
     xs = _split(x)
     z = _rank_normalize(xs)
     folded = _rank_normalize(np.abs(xs - np.median(xs)))
@@ -154,8 +175,17 @@ def diagnose_param(x, quantiles=(0.05, 0.5, 0.95)):
         ind = _split((x <= np.quantile(x, p)).astype(float))
         e = _ess(ind)
         se_p = math.sqrt(p * (1 - p) / e) if e and e > 0 else float("nan")
-        lo, hi = np.quantile(x, [max(p - se_p, 0.0), min(p + se_p, 1.0)])
-        out_q[str(p)] = {"value": float(np.quantile(x, p)), "mcse": float((hi - lo) / 2), "ess": float(e)}
+        if not math.isfinite(se_p):
+            out_q[str(p)] = {"value": float(np.quantile(x, p)), "mcse": None, "ess": None,
+                             "note": "undefined: the quantile indicator is constant (ties or a degenerate quantile)"}
+            flags.append(f"MCSE of the {p} quantile is undefined (ties or a degenerate quantile)")
+            continue
+        # Vehtari et al. (2021): the MCSE of a quantile from the Beta(e p + 1, e (1 - p) + 1) interval of its rank
+        srt = np.sort(x.ravel())
+        lo_q, hi_q = (_beta_ppf(c, e * p + 1, e * (1 - p) + 1) * srt.size - 1 for c in (0.15865525393145707, 0.8413447460685429))
+        th1 = srt[int(math.floor(max(lo_q, 0.0)))]
+        th2 = srt[int(math.ceil(min(hi_q, srt.size - 1)))]
+        out_q[str(p)] = {"value": float(np.quantile(x, p)), "mcse": float((th2 - th1) / 2), "ess": float(e)}
     return {"chains": m, "draws_per_chain": n, "rhat": float(rhat), "ess_bulk": float(ess_bulk),
             "ess_tail": float(ess_tail), "quantiles": out_q, "flags": flags}
 
@@ -164,7 +194,8 @@ def classify(res, rhat_max=1.01, min_ess_per_chain=100):
     if res.get("status") == "incomplete":
         return "incomplete"
     need = min_ess_per_chain * res["chains"]
-    ok = res["rhat"] < rhat_max and res["ess_bulk"] >= need and res["ess_tail"] >= need
+    finite = all(math.isfinite(res[k]) for k in ("rhat", "ess_bulk", "ess_tail"))
+    ok = finite and res["rhat"] < rhat_max and res["ess_bulk"] >= need and res["ess_tail"] >= need
     if not ok:
         res["flags"].append(f"converged requires R-hat < {rhat_max} and bulk and tail ESS >= {need}")
     return "converged" if ok else "not-converged"
