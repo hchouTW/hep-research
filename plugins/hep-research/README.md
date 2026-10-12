@@ -20,7 +20,7 @@ labeled synthetic in file names and metadata. What is and is not validated is li
 | `physics-ml` | a machine-learning model or study for physics (PyTorch) |
 | `research-communication` | papers, figures, diagrams, talks, literature and citation checks, claims traced to results and sources |
 
-Skills are chosen by what you want produced, not by the experiment you name. Results that another skill continues
+Each skill folder under `skills/` has a `README.md` (purpose, folder map, scripts, references, handoffs, tests); `SKILL.md` is the entry point the host loads. Skills are chosen by what you want produced, not by the experiment you name. Results that another skill continues
 from are written as JSON artifacts in your project's `artifacts_dir` (default `./hep-research-artifacts/`).
 
 ## Install and remove
