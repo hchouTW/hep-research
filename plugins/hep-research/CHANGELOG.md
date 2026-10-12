@@ -3,7 +3,7 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.6.16 (2026-10-13)
 
 - **detector-response: front-end electronics and signal processing.** New reference
   `front-end-electronics-and-signal-processing.md` models readout electronics as part of the response: signal
