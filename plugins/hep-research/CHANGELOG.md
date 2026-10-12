@@ -14,7 +14,9 @@ Software checks establish contract consistency only, not physical validity.
   calibration and simulation of the electronics, with an explicit out-of-scope list (circuit, ASIC, FPGA design).
   New script `frontend_response.py` (ENC with closed-form CR-(RC)^n integrals and the shaping optimum, noise-hit rate,
   timing, quantization, pileup, SiPM, ballistic deficit, dead time, cluster noise), each result with a validity list;
-  23 tests against values checked by numerical integration and Monte Carlo.
+  23 tests against values checked by numerical integration and Monte Carlo. The bibliography gains an electronics
+  section of nine Crossref-checked citations (Shockley, Ramo, Radeka, Spieler, Cleland-Stern, Rice, Vinogradov,
+  MicroBooNE signal processing, Moll).
 - **detector-response: electronics statements corrected.** Shaping trades series against parallel noise (an optimum,
   not "slower is quieter"); sub-Nyquist sampling with a known pulse shape is unbiased; optimal filter instead of
   "template fit is best"; common-mode estimates exclude signal channels; dead-time formulas are exact for Poisson

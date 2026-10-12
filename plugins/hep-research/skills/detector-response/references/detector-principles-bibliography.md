@@ -84,6 +84,16 @@ criteria as above.
 - S. O. Rice, "Mathematical analysis of random noise", Bell Syst. Tech. J. 23 (1944)
   282-332, DOI 10.1002/j.1538-7305.1944.tb00874.x. Level-crossing rate of Gaussian noise
   (noise-hit rate above a threshold).
+- S. Vinogradov, "Analytical models of probability distribution and excess noise factor of
+  solid state photomultiplier signals with crosstalk", Nucl. Instrum. Methods A695 (2012)
+  247-251, DOI 10.1016/j.nima.2011.11.086. Borel branching model of SiPM optical crosstalk.
+- C. Adams et al. (MicroBooNE), "Ionization electron signal processing in single phase
+  LArTPCs. Part I. Algorithm description and quantitative evaluation with MicroBooNE
+  simulation", JINST 13 (2018) P07006, DOI 10.1088/1748-0221/13/07/P07006. Deconvolution
+  of induction and collection signals in a LAr TPC.
+- M. Moll, "Displacement damage in silicon detectors for high energy physics", IEEE Trans.
+  Nucl. Sci. 65 (2018) 1561-1582, DOI 10.1109/TNS.2018.2819506. Leakage current, depletion
+  voltage and trapping after irradiation.
 
 ## Timing detectors ([timing detectors](timing-detectors.md))
 

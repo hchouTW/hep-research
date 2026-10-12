@@ -5,7 +5,7 @@
  "by_skill": {
   "detector-response": {
    "references": 34,
-   "bytes": 393987,
+   "bytes": 394797,
    "uncited": 0
   },
   "hep-analysis": {
@@ -91,7 +91,7 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "d8bec60 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/cherenkov-imaging-variants-and-photosensors.md",
@@ -114,7 +114,7 @@
     "hep-analysis",
     "research-communication"
    ],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "d8bec60 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/core-detector-equations.md",
@@ -249,20 +249,20 @@
     "hep-analysis",
     "research-communication"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "d8bec60 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/detector-principles-bibliography.md",
    "owner": "detector-response",
-   "bytes": 12981,
-   "lines": 168,
+   "bytes": 13791,
+   "lines": 178,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/detector-principles-summary.md",
     "skills/detector-response/references/front-end-electronics-and-signal-processing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "d8bec60 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/detector-principles-summary.md",
@@ -276,7 +276,7 @@
     "skills/detector-response/references/core-detector-equations.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "5db10d5 2026-10-13"
+   "last_commit": "d8bec60 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/detector-simulation.md",
@@ -299,7 +299,7 @@
     "hep-analysis",
     "hep-theory"
    ],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "d8bec60 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/detector-systems-overview.md",
@@ -391,7 +391,7 @@
     "skills/detector-response/scripts/frontend_response.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "d8bec60 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/gaseous-and-specialized-tracking-technologies.md",
@@ -686,7 +686,7 @@
     "hep-analysis",
     "research-communication"
    ],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "d8bec60 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/space-based-direct-detection.md",
@@ -734,7 +734,7 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "d8bec60 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/tracking-and-vertexing.md",
@@ -789,7 +789,7 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "d8bec60 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/analysis-design.md",
