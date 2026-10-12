@@ -46,6 +46,9 @@ jobs:
       - name: Routing-harness tests (fake CLI, no model calls)
         working-directory: .
         run: python -m unittest discover -s evals/routing/tests -t evals/routing/tests
+      - name: Research-communication replay-scorer tests (no model calls)
+        working-directory: .
+        run: python -m unittest discover -s evals/research_communication/tests -t evals/research_communication/tests
       - name: Keep the check-run record
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
