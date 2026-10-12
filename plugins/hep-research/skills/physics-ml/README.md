@@ -1,6 +1,6 @@
 # physics-ml
 
-Use when the deliverable is a machine-learning model or study for physics, in PyTorch: classifiers and regressors for events, particles or detector signals, generative models and fast simulation, surrogates of expensive simulations or predictions, ML-assisted or simulation-based inference, calibration of model outputs, grouped train/validation/test splits and leakage checks, domain shift between simulation and data, uncertainty estimation, and the PyTorch engineering behind them. PyTorch only.
+Use when the deliverable is a machine-learning model or study for physics: classifiers and regressors for events, particles or detector signals, generative models and fast simulation, surrogates of expensive simulations or predictions, ML-assisted or simulation-based inference, calibration of model outputs, grouped train/validation/test splits and leakage checks, domain shift between simulation and data, uncertainty estimation, and the PyTorch engineering behind them. Neural networks in PyTorch; BDT and classical MVA guidance for analyses.
 
 **Owns:** classification and regression, generation, surrogates, ML-assisted inference, calibration, domain shift, and PyTorch engineering. Typical artifact: `ml-artifact` (labels, features, grouped splits, training domain, preprocessing, weights, model hash, calibration, downstream validation).
 
@@ -11,9 +11,9 @@ Use when the deliverable is a machine-learning model or study for physics, in Py
 | Path | Content |
 |---|---|
 | `SKILL.md` | entry point |
-| `references/` | thirty-four references: the PyTorch engineering guide, multivariate analysis, ML in analyses, scientific ML, data strategy, evaluation, uncertainty and calibration, robustness and distribution shift, reproducibility, training, scaling, debugging, deployment |
+| `references/` | thirty-eight references: ML in analyses (weights, metrics, decorrelation, systematics, sim-to-data, weak supervision), multivariate analysis, particle and jet architectures, space and astroparticle detectors, fast-simulation validation, SBI training, scientific ML, the PyTorch engineering guide, data strategy, evaluation, uncertainty and calibration, robustness and distribution shift, reproducibility, training, scaling, debugging, deployment |
 | `scripts/` | twelve helpers: split integrity, surrogate domain, dataset contract, run comparison, NaN batches, checkpoints, PyTorch environment, compute and memory budgets, dataloader profiling, serving capacity, benchmarking |
-| `assets/` | code starting points: dataset template, models, training loops (classifier, DDP skeleton, LoRA fine-tune, vision transfer, transformer classifier), metrics, inference, config, example split and run records |
+| `assets/` | code starting points: HEP metrics with signed weights (`hep_metrics.py`, NumPy) and losses (`hep_losses.py`: signed-weight BCE, DisCo, NaN-safe masking), dataset template, models, training loops (classifier, DDP skeleton, LoRA fine-tune, vision transfer, transformer classifier), metrics, inference, config, example split and run records |
 
 ## Scripts
 
@@ -21,7 +21,7 @@ Use when the deliverable is a machine-learning model or study for physics, in Py
 
 ## References
 
-Start with `references/deep-learning-guide.md`; physics-facing entry points are `references/multivariate-analysis-bdt-nn.md`, `references/ml-analysis.md` and `references/scientific-machine-learning.md`.
+Start with `references/ml-analysis.md` for physics work and `references/deep-learning-guide.md` for PyTorch engineering; `SKILL.md` has the task-to-reference table.
 
 ## Handoffs
 
@@ -30,12 +30,13 @@ Start with `references/deep-learning-guide.md`; physics-facing entry points are 
 | Physics assumptions or validity domain of a surrogate | hep-theory |
 | Inference using the model (coverage, systematics) | hep-statistics |
 | Pipeline, I/O, batch training jobs | hep-computing |
-| Fast-simulation validation against full simulation | detector-response |
+| Selection design, normalization, systematics plan around a score | hep-analysis |
+| Scale factors, tag-and-probe, fast-simulation validation against full simulation | detector-response |
 | Writing up results and figures | research-communication |
 
 ## Tests and validation
 
-`tests/skills/physics_ml/` (four modules; the GPU module runs only with `HEP_TORCH_GPU_TEST=1` on hardware the maintainer may use) and the `optional (torch-cpu)` CI job. What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
+`tests/skills/physics_ml/` (six modules, including analytic checks of the HEP metrics and, with PyTorch, of the losses; the GPU module runs only with `HEP_TORCH_GPU_TEST=1` on hardware the maintainer may use) and the `optional (torch-cpu)` CI job. What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
 
 ## How this folder is used
 

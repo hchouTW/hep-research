@@ -2,7 +2,9 @@
 
 Training loops, losses, and failure modes specific to generative models. Assumes
 familiarity with [training-loop.md](training-loop.md); this file covers
-what differs from a standard supervised loop.
+what differs from a standard supervised loop. For detector fast simulation and physics validation (conditioning,
+physics constraints, CaloChallenge-style metrics, statistical meaning of generated samples), read
+[fast-simulation-validation.md](fast-simulation-validation.md) first; this file is the generic mechanics.
 
 ## Variational autoencoder (VAE)
 
@@ -11,6 +13,9 @@ distribution toward a standard normal prior:
 
 ```python
 def vae_loss(recon_x, x, mu, logvar, kl_weight=1.0):
+    # BCE assumes data in [0, 1] (pixel intensities). For continuous physics quantities (cell energies,
+    # kinematics) use a likelihood that matches the data, e.g. Gaussian (MSE) on standardized or log-transformed
+    # inputs, and treat the many exact zeros of sparse calorimeter data explicitly.
     recon_loss = nn.functional.binary_cross_entropy(recon_x, x, reduction="sum")
     kl = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
     return recon_loss + kl_weight * kl, recon_loss.detach(), kl.detach()
@@ -113,7 +118,10 @@ Prefer, in addition:
   can miss.
 - **Distributional metrics** (e.g. FID for images) when comparing checkpoints or
   configurations quantitatively - these compare feature-space statistics of
-  generated vs. real samples rather than per-sample fidelity.
+  generated vs. real samples rather than per-sample fidelity. For physics data, FID's
+  ImageNet features are not meaningful: use physics features (FPD/KPD), classifier
+  two-sample tests and downstream closure, as in
+  [fast-simulation-validation.md](fast-simulation-validation.md).
 - **Diversity checks**: generate many samples from different noise seeds/latents
   and confirm they differ meaningfully - a model that reproduces the same handful
   of outputs has collapsed even if individual samples look good.

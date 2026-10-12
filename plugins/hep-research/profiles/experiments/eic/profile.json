@@ -18,7 +18,8 @@
   "hep-analysis",
   "detector-response",
   "hep-theory",
-  "hep-computing"
+  "hep-computing",
+  "physics-ml"
  ],
  "resources": {
   "index": "index.md",
