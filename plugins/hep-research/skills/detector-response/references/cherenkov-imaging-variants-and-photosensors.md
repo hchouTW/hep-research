@@ -92,7 +92,12 @@ and ice (large volumes, optics dominated by absorption/scattering, e.g.
 
 **Response model.** `N_pe ~ Poisson(N_gamma * eps_coll * QE)`; gain per photoelectron
 fluctuates (Polya/excess-noise `F`); SiPMs add crosstalk and afterpulsing as
-compound-Poisson terms; a dark count rate `DCR` contributes an offset `DCR * gate`;
+compound-Poisson terms (optical crosstalk is a branching process: with `lambda` the mean
+number of secondaries per avalanche, `lambda = -ln(1 - P_ct)`, a primary gives mean
+`1/(1-lambda)` cells, variance `lambda/(1-lambda)^3`); a dark count rate `DCR` contributes a mean
+`DCR * gate` *and* a variance, so pedestal subtraction removes only the mean;
+SiPM saturation `N_cells (1 - exp(-N_pe/N_cells))` makes the response nonlinear
+([front-end electronics](front-end-electronics-and-signal-processing.md));
 timing has transit-time spread and jitter ([timing detectors](timing-detectors.md)).
 
 **Light transport elements.**
@@ -119,7 +124,9 @@ time series* (gain versus temperature/dose) rather than a single constant.
   fluctuations and detection efficiency; degeneracy: gain vs light yield vs coupling.
 - **Informative residual**: SPE spectrum, gain and DCR vs time, LED-linearity curve,
   light-yield vs position.
-- **Scaling**: `sigma/N ≈ sqrt(F/N_pe)`; timing `~ 1/sqrt(N_pe)`.
+- **Scaling**: `sigma/N ≈ sqrt(F/N_pe)`; timing from the first photoelectrons `~ tau_d/N_pe`
+  for a negligible rise time, closer to `sqrt(tau_r tau_d/N_pe)` with a finite one
+  ([timing detectors](timing-detectors.md)).
 - **Tails**: afterpulses, crosstalk clusters, dark-count pileup, saturation.
 - **Dependence**: temperature (SiPM), magnetic field (PMT), dose, rate.
 - **Data sample**: LED/laser, SPE, MIPs, mono-energetic lines.

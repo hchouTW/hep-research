@@ -404,6 +404,22 @@ class EdgeCaseCliTests(_TempFiles, unittest.TestCase):
              '--lambda-param', '60', '--depths', 'nan,inf'),
             ('xmax_gaisser_hillas.py', '--n-max', '2e7', '--x-max', '750', '--x0', '-60',
              '--lambda-param', '60', '--depths=-100,400'),
+            ('frontend_response.py', 'enc', '--capacitance', '1e308', '--en', '1e308', '--leakage', '1e308',
+             '--peaking', '1e308'),
+            ('frontend_response.py', 'enc', '--capacitance', 'nan', '--en', '1', '--leakage', '1',
+             '--peaking', '25'),
+            ('frontend_response.py', 'noise-rate', '--threshold', '0', '--peaking', '1e-308', '--order', '2',
+             '--channels', '1e308', '--window', '1e308'),
+            ('frontend_response.py', 'timing', '--rise', '1', '--snr', 'inf'),
+            ('frontend_response.py', 'quantize', '--noise-lsb', '1e308'),
+            ('frontend_response.py', 'pileup', '--rate', '1e308', '--mean-amp', '1e308', '--peaking', '1e308',
+             '--bipolar'),
+            ('frontend_response.py', 'sipm', '--cells', '1', '--npe', '1e308', '--crosstalk', '0.999999',
+             '--dcr', '1e308', '--gate', '1e308'),
+            ('frontend_response.py', 'ballistic', '--collection', '1e308', '--peaking', '1e-308'),
+            ('frontend_response.py', 'deadtime', '--dead-time', '1e308', '--rate', '1e308',
+             '--model', 'paralyzable'),
+            ('frontend_response.py', 'cluster-noise', '--channels', '4', '--sigma', '1e308', '--rho', '1'),
         ]
 
     def test_all_scripts_emit_strict_json_and_no_traceback(self):

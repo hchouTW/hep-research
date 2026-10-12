@@ -111,6 +111,8 @@ edge. Consequences: an efficiency measured on a plateau does not constrain the g
 a threshold effect is largest for the lowest-signal population (minimum-ionizing
 particles in thin sensors, low-energy showers, single photoelectrons); and a change
 in threshold or noise looks like a change in efficiency only for events near it.
+Threshold scans (S-curves), threshold dispersion, and the noise-hit rate versus
+threshold are in [front-end electronics and signal processing](front-end-electronics-and-signal-processing.md).
 
 ## Conditional probability as the language of performance
 

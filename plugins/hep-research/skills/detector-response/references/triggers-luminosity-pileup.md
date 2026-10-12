@@ -103,6 +103,32 @@ in a control region - a reweighting step that is applied but silently no-ops (e.
 from a units or binning mismatch between the two input histograms) is a common,
 easy-to-miss bug.
 
+## Dead time and live time
+
+Every readout and trigger system is blind for part of the time: busy front ends,
+full buffers, trigger rules (a minimum spacing between accepts, a maximum number per
+window), run-control pauses. The fraction of time it can accept an event is the
+*live fraction*, and a cross section or flux uses the luminosity or exposure *while
+live*.
+
+- **Models** (exact for Poisson arrivals at true rate `n` and dead time `tau_d`):
+  non-paralyzable `m = n/(1 + n tau_d)`, live fraction `1/(1 + n tau_d)`;
+  paralyzable `m = n exp(-n tau_d)`. Bunched beams, spills, bursts, and trigger rules
+  break the Poisson assumption, and several dead-time sources in series do not
+  combine by a simple formula; measure rather than model when precision matters
+  ([front-end electronics and signal processing](front-end-electronics-and-signal-processing.md)).
+- **Measurement**: count a free-running clock or random triggers gated and ungated by
+  the busy signal, per luminosity block (or per second for a space instrument); the
+  ratio is the live fraction for that block.
+- **Application**: the effective luminosity is `sum_i L_i f_i` over blocks `i`, not the
+  total luminosity times the time-averaged live fraction, because the live fraction falls
+  when the instantaneous luminosity (and rate) is high; the same holds for exposure,
+  `sum_i A_i T_i f_i`. Prescales enter the same sum.
+- **Event-dependent losses**: buffer overflow and derandomizer losses fall
+  preferentially on large or closely spaced events, so they are an efficiency that
+  depends on the event, not only a time fraction; check with random triggers whether
+  the lost fraction depends on occupancy.
+
 ## Deliverables
 
 - Tag-and-probe selection (resonance/mass window, tag and probe object definitions)
@@ -117,3 +143,5 @@ easy-to-miss bug.
 - Pileup reweighting target (data profile source, minimum-bias cross section
   assumption) and a closure check that reweighted MC pileup matches data in a
   control region.
+- Live-fraction measurement per luminosity block (or time interval), its sources,
+  and confirmation that the luminosity or exposure is summed block by block with it.

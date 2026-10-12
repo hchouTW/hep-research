@@ -63,6 +63,28 @@ the textbooks are for principles.
   multigap RPC", Nucl. Instrum. Methods A374 (1996) 132-135,
   DOI 10.1016/0168-9002(96)00158-1.
 
+## Front-end electronics and signal processing ([front-end electronics and signal processing](front-end-electronics-and-signal-processing.md))
+
+Entries in this section were matched against Crossref on 2026-10-13, with the same
+criteria as above.
+
+- W. Shockley, "Currents to conductors induced by a moving point charge", J. Appl. Phys.
+  9 (1938) 635-636, DOI 10.1063/1.1710367. Induced current on electrodes (with Ramo).
+- S. Ramo, "Currents induced by electron motion", Proc. IRE 27 (1939) 584-585,
+  DOI 10.1109/JRPROC.1939.228757. Weighting-field form of signal induction.
+- V. Radeka, "Low-noise techniques in detectors", Annu. Rev. Nucl. Part. Sci. 38 (1988)
+  217-277, DOI 10.1146/annurev.ns.38.120188.001245. Series, parallel and `1/f` noise,
+  shaping and the noise optimum.
+- H. Spieler, *Semiconductor Detector Systems* (Oxford University Press, 2005),
+  DOI 10.1093/acprof:oso/9780198527848.001.0001. Textbook: signal formation, front-end
+  electronics, noise, shaping, timing, and system design.
+- W. E. Cleland and E. G. Stern, "Signal processing considerations for liquid ionization
+  calorimeters in a high rate environment", Nucl. Instrum. Methods A338 (1994) 467-497,
+  DOI 10.1016/0168-9002(94)91332-3. Optimal filtering of sampled pulses with pileup noise.
+- S. O. Rice, "Mathematical analysis of random noise", Bell Syst. Tech. J. 23 (1944)
+  282-332, DOI 10.1002/j.1538-7305.1944.tb00874.x. Level-crossing rate of Gaussian noise
+  (noise-hit rate above a threshold).
+
 ## Timing detectors ([timing detectors](timing-detectors.md))
 
 - G. Pellegrini et al., "Technology developments and first measurements of Low Gain

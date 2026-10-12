@@ -42,9 +42,9 @@ description: "Use when the deliverable is about how a detector responds: signal 
 
 ## Resources
 
-Start with [the principles summary](references/detector-principles-summary.md); its reference index (section 11) names every topic file: framework and equations, subsystems, reconstruction and performance, folding, data/MC validation, simulation, calibration and alignment, case studies, comparison tables, glossary, bibliography, and the astroparticle instruments (cosmic-ray spectrum, air showers, ground arrays, imaging atmospheric Cherenkov telescopes, neutrino telescopes, space-based direct detection, multimessenger analysis). Folder guide for people: [README.md](README.md).
+Start with [the principles summary](references/detector-principles-summary.md); its reference index (section 11) names every topic file: framework and equations, front-end electronics, subsystems, reconstruction and performance, folding, data/MC validation, simulation, calibration and alignment, case studies, comparison tables, glossary, bibliography, and the astroparticle instruments (cosmic-ray spectrum, air showers, ground arrays, imaging atmospheric Cherenkov telescopes, neutrino telescopes, space-based direct detection, multimessenger analysis). Folder guide for people: [README.md](README.md).
 
-Scripts in `<plugin root>/skills/detector-response/scripts/` (read `--help` first): `calorimeter_resolution.py`, `cherenkov_angle.py`, `multiple_scattering.py`, `pid_separation_power.py`, `pileup_reweight.py`, `tag_and_probe_efficiency.py`, `xmax_gaisser_hillas.py`. Example inputs: `assets/`.
+Scripts in `<plugin root>/skills/detector-response/scripts/` (read `--help` first): `calorimeter_resolution.py`, `cherenkov_angle.py`, `frontend_response.py`, `multiple_scattering.py`, `pid_separation_power.py`, `pileup_reweight.py`, `tag_and_probe_efficiency.py`, `xmax_gaisser_hillas.py`. Example inputs: `assets/`.
 
 ## Handoffs
 
