@@ -46,7 +46,23 @@ A live run (paid model calls; run only with approval and a budget, like `evals/r
 The summary keeps the model, prompt version, plugin commit, tool access and coverage, and says whether it is a live
 run. One agent performing both the answer and the semantic judgment is not an independent review; record who judged.
 
+## Running live
+
+`run_live_eval.py --model claude-sonnet-5-5 [--ids a,b] [--budget-usd 10] [--dry-run]` runs each case in a fresh folder
+holding only its fixtures through `claude -p` with the plugin from this checkout, read-only tools (Skill, Read, Glob,
+Grep), `--setting-sources project,local` and `--strict-mcp-config`, writes `outputs/<run_id>.json` with every semantic
+judgment `unjudged`, and scores it into `results/<run_id>.json`. Raw streams go to `runs/<run_id>/raw/` (not
+committed). A reviewer then records `judgments.semantic` per case (with `by` and `date`) and re-scores; who judged is
+kept in `meta.judged_by` and `meta.independent_review`.
+
+## Runs so far
+
+| Run | Model, CLI | Plugin | Cost | Outcome |
+|---|---|---|---|---|
+| `live-20261013-sonnet` | claude-sonnet-5-5, Claude Code 2.1.296 | `f7709da` (0.6.14) | $0.71 for 11 cases | 6 pass, 4 fail, 1 critical-fail. The four fails are routing: the quick drafting, Chinese status, Chinese terminology and injection cases answered without loading a plugin skill (and the significance draft named no hep-statistics handoff); their prose was judged correct. The critical failure is a referee reply that says the rerun has not been done but also "we have added a sentence in Section [S]" with only a bracketed note to delete it. No fabricated identifier, invented number or status promotion in any case. Semantic judgments by the executor of the session that built the evaluation, not an independent review. The scorer was calibrated to 1.1 on this run's outputs (fixture content is grounded; file:line references, years and small integers are not claims; a negated phrase is not an assertion; phrase alternatives) and the outputs re-scored without new model calls: the first scoring had reported 7 critical failures, all of them scorer artifacts except the one above. |
+
 ## Status
 
-The scorer and the cases are tested (`python3 -m unittest discover -s tests -t tests`, also in CI). No live model
-run has been performed for these cases: the evaluation infrastructure is tested, model behavior is not validated.
+The scorer and the cases are tested (`python3 -m unittest discover -s tests -t tests`, also in CI). One live run on
+claude-sonnet-5-5 is recorded above; it measures that model, with that CLI and plugin commit, on these eleven cases,
+with a non-independent semantic judgment. Nothing else is validated.

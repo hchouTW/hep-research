@@ -3,6 +3,15 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **Live behavioral evaluation recorded.** `evals/research_communication/run_live_eval.py` runs the eleven cases through
+  a headless `claude -p` with the routing harness's isolation; one run on claude-sonnet-5-5 at 0.6.14 (`f7709da`,
+  $0.71) scored 6 pass, 4 fail (all routing: quick cases answered without a plugin skill) and 1 critical-fail (a
+  referee reply asserting an edit behind a bracketed caveat); no fabricated evidence, invented number or status
+  promotion. The scorer was calibrated to 1.1 on that run (grounded fixture content, file:line references, years,
+  negated phrases, phrase alternatives); the semantic judgments are the executor's, not an independent review.
+
 ## 0.6.14 (2026-10-13)
 
 - **Lint-clean contracts.** No behavior change from 0.6.13: the communication contract modules satisfy ruff (B007)
