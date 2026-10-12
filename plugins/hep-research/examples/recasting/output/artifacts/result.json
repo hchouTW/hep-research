@@ -41,6 +41,9 @@
  ],
  "artifact_id": "synthetic-j7-coupling-limit",
  "artifact_type": "statistical-result",
+ "required_capabilities": [
+  "stats:result-semantics"
+ ],
  "objective": "SYNTHETIC 95% CLs upper limit on the toy-model coupling versus m_X (illustrative recast)",
  "extension": {
   "paradigm": "frequentist",

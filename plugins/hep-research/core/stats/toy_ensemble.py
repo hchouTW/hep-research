@@ -140,7 +140,8 @@ def merge(parts: list[dict]) -> dict:
     """Merge task results of one study: same ensemble kind, seed and n_toys; every index exactly once."""
     if not parts:
         raise EnsembleError("nothing to merge")
-    keys = {(p["ensemble"]["kind"], p["ensemble"]["seed"], p["ensemble"]["n_toys"], p["ensemble"]["failure_policy"]) for p in parts}
+    keys = {(p["ensemble"]["kind"], p["ensemble"]["seed"], p["ensemble"]["n_toys"], p["ensemble"]["failure_policy"],
+             p["ensemble"]["timeout_s"]) for p in parts}
     if len(keys) != 1:
         raise EnsembleError(f"cannot merge different studies or ensembles: {sorted(keys)}")
     rows = sorted((r for p in parts for r in p["rows"]), key=lambda r: r[0])

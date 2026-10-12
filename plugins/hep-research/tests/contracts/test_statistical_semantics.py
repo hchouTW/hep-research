@@ -164,6 +164,56 @@ class T07PublicationGate(unittest.TestCase):
                 self.assertEqual(v.main([str(bad), "--gate", "other"]), 2)
 
 
+class ReviewFindings(unittest.TestCase):
+    """An independent review found that typed 2.2 fields changed the outcome of older artifacts, and that the gate let
+    recorded undercoverage and empty coverage evidence pass."""
+
+    def test_typed_fields_do_not_change_legacy_outcomes(self):
+        legacy = copy.deepcopy(BASE)
+        legacy["contract_version"] = legacy["versions"]["contracts"] = "2.1.0"
+        for change in ({"coverage": {"n_toys": "1000"}}, {"coverage": {"cl": 0}}, {"likelihood": {"backend": {"name": "pyhf"}}},
+                       {"fit_diagnostics": {"status": "converged"}}, {"likelihood": {"model_card": {}}}):
+            with self.subTest(change=change):
+                d = copy.deepcopy(legacy)
+                d["extension"].update(change)
+                self.assertTrue(v.validate_artifact(d).ok)
+                self.assertFalse(v.validate_artifact(d, strict=True).ok)
+                self.assertFalse(v.validate_artifact(current(d)).ok)
+
+    def test_gate_rejects_weak_coverage_evidence(self):
+        cases = {
+            "undercoverage": ({"check": "toys", "method": "toys", "n_toys": 20000, "coverage": 0.80, "cl": 0.95}, "failed", "gate.undercoverage"),
+            "no_value": ({"check": "toys", "method": "toys", "n_toys": 1, "cl": 0.95}, "unresolved", "stats.coverage_value_missing"),
+            "no_nominal": ({"check": "toys", "method": "toys", "n_toys": 100, "coverage": 0.95}, "unresolved", "gate.coverage_nominal_missing"),
+            "bare_analytic": ({"check": "analytic"}, "unresolved", "stats.coverage_justification_missing"),
+        }
+        for name, (cov, status, code) in cases.items():
+            with self.subTest(name=name):
+                d = copy.deepcopy(PUBLISHABLE)
+                d["extension"]["coverage"] = cov
+                g = v.publication_gate(d)
+                self.assertEqual(g["status"], status, g["reasons"])
+                self.assertIn(code, {r["code"] for r in g["reasons"]})
+
+    def test_global_toys_and_bound_below_local(self):
+        d = copy.deepcopy(PUBLISHABLE)
+        d["extension"]["significance"].update(trials_method="toys")
+        del d["extension"]["significance"]["global_n_toys"]
+        self.assertIn("stats.global_toys_missing", codes(v.validate_artifact(d), "unresolved"))
+        d = copy.deepcopy(PUBLISHABLE)
+        sig = d["extension"]["significance"]
+        del sig["global_p"]
+        sig["local_p"] = 0.01
+        sig["global_p_bound"] = {"kind": "upper", "value": 1e-4, "cl": 0.95, "convention": "clopper-pearson"}
+        self.assertIn("stats.global_below_local", codes(v.validate_artifact(d), "error"))
+
+    def test_capability_declaration_warning(self):
+        d = copy.deepcopy(PUBLISHABLE)
+        d.pop("required_capabilities")
+        self.assertIn("stats.capability_not_declared", codes(v.validate_artifact(d), "warning"))
+        self.assertNotIn("stats.capability_not_declared", codes(v.validate_artifact(PUBLISHABLE)))
+
+
 class T08Migration(unittest.TestCase):
     def test_old_reader_refuses_the_new_capability(self):
         old = frozenset(contracts.KNOWN_CAPABILITIES - {"stats:result-semantics"})

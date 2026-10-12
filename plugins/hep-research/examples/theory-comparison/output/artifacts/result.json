@@ -30,6 +30,9 @@
  "unresolved_inputs": [],
  "artifact_id": "synthetic-path-d-mu-fit",
  "artifact_type": "statistical-result",
+ "required_capabilities": [
+  "stats:result-semantics"
+ ],
  "inputs": [
   {
    "ref": "artifacts/comparison_spec.json",

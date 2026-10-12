@@ -271,7 +271,8 @@ def profile_significance(n: int, b: float, sigma_b: float, toys: int, seed: int)
            "p_value_half_chi2_asymptotic": 0.5 * math.erfc(z / math.sqrt(2.0)) if q_obs > 0 else 0.5,
            "p_value_naive_wilks_chi2_1dof": math.erfc(z / math.sqrt(2.0)) if q_obs > 0 else 1.0,
            "fraction_toys_with_q0_zero": zero / toys}
-    out["asymptotic_calibration"] = _asymptotic_gate(hits, toys, out["p_value_half_chi2_asymptotic"], "half-chi2 p-value of q0")
+    out["asymptotic_calibration"] = _asymptotic_gate(hits, toys, out["p_value_half_chi2_asymptotic"], "half-chi2 p-value of q0",
+                                                     q_obs=q_obs)
     if sig == 0.0:
         from core.stats.poisson_diagnostics import log_poisson_sf, z_from_log_p
         log_p = log_poisson_sf(n, b)  # summed in the tail: 1 - P(N <= n - 1) cancels to 0 below about 1e-16
@@ -811,6 +812,7 @@ class _ShapeModel:
         self.mc_rel = [x.get("mc_stat", 0.0) / x["b"] if x.get("mc_stat", 0.0) > 0 else 0.0 for x in bins] \
             if any(x.get("mc_stat", 0.0) > 0 for x in bins) else None
         self.log = FitLog()  # every fit and its verdict, by context (observed data or toys)
+        self.better_global: dict = {}  # counts -> a global fit better than the one a caller passed to q
 
     def aux_obs(self):
         return [t if g else 0.0 for g, t in zip(self.gamma, self.tau)] + ([1.0] * len(self.b) if self.mc_rel else [])
@@ -948,8 +950,12 @@ class _ShapeModel:
         th_c, cval = self.cond(mu, ns, aux)
         if cval < val - DNLL_TOL:
             self.log.events["global_refit"] += 1
-            mu_hat, _, val2 = self._glob_from(ns, aux, [mu] + list(th_c))
-            val = min(val, val2)
+            g2 = self._glob_from(ns, aux, [mu] + list(th_c))
+            if g2[2] < val - DNLL_TOL:          # a better global minimum: use it here and keep it for the caller
+                mu_hat, val = g2[0], g2[2]
+                key = tuple(ns)
+                if g is not None and (key not in self.better_global or g2[2] < self.better_global[key][2]):
+                    self.better_global[key] = g2
             if cval < val - DNLL_TOL:
                 self.log.fail("global_above_conditional")
             if mu_hat > mu:
@@ -978,22 +984,30 @@ def _fit_summary(log: FitLog, toys_run: int = 0, toys_failed: int = 0) -> dict:
 
 
 CALIBRATION_CL = 0.99  # the asymptotic gate's toy interval (T10): fixed before any comparison was made
-LIMIT_MC_CL = 0.95     # exact intervals on CLs+b and CLb propagated to the toy CLs limit (T11)
+LIMIT_MC_CL = 0.95     # exact intervals on CLs+b and CLb propagated to the toy CLs limit (T11); the CLs range takes
+                       # the extremes of the two independent intervals, so it covers with probability >= 0.95^2 = 0.90
 
 
-def _asymptotic_gate(hits: int, toys: int, p_asymptotic: float, what: str) -> dict:
+def _asymptotic_gate(hits: int, toys: int, p_asymptotic: float, what: str, q_obs: float | None = None,
+                     failed: int = 0) -> dict:
     """Calibration gate of an asymptotic p-value against seeded toys (audit T10). consistent: p_asymptotic lies in the
     toys' central Clopper-Pearson interval at CALIBRATION_CL; inapplicable: it lies outside, so the asymptotic
     approximation fails here and the toy value is the result; unresolved: no toy reached the observed value and
     p_asymptotic is below the toys' upper bound (more toys needed). The gate says nothing about where it was not run."""
     from core.stats.tail_estimation import clopper_pearson, one_sided_upper
     lo, hi = clopper_pearson(hits, toys, CALIBRATION_CL)
-    if hits == 0 and p_asymptotic <= one_sided_upper(0, toys, CALIBRATION_CL):
+    if q_obs is not None and q_obs <= 0.0:
+        # no excess: the statistic sits on its point mass at 0 and every toy reaches it, while the half-chi2 form is
+        # quoted as 0.5 by convention; nothing about the approximation is tested here
+        verdict = "not-applicable"
+    elif failed:
+        verdict = "unresolved"      # failed toys could fall on either side: the comparison is not decided
+    elif hits == 0 and p_asymptotic <= one_sided_upper(0, toys, CALIBRATION_CL):
         verdict = "unresolved"
     else:
         verdict = "consistent" if lo <= p_asymptotic <= hi else "inapplicable"
     return {"verdict": verdict, "compared": what, "asymptotic_p": p_asymptotic, "toy_interval": [lo, hi],
-            "interval_cl": CALIBRATION_CL, "toys": toys,
+            "interval_cl": CALIBRATION_CL, "toys": toys, "failed_toys": failed,
             "rule": "asymptotic p inside the toys' central Clopper-Pearson interval; otherwise use the toy result"}
 
 
@@ -1179,8 +1193,15 @@ def shape_limit(doc: dict, cl: float, toys: int, seed: int, cls_toys: int = 0, c
 
     def limit(ns):
         g = model.glob(ns, aux0)
-        hi = g[0] + 30.0 * (math.sqrt(sum(ns) + 1.0) + 1.0) / max(sum(model.s), 1e-12) + 20.0 / max(sum(model.s), 1e-12)
-        return _bisect(lambda m: model.q(m, ns, aux0, g) - z * z, g[0], hi, 45), g
+        for _attempt in range(3):   # a refit that finds a better global minimum restarts the limit from it
+            hi = g[0] + 30.0 * (math.sqrt(sum(ns) + 1.0) + 1.0) / max(sum(model.s), 1e-12) + 20.0 / max(sum(model.s), 1e-12)
+            lim = _bisect(lambda m: model.q(m, ns, aux0, g) - z * z, g[0], hi, 45)
+            better = model.better_global.pop(tuple(ns), None)
+            if better is None:
+                return lim, g
+            g = better
+        model.log.fail("global_minimum_unstable")
+        return lim, g
     obs, g_obs = limit(model.n)
     asimov_ns = [float(v) for v in model.b]
     asimov, g_a = limit(asimov_ns)
@@ -1214,11 +1235,15 @@ def shape_limit(doc: dict, cl: float, toys: int, seed: int, cls_toys: int = 0, c
         out.update({"toy_p_value_at_asymptotic_limit": p if hits else None,
                     "binomial_error_on_p": math.sqrt(max(p * (1 - p), 0.0) / toys) if 0 < hits < toys else None,
                     "target_p_value": 1.0 - cl, **_toy_p(hits, toy_fails, toys),
-                    "asymptotic_calibration": _asymptotic_gate(hits, toys, 1.0 - cl, "toy p-value at the asymptotic limit vs 1 - cl")})
+                    "asymptotic_calibration": _asymptotic_gate(hits, toys, 1.0 - cl, "toy p-value at the asymptotic limit vs 1 - cl",
+                                                               failed=toy_fails)})
     if cls_toys:
         hi = 1.3 * max(out["asymptotic_observed_cls_upper_limit"], out["asymptotic_expected_limits"]["cls"]["+2sigma"])
         out["toy_cls"] = _toy_cls(model, aux0, g_obs, cl, cls_toys, seed, hi, cls_points)
         toy_fails += out["toy_cls"]["toys_with_a_failed_fit"]
+    for key in (tuple(model.n), tuple(asimov_ns)):
+        if key in model.better_global:   # a better global minimum appeared after the results that used the old one
+            model.log.fail("global_minimum_moved_after_use")
     out["fit_diagnostics"] = _fit_summary(model.log, toys + (out["toy_cls"]["toys_run"] if cls_toys else 0), toy_fails)
     out["status"] = out["fit_diagnostics"]["status"]
     out["constraints"] = {d["name"]: d.get("prior", "gaussian") for d in nuis}
@@ -1327,6 +1352,7 @@ class _TwoPoiModel:
 
     def __init__(self, bins1, bins2, nuis, chol):
         self.m1, self.m2 = _ShapeModel(bins1, nuis, chol), _ShapeModel(bins2, nuis, chol)
+        self.better = None
         self.n, self.k = self.m1.n, self.m1.k
 
     def means(self, mu1, mu2, th):
@@ -1379,6 +1405,8 @@ class _TwoPoiModel:
         if cval < g[3] - DNLL_TOL:
             self.log.events["global_refit"] += 1
             g2 = self.glob(ns, aux, [mu1, mu2] + list(th_c))
+            if g2[3] < g[3] - DNLL_TOL and (self.better is None or g2[3] < self.better[3]):
+                self.better = g2   # the caller's best fit is stale: profile_contour restarts from this one
             if cval < min(g[3], g2[3]) - DNLL_TOL:
                 self.log.fail("global_above_conditional")
             return max(0.0, 2.0 * (cval - min(g[3], g2[3])))
@@ -1403,22 +1431,9 @@ def _load_two_poi(doc):
     return bins1, bins2, nuis, chol
 
 
-def profile_contour(doc: dict, cls=(0.6827, 0.95), rays: int = 36) -> dict:
-    """Best fit of (mu1, mu2) and the profile-likelihood contours q(mu1, mu2) = 2 (min_theta nll - min nll) = level,
-    with level the chi-square quantile for 2 degrees of freedom (Wilks), traced along rays from the best fit."""
-    bins1, bins2, nuis, chol = _load_two_poi(doc)
-    cls = [_num(c, "cl", 0.0, 1.0, strict_low=True) for c in cls]
-    if any(c >= 1.0 for c in cls) or not cls:
-        raise LikelihoodError("each contour cl must lie strictly between 0 and 1")
-    if isinstance(rays, bool) or not isinstance(rays, int) or not 8 <= rays <= 360:
-        raise LikelihoodError("rays must be an integer in [8, 360]")
-    model = _TwoPoiModel(bins1, bins2, nuis, chol)
-    aux0 = model.m1.aux_obs()
-    g = model.glob(model.n, aux0)
+def _trace_contours(model, aux0, g, cls, rays):
+    """Hessian covariance at the best fit g and contour points along rays (one pass of profile_contour)."""
     m1h, m2h = g[0], g[1]
-    if not math.isfinite(g[3]):
-        raise LikelihoodError("the global fit failed (no finite likelihood)")
-    # local covariance of (mu1, mu2) from the numerical Hessian of q / 2 at the best fit
     s1, s2 = (max(sum(model.m1.s), 1e-12), max(sum(model.m2.s), 1e-12))
     h1, h2 = 0.05 * math.sqrt(sum(model.n) + 1.0) / s1, 0.05 * math.sqrt(sum(model.n) + 1.0) / s2
     f = lambda a, b: 0.5 * model.q(a, b, model.n, aux0, g)
@@ -1442,14 +1457,41 @@ def profile_contour(doc: dict, cls=(0.6827, 0.95), rays: int = 36) -> dict:
             except LikelihoodError:
                 failures.append({"cl": c, "angle_deg": 360.0 * j / rays})
         contours[f"{c:g}"] = {"q_level": level, "points": pts}
+    return m1h, m2h, cov, contours, failures
+
+
+def profile_contour(doc: dict, cls=(0.6827, 0.95), rays: int = 36) -> dict:
+    """Best fit of (mu1, mu2) and the profile-likelihood contours q(mu1, mu2) = 2 (min_theta nll - min nll) = level,
+    with level the chi-square quantile for 2 degrees of freedom (Wilks), traced along rays from the best fit."""
+    bins1, bins2, nuis, chol = _load_two_poi(doc)
+    cls = [_num(c, "cl", 0.0, 1.0, strict_low=True) for c in cls]
+    if any(c >= 1.0 for c in cls) or not cls:
+        raise LikelihoodError("each contour cl must lie strictly between 0 and 1")
+    if isinstance(rays, bool) or not isinstance(rays, int) or not 8 <= rays <= 360:
+        raise LikelihoodError("rays must be an integer in [8, 360]")
+    model = _TwoPoiModel(bins1, bins2, nuis, chol)
+    aux0 = model.m1.aux_obs()
+    g = model.glob(model.n, aux0)
+    if not math.isfinite(g[3]):
+        raise LikelihoodError("the global fit failed (no finite likelihood)")
+    for _attempt in range(3):   # a refit that finds a better global minimum restarts from it (best fit, Hessian, rays)
+        model.better = None
+        m1h, m2h, cov, contours, failures = _trace_contours(model, aux0, g, cls, rays)
+        if model.better is None:
+            break
+        g = model.better
+    else:
+        model.log.fail("global_minimum_unstable")
     out = {"label": LABEL, "method": "profile-likelihood contours of two signal strengths (Wilks, 2 degrees of freedom)",
            "bins": len(bins1), "nuisances": [d["name"] for d in nuis], "best_fit": {"mu1": m1h, "mu2": m2h},
            "best_fit_nuisances": dict(zip([d["name"] for d in nuis], g[2])), "covariance_from_hessian": cov,
            "contours": contours, "rays": rays}
-    if failures:
-        out["rays_not_closed"] = failures
     fd = _fit_summary(model.log)
     out["fit_diagnostics"], out["status"] = fd, fd["status"]
+    if failures:
+        out["rays_not_closed"] = failures
+        if out["status"] == "ok":
+            out["status"] = "incomplete"   # an open contour is not a region: exit 3, not ok
     out["note"] = ("each contour point is where the profile statistic q(mu1, mu2), minimized over every nuisance, reaches "
                    "the chi-square 2-dof quantile of the stated cl, found along a ray from the best fit (scaled by the "
                    "Hessian errors), so a non-star-shaped region is not traced; Wilks coverage needs enough events per "

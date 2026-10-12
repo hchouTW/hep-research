@@ -26,6 +26,9 @@
  ],
  "artifact_id": "synthetic-t24-mu",
  "artifact_type": "statistical-result",
+ "required_capabilities": [
+  "stats:result-semantics"
+ ],
  "status": [
   "synthetic"
  ],

@@ -273,7 +273,7 @@ def artifacts(pred_doc, gate_res, fold_counts, r, counts, obs_fit, toy_res, crea
                                                          "values": (fold_counts * r).tolist(), "correlation": "fully-correlated"}]},
                            "uncertainties": [{"name": "missing higher orders and Z exchange", "kind": "truncation", "correlation": "unknown"}],
                            "allowed_transformations": []})
-    stat = dict(base, artifact_id="synthetic-path-d-mu-fit", artifact_type="statistical-result",
+    stat = dict(base, artifact_id="synthetic-path-d-mu-fit", artifact_type="statistical-result", required_capabilities=["stats:result-semantics"],
                 inputs=[{"ref": "artifacts/comparison_spec.json", "artifact_type": "comparison-spec", "status": ["synthetic"]},
                         {"ref": "artifacts/folded_expectation.json", "artifact_type": "prediction", "status": ["synthetic"]}, data_in],
                 objective="Normalization scale mu of the QED prediction on SYNTHETIC data",

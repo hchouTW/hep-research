@@ -84,7 +84,7 @@ def beta_ppf(q: float, a: float, b: float) -> float:
         return 1.0
     lo, hi = 0.0, 1.0
     for _ in range(400):
-        mid = math.sqrt(lo * hi) if lo > 0.0 and hi / lo > 4.0 else (0.5 * (lo + hi) if lo > 0.0 else
+        mid = math.sqrt(lo) * math.sqrt(hi) if lo > 0.0 and hi / lo > 4.0 else (0.5 * (lo + hi) if lo > 0.0 else
                                                                         (hi * 1e-3 if hi > 1e-300 else 0.5 * hi))
         if mid <= lo or mid >= hi:
             break

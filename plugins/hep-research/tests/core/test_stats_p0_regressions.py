@@ -105,6 +105,12 @@ class T02T03ToyTails(unittest.TestCase):
         self.assertLess(1 / n, hi)
         self.assertEqual(te.toy_tail(n - 1, n)["estimate"], (n - 1) / n)
 
+    def test_extreme_beta_quantiles_keep_relative_precision(self):
+        # review finding: sqrt(lo * hi) underflowed below 1e-308 and stopped the search early (5e-199 for 2e-201)
+        for q in (1e-100, 1e-200, 1e-300):
+            ref = sps.beta.ppf(q, 1, 5)
+            self.assertAlmostEqual(te.beta_ppf(q, 1, 5) / ref, 1.0, delta=1e-9)
+
     def test_zero_toys_rejected(self):
         for bad in (0, -1, 2.5, True):
             with self.assertRaises(te.TailError):
@@ -216,6 +222,77 @@ class T05GlobalVersusConditional(unittest.TestCase):
         s = m.log.summary()["observed"]
         self.assertEqual(s["failed"], 0, s)
         self.assertGreaterEqual(m.log.events.get("boundary_kkt_ok", 0), 1)
+
+
+class ReviewFindings(unittest.TestCase):
+    """Paths an independent review found untested: a KKT violation at the boundary, the incomplete status (only toy
+    fits failed, exit 3), and the asymptotic gate at q0 = 0 and with failed toys."""
+
+    DOC = {"bins": [{"n": 9, "b": 3.0, "s": 2.0}, {"n": 5, "b": 2.0, "s": 1.0}],
+           "nuisances": [{"name": "bkg", "kind": "background_norm", "sigma": 0.2}]}
+
+    def test_boundary_kkt_violation_is_a_failure(self):
+        # a degraded global optimizer claims mu-hat < 0 on data with a clear excess: the boundary fit at mu = 0 fails KKT
+        from core.stats.fit_diagnostics import FitResult
+        m = shape_model(self.DOC)
+        orig = ll.newton_fit
+
+        def degraded(f, x0, fixed_first=False, max_iter=60):
+            r = orig(f, x0, fixed_first, max_iter)
+            if len(x0) == m.k + 1:
+                return FitResult([-1.0] + r.x[1:], r.fval, r.status, r.reasons, r.iterations, r.edm, r.stop)
+            return r
+        ll.newton_fit = degraded
+        try:
+            mu, _, _ = m.glob(m.n, m.aux_obs())
+        finally:
+            ll.newton_fit = orig
+        self.assertEqual(mu, 0.0)
+        self.assertIn("boundary_kkt_violated", m.log.summary()["observed"]["reasons"])
+
+    def test_only_toy_failures_give_incomplete_and_exit_3(self):
+        import contextlib
+        import io
+        import tempfile
+        orig = ll.newton_fit
+        calls = {"n": 0}
+
+        def counting(f, x0, fixed_first=False, max_iter=60):
+            calls["n"] += 1
+            return orig(f, x0, fixed_first, max_iter)
+        ll.newton_fit = counting
+        try:
+            ll.shape_limit(self.DOC, 0.95, 0, 1)
+        finally:
+            ll.newton_fit = orig
+        observed_calls = calls["n"]
+
+        def fail_after_observed(f, x0, fixed_first=False, max_iter=60):
+            calls["n"] += 1
+            return orig(f, x0, fixed_first, 0 if calls["n"] > observed_calls + 2 else max_iter)
+        calls["n"] = 0
+        ll.newton_fit = fail_after_observed
+        try:
+            r = ll.shape_limit(self.DOC, 0.95, 100, 1)
+            self.assertEqual(r["status"], "incomplete")
+            self.assertGreater(r["fit_diagnostics"]["toys_with_a_failed_fit"], 0)
+            self.assertEqual(r["fit_diagnostics"]["observed"]["failed"], 0)
+            self.assertIn("toy_p_value_range_with_failures", r)
+            self.assertEqual(r["asymptotic_calibration"]["verdict"], "unresolved")
+            with tempfile.TemporaryDirectory() as d:
+                p = Path(d) / "m.json"
+                p.write_text(__import__("json").dumps(self.DOC))
+                calls["n"] = 0
+                with contextlib.redirect_stdout(io.StringIO()):
+                    self.assertEqual(ll.main(["shape-limit", "--input", str(p), "--toys", "100", "--seed", "1"]), 3)
+        finally:
+            ll.newton_fit = orig
+
+    def test_gate_at_q0_zero_is_not_applicable(self):
+        for n in (1, 3):
+            r = ll.profile_significance(n, 3.0, 0.0, 2000, 1)
+            self.assertEqual(r["q0_observed"], 0.0)
+            self.assertEqual(r["asymptotic_calibration"]["verdict"], "not-applicable")
 
 
 class ConstraintNaming(unittest.TestCase):

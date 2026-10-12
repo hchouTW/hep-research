@@ -26,7 +26,10 @@ STATS-AUDIT). Batch A (P0, T01–T08):
   best fit at `mu = 0` is checked by the KKT condition. A conditional NLL below the global one by more than 1e-4
   triggers a global refit and, if it remains, a failure (it was clipped to `q = 0` before). `shape-limit`,
   `shape-gof` and `contour` report `fit_diagnostics` and `status`; the CLI exits 1 (`failed`, a fit on the data) or
-  3 (`incomplete`, only toy fits failed) instead of always 0. Failed toys are counted, never dropped.
+  3 (`incomplete`, only toy fits failed, or an open contour) instead of always 0. Failed toys are counted and make the
+  result incomplete; toy p-values carry the range [k/N, (k+F)/N], while the toy CLs curves still include the q values of
+  failed toys, which is why such a result is never ok. A better global minimum found by a refit restarts the limit or
+  contour from it.
 - **Contracts 2.2.0 (minor): statistical-result semantics (F04, T06–T08).** New optional fields: typed p-value bounds
   (`significance.local_p_bound`, `global_p_bound`), `global_n_toys`, `coverage.check` (`toys`, `exact-construction`,
   `analytic`, `not-checked`) with `n_toys`, `coverage`, `interval`, `cl`, `ensemble`, `failure_policy`, `failures`;

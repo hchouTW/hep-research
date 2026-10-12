@@ -139,7 +139,7 @@ def main(argv=None) -> int:
                                                      "luminosity part of the covariance used as given (fully correlated)"],
                            "limits": ["synthetic record", "no detector information used or needed",
                                       PEELLE]})
-    stat = dict(base, artifact_id="synthetic-t24-mu", artifact_type="statistical-result", status=["synthetic"],
+    stat = dict(base, artifact_id="synthetic-t24-mu", artifact_type="statistical-result", required_capabilities=["stats:result-semantics"], status=["synthetic"],
                 inputs=[{"ref": "artifacts/comparison_spec.json", "artifact_type": "comparison-spec", "status": ["synthetic"]}],
                 objective="Normalization scale of the QED prediction on a SYNTHETIC published-style record",
                 provenance={"producer_skill": "hep-statistics", "created": "2026-10-02"},

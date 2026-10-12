@@ -1,0 +1,146 @@
+{
+ "$comment": "Owner: hep-statistics. Typed fields of a statistical-result since contracts 2.2.0, applied by contracts.validate on top of ext_statistical_result.json only to artifacts of contract 2.2.0 or later, or to older ones with --strict. Semantic rules: contracts.validate._stat_semantics.",
+ "type": "object",
+ "$defs": {
+  "p_bound": {
+   "type": "object",
+   "required": [
+    "kind",
+    "value",
+    "cl",
+    "convention"
+   ],
+   "$comment": "since 2.2.0: a p-value the toys bound but do not measure (k = 0 or k = n exceedances)",
+   "properties": {
+    "kind": {
+     "type": "string",
+     "enum": [
+      "upper",
+      "lower"
+     ]
+    },
+    "value": {
+     "type": "number",
+     "minimum": 0
+    },
+    "cl": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "convention": {
+     "type": "string"
+    },
+    "k": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "n": {
+     "type": "integer",
+     "minimum": 1
+    }
+   }
+  }
+ },
+ "properties": {
+  "likelihood": {
+   "type": "object",
+   "properties": {
+    "backend": {
+     "type": "string",
+     "$comment": "since 2.2.0"
+    },
+    "backend_version": {
+     "type": "string"
+    },
+    "model_ref": {
+     "type": "string"
+    },
+    "model_sha256": {
+     "type": "string"
+    },
+    "model_card": {
+     "$ref": "statistical_model.json"
+    }
+   }
+  },
+  "significance": {
+   "type": "object",
+   "properties": {
+    "local_p_bound": {
+     "$ref": "#/$defs/p_bound"
+    },
+    "global_p_bound": {
+     "$ref": "#/$defs/p_bound"
+    },
+    "global_n_toys": {
+     "type": "integer",
+     "minimum": 1,
+     "$comment": "since 2.2.0"
+    }
+   }
+  },
+  "coverage": {
+   "type": "object",
+   "$comment": "method is free text (how coverage was or was not studied); typed fields since 2.2.0: check names the evidence, and an object without check is an untyped placeholder (unresolved)",
+   "properties": {
+    "method": {
+     "type": "string"
+    },
+    "check": {
+     "type": "string",
+     "enum": [
+      "toys",
+      "exact-construction",
+      "analytic",
+      "not-checked"
+     ]
+    },
+    "n_toys": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "coverage": {
+     "type": "number",
+     "minimum": 0
+    },
+    "interval": {
+     "type": "array",
+     "items": {
+      "type": "number"
+     }
+    },
+    "cl": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "ensemble": {
+     "type": "string"
+    },
+    "failure_policy": {
+     "type": "string"
+    },
+    "failures": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "points": {
+     "type": "array"
+    }
+   }
+  },
+  "fit_diagnostics": {
+   "type": "object",
+   "$comment": "since 2.2.0: the producing code's fit verdicts (core/stats/fit_diagnostics.py)",
+   "properties": {
+    "status": {
+     "type": "string",
+     "enum": [
+      "ok",
+      "failed",
+      "incomplete"
+     ]
+    }
+   }
+  }
+ }
+}

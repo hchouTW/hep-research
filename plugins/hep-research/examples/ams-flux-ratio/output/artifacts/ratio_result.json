@@ -33,6 +33,9 @@
  "unresolved_inputs": [],
  "artifact_id": "synthetic-path-a-ratio-result",
  "artifact_type": "statistical-result",
+ "required_capabilities": [
+  "stats:result-semantics"
+ ],
  "objective": "SYNTHETIC He/p ratio per bin and period with covariance",
  "provenance": {
   "producer_skill": "hep-statistics",

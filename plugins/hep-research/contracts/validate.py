@@ -302,6 +302,20 @@ def _stat_semantics(doc: dict, ext: dict, rep: Report, strict: bool) -> None:
                 "not-checked; a free-text method or note alone is not coverage evidence")
     if cov is not None and cov.get("check") == "toys" and not (_is_num(cov.get("n_toys")) and cov["n_toys"] > 0):
         rep.add("unresolved", "$.extension.coverage.n_toys", "stats.coverage_without_toys", "toy coverage needs its toy count")
+    if cov is not None and cov.get("check") == "toys" and not (_is_num(cov.get("coverage")) or cov.get("points")):
+        rep.add("unresolved", "$.extension.coverage.coverage", "stats.coverage_value_missing",
+                "toy coverage needs the measured coverage (coverage, or points with their values)")
+    if cov is not None and cov.get("check") in ("analytic", "exact-construction") and not cov.get("method"):
+        rep.add("unresolved", "$.extension.coverage.method", "stats.coverage_justification_missing",
+                f"coverage check '{cov.get('check')}' needs its justification in method")
+    if sig.get("trials_method") == "toys" and ("global_p" in sig or "global_p_bound" in sig) and not _is_num(sig.get("global_n_toys")):
+        rep.add("unresolved", "$.extension.significance.global_n_toys", "stats.global_toys_missing",
+                "a toy-calibrated global p-value needs its toy count (global_n_toys)")
+    gb: Any = sig.get("global_p_bound")
+    if isinstance(gb, dict) and gb.get("kind") == "upper" and _is_num(gb.get("value")) and _is_num(sig.get("local_p")) \
+            and gb["value"] < sig["local_p"] - 1e-12:
+        rep.add("error", "$.extension.significance.global_p_bound", "stats.global_below_local",
+                f"global p upper bound {gb['value']} is below local p {sig['local_p']}")
     if isinstance(sig.get("scan"), dict) and ("global_p" in sig or "global_p_bound" in sig) and not sig.get("trials_method"):
         rep.add("unresolved", "$.extension.significance.trials_method", "stats.trials_method_missing",
                 "a global p-value without its trials_method is not an established global significance")
@@ -310,6 +324,11 @@ def _stat_semantics(doc: dict, ext: dict, rep: Report, strict: bool) -> None:
     lik: Any = ext.get("likelihood")
     if isinstance(lik, dict) and isinstance(lik.get("model_card"), dict):
         _model_card_rules(lik["model_card"], ext.get("paradigm"), rep)
+    if _at_least(doc.get("contract_version"), STAT_SEMANTICS_FROM) and \
+            "stats:result-semantics" not in (doc.get("required_capabilities") or []):
+        rep.add("warning", "$.required_capabilities", "stats.capability_not_declared",
+                "a 2.2 statistical-result should require stats:result-semantics, so a 2.1 reader refuses it instead of "
+                "reading it under the older rules")
     fd: Any = ext.get("fit_diagnostics")
     if isinstance(fd, dict) and fd.get("status") == "failed" and ext.get("fit_status") in ("converged", "converged-with-warnings"):
         rep.add("error", "$.extension.fit_status", "stats.fit_status_mismatch",
@@ -464,6 +483,16 @@ def publication_gate(doc: dict, vocab: Vocabulary | None = None) -> dict:
         cov: Any = ext.get("coverage") if isinstance(ext.get("coverage"), dict) else {}
         if cov.get("check") in (None, "not-checked"):
             add("unresolved", "gate.coverage_not_established", "coverage is not established (check missing or not-checked)")
+        nominal: Any = cov.get("cl", (ext.get("results") or {}).get("cl") if isinstance(ext.get("results"), dict) else None)
+        value: Any = cov.get("coverage")
+        if cov.get("check") == "toys" and _is_num(value) and _is_num(nominal):
+            interval: Any = cov.get("interval")
+            upper = interval[1] if isinstance(interval, list) and len(interval) == 2 and _is_num(interval[1]) else value
+            if upper < nominal - 0.01:
+                add("failed", "gate.undercoverage", f"recorded coverage {value} (upper end {upper}) is below the nominal "
+                                                    f"{nominal} by more than 0.01")
+        elif cov.get("check") == "toys" and not _is_num(nominal):
+            add("unresolved", "gate.coverage_nominal_missing", "toy coverage needs the nominal level (coverage.cl)")
     if ext.get("paradigm") == "bayesian":
         conv: Any = ext.get("convergence") if isinstance(ext.get("convergence"), dict) else {}
         if _max_rhat(conv) is None or not any(k.startswith("ess") for k in conv):
@@ -562,7 +591,10 @@ def validate_artifact(doc, vocab: Vocabulary | None = None, protected: bool = Fa
         if not any(f.code in SHAPE_ERRORS for f in rep.errors):
             _rules(doc, ext, vocab, rep)
             if at == "statistical-result":
-                _stat_semantics(doc, ext, rep, strict)
+                if strict or _at_least(doc.get("contract_version"), STAT_SEMANTICS_FROM):
+                    validate(ext, "ext_statistical_result_v2_2.json", vocab, rep, "$.extension")
+                if not any(f.code in SHAPE_ERRORS for f in rep.errors):
+                    _stat_semantics(doc, ext, rep, strict)
     return rep
 
 

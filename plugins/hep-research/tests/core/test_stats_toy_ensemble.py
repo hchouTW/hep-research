@@ -49,7 +49,9 @@ class T11ToyCls(unittest.TestCase):
         for key in ("double", "fine"):
             other = self.runs[key]
             half = lambda r: 0.5 * (r["observed_limit_mc_range"][1] - r["observed_limit_mc_range"][0])
-            allowed = half(base) + half(other) + max(base["grid_step"], other["grid_step"])
+            # quadrature of the two half-ranges plus half a grid step (linear interpolation); each range combines two
+            # independent 95% exact intervals, so it covers with probability >= 0.95^2 = 0.90
+            allowed = math.hypot(half(base), half(other)) + 0.5 * max(base["grid_step"], other["grid_step"])
             self.assertLess(abs(base["observed_upper_limit"] - other["observed_upper_limit"]), allowed, key)
         width = lambda r: r["observed_limit_mc_range"][1] - r["observed_limit_mc_range"][0]
         self.assertLess(width(self.runs["double"]), width(base))

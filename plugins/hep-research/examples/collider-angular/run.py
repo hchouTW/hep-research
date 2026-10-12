@@ -149,7 +149,7 @@ def artifacts(res, resp, created):
                                    "underflow_overflow": "reco outside [-1, 1] is lost; outer truth bins are buffers",
                                    "conditions": "single synthetic run", "provenance": "analytic integration of the synthetic detector model",
                                    "matrix_ref": "results.json#response", "form": "matrix"})
-    stat = dict(base, artifact_id="synthetic-path-b-result", artifact_type="statistical-result",
+    stat = dict(base, artifact_id="synthetic-path-b-result", artifact_type="statistical-result", required_capabilities=["stats:result-semantics"],
                 objective="SYNTHETIC corrected angular distribution and fiducial cross section with covariance",
                 provenance={"producer_skill": "hep-statistics", "created": created}, status=["synthetic"],
                 inputs=[{"ref": "artifacts/measurement_spec.json", "artifact_type": "measurement-spec", "status": ["synthetic"]}],

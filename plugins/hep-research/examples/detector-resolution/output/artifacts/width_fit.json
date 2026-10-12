@@ -36,6 +36,9 @@
  ],
  "artifact_id": "synthetic-j2-width-fit",
  "artifact_type": "statistical-result",
+ "required_capabilities": [
+  "stats:result-semantics"
+ ],
  "objective": "SYNTHETIC J2: constant-width fit of the per-bin resolution",
  "provenance": {
   "producer_skill": "hep-statistics",

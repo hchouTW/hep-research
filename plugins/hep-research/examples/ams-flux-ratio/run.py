@@ -318,7 +318,7 @@ def artifacts(world, res, created):
                                       "conditions": "per synthetic period (spectral shape inside bins differs slightly)",
                                       "provenance": "computed analytically from the synthetic resolution model", "matrix_ref": "results.json",
                                       "form": "matrix"})
-    stat = dict(base, artifact_id="synthetic-path-a-ratio-result", artifact_type="statistical-result",
+    stat = dict(base, artifact_id="synthetic-path-a-ratio-result", artifact_type="statistical-result", required_capabilities=["stats:result-semantics"],
                 objective="SYNTHETIC He/p ratio per bin and period with covariance",
                 provenance={"producer_skill": "hep-statistics", "created": created}, status=["synthetic"],
                 inputs=[{"ref": "artifacts/measurement_spec.json", "artifact_type": "measurement-spec", "status": ["synthetic"]}],

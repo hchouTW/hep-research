@@ -192,7 +192,7 @@ def main(argv=None) -> int:
                       "g2_upper": s_up / per_g2, "g_upper": math.sqrt(s_up / per_g2)})
 
     docs = {"search_record": rec, "prediction_m300": prediction_doc(300.0, a.created), "efficiency_map": resp}
-    docs["result"] = dict(base(a.created, "hep-statistics"), artifact_id="synthetic-j7-coupling-limit", artifact_type="statistical-result",
+    docs["result"] = dict(base(a.created, "hep-statistics"), artifact_id="synthetic-j7-coupling-limit", artifact_type="statistical-result", required_capabilities=["stats:result-semantics"],
                           objective="SYNTHETIC 95% CLs upper limit on the toy-model coupling versus m_X (illustrative recast)",
                           inputs=[{"ref": "artifacts/search_record.json", "artifact_type": "dataset-record", "status": ["synthetic"]},
                                   {"ref": "artifacts/efficiency_map.json", "artifact_type": "response", "status": ["synthetic"]}],
