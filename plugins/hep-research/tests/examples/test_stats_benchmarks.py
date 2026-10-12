@@ -16,6 +16,7 @@ from pathlib import Path
 PLUGIN = Path(__file__).resolve().parents[2]
 BENCH = PLUGIN / "examples" / "stats-benchmarks"
 SLOW = os.environ.get("HEP_SLOW_TESTS") == "1"
+NETWORK = os.environ.get("HEP_NETWORK_TESTS") == "1"
 
 
 def load(name):
@@ -80,6 +81,52 @@ class CoverageGrid(unittest.TestCase):
         code, res = run(self.mod)
         self.assertEqual(code, 0)
         self.assertEqual(close(res, self.committed), [])
+
+
+class PublishedLikelihood(unittest.TestCase):
+    """T17: the committed reproduction of ATLAS-SUSY-2018-31 SRB (OBSERVED public likelihood). The asymptotic
+    construction was preregistered as primary and reproduces every value; the toy construction is reported with its
+    own verdict (it does not reproduce the observed and -1 sigma limits); the fit without the control region fails."""
+
+    @classmethod
+    def setUpClass(cls):
+        out = BENCH / "published-likelihood-sbottom" / "output"
+        cls.res = json.loads((out / "results.json").read_text())
+        cls.val = json.loads((out / "artifact_validation.json").read_text())
+        cls.mod = load("published-likelihood-sbottom")
+
+    def test_committed_verdicts(self):
+        v = self.res["verdict"]
+        self.assertTrue(v["asymptotic_reproduces"])
+        self.assertTrue(v["negative_control_fails"])
+        self.assertFalse(v["toy_based_reproduces"])
+        self.assertEqual(self.res["pallet_sha256"], self.mod.SHA256)
+        self.assertEqual(self.res["preregistration"], self.mod.PREREGISTRATION)
+        a = self.res["asymptotic"]["values"]
+        self.assertEqual(len(a["S95_exp"]), 5)
+        self.assertEqual(len(a["cls_scan"]["S"]), 31)                     # a full scan, not CLs at one point
+        t = self.res["toy_based"]["values"]
+        self.assertEqual(t["toys_per_point"], 5000)
+        lo, hi = t["S95_obs_mc_range_95"]
+        self.assertGreater(lo, 4.9 + 0.05)                                 # the toy limit is not the published one
+
+    def test_artifacts_validate_and_the_gate_is_not_passed(self):
+        self.assertTrue(self.val["computational_run"]["ok"])
+        self.assertTrue(self.val["statistical_result"]["ok"])
+        self.assertEqual(self.val["publication_gate"]["status"], "unresolved")
+
+    @unittest.skipUnless(NETWORK and SLOW, "network and slow (downloads the HEPData pallet): set HEP_NETWORK_TESTS=1 and HEP_SLOW_TESTS=1")
+    def test_asymptotic_reproduction_reruns(self):
+        import tempfile as _t
+        with _t.TemporaryDirectory() as td:
+            with contextlib.redirect_stdout(io.StringIO()):
+                code = self.mod.main(["--download", td, "--toys", "0", "--out", td])
+            self.assertEqual(code, 0)
+            new = json.loads((Path(td) / "results.json").read_text())
+        for k, row in self.res["asymptotic"]["comparison"].items():
+            self.assertEqual(new["asymptotic"]["comparison"][k]["status"], row["status"], k)
+            self.assertAlmostEqual(new["asymptotic"]["comparison"][k]["reproduced"], row["reproduced"],
+                                   delta=1e-3 * abs(row["reproduced"]), msg=k)   # optimizer and platform differences
 
 
 if __name__ == "__main__":
