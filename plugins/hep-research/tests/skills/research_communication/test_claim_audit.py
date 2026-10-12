@@ -233,7 +233,7 @@ class Cli(Base):
         code, out, err = self.run_cli(self.p["record"], "--project-root", self.p["root"])
         self.assertEqual(code, 0, out + err)
         rep = json.loads(out)
-        self.assertEqual(rep["scope"]["policy"]["path"], str(POLICY))
+        self.assertEqual(rep["scope"]["policy"]["path"], "<plugin root>/skills/research-communication/assets/reporting-policies.json")
         code, out, _ = self.run_cli(self.p["record"], "--project-root", self.p["root"], "--format", "markdown")
         self.assertTrue(out.startswith("# audit_claims"))
         self.assertIn("claim:C1", out)

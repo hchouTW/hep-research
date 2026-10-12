@@ -24,6 +24,7 @@ description: "Use when the deliverable is scientific communication or literature
 2. Gather the result artifacts the text will cite; list each claim with its artifact or source.
 3. Draft; mark limitations and statuses where they apply.
 4. Write the `communication` artifact for durable deliverables and validate it.
+5. Depth follows the request: **quick** (a source-backed answer, inline, from the ledger or a stated lookup), **standard** (a durable deliverable with its `communication` record), **audit** (the traceability record checked with the scripts below). Never require a full dossier for a quick answer.
 
 <!-- BEGIN context-resolution: generated from contracts/stanzas/context-resolution.md by tools/build_stanzas.py; do not edit -->
 ## Context resolution

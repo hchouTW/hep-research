@@ -1,0 +1,75 @@
+{
+ "note": "synthetic worked example; statuses are the tools' outcomes on placeholder data",
+ "steps": {
+  "01-check-communication": {
+   "args": [
+    "artifacts/comm.json",
+    "--project-root",
+    ".",
+    "--checks",
+    "manuscript"
+   ],
+   "exit_code": 0,
+   "findings": [],
+   "script": "check_communication.py",
+   "status": "pass"
+  },
+  "02-audit-claims": {
+   "args": [
+    "artifacts/comm.json",
+    "--project-root",
+    "."
+   ],
+   "exit_code": 0,
+   "findings": [],
+   "script": "audit_claims.py",
+   "status": "pass"
+  },
+  "03-revision-impact": {
+   "args": [
+    "artifacts/comm.json",
+    "artifacts/comm_v2.json",
+    "--project-root",
+    "."
+   ],
+   "exit_code": 3,
+   "findings": [
+    "revision.assessment_stale",
+    "revision.coverage_unmapped",
+    "revision.identity_changed",
+    "revision.item_not_verified"
+   ],
+   "script": "track_revision_impact.py",
+   "status": "incomplete"
+  },
+  "04-responses": {
+   "args": [
+    "artifacts/comm_v2.json",
+    "--project-root",
+    ".",
+    "--responses"
+   ],
+   "exit_code": 1,
+   "findings": [
+    "response.asserts_uncompleted_work",
+    "response.changed_without_completion"
+   ],
+   "script": "check_adaptation.py",
+   "status": "fail"
+  },
+  "05-unresolved-source": {
+   "args": [
+    "artifacts/comm_v3.json",
+    "--project-root",
+    "."
+   ],
+   "exit_code": 3,
+   "findings": [
+    "resolution.ledger_missing",
+    "resolution.source_unavailable"
+   ],
+   "script": "check_communication.py",
+   "status": "incomplete"
+  }
+ }
+}

@@ -458,6 +458,42 @@ Cowan et al. (one written in this work was wrong). An independent review of the 
 2.2 fields changing legacy outcomes, a permissive publication gate, the gate at q0 = 0, stale global fits, a
 `beta_ppf` underflow), all fixed with tests. pyhf 0.7.6's toy expected bands fail with NumPy ≥ 2.4 (upstream).
 
+## RC-TRACEABILITY (2026-10-12, E2, version 0.6.12 + unreleased): research-communication reliability plan T0–T11
+
+Work order: the research-communication implementation plan (revision 2, inspected baseline `1d42271`, plugin 0.6.10,
+contracts 2.1.0), executed on `e699b24` (plugin 0.6.12, contracts 2.2.0) on branch
+`feat/research-communication-traceability`. Host: E2 (macOS, Python 3.13.2) with Graphviz, Mermaid CLI with Chromium,
+PlantUML, Java and tectonic on PATH. All fixtures are synthetic; the `observed` label of the golden input simulates a
+measured result. Software checks: consistency only, not scientific support or physical validity.
+
+**T0 discrepancy log (before):** F1 a claim with numeric text, null `result_ref` and object status validated (ok,
+no findings); F2 a dangling `result_ref` and an unknown `sources_read` id validated (by design of the pure validator;
+no project bridge existed); F3 an observed-only claim in a mixed observed/synthetic document was rejected
+(`communication.status_upgraded`); F4 an empty manuscript directory exited 0 with "No issues found"; F5 a label in an
+unincluded sibling `.tex` satisfied a reference in `main.tex` (exit 0); F6 `code-review-report.md` sent the statistical
+treatment of ROOT/uproot code to hep-analysis; F7 "Checked N block(s)" counted linted and skipped diagram blocks; F8
+`evals/` held routing only. Reproduced with minimal fixtures on `e699b24` before any change. The one failing
+diagram test of the review (Chromium startup) did not reproduce on E2: every shipped diagram renders here.
+
+| Item | Result | Evidence |
+|---|---|---|
+| T1 contracts | pass: F1 types rejected, F3 claim-scoped propagation, capability dispatch and old-reader rejection, mixed provenance, comparison and contradictory-evidence cases, assessment currency, layering (no cycle, no file opened by pure validation); project resolution of inputs, ledgers, sources, documents, bound-profile ledgers and vocabulary; outcome normalization and output aliasing | `tests/contracts/test_communication.py` (29), `test_communication_project.py` (21); fixtures `communication_traceability.json` and four invalid, one unresolved |
+| T2 manuscript | pass: F4 empty directory exit 2; F5 unincluded label no longer resolves in `--main` mode; nested includes, suffixes, missing includes, cycles, build-root semantics, out-of-root refusal (audit hook), macro-generated and conditional includes incomplete, `\includeonly`, verbatim bodies, declared bibliography only, unassociated `.bbl` unresolved, separate documents sharing labels, JSON report | `test_check_manuscript_main.py` (22); the 25 earlier tests unchanged |
+| T3 diagrams | pass: F7 per-block outcomes reconcile with the total; preflight once, broken renderer not relaunched (launch counter), parse error vs timeout vs no output, strict mode exit 3, SVG XML-only, TikZ skipped; real `dot` rejects bad source as a source error; shipped bundle 69 blocks: 53 rendered, 2 lint-only (SVG), 14 skipped (TikZ/LaTeX) | `test_diagrams.py` (29) |
+| T4 handoffs | pass: F6 fixed; routing by the question in `code-review-report.md` and the papers guide; significance table scoped; reuse of verified records; response wording from completion state; 157 routing cases pass the static check | `test_handoff_text.py` (6), `tests/routing/` |
+| T5 claims and reporting | pass: golden scenario (abstract, body, caption located; wrong manuscript sentence behind a correct manifest fails; unresolved source incomplete; schema-only opens no project file); claim audit (unsupported verdict fails, abstract value citable with its locator while an unread table is unresolved, status-promotion and discovery wording advisory with a hep-statistics handoff, rounding within the declared rule accepted, outside it failed, unit conversion unresolved); reporting policies for five result types | `test_communication_audit.py` (20), `test_claim_audit.py` (18), `test_reporting_completeness.py` (12) |
+| T6 revisions | pass: changed result lists exactly the three stale occurrences and keeps the illustration; rename, same-filename replacement (old value not recovered from today's file), rounding-only edit, stronger wording, metadata-only change, one claim changed, overwritten history, unmapped coverage, verified items reopened or lacking evidence | `test_revision_impact.py` (17) |
+| T7 literature | pass: identifier-only merges, similar titles proposed not merged, report and study related, arXiv version history flags claims, partial notice flags one claim to reassess and the other to check, retraction asserts no falsity, journal-version supersession, incomplete search unresolved, access limitation, quoted instruction kept as data, citation-key collision; input never edited | `test_literature_lifecycle.py` (16) |
+| T8 adaptation | pass: consistent summary passes; missing statement, missing claim id, wrong number, dropped status label, dropped caveat (paraphrase declared counts), universal wording, stale record, missing semantic review; reviewer responses: pending rerun not worded as done, completed change past tense with locator, many-to-one and one-to-many links, reasoned decline | `test_adaptation.py` (15) |
+| T9 terminology | pass: acceptance/efficiency in Chinese and English, precision/resolution, confidence/credible, quoted mention skipped, bilingual aliases fine, scoped symbol reuse vs drift, undeclared scope, abbreviation redefined and used before definition, LaTeX and a second document | `test_terminology.py` (14) |
+| T10 evaluation | infrastructure pass: eleven cases, scorer self-tests (good output, uncertainty-stating correct answer, prose inventing a result behind a correct manifest, invented citation with the right skill, hidden promotion, false completion, everything-unresolved, unjudged never pass, summary lists every critical failure); **no live model run**: model behavior not measured | `evals/research_communication/tests/test_score_replay.py` (16) |
+| T11 integration | pass: worked example regenerates byte-identical reports (`examples/evidence-linked/`, five steps including the unresolved branch); capability matrix, references, SKILL.md and README updated; `run_all_checks.py --no-cli --jobs 4`: 18 checks pass, 2 CLI checks skipped (`--no-cli`); 2209 unit tests, 0 failures, 0 errors, 96 skipped (slow tier, network, GPU, scheduler and optional tools); a first run failed one packaging test because a test file then held a literal private-path string, fixed before the second run | `test_worked_example.py` (3) |
+
+Not verified here: online literature verification (no lookup is performed by any new tool); rendering of diagrams on a
+host without Chromium (the preflight path is covered by fake renderers only); behavioral quality of any model on the
+new cases; Combine, ROOT and GPU paths (unchanged by this work). The contracts version stays 2.2.0 on the branch; the
+release that ships `communication:traceability-v1` bumps it as a minor change.
+
 ## 0.6.12 release check (2026-10-12, E2)
 
 Version 0.6.12 (hep-statistics follow-ups, #51: T27 coverage at 1,500 toys, the Combine release gate, the campaigns

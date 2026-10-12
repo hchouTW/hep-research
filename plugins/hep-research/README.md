@@ -18,7 +18,7 @@ labeled synthetic in file names and metadata. What is and is not validated is li
 | `hep-statistics` | an inference: likelihoods, fits, intervals, limits, unfolding, combinations, comparisons with data |
 | `hep-computing` | working, reproducible software and its execution, including task files for coding agents |
 | `physics-ml` | a machine-learning model or study for physics (PyTorch) |
-| `research-communication` | papers, figures, diagrams, talks, literature and citation checks |
+| `research-communication` | papers, figures, diagrams, talks, literature and citation checks, claims traced to results and sources |
 
 Skills are chosen by what you want produced, not by the experiment you name. Results that another skill continues
 from are written as JSON artifacts in your project's `artifacts_dir` (default `./hep-research-artifacts/`).

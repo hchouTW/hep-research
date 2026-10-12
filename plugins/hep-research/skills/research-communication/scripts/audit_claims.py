@@ -40,7 +40,8 @@ def main(argv=None) -> int:
         except (OSError, ValueError) as exc:
             raise ValueError(f"cannot read policy {args.policy}: {exc}") from exc
         rep = audit_claims(record, ctx, policy)
-        rep["scope"]["policy"]["path"] = str(args.policy)
+        rep["scope"]["policy"]["path"] = ("<plugin root>/skills/research-communication/assets/reporting-policies.json"
+                                          if args.policy.resolve() == DEFAULT_POLICY.resolve() else str(args.policy))
         rep["scope"]["project_root"] = str(args.project_root)
         return rep
     return R.run("audit_claims", __doc__, argv, build, add_args=add_args, all_checks=CHECKS)

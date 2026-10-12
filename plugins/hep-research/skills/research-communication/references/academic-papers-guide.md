@@ -2,6 +2,17 @@
 
 ## When to read this file
 
+| Task | Minimum inputs | Load | Output | Done when |
+|---|---|---|---|---|
+| Quick source-backed answer | the question; ledger or a reachable primary source | `citation-verification.md` | an inline answer naming the source, its version and read level | the source and date are stated; nothing from memory |
+| Draft or revise a section | result artifacts or supplied numbers; target venue | this guide, `scientific-style.md` | the text with status labels and `[VALUE NEEDED]` slots | every number links to an artifact or a source |
+| Evidence-linked manuscript (audit depth) | a traceability `communication` record and the documents | `evidence-linked-writing.md` | `check_communication.py` and `audit_claims.py` reports, draft facts | both reports pass or their open items are listed |
+| Changed result during revision | baseline and revised records | `revision-impact-tracking.md` | `track_revision_impact.py` report, reopened assessments | stale occurrences fixed and re-checked |
+| Referee reply or derived draft | reviewer and revision items; a manifest for the draft | `submission-and-peer-review.md`, `../assets/paper/audience-adaptation-templates.md` | `check_adaptation.py` report and generated wording | no assertion of uncompleted work; caveats kept |
+| Literature search and lifecycle | search log, ledgers, notices | `literature-discovery-and-search.md` | `manage_literature.py` record with provenance | merges only on identifiers; flags listed |
+| Terminology pass | glossary, documents | `equation-and-notation-auditing.md` | `check_terminology.py` report | findings reviewed by a reader |
+
+
 This file holds the routing and rules for work on scientific papers. Read it when a research-communication task falls in its scope; the reference files it routes to are linked relative to this file.
 
 A skill for the full lifecycle around scientific papers: reading and critically
