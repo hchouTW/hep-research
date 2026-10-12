@@ -121,7 +121,7 @@ def independence(m, t, mean, width) -> dict:
         edges = np.quantile(x, np.linspace(0, 1, SLICES + 1))
         groups = [ts[(x >= lo) & ((x <= hi) if k == SLICES - 1 else (x < hi))] for k, (lo, hi) in enumerate(zip(edges, edges[1:]))]
         return stats.kruskal(*groups)
-    (h1, p1), (h2, p2) = kw(ms), kw(np.abs(ms - mean))
+    (_, p1), (_, p2) = kw(ms), kw(np.abs(ms - mean))
     p = min(1.0, 2.0 * min(p1, p2))               # Bonferroni over the two slicings
     return {"status": "violated" if p < INDEPENDENCE_ALPHA else "not-rejected",
             "test": f"Kruskal-Wallis of t over {SLICES} slices in m and in |m - mean| (Bonferroni)",

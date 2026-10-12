@@ -13,6 +13,7 @@ z_from_log_tail. Standard library only.
 from __future__ import annotations
 
 import math
+import numbers
 
 INTERVAL_CL = 0.6827  # central interval reported with every toy estimate (about +-1 sigma)
 BOUND_CL = 0.95       # one-sided bound reported at k = 0 or k = n
@@ -24,9 +25,9 @@ class TailError(ValueError):
 
 
 def _check(k, n, cl=None) -> None:
-    if isinstance(n, bool) or not isinstance(n, int) or n < 1:
+    if isinstance(n, bool) or not isinstance(n, numbers.Integral) or int(n) < 1:
         raise TailError(f"the toy count must be a positive integer, got {n!r} (no toys: no tail estimate)")
-    if isinstance(k, bool) or not isinstance(k, int) or not 0 <= k <= n:
+    if isinstance(k, bool) or not isinstance(k, numbers.Integral) or not 0 <= int(k) <= int(n):
         raise TailError(f"the exceedance count must be an integer in [0, {n}], got {k!r}")
     if cl is not None and (isinstance(cl, bool) or not isinstance(cl, (int, float)) or not 0.0 < cl < 1.0):
         raise TailError(f"the confidence level must lie strictly between 0 and 1, got {cl!r}")
@@ -133,6 +134,7 @@ def toy_tail(k: int, n: int, cl: float = BOUND_CL, interval_cl: float = INTERVAL
     at interval_cl; at k = 0 an upper_bound and at k = n a lower_bound are given at one-sided confidence cl."""
     _check(k, n, cl)
     _check(k, n, interval_cl)
+    k, n = int(k), int(n)
     out = {"k": k, "n": n, "convention": CONVENTION, "estimate": None if k == 0 else k / n,
            "resolved": 0 < k, "binomial_error": math.sqrt(k / n * (1 - k / n) / n) if 0 < k < n else None,
            "interval": list(clopper_pearson(k, n, interval_cl)), "interval_cl": interval_cl}
