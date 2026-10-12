@@ -3,7 +3,7 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.6.11 (2026-10-12)
 
 Hep-statistics audit (audit commit b5c3a55, findings F01–F04, checks T01–T30; evidence in VALIDATION.md,
 STATS-AUDIT). Batch A (P0, T01–T08):
