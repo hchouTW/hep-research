@@ -305,6 +305,8 @@ def _stat_semantics(doc: dict, ext: dict, rep: Report, strict: bool) -> None:
     if isinstance(sig.get("scan"), dict) and ("global_p" in sig or "global_p_bound" in sig) and not sig.get("trials_method"):
         rep.add("unresolved", "$.extension.significance.trials_method", "stats.trials_method_missing",
                 "a global p-value without its trials_method is not an established global significance")
+    if ext.get("paradigm") == "bayesian":
+        _bayesian_rules(ext, rep)
     lik: Any = ext.get("likelihood")
     if isinstance(lik, dict) and isinstance(lik.get("model_card"), dict):
         _model_card_rules(lik["model_card"], ext.get("paradigm"), rep)
@@ -312,6 +314,42 @@ def _stat_semantics(doc: dict, ext: dict, rep: Report, strict: bool) -> None:
     if isinstance(fd, dict) and fd.get("status") == "failed" and ext.get("fit_status") in ("converged", "converged-with-warnings"):
         rep.add("error", "$.extension.fit_status", "stats.fit_status_mismatch",
                 "fit_diagnostics.status is failed but fit_status says converged")
+
+
+GRADIENT_SAMPLERS = re.compile(r"\b(nuts|hmc|hamiltonian)\b", re.I)
+SAMPLER_METADATA = ("warmup", "chains", "draws", "divergences", "e_bfmi_min", "max_treedepth_hits")
+IMPROPER_FORMS = re.compile(r"^\s*(flat|improper|uniform\s*\(\s*-?inf|uniform\[\s*-?inf)", re.I)
+E_BFMI_MIN = 0.3  # Stan's warning threshold
+
+
+def _bayesian_rules(ext: dict, rep: Report) -> None:
+    """Bayesian results (audit T25): gradient-based samplers carry their warmup, chains, draws, divergences, E-BFMI and
+    tree-depth saturations; divergences or a low E-BFMI under fit_status converged are errors; an improper prior is
+    unresolved until the posterior's propriety is shown; SBC is calibration over the prior predictive, so it is not
+    reported as frequentist coverage."""
+    smp: Any = ext.get("sampler")
+    conv = ext.get("fit_status") == "converged"
+    if isinstance(smp, dict) and GRADIENT_SAMPLERS.search(str(smp.get("name", "")) + " " + str(smp.get("algorithm", ""))):
+        missing = [k for k in SAMPLER_METADATA if k not in smp]
+        if missing:
+            rep.add("unresolved", "$.extension.sampler", "stats.sampler_metadata_missing",
+                    f"a gradient-based sampler needs {', '.join(missing)}")
+        dv: Any = smp.get("divergences")
+        if _is_num(dv) and dv > 0 and conv:
+            rep.add("error", "$.extension.fit_status", "stats.divergences_unreported",
+                    f"{dv} divergent transitions but fit_status converged: use converged-with-warnings or failed")
+        eb: Any = smp.get("e_bfmi_min")
+        if _is_num(eb) and eb < E_BFMI_MIN and conv:
+            rep.add("error", "$.extension.fit_status", "stats.low_e_bfmi",
+                    f"E-BFMI {eb} below {E_BFMI_MIN} but fit_status converged")
+    for i, pr in enumerate(ext.get("priors", []) or []):
+        if isinstance(pr, dict) and IMPROPER_FORMS.search(str(pr.get("form", ""))) and not pr.get("propriety"):
+            rep.add("unresolved", f"$.extension.priors[{i}]", "stats.improper_prior",
+                    f"prior '{pr.get('form')}' on {pr.get('parameter')} is improper: state why the posterior is proper "
+                    "(priors[].propriety) or use a proper prior")
+    if "coverage" in ext:
+        rep.add("error", "$.extension.coverage", "stats.paradigm_mislabeled",
+                "a Bayesian result reports calibration (for example SBC) under checks, not frequentist coverage")
 
 
 def check_model_card(card: dict, paradigm: str | None, rep: Report, path: str = "$.extension.likelihood.model_card") -> None:
