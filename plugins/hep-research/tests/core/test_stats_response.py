@@ -157,12 +157,20 @@ class NormalizationAndBookkeepingTests(unittest.TestCase):
 
 
 class BinAndHoleTests(unittest.TestCase):
+    # The next three tests used to assert errors with no declared use. Rank deficiency, fewer reco than truth
+    # bins and an empty truth bin defeat unfolding but are legitimate for forward folding, so the error is now
+    # tied to intended_use "unfolding" (and kept, with a warning to declare the use, when the use is absent).
     def test_empty_truth_bin(self):
         doc = asym_doc()
         for row in doc["matrix"]:
             row[1] = 0.0
-        result = vr.validate_response(doc)
-        self.assertIn("empty.truth_bin", codes(result))
+        for use in ("unfolding", None):
+            doc["metadata"].pop("intended_use", None)
+            if use:
+                doc["metadata"]["intended_use"] = use
+            result = vr.validate_response(doc)
+            self.assertIn("empty.truth_bin", codes(result))
+        self.assertIn("metadata.intended_use_missing", codes(result, "warnings"))
 
     def test_empty_reco_bin(self):
         doc = asym_doc()
@@ -172,13 +180,21 @@ class BinAndHoleTests(unittest.TestCase):
 
     def test_degenerate_truth_bins_are_not_identifiable(self):
         doc = asym_doc()
+        doc["metadata"]["intended_use"] = "unfolding"
         doc["matrix"] = [[0.5, 0.5, 0.0], [0.5, 0.5, 0.3], [0.0, 0.0, 0.7]]
         self.assertIn("identifiability.rank_deficient", codes(vr.validate_response(doc)))
+        del doc["metadata"]["intended_use"]
+        result = vr.validate_response(doc)
+        self.assertIn("identifiability.rank_deficient", codes(result))
+        self.assertIn("metadata.intended_use_missing", codes(result, "warnings"))
 
     def test_fewer_reco_than_truth_bins(self):
         doc = asym_doc()
+        doc["metadata"]["intended_use"] = "unfolding"
         doc["metadata"]["reco_axis"]["edges"] = [1, 4, 8]
         doc["matrix"] = [[0.9, 0.2, 0.0], [0.1, 0.8, 1.0]]
+        self.assertIn("identifiability.underdetermined", codes(vr.validate_response(doc)))
+        del doc["metadata"]["intended_use"]
         self.assertIn("identifiability.underdetermined", codes(vr.validate_response(doc)))
 
     def test_ill_conditioned_warns(self):
@@ -262,6 +278,100 @@ class ClosureTests(unittest.TestCase):
         doc["closure"]["truth"] = [1, 2]
         self.assertIn("closure.malformed", codes(vr.validate_response(doc)))
 
+
+
+def counts_doc():
+    """The review's 2x2 counts response: M = [[80, 10], [20, 90]] from 100 generated events per truth bin."""
+    axis = {"variable": "E", "unit": "GeV", "edges": [0, 1, 2]}
+    return {"metadata": {"truth_axis": dict(axis), "reco_axis": dict(axis), "orientation": "rows_reco_cols_truth",
+                         "normalization": "counts", "inefficiency": "inside_matrix", "acceptance": "outside_matrix",
+                         "underflow_overflow": "not_represented", "efficiency_applied_separately": False,
+                         "acceptance_applied_separately": True, "intended_use": "forward_folding"},
+            "matrix": [[80, 10], [20, 90]], "generated_per_truth_bin": [100, 100],
+            "closure": {"truth": [100, 100], "reco": [90, 110]}}
+
+
+class CountsClosureTests(unittest.TestCase):
+    def test_counts_closure_divides_by_generated(self):
+        result = vr.validate_response(counts_doc())
+        self.assertEqual(result["metrics"]["closure"]["predicted_reco"], [90.0, 110.0])
+        self.assertNotIn("closure.large_pull", codes(result, "warnings"))
+
+    def test_counts_and_probability_representations_fold_alike(self):
+        prob = counts_doc()
+        prob["metadata"]["normalization"] = "includes_efficiency"
+        prob["matrix"] = [[0.8, 0.1], [0.2, 0.9]]
+        del prob["generated_per_truth_bin"]
+        for truth in ([100, 100], [37.5, 812.25]):
+            a, b = counts_doc(), copy.deepcopy(prob)
+            a["closure"]["truth"] = b["closure"]["truth"] = truth
+            pa = vr.validate_response(a)["metrics"]["closure"]["predicted_reco"]
+            pb = vr.validate_response(b)["metrics"]["closure"]["predicted_reco"]
+            for x, y in zip(pa, pb):
+                self.assertLess(abs(x - y), 1e-12)
+
+    def test_counts_closure_without_generated_is_not_assessable(self):
+        doc = counts_doc()
+        del doc["generated_per_truth_bin"]
+        closure = vr.validate_response(doc)["metrics"]["closure"]
+        self.assertEqual(closure["status"], "not_assessable")
+        self.assertIn("generated_per_truth_bin", closure["reason"])
+        self.assertNotIn("predicted_reco", closure)
+
+    def test_negative_closure_truth_is_an_error(self):
+        doc = counts_doc()
+        doc["closure"]["truth"] = [100, -5]
+        self.assertIn("closure.negative_truth", codes(vr.validate_response(doc)))
+
+
+class IntendedUseTests(unittest.TestCase):
+    def folding_doc(self):
+        doc = asym_doc()
+        doc["metadata"]["intended_use"] = "forward_folding"
+        doc["closure"] = {"truth": [100, 90, 80], "reco": [88, 90, 92]}
+        return doc
+
+    def test_rectangular_response_is_valid_for_forward_folding(self):
+        doc = self.folding_doc()
+        doc["metadata"].update({"normalization": "includes_efficiency", "inefficiency": "inside_matrix",
+                                "efficiency_applied_separately": False})
+        doc["metadata"]["truth_axis"]["edges"] = [1, 2, 4]
+        doc["metadata"]["reco_axis"]["edges"] = [1, 4]
+        doc["matrix"] = [[0.8, 0.7]]
+        doc["closure"] = {"truth": [100, 100], "reco": [150]}
+        result = vr.validate_response(doc)
+        self.assertNotEqual(result["status"], "fail", result["errors"])
+        self.assertTrue({"identifiability.underdetermined", "identifiability.rank_deficient"} <= codes(result, "warnings"))
+        self.assertEqual(result["metrics"]["closure"]["predicted_reco"], [150.0])
+
+    def test_zero_efficiency_truth_bin_is_valid_for_forward_folding(self):
+        doc = self.folding_doc()
+        for row in doc["matrix"]:
+            row[1] = 0.0
+        doc["closure"]["reco"] = [70, 30, 70]
+        result = vr.validate_response(doc)
+        self.assertNotEqual(result["status"], "fail", result["errors"])
+        self.assertIn("empty.truth_bin", codes(result, "warnings"))
+        self.assertIn("closure", result["metrics"])
+
+    def test_unknown_intended_use_is_an_error(self):
+        doc = self.folding_doc()
+        doc["metadata"]["intended_use"] = "plotting"
+        self.assertIn("metadata.intended_use", codes(vr.validate_response(doc)))
+
+    def test_identifiability_errors_no_longer_skip_closure(self):
+        doc = asym_doc()
+        doc["metadata"]["intended_use"] = "unfolding"
+        doc["matrix"] = [[0.5, 0.5, 0.0], [0.5, 0.5, 0.3], [0.0, 0.0, 0.7]]
+        doc["closure"] = {"truth": [100, 100, 100], "reco": [100, 130, 70]}
+        result = vr.validate_response(doc)
+        self.assertEqual(result["status"], "fail")
+        self.assertEqual(result["metrics"]["closure"]["predicted_reco"], [100.0, 130.0, 70.0])
+
+    def test_conditional_on_selected_with_acceptance_inside_is_inconsistent(self):
+        doc = valid()
+        doc["metadata"].update({"acceptance": "inside_matrix", "acceptance_applied_separately": False})
+        self.assertIn("metadata.inconsistent", codes(vr.validate_response(doc)))
 
 class CliTests(unittest.TestCase):
     def run_cli(self, *argv):

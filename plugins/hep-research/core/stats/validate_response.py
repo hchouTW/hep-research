@@ -7,6 +7,13 @@ convention, efficiency or acceptance counted twice (or not at all), probability 
 outside the axes, empty bins, and phase-space holes that make the problem
 non-identifiable. It never modifies the matrix.
 
+Identifiability depends on the declared use (metadata.intended_use). For "unfolding",
+fewer reco than truth bins, a rank-deficient matrix and a truth bin with no response are
+errors. For "forward_folding" they are warnings: folding a prediction through such a
+response is valid, it only loses information. For "parametric_fit" they are warnings too:
+what must be identifiable is the model's parameters, which this tool does not check.
+Without a declared use the unfolding verdict applies and a warning asks for the use.
+
 What it does: reads a JSON response card + matrix, checks it, and prints errors,
 warnings, metrics and a status. With `closure` truth/reco test spectra it also folds
 the truth through the matrix and reports residuals and pull summaries. Correct
@@ -23,17 +30,21 @@ Input JSON:
       "inefficiency": "inside_matrix" | "outside_matrix",
       "acceptance":   "inside_matrix" | "outside_matrix",
       "underflow_overflow": "explicit_bins" | "folded_into_edge_bins" | "not_represented",
-      "efficiency_applied_separately": bool, "acceptance_applied_separately": bool},
+      "efficiency_applied_separately": bool, "acceptance_applied_separately": bool,
+      "intended_use": "forward_folding" | "unfolding" | "parametric_fit"},   # recommended
    "matrix": [[...]],                  # entries per the declared normalization
    "underflow": [...], "overflow": [...],   # per truth bin (explicit_bins)
-   "generated_per_truth_bin": [...],   # optional (normalization "counts")
-   "closure": {"truth": [...], "reco": [...], "reco_sigma": [...]},   # optional
+   "generated_per_truth_bin": [...],   # optional (normalization "counts"; closure needs it)
+   "closure": {"truth": [...], "reco": [...], "reco_sigma": [...]},   # optional; truth >= 0
    "tolerances": {"normalization": 1e-6, "rank": 1e-12, "condition_warn": 1e4,
                   "min_efficiency": 1e-3, "pull_warn": 3.0}}
 Normalization meanings (sums are over reco bins, plus explicit under/overflow, per truth bin):
   conditional_on_selected  each truth-bin sum = 1; inefficiency/acceptance live outside
   includes_efficiency      each truth-bin sum = efficiency <= 1; inefficiency lives inside
   counts                   raw counts; sums <= generated_per_truth_bin when supplied
+Closure folds the truth as pred_i = sum_j P_ij truth_j with P = the matrix, or, under
+"counts", P_ij = M_ij / generated_j; without generated_per_truth_bin a counts closure is
+"not_assessable". Only shape, entry, normalization and orientation errors skip closure.
 
 Usage: python3 core/stats/validate_response.py FILE.json [--strict]
 Exit codes: 0 pass (or warn without --strict); 1 errors; 2 unreadable or not JSON.
@@ -63,6 +74,9 @@ ORIENTATIONS = ("rows_reco_cols_truth", "rows_truth_cols_reco")
 NORMALIZATIONS = ("conditional_on_selected", "includes_efficiency", "counts")
 PLACEMENT = ("inside_matrix", "outside_matrix")
 FLOW = ("explicit_bins", "folded_into_edge_bins", "not_represented")
+INTENDED_USES = ("forward_folding", "unfolding", "parametric_fit")
+CLOSURE_BLOCKING = ("shape", "entries", "normalization", "metadata.normalization", "metadata.orientation",
+                    "orientation", "dimensions")
 
 
 def _num(x) -> bool:
@@ -120,6 +134,27 @@ def _check_metadata(meta: dict, report: Report) -> None:
     for key in ("efficiency_applied_separately", "acceptance_applied_separately"):
         if not isinstance(meta.get(key), bool):
             report.warn(f"metadata.{key}", f"{key} not declared as true/false: double counting or a missing correction cannot be excluded")
+    if "intended_use" in meta and meta["intended_use"] not in INTENDED_USES:
+        report.error("metadata.intended_use", f"intended_use must be one of {list(INTENDED_USES)}, got {meta['intended_use']!r}")
+
+
+class _Identifiability:
+    """Reports findings that defeat unfolding but not forward folding, at the severity the declared use implies."""
+
+    def __init__(self, report: Report, use) -> None:
+        self.report, self.use, self.asked = report, use, False
+
+    def __call__(self, code: str, message: str) -> None:
+        if self.use in ("forward_folding", "parametric_fit"):
+            what = "the model parameters must still be shown identifiable" if self.use == "parametric_fit" else \
+                "valid for forward folding, but information is lost"
+            self.report.warn(code, f"{message} ({what})")
+            return
+        self.report.error(code, message)
+        if self.use is None and not self.asked:
+            self.asked = True
+            self.report.warn("metadata.intended_use_missing", "intended_use is not declared, so the unfolding verdict "
+                             "applies; declare 'forward_folding' or 'parametric_fit' if the response is not inverted")
 
 
 def _bookkeeping(meta: dict, report: Report) -> None:
@@ -133,11 +168,14 @@ def _bookkeeping(meta: dict, report: Report) -> None:
     norm = meta.get("normalization")
     if norm == "conditional_on_selected" and meta.get("inefficiency") == "inside_matrix":
         report.error("metadata.inconsistent", "normalization 'conditional_on_selected' means inefficiency is outside the matrix, but inefficiency is declared inside")
+    if norm == "conditional_on_selected" and meta.get("acceptance") == "inside_matrix":
+        report.error("metadata.inconsistent", "normalization 'conditional_on_selected' means acceptance is outside the matrix, but acceptance is declared inside")
     if norm == "includes_efficiency" and meta.get("inefficiency") == "outside_matrix":
         report.error("metadata.inconsistent", "normalization 'includes_efficiency' means inefficiency is inside the matrix, but it is declared outside")
 
 
-def _rank_and_condition(m: list[list[float]], tol: dict, report: Report, n_reco: int, n_truth: int) -> dict:
+def _rank_and_condition(m: list[list[float]], tol: dict, report: Report, n_reco: int, n_truth: int,
+                        flag: _Identifiability | None = None) -> dict:
     """Identifiability from the singular values of the reco-by-truth matrix m[i][j] (via M^T M)."""
     gram = [[sum(m[k][i] * m[k][j] for k in range(n_reco)) for j in range(n_truth)] for i in range(n_truth)]
     solver: dict = {}
@@ -153,10 +191,11 @@ def _rank_and_condition(m: list[list[float]], tol: dict, report: Report, n_reco:
     rank = sum(1 for v in values if v > tol["rank"] * lmax)
     metrics["numerical_rank"] = rank
     metrics["n_truth_bins"] = n_truth
+    flag = flag or _Identifiability(report, "unfolding")
     if n_reco < n_truth:
-        report.error("identifiability.underdetermined", f"{n_reco} reconstructed bins cannot determine {n_truth} truth bins without regularization or a model")
+        flag("identifiability.underdetermined", f"{n_reco} reconstructed bins cannot determine {n_truth} truth bins without regularization or a model")
     if rank < n_truth:
-        report.error("identifiability.rank_deficient", f"numerical rank {rank} < {n_truth} truth bins: some truth combinations are invisible to the data (phase-space hole or degenerate bins)")
+        flag("identifiability.rank_deficient", f"numerical rank {rank} < {n_truth} truth bins: some truth combinations are invisible to the data (phase-space hole or degenerate bins)")
     else:
         cond = math.sqrt(lmax / max(values[0], 1e-300))
         metrics["condition_number"] = cond
@@ -165,7 +204,25 @@ def _rank_and_condition(m: list[list[float]], tol: dict, report: Report, n_reco:
     return metrics
 
 
-def _closure(doc: dict, m: list[list[float]], n_reco: int, n_truth: int, norm: str, tol: dict, report: Report) -> dict | None:
+def probability_matrix(m: list[list[float]], norm: str, generated: list[float] | None = None) -> list[list[float]]:
+    """P[i][j] = probability that truth bin j lands in reco bin i, from m[i][j] (reco i, truth j). Under 'counts' the
+    counts are divided by generated[j] (a truth bin with nothing generated contributes nothing); the other
+    normalizations are probabilities already."""
+    if norm != "counts":
+        return [list(r) for r in m]
+    if generated is None:
+        raise ValueError("normalization 'counts' needs generated_per_truth_bin to give probabilities")
+    return [[x / generated[j] if generated[j] > 0 else 0.0 for j, x in enumerate(r)] for r in m]
+
+
+def fold(p: list[list[float]], truth: list[float], background: list[float] | None = None) -> list[float]:
+    """nu_i = sum_j P[i][j] truth_j + b_i (P from probability_matrix)."""
+    b = background or [0.0] * len(p)
+    return [sum(pij * t for pij, t in zip(row, truth)) + bi for row, bi in zip(p, b)]
+
+
+def _closure(doc: dict, m: list[list[float]], n_reco: int, n_truth: int, norm: str, tol: dict, report: Report,
+             generated: list[float] | None = None) -> dict | None:
     c = doc.get("closure")
     if c is None:
         return None
@@ -175,7 +232,13 @@ def _closure(doc: dict, m: list[list[float]], n_reco: int, n_truth: int, norm: s
             or (sig is not None and (not isinstance(sig, list) or len(sig) != n_reco or not all(_num(x) and x > 0 for x in sig)))):
         report.error("closure.malformed", f"closure needs truth ({n_truth}), reco ({n_reco}) and optionally positive reco_sigma ({n_reco}) numbers")
         return None
-    pred = [sum(m[i][j] * truth[j] for j in range(n_truth)) for i in range(n_reco)]
+    if any(x < 0 for x in truth):
+        report.error("closure.negative_truth", "closure truth must be non-negative (event counts or rates)")
+        return None
+    if norm == "counts" and generated is None:
+        return {"status": "not_assessable", "reason": "normalization 'counts' needs generated_per_truth_bin to turn "
+                "counts into probabilities; without it the closure cannot be folded"}
+    pred = fold(probability_matrix(m, norm, generated), truth)
     pulls, skipped = [], []
     for i in range(n_reco):
         sigma = sig[i] if sig else math.sqrt(pred[i]) if pred[i] > 0 else 0.0
@@ -185,8 +248,8 @@ def _closure(doc: dict, m: list[list[float]], n_reco: int, n_truth: int, norm: s
             skipped.append(i)
     interp = {"conditional_on_selected": "truth = selected-event truth (efficiency and acceptance already applied by the caller)",
               "includes_efficiency": "truth = generated events in the fiducial phase space",
-              "counts": "truth = generated event counts matching the matrix counts"}[norm]
-    out: dict[str, Any] = {"truth_interpretation": interp, "predicted_reco": pred, "residuals": [r - p for r, p in zip(reco, pred)],
+              "counts": "truth = generated events; the counts are divided by generated_per_truth_bin"}[norm]
+    out: dict[str, Any] = {"status": "assessed", "truth_interpretation": interp, "predicted_reco": pred, "residuals": [r - p for r, p in zip(reco, pred)],
                            "sigma_source": "supplied reco_sigma" if sig else "Poisson sqrt(predicted)", "skipped_bins_zero_sigma": skipped}
     if pulls:
         out.update({"chi2": sum(p * p for p in pulls), "ndof": len(pulls), "mean_pull": sum(pulls) / len(pulls),
@@ -268,7 +331,7 @@ def validate_response(doc: dict) -> dict:
 
     norm, nt = meta.get("normalization"), tol["normalization"]
     generated = doc.get("generated_per_truth_bin")
-    declared_ok, other_ok = True, None
+    declared_ok, other_ok, gen_ok = True, None, None
     if norm == "conditional_on_selected":
         lost = [1.0 - s for s in truth_sum]
         declared_ok = all(abs(s - 1.0) <= nt for j, s in enumerate(truth_sum) if truth_in[j] > 0)
@@ -292,6 +355,7 @@ def validate_response(doc: dict) -> dict:
             report.warn("holes.low_efficiency", f"truth bins {low} have efficiency below {tol['min_efficiency']}")
     elif norm == "counts":
         if isinstance(generated, list) and len(generated) == n_truth and all(_num(g) and g >= 0 for g in generated):
+            gen_ok = [float(g) for g in generated]
             over_gen = [j for j in range(n_truth) if truth_sum[j] > generated[j] * (1 + nt) + nt]
             report.metrics["lost_counts"] = [g - s for g, s in zip(generated, truth_sum)]
             if over_gen:
@@ -302,19 +366,23 @@ def validate_response(doc: dict) -> dict:
     if norm in ("conditional_on_selected", "includes_efficiency") and not declared_ok and other_ok:
         report.error("orientation.likely_transposed", "sums along the OTHER axis satisfy the declared normalization: the matrix is probably transposed relative to metadata.orientation")
 
+    use = meta.get("intended_use") if meta.get("intended_use") in INTENDED_USES else None
+    report.metrics["intended_use"] = use or "undeclared"
+    flag = _Identifiability(report, use)
     empty_truth = [j for j in range(n_truth) if truth_sum[j] == 0]
     empty_reco = [i for i in range(n_reco) if reco_sum[i] == 0]
     if empty_truth:
-        report.error("empty.truth_bin", f"truth bins {empty_truth} have no response at all: a phase-space hole, unfolding cannot constrain them")
+        flag("empty.truth_bin", f"truth bins {empty_truth} have no response at all: a phase-space hole, unfolding cannot constrain them")
     if empty_reco:
         report.warn("empty.reco_bin", f"reco bins {empty_reco} receive nothing from any truth bin: data counts there cannot be explained")
     if not empty_truth:
-        report.metrics.update(_rank_and_condition(m, tol, report, n_reco, n_truth))
+        report.metrics.update(_rank_and_condition(m, tol, report, n_reco, n_truth, flag))
     else:
         keep = [j for j in range(n_truth) if j not in empty_truth]
         if keep:
             report.metrics.update(_rank_and_condition([[m[i][j] for j in keep] for i in range(n_reco)], tol, Report(), n_reco, len(keep)))
-    closure = _closure(doc, m, n_reco, n_truth, norm if norm in NORMALIZATIONS else "counts", tol, report) if not report.errors else None
+    blocked = any(e["code"].startswith(CLOSURE_BLOCKING) for e in report.errors) or norm not in NORMALIZATIONS
+    closure = None if blocked else _closure(doc, m, n_reco, n_truth, norm, tol, report, gen_ok)
     if closure is not None:
         report.metrics["closure"] = closure
     return {"status": report.status(), "errors": report.errors, "warnings": report.warnings, "metrics": report.metrics, **result}

@@ -1,5 +1,5 @@
 {
- "$comment": "Owner: detector-response. form=parametrized (recasting): axes may be 'not-applicable'; a parametrization with validity range is required.",
+ "$comment": "Owner: detector-response. form=parametrized (recasting): axes may be 'not-applicable'; a parametrization with validity range is required. form=matrix: matrix (inline) or matrix_ref. includes / applied_separately use the response_corrections vocabulary (or namespaced terms); contracts.response_adapter converts the extension into core/stats/validate_response.py input.",
  "type": "object",
  "required": [
   "truth_axis",
@@ -102,6 +102,34 @@
     "function_ref",
     "validity_range"
    ]
+  },
+  "matrix": {
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "type": "array",
+    "minItems": 1,
+    "items": {
+     "type": "number"
+    }
+   }
+  },
+  "generated_per_truth_bin": {
+   "type": "array",
+   "items": {
+    "type": "number"
+   }
+  },
+  "intended_use": {
+   "type": "string",
+   "enum": [
+    "forward_folding",
+    "unfolding",
+    "parametric_fit"
+   ]
+  },
+  "variable_conversion": {
+   "type": "string"
   }
  }
 }

@@ -41,6 +41,7 @@ from core.stats.statistical_toys import ratio_measured  # noqa: E402
 from core.stats.unfolding_diagnostics import linear_matrix  # noqa: E402
 from core.stats.validate_covariance import validate_covariance  # noqa: E402
 from core.stats.validate_response import validate_response  # noqa: E402
+from contracts.response_adapter import to_validator_input  # noqa: E402
 
 PROFILE_DIR = PLUGIN / "profiles" / "experiments" / "ams-02"
 PROFILE = json.loads((PROFILE_DIR / "profile.json").read_text(encoding="utf-8"))
@@ -314,9 +315,11 @@ def artifacts(world, res, created):
                                       "orientation": "rows_reco_cols_truth", "normalization": "conditional_on_selected",
                                       "inefficiency": "outside_matrix", "acceptance": "outside_matrix", "includes": ["migration"],
                                       "applied_separately": ["trigger_efficiency", "selection_efficiency", "acceptance", "exposure"],
-                                      "underflow_overflow": "lost outside [1.5, 150] GV; first and last bins are buffers",
+                                      "underflow_overflow": "explicit_bins", "intended_use": "unfolding",
                                       "conditions": "per synthetic period (spectral shape inside bins differs slightly)",
-                                      "provenance": "computed analytically from the synthetic resolution model", "matrix_ref": "results.json",
+                                      "provenance": "computed analytically from the synthetic resolution model; migration outside "
+                                                    "[1.5, 150] GV is kept in explicit underflow/overflow vectors; first and last "
+                                                    "bins are buffers", "matrix_ref": "results.json",
                                       "form": "matrix"})
     stat = dict(base, artifact_id="synthetic-path-a-ratio-result", artifact_type="statistical-result", required_capabilities=["stats:result-semantics"],
                 objective="SYNTHETIC He/p ratio per bin and period with covariance",
@@ -387,14 +390,11 @@ def main(argv=None) -> int:
     res = run_analysis(sim, world)
     toys = toy_closure(world, args.toys, args.seed + 1)
     refs = {p: ratio_reference(res, p) for p in PERIODS}
-    resp_checks = {s: validate_response({"metadata": {"truth_axis": {"variable": "rigidity", "unit": "GV", "edges": EDGES.tolist()},
-                                                      "reco_axis": {"variable": "rigidity", "unit": "GV", "edges": EDGES.tolist()},
-                                                      "orientation": "rows_reco_cols_truth", "normalization": "conditional_on_selected",
-                                                      "inefficiency": "outside_matrix", "acceptance": "outside_matrix",
-                                                      "underflow_overflow": "explicit_bins", "efficiency_applied_separately": True,
-                                                      "acceptance_applied_separately": True},
-                                         "matrix": world[s][p]["response"].tolist(), "underflow": world[s][p]["underflow"].tolist(),
-                                         "overflow": world[s][p]["overflow"].tolist()})["status"]
+    docs, contract = artifacts(world, res, args.created)
+    # the validator input comes from each response artifact (contracts.response_adapter), not a second declaration
+    resp_checks = {s: validate_response(to_validator_input(docs[f"response_{s}"]["extension"], matrix=world[s][p]["response"].tolist(),
+                                                           underflow=world[s][p]["underflow"].tolist(),
+                                                           overflow=world[s][p]["overflow"].tolist())["input"])["status"]
                    for s in SPECIES for p in list(PERIODS)[:1]}
     cov_checks = {}
     for (k, p), b in res.items():
@@ -404,7 +404,6 @@ def main(argv=None) -> int:
                                                           "units": "(m^-2 sr^-1 s^-1 GV^-1)^2", "matrix": b["total"][sl, sl].tolist(),
                                                           "blocks": {"stat": b["stat"][sl, sl].tolist(), "trigger": b["trigger"][sl, sl].tolist(),
                                                                      "selection": b["selection"][sl, sl].tolist()}})["status"]
-    docs, contract = artifacts(world, res, args.created)
     for name, doc in docs.items():
         (out / "artifacts" / f"{name}.json").write_text(json.dumps(doc, indent=1) + "\n")
 

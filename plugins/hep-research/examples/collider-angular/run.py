@@ -40,6 +40,7 @@ from contracts.vocab import Vocabulary  # noqa: E402
 from core.stats.unfolding_diagnostics import linear_matrix  # noqa: E402
 from core.stats.validate_covariance import validate_covariance  # noqa: E402
 from core.stats.validate_response import validate_response  # noqa: E402
+from contracts.response_adapter import to_validator_input  # noqa: E402
 
 PROFILE = json.loads((PROFILE_DIR / "profile.json").read_text(encoding="utf-8"))
 CFG = json.loads((PROFILE_DIR / "benchmarks" / "path-b.json").read_text(encoding="utf-8"))
@@ -146,8 +147,10 @@ def artifacts(res, resp, created):
                                    "orientation": "rows_reco_cols_truth", "normalization": "conditional_on_generated",
                                    "inefficiency": "inside_matrix", "acceptance": "inside_matrix", "includes": ["migration", "efficiency"],
                                    "applied_separately": ["luminosity"],
-                                   "underflow_overflow": "reco outside [-1, 1] is lost; outer truth bins are buffers",
-                                   "conditions": "single synthetic run", "provenance": "analytic integration of the synthetic detector model",
+                                   "underflow_overflow": "explicit_bins", "intended_use": "unfolding",
+                                   "conditions": "single synthetic run",
+                                   "provenance": "analytic integration of the synthetic detector model; reco outside [-1, 1] is "
+                                                 "kept in explicit underflow/overflow vectors; outer truth bins are buffers",
                                    "matrix_ref": "results.json#response", "form": "matrix"})
     stat = dict(base, artifact_id="synthetic-path-b-result", artifact_type="statistical-result", required_capabilities=["stats:result-semantics"],
                 objective="SYNTHETIC corrected angular distribution and fiducial cross section with covariance",
@@ -214,17 +217,13 @@ def main(argv=None) -> int:
     c2 = chi2(res["dsigma"], expected, res["total"])
     toys = toy_closure(m, mu_reco, expected, fid_expected, args.toys, args.seed + 1)
 
-    rv = validate_response({"metadata": {"truth_axis": {"variable": "cos_theta", "unit": "1", "edges": TE.tolist()},
-                                         "reco_axis": {"variable": "cos_theta", "unit": "1", "edges": RE.tolist()},
-                                         "orientation": "rows_reco_cols_truth", "normalization": "includes_efficiency",
-                                         "inefficiency": "inside_matrix", "acceptance": "inside_matrix",
-                                         "underflow_overflow": "explicit_bins", "efficiency_applied_separately": False,
-                                         "acceptance_applied_separately": False},
-                            "matrix": m.tolist(), "underflow": resp["underflow"].tolist(), "overflow": resp["overflow"].tolist()})
+    docs, contract = artifacts(res, resp, args.created)
+    # the validator input comes from the response artifact itself (contracts.response_adapter), not a second declaration
+    rv = validate_response(to_validator_input(docs["response"]["extension"], matrix=m.tolist(),
+                                              underflow=resp["underflow"].tolist(), overflow=resp["overflow"].tolist())["input"])
     labels = [f"b{j}" for j in range(REP.start, REP.stop)]
     cv = validate_covariance({"labels": labels, "kind": "absolute", "units": "pb^2", "matrix": res["total"][REP, REP].tolist(),
                               "blocks": {"stat": res["stat"][REP, REP].tolist(), "lumi": res["lumi"][REP, REP].tolist()}})
-    docs, contract = artifacts(res, resp, args.created)
     for name, doc in docs.items():
         (out / "artifacts" / f"{name}.json").write_text(json.dumps(doc, indent=1) + "\n")
 

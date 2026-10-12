@@ -15,6 +15,7 @@
   "prediction.json",
   "response.json",
   "response_parametrized.json",
+  "response_v24.json",
   "statres_bayesian.json",
   "statres_bayesian_rhat_warning.json",
   "statres_frequentist.json",
@@ -39,6 +40,15 @@
   ],
   "response_double_counted.json": [
    "response.double_counted"
+  ],
+  "response_trigger_efficiency_twice.json": [
+   "response.double_counted"
+  ],
+  "response_matrix_missing.json": [
+   "response.matrix_missing"
+  ],
+  "response_joint_counts_inefficiency_inside.json": [
+   "response.normalization_inconsistent"
   ],
   "prediction_gaussian_envelope.json": [
    "uncertainty.auto_gaussian"
