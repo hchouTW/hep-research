@@ -53,6 +53,15 @@ Standard HEP convention (not universal, but widely expected by referees):
 State the exact significance number alongside the word, not instead of it
 ("a 3.4σ excess, corresponding to evidence for...").
 
+The table applies only to a search's significance statement about a signal
+hypothesis, under the conventions of the source's own field and venue (check the
+collaboration's or journal's policy where one exists; some fields quote Bayes
+factors or p-values without the σ words). The everyday sense of "evidence" (a
+source, result or figure that supports a claim, as in the claim-evidence matrix of
+`claim-evidence-mapping.md`) is not a significance claim and carries no σ
+threshold: never rewrite "the evidence for this choice is Table 2" as if it needed
+3σ, and never let a 3σ convention decide whether a cited source supports a sentence.
+
 The σ values are one-sided Gaussian tail probabilities: 3σ is p = 1.35 × 10⁻³ and
 5σ is p = 2.87 × 10⁻⁷ (computed 2026-09-26). The 3σ/5σ thresholds are a field
 convention, not a statistical law; L. Lyons, "Discovering the significance of 5

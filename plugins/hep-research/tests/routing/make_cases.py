@@ -140,6 +140,13 @@ C = [
  ('rc-t3-neg', 'zh-Hant', 'negative', '這張 Feynman 圖在樹圖階是否物理上允許？', 'hep-theory', ['Feynman diagram is allowed'], 'research-communication', None, {"set": "T3"}),
  ('co-t3-neg', 'en', 'negative', 'My code runs fine; which event selection cuts should define the signal region of my dimuon search?', 'hep-analysis', ['event/candidate selection'], 'hep-computing', None, {"set": "T3"}),
  ('an-t3-neg', 'en', 'negative', 'Train a PyTorch classifier for my signal selection with grouped train/validation/test splits by run.', 'physics-ml', ['grouped train/validation/test splits and leakage checks'], 'hep-analysis', None, {"set": "T3"}),
+ # T4 (research-communication plan): handoffs by the question asked, not by the library or the document in play
+ ('rc-t4-code-1', 'en', 'negative', 'The script that produces Figure 3 of my paper crashes on the new ntuple format; fix it.', 'hep-computing', ['crashes'], 'research-communication', None, {"set": "T4"}),
+ ('rc-t4-stat-1', 'en', 'negative', 'Before I write "evidence for" in the abstract: compute the global significance of my 3.4σ local excess with the look-elsewhere effect.', 'hep-statistics', ['significance and look-elsewhere effects'], 'research-communication', None, {"set": "T4"}),
+ ('rc-t4-ml-1', 'zh-Hant', 'negative', '論文裡宣稱分類器比基線好 3%，請用不同 seed 做 uncertainty estimation，檢查這個改善是否真實。', 'physics-ml', ['uncertainty estimation'], 'research-communication', None, {"set": "T4"}),
+ ('rc-t4-det-1', 'en', 'negative', 'For the detector section of the paper, measure the tracking resolution of our silicon tracker from the data.', 'detector-response', ['resolution'], 'research-communication', None, {"set": "T4"}),
+ ('rc-t4-review-1', 'en', 'direct', "Write the code-review part of my referee report: does the released repository do what the paper says it does?", 'research-communication', ['referee reports'], None, None, {"set": "T4"}),
+ ('rc-t4-reuse-1', 'zh-Hant', 'direct', '上次已經查證過這篇 citations 的 INSPIRE-HEP 紀錄，這次改稿能直接沿用嗎？', 'research-communication', ['citations', 'INSPIRE-HEP'], None, None, {"set": "T4", "note": "reuse keeps the old verification date; a time-sensitive claim is rechecked"}),
  # T19: Simplified Chinese, Japanese and German
  ('t19-zhs-1', 'zh-Hans', 'direct', '请用 tag-and-probe 测量 muon 触发效率，并给出每个 bin 的不确定度。', 'detector-response', ['tag-and-probe'], None, None, {"set": "T19"}),
  ('t19-zhs-2', 'zh-Hans', 'direct', '我想对这个能谱做 unfolding，并检查 coverage。', 'hep-statistics', ['unfolding', 'coverage'], None, None, {"set": "T19"}),

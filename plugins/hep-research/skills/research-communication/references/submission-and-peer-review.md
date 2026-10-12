@@ -167,6 +167,16 @@ referee's report:
    substantial, so the editor doesn't have to reconstruct it from the
    point-by-point list.
 
+Write each assertion from the state of the change in the revision ledger
+(`revision-impact-tracking.md`): "We have changed/added/revised ..." only for a
+change completed and checked in the revised manuscript, with its locator; a rerun,
+regenerated figure or reassessment that has not happened yet stays explicit in the
+draft ("the fit is being rerun; the number in Sec. IV will be updated" or a
+`[VALUE NEEDED: ...]` slot), never "we performed". A reasoned decision not to
+change the manuscript is a valid disposition and is stated as such. One referee
+comment may map to several changes and several comments to one; keep the links so
+the replies stay consistent with each other.
+
 ## Conference-style rebuttals
 
 ML/AI conferences (NeurIPS, ICML, ICLR, AAAI, CVPR/ICCV/ECCV) replace the

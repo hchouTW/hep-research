@@ -35,7 +35,7 @@
   },
   "research-communication": {
    "references": 52,
-   "bytes": 359173,
+   "bytes": 367996,
    "uncited": 0
   }
  },
@@ -1460,7 +1460,7 @@
     "tests/skills/hep_statistics/test_core_stats_guide.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "06b86c8 2026-10-12"
+   "last_commit": "e375e7d 2026-10-12"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
@@ -1580,7 +1580,7 @@
     "hep-analysis",
     "physics-ml"
    ],
-   "last_commit": "06b86c8 2026-10-12"
+   "last_commit": "e375e7d 2026-10-12"
   },
   {
    "path": "skills/hep-statistics/references/unfolding.md",
@@ -2297,17 +2297,18 @@
   {
    "path": "skills/research-communication/references/academic-papers-guide.md",
    "owner": "research-communication",
-   "bytes": 35312,
-   "lines": 472,
+   "bytes": 36777,
+   "lines": 484,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/research-communication/SKILL.md",
     "skills/research-communication/references/academic-diagrams-guide.md",
     "skills/research-communication/references/code-to-methodology-synthesis.md",
-    "skills/research-communication/references/submission-and-peer-review.md"
+    "skills/research-communication/references/submission-and-peer-review.md",
+    "tests/skills/research_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "2261425 2026-10-12"
   },
   {
    "path": "skills/research-communication/references/artifact-packaging-for-release.md",
@@ -2347,8 +2348,8 @@
   {
    "path": "skills/research-communication/references/citation-verification.md",
    "owner": "research-communication",
-   "bytes": 2700,
-   "lines": 50,
+   "bytes": 3501,
+   "lines": 63,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/research-communication/SKILL.md",
@@ -2356,7 +2357,8 @@
     "skills/research-communication/references/astroparticle-and-cosmic-ray-papers.md",
     "skills/research-communication/references/claim-evidence-mapping.md",
     "skills/research-communication/references/literature-review.md",
-    "skills/research-communication/references/plagiarism-and-text-reuse-checking.md"
+    "skills/research-communication/references/plagiarism-and-text-reuse-checking.md",
+    "tests/skills/research_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "351029c 2026-10-07"
@@ -2397,7 +2399,8 @@
     "skills/research-communication/references/interpreting-scientific-graphics.md",
     "skills/research-communication/references/logical-consistency-and-argument-uniformity.md",
     "skills/research-communication/references/paper-structure.md",
-    "skills/research-communication/references/reviewer-style-assessment.md"
+    "skills/research-communication/references/reviewer-style-assessment.md",
+    "skills/research-communication/references/scientific-style.md"
    ],
    "cited_by_other_skills": [
     "hep-statistics",
@@ -2408,12 +2411,13 @@
   {
    "path": "skills/research-communication/references/code-review-report.md",
    "owner": "research-communication",
-   "bytes": 4418,
-   "lines": 87,
+   "bytes": 5362,
+   "lines": 100,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
-    "skills/research-communication/references/code-to-methodology-synthesis.md"
+    "skills/research-communication/references/code-to-methodology-synthesis.md",
+    "tests/skills/research_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "351029c 2026-10-07"
@@ -2733,16 +2737,15 @@
   {
    "path": "skills/research-communication/references/mermaid-patterns.md",
    "owner": "research-communication",
-   "bytes": 4180,
-   "lines": 110,
+   "bytes": 8470,
+   "lines": 221,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/examples/computer-science/07-database-architecture.md",
-    "skills/research-communication/references/academic-diagrams-guide.md",
-    "skills/research-communication/scripts/check_diagram_sources.py"
+    "skills/research-communication/references/academic-diagrams-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9546574 2026-10-08"
+   "last_commit": "dee7155 2026-10-12"
   },
   {
    "path": "skills/research-communication/references/multi-venue-reformatting.md",
@@ -2962,7 +2965,8 @@
     "skills/research-communication/references/preprint-to-journal-reconciliation.md",
     "skills/research-communication/references/preregistration-and-registered-reports.md",
     "skills/research-communication/references/submission-and-peer-review.md",
-    "skills/research-communication/references/thesis-by-publication-assembly.md"
+    "skills/research-communication/references/thesis-by-publication-assembly.md",
+    "tests/skills/research_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "351029c 2026-10-07"
@@ -2970,8 +2974,8 @@
   {
    "path": "skills/research-communication/references/scientific-style.md",
    "owner": "research-communication",
-   "bytes": 8954,
-   "lines": 164,
+   "bytes": 9596,
+   "lines": 173,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-statistics/references/statistical-inference-for-physics.md",
@@ -2981,7 +2985,8 @@
     "skills/research-communication/references/latex-venue-setup.md",
     "skills/research-communication/references/outreach-and-public-facing-summaries.md",
     "skills/research-communication/references/paper-structure.md",
-    "skills/research-communication/references/statistics-and-ml-papers.md"
+    "skills/research-communication/references/statistics-and-ml-papers.md",
+    "tests/skills/research_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [
     "hep-statistics"
@@ -3010,8 +3015,8 @@
   {
    "path": "skills/research-communication/references/submission-and-peer-review.md",
    "owner": "research-communication",
-   "bytes": 12546,
-   "lines": 218,
+   "bytes": 13227,
+   "lines": 228,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -3022,7 +3027,8 @@
     "skills/research-communication/references/reviewer-style-assessment.md",
     "skills/research-communication/references/revision-impact-tracking.md",
     "skills/research-communication/references/statistics-and-ml-papers.md",
-    "skills/research-communication/references/thesis-by-publication-assembly.md"
+    "skills/research-communication/references/thesis-by-publication-assembly.md",
+    "tests/skills/research_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "351029c 2026-10-07"

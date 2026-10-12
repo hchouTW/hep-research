@@ -37,18 +37,31 @@ is stale relative to the released version. Report the discrepancy and which
 artifact (paper or code) is authoritative is for the authors/editors to
 resolve, not something to silently pick.
 
-## Delegate deep technical review to the domain skill
+## Delegate deep technical review to the owning skill
 
 This file does not restate framework- or domain-specific correctness
 guidance that already exists elsewhere. Once the paper-alignment pass above
-is done, hand off:
+is done, hand each question to the skill that owns it. Route by the actual
+question, not by the library the code uses: a ROOT macro and a PyTorch
+script raise the same six kinds of question.
 
-- PyTorch code (models, training/eval loops, data pipelines) — invoke
-  `physics-ml` for correctness, numerical stability, and performance
-  issues.
-- ROOT/PyROOT/RDataFrame or uproot/awkward columnar analysis code — invoke
-  `hep-analysis` for cutflow logic, statistical treatment, and systematic
-  propagation correctness.
+- Implementation, I/O, build, performance and reproducibility of the code
+  (does it run, read the files it claims, use the seeds and versions it
+  states, scale) — `hep-computing`, whatever the framework (ROOT/PyROOT/
+  RDataFrame, uproot/awkward, PyTorch data pipelines included).
+- Measurement design and corrections (cutflow logic, control regions,
+  efficiency and acceptance corrections, systematic sources and their
+  evaluation plan) — `hep-analysis`.
+- Statistical treatment (the likelihood, the test, the interval or limit
+  construction, significance and look-elsewhere corrections, unfolding,
+  uncertainty propagation) — `hep-statistics`, also when it is written in
+  ROOT or uproot.
+- ML-specific rigor (training and evaluation loops, splits and leakage,
+  seed variance, ablations, calibration of model outputs) — `physics-ml`.
+- Theory validity of what the code computes (conventions, approximations,
+  validity domain of a prediction) — `hep-theory`.
+- Detector response (resolution, efficiency, response matrices, folding,
+  calibration constants) — `detector-response`.
 
 Bring back only the findings that matter for the paper's claims — a code
 review report is not a general linting pass on someone else's repository.

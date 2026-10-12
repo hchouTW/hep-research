@@ -35,6 +35,19 @@ behind manuscript claims. For export and formatting, use
    relevant version, or supply a verified replacement. Preserve citation keys
    unless renaming is necessary; update their callers together if changed.
 
+## Reusing previously verified records
+
+A ledger entry or a `sources_read` record from an earlier session is reused as it
+is: keep its verification date, version (arXiv version, DOI version), read level
+and locators. It stays a statement about what was read on that date. Never
+relabel an old read event as a new one, and never raise its read level without
+reading again. Recheck before quoting when the claim is time-sensitive ("the
+latest result", "still the best limit", "no correction has appeared"), when the
+record's version differs from the version cited, or when the manuscript now cites
+a passage the old locators do not cover; otherwise the old record supports the
+same claim it supported before. A recheck is a new read event with its own date
+beside the old one, not a replacement of it.
+
 ## Deliverable
 
 Deliver a ledger with: manuscript location and claim; citation key and stable

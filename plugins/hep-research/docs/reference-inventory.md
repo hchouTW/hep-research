@@ -14,7 +14,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-statistics | 9 | 117 | 0 |
 | hep-theory | 8 | 42 | 0 |
 | physics-ml | 34 | 184 | 0 |
-| research-communication | 52 | 359 | 0 |
+| research-communication | 52 | 368 | 0 |
 
 ## Overlapping pairs
 
@@ -151,13 +151,13 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `task-quality-checklist.md` | hep-computing | 3.0 | no | 4 | - | 351029c 2026-10-07 |
 | `validation-and-done.md` | hep-computing | 3.7 | yes | 4 | - | 351029c 2026-10-07 |
 | `astroparticle-statistics.md` | hep-statistics | 8.6 | yes | 12 | detector-response, hep-analysis | 351029c 2026-10-07 |
-| `core-stats-guide.md` | hep-statistics | 36.1 | yes | 7 | - | 06b86c8 2026-10-12 |
+| `core-stats-guide.md` | hep-statistics | 36.1 | yes | 7 | - | e375e7d 2026-10-12 |
 | `inference-recipes.md` | hep-statistics | 14.7 | yes | 7 | detector-response, hep-analysis | 06b86c8 2026-10-12 |
 | `likelihood-fitting.md` | hep-statistics | 8.9 | yes | 7 | detector-response, hep-analysis, hep-computing | 06b86c8 2026-10-12 |
 | `ml-assisted-inference.md` | hep-statistics | 6.2 | yes | 3 | physics-ml | 06b86c8 2026-10-12 |
 | `nuisance-modeling.md` | hep-statistics | 17.2 | yes | 6 | hep-analysis | 06b86c8 2026-10-12 |
 | `statistical-inference-for-physics.md` | hep-statistics | 12.7 | yes | 8 | hep-computing, hep-theory, research-communication | 351029c 2026-10-07 |
-| `statistical-tools.md` | hep-statistics | 9.4 | yes | 5 | hep-analysis, physics-ml | 06b86c8 2026-10-12 |
+| `statistical-tools.md` | hep-statistics | 9.4 | yes | 5 | hep-analysis, physics-ml | e375e7d 2026-10-12 |
 | `unfolding.md` | hep-statistics | 3.3 | yes | 22 | detector-response, hep-analysis | 06b86c8 2026-10-12 |
 | `cosmic-ray-propagation.md` | hep-theory | 5.2 | yes | 1 | - | 351029c 2026-10-07 |
 | `dis-kinematics.md` | hep-theory | 4.8 | yes | 4 | - | 351029c 2026-10-07 |
@@ -202,13 +202,13 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `transformer-architectures.md` | physics-ml | 7.0 | no | 5 | - | 351029c 2026-10-07 |
 | `uncertainty-and-calibration.md` | physics-ml | 6.3 | no | 6 | hep-statistics | 351029c 2026-10-07 |
 | `academic-diagrams-guide.md` | research-communication | 10.4 | yes | 4 | hep-analysis | 351029c 2026-10-07 |
-| `academic-papers-guide.md` | research-communication | 35.3 | yes | 4 | - | 351029c 2026-10-07 |
+| `academic-papers-guide.md` | research-communication | 36.8 | yes | 5 | - | 2261425 2026-10-12 |
 | `artifact-packaging-for-release.md` | research-communication | 2.8 | no | 3 | - | 351029c 2026-10-07 |
 | `astroparticle-and-cosmic-ray-papers.md` | research-communication | 19.5 | no | 10 | - | 351029c 2026-10-07 |
-| `citation-verification.md` | research-communication | 2.7 | yes | 6 | - | 351029c 2026-10-07 |
+| `citation-verification.md` | research-communication | 3.5 | yes | 7 | - | 351029c 2026-10-07 |
 | `citations-and-bibliography.md` | research-communication | 18.1 | yes | 11 | - | 9546574 2026-10-08 |
-| `claim-evidence-mapping.md` | research-communication | 3.3 | yes | 8 | hep-statistics, hep-theory | 351029c 2026-10-07 |
-| `code-review-report.md` | research-communication | 4.4 | no | 2 | - | 351029c 2026-10-07 |
+| `claim-evidence-mapping.md` | research-communication | 3.3 | yes | 9 | hep-statistics, hep-theory | 351029c 2026-10-07 |
+| `code-review-report.md` | research-communication | 5.4 | no | 3 | - | 351029c 2026-10-07 |
 | `code-to-methodology-synthesis.md` | research-communication | 5.6 | no | 2 | - | 351029c 2026-10-07 |
 | `comment-and-reply-exchange.md` | research-communication | 3.0 | no | 2 | - | 351029c 2026-10-07 |
 | `conflict-of-interest-and-ethics-statements.md` | research-communication | 2.5 | no | 1 | - | 351029c 2026-10-07 |
@@ -231,7 +231,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `literature-review.md` | research-communication | 7.7 | no | 5 | - | 351029c 2026-10-07 |
 | `logical-consistency-and-argument-uniformity.md` | research-communication | 4.8 | no | 5 | hep-theory | 351029c 2026-10-07 |
 | `manuscript-consistency-auditing.md` | research-communication | 3.5 | no | 4 | - | 351029c 2026-10-07 |
-| `mermaid-patterns.md` | research-communication | 4.2 | no | 3 | - | 9546574 2026-10-08 |
+| `mermaid-patterns.md` | research-communication | 8.5 | no | 2 | - | dee7155 2026-10-12 |
 | `multi-venue-reformatting.md` | research-communication | 2.9 | no | 1 | - | 351029c 2026-10-07 |
 | `outreach-and-public-facing-summaries.md` | research-communication | 4.7 | no | 5 | - | 351029c 2026-10-07 |
 | `paper-genre-variants.md` | research-communication | 4.3 | no | 4 | - | 351029c 2026-10-07 |
@@ -245,10 +245,10 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `reading-papers.md` | research-communication | 10.1 | no | 8 | hep-statistics | 351029c 2026-10-07 |
 | `reproducibility-auditing.md` | research-communication | 3.0 | no | 9 | hep-computing | 351029c 2026-10-07 |
 | `reviewer-style-assessment.md` | research-communication | 2.0 | no | 1 | - | 351029c 2026-10-07 |
-| `revision-impact-tracking.md` | research-communication | 3.1 | no | 8 | - | 351029c 2026-10-07 |
-| `scientific-style.md` | research-communication | 9.0 | no | 8 | hep-statistics | 351029c 2026-10-07 |
+| `revision-impact-tracking.md` | research-communication | 3.1 | no | 9 | - | 351029c 2026-10-07 |
+| `scientific-style.md` | research-communication | 9.6 | no | 9 | hep-statistics | 351029c 2026-10-07 |
 | `statistics-and-ml-papers.md` | research-communication | 14.0 | no | 8 | - | 351029c 2026-10-07 |
-| `submission-and-peer-review.md` | research-communication | 12.5 | no | 9 | - | 351029c 2026-10-07 |
+| `submission-and-peer-review.md` | research-communication | 13.2 | no | 10 | - | 351029c 2026-10-07 |
 | `supplementary-material-planning.md` | research-communication | 2.0 | no | 1 | - | 351029c 2026-10-07 |
 | `systematic-review-screening.md` | research-communication | 3.0 | no | 2 | - | 351029c 2026-10-07 |
 | `thesis-by-publication-assembly.md` | research-communication | 3.8 | no | 2 | - | 351029c 2026-10-07 |

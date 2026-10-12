@@ -1534,6 +1534,78 @@
    "set": "T3"
   },
   {
+   "id": "rc-t4-code-1",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "The script that produces Figure 3 of my paper crashes on the new ntuple format; fix it.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "crashes"
+   ],
+   "not": "research-communication",
+   "set": "T4"
+  },
+  {
+   "id": "rc-t4-stat-1",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "Before I write \"evidence for\" in the abstract: compute the global significance of my 3.4σ local excess with the look-elsewhere effect.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "significance and look-elsewhere effects"
+   ],
+   "not": "research-communication",
+   "set": "T4"
+  },
+  {
+   "id": "rc-t4-ml-1",
+   "lang": "zh-Hant",
+   "kind": "negative",
+   "prompt": "論文裡宣稱分類器比基線好 3%，請用不同 seed 做 uncertainty estimation，檢查這個改善是否真實。",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "uncertainty estimation"
+   ],
+   "not": "research-communication",
+   "set": "T4"
+  },
+  {
+   "id": "rc-t4-det-1",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "For the detector section of the paper, measure the tracking resolution of our silicon tracker from the data.",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "resolution"
+   ],
+   "not": "research-communication",
+   "set": "T4"
+  },
+  {
+   "id": "rc-t4-review-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Write the code-review part of my referee report: does the released repository do what the paper says it does?",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "referee reports"
+   ],
+   "set": "T4"
+  },
+  {
+   "id": "rc-t4-reuse-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "上次已經查證過這篇 citations 的 INSPIRE-HEP 紀錄，這次改稿能直接沿用嗎？",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "citations",
+    "INSPIRE-HEP"
+   ],
+   "set": "T4",
+   "note": "reuse keeps the old verification date; a time-sensitive claim is rechecked"
+  },
+  {
    "id": "t19-zhs-1",
    "lang": "zh-Hans",
    "kind": "direct",

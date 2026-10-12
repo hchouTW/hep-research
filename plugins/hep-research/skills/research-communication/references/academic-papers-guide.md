@@ -20,9 +20,10 @@ limits, and — for the astroparticle side — spectrum/composition/anisotropy a
 and astroparticle statistics) and `physics-ml` (the ML/statistical rigor itself:
 ablations, seed variance, matched-budget comparisons, evaluation-harness design —
 not just a methods section to read through). This skill owns the *reading and
-writing*, not the analysis itself — if the user still needs to run a fit, produce a
-limit, prove an improvement is real, or debug a plot, hand that off to
-`hep-statistics` or `physics-ml` first.
+writing*, not the analysis itself — if the user still needs to run a fit or produce
+a limit, hand that to `hep-statistics` first; to prove an improvement is real, to
+`physics-ml`; to debug the code behind a plot or table, to `hep-computing`; to
+design a selection or a correction, to `hep-analysis`.
 
 ## Rules for every task
 
@@ -45,8 +46,11 @@ are stated here in full.
    (e.g. "the background uncertainty is included as a constrained nuisance
    parameter"); use a placeholder for any choice not yet made. **Never estimate a
    σ, limit or fit value from a plot or a ratio panel, not even roughly.**
-3. **Calibrate claims to the evidence.** "Evidence" needs ≥ 3σ and "observation"
-   ≥ 5σ; whenever a look-elsewhere effect applies (a scan over mass, sky position,
+3. **Calibrate claims to the evidence.** In a search's significance statement,
+   "evidence for" conventionally needs ≥ 3σ and "observation of" ≥ 5σ (a field
+   convention, stated by the source's own community; `scientific-style.md` scopes
+   it, and the everyday sense of "evidence", a source or result that supports a
+   claim, carries no threshold); whenever a look-elsewhere effect applies (a scan over mass, sky position,
    energy or time), use the global (post-trial) significance, and always say which
    one is quoted. If a claim is stronger than its source, say so and propose the
    weaker wording explicitly, rather than silently softening it.
@@ -175,8 +179,8 @@ Use these when requested or needed to substantiate claims — not for an ordinar
 **Verification and auditing**
 - **Citation verification** — reference identity/version/status and whether cited text supports the claim (a resolving DOI/valid BibTeX entry alone doesn't verify it): `citation-verification.md`
 - **Systematic-review screening** — eligibility, reproducible search logs, deduplication, screening decisions; keep narrative reviews lightweight unless this is requested: `systematic-review-screening.md`
-- **Reproducibility auditing** — trace results to methods/data/code/config/execution evidence; distinguish documentation inspection from an actual rerun (hand execution to `hep-analysis`/`physics-ml`): `reproducibility-auditing.md`
-- **Code review report** — paper-to-code alignment, documentation, packaging, severity-ranked findings; distinct from reproducibility auditing, delegates framework correctness to `physics-ml`/`hep-analysis`: `code-review-report.md`
+- **Reproducibility auditing** — trace results to methods/data/code/config/execution evidence; distinguish documentation inspection from an actual rerun (hand execution to `hep-computing`; what a rerun's number means to `hep-statistics`, `hep-analysis` or `physics-ml` as the question demands): `reproducibility-auditing.md`
+- **Code review report** — paper-to-code alignment, documentation, packaging, severity-ranked findings; distinct from reproducibility auditing, delegates by the question: implementation to `hep-computing`, statistical treatment to `hep-statistics`, measurement design to `hep-analysis`, ML rigor to `physics-ml`: `code-review-report.md`
 - **Equation and notation auditing** — definitions, dimensions, index/shape consistency, assumptions, derivation steps: `equation-and-notation-auditing.md`
 - **Mathematical reasoning and proof status** — soundness of assumptions vs. claimed proof status (formal/analytic/perturbative/asymptotic/heuristic/numerical/empirical/conjecture): `../../hep-theory/references/mathematical-reasoning-and-proof.md`
 - **Statistical inference for physics** — correctness of a likelihood/test/interval/limit vs. the stated conclusion: `../../hep-statistics/references/statistical-inference-for-physics.md`
@@ -426,8 +430,8 @@ review. Grouped by function; within a group, order roughly follows the workflow.
   research/algorithmic source code with no existing paper (not generic
   software with no mathematical content) into a Methodology + Technical
   Manual document: codebase dissection, math/algorithm reconstruction,
-  two-part synthesis; delegates correctness verification to
-  `hep-analysis`/`physics-ml` where applicable; template skeleton in
+  two-part synthesis; delegates correctness verification by the question
+  (`hep-computing`, `hep-statistics`, `hep-analysis`, `physics-ml`); template skeleton in
   `../assets/paper/code-to-methodology-manual-template.md`
 
 ## Bundled scripts
