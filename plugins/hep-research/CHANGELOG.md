@@ -108,6 +108,16 @@ Software checks establish contract consistency only, not physical validity.
   locators, completion evidence) and generates response wording from the recorded state: past tense only for a
   verified change with evidence, pending work explicit, a reasoned decline valid with its reason; a draft that asserts
   uncompleted work is an error.
+- **Project terminology and notation consistency (T9).** `check_terminology.py RECORD --project-root ROOT --glossary
+  G` scans the record's documents against a project glossary (`assets/paper/glossary-template.json`: concept,
+  preferred term per language with English and Traditional Chinese, contextual aliases, definition, abbreviations,
+  scope, disallowed substitutions with the context words that make them a likely confusion; notation definitions by
+  section scope). Findings are contextual and carry both locations and the rule: a disallowed term next to its context
+  word (warning; acceptance versus efficiency, resolution versus precision, confidence versus credible, in either
+  language), an abbreviation redefined with another expansion (error) or used before its definition (warning), a
+  symbol defined twice in one section with different wording (error), a definition in a scope the glossary does not
+  declare (warning). Aliases, bilingual equivalents and declared scoped reuse are never flagged; quoted and
+  "so-called" mentions are skipped; nothing is replaced or translated, and meaning stays the reader's review.
 - **T17 toy construction diagnosed.** The published-likelihood benchmark (ATLAS-SUSY-2018-31 SRB) adds a post-hoc
   diagnosis, labelled as such: the exact counting CLs limit of the one-bin SRB (n = 3, b = 3.23) is 5.284, inside the
   toy limit's MC range; pyhf's toys match exact Poisson sums on the bare one-bin model; the asymptotic formulae give

@@ -35,7 +35,7 @@
   },
   "research-communication": {
    "references": 53,
-   "bytes": 375262,
+   "bytes": 375754,
    "uncited": 0
   }
  },
@@ -2529,8 +2529,8 @@
   {
    "path": "skills/research-communication/references/equation-and-notation-auditing.md",
    "owner": "research-communication",
-   "bytes": 3417,
-   "lines": 54,
+   "bytes": 3909,
+   "lines": 60,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-statistics/references/statistical-inference-for-physics.md",
@@ -2789,7 +2789,7 @@
     "skills/research-communication/references/poster-and-talk-design.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "a2a25ec 2026-10-12"
   },
   {
    "path": "skills/research-communication/references/paper-genre-variants.md",
@@ -2861,7 +2861,7 @@
     "skills/research-communication/references/academic-papers-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "a2a25ec 2026-10-12"
   },
   {
    "path": "skills/research-communication/references/preprint-to-journal-reconciliation.md",
@@ -3048,7 +3048,7 @@
     "tests/skills/research_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "d41501c 2026-10-12"
+   "last_commit": "a2a25ec 2026-10-12"
   },
   {
    "path": "skills/research-communication/references/supplementary-material-planning.md",

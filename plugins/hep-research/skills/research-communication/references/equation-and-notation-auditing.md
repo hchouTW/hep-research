@@ -1,5 +1,11 @@
 # Equation and notation auditing
 
+> Project terminology and notation: declare preferred terms (English and Traditional Chinese), aliases, abbreviations,
+> disallowed substitutions with their context words, and symbol definitions by section scope in a glossary
+> (`../assets/paper/glossary-template.json`), then run `check_terminology.py RECORD --project-root ROOT --glossary G`:
+> contextual findings with both locations and the rule; aliases and declared scoped reuse are never flagged; meaning
+> stays the reader's review.
+
 Use for checking equations or notation in a manuscript, not as a substitute for
 validating the underlying analysis. Establish which sections and derivations are
 in scope; report unchecked portions explicitly. If drift is found and the source

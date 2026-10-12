@@ -69,6 +69,7 @@ MISSING_FILE_ARGS = {
     "skills/research-communication/scripts/check_communication.py": [M, "--project-root", "/tmp"],
     "skills/research-communication/scripts/check_diagram_sources.py": [M],
     "skills/research-communication/scripts/check_manuscript.py": [M],
+    "skills/research-communication/scripts/check_terminology.py": [M, "--project-root", "/tmp", "--glossary", M],
     "skills/research-communication/scripts/manage_literature.py": ["import", M, "--project-root", "/tmp", "--out", OUT],
     "skills/research-communication/scripts/track_revision_impact.py": [M, M, "--project-root", "/tmp"],
     "adapters/hepdata/assets/hepdata_export.py": ["--artifact", M, "--out", OUT],
