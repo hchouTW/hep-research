@@ -86,9 +86,10 @@ Save enough information to reproduce or compare runs:
 - Dataset version and split identifiers.
 - Checkpoint with model, optimizer, scheduler, epoch, best metric, and config.
 
-In this plugin the `ml-artifact` has no environment fields: record the training run as a `computational-run`
-artifact (its `environment`, `tools`, `seeds` and `resources`, with the GPU) and list that artifact in the
-`ml-artifact`'s `inputs`, so the model hash leads to the environment it was trained in.
+Since contracts 2.5.0 the `ml-artifact` has an `environment` field (framework version, device, precision, seeds;
+`write_ml_artifact.py` fills it from the training run summary, and a missing seed is a warning). For the full
+software stack and the GPU, also record the run as a `computational-run` artifact and list it in the `ml-artifact`'s
+`inputs`, so the model hash leads to the environment it was trained in.
 
 ## Reproducibility levels
 

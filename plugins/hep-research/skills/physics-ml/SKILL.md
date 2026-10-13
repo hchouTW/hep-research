@@ -5,7 +5,7 @@ description: "Use when the deliverable is a machine-learning model or study for 
 
 # physics-ml: machine learning for physics
 
-**Owns:** classification and regression, generation, surrogates, ML-assisted inference (training side), calibration, domain shift, and PyTorch engineering; BDT and classical MVA guidance for analyses.
+**Owns:** classification and regression, generation (fast simulation training), surrogates, ML-assisted inference (training side), calibration of model outputs, domain shift, and PyTorch engineering; BDT and classical MVA guidance for analyses.
 **Typical artifacts:** `ml-artifact` (labels, features, grouped splits, training domain, preprocessing, weights, model hash, calibration, downstream validation).
 **Never:** let a metric such as AUC stand in for physics validity; extrapolate a surrogate outside its declared domain without saying so.
 
@@ -54,7 +54,7 @@ Read by task (all under `references/`); physics first, engineering when the task
 | Calibration, uncertainty, distribution shift | [uncertainty-and-calibration.md](references/uncertainty-and-calibration.md), [robustness-and-distribution-shift.md](references/robustness-and-distribution-shift.md) |
 | PyTorch engineering (training, data, debugging, scaling, export) | [deep-learning-guide.md](references/deep-learning-guide.md), which routes to the rest |
 
-Code starting points: `assets/hep_metrics.py` (signed-weight ROC, rejection at fixed signal efficiency with uncertainty, Asimov significance, distance correlation, mass-sculpting JSD; NumPy), `assets/hep_losses.py` (signed-weight BCE, DisCo penalty, NaN-safe masked softmax and mean), training templates. Scripts in `<plugin root>/skills/physics-ml/scripts/` (read `--help` first): `check_split_integrity.py`, `check_surrogate_domain.py`, `check_dataset_contract.py`, `compare_model_runs.py`, `find_nan_batches.py`, `inspect_checkpoint.py`, `check_pytorch_env.py`, budget estimators. Folder guide: [README.md](README.md).
+Pipeline (scripts in `<plugin root>/skills/physics-ml/scripts/`, assets in `assets/`; read `--help` first): `make_grouped_splits.py` → `check_split_integrity.py` → `assets/train_classifier.py --split-manifest` (refuses a leaky split; signed weights) → `assets/calibration.py` (fit on validation, evaluate on test) → `assets/inference.py` (flags out-of-domain inputs) → `write_ml_artifact.py` (validated `ml-artifact`). Worked example: `<plugin root>/examples/ml-classifier-to-inference/`. Also `assets/hep_metrics.py`, `assets/hep_losses.py`, `assets/set_classifier.py` (Deep Sets, ParT-lite), `check_surrogate_domain.py` (whitened Mahalanobis and kNN, calibrated threshold), debugging and budget scripts. Folder guide: [README.md](README.md).
 
 ## Handoffs
 

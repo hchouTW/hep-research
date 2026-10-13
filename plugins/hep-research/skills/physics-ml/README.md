@@ -12,16 +12,20 @@ Use when the deliverable is a machine-learning model or study for physics: class
 |---|---|
 | `SKILL.md` | entry point |
 | `references/` | thirty-eight references: ML in analyses (weights, metrics, decorrelation, systematics, sim-to-data, weak supervision), multivariate analysis, particle and jet architectures, space and astroparticle detectors, fast-simulation validation, SBI training, scientific ML, the PyTorch engineering guide, data strategy, evaluation, uncertainty and calibration, robustness and distribution shift, reproducibility, training, scaling, debugging, deployment |
-| `scripts/` | twelve helpers: split integrity, surrogate domain, dataset contract, run comparison, NaN batches, checkpoints, PyTorch environment, compute and memory budgets, dataloader profiling, serving capacity, benchmarking |
-| `assets/` | code starting points: HEP metrics with signed weights (`hep_metrics.py`, NumPy) and losses (`hep_losses.py`: signed-weight BCE, DisCo, NaN-safe masking), dataset template, models, training loops (classifier, DDP skeleton, LoRA fine-tune, vision transfer, transformer classifier), metrics, inference, config, example split and run records |
+| `scripts/` | fourteen helpers: grouped split builder, split integrity, ml-artifact writer, surrogate domain, dataset contract, run comparison, NaN batches, checkpoints, PyTorch environment, compute and memory budgets, dataloader profiling, serving capacity, benchmarking |
+| `assets/` | code starting points: HEP metrics with signed weights (`hep_metrics.py`, NumPy) and losses (`hep_losses.py`: signed-weight BCE, DisCo, NaN-safe masking), output calibration (`calibration.py`: temperature, Platt, weighted isotonic, reliability, ECE), set classifiers (`set_classifier.py`: Deep Sets/PFN, ParT-lite), the classifier training pipeline (`train_classifier.py`: grouped split manifest, signed weights, run summary) and `inference.py` (out-of-domain flags), dataset template, models, other training loops (DDP skeleton, LoRA fine-tune, vision transfer, transformer classifier), metrics, config, example split and run records |
 
 ## Scripts
 
-`check_split_integrity.py` (group leakage between splits), `check_surrogate_domain.py` (queries outside or in sparse parts of the training domain), `check_dataset_contract.py`, `compare_model_runs.py`, `find_nan_batches.py`, `inspect_checkpoint.py`, `check_pytorch_env.py` (exits 3 when the build cannot use the GPU), `estimate_compute_budget.py`, `estimate_training_memory.py`, `profile_dataloader.py`, `serving_capacity.py`, `benchmark_model.py`. Scripts that need PyTorch say so and skip cleanly without it.
+`make_grouped_splits.py` (train/val/test or k-fold assignment by run, period, seed or parameter point; random-groups or temporal), `check_split_integrity.py` (group leakage between splits; null groups and case or whitespace variants are reported), `check_surrogate_domain.py` (whitened Mahalanobis and k-NN distance with thresholds calibrated on held-out training points; reports the false-positive rate), `write_ml_artifact.py` (builds and validates an `ml-artifact` from a training run summary, calibration and domain-shift results), `check_dataset_contract.py`, `compare_model_runs.py`, `find_nan_batches.py`, `inspect_checkpoint.py`, `check_pytorch_env.py` (exits 3 when the build cannot use the GPU), `estimate_compute_budget.py`, `estimate_training_memory.py`, `profile_dataloader.py`, `serving_capacity.py`, `benchmark_model.py`. Scripts that need PyTorch say so and skip cleanly without it.
 
 ## References
 
-Start with `references/ml-analysis.md` for physics work and `references/deep-learning-guide.md` for PyTorch engineering; `SKILL.md` has the task-to-reference table.
+Start with `references/ml-analysis.md` for physics work and `references/deep-learning-guide.md` for PyTorch engineering; `SKILL.md` has the task-to-reference table. Files marked "Generic ML engineering" at the top (serving, monitoring, fine-tuning, large-model scaling) are not physics-specific.
+
+## Worked example
+
+`examples/ml-classifier-to-inference/` (journey J9, SYNTHETIC): grouped split and leakage check, signed-weight training, calibration on a separate sample, domain-shift check, a validated `ml-artifact`, then a template fit of the signal strength written as a `statistical-result`.
 
 ## Handoffs
 
@@ -36,7 +40,7 @@ Start with `references/ml-analysis.md` for physics work and `references/deep-lea
 
 ## Tests and validation
 
-`tests/skills/physics_ml/` (six modules, including analytic checks of the HEP metrics and, with PyTorch, of the losses; the GPU module runs only with `HEP_TORCH_GPU_TEST=1` on hardware the maintainer may use) and the `optional (torch-cpu)` CI job. What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
+`tests/skills/physics_ml/` (thirteen modules, including analytic checks of the HEP metrics, calibration and the domain check and, with PyTorch, of the losses, the set classifiers and the training pipeline; the GPU module runs only with `HEP_TORCH_GPU_TEST=1` on hardware the maintainer may use) and the `optional (torch-cpu)` CI job. What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
 
 ## How this folder is used
 

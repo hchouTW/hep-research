@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Check train/validation/test splits for overlap, duplication, and group leakage.
 
-Purpose: catch the failure that metrics cannot show. If the same record, user, patient,
-or session appears in more than one split, the test set is measuring memorization - and
+Purpose: catch the failure that metrics cannot show. If the same event, run, simulation
+seed or parameter point appears in more than one split, the test set is measuring memorization - and
 nothing about the numbers looks wrong. Group leakage is the most common serious split
 error and is invisible in every metric.
 

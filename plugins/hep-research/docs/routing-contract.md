@@ -36,6 +36,8 @@ as spaces.
 | Fits that use a response or a folded prediction | hep-statistics | `fits that use a folded prediction`, `fits that use a response` | — |
 | BDTs and classical MVA in an analysis: training, weights, working points | physics-ml | `BDT`, `classical MVA` | — |
 | Training networks for ML-assisted or simulation-based inference | physics-ml | `ML-assisted inference` | — |
+| Training generative fast simulation | physics-ml | `fast simulation training` | — |
+| Calibration of ML model outputs (temperature, isotonic, reliability) | physics-ml | `calibration of model outputs` | — |
 | Validity and coverage of an inference built on an ML model | hep-statistics | `coverage` | — |
 | Detector calibration (energy scale, alignment constants, conditions) | detector-response | `detector calibration` | — |
 | Validation of a fast or learned simulation against full detector simulation | detector-response | `detector simulation` | — |
@@ -49,10 +51,7 @@ ML topics split by deliverable. physics-ml owns the model: training a BDT or net
 simulation-based inference, and the calibration of the model's outputs. The neighbours own what is built on it or
 checked against it: hep-statistics the validity and coverage of the inference, detector-response the detector
 calibration chain and the validation of a fast simulation against full simulation, hep-analysis the selection,
-normalization and systematics around a score. Two physics-ml rows (fast-simulation training, calibration of model
-outputs) are not in the table yet: the physics-ml "Owns" line names them only as "generation" and "calibration", words
-that hep-theory ("event-generation physics") and detector-response also use, so the check cannot hold them until that
-line names them specifically.
+normalization and systematics around a score.
 
 ## Deliverable-based rules
 
