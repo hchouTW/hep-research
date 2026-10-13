@@ -10,6 +10,11 @@ from pathlib import Path
 
 PLUGIN = Path(__file__).resolve().parents[3]
 GUIDE = PLUGIN / "skills" / "hep-statistics" / "references" / "core-stats-guide.md"
+COMMANDS = GUIDE.with_name("core-stats-commands.md")  # per-module reference split from the guide (STH-T2.7)
+
+
+def guide_and_commands() -> str:
+    return GUIDE.read_text(encoding="utf-8") + "\n" + COMMANDS.read_text(encoding="utf-8")
 sys.path.insert(0, str(PLUGIN))
 
 SUBCOMMAND_MODULES = ("likelihood_limits", "poisson_diagnostics", "statistical_toys", "template_fit",
@@ -29,7 +34,7 @@ def subcommands(module):
 
 class CoreStatsGuide(unittest.TestCase):
     def setUp(self):
-        self.text = GUIDE.read_text(encoding="utf-8")
+        self.text = guide_and_commands()
 
     def section(self, module):
         start = self.text.index(f"## `{module}.py")
@@ -86,7 +91,7 @@ class RunScriptsWhenAShellExists(unittest.TestCase):
 
     def test_skill_and_guide_say_to_run_the_script_and_label_hand_values(self):
         skill = (PLUGIN / "skills" / "hep-statistics" / "SKILL.md").read_text(encoding="utf-8")
-        guide = GUIDE.read_text(encoding="utf-8")
+        guide = guide_and_commands()
         self.assertIn("when a shell is available, run its row's tool", skill)  # Step 0 (STH-T2.1)
         self.assertIn("label a value worked by hand as such", skill)
         self.assertIn("When a shell is available, run the matching subcommand", guide)
@@ -170,7 +175,12 @@ class CapsTable(unittest.TestCase):
                 self.assertEqual(self.cap(row, label), code_values[0])
 
     def test_no_single_global_limit_claimed(self):
-        self.assertNotIn("in every module", GUIDE.read_text(encoding="utf-8"))
+        self.assertNotIn("in every module", guide_and_commands())
+
+    def test_decision_guide_size(self):
+        """STH-T2.7: the part every request reads stays small; the per-module detail is in the command reference."""
+        self.assertLess(len(GUIDE.read_bytes()), 17000)
+        self.assertIn("core-stats-commands.md", GUIDE.read_text(encoding="utf-8"))
 
 
 SKILL = PLUGIN / "skills" / "hep-statistics" / "SKILL.md"

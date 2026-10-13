@@ -15,7 +15,7 @@ description: "Use when the deliverable is a statistical inference or its diagnos
 - Approximations are named and validated: Gaussian, Wilks, asymptotic, exact Poisson, toys. Low or zero counts, parameters on a boundary, and non-Gaussian tails get exact or toy-based treatment.
 - Missing covariance stays missing; never assume a diagonal matrix silently. Correlations across bins, species, periods or experiments need evidence or a scoped, stated assumption.
 - Overlapping datasets or shared auxiliary measurements are never combined by multiplying likelihoods as if independent.
-- Before any mixed inference, the comparison gate must report the inputs comparable (quantity, units, binning, phase space, level, normalization, conventions) or list the declared transformations.
+- Before any mixed inference, the comparison gate must report the inputs comparable (units, binning, level, normalization, conventions) or list the declared transformations.
 - Injection tests and closure on Asimov and toy data precede any claim about observed data from a new model; a validated core tool's own tests count as that closure. Asimov, synthetic and observed results keep their labels.
 - Failed or not-run fits propagate as `failed` / `not-run`; downstream artifacts keep it.
 
@@ -48,7 +48,7 @@ One number: when a shell is available, run its row's tool, state the constructio
 
 ## Resources
 
-References: [core/stats guide](references/core-stats-guide.md), [nuisance modeling](references/nuisance-modeling.md), [likelihood fitting](references/likelihood-fitting.md), [unfolding](references/unfolding.md), [inference recipes](references/inference-recipes.md), [pyhf, Combine](references/statistical-tools.md), [astroparticle statistics](references/astroparticle-statistics.md), [ML-assisted inference](references/ml-assisted-inference.md), [inference reasoning](references/statistical-inference-for-physics.md).
+References: [core/stats guide](references/core-stats-guide.md) and [commands](references/core-stats-commands.md), [nuisance modeling](references/nuisance-modeling.md), [likelihood fitting](references/likelihood-fitting.md), [unfolding](references/unfolding.md), [inference recipes](references/inference-recipes.md), [pyhf, Combine](references/statistical-tools.md), [astroparticle statistics](references/astroparticle-statistics.md), [ML-assisted inference](references/ml-assisted-inference.md), [inference reasoning](references/statistical-inference-for-physics.md).
 
 Scripts and their checks: the guide's Skill scripts table. Adapters (pyhf, Combine, unbinned fits): `<plugin root>/adapters/`. Folder guide: [README.md](README.md).
 

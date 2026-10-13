@@ -19,8 +19,8 @@
    "uncited": 0
   },
   "hep-statistics": {
-   "references": 9,
-   "bytes": 127082,
+   "references": 10,
+   "bytes": 127953,
    "uncited": 0
   },
   "hep-theory": {
@@ -1492,23 +1492,38 @@
    "last_commit": "578c12f 2026-10-13"
   },
   {
+   "path": "skills/hep-statistics/references/core-stats-commands.md",
+   "owner": "hep-statistics",
+   "bytes": 28333,
+   "lines": 301,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-statistics/SKILL.md",
+    "skills/hep-statistics/references/core-stats-guide.md",
+    "skills/hep-statistics/references/unfolding.md",
+    "tests/skills/hep_statistics/test_core_stats_guide.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 44138,
-   "lines": 464,
+   "bytes": 16673,
+   "lines": 174,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/inference-and-unfolding.md",
     "profiles/experiments/ams-02/modules/methods/statistical-diagnostics.md",
     "skills/hep-statistics/README.md",
     "skills/hep-statistics/SKILL.md",
+    "skills/hep-statistics/references/core-stats-commands.md",
     "skills/hep-statistics/references/inference-recipes.md",
     "skills/hep-statistics/references/nuisance-modeling.md",
-    "skills/hep-statistics/references/unfolding.md",
     "tests/skills/hep_statistics/test_core_stats_guide.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "47a999b 2026-10-13"
+   "last_commit": "cd58e47 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
@@ -1581,7 +1596,7 @@
     "adapters/pyhf-combine/assets/pyhf_nuisance_diagnostics.py",
     "skills/hep-analysis/references/systematics.md",
     "skills/hep-statistics/SKILL.md",
-    "skills/hep-statistics/references/core-stats-guide.md",
+    "skills/hep-statistics/references/core-stats-commands.md",
     "skills/hep-statistics/references/statistical-tools.md",
     "tests/adapters/test_nuisance_interpolation.py"
    ],
@@ -1636,7 +1651,7 @@
   {
    "path": "skills/hep-statistics/references/unfolding.md",
    "owner": "hep-statistics",
-   "bytes": 3380,
+   "bytes": 3383,
    "lines": 48,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -3352,6 +3367,10 @@
    "skills/research-communication/references/logical-consistency-and-argument-uniformity.md",
    "skills/research-communication/references/manuscript-consistency-auditing.md"
   ],
+  "core": [
+   "skills/hep-statistics/references/core-stats-commands.md",
+   "skills/hep-statistics/references/core-stats-guide.md"
+  ],
   "data": [
    "skills/physics-ml/references/data-loading.md",
    "skills/physics-ml/references/data-strategy.md"
@@ -3473,6 +3492,10 @@
   "site": [
    "skills/hep-computing/references/batch-site-cern-htcondor.md",
    "skills/hep-computing/references/batch-site-nstccore-slurm.md"
+  ],
+  "stat": [
+   "skills/hep-statistics/references/core-stats-commands.md",
+   "skills/hep-statistics/references/core-stats-guide.md"
   ],
   "statistic": [
    "skills/research-communication/references/diagrams-statistics.md",

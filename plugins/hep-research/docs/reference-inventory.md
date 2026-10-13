@@ -11,7 +11,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | detector-response | 34 | 395 | 0 |
 | hep-analysis | 9 | 74 | 0 |
 | hep-computing | 29 | 338 | 0 |
-| hep-statistics | 9 | 127 | 0 |
+| hep-statistics | 10 | 128 | 0 |
 | hep-theory | 8 | 42 | 0 |
 | physics-ml | 38 | 257 | 0 |
 | research-communication | 53 | 378 | 0 |
@@ -40,6 +40,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 - **citation**: `citation-verification.md`, `citations-and-bibliography.md`
 - **code**: `code-review-report.md`, `code-to-methodology-synthesis.md`
 - **consistency**: `logical-consistency-and-argument-uniformity.md`, `manuscript-consistency-auditing.md`
+- **core**: `core-stats-commands.md`, `core-stats-guide.md`
 - **data**: `data-loading.md`, `data-strategy.md`
 - **detection**: `ground-based-detection-arrays.md`, `space-based-direct-detection.md`
 - **engineering**: `engineering-playbook.md`, `loop-engineering.md`, `prompt-engineering-and-token-optimization.md`
@@ -68,6 +69,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 - **scientific**: `interpreting-scientific-graphics.md`, `scientific-style.md`
 - **signal**: `front-end-electronics-and-signal-processing.md`, `signal-formation-and-readout.md`
 - **site**: `batch-site-cern-htcondor.md`, `batch-site-nstccore-slurm.md`
+- **stat**: `core-stats-commands.md`, `core-stats-guide.md`
 - **statistic**: `diagrams-statistics.md`, `statistics-and-ml-papers.md`
 - **statistical**: `statistical-inference-for-physics.md`, `statistical-tools.md`
 - **strategy**: `data-strategy.md`, `evaluation-strategy.md`, `parallelism-strategy.md`
@@ -155,7 +157,8 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `task-quality-checklist.md` | hep-computing | 3.0 | no | 4 | - | 351029c 2026-10-07 |
 | `validation-and-done.md` | hep-computing | 3.7 | yes | 5 | - | 351029c 2026-10-07 |
 | `astroparticle-statistics.md` | hep-statistics | 8.7 | yes | 12 | detector-response, hep-analysis | 578c12f 2026-10-13 |
-| `core-stats-guide.md` | hep-statistics | 44.1 | yes | 8 | - | 47a999b 2026-10-13 |
+| `core-stats-commands.md` | hep-statistics | 28.3 | yes | 4 | - | untracked |
+| `core-stats-guide.md` | hep-statistics | 16.7 | yes | 8 | - | cd58e47 2026-10-13 |
 | `inference-recipes.md` | hep-statistics | 15.1 | yes | 7 | detector-response, hep-analysis | 578c12f 2026-10-13 |
 | `likelihood-fitting.md` | hep-statistics | 9.1 | yes | 7 | detector-response, hep-analysis, hep-computing | 578c12f 2026-10-13 |
 | `ml-assisted-inference.md` | hep-statistics | 6.2 | yes | 5 | physics-ml | 06b86c8 2026-10-12 |
