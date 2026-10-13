@@ -85,6 +85,12 @@ Software checks establish contract consistency only, not physical validity.
   (no `ROOT_INCLUDE_DIRS`/`ROOT_LIBRARIES`, no second `-std`); configures, builds and runs against Homebrew ROOT
   6.38.04 with CMake 4.3.2. `cpp-balanced-design-guidelines.md` now states the same C++17 baseline and marks its
   C++20 examples "C++20 only".
+- **CMP-15 `bash-balanced-design-guidelines.md`.** B1: sourcing `thisroot.sh`, an LCG `setup.sh` or `module load`
+  under `set -u` fails; wrap in `set +u` … `set -u`. B2: `"${arr[@]}"` on an empty array fails under `set -u`
+  before Bash 4.4 (macOS `/bin/bash` 3.2; checked on 3.2.57), with the `${arr[@]+"${arr[@]}"}` guard. B3: no
+  `/var/lock` (root-owned, node-local) and no `flock` on NFS/EOS/AFS/Lustre; lock in local scratch. B4: the EXIT
+  trap does not stop children; forward SIGTERM to the child and `wait` (preemption), exit 143; checked on Bash 3.2.
+  B5: the bad-comment example no longer uses `((i++))`.
 
 ## 0.6.17 (2026-10-13)
 

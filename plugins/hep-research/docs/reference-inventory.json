@@ -15,7 +15,7 @@
   },
   "hep-computing": {
    "references": 29,
-   "bytes": 342730,
+   "bytes": 344962,
    "uncited": 0
   },
   "hep-statistics": {
@@ -1046,8 +1046,8 @@
   {
    "path": "skills/hep-computing/references/bash-balanced-design-guidelines.md",
    "owner": "hep-computing",
-   "bytes": 24757,
-   "lines": 940,
+   "bytes": 26989,
+   "lines": 974,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",
@@ -1117,7 +1117,7 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "fe8f71e 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/cpp-balanced-design-guidelines.md",
@@ -1136,7 +1136,7 @@
    "cited_by_other_skills": [
     "physics-ml"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "fe8f71e 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/design-and-estimation.md",

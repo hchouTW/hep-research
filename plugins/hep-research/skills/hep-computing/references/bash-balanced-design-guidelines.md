@@ -292,21 +292,28 @@ work_dir="$(mktemp -d)"
 rm -rf -- "${work_dir}"  # skipped if an earlier command exits/returns first
 ```
 
-Use `flock` for resources that must not be accessed concurrently:
+Use `flock` for resources that must not be accessed concurrently, with the lock file on a local disk the user owns:
 
 ```bash
 # `flock` is part of util-linux; it is not installed on stock macOS.
-exec 9>"/var/lock/myscript.lock"
+lock_dir="${TMPDIR:-/tmp}"   # on a batch node: the job's local scratch ($_CONDOR_SCRATCH_DIR, a node-local $TMPDIR)
+exec 9>"${lock_dir}/myscript.${USER}.lock"
 flock -n 9 || { echo "already running" >&2; exit 1; }
 ```
 
 The lock needs no unlock trap: it is held by file descriptor 9 and released
-when the script exits and the descriptor closes.
+when the script exits and the descriptor closes. Do not use `/var/lock`: it is root-owned on most systems and
+node-local, so it neither works for a user nor serializes jobs on different nodes. `flock` on network and
+distributed file systems (NFS, EOS, AFS, Lustre, CVMFS) is unreliable or a no-op: it may succeed on two nodes at
+once. To serialize work across nodes, let the scheduler do it (job dependencies, a single job per resource) or use
+an atomic `mkdir` of a lock folder on a file system that guarantees it, never `flock` on shared storage.
 
 Combine multiple cleanup actions in one function — Bash does not stack `EXIT`
-traps, so a second `trap ... EXIT` silently replaces the first. Bash also runs
-the `EXIT` trap when the script is killed by `SIGINT` or `SIGTERM`, so one
-`EXIT` trap covers those cases:
+traps, so a second `trap ... EXIT` silently replaces the first. Bash runs the `EXIT` trap when the script exits
+after `SIGINT` or `SIGTERM`, but it does not stop the script's children, and while a foreground child runs the
+trap waits for it to finish. A batch system that preempts a job sends `SIGTERM` (then `SIGKILL` after a grace
+period, often 30 s to a few minutes): forward the signal to the children and `wait` for them, so they can flush and
+close their output inside the grace period, and run the long step in the background so the trap fires at once:
 
 ```bash
 cleanup() {
@@ -314,6 +321,18 @@ cleanup() {
   rm -f -- "${pid_file}"
 }
 trap cleanup EXIT
+
+child_pid=""
+on_term() {
+  [[ -n "${child_pid}" ]] && kill -TERM "${child_pid}" 2>/dev/null
+  wait "${child_pid}" 2>/dev/null   # let it write and close its output
+  exit 143                          # 128 + SIGTERM: the scheduler sees a terminated job, not success
+}
+trap on_term TERM INT
+
+./run_analysis --out "${work_dir}/out.root" &
+child_pid=$!
+wait "${child_pid}"
 ```
 
 ---
@@ -455,6 +474,21 @@ Start scripts meant to run unattended with:
 #!/usr/bin/env bash
 set -euo pipefail
 ```
+
+Two `set -u` pitfalls are common in HEP job scripts:
+
+- Environment setup scripts are not written for `set -u`: sourcing ROOT's `thisroot.sh`, an LCG view's `setup.sh`,
+  an experiment setup script or running `module load` reads unset variables (`$LD_LIBRARY_PATH`, `$PYTHONPATH`,
+  `$MANPATH` on a clean node) and stops the job. Relax `-u` only around the source:
+
+  ```bash
+  set +u
+  source /cvmfs/sft.cern.ch/lcg/views/LCG_106/x86_64-el9-gcc13-opt/setup.sh
+  set -u
+  ```
+- `"${arr[@]}"` on an empty array is an "unbound variable" error under `set -u` before Bash 4.4, and macOS ships Bash
+  3.2 as `/bin/bash`. Use `${arr[@]+"${arr[@]}"}` where the array may be empty and the script must run on old
+  Bash, or require Bash 4.4+ explicitly (`(( BASH_VERSINFO[0] * 100 + BASH_VERSINFO[1] >= 404 ))`).
 
 Prefer explicit checks for expected, recoverable failures:
 
@@ -832,7 +866,7 @@ Avoid comments that repeat the code:
 
 ```bash
 # Increment i by 1.
-((i++))
+i=$((i + 1))
 ```
 
 Prefer comments that explain intent, constraints, or non-obvious decisions:
