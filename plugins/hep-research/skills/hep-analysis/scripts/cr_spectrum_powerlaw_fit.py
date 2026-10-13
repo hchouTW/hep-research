@@ -13,10 +13,17 @@ formula quoted in that reference.
 What it does: fits log(flux) = log(A) - gamma * log(E) by exact weighted linear least
 squares in log-log space (a single power law is linear in its two parameters over the
 basis {1, log E}, so - like <plugin root>/skills/detector-response/scripts/calorimeter_resolution.py - this is a closed-form
-fit, not a minimizer). A single power law is fit to all points; a "segmented" fit
-splits the points at a given break energy and fits each side independently, reporting
-both indices and, if requested, whether their difference is significant relative to
-their combined uncertainty.
+fit, not a minimizer). Models (--model): a single power law; a continuous broken power law, sharp
+(log J = log A - g1 min(x, 0) - g2 max(x, 0), x = log(E/E_b)) or smooth (J = A (E/E_b)^-g1
+[1 + (E/E_b)^(1/s)]^-(g2-g1) s, --smoothness s), with the break fixed (--break-energy) or free (--free-break:
+profiled on a grid with golden-section refinement; its uncertainty from the linearized covariance). Both broken
+models are linear in (log A, g1, g2) at a fixed break, so each break is a generalized least-squares solve. The output
+gives chi2/ndf and the chi2 p-value (weighted fits), accepts a full flux covariance (--covariance) or asymmetric
+errors, takes bin edges ("edges") with log-centre or Lafferty-Wyatt point energies, and reports the normalization at a
+--pivot energy. The break's delta chi2 against a single power law is a likelihood-ratio statistic, not a calibrated
+significance: a free break is a look-elsewhere trial, handed to hep-statistics
+(<plugin root>/skills/hep-statistics/scripts/global_significance.py). fit_segmented (two independent fits,
+discontinuous at the break) is kept for the library only, as a diagnostic; the command line no longer uses it.
 
 Usage notes / assumptions: standard library only. Energies and fluxes must be
 positive and finite; at least two distinct energies are required per segment. Point
@@ -30,11 +37,17 @@ Status: --status (default unvalidated; one of the core artifact_statuses) is ech
 Exit codes: 0 ok; 1 the computation failed; 2 usage or invalid input (NaN, inf, malformed file);
 3 incomplete or inconclusive.
 Run: python3 <plugin root>/skills/hep-analysis/scripts/cr_spectrum_powerlaw_fit.py --input <plugin root>/skills/hep-analysis/assets/cosmic-ray-spectrum.example.json
-     python3 <plugin root>/skills/hep-analysis/scripts/cr_spectrum_powerlaw_fit.py --input <plugin root>/skills/hep-analysis/assets/cosmic-ray-spectrum.example.json --break-energy 4.5e15
+     python3 <plugin root>/skills/hep-analysis/scripts/cr_spectrum_powerlaw_fit.py --input <plugin root>/skills/hep-analysis/assets/cosmic-ray-spectrum.example.json --free-break
 """
 import argparse
 import json
 import math
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))  # the plugin root, also under python3 -I
+from core.stats._linalg import solve  # noqa: E402
+from core.stats.statistical_toys import chi2_sf  # noqa: E402
 
 STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
             'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
@@ -154,13 +167,258 @@ def fit_segmented(points, break_energy):
     return result
 
 
+# ---------------------------------------------------------------------------------------------------------------
+# Continuous broken power law (ANA-P2-4). log J = log A - g1 * u1(x) - g2 * u2(x), x = log(E / E_b), with
+#   sharp break:    u1 = min(x, 0), u2 = max(x, 0)                      (continuous at E_b by construction)
+#   smooth break:   u1 = x - s * L, u2 = s * L, L = log(1 + exp(x / s))  (J = A (E/E_b)^-g1 [1 + (E/E_b)^(1/s)]^-(g2-g1) s,
+#                   up to the constant A' = A 2^-(g2-g1) s that A absorbs)
+# Both are linear in (log A, g1, g2) for a fixed break, so the fit profiles the break on a grid with a golden-section
+# refinement and solves a generalized least-squares problem in log flux at each break.
+
+MODELS = ('single', 'broken', 'smooth-broken')
+
+
+def _basis(x, smoothness):
+    if smoothness is None:
+        return min(x, 0.0), max(x, 0.0)
+    z = x / smoothness
+    soft = z + math.log1p(math.exp(-z)) if z > 0 else math.log1p(math.exp(z))
+    return x - smoothness * soft, smoothness * soft
+
+
+def broken_log_flux(energy, log_a, g1, g2, break_energy, smoothness=None):
+    """log J of the continuous broken power law at one energy."""
+    u1, u2 = _basis(math.log(energy / break_energy), smoothness)
+    return log_a - g1 * u1 - g2 * u2
+
+
+def _log_cov(points, covariance):
+    """Covariance of log flux: from a full flux covariance (C_ij / f_i f_j) or the per-point errors."""
+    n = len(points)
+    if covariance is not None:
+        if len(covariance) != n or any(len(r) != n for r in covariance):
+            raise ValueError(f'covariance must be a {n} x {n} matrix')
+        c = [[float(covariance[i][j]) / (points[i][1] * points[j][1]) for j in range(n)] for i in range(n)]
+        for i in range(n):
+            for j in range(n):
+                if not math.isfinite(c[i][j]) or abs(c[i][j] - c[j][i]) > 1e-9 * max(abs(c[i][j]), 1e-300):
+                    raise ValueError('covariance must be finite and symmetric')
+            if c[i][i] <= 0:
+                raise ValueError('covariance diagonal must be positive')
+        return c, True
+    if all(p[2] is not None for p in points):
+        return [[(points[i][2] / points[i][1]) ** 2 if i == j else 0.0 for j in range(n)] for i in range(n)], True
+    if any(p[2] is not None for p in points):
+        raise ValueError('give an uncertainty for every point or for none')
+    return [[1.0 if i == j else 0.0 for j in range(n)] for i in range(n)], False
+
+
+def _gls(rows, y, w):
+    """theta, its covariance and chi2 for the linear model y ~ rows . theta with weight matrix w."""
+    k = len(rows[0])
+    wx = [[sum(w[i][j] * rows[j][c] for j in range(len(y))) for c in range(k)] for i in range(len(y))]
+    a = [[sum(rows[i][r] * wx[i][c] for i in range(len(y))) for c in range(k)] for r in range(k)]
+    b = [[sum(wx[i][r] * y[i] for i in range(len(y)))] for r in range(k)]
+    ident = [[1.0 if r == c else 0.0 for c in range(k)] for r in range(k)]
+    inv = solve(a, ident, error=ValueError, what='normal-equation matrix (degenerate energies or break)')
+    theta = [sum(inv[r][c] * b[c][0] for c in range(k)) for r in range(k)]
+    res = [y[i] - sum(rows[i][c] * theta[c] for c in range(k)) for i in range(len(y))]
+    chi2 = sum(res[i] * w[i][j] * res[j] for i in range(len(y)) for j in range(len(y)))
+    return theta, inv, chi2
+
+
+def _weights(points, model_logs, cov_log, asym):
+    """Weight matrix; with asymmetric errors the side is chosen by where the model lies (iterated by the caller)."""
+    n = len(points)
+    if asym:
+        diag = []
+        for i, p in enumerate(points):
+            lo, hi = p[3]
+            side = hi if model_logs is not None and model_logs[i] > math.log(p[1]) else lo
+            diag.append((side / p[1]) ** 2)
+        cov_log = [[diag[i] if i == j else 0.0 for j in range(n)] for i in range(n)]
+    ident = [[1.0 if r == c else 0.0 for c in range(n)] for r in range(n)]
+    return solve(cov_log, ident, error=ValueError, what='covariance')
+
+
+def fit_spectrum(points, model='broken', break_energy=None, smoothness=None, covariance=None, pivot=None,
+                 edges=None, bin_centre='log-centre'):
+    """Fit a single or continuous broken power law (sharp or smooth) to (E, J) points.
+
+    points: [E, J], [E, J, sigma] or [E, J, sigma_low, sigma_high] (asymmetric). covariance: full flux covariance
+    (overrides per-point sigma). break_energy: fixed break (None: free, profiled). edges: per-point [lo, hi]; the
+    point energies are then the bin centres from bin_centre ('log-centre' or 'lafferty-wyatt', iterated with the
+    fitted model). pivot: report the normalization at this energy (removes the A-gamma correlation)."""
+    if model not in MODELS:
+        raise ValueError(f'model must be one of {", ".join(MODELS)}')
+    raw = []
+    for i, p in enumerate(points):
+        if not isinstance(p, (list, tuple)) or len(p) not in (2, 3, 4):
+            raise ValueError(f'point {i} must be [E, J], [E, J, sigma] or [E, J, sigma_low, sigma_high]')
+        for v, nm in zip(p, ('energy', 'flux', 'sigma', 'sigma_high')):
+            if isinstance(v, bool) or not isinstance(v, (int, float)) or not math.isfinite(v) or v <= 0:
+                raise ValueError(f'point {i} {nm} must be finite and greater than zero')
+        e, f = float(p[0]), float(p[1])
+        raw.append([e, f, float(p[2]) if len(p) == 3 else None, (float(p[2]), float(p[3])) if len(p) == 4 else None])
+    asym = any(p[3] is not None for p in raw)
+    if asym and (covariance is not None or not all(p[3] is not None for p in raw)):
+        raise ValueError('asymmetric errors need [E, J, sigma_low, sigma_high] for every point and no covariance')
+    if asym:
+        for p in raw:
+            p[2] = 0.5 * (p[3][0] + p[3][1])
+    if edges is not None:
+        if len(edges) != len(raw):
+            raise ValueError('edges must give one [lo, hi] per point')
+        for i, (lo, hi) in enumerate(edges):
+            if not (0 < lo < hi and math.isfinite(hi)):
+                raise ValueError(f'edges {i} must be 0 < lo < hi')
+            raw[i][0] = math.sqrt(lo * hi)
+    if bin_centre not in ('log-centre', 'lafferty-wyatt'):
+        raise ValueError("bin_centre must be 'log-centre' or 'lafferty-wyatt'")
+    if smoothness is not None and (not math.isfinite(smoothness) or smoothness <= 0):
+        raise ValueError('smoothness must be finite and greater than zero')
+    n_par = 2 if model == 'single' else (3 if break_energy is not None else 4)
+    if len({p[0] for p in raw}) < n_par + 1:
+        raise ValueError(f'need at least {n_par + 1} distinct energies for the {model} model')
+    cov_log, weighted = _log_cov(raw, covariance)
+    s = smoothness if model == 'smooth-broken' else None
+    if model == 'smooth-broken' and s is None:
+        raise ValueError('smooth-broken needs --smoothness')
+
+    def solve_at(log_eb, model_logs=None):
+        w = _weights(raw, model_logs, cov_log, asym)
+        y = [math.log(p[1]) for p in raw]
+        if model == 'single':
+            rows = [[1.0, -math.log(p[0])] for p in raw]
+        else:
+            rows = []
+            for p in raw:
+                u1, u2 = _basis(math.log(p[0]) - log_eb, s)
+                rows.append([1.0, -u1, -u2])
+        return _gls(rows, y, w)
+
+    log_es = sorted(math.log(p[0]) for p in raw)
+
+    def best_break(model_logs=None):
+        if model == 'single' or break_energy is not None:
+            return None if model == 'single' else math.log(break_energy)
+        lo, hi = log_es[1], log_es[-2]
+        grid = [lo + (hi - lo) * k / 200 for k in range(201)]
+        chis = [solve_at(g, model_logs)[2] for g in grid]
+        k = min(range(len(grid)), key=chis.__getitem__)
+        a, b = grid[max(k - 1, 0)], grid[min(k + 1, len(grid) - 1)]
+        for _ in range(60):
+            m1, m2 = a + 0.382 * (b - a), a + 0.618 * (b - a)
+            if solve_at(m1, model_logs)[2] < solve_at(m2, model_logs)[2]:
+                b = m2
+            else:
+                a = m1
+        return 0.5 * (a + b)
+
+    model_logs = None
+    positions = [p[0] for p in raw]
+    for _ in range(4 if (asym or (edges is not None and bin_centre == 'lafferty-wyatt')) else 1):
+        log_eb = best_break(model_logs)
+        theta, cov, chi2 = solve_at(log_eb if log_eb is not None else 0.0, model_logs)
+
+        def logj(e, th=theta, lb=log_eb):
+            if model == 'single':
+                return th[0] - th[1] * math.log(e)
+            return broken_log_flux(e, th[0], th[1], th[2], math.exp(lb), s)
+        model_logs = [logj(p[0]) for p in raw]
+        if edges is not None and bin_centre == 'lafferty-wyatt':
+            for i, (lo, hi) in enumerate(edges):
+                xs = [lo * (hi / lo) ** (k / 200) for k in range(201)]
+                vals = [math.exp(logj(x)) * x for x in xs]  # integrate in log E: dE = E dlogE
+                h = math.log(hi / lo) / 200
+                mean = h / 3 * (vals[0] + vals[-1] + 4 * sum(vals[1:-1:2]) + 2 * sum(vals[2:-1:2])) / (hi - lo)
+                a, b = lo, hi
+                for _ in range(100):  # the model falls with E: bisection for J(x) = mean
+                    mid = math.sqrt(a * b)
+                    if math.exp(logj(mid)) > mean:
+                        a = mid
+                    else:
+                        b = mid
+                raw[i][0] = math.sqrt(a * b)
+            positions = [p[0] for p in raw]
+            model_logs = [logj(p[0]) for p in raw]
+    ndf = len(raw) - n_par
+    w = _weights(raw, model_logs, cov_log, asym)
+    # full linearized covariance including the break (column d logJ / d log E_b by finite difference)
+    if model != 'single' and break_energy is None:
+        jac = []
+        for p in raw:
+            u1, u2 = _basis(math.log(p[0]) - log_eb, s)
+            h = 1e-6
+            dlb = (broken_log_flux(p[0], *theta, math.exp(log_eb + h), s)
+                   - broken_log_flux(p[0], *theta, math.exp(log_eb - h), s)) / (2 * h)
+            jac.append([1.0, -u1, -u2, dlb])
+        k = 4
+        a_m = [[sum(jac[i][r] * w[i][j] * jac[j][c] for i in range(len(raw)) for j in range(len(raw)))
+                for c in range(k)] for r in range(k)]
+        cov = solve(a_m, [[1.0 if r == c else 0.0 for c in range(k)] for r in range(k)], error=ValueError,
+                    what='linearized covariance')
+    scale = 1.0 if weighted else (chi2 / ndf if ndf > 0 else float('nan'))
+    err = [math.sqrt(cov[i][i] * scale) if cov[i][i] * scale >= 0 else None for i in range(len(cov))]
+    out = {'model': model, 'points': len(raw), 'point_energies': positions, 'ndf': ndf, 'chi2': chi2 if weighted else None,
+           'chi2_per_ndf': chi2 / ndf if weighted and ndf > 0 else None,
+           'p_value': chi2_sf(chi2, ndf) if weighted and ndf > 0 else None, 'weighted': weighted}
+    if not weighted:
+        out['note'] = 'unweighted fit: uncertainties scaled by the residual scatter; no chi2 or p-value'
+    if model == 'single':
+        out.update(index=theta[1], index_uncertainty=err[1], normalization_at_e1=math.exp(theta[0]))
+    else:
+        out.update(index_below=theta[1], index_below_uncertainty=err[1], index_above=theta[2],
+                   index_above_uncertainty=err[2], break_energy=math.exp(log_eb), smoothness=s,
+                   break_free=break_energy is None)
+        if break_energy is None:
+            out['log_break_energy_uncertainty'] = err[3]
+        out['normalization_at_break'] = math.exp(theta[0])
+        single = fit_spectrum([p[:2] + ([p[2]] if p[2] is not None and not asym else []) for p in raw] if not asym else
+                              [[p[0], p[1], p[3][0], p[3][1]] for p in raw], 'single', covariance=covariance)
+        if weighted:
+            out['break_test'] = {
+                'delta_chi2_vs_single': single['chi2'] - chi2,
+                'label': ('likelihood-ratio statistic of the break, not a calibrated significance: the free break '
+                          'position is a look-elsewhere trial; hand the trials treatment to hep-statistics '
+                          '(skills/hep-statistics/scripts/global_significance.py)')}
+    if pivot is not None:
+        if not (math.isfinite(pivot) and pivot > 0):
+            raise ValueError('pivot must be finite and greater than zero')
+        if model == 'single':
+            g = [1.0, -math.log(pivot)]
+            lj = theta[0] - theta[1] * math.log(pivot)
+        else:
+            u1, u2 = _basis(math.log(pivot) - log_eb, s)
+            g = [1.0, -u1, -u2]
+            lj = broken_log_flux(pivot, *theta, math.exp(log_eb), s)
+            if len(cov) == 4:
+                h = 1e-6
+                g.append((broken_log_flux(pivot, *theta, math.exp(log_eb + h), s)
+                          - broken_log_flux(pivot, *theta, math.exp(log_eb - h), s)) / (2 * h))
+        var = sum(g[r] * cov[r][c] * g[c] for r in range(len(g)) for c in range(len(g))) * scale
+        out['pivot'] = {'energy': pivot, 'flux': math.exp(lj), 'flux_relative_uncertainty': math.sqrt(max(var, 0.0))}
+    return out
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--input', required=True, metavar='JSON',
-                        help='JSON file with {"points": [[energy, flux] or [energy, flux, sigma_flux], ...]}')
+                        help='JSON {"points": [[E, J] | [E, J, sigma] | [E, J, sigma_low, sigma_high], ...], '
+                             'optional "edges": [[lo, hi], ...] per point}')
+    parser.add_argument('--model', choices=MODELS, default=None,
+                        help='single (default without --break-energy/--free-break), broken (continuous, sharp) or '
+                             'smooth-broken (with --smoothness)')
     parser.add_argument('--break-energy', type=float, default=None, dest='break_energy',
-                        help='if given, fit two segments split at this energy instead of one power law')
+                        help='fix the break of the continuous broken power law at this energy (implies --model broken)')
+    parser.add_argument('--free-break', action='store_true', dest='free_break',
+                        help='fit the break energy (profiled on a grid, golden-section refined)')
+    parser.add_argument('--smoothness', type=float, default=None, help='smoothness s of the smooth-broken model')
+    parser.add_argument('--covariance', metavar='JSON', help='JSON n x n flux covariance matrix (overrides sigmas)')
+    parser.add_argument('--pivot', type=float, default=None, help='report the normalization at this energy')
+    parser.add_argument('--bin-centre', choices=('log-centre', 'lafferty-wyatt'), default='log-centre',
+                        dest='bin_centre', help='point energies from "edges": log centre or Lafferty-Wyatt (iterated)')
     parser.add_argument('--status', choices=STATUSES, default='unvalidated',
                         help='status label of the inputs, echoed as status (default unvalidated)')
     args = parser.parse_args()
@@ -170,14 +428,25 @@ def main():
             payload = json.load(handle, parse_constant=_reject_constant)
         if not isinstance(payload, dict) or 'points' not in payload:
             raise ValueError('input must be a JSON object with a "points" list')
-        if args.break_energy is not None:
-            result = fit_segmented(payload['points'], args.break_energy)
-            method = 'segmented weighted linear least squares in log(E), log(flux)'
-        else:
-            result = fit_power_law(payload['points'])
-            method = 'weighted linear least squares in log(E), log(flux)'
-    except (OSError, ValueError, json.JSONDecodeError) as exc:
-        parser.error(str(exc))
+        covariance = None
+        if args.covariance:
+            with open(args.covariance, encoding='utf-8') as handle:
+                covariance = json.load(handle, parse_constant=_reject_constant)
+        model = args.model or ('broken' if (args.break_energy is not None or args.free_break) else 'single')
+        if model != 'single' and args.break_energy is None and not args.free_break:
+            raise ValueError(f'--model {model} needs --break-energy or --free-break')
+        if args.break_energy is not None and args.free_break:
+            raise ValueError('give --break-energy or --free-break, not both')
+        if args.break_energy is not None and not (math.isfinite(args.break_energy) and args.break_energy > 0):
+            raise ValueError('break_energy must be finite and greater than zero')
+        result = fit_spectrum(payload['points'], model, args.break_energy, args.smoothness, covariance, args.pivot,
+                              payload.get('edges'), args.bin_centre)
+        method = {'single': 'weighted least squares in log(E), log(flux)',
+                  'broken': 'continuous sharply broken power law, generalized least squares in log flux',
+                  'smooth-broken': 'continuous smoothly broken power law, generalized least squares in log flux'}[model]
+    except (OSError, ValueError, TypeError, json.JSONDecodeError) as exc:
+        print(f'{parser.prog}: error: {exc}', file=sys.stderr)  # one line, no usage block
+        sys.exit(2)
 
     print(json.dumps({'status': args.status, 'method': method, **result}, indent=2))
 

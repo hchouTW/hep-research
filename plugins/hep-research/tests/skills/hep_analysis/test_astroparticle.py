@@ -213,8 +213,9 @@ class SpectrumPowerLawFitTests(unittest.TestCase):
              '--break-energy', '4.0e15'],
             capture_output=True, text=True, check=True, timeout=600)
         payload = json.loads(proc.stdout)
-        self.assertAlmostEqual(payload['below_break']['index'], self.gamma1, places=6)
-        self.assertAlmostEqual(payload['above_break']['index'], self.gamma2, places=6)
+        # P2-4: --break-energy fixes the break of the continuous broken power law
+        self.assertAlmostEqual(payload['index_below'], self.gamma1, places=6)
+        self.assertAlmostEqual(payload['index_above'], self.gamma2, places=6)
 
     def test_cli_missing_file_fails_cleanly_not_with_traceback(self):
         proc = subprocess.run(
