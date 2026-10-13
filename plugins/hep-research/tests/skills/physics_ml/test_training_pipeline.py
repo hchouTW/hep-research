@@ -23,6 +23,7 @@ ROOT = Path(__file__).resolve().parents[3] / "skills" / "physics-ml"
 ASSETS = ROOT / "assets"
 TORCH = importlib.util.find_spec("torch") is not None
 TORCHVISION = TORCH and importlib.util.find_spec("torchvision") is not None
+YAML = importlib.util.find_spec("yaml") is not None
 
 SUMMARY_KEYS = {"task", "features", "units", "labels", "grouping_key", "split_manifest", "split_check",
                 "training_domain", "preprocessing", "weights", "model_hash", "checkpoint", "environment", "metrics",
@@ -306,6 +307,7 @@ class TrainClassifierSyntheticTests(unittest.TestCase):
         self.assertEqual(summary["split_check"]["result"], "pass")
         self.assertEqual(summary["grouping_key"], "synthetic_group")
 
+    @unittest.skipUnless(YAML, "PyYAML not installed (--config needs it)")
     def test_config_file_with_cli_override(self):
         sys.path.insert(0, str(ASSETS))
         try:
