@@ -270,6 +270,46 @@
    }
   },
   {
+   "id": "th-selection-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Is pi0 -> gamma gamma gamma allowed? Which rule forbids it?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "selection rules"
+   ]
+  },
+  {
+   "id": "th-selection-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "π0 → γγγ 這個衰變允許嗎？是哪一條 selection rules 禁止它？",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "selection rules"
+   ]
+  },
+  {
+   "id": "th-scheme-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Convert the MS-bar bottom mass m_b(m_b) to the pole mass; state the schemes and the loop order.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "schemes"
+   ]
+  },
+  {
+   "id": "th-scheme-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請把 MS-bar 的 b 夸克質量換算成 pole mass，並說明使用的 schemes 與迴圈階數。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "schemes"
+   ]
+  },
+  {
    "id": "ml-direct-1",
    "lang": "en",
    "kind": "direct",
