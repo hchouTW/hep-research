@@ -1,6 +1,6 @@
-"""Behavioral tests for the AMS-02-case-study scripts: orbit-averaged geomagnetic
+"""Behavioral tests for the generic cosmic-ray helper scripts: orbit-averaged geomagnetic
 cutoff, the solar-modulation force-field approximation, particle-ratio error
-propagation, and cosmic-ray flux/statistics from counts.
+propagation, and cosmic-ray flux/statistics from counts (no experiment profile involved).
 
 Run from the skill directory with python3 -m unittest discover -s tests -v.
 Uses synthetic data and standard library only; no experiment files are needed.

@@ -10,7 +10,7 @@
   },
   "hep-analysis": {
    "references": 11,
-   "bytes": 78713,
+   "bytes": 78948,
    "uncited": 0
   },
   "hep-computing": {
@@ -842,7 +842,7 @@
   {
    "path": "skills/hep-analysis/references/hep-analysis-guide.md",
    "owner": "hep-analysis",
-   "bytes": 19530,
+   "bytes": 19765,
    "lines": 119,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -850,14 +850,13 @@
     "skills/hep-analysis/README.md",
     "skills/hep-analysis/SKILL.md",
     "tests/skills/detector_response/test_reference_values.py",
-    "tests/skills/hep_analysis/test_check_systematic_variations.py",
     "tests/skills/hep_analysis/test_method_references.py",
     "tests/skills/hep_analysis/test_reference_links.py"
    ],
    "cited_by_other_skills": [
     "detector-response"
    ],
-   "last_commit": "3210ab8 2026-10-13"
+   "last_commit": "3da6758 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/histograms-efficiencies.md",

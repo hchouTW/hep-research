@@ -33,7 +33,7 @@ Start with `references/hep-analysis-guide.md`, which routes to one reference per
 
 ## Tests and validation
 
-`tests/skills/hep_analysis/` (eight modules) and the journey examples under `examples/` (the synthetic flux-ratio and collider-angular examples start here). What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
+`tests/skills/hep_analysis/` (one module per script or reference family, including the CLI contract, the reference links and the worked examples of the method references) and the journey examples under `examples/` (the synthetic flux-ratio and collider-angular examples start here). What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
 
 ## How this folder is used
 

@@ -109,7 +109,7 @@
   "tests.skills.detector_response.test_frontend_response": 2.0,
   "tests.skills.detector_response.test_reference_values": 1.8,
   "tests.skills.detector_response.test_script_guards": 4.0,
-  "tests.skills.hep_analysis.test_ams02_helpers": 0.5,
+  "tests.skills.hep_analysis.test_cosmic_ray_helpers": 0.5,
   "tests.skills.hep_analysis.test_astroparticle": 0.4,
   "tests.skills.hep_analysis.test_check_systematic_variations": 0.1,
   "tests.skills.hep_analysis.test_counting_reference": 0.4,
