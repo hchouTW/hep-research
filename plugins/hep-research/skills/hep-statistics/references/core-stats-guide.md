@@ -43,9 +43,24 @@ pyhf/Combine adapter ([statistical tools](statistical-tools.md)). Run any script
 | `validate_covariance.py` | pass (or warnings without `--strict`) | errors (or warnings with `--strict`) | unreadable or not JSON |
 | `validate_response.py` | pass (or warnings without `--strict`) | errors | unreadable or not JSON |
 
-- **Poisson means** are limited to 1e5 in every module (`_poisson.py`, private: log-space distribution, tail and
-  quantile, accurate to that limit). A limit that cannot be bracketed below it is reported `failed`, never
-  clipped to the limit. `fc-interval` alone scans a grid and is limited to total means of 500.
+- **Caps.** Each module refuses inputs beyond its own range (exit 2), and the ranges differ by subcommand; there is
+  no single limit. A limit that cannot be bracketed below the Poisson mean cap is reported `failed`, never clipped.
+  This table is checked against the code by `tests/skills/hep_statistics/test_core_stats_guide.py` (`CapsTable`):
+
+| Where | Cap | Beyond it |
+|---|---|---|
+| every Poisson routine (`_poisson.py` `MAX_MEAN`) | mean <= 1e5 | asymptotic or Gaussian treatment, labeled as such |
+| `poisson_diagnostics.py fc-interval` (`FC_MAX_TOTAL_MEAN`) | total mean <= 500 | `cls-limit`, or `likelihood_limits.py profile-fc` |
+| `likelihood_limits.py` single-bin subcommands (`_inputs1`: profile-*, neyman-*) | b <= 200, sigma_b <= 100 | the pyhf adapter, or the asymptotic formulas labeled as such |
+| `likelihood_limits.py multibin-limit` | bins <= 50, bin b <= 200, total n <= 400, mc_stat <= 100 | the pyhf adapter |
+| `likelihood_limits.py shape-limit`, `shape-gof`, `contour` | bins <= 40, bin b <= 200, total n <= 400, mc_stat <= 100 | the pyhf adapter |
+| `likelihood_limits.py` toy counts | toys 100 to 100000 | partition the toys (hep-computing) and merge |
+| `statistical_toys.py` toy counts (`MAX_TOYS`) | toys <= 200000 | partition the toys and merge |
+| `statistical_toys.py ratio-cov` | numerator, denominator <= 1e5 | `ratio-measured` with a measured covariance (denominator <= 1e12) |
+| `statistical_toys.py unfold-scan` | reco and truth bins <= 60 | a dedicated unfolding framework |
+| `unfolding_diagnostics.py` response-stat, outer-coverage, response-covariance | mc_events <= 1e5 | the analytic response covariance by hand, labeled |
+| `unfolding_diagnostics.py` response-covariance, response-measured | response cells <= 400 | rebin, or a dedicated framework |
+| `template_fit.py` (`MAX_TEMPLATES`, `MAX_BINS`) | templates <= 6, bins <= 60 | the pyhf adapter |
 - **Fit verdicts** (`fit_diagnostics.py`, helper, no CLI). The damped Newton fits of `shape-limit`, `shape-gof` and
   `contour` return a verdict: `converged` only with a finite NLL, a positive-definite Hessian and EDM = g^T H^-1 g / 2
   at most 1e-5 (stricter than iminuit's default: Migrad stops at EDM < 0.002 x tol x errordef, with tol 0.1,
