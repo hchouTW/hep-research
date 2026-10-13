@@ -91,3 +91,22 @@ Worked example (synthetic, invented interaction lengths): with x = 10 g/cm2 abov
 P_heavy = 0.55 and 10% of their fragments are reconstructed as the light species, the feed-down is
 1000 x 0.45 x 0.10 = 45 events, to be subtracted before the survival correction.
 
+## Neutrino and fixed-target specifics
+
+- **Protons on target.** The normalization is the integrated POT of the selected spills (beam-quality and detector-live
+  requirements applied to the same spills as the events), declared as the `protons-on-target` normalization kind.
+- **Near/far extrapolation.** Predict the far-detector spectrum from the near-detector data times a far/near ratio from
+  simulation (or a fit that shares the flux and cross-section parameters); flux and cross-section uncertainties that are
+  common to both detectors largely cancel in the ratio, while detector-specific efficiencies, acceptance and energy
+  scales do not. Record which parts are correlated between the detectors: that is evidence for hep-statistics.
+- **Flux and cross section are correlated.** A measured event rate constrains flux x cross section; a cross-section
+  measurement takes the flux from an external prediction or constraint, and its uncertainty must not be counted again
+  through a flux systematic.
+- **Target thickness and absorption.** For a target of length L and interaction length lambda, the beam is attenuated
+  inside the target; the effective thickness is `L_eff = lambda (1 - exp(-L / lambda))`, not L.
+- **Empty-target subtraction.** Subtract the target-out (empty-target) rate scaled to the same POT; its statistical
+  uncertainty and any difference in beam conditions enter the background.
+
+Worked example (synthetic): 1000 events in 1.0e12 POT with the target in and 100 events in 5.0e11 POT with it out give
+1000 - 100 x 2 = 800 target events; a 2 cm target with lambda = 40 cm has L_eff = 1.951 cm, 2.5% less than its length.
+

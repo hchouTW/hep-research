@@ -70,6 +70,7 @@ Exact 68.27% (Garwood) interval on the count N; divide by exposure times bin wid
 | Correction chain: efficiency factors and their denominators, exposure, luminosity, POT, data/MC ratios | [Correction chain](correction-chain.md) |
 | Time-dependent measurements: per-period exposure, Bartels rotations, efficiency drift | [Correction chain, time dependence](correction-chain.md#time-dependent-measurements) |
 | Nuclei and isotopes: survival probability, fragmentation feed-down, charge-ladder leakage | [Correction chain, nuclei](correction-chain.md#nuclei-and-isotopes) |
+| Neutrino and fixed-target: POT, near/far extrapolation, target absorption, empty-target subtraction | [Correction chain, neutrino and fixed target](correction-chain.md#neutrino-and-fixed-target-specifics) |
 | Luminosity, cross sections, signed weights, cutflows | [Normalization](weights-normalization.md) |
 | Histograms, efficiencies, covariance, plotting | [Histograms and uncertainties](histograms-efficiencies.md) |
 | Control regions, ABCD, fake rates, sidebands, transfer factors | [Background estimation](backgrounds.md) |

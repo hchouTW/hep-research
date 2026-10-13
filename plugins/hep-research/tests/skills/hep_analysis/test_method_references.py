@@ -158,5 +158,16 @@ class OptimizationTests(unittest.TestCase):
             self.assertIn(n, t)
 
 
+class FixedTargetTests(unittest.TestCase):
+    def test_empty_target_and_absorption(self):
+        import math
+        self.assertEqual(1000 - 100 * (1.0e12 / 5.0e11), 800)
+        l_eff = 40 * (1 - math.exp(-2 / 40))
+        self.assertAlmostEqual(l_eff, 1.951, delta=5e-4)
+        self.assertAlmostEqual(1 - l_eff / 2, 0.025, delta=5e-4)
+        t = text('correction-chain.md')
+        self.assertIn('L_eff = 1.951 cm', t)
+
+
 if __name__ == '__main__':
     unittest.main()
