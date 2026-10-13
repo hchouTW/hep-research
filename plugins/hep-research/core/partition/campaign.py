@@ -655,7 +655,7 @@ def collect(campaign_dir) -> dict:
 
 def _apply(row: dict, rec: dict, obs: dict) -> None:
     for k in ("native_state", "exit_code", "signal", "hold_reason", "hold_code", "host", "elapsed_s", "max_rss_mb", "alloc_cpus",
-              "alloc_gpus", "evidence"):
+              "alloc_gpus", "evidence", "failure_reason"):
         if obs.get(k) is not None or k in ("hold_reason", "hold_code"):
             rec[k] = obs.get(k)
     new_restarts = int(obs.get("restarts") or 0) - rec.get("restarts_seen", 0)

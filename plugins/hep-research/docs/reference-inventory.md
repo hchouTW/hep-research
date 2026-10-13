@@ -10,7 +10,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 |---|---|---|---|
 | detector-response | 34 | 395 | 0 |
 | hep-analysis | 9 | 74 | 0 |
-| hep-computing | 32 | 374 | 0 |
+| hep-computing | 32 | 375 | 0 |
 | hep-statistics | 9 | 119 | 0 |
 | hep-theory | 8 | 42 | 0 |
 | physics-ml | 38 | 257 | 0 |
@@ -130,7 +130,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `acceptance-criteria.md` | hep-computing | 3.7 | no | 3 | - | 351029c 2026-10-07 |
 | `agile-development-guide.md` | hep-computing | 10.7 | yes | 8 | physics-ml | 351029c 2026-10-07 |
 | `bash-balanced-design-guidelines.md` | hep-computing | 27.0 | yes | 2 | - | b0cb9ac 2026-10-13 |
-| `batch-scheduling.md` | hep-computing | 29.8 | yes | 11 | - | 22ea71e 2026-10-12 |
+| `batch-scheduling.md` | hep-computing | 30.0 | yes | 11 | - | 051be1f 2026-10-13 |
 | `batch-site-cern-htcondor.md` | hep-computing | 11.2 | no | 2 | - | 6815df4 2026-10-10 |
 | `batch-site-nstccore-slurm.md` | hep-computing | 11.5 | no | 1 | - | 22ea71e 2026-10-12 |
 | `cmake-and-build.md` | hep-computing | 2.9 | yes | 5 | hep-analysis | fe8f71e 2026-10-13 |

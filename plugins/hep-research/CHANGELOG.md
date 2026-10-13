@@ -122,6 +122,12 @@ Software checks establish contract consistency only, not physical validity.
   largest index is not below it; an unreadable value leaves the decision to `sbatch`. New fake `scontrol` in
   `tests/adapters/batch_shims/`; tool facts table row added. Tests: `tests/adapters/test_batch_cmp_regressions.py`.
   (Also: the CMP-07 git test no longer uses an e-mail-shaped placeholder, which the packaging check flags.)
+- **CMP-23 Slurm `DerivedExitCode`.** `SACCT_FIELDS` gains `DerivedExitCode`; a job row `COMPLETED 0:0` with a
+  nonzero derived code (a failed `srun` step) is `failed` with the derived exit code and `failure_reason`
+  `derived-exit`. `core/partition/states.signature` appends `reason=<failure_reason>` when a backend sets one (older
+  records keep their signature), and `campaign._apply` carries the field. 8-field sacct recordings still parse. The
+  fake `sacct` emits the field; `examples/batch-partition/output/results.json` regenerated (the new `scontrol` call
+  count from CMP-22, nothing else changed).
 
 ## 0.6.17 (2026-10-13)
 

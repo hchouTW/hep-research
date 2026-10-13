@@ -146,7 +146,8 @@
    "merge_status": "complete",
    "scheduler_calls": {
     "sacct": 3,
-    "sbatch": 4
+    "sbatch": 4,
+    "scontrol": 3
    },
    "scheduler_tool": {
     "name": "slurm",

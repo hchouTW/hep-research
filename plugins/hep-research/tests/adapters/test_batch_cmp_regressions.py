@@ -41,5 +41,25 @@ class SlurmMaxArraySizeTests(unittest.TestCase):
         self.assertEqual(sb.MAX_ARRAY.search("A = 1\nMaxArraySize            = 20000\n").group(1), "20000")
 
 
+class SlurmDerivedExitCodeTests(unittest.TestCase):
+    """CMP-23."""
+
+    def test_completed_with_nonzero_derived_exit_code_fails(self):
+        h = Harness("slurm", items=2, chunk=1)
+        self.addCleanup(h.cleanup)
+        h.plan()
+        h.set_faults({"c0000": [{"kind": "native", "state": "COMPLETED", "exit": "0:0", "derived": "4:0"}]})
+        h.cli("submit", "--submit")
+        code, rep = h.cli("status")
+        c = rep["chunks"]["c0000"]
+        self.assertEqual(c["status"], "failed", c)
+        self.assertEqual(rep["chunks"]["c0001"]["status"], "done")
+        errors = h.state()["chunks"]["c0000"]["errors"]
+        self.assertEqual(len(errors), 1)
+        self.assertIn("derived-exit", errors[0])
+        self.assertIn("exit=4", errors[0])
+        self.assertIn("DerivedExitCode", sb.SACCT_FIELDS)
+
+
 if __name__ == "__main__":
     unittest.main()

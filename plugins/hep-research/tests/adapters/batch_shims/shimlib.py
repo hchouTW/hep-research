@@ -8,7 +8,8 @@ Environment:
   HEP_BATCH_SHIM_FAULTS  JSON file {chunk_id: [fault, ...], "_global": {tool: mode}}; each run of a chunk consumes
                          the first fault in its list, and an empty list means a normal run.
 Chunk faults (Slurm): exit (code), timeout, oom, node-failure, preempt, cancelled, requeue-duplicate (runs twice,
-the first record REQUEUED), vanish (no record anywhere), stuck (PENDING forever), native (state: any text).
+the first record REQUEUED), vanish (no record anywhere), stuck (PENDING forever), native (state: any text; "exit" and
+"derived" set ExitCode and DerivedExitCode).
 Chunk faults (HTCondor): exit (code), signal (signal), evict (evicted before output, then rerun), evict-after-output
 (ran, evicted, ran again: a duplicate), hold (reason, code, subcode), remove, stuck (idle forever), vanish.
 Any fault may carry "node" (the execution host reported) and, for Slurm, "alloc_cpus" (AllocCPUS reported; default
@@ -132,7 +133,7 @@ def sbatch(argv: list) -> int:
 
         def rec(state, code="0:0", ran=True):
             task["records"].append({"state": state, "exit": code, "elapsed": "00:00:01", "rss": "20480K" if ran else "", "nodes": node, "ran": ran,
-                                    "alloc": alloc, "tres": tres})
+                                    "alloc": alloc, "tres": tres, "derived": fault.get("derived", code)})
 
         if kind == "vanish":
             del store["slurm"][key]
@@ -186,12 +187,13 @@ def sacct(argv: list) -> int:
             continue
         recs = task["records"] if dup else task["records"][-1:]
         if task["queue"] and not recs:
-            print(f"{key}|{task['queue']}|0:0|00:00:00||None assigned|0|")
+            print(f"{key}|{task['queue']}|0:0|00:00:00||None assigned|0||0:0")
         for r in recs:
             alloc, tres = r.get("alloc", "1"), r.get("tres", "billing=1,cpu=1,node=1")
-            print(f"{key}|{r['state']}|{r['exit']}|{r['elapsed']}||{r['nodes']}|{alloc}|{tres}")
+            derived = r.get("derived", r["exit"])  # DerivedExitCode: job rows only (step rows leave it empty)
+            print(f"{key}|{r['state']}|{r['exit']}|{r['elapsed']}||{r['nodes']}|{alloc}|{tres}|{derived}")
             if r["ran"]:
-                print(f"{key}.batch|{r['state'].split()[0]}|{r['exit']}|{r['elapsed']}|{r['rss']}|{r['nodes']}|{alloc}|{tres.removeprefix(f'billing={alloc},')}")
+                print(f"{key}.batch|{r['state'].split()[0]}|{r['exit']}|{r['elapsed']}|{r['rss']}|{r['nodes']}|{alloc}|{tres.removeprefix(f'billing={alloc},')}|")
     return 0
 
 
