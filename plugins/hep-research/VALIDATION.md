@@ -506,6 +506,30 @@ strict; against the 2.1.293 baseline one quick case regressed (`st-sensitivity-1
 tree: stochastic, and its routing description did not change), one improved, two second-turn misses as before, two
 cases newer than the baseline missed; 0 loading violations. Recorded in `evals/routing/README.md`.
 
+## PHYSICS-ML-ENFORCEMENT (2026-10-13, E2 + PyTorch 2.14.1 on CPU, version 0.6.16 + unreleased, contracts 2.5.0)
+
+Open items of the external physics-ml review (Chapter 8 patch merged as PR #59; this entry covers its section 8.4 and
+roadmap phases 1, 2 and 4). Scientific checks, not only smoke tests:
+
+| Item | Result | Evidence |
+|---|---|---|
+| Domain check, 800 points from a 20-D standard normal, query (2, ..., 2) | flagged outside (Mahalanobis about 9.3, threshold about 6.6); the old check called it inside | `test_check_surrogate_domain.py` |
+| Domain check, 200 in-distribution draws at q = 0.99 | about 1 % flagged; reported false-positive rate from a held-out cross-fit | same |
+| Domain check, correlated features, point inside the per-feature box but off the ridge; constant feature; dimension mismatch | outside; no overflow; exit 2 | same |
+| Grouped splits by run, period (temporal) and k-fold | manifests pass `check_split_integrity.py --strict`; deterministic for a seed; folds disjoint | `test_make_grouped_splits.py` |
+| Split check with null groups and case or whitespace variants | reported, not a pass | `test_split_integrity_normalization.py` |
+| Training pipeline | a leaky manifest stops training before a model is built; test ids disjoint from validation; model hash matches `best.pt`; out-of-domain rows flagged, refused with `reject` | `test_training_pipeline.py` (21 tests) |
+| Calibration on a toy with known miscalibration (T = 3) | T recovered within 0.06; T near 1 for a calibrated input; isotonic reaches the ECE floor; integer weights equal duplicated events | `test_calibration.py` (21 tests) |
+| Set classifiers | permutation and padding invariance at 1e-5, finite outputs for empty sets, toy AUC above 0.6 | `test_set_classifier.py` (10 tests) |
+| ml-artifact contracts 2.5.0 | each new code fires at its level; 2.4.0 artifacts keep their outcome without `--strict`; lint with the CI pins (ruff 0.16.10, mypy 2.4.0) clean on `core/` and `contracts/` | `test_ml_contract.py`, `test_write_ml_artifact.py` |
+| Journey J9, `examples/ml-classifier-to-inference/` (SYNTHETIC, seed 20261013, NumPy trainer, runs without PyTorch) | 12 of 12 pre-declared criteria pass: random row split caught (leakage in all 24 runs), grouped split passes, ECE 0.0176 after calibration (floor 0.0158), injected `pt_miss` shift detected (KS D 0.056, floor 0.024), 9 of 357 pseudo-data rows out of domain, Asimov mu 1.000000, toy pull mean -0.055 and width 0.984, 68 % coverage 0.693, pseudo-data mu 1.307 +0.281 -0.261 (GoF p 0.80); both artifacts validate and the statistical-result links the ml-artifact by sha256; `results.json` byte-identical between the E2 venv and miniconda; the `--trainer torch` path also passes all criteria (run once) | `tests/examples/test_ml_classifier_to_inference.py` (8 tests) |
+| Reference snippets (ONNX `dynamo=True` with onnxruntime at a new batch size and multiplicity, `torch.export` and AOTInductor, checkpoint resume bit-identical, seeded workers, bf16 and fp16 recipes, `torch.compile` dynamic shapes, FSDP2 + DCP on gloo world size 1) | run; each marked with the version | onnx/onnxruntime in a scratch target dir, not in E2 |
+
+`tools/run_all_checks.py` with the host CLIs and the E2 venv: 20 of 20 checks pass; 2,458 unit tests, 0 failures, 55
+skipped. Not run: GPU, multi-GPU NCCL for FSDP2, a benchmark-dataset performance study of the set classifiers. The
+J9 example's fit uses private helpers of `core/stats/likelihood_limits.py` (`template_fit.py` refuses signed-weight
+templates).
+
 ## 0.6.16 release check (2026-10-13, E2)
 
 Version 0.6.16 (detector-response front-end electronics and signal processing, PR #57: a new reference, the
