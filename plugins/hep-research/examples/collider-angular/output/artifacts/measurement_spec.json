@@ -84,10 +84,23 @@
     "name": "synthetic event selection",
     "definition": "efficiency e0 - e1 cos^4 theta (invented)",
     "conditional_denominator": "generated events in the truth bin"
+   },
+   {
+    "name": "signal region",
+    "definition": "SYNTHETIC: visible-energy fraction x_vis >= 0.9",
+    "conditional_denominator": "selected events (signal x_vis = 1 + N(0, 0.01): inside by construction)"
    }
   ],
-  "backgrounds": [],
-  "no_backgrounds_reason": "SYNTHETIC: the generator produces signal events only",
+  "backgrounds": [
+   {
+    "name": "synthetic tau-pair-like background",
+    "estimator": "sideband extrapolation in x_vis: B_k = TF x N_CR,k per reco cos theta bin, TF = f(SR) / f(CR) from the simulated background x_vis shape",
+    "control_region": "SYNTHETIC: 0.5 <= x_vis < 0.8 (signal-free by construction)",
+    "closure": "SYNTHETIC: validation band 0.8 <= x_vis < 0.9 predicted from the control sideband (results.json#background/validation_closure); Asimov closure exact",
+    "transfer_factor": 0.07070707070707047,
+    "uncertainty": "10% on TF, fully correlated (synthetic x_vis shape modelling); control-sideband counts in the statistical block"
+   }
+  ],
   "corrections": [
    {
     "effect_id": "efficiency_and_migration",
@@ -101,11 +114,31 @@
     "source": "synthetic 2% assumption",
     "effect": "normalization",
     "applied_via": "covariance (fully correlated across bins)"
+   },
+   {
+    "name": "background_transfer_factor",
+    "source": "synthetic 10% on the x_vis transfer factor",
+    "effect": "mixed",
+    "applied_via": "covariance (TF x control counts, fully correlated, unfolded)"
    }
   ],
   "blinding": {
-   "blinded": false
+   "blinded": true,
+   "mask": {
+    "regions": [
+     "signal region x_vis >= 0.9 in the forward bin cos theta >= 0.9"
+    ],
+    "intervals": [
+     {
+      "variable": "cos_theta",
+      "low": 0.9,
+      "high": 1.0
+     }
+    ]
+   },
+   "unblinding_record_ref": null
   },
+  "notes": "SYNTHETIC blinding policy: the forward signal-region bin, outside the reported fiducial range, is masked by the custodian step and filled with the simulated expectation in the unfolding; the sidebands stay open",
   "experiment_fields": {
    "synthcol:note": "ILLUSTRATIVE and SYNTHETIC; every number is invented"
   }

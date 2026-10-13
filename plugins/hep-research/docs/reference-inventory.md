@@ -9,7 +9,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | Skill | References | KB | Cited nowhere |
 |---|---|---|---|
 | detector-response | 34 | 395 | 0 |
-| hep-analysis | 11 | 79 | 0 |
+| hep-analysis | 11 | 80 | 0 |
 | hep-computing | 32 | 294 | 0 |
 | hep-statistics | 11 | 149 | 0 |
 | hep-theory | 11 | 78 | 0 |
@@ -123,7 +123,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `backgrounds.md` | hep-analysis | 4.7 | no | 16 | detector-response | 633d6c9 2026-10-13 |
 | `correction-chain.md` | hep-analysis | 9.1 | no | 4 | - | 57316ad 2026-10-13 |
 | `data-pipelines.md` | hep-analysis | 0.4 | no | 8 | hep-computing | 7e34ef8 2026-10-13 |
-| `hep-analysis-guide.md` | hep-analysis | 20.2 | yes | 6 | detector-response | d058154 2026-10-13 |
+| `hep-analysis-guide.md` | hep-analysis | 20.4 | yes | 6 | detector-response | d058154 2026-10-13 |
 | `histograms-efficiencies.md` | hep-analysis | 3.1 | no | 7 | detector-response, hep-computing | c180c4e 2026-10-13 |
 | `measurements-and-unfolding.md` | hep-analysis | 7.4 | no | 9 | detector-response, hep-statistics | 4fb4d83 2026-10-13 |
 | `review-and-artifacts.md` | hep-analysis | 7.2 | yes | 9 | - | e085335 2026-10-13 |

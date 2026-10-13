@@ -6,7 +6,7 @@ Reproduce: `python3 examples/published-comparison/run.py` (from the plugin root)
 
 Gate: comparable after level-identification, fiducial-restriction (both justified), with declared convention mappings.
 
-mu = 0.9951 ± 0.0218; chi2 = 10.27 / 9 (p = 0.33). Whitened least squares gives the same mu to 2.2e-16. Fiducial prediction 744.09 pb.
+mu = 0.9977 ± 0.0221; chi2 = 7.98 / 9 (p = 0.54). Whitened least squares gives the same mu to 0.0e+00. Fiducial prediction 744.09 pb.
 
 Limitation: the record's luminosity block is built from the measured values (fully correlated, proportional to the data); a Gaussian GLS normalization fit with such a matrix is known to be biased low for multiplicative uncertainties (Peelle's pertinent puzzle), so mu here can differ from the ratio of fiducial cross sections.
 

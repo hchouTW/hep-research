@@ -583,7 +583,32 @@ fix; unit tests 2,596 run, 0 failures, 55 skipped (201 modules). Lint with the C
 `core/` and `contracts/`: clean. Physics statements corrected with sources opened on 2026-10-13: SILSO cycle table and
 news item (cycle 24), Kampert & Unger 2012 (sigma(X_max)), Gross & Vitells 2010 (trials), Barlow hep-ex/0207026
 (passed checks), AME2020 and CODATA 2022 (nuclear masses). Not done: simulated backgrounds and masked outputs inside
-the two example pipelines (P4-2 partial).
+the two example pipelines (P4-2 partial; completed in HEP-ANALYSIS-P4-2 below).
+
+## HEP-ANALYSIS-P4-2 (2026-10-13, E2, version 0.6.17 + unreleased, contracts 2.6.0)
+
+hep-analysis audit items P4-2 and P3-12 on branch `fix/hep-analysis-p4-2`: simulated backgrounds with a sideband
+estimate and closure, and a blinded output, inside both journey pipelines. All inputs synthetic.
+
+| Example | Background and estimate | Closure (pre-declared criteria) | Blinded output |
+|---|---|---|---|
+| `collider-angular` (Path B) | tau-pair-like sample from the synthetic-collider generator; B = TF x N(0.5 <= x_vis < 0.8), TF = 0.0707, 10% fully correlated; 414.9 events in the unblinded signal-region bins | Asimov 2.2e-16; validation band 0.8-0.9: observed 1171, predicted 1173.0, pull -0.05, chi2 13.7/12 (p 0.32); toys run the blinded procedure | forward signal-region bin cos theta >= 0.9 (outside the fiducial range); fiducial sigma 746.50 +- 6.73 (stat) +- 2.23 (bkg) +- 14.93 (lumi) pb, expected 745.81 |
+| `ams-flux-ratio` (Path A) | Z=1 charge tail in the helium window; B = TF x N(1.3 <= Q < 1.6), TF = 0.1710, 10% fully correlated | Asimov 2.2e-16; validation band 1.6-1.7: period 1 observed 259, predicted 308.6, pull -2.68, chi2 10.5/8; period 2 observed 416, predicted 390.0, pull 1.25, chi2 8.2/9 (pull spread over seeds 0-9 consistent with unit width) | helium signal-region count at 60-100 GV in both periods; helium flux, He/p ratio and period average null there, dataset records stop at 60 GV |
+
+Both pipelines mask through `mask_blinded_bins.py` as the custodian step (the unmasked histogram lives only in a
+temporary directory), fill the blinded bin with the simulated expectation at zero variance, and save figures only
+after `core.blinding.check_figure` finds nothing in the blinded range. The example tests rerun each pipeline with a
+synthetic sentinel (987654.321) in the blinded bins: all outputs byte-identical to the normal run,
+`audit_blinded_outputs.py scan` with the sealed sentinel histogram passes, a planted sentinel fails. Sealing the real
+blinded counts instead gives false hits in the AMS example (a two-digit count equal to an unrelated public count, and
+a three-digit printed factor within rounding of a sealed ratio), so the sentinel form is the test. Specs validate
+strictly with their profiles and review as `acceptable-with-open-inputs`; gate-verdict snapshot unchanged (no
+`--write`). Downstream: the published-comparison record copied from Path B is regenerated (mu 0.9977 +- 0.0221, chi2
+7.98/9); theory-comparison and detector-resolution rerun byte-identically. The synthetic-collider profile dataset
+record `datasets/synthetic-path-b-dsigma.json` is a contracts-1.0.0 snapshot and was not regenerated.
+
+`tools/run_all_checks.py` with the host CLIs and the E2 venv at `a1801ce`: 21 pass, 0 fail; unit tests 2,804 run,
+0 failures, 58 skipped (212 modules); synthetic-collider profile suite 12 tests. `core/` and `contracts/` not touched.
 
 ## 0.6.17 release check (2026-10-13, E2)
 

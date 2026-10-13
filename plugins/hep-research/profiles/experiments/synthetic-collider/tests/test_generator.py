@@ -44,6 +44,34 @@ class GeneratorTests(unittest.TestCase):
         self.assertEqual(gen.generate(CFG, 1)["meta"]["label"], "SYNTHETIC")
         self.assertTrue(CFG["label"].startswith("SYNTHETIC"))
 
+    def test_background_is_additive(self):
+        """The background and the signal x_vis come from their own streams: generate() is unchanged."""
+        before = gen.generate(CFG, 5)
+        bkg = gen.generate_background(CFG, 6)
+        gen.signal_xvis(CFG, 100, 7)
+        np.testing.assert_array_equal(before["reco_cos"], gen.generate(CFG, 5)["reco_cos"])
+        np.testing.assert_array_equal(bkg["x_vis"], gen.generate_background(CFG, 6)["x_vis"])
+        self.assertEqual(bkg["meta"]["label"], "SYNTHETIC background")
+        self.assertTrue(CFG["background"]["label"].startswith("SYNTHETIC"))
+
+    def test_background_xvis_matches_the_analytic_fractions(self):
+        cfg = json.loads(json.dumps(CFG))
+        cfg["background"]["sigma_pb"] = 20000.0  # large sample for the comparison
+        x = gen.generate_background(cfg, 11)["x_vis"]
+        for lo, hi in ((0.5, 0.8), (0.8, 0.9), (0.9, 1.0)):
+            f = gen.xvis_fraction(cfg, lo, hi, "background")
+            obs = np.mean((x >= lo) & (x < hi))
+            self.assertLess(abs(obs - f), 5 * np.sqrt(f * (1 - f) / x.size), (lo, hi))
+        # Beta(2, 2): CDF 3x^2 - 2x^3
+        self.assertAlmostEqual(gen.xvis_fraction(cfg, 0.9, 1.0, "background"), 1 - (3 * 0.81 - 2 * 0.729), places=12)
+        self.assertAlmostEqual(gen.xvis_fraction(cfg, 0.0, 1.0, "background"), 1.0, places=12)
+
+    def test_signal_xvis_is_inside_the_signal_region(self):
+        x = gen.signal_xvis(CFG, 100000, 3)
+        self.assertLess(gen.xvis_fraction(CFG, -np.inf, 0.9, "signal"), 1e-20)
+        self.assertTrue(np.all(x >= 0.9))
+        self.assertLess(abs(x.mean() - 1.0), 5 * CFG["background"]["x_vis"]["signal_sigma"] / np.sqrt(x.size))
+
     def test_generator_imports_no_theory_code(self):
         for f in (ROOT / "scripts").glob("*.py"):
             text = f.read_text(encoding="utf-8")

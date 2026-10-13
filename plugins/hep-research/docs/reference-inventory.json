@@ -10,7 +10,7 @@
   },
   "hep-analysis": {
    "references": 11,
-   "bytes": 79432,
+   "bytes": 79537,
    "uncited": 0
   },
   "hep-computing": {
@@ -842,7 +842,7 @@
   {
    "path": "skills/hep-analysis/references/hep-analysis-guide.md",
    "owner": "hep-analysis",
-   "bytes": 20249,
+   "bytes": 20354,
    "lines": 119,
    "linked_from_skill_md": true,
    "cited_by": [

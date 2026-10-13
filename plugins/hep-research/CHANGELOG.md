@@ -260,6 +260,20 @@ same level, and at the publication gate; no new capability).
   `test_cosmic_ray_helpers.py`; a worked cosmic-ray spec with backgrounds and an active mask
   (`assets/worked-spec.cosmic-ray.synthetic.json`); the flagship example documents the `--profiles-from`
   validation command; capability-matrix title no longer carries a version.
+- **Backgrounds and blinding in both journey examples (P4-2, P3-12).** `examples/collider-angular` subtracts a
+  synthetic tau-pair-like background estimated from an x_vis sideband (transfer factor from the simulated shape, 10%
+  fully correlated), closes it in a validation band and by Asimov, and blinds the forward signal-region bin
+  cos theta >= 0.9 (outside the fiducial range). `examples/ams-flux-ratio` subtracts a synthetic Z=1 charge tail from
+  the helium window with a charge-sideband estimate and validation band, and blinds the helium signal-region count at
+  60-100 GV (helium flux, He/p ratio and period average null there; dataset records stop at 60 GV). In both, a
+  custodian step runs `mask_blinded_bins.py` (the unmasked histogram lives only in a temporary directory), the
+  unfolding fills the blinded bin with the simulated expectation at zero variance, figures pass
+  `core.blinding.check_figure`, and the specs declare backgrounds, the transfer-factor systematic and the mask. The
+  example tests check the estimate, the closure, the absent bins, and rerun with a synthetic sentinel in the blinded
+  bins: outputs byte-identical, `audit_blinded_outputs.py` passes, a planted sentinel fails. The synthetic-collider
+  profile generator gains an optional background sample with a visible-energy fraction (`generate_background`,
+  `signal_xvis`, `xvis_fraction`, `--background`); `generate()` is unchanged. The published-comparison record copied
+  from Path B is regenerated (its covariance gains the transfer-factor block).
 
 ### hep-statistics
 
