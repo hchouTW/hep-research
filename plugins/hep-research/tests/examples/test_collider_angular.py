@@ -151,10 +151,31 @@ class PathBTests(unittest.TestCase):
         np.testing.assert_array_equal(a["total"], b["total"])
 
     def test_blinding_audit_with_synthetic_sentinel(self):
-        """Seal the blinded signal-region count (acting as custodian, synthetic data only) and scan every output; a planted
-        copy of a sealed number must be found (positive control)."""
+        """Rerun with a synthetic sentinel in place of the blinded signal-region count: every output is byte-identical
+        to the normal run (no published number depends on the blinded count), and audit_blinded_outputs.py, sealing the
+        sentinel histogram as the custodian would, finds none of its sealed numbers in the outputs. A planted copy of the
+        sentinel is found (positive control). The sentinel avoids false hits of short integer counts."""
+        sentinel = 987654.321
+        real = self.m.pseudo_data
+        seed = self.r["seed"]
+
+        def planted(s):
+            d = real(s)
+            d["sr"][self.m.BLINDED] = sentinel
+            return d
+        sent_out = Path(self.tmp.name) / "sentinel"
+        self.m.pseudo_data = planted
+        try:
+            self.assertEqual(run(self.m, "--out", str(sent_out)), 0)
+        finally:
+            self.m.pseudo_data = real
+        files = sorted(p.relative_to(self.out) for p in self.out.rglob("*") if p.is_file())
+        self.assertEqual(files, sorted(p.relative_to(sent_out) for p in sent_out.rglob("*") if p.is_file()))
+        for f in files:
+            self.assertEqual((self.out / f).read_bytes(), (sent_out / f).read_bytes(), str(f))
+
         audit = PLUGIN / "skills" / "hep-computing" / "scripts" / "audit_blinded_outputs.py"
-        d = self.m.pseudo_data(self.r["seed"])
+        d = planted(seed)
         g = self.m.CFG["generator"]
         m = self.m.detector.response(self.m.CFG, g["shape_a"], g["shape_b"])["matrix"]
         mu = m @ (self.m.LUMI * self.m.expected_dsigma(g["sigma_pb"], g["shape_a"], g["shape_b"]) * self.m.WIDTH)
@@ -169,15 +190,14 @@ class PathBTests(unittest.TestCase):
             seal = subprocess.run([sys.executable, str(audit), "seal", "--hist", str(p / "hist.json"), "--low", "0.9", "--high", "1.0",
                                    *ref_args, "--out", str(p / "sealed.json")], capture_output=True, text=True, timeout=120)
             self.assertEqual(seal.returncode, 0, seal.stderr)
-            exempt = ["--exempt", f"{self.out / 'dsigma_dcos.png'}=checked with core.blinding.check_figure in run.py"]
-            scan = subprocess.run([sys.executable, str(audit), "scan", "--sealed", str(p / "sealed.json"), str(self.out), *exempt],
+            exempt = ["--exempt", f"{sent_out / 'dsigma_dcos.png'}=checked with core.blinding.check_figure in run.py"]
+            scan = subprocess.run([sys.executable, str(audit), "scan", "--sealed", str(p / "sealed.json"), str(sent_out), *exempt],
                                   capture_output=True, text=True, timeout=120)
             self.assertEqual(scan.returncode, 0, scan.stdout)
             self.assertEqual(json.loads(scan.stdout)["status"], "pass")
-            # positive control: the blinded count planted in a copy of the outputs is found
-            leak = Path(private) / "leak"
+            leak = p / "leak"
             leak.mkdir()
-            (leak / "log.txt").write_text(f"bin 11 count {d['sr'][11]:.1f}\n")
+            (leak / "log.txt").write_text(f"forward bin count {sentinel}\n")
             bad = subprocess.run([sys.executable, str(audit), "scan", "--sealed", str(p / "sealed.json"), str(leak)],
                                  capture_output=True, text=True, timeout=120)
             self.assertEqual(bad.returncode, 1, bad.stdout)
@@ -202,6 +222,7 @@ class PathBTests(unittest.TestCase):
     def test_labels(self):
         self.assertIn("SYNTHETIC", self.r["label"])
         self.assertIn("ILLUSTRATIVE", (self.out / "report.md").read_text().splitlines()[0])
+
 
 
 if __name__ == "__main__":
