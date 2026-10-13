@@ -210,6 +210,16 @@ class SourceTests(unittest.TestCase):
         os.chmod(self.dir, 0o775)
         self.assertIn("source.replaceable", self.codes(self.load(acct)))
 
+    def test_read_only_directory_of_the_account_is_replaceable(self):
+        """The owner of a directory can chmod it writable and swap the file: read-only is not protection."""
+        acct = Account(os.stat(self.dir).st_uid, frozenset())
+        os.chmod(self.dir, 0o555)
+        from core.protected.trusted_input import _replaceable
+        self.assertTrue(_replaceable(os.stat(self.dir), os.stat(self.log), acct))  # the directory rule itself
+        self.assertFalse(_replaceable(os.stat(self.dir), os.stat(self.log), other_account()))
+        st = rv.load(self.log, self.head, source=SRC, now=NOW, protected=True, account=acct)
+        self.assertIn("source.replaceable", self.codes(st))
+
     def test_sticky_directory_is_not_replaceable_by_others(self):
         acct = Account(os.geteuid() + 4242, frozenset({os.stat(self.dir).st_gid}))
         os.chmod(self.dir, 0o1777)

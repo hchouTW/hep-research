@@ -134,8 +134,8 @@ class _Checker:
                 self.add("unresolved", where, "dependency.no_hash", f"{ref!r} has no sha256: a substituted source cannot be detected")
             elif HEX64.match(str(sha)) and sha != digest:
                 self.add("error", where, "dependency.hash_mismatch", f"{ref!r} has sha256 {digest}, the input declares {sha}")
-            if digest in self.revoked:
-                ev = self.revoked[digest]
+            ev = self.revoked.get(digest) or self.revoked.get("ref:" + src.relative_to(self.root).as_posix())
+            if ev is not None:
                 self.add("error", where, "dependency.revoked",
                          f"{ref!r} (sha256 {digest[:12]}...) was revoked {ev.get('issued', '')}: {ev.get('reason')}")
             try:
@@ -178,6 +178,19 @@ class _Checker:
                 self.artifact(src, sdoc, trail + (src,))
 
 
+def _event_keys(events) -> dict:
+    """{sha256: event} for digest subjects and {"ref:<project-relative path>": event} for artifact or recipe subjects
+    named by a path (relative to the project root); the first event per key wins."""
+    out: dict = {}
+    for ev in reversed(events):
+        s = ev["subject"]
+        if "sha256" in s:
+            out.setdefault(s["sha256"], dict(ev, issued=ev["time"]))
+        if "ref" in s and s["kind"] in ("artifact", "recipe"):
+            out.setdefault("ref:" + Path(s["ref"]).as_posix(), dict(ev, issued=ev["time"]))
+    return out
+
+
 def _revocation_findings(revocations, head, source, max_age_s, now, protected: bool, account) -> tuple[dict, list[tuple]]:
     """({sha256: event}, [(severity, code, message)]) for the given revocation input; see the module docstring."""
     try:
@@ -190,8 +203,7 @@ def _revocation_findings(revocations, head, source, max_age_s, now, protected: b
         if not st.ok:
             return {}, [("error", "dependency.revocations_unverified",
                          "the revocation log did not verify: " + ", ".join(sorted({f["code"] for f in st.findings})))]
-        return {ev["subject"]["sha256"]: dict(ev, issued=ev["time"]) for ev in reversed(st.events)
-                if "sha256" in ev["subject"]}, []
+        return _event_keys(st.events), []
     if protected:
         return {}, [("error", "dependency.revocations_legacy",
                      "protected use needs the hash-chained revocation log with its head; the legacy format is refused")]
@@ -222,9 +234,8 @@ def validate_dependencies(artifact_path, project_root, base=None, revocations=No
     revoked, rfindings = (_revocation_findings(revocations, revocation_head, revocation_source, max_status_age_s, now,
                                                protected, account) if revocations and not refusals else ({}, []))
     if ctx is not None and ctx.protected and ctx.revocations is not None:  # the authoritative log is always applied
-        for ev in reversed(ctx.revocations.events):
-            if "sha256" in ev["subject"]:
-                revoked.setdefault(ev["subject"]["sha256"], dict(ev, issued=ev["time"]))
+        for key, ev in _event_keys(ctx.revocations.events).items():
+            revoked.setdefault(key, ev)
     chk = _Checker(root, Path(base).resolve() if base else root, revoked, protected, vocab,
                    ctx if ctx is not None and ctx.protected else None)
     for severity, code, message in rfindings:
@@ -250,8 +261,9 @@ def validate_dependencies(artifact_path, project_root, base=None, revocations=No
             chk.add("error", "$", "dependency.unreadable", f"cannot read {artifact_path}: {exc}")
         else:
             own = hashlib.sha256(raw).hexdigest()
-            if own in chk.revoked:
-                chk.add("error", "$", "dependency.revoked", f"this artifact was revoked: {chk.revoked[own].get('reason')}")
+            ev = chk.revoked.get(own) or chk.revoked.get("ref:" + path.relative_to(root).as_posix())
+            if ev is not None:
+                chk.add("error", "$", "dependency.revoked", f"this artifact was revoked: {ev.get('reason')}")
             if isinstance(doc, dict):
                 chk.artifact(path, doc, (path,))
             else:

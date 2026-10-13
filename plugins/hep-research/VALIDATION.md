@@ -1152,3 +1152,21 @@ ams02-research (main `dc0e674`, 1.4.10) checker reports 0.7.1 `compatible` (requ
 with the host CLIs (Claude Code 2.1.296, codex-cli 0.160.0) and the E2 venv: 21 of 21 checks pass; 2,830 unit tests in
 213 modules, 0 failures, 58 skipped. CI passed on both merged PRs (#67 every job; #68 every required job). Release
 manifest `release-manifests/0.7.1.json`.
+
+## AGENTIC-COMPLETION release A (2026-10-14, E2: Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1; version 0.7.1 + unreleased, contracts 2.6.0)
+
+Plan "Complete the agentic architecture inside hep-research", packages P2, P3, P1 and P7 for them (decisions DP-1 to
+DP-6 as recommended). Synthetic data and sentinels only; custodian-written files are modeled by evaluating them for
+another account, because a test cannot create files owned by another identity without privileges.
+
+| Package | Evidence |
+|---|---|
+| P2 revocation log, head, reverse index, source checks | `tests/contracts/test_revocation.py` (43 tests): every corruption refused and unanswerable; recipe, release, source and attestation revocation reach every dependent with no byte change; own, writable, replaceable (including an account-owned read-only directory), hard-linked and non-regular inputs refused; `dependencies.py`, `release_manifest.py`, `attestation.py` read the same verified log |
+| P3 exposure and decision lineage | `tests/contracts/test_lineage.py` (17 tests): ordering and append-only checks, `exposed` from signal-region entries and `unknown` from missing records, decision binding through appends, producers and the release check use one derivation, new capabilities refused by an older reader |
+| P1 protected-use mode (C07 plugin half) | `tests/contracts/test_protected_entry_points.py` (16 tests): 17 command lines and 31 lower-level functions under 9 failure modes with a valid control (only formal use refused there), revoked inputs (digest, canonical digest, path), unknown capabilities, qualification revocation and binding, the review regressions, nothing changing outside protected mode, core rules equal to the schemas on every single-field mutation |
+| P7 texts | `tools/check_instruction_text.py` 17 rules (P01-P03 new), 0 findings; reference inventory regenerated; SKILL.md files unchanged |
+
+An independent review of the first implementation reported eight findings; seven were fixed with regression tests
+(`ReviewFindingTests`), and the eighth (custodian tools are not guarded) is a stated limit. `tools/run_all_checks.py`
+with the E2 venv: 21 of 21 checks pass; 2,917 unit tests in 216 modules, 0 failures, 58 skipped. ruff 0.16.10 and
+mypy 2.4.0 clean on `core` and `contracts`. Not run: CI, the host CLIs' live sessions, any carry-over.

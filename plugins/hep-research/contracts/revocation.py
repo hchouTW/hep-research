@@ -88,6 +88,14 @@ class Index:
                 "edges": {k: sorted(v) for k, v in sorted(self.edges.items())}}
 
 
+def _resolve(base: Path, ref: str) -> Path:
+    """ref resolved against base; an unresolvable ref (NUL, a link loop) resolves to base, which links nothing new."""
+    try:
+        return (base / ref).resolve()
+    except (OSError, ValueError, RuntimeError):
+        return base
+
+
 def _obj(value) -> dict:
     return value if isinstance(value, dict) else {}
 
@@ -97,7 +105,11 @@ def _json_files(root: Path):
         dirs[:] = sorted(d for d in dirs if d not in SKIP_DIRS and not os.path.islink(os.path.join(parent, d)))
         for name in sorted(names):
             p = Path(parent) / name
-            if p.suffix.lower() == ".json" and stat.S_ISREG(os.lstat(p).st_mode):
+            try:
+                regular = stat.S_ISREG(os.lstat(p).st_mode)
+            except OSError:
+                regular = False
+            if p.suffix.lower() == ".json" and regular:
                 yield p
 
 
@@ -108,18 +120,22 @@ def build_index(root) -> Index:
     idx = Index(str(root))
     for p in _json_files(root):
         rel = p.relative_to(root).as_posix()
-        data = p.read_bytes()
+        try:
+            data = p.read_bytes()
+        except OSError:
+            continue  # unreadable: it cannot be indexed (the closure is only as complete as the readable project)
         node = f"path:{rel}"
         sha = hashlib.sha256(data).hexdigest()
         idx.files[rel] = sha
         idx.same(node, f"sha256:{sha}")
         try:
             doc = json.loads(data.decode("utf-8"))
-        except (UnicodeDecodeError, ValueError):
+            canonical = canonical_sha256(doc)
+        except (UnicodeError, ValueError, RecursionError):
             continue
         if not isinstance(doc, dict):
             continue
-        idx.same(node, f"sha256:{canonical_sha256(doc)}")
+        idx.same(node, f"sha256:{canonical}")
         if "artifact_type" in doc and "contract_version" in doc:
             for inp in doc.get("inputs") or []:
                 if not isinstance(inp, dict):
@@ -128,12 +144,12 @@ def build_index(root) -> Index:
                     idx.link(f"sha256:{inp['sha256']}", node)
                 ref = inp.get("ref")
                 if isinstance(ref, str) and not inp.get("external"):
-                    tgt = (root / ref).resolve() if not Path(ref).is_absolute() else Path(ref).resolve()
+                    tgt = _resolve(root, ref)
                     if tgt == root or root in tgt.parents:
                         idx.link(f"path:{tgt.relative_to(root).as_posix()}", node)
             rec = _obj(doc.get("data_exposure")).get("record_ref")
             if isinstance(rec, str):
-                tgt = (p.parent / rec).resolve()
+                tgt = _resolve(p.parent, rec)
                 if root in tgt.parents:
                     idx.link(f"path:{tgt.relative_to(root).as_posix()}", node)
         elif "manifest_version" in doc and isinstance(doc.get("release_id"), str):
@@ -285,7 +301,11 @@ def main(argv=None) -> int:
         if args.root.is_symlink() or not args.root.is_dir():
             print(json.dumps({"status": "unreadable", "error": f"{args.root}: not a directory (a link is never followed)"}))
             return 2
-        out["affected"] = affected_by(build_index(args.root), st)
+        try:
+            out["affected"] = affected_by(build_index(args.root), st)
+        except (OSError, ValueError, RecursionError) as exc:
+            print(json.dumps({"status": "unreadable", "error": f"cannot index {args.root}: {type(exc).__name__}"}))
+            return 2
     print(json.dumps(out, indent=1))
     return 0 if st.ok else 1
 

@@ -183,14 +183,23 @@ def is_chained_log(data: bytes) -> bool:
     first = data.split(b"\n", 1)[0]
     try:
         rec = json.loads(first.decode("utf-8"))
-    except (UnicodeDecodeError, ValueError):
+    except (UnicodeDecodeError, ValueError, RecursionError):
         return False
     return isinstance(rec, dict) and isinstance(rec.get("genesis"), dict)
 
 
 def verify(log_bytes: bytes | None, head, *, source: str, now: datetime.datetime | None = None,
            max_age_s: int = MAX_STATUS_AGE_S) -> RevocationStatus:
-    """Verify a log against its head (both already read). See contracts/revocation.py."""
+    """Verify a log against its head (both already read). See contracts/revocation.py. Never raises on malformed input."""
+    try:
+        return _verify(log_bytes, head, source=source, now=now, max_age_s=max_age_s)
+    except (ValueError, UnicodeError, RecursionError, TypeError, KeyError) as exc:
+        return RevocationStatus(ok=False, findings=[{"severity": "error", "path": "$log", "code": "revocation.bad_record",
+                                                     "message": f"malformed record: {type(exc).__name__}"}])
+
+
+def _verify(log_bytes: bytes | None, head, *, source: str, now: datetime.datetime | None = None,
+            max_age_s: int = MAX_STATUS_AGE_S) -> RevocationStatus:
     now = now or datetime.datetime.now(datetime.UTC)
     findings: list[dict] = []
 
@@ -215,7 +224,7 @@ def verify(log_bytes: bytes | None, head, *, source: str, now: datetime.datetime
             where = f"$log:{n}"
             try:
                 rec = json.loads(line.decode("utf-8"), object_pairs_hook=no_duplicates)
-            except (UnicodeDecodeError, ValueError):
+            except (UnicodeDecodeError, ValueError, RecursionError):
                 add(where, "revocation.bad_record", "not one JSON object per line")
                 break
             problem = genesis_problem(rec) if n == 1 else event_problem(rec)
@@ -277,6 +286,6 @@ def load(log_path, head_path, *, source: str, now: datetime.datetime | None = No
     if head_bytes is not None:
         try:
             head = json.loads(head_bytes.decode("utf-8"), object_pairs_hook=no_duplicates)
-        except (UnicodeDecodeError, ValueError):
+        except (UnicodeDecodeError, ValueError, RecursionError):
             head = None
     return verify(log_bytes, head, source=source, now=now, max_age_s=max_age_s)

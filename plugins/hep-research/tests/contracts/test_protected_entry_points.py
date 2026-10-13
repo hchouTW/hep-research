@@ -340,3 +340,106 @@ class SchemaAgreementTests(unittest.TestCase):
         self.agree({"$ref": "revocation_event.json#/$defs/genesis"}, rl.genesis_problem, g)
         self.agree("revocation_event.json", rl.event_problem, ev)
         self.agree("revocation_head.json", rl.head_problem, rl.head_of([g, ev], "src", "2026-10-14T10:00:00Z"))
+
+
+class ReviewFindingTests(unittest.TestCase):
+    """Regressions for the review of the first implementation: each case failed open or raised before the fix."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.pp = ProtectedProject(Path(self.tmp.name) / "p").start()
+        self.env = Env(self.pp)
+        self.outside = Path(self.tmp.name) / "outside"
+        self.outside.mkdir()
+
+    def tearDown(self):
+        self.pp.stop()
+        self.pp.cleanup_modes()
+        self.tmp.cleanup()
+
+    def guard_codes(self, **kw):
+        from core.protected.guard import guard
+        try:
+            guard("test", **kw)
+        except ProtectedUseRefused as exc:
+            return {r["code"] for r in exc.refusals}
+        return set()
+
+    def test_qualification_revoked_by_digest(self):
+        from core.protected.revocation_log import canonical_sha256
+        q = json.loads(self.pp.qual.read_text())
+        self.pp.revoke("qualification", sha256=canonical_sha256(q))
+        self.assertIn("protected.qualification_revoked", self.guard_codes(paths=[self.env.art]))
+
+    def test_link_from_outside_the_project_is_detected(self):
+        link = self.outside / "x.json"
+        link.symlink_to(self.env.art)
+        self.pp.fail("empty")
+        cwd = os.getcwd()
+        os.chdir(self.outside)
+        try:
+            self.assertIn("revocation.empty", self.guard_codes(paths=[link]))
+        finally:
+            os.chdir(cwd)
+
+    def test_unreadable_config_fails_closed(self):
+        (self.outside / "hep-research.project.json").write_text('{"agent_policy": {"policy_version": ')
+        (self.outside / "a.json").write_text("{}")
+        self.assertIn("protected.config_unreadable", self.guard_codes(paths=[self.outside / "a.json"]))
+        (self.outside / "hep-research.project.json").write_text("{not json")  # no sign of a policy: unchanged
+        from core.protected.guard import detect
+        cwd = os.getcwd()
+        os.chdir(self.outside)
+        try:
+            self.assertFalse(detect([self.outside / "a.json"])[0])
+        finally:
+            os.chdir(cwd)
+
+    def test_revoked_by_canonical_digest_ref_and_upper_case(self):
+        from core.protected.revocation_log import canonical_sha256
+        self.pp.revoke("artifact", sha256=canonical_sha256(self.env.doc))  # the file itself is indented JSON
+        self.assertIn("protected.input_revoked", self.guard_codes(paths=[self.env.art]))
+        self.tearDown()
+        self.setUp()
+        self.pp.revoke("artifact", ref="art.json")
+        self.assertIn("protected.input_revoked", self.guard_codes(paths=[self.env.art]))
+        from contracts import dependencies
+        down = self.pp.artifact("down.json", dict(self.env.doc, artifact_id="down", inputs=[
+            {"ref": "art.json", "sha256": hashlib.sha256(self.env.art.read_bytes()).hexdigest(),
+             "status": self.env.doc.get("status", [])}]))
+        self.assertIn("dependency.revoked", codes_of(dependencies.validate_dependencies(down, self.env.proj)))
+        self.tearDown()
+        self.setUp()
+        self.pp.revoke("artifact", sha256="ab" * 32)
+        self.assertIn("protected.input_revoked", self.guard_codes(paths=[self.env.cap_art], digests=["AB" * 32]))
+
+    def test_unreadable_input_is_refused(self):
+        os.chmod(self.env.art, 0)
+        try:
+            if os.access(self.env.art, os.R_OK):
+                self.skipTest("running with privileges that read any file")
+            self.assertIn("protected.input_unreadable", self.guard_codes(paths=[self.env.art]))
+        finally:
+            os.chmod(self.env.art, 0o644)
+
+    def test_malformed_protected_input_is_a_refusal_not_a_crash(self):
+        self.pp.policy["policy_version"] = "1.0.0"
+        body = b'{"bad": "\\ud800"}'
+        self.pp._write(self.pp.qual, body)
+        self.assertTrue(self.guard_codes(paths=[self.env.art]))
+        self.pp._write(self.pp.log, b'[' * 100000 + b'\n')
+        self.assertTrue(self.guard_codes(paths=[self.env.art]))
+
+    def test_exposure_record_written_by_the_session_is_not_trusted_in_protected_mode(self):
+        from contracts.lineage import load_exposure
+        from core.protected.guard import CURRENT, establish
+        rec = self.pp.artifact("records/exposure.json", {"record_version": "1.0.0", "analysis": "a",
+                                                          "source": {"snapshot_id": "s", "sha256": "1" * 64},
+                                                          "previous_sha256": None, "entries": []})
+        os.chmod(rec, 0o666)  # writable by the session's account (the fixture models other files as custodian-owned)
+        self.assertIsNotNone(load_exposure(rec))  # outside a protected command: read as given
+        token = CURRENT.set(establish([rec]))
+        try:
+            self.assertIsNone(load_exposure(rec))  # inside: replaceable by the session, so unknown
+        finally:
+            CURRENT.reset(token)

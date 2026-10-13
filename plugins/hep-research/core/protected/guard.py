@@ -23,11 +23,16 @@ the inputs that requires another capability. Every refusal is a ProtectedUseRefu
 value. Nothing here reports a use as allowed: formal_use_allowed is always false; whether a use proceeds is decided
 outside the agent-run code. Lower-level functions call guard() themselves, so calling them directly does not skip it.
 
+Limits (stated, not checked here): release_manifest.py and attestation.py are custodian tools run as the custodian
+identity, which owns the protected inputs, so they are not guarded (their verdicts bind nothing in the session); a
+context established for a command is reused for the library calls it makes and is not re-evaluated while it runs; a
+path a nested call names in another project is judged under the command's context.
+
 Codes: protected.policy_missing, protected.policy_unanchored, protected.policy_anchor_mismatch,
 protected.policy_differs, protected.inputs_missing, protected.qualification_malformed,
 protected.qualification_not_valid_now, protected.qualification_other_policy, protected.qualification_other_plugin,
 protected.qualification_revoked, protected.formal_use_unavailable, protected.input_revoked,
-protected.unknown_capability, plus the source.* codes of trusted_input and the revocation.* codes of revocation_log.
+protected.unknown_capability, protected.input_unreadable, protected.config_unreadable, protected.input_malformed, plus the source.* codes of trusted_input and the revocation.* codes of revocation_log.
 """
 from __future__ import annotations
 
@@ -110,12 +115,11 @@ def find_configs(paths=(), project=None) -> list[Path]:
     """Project configs that govern the given project directory, paths and the working directory (first found per
     start, upward), in that order, without duplicates."""
     starts: list[Path] = []
-    if project is not None:
-        starts.append(Path(project).absolute())
-    for p in paths:
+    raw = ([] if project is None else [project]) + list(paths)
+    for p in raw:  # both the given and the link-free location: a link into a project must not hide it
         try:
-            starts.append(Path(p).absolute())
-        except (TypeError, ValueError):
+            starts += [Path(p).absolute(), Path(os.path.realpath(p))]
+        except (TypeError, ValueError, OSError):
             continue
     starts.append(Path.cwd())
     out: list[Path] = []
@@ -133,17 +137,33 @@ def detect(paths=(), flag: bool = False, project=None) -> tuple[bool, list[str],
     """(on, reasons, config path, config) for the mode rule of DP-2 (see the module docstring)."""
     reasons = ["--protected given"] if flag else []
     chosen: tuple[Path | None, dict | None] = (None, None)
+    fallback: tuple[Path | None, dict | None] = (None, None)
     for cfg_path in find_configs(paths, project):
         try:
-            cfg = json.loads(cfg_path.read_text(encoding="utf-8"))
-        except (OSError, ValueError, UnicodeDecodeError):
+            raw = cfg_path.read_bytes()
+        except OSError:
+            raw = None
+        try:
+            cfg = json.loads((raw or b"").decode("utf-8")) if raw is not None else None
+        except (ValueError, UnicodeDecodeError, RecursionError):
+            cfg = None
+        if cfg is None:
+            # an unreadable config cannot show that agent_policy is absent, nor can a malformed one that names it:
+            # fail closed; a malformed config that does not name it stays outside protected mode, as before
+            if raw is not None and b"agent_policy" not in raw:
+                continue
+            reasons.append(f"{cfg_path} cannot be read")
+            if chosen[0] is None:
+                chosen = (cfg_path, None)
             continue
         if isinstance(cfg, dict) and "agent_policy" in cfg:
             reasons.append(f"{cfg_path} declares agent_policy")
-            if chosen[0] is None:
+            if chosen[0] is None or chosen[1] is None:
                 chosen = (cfg_path, cfg)
-        elif chosen[0] is None and flag and isinstance(cfg, dict):
-            chosen = (cfg_path, cfg)
+        elif fallback[0] is None and isinstance(cfg, dict):
+            fallback = (cfg_path, cfg)
+    if chosen[0] is None:
+        chosen = fallback
     return bool(reasons), reasons, chosen[0], chosen[1]
 
 
@@ -174,7 +194,7 @@ def qualification_problem(q) -> str | None:
 def _json(data: bytes):
     try:
         return json.loads(data.decode("utf-8"))
-    except (UnicodeDecodeError, ValueError):
+    except (UnicodeDecodeError, ValueError, RecursionError):
         return None
 
 
@@ -184,12 +204,24 @@ def _source_refusals(chk, where: str) -> list[dict]:
 
 def establish(paths=(), flag: bool = False, project=None, use: str = "protected", now: datetime.datetime | None = None,
               account: Account | None = None) -> Context:
-    """The protected-use context for an entry point: off, or on with its refusals (see the module docstring)."""
+    """The protected-use context for an entry point: off, or on with its refusals (see the module docstring). Malformed
+    input never raises: it is a refusal."""
+    try:
+        return _establish(paths, flag, project, use, now, account)
+    except (ValueError, UnicodeError, RecursionError, TypeError, KeyError) as exc:
+        return Context(protected=True, reasons=["protected inputs could not be evaluated"],
+                       refusals=[_refusal("protected.input_malformed", "$", f"malformed protected input: {type(exc).__name__}")])
+
+
+def _establish(paths, flag, project, use, now, account) -> Context:
     on, reasons, cfg_path, cfg = detect(paths, flag, project)
     if not on:
         return Context(protected=False)
     now = now or datetime.datetime.now(datetime.UTC)
     ctx = Context(protected=True, reasons=reasons, config=None if cfg_path is None else str(cfg_path))
+    if cfg_path is not None and cfg is None:
+        ctx.refusals.append(_refusal("protected.config_unreadable", "$config", "the project config cannot be read"))
+        return ctx
     policy = (cfg or {}).get("agent_policy")
     if not isinstance(policy, dict):
         ctx.refusals.append(_refusal("protected.policy_missing", "$config",
@@ -250,7 +282,8 @@ def establish(paths=(), flag: bool = False, project=None, use: str = "protected"
             if (ident.get("release"), ident.get("digest")) != (q["plugin"]["release"], q["plugin"]["digest"]):
                 ctx.refusals.append(_refusal("protected.qualification_other_plugin", "$qualification.plugin",
                                              "the running plugin is not the qualified release (or has no recorded identity)"))
-            if rev.ok and rev.revoked(kind="qualification", ref=q["qualification_id"]):
+            if rev.ok and any(rev.revoked(kind="qualification", ref=q["qualification_id"], sha256=d)
+                              for d in (qchk.sha256, canonical_sha256(q))):
                 ctx.refusals.append(_refusal("protected.qualification_revoked", "$qualification", "the qualification is revoked"))
     if use == "formal":
         ctx.refusals.append(_refusal("protected.formal_use_unavailable", "$use",
@@ -270,28 +303,45 @@ def input_refusals(ctx: Context, paths=(), digests=(), capabilities=None) -> lis
     """Refusals for inputs a verified log revokes, and for JSON artifacts requiring a capability not in `capabilities`."""
     out: list[dict] = []
     revs = ctx.revocations
+    base = Path(ctx.config).parent if ctx.config else None
+    revoked_refs = set()
+    if revs is not None and base is not None:  # artifact events that name a project path instead of a digest
+        for ev in revs.events:
+            s = ev["subject"]
+            if s["kind"] in ("artifact", "recipe") and "ref" in s:
+                revoked_refs.add(os.path.realpath(base / s["ref"]))
     for p in paths:
         try:
             path = Path(p)
-            if not path.is_file():
-                continue
+            if path.is_dir():
+                continue  # a directory is not an input file; the files read from it are checked where they are read
             digest = _sha256_file(path)
-        except (OSError, TypeError, ValueError):
+        except (OSError, TypeError, ValueError) as exc:
+            out.append(_refusal("protected.input_unreadable", str(p), f"cannot be checked: {type(exc).__name__}"))
             continue
-        if revs is not None and revs.revoked(sha256=digest):
-            out.append(_refusal("protected.input_revoked", str(p), "this input is revoked"))
-        if capabilities is not None and path.suffix.lower() == ".json":
+        doc = None
+        if path.suffix.lower() == ".json":
             try:
                 doc = json.loads(path.read_text(encoding="utf-8"))
-            except (OSError, ValueError, UnicodeDecodeError):
-                continue
+            except (OSError, ValueError, UnicodeDecodeError, RecursionError):
+                doc = None
+        digests_here = {digest}
+        if doc is not None:
+            try:
+                digests_here.add(canonical_sha256(doc))
+            except (ValueError, UnicodeEncodeError, RecursionError):
+                pass
+        if revs is not None and (any(revs.revoked(sha256=d) for d in digests_here)
+                                 or os.path.realpath(path) in revoked_refs):
+            out.append(_refusal("protected.input_revoked", str(p), "this input is revoked"))
+        if capabilities is not None and doc is not None:
             caps = doc.get("required_capabilities") if isinstance(doc, dict) else None
             unknown = sorted(c for c in caps or [] if isinstance(c, str) and c not in capabilities) if isinstance(caps, list) else []
             if unknown:
                 out.append(_refusal("protected.unknown_capability", str(p),
                                     f"requires capabilities this reader does not implement: {unknown}"))
     for d in digests:
-        if revs is not None and isinstance(d, str) and revs.revoked(sha256=d):
+        if revs is not None and isinstance(d, str) and revs.revoked(sha256=d.lower()):
             out.append(_refusal("protected.input_revoked", f"sha256:{d[:12]}", "this input is revoked"))
     return out
 
