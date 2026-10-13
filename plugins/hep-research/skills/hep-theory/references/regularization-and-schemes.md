@@ -2,8 +2,8 @@
 
 Purpose: make the regularization scheme, the renormalization scheme of every mass and coupling, and the loop order
 of every scheme conversion travel with a loop-level result. Statements are quoted from sources opened on 2026-10-13
-(list at the end); a statement without one is marked `unverified`. The loop-level profile `theory:higgs-bb-width`
-applies the running-mass part of this file to one observable.
+(list at the end); a statement without one is marked `unverified`. The loop-level (running-mass) theory profile in
+`<plugin root>/profiles/registry.json` applies the running-mass part of this file to one observable.
 
 ## Dimensional schemes
 
@@ -33,7 +33,7 @@ applies the running-mass part of this file to one observable.
 - In a_s = alpha_s / (4 pi): d a_s / d ln mu^2 = -beta_0 a_s^2 - beta_1 a_s^3 - beta_2 a_s^4 - beta_3 a_s^5 with
   beta_0 = 11 - 2/3 n_f, beta_1 = 102 - 38/3 n_f, beta_2 = 2857/2 - 5033/18 n_f + 325/54 n_f^2 and beta_3 given there
   (van Ritbergen, Vermaseren, Larin, arXiv:hep-ph/9701390, Eqs. (4), (11), read 2026-10-13). Dividing beta_i by
-  4^(i+1) gives the a_s = alpha_s / pi normalization (arithmetic, checked in `theory:higgs-bb-width`).
+  4^(i+1) gives the a_s = alpha_s / pi normalization (arithmetic, checked in the running-mass theory profile).
 - State the normalization (alpha_s, alpha_s / pi or alpha_s / (4 pi)), n_f, the loop order of the running, and the
   matching at flavour thresholds (`unverified` for matching: no opened source quoted).
 
@@ -68,7 +68,7 @@ applies the running-mass part of this file to one observable.
 
 - The same quantity in two schemes differs only by the stated conversion terms at the stated order.
 - mu-independence of a physical prediction order by order: d/d ln mu^2 of the truncated series is of the next order
-  (exact-arithmetic check in `theory:higgs-bb-width`).
+  (exact-arithmetic check in the running-mass theory profile).
 - The normalization of beta and gamma coefficients against a second source (done above for PDG vs van Ritbergen et
   al. and PDG vs Chetyrkin).
 - Infrared and collinear safety of the observable.

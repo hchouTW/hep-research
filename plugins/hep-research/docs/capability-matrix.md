@@ -109,6 +109,7 @@ results; they are listed in "E3 results" at the end. Evidence: VALIDATION FULLTE
 | `experiment:eic` | experiment (EIC facility context and ePIC experiment, public documents only) | documented (E2) for the facility, detector and software modules; tested (E2) for the ledger (5 sources, 9 claims; one Tier 3 context claim) and five static routing scenarios; `software-execution` unavailable; no datasets, no performance numbers | 43 profile tests; `examples/eic-profile-routing/`; VALIDATION EIC-PROFILE, VALIDATION EIC-FOLLOWUPS |
 | `theory:qed-benchmark` | theory domain | tested (E1), tree level only | 16 profile tests; Path C |
 | `theory:qcd-r-ratio` | theory domain | tested (E4), massless QCD corrections to R through alpha_s^4, photon exchange only | 19 profile tests (derivation, prediction, convention mismatches); PDG eqs. 9.3, 9.7-9.9 and Table 1.1 read 2026-10-07 |
+| `theory:higgs-bb-width` | theory domain | tested (E2), Gamma(H -> b bbar) with the MS-bar running b mass and alpha_s through alpha_s^4, massless b at leading power, n_f = 5 | 25 profile tests (derivation with exact mu-independence checks, prediction, convention mismatches, missing SymPy); hep-ph/9608318, hep-ph/0511063, hep-ph/9703278, hep-ph/9701390 and PDG 2026 inputs read 2026-10-13 |
 | Private local profiles | any | tested (E1) with a fixture | T27 |
 
 ## Adapters

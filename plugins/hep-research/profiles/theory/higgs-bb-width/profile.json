@@ -1,0 +1,65 @@
+{
+ "id": "theory:higgs-bb-width",
+ "kind": "theory-domain",
+ "version": "0.1.0",
+ "scope": "First loop-level theory domain with a running mass: Gamma(H -> b bbar) with the MS-bar mass mbar_b(mu) and alpha_s(mu), massless b at leading power, QCD corrections through alpha_s^4 (s_1..s_3 exact from hep-ph/9608318 eq. 21, s_4 at n_f = 5 from hep-ph/0511063 Table I), the scale dependence of coupling and mass derived from the RGE and checked mu-independent order by order in exact arithmetic, and the scale envelope, truncation estimate and parametric alpha_s and m_b variations as separate objects. Validity: n_f = 5, mu in [M_H/2, 2 M_H].",
+ "exclusions": [
+  "Power corrections m_b^2 / M_H^2, top-induced (singlet) and electroweak corrections",
+  "Flavour-threshold matching (n_f = 5 is kept up to 2 M_H, above the top mass)",
+  "Any experiment, detector, data or blinding field; no comparison with a measured width or branching ratio",
+  "Claims of formal proof or of coverage of the scale envelope"
+ ],
+ "compatible": {
+  "core": ">=1.0,<2.0",
+  "contracts": ">=2.0,<3.0"
+ },
+ "related_skills": [
+  "hep-theory",
+  "hep-computing",
+  "hep-statistics"
+ ],
+ "resources": {
+  "index": "index.md",
+  "conventions": "conventions.json",
+  "model": "models/running-mass-hbb.md",
+  "derivation": "derivations/derivation-record.md",
+  "predictions": "predictions/",
+  "benchmarks": "benchmarks/",
+  "evidence": "evidence/"
+ },
+ "vocabulary_namespaces": [
+  "hbb"
+ ],
+ "vocabulary_extensions": {
+  "conventions": [
+   "hbb:observable",
+   "hbb:mass_input"
+  ]
+ },
+ "adapters": {
+  "required": [],
+  "optional": []
+ },
+ "depends_on": [],
+ "evidence_namespace": "hbb",
+ "maintainer": "hchouTW",
+ "capabilities": [
+  {
+   "name": "running-mass-scale-dependence",
+   "status": "tested-in-declared-environment",
+   "scope": "SymPy derivation of r_n(L) from s_1..s_4, gamma_0..gamma_3 and beta_0..beta_3; r_n(0) = s_n; m(mu)^2 times the truncated series mu-independent through its order (N = 1..4), negative test with a wrong gamma_0; coefficient and normalization cross-checks against a second source (perturbative argument, not formal proof)",
+   "tests": [
+    "tests/test_derivation.py"
+   ]
+  },
+  {
+   "name": "running-mass-width-prediction",
+   "status": "tested-in-declared-environment",
+   "scope": "Gamma(H -> b bbar) at orders alpha_s^0..alpha_s^4 with the scale envelope, truncation estimate and parametric alpha_s and m_b variations reported separately",
+   "tests": [
+    "tests/test_prediction.py",
+    "tests/test_convention_mismatch.py"
+   ]
+  }
+ ]
+}
