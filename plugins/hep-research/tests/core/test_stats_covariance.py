@@ -81,6 +81,41 @@ class ValidMatrixTests(unittest.TestCase):
         self.assertEqual(doc, before)
 
 
+class ScaleInvarianceTests(unittest.TestCase):
+    """STH-T1.5: the eigenvalue checks run on D^-1/2 C D^-1/2, so units per bin do not change the verdict."""
+
+    @staticmethod
+    def doc(rho, sig):
+        n = len(sig)
+        return {"labels": [f"b{i}" for i in range(n)], "kind": "absolute", "units": "synthetic^2",
+                "matrix": [[rho[i][j] * sig[i] * sig[j] for j in range(n)] for i in range(n)]}
+
+    def test_indefinite_correlation_fails_whatever_the_scales(self):
+        rho = [[1, 0.9, 0.9, 0], [0.9, 1, -0.9, 0], [0.9, -0.9, 1, 0], [0, 0, 0, 1]]
+        for sig in ([1, 1, 1, 1], [0.01, 0.01, 0.01, 100], [1e-6, 1e-6, 1e-6, 1e6]):
+            with self.subTest(sig=sig):
+                r = vc.validate_covariance(self.doc(rho, sig))
+                self.assertEqual(r["status"], "fail")
+                self.assertIn("not_psd", codes(r))
+                self.assertAlmostEqual(r["metrics"]["total"]["scaled_eigenvalue_min"], -0.80, delta=0.01)
+                self.assertIn("eigenvalue_min", r["metrics"]["total"])
+
+    def test_disparate_uncorrelated_scales_are_full_rank(self):
+        r = vc.validate_covariance(self.doc([[1, 0], [0, 1]], [1e-10, 1e10]))
+        self.assertEqual(r["status"], "pass", r)
+        m = r["metrics"]["total"]
+        self.assertEqual((m["numerical_rank"], m["condition_number"]), (2, 1.0))
+        self.assertAlmostEqual(m["unscaled_condition_number"], 1e40, delta=1e30)
+
+    def test_cli_exit_code(self):
+        rho = [[1, 0.9, 0.9, 0], [0.9, 1, -0.9, 0], [0.9, -0.9, 1, 0], [0, 0, 0, 1]]
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td) / "c.json"
+            p.write_text(json.dumps(self.doc(rho, [0.01, 0.01, 0.01, 100])))
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(vc.main([str(p)]), 1)
+
+
 class DefectTests(unittest.TestCase):
     def mutate(self, edit):
         doc = load("cov_valid.json")

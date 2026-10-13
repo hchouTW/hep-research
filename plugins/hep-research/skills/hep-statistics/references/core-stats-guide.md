@@ -322,7 +322,10 @@ comes from a finite MC sample.
 Single-command validators that never modify their input (no subcommands).
 
 - `validate_covariance.py FILE.json [--strict] [--demo-psd-clip]`: asymmetry, negative variance, non-PSD, impossible
-  correlations, zero-variance rows with covariance, near-singularity and blocks that do not add up. `--demo-psd-clip`
+  correlations, zero-variance rows with covariance, near-singularity and blocks that do not add up. PSD, rank and
+  conditioning are judged on the correlation matrix D^-1/2 C D^-1/2, so they do not depend on each bin's units (a
+  negative eigenvalue of the correlation structure fails even when one bin's variance dominates); `metrics` reports the
+  scaled and the unscaled eigenvalues. `--demo-psd-clip`
   shows the effect of eigenvalue clipping as a labeled `[Proposal]` diagnostic, never as a repair: a construction error
   is fixed at its source.
 - `validate_response.py FILE.json [--strict]`: orientation, normalization against the declared convention, efficiency
