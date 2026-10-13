@@ -46,7 +46,7 @@
   {
    "name": "synthetic-event-generation",
    "status": "tested-in-declared-environment",
-   "scope": "Seeded synthetic e+e- -> mu+mu- angular events (cos theta) with a configurable 1 + a cos^2 + b cos shape; no theory code imported",
+   "scope": "Seeded synthetic e+e- -> mu+mu- angular events (cos theta) with a configurable 1 + a cos^2 + b cos shape, and an optional invented background sample with a visible-energy fraction; no theory code imported",
    "tests": [
     "tests/test_generator.py"
    ]
