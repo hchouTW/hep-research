@@ -78,6 +78,13 @@ Iterate on validation. Reserve test for the final check. If it has been used hea
 say so and construct a fresh one before making a claim. Hold out a genuinely untouched
 set for the ship decision where the stakes justify it.
 
+For a method that is developed and then qualified, keep three tiers: development on
+public or synthetic fixtures, qualification on held-back task families or data, and a
+final confirmation on a set frozen in advance. Changing only the random seed of a
+generator still overfits that generator and its defect types; vary the generator
+family, the defect type and the method variant too. Even pass/fail answers from a
+held-back set leak information, so count every query against it.
+
 ## Evaluation hierarchy
 
 Predictive performance, calibration, robustness, and downstream/scientific validity

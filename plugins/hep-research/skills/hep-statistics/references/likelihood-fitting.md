@@ -71,6 +71,8 @@ Provide pre/postfit yields, residuals, estimates, correlations, and pulls/constr
 
 Use goodness-of-fit statistics consistent with the data model. Sparse counts do not automatically justify Gaussian per-bin chi-square tests. Treat zero-count terms in saturated deviance through their limits. Fitted parameters, boundaries, and nuisances affect the reference distribution; use refitted toys when needed. A good goodness-of-fit value does not establish absence of bias; perform closure or injection tests.
 
+Judge injection tests and pulls on an ensemble: a single fit is not expected to return the injected value, so report the ensemble bias, coverage and failure rate. Pulls are standard normal only when the asymptotic approximation holds, the uncertainty definition fits and the parameter is far from a boundary; for low counts or non-Gaussian cases compare against the pull distribution of toys instead.
+
 ## Worked walkthrough: a RooFit signal + background fit (verified 2026-09-24)
 
 Run from the skill directory with a ROOT-capable Python (e.g. Homebrew `python3.14`):

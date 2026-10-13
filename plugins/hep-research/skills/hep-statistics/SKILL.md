@@ -16,7 +16,7 @@ description: "Use when the deliverable is a statistical inference or its diagnos
 - Missing covariance stays missing; never assume a diagonal matrix silently. Correlations across bins, species, periods or experiments need evidence or a scoped, stated assumption.
 - Overlapping datasets or shared auxiliary measurements are never combined by multiplying likelihoods as if independent.
 - Before any mixed inference, the comparison gate must report the inputs comparable (units, binning, level, normalization, conventions) or list the declared transformations.
-- Injection tests and closure on Asimov and toy data precede any claim about observed data from a new model; a validated core tool's own tests count as that closure. Asimov, synthetic and observed results keep their labels.
+- Injection tests and closure on Asimov and toy data precede any claim about observed data from a new model; a validated core tool's own tests count as closure only for the model they test. Asimov, synthetic and observed results keep their labels.
 - Failed or not-run fits propagate as `failed` / `not-run`; downstream artifacts keep it.
 
 ## Step 0: quick question, and task to tool

@@ -53,8 +53,10 @@ Choose binning using resolution, MC statistics, background stability, systematic
   significance of a sigma ([Punzi 2003, arXiv:physics/0308063](https://arxiv.org/abs/physics/0308063)). `s / sqrt(b)`
   overstates the sensitivity at small b.
 - **Optimize on samples that are not measured.** Use simulation, sidebands or control regions, or an independent
-  (disjoint) part of the data; never the events that give the result. Keep the optimization and the measurement samples
-  disjoint and record which events were used.
+  (disjoint) part of the data, and record which events were used. Optimizing on the events that give the result is
+  biased unless a pre-designed procedure removes the bias, such as cross-fitting or k-fold where each event's selection
+  is fixed without it ([backgrounds](backgrounds.md)); validate that procedure (for example on toys) before relying on
+  it. Keep three uses apart: independent performance evaluation, method selection, and the formal inference.
 - **Fix the outcome of the optimization** (cuts, categories, binning) before unblinding, and treat later changes with
   the change-review procedure (`review_analysis_change.py`).
 

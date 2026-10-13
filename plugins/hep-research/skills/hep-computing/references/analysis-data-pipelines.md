@@ -83,7 +83,7 @@ Follow the existing project. RDataFrame suits new ROOT-native pipelines; uproot/
 
 For every file, check successful opening, required trees/objects, entries, branches, types, and jagged-array structure. Do not silently skip failed remote files and report a complete sample. Bound retries and record failed files in the manifest. Run a small schema smoke test before reading the full production, and request only required branches.
 
-Use chunked reads such as `uproot.iterate(..., expressions=..., step_size="100 MB", library="ak")` where appropriate. Merge sumw, sumw2, and cutflows across chunks and verify that changing chunk size preserves results. See the [official uproot guide](https://uproot.readthedocs.io/en/latest/basic.html).
+Use chunked reads such as `uproot.iterate(..., expressions=..., step_size="100 MB", library="ak")` where appropriate. Merge sumw, sumw2, and cutflows across chunks and verify that changing chunk size preserves results within a declared tolerance. Additive quantities merge exactly up to floating-point order; medians, quantiles or fits do not merge by addition. See the [official uproot guide](https://uproot.readthedocs.io/en/latest/basic.html).
 
 Check multiplicities before indexing `[:, 0]`. Object masks and event masks act on different axes. Object-level histograms require deliberate broadcasting of event weights and treatment of correlations from multiple objects in one event. Define behavior for empty lists, missing values, NaNs, and insufficient multiplicity.
 
@@ -116,7 +116,7 @@ Book related actions before triggering evaluation or writing results to reduce r
 
 Manage ROOT ownership explicitly. Histograms that must outlive an input TFile need appropriate cloning/detachment and ownership. Check zombie files, null pointers, branch types, and dictionary warnings. Multithreaded helpers must not share mutable event state. Derive smearing seeds from stable event identifiers and source labels rather than scheduling order.
 
-Avoid SetBranchAddress bindings to expired local storage. Snapshot branch selection, output tree names, and compression form part of the output contract. If event order changes, compare by stable event keys rather than row index.
+Avoid SetBranchAddress bindings to expired local storage. Snapshot branch selection, output tree names, and compression form part of the output contract. If event order changes, compare by stable event keys rather than row index. Results are invariant under event order only for order-independent algorithms: time-dependent state, online calibration and sequence models change with it.
 
 ## Performance and preservation
 

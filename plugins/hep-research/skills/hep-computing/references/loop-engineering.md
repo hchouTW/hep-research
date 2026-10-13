@@ -68,6 +68,11 @@ must specify failure handling, not just the happy path:
 
 ## Guardrails and Control Flow
 
+What a loop learns (a new check, rule, recipe, negative fixture or memory entry)
+starts in quarantine: recorded with its source, scope, version and exposure label,
+and reviewed before anything trusts it. A rule the agent proposed must not
+approve the agent's own work.
+
 Fix all of the following in Acceptance Criteria - never leave them for the
 implementer to decide silently, and never invent a specific number the
 requester never gave (mark it Open Question / TBD instead, per task-authoring-guide.md's

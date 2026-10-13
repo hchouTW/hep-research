@@ -110,7 +110,9 @@ software stack and the GPU, also record the run as a `computational-run` artifac
   "reproduces" means (same conclusion, not bit-identical numbers) before claiming it.
 - **Reproducing conclusions with an independent implementation** - the strongest
   level; requires someone else's separately-written code to reach the same
-  qualitative conclusion.
+  qualitative conclusion. State what the implementations still share (inputs,
+  calibration, model assumptions, libraries, algorithms): agreement is evidence,
+  not proof of correctness.
 
 Do not claim a stronger level than was actually demonstrated - "we reproduced the
 result" after only reloading a checkpoint and reproducing evaluation is a narrower
