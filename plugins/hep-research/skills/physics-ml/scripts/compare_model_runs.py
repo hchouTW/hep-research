@@ -13,7 +13,10 @@ effect this many seeds could reliably detect. Also flags a best-of-N comparison,
 is a biased estimator whose expectation rises with N.
 
 Usage notes / assumptions: standard library only; PyTorch is not required. Scores are
-assumed to be "higher is better" unless --lower-is-better is given. Paired mode
+assumed to be "higher is better" unless --lower-is-better is given or the runs file sets
+"lower_is_better": true; a flag given on the command line (--lower-is-better or
+--no-lower-is-better) always wins over the file, and the report records which source
+decided ("lower_is_better_source"). Paired mode
 requires equal-length arrays whose entries correspond to the same seed and split;
 unpaired mode is used automatically otherwise and is substantially less sensitive.
 The bootstrap is seeded, so results are reproducible.
@@ -201,7 +204,9 @@ def main():
     parser.add_argument("--baseline", type=float, nargs="+")
     parser.add_argument("--variant", type=float, nargs="+")
     parser.add_argument("--level", type=float, default=0.95)
-    parser.add_argument("--lower-is-better", action="store_true", dest="lower_is_better")
+    parser.add_argument("--lower-is-better", action=argparse.BooleanOptionalAction, default=None,
+                        dest="lower_is_better",
+                        help="score direction; overrides 'lower_is_better' in the runs file when given")
     parser.add_argument("--resamples", type=int, default=DEFAULT_RESAMPLES)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--json", action="store_true")
@@ -211,24 +216,35 @@ def main():
         if args.runs:
             with open(args.runs, encoding="utf-8") as handle:
                 payload = json.load(handle)
+            if not isinstance(payload, dict):
+                raise ValueError("runs file must contain a JSON object")
             baseline = payload["baseline"]
             variant = payload["variant"]
-            lower_is_better = payload.get("lower_is_better", args.lower_is_better)
+            file_value = payload.get("lower_is_better")
+            if file_value is not None and not isinstance(file_value, bool):
+                raise ValueError("'lower_is_better' in the runs file must be true or false")
         elif args.baseline and args.variant:
             baseline, variant = args.baseline, args.variant
-            lower_is_better = args.lower_is_better
+            file_value = None
         else:
             raise ValueError("supply a runs file, or both --baseline and --variant")
+        if args.lower_is_better is not None:  # the command line wins when given
+            lower_is_better, source = args.lower_is_better, "command line"
+        elif file_value is not None:
+            lower_is_better, source = file_value, "runs file"
+        else:
+            lower_is_better, source = False, "default (higher is better)"
         if args.resamples < 100:
             raise ValueError("resamples must be at least 100")
         result = compare(baseline, variant, args.level, lower_is_better,
                          args.resamples, args.seed)
+        result["lower_is_better_source"] = source
         lines = verdict(result)
     except (OSError, ValueError, KeyError, json.JSONDecodeError) as exc:
         sys.exit(f"error: {exc}")
 
     if args.json:
-        print(json.dumps({**result, "verdict": lines}, indent=2))
+        print(json.dumps({**result, "verdict": lines}, indent=2, allow_nan=False))
     else:
         print(_format(result, lines))
 

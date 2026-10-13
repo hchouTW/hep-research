@@ -67,8 +67,13 @@ class MachineLearningT16(unittest.TestCase):
         self.assertEqual(rep["group_leakage"], {"run3": ["test", "train"]})
 
     def test_surrogate_extrapolation_reported(self):
-        grid = [[x / 4, y / 4] for x in range(5) for y in range(5) if not (1 <= x <= 3 and 1 <= y <= 3)]  # hole in the middle
-        rep = check_surrogate_domain.check({"features": ["a", "b"], "training": grid, "queries": [[0.1, 0.9], [1.4, 0.5], [0.5, 0.5]]}, 1.5)
+        # The domain check calibrates its thresholds on held-out training points, so it needs a real training set
+        # (the old 16-point ring with a hand-set spacing factor is now too small to calibrate): a 30x30 grid with a
+        # hole in the middle, slightly jittered.
+        grid = [[x / 29 + 0.001 * ((7 * x + 3 * y) % 5 - 2), y / 29 + 0.001 * ((3 * x + 7 * y) % 5 - 2)]
+                for x in range(30) for y in range(30) if not (9 <= x <= 20 and 9 <= y <= 20)]
+        rep = check_surrogate_domain.check({"features": ["a", "b"], "training": grid,
+                                            "queries": [[0.1, 0.9], [1.4, 0.5], [0.5, 0.5]]})
         self.assertEqual([q["status"] for q in rep["queries"]], ["inside", "outside", "sparse"])
         self.assertEqual(rep["queries"][1]["outside_features"], ["a"])
         self.assertFalse(rep["passed"])

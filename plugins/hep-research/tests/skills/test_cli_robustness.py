@@ -63,6 +63,7 @@ MISSING_FILE_ARGS = {
     "skills/physics-ml/scripts/check_surrogate_domain.py": [M],
     "skills/physics-ml/scripts/compare_model_runs.py": [M],
     "skills/physics-ml/scripts/inspect_checkpoint.py": [M],
+    "skills/physics-ml/scripts/make_grouped_splits.py": [M, "--id-column", "id", "--group-column", "g", "--out", OUT],
     "skills/research-communication/scripts/audit_claims.py": [M, "--project-root", "/tmp"],
     "skills/research-communication/scripts/build_lit_matrix.py": [M],
     "skills/research-communication/scripts/check_adaptation.py": [M, "--project-root", "/tmp", "--responses"],
