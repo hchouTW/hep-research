@@ -21,7 +21,7 @@ description: "Use when the deliverable is the design or review of an experimenta
 
 ## Workflow
 
-1. Resolve context (stanza below). Decide whether the deliverable is a quick answer, a measurement brief, a full `measurement-spec`, or a review.
+1. Resolve context (stanza below). Decide whether the deliverable is a quick answer, a measurement brief, a full `measurement-spec`, or a review; a review gives its verdict first ([review procedure](references/review-and-artifacts.md)).
 2. Fix the observable spec: quantity type, variables with units and binning, phase space or fiducial definition, level, frame, normalization kind, bin semantics.
 3. Build ledgers: selections (with denominators and validation metric-threshold-action), backgrounds, corrections, systematics (with `applied_via`).
 4. List unresolved inputs explicitly; they are `unresolved`, not errors.

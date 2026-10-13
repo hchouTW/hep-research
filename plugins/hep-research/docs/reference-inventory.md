@@ -9,7 +9,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | Skill | References | KB | Cited nowhere |
 |---|---|---|---|
 | detector-response | 34 | 395 | 0 |
-| hep-analysis | 9 | 75 | 0 |
+| hep-analysis | 10 | 82 | 0 |
 | hep-computing | 29 | 338 | 0 |
 | hep-statistics | 9 | 119 | 0 |
 | hep-theory | 8 | 42 | 0 |
@@ -116,15 +116,16 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `timing-detectors.md` | detector-response | 8.6 | no | 8 | hep-analysis | d8bec60 2026-10-13 |
 | `tracking-and-vertexing.md` | detector-response | 13.1 | no | 15 | hep-analysis, research-communication | b944a23 2026-10-13 |
 | `triggers-luminosity-pileup.md` | detector-response | 9.3 | no | 13 | hep-analysis | d8bec60 2026-10-13 |
-| `analysis-design.md` | hep-analysis | 4.4 | yes | 7 | detector-response, hep-computing | 9546574 2026-10-08 |
-| `analysis-validation.md` | hep-analysis | 4.4 | yes | 6 | detector-response, hep-computing | 351029c 2026-10-07 |
-| `backgrounds.md` | hep-analysis | 2.7 | yes | 16 | detector-response | 351029c 2026-10-07 |
-| `data-pipelines.md` | hep-analysis | 4.5 | yes | 4 | hep-computing | 351029c 2026-10-07 |
-| `hep-analysis-guide.md` | hep-analysis | 41.9 | yes | 5 | detector-response | 4c6ec20 2026-10-13 |
-| `histograms-efficiencies.md` | hep-analysis | 3.2 | yes | 8 | detector-response, hep-computing | 9546574 2026-10-08 |
-| `measurements-and-unfolding.md` | hep-analysis | 2.7 | yes | 9 | detector-response, hep-statistics | 351029c 2026-10-07 |
-| `systematics.md` | hep-analysis | 6.0 | yes | 25 | detector-response, hep-statistics, hep-theory, physics-ml | 364918e 2026-10-09 |
-| `weights-normalization.md` | hep-analysis | 5.1 | yes | 7 | detector-response, hep-theory, physics-ml | 351029c 2026-10-07 |
+| `analysis-design.md` | hep-analysis | 4.6 | yes | 9 | detector-response, hep-computing | c180c4e 2026-10-13 |
+| `analysis-validation.md` | hep-analysis | 4.4 | no | 5 | detector-response, hep-computing | 351029c 2026-10-07 |
+| `backgrounds.md` | hep-analysis | 2.7 | no | 15 | detector-response | 351029c 2026-10-07 |
+| `data-pipelines.md` | hep-analysis | 4.5 | no | 3 | hep-computing | 351029c 2026-10-07 |
+| `hep-analysis-guide.md` | hep-analysis | 41.6 | yes | 5 | detector-response | c180c4e 2026-10-13 |
+| `histograms-efficiencies.md` | hep-analysis | 3.1 | no | 7 | detector-response, hep-computing | c180c4e 2026-10-13 |
+| `measurements-and-unfolding.md` | hep-analysis | 2.7 | no | 8 | detector-response, hep-statistics | 351029c 2026-10-07 |
+| `review-and-artifacts.md` | hep-analysis | 7.2 | yes | 6 | - | untracked |
+| `systematics.md` | hep-analysis | 6.0 | no | 24 | detector-response, hep-statistics, hep-theory, physics-ml | 8e6d66b 2026-10-13 |
+| `weights-normalization.md` | hep-analysis | 5.1 | no | 6 | detector-response, hep-theory, physics-ml | 351029c 2026-10-07 |
 | `acceptance-criteria.md` | hep-computing | 3.7 | no | 3 | - | 351029c 2026-10-07 |
 | `agile-development-guide.md` | hep-computing | 10.7 | yes | 8 | physics-ml | 351029c 2026-10-07 |
 | `bash-balanced-design-guidelines.md` | hep-computing | 24.8 | yes | 2 | - | 351029c 2026-10-07 |
@@ -162,7 +163,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `nuisance-modeling.md` | hep-statistics | 17.2 | yes | 6 | hep-analysis | 06b86c8 2026-10-12 |
 | `statistical-inference-for-physics.md` | hep-statistics | 12.7 | yes | 9 | hep-computing, hep-theory, research-communication | 351029c 2026-10-07 |
 | `statistical-tools.md` | hep-statistics | 9.4 | yes | 5 | hep-analysis, physics-ml | e375e7d 2026-10-12 |
-| `unfolding.md` | hep-statistics | 3.4 | yes | 22 | detector-response, hep-analysis | 24b8216 2026-10-13 |
+| `unfolding.md` | hep-statistics | 3.4 | yes | 21 | detector-response, hep-analysis | 24b8216 2026-10-13 |
 | `cosmic-ray-propagation.md` | hep-theory | 5.2 | yes | 1 | - | 351029c 2026-10-07 |
 | `dis-kinematics.md` | hep-theory | 4.8 | yes | 4 | - | 351029c 2026-10-07 |
 | `event-generation.md` | hep-theory | 9.2 | yes | 4 | detector-response, hep-analysis | 351029c 2026-10-07 |

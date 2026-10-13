@@ -79,6 +79,7 @@ awkward leading objects: apply the object mask, order each event with `jets = je
 | Task | Read |
 |---|---|
 | Analysis design, quality masks, triggers, blinding | [Analysis contract](analysis-design.md) |
+| Review an analysis, note or spec; which deliverable to produce; measurement brief | [Review and deliverables](review-and-artifacts.md) |
 | ROOT/columnar I/O, event loops, performance, ownership | [Data pipelines](data-pipelines.md) |
 | Luminosity, cross sections, signed weights, cutflows | [Normalization](weights-normalization.md) |
 | Histograms, efficiencies, covariance, plotting (statistics) | [Histograms and uncertainties](histograms-efficiencies.md) |
