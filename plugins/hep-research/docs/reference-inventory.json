@@ -5,12 +5,12 @@
  "by_skill": {
   "detector-response": {
    "references": 34,
-   "bytes": 395366,
+   "bytes": 395364,
    "uncited": 0
   },
   "hep-analysis": {
-   "references": 10,
-   "bytes": 54583,
+   "references": 11,
+   "bytes": 59164,
    "uncited": 0
   },
   "hep-computing": {
@@ -343,7 +343,7 @@
    "cited_by_other_skills": [
     "research-communication"
    ],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "e9687b6 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/front-end-electronics-and-signal-processing.md",
@@ -636,7 +636,7 @@
   {
    "path": "skills/detector-response/references/space-based-direct-detection.md",
    "owner": "detector-response",
-   "bytes": 17037,
+   "bytes": 17035,
    "lines": 248,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -658,7 +658,7 @@
     "hep-statistics",
     "research-communication"
    ],
-   "last_commit": "911967e 2026-10-13"
+   "last_commit": "1d020b8 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/timing-detectors.md",
@@ -801,6 +801,19 @@
    "last_commit": "4b3f0d9 2026-10-13"
   },
   {
+   "path": "skills/hep-analysis/references/correction-chain.md",
+   "owner": "hep-analysis",
+   "bytes": 4251,
+   "lines": 55,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-analysis/references/hep-analysis-guide.md",
+    "tests/skills/hep_analysis/test_method_references.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
    "path": "skills/hep-analysis/references/data-pipelines.md",
    "owner": "hep-analysis",
    "bytes": 423,
@@ -813,7 +826,8 @@
     "skills/hep-analysis/references/weights-normalization.md",
     "skills/hep-computing/references/analysis-data-pipelines.md",
     "skills/hep-computing/references/python-hep-coding-patterns.md",
-    "skills/hep-computing/references/root-balanced-design-guidelines.md"
+    "skills/hep-computing/references/root-balanced-design-guidelines.md",
+    "tests/skills/hep_analysis/test_method_references.py"
    ],
    "cited_by_other_skills": [
     "hep-computing"
@@ -823,8 +837,8 @@
   {
    "path": "skills/hep-analysis/references/hep-analysis-guide.md",
    "owner": "hep-analysis",
-   "bytes": 17241,
-   "lines": 107,
+   "bytes": 17571,
+   "lines": 108,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
@@ -832,12 +846,13 @@
     "skills/hep-analysis/SKILL.md",
     "tests/skills/detector_response/test_reference_values.py",
     "tests/skills/hep_analysis/test_check_systematic_variations.py",
+    "tests/skills/hep_analysis/test_method_references.py",
     "tests/skills/hep_analysis/test_reference_links.py"
    ],
    "cited_by_other_skills": [
     "detector-response"
    ],
-   "last_commit": "7e34ef8 2026-10-13"
+   "last_commit": "fbd4a26 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/histograms-efficiencies.md",
@@ -880,7 +895,7 @@
     "detector-response",
     "hep-statistics"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "e9687b6 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/review-and-artifacts.md",
@@ -937,7 +952,7 @@
     "hep-theory",
     "physics-ml"
    ],
-   "last_commit": "4b3f0d9 2026-10-13"
+   "last_commit": "e9687b6 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/weights-normalization.md",

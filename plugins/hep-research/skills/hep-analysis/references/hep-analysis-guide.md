@@ -65,6 +65,7 @@ Exact 68.27% (Garwood) interval on the count N; divide by exposure times bin wid
 | Analysis design, quality masks, triggers, blinding, event keys | [Analysis design](analysis-design.md) |
 | Review an analysis, note or spec; which deliverable to produce; measurement brief | [Review and deliverables](review-and-artifacts.md) |
 | The measurement-spec fields and template | [Field guide](../assets/measurement_spec.template.md) |
+| Correction chain: efficiency factors and their denominators, exposure, luminosity, POT, data/MC ratios | [Correction chain](correction-chain.md) |
 | Luminosity, cross sections, signed weights, cutflows | [Normalization](weights-normalization.md) |
 | Histograms, efficiencies, covariance, plotting | [Histograms and uncertainties](histograms-efficiencies.md) |
 | Control regions, ABCD, fake rates, sidebands, transfer factors | [Background estimation](backgrounds.md) |

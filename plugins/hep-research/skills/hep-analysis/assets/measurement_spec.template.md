@@ -58,7 +58,8 @@ values are synthetic placeholders.
 <!-- /example -->
 
 A cosmic-ray level such as top of instrument comes from the bound profile's vocabulary (validate with
-`--profiles-from`); the generic levels are in `contracts/vocab/core.json`.
+`--profiles-from`); the generic levels are in `contracts/vocab/core.json`. The chain itself (factors, denominators, factorization tests) is in
+[correction-chain.md](../references/correction-chain.md).
 
 ## Statistics fields
 

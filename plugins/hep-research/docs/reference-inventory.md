@@ -9,7 +9,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | Skill | References | KB | Cited nowhere |
 |---|---|---|---|
 | detector-response | 34 | 395 | 0 |
-| hep-analysis | 10 | 55 | 0 |
+| hep-analysis | 11 | 59 | 0 |
 | hep-computing | 30 | 347 | 0 |
 | hep-statistics | 9 | 119 | 0 |
 | hep-theory | 8 | 42 | 0 |
@@ -97,7 +97,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `detector-simulation.md` | detector-response | 12.4 | no | 9 | hep-theory, physics-ml | d8bec60 2026-10-13 |
 | `detector-systems-overview.md` | detector-response | 12.2 | no | 13 | hep-analysis | b944a23 2026-10-13 |
 | `event-reconstruction.md` | detector-response | 10.8 | no | 6 | - | b944a23 2026-10-13 |
-| `extensive-air-showers.md` | detector-response | 8.2 | no | 9 | research-communication | b944a23 2026-10-13 |
+| `extensive-air-showers.md` | detector-response | 8.2 | no | 9 | research-communication | e9687b6 2026-10-13 |
 | `front-end-electronics-and-signal-processing.md` | detector-response | 24.5 | no | 10 | - | d8bec60 2026-10-13 |
 | `gaseous-and-specialized-tracking-technologies.md` | detector-response | 15.3 | no | 8 | research-communication | b944a23 2026-10-13 |
 | `ground-based-detection-arrays.md` | detector-response | 8.0 | no | 7 | - | b944a23 2026-10-13 |
@@ -112,19 +112,20 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `reconstruction-performance-and-truth-matching.md` | detector-response | 10.5 | no | 8 | - | b944a23 2026-10-13 |
 | `response-and-forward-folding.md` | detector-response | 5.1 | no | 7 | hep-analysis, hep-statistics | 24b8216 2026-10-13 |
 | `signal-formation-and-readout.md` | detector-response | 15.3 | no | 8 | research-communication | d8bec60 2026-10-13 |
-| `space-based-direct-detection.md` | detector-response | 17.0 | no | 12 | hep-analysis, hep-statistics, research-communication | 911967e 2026-10-13 |
+| `space-based-direct-detection.md` | detector-response | 17.0 | no | 12 | hep-analysis, hep-statistics, research-communication | 1d020b8 2026-10-13 |
 | `timing-detectors.md` | detector-response | 8.6 | no | 7 | - | d8bec60 2026-10-13 |
 | `tracking-and-vertexing.md` | detector-response | 13.1 | no | 14 | research-communication | b944a23 2026-10-13 |
 | `triggers-luminosity-pileup.md` | detector-response | 9.3 | no | 12 | - | d8bec60 2026-10-13 |
 | `analysis-design.md` | hep-analysis | 5.3 | yes | 11 | detector-response, hep-computing | 7e34ef8 2026-10-13 |
 | `analysis-validation.md` | hep-analysis | 4.4 | no | 5 | detector-response, hep-computing | 351029c 2026-10-07 |
 | `backgrounds.md` | hep-analysis | 2.8 | no | 15 | detector-response | 4b3f0d9 2026-10-13 |
-| `data-pipelines.md` | hep-analysis | 0.4 | no | 7 | hep-computing | 7e34ef8 2026-10-13 |
-| `hep-analysis-guide.md` | hep-analysis | 17.2 | yes | 6 | detector-response | 7e34ef8 2026-10-13 |
+| `correction-chain.md` | hep-analysis | 4.3 | no | 2 | - | untracked |
+| `data-pipelines.md` | hep-analysis | 0.4 | no | 8 | hep-computing | 7e34ef8 2026-10-13 |
+| `hep-analysis-guide.md` | hep-analysis | 17.6 | yes | 7 | detector-response | fbd4a26 2026-10-13 |
 | `histograms-efficiencies.md` | hep-analysis | 3.1 | no | 7 | detector-response, hep-computing | c180c4e 2026-10-13 |
-| `measurements-and-unfolding.md` | hep-analysis | 3.0 | no | 8 | detector-response, hep-statistics | 351029c 2026-10-07 |
+| `measurements-and-unfolding.md` | hep-analysis | 3.0 | no | 8 | detector-response, hep-statistics | e9687b6 2026-10-13 |
 | `review-and-artifacts.md` | hep-analysis | 7.2 | yes | 6 | - | e085335 2026-10-13 |
-| `systematics.md` | hep-analysis | 6.7 | no | 24 | detector-response, hep-statistics, hep-theory, physics-ml | 4b3f0d9 2026-10-13 |
+| `systematics.md` | hep-analysis | 6.7 | no | 24 | detector-response, hep-statistics, hep-theory, physics-ml | e9687b6 2026-10-13 |
 | `weights-normalization.md` | hep-analysis | 4.5 | no | 9 | detector-response, hep-computing, hep-theory, physics-ml | 7e34ef8 2026-10-13 |
 | `acceptance-criteria.md` | hep-computing | 3.7 | no | 3 | - | 351029c 2026-10-07 |
 | `agile-development-guide.md` | hep-computing | 10.7 | yes | 8 | physics-ml | 351029c 2026-10-07 |
