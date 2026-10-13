@@ -16,8 +16,9 @@ class CustomTensorDataset(Dataset):
     """
 
     def __init__(self, features_path: str | Path, labels_path: str | Path, transform: Optional[Callable] = None):
-        self.features = torch.load(features_path, map_location="cpu")
-        self.labels = torch.load(labels_path, map_location="cpu")
+        # weights_only=True: tensors and plain containers only; a full unpickle can run arbitrary code
+        self.features = torch.load(features_path, map_location="cpu", weights_only=True)
+        self.labels = torch.load(labels_path, map_location="cpu", weights_only=True)
         self.transform = transform
 
         if len(self.features) != len(self.labels):

@@ -13,16 +13,52 @@ blocks with a padding mask, mean-pools over non-pad positions, and classifies wi
 a linear head. Input: token ids `[batch, seq_len]` (long) and a boolean padding
 mask `[batch, seq_len]` (True = real token). Output: `[batch, num_classes]` logits.
 
+A fully padded sequence (no real token) gives finite outputs: the attention softmax
+is masked NaN-safely (all-zero weights instead of NaN) and the mean pool divides by
+max(count, 1).
+
 Usage notes: requires PyTorch. Replace `vocab_size`/`num_classes` and the
-`create_dummy_batch` function for a real dataset and tokenizer; this file has no
-CLI and is meant to be imported/adapted, not run standalone.
+`create_dummy_batch` function for a real dataset and tokenizer; the file is meant
+to be imported/adapted. Run directly, it does a forward/backward smoke test
+(--help works without PyTorch; exit code 3 when PyTorch is missing).
 """
 from __future__ import annotations
 
+import argparse
 import math
+import sys
 
-import torch
-from torch import nn
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Forward/backward smoke test of the from-scratch Transformer "
+                                     "classifier on a synthetic padded batch.")
+    parser.add_argument("--batch-size", type=int, default=8)
+    parser.add_argument("--seq-len", type=int, default=32)
+    return parser
+
+
+if __name__ == "__main__":
+    build_parser().parse_args()  # --help works without PyTorch
+
+try:
+    import torch
+    from torch import nn
+except ModuleNotFoundError as _exc:
+    if __name__ != "__main__":
+        raise
+    print(f"transformer_classifier.py: torch not available ({_exc})", file=sys.stderr)
+    sys.exit(3)
+
+
+def masked_softmax(scores: torch.Tensor, mask: torch.Tensor, dim: int = -1) -> torch.Tensor:
+    """Softmax over `dim` ignoring masked-out positions; a fully masked row gives zeros, not NaN.
+
+    Same contract as hep_losses.masked_softmax (kept inline so this file stays self-contained).
+    """
+    mask = mask.to(torch.bool).expand_as(scores)
+    filled = scores.masked_fill(~mask, float("-inf"))
+    filled = torch.where(mask.any(dim=dim, keepdim=True), filled, torch.zeros_like(filled))
+    return torch.softmax(filled, dim=dim) * mask
 
 
 class SinusoidalPositionalEncoding(nn.Module):
@@ -58,10 +94,11 @@ class MultiHeadAttention(nn.Module):
         scale = 1.0 / math.sqrt(self.head_dim)
         scores = (q @ k.transpose(-2, -1)) * scale  # [batch, heads, seq, seq]
         if padding_mask is not None:
-            # padding_mask: [batch, seq] True=real token -> broadcast over heads/query dim
-            key_mask = padding_mask[:, None, None, :]
-            scores = scores.masked_fill(~key_mask, float("-inf"))
-        weights = torch.softmax(scores, dim=-1)
+            # padding_mask: [batch, seq] True=real token -> broadcast over heads/query dim. A plain
+            # masked_fill(-inf) + softmax gives NaN for a fully padded row; masked_softmax gives zeros.
+            weights = masked_softmax(scores, padding_mask[:, None, None, :])
+        else:
+            weights = torch.softmax(scores, dim=-1)
         attended = weights @ v  # [batch, heads, seq, head_dim]
         attended = attended.transpose(1, 2).reshape(batch, seq, embed_dim)
         return self.out(attended)
@@ -130,8 +167,9 @@ def create_dummy_batch(batch_size: int = 8, seq_len: int = 32, vocab_size: int =
 
 
 if __name__ == "__main__":
+    cli = build_parser().parse_args()
     model = TransformerClassifier(vocab_size=1000, num_classes=5)
-    token_ids, padding_mask = create_dummy_batch()
+    token_ids, padding_mask = create_dummy_batch(cli.batch_size, cli.seq_len)
     logits = model(token_ids, padding_mask)
     loss = logits.sum()
     loss.backward()

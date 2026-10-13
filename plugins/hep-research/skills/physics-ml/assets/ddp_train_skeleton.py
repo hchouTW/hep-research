@@ -11,13 +11,30 @@ Uses NCCL on CUDA; without CUDA it falls back to CPU with the gloo backend (smok
 
 from __future__ import annotations
 
+import argparse
 import os
+import sys
 
-import torch
-import torch.distributed as dist
-from torch import nn
-from torch.nn.parallel import DistributedDataParallel
-from torch.utils.data import DataLoader, DistributedSampler, TensorDataset
+
+def build_parser() -> argparse.ArgumentParser:
+    return argparse.ArgumentParser(description="Minimal DistributedDataParallel training skeleton; launch with "
+                                   "torchrun --nproc_per_node=N ddp_train_skeleton.py")
+
+
+if __name__ == "__main__":
+    build_parser().parse_args()  # --help works without PyTorch
+
+try:
+    import torch
+    import torch.distributed as dist
+    from torch import nn
+    from torch.nn.parallel import DistributedDataParallel
+    from torch.utils.data import DataLoader, DistributedSampler, TensorDataset
+except ModuleNotFoundError as _exc:
+    if __name__ != "__main__":
+        raise
+    print(f"ddp_train_skeleton.py: {_exc.name or 'torch'} not available ({_exc})", file=sys.stderr)
+    sys.exit(3)
 
 
 def setup_distributed():

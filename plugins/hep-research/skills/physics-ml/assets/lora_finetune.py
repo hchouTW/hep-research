@@ -11,13 +11,32 @@ an optimizer over only the adapter parameters. Input/output shapes follow whatev
 base model is wrapped - this file does not define a base model itself.
 
 Usage notes: requires PyTorch. Replace `build_base_model` with the real base model
-and `create_dataset` with the real fine-tuning data; this file has no CLI and is
-meant to be imported/adapted, not run standalone.
+and `create_dataset` with the real fine-tuning data; the file is meant to be
+imported/adapted. Run directly, it trains the placeholder for one epoch as a smoke
+test (--help works without PyTorch; exit code 3 when PyTorch is missing).
 """
 from __future__ import annotations
 
-import torch
-from torch import nn
+import argparse
+import sys
+
+
+def build_parser() -> argparse.ArgumentParser:
+    return argparse.ArgumentParser(description="LoRA smoke test: wrap a placeholder model's Linear layers with "
+                                   "low-rank adapters and train only the adapters for one epoch.")
+
+
+if __name__ == "__main__":
+    build_parser().parse_args()  # --help works without PyTorch
+
+try:
+    import torch
+    from torch import nn
+except ModuleNotFoundError as _exc:
+    if __name__ != "__main__":
+        raise
+    print(f"lora_finetune.py: {_exc.name or 'torch'} not available ({_exc})", file=sys.stderr)
+    sys.exit(3)
 
 
 class LoRALinear(nn.Module):

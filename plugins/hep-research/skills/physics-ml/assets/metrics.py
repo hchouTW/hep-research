@@ -35,11 +35,20 @@ def multilabel_accuracy(logits: torch.Tensor, targets: torch.Tensor, threshold: 
     return (preds == targets.bool()).float().mean().item()
 
 
+def _check_same_shape(preds: torch.Tensor, targets: torch.Tensor) -> None:
+    # [B, 1] - [B] broadcasts to [B, B] and gives a wrong number without any error; refuse instead.
+    if preds.shape != targets.shape:
+        raise ValueError(f"preds and targets must have the same shape, got {tuple(preds.shape)} and "
+                         f"{tuple(targets.shape)}; squeeze or reshape explicitly")
+
+
 def regression_mae(preds: torch.Tensor, targets: torch.Tensor) -> float:
-    """Return mean absolute error."""
+    """Return mean absolute error. Shapes must match exactly (no broadcasting)."""
+    _check_same_shape(preds, targets)
     return (preds - targets).abs().mean().item()
 
 
 def regression_rmse(preds: torch.Tensor, targets: torch.Tensor) -> float:
-    """Return root mean squared error."""
+    """Return root mean squared error. Shapes must match exactly (no broadcasting)."""
+    _check_same_shape(preds, targets)
     return torch.sqrt(torch.mean((preds - targets) ** 2)).item()
