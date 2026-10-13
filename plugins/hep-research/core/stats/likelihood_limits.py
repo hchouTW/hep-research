@@ -231,9 +231,12 @@ def profile_limit(n: int, b: float, sigma_b: float, cl: float, toys: int, seed: 
     gauss = [rng.gauss(0.0, 1.0) for _ in range(toys)]
     alpha = 1.0 - cl
     s_toy = _bisect(lambda s: alpha - _toy_p1(n, b, sig, s, uniforms, gauss), s_hat, hi, 30)
+    p_end = lambda s, k: _mc_bounds(_toy_p1(n, b, sig, s, uniforms, gauss), toys)[k]
+    mc_range = [_decreasing_crossing(lambda s: p_end(s, 0), s_hat, hi, alpha), _decreasing_crossing(lambda s: p_end(s, 1), s_hat, hi, alpha)]
     out = {"label": LABEL, "method": "profile-likelihood upper limit on s, single bin, Gaussian-constrained background",
            "n_obs": n, "b": b, "sigma_b": sig, "cl": cl, "toys": toys, "seed": seed,
            "asymptotic_upper_limit": s_asym, "toy_calibrated_upper_limit": s_toy,
+           "toy_limit_mc_range": mc_range, "toy_limit_mc_range_cl": LIMIT_MC_CL,
            "asymptotic_over_toy": s_asym / s_toy if s_toy > 0 else None}
     if sig == 0.0:
         from core.stats.poisson_diagnostics import upper_limit
@@ -620,6 +623,22 @@ def _cls_at(n_obs, b0, sig, s, q_pool_b_uniforms, q_pool_gauss, uniforms, gauss)
     return sb, bo, (sb / max(bo, 1.0 / len(q_pool_b_uniforms)))
 
 
+def _mc_bounds(frac: float, n: int) -> tuple[float, float]:
+    """Exact (Clopper-Pearson, LIMIT_MC_CL) interval of a toy fraction frac = k/n."""
+    from core.stats.tail_estimation import clopper_pearson
+    return clopper_pearson(int(round(frac * n)), n, LIMIT_MC_CL)
+
+
+def _decreasing_crossing(f, lo: float, hi: float, level: float, iters: int = 30) -> float | None:
+    """s where a decreasing f crosses level, by bisection on [lo, hi]; None when f(hi) is still above level."""
+    if f(hi) > level:
+        return None
+    for _ in range(iters):
+        mid = 0.5 * (lo + hi)
+        lo, hi = (mid, hi) if f(mid) > level else (lo, mid)
+    return 0.5 * (lo + hi)
+
+
 def _cls_limit(n_obs, b0, sig, cl, u1, g1, u2, g2, hi, iters=18):
     lo, up = max(n_obs - b0, 0.0), hi
     for _ in range(iters):
@@ -643,6 +662,14 @@ def profile_cls(n: int, b: float, sigma_b: float, cl: float, toys: int, expected
     u1, g1 = _draws(rng, toys)
     u2, g2 = _draws(rng, toys)
     obs = _cls_limit(n, b, sig, cl, u1, g1, u2, g2, hi)
+
+    def cls_extreme(s, upper):  # CLs from the ends of the exact intervals on CLs+b and CLb (as shape-limit --cls-toys)
+        sb, bo, _ = _cls_at(n, b, sig, s, u2, g2, u1, g1)
+        (sb_lo, sb_hi), (b_lo, b_hi) = _mc_bounds(sb, toys), _mc_bounds(bo, toys)
+        return (sb_hi / b_lo if b_lo > 0 else math.inf) if upper else sb_lo / b_hi
+    start = max(n - b, 0.0)
+    mc_range = [_decreasing_crossing(lambda s: cls_extreme(s, False), start, hi, 1.0 - cl, 18),
+                _decreasing_crossing(lambda s: cls_extreme(s, True), start, hi, 1.0 - cl, 18)]
     expected = {}
     if expected_toys:
         inner = min(toys, 300)
@@ -658,7 +685,11 @@ def profile_cls(n: int, b: float, sigma_b: float, cl: float, toys: int, expected
         expected = {**{name: q(NormalDist().cdf(z)) for name, z in BANDS},  # exact Phi(z) quantiles (STH-T3.9)
                     "pseudo_experiments": expected_toys, "inner_toys": inner}
     out = {"label": LABEL, "method": "CLs upper limit with the background nuisance profiled, seeded toys of q-tilde",
-           "n_obs": n, "b": b, "sigma_b": sig, "cl": cl, "toys": toys, "seed": seed, "observed_upper_limit": obs}
+           "n_obs": n, "b": b, "sigma_b": sig, "cl": cl, "toys": toys, "seed": seed, "observed_upper_limit": obs,
+           "observed_limit_mc_range": mc_range, "observed_limit_mc_range_cl": LIMIT_MC_CL,
+           "observed_limit_mc_range_note": ("limits where CLs from the ends of the exact intervals on CLs+b and CLb "
+                                            "crosses 1 - cl (the two intervals are independent, so the range covers "
+                                            "with probability >= 0.95^2); None: not reached in the scan range")}
     if expected:
         out["expected_under_background_only"] = expected
     out["note"] = ("both CLs+b and CLb come from toys of the one-sided profile statistic with the nuisance fixed at its "
