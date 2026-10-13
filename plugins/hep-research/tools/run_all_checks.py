@@ -2,10 +2,14 @@
 """Aggregate runner: every check in one JSON summary, with pass / fail / skip kept separate.
 
 Usage: python3 tools/run_all_checks.py [--out DIR] [--no-cli] [--module-timeout S] [--jobs N]
+                                       [--part all|units|checks] [--shard K/N] [--write-timings FILE]
 Writes DIR/check-run-<UTC timestamp>.json when --out is given; always prints the summary.
 Exit 0 when nothing failed (skips are reported, not hidden), 1 otherwise.
 Each test module runs in its own process with a timeout (default 600 s, or HEP_MODULE_TIMEOUT): a module that
 does not finish is a failure with its reason, never a hang, and every module's duration is in the JSON output.
+Test modules start slowest first (tools/module_timings.json). --part and --shard split the work across CI runners:
+'units' runs the test modules (all of them, or shard K of N, balanced by the recorded timings), 'checks' runs the
+profile suites and the static and host checks; every module belongs to exactly one shard.
 Passing checks shows software consistency only, not physical validity or statistical coverage.
 """
 from __future__ import annotations
@@ -26,6 +30,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 MODULE_TIMEOUT = float(os.environ.get("HEP_MODULE_TIMEOUT", "600"))  # seconds per test module or check
+TIMINGS = ROOT / "tools" / "module_timings.json"
 SLOW_MODULE_SECONDS = 60.0  # a fast-tier module above this belongs in the slow tier (HEP_SLOW_TESTS=1)
 
 
@@ -40,6 +45,51 @@ print(json.dumps({"run": res.testsRun, "failures": len(res.failures), "errors": 
 
 def test_modules() -> list[str]:
     return sorted(".".join(p.relative_to(ROOT).with_suffix("").parts) for p in (ROOT / "tests").rglob("test_*.py"))
+
+
+def load_timings(path: Path = TIMINGS) -> dict[str, float]:
+    try:
+        return {k: float(v) for k, v in json.loads(path.read_text(encoding="utf-8"))["seconds"].items()}
+    except (OSError, ValueError, KeyError, TypeError, AttributeError):
+        return {}
+
+
+def expected_seconds(modules: list[str], timings: dict[str, float]) -> dict[str, float]:
+    """Recorded seconds per module; a module without a record gets the median, so a new module is neither first nor
+    last by accident."""
+    known = sorted(timings.values())
+    default = known[len(known) // 2] if known else 1.0
+    return {m: timings.get(m, default) for m in modules}
+
+
+def slowest_first(modules: list[str], timings: dict[str, float]) -> list[str]:
+    est = expected_seconds(modules, timings)
+    return sorted(modules, key=lambda m: (-est[m], m))
+
+
+def shard_modules(modules: list[str], k: int, n: int, timings: dict[str, float]) -> list[str]:
+    """Shard k (1-based) of n: modules placed slowest first, each on the shard with the least expected time so far
+    (ties to the lowest shard), so the shards finish together and every module is in exactly one shard."""
+    if not 1 <= k <= n:
+        raise ValueError(f"shard {k}/{n}: need 1 <= K <= N")
+    est = expected_seconds(modules, timings)
+    load = [0.0] * n
+    parts: list[list[str]] = [[] for _ in range(n)]
+    for m in slowest_first(modules, timings):
+        i = min(range(n), key=lambda j: (load[j], j))
+        parts[i].append(m)
+        load[i] += est[m]
+    return parts[k - 1]
+
+
+def parse_shard(text: str) -> tuple[int, int]:
+    try:
+        k, n = (int(x) for x in text.split("/"))
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"--shard wants K/N, got {text!r}") from None
+    if not 1 <= k <= n:
+        raise argparse.ArgumentTypeError(f"--shard {text}: need 1 <= K <= N")
+    return k, n
 
 
 def run_module(module: str, timeout: float) -> dict:
@@ -62,8 +112,12 @@ def run_module(module: str, timeout: float) -> dict:
             "failed": r["failed"], "skipped": r["skipped_list"]}
 
 
-def run_unittests(timeout: float = MODULE_TIMEOUT, jobs: int = 1) -> dict:
+def run_unittests(timeout: float = MODULE_TIMEOUT, jobs: int = 1, shard: tuple[int, int] | None = None) -> dict:
+    timings = load_timings()
     modules = test_modules()
+    if shard:
+        modules = shard_modules(modules, *shard, timings)
+    modules = slowest_first(modules, timings)  # a long module started last would hold up the whole run
     with ThreadPoolExecutor(max_workers=max(1, jobs)) as pool:
         rows = list(pool.map(lambda m: run_module(m, timeout), modules))
     total = {k: sum((r["counts"] or {}).get(k, 0) for r in rows) for k in ("run", "failures", "errors", "skipped")}
@@ -73,7 +127,7 @@ def run_unittests(timeout: float = MODULE_TIMEOUT, jobs: int = 1) -> dict:
     return {"name": "unittest", "command": "python3 -m unittest <module>, one process per module under tests/",
             "status": "pass" if all(r["status"] == "pass" for r in rows) else "fail",
             "counts": dict(total, modules=len(rows), modules_failed_to_finish=len(broken)),
-            "module_timeout_seconds": timeout,
+            "module_timeout_seconds": timeout, "shard": f"{shard[0]}/{shard[1]}" if shard else None,
             "failed": [f for r in rows for f in r["failed"]] + [f"{r['module']}: {r['reason']}" for r in broken],
             "skipped": [s for r in rows for s in r["skipped"]],
             "slow_modules": [{"module": r["module"], "seconds": r["seconds"]} for r in slow],
@@ -170,19 +224,28 @@ def parse_args(argv=None) -> argparse.Namespace:
     ap.add_argument("--module-timeout", type=float, default=MODULE_TIMEOUT, metavar="S",
                     help="seconds allowed per test module (default 600 or HEP_MODULE_TIMEOUT)")
     ap.add_argument("--jobs", type=int, default=1, metavar="N", help="test modules run in parallel (default 1)")
+    ap.add_argument("--part", choices=("all", "units", "checks"), default="all",
+                    help="units: the test modules only; checks: profile suites, static and host checks only (default all)")
+    ap.add_argument("--shard", type=parse_shard, metavar="K/N",
+                    help="run only shard K of N of the test modules, balanced by tools/module_timings.json")
+    ap.add_argument("--write-timings", type=Path, metavar="FILE",
+                    help="also write the measured seconds per test module to FILE (the format of tools/module_timings.json)")
     return ap.parse_args(argv)
 
 
 def main(argv=None) -> int:
     opts = parse_args(argv)
+    if opts.shard and opts.part == "checks":
+        print("--shard applies to the test modules; it cannot be combined with --part checks", file=sys.stderr)
+        return 2
     py = sys.executable
-    checks = [
-        run_unittests(opts.module_timeout, opts.jobs),
+    units = [run_unittests(opts.module_timeout, opts.jobs, opts.shard)] if opts.part in ("all", "units") else []
+    checks = units + ([] if opts.part == "units" else [
         *run_profile_tests(),
         run_script("check_layering", [py, "tools/check_layering.py"]),
         run_script("stanza_consistency", [py, "tools/build_stanzas.py", "--check"]),
         run_script("registry", [py, "contracts/registry.py"]),
-        run_script("ams_optional", [py, "tools/check_ams_optional.py"]),
+        run_script("ams_optional", [py, "tools/check_ams_optional.py", "--jobs", str(opts.jobs)]),
         run_script("routing_static", [py, "tools/check_routing_static.py"]),
         run_script("ownership", [py, "tools/check_ownership.py"]),
         run_script("reference_inventory", [py, "tools/reference_inventory.py", "--check"]),
@@ -193,13 +256,21 @@ def main(argv=None) -> int:
         run_script("measure_entrypoints", [py, "tools/measure_entrypoints.py"] + (["--no-cli"] if opts.no_cli else [])),
         host_validate() if not opts.no_cli else {"name": "claude-plugin-validate", "status": "skip", "reason": "--no-cli"},
         codex_load() if not opts.no_cli else {"name": "codex-plugin-load", "status": "skip", "reason": "--no-cli"},
-    ]
+    ])
+    if opts.write_timings and units:
+        old = json.loads(TIMINGS.read_text(encoding="utf-8")) if TIMINGS.is_file() else {}
+        record = {"note": old.get("note", ""),
+                  "source": f"run_all_checks.py --jobs {opts.jobs} on {platform.platform()}, Python {platform.python_version()}",
+                  "seconds": {r["module"]: r["seconds"] for r in sorted(units[0]["modules"], key=lambda r: r["module"])}}
+        opts.write_timings.parent.mkdir(parents=True, exist_ok=True)
+        opts.write_timings.write_text(json.dumps(record, indent=1) + "\n", encoding="utf-8")
     summary = {
         "timestamp_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "plugin_version": json.loads((ROOT / ".claude-plugin" / "plugin.json").read_text())["version"],
         "environment": {"python": platform.python_version(), "platform": platform.platform(), "executable": py,
                         "hosts": host_versions()},
         "git_commit": subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, cwd=str(ROOT), timeout=MODULE_TIMEOUT).stdout.strip() or "unknown",
+        "part": opts.part,
         "counts": {s: sum(1 for c in checks if c["status"] == s) for s in ("pass", "fail", "skip")},
         "checks": checks,
         "caveat": "Software checks only; not physical validity, proof, statistical coverage, or authorization to unblind.",

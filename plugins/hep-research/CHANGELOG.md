@@ -87,6 +87,12 @@ Contracts 2.5.0 (minor: ML semantics; every 2.4.0 artifact keeps its outcome and
   detector-response row to scale factors and tag-and-probe.
 - **Profiles connected to physics-ml.** AMS-02 lists physics-ml in `related_skills` and its working-rules routing
   table gains a classifier/regressor row; the EIC profile lists physics-ml and its placement inventory gains an ML row.
+- **CI runs faster without testing less.** `tools/run_all_checks.py` starts test modules slowest first (durations
+  in the new `tools/module_timings.json`), gains `--part units|checks` and `--shard K/N` (shards balanced by those
+  durations; every module in exactly one shard) and `--write-timings`. The `checks` job of `tests.yml` runs as three
+  parallel jobs per Python version (two unit shards, one for the profile suites and static checks), and the optional
+  jobs use the parallel runner instead of a serial `unittest discover`. `tools/check_ams_optional.py` runs its suites
+  one test module per process with `--jobs` (the same modules as `unittest discover`; 218 s to 66 s locally with 8).
 
 ## 0.6.16 (2026-10-13)
 

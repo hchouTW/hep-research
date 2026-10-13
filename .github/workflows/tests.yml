@@ -1,7 +1,9 @@
 # tests: the hep-research test suite (T13). Runs on pushes to main, on pull requests, and weekly against the latest
 # releases. Branch pushes are tested through their pull request only, so each PR commit runs once, not twice.
 #   checks     unit tests (fast tier), profile suites and the static checks, on Python 3.11, 3.12 and 3.13 with the
-#              pinned set (plugins/hep-research/requirements-ci.lock); required
+#              pinned set (plugins/hep-research/requirements-ci.lock); required. Each Python version runs as three
+#              parallel jobs: the test modules in two shards balanced by tools/module_timings.json, and the profile
+#              suites with the static checks (run_all_checks.py --part / --shard); every module is in one shard
 #   lint       ruff and mypy on core/ and contracts/; required
 #   stats-backends  the statistics tests with pyhf 0.7.6 and ArviZ 0.23.4 required: a skip for either fails; required
 #   optional-* the same unit tests with pyhf, uproot + awkward, hepdata_lib + hepdata-validator, PyTorch (CPU) or ROOT; they may fail without
@@ -27,13 +29,17 @@ defaults:
 
 jobs:
   checks:
-    name: checks (Python ${{ matrix.python }})
+    name: checks (Python ${{ matrix.python }}, ${{ matrix.part.name }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         python: ["3.11", "3.12", "3.13"]
+        part:
+          - {name: "units 1/2", key: units-1, args: "--part units --shard 1/2"}
+          - {name: "units 2/2", key: units-2, args: "--part units --shard 2/2"}
+          - {name: "static and profiles", key: checks, args: "--part checks"}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
@@ -41,19 +47,21 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: Install the pinned set
         run: python -m pip install -r requirements-ci.lock
-      - name: Unit tests, profile suites and static checks
-        run: python tools/run_all_checks.py --no-cli --jobs 4 --out ../../check-runs
+      - name: ${{ matrix.part.name }}
+        run: python tools/run_all_checks.py --no-cli --jobs 4 ${{ matrix.part.args }} --out ../../check-runs
       - name: Routing-harness tests (fake CLI, no model calls)
+        if: matrix.part.key == 'checks'
         working-directory: .
         run: python -m unittest discover -s evals/routing/tests -t evals/routing/tests
       - name: Research-communication replay-scorer tests (no model calls)
+        if: matrix.part.key == 'checks'
         working-directory: .
         run: python -m unittest discover -s evals/research_communication/tests -t evals/research_communication/tests
       - name: Keep the check-run record
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
-          name: check-run-py${{ matrix.python }}
+          name: check-run-py${{ matrix.python }}-${{ matrix.part.key }}
           path: check-runs/
 
   stats-backends:
@@ -148,7 +156,7 @@ jobs:
           python -m pip install -r requirements-ci.lock
           python -m pip install ${{ matrix.install }}
       - name: Unit tests with ${{ matrix.extra }} available
-        run: python -m unittest discover -s tests -t .
+        run: python tools/run_all_checks.py --part units --no-cli --jobs 4
 
   optional-root:
     name: optional (ROOT)
@@ -166,7 +174,7 @@ jobs:
         run: |
           if command -v git >/dev/null; then git config --global --add safe.directory "$GITHUB_WORKSPACE"; fi  # checkout owned by another user
           python3 -c "import ROOT; print('ROOT', ROOT.gROOT.GetVersion())"
-          python3 -m unittest discover -s tests -t .
+          python3 tools/run_all_checks.py --part units --no-cli --jobs 4
 
   latest:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
