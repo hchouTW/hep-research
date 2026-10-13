@@ -53,7 +53,8 @@ Per-module subcommands, inputs and outputs, the validation tools outside `core/s
 | `likelihood_limits.py shape-limit`, `shape-gof`, `contour` | bins <= 40, bin b <= 200, total n <= 400, mc_stat <= 100 | the pyhf adapter |
 | `likelihood_limits.py` toy counts | toys 100 to 100000 | partition the toys (hep-computing) and merge |
 | `statistical_toys.py` toy counts (`MAX_TOYS`) | toys <= 200000 | partition the toys and merge |
-| `statistical_toys.py ratio-cov` | numerator, denominator <= 1e5 | `ratio-measured` with a measured covariance (denominator <= 1e12) |
+| `statistical_toys.py ratio-cov` | numerator, denominator <= 1e5 | `ratio-cov-analytic`, or `ratio-measured` (measured covariance, denominator <= 1e12) |
+| `statistical_toys.py ratio-cov-analytic` (`ANALYTIC_MIN_COUNTS`, `ANALYTIC_MAX_COUNTS`) | counts 1e4 to 1e12 | below: `ratio-cov` (toys) |
 | `statistical_toys.py unfold-scan` | reco and truth bins <= 60 | a dedicated unfolding framework |
 | `unfolding_diagnostics.py` response-stat, outer-coverage, response-covariance | mc_events <= 1e5 | the analytic response covariance by hand, labeled |
 | `unfolding_diagnostics.py` response-covariance, response-measured | response cells <= 400 | rebin, or a dedicated framework |
@@ -77,18 +78,8 @@ Per-module subcommands, inputs and outputs, the validation tools outside `core/s
   `toy_tail`: k, N, the estimate k/N (None at k = 0), the Clopper-Pearson interval at 68.27%, and at k = 0 a one-sided
   95% upper bound `1 - 0.05^(1/N)` (0.0295 for N = 100); the legacy `p_value_toys` and binomial-error fields are None
   where they would claim p = 0 or an error of 0. Exact Poisson tails stay in log space (`log_p_value_exact_poisson`).
-- **Toy ensembles** (`toy_ensemble.py`, helper, no CLI). A toy study states its ensemble explicitly (no default):
-  `conditional-fluctuated-aux` (nuisances at the conditional fit, auxiliary measurements redrawn: the profile
-  construction), `conditional-fixed-aux`, `unconditional-prior` (nuisances drawn from their constraints: a
-  prior-predictive average, not coverage at a true nuisance) or `plug-in` (nuisances at a given point, as in a
-  coverage study at a true point). Toy i uses a seed derived from (seed, i), so partitioned tasks merge to the single
-  run and `merge` refuses duplicates and gaps. Every toy has one outcome (ok, fit_failed, invalid_data, empty_data,
-  timeout, error); `coverage` keeps C/N, (C+F)/N and C/(N-F) with exact intervals and takes the headline from a
-  predeclared failure policy; `coverage_gate` passes a point when the one-sided lower bound (Bonferroni over a
-  grid) is at least nominal - 0.01, fails it when the upper bound is below, and otherwise reports insufficient
-  precision. Results of different ensembles are never pooled; there are no automatic retries.
-  `likelihood_limits.shape_toy_generator` and `shape_q_evaluator` connect it to the shape model (every toy refitted).
-  Benchmarks: `<plugin root>/examples/stats-benchmarks/` (coverage grid of the counting constructions).
+- **Toy ensembles** (`toy_ensemble.py`, helper, no CLI): every toy study states its ensemble, counts every toy's
+  outcome and never pools ensembles; details in the [command reference](core-stats-commands.md#toy-ensembles).
 - **Covariance and correlation matrices** go through one strict Cholesky (`_linalg.py`, private, no CLI). It works
   on the matrix scaled to a unit diagonal, so units never change the verdict. A pivot below -1e-10 is an error
   that names the matrix, a fit refuses a singular matrix, and toy sampling accepts a semi-definite one and records
@@ -106,7 +97,7 @@ Per-module subcommands, inputs and outputs, the validation tools outside `core/s
 | Finite Monte Carlo statistics in templates | `statistical_toys.py template-stat`, then `template-bb` | `template_fit.py bb-fit`/`bb-toys` for several templates, `wbb-fit`/`wbb-toys` for weighted MC and nuisances |
 | Unfolding: D'Agostini iterations | `statistical_toys.py unfold-scan`, then `unfolding_diagnostics.py closure --method dagostini` | `response-stat`, `response-covariance` (also `--method dagostini`) |
 | Unfolding: Tikhonov or truncated SVD | `unfolding_diagnostics.py regularized-scan` (`tikhonov`, `tsvd`; it refuses `dagostini`), `closure` | `choose-regularization`, `response-stat`, `response-covariance`, `fold-compare`, `nonparam-fold` |
-| Ratio or fraction with correlated systematics | `statistical_toys.py ratio-measured` (measured covariance) | `ratio-cov` (declared structures), `ratio-toys` (counts with systematic nuisances) |
+| Ratio or fraction with correlated systematics | `statistical_toys.py ratio-measured` (measured covariance) | `ratio-cov` (declared structures), `ratio-cov-analytic` (the same at counts >= 1e4, full covariance), `ratio-toys` (counts with systematic nuisances) |
 | Is this covariance or response matrix well formed? | `validate_covariance.py`, `validate_response.py` | — |
 
 ## Skill scripts
@@ -124,7 +115,7 @@ without NumPy (and SciPy) with exit 2 and a JSON message, and every script print
 - `sensitivity_and_gof.py` (needs NumPy): Asimov discovery sensitivity (standard library) and toy-calibrated goodness of fit (NumPy).
 - `bayes_diagnostics.py` (needs NumPy): R-hat, ESS and MCSE of supplied chains, prior reweighting; `bayes_calibration.py` (needs NumPy and SciPy): quantile and SBC calibration checks.
 - `combine_measurements.py` (needs NumPy): generalized least squares combination of one observable once the combination plan accepts the inputs (declared cross-dataset blocks, shared auxiliary measurements, no Gaussianized envelope); a worked SYNTHETIC input (two experiments, three bins, a shared luminosity term) is `skills/hep-statistics/assets/combine.example.json`; `combine_asymmetric.py`: Barlow's asymmetric errors.
-- `covariance_fit.py` (needs NumPy and SciPy): fits to published points with their covariance, with the Peelle diagnostics (models constant, line, normalized exponential, sharp and smoothly broken power laws, and a plug-in Python model `function(theta, x)`); `break-scan` profiles the break position on a grid with a toy-calibrated interval (the break is not a regular parameter: no Wilks) and a toy-calibrated no-break test (validated: 500 toys, bias 0.1 sigma, 68% coverage within 0.03); `discrete_profile.py` (needs NumPy and SciPy): discrete profiling over a model family; `eft_scan.py` (needs NumPy and SciPy): EFT parameter scans; `pcl_efficiency_ratio.py` (needs NumPy and SciPy), `ratio_estimation.py` (needs NumPy): ratio and efficiency intervals; `sweighted_fit.py` (needs NumPy and SciPy): sWeighted fits with covering uncertainties.
+- `covariance_fit.py` (needs NumPy and SciPy): fits to published points with their covariance, with the Peelle diagnostics (constant, line, normalized exponential, sharp or smooth broken power law, plug-in `function(theta, x)`); `break-scan`: toy-calibrated break interval and no-break test (no Wilks); `discrete_profile.py` (needs NumPy and SciPy): discrete profiling over a model family; `eft_scan.py` (needs NumPy and SciPy): EFT parameter scans; `pcl_efficiency_ratio.py` (needs NumPy and SciPy), `ratio_estimation.py` (needs NumPy): ratio and efficiency intervals; `sweighted_fit.py` (needs NumPy and SciPy): sWeighted fits with covering uncertainties.
 - `result_artifact.py`: writes a `statistical-result` artifact from a tool's output, with its status label.
 - Inference scripts owned by hep-analysis (read their `--help`: the hep-analysis skill may extend them). As shipped in
   0.6.17, `skills/hep-analysis/scripts/cr_spectrum_powerlaw_fit.py` fits a (segmented) power law in log-log space

@@ -35,7 +35,7 @@ One number: when a shell is available, run its row's tool, state the constructio
 | D'Agostini iterations | `cs/statistical_toys.py unfold-scan`, then `cs/unfolding_diagnostics.py closure` | Tikhonov/SVD: `regularized-scan` |
 | MCMC posterior | user's sampler, then `sc/bayes_diagnostics.py diagnose` | SBC: `sc/bayes_calibration.py sbc` |
 | Fit to published points, covariance | `sc/covariance_fit.py fit` (line, exponential, broken power law, plug-in) | break position: `break-scan` |
-| Ratio with covariance | `cs/statistical_toys.py ratio-cov` (denominators <= 1e5) | above: delta method, labeled hand-worked |
+| Ratio with covariance | `cs/statistical_toys.py ratio-cov` (counts <= 1e5) | counts >= 1e4: `ratio-cov-analytic` |
 | Write the result | `sc/result_artifact.py` | then `contracts/validate.py --gate publication` |
 
 ## Workflow

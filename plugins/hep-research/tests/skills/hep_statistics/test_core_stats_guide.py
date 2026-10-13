@@ -163,6 +163,8 @@ class CapsTable(unittest.TestCase):
             ("`statistical_toys.py ratio-cov`", "denominator",
              _nums(st, r'_num\(v, "denominator", 0\.0, (MAX_MEAN), strict_low=True\)')),
             ("`statistical_toys.py unfold-scan`", "bins", _nums(st, r"max\(n_reco, n_truth\) > (\d+)")),
+            ("`statistical_toys.py ratio-cov-analytic`", "counts", _nums(st, r"^ANALYTIC_MIN_COUNTS = ([0-9.e+]+)")),
+            ("`statistical_toys.py ratio-cov-analytic`", "to", _nums(st, r"^ANALYTIC_MAX_COUNTS = ([0-9.e+]+)")),
             ("`unfolding_diagnostics.py` response-stat", "mc_events", sorted(_num_upper(ud, "mc_events"))),
             ("`unfolding_diagnostics.py` response-covariance", "cells", _nums(ud, r"n_truth \* n_reco > (\d+)")),
             ("`template_fit.py`", "templates", _nums("template_fit", r"^MAX_TEMPLATES, MAX_BINS = (\d+), \d+")),
@@ -235,6 +237,7 @@ ROUTES = {
     ("skills/hep-statistics/scripts/covariance_fit.py", "fit"): (["--input", "@IN"], COVFIT),
     ("skills/hep-statistics/scripts/covariance_fit.py", "break-scan"): (["--input", "@IN", "--toys", "50", "--seed", "1"], BPL),
     ("core/stats/statistical_toys.py", "ratio-cov"): (["--input", "@IN", "--toys", "200", "--seed", "1"], RATIO),
+    ("core/stats/statistical_toys.py", "ratio-cov-analytic"): (["--input", "@IN"], {**RATIO, "numerator": [4e4, 3e4], "denominator": [9e4, 8e4]}),
     ("skills/hep-statistics/scripts/result_artifact.py", None): None,  # covered by test_result_artifact.py
 }
 

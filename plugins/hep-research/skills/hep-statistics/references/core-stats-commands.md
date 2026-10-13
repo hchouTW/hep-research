@@ -11,6 +11,7 @@ Per-module reference for the scripts in `<plugin root>/core/stats/`, split from 
 5. [`unfolding_diagnostics.py`: regularization, closure, folding](#unfolding_diagnosticspy-regularization-closure-folding)
 6. [`validate_covariance.py` and `validate_response.py`](#validate_covariancepy-and-validate_responsepy)
 7. [Validation tools outside `core/stats`](#validation-tools-outside-corestats)
+8. [Toy ensembles](#toy-ensembles)
 
 ## `poisson_diagnostics.py`: exact Poisson constructions
 
@@ -144,6 +145,10 @@ Each subcommand answers one question under stated simplifications.
 - `ratio-cov --input FILE [--toys --seed]`: per-bin ratios with declared systematics (per-bin fractional sigma for
   numerator and denominator, numerator-denominator `rho`, bin-to-bin `full`, `none` or `exponential`); the weighted-mean
   spread against the independent-bins assumption. Use it only when no measured covariance exists.
+- `ratio-cov-analytic --input FILE`: the full covariance matrix of the same per-bin ratios (same input) without toys,
+  for every numerator and denominator count at least 1e4 (up to 1e12): first-order Poisson term `r^2 (1/N + 1/D)`,
+  exact log-normal systematics. It agrees with toys within 5% per element at denominators 1e5-1e7
+  (`tests/core/test_stats_statistical_toys.py`); below 1e4 it refuses and points to `ratio-cov`.
 - `ratio-toys --n1 --n2 --sys name:sigma_num:sigma_den:rho [--toys --seed]`: ratio of two Poisson counts with
   multiplicative systematic nuisances of declared correlation; statistical, systematic and total spread against the
   residual, "cancels" and "independent" assumptions, plus the low-denominator bias. Run it before claiming that a ratio
@@ -301,3 +306,18 @@ Unresolved: fewer than 200 coverage toys; an observed limit without the expected
 without global_p; toys (construction, coverage, goodness of fit, significance) without `extension.seeds` or
 `coverage.seed`; toy goodness of fit without `n_toys`; Bayesian: an improper prior whose propriety is not
 `{argument, ref}`, a parameter of interest without a prior, bulk or tail ESS below 100 per chain, no chain count.
+
+## Toy ensembles
+
+`toy_ensemble.py` (helper, no CLI). A toy study states its ensemble explicitly (no default):
+`conditional-fluctuated-aux` (nuisances at the conditional fit, auxiliary measurements redrawn: the profile
+construction), `conditional-fixed-aux`, `unconditional-prior` (nuisances drawn from their constraints: a
+prior-predictive average, not coverage at a true nuisance) or `plug-in` (nuisances at a given point, as in a
+coverage study at a true point). Toy i uses a seed derived from (seed, i), so partitioned tasks merge to the single
+run and `merge` refuses duplicates and gaps. Every toy has one outcome (ok, fit_failed, invalid_data, empty_data,
+timeout, error); `coverage` keeps C/N, (C+F)/N and C/(N-F) with exact intervals and takes the headline from a
+predeclared failure policy; `coverage_gate` passes a point when the one-sided lower bound (Bonferroni over a
+grid) is at least nominal - 0.01, fails it when the upper bound is below, and otherwise reports insufficient
+precision. Results of different ensembles are never pooled; there are no automatic retries.
+`likelihood_limits.shape_toy_generator` and `shape_q_evaluator` connect it to the shape model (every toy refitted).
+Benchmarks: `<plugin root>/examples/stats-benchmarks/` (coverage grid of the counting constructions).

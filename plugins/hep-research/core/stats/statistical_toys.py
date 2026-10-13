@@ -22,6 +22,9 @@ Subcommands:
   ratio-cov      per-bin ratios (for example across rigidity) with systematics correlated across bins
                  and between numerator and denominator, from a JSON file; the effect on a weighted
                  mean versus an independent-bins assumption.
+  ratio-cov-analytic
+                 the full covariance of the same per-bin ratios without toys, for every count >= 1e4
+                 (first-order Poisson term, exact log-normal systematics); counts up to 1e12.
   ratio-measured per-bin ratios of two measured vectors with a supplied joint covariance (numerator
                  and denominator blocks, including their cross-covariance): linear and toy
                  propagation, nonlinearity bias, and a constant-ratio fit with the full covariance
@@ -592,6 +595,65 @@ def ratio_cov(doc: dict, toys: int, seed: int) -> dict:
     return out
 
 
+ANALYTIC_MIN_COUNTS = 1e4   # ratio-cov-analytic needs every numerator and denominator at least this large (Q12)
+ANALYTIC_MAX_COUNTS = 1e12
+
+
+def _bin_corr(kind: str, length, n: int) -> list[list[float]]:
+    if kind == "full":
+        return [[1.0] * n for _ in range(n)]
+    if kind == "none":
+        return [[1.0 if i == j else 0.0 for j in range(n)] for i in range(n)]
+    return [[math.exp(-abs(i - j) / length) for j in range(n)] for i in range(n)]
+
+
+def ratio_cov_analytic(doc: dict) -> dict:
+    """Full covariance of per-bin ratios r_i = (N_i / D_i) X_i at high counts, without toys (STH-T3.14). The counts are
+    Poisson with relative variance 1/N + 1/D per bin (first order, valid when every count is >= ANALYTIC_MIN_COUNTS);
+    the systematics are the multiplicative log-normal nuisances of ratio-cov, X_i = exp(e_i) with
+    Cov(e_i, e_j) = sum_k C_k(i, j) [sn_i sn_j + sd_i sd_j - rho_k (sn_i sd_j + sd_i sn_j)], taken exactly:
+    Cov(r_i, r_j) = (r_i r_j + delta_ij V_i) E[X_i X_j] - r_i r_j E[X_i] E[X_j]."""
+    if not isinstance(doc, dict):
+        raise ToyError("input must be a JSON object")
+    num, den = doc.get("numerator"), doc.get("denominator")
+    if not isinstance(num, list) or not isinstance(den, list) or len(num) != len(den) or not 1 <= len(num) <= 500:
+        raise ToyError("numerator and denominator must be lists of equal length, 1 to 500 bins")
+    num = [_num(v, "numerator", 0.0, ANALYTIC_MAX_COUNTS, strict_low=True) for v in num]
+    den = [_num(v, "denominator", 0.0, ANALYTIC_MAX_COUNTS, strict_low=True) for v in den]
+    low = [i for i in range(len(num)) if min(num[i], den[i]) < ANALYTIC_MIN_COUNTS]
+    if low:
+        raise ToyError(f"bins {low} have counts below {ANALYTIC_MIN_COUNTS:g}: the first-order Poisson term is not "
+                       "accurate there; use ratio-cov (toys)")
+    n = len(num)
+    sig = [[0.0] * n for _ in range(n)]
+    for d in doc.get("systematics", []):
+        if not isinstance(d, dict) or "name" not in d:
+            raise ToyError("each systematic needs a name")
+        rho = _num(d.get("num_den_rho", 0.0), "num_den_rho", -1.0, 1.0)
+        bc = d.get("bin_correlation", {"kind": "full"})
+        kind = bc.get("kind") if isinstance(bc, dict) else None
+        if kind not in ("full", "none", "exponential"):
+            raise ToyError("bin_correlation.kind must be full, none or exponential")
+        length = _num(bc.get("length"), "bin_correlation.length", 0.0, 1000.0, strict_low=True) if kind == "exponential" else None
+        c = _bin_corr(kind, length, n)
+        sn, sd = _vec(d.get("sigma_num", 0.0), n, "sigma_num"), _vec(d.get("sigma_den", 0.0), n, "sigma_den")
+        for i in range(n):
+            for j in range(n):
+                sig[i][j] += c[i][j] * (sn[i] * sn[j] + sd[i] * sd[j] - rho * (sn[i] * sd[j] + sd[i] * sn[j]))
+    r = [num[i] / den[i] for i in range(n)]
+    v = [r[i] ** 2 * (1.0 / num[i] + 1.0 / den[i]) for i in range(n)]
+    ex = [math.exp(0.5 * sig[i][i]) for i in range(n)]
+    cov = [[(r[i] * r[j] + (v[i] if i == j else 0.0)) * math.exp(0.5 * (sig[i][i] + sig[j][j]) + sig[i][j])
+            - r[i] * r[j] * ex[i] * ex[j] for j in range(n)] for i in range(n)]
+    return {"label": LABEL, "method": "analytic covariance of per-bin ratios: first-order Poisson counts, exact log-normal systematics",
+            "bins": n, "nominal_ratio": r, "mean_ratio": [r[i] * ex[i] for i in range(n)], "ratio_covariance": cov,
+            "statistical_variance": v, "log_systematic_covariance": sig,
+            "validity": f"every count >= {ANALYTIC_MIN_COUNTS:g} (relative error of the first-order Poisson term ~ 1/count); "
+                        "check against ratio-cov toys where both apply",
+            "note": "the systematic structures are the declared inputs of ratio-cov (full, none, exponential); the toys of "
+                    "ratio-cov (counts <= 1e5) are the reference this path agrees with"}
+
+
 # ------------------------------------------------------------------------- ratio-measured
 def _gammaq(a: float, x: float) -> float:
     """Regularized upper incomplete gamma function Q(a, x) (series and continued fraction)."""
@@ -763,6 +825,8 @@ def build_parser() -> argparse.ArgumentParser:
     rc = sub.add_parser("ratio-cov", help="ratios with across-bin correlated systematics")
     rc.add_argument("--input", required=True, help="JSON file: numerator, denominator, systematics")
     common(rc, 5000)
+    ra = sub.add_parser("ratio-cov-analytic", help="full ratio covariance without toys, every count >= 1e4")
+    ra.add_argument("--input", required=True, help="JSON file: numerator, denominator, systematics (as ratio-cov)")
     rm = sub.add_parser("ratio-measured", help="ratios with a supplied measured joint covariance")
     rm.add_argument("--input", required=True, help="JSON file: numerator, denominator, covariance (2n x 2n)")
     common(rm, 20000)
@@ -792,6 +856,12 @@ def main(argv: list[str] | None = None) -> int:
             except (OSError, json.JSONDecodeError) as exc:
                 raise ToyError(f"cannot read {args.input}: {exc}") from None
             result = ratio_cov(doc, args.toys, args.seed)
+        elif args.command == "ratio-cov-analytic":
+            try:
+                doc = json.loads(Path(args.input).read_text())
+            except (OSError, json.JSONDecodeError) as exc:
+                raise ToyError(f"cannot read {args.input}: {exc}") from None
+            result = ratio_cov_analytic(doc)
         elif args.command == "ratio-measured":
             try:
                 doc = json.loads(Path(args.input).read_text())

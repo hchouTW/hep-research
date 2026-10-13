@@ -319,5 +319,46 @@ class CliTests(unittest.TestCase):
         self.assertEqual((code, out["status"]), (2, "rejected"))
 
 
+class RatioCovAnalyticSTH314(unittest.TestCase):
+    """STH-T3.14: the analytic ratio covariance agrees with an independent NumPy toy covariance within 5% per element
+    at denominators 1e5, 1e6 and 1e7 (ratio-cov's own toys stop at means of 1e5)."""
+    SYST = [{"name": "eff", "sigma_num": 0.02, "sigma_den": 0.015, "num_den_rho": 0.6, "bin_correlation": {"kind": "full"}},
+            {"name": "shape", "sigma_num": 0.01, "sigma_den": 0.0, "bin_correlation": {"kind": "exponential", "length": 2}}]
+
+    def test_agrees_with_toys(self):
+        try:
+            import numpy as np
+        except ImportError:
+            self.skipTest("NumPy needed for the toy oracle")
+        for scale in (1e5, 1e6, 1e7):
+            with self.subTest(scale=scale):
+                num, den = [0.3 * scale, 0.25 * scale, 0.2 * scale], [scale, 0.9 * scale, 0.8 * scale]
+                r = st.ratio_cov_analytic({"numerator": num, "denominator": den, "systematics": self.SYST})
+                cov = np.array(r["ratio_covariance"])
+                rng = np.random.default_rng(int(math.log10(scale)))
+                T, n = 200000, 3
+                lsig = np.array(r["log_systematic_covariance"])
+                e = rng.multivariate_normal(np.zeros(n), lsig, size=T)
+                a = rng.poisson(num, size=(T, n))
+                d = rng.poisson(den, size=(T, n))
+                toys = a / d * np.exp(e)
+                tc = np.cov(toys, rowvar=False)
+                rel = np.abs(cov - tc) / np.abs(tc)
+                self.assertLess(rel.max(), 0.05, (scale, rel))
+
+    def test_low_counts_refused(self):
+        with self.assertRaises(st.ToyError):
+            st.ratio_cov_analytic({"numerator": [500.0, 600.0], "denominator": [1e5, 1e5], "systematics": []})
+
+    def test_matches_ratio_cov_toys_where_both_apply(self):
+        doc = {"numerator": [3e4, 2e4], "denominator": [9e4, 8e4], "systematics": self.SYST[:1]}
+        a = st.ratio_cov_analytic(doc)
+        t = st.ratio_cov(doc, 4000, 3)
+        for i in range(2):
+            frac = math.sqrt(a["ratio_covariance"][i][i]) / a["nominal_ratio"][i]
+            sys_stat = math.hypot(t["fractional_spread_per_bin_systematic_only"][i], t["fractional_spread_per_bin_statistical_only"][i])
+            self.assertAlmostEqual(frac, sys_stat, delta=0.06 * frac)
+
+
 if __name__ == "__main__":
     unittest.main()
