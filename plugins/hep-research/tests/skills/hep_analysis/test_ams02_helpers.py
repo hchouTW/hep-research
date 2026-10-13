@@ -237,7 +237,7 @@ class CosmicRayFluxTests(unittest.TestCase):
     def test_cli_matches_library_result(self):
         proc = subprocess.run(
             [sys.executable, str(ROOT / 'skills/hep-analysis/scripts/cosmic_ray_flux.py'),
-             '--counts', '42', '--exposure', '1.5e7', '--bin-width', '10'],
+             '--counts', '42', '--exposure', '1.5e7', '--bin-width', '10', '--bin-width-unit', 'GV'],
             capture_output=True, text=True, check=True, timeout=600)
         payload = json.loads(proc.stdout)
         expected = flux_from_counts(42, exposure=1.5e7, bin_width=10.0)
@@ -247,7 +247,7 @@ class CosmicRayFluxTests(unittest.TestCase):
     def test_cli_rejects_bad_input_cleanly_not_with_traceback(self):
         proc = subprocess.run(
             [sys.executable, str(ROOT / 'skills/hep-analysis/scripts/cosmic_ray_flux.py'),
-             '--counts', '-1', '--exposure', '1e6', '--bin-width', '1'],
+             '--counts', '-1', '--exposure', '1e6', '--bin-width', '1', '--bin-width-unit', 'GV'],
             capture_output=True, text=True, timeout=600)
         self.assertNotEqual(proc.returncode, 0)
         self.assertNotIn('Traceback', proc.stderr)

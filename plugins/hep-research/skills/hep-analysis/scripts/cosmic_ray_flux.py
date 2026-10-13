@@ -41,8 +41,11 @@ migration matrix; see <plugin root>/skills/hep-analysis/references/measurements-
 <plugin root>/skills/hep-statistics/references/astroparticle-statistics.md for why a steeply falling spectrum should
 be compared via forward-folding rather than treating each bin's flux point as
 migration-free.
-Run: python3 <plugin root>/skills/hep-analysis/scripts/cosmic_ray_flux.py --counts 42 --exposure 1.5e7 --bin-width 10
-     python3 <plugin root>/skills/hep-analysis/scripts/cosmic_ray_flux.py --counts 42 --background 8 --background-sigma 1.5 --exposure 1.5e7 --bin-width 10
+Bin-width unit: --bin-width-unit is required and is echoed as bin_width_unit. The width must be in the unit the flux
+is differential in (per GV: 600 for a 1.2-1.8 TV bin; never pass a width in TV when the flux is quoted per GV, which
+makes the flux 1000x too large).
+Run: python3 <plugin root>/skills/hep-analysis/scripts/cosmic_ray_flux.py --counts 42 --exposure 1.5e7 --bin-width 10 --bin-width-unit GV
+     python3 <plugin root>/skills/hep-analysis/scripts/cosmic_ray_flux.py --counts 42 --background 8 --background-sigma 1.5 --exposure 1.5e7 --bin-width 10 --bin-width-unit GV
 """
 import argparse
 import json
@@ -54,6 +57,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))  # the sibling script, 
 from counting_reference import poisson_upper_tail  # noqa: E402
 
 MAX_POISSON_INPUT = 500
+BIN_WIDTH_UNITS = ('GV', 'GeV', 'GeV/n', 'TeV', 'TV')
 
 
 def _positive_finite(value, name):
@@ -133,13 +137,15 @@ def poisson_interval(observed, level=0.6827):
     return lower, upper
 
 
-def flux_from_counts(counts, exposure, bin_width, background=0.0, background_sigma=0.0, level=0.6827):
+def flux_from_counts(counts, exposure, bin_width, background=0.0, background_sigma=0.0, level=0.6827,
+                     bin_width_unit=None):
     """Differential flux and its uncertainty for one bin.
 
     counts: observed integer count (source region, before background subtraction).
     exposure: effective area/geometric factor * live time * solid angle (one number).
     bin_width: width of the energy/rigidity bin, in the same units the flux should
-    be differential in.
+    be differential in (per GV: 600 for a 1.2-1.8 TV bin). bin_width_unit, when given,
+    is one of BIN_WIDTH_UNITS and is echoed in the result.
     background, background_sigma: an optional estimated background count and its
     uncertainty, subtracted before computing flux (Gaussian combination for the
     subtraction step; use li_ma_significance.py for a low-count ON/OFF significance).
@@ -151,6 +157,8 @@ def flux_from_counts(counts, exposure, bin_width, background=0.0, background_sig
     background_sigma = _nonnegative_finite(background_sigma, 'background_sigma')
     if isinstance(level, bool) or not isinstance(level, (int, float)) or not 0 < level < 1:
         raise ValueError('level must be a confidence level strictly between 0 and 1')
+    if bin_width_unit is not None and bin_width_unit not in BIN_WIDTH_UNITS:
+        raise ValueError(f'bin_width_unit must be one of {", ".join(BIN_WIDTH_UNITS)}')
 
     lower, upper = poisson_interval(counts, level)
     net_counts = counts - background
@@ -168,7 +176,7 @@ def flux_from_counts(counts, exposure, bin_width, background=0.0, background_sig
     flux = (net_counts / denom, lower_net / denom, upper_net / denom)
     if not all(math.isfinite(f) for f in flux):
         raise ValueError('the flux is not finite for this exposure and bin width')
-    return {
+    out = {
         'counts': counts,
         'background': background,
         'background_sigma': background_sigma,
@@ -182,16 +190,33 @@ def flux_from_counts(counts, exposure, bin_width, background=0.0, background_sig
         'flux_lower': flux[1],
         'flux_upper': flux[2],
     }
+    if bin_width_unit is not None:
+        out['bin_width_unit'] = bin_width_unit
+    return out
+
+
+UNIT_RULE = ('--bin-width-unit is required: give the bin width in the unit the flux is differential in '
+             '(per GV: 600 for a 1.2-1.8 TV bin; never a width in TV for a flux per GV)')
+
+
+class _Parser(argparse.ArgumentParser):
+    def error(self, message):
+        if '--bin-width-unit' in message:
+            message = f'{message}; {UNIT_RULE}'
+        super().error(message)
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__,
+    parser = _Parser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--counts', type=int, required=True, help='observed integer count')
     parser.add_argument('--exposure', type=float, required=True,
                         help='exposure: effective area/geometric factor * live time * solid angle')
     parser.add_argument('--bin-width', type=float, required=True, dest='bin_width',
-                        help='energy/rigidity bin width, in the units flux should be differential in')
+                        help='energy/rigidity bin width, in the unit the flux is differential in '
+                             '(per GV: 600 for a 1.2-1.8 TV bin; never a width in TV for a flux per GV)')
+    parser.add_argument('--bin-width-unit', required=True, choices=BIN_WIDTH_UNITS, dest='bin_width_unit',
+                        help='unit of --bin-width (required; echoed as bin_width_unit). The flux is per this unit')
     parser.add_argument('--background', type=float, default=0.0, help='estimated background count to subtract')
     parser.add_argument('--background-sigma', type=float, default=0.0, dest='background_sigma',
                         help='uncertainty on the background estimate')
@@ -201,7 +226,7 @@ def main():
 
     try:
         result = flux_from_counts(args.counts, args.exposure, args.bin_width,
-                                  args.background, args.background_sigma, args.level)
+                                  args.background, args.background_sigma, args.level, args.bin_width_unit)
     except ValueError as exc:
         parser.error(str(exc))
 

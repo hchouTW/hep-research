@@ -188,7 +188,7 @@ radii (ISS-like).
 
 ```bash
 python3 <plugin root>/skills/hep-analysis/scripts/geomagnetic_cutoff.py --latitude 40 --altitude-re 1.0627
-python3 <plugin root>/skills/hep-analysis/scripts/cosmic_ray_flux.py --counts 320 --exposure 2.4e5 --bin-width 1.0
+python3 <plugin root>/skills/hep-analysis/scripts/cosmic_ray_flux.py --counts 320 --exposure 2.4e5 --bin-width 1.0 --bin-width-unit GV
 python3 <plugin root>/skills/hep-analysis/scripts/solar_modulation_force_field.py --demodulate --energy 4.641 --mass 0.938272 \
     --charge 1 --phi 0.6 --toa-flux 1.0
 ```
@@ -210,7 +210,7 @@ python3 <plugin root>/skills/hep-analysis/scripts/solar_modulation_force_field.p
 ### Low-count, high-rigidity bins
 
 For 4 events in 1.3-2.0 TV with exposure 2.0e7 m^2 sr s
-(`<plugin root>/skills/hep-analysis/scripts/cosmic_ray_flux.py --counts 4 --exposure 2.0e7 --bin-width 700`, verified 2026-09-25):
+(`<plugin root>/skills/hep-analysis/scripts/cosmic_ray_flux.py --counts 4 --exposure 2.0e7 --bin-width 700 --bin-width-unit GV`, verified 2026-09-25):
 
 - If a user proposes `sqrt(N)/exposure/dR` for a bin with a few counts, the answer is **no**.
   Do not call it "approximately correct". Use the exact (Garwood) Poisson interval. At 68% it
