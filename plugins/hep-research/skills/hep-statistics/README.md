@@ -10,8 +10,9 @@ Use when the deliverable is a statistical inference or its diagnostics in physic
 
 | Path | Content |
 |---|---|
-| `SKILL.md` | entry point |
-| `references/` | nine references: the `core/stats` guide, nuisance modeling, likelihood fitting (including sWeights and weighted unbinned fits), unfolding, inference recipes, statistical tools (pyhf, Combine), astroparticle statistics, ML-assisted inference, inference reasoning |
+| `SKILL.md` | entry point: invariants, Step 0 for a quick question and the task-to-tool table (default tool, fallback, or "no shipped tool"), workflow, context resolution |
+| `references/` | eleven references: the `core/stats` decision guide and its command reference, combinations (BLUE, Peelle, likelihood-level), nuisance modeling, likelihood fitting (including sWeights and weighted unbinned fits), unfolding, inference recipes, statistical tools (pyhf, Combine), astroparticle statistics, ML-assisted inference, inference reasoning |
+| `assets/` | `combine.example.json`: SYNTHETIC input for `combine_measurements.py` (two experiments, shared luminosity) |
 | `scripts/` | fifteen helpers; the executable checks themselves (limits, template fits, unfolding diagnostics, Poisson diagnostics, toys, covariance and response validation) live in `core/stats/` |
 
 ## Scripts

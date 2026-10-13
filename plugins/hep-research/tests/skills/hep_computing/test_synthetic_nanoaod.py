@@ -123,11 +123,13 @@ class MissingPackagesTests(unittest.TestCase):
             for blocked in ('numpy', 'uproot', 'numpy,uproot'):
                 out = Path(tmp) / 'sample.root'
                 proc = self.run_blocked(blocked, '--out', str(out))
-                self.assertNotEqual(proc.returncode, 0)
+                self.assertEqual(proc.returncode, 3)  # script contract: 3 = missing optional dependency (CMP-08)
                 self.assertNotIn('Traceback', proc.stderr)
-                self.assertIn('missing required package(s)', proc.stderr)
+                doc = json.loads(proc.stdout)
+                self.assertEqual(doc['status'], 'missing-dependency')
+                self.assertIn('missing required package(s)', doc['error'])
                 for name in blocked.split(','):
-                    self.assertIn(name, proc.stderr)
+                    self.assertIn(name, doc['error'])
                 self.assertFalse(out.exists())
 
 

@@ -23,7 +23,9 @@ Input JSON:
    "tolerances": {"symmetry": 1e-8, "psd": 1e-8, "correlation": 1e-8,
                   "condition_warn": 1e10, "rank": 1e-12, "block_sum": 1e-8}}
 Tolerances are relative: symmetry, correlation and block_sum to the largest |entry|;
-psd and rank to the largest eigenvalue.
+psd, rank and condition_warn apply to the eigenvalues of the correlation matrix D^-1/2 C D^-1/2 (D = diag C, rows
+with positive variance), so the checks do not depend on the units of each bin; metrics report both the scaled
+(scaled_eigenvalue_min/max, condition_number) and the unscaled (eigenvalue_min/max, unscaled_condition_number) values.
 
 Usage: python3 core/stats/validate_covariance.py FILE.json [--strict] [--demo-psd-clip]
 Exit codes: 0 pass (or warn without --strict); 1 errors (or warnings with --strict);
@@ -109,7 +111,9 @@ def _check_matrix(name: str, m: list[list[float]], tol: dict, report: Report, pr
     if neg:
         report.error(f"{prefix}negative_diagonal", f"{name}: negative variance in rows {neg}")
     dmax = max(diag) if diag else 0.0
-    zero_rows = [i for i, d in enumerate(diag) if abs(d) <= 1e-15 * max(dmax, 1e-300)]
+    # zero variance means zero (or below the smallest normal float), not small next to another bin's variance: a bin in
+    # other units may legitimately carry a variance 1e-40 times the largest (STH-T1.5)
+    zero_rows = [i for i, d in enumerate(diag) if abs(d) < sys.float_info.min or (dmax > 0 and abs(d) <= 1e-300 * dmax)]
     for i in zero_rows:
         cov = max((abs(s[i][j]) for j in range(n) if j != i), default=0.0)
         if cov > tol["symmetry"] * scale:
@@ -135,25 +139,44 @@ def _check_matrix(name: str, m: list[list[float]], tol: dict, report: Report, pr
     if not solver["converged"]:
         report.warn(f"{prefix}eigen_not_converged", f"{name}: the eigenvalue rotations did not converge in {solver['sweeps']} "
                     f"sweeps (off-diagonal norm {solver['off_diagonal']:.3e}); the eigenvalue checks are approximate")
-    lmax, lmin = values[-1], values[0]
-    noise = 10.0 * n * EPS * max(abs(lmax), abs(lmin))
-    metrics.update({"eigenvalue_min": lmin, "eigenvalue_max": lmax, "roundoff_level": noise})
+    metrics.update({"eigenvalue_min": values[0], "eigenvalue_max": values[-1]})
+    # Scale-invariant checks (STH-T1.5): PSD, rank and conditioning are judged on R = D^-1/2 C D^-1/2 over the rows with
+    # positive variance, so a bin measured in other units (sigma 0.01 next to sigma 100) cannot hide a negative
+    # eigenvalue of the correlation structure, and disparate but uncorrelated scales are not called singular.
+    # Zero-variance rows are handled above and count as rank deficiency.
+    pos = [i for i in range(n) if i not in zero_rows and diag[i] > 0]
+    if pos:
+        r = [[s[i][j] / math.sqrt(diag[i] * diag[j]) for j in pos] for i in pos]
+        rsolver: dict = {}
+        rvalues, _ = _linalg.eigh(r, info=rsolver)
+        if not rsolver["converged"]:
+            report.warn(f"{prefix}eigen_not_converged", f"{name}: the rotations on the correlation matrix did not converge; "
+                        "the eigenvalue checks are approximate")
+    else:
+        rvalues = []
+    lmax, lmin = (rvalues[-1], rvalues[0]) if rvalues else (0.0, 0.0)
+    noise = 10.0 * max(n, 1) * EPS * max(abs(lmax), abs(lmin))
+    metrics.update({"scaled_eigenvalue_min": lmin if rvalues else None, "scaled_eigenvalue_max": lmax if rvalues else None,
+                    "roundoff_level": noise, "eigen_checks_on": "correlation matrix D^-1/2 C D^-1/2 (rows with positive variance)"})
     if lmin < -noise:
         if lmin >= -tol["psd"] * max(lmax, 1e-300):
-            report.warn(f"{prefix}psd_small_negative", f"{name}: smallest eigenvalue {lmin:.3e} is beyond round-off ({noise:.1e}) but within the stated PSD tolerance {tol['psd']:.1e} x largest")
+            report.warn(f"{prefix}psd_small_negative", f"{name}: smallest eigenvalue of the correlation matrix {lmin:.3e} is beyond round-off ({noise:.1e}) but within the stated PSD tolerance {tol['psd']:.1e} x largest")
         else:
-            report.error(f"{prefix}not_psd", f"{name}: smallest eigenvalue {lmin:.3e} is negative beyond tolerance ({tol['psd']:.1e} x largest {lmax:.3e}); suspect a construction error, not numerics")
-    positive = [x for x in values if x > tol["rank"] * lmax]
-    metrics["numerical_rank"] = len(positive) if lmax > 0 else 0
+            report.error(f"{prefix}not_psd", f"{name}: smallest eigenvalue of the correlation matrix {lmin:.3e} is negative beyond tolerance ({tol['psd']:.1e} x largest {lmax:.3e}; unscaled {values[0]:.3e}); suspect a construction error, not numerics")
+    positive = [x for x in rvalues if x > tol["rank"] * lmax]
+    rank = len(positive) if lmax > 0 else 0
+    metrics["numerical_rank"] = rank
     if lmax > 0 and lmin > 0:
         cond = lmax / lmin
         metrics["condition_number"] = cond
+        if values[0] > 0:
+            metrics["unscaled_condition_number"] = values[-1] / values[0]
         if cond > tol["condition_warn"]:
-            report.warn(f"{prefix}ill_conditioned", f"{name}: condition number {cond:.2e} exceeds {tol['condition_warn']:.1e}")
+            report.warn(f"{prefix}ill_conditioned", f"{name}: condition number of the correlation matrix {cond:.2e} exceeds {tol['condition_warn']:.1e}")
     elif lmax > 0:
         metrics["condition_number"] = None  # singular: smallest eigenvalue <= 0
-    if lmax > 0 and len(positive) < n:
-        report.warn(f"{prefix}rank_deficient", f"{name}: numerical rank {len(positive)} < {n}; may mean an implicit constraint or an over-regularized unfolding")
+    if lmax > 0 and rank < n:
+        report.warn(f"{prefix}rank_deficient", f"{name}: numerical rank {rank} < {n}; may mean an implicit constraint or an over-regularized unfolding")
     return metrics
 
 

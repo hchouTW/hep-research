@@ -61,6 +61,38 @@ class Eft1D(unittest.TestCase):
         self.assertFalse(self.r["reaches_grid_edge"])
 
 
+class EftDomainSTH33(unittest.TestCase):
+    """STH-T3.3: a bin mean <= 0 is outside the domain also for an empty bin; cl outside (0, 1) is refused; the
+    output states its grid resolution (there is no local refinement)."""
+
+    def test_negative_mean_in_an_empty_bin_is_excluded(self):
+        m = {"b": [1.0, 5.0], "n": [0, 5], "I": [[-1.0, 0.0]], "Q": [[[0.0, 0.0]]], "grid": [[-1.0, 10.0, 111]]}
+        r = e.scan(m, 0.95)
+        for lo, hi in r["allowed_intervals_wilks"]:
+            self.assertLess(hi, 1.0, r["allowed_intervals_wilks"])  # every c >= 1 has nu_1 <= 0
+        self.assertAlmostEqual(r["grid_resolution"][0], 0.1, places=12)
+
+    def test_cl_outside_unit_interval_is_refused(self):
+        for cl in (1.5, 0.0, float("nan")):
+            with self.subTest(cl=cl), self.assertRaises(ValueError):
+                e.scan(M1, cl)
+        import subprocess
+        import tempfile
+        import json
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td) / "m.json"
+            p.write_text(json.dumps(M1))
+            cp = subprocess.run([sys.executable, str(ROOT / "skills" / "hep-statistics" / "scripts" / "eft_scan.py"), "scan",
+                                 "--input", str(p), "--cl", "1.5"], capture_output=True, text=True, timeout=120)
+        self.assertEqual(cp.returncode, 2)
+
+    def test_resolution_is_reported_on_a_coarse_grid(self):
+        m = dict(M1, grid=[[-3.0, 9.0, 7]])
+        r = e.scan(m, 0.95)
+        self.assertEqual(r["grid_resolution"], [2.0])
+        self.assertIn("grid step", r["resolution_note"])
+
+
 class Eft2D(unittest.TestCase):
     def test_two_components_and_profiled_vs_joint(self):
         m = {"b": [10.0, 20.0], "n": [10, 20], "I": [[-6.0, 0.0], [0.0, 3.0]],

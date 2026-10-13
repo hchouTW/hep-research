@@ -1,0 +1,87 @@
+{
+ "contract_version": "2.6.0",
+ "artifact_id": "fixture-synthetic-statistical-result",
+ "artifact_type": "statistical-result",
+ "objective": "SYNTHETIC structural fixture; values are placeholders, not physics",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.6.17",
+  "contracts": "2.6.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-statistics",
+  "created": "2026-10-02",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "paradigm": "frequentist",
+  "likelihood": {
+   "form": "poisson (synthetic)",
+   "backend": "core.stats.likelihood_limits",
+   "model_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "parameters_of_interest": [
+   "mu"
+  ],
+  "nuisances": [],
+  "fit_status": "converged",
+  "test_statistic": "q_mu",
+  "construction": "toy-calibrated-profile",
+  "coverage": {
+   "check": "toys",
+   "method": "seeded toys of the full procedure (synthetic)",
+   "n_toys": 1000,
+   "coverage": 0.951,
+   "interval": [
+    0.944,
+    0.957
+   ],
+   "cl": 0.95
+  },
+  "seeds": {
+   "toys": 1,
+   "coverage": 2
+  },
+  "expected": {
+   "median": 1.2,
+   "band_1sigma": [
+    0.9,
+    1.7
+   ],
+   "band_2sigma": [
+    0.7,
+    2.4
+   ],
+   "method": "toys"
+  },
+  "significance": {
+   "local_p": 0.5,
+   "local_z": 5.0
+  },
+  "goodness_of_fit": {
+   "statistic": "saturated-deviance",
+   "p_value": 0.4,
+   "calibration": "toys",
+   "n_toys": 1000
+  },
+  "results": {
+   "mu_95": 2.1,
+   "cl": 0.95,
+   "p0": 0.3
+  }
+ },
+ "required_capabilities": [
+  "stats:result-semantics"
+ ]
+}

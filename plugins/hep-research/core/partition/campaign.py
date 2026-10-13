@@ -52,7 +52,6 @@ import math
 import os
 import shutil
 import stat
-from threading import local as _thread_state  # the packaging scan reads '.local' as a host name
 import time
 import uuid
 from pathlib import Path
@@ -149,47 +148,14 @@ def _risk(state: dict, kind: str, note: str, rec: dict | None = None, **extra) -
         risks.append(entry)
 
 
-_HELD = _thread_state()  # campaign directories this thread holds the lock of, with a depth (calls nest)
-
-
 @contextlib.contextmanager
 def campaign_lock(campaign_dir, operation: str):
-    """Exclusive lock on <campaign>/.lock for one operation; nested calls in the same thread reuse it."""
-    cdir = Path(campaign_dir).resolve()
-    held = getattr(_HELD, "dirs", None)
-    if held is None:
-        held = _HELD.dirs = {}
-    if held.get(cdir):
-        held[cdir] += 1
-        try:
-            yield
-        finally:
-            held[cdir] -= 1
-        return
-    cdir.mkdir(parents=True, exist_ok=True)
-    fh = open(cdir / ".lock", "a+", encoding="utf-8")
-    try:
-        try:
-            import fcntl
-            fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except ImportError:  # Windows
-            import msvcrt
-            msvcrt.locking(fh.fileno(), msvcrt.LK_NBLCK, 1)  # type: ignore[attr-defined]  # Windows-only API, absent from non-win32 stubs
-    except OSError:
-        fh.seek(0)
-        holder = fh.read().strip() or "another process"
-        fh.close()
-        raise CampaignError("campaign.locked", f"{cdir} is in use ({holder}); wait for it to finish") from None
-    try:
-        fh.seek(0)
-        fh.truncate()
-        fh.write(f"{operation} by pid {os.getpid()} since {_now()}")
-        fh.flush()
-        held[cdir] = 1
+    """Exclusive lock on <campaign>/.lock for one operation; nested calls in the same thread reuse it. The lock is
+    engine.dir_lock, so engine.merge() inside a campaign call reuses it instead of blocking on it."""
+    def busy(cdir: Path, holder: str) -> Exception:
+        return CampaignError("campaign.locked", f"{cdir} is in use ({holder}); wait for it to finish")
+    with engine.dir_lock(campaign_dir, operation, busy):
         yield
-    finally:
-        held.pop(cdir, None)
-        fh.close()  # closing the file releases the lock
 
 
 def _locked(operation: str):
@@ -689,7 +655,7 @@ def collect(campaign_dir) -> dict:
 
 def _apply(row: dict, rec: dict, obs: dict) -> None:
     for k in ("native_state", "exit_code", "signal", "hold_reason", "hold_code", "host", "elapsed_s", "max_rss_mb", "alloc_cpus",
-              "alloc_gpus", "evidence"):
+              "alloc_gpus", "evidence", "failure_reason"):
         if obs.get(k) is not None or k in ("hold_reason", "hold_code"):
             rec[k] = obs.get(k)
     new_restarts = int(obs.get("restarts") or 0) - rec.get("restarts_seen", 0)

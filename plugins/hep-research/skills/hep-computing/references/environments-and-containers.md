@@ -22,23 +22,27 @@ diverge: record both layers or avoid the mix.
 Run, inside the environment that produced the result:
 
 ```
-python3 <plugin root>/skills/hep-computing/scripts/environment_manifest.py record --project . --out environment.json
+python3 <plugin root>/skills/hep-computing/scripts/environment_manifest.py record --project . --inputs data/*.json --out environment.json
 ```
 
-It writes the `environment` object and the `tools` list of a `computational-run` artifact: Python version and
-executable, platform, where the environment comes from (`lcg-view`, `container`, `conda`, `venv`, `system`), the
-versions of the named packages (`--packages`, or `--all-packages`), a fixed list of environment variables
-(`LCG_VERSION`, `BINARY_TAG`, `ROOTSYS`, `APPTAINER_CONTAINER`, ...) and the project's git commit and dirty state.
+It writes the `environment` object, the `tools` list and (with `--inputs`) the `input_manifest` (path, SHA-256, size)
+of a `computational-run` artifact: Python version and executable, the system (OS family, architecture, libc, and the
+kernel release for information), where the environment comes from (`lcg-view`, `container`, `conda`, `venv`,
+`system`), the versions of the named packages (`--packages`, or `--all-packages`), a fixed list of environment
+variables (`LCG_VERSION`, `BINARY_TAG`, `ROOTSYS`, `APPTAINER_CONTAINER`, ...) and the project's git commit and dirty
+state.
 Other variables are never recorded: they can hold credentials. Add by hand what the script cannot see: the LCG
 release and platform you sourced, the container image digest (`apptainer inspect`), compiler flags of compiled code.
 
 ## Check before reusing a result
 
 ```
-python3 <plugin root>/skills/hep-computing/scripts/environment_manifest.py check --manifest environment.json
+python3 <plugin root>/skills/hep-computing/scripts/environment_manifest.py check --manifest environment.json --project .
 ```
 
-lists every difference in Python, platform, origin, package versions and recorded variables (exit 1 on drift). A drift
+lists every difference in Python, executable, OS family, architecture, libc, origin, package versions, recorded
+variables and input checksums, and with `--project` a changed commit or a dirty checkout (exit 1 on drift). A
+different kernel release alone is a note: on a batch farm the kernel changes from node to node. A drift
 is not an error by itself; it means the earlier result is not yet reproduced here. Rerun the closure or regression
 test that the result depends on and compare within its declared tolerance before reusing the number.
 

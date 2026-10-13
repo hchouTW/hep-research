@@ -41,10 +41,12 @@ def observable(kind="integrated-luminosity", level="particle-fiducial", **extra)
 
 
 def measurement(kind="integrated-luminosity", **extra):
-    ext = {"observable": observable(kind), "species_or_process": "synthetic",
+    ext = {"estimand": "SYNTHETIC: placeholder differential cross section in cos_theta at particle level",
+           "observable": observable(kind), "species_or_process": "synthetic",
            "period": {"start": "synthetic-period-1", "end": "synthetic-period-1"},
            "selections": [{"name": "two-muons", "definition": "placeholder", "conditional_denominator": "all events"}],
-           "backgrounds": [{"name": "placeholder-bkg", "estimator": "sideband"}],
+           "backgrounds": [{"name": "placeholder-bkg", "estimator": "sideband", "control_region": "synthetic sideband",
+                            "closure": "synthetic validation region"}],
            "corrections": [{"effect_id": "trigger-eff", "category": "efficiency", "applied_in": "estimator"}],
            "systematics": [{"name": "energy-scale", "source": "calibration", "effect": "migration", "applied_via": "migration"}],
            "blinding": {"blinded": False}}
@@ -52,9 +54,29 @@ def measurement(kind="integrated-luminosity", **extra):
     return envelope("measurement-spec", ext, "hep-analysis")
 
 
+CONVENTIONS_ALL = {"unit_system": "natural units (synthetic)", "hbar_c_one": True, "metric_signature": "+---",
+                   "coupling_normalization": "not-applicable", "renormalization_scheme": "not-applicable",
+                   "scales": "not-applicable", "energy_variable": "sqrt_s", "frame": "center-of-mass",
+                   "angle_definition": "not-applicable", "spin_treatment": "not-applicable",
+                   "mass_approximation": "not-applicable"}
+def measurement_v26(mutate=None, status=None):
+    """measurement-spec under the 2.6.0 rules (an estimand, factorized efficiencies, a blinding mask); `mutate` edits
+    the document in place to make one defect."""
+    from contracts import CONTRACTS_VERSION
+    d = measurement(corrections=[{"effect_id": "trigger-eff", "category": "trigger_efficiency", "applied_in": "estimator"},
+                                 {"effect_id": "selection-eff", "category": "selection_efficiency", "applied_in": "estimator"}],
+                    blinding={"blinded": True, "mask": {"intervals": [{"variable": "cos_theta", "low": 0.5, "high": 1.0}]}})
+    d.update(contract_version=CONTRACTS_VERSION, versions={"plugin": "0.6.17", "contracts": CONTRACTS_VERSION, "profiles": {}})
+    if status:
+        d["status"] = list(status)
+    if mutate:
+        mutate(d, d["extension"])
+    return d
+
+
 def theory(**extra):
     ext = {"model": {"id": "synthetic-model", "description": "structural fixture"},
-           "assumptions": ["placeholder assumption"], "conventions": {"hbar_c_one": True, "metric_signature": "+---"},
+           "assumptions": ["placeholder assumption"], "conventions": dict(CONVENTIONS_ALL),
            "order": "tree-level", "parameters": {"p": "placeholder"}, "scales": "not-applicable",
            "derivation_status": "not-derived", "validity_domain": {"note": "placeholder"},
            "checks_run": [], "checks_not_run": ["all (fixture)"]}
@@ -65,10 +87,54 @@ def theory(**extra):
 def prediction(**extra):
     ext = {"observable": observable(), "parameter_point": {"p": 1}, "representation": "numerical",
            "values": {"edges": [-1.0, -0.5, 0.0, 0.5, 1.0], "values": [1.0, 1.0, 1.0, 1.0], "unit": "pb"},
-           "uncertainties": [{"name": "scale", "kind": "scale-envelope", "correlation": "unknown"}],
+           "uncertainties": [{"name": "scale", "kind": "scale-envelope", "correlation": "unknown", "prescription": "3-point"}],
            "allowed_transformations": ["forward-fold"]}
     ext.update(extra)
     return envelope("prediction", ext, "hep-theory")
+
+
+def _v26(doc):
+    """Stamp a builder's document at the contract version from which the theory rules are native (2.6.0)."""
+    from contracts.validate import THEORY_SEMANTICS_FROM
+    doc["contract_version"] = THEORY_SEMANTICS_FROM
+    doc["versions"] = {"plugin": "0.6.17", "contracts": THEORY_SEMANTICS_FROM, "profiles": {}}
+    return doc
+
+
+def theory_v26(**extra):
+    """theory-spec under the 2.6.0 rules: all core convention keys, a perturbative argument with its order, a check
+    run with a result from check_results and its tolerance, a validity domain, what was neglected."""
+    ext = {"derivation_status": "perturbative-argument", "order": "tree-level (synthetic)",
+           "checks_run": [{"name": "units", "result": "pass", "tolerance": "exact"}],
+           "validity_domain": {"sqrt_s": "placeholder range"}, "neglected": ["placeholder higher orders"], **extra}
+    ext = {k: x for k, x in ext.items() if x is not None}  # extra key=None removes the field
+    doc = theory(**ext)
+    doc["extension"] = {k: x for k, x in doc["extension"].items() if x is not None}
+    doc["artifact_id"] = "fixture-synthetic-theory-spec-v26"
+    return _v26(doc)
+
+
+def prediction_v26(**extra):
+    """prediction under the 2.6.0 rules: linked to its theory spec, a scale envelope with its prescription and a
+    [min, max] pair, a truncation estimate with its method."""
+    ext = {"theory_spec_ref": "artifacts/theory_spec.json",
+           "uncertainties": [{"name": "scale", "kind": "scale-envelope", "correlation": "unknown", "prescription": "3-point",
+                              "values": [0.9, 1.1]},
+                             {"name": "missing higher orders", "kind": "truncation", "correlation": "unknown",
+                              "method": "last-term"}], **extra}
+    doc = prediction(**ext)
+    doc["extension"] = {k: x for k, x in doc["extension"].items() if x is not None}
+    doc["artifact_id"] = "fixture-synthetic-prediction-v26"
+    return _v26(doc)
+
+
+def envelope_unc(**kw):
+    u = {"name": "scale", "kind": "scale-envelope", "correlation": "unknown", "prescription": "3-point", "values": [0.9, 1.1]}
+    u.update(kw)
+    return [{k: x for k, x in u.items() if x is not None}]
+
+
+LINKED_SPEC = [{"ref": "artifacts/theory_spec.json", "artifact_type": "theory-spec", "status": ["validated-in-scope"]}]
 
 
 def dataset(status="synthetic", did="synthetic-collider:synthetic-angular-1", **extra):
@@ -186,7 +252,40 @@ def ml_v25_splits(**splits):
                           **splits})
 
 
+def statres_v26(**extra):
+    """statistical-result under the 2.6.0 hardening rules: toy-calibrated profile limit with seeds, toy coverage whose
+    interval matches its counts, expected bands, z consistent with p, a well-formed model hash."""
+    from contracts import CONTRACTS_VERSION
+    ext = {"paradigm": "frequentist", "likelihood": {"form": "poisson (synthetic)", "backend": "core.stats.likelihood_limits",
+                                                      "model_sha256": "0" * 64},
+           "parameters_of_interest": ["mu"], "nuisances": [], "fit_status": "converged",
+           "test_statistic": "q_mu", "construction": "toy-calibrated-profile",
+           "coverage": {"check": "toys", "method": "seeded toys of the full procedure (synthetic)", "n_toys": 1000,
+                        "coverage": 0.951, "interval": [0.944, 0.957], "cl": 0.95},
+           "seeds": {"toys": 1, "coverage": 2},
+           "expected": {"median": 1.2, "band_1sigma": [0.9, 1.7], "band_2sigma": [0.7, 2.4], "method": "toys"},
+           "significance": {"local_p": 0.3, "local_z": 0.5244},
+           "goodness_of_fit": {"statistic": "saturated-deviance", "p_value": 0.4, "calibration": "toys", "n_toys": 1000},
+           "results": {"mu_95": 2.1, "cl": 0.95, "p0": 0.3}, **extra}
+    ext = {k: x for k, x in ext.items() if x is not None}  # extra key=None removes the field
+    return envelope("statistical-result", ext, "hep-statistics", contract_version=CONTRACTS_VERSION,
+                    versions={"plugin": "0.6.17", "contracts": CONTRACTS_VERSION, "profiles": {}},
+                    required_capabilities=["stats:result-semantics"])
+
+
+def statres_v26_bayes(**extra):
+    """Bayesian statistical-result under the 2.6.0 rules: a proper prior on the POI, chains recorded, ESS above floor."""
+    ext = {"paradigm": "bayesian", "priors": [{"parameter": "mu", "form": "uniform(0, 10)"}],
+           "sampler": {"name": "metropolis (synthetic)", "chains": 4, "draws": 4000},
+           "convergence": {"rhat": 1.002, "ess_bulk": 3000, "ess_tail": 2500}, "test_statistic": None,
+           "construction": None, "coverage": None, "seeds": {"chains": 7}, "expected": None, "significance": None,
+           "goodness_of_fit": None, "results": {"mu_median": 1.1}, **extra}
+    return statres_v26(**ext)
+
+
 VALID = {
+    "statres_v26.json": statres_v26(),
+    "statres_v26_bayesian.json": statres_v26_bayes(),
     "measurement_collider.json": measurement(),
     "measurement_exposure.json": measurement("exposure", observable=observable("exposure", level="detector", quantity="differential-flux", unit="m^-2 sr^-1 s^-1 GV^-1", variables=[{"name": "rigidity", "unit": "GV", "edges": [1, 2, 4]}])),
     "measurement_protons_on_target.json": measurement("protons-on-target", observable=observable("protons-on-target", level="detector", quantity="event-count", unit="1")),
@@ -239,6 +338,21 @@ VALID = {
     "communication_traceability.json": communication_rich(),
     "response_v24.json": response_v24(),
     "ml_artifact_v25.json": ml_v25(),
+    "theory_spec_v26.json": theory_v26(),
+    "theory_spec_v26_asymptotic.json": theory_v26(derivation_status="asymptotic-argument", limit="m / sqrt(s) -> 0 (synthetic)"),
+    "theory_spec_v26_analytic_checked.json": theory_v26(derivation_status="analytic-derivation"),
+    "theory_spec_v26_inapplicable_listed.json": theory_v26(conventions={k: x for k, x in CONVENTIONS_ALL.items() if k != "frame"},
+                                                          inapplicable=["frame"]),
+    "theory_spec_v26_propagation.json": theory_v26(model={"id": "synthetic-diffusion-model", "description": "structural fixture",
+                                                          "family": "cosmic-ray-propagation"},
+                                                   degenerate_directions=["D0/L (synthetic)"]),
+    "prediction_v26.json": prediction_v26(),
+    "prediction_v26_validated_linked.json": _v26(dict(prediction_v26(), status=["validated-in-scope", "synthetic"],
+                                                      inputs=LINKED_SPEC)),
+    "prediction_v26_derivation_status.json": prediction_v26(theory_spec_ref=None, derivation_status="numerical-evidence"),
+    "prediction_v26_binned_envelope.json": prediction_v26(uncertainties=envelope_unc(
+        values=None, bounds={"lower": [0.9, 0.9, 0.9, 0.9], "upper": [1.1, 1.1, 1.1, 1.1]})),
+    "measurement_v26.json": measurement_v26(),
 }
 
 bad = {}
@@ -280,6 +394,98 @@ d = communication_rich(); d["required_capabilities"] = []; bad["communication_tr
 d = communication_rich(); d["extension"]["claims"][1]["status"] = ["observed"]; d["extension"]["claims"][1]["assessment"]["currency"] = "stale"; bad["communication_claim_status_upgraded.json"] = (d, ["communication.status_upgraded"])
 d = communication_rich(); d["extension"]["claims"][2]["status"] = ["observed", "synthetic", "unvalidated"]; d["extension"]["claims"][2]["assessment"]["currency"] = "stale"; bad["communication_claim_status_conflict.json"] = (d, ["communication.claim_status_conflict"])
 
+# theory-spec and prediction rules of contracts 2.6.0 (hep-theory audit, THY-WP2.3)
+bad["prediction_v26_observed.json"] = (_v26(dict(prediction_v26(), status=["observed"])), ["prediction.status_upgraded"])
+bad["prediction_v26_validated_unlinked.json"] = (_v26(dict(prediction_v26(), status=["validated-in-scope", "synthetic"])),
+                                                 ["prediction.status_upgraded"])
+bad["prediction_v26_envelope_no_prescription.json"] = (prediction_v26(uncertainties=envelope_unc(prescription=None)),
+                                                       ["prediction.envelope_prescription"])
+bad["prediction_v26_envelope_inverted.json"] = (prediction_v26(uncertainties=envelope_unc(values=[1.1, 0.9])),
+                                                ["prediction.envelope_prescription"])
+bad["theory_v26_order_missing.json"] = (theory_v26(order=""), ["theory.order_missing"])
+bad["theory_v26_limit_missing.json"] = (theory_v26(derivation_status="asymptotic-argument"), ["theory.limit_missing"])
+bad["theory_v26_unchecked_formal_proof.json"] = (theory_v26(derivation_status="formal-proof", checks_run=[]),
+                                                 ["theory.unchecked_strong_status"])
+bad["theory_v26_check_result_vocab.json"] = (theory_v26(checks_run=[{"name": "units", "result": "looks fine"}]),
+                                             ["theory.check_result_vocab"])
+bad["theory_v26_validity_empty.json"] = (theory_v26(validity_domain={}), ["theory.validity_empty"])
+bad["theory_v26_propagation_no_degeneracy.json"] = (theory_v26(model={"id": "synthetic-diffusion-model", "description": "structural fixture",
+                                                                       "family": "cosmic-ray-propagation"}),
+                                                    ["theory.degeneracy_missing"])
+
+# Valid but reported with a warning (the rule is advisory): cases.json "warning".
+WARNING = {"theory_v26_conventions_incomplete.json": (theory_v26(conventions={"hbar_c_one": True}), ["theory.conventions_incomplete"]),
+           "prediction_v26_truncation_no_method.json": (prediction_v26(uncertainties=[
+               {"name": "missing higher orders", "kind": "truncation", "correlation": "unknown"}]), ["prediction.truncation_method"])}
+
+
+# measurement-spec rules of contracts 2.6.0 (hep-analysis audit): one invalid fixture per rule
+MEAS_INVALID = {
+    "estimand_missing": (lambda d, e: e.pop("estimand"), "measurement.estimand_missing"),
+    "estimand_not_a_sentence": (lambda d, e: e.update(estimand="flux"), "measurement.estimand_not_a_sentence"),
+    "variable_incomplete": (lambda d, e: e["observable"]["variables"][0].pop("edges"), "measurement.variable_incomplete"),
+    "phase_space_missing": (lambda d, e: e["observable"].pop("phase_space"), "measurement.phase_space_missing"),
+    "frame_missing": (lambda d, e: e["observable"].pop("frame"), "measurement.frame_missing"),
+    "selections_empty": (lambda d, e: e.update(selections=[]), "measurement.selections_empty"),
+    "denominator_blank": (lambda d, e: e["selections"][0].update(conditional_denominator=" "), "measurement.denominator_blank"),
+    "unknown_not_listed": (lambda d, e: e["selections"][0].update(conditional_denominator="unknown"),
+                           "measurement.unresolved_not_listed"),
+    "backgrounds_empty": (lambda d, e: e.update(backgrounds=[]), "measurement.backgrounds_empty"),
+    "background_estimator_missing": (lambda d, e: e["backgrounds"][0].update(estimator=""),
+                                     "measurement.background_estimator_missing"),
+    "background_constraint_missing": (lambda d, e: e["backgrounds"][0].pop("control_region"),
+                                      "measurement.background_constraint_missing"),
+    "correction_case_variant": (lambda d, e: e["corrections"].append({"effect_id": "Trigger_Eff", "category": "migration",
+                                                                      "applied_in": "unfolding"}),
+                                "measurement.duplicate_correction"),
+    "category_repeated": (lambda d, e: e["corrections"][1].update(category="trigger_efficiency"),
+                          "measurement.correction_category_repeated"),
+    "bare_efficiency_with_factor": (lambda d, e: e["corrections"][1].update(category="efficiency"),
+                                    "measurement.correction_category_repeated"),
+    "unknown_category": (lambda d, e: e["corrections"][1].update(category="magic"),
+                         "measurement.unknown_correction_category"),
+    "luminosity_twice": (lambda d, e: e["corrections"].append({"effect_id": "lumi", "category": "luminosity",
+                                                               "applied_in": "estimator"}),
+                         "measurement.normalization_double_counted"),
+    "included_and_applied": (lambda d, e: e["observable"].update(included_corrections=["trigger-eff"]),
+                             "measurement.correction_in_observable_and_chain"),
+    "zero_normalization": (lambda d, e: e["observable"]["normalization"].update(value=0), "measurement.zero_value"),
+    "zero_correction": (lambda d, e: e["corrections"][0].update(value=0), "measurement.zero_value"),
+    "shape_only_value": (lambda d, e: e["observable"].update(normalization={"kind": "shape-only", "value": 3.2}),
+                         "measurement.shape_only_value"),
+    "systematics_empty": (lambda d, e: e.update(systematics=[]), "measurement.systematics_empty"),
+    "applied_via_blank": (lambda d, e: e["systematics"][0].update(applied_via=""), "measurement.applied_via_missing"),
+    "duplicate_systematic": (lambda d, e: e["systematics"].append(dict(e["systematics"][0], name="Energy_Scale")),
+                             "measurement.duplicate_systematic"),
+    "blinded_no_mask": (lambda d, e: e["blinding"].pop("mask"), "measurement.blinding_mask_missing"),
+    "blinded_observed": (lambda d, e: d.update(status=["observed"]), "measurement.blinded_observed"),
+    "ratio_block_missing": (lambda d, e: e["observable"].update(quantity="ratio"), "measurement.ratio_block_missing"),
+    "ratio_self": (lambda d, e: e.update(ratio={"numerator": "species-A", "denominator": "Species_A", "cancellations": [
+        {"effect": "exposure", "treatment": "cancels", "correlation_model": "same", "verification": "by construction"}]}),
+                   "measurement.ratio_self"),
+    "ratio_cancellations_empty": (lambda d, e: e.update(ratio={"numerator": "a", "denominator": "b", "cancellations": []}),
+                                  "measurement.ratio_cancellations_empty"),
+    "period_reversed": (lambda d, e: e.update(period={"start": "2020-01-01", "end": "2019-06-30"}),
+                        "measurement.period_reversed"),
+    "misspelled_key": (lambda d, e: e["selections"][0].update(conditonal_denominator="all"), "measurement.misspelled_key"),
+}
+for _name, (_fn, _code) in MEAS_INVALID.items():
+    bad[f"measurement_v26_{_name}.json"] = (measurement_v26(_fn), [_code])
+# contracts 2.6.0 statistical-result hardening (STH-T1): one fixture per new error code
+_COV = {"check": "toys", "method": "seeded toys (synthetic)", "n_toys": 1000, "coverage": 0.951, "cl": 0.95}
+bad["statres_v26_coverage_cl_mismatch.json"] = (statres_v26(coverage={**_COV, "cl": 0.68, "coverage": 0.69}), ["stats.coverage_cl_mismatch"])
+bad["statres_v26_coverage_interval_wide.json"] = (statres_v26(coverage={**_COV, "interval": [0.5, 0.99]}), ["stats.coverage_interval_inconsistent"])
+bad["statres_v26_p_zero.json"] = (statres_v26(significance={"local_p": 0.0, "local_z": 8.0}), ["stats.p_zero_without_bound"])
+bad["statres_v26_results_p_out_of_range.json"] = (statres_v26(results={"mu_95": 2.1, "cl": 0.95, "p0": 1.7}), ["stats.p_out_of_range"])
+bad["statres_v26_z_p_inconsistent.json"] = (statres_v26(significance={"local_p": 0.5, "local_z": 5.0}), ["stats.z_p_inconsistent"])
+bad["statres_v26_global_z_above_local.json"] = (statres_v26(significance={"local_p": 0.3, "local_z": 0.5244, "global_p": 0.4,
+                                                                          "global_z": 0.9, "trials_method": "toys", "global_n_toys": 1000}),
+                                                ["stats.global_z_above_local"])
+bad["statres_v26_construction_statistic.json"] = (statres_v26(construction="feldman-cousins", test_statistic="q0"),
+                                                  ["stats.construction_statistic_mismatch"])
+bad["statres_v26_model_sha256_malformed.json"] = (statres_v26(likelihood={"form": "poisson (synthetic)", "backend": "core.stats",
+                                                                          "model_sha256": "abc"}), ["stats.model_sha256_malformed"])
+
 
 # Valid (no error) but not usable as a final result: the validator reports these codes as `unresolved`.
 UNRESOLVED = {"statres_scan_no_global.json": (statres_v11("frequentist", significance=dict(SCAN)), ["stats.lee_missing"])}
@@ -287,12 +493,35 @@ d = communication_rich(); d["extension"]["claims"][0]["text"] = "The ratio estab
 d["extension"]["claims"][1]["evidence"] = []; del d["extension"]["claims"][1]["assessment"]; d["extension"]["claims"][1]["unresolved_inputs"] = ["the illustration artifact is not yet written"]
 UNRESOLVED["communication_traceability_pending.json"] = (d, ["communication.assessment_stale", "communication.assessment_missing"])
 UNRESOLVED["ml_domain_shift_missing.json"] = (ml_v25(domain_shift=None), ["ml.domain_shift_missing"])
+UNRESOLVED["measurement_v26_closure_missing.json"] = (measurement_v26(lambda d, e: e["backgrounds"][0].pop("closure")),
+                                                     ["measurement.background_closure_missing"])
+UNRESOLVED["measurement_v26_input_listed.json"] = (
+    measurement_v26(lambda d, e: (e.update(period="not-provided"), d.update(unresolved_inputs=["period: not provided yet"]))),
+    ["measurement.input_unresolved"])
 UNRESOLVED["ml_split_overlap_not_run.json"] = (ml_v25_splits(overlap_check={"tool": "check_split_integrity.py", "result": "not-run"}),
                                                ["ml.split_overlap_not_run"])
+UNRESOLVED["prediction_v26_unlinked.json"] = (prediction_v26(theory_spec_ref=None), ["prediction.spec_unlinked"])
+# contracts 2.6.0 statistical-result hardening (STH-T1): one fixture per new unresolved code
+UNRESOLVED["statres_v26_coverage_toys_too_few.json"] = (statres_v26(coverage={**_COV, "n_toys": 50, "coverage": 0.96}),
+                                                        ["stats.coverage_toys_too_few"])
+UNRESOLVED["statres_v26_expected_missing.json"] = (statres_v26(expected={"median": 1.2, "method": "toys"}), ["stats.expected_bands_missing"])
+UNRESOLVED["statres_v26_global_z_without_p.json"] = (statres_v26(significance={"local_p": 0.3, "local_z": 0.5244, "global_z": 0.1}),
+                                                     ["stats.global_z_without_p"])
+UNRESOLVED["statres_v26_seed_missing.json"] = (statres_v26(seeds=None), ["stats.seed_missing"])
+UNRESOLVED["statres_v26_gof_toys_missing.json"] = (statres_v26(goodness_of_fit={"statistic": "saturated-deviance", "p_value": 0.4,
+                                                                               "calibration": "toys"}), ["stats.gof_toys_missing"])
+UNRESOLVED["statres_v26_bayes_propriety_unsupported.json"] = (
+    statres_v26_bayes(priors=[{"parameter": "mu", "form": "uniform(0, inf)", "propriety": "yes"}]), ["stats.propriety_unsupported"])
+UNRESOLVED["statres_v26_bayes_poi_prior_missing.json"] = (
+    statres_v26_bayes(priors=[{"parameter": "bkg_norm", "form": "lognormal(0, 0.1)"}]), ["stats.poi_prior_missing"])
+UNRESOLVED["statres_v26_bayes_ess_too_low.json"] = (statres_v26_bayes(convergence={"rhat": 1.0, "ess_bulk": 30, "ess_tail": 25}),
+                                                    ["stats.ess_too_low"])
+UNRESOLVED["statres_v26_bayes_chains_missing.json"] = (statres_v26_bayes(sampler={"name": "metropolis (synthetic)", "draws": 4000}),
+                                                       ["stats.chains_missing"])
 
 
 def main() -> None:
-    for sub in ("valid", "invalid", "unresolved"):
+    for sub in ("valid", "invalid", "unresolved", "warning"):
         (OUT / sub).mkdir(parents=True, exist_ok=True)
         for f in (OUT / sub).glob("*.json"):
             f.unlink()
@@ -306,8 +535,12 @@ def main() -> None:
     for name, (doc, codes) in UNRESOLVED.items():
         (OUT / "unresolved" / name).write_text(json.dumps(doc, indent=1) + "\n")
         cases["unresolved"][name] = codes
+    cases["warning"] = {}
+    for name, (doc, codes) in WARNING.items():
+        (OUT / "warning" / name).write_text(json.dumps(doc, indent=1) + "\n")
+        cases["warning"][name] = codes
     (OUT / "cases.json").write_text(json.dumps(cases, indent=1) + "\n")
-    print(f"{len(VALID)} valid, {len(bad)} invalid, {len(UNRESOLVED)} unresolved fixtures")
+    print(f"{len(VALID)} valid, {len(bad)} invalid, {len(UNRESOLVED)} unresolved, {len(WARNING)} warning fixtures")
 
 
 if __name__ == "__main__":

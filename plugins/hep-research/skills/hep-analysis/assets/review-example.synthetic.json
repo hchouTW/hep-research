@@ -1,0 +1,106 @@
+{
+ "contract_version": "2.6.0",
+ "artifact_id": "synthetic-review-example-defective-spec",
+ "artifact_type": "measurement-spec",
+ "objective": "SYNTHETIC deliberately defective measurement spec for the worked review in references/review-and-artifacts.md; every value is invented",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.6.17",
+  "contracts": "2.6.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-analysis",
+  "created": "2026-10-13",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "estimand": "SYNTHETIC: the fiducial cross section of a placeholder dilepton process in bins of the dilepton mass, at particle level",
+  "observable": {
+   "quantity": "differential-cross-section",
+   "process": "synthetic placeholder dilepton process",
+   "variables": [
+    {
+     "name": "m_ll",
+     "unit": "GeV",
+     "edges": [
+      60.0,
+      80.0,
+      100.0,
+      120.0
+     ]
+    }
+   ],
+   "phase_space": {
+    "definition": "SYNTHETIC: two leptons with placeholder kinematic cuts",
+    "fiducial": true
+   },
+   "level": "particle-fiducial",
+   "frame": "laboratory",
+   "normalization": {
+    "kind": "integrated-luminosity",
+    "value": 10.0,
+    "unit": "fb^-1"
+   },
+   "bin_semantics": "bin-averaged",
+   "unit": "fb/GeV"
+  },
+  "species_or_process": "synthetic",
+  "period": {
+   "start": "synthetic-period-1",
+   "end": "synthetic-period-1"
+  },
+  "selections": [
+   {
+    "name": "two-leptons",
+    "definition": "SYNTHETIC: two isolated leptons",
+    "conditional_denominator": "unknown"
+   }
+  ],
+  "backgrounds": [
+   {
+    "name": "misidentified-leptons",
+    "estimator": "fake factor from simulation"
+   }
+  ],
+  "corrections": [
+   {
+    "effect_id": "lepton-efficiency",
+    "category": "identification_efficiency",
+    "applied_in": "estimator"
+   },
+   {
+    "effect_id": "lumi-scale",
+    "category": "luminosity",
+    "applied_in": "estimator"
+   },
+   {
+    "effect_id": "fake-rate",
+    "category": "fakes",
+    "applied_in": "estimator",
+    "value": 0
+   }
+  ],
+  "systematics": [
+   {
+    "name": "lepton-energy-scale",
+    "source": "SYNTHETIC: calibration",
+    "effect": "migration",
+    "applied_via": ""
+   }
+  ],
+  "blinding": {
+   "blinded": true
+  }
+ }
+}

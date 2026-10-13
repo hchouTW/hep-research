@@ -8,12 +8,13 @@ Environment:
   HEP_BATCH_SHIM_FAULTS  JSON file {chunk_id: [fault, ...], "_global": {tool: mode}}; each run of a chunk consumes
                          the first fault in its list, and an empty list means a normal run.
 Chunk faults (Slurm): exit (code), timeout, oom, node-failure, preempt, cancelled, requeue-duplicate (runs twice,
-the first record REQUEUED), vanish (no record anywhere), stuck (PENDING forever), native (state: any text).
-Chunk faults (HTCondor): exit (code), signal (signal), evict (evicted before output, then rerun), evict-after-output
+the first record REQUEUED), vanish (no record anywhere), stuck (PENDING forever), native (state: any text; "exit" and
+"derived" set ExitCode and DerivedExitCode).
+Chunk faults (HTCondor): exit (code), signal (signal), executable-error (event 002, no execution), evict (evicted before output, then rerun), evict-after-output
 (ran, evicted, ran again: a duplicate), hold (reason, code, subcode), remove, stuck (idle forever), vanish.
 Any fault may carry "node" (the execution host reported) and, for Slurm, "alloc_cpus" (AllocCPUS reported; default
 the requested --cpus-per-task, else 1) and "alloc_gpus" (gres/gpu in AllocTRES; default the requested --gpus, else
-none, as for a CPU job). Global modes: sacct unavailable|malformed, squeue
+none, as for a CPU job). Global modes: sacct unavailable|malformed, scontrol unavailable|<MaxArraySize>, squeue
 malformed, eventlog missing|malformed, condor_q malformed.
 
 Output formats are those the backends parse; each emitter names the documentation it follows (see the tool facts
@@ -132,7 +133,7 @@ def sbatch(argv: list) -> int:
 
         def rec(state, code="0:0", ran=True):
             task["records"].append({"state": state, "exit": code, "elapsed": "00:00:01", "rss": "20480K" if ran else "", "nodes": node, "ran": ran,
-                                    "alloc": alloc, "tres": tres})
+                                    "alloc": alloc, "tres": tres, "derived": fault.get("derived", code)})
 
         if kind == "vanish":
             del store["slurm"][key]
@@ -186,12 +187,30 @@ def sacct(argv: list) -> int:
             continue
         recs = task["records"] if dup else task["records"][-1:]
         if task["queue"] and not recs:
-            print(f"{key}|{task['queue']}|0:0|00:00:00||None assigned|0|")
+            print(f"{key}|{task['queue']}|0:0|00:00:00||None assigned|0||0:0")
         for r in recs:
             alloc, tres = r.get("alloc", "1"), r.get("tres", "billing=1,cpu=1,node=1")
-            print(f"{key}|{r['state']}|{r['exit']}|{r['elapsed']}||{r['nodes']}|{alloc}|{tres}")
+            derived = r.get("derived", r["exit"])  # DerivedExitCode: job rows only (step rows leave it empty)
+            print(f"{key}|{r['state']}|{r['exit']}|{r['elapsed']}||{r['nodes']}|{alloc}|{tres}|{derived}")
             if r["ran"]:
-                print(f"{key}.batch|{r['state'].split()[0]}|{r['exit']}|{r['elapsed']}|{r['rss']}|{r['nodes']}|{alloc}|{tres.removeprefix(f'billing={alloc},')}")
+                print(f"{key}.batch|{r['state'].split()[0]}|{r['exit']}|{r['elapsed']}|{r['rss']}|{r['nodes']}|{alloc}|{tres.removeprefix(f'billing={alloc},')}|")
+    return 0
+
+
+def scontrol(argv: list) -> int:
+    """scontrol show config: the lines the backend reads (format of scontrol(1), "show config"). _global
+    "scontrol": an integer MaxArraySize (default 1001, Slurm's default) or "unavailable"."""
+    mode = global_mode("scontrol")
+    if mode == "unavailable":
+        print("scontrol: error: Unable to contact slurm controller", file=sys.stderr)
+        return 1
+    if argv[:2] != ["show", "config"]:
+        print(f"scontrol: unsupported in the shim: {argv}", file=sys.stderr)
+        return 1
+    print("Configuration data as of 2026-10-13T00:00:00")
+    print("ClusterName             = shim")
+    print(f"MaxArraySize            = {int(mode) if mode else 1001}")
+    print("MaxJobCount             = 10000")
     return 0
 
 
@@ -342,6 +361,9 @@ def condor_submit(argv: list) -> int:
         elif kind == "hold":
             _event(log, "012", cluster, proc, "Job was held.", [fault["reason"], f"Code {fault['code']} Subcode {fault.get('subcode', 0)}"])
             st.update(JobStatus=5, HoldReason=fault["reason"], HoldReasonCode=fault["code"], HoldReasonSubCode=fault.get("subcode", 0))
+        elif kind == "executable-error":  # the starter could not execute the job (event 002), then the job is held
+            _event(log, "002", cluster, proc, "(1) Job file not executable.")
+            st.update(JobStatus=5, HoldReason="Error from starter: Failed to execute", HoldReasonCode=6, HoldReasonSubCode=2)
         elif kind == "remove":
             _event(log, "009", cluster, proc, "Job was aborted.", ["via condor_rm (by user shim)"])
             st["JobStatus"] = 3
@@ -423,7 +445,7 @@ def condor_version(argv: list) -> int:
     return 0
 
 
-TOOLS = {"sbatch": sbatch, "sacct": sacct, "squeue": squeue, "scancel": scancel, "condor_submit": condor_submit,
+TOOLS = {"sbatch": sbatch, "sacct": sacct, "scontrol": scontrol, "squeue": squeue, "scancel": scancel, "condor_submit": condor_submit,
          "condor_q": condor_q, "condor_history": condor_history, "condor_rm": condor_rm, "condor_version": condor_version}
 
 

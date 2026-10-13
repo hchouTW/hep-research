@@ -14,6 +14,10 @@ German, the special categories (AMS-mentioning computing, theory without experim
 underspecified, multi-turn) and the variants (adversarial: a tool is named but the deliverable belongs to another
 skill; quick: a short quick question). A multi-turn case lists later turns, each with its own expected skill and
 trigger terms, checked the same way.
+Language independence (STH-T4.6): trigger terms are required for English cases only; a non-English case may be a
+natural prompt ("natural": true) that reuses no run of NATURAL_NGRAM consecutive words of the expected skill's
+description, and every topic listed for a skill in the description-topics table of docs/routing-contract.md must stay
+named in that skill's "Use when" text.
 Also checks that no SKILL.md mentions a dispatch API. This is a static check of descriptions, not a live routing run.
 
 Usage: python3 tools/check_routing_static.py   Exit 0 all pass, 1 otherwise. Output: JSON.
@@ -32,6 +36,37 @@ LANGS = ("en", "zh-Hant", "zh-Hans", "ja", "de")
 VARIANTS = ("adversarial", "quick")  # a tool named for another skill's deliverable; a short quick question
 LIMITED = re.compile(r"no validated domain profile|domain without a validated profile", re.I)
 DISPATCH = re.compile(r"\b(dispatch|invoke_skill|call_skill|route_to)\s*\(", re.I)
+NATURAL_NGRAM = 4  # a natural prompt may not reuse this many consecutive description words
+TOPICS_MARKER = "<!-- description-topics: read by tools/check_routing_static.py -->"
+
+
+def description_topics() -> dict:
+    """{skill: [topic, ...]} from the description-topics table of docs/routing-contract.md."""
+    text = (ROOT / "docs" / "routing-contract.md").read_text(encoding="utf-8")
+    if TOPICS_MARKER not in text:
+        return {}
+    out = {}
+    for line in text.split(TOPICS_MARKER, 1)[1].strip().splitlines()[2:]:
+        if not line.startswith("|"):
+            break
+        cells = [c.strip() for c in line.strip("|").split("|")]
+        out[cells[0]] = [t.strip() for t in cells[1].split(";") if t.strip()]
+    return out
+
+
+def _words(text: str) -> list[str]:
+    return re.findall(r"[a-z0-9][a-z0-9'/-]*", text.lower())
+
+
+def reused_ngram(prompt: str, description: str, n: int = NATURAL_NGRAM) -> str | None:
+    """The first run of n consecutive description words that the prompt contains, else None."""
+    p = " " + " ".join(_words(prompt)) + " "
+    w = _words(description)
+    for i in range(len(w) - n + 1):
+        gram = " ".join(w[i:i + n])
+        if f" {gram} " in p:
+            return gram
+    return None
 
 
 def descriptions() -> dict:
@@ -75,8 +110,14 @@ def main() -> int:
                     errs.append(f"trigger '{t}' not in the {exp} description")
             if c.get("limited_support") and not LIMITED.search(d[exp]["body"]):
                 errs.append(f"{exp} SKILL.md lacks the limited-support notice")
-            if not c.get("trigger_terms") and not c.get("limited_support"):
-                errs.append("no trigger terms to check")
+            if not c.get("trigger_terms") and not c.get("limited_support") and c.get("lang") == "en":
+                errs.append("no trigger terms to check (required for English cases)")
+            if c.get("natural"):
+                if c.get("lang") == "en":
+                    errs.append("a natural prompt case is for a non-English request")
+                gram = reused_ngram(c["prompt"], d[exp]["use"])
+                if gram:
+                    errs.append(f"natural prompt reuses the description words '{gram}'")
             for o in c.get("also_accept", []):
                 if not c.get("limited_support"):
                     errs.append("also_accept is only for limited-support cases")
@@ -121,11 +162,19 @@ def main() -> int:
     langs = {c["lang"] for c in cases}
     coverage_errors += [f"no {lang} cases" for lang in LANGS if lang not in langs]
     coverage_errors += [f"no {v} case" for v in VARIANTS if not any(c.get("variant") == v for c in cases)]
+    topic_errors = []
+    for skill, topics in description_topics().items():
+        if skill not in d:
+            topic_errors.append(f"description-topics names unknown skill {skill}")
+            continue
+        topic_errors += [f"{skill}: topic '{t}' is not named in its description" for t in topics
+                         if t.lower() not in d[skill]["use"]]
     dispatch = [s for s in SKILLS if DISPATCH.search(d[s]["body"])]
     rep = {"cases": len(cases), "failed": [r for r in results if not r["ok"]], "coverage_errors": coverage_errors,
+           "topic_errors": topic_errors, "natural_cases": sum(1 for c in cases if c.get("natural")),
            "dispatch_api_mentions": dispatch, "languages": sorted(langs),
            "note": "static check only: descriptions cover the cases; a live routing run needs approval (paid model calls)"}
-    rep["ok"] = not rep["failed"] and not coverage_errors and not dispatch
+    rep["ok"] = not rep["failed"] and not coverage_errors and not dispatch and not topic_errors
     print(json.dumps(rep, indent=1, ensure_ascii=False))
     return 0 if rep["ok"] else 1
 

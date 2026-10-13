@@ -79,6 +79,20 @@ class GlsInputTests(unittest.TestCase):
         self.assertEqual(cm.combine(doc([[1.0, 0.0], [0.0, 1.0]], {"independent": True}))["status"], "combined")
         self.assertEqual(cm.combine(doc([[1.0, 0.3], [0.3, 1.0]], {"source": "alpha:norm"}))["status"], "combined")
 
+    @unittest.skipUnless(HAVE_NP, "numpy not installed")
+    def test_shipped_example_combines(self):
+        """STH-T2.6: assets/combine.example.json (SYNTHETIC) runs as documented."""
+        ex = PLUGIN / "skills" / "hep-statistics" / "assets" / "combine.example.json"
+        self.assertIn("SYNTHETIC", json.loads(ex.read_text())["note"])
+        proc = subprocess.run([sys.executable, str(SCRIPT), str(ex)], capture_output=True, text=True, timeout=120)
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        out = json.loads(proc.stdout)
+        self.assertEqual((out["status"], out["plan"]["treatment"], len(out["values"])), ("combined", "joint-gls", 3))
+        # each combined value lies between the two inputs (positive weights for a common correlated term)
+        d = json.loads(ex.read_text())["datasets"]
+        for x, a, b in zip(out["values"], d[0]["values"], d[1]["values"]):
+            self.assertTrue(min(a, b) <= x <= max(a, b), (x, a, b))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -122,5 +122,31 @@ class LookElsewhere(unittest.TestCase):
               "mean upcrossings at c0 = 1:", round(n_mean, 3))
 
 
+
+@unittest.skipUnless(HAVE_NP, "NumPy not installed")
+class MemoryBudgetSTH37(unittest.TestCase):
+    """STH-T3.7: chunks of toys sized from a memory budget; 200 scan points x 200 bins stay under 500 MB peak (the
+    fixed 2000-toy chunk needed about 640 MB per working array), with results independent of the budget."""
+
+    def setUp(self):
+        rng = np.random.default_rng(4)
+        self.b = np.full(200, 20.0)
+        x = np.arange(200) + 0.5
+        self.t = np.exp(-0.5 * ((x[None, :] - np.linspace(5, 195, 200)[:, None]) / 3.0) ** 2)
+        self.t /= self.t.sum(axis=1, keepdims=True)
+        self.n = rng.poisson(self.b, size=(2500, 200)).astype(float)
+
+    def test_peak_memory_and_identical_results(self):
+        import tracemalloc
+        tracemalloc.start()
+        q_default = le.q0_scan(self.n, self.b, self.t)
+        _, peak = tracemalloc.get_traced_memory()
+        tracemalloc.stop()
+        self.assertLess(peak / 2 ** 20, 500.0)
+        q_small = le.q0_scan(self.n[:300], self.b, self.t, budget_mb=16)
+        np.testing.assert_array_equal(q_small, q_default[:300])
+        self.assertEqual(le.chunk_size(200, 200, 256.0), int(256 * 2 ** 20 // (le.WORK_ARRAYS * 8 * 200 * 200)))
+
+
 if __name__ == "__main__":
     unittest.main()

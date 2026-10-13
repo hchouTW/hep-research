@@ -365,7 +365,7 @@ def main(argv=None) -> int:
                 raise ValueError("--min-ess-fraction must be in (0, 1)")
             res, code = reweight(json.loads(Path(args.input).read_text(encoding="utf-8")), args.min_ess_fraction)
         else:
-            if args.n < 0 or args.b < 0 or args.chains < 1 or args.draws < 1 or not 0 < args.cl < 1:
+            if args.n < 0 or not (math.isfinite(args.b) and args.b >= 0) or args.chains < 1 or args.draws < 1 or not 0 < args.cl < 1:
                 raise ValueError("need n >= 0, b >= 0, chains >= 1, draws >= 1, 0 < cl < 1")
             x = demo_sampler(args.n, args.b, args.chains, args.draws, args.seed)
             diag = diagnose({"s": x}, (args.cl,), 1.01, 100)

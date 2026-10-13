@@ -4,6 +4,7 @@
  "properties": {
   "observable": {"$ref": "common.json#/$defs/observable_spec"},
   "theory_spec_ref": {"type": "string"},
+  "derivation_status": {"type": "string", "x-vocab": "derivation_statuses"},
   "parameter_point": {"type": "object"},
   "representation": {"type": "string", "enum": ["symbolic", "numerical", "grid"]},
   "values": {"$ref": "common.json#/$defs/binned_data"},

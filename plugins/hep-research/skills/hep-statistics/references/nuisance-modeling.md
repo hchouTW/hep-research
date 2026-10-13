@@ -53,7 +53,7 @@ pyhf 0.7.6 (read from the installed source, `pyhf/interpolators/`, 2026-10-03):
 | `normsys` | `code1` | exponential: `(hi)^theta` for `theta >= 0`, `(lo)^(-theta)` below | same |
 | `normsys` | `code4` (Model default) | 6th-order polynomial matching value, first and second derivative at `+-1` | exponential, as `code1` |
 | `histosys` | `code0` | piecewise linear: `theta (hi - nom)` above 0, `theta (nom - lo)` below (kink at 0) | linear |
-| `histosys` | `code4p` (Model default) | `theta S + theta^2 (3 theta^4 - 10 theta^2 + 15) A` with `S = (d+ + d-)/2`, `A = (d+ - d-)/16` | linear |
+| `histosys` | `code4p` (Model default) | `theta S + theta^2 (3 theta^4 - 10 theta^2 + 15) A` with `S = (d+ + d-)/2`, `A = (d+ - d-)/16`, `d+ = up - nom`, `d- = nom - down` (pyhf 0.7.6 `interpolators/code4p.py`) | linear |
 
 `pyhf.Model` uses `code4`/`code4p` unless `modifier_settings` says otherwise; the modifier classes alone default to
 `code1`/`code0`. `core/stats/likelihood_limits.py shape-limit` implements the same codes (`hi`/`lo` normalization
@@ -130,7 +130,15 @@ for an asymmetric one by 3%. The difference grows with the asymmetry and with ho
   separate results. A single Gaussian nuisance interpolating between two non-nested functions is not a model of
   either and is not acceptable when the alternatives differ in shape.
 - A spurious-signal test (fit a signal on a background-only model of each alternative) measures the bias a choice
-  induces; its size and the criterion for accepting a function are fixed before looking at the data.
+  induces; its size and the criterion for accepting a function are fixed before looking at the data. A common
+  criterion accepts a function when the fitted spurious signal stays below a stated fraction of the statistical
+  uncertainty of the signal (or of the expected signal) over the mass range; the fraction is a convention to state,
+  not a derived number.
+- **Discrete profiling** (Dauncey, Kenzie, Wardle and Davies, arXiv:1408.6865): the choice among background
+  functions is a discrete nuisance; the profile at each value of the parameter of interest is the envelope (minimum)
+  over the functions of `-2 ln L` plus a penalty per free parameter fixed in advance (one unit of `-2 ln L` per
+  parameter is the usual choice). Its coverage must be checked with toys from several functions in the family and
+  from one outside it; `skills/hep-statistics/scripts/discrete_profile.py` (EXPERIMENTAL) runs that study.
 
 ## MC statistics
 
@@ -144,8 +152,20 @@ for an asymmetric one by 3%. The difference grows with the asymmetry and with ho
   factor to `multibin-limit`, `shape-limit` and `contour`. Use the lite form
   when one template dominates each bin; when several small-statistics templates share a bin, check the full form.
 - One statistical source gets one treatment: never `staterror` and `shapesys` (or a Barlow-Beeston term) on the same
-  MC sample. Bins with zero nominal yield and non-zero MC uncertainty need an explicit convention (pyhf does not
-  supply one: check the tool's behavior and state the choice).
+  MC sample. Bins with zero nominal yield need an explicit convention: pyhf 0.7.6 sets the relative error to 0 there and fixes
+  that bin's `staterror` gamma (`modifiers/staterror.py`); other tools differ, so state the choice.
+- Default constraint of the MC-statistics term: pyhf `staterror` is Gaussian (`constrained_by_normal`, pyhf 0.7.6
+  `modifiers/staterror.py`), while ROOT HistFactory's StatError defaults to a Poisson constraint, applied to bins whose relative MC
+  uncertainty exceeds 5% (`StatErrorConfig` in `RooStats/HistFactory/Measurement.h`); Combine's
+  `autoMCStats` is Barlow-Beeston-lite with its own threshold ([Combine docs](https://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/latest/)).
+- **Combine `autoMCStats`** (datacard line `[channel] autoMCStats threshold [include-signal] [hist-mode]`, Combine
+  v11 documentation, "Automatic statistical uncertainties"): per bin it forms the effective number of unweighted
+  events `n_eff = n_tot^2 / e_tot^2` from the summed background yields and their errors in quadrature; above the
+  threshold one Gaussian Barlow-Beeston-lite parameter scales the bin's total yield, at or below it every process gets
+  its own Poisson-constrained parameter (Gaussian when its error exceeds its yield); signal is included in the test
+  only with `include-signal = 1`, and bins with zero total error are skipped. The threshold is a required argument;
+  state it.
+  The same workspace can give different likelihoods across tools for this reason alone.
 
 ## Smoothing, symmetrization and pruning
 
@@ -186,7 +206,10 @@ Run after every fit that is used for a result, and after each pruning, smoothing
 - **Ranking** by post-fit impact shows what drives the result; it is not a pruning criterion on its own.
 - **Grouped breakdown.** Freeze a group at its best-fit values and quote `sqrt(sigma_total^2 - sigma_frozen^2)`. The
   result depends on the method (freeze one group, or freeze sequentially) and on the order; report the method, the
-  order and the closure of the quadrature sum against the total.
+  order and the closure of the quadrature sum against the total. Group contributions are not additive in general:
+  correlated nuisances share variance, so the quadrature sum of the groups need not equal the total. Impacts are not
+  uncertainty components either: Pinto et al. (arXiv:2307.04007) show that impacts are not adequate for a breakdown
+  of the total uncertainty and give a method for the actual components; say which quantity a table shows.
 - **Correlations.** List nuisance pairs with large `|rho|` (a stated threshold); `|rho|` near 1 means two nuisances
   describe the same direction and only their combination is measured.
 - A refit that fails is a `failed` entry, never a silently missing row.

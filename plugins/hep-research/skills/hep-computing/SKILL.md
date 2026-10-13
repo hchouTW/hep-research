@@ -5,7 +5,7 @@ description: "Use when the deliverable is working, reproducible scientific softw
 
 # hep-computing: scientific software and execution
 
-**Owns:** scientific software, symbolic and numerical execution, builds, I/O, debugging, performance, manifests, partition/merge/recovery, reproducibility, advisory blinding checks of outputs, logs and caches (enforcement lies outside the agent), research-task authoring; stewardship of `core/blinding`.
+**Owns:** scientific software, symbolic and numerical execution, builds, I/O, debugging, performance, manifests, partition/merge/recovery, reproducibility, advisory blinding checks of outputs, logs and caches (enforcement lies outside the agent), research-task authoring; stewardship of `core/blinding` and `core/partition`.
 **Typical artifacts:** code, `computational-run` (inputs with checksums, tool versions, commands, environment, seeds, tolerances, exit status, output hashes), output audits.
 **Never:** treat a successful run as scientific validity; install software system-wide or fetch from the network without the user's approval or beyond the session's egress policy (queries never carry protected content).
 
@@ -15,7 +15,7 @@ description: "Use when the deliverable is working, reproducible scientific softw
 - Record what is needed to reproduce: input checksums, tool and library versions, exact commands, seeds, tolerances, environment.
 - Partitioned work uses a manifest: no duplicate events or chunks on resubmission, missing work detected, merged and single-run results agree within a declared tolerance. Automatic retries only with a configured maximum attempt count; absent config means no retries; repeated identical failures stop with state retained.
 - Blinded values never appear in plots, logs, caches, or reports produced by the code.
-- Scripts locate their files from their own path, take an explicit output directory, emit an exit code plus a JSON status, and explain missing optional dependencies.
+- Scripts locate their files from their own path, write only to output paths they are given (creating or cleanly refusing folders), print JSON with a `status` key (interactive ROOT viewers on `--json`; the `inspect_root_file.C` macro is exempt), explain missing optional dependencies, and exit 0 ok, 1 negative verdict, 2 bad input, 3 missing dependency or incomplete.
 - Changes are small and verifiable: state acceptance criteria and how they were checked; keep diffs surgical.
 - Failures (missing tools or licenses, nonconvergence, invalid outputs) are explicit statuses passed downstream.
 

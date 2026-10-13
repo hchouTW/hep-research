@@ -3,6 +3,354 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+Contracts 2.6.0 (minor: theory-spec, prediction, measurement-spec and statistical-result hardening rules; optional
+fields only; every 2.5.0 artifact keeps its default outcome and gets the new rules with `validate.py --strict`, at the
+same level, and at the publication gate; no new capability).
+
+### hep-theory
+
+- **theory-spec and prediction semantics (contracts 2.6.0).** `ext_theory_spec.json` gains optional `limit`,
+  `neglected`, `computational_run_ref`, `degenerate_directions`, `model.family`, `checks_run[].tolerance` and
+  `references_read[].date_read`; `ext_prediction.json` gains `derivation_status`; `uncertainty_component` gains
+  `prescription`, `method` and per-bin `bounds`. New core vocabularies `envelope_prescriptions`, `truncation_methods`
+  (including `not-estimated`) and `check_results`. New checks (native from 2.6.0): an `observed` prediction, or a
+  `validated-in-scope` one without a linked theory-spec input carrying that status, a perturbative argument without
+  an order, an asymptotic argument without a limit, a formal proof or analytic derivation with no check run, a check
+  result outside the vocabulary, an empty validity domain, a scale envelope without a prescription or with values
+  that are not one [min, max] pair (or bounds that do not match the bins), and a `cosmic-ray-propagation` model
+  without degenerate directions are errors; a prediction with neither `theory_spec_ref` nor `derivation_status` is
+  unresolved; a missing core convention key and a truncation without a method are warnings.
+- **Scripts refuse what used to give a wrong number.** `pdf_uncertainty.py` accepts `symmhessian+as`, `hessian+as`
+  and `replicas+as` (the last two members are alpha_s down and up, reported as a separate `alphas` object; PDF4LHC21
+  Eqs. 6.7-6.8), checks `num_members`, offers `--combine-alphas quadrature` (labelled a prescription) and
+  `--symmetrize`, and refuses non-finite members. `eft_truncation.py` refuses `a*b` given with `b*a`, keys that are
+  not one pair, blank conventions, an empty operator list, `lambda_tev` <= 0 (was a `ZeroDivisionError`) and
+  non-finite numbers, requires `cross_term_convention` for off-diagonal terms, runs the promised rescaling check and
+  reports the flag fraction's source. `event_weights.py` refuses negative, out-of-range, repeated and non-integer
+  selected indices (an `IndexError` and Python wrap-around before), non-positive cross sections, negative luminosity
+  and non-finite weights, and reports the selected sum of weights, sum of squares, effective sample size and relative
+  statistical uncertainty. `dis_kinematics.py` refuses points outside the exact lepton-mass bounds y_max and
+  Q^2_min(y), reports them, and accepts a target at rest.
+- **References.** New `amplitudes-and-widths.md` (phase space and widths from the PDG Kinematics review, narrow-width
+  conditions, Breit-Wigner and complex-mass scheme), `selection-rules.md` (procedure, conserved quantities,
+  Landau-Yang, Furry, helicity suppression, G-parity) and `regularization-and-schemes.md` (CDR/HV/FDH/DRED, gamma_5,
+  beta and gamma_m normalizations, pole vs MS-bar, IRC safety). `cosmic-ray-propagation.md` gains kinematics (pointing
+  to `core/kinematics/relativistic.py`), the force-field formula with its source and limits (code stays in
+  hep-analysis), and antiproton source-term conventions. Each statement cites an opened source with its location and
+  read date, or says `unverified`.
+- **New theory profile `theory:higgs-bb-width`.** Gamma(H -> b bbar) with the MS-bar running b mass through
+  alpha_s^4, the running of mass and coupling derived and checked mu-independent order by order in exact arithmetic,
+  and the scale envelope, truncation estimate and parametric alpha_s and m_b variations kept apart.
+- Routing cases for selection rules and a scheme conversion (en, zh-Hant). The committed theory examples
+  (`qed-prediction`, `theory-comparison`, `recasting`) are written at contracts 2.6.0 with the added fields; their
+  numbers are unchanged.
+
+### hep-computing (remediation CMP-01…CMP-28)
+
+- **CMP-01 partition state lock.** `core/partition/engine.py` `run()`, `reset()` and `merge()` hold an exclusive,
+  non-blocking lock on `<state>/.lock` (`dir_lock`, shared with `campaign_lock`, so campaign calls still nest); a second
+  process gets `PartitionError("partition.locked")`, and `local_partition.py` prints it as a JSON `error` with
+  `code`, exit 2. `status` stays lock-free. Tests: `tests/core/test_partition_robustness.py`.
+- **CMP-02 atomic chunk writes.** `_write_atomic` serializes first, flushes and fsyncs, and removes its `.tmp-*` file on
+  any failure. A worker result that is not JSON-serializable is a failed attempt with signature
+  `unserializable-result` (counted; the run continues) instead of a `TypeError` out of `run()`; `merge` ignores dotfiles
+  in `chunks/`. A chunk that uses its last attempt is marked `attempts-exhausted` by that same call, not `failed` (Q5).
+- **CMP-03 manifest checked by every subcommand.** `local_partition.py status`, `merge` and `reset` validate the
+  manifest first (a list or a dict without `chunks` exits 2 with a JSON `error`, no traceback); `reset` writes nothing
+  before validation and refuses a state folder of another manifest (`engine.reset(..., manifest=)`) or an unknown chunk.
+- **CMP-04 seal only what public data do not reveal (Q3 option a).** `core/blinding` `seal()` drops exact zero and every
+  number equal (relative 1e-9, sign ignored) to one the unblinded bins give alone: a sum over any run of unblinded
+  bins, the sideband total, or their square roots. A blinded empty bin no longer makes `job finished: 0 errors` or a
+  public sideband CSV a leak; a nonzero blinded value is still found. When nothing is left, `audit_blinded_outputs.py
+  seal` writes `nothing_sealable: true` and `scan` accepts the empty list. `NOT_SEALED` names both exclusions.
+  `tests/core/test_stats_edge_cases.py` updated: 0 is no longer sealed. Tests: `tests/core/test_blinding_regressions.py`.
+- **CMP-05 unreadable numpy caches are unscanned.** An object `.npy`, a pickled or non-zip `.npz` and a corrupt zip
+  `.npz` (`BadZipFile`) are listed as unscanned: the scan ends `incomplete`, exit 3, instead of exit 2 or a traceback
+  with exit 1 (reserved for a found leak).
+- **CMP-ANA-P2-7 (core part of hep-analysis audit P2-7) masking fails closed.** `mask_ratio` refuses numerator,
+  denominator and mask of different lengths (`zip` truncated them: a 2-entry reference against 4 bins gave a 2-entry
+  ratio); `mask_binned`, `mask_ratio` and `seal` refuse strings, booleans and non-finite numbers; `mask_binned(...,
+  errors=)` masks an error array with the values' mask; `flow=True` (in `blinded_mask`, `mask_binned`, `seal`) adds
+  underflow and overflow bins, blinded when the region reaches past the first or last edge. The script
+  `mask_blinded_bins.py` is unchanged here (hep-analysis branch).
+- **CMP-06 `compare_root_histograms.py` is a comparison.** Tolerances `--abs-tol`, `--rel-tol` (default 1e-9) and
+  optional `--sigma-tol` (difference over combined bin errors); edges checked on every axis; TH2/TH3 compared per
+  (x, y, z) bin in ROOT numbering; worst bin by absolute difference, relative difference and pull reported separately;
+  one JSON object with `status`; uproot backend when PyROOT is absent (`--backend`). Exit 0 within tolerance, 1 outside
+  or shape/edge mismatch (no traceback), 2 bad input, 3 no backend. Tests: `tests/skills/hep_computing/test_compare_histograms.py`
+  (uproot, E2); `test_root_integration.py` now parses the JSON (PyROOT).
+- **CMP-07 `environment_manifest.py` drift, inputs, project, output.** Records `system` (OS family, architecture,
+  libc: compared; kernel release: a note only) instead of comparing `platform.platform()`; also compares `executable`
+  and `machine`. `record --inputs FILE...` writes `input_manifest` (`path`, `sha256`, `size`; validates as a
+  `computational-run`), `check` reports changed or missing inputs and, with `--project`, a changed commit or a dirty
+  checkout. `--out` creates parent folders; an unwritable output is a JSON error, exit 2; `record` prints a JSON
+  `status` (`recorded`). `references/environments-and-containers.md` updated.
+- **CMP-08 script contract (Q4).** Every Python and shell script of the skill prints JSON with a `status` key (the
+  ROOT viewers `inspect_root_file.py`, `summarize_histogram_statistics.py`, `roofit_workspace_summary.py`, plus
+  `lint_task.py`, `check_root_cpp_env.sh` and the maintenance validators on `--json`; human text stays the default),
+  exits 0/1/2/3 (3: missing optional dependency or incomplete; PyROOT missing was exit 1), and refuses an unwritable
+  output without a traceback (`create_story_card.py`, `generate_skill_example.py`, `make_synthetic_nanoaod.py`
+  now create folders). `local_partition.py` adds a uniform `status` (planned, complete, incomplete, error);
+  `audit_histograms.py` adds `status` and exits 2 on an unreadable file. `inspect_root_file.C` is exempt by name.
+  `SKILL.md` invariant 5 and the playbook state the contract; the per-script table is in the skill `README.md`.
+- **CMP-09 `new_root_cpp_project.sh` target, overwrite, name.** `--dir DIR` (default `./NAME`); NAME must match
+  `^[A-Za-z_][A-Za-z0-9_]*$` before it enters `project(...)` (`bad name`, `../x`, an absolute path exit 2); an
+  existing non-empty target is refused (exit 2) unless `--force`; the generated program writes `output.root` and
+  `pt.pdf` into an output folder argument (default `output/`); the CMake file links imported `ROOT::` targets and
+  takes the standard from `ROOT_CXX_STANDARD`; the build hint is quoted; `--json`. The generated project configures
+  and builds against Homebrew ROOT 6.38.04 (test skipped without cmake and ROOT).
+- **CMP-10 `check_root_cpp_env.sh` private temporary folder.** `mktemp -d "${TMPDIR:-/tmp}/root_cpp_check.XXXXXX"`
+  replaces `$TMPDIR/root_cpp_check.$$` (and no longer reassigns `TMPDIR`); the trap removes it; the test program takes
+  `-std` from `root-config --cflags` only. Two parallel runs do not collide and leave nothing behind.
+- **CMP-11 `lint_task.py` cited paths stay inside the repository.** Each cited path is resolved (`..` and symbolic
+  links followed) and must stay under `--repo` (or the skill root for the fallback); one that escapes is an error
+  "path leaves the repository" (an `src/` + 14×`../` + `etc/asl.conf` path was accepted as existing). A path starting
+  with `../` is a warning instead of a silent skip; in-repo paths with `..` still pass.
+- **CMP-12 robustness test asserts the contract.** `tests/skills/test_cli_robustness.py` gains
+  `HepComputingScriptContractTests`: every hep-computing script (both `.sh` included; `inspect_root_file.C` exempt by
+  name) must print one JSON object with `status` and the documented exit code for a missing input, a refused target
+  and an output path that cannot be created (22 cases fail on c1d375c, including the four output-path tracebacks).
+- **CMP-13 `root-balanced-design-guidelines.md` corrections.** R1: writing to a `TFile` does not need `TObject`
+  (`WriteObject`/`Get<T>` for any class with a dictionary; non-`TObject` branches); `TObject` is for `TList`/`TObjArray`
+  containers, `TObject*` APIs and directory registration. R2: `ClassImp` is not needed in ROOT 6; `ClassDefOverride`
+  only adds `override`; `#pragma read` rules instead of a hand-written `Streamer()`. R3: one baseline, C++17, `-std`
+  from `root-config --cflags`. R4: the double delete is order-dependent (`~TH1` deregisters); the hazard is a smart
+  pointer outliving its file; callers own non-registering `Get` results (`TGraph`, `TF1`, `TCanvas`, `TVectorD`);
+  `TH1::AddDirectory(kFALSE)`; `RResultPtr` ownership; the demo now compiles (checked against ROOT 6.38.04). R5:
+  `gRandom` in `Define` under IMT, `DefineSlot`, eager `Snapshot` unless `fLazy`, `Range` unsupported with IMT,
+  non-deterministic order and sums. R6: "CINT" dropped. R7: one rule each for naming, non-owning members (pointer),
+  `std::filesystem` and exceptions, stated once at the top.
+- **CMP-14 `cmake-and-build.md` imported targets, one C++ baseline (Q2).** The minimal project links
+  `ROOT::RIO ROOT::Tree ROOT::Hist ROOT::Gpad ROOT::ROOTDataFrame` and sets the standard from `ROOT_CXX_STANDARD`
+  (no `ROOT_INCLUDE_DIRS`/`ROOT_LIBRARIES`, no second `-std`); configures, builds and runs against Homebrew ROOT
+  6.38.04 with CMake 4.3.2. `cpp-balanced-design-guidelines.md` now states the same C++17 baseline and marks its
+  C++20 examples "C++20 only".
+- **CMP-15 `bash-balanced-design-guidelines.md`.** B1: sourcing `thisroot.sh`, an LCG `setup.sh` or `module load`
+  under `set -u` fails; wrap in `set +u` … `set -u`. B2: `"${arr[@]}"` on an empty array fails under `set -u`
+  before Bash 4.4 (macOS `/bin/bash` 3.2; checked on 3.2.57), with the `${arr[@]+"${arr[@]}"}` guard. B3: no
+  `/var/lock` (root-owned, node-local) and no `flock` on NFS/EOS/AFS/Lustre; lock in local scratch. B4: the EXIT
+  trap does not stop children; forward SIGTERM to the child and `wait` (preemption), exit 143; checked on Bash 3.2.
+  B5: the bad-comment example no longer uses `((i++))`.
+- **CMP-16 `python-hep-coding-patterns.md`.** P1: `with ROOT.TFile.Open(...) as f:` / `with uproot.recreate(...)`
+  instead of "close output files explicitly", consistent with the Python guidelines. P2: `ROOT.SetOwnership` and the
+  pitfall of a histogram drawn in a helper vanishing from the canvas. Checked with PyROOT 6.38.04.
+- **CMP-17 new reference `crash-and-memory-debugging.md`.** Decision rules (reproduce, shrink to one thread and few
+  events, first frame in own code, symbols, stop rule), ROOT's stack trace and `gDebug`, gdb/lldb on `root.exe`,
+  valgrind with `$(root-config --etcdir)/valgrind-root.supp`, ASan/UBSan through CMake and their limits with ROOT,
+  ACLiC `+g` and the stale-library pitfall, a crash-cause table, and leak triage (RSS against events with
+  `gSystem->GetProcInfo`, `gObjectTable`, the directory that holds histograms, jitted RDataFrame strings). Linked
+  from `root-debugging.md` and a new "References of the hep-computing skill" section in the playbook.
+- **CMP-18 new reference `performance-profiling.md`.** Target in the acceptance criteria and a stop rule; wall time
+  and peak RSS first; `perf record -g`, `cProfile`, `py-spy`; RDataFrame one loop (`GetNRuns`, checked 1 then 2),
+  `RunGraphs`, IMT and jitting caveats, lazy `Snapshot`; `TTreePerfStats`, cluster and basket sizes (default
+  auto-flush 30 MB), branch selection, compression; uproot `expressions`/`filter_name` and `step_size`; batch sizing.
+- **CMP-19 new reference `symbolic-and-numerical-computation.md`.** SymPy assumptions, the limits of `simplify`, a
+  numeric identity check at random points, `lambdify`, exact rationals; `quad` error estimates, endpoint
+  singularities, `points`, a narrow peak missed silently (and still with `points`) until the range is split,
+  infinite and oscillatory ranges; `solve_ivp` method choice (RK45 729,668 against Radau 726 evaluations on a stiff
+  system), `rtol`/`atol`, the rtol/10 check, events, status; `brentq`, `minimize` status. Every number from a run
+  with SymPy 1.14.0 and SciPy 1.18.1; points to `find_python.py` and the validation ladder.
+- **CMP-20 current stack.** `root-balanced-design-guidelines.md` gains "RNTuple and current RDataFrame features":
+  RNTuple versus TTree (format 1.0 final since 6.34, types in `ROOT::` since 6.36; read by RDataFrame and by uproot
+  5.7.6), `Vary`/`VariationsFor`, `DefinePerSample`, `FromSpec`, `DefineSlot`/`rdfslot_`, distributed RDataFrame with
+  `executor=` (6.36; the `Experimental` path removed in 6.38), `AsNumpy`/`FromNumpy`; all run with ROOT 6.38.04 and
+  cited to the 6.34/6.36 release notes. `python-hep-coding-patterns.md` gains link-level guidance for hist and
+  boost-histogram, vector, correctionlib, coffea, dask-awkward and numba. `performance-profiling.md` notes the 6.38
+  `Snapshot` compression default (505).
+- **CMP-22 Slurm `MaxArraySize` preflight.** `slurm_backend.py` reads `MaxArraySize` from `scontrol show config`
+  before `sbatch` and refuses (`slurm.array.too_large`, attempts not-submitted, no `sbatch` call) an array whose
+  largest index is not below it; an unreadable value leaves the decision to `sbatch`. New fake `scontrol` in
+  `tests/adapters/batch_shims/`; tool facts table row added. Tests: `tests/adapters/test_batch_cmp_regressions.py`.
+  (Also: the CMP-07 git test no longer uses an e-mail-shaped placeholder, which the packaging check flags.)
+- **CMP-23 Slurm `DerivedExitCode`.** `SACCT_FIELDS` gains `DerivedExitCode`; a job row `COMPLETED 0:0` with a
+  nonzero derived code (a failed `srun` step) is `failed` with the derived exit code and `failure_reason`
+  `derived-exit`. `core/partition/states.signature` appends `reason=<failure_reason>` when a backend sets one (older
+  records keep their signature), and `campaign._apply` carries the field. 8-field sacct recordings still parse. The
+  fake `sacct` emits the field; `examples/batch-partition/output/results.json` regenerated (the new `scontrol` call
+  count from CMP-22, nothing else changed).
+- **CMP-24 HTCondor event 002.** `parse_event_log` maps event 002 (error in executable) to `failed` with
+  `failure_reason` `executable-error` (signature `...|reason=executable-error`) instead of leaving the job queued and
+  asking `condor_q`; a later hold event still wins. The fake `condor_submit` gains an `executable-error` fault.
+- **CMP-21 bookkeeping.** `SKILL.md` Owns names `core/blinding` and `core/partition`; skill README counts (thirty-two
+  references, twelve test modules) and links to the new references; three static routing cases (`co-cmp-crash-1`,
+  `co-cmp-perf-1`, `co-cmp-ode-1`, all hep-computing, triggers from the existing description) in
+  `tests/routing/make_cases.py`, `cases.json` regenerated; capability-matrix rows for blinding, local partition,
+  ROOT tools, task authoring and the environment manifest updated; VALIDATION section CMP-REMEDIATION.
+- **CMP-25 design guidelines consolidated (Q1).** `root-balanced-design-guidelines.md` keeps the ROOT-specific rules
+  (TObject or plain C++, dictionaries and I/O, directory ownership, ROOT globals, errors at the ROOT boundary,
+  dictionary limits of templates, naming/comments/file headers for every language, build layout, RDataFrame and
+  RNTuple patterns, checklist) and the shared conventions; the generic class/struct/inheritance/state/testing
+  sections and the toy examples are gone. `cpp-`, `python-` and `bash-balanced-design-guidelines.md` are checklists
+  around HEP failure modes with grep-able anti-pattern tables; the CMP-13..15 rules are kept. Four files: 4,573 →
+  1,028 lines; file names and linked anchors unchanged. `docs/reference-consolidation.md` records P1 as executed.
+- **CMP-26 off-domain material moved (Q1, Q6).** `product-framing.md` moved to `docs/dev/engineering/` (`git mv`);
+  the playbook's New Endpoint, UI Feature, Database Migration and Incident Response sections, the Sprint planning
+  and Feature flags sections of `design-and-estimation.md` and the Accessibility section of `risk-and-quality.md`
+  moved to `docs/dev/engineering/web-and-delivery-practices.md`, with a one-line pointer at each old place and the
+  skill's links re-pointed. `prompt-engineering-and-token-optimization.md` stays (the bundle validator and the task
+  guide require it). The skill now has thirty-one references.
+- **CMP-27 deferred (Q1).** The six task- and example-authoring scripts stay in `skills/hep-computing/scripts/`:
+  task and example authoring remain in the skill's scope.
+- **CMP-28 physics-code worked example.** `examples/physics-code-task.md`: prove that the RDataFrame cutflow asset
+  reproduces a `TTreeReader` event loop bin for bin (zero-tolerance `compare_root_histograms.py`, bin errors
+  compared separately, single- and multithreaded, deliberate mutations must fail); passes `lint_task.py --repo` and
+  the example tests; listed in `examples/README.md`.
+
+### hep-analysis
+
+- **Flux bin-width unit.** `cosmic_ray_flux.py` requires `--bin-width-unit {GV,GeV,GeV/n,TeV,TV}` and echoes
+  `bin_width_unit`; the guide's check-first row passed a 1.2-1.8 TV bin as 0.6, which makes a flux per GV 1000x too
+  large (now: 600 GV). Detector-response commands and the tool contract follow.
+- **Bounded flux intervals.** `cosmic_ray_flux.py` now reports an interval on the signal mean s >= 0 from core/stats:
+  Garwood for any count (the 500 ceiling is gone), Feldman-Cousins for a known background, Cousins-Highland by
+  default for an uncertain one (labelled approximate), `--method profile-fc --toys --seed` for publication use. No
+  bound is negative; `flux_upper_limit` when the lower end is 0. The old subtraction is `--method naive`
+  (approximate, clipped at 0). Above the FC grid limit it exits 3 and names the alternative. New
+  `--exposure-rel-uncertainty` gives `flux_syst_exposure`.
+- **One CLI contract.** All twelve scripts take `--status` (core statuses; tables also `published`) and report it;
+  exit codes 0 ok, 1 finding or failed computation, 2 invalid input or usage (NaN, inf, malformed files), 3
+  incomplete; one-line errors, no tracebacks. `make_yield_table.py` requires `--status`;
+  `check_systematic_variations.py` defaults to JSON.
+- **One spec format.** `assets/analysis-contract.yaml` and `systematics-config.example.yaml` are removed; new
+  `assets/measurement_spec.template.json` (validates with `--strict`) and its field guide. `systematics.csv` uses the
+  spec's systematics ledger columns; `systematics_table_tex.py` renders them.
+- **measurement-spec semantics (contracts 2.6.0).** `MEASUREMENT_SEMANTICS_FROM = "2.6.0"`: estimand sentence,
+  complete observable (phase space, frame, unit and binning), conditional denominators, backgrounds with estimator,
+  control region or constraint and closure, each correction once from the controlled categories (factorized
+  efficiencies allowed), no zero for unknown, systematics with `applied_via` and unique names, missing markers listed
+  in `unresolved_inputs`, blinded specs with a mask and without `observed` status, ratio blocks, ordered periods,
+  misspelled keys. New optional schema fields: `estimand`, `no_backgrounds_reason`, background `control_region`,
+  `constraint`, `closure`, correction `exact_zero`, blinding `mask` and `unblinding_record_ref`. The 30-mutation probe
+  went from 30 silent passes to 2 (both by design). `validate.py` accepts flags before the artifact path. Example
+  specs gain an estimand and drop the double-listed luminosity and exposure corrections.
+- **Review procedure.** New `references/review-and-artifacts.md` (verdict scale `blocked` / `needs-work` /
+  `acceptable-with-open-inputs`, output order, checklist, measurement brief, worked review of a synthetic defective
+  spec) and `assets/measurement-review-template.md`; the AMS module links it.
+- **Correlations.** One rule in SKILL.md, README, references, routing contract (new ownership row `correlation
+  evidence`) and the hep-statistics handoff line: hep-analysis supplies the evidence and a proposed scheme,
+  hep-statistics encodes it and checks positive semidefiniteness.
+- **Guide re-scoped** (219 to 106 lines): code-level material (API selection, pipelines, code-file requirement, the
+  RDataFrame normalization code) moved to `skills/hep-computing/references/analysis-data-pipelines.md`;
+  `data-pipelines.md` is a pointer; link checker test for `skills/hep-analysis/**/*.md`.
+- **Physics corrections** with primary sources: solar cycle 24 phases (SILSO), cutoff selection rule and exposure
+  formula, sigma(Xmax) for p and Fe (Kampert & Unger 2012), ratio cancellation, trials (Gross & Vitells 2010), Garwood
+  N = 0 footnote, Barlow's rule, Peelle's Pertinent Puzzle.
+- **SKILL.md** 8157 to 7771 B; one home per invariant (blinding rules only in `analysis-design.md`); workflow step 5
+  names the `validate.py` command.
+- **Scripts.** Orbit cutoff: tilted-dipole ground-track mode with time fractions and an exposure-versus-cutoff table.
+  Geomagnetic cutoff: AME2020 nuclear masses, `--radius-re` (old `--altitude-re` deprecated). Force field:
+  `--energy-kind`, `--phi-unit`, `--phi-uncertainty`, `--lis-table`, conversions via core/kinematics, NaN exit 2.
+  Power-law fit: continuous sharp or smooth broken power law with a free break, chi2/ndf, p-value, covariance,
+  asymmetric errors, Lafferty-Wyatt centres, pivot normalization; `--break-energy` now fixes the break of the
+  continuous model. Systematic variations: statistical normalization and shape tests with bin uncertainties, flow
+  bins for JSON. Blinded-bin masking fails closed on length or type mismatches and masks errors and flow bins.
+  Change review: outcome and signal-region wording, strict booleans, new `needs-human-review` decision. Ratio:
+  exact `poisson-ratio` and `binomial-fraction` methods. Tables: escaping, `--totals`, safe LaTeX labels.
+- **Method content.** New `references/correction-chain.md` (factorized efficiencies with denominators, data/MC
+  ratios, time-dependent measurements, nuclei and isotopes, neutrino and fixed-target specifics); estimand and fiducial
+  definitions and steeply falling spectra in `measurements-and-unfolding.md`; systematics budget; antiparticle
+  backgrounds; trigger efficiency from data, unbiased optimization and look-elsewhere at the design stage in
+  `analysis-design.md`. Each has a synthetic worked example checked by `tests/skills/hep_analysis/test_method_references.py`.
+- **Spec review script.** New `scripts/review_measurement_spec.py` drafts a verdict-first review from the validator
+  findings; the collider and cosmic-ray examples run it and write `review.md`.
+- **Tests and records.** Behavioural invariant tests replace the guide-wording test; 14 new routing cases (en and
+  zh-Hant) for the hep-analysis boundaries, live run pending; `test_ams02_helpers.py` renamed
+  `test_cosmic_ray_helpers.py`; a worked cosmic-ray spec with backgrounds and an active mask
+  (`assets/worked-spec.cosmic-ray.synthetic.json`); the flagship example documents the `--profiles-from`
+  validation command; capability-matrix title no longer carries a version.
+
+### hep-statistics
+
+- **Statistical-result hardening (contracts 2.6.0).** New errors: `stats.coverage_cl_mismatch`,
+  `stats.coverage_interval_inconsistent` (a recorded interval outside the 99.73% Clopper-Pearson interval of its toy
+  counts), `stats.p_zero_without_bound`, `stats.p_out_of_range` on probability-like `results` keys (p0, p_value, CLs,
+  CLb, ...), `stats.z_p_inconsistent` (one-sided, |Δz| > 0.01), `stats.global_z_above_local`,
+  `stats.construction_statistic_mismatch` (for example Feldman-Cousins with q0, CLs values from a Neyman
+  construction), `stats.model_sha256_malformed`. New unresolved: `stats.coverage_toys_too_few` (fewer than 200 toys),
+  `stats.expected_bands_missing` (an observed limit without median and both bands), `stats.global_z_without_p`,
+  `stats.seed_missing`, `stats.gof_toys_missing`; Bayesian `stats.propriety_unsupported` (propriety needs
+  {argument, ref}), `stats.poi_prior_missing`, `stats.ess_too_low` (100 per chain), `stats.chains_missing`; `stan`,
+  `pymc`, `numpyro` count as gradient samplers and `uniform(0, inf)` as improper. Optional fields `extension.seeds`,
+  `coverage.seed`, `goodness_of_fit.p_value_bound`, `significance.convention` (`ext_statistical_result_v2_6.json`).
+- **Publication gate.** A `synthetic` or `asimov` statistical-result now fails (`gate.not_observed_data`); toy
+  undercoverage is judged on the 68.27% Clopper-Pearson upper end computed from the counts; a blank backend or model
+  reference is missing provenance. Gate verdict changes on committed artifacts: the J9 example
+  (`examples/ml-classifier-to-inference`, `synthetic`) passed and now fails; 11 synthetic or asimov examples and
+  fixtures go from unresolved to failed for the same reason; default and strict validator outcomes are unchanged
+  for all of them (`tests/contracts/test_gate_verdict_snapshot.py`).
+- `migrate_statistical_result.py` brings a 2.2-2.5 artifact to 2.6.0 (version only) and refuses one that breaks a
+  2.6.0 error rule; it never repairs a number or invents a seed.
+- **Comparison gate.** `variable-change` needs `edges` (the image of every current edge, strictly monotonic,
+  recorded as `edge_map`) and a Jacobian that is a number or `{expression, ref}` (a bare word leaves the comparison
+  unresolved); `from == to` is refused (use `rebin`). `unit-conversion` needs a finite factor > 0, recorded as
+  `recorded_factor`. `plan_combination` refuses duplicate dataset ids (`combine.duplicate_id`); `envelope` refuses
+  rows of unequal length.
+- **`validate_covariance.py`** judges PSD, rank and conditioning on the correlation matrix D^-1/2 C D^-1/2: an
+  indefinite correlation structure fails whatever the units per bin, and disparate but uncorrelated variances are no
+  longer rank-deficient or ill-conditioned; metrics report scaled and unscaled eigenvalues.
+- **`likelihood_limits.py contour`**: probes where a bin mean is <= 0 are out of the domain (q = +inf, counted as
+  `out_of_domain_probes`), not failed fits; the 3-bin audit input now exits 0.
+- **`result_artifact.py`** refuses a CLI output without `status` unless `--assume-status` is given (recorded as
+  `results.cli_status_assumed`), refuses a coverage value or toy count under `--coverage-check not-checked`, and
+  refuses a JSON list input.
+- **Skill entry point and guide.** `SKILL.md` has a Step 0 for one-number questions and a task-to-tool table
+  (default tool, fallback, or "no shipped tool"); the closure invariant applies to new models; the context stanza
+  sits below Resources; the description says "producing missing physics inputs". `core-stats-guide.md` is split into
+  a decision guide (conventions, a per-subcommand caps table checked against the code, choosing a tool, skill
+  scripts with NumPy/SciPy markers) and `core-stats-commands.md` (per-module reference, gate rules). D'Agostini
+  routes to `unfold-scan` (not `regularized-scan`, which refuses it). Ten reference corrections with ledgered
+  sources (Bartlett's effect, `SumW2Error` scope, code4p sign convention, pyhf zero-nominal and staterror defaults,
+  iminuit EDM, familywise global p-values, ROOT 6.40 off the Combine stack, ...). New
+  `assets/combine.example.json`.
+- **New capabilities.** `covariance_fit.py`: broken and smoothly broken power laws, plug-in models, `break-scan`
+  (toy-calibrated break interval and no-break test); `statistical_toys.py ratio-cov-analytic` (full ratio
+  covariance at counts >= 1e4); `unfolding_diagnostics.py dagostini-unfold` (data unfolding with data and response
+  covariance); `shape-limit` without toys at ordinary sizes (100 bins, 1e4 events per bin); `shape-significance`
+  (multi-bin q0).
+- **Defects fixed on valid inputs.** Exact Phi quantiles for expected bands (`cls-limit --n 2 --b 3.7`: -2 sigma
+  2.996, was 3.56; `profile-cls` too); MC ranges for `profile-cls` and `profile-limit`; `shape-limit` at n = 0,
+  b = 0 (boundary, no longer failed) and a toy-CLs runtime estimate with a 600 s budget; `unbinned_fit.py` at wide
+  or offset ranges (natural-scale Hessian steps, exponential relative to lo, boundary policy for n_sig);
+  `eft_scan.py` excludes nu <= 0 in empty bins and refuses CL outside (0, 1); `global_significance.py` input checks,
+  auxiliary redraw at the fitted scale, shared upcrossing definition; `pcl_efficiency_ratio.py` exact classical limit
+  (n, b up to 1e5 in < 1 s); `covariance_fit.py` checks `relative_cov`; `look_elsewhere.py` memory budget;
+  `sensitivity_and_gof.py` reports an infeasible model; `model_card.py` leaves validation regions out of the fit and
+  uses constraint widths. Every statistics CLI refuses malformed input with exit 2 and JSON (no tracebacks) and
+  prints `--help` without NumPy.
+- **References.** `unfolding.md` (SVD, TUnfold, iterative and fully Bayesian unfolding, OmniFold, purity and
+  stability, undercoverage of regularized intervals, publishing), new `combinations.md` (BLUE, negative weights,
+  Peelle's puzzle, likelihood-level combination), `inference-recipes.md` (Wald and sigma_A, Rolke-Lopez-Conrad,
+  Cousins-Highland, PCL, the conditional on/off test, Baker-Cousins, reference priors), `nuisance-modeling.md`
+  (`autoMCStats`, spurious signal, discrete profiling, non-additive breakdowns), `astroparticle-statistics.md`
+  (unbinned point-source likelihood, TS and Chernoff, Rayleigh/Z_m^2/H-test, Bayesian blocks). Every new source is in
+  `docs/evidence/statistics/sources.json` with its verification level (S15-S41), with claims C12-C17 and eight new
+  capability entries.
+- **Routing checks are language independent** (all skills): `tools/check_routing_static.py` requires trigger terms
+  for English cases only; a non-English case may be a natural prompt (`"natural": true`) that reuses no four
+  consecutive description words; the description-topics table in `docs/routing-contract.md` (hep-statistics row
+  now) must stay named in the owner's description. New cases: six natural zh-Hant hep-statistics prompts, ratio
+  with covariance, broken-power-law fit to published points, bump hunt with a fitted background, an English
+  combination prompt, and the fit half of J5 (`j05-turn-fit`, Q9).
+- `examples/ml-classifier-to-inference/run.py` records the coverage toy seed and no longer crashes on an unresolved
+  finding (`Finding.severity`, not `.level`); J9 and `published-comparison` outputs regenerated (version strings,
+  the seed, the schema list read).
+
+### Integration (PR #64)
+
+- **Same-event systematic variations.** `check_systematic_variations.py` no longer combines per-sample variances
+  (ROOT bin errors, JSON `*_sumw2`) as if the variation were independent of the nominal: that hid a 3% JES shift made
+  from the same events (`none`, "neither variation changes this histogram"). The statistical test now uses
+  `up_diff_sumw2`/`down_diff_sumw2` (new), `--stat-unc`, or per-sample variances only with `--independent` (new);
+  otherwise no test is made, the output says why, and the effect comes from the tolerance. The "neither variation
+  changes" warning is given only when no bin changed.
+- **`check_root_cpp_env.sh` under `set -e`.** A nonzero exit of `root --version` (informational) ended the check
+  without output (CMP-08 moved it into an assignment); it is now tolerated, and a failing `root-config` reports
+  `failed` in the JSON. Found by the optional ROOT CI job (Linux container), whose check-run record is now uploaded.
+- Test fixes found by CI: the pyhf skip restored on `SrCrModelCard`; the broken-power-law covariance comparison uses a
+  relative tolerance (finite-difference precision, Python 3.11).
+
 ## 0.6.17 (2026-10-13)
 
 Contracts 2.5.0 (minor: ML semantics; every 2.4.0 artifact keeps its outcome and gets the new rules with

@@ -6,12 +6,15 @@ The CLI's status decides the artifact's (audit T04): ok -> fit_status converged;
 'failed' status label; rejected -> no artifact. The CLI's fit_diagnostics block is copied. A toy p-value with no
 exceedance is written as a typed bound (significance.local_p_bound), never as p = 0. The model file, when given, is
 hashed into likelihood.model_sha256 with likelihood.backend naming the CLI. Coverage is written only as declared
-(--coverage-check, default not-checked): this script never claims coverage it did not see.
+(--coverage-check, default not-checked): this script never claims coverage it did not see, and refuses a coverage
+value or toy count under not-checked. A CLI output without a status is refused (exit 2) unless --assume-status names
+it; the assumption is recorded in results.cli_status_assumed. A JSON input that is not an object is refused.
 
 Usage:
   python3 result_artifact.py --cli-output OUT.json --poi mu --construction asymptotic --test-statistic q_mu_tilde \
       --label synthetic --artifact-id my-limit --out result.json [--model MODEL.json] [--backend NAME]
       [--coverage-check not-checked|toys|exact-construction|analytic --coverage-n-toys N --coverage-value C]
+      [--assume-status ok|incomplete|failed]
 Exit codes: 0 written, the artifact validates and its CLI status was ok; 1 written but the CLI status was failed
 or incomplete (the artifact says so), or the artifact does not validate (not written); 2 rejected input.
 Standard library only.
@@ -36,8 +39,24 @@ FIT_STATUS = {"ok": "converged", "incomplete": "converged-with-warnings", "faile
 LABELS = ("synthetic", "asimov", "observed", "preliminary", "unvalidated", "user-supplied")
 
 
+def effective_status(cli, a: argparse.Namespace) -> str:
+    """The CLI's own status; an output without one (for example li_ma_significance.py) is refused unless the caller
+    states it with --assume-status, which is then recorded in results.cli_status_assumed (STH-T1.7)."""
+    if not isinstance(cli, dict):
+        raise ValueError(f"the CLI output must be a JSON object, got {type(cli).__name__}")
+    if "status" in cli:
+        return cli["status"]
+    if getattr(a, "assume_status", None):
+        return a.assume_status
+    raise ValueError("the CLI output has no 'status': a missing status is not a converged fit; rerun a core/stats CLI "
+                     "that reports one, or state it with --assume-status ok|incomplete|failed (recorded in the artifact)")
+
+
 def build(cli: dict, a: argparse.Namespace, model_bytes: bytes | None) -> dict:
-    status = cli.get("status", "ok")
+    status = effective_status(cli, a)
+    if a.coverage_check == "not-checked" and (a.coverage_value is not None or a.coverage_n_toys is not None):
+        raise ValueError("--coverage-check not-checked contradicts --coverage-value/--coverage-n-toys: give the check that "
+                         "produced those numbers (toys), or drop them")
     if status not in FIT_STATUS:
         raise ValueError(f"CLI status {status!r} cannot become a result (rejected input or unknown status)")
     labels = list(dict.fromkeys(a.label))
@@ -68,6 +87,8 @@ def build(cli: dict, a: argparse.Namespace, model_bytes: bytes | None) -> dict:
             ext["significance"] = {"local_p": tail["estimate"]}
     ext["results"] = {k: v for k, v in cli.items() if isinstance(v, (int, float)) and not isinstance(v, bool)}
     ext["results"]["cli_status"] = status
+    if "status" not in cli:
+        ext["results"]["cli_status_assumed"] = status
     if "cl" in cli:
         ext["results"]["cl"] = cli["cl"]
     return {"contract_version": CONTRACTS_VERSION, "artifact_id": a.artifact_id, "artifact_type": "statistical-result",
@@ -95,6 +116,8 @@ def main(argv=None) -> int:
     p.add_argument("--coverage-method", default="not studied by this run")
     p.add_argument("--coverage-n-toys", type=int)
     p.add_argument("--coverage-value", type=float)
+    p.add_argument("--assume-status", choices=tuple(FIT_STATUS),
+                   help="status of a CLI output that reports none (recorded as results.cli_status_assumed)")
     p.add_argument("--created", default=date.today().isoformat())
     a = p.parse_args(argv)
     try:
@@ -111,7 +134,7 @@ def main(argv=None) -> int:
     Path(a.out).write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8")
     print(json.dumps({"status": "written", "out": a.out, "fit_status": doc["extension"]["fit_status"],
                       "labels": doc["status"], "findings": rep.as_dict()["findings"]}, indent=1))
-    return 0 if cli.get("status", "ok") == "ok" else 1
+    return 0 if effective_status(cli, a) == "ok" else 1
 
 
 if __name__ == "__main__":

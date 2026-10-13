@@ -75,6 +75,13 @@ Handling them correctly is a hard requirement:
   [weights-normalization.md](../../hep-analysis/references/weights-normalization.md) and it is
   violated most often when a sample is split across production batches or partially
   reprocessed.
+- **Selected-event statistics** (`<plugin root>/skills/hep-theory/scripts/event_weights.py`
+  with `selected`): the output gives `selected_sum_w`, `selected_sum_w2`,
+  `selected_effective_sample_size` = (sum w)^2 / sum w^2 and
+  `selected_relative_stat_uncertainty` = sqrt(sum w^2) / |sum w| over the selected events,
+  besides the selected cross section normalized to the full sum. A selected sum <= 0 is
+  refused, not flagged (`selected_non_positive_sum: "refused"`). Indices must be distinct
+  integers in 0..N-1; non-finite weights, sigma_pb <= 0 and a negative luminosity are refused.
 
 ## Systematic variations from generation
 

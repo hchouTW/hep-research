@@ -1,5 +1,5 @@
 {
- "contract_version": "2.5.0",
+ "contract_version": "2.6.0",
  "bindings": {
   "experiments": [
    {
@@ -11,7 +11,7 @@
  },
  "versions": {
   "plugin": "0.6.17",
-  "contracts": "2.5.0",
+  "contracts": "2.6.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -34,6 +34,7 @@
   "synthetic"
  ],
  "extension": {
+  "estimand": "SYNTHETIC: the differential cross section d sigma / d cos theta of e+e- -> mu+mu- at fixed sqrt(s) = 10 GeV, at particle level in the fiducial region |cos theta| < 0.9, center-of-mass frame",
   "observable": {
    "quantity": "differential-cross-section",
    "process": "e+e- -> mu+mu- (synthetic generator)",
@@ -86,16 +87,12 @@
    }
   ],
   "backgrounds": [],
+  "no_backgrounds_reason": "SYNTHETIC: the generator produces signal events only",
   "corrections": [
    {
     "effect_id": "efficiency_and_migration",
-    "category": "response",
+    "category": "migration",
     "applied_in": "response_matrix"
-   },
-   {
-    "effect_id": "luminosity",
-    "category": "normalization",
-    "applied_in": "estimator"
    }
   ],
   "systematics": [

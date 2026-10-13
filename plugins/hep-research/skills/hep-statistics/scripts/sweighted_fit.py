@@ -39,8 +39,11 @@ import math
 import sys
 from pathlib import Path
 
-import numpy as np
-from scipy import stats
+try:  # --help works without them; main() refuses to run without them (STH-T3.1)
+    import numpy as np
+    from scipy import stats
+except ImportError:  # pragma: no cover
+    np = stats = None  # type: ignore[assignment]
 
 LABEL = "[General method]"
 INDEPENDENCE_ALPHA = 0.01
@@ -136,6 +139,11 @@ def fit(m, t, mean, width, bootstrap=200, seed=1) -> dict:
         raise SWeightError("m and t must be equal-length lists of at least 50 events")
     if np.any((m < 0) | (m > 1)) or np.any(t < 0):
         raise SWeightError("m must lie in [0, 1] and t >= 0")
+    if not (isinstance(mean, (int, float)) and isinstance(width, (int, float)) and math.isfinite(mean)
+            and math.isfinite(width) and width > 0 and 0 <= mean <= 1):
+        raise SWeightError("signal mean must lie in [0, 1] and width must be a finite positive number")
+    if not (np.all(np.isfinite(m)) and np.all(np.isfinite(t))) or bootstrap < 0:
+        raise SWeightError("m and t must be finite and --bootstrap >= 0")
     res = chain(m, t, mean, width)
     if bootstrap:
         rng = np.random.default_rng(seed)
@@ -163,6 +171,9 @@ def main(argv=None) -> int:
     p.add_argument("--bootstrap", type=int, default=200)
     p.add_argument("--seed", type=int, default=1)
     a = ap.parse_args(argv)
+    if np is None:
+        print(json.dumps({"status": "rejected", "error": "NumPy and SciPy are required"}))
+        return 2
     try:
         doc = json.loads(Path(a.input).read_text())
         out = fit(doc["m"], doc["t"], doc["signal"]["mean"], doc["signal"]["width"], a.bootstrap, a.seed)

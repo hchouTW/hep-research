@@ -185,7 +185,7 @@ def main() -> None:
     (args.outdir / "summary.json").write_text(json.dumps(summary, indent=1))
 
     subprocess.run([sys.executable, str(SKILL_DIR / "scripts/make_yield_table.py"),
-                    "--input", str(args.outdir / "yields.csv"), "--precision", "1"], check=True)
+                    "--input", str(args.outdir / "yields.csv"), "--precision", "1", "--status", "synthetic"], check=True)
     print(json.dumps(summary, indent=1))
 
 

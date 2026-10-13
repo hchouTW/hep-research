@@ -79,5 +79,46 @@ class BackendEquivalence(unittest.TestCase):
                 self.bc.compare(doc)
 
 
+@unittest.skipUnless(HAVE, "pyhf not installed: ordinary-size asymptotic CLs unverified against pyhf")
+class OrdinarySizeAsymptoticCLsSTH316(unittest.TestCase):
+    """STH-T3.16: 100 bins with about 1000 background events each run on the asymptotic path of shape-limit (the toy
+    caps of 40 bins, b <= 200 and 400 events do not apply without toys); the observed asymptotic CLs limit agrees with
+    pyhf 0.7.6 (q-tilde, asymptotic CLs) within 1%."""
+
+    def test_cls_limit_matches_pyhf(self):
+        import math
+        import random
+        import pyhf
+        sys.path.insert(0, str(ROOT))
+        from core.stats import likelihood_limits as ll
+        rng = random.Random(3)
+        b = [800.0 + 400.0 * math.sin(0.1 * i) ** 2 for i in range(100)]
+        sig = [30.0 * math.exp(-0.5 * ((i - 50) / 4.0) ** 2) for i in range(100)]
+        n = [int(round(bi + rng.gauss(0.0, math.sqrt(bi)))) for bi in b]
+        ours = ll.shape_limit({"bins": [{"n": ni, "b": bi, "s": si} for ni, bi, si in zip(n, b, sig)], "cl": 0.95}, 0.95, 0, 1)
+        self.assertEqual(ours["status"], "ok", ours["fit_diagnostics"])
+        self.assertTrue(ours["path"].startswith("asymptotic"))
+        spec = {"channels": [{"name": "c", "samples": [
+            {"name": "s", "data": sig, "modifiers": [{"name": "mu", "type": "normfactor", "data": None}]},
+            {"name": "b", "data": b, "modifiers": []}]}]}
+        pyhf.set_backend("numpy", "scipy")
+        model = pyhf.Model(spec, poi_name="mu")
+        import numpy as np
+        data = np.array([float(v) for v in n] + list(model.config.auxdata))
+        mus = np.array([0.05 * k for k in range(1, 121)])
+        obs = pyhf.infer.intervals.upper_limits.upper_limit(data, model, mus, level=0.05, test_stat="qtilde",
+                                                            return_results=False)[0]
+        self.assertLess(abs(ours["asymptotic_observed_cls_upper_limit"] / float(obs) - 1.0), 0.01,
+                        (ours["asymptotic_observed_cls_upper_limit"], float(obs)))
+
+    def test_toy_paths_keep_their_caps(self):
+        sys.path.insert(0, str(ROOT))
+        from core.stats import likelihood_limits as ll
+        doc = {"bins": [{"n": 1000, "b": 1000.0, "s": 5.0} for _ in range(60)]}
+        with self.assertRaises(ll.LikelihoodError) as ctx:
+            ll.shape_limit(doc, 0.95, 100, 1)
+        self.assertIn("pyhf", str(ctx.exception))
+
+
 if __name__ == "__main__":
     unittest.main()

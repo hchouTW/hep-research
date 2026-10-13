@@ -71,8 +71,10 @@ component that broadens a nucleus-initiated shower's fluctuations.
 
 **`X_max` fluctuations, not just its mean, carry composition information.** A
 proton-initiated shower's depth of first interaction fluctuates with the full
-proton-air cross section's interaction-length distribution, while a nucleus's
-superposition of `A` sub-showers averages fluctuations down by roughly `1/sqrt(A)`.
+proton-air cross section's interaction-length distribution, while a nucleus's sub-showers average part of
+the fluctuations out: simulations give about 60 g/cm2 for protons and about 20 g/cm2 for iron near 1e18 eV, much
+wider than the naive superposition value (about 8 g/cm2), because the nucleons of one interaction are correlated
+([Kampert & Unger 2012, arXiv:1201.0018](https://arxiv.org/abs/1201.0018), Sec. 2).
 Measuring only `<X_max>(E)` and its slope, the elongation rate
 `D_10 = d<X_max>/d log10(E)`, and not its shower-to-shower spread discards a composition-sensitive observable and, worse, can mask a mixed
 composition that happens to produce the same mean as a single pure species.

@@ -5,6 +5,7 @@ $HEP_ROOT_PYTHON if set (e.g. /opt/homebrew/bin/python3.14 for Homebrew ROOT, wh
 PyROOT does not load under a conda python), else the one running the tests.
 Fixtures come from <plugin root>/tests/skills/hep_computing/make_root_fixtures.py.
 """
+import json
 import os
 import subprocess
 import sys
@@ -48,15 +49,29 @@ class RootIntegrationTests(unittest.TestCase):
         self.assertIn('Muon_pt [Float_t]', out)
 
     def test_check_systematic_variations(self):
-        out = self.run_script('skills/hep-analysis/scripts/check_systematic_variations.py', '--input', self.fx / 'histograms.root',
-                              '--nominal', 'nominal', '--up', 'jes_Up', '--down', 'jes_Down')
-        self.assertIn('up max relative bin difference', out)
+        # jes_Up/jes_Down are the nominal events scaled by 1.03/0.97: a real shape change, correlated with nominal
+        args = ['--input', self.fx / 'histograms.root', '--nominal', 'nominal', '--up', 'jes_Up', '--down', 'jes_Down']
+        doc = json.loads(self.run_script('skills/hep-analysis/scripts/check_systematic_variations.py', *args))
+        for label in ('up', 'down'):
+            self.assertNotEqual(doc[label]['effect'], 'none')
+            self.assertNotIn('statistical_test', doc[label])
+        self.assertIn('independent', doc['statistical_test'])
+        text = self.run_script('skills/hep-analysis/scripts/check_systematic_variations.py', *args, '--format', 'text')
+        self.assertIn('up max relative bin difference', text)
+        indep = json.loads(self.run_script('skills/hep-analysis/scripts/check_systematic_variations.py', *args,
+                                           '--independent'))
+        self.assertIsInstance(indep['up']['statistical_test'], dict)
 
     def test_compare_histograms_sees_two_percent_shift(self):
-        out = self.run_script('skills/hep-computing/scripts/compare_root_histograms.py', '--reference', self.fx / 'histograms.root',
-                              '--candidate', self.fx / 'histograms_candidate.root', '--hist', 'nominal')
-        line = next(l for l in out.splitlines() if l.startswith('max relative bin difference'))
-        self.assertAlmostEqual(float(line.split(':')[1]), 0.02, places=9)
+        args = ['--reference', self.fx / 'histograms.root', '--candidate', self.fx / 'histograms_candidate.root',
+                '--hist', 'nominal', '--backend', 'pyroot']
+        doc = json.loads(self.run_script('skills/hep-computing/scripts/compare_root_histograms.py', *args, '--rel-tol', 0.021))
+        self.assertEqual((doc['status'], doc['backend']), ('pass', 'pyroot'))
+        self.assertAlmostEqual(doc['worst_bins']['rel']['rel_diff'], 0.02, places=9)
+        proc = subprocess.run([PYTHON, str(ROOT_DIR / 'skills/hep-computing/scripts/compare_root_histograms.py'),
+                               *map(str, args), '--rel-tol', '0.01'], capture_output=True, text=True, timeout=600)
+        self.assertEqual(proc.returncode, 1, proc.stderr[-2000:])
+        self.assertEqual(json.loads(proc.stdout)['checks']['values']['bins_outside'] > 0, True)
 
     def test_summarize_histogram_statistics(self):
         out = self.run_script('skills/hep-computing/scripts/summarize_histogram_statistics.py', '--input', self.fx / 'histograms.root',
@@ -68,6 +83,24 @@ class RootIntegrationTests(unittest.TestCase):
                               '--workspace', 'workspace')
         self.assertIn('model [RooAddPdf]', out)
         self.assertIn('data [RooDataSet] entries=1000', out)
+
+    def test_viewers_json_mode(self):
+        """CMP-08: the interactive viewers print one JSON object with a status key on --json."""
+        doc = json.loads(self.run_script('skills/hep-computing/scripts/inspect_root_file.py', '--input', self.fx / 'events.root',
+                                         '--tree', 'Events', '--json'))
+        self.assertEqual((doc['status'], doc['tree']['entries']), ('ok', 5000))
+        doc = json.loads(self.run_script('skills/hep-computing/scripts/summarize_histogram_statistics.py', '--input',
+                                         self.fx / 'histograms.root', '--hist', 'nominal', '--include-flow', '--json'))
+        self.assertEqual((doc['status'], doc['integral']), ('ok', 20000.0))
+        doc = json.loads(self.run_script('skills/hep-computing/scripts/roofit_workspace_summary.py', '--input',
+                                         self.fx / 'workspace.root', '--workspace', 'workspace', '--json'))
+        self.assertEqual(doc['status'], 'ok')
+        self.assertIn({'name': 'data', 'class': 'RooDataSet', 'entries': 1000}, doc['datasets'])
+        proc = subprocess.run([PYTHON, str(ROOT_DIR / 'skills/hep-computing/scripts/inspect_root_file.py'), '--input',
+                               str(self.fx / 'events.root'), '--tree', 'Nope', '--json'], capture_output=True, text=True, timeout=600)
+        self.assertEqual(proc.returncode, 2)
+        self.assertNotIn('Traceback', proc.stderr)
+        self.assertEqual(json.loads(proc.stdout)['status'], 'error')
 
     def test_pyroot_rdataframe_asset_cutflow(self):
         out = self.run_script('adapters/root-uproot/assets/pyroot_rdf_cutflow_analysis.py', '--input', self.fx / 'events.root',

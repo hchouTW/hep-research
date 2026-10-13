@@ -1,0 +1,36 @@
+{
+ "label": "theory:higgs-bb-width scale-dependent coefficients (SymPy 1.14.0)",
+ "status": "perturbative-argument",
+ "order": "R through a^4 (alpha_s^4) with a = alpha_s/pi, MS-bar mass and coupling, massless b at leading power",
+ "assumptions": [
+  "a = alpha_s/pi and mbar_b(mu) in the MS-bar scheme with n_f = 5 active flavours (top decoupled)",
+  "Gamma = 3 G_F M_H / (4 sqrt 2 pi) mbar_b(mu)^2 R; m_b^2/M_H^2 power corrections neglected",
+  "s_1..s_3 exact (hep-ph/9608318 eq. 21), s_4 = -825.7 at n_f = 5 only (hep-ph/0511063 Table I)",
+  "no electroweak corrections and no top-induced (singlet) terms; n_f fixed between m_b and 2 M_H"
+ ],
+ "results": {
+  "r_n(L), L = ln(mu^2/M_H^2), n_f = 5, s_4 symbolic": [
+   "1",
+   "2*L + 17/3",
+   "47*L**2/12 + 263*L/9 - 47*pi2/36 - 97*zeta3/6 + 8851/144",
+   "1645*L**3/216 + 10225*L**2/108 - 1645*L*pi2/216 - 3695*L*zeta3/36 + 141563*L/324 - 5*pi2**2/108 - 10225*pi2/324 - 80095*zeta3/216 + 1945*zeta5/36 + 34873057/46656",
+   "50995*L**4/3456 + 28087*L**3/108 - 50995*L**2*pi2/1728 - 116945*L**2*zeta3/288 + 19637651*L**2/10368 - 5*L*pi2**2/54 - 28087*L*pi2/108 - 2766721*L*zeta3/864 + 61895*L*zeta5/144 + 631799135*L/93312 + s_4"
+  ],
+  "s_n(n_f = 5), s_4 = -825.7": [
+   5.666666666666667,
+   29.14670765305323,
+   41.75760630780509,
+   -825.7
+  ]
+ },
+ "checks": {
+  "r_n_at_L0_equal_s_n": true,
+  "truncated_series_mu_independent_to_its_order": true,
+  "r1_equals_s1_plus_2_gamma0_L": true,
+  "wrong_gamma0_sign_breaks_mu_independence": true,
+  "nf5_s1_s2_s3_match_hep_ph_0511063_eq3": true,
+  "nf_forms_match_hep_ph_9608318_eq22": true,
+  "gamma_normalization_matches_pdg_eq_60_3": true,
+  "beta_normalization_matches_pdg_eq_9_3": true
+ }
+}

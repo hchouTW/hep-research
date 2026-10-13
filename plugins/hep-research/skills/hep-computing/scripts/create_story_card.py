@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-"""Generate an Agile story-card markdown file."""
+"""Generate an Agile story-card markdown file.
+
+Exit codes: 0 written, 2 bad input or unwritable output (one line, or JSON with --json).
+"""
 
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -66,7 +70,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--in-scope", default="The smallest behavior that satisfies the current request.")
     parser.add_argument("--out-of-scope", default="Follow-up enhancements not required for this increment.")
     parser.add_argument("--risk", default="No material risk identified yet.")
-    parser.add_argument("--output", type=Path, help="Optional output path. Prints to stdout when omitted.")
+    parser.add_argument("--output", type=Path, help="Optional output path (parent folders are created). Prints to stdout when omitted.")
+    parser.add_argument("--json", action="store_true", help='print {"status": ...} as JSON (the card itself under "card" without --output)')
     return parser.parse_args()
 
 
@@ -75,13 +80,28 @@ def main() -> int:
     try:
         content = build_card(args)
     except ValueError as exc:
-        print(f"error: {exc}", file=sys.stderr)
-        return 2
+        return _fail(args, str(exc))
     if args.output:
-        args.output.write_text(content, encoding="utf-8")
+        try:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(content, encoding="utf-8")
+        except OSError as exc:
+            return _fail(args, f"cannot write {args.output}: {exc}")
+        if args.json:
+            print(json.dumps({"status": "written", "output": str(args.output)}))
+    elif args.json:
+        print(json.dumps({"status": "ok", "card": content}))
     else:
         print(content, end="")
     return 0
+
+
+def _fail(args: argparse.Namespace, message: str) -> int:
+    if args.json:
+        print(json.dumps({"status": "error", "error": message}))
+    else:
+        print(f"error: {message}", file=sys.stderr)
+    return 2
 
 
 if __name__ == "__main__":

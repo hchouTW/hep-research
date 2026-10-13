@@ -36,6 +36,8 @@ Subcommands:
   multibin-limit and shape-limit also give the asymptotic CLs limit and the expected median and 1/2-sigma limits
   (CLs and CLs+b) from the background-only Asimov data set (Cowan, Cranmer, Gross, Vitells 2011, sec. 4.3).
 
+  shape-significance    multi-bin discovery q0 of a shape-limit model: asymptotic p-value and, with --toys, a toy
+                        p-value (bound at zero exceedances) from background-only toys with redrawn auxiliaries.
   shape-gof             saturated-model goodness of fit of a shape-limit model (Poisson bins and constraint
                         terms; mu fitted or fixed with --mu), calibrated by seeded toys from the fitted model, with
                         the chi-square reference (bins - 1 or bins degrees of freedom) labeled approximate.
@@ -231,9 +233,12 @@ def profile_limit(n: int, b: float, sigma_b: float, cl: float, toys: int, seed: 
     gauss = [rng.gauss(0.0, 1.0) for _ in range(toys)]
     alpha = 1.0 - cl
     s_toy = _bisect(lambda s: alpha - _toy_p1(n, b, sig, s, uniforms, gauss), s_hat, hi, 30)
+    p_end = lambda s, k: _mc_bounds(_toy_p1(n, b, sig, s, uniforms, gauss), toys)[k]
+    mc_range = [_decreasing_crossing(lambda s: p_end(s, 0), s_hat, hi, alpha), _decreasing_crossing(lambda s: p_end(s, 1), s_hat, hi, alpha)]
     out = {"label": LABEL, "method": "profile-likelihood upper limit on s, single bin, Gaussian-constrained background",
            "n_obs": n, "b": b, "sigma_b": sig, "cl": cl, "toys": toys, "seed": seed,
            "asymptotic_upper_limit": s_asym, "toy_calibrated_upper_limit": s_toy,
+           "toy_limit_mc_range": mc_range, "toy_limit_mc_range_cl": LIMIT_MC_CL,
            "asymptotic_over_toy": s_asym / s_toy if s_toy > 0 else None}
     if sig == 0.0:
         from core.stats.poisson_diagnostics import upper_limit
@@ -620,6 +625,22 @@ def _cls_at(n_obs, b0, sig, s, q_pool_b_uniforms, q_pool_gauss, uniforms, gauss)
     return sb, bo, (sb / max(bo, 1.0 / len(q_pool_b_uniforms)))
 
 
+def _mc_bounds(frac: float, n: int) -> tuple[float, float]:
+    """Exact (Clopper-Pearson, LIMIT_MC_CL) interval of a toy fraction frac = k/n."""
+    from core.stats.tail_estimation import clopper_pearson
+    return clopper_pearson(int(round(frac * n)), n, LIMIT_MC_CL)
+
+
+def _decreasing_crossing(f, lo: float, hi: float, level: float, iters: int = 30) -> float | None:
+    """s where a decreasing f crosses level, by bisection on [lo, hi]; None when f(hi) is still above level."""
+    if f(hi) > level:
+        return None
+    for _ in range(iters):
+        mid = 0.5 * (lo + hi)
+        lo, hi = (mid, hi) if f(mid) > level else (lo, mid)
+    return 0.5 * (lo + hi)
+
+
 def _cls_limit(n_obs, b0, sig, cl, u1, g1, u2, g2, hi, iters=18):
     lo, up = max(n_obs - b0, 0.0), hi
     for _ in range(iters):
@@ -643,6 +664,14 @@ def profile_cls(n: int, b: float, sigma_b: float, cl: float, toys: int, expected
     u1, g1 = _draws(rng, toys)
     u2, g2 = _draws(rng, toys)
     obs = _cls_limit(n, b, sig, cl, u1, g1, u2, g2, hi)
+
+    def cls_extreme(s, upper):  # CLs from the ends of the exact intervals on CLs+b and CLb (as shape-limit --cls-toys)
+        sb, bo, _ = _cls_at(n, b, sig, s, u2, g2, u1, g1)
+        (sb_lo, sb_hi), (b_lo, b_hi) = _mc_bounds(sb, toys), _mc_bounds(bo, toys)
+        return (sb_hi / b_lo if b_lo > 0 else math.inf) if upper else sb_lo / b_hi
+    start = max(n - b, 0.0)
+    mc_range = [_decreasing_crossing(lambda s: cls_extreme(s, False), start, hi, 1.0 - cl, 18),
+                _decreasing_crossing(lambda s: cls_extreme(s, True), start, hi, 1.0 - cl, 18)]
     expected = {}
     if expected_toys:
         inner = min(toys, 300)
@@ -655,10 +684,14 @@ def profile_cls(n: int, b: float, sigma_b: float, cl: float, toys: int, expected
             limits.append(_cls_limit(nn, bb0, sig, cl, ui1, gi1, ui2, gi2, h))
         limits.sort()
         q = lambda f: limits[min(len(limits) - 1, max(0, int(round(f * len(limits))) - 1))]
-        expected = {"-2sigma": q(0.025), "-1sigma": q(0.16), "median": q(0.5), "+1sigma": q(0.84), "+2sigma": q(0.975),
+        expected = {**{name: q(NormalDist().cdf(z)) for name, z in BANDS},  # exact Phi(z) quantiles (STH-T3.9)
                     "pseudo_experiments": expected_toys, "inner_toys": inner}
     out = {"label": LABEL, "method": "CLs upper limit with the background nuisance profiled, seeded toys of q-tilde",
-           "n_obs": n, "b": b, "sigma_b": sig, "cl": cl, "toys": toys, "seed": seed, "observed_upper_limit": obs}
+           "n_obs": n, "b": b, "sigma_b": sig, "cl": cl, "toys": toys, "seed": seed, "observed_upper_limit": obs,
+           "observed_limit_mc_range": mc_range, "observed_limit_mc_range_cl": LIMIT_MC_CL,
+           "observed_limit_mc_range_note": ("limits where CLs from the ends of the exact intervals on CLs+b and CLb "
+                                            "crosses 1 - cl (the two intervals are independent, so the range covers "
+                                            "with probability >= 0.95^2); None: not reached in the scan range")}
     if expected:
         out["expected_under_background_only"] = expected
     out["note"] = ("both CLs+b and CLb come from toys of the one-sided profile statistic with the nuisance fixed at its "
@@ -709,12 +742,21 @@ def _interp_shape(theta: float, nom: float, up: float, down: float, code: str) -
     return theta * ((up - nom) if theta >= 0 else (nom - down))
 
 
-def _load_shape(doc):
+# shape-model sizes (STH-T3.16): toy paths keep the small caps (each toy costs two profile fits); the asymptotic path
+# (no toys) accepts ordinary analysis sizes, order question Q10: up to 100 bins x 1e4 expected events per bin
+SHAPE_TOY_CAPS = {"bins": 40, "bin_b": 200.0, "total_n": 400}
+SHAPE_ASYMPTOTIC_CAPS = {"bins": 100, "bin_b": 1e4, "total_n": 1000000}
+
+
+def _load_shape(doc, asymptotic: bool = False):
     if not isinstance(doc, dict):
         raise LikelihoodError("input must be a JSON object")
+    caps = SHAPE_ASYMPTOTIC_CAPS if asymptotic else SHAPE_TOY_CAPS
     raw = doc.get("bins")
-    if not isinstance(raw, list) or not 1 <= len(raw) <= 40:
-        raise LikelihoodError("bins must be a list of 1 to 40 bins")
+    if not isinstance(raw, list) or not 1 <= len(raw) <= caps["bins"]:
+        more = "" if asymptotic else (f"; up to {SHAPE_ASYMPTOTIC_CAPS['bins']} bins without toys (asymptotic path), "
+                                      "beyond that use the pyhf adapter")
+        raise LikelihoodError(f"bins must be a list of 1 to {caps['bins']} bins{more}")
     bins = []
     for i, x in enumerate(raw):
         if not isinstance(x, dict):
@@ -722,11 +764,12 @@ def _load_shape(doc):
         n = x.get("n")
         if isinstance(n, bool) or not isinstance(n, (int, float)) or not math.isfinite(n) or n < 0 or n != int(n):
             raise LikelihoodError(f"bin {i}: n must be a non-negative integer")
-        bins.append({"n": int(n), "b": _num(x.get("b"), f"bin {i} b", 0.0, 200.0), "s": _num(x.get("s"), f"bin {i} s", 0.0, 1e6)})
+        bins.append({"n": int(n), "b": _num(x.get("b"), f"bin {i} b", 0.0, caps["bin_b"]), "s": _num(x.get("s"), f"bin {i} s", 0.0, 1e6)})
     if sum(x["s"] for x in bins) <= 0:
         raise LikelihoodError("at least one bin needs a positive signal expectation s")
-    if sum(x["n"] for x in bins) > 400:
-        raise LikelihoodError("total counts above 400 are outside this script's range")
+    if sum(x["n"] for x in bins) > caps["total_n"]:
+        hint = "" if asymptotic else "; larger samples run on the asymptotic path (no toys) or with the pyhf adapter"
+        raise LikelihoodError(f"total counts above {caps['total_n']} are outside this path's range{hint}")
     nuis = doc.get("nuisances", [])
     if not isinstance(nuis, list) or len(nuis) > 8:
         raise LikelihoodError("nuisances must be a list of at most 8 entries")
@@ -924,7 +967,10 @@ class _ShapeModel:
         """Global fit over mu >= 0 from x0 = [mu] + theta. An unconstrained optimum below 0 is replaced by the
         conditional fit at the boundary mu = 0, which is checked by the KKT condition, not by an interior Hessian."""
         r = newton_fit(lambda v: self.nll(v[0], v[1:], ns, aux), x0)
-        if r.x[0] < 0.0 or not math.isfinite(r.fval):
+        # a search that stalls against the domain edge at mu ~ 0 (for example b = 0 and n = 0: mu < 0 gives a negative
+        # mean) has its optimum on the boundary: judge it there by KKT, not as a failed interior fit (STH-T3.11)
+        at_edge = not r.ok and r.x[0] <= 1e-6 / max(sum(self.s), 1e-12) and math.isfinite(r.fval)
+        if r.x[0] < 0.0 or not math.isfinite(r.fval) or at_edge:
             th, val = self.cond(0.0, ns, aux, r.x[1:] if math.isfinite(r.fval) else None)
             ok, _ = boundary_kkt(lambda v: self.nll(v[0], v[1:], ns, aux), [0.0] + list(th), 0, 0.0,
                                  scale=max(sum(self.s), 1e-12))
@@ -1178,8 +1224,13 @@ def _toy_cls(model, aux0, g_obs, cl: float, toys: int, seed: int, hi: float, poi
     return out
 
 
-def shape_limit(doc: dict, cl: float, toys: int, seed: int, cls_toys: int = 0, cls_points: int = 16) -> dict:
-    bins, nuis, corr_chol = _load_shape(doc)
+CLS_MAX_RUNTIME_S = 600.0  # toy CLs refuses to start when its estimated runtime exceeds this (order question Q10)
+
+
+def shape_limit(doc: dict, cl: float, toys: int, seed: int, cls_toys: int = 0, cls_points: int = 16,
+                cls_max_runtime: float = CLS_MAX_RUNTIME_S) -> dict:
+    asymptotic_only = not toys and not cls_toys
+    bins, nuis, corr_chol = _load_shape(doc, asymptotic=asymptotic_only)
     cl = _num(doc.get("cl", cl), "cl", 0.0, 1.0, strict_low=True)
     if cl >= 1.0:
         raise LikelihoodError("cl must lie strictly between 0 and 1")
@@ -1206,6 +1257,7 @@ def shape_limit(doc: dict, cl: float, toys: int, seed: int, cls_toys: int = 0, c
     asimov_ns = [float(v) for v in model.b]
     asimov, g_a = limit(asimov_ns)
     out = {"label": LABEL, "method": "multi-bin profile-likelihood upper limit with normalization and shape nuisances",
+           "path": "asymptotic (no toys): ordinary sizes, caps SHAPE_ASYMPTOTIC_CAPS" if asymptotic_only else "with toys: caps SHAPE_TOY_CAPS",
            "bins": len(bins), "nuisances": [d["name"] for d in nuis], "cl": cl, "seed": seed, "toys": toys,
            "best_fit_mu": g_obs[0], "best_fit_nuisances": dict(zip([d["name"] for d in nuis], g_obs[1])),
            "asymptotic_observed_upper_limit": obs, "asymptotic_asimov_median_expected_limit": asimov}
@@ -1239,6 +1291,19 @@ def shape_limit(doc: dict, cl: float, toys: int, seed: int, cls_toys: int = 0, c
                                                                failed=toy_fails)})
     if cls_toys:
         hi = 1.3 * max(out["asymptotic_observed_cls_upper_limit"], out["asymptotic_expected_limits"]["cls"]["+2sigma"])
+        # runtime estimate (STH-T3.11): every toy costs about one q evaluation (a global and a conditional fit) per
+        # hypothesis and grid point; time three on the data and extrapolate before starting
+        import time
+        t0 = time.perf_counter()
+        for f in (0.3, 0.6, 0.9):
+            model.q(f * hi, model.n, aux0, g_obs)
+        per_q = (time.perf_counter() - t0) / 3.0
+        estimate = per_q * 2 * cls_toys * cls_points
+        out["toy_cls_runtime_estimate_s"] = estimate
+        if estimate > cls_max_runtime:
+            raise LikelihoodError(f"toy CLs with {cls_toys} toys x {cls_points} points x 2 hypotheses is estimated at "
+                                  f"{estimate:.0f} s (> {cls_max_runtime:.0f} s): reduce --cls-toys or --cls-points, "
+                                  "partition the toys (hep-computing), raise --cls-max-runtime, or use the pyhf adapter")
         out["toy_cls"] = _toy_cls(model, aux0, g_obs, cl, cls_toys, seed, hi, cls_points)
         toy_fails += out["toy_cls"]["toys_with_a_failed_fit"]
     for key in (tuple(model.n), tuple(asimov_ns)):
@@ -1287,6 +1352,56 @@ def _gof_stat(model, ns, aux, mu_fixed):
         mu = mu_fixed
         th, val = model.cond(mu_fixed, ns, aux)
     return max(0.0, 2.0 * (val - _nll_saturated(model, ns, aux))), mu, th
+
+
+def _q0_shape(model, ns, aux):
+    """Discovery statistic of a shape model: q0 = 2 (NLL(mu = 0, theta profiled) - NLL(mu_hat, theta_hat)) for
+    mu_hat > 0, else 0 (one-sided)."""
+    g = model.glob(ns, aux)
+    if g[0] <= 0.0:
+        return 0.0, g
+    _, c0 = model.cond(0.0, ns, aux)
+    return max(0.0, 2.0 * (c0 - g[2])), g
+
+
+def shape_significance(doc: dict, toys: int, seed: int) -> dict:
+    """Multi-bin discovery significance of the shape model (STH-T3.17): q0 on the data with its asymptotic p-value
+    (half chi2, 1 dof: p = 1 - Phi(sqrt(q0))) and, with toys, a toy p-value from background-only toys generated at the
+    nuisances profiled at mu = 0 with the auxiliary measurements redrawn (core/stats/tail_estimation.py: a bound when
+    no toy exceeds). Toys keep the shape-limit toy caps; without toys the asymptotic caps apply."""
+    bins, nuis, corr_chol = _load_shape(doc, asymptotic=not toys)
+    toys, seed = _seed_toys(toys, seed, allow_zero=True)
+    model = _ShapeModel(bins, nuis, corr_chol)
+    aux0 = model.aux_obs()
+    q_obs, g = _q0_shape(model, model.n, aux0)
+    z = math.sqrt(q_obs)
+    out = {"label": LABEL, "method": "multi-bin discovery statistic q0 of the shape model (profile likelihood, mu >= 0)",
+           "bins": len(bins), "nuisances": [d["name"] for d in nuis], "toys": toys, "seed": seed,
+           "best_fit_mu": g[0], "q0_observed": q_obs,
+           "asymptotic_p_value": 0.5 * math.erfc(z / math.sqrt(2.0)), "asymptotic_z": z}
+    if toys:
+        gen = shape_toy_generator(model, aux0, 0.0, "conditional-fluctuated-aux")
+        hits, failed = 0, 0
+        for i in range(toys):
+            ns, aux = gen(random.Random(seed * 1000003 + i), i)
+            model.log.context = "toy"
+            before = model.log.failures("toy")
+            try:
+                q, _ = _q0_shape(model, ns, aux)
+            finally:
+                model.log.context = "observed"
+            if model.log.failures("toy") > before:
+                failed += 1
+                continue
+            hits += q >= q_obs - 1e-12
+        out.update({"toy_tail": toy_tail(hits, toys - failed) if toys > failed else None, "toys_failed": failed,
+                    "toy_ensemble": "conditional-fluctuated-aux at mu = 0"})
+    fd = _fit_summary(model.log, toys, out.get("toys_failed", 0))
+    out["fit_diagnostics"], out["status"] = fd, fd["status"]
+    out["note"] = ("q0 is one-sided (0 when mu_hat <= 0); the asymptotic p-value assumes the half-chi2 distribution "
+                   "(Cowan et al. 2011), which needs enough events, so check it with toys at small counts; a scan over "
+                   "signal positions needs a look-elsewhere correction (look_elsewhere.py, global_significance.py)")
+    return out
 
 
 def shape_gof(doc: dict, toys: int, seed: int, mu: float | None = None) -> dict:
@@ -1384,12 +1499,24 @@ class _TwoPoiModel:
     def log(self) -> FitLog:
         return self.m1.log
 
-    def cond(self, mu1, mu2, ns, aux, start=None):
+    def cond(self, mu1, mu2, ns, aux, start=None, probe=False):
+        """Conditional fit at (mu1, mu2). With probe (a contour or Hessian probe, STH-T1.6), a point where no nuisance
+        value gives a valid likelihood (some bin mean <= 0) is outside the domain: q = +inf for the root finder,
+        counted as an event, not recorded as a failed fit on the observed data."""
         if self.k == 0:
             val = self.nll(mu1, mu2, [], ns, aux)
+            if probe and not math.isfinite(val):
+                self.log.events["out_of_domain_probes"] += 1
+                return [], math.inf
             self.log.record(_verdict_no_free(val))
             return [], val
-        r = self.log.record(newton_fit(lambda x: self.nll(mu1, mu2, x, ns, aux), list(start) if start else [0.0] * self.k))
+        r = newton_fit(lambda x: self.nll(mu1, mu2, x, ns, aux), list(start) if start else [0.0] * self.k)
+        if probe and not math.isfinite(r.fval) and start:   # the start may be what is outside: retry from nominal
+            r = newton_fit(lambda x: self.nll(mu1, mu2, x, ns, aux), [0.0] * self.k)
+        if probe and not math.isfinite(r.fval):
+            self.log.events["out_of_domain_probes"] += 1
+            return list(start) if start else [0.0] * self.k, math.inf
+        self.log.record(r)
         return r.x, r.fval
 
     def glob(self, ns, aux, start=None):
@@ -1397,11 +1524,14 @@ class _TwoPoiModel:
         r = self.log.record(newton_fit(lambda v: self.nll(v[0], v[1], v[2:], ns, aux), x0))
         return r.x[0], r.x[1], r.x[2:], r.fval
 
-    def q(self, mu1, mu2, ns, aux, g=None):
+    def q(self, mu1, mu2, ns, aux, g=None, probe=False):
         """2 (conditional - global NLL); a conditional minimum below the global one beyond DNLL_TOL triggers a global
-        refit from the conditional point and, if it remains, a recorded failure (audit T05)."""
+        refit from the conditional point and, if it remains, a recorded failure (audit T05). With probe, +inf outside
+        the domain (see cond)."""
         g = g if g else self.glob(ns, aux)
-        th_c, cval = self.cond(mu1, mu2, ns, aux, g[2])
+        th_c, cval = self.cond(mu1, mu2, ns, aux, g[2], probe)
+        if not math.isfinite(cval):
+            return math.inf
         if cval < g[3] - DNLL_TOL:
             self.log.events["global_refit"] += 1
             g2 = self.glob(ns, aux, [mu1, mu2] + list(th_c))
@@ -1431,17 +1561,43 @@ def _load_two_poi(doc):
     return bins1, bins2, nuis, chol
 
 
+def _root_increasing_in_domain(f, lo: float, hi: float, tol: float = 1e-7) -> float:
+    """_root_increasing for an f that is +inf outside the likelihood's domain (STH-T1.6): hi is doubled until f(hi) > 0,
+    then an infinite f(hi) is bisected back into the domain before the Illinois steps. A ray that meets the domain
+    edge (some bin mean <= 0) before f crosses zero is refused, not closed at the edge."""
+    fhi = f(hi)
+    for _ in range(20):
+        if fhi > 0.0:
+            break
+        lo, hi = hi, 2.0 * hi
+        fhi = f(hi)
+    else:
+        raise LikelihoodError("the contour level lies beyond the scan range")
+    for _ in range(200):
+        if math.isfinite(fhi):
+            return _root_increasing(f, lo, hi, tol)
+        if hi - lo < tol * max(1.0, abs(hi)):
+            break
+        mid = 0.5 * (lo + hi)
+        fm = f(mid)
+        if fm > 0.0:
+            hi, fhi = mid, fm
+        else:
+            lo = mid
+    raise LikelihoodError("the ray reaches the edge of the domain (a bin mean <= 0) before the contour level")
+
+
 def _trace_contours(model, aux0, g, cls, rays):
     """Hessian covariance at the best fit g and contour points along rays (one pass of profile_contour)."""
     m1h, m2h = g[0], g[1]
     s1, s2 = (max(sum(model.m1.s), 1e-12), max(sum(model.m2.s), 1e-12))
     h1, h2 = 0.05 * math.sqrt(sum(model.n) + 1.0) / s1, 0.05 * math.sqrt(sum(model.n) + 1.0) / s2
-    f = lambda a, b: 0.5 * model.q(a, b, model.n, aux0, g)
+    f = lambda a, b: 0.5 * model.q(a, b, model.n, aux0, g, probe=True)
     f11 = (f(m1h + h1, m2h) + f(m1h - h1, m2h)) / h1 ** 2
     f22 = (f(m1h, m2h + h2) + f(m1h, m2h - h2)) / h2 ** 2
     f12 = (f(m1h + h1, m2h + h2) - f(m1h + h1, m2h - h2) - f(m1h - h1, m2h + h2) + f(m1h - h1, m2h - h2)) / (4 * h1 * h2)
     det = f11 * f22 - f12 * f12
-    cov = [[f22 / det, -f12 / det], [-f12 / det, f11 / det]] if det > 0 else None
+    cov = [[f22 / det, -f12 / det], [-f12 / det, f11 / det]] if math.isfinite(det) and det > 0 else None
     sd = (math.sqrt(cov[0][0]), math.sqrt(cov[1][1])) if cov and cov[0][0] > 0 and cov[1][1] > 0 else (1.0 / s1, 1.0 / s2)
     contours, failures = {}, []
     for c in cls:
@@ -1451,11 +1607,11 @@ def _trace_contours(model, aux0, g, cls, rays):
             phi = 2.0 * math.pi * j / rays
             u1, u2 = math.cos(phi) * sd[0], math.sin(phi) * sd[1]
             try:
-                r = _root_increasing(lambda r_: model.q(m1h + r_ * u1, m2h + r_ * u2, model.n, aux0, g) - level,
-                                     0.0, 2.0 * math.sqrt(level), tol=1e-6)
+                r = _root_increasing_in_domain(lambda r_: model.q(m1h + r_ * u1, m2h + r_ * u2, model.n, aux0, g, probe=True) - level,
+                                               0.0, 2.0 * math.sqrt(level), tol=1e-6)
                 pts.append([m1h + r * u1, m2h + r * u2])
-            except LikelihoodError:
-                failures.append({"cl": c, "angle_deg": 360.0 * j / rays})
+            except LikelihoodError as exc:
+                failures.append({"cl": c, "angle_deg": 360.0 * j / rays, "reason": str(exc)})
         contours[f"{c:g}"] = {"q_level": level, "points": pts}
     return m1h, m2h, cov, contours, failures
 
@@ -1725,6 +1881,9 @@ def build_parser() -> argparse.ArgumentParser:
     nc.add_argument("--inner", type=int, default=200, help="toys per p-value")
     nc.add_argument("--points", type=int, default=9)
     nc.add_argument("--seed", type=int, required=True, help="required: every toy study records its seed")
+    sx = sub.add_parser("shape-significance", help="multi-bin discovery q0 of a shape-limit model (asymptotic and toys)")
+    sx.add_argument("--input", required=True)
+    common(sx, 0)
     gf = sub.add_parser("shape-gof", help="saturated-model goodness of fit of a shape-limit model")
     gf.add_argument("--input", required=True)
     gf.add_argument("--mu", type=float, default=None, help="fix mu (default: fitted, mu >= 0)")
@@ -1736,7 +1895,12 @@ def build_parser() -> argparse.ArgumentParser:
     h = sub.add_parser("shape-limit", help="multi-bin limit with shape and normalization nuisances")
     h.add_argument("--input", required=True)
     h.add_argument("--cl", type=float, default=0.95, help="used when the file has no cl")
-    h.add_argument("--cls-toys", type=int, default=0, help="toys per hypothesis and grid point for toy-based CLs (0: none)")
+    h.add_argument("--cls-toys", type=int, default=0,
+                   help="toys per hypothesis and grid point for toy-based CLs (0: none); cost about 2 x toys x points "
+                        "profile fits (seconds to minutes; the run prints toy_cls_runtime_estimate_s and refuses above "
+                        "--cls-max-runtime)")
+    h.add_argument("--cls-max-runtime", type=float, default=CLS_MAX_RUNTIME_S,
+                   help=f"refuse toy CLs whose estimated runtime exceeds this many seconds (default {CLS_MAX_RUNTIME_S:g})")
     h.add_argument("--cls-points", type=int, default=16, help="grid points in mu for toy-based CLs")
     common(h, 0)
     return parser
@@ -1758,7 +1922,13 @@ def main(argv: list[str] | None = None) -> int:
                 doc = json.loads(Path(args.input).read_text())
             except (OSError, json.JSONDecodeError) as exc:
                 raise LikelihoodError(f"cannot read {args.input}: {exc}") from None
-            result = shape_limit(doc, args.cl, args.toys, args.seed, args.cls_toys, args.cls_points)
+            result = shape_limit(doc, args.cl, args.toys, args.seed, args.cls_toys, args.cls_points, args.cls_max_runtime)
+        elif args.command == "shape-significance":
+            try:
+                doc = json.loads(Path(args.input).read_text())
+            except (OSError, json.JSONDecodeError) as exc:
+                raise LikelihoodError(f"cannot read {args.input}: {exc}") from None
+            result = shape_significance(doc, args.toys, args.seed)
         elif args.command == "shape-gof":
             try:
                 doc = json.loads(Path(args.input).read_text())

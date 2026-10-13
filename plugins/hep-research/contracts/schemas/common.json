@@ -65,7 +65,12 @@
         "values": {"type": "array", "items": {"type": "number"}},
         "correlation": {"type": "string", "enum": ["uncorrelated", "fully-correlated", "covariance", "unknown"]},
         "covariance_ref": {"type": "string"},
-        "gaussian": {"type": "boolean"}
+        "gaussian": {"type": "boolean"},
+        "prescription": {"type": "string", "description": "scale-envelope prescription (contracts 2.6.0 vocabulary envelope_prescriptions)"},
+        "method": {"type": "string", "description": "truncation-estimate method (contracts 2.6.0 vocabulary truncation_methods)"},
+        "bounds": {"type": "object", "description": "per-bin envelope of a binned prediction: lower and upper, one entry per bin",
+                   "properties": {"lower": {"type": "array", "items": {"type": "number"}},
+                                  "upper": {"type": "array", "items": {"type": "number"}}}}
       }
     },
     "binned_data": {

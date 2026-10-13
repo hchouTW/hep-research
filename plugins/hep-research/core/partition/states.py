@@ -38,9 +38,14 @@ def signature(rec: dict) -> str:
     """Failure signature for the 'two identical failures stop' rule: state, exit code, signal and hold code only.
 
     Host names, job IDs and times are left out, so a deterministic bug stops after two attempts on different nodes.
+    A backend-specific failure_reason (Slurm 'derived-exit', HTCondor 'executable-error') is appended when present,
+    so those failures have their own signature; records without one keep the earlier form.
     """
-    return "|".join([rec.get("final_state") or "unknown", f"exit={rec.get('exit_code')}", f"signal={rec.get('signal')}",
-                     f"hold={rec.get('hold_code')}"])
+    parts = [rec.get("final_state") or "unknown", f"exit={rec.get('exit_code')}", f"signal={rec.get('signal')}",
+             f"hold={rec.get('hold_code')}"]
+    if rec.get("failure_reason"):
+        parts.append(f"reason={rec['failure_reason']}")
+    return "|".join(parts)
 
 
 def repeated(errors: list) -> bool:

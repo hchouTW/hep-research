@@ -1,6 +1,6 @@
-"""Behavioral tests for the AMS-02-case-study scripts: orbit-averaged geomagnetic
+"""Behavioral tests for the generic cosmic-ray helper scripts: orbit-averaged geomagnetic
 cutoff, the solar-modulation force-field approximation, particle-ratio error
-propagation, and cosmic-ray flux/statistics from counts.
+propagation, and cosmic-ray flux/statistics from counts (no experiment profile involved).
 
 Run from the skill directory with python3 -m unittest discover -s tests -v.
 Uses synthetic data and standard library only; no experiment files are needed.
@@ -230,14 +230,14 @@ class CosmicRayFluxTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             flux_from_counts(4.5, exposure=1e6, bin_width=1.0)
 
-    def test_count_beyond_exact_tool_range_raises_clear_error(self):
-        with self.assertRaises(ValueError):
-            poisson_interval(501)
+    def test_count_above_the_old_500_ceiling_is_supported(self):
+        lo, hi = poisson_interval(501)
+        self.assertTrue(lo < 501 < hi)
 
     def test_cli_matches_library_result(self):
         proc = subprocess.run(
             [sys.executable, str(ROOT / 'skills/hep-analysis/scripts/cosmic_ray_flux.py'),
-             '--counts', '42', '--exposure', '1.5e7', '--bin-width', '10'],
+             '--counts', '42', '--exposure', '1.5e7', '--bin-width', '10', '--bin-width-unit', 'GV'],
             capture_output=True, text=True, check=True, timeout=600)
         payload = json.loads(proc.stdout)
         expected = flux_from_counts(42, exposure=1.5e7, bin_width=10.0)
@@ -247,7 +247,7 @@ class CosmicRayFluxTests(unittest.TestCase):
     def test_cli_rejects_bad_input_cleanly_not_with_traceback(self):
         proc = subprocess.run(
             [sys.executable, str(ROOT / 'skills/hep-analysis/scripts/cosmic_ray_flux.py'),
-             '--counts', '-1', '--exposure', '1e6', '--bin-width', '1'],
+             '--counts', '-1', '--exposure', '1e6', '--bin-width', '1', '--bin-width-unit', 'GV'],
             capture_output=True, text=True, timeout=600)
         self.assertNotEqual(proc.returncode, 0)
         self.assertNotIn('Traceback', proc.stderr)

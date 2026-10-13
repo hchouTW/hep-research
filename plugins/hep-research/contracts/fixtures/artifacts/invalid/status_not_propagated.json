@@ -89,7 +89,8 @@
    {
     "name": "scale",
     "kind": "scale-envelope",
-    "correlation": "unknown"
+    "correlation": "unknown",
+    "prescription": "3-point"
    }
   ],
   "allowed_transformations": [

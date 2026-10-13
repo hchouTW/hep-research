@@ -12,6 +12,7 @@ existing notes keep passing.
 from __future__ import annotations
 
 import argparse
+import json
 import re
 from pathlib import Path
 
@@ -130,6 +131,7 @@ def parse_args() -> argparse.Namespace:
         help="Require every numbered plan step to carry a verification, and reject "
              "placeholder verifications such as 'looks right'.",
     )
+    parser.add_argument("--json", action="store_true", help='print {"status": "ok" | "problems" | "error", ...}')
     return parser.parse_args()
 
 
@@ -144,13 +146,15 @@ def main() -> int:
             check_plan_verification(args.file.read_text(encoding="utf-8-sig"))
             if args.require_plan_verification else []
         )
-    except FileNotFoundError:
-        print(f"{args.file}: file not found")
-        return 2
-    except OSError as exc:
-        print(f"{args.file}: could not read file ({exc})")
+    except (OSError, UnicodeDecodeError) as exc:
+        message = "file not found" if isinstance(exc, FileNotFoundError) else f"could not read file ({exc})"
+        print(json.dumps({"status": "error", "error": f"{args.file}: {message}"}) if args.json else f"{args.file}: {message}")
         return 2
 
+    if args.json:
+        print(json.dumps({"status": "problems" if missing or plan_problems else "ok", "file": str(args.file),
+                          "missing_headings": missing, "plan_problems": plan_problems, "headings": headings}))
+        return 1 if missing or plan_problems else 0
     if missing:
         print(f"{args.file}: missing required headings: {', '.join(missing)}")
         print(f"found headings: {', '.join(headings) if headings else '(none)'}")

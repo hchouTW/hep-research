@@ -530,6 +530,61 @@ skipped. Not run: GPU, multi-GPU NCCL for FSDP2, a benchmark-dataset performance
 J9 example's fit uses private helpers of `core/stats/likelihood_limits.py` (`template_fit.py` refuses signed-weight
 templates).
 
+## THEORY-AUDIT (2026-10-13, E2 + SymPy 1.14.0, version 0.6.17 + unreleased, contracts 2.6.0): hep-theory audit THY-WP0 to WP5
+
+Each fix had its regression test seen failing on the `c1d375c` code first (counts in the commit messages).
+
+| Finding | Regression test | Before | After |
+|---|---|---|---|
+| `pdf_uncertainty.py` mixes the two alpha_s members into a `symmhessian` delta; `+as` types refused; NaN member ok | `tests/skills/hep_theory/test_pdf_uncertainty.py` | 43 members: delta 0.0443; `symmhessian+as` failed; NaN gave `ok` | `+as`: PDF delta 0.012649 (40 eigenvectors), separate `alphas.delta` 0.03; `num_members` mismatch, NaN refused (exit 1) |
+| `eft_truncation.py` sums `a*b` and `b*a`; empty conventions ok; `lambda_tev` 0 traceback; rescaling check absent | `test_eft_truncation.py` | quadratic 0.11, ok; `ZeroDivisionError` | refused with both spellings named; `rescaling_check: pass`; flag fraction with its source |
+| `event_weights.py`: index -1, 7, repeated indices; negative sigma and luminosity; NaN weight | `test_event_weights.py` | wrap-around, `IndexError`, fraction 1.5, ok | refused (exit 1, JSON); selected sum w, sum w^2, N_eff, relative uncertainty to 1e-12 |
+| `dis_kinematics.py` ignores the lepton mass in the bounds; target at rest refused | `test_dis_kinematics.py` (+5) | muon y = 1 and Q^2 below Q^2_min accepted | exact y_max, Q^2_min(y) against a 60-digit angle scan (1e-9, collider and fixed target); refused outside |
+| theory-spec / prediction invariants unchecked (six audit copies all `ok`, also with `--strict`) | `tests/contracts/test_theory_contract.py` (16 tests), fixtures from `make_fixtures.py` | no rule fired | eleven codes at their levels from 2.6.0; 2.5.0 artifacts keep their outcome, codes with `--strict` (API and CLI) |
+| Committed theory examples | same, `CommittedExampleTests` | 2.5.0, `folded_expectation` unlinked, truncation without method | 2.6.0, numbers byte-identical (word diff: versions and added fields only) |
+
+References `amplitudes-and-widths.md`, `selection-rules.md`, `regularization-and-schemes.md` and the cosmic-ray
+additions cite sources opened on 2026-10-13 (PDG 2026 reviews, arXiv papers, the Gleeson-Axford ADS scan) or say
+`unverified` (Furry's theorem, read only in a tertiary source; isospin and strangeness conservation by interaction;
+LHAPDF `.info` files, blocked). New profile `theory:higgs-bb-width`: 25 tests (derivation with exact mu-independence
+through alpha_s^4 and negative tests, prediction, convention mismatches, missing SymPy) pass in E2; in
+`sympy-py313` 25 run, 9 skipped (no scipy). Gamma(H -> b bbar) = 2.386 MeV at alpha_s^4 (scale envelope 2.384-2.386
+MeV), a perturbative argument conditional on the stated exclusions.
+
+`tools/run_all_checks.py` with the host CLIs and the E2 venv: 21 of 21 checks pass; 2,525 unit tests, 0 failures, 55
+skipped; profile suites ams-02 238, eic 43, synthetic-collider 9, qed-benchmark 18, qcd-r-ratio 21, higgs-bb-width
+25. `check_relocation.py`: pass. Lint with the CI pins (ruff 0.16.10, mypy 2.4.0) clean on `core/` and `contracts/`.
+`make_fixtures.py` and `make_cases.py` leave no diff on a second run. Not run: a live routing run (paid); CI on a PR
+(no PR opened); LHAPDF, MadGraph or any generator.
+## HEP-ANALYSIS-AUDIT (2026-10-13, E2, version 0.6.17 + unreleased, contracts 2.6.0)
+
+hep-analysis audit P0-1 to P4-8 on branch `fix/hep-analysis-audit`.
+
+Live routing evidence for the fourteen new boundary cases (`an-b-*`, one en and one zh-Hant per boundary): **pending**.
+A live run makes paid model calls and was not authorized for this branch; the static check covers the cases (179
+cases, 0 failed). The description changed only by dropping "space or ground-based" (925 to 897 characters, Q7), so the
+previous live routing baseline stays the reference until that run.
+
+| Item | Before (`c1d375c`) | After | Evidence |
+|---|---|---|---|
+| hep-analysis `SKILL.md` | 8,157 B, description 925 characters | 7,795 B, 897 characters | `tools/measure_entrypoints.py` |
+| Analysis guide | 219 lines | 118 lines | `tests/skills/hep_analysis/test_reference_links.py` |
+| Validator mutation probe (30 spec violations of the SKILL.md invariants, plain and `--strict`) | 30 silent passes (contracts 2.5.0) | 2 silent passes (contracts 2.6.0): `objective_x` (the estimand now lives in `estimand`; `estimand: "x"` fails) and `ratio_cancels_no_verification` (a warning by design) | audit probe, `tests/contracts/test_measurement_contract.py` |
+| `cosmic_ray_flux.py` (n = 3, b = 10 +- 1) | flux -7, interval [-8.9, -3.9] | lower bound 0, upper limit 0.2 (Cousins-Highland) | `test_cosmic_ray_flux.py` |
+| `cosmic_ray_flux.py` N = 480, 1000, 10000 | N = 480 exits 2 (500 ceiling) | Garwood bounds equal scipy chi2 to 1e-6 | same |
+| Orbit cutoff, 51.6 deg, 1.065 Re | min 1.96 GV (untilted) | tilted dipole (pole as input), 30 days: geomagnetic latitude +-60.9 deg, min 0.735 GV, mean 6.97 GV | `test_orbit_cutoff.py` |
+| Deuteron mass in the cutoff conversion | 1.863 GeV (A x u) | 1.875613 GeV (AME2020) | `test_nuclear_masses.py` |
+| Systematic check, +-1e-5 wiggle with 1% errors | "shape" | "none" (5% tilt: "shape") | `test_systematic_stat_test.py` |
+| Change review, four documented evasions | accepted, exit 0 | flagged or exit 2 | `test_review_analysis_change.py` |
+| Ratio 3/5 | 0.6 +- 0.438 | Poisson ratio [0.218, 1.564] at 68.27% | `test_ratio_intervals.py` |
+
+`tools/run_all_checks.py --out <scratch>` with the host CLIs and the E2 venv: all checks pass after the AMS-optional
+fix; unit tests 2,596 run, 0 failures, 55 skipped (201 modules). Lint with the CI pins (ruff 0.16.10, mypy 2.4.0) on
+`core/` and `contracts/`: clean. Physics statements corrected with sources opened on 2026-10-13: SILSO cycle table and
+news item (cycle 24), Kampert & Unger 2012 (sigma(X_max)), Gross & Vitells 2010 (trials), Barlow hep-ex/0207026
+(passed checks), AME2020 and CODATA 2022 (nuclear masses). Not done: simulated backgrounds and masked outputs inside
+the two example pipelines (P4-2 partial).
+
 ## 0.6.17 release check (2026-10-13, E2)
 
 Version 0.6.17: physics-ml enforcement and ML artifact semantics (contracts 2.5.0, PRs #59 and #60); partition engine
@@ -907,7 +962,8 @@ has no SymPy). `find_python.py` on E2 picks the calling interpreter (miniconda b
 skipped for optional tools); `check_relocation.py`: pass.
 
 Finding, not changed: the `theory-spec` extension has no field for tool versions. The skill text records the
-interpreter and the SymPy version in a `computational-run` (`tools`, `environment`) instead.
+interpreter and the SymPy version in a `computational-run` (`tools`, `environment`) instead. Closed 2026-10-13 (THEORY-AUDIT, THY-WP2.1): the
+extension has an optional `computational_run_ref` naming that `computational-run`.
 
 CI on the PR (Linux): the `checks` jobs on Python 3.11, 3.12 and 3.13 and every optional job pass.
 
@@ -965,3 +1021,61 @@ is recorded in the release commit; the tag `hep-research--v0.6.0` points at the 
 The companion ams02-research 1.3.1 declares hep-research `>=0.4.0,<0.6.0`, so its preflight refuses this release until
 the companion widens its range. Software checks establish consistency only; no host configuration is qualified for
 private or blinded data by this release.
+
+## CMP-REMEDIATION (2026-10-13, E2 + Homebrew ROOT 6.38.04, version 0.6.17 + unreleased): hep-computing remediation
+
+Branch `fix/hep-computing-remediation` from `c1d375c`, one commit per task CMP-01…CMP-28 (CMP-27 deferred by Q1)
+plus CMP-ANA-P2-7 (the `core/blinding` part of the hep-analysis audit item P2-7). Every bug-fix test was run against
+an export of `c1d375c` and failed there: `tests/core/test_partition_robustness.py` (8 of 8),
+`tests/core/test_blinding_regressions.py` (8 of 10; the two that pass on `c1d375c` check that nonzero blinded values
+stay sealed), `test_local_partition.py` (2 new), `test_compare_histograms.py` (10 of 10), the CMP-07 class of
+`test_environment_manifest.py` (7 of 7), `test_root_cpp_scripts.py` (5 of 6 new; the CMake build test passes on `c1d375c` too), `test_lint_task.py` (3 of 4 new),
+`tests/skills/test_cli_robustness.py` contract class (22 cases) and `tests/adapters/test_batch_cmp_regressions.py`
+(5 of 6).
+`tools/run_all_checks.py` with `~/.venvs/hep-research-e2` (Python 3.13.2) at `1606c04`: 20 pass, 0 fail, 0 skip;
+2535 unit tests in 191 modules, 0 failures, 56 skipped (55 at 0.6.17; the new skip is
+`test_root_integration.test_viewers_json_mode`, PyROOT). PyROOT-dependent tests run with
+`HEP_ROOT_PYTHON=/opt/homebrew/bin/python3.14` (Homebrew ROOT 6.38.04): `test_root_integration` 8 and
+`tests.adapters.test_root_cpp_assets` 5, all pass; the generated `new_root_cpp_project.sh` project and the
+`cmake-and-build.md` snippet configured and built with CMake 4.3.2; the parallel `check_root_cpp_env.sh` test ran.
+uproot 5.7.6 ran the uproot backend of `compare_root_histograms.py`. CI lint pins in a scratch venv: `ruff 0.16.10`
+`check core contracts` clean, `mypy 2.4.0` clean (55 files). Reference snippets were run where the tool exists:
+SymPy 1.14.0 and SciPy 1.18.1 (every number in `symbolic-and-numerical-computation.md`), PyROOT 6.38.04
+(`python-hep-coding-patterns.md`, the RDataFrame/RNTuple features, `GetNRuns`, `TTreePerfStats`, the directory
+"leak"), Bash 3.2.57 (`set -u` empty arrays, SIGTERM forwarding). Not run here: gdb, valgrind, perf, py-spy, the
+Linux LeakSanitizer, real Slurm or HTCondor (fakes only), and a live routing run (three static cases added). The
+`lint_task.py` run on the task order reports one error by design: it cites `references/product-framing.md`, which
+CMP-26 moved to `docs/dev/engineering/`. Contracts unchanged (2.5.0). Software checks only; no scientific validity.
+## STATISTICS-HARDENING (2026-10-13, CI lock env: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, pyhf 0.7.6, ArviZ 0.23.4; version 0.6.17 + unreleased, contracts 2.6.0)
+
+hep-statistics hardening order STH (audit on 0.6.15, re-checked on `c1d375c`). Contract checks establish consistency
+only, not statistical validity.
+
+| Item | Result | Evidence |
+|---|---|---|
+| Adversarial gate inputs (17 statistical-result mutations, 5 Bayesian, comparison-gate relabel, edge overwrite and unit factors -3/0/NaN/inf, duplicate combination id, unequal envelope rows, scaled covariance, contour domain, result_artifact refusals) | 36 failing (sub)tests on `c1d375c` (only the unmutated-bases control passed); all green on the branch, each with its own reason code | `tests/contracts/test_gate_adversarial.py` |
+| Verdict snapshot of the 90 committed artifacts of `c1d375c` | default and strict validator outcomes unchanged for every artifact; gate verdicts changed only through `gate.not_observed_data` (Q3): J9 passed -> failed, 11 synthetic/asimov examples and fixtures unresolved -> failed; the sbottom benchmark stays unresolved; 19 new 2.6.0 fixtures added | `tests/contracts/test_gate_verdict_snapshot.py`, `tests/contracts/gate_verdicts.json` |
+| Contracts 2.6.0 back-compatibility and migration | each new code fires natively at 2.6.0; a 2.5.0 copy of every new fixture keeps ok without `--strict` and reports the code with it; the migrator refuses each of the 8 new error fixtures and moves a 2.5.0 artifact to 2.6.0 without inventing a seed | `tests/contracts/test_statistical_semantics.py` (`Contracts26Hardening`) |
+| Covariance scale invariance | the rho/sigma matrix (correlation eigenvalue -0.80) fails with `not_psd` at sigma ratios 1, 1e4 and 1e12; diag(1e-20, 1e20) passes with rank 2, condition 1 | `tests/core/test_stats_covariance.py` |
+| Two-POI contour, 3-bin audit input | exit 0, status ok, 72 points on the level of an independent Poisson deviance within 1e-4; out-of-domain probes counted, not failed | `tests/core/test_stats_two_poi.py` |
+
+| Unbinned fit at three scales (same shape on [0, 5], [0, 500], [10000, 10500]) | 300 toys each (HEP_SLOW_TESTS=1, 95 s): no failed fit, every pull width in [0.9, 1.1]; before, the last two failed every toy | `tests/adapters/test_unbinned_fit.py` |
+| Break position of a broken power law (x_b = 10, gamma 2.7 -> 2.4, 20 points, 2% + 1% correlated errors) | 500 toys (HEP_SLOW_TESTS=1, 342 s): bias of ln x_b within 0.2 sigma (0.11 in a 300-toy probe), toy-calibrated 68.27% interval coverage within 0.03 (0.693 in the probe); no-break control: chi2(1) reference rejects > 10% at 5% | `tests/skills/hep_statistics/test_covariance_fit.py` |
+| Ratio covariance at 1e5-1e7 counts; D'Agostini data unfolding; asymptotic shape-limit vs pyhf; multi-bin q0 | within 5% per element of 200k toys; 15 x 15 variances within 10% of 1500 toys; CLs limit within 1% of pyhf 0.7.6 at 100 bins x 1000 events; q0 equal to `look_elsewhere.py local` to 1e-6 | `test_stats_statistical_toys.py`, `test_stats_unfolding_outer.py`, `test_backend_likelihood_equivalence.py`, `test_stats_likelihood_limits.py` |
+| Expected bands; MC ranges; shape-limit at n = b = 0; model card with pyhf | `cls-limit --n 2 --b 3.7` -2 sigma 2.996 (was 3.5595); `profile-cls --n 0 --b 3` range contains 3.00; n = b = 0 status ok, toy CLs range contains 2.996; a validation region moved mu_hat 0.70 -> -3.94 before the fix, none after | `test_stats_poisson.py`, `test_stats_toy_ensemble.py`, `test_stats_likelihood_limits.py`, `test_sr_cr_model_card.py` |
+
+| Reference sources (STH-T2.4, T4.1-T4.5) | 27 sources added to `docs/evidence/statistics/sources.json` (S15-S41): 15 arXiv abstract pages and, at page level, the iminuit reference and the HistFactory `Measurement.h` header read on 2026-10-13 (two Combine documentation pages update S14); 10 recorded metadata-only and cited only for what their titles and venues establish; the ledger check passes strictly | `tests/tools/test_statistics_evidence.py`, `tests/core/test_evidence_ledger.py` |
+
+Provenance moved here from `core-stats-guide.md` (STH-T2.3): the "Validation tools outside `core/stats`" table there
+(result_artifact, covariance_fit, sweighted_fit, bayes_calibration, the EXPERIMENTAL eft_scan, discrete_profile,
+global_significance, pcl_efficiency_ratio and ratio_estimation, the pyhf backend comparison and model card, the
+sbottom benchmark) was added by the hep-statistics audit of 2026-10-12 (T01-T30, PRs #49, #51, #53).
+
+## INTEGRATION (2026-10-13, E2 + Homebrew ROOT 6.38.04, PR #64): fixes found by CI on the merged audits
+
+| Finding | Regression test | Before | After |
+|---|---|---|---|
+| `check_systematic_variations.py` combined per-sample variances as independent for same-event variations (ROOT fixture `jes_Up`/`jes_Down` = nominal events scaled by 1.03/0.97) | `tests/skills/hep_analysis/test_systematic_stat_test.py` `SameEventVariationTests` (4), `tests/skills/hep_computing/test_root_integration.py::test_check_systematic_variations` | up/down `effect: none`, "neither variation changes this histogram" | no test without `--independent` or difference variances, effect from tolerance (`mixed`); `up_diff_sumw2` detects the shift |
+| `SrCrModelCard` lost its pyhf skip (STH-T3.12 inserted a class under the decorator) | `tests/adapters/test_sr_cr_model_card.py` with pyhf hidden | 3 errors without pyhf | 6 skipped without pyhf, all pass with it |
+| Broken-power-law covariance comparison at `places=9` | `tests/skills/hep_analysis/test_broken_power_law.py` | fails on Python 3.11 (difference 1.8e-9) | relative 1e-6; measured 1.0e-8 (3.12, 3.13), 9.0e-8 (3.11) |
+| `check_root_cpp_env.sh`: `ROOT_VERSION=$(root --version \| head -n 1)` under `set -euo pipefail` (CI: `test_env_check_parallel_runs_and_cleanup` failed in `rootproject/root:6.38.00-ubuntu25.10`, passed on macOS) | `tests/skills/hep_computing/test_root_cpp_scripts.py` `test_env_check_survives_a_failing_root_version`, `test_env_check_reports_a_failing_root_config` | fake `root --version` exiting 1: exit 1, no output; failing `root-config`: exit 1, no JSON | `status: ok` with the first version line; `status: failed`, exit 1 |

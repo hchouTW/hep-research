@@ -26,20 +26,24 @@ import math
 import sys
 from pathlib import Path
 
-import numpy as np
-from scipy import optimize
+try:  # --help works without them; main() refuses to run without them (STH-T3.1)
+    import numpy as np
+    from scipy import optimize
+except ImportError:  # pragma: no cover
+    np = optimize = None  # type: ignore[assignment]
 
 LABEL = "[General method] EXPERIMENTAL SYNTHETIC"
-EDGES = np.linspace(100.0, 180.0, 41)
-X = 0.5 * (EDGES[1:] + EDGES[:-1])
-U = (X - 100.0) / 80.0
-PENALTY_PER_PARAMETER = 1.0          # in -2 ln L units, fixed before any study
-# acceptance, fixed before the first study run: the envelope passes at a truth when |bias| <= 0.2 of the toy spread and
-# the one-sided 95% lower bound on its 68.27% coverage (Bonferroni over the rows) is at least 0.6827 - 0.05
-CRITERIA = {"max_abs_bias_over_spread": 0.2, "coverage_nominal": 0.6827, "max_coverage_deficit": 0.05, "bound_cl": 0.95}
-S_TOTAL = 30.0
-SIG = np.exp(-0.5 * ((X - 125.0) / 2.0) ** 2)
-SIG = S_TOTAL * SIG / SIG.sum()
+if np is not None:  # module data of the study (needs NumPy)
+    EDGES = np.linspace(100.0, 180.0, 41)
+    X = 0.5 * (EDGES[1:] + EDGES[:-1])
+    U = (X - 100.0) / 80.0
+    PENALTY_PER_PARAMETER = 1.0          # in -2 ln L units, fixed before any study
+    # acceptance, fixed before the first study run: the envelope passes at a truth when |bias| <= 0.2 of the toy spread and
+    # the one-sided 95% lower bound on its 68.27% coverage (Bonferroni over the rows) is at least 0.6827 - 0.05
+    CRITERIA = {"max_abs_bias_over_spread": 0.2, "coverage_nominal": 0.6827, "max_coverage_deficit": 0.05, "bound_cl": 0.95}
+    S_TOTAL = 30.0
+    SIG = np.exp(-0.5 * ((X - 125.0) / 2.0) ** 2)
+    SIG = S_TOTAL * SIG / SIG.sum()
 
 
 def _exp1(p):
@@ -204,6 +208,9 @@ def main(argv=None) -> int:
     s.add_argument("--procedures", default="envelope,single_exp1")
     s.add_argument("--workers", type=int, default=1)
     a = ap.parse_args(argv)
+    if np is None:
+        print(json.dumps({"status": "rejected", "error": "NumPy and SciPy are required"}))
+        return 2
     if a.toys < 10:
         print(json.dumps({"status": "rejected", "error": "--toys must be at least 10"}))
         return 2

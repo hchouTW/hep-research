@@ -77,7 +77,7 @@ They have not been run with this plugin. Plugins need a paid plan (Pro, Max, Tea
 3. Find `hep-research` under **Discover** and select **Add** (or **Install**).
 4. Alternatively, **Add > Upload plugin** accepts a `.zip` of this folder; the archive must hold exactly one
    `.claude-plugin/plugin.json`. Build it from a clean checkout so it carries no caches:
-   `git archive --format=zip -o hep-research.zip HEAD:plugins/hep-research`. The plugin (about 1200 files, 12.1 MB uncompressed) is inside the documented limits (5,000 files, 200 MB). An uploaded plugin does not update from GitHub.
+   `git archive --format=zip -o hep-research.zip HEAD:plugins/hep-research`. The plugin (about 1360 files, 13.5 MB uncompressed) is inside the documented limits (5,000 files, 200 MB). An uploaded plugin does not update from GitHub.
 
 The plugin is saved to your account, so it is then available in Chat, in Cowork, and in Claude Code sessions signed
 in to the same account (Claude Code downloads it as a synced plugin; run `/reload-plugins`). Pick a skill by typing
@@ -171,7 +171,8 @@ Profiles are used only when you name them or when your project root holds `hep-r
 Shipped profiles: `experiment:ams-02` (public evidence ledger and public-domain methods; no internal data or
 software), `experiment:eic` (EIC facility context and the ePIC experiment, public documents only, no performance
 numbers), `experiment:synthetic-collider` (an invented detector for examples), `theory:qed-benchmark` (tree-level
-QED) and `theory:qcd-r-ratio` (R ratio with QCD corrections). Private profiles stay in your project and are listed in
+QED), `theory:qcd-r-ratio` (R ratio with QCD corrections) and `theory:higgs-bb-width` (H -> b bbar with the MS-bar
+running mass). Private profiles stay in your project and are listed in
 the config's `local_profile_paths`; check the config with
 `python3 "<plugin root>/contracts/project.py" <project-dir>`, where `<plugin root>` is the folder that holds this README
 (in an install, the host's copy of the plugin). Nothing private is copied into the plugin.

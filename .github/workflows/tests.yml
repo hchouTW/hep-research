@@ -156,7 +156,13 @@ jobs:
           python -m pip install -r requirements-ci.lock
           python -m pip install ${{ matrix.install }}
       - name: Unit tests with ${{ matrix.extra }} available
-        run: python tools/run_all_checks.py --part units --no-cli --jobs 4
+        run: python tools/run_all_checks.py --part units --no-cli --jobs 4 --out ../../check-runs
+      - name: Keep the check-run record
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: check-run-optional-${{ matrix.extra }}
+          path: check-runs/
 
   optional-root:
     name: optional (ROOT)
@@ -174,7 +180,13 @@ jobs:
         run: |
           if command -v git >/dev/null; then git config --global --add safe.directory "$GITHUB_WORKSPACE"; fi  # checkout owned by another user
           python3 -c "import ROOT; print('ROOT', ROOT.gROOT.GetVersion())"
-          python3 tools/run_all_checks.py --part units --no-cli --jobs 4
+          python3 tools/run_all_checks.py --part units --no-cli --jobs 4 --out ../../check-runs
+      - name: Keep the check-run record
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: check-run-optional-ROOT
+          path: check-runs/
 
   latest:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'

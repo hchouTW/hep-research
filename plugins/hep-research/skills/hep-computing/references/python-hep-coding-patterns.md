@@ -25,9 +25,25 @@ naming and general/ROOT-specific C++ design guidance, see
 - Call `ROOT.gROOT.SetBatch(True)` for any script that creates plots.
 - Validate files with `TFile.Open` and `IsZombie()`.
 - Validate trees and histograms before dereferencing.
-- Close output files explicitly.
-- Be careful with object ownership when returning ROOT objects from helper functions —
-  a Python-side reference does not always keep the underlying C++ object alive.
+- Open files in a `with` block so they close on every path, the same rule as for any resource in the
+  [Python guidelines](python-balanced-design-guidelines.md): `with ROOT.TFile.Open(path, "RECREATE") as f:` in
+  PyROOT (ROOT 6.22+), `with uproot.recreate(path) as f:` in uproot. A histogram read inside the block is deleted
+  with the file unless it is detached first: `h.SetDirectory(ROOT.nullptr)`.
+- Ownership crosses the language boundary. Python deletes an object it created when the last Python reference goes
+  away, even if C++ still uses it: a histogram drawn on a canvas inside a helper function vanishes from the canvas
+  when the helper returns (the saved plot is empty, no error). Keep a reference for as long as the canvas is used
+  (return the histogram too, or store it on an object). When C++ takes ownership (a `TList` with `SetOwner(True)`,
+  a canvas primitive that the canvas should delete), call `ROOT.SetOwnership(obj, False)` so Python does not delete
+  it a second time; `ROOT.SetOwnership(obj, True)` makes Python delete an object a C++ factory returned.
+
+```python
+with ROOT.TFile.Open(path) as f:
+    h = f.Get("h_pt")
+    h.SetDirectory(ROOT.nullptr)  # keep it after the file closes
+```
+
+Checked with PyROOT 6.38.04 (Homebrew, Python 3.14) on 2026-10-13: the `with` form closes the file, a detached
+histogram keeps its entries, and a histogram drawn in a helper is gone from the canvas after the helper returns.
 
 ## uproot and awkward
 
@@ -49,6 +65,25 @@ for arrays in uproot.iterate(files, expressions=["Muon_pt", "Muon_eta", "event_w
     values = arrays["Muon_pt"][mask, 0]
     weights = arrays["event_weight"][mask]
 ```
+
+## Python HEP ecosystem (link-level)
+
+When to reach for each package; read its documentation for the API (links accessed 2026-10-13; none of these is
+installed in the plugin's test environment, so no version is claimed here: record the version you use).
+
+- [hist](https://hist.readthedocs.io) and [boost-histogram](https://boost-histogram.readthedocs.io): histograms with
+  axes, weights and variances (`hist.Hist`, `.Weight()` storage) instead of hand-kept `np.histogram` pairs; uproot
+  writes and reads them.
+- [vector](https://vector.readthedocs.io): Lorentz vectors on awkward arrays (`vector.register_awkward()`), for
+  invariant masses and boosts without hand-written formulas.
+- [correctionlib](https://cms-nanoaod.github.io/correctionlib/): evaluate scale factors and corrections from a JSON
+  correction set, the same file in Python and C++; do not re-implement binned lookups.
+- [coffea](https://coffeateam.github.io/coffea/): processors over NanoAOD-like data with awkward, the
+  `adapters/root-uproot/assets/coffea_dijet_processor.py` starting point; it brings dask-based scale-out.
+- [dask-awkward](https://dask-awkward.readthedocs.io): lazy, partitioned awkward arrays for datasets larger than
+  memory; compute once at the end, as with RDataFrame booking.
+- [numba](https://numba.readthedocs.io): compile a loop that cannot be written columnar; check its result against a
+  small pure-Python version.
 
 ## Remote files (XRootD)
 

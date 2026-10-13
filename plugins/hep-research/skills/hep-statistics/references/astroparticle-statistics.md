@@ -70,8 +70,8 @@ specific, recurring forms in this domain that are easy to under-count:
   correlated by the point-spread function, so the effective trials count is roughly
   `N_eff ~ min(N_positions, scanned area / PSF solid angle)` - never *more* than the
   number of positions actually tested (a grid finer than the PSF gives the area term; a
-  coarser grid gives `N_positions`). For a quick bound, `p_global = 1 - (1 -
-  p_local)^N_eff`; e.g. a 3.0 sigma local hotspot (one-sided p = 1.35e-3) from a 1000-position scan
+  coarser grid gives `N_positions`). As an approximation (exact only for N_eff independent trials, and N_eff is itself estimated),
+  `p_global = 1 - (1 - p_local)^N_eff`; e.g. a 3.0 sigma local hotspot (one-sided p = 1.35e-3) from a 1000-position scan
   has `p_global` about 0.74 for `N_eff = 1000` and about 0.13 even for `N_eff = 100` -
   not a detection either way. Estimating the correct global
   p-value from pixel-level local p-values is standard practice done via simulated
@@ -105,6 +105,33 @@ argument stated in
 upper limit or best-fit flux that does not state the assumed spectral shape used in
 the exposure weighting is not reproducible, because a harder or softer assumed
 spectrum shifts the effective exposure (and hence the limit) systematically.
+
+## Point sources, test statistics, periodicity and variability
+
+These are statistical methods and belong here (order question Q15); the instrument response they use (point-spread
+function, energy dispersion, effective area) belongs to detector-response.
+
+- **Unbinned point-source likelihood** (Braun et al., Astropart. Phys. 29 (2008) 299, arXiv:0801.1604): each event
+  enters with a signal density (the point-spread function around the source position, times an energy term for the
+  assumed spectrum) and a background density estimated from the data themselves (for example scrambled in right
+  ascension), `L(n_s, gamma) = prod_i [n_s/N S_i + (1 - n_s/N) B_i]`; the number of signal events `n_s >= 0` is fitted.
+  The background-only distribution of the test statistic comes from scrambled data, not from Wilks alone.
+- **Test statistic and its reference** (Mattox et al., ApJ 461 (1996) 396): `TS = 2 ln(L_1 / L_0)`. With the flux
+  bounded at zero and the position fixed, the asymptotic background-only distribution is the half-and-half mixture
+  `1/2 chi2_0 + 1/2 chi2_1` (Chernoff, Ann. Math. Stat. 25 (1954) 573), so `sqrt(TS)` is the one-sided significance;
+  with the position (or the spectral index) also free, more degrees of freedom enter and a scan over positions is a
+  look-elsewhere problem (section above). Calibrate with simulated or scrambled skies when it matters.
+- **Periodicity in arrival times.** With phases `phi_i` at a trial frequency, the Rayleigh test is
+  `Z_1^2 = (2/N) [(sum cos phi_i)^2 + (sum sin phi_i)^2]` and the `Z_m^2` test (Buccheri et al., A&A 128 (1983) 245)
+  sums the first `m` harmonics, `chi2` with `2m` degrees of freedom for uniform phases and large `N`. The H-test
+  `H = max over m <= 20 of (Z_m^2 - 4m + 4)` does not fix `m` in advance; its tail is `P(> H) ~ exp(-0.4 H)` (de Jager
+  and Buesching, A&A 517 (2010) L9, arXiv:1005.4867). A search over frequencies (and frequency derivatives) is a
+  trials problem: the number of independent frequencies, or simulations, gives the global p-value.
+- **Variability: Bayesian blocks** (Scargle et al., ApJ 764 (2013) 167, arXiv:1207.5578) segment a light curve (event
+  times or binned counts) into intervals of constant rate by an exact optimization; the prior on the number of change
+  points is set from a chosen false-positive rate per change point, which must be stated (and checked with
+  simulations of a constant source). A change point is not by itself a significant flare: report the rate change and
+  its significance with the trials of the segmentation.
 
 ## Deliverables
 

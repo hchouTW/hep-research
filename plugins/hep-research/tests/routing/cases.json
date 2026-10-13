@@ -114,6 +114,168 @@
    }
   },
   {
+   "id": "an-b-eff-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "How should the trigger and selection efficiencies enter the correction chain of my flux measurement, each with its own denominator?",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "correction chains"
+   ],
+   "set": "ANA-P4-5"
+  },
+  {
+   "id": "an-b-eff-2",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "請用 tag-and-probe 量測這個 muon 的重建效率，並給出每個 bin 的不確定度。",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "tag-and-probe"
+   ],
+   "not": "hep-analysis",
+   "set": "ANA-P4-5"
+  },
+  {
+   "id": "an-b-blind-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Help me design the blinding policy for my search: which regions and observables stay masked until unblinding?",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "blinding policy"
+   ],
+   "set": "ANA-P4-5"
+  },
+  {
+   "id": "an-b-blind-2",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "請幫我檢查這些輸出、logs 和 caches 有沒有洩漏盲區的數值（advisory blinding checks）。",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "advisory blinding checks of outputs, logs and caches"
+   ],
+   "not": "hep-analysis",
+   "set": "ANA-P4-5"
+  },
+  {
+   "id": "an-b-closure-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Design the closure test for my ABCD background estimation in a validation region.",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "background estimation",
+    "ABCD"
+   ],
+   "set": "ANA-P4-5"
+  },
+  {
+   "id": "an-b-closure-2",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "我的 template fits 已經完成，請計算 goodness of fit 並給出 p 值。",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "template fits",
+    "goodness of fit"
+   ],
+   "not": "hep-analysis",
+   "set": "ANA-P4-5"
+  },
+  {
+   "id": "an-b-syst-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Write the evaluation plan for the physical sources of systematic uncertainties in my cross-section measurement.",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "systematic uncertainties and their evaluation plan"
+   ],
+   "set": "ANA-P4-5"
+  },
+  {
+   "id": "an-b-syst-2",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "請把這些系統誤差做 covariance assembly and validation，並檢查矩陣是否半正定。",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "covariance assembly and validation"
+   ],
+   "not": "hep-analysis",
+   "set": "ANA-P4-5"
+  },
+  {
+   "id": "an-b-cutflow-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Design the cutflows for my dimuon selection: which cuts, in which order, and with which denominators?",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "cutflows"
+   ],
+   "set": "ANA-P4-5"
+  },
+  {
+   "id": "an-b-cutflow-2",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "請用 RDataFrame 寫出這個 cutflow 的程式碼，並輸出每一步的加權事件數。",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "RDataFrame"
+   ],
+   "not": "hep-analysis",
+   "set": "ANA-P4-5"
+  },
+  {
+   "id": "an-b-level-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Should my spectrum be reported at detector level or unfolded to particle level? Help me with the observable definition.",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "observable definition"
+   ],
+   "set": "ANA-P4-5"
+  },
+  {
+   "id": "an-b-level-2",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "請幫我做帶正則化的 unfolding，並檢查結果的 coverage（unfolding with regularization and coverage）。",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "unfolding with regularization and coverage"
+   ],
+   "not": "hep-analysis",
+   "set": "ANA-P4-5"
+  },
+  {
+   "id": "an-b-review-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Here is our analysis note on the dilepton cross section; give me a verdict-first measurement review.",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "verdict-first measurement review"
+   ],
+   "set": "ANA-P4-5"
+  },
+  {
+   "id": "an-b-review-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "這是我們的分析筆記，請做 measurement review，先給結論再列出缺陷。",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "measurement review"
+   ],
+   "set": "ANA-P4-5"
+  },
+  {
    "id": "co-direct-1",
    "lang": "en",
    "kind": "direct",
@@ -268,6 +430,46 @@
    "inputs": {
     "fit_outputs.json": "{\"_note\": \"SYNTHETIC routing fixture: invented values, not data from any experiment.\", \"status\": [\"synthetic\"], \"mu\": 1.02, \"mu_err\": [0.11, 0.12], \"chi2\": 9.8, \"ndf\": 9}\n"
    }
+  },
+  {
+   "id": "th-selection-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Is pi0 -> gamma gamma gamma allowed? Which rule forbids it?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "selection rules"
+   ]
+  },
+  {
+   "id": "th-selection-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "π0 → γγγ 這個衰變允許嗎？是哪一條 selection rules 禁止它？",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "selection rules"
+   ]
+  },
+  {
+   "id": "th-scheme-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Convert the MS-bar bottom mass m_b(m_b) to the pole mass; state the schemes and the loop order.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "schemes"
+   ]
+  },
+  {
+   "id": "th-scheme-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請把 MS-bar 的 b 夸克質量換算成 pole mass，並說明使用的 schemes 與迴圈階數。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "schemes"
+   ]
   },
   {
    "id": "ml-direct-1",
@@ -1225,6 +1427,42 @@
    "set": "T3"
   },
   {
+   "id": "co-cmp-crash-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My compiled ROOT analysis crashes with a segmentation violation; valgrind reports an invalid read in my code. Help me find it.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "crashes",
+    "ROOT/PyROOT"
+   ],
+   "set": "CMP"
+  },
+  {
+   "id": "co-cmp-perf-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Profile my RDataFrame job: it takes three hours per file and I need it under thirty minutes.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "RDataFrame",
+    "performance"
+   ],
+   "set": "CMP"
+  },
+  {
+   "id": "co-cmp-ode-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我用 solve_ivp 解這組 ODE，請幫我做 convergence and tolerance studies，確認結果穩定。",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "ODEs",
+    "convergence and tolerance studies"
+   ],
+   "set": "CMP"
+  },
+  {
    "id": "th-t3-1",
    "lang": "en",
    "kind": "direct",
@@ -2130,6 +2368,131 @@
    "not": "detector-response",
    "set": "ML-OWN",
    "note": "the deliverable is a trained regression model, which physics-ml owns; the detector calibration chain and its validation in data stay with detector-response"
+  },
+  {
+   "id": "st-t46-nat-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "兩個實驗量測同一物理量，有共同的亮度誤差，要怎麼合併？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [],
+   "set": "STH-T4.6",
+   "natural": true
+  },
+  {
+   "id": "st-t46-nat-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我觀測到 3 個事件，預期背景 1.2 個且有兩成不確定度，上限該怎麼算？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [],
+   "set": "STH-T4.6",
+   "natural": true
+  },
+  {
+   "id": "st-t46-nat-3",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "這組 MCMC 樣本的鏈混合得不好，後驗分布還能用嗎？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [],
+   "set": "STH-T4.6",
+   "natural": true
+  },
+  {
+   "id": "st-t46-nat-4",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "掃描所有質量之後，這個峰值是否仍然顯著？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [],
+   "set": "STH-T4.6",
+   "natural": true
+  },
+  {
+   "id": "st-t46-nat-5",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "用迭代貝氏方法反摺積這個能譜，迭代次數要怎麼選、誤差怎麼給？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [],
+   "set": "STH-T4.6",
+   "natural": true
+  },
+  {
+   "id": "st-t46-nat-6",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "分子和分母的計數都上百萬，各能量區間比值之間的相關誤差矩陣要怎麼算？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [],
+   "set": "STH-T4.6",
+   "natural": true
+  },
+  {
+   "id": "st-t46-ratio-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Compute the per-bin ratio of these two spectra with its full covariance, including the efficiency systematic they share.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "covariance assembly and validation"
+   ],
+   "set": "STH-T4.6"
+  },
+  {
+   "id": "st-t46-break-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Fit a broken power law to these published flux points with their covariance and give an interval for the break energy.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "fits of model parameters to published data points with their covariance"
+   ],
+   "set": "STH-T4.6"
+  },
+  {
+   "id": "st-t46-bump-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Search for a bump on a smoothly falling background that I fit from the data, and quote the global significance.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "significance and look-elsewhere effects"
+   ],
+   "set": "STH-T4.6"
+  },
+  {
+   "id": "st-t46-comb-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Combine our cross-section measurement with the other experiment's; both depend on the same luminosity measurement.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "combinations across datasets or experiments"
+   ],
+   "set": "STH-T4.6"
+  },
+  {
+   "id": "j05-turn-fit",
+   "lang": "en",
+   "kind": "multi-turn",
+   "prompt": "Fold my prediction through the detector response.",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "folding a prediction through the response"
+   ],
+   "set": "STH-T4.6",
+   "turns": [
+    {
+     "prompt": "Now fit the normalization of the folded prediction to the data.",
+     "expected": "hep-statistics",
+     "trigger_terms": [
+      "fits that use a folded prediction"
+     ]
+    }
+   ],
+   "note": "Q9: the fold belongs to detector-response, the fit that uses the folded prediction to hep-statistics (routing contract row 36)"
   }
  ]
 }

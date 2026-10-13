@@ -1,33 +1,247 @@
-{"contract_version": "1.0.0",
+{
+ "contract_version": "1.0.0",
  "tool_id": "cosmic-ray-flux",
  "entry": "skills/hep-analysis/scripts/cosmic_ray_flux.py",
- "operations": [{
-  "operation_id": "flux",
-  "summary": "Differential flux of one bin: (counts - background) / (exposure * bin_width), with an exact Poisson interval on the raw count and the background uncertainty combined in quadrature",
-  "invocation": {"kind": "cli", "output": "json-stdout", "options": [
-   {"flag": "--counts", "input": "counts"},
-   {"flag": "--exposure", "input": "exposure"},
-   {"flag": "--bin-width", "input": "bin_width"},
-   {"flag": "--background", "input": "background"},
-   {"flag": "--background-sigma", "input": "background_sigma"},
-   {"flag": "--level", "input": "level"}]},
-  "inputs": [
-   {"name": "counts", "kind": "counts", "unit": "1", "required": true, "constraint": "integer, 0 <= counts <= 500 (exact Poisson range)"},
-   {"name": "exposure", "kind": "exposure", "unit": "{X}", "required": true, "constraint": "finite, > 0; geometric factor or effective area times live time times solid angle, one number per bin. Whether it contains the efficiency is the caller's statement (recipe operator divide_exposure or divide_effective_exposure); the tool cannot tell"},
-   {"name": "bin_width", "kind": "bin_width", "unit": "{E}", "required": true, "constraint": "finite, > 0; in the unit the flux is differential in"},
-   {"name": "background", "kind": "background_counts", "unit": "1", "required": false, "constraint": "finite, >= 0", "default": 0.0},
-   {"name": "background_sigma", "kind": "background_counts", "unit": "1", "required": false, "constraint": "finite, >= 0", "default": 0.0},
-   {"name": "level", "kind": "parameter", "unit": "1", "required": false, "constraint": "confidence level in (0, 1)", "default": 0.6827}],
-  "outputs": [
-   {"name": "net_counts", "kind": "counts", "unit": "1"},
-   {"name": "raw_count_interval", "kind": "counts", "unit": "1"},
-   {"name": "net_count_interval", "kind": "counts", "unit": "1"},
-   {"name": "flux", "kind": "differential_flux", "unit": "1/({X} {E})"},
-   {"name": "flux_lower", "kind": "differential_flux", "unit": "1/({X} {E})"},
-   {"name": "flux_upper", "kind": "differential_flux", "unit": "1/({X} {E})"}],
-  "failure_states": [
-   {"exit_code": 2, "status": "invalid-input", "meaning": "an argument is missing, malformed or out of range, or the exact interval needs a rate above 500; the reason is on stderr and nothing is printed on stdout"}],
-  "required_capabilities": [],
-  "purposes": ["exploration", "fixed-execution", "validation"],
-  "operators": ["subtract_background", "divide_exposure", "divide_effective_exposure", "divide_bin_width"],
-  "side_effects": {"writes_files": false, "network": false, "subprocess": false}}]}
+ "operations": [
+  {
+   "operation_id": "flux",
+   "summary": "Differential flux of one bin: signal mean / (exposure * bin_width). No background: Garwood interval for any count; known background: Feldman-Cousins on s >= 0; uncertain background: Cousins-Highland by default or a seeded profile-FC; naive subtraction only on request, labelled approximate. No bound is negative; flux_upper_limit is added when the lower end is 0, flux_syst_exposure when an exposure uncertainty is given",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--counts",
+      "input": "counts"
+     },
+     {
+      "flag": "--exposure",
+      "input": "exposure"
+     },
+     {
+      "flag": "--bin-width",
+      "input": "bin_width"
+     },
+     {
+      "flag": "--bin-width-unit",
+      "input": "bin_width_unit"
+     },
+     {
+      "flag": "--background",
+      "input": "background"
+     },
+     {
+      "flag": "--background-sigma",
+      "input": "background_sigma"
+     },
+     {
+      "flag": "--level",
+      "input": "level"
+     },
+     {
+      "flag": "--method",
+      "input": "method"
+     },
+     {
+      "flag": "--toys",
+      "input": "toys"
+     },
+     {
+      "flag": "--seed",
+      "input": "seed"
+     },
+     {
+      "flag": "--exposure-rel-uncertainty",
+      "input": "exposure_rel_uncertainty"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "counts",
+     "kind": "counts",
+     "unit": "1",
+     "required": true,
+     "constraint": "integer >= 0, up to the core/stats mean limit (1e5); with a background the Feldman-Cousins grid needs a total mean <= 500 (exit 3 otherwise)"
+    },
+    {
+     "name": "exposure",
+     "kind": "exposure",
+     "unit": "{X}",
+     "required": true,
+     "constraint": "finite, > 0; geometric factor or effective area times live time times solid angle, one number per bin. Whether it contains the efficiency is the caller's statement (recipe operator divide_exposure or divide_effective_exposure); the tool cannot tell"
+    },
+    {
+     "name": "bin_width",
+     "kind": "bin_width",
+     "unit": "{E}",
+     "required": true,
+     "constraint": "finite, > 0; in the unit the flux is differential in (per GV: 600 for a 1.2-1.8 TV bin; never a width in TV for a flux per GV)"
+    },
+    {
+     "name": "bin_width_unit",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "one of GV, GeV, GeV/n, TeV, TV; names the unit {E} of bin_width and is echoed in the output"
+    },
+    {
+     "name": "background",
+     "kind": "background_counts",
+     "unit": "1",
+     "required": false,
+     "constraint": "finite, >= 0",
+     "default": 0.0
+    },
+    {
+     "name": "background_sigma",
+     "kind": "background_counts",
+     "unit": "1",
+     "required": false,
+     "constraint": "finite, >= 0",
+     "default": 0.0
+    },
+    {
+     "name": "level",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "confidence level in (0, 1)",
+     "default": 0.6827
+    },
+    {
+     "name": "method",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "auto, garwood, feldman-cousins, cousins-highland, profile-fc or naive",
+     "default": "auto"
+    },
+    {
+     "name": "toys",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "integer, 100..100000; profile-fc only"
+    },
+    {
+     "name": "seed",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "integer; profile-fc only"
+    },
+    {
+     "name": "exposure_rel_uncertainty",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "finite, >= 0; reported separately as flux_syst_exposure"
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "method_id",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "approximate",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "bin_width_unit",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "net_counts",
+     "kind": "counts",
+     "unit": "1"
+    },
+    {
+     "name": "raw_count_interval",
+     "kind": "counts",
+     "unit": "1"
+    },
+    {
+     "name": "net_count_interval",
+     "kind": "counts",
+     "unit": "1"
+    },
+    {
+     "name": "flux",
+     "kind": "differential_flux",
+     "unit": "1/({X} {E})"
+    },
+    {
+     "name": "flux_lower",
+     "kind": "differential_flux",
+     "unit": "1/({X} {E})"
+    },
+    {
+     "name": "flux_upper",
+     "kind": "differential_flux",
+     "unit": "1/({X} {E})"
+    },
+    {
+     "name": "interval_kind",
+     "kind": "label",
+     "unit": "n/a"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "core/stats could not bracket an interval end; the reason is on stderr and nothing is printed on stdout"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed or out of range (including a missing --bin-width-unit, or a method that does not fit the background inputs); the reason is on stderr and nothing is printed on stdout"
+    },
+    {
+     "exit_code": 3,
+     "status": "unsupported-range",
+     "meaning": "the method's grid or mean limit is exceeded (Feldman-Cousins total mean above 500); the message names the alternative (profile-fc or an asymptotic construction); nothing is printed on stdout"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "operators": [
+    "subtract_background",
+    "divide_exposure",
+    "divide_effective_exposure",
+    "divide_bin_width"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   }
+  }
+ ]
+}

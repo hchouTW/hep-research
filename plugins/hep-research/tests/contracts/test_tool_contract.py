@@ -15,7 +15,8 @@ sys.path.insert(0, str(ROOT))
 from contracts import tool_contract as tc  # noqa: E402
 
 FLUX = json.loads((ROOT / "contracts" / "tool_contracts" / "cosmic_ray_flux.json").read_text(encoding="utf-8"))
-FLUX_ARGS = ["--counts", "42", "--exposure", "1.5e7", "--bin-width", "10"]
+FLUX_ARGS = ["--counts", "42", "--exposure", "1.5e7", "--bin-width", "10", "--bin-width-unit", "GV"]
+UNIT = ["--bin-width-unit", "GV"]
 
 
 def codes(res):
@@ -47,15 +48,17 @@ class ShippedContractTests(unittest.TestCase):
 
     def test_flux_failure_states_are_the_declared_exit(self):
         declared = {f["exit_code"] for f in FLUX["operations"][0]["failure_states"]}
-        bad = [["--counts", "-1", "--exposure", "1", "--bin-width", "1"],
-               ["--counts", "3", "--exposure", "0", "--bin-width", "1"],
-               ["--counts", "3", "--exposure", "1", "--bin-width", "nan"],
-               ["--counts", "501", "--exposure", "1", "--bin-width", "1"],
+        bad = [["--counts", "-1", "--exposure", "1", "--bin-width", "1"] + UNIT,
+               ["--counts", "3", "--exposure", "0", "--bin-width", "1"] + UNIT,
+               ["--counts", "3", "--exposure", "1", "--bin-width", "nan"] + UNIT,
+               ["--counts", "3", "--exposure", "1", "--bin-width", "1", "--background", "1", "--method", "garwood"] + UNIT,
+               ["--counts", "480", "--exposure", "1", "--bin-width", "1", "--background", "10"] + UNIT,
                FLUX_ARGS + ["--level", "0"], FLUX_ARGS + ["--level", "1"], FLUX_ARGS + ["--level", "nan"],
                FLUX_ARGS + ["--background", "-1"], ["--exposure", "1", "--bin-width", "1"],
-               ["--counts", "3", "--exposure", "1e-200", "--bin-width", "1e-200"],
-               ["--counts", "3", "--exposure", "1e200", "--bin-width", "1e200"],
-               ["--counts", "10", "--exposure", "1", "--bin-width", "1", "--background-sigma", "1e200"]]
+               ["--counts", "3", "--exposure", "1", "--bin-width", "1"], FLUX_ARGS[:-1] + ["MV"],
+               ["--counts", "3", "--exposure", "1e-200", "--bin-width", "1e-200"] + UNIT,
+               ["--counts", "3", "--exposure", "1e200", "--bin-width", "1e200"] + UNIT,
+               ["--counts", "10", "--exposure", "1", "--bin-width", "1", "--background-sigma", "1e200"] + UNIT]
         for args in bad:
             with self.subTest(args=args):
                 p = run_tool(FLUX["entry"], args)
@@ -86,8 +89,8 @@ class MutationTests(unittest.TestCase):
 
     def test_option_the_tool_lacks(self):
         def add(d):
-            self.op(d)["invocation"]["options"].append({"flag": "--seed", "input": "seed"})
-            self.op(d)["inputs"].append({"name": "seed", "kind": "parameter", "unit": "1", "required": False,
+            self.op(d)["invocation"]["options"].append({"flag": "--no-such-option", "input": "no_such_option"})
+            self.op(d)["inputs"].append({"name": "no_such_option", "kind": "parameter", "unit": "1", "required": False,
                                          "constraint": "integer"})
         self.assertIn("tool.option_missing", codes(self.mutate(add)))
 

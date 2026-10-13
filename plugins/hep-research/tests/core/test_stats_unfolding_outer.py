@@ -101,5 +101,68 @@ class T23ResponseToys(unittest.TestCase):
             ud.response_stat(self.doc(0.3, 2), "tsvd", N, 300, 3, "multinomial")
 
 
+def _dag_example(n=15):
+    truth = [2000.0 * math.exp(-0.25 * j) + 50.0 for j in range(n)]
+    resp = [[0.0] * n for _ in range(n)]
+    for j in range(n):
+        eff = 0.8 - 0.01 * j
+        w = [math.exp(-0.5 * ((i - j) / 0.8) ** 2) for i in range(n)]
+        sw = sum(w)
+        for i in range(n):
+            resp[i][j] = eff * w[i] / sw
+    return resp, truth
+
+
+class DagostiniUnfoldSTH315(unittest.TestCase):
+    """STH-T3.15: D'Agostini unfolding of data with its covariance. 15 x 15 response; the analytic variances (data and
+    response terms) agree with toys (data and response redrawn, NumPy oracle) within 10% per bin; mc_events above
+    1e5 are accepted on this analytic path."""
+
+    def test_variances_agree_with_toys(self):
+        try:
+            import numpy as np
+        except ImportError:
+            self.skipTest("NumPy needed for the toy oracle")
+        from core.stats import unfolding_diagnostics as ud
+        resp, truth = _dag_example()
+        n = len(truth)
+        mu = [sum(resp[i][j] * truth[j] for j in range(n)) for i in range(n)]
+        gen = [20000.0] * n
+        iters = 4
+        r = ud.dagostini_unfold({"response": resp, "data": mu, "mc_events_per_truth_bin": gen}, iters, "multinomial")
+        var = [r["covariance_total"][a][a] for a in range(n)]
+        rng = np.random.default_rng(7)
+        R = np.array(resp)
+        eff = R.sum(axis=0)
+        est = []
+        for _ in range(1500):
+            d = rng.poisson(mu).astype(float)
+            Rt = np.empty_like(R)
+            for j in range(n):
+                probs = np.append(R[:, j], 1.0 - eff[j])
+                Rt[:, j] = rng.multinomial(int(gen[j]), probs)[:-1] / gen[j]
+            t = np.ones(n) * d.sum() / max(Rt.sum(), 1e-12)
+            e = Rt.sum(axis=0)
+            for _ in range(iters):
+                fold = Rt @ t
+                t = (Rt.T @ (d / np.where(fold > 0, fold, 1.0))) * t / e
+            est.append(t)
+        tv = np.var(np.array(est), axis=0, ddof=1)
+        for a in range(n):
+            self.assertLess(abs(var[a] / tv[a] - 1.0), 0.10, (a, var[a], tv[a]))
+
+    def test_large_mc_counts_and_refusals(self):
+        from core.stats import unfolding_diagnostics as ud
+        resp, truth = _dag_example(5)
+        mu = [sum(resp[i][j] * truth[j] for j in range(5)) for i in range(5)]
+        r = ud.dagostini_unfold({"response": resp, "data": mu, "mc_events_per_truth_bin": [1e8] * 5}, 3)
+        self.assertEqual(len(r["estimate"]), 5)
+        self.assertLess(max(r["covariance_response"][a][a] / r["covariance_data"][a][a] for a in range(5)), 1e-3)
+        for bad in ({"response": resp, "data": mu[:4]}, {"response": resp, "data": [0.0] * 5},
+                    {"response": resp, "data": mu, "mc_events_per_truth_bin": [0.5] * 5}):
+            with self.assertRaises(ud.ToyError):
+                ud.dagostini_unfold(bad, 3)
+
+
 if __name__ == "__main__":
     unittest.main()

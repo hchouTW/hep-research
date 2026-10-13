@@ -9,7 +9,9 @@ PDG review "Structure Functions", section 18.1 (see
 What it does: builds s = (k + P)^2 exactly from the two beam four-momenta (a crossing angle is allowed),
 then from two of x, y, Q^2 computes the third with the exact identity Q^2 = x y (s - M^2 - m_l^2), and
 nu = Q^2 / (2 M x), W^2 = M^2 + 2 M nu - Q^2, k.P = (s - M^2 - m_l^2) / 2. Refuses x or y outside (0, 1],
-Q^2 <= 0 or W^2 < M^2 with exit 1 and a JSON reason. from_four_vectors() computes the same invariants
+Q^2 <= 0 or W^2 < M^2 with exit 1 and a JSON reason; with a lepton mass m_l > 0 (same mass in and out) it also refuses
+y > y_max = 1 - m_l / E and Q^2 < Q^2_min(y) (theta = 0), E = k.P / M being the lepton energy in the nucleon rest
+frame, and reports both bounds in every ok output. A target at rest (E_hadron = M) is allowed. from_four_vectors() computes the same invariants
 directly from k, k', P and is the independent check used by the tests.
 
 Usage notes / assumptions: standard library only. Energies in GeV; the hadron energy is PER NUCLEON and M is
@@ -57,6 +59,28 @@ def from_four_vectors(k, kp, P) -> dict:
             "s": s, "sqrt_s": math.sqrt(s), "kP": _dot(k, P)}
 
 
+def lepton_mass_bounds(s: float, M: float, m_lepton: float) -> dict:
+    """Exact y_max for an outgoing lepton of the same mass m_l as the incoming one.
+
+    In the nucleon rest frame the incoming lepton has E = k.P / M, the energy transfer is nu = y E and the outgoing
+    lepton E' = E (1 - y); E' >= m_l gives y <= y_max = 1 - m_l / E (y_max = 1 for m_l = 0)."""
+    E = (s - M**2 - m_lepton**2) / (2.0 * M)
+    return {"E_lepton_rest_frame": E, "y_max": 1.0 - m_lepton / E}
+
+
+def q2_min(s: float, M: float, m_lepton: float, y: float) -> float:
+    """Q^2 at theta = 0 in the nucleon rest frame for given y (equal lepton masses), the smallest Q^2 at that y.
+
+    Q^2 = 2 (E E' - m_l^2 - |k| |k'| cos theta); at theta = 0, using (E E' - m_l^2)^2 - |k|^2 |k'|^2 = m_l^2 nu^2,
+    Q^2_min = 2 m_l^2 nu^2 / (E E' - m_l^2 + |k| |k'|) (the cancellation-free form; 0 for m_l = 0)."""
+    E = (s - M**2 - m_lepton**2) / (2.0 * M)
+    Ep, nu = E * (1.0 - y), E * y
+    if m_lepton == 0.0:
+        return 0.0
+    pk, pkp = math.sqrt(E**2 - m_lepton**2), math.sqrt(max(Ep**2 - m_lepton**2, 0.0))
+    return 2.0 * m_lepton**2 * nu**2 / (E * Ep - m_lepton**2 + pk * pkp)
+
+
 def invariants(s: float, M: float, m_lepton: float = 0.0, x: float | None = None, y: float | None = None,
                Q2: float | None = None) -> dict:
     """Closed forms from exactly two of x, y, Q^2. Raises ValueError when the kinematics are unphysical."""
@@ -81,11 +105,20 @@ def invariants(s: float, M: float, m_lepton: float = 0.0, x: float | None = None
         raise ValueError(f"y = {y} outside (0, 1]")
     if Q2 <= 0:
         raise ValueError(f"Q^2 = {Q2} must be positive")
+    bounds = lepton_mass_bounds(s, M, m_lepton)
+    if y > bounds["y_max"] * (1 + 1e-12):
+        raise ValueError(f"y = {y} above y_max = 1 - m_l/E = {bounds['y_max']} (outgoing lepton energy below its mass "
+                         "in the nucleon rest frame)")
+    bounds["Q2_min_at_y"] = q2_min(s, M, m_lepton, y)
+    if Q2 < bounds["Q2_min_at_y"] * (1 - 1e-12):
+        raise ValueError(f"Q^2 = {Q2} below Q^2_min(y = {y}) = {bounds['Q2_min_at_y']} (theta = 0 with lepton mass "
+                         f"{m_lepton})")
     nu = Q2 / (2.0 * M * x)
     W2 = M**2 + 2.0 * M * nu - Q2
     if W2 < M**2 * (1 - 1e-12):
         raise ValueError(f"W^2 = {W2} below M^2")
-    return {"x": x, "y": y, "Q2": Q2, "nu": nu, "W2": W2, "W": math.sqrt(W2), "s": s, "sqrt_s": math.sqrt(s), "kP": kP}
+    return {"x": x, "y": y, "Q2": Q2, "nu": nu, "W2": W2, "W": math.sqrt(W2), "s": s, "sqrt_s": math.sqrt(s), "kP": kP,
+            "lepton_mass_bounds": bounds}
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -112,8 +145,9 @@ def main(argv: list[str] | None = None) -> int:
             p.error(f"--{name.replace('_', '-')} must be finite, got {value}")        # argparse exits 2
     if len(given) != 2:
         p.error("give exactly two of --x, --y, --Q2")                       # argparse exits 2
-    if a.E_lepton <= 0 or a.E_hadron <= 0 or a.M <= 0 or a.m_lepton < 0 or a.E_lepton <= a.m_lepton or a.E_hadron <= a.M:
-        p.error("beam energies must be positive and exceed the respective masses; M must be positive")
+    if a.E_lepton <= 0 or a.E_hadron <= 0 or a.M <= 0 or a.m_lepton < 0 or a.E_lepton <= a.m_lepton or a.E_hadron < a.M:
+        p.error("beam energies must be positive; the lepton energy must exceed its mass and the hadron energy per nucleon "
+                "must be at least M (equal to M: target at rest); M must be positive")
     conventions = {"units": "GeV, GeV^2", "lepton_mass_GeV": a.m_lepton,
                    "hadron_energy": "per nucleon; M is the mass the user supplied",
                    "crossing_angle_mrad": a.crossing_angle_mrad,
@@ -128,7 +162,8 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps({"status": "failed", "reason": str(exc), "inputs": inputs, "conventions": conventions, "outputs": {}}, indent=1))
         return 1
     print(json.dumps({"status": "ok", "inputs": inputs, "conventions": conventions, "outputs": out,
-                      "checks": {"x_in_(0,1]": True, "y_in_(0,1]": True, "Q2_positive": True, "W2_at_least_M2": True}}, indent=1))
+                      "checks": {"x_in_(0,1]": True, "y_in_(0,1]": True, "Q2_positive": True, "W2_at_least_M2": True,
+                                 "y_at_most_y_max": True, "Q2_at_least_Q2_min": True}}, indent=1))
     return 0
 
 

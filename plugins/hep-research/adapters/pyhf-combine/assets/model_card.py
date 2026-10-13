@@ -47,12 +47,38 @@ def check(card: dict, paradigm: str = "frequentist") -> None:
         raise CardRefused("; ".join(errors))
 
 
+WIDTH_TOL = 1e-9  # a constraint width must equal the modifier's hi - 1 and 1 - lo when both are given
+
+
+def fitted_channels(card: dict) -> list[dict]:
+    """Channels that enter the likelihood: signal and control regions. A validation region is a check of the fitted
+    model, never part of the fit (STH-T3.12: before, its counts pulled the fit)."""
+    return [ch for ch in card["channels"] if ch.get("role") != "validation-region"]
+
+
+def _normsys(m: dict, c: dict) -> dict:
+    """hi/lo of a constrained normalization: as given, or from the constraint width (1 +- width); refused when both
+    are given and disagree (the card would describe two different constraints)."""
+    w = c.get("width")
+    if "hi" in m and "lo" in m:
+        if w is not None and (abs(m["hi"] - 1.0 - w) > WIDTH_TOL or abs(1.0 - m["lo"] - w) > WIDTH_TOL):
+            raise CardRefused(f"'{m['parameter']}': constraint width {w} disagrees with the modifier's hi/lo "
+                              f"({m['hi']}, {m['lo']}); give one consistent description")
+        return {"hi": m["hi"], "lo": m["lo"]}
+    if w is None:
+        raise CardRefused(f"'{m['parameter']}' needs hi/lo on the modifier or a width on its constraint")
+    if not 0 < w < 1:
+        raise CardRefused(f"'{m['parameter']}': width {w} must lie in (0, 1) to map to hi/lo = 1 +- width")
+    return {"hi": 1.0 + w, "lo": 1.0 - w}
+
+
 def to_pyhf(card: dict, observed: dict | None = None) -> dict:
-    """pyhf workspace spec of the card; observed overrides the card's counts per channel (for Asimov data)."""
+    """pyhf workspace spec of the card; observed overrides the card's counts per channel (for Asimov data).
+    Validation-region channels are left out of the likelihood; constraint widths reach the normsys hi/lo."""
     check(card)
     cons = {c["parameter"]: c for c in card["constraints"]}
     channels = []
-    for ch in card["channels"]:
+    for ch in fitted_channels(card):
         samples = []
         for s in card["samples"]:
             if s["channel"] != ch["name"]:
@@ -65,12 +91,14 @@ def to_pyhf(card: dict, observed: dict | None = None) -> dict:
                     c = cons[m["parameter"]]
                     if c["form"] != "gaussian":
                         raise CardRefused(f"constraint form {c['form']} of '{m['parameter']}' is not mapped (gaussian only)")
-                    mods.append({"name": m["parameter"], "type": "normsys", "data": {"hi": m["hi"], "lo": m["lo"]}})
+                    mods.append({"name": m["parameter"], "type": "normsys", "data": _normsys(m, c)})
             samples.append({"name": s["name"], "data": list(map(float, s["yields"])), "modifiers": mods})
         channels.append({"name": ch["name"], "samples": samples})
-    obs = observed or {ch["name"]: ch["observed"] for ch in card["channels"]}
+    fitted = {ch["name"] for ch in fitted_channels(card)}
+    obs = {k: v for k, v in (observed or {ch["name"]: ch["observed"] for ch in card["channels"]}).items() if k in fitted}
     params = [{"name": card["poi"], "bounds": [[-10.0, 50.0]]}]
-    free = {m["parameter"] for s in card["samples"] for m in s["modifiers"] if m["type"] == "free-normalization"}
+    free = {m["parameter"] for s in card["samples"] if s["channel"] in fitted for m in s["modifiers"]
+            if m["type"] == "free-normalization"}
     params += [{"name": p, "bounds": [[0.0, 50.0]]} for p in sorted(free)]
     return {"channels": channels, "observations": [{"name": k, "data": [float(x) for x in v]} for k, v in obs.items()],
             "measurements": [{"name": "card", "config": {"poi": card["poi"], "parameters": params}}], "version": "1.0.0"}
@@ -108,7 +136,10 @@ def fit(card: dict, observed: dict | None = None) -> dict:
         values = {n: float(pars[model.config.par_slice(n)][0]) for n in model.config.par_order}
     finally:
         pyhf.set_backend("numpy", "scipy")
-    return {"values": values, "poi_hat": values[card["poi"]], "twice_nll": float(twice_nll), "pulls": pulls}
+    return {"values": values, "poi_hat": values[card["poi"]], "twice_nll": float(twice_nll), "pulls": pulls,
+            "validation_regions_excluded": [ch["name"] for ch in card["channels"] if ch.get("role") == "validation-region"],
+            "ensemble": card.get("ensemble"),
+            "ensemble_note": "recorded from the card, not used here: this converter fits once and generates no toys"}
 
 
 def asimov_closure(card: dict, truth: dict, truth_values: dict) -> dict:

@@ -1,5 +1,5 @@
 {
- "contract_version": "2.5.0",
+ "contract_version": "2.6.0",
  "bindings": {
   "experiments": [],
   "theory": [
@@ -11,7 +11,7 @@
  },
  "versions": {
   "plugin": "0.6.17",
-  "contracts": "2.5.0",
+  "contracts": "2.6.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -179,7 +179,8 @@
    {
     "name": "missing higher orders and Z exchange",
     "kind": "truncation",
-    "correlation": "unknown"
+    "correlation": "unknown",
+    "method": "not-estimated"
    }
   ],
   "allowed_transformations": [

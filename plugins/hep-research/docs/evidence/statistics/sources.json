@@ -63,7 +63,7 @@
   "supersedes": [],
   "superseded_by": [],
   "attribution": "P. D. Dauncey, M. Kenzie, N. Wardle, G. J. Davies",
-  "notes": "arXiv abstract page and metadata read 2026-10-12; the penalty convention (1 per parameter in -2 ln L) used by discrete_profile.py was not checked against the full text."
+  "notes": "arXiv abstract page and metadata read 2026-10-12; the penalty convention (1 per parameter in -2 ln L) used by discrete_profile.py was not checked against the full text. Cited again 2026-10-13 for discrete profiling in nuisance-modeling.md (abstract level)."
  },
  {
   "id": "hepstats:S04",
@@ -233,7 +233,7 @@
   "supersedes": [],
   "superseded_by": [],
   "attribution": "L. Heinrich, M. Feickert, G. Stark",
-  "notes": "Installed; ToyCalculator.expected_pvalues source read 2026-10-12 (calls numpy.percentile with the removed 'interpolation' keyword)."
+  "notes": "Installed; ToyCalculator.expected_pvalues source read 2026-10-12 (calls numpy.percentile with the removed 'interpolation' keyword). Re-read 2026-10-13 in the installed 0.7.6 package: interpolators/code4p.py (delta_up = up - nom, delta_down = nom - down) and modifiers/staterror.py (constrained_by_normal; zero sigmas fixed)."
  },
  {
   "id": "hepstats:S12",
@@ -283,13 +283,583 @@
   },
   "tier": 2,
   "verification_level": "page",
-  "verification_date": "2026-10-03",
+  "verification_date": "2026-10-13",
   "publication_date": "2026",
   "data_taking_period": null,
   "formal_status": "reference",
   "supersedes": [],
   "superseded_by": [],
   "attribution": "CMS Collaboration",
-  "notes": "As recorded in nuisance-modeling.md (read 2026-10-03); not re-read in this session; Combine not executed here."
+  "notes": "Front page read 2026-10-13: installation via CMSSW 16_0_X or LCG with ROOT 6.32, conda recipe with root=6.34. Earlier content as recorded in nuisance-modeling.md (read 2026-10-03); Combine not executed here. Bin-wise statistics page (part2/bin-wise-stats) read 2026-10-13: autoMCStats syntax, n_eff threshold rule."
+ },
+ {
+  "id": "hepstats:S15",
+  "title": "A comment on D. V. Lindley's statistical paradox",
+  "authors": "M. S. Bartlett",
+  "year": 1957,
+  "identifiers": {
+   "doi": "10.1093/biomet/44.3-4.533",
+   "url": "https://doi.org/10.1093/biomet/44.3-4.533"
+  },
+  "tier": 1,
+  "verification_level": "metadata-only",
+  "verification_date": "2026-10-13",
+  "publication_date": "1957",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "M. S. Bartlett",
+  "notes": "Biometrika 44 (1957) 533; bibliographic record only (not opened 2026-10-13). Cited for the prior-width dependence of Bayes factors (Bartlett's effect), as attributed in Cousins 2017."
+ },
+ {
+  "id": "hepstats:S16",
+  "title": "The Jeffreys-Lindley Paradox and Discovery Criteria in High Energy Physics",
+  "authors": "R. D. Cousins",
+  "year": 2017,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/1310.3791",
+   "arxiv_ids": [
+    "1310.3791"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2017",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "R. D. Cousins",
+  "notes": "Synthese 194 (2017) 395-432; arXiv abstract page read 2026-10-13 (the abstract does not itself name Bartlett; the body was not read here)."
+ },
+ {
+  "id": "hepstats:S17",
+  "title": "iminuit reference documentation (Minuit.tol, Minuit.errordef)",
+  "authors": "iminuit developers",
+  "year": 2026,
+  "identifiers": {
+   "url": "https://scikit-hep.org/iminuit/reference.html"
+  },
+  "tier": 2,
+  "verification_level": "page",
+  "verification_date": "2026-10-13",
+  "publication_date": "2026",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "iminuit developers",
+  "notes": "Read 2026-10-13: Migrad stops when edm < 0.002 * tol * errordef; tol default 0.1; errordef 1.0 (least squares) or 0.5 (negative log-likelihood)."
+ },
+ {
+  "id": "hepstats:S18",
+  "title": "ROOT HistFactory Measurement.h (StatErrorConfig)",
+  "authors": "ROOT team",
+  "year": 2026,
+  "identifiers": {
+   "url": "https://github.com/root-project/root/blob/master/roofit/histfactory/inc/RooStats/HistFactory/Measurement.h"
+  },
+  "tier": 2,
+  "verification_level": "page",
+  "verification_date": "2026-10-13",
+  "publication_date": "2026",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "ROOT team",
+  "notes": "Header on ROOT master read 2026-10-13: StatErrorConfig defaults fRelErrorThreshold = 0.05, fConstraintType = Constraint::Poisson."
+ },
+ {
+  "id": "hepstats:S19",
+  "title": "SVD Approach to Data Unfolding",
+  "authors": "A. Hoecker, V. Kartvelishvili",
+  "year": 1996,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/hep-ph/9509307",
+   "arxiv_ids": [
+    "hep-ph/9509307"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "1996",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "A. Hoecker, V. Kartvelishvili",
+  "notes": "Nucl. Instrum. Meth. A372 (1996) 469-481. arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S20",
+  "title": "TUnfold: an algorithm for correcting migration effects in high energy physics",
+  "authors": "S. Schmitt",
+  "year": 2012,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/1205.6201",
+   "arxiv_ids": [
+    "1205.6201"
+   ],
+   "doi": "10.1088/1748-0221/7/10/T10003"
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2012",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "S. Schmitt",
+  "notes": "JINST 7 (2012) T10003. arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S21",
+  "title": "A multidimensional unfolding method based on Bayes' theorem",
+  "authors": "G. D'Agostini",
+  "year": 1995,
+  "identifiers": {
+   "doi": "10.1016/0168-9002(95)00274-X",
+   "url": "https://doi.org/10.1016/0168-9002(95)00274-X"
+  },
+  "tier": 1,
+  "verification_level": "metadata-only",
+  "verification_date": "2026-10-13",
+  "publication_date": "1995",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "G. D'Agostini",
+  "notes": "Nucl. Instrum. Meth. A362 (1995) 487-498. Bibliographic record only (not opened 2026-10-13)."
+ },
+ {
+  "id": "hepstats:S22",
+  "title": "Improved iterative Bayesian unfolding",
+  "authors": "G. D'Agostini",
+  "year": 2010,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/1010.0632",
+   "arxiv_ids": [
+    "1010.0632"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2010",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "G. D'Agostini",
+  "notes": "Alliance Workshop on Unfolding and Data Correction, DESY 2010. arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S23",
+  "title": "Fully Bayesian Unfolding",
+  "authors": "G. Choudalakis",
+  "year": 2012,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/1201.4612",
+   "arxiv_ids": [
+    "1201.4612"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2012",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "G. Choudalakis",
+  "notes": "arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S24",
+  "title": "OmniFold: A Method to Simultaneously Unfold All Observables",
+  "authors": "A. Andreassen, P. T. Komiske, E. M. Metodiev, B. Nachman, J. Thaler",
+  "year": 2020,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/1911.09107",
+   "arxiv_ids": [
+    "1911.09107"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2020",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "A. Andreassen, P. T. Komiske, E. M. Metodiev, B. Nachman, J. Thaler",
+  "notes": "Phys. Rev. Lett. 124 (2020) 182001. arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S25",
+  "title": "Statistical unfolding of elementary particle spectra: Empirical Bayes estimation and bias-corrected uncertainty quantification",
+  "authors": "M. Kuusela, V. M. Panaretos",
+  "year": 2015,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/1505.04768",
+   "arxiv_ids": [
+    "1505.04768"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2015",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "M. Kuusela, V. M. Panaretos",
+  "notes": "Ann. Appl. Stat. 9 (2015) 1671-1705. arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S26",
+  "title": "How to combine correlated estimates of a single physical quantity",
+  "authors": "L. Lyons, D. Gibaut, P. Clifford",
+  "year": 1988,
+  "identifiers": {
+   "doi": "10.1016/0168-9002(88)90018-6",
+   "url": "https://doi.org/10.1016/0168-9002(88)90018-6"
+  },
+  "tier": 1,
+  "verification_level": "metadata-only",
+  "verification_date": "2026-10-13",
+  "publication_date": "1988",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "L. Lyons, D. Gibaut, P. Clifford",
+  "notes": "Nucl. Instrum. Meth. A270 (1988) 110-117 (BLUE). Bibliographic record only (not opened 2026-10-13)."
+ },
+ {
+  "id": "hepstats:S27",
+  "title": "Combining correlated measurements of several different physical quantities",
+  "authors": "A. Valassi",
+  "year": 2003,
+  "identifiers": {
+   "doi": "10.1016/S0168-9002(03)00329-2",
+   "url": "https://doi.org/10.1016/S0168-9002(03)00329-2"
+  },
+  "tier": 1,
+  "verification_level": "metadata-only",
+  "verification_date": "2026-10-13",
+  "publication_date": "2003",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "A. Valassi",
+  "notes": "Nucl. Instrum. Meth. A500 (2003) 391-405. Bibliographic record only (not opened 2026-10-13)."
+ },
+ {
+  "id": "hepstats:S28",
+  "title": "Information and treatment of unknown correlations in the combination of measurements using the BLUE method",
+  "authors": "A. Valassi, R. Chierici",
+  "year": 2014,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/1307.4003",
+   "arxiv_ids": [
+    "1307.4003"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2014",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "A. Valassi, R. Chierici",
+  "notes": "Eur. Phys. J. C 74 (2014) 2717. arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S29",
+  "title": "On the use of the covariance matrix to fit correlated data",
+  "authors": "G. D'Agostini",
+  "year": 1994,
+  "identifiers": {
+   "doi": "10.1016/0168-9002(94)90719-6",
+   "url": "https://doi.org/10.1016/0168-9002(94)90719-6"
+  },
+  "tier": 1,
+  "verification_level": "metadata-only",
+  "verification_date": "2026-10-13",
+  "publication_date": "1994",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "G. D'Agostini",
+  "notes": "Nucl. Instrum. Meth. A346 (1994) 306-311 (Peelle's pertinent puzzle). Bibliographic record only (not opened 2026-10-13)."
+ },
+ {
+  "id": "hepstats:S30",
+  "title": "Limits and Confidence Intervals in the Presence of Nuisance Parameters",
+  "authors": "W. A. Rolke, A. M. Lopez, J. Conrad",
+  "year": 2005,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/physics/0403059",
+   "arxiv_ids": [
+    "physics/0403059"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2005",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "W. A. Rolke, A. M. Lopez, J. Conrad",
+  "notes": "Nucl. Instrum. Meth. A551 (2005) 493-503. arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S31",
+  "title": "Reference priors for high energy physics",
+  "authors": "L. Demortier, S. Jain, H. B. Prosper",
+  "year": 2010,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/1002.1111",
+   "arxiv_ids": [
+    "1002.1111"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2010",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "L. Demortier, S. Jain, H. B. Prosper",
+  "notes": "Phys. Rev. D 82 (2010) 034002. arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S32",
+  "title": "Incorporating systematic uncertainties into an upper limit",
+  "authors": "R. D. Cousins, V. L. Highland",
+  "year": 1992,
+  "identifiers": {
+   "doi": "10.1016/0168-9002(92)90794-5",
+   "url": "https://doi.org/10.1016/0168-9002(92)90794-5"
+  },
+  "tier": 1,
+  "verification_level": "metadata-only",
+  "verification_date": "2026-10-13",
+  "publication_date": "1992",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "R. D. Cousins, V. L. Highland",
+  "notes": "Nucl. Instrum. Meth. A320 (1992) 331-335. Bibliographic record only (not opened 2026-10-13)."
+ },
+ {
+  "id": "hepstats:S33",
+  "title": "Evaluation of three methods for calculating statistical significance when incorporating a systematic uncertainty into a test of the background-only hypothesis for a Poisson process",
+  "authors": "R. D. Cousins, J. T. Linnemann, J. Tucker",
+  "year": 2008,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/physics/0702156",
+   "arxiv_ids": [
+    "physics/0702156"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2008",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "R. D. Cousins, J. T. Linnemann, J. Tucker",
+  "notes": "Nucl. Instrum. Meth. A595 (2008) 480-501. arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S34",
+  "title": "Clarification of the use of chi-square and likelihood functions in fits to histograms",
+  "authors": "S. Baker, R. D. Cousins",
+  "year": 1984,
+  "identifiers": {
+   "doi": "10.1016/0167-5087(84)90016-4",
+   "url": "https://doi.org/10.1016/0167-5087(84)90016-4"
+  },
+  "tier": 1,
+  "verification_level": "metadata-only",
+  "verification_date": "2026-10-13",
+  "publication_date": "1984",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "S. Baker, R. D. Cousins",
+  "notes": "Nucl. Instrum. Meth. 221 (1984) 437-442. Bibliographic record only (not opened 2026-10-13)."
+ },
+ {
+  "id": "hepstats:S35",
+  "title": "Uncertainty components in profile likelihood fits",
+  "authors": "A. Pinto, Z. Wu, F. Balli, N. Berger, M. Boonekamp, E. Chapon, T. Kawamoto, B. Malaescu",
+  "year": 2024,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/2307.04007",
+   "arxiv_ids": [
+    "2307.04007"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2024",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "A. Pinto, Z. Wu, F. Balli, N. Berger, M. Boonekamp, E. Chapon, T. Kawamoto, B. Malaescu",
+  "notes": "arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S36",
+  "title": "Methods for point source analysis in high energy neutrino telescopes",
+  "authors": "J. Braun, J. Dumm, F. De Palma, C. Finley, A. Karle, T. Montaruli",
+  "year": 2008,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/0801.1604",
+   "arxiv_ids": [
+    "0801.1604"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2008",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "J. Braun, J. Dumm, F. De Palma, C. Finley, A. Karle, T. Montaruli",
+  "notes": "Astropart. Phys. 29 (2008) 299-305. arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S37",
+  "title": "The likelihood analysis of EGRET data",
+  "authors": "J. R. Mattox et al.",
+  "year": 1996,
+  "identifiers": {
+   "doi": "10.1086/177068",
+   "url": "https://doi.org/10.1086/177068"
+  },
+  "tier": 1,
+  "verification_level": "metadata-only",
+  "verification_date": "2026-10-13",
+  "publication_date": "1996",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "J. R. Mattox et al.",
+  "notes": "ApJ 461 (1996) 396 (test statistic TS). Bibliographic record only (not opened 2026-10-13)."
+ },
+ {
+  "id": "hepstats:S38",
+  "title": "The H-test probability distribution revisited: Improved sensitivity",
+  "authors": "O. C. de Jager, I. Buesching",
+  "year": 2010,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/1005.4867",
+   "arxiv_ids": [
+    "1005.4867"
+   ],
+   "doi": "10.1051/0004-6361/201014362"
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2010",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "O. C. de Jager, I. Buesching",
+  "notes": "A&A 517 (2010) L9. arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S39",
+  "title": "Studies in Astronomical Time Series Analysis. VI. Bayesian Block Representations",
+  "authors": "J. D. Scargle, J. P. Norris, B. Jackson, J. Chiang",
+  "year": 2013,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/1207.5578",
+   "arxiv_ids": [
+    "1207.5578"
+   ],
+   "doi": "10.1088/0004-637X/764/2/167"
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2013",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "J. D. Scargle, J. P. Norris, B. Jackson, J. Chiang",
+  "notes": "ApJ 764 (2013) 167. arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S40",
+  "title": "Search for pulsed gamma-ray emission from radio pulsars in the COS-B data",
+  "authors": "R. Buccheri et al.",
+  "year": 1983,
+  "identifiers": {
+   "url": "https://ui.adsabs.harvard.edu/abs/1983A&A...128..245B"
+  },
+  "tier": 1,
+  "verification_level": "metadata-only",
+  "verification_date": "2026-10-13",
+  "publication_date": "1983",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "R. Buccheri et al.",
+  "notes": "A&A 128 (1983) 245 (Z_m^2 test). Bibliographic record only (not opened 2026-10-13)."
+ },
+ {
+  "id": "hepstats:S41",
+  "title": "On the distribution of the likelihood ratio",
+  "authors": "H. Chernoff",
+  "year": 1954,
+  "identifiers": {
+   "doi": "10.1214/aoms/1177728725",
+   "url": "https://doi.org/10.1214/aoms/1177728725"
+  },
+  "tier": 1,
+  "verification_level": "metadata-only",
+  "verification_date": "2026-10-13",
+  "publication_date": "1954",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "H. Chernoff",
+  "notes": "Ann. Math. Stat. 25 (1954) 573-578. Bibliographic record only (not opened 2026-10-13)."
  }
 ]

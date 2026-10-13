@@ -3,13 +3,19 @@
 Rules this enforces:
 - The work is split once into a manifest of chunks (id, item range, seed); the manifest hash ties every output to it.
 - A chunk's output is written atomically and only once; resubmission skips finished chunks, so nothing is counted twice.
+  Atomic means serialized first, fsynced, renamed; a failed write removes its .tmp-* file. A worker result json cannot
+  write (a set, an object) is a failed attempt with signature 'unserializable-result'; the run goes on.
 - Retries happen only when the run configuration sets "max_attempts"; with no configuration a failed chunk is not
   retried. max_attempts bounds the attempts of a chunk since its last reset() across every run() call, not per call:
-  rerunning the command never buys more attempts ('attempts-exhausted'); only reset() with a reason does.
+  rerunning the command never buys more attempts ('attempts-exhausted', set by the call that used the last attempt);
+  only reset() with a reason does.
 - A chunk whose last two attempts failed with the same failure signature is stopped even if attempts remain. The
   signature is the worker exception's 'signature' attribute when it has one, else its type and message with paths,
   long hex strings and numbers masked, so a temporary path or a timestamp in the message does not defeat the stop.
 - State (attempts, errors) is kept on disk after any failure, so a later resubmission continues where it stopped.
+- run(), reset() and merge() hold an exclusive lock on <state>/.lock (dir_lock); a second process or thread gets
+  PartitionError("partition.locked") at once instead of racing it for state.json. status() only reads and takes no
+  lock. The same lock (shared per-thread registry) is the campaign lock, so a campaign call may nest engine calls.
 - Merging reads each manifest chunk from its canonical file chunks/<id>.json only, and checks that it belongs to this
   manifest and has the manifest's id, range and seed, and that the ranges tile [0, n) with no gap or overlap; a missing
   chunk makes the merge 'incomplete', never a silent partial sum. Any other file claiming a manifest chunk is never
@@ -17,10 +23,12 @@ Rules this enforces:
 
 API: make_manifest(job_id, n_items, chunk_size, seed) -> dict; validate_manifest(manifest); check_template(cmd); run(manifest, state_dir, worker, config=None) -> dict
 (synchronous, in-process); status(manifest, state_dir); reset(state_dir, chunk_ids, reason); merge(manifest,
-state_dir, combine=None). Standard library only.
+state_dir, combine=None); dir_lock(directory, operation, busy). Standard library only.
 """
 from __future__ import annotations
 
+import contextlib
+import datetime
 import hashlib
 import json
 import math
@@ -29,8 +37,66 @@ import re
 import shlex
 import string
 import tempfile
+from collections.abc import Callable, Iterator
 from pathlib import Path
+from threading import local as _thread_state  # the packaging scan reads '.local' as a host name
 from typing import Any
+
+
+class PartitionError(ValueError):
+    """Refusal with a named code (exit 2 in a CLI)."""
+
+    def __init__(self, code: str, message: str):
+        super().__init__(f"{code}: {message}")
+        self.code = code
+
+
+_HELD = _thread_state()  # directories this thread holds the lock of, with a depth (calls nest)
+
+
+@contextlib.contextmanager
+def dir_lock(directory, operation: str, busy: Callable[[Path, str], Exception] | None = None) -> Iterator[None]:
+    """Exclusive, non-blocking lock on <directory>/.lock for one operation; nested calls in the same thread reuse it.
+    busy(directory, holder) builds the exception raised when another process or thread holds it (default
+    PartitionError("partition.locked")). The holder text (operation, pid, time) is written into the lock file."""
+    ddir = Path(directory).resolve()
+    held = getattr(_HELD, "dirs", None)
+    if held is None:
+        held = _HELD.dirs = {}
+    if held.get(ddir):
+        held[ddir] += 1
+        try:
+            yield
+        finally:
+            held[ddir] -= 1
+        return
+    ddir.mkdir(parents=True, exist_ok=True)
+    fh = open(ddir / ".lock", "a+", encoding="utf-8")
+    try:
+        try:
+            import fcntl
+            fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except ImportError:  # Windows
+            import msvcrt
+            msvcrt.locking(fh.fileno(), msvcrt.LK_NBLCK, 1)  # type: ignore[attr-defined]  # Windows-only API, absent from non-win32 stubs
+    except OSError:
+        fh.seek(0)
+        holder = fh.read().strip() or "another process"
+        fh.close()
+        if busy is None:
+            raise PartitionError("partition.locked", f"{ddir} is in use ({holder}); wait for it to finish") from None
+        raise busy(ddir, holder) from None
+    try:
+        fh.seek(0)
+        fh.truncate()
+        now = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+        fh.write(f"{operation} by pid {os.getpid()} since {now}")
+        fh.flush()
+        held[ddir] = 1
+        yield
+    finally:
+        held.pop(ddir, None)
+        fh.close()  # closing the file releases the lock
 
 
 def _hash(obj) -> str:
@@ -120,11 +186,22 @@ def make_manifest(job_id: str, n_items: int, chunk_size: int, seed: int) -> dict
 
 
 def _write_atomic(path: Path, obj) -> None:
+    """Write obj as JSON to path atomically: serialized first (a TypeError leaves nothing behind), written to a
+    .tmp-* file in the same folder, flushed and fsynced, then renamed over path. On any failure the .tmp-* file is
+    removed and the exception re-raised, so path holds either the old or the new content."""
+    text = json.dumps(obj, sort_keys=True)
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=".tmp-", suffix=".json")
-    with os.fdopen(fd, "w", encoding="utf-8") as fh:
-        json.dump(obj, fh, sort_keys=True)
-    os.replace(tmp, path)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            fh.write(text)
+            fh.flush()
+            os.fsync(fh.fileno())
+        os.replace(tmp, path)
+    except BaseException:
+        with contextlib.suppress(OSError):
+            os.unlink(tmp)
+        raise
 
 
 def _load_state(state_dir: Path) -> dict:
@@ -135,6 +212,12 @@ def _load_state(state_dir: Path) -> dict:
 _PATH = re.compile(r"(?:[A-Za-z]:)?[\\/][^\s:'\"]*[\\/][^\s:'\"]*")  # absolute or rooted paths with 2+ segments
 _HEX = re.compile(r"\b[0-9a-fA-F]{8,}\b")
 _NUM = re.compile(r"\d+(?:\.\d+)?")
+
+
+class _Unserializable(TypeError):
+    """A worker result json cannot write; recorded as a chunk failure with a stable signature."""
+
+    signature = "unserializable-result"
 
 
 def failure_signature(exc: BaseException) -> str:
@@ -171,6 +254,11 @@ def run(manifest: dict, state_dir, worker, config: dict | None = None) -> dict:
     """Run every chunk without an output, each within max_attempts counted since its last reset() over all calls."""
     state_dir = Path(state_dir)
     max_attempts = _max_attempts(config)
+    with dir_lock(state_dir, "run"):
+        return _run(manifest, state_dir, worker, config, max_attempts)
+
+
+def _run(manifest: dict, state_dir: Path, worker, config: dict | None, max_attempts: int) -> dict:
     state = _load_state(state_dir)
     if state.get("manifest_hash", manifest["manifest_hash"]) != manifest["manifest_hash"]:
         raise ValueError("state directory belongs to a different manifest")
@@ -187,29 +275,32 @@ def run(manifest: dict, state_dir, worker, config: dict | None = None) -> dict:
             st["status"] = "done"
             skipped.append(ch["id"])
             continue
-        tried_now = False
         while True:
             if _repeated(st):
                 st["status"] = "stopped-repeated-failure"
                 break
             if st["attempts_since_reset"] >= max_attempts:
-                if not tried_now:  # nothing left for this call: say why instead of a stale 'failed'
-                    st["status"] = "attempts-exhausted"
+                # nothing left: say why instead of 'failed', also on the call that used the last attempt (Q5)
+                st["status"] = "attempts-exhausted"
                 break
             st["attempts"] += 1
             st["attempts_since_reset"] += 1
-            tried_now = True
             ran.append(ch["id"])
             try:
                 result = worker(ch)
+                doc = {"chunk_id": ch["id"], "manifest_hash": manifest["manifest_hash"], "start": ch["start"],
+                       "stop": ch["stop"], "seed": ch["seed"], "result": result}
+                try:
+                    json.dumps(doc)
+                except (TypeError, ValueError) as exc:  # e.g. a set: the attempt failed, the run goes on
+                    raise _Unserializable(f"worker result is not JSON-serializable: {exc}") from None
             except Exception as exc:  # noqa: BLE001 - every worker failure is recorded, not hidden
                 st["errors"].append(f"{type(exc).__name__}: {exc}")
                 st["signatures"].append(failure_signature(exc))
                 st["status"] = "failed"
                 _write_atomic(state_dir / "state.json", state)
                 continue
-            _write_atomic(out, {"chunk_id": ch["id"], "manifest_hash": manifest["manifest_hash"], "start": ch["start"],
-                                "stop": ch["stop"], "seed": ch["seed"], "result": result})
+            _write_atomic(out, doc)
             st["status"] = "done"
             break
         _write_atomic(state_dir / "state.json", state)
@@ -218,10 +309,21 @@ def run(manifest: dict, state_dir, worker, config: dict | None = None) -> dict:
                 retries_configured=bool(config and "max_attempts" in config))
 
 
-def reset(state_dir, chunk_ids, reason: str) -> dict:
-    """Clear the error history of chunks after their cause was fixed, so they can run again. Kept in 'resets'."""
+def reset(state_dir, chunk_ids, reason: str, manifest: dict | None = None) -> dict:
+    """Clear the error history of chunks after their cause was fixed, so they can run again. Kept in 'resets'.
+    With a manifest, a state folder that belongs to another manifest is refused before anything is written."""
     state_dir = Path(state_dir)
+    with dir_lock(state_dir, "reset"):
+        return _reset(state_dir, chunk_ids, reason, manifest)
+
+
+def _reset(state_dir: Path, chunk_ids, reason: str, manifest: dict | None) -> dict:
     state = _load_state(state_dir)
+    if manifest is not None and state.get("manifest_hash", manifest["manifest_hash"]) != manifest["manifest_hash"]:
+        raise ValueError("state directory belongs to a different manifest")
+    unknown = [cid for cid in chunk_ids if cid not in state["chunks"]]
+    if unknown:
+        raise ValueError(f"unknown chunk {unknown[0]}")
     for cid in chunk_ids:
         st = state["chunks"].get(cid)
         if st is None:
@@ -270,6 +372,11 @@ def _nonfinite(x, path="result") -> str | None:
 
 def merge(manifest: dict, state_dir, combine=None) -> dict:
     """Merge chunk outputs; combine(list_of_results) defaults to key-by-key summation."""
+    with dir_lock(state_dir, "merge"):
+        return _merge(manifest, Path(state_dir), combine)
+
+
+def _merge(manifest: dict, state_dir: Path, combine=None) -> dict:
     combine = combine or (lambda rs: _reduce(rs))
     problems: list[dict[str, Any]] = []
     seen: dict[str, str] = {}
@@ -308,7 +415,7 @@ def merge(manifest: dict, state_dir, combine=None) -> dict:
         results.append((c["start"], doc["result"]))
     # 2. every other file is never summed; one that claims a manifest chunk with a different result is a conflict
     for f in sorted(cdir.glob("*.json")) if cdir.is_dir() else []:
-        if f.stem in wanted:
+        if f.stem in wanted or f.name.startswith("."):  # .tmp-* files of an interrupted write are not outputs
             continue
         doc, why = _read_chunk(f)
         if why:

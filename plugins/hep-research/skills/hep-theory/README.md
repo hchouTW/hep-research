@@ -11,12 +11,12 @@ Use when the deliverable is a theoretical or phenomenological result: model defi
 | Path | Content |
 |---|---|
 | `SKILL.md` | entry point |
-| `references/` | eight references: mathematical reasoning and proof status, higher-order predictions, PDFs and LHAPDF, SMEFT and EFT conventions, cosmic-ray propagation (guidance only; fits are outside v1), event generation, the recasting toolchain (documented, not run), DIS kinematics |
+| `references/` | eleven references: mathematical reasoning and proof status, higher-order predictions, PDFs and LHAPDF, SMEFT and EFT conventions, cosmic-ray propagation (guidance only; fits are outside v1), event generation, the recasting toolchain (documented, not run), DIS kinematics, amplitudes and widths (phase space, narrow width, Breit-Wigner), selection rules, regularization and schemes (running masses) |
 | `scripts/` | four helpers: DIS kinematics, PDF uncertainty, event weights, EFT truncation |
 
 ## Scripts
 
-`dis_kinematics.py` (invariants, beam relations, Jacobians, frames), `pdf_uncertainty.py`, `event_weights.py` (signed weights pass unclipped), `eft_truncation.py`. The SymPy interpreter for derivations is chosen by `skills/hep-computing/scripts/find_python.py`. A HEPData table becomes a dataset record through `adapters/hepdata/assets/hepdata_record.py`.
+`dis_kinematics.py` (invariants, beam relations, Jacobians, frames; lepton-mass bounds), `pdf_uncertainty.py` (`+as` alpha_s members, `num_members`), `event_weights.py` (signed weights pass unclipped; selected-event statistics), `eft_truncation.py` (cross-term convention, rescaling check). Each refuses non-finite or ambiguous input with exit 1 and a JSON reason. The SymPy interpreter for derivations is chosen by `skills/hep-computing/scripts/find_python.py`. A HEPData table becomes a dataset record through `adapters/hepdata/assets/hepdata_record.py`. Cosmic-ray kinematics (rigidity, momentum, total and kinetic energy, kinetic energy per nucleon, bin edges and flux Jacobians) is `core/kinematics/relativistic.py` (steward hep-theory), and force-field solar modulation is `skills/hep-analysis/scripts/solar_modulation_force_field.py`; `references/cosmic-ray-propagation.md` states their conventions.
 
 ## References
 
@@ -34,7 +34,7 @@ Use when the deliverable is a theoretical or phenomenological result: model defi
 
 ## Tests and validation
 
-`tests/skills/hep_theory/` (three modules), the `qed-prediction`, `theory-comparison`, `published-comparison` and `recasting` examples under `examples/`, and the theory routing tests under `tests/routing/`. What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
+`tests/skills/hep_theory/` (six modules), the `qed-prediction`, `theory-comparison`, `published-comparison` and `recasting` examples under `examples/`, and the theory routing tests under `tests/routing/`. What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
 
 ## How this folder is used
 

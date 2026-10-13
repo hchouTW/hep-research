@@ -11,9 +11,14 @@
   "measurement_protons_on_target.json",
   "measurement_ratio.json",
   "measurement_target_exposure.json",
+  "measurement_v26.json",
   "ml_artifact.json",
   "ml_artifact_v25.json",
   "prediction.json",
+  "prediction_v26.json",
+  "prediction_v26_binned_envelope.json",
+  "prediction_v26_derivation_status.json",
+  "prediction_v26_validated_linked.json",
   "response.json",
   "response_parametrized.json",
   "response_v24.json",
@@ -21,7 +26,14 @@
   "statres_bayesian_rhat_warning.json",
   "statres_frequentist.json",
   "statres_scan_global.json",
-  "theory_spec.json"
+  "statres_v26.json",
+  "statres_v26_bayesian.json",
+  "theory_spec.json",
+  "theory_spec_v26.json",
+  "theory_spec_v26_analytic_checked.json",
+  "theory_spec_v26_asymptotic.json",
+  "theory_spec_v26_inapplicable_listed.json",
+  "theory_spec_v26_propagation.json"
  ],
  "invalid": {
   "theory_experiment_field.json": [
@@ -129,6 +141,150 @@
   ],
   "communication_claim_status_conflict.json": [
    "communication.claim_status_conflict"
+  ],
+  "prediction_v26_observed.json": [
+   "prediction.status_upgraded"
+  ],
+  "prediction_v26_validated_unlinked.json": [
+   "prediction.status_upgraded"
+  ],
+  "prediction_v26_envelope_no_prescription.json": [
+   "prediction.envelope_prescription"
+  ],
+  "prediction_v26_envelope_inverted.json": [
+   "prediction.envelope_prescription"
+  ],
+  "theory_v26_order_missing.json": [
+   "theory.order_missing"
+  ],
+  "theory_v26_limit_missing.json": [
+   "theory.limit_missing"
+  ],
+  "theory_v26_unchecked_formal_proof.json": [
+   "theory.unchecked_strong_status"
+  ],
+  "theory_v26_check_result_vocab.json": [
+   "theory.check_result_vocab"
+  ],
+  "theory_v26_validity_empty.json": [
+   "theory.validity_empty"
+  ],
+  "theory_v26_propagation_no_degeneracy.json": [
+   "theory.degeneracy_missing"
+  ],
+  "measurement_v26_estimand_missing.json": [
+   "measurement.estimand_missing"
+  ],
+  "measurement_v26_estimand_not_a_sentence.json": [
+   "measurement.estimand_not_a_sentence"
+  ],
+  "measurement_v26_variable_incomplete.json": [
+   "measurement.variable_incomplete"
+  ],
+  "measurement_v26_phase_space_missing.json": [
+   "measurement.phase_space_missing"
+  ],
+  "measurement_v26_frame_missing.json": [
+   "measurement.frame_missing"
+  ],
+  "measurement_v26_selections_empty.json": [
+   "measurement.selections_empty"
+  ],
+  "measurement_v26_denominator_blank.json": [
+   "measurement.denominator_blank"
+  ],
+  "measurement_v26_unknown_not_listed.json": [
+   "measurement.unresolved_not_listed"
+  ],
+  "measurement_v26_backgrounds_empty.json": [
+   "measurement.backgrounds_empty"
+  ],
+  "measurement_v26_background_estimator_missing.json": [
+   "measurement.background_estimator_missing"
+  ],
+  "measurement_v26_background_constraint_missing.json": [
+   "measurement.background_constraint_missing"
+  ],
+  "measurement_v26_correction_case_variant.json": [
+   "measurement.duplicate_correction"
+  ],
+  "measurement_v26_category_repeated.json": [
+   "measurement.correction_category_repeated"
+  ],
+  "measurement_v26_bare_efficiency_with_factor.json": [
+   "measurement.correction_category_repeated"
+  ],
+  "measurement_v26_unknown_category.json": [
+   "measurement.unknown_correction_category"
+  ],
+  "measurement_v26_luminosity_twice.json": [
+   "measurement.normalization_double_counted"
+  ],
+  "measurement_v26_included_and_applied.json": [
+   "measurement.correction_in_observable_and_chain"
+  ],
+  "measurement_v26_zero_normalization.json": [
+   "measurement.zero_value"
+  ],
+  "measurement_v26_zero_correction.json": [
+   "measurement.zero_value"
+  ],
+  "measurement_v26_shape_only_value.json": [
+   "measurement.shape_only_value"
+  ],
+  "measurement_v26_systematics_empty.json": [
+   "measurement.systematics_empty"
+  ],
+  "measurement_v26_applied_via_blank.json": [
+   "measurement.applied_via_missing"
+  ],
+  "measurement_v26_duplicate_systematic.json": [
+   "measurement.duplicate_systematic"
+  ],
+  "measurement_v26_blinded_no_mask.json": [
+   "measurement.blinding_mask_missing"
+  ],
+  "measurement_v26_blinded_observed.json": [
+   "measurement.blinded_observed"
+  ],
+  "measurement_v26_ratio_block_missing.json": [
+   "measurement.ratio_block_missing"
+  ],
+  "measurement_v26_ratio_self.json": [
+   "measurement.ratio_self"
+  ],
+  "measurement_v26_ratio_cancellations_empty.json": [
+   "measurement.ratio_cancellations_empty"
+  ],
+  "measurement_v26_period_reversed.json": [
+   "measurement.period_reversed"
+  ],
+  "measurement_v26_misspelled_key.json": [
+   "measurement.misspelled_key"
+  ],
+  "statres_v26_coverage_cl_mismatch.json": [
+   "stats.coverage_cl_mismatch"
+  ],
+  "statres_v26_coverage_interval_wide.json": [
+   "stats.coverage_interval_inconsistent"
+  ],
+  "statres_v26_p_zero.json": [
+   "stats.p_zero_without_bound"
+  ],
+  "statres_v26_results_p_out_of_range.json": [
+   "stats.p_out_of_range"
+  ],
+  "statres_v26_z_p_inconsistent.json": [
+   "stats.z_p_inconsistent"
+  ],
+  "statres_v26_global_z_above_local.json": [
+   "stats.global_z_above_local"
+  ],
+  "statres_v26_construction_statistic.json": [
+   "stats.construction_statistic_mismatch"
+  ],
+  "statres_v26_model_sha256_malformed.json": [
+   "stats.model_sha256_malformed"
   ]
  },
  "unresolved": {
@@ -142,8 +298,52 @@
   "ml_domain_shift_missing.json": [
    "ml.domain_shift_missing"
   ],
+  "measurement_v26_closure_missing.json": [
+   "measurement.background_closure_missing"
+  ],
+  "measurement_v26_input_listed.json": [
+   "measurement.input_unresolved"
+  ],
   "ml_split_overlap_not_run.json": [
    "ml.split_overlap_not_run"
+  ],
+  "prediction_v26_unlinked.json": [
+   "prediction.spec_unlinked"
+  ],
+  "statres_v26_coverage_toys_too_few.json": [
+   "stats.coverage_toys_too_few"
+  ],
+  "statres_v26_expected_missing.json": [
+   "stats.expected_bands_missing"
+  ],
+  "statres_v26_global_z_without_p.json": [
+   "stats.global_z_without_p"
+  ],
+  "statres_v26_seed_missing.json": [
+   "stats.seed_missing"
+  ],
+  "statres_v26_gof_toys_missing.json": [
+   "stats.gof_toys_missing"
+  ],
+  "statres_v26_bayes_propriety_unsupported.json": [
+   "stats.propriety_unsupported"
+  ],
+  "statres_v26_bayes_poi_prior_missing.json": [
+   "stats.poi_prior_missing"
+  ],
+  "statres_v26_bayes_ess_too_low.json": [
+   "stats.ess_too_low"
+  ],
+  "statres_v26_bayes_chains_missing.json": [
+   "stats.chains_missing"
+  ]
+ },
+ "warning": {
+  "theory_v26_conventions_incomplete.json": [
+   "theory.conventions_incomplete"
+  ],
+  "prediction_v26_truncation_no_method.json": [
+   "prediction.truncation_method"
   ]
  }
 }

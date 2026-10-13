@@ -13,9 +13,24 @@ calibration) and the response semantic rules of contracts 2.4.0 (controlled corr
 matrix_ref, normalization consistent with what sits inside the matrix, one unit per variable) and the ml-artifact
 rules of contracts 2.5.0 (non-blank grouping key, model hash, labels and features; training domain on the features
 with lo < hi; split-overlap result; calibration where the output must be calibrated, not evaluated on its fit sample;
-domain-shift check; seeds) to artifacts written under older contracts, which otherwise keep their outcome. --gate publication adds
-the publication gate of a statistical-result (publication_gate): passed, unresolved or failed, with reasons; an
-archived artifact may be valid and still not pass it. Passing the gate is a contract-level prerequisite for
+domain-shift check; seeds), the theory-spec and prediction rules of contracts 2.6.0 (conventions block, order of a
+perturbative argument, limit of an asymptotic one, checks behind a formal proof or analytic derivation, check-result
+vocabulary, non-empty validity domain, degenerate directions of a propagation model; no upgraded prediction status,
+a linked theory spec, envelope prescription and [min, max] values, truncation method), the measurement-spec rules
+of contracts 2.6.0 (an estimand sentence; complete observable with phase space and frame; conditional denominators;
+backgrounds with estimator, control region or constraint, and closure; each correction once, from the controlled
+categories, not repeating the normalization or the observable's included corrections; no zero standing for unknown;
+systematics with applied_via and unique names; every missing marker listed in unresolved_inputs; blinded specs with a
+mask and without observed status; ratio blocks; ordered periods; misspelled keys) and the statistical-result hardening
+rules of contracts 2.6.0 (coverage level and interval consistent with the toy counts, at least 200 coverage toys, no
+p-value of exactly 0, probability-like results in [0, 1], z consistent with p, construction and test statistic
+compatible, expected bands with an observed limit, recorded seeds for toys, a well-formed model_sha256; Bayesian:
+improper uniform forms, propriety with an argument and a reference, a prior on every parameter of interest, an ESS
+floor of 100 per chain) to artifacts written under older contracts, which otherwise keep their outcome; --strict
+never raises a rule's level. Flags may come before or after ARTIFACT.json. --gate publication adds the publication
+gate of a statistical-result (publication_gate): passed, unresolved or failed, with reasons (from 2.6.0 a
+'synthetic' or 'asimov' result fails it); an archived artifact may be valid and still not pass it. Passing the gate
+is a contract-level prerequisite for
 reporting a result as validated, not evidence of scientific validity.
 """
 from __future__ import annotations
@@ -43,6 +58,8 @@ EXTENSION_SCHEMAS = {
 }
 # Statuses that must survive every handoff: a consumer of such an input carries the label.
 STICKY_STATUSES = ["failed", "unvalidated", "preliminary", "synthetic", "asimov", "user-supplied"]
+# Statuses under which a statistical-result is not a result on data: the publication gate fails them (contracts 2.6.0).
+NOT_OBSERVED_STATUSES = ("synthetic", "asimov")
 NON_GAUSSIAN_KINDS = {"scale-envelope", "model-alternative", "truncation"}
 UPGRADED = {"observed", "validated-in-scope"}
 SHAPE_ERRORS = {"schema.type", "schema.any_of"}
@@ -157,6 +174,8 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, strict: bool = 
         ids = [c.get("effect_id") for c in ext.get("corrections", [])]
         for dup in sorted({x for x in ids if ids.count(x) > 1}):
             rep.add("error", "$.extension.corrections", "measurement.duplicate_correction", f"effect '{dup}' applied twice")
+        if strict or _at_least(doc.get("contract_version"), MEASUREMENT_SEMANTICS_FROM):
+            _measurement_semantics(doc, ext, vocab, rep)
     elif t == "response":
         both = set(ext.get("includes", [])) & set(ext.get("applied_separately", []))
         for x in sorted(both):
@@ -176,6 +195,8 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, strict: bool = 
         check_conventions(ext.get("conventions", {}), vocab, rep, "$.extension.conventions")
         for bad in sorted(EXPERIMENT_ONLY_FIELDS & set(ext)):
             rep.add("error", f"$.extension.{bad}", "theory.experiment_field", f"experiment field '{bad}' in a theory spec")
+        if strict or _at_least(doc.get("contract_version"), THEORY_SEMANTICS_FROM):
+            _theory_semantics(doc, ext, vocab, rep)
     elif t == "prediction":
         for i, u in enumerate(ext.get("uncertainties", [])):
             if u.get("kind") in NON_GAUSSIAN_KINDS and u.get("gaussian") is True:
@@ -188,6 +209,8 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, strict: bool = 
         if need and not ext.get(need):
             rep.add("error", f"$.extension.{need}", "prediction.payload_missing",
                     f"a {rp} prediction needs '{need}' (numbers kept elsewhere: reference them and use a metadata record)")
+        if strict or _at_least(doc.get("contract_version"), THEORY_SEMANTICS_FROM):
+            _theory_semantics(doc, ext, vocab, rep)
     elif t == "dataset-record":
         if isinstance(ext.get("data"), dict):
             check_binned(ext["data"], rep, "$.extension.data", ext.get("observable"))
@@ -403,6 +426,344 @@ def _ml_semantics(ext: dict, rep: Report) -> None:
                     "the domain-shift check failed: correct or bound the data/simulation difference before use")
 
 
+THEORY_SEMANTICS_FROM = "2.6.0"  # theory-spec and prediction rules apply natively from this contract version
+STRONG_STATUSES = {"formal-proof", "analytic-derivation"}
+
+
+def _theory_semantics(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:
+    """theory-spec and prediction rules of contracts 2.6.0 (hep-theory audit 2026-10-13). Native for artifacts of
+    contract 2.6.0 or later; an older artifact gets them only in strict mode, at the same level, so its promised outcome
+    is unchanged.
+    theory-spec: errors for a perturbative argument without an order, an asymptotic argument without a limit, a
+    formal proof or analytic derivation with no check run, a check result outside check_results, an empty validity
+    domain, and a cosmic-ray-propagation model without degenerate_directions; a warning for each core convention key
+    that is neither given (a value or 'not-applicable') nor listed in 'inapplicable'.
+    prediction: errors for 'observed', for 'validated-in-scope' without a linked theory-spec input that carries it,
+    and for a scale envelope without an envelope_prescriptions term or with values that are not [min, max] (bounds
+    per bin for a binned envelope); unresolved when neither theory_spec_ref nor derivation_status links the
+    prediction to its derivation; a warning for a truncation without a truncation_methods term."""
+    if doc.get("artifact_type") == "theory-spec":
+        _theory_spec_rules(ext, vocab, rep)
+    else:
+        _prediction_rules(doc, ext, vocab, rep)
+
+
+def _term_ok(vocab: Vocabulary, name: str, term) -> bool:
+    return isinstance(term, str) and (vocab.has(name, term) or bool(NAMESPACED.match(term)))
+
+
+def _theory_spec_rules(ext: dict, vocab: Vocabulary, rep: Report) -> None:
+    conv: Any = ext.get("conventions") if isinstance(ext.get("conventions"), dict) else {}
+    listed = set(ext.get("inapplicable") or [])
+    core_keys = sorted(vocab.core("convention_keys"))
+    absent = [k for k in core_keys if k not in listed and (conv.get(k) is None or (isinstance(conv.get(k), str)
+                                                                                  and not conv[k].strip()))]
+    if absent:
+        rep.add("warning", "$.extension.conventions", "theory.conventions_incomplete",
+                f"core convention keys {absent} are neither given nor marked 'not-applicable' (or listed in "
+                "'inapplicable'): a conventions block travels with every derivation")
+    status = ext.get("derivation_status")
+    if status == "perturbative-argument" and _blank(ext.get("order")):
+        rep.add("error", "$.extension.order", "theory.order_missing",
+                "a perturbative argument states its order")
+    if status == "asymptotic-argument" and _blank(ext.get("limit")):
+        rep.add("error", "$.extension.limit", "theory.limit_missing",
+                "an asymptotic argument states the limit it holds in ('limit')")
+    checks = ext.get("checks_run") or []
+    if status in STRONG_STATUSES and not checks:
+        rep.add("error", "$.extension.checks_run", "theory.unchecked_strong_status",
+                f"'{status}' with no check run: list the checks (units, limits, symmetries, ...) or lower the status")
+    for i, c in enumerate(checks):
+        if isinstance(c, dict) and not (isinstance(c.get("result"), str) and vocab.has("check_results", c["result"])):
+            rep.add("error", f"$.extension.checks_run[{i}].result", "theory.check_result_vocab",
+                    f"check result {c.get('result')!r} is not one of {sorted(vocab.core('check_results'))}")
+    if ext.get("validity_domain") == {}:
+        rep.add("error", "$.extension.validity_domain", "theory.validity_empty",
+                "the validity domain is empty: state where the result holds")
+    model: Any = ext.get("model") if isinstance(ext.get("model"), dict) else {}
+    if model.get("family") == "cosmic-ray-propagation" and not any(
+            not _blank(d) for d in ext.get("degenerate_directions") or []):
+        rep.add("error", "$.extension.degenerate_directions", "theory.degeneracy_missing",
+                "a cosmic-ray propagation model lists the parameter combinations the data cannot separate "
+                "(degenerate_directions, e.g. 'D0/L')")
+
+
+def _prediction_rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:
+    status = set(doc.get("status", []))
+    if "observed" in status:
+        rep.add("error", "$.status", "prediction.status_upgraded", "a prediction is not 'observed'")
+    if "validated-in-scope" in status:
+        ref = ext.get("theory_spec_ref")
+        linked = [i for i in doc.get("inputs", []) if isinstance(i, dict) and i.get("artifact_type") == "theory-spec"
+                  and (ref is None or ref in (i.get("ref"), i.get("artifact_id")))]
+        if not any("validated-in-scope" in (i.get("status") or []) for i in linked):
+            rep.add("error", "$.status", "prediction.status_upgraded",
+                    "'validated-in-scope' needs a linked theory-spec input that carries it (a status is never upgraded "
+                    "when a result is reused)")
+    if _blank(ext.get("theory_spec_ref")) and _blank(ext.get("derivation_status")):
+        rep.add("unresolved", "$.extension", "prediction.spec_unlinked",
+                "no theory_spec_ref and no derivation_status: the prediction is not linked to its derivation")
+    vals: Any = ext.get("values") if isinstance(ext.get("values"), dict) else {}
+    n_bins = len(vals.get("values") or [])
+    for i, u in enumerate(ext.get("uncertainties", [])):
+        path = f"$.extension.uncertainties[{i}]"
+        if u.get("kind") == "scale-envelope":
+            if not _term_ok(vocab, "envelope_prescriptions", u.get("prescription")):
+                rep.add("error", f"{path}.prescription", "prediction.envelope_prescription",
+                        f"a scale envelope names its prescription, one of "
+                        f"{sorted(vocab.core('envelope_prescriptions'))} or a namespaced '<ns>:<term>'; "
+                        f"got {u.get('prescription')!r}")
+            ev = u.get("values")
+            if ev is not None and not (len(ev) == 2 and ev[0] <= ev[1]):
+                rep.add("error", f"{path}.values", "prediction.envelope_prescription",
+                        f"envelope values must be one [min, max] pair with min <= max, got {ev}; a binned envelope "
+                        "uses bounds {lower, upper} with one entry per bin")
+            b: Any = u.get("bounds")
+            if isinstance(b, dict):
+                lo, hi = b.get("lower") or [], b.get("upper") or []
+                if len(lo) != len(hi) or (n_bins and len(lo) != n_bins) or any(x > y for x, y in zip(lo, hi)):
+                    rep.add("error", f"{path}.bounds", "prediction.envelope_prescription",
+                            f"bounds need lower <= upper bin by bin and one entry per bin ({n_bins} bins); "
+                            f"got {len(lo)} lower and {len(hi)} upper")
+        if u.get("kind") == "truncation" and not _term_ok(vocab, "truncation_methods", u.get("method")):
+            rep.add("warning", f"{path}.method", "prediction.truncation_method",
+                    f"a truncation estimate names its method, one of "
+                    f"{sorted(vocab.core('truncation_methods'))}; got {u.get('method')!r}")
+MEASUREMENT_SEMANTICS_FROM = "2.6.0"  # measurement-spec semantic rules apply natively from this contract version
+MISSING_MARKERS = ("unknown", "not-provided")  # 'not-applicable' is a statement, not an open input
+NORMALIZATION_CORRECTIONS = {"luminosity": "integrated-luminosity", "exposure": "exposure", "livetime": "live-time"}
+ESTIMAND_MIN_WORDS = 5
+MEASUREMENT_KEYS = {
+    "extension": {"estimand", "observable", "species_or_process", "period", "selections", "backgrounds", "corrections",
+                  "systematics", "blinding", "experiment_fields", "ratio", "no_backgrounds_reason", "notes"},
+    "selections": {"name", "id", "definition", "conditional_denominator", "validation", "efficiency", "evidence_ids",
+                   "notes", "status", "order", "applied_in", "variable", "value", "unit", "ref", "region"},
+    "backgrounds": {"name", "id", "estimator", "control_region", "constraint", "closure", "normalization", "shape",
+                    "evidence_ids", "notes", "status", "processes", "method", "ref", "uncertainty", "value", "unit",
+                    "transfer_factor", "template"},
+    "corrections": {"effect_id", "category", "applied_in", "value", "unit", "exact_zero", "ref", "evidence_ids",
+                    "source", "notes", "uncertainty", "status", "conditional_denominator", "method", "definition",
+                    "name", "factor_of"},
+    "systematics": {"name", "source", "effect", "applied_via", "affected_processes", "correlation_key", "payload",
+                    "validation", "magnitude", "evidence_ids", "notes", "status", "correlation_evidence",
+                    "proposed_scheme", "ref", "periods", "regions", "value", "unit"},
+}
+_ISO_DATE = re.compile(r"^\d{4}(-\d{2}(-\d{2})?)?([T ].*)?$")
+
+
+def _norm_id(text) -> str:
+    """Comparison form of an identifier: case, '-', '_' and spaces ignored."""
+    return re.sub(r"[\s_-]+", "", str(text)).lower()
+
+
+def _key_checks(item, known: set[str], path: str, rep: Report) -> None:
+    """Unknown keys are warnings; a near-miss of a known key is an error (the field it should fill is missing)."""
+    import difflib
+    if not isinstance(item, dict):
+        return
+    for key in sorted(item):
+        if key in known or NAMESPACED.match(key):
+            continue
+        near = difflib.get_close_matches(key, sorted(known), n=1, cutoff=0.85)
+        if near:
+            rep.add("error", f"{path}.{key}", "measurement.misspelled_key",
+                    f"'{key}' is not a measurement-spec field; did you mean '{near[0]}'?")
+        else:
+            rep.add("warning", f"{path}.{key}", "measurement.unknown_key",
+                    f"'{key}' is not a measurement-spec field: no rule or consumer reads it (profile fields go under "
+                    "experiment_fields)")
+
+
+def _markers(value, path: str):
+    """(path, marker) for every string equal to a missing marker inside value."""
+    if isinstance(value, str) and value in MISSING_MARKERS:
+        yield path, value
+    elif isinstance(value, dict):
+        for k, v in value.items():
+            yield from _markers(v, f"{path}.{k}")
+    elif isinstance(value, list):
+        for i, v in enumerate(value):
+            yield from _markers(v, f"{path}[{i}]")
+
+
+def _listed(path: str, unresolved) -> bool:
+    """An unresolved_inputs entry names this field: it contains the field's key (or its path)."""
+    key = re.sub(r"\[\d+\]", "", path.rsplit(".", 1)[-1])
+    rel = path.replace("$.extension.", "")
+    entries = [str(e) for e in unresolved] if isinstance(unresolved, list) else []
+    return any(rel in e or re.search(rf"(^|[^A-Za-z0-9_]){re.escape(key)}([^A-Za-z0-9_]|$)", e) for e in entries)
+
+
+def _is_zero(v) -> bool:
+    return isinstance(v, (int, float)) and not isinstance(v, bool) and v == 0
+
+
+def _measurement_semantics(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:
+    """measurement-spec rules of contracts 2.6.0 (hep-analysis audit 2026-10-13): the SKILL.md invariants. Native for
+    artifacts of contract 2.6.0 or later; an older artifact gets them only in strict mode, so its promised outcome is
+    unchanged. Errors: no estimand sentence; a variable without unit and binning, no phase_space or frame; no
+    selection, or a blank conditional denominator; no background without no_backgrounds_reason, a background without
+    estimator or without control_region/constraint; a correction repeated (case and separators ignored), a category
+    outside response_corrections / '<x>_efficiency' / '<ns>:<term>', a repeated category or a bare 'efficiency' next to
+    a '<x>_efficiency', a chain item also in observable.included_corrections, a luminosity/exposure/livetime
+    correction next to the normalization of the same kind; a zero normalization or correction value without
+    exact_zero, a shape-only normalization with a numeric value; no systematic, a blank applied_via, a repeated
+    systematic name; a missing marker not named in unresolved_inputs; a blinded spec without mask, or blinded with
+    'observed' status; a ratio quantity without ratio block, a ratio of a quantity to itself, no cancellation entry; a
+    period ending before it starts; a misspelled key. Unresolved: a listed missing marker, a background without
+    closure. Warnings: partial selection validation, a 'cancels' entry without verification, unknown keys."""
+    obs: Any = ext.get("observable") if isinstance(ext.get("observable"), dict) else {}
+    x = "$.extension"
+    est = ext.get("estimand")
+    if not (isinstance(est, str) and est.strip()):
+        rep.add("error", f"{x}.estimand", "measurement.estimand_missing",
+                "state the estimand in one sentence: quantity, species or process, variable and range, level, frame, "
+                "what is held fixed")
+    elif est not in MISSING_MARKERS and len(est.split()) < ESTIMAND_MIN_WORDS:
+        rep.add("error", f"{x}.estimand", "measurement.estimand_not_a_sentence",
+                f"'{est}' is not an estimand sentence (quantity, species or process, variable, range, level)")
+    for i, var in enumerate(obs.get("variables", []) if isinstance(obs.get("variables"), list) else []):
+        if isinstance(var, dict) and not (str(var.get("unit", "")).strip() and ("edges" in var or "points" in var)):
+            rep.add("error", f"{x}.observable.variables[{i}]", "measurement.variable_incomplete",
+                    f"variable '{var.get('name')}' needs a unit and edges or points")
+    for key in ("phase_space", "frame"):
+        if key not in obs:
+            rep.add("error", f"{x}.observable.{key}", f"measurement.{key}_missing",
+                    f"the observable needs '{key}' (or a missing marker listed in unresolved_inputs)")
+    sels: Any = ext.get("selections")
+    if isinstance(sels, list) and not sels:
+        rep.add("error", f"{x}.selections", "measurement.selections_empty", "a measurement needs at least one selection")
+    for i, s in enumerate(sels if isinstance(sels, list) else []):
+        if not isinstance(s, dict):
+            continue
+        den = s.get("conditional_denominator")
+        if isinstance(den, str) and not den.strip():
+            rep.add("error", f"{x}.selections[{i}].conditional_denominator", "measurement.denominator_blank",
+                    f"selection '{s.get('name')}' needs its conditional denominator")
+        val = s.get("validation")
+        if isinstance(val, dict) and not all(not _blank(val.get(k)) for k in ("metric", "threshold", "action")):
+            rep.add("warning", f"{x}.selections[{i}].validation", "measurement.selection_validation_partial",
+                    "selection validation needs metric, threshold and action")
+        _key_checks(s, MEASUREMENT_KEYS["selections"], f"{x}.selections[{i}]", rep)
+    bkgs: Any = ext.get("backgrounds")
+    if isinstance(bkgs, list) and not bkgs and _blank(ext.get("no_backgrounds_reason")):
+        rep.add("error", f"{x}.backgrounds", "measurement.backgrounds_empty",
+                "no background listed: give each background, or state why there is none in no_backgrounds_reason")
+    for i, b in enumerate(bkgs if isinstance(bkgs, list) else []):
+        if not isinstance(b, dict):
+            continue
+        p = f"{x}.backgrounds[{i}]"
+        if _blank(b.get("estimator")):
+            rep.add("error", f"{p}.estimator", "measurement.background_estimator_missing",
+                    f"background '{b.get('name')}' needs an estimator")
+        if _blank(b.get("control_region")) and _blank(b.get("constraint")):
+            rep.add("error", p, "measurement.background_constraint_missing",
+                    f"background '{b.get('name')}' needs a control_region or a constraint")
+        if _blank(b.get("closure")):
+            rep.add("unresolved", f"{p}.closure", "measurement.background_closure_missing",
+                    f"background '{b.get('name')}' has no closure test yet")
+        _key_checks(b, MEASUREMENT_KEYS["backgrounds"], p, rep)
+    corrs = [c for c in ext.get("corrections", []) if isinstance(c, dict)] if isinstance(ext.get("corrections"), list) else []
+    seen: dict[str, str] = {}
+    for c in corrs:
+        eid = c.get("effect_id")
+        if isinstance(eid, str) and _norm_id(eid) in seen and seen[_norm_id(eid)] != eid:
+            rep.add("error", f"{x}.corrections", "measurement.duplicate_correction",
+                    f"'{eid}' and '{seen[_norm_id(eid)]}' are the same correction (case and separators ignored)")
+        elif isinstance(eid, str):
+            seen.setdefault(_norm_id(eid), eid)
+    cats = [str(c.get("category", "")) for c in corrs]
+    for i, cat in enumerate(cats):
+        if not (vocab.has("response_corrections", cat) or NAMESPACED.match(cat)
+                or re.fullmatch(r"[a-z][a-z0-9_]*_efficiency", cat)):
+            rep.add("error", f"{x}.corrections[{i}].category", "measurement.unknown_correction_category",
+                    f"'{cat}' is not a response_corrections term, a '<x>_efficiency' term or a namespaced '<ns>:<term>'")
+    normed = [_norm_id(cat) for cat in cats]
+    for cat in sorted({c for c in normed if normed.count(c) > 1}):
+        rep.add("error", f"{x}.corrections", "measurement.correction_category_repeated",
+                f"category '{cat}' appears twice: name each factor once (trigger_efficiency, selection_efficiency, ...)")
+    bare = [c.split(":", 1)[-1] for c in cats]
+    if "efficiency" in bare and any(c.endswith("_efficiency") for c in bare):
+        rep.add("error", f"{x}.corrections", "measurement.correction_category_repeated",
+                "a bare 'efficiency' next to a '<x>_efficiency' factor counts the efficiency twice")
+    included = obs.get("included_corrections") if isinstance(obs.get("included_corrections"), list) else []
+    chain = {_norm_id(c.get("effect_id", "")) for c in corrs} | set(normed)
+    for item in included:
+        if _norm_id(item) in chain:
+            rep.add("error", f"{x}.observable.included_corrections", "measurement.correction_in_observable_and_chain",
+                    f"'{item}' is already inside the observable and is applied again in the chain")
+    norm: Any = obs.get("normalization") if isinstance(obs.get("normalization"), dict) else {}
+    for i, cat in enumerate(bare):
+        if NORMALIZATION_CORRECTIONS.get(cat) == norm.get("kind"):
+            rep.add("error", f"{x}.corrections[{i}]", "measurement.normalization_double_counted",
+                    f"a '{cat}' correction next to a '{norm.get('kind')}' normalization applies it twice")
+    if _is_zero(norm.get("value")) and norm.get("exact_zero") is not True:
+        rep.add("error", f"{x}.observable.normalization.value", "measurement.zero_value",
+                "a normalization value of 0 needs \"exact_zero\": true; an unknown value is 'unknown', never 0")
+    if norm.get("kind") == "shape-only" and isinstance(norm.get("value"), (int, float)) and not isinstance(norm.get("value"), bool):
+        rep.add("error", f"{x}.observable.normalization.value", "measurement.shape_only_value",
+                "a shape-only normalization carries no absolute value")
+    for i, c in enumerate(corrs):
+        if _is_zero(c.get("value")) and c.get("exact_zero") is not True:
+            rep.add("error", f"{x}.corrections[{i}].value", "measurement.zero_value",
+                    f"correction '{c.get('effect_id')}' has value 0 without \"exact_zero\": true")
+        _key_checks(c, MEASUREMENT_KEYS["corrections"], f"{x}.corrections[{i}]", rep)
+    syst: Any = ext.get("systematics")
+    if isinstance(syst, list) and not syst:
+        rep.add("error", f"{x}.systematics", "measurement.systematics_empty",
+                "no systematic listed: every measurement has at least one source (state its physical effect)")
+    names = []
+    for i, s in enumerate(syst if isinstance(syst, list) else []):
+        if not isinstance(s, dict):
+            continue
+        if _blank(s.get("applied_via")):
+            rep.add("error", f"{x}.systematics[{i}].applied_via", "measurement.applied_via_missing",
+                    f"systematic '{s.get('name')}' needs applied_via (how the variation reaches the result)")
+        if _norm_id(s.get("name", "")) in names:
+            rep.add("error", f"{x}.systematics[{i}].name", "measurement.duplicate_systematic",
+                    f"systematic '{s.get('name')}' is listed twice")
+        names.append(_norm_id(s.get("name", "")))
+        _key_checks(s, MEASUREMENT_KEYS["systematics"], f"{x}.systematics[{i}]", rep)
+    for path, marker in _markers(ext, x):
+        if _listed(path, doc.get("unresolved_inputs")):
+            rep.add("unresolved", path, "measurement.input_unresolved", f"'{marker}': listed in unresolved_inputs")
+        else:
+            rep.add("error", path, "measurement.unresolved_not_listed",
+                    f"'{marker}' is not named in unresolved_inputs: list every open input explicitly")
+    bl: Any = ext.get("blinding")
+    if isinstance(bl, dict) and bl.get("blinded") is True:
+        mask: Any = bl.get("mask")
+        if not (isinstance(mask, dict) and (mask.get("regions") or mask.get("intervals"))):
+            rep.add("error", f"{x}.blinding.mask", "measurement.blinding_mask_missing",
+                    "a blinded measurement needs its mask (regions or observable intervals)")
+        if "observed" in set(doc.get("status", [])):
+            rep.add("error", "$.status", "measurement.blinded_observed",
+                    "a blinded spec cannot carry 'observed' results: only an authorized person unblinds, outside the "
+                    "agent session; label it preliminary or unvalidated until then")
+    ratio: Any = ext.get("ratio")
+    if obs.get("quantity") in ("ratio", "fraction") and not isinstance(ratio, dict):
+        rep.add("error", f"{x}.ratio", "measurement.ratio_block_missing",
+                f"a {obs.get('quantity')} needs the ratio block (numerator, denominator, cancellations)")
+    if isinstance(ratio, dict):
+        if _norm_id(ratio.get("numerator", "")) == _norm_id(ratio.get("denominator", "")):
+            rep.add("error", f"{x}.ratio", "measurement.ratio_self", "numerator and denominator are the same quantity")
+        canc: Any = ratio.get("cancellations")
+        if isinstance(canc, list) and not canc:
+            rep.add("error", f"{x}.ratio.cancellations", "measurement.ratio_cancellations_empty",
+                    "list each shared effect with its treatment ('independent' for one that does not cancel)")
+        for i, c in enumerate(canc if isinstance(canc, list) else []):
+            if isinstance(c, dict) and c.get("treatment") == "cancels" and _blank(c.get("verification")):
+                rep.add("warning", f"{x}.ratio.cancellations[{i}]", "measurement.cancellation_unverified",
+                        f"'{c.get('effect')}' is assumed to cancel without a verification")
+    periods: Any = ext.get("period")
+    for i, per in enumerate(periods if isinstance(periods, list) else [periods]):
+        if isinstance(per, dict) and all(isinstance(per.get(k), str) and _ISO_DATE.match(per[k]) for k in ("start", "end")) \
+                and per["end"][:10] < per["start"][:10]:
+            rep.add("error", f"{x}.period", "measurement.period_reversed",
+                    f"period {i}: end {per['end']} is before start {per['start']}")
+    _key_checks(ext, MEASUREMENT_KEYS["extension"], x, rep)
+
+
 STAT_SEMANTICS_FROM = "2.2.0"  # statistical-result semantic rules apply natively from this contract version
 BAND_KEYS = ("band_1sigma", "band_2sigma")
 
@@ -478,7 +839,7 @@ def _stat_semantics(doc: dict, ext: dict, rep: Report, strict: bool) -> None:
         rep.add("unresolved", "$.extension.significance.trials_method", "stats.trials_method_missing",
                 "a global p-value without its trials_method is not an established global significance")
     if ext.get("paradigm") == "bayesian":
-        _bayesian_rules(ext, rep)
+        _bayesian_rules(ext, rep, strict or _at_least(doc.get("contract_version"), STAT_HARDENING_FROM))
     lik: Any = ext.get("likelihood")
     if isinstance(lik, dict) and isinstance(lik.get("model_card"), dict):
         _model_card_rules(lik["model_card"], ext.get("paradigm"), rep)
@@ -491,22 +852,256 @@ def _stat_semantics(doc: dict, ext: dict, rep: Report, strict: bool) -> None:
     if isinstance(fd, dict) and fd.get("status") == "failed" and ext.get("fit_status") in ("converged", "converged-with-warnings"):
         rep.add("error", "$.extension.fit_status", "stats.fit_status_mismatch",
                 "fit_diagnostics.status is failed but fit_status says converged")
+    if strict or _at_least(doc.get("contract_version"), STAT_HARDENING_FROM):
+        _stat_hardening(ext, rep)
+
+
+STAT_HARDENING_FROM = "2.6.0"  # hep-statistics hardening rules (STH-T1) apply natively from this contract version
+COVERAGE_MIN_TOYS = 200        # below this a toy coverage claim is unresolved (binomial sigma <= 0.035 at any level)
+COVERAGE_TOLERANCE = 0.01      # undercoverage fails when the Clopper-Pearson upper end is below nominal - 0.01
+COVERAGE_INTERVAL_CL = 0.6827  # the central Clopper-Pearson interval the gate computes from the toy counts
+COVERAGE_INTERVAL_MAX_CL = 0.9973  # a recorded interval wider than this exact interval does not describe the counts
+Z_P_TOLERANCE = 0.01           # |z - Phi^-1(1 - p)| allowed between a reported z and its p (one-sided)
+SHA256 = re.compile(r"^[0-9a-fA-F]{64}$")
+# Probability-like results keys: exact names, and prefixes (a key that names a limit, bound or band is not one).
+PROB_RESULT_KEYS = frozenset({"p0", "p_value", "pvalue", "cls", "clb", "clsb", "cl_s", "cl_b", "cl_sb"})
+PROB_RESULT_PREFIXES = ("cls_", "clb_", "clsb_", "p_", "p0_")
+NOT_PROB = re.compile(r"(limit|upper|lower|bound|band|_ul\b|^ul_|interval)", re.I)
+# Results keys that name an observed upper limit (S95_observed, mu_95, upper_limit, limit_obs, ...).
+LIMIT_KEY = re.compile(r"(limit|upper[_ ]?bound|^(s|mu|r|n|sigma|xs)_?\d{2}(_|$)|^ul(_|$)|_ul$)", re.I)
+# Test-statistic families recognized in the free-text test_statistic (first match wins; unrecognized text is not
+# judged), and the families each construction admits. A construction absent here admits any declared ordering.
+STATISTIC_FAMILIES = (("q0", re.compile(r"\bq_?\{?0\}?(?![\d.])|discovery", re.I)),
+                      ("q-tilde", re.compile(r"q[-_ ]?tilde|q̃|\\tilde\{?q|qtilde", re.I)),
+                      ("q_mu", re.compile(r"\bq_?\{?mu\}?\b|q\(\s*mu\s*\)|q_?μ", re.I)),
+                      ("lep", re.compile(r"\blep\b|q_lep|-2\s*ln\s*q\b", re.I)),
+                      ("lr", re.compile(r"likelihood[- ]ratio|\blambda\b|\bt_?mu\b|t[-_ ]?tilde|\blr\b|ordering", re.I)),
+                      ("chi2", re.compile(r"chi2|chi\^2|chi-squared?|chi squared|χ²", re.I)))
+CONSTRUCTION_STATISTICS = {
+    "feldman-cousins": frozenset({"lr", "chi2"}),  # the unified ordering is the two-sided likelihood ratio
+    "cls": frozenset({"q_mu", "q-tilde", "lep", "lr", "chi2"}),  # a limit statistic, never the discovery q0
+    "asymptotic": frozenset({"q0", "q_mu", "q-tilde", "lr", "chi2"}),
+    "profile-likelihood-wilks": frozenset({"q0", "q_mu", "q-tilde", "lr", "chi2"}),
+}
+NO_CLS_RESULTS = frozenset({"neyman", "feldman-cousins"})  # constructions that do not produce CLs/CLb values
+TOY_CONSTRUCTIONS = frozenset({"toy-calibrated-profile"})
+
+
+def statistic_family(text) -> str | None:
+    """Family of a free-text test statistic (q0, q-tilde, q_mu, lep, lr, chi2), or None when not recognized."""
+    for name, rx in STATISTIC_FAMILIES:
+        if isinstance(text, str) and rx.search(text):
+            return name
+    return None
+
+
+def _prob_key(key: str) -> bool:
+    k = key.lower()
+    return (k in PROB_RESULT_KEYS or k.startswith(PROB_RESULT_PREFIXES)) and not NOT_PROB.search(k)
+
+
+def _z_of_p(p: float, two_sided: bool) -> float:
+    from statistics import NormalDist
+    return -NormalDist().inv_cdf(p / 2.0 if two_sided else p)
+
+
+def _toy_based(ext: dict) -> list[str]:
+    """Parts of a statistical-result that rest on toys (each needs a recorded seed)."""
+    parts = []
+    if ext.get("construction") in TOY_CONSTRUCTIONS:
+        parts.append(f"construction {ext['construction']}")
+    cov: Any = ext.get("coverage")
+    if isinstance(cov, dict) and cov.get("check") == "toys":
+        parts.append("toy coverage")
+    gof: Any = ext.get("goodness_of_fit")
+    if isinstance(gof, dict) and gof.get("calibration") == "toys":
+        parts.append("toy goodness of fit")
+    sig: Any = ext.get("significance")
+    if isinstance(sig, dict) and (sig.get("trials_method") == "toys" or sig.get("method") == "toys"):
+        parts.append("toy-calibrated significance")
+    return parts
+
+
+def _stat_hardening(ext: dict, rep: Report) -> None:
+    """Statistical-result rules of contracts 2.6.0 (hep-statistics hardening STH-T1.1). Native for artifacts of
+    contract 2.6.0 or later; an older artifact gets them only in strict mode (and so at the publication gate), so its
+    default outcome is unchanged.
+    Errors: coverage.cl different from results.cl or extension.cl (stats.coverage_cl_mismatch); a recorded coverage
+    interval that is not inside the 99.73% Clopper-Pearson interval of round(coverage x n_toys) of n_toys or does not
+    contain the coverage (stats.coverage_interval_inconsistent); a local, global or goodness-of-fit p-value of exactly 0
+    (stats.p_zero_without_bound: give the *_p_bound the toys support); a probability-like results value (keys
+    PROB_RESULT_KEYS, prefixes PROB_RESULT_PREFIXES) outside [0, 1] (stats.p_out_of_range); a z that disagrees with its
+    p by more than Z_P_TOLERANCE under the one-sided convention Phi^-1(1 - p) (significance.convention 'two-sided' uses
+    p/2) (stats.z_p_inconsistent); global_z above local_z (stats.global_z_above_local); a recognized test statistic a
+    construction does not admit (CONSTRUCTION_STATISTICS), or CLs/CLb results from a Neyman or Feldman-Cousins
+    construction (stats.construction_statistic_mismatch); likelihood.model_sha256 that is not 64 hex digits
+    (stats.model_sha256_malformed).
+    Unresolved: toy coverage with fewer than COVERAGE_MIN_TOYS toys (stats.coverage_toys_too_few); an observed limit
+    (construction cls, or a results key matching LIMIT_KEY) without expected.median and both bands
+    (stats.expected_bands_missing); global_z without global_p or global_p_bound (stats.global_z_without_p); a toy-based
+    construction, coverage, goodness of fit or significance without extension.seeds or coverage.seed
+    (stats.seed_missing); toy goodness of fit without n_toys (stats.gof_toys_missing)."""
+    results: Any = ext.get("results") if isinstance(ext.get("results"), dict) else {}
+    cov: Any = ext.get("coverage") if isinstance(ext.get("coverage"), dict) else None
+    if cov is not None and _is_num(cov.get("cl")):
+        for path, other in (("$.extension.results.cl", results.get("cl")), ("$.extension.cl", ext.get("cl"))):
+            if _is_num(other) and abs(other - cov["cl"]) > 1e-9:
+                rep.add("error", "$.extension.coverage.cl", "stats.coverage_cl_mismatch",
+                        f"coverage was checked at cl {cov['cl']} but {path[2:]} is {other}: the coverage claim is about another interval")
+    if cov is not None and cov.get("check") == "toys":
+        n, value = cov.get("n_toys"), cov.get("coverage")
+        if _is_num(n) and 0 < n < COVERAGE_MIN_TOYS:
+            rep.add("unresolved", "$.extension.coverage.n_toys", "stats.coverage_toys_too_few",
+                    f"{n} toys cannot establish coverage: use at least {COVERAGE_MIN_TOYS} (binomial sigma <= 0.035)")
+        interval: Any = cov.get("interval")
+        if isinstance(n, int) and not isinstance(n, bool) and n > 0 and _is_num(value) and 0.0 <= value <= 1.0 \
+                and isinstance(interval, list) and len(interval) == 2 and all(_is_num(x) for x in interval):
+            from core.stats.tail_estimation import clopper_pearson
+            lo, hi = clopper_pearson(round(value * n), n, COVERAGE_INTERVAL_MAX_CL)
+            if interval[0] < lo - 1e-9 or interval[1] > hi + 1e-9 or not interval[0] - 1e-12 <= value <= interval[1] + 1e-12:
+                rep.add("error", "$.extension.coverage.interval", "stats.coverage_interval_inconsistent",
+                        f"interval {interval} does not describe {round(value * n)} of {n} toys (exact "
+                        f"{COVERAGE_INTERVAL_MAX_CL} interval [{lo:.4g}, {hi:.4g}]): a wide interval cannot hide undercoverage")
+    sig: Any = ext.get("significance") if isinstance(ext.get("significance"), dict) else {}
+    gof: Any = ext.get("goodness_of_fit") if isinstance(ext.get("goodness_of_fit"), dict) else {}
+    for path, v in (("significance.local_p", sig.get("local_p")), ("significance.global_p", sig.get("global_p")),
+                    ("goodness_of_fit.p_value", gof.get("p_value"))):
+        if _is_num(v) and v == 0:
+            rep.add("error", f"$.extension.{path}", "stats.p_zero_without_bound",
+                    f"{path} = 0 is not an estimate: toys with no exceedance only bound it (record the bound "
+                    "{kind, value, cl, convention}, for example from core/stats/tail_estimation.py)")
+    for key, v in results.items():
+        if not (isinstance(key, str) and _prob_key(key)):
+            continue
+        vals = v if isinstance(v, list) else [v]
+        bad = [x for x in vals if _is_num(x) and not 0.0 <= x <= 1.0]
+        if bad:
+            rep.add("error", f"$.extension.results.{key}", "stats.p_out_of_range",
+                    f"results.{key} = {bad[0]} is a probability outside [0, 1]")
+    two_sided = sig.get("convention") == "two-sided"
+    for zk, pk in (("local_z", "local_p"), ("global_z", "global_p")):
+        z, p = sig.get(zk), sig.get(pk)
+        if _is_num(z) and _is_num(p) and 0.0 < p < 1.0 and abs(z - _z_of_p(p, two_sided)) > Z_P_TOLERANCE:
+            rep.add("error", f"$.extension.significance.{zk}", "stats.z_p_inconsistent",
+                    f"{zk} = {z} but {pk} = {p} gives z = {_z_of_p(p, two_sided):.4g} "
+                    f"({'two' if two_sided else 'one'}-sided): one of them is wrong")
+    if _is_num(sig.get("global_z")) and _is_num(sig.get("local_z")) and sig["global_z"] > sig["local_z"] + 1e-9:
+        rep.add("error", "$.extension.significance.global_z", "stats.global_z_above_local",
+                f"global_z {sig['global_z']} exceeds local_z {sig['local_z']}: a trials correction cannot raise a significance")
+    if "global_z" in sig and "global_p" not in sig and "global_p_bound" not in sig:
+        rep.add("unresolved", "$.extension.significance.global_p", "stats.global_z_without_p",
+                "global_z is reported without global_p (or its bound): the global significance is not established")
+    cons, fam = ext.get("construction"), statistic_family(ext.get("test_statistic"))
+    allowed = CONSTRUCTION_STATISTICS.get(cons) if isinstance(cons, str) else None
+    if allowed is not None and fam is not None and fam not in allowed:
+        rep.add("error", "$.extension.test_statistic", "stats.construction_statistic_mismatch",
+                f"construction {cons} does not use a {fam} test statistic (admits {', '.join(sorted(allowed))})")
+    if cons in NO_CLS_RESULTS:
+        cls_keys = [k for k in results if isinstance(k, str) and k.lower().startswith(("cls", "clb"))]
+        if cls_keys:
+            rep.add("error", "$.extension.construction", "stats.construction_statistic_mismatch",
+                    f"construction {cons} does not produce CLs/CLb values, but results carry {', '.join(cls_keys)}")
+    if ext.get("paradigm") == "frequentist" and (cons == "cls" or any(isinstance(k, str) and LIMIT_KEY.search(k) for k in results)):
+        exp: Any = ext.get("expected") if isinstance(ext.get("expected"), dict) else {}
+        missing = [k for k in ("median",) + BAND_KEYS if k not in exp]
+        if missing:
+            rep.add("unresolved", "$.extension.expected", "stats.expected_bands_missing",
+                    f"an observed limit needs its expected median and both bands for comparison (missing {', '.join(missing)})")
+    toys = _toy_based(ext)
+    seeds: Any = ext.get("seeds")
+    if toys and not (isinstance(seeds, dict) and seeds) and not (cov is not None and "seed" in cov):
+        rep.add("unresolved", "$.extension.seeds", "stats.seed_missing",
+                f"{', '.join(toys)} without a recorded seed (extension.seeds or coverage.seed): the toys cannot be reproduced")
+    if gof.get("calibration") == "toys" and not _is_num(gof.get("n_toys")):
+        rep.add("unresolved", "$.extension.goodness_of_fit.n_toys", "stats.gof_toys_missing",
+                "a toy-calibrated goodness-of-fit p-value needs its toy count (n_toys)")
+    lik: Any = ext.get("likelihood") if isinstance(ext.get("likelihood"), dict) else {}
+    sha = lik.get("model_sha256")
+    if sha is not None and not (isinstance(sha, str) and SHA256.match(sha)):
+        rep.add("error", "$.extension.likelihood.model_sha256", "stats.model_sha256_malformed",
+                f"model_sha256 {sha!r} is not a SHA-256 digest (64 hexadecimal digits)")
 
 
 GRADIENT_SAMPLERS = re.compile(r"\b(nuts|hmc|hamiltonian)\b", re.I)
 SAMPLER_METADATA = ("warmup", "chains", "draws", "divergences", "e_bfmi_min", "max_treedepth_hits")
 IMPROPER_FORMS = re.compile(r"^\s*(flat|improper|uniform\s*\(\s*-?inf|uniform\[\s*-?inf)", re.I)
 E_BFMI_MIN = 0.3  # Stan's warning threshold
+# contracts 2.6.0 (STH-T1.2): samplers that are gradient-based by default, an infinite bound on either side of a
+# uniform form, a propriety argument with a reference, a prior on every parameter of interest, an ESS floor.
+GRADIENT_SAMPLERS_2_6 = re.compile(r"\b(nuts|hmc|hamiltonian|stan|cmdstan|pystan|pymc3?|numpyro|blackjax)\b", re.I)
+IMPROPER_FORMS_2_6 = re.compile(r"^\s*(flat|improper)|uniform\s*[(\[][^,\])]*\binf\b|uniform\s*[(\[][^,]*,[^\])]*\binf\b", re.I)
+ESS_PER_CHAIN = 100  # bulk and tail ESS floor per chain (bayes_diagnostics.py --min-ess-per-chain), order question Q2
+ESS_FLOOR_NO_CHAINS = 400  # total floor when the chain count is not recorded (four chains' worth)
 
 
-def _bayesian_rules(ext: dict, rep: Report) -> None:
+def _poi_names(poi: str) -> set[str]:
+    """Names a prior may use for a parameter of interest: the full string and its leading identifier
+    ('S (signal events in SRB)' -> 'S')."""
+    out = {poi.strip()}
+    m = re.match(r"\s*([^\s(\[]+)", poi)
+    if m:
+        out.add(m.group(1))
+    return out
+
+
+def _ess_values(v) -> list[float]:
+    if _is_num(v):
+        return [float(v)]
+    if isinstance(v, dict):
+        return [float(x) for x in v.values() if _is_num(x)]
+    return []
+
+
+def _bayesian_hardening(ext: dict, rep: Report) -> None:
+    """Bayesian rules of contracts 2.6.0 (STH-T1.2). Unresolved: an improper prior (IMPROPER_FORMS_2_6: flat,
+    improper, or an infinite bound on either side of a uniform form) whose propriety is a bare 'yes'/true instead of
+    {argument or derivation, ref} (stats.propriety_unsupported); a parameter of interest without a prior, matched by the
+    full name or its leading identifier (stats.poi_prior_missing); a bulk or tail ESS below ESS_PER_CHAIN x
+    sampler.chains, or below ESS_FLOOR_NO_CHAINS when the chain count is not recorded (stats.ess_too_low), and the
+    missing chain count itself (stats.chains_missing)."""
+    priors = [pr for pr in ext.get("priors", []) or [] if isinstance(pr, dict)]
+    for i, pr in enumerate(priors):
+        prop = pr.get("propriety")
+        if not IMPROPER_FORMS_2_6.search(str(pr.get("form", ""))) or not prop:
+            continue
+        supported = isinstance(prop, dict) and not (_blank(prop.get("argument")) and _blank(prop.get("derivation"))) \
+            and not _blank(prop.get("ref"))
+        if not supported:
+            rep.add("unresolved", f"$.extension.priors[{i}].propriety", "stats.propriety_unsupported",
+                    f"prior '{pr.get('form')}' on {pr.get('parameter')} is improper and propriety {prop!r} is a claim, not "
+                    "an argument: give {argument (or derivation), ref} showing the posterior is proper")
+    names = {pr["parameter"] for pr in priors if isinstance(pr.get("parameter"), str)}
+    for poi in ext.get("parameters_of_interest", []) or []:
+        if isinstance(poi, str) and not (_poi_names(poi) & names):
+            rep.add("unresolved", "$.extension.priors", "stats.poi_prior_missing",
+                    f"parameter of interest '{poi}' has no prior (priors[].parameter must name it or its leading identifier)")
+    smp: Any = ext.get("sampler") if isinstance(ext.get("sampler"), dict) else {}
+    conv: Any = ext.get("convergence") if isinstance(ext.get("convergence"), dict) else {}
+    chains: Any = smp.get("chains")
+    has_chains = _is_num(chains) and chains >= 1
+    floor = ESS_PER_CHAIN * chains if has_chains else ESS_FLOOR_NO_CHAINS
+    ess_keys = [k for k in ("ess_bulk", "ess_tail", "ess") if k in conv]
+    if ess_keys and not has_chains:
+        rep.add("unresolved", "$.extension.sampler.chains", "stats.chains_missing",
+                f"the chain count is not recorded: the ESS floor is {ESS_PER_CHAIN} per chain ({ESS_FLOOR_NO_CHAINS} total assumed)")
+    for k in ess_keys:
+        low = [x for x in _ess_values(conv[k]) if x < floor]
+        if low:
+            rep.add("unresolved", f"$.extension.convergence.{k}", "stats.ess_too_low",
+                    f"{k} {min(low):g} is below the floor {floor:g} ({ESS_PER_CHAIN} per chain): the posterior summaries are not established")
+
+
+def _bayesian_rules(ext: dict, rep: Report, hardening: bool = False) -> None:
     """Bayesian results (audit T25): gradient-based samplers carry their warmup, chains, draws, divergences, E-BFMI and
     tree-depth saturations; divergences or a low E-BFMI under fit_status converged are errors; an improper prior is
     unresolved until the posterior's propriety is shown; SBC is calibration over the prior predictive, so it is not
-    reported as frequentist coverage."""
+    reported as frequentist coverage. With hardening (contract 2.6.0 or strict) the sampler and improper-form patterns
+    are the 2.6.0 ones and _bayesian_hardening applies."""
     smp: Any = ext.get("sampler")
     conv = ext.get("fit_status") == "converged"
-    if isinstance(smp, dict) and GRADIENT_SAMPLERS.search(str(smp.get("name", "")) + " " + str(smp.get("algorithm", ""))):
+    samplers = GRADIENT_SAMPLERS_2_6 if hardening else GRADIENT_SAMPLERS
+    improper = IMPROPER_FORMS_2_6 if hardening else IMPROPER_FORMS
+    if isinstance(smp, dict) and samplers.search(str(smp.get("name", "")) + " " + str(smp.get("algorithm", ""))):
         missing = [k for k in SAMPLER_METADATA if k not in smp]
         if missing:
             rep.add("unresolved", "$.extension.sampler", "stats.sampler_metadata_missing",
@@ -520,13 +1115,15 @@ def _bayesian_rules(ext: dict, rep: Report) -> None:
             rep.add("error", "$.extension.fit_status", "stats.low_e_bfmi",
                     f"E-BFMI {eb} below {E_BFMI_MIN} but fit_status converged")
     for i, pr in enumerate(ext.get("priors", []) or []):
-        if isinstance(pr, dict) and IMPROPER_FORMS.search(str(pr.get("form", ""))) and not pr.get("propriety"):
+        if isinstance(pr, dict) and improper.search(str(pr.get("form", ""))) and not pr.get("propriety"):
             rep.add("unresolved", f"$.extension.priors[{i}]", "stats.improper_prior",
                     f"prior '{pr.get('form')}' on {pr.get('parameter')} is improper: state why the posterior is proper "
                     "(priors[].propriety) or use a proper prior")
     if "coverage" in ext:
         rep.add("error", "$.extension.coverage", "stats.paradigm_mislabeled",
                 "a Bayesian result reports calibration (for example SBC) under checks, not frequentist coverage")
+    if hardening:
+        _bayesian_hardening(ext, rep)
 
 
 def check_model_card(card: dict, paradigm: str | None, rep: Report, path: str = "$.extension.likelihood.model_card") -> None:
@@ -601,11 +1198,14 @@ def _check_bands(exp: dict, rep: Report) -> None:
 def publication_gate(doc: dict, vocab: Vocabulary | None = None) -> dict:
     """Publication gate of a statistical-result (T07): status passed, unresolved or failed, with reasons.
 
-    failed: the artifact has errors under strict validation, carries the 'failed' status, its fit failed or was not
-    run, or its fit diagnostics failed. unresolved: anything not yet established: an 'unvalidated' or 'preliminary'
+    failed: the artifact has errors under strict validation, carries the 'failed' status, carries 'synthetic' or
+    'asimov' (gate.not_observed_data, contracts 2.6.0: nothing makes such a result publishable as data), its fit failed
+    or was not run, its fit diagnostics failed, or toy coverage is short: the upper end of the 68.27% Clopper-Pearson
+    interval of round(coverage x n_toys) of n_toys lies below the nominal level by more than 0.01 (gate.undercoverage;
+    without n_toys the recorded interval or value is used). unresolved: anything not yet established: an 'unvalidated' or 'preliminary'
     label, unresolved inputs, fit_status converged-with-warnings, untyped or not-checked coverage (frequentist), a scan
     without a global p-value and its trials_method, a Bayesian result without numeric R-hat and ESS, or no model and
-    backend provenance (likelihood.backend with likelihood.model_ref or model_sha256). Passing says the contract-level
+    backend provenance (a non-blank likelihood.backend with a non-blank model_ref or model_sha256). Passing says the contract-level
     prerequisites for reporting the result as validated are present; it is not a scientific validation."""
     reasons: list[dict] = []
 
@@ -624,6 +1224,10 @@ def publication_gate(doc: dict, vocab: Vocabulary | None = None) -> dict:
     status = set(doc.get("status", []))
     if "failed" in status:
         add("failed", "gate.failed_label", "the artifact carries the 'failed' status")
+    for s in NOT_OBSERVED_STATUSES:
+        if s in status:
+            add("failed", "gate.not_observed_data", f"the artifact carries '{s}': no further evidence makes a result on "
+                                                    "synthetic or Asimov data publishable as a result on data")
     for s in ("unvalidated", "preliminary"):
         if s in status:
             add("unresolved", "gate.status_label", f"the artifact carries '{s}': an archival artifact, not a validated result")
@@ -644,11 +1248,17 @@ def publication_gate(doc: dict, vocab: Vocabulary | None = None) -> dict:
         nominal: Any = cov.get("cl", (ext.get("results") or {}).get("cl") if isinstance(ext.get("results"), dict) else None)
         value: Any = cov.get("coverage")
         if cov.get("check") == "toys" and _is_num(value) and _is_num(nominal):
-            interval: Any = cov.get("interval")
-            upper = interval[1] if isinstance(interval, list) and len(interval) == 2 and _is_num(interval[1]) else value
-            if upper < nominal - 0.01:
-                add("failed", "gate.undercoverage", f"recorded coverage {value} (upper end {upper}) is below the nominal "
-                                                    f"{nominal} by more than 0.01")
+            n: Any = cov.get("n_toys")
+            if isinstance(n, int) and not isinstance(n, bool) and n > 0 and 0.0 <= value <= 1.0:
+                # the exact interval from the counts, not a recorded interval (which could be widened to hide a deficit)
+                from core.stats.tail_estimation import clopper_pearson
+                upper = clopper_pearson(round(value * n), n, COVERAGE_INTERVAL_CL)[1]
+            else:
+                interval: Any = cov.get("interval")
+                upper = interval[1] if isinstance(interval, list) and len(interval) == 2 and _is_num(interval[1]) else value
+            if upper < nominal - COVERAGE_TOLERANCE:
+                add("failed", "gate.undercoverage", f"recorded coverage {value} (upper end {upper:.4g}) is below the nominal "
+                                                    f"{nominal} by more than {COVERAGE_TOLERANCE}")
         elif cov.get("check") == "toys" and not _is_num(nominal):
             add("unresolved", "gate.coverage_nominal_missing", "toy coverage needs the nominal level (coverage.cl)")
     if ext.get("paradigm") == "bayesian":
@@ -659,7 +1269,7 @@ def publication_gate(doc: dict, vocab: Vocabulary | None = None) -> dict:
     if isinstance(sig.get("scan"), dict) and not (("global_p" in sig or "global_p_bound" in sig) and sig.get("trials_method")):
         add("unresolved", "gate.global_not_established", "a scan needs a global p-value (or bound) with its trials_method")
     lik: Any = ext.get("likelihood") if isinstance(ext.get("likelihood"), dict) else {}
-    if not (lik.get("backend") and (lik.get("model_ref") or lik.get("model_sha256"))):
+    if _blank(lik.get("backend")) or (_blank(lik.get("model_ref")) and _blank(lik.get("model_sha256"))):
         add("unresolved", "gate.model_provenance_missing", "likelihood.backend and a model_ref or model_sha256 are required")
     levels = {r["level"] for r in reasons}
     status_out = "failed" if "failed" in levels else ("unresolved" if levels else "passed")
@@ -754,6 +1364,8 @@ def validate_artifact(doc, vocab: Vocabulary | None = None, protected: bool = Fa
             if at == "statistical-result":
                 if strict or _at_least(doc.get("contract_version"), STAT_SEMANTICS_FROM):
                     validate(ext, "ext_statistical_result_v2_2.json", vocab, rep, "$.extension")
+                if strict or _at_least(doc.get("contract_version"), STAT_HARDENING_FROM):
+                    validate(ext, "ext_statistical_result_v2_6.json", vocab, rep, "$.extension")
                 if not any(f.code in SHAPE_ERRORS for f in rep.errors):
                     _stat_semantics(doc, ext, rep, strict)
     return rep
@@ -764,10 +1376,15 @@ def main(argv=None) -> int:
     if not args or args[0] in ("-h", "--help"):
         print(__doc__)
         return 0 if args else 2
+    takes_value = {"--profiles-from", "--gate"}
+    positional = [a for k, a in enumerate(args) if not a.startswith("--") and (k == 0 or args[k - 1] not in takes_value)]
+    if not positional:
+        print(json.dumps({"ok": False, "error": "no artifact path given"}))
+        return 2
     try:
-        doc = json.loads(Path(args[0]).read_text(encoding="utf-8"))
+        doc = json.loads(Path(positional[0]).read_text(encoding="utf-8"))
     except (OSError, ValueError) as exc:
-        print(json.dumps({"ok": False, "error": f"cannot read {args[0]}: {exc}"}))
+        print(json.dumps({"ok": False, "error": f"cannot read {positional[0]}: {exc}"}))
         return 2
     vocab, pre = Vocabulary(), Report()
     if "--profiles-from" in args:

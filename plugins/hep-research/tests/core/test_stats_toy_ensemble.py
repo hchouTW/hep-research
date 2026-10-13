@@ -26,6 +26,25 @@ DOC = {"bins": [{"n": 4, "b": 3.0, "s": 1.0}, {"n": 2, "b": 1.5, "s": 0.8}],
        "nuisances": [{"name": "bkg", "kind": "background_norm", "sigma": 0.1}]}
 
 
+class STH310SingleBinMcRanges(unittest.TestCase):
+    """STH-T3.10: profile-cls and profile-limit report the Monte Carlo range of their toy limits, as shape-limit
+    --cls-toys does; n = 0, b = 3, sigma_b = 0: the exact CLs limit -ln(0.05) = 3.00 lies inside the range."""
+
+    def test_profile_cls_range_contains_the_exact_limit(self):
+        r = ll.profile_cls(0, 3.0, 0.0, 0.95, 1000, 0, 1)
+        lo, hi = r["observed_limit_mc_range"]
+        self.assertLessEqual(lo, r["observed_upper_limit"])
+        self.assertLessEqual(lo, -math.log(0.05))
+        self.assertTrue(hi is None or hi >= -math.log(0.05), r["observed_limit_mc_range"])
+        self.assertEqual(r["observed_limit_mc_range_cl"], ll.LIMIT_MC_CL)
+
+    def test_profile_limit_range_brackets_its_estimate(self):
+        r = ll.profile_limit(5, 3.0, 1.0, 0.95, 1000, 1)
+        lo, hi = r["toy_limit_mc_range"]
+        self.assertTrue(lo <= r["toy_calibrated_upper_limit"] <= hi, r)
+        self.assertLess(hi - lo, 0.5 * r["toy_calibrated_upper_limit"])
+
+
 class T11ToyCls(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

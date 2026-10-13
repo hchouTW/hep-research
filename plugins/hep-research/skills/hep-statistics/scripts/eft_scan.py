@@ -4,7 +4,9 @@ Needs NumPy and SciPy.
 
 Model: Poisson bins with mean nu_i(c) = b_i + sum_k c_k I_ki + sum_kl c_k c_l Q_kli (one or two coefficients c;
 interference I, quadratic Q), no nuisance parameters. The negative log-likelihood is evaluated on a complete grid, so
-no optimizer can miss a second minimum: q(c) = 2 (NLL(c) - min over the grid and a local refinement).
+no optimizer can miss a second minimum: q(c) = 2 (NLL(c) - min over the grid). There is no local refinement: interval
+ends and the best fit are known to the grid step, reported as grid_resolution (refine the grid to sharpen them).
+A point where any bin mean is <= 0 is outside the model's domain (q = +inf, also for an empty bin).
 
 What it reports, and what it refuses to do:
 - 1D: every interval of {c: q(c) <= threshold}, in order; an allowed set made of two disjoint intervals is reported as
@@ -30,8 +32,11 @@ import json
 import sys
 from pathlib import Path
 
-import numpy as np
-from scipy import ndimage, stats
+try:  # --help works without them; main() refuses to run without them (STH-T3.1)
+    import numpy as np
+    from scipy import ndimage, stats
+except ImportError:  # pragma: no cover
+    np = ndimage = stats = None  # type: ignore[assignment]
 
 LABEL = "[General method] EXPERIMENTAL"
 
@@ -49,7 +54,9 @@ def nll(model: dict, c: np.ndarray, n=None) -> np.ndarray:
     n = np.asarray(model["n"] if n is None else n, float)
     nu = expected(model, c)
     with np.errstate(divide="ignore", invalid="ignore"):
-        val = np.where(nu > 0, nu - n * np.log(np.where(nu > 0, nu, 1.0)), np.where(n > 0, np.inf, 0.0))
+        # nu <= 0 in any bin is outside the domain (+inf), also where n = 0 (STH-T3.3: before, nu < 0 with n = 0
+        # counted as an allowed point)
+        val = np.where(nu > 0, nu - n * np.log(np.where(nu > 0, nu, 1.0)), np.inf)
     return val.sum(axis=-1)
 
 
@@ -73,6 +80,10 @@ def intervals(axis, mask) -> list[list[float]]:
 
 
 def scan(model: dict, cl: float = 0.95, toys: int = 0, seed: int = 1) -> dict:
+    if not isinstance(model, dict):
+        raise ValueError("the model must be a JSON object")
+    if not (isinstance(cl, (int, float)) and 0.0 < cl < 1.0):
+        raise ValueError(f"cl must lie in (0, 1), got {cl}")
     k = len(model["I"])
     if k not in (1, 2) or len(model["grid"]) != k:
         raise ValueError("one or two coefficients, with one grid per coefficient")
@@ -82,6 +93,8 @@ def scan(model: dict, cl: float = 0.95, toys: int = 0, seed: int = 1) -> dict:
         raise ValueError("no grid point gives a valid Poisson mean for the data")
     q = 2.0 * (nl - np.nanmin(nl[np.isfinite(nl)]))
     out = {"label": LABEL, "coefficients": k, "cl": cl, "grid_points": [len(a) for a in axes],
+           "grid_resolution": [float(a[1] - a[0]) if len(a) > 1 else None for a in axes],
+           "resolution_note": "interval ends and the best fit are grid values: each is known to one grid step",
            "best_fit": mesh[np.unravel_index(np.nanargmin(np.where(np.isfinite(nl), nl, np.inf)), nl.shape)].tolist()}
     t1 = stats.chi2.ppf(cl, 1)
     if k == 1:
@@ -125,6 +138,9 @@ def main(argv=None) -> int:
     s.add_argument("--toys", type=int, default=0)
     s.add_argument("--seed", type=int, default=1)
     a = ap.parse_args(argv)
+    if np is None:
+        print(json.dumps({"status": "rejected", "error": "NumPy and SciPy are required"}))
+        return 2
     try:
         out = scan(json.loads(Path(a.input).read_text()), a.cl, a.toys, a.seed)
     except (OSError, ValueError, KeyError, TypeError) as exc:

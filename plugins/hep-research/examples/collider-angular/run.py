@@ -129,12 +129,16 @@ def artifacts(res, resp, created):
     spec = dict(base, artifact_id="synthetic-path-b-measurement-spec", artifact_type="measurement-spec",
                 objective="SYNTHETIC Path B: corrected d sigma / d cos theta in the fiducial region (illustrative profile)",
                 provenance={"producer_skill": "hep-analysis", "created": created}, status=["synthetic"],
-                extension={"observable": obs, "species_or_process": "e+e- -> mu+mu- (synthetic)", "period": "not-applicable",
+                extension={"estimand": ("SYNTHETIC: the differential cross section d sigma / d cos theta of e+e- -> mu+mu- at "
+                                        "fixed sqrt(s) = 10 GeV, at particle level in the fiducial region |cos theta| < 0.9, "
+                                        "center-of-mass frame"),
+                           "observable": obs, "species_or_process": "e+e- -> mu+mu- (synthetic)", "period": "not-applicable",
                            "selections": [{"name": "synthetic event selection", "definition": "efficiency e0 - e1 cos^4 theta (invented)",
                                            "conditional_denominator": "generated events in the truth bin"}],
-                           "backgrounds": [], "corrections": [
-                               {"effect_id": "efficiency_and_migration", "category": "response", "applied_in": "response_matrix"},
-                               {"effect_id": "luminosity", "category": "normalization", "applied_in": "estimator"}],
+                           "backgrounds": [],
+                           "no_backgrounds_reason": "SYNTHETIC: the generator produces signal events only",
+                           "corrections": [
+                               {"effect_id": "efficiency_and_migration", "category": "migration", "applied_in": "response_matrix"}],
                            "systematics": [{"name": "luminosity", "source": "synthetic 2% assumption", "effect": "normalization",
                                             "applied_via": "covariance (fully correlated across bins)"}],
                            "blinding": {"blinded": False},
@@ -189,6 +193,15 @@ def figures(res, expected, out):
     ax.legend(fontsize=7); fig.tight_layout(); fig.savefig(out / "dsigma_dcos.png", dpi=110); plt.close(fig)
 
 
+def review_spec(spec, vocab, out):
+    """Verdict-first review draft of the spec with the hep-analysis review script (references/review-and-artifacts.md)."""
+    sys.path.insert(0, str(PLUGIN / "skills" / "hep-analysis" / "scripts"))
+    import review_measurement_spec
+    review = review_measurement_spec.draft(spec, vocab)
+    (out / "review.md").write_text(review_measurement_spec.markdown(review, spec["artifact_id"], "synthetic"))
+    return {"verdict": review["verdict"], "defects": len(review["defects"]), "unresolved": len(review["unresolved"])}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--toys", type=int, default=CFG["toys"])
@@ -237,8 +250,11 @@ def main(argv=None) -> int:
         "covariance_validation": cv["status"] != "fail",
         "contracts": all(c["ok"] for c in contract.values()),
     }
+    review = review_spec(docs["measurement_spec"], Vocabulary.with_profiles([PROFILE]), out)
+    passes["review_verdict"] = review["verdict"] == "acceptable-with-open-inputs"
     results = {
         "label": "SYNTHETIC and ILLUSTRATIVE: invented inputs; describes no experiment",
+        "review": review,
         "profiles_loaded": [PROFILE["id"]],
         "seed": args.seed, "toys": args.toys, "criteria": CRITERIA, "pass": passes,
         "config": CFG, "truth_edges": TE.tolist(), "reported_truth_bins": [REP.start, REP.stop],

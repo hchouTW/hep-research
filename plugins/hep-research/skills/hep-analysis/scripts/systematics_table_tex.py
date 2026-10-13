@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 """Render a systematics registry CSV as a booktabs LaTeX table for a paper or note.
 
-Input: a CSV in the format of <plugin root>/skills/hep-analysis/assets/systematics.csv (source, type, process_scope,
-era_scope, region_scope, correlation_key, rate_shape, payload, validation), optionally with impact columns of your
+Input: a CSV in the format of <plugin root>/skills/hep-analysis/assets/systematics.csv (name, source, effect,
+applied_via, affected_processes, correlation_key, payload, validation: the measurement-spec systematics ledger, with
+effect one of normalization, shape, migration, mixed), optionally with impact columns of your
 own (for example `impact_percent`) and a per-row `status` column. Every table carries a status label: give --status
 (synthetic, observed, preliminary, ...) for the whole table, or a `status` column for every row; a table without one is
 refused, so unlabeled numbers never reach a manuscript. A synthetic or preliminary label appears in the caption and in a
 LaTeX comment; per-row statuses get their own column.
 
 Usage:
-  python3 systematics_table_tex.py --input systematics.csv --status synthetic [--columns source,type,correlation_key]
+  python3 systematics_table_tex.py --input systematics.csv --status synthetic [--columns name,effect,correlation_key]
          [--caption TEXT] [--label tab:systematics] [--out table.tex]
+Statuses: the core artifact_statuses plus `published` (a table-only value: a published table is a legitimate source).
+A cell that reads nan or inf is refused.
 Needs \\usepackage{booktabs} in the document. Exit codes: 0 written, 2 refused input. Standard library only.
 """
 from __future__ import annotations
@@ -20,12 +23,15 @@ import csv
 import sys
 from pathlib import Path
 
-DEFAULT_COLUMNS = ["source", "type", "process_scope", "region_scope", "correlation_key", "rate_shape"]
-HEADERS = {"source": "Source", "type": "Type", "process_scope": "Processes", "era_scope": "Periods",
-           "region_scope": "Regions", "correlation_key": "Correlation", "rate_shape": "Effect", "payload": "Payload",
+DEFAULT_COLUMNS = ["name", "source", "effect", "applied_via", "affected_processes", "correlation_key"]
+HEADERS = {"name": "Name", "source": "Source", "effect": "Effect", "applied_via": "Applied via",
+           "affected_processes": "Processes", "correlation_key": "Correlation", "payload": "Payload",
            "validation": "Validation", "status": "Status"}
-STATUSES = ("synthetic", "asimov", "observed", "preliminary", "published", "unvalidated", "user-supplied")
-FLAGGED = ("synthetic", "asimov", "preliminary", "unvalidated")  # said in the caption itself
+EFFECTS = ("normalization", "shape", "migration", "mixed")  # the measurement-spec systematics vocabulary
+STATUSES = ("failed", "unvalidated", "preliminary", "synthetic", "asimov", "observed", "user-supplied",
+            "validated-in-scope", "published")  # core artifact_statuses + published (tables only)
+FLAGGED = ("failed", "synthetic", "asimov", "preliminary", "unvalidated")  # said in the caption itself
+NON_FINITE = {"nan", "+nan", "-nan", "inf", "+inf", "-inf", "infinity", "+infinity", "-infinity"}
 SPECIAL = {"\\": r"\textbackslash{}", "&": r"\&", "%": r"\%", "$": r"\$", "#": r"\#", "_": r"\_", "{": r"\{",
            "}": r"\}", "~": r"\textasciitilde{}", "^": r"\textasciicircum{}"}
 
@@ -35,7 +41,13 @@ class Refused(ValueError):
 
 
 def tex(text: str) -> str:
-    return "".join(SPECIAL.get(c, c) for c in text)
+    """LaTeX-escaped text on one line (line breaks become spaces)."""
+    return "".join(SPECIAL.get(c, c) for c in " ".join(str(text).split()))
+
+
+def safe_label(label: str) -> str:
+    """A \\label key: letters, digits and : . _ - only; any other character becomes '-'."""
+    return "".join(c if (c.isascii() and (c.isalnum() or c in ":._-")) else "-" for c in label) or "tab"
 
 
 def render(rows: list[dict], columns: list[str], status: str | None, caption: str, label: str) -> str:
@@ -51,6 +63,14 @@ def render(rows: list[dict], columns: list[str], status: str | None, caption: st
             if s not in STATUSES:
                 raise Refused(f"row {i}: status {s!r} is not one of {', '.join(STATUSES)}")
             statuses.add(s)
+    for i, r in enumerate(rows, 1):
+        for c, v in r.items():
+            if isinstance(v, str) and v.strip().lower() in NON_FINITE:
+                raise Refused(f"row {i}, column {c!r}: non-finite value {v.strip()!r}")
+    if "effect" in rows[0]:
+        for i, r in enumerate(rows, 1):
+            if (r.get("effect") or "").strip() not in EFFECTS:
+                raise Refused(f"row {i}: effect {r.get('effect')!r} is not one of {', '.join(EFFECTS)}")
     missing = [c for c in columns if c not in rows[0]]
     if missing:
         raise Refused(f"columns not in the CSV: {missing}")
@@ -63,14 +83,14 @@ def render(rows: list[dict], columns: list[str], status: str | None, caption: st
     if flagged:
         full_caption = f"{' and '.join(s.upper() for s in flagged)}: {caption}"
     lines = [f"% generated by systematics_table_tex.py; status: {', '.join(sorted(statuses))}",
-             r"\begin{table}[htbp]", r"\centering", f"\\caption{{{tex(full_caption)}}}", f"\\label{{{label}}}",
+             r"\begin{table}[htbp]", r"\centering", f"\\caption{{{tex(full_caption)}}}", f"\\label{{{safe_label(label)}}}",
              f"\\begin{{tabular}}{{{'l' * len(columns)}}}", r"\toprule", head + r" \\", r"\midrule", *body,
              r"\bottomrule", r"\end{tabular}", r"\end{table}"]
     return "\n".join(lines) + "\n"
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--input", type=Path, required=True, help="systematics CSV (assets/systematics.csv format)")
     ap.add_argument("--status", choices=STATUSES, help="status of the whole table (or give a status column)")
     ap.add_argument("--columns", default=",".join(DEFAULT_COLUMNS), help="comma-separated CSV columns, in order")

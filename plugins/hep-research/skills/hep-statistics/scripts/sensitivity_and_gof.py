@@ -25,7 +25,8 @@ Subcommands:
 Input JSON for gof: {"observed": [n_i], "templates": {"name": [t_i], ...}} (templates are shapes; their yields are
 fitted, each >= 0). Output: JSON with the statistic, the observed value, the toy p-value (binomial Monte Carlo error,
 or a 95% bound with zero exceedances), the asymptotic chi2 reference (labeled as such), the seed and the toy count.
-Needs NumPy (and SciPy for the chi2 reference). Exit codes: 0 ok; 1 the fit did not converge; 2 rejected input.
+Needs NumPy (and SciPy for the chi2 reference). Exit codes: 0 ok; 1 the fit did not converge; 2 rejected input, or a
+model that cannot describe the data at all (status 'infeasible': a bin with data where every template is zero).
 """
 from __future__ import annotations
 
@@ -101,6 +102,10 @@ def gof(doc, toys, seed, min_expected=5.0):
         raise ValueError("templates must be finite, nonnegative and non-empty")
     if A.shape[1] >= n.size:
         raise ValueError("need more bins than templates for a goodness-of-fit test")
+    empty = [int(i) for i in np.where((A.sum(axis=1) <= 0) & (n > 0))[0]]
+    if empty:  # no yield can put events there: the model is infeasible, not a fit that failed to converge (STH-T3.8)
+        return {"status": "infeasible", "error": f"bins {empty} have data but every template is zero there: no choice of "
+                                                 "yields can describe them; add the missing component or drop the bins"}, 2
     A = A / A.sum(axis=0)
     y, conv = fit_yields(n, A)
     if not conv[0]:

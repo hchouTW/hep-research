@@ -1,7 +1,7 @@
 # Implementation Discipline
 
 How to behave while making the change, as distinct from how to scope it
-([product-framing.md](product-framing.md)) or how to check it
+([product framing](../../../docs/dev/engineering/product-framing.md)) or how to check it
 ([validation-and-done.md](validation-and-done.md)). These are the failure modes that
 show up in the diff rather than in the plan: guessing instead of asking, writing more
 code than the problem needs, editing more than the request touches, and calling

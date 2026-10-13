@@ -5,8 +5,11 @@ blinding (the agent reads only released blinded derivatives) plus OS access cont
 regions are blinded) belongs to the collaboration, recorded through hep-analysis and the project config.
 A region is {"variable": name, "low": x0, "high": x1}; a bin is blinded when it overlaps [low, high).
 
-- mask_binned(edges, values, region)      -> values with blinded bins replaced by None, plus the mask
-- mask_ratio(num, den, mask)              -> ratio with every blinded bin masked (a ratio reveals its numerator)
+- mask_binned(edges, values, region, errors=None, flow=False)
+                                          -> values (and errors) with blinded bins replaced by None, plus the mask;
+                                             flow=True adds underflow/overflow bins; lengths and numbers checked
+- mask_ratio(num, den, mask)              -> ratio with every blinded bin masked (a ratio reveals its numerator);
+                                             inputs of different lengths are a ValueError, never truncated
 - seal(edges, values, region, references) -> the numbers an output must never contain (SEALED_KINDS: blinded bin
                                              values, sums, total, cumulative sums, square roots, fractions of the
                                              total, and ratios, differences and (N-B)/sqrt(B) to references);
@@ -46,6 +49,7 @@ from __future__ import annotations
 
 import json
 import math
+import numbers
 import re
 import unicodedata
 from pathlib import Path
@@ -72,24 +76,62 @@ def validate_edges(edges) -> list[float]:
     return e
 
 
-def blinded_mask(edges, region: dict) -> list[bool]:
+def blinded_mask(edges, region: dict, flow: bool = False) -> list[bool]:
+    """One flag per bin: True when the bin overlaps [low, high). With flow=True the list has an underflow bin
+    (-inf, edges[0]) first and an overflow bin [edges[-1], +inf) last, blinded when the region reaches past the edge."""
     lo, hi = float(region["low"]), float(region["high"])
     if not lo < hi:
         raise ValueError("blinded region needs low < high")
     edges = validate_edges(edges)
-    return [e1 > lo and e0 < hi for e0, e1 in zip(edges[:-1], edges[1:])]
+    m = [e1 > lo and e0 < hi for e0, e1 in zip(edges[:-1], edges[1:])]
+    return [lo < edges[0]] + m + [hi > edges[-1]] if flow else m
 
 
-def mask_binned(edges, values, region: dict) -> dict:
-    if len(values) != len(edges) - 1:
-        raise ValueError("values need one entry per bin")
-    m = blinded_mask(edges, region)
-    return {"edges": list(edges), "values": [None if b else v for v, b in zip(values, m)], "blinded_bins": m,
-            "blinding": {"region": dict(region), "note": "masked bins carry no value"}}
+def _check_numbers(values, name: str, n: int) -> list:
+    """values unchanged, or ValueError unless it is a list of n finite real numbers (None allowed: already masked).
+    A string, a boolean or a NaN in a histogram must not pass through masking unnoticed."""
+    if isinstance(values, (str, bytes, dict)) or not hasattr(values, "__len__"):
+        raise ValueError(f"{name} must be a list of numbers")
+    if len(values) != n:
+        raise ValueError(f"{name} has {len(values)} entries, expected {n} (one per bin)")
+    for i, v in enumerate(values):
+        if v is None:
+            continue
+        if isinstance(v, bool) or not isinstance(v, numbers.Real) or not math.isfinite(v):
+            raise ValueError(f"{name}[{i}] = {v!r} is not a finite number")
+    return list(values)
+
+
+def mask_binned(edges, values, region: dict, errors=None, flow: bool = False) -> dict:
+    """Values (and errors, if given) with every blinded bin replaced by None, plus the mask. values and errors need
+    one finite number per bin (len(edges) - 1, or len(edges) + 1 with flow=True: underflow first, overflow last);
+    a length mismatch or a non-number is a ValueError, never a silently shifted mask. Errors are masked with the
+    values' mask, so no output pairs a masked value with its unmasked error."""
+    n = len(edges) - 1 + (2 if flow else 0)
+    if len(values) != n:
+        raise ValueError("values need one entry per bin" + (" plus underflow and overflow" if flow else ""))
+    m = blinded_mask(edges, region, flow)
+    vals = _check_numbers(values, "values", n)
+    out: dict[str, Any] = {"edges": list(edges), "values": [None if b else v for v, b in zip(vals, m)], "blinded_bins": m,
+                           "blinding": {"region": dict(region), "note": "masked bins carry no value"}}
+    if errors is not None:
+        errs = _check_numbers(errors, "errors", n)
+        if any(e is not None and e < 0 for e in errs):
+            raise ValueError("errors must not be negative")
+        out["errors"] = [None if b else e for e, b in zip(errs, m)]
+    if flow:
+        out["flow"] = True  # values[0] is the underflow bin, values[-1] the overflow bin
+    return out
 
 
 def mask_ratio(num, den, mask) -> list:
-    return [None if (b or n is None or d is None or d == 0) else n / d for n, d, b in zip(num, den, mask)]
+    """num/den per bin with every blinded bin (and every bin with a missing or zero denominator) None. The three lists
+    must have the same length: zip would otherwise truncate them and misalign the mask (fail closed, ValueError)."""
+    n = len(mask)
+    if len(num) != n or len(den) != n:
+        raise ValueError(f"ratio inputs need one entry per bin: numerator {len(num)}, denominator {len(den)}, mask {n}")
+    num, den = _check_numbers(num, "numerator", n), _check_numbers(den, "denominator", n)
+    return [None if (b or x is None or d is None or d == 0) else x / d for x, d, b in zip(num, den, mask)]
 
 
 SEALED_KINDS = ("each blinded bin value and its square root", "the blinded-region sum and its square root",
@@ -99,22 +141,59 @@ SEALED_KINDS = ("each blinded bin value and its square root", "the blinded-regio
                 "in each blinded bin and for the blinded-region sums")
 NOT_SEALED = ("sums over bin ranges that do not include a blinded bin", "neighbour- or sideband-subtracted counts",
               "fit results, smoothed, rescaled or shifted values", "quantities derived from a reference not passed to seal",
-              "products or ratios of two blinded quantities other than those listed")
+              "products or ratios of two blinded quantities other than those listed",
+              "exact zero (it is in every log and table; a blinded zero cannot be scanned for)",
+              "any otherwise sealed number equal to one public data alone give: a sum over a run of unblinded bins, "
+              "the sideband total, or the square root of either (a blinded empty bin makes cumulative sums and the "
+              "grand total equal to public sideband sums)")
+PUBLIC_RTOL = 1e-9  # a sealed number this close to a public one is not sealed (rule of seal(), Q3 option a)
 
 
-def seal(edges, values, region: dict, references=()) -> list[float]:
+def _public_numbers(vals: list[float], mask: list[bool]) -> list[float]:
+    """Sorted absolute values data outside the blinded bins give on their own: the sum over every contiguous run of
+    unblinded bins (single bins included), the sum of all unblinded bins, and the square roots of these."""
+    pub: set[float] = set()
+    run: list[float] = []
+    for v, b in list(zip(vals, mask)) + [(0.0, True)]:
+        if not b:
+            run.append(v)
+            continue
+        for i in range(len(run)):
+            acc = 0.0
+            for x in run[i:]:
+                acc += x
+                pub.add(abs(acc))
+        run = []
+    pub.add(abs(sum(v for v, b in zip(vals, mask) if not b)))
+    pub |= {math.sqrt(x) for x in list(pub) if x > 0}
+    return sorted(pub)
+
+
+def _is_public(x: float, public: list[float]) -> bool:
+    import bisect
+    a = abs(x)
+    i = bisect.bisect_left(public, a * (1 - PUBLIC_RTOL))
+    return i < len(public) and public[i] <= a * (1 + PUBLIC_RTOL)
+
+
+def seal(edges, values, region: dict, references=(), flow: bool = False) -> list[float]:
     """Numbers that would reveal blinded content (SEALED_KINDS): blinded bin values and their square roots, the
     blinded-region sum and its square root, the grand total, every cumulative sum from either end that includes a
     blinded bin (integrated yields above or below a threshold, CDF tables), the blinded bins and sum as fractions of
     the total, and for each reference array (for example an MC prediction drawn next to data) the ratio both ways,
     the difference and the significance-like (N-B)/sqrt(B) in each blinded bin and of the blinded-region sums.
-    NOT_SEALED lists what stays unsealed. Raises ValueError on invalid edges (validate_edges)."""
-    m = blinded_mask(edges, region)
+    Not sealed (Q3, option a): exact zero, and any number equal (relative 1e-9, sign ignored) to one the unblinded
+    bins give alone (_public_numbers): sealing those makes every log line "0 errors" or every public sideband table a
+    false leak, and protects nothing. NOT_SEALED lists what stays unsealed. Raises ValueError on invalid edges."""
+    m = blinded_mask(edges, region, flow)
     if len(values) != len(m):
-        raise ValueError("values need one entry per bin")
+        raise ValueError("values need one entry per bin" + (" plus underflow and overflow" if flow else ""))
     if any(v is None for v in values):
         raise ValueError("seal needs the unmasked values (got None entries)")
-    vals = [float(v) for v in values]
+    vals = [float(v) for v in _check_numbers(values, "values", len(m))]
+    references = [_check_numbers(r, "reference", len(m)) for r in references]
+    if any(v is None for r in references for v in r):
+        raise ValueError("seal needs complete references (got None entries)")
     blind = [v for v, b in zip(vals, m) if b]
     if not blind:
         return []
@@ -140,7 +219,8 @@ def seal(edges, values, region: dict, references=()) -> list[float]:
                 out.append(r / v)
             if r > 0:
                 out.append((v - r) / math.sqrt(r))
-    return sorted(set(out))
+    public = _public_numbers(vals, m)
+    return sorted({x for x in out if x != 0 and not _is_public(x, public)})
 
 
 def _close(x: float, target: float, rtol: float) -> bool:
@@ -314,16 +394,34 @@ def decode_text(raw: bytes) -> tuple[str | None, str]:
     return raw.decode("latin-1"), "latin-1"
 
 
+def _load_arrays(path: Path, suf: str) -> tuple[dict, str | None]:
+    """({name: array}, None), or ({}, why) for a cache numpy cannot read without pickle: an object array, a pickled or
+    non-zip .npz, a corrupt archive or member. Such a file is unscanned (status incomplete), never an abort."""
+    import zipfile
+    import zlib
+    import numpy as np
+    try:
+        with open(path, "rb") as fh:  # our own handle: np.load leaks its file when a zip archive is corrupt
+            data = np.load(fh, allow_pickle=False)
+            if suf == ".npy":
+                if not isinstance(data, np.ndarray):
+                    return {}, "a .npy file that does not hold a single array is not scanned"
+                return {"": data}, None
+            if not isinstance(data, np.lib.npyio.NpzFile):
+                return {}, "a .npz file that is not a zip archive of arrays is not scanned"
+            with data:  # members are read while the file is open
+                return {k: data[k] for k in data.files}, None
+    except (OSError, ValueError, EOFError, KeyError, zipfile.BadZipFile, zlib.error) as exc:
+        return {}, f"numpy cache that cannot be read without pickle or is corrupt ({type(exc).__name__}) is not scanned"
+
+
 def scan_file(path: Path, sealed, rtol: float = 1e-9) -> list[dict]:
     path = Path(path)
     suf = path.suffix.lower()
     if suf in (".npy", ".npz"):
-        import numpy as np
-        if suf == ".npy":  # np.load returns a plain ndarray (no file handle stays open)
-            arrays = {"": np.load(path, allow_pickle=False)}
-        else:  # NpzFile keeps the archive open until closed
-            with np.load(path, allow_pickle=False) as data:
-                arrays = {k: data[k] for k in data.files}
+        arrays, why = _load_arrays(path, suf)
+        if why:
+            return [{"unscanned": True, "reason": why}]
         hits, unscanned = [], []
         for k, arr in arrays.items():
             res = _scan_array(arr, sealed, rtol)

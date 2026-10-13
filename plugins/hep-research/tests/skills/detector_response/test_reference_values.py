@@ -114,8 +114,8 @@ class PublishedValueTests(unittest.TestCase):
 
 class IndependentFormulaTests(unittest.TestCase):
     def test_proton_cutoff_kinetic_energy_uses_the_proton_mass(self):
-        # A = 1 is a bare proton (PDG m_p = 0.938272 GeV), not A atomic mass units
-        m_p = 0.938272
+        # A = 1 is a bare proton (CODATA 2022 m_p = 0.93827208943 GeV), not A atomic mass units
+        m_p = 0.93827208943
         for r in (0.5, 2.0, 10.0):
             self.assertAlmostEqual(cutoff_kinetic_energy_per_nucleon_gev(r, charge=1, mass_number=1),
                                    math.hypot(r, m_p) - m_p, places=12)

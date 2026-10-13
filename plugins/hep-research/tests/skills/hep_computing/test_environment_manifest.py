@@ -79,6 +79,112 @@ class EnvironmentManifestTests(unittest.TestCase):
             self.assertTrue(set(tool_req) <= set(t), t)
 
 
+class EnvironmentManifestRemediationTests(unittest.TestCase):
+    """CMP-07: drift compared platform.platform() (kernel release on Linux), ignored executable, machine, project and
+    inputs; record --out into a missing folder was a traceback; record printed no status."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.d = Path(self.tmp.name)
+
+    def cli(self, *args):
+        p = subprocess.run([sys.executable, "-I", str(SCRIPT), *map(str, args)], capture_output=True, text=True, timeout=120)
+        self.assertNotIn("Traceback", p.stderr)
+        return p.returncode, json.loads(p.stdout)
+
+    def recorded(self, *extra):
+        out = self.d / "m.json"
+        code, doc = self.cli("record", "--packages", "pip", "--out", out, *extra)
+        self.assertEqual((code, doc["status"]), (0, "recorded"))
+        return out, json.loads(out.read_text())
+
+    def test_kernel_release_alone_is_a_note(self):
+        out, doc = self.recorded()
+        doc["environment"]["system"]["kernel"] = "0.0.0-other"
+        doc["environment"]["platform"] = "Linux-0.0.0-other-x86_64-with-glibc2.28"
+        out.write_text(json.dumps(doc))
+        code, res = self.cli("check", "--manifest", out)
+        self.assertEqual((code, res["status"]), (0, "same"), res)
+        self.assertTrue(any("kernel release" in n for n in res["notes"]), res)
+
+    def test_executable_libc_and_arch_are_compared(self):
+        out, doc = self.recorded()
+        doc["environment"]["executable"] = "/elsewhere/python"
+        doc["environment"]["system"]["libc"] = "glibc 2.17"
+        out.write_text(json.dumps(doc))
+        code, res = self.cli("check", "--manifest", out)
+        self.assertEqual(code, 1)
+        self.assertTrue(any(x.startswith("executable:") for x in res["drift"]), res)
+        self.assertTrue(any(x.startswith("system libc:") for x in res["drift"]), res)
+
+    def test_changed_and_missing_inputs_are_drift(self):
+        a, b = self.d / "a.dat", self.d / "b.dat"
+        a.write_text("one")
+        b.write_text("two")
+        out, doc = self.recorded("--inputs", a, b)
+        self.assertEqual([e["size"] for e in doc["input_manifest"]], [3, 3])
+        self.assertEqual(self.cli("check", "--manifest", out)[0], 0)
+        a.write_text("ONE")
+        b.unlink()
+        code, res = self.cli("check", "--manifest", out)
+        self.assertEqual(code, 1)
+        self.assertIn(f"input changed: {a}", res["drift"])
+        self.assertIn(f"input missing: {b}", res["drift"])
+
+    def test_dirty_or_moved_project_is_drift(self):
+        repo = self.d / "repo"
+        repo.mkdir()
+        git = ["git", "-C", str(repo), "-c", "user.email=synthetic-test", "-c", "user.name=t"]
+        if subprocess.run(git[:3] + ["init", "-q"], capture_output=True, timeout=60).returncode:
+            self.skipTest("git not available")
+        (repo / "f.txt").write_text("x")
+        subprocess.run(git + ["add", "f.txt"], check=True, timeout=60)
+        subprocess.run(git + ["commit", "-qm", "c1"], check=True, timeout=60)
+        out, _ = self.recorded("--project", repo)
+        self.assertEqual(self.cli("check", "--manifest", out, "--project", repo)[0], 0)
+        code, res = self.cli("check", "--manifest", out)
+        self.assertTrue(any("--project" in n for n in res["notes"]))
+        (repo / "f.txt").write_text("changed")
+        code, res = self.cli("check", "--manifest", out, "--project", repo)
+        self.assertEqual(code, 1)
+        self.assertTrue(any("dirty" in x for x in res["drift"]), res)
+        subprocess.run(git + ["commit", "-qam", "c2"], check=True, timeout=60)
+        code, res = self.cli("check", "--manifest", out, "--project", repo)
+        self.assertEqual(code, 1)
+        self.assertTrue(any(x.startswith("project commit:") for x in res["drift"]), res)
+
+    def test_out_creates_folders_and_unwritable_out_is_exit_2(self):
+        out = self.d / "new" / "dir" / "m.json"
+        code, doc = self.cli("record", "--packages", "pip", "--out", out)
+        self.assertEqual(code, 0)
+        self.assertTrue(out.is_file())
+        blocker = self.d / "file"
+        blocker.write_text("x")
+        code, doc = self.cli("record", "--packages", "pip", "--out", blocker / "m.json")
+        self.assertEqual((code, doc["status"]), (2, "error"))
+
+    def test_printed_record_has_status_and_round_trips(self):
+        p = subprocess.run([sys.executable, "-I", str(SCRIPT), "record", "--packages", "pip"], capture_output=True,
+                           text=True, timeout=120)
+        doc = json.loads(p.stdout)
+        self.assertEqual(doc["status"], "recorded")
+        (self.d / "printed.json").write_text(p.stdout)
+        self.assertEqual(self.cli("check", "--manifest", self.d / "printed.json")[0], 0)
+
+    def test_manifest_with_inputs_validates_as_a_computational_run(self):
+        a = self.d / "in.dat"
+        a.write_text("data")
+        _, doc = self.recorded("--inputs", a)
+        fixture = json.loads((ROOT / "contracts" / "fixtures" / "artifacts" / "valid" / "computational_run.json").read_text())
+        fixture["extension"].update(input_manifest=doc["input_manifest"], tools=doc["tools"], environment=doc["environment"])
+        art = self.d / "run.json"
+        art.write_text(json.dumps(fixture))
+        p = subprocess.run([sys.executable, str(ROOT / "contracts" / "validate.py"), str(art)], capture_output=True,
+                           text=True, timeout=120)
+        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+
+
 class EnvironmentTemplateTests(unittest.TestCase):
     ADAPTER = ROOT / "adapters" / "environments"
 
