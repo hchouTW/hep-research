@@ -41,7 +41,14 @@ try:
 except ImportError:  # pragma: no cover
     np = None
 
-CHUNK = 2000
+MEMORY_BUDGET_MB = 256.0   # working memory of q0_scan per chunk of toys (STH-T3.7); --memory-mb overrides it
+WORK_ARRAYS = 6            # [T, K, B] float64 temporaries alive at once in the Newton steps (nn * s / lam, ...)
+
+
+def chunk_size(k: int, bins: int, budget_mb: float = MEMORY_BUDGET_MB) -> int:
+    """Toys per chunk so that WORK_ARRAYS arrays of shape [chunk, k, bins] fit in budget_mb (at least one toy)."""
+    per_toy = WORK_ARRAYS * 8.0 * max(k, 1) * max(bins, 1)
+    return max(1, int(budget_mb * 2 ** 20 // per_toy))
 
 
 def _phi_bar(z):
@@ -103,12 +110,14 @@ def load(doc):
     return b, n, grid, t, scan.get("parameter", "parameter")
 
 
-def q0_scan(n, b, t, iters=60):
-    """q0 for every row of n (shape [T, B]) at every template (t: [K, B]); returns [T, K]."""
+def q0_scan(n, b, t, iters=60, budget_mb=None):
+    """q0 for every row of n (shape [T, B]) at every template (t: [K, B]); returns [T, K]. Toys are processed in chunks
+    sized from a memory budget (chunk_size), so the result does not depend on the budget, only the peak memory does."""
     n = np.atleast_2d(n)
     out = np.empty((n.shape[0], t.shape[0]))
-    for start in range(0, n.shape[0], CHUNK):
-        nn = n[start:start + CHUNK][:, None, :]                  # [T, 1, B]
+    chunk = chunk_size(t.shape[0], t.shape[1], MEMORY_BUDGET_MB if budget_mb is None else budget_mb)
+    for start in range(0, n.shape[0], chunk):
+        nn = n[start:start + chunk][:, None, :]                  # [T, 1, B]
         s = t[None, :, :]                                        # [1, K, B]
         stot = t.sum(axis=1)[None, :]                            # [1, K]
         g0 = np.sum(nn * s / b, axis=2) - stot                   # score at mu = 0
@@ -127,7 +136,7 @@ def q0_scan(n, b, t, iters=60):
         lam = b + mu[..., None] * s
         with np.errstate(divide="ignore", invalid="ignore"):
             ll = np.sum(np.where(nn > 0, nn * np.log(lam / b), 0.0), axis=2) - mu * stot
-        out[start:start + CHUNK] = np.where(active, np.maximum(2 * ll, 0.0), 0.0)
+        out[start:start + chunk] = np.where(active, np.maximum(2 * ll, 0.0), 0.0)
     return out
 
 
@@ -230,6 +239,9 @@ def build_parser():
             s.add_argument("--seed", type=int, required=True)
         if name == "gross-vitells":
             s.add_argument("--ref-level", type=float, default=1.0, help="reference level c0 of q0 (default 1)")
+        if name != "local":
+            s.add_argument("--memory-mb", type=float, default=MEMORY_BUDGET_MB,
+                           help=f"working-memory budget of the toy scan in MB (default {MEMORY_BUDGET_MB:g}); sets the chunk size only")
     return p
 
 
@@ -246,6 +258,11 @@ def main(argv=None) -> int:
             raise ValueError("--toys must be positive")
         if args.cmd == "gross-vitells" and not args.ref_level > 0:
             raise ValueError("--ref-level must be positive")
+        if args.cmd != "local":
+            if not args.memory_mb > 0:
+                raise ValueError("--memory-mb must be positive")
+            global MEMORY_BUDGET_MB
+            MEMORY_BUDGET_MB = float(args.memory_mb)
     except (OSError, ValueError) as exc:
         print(json.dumps({"status": "rejected", "error": str(exc)}))
         return 2
