@@ -108,6 +108,12 @@ Contracts 2.5.0 (minor: ML semantics; every 2.4.0 artifact keeps its outcome and
 - **`run_all_checks.py` runs test modules in parallel by default.** `--jobs` defaults to the CPU count, at most 8
   (was 1); `--jobs 1` runs them serially. Each module already ran in its own process; the full suite passes with
   `--jobs 8` (5 min 54 s wall time on an 8-core host).
+- **CI runs faster without testing less.** `tools/run_all_checks.py` starts test modules slowest first (durations
+  in the new `tools/module_timings.json`), gains `--part units|checks` and `--shard K/N` (shards balanced by those
+  durations; every module in exactly one shard) and `--write-timings`. The `checks` job of `tests.yml` runs as three
+  parallel jobs per Python version (two unit shards, one for the profile suites and static checks), and the optional
+  jobs use the parallel runner instead of a serial `unittest discover`. `tools/check_ams_optional.py` runs its suites
+  one test module per process with `--jobs` (the same modules as `unittest discover`; 218 s to 66 s locally with 8).
 
 ## 0.6.16 (2026-10-13)
 
