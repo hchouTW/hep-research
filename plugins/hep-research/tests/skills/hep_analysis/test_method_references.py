@@ -146,5 +146,17 @@ class TriggerEfficiencyTests(unittest.TestCase):
         self.assertIn('eps(T2) = 0.882', t)
 
 
+class OptimizationTests(unittest.TestCase):
+    def test_figures_of_merit(self):
+        import math
+        s, b = 10.0, 100.0
+        self.assertAlmostEqual(s / math.sqrt(s + b), 0.953, delta=5e-4)
+        self.assertAlmostEqual(math.sqrt(2 * ((s + b) * math.log(1 + s / b) - s)), 0.984, delta=5e-4)
+        self.assertAlmostEqual(0.5 / (3 / 2 + math.sqrt(b)), 0.0435, delta=5e-5)
+        t = text('analysis-design.md')
+        for n in ('0.953', '0.984', '0.0435'):
+            self.assertIn(n, t)
+
+
 if __name__ == '__main__':
     unittest.main()

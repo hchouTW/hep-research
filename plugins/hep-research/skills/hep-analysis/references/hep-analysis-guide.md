@@ -64,6 +64,7 @@ Exact 68.27% (Garwood) interval on the count N; divide by exposure times bin wid
 |---|---|
 | Analysis design, quality masks, triggers, blinding, event keys | [Analysis design](analysis-design.md) |
 | Trigger efficiency from data: orthogonal and bootstrap triggers, prescaled unbiased samples, bias checks | [Analysis design, triggers](analysis-design.md#trigger-efficiency-from-data) |
+| Selection optimization: figures of merit (Asimov Z, Punzi), disjoint optimization samples | [Analysis design, optimization](analysis-design.md#selection-optimization-without-bias) |
 | Review an analysis, note or spec; which deliverable to produce; measurement brief | [Review and deliverables](review-and-artifacts.md) |
 | The measurement-spec fields and template | [Field guide](../assets/measurement_spec.template.md) |
 | Correction chain: efficiency factors and their denominators, exposure, luminosity, POT, data/MC ratios | [Correction chain](correction-chain.md) |

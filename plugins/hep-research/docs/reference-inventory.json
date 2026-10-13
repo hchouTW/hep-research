@@ -10,7 +10,7 @@
   },
   "hep-analysis": {
    "references": 11,
-   "bytes": 73685,
+   "bytes": 75079,
    "uncited": 0
   },
   "hep-computing": {
@@ -731,8 +731,8 @@
   {
    "path": "skills/hep-analysis/references/analysis-design.md",
    "owner": "hep-analysis",
-   "bytes": 6984,
-   "lines": 57,
+   "bytes": 8194,
+   "lines": 73,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/efficiency-acceptance-backgrounds.md",
@@ -753,7 +753,7 @@
     "detector-response",
     "hep-computing"
    ],
-   "last_commit": "7e34ef8 2026-10-13"
+   "last_commit": "b4f9262 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/analysis-validation.md",
@@ -842,8 +842,8 @@
   {
    "path": "skills/hep-analysis/references/hep-analysis-guide.md",
    "owner": "hep-analysis",
-   "bytes": 18541,
-   "lines": 113,
+   "bytes": 18725,
+   "lines": 114,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
@@ -857,7 +857,7 @@
    "cited_by_other_skills": [
     "detector-response"
    ],
-   "last_commit": "da0f716 2026-10-13"
+   "last_commit": "b4f9262 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/histograms-efficiencies.md",

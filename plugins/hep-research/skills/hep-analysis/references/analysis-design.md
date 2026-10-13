@@ -45,6 +45,22 @@ Signal regions (SRs) drive signal inference, control regions (CRs) constrain bac
 
 Choose binning using resolution, MC statistics, background stability, systematic uncertainties, and expected sensitivity. Use simulation, independent optimization samples, or Asimov data to set the strategy. Avoid repeatedly changing categories after examining signal-sensitive observations.
 
+## Selection optimization without bias
+
+- **Figure of merit, chosen before optimizing.** `s / sqrt(s + b)` for a large expected signal; the Asimov significance
+  `Z_A = sqrt(2 ((s + b) ln(1 + s / b) - s))` for small counts ([Cowan et al. 2011, arXiv:1007.1727](https://arxiv.org/abs/1007.1727));
+  the Punzi figure `eps_s / (a / 2 + sqrt(b))` when the signal rate is unknown and the goal is discovery at a
+  significance of a sigma ([Punzi 2003, arXiv:physics/0308063](https://arxiv.org/abs/physics/0308063)). `s / sqrt(b)`
+  overstates the sensitivity at small b.
+- **Optimize on samples that are not measured.** Use simulation, sidebands or control regions, or an independent
+  (disjoint) part of the data; never the events that give the result. Keep the optimization and the measurement samples
+  disjoint and record which events were used.
+- **Fix the outcome of the optimization** (cuts, categories, binning) before unblinding, and treat later changes with
+  the change-review procedure (`review_analysis_change.py`).
+
+Worked example (synthetic): s = 10, b = 100 gives `s / sqrt(s + b)` = 0.953 and `Z_A` = 0.984; with a signal efficiency
+of 0.5 and a = 3, the Punzi figure is 0.5 / (1.5 + 10) = 0.0435.
+
 ## Blinding
 
 Define the mask by region, observable interval, and category. Real data arrive as a released blinded derivative, prepared by the data custodian outside the agent session; the agent never reads the unblinded values. In-code masks are defence in depth on such inputs, and the method for synthetic data: filter at read time, or set blinded bins to NaN before plotting, ratio or pull computation. Drawing a shaded box over plotted data does not blind it, so check the rendered output shows no observed points in the region. Uncertainties, ratios and pulls are computed on the blinded data or withheld, never from the unblinded values. A pre-unblinding check of a blinded region uses simulation, Asimov data, or control and validation regions. Apply it to plots, yield tables, ratios, pulls, debug output, caches, and notebook displays. Store Asimov/expected results separately from observed results. Do not use the actual SR count to optimize the supposedly blinded model.
