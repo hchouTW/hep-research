@@ -18,7 +18,15 @@ is not thereby allowed).
 Every source is also validated as a contract artifact (contracts/validate.py); --protected applies the stricter version
 policy for protected use.
 
-Usage: python3 contracts/dependencies.py ARTIFACT.json --root PROJECT_ROOT [--base DIR] [--revocations FILE] [--protected]
+Revocations: --revocations names the hash-chained revocation log (contracts/revocation.py), which needs --revocation-head
+and --revocation-source; it is verified before any lookup (an empty, cut, edited or stale log, or one whose head does
+not match, is an error and nothing is read as 'not revoked'). With --protected the log and head must also be files the
+running account neither owns nor can write or replace. The legacy format (JSON Lines {"subject_sha256", "reason"}
+without a genesis record) is read with a warning outside protected mode and refused with --protected; an empty legacy
+file is an error.
+
+Usage: python3 contracts/dependencies.py ARTIFACT.json --root PROJECT_ROOT [--base DIR] [--revocations LOG
+           --revocation-head HEAD --revocation-source SOURCE [--max-status-age S] [--now T]] [--protected]
 Exit codes: 0 ok, 1 errors, 3 unresolved only, 2 unreadable input or bad usage. Output: JSON report on stdout.
 """
 from __future__ import annotations
@@ -33,6 +41,7 @@ from pathlib import Path
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from contracts import revocation as rv  # noqa: E402
 from contracts.validate import STICKY_STATUSES, validate_artifact  # noqa: E402
 
 SCHEME = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
@@ -45,13 +54,16 @@ def _inside(path: Path, root: Path) -> bool:
 
 
 def load_revocations(path) -> tuple[dict, list[str]]:
-    """{subject_sha256: event} from a JSON Lines file, plus the problems found (each problem is reported as an error)."""
+    """{subject_sha256: event} from a legacy JSON Lines file, plus the problems found (each problem is reported as an
+    error). An empty file is a problem: it cannot be told apart from a truncated one."""
     revoked: dict[str, dict] = {}
     problems: list = []
     try:
         lines = Path(path).read_text(encoding="utf-8").splitlines()
     except (OSError, UnicodeDecodeError) as exc:
         return {}, [f"cannot read revocations {path}: {exc}"]
+    if not any(line.strip() for line in lines):
+        return {}, [f"{path} is empty: an empty file is not 'nothing revoked'"]
     for n, line in enumerate(lines, 1):
         if not line.strip():
             continue
@@ -161,16 +173,44 @@ class _Checker:
                 self.artifact(src, sdoc, trail + (src,))
 
 
-def validate_dependencies(artifact_path, project_root, base=None, revocations=None, protected: bool = False, vocab=None) -> dict:
+def _revocation_findings(revocations, head, source, max_age_s, now, protected: bool, account) -> tuple[dict, list[tuple]]:
+    """({sha256: event}, [(severity, code, message)]) for the given revocation input; see the module docstring."""
+    try:
+        first = Path(revocations).read_bytes()[:65536]
+    except OSError as exc:
+        return {}, [("error", "dependency.revocations_unreadable", f"cannot read revocations: {exc.strerror}")]
+    if rv.is_chained_log(first):
+        st = rv.load(revocations, head, source=source, now=now, max_age_s=max_age_s, protected=protected,
+                     account=account)
+        if not st.ok:
+            return {}, [("error", "dependency.revocations_unverified",
+                         "the revocation log did not verify: " + ", ".join(sorted({f["code"] for f in st.findings})))]
+        return {ev["subject"]["sha256"]: dict(ev, issued=ev["time"]) for ev in reversed(st.events)
+                if "sha256" in ev["subject"]}, []
+    if protected:
+        return {}, [("error", "dependency.revocations_legacy",
+                     "protected use needs the hash-chained revocation log with its head; the legacy format is refused")]
+    revoked, problems = load_revocations(revocations)
+    out = [("warning", "dependency.revocations_legacy",
+            "legacy revocation events: no chain or head, so a truncated or edited file is not detectable")]
+    out += [("error", "dependency.revocations_unreadable", p) for p in problems]
+    return revoked, out
+
+
+def validate_dependencies(artifact_path, project_root, base=None, revocations=None, protected: bool = False, vocab=None,
+                          *, revocation_head=None, revocation_source=None, max_status_age_s: int = rv.MAX_STATUS_AGE_S,
+                          now=None, account=None) -> dict:
     """See the module docstring. `vocab` (a contracts.vocab.Vocabulary, default the core vocabulary) lets sources that use
-    a bound profile's namespaced terms validate; it is additive and changes nothing when omitted."""
+    a bound profile's namespaced terms validate; it is additive and changes nothing when omitted. `account`
+    (contracts.trusted_input.Account) replaces the running account in the protected source checks (tests)."""
     root = Path(project_root).resolve()
     path = Path(artifact_path)
     path = (path if path.is_absolute() else Path.cwd() / path).resolve()
-    revoked, rproblems = load_revocations(revocations) if revocations else ({}, [])
+    revoked, rfindings = (_revocation_findings(revocations, revocation_head, revocation_source, max_status_age_s, now,
+                                               protected, account) if revocations else ({}, []))
     chk = _Checker(root, Path(base).resolve() if base else root, revoked, protected, vocab)
-    for prob in rproblems:
-        chk.add("error", "$revocations", "dependency.revocations_unreadable", prob)
+    for severity, code, message in rfindings:
+        chk.add(severity, "$revocations", code, message)
     if not root.is_dir():
         chk.add("error", "$", "dependency.bad_root", f"project root {project_root} is not a directory")
     elif not _inside(path, root):
@@ -206,13 +246,26 @@ def main(argv=None) -> int:
     ap.add_argument("artifact", type=Path)
     ap.add_argument("--root", type=Path, required=True, help="project root: no file outside it is read")
     ap.add_argument("--base", type=Path, help="directory that refs are relative to (default: the project root)")
-    ap.add_argument("--revocations", type=Path, help="JSON Lines revocation events (append-only history)")
-    ap.add_argument("--protected", action="store_true", help="stricter version policy: a newer minor contract is an error")
+    ap.add_argument("--revocations", type=Path, help="the hash-chained revocation log (legacy JSON Lines: warning, "
+                                                     "refused with --protected)")
+    ap.add_argument("--revocation-head", dest="revocation_head", type=Path, help="the log's head (revocation_head.json)")
+    ap.add_argument("--revocation-source", dest="revocation_source", help="the status source the head must name")
+    ap.add_argument("--max-status-age", dest="max_status_age", type=int, default=rv.MAX_STATUS_AGE_S,
+                    help=f"seconds; at most {rv.MAX_STATUS_AGE_S}")
+    ap.add_argument("--now", help="evaluate at another time (tests, replay), YYYY-MM-DDTHH:MM:SSZ")
+    ap.add_argument("--protected", action="store_true", help="stricter version policy (a newer minor contract is an "
+                                                             "error) and protected-source checks on the revocation input")
     try:
         args = ap.parse_args(argv)
     except SystemExit as exc:
         return 2 if exc.code else 0
-    rep = validate_dependencies(args.artifact, args.root, args.base, args.revocations, args.protected)
+    now = rv._ts(args.now) if args.now else None
+    if args.now and now is None:
+        print(json.dumps({"status": "unreadable", "error": "--now must be YYYY-MM-DDTHH:MM:SSZ"}))
+        return 2
+    rep = validate_dependencies(args.artifact, args.root, args.base, args.revocations, args.protected,
+                                revocation_head=args.revocation_head, revocation_source=args.revocation_source,
+                                max_status_age_s=args.max_status_age, now=now)
     print(json.dumps(rep, indent=1))
     if any(f["code"] in ("dependency.bad_root",) for f in rep["findings"]) or \
             (rep["findings"] and rep["findings"][0]["path"] == "$" and rep["findings"][0]["code"] == "dependency.unreadable"):
