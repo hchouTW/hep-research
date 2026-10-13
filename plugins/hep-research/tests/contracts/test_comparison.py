@@ -316,6 +316,27 @@ class VariableChangeAndUnitsSTH13(unittest.TestCase):
                 self.assertFalse(gate(pred(unit="nb"), meas(), [{**conv, "factor": f}], [], COND)["comparable"])
 
 
+class CombinationIdsAndEnvelopeRowsSTH14(unittest.TestCase):
+    """STH-T1.4: a dataset id used twice is not combinable; an envelope needs rows of one length."""
+
+    def test_duplicate_id(self):
+        ds = {"id": "alpha:A", "observable": obs(), "covariance": "present", "auxiliary": [], "uncertainties": []}
+        r = plan_combination([dict(ds), dict(ds)], [{"between": ["alpha:A", "alpha:A"], "independent": True,
+                                                    "assumption": {"justification": "synthetic", "scope": "synthetic"}}])
+        self.assertEqual((r["combinable"], r["treatment"]), (False, "comparison-only"))
+        self.assertIn("combine.duplicate_id", {p["code"] for p in r["problems"]})
+
+    def test_envelope_rows(self):
+        ms = {"ok": True, "alternatives": [{"id": "a"}, {"id": "b"}]}
+        pres = {"kind": "min-max", "owner": "hep-theory", "justification": "synthetic"}
+        bad = envelope(ms, {"a": [1, 2, 3, 4], "b": [1, 2]}, pres)
+        self.assertFalse(bad["ok"])
+        self.assertIn("'a': 4", bad["reason"])
+        self.assertFalse(envelope(ms, {"a": [1, 2]}, pres)["ok"])
+        good = envelope(ms, {"a": [1, 4], "b": [2, 3]}, pres)
+        self.assertEqual((good["uncertainty"]["lower"], good["uncertainty"]["upper"]), ([1, 3], [2, 4]))
+
+
 class ComposeTests(unittest.TestCase):
     def test_disjoint_namespaces_ok(self):
         r = compose([profile("experiment:a", "alpha"), profile("experiment:b", "beta")], ids=["alpha:D1", "beta:D2"])

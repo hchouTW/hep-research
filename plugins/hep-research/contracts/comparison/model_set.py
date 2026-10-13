@@ -4,7 +4,8 @@ model_set(prediction_docs) -> {"ok", "problems", "alternatives"}
   Each prediction keeps its own theory spec, assumptions and parameter point; none needs an experiment binding.
 envelope(model_set_result, values_by_id, prescription=None) -> {"ok", ...}
   An envelope over alternatives is a 'model-alternative' uncertainty object. It is built only from a prescription
-  owned by hep-theory, is never Gaussian, and does not replace the alternatives it summarizes.
+  owned by hep-theory, is never Gaussian, and does not replace the alternatives it summarizes. Every alternative
+  needs a row of values, and all rows must have the same length (the same binning); otherwise ok is False.
 """
 from __future__ import annotations
 
@@ -52,8 +53,15 @@ def envelope(ms: dict, values_by_id: dict, prescription: dict | None = None) -> 
                                        "with a justification, and is never Gaussian"}
     if prescription.get("kind") != "min-max":
         return {"ok": False, "reason": f"unsupported envelope kind '{prescription.get('kind')}'"}
+    missing = [a["id"] for a in ms["alternatives"] if a["id"] not in values_by_id]
+    if missing:
+        return {"ok": False, "reason": f"no values for alternative(s) {missing}"}
     rows = [values_by_id[a["id"]] for a in ms["alternatives"]]
-    lo = [min(v) for v in zip(*rows)]
+    lengths = {a["id"]: len(r) if isinstance(r, list) else None for a, r in zip(ms["alternatives"], rows)}
+    if len(set(lengths.values())) != 1 or None in lengths.values():
+        return {"ok": False, "reason": f"alternatives have rows of different lengths (or not lists): {lengths}; an envelope is "
+                                       "taken bin by bin over predictions in the same binning"}
+    lo =[min(v) for v in zip(*rows)]
     hi = [max(v) for v in zip(*rows)]
     return {"ok": True, "uncertainty": {"name": "model envelope", "kind": "model-alternative", "correlation": "unknown",
                                         "gaussian": False, "lower": lo, "upper": hi, "members": [a["id"] for a in ms["alternatives"]],
