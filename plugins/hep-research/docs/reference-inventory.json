@@ -5,22 +5,22 @@
  "by_skill": {
   "detector-response": {
    "references": 34,
-   "bytes": 395364,
+   "bytes": 395520,
    "uncited": 0
   },
   "hep-analysis": {
    "references": 11,
-   "bytes": 79537,
+   "bytes": 80250,
    "uncited": 0
   },
   "hep-computing": {
    "references": 32,
-   "bytes": 294007,
+   "bytes": 295591,
    "uncited": 0
   },
   "hep-statistics": {
    "references": 11,
-   "bytes": 148748,
+   "bytes": 149150,
    "uncited": 0
   },
   "hep-theory": {
@@ -30,12 +30,12 @@
   },
   "physics-ml": {
    "references": 38,
-   "bytes": 256540,
+   "bytes": 257182,
    "uncited": 0
   },
   "research-communication": {
    "references": 53,
-   "bytes": 377787,
+   "bytes": 377891,
    "uncited": 0
   }
  },
@@ -150,8 +150,8 @@
   {
    "path": "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
    "owner": "detector-response",
-   "bytes": 11585,
-   "lines": 170,
+   "bytes": 11741,
+   "lines": 172,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/detector-case-studies-and-checklists.md",
@@ -731,8 +731,8 @@
   {
    "path": "skills/hep-analysis/references/analysis-design.md",
    "owner": "hep-analysis",
-   "bytes": 9374,
-   "lines": 89,
+   "bytes": 9671,
+   "lines": 91,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/efficiency-acceptance-backgrounds.md",
@@ -795,6 +795,7 @@
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
     "skills/detector-response/references/particle-identification.md",
     "skills/detector-response/references/tracking-and-vertexing.md",
+    "skills/hep-analysis/references/analysis-design.md",
     "skills/hep-analysis/references/hep-analysis-guide.md",
     "tests/skills/hep_analysis/test_method_references.py"
    ],
@@ -806,8 +807,8 @@
   {
    "path": "skills/hep-analysis/references/correction-chain.md",
    "owner": "hep-analysis",
-   "bytes": 9147,
-   "lines": 113,
+   "bytes": 9563,
+   "lines": 117,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-analysis/assets/measurement_spec.template.md",
@@ -1026,7 +1027,7 @@
   {
    "path": "skills/hep-computing/references/analysis-data-pipelines.md",
    "owner": "hep-computing",
-   "bytes": 9531,
+   "bytes": 9830,
    "lines": 126,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -1170,8 +1171,8 @@
   {
    "path": "skills/hep-computing/references/engineering-playbook.md",
    "owner": "hep-computing",
-   "bytes": 9044,
-   "lines": 146,
+   "bytes": 9258,
+   "lines": 147,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/README.md",
@@ -1245,8 +1246,8 @@
   {
    "path": "skills/hep-computing/references/loop-engineering.md",
    "owner": "hep-computing",
-   "bytes": 6739,
-   "lines": 122,
+   "bytes": 7009,
+   "lines": 127,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-computing/assets/task-template.md",
@@ -1263,8 +1264,8 @@
   {
    "path": "skills/hep-computing/references/numerical-and-computational-methods.md",
    "owner": "hep-computing",
-   "bytes": 8484,
-   "lines": 163,
+   "bytes": 9285,
+   "lines": 176,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",
@@ -1602,8 +1603,8 @@
   {
    "path": "skills/hep-statistics/references/likelihood-fitting.md",
    "owner": "hep-statistics",
-   "bytes": 9128,
-   "lines": 93,
+   "bytes": 9530,
+   "lines": 95,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
@@ -2086,8 +2087,8 @@
   {
    "path": "skills/physics-ml/references/evaluation-strategy.md",
    "owner": "physics-ml",
-   "bytes": 6339,
-   "lines": 127,
+   "bytes": 6820,
+   "lines": 134,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/physics-ml/references/ablation-and-design-review.md",
@@ -2334,8 +2335,8 @@
   {
    "path": "skills/physics-ml/references/reproducibility.md",
    "owner": "physics-ml",
-   "bytes": 8302,
-   "lines": 170,
+   "bytes": 8463,
+   "lines": 172,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/physics-ml/references/checkpointing.md",
@@ -2613,8 +2614,8 @@
   {
    "path": "skills/research-communication/references/citation-verification.md",
    "owner": "research-communication",
-   "bytes": 3501,
-   "lines": 63,
+   "bytes": 3605,
+   "lines": 64,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/research-communication/README.md",

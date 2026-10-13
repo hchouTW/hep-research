@@ -66,6 +66,10 @@ already includes the trigger and reconstruction), multiplying it with the other 
 - **Systematics by period.** Separate the period-correlated part of each systematic (a common calibration, the
   acceptance model) from the period-specific part (a per-period efficiency fit). The correlation pattern is evidence
   for hep-statistics, which encodes it in the time-series covariance.
+- **Period agreement as a null test.** Agreement of fluxes between periods in a range where no physical variation is
+  expected (for cosmic rays, high rigidity above the solar-modulation range) tests the time-dependent corrections only
+  after arguing that instrument, exposure, composition and other time effects are controlled there. It is a check
+  within one experiment, not a general oracle across experiments.
 
 Worked example (synthetic): period 1 has N = 100 in exposure 1.0e4, period 2 has N = 30 in exposure 2.0e3 (a short
 period). Fluxes 1.0e-2 and 1.5e-2; the exposure-weighted average is 130 / 1.2e4 = 1.083e-2, while the plain mean of the

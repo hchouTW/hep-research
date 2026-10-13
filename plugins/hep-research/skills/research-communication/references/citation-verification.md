@@ -21,7 +21,8 @@ behind manuscript claims. For export and formatting, use
    correctly — treat it the same as a search snippet, not as having checked the
    source. For anything numeric or enumerable (a publication count, a list of
    entries), get the itemized content or the raw page/record directly, or
-   cross-check two independent passes, rather than trusting one summarized answer.
+   cross-check two passes that reach the source by different routes (two summaries of the same page by the same
+   model are not independent), rather than trusting one summarized answer.
 3. Read the relevant passage, equation, table, or figure in the primary source.
    Check the population/dataset, conditions, uncertainty, and qualifiers against
    the citing sentence. Separate direct support from inference and secondary

@@ -45,8 +45,9 @@ Do not add comments that merely repeat the code. Prefer clearer names and simple
 2. Locate the smallest root cause rather than patching only the visible symptom.
 3. Add a failing regression test where the project supports testing.
 4. Implement the least risky correction consistent with expected behavior.
-5. Run regression checks for neighboring behavior likely to be affected.
-6. Report the root cause, fix, and verification.
+5. Run regression checks for neighboring behavior likely to be affected, and a set of related variants of the defect.
+6. Report the root cause, fix, and verification: the known case reproduced and is now caught, which variants were
+   tried, and which related cases remain uncovered (a blind spot, not a claim that the class is fixed).
 
 ## Feature
 

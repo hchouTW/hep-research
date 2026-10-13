@@ -15,6 +15,18 @@ Software checks establish contract consistency only, not physical validity.
   recipe, a key for an effect the step or input does not apply, and an input key that differs from the upstream record
   are errors. The operator-semantics table (`differential_flux.json`, approved 1.0.0) is unchanged. Tests in
   `tests/contracts/test_recipe_semantics.py`.
+- **Scientific-validation wording aligned with R4 §9 (AGENTIC-R5 backlog).** Statements that were stronger than the
+  method allows are qualified: optimizing on the measured events is biased unless a validated pre-designed procedure
+  (cross-fitting, k-fold) removes the bias, keeping performance evaluation, method selection and formal inference
+  apart (hep-analysis `analysis-design.md`); a core tool's own tests count as closure only for the model they test
+  (hep-statistics `SKILL.md`); detector closure is labelled same-model and needs a model-mismatch test or a control
+  sample beside it; "independent implementation" states what is shared, and agreement is evidence, not proof. Added:
+  injection tests and pulls judged on toy ensembles, with a toy oracle for low counts and boundaries
+  (`likelihood-fitting.md`); a closure taxonomy and N-version caveat (`numerical-and-computational-methods.md`);
+  chunk-merge preconditions and the event-order caveat (hep-computing `SKILL.md`, `analysis-data-pipelines.md`); the
+  guarded period-agreement null test (`correction-chain.md`); holdout tiers and generator-family variation
+  (physics-ml `evaluation-strategy.md`); quarantine for what a loop learns and variant sets with registered blind
+  spots in bug fixes (`loop-engineering.md`, `engineering-playbook.md`).
 
 ## 0.7.0 (2026-10-13)
 

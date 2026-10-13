@@ -64,6 +64,11 @@ converged — request or perform at least one point of comparison (a finer
 setting, a known limit, or a second implementation) before treating the value
 as validated.
 
+A second implementation is independent only in what it does not share. List the
+shared inputs, calibration, model assumptions, libraries and algorithms; another
+tool, language, model vendor or prompt does not by itself make errors
+independent, and agreement is evidence, not proof of correctness.
+
 ## Optimization
 
 Do not equate optimizer termination with proof that the intended (often
@@ -143,13 +148,21 @@ tuning gap rather than accepting the final number at face value.
 Where relevant, check for: a held-out validation sample distinct from the one
 used to tune the method; a blinded signal region; closure tests (does the
 method recover a known/injected answer on a control sample); injection tests
-(does an artificially inserted signal come back at the injected size); null
+(does an artificially inserted signal come back without bias over a toy
+ensemble, with the expected coverage and failure rate; a single fit is not
+expected to return the injected value exactly); null
 tests (does the method report nothing when nothing is there); and whether
 sensitivity/robustness was checked against the choices that were somewhat
 arbitrary (binning, a selection threshold). For the depth of an ML ablation or
 matched-budget comparison itself, hand off to `physics-ml`; for a physics
 control/validation-region design, hand off to `hep-analysis` — this section is
 for recognizing the gap while reading or reviewing, not for running the study.
+
+A closure test answers a question set by what it shares with the analysis. Keep
+these apart, since none replaces another: same-model closure (generator,
+response and method from one implementation, so an error they share cancels),
+a model-mismatch stress test (truth from another model), an analytically
+controlled toy, an independent implementation, and a real control sample.
 
 ## Algorithmic reasoning
 

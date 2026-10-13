@@ -13,7 +13,7 @@ description: "Use when the deliverable is working, reproducible scientific softw
 
 - Execution success is not scientific validity; a run that terminates has not necessarily converged. Report tolerances and refinement studies.
 - Record what is needed to reproduce: input checksums, tool and library versions, exact commands, seeds, tolerances, environment.
-- Partitioned work uses a manifest: no duplicate events or chunks on resubmission, missing work detected, merged and single-run results agree within a declared tolerance. Automatic retries only with a configured maximum attempt count; absent config means no retries; repeated identical failures stop with state retained.
+- Partitioned work uses a manifest: no duplicate events or chunks on resubmission, missing work detected, merged and single-run results agree within a declared tolerance (mergeable reductions, deduplicated event IDs, per-chunk seeds). Automatic retries only with a configured maximum attempt count; absent config means no retries; repeated identical failures stop with state retained.
 - Blinded values never appear in plots, logs, caches, or reports produced by the code.
 - Scripts locate their files from their own path, write only to output paths they are given (creating or cleanly refusing folders), print JSON with a `status` key (interactive ROOT viewers on `--json`; the `inspect_root_file.C` macro is exempt), explain missing optional dependencies, and exit 0 ok, 1 negative verdict, 2 bad input, 3 missing dependency or incomplete.
 - Changes are small and verifiable: state acceptance criteria and how they were checked; keep diffs surgical.

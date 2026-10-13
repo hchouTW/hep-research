@@ -31,8 +31,10 @@ validation in independent samples distinct from those used to tune the simulatio
 
 - **Control / validation / signal regions**: tune in control, check in validation,
   measure in signal; keep them disjoint ([backgrounds](../../hep-analysis/references/backgrounds.md)).
-- **Closure**: apply the method to simulation where truth is known and recover the
+- **Closure** (same-model): apply the method to simulation where truth is known and recover the
   input within uncertainty; non-closure is a quoted systematic, not something to tune away.
+  A pass cannot reveal an error the generator, the response and the method share: add a
+  model-mismatch stress test or a real control sample.
 - **Tag-and-probe**: a resonance (`Z`, `J/psi`, `K_s`, `Lambda`) supplies a *tag* with tight
   selection and an unbiased *probe*; efficiency = probes passing / probes, from a
   background-subtracted sample (sideband or fit); biases from tag-probe correlation and
