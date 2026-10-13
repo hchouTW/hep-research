@@ -71,3 +71,23 @@ Worked example (synthetic): period 1 has N = 100 in exposure 1.0e4, period 2 has
 period). Fluxes 1.0e-2 and 1.5e-2; the exposure-weighted average is 130 / 1.2e4 = 1.083e-2, while the plain mean of the
 two fluxes would be 1.25e-2, 15% higher.
 
+## Nuclei and isotopes
+
+- **Survival probability.** A nucleus crossing material of grammage x survives without an inelastic interaction with
+  probability `P = exp(-x / lambda_int)`, with lambda_int the interaction length of that nucleus in that material; the
+  top-of-instrument flux divides by P for the material above the measuring layers. lambda_int comes from measured
+  cross sections or a validated simulation, per species and energy; its uncertainty is a systematic.
+- **Fragmentation in the detector and above it.** A heavier nucleus that fragments in the upper material can be
+  reconstructed as a lighter one (for example carbon into boron), so the lighter species gains a feed-down background
+  `N_feed = N_heavy (1 - P_heavy) f(heavy -> light)`, with f the partial fragmentation fraction into that species;
+  subtract it, or fit the charge measured in several layers to tag fragmentation before the last layer.
+- **Charge-ladder leakage.** Charge resolution spreads each species into its neighbours (Z +- 1); fit the charge
+  templates of the neighbouring species together, and take the template tails from data where possible.
+- **Isotopes.** Separating isotopes needs mass, so velocity and rigidity (or energy) both enter; the mass resolution
+  degrades with gamma, so the isotope ratio has a limited energy range set by the resolution, not by the statistics.
+
+Worked example (synthetic, invented interaction lengths): with x = 10 g/cm2 above the detector and lambda_int =
+20 g/cm2 for the light species, P = 0.607 and the flux is corrected by 1/P = 1.65. If 1000 heavy nuclei arrive with
+P_heavy = 0.55 and 10% of their fragments are reconstructed as the light species, the feed-down is
+1000 x 0.45 x 0.10 = 45 events, to be subtracted before the survival correction.
+

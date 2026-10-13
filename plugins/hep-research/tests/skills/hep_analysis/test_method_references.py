@@ -121,5 +121,17 @@ class ChargeConfusionTests(unittest.TestCase):
         self.assertIn('1.1e-4', text('backgrounds.md'))
 
 
+class NucleiTests(unittest.TestCase):
+    def test_survival_and_feed_down(self):
+        import math
+        surv = math.exp(-10 / 20)
+        self.assertAlmostEqual(surv, 0.607, delta=5e-4)
+        self.assertAlmostEqual(1 / surv, 1.65, delta=5e-3)
+        self.assertAlmostEqual(1000 * (1 - 0.55) * 0.10, 45.0)
+        t = text('correction-chain.md')
+        self.assertIn('P = 0.607', t)
+        self.assertIn('= 45 events', t)
+
+
 if __name__ == '__main__':
     unittest.main()

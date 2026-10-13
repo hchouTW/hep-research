@@ -10,7 +10,7 @@
   },
   "hep-analysis": {
    "references": 11,
-   "bytes": 69846,
+   "bytes": 71795,
    "uncited": 0
   },
   "hep-computing": {
@@ -799,13 +799,13 @@
    "cited_by_other_skills": [
     "detector-response"
    ],
-   "last_commit": "4b3f0d9 2026-10-13"
+   "last_commit": "633d6c9 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/correction-chain.md",
    "owner": "hep-analysis",
-   "bytes": 5713,
-   "lines": 74,
+   "bytes": 7498,
+   "lines": 94,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-analysis/assets/measurement_spec.template.md",
@@ -840,8 +840,8 @@
   {
    "path": "skills/hep-analysis/references/hep-analysis-guide.md",
    "owner": "hep-analysis",
-   "bytes": 18189,
-   "lines": 111,
+   "bytes": 18353,
+   "lines": 112,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
@@ -855,7 +855,7 @@
    "cited_by_other_skills": [
     "detector-response"
    ],
-   "last_commit": "4fb4d83 2026-10-13"
+   "last_commit": "633d6c9 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/histograms-efficiencies.md",
