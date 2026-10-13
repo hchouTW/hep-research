@@ -103,6 +103,11 @@ Contracts 2.5.0 (minor: ML semantics; every 2.4.0 artifact keeps its outcome and
   `merge.id_mismatch` and `merge.seed_mismatch`; non-object or incomplete chunk files are reported as
   `merge.unreadable` instead of crashing. Regressions: `tests/core/test_partition_p0_regressions.py` (15 tests, 14
   fail on the previous code).
+- **`local_partition.py`: missing-output message names the path.** The new `missing-output` failure printed
+  `{out}` literally (missing f-string prefix).
+- **`run_all_checks.py` runs test modules in parallel by default.** `--jobs` defaults to the CPU count, at most 8
+  (was 1); `--jobs 1` runs them serially. Each module already ran in its own process; the full suite passes with
+  `--jobs 8` (5 min 54 s wall time on an 8-core host).
 
 ## 0.6.16 (2026-10-13)
 

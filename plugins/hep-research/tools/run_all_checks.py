@@ -38,6 +38,9 @@ print(json.dumps({"run": res.testsRun, "failures": len(res.failures), "errors": 
 """
 
 
+DEFAULT_JOBS = min(8, os.cpu_count() or 1)
+
+
 def test_modules() -> list[str]:
     return sorted(".".join(p.relative_to(ROOT).with_suffix("").parts) for p in (ROOT / "tests").rglob("test_*.py"))
 
@@ -169,7 +172,8 @@ def parse_args(argv=None) -> argparse.Namespace:
     ap.add_argument("--no-cli", action="store_true", help="skip the host CLI checks (claude plugin validate, codex plugin load)")
     ap.add_argument("--module-timeout", type=float, default=MODULE_TIMEOUT, metavar="S",
                     help="seconds allowed per test module (default 600 or HEP_MODULE_TIMEOUT)")
-    ap.add_argument("--jobs", type=int, default=1, metavar="N", help="test modules run in parallel (default 1)")
+    ap.add_argument("--jobs", type=int, default=DEFAULT_JOBS, metavar="N",
+                    help=f"test modules run in parallel (default {DEFAULT_JOBS}: CPU count, at most 8; 1 runs them serially)")
     return ap.parse_args(argv)
 
 
