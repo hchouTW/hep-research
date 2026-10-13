@@ -19,6 +19,9 @@ over periods -> Asimov closure and seeded toy closure -> contract artifacts, fig
 Usage (from the plugin root): python3 examples/ams-flux-ratio/run.py [--toys 400] [--seed 20261002] [--out DIR]
 Default output: examples/ams-flux-ratio/output/. Exit 0 when every pre-declared closure criterion passes,
 1 otherwise. Requires numpy and matplotlib (the D5 environment).
+Validating the spec by hand: its level `crflux:top-of-instrument` is a profile term, so plain validation reports
+vocab.unknown_term; bind experiment:ams-02 in a project config outside the plugin (with an artifacts_dir outside it)
+and run python3 "<plugin root>/contracts/validate.py" examples/ams-flux-ratio/output/artifacts/measurement_spec.json --profiles-from <your project>/hep-research.project.json.
 """
 from __future__ import annotations
 
@@ -472,6 +475,11 @@ def write_report(out: Path, r: dict) -> None:
         "the proton flux analysis [Documented, ams02:C31] and applied to helium here as a [Proposal].",
         "",
         f"Reproduce: `python3 examples/ams-flux-ratio/run.py --toys {r['toys']} --seed {r['seed']}` (from the plugin root, D5 environment).",
+        "",
+        "Validate the spec (its level is a profile term, so the profile vocabulary is needed): bind `experiment:ams-02` in a "
+        "`hep-research.project.json` outside the plugin and run "
+        "`python3 \"<plugin root>/contracts/validate.py\" examples/ams-flux-ratio/output/artifacts/measurement_spec.json "
+        "--profiles-from <your project>/hep-research.project.json`.",
         "",
         "## Pre-declared criteria and outcome",
         "",
