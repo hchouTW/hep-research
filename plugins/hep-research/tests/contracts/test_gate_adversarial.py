@@ -127,7 +127,11 @@ def _codes(g) -> set:
 class SameAsCommitted(unittest.TestCase):
     @unittest.skipUnless(SBOTTOM.exists(), "example outputs not present in this copy")
     def test_inlined_base_is_the_committed_artifact(self):
-        self.assertEqual(json.loads(SBOTTOM.read_text(encoding="utf-8")), SBOTTOM_DOC)
+        # the plugin version string is rewritten at every release; it does not affect the gate
+        committed, inlined = json.loads(SBOTTOM.read_text(encoding="utf-8")), copy.deepcopy(SBOTTOM_DOC)
+        for doc in (committed, inlined):
+            doc.get("versions", {}).pop("plugin", None)
+        self.assertEqual(committed, inlined)
 
 
 class BasesPass(unittest.TestCase):
