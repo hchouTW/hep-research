@@ -108,8 +108,8 @@ def main(argv=None) -> int:
             print(json.dumps({"manifest": str(args.out)}))
             return 0
         manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
+        validate_manifest(manifest)  # every subcommand: a bad manifest is refused before anything is read or written
         if args.cmd == "run":
-            validate_manifest(manifest)
             check_template(args.template)
             cfg = json.loads(args.config.read_text(encoding="utf-8")) if args.config else None
             args.state.mkdir(parents=True, exist_ok=True)
@@ -121,7 +121,7 @@ def main(argv=None) -> int:
             print(json.dumps(res, indent=1))
             return 0 if res["complete"] else 1
         if args.cmd == "reset":
-            reset(args.state, args.chunks, args.reason)
+            reset(args.state, args.chunks, args.reason, manifest)
             print(json.dumps(status(manifest, args.state), indent=1))
             return 0
         res = merge(manifest, args.state)

@@ -309,15 +309,21 @@ def _run(manifest: dict, state_dir: Path, worker, config: dict | None, max_attem
                 retries_configured=bool(config and "max_attempts" in config))
 
 
-def reset(state_dir, chunk_ids, reason: str) -> dict:
-    """Clear the error history of chunks after their cause was fixed, so they can run again. Kept in 'resets'."""
+def reset(state_dir, chunk_ids, reason: str, manifest: dict | None = None) -> dict:
+    """Clear the error history of chunks after their cause was fixed, so they can run again. Kept in 'resets'.
+    With a manifest, a state folder that belongs to another manifest is refused before anything is written."""
     state_dir = Path(state_dir)
     with dir_lock(state_dir, "reset"):
-        return _reset(state_dir, chunk_ids, reason)
+        return _reset(state_dir, chunk_ids, reason, manifest)
 
 
-def _reset(state_dir: Path, chunk_ids, reason: str) -> dict:
+def _reset(state_dir: Path, chunk_ids, reason: str, manifest: dict | None) -> dict:
     state = _load_state(state_dir)
+    if manifest is not None and state.get("manifest_hash", manifest["manifest_hash"]) != manifest["manifest_hash"]:
+        raise ValueError("state directory belongs to a different manifest")
+    unknown = [cid for cid in chunk_ids if cid not in state["chunks"]]
+    if unknown:
+        raise ValueError(f"unknown chunk {unknown[0]}")
     for cid in chunk_ids:
         st = state["chunks"].get(cid)
         if st is None:

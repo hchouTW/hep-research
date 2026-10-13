@@ -15,6 +15,9 @@ Software checks establish contract consistency only, not physical validity.
   any failure. A worker result that is not JSON-serializable is a failed attempt with signature
   `unserializable-result` (counted; the run continues) instead of a `TypeError` out of `run()`; `merge` ignores dotfiles
   in `chunks/`. A chunk that uses its last attempt is marked `attempts-exhausted` by that same call, not `failed` (Q5).
+- **CMP-03 manifest checked by every subcommand.** `local_partition.py status`, `merge` and `reset` validate the
+  manifest first (a list or a dict without `chunks` exits 2 with a JSON `error`, no traceback); `reset` writes nothing
+  before validation and refuses a state folder of another manifest (`engine.reset(..., manifest=)`) or an unknown chunk.
 
 ## 0.6.17 (2026-10-13)
 
