@@ -129,7 +129,11 @@ class ShippedSpecs(unittest.TestCase):
         from contracts.vocab import Vocabulary
         for ex, profile in (("collider-angular", "synthetic-collider"), ("ams-flux-ratio", "ams-02")):
             with self.subTest(example=ex):
-                doc = load(ROOT / "examples" / ex / "output" / "artifacts" / "measurement_spec.json")
+                spec = ROOT / "examples" / ex / "output" / "artifacts" / "measurement_spec.json"
+                profile_json = ROOT / "profiles" / "experiments" / profile / "profile.json"
+                if not (spec.exists() and profile_json.exists()):
+                    continue  # the AMS-optional check runs this suite without the AMS profile and its example
+                doc = load(spec)
                 self.assertEqual(doc["contract_version"], CONTRACTS_VERSION)
                 vocab = Vocabulary.with_profiles([load(ROOT / "profiles" / "experiments" / profile / "profile.json")])
                 rep = v.validate_artifact(doc, vocab, strict=True)
