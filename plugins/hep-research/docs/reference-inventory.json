@@ -20,7 +20,7 @@
   },
   "hep-statistics": {
    "references": 11,
-   "bytes": 144006,
+   "bytes": 146571,
    "uncited": 0
   },
   "hep-theory": {
@@ -1468,8 +1468,8 @@
   {
    "path": "skills/hep-statistics/references/astroparticle-statistics.md",
    "owner": "hep-statistics",
-   "bytes": 8722,
-   "lines": 128,
+   "bytes": 11287,
+   "lines": 155,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -1615,7 +1615,7 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "578c12f 2026-10-13"
+   "last_commit": "7c2abb1 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/statistical-inference-for-physics.md",

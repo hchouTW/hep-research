@@ -319,5 +319,25 @@
   "verification_strength": "abstract+metadata",
   "numeric_quotation_allowed": false,
   "last_reviewed": "2026-10-13"
+ },
+ {
+  "id": "hepstats:C17",
+  "claim": "The H-test tail probability follows an exponential law with lambda = 0.4.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "hepstats:S38"
+  ],
+  "location": "arXiv:1005.4867 abstract",
+  "scope": {
+   "text": "periodicity tests on photon arrival times"
+  },
+  "limitations": "abstract-level support",
+  "verification_strength": "abstract+metadata",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-13"
  }
 ]

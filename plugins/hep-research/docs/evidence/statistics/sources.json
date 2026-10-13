@@ -734,5 +734,132 @@
   "superseded_by": [],
   "attribution": "A. Pinto, Z. Wu, F. Balli, N. Berger, M. Boonekamp, E. Chapon, T. Kawamoto, B. Malaescu",
   "notes": "arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S36",
+  "title": "Methods for point source analysis in high energy neutrino telescopes",
+  "authors": "J. Braun, J. Dumm, F. De Palma, C. Finley, A. Karle, T. Montaruli",
+  "year": 2008,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/0801.1604",
+   "arxiv_ids": [
+    "0801.1604"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2008",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "J. Braun, J. Dumm, F. De Palma, C. Finley, A. Karle, T. Montaruli",
+  "notes": "Astropart. Phys. 29 (2008) 299-305. arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S37",
+  "title": "The likelihood analysis of EGRET data",
+  "authors": "J. R. Mattox et al.",
+  "year": 1996,
+  "identifiers": {
+   "doi": "10.1086/177068",
+   "url": "https://doi.org/10.1086/177068"
+  },
+  "tier": 1,
+  "verification_level": "metadata-only",
+  "verification_date": "2026-10-13",
+  "publication_date": "1996",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "J. R. Mattox et al.",
+  "notes": "ApJ 461 (1996) 396 (test statistic TS). Bibliographic record only (not opened 2026-10-13)."
+ },
+ {
+  "id": "hepstats:S38",
+  "title": "The H-test probability distribution revisited: Improved sensitivity",
+  "authors": "O. C. de Jager, I. Buesching",
+  "year": 2010,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/1005.4867",
+   "arxiv_ids": [
+    "1005.4867"
+   ],
+   "doi": "10.1051/0004-6361/201014362"
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2010",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "O. C. de Jager, I. Buesching",
+  "notes": "A&A 517 (2010) L9. arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S39",
+  "title": "Studies in Astronomical Time Series Analysis. VI. Bayesian Block Representations",
+  "authors": "J. D. Scargle, J. P. Norris, B. Jackson, J. Chiang",
+  "year": 2013,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/1207.5578",
+   "arxiv_ids": [
+    "1207.5578"
+   ],
+   "doi": "10.1088/0004-637X/764/2/167"
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2013",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "J. D. Scargle, J. P. Norris, B. Jackson, J. Chiang",
+  "notes": "ApJ 764 (2013) 167. arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S40",
+  "title": "Search for pulsed gamma-ray emission from radio pulsars in the COS-B data",
+  "authors": "R. Buccheri et al.",
+  "year": 1983,
+  "identifiers": {
+   "url": "https://ui.adsabs.harvard.edu/abs/1983A&A...128..245B"
+  },
+  "tier": 1,
+  "verification_level": "metadata-only",
+  "verification_date": "2026-10-13",
+  "publication_date": "1983",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "R. Buccheri et al.",
+  "notes": "A&A 128 (1983) 245 (Z_m^2 test). Bibliographic record only (not opened 2026-10-13)."
+ },
+ {
+  "id": "hepstats:S41",
+  "title": "On the distribution of the likelihood ratio",
+  "authors": "H. Chernoff",
+  "year": 1954,
+  "identifiers": {
+   "doi": "10.1214/aoms/1177728725",
+   "url": "https://doi.org/10.1214/aoms/1177728725"
+  },
+  "tier": 1,
+  "verification_level": "metadata-only",
+  "verification_date": "2026-10-13",
+  "publication_date": "1954",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "H. Chernoff",
+  "notes": "Ann. Math. Stat. 25 (1954) 573-578. Bibliographic record only (not opened 2026-10-13)."
  }
 ]
