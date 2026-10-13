@@ -75,6 +75,12 @@ new capability).
   (unbinned point-source likelihood, TS and Chernoff, Rayleigh/Z_m^2/H-test, Bayesian blocks). Every new source is in
   `docs/evidence/statistics/sources.json` with its verification level (S15-S41), with claims C12-C17 and eight new
   capability entries.
+- **Routing checks are language independent** (all skills): `tools/check_routing_static.py` requires trigger terms
+  for English cases only; a non-English case may be a natural prompt (`"natural": true`) that reuses no four
+  consecutive description words; the description-topics table in `docs/routing-contract.md` (hep-statistics row
+  now) must stay named in the owner's description. New cases: six natural zh-Hant hep-statistics prompts, ratio
+  with covariance, broken-power-law fit to published points, bump hunt with a fitted background, an English
+  combination prompt, and the fit half of J5 (`j05-turn-fit`, Q9).
 - `examples/ml-classifier-to-inference/run.py` records the coverage toy seed and no longer crashes on an unresolved
   finding (`Finding.severity`, not `.level`); J9 and `published-comparison` outputs regenerated (version strings,
   the seed, the schema list read).

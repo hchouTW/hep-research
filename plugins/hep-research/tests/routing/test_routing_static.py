@@ -22,5 +22,58 @@ class StaticRoutingTests(unittest.TestCase):
         self.assertEqual((ROOT / "tests" / "routing" / "cases.json").read_bytes(), generated)
 
 
+
+class LanguageIndependenceSTH46(unittest.TestCase):
+    """STH-T4.6: natural non-English prompts need no English trigger terms; they may not quote the description; the
+    owned topics listed in docs/routing-contract.md must stay named in the description."""
+
+    @classmethod
+    def setUpClass(cls):
+        sys.path.insert(0, str(ROOT / "tools"))
+        import check_routing_static as crs
+        cls.crs = crs
+        cls.cases = json.loads((ROOT / "tests" / "routing" / "cases.json").read_text(encoding="utf-8"))["cases"]
+
+    def test_natural_zh_hant_statistics_cases(self):
+        nat = [c for c in self.cases if c.get("natural") and c["lang"] == "zh-Hant" and c["expected_primary"] == "hep-statistics"]
+        self.assertGreaterEqual(len(nat), 5)
+        desc = self.crs.descriptions()["hep-statistics"]["use"]
+        for c in nat:
+            self.assertIsNone(self.crs.reused_ngram(c["prompt"], desc), c["id"])
+            self.assertEqual(c["trigger_terms"], [])
+
+    def test_reuse_is_detected(self):
+        desc = self.crs.descriptions()["hep-statistics"]["use"]
+        self.assertEqual(self.crs.reused_ngram("請做 combinations across datasets or experiments。", desc),
+                         "combinations across datasets or")
+        self.assertIsNone(self.crs.reused_ngram("combinations across datasets", desc))   # three words are allowed
+
+    def test_removing_a_topic_from_the_description_fails(self):
+        from unittest import mock
+        real = self.crs.descriptions()
+
+        def without_unfolding():
+            d = {k: dict(v) for k, v in real.items()}
+            d["hep-statistics"]["use"] = d["hep-statistics"]["use"].replace("unfolding", "")
+            return d
+        import contextlib
+        import io
+        with mock.patch.object(self.crs, "descriptions", without_unfolding), contextlib.redirect_stdout(io.StringIO()) as buf:
+            code = self.crs.main()
+        rep = json.loads(buf.getvalue())
+        self.assertEqual(code, 1)
+        self.assertIn("hep-statistics: topic 'unfolding' is not named in its description", rep["topic_errors"])
+
+    def test_topics_table_is_read(self):
+        topics = self.crs.description_topics()
+        self.assertIn("folded prediction", topics["hep-statistics"])
+
+    def test_gap_cases_and_j05_fit_half(self):
+        ids = {c["id"]: c for c in self.cases}
+        for cid in ("st-t46-ratio-1", "st-t46-break-1", "st-t46-bump-1", "st-t46-comb-1"):
+            self.assertEqual(ids[cid]["expected_primary"], "hep-statistics")
+        self.assertEqual(ids["j05-turn-fit"]["turns"][0]["expected"], "hep-statistics")
+
+
 if __name__ == "__main__":
     unittest.main()

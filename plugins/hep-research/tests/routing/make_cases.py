@@ -198,6 +198,20 @@ C = [
   {"set": "ML-OWN", "note": "the deliverable is a trained regression model, which physics-ml owns; the detector calibration chain and its validation in data stay with detector-response"}),
  ('ml-own-ecal-2', 'zh-Hant', 'neighboring', '請用神經網路訓練 ECAL 能量回歸（classifiers and regressors），從 cell 能量校正 cluster 能量。', 'physics-ml', ['classifiers and regressors'], 'detector-response', None,
   {"set": "ML-OWN", "note": "the deliverable is a trained regression model, which physics-ml owns; the detector calibration chain and its validation in data stay with detector-response"}),
+ # STH-T4.6: natural (non-English) prompts that quote no description wording, gap cases, and the fit half of J5
+ ('st-t46-nat-1', 'zh-Hant', 'direct', '兩個實驗量測同一物理量，有共同的亮度誤差，要怎麼合併？', 'hep-statistics', [], None, None, {"set": "STH-T4.6", "natural": True}),
+ ('st-t46-nat-2', 'zh-Hant', 'direct', '我觀測到 3 個事件，預期背景 1.2 個且有兩成不確定度，上限該怎麼算？', 'hep-statistics', [], None, None, {"set": "STH-T4.6", "natural": True}),
+ ('st-t46-nat-3', 'zh-Hant', 'direct', '這組 MCMC 樣本的鏈混合得不好，後驗分布還能用嗎？', 'hep-statistics', [], None, None, {"set": "STH-T4.6", "natural": True}),
+ ('st-t46-nat-4', 'zh-Hant', 'direct', '掃描所有質量之後，這個峰值是否仍然顯著？', 'hep-statistics', [], None, None, {"set": "STH-T4.6", "natural": True}),
+ ('st-t46-nat-5', 'zh-Hant', 'direct', '用迭代貝氏方法反摺積這個能譜，迭代次數要怎麼選、誤差怎麼給？', 'hep-statistics', [], None, None, {"set": "STH-T4.6", "natural": True}),
+ ('st-t46-nat-6', 'zh-Hant', 'direct', '分子和分母的計數都上百萬，各能量區間比值之間的相關誤差矩陣要怎麼算？', 'hep-statistics', [], None, None, {"set": "STH-T4.6", "natural": True}),
+ ('st-t46-ratio-1', 'en', 'direct', 'Compute the per-bin ratio of these two spectra with its full covariance, including the efficiency systematic they share.', 'hep-statistics', ['covariance assembly and validation'], None, None, {"set": "STH-T4.6"}),
+ ('st-t46-break-1', 'en', 'direct', 'Fit a broken power law to these published flux points with their covariance and give an interval for the break energy.', 'hep-statistics', ['fits of model parameters to published data points with their covariance'], None, None, {"set": "STH-T4.6"}),
+ ('st-t46-bump-1', 'en', 'direct', 'Search for a bump on a smoothly falling background that I fit from the data, and quote the global significance.', 'hep-statistics', ['significance and look-elsewhere effects'], None, None, {"set": "STH-T4.6"}),
+ ('st-t46-comb-1', 'en', 'direct', "Combine our cross-section measurement with the other experiment's; both depend on the same luminosity measurement.", 'hep-statistics', ['combinations across datasets or experiments'], None, None, {"set": "STH-T4.6"}),
+ ('j05-turn-fit', 'en', 'multi-turn', 'Fold my prediction through the detector response.', 'detector-response', ['folding a prediction through the response'], None, None,
+  {"set": "STH-T4.6", "turns": [{"prompt": "Now fit the normalization of the folded prediction to the data.", "expected": "hep-statistics", "trigger_terms": ["fits that use a folded prediction"]}],
+   "note": "Q9: the fold belongs to detector-response, the fit that uses the folded prediction to hep-statistics (routing contract row 36)"}),
 ]
 
 cases = []
