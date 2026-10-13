@@ -530,6 +530,15 @@ skipped. Not run: GPU, multi-GPU NCCL for FSDP2, a benchmark-dataset performance
 J9 example's fit uses private helpers of `core/stats/likelihood_limits.py` (`template_fit.py` refuses signed-weight
 templates).
 
+## HEP-ANALYSIS-AUDIT (2026-10-13, E2, version 0.6.17 + unreleased, contracts 2.6.0)
+
+hep-analysis audit P0-1 to P4-8 on branch `fix/hep-analysis-audit`.
+
+Live routing evidence for the fourteen new boundary cases (`an-b-*`, one en and one zh-Hant per boundary): **pending**.
+A live run makes paid model calls and was not authorized for this branch; the static check covers the cases (179
+cases, 0 failed). The description changed only by dropping "space or ground-based" (925 to 897 characters, Q7), so the
+previous live routing baseline stays the reference until that run.
+
 ## 0.6.17 release check (2026-10-13, E2)
 
 Version 0.6.17: physics-ml enforcement and ML artifact semantics (contracts 2.5.0, PRs #59 and #60); partition engine
