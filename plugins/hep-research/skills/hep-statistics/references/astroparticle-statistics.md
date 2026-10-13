@@ -70,8 +70,8 @@ specific, recurring forms in this domain that are easy to under-count:
   correlated by the point-spread function, so the effective trials count is roughly
   `N_eff ~ min(N_positions, scanned area / PSF solid angle)` - never *more* than the
   number of positions actually tested (a grid finer than the PSF gives the area term; a
-  coarser grid gives `N_positions`). For a quick bound, `p_global = 1 - (1 -
-  p_local)^N_eff`; e.g. a 3.0 sigma local hotspot (one-sided p = 1.35e-3) from a 1000-position scan
+  coarser grid gives `N_positions`). As an approximation (exact only for N_eff independent trials, and N_eff is itself estimated),
+  `p_global = 1 - (1 - p_local)^N_eff`; e.g. a 3.0 sigma local hotspot (one-sided p = 1.35e-3) from a 1000-position scan
   has `p_global` about 0.74 for `N_eff = 1000` and about 0.13 even for `N_eff = 100` -
   not a detection either way. Estimating the correct global
   p-value from pixel-level local p-values is standard practice done via simulated

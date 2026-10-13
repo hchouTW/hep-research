@@ -87,4 +87,6 @@ nsig 2944 +- 67 (3000 generated), nbkg 5488 +- 84 (about 5440 expected in range)
 Checks to do on a real fit, in this order: status and covQual; parameters away from their
 bounds; pulls of the generated truth in a toy study before trusting the errors; and the fit
 repeated with an alternative background shape, whose difference is a systematic. Weighted
-histograms need `SumW2Error(True)` (the template sets it) or an explicit coverage check.
+histograms with known, constant per-event weights can use `SumW2Error(True)` (the template sets it); it treats the
+weights as known constants, so for sWeights or weights estimated from the data use the asymptotically correct
+covariance below (Langenbruch, EPJC 82 (2022) 393; RooFit `AsymptoticError`), and check coverage either way.

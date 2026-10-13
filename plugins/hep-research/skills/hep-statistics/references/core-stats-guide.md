@@ -48,7 +48,9 @@ pyhf/Combine adapter ([statistical tools](statistical-tools.md)). Run any script
   clipped to the limit. `fc-interval` alone scans a grid and is limited to total means of 500.
 - **Fit verdicts** (`fit_diagnostics.py`, helper, no CLI). The damped Newton fits of `shape-limit`, `shape-gof` and
   `contour` return a verdict: `converged` only with a finite NLL, a positive-definite Hessian and EDM = g^T H^-1 g / 2
-  at most 1e-5 (Minuit2's default threshold); otherwise `failed` with reasons (`invalid_domain`,
+  at most 1e-5 (stricter than iminuit's default: Migrad stops at EDM < 0.002 x tol x errordef, with tol 0.1,
+  that is 1e-4 for a negative log-likelihood with errordef 0.5; the threshold depends on the tolerance, iminuit
+  reference documentation); otherwise `failed` with reasons (`invalid_domain`,
   `hessian_not_positive_definite`, `gradient_not_small`, `max_iterations`, `line_search_stalled`). A best fit on the
   boundary `mu = 0` is checked by the KKT condition (the profile rises into `mu > 0`), not by an interior Hessian. A
   conditional NLL below the global one by more than 1e-4 triggers a global refit from the conditional point and, if

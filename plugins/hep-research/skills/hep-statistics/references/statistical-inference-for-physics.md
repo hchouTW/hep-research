@@ -108,7 +108,9 @@ Other checks:
 - **Multiple testing**: when several hypotheses or channels are tested, check
   for a stated correction (Bonferroni, Holm, false-discovery-rate) or an
   explicit argument for why none is needed (e.g. a single pre-registered
-  channel).
+  channel). A HEP discovery claim uses a familywise global p-value (look-elsewhere: Gross and Vitells,
+  arXiv:1005.1891; toys or upcrossings); a false-discovery rate controls a different error and does not
+  replace it.
 
 ## Bayesian inference
 

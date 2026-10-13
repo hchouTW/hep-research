@@ -77,7 +77,7 @@ Quote the expected sensitivity with every observed result, computed before unbli
   2012, eq. 20). For `s = 5`, `b = 20`, `sigma_b = 2` it gives 0.9755; a numerical profile of `q0` on the Asimov data
   of that model gives the same to 1e-6. It does not hold for a Gaussian constraint or a background from simulation
   with an unrelated uncertainty.
-- `s/sqrt(b)` (and `s/sqrt(b + sigma_b^2)`) is the large-`b` limit of these formulas. Never quote it without saying
+- `s/sqrt(b)` (and `s/sqrt(b + sigma_b^2)`) is the `s << b` limit of these formulas (expand ln(1 + s/b) for small s/b; Cowan et al., arXiv:1007.1727 eq. 97). Never quote it without saying
   so; at small `b` it overstates the sensitivity.
 - **Limits:** the median expected limit and its 1- and 2-sigma bands under background only come from
   `core/stats/poisson_diagnostics.py cls-limit` (known background), `likelihood_limits.py profile-cls` or
@@ -116,7 +116,7 @@ computes both forms (checked in `tests/skills/hep_statistics/test_sensitivity_an
   unit-information priors. Neither gives a p-value or a probability that a model is true.
 - **Bayes factors** depend on the priors of the parameters that differ between the models, even when the posteriors
   do not: widening a prior on a parameter present only in the larger model drives the factor towards the smaller one
-  (Lindley's paradox, [Lindley 1957](https://doi.org/10.1093/biomet/44.1-2.187)). Report the priors and a prior
+  (Bartlett's effect, [Bartlett 1957](https://doi.org/10.1093/biomet/44.3-4.533); see [Cousins 2017](https://arxiv.org/abs/1310.3791), Synthese 194 (2017) 395; Lindley's paradox, [Lindley 1957](https://doi.org/10.1093/biomet/44.1-2.187), is the related conflict between a small p-value and a Bayes factor favoring the null). Report the priors and a prior
   sensitivity study with any Bayes factor (Bayesian section below).
 
 ## Bayesian inference
@@ -131,8 +131,8 @@ Specify priors and parameterization, and check posterior propriety. A flat prior
   constraints; do not mix them in one result, and label which one was done.
 - **Wording.** A credible interval is a statement about the posterior; a confidence interval about the coverage of a
   procedure. Do not call one the other ([inference reasoning](statistical-inference-for-physics.md)).
-- **Bayes factors** depend on the priors of the parameters not shared by the models (Lindley's paradox,
-  [Lindley 1957](https://doi.org/10.1093/biomet/44.1-2.187)); report a prior-sensitivity study with any Bayes factor.
+- **Bayes factors** depend on the priors of the parameters not shared by the models (Bartlett's
+  effect, [Bartlett 1957](https://doi.org/10.1093/biomet/44.3-4.533); see [Cousins 2017](https://arxiv.org/abs/1310.3791), Synthese 194 (2017) 395); report a prior-sensitivity study with any Bayes factor.
 
 ### Convergence and prior-sensitivity checks
 

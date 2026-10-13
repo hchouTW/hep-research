@@ -53,7 +53,7 @@ pyhf 0.7.6 (read from the installed source, `pyhf/interpolators/`, 2026-10-03):
 | `normsys` | `code1` | exponential: `(hi)^theta` for `theta >= 0`, `(lo)^(-theta)` below | same |
 | `normsys` | `code4` (Model default) | 6th-order polynomial matching value, first and second derivative at `+-1` | exponential, as `code1` |
 | `histosys` | `code0` | piecewise linear: `theta (hi - nom)` above 0, `theta (nom - lo)` below (kink at 0) | linear |
-| `histosys` | `code4p` (Model default) | `theta S + theta^2 (3 theta^4 - 10 theta^2 + 15) A` with `S = (d+ + d-)/2`, `A = (d+ - d-)/16` | linear |
+| `histosys` | `code4p` (Model default) | `theta S + theta^2 (3 theta^4 - 10 theta^2 + 15) A` with `S = (d+ + d-)/2`, `A = (d+ - d-)/16`, `d+ = up - nom`, `d- = nom - down` (pyhf 0.7.6 `interpolators/code4p.py`) | linear |
 
 `pyhf.Model` uses `code4`/`code4p` unless `modifier_settings` says otherwise; the modifier classes alone default to
 `code1`/`code0`. `core/stats/likelihood_limits.py shape-limit` implements the same codes (`hi`/`lo` normalization
@@ -144,8 +144,13 @@ for an asymmetric one by 3%. The difference grows with the asymmetry and with ho
   factor to `multibin-limit`, `shape-limit` and `contour`. Use the lite form
   when one template dominates each bin; when several small-statistics templates share a bin, check the full form.
 - One statistical source gets one treatment: never `staterror` and `shapesys` (or a Barlow-Beeston term) on the same
-  MC sample. Bins with zero nominal yield and non-zero MC uncertainty need an explicit convention (pyhf does not
-  supply one: check the tool's behavior and state the choice).
+  MC sample. Bins with zero nominal yield need an explicit convention: pyhf 0.7.6 sets the relative error to 0 there and fixes
+  that bin's `staterror` gamma (`modifiers/staterror.py`); other tools differ, so state the choice.
+- Default constraint of the MC-statistics term: pyhf `staterror` is Gaussian (`constrained_by_normal`, pyhf 0.7.6
+  `modifiers/staterror.py`), while ROOT HistFactory's StatError defaults to a Poisson constraint, applied to bins whose relative MC
+  uncertainty exceeds 5% (`StatErrorConfig` in `RooStats/HistFactory/Measurement.h`); Combine's
+  `autoMCStats` is Barlow-Beeston-lite with its own threshold ([Combine docs](https://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/latest/)).
+  The same workspace can give different likelihoods across tools for this reason alone.
 
 ## Smoothing, symmetrization and pruning
 

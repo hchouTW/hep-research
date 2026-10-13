@@ -233,7 +233,7 @@
   "supersedes": [],
   "superseded_by": [],
   "attribution": "L. Heinrich, M. Feickert, G. Stark",
-  "notes": "Installed; ToyCalculator.expected_pvalues source read 2026-10-12 (calls numpy.percentile with the removed 'interpolation' keyword)."
+  "notes": "Installed; ToyCalculator.expected_pvalues source read 2026-10-12 (calls numpy.percentile with the removed 'interpolation' keyword). Re-read 2026-10-13 in the installed 0.7.6 package: interpolators/code4p.py (delta_up = up - nom, delta_down = nom - down) and modifiers/staterror.py (constrained_by_normal; zero sigmas fixed)."
  },
  {
   "id": "hepstats:S12",
@@ -283,13 +283,93 @@
   },
   "tier": 2,
   "verification_level": "page",
-  "verification_date": "2026-10-03",
+  "verification_date": "2026-10-13",
   "publication_date": "2026",
   "data_taking_period": null,
   "formal_status": "reference",
   "supersedes": [],
   "superseded_by": [],
   "attribution": "CMS Collaboration",
-  "notes": "As recorded in nuisance-modeling.md (read 2026-10-03); not re-read in this session; Combine not executed here."
+  "notes": "Front page read 2026-10-13: installation via CMSSW 16_0_X or LCG with ROOT 6.32, conda recipe with root=6.34. Earlier content as recorded in nuisance-modeling.md (read 2026-10-03); Combine not executed here."
+ },
+ {
+  "id": "hepstats:S15",
+  "title": "A comment on D. V. Lindley's statistical paradox",
+  "authors": "M. S. Bartlett",
+  "year": 1957,
+  "identifiers": {
+   "doi": "10.1093/biomet/44.3-4.533",
+   "url": "https://doi.org/10.1093/biomet/44.3-4.533"
+  },
+  "tier": 1,
+  "verification_level": "metadata-only",
+  "verification_date": "2026-10-13",
+  "publication_date": "1957",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "M. S. Bartlett",
+  "notes": "Biometrika 44 (1957) 533; bibliographic record only (not opened 2026-10-13). Cited for the prior-width dependence of Bayes factors (Bartlett's effect), as attributed in Cousins 2017."
+ },
+ {
+  "id": "hepstats:S16",
+  "title": "The Jeffreys-Lindley Paradox and Discovery Criteria in High Energy Physics",
+  "authors": "R. D. Cousins",
+  "year": 2017,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/1310.3791",
+   "arxiv_ids": [
+    "1310.3791"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2017",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "R. D. Cousins",
+  "notes": "Synthese 194 (2017) 395-432; arXiv abstract page read 2026-10-13 (the abstract does not itself name Bartlett; the body was not read here)."
+ },
+ {
+  "id": "hepstats:S17",
+  "title": "iminuit reference documentation (Minuit.tol, Minuit.errordef)",
+  "authors": "iminuit developers",
+  "year": 2026,
+  "identifiers": {
+   "url": "https://scikit-hep.org/iminuit/reference.html"
+  },
+  "tier": 2,
+  "verification_level": "page",
+  "verification_date": "2026-10-13",
+  "publication_date": "2026",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "iminuit developers",
+  "notes": "Read 2026-10-13: Migrad stops when edm < 0.002 * tol * errordef; tol default 0.1; errordef 1.0 (least squares) or 0.5 (negative log-likelihood)."
+ },
+ {
+  "id": "hepstats:S18",
+  "title": "ROOT HistFactory Measurement.h (StatErrorConfig)",
+  "authors": "ROOT team",
+  "year": 2026,
+  "identifiers": {
+   "url": "https://github.com/root-project/root/blob/master/roofit/histfactory/inc/RooStats/HistFactory/Measurement.h"
+  },
+  "tier": 2,
+  "verification_level": "page",
+  "verification_date": "2026-10-13",
+  "publication_date": "2026",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "ROOT team",
+  "notes": "Header on ROOT master read 2026-10-13: StatErrorConfig defaults fRelErrorThreshold = 0.05, fConstraintType = Constraint::Poisson."
  }
 ]
