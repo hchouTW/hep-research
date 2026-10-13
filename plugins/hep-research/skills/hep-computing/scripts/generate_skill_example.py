@@ -31,6 +31,8 @@ library only.
 from __future__ import annotations
 
 import argparse
+import json
+import sys
 from pathlib import Path
 
 MIN_TAKEAWAYS = 3
@@ -331,7 +333,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=None,
         help=f"Contrast only: number of key-takeaway placeholders ({MIN_TAKEAWAYS}-{MAX_TAKEAWAYS}, default 4).",
     )
-    parser.add_argument("--output", type=Path, help="Optional output path. Prints to stdout when omitted.")
+    parser.add_argument("--output", type=Path, help="Optional output path (parent folders are created). Prints to stdout when omitted.")
+    parser.add_argument("--json", action="store_true", help='with --output: print {"status": "written", ...} as JSON')
     args = parser.parse_args(argv)
 
     field, flag_name = SCENARIO_FIELD[args.archetype]
@@ -356,8 +359,16 @@ def main() -> int:
     args = parse_args()
     content = build_skeleton(args)
     if args.output:
-        args.output.parent.mkdir(parents=True, exist_ok=True)
-        args.output.write_text(content, encoding="utf-8")
+        try:
+            args.output.parent.mkdir(parents=True, exist_ok=True)
+            args.output.write_text(content, encoding="utf-8")
+        except OSError as exc:
+            message = f"cannot write {args.output}: {exc}"
+            print(json.dumps({"status": "error", "error": message}) if args.json else f"error: {message}",
+                  file=sys.stdout if args.json else sys.stderr)
+            return 2
+        if args.json:
+            print(json.dumps({"status": "written", "output": str(args.output)}))
     else:
         print(content, end="")
     return 0

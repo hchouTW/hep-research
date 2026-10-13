@@ -166,8 +166,14 @@ Do not add comments that merely repeat the code. Prefer clearer names and simple
 
 ## Scripts of the hep-computing skill
 
-In `skills/hep-computing/scripts/`; read `--help` first. Each locates its files from its own path, takes an explicit
-output directory, emits an exit code plus a JSON status, and explains a missing optional dependency.
+In `skills/hep-computing/scripts/`; read `--help` first. Each locates its files from its own path (it does not depend
+on the working directory), writes only to the output paths it is given (missing folders are created, an unwritable
+path is a clean refusal with exit 2, never a traceback), prints a JSON object with a `status` key, explains a missing
+optional dependency, and exits 0 success, 1 negative verdict (drift, leak, outside tolerance, lint errors), 2 bad input,
+3 missing optional dependency or incomplete. The interactive ROOT viewers (`inspect_root_file.py`,
+`summarize_histogram_statistics.py`, `roofit_workspace_summary.py`) print text by default and JSON with `--json`; the
+maintenance validators and `lint_task.py` too. The `inspect_root_file.C` macro is exempt: it runs inside ROOT and
+prints text only. The per-script table is in the skill's `README.md`.
 
 - Interpreter choice for package-dependent work (SymPy): `find_python.py` (`--python`, then `HEP_RESEARCH_PYTHON`, the caller, `python3` on PATH).
 - ROOT file inspection and comparison: `inspect_root_file.py` (and the `inspect_root_file.C` macro), `compare_root_histograms.py`, `summarize_histogram_statistics.py`, `roofit_workspace_summary.py`, `audit_histograms.py`.

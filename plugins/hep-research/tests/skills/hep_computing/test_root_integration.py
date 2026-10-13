@@ -75,6 +75,24 @@ class RootIntegrationTests(unittest.TestCase):
         self.assertIn('model [RooAddPdf]', out)
         self.assertIn('data [RooDataSet] entries=1000', out)
 
+    def test_viewers_json_mode(self):
+        """CMP-08: the interactive viewers print one JSON object with a status key on --json."""
+        doc = json.loads(self.run_script('skills/hep-computing/scripts/inspect_root_file.py', '--input', self.fx / 'events.root',
+                                         '--tree', 'Events', '--json'))
+        self.assertEqual((doc['status'], doc['tree']['entries']), ('ok', 5000))
+        doc = json.loads(self.run_script('skills/hep-computing/scripts/summarize_histogram_statistics.py', '--input',
+                                         self.fx / 'histograms.root', '--hist', 'nominal', '--include-flow', '--json'))
+        self.assertEqual((doc['status'], doc['integral']), ('ok', 20000.0))
+        doc = json.loads(self.run_script('skills/hep-computing/scripts/roofit_workspace_summary.py', '--input',
+                                         self.fx / 'workspace.root', '--workspace', 'workspace', '--json'))
+        self.assertEqual(doc['status'], 'ok')
+        self.assertIn({'name': 'data', 'class': 'RooDataSet', 'entries': 1000}, doc['datasets'])
+        proc = subprocess.run([PYTHON, str(ROOT_DIR / 'skills/hep-computing/scripts/inspect_root_file.py'), '--input',
+                               str(self.fx / 'events.root'), '--tree', 'Nope', '--json'], capture_output=True, text=True, timeout=600)
+        self.assertEqual(proc.returncode, 2)
+        self.assertNotIn('Traceback', proc.stderr)
+        self.assertEqual(json.loads(proc.stdout)['status'], 'error')
+
     def test_pyroot_rdataframe_asset_cutflow(self):
         out = self.run_script('adapters/root-uproot/assets/pyroot_rdf_cutflow_analysis.py', '--input', self.fx / 'events.root',
                               '--output', self.fx / 'rdf.root')

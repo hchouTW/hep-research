@@ -101,7 +101,7 @@ def main(argv=None) -> int:
         sealed, rtol = load_sealed(args.sealed)
         for label, path in (("sealed file", args.sealed), ("report", args.report)):
             if path is not None and inside(path, args.paths):
-                print(json.dumps({"error": f"the {label} lies inside the audited outputs"}))
+                print(json.dumps({"status": "error", "error": f"the {label} lies inside the audited outputs"}))
                 return 2
         exemptions = {}
         for item in args.exempt:
@@ -119,7 +119,7 @@ def main(argv=None) -> int:
         print(json.dumps(view, indent=1))
         return {"pass": 0, "fail": 1, "incomplete": 3}[rep["status"]]
     except (OSError, ValueError, KeyError) as exc:
-        print(json.dumps({"error": str(exc)}))
+        print(json.dumps({"status": "error", "error": str(exc)}))
         return 2
 
 

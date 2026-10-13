@@ -15,7 +15,7 @@
   },
   "hep-computing": {
    "references": 29,
-   "bytes": 338018,
+   "bytes": 338673,
    "uncited": 0
   },
   "hep-statistics": {
@@ -1155,8 +1155,8 @@
   {
    "path": "skills/hep-computing/references/engineering-playbook.md",
    "owner": "hep-computing",
-   "bytes": 10612,
-   "lines": 180,
+   "bytes": 11267,
+   "lines": 186,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/README.md",
@@ -1178,7 +1178,7 @@
     "skills/hep-computing/references/engineering-playbook.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9546574 2026-10-08"
+   "last_commit": "efa283c 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/example-authoring.md",

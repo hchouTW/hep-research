@@ -25,6 +25,7 @@ CLI:
   status --manifest manifest.json --state DIR
   merge --manifest manifest.json --state DIR   (sums numeric lists/values key by key)
   reset --manifest manifest.json --state DIR --chunks c0004 --reason "fixed input path"   (after fixing a stopped chunk)
+Output: one JSON object with "status": planned, complete, incomplete (run, status, reset, merge) or error.
 Exit codes: 0 complete, 1 incomplete or failed chunks, 2 bad input or a state folder in use by another run, reset
 or merge ({"error": ..., "code": "partition.locked"}; status takes no lock).
 The engine lives in core/partition (shared with the batch-scheduler adapter); this file is its CLI.
@@ -79,6 +80,11 @@ def _cmd_worker(template: str, state_dir: Path, timeout: float | None = None, pa
     return worker
 
 
+def _with_status(res: dict) -> dict:
+    """A run or status summary with the uniform 'status' key ('complete' or 'incomplete') first."""
+    return {"status": "complete" if res["complete"] else "incomplete", **res}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -105,7 +111,7 @@ def main(argv=None) -> int:
     try:
         if args.cmd == "plan":
             _write_atomic(args.out, make_manifest(args.job, args.items, args.chunk_size, args.seed))
-            print(json.dumps({"manifest": str(args.out)}))
+            print(json.dumps({"status": "planned", "manifest": str(args.out)}))
             return 0
         manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
         validate_manifest(manifest)  # every subcommand: a bad manifest is refused before anything is read or written
@@ -114,24 +120,24 @@ def main(argv=None) -> int:
             cfg = json.loads(args.config.read_text(encoding="utf-8")) if args.config else None
             args.state.mkdir(parents=True, exist_ok=True)
             res = run(manifest, args.state, _cmd_worker(args.template, args.state, args.timeout, args.env_passthrough), cfg)
-            print(json.dumps(res, indent=1))
+            print(json.dumps(_with_status(res), indent=1))
             return 0 if res["complete"] else 1
         if args.cmd == "status":
             res = status(manifest, args.state)
-            print(json.dumps(res, indent=1))
+            print(json.dumps(_with_status(res), indent=1))
             return 0 if res["complete"] else 1
         if args.cmd == "reset":
             reset(args.state, args.chunks, args.reason, manifest)
-            print(json.dumps(status(manifest, args.state), indent=1))
+            print(json.dumps(dict(_with_status(status(manifest, args.state)), reset=args.chunks), indent=1))
             return 0
         res = merge(manifest, args.state)
         print(json.dumps(res, indent=1))
         return 0 if res["status"] == "complete" else 1
     except PartitionError as exc:
-        print(json.dumps({"error": str(exc), "code": exc.code}))
+        print(json.dumps({"status": "error", "error": str(exc), "code": exc.code}))
         return 2
     except (OSError, ValueError, KeyError) as exc:
-        print(json.dumps({"error": str(exc)}))
+        print(json.dumps({"status": "error", "error": str(exc)}))
         return 2
 
 

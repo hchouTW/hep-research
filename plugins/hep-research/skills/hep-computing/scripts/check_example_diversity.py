@@ -25,6 +25,7 @@ Standard library only.
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -62,12 +63,22 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         description="Check that no two examples in the same archetype share a skill."
     )
     parser.add_argument("files", nargs="+", type=Path, help="Example markdown files to check.")
+    parser.add_argument("--json", action="store_true", help='print {"status": "ok" | "violations" | "error", ...}')
     return parser.parse_args(argv)
 
 
 def main() -> int:
     args = parse_args()
-    violations = find_violations(args.files)
+    try:
+        violations = find_violations(args.files)
+    except OSError as exc:
+        if not args.json:
+            raise
+        print(json.dumps({"status": "error", "error": str(exc)}))
+        return 2
+    if args.json:
+        print(json.dumps({"status": "violations" if violations else "ok", "violations": violations, "files": len(args.files)}))
+        return 1 if violations else 0
     if violations:
         print(f"{len(violations)} diversity violation(s) found:")
         for violation in violations:

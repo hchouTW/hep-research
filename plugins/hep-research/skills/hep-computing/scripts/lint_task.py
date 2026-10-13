@@ -19,12 +19,14 @@ or proposed (create, add, new, propose, write, introduce) or is absent (does not
 exist, not found, missing, e.g.), or anywhere in the Deliverables section, is a warning, not an error; so is any path when `--repo` is
 not given.
 
-Usage: `python3 <plugin root>/skills/hep-computing/scripts/lint_task.py TASK.md [--repo REPO_ROOT]`
+Usage: `python3 <plugin root>/skills/hep-computing/scripts/lint_task.py TASK.md [--repo REPO_ROOT] [--json]`
+(--json: one JSON object with "status" "ok", "errors" or "error" instead of text.)
 Exit codes: 0 no errors, 1 errors found, 2 unreadable input. Standard library only.
 """
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 from pathlib import Path
@@ -122,13 +124,20 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("task", type=Path)
     parser.add_argument("--repo", type=Path, help="repository root that cited paths are resolved against")
+    parser.add_argument("--json", action="store_true", help="print one JSON object (status, errors, warnings)")
     args = parser.parse_args(argv)
     try:
         text = args.task.read_text(encoding="utf-8")
-    except OSError as exc:
-        print(f"error: cannot read {args.task}: {exc}", file=sys.stderr)
+    except (OSError, UnicodeDecodeError) as exc:
+        if args.json:
+            print(json.dumps({"status": "error", "error": f"cannot read {args.task}: {exc}"}))
+        else:
+            print(f"error: cannot read {args.task}: {exc}", file=sys.stderr)
         return 2
     errors, warnings = lint(text, args.repo)
+    if args.json:
+        print(json.dumps({"status": "errors" if errors else "ok", "errors": errors, "warnings": warnings}, indent=1))
+        return 1 if errors else 0
     for w in warnings:
         print(f"warning: {w}")
     for e in errors:

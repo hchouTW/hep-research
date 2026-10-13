@@ -45,6 +45,14 @@ Software checks establish contract consistency only, not physical validity.
   `computational-run`), `check` reports changed or missing inputs and, with `--project`, a changed commit or a dirty
   checkout. `--out` creates parent folders; an unwritable output is a JSON error, exit 2; `record` prints a JSON
   `status` (`recorded`). `references/environments-and-containers.md` updated.
+- **CMP-08 script contract (Q4).** Every Python and shell script of the skill prints JSON with a `status` key (the
+  ROOT viewers `inspect_root_file.py`, `summarize_histogram_statistics.py`, `roofit_workspace_summary.py`, plus
+  `lint_task.py`, `check_root_cpp_env.sh` and the maintenance validators on `--json`; human text stays the default),
+  exits 0/1/2/3 (3: missing optional dependency or incomplete; PyROOT missing was exit 1), and refuses an unwritable
+  output without a traceback (`create_story_card.py`, `generate_skill_example.py`, `make_synthetic_nanoaod.py`
+  now create folders). `local_partition.py` adds a uniform `status` (planned, complete, incomplete, error);
+  `audit_histograms.py` adds `status` and exits 2 on an unreadable file. `inspect_root_file.C` is exempt by name.
+  `SKILL.md` invariant 5 and the playbook state the contract; the per-script table is in the skill `README.md`.
 
 ## 0.6.17 (2026-10-13)
 
