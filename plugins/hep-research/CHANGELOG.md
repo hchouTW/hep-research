@@ -53,6 +53,12 @@ Software checks establish contract consistency only, not physical validity.
   now create folders). `local_partition.py` adds a uniform `status` (planned, complete, incomplete, error);
   `audit_histograms.py` adds `status` and exits 2 on an unreadable file. `inspect_root_file.C` is exempt by name.
   `SKILL.md` invariant 5 and the playbook state the contract; the per-script table is in the skill `README.md`.
+- **CMP-09 `new_root_cpp_project.sh` target, overwrite, name.** `--dir DIR` (default `./NAME`); NAME must match
+  `^[A-Za-z_][A-Za-z0-9_]*$` before it enters `project(...)` (`bad name`, `../x`, an absolute path exit 2); an
+  existing non-empty target is refused (exit 2) unless `--force`; the generated program writes `output.root` and
+  `pt.pdf` into an output folder argument (default `output/`); the CMake file links imported `ROOT::` targets and
+  takes the standard from `ROOT_CXX_STANDARD`; the build hint is quoted; `--json`. The generated project configures
+  and builds against Homebrew ROOT 6.38.04 (test skipped without cmake and ROOT).
 
 ## 0.6.17 (2026-10-13)
 
