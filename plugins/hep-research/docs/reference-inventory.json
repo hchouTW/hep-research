@@ -14,8 +14,8 @@
    "uncited": 0
   },
   "hep-computing": {
-   "references": 30,
-   "bytes": 355037,
+   "references": 31,
+   "bytes": 361807,
    "uncited": 0
   },
   "hep-statistics": {
@@ -1070,6 +1070,7 @@
     "skills/hep-computing/references/batch-site-cern-htcondor.md",
     "skills/hep-computing/references/batch-site-nstccore-slurm.md",
     "skills/hep-computing/references/engineering-playbook.md",
+    "skills/hep-computing/references/performance-profiling.md",
     "tests/adapters/batch_shims/shimlib.py",
     "tests/adapters/test_batch_reference.py",
     "tools/check_instruction_text.py"
@@ -1147,10 +1148,11 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-computing/references/engineering-playbook.md",
+    "skills/hep-computing/references/performance-profiling.md",
     "skills/hep-computing/references/root-debugging.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "80a8344 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/design-and-estimation.md",
@@ -1169,8 +1171,8 @@
   {
    "path": "skills/hep-computing/references/engineering-playbook.md",
    "owner": "hep-computing",
-   "bytes": 11602,
-   "lines": 193,
+   "bytes": 11842,
+   "lines": 196,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/README.md",
@@ -1179,7 +1181,7 @@
     "skills/hep-computing/references/design-and-estimation.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "80ac12a 2026-10-13"
+   "last_commit": "80a8344 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/environments-and-containers.md",
@@ -1269,6 +1271,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",
+    "skills/hep-computing/references/performance-profiling.md",
     "skills/hep-theory/references/mathematical-reasoning-and-proof.md",
     "skills/research-communication/references/academic-papers-guide.md",
     "skills/research-communication/references/reading-papers.md",
@@ -1279,6 +1282,19 @@
     "research-communication"
    ],
    "last_commit": "351029c 2026-10-07"
+  },
+  {
+   "path": "skills/hep-computing/references/performance-profiling.md",
+   "owner": "hep-computing",
+   "bytes": 6530,
+   "lines": 95,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-computing/references/crash-and-memory-debugging.md",
+    "skills/hep-computing/references/engineering-playbook.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-computing/references/product-framing.md",
@@ -1333,6 +1349,7 @@
     "skills/hep-analysis/references/hep-analysis-guide.md",
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/references/crash-and-memory-debugging.md",
+    "skills/hep-computing/references/performance-profiling.md",
     "skills/hep-computing/references/root-balanced-design-guidelines.md",
     "skills/hep-computing/references/storage-cern-eos.md"
    ],
@@ -1366,6 +1383,7 @@
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/references/cpp-balanced-design-guidelines.md",
     "skills/hep-computing/references/crash-and-memory-debugging.md",
+    "skills/hep-computing/references/performance-profiling.md",
     "skills/hep-computing/references/python-hep-coding-patterns.md"
    ],
    "cited_by_other_skills": [
@@ -1389,7 +1407,7 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "80a8344 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/software-architecture.md",

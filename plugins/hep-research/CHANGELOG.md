@@ -100,6 +100,10 @@ Software checks establish contract consistency only, not physical validity.
   ACLiC `+g` and the stale-library pitfall, a crash-cause table, and leak triage (RSS against events with
   `gSystem->GetProcInfo`, `gObjectTable`, the directory that holds histograms, jitted RDataFrame strings). Linked
   from `root-debugging.md` and a new "References of the hep-computing skill" section in the playbook.
+- **CMP-18 new reference `performance-profiling.md`.** Target in the acceptance criteria and a stop rule; wall time
+  and peak RSS first; `perf record -g`, `cProfile`, `py-spy`; RDataFrame one loop (`GetNRuns`, checked 1 then 2),
+  `RunGraphs`, IMT and jitting caveats, lazy `Snapshot`; `TTreePerfStats`, cluster and basket sizes (default
+  auto-flush 30 MB), branch selection, compression; uproot `expressions`/`filter_name` and `step_size`; batch sizing.
 
 ## 0.6.17 (2026-10-13)
 

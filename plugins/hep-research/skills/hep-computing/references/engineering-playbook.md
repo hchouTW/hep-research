@@ -170,6 +170,9 @@ Debugging, performance and numerics references beyond this playbook (all in `ski
 
 - [Crash and memory debugging](crash-and-memory-debugging.md): reproducer, ROOT stack traces, gdb/lldb, valgrind with
   ROOT's suppressions, sanitizers, ACLiC `+g`, leak triage.
+- [Performance profiling](performance-profiling.md): target first, wall time and peak memory, perf, cProfile,
+  py-spy, RDataFrame `GetNRuns` and `RunGraphs`, `TTreePerfStats`, clusters and baskets, uproot `step_size` and
+  branch filters.
 
 ## Scripts of the hep-computing skill
 

@@ -10,7 +10,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 |---|---|---|---|
 | detector-response | 34 | 395 | 0 |
 | hep-analysis | 9 | 74 | 0 |
-| hep-computing | 30 | 355 | 0 |
+| hep-computing | 31 | 362 | 0 |
 | hep-statistics | 9 | 119 | 0 |
 | hep-theory | 8 | 42 | 0 |
 | physics-ml | 38 | 257 | 0 |
@@ -129,27 +129,28 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `acceptance-criteria.md` | hep-computing | 3.7 | no | 3 | - | 351029c 2026-10-07 |
 | `agile-development-guide.md` | hep-computing | 10.7 | yes | 8 | physics-ml | 351029c 2026-10-07 |
 | `bash-balanced-design-guidelines.md` | hep-computing | 27.0 | yes | 2 | - | b0cb9ac 2026-10-13 |
-| `batch-scheduling.md` | hep-computing | 29.3 | yes | 10 | - | 22ea71e 2026-10-12 |
+| `batch-scheduling.md` | hep-computing | 29.3 | yes | 11 | - | 22ea71e 2026-10-12 |
 | `batch-site-cern-htcondor.md` | hep-computing | 11.2 | no | 2 | - | 6815df4 2026-10-10 |
 | `batch-site-nstccore-slurm.md` | hep-computing | 11.5 | no | 1 | - | 22ea71e 2026-10-12 |
 | `cmake-and-build.md` | hep-computing | 2.9 | yes | 5 | hep-analysis | fe8f71e 2026-10-13 |
 | `cpp-balanced-design-guidelines.md` | hep-computing | 26.6 | yes | 6 | physics-ml | fe8f71e 2026-10-13 |
-| `crash-and-memory-debugging.md` | hep-computing | 8.2 | no | 2 | - | untracked |
+| `crash-and-memory-debugging.md` | hep-computing | 8.2 | no | 3 | - | 80a8344 2026-10-13 |
 | `design-and-estimation.md` | hep-computing | 7.5 | no | 3 | - | 351029c 2026-10-07 |
-| `engineering-playbook.md` | hep-computing | 11.6 | yes | 4 | - | 80ac12a 2026-10-13 |
+| `engineering-playbook.md` | hep-computing | 11.8 | yes | 4 | - | 80a8344 2026-10-13 |
 | `environments-and-containers.md` | hep-computing | 4.0 | no | 2 | - | efa283c 2026-10-13 |
 | `example-authoring.md` | hep-computing | 20.0 | no | 8 | hep-analysis, physics-ml | 351029c 2026-10-07 |
 | `host-notes.md` | hep-computing | 5.6 | no | 2 | - | 364918e 2026-10-09 |
 | `implementation-discipline.md` | hep-computing | 7.6 | no | 3 | - | 351029c 2026-10-07 |
 | `loop-engineering.md` | hep-computing | 6.7 | no | 7 | - | 351029c 2026-10-07 |
-| `numerical-and-computational-methods.md` | hep-computing | 8.3 | yes | 5 | hep-theory, research-communication | 351029c 2026-10-07 |
+| `numerical-and-computational-methods.md` | hep-computing | 8.3 | yes | 6 | hep-theory, research-communication | 351029c 2026-10-07 |
+| `performance-profiling.md` | hep-computing | 6.5 | no | 2 | - | untracked |
 | `product-framing.md` | hep-computing | 3.2 | no | 3 | - | 351029c 2026-10-07 |
 | `prompt-engineering-and-token-optimization.md` | hep-computing | 9.4 | no | 3 | - | 351029c 2026-10-07 |
 | `python-balanced-design-guidelines.md` | hep-computing | 31.1 | yes | 4 | - | 351029c 2026-10-07 |
-| `python-hep-coding-patterns.md` | hep-computing | 5.1 | yes | 5 | hep-analysis | 9add3f6 2026-10-13 |
+| `python-hep-coding-patterns.md` | hep-computing | 5.1 | yes | 6 | hep-analysis | 9add3f6 2026-10-13 |
 | `risk-and-quality.md` | hep-computing | 7.7 | no | 3 | - | 351029c 2026-10-07 |
-| `root-balanced-design-guidelines.md` | hep-computing | 50.9 | yes | 5 | hep-analysis | d257072 2026-10-13 |
-| `root-debugging.md` | hep-computing | 3.6 | yes | 5 | hep-analysis | 351029c 2026-10-07 |
+| `root-balanced-design-guidelines.md` | hep-computing | 50.9 | yes | 6 | hep-analysis | d257072 2026-10-13 |
+| `root-debugging.md` | hep-computing | 3.6 | yes | 5 | hep-analysis | 80a8344 2026-10-13 |
 | `software-architecture.md` | hep-computing | 7.8 | no | 4 | - | 351029c 2026-10-07 |
 | `status-updates-and-completion.md` | hep-computing | 2.0 | no | 3 | - | 351029c 2026-10-07 |
 | `storage-cern-eos.md` | hep-computing | 13.2 | yes | 3 | - | b0dce7a 2026-10-10 |
