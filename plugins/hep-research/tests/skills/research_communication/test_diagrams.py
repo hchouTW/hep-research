@@ -182,6 +182,22 @@ MD = ("```dot\ndigraph G { A -> B; }\n```\n\n```mermaid\nflowchart LR\n  A --> B
       "```tikz\n\\begin{tikzpicture}\\node{a};\\end{tikzpicture}\n```\n")
 
 
+_TOOL_DIR = None
+SHELL_TOOLS = ("sh", "grep", "sleep", "cat")  # what the fake renderers below call; never a renderer
+
+
+def tool_dir() -> str:
+    """A folder holding links to the shell utilities only, so PATH lookups cannot find a real renderer."""
+    global _TOOL_DIR
+    if _TOOL_DIR is None:
+        _TOOL_DIR = tempfile.mkdtemp()
+        for name in SHELL_TOOLS:
+            found = shutil.which(name)
+            if found:
+                os.symlink(found, Path(_TOOL_DIR) / name)
+    return _TOOL_DIR
+
+
 class CoverageOutcomes(unittest.TestCase):
     """T3: every block gets one of rendered, lint-only, skipped, source-error, environment-error; counts reconcile; an
     unavailable renderer never counts as rendered; a broken renderer is launched once; rendering is not inspection."""
@@ -190,8 +206,9 @@ class CoverageOutcomes(unittest.TestCase):
         tmp = tempfile.mkdtemp()
         md = Path(tmp) / "d.md"
         md.write_text(md_text, encoding="utf-8")
-        # no real renderer unless a fake (or a real one's folder) is placed in bin_dir; /usr/bin and /bin carry the shell utilities
-        env = dict(os.environ, PATH=f"{bin_dir or tmp}{os.pathsep}/usr/bin{os.pathsep}/bin")
+        # no real renderer unless a fake (or a real one's folder) is placed in bin_dir; the shell utilities the fakes use
+        # come from a private folder of links, never from /usr/bin or /bin, where a real `dot` may live (Linux images)
+        env = dict(os.environ, PATH=f"{bin_dir or tmp}{os.pathsep}{tool_dir()}")
         if timeout_s:
             env["HEP_RENDER_TIMEOUT"] = str(timeout_s)
         result = subprocess.run([sys.executable, str(ROOT / "scripts" / "check_diagram_sources.py"), str(md), "--format", "json", *args],
