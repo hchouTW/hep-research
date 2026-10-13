@@ -59,5 +59,27 @@ class ReviewScriptTests(unittest.TestCase):
         self.assertIn('## Verdict', rms.markdown(out, 'x', 'synthetic'))
 
 
+class WorkedSpecTests(unittest.TestCase):
+    """ANA-P4-2 / P3-12: one collider and one cosmic-ray spec with backgrounds (control region, closure) and an active
+    blinding mask, validated and reviewed."""
+
+    def test_worked_specs(self):
+        sys.path.insert(0, str(SKILL / 'scripts'))
+        import review_measurement_spec as rms
+        for name in ('measurement_spec.template.json', 'worked-spec.cosmic-ray.synthetic.json'):
+            with self.subTest(spec=name):
+                doc = json.loads((SKILL / 'assets' / name).read_text(encoding='utf-8'))
+                ext = doc['extension']
+                self.assertTrue(ext['backgrounds'])
+                for b in ext['backgrounds']:
+                    self.assertTrue(b.get('control_region') or b.get('constraint'))
+                    self.assertIn('closure', b)
+                self.assertTrue(ext['blinding']['blinded'])
+                self.assertTrue(ext['blinding']['mask']['intervals'])
+                self.assertIn('synthetic', doc['status'])
+                self.assertTrue(validate_artifact(doc, strict=True).ok)
+                self.assertEqual(rms.draft(doc)['verdict'], 'acceptable-with-open-inputs')
+
+
 if __name__ == '__main__':
     unittest.main()

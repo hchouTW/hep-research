@@ -102,9 +102,9 @@ Scripts in `<plugin root>/skills/hep-analysis/scripts/`; each takes `--status`, 
 - `cosmic_ray_flux.py`: differential flux from an observed count, exposure, and bin width (`--bin-width-unit` required), with an exact Garwood interval for any count, a Feldman-Cousins interval on s >= 0 with a known background, Cousins-Highland (default) or seeded profile-FC with an uncertain background; never a negative bound (`flux_upper_limit` when the lower end is 0); the old subtraction only as `--method naive`, labelled approximate.
 - `cr_spectrum_powerlaw_fit.py`, `geomagnetic_cutoff.py`, `orbit_averaged_geomagnetic_cutoff.py`, `solar_modulation_force_field.py`: power-law fits, vertical Stormer cutoff (single point and orbit), force-field solar modulation; planning estimates, not backtracing or a propagation model.
 
-Assets in `<plugin root>/skills/hep-analysis/assets/`: `measurement_spec.template.json` and its field guide, `measurement-review-template.md`, `review-example.synthetic.json`, `systematics.csv`, `report-template.md`, `cosmic-ray-spectrum.example.json` (synthetic input for the power-law fit).
+Assets in `<plugin root>/skills/hep-analysis/assets/`: `measurement_spec.template.json` and its field guide, `worked-spec.cosmic-ray.synthetic.json`, `measurement-review-template.md`, `review-example.synthetic.json`, `systematics.csv`, `report-template.md`, `cosmic-ray-spectrum.example.json` (synthetic input for the power-law fit).
 
-Worked end to end (estimand, ledgers, spec, validation, review verdict): `<plugin root>/examples/collider-angular/` and `<plugin root>/examples/ams-flux-ratio/` (each run writes `review.md` with `review_measurement_spec.py`).
+Worked end to end (estimand, ledgers, spec, validation, review verdict): `<plugin root>/examples/collider-angular/` and `<plugin root>/examples/ams-flux-ratio/` (each run writes `review.md` with `review_measurement_spec.py`); specs with backgrounds, control regions, closure and an active blinding mask: `assets/measurement_spec.template.json` (collider) and `assets/worked-spec.cosmic-ray.synthetic.json` (cosmic ray).
 
 ## Example requests
 
