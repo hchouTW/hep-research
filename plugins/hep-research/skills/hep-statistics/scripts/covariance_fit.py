@@ -25,7 +25,16 @@ Input (fit): {"y": [...], "cov": [[...]] (additive part), "x": [...] (abscissa, 
   "constraints": [[a_1, ..., a_n], ...] (optional rows: a . y = const), "start": [...],
   "multiplicative": {"relative_cov": [[...]], "mode": "data" | "model" | "nuisance"} (optional)}
 
+  "model_options": {"smoothness": s} for smoothly-broken-power-law, {"plugin": {"path", "function", "n_params"}} for
+  plugin (a Python file defining function(theta, x) -> n predictions; it runs with your permissions)}
+Models with x > 0: broken-power-law (sharp) and smoothly-broken-power-law, theta = [ln A, gamma1, gamma2, ln x_b],
+  ln F = ln A - gamma1 (u - h) - gamma2 h, u = ln(x / x_b), h = max(u, 0) or s ln((1 + e^(u/s)) / 2); give start.
+Input (break-scan): {"y", "cov", "x", "smoothness": 0 (sharp), "break_range": [lo, hi], "grid_points": 40}: the profile
+  chi2 over ln x_b, a toy-calibrated interval for the break (not Wilks: the break is not a regular parameter) and the
+  toy-calibrated no-break test.
+
 Usage: covariance_fit.py fit --input FILE
+       covariance_fit.py break-scan --input FILE [--toys 200 --seed 1 --cl 0.6827]
 Exit codes: 0 fitted; 1 refused (covariance singular beyond the declared constraints, a declared constraint that is not a
 null direction, no convergence); 2 bad input. Output JSON labelled [General method].
 """
@@ -82,8 +91,68 @@ def subspace(cov: np.ndarray, constraints) -> tuple[np.ndarray, dict]:
                "near_singular": cond > COND_WARN}
 
 
-def model_fn(name, x):
+def break_shape(u, smoothness=0.0):
+    """h(u) of the broken power law, u = ln(x / x_b): max(u, 0) for a sharp break, s ln((1 + e^(u/s)) / 2) for a
+    smooth one with smoothness s > 0 (which tends to the sharp form as s -> 0)."""
+    u = np.asarray(u, dtype=float)
+    if smoothness <= 0:
+        return np.maximum(u, 0.0)
+    return smoothness * (np.logaddexp(0.0, u / smoothness) - math.log(2.0))
+
+
+def bpl_log(theta, x, smoothness=0.0):
+    """ln F of the broken power law, theta = [ln A, gamma1, gamma2, ln x_b]:
+    ln F = ln A - gamma1 (u - h(u)) - gamma2 h(u), u = ln(x / x_b) (STH-T3.13). F(x_b) = A for the sharp form; the
+    index is gamma1 below and gamma2 above the break. The same parametrization is proposed to hep-analysis for
+    cr_spectrum_powerlaw_fit.py (order question Q8)."""
+    u = np.log(np.asarray(x, dtype=float)) - theta[3]
+    h = break_shape(u, smoothness)
+    return theta[0] - theta[1] * (u - h) - theta[2] * h
+
+
+def _plugin(spec, n):
+    """A user model: {"path": "model.py", "function": "predict", "n_params": k}; predict(theta, x) -> n values."""
+    import importlib.util
+    if not isinstance(spec, dict) or not all(k in spec for k in ("path", "function", "n_params")):
+        raise CovFitInputError('a plugin model needs {"path", "function", "n_params"}')
+    path = Path(spec["path"])
+    if not path.is_file():
+        raise CovFitInputError(f"plugin file {path} not found")
+    mod_spec = importlib.util.spec_from_file_location("covariance_fit_plugin", path)
+    mod = importlib.util.module_from_spec(mod_spec)
+    mod_spec.loader.exec_module(mod)  # type: ignore[union-attr]
+    fn = getattr(mod, spec["function"], None)
+    k = spec["n_params"]
+    if not callable(fn) or not (isinstance(k, int) and k >= 1):
+        raise CovFitInputError("the plugin function must exist and n_params must be a positive integer")
+
+    def f(th):
+        out = np.asarray(fn(np.asarray(th, dtype=float), _plugin_x), dtype=float)
+        if out.shape != (n,) or not np.all(np.isfinite(out)):
+            raise CovFitError(f"the plugin returned {out.shape} or non-finite values; expected {n} finite values")
+        return out
+    return f, k
+
+
+_plugin_x: object = None
+
+
+def model_fn(name, x, options=None):
+    """Prediction function and parameter count. Models: constant, line, exponential-normalized, broken-power-law
+    (sharp), smoothly-broken-power-law (options.smoothness), plugin (options.plugin, see _plugin)."""
+    global _plugin_x
     x = np.asarray(x, dtype=float)
+    options = options or {}
+    if name in ("broken-power-law", "smoothly-broken-power-law"):
+        if np.any(x <= 0):
+            raise CovFitInputError("a power law needs positive abscissae")
+        sm = 0.0 if name == "broken-power-law" else options.get("smoothness")
+        if name == "smoothly-broken-power-law" and not (isinstance(sm, (int, float)) and sm > 0):
+            raise CovFitInputError("smoothly-broken-power-law needs model_options.smoothness > 0")
+        return (lambda th: np.exp(bpl_log(th, x, float(sm)))), 4
+    if name == "plugin":
+        _plugin_x = x
+        return _plugin(options.get("plugin"), len(x))
     if name == "constant":
         return (lambda th: np.full(len(x), th[0])), 1
     if name == "line":
@@ -140,14 +209,15 @@ def _cov_at(cov_add, rel, mode, y, pred, f_scale=None):
     return cov_add + rel * np.outer(base, base)
 
 
-def fit(y, cov, model="constant", x=None, constraints=None, start=None, multiplicative=None, logdet=True) -> dict:
+def fit(y, cov, model="constant", x=None, constraints=None, start=None, multiplicative=None, logdet=True,
+        model_options=None) -> dict:
     y = np.asarray(y, dtype=float)
     cov = np.asarray(cov, dtype=float)
     n = len(y)
     if cov.shape != (n, n) or not np.allclose(cov, cov.T, rtol=1e-12, atol=0):
         raise CovFitError("cov must be a symmetric n x n matrix")
     x = np.arange(n, dtype=float) if x is None else np.asarray(x, dtype=float)
-    f, npar = model_fn(model, x)
+    f, npar = model_fn(model, x, model_options)
     rel, mode = None, None
     if multiplicative:
         rel = np.asarray(multiplicative["relative_cov"], dtype=float)
@@ -169,6 +239,8 @@ def fit(y, cov, model="constant", x=None, constraints=None, start=None, multipli
         if mode not in ("data", "model", "nuisance"):
             raise CovFitError("multiplicative.mode must be data, model or nuisance (no default)")
     q, info = subspace(cov if rel is None or mode == "nuisance" else cov + rel * np.outer(y, y), constraints)
+    if start is None and model in ("broken-power-law", "smoothly-broken-power-law"):
+        raise CovFitInputError("a broken power law needs start [ln A, gamma1, gamma2, ln x_b] (or use break-scan)")
     th0 = np.asarray(start if start is not None else ([float(np.mean(y))] + [0.0] * (npar - 1)), dtype=float)
 
     if mode == "nuisance":
@@ -224,11 +296,164 @@ def fit(y, cov, model="constant", x=None, constraints=None, start=None, multipli
                      "'data' mode is biased (Peelle's pertinent puzzle) and is reported, not recommended")}
 
 
+# ------------------------------------------------------------------------------------- break position (STH-T3.13)
+def _profile_bpl(Y, W, x, grid, smoothness, iters=30):
+    """For every row of Y [T, n] and every ln x_b in grid: chi2 minimized over (ln A, gamma1, gamma2) by Gauss-Newton
+    (ln F is linear in them at fixed x_b). Returns chi2 [T, G] and the fitted parameters [T, G, 3]."""
+    Y = np.atleast_2d(Y)
+    T, n = Y.shape
+    lx = np.log(x)
+    chi2 = np.full((T, len(grid)), np.inf)
+    pars = np.zeros((T, len(grid), 3))
+    w_diag = np.clip(np.diag(W), 1e-300, None)
+    for g, lxb in enumerate(grid):
+        u = lx - lxb
+        h = break_shape(u, smoothness)
+        B = np.stack([np.ones(n), -(u - h), -h], axis=1)              # [n, 3]
+        ly = np.log(np.clip(Y, 1e-300, None))
+        # start: weighted linear least squares in log space (weights y^2 / var)
+        wl = (Y ** 2) * w_diag
+        A = np.einsum("tn,ni,nj->tij", wl, B, B) + 1e-12 * np.eye(3)
+        p = np.linalg.solve(A, np.einsum("tn,ni,tn->ti", wl, B, ly)[..., None])[..., 0]
+        for _ in range(iters):
+            F = np.exp(p @ B.T)                                       # [T, n]
+            J = F[:, :, None] * B[None]                               # [T, n, 3]
+            r = Y - F
+            JW = np.einsum("tni,nm->tim", J, W)
+            H = np.einsum("tim,tmj->tij", JW, J) + 1e-12 * np.eye(3)
+            step = np.linalg.solve(H, np.einsum("tim,tm->ti", JW, r)[..., None])[..., 0]
+            p = p + step
+            if np.all(np.abs(step) < 1e-10 * (1 + np.abs(p))):
+                break
+        F = np.exp(p @ B.T)
+        r = Y - F
+        chi2[:, g] = np.einsum("tn,nm,tm->t", r, W, r)
+        pars[:, g] = p
+    return chi2, pars
+
+
+def _single_pl_chi2(Y, W, x, iters=30):
+    """chi2 of a single power law (the no-break null) for every row of Y."""
+    Y = np.atleast_2d(Y)
+    n = Y.shape[1]
+    B = np.stack([np.ones(n), -np.log(x)], axis=1)
+    wl = (Y ** 2) * np.clip(np.diag(W), 1e-300, None)
+    p = np.linalg.solve(np.einsum("tn,ni,nj->tij", wl, B, B), np.einsum("tn,ni,tn->ti", wl, B, np.log(np.clip(Y, 1e-300, None)))[..., None])[..., 0]
+    for _ in range(iters):
+        F = np.exp(p @ B.T)
+        J = F[:, :, None] * B[None]
+        JW = np.einsum("tni,nm->tim", J, W)
+        H = np.einsum("tim,tmj->tij", JW, J) + 1e-12 * np.eye(2)
+        step = np.linalg.solve(H, np.einsum("tim,tm->ti", JW, Y - F)[..., None])[..., 0]
+        p = p + step
+        if np.all(np.abs(step) < 1e-10 * (1 + np.abs(p))):
+            break
+    F = np.exp(p @ B.T)
+    r = Y - F
+    return np.einsum("tn,nm,tm->t", r, W, r), p
+
+
+def _runs(grid, d, level):
+    """Intervals of {ln x_b: d <= level} in x_b, each end interpolated linearly in d between the last grid point
+    inside and the first outside (a run that reaches the grid edge ends there)."""
+    mask = d <= level
+    out, start = [], None
+
+    def cross(i, j):  # ln x_b between grid points i (inside) and j (outside) where d = level
+        t = (level - d[i]) / (d[j] - d[i]) if d[j] != d[i] else 0.0
+        return grid[i] + t * (grid[j] - grid[i])
+    for k, m in enumerate(mask):
+        if m and start is None:
+            start = k
+        if start is not None and (not m or k == len(mask) - 1):
+            end = k if m else k - 1
+            lo = cross(start, start - 1) if start > 0 else grid[start]
+            hi = cross(end, end + 1) if end < len(mask) - 1 else grid[end]
+            out.append([float(math.exp(lo)), float(math.exp(hi))])
+            start = None
+    return out
+
+
+def break_scan(doc: dict, toys: int = 200, seed: int = 1, cl: float = 0.6827) -> dict:
+    """Break position of a (smoothly) broken power law fitted to points with a full covariance: the profile chi2 over a
+    grid of ln x_b, an interval calibrated with toys (the break is not a regular parameter: no Wilks), and the
+    no-break test calibrated with toys under the single-power-law fit (STH-T3.13)."""
+    if not isinstance(doc, dict):
+        raise CovFitInputError("the input must be a JSON object")
+    y = np.asarray(doc["y"], dtype=float)
+    cov = np.asarray(doc["cov"], dtype=float)
+    x = np.asarray(doc["x"], dtype=float)
+    n = len(y)
+    if y.ndim != 1 or n < 5 or x.shape != (n,) or cov.shape != (n, n) or np.any(x <= 0) or np.any(np.diff(x) <= 0):
+        raise CovFitInputError("need at least 5 points, increasing positive x and an n x n covariance")
+    if not np.all(np.isfinite(y)) or np.any(y <= 0):
+        raise CovFitInputError("break-scan fits positive values (a power law)")
+    if not np.allclose(cov, cov.T, rtol=1e-12, atol=0) or np.linalg.eigvalsh(cov)[0] <= 0:
+        raise CovFitInputError("cov must be symmetric positive definite")
+    if not (isinstance(toys, int) and 50 <= toys <= 100000) or not 0 < cl < 1:
+        raise CovFitInputError("toys must be in [50, 100000] and cl in (0, 1)")
+    sm = float(doc.get("smoothness", 0.0))
+    if sm < 0:
+        raise CovFitInputError("smoothness must be >= 0 (0: sharp break)")
+    lo, hi = doc.get("break_range", [float(x[1]), float(x[-2])])
+    if not (x[0] < lo < hi < x[-1]):
+        raise CovFitInputError("break_range must lie strictly inside the x range")
+    points = int(doc.get("grid_points", 40))
+    if not 5 <= points <= 400:
+        raise CovFitInputError("grid_points must be in [5, 400]")
+    grid = np.linspace(math.log(lo), math.log(hi), points)
+    W = np.linalg.inv(cov)
+    chi2_obs, pars = _profile_bpl(y, W, x, grid, sm)
+    j = int(np.argmin(chi2_obs[0]))
+    best = np.append(pars[0, j], grid[j])
+    d_obs = chi2_obs[0] - chi2_obs[0, j]
+    rng = np.random.default_rng(seed)
+    f_best = np.exp(bpl_log(best, x, sm))
+    Yt = rng.multivariate_normal(f_best, cov, size=toys)
+    Yt = np.clip(Yt, 1e-12 * np.max(f_best), None)
+    chi2_t, _ = _profile_bpl(Yt, W, x, grid, sm)
+    d_t = chi2_t[:, j] - chi2_t.min(axis=1)              # the toys' Delta chi2 at their true break (the best fit)
+    crit = float(np.quantile(d_t, cl))
+    chi2_single, p_single = _single_pl_chi2(y, W, x)
+    q_break = float(chi2_single[0] - chi2_obs[0, j])
+    f_null = np.exp(np.stack([np.ones(n), -np.log(x)], axis=1) @ p_single[0])
+    Yn = np.clip(rng.multivariate_normal(f_null, cov, size=toys), 1e-12 * np.max(f_null), None)
+    c_null, _ = _profile_bpl(Yn, W, x, grid, sm)
+    q_null = _single_pl_chi2(Yn, W, x)[0] - c_null.min(axis=1)
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+    from core.stats.tail_estimation import toy_tail
+    from scipy.stats import chi2 as chi2_dist
+    k = int(np.sum(q_null >= q_break - 1e-12))
+    return {"label": LABEL, "model": "broken-power-law" if sm == 0 else "smoothly-broken-power-law", "smoothness": sm,
+            "parametrization": "ln F = ln A - gamma1 (u - h(u)) - gamma2 h(u), u = ln(x / x_b)",
+            "best_fit": {"ln_A": float(best[0]), "gamma1": float(best[1]), "gamma2": float(best[2]), "x_b": float(math.exp(best[3]))},
+            "chi2_min": float(chi2_obs[0, j]), "dof": n - 4,
+            "grid": {"ln_x_b": grid.tolist(), "resolution_ln": float(grid[1] - grid[0])},
+            "profile_delta_chi2": d_obs.tolist(),
+            "break_interval": {"cl": cl, "critical_value_toys": crit, "intervals": _runs(grid, d_obs, crit),
+                               "calibration": f"{toys} toys from the best fit with the full covariance (plug-in), seed {seed}"},
+            "break_interval_wilks_for_comparison": {"critical_value": float(chi2_dist.ppf(cl, 1)),
+                                                    "intervals": _runs(grid, d_obs, chi2_dist.ppf(cl, 1))},
+            "break_test": {"q_obs": q_break, "p_toys": toy_tail(k, toys),
+                           "p_wilks_chi2_1dof_if_x_b_known": float(chi2_dist.sf(q_break, 1)),
+                           "p_wilks_chi2_2dof": float(chi2_dist.sf(q_break, 2)),
+                           "note": "under no break, x_b is undefined and q is maximized over it (Davies, a look-elsewhere "
+                                   "scan): neither chi2 reference is valid (chi2(1) rejects too often); use the toy p-value"},
+            "toys": toys, "seed": seed,
+            "note": "the break position is not a regular parameter (its profile is not quadratic and the no-break null is "
+                    "on the boundary): its interval is calibrated with toys, never by Wilks; ends are known to one grid step"}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = ap.add_subparsers(dest="command", required=True)
     p = sub.add_parser("fit")
     p.add_argument("--input", required=True)
+    bs = sub.add_parser("break-scan", help="break position of a broken power law with a toy-calibrated interval")
+    bs.add_argument("--input", required=True)
+    bs.add_argument("--toys", type=int, default=200)
+    bs.add_argument("--seed", type=int, default=1)
+    bs.add_argument("--cl", type=float, default=0.6827)
     a = ap.parse_args(argv)
     if np is None:
         print(json.dumps({"status": "rejected", "error": "NumPy and SciPy are required"}))
@@ -241,8 +466,11 @@ def main(argv=None) -> int:
         print(json.dumps({"status": "rejected", "error": f"cannot read {a.input}: {exc}"}))
         return 2
     try:
-        out = fit(doc["y"], doc["cov"], doc.get("model", "constant"), doc.get("x"), doc.get("constraints"),
-                  doc.get("start"), doc.get("multiplicative"))
+        if a.command == "break-scan":
+            out = break_scan(doc, a.toys, a.seed, a.cl)
+        else:
+            out = fit(doc["y"], doc["cov"], doc.get("model", "constant"), doc.get("x"), doc.get("constraints"),
+                      doc.get("start"), doc.get("multiplicative"), model_options=doc.get("model_options"))
     except KeyError as exc:
         print(json.dumps({"status": "rejected", "error": f"missing {exc}"}))
         return 2

@@ -34,7 +34,7 @@ One number: when a shell is available, run its row's tool, state the constructio
 | Combination | `sc/combine_measurements.py` | asymmetric errors: `sc/combine_asymmetric.py` |
 | D'Agostini iterations | `cs/statistical_toys.py unfold-scan`, then `cs/unfolding_diagnostics.py closure` | Tikhonov/SVD: `regularized-scan` |
 | MCMC posterior | user's sampler, then `sc/bayes_diagnostics.py diagnose` | SBC: `sc/bayes_calibration.py sbc` |
-| Fit to published points, covariance | `sc/covariance_fit.py fit` (constant, line, exponential) | other models: no tool; label a hand fit |
+| Fit to published points, covariance | `sc/covariance_fit.py fit` (line, exponential, broken power law, plug-in) | break position: `break-scan` |
 | Ratio with covariance | `cs/statistical_toys.py ratio-cov` (denominators <= 1e5) | above: delta method, labeled hand-worked |
 | Write the result | `sc/result_artifact.py` | then `contracts/validate.py --gate publication` |
 

@@ -198,6 +198,10 @@ GSCAN = {"bin_centers": [i + 0.5 for i in range(8)], "variants": [{"name": "loos
 CHAINS = {"mu": [[0.1 * ((7 * i + 3 * c) % 11) for i in range(200)] for c in range(4)]}
 COVFIT = {"y": [1.0, 2.1, 2.9], "cov": [[0.04, 0.01, 0.0], [0.01, 0.04, 0.01], [0.0, 0.01, 0.04]], "x": [1.0, 2.0, 3.0],
           "model": "line"}
+BPL = {"x": [1.0, 1.6, 2.5, 4.0, 6.3, 10.0, 16.0, 25.0, 40.0, 63.0, 100.0],
+       "y": [1000.0 * (v / 10.0) ** (-2.7 if v < 10 else -2.4) for v in (1.0, 1.6, 2.5, 4.0, 6.3, 10.0, 16.0, 25.0, 40.0, 63.0, 100.0)],
+       "grid_points": 20}
+BPL["cov"] = [[(0.03 * BPL["y"][i]) ** 2 if i == j else 0.0 for j in range(11)] for i in range(11)]
 RATIO = {"numerator": [400.0, 300.0], "denominator": [900.0, 800.0],
          "systematics": [{"name": "eff", "sigma_num": 0.02, "sigma_den": 0.02, "num_den_rho": 0.8, "bin_correlation": {"kind": "full"}}]}
 # (script path relative to the plugin, subcommand or None) -> (arguments, input document or None). Every tool named in
@@ -229,6 +233,7 @@ ROUTES = {
     ("skills/hep-statistics/scripts/bayes_calibration.py", "sbc"): (["--reps", "40", "--draws", "19", "--bins", "5", "--seed", "1",
                                                                      "--power-runs", "2"], None),
     ("skills/hep-statistics/scripts/covariance_fit.py", "fit"): (["--input", "@IN"], COVFIT),
+    ("skills/hep-statistics/scripts/covariance_fit.py", "break-scan"): (["--input", "@IN", "--toys", "50", "--seed", "1"], BPL),
     ("core/stats/statistical_toys.py", "ratio-cov"): (["--input", "@IN", "--toys", "200", "--seed", "1"], RATIO),
     ("skills/hep-statistics/scripts/result_artifact.py", None): None,  # covered by test_result_artifact.py
 }
