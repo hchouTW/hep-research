@@ -655,7 +655,7 @@ def profile_cls(n: int, b: float, sigma_b: float, cl: float, toys: int, expected
             limits.append(_cls_limit(nn, bb0, sig, cl, ui1, gi1, ui2, gi2, h))
         limits.sort()
         q = lambda f: limits[min(len(limits) - 1, max(0, int(round(f * len(limits))) - 1))]
-        expected = {"-2sigma": q(0.025), "-1sigma": q(0.16), "median": q(0.5), "+1sigma": q(0.84), "+2sigma": q(0.975),
+        expected = {**{name: q(NormalDist().cdf(z)) for name, z in BANDS},  # exact Phi(z) quantiles (STH-T3.9)
                     "pseudo_experiments": expected_toys, "inner_toys": inner}
     out = {"label": LABEL, "method": "CLs upper limit with the background nuisance profiled, seeded toys of q-tilde",
            "n_obs": n, "b": b, "sigma_b": sig, "cl": cl, "toys": toys, "seed": seed, "observed_upper_limit": obs}

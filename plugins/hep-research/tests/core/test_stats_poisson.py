@@ -17,6 +17,14 @@ from core.stats import poisson_diagnostics as pd  # noqa: E402
 
 
 class ExactValueTests(unittest.TestCase):
+    def test_expected_bands_use_exact_normal_quantiles(self):
+        """STH-T3.9: P(n = 0 | b = 3.7) = 0.0247 lies above Phi(-2) = 0.02275, so the -2 sigma expected limit is the
+        n = 0 limit -ln(0.05) = 2.996; with the old 0.025 it was the n = 1 limit 3.56."""
+        exp = pd.cls_limit(2, 3.7, 0.95)["expected_under_background_only"]
+        self.assertAlmostEqual(exp["-2sigma"], -math.log(0.05), delta=0.01)
+        self.assertAlmostEqual(pd.BAND_QUANTILES["-1sigma"], 0.158655, places=6)
+        self.assertAlmostEqual(pd.BAND_QUANTILES["+2sigma"], 0.977250, places=6)
+
     def test_cdf_matches_closed_forms(self):
         self.assertAlmostEqual(pd.poisson_cdf(0, 2.0), math.exp(-2.0), places=14)
         self.assertAlmostEqual(pd.poisson_cdf(2, 3.0), math.exp(-3.0) * (1 + 3 + 4.5), places=14)

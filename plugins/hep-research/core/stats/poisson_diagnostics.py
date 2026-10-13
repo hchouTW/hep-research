@@ -55,6 +55,8 @@ from core.stats._linalg import bisect
 from core.stats._poisson import MAX_MEAN  # one limit for core/stats; the numerics below stay accurate up to it
 
 LABEL = "[General method]"
+# expected-band quantiles of the background-only distribution: exact Phi(z) for z = -2..2
+BAND_QUANTILES = {name: NormalDist().cdf(z) for name, z in (("-2sigma", -2), ("-1sigma", -1), ("median", 0), ("+1sigma", 1), ("+2sigma", 2))}
 FC_MAX_TOTAL_MEAN = 500.0  # fc-interval scans a 0.005 grid in s and sums from exp(-mu): a small-count method
 
 
@@ -407,8 +409,8 @@ def cls_limit(n: int, b: float, cl: float = 0.95, sigma_b: float = 0.0, nodes: i
 
     n_cap = int(b + 5.0 * sigma_b + 10.0 * math.sqrt(b + 1.0) + 20)
     weights = [_marg_pmf(m, 0.0, bk) for m in range(n_cap + 1)]
-    cum, expected, targets = 0.0, {}, [("-2sigma", 0.025), ("-1sigma", 0.16), ("median", 0.5),
-                                       ("+1sigma", 0.84), ("+2sigma", 0.975)]
+    # exact normal quantiles Phi(-2..2) = 0.02275, 0.15866, 0.5, 0.84134, 0.97725 (STH-T3.9; 0.025/0.16 were used before)
+    cum, expected, targets = 0.0, {}, list(BAND_QUANTILES.items())
     cache: dict[int, float] = {}
     for m, w in enumerate(weights):
         cum += w
