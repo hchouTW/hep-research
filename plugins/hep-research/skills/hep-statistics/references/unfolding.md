@@ -18,6 +18,32 @@ avoids unfolding; unfolding is needed when the deliverable is a truth-level spec
 Regularization and stopping rules trade variance against bias. Use predefined criteria and independent truth
 variations, not visual smoothness alone.
 
+### Methods and what each assumes
+
+- **Regularized inversion, SVD** (Hoecker and Kartvelishvili, NIM A372 (1996) 469, hep-ph/9509307): the response is
+  decomposed into singular values and the small ones, which amplify noise, are damped or cut; the regularization is the
+  number of kept components or the damping strength. `unfolding_diagnostics.py --method tsvd` is the truncated form.
+- **Tikhonov least squares with an area constraint, TUnfold** (Schmitt, JINST 7 (2012) T10003, arXiv:1205.6201):
+  least-squares fit of the truth with a curvature (or other) penalty, background subtraction and an optional constraint
+  on the total; the strength is chosen by the L-curve or a minimum global correlation. `--method tikhonov` is the
+  curvature-penalty form without the area constraint.
+- **Iterative Bayesian (D'Agostini)** (NIM A362 (1995) 487; improved treatment of uncertainties: arXiv:1010.0632):
+  Bayes' theorem applied iteratively from a prior; the iteration count is the regularization, and the result depends
+  on the prior for few iterations. Scan the iterations with `statistical_toys.py unfold-scan`, check `closure`, then
+  unfold the data with its covariance with `unfolding_diagnostics.py dagostini-unfold`.
+- **Fully Bayesian unfolding** (Choudalakis, arXiv:1201.4612): the posterior over truth spectra, regularized through
+  a non-constant prior; report the prior and a prior-sensitivity study (as for any Bayesian result).
+- **OmniFold** (Andreassen et al., PRL 124 (2020) 182001, arXiv:1911.09107): iterative reweighting of simulated events
+  by classifiers, unbinned and in many observables at once; its uncertainty and coverage need the same toy validation
+  as the binned methods, and the trained models are physics-ml artifacts.
+
+### Binning: purity and stability
+
+Choose truth and reco bins so that most events stay in their bin: purity (the fraction of reco-bin events generated in
+the same truth bin) and stability (the fraction of truth-bin events reconstructed in the same bin) are commonly kept above
+about one half; bins narrower than the resolution make the inversion unstable and the correlations large. Use at least
+as many reco as truth bins (an underdetermined system is refused by `validate_response.py` for unfolding).
+
 ## Validation
 
 Validate nominal closure, alternative truth shapes, stress tests, injections, pulls/coverage, response MC statistics,
@@ -28,6 +54,12 @@ Coverage is a property of the full procedure (method, regularization choice, res
 Report bias and pull width per bin for at least one truth other than the one used to build the response, and state
 the truths tested; a procedure validated only at the nominal truth has unknown coverage elsewhere.
 
+**Regularized intervals undercover.** The regularized estimate is biased toward the prior or the smooth solution, so
+intervals built around it (Bayesian credible intervals or a standard bootstrap) can cover well below nominal; Kuusela
+and Panaretos (Ann. Appl. Stat. 9 (2015) 1671, arXiv:1505.04768) show this and restore nearly nominal coverage with an
+iteratively bias-corrected bootstrap at a modest cost in length. State the coverage measured by
+`unfolding_diagnostics.py outer-coverage` at the truths tested, or say it is not established.
+
 ## Uncertainties
 
 Bootstrap at event level, preserving truth/reconstruction pairing and signed weights. Independently resampling matrix
@@ -35,6 +67,17 @@ cells destroys event correlations. Propagate each systematic consistently throug
 efficiency; use the same nuisance variation when one source affects several components. Quote the unfolded result
 with its full covariance (data and response parts); regularized bins are correlated, and a fit to the unfolded
 spectrum that ignores those correlations is wrong.
+
+**Strong negative correlations.** Weak regularization leaves adjacent unfolded bins strongly anticorrelated; the
+covariance is then nearly singular and its inverse amplifies rounding and Monte Carlo noise. Validate it first
+(`validate_covariance.py`: PSD and conditioning on the correlation matrix), fit with the full matrix, and if it is
+ill-conditioned refit in reco space (forward folding) rather than inverting it; never drop the off-diagonal terms.
+
+## Publishing
+
+Publish the unfolded spectrum with its full covariance (statistical and systematic parts separately when possible),
+the response matrix and the truth and reco binning, the regularization choice and its criterion, and the truths used
+for the coverage study, so that others can refold a prediction or redo the comparison in reco space.
 
 ## Executable checks
 

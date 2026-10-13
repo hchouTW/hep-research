@@ -219,5 +219,25 @@
   "verification_strength": "page",
   "numeric_quotation_allowed": false,
   "last_reviewed": "2026-10-12"
+ },
+ {
+  "id": "hepstats:C12",
+  "claim": "Intervals around a regularized unfolded estimate (Bayesian credible or standard bootstrap) can undercover because the regularized point estimate is biased; a bias-corrected bootstrap restores nearly nominal coverage at a modest cost in length.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "hepstats:S25"
+  ],
+  "location": "arXiv:1505.04768 abstract",
+  "scope": {
+   "text": "regularized unfolding"
+  },
+  "limitations": "abstract-level support; coverage depends on the procedure and the truth",
+  "verification_strength": "abstract+metadata",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-13"
  }
 ]

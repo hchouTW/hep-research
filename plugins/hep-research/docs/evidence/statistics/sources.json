@@ -371,5 +371,158 @@
   "superseded_by": [],
   "attribution": "ROOT team",
   "notes": "Header on ROOT master read 2026-10-13: StatErrorConfig defaults fRelErrorThreshold = 0.05, fConstraintType = Constraint::Poisson."
+ },
+ {
+  "id": "hepstats:S19",
+  "title": "SVD Approach to Data Unfolding",
+  "authors": "A. Hoecker, V. Kartvelishvili",
+  "year": 1996,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/hep-ph/9509307",
+   "arxiv_ids": [
+    "hep-ph/9509307"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "1996",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "A. Hoecker, V. Kartvelishvili",
+  "notes": "Nucl. Instrum. Meth. A372 (1996) 469-481. arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S20",
+  "title": "TUnfold: an algorithm for correcting migration effects in high energy physics",
+  "authors": "S. Schmitt",
+  "year": 2012,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/1205.6201",
+   "arxiv_ids": [
+    "1205.6201"
+   ],
+   "doi": "10.1088/1748-0221/7/10/T10003"
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2012",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "S. Schmitt",
+  "notes": "JINST 7 (2012) T10003. arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S21",
+  "title": "A multidimensional unfolding method based on Bayes' theorem",
+  "authors": "G. D'Agostini",
+  "year": 1995,
+  "identifiers": {
+   "doi": "10.1016/0168-9002(95)00274-X",
+   "url": "https://doi.org/10.1016/0168-9002(95)00274-X"
+  },
+  "tier": 1,
+  "verification_level": "metadata-only",
+  "verification_date": "2026-10-13",
+  "publication_date": "1995",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "G. D'Agostini",
+  "notes": "Nucl. Instrum. Meth. A362 (1995) 487-498. Bibliographic record only (not opened 2026-10-13)."
+ },
+ {
+  "id": "hepstats:S22",
+  "title": "Improved iterative Bayesian unfolding",
+  "authors": "G. D'Agostini",
+  "year": 2010,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/1010.0632",
+   "arxiv_ids": [
+    "1010.0632"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2010",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "G. D'Agostini",
+  "notes": "Alliance Workshop on Unfolding and Data Correction, DESY 2010. arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S23",
+  "title": "Fully Bayesian Unfolding",
+  "authors": "G. Choudalakis",
+  "year": 2012,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/1201.4612",
+   "arxiv_ids": [
+    "1201.4612"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2012",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "G. Choudalakis",
+  "notes": "arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S24",
+  "title": "OmniFold: A Method to Simultaneously Unfold All Observables",
+  "authors": "A. Andreassen, P. T. Komiske, E. M. Metodiev, B. Nachman, J. Thaler",
+  "year": 2020,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/1911.09107",
+   "arxiv_ids": [
+    "1911.09107"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2020",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "A. Andreassen, P. T. Komiske, E. M. Metodiev, B. Nachman, J. Thaler",
+  "notes": "Phys. Rev. Lett. 124 (2020) 182001. arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S25",
+  "title": "Statistical unfolding of elementary particle spectra: Empirical Bayes estimation and bias-corrected uncertainty quantification",
+  "authors": "M. Kuusela, V. M. Panaretos",
+  "year": 2015,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/1505.04768",
+   "arxiv_ids": [
+    "1505.04768"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2015",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "M. Kuusela, V. M. Panaretos",
+  "notes": "Ann. Appl. Stat. 9 (2015) 1671-1705. arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
  }
 ]

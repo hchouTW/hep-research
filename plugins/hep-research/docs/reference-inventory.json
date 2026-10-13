@@ -20,7 +20,7 @@
   },
   "hep-statistics": {
    "references": 10,
-   "bytes": 131257,
+   "bytes": 134867,
    "uncited": 0
   },
   "hep-theory": {
@@ -1504,7 +1504,7 @@
     "tests/skills/hep_statistics/test_core_stats_guide.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "6800061 2026-10-13"
+   "last_commit": "d648b8a 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
@@ -1523,7 +1523,7 @@
     "tests/skills/hep_statistics/test_core_stats_guide.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "6800061 2026-10-13"
+   "last_commit": "d648b8a 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
@@ -1651,8 +1651,8 @@
   {
    "path": "skills/hep-statistics/references/unfolding.md",
    "owner": "hep-statistics",
-   "bytes": 3383,
-   "lines": 48,
+   "bytes": 6993,
+   "lines": 91,
    "linked_from_skill_md": true,
    "cited_by": [
     "core/stats/unfolding_diagnostics.py",
