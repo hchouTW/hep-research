@@ -10,7 +10,7 @@
   },
   "hep-analysis": {
    "references": 11,
-   "bytes": 79079,
+   "bytes": 79432,
    "uncited": 0
   },
   "hep-computing": {
@@ -20,7 +20,7 @@
   },
   "hep-statistics": {
    "references": 11,
-   "bytes": 146571,
+   "bytes": 148748,
    "uncited": 0
   },
   "hep-theory": {
@@ -842,7 +842,7 @@
   {
    "path": "skills/hep-analysis/references/hep-analysis-guide.md",
    "owner": "hep-analysis",
-   "bytes": 19896,
+   "bytes": 20249,
    "lines": 119,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -856,7 +856,7 @@
    "cited_by_other_skills": [
     "detector-response"
    ],
-   "last_commit": "3da6758 2026-10-13"
+   "last_commit": "d058154 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/histograms-efficiencies.md",
@@ -1504,7 +1504,7 @@
    "owner": "hep-statistics",
    "bytes": 11287,
    "lines": 155,
-   "linked_from_skill_md": true,
+   "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
     "skills/detector-response/references/imaging-atmospheric-cherenkov.md",
@@ -1514,7 +1514,7 @@
     "skills/hep-analysis/references/measurements-and-unfolding.md",
     "skills/hep-analysis/scripts/cosmic_ray_flux.py",
     "skills/hep-analysis/scripts/particle_ratio_with_uncertainty.py",
-    "skills/hep-statistics/SKILL.md",
+    "skills/hep-statistics/references/core-stats-guide.md",
     "skills/hep-statistics/references/inference-recipes.md",
     "skills/hep-statistics/scripts/li_ma_significance.py",
     "tests/skills/hep_statistics/test_li_ma_significance.py"
@@ -1530,9 +1530,9 @@
    "owner": "hep-statistics",
    "bytes": 4105,
    "lines": 56,
-   "linked_from_skill_md": true,
+   "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-statistics/SKILL.md"
+    "skills/hep-statistics/references/core-stats-guide.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "591e7d0 2026-10-13"
@@ -1540,23 +1540,25 @@
   {
    "path": "skills/hep-statistics/references/core-stats-commands.md",
    "owner": "hep-statistics",
-   "bytes": 32015,
-   "lines": 338,
-   "linked_from_skill_md": true,
+   "bytes": 33543,
+   "lines": 356,
+   "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-statistics/SKILL.md",
+    "skills/hep-analysis/references/hep-analysis-guide.md",
     "skills/hep-statistics/references/core-stats-guide.md",
     "skills/hep-statistics/references/unfolding.md",
     "tests/skills/hep_statistics/test_core_stats_guide.py"
    ],
-   "cited_by_other_skills": [],
-   "last_commit": "d648b8a 2026-10-13"
+   "cited_by_other_skills": [
+    "hep-analysis"
+   ],
+   "last_commit": "d058154 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 16295,
-   "lines": 167,
+   "bytes": 16944,
+   "lines": 174,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/inference-and-unfolding.md",
@@ -1573,22 +1575,22 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "d648b8a 2026-10-13"
+   "last_commit": "d058154 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
    "owner": "hep-statistics",
    "bytes": 18218,
    "lines": 197,
-   "linked_from_skill_md": true,
+   "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
     "skills/detector-response/references/multimessenger-analysis.md",
     "skills/hep-analysis/references/analysis-design.md",
     "skills/hep-analysis/references/hep-analysis-guide.md",
-    "skills/hep-statistics/SKILL.md",
     "skills/hep-statistics/references/astroparticle-statistics.md",
+    "skills/hep-statistics/references/core-stats-guide.md",
     "skills/hep-statistics/references/ml-assisted-inference.md"
    ],
    "cited_by_other_skills": [
@@ -1602,12 +1604,12 @@
    "owner": "hep-statistics",
    "bytes": 9128,
    "lines": 93,
-   "linked_from_skill_md": true,
+   "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
     "skills/hep-computing/references/root-debugging.md",
-    "skills/hep-statistics/SKILL.md",
     "skills/hep-statistics/references/astroparticle-statistics.md",
+    "skills/hep-statistics/references/core-stats-guide.md",
     "skills/hep-statistics/references/nuisance-modeling.md",
     "tests/skills/hep_statistics/test_weighted_unbinned_fit.py"
    ],
@@ -1625,6 +1627,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-statistics/SKILL.md",
+    "skills/hep-statistics/references/core-stats-guide.md",
     "skills/physics-ml/references/ml-analysis.md",
     "skills/physics-ml/references/sbi-training.md",
     "skills/physics-ml/references/scientific-machine-learning.md",
@@ -1640,13 +1643,13 @@
    "owner": "hep-statistics",
    "bytes": 19842,
    "lines": 246,
-   "linked_from_skill_md": true,
+   "linked_from_skill_md": false,
    "cited_by": [
     "adapters/pyhf-combine/assets/pyhf_nuisance_diagnostics.py",
     "skills/hep-analysis/references/hep-analysis-guide.md",
     "skills/hep-analysis/references/systematics.md",
-    "skills/hep-statistics/SKILL.md",
     "skills/hep-statistics/references/core-stats-commands.md",
+    "skills/hep-statistics/references/core-stats-guide.md",
     "skills/hep-statistics/references/statistical-tools.md",
     "tests/adapters/test_nuisance_interpolation.py"
    ],
@@ -1660,11 +1663,11 @@
    "owner": "hep-statistics",
    "bytes": 12920,
    "lines": 227,
-   "linked_from_skill_md": true,
+   "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-computing/references/numerical-and-computational-methods.md",
     "skills/hep-statistics/README.md",
-    "skills/hep-statistics/SKILL.md",
+    "skills/hep-statistics/references/core-stats-guide.md",
     "skills/hep-statistics/references/inference-recipes.md",
     "skills/hep-theory/references/mathematical-reasoning-and-proof.md",
     "skills/research-communication/references/academic-papers-guide.md",
@@ -1684,9 +1687,8 @@
    "owner": "hep-statistics",
    "bytes": 9577,
    "lines": 96,
-   "linked_from_skill_md": true,
+   "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-statistics/SKILL.md",
     "skills/hep-statistics/references/astroparticle-statistics.md",
     "skills/hep-statistics/references/core-stats-guide.md",
     "skills/physics-ml/references/multivariate-analysis-bdt-nn.md"
@@ -1701,7 +1703,7 @@
    "owner": "hep-statistics",
    "bytes": 6993,
    "lines": 91,
-   "linked_from_skill_md": true,
+   "linked_from_skill_md": false,
    "cited_by": [
     "core/stats/unfolding_diagnostics.py",
     "profiles/experiments/ams-02/index.md",
@@ -1723,8 +1725,8 @@
     "skills/hep-analysis/references/measurements-and-unfolding.md",
     "skills/hep-analysis/scripts/cosmic_ray_flux.py",
     "skills/hep-analysis/scripts/cr_spectrum_powerlaw_fit.py",
-    "skills/hep-statistics/SKILL.md",
     "skills/hep-statistics/references/astroparticle-statistics.md",
+    "skills/hep-statistics/references/core-stats-guide.md",
     "tests/skills/hep_analysis/test_method_references.py"
    ],
    "cited_by_other_skills": [

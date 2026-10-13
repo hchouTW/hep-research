@@ -1079,3 +1079,20 @@ sbottom benchmark) was added by the hep-statistics audit of 2026-10-12 (T01-T30,
 | `SrCrModelCard` lost its pyhf skip (STH-T3.12 inserted a class under the decorator) | `tests/adapters/test_sr_cr_model_card.py` with pyhf hidden | 3 errors without pyhf | 6 skipped without pyhf, all pass with it |
 | Broken-power-law covariance comparison at `places=9` | `tests/skills/hep_analysis/test_broken_power_law.py` | fails on Python 3.11 (difference 1.8e-9) | relative 1e-6; measured 1.0e-8 (3.12, 3.13), 9.0e-8 (3.11) |
 | `check_root_cpp_env.sh`: `ROOT_VERSION=$(root --version \| head -n 1)` under `set -euo pipefail` (CI: `test_env_check_parallel_runs_and_cleanup` failed in `rootproject/root:6.38.00-ubuntu25.10`, passed on macOS) | `tests/skills/hep_computing/test_root_cpp_scripts.py` `test_env_check_survives_a_failing_root_version`, `test_env_check_reports_a_failing_root_config` | fake `root --version` exiting 1: exit 1, no output; failing `root-config`: exit 1, no JSON | `status: ok` with the first version line; `status: failed`, exit 1 |
+
+## STATISTICS-FOLLOWUPS (2026-10-13, E2: Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1; version 0.6.17 + unreleased, contracts 2.6.0)
+
+STH Q8 (one broken-power-law parametrization). Synthetic input: 20 points over x = 3-300, truth
+`[ln 5, 2.7, 2.4, ln 30]`, covariance 2% uncorrelated + 1% fully correlated; smooth case s = 0.3.
+
+| Check | Before | After | Test |
+|---|---|---|---|
+| Model value, same parameters, `cr_spectrum_powerlaw_fit.broken_log_flux` vs `covariance_fit.bpl_log` | sharp identical (1e-15); smooth differs by the constant 2^-((g2-g1) s) = 1/1.0644 (the hep-analysis form had no 1/2) | identical (covariance_fit bit-identical to the core helper; hep-analysis within 1e-12, the exp/log round trip of x_b) | `tests/core/test_stats_broken_power_law.py` `test_identical_model_values` |
+| Smooth fit, Asimov points: A from both tools | 5.199 (hep-analysis, labelled `normalization_at_break` but `F(x_b) 2^((g2-g1)s)`) vs 5.195 | both recover the truth: hep-analysis within 1e-6, covariance_fit within 1e-3 sigma; index and break uncertainties agree to 1e-3 relative | `test_asimov_both_recover_the_truth` |
+| Fitted parameters on the same toys (40 seeded per model, measured; 8 per model in the test) | not comparable for A (smooth) | largest difference 0.17 sigma (sharp, covariance_fit started at the hep-analysis fit) and 0.11 sigma (smooth); test tolerance 0.3 sigma. The tools minimize different chi2 (ln F with the linearized covariance vs F) | `test_toys_agree_within_stated_tolerance` |
+| Sharp break, covariance_fit started at the truth instead | — | 2 of 40 toys reach another local minimum (differences up to 1.4 sigma; one has the lower flux chi2 at the hep-analysis point): the sharp-break chi2 is kinked in ln x_b, so the guide says to start from a profiled break | measured, not a test |
+| Found, not changed: `covariance_fit.py fit` on the same spectrum over x = 1-1000 (flux spans 8 decades) | refused: "singular beyond the 0 declared constraint(s)", eigenvalue ratio 4e-16 in absolute units | open: the subspace singularity test is not on the correlation scale (unlike `_linalg.py`); the comparison uses x = 3-300 | — |
+
+hep-statistics SKILL.md headroom: `tools/measure_entrypoints.py` 8178 -> 7653 B (budget 8192, target <= 7700);
+core-stats-guide.md 16651 -> 16944 B (test limit 17000); `tools/check_routing_static.py` ok (197 cases, no failures);
+`test_core_stats_guide`, `test_skill_resources`, `test_ml_inference_routing`, `test_check_ownership` pass.

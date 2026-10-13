@@ -21,7 +21,7 @@ description: "Use when the deliverable is a statistical inference or its diagnos
 
 ## Step 0: quick question, and task to tool
 
-One number: when a shell is available, run its row's tool, state the construction and approximation, and label a value worked by hand as such; the workflow is for new models. `cs/` = `<plugin root>/core/stats/`, `sc/` = `<plugin root>/skills/hep-statistics/scripts/`; read `--help` first; caps in the guide.
+One number: when a shell is available, run its row's tool, state the construction and approximation, and label a value worked by hand as such; the workflow is for new models. `cs/` = `<plugin root>/core/stats/`, `sc/` = `<plugin root>/skills/hep-statistics/scripts/`; read `--help` first; caps and more rows in the guide.
 
 | Request | Default | Fallback |
 |---|---|---|
@@ -30,7 +30,6 @@ One number: when a shell is available, run its row's tool, state the constructio
 | Discovery | `cs/likelihood_limits.py profile-significance`; bins: `shape-significance` | ON/OFF: `sc/li_ma_significance.py` |
 | Multi-bin limit, nuisances; two POIs | `cs/likelihood_limits.py shape-limit`; `contour` | beyond the caps: pyhf adapter |
 | Scan look-elsewhere | `sc/look_elsewhere.py brute`, `gross-vitells` | `sc/global_significance.py run` |
-| N hypotheses, no scan data | Bonferroni or Šidák bound (conservative) | no tool: hand-worked |
 | Combination | `sc/combine_measurements.py` | asymmetric errors: `sc/combine_asymmetric.py` |
 | D'Agostini iterations | `cs/statistical_toys.py unfold-scan`, then `cs/unfolding_diagnostics.py closure` | unfold data with covariance: `dagostini-unfold` |
 | MCMC posterior | user's sampler, then `sc/bayes_diagnostics.py diagnose` | SBC: `sc/bayes_calibration.py sbc` |
@@ -47,9 +46,7 @@ One number: when a shell is available, run its row's tool, state the constructio
 
 ## Resources
 
-References: [core/stats guide](references/core-stats-guide.md) and [commands](references/core-stats-commands.md), [nuisance modeling](references/nuisance-modeling.md), [likelihood fitting](references/likelihood-fitting.md), [unfolding](references/unfolding.md), [combinations](references/combinations.md), [inference recipes](references/inference-recipes.md), [pyhf, Combine](references/statistical-tools.md), [astroparticle](references/astroparticle-statistics.md), [ML-assisted](references/ml-assisted-inference.md), [inference reasoning](references/statistical-inference-for-physics.md).
-
-Scripts and their checks: the guide's Skill scripts table. Adapters (pyhf, Combine, unbinned fits): `<plugin root>/adapters/`. Folder guide: [README.md](README.md).
+Start at the [core/stats guide](references/core-stats-guide.md): its reference index links every topic file ([ML-assisted](references/ml-assisted-inference.md) among them), its Skill scripts table every script. Adapters (pyhf, Combine, unbinned fits): `<plugin root>/adapters/`. Folder guide: [README.md](README.md).
 
 <!-- BEGIN context-resolution: generated from contracts/stanzas/context-resolution.md by tools/build_stanzas.py; do not edit -->
 ## Context resolution
