@@ -15,7 +15,7 @@
   },
   "hep-computing": {
    "references": 32,
-   "bytes": 369246,
+   "bytes": 373853,
    "uncited": 0
   },
   "hep-statistics": {
@@ -1181,7 +1181,7 @@
     "skills/hep-computing/references/design-and-estimation.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "f830fd9 2026-10-13"
+   "last_commit": "46cea2c 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/environments-and-containers.md",
@@ -1282,13 +1282,13 @@
     "hep-theory",
     "research-communication"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "46cea2c 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/performance-profiling.md",
    "owner": "hep-computing",
-   "bytes": 6530,
-   "lines": 95,
+   "bytes": 6747,
+   "lines": 97,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-computing/references/crash-and-memory-debugging.md",
@@ -1344,8 +1344,8 @@
   {
    "path": "skills/hep-computing/references/python-hep-coding-patterns.md",
    "owner": "hep-computing",
-   "bytes": 5148,
-   "lines": 105,
+   "bytes": 6566,
+   "lines": 124,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-analysis/references/hep-analysis-guide.md",
@@ -1377,8 +1377,8 @@
   {
    "path": "skills/hep-computing/references/root-balanced-design-guidelines.md",
    "owner": "hep-computing",
-   "bytes": 50876,
-   "lines": 1260,
+   "bytes": 53848,
+   "lines": 1293,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-analysis/references/hep-analysis-guide.md",
@@ -1465,7 +1465,7 @@
     "skills/hep-computing/references/numerical-and-computational-methods.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "46cea2c 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/task-authoring-guide.md",
@@ -3331,7 +3331,7 @@
   {
    "a": "skills/hep-computing/references/cpp-balanced-design-guidelines.md",
    "b": "skills/hep-computing/references/root-balanced-design-guidelines.md",
-   "jaccard": 0.125,
+   "jaccard": 0.119,
    "containment": 0.334,
    "shared_shingles": 1226
   },

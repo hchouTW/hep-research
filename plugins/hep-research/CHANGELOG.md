@@ -110,6 +110,13 @@ Software checks establish contract consistency only, not physical validity.
   infinite and oscillatory ranges; `solve_ivp` method choice (RK45 729,668 against Radau 726 evaluations on a stiff
   system), `rtol`/`atol`, the rtol/10 check, events, status; `brentq`, `minimize` status. Every number from a run
   with SymPy 1.14.0 and SciPy 1.18.1; points to `find_python.py` and the validation ladder.
+- **CMP-20 current stack.** `root-balanced-design-guidelines.md` gains "RNTuple and current RDataFrame features":
+  RNTuple versus TTree (format 1.0 final since 6.34, types in `ROOT::` since 6.36; read by RDataFrame and by uproot
+  5.7.6), `Vary`/`VariationsFor`, `DefinePerSample`, `FromSpec`, `DefineSlot`/`rdfslot_`, distributed RDataFrame with
+  `executor=` (6.36; the `Experimental` path removed in 6.38), `AsNumpy`/`FromNumpy`; all run with ROOT 6.38.04 and
+  cited to the 6.34/6.36 release notes. `python-hep-coding-patterns.md` gains link-level guidance for hist and
+  boost-histogram, vector, correctionlib, coffea, dask-awkward and numba. `performance-profiling.md` notes the 6.38
+  `Snapshot` compression default (505).
 
 ## 0.6.17 (2026-10-13)
 

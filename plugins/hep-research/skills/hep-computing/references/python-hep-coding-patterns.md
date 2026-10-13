@@ -66,6 +66,25 @@ for arrays in uproot.iterate(files, expressions=["Muon_pt", "Muon_eta", "event_w
     weights = arrays["event_weight"][mask]
 ```
 
+## Python HEP ecosystem (link-level)
+
+When to reach for each package; read its documentation for the API (links accessed 2026-10-13; none of these is
+installed in the plugin's test environment, so no version is claimed here: record the version you use).
+
+- [hist](https://hist.readthedocs.io) and [boost-histogram](https://boost-histogram.readthedocs.io): histograms with
+  axes, weights and variances (`hist.Hist`, `.Weight()` storage) instead of hand-kept `np.histogram` pairs; uproot
+  writes and reads them.
+- [vector](https://vector.readthedocs.io): Lorentz vectors on awkward arrays (`vector.register_awkward()`), for
+  invariant masses and boosts without hand-written formulas.
+- [correctionlib](https://cms-nanoaod.github.io/correctionlib/): evaluate scale factors and corrections from a JSON
+  correction set, the same file in Python and C++; do not re-implement binned lookups.
+- [coffea](https://coffeateam.github.io/coffea/): processors over NanoAOD-like data with awkward, the
+  `adapters/root-uproot/assets/coffea_dijet_processor.py` starting point; it brings dask-based scale-out.
+- [dask-awkward](https://dask-awkward.readthedocs.io): lazy, partitioned awkward arrays for datasets larger than
+  memory; compute once at the end, as with RDataFrame booking.
+- [numba](https://numba.readthedocs.io): compile a loop that cannot be written columnar; check its result against a
+  small pure-Python version.
+
 ## Remote files (XRootD)
 
 - Open `root://<instance>/<path>` URLs directly: `ROOT.TFile.Open(url)` in PyROOT, `uproot.open(url)` or

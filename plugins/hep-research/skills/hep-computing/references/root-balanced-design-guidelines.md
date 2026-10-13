@@ -1101,6 +1101,39 @@ std::cout << "Events: " << *n << "\n";
 h->Write();
 ```
 
+### RNTuple and current RDataFrame features
+
+Checked by running them with ROOT 6.38.04 (PyROOT) and uproot 5.7.6 on 2026-10-13; release facts from the
+[6.34](https://root.cern/doc/v634/release-notes.html) and [6.36](https://root.cern/doc/v636/release-notes.html)
+release notes (accessed 2026-10-13).
+
+- **RNTuple or TTree.** RNTuple is ROOT's columnar successor to `TTree`: its on-disk format 1.0 is final since ROOT
+  6.34 (later releases read it; experimental files from earlier releases are not readable), and its main types moved
+  from `ROOT::Experimental` to `ROOT` in 6.36 (`ROOT::RNTupleReader`, `ROOT::RNTupleModel`). Choose RNTuple for new
+  outputs whose readers are all on ROOT 6.34+ or uproot 5 (uproot 5.7.6 read a ROOT 6.38 RNTuple with a jagged
+  column); keep `TTree` when a reader is older, when an experiment framework writes or requires it, or when the
+  data need `TObject`-based classes. RDataFrame reads both with the same code: `ROOT::RDataFrame("Events", file)`
+  detects the format. To write one, set `RSnapshotOptions::fOutputFormat = ROOT::RDF::ESnapshotOutputFormat::kRNTuple`.
+  The branch-naming advice in [Branch names](#branch-names-and-one-list-of-fields) is about `TTree` leaves;
+  RNTuple fields are named by the model and have no leaf level.
+- **`Vary`** books systematic variations of a column in the same event loop:
+  `df.Vary("pt", "ROOT::RVecD{pt*0.98, pt*1.02}", {"down", "up"})`, then
+  `ROOT::RDF::Experimental::VariationsFor(result)` gives `nominal`, `pt:down`, `pt:up`. Prefer it to one event loop
+  per variation; every result downstream of the varied column is varied.
+- **`DefinePerSample`** computes a value once per input sample (a cross section, a luminosity weight from
+  `rdfsampleinfo_`), not once per event; **`ROOT::RDF::Experimental::FromSpec(spec.json)`** builds the dataframe from
+  a JSON list of samples with metadata (`rdfsampleinfo_.GetD("xsec")`). Use the spec for multi-sample analyses
+  instead of hand-written file loops.
+- **`DefineSlot`** passes the slot (thread) number as the first argument of a compiled callable; with implicit
+  multithreading use it for per-thread state such as one random generator per slot, seeded from a base seed and the
+  slot. A jitted string sees the same number as `rdfslot_`. `GetNSlots()` gives the number of slots to allocate.
+- **Distributed RDataFrame** runs the same graph on Dask or Spark: since 6.36 pass the cluster client with the
+  `executor` keyword (`ROOT.RDataFrame("Events", files, executor=client)`); the old
+  `ROOT.RDF.Experimental.Distributed` path warns in 6.36 and is removed in 6.38. Seeds, `Range` and actions that
+  need the whole dataset in one process (`Take` of large columns, `Foreach` with side effects) need rethinking there.
+- **NumPy bridges.** `df.AsNumpy(["x"])` returns NumPy arrays of the selected columns (materializes them: select
+  columns and filter first); `ROOT.RDF.FromNumpy({"w": array})` makes a dataframe from NumPy arrays.
+
 ### Input and object safety
 
 Validate every file, tree, and branch before building a large workflow, and fail

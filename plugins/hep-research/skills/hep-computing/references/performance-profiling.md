@@ -62,7 +62,9 @@ Checked on 2026-10-13 with ROOT 6.38.04 (PyROOT, Python 3.14), uproot 5.7.6 and 
   first flush; `TTree::OptimizeBaskets` re-balances them. Change these only with a `TTreePerfStats` comparison.
 - Compression (`TFile::SetCompressionSettings`, `ROOT::RCompressionSetting`) trades size for read speed: LZ4
   decompresses fastest, ZSTD and LZMA write smaller files. Decide with a measurement on your own files and record
-  the setting with the output.
+  the setting with the output. RDataFrame `Snapshot` changed its default in ROOT 6.38 from 101 (ZLIB level 1, the
+  `TTree` default) to 505 (ZSTD level 5), as ROOT 6.38.04 itself reports; outputs of the same code differ in size
+  between releases.
 - Remote files (XRootD): latency dominates; read a larger cache or copy the file once when it is read many times
   (see [Python coding](python-hep-coding-patterns.md#remote-files-xrootd)).
 
