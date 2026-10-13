@@ -10,7 +10,7 @@
   },
   "hep-analysis": {
    "references": 11,
-   "bytes": 64080,
+   "bytes": 65719,
    "uncited": 0
   },
   "hep-computing": {
@@ -803,8 +803,8 @@
   {
    "path": "skills/hep-analysis/references/correction-chain.md",
    "owner": "hep-analysis",
-   "bytes": 4251,
-   "lines": 55,
+   "bytes": 5713,
+   "lines": 74,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-analysis/assets/measurement_spec.template.md",
@@ -839,8 +839,8 @@
   {
    "path": "skills/hep-analysis/references/hep-analysis-guide.md",
    "owner": "hep-analysis",
-   "bytes": 17628,
-   "lines": 108,
+   "bytes": 17805,
+   "lines": 109,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
@@ -956,7 +956,7 @@
     "hep-theory",
     "physics-ml"
    ],
-   "last_commit": "e9687b6 2026-10-13"
+   "last_commit": "839bbd1 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/weights-normalization.md",

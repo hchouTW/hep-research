@@ -83,5 +83,16 @@ class SystematicsBudgetTests(unittest.TestCase):
             self.assertIn(number, t)
 
 
+class TimeDependenceTests(unittest.TestCase):
+    def test_exposure_weighted_average(self):
+        n, e = (100, 30), (1.0e4, 2.0e3)
+        weighted = sum(n) / sum(e)
+        plain = (n[0] / e[0] + n[1] / e[1]) / 2
+        self.assertAlmostEqual(weighted, 1.083e-2, delta=1e-5)
+        self.assertAlmostEqual(plain, 1.25e-2, places=9)
+        self.assertAlmostEqual(plain / weighted - 1, 0.15, delta=0.01)
+        self.assertIn('1.083e-2', text('correction-chain.md'))
+
+
 if __name__ == '__main__':
     unittest.main()

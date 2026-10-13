@@ -52,3 +52,22 @@ eps_sel = 0.75 (each relative to the previous step): eps = 0.54, exposure A T = 
 efficiency = 2.7e3) prints flux 1.333e-3 with its Feldman-Cousins interval. If eps_sel had instead been quoted relative to all events in the acceptance (0.54
 already includes the trigger and reconstruction), multiplying it with the other two would give eps = 0.389 and a flux
 1.39 times too high: the denominator, not the number, decides.
+
+## Time-dependent measurements
+
+- **Per-period exposure and live time.** Each period (run, day, Bartels rotation of 27 days for solar-modulation
+  studies) has its own live time, acceptance-weighted exposure and, near a geomagnetic cutoff, its own cutoff-filtered
+  exposure per bin. The flux of a period is that period's counts over that period's exposure.
+- **Averaging periods.** The average flux over periods is `sum_p N_p / sum_p E_p` (exposure-weighted), not the mean of
+  the period fluxes; the two differ whenever the exposures differ, and the plain mean over-weights short periods.
+- **Efficiency in time.** Detector efficiencies drift (gain, dead channels, thresholds). Measure them per period, or
+  monitor them with a control species or a control sample whose true rate is stable over the period, and correct or
+  bin in time where the monitor moves beyond its statistics.
+- **Systematics by period.** Separate the period-correlated part of each systematic (a common calibration, the
+  acceptance model) from the period-specific part (a per-period efficiency fit). The correlation pattern is evidence
+  for hep-statistics, which encodes it in the time-series covariance.
+
+Worked example (synthetic): period 1 has N = 100 in exposure 1.0e4, period 2 has N = 30 in exposure 2.0e3 (a short
+period). Fluxes 1.0e-2 and 1.5e-2; the exposure-weighted average is 130 / 1.2e4 = 1.083e-2, while the plain mean of the
+two fluxes would be 1.25e-2, 15% higher.
+
