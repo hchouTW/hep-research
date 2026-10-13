@@ -1,0 +1,69 @@
+{
+ "contract_version": "2.6.0",
+ "artifact_id": "fixture-synthetic-theory-spec-v26",
+ "artifact_type": "theory-spec",
+ "objective": "SYNTHETIC structural fixture; values are placeholders, not physics",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.6.17",
+  "contracts": "2.6.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-theory",
+  "created": "2026-10-02",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "model": {
+   "id": "synthetic-model",
+   "description": "structural fixture"
+  },
+  "assumptions": [
+   "placeholder assumption"
+  ],
+  "conventions": {
+   "unit_system": "natural units (synthetic)",
+   "hbar_c_one": true,
+   "metric_signature": "+---",
+   "coupling_normalization": "not-applicable",
+   "renormalization_scheme": "not-applicable",
+   "scales": "not-applicable",
+   "energy_variable": "sqrt_s",
+   "frame": "center-of-mass",
+   "angle_definition": "not-applicable",
+   "spin_treatment": "not-applicable",
+   "mass_approximation": "not-applicable"
+  },
+  "order": "tree-level (synthetic)",
+  "parameters": {
+   "p": "placeholder"
+  },
+  "scales": "not-applicable",
+  "derivation_status": "perturbative-argument",
+  "validity_domain": {
+   "sqrt_s": "placeholder range"
+  },
+  "checks_run": [
+   {
+    "name": "units",
+    "result": "looks fine"
+   }
+  ],
+  "checks_not_run": [
+   "all (fixture)"
+  ],
+  "neglected": [
+   "placeholder higher orders"
+  ]
+ }
+}

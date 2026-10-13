@@ -32,8 +32,17 @@
    "placeholder assumption"
   ],
   "conventions": {
+   "unit_system": "natural units (synthetic)",
    "hbar_c_one": true,
-   "metric_signature": "+---"
+   "metric_signature": "+---",
+   "coupling_normalization": "not-applicable",
+   "renormalization_scheme": "not-applicable",
+   "scales": "not-applicable",
+   "energy_variable": "sqrt_s",
+   "frame": "center-of-mass",
+   "angle_definition": "not-applicable",
+   "spin_treatment": "not-applicable",
+   "mass_approximation": "not-applicable"
   },
   "order": "tree-level",
   "parameters": {

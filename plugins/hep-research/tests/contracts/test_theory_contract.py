@@ -194,5 +194,48 @@ class NativeRuleTests(unittest.TestCase):
             self.assertTrue(rep.ok)
 
 
+class FixtureTests(unittest.TestCase):
+    """THY-WP2.3: generated fixtures (tests/contracts/make_fixtures.py) cover every rule with a negative and a positive."""
+    CASES = json.loads((ART / "cases.json").read_text())
+    RULES = {"prediction.status_upgraded", "theory.conventions_incomplete", "theory.order_missing", "theory.limit_missing",
+             "theory.unchecked_strong_status", "theory.check_result_vocab", "theory.validity_empty",
+             "prediction.spec_unlinked", "prediction.envelope_prescription", "prediction.truncation_method"}
+
+    def test_warning_fixtures_are_valid_and_warn(self):
+        self.assertTrue(self.CASES["warning"])
+        for name, expected in self.CASES["warning"].items():
+            with self.subTest(name):
+                rep = v.validate_artifact(json.loads((ART / "warning" / name).read_text()))
+                self.assertTrue(rep.ok, rep.as_dict())
+                self.assertTrue(set(expected) <= codes(rep, "warning"), rep.as_dict())
+
+    def test_every_rule_has_a_negative_fixture(self):
+        covered = set()
+        for group in ("invalid", "unresolved", "warning"):
+            for codes_ in self.CASES[group].values():
+                covered |= set(codes_)
+        self.assertEqual(self.RULES - covered, set())
+
+    def test_positive_v26_fixtures_have_no_theory_findings(self):
+        names = [n for n in self.CASES["valid"] if n.startswith(("theory_spec_v26", "prediction_v26"))]
+        self.assertGreaterEqual(len(names), 8)
+        for name in names:
+            with self.subTest(name):
+                rep = v.validate_artifact(json.loads((ART / "valid" / name).read_text()))
+                self.assertTrue(rep.ok, rep.as_dict())
+                self.assertFalse({f.code for f in rep.findings if f.code.startswith(("theory.", "prediction."))},
+                                 rep.as_dict())
+
+    def test_legacy_valid_fixtures_are_complete(self):
+        """valid/theory_spec.json lists every core convention key; valid/prediction.json names its envelope prescription;
+        both stay 1.0.0."""
+        self.assertEqual(THEORY_1_0["contract_version"], "1.0.0")
+        self.assertEqual(sorted(THEORY_1_0["extension"]["conventions"]), sorted(CORE_KEYS))
+        self.assertEqual(PREDICTION_1_0["extension"]["uncertainties"][0]["prescription"], "3-point")
+        for doc in (THEORY_1_0, PREDICTION_1_0):
+            strict = v.validate_artifact(copy.deepcopy(doc), strict=True)
+            self.assertTrue(strict.ok, strict.as_dict())
+
+
 if __name__ == "__main__":
     unittest.main()
