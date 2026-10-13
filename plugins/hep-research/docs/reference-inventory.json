@@ -1041,7 +1041,7 @@
    "cited_by_other_skills": [
     "physics-ml"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "f437237 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/bash-balanced-design-guidelines.md",
@@ -1170,7 +1170,7 @@
     "tests/skills/hep_computing/test_example_authoring.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "f437237 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/engineering-playbook.md",
@@ -1184,7 +1184,7 @@
     "skills/hep-computing/references/agile-development-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "46cea2c 2026-10-13"
+   "last_commit": "f437237 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/environments-and-containers.md",
@@ -1247,7 +1247,7 @@
     "skills/hep-computing/scripts/validate_agile_notes.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "f437237 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/loop-engineering.md",
@@ -1364,7 +1364,7 @@
     "skills/hep-computing/references/software-architecture.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "f437237 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/root-balanced-design-guidelines.md",
@@ -1375,6 +1375,7 @@
    "cited_by": [
     "skills/hep-analysis/references/hep-analysis-guide.md",
     "skills/hep-computing/SKILL.md",
+    "skills/hep-computing/examples/physics-code-task.md",
     "skills/hep-computing/references/bash-balanced-design-guidelines.md",
     "skills/hep-computing/references/cpp-balanced-design-guidelines.md",
     "skills/hep-computing/references/crash-and-memory-debugging.md",

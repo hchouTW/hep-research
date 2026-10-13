@@ -149,6 +149,12 @@ Software checks establish contract consistency only, not physical validity.
   moved to `docs/dev/engineering/web-and-delivery-practices.md`, with a one-line pointer at each old place and the
   skill's links re-pointed. `prompt-engineering-and-token-optimization.md` stays (the bundle validator and the task
   guide require it). The skill now has thirty-one references.
+- **CMP-27 deferred (Q1).** The six task- and example-authoring scripts stay in `skills/hep-computing/scripts/`:
+  task and example authoring remain in the skill's scope.
+- **CMP-28 physics-code worked example.** `examples/physics-code-task.md`: prove that the RDataFrame cutflow asset
+  reproduces a `TTreeReader` event loop bin for bin (zero-tolerance `compare_root_histograms.py`, bin errors
+  compared separately, single- and multithreaded, deliberate mutations must fail); passes `lint_task.py --repo` and
+  the example tests; listed in `examples/README.md`.
 
 ## 0.6.17 (2026-10-13)
 
