@@ -2492,7 +2492,12 @@
      ]
     }
    ],
-   "note": "Q9: the fold belongs to detector-response, the fit that uses the folded prediction to hep-statistics (routing contract row 36)"
+   "note": "Q9: the fold belongs to detector-response, the fit that uses the folded prediction to hep-statistics (routing contract row 36); the inputs of j05, so the folded prediction can exist",
+   "inputs": {
+    "prediction.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nbin,lo,hi,sigma_pb\n0,-1,0,370\n1,0,1,375\n",
+    "response.json": "{\"_note\": \"SYNTHETIC routing fixture: invented values, not data from any experiment.\", \"level_in\": \"particle\", \"level_out\": \"detector\", \"matrix\": [[0.9,0.05],[0.05,0.9]], \"efficiency_included\": true}\n",
+    "observed.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nbin,counts\n0,3410\n1,3460\n"
+   }
   }
  ]
 }
