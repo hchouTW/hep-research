@@ -345,6 +345,9 @@ same level, and at the publication gate; no new capability).
   `up_diff_sumw2`/`down_diff_sumw2` (new), `--stat-unc`, or per-sample variances only with `--independent` (new);
   otherwise no test is made, the output says why, and the effect comes from the tolerance. The "neither variation
   changes" warning is given only when no bin changed.
+- **`check_root_cpp_env.sh` under `set -e`.** A nonzero exit of `root --version` (informational) ended the check
+  without output (CMP-08 moved it into an assignment); it is now tolerated, and a failing `root-config` reports
+  `failed` in the JSON. Found by the optional ROOT CI job (Linux container), whose check-run record is now uploaded.
 - Test fixes found by CI: the pyhf skip restored on `SrCrModelCard`; the broken-power-law covariance comparison uses a
   relative tolerance (finite-difference precision, Python 3.11).
 

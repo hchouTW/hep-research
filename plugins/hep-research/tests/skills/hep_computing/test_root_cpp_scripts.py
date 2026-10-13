@@ -101,6 +101,38 @@ class RootCppScriptArgsTests(unittest.TestCase):
                 self.assertEqual(json.loads(out)['status'], 'ok')
             self.assertEqual(list(Path(tmp).iterdir()), [])
 
+    @unittest.skipUnless(shutil.which('root-config') and shutil.which('c++'), 'ROOT C++ toolchain needed')
+    def test_env_check_survives_a_failing_root_version(self):
+        # PR #64: under set -euo pipefail, ROOT_VERSION=$(root --version | head -n 1) killed the script without output
+        # when 'root --version' exited nonzero; the version is informational and must not stop the check
+        import os
+        with tempfile.TemporaryDirectory() as tmp:
+            fake = Path(tmp) / 'bin'
+            fake.mkdir()
+            (fake / 'root').write_text('#!/bin/sh\necho "ROOT Version: 6.38/00"\necho "Built for linuxx8664gcc"\nexit 1\n')
+            (fake / 'root').chmod(0o755)
+            os.symlink(shutil.which('root-config'), fake / 'root-config')
+            env = dict(os.environ, PATH=f"{fake}{os.pathsep}{os.environ['PATH']}", TMPDIR=tmp)
+            proc = subprocess.run(['bash', str(SCRIPTS / 'check_root_cpp_env.sh'), '--json'], env=env,
+                                  capture_output=True, text=True, timeout=600)
+            self.assertEqual(proc.returncode, 0, proc.stderr[-2000:])
+            doc = json.loads(proc.stdout)
+            self.assertEqual((doc['status'], doc['root_version']), ('ok', 'ROOT Version: 6.38/00'))
+
+    def test_env_check_reports_a_failing_root_config(self):
+        import os
+        with tempfile.TemporaryDirectory() as tmp:
+            fake = Path(tmp) / 'bin'
+            fake.mkdir()
+            for name, body in (('root', 'echo "ROOT Version: 6.38/00"'), ('root-config', 'exit 1')):
+                (fake / name).write_text(f'#!/bin/sh\n{body}\n')
+                (fake / name).chmod(0o755)
+            env = dict(os.environ, PATH=f"{fake}{os.pathsep}{os.environ['PATH']}", TMPDIR=tmp)
+            proc = subprocess.run(['bash', str(SCRIPTS / 'check_root_cpp_env.sh'), '--json'], env=env,
+                                  capture_output=True, text=True, timeout=60)
+            self.assertEqual(proc.returncode, 1, proc.stderr[-2000:])
+            self.assertEqual(json.loads(proc.stdout)['status'], 'failed')
+
     def test_env_check_help_exits_zero_without_checking(self):
         for flag in ('-h', '--help'):
             with tempfile.TemporaryDirectory() as tmp:

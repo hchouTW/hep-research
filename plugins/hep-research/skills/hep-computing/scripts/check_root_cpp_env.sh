@@ -47,10 +47,13 @@ command -v root >/dev/null 2>&1 || finish missing-dependency 3 'root command not
 command -v root-config >/dev/null 2>&1 || finish missing-dependency 3 'root-config command not found.'
 
 ROOT_BIN=$(command -v root)
-CFLAGS=$(root-config --cflags)
-LIBS=$(root-config --libs)
-CONFIG_VERSION=$(root-config --version)
-ROOT_VERSION=$(root --version 2>&1 | head -n 1)
+CFLAGS=$(root-config --cflags) || finish failed 1 'root-config --cflags failed.'
+LIBS=$(root-config --libs) || finish failed 1 'root-config --libs failed.'
+CONFIG_VERSION=$(root-config --version) || finish failed 1 'root-config --version failed.'
+# informational only: a nonzero exit of 'root --version' must not stop the check under set -e, and sed reads all of
+# its input (head would close the pipe early, and SIGPIPE fails the pipeline under pipefail)
+ROOT_VERSION=$({ root --version 2>&1 || true; } | sed -n '1p')
+ROOT_VERSION=${ROOT_VERSION:-unknown}
 
 say "root: $ROOT_BIN"
 say "root version: $ROOT_VERSION"
