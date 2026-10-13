@@ -128,8 +128,12 @@ def classify_variation(nominal, varied, tol: float = DEFAULT_TOL) -> dict:
         "shape": "integral unchanged but the shape changes: a shape/migration effect; this is NOT a propagation failure",
         "mixed": "both the integral and the normalized shape change",
     }
+    note = notes[effect]
+    if effect == "none" and bin_changed:
+        note = ("some bins differ beyond tolerance, but neither the integral nor the normalized shape does: confirm "
+                "propagation, then check the effect on the final result")
     return {"effect": effect, "integral_rel_change": integral, "shape_max_abs_change": shape,
-            "migration_fraction": migration, "bins_changed": bin_changed, "note": notes[effect]}
+            "migration_fraction": migration, "bins_changed": bin_changed, "note": note}
 
 
 def stat_test(nominal, varied, variance, alpha: float = DEFAULT_ALPHA) -> dict:
@@ -177,9 +181,13 @@ def assess(nominal, up, down, tol: float = DEFAULT_TOL, variances=None, alpha: f
         out["statistical_test"] = no_test or "not made: no per-bin uncertainties (give sumw2, ROOT bin errors or --stat-unc)"
     warnings = []
     if out["up"]["effect"] == "none" and out["down"]["effect"] == "none":
-        if out["up"]["bins_changed"] or out["down"]["bins_changed"]:
-            warnings.append(f"neither variation is significant at alpha = {alpha:g} although bins differ: confirm the "
+        if (out["up"]["bins_changed"] or out["down"]["bins_changed"]) and variances is not None:
+            warnings.append(f"bins differ, but neither variation is significant at alpha = {alpha:g}: confirm the "
                             "variances describe the difference, then judge by the effect on the result")
+        elif out["up"]["bins_changed"] or out["down"]["bins_changed"]:
+            warnings.append("bins differ, but neither variation changes the integral or the normalized shape beyond "
+                            "the tolerance (no statistical test made): confirm propagation, then judge by the effect on "
+                            "the result")
         else:
             warnings.append("neither variation changes this histogram: confirm propagation, then judge by the effect on "
                             "the result")

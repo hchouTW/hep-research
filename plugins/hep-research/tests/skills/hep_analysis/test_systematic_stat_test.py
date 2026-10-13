@@ -122,5 +122,37 @@ class SameEventVariationTests(unittest.TestCase):
                 self.assertNotIn('Traceback', p.stderr)
 
 
+
+class NeitherVariationWarningTests(unittest.TestCase):
+    """The 'neither variation' warning names what was actually checked: a statistical test only when one was made."""
+
+    def test_unchanged_bins_say_no_change(self):
+        out = csv_.assess(NOM, NOM, NOM)
+        self.assertTrue(any('neither variation changes this histogram' in w for w in out['warnings']))
+
+    def test_changed_bins_within_their_errors_say_not_significant(self):
+        up = [x * (1 + 1e-5 * (-1) ** i) for i, x in enumerate(NOM)]
+        down = [x * (1 - 1e-5 * (-1) ** i) for i, x in enumerate(NOM)]
+        var = [(0.01 * x) ** 2 for x in NOM]
+        out = csv_.assess(NOM, up, down, variances={'up': var, 'down': var})
+        self.assertTrue(any('neither variation is significant at alpha = 0.01' in w for w in out['warnings']), out['warnings'])
+        self.assertFalse(any('changes this histogram' in w for w in out['warnings']))
+
+    def test_changed_bins_without_a_test_never_claim_significance(self):
+        # one small bin moves beyond the tolerance; the integral and the peak-normalized shape stay within it
+        nom = [1e6, 1.0, 1e6]
+        up = [1e6, 1.0 + 2e-6, 1e6]
+        out = csv_.assess(nom, up, nom)
+        self.assertEqual(out['up']['effect'], 'none')
+        self.assertTrue(out['up']['bins_changed'])
+        self.assertFalse(any('significant' in w for w in out['warnings']), out['warnings'])
+        self.assertFalse(any('changes this histogram' in w for w in out['warnings']), out['warnings'])
+        self.assertTrue(any('tolerance' in w for w in out['warnings']), out['warnings'])
+        self.assertNotIn('no bin differs', out['up']['note'])
+        # the same with per-sample variances of same-event variations (no test made, NO_TEST_CORRELATED)
+        out = csv_.assess(nom, up, nom, no_test=csv_.NO_TEST_CORRELATED)
+        self.assertFalse(any('significant' in w for w in out['warnings']), out['warnings'])
+
+
 if __name__ == '__main__':
     unittest.main()

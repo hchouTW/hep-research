@@ -344,7 +344,10 @@ same level, and at the publication gate; no new capability).
   from the same events (`none`, "neither variation changes this histogram"). The statistical test now uses
   `up_diff_sumw2`/`down_diff_sumw2` (new), `--stat-unc`, or per-sample variances only with `--independent` (new);
   otherwise no test is made, the output says why, and the effect comes from the tolerance. The "neither variation
-  changes" warning is given only when no bin changed.
+  changes" warning is given only when no bin changed. When bins differ but neither variation is flagged, the
+  warning says "not significant at alpha" only if a statistical test was made; on the tolerance-only path (including
+  same-event variations without difference variances) it says the integral and normalized shape stay within the
+  tolerance, and the per-variation note no longer claims that no bin differs.
 - **`check_root_cpp_env.sh` under `set -e`.** A nonzero exit of `root --version` (informational) ended the check
   without output (CMP-08 moved it into an assignment); it is now tolerated, and a failing `root-config` reports
   `failed` in the JSON. Found by the optional ROOT CI job (Linux container), whose check-run record is now uploaded.
