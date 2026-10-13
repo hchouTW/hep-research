@@ -58,6 +58,7 @@ Per-module subcommands, inputs and outputs, the validation tools outside `core/s
 | `statistical_toys.py unfold-scan` | reco and truth bins <= 60 | a dedicated unfolding framework |
 | `unfolding_diagnostics.py` response-stat, outer-coverage, response-covariance | mc_events <= 1e5 | the analytic response covariance by hand, labeled |
 | `unfolding_diagnostics.py` response-covariance, response-measured | response cells <= 400 | rebin, or a dedicated framework |
+| `unfolding_diagnostics.py dagostini-unfold` (`UNFOLD_MAX_COUNTS`, `UNFOLD_MAX_MC_EVENTS`) | data <= 1e9, mc_events <= 1e12 | a dedicated framework |
 | `template_fit.py` (`MAX_TEMPLATES`, `MAX_BINS`) | templates <= 6, bins <= 60 | the pyhf adapter |
 - **Fit verdicts** (`fit_diagnostics.py`, helper, no CLI). The damped Newton fits of `shape-limit`, `shape-gof` and
   `contour` return a verdict: `converged` only with a finite NLL, a positive-definite Hessian and EDM = g^T H^-1 g / 2
@@ -95,7 +96,7 @@ Per-module subcommands, inputs and outputs, the validation tools outside `core/s
 | Discovery significance of a count | `likelihood_limits.py profile-significance` (uncertain b), `statistical_toys.py boundary` (known b) | ON/OFF counting: `<plugin root>/skills/hep-statistics/scripts/li_ma_significance.py` |
 | Several bins sharing one signal strength | `likelihood_limits.py multibin-limit` | `shape-limit` when shapes and several nuisances matter; the pyhf adapter beyond that |
 | Finite Monte Carlo statistics in templates | `statistical_toys.py template-stat`, then `template-bb` | `template_fit.py bb-fit`/`bb-toys` for several templates, `wbb-fit`/`wbb-toys` for weighted MC and nuisances |
-| Unfolding: D'Agostini iterations | `statistical_toys.py unfold-scan`, then `unfolding_diagnostics.py closure --method dagostini` | `response-stat`, `response-covariance` (also `--method dagostini`) |
+| Unfolding: D'Agostini iterations | `statistical_toys.py unfold-scan`, then `unfolding_diagnostics.py closure --method dagostini` | then `dagostini-unfold` (the data, with covariance) |
 | Unfolding: Tikhonov or truncated SVD | `unfolding_diagnostics.py regularized-scan` (`tikhonov`, `tsvd`; it refuses `dagostini`), `closure` | `choose-regularization`, `response-stat`, `response-covariance`, `fold-compare`, `nonparam-fold` |
 | Ratio or fraction with correlated systematics | `statistical_toys.py ratio-measured` (measured covariance) | `ratio-cov` (declared structures), `ratio-cov-analytic` (the same at counts >= 1e4, full covariance), `ratio-toys` (counts with systematic nuisances) |
 | Is this covariance or response matrix well formed? | `validate_covariance.py`, `validate_response.py` | — |

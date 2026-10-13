@@ -24,6 +24,9 @@ Subcommands:
                     L-curve corner and cross-validation (leave-one-bin-out and generalized) choice of
                     the strength or truncation for given data, with a seeded-toy check of how well each
                     criterion picks a setting compared with the best fixed one.
+  dagostini-unfold
+                    D'Agostini unfolding of measured data (--param iterations) with its first-order covariance
+                    from the data and, with mc_events_per_truth_bin, from the response statistics; no toys.
   response-measured
                     first-order propagation of a supplied (measured) response-matrix covariance, or of
                     response replicas (for example a bootstrap of the MC), with a direct replica check.
@@ -884,6 +887,82 @@ def response_covariance(doc: dict, method: str, param, toys: int, seed: int, res
     return out
 
 
+UNFOLD_MAX_COUNTS = 1e9    # dagostini-unfold: measured counts per reco bin (first-order propagation, no toys)
+UNFOLD_MAX_MC_EVENTS = 1e12  # dagostini-unfold: generated events per truth bin for the response term (analytic path)
+
+
+def dagostini_unfold(doc: dict, iterations, response_model: str = "multinomial") -> dict:
+    """D'Agostini unfolding of measured counts with its covariance (STH-T3.15): the estimate after `iterations`
+    iterations, the data covariance J_n diag(R t_hat) J_n^T (Poisson counts at the folded estimate, J_n the numerical
+    Jacobian of the estimator with respect to the counts) and, with mc_events_per_truth_bin, the response covariance
+    J_R Cov(R) J_R^T (independent Poisson cells, or the multinomial with a lost-event class per truth column). No toys:
+    counts up to UNFOLD_MAX_COUNTS and generated events up to UNFOLD_MAX_MC_EVENTS are accepted."""
+    if not isinstance(doc, dict):
+        raise ToyError("input must be a JSON object")
+    raw = doc.get("response")
+    if not isinstance(raw, list) or not raw or not all(isinstance(x, list) and x for x in raw):
+        raise ToyError("response must be a non-empty matrix (list of rows)")
+    n_truth = len(raw[0]) if doc.get("orientation", "rows_reco_cols_truth") == "rows_reco_cols_truth" else len(raw)
+    r, _, prior, _ = _load_response(dict(doc, truth=[0.0] * n_truth, max_iterations=1))
+    n_reco = len(r)
+    if n_truth * n_reco > 400:
+        raise ToyError("dagostini-unfold is limited to 400 response cells (a Jacobian column per cell)")
+    p = _check_method("dagostini", iterations, n_truth)
+    data = doc.get("data")
+    if not isinstance(data, list) or len(data) != n_reco:
+        raise ToyError(f"data must list {n_reco} measured counts")
+    data = [_num(v, "data", 0.0, UNFOLD_MAX_COUNTS) for v in data]
+    if sum(data) <= 0:
+        raise ToyError("data must contain events")
+    model = _check_model(response_model)
+    est, _ = _estimator("dagostini", p, r, data, prior)
+    t_hat = est(data)
+    folded = _mu(r, t_hat)
+    jac_n = _numeric_jacobian(est, list(data), 1e-3, 1.0)                 # jac_n[reco][truth]
+    cov_data = [[sum(jac_n[i][a] * jac_n[i][b] * folded[i] for i in range(n_reco)) for b in range(n_truth)]
+                for a in range(n_truth)]
+    cov_resp = None
+    gen = doc.get("mc_events_per_truth_bin")
+    if gen is not None:
+        if not isinstance(gen, list) or len(gen) != n_truth:
+            raise ToyError(f"mc_events_per_truth_bin must list {n_truth} generated-event counts")
+        gen = [_num(g, "mc_events", 1.0, UNFOLD_MAX_MC_EVENTS) for g in gen]
+        flat = [r[i][j] for i in range(n_reco) for j in range(n_truth)]
+
+        def est_r(vec):
+            rr = [[vec[i * n_truth + j] for j in range(n_truth)] for i in range(n_reco)]
+            e, _ = _estimator("dagostini", p, rr, data, prior)
+            return e(data)
+        jac_r = _numeric_jacobian(est_r, flat, 1e-3, 1e-6)                # jac_r[cell][truth]
+        cov_resp = [[0.0] * n_truth for _ in range(n_truth)]
+        for j in range(n_truth):
+            cells = [i * n_truth + j for i in range(n_reco)]
+            for ii, c in enumerate(cells):
+                for kk, d in enumerate(cells):
+                    if model == "poisson_cells":
+                        cv = flat[c] / gen[j] if ii == kk else 0.0
+                    else:
+                        cv = ((flat[c] if ii == kk else 0.0) - flat[c] * flat[d]) / gen[j]
+                    if cv == 0.0:
+                        continue
+                    for a in range(n_truth):
+                        for b in range(n_truth):
+                            cov_resp[a][b] += cv * jac_r[c][a] * jac_r[d][b]
+    total = [[cov_data[a][b] + (cov_resp[a][b] if cov_resp else 0.0) for b in range(n_truth)] for a in range(n_truth)]
+    sig = [math.sqrt(max(total[a][a], 0.0)) for a in range(n_truth)]
+    corr = [[total[a][b] / (sig[a] * sig[b]) if sig[a] > 0 and sig[b] > 0 else None for b in range(n_truth)] for a in range(n_truth)]
+    return {"label": LABEL, "method": f"D'Agostini unfolding, {p} iterations, first-order covariance (no toys)",
+            "bins_truth": n_truth, "bins_reco": n_reco, "iterations": p, "estimate": t_hat,
+            "covariance_data": cov_data, "covariance_response": cov_resp, "covariance_total": total,
+            "sigma_total": sig, "correlation_total": corr, "response_model": model if cov_resp is not None else None,
+            "note": ("the data term uses Poisson variances at the folded estimate R t_hat; the response term (when "
+                     "mc_events_per_truth_bin is given) uses the same cell model as response-covariance; both are "
+                     "first-order (Jacobians of the nonlinear estimator at the data), so check them with response-stat "
+                     "or toys when counts are small; the iteration count is a regularization choice (scan it with "
+                     "statistical_toys.py unfold-scan and check closure); regularized-interval coverage is not "
+                     "guaranteed (see references/unfolding.md)")}
+
+
 def response_measured(doc: dict, method: str, param) -> dict:
     r, truth, prior, p, _, mu, flat, est_from_R = _setup_response(doc, method, param, need_gen=False)
     n_truth, n_reco = len(truth), len(r)
@@ -1258,6 +1337,10 @@ def build_parser() -> argparse.ArgumentParser:
     rc = sub.add_parser("response-covariance", help="analytic propagation of response statistics")
     common(rc, 200)
     rc.add_argument("--response-model", choices=RESPONSE_MODELS, default="poisson_cells", help="statistical model of the response cells")
+    du = sub.add_parser("dagostini-unfold", help="D'Agostini unfolding of measured data with its covariance")
+    du.add_argument("--input", required=True, help="JSON file: response, data, optional prior and mc_events_per_truth_bin")
+    du.add_argument("--param", type=float, required=True, help="iterations")
+    du.add_argument("--response-model", choices=RESPONSE_MODELS, default="multinomial", help="statistical model of the response cells")
     rm = sub.add_parser("response-measured", help="propagate a measured response covariance or replicas")
     rm.add_argument("--input", required=True)
     rm.add_argument("--method", choices=METHODS, required=True)
@@ -1310,6 +1393,8 @@ def main(argv: list[str] | None = None) -> int:
             result = response_covariance(doc, args.method, args.param, args.toys, args.seed, args.response_model)
         elif args.command == "response-measured":
             result = response_measured(doc, args.method, args.param)
+        elif args.command == "dagostini-unfold":
+            result = dagostini_unfold(doc, args.param, args.response_model)
         elif args.command == "nonparam-fold":
             result = nonparam_fold(doc, args.tau, args.compare_tau, args.toys, args.seed, args.prior)
         elif args.command == "compare-fold-priors":

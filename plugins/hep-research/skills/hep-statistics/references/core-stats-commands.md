@@ -220,6 +220,12 @@ Poisson-weighted response); `--param` sets the strength, iterations or truncatio
   covariance with a lost-event class (`Var R_ij = R_ij (1 - R_ij) / gen_j`, `Cov(R_ij, R_kj) = -R_ij R_kj / gen_j`),
   appropriate for high-efficiency columns; an `efficiency_uncertainty` entry adds a declared systematic scaling whole
   columns.
+- `dagostini-unfold --input --param [--response-model]`: unfolds the measured `data` (input also `response`,
+  optional `prior` and `mc_events_per_truth_bin`) with `--param` D'Agostini iterations and returns the estimate with its
+  first-order covariance: data (Poisson at the folded estimate) and response statistics (`multinomial` by default, or
+  `poisson_cells`), separately and in total, with correlations. No toys, so counts up to 1e9 and generated events up to
+  1e12 are accepted; on a 15 x 15 example its variances agree with toys within 10%
+  (`tests/core/test_stats_unfolding_outer.py`). Choose the iterations with `unfold-scan` and `closure` first.
 - `response-measured --input --method --param`: first-order propagation of a supplied measured response covariance
   (row-major reco-truth cells) or of response replicas, with every replica unfolded as a nonlinear cross-check; the
   shift of the replica mean is reported as a bias, not a covariance.
