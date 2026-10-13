@@ -955,7 +955,10 @@ class _ShapeModel:
         """Global fit over mu >= 0 from x0 = [mu] + theta. An unconstrained optimum below 0 is replaced by the
         conditional fit at the boundary mu = 0, which is checked by the KKT condition, not by an interior Hessian."""
         r = newton_fit(lambda v: self.nll(v[0], v[1:], ns, aux), x0)
-        if r.x[0] < 0.0 or not math.isfinite(r.fval):
+        # a search that stalls against the domain edge at mu ~ 0 (for example b = 0 and n = 0: mu < 0 gives a negative
+        # mean) has its optimum on the boundary: judge it there by KKT, not as a failed interior fit (STH-T3.11)
+        at_edge = not r.ok and r.x[0] <= 1e-6 / max(sum(self.s), 1e-12) and math.isfinite(r.fval)
+        if r.x[0] < 0.0 or not math.isfinite(r.fval) or at_edge:
             th, val = self.cond(0.0, ns, aux, r.x[1:] if math.isfinite(r.fval) else None)
             ok, _ = boundary_kkt(lambda v: self.nll(v[0], v[1:], ns, aux), [0.0] + list(th), 0, 0.0,
                                  scale=max(sum(self.s), 1e-12))
@@ -1209,7 +1212,11 @@ def _toy_cls(model, aux0, g_obs, cl: float, toys: int, seed: int, hi: float, poi
     return out
 
 
-def shape_limit(doc: dict, cl: float, toys: int, seed: int, cls_toys: int = 0, cls_points: int = 16) -> dict:
+CLS_MAX_RUNTIME_S = 600.0  # toy CLs refuses to start when its estimated runtime exceeds this (order question Q10)
+
+
+def shape_limit(doc: dict, cl: float, toys: int, seed: int, cls_toys: int = 0, cls_points: int = 16,
+                cls_max_runtime: float = CLS_MAX_RUNTIME_S) -> dict:
     bins, nuis, corr_chol = _load_shape(doc)
     cl = _num(doc.get("cl", cl), "cl", 0.0, 1.0, strict_low=True)
     if cl >= 1.0:
@@ -1270,6 +1277,19 @@ def shape_limit(doc: dict, cl: float, toys: int, seed: int, cls_toys: int = 0, c
                                                                failed=toy_fails)})
     if cls_toys:
         hi = 1.3 * max(out["asymptotic_observed_cls_upper_limit"], out["asymptotic_expected_limits"]["cls"]["+2sigma"])
+        # runtime estimate (STH-T3.11): every toy costs about one q evaluation (a global and a conditional fit) per
+        # hypothesis and grid point; time three on the data and extrapolate before starting
+        import time
+        t0 = time.perf_counter()
+        for f in (0.3, 0.6, 0.9):
+            model.q(f * hi, model.n, aux0, g_obs)
+        per_q = (time.perf_counter() - t0) / 3.0
+        estimate = per_q * 2 * cls_toys * cls_points
+        out["toy_cls_runtime_estimate_s"] = estimate
+        if estimate > cls_max_runtime:
+            raise LikelihoodError(f"toy CLs with {cls_toys} toys x {cls_points} points x 2 hypotheses is estimated at "
+                                  f"{estimate:.0f} s (> {cls_max_runtime:.0f} s): reduce --cls-toys or --cls-points, "
+                                  "partition the toys (hep-computing), raise --cls-max-runtime, or use the pyhf adapter")
         out["toy_cls"] = _toy_cls(model, aux0, g_obs, cl, cls_toys, seed, hi, cls_points)
         toy_fails += out["toy_cls"]["toys_with_a_failed_fit"]
     for key in (tuple(model.n), tuple(asimov_ns)):
@@ -1808,7 +1828,12 @@ def build_parser() -> argparse.ArgumentParser:
     h = sub.add_parser("shape-limit", help="multi-bin limit with shape and normalization nuisances")
     h.add_argument("--input", required=True)
     h.add_argument("--cl", type=float, default=0.95, help="used when the file has no cl")
-    h.add_argument("--cls-toys", type=int, default=0, help="toys per hypothesis and grid point for toy-based CLs (0: none)")
+    h.add_argument("--cls-toys", type=int, default=0,
+                   help="toys per hypothesis and grid point for toy-based CLs (0: none); cost about 2 x toys x points "
+                        "profile fits (seconds to minutes; the run prints toy_cls_runtime_estimate_s and refuses above "
+                        "--cls-max-runtime)")
+    h.add_argument("--cls-max-runtime", type=float, default=CLS_MAX_RUNTIME_S,
+                   help=f"refuse toy CLs whose estimated runtime exceeds this many seconds (default {CLS_MAX_RUNTIME_S:g})")
     h.add_argument("--cls-points", type=int, default=16, help="grid points in mu for toy-based CLs")
     common(h, 0)
     return parser
@@ -1830,7 +1855,7 @@ def main(argv: list[str] | None = None) -> int:
                 doc = json.loads(Path(args.input).read_text())
             except (OSError, json.JSONDecodeError) as exc:
                 raise LikelihoodError(f"cannot read {args.input}: {exc}") from None
-            result = shape_limit(doc, args.cl, args.toys, args.seed, args.cls_toys, args.cls_points)
+            result = shape_limit(doc, args.cl, args.toys, args.seed, args.cls_toys, args.cls_points, args.cls_max_runtime)
         elif args.command == "shape-gof":
             try:
                 doc = json.loads(Path(args.input).read_text())

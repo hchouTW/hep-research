@@ -24,6 +24,25 @@ def doc(kind="none", sigma=None, bins=None):
     return d
 
 
+class ShapeLimitEdgeSTH311(unittest.TestCase):
+    """STH-T3.11: one bin with n = 0, b = 0, s = 1 was 'failed' (line search stalled at the mu = 0 domain edge); it is
+    a boundary optimum. With b = 0, CLb = 1 and the toy CLs limit is CLs+b = -ln(0.05) = 2.996 within its MC range."""
+    DOC = {"bins": [{"n": 0, "b": 0, "s": 1}]}
+
+    def test_zero_count_zero_background_bin(self):
+        r = ll.shape_limit(self.DOC, 0.95, 0, 1, cls_toys=1000, cls_points=16)
+        self.assertEqual(r["status"], "ok", r["fit_diagnostics"])
+        lo, hi = r["toy_cls"]["observed_limit_mc_range"]
+        self.assertTrue(lo <= -math.log(0.05) <= hi, (lo, hi))
+        self.assertLess(abs(r["toy_cls"]["observed_upper_limit"] - -math.log(0.05)), 0.5)
+        self.assertGreater(r["toy_cls_runtime_estimate_s"], 0.0)
+
+    def test_toy_cls_refuses_beyond_its_runtime_budget(self):
+        with self.assertRaises(ll.LikelihoodError) as ctx:
+            ll.shape_limit(self.DOC, 0.95, 0, 1, cls_toys=1000, cls_points=16, cls_max_runtime=1e-9)
+        self.assertIn("estimated at", str(ctx.exception))
+
+
 class SingleBinTests(unittest.TestCase):
     def test_toy_limit_matches_exact_classical_and_asymptotic_undershoots(self):
         out = ll.profile_limit(5, 2.0, 0.0, 0.95, 3000, 1)

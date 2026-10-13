@@ -72,13 +72,16 @@ and use common random numbers across a scan.
   construction). Shapes and other nuisances are not modeled. A per-bin `mc_stat` (MC-statistics uncertainty of the
   background, also in `shape-limit` and `contour`) adds a Barlow-Beeston-lite factor per bin; leave it out only when
   the templates' MC statistics are negligible.
-- `shape-limit --input FILE [--cl --toys --seed --cls-toys --cls-points]`: multi-bin limit with several nuisances:
+- `shape-limit --input FILE [--cl --toys --seed --cls-toys --cls-points --cls-max-runtime]`: multi-bin limit with several nuisances:
   background and signal normalization, background and signal shape by vertical interpolation (piecewise linear
   `code0` by default, or the smooth `code4p`; asymmetric normalization factors `hi`/`lo` with `code4`, `code1` or
   `code0`, as in pyhf), a damped Newton profile, the same asymptotic limits and bands as `multibin-limit`, and an
   optional toy p-value at the limit. With `--cls-toys N` it adds a toy-based CLs limit and expected 1/2-sigma limits on
   a grid of `--cls-points` values of `mu` (use it at low counts, where the asymptotic bands are too wide; the cost grows
-  as toys x grid points x two fits). A normalization nuisance may be `gaussian` (factor `1 + sigma theta`), `lognormal`
+  as toys x grid points x two fits: the run times three profile evaluations on the data, records
+  `toy_cls_runtime_estimate_s` and refuses (exit 2) above `--cls-max-runtime`, default 600 s). A one-bin count
+  with `b = 0` and `n = 0` reaches its optimum on the `mu = 0` boundary, judged by KKT; the toy CLs limit then
+  equals CLs+b, `-ln(1 - cl)` within its Monte Carlo range. A normalization nuisance may be `gaussian` (factor `1 + sigma theta`), `lognormal`
   (`exp(sigma theta)`) or `gamma` (`1 + sigma theta` with a Poisson auxiliary measurement of `tau = 1/sigma^2`); an
   optional correlation matrix correlates the Gaussian-type nuisances (gamma ones cannot be correlated). Choose the
   constraint from the origin of the uncertainty ([nuisance modeling](nuisance-modeling.md)), not by convenience. Slow
