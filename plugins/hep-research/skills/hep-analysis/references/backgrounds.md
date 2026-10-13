@@ -24,4 +24,4 @@ Propagate covariance and finite control-sample statistics after subtraction, smo
 
 ## Deliverables
 
-Provide region definitions, contamination estimates, transfer factors/kappa, closure plots and uncertainties, correlation choices, and an inventory of how each dataset enters the joint likelihood. Distinguish validation of normalization, shape, and extrapolation.
+Provide region definitions, contamination estimates, transfer factors/kappa, closure plots and uncertainties, the correlation evidence with a proposed scheme (hep-statistics encodes it), and an inventory of how each dataset enters the joint likelihood. Distinguish validation of normalization, shape, and extrapolation.

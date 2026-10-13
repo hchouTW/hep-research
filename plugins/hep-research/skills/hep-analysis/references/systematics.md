@@ -1,12 +1,12 @@
-# Systematic Uncertainties and Nuisance Correlations
+# Systematic Uncertainties and Correlation Evidence
 
-This file covers the physical sources, their payloads and correlations. How each source then enters the likelihood (constraint form, interpolation code, one-sided and two-point variations, MC-statistics modifiers, pruning criteria) and the post-fit pulls, impacts and breakdowns are owned by hep-statistics: [nuisance modeling](../../hep-statistics/references/nuisance-modeling.md).
+This file covers the physical sources, their payloads and the correlation evidence. hep-analysis supplies the physical correlation evidence and a proposed scheme with its justification; hep-statistics encodes it in the likelihood and checks positive semidefiniteness. How each source then enters the likelihood (constraint form, interpolation code, one-sided and two-point variations, MC-statistics modifiers, pruning criteria) and the post-fit pulls, impacts and breakdowns are owned by hep-statistics: [nuisance modeling](../../hep-statistics/references/nuisance-modeling.md).
 
 ## Source inventory
 
 Use `<plugin root>/skills/hep-analysis/assets/systematics.csv` (the columns of the measurement-spec `systematics` ledger: name, source, effect, applied_via, affected_processes, correlation_key, payload, validation; effect is normalization, shape, migration or mixed) to record each source. Nuisance names have statistical meaning: sharing a name often shares a parameter. Do not reuse names solely for convenience. For a paper or note, `<plugin root>/skills/hep-analysis/scripts/systematics_table_tex.py` renders the registry as a booktabs LaTeX table and refuses one without a status label (synthetic, observed, ...).
 
-Correlations follow shared physical sources, measurement procedures, and documented prescriptions. Neither "all uncertainties in one year are correlated" nor "different years are independent" is a valid blanket rule. Decompose luminosity, JES, or object scale factors into justified components when prescribed. Represent partial Gaussian correlations with a covariance matrix or latent standard-normal variables; verify positive semidefiniteness and compatibility of pairwise correlations.
+Correlations follow shared physical sources, measurement procedures, and documented prescriptions. Neither "all uncertainties in one year are correlated" nor "different years are independent" is a valid blanket rule. Decompose luminosity, JES, or object scale factors into justified components when prescribed. Propose partial correlations with their justification and check that the pairwise values you propose are mutually compatible; hep-statistics encodes them (a covariance matrix or latent standard-normal variables) and checks positive semidefiniteness.
 
 ## Types and propagation
 

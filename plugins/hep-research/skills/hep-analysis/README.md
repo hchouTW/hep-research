@@ -1,7 +1,7 @@
 # hep-analysis
 
 Measurement design and review for particle and astroparticle physics. What the skill owns, never does, and its
-invariants are stated once, in [SKILL.md](SKILL.md); this page is a folder guide for people.
+invariants are stated once, in [SKILL.md](SKILL.md); this page is a folder guide for people. Correlations: hep-analysis supplies the physical correlation evidence and a proposed scheme with its justification; hep-statistics encodes it in the likelihood and checks positive semidefiniteness.
 
 ## Folder map
 

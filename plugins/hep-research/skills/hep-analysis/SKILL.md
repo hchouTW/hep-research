@@ -5,9 +5,10 @@ description: "Use when the deliverable is the design or review of an experimenta
 
 # hep-analysis: measurement design and review
 
-**Owns:** experimental design, estimands, selections, backgrounds, correction chains, physical sources of systematics and their evaluation plan, measurement review, blinding design advice (the blinding policy itself belongs to the collaboration).
+**Owns:** experimental design, estimands, selections, backgrounds, correction chains, physical sources of systematics, their correlation evidence and evaluation plan, measurement review, blinding design advice (the blinding policy itself belongs to the collaboration).
 **Typical artifacts:** `measurement-spec` (selection, background and systematics ledgers inside it).
-**Never:** invent experiment conventions, cut values, efficiencies or resolutions; write theory derivations; choose correlations for the likelihood.
+**Never:** invent experiment conventions, cut values, efficiencies or resolutions; write theory derivations; encode correlations in the likelihood.
+**Correlations:** hep-analysis supplies the physical correlation evidence and a proposed scheme with its justification; hep-statistics encodes it in the likelihood and checks positive semidefiniteness.
 
 ## Invariants
 
@@ -25,7 +26,7 @@ description: "Use when the deliverable is the design or review of an experimenta
 2. Fix the observable spec: quantity type, variables with units and binning, phase space or fiducial definition, level, frame, normalization kind, bin semantics.
 3. Build ledgers: selections (with denominators and validation metric-threshold-action), backgrounds, corrections, systematics (with `applied_via`).
 4. List unresolved inputs explicitly; they are `unresolved`, not errors.
-5. Validate: `python3 "<plugin root>/contracts/validate.py" <artifact.json> [--profiles-from <hep-research.project.json>]` (profile terms need the flag), then hand off.
+5. Validate: `python3 "<plugin root>/contracts/validate.py" <artifact.json> [--profiles-from <hep-research.project.json>]`, then hand off.
 
 <!-- BEGIN context-resolution: generated from contracts/stanzas/context-resolution.md by tools/build_stanzas.py; do not edit -->
 ## Context resolution
@@ -42,9 +43,7 @@ description: "Use when the deliverable is the design or review of an experimenta
 
 ## Resources
 
-Folder guide for people: [README.md](README.md).
-
-Start with [the analysis guide](references/hep-analysis-guide.md): it routes to one reference per question (design and blinding, weights, histograms and efficiencies, backgrounds, systematics, measurement definitions, validation). Unfolding and combination methods belong to hep-statistics; detector data/MC validation to detector-response.
+Folder guide: [README.md](README.md). Start with [the analysis guide](references/hep-analysis-guide.md): it routes to one reference per question (design and blinding, weights, histograms and efficiencies, backgrounds, systematics, measurement definitions, validation). Unfolding and combination methods belong to hep-statistics; detector data/MC validation to detector-response.
 
 Scripts in `<plugin root>/skills/hep-analysis/scripts/` (read `--help` first; each is described in the README): `check_systematic_variations.py`, `make_yield_table.py`, `systematics_table_tex.py`, `counting_reference.py`, `particle_ratio_with_uncertainty.py`, `mask_blinded_bins.py` (synthetic data and tests only), `review_analysis_change.py`, and cosmic-ray helpers (`cosmic_ray_flux.py`, `cr_spectrum_powerlaw_fit.py`, `geomagnetic_cutoff.py`, `orbit_averaged_geomagnetic_cutoff.py`, `solar_modulation_force_field.py`). Spec template and field guide: `assets/measurement_spec.template.{json,md}`.
 
@@ -59,9 +58,9 @@ Scripts in `<plugin root>/skills/hep-analysis/scripts/` (read `--help` first; ea
 | Pipeline code, partition/merge, run manifests | hep-computing | `computational-run` |
 | Write-up | research-communication | `communication` |
 
-Name the consuming skill and the artifact path in the answer. Do not assume any other skill runs automatically. A handoff chain ends when the user's deliverable exists or a blocker is reported.
+Name the consuming skill and the artifact path; no other skill runs automatically; a handoff chain ends at the deliverable or a reported blocker.
 
-<!-- example: routing (profile IDs allowed only inside example blocks) -->
+<!-- example: routing -->
 - "Design an AMS-02 B/C ratio analysis over two periods" → this skill + `experiment:ams-02`.
 - "RICH velocity resolution study" → detector-response, not this skill.
 - "Compare my model with the published AMS proton flux" → hep-theory with a dataset record.
