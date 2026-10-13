@@ -2,8 +2,10 @@
 
 When modifying or writing C++ code, prefer a balanced style between object-oriented and procedural programming. Follow established repository conventions when they intentionally differ from this reference.
 
-The examples assume C++20 (designated initializers, `std::numbers`, concepts); a C++17
-codebase needs them adapted.
+Baseline: C++17, the standard ROOT 6.38 and 6.40 are built with (one baseline for every hep-computing reference; see
+the conventions at the top of the [ROOT guidelines](root-balanced-design-guidelines.md)). Take `-std` from
+`root-config --cflags` or `ROOT_CXX_STANDARD`. Examples marked "C++20 only" (designated initializers,
+`std::numbers`, `std::span`, concepts and ranges) need a C++20 build of the whole stack.
 
 The examples follow the
 [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html):
@@ -225,7 +227,7 @@ struct Point {
   double y;
 };
 
-Point Midpoint(Point a, Point b) {
+Point Midpoint(Point a, Point b) {  // designated initializers: C++20 only
   return Point{
       .x = (a.x + b.x) / 2.0,
       .y = (a.y + b.y) / 2.0,
@@ -424,7 +426,7 @@ class Circle final : public Shape {
  public:
   explicit Circle(double radius) : radius_(radius) {}
 
-  double Area() const override { return std::numbers::pi * radius_ * radius_; }
+  double Area() const override { return std::numbers::pi * radius_ * radius_; }  // C++20 only (TMath::Pi() in C++17)
 
  private:
   double radius_;
@@ -483,7 +485,7 @@ using Shape = std::variant<Circle, Rectangle>;
 double Area(const Shape& shape) {
   struct AreaVisitor {
     double operator()(const Circle& c) const {
-      return std::numbers::pi * c.radius * c.radius;
+      return std::numbers::pi * c.radius * c.radius;  // C++20 only
     }
     double operator()(const Rectangle& r) const { return r.width * r.height; }
   };
@@ -758,7 +760,7 @@ callers can pass any compatible container without a copy:
 
 ```cpp
 int CountWords(std::string_view text);
-double Average(std::span<const double> samples);
+double Average(std::span<const double> samples);  // C++20 only; C++17: const std::vector<double>&
 ```
 
 Do not store a `string_view` or `span` beyond the call unless the owner is
@@ -980,8 +982,8 @@ Code should be designed so that core logic can be tested without file systems, n
 
 Use templates when the algorithm naturally works across multiple types.
 
-Constrain templates with concepts so a wrong argument fails at the call site
-with a readable error, not deep inside the body.
+In C++20 only, constrain templates with concepts so a wrong argument fails at the call site
+with a readable error, not deep inside the body (in C++17, a `static_assert` on the value type does the same).
 
 Good example:
 

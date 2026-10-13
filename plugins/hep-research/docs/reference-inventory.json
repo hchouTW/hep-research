@@ -15,7 +15,7 @@
   },
   "hep-computing": {
    "references": 29,
-   "bytes": 341437,
+   "bytes": 342730,
    "uncited": 0
   },
   "hep-statistics": {
@@ -1105,8 +1105,8 @@
   {
    "path": "skills/hep-computing/references/cmake-and-build.md",
    "owner": "hep-computing",
-   "bytes": 2150,
-   "lines": 51,
+   "bytes": 2924,
+   "lines": 57,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-analysis/references/hep-analysis-guide.md",
@@ -1122,8 +1122,8 @@
   {
    "path": "skills/hep-computing/references/cpp-balanced-design-guidelines.md",
    "owner": "hep-computing",
-   "bytes": 26049,
-   "lines": 1154,
+   "bytes": 26568,
+   "lines": 1156,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",
@@ -1348,12 +1348,13 @@
    "cited_by": [
     "skills/hep-analysis/references/hep-analysis-guide.md",
     "skills/hep-computing/SKILL.md",
+    "skills/hep-computing/references/cpp-balanced-design-guidelines.md",
     "skills/hep-computing/references/python-hep-coding-patterns.md"
    ],
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "9546574 2026-10-08"
+   "last_commit": "d257072 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/root-debugging.md",
@@ -3279,15 +3280,15 @@
    "a": "skills/hep-computing/references/cpp-balanced-design-guidelines.md",
    "b": "skills/hep-computing/references/root-balanced-design-guidelines.md",
    "jaccard": 0.125,
-   "containment": 0.34,
-   "shared_shingles": 1217
+   "containment": 0.334,
+   "shared_shingles": 1226
   },
   {
    "a": "skills/hep-computing/references/cpp-balanced-design-guidelines.md",
    "b": "skills/hep-computing/references/python-balanced-design-guidelines.md",
-   "jaccard": 0.132,
-   "containment": 0.256,
-   "shared_shingles": 917
+   "jaccard": 0.13,
+   "containment": 0.249,
+   "shared_shingles": 914
   },
   {
    "a": "skills/detector-response/references/core-detector-equations.md",

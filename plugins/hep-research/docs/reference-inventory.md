@@ -10,7 +10,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 |---|---|---|---|
 | detector-response | 34 | 395 | 0 |
 | hep-analysis | 9 | 74 | 0 |
-| hep-computing | 29 | 341 | 0 |
+| hep-computing | 29 | 343 | 0 |
 | hep-statistics | 9 | 119 | 0 |
 | hep-theory | 8 | 42 | 0 |
 | physics-ml | 38 | 257 | 0 |
@@ -22,8 +22,8 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 
 | A | B | Jaccard | Containment | Shared shingles |
 |---|---|---|---|---|
-| `skills/hep-computing/references/cpp-balanced-design-guidelines.md` | `skills/hep-computing/references/root-balanced-design-guidelines.md` | 0.125 | 0.34 | 1217 |
-| `skills/hep-computing/references/cpp-balanced-design-guidelines.md` | `skills/hep-computing/references/python-balanced-design-guidelines.md` | 0.132 | 0.256 | 917 |
+| `skills/hep-computing/references/cpp-balanced-design-guidelines.md` | `skills/hep-computing/references/root-balanced-design-guidelines.md` | 0.125 | 0.334 | 1226 |
+| `skills/hep-computing/references/cpp-balanced-design-guidelines.md` | `skills/hep-computing/references/python-balanced-design-guidelines.md` | 0.13 | 0.249 | 914 |
 | `skills/detector-response/references/core-detector-equations.md` | `skills/detector-response/references/detector-principles-summary.md` | 0.042 | 0.176 | 162 |
 
 ## Similar names (same skill, a shared name token in at most 4 files)
@@ -131,8 +131,8 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `batch-scheduling.md` | hep-computing | 29.3 | yes | 10 | - | 22ea71e 2026-10-12 |
 | `batch-site-cern-htcondor.md` | hep-computing | 11.2 | no | 2 | - | 6815df4 2026-10-10 |
 | `batch-site-nstccore-slurm.md` | hep-computing | 11.5 | no | 1 | - | 22ea71e 2026-10-12 |
-| `cmake-and-build.md` | hep-computing | 2.1 | yes | 4 | hep-analysis | 351029c 2026-10-07 |
-| `cpp-balanced-design-guidelines.md` | hep-computing | 26.0 | yes | 6 | physics-ml | 351029c 2026-10-07 |
+| `cmake-and-build.md` | hep-computing | 2.9 | yes | 4 | hep-analysis | 351029c 2026-10-07 |
+| `cpp-balanced-design-guidelines.md` | hep-computing | 26.6 | yes | 6 | physics-ml | 351029c 2026-10-07 |
 | `design-and-estimation.md` | hep-computing | 7.5 | no | 3 | - | 351029c 2026-10-07 |
 | `engineering-playbook.md` | hep-computing | 11.3 | yes | 4 | - | 80ac12a 2026-10-13 |
 | `environments-and-containers.md` | hep-computing | 4.0 | no | 2 | - | efa283c 2026-10-13 |
@@ -146,7 +146,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `python-balanced-design-guidelines.md` | hep-computing | 31.1 | yes | 3 | - | 351029c 2026-10-07 |
 | `python-hep-coding-patterns.md` | hep-computing | 3.9 | yes | 4 | hep-analysis | b0dce7a 2026-10-10 |
 | `risk-and-quality.md` | hep-computing | 7.7 | no | 3 | - | 351029c 2026-10-07 |
-| `root-balanced-design-guidelines.md` | hep-computing | 50.9 | yes | 3 | hep-analysis | 9546574 2026-10-08 |
+| `root-balanced-design-guidelines.md` | hep-computing | 50.9 | yes | 4 | hep-analysis | d257072 2026-10-13 |
 | `root-debugging.md` | hep-computing | 3.3 | yes | 4 | hep-analysis | 351029c 2026-10-07 |
 | `software-architecture.md` | hep-computing | 7.8 | no | 4 | - | 351029c 2026-10-07 |
 | `status-updates-and-completion.md` | hep-computing | 2.0 | no | 3 | - | 351029c 2026-10-07 |

@@ -80,6 +80,11 @@ Software checks establish contract consistency only, not physical validity.
   `gRandom` in `Define` under IMT, `DefineSlot`, eager `Snapshot` unless `fLazy`, `Range` unsupported with IMT,
   non-deterministic order and sums. R6: "CINT" dropped. R7: one rule each for naming, non-owning members (pointer),
   `std::filesystem` and exceptions, stated once at the top.
+- **CMP-14 `cmake-and-build.md` imported targets, one C++ baseline (Q2).** The minimal project links
+  `ROOT::RIO ROOT::Tree ROOT::Hist ROOT::Gpad ROOT::ROOTDataFrame` and sets the standard from `ROOT_CXX_STANDARD`
+  (no `ROOT_INCLUDE_DIRS`/`ROOT_LIBRARIES`, no second `-std`); configures, builds and runs against Homebrew ROOT
+  6.38.04 with CMake 4.3.2. `cpp-balanced-design-guidelines.md` now states the same C++17 baseline and marks its
+  C++20 examples "C++20 only".
 
 ## 0.6.17 (2026-10-13)
 
