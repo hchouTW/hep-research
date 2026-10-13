@@ -42,16 +42,17 @@ LABEL = "[General method] EXPERIMENTAL"
 # ------------------------------------------------------------------------------------------------- pcl
 def classical_upper(n: int, b: float, cl: float) -> float:
     """s with P(N <= n | s + b) = 1 - cl (may be negative: the unconstrained CLs+b limit)."""
-    a = 1 - cl
-    if stats.poisson.cdf(n, b) <= a:
-        return optimize.brentq(lambda mu: stats.poisson.cdf(n, mu) - a, 1e-12, b) - b
-    return optimize.brentq(lambda mu: stats.poisson.cdf(n, mu) - a, b, 1e4) - b
+    # P(N <= n | mu) = 1 - cl  <=>  mu = Gamma(n + 1) quantile at cl (exact, no bracket: STH-T3.5; the old bracket
+    # [b, 1e4] failed for large n or b)
+    return float(stats.gamma.ppf(cl, n + 1)) - b
 
 
 def power_threshold_limit(b: float, cl: float, threshold: float) -> float:
     """s_min: the smallest s whose exclusion probability under s = 0 reaches the threshold (the expected limit at the
     threshold quantile of the background-only count distribution)."""
-    m = 0
+    m = int(stats.poisson.ppf(threshold, b)) if b > 0 else 0  # smallest m with P(N <= m | b) >= threshold
+    while m > 0 and stats.poisson.cdf(m - 1, b) >= threshold:  # guard against ppf rounding
+        m -= 1
     while stats.poisson.cdf(m, b) < threshold:
         m += 1
     return max(classical_upper(m, b, cl), 0.0)
