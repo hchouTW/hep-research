@@ -480,7 +480,7 @@ def _stat_semantics(doc: dict, ext: dict, rep: Report, strict: bool) -> None:
         rep.add("unresolved", "$.extension.significance.trials_method", "stats.trials_method_missing",
                 "a global p-value without its trials_method is not an established global significance")
     if ext.get("paradigm") == "bayesian":
-        _bayesian_rules(ext, rep)
+        _bayesian_rules(ext, rep, strict or _at_least(doc.get("contract_version"), STAT_HARDENING_FROM))
     lik: Any = ext.get("likelihood")
     if isinstance(lik, dict) and isinstance(lik.get("model_card"), dict):
         _model_card_rules(lik["model_card"], ext.get("paradigm"), rep)
@@ -667,16 +667,82 @@ GRADIENT_SAMPLERS = re.compile(r"\b(nuts|hmc|hamiltonian)\b", re.I)
 SAMPLER_METADATA = ("warmup", "chains", "draws", "divergences", "e_bfmi_min", "max_treedepth_hits")
 IMPROPER_FORMS = re.compile(r"^\s*(flat|improper|uniform\s*\(\s*-?inf|uniform\[\s*-?inf)", re.I)
 E_BFMI_MIN = 0.3  # Stan's warning threshold
+# contracts 2.6.0 (STH-T1.2): samplers that are gradient-based by default, an infinite bound on either side of a
+# uniform form, a propriety argument with a reference, a prior on every parameter of interest, an ESS floor.
+GRADIENT_SAMPLERS_2_6 = re.compile(r"\b(nuts|hmc|hamiltonian|stan|cmdstan|pystan|pymc3?|numpyro|blackjax)\b", re.I)
+IMPROPER_FORMS_2_6 = re.compile(r"^\s*(flat|improper)|uniform\s*[(\[][^,\])]*\binf\b|uniform\s*[(\[][^,]*,[^\])]*\binf\b", re.I)
+ESS_PER_CHAIN = 100  # bulk and tail ESS floor per chain (bayes_diagnostics.py --min-ess-per-chain), order question Q2
+ESS_FLOOR_NO_CHAINS = 400  # total floor when the chain count is not recorded (four chains' worth)
 
 
-def _bayesian_rules(ext: dict, rep: Report) -> None:
+def _poi_names(poi: str) -> set[str]:
+    """Names a prior may use for a parameter of interest: the full string and its leading identifier
+    ('S (signal events in SRB)' -> 'S')."""
+    out = {poi.strip()}
+    m = re.match(r"\s*([^\s(\[]+)", poi)
+    if m:
+        out.add(m.group(1))
+    return out
+
+
+def _ess_values(v) -> list[float]:
+    if _is_num(v):
+        return [float(v)]
+    if isinstance(v, dict):
+        return [float(x) for x in v.values() if _is_num(x)]
+    return []
+
+
+def _bayesian_hardening(ext: dict, rep: Report) -> None:
+    """Bayesian rules of contracts 2.6.0 (STH-T1.2). Unresolved: an improper prior (IMPROPER_FORMS_2_6: flat,
+    improper, or an infinite bound on either side of a uniform form) whose propriety is a bare 'yes'/true instead of
+    {argument or derivation, ref} (stats.propriety_unsupported); a parameter of interest without a prior, matched by the
+    full name or its leading identifier (stats.poi_prior_missing); a bulk or tail ESS below ESS_PER_CHAIN x
+    sampler.chains, or below ESS_FLOOR_NO_CHAINS when the chain count is not recorded (stats.ess_too_low), and the
+    missing chain count itself (stats.chains_missing)."""
+    priors = [pr for pr in ext.get("priors", []) or [] if isinstance(pr, dict)]
+    for i, pr in enumerate(priors):
+        prop = pr.get("propriety")
+        if not IMPROPER_FORMS_2_6.search(str(pr.get("form", ""))) or not prop:
+            continue
+        supported = isinstance(prop, dict) and not (_blank(prop.get("argument")) and _blank(prop.get("derivation"))) \
+            and not _blank(prop.get("ref"))
+        if not supported:
+            rep.add("unresolved", f"$.extension.priors[{i}].propriety", "stats.propriety_unsupported",
+                    f"prior '{pr.get('form')}' on {pr.get('parameter')} is improper and propriety {prop!r} is a claim, not "
+                    "an argument: give {argument (or derivation), ref} showing the posterior is proper")
+    names = {pr.get("parameter") for pr in priors}
+    for poi in ext.get("parameters_of_interest", []) or []:
+        if isinstance(poi, str) and not (_poi_names(poi) & names):
+            rep.add("unresolved", "$.extension.priors", "stats.poi_prior_missing",
+                    f"parameter of interest '{poi}' has no prior (priors[].parameter must name it or its leading identifier)")
+    smp: Any = ext.get("sampler") if isinstance(ext.get("sampler"), dict) else {}
+    conv: Any = ext.get("convergence") if isinstance(ext.get("convergence"), dict) else {}
+    chains: Any = smp.get("chains")
+    has_chains = _is_num(chains) and chains >= 1
+    floor = ESS_PER_CHAIN * chains if has_chains else ESS_FLOOR_NO_CHAINS
+    ess_keys = [k for k in ("ess_bulk", "ess_tail", "ess") if k in conv]
+    if ess_keys and not has_chains:
+        rep.add("unresolved", "$.extension.sampler.chains", "stats.chains_missing",
+                f"the chain count is not recorded: the ESS floor is {ESS_PER_CHAIN} per chain ({ESS_FLOOR_NO_CHAINS} total assumed)")
+    for k in ess_keys:
+        low = [x for x in _ess_values(conv[k]) if x < floor]
+        if low:
+            rep.add("unresolved", f"$.extension.convergence.{k}", "stats.ess_too_low",
+                    f"{k} {min(low):g} is below the floor {floor:g} ({ESS_PER_CHAIN} per chain): the posterior summaries are not established")
+
+
+def _bayesian_rules(ext: dict, rep: Report, hardening: bool = False) -> None:
     """Bayesian results (audit T25): gradient-based samplers carry their warmup, chains, draws, divergences, E-BFMI and
     tree-depth saturations; divergences or a low E-BFMI under fit_status converged are errors; an improper prior is
     unresolved until the posterior's propriety is shown; SBC is calibration over the prior predictive, so it is not
-    reported as frequentist coverage."""
+    reported as frequentist coverage. With hardening (contract 2.6.0 or strict) the sampler and improper-form patterns
+    are the 2.6.0 ones and _bayesian_hardening applies."""
     smp: Any = ext.get("sampler")
     conv = ext.get("fit_status") == "converged"
-    if isinstance(smp, dict) and GRADIENT_SAMPLERS.search(str(smp.get("name", "")) + " " + str(smp.get("algorithm", ""))):
+    samplers = GRADIENT_SAMPLERS_2_6 if hardening else GRADIENT_SAMPLERS
+    improper = IMPROPER_FORMS_2_6 if hardening else IMPROPER_FORMS
+    if isinstance(smp, dict) and samplers.search(str(smp.get("name", "")) + " " + str(smp.get("algorithm", ""))):
         missing = [k for k in SAMPLER_METADATA if k not in smp]
         if missing:
             rep.add("unresolved", "$.extension.sampler", "stats.sampler_metadata_missing",
@@ -690,13 +756,15 @@ def _bayesian_rules(ext: dict, rep: Report) -> None:
             rep.add("error", "$.extension.fit_status", "stats.low_e_bfmi",
                     f"E-BFMI {eb} below {E_BFMI_MIN} but fit_status converged")
     for i, pr in enumerate(ext.get("priors", []) or []):
-        if isinstance(pr, dict) and IMPROPER_FORMS.search(str(pr.get("form", ""))) and not pr.get("propriety"):
+        if isinstance(pr, dict) and improper.search(str(pr.get("form", ""))) and not pr.get("propriety"):
             rep.add("unresolved", f"$.extension.priors[{i}]", "stats.improper_prior",
                     f"prior '{pr.get('form')}' on {pr.get('parameter')} is improper: state why the posterior is proper "
                     "(priors[].propriety) or use a proper prior")
     if "coverage" in ext:
         rep.add("error", "$.extension.coverage", "stats.paradigm_mislabeled",
                 "a Bayesian result reports calibration (for example SBC) under checks, not frequentist coverage")
+    if hardening:
+        _bayesian_hardening(ext, rep)
 
 
 def check_model_card(card: dict, paradigm: str | None, rep: Report, path: str = "$.extension.likelihood.model_card") -> None:

@@ -127,6 +127,33 @@ class BayesianMutations(unittest.TestCase):
                 self.assertTrue(set(want) <= _codes(g), (sorted(_codes(g)), want))
 
 
+class BayesianControls(unittest.TestCase):
+    """What clears the 2.6.0 Bayesian rules, and that a 2.5.0 artifact keeps its default outcome."""
+
+    def test_a_referenced_propriety_argument_clears_an_improper_prior(self):
+        prop = {"argument": "Poisson likelihood with n >= 1 makes the posterior integrable", "ref": "derivation.md#proper"}
+        g = publication_gate(_mut(_bayes_base, _set(priors=[{"parameter": "S", "form": "uniform(0, inf)", "propriety": prop}])))
+        self.assertEqual(g["status"], "passed", g["reasons"])
+
+    def test_ess_floor_scales_with_chains(self):
+        g = publication_gate(_mut(_bayes_base, _set(convergence={"rhat": 1.0, "ess_bulk": 450, "ess_tail": 420})))
+        self.assertEqual(g["status"], "passed", g["reasons"])
+        g = publication_gate(_mut(_bayes_base, lambda e, d: e["sampler"].update(chains=8) or
+                                  e.update(convergence={"rhat": 1.0, "ess_bulk": 450, "ess_tail": 420})))
+        self.assertIn("stats.ess_too_low", _codes(g))
+        g = publication_gate(_mut(_bayes_base, lambda e, d: e["sampler"].pop("chains")))
+        self.assertIn("stats.chains_missing", _codes(g))
+
+    def test_legacy_default_outcome_is_unchanged(self):
+        from contracts.validate import validate_artifact
+        d = _mut(_bayes_base, _set(sampler={"name": "stan"}, priors=[{"parameter": "bkg", "form": "flat", "propriety": "yes"}],
+                                   convergence={"rhat": 1.0, "ess_bulk": 3}))
+        d["contract_version"] = d["versions"]["contracts"] = "2.5.0"
+        default = {f.code for f in validate_artifact(d).findings}
+        self.assertFalse(default & {"stats.sampler_metadata_missing", "stats.propriety_unsupported", "stats.poi_prior_missing",
+                                    "stats.ess_too_low"}, default)
+
+
 def _obs(var, unit, edges, q_unit="m^-2 sr^-1 s^-1 GV^-1"):
     return {"quantity": "differential-flux", "variables": [{"name": var, "unit": unit, "edges": list(edges)}],
             "phase_space": {"definition": "full sky", "fiducial": False}, "level": "unfolded", "frame": "lab",
