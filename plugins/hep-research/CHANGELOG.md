@@ -3,6 +3,49 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+Contracts 2.6.0 (minor: theory-spec and prediction semantics; every 2.5.0 artifact keeps its outcome and gets the new
+rules with `validate.py --strict`, at the same level; no new capability).
+
+### hep-theory
+
+- **theory-spec and prediction semantics (contracts 2.6.0).** `ext_theory_spec.json` gains optional `limit`,
+  `neglected`, `computational_run_ref`, `degenerate_directions`, `model.family`, `checks_run[].tolerance` and
+  `references_read[].date_read`; `ext_prediction.json` gains `derivation_status`; `uncertainty_component` gains
+  `prescription`, `method` and per-bin `bounds`. New core vocabularies `envelope_prescriptions`, `truncation_methods`
+  (including `not-estimated`) and `check_results`. New checks (native from 2.6.0): an `observed` prediction, or a
+  `validated-in-scope` one without a linked theory-spec input carrying that status, a perturbative argument without
+  an order, an asymptotic argument without a limit, a formal proof or analytic derivation with no check run, a check
+  result outside the vocabulary, an empty validity domain, a scale envelope without a prescription or with values
+  that are not one [min, max] pair (or bounds that do not match the bins), and a `cosmic-ray-propagation` model
+  without degenerate directions are errors; a prediction with neither `theory_spec_ref` nor `derivation_status` is
+  unresolved; a missing core convention key and a truncation without a method are warnings.
+- **Scripts refuse what used to give a wrong number.** `pdf_uncertainty.py` accepts `symmhessian+as`, `hessian+as`
+  and `replicas+as` (the last two members are alpha_s down and up, reported as a separate `alphas` object; PDF4LHC21
+  Eqs. 6.7-6.8), checks `num_members`, offers `--combine-alphas quadrature` (labelled a prescription) and
+  `--symmetrize`, and refuses non-finite members. `eft_truncation.py` refuses `a*b` given with `b*a`, keys that are
+  not one pair, blank conventions, an empty operator list, `lambda_tev` <= 0 (was a `ZeroDivisionError`) and
+  non-finite numbers, requires `cross_term_convention` for off-diagonal terms, runs the promised rescaling check and
+  reports the flag fraction's source. `event_weights.py` refuses negative, out-of-range, repeated and non-integer
+  selected indices (an `IndexError` and Python wrap-around before), non-positive cross sections, negative luminosity
+  and non-finite weights, and reports the selected sum of weights, sum of squares, effective sample size and relative
+  statistical uncertainty. `dis_kinematics.py` refuses points outside the exact lepton-mass bounds y_max and
+  Q^2_min(y), reports them, and accepts a target at rest.
+- **References.** New `amplitudes-and-widths.md` (phase space and widths from the PDG Kinematics review, narrow-width
+  conditions, Breit-Wigner and complex-mass scheme), `selection-rules.md` (procedure, conserved quantities,
+  Landau-Yang, Furry, helicity suppression, G-parity) and `regularization-and-schemes.md` (CDR/HV/FDH/DRED, gamma_5,
+  beta and gamma_m normalizations, pole vs MS-bar, IRC safety). `cosmic-ray-propagation.md` gains kinematics (pointing
+  to `core/kinematics/relativistic.py`), the force-field formula with its source and limits (code stays in
+  hep-analysis), and antiproton source-term conventions. Each statement cites an opened source with its location and
+  read date, or says `unverified`.
+- **New theory profile `theory:higgs-bb-width`.** Gamma(H -> b bbar) with the MS-bar running b mass through
+  alpha_s^4, the running of mass and coupling derived and checked mu-independent order by order in exact arithmetic,
+  and the scale envelope, truncation estimate and parametric alpha_s and m_b variations kept apart.
+- Routing cases for selection rules and a scheme conversion (en, zh-Hant). The committed theory examples
+  (`qed-prediction`, `theory-comparison`, `recasting`) are written at contracts 2.6.0 with the added fields; their
+  numbers are unchanged.
+
 ## 0.6.17 (2026-10-13)
 
 Contracts 2.5.0 (minor: ML semantics; every 2.4.0 artifact keeps its outcome and gets the new rules with

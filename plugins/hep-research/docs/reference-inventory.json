@@ -24,8 +24,8 @@
    "uncited": 0
   },
   "hep-theory": {
-   "references": 8,
-   "bytes": 41644,
+   "references": 11,
+   "bytes": 78189,
    "uncited": 0
   },
   "physics-ml": {
@@ -1670,22 +1670,35 @@
    "last_commit": "24b8216 2026-10-13"
   },
   {
-   "path": "skills/hep-theory/references/cosmic-ray-propagation.md",
+   "path": "skills/hep-theory/references/amplitudes-and-widths.md",
    "owner": "hep-theory",
-   "bytes": 5217,
-   "lines": 67,
+   "bytes": 8257,
+   "lines": 99,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-theory/SKILL.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "83ae4f6 2026-10-13"
+  },
+  {
+   "path": "skills/hep-theory/references/cosmic-ray-propagation.md",
+   "owner": "hep-theory",
+   "bytes": 12970,
+   "lines": 155,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-theory/README.md",
+    "skills/hep-theory/SKILL.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "87ee57c 2026-10-13"
   },
   {
    "path": "skills/hep-theory/references/dis-kinematics.md",
    "owner": "hep-theory",
-   "bytes": 4824,
-   "lines": 67,
+   "bytes": 5898,
+   "lines": 77,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/eic/modules/placement-inventory.md",
@@ -1694,13 +1707,13 @@
     "tests/skills/hep_theory/test_dis_kinematics.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "9b8406c 2026-10-13"
   },
   {
    "path": "skills/hep-theory/references/event-generation.md",
    "owner": "hep-theory",
-   "bytes": 9196,
-   "lines": 148,
+   "bytes": 9787,
+   "lines": 155,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/detector-response/references/detector-simulation.md",
@@ -1712,7 +1725,7 @@
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "a38fad5 2026-10-13"
   },
   {
    "path": "skills/hep-theory/references/higher-order-predictions.md",
@@ -1750,15 +1763,15 @@
   {
    "path": "skills/hep-theory/references/pdfs-and-lhapdf.md",
    "owner": "hep-theory",
-   "bytes": 3155,
-   "lines": 52,
+   "bytes": 6047,
+   "lines": 80,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-theory/SKILL.md",
     "skills/hep-theory/scripts/pdf_uncertainty.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "6164b84 2026-10-13"
   },
   {
    "path": "skills/hep-theory/references/recasting-toolchain.md",
@@ -1774,17 +1787,43 @@
    "last_commit": "ae5e376 2026-10-08"
   },
   {
+   "path": "skills/hep-theory/references/regularization-and-schemes.md",
+   "owner": "hep-theory",
+   "bytes": 7631,
+   "lines": 99,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "profiles/theory/higgs-bb-width/index.md",
+    "profiles/theory/higgs-bb-width/models/running-mass-hbb.md",
+    "skills/hep-theory/SKILL.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "6c22fd5 2026-10-13"
+  },
+  {
+   "path": "skills/hep-theory/references/selection-rules.md",
+   "owner": "hep-theory",
+   "bytes": 7721,
+   "lines": 94,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-theory/SKILL.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "195e4d1 2026-10-13"
+  },
+  {
    "path": "skills/hep-theory/references/smeft-and-eft.md",
    "owner": "hep-theory",
-   "bytes": 2795,
-   "lines": 41,
+   "bytes": 3421,
+   "lines": 48,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-theory/SKILL.md",
     "skills/hep-theory/scripts/eft_truncation.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "fa29fcf 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/ablation-and-design-review.md",
