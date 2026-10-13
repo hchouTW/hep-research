@@ -22,6 +22,22 @@ C_NORM = (np.diag(P) - np.outer(P, P)) / N          # covariance of a normalized
 ONES = [[1.0] * 8]
 
 
+class RelativeCovChecksSTH36(unittest.TestCase):
+    """STH-T3.6: relative_cov must be n x n, symmetric and positive semidefinite; a 1 x 1 matrix is not broadcast."""
+    Y, COV = [1.0, 1.1, 0.9], (0.01 * np.eye(3)).tolist()
+
+    def test_refusals(self):
+        for rel in ([[0.01]], [[0.01, 0.002, 0.0], [0.0, 0.01, 0.0], [0.0, 0.0, 0.01]],
+                    [[0.01, 0.02, 0.0], [0.02, 0.01, 0.0], [0.0, 0.0, 0.01]], [[0.01, 0, 0], [0, -0.01, 0], [0, 0, 0.01]]):
+            with self.subTest(rel=rel), self.assertRaises(cf.CovFitError):
+                cf.fit(self.Y, self.COV, "constant", multiplicative={"relative_cov": rel, "mode": "data"})
+
+    def test_valid_full_matrix_fits(self):
+        rel = (0.0004 * np.ones((3, 3))).tolist()
+        r = cf.fit(self.Y, self.COV, "constant", multiplicative={"relative_cov": rel, "mode": "model"})
+        self.assertIn("theta", r)
+
+
 class T18ConstrainedSpectrum(unittest.TestCase):
     def test_unconstrained_fit_is_refused_not_regularized(self):
         y = np.random.default_rng(1).multinomial(N, P) / N

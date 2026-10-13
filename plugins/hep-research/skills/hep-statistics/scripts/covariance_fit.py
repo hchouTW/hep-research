@@ -52,6 +52,10 @@ class CovFitError(ValueError):
     """Refused input or a fit that cannot be done without an undeclared assumption."""
 
 
+class CovFitInputError(CovFitError):
+    """A malformed input (exit 2), as opposed to a refused fit (exit 1)."""
+
+
 def subspace(cov: np.ndarray, constraints) -> tuple[np.ndarray, dict]:
     """Orthonormal basis Q of the complement of the declared constraint rows, after checking each row is a null direction
     of cov; returns Q and a record (rank, condition number in the subspace)."""
@@ -147,6 +151,20 @@ def fit(y, cov, model="constant", x=None, constraints=None, start=None, multipli
     rel, mode = None, None
     if multiplicative:
         rel = np.asarray(multiplicative["relative_cov"], dtype=float)
+        # STH-T3.6: n x n, finite, symmetric and positive semidefinite on its correlation scale (the
+        # validate_covariance.py rule); a 1 x 1 matrix is never broadcast to every pair of points
+        if rel.shape != (n, n) or not np.all(np.isfinite(rel)):
+            raise CovFitInputError(f"multiplicative.relative_cov must be a finite {n} x {n} matrix, got shape {list(rel.shape)}")
+        if not np.allclose(rel, rel.T, rtol=1e-10, atol=1e-15 * max(float(np.max(np.abs(rel))), 1e-300)):
+            raise CovFitInputError("multiplicative.relative_cov must be symmetric")
+        d = np.sqrt(np.clip(np.diag(rel), 0.0, None))
+        if np.any(np.diag(rel) < 0):
+            raise CovFitInputError("multiplicative.relative_cov has a negative variance")
+        nz = d > 0
+        if nz.any():
+            corr = rel[np.ix_(nz, nz)] / np.outer(d[nz], d[nz])
+            if np.linalg.eigvalsh(corr)[0] < -1e-8 * max(1.0, float(np.linalg.eigvalsh(corr)[-1])):
+                raise CovFitInputError("multiplicative.relative_cov is not positive semidefinite")
         mode = multiplicative.get("mode")
         if mode not in ("data", "model", "nuisance"):
             raise CovFitError("multiplicative.mode must be data, model or nuisance (no default)")
@@ -227,6 +245,9 @@ def main(argv=None) -> int:
                   doc.get("start"), doc.get("multiplicative"))
     except KeyError as exc:
         print(json.dumps({"status": "rejected", "error": f"missing {exc}"}))
+        return 2
+    except CovFitInputError as exc:
+        print(json.dumps({"status": "rejected", "error": str(exc)}))
         return 2
     except CovFitError as exc:
         print(json.dumps({"label": LABEL, "status": "refused", "error": str(exc)}))
