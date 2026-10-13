@@ -116,5 +116,54 @@ class UnreadableArrayTests(unittest.TestCase):
                 self.assertEqual([Path(u).name for u in view["unscanned"]], [name])
 
 
+class MaskInputTests(unittest.TestCase):
+    """hep-analysis audit P2-7, core part: mask_ratio truncated mismatched inputs with zip (a 2-entry reference
+    against 4 bins gave a 2-entry ratio); non-numbers passed; there was no underflow/overflow or error masking."""
+
+    E = [0.0, 1.0, 2.0, 3.0, 4.0]
+    R = {"low": 1.0, "high": 2.0}
+
+    def test_ratio_length_mismatch_fails_closed(self):
+        m = bl.mask_binned(self.E, [5, 6, 7, 8], self.R)["blinded_bins"]
+        with self.assertRaises(ValueError):
+            bl.mask_ratio([5, 6, 7, 8], [1, 2], m)
+        with self.assertRaises(ValueError):
+            bl.mask_ratio([5, 6], [1, 2, 3, 4], m)
+        self.assertEqual(bl.mask_ratio([5, 6, 7, 8], [1, 2, 7, 0], m), [5.0, None, 1.0, None])
+
+    def test_non_numbers_refused(self):
+        for bad in (["x", 1, 2, 3], [True, 1, 2, 3], [float("nan"), 1, 2, 3], "1234"):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                bl.mask_binned(self.E, bad, self.R)
+        with self.assertRaises(ValueError):
+            bl.mask_ratio([1, 2, 3, 4], [1, "x", 1, 1], [False] * 4)
+        with self.assertRaises(ValueError):
+            bl.seal(self.E, [1, 2, 3, 4], self.R, [[1, 2]])
+
+    def test_errors_masked_with_the_values(self):
+        out = bl.mask_binned(self.E, [5, 6, 7, 8], self.R, errors=[2.2, 2.4, 2.6, 2.8])
+        self.assertEqual(out["values"], [5, None, 7, 8])
+        self.assertEqual(out["errors"], [2.2, None, 2.6, 2.8])
+        with self.assertRaises(ValueError):
+            bl.mask_binned(self.E, [5, 6, 7, 8], self.R, errors=[1, 1])
+        with self.assertRaises(ValueError):
+            bl.mask_binned(self.E, [5, 6, 7, 8], self.R, errors=[1, -1, 1, 1])
+
+    def test_underflow_and_overflow_bins(self):
+        # values: underflow, 4 bins, overflow
+        vals = [9, 5, 6, 7, 8, 23]
+        out = bl.mask_binned(self.E, vals, {"low": 3.5, "high": 10.0}, flow=True)
+        self.assertEqual(out["blinded_bins"], [False, False, False, False, True, True])
+        self.assertEqual(out["values"], [9, 5, 6, 7, None, None])
+        self.assertTrue(out["flow"])
+        out = bl.mask_binned(self.E, vals, {"low": -5.0, "high": 0.5}, flow=True)
+        self.assertEqual(out["values"], [None, None, 6, 7, 8, 23])
+        with self.assertRaises(ValueError):
+            bl.mask_binned(self.E, [5, 6, 7, 8], self.R, flow=True)
+        s = bl.seal(self.E, vals, {"low": 3.5, "high": 10.0}, flow=True)
+        self.assertIn(23.0, s)
+        self.assertIn(31.0, s)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -27,6 +27,12 @@ Software checks establish contract consistency only, not physical validity.
 - **CMP-05 unreadable numpy caches are unscanned.** An object `.npy`, a pickled or non-zip `.npz` and a corrupt zip
   `.npz` (`BadZipFile`) are listed as unscanned: the scan ends `incomplete`, exit 3, instead of exit 2 or a traceback
   with exit 1 (reserved for a found leak).
+- **CMP-ANA-P2-7 (core part of hep-analysis audit P2-7) masking fails closed.** `mask_ratio` refuses numerator,
+  denominator and mask of different lengths (`zip` truncated them: a 2-entry reference against 4 bins gave a 2-entry
+  ratio); `mask_binned`, `mask_ratio` and `seal` refuse strings, booleans and non-finite numbers; `mask_binned(...,
+  errors=)` masks an error array with the values' mask; `flow=True` (in `blinded_mask`, `mask_binned`, `seal`) adds
+  underflow and overflow bins, blinded when the region reaches past the first or last edge. The script
+  `mask_blinded_bins.py` is unchanged here (hep-analysis branch).
 
 ## 0.6.17 (2026-10-13)
 
