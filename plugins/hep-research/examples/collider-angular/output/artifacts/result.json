@@ -54,7 +54,8 @@
    "fiducial cross section"
   ],
   "nuisances": [
-   "integrated luminosity"
+   "integrated luminosity",
+   "background transfer factor"
   ],
   "test_statistic": "not-applicable (point estimates with linear covariance)",
   "construction": "other",

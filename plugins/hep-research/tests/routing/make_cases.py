@@ -233,7 +233,7 @@ C = [
  ('st-t46-comb-1', 'en', 'direct', "Combine our cross-section measurement with the other experiment's; both depend on the same luminosity measurement.", 'hep-statistics', ['combinations across datasets or experiments'], None, None, {"set": "STH-T4.6"}),
  ('j05-turn-fit', 'en', 'multi-turn', 'Fold my prediction through the detector response.', 'detector-response', ['folding a prediction through the response'], None, None,
   {"set": "STH-T4.6", "turns": [{"prompt": "Now fit the normalization of the folded prediction to the data.", "expected": "hep-statistics", "trigger_terms": ["fits that use a folded prediction"]}],
-   "note": "Q9: the fold belongs to detector-response, the fit that uses the folded prediction to hep-statistics (routing contract row 36)"}),
+   "note": "Q9: the fold belongs to detector-response, the fit that uses the folded prediction to hep-statistics (routing contract row 36); the inputs of j05, so the folded prediction can exist"}),
 ]
 
 cases = []

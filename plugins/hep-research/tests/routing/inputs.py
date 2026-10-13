@@ -72,3 +72,6 @@ INPUTS = {
   "fit_result.json": json.dumps({"_note": TAG, "fit": "maximum likelihood on workspace.json (pyhf 0.7.6), observed data", "bestfit": {"mu": 1.275, "bkg_norm": 0.053, "jes": 0.052},
                                  "uncertainty": {"mu": 0.845, "bkg_norm": 0.972, "jes": 0.977}}, indent=1) + "\n"},
 }
+# the multi-turn follow-up of j05 needs the same files: its second turn fits "the folded prediction", which exists only
+# if the first turn has a prediction and a response to fold (without them it measured a missing-input dialogue instead)
+INPUTS["j05-turn-fit"] = INPUTS["j05"]

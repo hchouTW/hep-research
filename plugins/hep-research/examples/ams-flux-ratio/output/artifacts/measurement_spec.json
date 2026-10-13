@@ -109,10 +109,26 @@
     "name": "species selection",
     "definition": "synthetic per-species selection",
     "conditional_denominator": "triggered events in acceptance"
+   },
+   {
+    "name": "helium charge window",
+    "definition": "SYNTHETIC: charge estimator 1.7 <= Q < 2.5",
+    "conditional_denominator": "helium events passing the species selection (inside by construction)"
    }
   ],
-  "backgrounds": [],
-  "no_backgrounds_reason": "SYNTHETIC: the toy generates the two signal species only",
+  "backgrounds": [
+   {
+    "name": "Z=1 charge tail in the helium window (synthetic)",
+    "estimator": "charge-sideband extrapolation: B_k = TF x N_sideband,k per reco rigidity bin and period, TF = tail fraction in the window / in the sideband from the synthetic tail shape",
+    "control_region": "SYNTHETIC: charge estimator 1.3 <= Q < 1.6 (helium-free by construction)",
+    "closure": "SYNTHETIC: validation band 1.6 <= Q < 1.7 predicted from the sideband per period (results.json#background/validation_closure); Asimov closure exact",
+    "transfer_factor": 0.1710151742862487,
+    "processes": [
+     "proton (Z=1)"
+    ],
+    "uncertainty": "10% on TF, fully correlated (synthetic tail-shape modelling); sideband counts in the statistical block"
+   }
+  ],
   "corrections": [
    {
     "effect_id": "trigger_efficiency",
@@ -147,11 +163,31 @@
     "source": "control sample",
     "effect": "normalization",
     "applied_via": "covariance (per bin, per species)"
+   },
+   {
+    "name": "background_transfer_factor",
+    "source": "synthetic 10% on the charge-tail transfer factor",
+    "effect": "mixed",
+    "applied_via": "covariance (TF x sideband counts, fully correlated across bins, helium only, unfolded)"
    }
   ],
   "blinding": {
-   "blinded": false
+   "blinded": true,
+   "mask": {
+    "regions": [
+     "helium signal region (1.7 <= Q < 2.5) in the bin 60-100 GV, both periods"
+    ],
+    "intervals": [
+     {
+      "variable": "rigidity",
+      "low": 60.0,
+      "high": 100.0
+     }
+    ]
+   },
+   "unblinding_record_ref": null
   },
+  "notes": "SYNTHETIC blinding policy: the custodian step masks the helium signal-region count in the blinded bin; the unfolding fills it with the simulated expectation; helium flux, ratio and period average are null there; proton counts and the charge sidebands stay open",
   "ratio": {
    "numerator": "helium flux",
    "denominator": "proton flux",
@@ -177,6 +213,11 @@
      "effect": "selection_efficiency",
      "treatment": "independent",
      "correlation_model": "separate control samples per species"
+    },
+    {
+     "effect": "background_subtraction",
+     "treatment": "independent",
+     "correlation_model": "helium (numerator) only; the proton sample has no subtracted background here"
     }
    ]
   },

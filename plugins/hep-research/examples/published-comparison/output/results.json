@@ -11,12 +11,12 @@
   "no_detector_files_read": true,
   "contracts": true
  },
- "mu_hat": 0.9950962580369148,
- "sigma_mu": 0.021816617742651707,
- "mu_whitened_lstsq": 0.995096258036915,
- "chi2": 10.274833881611531,
+ "mu_hat": 0.99774310225187,
+ "sigma_mu": 0.022125357914969355,
+ "mu_whitened_lstsq": 0.99774310225187,
+ "chi2": 7.977057787548025,
  "ndf": 9,
- "p_value": 0.32869754826441694,
+ "p_value": 0.5364598921851234,
  "prediction_restricted_pb": [
   539.9394,
   455.56980000000004,

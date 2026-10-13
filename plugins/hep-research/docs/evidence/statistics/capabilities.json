@@ -262,7 +262,8 @@
    "status": "supported",
    "gate": "pr",
    "tests": [
-    "tests/skills/hep_statistics/test_covariance_fit.py"
+    "tests/skills/hep_statistics/test_covariance_fit.py",
+    "tests/core/test_stats_broken_power_law.py"
    ],
    "scope": "one validated truth (500-toy slow test); other truths need their own coverage study"
   },

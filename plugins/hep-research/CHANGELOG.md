@@ -260,6 +260,20 @@ same level, and at the publication gate; no new capability).
   `test_cosmic_ray_helpers.py`; a worked cosmic-ray spec with backgrounds and an active mask
   (`assets/worked-spec.cosmic-ray.synthetic.json`); the flagship example documents the `--profiles-from`
   validation command; capability-matrix title no longer carries a version.
+- **Backgrounds and blinding in both journey examples (P4-2, P3-12).** `examples/collider-angular` subtracts a
+  synthetic tau-pair-like background estimated from an x_vis sideband (transfer factor from the simulated shape, 10%
+  fully correlated), closes it in a validation band and by Asimov, and blinds the forward signal-region bin
+  cos theta >= 0.9 (outside the fiducial range). `examples/ams-flux-ratio` subtracts a synthetic Z=1 charge tail from
+  the helium window with a charge-sideband estimate and validation band, and blinds the helium signal-region count at
+  60-100 GV (helium flux, He/p ratio and period average null there; dataset records stop at 60 GV). In both, a
+  custodian step runs `mask_blinded_bins.py` (the unmasked histogram lives only in a temporary directory), the
+  unfolding fills the blinded bin with the simulated expectation at zero variance, figures pass
+  `core.blinding.check_figure`, and the specs declare backgrounds, the transfer-factor systematic and the mask. The
+  example tests check the estimate, the closure, the absent bins, and rerun with a synthetic sentinel in the blinded
+  bins: outputs byte-identical, `audit_blinded_outputs.py` passes, a planted sentinel fails. The synthetic-collider
+  profile generator gains an optional background sample with a visible-energy fraction (`generate_background`,
+  `signal_xvis`, `xvis_fraction`, `--background`); `generate()` is unchanged. The published-comparison record copied
+  from Path B is regenerated (its covariance gains the transfer-factor block).
 
 ### hep-statistics
 
@@ -344,12 +358,32 @@ same level, and at the publication gate; no new capability).
   from the same events (`none`, "neither variation changes this histogram"). The statistical test now uses
   `up_diff_sumw2`/`down_diff_sumw2` (new), `--stat-unc`, or per-sample variances only with `--independent` (new);
   otherwise no test is made, the output says why, and the effect comes from the tolerance. The "neither variation
-  changes" warning is given only when no bin changed.
+  changes" warning is given only when no bin changed. When bins differ but neither variation is flagged, the
+  warning says "not significant at alpha" only if a statistical test was made; on the tolerance-only path (including
+  same-event variations without difference variances) it says the integral and normalized shape stay within the
+  tolerance, and the per-variation note no longer claims that no bin differs.
 - **`check_root_cpp_env.sh` under `set -e`.** A nonzero exit of `root --version` (informational) ended the check
   without output (CMP-08 moved it into an assignment); it is now tolerated, and a failing `root-config` reports
   `failed` in the JSON. Found by the optional ROOT CI job (Linux container), whose check-run record is now uploaded.
 - Test fixes found by CI: the pyhf skip restored on `SrCrModelCard`; the broken-power-law covariance comparison uses a
   relative tolerance (finite-difference precision, Python 3.11).
+
+### hep-statistics follow-ups
+
+- **One broken-power-law parametrization (STH Q8).** New helper `core/stats/broken_power_law.py` (steward
+  hep-statistics, no CLI): `[ln A, gamma1, gamma2, ln x_b]`, `ln F = ln A - gamma1 (u - h) - gamma2 h`,
+  `u = ln(x/x_b)`, `h = max(u, 0)` (sharp) or `s ln((1 + e^(u/s))/2)` (smooth), so `A = F(x_b)` in both forms.
+  hep-analysis `cr_spectrum_powerlaw_fit.py` and hep-statistics `covariance_fit.py` both evaluate it and give
+  identical model values. Behavior change in `cr_spectrum_powerlaw_fit.py --model smooth-broken`: its smooth form
+  lacked the 1/2, so the reported `normalization_at_break` was `F(x_b) 2^((g2-g1) s)`, not the flux at the break; it
+  is now `F(x_b)` (indices, break and chi2 unchanged). Documented once in the core/stats guide (conventions) and
+  linked from the hep-analysis guide; the guide's stale "diagonal errors only" description of
+  `cr_spectrum_powerlaw_fit.py` is replaced.
+- **hep-statistics SKILL.md headroom.** 8178 -> 7653 B (budget 8192): the Resources list of ten reference links moved
+  into a reference index in the core/stats guide (Contents), with the ML-assisted link kept in SKILL.md; the
+  "N hypotheses, no scan data" row (Bonferroni or Sidak, by hand, labeled) moved to the guide's Choosing a tool table.
+  No rule removed; the description and the generated context-resolution stanza are unchanged. The guide stays under
+  its 17000 B test (16944 B) by dropping a sentence that repeated its "run, do not hand-compute" convention.
 
 ## 0.6.17 (2026-10-13)
 

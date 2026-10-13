@@ -17,11 +17,12 @@ This README is for people. The skills route through [index.md](index.md); the ma
 - **Detector model** (`modules/detector-model.md`): the invented parameters and their limitations.
 - **Working rules** (`modules/working-rules.md`): labels to keep and what not to claim.
 - **Generator** (`scripts/generate_events.py`): seeded synthetic e+e- -> mu+mu- angular events with a
-  `1 + a cos^2 + b cos` shape. It imports no theory code.
+  `1 + a cos^2 + b cos` shape, and an optional invented background sample with a visible-energy fraction for a
+  sideband estimate (`--background`). It imports no theory code.
 - **Detector** (`scripts/detector.py`): invented efficiency, Gaussian cos theta smearing and an analytic response
   matrix that includes the efficiency.
 - **Run configuration** (`benchmarks/path-b.json`): sqrt(s) = 10 GeV, luminosity, shape, efficiency, resolution,
-  binning, seed and toy count.
+  background model, binning, seed and toy count.
 - **Dataset record** (`datasets/synthetic-path-b-dsigma.json`) of the synthetic measurement.
 - **Evidence ledger** (`evidence/`): empty by design, since there is no real source to cite.
 

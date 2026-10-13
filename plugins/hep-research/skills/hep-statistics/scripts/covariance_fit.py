@@ -52,6 +52,9 @@ try:  # --help works without them; main() refuses to run without them (STH-T3.1)
 except ImportError:  # pragma: no cover
     np = optimize = None  # type: ignore[assignment]
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))  # the plugin root
+from core.stats import broken_power_law as _bpl  # noqa: E402
+
 LABEL = "[General method]"
 COND_WARN = 1e10
 NULL_TOL = 1e-9
@@ -93,21 +96,16 @@ def subspace(cov: np.ndarray, constraints) -> tuple[np.ndarray, dict]:
 
 def break_shape(u, smoothness=0.0):
     """h(u) of the broken power law, u = ln(x / x_b): max(u, 0) for a sharp break, s ln((1 + e^(u/s)) / 2) for a
-    smooth one with smoothness s > 0 (which tends to the sharp form as s -> 0)."""
-    u = np.asarray(u, dtype=float)
-    if smoothness <= 0:
-        return np.maximum(u, 0.0)
-    return smoothness * (np.logaddexp(0.0, u / smoothness) - math.log(2.0))
+    smooth one with smoothness s > 0 (which tends to the sharp form as s -> 0); core/stats/broken_power_law.py."""
+    return _bpl.break_shape(np.asarray(u, dtype=float), smoothness)
 
 
 def bpl_log(theta, x, smoothness=0.0):
     """ln F of the broken power law, theta = [ln A, gamma1, gamma2, ln x_b]:
-    ln F = ln A - gamma1 (u - h(u)) - gamma2 h(u), u = ln(x / x_b) (STH-T3.13). F(x_b) = A for the sharp form; the
-    index is gamma1 below and gamma2 above the break. The same parametrization is proposed to hep-analysis for
-    cr_spectrum_powerlaw_fit.py (order question Q8)."""
-    u = np.log(np.asarray(x, dtype=float)) - theta[3]
-    h = break_shape(u, smoothness)
-    return theta[0] - theta[1] * (u - h) - theta[2] * h
+    ln F = ln A - gamma1 (u - h(u)) - gamma2 h(u), u = ln(x / x_b) (STH-T3.13). F(x_b) = A for the sharp and the
+    smooth form; the index is gamma1 below and gamma2 above the break. The plugin's one parametrization (STH Q8),
+    shared with hep-analysis cr_spectrum_powerlaw_fit.py through core/stats/broken_power_law.py."""
+    return _bpl.log_flux(np.asarray(x, dtype=float), theta[0], theta[1], theta[2], theta[3], smoothness)
 
 
 def _plugin(spec, n):
@@ -420,7 +418,6 @@ def break_scan(doc: dict, toys: int = 200, seed: int = 1, cl: float = 0.6827) ->
     Yn = np.clip(rng.multivariate_normal(f_null, cov, size=toys), 1e-12 * np.max(f_null), None)
     c_null, _ = _profile_bpl(Yn, W, x, grid, sm)
     q_null = _single_pl_chi2(Yn, W, x)[0] - c_null.min(axis=1)
-    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
     from core.stats.tail_estimation import toy_tail
     from scipy.stats import chi2 as chi2_dist
     k = int(np.sum(q_null >= q_break - 1e-12))

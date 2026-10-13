@@ -583,7 +583,32 @@ fix; unit tests 2,596 run, 0 failures, 55 skipped (201 modules). Lint with the C
 `core/` and `contracts/`: clean. Physics statements corrected with sources opened on 2026-10-13: SILSO cycle table and
 news item (cycle 24), Kampert & Unger 2012 (sigma(X_max)), Gross & Vitells 2010 (trials), Barlow hep-ex/0207026
 (passed checks), AME2020 and CODATA 2022 (nuclear masses). Not done: simulated backgrounds and masked outputs inside
-the two example pipelines (P4-2 partial).
+the two example pipelines (P4-2 partial; completed in HEP-ANALYSIS-P4-2 below).
+
+## HEP-ANALYSIS-P4-2 (2026-10-13, E2, version 0.6.17 + unreleased, contracts 2.6.0)
+
+hep-analysis audit items P4-2 and P3-12 on branch `fix/hep-analysis-p4-2`: simulated backgrounds with a sideband
+estimate and closure, and a blinded output, inside both journey pipelines. All inputs synthetic.
+
+| Example | Background and estimate | Closure (pre-declared criteria) | Blinded output |
+|---|---|---|---|
+| `collider-angular` (Path B) | tau-pair-like sample from the synthetic-collider generator; B = TF x N(0.5 <= x_vis < 0.8), TF = 0.0707, 10% fully correlated; 414.9 events in the unblinded signal-region bins | Asimov 2.2e-16; validation band 0.8-0.9: observed 1171, predicted 1173.0, pull -0.05, chi2 13.7/12 (p 0.32); toys run the blinded procedure | forward signal-region bin cos theta >= 0.9 (outside the fiducial range); fiducial sigma 746.50 +- 6.73 (stat) +- 2.23 (bkg) +- 14.93 (lumi) pb, expected 745.81 |
+| `ams-flux-ratio` (Path A) | Z=1 charge tail in the helium window; B = TF x N(1.3 <= Q < 1.6), TF = 0.1710, 10% fully correlated | Asimov 2.2e-16; validation band 1.6-1.7: period 1 observed 259, predicted 308.6, pull -2.68, chi2 10.5/8; period 2 observed 416, predicted 390.0, pull 1.25, chi2 8.2/9 (pull spread over seeds 0-9 consistent with unit width) | helium signal-region count at 60-100 GV in both periods; helium flux, He/p ratio and period average null there, dataset records stop at 60 GV |
+
+Both pipelines mask through `mask_blinded_bins.py` as the custodian step (the unmasked histogram lives only in a
+temporary directory), fill the blinded bin with the simulated expectation at zero variance, and save figures only
+after `core.blinding.check_figure` finds nothing in the blinded range. The example tests rerun each pipeline with a
+synthetic sentinel (987654.321) in the blinded bins: all outputs byte-identical to the normal run,
+`audit_blinded_outputs.py scan` with the sealed sentinel histogram passes, a planted sentinel fails. Sealing the real
+blinded counts instead gives false hits in the AMS example (a two-digit count equal to an unrelated public count, and
+a three-digit printed factor within rounding of a sealed ratio), so the sentinel form is the test. Specs validate
+strictly with their profiles and review as `acceptable-with-open-inputs`; gate-verdict snapshot unchanged (no
+`--write`). Downstream: the published-comparison record copied from Path B is regenerated (mu 0.9977 +- 0.0221, chi2
+7.98/9); theory-comparison and detector-resolution rerun byte-identically. The synthetic-collider profile dataset
+record `datasets/synthetic-path-b-dsigma.json` is a contracts-1.0.0 snapshot and was not regenerated.
+
+`tools/run_all_checks.py` with the host CLIs and the E2 venv at `a1801ce`: 21 pass, 0 fail; unit tests 2,804 run,
+0 failures, 58 skipped (212 modules); synthetic-collider profile suite 12 tests. `core/` and `contracts/` not touched.
 
 ## 0.6.17 release check (2026-10-13, E2)
 
@@ -1079,3 +1104,20 @@ sbottom benchmark) was added by the hep-statistics audit of 2026-10-12 (T01-T30,
 | `SrCrModelCard` lost its pyhf skip (STH-T3.12 inserted a class under the decorator) | `tests/adapters/test_sr_cr_model_card.py` with pyhf hidden | 3 errors without pyhf | 6 skipped without pyhf, all pass with it |
 | Broken-power-law covariance comparison at `places=9` | `tests/skills/hep_analysis/test_broken_power_law.py` | fails on Python 3.11 (difference 1.8e-9) | relative 1e-6; measured 1.0e-8 (3.12, 3.13), 9.0e-8 (3.11) |
 | `check_root_cpp_env.sh`: `ROOT_VERSION=$(root --version \| head -n 1)` under `set -euo pipefail` (CI: `test_env_check_parallel_runs_and_cleanup` failed in `rootproject/root:6.38.00-ubuntu25.10`, passed on macOS) | `tests/skills/hep_computing/test_root_cpp_scripts.py` `test_env_check_survives_a_failing_root_version`, `test_env_check_reports_a_failing_root_config` | fake `root --version` exiting 1: exit 1, no output; failing `root-config`: exit 1, no JSON | `status: ok` with the first version line; `status: failed`, exit 1 |
+
+## STATISTICS-FOLLOWUPS (2026-10-13, E2: Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1; version 0.6.17 + unreleased, contracts 2.6.0)
+
+STH Q8 (one broken-power-law parametrization). Synthetic input: 20 points over x = 3-300, truth
+`[ln 5, 2.7, 2.4, ln 30]`, covariance 2% uncorrelated + 1% fully correlated; smooth case s = 0.3.
+
+| Check | Before | After | Test |
+|---|---|---|---|
+| Model value, same parameters, `cr_spectrum_powerlaw_fit.broken_log_flux` vs `covariance_fit.bpl_log` | sharp identical (1e-15); smooth differs by the constant 2^-((g2-g1) s) = 1/1.0644 (the hep-analysis form had no 1/2) | identical (covariance_fit bit-identical to the core helper; hep-analysis within 1e-12, the exp/log round trip of x_b) | `tests/core/test_stats_broken_power_law.py` `test_identical_model_values` |
+| Smooth fit, Asimov points: A from both tools | 5.199 (hep-analysis, labelled `normalization_at_break` but `F(x_b) 2^((g2-g1)s)`) vs 5.195 | both recover the truth: hep-analysis within 1e-6, covariance_fit within 1e-3 sigma; index and break uncertainties agree to 1e-3 relative | `test_asimov_both_recover_the_truth` |
+| Fitted parameters on the same toys (40 seeded per model, measured; 8 per model in the test) | not comparable for A (smooth) | largest difference 0.17 sigma (sharp, covariance_fit started at the hep-analysis fit) and 0.11 sigma (smooth); test tolerance 0.3 sigma. The tools minimize different chi2 (ln F with the linearized covariance vs F) | `test_toys_agree_within_stated_tolerance` |
+| Sharp break, covariance_fit started at the truth instead | — | 2 of 40 toys reach another local minimum (differences up to 1.4 sigma; one has the lower flux chi2 at the hep-analysis point): the sharp-break chi2 is kinked in ln x_b, so the guide says to start from a profiled break | measured, not a test |
+| Found, not changed: `covariance_fit.py fit` on the same spectrum over x = 1-1000 (flux spans 8 decades) | refused: "singular beyond the 0 declared constraint(s)", eigenvalue ratio 4e-16 in absolute units | open: the subspace singularity test is not on the correlation scale (unlike `_linalg.py`); the comparison uses x = 3-300 | — |
+
+hep-statistics SKILL.md headroom: `tools/measure_entrypoints.py` 8178 -> 7653 B (budget 8192, target <= 7700);
+core-stats-guide.md 16651 -> 16944 B (test limit 17000); `tools/check_routing_static.py` ok (197 cases, no failures);
+`test_core_stats_guide`, `test_skill_resources`, `test_ml_inference_routing`, `test_check_ownership` pass.
