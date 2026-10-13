@@ -299,5 +299,25 @@
   "verification_strength": "abstract+metadata",
   "numeric_quotation_allowed": false,
   "last_reviewed": "2026-10-13"
+ },
+ {
+  "id": "hepstats:C16",
+  "claim": "Impacts are not uncertainty components: they are not adequate for quoting a breakdown of the total uncertainty, for which the actual components must be determined separately.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "hepstats:S35"
+  ],
+  "location": "arXiv:2307.04007 abstract",
+  "scope": {
+   "text": "uncertainty breakdowns of profile-likelihood fits"
+  },
+  "limitations": "abstract-level support",
+  "verification_strength": "abstract+metadata",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-13"
  }
 ]

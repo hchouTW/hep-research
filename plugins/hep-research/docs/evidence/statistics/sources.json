@@ -63,7 +63,7 @@
   "supersedes": [],
   "superseded_by": [],
   "attribution": "P. D. Dauncey, M. Kenzie, N. Wardle, G. J. Davies",
-  "notes": "arXiv abstract page and metadata read 2026-10-12; the penalty convention (1 per parameter in -2 ln L) used by discrete_profile.py was not checked against the full text."
+  "notes": "arXiv abstract page and metadata read 2026-10-12; the penalty convention (1 per parameter in -2 ln L) used by discrete_profile.py was not checked against the full text. Cited again 2026-10-13 for discrete profiling in nuisance-modeling.md (abstract level)."
  },
  {
   "id": "hepstats:S04",
@@ -290,7 +290,7 @@
   "supersedes": [],
   "superseded_by": [],
   "attribution": "CMS Collaboration",
-  "notes": "Front page read 2026-10-13: installation via CMSSW 16_0_X or LCG with ROOT 6.32, conda recipe with root=6.34. Earlier content as recorded in nuisance-modeling.md (read 2026-10-03); Combine not executed here."
+  "notes": "Front page read 2026-10-13: installation via CMSSW 16_0_X or LCG with ROOT 6.32, conda recipe with root=6.34. Earlier content as recorded in nuisance-modeling.md (read 2026-10-03); Combine not executed here. Bin-wise statistics page (part2/bin-wise-stats) read 2026-10-13: autoMCStats syntax, n_eff threshold rule."
  },
  {
   "id": "hepstats:S15",
@@ -712,5 +712,27 @@
   "superseded_by": [],
   "attribution": "S. Baker, R. D. Cousins",
   "notes": "Nucl. Instrum. Meth. 221 (1984) 437-442. Bibliographic record only (not opened 2026-10-13)."
+ },
+ {
+  "id": "hepstats:S35",
+  "title": "Uncertainty components in profile likelihood fits",
+  "authors": "A. Pinto, Z. Wu, F. Balli, N. Berger, M. Boonekamp, E. Chapon, T. Kawamoto, B. Malaescu",
+  "year": 2024,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/2307.04007",
+   "arxiv_ids": [
+    "2307.04007"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2024",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "A. Pinto, Z. Wu, F. Balli, N. Berger, M. Boonekamp, E. Chapon, T. Kawamoto, B. Malaescu",
+  "notes": "arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
  }
 ]

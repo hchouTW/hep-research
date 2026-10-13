@@ -20,7 +20,7 @@
   },
   "hep-statistics": {
    "references": 11,
-   "bytes": 142095,
+   "bytes": 144006,
    "uncited": 0
   },
   "hep-theory": {
@@ -1556,7 +1556,7 @@
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "578c12f 2026-10-13"
+   "last_commit": "1386866 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/likelihood-fitting.md",
@@ -1601,8 +1601,8 @@
   {
    "path": "skills/hep-statistics/references/nuisance-modeling.md",
    "owner": "hep-statistics",
-   "bytes": 17931,
-   "lines": 228,
+   "bytes": 19842,
+   "lines": 246,
    "linked_from_skill_md": true,
    "cited_by": [
     "adapters/pyhf-combine/assets/pyhf_nuisance_diagnostics.py",
