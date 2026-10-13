@@ -25,6 +25,58 @@ def run_json(doc):
         return run(str(p))
 
 
+def change(**kw):
+    base = {"id": "c", "parameter": "cut", "old": 1, "new": 2, "motivation": "new calibration from the control sample",
+            "evidence": dict(CONTROL), "looked_at": ["control-region data"]}
+    base.update(kw)
+    return base
+
+
+class EvasionTests(unittest.TestCase):
+    """ANA-P2-8: the four documented evasions (audit appendix) and variants no longer pass."""
+
+    def decide(self, c):
+        return rac.review(c)["decision"]
+
+    def test_prominent_bump(self):
+        for text in ("tighten cut to make the bump more prominent", "loosen the cut so the peak looks more significant",
+                     "make the excess more visible"):
+            with self.subTest(text=text):
+                self.assertIn(self.decide(change(motivation=text)), ("flag", "needs-human-review"))
+
+    def test_sr_seen_in_motivation_despite_looked_at(self):
+        c = change(motivation="after seeing SR mass peak shift we recalibrated", looked_at=["simulation"])
+        self.assertEqual(self.decide(c), "flag")
+        c = change(description="we noticed the signal region was low", looked_at=["simulation"])
+        self.assertEqual(self.decide(c), "flag")
+
+    def test_string_boolean_is_bad_input(self):
+        c = change(evidence={"control_sample": "x", "independent_of_signal_region": "no"})
+        with self.assertRaises(rac.BadExposure):
+            rac.review(c)
+        p = run_json({"changes": [c]})
+        self.assertEqual(p.returncode, 2)
+        with self.assertRaises(rac.BadExposure):
+            rac.review(change(after_unblinding="yes"))
+
+    def test_after_unblinding_with_unexposed_record(self):
+        c = change(after_unblinding=True, looked_at=None,
+                   data_exposure={"state": "unexposed", "basis": "structured-record", "record_ref": "r1"})
+        out = rac.review(c)
+        self.assertEqual(out["decision"], "flag")
+        self.assertTrue(any("contradict" in r for r in out["reasons"]))
+
+    def test_region_named_without_saying_what_was_seen_needs_review(self):
+        out = run_json({"changes": [change(motivation="adjust the cut used in the signal region")]})
+        self.assertEqual(out.returncode, 1)
+        self.assertEqual(json.loads(out.stdout)["changes"][0]["decision"], "needs-human-review")
+
+    def test_calibration_with_provenance_is_still_accepted(self):
+        for text in ("new calibration from the Z peak in control-region data", "update energy scale from test beam"):
+            with self.subTest(text=text):
+                self.assertEqual(self.decide(change(motivation=text)), "accept")
+
+
 class ReviewCliTests(unittest.TestCase):
     def test_help_exits_zero(self):
         proc = run("--help")
