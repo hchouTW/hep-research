@@ -12,6 +12,7 @@ Per-module reference for the scripts in `<plugin root>/core/stats/`, split from 
 6. [`validate_covariance.py` and `validate_response.py`](#validate_covariancepy-and-validate_responsepy)
 7. [Validation tools outside `core/stats`](#validation-tools-outside-corestats)
 8. [Toy ensembles](#toy-ensembles)
+9. [Broken power law](#broken-power-law)
 
 ## `poisson_diagnostics.py`: exact Poisson constructions
 
@@ -335,3 +336,20 @@ grid) is at least nominal - 0.01, fails it when the upper bound is below, and ot
 precision. Results of different ensembles are never pooled; there are no automatic retries.
 `likelihood_limits.shape_toy_generator` and `shape_q_evaluator` connect it to the shape model (every toy refitted).
 Benchmarks: `<plugin root>/examples/stats-benchmarks/` (coverage grid of the counting constructions).
+
+## Broken power law
+
+`broken_power_law.py` (helper, no CLI) is the plugin's one parametrization, used by
+`covariance_fit.py` here and by hep-analysis `cr_spectrum_powerlaw_fit.py`, which give identical model values
+(`tests/core/test_stats_broken_power_law.py`). Parameters `[ln A, gamma1, gamma2, ln x_b]`;
+`ln F = ln A - gamma1 (u - h) - gamma2 h`, `u = ln(x / x_b)`, with `h = max(u, 0)` for a sharp break and
+`h = s ln((1 + e^(u/s)) / 2)` for a smooth one: `F = A (x/x_b)^-gamma1` below and `A (x/x_b)^-gamma2` above a
+sharp break, `F = A (x/x_b)^-gamma1 [(1 + (x/x_b)^(1/s)) / 2]^(-(gamma2 - gamma1) s)` for a smooth one. Indices
+are positive for a falling spectrum; `A = F(x_b)` in both forms (without the 1/2, A would be
+`F(x_b) 2^((gamma2 - gamma1) s)`); s is the transition width in ln x, and s -> 0 gives the sharp form with the
+same parameters. x is the caller's abscissa (energy, energy per nucleon or rigidity) and x_b is in its units; a
+form written as `[1 + (x/x_b)^(Delta gamma / s)]^s` uses another s and another normalization: convert before
+comparing. The two tools minimize different objectives (chi2 in ln F with the linearized covariance; chi2 in F
+with the full covariance), so on the same points their fits agree to a fraction of sigma (0.17 sigma at most on
+40 seeded toys), and exactly on Asimov points. A sharp break makes the chi2 kinked in ln x_b: start
+`covariance_fit.py fit` from a profiled break (the hep-analysis fit or `break-scan`), not from a guess.

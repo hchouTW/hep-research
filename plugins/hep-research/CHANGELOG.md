@@ -351,6 +351,18 @@ same level, and at the publication gate; no new capability).
 - Test fixes found by CI: the pyhf skip restored on `SrCrModelCard`; the broken-power-law covariance comparison uses a
   relative tolerance (finite-difference precision, Python 3.11).
 
+### hep-statistics follow-ups
+
+- **One broken-power-law parametrization (STH Q8).** New helper `core/stats/broken_power_law.py` (steward
+  hep-statistics, no CLI): `[ln A, gamma1, gamma2, ln x_b]`, `ln F = ln A - gamma1 (u - h) - gamma2 h`,
+  `u = ln(x/x_b)`, `h = max(u, 0)` (sharp) or `s ln((1 + e^(u/s))/2)` (smooth), so `A = F(x_b)` in both forms.
+  hep-analysis `cr_spectrum_powerlaw_fit.py` and hep-statistics `covariance_fit.py` both evaluate it and give
+  identical model values. Behavior change in `cr_spectrum_powerlaw_fit.py --model smooth-broken`: its smooth form
+  lacked the 1/2, so the reported `normalization_at_break` was `F(x_b) 2^((g2-g1) s)`, not the flux at the break; it
+  is now `F(x_b)` (indices, break and chi2 unchanged). Documented once in the core/stats guide (conventions) and
+  linked from the hep-analysis guide; the guide's stale "diagonal errors only" description of
+  `cr_spectrum_powerlaw_fit.py` is replaced.
+
 ## 0.6.17 (2026-10-13)
 
 Contracts 2.5.0 (minor: ML semantics; every 2.4.0 artifact keeps its outcome and gets the new rules with

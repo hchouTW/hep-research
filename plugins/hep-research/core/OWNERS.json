@@ -27,7 +27,8 @@
     "_validate",
     "fit_diagnostics",
     "tail_estimation",
-    "toy_ensemble"
+    "toy_ensemble",
+    "broken_power_law"
    ],
    "source": "experiment-neutral implementations; imports packaged"
   },

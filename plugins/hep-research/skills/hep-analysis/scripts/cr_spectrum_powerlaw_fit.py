@@ -14,8 +14,9 @@ What it does: fits log(flux) = log(A) - gamma * log(E) by exact weighted linear 
 squares in log-log space (a single power law is linear in its two parameters over the
 basis {1, log E}, so - like <plugin root>/skills/detector-response/scripts/calorimeter_resolution.py - this is a closed-form
 fit, not a minimizer). Models (--model): a single power law; a continuous broken power law, sharp
-(log J = log A - g1 min(x, 0) - g2 max(x, 0), x = log(E/E_b)) or smooth (J = A (E/E_b)^-g1
-[1 + (E/E_b)^(1/s)]^-(g2-g1) s, --smoothness s), with the break fixed (--break-energy) or free (--free-break:
+(J = A (E/E_b)^-g1 below E_b, A (E/E_b)^-g2 above) or smooth (J = A (E/E_b)^-g1 [(1 + (E/E_b)^(1/s)) / 2]^-(g2-g1) s,
+--smoothness s; A = J(E_b) in both), the plugin's one parametrization (<plugin root>/core/stats/broken_power_law.py,
+shared with hep-statistics covariance_fit.py), with the break fixed (--break-energy) or free (--free-break:
 profiled on a grid with golden-section refinement; its uncertainty from the linearized covariance). Both broken
 models are linear in (log A, g1, g2) at a fixed break, so each break is a generalized least-squares solve. The output
 gives chi2/ndf and the chi2 p-value (weighted fits), accepts a full flux covariance (--covariance) or asymmetric
@@ -47,6 +48,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))  # the plugin root, also under python3 -I
 from core.stats._linalg import solve  # noqa: E402
+from core.stats.broken_power_law import basis as _basis, log_flux as _bpl_log_flux  # noqa: E402
 from core.stats.statistical_toys import chi2_sf  # noqa: E402
 
 STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
@@ -168,28 +170,20 @@ def fit_segmented(points, break_energy):
 
 
 # ---------------------------------------------------------------------------------------------------------------
-# Continuous broken power law (ANA-P2-4). log J = log A - g1 * u1(x) - g2 * u2(x), x = log(E / E_b), with
-#   sharp break:    u1 = min(x, 0), u2 = max(x, 0)                      (continuous at E_b by construction)
-#   smooth break:   u1 = x - s * L, u2 = s * L, L = log(1 + exp(x / s))  (J = A (E/E_b)^-g1 [1 + (E/E_b)^(1/s)]^-(g2-g1) s,
-#                   up to the constant A' = A 2^-(g2-g1) s that A absorbs)
-# Both are linear in (log A, g1, g2) for a fixed break, so the fit profiles the break on a grid with a golden-section
-# refinement and solves a generalized least-squares problem in log flux at each break.
+# Continuous broken power law (ANA-P2-4), in the plugin's one parametrization (STH Q8,
+# core/stats/broken_power_law.py): log J = log A - g1 * u1(x) - g2 * u2(x), x = log(E / E_b), with
+#   sharp break:    u1 = min(x, 0), u2 = max(x, 0)                           (continuous at E_b by construction)
+#   smooth break:   u1 = x - h, u2 = h, h = s log((1 + exp(x / s)) / 2)
+#                   (J = A (E/E_b)^-g1 [(1 + (E/E_b)^(1/s)) / 2]^-(g2-g1) s)
+# A = J(E_b) for both. Both are linear in (log A, g1, g2) for a fixed break, so the fit profiles the break on a grid
+# with a golden-section refinement and solves a generalized least-squares problem in log flux at each break.
 
 MODELS = ('single', 'broken', 'smooth-broken')
 
 
-def _basis(x, smoothness):
-    if smoothness is None:
-        return min(x, 0.0), max(x, 0.0)
-    z = x / smoothness
-    soft = z + math.log1p(math.exp(-z)) if z > 0 else math.log1p(math.exp(z))
-    return x - smoothness * soft, smoothness * soft
-
-
 def broken_log_flux(energy, log_a, g1, g2, break_energy, smoothness=None):
-    """log J of the continuous broken power law at one energy."""
-    u1, u2 = _basis(math.log(energy / break_energy), smoothness)
-    return log_a - g1 * u1 - g2 * u2
+    """log J of the continuous broken power law at one energy (core/stats/broken_power_law.py)."""
+    return _bpl_log_flux(energy, log_a, g1, g2, math.log(break_energy), smoothness)
 
 
 def _log_cov(points, covariance):

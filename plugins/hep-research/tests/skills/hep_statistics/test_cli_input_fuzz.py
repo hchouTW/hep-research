@@ -21,7 +21,7 @@ HIDE = ("import runpy, sys; sys.modules['numpy'] = None; sys.modules['scipy'] = 
         "sys.argv = sys.argv[1:]; runpy.run_path(sys.argv[0], run_name='__main__')")
 VALIDATORS = {"validate_covariance.py", "validate_response.py"}
 # Modules without a CLI (helpers) are skipped.
-NO_CLI = {"fit_diagnostics.py", "tail_estimation.py", "toy_ensemble.py"}
+NO_CLI = {"broken_power_law.py", "fit_diagnostics.py", "tail_estimation.py", "toy_ensemble.py"}
 # Values used for required options that are not under test.
 FILL = {"--seed": "1", "--toys": "100", "--method": None, "--param": "2", "--cl": "0.95", "--n": "3", "--b": "2",
         "--on": "10", "--off": "20", "--alpha": "0.5", "--n-data": "100", "--f": "0.2", "--mc-sig": "100",
