@@ -45,6 +45,29 @@ It takes |Z|, A and the mass from the caller and ships no particle constants; do
   The force-field approximation has one parameter (the modulation potential phi, per time period) and ignores charge-
   sign and drift effects; numerical heliospheric models do not. Time-resolved data need a time-dependent modulation.
 
+## Force-field solar modulation
+
+- Gleeson and Axford derive, for a spherically symmetric heliosphere with a separable diffusion coefficient and
+  negligible streaming, J(r, E, t) / (E^2 - E_0^2) = J(infinity, E + Phi) / ((E + Phi)^2 - E_0^2) with E the total
+  energy, E_0 the rest energy and, for kappa_2 proportional to rigidity, Phi = |Z| e phi(r, t) (ApJ 154 (1968) 1011,
+  Sec. III, Eqs. (15)-(16), pp. 1015-1016, read 2026-10-13 from the ADS scan). phi is "a single parameter describing
+  the modulation" (Eq. (13), p. 1014) and has the units of a potential (their Fig. 2 abscissa in BV; a fitted shift of
+  -80 MV, p. 1015).
+- Per nucleon (Ghelfi et al., arXiv:1511.08650, Sec. 2.1, Eq. (1), read 2026-10-13): E^TOA / A = E^IS / A -
+  (|Z| / A) phi and J^TOA(E^TOA) = (p^TOA / p^IS)^2 J^IS(E^IS), with J the flux per kinetic energy per nucleon and phi
+  of the dimension of rigidity. So the per-nucleon shift is Phi_n = (|Z| / A) phi, the same physics as the
+  total-energy shift |Z| phi.
+- Validity: Gleeson and Axford find the approximation breaks down below about 300 MeV per nucleon for protons and
+  250 MeV per nucleon for alpha particles, where streaming is no longer negligible (p. 1016, read 2026-10-13). The
+  force field "does not allow for any rigidity dependent effects" and cannot predict the time dependence of the
+  potential; studies often use different phi for positive and negative charges to allow charge-sign effects, and phi
+  is degenerate with injection and transport parameters (Cholis, Hooper, Linden, arXiv:1511.01507v3, pp. 1-2, read
+  2026-10-13). Drift (charge-sign) effects are absent from the formula: one phi per period and per charge sign at most.
+- Code: `<plugin root>/skills/hep-analysis/scripts/solar_modulation_force_field.py` implements it in total kinetic
+  energy with the shift |Z| phi (owned by hep-analysis; its extension to rigidity input and tabulated local
+  interstellar spectra is planned there). Convert rigidity or per-nucleon inputs with
+  `core/kinematics/relativistic.py` first. Do not add a second implementation under hep-theory.
+
 ## Inputs that dominate the uncertainty
 
 - **Production (spallation) cross sections** of secondaries (for example B from C and O, including ghost-nucleus
