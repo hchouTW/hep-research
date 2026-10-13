@@ -13,7 +13,7 @@ Chunk faults (HTCondor): exit (code), signal (signal), evict (evicted before out
 (ran, evicted, ran again: a duplicate), hold (reason, code, subcode), remove, stuck (idle forever), vanish.
 Any fault may carry "node" (the execution host reported) and, for Slurm, "alloc_cpus" (AllocCPUS reported; default
 the requested --cpus-per-task, else 1) and "alloc_gpus" (gres/gpu in AllocTRES; default the requested --gpus, else
-none, as for a CPU job). Global modes: sacct unavailable|malformed, squeue
+none, as for a CPU job). Global modes: sacct unavailable|malformed, scontrol unavailable|<MaxArraySize>, squeue
 malformed, eventlog missing|malformed, condor_q malformed.
 
 Output formats are those the backends parse; each emitter names the documentation it follows (see the tool facts
@@ -192,6 +192,23 @@ def sacct(argv: list) -> int:
             print(f"{key}|{r['state']}|{r['exit']}|{r['elapsed']}||{r['nodes']}|{alloc}|{tres}")
             if r["ran"]:
                 print(f"{key}.batch|{r['state'].split()[0]}|{r['exit']}|{r['elapsed']}|{r['rss']}|{r['nodes']}|{alloc}|{tres.removeprefix(f'billing={alloc},')}")
+    return 0
+
+
+def scontrol(argv: list) -> int:
+    """scontrol show config: the lines the backend reads (format of scontrol(1), "show config"). _global
+    "scontrol": an integer MaxArraySize (default 1001, Slurm's default) or "unavailable"."""
+    mode = global_mode("scontrol")
+    if mode == "unavailable":
+        print("scontrol: error: Unable to contact slurm controller", file=sys.stderr)
+        return 1
+    if argv[:2] != ["show", "config"]:
+        print(f"scontrol: unsupported in the shim: {argv}", file=sys.stderr)
+        return 1
+    print("Configuration data as of 2026-10-13T00:00:00")
+    print("ClusterName             = shim")
+    print(f"MaxArraySize            = {int(mode) if mode else 1001}")
+    print("MaxJobCount             = 10000")
     return 0
 
 
@@ -423,7 +440,7 @@ def condor_version(argv: list) -> int:
     return 0
 
 
-TOOLS = {"sbatch": sbatch, "sacct": sacct, "squeue": squeue, "scancel": scancel, "condor_submit": condor_submit,
+TOOLS = {"sbatch": sbatch, "sacct": sacct, "scontrol": scontrol, "squeue": squeue, "scancel": scancel, "condor_submit": condor_submit,
          "condor_q": condor_q, "condor_history": condor_history, "condor_rm": condor_rm, "condor_version": condor_version}
 
 

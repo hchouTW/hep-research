@@ -15,7 +15,7 @@
   },
   "hep-computing": {
    "references": 32,
-   "bytes": 373853,
+   "bytes": 374318,
    "uncited": 0
   },
   "hep-statistics": {
@@ -1059,8 +1059,8 @@
   {
    "path": "skills/hep-computing/references/batch-scheduling.md",
    "owner": "hep-computing",
-   "bytes": 29320,
-   "lines": 273,
+   "bytes": 29785,
+   "lines": 274,
    "linked_from_skill_md": true,
    "cited_by": [
     "adapters/batch-schedulers/htcondor_backend.py",
@@ -1296,7 +1296,7 @@
     "skills/hep-computing/references/symbolic-and-numerical-computation.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "f830fd9 2026-10-13"
+   "last_commit": "7884639 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/product-framing.md",
@@ -1358,7 +1358,7 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "9add3f6 2026-10-13"
+   "last_commit": "7884639 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/risk-and-quality.md",
@@ -1391,7 +1391,7 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "d257072 2026-10-13"
+   "last_commit": "7884639 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/root-debugging.md",

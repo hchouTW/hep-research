@@ -135,7 +135,7 @@ class EnvironmentManifestRemediationTests(unittest.TestCase):
     def test_dirty_or_moved_project_is_drift(self):
         repo = self.d / "repo"
         repo.mkdir()
-        git = ["git", "-C", str(repo), "-c", "user.email=t@example.invalid", "-c", "user.name=t"]
+        git = ["git", "-C", str(repo), "-c", "user.email=synthetic-test", "-c", "user.name=t"]
         if subprocess.run(git[:3] + ["init", "-q"], capture_output=True, timeout=60).returncode:
             self.skipTest("git not available")
         (repo / "f.txt").write_text("x")

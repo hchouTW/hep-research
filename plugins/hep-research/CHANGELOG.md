@@ -117,6 +117,11 @@ Software checks establish contract consistency only, not physical validity.
   cited to the 6.34/6.36 release notes. `python-hep-coding-patterns.md` gains link-level guidance for hist and
   boost-histogram, vector, correctionlib, coffea, dask-awkward and numba. `performance-profiling.md` notes the 6.38
   `Snapshot` compression default (505).
+- **CMP-22 Slurm `MaxArraySize` preflight.** `slurm_backend.py` reads `MaxArraySize` from `scontrol show config`
+  before `sbatch` and refuses (`slurm.array.too_large`, attempts not-submitted, no `sbatch` call) an array whose
+  largest index is not below it; an unreadable value leaves the decision to `sbatch`. New fake `scontrol` in
+  `tests/adapters/batch_shims/`; tool facts table row added. Tests: `tests/adapters/test_batch_cmp_regressions.py`.
+  (Also: the CMP-07 git test no longer uses an e-mail-shaped placeholder, which the packaging check flags.)
 
 ## 0.6.17 (2026-10-13)
 

@@ -3,7 +3,10 @@
 prepare  renders assets/slurm-array.sbatch.template: --array=0-(n-1)[%throttle], --no-requeue, resources and site
          keys only from the configuration; the job runs the campaign's runner with the array index, which the
          runner maps to a chunk through the submission map (map.json) written with the script.
-submit   sbatch --parsable --output=<logs>/%A_%a.stdout.log --error=<logs>/%A_%a.stderr.log job.sbatch
+submit   preflight: scontrol show config gives MaxArraySize; an array whose largest index is MaxArraySize or more is
+         refused before sbatch (slurm.array.too_large, attempts not-submitted). Without a readable value (no scontrol
+         on the submit host) sbatch decides. Then
+         sbatch --parsable --output=<logs>/%A_%a.stdout.log --error=<logs>/%A_%a.stderr.log job.sbatch
 poll     sacct --jobs=<ids> --duplicates --parsable2 --noheader
          --format=JobID,State,ExitCode,Elapsed,MaxRSS,NodeList,AllocCPUS,AllocTRES
          (ExitCode is "exit:signal"; MaxRSS is taken from the job steps; AllocCPUS, 0 while pending, feeds the
@@ -24,7 +27,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from core.partition.executors import Executor, PollError, SubmitAmbiguous, _blank  # noqa: E402
+from core.partition.executors import Executor, PollError, SubmitAmbiguous, SubmitRefused, _blank  # noqa: E402
 
 TEMPLATE = Path(__file__).resolve().parent / "assets" / "slurm-array.sbatch.template"
 SACCT_FIELDS = "JobID,State,ExitCode,Elapsed,MaxRSS,NodeList,AllocCPUS,AllocTRES"
@@ -41,6 +44,7 @@ STATES = {  # native State (first word; "CANCELLED by 123" -> CANCELLED) -> norm
     "DEADLINE": "failed", "REVOKED": "cancelled",
 }
 TASK = re.compile(r"^(\d+)_(\d+)$")
+MAX_ARRAY = re.compile(r"^\s*MaxArraySize\s*=\s*(\d+)\s*$", re.M)
 PENDING_RANGE = re.compile(r"^(\d+)_\[(.+)\]$")
 
 
@@ -137,7 +141,21 @@ class SlurmExecutor(Executor):
                 "files": {"job.sbatch": text, "map.json": json.dumps(ctx["rows"], indent=1) + "\n"},
                 "submit_argv": argv, "rows": ctx["rows"]}
 
+    def max_array_size(self) -> int | None:
+        """MaxArraySize from scontrol show config (array indices must be below it), None when it cannot be read."""
+        try:
+            p = self.run_poll(["scontrol", "show", "config"])
+        except PollError:
+            return None
+        m = MAX_ARRAY.search(p.stdout or "") if p.returncode == 0 else None
+        return int(m.group(1)) if m else None
+
     def submit(self, plan: dict) -> list[dict]:
+        limit = self.max_array_size()
+        top = max((r["index"] for r in plan.get("rows", [])), default=-1)
+        if limit is not None and top >= limit:
+            raise SubmitRefused("slurm.array.too_large", f"array index {top} is not below this cluster's MaxArraySize "
+                                f"{limit}: split the campaign into submissions of at most {limit} chunks")
         p = self.run_submit(plan["submit_argv"], cwd=plan["submission_dir"])
         first = (p.stdout.strip().splitlines() or [""])[0]
         job = first.split(";")[0]

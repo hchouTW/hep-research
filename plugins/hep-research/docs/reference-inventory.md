@@ -130,7 +130,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `acceptance-criteria.md` | hep-computing | 3.7 | no | 3 | - | 351029c 2026-10-07 |
 | `agile-development-guide.md` | hep-computing | 10.7 | yes | 8 | physics-ml | 351029c 2026-10-07 |
 | `bash-balanced-design-guidelines.md` | hep-computing | 27.0 | yes | 2 | - | b0cb9ac 2026-10-13 |
-| `batch-scheduling.md` | hep-computing | 29.3 | yes | 11 | - | 22ea71e 2026-10-12 |
+| `batch-scheduling.md` | hep-computing | 29.8 | yes | 11 | - | 22ea71e 2026-10-12 |
 | `batch-site-cern-htcondor.md` | hep-computing | 11.2 | no | 2 | - | 6815df4 2026-10-10 |
 | `batch-site-nstccore-slurm.md` | hep-computing | 11.5 | no | 1 | - | 22ea71e 2026-10-12 |
 | `cmake-and-build.md` | hep-computing | 2.9 | yes | 5 | hep-analysis | fe8f71e 2026-10-13 |
@@ -144,13 +144,13 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `implementation-discipline.md` | hep-computing | 7.6 | no | 3 | - | 351029c 2026-10-07 |
 | `loop-engineering.md` | hep-computing | 6.7 | no | 7 | - | 351029c 2026-10-07 |
 | `numerical-and-computational-methods.md` | hep-computing | 8.5 | yes | 7 | hep-theory, research-communication | 46cea2c 2026-10-13 |
-| `performance-profiling.md` | hep-computing | 6.7 | no | 3 | - | f830fd9 2026-10-13 |
+| `performance-profiling.md` | hep-computing | 6.7 | no | 3 | - | 7884639 2026-10-13 |
 | `product-framing.md` | hep-computing | 3.2 | no | 3 | - | 351029c 2026-10-07 |
 | `prompt-engineering-and-token-optimization.md` | hep-computing | 9.4 | no | 3 | - | 351029c 2026-10-07 |
 | `python-balanced-design-guidelines.md` | hep-computing | 31.1 | yes | 4 | - | 351029c 2026-10-07 |
-| `python-hep-coding-patterns.md` | hep-computing | 6.6 | yes | 6 | hep-analysis | 9add3f6 2026-10-13 |
+| `python-hep-coding-patterns.md` | hep-computing | 6.6 | yes | 6 | hep-analysis | 7884639 2026-10-13 |
 | `risk-and-quality.md` | hep-computing | 7.7 | no | 3 | - | 351029c 2026-10-07 |
-| `root-balanced-design-guidelines.md` | hep-computing | 53.8 | yes | 6 | hep-analysis | d257072 2026-10-13 |
+| `root-balanced-design-guidelines.md` | hep-computing | 53.8 | yes | 6 | hep-analysis | 7884639 2026-10-13 |
 | `root-debugging.md` | hep-computing | 3.6 | yes | 5 | hep-analysis | 80a8344 2026-10-13 |
 | `software-architecture.md` | hep-computing | 7.8 | no | 4 | - | 351029c 2026-10-07 |
 | `status-updates-and-completion.md` | hep-computing | 2.0 | no | 3 | - | 351029c 2026-10-07 |
