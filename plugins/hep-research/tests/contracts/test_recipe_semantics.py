@@ -1,6 +1,8 @@
 """T4.6: operator semantics for bounded recipes. The shipped recipe passes against the shipped table; repeated
 corrections (within the recipe or across upstream artifacts, P05), wrong order, kind or unit mismatches, incomplete
-results, unknown operators, changed tables and uncontracted tools fail with specific codes. Synthetic values only."""
+results, unknown operators, changed tables and uncontracted tools fail with specific codes. With R4 correction keys a
+repeat on the same scope and variation fails, another scope or variation passes with a warning, and an unkeyed side is
+undetermined. Synthetic values only."""
 import copy
 import json
 import subprocess
@@ -121,6 +123,146 @@ class RepeatedCorrectionTests(unittest.TestCase):
         art = {"extension": {"observable": {"included_corrections": ["background"]}}}
         r = recipe("correct_efficiency", "divide_exposure", "divide_bin_width", applied=["background"])
         self.assertEqual(rs.check_recipe(r, TABLES, upstream=[art])["status"], "pass")
+
+
+def key(scope="species:b", calib="none", var="nominal", stage="unfolded"):
+    return {"target_scope": scope, "calibration_digest": calib, "variation_id": var, "stage": stage}
+
+
+def keyed(*ops, keys=None, applied=(), input_keys=None):
+    """A 1.1.0 recipe; keys: step index -> {effect: key}."""
+    r = recipe(*ops, applied=applied)
+    r["recipe_version"] = "1.1.0"
+    for i, k in (keys or {}).items():
+        r["steps"][i]["effect_keys"] = k
+    if input_keys is not None:
+        r["input"]["effect_keys"] = input_keys
+    return r
+
+
+TWICE = ("subtract_background", "unfold_with_efficiency", "correct_efficiency", "divide_exposure", "divide_bin_width")
+
+
+def warnings(res):
+    return sorted({f["code"] for f in res["findings"] if f["severity"] == "warning"})
+
+
+class CorrectionKeyTests(unittest.TestCase):
+    """R4 F04/T04: the same scoped correction repeated is rejected; another legal scope or variation is not blocked;
+    a repeat that cannot be decided asks for the keys."""
+
+    def test_unkeyed_1_1_0_keeps_the_name_rule(self):
+        r = keyed(*TWICE)
+        self.assertEqual(codes(rs.check_recipe(r, TABLES)), ["semantics.repeated_correction"])
+
+    def test_same_key_is_a_repeat(self):
+        r = keyed(*TWICE, keys={1: {"efficiency": key()}, 2: {"efficiency": key()}})
+        self.assertEqual(codes(rs.check_recipe(r, TABLES)), ["semantics.repeated_correction"])
+
+    def test_other_calibration_or_stage_is_still_a_repeat(self):
+        c = "a" * 64
+        for k2 in (key(calib=c), key(stage="folded"), key(calib=c, stage="folded")):
+            with self.subTest(k2=k2):
+                r = keyed(*TWICE, keys={1: {"efficiency": key()}, 2: {"efficiency": k2}})
+                self.assertEqual(codes(rs.check_recipe(r, TABLES)), ["semantics.repeated_correction"])
+
+    def test_other_scope_or_variation_is_not_blocked(self):
+        for k2 in (key(scope="species:c"), key(var="eff-up"), key(scope="period:2", var="eff-up")):
+            with self.subTest(k2=k2):
+                r = keyed(*TWICE, keys={1: {"efficiency": key()}, 2: {"efficiency": k2}})
+                res = rs.check_recipe(r, TABLES)
+                self.assertEqual(res["status"], "pass", res["findings"])
+                self.assertEqual(warnings(res), ["semantics.repeat_distinct_instance"])
+
+    def test_one_side_unkeyed_is_undetermined(self):
+        for keys in ({1: {"efficiency": key()}}, {2: {"efficiency": key()}}):
+            with self.subTest(keys=keys):
+                self.assertEqual(codes(rs.check_recipe(keyed(*TWICE, keys=keys), TABLES)), ["semantics.repeat_undetermined"])
+
+    def test_keys_need_1_1_0(self):
+        r = keyed(*SEPARATE, keys={2: {"efficiency": key()}})
+        self.assertEqual(rs.check_recipe(r, TABLES)["status"], "pass")
+        r["recipe_version"] = "1.0.0"
+        self.assertEqual(codes(rs.check_recipe(r, TABLES)), ["semantics.version_feature"])
+
+    def test_key_for_an_effect_not_applied(self):
+        r = keyed(*SEPARATE, keys={2: {"background": key()}})
+        self.assertEqual(codes(rs.check_recipe(r, TABLES)), ["semantics.key_unused"])
+        r = keyed("correct_efficiency", "divide_exposure", "divide_bin_width", applied=["background"],
+                  input_keys={"migration": key()})
+        self.assertIn("semantics.key_unused", codes(rs.check_recipe(r, TABLES)))
+
+    def test_key_schema(self):
+        for bad in (key(calib="abc"), dict(key(), extra=1), {"target_scope": "x"}, key(scope="has space")):
+            with self.subTest(bad=bad):
+                r = keyed(*SEPARATE, keys={2: {"efficiency": bad}})
+                self.assertEqual(rs.check_recipe(r, TABLES)["status"], "fail")
+
+    def test_upstream_keys(self):
+        def up(**k):
+            return {"extension": {"corrections": [dict({"effect_id": "background", "category": "x", "applied_in": "y"}, **k)]}}
+        r = keyed(*SEPARATE, keys={0: {"background": key()}})
+        cases = [("semantics.repeated_correction", up(**key())), ("semantics.repeat_undetermined", up()),
+                 ("semantics.repeat_undetermined", up(target_scope="species:b"))]
+        for code, art in cases:
+            with self.subTest(art=art):
+                self.assertEqual(codes(rs.check_recipe(r, TABLES, upstream=[art])), [code])
+        res = rs.check_recipe(r, TABLES, upstream=[up(**key(scope="species:c"))])
+        self.assertEqual(res["status"], "pass", res["findings"])
+        self.assertEqual(warnings(res), ["semantics.repeat_distinct_instance"])
+
+    def test_cumulative_upstream_records_are_one_application(self):
+        art = {"extension": {"observable": {"included_corrections": ["background"]}}}
+        r = recipe("correct_efficiency", "divide_exposure", "divide_bin_width", applied=["background"])
+        self.assertEqual(rs.check_recipe(r, TABLES, upstream=[art, copy.deepcopy(art)])["status"], "pass")
+
+    def test_keyed_record_subsumes_unkeyed_one(self):
+        corr = dict({"effect_id": "background", "category": "x", "applied_in": "y"}, **key())
+        art = {"extension": {"observable": {"included_corrections": ["background"]}, "corrections": [corr]}}
+        r = recipe("correct_efficiency", "divide_exposure", "divide_bin_width")
+        for arts in ([art], [art, {"extension": {"observable": {"included_corrections": ["background"]}}}],
+                     [{"extension": {"observable": {"included_corrections": ["background"]}}}, art]):
+            with self.subTest(n=len(arts)):
+                res = rs.check_recipe(r, TABLES, upstream=arts)
+                self.assertEqual(res["status"], "pass", res["findings"])
+
+    def test_input_claim_does_not_hide_upstream_repeats(self):
+        def up(**k):
+            return {"extension": {"corrections": [dict({"effect_id": "background", "category": "x", "applied_in": "y"}, **k)]}}
+        ops = ("correct_efficiency", "divide_exposure", "divide_bin_width")
+        for keys in (None, {"background": key()}):
+            with self.subTest(input_keys=keys):
+                r = keyed(*ops, applied=["background"], input_keys=keys)
+                res = rs.check_recipe(r, TABLES, upstream=[up(**key()), up(**key(calib="b" * 64))])
+                self.assertEqual(codes(res), ["semantics.repeated_correction"])
+                res = rs.check_recipe(r, TABLES, upstream=[up(**key()), up(**key(scope="species:c"))])
+                self.assertEqual(res["status"], "pass", res["findings"])
+                self.assertEqual(warnings(res), ["semantics.repeat_distinct_instance"])
+
+    def test_malformed_upstream_key_is_incomplete(self):
+        r = keyed(*SEPARATE, keys={0: {"background": key()}})
+        for bad in (key(calib="xyz"), key(scope=""), key(var="Nominal"), dict(key(), stage=3)):
+            with self.subTest(bad=bad):
+                art = {"extension": {"corrections": [dict({"effect_id": "background", "category": "x", "applied_in": "y"}, **bad)]}}
+                self.assertEqual(codes(rs.check_recipe(r, TABLES, upstream=[art])), ["semantics.repeat_undetermined"])
+
+    def test_1_0_0_recipe_with_keyed_upstream(self):
+        art = {"extension": {"corrections": [dict({"effect_id": "background", "category": "x", "applied_in": "y"}, **key())]}}
+        self.assertEqual(codes(rs.check_recipe(recipe(*SEPARATE), TABLES, upstream=[art])), ["semantics.repeat_undetermined"])
+
+    def test_input_key_corroborated_by_unkeyed_upstream(self):
+        art = {"extension": {"observable": {"included_corrections": ["background"]}}}
+        r = keyed("correct_efficiency", "divide_exposure", "divide_bin_width", applied=["background"],
+                  input_keys={"background": key()})
+        self.assertEqual(rs.check_recipe(r, TABLES, upstream=[art])["status"], "pass")
+
+    def test_input_key_must_match_upstream(self):
+        art = {"extension": {"corrections": [dict({"effect_id": "background", "category": "x", "applied_in": "y"}, **key())]}}
+        ops = ("correct_efficiency", "divide_exposure", "divide_bin_width")
+        r = keyed(*ops, applied=["background"], input_keys={"background": key()})
+        self.assertEqual(rs.check_recipe(r, TABLES, upstream=[art])["status"], "pass")
+        r = keyed(*ops, applied=["background"], input_keys={"background": key(scope="species:c")})
+        self.assertEqual(codes(rs.check_recipe(r, TABLES, upstream=[art])), ["semantics.key_mismatch"])
 
 
 class OrderAndKindTests(unittest.TestCase):

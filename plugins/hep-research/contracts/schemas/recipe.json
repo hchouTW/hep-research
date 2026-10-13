@@ -3,14 +3,15 @@
  "required": ["recipe_version", "recipe_id", "semantics", "input", "estimand_kind", "steps", "not_applied"],
  "additionalProperties": false,
  "properties": {
-  "recipe_version": {"type": "string", "const": "1.0.0"},
+  "recipe_version": {"$comment": "1.1.0 adds the optional correction keys (effect_keys)", "type": "string", "enum": ["1.0.0", "1.1.0"]},
   "recipe_id": {"$ref": "#/$defs/id"},
   "semantics": {"type": "object", "required": ["table_id", "sha256"], "additionalProperties": false, "properties": {
     "table_id": {"$ref": "#/$defs/id"},
     "sha256": {"$comment": "canonical JSON digest of the table (sorted keys, no whitespace)", "type": "string", "pattern": "^[0-9a-f]{64}$"}}},
   "input": {"type": "object", "required": ["kind", "applied_effects"], "additionalProperties": false, "properties": {
     "kind": {"$ref": "#/$defs/id"},
-    "applied_effects": {"$comment": "effects already applied upstream; the checker adds those named by upstream artifacts", "type": "array", "items": {"$ref": "#/$defs/id"}}}},
+    "applied_effects": {"$comment": "effects already applied upstream; the checker adds those named by upstream artifacts", "type": "array", "items": {"$ref": "#/$defs/id"}},
+    "effect_keys": {"$comment": "correction key per effect of applied_effects (recipe_version 1.1.0)", "$ref": "#/$defs/effect_keys"}}},
   "estimand_kind": {"$ref": "#/$defs/id"},
   "not_applied": {"$comment": "every effect of the table the recipe does not apply, with the reason; an omission is never silent",
     "type": "array", "items": {"type": "object", "required": ["effect_id", "reason"], "additionalProperties": false, "properties": {
@@ -20,7 +21,15 @@
     "properties": {
     "step_id": {"$ref": "#/$defs/id"},
     "operator": {"$ref": "#/$defs/id"},
-    "tool": {"$comment": "<tool_id>:<operation_id> of a tool contract whose operation lists this operator", "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{0,63}:[a-z0-9][a-z0-9_-]{0,63}$"}}}}
+    "tool": {"$comment": "<tool_id>:<operation_id> of a tool contract whose operation lists this operator", "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{0,63}:[a-z0-9][a-z0-9_-]{0,63}$"},
+    "effect_keys": {"$comment": "correction key per effect this step's operator applies (recipe_version 1.1.0)", "$ref": "#/$defs/effect_keys"}}}}
  },
- "$defs": {"id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$"}}
+ "$defs": {"id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$"},
+  "effect_keys": {"$comment": "effect_id -> correction key", "type": "object", "additionalProperties": {"$ref": "#/$defs/correction_key"}},
+  "correction_key": {"$comment": "R4 correction key (F04, R4 T04), with the effect_id that names it: which application of an effect this is. The same effect on another target scope or as another variation is a distinct application; the same scope and variation again is a repeat whatever the calibration or stage",
+   "type": "object", "required": ["target_scope", "calibration_digest", "variation_id", "stage"], "additionalProperties": false, "properties": {
+   "target_scope": {"$comment": "what the correction acts on, e.g. species, period, detector region", "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/+-]{0,127}$"},
+   "calibration_digest": {"$comment": "SHA-256 of the calibration input, or none when the effect has none", "anyOf": [{"type": "string", "pattern": "^[0-9a-f]{64}$"}, {"type": "string", "const": "none"}]},
+   "variation_id": {"$comment": "nominal or the systematic variation", "$ref": "#/$defs/id"},
+   "stage": {"$comment": "processing stage at which it is applied", "$ref": "#/$defs/id"}}}}
 }
