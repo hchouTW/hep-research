@@ -1384,12 +1384,24 @@ class _TwoPoiModel:
     def log(self) -> FitLog:
         return self.m1.log
 
-    def cond(self, mu1, mu2, ns, aux, start=None):
+    def cond(self, mu1, mu2, ns, aux, start=None, probe=False):
+        """Conditional fit at (mu1, mu2). With probe (a contour or Hessian probe, STH-T1.6), a point where no nuisance
+        value gives a valid likelihood (some bin mean <= 0) is outside the domain: q = +inf for the root finder,
+        counted as an event, not recorded as a failed fit on the observed data."""
         if self.k == 0:
             val = self.nll(mu1, mu2, [], ns, aux)
+            if probe and not math.isfinite(val):
+                self.log.events["out_of_domain_probes"] += 1
+                return [], math.inf
             self.log.record(_verdict_no_free(val))
             return [], val
-        r = self.log.record(newton_fit(lambda x: self.nll(mu1, mu2, x, ns, aux), list(start) if start else [0.0] * self.k))
+        r = newton_fit(lambda x: self.nll(mu1, mu2, x, ns, aux), list(start) if start else [0.0] * self.k)
+        if probe and not math.isfinite(r.fval) and start:   # the start may be what is outside: retry from nominal
+            r = newton_fit(lambda x: self.nll(mu1, mu2, x, ns, aux), [0.0] * self.k)
+        if probe and not math.isfinite(r.fval):
+            self.log.events["out_of_domain_probes"] += 1
+            return list(start) if start else [0.0] * self.k, math.inf
+        self.log.record(r)
         return r.x, r.fval
 
     def glob(self, ns, aux, start=None):
@@ -1397,11 +1409,14 @@ class _TwoPoiModel:
         r = self.log.record(newton_fit(lambda v: self.nll(v[0], v[1], v[2:], ns, aux), x0))
         return r.x[0], r.x[1], r.x[2:], r.fval
 
-    def q(self, mu1, mu2, ns, aux, g=None):
+    def q(self, mu1, mu2, ns, aux, g=None, probe=False):
         """2 (conditional - global NLL); a conditional minimum below the global one beyond DNLL_TOL triggers a global
-        refit from the conditional point and, if it remains, a recorded failure (audit T05)."""
+        refit from the conditional point and, if it remains, a recorded failure (audit T05). With probe, +inf outside
+        the domain (see cond)."""
         g = g if g else self.glob(ns, aux)
-        th_c, cval = self.cond(mu1, mu2, ns, aux, g[2])
+        th_c, cval = self.cond(mu1, mu2, ns, aux, g[2], probe)
+        if not math.isfinite(cval):
+            return math.inf
         if cval < g[3] - DNLL_TOL:
             self.log.events["global_refit"] += 1
             g2 = self.glob(ns, aux, [mu1, mu2] + list(th_c))
@@ -1431,17 +1446,43 @@ def _load_two_poi(doc):
     return bins1, bins2, nuis, chol
 
 
+def _root_increasing_in_domain(f, lo: float, hi: float, tol: float = 1e-7) -> float:
+    """_root_increasing for an f that is +inf outside the likelihood's domain (STH-T1.6): hi is doubled until f(hi) > 0,
+    then an infinite f(hi) is bisected back into the domain before the Illinois steps. A ray that meets the domain
+    edge (some bin mean <= 0) before f crosses zero is refused, not closed at the edge."""
+    flo, fhi = f(lo), f(hi)
+    for _ in range(20):
+        if fhi > 0.0:
+            break
+        lo, flo, hi = hi, fhi, 2.0 * hi
+        fhi = f(hi)
+    else:
+        raise LikelihoodError("the contour level lies beyond the scan range")
+    for _ in range(200):
+        if math.isfinite(fhi):
+            return _root_increasing(f, lo, hi, tol)
+        if hi - lo < tol * max(1.0, abs(hi)):
+            break
+        mid = 0.5 * (lo + hi)
+        fm = f(mid)
+        if fm > 0.0:
+            hi, fhi = mid, fm
+        else:
+            lo, flo = mid, fm
+    raise LikelihoodError("the ray reaches the edge of the domain (a bin mean <= 0) before the contour level")
+
+
 def _trace_contours(model, aux0, g, cls, rays):
     """Hessian covariance at the best fit g and contour points along rays (one pass of profile_contour)."""
     m1h, m2h = g[0], g[1]
     s1, s2 = (max(sum(model.m1.s), 1e-12), max(sum(model.m2.s), 1e-12))
     h1, h2 = 0.05 * math.sqrt(sum(model.n) + 1.0) / s1, 0.05 * math.sqrt(sum(model.n) + 1.0) / s2
-    f = lambda a, b: 0.5 * model.q(a, b, model.n, aux0, g)
+    f = lambda a, b: 0.5 * model.q(a, b, model.n, aux0, g, probe=True)
     f11 = (f(m1h + h1, m2h) + f(m1h - h1, m2h)) / h1 ** 2
     f22 = (f(m1h, m2h + h2) + f(m1h, m2h - h2)) / h2 ** 2
     f12 = (f(m1h + h1, m2h + h2) - f(m1h + h1, m2h - h2) - f(m1h - h1, m2h + h2) + f(m1h - h1, m2h - h2)) / (4 * h1 * h2)
     det = f11 * f22 - f12 * f12
-    cov = [[f22 / det, -f12 / det], [-f12 / det, f11 / det]] if det > 0 else None
+    cov = [[f22 / det, -f12 / det], [-f12 / det, f11 / det]] if math.isfinite(det) and det > 0 else None
     sd = (math.sqrt(cov[0][0]), math.sqrt(cov[1][1])) if cov and cov[0][0] > 0 and cov[1][1] > 0 else (1.0 / s1, 1.0 / s2)
     contours, failures = {}, []
     for c in cls:
@@ -1451,11 +1492,11 @@ def _trace_contours(model, aux0, g, cls, rays):
             phi = 2.0 * math.pi * j / rays
             u1, u2 = math.cos(phi) * sd[0], math.sin(phi) * sd[1]
             try:
-                r = _root_increasing(lambda r_: model.q(m1h + r_ * u1, m2h + r_ * u2, model.n, aux0, g) - level,
-                                     0.0, 2.0 * math.sqrt(level), tol=1e-6)
+                r = _root_increasing_in_domain(lambda r_: model.q(m1h + r_ * u1, m2h + r_ * u2, model.n, aux0, g, probe=True) - level,
+                                               0.0, 2.0 * math.sqrt(level), tol=1e-6)
                 pts.append([m1h + r * u1, m2h + r * u2])
-            except LikelihoodError:
-                failures.append({"cl": c, "angle_deg": 360.0 * j / rays})
+            except LikelihoodError as exc:
+                failures.append({"cl": c, "angle_deg": 360.0 * j / rays, "reason": str(exc)})
         contours[f"{c:g}"] = {"q_level": level, "points": pts}
     return m1h, m2h, cov, contours, failures
 

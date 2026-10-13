@@ -68,6 +68,30 @@ class ContourTests(unittest.TestCase):
         self.assertNotIn("rays_not_closed", r)
         self.assertGreater(r["covariance_from_hessian"][0][0], 0)
 
+    def test_probes_outside_the_domain_are_not_failed_fits(self):
+        """STH-T1.6: rays from this best fit cross points where a bin mean is <= 0 (mu1 or mu2 well below zero); those
+        probes are q = +inf for the root finder, not failed observed-data fits."""
+        doc = {"bins": [{"n": 20, "b": 10, "s1": 5, "s2": 1}, {"n": 15, "b": 10, "s1": 1, "s2": 5},
+                        {"n": 12, "b": 10, "s1": 2, "s2": 2}]}
+        r = ll.profile_contour(doc)
+        self.assertEqual(r["status"], "ok", r["fit_diagnostics"])
+        self.assertNotIn("rays_not_closed", r)
+        self.assertGreater(r["fit_diagnostics"]["events"].get("out_of_domain_probes", 0), 0)
+        ns = [x["n"] for x in doc["bins"]]
+        nus = lambda a, b: [a * x["s1"] + b * x["s2"] + x["b"] for x in doc["bins"]]
+        best = deviance(ns, nus(r["best_fit"]["mu1"], r["best_fit"]["mu2"]))
+        for d1, d2 in ((1e-3, 0), (-1e-3, 0), (0, 1e-3), (0, -1e-3)):
+            self.assertGreaterEqual(deviance(ns, nus(r["best_fit"]["mu1"] + d1, r["best_fit"]["mu2"] + d2)), best - 1e-9)
+        for c, v in r["contours"].items():
+            self.assertEqual(len(v["points"]), 36, c)
+            for x, y in v["points"]:
+                self.assertAlmostEqual(deviance(ns, nus(x, y)) - best, v["q_level"], delta=1e-4, msg=(c, x, y))
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "c.json"
+            path.write_text(json.dumps(doc))
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(ll.main(["contour", "--input", str(path)]), 0)
+
     def test_a_nuisance_widens_the_contour(self):
         plain = ll.profile_contour(self.DOC, (0.95,), 12)
         wide = ll.profile_contour(dict(self.DOC, nuisances=[{"kind": "background_norm", "sigma": 0.15}]), (0.95,), 12)
