@@ -86,7 +86,10 @@ and use common random numbers across a scan.
   (`exp(sigma theta)`) or `gamma` (`1 + sigma theta` with a Poisson auxiliary measurement of `tau = 1/sigma^2`); an
   optional correlation matrix correlates the Gaussian-type nuisances (gamma ones cannot be correlated). Choose the
   constraint from the origin of the uncertainty ([nuisance modeling](nuisance-modeling.md)), not by convenience. Slow
-  for many nuisances.
+  for many nuisances. Without toys (`--toys 0`, no `--cls-toys`) it runs on the asymptotic path at ordinary sizes (up to
+  100 bins, 1e4 expected background events per bin, 1e6 events; `path` in the output); its asymptotic CLs limit agrees
+  with pyhf 0.7.6 within 1% at 100 bins x 1000 events (`tests/adapters/test_backend_likelihood_equivalence.py`). The
+  toy paths keep the small caps and point to the pyhf adapter beyond them.
 - `shape-gof --input FILE [--mu --toys --seed]`: saturated-model goodness of fit of a `shape-limit` model (Poisson
   bins plus constraint terms, so pulled nuisances count), `mu` fitted (`mu >= 0`) or fixed, calibrated by toys from
   the fitted model; the chi-square reference (bins - 1 or bins degrees of freedom) is approximate and

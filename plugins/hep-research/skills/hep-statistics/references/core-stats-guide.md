@@ -50,7 +50,8 @@ Per-module subcommands, inputs and outputs, the validation tools outside `core/s
 | `poisson_diagnostics.py fc-interval` (`FC_MAX_TOTAL_MEAN`) | total mean <= 500 | `cls-limit`, or `likelihood_limits.py profile-fc` |
 | `likelihood_limits.py` single-bin subcommands (`_inputs1`: profile-*, neyman-*) | b <= 200, sigma_b <= 100 | the pyhf adapter, or the asymptotic formulas labeled as such |
 | `likelihood_limits.py multibin-limit` | bins <= 50, bin b <= 200, total n <= 400, mc_stat <= 100 | the pyhf adapter |
-| `likelihood_limits.py shape-limit`, `shape-gof`, `contour` | bins <= 40, bin b <= 200, total n <= 400, mc_stat <= 100 | the pyhf adapter |
+| `likelihood_limits.py shape-limit` with toys, `shape-gof`, `contour` (`SHAPE_TOY_CAPS`) | bins <= 40, bin b <= 200, total n <= 400, mc_stat <= 100 | `shape-limit` without toys, or the pyhf adapter |
+| `likelihood_limits.py shape-limit` without toys (`SHAPE_ASYMPTOTIC_CAPS`) | bins <= 100, bin b <= 1e4, total n <= 1000000 | the pyhf adapter |
 | `likelihood_limits.py` toy counts | toys 100 to 100000 | partition the toys (hep-computing) and merge |
 | `statistical_toys.py` toy counts (`MAX_TOYS`) | toys <= 200000 | partition the toys and merge |
 | `statistical_toys.py ratio-cov` | numerator, denominator <= 1e5 | `ratio-cov-analytic`, or `ratio-measured` (measured covariance, denominator <= 1e12) |

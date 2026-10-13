@@ -20,7 +20,7 @@
   },
   "hep-statistics": {
    "references": 10,
-   "bytes": 130108,
+   "bytes": 130723,
    "uncited": 0
   },
   "hep-theory": {
@@ -1494,8 +1494,8 @@
   {
    "path": "skills/hep-statistics/references/core-stats-commands.md",
    "owner": "hep-statistics",
-   "bytes": 31119,
-   "lines": 330,
+   "bytes": 31529,
+   "lines": 333,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-statistics/SKILL.md",
@@ -1504,13 +1504,13 @@
     "tests/skills/hep_statistics/test_core_stats_guide.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "8dc090e 2026-10-13"
+   "last_commit": "8fa006b 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 16042,
-   "lines": 166,
+   "bytes": 16247,
+   "lines": 167,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/inference-and-unfolding.md",
@@ -1523,7 +1523,7 @@
     "tests/skills/hep_statistics/test_core_stats_guide.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "8dc090e 2026-10-13"
+   "last_commit": "8fa006b 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",

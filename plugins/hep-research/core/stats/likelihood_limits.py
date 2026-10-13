@@ -740,12 +740,21 @@ def _interp_shape(theta: float, nom: float, up: float, down: float, code: str) -
     return theta * ((up - nom) if theta >= 0 else (nom - down))
 
 
-def _load_shape(doc):
+# shape-model sizes (STH-T3.16): toy paths keep the small caps (each toy costs two profile fits); the asymptotic path
+# (no toys) accepts ordinary analysis sizes, order question Q10: up to 100 bins x 1e4 expected events per bin
+SHAPE_TOY_CAPS = {"bins": 40, "bin_b": 200.0, "total_n": 400}
+SHAPE_ASYMPTOTIC_CAPS = {"bins": 100, "bin_b": 1e4, "total_n": 1000000}
+
+
+def _load_shape(doc, asymptotic: bool = False):
     if not isinstance(doc, dict):
         raise LikelihoodError("input must be a JSON object")
+    caps = SHAPE_ASYMPTOTIC_CAPS if asymptotic else SHAPE_TOY_CAPS
     raw = doc.get("bins")
-    if not isinstance(raw, list) or not 1 <= len(raw) <= 40:
-        raise LikelihoodError("bins must be a list of 1 to 40 bins")
+    if not isinstance(raw, list) or not 1 <= len(raw) <= caps["bins"]:
+        more = "" if asymptotic else (f"; up to {SHAPE_ASYMPTOTIC_CAPS['bins']} bins without toys (asymptotic path), "
+                                      "beyond that use the pyhf adapter")
+        raise LikelihoodError(f"bins must be a list of 1 to {caps['bins']} bins{more}")
     bins = []
     for i, x in enumerate(raw):
         if not isinstance(x, dict):
@@ -753,11 +762,12 @@ def _load_shape(doc):
         n = x.get("n")
         if isinstance(n, bool) or not isinstance(n, (int, float)) or not math.isfinite(n) or n < 0 or n != int(n):
             raise LikelihoodError(f"bin {i}: n must be a non-negative integer")
-        bins.append({"n": int(n), "b": _num(x.get("b"), f"bin {i} b", 0.0, 200.0), "s": _num(x.get("s"), f"bin {i} s", 0.0, 1e6)})
+        bins.append({"n": int(n), "b": _num(x.get("b"), f"bin {i} b", 0.0, caps["bin_b"]), "s": _num(x.get("s"), f"bin {i} s", 0.0, 1e6)})
     if sum(x["s"] for x in bins) <= 0:
         raise LikelihoodError("at least one bin needs a positive signal expectation s")
-    if sum(x["n"] for x in bins) > 400:
-        raise LikelihoodError("total counts above 400 are outside this script's range")
+    if sum(x["n"] for x in bins) > caps["total_n"]:
+        hint = "" if asymptotic else "; larger samples run on the asymptotic path (no toys) or with the pyhf adapter"
+        raise LikelihoodError(f"total counts above {caps['total_n']} are outside this path's range{hint}")
     nuis = doc.get("nuisances", [])
     if not isinstance(nuis, list) or len(nuis) > 8:
         raise LikelihoodError("nuisances must be a list of at most 8 entries")
@@ -1217,7 +1227,8 @@ CLS_MAX_RUNTIME_S = 600.0  # toy CLs refuses to start when its estimated runtime
 
 def shape_limit(doc: dict, cl: float, toys: int, seed: int, cls_toys: int = 0, cls_points: int = 16,
                 cls_max_runtime: float = CLS_MAX_RUNTIME_S) -> dict:
-    bins, nuis, corr_chol = _load_shape(doc)
+    asymptotic_only = not toys and not cls_toys
+    bins, nuis, corr_chol = _load_shape(doc, asymptotic=asymptotic_only)
     cl = _num(doc.get("cl", cl), "cl", 0.0, 1.0, strict_low=True)
     if cl >= 1.0:
         raise LikelihoodError("cl must lie strictly between 0 and 1")
@@ -1244,6 +1255,7 @@ def shape_limit(doc: dict, cl: float, toys: int, seed: int, cls_toys: int = 0, c
     asimov_ns = [float(v) for v in model.b]
     asimov, g_a = limit(asimov_ns)
     out = {"label": LABEL, "method": "multi-bin profile-likelihood upper limit with normalization and shape nuisances",
+           "path": "asymptotic (no toys): ordinary sizes, caps SHAPE_ASYMPTOTIC_CAPS" if asymptotic_only else "with toys: caps SHAPE_TOY_CAPS",
            "bins": len(bins), "nuisances": [d["name"] for d in nuis], "cl": cl, "seed": seed, "toys": toys,
            "best_fit_mu": g_obs[0], "best_fit_nuisances": dict(zip([d["name"] for d in nuis], g_obs[1])),
            "asymptotic_observed_upper_limit": obs, "asymptotic_asimov_median_expected_limit": asimov}
