@@ -51,7 +51,8 @@ class ShippedContractTests(unittest.TestCase):
         bad = [["--counts", "-1", "--exposure", "1", "--bin-width", "1"] + UNIT,
                ["--counts", "3", "--exposure", "0", "--bin-width", "1"] + UNIT,
                ["--counts", "3", "--exposure", "1", "--bin-width", "nan"] + UNIT,
-               ["--counts", "501", "--exposure", "1", "--bin-width", "1"] + UNIT,
+               ["--counts", "3", "--exposure", "1", "--bin-width", "1", "--background", "1", "--method", "garwood"] + UNIT,
+               ["--counts", "480", "--exposure", "1", "--bin-width", "1", "--background", "10"] + UNIT,
                FLUX_ARGS + ["--level", "0"], FLUX_ARGS + ["--level", "1"], FLUX_ARGS + ["--level", "nan"],
                FLUX_ARGS + ["--background", "-1"], ["--exposure", "1", "--bin-width", "1"],
                ["--counts", "3", "--exposure", "1", "--bin-width", "1"], FLUX_ARGS[:-1] + ["MV"],
@@ -88,8 +89,8 @@ class MutationTests(unittest.TestCase):
 
     def test_option_the_tool_lacks(self):
         def add(d):
-            self.op(d)["invocation"]["options"].append({"flag": "--seed", "input": "seed"})
-            self.op(d)["inputs"].append({"name": "seed", "kind": "parameter", "unit": "1", "required": False,
+            self.op(d)["invocation"]["options"].append({"flag": "--no-such-option", "input": "no_such_option"})
+            self.op(d)["inputs"].append({"name": "no_such_option", "kind": "parameter", "unit": "1", "required": False,
                                          "constraint": "integer"})
         self.assertIn("tool.option_missing", codes(self.mutate(add)))
 

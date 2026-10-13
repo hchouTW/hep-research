@@ -230,9 +230,9 @@ class CosmicRayFluxTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             flux_from_counts(4.5, exposure=1e6, bin_width=1.0)
 
-    def test_count_beyond_exact_tool_range_raises_clear_error(self):
-        with self.assertRaises(ValueError):
-            poisson_interval(501)
+    def test_count_above_the_old_500_ceiling_is_supported(self):
+        lo, hi = poisson_interval(501)
+        self.assertTrue(lo < 501 < hi)
 
     def test_cli_matches_library_result(self):
         proc = subprocess.run(
