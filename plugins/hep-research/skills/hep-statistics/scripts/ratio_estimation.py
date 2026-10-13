@@ -27,7 +27,10 @@ import json
 import math
 import sys
 
-import numpy as np
+try:  # --help works without them; main() refuses to run without them (STH-T3.1)
+    import numpy as np
+except ImportError:  # pragma: no cover
+    np = None  # type: ignore[assignment]
 
 LABEL = "[General method] EXPERIMENTAL SYNTHETIC"
 CHECKS = {"max_rms_logr_error": 0.05, "max_seed_rms_spread": 0.05, "calibration_z": 4.0, "power_min": 0.9,
@@ -110,6 +113,12 @@ def main(argv=None) -> int:
     c.add_argument("--seed", type=int, default=1)
     c.add_argument("--power-runs", type=int, default=30)
     a = ap.parse_args(argv)
+    if np is None:
+        print(json.dumps({"status": "rejected", "error": "NumPy is required"}))
+        return 2
+    if a.n < 100 or a.power_runs < 0 or not (math.isfinite(a.theta1) and math.isfinite(a.sigma_nu) and a.sigma_nu >= 0):
+        print(json.dumps({"status": "rejected", "error": "need --n >= 100, --power-runs >= 0, finite --theta1 and --sigma-nu >= 0"}))
+        return 2
     out = check(a.theta1, a.sigma_nu, a.n, a.seed, a.power_runs)
     print(json.dumps(out, indent=1))
     return {"pass": 0, "fail": 1, "inconclusive": 3}[out["status"]]

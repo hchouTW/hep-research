@@ -1222,9 +1222,12 @@ def choose_penalty_poisson(doc: dict, prior: str, taus, toys: int, seed: int) ->
 # ------------------------------------------------------------------------------ CLI
 def _read(path):
     try:
-        return json.loads(Path(path).read_text())
+        doc = json.loads(Path(path).read_text())
     except (OSError, json.JSONDecodeError) as exc:
         raise ToyError(f"cannot read {path}: {exc}") from None
+    if not isinstance(doc, dict):
+        raise ToyError(f"{path}: the input must be a JSON object, got {type(doc).__name__}")
+    return doc
 
 
 def build_parser() -> argparse.ArgumentParser:

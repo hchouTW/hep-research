@@ -44,6 +44,7 @@ import bisect
 import json
 import math
 import random
+import sys
 
 
 def _nonnegative_int(value, name):
@@ -180,6 +181,12 @@ def p_values(n_on, n_off, alpha, toys=None, seed=None, exact=False):
     return rows
 
 
+def _refuse(message):
+    """A refused input: JSON on stdout and exit 2, never only an argparse message (STH-T3.1)."""
+    print(json.dumps({'status': 'rejected', 'error': message}))
+    sys.exit(2)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -194,15 +201,15 @@ def main():
     args = parser.parse_args()
     if args.toys is not None:
         if args.toys < 1:
-            parser.error('--toys must be a positive integer')
+            _refuse('--toys must be a positive integer')
         if args.seed is None:
-            parser.error('--toys needs --seed so the result can be reproduced')
+            _refuse('--toys needs --seed so the result can be reproduced')
     try:
         result = li_ma_significance(args.n_on, args.n_off, args.alpha)
         rows = p_values(args.n_on, args.n_off, args.alpha, args.toys, args.seed, args.exact_conditional) \
             if args.toys or args.exact_conditional else None
     except ValueError as exc:
-        parser.error(str(exc))
+        _refuse(str(exc))
     out = {
         'method': 'Li & Ma (1983) likelihood-ratio significance',
         **result,

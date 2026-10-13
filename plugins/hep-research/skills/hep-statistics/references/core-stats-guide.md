@@ -115,15 +115,15 @@ Command-line helpers in `skills/hep-statistics/scripts/` (read `--help` first); 
 replace them. When a shell is available, run the matching script and report its output; a value worked by hand is
 labeled as such.
 
-Dependencies are marked per script: unmarked scripts use the standard library only; `--help` works without NumPy
-only where the import is guarded (the four marked "(needs NumPy; `--help` without it)").
+Dependencies are marked per script: unmarked scripts use the standard library only; marked ones refuse to run
+without NumPy (and SciPy) with exit 2 and a JSON message, and every script prints `--help` without them.
 
 - `li_ma_significance.py`: ON/OFF significance, with toy or exact conditional p-values at low counts.
-- `look_elsewhere.py` (needs NumPy; `--help` without it): global significance of a one-dimensional scan (brute-force toys or upcrossings).
+- `look_elsewhere.py` (needs NumPy): global significance of a one-dimensional scan (brute-force toys or upcrossings).
 - `global_significance.py` (needs NumPy): toy-calibrated global significance for a recorded scan.
-- `sensitivity_and_gof.py` (needs NumPy; `--help` without it): Asimov discovery sensitivity (standard library) and toy-calibrated goodness of fit (NumPy).
-- `bayes_diagnostics.py` (needs NumPy; `--help` without it): R-hat, ESS and MCSE of supplied chains, prior reweighting; `bayes_calibration.py` (needs NumPy and SciPy): quantile and SBC calibration checks.
-- `combine_measurements.py` (needs NumPy; `--help` without it): generalized least squares combination of one observable once the combination plan accepts the inputs (declared cross-dataset blocks, shared auxiliary measurements, no Gaussianized envelope); a worked SYNTHETIC input (two experiments, three bins, a shared luminosity term) is `skills/hep-statistics/assets/combine.example.json`; `combine_asymmetric.py`: Barlow's asymmetric errors.
+- `sensitivity_and_gof.py` (needs NumPy): Asimov discovery sensitivity (standard library) and toy-calibrated goodness of fit (NumPy).
+- `bayes_diagnostics.py` (needs NumPy): R-hat, ESS and MCSE of supplied chains, prior reweighting; `bayes_calibration.py` (needs NumPy and SciPy): quantile and SBC calibration checks.
+- `combine_measurements.py` (needs NumPy): generalized least squares combination of one observable once the combination plan accepts the inputs (declared cross-dataset blocks, shared auxiliary measurements, no Gaussianized envelope); a worked SYNTHETIC input (two experiments, three bins, a shared luminosity term) is `skills/hep-statistics/assets/combine.example.json`; `combine_asymmetric.py`: Barlow's asymmetric errors.
 - `covariance_fit.py` (needs NumPy and SciPy): fits to published points with their covariance, with the Peelle diagnostics; `discrete_profile.py` (needs NumPy and SciPy): discrete profiling over a model family; `eft_scan.py` (needs NumPy and SciPy): EFT parameter scans; `pcl_efficiency_ratio.py` (needs NumPy and SciPy), `ratio_estimation.py` (needs NumPy): ratio and efficiency intervals; `sweighted_fit.py` (needs NumPy and SciPy): sWeighted fits with covering uncertainties.
 - `result_artifact.py`: writes a `statistical-result` artifact from a tool's output, with its status label.
 - Inference scripts owned by hep-analysis (read their `--help`: the hep-analysis skill may extend them). As shipped in

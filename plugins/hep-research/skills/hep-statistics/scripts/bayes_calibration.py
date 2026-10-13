@@ -31,8 +31,11 @@ import math
 import sys
 from pathlib import Path
 
-import numpy as np
-from scipy import stats
+try:  # --help works without them; main() refuses to run without them (STH-T3.1)
+    import numpy as np
+    from scipy import stats
+except ImportError:  # pragma: no cover
+    np = stats = None  # type: ignore[assignment]
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import bayes_diagnostics as bd  # noqa: E402
@@ -100,6 +103,10 @@ def _sbc_once(rng, reps, draws, bins, width_factor, a=3.0, b=1.0, t=2.0):
 
 
 def sbc(seed=1, width_factor=1.0, power_runs=50, reps=SBC["reps"], draws=SBC["draws"], bins=SBC["bins"]) -> dict:
+    if not (isinstance(bins, int) and bins >= 2 and reps >= 1 and draws >= 1 and power_runs >= 0):
+        raise ValueError("need bins >= 2, reps >= 1, draws >= 1 and power_runs >= 0")
+    if not (math.isfinite(width_factor) and width_factor > 0):
+        raise ValueError("width_factor must be a finite positive number")
     if (draws + 1) % bins:
         raise ValueError("bins must divide draws + 1 (equal rank bins)")
     rng = np.random.default_rng(seed)
@@ -137,6 +144,9 @@ def main(argv=None) -> int:
     s.add_argument("--draws", type=int, default=SBC["draws"])
     s.add_argument("--bins", type=int, default=SBC["bins"])
     a = ap.parse_args(argv)
+    if np is None:
+        print(json.dumps({"status": "rejected", "error": "NumPy and SciPy are required"}))
+        return 2
     try:
         if a.command == "check-quantiles":
             doc = json.loads(Path(a.input).read_text())

@@ -32,7 +32,10 @@ import math
 import sys
 from pathlib import Path
 
-import numpy as np
+try:  # --help works without them; main() refuses to run without them (STH-T3.1)
+    import numpy as np
+except ImportError:  # pragma: no cover
+    np = None  # type: ignore[assignment]
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from core.stats.tail_estimation import clopper_pearson, toy_tail  # noqa: E402
@@ -179,6 +182,9 @@ def main(argv=None) -> int:
     r.add_argument("--toys", type=int, default=1000)
     r.add_argument("--seed", type=int, required=True)
     a = ap.parse_args(argv)
+    if np is None:
+        print(json.dumps({"status": "rejected", "error": "NumPy is required"}))
+        return 2
     try:
         out = run(json.loads(Path(a.input).read_text()), a.toys, a.seed)
     except (OSError, ValueError, KeyError, TypeError) as exc:

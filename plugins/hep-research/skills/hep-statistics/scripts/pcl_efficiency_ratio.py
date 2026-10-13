@@ -30,8 +30,11 @@ import json
 import math
 import sys
 
-import numpy as np
-from scipy import optimize, stats
+try:  # --help works without them; main() refuses to run without them (STH-T3.1)
+    import numpy as np
+    from scipy import optimize, stats
+except ImportError:  # pragma: no cover
+    np = optimize = stats = None  # type: ignore[assignment]
 
 LABEL = "[General method] EXPERIMENTAL"
 
@@ -110,8 +113,10 @@ def efficiency_coverage(n: int, cl: float, eps_grid, prior: str = "jeffreys") ->
 
 # --------------------------------------------------------------------------------------------- ratio
 def fieller(x: float, sx: float, y: float, sy: float, rho: float = 0.0, cl: float = 0.6827) -> dict:
-    if sx <= 0 or sy <= 0 or not -1 < rho < 1:
-        raise ValueError("need sx > 0, sy > 0 and |rho| < 1")
+    if not (sx > 0 and sy > 0 and -1 < rho < 1 and math.isfinite(x) and math.isfinite(y) and math.isfinite(sx) and math.isfinite(sy)):
+        raise ValueError("need finite x, y, sx > 0, sy > 0 and |rho| < 1")
+    if y * y == stats.chi2.ppf(cl, 1) * sy * sy:
+        raise ValueError("y^2 equals z^2 sy^2 exactly: the Fieller quadratic degenerates (move cl or sy slightly)")
     z2 = stats.chi2.ppf(cl, 1)
     a = y * y - z2 * sy * sy
     bq = -2 * (x * y - z2 * rho * sx * sy)
@@ -125,11 +130,15 @@ def fieller(x: float, sx: float, y: float, sy: float, rho: float = 0.0, cl: floa
         kind, sets = "complement", [[-math.inf, r1], [r2, math.inf]]
     else:
         kind, sets = "unbounded", [[-math.inf, math.inf]]
-    r = x / y
-    sr = abs(r) * math.sqrt((sx / x) ** 2 + (sy / y) ** 2 - 2 * rho * sx * sy / (x * y)) if x != 0 else abs(sx / y)
     z = math.sqrt(z2)
+    if y == 0:  # the Fieller set above is still defined; the point estimate and its linearization are not (STH-T3.1)
+        delta: dict = {"interval": None, "note": "y = 0: the ratio x/y and its linearization are undefined; use the Fieller set"}
+    else:
+        r = x / y
+        sr = abs(r) * math.sqrt((sx / x) ** 2 + (sy / y) ** 2 - 2 * rho * sx * sy / (x * y)) if x != 0 else abs(sx / y)
+        delta = {"interval": [r - z * sr, r + z * sr], "note": "symmetric linearization; fails when y is within a few sigma of 0"}
     return {"label": LABEL, "x": x, "y": y, "cl": cl, "fieller": {"kind": kind, "set": sets},
-            "delta_method": {"interval": [r - z * sr, r + z * sr], "note": "symmetric linearization; fails when y is within a few sigma of 0"},
+            "delta_method": delta,
             "denominator_significance": abs(y) / sy}
 
 
@@ -173,6 +182,12 @@ def main(argv=None) -> int:
     r.add_argument("--rho", type=float, default=0.0)
     r.add_argument("--cl", type=float, default=0.6827)
     a = ap.parse_args(argv)
+    if np is None:
+        print(json.dumps({"status": "rejected", "error": "NumPy and SciPy are required"}))
+        return 2
+    if not 0 < a.cl < 1:  # also refuses NaN
+        print(json.dumps({"status": "rejected", "error": f"--cl must lie in (0, 1), got {a.cl}"}))
+        return 2
     try:
         if a.command == "pcl":
             out = pcl(a.n, a.b, a.cl, a.power_threshold)
@@ -180,7 +195,7 @@ def main(argv=None) -> int:
             out = efficiency(a.k, a.n, a.cl, a.prior)
         else:
             out = fieller(a.x, a.sx, a.y, a.sy, a.rho, a.cl)
-    except (ValueError, KeyError) as exc:
+    except (ValueError, KeyError, ZeroDivisionError, OverflowError) as exc:
         print(json.dumps({"status": "rejected", "error": str(exc)}))
         return 2
     out["status"] = "ok"

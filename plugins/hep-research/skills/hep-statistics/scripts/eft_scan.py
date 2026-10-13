@@ -30,8 +30,11 @@ import json
 import sys
 from pathlib import Path
 
-import numpy as np
-from scipy import ndimage, stats
+try:  # --help works without them; main() refuses to run without them (STH-T3.1)
+    import numpy as np
+    from scipy import ndimage, stats
+except ImportError:  # pragma: no cover
+    np = ndimage = stats = None  # type: ignore[assignment]
 
 LABEL = "[General method] EXPERIMENTAL"
 
@@ -125,6 +128,9 @@ def main(argv=None) -> int:
     s.add_argument("--toys", type=int, default=0)
     s.add_argument("--seed", type=int, default=1)
     a = ap.parse_args(argv)
+    if np is None:
+        print(json.dumps({"status": "rejected", "error": "NumPy and SciPy are required"}))
+        return 2
     try:
         out = scan(json.loads(Path(a.input).read_text()), a.cl, a.toys, a.seed)
     except (OSError, ValueError, KeyError, TypeError) as exc:

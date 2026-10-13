@@ -117,9 +117,9 @@ class PValues(unittest.TestCase):
         self.assertAlmostEqual(row["p_upper_95"], 1 - 0.05 ** (1 / 1000), places=12)
 
     def test_toys_need_a_seed(self):
-        code, _, err = run("--on", "4", "--off", "2", "--alpha", "0.25", "--toys", "100")
+        code, out, err = run("--on", "4", "--off", "2", "--alpha", "0.25", "--toys", "100")
         self.assertEqual(code, 2)
-        self.assertIn("--seed", err)
+        self.assertIn("--seed", out + err)  # since STH-T3.1 a JSON refusal on stdout
 
 
 if __name__ == "__main__":

@@ -37,8 +37,11 @@ import math
 import sys
 from pathlib import Path
 
-import numpy as np
-from scipy import optimize
+try:  # --help works without them; main() refuses to run without them (STH-T3.1)
+    import numpy as np
+    from scipy import optimize
+except ImportError:  # pragma: no cover
+    np = optimize = None  # type: ignore[assignment]
 
 LABEL = "[General method]"
 COND_WARN = 1e10
@@ -209,8 +212,13 @@ def main(argv=None) -> int:
     p = sub.add_parser("fit")
     p.add_argument("--input", required=True)
     a = ap.parse_args(argv)
+    if np is None:
+        print(json.dumps({"status": "rejected", "error": "NumPy and SciPy are required"}))
+        return 2
     try:
         doc = json.loads(Path(a.input).read_text())
+        if not isinstance(doc, dict):
+            raise ValueError(f"the input must be a JSON object, got {type(doc).__name__}")
     except (OSError, ValueError) as exc:
         print(json.dumps({"status": "rejected", "error": f"cannot read {a.input}: {exc}"}))
         return 2
