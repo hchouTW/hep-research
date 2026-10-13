@@ -79,5 +79,42 @@ class SealedValueRuleTests(unittest.TestCase):
         self.assertEqual(code, 0)
 
 
+class UnreadableArrayTests(unittest.TestCase):
+    """CMP-05."""
+
+    def setUp(self):
+        import numpy as np
+        self.np = np
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.d = Path(self.tmp.name)
+        (self.d / "hist.json").write_text(json.dumps({"edges": EDGES, "values": BLINDED}))
+        self.assertEqual(run("seal", "--hist", self.d / "hist.json", "--low", 120, "--high", 130,
+                             "--out", self.d / "sealed.json")[0], 0)
+
+    def bad_files(self):
+        import pickle
+        np = self.np
+        yield "object.npy", lambda p: np.save(p, np.array([{"a": 1}, None], dtype=object), allow_pickle=True)
+        yield "pickled.npz", lambda p: p.write_bytes(pickle.dumps({"x": [1, 2]}))
+        yield "text.npz", lambda p: p.write_text("not an archive at all\n")
+        yield "corrupt.npz", lambda p: p.write_bytes(b"PK\x03\x04" + b"\x00" * 40 + b"garbage")
+
+    def test_each_bad_cache_is_unscanned_not_an_error(self):
+        for name, make in self.bad_files():
+            with self.subTest(name=name):
+                out = self.d / f"out-{name}"
+                out.mkdir()
+                (out / "clean.csv").write_text("bin,yield\nlow,812\n")
+                self.np.save(out / "clean.npy", self.np.array([1.0, 2.0]))
+                make(out / name)
+                self.assertEqual(bl.scan_paths([out], [1234.567])["status"], "incomplete")
+                code, stdout, err = run("scan", "--sealed", self.d / "sealed.json", out)
+                self.assertNotIn("Traceback", err)
+                view = json.loads(stdout)
+                self.assertEqual((code, view["status"]), (3, "incomplete"), stdout)
+                self.assertEqual([Path(u).name for u in view["unscanned"]], [name])
+
+
 if __name__ == "__main__":
     unittest.main()

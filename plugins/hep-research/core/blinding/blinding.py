@@ -349,16 +349,34 @@ def decode_text(raw: bytes) -> tuple[str | None, str]:
     return raw.decode("latin-1"), "latin-1"
 
 
+def _load_arrays(path: Path, suf: str) -> tuple[dict, str | None]:
+    """({name: array}, None), or ({}, why) for a cache numpy cannot read without pickle: an object array, a pickled or
+    non-zip .npz, a corrupt archive or member. Such a file is unscanned (status incomplete), never an abort."""
+    import zipfile
+    import zlib
+    import numpy as np
+    try:
+        if suf == ".npy":  # np.load returns a plain ndarray (no file handle stays open)
+            arr = np.load(path, allow_pickle=False)
+            if not isinstance(arr, np.ndarray):
+                return {}, "a .npy file that does not hold a single array is not scanned"
+            return {"": arr}, None
+        data = np.load(path, allow_pickle=False)
+        if not isinstance(data, np.lib.npyio.NpzFile):
+            return {}, "a .npz file that is not a zip archive of arrays is not scanned"
+        with data:  # NpzFile keeps the archive open until closed
+            return {k: data[k] for k in data.files}, None
+    except (OSError, ValueError, EOFError, KeyError, zipfile.BadZipFile, zlib.error) as exc:
+        return {}, f"numpy cache that cannot be read without pickle or is corrupt ({type(exc).__name__}) is not scanned"
+
+
 def scan_file(path: Path, sealed, rtol: float = 1e-9) -> list[dict]:
     path = Path(path)
     suf = path.suffix.lower()
     if suf in (".npy", ".npz"):
-        import numpy as np
-        if suf == ".npy":  # np.load returns a plain ndarray (no file handle stays open)
-            arrays = {"": np.load(path, allow_pickle=False)}
-        else:  # NpzFile keeps the archive open until closed
-            with np.load(path, allow_pickle=False) as data:
-                arrays = {k: data[k] for k in data.files}
+        arrays, why = _load_arrays(path, suf)
+        if why:
+            return [{"unscanned": True, "reason": why}]
         hits, unscanned = [], []
         for k, arr in arrays.items():
             res = _scan_array(arr, sealed, rtol)
