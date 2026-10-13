@@ -88,7 +88,8 @@ class EventWeightTests(unittest.TestCase):
 class EftTruncationTests(unittest.TestCase):
     DOC = {"basis": "Warsaw (test input)", "normalization": "C_i / Lambda^2", "input_scheme": "{m_W, m_Z, G_F} (test input)",
            "lambda_tev": 1.0, "operators": ["c1", "c2"], "x_sm": 100.0, "linear": {"c1": 10.0, "c2": -4.0},
-           "quadratic": {"c1*c1": 3.0, "c1*c2": 1.0}, "points": [{"c1": 0.1}, {"c1": 2.0, "c2": 1.0}],
+           "quadratic": {"c1*c1": 3.0, "c1*c2": 1.0}, "cross_term_convention": "B_12 multiplies C_1 C_2 once (test input)",
+           "points": [{"c1": 0.1}, {"c1": 2.0, "c2": 1.0}],
            "quadratic_flag_fraction": 0.3}
 
     def test_linear_and_quadratic_terms(self):

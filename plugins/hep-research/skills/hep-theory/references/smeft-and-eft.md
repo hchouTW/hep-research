@@ -21,10 +21,17 @@ truncation bookkeeping is executable in `<plugin root>/skills/hep-theory/scripts
 ## What the plugin can check
 
 - That the convention block above is complete before a prediction is compared or combined (`eft_truncation.py`
-  refuses missing basis, normalization or input scheme, and undeclared operators).
-- That only C/Lambda^2 enters a linear prediction (rescaling C and Lambda together leaves it unchanged).
+  refuses a missing or blank basis, normalization or input scheme, an empty operator list, lambda_tev not finite
+  and > 0, undeclared operators and non-finite numbers).
+- That each quadratic coefficient is given once: keys are one `i*j` pair, `a*b` and `b*a` are the same B_ij and
+  are refused when both appear. The script's convention is that an off-diagonal B_ij multiplies C_i C_j / Lambda^4
+  once, with no implicit factor 2; generators and papers differ here, so an input with an off-diagonal key must
+  state its `cross_term_convention`, which the output repeats.
+- That only C/Lambda^2 enters: every point is re-evaluated at (4 C, 2 Lambda) and the linear and quadratic terms
+  must agree within a relative 1e-12 (`rescaling_check: pass|fail`).
 - The size of the quadratic part relative to the linear part at the points used, with a flag when it exceeds a
-  stated fraction: there the truncation, not the data, drives the conclusion.
+  stated fraction (default 0.3, reported with `source: default` or `input`): there the truncation, not the data,
+  drives the conclusion.
 - Unit and convention consistency when two EFT predictions are compared (the comparison gate in `contracts/`).
 
 ## What it cannot validate (outside v1)
