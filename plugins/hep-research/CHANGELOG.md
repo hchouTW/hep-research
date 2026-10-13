@@ -3,6 +3,19 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **R4 correction key for bounded recipes (AGENTIC-R5 backlog, R4 F04/T04).** `recipe.json` accepts
+  `recipe_version` 1.1.0 with optional `effect_keys` on the input and on steps: per effect, the key
+  `(target_scope, calibration_digest, variation_id, stage)`. `recipe_semantics.py` also reads these fields from upstream
+  `extension.corrections[]` entries. A second application of an effect on the same target scope and variation is
+  `semantics.repeated_correction` whatever its calibration or stage; on another scope or variation it is not blocked
+  (warning `semantics.repeat_distinct_instance`, for review); a repeat where either side lacks a complete key is
+  `semantics.repeat_undetermined` (supply the keys). Unkeyed recipes keep the effect-name rule; keys on a 1.0.0
+  recipe, a key for an effect the step or input does not apply, and an input key that differs from the upstream record
+  are errors. The operator-semantics table (`differential_flux.json`, approved 1.0.0) is unchanged. Tests in
+  `tests/contracts/test_recipe_semantics.py`.
+
 ## 0.7.0 (2026-10-13)
 
 Contracts 2.6.0 (minor: theory-spec, prediction, measurement-spec and statistical-result hardening rules; optional

@@ -15,7 +15,12 @@ Checks: the table is consistent (unique ids; every kind and effect an operator o
 recipe's digest matches the table; every step's operator is in the table; quantity kinds chain from the input kind
 through every step to the estimand kind (units follow the kinds); each step's required effects are already applied
 and none of its forbidden ones are (ordering); no effect is applied twice, counting upstream artifacts (a repeated
-correction across steps, P05); the result carries every effect the table requires for the estimand; every other effect of the table is applied or
+correction across steps, P05). With correction keys (recipe_version 1.1.0: effect_keys on the input and on steps;
+target_scope, calibration_digest, variation_id, stage on upstream extension.corrections[] entries; R4 F04/T04), a
+second application of an effect on another target scope or as another variation is a distinct application (warning
+semantics.repeat_distinct_instance, for review), the same scope and variation again is a repeat whatever the
+calibration or stage, and a repeat where either application lacks a complete key is undetermined
+(semantics.repeat_undetermined: supply the keys); without any keys every second application is a repeat; the result carries every effect the table requires for the estimand; every other effect of the table is applied or
 listed in not_applied with a reason; a step's tool, if named, has a passing tool contract whose operation lists the
 operator (contracts/tool_contracts/).
 Output: JSON {"status": "pass"|"fail", "recipes": [{"recipe_id", "status", "applied_effects", "findings"}], "note"}.
@@ -76,21 +81,53 @@ def check_table(table) -> Report:
     return rep
 
 
-def upstream_effects(artifact) -> list[str] | None:
-    """Effects an upstream contract artifact records as applied; None when it has no such record at all."""
+KEY_FIELDS = ("target_scope", "calibration_digest", "variation_id", "stage")
+
+
+def upstream_instances(artifact) -> list[tuple[str, dict | None]] | None:
+    """(effect, correction key or None) an upstream contract artifact records as applied; None when it has no such
+    record at all. A key is read from the R4 key fields of an extension.corrections[] entry; an entry with only some of
+    them keeps those, so the repeat check can call it incomplete."""
     ext = artifact.get("extension") if isinstance(artifact, dict) else None
     if not isinstance(ext, dict):
         return None
-    out, recorded = [], False
+    out: list[tuple[str, dict | None]] = []
+    recorded = False
     obs = ext.get("observable")
     if isinstance(obs, dict) and isinstance(obs.get("included_corrections"), list):
         recorded = True
-        out += [str(x) for x in obs["included_corrections"]]
+        out += [(str(x), None) for x in obs["included_corrections"]]
     if isinstance(ext.get("corrections"), list):
         recorded = True
         # an entry of the wrong shape is kept as text: it maps to a table effect or fails as unmapped, never vanishes
-        out += [str(c.get("effect_id") if isinstance(c, dict) else c) for c in ext["corrections"]]
+        for c in ext["corrections"]:
+            if isinstance(c, dict):
+                key = {f: c[f] for f in KEY_FIELDS if f in c}
+                out.append((str(c.get("effect_id")), key or None))
+            else:
+                out.append((str(c), None))
     return out if recorded else None
+
+
+def upstream_effects(artifact) -> list[str] | None:
+    """Effects an upstream contract artifact records as applied; None when it has no such record at all."""
+    found = upstream_instances(artifact)
+    return None if found is None else [e for e, _ in found]
+
+
+def _complete(key) -> bool:
+    return isinstance(key, dict) and all(isinstance(key.get(f), str) and key[f] for f in KEY_FIELDS)
+
+
+def _same_application(a, b) -> bool | None:
+    """Two applications of one effect: True a repeat, False distinct, None undetermined (a key missing or incomplete).
+    Neither keyed keeps the effect-name rule (a repeat). Another target scope or variation is distinct; the same scope
+    and variation is a repeat even with another calibration or at another stage (that is the double correction)."""
+    if a is None and b is None:
+        return True
+    if not (_complete(a) and _complete(b)):
+        return None
+    return a["target_scope"] == b["target_scope"] and a["variation_id"] == b["variation_id"]
 
 
 def _tool_ops(contracts) -> dict[str, list[str]]:
@@ -129,32 +166,63 @@ def _walk(recipe: dict, table: dict, upstream: list, contracts: list | None, rep
     ops = {o["operator_id"]: o for o in table["operators"]}
     tool_ops = _tool_ops(contracts if contracts is not None else _load_dir(CONTRACT_DIR))
     applied: list[str] = []
+    instances: list[dict] = []
+    keyed = recipe["recipe_version"] != "1.0.0"
+    if not keyed and ("effect_keys" in recipe["input"] or any("effect_keys" in s for s in recipe["steps"])):
+        rep.add("error", "recipe_version", "semantics.version_feature", "effect_keys need recipe_version 1.1.0")
 
-    def apply(effect: str, where: str) -> None:
-        if effect in applied:
-            rep.add("error", where, "semantics.repeated_correction", f"'{effect}' is already applied")
-        else:
+    def apply(effect: str, where: str, key: dict | None) -> None:
+        for prev in instances:
+            if prev["effect_id"] != effect:
+                continue
+            same = _same_application(prev["key"], key)
+            if same is None:
+                rep.add("error", where, "semantics.repeat_undetermined",
+                        f"'{effect}' is applied again ({prev['where']} first) and a correction key is missing or "
+                        f"incomplete: give target_scope, calibration_digest, variation_id and stage for both")
+                return
+            if same:
+                hint = "" if key is None else " on the same target scope and variation"
+                rep.add("error", where, "semantics.repeated_correction",
+                        f"'{effect}' is already applied{hint} ({prev['where']})")
+                return
+        for prev in instances:
+            if prev["effect_id"] == effect:
+                rep.add("warning", where, "semantics.repeat_distinct_instance",
+                        f"'{effect}' is applied again for another target scope or variation than at {prev['where']}: "
+                        f"review that the scopes are disjoint or the variations are separate branches")
+                break
+        instances.append({"effect_id": effect, "key": key, "where": where})
+        if effect not in applied:
             applied.append(effect)
 
+    in_keys = recipe["input"].get("effect_keys", {})
+    for e in sorted(set(in_keys) - set(recipe["input"]["applied_effects"])):
+        rep.add("error", "input.effect_keys", "semantics.key_unused", f"'{e}' is not in applied_effects")
     for e in recipe["input"]["applied_effects"]:
         if e not in effects:
             rep.add("error", "input.applied_effects", "semantics.undeclared_effect", f"effect '{e}' is not in the table")
-        apply(e, "input.applied_effects")
+        apply(e, "input.applied_effects", in_keys.get(e))
     recorded: set[str] = set()
     for i, art in enumerate(upstream):
-        found = upstream_effects(art)
+        found = upstream_instances(art)
         if found is None:
             rep.add("error", f"upstream[{i}]", "semantics.upstream_unrecorded",
                     "the artifact records no applied effects: a repeated correction cannot be excluded")
             continue
-        recorded |= set(found)
-        for e in found:
+        recorded |= {e for e, _ in found}
+        for e, key in found:
             if e not in effects:
                 rep.add("error", f"upstream[{i}]", "semantics.upstream_unmapped",
                         f"upstream effect '{e}' is not in the table: a repeated correction cannot be excluded")
-            elif e not in applied:
-                applied.append(e)
-            # an upstream effect also listed in the recipe's input is the same application, not a repeat
+            elif e in recipe["input"]["applied_effects"]:
+                # the recipe's input claims this application: the same one, not a repeat; its keys must agree
+                if key is not None and in_keys.get(e) is not None and key != in_keys[e]:
+                    rep.add("error", "input.effect_keys", "semantics.key_mismatch",
+                            f"the key of '{e}' differs from the one upstream[{i}] records")
+            elif not any(x["effect_id"] == e and x["where"].startswith("upstream") and x["key"] == key for x in instances):
+                # cumulative records: the same effect with the same key in several upstream artifacts is one application
+                apply(e, f"upstream[{i}]", key)
     claimed = recipe["input"]["applied_effects"]
     if claimed and not upstream:
         rep.add("warning", "input.applied_effects", "semantics.input_effects_unverified",
@@ -182,8 +250,11 @@ def _walk(recipe: dict, table: dict, upstream: list, contracts: list | None, rep
         for e in op["forbids_after"]:
             if e in applied:
                 rep.add("error", where, "semantics.order", f"'{s['operator']}' is defined only before '{e}'")
+        keys = s.get("effect_keys", {})
+        for e in sorted(set(keys) - set(op["applies"])):
+            rep.add("error", f"{where}.effect_keys", "semantics.key_unused", f"'{s['operator']}' does not apply '{e}'")
         for e in op["applies"]:
-            apply(e, where)
+            apply(e, where, keys.get(e))
         if "tool" in s and s["operator"] not in tool_ops.get(s["tool"], []):
             rep.add("error", where, "semantics.tool_uncontracted",
                     f"no tool contract {s['tool']} lists the operator '{s['operator']}'")
