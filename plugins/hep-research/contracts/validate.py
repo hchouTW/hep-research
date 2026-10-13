@@ -13,7 +13,11 @@ calibration) and the response semantic rules of contracts 2.4.0 (controlled corr
 matrix_ref, normalization consistent with what sits inside the matrix, one unit per variable) and the ml-artifact
 rules of contracts 2.5.0 (non-blank grouping key, model hash, labels and features; training domain on the features
 with lo < hi; split-overlap result; calibration where the output must be calibrated, not evaluated on its fit sample;
-domain-shift check; seeds) to artifacts written under older contracts, which otherwise keep their outcome. --gate publication adds
+domain-shift check; seeds) and the theory-spec and prediction rules of contracts 2.6.0 (conventions block, order of a
+perturbative argument, limit of an asymptotic one, checks behind a formal proof or analytic derivation, check-result
+vocabulary, non-empty validity domain, degenerate directions of a propagation model; no upgraded prediction status,
+a linked theory spec, envelope prescription and [min, max] values, truncation method) to artifacts written under older
+contracts, which otherwise keep their outcome; --strict never raises a rule's level. --gate publication adds
 the publication gate of a statistical-result (publication_gate): passed, unresolved or failed, with reasons; an
 archived artifact may be valid and still not pass it. Passing the gate is a contract-level prerequisite for
 reporting a result as validated, not evidence of scientific validity.

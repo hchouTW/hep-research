@@ -318,5 +318,24 @@ class BackCompatibilityTests(unittest.TestCase):
                     self.assertIn(MUTATIONS[name][3], buf.getvalue())
 
 
+class CommittedExampleTests(unittest.TestCase):
+    """THY-WP2.5: the committed theory examples are written under the current contracts and satisfy the theory rules."""
+    PATHS = ("examples/qed-prediction/output/artifacts/theory_spec.json",
+             "examples/qed-prediction/output/artifacts/prediction.json",
+             "examples/theory-comparison/output/artifacts/folded_expectation.json",
+             "examples/recasting/output/artifacts/prediction_m300.json")
+
+    def test_theory_examples_validate_at_the_current_contracts(self):
+        from contracts import CONTRACTS_VERSION
+        for rel in self.PATHS:
+            with self.subTest(rel):
+                doc = json.loads((ROOT / rel).read_text())
+                self.assertEqual(doc["contract_version"], CONTRACTS_VERSION)
+                rep = v.validate_artifact(doc)
+                self.assertTrue(rep.ok, rep.as_dict())
+                self.assertFalse({f.code for f in rep.findings if f.code.startswith(("theory.", "prediction."))},
+                                 rep.as_dict())
+
+
 if __name__ == "__main__":
     unittest.main()
