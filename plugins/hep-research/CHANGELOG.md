@@ -143,6 +143,12 @@ Software checks establish contract consistency only, not physical validity.
   sections and the toy examples are gone. `cpp-`, `python-` and `bash-balanced-design-guidelines.md` are checklists
   around HEP failure modes with grep-able anti-pattern tables; the CMP-13..15 rules are kept. Four files: 4,573 →
   1,028 lines; file names and linked anchors unchanged. `docs/reference-consolidation.md` records P1 as executed.
+- **CMP-26 off-domain material moved (Q1, Q6).** `product-framing.md` moved to `docs/dev/engineering/` (`git mv`);
+  the playbook's New Endpoint, UI Feature, Database Migration and Incident Response sections, the Sprint planning
+  and Feature flags sections of `design-and-estimation.md` and the Accessibility section of `risk-and-quality.md`
+  moved to `docs/dev/engineering/web-and-delivery-practices.md`, with a one-line pointer at each old place and the
+  skill's links re-pointed. `prompt-engineering-and-token-optimization.md` stays (the bundle validator and the task
+  guide require it). The skill now has thirty-one references.
 
 ## 0.6.17 (2026-10-13)
 

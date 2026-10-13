@@ -14,8 +14,8 @@
    "uncited": 0
   },
   "hep-computing": {
-   "references": 32,
-   "bytes": 293149,
+   "references": 31,
+   "bytes": 284476,
    "uncited": 0
   },
   "hep-statistics": {
@@ -1025,7 +1025,7 @@
   {
    "path": "skills/hep-computing/references/agile-development-guide.md",
    "owner": "hep-computing",
-   "bytes": 10659,
+   "bytes": 10903,
    "lines": 176,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -1055,7 +1055,7 @@
     "skills/hep-computing/references/root-balanced-design-guidelines.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b0cb9ac 2026-10-13"
+   "last_commit": "8eefac0 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/batch-scheduling.md",
@@ -1139,7 +1139,7 @@
    "cited_by_other_skills": [
     "physics-ml"
    ],
-   "last_commit": "fe8f71e 2026-10-13"
+   "last_commit": "8eefac0 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/crash-and-memory-debugging.md",
@@ -1161,8 +1161,8 @@
   {
    "path": "skills/hep-computing/references/design-and-estimation.md",
    "owner": "hep-computing",
-   "bytes": 7493,
-   "lines": 124,
+   "bytes": 5135,
+   "lines": 84,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-computing/references/agile-development-guide.md",
@@ -1175,14 +1175,13 @@
   {
    "path": "skills/hep-computing/references/engineering-playbook.md",
    "owner": "hep-computing",
-   "bytes": 12129,
-   "lines": 199,
+   "bytes": 9044,
+   "lines": 146,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/README.md",
     "skills/hep-computing/SKILL.md",
-    "skills/hep-computing/references/agile-development-guide.md",
-    "skills/hep-computing/references/design-and-estimation.md"
+    "skills/hep-computing/references/agile-development-guide.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "46cea2c 2026-10-13"
@@ -1239,7 +1238,7 @@
   {
    "path": "skills/hep-computing/references/implementation-discipline.md",
    "owner": "hep-computing",
-   "bytes": 7586,
+   "bytes": 7613,
    "lines": 147,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -1305,20 +1304,6 @@
    "last_commit": "7884639 2026-10-13"
   },
   {
-   "path": "skills/hep-computing/references/product-framing.md",
-   "owner": "hep-computing",
-   "bytes": 3158,
-   "lines": 76,
-   "linked_from_skill_md": false,
-   "cited_by": [
-    "skills/hep-computing/references/agile-development-guide.md",
-    "skills/hep-computing/references/design-and-estimation.md",
-    "skills/hep-computing/references/implementation-discipline.md"
-   ],
-   "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
-  },
-  {
    "path": "skills/hep-computing/references/prompt-engineering-and-token-optimization.md",
    "owner": "hep-computing",
    "bytes": 9358,
@@ -1345,7 +1330,7 @@
     "skills/hep-computing/references/root-balanced-design-guidelines.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "8eefac0 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/python-hep-coding-patterns.md",
@@ -1370,8 +1355,8 @@
   {
    "path": "skills/hep-computing/references/risk-and-quality.md",
    "owner": "hep-computing",
-   "bytes": 7727,
-   "lines": 134,
+   "bytes": 7384,
+   "lines": 127,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-computing/references/agile-development-guide.md",
@@ -1400,7 +1385,7 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "7884639 2026-10-13"
+   "last_commit": "8eefac0 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/root-debugging.md",
@@ -1443,7 +1428,6 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-computing/references/agile-development-guide.md",
-    "skills/hep-computing/references/engineering-playbook.md",
     "skills/hep-computing/references/implementation-discipline.md"
    ],
    "cited_by_other_skills": [],

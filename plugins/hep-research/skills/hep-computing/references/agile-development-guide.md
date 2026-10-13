@@ -19,10 +19,10 @@ done, reported honestly.
    nearby code, tests, fixtures, and tooling config to find existing conventions.
 3. **Write acceptance criteria.** Make them observable and testable, each with the
    check that proves it (a test, a command, a repeatable observation) - see
-   [references/product-framing.md](product-framing.md) for the
+   [product framing](../../../docs/dev/engineering/product-framing.md) for the
    given/when/then format and a user-story template.
 4. **Pick the smallest coherent slice.** One end-to-end path beats a half-finished
-   broad redesign. See "Slicing" in product-framing.md.
+   broad redesign. See "Slicing" in [product framing](../../../docs/dev/engineering/product-framing.md).
 5. **Implement inside existing conventions.** Match style, naming, and structure;
    avoid unrelated refactors or formatting churn - see
    [references/implementation-discipline.md](implementation-discipline.md)
@@ -82,7 +82,7 @@ report rather than adding one to a trivial diff.
 ## When to Load References
 
 - **Ask vs. assume, keeping the change minimal and surgical, verifiable success criteria** -> [references/implementation-discipline.md](implementation-discipline.md)
-- **Story framing, readiness, backlog slicing** -> [references/product-framing.md](product-framing.md)
+- **Story framing, readiness, backlog slicing** -> [product framing](../../../docs/dev/engineering/product-framing.md)
 - **Test strategy, validation ladder, definition of done** -> [references/validation-and-done.md](validation-and-done.md)
 - **Scenario playbooks** (bug fix, new feature, new endpoint, UI feature, DB migration,
   dependency update, CLI change) -> [references/engineering-playbook.md](engineering-playbook.md)
@@ -98,14 +98,14 @@ report rather than adding one to a trivial diff.
 - **Bash design - load only when designing Bash code** (functions vs. associative arrays, avoiding simulated OOP,
   trap-based cleanup, quoting/`set -euo pipefail` discipline) ->
   [references/bash-balanced-design-guidelines.md](bash-balanced-design-guidelines.md)
-- **Design docs/RFCs, estimation and spikes, sprint planning, feature flags and progressive rollout** ->
-  [references/design-and-estimation.md](design-and-estimation.md)
+- **Design docs/RFCs, estimation and spikes** -> [references/design-and-estimation.md](design-and-estimation.md);
+  sprint planning, feature flags and progressive rollout -> [web and delivery practices](../../../docs/dev/engineering/web-and-delivery-practices.md)
 - **Software architecture, component boundaries, dependency direction, data
   ownership, architectural tradeoffs, or ADRs** ->
   [references/software-architecture.md](software-architecture.md)
-- **Production incidents/outages, working safely in legacy code without tests** ->
-  see the Incident Response and Legacy Code Without Tests sections in
-  [references/engineering-playbook.md](engineering-playbook.md)
+- **Working safely in legacy code without tests** -> the Legacy Code Without Tests section in
+  [references/engineering-playbook.md](engineering-playbook.md); production incidents and outages ->
+  [web and delivery practices](../../../docs/dev/engineering/web-and-delivery-practices.md)
 - **Reviewing someone else's change** -> see the Reviewing Someone Else's Change
   section in [references/risk-and-quality.md](risk-and-quality.md)
 

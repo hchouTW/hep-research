@@ -17,6 +17,15 @@ design guidelines (P1), move only the web, sprint, feature-flag and accessibilit
   grep-able anti-pattern tables. Toy examples (`BankAccount`, `Animal`, `Shape`, `MathHelper`, `ReportGenerator`)
   were removed. The four files went from 4,573 to about 1,030 lines; file names and the anchors other skills link
   to are unchanged.
+- **P2, in part (2026-10-13, CMP-26).** `product-framing.md` moved (with `git mv`) to
+  [dev/engineering/product-framing.md](dev/engineering/product-framing.md); the playbook's New Endpoint, UI Feature,
+  Database Migration and Incident Response sections, the Sprint planning and Feature flags sections of
+  `design-and-estimation.md` and the Accessibility section of `risk-and-quality.md` moved to
+  [dev/engineering/web-and-delivery-practices.md](dev/engineering/web-and-delivery-practices.md). Each old place keeps
+  a one-line pointer; the skill's links point to the new paths. Kept in the skill: `agile-development-guide.md`
+  (cited by physics-ml), `prompt-engineering-and-token-optimization.md` and `loop-engineering.md` (required by
+  `scripts/validate_skill_bundle.py` and the task guide), and the six task- and example-authoring scripts (CMP-27
+  deferred).
 
 ## What the inventory shows
 

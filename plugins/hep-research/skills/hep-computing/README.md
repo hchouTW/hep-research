@@ -11,7 +11,7 @@ Use when the deliverable is working, reproducible scientific software or its exe
 | Path | Content |
 |---|---|
 | `SKILL.md` | entry point |
-| `references/` | thirty-two references: engineering playbook, agile delivery, task authoring, ROOT design and debugging, crash and memory debugging, performance profiling, symbolic and numerical computation, CMake, Python HEP patterns, storage, environments and containers, batch scheduling, numerical methods, design guidelines (Python, C++, Bash), validation and definition of done |
+| `references/` | thirty-one references: engineering playbook, agile delivery, task authoring, ROOT design and debugging, crash and memory debugging, performance profiling, symbolic and numerical computation, CMake, Python HEP patterns, storage, environments and containers, batch scheduling, numerical methods, design guidelines (Python, C++, Bash), validation and definition of done |
 | `scripts/` | twenty helpers: interpreter choice, ROOT inspection and comparison, environment manifests, synthetic NanoAOD, task and skill-bundle validation, local partition, blinding audits |
 | `assets/` | task template, story card, definition of done, completion summary, risk register, example configs |
 | `examples/` | worked research tasks (bug, migration, data/ML, agentic loop) with their own README |
