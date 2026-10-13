@@ -9,7 +9,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | Skill | References | KB | Cited nowhere |
 |---|---|---|---|
 | detector-response | 34 | 395 | 0 |
-| hep-analysis | 9 | 74 | 0 |
+| hep-analysis | 9 | 75 | 0 |
 | hep-computing | 29 | 338 | 0 |
 | hep-statistics | 9 | 119 | 0 |
 | hep-theory | 8 | 42 | 0 |
@@ -112,18 +112,18 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `reconstruction-performance-and-truth-matching.md` | detector-response | 10.5 | no | 9 | hep-analysis | b944a23 2026-10-13 |
 | `response-and-forward-folding.md` | detector-response | 5.1 | no | 7 | hep-analysis, hep-statistics | 24b8216 2026-10-13 |
 | `signal-formation-and-readout.md` | detector-response | 15.3 | no | 9 | hep-analysis, research-communication | d8bec60 2026-10-13 |
-| `space-based-direct-detection.md` | detector-response | 16.7 | no | 12 | hep-analysis, hep-statistics, research-communication | b944a23 2026-10-13 |
+| `space-based-direct-detection.md` | detector-response | 16.8 | no | 12 | hep-analysis, hep-statistics, research-communication | 911967e 2026-10-13 |
 | `timing-detectors.md` | detector-response | 8.6 | no | 8 | hep-analysis | d8bec60 2026-10-13 |
 | `tracking-and-vertexing.md` | detector-response | 13.1 | no | 15 | hep-analysis, research-communication | b944a23 2026-10-13 |
 | `triggers-luminosity-pileup.md` | detector-response | 9.3 | no | 13 | hep-analysis | d8bec60 2026-10-13 |
-| `analysis-design.md` | hep-analysis | 3.9 | yes | 7 | detector-response, hep-computing | 9546574 2026-10-08 |
+| `analysis-design.md` | hep-analysis | 4.4 | yes | 7 | detector-response, hep-computing | 9546574 2026-10-08 |
 | `analysis-validation.md` | hep-analysis | 4.4 | yes | 6 | detector-response, hep-computing | 351029c 2026-10-07 |
 | `backgrounds.md` | hep-analysis | 2.7 | yes | 16 | detector-response | 351029c 2026-10-07 |
 | `data-pipelines.md` | hep-analysis | 4.5 | yes | 4 | hep-computing | 351029c 2026-10-07 |
-| `hep-analysis-guide.md` | hep-analysis | 41.8 | yes | 5 | detector-response | ec79d3b 2026-10-13 |
+| `hep-analysis-guide.md` | hep-analysis | 41.9 | yes | 5 | detector-response | 4c6ec20 2026-10-13 |
 | `histograms-efficiencies.md` | hep-analysis | 3.2 | yes | 8 | detector-response, hep-computing | 9546574 2026-10-08 |
 | `measurements-and-unfolding.md` | hep-analysis | 2.7 | yes | 9 | detector-response, hep-statistics | 351029c 2026-10-07 |
-| `systematics.md` | hep-analysis | 5.9 | yes | 25 | detector-response, hep-statistics, hep-theory, physics-ml | 364918e 2026-10-09 |
+| `systematics.md` | hep-analysis | 6.0 | yes | 25 | detector-response, hep-statistics, hep-theory, physics-ml | 364918e 2026-10-09 |
 | `weights-normalization.md` | hep-analysis | 5.1 | yes | 7 | detector-response, hep-theory, physics-ml | 351029c 2026-10-07 |
 | `acceptance-criteria.md` | hep-computing | 3.7 | no | 3 | - | 351029c 2026-10-07 |
 | `agile-development-guide.md` | hep-computing | 10.7 | yes | 8 | physics-ml | 351029c 2026-10-07 |

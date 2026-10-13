@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """Render a systematics registry CSV as a booktabs LaTeX table for a paper or note.
 
-Input: a CSV in the format of <plugin root>/skills/hep-analysis/assets/systematics.csv (source, type, process_scope,
-era_scope, region_scope, correlation_key, rate_shape, payload, validation), optionally with impact columns of your
+Input: a CSV in the format of <plugin root>/skills/hep-analysis/assets/systematics.csv (name, source, effect,
+applied_via, affected_processes, correlation_key, payload, validation: the measurement-spec systematics ledger, with
+effect one of normalization, shape, migration, mixed), optionally with impact columns of your
 own (for example `impact_percent`) and a per-row `status` column. Every table carries a status label: give --status
 (synthetic, observed, preliminary, ...) for the whole table, or a `status` column for every row; a table without one is
 refused, so unlabeled numbers never reach a manuscript. A synthetic or preliminary label appears in the caption and in a
 LaTeX comment; per-row statuses get their own column.
 
 Usage:
-  python3 systematics_table_tex.py --input systematics.csv --status synthetic [--columns source,type,correlation_key]
+  python3 systematics_table_tex.py --input systematics.csv --status synthetic [--columns name,effect,correlation_key]
          [--caption TEXT] [--label tab:systematics] [--out table.tex]
 Statuses: the core artifact_statuses plus `published` (a table-only value: a published table is a legitimate source).
 A cell that reads nan or inf is refused.
@@ -22,10 +23,11 @@ import csv
 import sys
 from pathlib import Path
 
-DEFAULT_COLUMNS = ["source", "type", "process_scope", "region_scope", "correlation_key", "rate_shape"]
-HEADERS = {"source": "Source", "type": "Type", "process_scope": "Processes", "era_scope": "Periods",
-           "region_scope": "Regions", "correlation_key": "Correlation", "rate_shape": "Effect", "payload": "Payload",
+DEFAULT_COLUMNS = ["name", "source", "effect", "applied_via", "affected_processes", "correlation_key"]
+HEADERS = {"name": "Name", "source": "Source", "effect": "Effect", "applied_via": "Applied via",
+           "affected_processes": "Processes", "correlation_key": "Correlation", "payload": "Payload",
            "validation": "Validation", "status": "Status"}
+EFFECTS = ("normalization", "shape", "migration", "mixed")  # the measurement-spec systematics vocabulary
 STATUSES = ("failed", "unvalidated", "preliminary", "synthetic", "asimov", "observed", "user-supplied",
             "validated-in-scope", "published")  # core artifact_statuses + published (tables only)
 FLAGGED = ("failed", "synthetic", "asimov", "preliminary", "unvalidated")  # said in the caption itself
@@ -59,6 +61,10 @@ def render(rows: list[dict], columns: list[str], status: str | None, caption: st
         for c, v in r.items():
             if isinstance(v, str) and v.strip().lower() in NON_FINITE:
                 raise Refused(f"row {i}, column {c!r}: non-finite value {v.strip()!r}")
+    if "effect" in rows[0]:
+        for i, r in enumerate(rows, 1):
+            if (r.get("effect") or "").strip() not in EFFECTS:
+                raise Refused(f"row {i}: effect {r.get('effect')!r} is not one of {', '.join(EFFECTS)}")
     missing = [c for c in columns if c not in rows[0]]
     if missing:
         raise Refused(f"columns not in the CSV: {missing}")

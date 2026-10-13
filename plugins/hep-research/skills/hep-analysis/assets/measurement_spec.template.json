@@ -1,0 +1,136 @@
+{
+ "contract_version": "2.5.0",
+ "artifact_id": "TEMPLATE-synthetic-measurement-spec",
+ "artifact_type": "measurement-spec",
+ "objective": "SYNTHETIC TEMPLATE: copy, rename the artifact_id and replace every placeholder; the field guide is measurement_spec.template.md",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.6.17",
+  "contracts": "2.5.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-analysis",
+  "created": "2026-10-13",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [
+  "period: run period not provided yet"
+ ],
+ "extension": {
+  "estimand": "SYNTHETIC: the differential cross section of a placeholder process in bins of cos_theta from -1 to 1, at particle level inside the fiducial region below, in the center-of-mass frame",
+  "observable": {
+   "quantity": "differential-cross-section",
+   "process": "synthetic placeholder process",
+   "variables": [
+    {
+     "name": "cos_theta",
+     "unit": "1",
+     "edges": [
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0
+     ]
+    }
+   ],
+   "phase_space": {
+    "definition": "SYNTHETIC: placeholder fiducial region (replace with the truth-level object definitions and cuts)",
+    "fiducial": true
+   },
+   "level": "particle-fiducial",
+   "frame": "center-of-mass",
+   "normalization": {
+    "kind": "integrated-luminosity",
+    "ref": "synthetic-normalization.json",
+    "convention": "unfolded counts / (integrated luminosity x bin width)"
+   },
+   "bin_semantics": "bin-averaged",
+   "unit": "pb",
+   "conventions": {
+    "frame": "center-of-mass"
+   }
+  },
+  "species_or_process": "synthetic placeholder process",
+  "period": "not-provided",
+  "selections": [
+   {
+    "name": "trigger",
+    "definition": "SYNTHETIC: placeholder trigger requirement",
+    "conditional_denominator": "events in the fiducial region",
+    "validation": {
+     "metric": "trigger efficiency from an orthogonal trigger sample",
+     "threshold": "data/simulation ratio within the stated uncertainty",
+     "action": "measure a scale factor and add its uncertainty"
+    }
+   },
+   {
+    "name": "two-objects",
+    "definition": "SYNTHETIC: placeholder object selection",
+    "conditional_denominator": "triggered events"
+   }
+  ],
+  "backgrounds": [
+   {
+    "name": "placeholder-background",
+    "estimator": "sideband extrapolation",
+    "control_region": "SYNTHETIC: placeholder sideband in the invariant mass",
+    "closure": "SYNTHETIC: closure in a validation region next to the sideband"
+   }
+  ],
+  "corrections": [
+   {
+    "effect_id": "trigger-efficiency",
+    "category": "trigger_efficiency",
+    "applied_in": "estimator"
+   },
+   {
+    "effect_id": "selection-efficiency",
+    "category": "selection_efficiency",
+    "applied_in": "estimator"
+   },
+   {
+    "effect_id": "detector-migration",
+    "category": "migration",
+    "applied_in": "unfolding"
+   }
+  ],
+  "systematics": [
+   {
+    "name": "energy-scale",
+    "source": "SYNTHETIC: placeholder object energy calibration",
+    "effect": "migration",
+    "applied_via": "rerun the selection with shifted object energies and refill the response"
+   },
+   {
+    "name": "background-normalization",
+    "source": "SYNTHETIC: placeholder control-region statistics",
+    "effect": "normalization",
+    "applied_via": "control-region constraint on the background yield"
+   }
+  ],
+  "blinding": {
+   "blinded": true,
+   "mask": {
+    "intervals": [
+     {
+      "variable": "cos_theta",
+      "low": 0.5,
+      "high": 1.0
+     }
+    ]
+   },
+   "unblinding_record_ref": null
+  }
+ }
+}

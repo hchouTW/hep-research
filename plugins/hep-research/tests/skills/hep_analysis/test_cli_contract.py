@@ -24,8 +24,8 @@ CHANGES = {'changes': [{'id': 'c1', 'parameter': 'p', 'old': 1, 'new': 2, 'motiv
                         'evidence': {'control_sample': 'Z->ee', 'evidence_ids': [], 'independent_of_signal_region': True},
                         'looked_at': ['control-region data']}]}
 YIELDS = 'region,sample,yield,uncertainty\nSR,ttbar,10.5,1.2\n'
-SYST_CSV = ('source,type,process_scope,era_scope,region_scope,correlation_key,rate_shape,payload,validation\n'
-            'jes,shape,all,all,all,jes,shape,p,v\n')
+SYST_CSV = ('name,source,effect,applied_via,affected_processes,correlation_key,payload,validation\n'
+            'jes,calibration,shape,rerun,all,jes,p,v\n')
 
 # script: (valid args, NaN args, malformed-file args or None, how the status is reported)
 # '{f}' is replaced by a file written from the given text.

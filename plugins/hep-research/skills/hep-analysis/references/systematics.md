@@ -4,7 +4,7 @@ This file covers the physical sources, their payloads and correlations. How each
 
 ## Source inventory
 
-Use `<plugin root>/skills/hep-analysis/assets/systematics.csv` to record source, type, affected processes/eras/regions, correlation key, rate/shape behavior, payload, and validation. Nuisance names have statistical meaning: sharing a name often shares a parameter. Do not reuse names solely for convenience. For a paper or note, `<plugin root>/skills/hep-analysis/scripts/systematics_table_tex.py` renders the registry as a booktabs LaTeX table and refuses one without a status label (synthetic, observed, ...).
+Use `<plugin root>/skills/hep-analysis/assets/systematics.csv` (the columns of the measurement-spec `systematics` ledger: name, source, effect, applied_via, affected_processes, correlation_key, payload, validation; effect is normalization, shape, migration or mixed) to record each source. Nuisance names have statistical meaning: sharing a name often shares a parameter. Do not reuse names solely for convenience. For a paper or note, `<plugin root>/skills/hep-analysis/scripts/systematics_table_tex.py` renders the registry as a booktabs LaTeX table and refuses one without a status label (synthetic, observed, ...).
 
 Correlations follow shared physical sources, measurement procedures, and documented prescriptions. Neither "all uncertainties in one year are correlated" nor "different years are independent" is a valid blanket rule. Decompose luminosity, JES, or object scale factors into justified components when prescribed. Represent partial Gaussian correlations with a covariance matrix or latent standard-normal variables; verify positive semidefiniteness and compatibility of pairwise correlations.
 
@@ -18,7 +18,7 @@ Correlations follow shared physical sources, measurement procedures, and documen
 
 ## Variation registry and implementation pattern
 
-Keep a central registry (`<plugin root>/skills/hep-analysis/assets/systematics.csv` or equivalent) recording, per
+Keep a central registry (the spec's `systematics` ledger, `<plugin root>/skills/hep-analysis/assets/systematics.csv`, or equivalent) recording, per
 source: variation name and downstream suffix; type (weight, shape,
 normalization-only, one-sided, envelope, theory set); samples affected; the data
 exclusion rule; the correlation model across eras/channels/bins/processes; the

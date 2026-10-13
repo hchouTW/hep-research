@@ -5,12 +5,12 @@
  "by_skill": {
   "detector-response": {
    "references": 34,
-   "bytes": 394797,
+   "bytes": 394837,
    "uncited": 0
   },
   "hep-analysis": {
    "references": 9,
-   "bytes": 74120,
+   "bytes": 74886,
    "uncited": 0
   },
   "hep-computing": {
@@ -695,7 +695,7 @@
   {
    "path": "skills/detector-response/references/space-based-direct-detection.md",
    "owner": "detector-response",
-   "bytes": 16722,
+   "bytes": 16762,
    "lines": 247,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -717,7 +717,7 @@
     "hep-statistics",
     "research-communication"
    ],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "911967e 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/timing-detectors.md",
@@ -798,7 +798,7 @@
   {
    "path": "skills/hep-analysis/references/analysis-design.md",
    "owner": "hep-analysis",
-   "bytes": 3942,
+   "bytes": 4420,
    "lines": 32,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -885,7 +885,7 @@
   {
    "path": "skills/hep-analysis/references/hep-analysis-guide.md",
    "owner": "hep-analysis",
-   "bytes": 41793,
+   "bytes": 41940,
    "lines": 220,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -898,7 +898,7 @@
    "cited_by_other_skills": [
     "detector-response"
    ],
-   "last_commit": "ec79d3b 2026-10-13"
+   "last_commit": "4c6ec20 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/histograms-efficiencies.md",
@@ -948,7 +948,7 @@
   {
    "path": "skills/hep-analysis/references/systematics.md",
    "owner": "hep-analysis",
-   "bytes": 5872,
+   "bytes": 6013,
    "lines": 59,
    "linked_from_skill_md": true,
    "cited_by": [

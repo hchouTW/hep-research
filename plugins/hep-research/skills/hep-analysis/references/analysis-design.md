@@ -1,10 +1,10 @@
 # Analysis Design, Data Quality, and Blinding
 
-## Establish the analysis contract
+## Write the measurement spec
 
-Complete `<plugin root>/skills/hep-analysis/assets/analysis-contract.yaml`. Identify the collision system, energy, era, data format, target process, fiducial phase space, observables, and POI. State the measurement precisely: inclusive/fiducial/differential cross section, branching fraction, mass, coupling, or signal strength. For signal strength, document the reference cross section and branching ratio.
+The skill has one spec format, the JSON `measurement-spec`: copy `<plugin root>/skills/hep-analysis/assets/measurement_spec.template.json` and fill it with the field guide [measurement_spec.template.md](../assets/measurement_spec.template.md). It covers collider, cosmic-ray and neutrino normalization kinds. Start with the estimand in one sentence (quantity, species or process, variable and range, level, frame, what is held fixed), then the observable, period, selections, backgrounds, corrections, systematics and blinding. For signal strength, document the reference cross section and branching ratio. Inference settings (parameter of interest, test statistic, confidence level) are not part of the spec: they belong to hep-statistics. Experiment conventions live in the bound profile (an experiment profile may have its own spec format and auditor).
 
-Keep unknown physical inputs null or explicitly unresolved. Independent exploration may continue, but reported yields and inference require sourced inputs. Synthetic demonstrations may define arbitrary values if both files and reports label them synthetic.
+Keep unknown physical inputs `unknown` or `not-provided` and list them in `unresolved_inputs`. Independent exploration may continue, but reported yields and inference require sourced inputs. Synthetic demonstrations may define arbitrary values if both files and reports label them synthetic.
 
 ## Event and object definitions
 
