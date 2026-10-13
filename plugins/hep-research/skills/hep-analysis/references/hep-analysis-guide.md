@@ -70,7 +70,7 @@ Exact 68.27% (Garwood) interval on the count N; divide by exposure times bin wid
 | Histograms, efficiencies, covariance, plotting | [Histograms and uncertainties](histograms-efficiencies.md) |
 | Control regions, ABCD, fake rates, sidebands, transfer factors | [Background estimation](backgrounds.md) |
 | Physical sources of systematics, correlation evidence, variation registry | [Systematics](systematics.md) |
-| Cross sections, result levels, response, unfolding inputs, combinations | [Measurements and unfolding](measurements-and-unfolding.md) |
+| Estimand sentence, truth-level and fiducial definitions, result levels; cross sections, response, unfolding inputs, combinations | [Measurements and unfolding](measurements-and-unfolding.md) |
 | Debugging, verification, preservation, review checks | [Validation](analysis-validation.md) |
 | Detector response, efficiencies, resolution, triggers, calibration, cosmic-ray detection | detector-response: [detector measurement framework](../../detector-response/references/detector-measurement-framework.md) |
 | Likelihoods, nuisance modeling, intervals, significance, unfolding, combinations | hep-statistics: [core statistics guide](../../hep-statistics/references/core-stats-guide.md) |

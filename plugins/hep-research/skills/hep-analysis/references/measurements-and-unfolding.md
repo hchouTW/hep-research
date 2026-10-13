@@ -5,6 +5,39 @@ This file keeps the measurement-design view. The response object and forward fol
 algorithms, regularization, coverage and combination methods are hep-statistics'
 ([unfolding](../../hep-statistics/references/unfolding.md)). Ownership: `docs/routing-contract.md`.
 
+## Estimand and fiducial definition
+
+Write the estimand in one sentence before the selection: quantity, species or process, variable and range, level,
+frame, and what is held fixed. It goes in the spec's `estimand` field, and the validator refuses a spec without one.
+
+**Truth-level objects (collider).** Define the objects on stable final-state particles (a lifetime cut such as
+c tau > 10 mm is the usual convention; state the one used). Leptons are *dressed* (photons within a stated Delta R
+added back), *bare* (after final-state radiation) or *Born* (before it); dressed leptons are the least model-dependent
+and match what the detector sees. *Prompt* means not from a hadron or tau decay; say how taus are treated. Jets are
+clustered from stable particles with neutrinos either included or excluded, stated.
+
+**Fiducial cuts, Rivet-style.** The fiducial region applies to the truth objects the cuts that mirror the reconstructed
+selection (thresholds, |eta| ranges, isolation on stable particles), never cuts on partons, the boson's mass before
+radiation, or invisible particles that the measurement cannot see. Then the extrapolation from the fiducial region to
+the full phase space, if wanted, is a separate, model-dependent step with its own uncertainty. Publish the definition as
+code (a Rivet routine or equivalent) so a prediction can be computed in the same region.
+
+**Result levels (cosmic rays).** Top of instrument: corrected for the detector, still including interactions in the
+material above it if any. Top of atmosphere: corrected for the overburden of a balloon or ground instrument. Local
+interstellar: additionally corrected for solar modulation, which needs a model (for example the force field,
+`solar_modulation_force_field.py`) and its epoch; a modulated or demodulated flux is model-dependent and is labelled
+so. A profile may define its own levels (for example a top-of-instrument term in its vocabulary).
+
+One-sentence estimands (synthetic examples):
+
+- Collider: "The differential cross section d sigma / d pT of the leading dressed muon in pp -> Z/gamma* -> mu mu, for
+  pT from 20 to 200 GeV, at particle level in the fiducial region of two prompt muons with pT > 20 GeV and |eta| < 2.4,
+  per bin of 10 GeV."
+- Cosmic ray: "The helium flux per rigidity bin from 2 to 100 GV at top of instrument, averaged over each Bartels
+  rotation of the period, for particles above the geomagnetic cutoff selection."
+- Neutrino: "The flux-averaged charged-current muon-neutrino cross section per nucleon on the target nucleus, in bins
+  of muon momentum and angle, at particle level, for the stated neutrino flux."
+
 ## Cross sections
 
 A simple fiducial estimate is `sigma_fid=(N_obs-N_bkg)/(L*C)`. Define whether C includes reconstruction, selection efficiency, and migration, consistently with the truth-level fiducial region. Extrapolation to a total cross section introduces acceptance and theory dependence. State whether branching fractions are included.

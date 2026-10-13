@@ -10,7 +10,7 @@
   },
   "hep-analysis": {
    "references": 11,
-   "bytes": 59164,
+   "bytes": 61858,
    "uncited": 0
   },
   "hep-computing": {
@@ -807,11 +807,12 @@
    "lines": 55,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-analysis/assets/measurement_spec.template.md",
     "skills/hep-analysis/references/hep-analysis-guide.md",
     "tests/skills/hep_analysis/test_method_references.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "b995ce7 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/data-pipelines.md",
@@ -837,7 +838,7 @@
   {
    "path": "skills/hep-analysis/references/hep-analysis-guide.md",
    "owner": "hep-analysis",
-   "bytes": 17571,
+   "bytes": 17628,
    "lines": 108,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -852,7 +853,7 @@
    "cited_by_other_skills": [
     "detector-response"
    ],
-   "last_commit": "fbd4a26 2026-10-13"
+   "last_commit": "b995ce7 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/histograms-efficiencies.md",
@@ -878,8 +879,8 @@
   {
    "path": "skills/hep-analysis/references/measurements-and-unfolding.md",
    "owner": "hep-analysis",
-   "bytes": 2988,
-   "lines": 32,
+   "bytes": 5625,
+   "lines": 65,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/cosmic-ray-spectrum-and-composition.md",
@@ -889,7 +890,8 @@
     "skills/hep-analysis/references/hep-analysis-guide.md",
     "skills/hep-analysis/scripts/cosmic_ray_flux.py",
     "skills/hep-analysis/scripts/cr_spectrum_powerlaw_fit.py",
-    "skills/hep-statistics/references/unfolding.md"
+    "skills/hep-statistics/references/unfolding.md",
+    "tests/skills/hep_analysis/test_method_references.py"
    ],
    "cited_by_other_skills": [
     "detector-response",
@@ -1637,7 +1639,8 @@
     "skills/hep-analysis/scripts/cosmic_ray_flux.py",
     "skills/hep-analysis/scripts/cr_spectrum_powerlaw_fit.py",
     "skills/hep-statistics/SKILL.md",
-    "skills/hep-statistics/references/astroparticle-statistics.md"
+    "skills/hep-statistics/references/astroparticle-statistics.md",
+    "tests/skills/hep_analysis/test_method_references.py"
    ],
    "cited_by_other_skills": [
     "detector-response",

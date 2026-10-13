@@ -52,5 +52,23 @@ class CorrectionChainTests(unittest.TestCase):
             self.assertTrue(vocab.has('response_corrections', cat), cat)
 
 
+class EstimandTests(unittest.TestCase):
+    def test_example_estimands_pass_the_validator(self):
+        sys.path.insert(0, str(ROOT))
+        from contracts.validate import validate_artifact
+        examples = re.findall(r'^- (?:Collider|Cosmic ray|Neutrino): "(.*?)"', text('measurements-and-unfolding.md'),
+                              re.M | re.S)
+        self.assertEqual(len(examples), 3)
+        template = json.loads((ROOT / 'skills' / 'hep-analysis' / 'assets' / 'measurement_spec.template.json')
+                              .read_text(encoding='utf-8'))
+        for est in examples:
+            with self.subTest(estimand=est[:40]):
+                template['extension']['estimand'] = ' '.join(est.split())
+                rep = validate_artifact(template, strict=True)
+                self.assertTrue(rep.ok, rep.as_dict())
+        template['extension']['estimand'] = 'helium flux'
+        self.assertFalse(validate_artifact(template).ok)
+
+
 if __name__ == '__main__':
     unittest.main()
