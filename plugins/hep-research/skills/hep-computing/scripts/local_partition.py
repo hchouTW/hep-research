@@ -6,10 +6,14 @@ Rules this enforces:
 - The work is split once into a manifest of chunks (id, item range, seed); the manifest hash ties every output to it.
 - A chunk's output is written atomically and only once; resubmission skips finished chunks, so nothing is counted twice.
 - Retries happen only when the run configuration sets "max_attempts"; with no configuration a failed chunk is not
-  retried. A chunk whose last two attempts failed with the same error is stopped even if attempts remain.
+  retried. max_attempts counts every attempt since the chunk's last reset, over all runs: running again does not buy
+  more attempts. A chunk whose last two attempts failed the same way (same exit code, timeout, missing or invalid
+  output) is stopped even if attempts remain.
 - State (attempts, errors) is kept on disk after any failure, so a later resubmission continues where it stopped.
-- Merging checks that every manifest chunk is present exactly once, belongs to this manifest, and that the item
-  ranges tile [0, n) with no gap or overlap; a missing chunk makes the merge 'incomplete', never a silent partial sum.
+- Merging reads each chunk from its own file chunks/<id>.json only and checks that it belongs to this manifest, with
+  the manifest's range and seed, and that the ranges tile [0, n) with no gap or overlap; a missing chunk makes the
+  merge 'incomplete', never a silent partial sum. A stray file claiming a chunk is never summed; if its result
+  differs from the chunk's own file the merge is 'incomplete' (merge.conflicting_duplicate).
 
 Python API: make_manifest(job_id, n_items, chunk_size, seed) -> dict; run(manifest, state_dir, worker, config=None)
 -> dict; merge(manifest, state_dir, combine) -> dict. worker(chunk) returns a JSON-serializable result or raises.
@@ -41,6 +45,15 @@ from core.partition.engine import (_hash, _load_state, _reduce, _sum, _write_ato
 from core.partition.executors import allowed_env  # noqa: E402
 
 
+class WorkerFailure(RuntimeError):
+    """A failed chunk command. 'signature' is what the repeated-failure rule compares (exit code, timeout, missing or
+    invalid output); the message keeps the stderr tail for people, which may hold paths or times that vary."""
+
+    def __init__(self, signature: str, message: str):
+        super().__init__(message)
+        self.signature = signature
+
+
 def _cmd_worker(template: str, state_dir: Path, timeout: float | None = None, passthrough=()):
     """The worker runs with an allow-listed environment (core.partition.executors.ENV_ALLOW plus passthrough names)
     and an optional timeout, the same rules as batch jobs (X16)."""
@@ -53,10 +66,15 @@ def _cmd_worker(template: str, state_dir: Path, timeout: float | None = None, pa
             try:
                 proc = subprocess.run(cmd, capture_output=True, text=True, env=env, timeout=timeout)
             except subprocess.TimeoutExpired:
-                raise RuntimeError(f"timeout after {timeout} s") from None
+                raise WorkerFailure("timeout", f"timeout after {timeout} s") from None
             if proc.returncode != 0:
-                raise RuntimeError(f"exit {proc.returncode}: {proc.stderr.strip()[-300:]}")
-            return json.loads(out.read_text(encoding="utf-8"))
+                raise WorkerFailure(f"exit={proc.returncode}", f"exit {proc.returncode}: {proc.stderr.strip()[-300:]}")
+            if not out.is_file():
+                raise WorkerFailure("missing-output", f"exit 0 but the command wrote no output to {out}")
+            try:
+                return json.loads(out.read_text(encoding="utf-8"))
+            except ValueError as exc:
+                raise WorkerFailure("invalid-output", f"output is not valid JSON: {exc}") from None
     return worker
 
 
