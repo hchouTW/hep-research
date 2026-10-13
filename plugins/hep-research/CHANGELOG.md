@@ -362,6 +362,11 @@ same level, and at the publication gate; no new capability).
   is now `F(x_b)` (indices, break and chi2 unchanged). Documented once in the core/stats guide (conventions) and
   linked from the hep-analysis guide; the guide's stale "diagonal errors only" description of
   `cr_spectrum_powerlaw_fit.py` is replaced.
+- **hep-statistics SKILL.md headroom.** 8178 -> 7653 B (budget 8192): the Resources list of ten reference links moved
+  into a reference index in the core/stats guide (Contents), with the ML-assisted link kept in SKILL.md; the
+  "N hypotheses, no scan data" row (Bonferroni or Sidak, by hand, labeled) moved to the guide's Choosing a tool table.
+  No rule removed; the description and the generated context-resolution stanza are unchanged. The guide stays under
+  its 17000 B test (16944 B) by dropping a sentence that repeated its "run, do not hand-compute" convention.
 
 ## 0.6.17 (2026-10-13)
 

@@ -17,7 +17,12 @@ pyhf/Combine adapter ([statistical tools](statistical-tools.md)). Run any script
 4. [Not implemented](#not-implemented)
 5. [Failure modes](#failure-modes)
 
-Per-module subcommands, inputs and outputs, the validation tools outside `core/stats` and the publication-gate rules are in the [command reference](core-stats-commands.md).
+**Reference index**: the [command reference](core-stats-commands.md) (per-module
+subcommands, inputs and outputs, validation tools outside `core/stats`, publication-gate rules),
+[nuisance modeling](nuisance-modeling.md), [likelihood fitting](likelihood-fitting.md) (with sWeights),
+[unfolding](unfolding.md), [combinations](combinations.md), [inference recipes](inference-recipes.md),
+[pyhf and Combine](statistical-tools.md), [astroparticle](astroparticle-statistics.md),
+[ML-assisted inference](ml-assisted-inference.md), [inference reasoning](statistical-inference-for-physics.md).
 
 ## Common conventions
 
@@ -82,9 +87,8 @@ Per-module subcommands, inputs and outputs, the validation tools outside `core/s
   where they would claim p = 0 or an error of 0. Exact Poisson tails stay in log space (`log_p_value_exact_poisson`).
 - **Toy ensembles** (`toy_ensemble.py`, helper, no CLI): every toy study states its ensemble, counts every toy's
   outcome and never pools ensembles; details in the [command reference](core-stats-commands.md#toy-ensembles).
-- **Broken power law** (`broken_power_law.py`, helper, no CLI): the plugin's one parametrization,
-  `[ln A, gamma1, gamma2, ln x_b]` with `A = F(x_b)`, shared by `covariance_fit.py` and hep-analysis
-  `cr_spectrum_powerlaw_fit.py`; formula and conventions in the [command reference](core-stats-commands.md#broken-power-law).
+- **Broken power law** (`broken_power_law.py`, helper, no CLI): one parametrization for `covariance_fit.py` and
+  hep-analysis `cr_spectrum_powerlaw_fit.py` ([conventions](core-stats-commands.md#broken-power-law)).
 - **Covariance and correlation matrices** go through one strict Cholesky (`_linalg.py`, private, no CLI). It works
   on the matrix scaled to a unit diagonal, so units never change the verdict. A pivot below -1e-10 is an error
   that names the matrix, a fit refuses a singular matrix, and toy sampling accepts a semi-definite one and records
@@ -98,6 +102,7 @@ Per-module subcommands, inputs and outputs, the validation tools outside `core/s
 | Limit or interval for a count with a **known** background | `poisson_diagnostics.py upper-limit`, `fc-interval`, `cls-limit` | `interval` for a mean with no background; `coverage` to check a construction |
 | Same with an **uncertain** background | `likelihood_limits.py profile-limit`, `profile-cls`, `profile-fc` | compare with the marginalized `--sigma-b` result; `neyman-limit` when coverage over the nuisance matters |
 | Discovery significance of a count | `likelihood_limits.py profile-significance` (uncertain b), `statistical_toys.py boundary` (known b), `shape-significance` (several bins, nuisances) | ON/OFF counting: `<plugin root>/skills/hep-statistics/scripts/li_ma_significance.py` |
+| N hypotheses, no scan data | Bonferroni or Šidák bound (conservative), worked by hand and labeled | with scan data: `look_elsewhere.py` |
 | Several bins sharing one signal strength | `likelihood_limits.py multibin-limit` | `shape-limit` when shapes and several nuisances matter; the pyhf adapter beyond that |
 | Finite Monte Carlo statistics in templates | `statistical_toys.py template-stat`, then `template-bb` | `template_fit.py bb-fit`/`bb-toys` for several templates, `wbb-fit`/`wbb-toys` for weighted MC and nuisances |
 | Unfolding: D'Agostini iterations | `statistical_toys.py unfold-scan`, then `unfolding_diagnostics.py closure --method dagostini` | then `dagostini-unfold` (the data, with covariance) |
@@ -108,8 +113,7 @@ Per-module subcommands, inputs and outputs, the validation tools outside `core/s
 ## Skill scripts
 
 Command-line helpers in `skills/hep-statistics/scripts/` (read `--help` first); they call the modules above and never
-replace them. When a shell is available, run the matching script and report its output; a value worked by hand is
-labeled as such.
+replace them. The rule "run, do not hand-compute" applies.
 
 Dependencies are marked per script: unmarked scripts use the standard library only; marked ones refuse to run
 without NumPy (and SciPy) with exit 2 and a JSON message, and every script prints `--help` without them.
@@ -123,9 +127,8 @@ without NumPy (and SciPy) with exit 2 and a JSON message, and every script print
 - `covariance_fit.py` (needs NumPy and SciPy): fits to published points with their covariance, with the Peelle diagnostics (constant, line, normalized exponential, sharp or smooth broken power law, plug-in `function(theta, x)`); `break-scan`: toy-calibrated break interval and no-break test (no Wilks); `discrete_profile.py` (needs NumPy and SciPy): discrete profiling over a model family; `eft_scan.py` (needs NumPy and SciPy): EFT parameter scans; `pcl_efficiency_ratio.py` (needs NumPy and SciPy), `ratio_estimation.py` (needs NumPy): ratio and efficiency intervals; `sweighted_fit.py` (needs NumPy and SciPy): sWeighted fits with covering uncertainties.
 - `result_artifact.py`: writes a `statistical-result` artifact from a tool's output, with its status label.
 - Inference scripts owned by hep-analysis (read their `--help`). `cr_spectrum_powerlaw_fit.py` fits a single or
-  continuous broken power law ([parametrization](core-stats-commands.md#broken-power-law)) in log flux, a full
-  covariance linearized; a free break's interval and significance are calibrated here (`break-scan`,
-  `global_significance.py`). `particle_ratio_with_uncertainty.py` gives a ratio or fraction of two yields by the
+  continuous broken power law in log flux (a full covariance, linearized); a free break is calibrated here
+  (`break-scan`, `global_significance.py`). `particle_ratio_with_uncertainty.py` gives a ratio or fraction of two yields by the
   delta method with one optional correlation coefficient: with correlated points or bin-to-bin correlated
   systematics use `covariance_fit.py fit` or
   `statistical_toys.py ratio-cov` / `ratio-measured` here, and at low counts an exact construction
@@ -142,7 +145,7 @@ correlated gamma nuisances; Poisson-exact cross-validation for the linear estima
 forward-folding priors learned from data or with free hyperparameters; efficiency uncertainties that depend on the
 unfolded spectrum; a measured covariance of anything other than the response cells. Each would be a framework, not a
 diagnostic. Post-fit nuisance impacts, look-elsewhere corrections, expected sensitivity, goodness of fit and Bayesian
-convergence live outside `core/stats` (see the SKILL.md resources).
+convergence live outside `core/stats` (the reference index and skill scripts).
 
 ## Failure modes
 

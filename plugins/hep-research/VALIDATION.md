@@ -1092,3 +1092,7 @@ STH Q8 (one broken-power-law parametrization). Synthetic input: 20 points over x
 | Fitted parameters on the same toys (40 seeded per model, measured; 8 per model in the test) | not comparable for A (smooth) | largest difference 0.17 sigma (sharp, covariance_fit started at the hep-analysis fit) and 0.11 sigma (smooth); test tolerance 0.3 sigma. The tools minimize different chi2 (ln F with the linearized covariance vs F) | `test_toys_agree_within_stated_tolerance` |
 | Sharp break, covariance_fit started at the truth instead | — | 2 of 40 toys reach another local minimum (differences up to 1.4 sigma; one has the lower flux chi2 at the hep-analysis point): the sharp-break chi2 is kinked in ln x_b, so the guide says to start from a profiled break | measured, not a test |
 | Found, not changed: `covariance_fit.py fit` on the same spectrum over x = 1-1000 (flux spans 8 decades) | refused: "singular beyond the 0 declared constraint(s)", eigenvalue ratio 4e-16 in absolute units | open: the subspace singularity test is not on the correlation scale (unlike `_linalg.py`); the comparison uses x = 3-300 | — |
+
+hep-statistics SKILL.md headroom: `tools/measure_entrypoints.py` 8178 -> 7653 B (budget 8192, target <= 7700);
+core-stats-guide.md 16651 -> 16944 B (test limit 17000); `tools/check_routing_static.py` ok (197 cases, no failures);
+`test_core_stats_guide`, `test_skill_resources`, `test_ml_inference_routing`, `test_check_ownership` pass.
