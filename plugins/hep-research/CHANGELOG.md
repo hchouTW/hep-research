@@ -11,6 +11,10 @@ Software checks establish contract consistency only, not physical validity.
   non-blocking lock on `<state>/.lock` (`dir_lock`, shared with `campaign_lock`, so campaign calls still nest); a second
   process gets `PartitionError("partition.locked")`, and `local_partition.py` prints it as a JSON `error` with
   `code`, exit 2. `status` stays lock-free. Tests: `tests/core/test_partition_robustness.py`.
+- **CMP-02 atomic chunk writes.** `_write_atomic` serializes first, flushes and fsyncs, and removes its `.tmp-*` file on
+  any failure. A worker result that is not JSON-serializable is a failed attempt with signature
+  `unserializable-result` (counted; the run continues) instead of a `TypeError` out of `run()`; `merge` ignores dotfiles
+  in `chunks/`. A chunk that uses its last attempt is marked `attempts-exhausted` by that same call, not `failed` (Q5).
 
 ## 0.6.17 (2026-10-13)
 

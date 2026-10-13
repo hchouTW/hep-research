@@ -3,9 +3,12 @@
 Rules this enforces:
 - The work is split once into a manifest of chunks (id, item range, seed); the manifest hash ties every output to it.
 - A chunk's output is written atomically and only once; resubmission skips finished chunks, so nothing is counted twice.
+  Atomic means serialized first, fsynced, renamed; a failed write removes its .tmp-* file. A worker result json cannot
+  write (a set, an object) is a failed attempt with signature 'unserializable-result'; the run goes on.
 - Retries happen only when the run configuration sets "max_attempts"; with no configuration a failed chunk is not
   retried. max_attempts bounds the attempts of a chunk since its last reset() across every run() call, not per call:
-  rerunning the command never buys more attempts ('attempts-exhausted'); only reset() with a reason does.
+  rerunning the command never buys more attempts ('attempts-exhausted', set by the call that used the last attempt);
+  only reset() with a reason does.
 - A chunk whose last two attempts failed with the same failure signature is stopped even if attempts remain. The
   signature is the worker exception's 'signature' attribute when it has one, else its type and message with paths,
   long hex strings and numbers masked, so a temporary path or a timestamp in the message does not defeat the stop.
@@ -183,11 +186,22 @@ def make_manifest(job_id: str, n_items: int, chunk_size: int, seed: int) -> dict
 
 
 def _write_atomic(path: Path, obj) -> None:
+    """Write obj as JSON to path atomically: serialized first (a TypeError leaves nothing behind), written to a
+    .tmp-* file in the same folder, flushed and fsynced, then renamed over path. On any failure the .tmp-* file is
+    removed and the exception re-raised, so path holds either the old or the new content."""
+    text = json.dumps(obj, sort_keys=True)
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=".tmp-", suffix=".json")
-    with os.fdopen(fd, "w", encoding="utf-8") as fh:
-        json.dump(obj, fh, sort_keys=True)
-    os.replace(tmp, path)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            fh.write(text)
+            fh.flush()
+            os.fsync(fh.fileno())
+        os.replace(tmp, path)
+    except BaseException:
+        with contextlib.suppress(OSError):
+            os.unlink(tmp)
+        raise
 
 
 def _load_state(state_dir: Path) -> dict:
@@ -198,6 +212,12 @@ def _load_state(state_dir: Path) -> dict:
 _PATH = re.compile(r"(?:[A-Za-z]:)?[\\/][^\s:'\"]*[\\/][^\s:'\"]*")  # absolute or rooted paths with 2+ segments
 _HEX = re.compile(r"\b[0-9a-fA-F]{8,}\b")
 _NUM = re.compile(r"\d+(?:\.\d+)?")
+
+
+class _Unserializable(TypeError):
+    """A worker result json cannot write; recorded as a chunk failure with a stable signature."""
+
+    signature = "unserializable-result"
 
 
 def failure_signature(exc: BaseException) -> str:
@@ -255,29 +275,32 @@ def _run(manifest: dict, state_dir: Path, worker, config: dict | None, max_attem
             st["status"] = "done"
             skipped.append(ch["id"])
             continue
-        tried_now = False
         while True:
             if _repeated(st):
                 st["status"] = "stopped-repeated-failure"
                 break
             if st["attempts_since_reset"] >= max_attempts:
-                if not tried_now:  # nothing left for this call: say why instead of a stale 'failed'
-                    st["status"] = "attempts-exhausted"
+                # nothing left: say why instead of 'failed', also on the call that used the last attempt (Q5)
+                st["status"] = "attempts-exhausted"
                 break
             st["attempts"] += 1
             st["attempts_since_reset"] += 1
-            tried_now = True
             ran.append(ch["id"])
             try:
                 result = worker(ch)
+                doc = {"chunk_id": ch["id"], "manifest_hash": manifest["manifest_hash"], "start": ch["start"],
+                       "stop": ch["stop"], "seed": ch["seed"], "result": result}
+                try:
+                    json.dumps(doc)
+                except (TypeError, ValueError) as exc:  # e.g. a set: the attempt failed, the run goes on
+                    raise _Unserializable(f"worker result is not JSON-serializable: {exc}") from None
             except Exception as exc:  # noqa: BLE001 - every worker failure is recorded, not hidden
                 st["errors"].append(f"{type(exc).__name__}: {exc}")
                 st["signatures"].append(failure_signature(exc))
                 st["status"] = "failed"
                 _write_atomic(state_dir / "state.json", state)
                 continue
-            _write_atomic(out, {"chunk_id": ch["id"], "manifest_hash": manifest["manifest_hash"], "start": ch["start"],
-                                "stop": ch["stop"], "seed": ch["seed"], "result": result})
+            _write_atomic(out, doc)
             st["status"] = "done"
             break
         _write_atomic(state_dir / "state.json", state)
@@ -386,7 +409,7 @@ def _merge(manifest: dict, state_dir: Path, combine=None) -> dict:
         results.append((c["start"], doc["result"]))
     # 2. every other file is never summed; one that claims a manifest chunk with a different result is a conflict
     for f in sorted(cdir.glob("*.json")) if cdir.is_dir() else []:
-        if f.stem in wanted:
+        if f.stem in wanted or f.name.startswith("."):  # .tmp-* files of an interrupted write are not outputs
             continue
         doc, why = _read_chunk(f)
         if why:

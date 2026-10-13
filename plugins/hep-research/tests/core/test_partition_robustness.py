@@ -96,5 +96,73 @@ class LockTests(_Base):
         self.assertEqual({c: s["attempts"] for c, s in state["chunks"].items()}, {c["id"]: 1 for c in self.man["chunks"]})
 
 
+class AtomicWriteTests(_Base):
+    """CMP-02 and Q5."""
+
+    def tmp_files(self):
+        return sorted(str(f.relative_to(self.d)) for f in self.d.rglob(".tmp-*"))
+
+    def test_unserializable_result_is_a_failed_attempt_and_the_run_goes_on(self):
+        def worker(ch):
+            return {1, 2} if ch["id"] == "c0001" else {"n": 1}
+        res = engine.run(self.man, self.state, worker, {"max_attempts": 3})
+        st = json.loads((self.state / "state.json").read_text())["chunks"]
+        self.assertEqual(st["c0001"]["signatures"], ["unserializable-result", "unserializable-result"])
+        self.assertEqual(st["c0001"]["attempts"], 2)  # two identical signatures stop the chunk
+        self.assertEqual(st["c0001"]["status"], "stopped-repeated-failure")
+        self.assertEqual([c for c, s in st.items() if s["status"] == "done"], ["c0000", "c0002", "c0003"])
+        self.assertEqual(res["not_done"], ["c0001"])
+        self.assertEqual(self.tmp_files(), [])
+        m = engine.merge(self.man, self.state)
+        self.assertNotIn("merge.unreadable", [p["code"] for p in m["problems"]])
+
+    def test_failed_write_removes_its_temporary_file(self):
+        target = self.d / "out" / "x.json"
+        with self.assertRaises(TypeError):
+            engine._write_atomic(target, {"a": object()})
+        self.assertFalse(target.exists())
+        self.assertEqual(self.tmp_files(), [])
+        orig = engine.os.replace
+
+        def boom(a, b):
+            raise OSError("synthetic rename failure")
+        engine.os.replace = boom
+        try:
+            with self.assertRaises(OSError):
+                engine._write_atomic(target, {"a": 1})
+        finally:
+            engine.os.replace = orig
+        self.assertEqual(self.tmp_files(), [])
+
+    def test_write_is_fsynced(self):
+        calls = []
+        orig = engine.os.fsync
+        engine.os.fsync = lambda fd: calls.append(fd) or orig(fd)
+        try:
+            engine._write_atomic(self.d / "y.json", {"a": 1})
+        finally:
+            engine.os.fsync = orig
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(json.loads((self.d / "y.json").read_text()), {"a": 1})
+
+    def test_merge_ignores_leftover_temporary_files(self):
+        engine.run(self.man, self.state, lambda ch: {"n": 1})
+        (self.state / "chunks" / ".tmp-abc.json").write_text('{"partial": ')
+        m = engine.merge(self.man, self.state)
+        self.assertEqual(m["status"], "complete")
+        self.assertEqual(m["problems"], [])
+
+    def test_attempts_exhausted_on_the_call_that_used_the_last_attempt(self):
+        n = {"k": 0}
+
+        def worker(ch):
+            n["k"] += 1
+            raise (RuntimeError, OSError)[n["k"] % 2](f"boom {ch['id']}")
+        engine.run(self.man, self.state, worker, {"max_attempts": 2})
+        st = json.loads((self.state / "state.json").read_text())["chunks"]
+        self.assertEqual({s["status"] for s in st.values()}, {"attempts-exhausted"})
+        self.assertEqual({s["attempts"] for s in st.values()}, {2})
+
+
 if __name__ == "__main__":
     unittest.main()
