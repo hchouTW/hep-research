@@ -159,6 +159,33 @@ def response_v24(**extra):
                     versions={"plugin": "0.6.14", "contracts": CONTRACTS_VERSION, "profiles": {}})
 
 
+def ml_v25(**extra):
+    """ml-artifact under the 2.5.0 rules: grouped splits with a passed overlap check, structured weights, a probability
+    output with a calibration validated on a held-out sample, a domain-shift check on a control sample, seeds."""
+    from contracts import CONTRACTS_VERSION
+    ext = {"task": "classification", "labels": ["sig", "bkg"], "features": ["x", "y"],
+           "splits": {"grouping_key": "run_id", "manifest": "splits/manifest.json", "test_groups_disjoint": True,
+                      "overlap_check": {"tool": "check_split_integrity.py", "result": "pass", "report": "splits/report.json"}},
+           "training_domain": {"x": [0.0, 1.0], "y": [-1.0, 1.0]}, "preprocessing": [],
+           "weights": {"source": "generator weights (synthetic)", "negative_weight_treatment": "none-present",
+                       "class_balancing": "inverse class frequency", "used_in": ["loss", "metrics"]},
+           "model_hash": "sha256:" + "0" * 64, "output_semantics": "probability",
+           "calibration": {"method": "temperature", "fit_sample": "val",
+                           "validation": {"metric": "ece", "sample": "test", "before": 0.05, "after": 0.01}},
+           "domain_shift": {"control_sample": "synthetic control region", "method": "score-shape comparison",
+                            "result": {"ks_p": 0.4}, "status": "checked"},
+           "environment": {"torch_version": "synthetic", "device": "cpu", "precision": "fp32", "seeds": {"torch": 1, "split": 2}},
+           "downstream_validation": [{"metric": "working-point efficiency in the synthetic signal region"}], **extra}
+    ext = {k: x for k, x in ext.items() if x is not None}  # extra key=None removes the field
+    return envelope("ml-artifact", ext, "physics-ml", contract_version=CONTRACTS_VERSION,
+                    versions={"plugin": "0.6.16", "contracts": CONTRACTS_VERSION, "profiles": {}})
+
+
+def ml_v25_splits(**splits):
+    return ml_v25(splits={"grouping_key": "run_id", "overlap_check": {"tool": "check_split_integrity.py", "result": "pass"},
+                          **splits})
+
+
 VALID = {
     "measurement_collider.json": measurement(),
     "measurement_exposure.json": measurement("exposure", observable=observable("exposure", level="detector", quantity="differential-flux", unit="m^-2 sr^-1 s^-1 GV^-1", variables=[{"name": "rigidity", "unit": "GV", "edges": [1, 2, 4]}])),
@@ -211,6 +238,7 @@ VALID = {
                                                      "limitations": ["fixture"]}, "research-communication"),
     "communication_traceability.json": communication_rich(),
     "response_v24.json": response_v24(),
+    "ml_artifact_v25.json": ml_v25(),
 }
 
 bad = {}
@@ -232,6 +260,16 @@ d = statres("frequentist"); d["extension"]["priors"] = [{"parameter": "mu", "for
 d = prediction(); d["inputs"] = [{"ref": "x.json", "status": ["asimov"]}]; bad["status_not_propagated.json"] = (d, ["status.not_propagated"])
 d = copy.deepcopy(VALID["computational_run.json"]); d["extension"]["exit_status"] = 3; bad["run_failed_unlabeled.json"] = (d, ["status.failed_unlabeled"])
 d = copy.deepcopy(VALID["ml_artifact.json"]); d["extension"]["splits"] = {"grouping_key": ""}; bad["ml_no_grouping.json"] = (d, ["ml.no_grouping"])
+bad["ml_blank_grouping_key.json"] = (ml_v25_splits(grouping_key="  "), ["ml.no_grouping"])
+bad["ml_empty_model_hash.json"] = (ml_v25(model_hash=" "), ["ml.model_hash_missing"])
+bad["ml_empty_labels_features.json"] = (ml_v25(labels=[], features=[], training_domain={}), ["ml.labels_missing", "ml.features_missing"])
+bad["ml_domain_unknown_feature.json"] = (ml_v25(training_domain={"x": [0.0, 1.0], "z": [0.0, 1.0]}), ["ml.training_domain_unknown_feature"])
+bad["ml_domain_inverted_range.json"] = (ml_v25(training_domain={"x": [1.0, 0.0]}), ["ml.training_domain_range"])
+bad["ml_split_overlap_failed.json"] = (ml_v25_splits(overlap_check={"tool": "check_split_integrity.py", "result": "fail"}), ["ml.split_overlap"])
+bad["ml_calibration_missing.json"] = (ml_v25(calibration=None), ["ml.calibration_missing"])
+bad["ml_calibration_on_fit_sample.json"] = (ml_v25(calibration={"method": "temperature", "fit_sample": "val",
+                                                                "validation": {"metric": "ece", "sample": "val", "after": 0.01}}),
+                                            ["ml.calibration_on_fit_sample"])
 d = statres_v11("bayesian", convergence={"rhat": {"mu": 1.05}}); bad["statres_bayesian_rhat_mismatch.json"] = (d, ["stats.convergence_mismatch"])
 d = statres_v11("frequentist", significance={**SCAN, "global_p": 0.02, "trials_method": "look-elsewhere"}); bad["statres_trials_method_unknown.json"] = (d, ["schema.enum"])
 d = theory(); del d["status"]; bad["envelope_missing_status.json"] = (d, ["schema.required"])
@@ -248,6 +286,9 @@ UNRESOLVED = {"statres_scan_no_global.json": (statres_v11("frequentist", signifi
 d = communication_rich(); d["extension"]["claims"][0]["text"] = "The ratio establishes a deviation (synthetic fixture)."; d["extension"]["claims"][0]["assessment"]["currency"] = "stale"
 d["extension"]["claims"][1]["evidence"] = []; del d["extension"]["claims"][1]["assessment"]; d["extension"]["claims"][1]["unresolved_inputs"] = ["the illustration artifact is not yet written"]
 UNRESOLVED["communication_traceability_pending.json"] = (d, ["communication.assessment_stale", "communication.assessment_missing"])
+UNRESOLVED["ml_domain_shift_missing.json"] = (ml_v25(domain_shift=None), ["ml.domain_shift_missing"])
+UNRESOLVED["ml_split_overlap_not_run.json"] = (ml_v25_splits(overlap_check={"tool": "check_split_integrity.py", "result": "not-run"}),
+                                               ["ml.split_overlap_not_run"])
 
 
 def main() -> None:

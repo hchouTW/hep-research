@@ -1,10 +1,41 @@
-{"$comment": "Owner: physics-ml.",
+{"$comment": "Owner: physics-ml. 2.5.0 adds optional splits.overlap_check/manifest/test_groups_disjoint, a structured weights object (a string stays valid), domain_shift, environment and output_semantics. Rules that would change an older artifact's outcome (blank grouping key, empty model_hash, labels or features, training_domain keys and ranges, calibration shape and sample) are semantic checks in contracts/validate.py (_ml_semantics), native from 2.5.0 and applied to older artifacts with --strict.",
  "type": "object",
  "required": ["task", "labels", "features", "splits", "training_domain", "preprocessing", "model_hash", "downstream_validation"],
  "properties": {
   "task": {"type": "string", "enum": ["classification", "regression", "generation", "surrogate", "inference"]},
   "labels": {"type": "array"}, "features": {"type": "array"},
-  "splits": {"type": "object", "required": ["grouping_key"], "properties": {"grouping_key": {"type": "string"}}},
-  "training_domain": {"type": "object"}, "preprocessing": {"type": "array"}, "weights": {"type": "string"},
-  "model_hash": {"type": "string"}, "calibration": {"type": "object"}, "downstream_validation": {"type": "array"}
+  "splits": {"type": "object", "required": ["grouping_key"], "properties": {
+   "grouping_key": {"type": "string", "minLength": 1},
+   "overlap_check": {"$comment": "2.5.0: result of a split-overlap / group-leakage check (for example check_split_integrity.py)",
+    "type": "object", "required": ["tool", "result"], "properties": {
+     "tool": {"type": "string", "minLength": 1},
+     "result": {"type": "string", "enum": ["pass", "fail", "not-run"]},
+     "report": {"type": "string"}}},
+   "manifest": {"type": "string", "$comment": "2.5.0: path or ref of the split manifest (IDs and groups per split)"},
+   "test_groups_disjoint": {"type": "boolean", "$comment": "2.5.0: no group of the test split appears in training or validation"}}},
+  "training_domain": {"type": "object"}, "preprocessing": {"type": "array"},
+  "weights": {"$comment": "2.5.0: a free-text string (legacy) or a structured declaration",
+   "anyOf": [{"type": "string"},
+    {"type": "object", "required": ["source", "negative_weight_treatment", "used_in"], "properties": {
+     "source": {"type": "string", "minLength": 1},
+     "negative_weight_treatment": {"type": "string",
+      "enum": ["none-present", "signed", "abs-with-correction", "reweighted-positive", "dropped"]},
+     "class_balancing": {"type": ["string", "object", "null"]},
+     "used_in": {"type": "array", "items": {"type": "string", "enum": ["loss", "metrics", "calibration", "templates"]}}}}]},
+  "model_hash": {"type": "string"},
+  "calibration": {"type": "object", "$comment": "shape {method, fit_sample, validation: {metric, sample, before?, after}} is checked semantically (2.5.0)"},
+  "downstream_validation": {"type": "array"},
+  "domain_shift": {"$comment": "2.5.0: check of the model on data or control samples (simulation-trained models)",
+   "type": "object", "required": ["control_sample", "method", "result"], "properties": {
+    "control_sample": {"type": "string", "minLength": 1},
+    "method": {"type": "string", "minLength": 1},
+    "result": {"type": ["string", "object"]},
+    "status": {"type": "string", "enum": ["checked", "not-checked", "failed"]}}},
+  "environment": {"$comment": "2.5.0: software, device, numerical precision and seeds of the training run",
+   "type": "object", "required": ["device", "precision"], "properties": {
+    "torch_version": {"type": "string"}, "framework": {"type": "string"},
+    "device": {"type": "string"}, "precision": {"type": "string"},
+    "seeds": {"type": "object", "$comment": "missing or empty: ml.seeds_missing warning"}}},
+  "output_semantics": {"type": "string", "enum": ["probability", "score", "density-ratio", "regression-value", "generated-sample"],
+   "$comment": "2.5.0: what the model output means; probability and density-ratio need a calibration"}
  }}
