@@ -32,7 +32,7 @@ One number: when a shell is available, run its row's tool, state the constructio
 | Scan look-elsewhere | `sc/look_elsewhere.py brute`, `gross-vitells` | `sc/global_significance.py run` |
 | N hypotheses, no scan data | Bonferroni or Šidák bound (conservative) | no tool: hand-worked |
 | Combination | `sc/combine_measurements.py` | asymmetric errors: `sc/combine_asymmetric.py` |
-| D'Agostini iterations | `cs/statistical_toys.py unfold-scan`, then `closure` (`cs/unfolding_diagnostics.py`) | Tikhonov/SVD: `regularized-scan` |
+| D'Agostini iterations | `cs/statistical_toys.py unfold-scan`, then `cs/unfolding_diagnostics.py closure` | Tikhonov/SVD: `regularized-scan` |
 | MCMC posterior | user's sampler, then `sc/bayes_diagnostics.py diagnose` | SBC: `sc/bayes_calibration.py sbc` |
 | Fit to published points, covariance | `sc/covariance_fit.py fit` (constant, line, exponential) | other models: no tool; label a hand fit |
 | Ratio with covariance | `cs/statistical_toys.py ratio-cov` (denominators <= 1e5) | above: delta method, labeled hand-worked |
