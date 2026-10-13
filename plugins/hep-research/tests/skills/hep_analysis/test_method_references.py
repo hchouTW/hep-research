@@ -169,5 +169,15 @@ class FixedTargetTests(unittest.TestCase):
         self.assertIn('L_eff = 1.951 cm', t)
 
 
+class LookElsewhereTests(unittest.TestCase):
+    def test_independent_trials(self):
+        from statistics import NormalDist
+        p_global = 1 - (1 - 1.0e-3) ** 50
+        self.assertAlmostEqual(p_global, 0.0488, delta=5e-5)
+        self.assertAlmostEqual(NormalDist().inv_cdf(1 - p_global), 1.66, delta=0.005)
+        self.assertAlmostEqual(NormalDist().inv_cdf(1 - 1.0e-3), 3.09, delta=0.005)
+        self.assertIn('0.0488', text('analysis-design.md'))
+
+
 if __name__ == '__main__':
     unittest.main()

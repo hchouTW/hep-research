@@ -61,6 +61,22 @@ Choose binning using resolution, MC statistics, background stability, systematic
 Worked example (synthetic): s = 10, b = 100 gives `s / sqrt(s + b)` = 0.953 and `Z_A` = 0.984; with a signal efficiency
 of 0.5 and a = 3, the Punzi figure is 0.5 / (1.5 + 10) = 0.0435.
 
+## Look-elsewhere at the design stage
+
+A search over masses, energies, positions, time windows or catalogs tests many hypotheses; the global significance
+depends on how many, so the trials are part of the design, fixed before unblinding:
+
+- Fix the scan grid (range, step or resolution-matched spacing) and every dimension that will be scanned, and write
+  them into the plan; adding a dimension after seeing the data adds trials that cannot be counted honestly.
+- Decide how the global p-value will be computed (toys of the full scan, or an asymptotic bound for a correlated
+  scan) and which local significance is reported next to it. The computation belongs to hep-statistics
+  ([look-elsewhere](../../hep-statistics/references/inference-recipes.md#look-elsewhere-global-significance-of-a-scan),
+  `skills/hep-statistics/scripts/global_significance.py`); the spec records the grid and the method.
+
+Worked example (synthetic): a local p-value of 1.0e-3 in a scan of 50 independent windows has a global p-value of
+`1 - (1 - 1.0e-3)^50` = 0.0488, about 1.66 sigma instead of 3.09; correlated windows give fewer effective trials, which
+only toys or the asymptotic bound can tell.
+
 ## Blinding
 
 Define the mask by region, observable interval, and category. Real data arrive as a released blinded derivative, prepared by the data custodian outside the agent session; the agent never reads the unblinded values. In-code masks are defence in depth on such inputs, and the method for synthetic data: filter at read time, or set blinded bins to NaN before plotting, ratio or pull computation. Drawing a shaded box over plotted data does not blind it, so check the rendered output shows no observed points in the region. Uncertainties, ratios and pulls are computed on the blinded data or withheld, never from the unblinded values. A pre-unblinding check of a blinded region uses simulation, Asimov data, or control and validation regions. Apply it to plots, yield tables, ratios, pulls, debug output, caches, and notebook displays. Store Asimov/expected results separately from observed results. Do not use the actual SR count to optimize the supposedly blinded model.

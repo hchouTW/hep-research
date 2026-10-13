@@ -10,7 +10,7 @@
   },
   "hep-analysis": {
    "references": 11,
-   "bytes": 76937,
+   "bytes": 78300,
    "uncited": 0
   },
   "hep-computing": {
@@ -731,8 +731,8 @@
   {
    "path": "skills/hep-analysis/references/analysis-design.md",
    "owner": "hep-analysis",
-   "bytes": 8194,
-   "lines": 73,
+   "bytes": 9374,
+   "lines": 89,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/efficiency-acceptance-backgrounds.md",
@@ -816,7 +816,7 @@
     "tests/skills/hep_analysis/test_method_references.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "da0f716 2026-10-13"
+   "last_commit": "57316ad 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/data-pipelines.md",
@@ -842,8 +842,8 @@
   {
    "path": "skills/hep-analysis/references/hep-analysis-guide.md",
    "owner": "hep-analysis",
-   "bytes": 18934,
-   "lines": 115,
+   "bytes": 19117,
+   "lines": 116,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
@@ -857,7 +857,7 @@
    "cited_by_other_skills": [
     "detector-response"
    ],
-   "last_commit": "118b172 2026-10-13"
+   "last_commit": "57316ad 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/histograms-efficiencies.md",
@@ -1508,6 +1508,7 @@
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
     "skills/detector-response/references/multimessenger-analysis.md",
+    "skills/hep-analysis/references/analysis-design.md",
     "skills/hep-analysis/references/hep-analysis-guide.md",
     "skills/hep-statistics/SKILL.md",
     "skills/hep-statistics/references/astroparticle-statistics.md",
