@@ -3,6 +3,37 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **physics-ml: HEP content and task routing (external review patch).** `ml-analysis.md` becomes the physics entry
+  point (23 to about 290 lines, original content kept): grouping and k-fold, training versus evaluation weights, class
+  balancing and prior correction, four treatments of negative weights and the optimization pathology, analysis
+  metrics (background rejection at fixed signal efficiency, Asimov significance with background uncertainty), mass
+  sculpting and decorrelation (DisCo, adversarial, planing, DDT, MoDe), parameterized and systematic-aware training,
+  simulation-to-data (scale factors, DCTR, domain-adversarial), weak supervision (CWoLa, CATHODE, CURTAINs), the
+  OmniFold training side, and deployment in experiment frameworks and triggers. New references
+  `particle-and-jet-architectures.md` (Deep Sets/EFN/PFN, ParticleNet, ParT, LorentzNet/PELICAN, variable
+  multiplicity, a masked Deep Sets example with permutation and empty-set checks), `fast-simulation-validation.md`
+  (conditioning range as training domain, physics constraints, five metric classes, statistical meaning of generated
+  samples), `space-and-astroparticle-ml.md` (methods only; experiment facts stay in the profile) and
+  `sbi-training.md` (NRE/NPE/NLE training, diagnostics handed to hep-statistics). `multivariate-analysis-bdt-nn.md`:
+  XGBoost has raised a fatal error on negative weights since 1.3.0 (it said "can silently mishandle");
+  `generative-models.md` points to the fast-simulation file and flags BCE and FID as unsuitable for physics data.
+- **physics-ml: weighted metrics and losses.** New `assets/hep_metrics.py` (NumPy, also a CLI with strict JSON):
+  signed-weight ROC/AUC, weighted efficiency with MC statistical uncertainty, 1/eps_B at fixed eps_S (a lower bound
+  when eps_B <= 0), Asimov significance with sigma_b, N_eff, weighted squared distance correlation, mass-sculpting JSD
+  with a statistical baseline, prior correction. New `assets/hep_losses.py` (PyTorch): signed-weight BCE with three
+  normalizations, per-batch weight report, DisCo penalty (float32, finite gradient on constant-score batches),
+  NaN-safe masked softmax and mean. 33 tests against analytic or construction-known values (Gaussian AUC,
+  Mann-Whitney with ties, integer weights equal duplicated events, Asimov limits, dCor cases, sculpting detection);
+  the PyTorch tests ran with torch 2.14.1 on CPU.
+- **physics-ml: description and routing.** The description is written by task and includes BDTs in analyses, adds
+  the load-first clause and a detector-response Not-for; an invariant records training and evaluation weights
+  separately; Resources becomes a task-to-reference table; Handoffs gain a hep-analysis row and widen the
+  detector-response row to scale factors and tag-and-probe.
+- **Profiles connected to physics-ml.** AMS-02 lists physics-ml in `related_skills` and its working-rules routing
+  table gains a classifier/regressor row; the EIC profile lists physics-ml and its placement inventory gains an ML row.
+
 ## 0.6.16 (2026-10-13)
 
 - **detector-response: front-end electronics and signal processing.** New reference

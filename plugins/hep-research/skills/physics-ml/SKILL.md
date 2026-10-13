@@ -1,11 +1,11 @@
 ---
 name: physics-ml
-description: "Use when the deliverable is a machine-learning model or study for physics, in PyTorch: classifiers and regressors for events, particles or detector signals, generative models and fast simulation, surrogates of expensive simulations or predictions, ML-assisted or simulation-based inference, calibration of model outputs, grouped train/validation/test splits and leakage checks, domain shift between simulation and data, uncertainty estimation, and the PyTorch engineering behind them (models, training loops, data loading, mixed precision, distributed training, debugging NaNs and shapes, checkpoints, export). Not for: the physics a surrogate encodes (hep-theory), validity of inference built on a model (hep-statistics), non-ML code (hep-computing). PyTorch only."
+description: "Use when the deliverable is a machine-learning model or study for physics: classifiers and regressors for events, particles, jets or detector signals (PyTorch networks, and BDTs in analyses), event weights including negative ones, working points and mass decorrelation, systematic-aware training, domain shift between simulation and data, weak supervision, generative models and fast simulation, surrogates, ML-assisted or simulation-based inference (training side), calibration of model outputs, grouped train/validation/test splits and leakage checks, uncertainty estimation, and PyTorch engineering (training loops, data loading, mixed precision, distributed training, debugging NaNs and shapes, checkpoints, export). Load it first even for a quick classifier, metric or training question. Not for: the physics a surrogate encodes (hep-theory), validity of inference built on a model (hep-statistics), detector-level fast-simulation validation (detector-response), non-ML code (hep-computing)."
 ---
 
 # physics-ml: machine learning for physics
 
-**Owns:** classification and regression, generation, surrogates, ML-assisted inference, calibration, domain shift, and PyTorch engineering.
+**Owns:** classification and regression, generation, surrogates, ML-assisted inference (training side), calibration, domain shift, and PyTorch engineering; BDT and classical MVA guidance for analyses.
 **Typical artifacts:** `ml-artifact` (labels, features, grouped splits, training domain, preprocessing, weights, model hash, calibration, downstream validation).
 **Never:** let a metric such as AUC stand in for physics validity; extrapolate a surrogate outside its declared domain without saying so.
 
@@ -15,7 +15,7 @@ description: "Use when the deliverable is a machine-learning model or study for 
 - The training domain is declared; inputs outside it are flagged at inference time.
 - Simulation-trained models are checked on data or control samples for domain shift before their outputs feed a measurement.
 - Classifier outputs used as probabilities are calibrated and the calibration is validated.
-- Event weights (including negative generator weights) are handled explicitly in losses and metrics.
+- Event weights (including negative generator weights) are handled explicitly in losses and metrics; training weights and evaluation weights are recorded separately.
 - A model feeding a measurement or an inference is validated downstream (effect on the physics result, not only on the ML metric).
 
 ## Workflow
@@ -23,7 +23,7 @@ description: "Use when the deliverable is a machine-learning model or study for 
 1. Resolve context (stanza below).
 2. Define the task, labels, features and grouping key; build grouped splits and check leakage.
 3. Train with recorded seeds and environment; monitor; checkpoint.
-4. Evaluate on held-out groups, calibrate, assess domain shift and the downstream effect.
+4. Evaluate on held-out groups with physics-weighted metrics at the working point, calibrate, assess domain shift and the downstream effect.
 5. Write the `ml-artifact` and validate it.
 
 <!-- BEGIN context-resolution: generated from contracts/stanzas/context-resolution.md by tools/build_stanzas.py; do not edit -->
@@ -41,11 +41,20 @@ description: "Use when the deliverable is a machine-learning model or study for 
 
 ## Resources
 
-Folder guide for people: [README.md](README.md).
+Read by task (all under `references/`); physics first, engineering when the task needs it:
 
-Start with [the PyTorch engineering guide](references/deep-learning-guide.md). Physics-facing references: [multivariate analysis](references/multivariate-analysis-bdt-nn.md), [ML in analyses](references/ml-analysis.md), [scientific ML](references/scientific-machine-learning.md), data strategy, evaluation, uncertainty and calibration, robustness and distribution shift, reproducibility; engineering references cover training, scaling, debugging and deployment, all under `references/`.
+| Task | Read |
+|---|---|
+| Classifier or regressor for an analysis: splits, weights, metrics, working points, decorrelation, systematics, sim-to-data, weak supervision, OmniFold, deployment | [ml-analysis.md](references/ml-analysis.md) |
+| Choosing BDT vs NN, BDT practice, regression targets | [multivariate-analysis-bdt-nn.md](references/multivariate-analysis-bdt-nn.md) |
+| Jets, particle sets, hits, point clouds, graphs | [particle-and-jet-architectures.md](references/particle-and-jet-architectures.md) |
+| Space or ground-based astroparticle detectors (with the bound profile) | [space-and-astroparticle-ml.md](references/space-and-astroparticle-ml.md) |
+| Fast simulation, generative models | [fast-simulation-validation.md](references/fast-simulation-validation.md), [generative-models.md](references/generative-models.md) |
+| Surrogates, SBI training | [scientific-machine-learning.md](references/scientific-machine-learning.md), [sbi-training.md](references/sbi-training.md) |
+| Calibration, uncertainty, distribution shift | [uncertainty-and-calibration.md](references/uncertainty-and-calibration.md), [robustness-and-distribution-shift.md](references/robustness-and-distribution-shift.md) |
+| PyTorch engineering (training, data, debugging, scaling, export) | [deep-learning-guide.md](references/deep-learning-guide.md), which routes to the rest |
 
-Scripts in `<plugin root>/skills/physics-ml/scripts/` (read `--help` first): `check_split_integrity.py` (group leakage), `check_surrogate_domain.py` (surrogate queries outside or in sparse parts of the training domain), `check_dataset_contract.py`, `compare_model_runs.py`, `find_nan_batches.py`, `inspect_checkpoint.py`, `check_pytorch_env.py`, and budget estimators. Code starting points are in `assets/`.
+Code starting points: `assets/hep_metrics.py` (signed-weight ROC, rejection at fixed signal efficiency with uncertainty, Asimov significance, distance correlation, mass-sculpting JSD; NumPy), `assets/hep_losses.py` (signed-weight BCE, DisCo penalty, NaN-safe masked softmax and mean), training templates. Scripts in `<plugin root>/skills/physics-ml/scripts/` (read `--help` first): `check_split_integrity.py`, `check_surrogate_domain.py`, `check_dataset_contract.py`, `compare_model_runs.py`, `find_nan_batches.py`, `inspect_checkpoint.py`, `check_pytorch_env.py`, budget estimators. Folder guide: [README.md](README.md).
 
 ## Handoffs
 
@@ -53,6 +62,7 @@ Scripts in `<plugin root>/skills/physics-ml/scripts/` (read `--help` first): `ch
 |---|---|---|
 | Physics assumptions or validity domain of a surrogate | hep-theory | `prediction` |
 | Inference using the model (coverage, systematics) | hep-statistics | `ml-artifact` |
+| Selection design, normalization, systematics plan around a score | hep-analysis | `ml-artifact` |
+| Scale factors, tag-and-probe, fast-simulation validation against full simulation | detector-response | `ml-artifact` |
 | Pipeline, I/O, batch training jobs | hep-computing | `computational-run` |
-| Fast-simulation validation against full simulation | detector-response | `ml-artifact` |
 | Writing up results and figures | research-communication | `ml-artifact` |

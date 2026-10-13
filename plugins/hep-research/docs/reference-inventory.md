@@ -13,7 +13,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-computing | 29 | 338 | 0 |
 | hep-statistics | 9 | 119 | 0 |
 | hep-theory | 8 | 42 | 0 |
-| physics-ml | 34 | 184 | 0 |
+| physics-ml | 38 | 231 | 0 |
 | research-communication | 53 | 378 | 0 |
 
 ## Overlapping pairs
@@ -29,7 +29,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 ## Similar names (same skill, a shared name token in at most 4 files)
 
 - **academic**: `academic-diagrams-guide.md`, `academic-papers-guide.md`
-- **architecture**: `architecture-selection.md`, `serving-architecture.md`, `transformer-architectures.md`
+- **architecture**: `architecture-selection.md`, `particle-and-jet-architectures.md`, `serving-architecture.md`, `transformer-architectures.md`
 - **auditing**: `equation-and-notation-auditing.md`, `manuscript-consistency-auditing.md`, `reproducibility-auditing.md`
 - **authoring**: `example-authoring.md`, `task-authoring-guide.md`
 - **balanced**: `bash-balanced-design-guidelines.md`, `cpp-balanced-design-guidelines.md`, `python-balanced-design-guidelines.md`, `root-balanced-design-guidelines.md`
@@ -53,6 +53,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 - **latex**: `latex-mechanics-and-tooling.md`, `latex-venue-setup.md`
 - **learning**: `deep-learning-guide.md`, `geometric-and-equivariant-learning.md`, `scientific-machine-learning.md`, `transfer-learning.md`
 - **literature**: `literature-discovery-and-search.md`, `literature-review.md`
+- **ml**: `ml-analysis.md`, `space-and-astroparticle-ml.md`
 - **model**: `generative-models.md`, `sequence-models.md`
 - **neutrino**: `neutrino-astronomy.md`, `noble-liquid-neutrino-and-rare-event-detectors.md`
 - **pattern**: `graphviz-patterns.md`, `mermaid-patterns.md`, `plantuml-patterns.md`, `tikz-patterns.md`
@@ -74,7 +75,6 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 - **system**: `detector-systems-overview.md`, `muon-systems.md`
 - **task**: `task-authoring-guide.md`, `task-quality-checklist.md`
 - **tracking**: `gaseous-and-specialized-tracking-technologies.md`, `tracking-and-vertexing.md`
-- **training**: `distributed-training.md`, `optimization-and-training-dynamics.md`, `training-at-scale.md`, `training-loop.md`
 - **venue**: `latex-venue-setup.md`, `multi-venue-reformatting.md`
 - **writing**: `evidence-linked-writing.md`, `grant-and-fellowship-proposal-writing.md`
 
@@ -92,16 +92,16 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `detector-comparison-tables.md` | detector-response | 14.5 | no | 3 | hep-analysis | b944a23 2026-10-13 |
 | `detector-glossary.md` | detector-response | 4.8 | no | 4 | hep-analysis | b944a23 2026-10-13 |
 | `detector-measurement-framework.md` | detector-response | 11.0 | no | 10 | hep-analysis, research-communication | d8bec60 2026-10-13 |
-| `detector-principles-bibliography.md` | detector-response | 13.8 | no | 2 | - | d8bec60 2026-10-13 |
+| `detector-principles-bibliography.md` | detector-response | 13.8 | no | 2 | - | 7fdda0d 2026-10-13 |
 | `detector-principles-summary.md` | detector-response | 22.5 | yes | 3 | - | d8bec60 2026-10-13 |
-| `detector-simulation.md` | detector-response | 12.4 | no | 9 | hep-analysis, hep-theory | d8bec60 2026-10-13 |
+| `detector-simulation.md` | detector-response | 12.4 | no | 10 | hep-analysis, hep-theory, physics-ml | d8bec60 2026-10-13 |
 | `detector-systems-overview.md` | detector-response | 12.2 | no | 14 | hep-analysis | b944a23 2026-10-13 |
 | `event-reconstruction.md` | detector-response | 10.8 | no | 7 | hep-analysis | b944a23 2026-10-13 |
 | `extensive-air-showers.md` | detector-response | 8.0 | no | 10 | hep-analysis, research-communication | b944a23 2026-10-13 |
 | `front-end-electronics-and-signal-processing.md` | detector-response | 24.5 | no | 10 | - | d8bec60 2026-10-13 |
 | `gaseous-and-specialized-tracking-technologies.md` | detector-response | 15.3 | no | 9 | hep-analysis, research-communication | b944a23 2026-10-13 |
 | `ground-based-detection-arrays.md` | detector-response | 8.0 | no | 8 | hep-analysis | b944a23 2026-10-13 |
-| `imaging-atmospheric-cherenkov.md` | detector-response | 10.3 | no | 10 | hep-analysis, hep-statistics, research-communication | b944a23 2026-10-13 |
+| `imaging-atmospheric-cherenkov.md` | detector-response | 10.3 | no | 11 | hep-analysis, hep-statistics, physics-ml, research-communication | b944a23 2026-10-13 |
 | `multimessenger-analysis.md` | detector-response | 6.6 | no | 3 | hep-analysis | b944a23 2026-10-13 |
 | `muon-systems.md` | detector-response | 8.4 | no | 8 | hep-analysis, research-communication | b944a23 2026-10-13 |
 | `neutrino-astronomy.md` | detector-response | 8.6 | no | 8 | hep-analysis, hep-statistics | b944a23 2026-10-13 |
@@ -124,7 +124,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `histograms-efficiencies.md` | hep-analysis | 3.2 | yes | 8 | detector-response, hep-computing | 9546574 2026-10-08 |
 | `measurements-and-unfolding.md` | hep-analysis | 2.7 | yes | 9 | detector-response, hep-statistics | 351029c 2026-10-07 |
 | `systematics.md` | hep-analysis | 5.9 | yes | 25 | detector-response, hep-statistics, hep-theory, physics-ml | 364918e 2026-10-09 |
-| `weights-normalization.md` | hep-analysis | 5.1 | yes | 6 | detector-response, hep-theory, physics-ml | 351029c 2026-10-07 |
+| `weights-normalization.md` | hep-analysis | 5.1 | yes | 7 | detector-response, hep-theory, physics-ml | 351029c 2026-10-07 |
 | `acceptance-criteria.md` | hep-computing | 3.7 | no | 3 | - | 351029c 2026-10-07 |
 | `agile-development-guide.md` | hep-computing | 10.7 | yes | 8 | physics-ml | 351029c 2026-10-07 |
 | `bash-balanced-design-guidelines.md` | hep-computing | 24.8 | yes | 2 | - | 351029c 2026-10-07 |
@@ -158,7 +158,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `core-stats-guide.md` | hep-statistics | 38.4 | yes | 8 | - | 24b8216 2026-10-13 |
 | `inference-recipes.md` | hep-statistics | 14.7 | yes | 7 | detector-response, hep-analysis | 06b86c8 2026-10-12 |
 | `likelihood-fitting.md` | hep-statistics | 8.9 | yes | 7 | detector-response, hep-analysis, hep-computing | 06b86c8 2026-10-12 |
-| `ml-assisted-inference.md` | hep-statistics | 6.2 | yes | 3 | physics-ml | 06b86c8 2026-10-12 |
+| `ml-assisted-inference.md` | hep-statistics | 6.2 | yes | 5 | physics-ml | 06b86c8 2026-10-12 |
 | `nuisance-modeling.md` | hep-statistics | 17.2 | yes | 6 | hep-analysis | 06b86c8 2026-10-12 |
 | `statistical-inference-for-physics.md` | hep-statistics | 12.7 | yes | 9 | hep-computing, hep-theory, research-communication | 351029c 2026-10-07 |
 | `statistical-tools.md` | hep-statistics | 9.4 | yes | 5 | hep-analysis, physics-ml | e375e7d 2026-10-12 |
@@ -183,28 +183,32 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `efficient-finetuning.md` | physics-ml | 6.2 | no | 7 | - | 351029c 2026-10-07 |
 | `evaluation-metrics.md` | physics-ml | 1.7 | no | 6 | - | 351029c 2026-10-07 |
 | `evaluation-strategy.md` | physics-ml | 6.3 | no | 9 | research-communication | 351029c 2026-10-07 |
-| `export-and-deployment.md` | physics-ml | 6.8 | no | 3 | - | 351029c 2026-10-07 |
-| `generative-models.md` | physics-ml | 6.9 | no | 3 | - | 351029c 2026-10-07 |
-| `geometric-and-equivariant-learning.md` | physics-ml | 4.7 | no | 3 | - | 351029c 2026-10-07 |
+| `export-and-deployment.md` | physics-ml | 6.8 | no | 4 | - | 351029c 2026-10-07 |
+| `fast-simulation-validation.md` | physics-ml | 6.0 | yes | 3 | - | 1497349 2026-10-13 |
+| `generative-models.md` | physics-ml | 7.7 | yes | 5 | - | 1497349 2026-10-13 |
+| `geometric-and-equivariant-learning.md` | physics-ml | 4.7 | no | 4 | - | 351029c 2026-10-07 |
 | `interpretability-and-explainability.md` | physics-ml | 6.5 | no | 3 | - | 351029c 2026-10-07 |
 | `mixed-precision.md` | physics-ml | 0.6 | no | 2 | - | 351029c 2026-10-07 |
-| `ml-analysis.md` | physics-ml | 2.9 | yes | 5 | detector-response, hep-analysis | 03929e2 2026-10-11 |
+| `ml-analysis.md` | physics-ml | 21.6 | yes | 9 | detector-response, hep-analysis | 1497349 2026-10-13 |
 | `monitoring-and-lifecycle.md` | physics-ml | 5.6 | no | 3 | - | 351029c 2026-10-07 |
-| `multivariate-analysis-bdt-nn.md` | physics-ml | 16.1 | yes | 6 | detector-response, hep-analysis | 351029c 2026-10-07 |
+| `multivariate-analysis-bdt-nn.md` | physics-ml | 16.4 | yes | 7 | detector-response, hep-analysis | 1497349 2026-10-13 |
 | `optimization-and-training-dynamics.md` | physics-ml | 8.7 | no | 2 | - | 351029c 2026-10-07 |
 | `parallelism-strategy.md` | physics-ml | 6.5 | no | 3 | - | 351029c 2026-10-07 |
+| `particle-and-jet-architectures.md` | physics-ml | 7.6 | yes | 2 | - | 1497349 2026-10-13 |
 | `performance-memory.md` | physics-ml | 1.9 | no | 5 | - | 351029c 2026-10-07 |
 | `reproducibility.md` | physics-ml | 6.3 | no | 3 | - | 03929e2 2026-10-11 |
-| `robustness-and-distribution-shift.md` | physics-ml | 4.3 | no | 6 | - | 351029c 2026-10-07 |
+| `robustness-and-distribution-shift.md` | physics-ml | 4.3 | yes | 8 | - | 351029c 2026-10-07 |
+| `sbi-training.md` | physics-ml | 4.3 | yes | 2 | - | 1497349 2026-10-13 |
 | `scientific-machine-learning.md` | physics-ml | 6.1 | yes | 8 | hep-statistics, hep-theory | 351029c 2026-10-07 |
 | `sequence-models.md` | physics-ml | 5.4 | no | 4 | - | 351029c 2026-10-07 |
 | `serving-architecture.md` | physics-ml | 4.2 | no | 4 | - | 351029c 2026-10-07 |
+| `space-and-astroparticle-ml.md` | physics-ml | 8.6 | yes | 2 | - | 1497349 2026-10-13 |
 | `tensor-shapes.md` | physics-ml | 1.9 | no | 1 | - | 351029c 2026-10-07 |
 | `training-at-scale.md` | physics-ml | 6.8 | no | 4 | - | 351029c 2026-10-07 |
 | `training-loop.md` | physics-ml | 1.1 | no | 5 | - | 351029c 2026-10-07 |
 | `transfer-learning.md` | physics-ml | 1.6 | no | 4 | - | 351029c 2026-10-07 |
 | `transformer-architectures.md` | physics-ml | 7.0 | no | 5 | - | 351029c 2026-10-07 |
-| `uncertainty-and-calibration.md` | physics-ml | 6.3 | no | 6 | hep-statistics | 351029c 2026-10-07 |
+| `uncertainty-and-calibration.md` | physics-ml | 6.3 | yes | 8 | hep-statistics | 351029c 2026-10-07 |
 | `academic-diagrams-guide.md` | research-communication | 10.4 | yes | 5 | hep-analysis | 351029c 2026-10-07 |
 | `academic-papers-guide.md` | research-communication | 38.4 | yes | 7 | - | cd88e8f 2026-10-12 |
 | `artifact-packaging-for-release.md` | research-communication | 2.8 | no | 3 | - | 351029c 2026-10-07 |

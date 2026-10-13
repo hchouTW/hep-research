@@ -20,7 +20,8 @@
   "hep-statistics",
   "hep-theory",
   "research-communication",
-  "hep-computing"
+  "hep-computing",
+  "physics-ml"
  ],
  "resources": {
   "index": "index.md",

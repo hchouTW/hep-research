@@ -70,12 +70,15 @@ in categories with re-derived background shapes).
   round count decided in advance; a round count picked once and reused across
   reprocessing campaigns without rechecking silently drifts from optimal as input
   samples change.
-- Some libraries' split-finding assumes nonnegative sample weights (e.g. XGBoost's
-  default histogram-based tree method) and can silently mishandle signed generator
-  weights; check the library's weight-handling documentation before training on a
-  sample with negative weights, and prefer the absolute-weight/bias-correction
-  schemes discussed in [weights-normalization.md](../../hep-analysis/references/weights-normalization.md)
-  over silently dropping the sign.
+- Tree libraries assume non-negative sample weights: a negative weight gives a negative
+  Hessian in gradient boosting. Since 1.3.0, XGBoost raises a fatal error on negative
+  instance weights (earlier versions trained on them with undefined behavior), so a
+  signed-weight sample needs a deliberate treatment before training. The options
+  (resampling to positive weights, |w| with a demonstrated effect, keeping signed weights
+  where the library allows) and their costs are in [ml-analysis.md](ml-analysis.md),
+  "Negative weights". Evaluate with the signed physics weights in every case
+  ([weights-normalization.md](../../hep-analysis/references/weights-normalization.md)),
+  and never silently drop the sign.
 - A hyperparameter search (grid, random, or Bayesian) must optimize the same
   weighted, physics-relevant metric used elsewhere in the analysis - expected
   sensitivity, not raw AUC or unweighted accuracy - or it can select an operating
