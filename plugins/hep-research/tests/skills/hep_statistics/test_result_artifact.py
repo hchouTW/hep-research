@@ -84,6 +84,28 @@ class ResultArtifactStatus(unittest.TestCase):
             code, art = self.write(tmp, {"status": "rejected", "error": "x"})
             self.assertEqual((code, art), (2, None))
 
+    def test_missing_status_needs_an_explicit_assumption(self):
+        """STH-T1.7: li_ma_significance.py prints no status; that is not a converged fit."""
+        li_ma = {"method": "Li-Ma", "significance": 2.1, "n_on": 30, "n_off": 100, "alpha": 0.1}
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertEqual(self.write(tmp, li_ma), (2, None))
+            code, art = self.write(tmp, li_ma, "--assume-status", "ok")
+            self.assertEqual(code, 0)
+            self.assertEqual(art["extension"]["results"]["cli_status_assumed"], "ok")
+            self.assertEqual(art["extension"]["fit_status"], "converged")
+            code, art = self.write(tmp, li_ma, "--assume-status", "failed")
+            self.assertEqual((code, art["extension"]["fit_status"]), (1, "failed"))
+
+    def test_contradictory_coverage_and_non_object_input(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            ok = {"status": "ok", "cl": 0.95}
+            for extra in (["--coverage-value", "0.95"], ["--coverage-n-toys", "100"]):
+                with self.subTest(extra=extra):
+                    self.assertEqual(self.write(tmp, ok, "--coverage-check", "not-checked", *extra), (2, None))
+            self.assertEqual(self.write(tmp, [1, 2, 3]), (2, None))
+            code, art = self.write(tmp, ok, "--coverage-check", "toys", "--coverage-n-toys", "500", "--coverage-value", "0.95")
+            self.assertEqual(code, 0)
+
 
 if __name__ == "__main__":
     unittest.main()

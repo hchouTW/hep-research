@@ -188,7 +188,9 @@ Every toy p-value in this module carries `toy_tail` (see Common conventions); `s
 `contour` carry `fit_diagnostics` and a `status` that sets the exit code. Write a `statistical-result` from any of
 these outputs with `<plugin root>/skills/hep-statistics/scripts/result_artifact.py`, which keeps the status (a failed
 fit becomes `fit_status: failed` with the `failed` label) and writes a toy p-value with no exceedance as a typed
-bound; check a result before calling it validated with `contracts/validate.py RESULT.json --gate publication`.
+bound. An output without a `status` (for example `li_ma_significance.py`) is refused unless `--assume-status` names
+it, and the assumption is recorded (`results.cli_status_assumed`); a coverage value or toy count under
+`--coverage-check not-checked` is refused. Check a result before calling it validated with `contracts/validate.py RESULT.json --gate publication`.
 
 Decision rule: with an uncertain background prefer `profile-limit`, `profile-significance` or `multibin-limit` to a
 marginalized result, and compare the two: the profile and the marginalized (Cousins-Highland) treatments answer
