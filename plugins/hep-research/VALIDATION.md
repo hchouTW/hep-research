@@ -979,6 +979,11 @@ only, not statistical validity.
 | Covariance scale invariance | the rho/sigma matrix (correlation eigenvalue -0.80) fails with `not_psd` at sigma ratios 1, 1e4 and 1e12; diag(1e-20, 1e20) passes with rank 2, condition 1 | `tests/core/test_stats_covariance.py` |
 | Two-POI contour, 3-bin audit input | exit 0, status ok, 72 points on the level of an independent Poisson deviance within 1e-4; out-of-domain probes counted, not failed | `tests/core/test_stats_two_poi.py` |
 
+| Unbinned fit at three scales (same shape on [0, 5], [0, 500], [10000, 10500]) | 300 toys each (HEP_SLOW_TESTS=1, 95 s): no failed fit, every pull width in [0.9, 1.1]; before, the last two failed every toy | `tests/adapters/test_unbinned_fit.py` |
+| Break position of a broken power law (x_b = 10, gamma 2.7 -> 2.4, 20 points, 2% + 1% correlated errors) | 500 toys (HEP_SLOW_TESTS=1, 342 s): bias of ln x_b within 0.2 sigma (0.11 in a 300-toy probe), toy-calibrated 68.27% interval coverage within 0.03 (0.693 in the probe); no-break control: chi2(1) reference rejects > 10% at 5% | `tests/skills/hep_statistics/test_covariance_fit.py` |
+| Ratio covariance at 1e5-1e7 counts; D'Agostini data unfolding; asymptotic shape-limit vs pyhf; multi-bin q0 | within 5% per element of 200k toys; 15 x 15 variances within 10% of 1500 toys; CLs limit within 1% of pyhf 0.7.6 at 100 bins x 1000 events; q0 equal to `look_elsewhere.py local` to 1e-6 | `test_stats_statistical_toys.py`, `test_stats_unfolding_outer.py`, `test_backend_likelihood_equivalence.py`, `test_stats_likelihood_limits.py` |
+| Expected bands; MC ranges; shape-limit at n = b = 0; model card with pyhf | `cls-limit --n 2 --b 3.7` -2 sigma 2.996 (was 3.5595); `profile-cls --n 0 --b 3` range contains 3.00; n = b = 0 status ok, toy CLs range contains 2.996; a validation region moved mu_hat 0.70 -> -3.94 before the fix, none after | `test_stats_poisson.py`, `test_stats_toy_ensemble.py`, `test_stats_likelihood_limits.py`, `test_sr_cr_model_card.py` |
+
 Provenance moved here from `core-stats-guide.md` (STH-T2.3): the "Validation tools outside `core/stats`" table there
 (result_artifact, covariance_fit, sweighted_fit, bayes_calibration, the EXPERIMENTAL eft_scan, discrete_profile,
 global_significance, pcl_efficiency_ratio and ratio_estimation, the pyhf backend comparison and model card, the

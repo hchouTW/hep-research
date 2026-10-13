@@ -59,7 +59,7 @@ def power_threshold_limit(b: float, cl: float, threshold: float) -> float:
 
 
 def pcl(n: int, b: float, cl: float = 0.95, threshold: float = 0.16) -> dict:
-    if n < 0 or b < 0 or not 0 < cl < 1 or not 0 < threshold < 0.5:
+    if n < 0 or not (math.isfinite(b) and b >= 0) or not 0 < cl < 1 or not 0 < threshold < 0.5:
         raise ValueError("need n >= 0, b >= 0, 0 < cl < 1, 0 < power threshold < 0.5")
     ul = classical_upper(n, b, cl)
     smin = power_threshold_limit(b, cl, threshold)

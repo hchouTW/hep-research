@@ -43,6 +43,30 @@ new capability).
 - **`result_artifact.py`** refuses a CLI output without `status` unless `--assume-status` is given (recorded as
   `results.cli_status_assumed`), refuses a coverage value or toy count under `--coverage-check not-checked`, and
   refuses a JSON list input.
+- **Skill entry point and guide.** `SKILL.md` has a Step 0 for one-number questions and a task-to-tool table
+  (default tool, fallback, or "no shipped tool"); the closure invariant applies to new models; the context stanza
+  sits below Resources; the description says "producing missing physics inputs". `core-stats-guide.md` is split into
+  a decision guide (conventions, a per-subcommand caps table checked against the code, choosing a tool, skill
+  scripts with NumPy/SciPy markers) and `core-stats-commands.md` (per-module reference, gate rules). D'Agostini
+  routes to `unfold-scan` (not `regularized-scan`, which refuses it). Ten reference corrections with ledgered
+  sources (Bartlett's effect, `SumW2Error` scope, code4p sign convention, pyhf zero-nominal and staterror defaults,
+  iminuit EDM, familywise global p-values, ROOT 6.40 off the Combine stack, ...). New
+  `assets/combine.example.json`.
+- **New capabilities.** `covariance_fit.py`: broken and smoothly broken power laws, plug-in models, `break-scan`
+  (toy-calibrated break interval and no-break test); `statistical_toys.py ratio-cov-analytic` (full ratio
+  covariance at counts >= 1e4); `unfolding_diagnostics.py dagostini-unfold` (data unfolding with data and response
+  covariance); `shape-limit` without toys at ordinary sizes (100 bins, 1e4 events per bin); `shape-significance`
+  (multi-bin q0).
+- **Defects fixed on valid inputs.** Exact Phi quantiles for expected bands (`cls-limit --n 2 --b 3.7`: -2 sigma
+  2.996, was 3.56; `profile-cls` too); MC ranges for `profile-cls` and `profile-limit`; `shape-limit` at n = 0,
+  b = 0 (boundary, no longer failed) and a toy-CLs runtime estimate with a 600 s budget; `unbinned_fit.py` at wide
+  or offset ranges (natural-scale Hessian steps, exponential relative to lo, boundary policy for n_sig);
+  `eft_scan.py` excludes nu <= 0 in empty bins and refuses CL outside (0, 1); `global_significance.py` input checks,
+  auxiliary redraw at the fitted scale, shared upcrossing definition; `pcl_efficiency_ratio.py` exact classical limit
+  (n, b up to 1e5 in < 1 s); `covariance_fit.py` checks `relative_cov`; `look_elsewhere.py` memory budget;
+  `sensitivity_and_gof.py` reports an infeasible model; `model_card.py` leaves validation regions out of the fit and
+  uses constraint widths. Every statistics CLI refuses malformed input with exit 2 and JSON (no tracebacks) and
+  prints `--help` without NumPy.
 - `examples/ml-classifier-to-inference/run.py` records the coverage toy seed and no longer crashes on an unresolved
   finding (`Finding.severity`, not `.level`); J9 and `published-comparison` outputs regenerated (version strings,
   the seed, the schema list read).
