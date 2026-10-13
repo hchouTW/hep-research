@@ -33,13 +33,14 @@ the model will be used:
 | Situation | Split by | Random split gives |
 |---|---|---|
 | Predicting the future | Time | Optimistic - the model sees the future |
-| Repeated entities (users, patients, sites) | Entity/group | Optimistic - memorizes entities |
+| Repeated units (events with several candidates, runs, detector periods, simulation seeds) | Group | Optimistic - memorizes units |
 | Near-duplicate records | Deduplicate first | Optimistic - test items seen in training |
 | Nested structure (frames in a video) | Outer unit | Severely optimistic |
 | Genuinely i.i.d. samples | Random is correct | Correct |
 
-**Group leakage is the most common serious error.** If the same user, patient, document,
-or session appears in both train and test, the test set measures memorization. It is
+**Group leakage is the most common serious error.** If the same event, run, detector
+period or simulation seed appears in both train and test, the test set measures
+memorization. It is
 invisible in the metrics - the numbers just look good.
 
 **Temporal leakage** is the second most common: any feature computed using information

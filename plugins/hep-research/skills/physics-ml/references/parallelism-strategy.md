@@ -1,7 +1,12 @@
 # Parallelism Strategy Reference
 
-Choosing *which* parallelism to use, and in what combination. For DDP mechanics and
-launch commands see [distributed-training.md](distributed-training.md); for
+> Generic ML engineering; not physics-specific. For physics tasks start at
+> [ml-analysis.md](ml-analysis.md). Most HEP models fit one GPU, and the answer is DDP
+> ([distributed-training.md](distributed-training.md)); read on only when the memory
+> equation below says model states or activations do not fit.
+
+Choosing *which* parallelism to use, and in what combination. For DDP and FSDP2
+mechanics and launch commands see [distributed-training.md](distributed-training.md); for
 single-GPU speed and memory tuning see [performance-memory.md](performance-memory.md).
 
 Use `<plugin root>/skills/physics-ml/scripts/estimate_training_memory.py` to get the numbers below for a concrete
@@ -11,9 +16,10 @@ configuration before committing to one.
 
 1. **Does one GPU hold the model states?** If yes, use DDP and stop. Do not add
    sharding you don't need - it costs communication and debugging complexity.
-2. **Does one GPU hold the model states if the optimizer is sharded?** Use ZeRO-1/2 or
-   FSDP with a shard strategy short of full sharding.
-3. **Do parameters still not fit?** Shard them: ZeRO-3 / FSDP full shard.
+2. **Does one GPU hold the model states if the optimizer is sharded?** Use ZeRO-1/2, or
+   FSDP2 (`fully_shard`) with `reshard_after_forward=False`.
+3. **Do parameters still not fit?** Shard them: ZeRO-3 / FSDP2 full sharding (the
+   `fully_shard` default).
 4. **Does a single layer not fit, or is the batch latency-bound?** Add tensor
    parallelism, inside a node.
 5. **Still out of memory with everything sharded?** Add pipeline parallelism across
@@ -55,7 +61,7 @@ help a run that is activation-bound.
 | DDP | - | - | - | - | gradient all-reduce per step |
 | ZeRO-1 | - | - | shard | - | + optimizer state gather |
 | ZeRO-2 | - | shard | shard | - | gradient reduce-scatter |
-| ZeRO-3 / FSDP full | shard | shard | shard | - | parameter all-gather per layer, twice per step |
+| ZeRO-3 / FSDP2 full sharding | shard | shard | shard | - | parameter all-gather per layer, twice per step |
 | Tensor parallel | shard | shard | shard | shard | all-reduce **inside** every layer |
 | Pipeline parallel | split | split | split | split by stage | point-to-point between stages |
 | Sequence/context parallel | - | - | - | shard | activation exchange along sequence |
@@ -65,10 +71,12 @@ help a run that is activation-bound.
 **DDP** - the default. Replicates everything, communicates gradients once per step,
 overlaps that with backward. Cheapest to debug. Fails only when memory runs out.
 
-**FSDP / ZeRO-3** - the usual answer for "the model doesn't fit." Communication volume
+**FSDP2 / ZeRO-3** - the usual answer for "the model doesn't fit." Communication volume
 is roughly 1.5x DDP for full sharding, but it is spread across the step rather than
-concentrated. Shard within fast interconnect; a hybrid strategy that shards inside a
-node and replicates across nodes usually beats sharding globally.
+concentrated. Shard within fast interconnect; a hybrid layout that shards inside a
+node and replicates across nodes (a 2-D device mesh, the FSDP1 `HYBRID_SHARD`) usually
+beats sharding globally. Parameters become `DTensor`s, and checkpoints go through
+distributed checkpoint (DCP); see [distributed-training.md](distributed-training.md).
 
 **Tensor parallel** - splits individual matrix multiplies. Adds an all-reduce *inside
 every layer*, so it is viable only over a fast intra-node interconnect. Keep the degree
@@ -97,9 +105,13 @@ try, before adding a parallelism dimension:
 |---|---|---|
 | None | full | 0% |
 | Selective (attention only) | large reduction | ~5% |
-| Full | ~2 bytes/token/layer | ~30% |
+| Full | 2 x h bytes per token per layer (only the bf16 block input of hidden size h is kept) | ~30% |
 
-Selective recomputation is close to free and should be the default at scale. See
+For comparison, without recomputation a standard transformer layer stores about
+`s*b*h*(34 + 5*a*s/h)` bytes (sequence length `s`, micro-batch `b`, hidden size `h`,
+`a` heads; Korthikanti et al., arXiv:2205.05198), which is what
+`estimate_training_memory.py` uses. Selective recomputation is close to free and should
+be the default at scale. See
 [custom-autograd-and-hooks.md](custom-autograd-and-hooks.md) for the mechanics.
 
 ## Diagnosing the binding constraint
@@ -117,6 +129,7 @@ Do not add a parallelism dimension before knowing which term is binding:
 ## Common failures
 
 - Adding FSDP to a run that was activation-bound, and gaining nothing.
+- Sharding a 10M-parameter tagger whose real bottleneck is the data loader.
 - Tensor parallelism spanning nodes, making every layer wait on the slow link.
 - Pipeline stages with too few microbatches, so most GPUs idle.
 - Assuming mixed precision halves memory, then sizing the run for a budget it never had.

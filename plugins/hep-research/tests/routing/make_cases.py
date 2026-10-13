@@ -187,6 +187,17 @@ C = [
   {"set": "T19", "turns": [{"prompt": "Write the results paragraph for the paper from that fit, keeping its status labels.", "expected": "research-communication", "trigger_terms": ["drafting or revising paper sections"]}]}),
  ('t19-turns-4', 'zh-Hant', 'multi-turn', '用 PyTorch 訓練我的訊號分類器，依 run 做 grouped train/validation/test splits。', 'physics-ml', ['grouped train/validation/test splits and leakage checks'], None, None,
   {"set": "T19", "turns": [{"prompt": "接著把分類器輸出加進事件選擇（event/candidate selection），並用 control regions 估計背景。", "expected": "hep-analysis", "trigger_terms": ["event/candidate selection", "control regions"]}]}),
+ # ML ownership rows of docs/routing-contract.md: BDTs and event weights, quick classifier questions, ML calibration
+ ('ml-own-bdt-1', 'en', 'neighboring', 'Train a BDT for my event selection and pick the working point.', 'physics-ml', ['BDTs in analyses', 'working points'], 'hep-analysis', None, {"set": "ML-OWN"}),
+ ('ml-own-bdt-2', 'zh-Hant', 'neighboring', '請幫我為事件選擇訓練一個 BDT（BDTs in analyses），並決定 working points。', 'physics-ml', ['BDTs in analyses', 'working points'], 'hep-analysis', None, {"set": "ML-OWN"}),
+ ('ml-own-negw-1', 'en', 'direct', 'My XGBoost BDT misbehaves with the negative event weights of my NLO samples; how should I train and evaluate it?', 'physics-ml', ['event weights including negative ones', 'BDTs in analyses'], None, None, {"set": "ML-OWN"}),
+ ('ml-own-negw-2', 'zh-Hant', 'direct', '我的 XGBoost 遇到 NLO 樣本的負權重（event weights including negative ones）就出問題，BDT 該怎麼訓練與評估？', 'physics-ml', ['event weights including negative ones', 'BDTs in analyses'], None, None, {"set": "ML-OWN"}),
+ ('ml-own-quick-1', 'en', 'direct', "Quick: is AUC enough to choose my jet classifier's working point?", 'physics-ml', ['working points'], None, None, {"set": "ML-OWN", "variant": "quick"}),
+ ('ml-own-quick-2', 'zh-Hant', 'direct', '快速問一下：分類器的 working points 要怎麼選，只看 AUC 可以嗎？', 'physics-ml', ['working points'], None, None, {"set": "ML-OWN", "variant": "quick"}),
+ ('ml-own-ecal-1', 'en', 'neighboring', 'Train a neural-network energy regression to calibrate ECAL clusters from their cell energies.', 'physics-ml', ['classifiers and regressors', 'detector signals'], 'detector-response', None,
+  {"set": "ML-OWN", "note": "the deliverable is a trained regression model, which physics-ml owns; the detector calibration chain and its validation in data stay with detector-response"}),
+ ('ml-own-ecal-2', 'zh-Hant', 'neighboring', '請用神經網路訓練 ECAL 能量回歸（classifiers and regressors），從 cell 能量校正 cluster 能量。', 'physics-ml', ['classifiers and regressors'], 'detector-response', None,
+  {"set": "ML-OWN", "note": "the deliverable is a trained regression model, which physics-ml owns; the detector calibration chain and its validation in data stay with detector-response"}),
 ]
 
 cases = []

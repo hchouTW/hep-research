@@ -2029,6 +2029,107 @@
      ]
     }
    ]
+  },
+  {
+   "id": "ml-own-bdt-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Train a BDT for my event selection and pick the working point.",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "BDTs in analyses",
+    "working points"
+   ],
+   "not": "hep-analysis",
+   "set": "ML-OWN"
+  },
+  {
+   "id": "ml-own-bdt-2",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "請幫我為事件選擇訓練一個 BDT（BDTs in analyses），並決定 working points。",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "BDTs in analyses",
+    "working points"
+   ],
+   "not": "hep-analysis",
+   "set": "ML-OWN"
+  },
+  {
+   "id": "ml-own-negw-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My XGBoost BDT misbehaves with the negative event weights of my NLO samples; how should I train and evaluate it?",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "event weights including negative ones",
+    "BDTs in analyses"
+   ],
+   "set": "ML-OWN"
+  },
+  {
+   "id": "ml-own-negw-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我的 XGBoost 遇到 NLO 樣本的負權重（event weights including negative ones）就出問題，BDT 該怎麼訓練與評估？",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "event weights including negative ones",
+    "BDTs in analyses"
+   ],
+   "set": "ML-OWN"
+  },
+  {
+   "id": "ml-own-quick-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Quick: is AUC enough to choose my jet classifier's working point?",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "working points"
+   ],
+   "set": "ML-OWN",
+   "variant": "quick"
+  },
+  {
+   "id": "ml-own-quick-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "快速問一下：分類器的 working points 要怎麼選，只看 AUC 可以嗎？",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "working points"
+   ],
+   "set": "ML-OWN",
+   "variant": "quick"
+  },
+  {
+   "id": "ml-own-ecal-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Train a neural-network energy regression to calibrate ECAL clusters from their cell energies.",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "classifiers and regressors",
+    "detector signals"
+   ],
+   "not": "detector-response",
+   "set": "ML-OWN",
+   "note": "the deliverable is a trained regression model, which physics-ml owns; the detector calibration chain and its validation in data stay with detector-response"
+  },
+  {
+   "id": "ml-own-ecal-2",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "請用神經網路訓練 ECAL 能量回歸（classifiers and regressors），從 cell 能量校正 cluster 能量。",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "classifiers and regressors"
+   ],
+   "not": "detector-response",
+   "set": "ML-OWN",
+   "note": "the deliverable is a trained regression model, which physics-ml owns; the detector calibration chain and its validation in data stay with detector-response"
   }
  ]
 }

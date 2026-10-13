@@ -1,5 +1,10 @@
 # Training at Scale Reference
 
+> Generic ML engineering; not physics-specific. For physics tasks start at
+> [ml-analysis.md](ml-analysis.md). The failure-handling and experiment-tracking sections
+> apply to any multi-day job on a batch cluster. The FLOP formula is written for
+> transformers, where D counts tokens (for a particle transformer, particles seen).
+
 Running a training job that costs real money and time: budgeting it, keeping the
 hardware busy, surviving failures, and searching hyperparameters without wasting the
 budget. For choosing the parallelism itself see
@@ -36,20 +41,15 @@ Compute the budget *before* launching. A run that turns out to need three months
 cluster is a planning failure, not a training failure, and it is visible from a
 one-line calculation.
 
-## Compute-optimal sizing
+## Model size against data
 
-For a fixed compute budget, there is a trade between model size and tokens seen.
-Chinchilla-style scaling puts the optimum near **D = 20N** - roughly 20 tokens per
-parameter. Training far from that ratio wastes budget:
-
-- `D/N` much below 20: undertrained. A smaller model trained longer would have reached
-  the same loss for less compute.
-- `D/N` much above 20: overtrained for the compute spent, but this is often the *right*
-  choice deliberately, because inference cost scales with `N` and not with `D`. A model
-  served billions of times should be smaller and trained longer than compute-optimal.
-
-State which regime you are targeting and why. "Compute-optimal" is optimal for training
-cost only.
+Published compute-optimal ratios (about 20 tokens per parameter) were fitted on language
+models and do not transfer to physics models. For a tagger or regressor, size the model
+from a learning curve on your own data: train two or three sizes and two or three
+training-set sizes, and check whether more simulated events or more parameters lower
+the validation loss (see [data-strategy.md](data-strategy.md) and
+[architecture-selection.md](architecture-selection.md)). Generating more simulation is
+often cheaper than a larger model.
 
 ## Keeping the hardware busy
 
@@ -76,8 +76,8 @@ not just speed:
   rate by the same factor as the batch size, with a warmup of several hundred to a few
   thousand steps. It holds over a useful range and then stops holding.
 - **Beyond a critical batch size** additional parallelism buys wall-clock but not sample
-  efficiency - each step improves the model less, and total tokens to reach a target
-  loss rises. There is no benefit to scaling past it except time.
+  efficiency - each step improves the model less, and the total number of samples to
+  reach a target loss rises. There is no benefit to scaling past it except time.
 - **Warmup is not optional at scale.** Large-batch runs diverge in the first few hundred
   steps far more often than they diverge later.
 - Gradient accumulation reproduces a large batch on fewer devices, and is the right
@@ -93,9 +93,11 @@ Design for it up front:
   expected lost work is smaller than the checkpoint cost. See
   [checkpointing.md](checkpointing.md).
 - **Checkpoints must be resumable, not just loadable**: model, optimizer, scheduler,
-  step count, dataloader position, and RNG state. A resume that restarts the data order
-  silently re-trains on the same tokens.
-- **Write checkpoints atomically** (temporary file, then rename). A job killed mid-write
+  `GradScaler`, step count, dataloader position, and RNG state. A resume that restarts
+  the data order silently re-trains on the same events. The recipe is in
+  [checkpointing.md](checkpointing.md).
+- **Write checkpoints atomically** (temporary file in the same directory, then
+  `os.replace`). A job killed mid-write, for example at a batch-system time limit,
   otherwise leaves a corrupt file that fails on resume, hours later.
 - **Detect stragglers.** One slow rank sets the pace for every collective; per-rank step
   timing exposes it, aggregate throughput does not.
@@ -131,8 +133,7 @@ Full search is unaffordable at scale, so use the structure of the problem:
 
 - Estimated FLOPs, GPU-hours, wall-clock, and cost, computed before launch.
 - Target and achieved MFU, with the throughput measurement that produced it.
-- The `D/N` ratio and whether the run is deliberately off compute-optimal, with the
-  reason.
+- For model size: the learning curve (model size and training-set size) that justifies it.
 - Global batch size, learning-rate scaling rule, and warmup length.
 - Checkpoint interval, atomicity, and confirmation that a resume restores data order
   and RNG state.

@@ -2,6 +2,9 @@
 
 ## Seed helper
 
+Verified with torch 2.14.1 (CPU), 2026-10-13: two runs with the same seed give identical
+batches through a two-worker `DataLoader`.
+
 ```python
 import os
 import random
@@ -10,15 +13,29 @@ import numpy as np
 import torch
 
 
-def seed_everything(seed: int) -> None:
+def seed_everything(seed: int, deterministic: bool = True) -> None:
+    """Seed Python, NumPy and torch (all devices); optionally force deterministic kernels."""
     random.seed(seed)
     np.random.seed(seed)
-    os.environ["PYTHONHASHSEED"] = str(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-    torch.backends.cudnn.benchmark = False
-    torch.backends.cudnn.deterministic = True
+    torch.manual_seed(seed)  # also seeds every CUDA device
+    if deterministic:
+        # cuBLAS reads this at the first CUDA matmul; set it in the job environment to be safe.
+        os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
+        torch.backends.cudnn.benchmark = False
+        torch.backends.cudnn.deterministic = True
+        torch.use_deterministic_algorithms(True)  # raises on ops with no deterministic implementation
 ```
+
+- `PYTHONHASHSEED` only takes effect when the interpreter starts; setting it inside
+  the running process changes nothing for that process (it only reaches subprocesses).
+  Set it in the launcher or batch script (`PYTHONHASHSEED=0 python train.py`) if string
+  hashing order matters, for example iteration over a `set` of strings.
+- Likewise export `CUBLAS_WORKSPACE_CONFIG=:4096:8` in the job script; the `setdefault`
+  above only helps if it runs before CUDA is first used.
+- `torch.use_deterministic_algorithms(True)` raises a `RuntimeError` naming the op when
+  an operation has no deterministic implementation (some scatter/index-add backward
+  passes used by graph networks on CUDA). Either replace the op or pass
+  `warn_only=True` and record that the run is not fully deterministic.
 
 Deterministic settings can reduce performance and still may not guarantee exact
 reproducibility across hardware, drivers, PyTorch versions, or nondeterministic
@@ -26,29 +43,34 @@ operators.
 
 ## Data splits
 
-Use a seeded generator and persist the split when comparisons must be exact.
-
-```python
-generator = torch.Generator().manual_seed(seed)
-train_ds, val_ds = torch.utils.data.random_split(dataset, [n_train, n_val], generator=generator)
-```
+Split by the grouping key (run, detector period, event, simulation seed, parameter
+point), never by row: the recipe is in [data-loading.md](data-loading.md) ("Grouped
+split"), and `make_grouped_splits.py` / `check_split_integrity.py` in
+`<plugin root>/skills/physics-ml/scripts/` write and check a split manifest. Seed the assignment, and persist the manifest (the list of groups in each
+split) with the run when comparisons must be exact.
 
 For distributed training, call `sampler.set_epoch(epoch)` so shuffling changes
 between epochs but remains coordinated across ranks.
 
 ## Worker seeds
 
-Use `worker_init_fn` when dataset code uses Python, NumPy, or other random
-generators in workers.
+Each `DataLoader` worker gets a distinct torch seed derived from the loader's generator,
+but Python's `random` and NumPy's global generator are not reseeded per worker. Use a
+`worker_init_fn` when dataset code draws random numbers (augmentation, smearing,
+sub-sampling of constituents), and pass a seeded `torch.Generator`:
 
 ```python
 def seed_worker(worker_id: int) -> None:
-    worker_seed = torch.initial_seed() % 2**32
+    worker_seed = torch.initial_seed() % 2**32  # differs per worker
     np.random.seed(worker_seed)
     random.seed(worker_seed)
-```
 
-Pass a seeded `torch.Generator` to the `DataLoader` as well.
+
+loader = DataLoader(
+    train_ds, batch_size=256, shuffle=True, num_workers=4,
+    worker_init_fn=seed_worker, generator=torch.Generator().manual_seed(seed),
+)
+```
 
 ## Experiment records
 
@@ -59,7 +81,8 @@ Save enough information to reproduce or compare runs:
 - PyTorch, CUDA, cuDNN, Python, and platform versions.
 - For GPU runs: the torch build's CUDA variant (for example `2.14.1+cu126`), GPU model and compute capability,
   driver version, precision (fp32, or AMP with its dtype) and the determinism settings actually used
-  (`cudnn.deterministic`, `torch.use_deterministic_algorithms`). `scripts/check_pytorch_env.py` prints most of these.
+  (`cudnn.deterministic`, `torch.use_deterministic_algorithms`). `<plugin root>/skills/physics-ml/scripts/check_pytorch_env.py` prints most of
+  these.
 - Dataset version and split identifiers.
 - Checkpoint with model, optimizer, scheduler, epoch, best metric, and config.
 

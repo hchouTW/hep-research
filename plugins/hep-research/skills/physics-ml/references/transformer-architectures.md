@@ -1,5 +1,11 @@
 # Transformer Architecture Reference
 
+> Generic ML engineering; not physics-specific. For physics tasks start at
+> [ml-analysis.md](ml-analysis.md). Transformers on particle sets (no positional encoding,
+> padding masks, pairwise features) are in
+> [particle-and-jet-architectures.md](particle-and-jet-architectures.md); this file covers
+> the generic building blocks.
+
 ## Core building block: scaled dot-product attention
 
 ```python
@@ -20,7 +26,9 @@ def scaled_dot_product_attention(q, k, v, mask=None):
 
 `mask` is boolean or 0/1 with `True`/`1` meaning "attend". Fill with `-inf` before
 softmax, never after - softmax of an already-zeroed score still lets that position
-contribute.
+contribute. A row that is masked everywhere (an empty event or a padded query) gives
+`softmax` of all `-inf`, which is NaN; guard it (`assets/hep_losses.py` has a NaN-safe
+masked softmax) or make sure every event keeps at least one real entry.
 
 ## Multi-head attention
 
@@ -53,14 +61,18 @@ modification it doesn't support.
 
 ## Positional information
 
-Attention has no inherent order, so add position information:
+Attention has no inherent order. For sets of particles, hits or tracks that is what you
+want: add no positional encoding, and the model stays permutation invariant (see
+[particle-and-jet-architectures.md](particle-and-jet-architectures.md)). For genuinely
+ordered inputs (time series, waveforms, sequences of detector layers), add position
+information:
 
 - **Sinusoidal (fixed, no parameters)**: good default for from-scratch models; adds
   cleanly to the token embedding.
 - **Learned absolute embeddings**: an `nn.Embedding(max_len, embed_dim)` indexed by
   position; simplest, but does not extrapolate past `max_len`.
 - **Rotary (RoPE)**: rotates query/key pairs by a position-dependent angle instead of
-  adding to the embedding; extrapolates better and is standard in modern LLMs. Do not
+  adding to the embedding; extrapolates better than learned embeddings. Do not
   hand-roll RoPE without a reference implementation to compare against - a sign or
   interleaving error is easy to introduce and silently degrades quality rather than
   crashing.
@@ -108,9 +120,10 @@ rate warmup, whereas post-norm often diverges early in deep stacks without one.
   classification/embedding tasks. Pool with the first token's representation (a
   learned `[CLS]`-style token) or mean-pool over non-pad positions - never mean-pool
   including pad positions.
-- **Decoder-only** (GPT-style): causal mask, autoregressive next-token objective;
-  used for generation. Training computes all positions' loss in parallel via
-  teacher forcing (see [sequence-models.md](sequence-models.md)); inference
+- **Decoder-only** (GPT-style): causal mask, autoregressive next-element objective;
+  used for autoregressive generation (for example of particles in a jet, after the
+  constituents are tokenized or ordered). Training computes all positions' loss in
+  parallel via teacher forcing (see [sequence-models.md](sequence-models.md)); inference
   is sequential and needs a KV cache (below) to be tractable.
 - **Encoder-decoder** (T5/original Transformer-style): encoder attends bidirectionally
   over the source; decoder self-attends causally over the target and cross-attends
@@ -132,14 +145,18 @@ out, _ = scaled_dot_product_attention(q_new, k_cache, v_cache, mask=None)
 Without a cache, naive generation re-runs the full forward pass per token: correct
 but O(n^2) in sequence length instead of O(n).
 
+The cache costs, per token and per layer, `2 (K and V) x n_kv_heads x head_dim x
+bytes_per_element` (with grouped-query attention `n_kv_heads` is smaller than the
+number of query heads); multiply by layers, sequence length and batch for the total.
+
 ## Common failure modes
 
 | Symptom | Likely cause |
 |---|---|
-| Loss plateaus immediately near `-log(1/vocab_size)` | Learning rate too high/low for warmup schedule, or causal mask is inverted/missing |
-| Works on short sequences, garbage on long ones | Positional encoding doesn't extrapolate past training `max_len` |
+| Loss plateaus immediately at the chance level | Learning rate too high/low for warmup schedule, mask inverted or missing, or all inputs padded |
+| Works on short sequences, garbage on long ones | Positional encoding doesn't extrapolate past training `max_len`, or high-multiplicity events were rare in training |
+| NaN only for some events | A fully masked row (empty or all-padded event) in the attention softmax |
 | Attention weights uniform everywhere | Missing scale factor (`1/sqrt(head_dim)`), or all-zero mask |
-| Great train loss, poor generation | Exposure bias from teacher forcing - see sequence-models.md; consider scheduled sampling or just more data/regularization first |
 | NaNs after adding more layers | Missing pre-norm, or residual scale growing with depth - check `debugging-pytorch.md` for the NaN checklist |
 
 ## When not to build from scratch
@@ -149,5 +166,5 @@ existing, tested implementation (e.g. `torch.nn.TransformerEncoderLayer`, or a
 well-maintained model library) over hand-rolling attention - the failure modes above
 are easy to introduce and hard to notice until training quality quietly suffers.
 Building from scratch is still the right call when the point is to modify the
-attention mechanism itself (custom masking, sparse attention, a novel positional
-scheme) or when a course/interview context asks for it explicitly.
+attention mechanism itself (custom masking, pairwise interaction features as attention
+biases, sparse attention).

@@ -1,11 +1,13 @@
 # Export and Deployment Reference
 
-Covers taking a trained model out of the training script and into a servable form.
-For inference-only weight loading and checkpoint format, see
-[checkpointing.md](checkpointing.md). For `torch.compile`'s use *during*
-training/eager inference, see the brief note in
-[performance-memory.md](performance-memory.md) - this file goes deeper
-on compile modes and covers the export formats it doesn't.
+Covers taking a trained model out of the training script and into a form that another
+process, language runtime or device can run. For inference-only weight loading and the
+checkpoint format, see [checkpointing.md](checkpointing.md). For `torch.compile` during
+training and eager inference, see [performance-memory.md](performance-memory.md). For
+deployment inside experiment software and hardware triggers (score agreement between
+environments, FPGA latency budgets, trigger systematics) see
+[ml-analysis.md](ml-analysis.md), "Deployment in experiment software and triggers"; this
+file covers the PyTorch side of the export.
 
 ## Before exporting anything
 
@@ -15,118 +17,151 @@ for p in model.parameters():
     p.requires_grad_(False)
 ```
 
-Forgetting `model.eval()` before export/tracing is one of the most common export
-bugs - `Dropout`/`BatchNorm` stay in training-mode behavior, so the exported
-artifact gives different (and nondeterministic, for dropout) outputs than the model
-you validated.
+Forgetting `model.eval()` before export is one of the most common export bugs -
+`Dropout`/`BatchNorm` stay in training-mode behavior, so the exported artifact gives
+different (and nondeterministic, for dropout) outputs than the model you validated.
 
-## TorchScript: trace vs. script
+## Which format
 
-TorchScript is deprecated: on torch 2.11 `torch.jit.script`, `torch.jit.trace` and
-`torch.jit.script_method` emit a warning pointing to `torch.compile` or `torch.export`.
-It still works (verified), so keep it for existing artifacts, but prefer
-`torch.export.export(model, (example_input,))` for new work (verified on torch 2.11 for a
-small MLP: `ep.module()(x)` matches the eager output).
+| Target | Export path |
+|---|---|
+| C++ framework with ONNX Runtime (CMSSW, Athena and other experiment frameworks), Python services | ONNX via `torch.onnx.export(..., dynamo=True)` |
+| ROOT-based C++ code without an ML runtime | ONNX, then TMVA SOFIE (generates C++ inference code from the ONNX graph) |
+| FPGA trigger | hls4ml (from ONNX or a supported model description); see [ml-analysis.md](ml-analysis.md) |
+| PyTorch-native C++ or Python deployment, ahead-of-time compiled | `torch.export` + AOTInductor (`.pt2` package) |
+| Same Python process, faster inference | `torch.compile` (not a portable artifact) |
 
-- **`torch.jit.trace(model, example_input)`** runs the model once with example
-  input and records the operations executed. Fast and usually just works, but
-  **silently bakes in whatever control-flow branch the example input took** - a
-  data-dependent `if` or a variable-length loop will not generalize to inputs that
-  would take a different branch. Only safe for models with no data-dependent
-  control flow.
-- **`torch.jit.script(model)`** parses the actual Python source (a restricted
-  subset) and preserves control flow, at the cost of needing code that's
-  script-compatible (type annotations matter more, some Python constructs aren't
-  supported). Prefer `script` whenever the model has real branching (e.g.
-  variable-length sequence handling, an `if` on a tensor value); use `trace` for
-  simple feed-forward architectures where it just works.
-- Always validate the exported module against the original on the same held-out
-  batch before trusting it:
-  ```python
-  scripted = torch.jit.script(model)
-  with torch.no_grad():
-      original_out = model(example_input)
-      scripted_out = scripted(example_input)
-  assert torch.allclose(original_out, scripted_out, atol=1e-5)
-  ```
-- Save/load with `torch.jit.save(scripted, "model.pt")` /
-  `torch.jit.load("model.pt")` - this is a self-contained artifact that doesn't
-  need the original Python model class to load, unlike a plain `state_dict`.
+Operator coverage differs between ONNX Runtime, SOFIE and hls4ml: a graph network with
+scatter operations or a custom attention may export to ONNX and still fail in SOFIE or
+hls4ml. Check the target's supported-operator list before choosing the architecture,
+not after training it.
 
-## ONNX export
+**TorchScript is deprecated.** With torch 2.14.1, `torch.jit.script` and
+`torch.jit.trace` emit a `FutureWarning` pointing to `torch.compile` or `torch.export`
+(checked 2026-10-13). Do not start new work on it; keep `torch.jit.load` only to read
+existing `.pt` TorchScript artifacts, and re-export them through `torch.export` when the
+deployment is next touched. The legacy ONNX path (`dynamo=False`, with `dynamic_axes`)
+is TorchScript-based too.
 
-Interchange format for serving outside a PyTorch runtime (ONNX Runtime, mobile
-runtimes, some hardware-vendor toolchains):
+## Variable particle multiplicity: declare the dynamic axes
+
+Taggers on particle sets, hits or tracks see a different number of entries per event.
+An export that fixes the example input's shape fails, or silently pads or truncates, on
+other events. Declare the batch and the particle axis dynamic with `torch.export.Dim`.
+Sizes 0 and 1 are specialized, so give the particle axis `min=2` and pad events with
+fewer entries. A data-dependent Python `if` on tensor values does not export; rewrite it
+with `torch.where` or `torch.cond`, or move it out of the model.
+
+## ONNX export (dynamo exporter)
+
+Verified with torch 2.14.1, onnx 1.23.2, onnxscript 0.7.2 and onnxruntime 1.31.0 (CPU),
+2026-10-13, for a masked Deep Sets tagger: exported at batch 8 and 30 particles, the
+ONNX Runtime output at batch 3 and 57 particles matched PyTorch within `rtol=1e-4`.
 
 ```python
-torch.onnx.export(
-    model, example_input, "model.onnx",
-    input_names=["input"], output_names=["output"],
-    dynamic_axes={"input": {0: "batch"}, "output": {0: "batch"}},  # variable batch size
-    opset_version=17,
+import numpy as np
+import onnxruntime as ort
+import torch
+
+model.eval()
+x = torch.randn(8, 30, 4)            # [batch, n_particles, features], example only
+mask = torch.ones(8, 30)             # [batch, n_particles], 1 for real particles
+
+batch = torch.export.Dim("batch", min=1)
+n_part = torch.export.Dim("n_particles", min=2, max=512)
+onnx_program = torch.onnx.export(
+    model, (x, mask), dynamo=True,
+    dynamic_shapes={"x": {0: batch, 1: n_part}, "mask": {0: batch, 1: n_part}},
+    input_names=["x", "mask"], output_names=["logits"],
 )
+onnx_program.save("tagger.onnx")
+
+session = ort.InferenceSession("tagger.onnx", providers=["CPUExecutionProvider"])
+x2, mask2 = torch.randn(3, 57, 4), torch.ones(3, 57)    # a different batch and multiplicity
+(onnx_out,) = session.run(None, {"x": x2.numpy(), "mask": mask2.numpy()})
+with torch.inference_mode():
+    np.testing.assert_allclose(onnx_out, model(x2, mask2).numpy(), rtol=1e-4, atol=1e-5)
 ```
 
-- On torch 2.11 `torch.onnx.export` uses the dynamo exporter by default and needs the
-  `onnx` and `onnxscript` packages; without them it raises `ModuleNotFoundError`
-  (`onnxscript`). `dynamo=False` selects the legacy TorchScript-based path, which needs
-  `onnx` and is the path `dynamic_axes` was written for. The snippet below was not
-  run end to end (neither package is installed in the test environment).
-- `dynamic_axes` marks which dimensions are not fixed at export time (batch size is
-  the near-universal case; sequence length if the model genuinely supports variable
-  length). Omitting it bakes the example input's shape in as a hard requirement.
-- Like `trace`, ONNX export traces the graph - the same data-dependent-control-flow
-  caveat applies, and models with such control flow need extra care (e.g.
-  `torch.onnx.export` with `torch.jit.script`-first, where supported) or a
-  restructuring to remove the data-dependent branching.
-- Validate numerically against the PyTorch model with `onnxruntime`, the same way
-  as the TorchScript check above, before trusting the export - shape mismatches or
-  operator version issues sometimes only surface as silently wrong (not erroring)
-  output.
+- `dynamo=True` is the default in torch 2.14.1 and needs the `onnx` and `onnxscript`
+  packages (`ModuleNotFoundError: onnxscript` otherwise); onnxruntime is needed only for
+  the check. The `dynamic_shapes` keys are the argument names of `forward`.
+- The exporter may print that a named axis "will not be used, since it shares the same
+  shape constraints with another axis": harmless, the ONNX inputs are still dynamic.
+- Pick the opset the deployment runtime supports (the experiment's ONNX Runtime
+  release, SOFIE or hls4ml) and record it with the model; a newer opset than the runtime
+  supports fails at load time in the experiment software, not at export.
+- Validate numerically against the PyTorch model, as above, on held-out events with
+  realistic multiplicities (including the smallest and the largest), not only on the
+  export example. Shape or operator-version problems sometimes give silently wrong
+  output rather than an error.
 
-## `torch.compile` deployment modes
+## `torch.export` and AOTInductor
 
-Beyond the basic `torch.compile(model)` shown in
+`torch.export.export` captures the whole graph ahead of time (no Python fallback) with
+the same `dynamic_shapes`; `torch.export.save` writes a `.pt2` file that reloads
+without the model class. AOTInductor compiles it into a package with native code for a
+given device that can be loaded from Python or C++ without the Python model code.
+Verified with torch 2.14.1 (CPU), 2026-10-13, with the tagger above; AOTInductor on CPU
+needs a working C++ compiler on the build host.
+
+```python
+ep = torch.export.export(model, (x, mask), dynamic_shapes={"x": {0: batch, 1: n_part},
+                                                          "mask": {0: batch, 1: n_part}})
+torch.export.save(ep, "tagger_ep.pt2")
+reloaded = torch.export.load("tagger_ep.pt2").module()
+
+package = torch._inductor.aoti_compile_and_package(ep, package_path="tagger_aoti.pt2")
+compiled = torch._inductor.aoti_load_package(package)
+with torch.inference_mode():
+    torch.testing.assert_close(compiled(x2, mask2), model(x2, mask2))
+```
+
+An AOTInductor package is compiled for one device type and is tied to the torch version
+that built it: rebuild it with the deployment environment's torch, and keep ONNX for
+targets that do not ship PyTorch.
+
+## `torch.compile` for in-process inference
+
+Beyond the basic `torch.compile(model)` and the dynamic-shape advice in
 [performance-memory.md](performance-memory.md):
 
-- `mode="reduce-overhead"` targets small-batch, latency-sensitive inference (uses
-  CUDA graphs where possible) - most relevant to serving, as opposed to
-  `mode="max-autotune"` which spends more compile time searching for the fastest
-  kernels and suits long-running training jobs better.
-- Expect a slow **first call per distinct input shape** (compilation/graph capture)
-  - for serving, warm up with representative shapes before accepting real traffic,
-  and prefer padding to a small set of fixed shapes (bucket similar-length inputs
-  together) over truly dynamic shapes, which can trigger recompilation per shape
-  and defeat the purpose.
-- `torch.compile`'s output is not a portable artifact the way TorchScript/ONNX are
-  - it compiles the same Python model in-process. Use it for same-process serving
-  performance; use TorchScript/ONNX when the deployment target is a different
-  process, language runtime, or device than the training environment.
+- `mode="reduce-overhead"` targets small-batch, latency-sensitive inference (uses CUDA
+  graphs where possible); `mode="max-autotune"` spends more compile time searching for
+  faster kernels and suits long jobs.
+- Expect a slow first call per new input shape. Warm up with representative shapes,
+  and either mark the particle axis dynamic or pad to a few fixed sizes.
+- `torch.compile`'s output is not a portable artifact - it compiles the same Python
+  model in-process. Use ONNX or `torch.export` when the deployment target is a
+  different process, language runtime, or device than the training environment.
 
 ## Quantization for deployment
 
-See [efficient-finetuning.md](efficient-finetuning.md) for
-quantization's use during fine-tuning; for pure inference deployment, the same
-dynamic/static/QAT choices apply, with static (calibrated) quantization typically
-the best throughput/accuracy trade-off for a fixed, known deployment target, and
-dynamic quantization the fastest to try first.
+For a fixed, known deployment target, static (calibrated) post-training quantization
+usually gives the best throughput/accuracy trade-off, and dynamic quantization is the
+fastest to try first. FPGA triggers use fixed-point arithmetic chosen per layer
+(quantization-aware training, for example with QKeras or Brevitas, before hls4ml);
+treat the bit widths as part of the model and validate the quantized scores, not only
+the float ones. See [efficient-finetuning.md](efficient-finetuning.md) for the
+quantization variants.
 
-## Inference-serving checklist
+## Deployment checklist
 
 - `model.eval()` and `torch.inference_mode()` (not just `no_grad()` - see
   [training-loop.md](training-loop.md)) around every inference call.
-- Batch requests where latency budget allows; single-example inference wastes
-  hardware parallelism.
-- Pin the exact PyTorch/CUDA/cuDNN/ONNX-Runtime versions used for export alongside
-  the exported artifact - a version mismatch between export and serving
-  environments is a common source of subtle numerical drift or outright load
-  failures. Record this the same way as
-  [reproducibility.md](reproducibility.md)'s experiment records.
-- Re-run the numerical-equivalence check (above) as part of CI/release, not only
-  once at export time - a dependency bump in the serving environment can silently
-  change results.
-- Decide and document the fallback behavior for out-of-distribution or malformed
-  inputs (e.g. wrong shape, out-of-range values) - an exported graph will often
-  produce a *plausible-looking* wrong answer rather than a clear error for such
-  inputs, unlike the Python model, which may have had explicit shape asserts that
-  did not survive export.
+- Pin the exact PyTorch, ONNX opset and ONNX Runtime (or SOFIE, hls4ml) versions used
+  for export alongside the exported artifact - a version mismatch between export and
+  deployment environments is a common source of subtle numerical drift or outright load
+  failures. Record this the same way as [reproducibility.md](reproducibility.md)'s
+  experiment records.
+- Compare scores event by event between the training environment and the deployed
+  model on the same events, and re-run the comparison when either environment changes;
+  a migration of events across the working point is a systematic
+  ([ml-analysis.md](ml-analysis.md)).
+- Preprocessing (standardization constants, log transforms, feature order, padding
+  value) is part of the model: export it with the graph or version it with the
+  artifact, and check it in the comparison above.
+- Decide and document the behavior for inputs outside the training domain or malformed
+  inputs (wrong multiplicity, out-of-range values) - an exported graph often produces a
+  plausible-looking wrong answer rather than an error, and shape asserts in the Python
+  model do not survive export.
