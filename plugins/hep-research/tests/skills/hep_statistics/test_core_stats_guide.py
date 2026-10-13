@@ -224,6 +224,7 @@ ROUTES = {
     ("core/stats/likelihood_limits.py", "neyman-limit"): (["--n", "3", "--b", "2", "--sigma-b", "0.5", "--toys", "100", "--seed", "1"], None),
     ("core/stats/likelihood_limits.py", "profile-significance"): (["--n", "8", "--b", "2", "--sigma-b", "0.5", "--toys", "200", "--seed", "1"], None),
     ("core/stats/likelihood_limits.py", "shape-limit"): (["--input", "@IN", "--seed", "1"], SHAPE),
+    ("core/stats/likelihood_limits.py", "shape-significance"): (["--input", "@IN", "--seed", "1"], SHAPE),
     ("core/stats/likelihood_limits.py", "contour"): (["--input", "@IN"], TWO),
     ("skills/hep-statistics/scripts/li_ma_significance.py", None): (["--on", "30", "--off", "100", "--alpha", "0.1"], None),
     ("skills/hep-statistics/scripts/look_elsewhere.py", "brute"): (["--input", "@IN", "--toys", "200", "--seed", "1"], SCAN),

@@ -27,7 +27,7 @@ One number: when a shell is available, run its row's tool, state the constructio
 |---|---|---|
 | Counting limit, known b | `cs/poisson_diagnostics.py cls-limit`, `fc-interval` | classical: `upper-limit` |
 | Counting limit, uncertain b | `cs/likelihood_limits.py profile-cls --expected-toys N` | `profile-limit`; Berger-Boos `neyman-limit` |
-| One-bin discovery | `cs/likelihood_limits.py profile-significance` | ON/OFF: `sc/li_ma_significance.py` |
+| Discovery | `cs/likelihood_limits.py profile-significance`; bins: `shape-significance` | ON/OFF: `sc/li_ma_significance.py` |
 | Multi-bin limit, nuisances; two POIs | `cs/likelihood_limits.py shape-limit`; `contour` | beyond the caps: pyhf adapter |
 | Scan look-elsewhere | `sc/look_elsewhere.py brute`, `gross-vitells` | `sc/global_significance.py run` |
 | N hypotheses, no scan data | Bonferroni or Šidák bound (conservative) | no tool: hand-worked |

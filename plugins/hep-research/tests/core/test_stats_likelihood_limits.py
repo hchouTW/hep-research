@@ -43,6 +43,48 @@ class ShapeLimitEdgeSTH311(unittest.TestCase):
         self.assertIn("estimated at", str(ctx.exception))
 
 
+class ShapeSignificanceSTH317(unittest.TestCase):
+    """STH-T3.17: multi-bin discovery q0 for the shape model; without nuisances it equals look_elsewhere.py local at
+    the same template to 1e-6; toy p-values go through tail_estimation (a bound at zero exceedances)."""
+
+    @staticmethod
+    def doc():
+        b = [50.0] * 20
+        s = [8.0 * math.exp(-0.5 * ((i + 0.5 - 10.0) / 1.5) ** 2) for i in range(20)]
+        n = [50, 47, 55, 52, 49, 51, 58, 60, 66, 70, 64, 59, 53, 48, 50, 47, 52, 49, 51, 50]
+        return b, s, n
+
+    def test_matches_look_elsewhere_local(self):
+        try:
+            import numpy as np
+        except ImportError:
+            self.skipTest("NumPy needed for look_elsewhere.py")
+        sys.path.insert(0, str(ROOT / "skills" / "hep-statistics" / "scripts"))
+        import look_elsewhere as le
+        b, s, n = self.doc()
+        r = ll.shape_significance({"bins": [{"n": ni, "b": bi, "s": si} for ni, bi, si in zip(n, b, s)]}, 0, 1)
+        t = np.array(s) / sum(s)
+        q_le = le.q0_scan(np.array(n, float), np.array(b), t[None, :])[0][0]
+        self.assertEqual(r["status"], "ok", r["fit_diagnostics"])
+        self.assertAlmostEqual(r["q0_observed"], float(q_le), delta=1e-6)
+        self.assertAlmostEqual(r["asymptotic_z"], math.sqrt(float(q_le)), delta=1e-6)
+
+    def test_toy_p_value_and_nuisances(self):
+        b, s, n = self.doc()
+        doc = {"bins": [{"n": ni, "b": bi, "s": si} for ni, bi, si in zip(n, b, s)][6:12],
+               "nuisances": [{"name": "bn", "kind": "background_norm", "sigma": 0.05}]}
+        r = ll.shape_significance(doc, 200, 3)
+        self.assertEqual(r["status"], "ok", r["fit_diagnostics"])
+        self.assertIn("toy_tail", r)
+        tt = r["toy_tail"]
+        self.assertEqual(tt["n"], 200 - r["toys_failed"])
+        if tt["estimate"] is not None:
+            self.assertGreater(tt["estimate"], 0.0)
+        # a background normalization uncertainty can only reduce q0 relative to a known background
+        r0 = ll.shape_significance({"bins": doc["bins"]}, 0, 1)
+        self.assertLessEqual(r["q0_observed"], r0["q0_observed"] + 1e-9)
+
+
 class SingleBinTests(unittest.TestCase):
     def test_toy_limit_matches_exact_classical_and_asymptotic_undershoots(self):
         out = ll.profile_limit(5, 2.0, 0.0, 0.95, 3000, 1)

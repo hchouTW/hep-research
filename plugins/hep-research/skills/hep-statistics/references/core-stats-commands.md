@@ -90,6 +90,11 @@ and use common random numbers across a scan.
   100 bins, 1e4 expected background events per bin, 1e6 events; `path` in the output); its asymptotic CLs limit agrees
   with pyhf 0.7.6 within 1% at 100 bins x 1000 events (`tests/adapters/test_backend_likelihood_equivalence.py`). The
   toy paths keep the small caps and point to the pyhf adapter beyond them.
+- `shape-significance --input FILE [--toys --seed]`: discovery statistic q0 of a `shape-limit` model (several bins,
+  the same nuisances): asymptotic p-value and, with `--toys`, a toy p-value from background-only toys at the nuisances
+  profiled at `mu = 0` with the auxiliary measurements redrawn, reported through `toy_tail` (a bound at zero
+  exceedances). Without nuisances it equals `look_elsewhere.py local` at the same template to 1e-6. Without toys the
+  asymptotic caps apply.
 - `shape-gof --input FILE [--mu --toys --seed]`: saturated-model goodness of fit of a `shape-limit` model (Poisson
   bins plus constraint terms, so pulled nuisances count), `mu` fitted (`mu >= 0`) or fixed, calibrated by toys from
   the fitted model; the chi-square reference (bins - 1 or bins degrees of freedom) is approximate and

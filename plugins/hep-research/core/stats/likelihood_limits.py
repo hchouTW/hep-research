@@ -36,6 +36,8 @@ Subcommands:
   multibin-limit and shape-limit also give the asymptotic CLs limit and the expected median and 1/2-sigma limits
   (CLs and CLs+b) from the background-only Asimov data set (Cowan, Cranmer, Gross, Vitells 2011, sec. 4.3).
 
+  shape-significance    multi-bin discovery q0 of a shape-limit model: asymptotic p-value and, with --toys, a toy
+                        p-value (bound at zero exceedances) from background-only toys with redrawn auxiliaries.
   shape-gof             saturated-model goodness of fit of a shape-limit model (Poisson bins and constraint
                         terms; mu fitted or fixed with --mu), calibrated by seeded toys from the fitted model, with
                         the chi-square reference (bins - 1 or bins degrees of freedom) labeled approximate.
@@ -1352,6 +1354,56 @@ def _gof_stat(model, ns, aux, mu_fixed):
     return max(0.0, 2.0 * (val - _nll_saturated(model, ns, aux))), mu, th
 
 
+def _q0_shape(model, ns, aux):
+    """Discovery statistic of a shape model: q0 = 2 (NLL(mu = 0, theta profiled) - NLL(mu_hat, theta_hat)) for
+    mu_hat > 0, else 0 (one-sided)."""
+    g = model.glob(ns, aux)
+    if g[0] <= 0.0:
+        return 0.0, g
+    _, c0 = model.cond(0.0, ns, aux)
+    return max(0.0, 2.0 * (c0 - g[2])), g
+
+
+def shape_significance(doc: dict, toys: int, seed: int) -> dict:
+    """Multi-bin discovery significance of the shape model (STH-T3.17): q0 on the data with its asymptotic p-value
+    (half chi2, 1 dof: p = 1 - Phi(sqrt(q0))) and, with toys, a toy p-value from background-only toys generated at the
+    nuisances profiled at mu = 0 with the auxiliary measurements redrawn (core/stats/tail_estimation.py: a bound when
+    no toy exceeds). Toys keep the shape-limit toy caps; without toys the asymptotic caps apply."""
+    bins, nuis, corr_chol = _load_shape(doc, asymptotic=not toys)
+    toys, seed = _seed_toys(toys, seed, allow_zero=True)
+    model = _ShapeModel(bins, nuis, corr_chol)
+    aux0 = model.aux_obs()
+    q_obs, g = _q0_shape(model, model.n, aux0)
+    z = math.sqrt(q_obs)
+    out = {"label": LABEL, "method": "multi-bin discovery statistic q0 of the shape model (profile likelihood, mu >= 0)",
+           "bins": len(bins), "nuisances": [d["name"] for d in nuis], "toys": toys, "seed": seed,
+           "best_fit_mu": g[0], "q0_observed": q_obs,
+           "asymptotic_p_value": 0.5 * math.erfc(z / math.sqrt(2.0)), "asymptotic_z": z}
+    if toys:
+        gen = shape_toy_generator(model, aux0, 0.0, "conditional-fluctuated-aux")
+        hits, failed = 0, 0
+        for i in range(toys):
+            ns, aux = gen(random.Random(seed * 1000003 + i), i)
+            model.log.context = "toy"
+            before = model.log.failures("toy")
+            try:
+                q, _ = _q0_shape(model, ns, aux)
+            finally:
+                model.log.context = "observed"
+            if model.log.failures("toy") > before:
+                failed += 1
+                continue
+            hits += q >= q_obs - 1e-12
+        out.update({"toy_tail": toy_tail(hits, toys - failed) if toys > failed else None, "toys_failed": failed,
+                    "toy_ensemble": "conditional-fluctuated-aux at mu = 0"})
+    fd = _fit_summary(model.log, toys, out.get("toys_failed", 0))
+    out["fit_diagnostics"], out["status"] = fd, fd["status"]
+    out["note"] = ("q0 is one-sided (0 when mu_hat <= 0); the asymptotic p-value assumes the half-chi2 distribution "
+                   "(Cowan et al. 2011), which needs enough events, so check it with toys at small counts; a scan over "
+                   "signal positions needs a look-elsewhere correction (look_elsewhere.py, global_significance.py)")
+    return out
+
+
 def shape_gof(doc: dict, toys: int, seed: int, mu: float | None = None) -> dict:
     """Saturated-model goodness of fit of the shape-limit model, with mu fitted (mu >= 0) or fixed, calibrated by
     seeded toys drawn from the fitted model with the auxiliary measurements redrawn and every toy refitted."""
@@ -1829,6 +1881,9 @@ def build_parser() -> argparse.ArgumentParser:
     nc.add_argument("--inner", type=int, default=200, help="toys per p-value")
     nc.add_argument("--points", type=int, default=9)
     nc.add_argument("--seed", type=int, required=True, help="required: every toy study records its seed")
+    sx = sub.add_parser("shape-significance", help="multi-bin discovery q0 of a shape-limit model (asymptotic and toys)")
+    sx.add_argument("--input", required=True)
+    common(sx, 0)
     gf = sub.add_parser("shape-gof", help="saturated-model goodness of fit of a shape-limit model")
     gf.add_argument("--input", required=True)
     gf.add_argument("--mu", type=float, default=None, help="fix mu (default: fitted, mu >= 0)")
@@ -1868,6 +1923,12 @@ def main(argv: list[str] | None = None) -> int:
             except (OSError, json.JSONDecodeError) as exc:
                 raise LikelihoodError(f"cannot read {args.input}: {exc}") from None
             result = shape_limit(doc, args.cl, args.toys, args.seed, args.cls_toys, args.cls_points, args.cls_max_runtime)
+        elif args.command == "shape-significance":
+            try:
+                doc = json.loads(Path(args.input).read_text())
+            except (OSError, json.JSONDecodeError) as exc:
+                raise LikelihoodError(f"cannot read {args.input}: {exc}") from None
+            result = shape_significance(doc, args.toys, args.seed)
         elif args.command == "shape-gof":
             try:
                 doc = json.loads(Path(args.input).read_text())
