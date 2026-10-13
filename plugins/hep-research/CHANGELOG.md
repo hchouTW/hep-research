@@ -33,6 +33,12 @@ Software checks establish contract consistency only, not physical validity.
   errors=)` masks an error array with the values' mask; `flow=True` (in `blinded_mask`, `mask_binned`, `seal`) adds
   underflow and overflow bins, blinded when the region reaches past the first or last edge. The script
   `mask_blinded_bins.py` is unchanged here (hep-analysis branch).
+- **CMP-06 `compare_root_histograms.py` is a comparison.** Tolerances `--abs-tol`, `--rel-tol` (default 1e-9) and
+  optional `--sigma-tol` (difference over combined bin errors); edges checked on every axis; TH2/TH3 compared per
+  (x, y, z) bin in ROOT numbering; worst bin by absolute difference, relative difference and pull reported separately;
+  one JSON object with `status`; uproot backend when PyROOT is absent (`--backend`). Exit 0 within tolerance, 1 outside
+  or shape/edge mismatch (no traceback), 2 bad input, 3 no backend. Tests: `tests/skills/hep_computing/test_compare_histograms.py`
+  (uproot, E2); `test_root_integration.py` now parses the JSON (PyROOT).
 
 ## 0.6.17 (2026-10-13)
 
