@@ -3,6 +3,29 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+Contracts 2.6.0 (unchanged; the data release manifest sidecar keeps `manifest_version` 1.0.0).
+
+- **Custodian checks in the release-manifest checker (AGENTIC-R5 T1.2, deployment work package B).** The checks a
+  custodian deployment ran on its own side move into `contracts/release_manifest.py`, so every custodian uses one
+  tested implementation. Always on, from the manifest alone: a transform parameter name that looks like key material
+  (`KEY_LIKE`: key, secret, offset, scale, seed, password, token) is `release.keys_present`, a wildcard in a destination
+  is `release.destination_wildcard`. New options (keyword-only in `check()`, flags on the command line; each adds
+  checks and none is needed for a pass): `--code-digest` (`release.transform_code_mismatch`), `--destination-sets`
+  (`release.destination_set_unknown`: the destinations must equal one held set exactly), `--analysis` (release history:
+  `release.related_incomplete`, `release.related_unknown`, warning `release.related_revoked`; ledger entries may carry
+  `analysis` and `source_sha256`), `--sealed` (every artifact scanned for a sealed value with `core.blinding`, JSON
+  objects without their structure keys: `release.sealed_value_present`; an artifact that cannot be scanned is
+  `release.scan_incomplete`, fail closed). Findings name the artifact only, never a sealed value or a count. Passing
+  still releases nothing. Tests in `tests/contracts/test_release_manifest.py` (`CustodianOptionTests`).
+- **Architecture and deployment documents.** New `docs/agentic-architecture.md` (objectives, constraints HC-01 to
+  HC-18, planes, blinding modes, release manifest, host enforcement points, guard, stages, component roles, the
+  scientific-integrity layer, batch architecture, and where each component lives) and `docs/deployment-model.md` (the
+  plugin in this repository; the host adapter and custodian in a separate deployment repository; the interfaces a
+  deployment relies on; the release-to-deployment procedure; a host-neutral qualification catalog). Documentation
+  only; nothing is qualified by them.
+
 ## 0.7.1 (2026-10-13)
 
 Contracts 2.6.0 (unchanged). The recipe sidecar gains `recipe_version` 1.1.0 (optional correction keys); 1.0.0 recipes
