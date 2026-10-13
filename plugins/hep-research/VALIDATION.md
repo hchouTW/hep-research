@@ -1121,3 +1121,19 @@ STH Q8 (one broken-power-law parametrization). Synthetic input: 20 points over x
 hep-statistics SKILL.md headroom: `tools/measure_entrypoints.py` 8178 -> 7653 B (budget 8192, target <= 7700);
 core-stats-guide.md 16651 -> 16944 B (test limit 17000); `tools/check_routing_static.py` ok (197 cases, no failures);
 `test_core_stats_guide`, `test_skill_resources`, `test_ml_inference_routing`, `test_check_ownership` pass.
+
+## 0.7.0 release check (2026-10-13, E2)
+
+Version 0.7.0: the hep-analysis, hep-computing, hep-statistics and hep-theory audits (PR #64; contracts 2.6.0 with three
+rule families, each native from 2.6.0 and applied to older artifacts only with `--strict`) and their follow-ups (PR #65:
+background estimates and masked outputs in the two flagship examples, one broken-power-law convention in
+`core/stats/broken_power_law.py`, hep-statistics `SKILL.md` 7,653 B, live routing 51/52 then `j05-turn-fit` 3/3 after
+giving it inputs). For the release the examples were rerun with the E2 venv: only the plugin version string changed,
+and the ML example's statistical result records the new hash of its ML artifact (unfolding-coverage and
+end-to-end-sample not rerun, as in earlier releases); the published-likelihood benchmark's two artifacts were rewritten
+with the new plugin version, and `tests/contracts/test_gate_adversarial.py` now ignores that string when it compares its
+inlined copy. The companion ams02-research requires `hep-research >=0.4.0`; its profile range is `contracts >=2.0,<3.0` in 1.4.9
+and `contracts >=2.0` from 1.4.10 (ams02-research PR #26), and its checker reports 0.7.0 `compatible`. `tools/run_all_checks.py` with the host CLIs (Claude Code 2.1.296,
+codex-cli 0.160.0) and the E2 venv: 21 of 21 checks pass; 2,814 unit tests in 213 modules, 0 failures, 58 skipped. CI on
+main at `3c348fa` passed every job, including the optional ROOT and Python-extras jobs. Release manifest
+`release-manifests/0.7.0.json`.

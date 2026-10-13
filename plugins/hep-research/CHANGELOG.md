@@ -3,11 +3,15 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.7.0 (2026-10-13)
 
 Contracts 2.6.0 (minor: theory-spec, prediction, measurement-spec and statistical-result hardening rules; optional
 fields only; every 2.5.0 artifact keeps its default outcome and gets the new rules with `validate.py --strict`, at the
 same level, and at the publication gate; no new capability).
+
+Release notes in brief: four skill audits (hep-analysis, hep-computing, hep-statistics, hep-theory; PR #64) and their
+follow-ups (PR #65). Test-only release fix: the gate test that inlines the sbottom benchmark artifact ignores its plugin
+version string, which every release rewrites.
 
 ### hep-theory
 
