@@ -17,11 +17,32 @@ numbers across the scan) restored 0.67-0.71 (nested toys, about ±0.03). Measure
 interval at such counts, and put every background that scales with a fitted yield (for example a species leaking into
 the other selection of a ratio) inside the likelihood, not as a fixed subtraction.
 
+**Wald approximation and the Asimov width.** For large samples `-2 ln lambda(mu) = (mu - mu_hat)^2 / sigma^2 + O(1/sqrt N)`
+(Cowan et al., arXiv:1007.1727, eq. 17), and the width `sigma` is read off the Asimov data set generated at `mu'`:
+`sigma_A^2 = (mu - mu')^2 / q_mu,A` with `q_mu,A = -2 ln lambda_A(mu)` (eq. 30). With nuisances the Asimov set uses
+the nuisances at their values under `mu'` (profiled on the data for an observed-data Asimov set, or at the nominal
+values for a pre-data expectation); state which, because the expected bands differ.
+
+**Profile likelihood with nuisances at low counts.** Rolke, Lopez and Conrad (NIM A551 (2005) 493,
+physics/0403059) give profile-likelihood intervals for a Poisson signal with a background (and efficiency) measured in
+auxiliary samples and show their coverage is close to nominal over a wide range; it is still a property to check with
+toys at the counts in hand (the measured example below shows how far Wilks can be off).
+
+**Cousins-Highland.** Integrating a background or efficiency uncertainty over a prior inside an otherwise frequentist
+limit (Cousins and Highland, NIM A320 (1992) 331) is a hybrid: its coverage is not guaranteed, it depends on the prior
+chosen for the nuisance, and it is not the same as profiling. `poisson_diagnostics.py --sigma-b` implements it; label
+it as such and compare with `likelihood_limits.py` (profiled) when the result matters.
+
 ## CLs and upper limits
 
 Fix a convention in which larger q_mu is less compatible with the tested strength. Define `p_mu=P(q_mu>=q_obs | mu)` and `p_b_tail=P(q_mu>=q_obs | 0)`. A common convention is then `CLs=p_mu/p_b_tail`. Sources defining p_b through the opposite tail write the denominator as `1-p_b`. Verify a backend's definition instead of inferring it from the symbol alone.
 
 For example, exclusion may use CLs<0.05. CLs is a modified exclusion criterion, not a posterior probability or a generic exact Neyman interval. Expected median and one-/two-standard-deviation bands describe background-only expected results or a specified asymptotic construction, not the standard error of an observed limit.
+
+**Power-constrained limits.** PCL (Cowan, Cranmer, Gross and Vitells, arXiv:1105.3166) reports the unconstrained
+(CLs+b-type) limit but never below a power threshold, the expected limit at a stated quantile (often the -1 sigma
+expected) of the background-only distribution; it avoids excluding signals the experiment is not sensitive to without
+the over-coverage of CLs. State the threshold; `pcl_efficiency_ratio.py pcl` computes it for a counting experiment.
 
 The scan must bracket the threshold crossing. If it does not, report that the limit lies outside the scanned range rather than returning an endpoint. Investigate failed fits and model behavior for nonmonotonic curves; report multiple intervals when appropriate.
 
@@ -77,14 +98,20 @@ Quote the expected sensitivity with every observed result, computed before unbli
   2012, eq. 20). For `s = 5`, `b = 20`, `sigma_b = 2` it gives 0.9755; a numerical profile of `q0` on the Asimov data
   of that model gives the same to 1e-6. It does not hold for a Gaussian constraint or a background from simulation
   with an unrelated uncertainty.
-- `s/sqrt(b)` (and `s/sqrt(b + sigma_b^2)`) is the large-`b` limit of these formulas. Never quote it without saying
+- `s/sqrt(b)` (and `s/sqrt(b + sigma_b^2)`) is the `s << b` limit of these formulas (expand ln(1 + s/b) for small s/b; Cowan et al., arXiv:1007.1727 eq. 97). Never quote it without saying
   so; at small `b` it overstates the sensitivity.
 - **Limits:** the median expected limit and its 1- and 2-sigma bands under background only come from
   `core/stats/poisson_diagnostics.py cls-limit` (known background), `likelihood_limits.py profile-cls` or
-  `multibin-limit` (median only), or pyhf with `return_expected_set=True` ([core/stats guide](core-stats-guide.md)).
+  `multibin-limit` (asymptotic: median and 1- and 2-sigma bands), or pyhf with `return_expected_set=True` ([core/stats guide](core-stats-guide.md)).
 
 `<plugin root>/skills/hep-statistics/scripts/sensitivity_and_gof.py asimov-z --s S --b B [--sigma-b SB]`
 computes both forms (checked in `tests/skills/hep_statistics/test_sensitivity_and_gof.py`).
+
+**On/off and ratio-of-Poisson-means significance.** For a signal region count against a background measured in a
+control region (ratio of exposures tau), the frequentist test conditional on the total count (a binomial test of the
+ratio of Poisson means, the Z_Bi of the HEP literature) is recommended over the Bayesian-frequentist hybrid, which can
+undercover severely at high Z (Cousins, Linnemann and Tucker, NIM A595 (2008) 480, physics/0702156).
+`li_ma_significance.py --exact-conditional` gives that conditional p-value; Li-Ma's formula is its large-count limit.
 
 ## Goodness of fit
 
@@ -92,6 +119,9 @@ computes both forms (checked in `tests/skills/hep_statistics/test_sensitivity_an
   replaced by its limit `2 nu`. Its chi-square reference with `bins - fitted parameters` degrees of freedom is
   asymptotic; with fitted parameters, boundaries and small counts calibrate it with toys drawn from the fitted model,
   **refitting each toy**.
+- That deviance is the Poisson likelihood-ratio chi-square of Baker and Cousins (NIM 221 (1984) 437): for fits to
+  histograms it is the statistic to minimize and to use for goodness of fit, unbiased where Pearson's and Neyman's
+  chi-square are biased at small counts.
 - Pearson `sum (n - nu)^2/nu` and Neyman `sum (n - nu)^2/n` chi-square need large expectations in every bin (state
   the condition, for example every `nu >= 5`); Neyman's is undefined at `n = 0`.
 - A good GoF p-value says the model is not rejected by this statistic; it says nothing about bias in the parameter of
@@ -116,7 +146,7 @@ computes both forms (checked in `tests/skills/hep_statistics/test_sensitivity_an
   unit-information priors. Neither gives a p-value or a probability that a model is true.
 - **Bayes factors** depend on the priors of the parameters that differ between the models, even when the posteriors
   do not: widening a prior on a parameter present only in the larger model drives the factor towards the smaller one
-  (Lindley's paradox, [Lindley 1957](https://doi.org/10.1093/biomet/44.1-2.187)). Report the priors and a prior
+  (Bartlett's effect, [Bartlett 1957](https://doi.org/10.1093/biomet/44.3-4.533); see [Cousins 2017](https://arxiv.org/abs/1310.3791), Synthese 194 (2017) 395; Lindley's paradox, [Lindley 1957](https://doi.org/10.1093/biomet/44.1-2.187), is the related conflict between a small p-value and a Bayes factor favoring the null). Report the priors and a prior
   sensitivity study with any Bayes factor (Bayesian section below).
 
 ## Bayesian inference
@@ -126,13 +156,17 @@ Specify priors and parameterization, and check posterior propriety. A flat prior
 - **Priors.** Reference and Jeffreys priors are conventions (invariance or information arguments), not "no
   information"; they depend on the parameterization and the model, can be improper, and a Jeffreys prior for a
   Poisson mean differs from a flat one. An improper prior needs a proof that the posterior is proper.
+- **Reference priors in HEP.** Demortier, Jain and Prosper (PRD 82 (2010) 034002, arXiv:1002.1111) construct
+  reference priors (parametrization-invariant, by reference analysis) for cross-section measurements with nuisance
+  parameters; they are a defensible default when a prior must be stated, still a convention, and the posterior
+  sensitivity to the prior is reported as for any other choice.
 - **Marginalization vs profiling.** A Bayesian result integrates nuisances over their priors; a frequentist profile
   maximizes over them. They agree for near-Gaussian likelihoods and can differ at boundaries or with skewed
   constraints; do not mix them in one result, and label which one was done.
 - **Wording.** A credible interval is a statement about the posterior; a confidence interval about the coverage of a
   procedure. Do not call one the other ([inference reasoning](statistical-inference-for-physics.md)).
-- **Bayes factors** depend on the priors of the parameters not shared by the models (Lindley's paradox,
-  [Lindley 1957](https://doi.org/10.1093/biomet/44.1-2.187)); report a prior-sensitivity study with any Bayes factor.
+- **Bayes factors** depend on the priors of the parameters not shared by the models (Bartlett's
+  effect, [Bartlett 1957](https://doi.org/10.1093/biomet/44.3-4.533); see [Cousins 2017](https://arxiv.org/abs/1310.3791), Synthese 194 (2017) 395); report a prior-sensitivity study with any Bayes factor.
 
 ### Convergence and prior-sensitivity checks
 

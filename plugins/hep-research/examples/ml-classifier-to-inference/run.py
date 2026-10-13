@@ -409,7 +409,8 @@ def stat_artifact(fit, asimov, toy, ml_doc, ml_ref, ml_sha, gof, created) -> dic
                                                         "MC-statistics auxiliary measurements redrawn; fraction of "
                                                         "68.27% profile intervals containing mu_true",
                              "n_toys": toy["n"], "coverage": toy["coverage_68"], "cl": 0.6827,
-                             "ensemble": f"mu_true = {MU_TRUE}, templates as fitted", "failures": toy["failed"]},
+                             "ensemble": f"mu_true = {MU_TRUE}, templates as fitted", "failures": toy["failed"],
+                             "seed": toy["seed"]},
                 "goodness_of_fit": {"statistic": "saturated-model -2 ln lambda", "p_value": gof["p"], "calibration": "asymptotic"},
                 "fit_status": "converged",
                 "results": {"mu_hat": fit["mu_hat"], "interval_68": [fit["lo"], fit["hi"]], "data": "pseudo-data (SYNTHETIC)",
@@ -611,9 +612,9 @@ def main(argv=None) -> int:
     (out / "artifacts" / "statistical_result.json").write_text(json.dumps(stat, indent=1) + "\n")
     stat_rep = validate_artifact(stat, vocab)
     contract = {"ml_artifact": {"ok": bool(ml_rep and ml_rep.ok), "errors": [f.message for f in ml_rep.errors] if ml_rep else ["not written"],
-                                "unresolved": [f.code for f in ml_rep.findings if f.level == "unresolved"] if ml_rep else []},
+                                "unresolved": [f.code for f in ml_rep.findings if f.severity == "unresolved"] if ml_rep else []},
                 "statistical_result": {"ok": stat_rep.ok, "errors": [f.message for f in stat_rep.errors],
-                                       "unresolved": [f.code for f in stat_rep.findings if f.level == "unresolved"]}}
+                                       "unresolved": [f.code for f in stat_rep.findings if f.severity == "unresolved"]}}
     linked = bool(ml_doc) and stat["inputs"][0]["artifact_id"] == ml_doc["artifact_id"] \
         and stat["inputs"][0]["sha256"] == hashlib.sha256(ml_path.read_bytes()).hexdigest()
 

@@ -1,0 +1,43 @@
+{
+ "$comment": "Owner: hep-statistics. Typed fields of a statistical-result since contracts 2.6.0, applied by contracts.validate on top of ext_statistical_result.json and ext_statistical_result_v2_2.json only to artifacts of contract 2.6.0 or later, or to older ones with --strict. All optional. Semantic rules: contracts.validate._stat_hardening.",
+ "type": "object",
+ "properties": {
+  "seeds": {
+   "type": "object",
+   "$comment": "since 2.6.0: the seeds of every toy ensemble the result rests on (for example {\"toys\": 1, \"coverage\": 2}); a toy-based construction, coverage, goodness of fit or significance without them is unresolved (stats.seed_missing)"
+  },
+  "coverage": {
+   "type": "object",
+   "properties": {
+    "seed": {
+     "type": [
+      "integer",
+      "string"
+     ],
+     "$comment": "since 2.6.0: the seed of the coverage toys (alternative to extension.seeds)"
+    }
+   }
+  },
+  "goodness_of_fit": {
+   "type": "object",
+   "properties": {
+    "p_value_bound": {
+     "$ref": "ext_statistical_result_v2_2.json#/$defs/p_bound"
+    }
+   }
+  },
+  "significance": {
+   "type": "object",
+   "properties": {
+    "convention": {
+     "type": "string",
+     "enum": [
+      "one-sided",
+      "two-sided"
+     ],
+     "$comment": "since 2.6.0: the z/p convention; default one-sided, z = Phi^-1(1 - p)"
+    }
+   }
+  }
+ }
+}

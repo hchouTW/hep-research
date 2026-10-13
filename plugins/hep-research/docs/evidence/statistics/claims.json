@@ -219,5 +219,125 @@
   "verification_strength": "page",
   "numeric_quotation_allowed": false,
   "last_reviewed": "2026-10-12"
+ },
+ {
+  "id": "hepstats:C12",
+  "claim": "Intervals around a regularized unfolded estimate (Bayesian credible or standard bootstrap) can undercover because the regularized point estimate is biased; a bias-corrected bootstrap restores nearly nominal coverage at a modest cost in length.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "hepstats:S25"
+  ],
+  "location": "arXiv:1505.04768 abstract",
+  "scope": {
+   "text": "regularized unfolding"
+  },
+  "limitations": "abstract-level support; coverage depends on the procedure and the truth",
+  "verification_strength": "abstract+metadata",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-13"
+ },
+ {
+  "id": "hepstats:C13",
+  "claim": "Negative BLUE weights indicate a regime of high correlations, where assuming full correlation of systematic uncertainties is not a conservative choice.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "hepstats:S28"
+  ],
+  "location": "arXiv:1307.4003 abstract",
+  "scope": {
+   "text": "BLUE combinations"
+  },
+  "limitations": "abstract-level support",
+  "verification_strength": "abstract+metadata",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-13"
+ },
+ {
+  "id": "hepstats:C14",
+  "claim": "From the Asimov data set, sigma_A^2 = (mu - mu')^2 / q_mu,A gives the width of the mu-hat distribution used in the Wald approximation -2 ln lambda(mu) = (mu - mu-hat)^2 / sigma^2 + O(1/sqrt N).",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "hepstats:S01"
+  ],
+  "location": "arXiv:1007.1727v3 eqs. (17) and (30)",
+  "scope": {
+   "text": "asymptotic formulae"
+  },
+  "limitations": "large-sample approximation",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-13"
+ },
+ {
+  "id": "hepstats:C15",
+  "claim": "A frequentist test of the ratio of Poisson means is recommended over the Bayesian-frequentist hybrid for on/off significance, which can undercover severely at high Z.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "hepstats:S33"
+  ],
+  "location": "physics/0702156 abstract",
+  "scope": {
+   "text": "on/off counting significance"
+  },
+  "limitations": "abstract-level support",
+  "verification_strength": "abstract+metadata",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-13"
+ },
+ {
+  "id": "hepstats:C16",
+  "claim": "Impacts are not uncertainty components: they are not adequate for quoting a breakdown of the total uncertainty, for which the actual components must be determined separately.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "hepstats:S35"
+  ],
+  "location": "arXiv:2307.04007 abstract",
+  "scope": {
+   "text": "uncertainty breakdowns of profile-likelihood fits"
+  },
+  "limitations": "abstract-level support",
+  "verification_strength": "abstract+metadata",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-13"
+ },
+ {
+  "id": "hepstats:C17",
+  "claim": "The H-test tail probability follows an exponential law with lambda = 0.4.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "hepstats:S38"
+  ],
+  "location": "arXiv:1005.4867 abstract",
+  "scope": {
+   "text": "periodicity tests on photon arrival times"
+  },
+  "limitations": "abstract-level support",
+  "verification_strength": "abstract+metadata",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-13"
  }
 ]

@@ -1,0 +1,474 @@
+{
+ "contracts/fixtures/artifacts/invalid/communication_bad_types.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/communication_claim_status_conflict.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/communication_claim_status_upgraded.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/communication_traceability_without_capability.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/dataset_binned_length.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/dataset_published_no_evidence.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/dataset_synthetic_unlabeled.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/envelope_missing_status.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_duplicate_correction.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_ratio_no_correlation_model.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_unknown_normalization.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_unnamespaced_level.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_blank_grouping_key.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_calibration_missing.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_calibration_on_fit_sample.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_domain_inverted_range.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_domain_unknown_feature.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_empty_labels_features.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_empty_model_hash.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_no_grouping.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_split_overlap_failed.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/prediction_gaussian_envelope.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_double_counted.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_joint_counts_inefficiency_inside.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_matrix_missing.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_parametrized_missing.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_trigger_efficiency_twice.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/run_failed_unlabeled.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/statres_bayesian_no_priors.json": {
+  "gate": "failed",
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/statres_bayesian_rhat_mismatch.json": {
+  "gate": "failed",
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/statres_frequentist_with_priors.json": {
+  "gate": "failed",
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/statres_trials_method_unknown.json": {
+  "gate": "failed",
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/statres_v26_construction_statistic.json": {
+  "gate": "failed",
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/statres_v26_coverage_cl_mismatch.json": {
+  "gate": "failed",
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/statres_v26_coverage_interval_wide.json": {
+  "gate": "failed",
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/statres_v26_global_z_above_local.json": {
+  "gate": "failed",
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/statres_v26_model_sha256_malformed.json": {
+  "gate": "failed",
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/statres_v26_p_zero.json": {
+  "gate": "failed",
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/statres_v26_results_p_out_of_range.json": {
+  "gate": "failed",
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/statres_v26_z_p_inconsistent.json": {
+  "gate": "failed",
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/status_not_propagated.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/theory_experiment_binding.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/theory_experiment_field.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/unresolved/communication_traceability_pending.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/ml_domain_shift_missing.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/ml_split_overlap_not_run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/statres_scan_no_global.json": {
+  "gate": "unresolved",
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/statres_v26_bayes_chains_missing.json": {
+  "gate": "failed",
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/statres_v26_bayes_ess_too_low.json": {
+  "gate": "failed",
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/statres_v26_bayes_poi_prior_missing.json": {
+  "gate": "failed",
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/statres_v26_bayes_propriety_unsupported.json": {
+  "gate": "failed",
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/statres_v26_coverage_toys_too_few.json": {
+  "gate": "failed",
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/statres_v26_expected_missing.json": {
+  "gate": "failed",
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/statres_v26_global_z_without_p.json": {
+  "gate": "failed",
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/statres_v26_gof_toys_missing.json": {
+  "gate": "failed",
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/statres_v26_seed_missing.json": {
+  "gate": "failed",
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/communication.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/communication_traceability.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/comparison_spec.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/computational_run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/dataset_record.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/measurement_collider.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/measurement_exposure.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/measurement_protons_on_target.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/measurement_ratio.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/measurement_target_exposure.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/ml_artifact.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/ml_artifact_v25.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/prediction.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/response.json": {
+  "ok": true,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/valid/response_parametrized.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/response_v24.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/statres_bayesian.json": {
+  "gate": "unresolved",
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/statres_bayesian_rhat_warning.json": {
+  "gate": "unresolved",
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/statres_frequentist.json": {
+  "gate": "unresolved",
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/statres_scan_global.json": {
+  "gate": "unresolved",
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/statres_v26.json": {
+  "gate": "failed",
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/statres_v26_bayesian.json": {
+  "gate": "failed",
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/theory_spec.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/ams-flux-ratio/output/artifacts/dataset_synthetic-period-1.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "examples/ams-flux-ratio/output/artifacts/dataset_synthetic-period-2.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "examples/ams-flux-ratio/output/artifacts/measurement_spec.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "examples/ams-flux-ratio/output/artifacts/ratio_result.json": {
+  "gate": "unresolved",
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/ams-flux-ratio/output/artifacts/response_helium.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/ams-flux-ratio/output/artifacts/response_proton.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/collider-angular/output/artifacts/dataset_record.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/collider-angular/output/artifacts/measurement_spec.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/collider-angular/output/artifacts/response.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/collider-angular/output/artifacts/result.json": {
+  "gate": "unresolved",
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/detector-resolution/output/artifacts/efficiency.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/detector-resolution/output/artifacts/resolution.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/detector-resolution/output/artifacts/width_fit.json": {
+  "gate": "unresolved",
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/ml-classifier-to-inference/output/artifacts/ml_artifact.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/ml-classifier-to-inference/output/artifacts/statistical_result.json": {
+  "gate": "passed",
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/published-comparison/output/artifacts/comparison_spec.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/published-comparison/output/artifacts/result.json": {
+  "gate": "unresolved",
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/published-comparison/synthetic-published-record.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/qed-prediction/output/artifacts/prediction.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/qed-prediction/output/artifacts/theory_spec.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/recasting/output/artifacts/efficiency_map.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/recasting/output/artifacts/prediction_m300.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/recasting/output/artifacts/result.json": {
+  "gate": "unresolved",
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/recasting/output/artifacts/search_record.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/stats-benchmarks/published-likelihood-sbottom/output/artifacts/computational_run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/stats-benchmarks/published-likelihood-sbottom/output/artifacts/statistical_result.json": {
+  "gate": "unresolved",
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/theory-comparison/output/artifacts/comparison_spec.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/theory-comparison/output/artifacts/dataset_record.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/theory-comparison/output/artifacts/folded_expectation.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/theory-comparison/output/artifacts/result.json": {
+  "gate": "unresolved",
+  "ok": true,
+  "strict_ok": true
+ }
+}

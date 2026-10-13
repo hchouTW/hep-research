@@ -96,6 +96,21 @@ found the following, so it is not shipped:
 
 Revisit if a live round shows quick-question misses that a reminder fixes.
 
+J5 ownership of the fit half (STH-T4.6, order question Q9): when the prediction exists, the case starts at the fold
+(detector-response, case `j05`); the follow-up "now fit the normalization" is a fit that uses a folded prediction and
+loads hep-statistics (multi-turn case `j05-turn-fit`), consistent with the topic table above.
+
 ## Language
 
 Routing cases include Traditional Chinese requests (AC20). At runtime the plugin answers end users in the language they use; artifacts and field names stay in English.
+
+Non-English cases need no English trigger terms: a real request does not quote the description, so a case may be
+written as a natural prompt (`"natural": true`), which `tools/check_routing_static.py` checks reuses no run of four or
+more consecutive words of the expected skill's description. What keeps routing anchored for those prompts is that each
+owned topic below stays named in the "Use when" part of the owner's description; the checker fails when one is
+removed. Skills may add their rows.
+
+<!-- description-topics: read by tools/check_routing_static.py -->
+| Skill | Topics the description must name |
+|---|---|
+| hep-statistics | likelihoods; binned and unbinned fits; template fits; published data points; intervals and limits; Feldman-Cousins; CLs; profile likelihood; Bayesian posteriors; significance and look-elsewhere effects; low or zero counts; nuisance parameters; covariance assembly; unfolding; folded prediction; toys and Asimov datasets; goodness of fit; model comparison; combinations |

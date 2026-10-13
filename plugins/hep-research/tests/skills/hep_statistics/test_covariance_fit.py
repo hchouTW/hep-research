@@ -22,6 +22,103 @@ C_NORM = (np.diag(P) - np.outer(P, P)) / N          # covariance of a normalized
 ONES = [[1.0] * 8]
 
 
+class RelativeCovChecksSTH36(unittest.TestCase):
+    """STH-T3.6: relative_cov must be n x n, symmetric and positive semidefinite; a 1 x 1 matrix is not broadcast."""
+    Y, COV = [1.0, 1.1, 0.9], (0.01 * np.eye(3)).tolist()
+
+    def test_refusals(self):
+        for rel in ([[0.01]], [[0.01, 0.002, 0.0], [0.0, 0.01, 0.0], [0.0, 0.0, 0.01]],
+                    [[0.01, 0.02, 0.0], [0.02, 0.01, 0.0], [0.0, 0.0, 0.01]], [[0.01, 0, 0], [0, -0.01, 0], [0, 0, 0.01]]):
+            with self.subTest(rel=rel), self.assertRaises(cf.CovFitError):
+                cf.fit(self.Y, self.COV, "constant", multiplicative={"relative_cov": rel, "mode": "data"})
+
+    def test_valid_full_matrix_fits(self):
+        rel = (0.0004 * np.ones((3, 3))).tolist()
+        r = cf.fit(self.Y, self.COV, "constant", multiplicative={"relative_cov": rel, "mode": "model"})
+        self.assertIn("theta", r)
+
+
+BPL_X = np.logspace(0, 2, 20)
+BPL_TRUTH = np.array([math.log(1e3), 2.7, 2.4, math.log(10.0)])
+
+
+def _bpl_setup(truth=BPL_TRUTH, smoothness=0.0):
+    f = np.exp(cf.bpl_log(truth, BPL_X, smoothness))
+    return f, np.diag((0.02 * f) ** 2) + np.outer(0.01 * f, 0.01 * f)
+
+
+class BrokenPowerLawSTH313(unittest.TestCase):
+    """STH-T3.13: broken power laws (sharp and smooth) and a plug-in model in covariance_fit.py; the break position is
+    a non-regular parameter, so its interval comes from a profile scan calibrated with toys (break-scan)."""
+
+    def test_asimov_break_scan_recovers_the_truth(self):
+        f, cov = _bpl_setup()
+        r = cf.break_scan({"y": f.tolist(), "cov": cov.tolist(), "x": BPL_X.tolist(), "break_range": [3.0, 35.0],
+                           "grid_points": 200}, 100, 1)
+        self.assertAlmostEqual(math.log(r["best_fit"]["x_b"]), math.log(10.0), delta=r["grid"]["resolution_ln"])
+        self.assertAlmostEqual(r["best_fit"]["gamma1"], 2.7, delta=0.01)
+        self.assertTrue(any(lo <= 10.0 <= hi for lo, hi in r["break_interval"]["intervals"]))
+        self.assertLess(r["break_test"]["p_toys"]["upper_bound"]["value"], 0.05)
+
+    def test_smooth_model_fit_and_plugin(self):
+        f, cov = _bpl_setup(smoothness=0.2)
+        r = cf.fit(f.tolist(), cov.tolist(), "smoothly-broken-power-law", BPL_X.tolist(),
+                   start=[math.log(900.0), 2.6, 2.5, math.log(9.0)], model_options={"smoothness": 0.2})
+        self.assertTrue(np.allclose(r["theta"], BPL_TRUTH, atol=1e-4), r["theta"])
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            plug = Path(td) / "m.py"
+            plug.write_text("import numpy as np\ndef predict(theta, x):\n    return theta[0] * np.exp(-x / theta[1])\n")
+            xs = np.linspace(0.0, 5.0, 8)
+            y = 4.0 * np.exp(-xs / 2.0)
+            r = cf.fit(y.tolist(), (0.01 * np.eye(8)).tolist(), "plugin", xs.tolist(), start=[3.0, 1.5],
+                       model_options={"plugin": {"path": str(plug), "function": "predict", "n_params": 2}})
+            self.assertTrue(np.allclose(r["theta"], [4.0, 2.0], atol=1e-5), r["theta"])
+
+    def test_refusals(self):
+        f, cov = _bpl_setup()
+        for d in ({"y": f.tolist(), "cov": cov.tolist(), "x": (-BPL_X).tolist()},
+                  {"y": f.tolist(), "cov": cov.tolist(), "x": BPL_X.tolist(), "break_range": [0.5, 50.0]},
+                  {"y": (-f).tolist(), "cov": cov.tolist(), "x": BPL_X.tolist()}):
+            with self.assertRaises(cf.CovFitInputError):
+                cf.break_scan(d, 100, 1)
+        with self.assertRaises(cf.CovFitInputError):
+            cf.fit(f.tolist(), cov.tolist(), "broken-power-law", BPL_X.tolist())          # no start
+
+    def test_no_break_negative_control_shows_wilks_miscalibration(self):
+        """With no break (gamma1 = gamma2) x_b is undefined and the break test maximizes over it (Davies): the Wilks
+        reference for the one extra index at a known break, chi2(1), rejects far more often than its 5%; chi2(2) is not
+        derived either (here it happens to land near 5%). Only the toy p-value is valid."""
+        truth = BPL_TRUTH.copy()
+        truth[2] = truth[1]
+        f, cov = _bpl_setup(truth)
+        rng = np.random.default_rng(21)
+        Y = np.clip(rng.multivariate_normal(f, cov, size=400), 1e-9, None)
+        grid = np.linspace(math.log(3.0), math.log(35.0), 60)
+        W = np.linalg.inv(cov)
+        q = cf._single_pl_chi2(Y, W, BPL_X)[0] - cf._profile_bpl(Y, W, BPL_X, grid, 0.0)[0].min(axis=1)
+        from scipy.stats import chi2
+        rate = float(np.mean(q > chi2.ppf(0.95, 1)))
+        self.assertGreater(rate, 0.10, rate)   # Wilks (x_b known) would give 0.05
+
+    @unittest.skipUnless(__import__("os").environ.get("HEP_SLOW_TESTS") == "1", "slow (about 6 minutes): set HEP_SLOW_TESTS=1")
+    def test_slow_break_bias_and_interval_coverage(self):
+        """500 toys at one truth (sharp break at x_b = 10, gamma 2.7 -> 2.4, 20 log-spaced points, 2% independent and
+        1% correlated errors): bias of ln x_b below 0.2 sigma and 68.27% interval coverage within +-0.03."""
+        f, cov = _bpl_setup()
+        rng = np.random.default_rng(11)
+        hits, est = 0, []
+        for i in range(500):
+            y = rng.multivariate_normal(f, cov)
+            r = cf.break_scan({"y": y.tolist(), "cov": cov.tolist(), "x": BPL_X.tolist(), "break_range": [3.0, 35.0],
+                               "grid_points": 200}, 100, i + 1)
+            est.append(math.log(r["best_fit"]["x_b"]))
+            hits += any(lo <= 10.0 <= hi for lo, hi in r["break_interval"]["intervals"])
+        est = np.array(est)
+        self.assertLess(abs(est.mean() - math.log(10.0)) / est.std(ddof=1), 0.2)
+        self.assertLess(abs(hits / 500 - 0.6827), 0.03, hits / 500)
+
+
 class T18ConstrainedSpectrum(unittest.TestCase):
     def test_unconstrained_fit_is_refused_not_regularized(self):
         y = np.random.default_rng(1).multinomial(N, P) / N

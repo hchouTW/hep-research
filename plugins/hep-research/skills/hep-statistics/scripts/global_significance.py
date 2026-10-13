@@ -32,10 +32,16 @@ import math
 import sys
 from pathlib import Path
 
-import numpy as np
+try:  # --help works without them; main() refuses to run without them (STH-T3.1)
+    import numpy as np
+except ImportError:  # pragma: no cover
+    np = None  # type: ignore[assignment]
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from core.stats.tail_estimation import clopper_pearson, toy_tail  # noqa: E402
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from look_elsewhere import upcrossings  # noqa: E402  one upcrossing definition for both scripts (STH-T3.4)
 
 LABEL = "[General method] EXPERIMENTAL"
 
@@ -110,10 +116,26 @@ def q0_all(n, b, temps, norm, aux):
 
 
 def run(doc: dict, toys: int, seed: int, gv_ref_level: float = 1.0) -> dict:
+    if not isinstance(doc, dict):
+        raise ValueError("the input must be a JSON object")
     x = np.asarray(doc["bin_centers"], float)
     variants = doc["variants"]
     if not variants:
         raise ValueError("at least one variant")
+    if x.ndim != 1 or x.size < 2 or not np.all(np.isfinite(x)) or np.any(np.diff(x) <= 0):
+        raise ValueError("bin_centers must be at least two finite, increasing values")
+    for v in variants:
+        for key in ("background", "observed"):
+            arr = np.asarray(v.get(key, []), float)
+            if arr.shape != x.shape or not np.all(np.isfinite(arr)) or np.any(arr < 0):
+                raise ValueError(f"variant {v.get('name')!r}: {key} needs one finite, non-negative value per bin")
+        if np.any(np.asarray(v["background"], float) <= 0):
+            raise ValueError(f"variant {v.get('name')!r}: every background expectation must be positive")
+    pos = np.asarray(doc["scan"]["positions"], float)
+    if pos.size == 0 or not np.all(np.isfinite(pos)) or np.any(pos < x[0]) or np.any(pos > x[-1]):
+        raise ValueError(f"scan positions must lie within the binning [{x[0]}, {x[-1]}]")
+    if any(not (np.isfinite(w) and w > 0) for w in doc["scan"].get("widths", [1.0])):
+        raise ValueError("scan widths must be finite and positive")
     seen = set()
     for v in variants:
         if "subset_of" in v and (v["subset_of"] not in seen or "efficiency" not in v):
@@ -131,10 +153,14 @@ def run(doc: dict, toys: int, seed: int, gv_ref_level: float = 1.0) -> dict:
     best_v = int(np.argmax([q.max() for q in q_obs_v]))
     best_j = int(np.argmax(q_obs_v[best_v]))
     q_max = float(q_obs_v[best_v][best_j])
-    maxima, local_hits, upcross = np.empty(toys), 0, []
+    maxima, local_hits, upcross, aux_drawn = np.empty(toys), 0, [], []
+    k_fit = obs[0][1]  # background scale of the background-only fit to the data (the toys' true nuisance)
     for t in range(toys):
         rng = np.random.default_rng([seed, t])         # toy t's data do not depend on the grid or the other variants
-        aux = 1.0 + norm["sigma"] * rng.standard_normal() if norm["kind"] == "constrained" else 1.0
+        # the auxiliary measurement is redrawn around the fitted scale the toys are generated with, not around its
+        # nominal 1.0: confirmed (STH-T3.4) that drawing it around 1.0 while the counts use k_fit mixes two ensembles
+        aux = k_fit + norm["sigma"] * rng.standard_normal() if norm["kind"] == "constrained" else 1.0
+        aux_drawn.append(aux)
         tq, drawn = [], {}
         for vi, (v, b, o) in enumerate(zip(variants, bs, obs)):
             if "subset_of" in v:                         # a tighter selection of another variant's events
@@ -147,8 +173,7 @@ def run(doc: dict, toys: int, seed: int, gv_ref_level: float = 1.0) -> dict:
         maxima[t] = max(q.max() for q in tq)
         local_hits += tq[best_v][best_j] >= q_max - 1e-12
         if len(widths) == 1 and len(variants) == 1:
-            above = tq[0] > gv_ref_level
-            upcross.append(int(np.sum(above[1:] & ~above[:-1]) + above[0]))
+            upcross.append(int(upcrossings(tq[0], gv_ref_level)[0]))
     k_glob = int(np.sum(maxima >= q_max - 1e-12))
     tail = toy_tail(k_glob, toys)
     p_local = 0.5 * math.erfc(math.sqrt(q_max / 2)) if q_max > 0 else 0.5
@@ -158,6 +183,8 @@ def run(doc: dict, toys: int, seed: int, gv_ref_level: float = 1.0) -> dict:
                         "variant": variants[best_v]["name"]},
            "local_p_asymptotic": p_local, "local_p_toys": toy_tail(local_hits, toys),
            "global_p_toys": tail, "toys": toys, "seed": seed, "ensemble": "conditional (background-only fit to the data)",
+           "auxiliary_redraw": ({"center": k_fit, "sigma": norm["sigma"], "mean_in_toys": float(np.mean(aux_drawn))}
+                                if norm["kind"] == "constrained" else None),
            "global_not_below_local": tail["estimate"] is None or tail["interval"][1] >= min(p_local, 1.0) - 1e-12}
     if upcross:
         n0 = float(np.mean(upcross))
@@ -179,6 +206,9 @@ def main(argv=None) -> int:
     r.add_argument("--toys", type=int, default=1000)
     r.add_argument("--seed", type=int, required=True)
     a = ap.parse_args(argv)
+    if np is None:
+        print(json.dumps({"status": "rejected", "error": "NumPy is required"}))
+        return 2
     try:
         out = run(json.loads(Path(a.input).read_text()), a.toys, a.seed)
     except (OSError, ValueError, KeyError, TypeError) as exc:

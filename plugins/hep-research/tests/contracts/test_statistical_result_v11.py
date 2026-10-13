@@ -33,6 +33,7 @@ class StatisticalResultV11(unittest.TestCase):
         # communication traceability; 2.4.0: response semantics (tests/contracts/test_response_contract.py); 2.5.0:
         # ml-artifact semantics (tests/contracts/test_ml_contract.py); 2.6.0: theory-spec and prediction semantics
         # (tests/contracts/test_theory_contract.py) and measurement-spec semantics (tests/contracts/test_measurement_contract.py)
+        # and statistical-result hardening (STH-T1, tests/contracts/test_gate_adversarial.py)
         self.assertEqual(CONTRACTS_VERSION, "2.6.0")
 
     def test_unresolved_fixtures(self):

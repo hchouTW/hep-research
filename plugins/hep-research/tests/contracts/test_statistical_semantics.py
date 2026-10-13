@@ -61,7 +61,8 @@ def current(doc):
 
 
 PUBLISHABLE = current(BASE)
-PUBLISHABLE["status"] = ["asimov"]
+PUBLISHABLE["status"] = ["observed"]  # 'asimov' fails the gate from contracts 2.6.0 (gate.not_observed_data)
+PUBLISHABLE["extension"]["seeds"] = {"toys": 1, "coverage": 2}
 PUBLISHABLE["extension"]["coverage"] = {"check": "toys", "method": "seeded toys of the full procedure", "n_toys": 20000, "coverage": 0.951, "interval": [0.948, 0.954],
                                         "cl": 0.95, "ensemble": "fixed-auxiliary", "failure_policy": "count-as-noncovering", "failures": 0}
 PUBLISHABLE["extension"]["likelihood"] = {"form": "poisson", "backend": "core.stats.likelihood_limits", "model_sha256": "0" * 64}
@@ -89,10 +90,11 @@ class T06Semantics(unittest.TestCase):
                 self.assertIn(code, codes(strict, level))
 
     def test_unmutated_fixture_in_strict_mode(self):
-        # no error; its coverage {"toys": 0, "note": "fixture"} is an untyped placeholder, which strict mode names
+        # no error; its coverage {"toys": 0, "note": "fixture"} is an untyped placeholder, which strict mode names, and
+        # (contracts 2.6.0) its toy-calibrated construction and toy goodness of fit record no seed
         rep = v.validate_artifact(BASE, strict=True)
         self.assertTrue(rep.ok)
-        self.assertEqual(codes(rep), {"stats.coverage_untyped"})
+        self.assertEqual(codes(rep), {"stats.coverage_untyped", "stats.seed_missing"})
 
     def test_non_finite_numbers_are_errors(self):
         for bad in (float("nan"), float("inf")):
@@ -128,7 +130,12 @@ class T07PublicationGate(unittest.TestCase):
 
     def test_archival_artifact_is_valid_but_not_publishable(self):
         self.assertTrue(v.validate_artifact(BASE).ok)
-        self.assertEqual(v.publication_gate(BASE)["status"], "unresolved")
+        g = v.publication_gate(BASE)  # an 'asimov' fixture: valid, and never a result on data (contracts 2.6.0)
+        self.assertEqual(g["status"], "failed")
+        self.assertIn("gate.not_observed_data", {r["code"] for r in g["reasons"]})
+        relabelled = copy.deepcopy(BASE)
+        relabelled["status"] = ["observed"]
+        self.assertEqual(v.publication_gate(relabelled)["status"], "unresolved")
 
     def test_each_gap_blocks(self):
         cases = {
@@ -214,6 +221,61 @@ class ReviewFindings(unittest.TestCase):
         self.assertNotIn("stats.capability_not_declared", codes(v.validate_artifact(PUBLISHABLE)))
 
 
+class Contracts26Hardening(unittest.TestCase):
+    """STH-T1.8: the 2.6.0 rules are native from 2.6.0; a 2.2-2.5 artifact keeps its default outcome, gets them under
+    --strict, and the migrator brings it to 2.6.0 or refuses it with the rule's code (never repairing a number or
+    inventing a seed)."""
+    CASES = json.loads((ART / "cases.json").read_text())
+
+    def _v26(self, kind):
+        return {n: c for n, c in self.CASES[kind].items() if n.startswith("statres_v26_")}
+
+    @staticmethod
+    def _as(doc, version):
+        d = copy.deepcopy(doc)
+        d["contract_version"] = d["versions"]["contracts"] = version
+        return d
+
+    def test_valid_fixtures_are_current_and_pass(self):
+        for name in ("statres_v26.json", "statres_v26_bayesian.json"):
+            with self.subTest(name):
+                d = json.loads((ART / "valid" / name).read_text())
+                self.assertEqual(d["contract_version"], CONTRACTS_VERSION)
+                rep = v.validate_artifact(d)
+                self.assertTrue(rep.ok)
+                self.assertFalse(codes(rep, "unresolved"), [f.as_dict() for f in rep.findings])
+
+    def test_legacy_outcome_kept_and_strict_reports(self):
+        for kind in ("invalid", "unresolved"):
+            for name, expected in self._v26(kind).items():
+                with self.subTest(name):
+                    legacy = self._as(json.loads((ART / kind / name).read_text()), "2.5.0")
+                    rep = v.validate_artifact(legacy)
+                    self.assertTrue(rep.ok, [f.as_dict() for f in rep.errors])
+                    self.assertFalse(set(expected) & codes(rep))
+                    self.assertTrue(set(expected) <= codes(v.validate_artifact(legacy, strict=True)))
+
+    def test_migrator_refuses_each_new_error(self):
+        errors = self._v26("invalid")
+        self.assertEqual(len(errors), 8)
+        for name, expected in errors.items():
+            with self.subTest(name):
+                new, rep = mig.migrate(self._as(json.loads((ART / "invalid" / name).read_text()), "2.5.0"))
+                self.assertIsNone(new)
+                self.assertEqual(rep["status"], "refused")
+                self.assertTrue(set(expected) <= {r["code"] for r in rep["refusals"]}, rep)
+
+    def test_migrator_brings_2_5_to_2_6_without_inventing_evidence(self):
+        d = self._as(json.loads((ART / "unresolved" / "statres_v26_seed_missing.json").read_text()), "2.5.0")
+        new, rep = mig.migrate(d)
+        self.assertEqual((rep["status"], new["contract_version"], new["versions"]["contracts"]), ("migrated", "2.6.0", "2.6.0"))
+        self.assertNotIn("seeds", new["extension"])
+        self.assertIn("stats.seed_missing", {x["code"] for x in rep["diagnostics"]})
+        self.assertEqual(new["extension"], d["extension"])  # only the version moved
+        same, rep2 = mig.migrate(new)
+        self.assertEqual(rep2["status"], "unchanged")
+
+
 class T08Migration(unittest.TestCase):
     def test_old_reader_refuses_the_new_capability(self):
         old = frozenset(contracts.KNOWN_CAPABILITIES - {"stats:result-semantics"})
@@ -244,6 +306,8 @@ class T08Migration(unittest.TestCase):
         self.assertEqual(new["extension"]["coverage"], {**BASE["extension"]["coverage"], "check": "not-checked"})
         self.assertIn("migrate.coverage_untyped", {x["code"] for x in rep["diagnostics"]})
         self.assertTrue(v.validate_artifact(new).ok)
+        self.assertEqual(v.publication_gate(new)["status"], "failed")  # the fixture is labelled 'asimov'
+        new["status"] = ["observed"]
         self.assertEqual(v.publication_gate(new)["status"], "unresolved")
 
     def test_migration_refuses_and_names_the_rule(self):

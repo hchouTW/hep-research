@@ -5,8 +5,9 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
-Contracts 2.6.0 (minor: theory-spec, prediction and measurement-spec semantics; every 2.5.0 artifact keeps its outcome
-and gets the new rules with `validate.py --strict`, at the same level; no new capability).
+Contracts 2.6.0 (minor: theory-spec, prediction, measurement-spec and statistical-result hardening rules; optional
+fields only; every 2.5.0 artifact keeps its default outcome and gets the new rules with `validate.py --strict`, at the
+same level, and at the publication gate; no new capability).
 
 ### hep-theory
 
@@ -259,6 +260,82 @@ and gets the new rules with `validate.py --strict`, at the same level; no new ca
   `test_cosmic_ray_helpers.py`; a worked cosmic-ray spec with backgrounds and an active mask
   (`assets/worked-spec.cosmic-ray.synthetic.json`); the flagship example documents the `--profiles-from`
   validation command; capability-matrix title no longer carries a version.
+
+### hep-statistics
+
+- **Statistical-result hardening (contracts 2.6.0).** New errors: `stats.coverage_cl_mismatch`,
+  `stats.coverage_interval_inconsistent` (a recorded interval outside the 99.73% Clopper-Pearson interval of its toy
+  counts), `stats.p_zero_without_bound`, `stats.p_out_of_range` on probability-like `results` keys (p0, p_value, CLs,
+  CLb, ...), `stats.z_p_inconsistent` (one-sided, |Δz| > 0.01), `stats.global_z_above_local`,
+  `stats.construction_statistic_mismatch` (for example Feldman-Cousins with q0, CLs values from a Neyman
+  construction), `stats.model_sha256_malformed`. New unresolved: `stats.coverage_toys_too_few` (fewer than 200 toys),
+  `stats.expected_bands_missing` (an observed limit without median and both bands), `stats.global_z_without_p`,
+  `stats.seed_missing`, `stats.gof_toys_missing`; Bayesian `stats.propriety_unsupported` (propriety needs
+  {argument, ref}), `stats.poi_prior_missing`, `stats.ess_too_low` (100 per chain), `stats.chains_missing`; `stan`,
+  `pymc`, `numpyro` count as gradient samplers and `uniform(0, inf)` as improper. Optional fields `extension.seeds`,
+  `coverage.seed`, `goodness_of_fit.p_value_bound`, `significance.convention` (`ext_statistical_result_v2_6.json`).
+- **Publication gate.** A `synthetic` or `asimov` statistical-result now fails (`gate.not_observed_data`); toy
+  undercoverage is judged on the 68.27% Clopper-Pearson upper end computed from the counts; a blank backend or model
+  reference is missing provenance. Gate verdict changes on committed artifacts: the J9 example
+  (`examples/ml-classifier-to-inference`, `synthetic`) passed and now fails; 11 synthetic or asimov examples and
+  fixtures go from unresolved to failed for the same reason; default and strict validator outcomes are unchanged
+  for all of them (`tests/contracts/test_gate_verdict_snapshot.py`).
+- `migrate_statistical_result.py` brings a 2.2-2.5 artifact to 2.6.0 (version only) and refuses one that breaks a
+  2.6.0 error rule; it never repairs a number or invents a seed.
+- **Comparison gate.** `variable-change` needs `edges` (the image of every current edge, strictly monotonic,
+  recorded as `edge_map`) and a Jacobian that is a number or `{expression, ref}` (a bare word leaves the comparison
+  unresolved); `from == to` is refused (use `rebin`). `unit-conversion` needs a finite factor > 0, recorded as
+  `recorded_factor`. `plan_combination` refuses duplicate dataset ids (`combine.duplicate_id`); `envelope` refuses
+  rows of unequal length.
+- **`validate_covariance.py`** judges PSD, rank and conditioning on the correlation matrix D^-1/2 C D^-1/2: an
+  indefinite correlation structure fails whatever the units per bin, and disparate but uncorrelated variances are no
+  longer rank-deficient or ill-conditioned; metrics report scaled and unscaled eigenvalues.
+- **`likelihood_limits.py contour`**: probes where a bin mean is <= 0 are out of the domain (q = +inf, counted as
+  `out_of_domain_probes`), not failed fits; the 3-bin audit input now exits 0.
+- **`result_artifact.py`** refuses a CLI output without `status` unless `--assume-status` is given (recorded as
+  `results.cli_status_assumed`), refuses a coverage value or toy count under `--coverage-check not-checked`, and
+  refuses a JSON list input.
+- **Skill entry point and guide.** `SKILL.md` has a Step 0 for one-number questions and a task-to-tool table
+  (default tool, fallback, or "no shipped tool"); the closure invariant applies to new models; the context stanza
+  sits below Resources; the description says "producing missing physics inputs". `core-stats-guide.md` is split into
+  a decision guide (conventions, a per-subcommand caps table checked against the code, choosing a tool, skill
+  scripts with NumPy/SciPy markers) and `core-stats-commands.md` (per-module reference, gate rules). D'Agostini
+  routes to `unfold-scan` (not `regularized-scan`, which refuses it). Ten reference corrections with ledgered
+  sources (Bartlett's effect, `SumW2Error` scope, code4p sign convention, pyhf zero-nominal and staterror defaults,
+  iminuit EDM, familywise global p-values, ROOT 6.40 off the Combine stack, ...). New
+  `assets/combine.example.json`.
+- **New capabilities.** `covariance_fit.py`: broken and smoothly broken power laws, plug-in models, `break-scan`
+  (toy-calibrated break interval and no-break test); `statistical_toys.py ratio-cov-analytic` (full ratio
+  covariance at counts >= 1e4); `unfolding_diagnostics.py dagostini-unfold` (data unfolding with data and response
+  covariance); `shape-limit` without toys at ordinary sizes (100 bins, 1e4 events per bin); `shape-significance`
+  (multi-bin q0).
+- **Defects fixed on valid inputs.** Exact Phi quantiles for expected bands (`cls-limit --n 2 --b 3.7`: -2 sigma
+  2.996, was 3.56; `profile-cls` too); MC ranges for `profile-cls` and `profile-limit`; `shape-limit` at n = 0,
+  b = 0 (boundary, no longer failed) and a toy-CLs runtime estimate with a 600 s budget; `unbinned_fit.py` at wide
+  or offset ranges (natural-scale Hessian steps, exponential relative to lo, boundary policy for n_sig);
+  `eft_scan.py` excludes nu <= 0 in empty bins and refuses CL outside (0, 1); `global_significance.py` input checks,
+  auxiliary redraw at the fitted scale, shared upcrossing definition; `pcl_efficiency_ratio.py` exact classical limit
+  (n, b up to 1e5 in < 1 s); `covariance_fit.py` checks `relative_cov`; `look_elsewhere.py` memory budget;
+  `sensitivity_and_gof.py` reports an infeasible model; `model_card.py` leaves validation regions out of the fit and
+  uses constraint widths. Every statistics CLI refuses malformed input with exit 2 and JSON (no tracebacks) and
+  prints `--help` without NumPy.
+- **References.** `unfolding.md` (SVD, TUnfold, iterative and fully Bayesian unfolding, OmniFold, purity and
+  stability, undercoverage of regularized intervals, publishing), new `combinations.md` (BLUE, negative weights,
+  Peelle's puzzle, likelihood-level combination), `inference-recipes.md` (Wald and sigma_A, Rolke-Lopez-Conrad,
+  Cousins-Highland, PCL, the conditional on/off test, Baker-Cousins, reference priors), `nuisance-modeling.md`
+  (`autoMCStats`, spurious signal, discrete profiling, non-additive breakdowns), `astroparticle-statistics.md`
+  (unbinned point-source likelihood, TS and Chernoff, Rayleigh/Z_m^2/H-test, Bayesian blocks). Every new source is in
+  `docs/evidence/statistics/sources.json` with its verification level (S15-S41), with claims C12-C17 and eight new
+  capability entries.
+- **Routing checks are language independent** (all skills): `tools/check_routing_static.py` requires trigger terms
+  for English cases only; a non-English case may be a natural prompt (`"natural": true`) that reuses no four
+  consecutive description words; the description-topics table in `docs/routing-contract.md` (hep-statistics row
+  now) must stay named in the owner's description. New cases: six natural zh-Hant hep-statistics prompts, ratio
+  with covariance, broken-power-law fit to published points, bump hunt with a fitted background, an English
+  combination prompt, and the fit half of J5 (`j05-turn-fit`, Q9).
+- `examples/ml-classifier-to-inference/run.py` records the coverage toy seed and no longer crashes on an unresolved
+  finding (`Finding.severity`, not `.level`); J9 and `published-comparison` outputs regenerated (version strings,
+  the seed, the schema list read).
 
 ## 0.6.17 (2026-10-13)
 

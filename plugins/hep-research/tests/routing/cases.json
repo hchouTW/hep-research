@@ -2368,6 +2368,131 @@
    "not": "detector-response",
    "set": "ML-OWN",
    "note": "the deliverable is a trained regression model, which physics-ml owns; the detector calibration chain and its validation in data stay with detector-response"
+  },
+  {
+   "id": "st-t46-nat-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "兩個實驗量測同一物理量，有共同的亮度誤差，要怎麼合併？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [],
+   "set": "STH-T4.6",
+   "natural": true
+  },
+  {
+   "id": "st-t46-nat-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我觀測到 3 個事件，預期背景 1.2 個且有兩成不確定度，上限該怎麼算？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [],
+   "set": "STH-T4.6",
+   "natural": true
+  },
+  {
+   "id": "st-t46-nat-3",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "這組 MCMC 樣本的鏈混合得不好，後驗分布還能用嗎？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [],
+   "set": "STH-T4.6",
+   "natural": true
+  },
+  {
+   "id": "st-t46-nat-4",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "掃描所有質量之後，這個峰值是否仍然顯著？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [],
+   "set": "STH-T4.6",
+   "natural": true
+  },
+  {
+   "id": "st-t46-nat-5",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "用迭代貝氏方法反摺積這個能譜，迭代次數要怎麼選、誤差怎麼給？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [],
+   "set": "STH-T4.6",
+   "natural": true
+  },
+  {
+   "id": "st-t46-nat-6",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "分子和分母的計數都上百萬，各能量區間比值之間的相關誤差矩陣要怎麼算？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [],
+   "set": "STH-T4.6",
+   "natural": true
+  },
+  {
+   "id": "st-t46-ratio-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Compute the per-bin ratio of these two spectra with its full covariance, including the efficiency systematic they share.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "covariance assembly and validation"
+   ],
+   "set": "STH-T4.6"
+  },
+  {
+   "id": "st-t46-break-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Fit a broken power law to these published flux points with their covariance and give an interval for the break energy.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "fits of model parameters to published data points with their covariance"
+   ],
+   "set": "STH-T4.6"
+  },
+  {
+   "id": "st-t46-bump-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Search for a bump on a smoothly falling background that I fit from the data, and quote the global significance.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "significance and look-elsewhere effects"
+   ],
+   "set": "STH-T4.6"
+  },
+  {
+   "id": "st-t46-comb-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Combine our cross-section measurement with the other experiment's; both depend on the same luminosity measurement.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "combinations across datasets or experiments"
+   ],
+   "set": "STH-T4.6"
+  },
+  {
+   "id": "j05-turn-fit",
+   "lang": "en",
+   "kind": "multi-turn",
+   "prompt": "Fold my prediction through the detector response.",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "folding a prediction through the response"
+   ],
+   "set": "STH-T4.6",
+   "turns": [
+    {
+     "prompt": "Now fit the normalization of the folded prediction to the data.",
+     "expected": "hep-statistics",
+     "trigger_terms": [
+      "fits that use a folded prediction"
+     ]
+    }
+   ],
+   "note": "Q9: the fold belongs to detector-response, the fit that uses the folded prediction to hep-statistics (routing contract row 36)"
   }
  ]
 }

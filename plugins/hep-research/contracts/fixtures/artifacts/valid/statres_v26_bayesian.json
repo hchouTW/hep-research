@@ -1,0 +1,65 @@
+{
+ "contract_version": "2.6.0",
+ "artifact_id": "fixture-synthetic-statistical-result",
+ "artifact_type": "statistical-result",
+ "objective": "SYNTHETIC structural fixture; values are placeholders, not physics",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.6.17",
+  "contracts": "2.6.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-statistics",
+  "created": "2026-10-02",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "paradigm": "bayesian",
+  "likelihood": {
+   "form": "poisson (synthetic)",
+   "backend": "core.stats.likelihood_limits",
+   "model_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "parameters_of_interest": [
+   "mu"
+  ],
+  "nuisances": [],
+  "fit_status": "converged",
+  "seeds": {
+   "chains": 7
+  },
+  "results": {
+   "mu_median": 1.1
+  },
+  "priors": [
+   {
+    "parameter": "mu",
+    "form": "uniform(0, 10)"
+   }
+  ],
+  "sampler": {
+   "name": "metropolis (synthetic)",
+   "chains": 4,
+   "draws": 4000
+  },
+  "convergence": {
+   "rhat": 1.002,
+   "ess_bulk": 3000,
+   "ess_tail": 2500
+  }
+ },
+ "required_capabilities": [
+  "stats:result-semantics"
+ ]
+}

@@ -30,8 +30,12 @@ Transformation kinds (each {"kind", "owner", "justification", ...}):
   level-identification       {"from", "to"}: two levels treated as the same for this observable (justify why)
   fiducial-restriction       {"variable", "range": [lo, hi]}: restrict to a cut on a binned variable (edges must align)
   rebin                      {"edges"}: merge bins exactly (target edges a subset of the current edges)
-  variable-change            {"from", "to", "unit", "jacobian"}: needs the Jacobian written out
-  unit-conversion            {"from", "to", "factor"}
+  variable-change            {"from", "to", "unit", "edges", "jacobian"}: "edges" is the image of every current edge
+                             under the change (same length, strictly monotonic), recorded as "edge_map"; "jacobian" is a
+                             finite non-zero number or {"expression" | "relation" | "value", "ref"} (a bare word such as
+                             "yes" is unresolved); from == to is refused (use rebin)
+  unit-conversion            {"from", "to", "factor"}: factor finite and > 0, recorded as "recorded_factor" (the gate
+                             describes, it does not multiply numbers)
   bin-integrate              {}: bin-averaged -> bin-integrated (x bin width); from 'point' needs "method"
   multiply-by-normalization  {"normalization_kind", "value", "unit_in", "unit_out"}: cross section -> expected counts
   forward-fold               {"truth_edges", "reco_edges", "truth_level", "includes": [...]}: -> detector level
@@ -41,6 +45,7 @@ from __future__ import annotations
 
 import copy
 import json
+import math
 import sys
 from pathlib import Path
 from typing import Any
@@ -141,6 +146,24 @@ def _is_num(x) -> bool:
     return isinstance(x, (int, float)) and not isinstance(x, bool)
 
 
+def _strictly_monotonic(xs) -> bool:
+    if not (isinstance(xs, list) and len(xs) >= 2 and all(_is_num(x) and math.isfinite(x) for x in xs)):
+        return False
+    d = [b - a for a, b in zip(xs, xs[1:])]
+    return all(x > 0 for x in d) or all(x < 0 for x in d)
+
+
+def _declared_relation(j) -> bool:
+    """A Jacobian the gate accepts: a finite non-zero number, or an object naming the relation (expression or value)
+    and its reference. A bare string ('yes', 'identity') declares nothing."""
+    if _is_num(j):
+        return math.isfinite(j) and j != 0
+    if isinstance(j, dict):
+        has_rel = any(isinstance(j.get(k), str) and j[k].strip() for k in ("expression", "relation")) or _is_num(j.get("value"))
+        return has_rel and isinstance(j.get("ref"), str) and bool(j["ref"].strip())
+    return False
+
+
 def _plan_problems(transformations, mappings, conditions) -> list[tuple[str, str]]:
     """(field path, problem) for every plan entry the gate cannot read; such entries are refused, never guessed."""
     out = []
@@ -231,18 +254,38 @@ def _apply(st: dict, t: dict, i: int, mism: list) -> None:
             return
         st["edges"] = list(t["edges"])
     elif k == "variable-change":
-        if t.get("from") != st["variable"] or not t.get("jacobian"):
-            _mm(mism, where, st["variable"], t.get("to"), "variable change without a matching source variable or a Jacobian",
-                "write the Jacobian and the edge mapping")
+        if t.get("from") != st["variable"]:
+            _mm(mism, where, st["variable"], t.get("from"), "variable change from a different source variable", "fix 'from'")
             return
+        if t.get("to") == t.get("from"):
+            _mm(mism, where, t.get("from"), t.get("to"), "a variable change to the same variable only rebins: it cannot replace the edges",
+                "use 'rebin' (merging bins) or recompute the prediction in the target bins")
+            return
+        mapped = t.get("edges")
+        cur = st["edges"]
+        if cur is not None and not (isinstance(mapped, list) and len(mapped) == len(cur) and _strictly_monotonic(mapped)):
+            _mm(mism, where, cur, mapped, "variable change needs 'edges': the image of each current edge under the change "
+                                         "(same length, strictly monotonic)", "map every current edge through the declared relation")
+            return
+        if not _declared_relation(t.get("jacobian")):
+            _mm(mism, where, t.get("jacobian"), None, "the Jacobian is not a declared value or relation (a number, or "
+                                                     "{expression or value, ref}); a bare word does not define the change",
+                "write the functional relation and its Jacobian, with a reference", kind="unresolved")
+            # applied to the description so later checks run, but the comparison stays unresolved
         st["variable"], st["variable_unit"] = t["to"], t.get("unit", st["variable_unit"])
-        if "edges" in t:
-            st["edges"] = list(t["edges"])
+        if cur is not None and isinstance(mapped, list):
+            st["edges"] = sorted(float(x) for x in mapped)
+            st["edge_map"] = {"from": list(cur), "to": list(mapped)}
     elif k == "unit-conversion":
-        if t.get("from") != st["unit"] or not isinstance(t.get("factor"), (int, float)):
+        f: Any = t.get("factor")
+        if t.get("from") != st["unit"] or not _is_num(f):
             _mm(mism, where, st["unit"], t.get("to"), "unit conversion from a different unit or without a numeric factor", "fix 'from' and 'factor'")
             return
+        if not (math.isfinite(f) and f > 0):
+            _mm(mism, where, f, None, f"unit-conversion factor {f!r} is not a finite positive number", "give the factor from 'from' to 'to'")
+            return
         st["unit"] = t["to"]
+        st["unit_factor"] = f
     elif k == "bin-integrate":
         if st["bin_semantics"] == "point" and not t.get("method"):
             _mm(mism, where, "point", "bin-integrated", "point values cannot be compared with bins without a defined mapping",
@@ -323,9 +366,17 @@ def gate(prediction: dict, measurement: dict, transformations=(), mappings=(), m
             continue
         before = copy.deepcopy(st)
         n = len(mism)
+        st.pop("edge_map", None)
+        st.pop("unit_factor", None)
         _apply(st, t, i, mism)
-        record.append({**t, "ok": len(mism) == n, "before": {k: before[k] for k in ("quantity", "unit", "level", "bin_semantics", "fiducial")},
-                       "after": {k: st[k] for k in ("quantity", "unit", "level", "bin_semantics", "fiducial")}})
+        entry = {**t, "ok": len(mism) == n, "before": {k: before[k] for k in ("quantity", "unit", "level", "bin_semantics", "fiducial")},
+                 "after": {k: st[k] for k in ("quantity", "unit", "level", "bin_semantics", "fiducial")}}
+        if len(mism) == n and "edge_map" in st:  # the mapped edges are recorded, never taken as new binning unchecked
+            entry["edge_map"] = st.pop("edge_map")
+            entry["before"]["variable"], entry["after"]["variable"] = before["variable"], st["variable"]
+        if len(mism) == n and "unit_factor" in st:  # recorded and checked; the gate describes, it never multiplies numbers
+            entry["recorded_factor"] = st.pop("unit_factor")
+        record.append(entry)
 
     m_obs = measurement["observable"]
     ms = _state(m_obs)

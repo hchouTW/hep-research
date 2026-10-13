@@ -7,9 +7,9 @@ plan_combination(datasets, correlations=(), profiles=()) -> {"combinable", "trea
                  or {..., "assumption": {"justification", "scope"}}]; an explicit independence statement is
                  {"between": [a, b], "independent": true, "assumption": {...}} and also needs a justification.
 
-Rules: observables must pass the comparison gate pairwise with no transformation; a missing or partial covariance
-stays missing (no diagonal is assumed); a shared auxiliary measurement needs a declared correlation, otherwise the
-only treatments are a joint fit with that measurement modeled once, or a comparison without combination (likelihoods
+Rules: dataset ids are unique (combine.duplicate_id); observables must pass the comparison gate pairwise with no
+transformation; a missing or partial covariance stays missing (no diagonal is assumed); a shared auxiliary
+measurement needs a declared correlation, otherwise the only treatments are a joint fit with that measurement modeled once, or a comparison without combination (likelihoods
 are never multiplied silently); every cross-dataset block needs evidence or a scoped assumption, including
 independence; non-Gaussian uncertainty objects (scale envelopes, model alternatives, truncation) never enter a
 Gaussian covariance.
@@ -33,7 +33,12 @@ def plan_combination(datasets, correlations=(), profiles=()) -> dict:
     if len(datasets) < 2:
         problems.append({"code": "combine.too_few", "message": "a combination needs at least two datasets"})
     ids = [d["id"] for d in datasets]
-    comp = compose(list(profiles), [], ids + [a for d in datasets for a in d.get("auxiliary", [])]) if profiles else None
+    dup = sorted({i for i in ids if ids.count(i) > 1})
+    if dup:
+        problems.append({"code": "combine.duplicate_id",
+                         "message": f"dataset id(s) {dup} appear more than once: one measurement entered twice is counted twice, "
+                                    "and its correlation with itself cannot be declared; give each dataset its own id"})
+    comp =compose(list(profiles), [], ids + [a for d in datasets for a in d.get("auxiliary", [])]) if profiles else None
     if comp:
         problems += [{"code": e["code"], "message": e["message"]} for e in comp["errors"]]
         notes += comp["notes"]

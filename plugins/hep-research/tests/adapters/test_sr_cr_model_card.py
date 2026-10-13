@@ -21,6 +21,7 @@ except ImportError:
 
 from contracts import CONTRACTS_VERSION  # noqa: E402
 from contracts.validate import validate_artifact  # noqa: E402
+import model_card as mc  # noqa: E402  (pyhf is imported inside fit only)
 
 S_SR, S_CR, B_SR, B_CR = 5.0, 1.5, 10.0, 40.0
 LUMI = {"type": "constrained-normalization", "parameter": "lumi", "hi": 1.02, "lo": 0.98}
@@ -44,6 +45,44 @@ def card(contamination=True, minor=True, n_sr=17.0, n_cr=50.0):
 
 
 @unittest.skipUnless(HAVE, "pyhf not installed: SR/CR model-card checks unverified")
+class FidelitySTH312(unittest.TestCase):
+    """STH-T3.12, confirmed with pyhf 0.7.6 before the fix: a validation region with 200 observed events against 40
+    expected moved mu_hat from 0.70 to -3.94 (it entered the fit), and a constraint width of 0.5 instead of 0.02 left
+    the fit unchanged (the width was ignored)."""
+
+    @unittest.skipUnless(HAVE, "pyhf not installed")
+    def test_validation_region_is_excluded_from_the_fit(self):
+        import copy
+        base = mc.fit(card())
+        vr = copy.deepcopy(card())
+        vr["channels"].append({"name": "VR", "role": "validation-region", "observed": [200.0]})
+        vr["samples"].append({"name": "bkg", "channel": "VR", "yields": [40.0],
+                              "modifiers": [{"type": "free-normalization", "parameter": "k_bkg"}]})
+        r = mc.fit(vr)
+        self.assertAlmostEqual(r["poi_hat"], base["poi_hat"], places=6)
+        self.assertEqual(r["validation_regions_excluded"], ["VR"])
+        self.assertNotIn("VR", [ch["name"] for ch in mc.to_pyhf(vr)["channels"]])
+
+    def test_constraint_width_reaches_the_model(self):
+        import copy
+        c = copy.deepcopy(card())
+        for smp in c["samples"]:
+            for m in smp["modifiers"]:
+                if m["parameter"] == "lumi":
+                    m.pop("hi")
+                    m.pop("lo")
+        c["constraints"][0]["width"] = 0.1
+        mods = [m for ch in mc.to_pyhf(c)["channels"] for smp in ch["samples"] for m in smp["modifiers"] if m["name"] == "lumi"]
+        self.assertTrue(mods)
+        for m in mods:
+            self.assertAlmostEqual(m["data"]["hi"], 1.1)
+            self.assertAlmostEqual(m["data"]["lo"], 0.9)
+        bad = copy.deepcopy(card())
+        bad["constraints"][0]["width"] = 0.5        # disagrees with hi/lo = 1.02/0.98
+        with self.assertRaises(mc.CardRefused):
+            mc.to_pyhf(bad)
+
+
 class SrCrModelCard(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

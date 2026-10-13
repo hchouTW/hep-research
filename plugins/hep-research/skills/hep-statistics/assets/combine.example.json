@@ -1,0 +1,176 @@
+{
+ "note": "SYNTHETIC example input for combine_measurements.py: two experiments measure one observable in three bins with a shared 2% luminosity uncertainty (fully correlated); values are placeholders, not physics.",
+ "datasets": [
+  {
+   "id": "synthetic-exp-A:xsec",
+   "observable": {
+    "quantity": "differential-cross-section",
+    "variables": [
+     {
+      "name": "x",
+      "unit": "1",
+      "edges": [
+       0.0,
+       1.0,
+       2.0,
+       3.0
+      ]
+     }
+    ],
+    "phase_space": {
+     "definition": "synthetic fiducial region",
+     "fiducial": true
+    },
+    "level": "particle-fiducial",
+    "frame": "lab",
+    "normalization": {
+     "kind": "integrated-luminosity",
+     "value": "not-applicable"
+    },
+    "bin_semantics": "bin-averaged",
+    "unit": "pb",
+    "conventions": {
+     "energy_variable": "sqrt_s"
+    }
+   },
+   "covariance": "present",
+   "auxiliary": [
+    "synthetic:luminosity"
+   ],
+   "uncertainties": [
+    {
+     "name": "stat",
+     "kind": "statistical",
+     "correlation": "uncorrelated"
+    },
+    {
+     "name": "luminosity",
+     "kind": "systematic",
+     "correlation": "fully correlated (shared)"
+    }
+   ],
+   "values": [
+    10.2,
+    5.1,
+    2.0
+   ]
+  },
+  {
+   "id": "synthetic-exp-B:xsec",
+   "observable": {
+    "quantity": "differential-cross-section",
+    "variables": [
+     {
+      "name": "x",
+      "unit": "1",
+      "edges": [
+       0.0,
+       1.0,
+       2.0,
+       3.0
+      ]
+     }
+    ],
+    "phase_space": {
+     "definition": "synthetic fiducial region",
+     "fiducial": true
+    },
+    "level": "particle-fiducial",
+    "frame": "lab",
+    "normalization": {
+     "kind": "integrated-luminosity",
+     "value": "not-applicable"
+    },
+    "bin_semantics": "bin-averaged",
+    "unit": "pb",
+    "conventions": {
+     "energy_variable": "sqrt_s"
+    }
+   },
+   "covariance": "present",
+   "auxiliary": [
+    "synthetic:luminosity"
+   ],
+   "uncertainties": [
+    {
+     "name": "stat",
+     "kind": "statistical",
+     "correlation": "uncorrelated"
+    },
+    {
+     "name": "luminosity",
+     "kind": "systematic",
+     "correlation": "fully correlated (shared)"
+    }
+   ],
+   "values": [
+    9.8,
+    5.3,
+    2.2
+   ]
+  }
+ ],
+ "correlations": [
+  {
+   "between": [
+    "synthetic-exp-A:xsec",
+    "synthetic-exp-B:xsec"
+   ],
+   "source": "synthetic:luminosity",
+   "assumption": {
+    "justification": "both use the same synthetic luminosity measurement",
+    "scope": "the luminosity term only; statistical parts independent"
+   }
+  }
+ ],
+ "joint_covariance": [
+  [
+   0.291616,
+   0.020808,
+   0.00816,
+   0.039984,
+   0.021624,
+   0.008976
+  ],
+  [
+   0.020808,
+   0.100404,
+   0.00408,
+   0.019992,
+   0.010812,
+   0.004488
+  ],
+  [
+   0.00816,
+   0.00408,
+   0.0416,
+   0.00784,
+   0.00424,
+   0.00176
+  ],
+  [
+   0.039984,
+   0.019992,
+   0.00784,
+   0.398416,
+   0.020776,
+   0.008624
+  ],
+  [
+   0.021624,
+   0.010812,
+   0.00424,
+   0.020776,
+   0.133736,
+   0.004664
+  ],
+  [
+   0.008976,
+   0.004488,
+   0.00176,
+   0.008624,
+   0.004664,
+   0.064436
+  ]
+ ]
+}

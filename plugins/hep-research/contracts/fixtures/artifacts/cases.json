@@ -26,6 +26,8 @@
   "statres_bayesian_rhat_warning.json",
   "statres_frequentist.json",
   "statres_scan_global.json",
+  "statres_v26.json",
+  "statres_v26_bayesian.json",
   "theory_spec.json",
   "theory_spec_v26.json",
   "theory_spec_v26_analytic_checked.json",
@@ -259,6 +261,30 @@
   ],
   "measurement_v26_misspelled_key.json": [
    "measurement.misspelled_key"
+  ],
+  "statres_v26_coverage_cl_mismatch.json": [
+   "stats.coverage_cl_mismatch"
+  ],
+  "statres_v26_coverage_interval_wide.json": [
+   "stats.coverage_interval_inconsistent"
+  ],
+  "statres_v26_p_zero.json": [
+   "stats.p_zero_without_bound"
+  ],
+  "statres_v26_results_p_out_of_range.json": [
+   "stats.p_out_of_range"
+  ],
+  "statres_v26_z_p_inconsistent.json": [
+   "stats.z_p_inconsistent"
+  ],
+  "statres_v26_global_z_above_local.json": [
+   "stats.global_z_above_local"
+  ],
+  "statres_v26_construction_statistic.json": [
+   "stats.construction_statistic_mismatch"
+  ],
+  "statres_v26_model_sha256_malformed.json": [
+   "stats.model_sha256_malformed"
   ]
  },
  "unresolved": {
@@ -283,6 +309,33 @@
   ],
   "prediction_v26_unlinked.json": [
    "prediction.spec_unlinked"
+  ],
+  "statres_v26_coverage_toys_too_few.json": [
+   "stats.coverage_toys_too_few"
+  ],
+  "statres_v26_expected_missing.json": [
+   "stats.expected_bands_missing"
+  ],
+  "statres_v26_global_z_without_p.json": [
+   "stats.global_z_without_p"
+  ],
+  "statres_v26_seed_missing.json": [
+   "stats.seed_missing"
+  ],
+  "statres_v26_gof_toys_missing.json": [
+   "stats.gof_toys_missing"
+  ],
+  "statres_v26_bayes_propriety_unsupported.json": [
+   "stats.propriety_unsupported"
+  ],
+  "statres_v26_bayes_poi_prior_missing.json": [
+   "stats.poi_prior_missing"
+  ],
+  "statres_v26_bayes_ess_too_low.json": [
+   "stats.ess_too_low"
+  ],
+  "statres_v26_bayes_chains_missing.json": [
+   "stats.chains_missing"
   ]
  },
  "warning": {

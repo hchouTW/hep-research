@@ -76,7 +76,8 @@
    "coverage": 0.693,
    "cl": 0.6827,
    "ensemble": "mu_true = 1.0, templates as fitted",
-   "failures": 0
+   "failures": 0,
+   "seed": 20261016
   },
   "goodness_of_fit": {
    "statistic": "saturated-model -2 ln lambda",

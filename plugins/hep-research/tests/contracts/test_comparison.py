@@ -269,6 +269,74 @@ class GateDefinitionAuditT01(unittest.TestCase):
         self.assertIn("phase_space", self.fields(r))
 
 
+class VariableChangeAndUnitsSTH13(unittest.TestCase):
+    """STH-T1.3: a variable change carries the image of every edge and a declared Jacobian; a unit conversion a finite
+    positive factor. Both are recorded in the transformation record."""
+    Y_EDGES = [0.0, 0.25, 1.0, 2.25, 4.0]  # y = (x + 1)^2 on the x edges
+
+    def _pred_meas(self):
+        p = pred()
+        m = meas(variables=[{"name": "y", "unit": "1", "edges": list(self.Y_EDGES)}])
+        return p, m
+
+    def _vc(self, **kw):
+        t = {"kind": "variable-change", "owner": "hep-theory", "justification": "synthetic", "from": "x", "to": "y", "unit": "1",
+             "edges": list(self.Y_EDGES), "jacobian": {"expression": "dy/dx = 2 (x + 1)", "ref": "synthetic-derivation.md"}}
+        t.update(kw)
+        return t
+
+    def test_declared_change_is_comparable_and_recorded(self):
+        p, m = self._pred_meas()
+        r = gate(p, m, [self._vc()], [], COND)
+        self.assertTrue(r["comparable"], r["mismatches"])
+        rec = r["transformations"][0]
+        self.assertEqual(rec["edge_map"], {"from": EDGES, "to": self.Y_EDGES})
+        self.assertEqual((rec["before"]["variable"], rec["after"]["variable"]), ("x", "y"))
+
+    def test_incomplete_or_undeclared_changes(self):
+        p, m = self._pred_meas()
+        cases = {"no_edges": (self._vc(edges=None), "not-comparable"),
+                 "short_edges": (self._vc(edges=self.Y_EDGES[:-1]), "not-comparable"),
+                 "non_monotonic": (self._vc(edges=[0.0, 1.0, 0.5, 2.0, 4.0]), "not-comparable"),
+                 "bare_word_jacobian": (self._vc(jacobian="yes"), "unresolved"),
+                 "object_without_ref": (self._vc(jacobian={"expression": "2 (x + 1)"}), "unresolved"),
+                 "same_variable": (self._vc(to="x"), "not-comparable")}
+        for name, (t, status) in cases.items():
+            with self.subTest(name):
+                t = {k: v for k, v in t.items() if v is not None}
+                self.assertEqual(gate(p, m, [t], [], COND)["status"], status)
+
+    def test_unit_factor_is_recorded_and_checked(self):
+        conv = {"kind": "unit-conversion", "owner": "hep-theory", "from": "nb", "to": "pb", "factor": 1000.0, "justification": "1 nb = 1000 pb"}
+        r = gate(pred(unit="nb"), meas(), [conv], [], COND)
+        self.assertTrue(r["comparable"], r["mismatches"])
+        self.assertEqual(r["transformations"][0]["recorded_factor"], 1000.0)
+        for f in (-3, 0, float("nan"), float("inf")):
+            with self.subTest(factor=f):
+                self.assertFalse(gate(pred(unit="nb"), meas(), [{**conv, "factor": f}], [], COND)["comparable"])
+
+
+class CombinationIdsAndEnvelopeRowsSTH14(unittest.TestCase):
+    """STH-T1.4: a dataset id used twice is not combinable; an envelope needs rows of one length."""
+
+    def test_duplicate_id(self):
+        ds = {"id": "alpha:A", "observable": obs(), "covariance": "present", "auxiliary": [], "uncertainties": []}
+        r = plan_combination([dict(ds), dict(ds)], [{"between": ["alpha:A", "alpha:A"], "independent": True,
+                                                    "assumption": {"justification": "synthetic", "scope": "synthetic"}}])
+        self.assertEqual((r["combinable"], r["treatment"]), (False, "comparison-only"))
+        self.assertIn("combine.duplicate_id", {p["code"] for p in r["problems"]})
+
+    def test_envelope_rows(self):
+        ms = {"ok": True, "alternatives": [{"id": "a"}, {"id": "b"}]}
+        pres = {"kind": "min-max", "owner": "hep-theory", "justification": "synthetic"}
+        bad = envelope(ms, {"a": [1, 2, 3, 4], "b": [1, 2]}, pres)
+        self.assertFalse(bad["ok"])
+        self.assertIn("'a': 4", bad["reason"])
+        self.assertFalse(envelope(ms, {"a": [1, 2]}, pres)["ok"])
+        good = envelope(ms, {"a": [1, 4], "b": [2, 3]}, pres)
+        self.assertEqual((good["uncertainty"]["lower"], good["uncertainty"]["upper"]), ([1, 3], [2, 4]))
+
+
 class ComposeTests(unittest.TestCase):
     def test_disjoint_namespaces_ok(self):
         r = compose([profile("experiment:a", "alpha"), profile("experiment:b", "beta")], ids=["alpha:D1", "beta:D2"])

@@ -21,5 +21,11 @@ CONTRACTS_VERSION = "2.6.0"
 # optional measurement-spec fields (estimand, background control_region/constraint/closure, blinding mask,
 # no_backgrounds_reason, correction exact_zero); no capability: the new rules only refuse incomplete or inconsistent
 # declarations, and a 2.5 reader of a 2.6 measurement-spec misreads no field.
+# 2.6.0 also adds statistical-result hardening rules (contracts.validate, _stat_hardening and _bayesian_hardening, constant
+# STAT_HARDENING_FROM; hep-statistics hardening STH-T1) and optional statistical-result fields (extension.seeds,
+# coverage.seed, goodness_of_fit.p_value_bound, significance.convention; ext_statistical_result_v2_6.json); no
+# capability: the rules only refuse inconsistent or incomplete results, and a 2.5 reader accepts the new optional
+# keys without misreading any field (it simply does not apply the new rules). Other rule families joining 2.6.0 add
+# their own *_SEMANTICS_FROM constant and helper.
 KNOWN_CAPABILITIES = frozenset({"core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1"})

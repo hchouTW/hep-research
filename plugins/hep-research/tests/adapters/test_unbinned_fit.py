@@ -81,5 +81,49 @@ class UnbinnedFitTests(unittest.TestCase):
             self.assertEqual(p.returncode, 1)
 
 
+
+SCALES = {"unit": {"range": [0, 5], "truth": {"n_sig": 200, "n_bkg": 800, "mu": 2.5, "sigma": 0.3, "slope": -0.5}},
+          "wide": {"range": [0, 500], "truth": {"n_sig": 200, "n_bkg": 800, "mu": 250, "sigma": 30, "slope": -0.005}},
+          "far": {"range": [10000, 10500], "truth": {"n_sig": 200, "n_bkg": 800, "mu": 10250, "sigma": 30, "slope": -0.005}}}
+
+
+class ScaleAndBoundarySTH32(unittest.TestCase):
+    """STH-T3.2: the same shape on [0, 5], [0, 500] and [10000, 10500] converges (Hessian steps on natural scales,
+    exponential normalized relative to lo); before, the last two gave 'every toy fit failed'."""
+
+    def test_three_ranges_converge(self):
+        for name, cfg in SCALES.items():
+            with self.subTest(name):
+                r = uf.coverage(cfg, 20, 1)
+                self.assertEqual(r["fits_failed"], 0, r["failed"])
+
+    @unittest.skipUnless(__import__("os").environ.get("HEP_SLOW_TESTS") == "1", "slow: set HEP_SLOW_TESTS=1")
+    def test_slow_pull_widths_over_300_toys(self):
+        for name, cfg in SCALES.items():
+            with self.subTest(name):
+                r = uf.coverage(cfg, 300, 2)
+                self.assertEqual(r["fits_failed"], 0)
+                for k, w in r["pull_width"].items():
+                    self.assertTrue(0.9 <= w <= 1.1, (name, k, w))
+
+    def test_signal_on_its_lower_bound_is_counted_not_dropped(self):
+        cfg = {"range": [0, 10], "truth": {"n_sig": 2, "n_bkg": 400, "mu": 5.0, "sigma": 0.4, "slope": -0.2}}
+        r = uf.coverage(cfg, 40, 3)
+        self.assertGreater(r["boundary_toys"], 0)
+        # a signal on its bound is never a failed fit; the remaining failures of this ill-posed low-signal model
+        # (floating mean and width) are counted and named
+        self.assertFalse([f for f in r["failed"] if any("['n_sig']" in p for p in f["problems"])], r["failed"])
+        self.assertEqual(r["fits_used"] + r["fits_failed"], 40)
+
+    def test_unknown_profile_parameter_is_refused(self):
+        with tempfile.TemporaryDirectory() as td:
+            c = Path(td) / "c.json"
+            c.write_text(json.dumps(dict(CFG, profile_parameter="nsig")))
+            p = subprocess.run([sys.executable, str(SCRIPT), "coverage", "--config", str(c), "--toys", "10"],
+                               capture_output=True, text=True, timeout=120)
+            self.assertEqual(p.returncode, 2, p.stdout)
+            self.assertEqual(json.loads(p.stdout)["status"], "rejected")
+
+
 if __name__ == "__main__":
     unittest.main()
