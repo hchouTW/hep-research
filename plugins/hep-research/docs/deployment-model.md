@@ -39,6 +39,8 @@ interfaces it uses. A change to any of them is called out in CHANGELOG.md, and a
 | `contracts/schemas/release_manifest.json` (`destinations` block) | Custodian destination sets | Same structure as a manifest's `destinations` |
 | `core.blinding` (`mask_binned`, `mask_ratio`, `seal`, `scan_text`, `scan_file`, `scan_paths`, `agent_view`) | Custodian preparation and output scanning | Fail closed on invalid input; `agent_view` is the only agent-visible form of a scan |
 | `contracts.attestation`, `core.partition.bundle` | Trusted gate, trusted submitter (when built) | Report axes and bundle digests; authorize nothing |
+| `contracts.revocation` (`genesis`, `next_event`, `head_of`, `encode`, `verify`, `load`, `build_index`, `affected`) and `contracts/schemas/revocation_{event,head}.json` | Custodian `revoke` (writes the log and head as the custodian identity); every relying check | The custodian appends canonical records and rewrites the head at least every status period; a log that does not verify answers nothing; `affected` changes no bytes |
+| `contracts.trusted_input.read_protected` | Every protected input a deployment hands to agent-run code | Refuses a file the running account owns, can write or can replace anywhere along its path; one link only |
 | Project config `agent_policy` (`contracts/project.py`) | Launcher (comparison with the authoritative copy) | Advisory in the project; the launcher holds the authoritative copy |
 
 ## 3. From a plugin release to a deployed configuration
