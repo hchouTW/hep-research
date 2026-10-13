@@ -10,7 +10,7 @@
   },
   "hep-analysis": {
    "references": 11,
-   "bytes": 61858,
+   "bytes": 64080,
    "uncited": 0
   },
   "hep-computing": {
@@ -809,6 +809,7 @@
    "cited_by": [
     "skills/hep-analysis/assets/measurement_spec.template.md",
     "skills/hep-analysis/references/hep-analysis-guide.md",
+    "skills/hep-analysis/references/systematics.md",
     "tests/skills/hep_analysis/test_method_references.py"
    ],
    "cited_by_other_skills": [],
@@ -853,7 +854,7 @@
    "cited_by_other_skills": [
     "detector-response"
    ],
-   "last_commit": "b995ce7 2026-10-13"
+   "last_commit": "1638720 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/histograms-efficiencies.md",
@@ -897,7 +898,7 @@
     "detector-response",
     "hep-statistics"
    ],
-   "last_commit": "e9687b6 2026-10-13"
+   "last_commit": "1638720 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/review-and-artifacts.md",
@@ -919,8 +920,8 @@
   {
    "path": "skills/hep-analysis/references/systematics.md",
    "owner": "hep-analysis",
-   "bytes": 6667,
-   "lines": 63,
+   "bytes": 8889,
+   "lines": 89,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/ams-02/index.md",
@@ -946,7 +947,8 @@
     "skills/hep-analysis/references/hep-analysis-guide.md",
     "skills/hep-statistics/references/nuisance-modeling.md",
     "skills/hep-theory/references/event-generation.md",
-    "skills/physics-ml/references/multivariate-analysis-bdt-nn.md"
+    "skills/physics-ml/references/multivariate-analysis-bdt-nn.md",
+    "tests/skills/hep_analysis/test_method_references.py"
    ],
    "cited_by_other_skills": [
     "detector-response",

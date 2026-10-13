@@ -9,7 +9,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | Skill | References | KB | Cited nowhere |
 |---|---|---|---|
 | detector-response | 34 | 395 | 0 |
-| hep-analysis | 11 | 62 | 0 |
+| hep-analysis | 11 | 64 | 0 |
 | hep-computing | 30 | 347 | 0 |
 | hep-statistics | 9 | 119 | 0 |
 | hep-theory | 8 | 42 | 0 |
@@ -119,13 +119,13 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `analysis-design.md` | hep-analysis | 5.3 | yes | 11 | detector-response, hep-computing | 7e34ef8 2026-10-13 |
 | `analysis-validation.md` | hep-analysis | 4.4 | no | 5 | detector-response, hep-computing | 351029c 2026-10-07 |
 | `backgrounds.md` | hep-analysis | 2.8 | no | 15 | detector-response | 4b3f0d9 2026-10-13 |
-| `correction-chain.md` | hep-analysis | 4.3 | no | 3 | - | b995ce7 2026-10-13 |
+| `correction-chain.md` | hep-analysis | 4.3 | no | 4 | - | b995ce7 2026-10-13 |
 | `data-pipelines.md` | hep-analysis | 0.4 | no | 8 | hep-computing | 7e34ef8 2026-10-13 |
-| `hep-analysis-guide.md` | hep-analysis | 17.6 | yes | 7 | detector-response | b995ce7 2026-10-13 |
+| `hep-analysis-guide.md` | hep-analysis | 17.6 | yes | 7 | detector-response | 1638720 2026-10-13 |
 | `histograms-efficiencies.md` | hep-analysis | 3.1 | no | 7 | detector-response, hep-computing | c180c4e 2026-10-13 |
-| `measurements-and-unfolding.md` | hep-analysis | 5.6 | no | 9 | detector-response, hep-statistics | e9687b6 2026-10-13 |
+| `measurements-and-unfolding.md` | hep-analysis | 5.6 | no | 9 | detector-response, hep-statistics | 1638720 2026-10-13 |
 | `review-and-artifacts.md` | hep-analysis | 7.2 | yes | 6 | - | e085335 2026-10-13 |
-| `systematics.md` | hep-analysis | 6.7 | no | 24 | detector-response, hep-statistics, hep-theory, physics-ml | e9687b6 2026-10-13 |
+| `systematics.md` | hep-analysis | 8.9 | no | 25 | detector-response, hep-statistics, hep-theory, physics-ml | e9687b6 2026-10-13 |
 | `weights-normalization.md` | hep-analysis | 4.5 | no | 9 | detector-response, hep-computing, hep-theory, physics-ml | 7e34ef8 2026-10-13 |
 | `acceptance-criteria.md` | hep-computing | 3.7 | no | 3 | - | 351029c 2026-10-07 |
 | `agile-development-guide.md` | hep-computing | 10.7 | yes | 8 | physics-ml | 351029c 2026-10-07 |

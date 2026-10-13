@@ -70,5 +70,18 @@ class EstimandTests(unittest.TestCase):
         self.assertFalse(validate_artifact(template).ok)
 
 
+class SystematicsBudgetTests(unittest.TestCase):
+    def test_worked_budget(self):
+        import math
+        shifts = [1.2, -0.4, 2.0, 0.8]
+        self.assertEqual(max(abs(x) for x in shifts), 2.0)
+        self.assertAlmostEqual(math.sqrt(sum(x * x for x in shifts) / 4), 1.25, delta=0.005)
+        self.assertAlmostEqual(math.hypot(2.0, 1.5, 0.5), 2.55, delta=0.005)
+        self.assertAlmostEqual(math.hypot(2.0, 0.5), 2.06, delta=0.005)
+        t = text('systematics.md')
+        for number in ('2.55%', '2.06%', '1.25%'):
+            self.assertIn(number, t)
+
+
 if __name__ == '__main__':
     unittest.main()
