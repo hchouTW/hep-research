@@ -7,16 +7,20 @@ evidence that the variation failed to propagate: a shape-only (migration) variat
 Only `none` (no bin changed beyond tolerance) asks the analyst to confirm propagation, and even then the
 right check is the variation's effect on the final result (refit / sensitivity), which this script cannot see.
 
-Inputs: a ROOT file (`--input`, needs PyROOT; bin errors give the variances) or a JSON file (`--json`) of the form
-{"nominal": [...], "up": [...], "down": [...]} with matching bin contents (no PyROOT needed), optionally with
-"nominal_sumw2", "up_sumw2", "down_sumw2" (per-bin variances) and "underflow"/"overflow" objects
+Inputs: a ROOT file (`--input`, needs PyROOT; bin errors give per-sample variances) or a JSON file (`--json`) of the
+form {"nominal": [...], "up": [...], "down": [...]} with matching bin contents (no PyROOT needed), optionally with
+per-sample variances "nominal_sumw2", "up_sumw2", "down_sumw2", or with the variance of each difference
+"up_diff_sumw2", "down_diff_sumw2" (not both kinds), and "underflow"/"overflow" objects
 {"nominal": x, "up": y, "down": z} that --include-flow adds as bins.
 
-Statistical test: with per-bin uncertainties (sumw2, ROOT bin errors, or --stat-unc REL applied to the nominal),
-the effect comes from a normalization pull z = (sum varied - sum nominal) / sqrt(sum var) and a chi2 test of the
-unit-normalized shapes (ndf = bins - 1), each significant at --alpha (default 0.01); a variation computed on the same
-events should be given the variance of the difference (its uncorrelated part). Without uncertainties the old relative
-tolerance is used and the output says no statistical test was made. The direction of a variation (which one is up)
+Statistical test: the effect comes from a normalization pull z = (sum varied - sum nominal) / sqrt(sum var) and a
+chi2 test of the unit-normalized shapes (ndf = bins - 1), each significant at --alpha (default 0.01), where var is the
+per-bin variance of the difference. A variation computed from the same events as the nominal (a scale or resolution
+variation) is correlated with it, so the sum of the two samples' variances overstates var and hides real changes. The
+test therefore uses: the given difference variances (up_diff_sumw2, down_diff_sumw2), or --stat-unc REL (the relative
+uncertainty of the difference), or the per-sample variances (sumw2 or ROOT bin errors) only with --independent
+(separately generated samples). Otherwise no statistical test is made, the output says why, and the effect comes from
+the relative tolerance. The direction of a variation (which one is up)
 cannot be inferred from integrals: establish it from the payloads and the generation code.
 The report is JSON by default (`--format text` for a readable one) and carries `status` (--status, default
 unvalidated; one of the core artifact_statuses).
@@ -73,6 +77,9 @@ def parse_args(argv=None) -> argparse.Namespace:
                         help="relative tolerance without uncertainties (default %(default)g)")
     parser.add_argument("--stat-unc", type=float, default=None, dest="stat_unc",
                         help="relative per-bin statistical uncertainty of the difference (JSON without sumw2)")
+    parser.add_argument("--independent", action="store_true",
+                        help="the variations are separate samples, statistically independent of the nominal: combine "
+                             "the per-sample variances (sumw2 or ROOT bin errors) for the test")
     parser.add_argument("--alpha", type=float, default=DEFAULT_ALPHA, help="test level (default %(default)g)")
     parser.add_argument("--format", choices=("text", "json"), default="json")
     parser.add_argument("--status", choices=STATUSES, default="unvalidated",
@@ -146,8 +153,16 @@ def stat_test(nominal, varied, variance, alpha: float = DEFAULT_ALPHA) -> dict:
             "shape_ndf": ndf, "shape_p_value": p_shape, "alpha": alpha}
 
 
-def assess(nominal, up, down, tol: float = DEFAULT_TOL, variances=None, alpha: float = DEFAULT_ALPHA) -> dict:
-    """variances: None (tolerance only) or {"up": [...], "down": [...]} per-bin variances of each difference."""
+NO_TEST_CORRELATED = ("not made: per-sample variances (sumw2 or ROOT bin errors) add up to the variance of the difference "
+                      "only for independent samples; a variation made from the same events is correlated with the "
+                      "nominal. Give up_diff_sumw2/down_diff_sumw2 or --stat-unc, or pass --independent for separately "
+                      "generated samples")
+
+
+def assess(nominal, up, down, tol: float = DEFAULT_TOL, variances=None, alpha: float = DEFAULT_ALPHA,
+           no_test: str | None = None) -> dict:
+    """variances: None (tolerance only) or {"up": [...], "down": [...]} per-bin variances of each difference;
+    no_test: the reason reported when no statistical test is made."""
     out = {"up": classify_variation(nominal, up, tol), "down": classify_variation(nominal, down, tol)}
     if variances is not None:
         for label, varied in (("up", up), ("down", down)):
@@ -159,10 +174,15 @@ def assess(nominal, up, down, tol: float = DEFAULT_TOL, variances=None, alpha: f
                 out[label]["note"] = ("bins differ, but within their statistical uncertainty: no significant effect at "
                                       f"alpha = {alpha:g}; confirm propagation, then check the effect on the result")
     else:
-        out["statistical_test"] = "not made: no per-bin uncertainties (give sumw2, ROOT bin errors or --stat-unc)"
+        out["statistical_test"] = no_test or "not made: no per-bin uncertainties (give sumw2, ROOT bin errors or --stat-unc)"
     warnings = []
     if out["up"]["effect"] == "none" and out["down"]["effect"] == "none":
-        warnings.append("neither variation changes this histogram: confirm propagation, then judge by the effect on the result")
+        if out["up"]["bins_changed"] or out["down"]["bins_changed"]:
+            warnings.append(f"neither variation is significant at alpha = {alpha:g} although bins differ: confirm the "
+                            "variances describe the difference, then judge by the effect on the result")
+        else:
+            warnings.append("neither variation changes this histogram: confirm propagation, then judge by the effect on "
+                            "the result")
     iu, idn = out["up"]["integral_rel_change"], out["down"]["integral_rel_change"]
     if iu is not None and idn is not None and iu * idn > 0 and abs(iu) > tol and abs(idn) > tol:
         warnings.append("up and down move the integral in the same direction: one-sided or possibly swapped/mislabelled variation")
@@ -242,23 +262,33 @@ def main(argv=None) -> int:
             raise InputError(f"malformed JSON in {args.json}: {exc}") from None
         nominal, up, down = (_bins(doc, k) for k in ("nominal", "up", "down"))
         sumw2 = {k: _bins(doc, f"{k}_sumw2") for k in ("nominal", "up", "down") if f"{k}_sumw2" in doc}
+        diff = {k: _bins(doc, f"{k}_diff_sumw2") for k in ("up", "down") if f"{k}_diff_sumw2" in doc}
+        if diff and sumw2:
+            raise InputError("give per-sample sumw2 or difference variances (up_diff_sumw2, down_diff_sumw2), not both")
         if args.include_flow:
             flow = [doc.get("underflow"), doc.get("overflow")]
             if not all(isinstance(f, dict) for f in flow):
                 raise InputError("--include-flow needs 'underflow' and 'overflow' objects {nominal, up, down} in the JSON")
             nominal, up, down = ([_bins({"x": [flow[0].get(k)]}, "x")[0]] + h + [_bins({"x": [flow[1].get(k)]}, "x")[0]]
                                  for k, h in (("nominal", nominal), ("up", up), ("down", down)))
-            if sumw2:
+            if sumw2 or diff:
                 raise InputError("give flow-bin variances inside the sumw2 arrays only without --include-flow")
-        variances = None
-        if sumw2:
+        variances, no_test = None, None
+        if diff:
+            if set(diff) != {"up", "down"}:
+                raise InputError("give up_diff_sumw2 and down_diff_sumw2 together")
+            variances = diff
+        elif sumw2:
             if set(sumw2) != {"nominal", "up", "down"}:
                 raise InputError("give nominal_sumw2, up_sumw2 and down_sumw2 together")
-            variances = {k: [a + b for a, b in zip(sumw2["nominal"], sumw2[k])] for k in ("up", "down")}
+            if args.independent:
+                variances = {k: [a + b for a, b in zip(sumw2["nominal"], sumw2[k])] for k in ("up", "down")}
+            else:
+                no_test = NO_TEST_CORRELATED
         elif args.stat_unc is not None:
             variances = {k: [(args.stat_unc * n) ** 2 for n in nominal] for k in ("up", "down")}
         try:
-            result = assess(nominal, up, down, args.tolerance, variances, args.alpha)
+            result = assess(nominal, up, down, args.tolerance, variances, args.alpha, no_test)
         except ValueError as exc:
             raise InputError(str(exc)) from None
         report({"status": args.status, **result}, args.format, [f"file: {args.json}"])
@@ -292,8 +322,10 @@ def main(argv=None) -> int:
                        f"{label} bin with max difference: {max_bin}"]
         var = {lbl: [float(nominal.GetBinError(i)) ** 2 + float(h.GetBinError(i)) ** 2 for i in bins]
                for lbl, h in (("up", up), ("down", down))}
+        has_errors = any(v > 0 for v in var["up"])
         result = assess(contents(nominal, bins), contents(up, bins), contents(down, bins), args.tolerance,
-                        var if any(v > 0 for v in var["up"]) else None, args.alpha)
+                        var if has_errors and args.independent else None, args.alpha,
+                        NO_TEST_CORRELATED if has_errors and not args.independent else None)
         report({"status": args.status, **result}, args.format, header)
     finally:
         if root_file:

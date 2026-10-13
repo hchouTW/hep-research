@@ -1070,3 +1070,11 @@ Provenance moved here from `core-stats-guide.md` (STH-T2.3): the "Validation too
 (result_artifact, covariance_fit, sweighted_fit, bayes_calibration, the EXPERIMENTAL eft_scan, discrete_profile,
 global_significance, pcl_efficiency_ratio and ratio_estimation, the pyhf backend comparison and model card, the
 sbottom benchmark) was added by the hep-statistics audit of 2026-10-12 (T01-T30, PRs #49, #51, #53).
+
+## INTEGRATION (2026-10-13, E2 + Homebrew ROOT 6.38.04, PR #64): fixes found by CI on the merged audits
+
+| Finding | Regression test | Before | After |
+|---|---|---|---|
+| `check_systematic_variations.py` combined per-sample variances as independent for same-event variations (ROOT fixture `jes_Up`/`jes_Down` = nominal events scaled by 1.03/0.97) | `tests/skills/hep_analysis/test_systematic_stat_test.py` `SameEventVariationTests` (4), `tests/skills/hep_computing/test_root_integration.py::test_check_systematic_variations` | up/down `effect: none`, "neither variation changes this histogram" | no test without `--independent` or difference variances, effect from tolerance (`mixed`); `up_diff_sumw2` detects the shift |
+| `SrCrModelCard` lost its pyhf skip (STH-T3.12 inserted a class under the decorator) | `tests/adapters/test_sr_cr_model_card.py` with pyhf hidden | 3 errors without pyhf | 6 skipped without pyhf, all pass with it |
+| Broken-power-law covariance comparison at `places=9` | `tests/skills/hep_analysis/test_broken_power_law.py` | fails on Python 3.11 (difference 1.8e-9) | relative 1e-6; measured 1.0e-8 (3.12, 3.13), 9.0e-8 (3.11) |

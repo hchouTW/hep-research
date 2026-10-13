@@ -49,9 +49,18 @@ class RootIntegrationTests(unittest.TestCase):
         self.assertIn('Muon_pt [Float_t]', out)
 
     def test_check_systematic_variations(self):
-        out = self.run_script('skills/hep-analysis/scripts/check_systematic_variations.py', '--input', self.fx / 'histograms.root',
-                              '--nominal', 'nominal', '--up', 'jes_Up', '--down', 'jes_Down')
-        self.assertIn('up max relative bin difference', out)
+        # jes_Up/jes_Down are the nominal events scaled by 1.03/0.97: a real shape change, correlated with nominal
+        args = ['--input', self.fx / 'histograms.root', '--nominal', 'nominal', '--up', 'jes_Up', '--down', 'jes_Down']
+        doc = json.loads(self.run_script('skills/hep-analysis/scripts/check_systematic_variations.py', *args))
+        for label in ('up', 'down'):
+            self.assertNotEqual(doc[label]['effect'], 'none')
+            self.assertNotIn('statistical_test', doc[label])
+        self.assertIn('independent', doc['statistical_test'])
+        text = self.run_script('skills/hep-analysis/scripts/check_systematic_variations.py', *args, '--format', 'text')
+        self.assertIn('up max relative bin difference', text)
+        indep = json.loads(self.run_script('skills/hep-analysis/scripts/check_systematic_variations.py', *args,
+                                           '--independent'))
+        self.assertIsInstance(indep['up']['statistical_test'], dict)
 
     def test_compare_histograms_sees_two_percent_shift(self):
         args = ['--reference', self.fx / 'histograms.root', '--candidate', self.fx / 'histograms_candidate.root',

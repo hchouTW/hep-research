@@ -337,6 +337,17 @@ same level, and at the publication gate; no new capability).
   finding (`Finding.severity`, not `.level`); J9 and `published-comparison` outputs regenerated (version strings,
   the seed, the schema list read).
 
+### Integration (PR #64)
+
+- **Same-event systematic variations.** `check_systematic_variations.py` no longer combines per-sample variances
+  (ROOT bin errors, JSON `*_sumw2`) as if the variation were independent of the nominal: that hid a 3% JES shift made
+  from the same events (`none`, "neither variation changes this histogram"). The statistical test now uses
+  `up_diff_sumw2`/`down_diff_sumw2` (new), `--stat-unc`, or per-sample variances only with `--independent` (new);
+  otherwise no test is made, the output says why, and the effect comes from the tolerance. The "neither variation
+  changes" warning is given only when no bin changed.
+- Test fixes found by CI: the pyhf skip restored on `SrCrModelCard`; the broken-power-law covariance comparison uses a
+  relative tolerance (finite-difference precision, Python 3.11).
+
 ## 0.6.17 (2026-10-13)
 
 Contracts 2.5.0 (minor: ML semantics; every 2.4.0 artifact keeps its outcome and gets the new rules with

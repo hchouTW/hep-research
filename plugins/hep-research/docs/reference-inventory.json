@@ -10,7 +10,7 @@
   },
   "hep-analysis": {
    "references": 11,
-   "bytes": 78948,
+   "bytes": 79079,
    "uncited": 0
   },
   "hep-computing": {
@@ -842,7 +842,7 @@
   {
    "path": "skills/hep-analysis/references/hep-analysis-guide.md",
    "owner": "hep-analysis",
-   "bytes": 19765,
+   "bytes": 19896,
    "lines": 119,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -1523,7 +1523,7 @@
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "33d96a1 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/combinations.md",
@@ -1535,7 +1535,7 @@
     "skills/hep-statistics/SKILL.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "591e7d0 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/core-stats-commands.md",
@@ -1550,7 +1550,7 @@
     "tests/skills/hep_statistics/test_core_stats_guide.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "d648b8a 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
@@ -1573,7 +1573,7 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "24b8216 2026-10-13"
+   "last_commit": "d648b8a 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
@@ -1595,7 +1595,7 @@
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "06b86c8 2026-10-12"
+   "last_commit": "1386866 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/likelihood-fitting.md",
@@ -1615,7 +1615,7 @@
     "detector-response",
     "hep-computing"
    ],
-   "last_commit": "06b86c8 2026-10-12"
+   "last_commit": "578c12f 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/ml-assisted-inference.md",
@@ -1653,7 +1653,7 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "06b86c8 2026-10-12"
+   "last_commit": "7c2abb1 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/statistical-inference-for-physics.md",
@@ -1677,7 +1677,7 @@
     "hep-theory",
     "research-communication"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "578c12f 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/statistical-tools.md",
@@ -1694,7 +1694,7 @@
    "cited_by_other_skills": [
     "physics-ml"
    ],
-   "last_commit": "e375e7d 2026-10-12"
+   "last_commit": "578c12f 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/unfolding.md",
@@ -1731,7 +1731,7 @@
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "24b8216 2026-10-13"
+   "last_commit": "11a01b9 2026-10-13"
   },
   {
    "path": "skills/hep-theory/references/amplitudes-and-widths.md",
