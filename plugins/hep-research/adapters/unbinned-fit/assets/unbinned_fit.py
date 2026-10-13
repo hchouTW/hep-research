@@ -7,7 +7,7 @@ normalized on the range, extended likelihood in the yields. SciPy only (D5); imi
 
 Model, on lo <= x <= hi:
   -log L = (n_sig + n_bkg) - sum_i log(n_sig g(x_i; mu, sigma) + n_bkg e(x_i; slope))
-  g: Gaussian normalized on the range; e: exp(slope x) normalized on the range.
+  g: Gaussian normalized on the range; e: exp(slope (x - lo)) normalized on the range (relative to lo: no overflow).
 Uncertainties: the inverse of the numerical Hessian at the minimum (symmetric, "hesse") and the profile-likelihood
 interval of one parameter (2 delta(-log L) = 1, other parameters refitted, "profile"). Neither is assumed to cover:
 `coverage` measures it with seeded toys generated from the configured truth (Poisson total, multinomial split).
@@ -24,7 +24,9 @@ estimated distance to the minimum (EDM = g^T H^-1 g / 2) exceeds 1e-3, the Hessi
 parameter sits on a bound.
 
 Usage: python3 unbinned_fit.py coverage --config cfg.json --toys 300 --seed 1
-Exit 0 ok, 1 refused input or failed fit, 2 bad arguments.
+Exit 0 ok, 1 refused input or failed fit, 2 bad arguments (including an unknown profile_parameter).
+A fit with n_sig on its lower bound is a boundary estimate ("boundary": ["n_sig"]): its profile interval starts at
+the bound; coverage counts such toys through the profile interval only (boundary_toys) and not in the Hesse pulls.
 """
 from __future__ import annotations
 
@@ -45,20 +47,26 @@ class FitError(ValueError):
     pass
 
 
+class BadArgument(ValueError):
+    """A refused configuration (exit 2), as opposed to a failed fit (exit 1)."""
+
+
 def _norm_gauss(lo, hi, mu, sigma):
     return 0.5 * (special.erf((hi - mu) / (math.sqrt(2) * sigma)) - special.erf((lo - mu) / (math.sqrt(2) * sigma)))
 
 
 def _norm_exp(lo, hi, slope):
-    if abs(slope) * (hi - lo) < 1e-8:
-        return hi - lo
-    return (math.exp(slope * hi) - math.exp(slope * lo)) / slope
+    """Normalization of exp(slope (x - lo)) on [lo, hi]: relative to lo, so a range far from 0 cannot overflow."""
+    w = hi - lo
+    if abs(slope) * w < 1e-8:
+        return w
+    return math.expm1(slope * w) / slope
 
 
 def nll(theta, x, lo, hi):
     n_sig, n_bkg, mu, sigma, slope = theta
     g = np.exp(-0.5 * ((x - mu) / sigma) ** 2) / (math.sqrt(2 * math.pi) * sigma * _norm_gauss(lo, hi, mu, sigma))
-    e = np.exp(slope * x) / _norm_exp(lo, hi, slope)
+    e = np.exp(slope * (x - lo)) / _norm_exp(lo, hi, slope)
     dens = n_sig * g + n_bkg * e
     if np.any(dens <= 0) or not np.all(np.isfinite(dens)):
         return 1e300
@@ -115,10 +123,14 @@ def fit(x, lo, hi, start, profile_parameter="n_sig"):
     # judged by a repeat pass that no longer lowers -log L and by the estimated distance to the minimum (EDM) below
     problems = [] if res.stable else ["-log L still falling after 5 minimizer passes"]
     on_bound = [NAMES[i] for i, (a, b) in enumerate(bounds) if min(theta[i] - a, b - theta[i]) < 1e-6 * max(1.0, abs(b - a))]
-    if on_bound:
+    # n_sig at its lower bound is a boundary estimate, not a failed fit: the profile interval then starts at the bound
+    # and the Hesse error is not used (coverage counts the toy through the profile interval only; STH-T3.2)
+    signal_boundary = on_bound == ["n_sig"] and theta[0] - bounds[0][0] < 1e-6 * max(1.0, bounds[0][1] - bounds[0][0])
+    if on_bound and not signal_boundary:
         problems.append(f"on a bound: {on_bound}")
-    steps = np.array([max(1e-4 * abs(v), 1e-5 * (hi - lo)) for v in theta])
-    steps[:2] = np.maximum(1e-3 * np.sqrt(np.maximum(theta[:2], 1.0)), 1e-4)
+    # Hessian steps on each parameter's natural scale (yields ~ sqrt(N), mu and sigma ~ sigma, slope ~ 1/width), so the
+    # steps neither vanish nor swamp a parameter when the range is far from 0 or wide (STH-T3.2)
+    steps = 1e-3 * _scales(dict(zip(NAMES, theta)), lo, hi)
     hess = _hessian(f, theta, steps)
     try:
         cov = np.linalg.inv(hess)
@@ -131,15 +143,19 @@ def fit(x, lo, hi, start, profile_parameter="n_sig"):
             problems.append(f"estimated distance to minimum {edm:.2g} > 1e-3")
     except np.linalg.LinAlgError:
         cov = None
-        problems.append("Hessian is not positive definite")
-    out = {"parameters": dict(zip(NAMES, map(float, theta))), "nll_min": float(res.fun), "problems": problems}
+        if not signal_boundary:
+            problems.append("Hessian is not positive definite")
+    out = {"parameters": dict(zip(NAMES, map(float, theta))), "nll_min": float(res.fun), "problems": problems,
+           "boundary": ["n_sig"] if signal_boundary else []}
     if cov is not None:
         out["edm"] = edm
+    k = NAMES.index(profile_parameter)
     if cov is not None:
-        out["hesse_errors"] = dict(zip(NAMES, map(float, np.sqrt(np.diag(cov)))))
+        out["hesse_errors"] = dict(zip(NAMES, map(float, np.sqrt(np.abs(np.diag(cov))))))
         out["covariance"] = cov.tolist()
-        out["profile_interval"] = {profile_parameter: _profile(f, theta, bounds, _scales(start, lo, hi), NAMES.index(profile_parameter),
-                                                               float(np.sqrt(cov[NAMES.index(profile_parameter)] [NAMES.index(profile_parameter)])))}
+    if cov is not None or signal_boundary:
+        err = float(np.sqrt(abs(cov[k][k]))) if cov is not None else _scales(dict(zip(NAMES, theta)), lo, hi)[k]
+        out["profile_interval"] = {profile_parameter: _profile(f, theta, bounds, _scales(start, lo, hi), k, err)}
     return out
 
 
@@ -161,20 +177,35 @@ def _profile(f, theta, bounds, scale, k, err):
         start = theta[others].copy()
         a, b = theta[k], theta[k] + sign * err
         lim = bounds[k][0] if sign < 0 else bounds[k][1]
-        for _ in range(6):
+        # one bracket policy on both sides: step out by err (doubling after the third step) for at most 12 steps or to
+        # the bound; a lower side of n_sig that reaches its bound below the level ends at the bound (the physical
+        # boundary), any other side reaching its bound is None (open within the parameter's bounds)
+        step, at_bound = err, False
+        for i in range(12):
             if (sign < 0 and b <= lim) or (sign > 0 and b >= lim):
                 b = lim
             if prof(b) > 0:
                 break
             if b == lim:
-                b = None
+                at_bound = True
                 break
-            a, b = b, b + sign * err
+            step = step * 2 if i >= 2 else step
+            a, b = b, b + sign * step
+        if at_bound and k == 0 and sign < 0:
+            ends.append(float(lim))
+            continue
+        if at_bound:
+            b = None
         if b is None:
             ends.append(None)
             continue
         start = theta[others].copy()
-        ends.append(float(optimize.brentq(prof, min(a, b), max(a, b), xtol=1e-6 * max(1.0, abs(err)))))
+        try:
+            ends.append(float(optimize.brentq(prof, min(a, b), max(a, b), xtol=1e-6 * max(1.0, abs(err)))))
+        except ValueError:
+            # the refitted profile is not monotonic between the bracket ends (another local minimum of the other
+            # parameters): the interval is not established; the fit is reported as failed and counted, never dropped
+            raise FitError(f"profile interval of {NAMES[k]} not bracketed (non-monotonic profile)") from None
     return ends
 
 
@@ -186,7 +217,7 @@ def generate(truth, lo, hi, rng):
         sig.extend(draw[(draw >= lo) & (draw <= hi)][: n_s - len(sig)])
     u = rng.random(n_b)
     s = truth["slope"]
-    bkg = lo + u * (hi - lo) if abs(s) * (hi - lo) < 1e-8 else np.log(np.exp(s * lo) + u * (np.exp(s * hi) - np.exp(s * lo))) / s
+    bkg = lo + u * (hi - lo) if abs(s) * (hi - lo) < 1e-8 else lo + np.log1p(u * np.expm1(s * (hi - lo))) / s
     return np.concatenate([np.array(sig), bkg])
 
 
@@ -196,7 +227,7 @@ def coverage(cfg, toys, seed):
     pp = cfg.get("profile_parameter", "n_sig")
     rng = np.random.default_rng(seed)
     pulls = {k: [] for k in NAMES}
-    hesse_cov, prof_cov, failed = {k: 0 for k in NAMES}, 0, []
+    hesse_cov, prof_cov, failed, boundary_toys = {k: 0 for k in NAMES}, 0, [], 0
     for t in range(toys):
         x = generate(truth, lo, hi, rng)
         try:
@@ -207,6 +238,11 @@ def coverage(cfg, toys, seed):
         if r["problems"]:
             failed.append({"toy": t, "problems": r["problems"]})
             continue
+        if r["boundary"] or "hesse_errors" not in r:
+            boundary_toys += 1  # n_sig on its lower bound: counted through the profile interval, no Hesse pull
+            lo_end, hi_end = r["profile_interval"][pp]
+            prof_cov += (lo_end is not None and hi_end is not None and lo_end <= truth[pp] <= hi_end)
+            continue
         for k in NAMES:
             p = (r["parameters"][k] - truth[k]) / r["hesse_errors"][k]
             pulls[k].append(p)
@@ -216,17 +252,21 @@ def coverage(cfg, toys, seed):
     good = toys - len(failed)
     if good == 0:
         raise FitError("every toy fit failed")
+    hesse_good = good - boundary_toys
     se = math.sqrt(0.6827 * 0.3173 / good)
     return {"label": LABEL, "data": "SYNTHETIC toys from the configured truth", "toys": toys, "seed": seed,
             "config": cfg, "fits_used": good, "fits_failed": len(failed), "failed": failed[:20],
-            "pull_mean": {k: float(np.mean(v)) for k, v in pulls.items()},
-            "pull_width": {k: float(np.std(v, ddof=1)) for k, v in pulls.items()},
-            "pull_mean_standard_error": 1 / math.sqrt(good),
-            "hesse_68_coverage": {k: v / good for k, v in hesse_cov.items()},
+            "boundary_toys": boundary_toys,
+            "pull_mean": {k: float(np.mean(v)) if v else None for k, v in pulls.items()},
+            "pull_width": {k: float(np.std(v, ddof=1)) if len(v) > 1 else None for k, v in pulls.items()},
+            "pull_mean_standard_error": 1 / math.sqrt(max(hesse_good, 1)),
+            "hesse_68_coverage": {k: v / hesse_good if hesse_good else None for k, v in hesse_cov.items()},
             "profile_68_coverage": {pp: prof_cov / good}, "coverage_standard_error": se,
             "note": ("coverage is the fraction of successful toy fits whose interval contains the truth; nominal 0.6827 "
                      "with the binomial standard error given; failed fits are excluded from the fractions and counted "
-                     "separately, so a large failure count makes the coverage optimistic")}
+                     "separately, so a large failure count makes the coverage optimistic; toys with n_sig on its lower "
+                     "bound (boundary_toys) enter the profile coverage with the interval starting at the bound and are "
+                     "left out of the Hesse pulls and coverage, which are undefined there")}
 
 
 def _check_cfg(cfg):
@@ -234,6 +274,8 @@ def _check_cfg(cfg):
     t = cfg["truth"]
     if not hi > lo or any(k not in t for k in NAMES) or t["sigma"] <= 0 or t["n_sig"] <= 0 or t["n_bkg"] <= 0:
         raise FitError("config needs range [lo < hi] and truth with positive n_sig, n_bkg, sigma, and mu, slope")
+    if cfg.get("profile_parameter", "n_sig") not in NAMES:
+        raise BadArgument(f"profile_parameter must be one of {NAMES}, got {cfg.get('profile_parameter')!r}")
     return lo, hi
 
 
@@ -262,6 +304,9 @@ def main(argv=None) -> int:
             raise FitError("--toys must be between 10 and 20000")
         print(json.dumps(coverage(cfg, opts.toys, opts.seed), indent=1))
         return 0
+    except BadArgument as exc:
+        print(json.dumps({"status": "rejected", "reason": str(exc)}))
+        return 2
     except (FitError, KeyError, TypeError, json.JSONDecodeError) as exc:
         print(json.dumps({"status": "failed", "reason": f"{type(exc).__name__}: {exc}"}))
         return 1
