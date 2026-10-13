@@ -22,6 +22,29 @@ Exclude or model signal leakage and specify fit ranges and extrapolation to the 
 
 Propagate covariance and finite control-sample statistics after subtraction, smoothing, or reweighting. If the same control data train a reweighter and test closure, split samples or use cross-fitting.
 
+## Antiparticles and charge-sign confusion
+
+In a measurement of a rare antiparticle against an abundant particle (antiprotons against protons, positrons against
+electrons in a proton-dominated flux), the main background is the abundant species reconstructed with the wrong
+charge sign or the wrong identity.
+
+- **Charge confusion as a migration matrix.** Write the observed counts as `(N+_obs, N-_obs) = M (N+, N-)` with
+  `M = [[1 - c+, c-], [c+, 1 - c-]]`, where `c+` is the probability that a positive particle is reconstructed negative.
+  Measure `c` from the tails of the tracker (curvature significance, track-quality variables) in data, validated on
+  simulation; it rises with rigidity as the curvature resolution degrades, so measure it per bin. Then invert `M` (or
+  fit the charge-sign templates); quote `c` and its uncertainty as a systematic.
+- **Species-specific effects do not cancel.** In a ratio of an antiparticle to a particle, effects common to both
+  (exposure, live time, a charge-independent efficiency) cancel to the extent they are equal; charge confusion,
+  charge-dependent interaction cross sections in the detector material and charge-sign-dependent acceptance belong to
+  one species and must be corrected separately (record them as `independent` in the spec's ratio cancellations).
+- **Misidentified protons in lepton selections.** Build the proton template from a data sample enriched in protons
+  (for example inverting the electron-identification requirement) and fit it with the lepton template in the
+  identification variable; the template shape and its rigidity dependence are a systematic, and the template must
+  come from events not used to define the signal selection.
+
+Worked example (synthetic): a true antiproton-to-proton ratio of 1.0e-4 with confusion `c+ = 1.0e-5` (and negligible
+`c-` contribution) is observed as `r(1 - c-) + c+` = 1.1e-4, a 10% bias that inverting `M` removes.
+
 ## Deliverables
 
 Provide region definitions, contamination estimates, transfer factors/kappa, closure plots and uncertainties, the correlation evidence with a proposed scheme (hep-statistics encodes it), and an inventory of how each dataset enters the joint likelihood. Distinguish validation of normalization, shape, and extrapolation.

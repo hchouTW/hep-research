@@ -70,6 +70,7 @@ Exact 68.27% (Garwood) interval on the count N; divide by exposure times bin wid
 | Luminosity, cross sections, signed weights, cutflows | [Normalization](weights-normalization.md) |
 | Histograms, efficiencies, covariance, plotting | [Histograms and uncertainties](histograms-efficiencies.md) |
 | Control regions, ABCD, fake rates, sidebands, transfer factors | [Background estimation](backgrounds.md) |
+| Antiparticle backgrounds: charge-sign confusion, species-specific effects, misidentified-proton templates | [Backgrounds, antiparticles](backgrounds.md#antiparticles-and-charge-sign-confusion) |
 | Physical sources of systematics, correlation evidence, variation registry | [Systematics](systematics.md) |
 | Estimand sentence, truth-level and fiducial definitions, result levels; cross sections, response, unfolding inputs, combinations | [Measurements and unfolding](measurements-and-unfolding.md) |
 | Steeply falling spectra: spillover, forward-fold or unfold, binning, resolution tails | [Measurements, spillover](measurements-and-unfolding.md#steeply-falling-spectra-and-spillover) |

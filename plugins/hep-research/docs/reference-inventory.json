@@ -10,7 +10,7 @@
   },
   "hep-analysis": {
    "references": 11,
-   "bytes": 67719,
+   "bytes": 69846,
    "uncited": 0
   },
   "hep-computing": {
@@ -775,8 +775,8 @@
   {
    "path": "skills/hep-analysis/references/backgrounds.md",
    "owner": "hep-analysis",
-   "bytes": 2763,
-   "lines": 28,
+   "bytes": 4693,
+   "lines": 51,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/ams-02/index.md",
@@ -793,7 +793,8 @@
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
     "skills/detector-response/references/particle-identification.md",
     "skills/detector-response/references/tracking-and-vertexing.md",
-    "skills/hep-analysis/references/hep-analysis-guide.md"
+    "skills/hep-analysis/references/hep-analysis-guide.md",
+    "tests/skills/hep_analysis/test_method_references.py"
    ],
    "cited_by_other_skills": [
     "detector-response"
@@ -839,8 +840,8 @@
   {
    "path": "skills/hep-analysis/references/hep-analysis-guide.md",
    "owner": "hep-analysis",
-   "bytes": 17992,
-   "lines": 110,
+   "bytes": 18189,
+   "lines": 111,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
@@ -854,7 +855,7 @@
    "cited_by_other_skills": [
     "detector-response"
    ],
-   "last_commit": "298a7af 2026-10-13"
+   "last_commit": "4fb4d83 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/histograms-efficiencies.md",
@@ -898,7 +899,7 @@
     "detector-response",
     "hep-statistics"
    ],
-   "last_commit": "1638720 2026-10-13"
+   "last_commit": "4fb4d83 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/review-and-artifacts.md",

@@ -108,5 +108,18 @@ class SpilloverTests(unittest.TestCase):
             self.assertAlmostEqual(ratio - 1, quoted, delta=0.003)
 
 
+class ChargeConfusionTests(unittest.TestCase):
+    def test_confusion_bias_and_inversion(self):
+        n_plus, r, c_plus, c_minus = 1.0e8, 1.0e-4, 1.0e-5, 0.0
+        n_minus = r * n_plus
+        obs_plus = (1 - c_plus) * n_plus + c_minus * n_minus
+        obs_minus = c_plus * n_plus + (1 - c_minus) * n_minus
+        self.assertAlmostEqual(obs_minus / n_plus, 1.1e-4, delta=1e-9)
+        det = (1 - c_plus) * (1 - c_minus) - c_plus * c_minus
+        true_minus = ((1 - c_plus) * obs_minus - c_plus * obs_plus) / det
+        self.assertAlmostEqual(true_minus / n_plus, r, delta=1e-12)
+        self.assertIn('1.1e-4', text('backgrounds.md'))
+
+
 if __name__ == '__main__':
     unittest.main()

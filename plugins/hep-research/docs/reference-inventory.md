@@ -9,7 +9,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | Skill | References | KB | Cited nowhere |
 |---|---|---|---|
 | detector-response | 34 | 395 | 0 |
-| hep-analysis | 11 | 68 | 0 |
+| hep-analysis | 11 | 70 | 0 |
 | hep-computing | 30 | 347 | 0 |
 | hep-statistics | 9 | 119 | 0 |
 | hep-theory | 8 | 42 | 0 |
@@ -118,12 +118,12 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `triggers-luminosity-pileup.md` | detector-response | 9.3 | no | 12 | - | d8bec60 2026-10-13 |
 | `analysis-design.md` | hep-analysis | 5.3 | yes | 11 | detector-response, hep-computing | 7e34ef8 2026-10-13 |
 | `analysis-validation.md` | hep-analysis | 4.4 | no | 5 | detector-response, hep-computing | 351029c 2026-10-07 |
-| `backgrounds.md` | hep-analysis | 2.8 | no | 15 | detector-response | 4b3f0d9 2026-10-13 |
+| `backgrounds.md` | hep-analysis | 4.7 | no | 16 | detector-response | 4b3f0d9 2026-10-13 |
 | `correction-chain.md` | hep-analysis | 5.7 | no | 4 | - | 298a7af 2026-10-13 |
 | `data-pipelines.md` | hep-analysis | 0.4 | no | 8 | hep-computing | 7e34ef8 2026-10-13 |
-| `hep-analysis-guide.md` | hep-analysis | 18.0 | yes | 7 | detector-response | 298a7af 2026-10-13 |
+| `hep-analysis-guide.md` | hep-analysis | 18.2 | yes | 7 | detector-response | 4fb4d83 2026-10-13 |
 | `histograms-efficiencies.md` | hep-analysis | 3.1 | no | 7 | detector-response, hep-computing | c180c4e 2026-10-13 |
-| `measurements-and-unfolding.md` | hep-analysis | 7.4 | no | 9 | detector-response, hep-statistics | 1638720 2026-10-13 |
+| `measurements-and-unfolding.md` | hep-analysis | 7.4 | no | 9 | detector-response, hep-statistics | 4fb4d83 2026-10-13 |
 | `review-and-artifacts.md` | hep-analysis | 7.2 | yes | 6 | - | e085335 2026-10-13 |
 | `systematics.md` | hep-analysis | 8.9 | no | 25 | detector-response, hep-statistics, hep-theory, physics-ml | 839bbd1 2026-10-13 |
 | `weights-normalization.md` | hep-analysis | 4.5 | no | 9 | detector-response, hep-computing, hep-theory, physics-ml | 7e34ef8 2026-10-13 |
