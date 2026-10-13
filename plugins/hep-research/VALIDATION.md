@@ -978,3 +978,8 @@ only, not statistical validity.
 | Contracts 2.6.0 back-compatibility and migration | each new code fires natively at 2.6.0; a 2.5.0 copy of every new fixture keeps ok without `--strict` and reports the code with it; the migrator refuses each of the 8 new error fixtures and moves a 2.5.0 artifact to 2.6.0 without inventing a seed | `tests/contracts/test_statistical_semantics.py` (`Contracts26Hardening`) |
 | Covariance scale invariance | the rho/sigma matrix (correlation eigenvalue -0.80) fails with `not_psd` at sigma ratios 1, 1e4 and 1e12; diag(1e-20, 1e20) passes with rank 2, condition 1 | `tests/core/test_stats_covariance.py` |
 | Two-POI contour, 3-bin audit input | exit 0, status ok, 72 points on the level of an independent Poisson deviance within 1e-4; out-of-domain probes counted, not failed | `tests/core/test_stats_two_poi.py` |
+
+Provenance moved here from `core-stats-guide.md` (STH-T2.3): the "Validation tools outside `core/stats`" table there
+(result_artifact, covariance_fit, sweighted_fit, bayes_calibration, the EXPERIMENTAL eft_scan, discrete_profile,
+global_significance, pcl_efficiency_ratio and ratio_estimation, the pyhf backend comparison and model card, the
+sbottom benchmark) was added by the hep-statistics audit of 2026-10-12 (T01-T30, PRs #49, #51, #53).

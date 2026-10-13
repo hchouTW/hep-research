@@ -81,7 +81,7 @@ Quote the expected sensitivity with every observed result, computed before unbli
   so; at small `b` it overstates the sensitivity.
 - **Limits:** the median expected limit and its 1- and 2-sigma bands under background only come from
   `core/stats/poisson_diagnostics.py cls-limit` (known background), `likelihood_limits.py profile-cls` or
-  `multibin-limit` (median only), or pyhf with `return_expected_set=True` ([core/stats guide](core-stats-guide.md)).
+  `multibin-limit` (asymptotic: median and 1- and 2-sigma bands), or pyhf with `return_expected_set=True` ([core/stats guide](core-stats-guide.md)).
 
 `<plugin root>/skills/hep-statistics/scripts/sensitivity_and_gof.py asimov-z --s S --b B [--sigma-b SB]`
 computes both forms (checked in `tests/skills/hep_statistics/test_sensitivity_and_gof.py`).

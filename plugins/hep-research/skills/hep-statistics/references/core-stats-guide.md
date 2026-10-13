@@ -80,7 +80,6 @@ pyhf/Combine adapter ([statistical tools](statistical-tools.md)). Run any script
   that names the matrix, a fit refuses a singular matrix, and toy sampling accepts a semi-definite one and records
   the shift in `regularization`. Nothing is repaired silently.
 - A `failed` fit never feeds an inference or a `statistical-result` except one whose `fit_status` is `failed`.
-- Toy tails: a tail estimate `k/N` carries its binomial Monte Carlo error; zero exceedances give a bound, not zero.
 
 ## Choosing a tool
 
@@ -91,7 +90,8 @@ pyhf/Combine adapter ([statistical tools](statistical-tools.md)). Run any script
 | Discovery significance of a count | `likelihood_limits.py profile-significance` (uncertain b), `statistical_toys.py boundary` (known b) | ON/OFF counting: `<plugin root>/skills/hep-statistics/scripts/li_ma_significance.py` |
 | Several bins sharing one signal strength | `likelihood_limits.py multibin-limit` | `shape-limit` when shapes and several nuisances matter; the pyhf adapter beyond that |
 | Finite Monte Carlo statistics in templates | `statistical_toys.py template-stat`, then `template-bb` | `template_fit.py bb-fit`/`bb-toys` for several templates, `wbb-fit`/`wbb-toys` for weighted MC and nuisances |
-| Unfolding regularization, closure, response statistics | `unfolding_diagnostics.py regularized-scan`, `closure` | `choose-regularization`, `response-stat`, `response-covariance`, `fold-compare`, `nonparam-fold` |
+| Unfolding: D'Agostini iterations | `statistical_toys.py unfold-scan`, then `unfolding_diagnostics.py closure --method dagostini` | `response-stat`, `response-covariance` (also `--method dagostini`) |
+| Unfolding: Tikhonov or truncated SVD | `unfolding_diagnostics.py regularized-scan` (`tikhonov`, `tsvd`; it refuses `dagostini`), `closure` | `choose-regularization`, `response-stat`, `response-covariance`, `fold-compare`, `nonparam-fold` |
 | Ratio or fraction with correlated systematics | `statistical_toys.py ratio-measured` (measured covariance) | `ratio-cov` (declared structures), `ratio-toys` (counts with systematic nuisances) |
 | Is this covariance or response matrix well formed? | `validate_covariance.py`, `validate_response.py` | — |
 
@@ -262,7 +262,8 @@ nuisance for one statistical source, never both ([nuisance modeling](nuisance-mo
 ## `unfolding_diagnostics.py`: regularization, closure, folding
 
 Small response matrices (at most 60 bins; orientation and efficiency convention of `validate_response.py`), independent
-Poisson data, no systematics. `--method` is `dagostini` (iterations; nonlinear, spread from toys), `tikhonov`
+Poisson data, no systematics. `--method` is `dagostini` (iterations; nonlinear, spread from toys; not accepted by
+`regularized-scan`, which is analytic: scan D'Agostini iterations with `statistical_toys.py unfold-scan`), `tikhonov`
 (curvature penalty, strength relative to the mean diagonal of `R^T W^2 R`) or `tsvd` (retained singular values of the
 Poisson-weighted response); `--param` sets the strength, iterations or truncation.
 
@@ -344,7 +345,7 @@ readings (inefficiency, or migration outside the tabulated range); the declared 
 
 ## Validation tools outside `core/stats`
 
-Added by the hep-statistics audit (2026-10-12). Each tool states its validity domain and has a test with an
+Each tool states its validity domain and has a test with an
 independent oracle and a negative baseline; the ones marked EXPERIMENTAL are controlled examples, not general support.
 Scripts are in `<plugin root>/skills/hep-statistics/scripts/` unless an adapter path is given; run `--help` first.
 
@@ -387,13 +388,16 @@ Command-line helpers in `skills/hep-statistics/scripts/` (read `--help` first); 
 replace them. When a shell is available, run the matching script and report its output; a value worked by hand is
 labeled as such.
 
+Dependencies are marked per script: unmarked scripts use the standard library only; `--help` works without NumPy
+only where the import is guarded (the four marked "(needs NumPy; `--help` without it)").
+
 - `li_ma_significance.py`: ON/OFF significance, with toy or exact conditional p-values at low counts.
-- `look_elsewhere.py`: global significance of a one-dimensional scan (brute-force toys or upcrossings).
-- `global_significance.py`: toy-calibrated global significance for a recorded scan.
-- `sensitivity_and_gof.py`: Asimov discovery sensitivity and toy-calibrated goodness of fit.
-- `bayes_diagnostics.py`: R-hat, ESS and MCSE of supplied chains, prior reweighting; `bayes_calibration.py`: quantile and SBC calibration checks.
-- `combine_measurements.py` (needs NumPy): generalized least squares combination of one observable once the combination plan accepts the inputs (declared cross-dataset blocks, shared auxiliary measurements, no Gaussianized envelope); `combine_asymmetric.py`: Barlow's asymmetric errors.
-- `covariance_fit.py`: fits to published points with their covariance, with the Peelle diagnostics; `discrete_profile.py`: discrete profiling over a model family; `eft_scan.py`: EFT parameter scans; `pcl_efficiency_ratio.py`, `ratio_estimation.py`: ratio and efficiency intervals; `sweighted_fit.py`: sWeighted fits with covering uncertainties.
+- `look_elsewhere.py` (needs NumPy; `--help` without it): global significance of a one-dimensional scan (brute-force toys or upcrossings).
+- `global_significance.py` (needs NumPy): toy-calibrated global significance for a recorded scan.
+- `sensitivity_and_gof.py` (needs NumPy; `--help` without it): Asimov discovery sensitivity (standard library) and toy-calibrated goodness of fit (NumPy).
+- `bayes_diagnostics.py` (needs NumPy; `--help` without it): R-hat, ESS and MCSE of supplied chains, prior reweighting; `bayes_calibration.py` (needs NumPy and SciPy): quantile and SBC calibration checks.
+- `combine_measurements.py` (needs NumPy; `--help` without it): generalized least squares combination of one observable once the combination plan accepts the inputs (declared cross-dataset blocks, shared auxiliary measurements, no Gaussianized envelope); `combine_asymmetric.py`: Barlow's asymmetric errors.
+- `covariance_fit.py` (needs NumPy and SciPy): fits to published points with their covariance, with the Peelle diagnostics; `discrete_profile.py` (needs NumPy and SciPy): discrete profiling over a model family; `eft_scan.py` (needs NumPy and SciPy): EFT parameter scans; `pcl_efficiency_ratio.py` (needs NumPy and SciPy), `ratio_estimation.py` (needs NumPy): ratio and efficiency intervals; `sweighted_fit.py` (needs NumPy and SciPy): sWeighted fits with covering uncertainties.
 - `result_artifact.py`: writes a `statistical-result` artifact from a tool's output, with its status label.
 - The Poisson counting reference is `skills/hep-analysis/scripts/counting_reference.py`. pyhf and Combine starting points: `adapters/pyhf-combine/assets/` (with `pyhf_nuisance_diagnostics.py` for pulls, constraints and impacts); unbinned fits: `adapters/unbinned-fit/assets/unbinned_fit.py`.
 
