@@ -329,6 +329,8 @@ class CommittedExampleTests(unittest.TestCase):
         from contracts import CONTRACTS_VERSION
         for rel in self.PATHS:
             with self.subTest(rel):
+                if not (ROOT / rel).is_file():  # tools/check_ams_optional.py runs tests/contracts on a copy without examples
+                    self.skipTest(f"{rel} is not in this copy of the plugin")
                 doc = json.loads((ROOT / rel).read_text())
                 self.assertEqual(doc["contract_version"], CONTRACTS_VERSION)
                 rep = v.validate_artifact(doc)
