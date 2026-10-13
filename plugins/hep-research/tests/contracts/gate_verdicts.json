@@ -47,6 +47,126 @@
   "ok": false,
   "strict_ok": false
  },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_applied_via_blank.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_background_constraint_missing.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_background_estimator_missing.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_backgrounds_empty.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_bare_efficiency_with_factor.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_blinded_no_mask.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_blinded_observed.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_category_repeated.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_correction_case_variant.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_denominator_blank.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_duplicate_systematic.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_estimand_missing.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_estimand_not_a_sentence.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_frame_missing.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_included_and_applied.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_luminosity_twice.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_misspelled_key.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_period_reversed.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_phase_space_missing.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_ratio_block_missing.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_ratio_cancellations_empty.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_ratio_self.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_selections_empty.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_shape_only_value.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_systematics_empty.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_unknown_category.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_unknown_not_listed.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_variable_incomplete.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_zero_correction.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/measurement_v26_zero_normalization.json": {
+  "ok": false,
+  "strict_ok": false
+ },
  "contracts/fixtures/artifacts/invalid/ml_blank_grouping_key.json": {
   "ok": false,
   "strict_ok": false
@@ -84,6 +204,22 @@
   "strict_ok": false
  },
  "contracts/fixtures/artifacts/invalid/prediction_gaussian_envelope.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/prediction_v26_envelope_inverted.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/prediction_v26_envelope_no_prescription.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/prediction_v26_observed.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/prediction_v26_validated_unlinked.json": {
   "ok": false,
   "strict_ok": false
  },
@@ -183,7 +319,39 @@
   "ok": false,
   "strict_ok": false
  },
+ "contracts/fixtures/artifacts/invalid/theory_v26_check_result_vocab.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/theory_v26_limit_missing.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/theory_v26_order_missing.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/theory_v26_propagation_no_degeneracy.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/theory_v26_unchecked_formal_proof.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/theory_v26_validity_empty.json": {
+  "ok": false,
+  "strict_ok": false
+ },
  "contracts/fixtures/artifacts/unresolved/communication_traceability_pending.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/measurement_v26_closure_missing.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/measurement_v26_input_listed.json": {
   "ok": true,
   "strict_ok": true
  },
@@ -192,6 +360,10 @@
   "strict_ok": true
  },
  "contracts/fixtures/artifacts/unresolved/ml_split_overlap_not_run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/prediction_v26_unlinked.json": {
   "ok": true,
   "strict_ok": true
  },
@@ -285,6 +457,10 @@
   "ok": true,
   "strict_ok": true
  },
+ "contracts/fixtures/artifacts/valid/measurement_v26.json": {
+  "ok": true,
+  "strict_ok": true
+ },
  "contracts/fixtures/artifacts/valid/ml_artifact.json": {
   "ok": true,
   "strict_ok": true
@@ -294,6 +470,22 @@
   "strict_ok": true
  },
  "contracts/fixtures/artifacts/valid/prediction.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/prediction_v26.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/prediction_v26_binned_envelope.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/prediction_v26_derivation_status.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/prediction_v26_validated_linked.json": {
   "ok": true,
   "strict_ok": true
  },
@@ -340,6 +532,34 @@
   "strict_ok": true
  },
  "contracts/fixtures/artifacts/valid/theory_spec.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/theory_spec_v26.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/theory_spec_v26_analytic_checked.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/theory_spec_v26_asymptotic.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/theory_spec_v26_inapplicable_listed.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/theory_spec_v26_propagation.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/warning/prediction_v26_truncation_no_method.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/warning/theory_v26_conventions_incomplete.json": {
   "ok": true,
   "strict_ok": true
  },
