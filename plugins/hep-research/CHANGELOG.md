@@ -87,6 +87,22 @@ Contracts 2.5.0 (minor: ML semantics; every 2.4.0 artifact keeps its outcome and
   detector-response row to scale factors and tag-and-probe.
 - **Profiles connected to physics-ml.** AMS-02 lists physics-ml in `related_skills` and its working-rules routing
   table gains a classifier/regressor row; the EIC profile lists physics-ml and its placement inventory gains an ML row.
+- **Partition engine: retries bounded across runs (hep-computing audit F01).** `core/partition/engine.py` counted
+  `max_attempts` per `run()` call, so rerunning bought new attempts (3, 6, 9, 12 over four calls). Attempts are now
+  counted since the chunk's last `reset()` over all calls (`attempts_since_reset`, as in the batch campaign); a chunk
+  with none left reports `attempts-exhausted`, and only `reset()` with a reason restores the budget. The "two identical
+  failures stop" rule compares failure signatures instead of raw messages: `local_partition.py` gives each command
+  failure a stable signature (exit code, timeout, missing or invalid output), and other exceptions are compared with
+  paths, long hex strings and numbers masked. `max_attempts` must be an integer of at least 1. A state written before
+  this change counts all its recorded attempts (fail closed).
+- **Partition engine: merge reads canonical chunk files only (F02).** `merge()` took chunk files in filename order and
+  kept the first claiming a chunk, so a stray `b_c0000.json` with another result replaced `c0000.json` and the merge
+  still reported `complete`. Each chunk is now read from `chunks/<id>.json` only; a stray file with the same result is
+  reported (`merge.duplicate_chunk`), one with a different result makes the merge incomplete
+  (`merge.conflicting_duplicate`), and a stray never stands in for a missing chunk. New hard problems
+  `merge.id_mismatch` and `merge.seed_mismatch`; non-object or incomplete chunk files are reported as
+  `merge.unreadable` instead of crashing. Regressions: `tests/core/test_partition_p0_regressions.py` (15 tests, 14
+  fail on the previous code).
 
 ## 0.6.16 (2026-10-13)
 
