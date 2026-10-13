@@ -62,6 +62,10 @@ Software checks establish contract consistency only, not physical validity.
 - **CMP-10 `check_root_cpp_env.sh` private temporary folder.** `mktemp -d "${TMPDIR:-/tmp}/root_cpp_check.XXXXXX"`
   replaces `$TMPDIR/root_cpp_check.$$` (and no longer reassigns `TMPDIR`); the trap removes it; the test program takes
   `-std` from `root-config --cflags` only. Two parallel runs do not collide and leave nothing behind.
+- **CMP-11 `lint_task.py` cited paths stay inside the repository.** Each cited path is resolved (`..` and symbolic
+  links followed) and must stay under `--repo` (or the skill root for the fallback); one that escapes is an error
+  "path leaves the repository" (an `src/` + 14×`../` + `etc/asl.conf` path was accepted as existing). A path starting
+  with `../` is a warning instead of a silent skip; in-repo paths with `..` still pass.
 
 ## 0.6.17 (2026-10-13)
 
