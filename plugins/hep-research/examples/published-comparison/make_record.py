@@ -40,10 +40,10 @@ def main() -> int:
               "inputs": [], "outputs": [], "unresolved_inputs": [],
               "extension": {"dataset_id": "synthcol:synthetic-published-dsigma", "source_evidence_ids": [], "observable": obs,
                             "data": {"edges": edges, "values": values, "unit": "pb",
-                                     "uncertainties": [{"name": "total (statistical + 2% luminosity)", "kind": "statistical",
+                                     "uncertainties": [{"name": "total (statistical + background transfer factor + 2% luminosity)", "kind": "statistical",
                                                         "correlation": "covariance", "covariance_ref": "synthetic-published-covariance.json"}]},
                             "covariance": {"status": "present", "ref": "synthetic-published-covariance.json",
-                                           "note": "statistical block plus a fully correlated 2% luminosity block"},
+                                           "note": "statistical block, a fully correlated background transfer-factor block and a fully correlated 2% luminosity block"},
                             "period": "not-applicable", "status": "synthetic", "experiment_profile": "experiment:synthetic-collider",
                             "conditions": "sqrt_s_gev = 10.0"}}
     (HERE / "synthetic-published-record.json").write_text(json.dumps(record, indent=1) + "\n", encoding="utf-8")
