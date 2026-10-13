@@ -8,6 +8,12 @@ Keep unknown physical inputs `unknown` or `not-provided` and list them in `unres
 
 ## Event and object definitions
 
+Physics rules any pipeline must implement (code patterns: [analysis data pipelines](../../hep-computing/references/analysis-data-pipelines.md)):
+
+- **Stable event keys.** Identify events by run, luminosity block (or time) and event number, plus dataset or production identity for simulation; compare outputs by these keys, never by row index.
+- **Duplicates across streams.** An event recorded in several data streams is counted once; remove duplicates before any yield.
+- **Signed weights.** Keep generator weights signed through every step and normalize with the signed pre-skim sum ([weights and normalization](weights-normalization.md)).
+
 Record run/luminosity-block/event identification, duplicate removal across data streams, data-quality flags, certified run/luminosity selections, and luminosity sources. A repeated event in different streams must not be counted twice. MC event identifiers may not be globally unique: include dataset, file, or production identity as needed.
 
 Specify identification, isolation, kinematic acceptance, overlap removal, primary-vertex selection, pileup mitigation, and trigger matching. Correcting before ordering and ordering before correcting can give different results; follow the formal object definition. Use wrapped differences for azimuthal angles and distinguish pseudorapidity from rapidity. Document energy and momentum units.

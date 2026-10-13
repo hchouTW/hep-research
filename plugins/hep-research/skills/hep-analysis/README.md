@@ -8,7 +8,7 @@ invariants are stated once, in [SKILL.md](SKILL.md); this page is a folder guide
 | Path | Content |
 |---|---|
 | `SKILL.md` | entry point: invariants, workflow, context resolution, resources, handoffs |
-| `references/` | nine method references, routed from `hep-analysis-guide.md` |
+| `references/` | method references, routed from `hep-analysis-guide.md` (`data-pipelines.md` is a pointer: the code-level pipeline material moved to hep-computing's `analysis-data-pipelines.md`) |
 | `scripts/` | twelve command-line helpers (systematic variations, yield and systematics tables, counting reference, blinded-bin masking, analysis-change review, cosmic-ray helpers) |
 | `assets/` | the `measurement-spec` template and its field guide, the systematics ledger (CSV), the report template, a synthetic cosmic-ray spectrum example |
 
@@ -18,7 +18,7 @@ invariants are stated once, in [SKILL.md](SKILL.md); this page is a folder guide
 
 ## References
 
-Start with `references/hep-analysis-guide.md`, which routes to one reference per question: analysis design, data pipelines, weights and normalization, histograms and efficiencies, backgrounds, systematics, measurement definitions (unfolding and combination methods belong to hep-statistics), analysis validation. Detector data/MC validation lives in detector-response.
+Start with `references/hep-analysis-guide.md`, which routes to one reference per question: analysis design, review and deliverables, weights and normalization, histograms and efficiencies, backgrounds, systematics, measurement definitions (unfolding and combination methods belong to hep-statistics), analysis validation. Detector data/MC validation lives in detector-response.
 
 ## Handoffs
 
