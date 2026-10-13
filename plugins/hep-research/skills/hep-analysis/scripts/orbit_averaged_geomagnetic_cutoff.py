@@ -31,8 +31,8 @@ already stated for the single-latitude formula in geomagnetic_cutoff.py.
 Status: --status (default unvalidated; one of the core artifact_statuses) is echoed as status.
 Exit codes: 0 ok; 1 the computation failed; 2 usage or invalid input (NaN, inf, malformed file);
 3 incomplete or inconclusive.
-Run: python3 <plugin root>/skills/hep-analysis/scripts/orbit_averaged_geomagnetic_cutoff.py --inclination 51.6 --altitude-re 1.0627
-     python3 <plugin root>/skills/hep-analysis/scripts/orbit_averaged_geomagnetic_cutoff.py --inclination 51.6 --altitude-re 1.065 \
+Run: python3 <plugin root>/skills/hep-analysis/scripts/orbit_averaged_geomagnetic_cutoff.py --inclination 51.6 --radius-re 1.0627
+     python3 <plugin root>/skills/hep-analysis/scripts/orbit_averaged_geomagnetic_cutoff.py --inclination 51.6 --radius-re 1.065
          --pole-lat <deg N> --pole-lon <deg E> --days 30 --thresholds 1,5,10
 """
 import argparse
@@ -167,8 +167,10 @@ def main():
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--inclination', type=float, required=True, dest='inclination_deg',
                         help='orbital inclination in degrees, 0 (exclusive) to 90')
-    parser.add_argument('--altitude-re', type=float, default=1.0,
-                        help='geocentric distance in Earth radii (default 1.0)')
+    parser.add_argument('--radius-re', type=float, default=None, dest='radius_re',
+                        help='orbit radius (geocentric distance) in Earth radii (default 1.0)')
+    parser.add_argument('--altitude-re', type=float, default=None, dest='altitude_re',
+                        help='deprecated alias of --radius-re (the value is a geocentric distance)')
     parser.add_argument('--dipole-moment', type=float, default=DEFAULT_DIPOLE_MOMENT_G_CM3,
                         help='dipole moment in G*cm^3 (default: approximate present epoch)')
     parser.add_argument('--n-samples', type=int, default=2000, dest='n_samples',
@@ -187,6 +189,12 @@ def main():
     args = parser.parse_args()
 
     try:
+        if args.radius_re is not None and args.altitude_re is not None:
+            raise ValueError('give --radius-re only (--altitude-re is its deprecated alias)')
+        if args.altitude_re is not None:
+            print('orbit_averaged_geomagnetic_cutoff.py: warning: --altitude-re is deprecated; use --radius-re',
+                  file=sys.stderr)
+        args.altitude_re = args.radius_re if args.radius_re is not None else (args.altitude_re or 1.0)
         if (args.pole_lat is None) != (args.pole_lon is None):
             raise ValueError('--pole-lat and --pole-lon must be given together')
         if args.pole_lat is not None:

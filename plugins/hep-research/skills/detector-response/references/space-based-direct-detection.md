@@ -188,7 +188,7 @@ The bin is 5.0-6.0 GV, with the spacecraft at geomagnetic latitude 40 deg and r 
 radii (ISS-like).
 
 ```bash
-python3 <plugin root>/skills/hep-analysis/scripts/geomagnetic_cutoff.py --latitude 40 --altitude-re 1.0627
+python3 <plugin root>/skills/hep-analysis/scripts/geomagnetic_cutoff.py --latitude 40 --radius-re 1.0627
 python3 <plugin root>/skills/hep-analysis/scripts/cosmic_ray_flux.py --counts 320 --exposure 2.4e5 --bin-width 1.0 --bin-width-unit GV
 python3 <plugin root>/skills/hep-analysis/scripts/solar_modulation_force_field.py --demodulate --energy 4.641 --mass 0.938272 \
     --charge 1 --phi 0.6 --toa-flux 1.0
