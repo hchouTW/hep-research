@@ -14,21 +14,32 @@ Validate the spec (its level is a profile term, so the profile vocabulary is nee
 | Toy closure, mean pull per bin | abs < 0.2 | pass |
 | Toy closure, pull width per bin | in (0.85, 1.15) | pass |
 | Ratio sigma vs independent propagation (T10) | relative difference < 1e-09 | pass |
+| Background estimate, Asimov closure | TF x expected sideband = expected window background, relative < 1e-12 | pass (max 2.2e-16) |
+| Background estimate, validation band 1.6 <= Q < 1.7, per period | abs total pull < 3.0 and chi2 p > 0.001 (bins with >= 5 predicted) | pass (synthetic-period-1: observed 259, predicted 308.6, pull -2.68, chi2 10.5 / 8; synthetic-period-2: observed 416, predicted 390.0, pull 1.25, chi2 8.2 / 9) |
+| Figures drawn outside the blinded range (core.blinding.check_figure) | no artist inside | pass |
 | Response and covariance validators (core.stats) | no failure | pass |
 | Contract artifacts (profile vocabulary) | all valid | pass |
 
-The covariance validator warns that the trigger block has rank 1. That is expected: a single per-period trigger efficiency scales every bin together, so its block is fully correlated by construction.
+The covariance validator warns that the trigger and background blocks have rank 1. That is expected: a single per-period trigger efficiency, and a single transfer factor, scale every bin together, so these blocks are fully correlated by construction.
+
+## Background: Z=1 charge tail in the helium window (synthetic)
+
+A synthetic 5% of the selected Z=1 events has a charge estimator Q above 1.3 with an exponential tail (slope 0.2); the part inside the helium window 1.7 <= Q < 2.5 is a background to helium. Per reco rigidity bin and period it is estimated as TF x the counts of the helium-free sideband 1.3 <= Q < 1.6, TF = 0.1710 from the synthetic tail shape (10% fully correlated uncertainty), and subtracted before the helium unfolding. The validation band 1.6 <= Q < 1.7 (TF = 0.1130) checks the extrapolation on data. The proton flux is not affected.
+
+## Blinding (synthetic policy)
+
+The helium signal-region count in the bin 60-100 GV is blinded in both periods. A custodian step (`skills/hep-analysis/scripts/mask_blinded_bins.py`) masks it before the analysis reads the histograms; the released files are `blinded/helium_signal_region_synthetic-period-1.masked.json`, `blinded/helium_signal_region_synthetic-period-2.masked.json`. The unfolding fills the blinded bin with the simulated helium expectation and zero variance, so no published number depends on its count. The helium flux, the He/p ratio and the period average are null in that bin in `results.json`, the dataset records stop at 60 GV, and the figures show 2-60 GV. Proton counts and the charge sidebands stay open. Nothing here unblinds; that is done by an authorized person outside the agent session.
 
 ## What the chain does
 
-Per species and synthetic period: selected truth counts = ∫Φ dR × acceptance × livetime × cutoff fraction × trigger efficiency × selection efficiency; rigidity migration (2% core resolution in curvature, a 2% tail five times wider) gives Poisson reco counts; a full-rank weighted least-squares unfolding (`core.stats.unfolding_diagnostics.linear_matrix`, no regularization) returns selected truth counts; dividing by the efficiencies, the exposure and the bin width gives the bin-averaged flux. The first and last bins (1.5-2 and 100-150 GV) absorb migration and are not reported.
+Per species and synthetic period: selected truth counts = ∫Φ dR × acceptance × livetime × cutoff fraction × trigger efficiency × selection efficiency; rigidity migration (2% core resolution in curvature, a 2% tail five times wider) gives Poisson reco counts; a full-rank weighted least-squares unfolding (`core.stats.unfolding_diagnostics.linear_matrix`, no regularization) returns selected truth counts; dividing by the efficiencies, the exposure and the bin width gives the bin-averaged flux. The first and last bins (1.5-2 and 100-150 GV) absorb migration and are not reported. For helium the charge-tail background is subtracted from the reco counts first.
 
 Efficiencies are estimated from synthetic control samples. The trigger efficiency is one estimate per period shared by both species (fully correlated across bins); the selection efficiency is measured per bin and species and shared by the two periods. In the He/p ratio the trigger term cancels exactly and the livetime and cutoff fraction cancel by construction; acceptance and selection efficiency do not cancel.
 
 ## Correlated ratio (T10)
 
-- synthetic-period-1: ratio sigma per bin 0.004651, 0.005471, 0.005127, 0.007371, 0.007611, 0.009615, 0.01549, 0.02472, 0.0306; independent linear propagation with the shared trigger component agrees to 2.2e-16. Treating the trigger term as independent would overstate the sigma by factors 1.096, 1.073, 1.091, 1.048, 1.049, 1.035, 1.017, 1.007, 1.004.
-- synthetic-period-2: ratio sigma per bin 0.004605, 0.005537, 0.004491, 0.006271, 0.006473, 0.007888, 0.01185, 0.01964, 0.02743; independent linear propagation with the shared trigger component agrees to 2.2e-16. Treating the trigger term as independent would overstate the sigma by factors 1.152, 1.112, 1.174, 1.097, 1.106, 1.084, 1.038, 1.016, 1.011.
+- synthetic-period-1: ratio sigma per bin 0.004847, 0.00566, 0.005279, 0.007528, 0.007845, 0.009792, 0.01588, 0.02464; independent linear propagation with the shared trigger component agrees to 2.2e-16. Treating the trigger term as independent would overstate the sigma by factors 1.089, 1.069, 1.085, 1.046, 1.046, 1.033, 1.016, 1.007.
+- synthetic-period-2: ratio sigma per bin 0.004775, 0.00571, 0.004635, 0.006425, 0.006632, 0.008083, 0.01206, 0.02002; independent linear propagation with the shared trigger component agrees to 1.1e-16. Treating the trigger term as independent would overstate the sigma by factors 1.143, 1.106, 1.162, 1.093, 1.1, 1.081, 1.036, 1.016.
 
 ## Time-dependent exposure (T11)
 
@@ -37,21 +48,21 @@ Efficiencies are estimated from synthetic control samples. The trigger efficienc
 
 ## Toy closure
 
-400 pseudo-experiments (seed 20261003) regenerate the counts and the control samples.
+400 pseudo-experiments (seed 20261003) regenerate the counts, the control samples, the charge-tail counts and the transfer factor, and apply the same blinded procedure; helium and ratio pulls cover 2-60 GV.
 
 | Quantity | mean pull per bin | pull width per bin |
 |---|---|---|
-| proton/synthetic-period-1 | -0.046, 0.0488, 0.0308, 0.0095, -0.0505, 0.0005, -0.0905, -0.0036, 0.0102 | 1.038, 0.9891, 0.9922, 0.9564, 1.029, 0.9617, 0.9821, 0.9953, 1.006 |
-| proton/synthetic-period-2 | -0.0729, -0.0731, -0.0654, 0.0343, -0.0567, -0.1067, -0.0802, -0.0154, 0.0567 | 0.9882, 1.001, 0.9936, 0.9906, 1.035, 1.001, 1.049, 1.013, 0.9932 |
-| helium/synthetic-period-1 | -0.0115, -0.1012, 0.0215, -0.0005, -0.1118, 0.0489, -0.017, -0.0574, -0.0321 | 0.9555, 1.042, 1.019, 0.9975, 1.009, 1.03, 1.027, 1.054, 0.9685 |
-| helium/synthetic-period-2 | 0.009, -0.0181, -0.0452, -0.0229, -0.0676, -0.0477, -0.1019, -0.0609, 0.0104 | 0.9533, 1.015, 0.9791, 1.01, 0.9864, 0.973, 0.9666, 1.015, 0.9949 |
-| ratio/synthetic-period-1 | 0.0065, -0.126, -0.002, -0.0114, -0.0894, 0.0385, 0.0114, -0.0686, -0.0516 | 0.9661, 1.001, 1.035, 1.002, 0.9914, 1.015, 1.011, 1.046, 0.93 |
-| ratio/synthetic-period-2 | 0.0458, 0.0156, -0.0115, -0.0469, -0.0424, 0.0018, -0.0709, -0.0642, -0.0333 | 0.9282, 0.9748, 0.997, 1.031, 0.9839, 0.946, 1.035, 1.032, 1.03 |
+| proton/synthetic-period-1 | -0.009, -0.043, -0.0466, -0.0512, -0.0755, -0.0092, 0.0042, 0.0415, -0.0511 | 1.031, 1.011, 0.9924, 1.012, 0.9514, 1.02, 0.9927, 1.025, 1.002 |
+| proton/synthetic-period-2 | -0.0785, -0.0423, 0.0029, -0.0236, -0.1315, -0.0756, 0.0076, -0.0564, 0.0102 | 0.9441, 0.9935, 0.9727, 0.9629, 0.9642, 1.018, 0.9715, 0.9578, 1.036 |
+| helium/synthetic-period-1 | -0.0304, -0.0156, -0.0226, -0.04, -0.0563, -0.0311, -0.0014, 0.025 | 0.9679, 1.05, 0.9704, 1.038, 0.986, 0.9671, 0.9509, 1.047 |
+| helium/synthetic-period-2 | -0.0278, -0.0612, -0.0043, -0.0327, -0.0044, -0.0614, -0.0506, 0.0389 | 1.013, 0.937, 1.01, 1.009, 0.9468, 0.9885, 1.036, 1.039 |
+| ratio/synthetic-period-1 | -0.031, -0.0011, -0.0042, -0.0226, -0.0254, -0.0322, -0.0137, -0.0101 | 0.9743, 1.046, 0.9745, 1.047, 0.9616, 0.942, 0.9762, 1.028 |
+| ratio/synthetic-period-2 | 0.0113, -0.0448, -0.0123, -0.0256, 0.058, -0.0297, -0.0597, 0.046 | 1.011, 0.9801, 1.04, 1.011, 0.9265, 1.024, 1.027, 1.034 |
 
 ## Limitations (by construction of this example)
 
 - Acceptance and the response are assumed exactly known; no finite-MC or acceptance systematic is modeled.
-- No background, charge confusion or fragmentation is modeled; the synthetic truth exists only in 1.5-150 GV.
+- The only background is the synthetic Z=1 charge tail; its charge shape factorizes from rigidity by construction, so one transfer factor serves every bin. No charge confusion or fragmentation is modeled; the synthetic truth exists only in 1.5-150 GV.
 - The response uses the generated spectral shape inside each bin, so model dependence of the unfolding is not studied.
 - Acceptance, efficiencies and cutoff fractions are constant within a bin by construction.
 - Passing these checks shows the chain is internally consistent on synthetic data; it says nothing about any real detector.

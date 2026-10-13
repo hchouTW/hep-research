@@ -16,6 +16,17 @@ trigger efficiency fully correlated across bins and shared by the species, selec
 bin and species) -> He/p ratio per period (the trigger term cancels) -> exposure-weighted average
 over periods -> Asimov closure and seeded toy closure -> contract artifacts, figures and a report.
 
+Background (SYNTHETIC): a tail of Z=1 events in the charge estimator Q leaks into the helium window 1.7 <= Q < 2.5.
+It is estimated per reco rigidity bin and period from the helium-free sideband 1.3 <= Q < 1.6 times a transfer
+factor from the synthetic tail shape (10% fully correlated uncertainty), subtracted before the helium unfolding, and
+checked in the validation band 1.6 <= Q < 1.7 and by Asimov closure.
+
+Blinding (SYNTHETIC policy): the helium signal-region count in the bin 60-100 GV is blinded in both periods. A
+custodian step (skills/hep-analysis/scripts/mask_blinded_bins.py) masks it before the analysis reads the counts; the
+unfolding fills it with the simulated helium expectation and zero variance, so no published number depends on it,
+and the helium flux, the He/p ratio and the period average are null in that bin in every output. The charge sidebands
+and the proton counts stay open. Unblinding is not done here.
+
 Usage (from the plugin root): python3 examples/ams-flux-ratio/run.py [--toys 400] [--seed 20261002] [--out DIR]
 Default output: examples/ams-flux-ratio/output/. Exit 0 when every pre-declared closure criterion passes,
 1 otherwise. Requires numpy and matplotlib (the D5 environment).
@@ -40,7 +51,8 @@ from contracts import CONTRACTS_VERSION  # noqa: E402
 from contracts.identity import plugin_release  # noqa: E402
 from contracts.validate import validate_artifact  # noqa: E402
 from contracts.vocab import Vocabulary  # noqa: E402
-from core.stats.statistical_toys import ratio_measured  # noqa: E402
+from core.blinding.blinding import blinded_mask, check_figure  # noqa: E402
+from core.stats.statistical_toys import chi2_sf, ratio_measured  # noqa: E402
 from core.stats.unfolding_diagnostics import linear_matrix  # noqa: E402
 from core.stats.validate_covariance import validate_covariance  # noqa: E402
 from core.stats.validate_response import validate_response  # noqa: E402
@@ -67,12 +79,32 @@ CUTOFF_FACTOR = 1.2  # documented for the proton analysis (ams02:C31); a proposa
 RESOLUTION = {"core_rel": 0.02, "mdr_gv": 2000.0, "tail_fraction": 0.02, "tail_scale": 5.0}  # in curvature 1/R
 N_CTRL_TRIGGER = 1000  # synthetic unbiased-trigger control sample per period
 N_CTRL_SELECTION = 5000  # synthetic control sample per bin and species (shared by the periods)
+CHARGE_TAIL = {"fraction": 0.05, "start": 1.3, "slope": 0.2}  # synthetic: fraction of selected Z=1 events with Q > start
+HE_WINDOW = (1.7, 2.5)  # helium signal region in the charge estimator Q (synthetic)
+SIDEBAND = (1.3, 1.6)  # helium-free control sideband (synthetic)
+VALIDATION_BAND = (1.6, 1.7)  # helium-free validation band (synthetic)
+TF_REL = 0.10  # synthetic transfer-factor uncertainty (tail-shape modelling), fully correlated
+BLIND = {"variable": "rigidity", "low": 60.0, "high": 100.0}  # synthetic blinding policy, helium signal region only
 CRITERIA = {"asimov_max_rel_dev": 1e-9, "toy_mean_pull_abs": 0.2, "toy_pull_width": (0.85, 1.15),
-            "reference_rel_agreement": 1e-9}
+            "reference_rel_agreement": 1e-9, "background_asimov_max_rel_dev": 1e-12, "validation_band_abs_pull": 3.0,
+            "validation_band_chi2_p_min": 1e-3, "validation_band_min_predicted": 5.0}
+MASK_SCRIPT = PLUGIN / "skills" / "hep-analysis" / "scripts" / "mask_blinded_bins.py"
 
 NB = len(EDGES) - 1
 WIDTH = np.diff(EDGES)
 CENTER = np.sqrt(EDGES[:-1] * EDGES[1:])
+BLINDED = np.array(blinded_mask(EDGES, BLIND))
+PUBLISHED = slice(REPORTED.start, int(np.flatnonzero(BLINDED)[0]))  # reported helium and ratio bins below the blinded one
+
+
+def tail_fraction(lo, hi):
+    """Fraction of the synthetic Z=1 charge tail (exponential above CHARGE_TAIL['start']) with lo <= Q < hi."""
+    t = CHARGE_TAIL
+    return math.exp(-(lo - t["start"]) / t["slope"]) - math.exp(-(hi - t["start"]) / t["slope"])
+
+
+TF_SR = tail_fraction(*HE_WINDOW) / tail_fraction(*SIDEBAND)
+TF_VR = tail_fraction(*VALIDATION_BAND) / tail_fraction(*SIDEBAND)
 
 
 def truth_flux(sp: dict, period: dict, r):
@@ -134,36 +166,54 @@ def response(sp, period, n=200):
 
 
 # ----------------------------------------------------------------------------- analysis
-def unfold(m, counts):
-    a = np.array(linear_matrix("tsvd", NB, m.tolist(), np.maximum(counts, 1.0).tolist()))
+def unfold(m, counts, var, weights):
+    a = np.array(linear_matrix("tsvd", NB, m.tolist(), np.maximum(weights, 1.0).tolist()))
     u = a @ counts
-    cov = a @ np.diag(counts) @ a.T
-    return u, cov
+    cov = a @ np.diag(var) @ a.T
+    return u, cov, a
 
 
-def analyse(counts, eff_trig_hat, eff_sel_hat, sigma_trig, sigma_sel, expo, m):
-    """Flux and covariance blocks for one species and period."""
-    u, cov_u = unfold(m, counts)
+def blind_counts(values):
+    """The analysis-side view of a helium signal-region histogram: the blinded bin is None."""
+    return [None if (b or v is None) else float(v) for v, b in zip(values, BLINDED)]
+
+
+def analyse(counts, eff_trig_hat, eff_sel_hat, sigma_trig, sigma_sel, expo, m, sideband=None, tf=0.0, fill=None):
+    """Flux and covariance blocks for one species and period. counts may hold None (a blinded bin, as released by the
+    custodian step): that bin takes the simulated expectation fill[k] with no variance. With a sideband, the
+    background tf x sideband is subtracted per reco bin; its statistical variance joins the statistical block and the
+    transfer-factor uncertainty forms the background block."""
+    blind = np.array([v is None for v in counts])
+    n = np.array([0.0 if v is None else float(v) for v in counts])
+    cr = np.zeros(NB) if sideband is None else np.asarray(sideband, float)
+    bkg = np.where(blind, 0.0, tf * cr)
+    s = np.where(blind, 0.0 if fill is None else fill, n - bkg)
+    var = np.where(blind, 0.0, n + tf ** 2 * cr)
+    u, cov_u, a = unfold(m, s, var, np.where(blind, s, var))  # the weights only condition the full-rank inverse
     denom = eff_trig_hat * eff_sel_hat * expo * WIDTH
     flux = u / denom
     jac = np.diag(1.0 / denom)
     stat = jac @ cov_u @ jac.T
+    bkg_cov = jac @ a @ (np.outer(bkg, bkg) * TF_REL ** 2) @ a.T @ jac.T
     trig = np.outer(flux, flux) * (sigma_trig / eff_trig_hat) ** 2  # fully correlated across bins
     sel = np.diag((flux * sigma_sel / eff_sel_hat) ** 2)  # independent per bin
-    return {"flux": flux, "unfolded": u, "stat": stat, "trigger": trig, "selection": sel, "total": stat + trig + sel}
+    return {"flux": flux, "unfolded": u, "stat": stat, "trigger": trig, "selection": sel, "background": bkg_cov,
+            "total": stat + trig + sel + bkg_cov, "background_estimate": tf * cr}
 
 
 def ratio_block(num, den):
     """He/p ratio and covariance; the trigger efficiency is the same estimate in both, so it cancels exactly."""
     r = num["flux"] / den["flux"]
-    rel = (num["stat"] + num["selection"]) / np.outer(num["flux"], num["flux"]) + \
-          (den["stat"] + den["selection"]) / np.outer(den["flux"], den["flux"])
+    rel = (num["stat"] + num["selection"] + num["background"]) / np.outer(num["flux"], num["flux"]) + \
+          (den["stat"] + den["selection"] + den["background"]) / np.outer(den["flux"], den["flux"])
     return r, rel * np.outer(r, r)
 
 
 def simulate(rng, world, asimov=False):
-    """One pseudo-experiment: reco counts per species and period, and the efficiency control samples."""
-    out = {"counts": {}, "trig_hat": {}, "sel_hat": {}}
+    """One pseudo-experiment: reco counts per species and period, the efficiency control samples, and the Z=1 charge
+    tail in the helium window, the sideband and the validation band. The tail is drawn after the signal, so the signal
+    counts of a seed are those of the signal-only chain. The helium counts are the full signal region (unmasked)."""
+    out = {"counts": {}, "trig_hat": {}, "sel_hat": {}, "sideband": {}, "validation": {}}
     for pname, per in PERIODS.items():
         out["trig_hat"][pname] = per["trigger"] if asimov else rng.binomial(N_CTRL_TRIGGER, per["trigger"]) / N_CTRL_TRIGGER
     for sname, sp in SPECIES.items():
@@ -172,18 +222,31 @@ def simulate(rng, world, asimov=False):
         for pname in PERIODS:
             mu = world[sname][pname]["expected_reco"]
             out["counts"][(sname, pname)] = mu.copy() if asimov else rng.poisson(mu).astype(float)
+    for pname in PERIODS:
+        leak = world["helium"][pname]["leak"]
+        draw = (lambda mu: mu.copy()) if asimov else (lambda mu: rng.poisson(mu).astype(float))  # noqa: E731
+        out["counts"][("helium", pname)] = out["counts"][("helium", pname)] + draw(leak["window"])
+        out["sideband"][pname] = draw(leak["sideband"])
+        out["validation"][pname] = draw(leak["validation"])
+    out["tf_hat"] = TF_SR if asimov else TF_SR * (1.0 + TF_REL * rng.normal())
     return out
 
 
 def run_analysis(sim, world):
+    """The published (blinded) procedure: the helium signal-region bin in BLIND is masked if it is not already."""
     res = {}
     for pname, per in PERIODS.items():
         st = math.sqrt(per["trigger"] * (1 - per["trigger"]) / N_CTRL_TRIGGER)
         for sname, sp in SPECIES.items():
             ss = np.sqrt(selection_eff(sp) * (1 - selection_eff(sp)) / N_CTRL_SELECTION)
             w = world[sname][pname]
-            res[(sname, pname)] = analyse(sim["counts"][(sname, pname)], sim["trig_hat"][pname], sim["sel_hat"][sname],
-                                          st, ss, w["exposure"], w["response"])
+            if sname == "helium":
+                extra = {"sideband": sim["sideband"][pname], "tf": sim["tf_hat"], "fill": w["expected_reco"]}
+                counts = blind_counts(sim["counts"][(sname, pname)])
+            else:
+                extra, counts = {}, sim["counts"][(sname, pname)]
+            res[(sname, pname)] = analyse(counts, sim["trig_hat"][pname], sim["sel_hat"][sname],
+                                          st, ss, w["exposure"], w["response"], **extra)
         res[("ratio", pname)] = ratio_block(res[("helium", pname)], res[("proton", pname)])
     for sname in SPECIES:  # exposure-weighted average over periods: sum of corrected counts / sum of exposures
         num = sum(res[(sname, p)]["unfolded"] / (sim["trig_hat"][p] * sim["sel_hat"][sname]) for p in PERIODS)
@@ -211,6 +274,10 @@ def build_world():
         world[sname]["equal_split_exposure"] = equal_split
     for pname in PERIODS:
         world.setdefault("ratio_truth", {})[pname] = world["helium"][pname]["truth_flux"] / world["proton"][pname]["truth_flux"]
+        # synthetic background: the Z=1 charge tail, binned like the proton reco counts, in each charge band
+        tail = CHARGE_TAIL["fraction"] * world["proton"][pname]["expected_reco"]
+        world["helium"][pname]["leak"] = {"window": tail * tail_fraction(*HE_WINDOW), "sideband": tail * tail_fraction(*SIDEBAND),
+                                          "validation": tail * tail_fraction(*VALIDATION_BAND)}
     return world
 
 
@@ -228,6 +295,8 @@ def asimov_closure(world):
 
 
 def toy_closure(world, toys, seed):
+    """Toys of the published procedure (helium blinded bin filled): pulls over the reported proton bins and over the
+    published helium and ratio bins (the blinded bin carries the expectation, not a measurement)."""
     rng = np.random.default_rng(seed)
     pulls = {}
     for _ in range(toys):
@@ -236,10 +305,10 @@ def toy_closure(world, toys, seed):
             for pname in PERIODS:
                 b = res[(sname, pname)]
                 p = (b["flux"] - world[sname][pname]["truth_flux"]) / np.sqrt(np.diag(b["total"]))
-                pulls.setdefault(f"{sname}/{pname}", []).append(p[REPORTED])
+                pulls.setdefault(f"{sname}/{pname}", []).append(p[REPORTED if sname == "proton" else PUBLISHED])
         for pname in PERIODS:
             r, c = res[("ratio", pname)]
-            pulls.setdefault(f"ratio/{pname}", []).append(((r - world["ratio_truth"][pname]) / np.sqrt(np.diag(c)))[REPORTED])
+            pulls.setdefault(f"ratio/{pname}", []).append(((r - world["ratio_truth"][pname]) / np.sqrt(np.diag(c)))[PUBLISHED])
     summary = {}
     for key, rows in pulls.items():
         a = np.array(rows)
@@ -251,7 +320,7 @@ def ratio_reference(res, pname):
     """Independent linear propagation (core.stats ratio_measured) from the joint He, p covariance in which the
     trigger term is a shared, fully correlated component. Must equal the cancellation used in ratio_block."""
     he, p = res[("helium", pname)], res[("proton", pname)]
-    sl = REPORTED
+    sl = PUBLISHED
     x, y = he["flux"][sl], p["flux"][sl]
     cxx, cyy = he["total"][sl, sl], p["total"][sl, sl]
     rel_trig = he["trigger"][sl, sl] / np.outer(x, x)  # same relative trigger variance for both species
@@ -266,6 +335,52 @@ def ratio_reference(res, pname):
             "max_rel_difference": float(np.max(np.abs(np.array(ref["linear_sigma"]) / mine - 1))),
             "sigma_if_trigger_treated_as_independent": naive.tolist(),
             "overestimate_factor_if_independent": (naive / mine).round(4).tolist()}
+
+
+def validation_closure(sim):
+    """Closure of the charge-sideband method in the helium-free validation band, per period: predicted TF_VR x sideband
+    against the observed counts; total pull with statistical uncertainties only, and chi2 over the bins with at least
+    CRITERIA['validation_band_min_predicted'] predicted events."""
+    out = {}
+    for pname in PERIODS:
+        cr, vr = sim["sideband"][pname], sim["validation"][pname]
+        pred = TF_VR * cr
+        var = pred + TF_VR ** 2 * cr
+        ok = pred >= CRITERIA["validation_band_min_predicted"]
+        chi2 = float(np.sum((vr - pred)[ok] ** 2 / var[ok]))
+        ndf = int(ok.sum())
+        out[pname] = {"observed": vr.tolist(), "predicted": pred.tolist(), "total_observed": float(vr.sum()),
+                      "total_predicted": float(pred.sum()), "total_pull": float((vr.sum() - pred.sum()) / math.sqrt(var.sum())),
+                      "chi2": chi2, "ndf": ndf, "p_value": chi2_sf(chi2, ndf)}
+    return out
+
+
+def custodian_mask(counts, expected, pname, out):
+    """SYNTHETIC stand-in for the data custodian's preparation step: the unmasked helium signal-region histogram exists
+    only in a temporary directory outside the outputs; mask_blinded_bins.py writes the released masked histogram (and
+    the masked data/expectation ratio) into the outputs, and the analysis reads only that file."""
+    import tempfile
+    sys.path.insert(0, str(MASK_SCRIPT.parent))
+    import mask_blinded_bins
+    target = out / "blinded" / f"helium_signal_region_{pname}.masked.json"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory() as tmp:
+        hist, ref = Path(tmp) / "hist.json", Path(tmp) / "expected.json"
+        hist.write_text(json.dumps({"edges": EDGES.tolist(), "values": np.asarray(counts).tolist()}))
+        ref.write_text(json.dumps({"edges": EDGES.tolist(), "values": np.asarray(expected).tolist()}))
+        code = mask_blinded_bins.main(["--hist", str(hist), "--low", str(BLIND["low"]), "--high", str(BLIND["high"]),
+                                       "--reference", str(ref), "--status", "synthetic", "--out", str(target)])
+    if code != 0:
+        raise RuntimeError("the masking step failed: nothing may be analysed")
+    return json.loads(target.read_text(encoding="utf-8"))["values"], target
+
+
+def pseudo_data(seed, world):
+    """The SYNTHETIC pseudo-data of a seed, unmasked: only the custodian step (and a test acting as custodian) reads
+    the helium signal-region counts from it. The data analysis uses the nominal transfer factor; only toys vary it."""
+    sim = simulate(np.random.default_rng(seed), world)
+    sim["tf_hat"] = TF_SR
+    return sim
 
 
 # ----------------------------------------------------------------------------- outputs
@@ -292,22 +407,40 @@ def artifacts(world, res, created):
                                         "geomagnetic cutoff selection"),
                            "observable": obs, "species_or_process": "helium, proton (synthetic)", "period": periods,
                            "selections": [{"name": "geomagnetic", "definition": "bin lower edge > 1.2 x maximum cutoff", "conditional_denominator": "livetime"},
-                                          {"name": "species selection", "definition": "synthetic per-species selection", "conditional_denominator": "triggered events in acceptance"}],
-                           "backgrounds": [],
-                           "no_backgrounds_reason": "SYNTHETIC: the toy generates the two signal species only",
+                                          {"name": "species selection", "definition": "synthetic per-species selection", "conditional_denominator": "triggered events in acceptance"},
+                                          {"name": "helium charge window", "definition": "SYNTHETIC: charge estimator 1.7 <= Q < 2.5",
+                                           "conditional_denominator": "helium events passing the species selection (inside by construction)"}],
+                           "backgrounds": [{"name": "Z=1 charge tail in the helium window (synthetic)",
+                                            "estimator": "charge-sideband extrapolation: B_k = TF x N_sideband,k per reco rigidity bin and "
+                                                         "period, TF = tail fraction in the window / in the sideband from the synthetic tail shape",
+                                            "control_region": "SYNTHETIC: charge estimator 1.3 <= Q < 1.6 (helium-free by construction)",
+                                            "closure": "SYNTHETIC: validation band 1.6 <= Q < 1.7 predicted from the sideband per period "
+                                                       "(results.json#background/validation_closure); Asimov closure exact",
+                                            "transfer_factor": TF_SR, "processes": ["proton (Z=1)"],
+                                            "uncertainty": "10% on TF, fully correlated (synthetic tail-shape modelling); sideband "
+                                                           "counts in the statistical block"}],
                            "corrections": [
                                {"effect_id": "trigger_efficiency", "category": "trigger_efficiency", "applied_in": "estimator"},
                                {"effect_id": "selection_efficiency", "category": "selection_efficiency", "applied_in": "estimator"},
                                {"effect_id": "acceptance", "category": "acceptance", "applied_in": "estimator"},
                                {"effect_id": "rigidity_migration", "category": "migration", "applied_in": "response_matrix"}],
                            "systematics": [{"name": "trigger_efficiency", "source": "control sample", "effect": "normalization", "applied_via": "covariance (fully correlated across bins, shared by species)"},
-                                           {"name": "selection_efficiency", "source": "control sample", "effect": "normalization", "applied_via": "covariance (per bin, per species)"}],
-                           "blinding": {"blinded": False},
+                                           {"name": "selection_efficiency", "source": "control sample", "effect": "normalization", "applied_via": "covariance (per bin, per species)"},
+                                           {"name": "background_transfer_factor", "source": "synthetic 10% on the charge-tail transfer factor", "effect": "mixed",
+                                            "applied_via": "covariance (TF x sideband counts, fully correlated across bins, helium only, unfolded)"}],
+                           "blinding": {"blinded": True,
+                                        "mask": {"regions": ["helium signal region (1.7 <= Q < 2.5) in the bin 60-100 GV, both periods"],
+                                                 "intervals": [dict(BLIND)]},
+                                        "unblinding_record_ref": None},
+                           "notes": ("SYNTHETIC blinding policy: the custodian step masks the helium signal-region count in the "
+                                     "blinded bin; the unfolding fills it with the simulated expectation; helium flux, ratio and "
+                                     "period average are null there; proton counts and the charge sidebands stay open"),
                            "ratio": {"numerator": "helium flux", "denominator": "proton flux", "cancellations": [
                                {"effect": "trigger_efficiency", "treatment": "cancels", "correlation_model": "the same per-period estimate divides both species", "verification": "independent linear propagation with the shared component (core.stats ratio_measured) agrees"},
                                {"effect": "livetime_and_cutoff", "treatment": "cancels", "correlation_model": "identical livetime and cutoff fraction per period and bin", "verification": "by construction of the exposure"},
                                {"effect": "acceptance", "treatment": "independent", "correlation_model": "species-specific acceptance (assumed exactly known here)"},
-                               {"effect": "selection_efficiency", "treatment": "independent", "correlation_model": "separate control samples per species"}]},
+                               {"effect": "selection_efficiency", "treatment": "independent", "correlation_model": "separate control samples per species"},
+                               {"effect": "background_subtraction", "treatment": "independent", "correlation_model": "helium (numerator) only; the proton sample has no subtracted background here"}]},
                            "experiment_fields": {"ams02:parameters": [
                                {"name": "geomagnetic cutoff safety factor", "value": CUTOFF_FACTOR, "provenance": "documented", "claim_ids": ["C31"], "applies_to": {"species": ["proton"]}},
                                {"name": "geomagnetic cutoff safety factor", "value": CUTOFF_FACTOR, "provenance": "proposal", "claim_ids": [], "applies_to": {"species": ["helium"]}}],
@@ -334,18 +467,21 @@ def artifacts(world, res, created):
                 inputs=[{"ref": "artifacts/measurement_spec.json", "artifact_type": "measurement-spec", "status": ["synthetic"]}],
                 extension={"paradigm": "frequentist", "likelihood": {"form": "Poisson counts per reco bin; unfolding by full-rank weighted least squares (no regularization)"},
                            "parameters_of_interest": ["He/p ratio per rigidity bin and period"],
-                           "nuisances": ["trigger efficiency per period", "selection efficiency per bin and species"],
+                           "nuisances": ["trigger efficiency per period", "selection efficiency per bin and species",
+                                         "background transfer factor (helium)"],
                            "test_statistic": "not-applicable (point estimates with linear covariance)", "construction": "other",
                            "coverage": {"check": "not-checked", "method": "seeded toys of the full chain (closure and pulls, not interval coverage)", "result_ref": "results.json#toy_closure"},
                            "fit_status": "converged", "results": {"ref": "results.json#ratio"}})
     data = {}
+    pub_edges = EDGES[PUBLISHED.start:PUBLISHED.stop + 1].tolist()  # the blinded bin is not released
+    pub_obs = dict(obs, variables=[{"name": "rigidity", "unit": "GV", "edges": pub_edges}])
     for pname in PERIODS:
         r, c = res[("ratio", pname)]
         data[pname] = dict(base, artifact_id=f"synthetic-path-a-ratio-{pname}", artifact_type="dataset-record",
-                           objective=f"SYNTHETIC He/p ratio, {pname}", status=["synthetic"],
+                           objective=f"SYNTHETIC He/p ratio, {pname}, unblinded bins", status=["synthetic"],
                            provenance={"producer_skill": "hep-analysis", "created": created},
                            extension={"dataset_id": f"ams02:synthetic-path-a-ratio-{pname}", "source_evidence_ids": [],
-                                      "observable": obs, "data": {"edges": edges, "values": r[REPORTED].tolist(), "unit": "1",
+                                      "observable": pub_obs, "data": {"edges": pub_edges, "values": r[PUBLISHED].tolist(), "unit": "1",
                                                                   "uncertainties": [{"name": "total", "kind": "statistical", "correlation": "covariance", "covariance_ref": f"results.json#ratio/{pname}/covariance"}]},
                                       "covariance": {"status": "present", "ref": f"results.json#ratio/{pname}/covariance"},
                                       "period": {"start": pname, "end": pname}, "status": "synthetic", "experiment_profile": PROFILE["id"]})
@@ -365,29 +501,42 @@ def review_spec(spec, vocab, out):
 
 
 def figures(world, res, out):
+    """Both figures show the bins below the blinded one only (every species, data and truth alike), and are saved only
+    when core.blinding.check_figure finds nothing drawn inside the blinded rigidity range."""
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     from matplotlib.ticker import NullFormatter
-    x = CENTER[REPORTED]
+    sl = PUBLISHED
+    x = CENTER[sl]
     shift = {p: f for p, f in zip(PERIODS, (0.97, 1.03))}  # offset the periods horizontally for legibility
+    checks = {}
     fig, axes = plt.subplots(1, 2, figsize=(10, 4))
     for ax, sname in zip(axes, SPECIES):
         for pname, mk in zip(PERIODS, ("o", "s")):
             b = res[(sname, pname)]
-            y, e = b["flux"][REPORTED], np.sqrt(np.diag(b["total"]))[REPORTED]
+            y, e = b["flux"][sl], np.sqrt(np.diag(b["total"]))[sl]
             ax.errorbar(x * shift[pname], y * x ** 2.7, yerr=e * x ** 2.7, fmt=mk, ms=4, label=f"{pname} (synthetic data)")
-            ax.plot(x, world[sname][pname]["truth_flux"][REPORTED] * x ** 2.7, "--" if pname.endswith("1") else "-", lw=1, label=f"{pname} truth")
+            ax.plot(x, world[sname][pname]["truth_flux"][sl] * x ** 2.7, "--" if pname.endswith("1") else "-", lw=1, label=f"{pname} truth")
         ax.set_xscale("log"); ax.xaxis.set_minor_formatter(NullFormatter()); ax.set_xlabel("rigidity R [GV]"); ax.set_ylabel("flux x R^2.7 [m^-2 sr^-1 s^-1 GV^1.7]")
-        ax.set_title(f"SYNTHETIC {sname} flux"); ax.legend(fontsize=7)
-    fig.tight_layout(); fig.savefig(out / "flux_per_period.png", dpi=110); plt.close(fig)
+        ax.set_title(f"SYNTHETIC {sname} flux (60-100 GV blinded)"); ax.legend(fontsize=7)
+    fig.tight_layout()
+    checks["flux_per_period.png"] = len(check_figure(fig, BLIND))
+    if not checks["flux_per_period.png"]:
+        fig.savefig(out / "flux_per_period.png", dpi=110)
+    plt.close(fig)
     fig, ax = plt.subplots(figsize=(5.5, 4))
     for pname, mk in zip(PERIODS, ("o", "s")):
         r, c = res[("ratio", pname)]
-        ax.errorbar(x * shift[pname], r[REPORTED], yerr=np.sqrt(np.diag(c))[REPORTED], fmt=mk, ms=4, label=f"{pname} (synthetic data)")
-        ax.plot(x, world["ratio_truth"][pname][REPORTED], "--" if pname.endswith("1") else "-", lw=1, label=f"{pname} truth")
-    ax.set_xscale("log"); ax.xaxis.set_minor_formatter(NullFormatter()); ax.set_xlabel("rigidity R [GV]"); ax.set_ylabel("He / p"); ax.set_title("SYNTHETIC He/p ratio"); ax.legend(fontsize=7)
-    fig.tight_layout(); fig.savefig(out / "ratio_per_period.png", dpi=110); plt.close(fig)
+        ax.errorbar(x * shift[pname], r[sl], yerr=np.sqrt(np.diag(c))[sl], fmt=mk, ms=4, label=f"{pname} (synthetic data)")
+        ax.plot(x, world["ratio_truth"][pname][sl], "--" if pname.endswith("1") else "-", lw=1, label=f"{pname} truth")
+    ax.set_xscale("log"); ax.xaxis.set_minor_formatter(NullFormatter()); ax.set_xlabel("rigidity R [GV]"); ax.set_ylabel("He / p"); ax.set_title("SYNTHETIC He/p ratio (60-100 GV blinded)"); ax.legend(fontsize=7)
+    fig.tight_layout()
+    checks["ratio_per_period.png"] = len(check_figure(fig, BLIND))
+    if not checks["ratio_per_period.png"]:
+        fig.savefig(out / "ratio_per_period.png", dpi=110)
+    plt.close(fig)
+    return {"status": "pass" if not any(checks.values()) else "fail", "artists_in_blinded_range": checks}
 
 
 def main(argv=None) -> int:
@@ -402,8 +551,16 @@ def main(argv=None) -> int:
 
     world = build_world()
     asimov_res, asimov_dev = asimov_closure(world)
-    sim = simulate(np.random.default_rng(args.seed), world)
+    bkg_asimov_dev = max(float(np.max(np.abs(TF_SR * world["helium"][p]["leak"]["sideband"] / world["helium"][p]["leak"]["window"] - 1)))
+                         for p in PERIODS)
+    sim = pseudo_data(args.seed, world)
+    # custodian step: the helium signal-region histograms are masked before the analysis reads them
+    released = {}
+    for p in PERIODS:
+        expected = world["helium"][p]["expected_reco"] + world["helium"][p]["leak"]["window"]
+        sim["counts"][("helium", p)], released[p] = custodian_mask(sim["counts"][("helium", p)], expected, p, out)
     res = run_analysis(sim, world)
+    vclos = validation_closure(sim)
     toys = toy_closure(world, args.toys, args.seed + 1)
     refs = {p: ratio_reference(res, p) for p in PERIODS}
     docs, contract = artifacts(world, res, args.created)
@@ -415,16 +572,30 @@ def main(argv=None) -> int:
     cov_checks = {}
     for (k, p), b in res.items():
         if k in SPECIES and p in PERIODS:
-            sl = REPORTED
+            sl = REPORTED if k == "proton" else PUBLISHED
+            blocks = {"stat": b["stat"][sl, sl].tolist(), "trigger": b["trigger"][sl, sl].tolist(), "selection": b["selection"][sl, sl].tolist()}
+            if k == "helium":
+                blocks["background"] = b["background"][sl, sl].tolist()
             cov_checks[f"{k}/{p}"] = validate_covariance({"labels": [f"b{j}" for j in range(sl.start, sl.stop)], "kind": "absolute",
                                                           "units": "(m^-2 sr^-1 s^-1 GV^-1)^2", "matrix": b["total"][sl, sl].tolist(),
-                                                          "blocks": {"stat": b["stat"][sl, sl].tolist(), "trigger": b["trigger"][sl, sl].tolist(),
-                                                                     "selection": b["selection"][sl, sl].tolist()}})["status"]
+                                                          "blocks": blocks})["status"]
     for name, doc in docs.items():
         (out / "artifacts" / f"{name}.json").write_text(json.dumps(doc, indent=1) + "\n")
+    fig_check = figures(world, res, out)
 
+    def pub(v, species="helium"):
+        """Values with the blinded bin null (helium and the ratio; proton values are open)."""
+        v = np.asarray(v).tolist()
+        return v if species == "proton" else [None if b else x for x, b in zip(v, BLINDED)]
+
+    def pub_cov(c, species="helium"):
+        c = np.asarray(c).tolist()
+        return c if species == "proton" else [pub(row) if not b else [None] * len(row) for row, b in zip(c, BLINDED)]
+
+    blinded_rep = BLINDED[REPORTED]
     t11 = {s: {"exposure_per_period": {p: world[s][p]["exposure"][REPORTED].tolist() for p in PERIODS},
-               "average_flux": res[(s, "average")][REPORTED].tolist(), "average_truth": world[s]["average_truth"][REPORTED].tolist(),
+               "average_flux": [None if (b and s == "helium") else x for x, b in zip(res[(s, "average")][REPORTED].tolist(), blinded_rep)],
+               "average_truth": world[s]["average_truth"][REPORTED].tolist(),
                "equal_split_exposure_rel_error": [round(float(v), 4) + 0.0 for v in world[s]["equal_split_exposure"][REPORTED] / sum(world[s][p]["exposure"] for p in PERIODS)[REPORTED] - 1]}
            for s in SPECIES}
     passes = {
@@ -432,6 +603,10 @@ def main(argv=None) -> int:
         "toy_mean_pull": all(abs(v) < CRITERIA["toy_mean_pull_abs"] for s in toys.values() for v in s["mean_per_bin"]),
         "toy_pull_width": all(CRITERIA["toy_pull_width"][0] < v < CRITERIA["toy_pull_width"][1] for s in toys.values() for v in s["width_per_bin"]),
         "ratio_reference_agreement": all(r["max_rel_difference"] < CRITERIA["reference_rel_agreement"] for r in refs.values()),
+        "background_asimov_closure": bkg_asimov_dev < CRITERIA["background_asimov_max_rel_dev"],
+        "background_validation_closure": all(abs(v["total_pull"]) < CRITERIA["validation_band_abs_pull"]
+                                             and v["p_value"] > CRITERIA["validation_band_chi2_p_min"] for v in vclos.values()),
+        "blinded_figures": fig_check["status"] == "pass",
         "response_checks": all(v != "fail" for v in resp_checks.values()),
         "covariance_checks": all(v != "fail" for v in cov_checks.values()),
         "contracts": all(c["ok"] for c in contract.values()),
@@ -443,20 +618,35 @@ def main(argv=None) -> int:
         "review": review,
         "seed": args.seed, "toys": args.toys, "criteria": CRITERIA, "pass": passes,
         "edges_gv": EDGES.tolist(), "reported_bins": [REPORTED.start, REPORTED.stop],
+        "published_helium_and_ratio_bins": [PUBLISHED.start, PUBLISHED.stop],
         "synthetic_inputs": {"species": SPECIES, "periods": PERIODS, "cutoff_factor": CUTOFF_FACTOR, "resolution": RESOLUTION,
-                             "n_ctrl_trigger": N_CTRL_TRIGGER, "n_ctrl_selection": N_CTRL_SELECTION},
-        "observed_counts": {f"{s}/{p}": sim["counts"][(s, p)].tolist() for s in SPECIES for p in PERIODS},
-        "flux": {f"{s}/{p}": {"values": res[(s, p)]["flux"].tolist(), "truth": world[s][p]["truth_flux"].tolist(),
-                              "covariance": {k: res[(s, p)][k].tolist() for k in ("stat", "trigger", "selection", "total")}}
+                             "n_ctrl_trigger": N_CTRL_TRIGGER, "n_ctrl_selection": N_CTRL_SELECTION,
+                             "charge_tail": CHARGE_TAIL, "charge_bands": {"helium_window": HE_WINDOW, "sideband": SIDEBAND,
+                                                                          "validation_band": VALIDATION_BAND},
+                             "transfer_factor_rel_uncertainty": TF_REL},
+        "blinding": {"region": BLIND, "blinded_bins": [int(j) for j in np.flatnonzero(BLINDED)], "applies_to": "helium signal region, both periods",
+                     "released_helium_histograms": {p: f.relative_to(out).as_posix() for p, f in released.items()},
+                     "procedure": "custodian masks the helium signal-region count (mask_blinded_bins.py); the analysis fills the "
+                                  "blinded bin with the simulated helium expectation and zero variance; helium and ratio values "
+                                  "in that bin are null in every output; proton counts and charge sidebands are open",
+                     "figure_check": fig_check, "unblinded": False},
+        "observed_counts": {f"{s}/{p}": (sim["counts"][(s, p)] if s == "helium" else sim["counts"][(s, p)].tolist())
+                            for s in SPECIES for p in PERIODS},
+        "background": {"transfer_factor_window": TF_SR, "transfer_factor_validation_band": TF_VR,
+                       "sideband_counts": {p: sim["sideband"][p].tolist() for p in PERIODS},
+                       "estimate_window": {p: pub(res[("helium", p)]["background_estimate"]) for p in PERIODS},
+                       "expected_window": {p: world["helium"][p]["leak"]["window"].tolist() for p in PERIODS},
+                       "asimov_closure_max_rel_dev": bkg_asimov_dev, "validation_closure": vclos},
+        "flux": {f"{s}/{p}": {"values": pub(res[(s, p)]["flux"], s), "truth": world[s][p]["truth_flux"].tolist(),
+                              "covariance": {k: pub_cov(res[(s, p)][k], s) for k in ("stat", "trigger", "selection", "background", "total")}}
                  for s in SPECIES for p in PERIODS},
-        "ratio": {p: {"values": res[("ratio", p)][0].tolist(), "truth": world["ratio_truth"][p].tolist(),
-                      "covariance": res[("ratio", p)][1].tolist()} for p in PERIODS},
+        "ratio": {p: {"values": pub(res[("ratio", p)][0]), "truth": world["ratio_truth"][p].tolist(),
+                      "covariance": pub_cov(res[("ratio", p)][1])} for p in PERIODS},
         "time_average_T11": t11,
         "asimov_closure_max_rel_dev": asimov_dev, "toy_closure": toys, "ratio_reference_T10": refs,
         "response_validation": resp_checks, "covariance_validation": cov_checks, "contract_validation": contract,
     }
     (out / "results.json").write_text(json.dumps(results, indent=1) + "\n")
-    figures(world, res, out)
     write_report(out, results)
     digest = hashlib.sha256((out / "results.json").read_bytes()).hexdigest()
     print(json.dumps({"pass": passes, "results_sha256": digest}, indent=1))
@@ -466,6 +656,8 @@ def main(argv=None) -> int:
 def write_report(out: Path, r: dict) -> None:
     def fmt(v):
         return ", ".join(f"{x:.4g}" for x in v)
+    vband = "; ".join(f"{p}: observed {v['total_observed']:.0f}, predicted {v['total_predicted']:.1f}, pull {v['total_pull']:.2f}, "
+                      f"chi2 {v['chi2']:.1f} / {v['ndf']}" for p, v in r["background"]["validation_closure"].items())
     lines = [
         "# Path A report: synthetic flux and correlated He/p ratio (SYNTHETIC)",
         "",
@@ -489,11 +681,35 @@ def write_report(out: Path, r: dict) -> None:
         f"| Toy closure, mean pull per bin | abs < {r['criteria']['toy_mean_pull_abs']} | {'pass' if r['pass']['toy_mean_pull'] else 'FAIL'} |",
         f"| Toy closure, pull width per bin | in {tuple(r['criteria']['toy_pull_width'])} | {'pass' if r['pass']['toy_pull_width'] else 'FAIL'} |",
         f"| Ratio sigma vs independent propagation (T10) | relative difference < {r['criteria']['reference_rel_agreement']} | {'pass' if r['pass']['ratio_reference_agreement'] else 'FAIL'} |",
+        f"| Background estimate, Asimov closure | TF x expected sideband = expected window background, relative < {r['criteria']['background_asimov_max_rel_dev']} | {'pass' if r['pass']['background_asimov_closure'] else 'FAIL'} (max {r['background']['asimov_closure_max_rel_dev']:.1e}) |",
+        f"| Background estimate, validation band 1.6 <= Q < 1.7, per period | abs total pull < {r['criteria']['validation_band_abs_pull']} and chi2 p > {r['criteria']['validation_band_chi2_p_min']} (bins with >= {r['criteria']['validation_band_min_predicted']:g} predicted) | {'pass' if r['pass']['background_validation_closure'] else 'FAIL'} ({vband}) |",
+        f"| Figures drawn outside the blinded range (core.blinding.check_figure) | no artist inside | {'pass' if r['pass']['blinded_figures'] else 'FAIL'} |",
         f"| Response and covariance validators (core.stats) | no failure | {'pass' if r['pass']['response_checks'] and r['pass']['covariance_checks'] else 'FAIL'} |",
         f"| Contract artifacts (profile vocabulary) | all valid | {'pass' if r['pass']['contracts'] else 'FAIL'} |",
         "",
-        "The covariance validator warns that the trigger block has rank 1. That is expected: a single per-period trigger "
-        "efficiency scales every bin together, so its block is fully correlated by construction.",
+        "The covariance validator warns that the trigger and background blocks have rank 1. That is expected: a single "
+        "per-period trigger efficiency, and a single transfer factor, scale every bin together, so these blocks are fully "
+        "correlated by construction.",
+        "",
+        "## Background: Z=1 charge tail in the helium window (synthetic)",
+        "",
+        f"A synthetic {r['synthetic_inputs']['charge_tail']['fraction']:.0%} of the selected Z=1 events has a charge estimator Q above "
+        f"{r['synthetic_inputs']['charge_tail']['start']} with an exponential tail (slope {r['synthetic_inputs']['charge_tail']['slope']}); "
+        "the part inside the helium window 1.7 <= Q < 2.5 is a background to helium. Per reco rigidity bin and period it is "
+        f"estimated as TF x the counts of the helium-free sideband 1.3 <= Q < 1.6, TF = {r['background']['transfer_factor_window']:.4f} "
+        "from the synthetic tail shape (10% fully correlated uncertainty), and subtracted before the helium unfolding. The "
+        "validation band 1.6 <= Q < 1.7 (TF = "
+        f"{r['background']['transfer_factor_validation_band']:.4f}) checks the extrapolation on data. The proton flux is not affected.",
+        "",
+        "## Blinding (synthetic policy)",
+        "",
+        "The helium signal-region count in the bin 60-100 GV is blinded in both periods. A custodian step "
+        "(`skills/hep-analysis/scripts/mask_blinded_bins.py`) masks it before the analysis reads the histograms; the released "
+        f"files are {', '.join('`' + f + '`' for f in r['blinding']['released_helium_histograms'].values())}. The unfolding fills the "
+        "blinded bin with the simulated helium expectation and zero variance, so no published number depends on its count. "
+        "The helium flux, the He/p ratio and the period average are null in that bin in `results.json`, the dataset records stop "
+        "at 60 GV, and the figures show 2-60 GV. Proton counts and the charge sidebands stay open. Nothing here unblinds; that "
+        "is done by an authorized person outside the agent session.",
         "",
         "## What the chain does",
         "",
@@ -501,7 +717,8 @@ def write_report(out: Path, r: dict) -> None:
         "efficiency × selection efficiency; rigidity migration (2% core resolution in curvature, a 2% tail five times wider) "
         "gives Poisson reco counts; a full-rank weighted least-squares unfolding (`core.stats.unfolding_diagnostics.linear_matrix`, "
         "no regularization) returns selected truth counts; dividing by the efficiencies, the exposure and the bin width gives the "
-        "bin-averaged flux. The first and last bins (1.5-2 and 100-150 GV) absorb migration and are not reported.",
+        "bin-averaged flux. The first and last bins (1.5-2 and 100-150 GV) absorb migration and are not reported. For helium "
+        "the charge-tail background is subtracted from the reco counts first.",
         "",
         "Efficiencies are estimated from synthetic control samples. The trigger efficiency is one estimate per period shared by "
         "both species (fully correlated across bins); the selection efficiency is measured per bin and species and shared by the "
@@ -522,13 +739,16 @@ def write_report(out: Path, r: dict) -> None:
                      f"(livetimes {livetimes}; "
                      f"different cutoff fractions). Splitting the total livetime equally between periods would mis-state the "
                      f"exposure per bin by {fmt(t['equal_split_exposure_rel_error'])} (relative).")
-    lines += ["", "## Toy closure", "", f"{r['toys']} pseudo-experiments (seed {r['seed'] + 1}) regenerate the counts and the control samples.", "",
+    lines += ["", "## Toy closure", "", f"{r['toys']} pseudo-experiments (seed {r['seed'] + 1}) regenerate the counts, the control samples, the charge-tail "
+              "counts and the transfer factor, and apply the same blinded procedure; helium and ratio pulls cover 2-60 GV.", "",
               "| Quantity | mean pull per bin | pull width per bin |", "|---|---|---|"]
     for k, v in r["toy_closure"].items():
         lines.append(f"| {k} | {fmt(v['mean_per_bin'])} | {fmt(v['width_per_bin'])} |")
     lines += ["", "## Limitations (by construction of this example)", "",
               "- Acceptance and the response are assumed exactly known; no finite-MC or acceptance systematic is modeled.",
-              "- No background, charge confusion or fragmentation is modeled; the synthetic truth exists only in 1.5-150 GV.",
+              "- The only background is the synthetic Z=1 charge tail; its charge shape factorizes from rigidity by construction, so "
+              "one transfer factor serves every bin. No charge confusion or fragmentation is modeled; the synthetic truth exists "
+              "only in 1.5-150 GV.",
               "- The response uses the generated spectral shape inside each bin, so model dependence of the unfolding is not studied.",
               "- Acceptance, efficiencies and cutoff fractions are constant within a bin by construction.",
               "- Passing these checks shows the chain is internally consistent on synthetic data; it says nothing about any real detector.",

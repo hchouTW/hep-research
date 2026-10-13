@@ -1,7 +1,8 @@
 """Path A (journey J1) regression tests: synthetic flux and correlated ratio with the AMS-02 profile.
 
 Covers reproducibility, Asimov closure, toy closure with the default 400 seeded toys, the correlated ratio against an
-independent propagation (T10), time-dependent exposure averaging (T11), contract validity and synthetic labeling.
+independent propagation (T10), time-dependent exposure averaging (T11), contract validity and synthetic labeling, the
+charge-sideband background with its closure and the blinded helium bin absent from every output (P4-2, sentinel audit).
 All inputs are synthetic; passing says the chain is internally consistent, nothing about a real detector.
 """
 import contextlib
@@ -157,6 +158,129 @@ class PathATests(unittest.TestCase):
         params = spec["extension"]["experiment_fields"]["ams02:parameters"]
         self.assertEqual({p["provenance"] for p in params}, {"documented", "proposal"})
         self.assertIn("ams02:C31", spec["provenance"]["evidence_ids"])
+
+    def test_background_charge_sideband_estimate_and_closure(self):
+        m, b = self.m, self.results["background"]
+        # exponential tail above 1.3 with slope 0.2: window [1.7, 2.5) over sideband [1.3, 1.6)
+        tail = lambda lo, hi: math.exp(-(lo - 1.3) / 0.2) - math.exp(-(hi - 1.3) / 0.2)  # noqa: E731
+        self.assertAlmostEqual(b["transfer_factor_window"], tail(1.7, 2.5) / tail(1.3, 1.6), places=12)
+        self.assertAlmostEqual(b["transfer_factor_validation_band"], tail(1.6, 1.7) / tail(1.3, 1.6), places=12)
+        self.assertLess(b["asimov_closure_max_rel_dev"], 1e-12)
+        for p in m.PERIODS:
+            for est, cr, blinded in zip(b["estimate_window"][p], b["sideband_counts"][p], m.BLINDED):
+                if blinded:
+                    self.assertIsNone(est)
+                else:
+                    self.assertAlmostEqual(est, b["transfer_factor_window"] * cr, places=9)
+            v = b["validation_closure"][p]
+            self.assertLess(abs(v["total_pull"]), 3.0, p)
+            self.assertGreater(v["p_value"], 1e-3, p)
+            # the background is a visible part of the helium window, not a no-op subtraction
+            he = [x for x in self.results["observed_counts"][f"helium/{p}"] if x is not None]
+            self.assertGreater(sum(x for x in b["estimate_window"][p] if x is not None) / sum(he), 0.02, p)
+        spec = json.loads((self.out / "artifacts" / "measurement_spec.json").read_text())["extension"]
+        self.assertEqual(len(spec["backgrounds"]), 1)
+        self.assertNotIn("no_backgrounds_reason", spec)
+        self.assertIn("1.3 <= Q < 1.6", spec["backgrounds"][0]["control_region"])
+        self.assertIn("validation band", spec["backgrounds"][0]["closure"])
+        self.assertIn("background_transfer_factor", [s["name"] for s in spec["systematics"]])
+
+    def test_subtraction_is_unbiased_on_the_expectation(self):
+        """Asimov input with the background: helium and ratio return the truth exactly; without the subtraction they
+        would be biased by the leak fraction."""
+        m, w = self.m, self.world
+        sim = m.simulate(None, w, asimov=True)
+        res = m.run_analysis(sim, w)
+        for p in m.PERIODS:
+            np.testing.assert_allclose(res[("helium", p)]["flux"][m.REPORTED], w["helium"][p]["truth_flux"][m.REPORTED], rtol=1e-9)
+        sim["sideband"] = {p: 0 * v for p, v in sim["sideband"].items()}
+        biased = m.run_analysis(sim, w)
+        p = next(iter(m.PERIODS))
+        self.assertGreater(np.max(biased[("helium", p)]["flux"][m.PUBLISHED] / w["helium"][p]["truth_flux"][m.PUBLISHED] - 1), 0.02)
+
+    def test_blinded_bin_is_absent_from_the_outputs(self):
+        m, r = self.m, self.results
+        blinded = [j for j, b in enumerate(m.BLINDED) if b]
+        self.assertEqual(blinded, [9])  # 60-100 GV
+        self.assertEqual(r["blinding"]["blinded_bins"], blinded)
+        self.assertFalse(r["blinding"]["unblinded"])
+        j = blinded[0]
+        for p in m.PERIODS:
+            self.assertIsNone(r["observed_counts"][f"helium/{p}"][j])
+            self.assertIsNotNone(r["observed_counts"][f"proton/{p}"][j])  # proton counts stay open
+            for vals, cov in ((r["flux"][f"helium/{p}"]["values"], r["flux"][f"helium/{p}"]["covariance"]["total"]),
+                              (r["ratio"][p]["values"], r["ratio"][p]["covariance"])):
+                self.assertIsNone(vals[j])
+                self.assertTrue(all(x is None for x in cov[j]) and all(row[j] is None for row in cov))
+            released = json.loads((self.out / r["blinding"]["released_helium_histograms"][p]).read_text())
+            self.assertEqual(released["status"], "synthetic")
+            self.assertIsNone(released["values"][j])
+            self.assertIsNone(released["ratio_to_reference"][j])
+            ds = json.loads((self.out / "artifacts" / f"dataset_{p}.json").read_text())["extension"]["data"]
+            self.assertEqual(ds["edges"][-1], 60.0)
+            self.assertEqual(len(ds["values"]), len(ds["edges"]) - 1)
+        self.assertIsNone(r["time_average_T11"]["helium"]["average_flux"][j - m.REPORTED.start])
+        spec = json.loads((self.out / "artifacts" / "measurement_spec.json").read_text())
+        bl = spec["extension"]["blinding"]
+        self.assertTrue(bl["blinded"])
+        self.assertEqual(bl["mask"]["intervals"], [{"variable": "rigidity", "low": 60.0, "high": 100.0}])
+        self.assertIsNone(bl["unblinding_record_ref"])
+        self.assertNotIn("observed", spec["status"])
+        self.assertEqual(r["blinding"]["figure_check"]["status"], "pass")
+
+    def test_blinding_audit_with_synthetic_sentinel(self):
+        """Rerun with synthetic sentinels in place of the blinded helium counts: every output is byte-identical to the
+        normal run (no published number depends on them), and audit_blinded_outputs.py, sealing each period's sentinel
+        histogram as the custodian would, finds none of the sealed numbers. A planted sentinel is found (positive
+        control). Sentinels avoid the false hits that short integer counts give."""
+        m = self.m
+        sentinels = dict(zip(m.PERIODS, (987654.321, 876543.219)))
+        real = m.pseudo_data
+
+        def planted(seed, world):
+            sim = real(seed, world)
+            for p, v in sentinels.items():
+                sim["counts"][("helium", p)][m.BLINDED] = v
+            return sim
+        sent_out = Path(self.tmp.name) / "sentinel"
+        m.pseudo_data = planted
+        try:
+            self.assertEqual(run(m, "--out", str(sent_out)), 0)
+        finally:
+            m.pseudo_data = real
+        files = sorted(p.relative_to(self.out) for p in self.out.rglob("*") if p.is_file())
+        self.assertEqual(files, sorted(p.relative_to(sent_out) for p in sent_out.rglob("*") if p.is_file()))
+        for f in files:
+            self.assertEqual((self.out / f).read_bytes(), (sent_out / f).read_bytes(), str(f))
+
+        audit = PLUGIN / "skills" / "hep-computing" / "scripts" / "audit_blinded_outputs.py"
+        sim = planted(self.results["seed"], self.world)
+        exempt = []
+        for png in ("flux_per_period.png", "ratio_per_period.png"):
+            exempt += ["--exempt", f"{sent_out / png}=checked with core.blinding.check_figure in run.py"]
+        with tempfile.TemporaryDirectory() as private:
+            d = Path(private)
+            for p in m.PERIODS:
+                w = self.world["helium"][p]
+                refs = [w["expected_reco"] + w["leak"]["window"], m.TF_SR * sim["sideband"][p]]
+                (d / f"{p}.json").write_text(json.dumps({"edges": m.EDGES.tolist(), "values": sim["counts"][("helium", p)].tolist()}))
+                args = []
+                for i, ref in enumerate(refs):
+                    (d / f"{p}-ref{i}.json").write_text(json.dumps({"edges": m.EDGES.tolist(), "values": ref.tolist()}))
+                    args += ["--reference", str(d / f"{p}-ref{i}.json")]
+                seal = subprocess.run([sys.executable, str(audit), "seal", "--hist", str(d / f"{p}.json"), "--low", "60", "--high", "100",
+                                       *args, "--out", str(d / f"{p}-sealed.json")], capture_output=True, text=True, timeout=120)
+                self.assertEqual(seal.returncode, 0, seal.stderr)
+                scan = subprocess.run([sys.executable, str(audit), "scan", "--sealed", str(d / f"{p}-sealed.json"), str(sent_out), *exempt],
+                                      capture_output=True, text=True, timeout=120)
+                self.assertEqual(scan.returncode, 0, scan.stdout)
+                self.assertEqual(json.loads(scan.stdout)["status"], "pass")
+            leak = d / "leak"
+            leak.mkdir()
+            (leak / "log.txt").write_text(f"helium 60-100 GV: {sentinels[next(iter(m.PERIODS))]}\n")
+            bad = subprocess.run([sys.executable, str(audit), "scan", "--sealed", str(d / f"{next(iter(m.PERIODS))}-sealed.json"), str(leak)],
+                                 capture_output=True, text=True, timeout=120)
+            self.assertEqual(bad.returncode, 1, bad.stdout)
 
     def test_documented_profile_validation_command_works(self):
         """P4-3: the report names the command; with a project config outside the plugin it exits 0."""

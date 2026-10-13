@@ -54,7 +54,8 @@
   ],
   "nuisances": [
    "trigger efficiency per period",
-   "selection efficiency per bin and species"
+   "selection efficiency per bin and species",
+   "background transfer factor (helium)"
   ],
   "test_statistic": "not-applicable (point estimates with linear covariance)",
   "construction": "other",
