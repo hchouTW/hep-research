@@ -259,5 +259,45 @@
   "verification_strength": "abstract+metadata",
   "numeric_quotation_allowed": false,
   "last_reviewed": "2026-10-13"
+ },
+ {
+  "id": "hepstats:C14",
+  "claim": "From the Asimov data set, sigma_A^2 = (mu - mu')^2 / q_mu,A gives the width of the mu-hat distribution used in the Wald approximation -2 ln lambda(mu) = (mu - mu-hat)^2 / sigma^2 + O(1/sqrt N).",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "hepstats:S01"
+  ],
+  "location": "arXiv:1007.1727v3 eqs. (17) and (30)",
+  "scope": {
+   "text": "asymptotic formulae"
+  },
+  "limitations": "large-sample approximation",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-13"
+ },
+ {
+  "id": "hepstats:C15",
+  "claim": "A frequentist test of the ratio of Poisson means is recommended over the Bayesian-frequentist hybrid for on/off significance, which can undercover severely at high Z.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "hepstats:S33"
+  ],
+  "location": "physics/0702156 abstract",
+  "scope": {
+   "text": "on/off counting significance"
+  },
+  "limitations": "abstract-level support",
+  "verification_strength": "abstract+metadata",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-13"
  }
 ]

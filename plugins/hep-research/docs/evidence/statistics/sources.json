@@ -606,5 +606,111 @@
   "superseded_by": [],
   "attribution": "G. D'Agostini",
   "notes": "Nucl. Instrum. Meth. A346 (1994) 306-311 (Peelle's pertinent puzzle). Bibliographic record only (not opened 2026-10-13)."
+ },
+ {
+  "id": "hepstats:S30",
+  "title": "Limits and Confidence Intervals in the Presence of Nuisance Parameters",
+  "authors": "W. A. Rolke, A. M. Lopez, J. Conrad",
+  "year": 2005,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/physics/0403059",
+   "arxiv_ids": [
+    "physics/0403059"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2005",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "W. A. Rolke, A. M. Lopez, J. Conrad",
+  "notes": "Nucl. Instrum. Meth. A551 (2005) 493-503. arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S31",
+  "title": "Reference priors for high energy physics",
+  "authors": "L. Demortier, S. Jain, H. B. Prosper",
+  "year": 2010,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/1002.1111",
+   "arxiv_ids": [
+    "1002.1111"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2010",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "L. Demortier, S. Jain, H. B. Prosper",
+  "notes": "Phys. Rev. D 82 (2010) 034002. arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S32",
+  "title": "Incorporating systematic uncertainties into an upper limit",
+  "authors": "R. D. Cousins, V. L. Highland",
+  "year": 1992,
+  "identifiers": {
+   "doi": "10.1016/0168-9002(92)90794-5",
+   "url": "https://doi.org/10.1016/0168-9002(92)90794-5"
+  },
+  "tier": 1,
+  "verification_level": "metadata-only",
+  "verification_date": "2026-10-13",
+  "publication_date": "1992",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "R. D. Cousins, V. L. Highland",
+  "notes": "Nucl. Instrum. Meth. A320 (1992) 331-335. Bibliographic record only (not opened 2026-10-13)."
+ },
+ {
+  "id": "hepstats:S33",
+  "title": "Evaluation of three methods for calculating statistical significance when incorporating a systematic uncertainty into a test of the background-only hypothesis for a Poisson process",
+  "authors": "R. D. Cousins, J. T. Linnemann, J. Tucker",
+  "year": 2008,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/physics/0702156",
+   "arxiv_ids": [
+    "physics/0702156"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2008",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "R. D. Cousins, J. T. Linnemann, J. Tucker",
+  "notes": "Nucl. Instrum. Meth. A595 (2008) 480-501. arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S34",
+  "title": "Clarification of the use of chi-square and likelihood functions in fits to histograms",
+  "authors": "S. Baker, R. D. Cousins",
+  "year": 1984,
+  "identifiers": {
+   "doi": "10.1016/0167-5087(84)90016-4",
+   "url": "https://doi.org/10.1016/0167-5087(84)90016-4"
+  },
+  "tier": 1,
+  "verification_level": "metadata-only",
+  "verification_date": "2026-10-13",
+  "publication_date": "1984",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "S. Baker, R. D. Cousins",
+  "notes": "Nucl. Instrum. Meth. 221 (1984) 437-442. Bibliographic record only (not opened 2026-10-13)."
  }
 ]

@@ -20,7 +20,7 @@
   },
   "hep-statistics": {
    "references": 11,
-   "bytes": 138972,
+   "bytes": 142095,
    "uncited": 0
   },
   "hep-theory": {
@@ -1501,7 +1501,7 @@
     "skills/hep-statistics/SKILL.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "591e7d0 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/core-stats-commands.md",
@@ -1540,8 +1540,8 @@
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
    "owner": "hep-statistics",
-   "bytes": 15095,
-   "lines": 163,
+   "bytes": 18218,
+   "lines": 197,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
