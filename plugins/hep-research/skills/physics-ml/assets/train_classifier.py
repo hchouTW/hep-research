@@ -22,8 +22,8 @@ points (thresholds at fixed signal efficiency) are fixed on validation and appli
 which is evaluated once, after selection.
 
 Outputs in --output-dir: config.json, split_manifest.json (synthetic only), split_check.json, best.pt, last.pt,
-training_log.json, test_scores.csv, run_summary.json. Checkpoints hold plain types only and load with
-torch.load(..., weights_only=True).
+training_log.json, val_scores.csv (calibration fit sample), test_scores.csv, run_summary.json. Checkpoints hold
+plain types only and load with torch.load(..., weights_only=True).
 --config config.yaml supplies defaults; flags given on the command line override it.
 Exit codes: 0 done, 1 split check did not pass (training refused), 2 usage or input error, 3 PyTorch not available.
 """
@@ -592,8 +592,9 @@ def run(args) -> int:
         metrics["val"]["working_points"] = working_points_val(val_scores, y[va], w[va], args.working_points)
         metrics["test"]["working_points"] = working_points_test(test_scores, y[te], w[te],
                                                                 metrics["val"]["working_points"])
-    scores_path = output_dir / "test_scores.csv"
+    scores_path, val_scores_path = output_dir / "test_scores.csv", output_dir / "val_scores.csv"
     write_scores(scores_path, [data["ids"][i] for i in te], y[te], w[te], test_scores, labels)
+    write_scores(val_scores_path, [data["ids"][i] for i in va], y[va], w[va], val_scores, labels)
 
     summary = {
         "task": "classification", "features": features, "units": data["units"], "labels": labels,
@@ -604,7 +605,7 @@ def run(args) -> int:
         "model_hash": sha256_file(best_path), "checkpoint": str(best_path.resolve()),
         "environment": {"torch_version": torch.__version__, "device": str(device), "precision": args.precision,
                         "seeds": seeds},
-        "metrics": metrics, "scores": {"test": str(scores_path.resolve())},
+        "metrics": metrics, "scores": {"val": str(val_scores_path.resolve()), "test": str(scores_path.resolve())},
     }
     (output_dir / "run_summary.json").write_text(json.dumps(_finite(summary), indent=2, allow_nan=False))
     test = metrics["test"]
