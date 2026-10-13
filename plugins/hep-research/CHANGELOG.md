@@ -3,6 +3,15 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+### hep-computing (remediation CMP-01…CMP-28)
+
+- **CMP-01 partition state lock.** `core/partition/engine.py` `run()`, `reset()` and `merge()` hold an exclusive,
+  non-blocking lock on `<state>/.lock` (`dir_lock`, shared with `campaign_lock`, so campaign calls still nest); a second
+  process gets `PartitionError("partition.locked")`, and `local_partition.py` prints it as a JSON `error` with
+  `code`, exit 2. `status` stays lock-free. Tests: `tests/core/test_partition_robustness.py`.
+
 ## 0.6.17 (2026-10-13)
 
 Contracts 2.5.0 (minor: ML semantics; every 2.4.0 artifact keeps its outcome and gets the new rules with

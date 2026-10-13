@@ -25,7 +25,8 @@ CLI:
   status --manifest manifest.json --state DIR
   merge --manifest manifest.json --state DIR   (sums numeric lists/values key by key)
   reset --manifest manifest.json --state DIR --chunks c0004 --reason "fixed input path"   (after fixing a stopped chunk)
-Exit codes: 0 complete, 1 incomplete or failed chunks, 2 bad input.
+Exit codes: 0 complete, 1 incomplete or failed chunks, 2 bad input or a state folder in use by another run, reset
+or merge ({"error": ..., "code": "partition.locked"}; status takes no lock).
 The engine lives in core/partition (shared with the batch-scheduler adapter); this file is its CLI.
 Standard library only.
 """
@@ -40,8 +41,8 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
-from core.partition.engine import (_hash, _load_state, _reduce, _sum, _write_atomic, check_template, make_manifest, merge,  # noqa: E402,F401,E501
-                                   reset, run, status, validate_manifest)
+from core.partition.engine import (PartitionError, _hash, _load_state, _reduce, _sum, _write_atomic, check_template,  # noqa: E402,F401,E501
+                                   make_manifest, merge, reset, run, status, validate_manifest)
 from core.partition.executors import allowed_env  # noqa: E402
 
 
@@ -126,6 +127,9 @@ def main(argv=None) -> int:
         res = merge(manifest, args.state)
         print(json.dumps(res, indent=1))
         return 0 if res["status"] == "complete" else 1
+    except PartitionError as exc:
+        print(json.dumps({"error": str(exc), "code": exc.code}))
+        return 2
     except (OSError, ValueError, KeyError) as exc:
         print(json.dumps({"error": str(exc)}))
         return 2

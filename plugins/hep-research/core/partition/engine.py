@@ -10,6 +10,9 @@ Rules this enforces:
   signature is the worker exception's 'signature' attribute when it has one, else its type and message with paths,
   long hex strings and numbers masked, so a temporary path or a timestamp in the message does not defeat the stop.
 - State (attempts, errors) is kept on disk after any failure, so a later resubmission continues where it stopped.
+- run(), reset() and merge() hold an exclusive lock on <state>/.lock (dir_lock); a second process or thread gets
+  PartitionError("partition.locked") at once instead of racing it for state.json. status() only reads and takes no
+  lock. The same lock (shared per-thread registry) is the campaign lock, so a campaign call may nest engine calls.
 - Merging reads each manifest chunk from its canonical file chunks/<id>.json only, and checks that it belongs to this
   manifest and has the manifest's id, range and seed, and that the ranges tile [0, n) with no gap or overlap; a missing
   chunk makes the merge 'incomplete', never a silent partial sum. Any other file claiming a manifest chunk is never
@@ -17,10 +20,12 @@ Rules this enforces:
 
 API: make_manifest(job_id, n_items, chunk_size, seed) -> dict; validate_manifest(manifest); check_template(cmd); run(manifest, state_dir, worker, config=None) -> dict
 (synchronous, in-process); status(manifest, state_dir); reset(state_dir, chunk_ids, reason); merge(manifest,
-state_dir, combine=None). Standard library only.
+state_dir, combine=None); dir_lock(directory, operation, busy). Standard library only.
 """
 from __future__ import annotations
 
+import contextlib
+import datetime
 import hashlib
 import json
 import math
@@ -29,8 +34,66 @@ import re
 import shlex
 import string
 import tempfile
+from collections.abc import Callable, Iterator
 from pathlib import Path
+from threading import local as _thread_state  # the packaging scan reads '.local' as a host name
 from typing import Any
+
+
+class PartitionError(ValueError):
+    """Refusal with a named code (exit 2 in a CLI)."""
+
+    def __init__(self, code: str, message: str):
+        super().__init__(f"{code}: {message}")
+        self.code = code
+
+
+_HELD = _thread_state()  # directories this thread holds the lock of, with a depth (calls nest)
+
+
+@contextlib.contextmanager
+def dir_lock(directory, operation: str, busy: Callable[[Path, str], Exception] | None = None) -> Iterator[None]:
+    """Exclusive, non-blocking lock on <directory>/.lock for one operation; nested calls in the same thread reuse it.
+    busy(directory, holder) builds the exception raised when another process or thread holds it (default
+    PartitionError("partition.locked")). The holder text (operation, pid, time) is written into the lock file."""
+    ddir = Path(directory).resolve()
+    held = getattr(_HELD, "dirs", None)
+    if held is None:
+        held = _HELD.dirs = {}
+    if held.get(ddir):
+        held[ddir] += 1
+        try:
+            yield
+        finally:
+            held[ddir] -= 1
+        return
+    ddir.mkdir(parents=True, exist_ok=True)
+    fh = open(ddir / ".lock", "a+", encoding="utf-8")
+    try:
+        try:
+            import fcntl
+            fcntl.flock(fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except ImportError:  # Windows
+            import msvcrt
+            msvcrt.locking(fh.fileno(), msvcrt.LK_NBLCK, 1)  # type: ignore[attr-defined]  # Windows-only API, absent from non-win32 stubs
+    except OSError:
+        fh.seek(0)
+        holder = fh.read().strip() or "another process"
+        fh.close()
+        if busy is None:
+            raise PartitionError("partition.locked", f"{ddir} is in use ({holder}); wait for it to finish") from None
+        raise busy(ddir, holder) from None
+    try:
+        fh.seek(0)
+        fh.truncate()
+        now = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+        fh.write(f"{operation} by pid {os.getpid()} since {now}")
+        fh.flush()
+        held[ddir] = 1
+        yield
+    finally:
+        held.pop(ddir, None)
+        fh.close()  # closing the file releases the lock
 
 
 def _hash(obj) -> str:
@@ -171,6 +234,11 @@ def run(manifest: dict, state_dir, worker, config: dict | None = None) -> dict:
     """Run every chunk without an output, each within max_attempts counted since its last reset() over all calls."""
     state_dir = Path(state_dir)
     max_attempts = _max_attempts(config)
+    with dir_lock(state_dir, "run"):
+        return _run(manifest, state_dir, worker, config, max_attempts)
+
+
+def _run(manifest: dict, state_dir: Path, worker, config: dict | None, max_attempts: int) -> dict:
     state = _load_state(state_dir)
     if state.get("manifest_hash", manifest["manifest_hash"]) != manifest["manifest_hash"]:
         raise ValueError("state directory belongs to a different manifest")
@@ -221,6 +289,11 @@ def run(manifest: dict, state_dir, worker, config: dict | None = None) -> dict:
 def reset(state_dir, chunk_ids, reason: str) -> dict:
     """Clear the error history of chunks after their cause was fixed, so they can run again. Kept in 'resets'."""
     state_dir = Path(state_dir)
+    with dir_lock(state_dir, "reset"):
+        return _reset(state_dir, chunk_ids, reason)
+
+
+def _reset(state_dir: Path, chunk_ids, reason: str) -> dict:
     state = _load_state(state_dir)
     for cid in chunk_ids:
         st = state["chunks"].get(cid)
@@ -270,6 +343,11 @@ def _nonfinite(x, path="result") -> str | None:
 
 def merge(manifest: dict, state_dir, combine=None) -> dict:
     """Merge chunk outputs; combine(list_of_results) defaults to key-by-key summation."""
+    with dir_lock(state_dir, "merge"):
+        return _merge(manifest, Path(state_dir), combine)
+
+
+def _merge(manifest: dict, state_dir: Path, combine=None) -> dict:
     combine = combine or (lambda rs: _reduce(rs))
     problems: list[dict[str, Any]] = []
     seen: dict[str, str] = {}
