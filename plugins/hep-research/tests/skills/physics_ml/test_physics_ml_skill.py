@@ -436,15 +436,28 @@ class MemoryEstimateCliTests(unittest.TestCase):
     """The CLI runs without PyTorch and fails cleanly on bad input."""
 
     SCRIPT = str(ROOT / "scripts/estimate_training_memory.py")
+    # A physics-scale plan file written per test (the shipped 7B-class language-model plan was removed as
+    # generic LLM material): a particle transformer over 256 constituents, no token vocabulary, on 4 GPUs.
+    PLAN = {"layers": 12, "hidden": 512, "heads": 8, "vocab_size": 0, "ffn_ratio": 4.0,
+            "seq_len": 256, "micro_batch": 64, "gpus": 4, "gpu_memory_gb": 40.0,
+            "precision": "mixed", "optimizer": "adam", "zero_stage": 0,
+            "tensor_parallel": 1, "pipeline_parallel": 1, "recompute": "none"}
 
-    def test_runs_on_shipped_plan(self):
+    def setUp(self):
+        handle = tempfile.NamedTemporaryFile("w", suffix=".json", delete=False)
+        with handle:
+            json.dump(self.PLAN, handle)
+        self.plan_path = handle.name
+        self.addCleanup(os.remove, self.plan_path)
+
+    def test_runs_on_a_plan_file(self):
         result = subprocess.run(
-            [sys.executable, self.SCRIPT, str(ROOT / "assets/scaling-plan.example.json"),
-             "--json"], capture_output=True, text=True, timeout=600)
+            [sys.executable, self.SCRIPT, self.plan_path, "--json"],
+            capture_output=True, text=True, timeout=600)
         self.assertEqual(result.returncode, 0, result.stderr)
         payload = json.loads(result.stdout)
         self.assertAlmostEqual(payload["parameters_total"],
-                               transformer_parameters(32, 4096, 32000, 4.0), places=0)
+                               transformer_parameters(12, 512, 0, 4.0), places=0)
         self.assertIn("advice", payload)
 
     def test_text_report_names_the_binding_term(self):
@@ -456,7 +469,7 @@ class MemoryEstimateCliTests(unittest.TestCase):
 
     def test_flags_override_the_plan_file(self):
         result = subprocess.run(
-            [sys.executable, self.SCRIPT, str(ROOT / "assets/scaling-plan.example.json"),
+            [sys.executable, self.SCRIPT, self.plan_path,
              "--zero-stage", "3", "--json"], capture_output=True, text=True, timeout=600)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(json.loads(result.stdout)["zero_stage"], 3)
@@ -959,7 +972,8 @@ class SplitIntegrityTests(unittest.TestCase):
         payload = json.loads((ROOT / "assets/dataset-splits.example.json").read_text())
         report = check(payload)
         self.assertFalse(report["passed"])
-        self.assertIn("p2", report["group_leakage"])
+        # the shipped manifest groups events by run (it used to group records by patient)
+        self.assertIn("run-1002", report["group_leakage"])
         self.assertTrue(report["temporal_violations"])
         # But it has no plain ID overlap - the leak is invisible to a naive check.
         self.assertEqual(report["overlaps_between_splits"], {})

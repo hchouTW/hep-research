@@ -1,5 +1,11 @@
 # Sequence Model Reference (RNN/LSTM/GRU)
 
+> Generic ML engineering; not physics-specific. For physics tasks start at
+> [ml-analysis.md](ml-analysis.md). Physics uses: digitized waveforms and pulse shapes,
+> time series of detector or accelerator conditions, and sequences of hits along a
+> track. Unordered particle sets should not be fed to an RNN in an arbitrary order; use
+> a set or graph model ([particle-and-jet-architectures.md](particle-and-jet-architectures.md)).
+
 For attention-based sequence models see
 [transformer-architectures.md](transformer-architectures.md). This file
 covers recurrent architectures, which remain a reasonable default for small
@@ -63,17 +69,12 @@ is easy to get off-by-one wrong.
 
 ## Teacher forcing and exposure bias
 
-During training, feed the *ground-truth* previous token as the decoder's next
-input rather than its own (possibly wrong) prediction - this parallelizes training
-and avoids compounding early mistakes. At inference the model must feed back its
-own predictions, which it never saw during training; this train/inference mismatch
-is **exposure bias** and is a common reason generation quality looks worse than
-training loss would suggest. Mitigations, roughly in order of effort: don't over-
-train past the point validation quality plateaus (exposure bias worsens with
-overfitting), scheduled sampling (mix in the model's own predictions with
-increasing probability during training), or evaluate with the actual decoding
-procedure (beam search / sampling) during validation rather than trusting
-teacher-forced validation loss alone.
+During training, feed the *ground-truth* previous element as the decoder's next
+input rather than its own prediction. At inference the model feeds back its own
+predictions, which it never saw during training (**exposure bias**), so generated
+sequences can look worse than the training loss suggests. Validate with the actual
+generation procedure, not only the teacher-forced loss; scheduled sampling is the usual
+mitigation.
 
 ## Masking the loss at padded positions
 
@@ -86,9 +87,11 @@ mask = (targets != pad_index).reshape(-1).float()
 loss = (loss_per_token * mask).sum() / mask.sum().clamp(min=1)
 ```
 
-Forgetting this mask is one of the most common silent bugs in sequence-to-sequence
-code: training still "works" (loss goes down) but converges slower and the model
-wastes capacity learning to predict the pad token correctly.
+Forgetting this mask is one of the most common silent bugs in sequence code:
+training still "works" (loss goes down) but converges slower and the model wastes
+capacity learning to predict the pad value. The same applies to padded hits or
+particles, and with event weights the mask multiplies the weight
+([ml-analysis.md](ml-analysis.md)).
 
 ## Bidirectional and stacked layers
 

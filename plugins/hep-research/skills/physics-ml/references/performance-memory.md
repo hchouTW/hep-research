@@ -41,9 +41,10 @@ outputs_cpu.append(outputs.cpu()) # only after detach/inference when needed
 
 ## Mixed precision
 
-CUDA AMP often improves throughput and memory use. Use `GradScaler` for training
-and keep reductions or numerically sensitive operations in full precision when
-needed.
+AMP often improves throughput and activation memory on GPUs with native bf16 or fp16
+units. Recipes (bf16 without `GradScaler`, fp16 with it), the fp16 overflow of raw inputs
+in MeV, keV or ADC counts, and what stays in fp32 are in
+[mixed-precision.md](mixed-precision.md).
 
 ## Memory pressure
 
@@ -68,4 +69,28 @@ if use_compile and hasattr(torch, "compile"):
 ```
 
 It can improve steady-state throughput but may slow startup, complicate stack
-traces, and be less helpful with dynamic shapes or heavy Python-side data work.
+traces, and be less helpful with heavy Python-side data work.
+
+### Variable particle multiplicity: the common recompilation trap
+
+Events have different numbers of particles, hits, tracks or constituents. Padding each
+batch to its own maximum gives a new shape almost every batch; `torch.compile`
+specializes on the first shape, recompiles on the next ones, and after the recompile
+limit (`torch._dynamo.config.recompile_limit`, 8 by default) falls back to eager with
+a single warning that is easy to miss. The run gets slower, not faster. Either:
+
+- mark the particle axis dynamic, so one graph serves every multiplicity:
+
+  ```python
+  model = torch.compile(model, dynamic=True)        # or leave dynamic=None and mark the axis:
+  torch._dynamo.mark_dynamic(x, 1)                   # x: [batch, n_particles, features]
+  torch._dynamo.mark_dynamic(mask, 1)                # mask: [batch, n_particles]
+  ```
+
+- or pad to a few fixed sizes (bucket events by multiplicity, for example 32, 64,
+  128, 256), which keeps static shapes and lets the compiler specialize per bucket.
+
+Check with `TORCH_LOGS=recompiles python train.py`: a recompile reported on every new
+size means the axis is not dynamic. Sizes 0 and 1 are specialized even on a dynamic
+axis, so pad events with fewer than two particles. Verified with torch 2.14.1 (CPU),
+2026-10-13, for a masked Deep Sets tagger across multiplicities 17, 41 and 90.

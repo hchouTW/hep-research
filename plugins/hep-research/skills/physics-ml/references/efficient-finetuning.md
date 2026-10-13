@@ -1,5 +1,11 @@
 # Efficient Fine-Tuning Reference (PEFT, Quantization)
 
+> Generic ML engineering; not physics-specific. For physics tasks start at
+> [ml-analysis.md](ml-analysis.md). The physics use is adapting a pretrained model (for
+> example a jet or particle foundation model trained on large simulated samples) to a
+> new task or detector with few labelled events; validate the adapted model exactly as
+> a model trained from scratch (grouped splits, simulation-to-data checks).
+
 For full fine-tuning, head replacement, and freezing/unfreezing strategy, see
 [transfer-learning.md](transfer-learning.md) first. This file covers
 techniques for fine-tuning large models under tighter compute/memory budgets.
@@ -66,10 +72,14 @@ class LoRALinear(nn.Module):
 Reduces the numeric precision of weights (and sometimes activations) to save
 memory and, on supported hardware, increase throughput.
 
-- **Dynamic quantization** (`torch.quantization.quantize_dynamic`): weights are
+- **Dynamic quantization** (`torch.ao.quantization.quantize_dynamic`): weights are
   quantized ahead of time, activations are quantized on the fly at inference. Easiest
   to apply, CPU-inference-oriented, no calibration data needed. Best for linear/LSTM-
-  heavy models.
+  heavy models. With torch 2.14.1 (CPU, checked 2026-10-13) it still runs but the whole
+  `torch.ao.quantization` namespace emits a `DeprecationWarning` pointing to the
+  separate `torchao` package, and on Apple-silicon CPUs it needs
+  `torch.backends.quantized.engine = "qnnpack"`. For new work use `torchao`, or quantize
+  in the deployment toolchain (ONNX Runtime, hls4ml).
 - **Static (post-training) quantization**: both weights and activations are
   quantized, using a calibration pass over representative data to determine
   activation ranges. More setup, generally better throughput than dynamic
@@ -78,12 +88,9 @@ memory and, on supported hardware, increase throughput.
   (fake-quantize) during training/fine-tuning so the model adapts to the precision
   loss. Highest accuracy at a given bit-width, at the cost of a training pass
   rather than a post-hoc conversion.
-- **Fine-tuning a quantized (or partially quantized) large model** (e.g. loading
-  base weights in 8-bit or 4-bit precision and training LoRA adapters in full/half
-  precision on top) combines both techniques above and is the standard way to
-  fine-tune large models on limited GPU memory - the frozen base dominates memory
-  and is quantized, while the small trainable adapters stay full-precision for
-  stable optimization.
+- **Fine-tuning a quantized base** (base weights in 8-bit or 4-bit, LoRA adapters in
+  full or half precision on top) only matters for pretrained models too large for the
+  GPU; most physics models are far below that size.
 - Quantization is a precision/throughput trade against accuracy: always compare
   quantized-model quality against the unquantized baseline on the same held-out
   set before adopting it, not just inference speed.

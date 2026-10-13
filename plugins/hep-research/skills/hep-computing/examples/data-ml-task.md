@@ -11,7 +11,7 @@ sample IDs. `skills/physics-ml/scripts/check_split_integrity.py` checks a JSON
 manifest of split IDs for exact overlap, duplicates within a split, group
 leakage and temporal ordering, and exits nonzero on failure; its example
 manifest `skills/physics-ml/assets/dataset-splits.example.json` fails on
-purpose (one group, `p2`, in train and test, and one timestamp violation).
+purpose (one run, `run-1002`, in train and test, and one timestamp violation).
 Nothing connects the two, so a user who replaces the synthetic data with a real
 dataset can train on leaked splits without the check ever running.
 

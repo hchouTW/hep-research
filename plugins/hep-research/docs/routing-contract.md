@@ -15,7 +15,7 @@ Choose the primary skill by the **deliverable**, never by an experiment, model, 
 | hep-theory | "Derive the tree-level cross section with these conventions"; "Compare my model with the published flux"; "Recast this search for my model" | "Fit my model's coupling to the data" → hep-statistics after the prediction; "Fold my prediction through the response" → detector-response | "Write the paper section" → research-communication |
 | hep-statistics | "Feldman–Cousins interval for zero observed events"; "Combine these two measurements with shared systematics"; "Bayesian posterior with these priors" | "Which correlation should I assume?" → evidence owner (hep-analysis / detector-response / hep-theory) | "Choose my selection cuts" → hep-analysis |
 | hep-computing | "Memory leak in my ROOT macro"; "Batch submission with resubmission and merge"; "Convergence study of this integral" | "Is this result physically right?" → owning physics skill | General non-physics software questions outside research code: no special handling |
-| physics-ml | "Train a classifier with grouped splits"; "Surrogate for my simulation"; "Domain shift between MC and data" | "What physics should the surrogate respect?" → hep-theory | TensorFlow/JAX-only questions: plugin gives general advice only |
+| physics-ml | "Train a classifier with grouped splits"; "Train a BDT for my event selection"; "ECAL energy regression with a neural network"; "Surrogate for my simulation"; "Domain shift between MC and data" | "What physics should the surrogate respect?" → hep-theory; "Is my SBI posterior's coverage valid?" → hep-statistics; "Validate the fast simulation against Geant4" → detector-response | TensorFlow/JAX-only questions: plugin gives general advice only |
 | research-communication | "Check that this citation supports the number"; "Draft the results section"; "Draw the analysis workflow" | "Is this Feynman diagram physically correct?" → hep-theory | "Run the fit for the paper" → hep-statistics |
 
 ## Topic ownership (single source)
@@ -34,10 +34,25 @@ as spaces.
 | Double-counting checks of corrections inside and outside the response | detector-response | `double counting checks` | Response objects, forward folding, double-counting checks |
 | Unfolding algorithms, regularization and their coverage | hep-statistics | `unfolding` | Unfolding |
 | Fits that use a response or a folded prediction | hep-statistics | `fits that use a folded prediction`, `fits that use a response` | — |
+| BDTs and classical MVA in an analysis: training, weights, working points | physics-ml | `BDT`, `classical MVA` | — |
+| Training networks for ML-assisted or simulation-based inference | physics-ml | `ML-assisted inference` | — |
+| Validity and coverage of an inference built on an ML model | hep-statistics | `coverage` | — |
+| Detector calibration (energy scale, alignment constants, conditions) | detector-response | `detector calibration` | — |
+| Validation of a fast or learned simulation against full detector simulation | detector-response | `detector simulation` | — |
 <!-- /ownership-table -->
 
 hep-analysis keeps the measurement-design view (which level to publish, which corrections the response carries) in
 `skills/hep-analysis/references/measurements-and-unfolding.md` and links out; it claims none of these topics.
+
+ML topics split by deliverable. physics-ml owns the model: training a BDT or network for a selection, a regression
+(including an ML energy calibration such as an ECAL regression), a generative fast simulation, or the networks of a
+simulation-based inference, and the calibration of the model's outputs. The neighbours own what is built on it or
+checked against it: hep-statistics the validity and coverage of the inference, detector-response the detector
+calibration chain and the validation of a fast simulation against full simulation, hep-analysis the selection,
+normalization and systematics around a score. Two physics-ml rows (fast-simulation training, calibration of model
+outputs) are not in the table yet: the physics-ml "Owns" line names them only as "generation" and "calibration", words
+that hep-theory ("event-generation physics") and detector-response also use, so the check cannot hold them until that
+line names them specifically.
 
 ## Deliverable-based rules
 
