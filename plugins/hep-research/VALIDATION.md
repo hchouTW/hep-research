@@ -1137,3 +1137,18 @@ and `contracts >=2.0` from 1.4.10 (ams02-research PR #26), and its checker repor
 codex-cli 0.160.0) and the E2 venv: 21 of 21 checks pass; 2,814 unit tests in 213 modules, 0 failures, 58 skipped. CI on
 main at `3c348fa` passed every job, including the optional ROOT and Python-extras jobs. Release manifest
 `release-manifests/0.7.0.json`.
+
+## 0.7.1 release check (2026-10-13, E2)
+
+Version 0.7.1: the R4 correction key for bounded recipes (PR #67: `recipe_version` 1.1.0 with optional `effect_keys`,
+upstream key fields, repeat / distinct / undetermined rule; `tests/contracts/test_recipe_semantics.py` 43 tests, the
+review-driven ones failing on the first commit and passing after the fix; the approved `differential_flux.json` table
+unchanged) and the skill texts aligned with R4 §9 scientific-validation guidance (PR #68: 14 skill files; hep-statistics
+and hep-computing `SKILL.md` 7,677 and 7,984 B of 8,192). Contracts stay 2.6.0. For the release the examples were rerun
+with the E2 venv: only the plugin version string changed, and the ML example's statistical result records the new hash
+of its ML artifact (unfolding-coverage and end-to-end-sample not rerun, as in earlier releases); the
+published-likelihood benchmark's two artifacts were rewritten with the new plugin version. The companion
+ams02-research (main `dc0e674`, 1.4.10) checker reports 0.7.1 `compatible` (requires `>=0.4.0`). `tools/run_all_checks.py`
+with the host CLIs (Claude Code 2.1.296, codex-cli 0.160.0) and the E2 venv: 21 of 21 checks pass; 2,830 unit tests in
+213 modules, 0 failures, 58 skipped. CI passed on both merged PRs (#67 every job; #68 every required job). Release
+manifest `release-manifests/0.7.1.json`.

@@ -3,7 +3,11 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.7.1 (2026-10-13)
+
+Contracts 2.6.0 (unchanged). The recipe sidecar gains `recipe_version` 1.1.0 (optional correction keys); 1.0.0 recipes
+keep their outcome. Release notes in brief: the R4 correction key for bounded recipes (PR #67) and the skill texts
+aligned with R4 §9 scientific-validation guidance (PR #68).
 
 - **R4 correction key for bounded recipes (AGENTIC-R5 backlog, R4 F04/T04).** `recipe.json` accepts
   `recipe_version` 1.1.0 with optional `effect_keys` on the input and on steps: per effect, the key

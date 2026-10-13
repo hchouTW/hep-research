@@ -163,7 +163,7 @@
     "skills/detector-response/references/performance-metrics-and-residual-diagnostics.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "4665f43 2026-10-13"
   },
   {
    "path": "skills/detector-response/references/detector-case-studies-and-checklists.md",
@@ -753,7 +753,7 @@
     "detector-response",
     "hep-computing"
    ],
-   "last_commit": "3210ab8 2026-10-13"
+   "last_commit": "4665f43 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/analysis-validation.md",
@@ -817,7 +817,7 @@
     "tests/skills/hep_analysis/test_method_references.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "57316ad 2026-10-13"
+   "last_commit": "4665f43 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/data-pipelines.md",
@@ -1040,7 +1040,7 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "7e34ef8 2026-10-13"
+   "last_commit": "4665f43 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/bash-balanced-design-guidelines.md",
@@ -1180,7 +1180,7 @@
     "skills/hep-computing/references/agile-development-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "f437237 2026-10-13"
+   "last_commit": "4665f43 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/environments-and-containers.md",
@@ -1259,7 +1259,7 @@
     "skills/hep-computing/scripts/validate_skill_bundle.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "4665f43 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/numerical-and-computational-methods.md",
@@ -1280,7 +1280,7 @@
     "hep-theory",
     "research-communication"
    ],
-   "last_commit": "46cea2c 2026-10-13"
+   "last_commit": "4665f43 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/performance-profiling.md",
@@ -1618,7 +1618,7 @@
     "detector-response",
     "hep-computing"
    ],
-   "last_commit": "578c12f 2026-10-13"
+   "last_commit": "4665f43 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/ml-assisted-inference.md",
@@ -2104,7 +2104,7 @@
    "cited_by_other_skills": [
     "research-communication"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "4665f43 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/export-and-deployment.md",
@@ -2346,7 +2346,7 @@
     "skills/physics-ml/references/training-at-scale.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "c5ae767 2026-10-13"
+   "last_commit": "4665f43 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/robustness-and-distribution-shift.md",
@@ -2630,7 +2630,7 @@
     "tests/skills/research_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "d41501c 2026-10-12"
+   "last_commit": "4665f43 2026-10-13"
   },
   {
    "path": "skills/research-communication/references/citations-and-bibliography.md",
