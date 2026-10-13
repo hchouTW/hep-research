@@ -59,6 +59,9 @@ Software checks establish contract consistency only, not physical validity.
   `pt.pdf` into an output folder argument (default `output/`); the CMake file links imported `ROOT::` targets and
   takes the standard from `ROOT_CXX_STANDARD`; the build hint is quoted; `--json`. The generated project configures
   and builds against Homebrew ROOT 6.38.04 (test skipped without cmake and ROOT).
+- **CMP-10 `check_root_cpp_env.sh` private temporary folder.** `mktemp -d "${TMPDIR:-/tmp}/root_cpp_check.XXXXXX"`
+  replaces `$TMPDIR/root_cpp_check.$$` (and no longer reassigns `TMPDIR`); the trap removes it; the test program takes
+  `-std` from `root-config --cflags` only. Two parallel runs do not collide and leave nothing behind.
 
 ## 0.6.17 (2026-10-13)
 

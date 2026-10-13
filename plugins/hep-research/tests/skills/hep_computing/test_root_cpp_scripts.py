@@ -81,6 +81,26 @@ class RootCppScriptArgsTests(unittest.TestCase):
             build = subprocess.run(['cmake', '--build', 'demo/build', '-j'], cwd=tmp, capture_output=True, text=True, timeout=1200)
             self.assertEqual(build.returncode, 0, build.stdout[-2000:] + build.stderr[-2000:])
 
+    def test_env_check_uses_a_private_temporary_folder(self):
+        """CMP-10: the work folder was $TMPDIR/root_cpp_check.$$ (predictable, reassigned TMPDIR)."""
+        text = (SCRIPTS / 'check_root_cpp_env.sh').read_text()
+        self.assertNotIn('$$', text)
+        self.assertIn('mktemp -d', text)
+        self.assertNotRegex(text, r'(?m)^\s*TMPDIR=')
+
+    @unittest.skipUnless(shutil.which('root-config') and shutil.which('c++'), 'ROOT C++ toolchain needed')
+    def test_env_check_parallel_runs_and_cleanup(self):
+        import os
+        with tempfile.TemporaryDirectory() as tmp:
+            env = dict(os.environ, TMPDIR=tmp)
+            procs = [subprocess.Popen(['bash', str(SCRIPTS / 'check_root_cpp_env.sh'), '--json'], env=env,
+                                      stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) for _ in range(2)]
+            results = [p.communicate(timeout=600) for p in procs]
+            for p, (out, err) in zip(procs, results):
+                self.assertEqual(p.returncode, 0, err[-2000:])
+                self.assertEqual(json.loads(out)['status'], 'ok')
+            self.assertEqual(list(Path(tmp).iterdir()), [])
+
     def test_env_check_help_exits_zero_without_checking(self):
         for flag in ('-h', '--help'):
             with tempfile.TemporaryDirectory() as tmp:

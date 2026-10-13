@@ -59,11 +59,10 @@ say "root-config version: $CONFIG_VERSION"
 say "cflags: $CFLAGS"
 say "libs: $LIBS"
 
-TMPDIR="${TMPDIR:-/tmp}/root_cpp_check.$$"
-mkdir -p "$TMPDIR"
-trap 'rm -rf "$TMPDIR"' EXIT
+WORK=$(mktemp -d "${TMPDIR:-/tmp}/root_cpp_check.XXXXXX") || finish failed 1 'cannot create a temporary folder.'
+trap 'rm -rf "$WORK"' EXIT
 
-cat > "$TMPDIR/check.cpp" <<'CPP'
+cat > "$WORK/check.cpp" <<'CPP'
 #include <ROOT/RDataFrame.hxx>
 #include <iostream>
 
@@ -75,12 +74,13 @@ int main() {
 }
 CPP
 
+# the -std flag comes from root-config --cflags (the standard ROOT was built with); do not add a second one
 # shellcheck disable=SC2086  # root-config flags are word lists
-if ! c++ -std=c++17 "$TMPDIR/check.cpp" $CFLAGS $LIBS -o "$TMPDIR/check" >"$TMPDIR/build.log" 2>&1; then
-  [ "$JSON" -eq 1 ] || cat "$TMPDIR/build.log" >&2
+if ! c++ "$WORK/check.cpp" $CFLAGS $LIBS -o "$WORK/check" >"$WORK/build.log" 2>&1; then
+  [ "$JSON" -eq 1 ] || cat "$WORK/build.log" >&2
   finish failed 1 'the RDataFrame test program does not compile against this ROOT.'
 fi
-if ! RUN_OUT=$("$TMPDIR/check" 2>&1); then
+if ! RUN_OUT=$("$WORK/check" 2>&1); then
   finish failed 1 "the RDataFrame test program failed: $RUN_OUT"
 fi
 say "$RUN_OUT"
