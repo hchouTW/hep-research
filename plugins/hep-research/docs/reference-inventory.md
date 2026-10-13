@@ -11,7 +11,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | detector-response | 34 | 395 | 0 |
 | hep-analysis | 9 | 74 | 0 |
 | hep-computing | 29 | 338 | 0 |
-| hep-statistics | 10 | 135 | 0 |
+| hep-statistics | 11 | 139 | 0 |
 | hep-theory | 8 | 42 | 0 |
 | physics-ml | 38 | 257 | 0 |
 | research-communication | 53 | 378 | 0 |
@@ -157,6 +157,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `task-quality-checklist.md` | hep-computing | 3.0 | no | 4 | - | 351029c 2026-10-07 |
 | `validation-and-done.md` | hep-computing | 3.7 | yes | 5 | - | 351029c 2026-10-07 |
 | `astroparticle-statistics.md` | hep-statistics | 8.7 | yes | 12 | detector-response, hep-analysis | 578c12f 2026-10-13 |
+| `combinations.md` | hep-statistics | 4.1 | yes | 1 | - | untracked |
 | `core-stats-commands.md` | hep-statistics | 32.0 | yes | 4 | - | d648b8a 2026-10-13 |
 | `core-stats-guide.md` | hep-statistics | 16.3 | yes | 8 | - | d648b8a 2026-10-13 |
 | `inference-recipes.md` | hep-statistics | 15.1 | yes | 7 | detector-response, hep-analysis | 578c12f 2026-10-13 |
@@ -165,7 +166,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `nuisance-modeling.md` | hep-statistics | 17.9 | yes | 6 | hep-analysis | 578c12f 2026-10-13 |
 | `statistical-inference-for-physics.md` | hep-statistics | 12.9 | yes | 9 | hep-computing, hep-theory, research-communication | 578c12f 2026-10-13 |
 | `statistical-tools.md` | hep-statistics | 9.6 | yes | 5 | hep-analysis, physics-ml | 578c12f 2026-10-13 |
-| `unfolding.md` | hep-statistics | 7.0 | yes | 23 | detector-response, hep-analysis | a10fbd9 2026-10-13 |
+| `unfolding.md` | hep-statistics | 7.0 | yes | 23 | detector-response, hep-analysis | 11a01b9 2026-10-13 |
 | `cosmic-ray-propagation.md` | hep-theory | 5.2 | yes | 1 | - | 351029c 2026-10-07 |
 | `dis-kinematics.md` | hep-theory | 4.8 | yes | 4 | - | 351029c 2026-10-07 |
 | `event-generation.md` | hep-theory | 9.2 | yes | 4 | detector-response, hep-analysis | 351029c 2026-10-07 |

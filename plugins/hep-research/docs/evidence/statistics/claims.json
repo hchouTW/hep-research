@@ -239,5 +239,25 @@
   "verification_strength": "abstract+metadata",
   "numeric_quotation_allowed": false,
   "last_reviewed": "2026-10-13"
+ },
+ {
+  "id": "hepstats:C13",
+  "claim": "Negative BLUE weights indicate a regime of high correlations, where assuming full correlation of systematic uncertainties is not a conservative choice.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "hepstats:S28"
+  ],
+  "location": "arXiv:1307.4003 abstract",
+  "scope": {
+   "text": "BLUE combinations"
+  },
+  "limitations": "abstract-level support",
+  "verification_strength": "abstract+metadata",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-13"
  }
 ]

@@ -524,5 +524,87 @@
   "superseded_by": [],
   "attribution": "M. Kuusela, V. M. Panaretos",
   "notes": "Ann. Appl. Stat. 9 (2015) 1671-1705. arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S26",
+  "title": "How to combine correlated estimates of a single physical quantity",
+  "authors": "L. Lyons, D. Gibaut, P. Clifford",
+  "year": 1988,
+  "identifiers": {
+   "doi": "10.1016/0168-9002(88)90018-6",
+   "url": "https://doi.org/10.1016/0168-9002(88)90018-6"
+  },
+  "tier": 1,
+  "verification_level": "metadata-only",
+  "verification_date": "2026-10-13",
+  "publication_date": "1988",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "L. Lyons, D. Gibaut, P. Clifford",
+  "notes": "Nucl. Instrum. Meth. A270 (1988) 110-117 (BLUE). Bibliographic record only (not opened 2026-10-13)."
+ },
+ {
+  "id": "hepstats:S27",
+  "title": "Combining correlated measurements of several different physical quantities",
+  "authors": "A. Valassi",
+  "year": 2003,
+  "identifiers": {
+   "doi": "10.1016/S0168-9002(03)00329-2",
+   "url": "https://doi.org/10.1016/S0168-9002(03)00329-2"
+  },
+  "tier": 1,
+  "verification_level": "metadata-only",
+  "verification_date": "2026-10-13",
+  "publication_date": "2003",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "A. Valassi",
+  "notes": "Nucl. Instrum. Meth. A500 (2003) 391-405. Bibliographic record only (not opened 2026-10-13)."
+ },
+ {
+  "id": "hepstats:S28",
+  "title": "Information and treatment of unknown correlations in the combination of measurements using the BLUE method",
+  "authors": "A. Valassi, R. Chierici",
+  "year": 2014,
+  "identifiers": {
+   "url": "https://arxiv.org/abs/1307.4003",
+   "arxiv_ids": [
+    "1307.4003"
+   ]
+  },
+  "tier": 1,
+  "verification_level": "abstract+metadata",
+  "verification_date": "2026-10-13",
+  "publication_date": "2014",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "A. Valassi, R. Chierici",
+  "notes": "Eur. Phys. J. C 74 (2014) 2717. arXiv abstract page read 2026-10-13 (title, authors, journal reference, abstract); body not read here."
+ },
+ {
+  "id": "hepstats:S29",
+  "title": "On the use of the covariance matrix to fit correlated data",
+  "authors": "G. D'Agostini",
+  "year": 1994,
+  "identifiers": {
+   "doi": "10.1016/0168-9002(94)90719-6",
+   "url": "https://doi.org/10.1016/0168-9002(94)90719-6"
+  },
+  "tier": 1,
+  "verification_level": "metadata-only",
+  "verification_date": "2026-10-13",
+  "publication_date": "1994",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": "G. D'Agostini",
+  "notes": "Nucl. Instrum. Meth. A346 (1994) 306-311 (Peelle's pertinent puzzle). Bibliographic record only (not opened 2026-10-13)."
  }
 ]

@@ -19,8 +19,8 @@
    "uncited": 0
   },
   "hep-statistics": {
-   "references": 10,
-   "bytes": 134867,
+   "references": 11,
+   "bytes": 138972,
    "uncited": 0
   },
   "hep-theory": {
@@ -1492,6 +1492,18 @@
    "last_commit": "578c12f 2026-10-13"
   },
   {
+   "path": "skills/hep-statistics/references/combinations.md",
+   "owner": "hep-statistics",
+   "bytes": 4105,
+   "lines": 56,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-statistics/SKILL.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
    "path": "skills/hep-statistics/references/core-stats-commands.md",
    "owner": "hep-statistics",
    "bytes": 32015,
@@ -1683,7 +1695,7 @@
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "a10fbd9 2026-10-13"
+   "last_commit": "11a01b9 2026-10-13"
   },
   {
    "path": "skills/hep-theory/references/cosmic-ray-propagation.md",

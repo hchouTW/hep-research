@@ -43,12 +43,11 @@ One number: when a shell is available, run its row's tool, state the constructio
 1. Resolve context (stanza below); collect inputs as artifacts (measurement spec, response, prediction, dataset records).
 2. Inputs from different producers: run `<plugin root>/contracts/comparison/gate.py` (exit 1 lists each mismatch).
 3. Build the model: observables, POIs, nuisances and constraints, correlations with their evidence.
-4. Validate on Asimov and toys (bias, pull widths, coverage), then fit.
-5. Write the `statistical-result` and validate it.
+4. Validate on Asimov and toys (bias, pulls, coverage); fit; write and validate the `statistical-result`.
 
 ## Resources
 
-References: [core/stats guide](references/core-stats-guide.md) and [commands](references/core-stats-commands.md), [nuisance modeling](references/nuisance-modeling.md), [likelihood fitting](references/likelihood-fitting.md), [unfolding](references/unfolding.md), [inference recipes](references/inference-recipes.md), [pyhf, Combine](references/statistical-tools.md), [astroparticle statistics](references/astroparticle-statistics.md), [ML-assisted inference](references/ml-assisted-inference.md), [inference reasoning](references/statistical-inference-for-physics.md).
+References: [core/stats guide](references/core-stats-guide.md) and [commands](references/core-stats-commands.md), [nuisance modeling](references/nuisance-modeling.md), [likelihood fitting](references/likelihood-fitting.md), [unfolding](references/unfolding.md), [combinations](references/combinations.md), [inference recipes](references/inference-recipes.md), [pyhf, Combine](references/statistical-tools.md), [astroparticle](references/astroparticle-statistics.md), [ML-assisted](references/ml-assisted-inference.md), [inference reasoning](references/statistical-inference-for-physics.md).
 
 Scripts and their checks: the guide's Skill scripts table. Adapters (pyhf, Combine, unbinned fits): `<plugin root>/adapters/`. Folder guide: [README.md](README.md).
 
