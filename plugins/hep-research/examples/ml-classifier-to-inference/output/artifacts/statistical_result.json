@@ -1,0 +1,98 @@
+{
+ "contract_version": "2.5.0",
+ "artifact_id": "synthetic-j9-signal-strength",
+ "artifact_type": "statistical-result",
+ "required_capabilities": [
+  "stats:result-semantics"
+ ],
+ "objective": "SYNTHETIC J9: signal strength from calibrated-classifier score templates fitted to pseudo-data",
+ "bindings": {
+  "experiments": [
+   {
+    "profile": "experiment:synthetic-collider",
+    "version": "1.0.0"
+   }
+  ],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.6.16",
+  "contracts": "2.5.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  },
+  "profiles": {
+   "experiment:synthetic-collider": "1.0.0"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-statistics",
+  "created": "2026-10-13",
+  "evidence_ids": []
+ },
+ "inputs": [
+  {
+   "ref": "artifacts/ml_artifact.json",
+   "artifact_type": "ml-artifact",
+   "artifact_id": "synthetic-j9-classifier",
+   "sha256": "f758d4a63c6be2a38b128dffbde7548ab84d6b7ec30b438c5d2d810d55a4424f",
+   "version": "2.5.0",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "paradigm": "frequentist",
+  "likelihood": {
+   "form": "extended binned Poisson in the calibrated classifier probability (7 bins), mean mu s_i + gamma_i b_i; gamma_i Gaussian-constrained MC-statistics factors (Barlow-Beeston-lite, width sqrt(sum w^2)/b of the signed-weight background template)",
+   "backend": "core.stats.likelihood_limits shape model (_ShapeModel)",
+   "model_ref": "results.json#templates"
+  },
+  "parameters_of_interest": [
+   "mu (signal strength)"
+  ],
+  "nuisances": [
+   "gamma_0 (background MC statistics, bin 0)",
+   "gamma_1 (background MC statistics, bin 1)",
+   "gamma_2 (background MC statistics, bin 2)",
+   "gamma_3 (background MC statistics, bin 3)",
+   "gamma_4 (background MC statistics, bin 4)",
+   "gamma_5 (background MC statistics, bin 5)",
+   "gamma_6 (background MC statistics, bin 6)"
+  ],
+  "test_statistic": "-2 ln lambda(mu), profile likelihood ratio with mu >= 0",
+  "construction": "profile-likelihood-wilks",
+  "coverage": {
+   "check": "toys",
+   "method": "seeded toys at mu_true from the template model with the MC-statistics auxiliary measurements redrawn; fraction of 68.27% profile intervals containing mu_true",
+   "n_toys": 1000,
+   "coverage": 0.693,
+   "cl": 0.6827,
+   "ensemble": "mu_true = 1.0, templates as fitted",
+   "failures": 0
+  },
+  "goodness_of_fit": {
+   "statistic": "saturated-model -2 ln lambda",
+   "p_value": 0.8012791544725114,
+   "calibration": "asymptotic"
+  },
+  "fit_status": "converged",
+  "results": {
+   "mu_hat": 1.3073764723234396,
+   "interval_68": [
+    1.046649465032274,
+    1.5882339006436932
+   ],
+   "data": "pseudo-data (SYNTHETIC)",
+   "asimov_mu_hat": 1.0000000000000004,
+   "ref": "results.json#fit"
+  }
+ }
+}

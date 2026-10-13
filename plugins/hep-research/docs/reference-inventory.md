@@ -13,7 +13,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-computing | 29 | 338 | 0 |
 | hep-statistics | 9 | 119 | 0 |
 | hep-theory | 8 | 42 | 0 |
-| physics-ml | 38 | 256 | 0 |
+| physics-ml | 38 | 257 | 0 |
 | research-communication | 53 | 378 | 0 |
 
 ## Overlapping pairs
@@ -172,42 +172,42 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `recasting-toolchain.md` | hep-theory | 3.3 | yes | 2 | - | ae5e376 2026-10-08 |
 | `smeft-and-eft.md` | hep-theory | 2.8 | yes | 2 | - | 351029c 2026-10-07 |
 | `ablation-and-design-review.md` | physics-ml | 5.2 | no | 12 | research-communication | 351029c 2026-10-07 |
-| `architecture-selection.md` | physics-ml | 6.9 | no | 4 | - | 351029c 2026-10-07 |
-| `checkpointing.md` | physics-ml | 6.0 | no | 5 | - | 351029c 2026-10-07 |
+| `architecture-selection.md` | physics-ml | 6.9 | no | 4 | - | 721d1ea 2026-10-13 |
+| `checkpointing.md` | physics-ml | 6.0 | no | 5 | - | 721d1ea 2026-10-13 |
 | `custom-autograd-and-hooks.md` | physics-ml | 6.5 | no | 4 | - | 351029c 2026-10-07 |
-| `data-loading.md` | physics-ml | 3.0 | no | 5 | - | 351029c 2026-10-07 |
-| `data-strategy.md` | physics-ml | 5.8 | no | 6 | - | 351029c 2026-10-07 |
+| `data-loading.md` | physics-ml | 3.0 | no | 5 | - | 721d1ea 2026-10-13 |
+| `data-strategy.md` | physics-ml | 5.8 | no | 6 | - | 721d1ea 2026-10-13 |
 | `debugging-pytorch.md` | physics-ml | 1.1 | no | 5 | - | 351029c 2026-10-07 |
-| `deep-learning-guide.md` | physics-ml | 25.7 | yes | 11 | hep-computing | 03929e2 2026-10-11 |
-| `distributed-training.md` | physics-ml | 4.8 | no | 3 | - | 351029c 2026-10-07 |
-| `efficient-finetuning.md` | physics-ml | 6.8 | no | 6 | - | 351029c 2026-10-07 |
+| `deep-learning-guide.md` | physics-ml | 25.7 | yes | 11 | hep-computing | 721d1ea 2026-10-13 |
+| `distributed-training.md` | physics-ml | 4.8 | no | 3 | - | 721d1ea 2026-10-13 |
+| `efficient-finetuning.md` | physics-ml | 6.8 | no | 6 | - | 721d1ea 2026-10-13 |
 | `evaluation-metrics.md` | physics-ml | 1.7 | no | 6 | - | 351029c 2026-10-07 |
 | `evaluation-strategy.md` | physics-ml | 6.3 | no | 9 | research-communication | 351029c 2026-10-07 |
-| `export-and-deployment.md` | physics-ml | 9.0 | no | 4 | - | 351029c 2026-10-07 |
+| `export-and-deployment.md` | physics-ml | 9.0 | no | 4 | - | 721d1ea 2026-10-13 |
 | `fast-simulation-validation.md` | physics-ml | 6.0 | yes | 4 | - | 1497349 2026-10-13 |
 | `generative-models.md` | physics-ml | 7.7 | yes | 5 | - | 1497349 2026-10-13 |
 | `geometric-and-equivariant-learning.md` | physics-ml | 4.7 | no | 4 | - | 351029c 2026-10-07 |
 | `interpretability-and-explainability.md` | physics-ml | 6.5 | no | 3 | - | 351029c 2026-10-07 |
-| `mixed-precision.md` | physics-ml | 4.3 | no | 6 | - | 351029c 2026-10-07 |
-| `ml-analysis.md` | physics-ml | 21.6 | yes | 20 | detector-response, hep-analysis | 1497349 2026-10-13 |
-| `monitoring-and-lifecycle.md` | physics-ml | 5.5 | no | 3 | - | 351029c 2026-10-07 |
+| `mixed-precision.md` | physics-ml | 4.3 | no | 6 | - | 721d1ea 2026-10-13 |
+| `ml-analysis.md` | physics-ml | 21.6 | yes | 23 | detector-response, hep-analysis | 721d1ea 2026-10-13 |
+| `monitoring-and-lifecycle.md` | physics-ml | 5.5 | no | 3 | - | 721d1ea 2026-10-13 |
 | `multivariate-analysis-bdt-nn.md` | physics-ml | 16.4 | yes | 8 | detector-response, hep-analysis | 1497349 2026-10-13 |
 | `optimization-and-training-dynamics.md` | physics-ml | 8.7 | no | 2 | - | 351029c 2026-10-07 |
-| `parallelism-strategy.md` | physics-ml | 7.5 | no | 5 | - | 351029c 2026-10-07 |
+| `parallelism-strategy.md` | physics-ml | 7.5 | no | 5 | - | 721d1ea 2026-10-13 |
 | `particle-and-jet-architectures.md` | physics-ml | 7.6 | yes | 6 | - | 1497349 2026-10-13 |
-| `performance-memory.md` | physics-ml | 3.4 | no | 6 | - | 351029c 2026-10-07 |
-| `reproducibility.md` | physics-ml | 8.2 | no | 5 | - | 03929e2 2026-10-11 |
+| `performance-memory.md` | physics-ml | 3.4 | no | 6 | - | 721d1ea 2026-10-13 |
+| `reproducibility.md` | physics-ml | 8.3 | no | 5 | - | c5ae767 2026-10-13 |
 | `robustness-and-distribution-shift.md` | physics-ml | 4.3 | yes | 8 | - | 351029c 2026-10-07 |
 | `sbi-training.md` | physics-ml | 4.3 | yes | 3 | - | 1497349 2026-10-13 |
 | `scientific-machine-learning.md` | physics-ml | 6.1 | yes | 8 | hep-statistics, hep-theory | 351029c 2026-10-07 |
-| `sequence-models.md` | physics-ml | 5.5 | no | 4 | - | 351029c 2026-10-07 |
-| `serving-architecture.md` | physics-ml | 4.2 | no | 4 | - | 351029c 2026-10-07 |
+| `sequence-models.md` | physics-ml | 5.5 | no | 4 | - | 721d1ea 2026-10-13 |
+| `serving-architecture.md` | physics-ml | 4.2 | no | 4 | - | 721d1ea 2026-10-13 |
 | `space-and-astroparticle-ml.md` | physics-ml | 8.6 | yes | 3 | - | 1497349 2026-10-13 |
 | `tensor-shapes.md` | physics-ml | 1.9 | no | 1 | - | 351029c 2026-10-07 |
-| `training-at-scale.md` | physics-ml | 7.1 | no | 5 | - | 351029c 2026-10-07 |
+| `training-at-scale.md` | physics-ml | 7.1 | no | 5 | - | 721d1ea 2026-10-13 |
 | `training-loop.md` | physics-ml | 1.1 | no | 5 | - | 351029c 2026-10-07 |
 | `transfer-learning.md` | physics-ml | 1.6 | no | 4 | - | 351029c 2026-10-07 |
-| `transformer-architectures.md` | physics-ml | 8.1 | no | 5 | - | 351029c 2026-10-07 |
+| `transformer-architectures.md` | physics-ml | 8.1 | no | 5 | - | 721d1ea 2026-10-13 |
 | `uncertainty-and-calibration.md` | physics-ml | 6.3 | yes | 8 | hep-statistics | 351029c 2026-10-07 |
 | `academic-diagrams-guide.md` | research-communication | 10.4 | yes | 5 | hep-analysis | 351029c 2026-10-07 |
 | `academic-papers-guide.md` | research-communication | 38.4 | yes | 7 | - | cd88e8f 2026-10-12 |

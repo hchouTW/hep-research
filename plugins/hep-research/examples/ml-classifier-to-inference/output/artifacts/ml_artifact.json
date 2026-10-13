@@ -1,0 +1,282 @@
+{
+ "contract_version": "2.5.0",
+ "artifact_id": "synthetic-j9-classifier",
+ "artifact_type": "ml-artifact",
+ "objective": "SYNTHETIC J9: calibrated event classifier whose probability feeds a template fit",
+ "bindings": {
+  "experiments": [
+   {
+    "profile": "experiment:synthetic-collider",
+    "version": "1.0.0"
+   }
+  ],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.6.16",
+  "contracts": "2.5.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  },
+  "profiles": {
+   "experiment:synthetic-collider": "1.0.0"
+  }
+ },
+ "provenance": {
+  "producer_skill": "physics-ml",
+  "created": "2026-10-13",
+  "evidence_ids": []
+ },
+ "inputs": [
+  {
+   "ref": "work/run_summary.json",
+   "sha256": "c81b865bb29048ce6bb7844898428ed5f4700a3d33fd4206df34ffb609e6d441"
+  },
+  {
+   "ref": "work/split_check.json",
+   "sha256": "27503d2c8f3938f80a2bda7cb4fa156e0a26e8f22e6031bf657517a84d409a5c"
+  },
+  {
+   "ref": "work/calibration.json",
+   "sha256": "38cfe1a2f97442ebdf742dc2e09131879ffaa57c5e274f760a9b7cbfb881d8ff"
+  },
+  {
+   "ref": "work/domain_shift.json",
+   "sha256": "6d64df1638dadc0045627a37c6207c2e6af620abac639183b2ea7d7111fdf12a"
+  },
+  {
+   "ref": "work/downstream.json",
+   "sha256": "914273dee6db614c4301b81e88fc22bab9fff3d9e8f5c15a37fc607f7d1b492b"
+  }
+ ],
+ "outputs": [
+  {
+   "ref": "work/model.json",
+   "kind": "checkpoint"
+  },
+  {
+   "ref": "work/test_scores.csv",
+   "kind": "scores:test"
+  },
+  {
+   "ref": "work/val_scores.csv",
+   "kind": "scores:val"
+  }
+ ],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "task": "classification",
+  "labels": [
+   "background",
+   "signal"
+  ],
+  "features": [
+   "m_ll",
+   "acop",
+   "pt_miss",
+   "cos_theta"
+  ],
+  "splits": {
+   "grouping_key": "run (data-taking run; runs nested in periods p1-p4)",
+   "manifest": "work/splits.json",
+   "overlap_check": {
+    "tool": "check_split_integrity.py",
+    "result": "pass",
+    "report": "work/split_check.json"
+   },
+   "test_groups_disjoint": true
+  },
+  "training_domain": {
+   "m_ll": [
+    1.609683,
+    11.230349
+   ],
+   "acop": [
+    5e-06,
+    0.766768
+   ],
+   "pt_miss": [
+    0.001207,
+    6.229241
+   ],
+   "cos_theta": [
+    -0.899867,
+    0.899745
+   ]
+  },
+  "preprocessing": [
+   {
+    "step": "standardize",
+    "features": [
+     "m_ll",
+     "acop",
+     "pt_miss",
+     "cos_theta"
+    ],
+    "fit_on": "train"
+   },
+   {
+    "step": "quadratic expansion",
+    "terms": "1, z_i, z_i^2, z_i z_j"
+   }
+  ],
+  "model_hash": "sha256:fe1963379857c83e5958676735e193f3e083328fa6dd5a5c8db16a6b86601b5d",
+  "units": {
+   "m_ll": "GeV",
+   "acop": "rad",
+   "pt_miss": "GeV",
+   "cos_theta": "1"
+  },
+  "weights": {
+   "source": "generator weights x L x sigma / N_generated (SYNTHETIC; NLO-like counter-events +-w)",
+   "negative_weight_treatment": "signed",
+   "class_balancing": {
+    "training": "per class, signed weights rescaled to equal sums (train split)",
+    "evaluation": "physics weights unchanged (metrics, calibration, templates)",
+    "prior_correction": "logit + ln r, r = 0.133333 (physics S/B on the calibration fit sample)"
+   },
+   "used_in": [
+    "loss",
+    "metrics",
+    "calibration",
+    "templates"
+   ]
+  },
+  "environment": {
+   "framework": "numpy 2.5.3",
+   "device": "cpu",
+   "precision": "fp64",
+   "seeds": {
+    "simulation_and_split": 20261013,
+    "pseudo_data": 20261014,
+    "toys": 20261016,
+    "domain_shift": 20261017
+   }
+  },
+  "metrics": {
+   "val": {
+    "auc_weighted": 0.917904,
+    "working_point": {
+     "target_eff_s": 0.5,
+     "threshold": 0.8525938559,
+     "eff_s": 0.5,
+     "eff_s_unc": 0.01825741858,
+     "eff_b": 0.034,
+     "eff_b_unc": 0.00679566038,
+     "rejection": 29.41176471
+    }
+   },
+   "test": {
+    "auc_weighted": 0.921752,
+    "working_point": {
+     "threshold_from": "val",
+     "threshold": 0.8525938559,
+     "eff_s": 0.4626666667,
+     "eff_s_unc": 0.01820645388,
+     "eff_b": 0.025,
+     "eff_b_unc": 0.006740270766,
+     "rejection": 40.0
+    },
+    "asimov_significance_at_wp": 5.259528547,
+    "expected_at_wp": {
+     "signal": 18.50666667,
+     "background": 7.5
+    }
+   }
+  },
+  "output_semantics": "probability",
+  "calibration": {
+   "method": "temperature",
+   "params": {
+    "temperature": 0.9773254276736743
+   },
+   "fit_sample": "work/val_scores.csv",
+   "validation": {
+    "metric": "ece",
+    "sample": "work/test_scores.csv",
+    "before": 0.015895708046126413,
+    "after": 0.017558563686100273,
+    "bins": 10,
+    "binning": "equal-width"
+   }
+  },
+  "domain_shift": {
+   "control_sample": "SYNTHETIC data-like background control sample (10000 events, pt_miss scaled by 1.1 by construction)",
+   "method": "weighted Kolmogorov-Smirnov, held-out simulation background versus control sample, noise floor = 95% quantile over 100 seeded unshifted replicas; inference-time domain flags on the pseudo-data (check_surrogate_domain.py)",
+   "result": {
+    "verdict": "shift above the noise floor in pt_miss, score; not corrected, bounded downstream by the Asimov shift of mu from the measured scale",
+    "variables_above_noise_floor": [
+     "pt_miss",
+     "score"
+    ],
+    "per_variable": {
+     "score": {
+      "ks_d": 0.0256,
+      "noise_floor_95": 0.022505,
+      "shift_detected": true
+     },
+     "m_ll": {
+      "ks_d": 0.023,
+      "noise_floor_95": 0.033605,
+      "shift_detected": false
+     },
+     "acop": {
+      "ks_d": 0.0326,
+      "noise_floor_95": 0.035325,
+      "shift_detected": false
+     },
+     "pt_miss": {
+      "ks_d": 0.056,
+      "noise_floor_95": 0.024115,
+      "shift_detected": true
+     },
+     "cos_theta": {
+      "ks_d": 0.0221,
+      "noise_floor_95": 0.0236,
+      "shift_detected": false
+     }
+    },
+    "measured_scale": {
+     "feature": "pt_miss",
+     "control_over_simulation_mean": 1.09868
+    },
+    "delta_mu_asimov_from_measured_scale": -0.107539,
+    "pseudo_data_domain_flags": {
+     "inside": 348,
+     "sparse": 0,
+     "outside": 9,
+     "n": 357
+    }
+   },
+   "status": "checked"
+  },
+  "downstream_validation": [
+   {
+    "metric": "Asimov closure of the signal strength in the calibrated-score template fit",
+    "value": 4.44089e-16,
+    "criterion": "abs < 0.001"
+   },
+   {
+    "metric": "toy pull mean and width of mu, and 68% interval coverage",
+    "pull_mean": -0.0546859,
+    "pull_width": 0.984352,
+    "coverage_68": 0.693,
+    "n_toys": 1000
+   },
+   {
+    "metric": "expected uncertainty on mu (Asimov, profile likelihood)",
+    "err_down": 0.237781,
+    "err_up": 0.258174
+   },
+   {
+    "metric": "shift of mu on Asimov when the background pt_miss scale is the one measured in the control sample",
+    "delta_mu": -0.107539,
+    "note": "the pseudo-data here are generated without the shift; a real analysis would correct the scale or carry it as a nuisance"
+   }
+  ]
+ }
+}

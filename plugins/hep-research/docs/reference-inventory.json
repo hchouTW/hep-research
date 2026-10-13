@@ -30,7 +30,7 @@
   },
   "physics-ml": {
    "references": 38,
-   "bytes": 256432,
+   "bytes": 256540,
    "uncited": 0
   },
   "research-communication": {
@@ -1824,7 +1824,7 @@
     "skills/physics-ml/references/training-at-scale.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/checkpointing.md",
@@ -1840,7 +1840,7 @@
     "skills/physics-ml/references/training-at-scale.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/custom-autograd-and-hooks.md",
@@ -1871,7 +1871,7 @@
     "skills/physics-ml/references/training-at-scale.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/data-strategy.md",
@@ -1888,7 +1888,7 @@
     "skills/physics-ml/scripts/check_split_integrity.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/debugging-pytorch.md",
@@ -1928,7 +1928,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "03929e2 2026-10-11"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/distributed-training.md",
@@ -1942,7 +1942,7 @@
     "skills/physics-ml/references/parallelism-strategy.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/efficient-finetuning.md",
@@ -1959,7 +1959,7 @@
     "skills/physics-ml/references/uncertainty-and-calibration.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/evaluation-metrics.md",
@@ -2013,7 +2013,7 @@
     "skills/physics-ml/references/uncertainty-and-calibration.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/fast-simulation-validation.md",
@@ -2090,7 +2090,7 @@
     "skills/physics-ml/references/performance-memory.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/ml-analysis.md",
@@ -2103,7 +2103,9 @@
     "skills/hep-analysis/references/hep-analysis-guide.md",
     "skills/physics-ml/README.md",
     "skills/physics-ml/SKILL.md",
+    "skills/physics-ml/assets/calibration.py",
     "skills/physics-ml/assets/hep_losses.py",
+    "skills/physics-ml/assets/set_classifier.py",
     "skills/physics-ml/references/data-loading.md",
     "skills/physics-ml/references/deep-learning-guide.md",
     "skills/physics-ml/references/efficient-finetuning.md",
@@ -2118,13 +2120,14 @@
     "skills/physics-ml/references/serving-architecture.md",
     "skills/physics-ml/references/space-and-astroparticle-ml.md",
     "skills/physics-ml/references/training-at-scale.md",
-    "skills/physics-ml/references/transformer-architectures.md"
+    "skills/physics-ml/references/transformer-architectures.md",
+    "skills/physics-ml/scripts/make_grouped_splits.py"
    ],
    "cited_by_other_skills": [
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "1497349 2026-10-13"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/monitoring-and-lifecycle.md",
@@ -2138,7 +2141,7 @@
     "skills/physics-ml/references/robustness-and-distribution-shift.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/multivariate-analysis-bdt-nn.md",
@@ -2189,7 +2192,7 @@
     "tests/skills/physics_ml/test_physics_ml_skill.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/particle-and-jet-architectures.md",
@@ -2223,13 +2226,13 @@
     "skills/physics-ml/references/training-at-scale.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/reproducibility.md",
    "owner": "physics-ml",
-   "bytes": 8194,
-   "lines": 169,
+   "bytes": 8302,
+   "lines": 170,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/physics-ml/references/checkpointing.md",
@@ -2239,7 +2242,7 @@
     "skills/physics-ml/references/training-at-scale.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "03929e2 2026-10-11"
+   "last_commit": "c5ae767 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/robustness-and-distribution-shift.md",
@@ -2309,7 +2312,7 @@
     "skills/physics-ml/references/transformer-architectures.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/serving-architecture.md",
@@ -2324,7 +2327,7 @@
     "skills/physics-ml/references/monitoring-and-lifecycle.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/space-and-astroparticle-ml.md",
@@ -2366,7 +2369,7 @@
     "skills/physics-ml/references/reproducibility.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/training-loop.md",
@@ -2413,7 +2416,7 @@
     "skills/physics-ml/references/sequence-models.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/uncertainty-and-calibration.md",
