@@ -12,6 +12,7 @@
   "measurement_ratio.json",
   "measurement_target_exposure.json",
   "ml_artifact.json",
+  "ml_artifact_v25.json",
   "prediction.json",
   "response.json",
   "response_parametrized.json",
@@ -77,6 +78,31 @@
   "ml_no_grouping.json": [
    "ml.no_grouping"
   ],
+  "ml_blank_grouping_key.json": [
+   "ml.no_grouping"
+  ],
+  "ml_empty_model_hash.json": [
+   "ml.model_hash_missing"
+  ],
+  "ml_empty_labels_features.json": [
+   "ml.labels_missing",
+   "ml.features_missing"
+  ],
+  "ml_domain_unknown_feature.json": [
+   "ml.training_domain_unknown_feature"
+  ],
+  "ml_domain_inverted_range.json": [
+   "ml.training_domain_range"
+  ],
+  "ml_split_overlap_failed.json": [
+   "ml.split_overlap"
+  ],
+  "ml_calibration_missing.json": [
+   "ml.calibration_missing"
+  ],
+  "ml_calibration_on_fit_sample.json": [
+   "ml.calibration_on_fit_sample"
+  ],
   "statres_bayesian_rhat_mismatch.json": [
    "stats.convergence_mismatch"
   ],
@@ -112,6 +138,12 @@
   "communication_traceability_pending.json": [
    "communication.assessment_stale",
    "communication.assessment_missing"
+  ],
+  "ml_domain_shift_missing.json": [
+   "ml.domain_shift_missing"
+  ],
+  "ml_split_overlap_not_run.json": [
+   "ml.split_overlap_not_run"
   ]
  }
 }

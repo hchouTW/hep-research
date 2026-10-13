@@ -1,0 +1,99 @@
+{
+ "contract_version": "2.5.0",
+ "artifact_id": "fixture-synthetic-ml-artifact",
+ "artifact_type": "ml-artifact",
+ "objective": "SYNTHETIC structural fixture; values are placeholders, not physics",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.6.16",
+  "contracts": "2.5.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "physics-ml",
+  "created": "2026-10-02",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "task": "classification",
+  "labels": [
+   "sig",
+   "bkg"
+  ],
+  "features": [
+   "x",
+   "y"
+  ],
+  "splits": {
+   "grouping_key": "run_id",
+   "overlap_check": {
+    "tool": "check_split_integrity.py",
+    "result": "not-run"
+   }
+  },
+  "training_domain": {
+   "x": [
+    0.0,
+    1.0
+   ],
+   "y": [
+    -1.0,
+    1.0
+   ]
+  },
+  "preprocessing": [],
+  "weights": {
+   "source": "generator weights (synthetic)",
+   "negative_weight_treatment": "none-present",
+   "class_balancing": "inverse class frequency",
+   "used_in": [
+    "loss",
+    "metrics"
+   ]
+  },
+  "model_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "output_semantics": "probability",
+  "calibration": {
+   "method": "temperature",
+   "fit_sample": "val",
+   "validation": {
+    "metric": "ece",
+    "sample": "test",
+    "before": 0.05,
+    "after": 0.01
+   }
+  },
+  "domain_shift": {
+   "control_sample": "synthetic control region",
+   "method": "score-shape comparison",
+   "result": {
+    "ks_p": 0.4
+   },
+   "status": "checked"
+  },
+  "environment": {
+   "torch_version": "synthetic",
+   "device": "cpu",
+   "precision": "fp32",
+   "seeds": {
+    "torch": 1,
+    "split": 2
+   }
+  },
+  "downstream_validation": [
+   {
+    "metric": "working-point efficiency in the synthetic signal region"
+   }
+  ]
+ }
+}

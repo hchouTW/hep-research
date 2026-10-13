@@ -10,8 +10,10 @@ advisory: it never authorizes a use. --protected applies the stricter version po
 minor contract version is an error, not a warning). --strict applies the statistical-result semantic rules of
 contracts 2.2.0 (p-values and confidence levels in range, ordered expected bands, typed coverage and global
 calibration) and the response semantic rules of contracts 2.4.0 (controlled correction vocabulary, a matrix or
-matrix_ref, normalization consistent with what sits inside the matrix, one unit per variable) to artifacts written
-under older contracts, which otherwise keep their outcome. --gate publication adds
+matrix_ref, normalization consistent with what sits inside the matrix, one unit per variable) and the ml-artifact
+rules of contracts 2.5.0 (non-blank grouping key, model hash, labels and features; training domain on the features
+with lo < hi; split-overlap result; calibration where the output must be calibrated, not evaluated on its fit sample;
+domain-shift check; seeds) to artifacts written under older contracts, which otherwise keep their outcome. --gate publication adds
 the publication gate of a statistical-result (publication_gate): passed, unresolved or failed, with reasons; an
 archived artifact may be valid and still not pass it. Passing the gate is a contract-level prerequisite for
 reporting a result as validated, not evidence of scientific validity.
@@ -238,6 +240,8 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, strict: bool = 
                     "AUC alone is insufficient: add calibration, working-point efficiency, or data/simulation agreement in the analysis region")
         if ext.get("task") == "surrogate" and not ext.get("training_domain"):
             rep.add("error", "$.extension.training_domain", "ml.no_training_domain", "a surrogate needs its training domain to detect extrapolation")
+        if strict or _at_least(doc.get("contract_version"), ML_SEMANTICS_FROM):
+            _ml_semantics(ext, rep)
     elif t == "communication":
         from contracts.communication import validate_extension  # lazy: communication imports this module's constants
         validate_extension(doc, vocab, rep)
@@ -295,6 +299,108 @@ def _response_semantics(ext: dict, vocab: Vocabulary, rep: Report) -> None:
             and t_ax.get("unit") != r_ax.get("unit"):
         rep.add("error", "$.extension.reco_axis.unit", "response.unit_mismatch",
                 f"'{t_ax.get('name')}' is in {t_ax.get('unit')!r} on the truth axis and {r_ax.get('unit')!r} on the reco axis")
+
+
+ML_SEMANTICS_FROM = "2.5.0"  # ml-artifact content rules apply natively from this contract version
+CALIBRATED_OUTPUTS = {"probability", "density-ratio"}
+DOMAIN_SHIFT_TASKS = {"classification", "regression"}
+
+
+def _feature_names(features) -> set[str]:
+    """Feature names from a list of strings or of objects with a 'name'."""
+    out = set()
+    for f in features if isinstance(features, list) else []:
+        name = f.get("name") if isinstance(f, dict) else f
+        if isinstance(name, str):
+            out.add(name)
+    return out
+
+
+def _blank(v) -> bool:
+    return not (isinstance(v, str) and v.strip())
+
+
+def _ml_semantics(ext: dict, rep: Report) -> None:
+    """ml-artifact content rules of contracts 2.5.0 (physics-ml review 2026-10-13). Native for artifacts of contract
+    2.5.0 or later; an older artifact gets them only in strict mode, so its promised outcome is unchanged.
+    Errors: blank grouping key, empty model_hash, labels or features, training_domain keyed on a variable that is not a
+    feature or with a range that is not [lo, hi] with lo < hi, a failed split-overlap check or test groups that are
+    not disjoint, a missing or incomplete calibration where the output must be calibrated (output_semantics
+    probability or density-ratio, task inference), a calibration evaluated on its fit sample. Unresolved: overlap check
+    not run, no domain-shift check for a classifier or regressor with downstream validation. Warnings: no overlap check
+    recorded, negative weights dropped, no seeds."""
+    splits: Any = ext.get("splits") if isinstance(ext.get("splits"), dict) else {}
+    gk = splits.get("grouping_key")
+    if isinstance(gk, str) and gk and not gk.strip():
+        rep.add("error", "$.extension.splits.grouping_key", "ml.no_grouping", "the grouping key is blank (leakage control)")
+    if _blank(ext.get("model_hash")):
+        rep.add("error", "$.extension.model_hash", "ml.model_hash_missing", "model_hash is empty: the artifact names no model")
+    for key in ("labels", "features"):
+        if not ext.get(key):
+            rep.add("error", f"$.extension.{key}", f"ml.{key}_missing",
+                    f"{key} is empty" + (": list the targets (class labels, regression targets or generated variables)"
+                                         if key == "labels" else ": list the model inputs"))
+    names = _feature_names(ext.get("features"))
+    dom: Any = ext.get("training_domain") if isinstance(ext.get("training_domain"), dict) else {}
+    for var, rng in dom.items():
+        if var not in names:
+            rep.add("error", f"$.extension.training_domain.{var}", "ml.training_domain_unknown_feature",
+                    f"training_domain names '{var}', which is not a feature {sorted(names)}")
+        if not (isinstance(rng, list) and len(rng) == 2 and all(_is_num(x) for x in rng)):
+            rep.add("error", f"$.extension.training_domain.{var}", "ml.training_domain_range",
+                    f"the range of '{var}' must be [lo, hi] with numbers, got {rng!r}")
+        elif rng[0] >= rng[1]:
+            rep.add("error", f"$.extension.training_domain.{var}", "ml.training_domain_range",
+                    f"the range of '{var}' is [{rng[0]}, {rng[1]}]: lo must be below hi")
+    oc: Any = splits.get("overlap_check")
+    if not isinstance(oc, dict):
+        rep.add("warning", "$.extension.splits.overlap_check", "ml.split_overlap_unchecked",
+                "no split-overlap check is recorded: run check_split_integrity.py and record its result")
+    elif oc.get("result") == "fail":
+        rep.add("error", "$.extension.splits.overlap_check", "ml.split_overlap",
+                "the split-overlap check failed: the test metrics measure leakage, not generalization")
+    elif oc.get("result") == "not-run":
+        rep.add("unresolved", "$.extension.splits.overlap_check", "ml.split_overlap_not_run",
+                "the split-overlap check was not run (or ran on incomplete group metadata): leakage is not excluded")
+    if splits.get("test_groups_disjoint") is False:
+        rep.add("error", "$.extension.splits.test_groups_disjoint", "ml.split_overlap",
+                "test groups also appear in training or validation")
+    cal: Any = ext.get("calibration")
+    needs_cal = ext.get("output_semantics") in CALIBRATED_OUTPUTS or ext.get("task") == "inference"
+    if cal is None and needs_cal:
+        why = f"output_semantics '{ext['output_semantics']}'" if ext.get("output_semantics") in CALIBRATED_OUTPUTS else "task inference"
+        rep.add("error", "$.extension.calibration", "ml.calibration_missing",
+                f"{why} is read as calibrated: record the calibration and its validation on a held-out sample")
+    elif isinstance(cal, dict):
+        val: Any = cal.get("validation") if isinstance(cal.get("validation"), dict) else None
+        missing = [k for k in ("method", "fit_sample") if _blank(cal.get(k))]
+        if val is None:
+            missing.append("validation")
+        else:
+            missing += [f"validation.{k}" for k in ("metric", "sample") if _blank(val.get(k))]
+            missing += ["validation.after"] if "after" not in val else []
+        if missing:
+            rep.add("error", "$.extension.calibration", "ml.calibration_incomplete",
+                    f"calibration needs {', '.join(missing)} ({{method, fit_sample, validation: {{metric, sample, before?, after}}}})")
+        if val is not None and not _blank(cal.get("fit_sample")) and cal.get("fit_sample") == val.get("sample"):
+            rep.add("error", "$.extension.calibration.validation.sample", "ml.calibration_on_fit_sample",
+                    f"calibration evaluated on its fit sample '{cal['fit_sample']}': validate it on a disjoint sample")
+    w: Any = ext.get("weights")
+    if isinstance(w, dict) and w.get("negative_weight_treatment") == "dropped":
+        rep.add("warning", "$.extension.weights.negative_weight_treatment", "ml.negative_weights_dropped",
+                "negative weights were dropped: the trained density is biased unless the effect is shown to be negligible")
+    env: Any = ext.get("environment")
+    if not (isinstance(env, dict) and isinstance(env.get("seeds"), dict) and env["seeds"]):
+        rep.add("warning", "$.extension.environment.seeds", "ml.seeds_missing",
+                "no seeds recorded: the training run cannot be reproduced or its seed variance estimated")
+    ds: Any = ext.get("domain_shift")
+    if ext.get("task") in DOMAIN_SHIFT_TASKS and ext.get("downstream_validation"):
+        if not isinstance(ds, dict) or ds.get("status") == "not-checked":
+            rep.add("unresolved", "$.extension.domain_shift", "ml.domain_shift_missing",
+                    "no domain-shift check: a simulation-trained model must be checked on data or control samples before use")
+        elif ds.get("status") == "failed":
+            rep.add("unresolved", "$.extension.domain_shift", "ml.domain_shift_failed",
+                    "the domain-shift check failed: correct or bound the data/simulation difference before use")
 
 
 STAT_SEMANTICS_FROM = "2.2.0"  # statistical-result semantic rules apply natively from this contract version
