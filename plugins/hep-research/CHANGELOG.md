@@ -136,6 +136,13 @@ Software checks establish contract consistency only, not physical validity.
   `co-cmp-perf-1`, `co-cmp-ode-1`, all hep-computing, triggers from the existing description) in
   `tests/routing/make_cases.py`, `cases.json` regenerated; capability-matrix rows for blinding, local partition,
   ROOT tools, task authoring and the environment manifest updated; VALIDATION section CMP-REMEDIATION.
+- **CMP-25 design guidelines consolidated (Q1).** `root-balanced-design-guidelines.md` keeps the ROOT-specific rules
+  (TObject or plain C++, dictionaries and I/O, directory ownership, ROOT globals, errors at the ROOT boundary,
+  dictionary limits of templates, naming/comments/file headers for every language, build layout, RDataFrame and
+  RNTuple patterns, checklist) and the shared conventions; the generic class/struct/inheritance/state/testing
+  sections and the toy examples are gone. `cpp-`, `python-` and `bash-balanced-design-guidelines.md` are checklists
+  around HEP failure modes with grep-able anti-pattern tables; the CMP-13..15 rules are kept. Four files: 4,573 →
+  1,028 lines; file names and linked anchors unchanged. `docs/reference-consolidation.md` records P1 as executed.
 
 ## 0.6.17 (2026-10-13)
 

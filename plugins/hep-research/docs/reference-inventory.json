@@ -15,7 +15,7 @@
   },
   "hep-computing": {
    "references": 32,
-   "bytes": 374665,
+   "bytes": 293149,
    "uncited": 0
   },
   "hep-statistics": {
@@ -1046,12 +1046,13 @@
   {
    "path": "skills/hep-computing/references/bash-balanced-design-guidelines.md",
    "owner": "hep-computing",
-   "bytes": 26989,
-   "lines": 974,
+   "bytes": 7570,
+   "lines": 132,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",
-    "skills/hep-computing/references/agile-development-guide.md"
+    "skills/hep-computing/references/agile-development-guide.md",
+    "skills/hep-computing/references/root-balanced-design-guidelines.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "b0cb9ac 2026-10-13"
@@ -1067,6 +1068,7 @@
     "adapters/batch-schedulers/slurm_backend.py",
     "skills/hep-computing/README.md",
     "skills/hep-computing/SKILL.md",
+    "skills/hep-computing/references/bash-balanced-design-guidelines.md",
     "skills/hep-computing/references/batch-site-cern-htcondor.md",
     "skills/hep-computing/references/batch-site-nstccore-slurm.md",
     "skills/hep-computing/references/engineering-playbook.md",
@@ -1112,6 +1114,7 @@
    "cited_by": [
     "skills/hep-analysis/references/hep-analysis-guide.md",
     "skills/hep-computing/SKILL.md",
+    "skills/hep-computing/references/cpp-balanced-design-guidelines.md",
     "skills/hep-computing/references/crash-and-memory-debugging.md",
     "skills/hep-computing/references/root-balanced-design-guidelines.md",
     "skills/hep-computing/references/root-debugging.md"
@@ -1124,14 +1127,12 @@
   {
    "path": "skills/hep-computing/references/cpp-balanced-design-guidelines.md",
    "owner": "hep-computing",
-   "bytes": 26568,
-   "lines": 1156,
+   "bytes": 6603,
+   "lines": 92,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/references/agile-development-guide.md",
-    "skills/hep-computing/references/bash-balanced-design-guidelines.md",
-    "skills/hep-computing/references/python-balanced-design-guidelines.md",
     "skills/hep-computing/references/root-balanced-design-guidelines.md",
     "skills/physics-ml/references/deep-learning-guide.md"
    ],
@@ -1148,8 +1149,10 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-computing/README.md",
+    "skills/hep-computing/references/cpp-balanced-design-guidelines.md",
     "skills/hep-computing/references/engineering-playbook.md",
     "skills/hep-computing/references/performance-profiling.md",
+    "skills/hep-computing/references/root-balanced-design-guidelines.md",
     "skills/hep-computing/references/root-debugging.md"
    ],
    "cited_by_other_skills": [],
@@ -1192,6 +1195,7 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-computing/README.md",
+    "skills/hep-computing/references/bash-balanced-design-guidelines.md",
     "skills/hep-computing/references/engineering-playbook.md"
    ],
    "cited_by_other_skills": [],
@@ -1331,14 +1335,14 @@
   {
    "path": "skills/hep-computing/references/python-balanced-design-guidelines.md",
    "owner": "hep-computing",
-   "bytes": 31144,
-   "lines": 1229,
+   "bytes": 5712,
+   "lines": 82,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/references/agile-development-guide.md",
-    "skills/hep-computing/references/bash-balanced-design-guidelines.md",
-    "skills/hep-computing/references/python-hep-coding-patterns.md"
+    "skills/hep-computing/references/python-hep-coding-patterns.md",
+    "skills/hep-computing/references/root-balanced-design-guidelines.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "351029c 2026-10-07"
@@ -1354,6 +1358,7 @@
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/references/crash-and-memory-debugging.md",
     "skills/hep-computing/references/performance-profiling.md",
+    "skills/hep-computing/references/python-balanced-design-guidelines.md",
     "skills/hep-computing/references/root-balanced-design-guidelines.md",
     "skills/hep-computing/references/storage-cern-eos.md"
    ],
@@ -1379,15 +1384,17 @@
   {
    "path": "skills/hep-computing/references/root-balanced-design-guidelines.md",
    "owner": "hep-computing",
-   "bytes": 53848,
-   "lines": 1293,
+   "bytes": 37148,
+   "lines": 726,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-analysis/references/hep-analysis-guide.md",
     "skills/hep-computing/SKILL.md",
+    "skills/hep-computing/references/bash-balanced-design-guidelines.md",
     "skills/hep-computing/references/cpp-balanced-design-guidelines.md",
     "skills/hep-computing/references/crash-and-memory-debugging.md",
     "skills/hep-computing/references/performance-profiling.md",
+    "skills/hep-computing/references/python-balanced-design-guidelines.md",
     "skills/hep-computing/references/python-hep-coding-patterns.md"
    ],
    "cited_by_other_skills": [
@@ -3331,20 +3338,6 @@
   }
  ],
  "overlap_pairs": [
-  {
-   "a": "skills/hep-computing/references/cpp-balanced-design-guidelines.md",
-   "b": "skills/hep-computing/references/root-balanced-design-guidelines.md",
-   "jaccard": 0.119,
-   "containment": 0.334,
-   "shared_shingles": 1226
-  },
-  {
-   "a": "skills/hep-computing/references/cpp-balanced-design-guidelines.md",
-   "b": "skills/hep-computing/references/python-balanced-design-guidelines.md",
-   "jaccard": 0.13,
-   "containment": 0.249,
-   "shared_shingles": 914
-  },
   {
    "a": "skills/detector-response/references/core-detector-equations.md",
    "b": "skills/detector-response/references/detector-principles-summary.md",
