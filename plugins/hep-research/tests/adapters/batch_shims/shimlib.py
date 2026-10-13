@@ -10,7 +10,7 @@ Environment:
 Chunk faults (Slurm): exit (code), timeout, oom, node-failure, preempt, cancelled, requeue-duplicate (runs twice,
 the first record REQUEUED), vanish (no record anywhere), stuck (PENDING forever), native (state: any text; "exit" and
 "derived" set ExitCode and DerivedExitCode).
-Chunk faults (HTCondor): exit (code), signal (signal), evict (evicted before output, then rerun), evict-after-output
+Chunk faults (HTCondor): exit (code), signal (signal), executable-error (event 002, no execution), evict (evicted before output, then rerun), evict-after-output
 (ran, evicted, ran again: a duplicate), hold (reason, code, subcode), remove, stuck (idle forever), vanish.
 Any fault may carry "node" (the execution host reported) and, for Slurm, "alloc_cpus" (AllocCPUS reported; default
 the requested --cpus-per-task, else 1) and "alloc_gpus" (gres/gpu in AllocTRES; default the requested --gpus, else
@@ -361,6 +361,9 @@ def condor_submit(argv: list) -> int:
         elif kind == "hold":
             _event(log, "012", cluster, proc, "Job was held.", [fault["reason"], f"Code {fault['code']} Subcode {fault.get('subcode', 0)}"])
             st.update(JobStatus=5, HoldReason=fault["reason"], HoldReasonCode=fault["code"], HoldReasonSubCode=fault.get("subcode", 0))
+        elif kind == "executable-error":  # the starter could not execute the job (event 002), then the job is held
+            _event(log, "002", cluster, proc, "(1) Job file not executable.")
+            st.update(JobStatus=5, HoldReason="Error from starter: Failed to execute", HoldReasonCode=6, HoldReasonSubCode=2)
         elif kind == "remove":
             _event(log, "009", cluster, proc, "Job was aborted.", ["via condor_rm (by user shim)"])
             st["JobStatus"] = 3

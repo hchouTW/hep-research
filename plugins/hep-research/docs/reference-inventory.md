@@ -130,7 +130,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `acceptance-criteria.md` | hep-computing | 3.7 | no | 3 | - | 351029c 2026-10-07 |
 | `agile-development-guide.md` | hep-computing | 10.7 | yes | 8 | physics-ml | 351029c 2026-10-07 |
 | `bash-balanced-design-guidelines.md` | hep-computing | 27.0 | yes | 2 | - | b0cb9ac 2026-10-13 |
-| `batch-scheduling.md` | hep-computing | 30.0 | yes | 11 | - | 051be1f 2026-10-13 |
+| `batch-scheduling.md` | hep-computing | 30.1 | yes | 11 | - | 0602de3 2026-10-13 |
 | `batch-site-cern-htcondor.md` | hep-computing | 11.2 | no | 2 | - | 6815df4 2026-10-10 |
 | `batch-site-nstccore-slurm.md` | hep-computing | 11.5 | no | 1 | - | 22ea71e 2026-10-12 |
 | `cmake-and-build.md` | hep-computing | 2.9 | yes | 5 | hep-analysis | fe8f71e 2026-10-13 |

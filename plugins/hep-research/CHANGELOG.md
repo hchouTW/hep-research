@@ -128,6 +128,9 @@ Software checks establish contract consistency only, not physical validity.
   records keep their signature), and `campaign._apply` carries the field. 8-field sacct recordings still parse. The
   fake `sacct` emits the field; `examples/batch-partition/output/results.json` regenerated (the new `scontrol` call
   count from CMP-22, nothing else changed).
+- **CMP-24 HTCondor event 002.** `parse_event_log` maps event 002 (error in executable) to `failed` with
+  `failure_reason` `executable-error` (signature `...|reason=executable-error`) instead of leaving the job queued and
+  asking `condor_q`; a later hold event still wins. The fake `condor_submit` gains an `executable-error` fault.
 
 ## 0.6.17 (2026-10-13)
 

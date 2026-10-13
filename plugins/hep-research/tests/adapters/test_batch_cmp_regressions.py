@@ -9,7 +9,8 @@ Each test fails on c1d375c. All inputs SYNTHETIC.
 import unittest
 
 from tests.adapters.batch_harness import Harness
-import slurm_backend as sb  # noqa: E402  (batch_harness put the adapter on sys.path)
+import htcondor_backend as hb  # noqa: E402  (batch_harness put the adapter on sys.path)
+import slurm_backend as sb  # noqa: E402
 
 
 class SlurmMaxArraySizeTests(unittest.TestCase):
@@ -59,6 +60,32 @@ class SlurmDerivedExitCodeTests(unittest.TestCase):
         self.assertIn("derived-exit", errors[0])
         self.assertIn("exit=4", errors[0])
         self.assertIn("DerivedExitCode", sb.SACCT_FIELDS)
+
+
+class HTCondorExecutableErrorTests(unittest.TestCase):
+    """CMP-24."""
+
+    LOG = ("000 (101.000.000) 2026-10-13 10:00:00 Job submitted from host: <127.0.0.1:9618>\n...\n"
+           "002 (101.000.000) 2026-10-13 10:00:05 (1) Job file not executable.\n...\n")
+
+    def test_event_002_is_a_failure_with_its_own_signature(self):
+        o = hb.parse_event_log(self.LOG)[(101, 0)]
+        self.assertEqual(o["state"], "failed")
+        self.assertEqual(o["failure_reason"], "executable-error")
+
+    def test_campaign_records_it_without_asking_condor_q(self):
+        h = Harness("htcondor", items=2, chunk=1)
+        self.addCleanup(h.cleanup)
+        h.plan()
+        h.set_faults({"c0000": [{"kind": "executable-error"}]})
+        self.assertEqual(h.cli("submit", "--submit")[0], 0)
+        n = len(h.calls())
+        code, rep = h.cli("status")
+        self.assertEqual(rep["chunks"]["c0000"]["status"], "failed", rep["chunks"]["c0000"])
+        self.assertIn("executable-error", h.state()["chunks"]["c0000"]["errors"][0])
+        later = [c["tool"] for c in h.calls()[n:]]
+        self.assertNotIn("condor_q", later)
+        self.assertNotIn("condor_history", later)
 
 
 if __name__ == "__main__":
