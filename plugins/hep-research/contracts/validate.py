@@ -176,6 +176,8 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, strict: bool = 
         check_conventions(ext.get("conventions", {}), vocab, rep, "$.extension.conventions")
         for bad in sorted(EXPERIMENT_ONLY_FIELDS & set(ext)):
             rep.add("error", f"$.extension.{bad}", "theory.experiment_field", f"experiment field '{bad}' in a theory spec")
+        if strict or _at_least(doc.get("contract_version"), THEORY_SEMANTICS_FROM):
+            _theory_semantics(doc, ext, vocab, rep)
     elif t == "prediction":
         for i, u in enumerate(ext.get("uncertainties", [])):
             if u.get("kind") in NON_GAUSSIAN_KINDS and u.get("gaussian") is True:
@@ -188,6 +190,8 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, strict: bool = 
         if need and not ext.get(need):
             rep.add("error", f"$.extension.{need}", "prediction.payload_missing",
                     f"a {rp} prediction needs '{need}' (numbers kept elsewhere: reference them and use a metadata record)")
+        if strict or _at_least(doc.get("contract_version"), THEORY_SEMANTICS_FROM):
+            _theory_semantics(doc, ext, vocab, rep)
     elif t == "dataset-record":
         if isinstance(ext.get("data"), dict):
             check_binned(ext["data"], rep, "$.extension.data", ext.get("observable"))
@@ -401,6 +405,105 @@ def _ml_semantics(ext: dict, rep: Report) -> None:
         elif ds.get("status") == "failed":
             rep.add("unresolved", "$.extension.domain_shift", "ml.domain_shift_failed",
                     "the domain-shift check failed: correct or bound the data/simulation difference before use")
+
+
+THEORY_SEMANTICS_FROM = "2.6.0"  # theory-spec and prediction rules apply natively from this contract version
+STRONG_STATUSES = {"formal-proof", "analytic-derivation"}
+
+
+def _theory_semantics(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:
+    """theory-spec and prediction rules of contracts 2.6.0 (hep-theory audit 2026-10-13). Native for artifacts of
+    contract 2.6.0 or later; an older artifact gets them only in strict mode, at the same level, so its promised outcome
+    is unchanged.
+    theory-spec: errors for a perturbative argument without an order, an asymptotic argument without a limit, a
+    formal proof or analytic derivation with no check run, a check result outside check_results, an empty validity
+    domain; a warning for each core convention key
+    that is neither given (a value or 'not-applicable') nor listed in 'inapplicable'.
+    prediction: errors for 'observed', for 'validated-in-scope' without a linked theory-spec input that carries it,
+    and for a scale envelope without an envelope_prescriptions term or with values that are not [min, max] (bounds
+    per bin for a binned envelope); unresolved when neither theory_spec_ref nor derivation_status links the
+    prediction to its derivation; a warning for a truncation without a truncation_methods term."""
+    if doc.get("artifact_type") == "theory-spec":
+        _theory_spec_rules(ext, vocab, rep)
+    else:
+        _prediction_rules(doc, ext, vocab, rep)
+
+
+def _term_ok(vocab: Vocabulary, name: str, term) -> bool:
+    return isinstance(term, str) and (vocab.has(name, term) or bool(NAMESPACED.match(term)))
+
+
+def _theory_spec_rules(ext: dict, vocab: Vocabulary, rep: Report) -> None:
+    conv: Any = ext.get("conventions") if isinstance(ext.get("conventions"), dict) else {}
+    listed = set(ext.get("inapplicable") or [])
+    core_keys = sorted(vocab.core("convention_keys"))
+    absent = [k for k in core_keys if k not in listed and (conv.get(k) is None or (isinstance(conv.get(k), str)
+                                                                                  and not conv[k].strip()))]
+    if absent:
+        rep.add("warning", "$.extension.conventions", "theory.conventions_incomplete",
+                f"core convention keys {absent} are neither given nor marked 'not-applicable' (or listed in "
+                "'inapplicable'): a conventions block travels with every derivation")
+    status = ext.get("derivation_status")
+    if status == "perturbative-argument" and _blank(ext.get("order")):
+        rep.add("error", "$.extension.order", "theory.order_missing",
+                "a perturbative argument states its order")
+    if status == "asymptotic-argument" and _blank(ext.get("limit")):
+        rep.add("error", "$.extension.limit", "theory.limit_missing",
+                "an asymptotic argument states the limit it holds in ('limit')")
+    checks = ext.get("checks_run") or []
+    if status in STRONG_STATUSES and not checks:
+        rep.add("error", "$.extension.checks_run", "theory.unchecked_strong_status",
+                f"'{status}' with no check run: list the checks (units, limits, symmetries, ...) or lower the status")
+    for i, c in enumerate(checks):
+        if isinstance(c, dict) and not (isinstance(c.get("result"), str) and vocab.has("check_results", c["result"])):
+            rep.add("error", f"$.extension.checks_run[{i}].result", "theory.check_result_vocab",
+                    f"check result {c.get('result')!r} is not one of {sorted(vocab.core('check_results'))}")
+    if ext.get("validity_domain") == {}:
+        rep.add("error", "$.extension.validity_domain", "theory.validity_empty",
+                "the validity domain is empty: state where the result holds")
+
+
+def _prediction_rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:
+    status = set(doc.get("status", []))
+    if "observed" in status:
+        rep.add("error", "$.status", "prediction.status_upgraded", "a prediction is not 'observed'")
+    if "validated-in-scope" in status:
+        ref = ext.get("theory_spec_ref")
+        linked = [i for i in doc.get("inputs", []) if isinstance(i, dict) and i.get("artifact_type") == "theory-spec"
+                  and (ref is None or ref in (i.get("ref"), i.get("artifact_id")))]
+        if not any("validated-in-scope" in (i.get("status") or []) for i in linked):
+            rep.add("error", "$.status", "prediction.status_upgraded",
+                    "'validated-in-scope' needs a linked theory-spec input that carries it (a status is never upgraded "
+                    "when a result is reused)")
+    if _blank(ext.get("theory_spec_ref")) and _blank(ext.get("derivation_status")):
+        rep.add("unresolved", "$.extension", "prediction.spec_unlinked",
+                "no theory_spec_ref and no derivation_status: the prediction is not linked to its derivation")
+    vals: Any = ext.get("values") if isinstance(ext.get("values"), dict) else {}
+    n_bins = len(vals.get("values") or [])
+    for i, u in enumerate(ext.get("uncertainties", [])):
+        path = f"$.extension.uncertainties[{i}]"
+        if u.get("kind") == "scale-envelope":
+            if not _term_ok(vocab, "envelope_prescriptions", u.get("prescription")):
+                rep.add("error", f"{path}.prescription", "prediction.envelope_prescription",
+                        f"a scale envelope names its prescription, one of "
+                        f"{sorted(vocab.core('envelope_prescriptions'))} or a namespaced '<ns>:<term>'; "
+                        f"got {u.get('prescription')!r}")
+            ev = u.get("values")
+            if ev is not None and not (len(ev) == 2 and ev[0] <= ev[1]):
+                rep.add("error", f"{path}.values", "prediction.envelope_prescription",
+                        f"envelope values must be one [min, max] pair with min <= max, got {ev}; a binned envelope "
+                        "uses bounds {lower, upper} with one entry per bin")
+            b: Any = u.get("bounds")
+            if isinstance(b, dict):
+                lo, hi = b.get("lower") or [], b.get("upper") or []
+                if len(lo) != len(hi) or (n_bins and len(lo) != n_bins) or any(x > y for x, y in zip(lo, hi)):
+                    rep.add("error", f"{path}.bounds", "prediction.envelope_prescription",
+                            f"bounds need lower <= upper bin by bin and one entry per bin ({n_bins} bins); "
+                            f"got {len(lo)} lower and {len(hi)} upper")
+        if u.get("kind") == "truncation" and not _term_ok(vocab, "truncation_methods", u.get("method")):
+            rep.add("warning", f"{path}.method", "prediction.truncation_method",
+                    f"a truncation estimate names its method, one of "
+                    f"{sorted(vocab.core('truncation_methods'))}; got {u.get('method')!r}")
 
 
 STAT_SEMANTICS_FROM = "2.2.0"  # statistical-result semantic rules apply natively from this contract version

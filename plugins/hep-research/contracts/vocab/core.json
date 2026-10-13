@@ -129,6 +129,22 @@
    "exposure": "Exposure (acceptance x live time) normalization",
    "luminosity": "Integrated luminosity normalization",
    "livetime": "Detector live time"
+  },
+  "envelope_prescriptions": {
+   "3-point": "Single scale at mu_0/2, mu_0, 2 mu_0; envelope = min and max of the three",
+   "scan-min-max": "Single scale scanned over [mu_0/2, 2 mu_0]; envelope = min and max over the scan",
+   "7-point": "mu_R and mu_F varied by factors of 2, the two opposite-direction combinations dropped",
+   "9-point": "mu_R and mu_F varied by factors of 2, all nine combinations kept"
+  },
+  "truncation_methods": {
+   "last-term": "Size of the last included term of the series",
+   "envelope-proxy": "The scale envelope used as a proxy for the missing higher orders",
+   "series-model": "A model for the unknown coefficients from the known ones (degree-of-belief interval; state the model)"
+  },
+  "check_results": {
+   "pass": "The check was run and passed at its stated tolerance",
+   "fail": "The check was run and failed",
+   "inconclusive": "The check was run and neither passed nor failed (state why)"
   }
  }
 }

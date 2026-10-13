@@ -63,5 +63,136 @@ class SchemaFieldTests(unittest.TestCase):
         self.assertIn("vocab.unknown_term", codes(v.validate_artifact(doc)))
 
 
+CORE_KEYS = ["unit_system", "hbar_c_one", "metric_signature", "coupling_normalization", "renormalization_scheme",
+             "scales", "energy_variable", "frame", "angle_definition", "spin_treatment", "mass_approximation"]
+
+
+def stamp(doc, version):
+    doc = copy.deepcopy(doc)
+    doc["contract_version"] = version
+    doc["versions"]["contracts"] = version
+    return doc
+
+
+def theory_base(version="2.6.0"):
+    """The 1.0.0 fixture completed so that every 2.6.0 rule is satisfied."""
+    doc = stamp(THEORY_1_0, version)
+    ext = doc["extension"]
+    ext["conventions"] = {k: ext["conventions"].get(k, "not-applicable") for k in CORE_KEYS}
+    ext.update(derivation_status="perturbative-argument", order="tree-level",
+               checks_run=[{"name": "units", "result": "pass", "tolerance": "exact"}])
+    return doc
+
+
+def prediction_base(version="2.6.0"):
+    doc = stamp(PREDICTION_1_0, version)
+    ext = doc["extension"]
+    ext["theory_spec_ref"] = "artifacts/theory_spec.json"
+    ext["uncertainties"] = [{"name": "scale", "kind": "scale-envelope", "correlation": "unknown", "prescription": "3-point",
+                             "values": [0.9, 1.1]},
+                            {"name": "mho", "kind": "truncation", "correlation": "unknown", "method": "last-term"}]
+    return doc
+
+
+def _ext(f):
+    def g(doc):
+        f(doc["extension"])
+    return g
+
+
+# name -> (base, mutation of the document, level, code)
+MUTATIONS = {
+    "pred_observed": ("prediction", lambda d: d.update(status=["observed"]), "error", "prediction.status_upgraded"),
+    "pred_validated_unsupported": ("prediction", lambda d: d.update(status=["validated-in-scope"]), "error",
+                                   "prediction.status_upgraded"),
+    "pred_validated_wrong_input": ("prediction", lambda d: d.update(
+        status=["validated-in-scope"], inputs=[{"ref": "other.json", "artifact_type": "theory-spec",
+                                                "status": ["validated-in-scope"]}]), "error", "prediction.status_upgraded"),
+    "pred_unlinked": ("prediction", _ext(lambda e: e.pop("theory_spec_ref")), "unresolved", "prediction.spec_unlinked"),
+    "pred_envelope_no_prescription": ("prediction", _ext(lambda e: e["uncertainties"][0].pop("prescription")), "error",
+                                      "prediction.envelope_prescription"),
+    "pred_envelope_unknown_prescription": ("prediction", _ext(lambda e: e["uncertainties"][0].update(prescription="max")),
+                                           "error", "prediction.envelope_prescription"),
+    "pred_envelope_inverted": ("prediction", _ext(lambda e: e["uncertainties"][0].update(values=[1.1, 0.9])), "error",
+                               "prediction.envelope_prescription"),
+    "pred_envelope_not_a_pair": ("prediction", _ext(lambda e: e["uncertainties"][0].update(values=[0.9, 1.0, 1.1, 1.2])),
+                                 "error", "prediction.envelope_prescription"),
+    "pred_envelope_bounds_short": ("prediction", _ext(lambda e: (e["uncertainties"][0].pop("values"), e["uncertainties"][0].update(
+        bounds={"lower": [0.9, 0.9], "upper": [1.1, 1.1]}))), "error", "prediction.envelope_prescription"),
+    "pred_truncation_no_method": ("prediction", _ext(lambda e: e["uncertainties"][1].pop("method")), "warning",
+                                  "prediction.truncation_method"),
+    "ts_conventions_incomplete": ("theory", _ext(lambda e: e["conventions"].pop("frame")), "warning",
+                                  "theory.conventions_incomplete"),
+    "ts_conventions_blank": ("theory", _ext(lambda e: e["conventions"].update(frame=" ")), "warning",
+                             "theory.conventions_incomplete"),
+    "ts_order_missing": ("theory", _ext(lambda e: e.update(order=" ")), "error", "theory.order_missing"),
+    "ts_limit_missing": ("theory", _ext(lambda e: e.update(derivation_status="asymptotic-argument")), "error",
+                         "theory.limit_missing"),
+    "ts_formal_proof_unchecked": ("theory", _ext(lambda e: e.update(derivation_status="formal-proof", checks_run=[])),
+                                  "error", "theory.unchecked_strong_status"),
+    "ts_analytic_unchecked": ("theory", _ext(lambda e: e.update(derivation_status="analytic-derivation", checks_run=[])),
+                              "error", "theory.unchecked_strong_status"),
+    "ts_check_result_vocab": ("theory", _ext(lambda e: e["checks_run"].append({"name": "limits", "result": "looks fine"})),
+                              "error", "theory.check_result_vocab"),
+    "ts_validity_empty": ("theory", _ext(lambda e: e.update(validity_domain={})), "error", "theory.validity_empty"),
+}
+
+
+def mutated(name, version="2.6.0"):
+    base, f, _, _ = MUTATIONS[name]
+    doc = theory_base(version) if base == "theory" else prediction_base(version)
+    f(doc)
+    return doc
+
+
+class NativeRuleTests(unittest.TestCase):
+    """THY-WP2.2 and WP4.3: the rules fire natively on a 2.6.0 artifact, each at its level."""
+
+    def test_complete_bases_have_no_findings_from_the_new_rules(self):
+        for doc in (theory_base(), prediction_base()):
+            rep = v.validate_artifact(doc)
+            self.assertTrue(rep.ok, rep.as_dict())
+            self.assertFalse({f.code for f in rep.findings if f.code.startswith(("theory.", "prediction."))}, rep.as_dict())
+
+    def test_each_mutation_is_reported_natively_at_its_level(self):
+        for name, (_, _, level, code) in MUTATIONS.items():
+            with self.subTest(name):
+                rep = v.validate_artifact(mutated(name))
+                self.assertIn(code, codes(rep, level), rep.as_dict())
+                self.assertEqual(rep.ok, level != "error")
+
+    def test_positive_forms(self):
+        ok = []
+        d = prediction_base(); d.update(status=["validated-in-scope"], inputs=[
+            {"ref": "artifacts/theory_spec.json", "artifact_type": "theory-spec", "status": ["validated-in-scope"]}])
+        ok.append(("validated with linked spec", d))
+        d = prediction_base(); d["extension"].pop("theory_spec_ref"); d["extension"]["derivation_status"] = "numerical-evidence"
+        ok.append(("derivation_status instead of a ref", d))
+        d = prediction_base(); d["extension"]["uncertainties"][0].pop("values")
+        ok.append(("envelope without values", d))
+        d = prediction_base(); d["extension"]["uncertainties"][0].pop("values")
+        d["extension"]["uncertainties"][0]["bounds"] = {"lower": [0.9] * 4, "upper": [1.1] * 4}
+        ok.append(("binned envelope bounds", d))
+        d = prediction_base(); d["extension"]["uncertainties"][0]["prescription"] = "synthetic-collider:custom"
+        ok.append(("namespaced prescription", d))
+        d = theory_base(); d["extension"]["conventions"].pop("frame"); d["extension"]["inapplicable"] = ["frame"]
+        ok.append(("key listed in inapplicable", d))
+        d = theory_base(); d["extension"].update(derivation_status="asymptotic-argument", limit="m_e -> 0")
+        ok.append(("asymptotic with limit", d))
+        for name, doc in ok:
+            with self.subTest(name):
+                rep = v.validate_artifact(doc)
+                self.assertTrue(rep.ok, rep.as_dict())
+                self.assertFalse({f.code for f in rep.findings if f.code.startswith(("theory.", "prediction."))},
+                                 rep.as_dict())
+
+    def test_conventions_rule_stays_a_warning_under_strict(self):
+        """Q2: --strict applies newer rules to older artifacts at the same level; it never raises a level."""
+        for version in ("2.6.0", "2.5.0"):
+            rep = v.validate_artifact(mutated("ts_conventions_incomplete", version), strict=True)
+            self.assertIn("theory.conventions_incomplete", codes(rep, "warning"))
+            self.assertTrue(rep.ok)
+
+
 if __name__ == "__main__":
     unittest.main()
