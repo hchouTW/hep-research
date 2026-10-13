@@ -15,7 +15,7 @@
   },
   "hep-computing": {
    "references": 29,
-   "bytes": 338673,
+   "bytes": 341437,
    "uncited": 0
   },
   "hep-statistics": {
@@ -1165,7 +1165,7 @@
     "skills/hep-computing/references/design-and-estimation.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "076eae1 2026-10-13"
+   "last_commit": "80ac12a 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/environments-and-containers.md",
@@ -1342,8 +1342,8 @@
   {
    "path": "skills/hep-computing/references/root-balanced-design-guidelines.md",
    "owner": "hep-computing",
-   "bytes": 48112,
-   "lines": 1254,
+   "bytes": 50876,
+   "lines": 1260,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-analysis/references/hep-analysis-guide.md",
@@ -3278,9 +3278,9 @@
   {
    "a": "skills/hep-computing/references/cpp-balanced-design-guidelines.md",
    "b": "skills/hep-computing/references/root-balanced-design-guidelines.md",
-   "jaccard": 0.144,
-   "containment": 0.368,
-   "shared_shingles": 1316
+   "jaccard": 0.125,
+   "containment": 0.34,
+   "shared_shingles": 1217
   },
   {
    "a": "skills/hep-computing/references/cpp-balanced-design-guidelines.md",

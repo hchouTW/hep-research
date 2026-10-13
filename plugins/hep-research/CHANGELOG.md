@@ -70,6 +70,16 @@ Software checks establish contract consistency only, not physical validity.
   `HepComputingScriptContractTests`: every hep-computing script (both `.sh` included; `inspect_root_file.C` exempt by
   name) must print one JSON object with `status` and the documented exit code for a missing input, a refused target
   and an output path that cannot be created (22 cases fail on c1d375c, including the four output-path tracebacks).
+- **CMP-13 `root-balanced-design-guidelines.md` corrections.** R1: writing to a `TFile` does not need `TObject`
+  (`WriteObject`/`Get<T>` for any class with a dictionary; non-`TObject` branches); `TObject` is for `TList`/`TObjArray`
+  containers, `TObject*` APIs and directory registration. R2: `ClassImp` is not needed in ROOT 6; `ClassDefOverride`
+  only adds `override`; `#pragma read` rules instead of a hand-written `Streamer()`. R3: one baseline, C++17, `-std`
+  from `root-config --cflags`. R4: the double delete is order-dependent (`~TH1` deregisters); the hazard is a smart
+  pointer outliving its file; callers own non-registering `Get` results (`TGraph`, `TF1`, `TCanvas`, `TVectorD`);
+  `TH1::AddDirectory(kFALSE)`; `RResultPtr` ownership; the demo now compiles (checked against ROOT 6.38.04). R5:
+  `gRandom` in `Define` under IMT, `DefineSlot`, eager `Snapshot` unless `fLazy`, `Range` unsupported with IMT,
+  non-deterministic order and sums. R6: "CINT" dropped. R7: one rule each for naming, non-owning members (pointer),
+  `std::filesystem` and exceptions, stated once at the top.
 
 ## 0.6.17 (2026-10-13)
 
