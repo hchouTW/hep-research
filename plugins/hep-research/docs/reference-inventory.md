@@ -189,7 +189,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `geometric-and-equivariant-learning.md` | physics-ml | 4.7 | no | 4 | - | 351029c 2026-10-07 |
 | `interpretability-and-explainability.md` | physics-ml | 6.5 | no | 3 | - | 351029c 2026-10-07 |
 | `mixed-precision.md` | physics-ml | 0.6 | no | 2 | - | 351029c 2026-10-07 |
-| `ml-analysis.md` | physics-ml | 21.6 | yes | 9 | detector-response, hep-analysis | 1497349 2026-10-13 |
+| `ml-analysis.md` | physics-ml | 21.6 | yes | 12 | detector-response, hep-analysis | 1497349 2026-10-13 |
 | `monitoring-and-lifecycle.md` | physics-ml | 5.6 | no | 3 | - | 351029c 2026-10-07 |
 | `multivariate-analysis-bdt-nn.md` | physics-ml | 16.4 | yes | 7 | detector-response, hep-analysis | 1497349 2026-10-13 |
 | `optimization-and-training-dynamics.md` | physics-ml | 8.7 | no | 2 | - | 351029c 2026-10-07 |

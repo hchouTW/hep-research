@@ -14,7 +14,8 @@
  "related_skills": [
   "hep-analysis",
   "detector-response",
-  "hep-statistics"
+  "hep-statistics",
+  "physics-ml"
  ],
  "resources": {
   "index": "index.md",

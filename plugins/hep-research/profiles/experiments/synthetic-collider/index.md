@@ -10,5 +10,6 @@ Profile `experiment:synthetic-collider` is **illustrative and synthetic**. It ex
 | Generate synthetic events | `scripts/generate_events.py --help` |
 | Efficiency, smearing, analytic response | `scripts/detector.py` |
 | Dataset record of the synthetic measurement | `datasets/` |
+| SYNTHETIC ML illustration: grouped splits, calibration, domain shift, ml-artifact feeding a template fit (physics-ml -> hep-statistics) | `../../../examples/ml-classifier-to-inference/run.py` (report in its `output/`) |
 
 Conventions: `conventions.json`. Evidence ledger: `evidence/` is empty by design (there is no real source to cite).

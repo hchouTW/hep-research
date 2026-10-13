@@ -2090,11 +2090,14 @@
     "skills/hep-analysis/references/hep-analysis-guide.md",
     "skills/physics-ml/README.md",
     "skills/physics-ml/SKILL.md",
+    "skills/physics-ml/assets/calibration.py",
     "skills/physics-ml/assets/hep_losses.py",
+    "skills/physics-ml/assets/set_classifier.py",
     "skills/physics-ml/references/multivariate-analysis-bdt-nn.md",
     "skills/physics-ml/references/particle-and-jet-architectures.md",
     "skills/physics-ml/references/sbi-training.md",
-    "skills/physics-ml/references/space-and-astroparticle-ml.md"
+    "skills/physics-ml/references/space-and-astroparticle-ml.md",
+    "skills/physics-ml/scripts/make_grouped_splits.py"
    ],
    "cited_by_other_skills": [
     "detector-response",

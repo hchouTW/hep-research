@@ -1,0 +1,359 @@
+{
+ "label": "SYNTHETIC and ILLUSTRATIVE: invented samples, pseudo-data not observed data; describes no experiment",
+ "profiles_loaded": [
+  "experiment:synthetic-collider"
+ ],
+ "trainer": "numpy",
+ "seed": 20261013,
+ "criteria": {
+  "split_check_strict": "passed",
+  "rowlevel_split": "failed (leakage)",
+  "ece_after_max": 0.03,
+  "domain_shift_detects_injected_shift": true,
+  "ood_outside_fraction_max": 0.05,
+  "asimov_mu_abs_dev_max": 0.001,
+  "toy_mean_pull_abs": 0.15,
+  "toy_pull_width": [
+   0.9,
+   1.1
+  ],
+  "toy_coverage_68": [
+   0.635,
+   0.73
+  ],
+  "pseudo_data_mu_within_sigma": 3.0
+ },
+ "pass": {
+  "grouped_split_check_strict": true,
+  "rowlevel_split_leak_caught": true,
+  "calibration_ece_after": true,
+  "domain_shift_detects_injected_shift": true,
+  "pseudo_data_out_of_domain_fraction": true,
+  "asimov_closure": true,
+  "toy_pull_mean": true,
+  "toy_pull_width": true,
+  "toy_coverage_68": true,
+  "pseudo_data_fit": true,
+  "ml_artifact_valid": true,
+  "statistical_result_valid_and_linked": true
+ },
+ "config": {
+  "features": [
+   "m_ll",
+   "acop",
+   "pt_miss",
+   "cos_theta"
+  ],
+  "units": {
+   "m_ll": "GeV",
+   "acop": "rad",
+   "pt_miss": "GeV",
+   "cos_theta": "1"
+  },
+  "lumi_fb": 10.0,
+  "xsec_fb": {
+   "signal": 4.0,
+   "background": 30.0
+  },
+  "periods": 4,
+  "runs_per_period": 6,
+  "mc_per_run": {
+   "signal": 150,
+   "background": 200,
+   "counter": 25
+  },
+  "shift": [
+   "pt_miss",
+   1.1
+  ],
+  "mu_true": 1.0,
+  "edges": [
+   0.0,
+   0.02,
+   0.05,
+   0.1,
+   0.2,
+   0.35,
+   0.5,
+   1.0
+  ],
+  "fractions": [
+   0.6,
+   0.2,
+   0.2
+  ],
+  "working_point_eff_s": 0.5
+ },
+ "samples": {
+  "n_mc": 9600,
+  "n_negative_weight": 600,
+  "negative_weight_fraction_background": 0.1,
+  "sum_w": {
+   "signal": 40.0,
+   "background": 300.0
+  },
+  "pseudo_data": {
+   "n_background_drawn": 315,
+   "n_signal_drawn": 42
+  }
+ },
+ "splits": {
+  "summary": {
+   "mode": "random-groups",
+   "seed": 20261013,
+   "groups": 24,
+   "splits": {
+    "train": {
+     "groups": 14,
+     "rows": 5600,
+     "fraction": 0.583333
+    },
+    "val": {
+     "groups": 5,
+     "rows": 2000,
+     "fraction": 0.208333
+    },
+    "test": {
+     "groups": 5,
+     "rows": 2000,
+     "fraction": 0.208333
+    }
+   }
+  },
+  "check": {
+   "exit": 0,
+   "status": "passed"
+  },
+  "rowlevel": {
+   "exit": 1,
+   "status": "failed",
+   "failure_kind": [
+    "leakage"
+   ],
+   "leaked_groups": 24
+  }
+ },
+ "training": {
+  "model": {
+   "type": "weighted logistic regression on quadratic features (NumPy, Newton)",
+   "iterations": 9,
+   "converged": true,
+   "l2": 1.0
+  },
+  "weights": {
+   "training_sum_per_class": [
+    2800.0,
+    2800.0
+   ],
+   "evaluation_sum_per_class_train_split": [
+    175.0,
+    23.3333
+   ],
+   "n_negative_train": 350
+  }
+ },
+ "metrics": {
+  "val": {
+   "auc_weighted": 0.917904,
+   "working_point": {
+    "target_eff_s": 0.5,
+    "threshold": 0.852594,
+    "eff_s": 0.5,
+    "eff_s_unc": 0.0182574,
+    "eff_b": 0.034,
+    "eff_b_unc": 0.00679566,
+    "rejection": 29.4118
+   }
+  },
+  "test": {
+   "auc_weighted": 0.921752,
+   "working_point": {
+    "threshold_from": "val",
+    "threshold": 0.852594,
+    "eff_s": 0.462667,
+    "eff_s_unc": 0.0182065,
+    "eff_b": 0.025,
+    "eff_b_unc": 0.00674027,
+    "rejection": 40.0
+   },
+   "asimov_significance_at_wp": 5.25953,
+   "expected_at_wp": {
+    "signal": 18.5067,
+    "background": 7.5
+   }
+  }
+ },
+ "calibration": {
+  "method": "temperature",
+  "params": {
+   "temperature": 0.977325
+  },
+  "prior_ratio_change": 0.133333,
+  "fit_sample": "work/val_scores.csv",
+  "eval_sample": "work/test_scores.csv",
+  "ece_before": 0.0158957,
+  "ece_after": 0.0175586,
+  "ece_floor_after": 0.0158455,
+  "nll_before": 0.205146,
+  "nll_after": 0.205091
+ },
+ "domain_shift": {
+  "per_variable": {
+   "score": {
+    "ks_d": 0.0256,
+    "noise_floor_95": 0.022505,
+    "shift_detected": true
+   },
+   "m_ll": {
+    "ks_d": 0.023,
+    "noise_floor_95": 0.033605,
+    "shift_detected": false
+   },
+   "acop": {
+    "ks_d": 0.0326,
+    "noise_floor_95": 0.035325,
+    "shift_detected": false
+   },
+   "pt_miss": {
+    "ks_d": 0.056,
+    "noise_floor_95": 0.024115,
+    "shift_detected": true
+   },
+   "cos_theta": {
+    "ks_d": 0.0221,
+    "noise_floor_95": 0.0236,
+    "shift_detected": false
+   }
+  },
+  "measured_scale": {
+   "feature": "pt_miss",
+   "control_over_simulation_mean": 1.09868
+  },
+  "delta_mu_asimov_from_measured_scale": -0.107539,
+  "pseudo_data_domain_flags": {
+   "inside": 348,
+   "sparse": 0,
+   "outside": 9,
+   "n": 357,
+   "method": "whitened Mahalanobis + k-NN (cKDTree), thresholds calibrated on held-out training points",
+   "exit": 1
+  }
+ },
+ "templates": {
+  "edges": [
+   0.0,
+   0.02,
+   0.05,
+   0.1,
+   0.2,
+   0.35,
+   0.5,
+   1.0
+  ],
+  "background": {
+   "sumw": [
+    168.6,
+    40.2,
+    32.4,
+    30.0,
+    16.8,
+    7.5,
+    4.5
+   ],
+   "sumw2": [
+    62.82,
+    15.12,
+    11.16,
+    10.44,
+    6.48,
+    3.87,
+    2.61
+   ]
+  },
+  "signal": {
+   "sumw": [
+    1.17333,
+    1.44,
+    2.50667,
+    4.0,
+    8.58667,
+    5.97333,
+    16.32
+   ],
+   "sumw2": [
+    0.0625778,
+    0.0768,
+    0.133689,
+    0.213333,
+    0.457956,
+    0.318578,
+    0.8704
+   ]
+  },
+  "scale_to_full_mc": [
+   4.8,
+   4.8
+  ],
+  "source": "test split"
+ },
+ "pseudo_data_counts": [
+  179,
+  43,
+  34,
+  27,
+  31,
+  19,
+  24
+ ],
+ "fit": {
+  "mu_hat": 1.30738,
+  "lo": 1.04665,
+  "hi": 1.58823,
+  "err_down": 0.260727,
+  "err_up": 0.280857,
+  "nll_min": -1179.3,
+  "at_boundary": false,
+  "gof": {
+   "statistic": 3.06,
+   "ndf": 6,
+   "p": 0.801279
+  }
+ },
+ "asimov": {
+  "mu_hat": 1.0,
+  "lo": 0.762219,
+  "hi": 1.25817,
+  "err_down": 0.237781,
+  "err_up": 0.258174,
+  "nll_min": -1111.24,
+  "at_boundary": false
+ },
+ "toys": {
+  "n": 1000,
+  "seed": 20261016,
+  "failed": 0,
+  "pull_mean": -0.0546859,
+  "pull_width": 0.984352,
+  "coverage_68": 0.693
+ },
+ "artifacts": {
+  "ml_artifact_id": "synthetic-j9-classifier",
+  "statistical_result_inputs_link": true,
+  "ml_artifact_writer": {
+   "exit": 0,
+   "findings": []
+  }
+ },
+ "contract_validation": {
+  "ml_artifact": {
+   "ok": true,
+   "errors": [],
+   "unresolved": []
+  },
+  "statistical_result": {
+   "ok": true,
+   "errors": [],
+   "unresolved": []
+  }
+ }
+}
