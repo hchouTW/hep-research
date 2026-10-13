@@ -83,6 +83,7 @@ class FidelitySTH312(unittest.TestCase):
             mc.to_pyhf(bad)
 
 
+@unittest.skipUnless(HAVE, "pyhf not installed: SR/CR model-card checks unverified")
 class SrCrModelCard(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
