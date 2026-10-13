@@ -91,6 +91,9 @@ Software checks establish contract consistency only, not physical validity.
   `/var/lock` (root-owned, node-local) and no `flock` on NFS/EOS/AFS/Lustre; lock in local scratch. B4: the EXIT
   trap does not stop children; forward SIGTERM to the child and `wait` (preemption), exit 143; checked on Bash 3.2.
   B5: the bad-comment example no longer uses `((i++))`.
+- **CMP-16 `python-hep-coding-patterns.md`.** P1: `with ROOT.TFile.Open(...) as f:` / `with uproot.recreate(...)`
+  instead of "close output files explicitly", consistent with the Python guidelines. P2: `ROOT.SetOwnership` and the
+  pitfall of a histogram drawn in a helper vanishing from the canvas. Checked with PyROOT 6.38.04.
 
 ## 0.6.17 (2026-10-13)
 
