@@ -41,15 +41,32 @@ def observable(kind="integrated-luminosity", level="particle-fiducial", **extra)
 
 
 def measurement(kind="integrated-luminosity", **extra):
-    ext = {"observable": observable(kind), "species_or_process": "synthetic",
+    ext = {"estimand": "SYNTHETIC: placeholder differential cross section in cos_theta at particle level",
+           "observable": observable(kind), "species_or_process": "synthetic",
            "period": {"start": "synthetic-period-1", "end": "synthetic-period-1"},
            "selections": [{"name": "two-muons", "definition": "placeholder", "conditional_denominator": "all events"}],
-           "backgrounds": [{"name": "placeholder-bkg", "estimator": "sideband"}],
+           "backgrounds": [{"name": "placeholder-bkg", "estimator": "sideband", "control_region": "synthetic sideband",
+                            "closure": "synthetic validation region"}],
            "corrections": [{"effect_id": "trigger-eff", "category": "efficiency", "applied_in": "estimator"}],
            "systematics": [{"name": "energy-scale", "source": "calibration", "effect": "migration", "applied_via": "migration"}],
            "blinding": {"blinded": False}}
     ext.update(extra)
     return envelope("measurement-spec", ext, "hep-analysis")
+
+
+def measurement_v26(mutate=None, status=None):
+    """measurement-spec under the 2.6.0 rules (an estimand, factorized efficiencies, a blinding mask); `mutate` edits
+    the document in place to make one defect."""
+    from contracts import CONTRACTS_VERSION
+    d = measurement(corrections=[{"effect_id": "trigger-eff", "category": "trigger_efficiency", "applied_in": "estimator"},
+                                 {"effect_id": "selection-eff", "category": "selection_efficiency", "applied_in": "estimator"}],
+                    blinding={"blinded": True, "mask": {"intervals": [{"variable": "cos_theta", "low": 0.5, "high": 1.0}]}})
+    d.update(contract_version=CONTRACTS_VERSION, versions={"plugin": "0.6.17", "contracts": CONTRACTS_VERSION, "profiles": {}})
+    if status:
+        d["status"] = list(status)
+    if mutate:
+        mutate(d, d["extension"])
+    return d
 
 
 def theory(**extra):
@@ -239,6 +256,7 @@ VALID = {
     "communication_traceability.json": communication_rich(),
     "response_v24.json": response_v24(),
     "ml_artifact_v25.json": ml_v25(),
+    "measurement_v26.json": measurement_v26(),
 }
 
 bad = {}
@@ -281,12 +299,70 @@ d = communication_rich(); d["extension"]["claims"][1]["status"] = ["observed"]; 
 d = communication_rich(); d["extension"]["claims"][2]["status"] = ["observed", "synthetic", "unvalidated"]; d["extension"]["claims"][2]["assessment"]["currency"] = "stale"; bad["communication_claim_status_conflict.json"] = (d, ["communication.claim_status_conflict"])
 
 
+# measurement-spec rules of contracts 2.6.0 (hep-analysis audit): one invalid fixture per rule
+MEAS_INVALID = {
+    "estimand_missing": (lambda d, e: e.pop("estimand"), "measurement.estimand_missing"),
+    "estimand_not_a_sentence": (lambda d, e: e.update(estimand="flux"), "measurement.estimand_not_a_sentence"),
+    "variable_incomplete": (lambda d, e: e["observable"]["variables"][0].pop("edges"), "measurement.variable_incomplete"),
+    "phase_space_missing": (lambda d, e: e["observable"].pop("phase_space"), "measurement.phase_space_missing"),
+    "frame_missing": (lambda d, e: e["observable"].pop("frame"), "measurement.frame_missing"),
+    "selections_empty": (lambda d, e: e.update(selections=[]), "measurement.selections_empty"),
+    "denominator_blank": (lambda d, e: e["selections"][0].update(conditional_denominator=" "), "measurement.denominator_blank"),
+    "unknown_not_listed": (lambda d, e: e["selections"][0].update(conditional_denominator="unknown"),
+                           "measurement.unresolved_not_listed"),
+    "backgrounds_empty": (lambda d, e: e.update(backgrounds=[]), "measurement.backgrounds_empty"),
+    "background_estimator_missing": (lambda d, e: e["backgrounds"][0].update(estimator=""),
+                                     "measurement.background_estimator_missing"),
+    "background_constraint_missing": (lambda d, e: e["backgrounds"][0].pop("control_region"),
+                                      "measurement.background_constraint_missing"),
+    "correction_case_variant": (lambda d, e: e["corrections"].append({"effect_id": "Trigger_Eff", "category": "migration",
+                                                                      "applied_in": "unfolding"}),
+                                "measurement.duplicate_correction"),
+    "category_repeated": (lambda d, e: e["corrections"][1].update(category="trigger_efficiency"),
+                          "measurement.correction_category_repeated"),
+    "bare_efficiency_with_factor": (lambda d, e: e["corrections"][1].update(category="efficiency"),
+                                    "measurement.correction_category_repeated"),
+    "unknown_category": (lambda d, e: e["corrections"][1].update(category="magic"),
+                         "measurement.unknown_correction_category"),
+    "luminosity_twice": (lambda d, e: e["corrections"].append({"effect_id": "lumi", "category": "luminosity",
+                                                               "applied_in": "estimator"}),
+                         "measurement.normalization_double_counted"),
+    "included_and_applied": (lambda d, e: e["observable"].update(included_corrections=["trigger-eff"]),
+                             "measurement.correction_in_observable_and_chain"),
+    "zero_normalization": (lambda d, e: e["observable"]["normalization"].update(value=0), "measurement.zero_value"),
+    "zero_correction": (lambda d, e: e["corrections"][0].update(value=0), "measurement.zero_value"),
+    "shape_only_value": (lambda d, e: e["observable"].update(normalization={"kind": "shape-only", "value": 3.2}),
+                         "measurement.shape_only_value"),
+    "systematics_empty": (lambda d, e: e.update(systematics=[]), "measurement.systematics_empty"),
+    "applied_via_blank": (lambda d, e: e["systematics"][0].update(applied_via=""), "measurement.applied_via_missing"),
+    "duplicate_systematic": (lambda d, e: e["systematics"].append(dict(e["systematics"][0], name="Energy_Scale")),
+                             "measurement.duplicate_systematic"),
+    "blinded_no_mask": (lambda d, e: e["blinding"].pop("mask"), "measurement.blinding_mask_missing"),
+    "blinded_observed": (lambda d, e: d.update(status=["observed"]), "measurement.blinded_observed"),
+    "ratio_block_missing": (lambda d, e: e["observable"].update(quantity="ratio"), "measurement.ratio_block_missing"),
+    "ratio_self": (lambda d, e: e.update(ratio={"numerator": "species-A", "denominator": "Species_A", "cancellations": [
+        {"effect": "exposure", "treatment": "cancels", "correlation_model": "same", "verification": "by construction"}]}),
+                   "measurement.ratio_self"),
+    "ratio_cancellations_empty": (lambda d, e: e.update(ratio={"numerator": "a", "denominator": "b", "cancellations": []}),
+                                  "measurement.ratio_cancellations_empty"),
+    "period_reversed": (lambda d, e: e.update(period={"start": "2020-01-01", "end": "2019-06-30"}),
+                        "measurement.period_reversed"),
+    "misspelled_key": (lambda d, e: e["selections"][0].update(conditonal_denominator="all"), "measurement.misspelled_key"),
+}
+for _name, (_fn, _code) in MEAS_INVALID.items():
+    bad[f"measurement_v26_{_name}.json"] = (measurement_v26(_fn), [_code])
+
 # Valid (no error) but not usable as a final result: the validator reports these codes as `unresolved`.
 UNRESOLVED = {"statres_scan_no_global.json": (statres_v11("frequentist", significance=dict(SCAN)), ["stats.lee_missing"])}
 d = communication_rich(); d["extension"]["claims"][0]["text"] = "The ratio establishes a deviation (synthetic fixture)."; d["extension"]["claims"][0]["assessment"]["currency"] = "stale"
 d["extension"]["claims"][1]["evidence"] = []; del d["extension"]["claims"][1]["assessment"]; d["extension"]["claims"][1]["unresolved_inputs"] = ["the illustration artifact is not yet written"]
 UNRESOLVED["communication_traceability_pending.json"] = (d, ["communication.assessment_stale", "communication.assessment_missing"])
 UNRESOLVED["ml_domain_shift_missing.json"] = (ml_v25(domain_shift=None), ["ml.domain_shift_missing"])
+UNRESOLVED["measurement_v26_closure_missing.json"] = (measurement_v26(lambda d, e: e["backgrounds"][0].pop("closure")),
+                                                     ["measurement.background_closure_missing"])
+UNRESOLVED["measurement_v26_input_listed.json"] = (
+    measurement_v26(lambda d, e: (e.update(period="not-provided"), d.update(unresolved_inputs=["period: not provided yet"]))),
+    ["measurement.input_unresolved"])
 UNRESOLVED["ml_split_overlap_not_run.json"] = (ml_v25_splits(overlap_check={"tool": "check_split_integrity.py", "result": "not-run"}),
                                                ["ml.split_overlap_not_run"])
 

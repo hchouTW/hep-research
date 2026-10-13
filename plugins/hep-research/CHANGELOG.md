@@ -3,6 +3,39 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+Contracts 2.6.0 (minor: measurement-spec semantics; every 2.5.0 artifact keeps its outcome and gets the new rules with
+`validate.py --strict`; no new capability).
+
+### hep-analysis
+
+- **Flux bin-width unit.** `cosmic_ray_flux.py` requires `--bin-width-unit {GV,GeV,GeV/n,TeV,TV}` and echoes
+  `bin_width_unit`; the guide's check-first row passed a 1.2-1.8 TV bin as 0.6, which makes a flux per GV 1000x too
+  large (now: 600 GV). Detector-response commands and the tool contract follow.
+- **Bounded flux intervals.** `cosmic_ray_flux.py` now reports an interval on the signal mean s >= 0 from core/stats:
+  Garwood for any count (the 500 ceiling is gone), Feldman-Cousins for a known background, Cousins-Highland by
+  default for an uncertain one (labelled approximate), `--method profile-fc --toys --seed` for publication use. No
+  bound is negative; `flux_upper_limit` when the lower end is 0. The old subtraction is `--method naive`
+  (approximate, clipped at 0). Above the FC grid limit it exits 3 and names the alternative. New
+  `--exposure-rel-uncertainty` gives `flux_syst_exposure`.
+- **One CLI contract.** All twelve scripts take `--status` (core statuses; tables also `published`) and report it;
+  exit codes 0 ok, 1 finding or failed computation, 2 invalid input or usage (NaN, inf, malformed files), 3
+  incomplete; one-line errors, no tracebacks. `make_yield_table.py` requires `--status`;
+  `check_systematic_variations.py` defaults to JSON.
+- **One spec format.** `assets/analysis-contract.yaml` and `systematics-config.example.yaml` are removed; new
+  `assets/measurement_spec.template.json` (validates with `--strict`) and its field guide. `systematics.csv` uses the
+  spec's systematics ledger columns; `systematics_table_tex.py` renders them.
+- **measurement-spec semantics (contracts 2.6.0).** `MEASUREMENT_SEMANTICS_FROM = "2.6.0"`: estimand sentence,
+  complete observable (phase space, frame, unit and binning), conditional denominators, backgrounds with estimator,
+  control region or constraint and closure, each correction once from the controlled categories (factorized
+  efficiencies allowed), no zero for unknown, systematics with `applied_via` and unique names, missing markers listed
+  in `unresolved_inputs`, blinded specs with a mask and without `observed` status, ratio blocks, ordered periods,
+  misspelled keys. New optional schema fields: `estimand`, `no_backgrounds_reason`, background `control_region`,
+  `constraint`, `closure`, correction `exact_zero`, blinding `mask` and `unblinding_record_ref`. The 30-mutation probe
+  went from 30 silent passes to 2 (both by design). `validate.py` accepts flags before the artifact path. Example
+  specs gain an estimand and drop the double-listed luminosity and exposure corrections.
+
 ## 0.6.17 (2026-10-13)
 
 Contracts 2.5.0 (minor: ML semantics; every 2.4.0 artifact keeps its outcome and gets the new rules with

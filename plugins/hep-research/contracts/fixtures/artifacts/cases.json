@@ -11,6 +11,7 @@
   "measurement_protons_on_target.json",
   "measurement_ratio.json",
   "measurement_target_exposure.json",
+  "measurement_v26.json",
   "ml_artifact.json",
   "ml_artifact_v25.json",
   "prediction.json",
@@ -129,6 +130,96 @@
   ],
   "communication_claim_status_conflict.json": [
    "communication.claim_status_conflict"
+  ],
+  "measurement_v26_estimand_missing.json": [
+   "measurement.estimand_missing"
+  ],
+  "measurement_v26_estimand_not_a_sentence.json": [
+   "measurement.estimand_not_a_sentence"
+  ],
+  "measurement_v26_variable_incomplete.json": [
+   "measurement.variable_incomplete"
+  ],
+  "measurement_v26_phase_space_missing.json": [
+   "measurement.phase_space_missing"
+  ],
+  "measurement_v26_frame_missing.json": [
+   "measurement.frame_missing"
+  ],
+  "measurement_v26_selections_empty.json": [
+   "measurement.selections_empty"
+  ],
+  "measurement_v26_denominator_blank.json": [
+   "measurement.denominator_blank"
+  ],
+  "measurement_v26_unknown_not_listed.json": [
+   "measurement.unresolved_not_listed"
+  ],
+  "measurement_v26_backgrounds_empty.json": [
+   "measurement.backgrounds_empty"
+  ],
+  "measurement_v26_background_estimator_missing.json": [
+   "measurement.background_estimator_missing"
+  ],
+  "measurement_v26_background_constraint_missing.json": [
+   "measurement.background_constraint_missing"
+  ],
+  "measurement_v26_correction_case_variant.json": [
+   "measurement.duplicate_correction"
+  ],
+  "measurement_v26_category_repeated.json": [
+   "measurement.correction_category_repeated"
+  ],
+  "measurement_v26_bare_efficiency_with_factor.json": [
+   "measurement.correction_category_repeated"
+  ],
+  "measurement_v26_unknown_category.json": [
+   "measurement.unknown_correction_category"
+  ],
+  "measurement_v26_luminosity_twice.json": [
+   "measurement.normalization_double_counted"
+  ],
+  "measurement_v26_included_and_applied.json": [
+   "measurement.correction_in_observable_and_chain"
+  ],
+  "measurement_v26_zero_normalization.json": [
+   "measurement.zero_value"
+  ],
+  "measurement_v26_zero_correction.json": [
+   "measurement.zero_value"
+  ],
+  "measurement_v26_shape_only_value.json": [
+   "measurement.shape_only_value"
+  ],
+  "measurement_v26_systematics_empty.json": [
+   "measurement.systematics_empty"
+  ],
+  "measurement_v26_applied_via_blank.json": [
+   "measurement.applied_via_missing"
+  ],
+  "measurement_v26_duplicate_systematic.json": [
+   "measurement.duplicate_systematic"
+  ],
+  "measurement_v26_blinded_no_mask.json": [
+   "measurement.blinding_mask_missing"
+  ],
+  "measurement_v26_blinded_observed.json": [
+   "measurement.blinded_observed"
+  ],
+  "measurement_v26_ratio_block_missing.json": [
+   "measurement.ratio_block_missing"
+  ],
+  "measurement_v26_ratio_self.json": [
+   "measurement.ratio_self"
+  ],
+  "measurement_v26_ratio_cancellations_empty.json": [
+   "measurement.ratio_cancellations_empty"
+  ],
+  "measurement_v26_period_reversed.json": [
+   "measurement.period_reversed"
+  ],
+  "measurement_v26_misspelled_key.json": [
+   "measurement.misspelled_key"
   ]
  },
  "unresolved": {
@@ -141,6 +232,12 @@
   ],
   "ml_domain_shift_missing.json": [
    "ml.domain_shift_missing"
+  ],
+  "measurement_v26_closure_missing.json": [
+   "measurement.background_closure_missing"
+  ],
+  "measurement_v26_input_listed.json": [
+   "measurement.input_unresolved"
   ],
   "ml_split_overlap_not_run.json": [
    "ml.split_overlap_not_run"

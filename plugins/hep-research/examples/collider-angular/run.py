@@ -129,12 +129,16 @@ def artifacts(res, resp, created):
     spec = dict(base, artifact_id="synthetic-path-b-measurement-spec", artifact_type="measurement-spec",
                 objective="SYNTHETIC Path B: corrected d sigma / d cos theta in the fiducial region (illustrative profile)",
                 provenance={"producer_skill": "hep-analysis", "created": created}, status=["synthetic"],
-                extension={"observable": obs, "species_or_process": "e+e- -> mu+mu- (synthetic)", "period": "not-applicable",
+                extension={"estimand": ("SYNTHETIC: the differential cross section d sigma / d cos theta of e+e- -> mu+mu- at "
+                                        "fixed sqrt(s) = 10 GeV, at particle level in the fiducial region |cos theta| < 0.9, "
+                                        "center-of-mass frame"),
+                           "observable": obs, "species_or_process": "e+e- -> mu+mu- (synthetic)", "period": "not-applicable",
                            "selections": [{"name": "synthetic event selection", "definition": "efficiency e0 - e1 cos^4 theta (invented)",
                                            "conditional_denominator": "generated events in the truth bin"}],
-                           "backgrounds": [], "corrections": [
-                               {"effect_id": "efficiency_and_migration", "category": "response", "applied_in": "response_matrix"},
-                               {"effect_id": "luminosity", "category": "normalization", "applied_in": "estimator"}],
+                           "backgrounds": [],
+                           "no_backgrounds_reason": "SYNTHETIC: the generator produces signal events only",
+                           "corrections": [
+                               {"effect_id": "efficiency_and_migration", "category": "migration", "applied_in": "response_matrix"}],
                            "systematics": [{"name": "luminosity", "source": "synthetic 2% assumption", "effect": "normalization",
                                             "applied_via": "covariance (fully correlated across bins)"}],
                            "blinding": {"blinded": False},

@@ -284,15 +284,19 @@ def artifacts(world, res, created):
                 objective="SYNTHETIC Path A: He/p flux ratio per rigidity bin in two synthetic periods",
                 provenance={"producer_skill": "hep-analysis", "created": created, "evidence_ids": ["ams02:C31"]},
                 status=["synthetic"],
-                extension={"observable": obs, "species_or_process": "helium, proton (synthetic)", "period": periods,
+                extension={"estimand": ("SYNTHETIC: the helium-to-proton flux ratio per rigidity bin (edges above, GV) at top "
+                                        "of instrument, separately in each of two synthetic periods, for particles above the "
+                                        "geomagnetic cutoff selection"),
+                           "observable": obs, "species_or_process": "helium, proton (synthetic)", "period": periods,
                            "selections": [{"name": "geomagnetic", "definition": "bin lower edge > 1.2 x maximum cutoff", "conditional_denominator": "livetime"},
                                           {"name": "species selection", "definition": "synthetic per-species selection", "conditional_denominator": "triggered events in acceptance"}],
-                           "backgrounds": [], "corrections": [
-                               {"effect_id": "trigger_efficiency", "category": "efficiency", "applied_in": "estimator"},
-                               {"effect_id": "selection_efficiency", "category": "efficiency", "applied_in": "estimator"},
+                           "backgrounds": [],
+                           "no_backgrounds_reason": "SYNTHETIC: the toy generates the two signal species only",
+                           "corrections": [
+                               {"effect_id": "trigger_efficiency", "category": "trigger_efficiency", "applied_in": "estimator"},
+                               {"effect_id": "selection_efficiency", "category": "selection_efficiency", "applied_in": "estimator"},
                                {"effect_id": "acceptance", "category": "acceptance", "applied_in": "estimator"},
-                               {"effect_id": "livetime_and_cutoff", "category": "exposure", "applied_in": "estimator"},
-                               {"effect_id": "rigidity_migration", "category": "response", "applied_in": "response_matrix"}],
+                               {"effect_id": "rigidity_migration", "category": "migration", "applied_in": "response_matrix"}],
                            "systematics": [{"name": "trigger_efficiency", "source": "control sample", "effect": "normalization", "applied_via": "covariance (fully correlated across bins, shared by species)"},
                                            {"name": "selection_efficiency", "source": "control sample", "effect": "normalization", "applied_via": "covariance (per bin, per species)"}],
                            "blinding": {"blinded": False},
