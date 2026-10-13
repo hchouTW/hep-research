@@ -58,9 +58,14 @@
    },
    "c0004": {
     "attempts": 2,
+    "attempts_since_reset": 2,
     "errors": [
      "OSError: input file for c0004 not found (synthetic injected failure)",
      "OSError: input file for c0004 not found (synthetic injected failure)"
+    ],
+    "signatures": [
+     "OSError: input file for c<n> not found (synthetic injected failure)",
+     "OSError: input file for c<n> not found (synthetic injected failure)"
     ],
     "status": "stopped-repeated-failure"
    },

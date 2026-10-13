@@ -530,6 +530,21 @@ skipped. Not run: GPU, multi-GPU NCCL for FSDP2, a benchmark-dataset performance
 J9 example's fit uses private helpers of `core/stats/likelihood_limits.py` (`template_fit.py` refuses signed-weight
 templates).
 
+## 0.6.17 release check (2026-10-13, E2)
+
+Version 0.6.17: physics-ml enforcement and ML artifact semantics (contracts 2.5.0, PRs #59 and #60); partition engine
+retries bounded across runs and merge from canonical chunk files only (hep-computing audit F01 and F02, PR #61, 15
+regression tests, 14 of which fail on the previous code); faster CI (PR #62: two balanced unit shards plus one job for
+the profile suites and static checks per Python version, slowest modules first, parallel optional and AMS-optional runs;
+PR CI wall time 17.5 min to about 7 min with every job passing). For the release the examples were rerun with the E2
+venv: the plugin version string changed, `local-partition/output/results.json` gained the new state fields
+(`attempts_since_reset`, `signatures`) and the ML example's statistical result records the new hash of its ML artifact
+(unfolding-coverage and end-to-end-sample not rerun, as in earlier releases); the published-likelihood benchmark's two
+artifacts were rewritten with the new plugin version. The contract fixtures keep the plugin version they were made
+with. `tools/run_all_checks.py` with the host CLIs (Claude Code 2.1.296, codex-cli 0.160.0) and the E2 venv: 20 of 20
+checks pass; 2,478 unit tests in 187 modules, 0 failures, 55 skipped. The CI lint job (ruff 0.16.10, mypy 2.4.0) passed
+on PRs #61 and #62. Release manifest `release-manifests/0.6.17.json`.
+
 ## 0.6.16 release check (2026-10-13, E2)
 
 Version 0.6.16 (detector-response front-end electronics and signal processing, PR #57: a new reference, the
