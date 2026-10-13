@@ -15,7 +15,8 @@ submit   condor_submit [-name S] -terse job.sub   (prints "<cluster>.<first proc
          attempts become not-submitted): the credential step ("Failed to process job credential requests ... BAILING
          OUT") and a rejected transaction ("Failed to commit job submission into the queue"); any other failure is
          ambiguous until a person reconciles.
-poll     the job event log first (it outlives the queue): submit 000, execute 001, executable error 002, evicted
+poll     the job event log first (it outlives the queue): submit 000, execute 001, executable error 002 ('failed',
+         failure_reason 'executable-error': the executable could not be started; a later hold event 012 still wins), evicted
          004, terminated 005 (return value or signal), shadow exception 007, aborted 009, held 012 (reason, Code,
          Subcode), released 013. A job the log still shows as queued or running is checked against condor_q and
          condor_history (-json); absent from both, it is 'lost'. Without a readable log, condor_q / condor_history
@@ -89,13 +90,17 @@ def parse_event_log(text: str) -> dict:
         if key[1] < 0:  # "Cluster submitted" / "Cluster removed" (HTCondor 24.12): no process, nothing to observe
             continue
         o = procs.setdefault(key,{"state": "queued", "starts": 0, "native": [], "exit_code": None, "signal": None,
-                                   "hold_reason": None, "hold_code": None, "host": None, "t_exec": None, "elapsed": None, "mem": None})
+                                   "hold_reason": None, "hold_code": None, "host": None, "t_exec": None, "elapsed": None, "mem": None,
+                                   "failure_reason": None})
         o["native"].append(code)
         if code == "001":
             o.update(state="running", t_exec=when)
             o["starts"] += 1
             h = re.search(r"host: (\S+)", m.group(6))
             o["host"] = h.group(1) if h else None
+        elif code == "002":  # error in executable: the job never ran; not queued, not a scheduler restart
+            o.update(state="failed", failure_reason="executable-error",
+                     hold_reason=(detail[0].strip() if detail else m.group(6).strip()) or None)
         elif code in ("004", "007", "013"):
             o.update(state="queued", hold_reason=None, hold_code=None)
         elif code == "009":
@@ -255,6 +260,7 @@ class HTCondorExecutor(Executor):
                 continue
             out[rec["attempt_id"]] = _blank(
                 state=o["state"], native_state="event " + o["native"][-1], exit_code=o["exit_code"], signal=o["signal"],
+                    failure_reason=o.get("failure_reason"),
                 hold_reason=o["hold_reason"], hold_code=o["hold_code"], host=o["host"], elapsed_s=o["elapsed"],
                 max_rss_mb=o["mem"], restarts=max(o["starts"] - 1, 0), evidence="job event log")
             if o["state"] in ("queued", "running"):
@@ -280,6 +286,7 @@ class HTCondorExecutor(Executor):
                 if o is not None and o["state"] not in ("queued", "running"):
                     out[rec["attempt_id"]] = _blank(
                         state=o["state"], native_state="event " + o["native"][-1], exit_code=o["exit_code"], signal=o["signal"],
+                    failure_reason=o.get("failure_reason"),
                         hold_reason=o["hold_reason"], hold_code=o["hold_code"], host=o["host"], elapsed_s=o["elapsed"],
                         max_rss_mb=o["mem"], restarts=max(o["starts"] - 1, 0), evidence="job event log")
                     missing.remove(rec)

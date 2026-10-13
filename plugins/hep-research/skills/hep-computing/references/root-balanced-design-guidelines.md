@@ -1,166 +1,61 @@
-# C++, ROOT, and Balanced Design Guidelines
+# C++ and ROOT Design Guidelines
 
-The single reference for writing and reviewing C++/ROOT/RDataFrame analysis code:
-concrete event-loop and histogram code patterns, naming/comments/file-documentation
-conventions, general C++ class/struct/RAII/ownership/inheritance design, and
-ROOT-specific object-model design (TObject inheritance, dictionaries, directory-based
-ownership). Not the statistical treatment of pipelines — see
-[Data pipelines](../../hep-analysis/references/data-pipelines.md) for I/O, ownership, and performance concerns
-at the design level — and not Python/PyROOT/uproot coding, see
-[Python coding](python-hep-coding-patterns.md) for that.
+The reference for writing and reviewing C++ code that touches ROOT: the object model (`TObject`, dictionaries,
+directory ownership), RDataFrame and TTree/RNTuple patterns, histograms and plots, and the conventions every
+hep-computing reference shares. General C++ design (classes, structs, RAII, ownership, const, templates, tests) is the
+checklist in [C++ guidelines](cpp-balanced-design-guidelines.md); Python is in
+[Python guidelines](python-balanced-design-guidelines.md) and [Python HEP coding](python-hep-coding-patterns.md),
+Bash in [Bash guidelines](bash-balanced-design-guidelines.md). Not the statistical treatment of pipelines: see
+[Data pipelines](../../hep-analysis/references/data-pipelines.md). Follow established repository conventions when
+they intentionally differ from this reference.
 
-When modifying or writing C++/ROOT code, prefer a balanced style between
-object-oriented and procedural programming, and prefer standard C++ idioms (RAII,
-`std::unique_ptr`, exceptions or explicit return values) except where ROOT's own
-object model forces a deliberate, contained departure from them. Follow established
-repository conventions when they intentionally differ from this reference.
+Conventions used in every example, decided once here (and in the C++ guidelines, which link back):
 
-The design-principle examples follow the
-[Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html):
-two-space indentation, `PascalCase` function names, `snake_case` variables, trailing
-underscores for data members, and documented namespace endings. The HEP-code
-examples instead follow this package's own naming convention — `snake_case`
-variables/params, `PascalCase` types/functions, `kPascalCase` static constants,
-`trailing_underscore_` members — which is documented in full under
-[Naming, Comments, and File Documentation](#naming-comments-and-file-documentation)
-below.
+- **Naming:** `snake_case` variables and parameters, `PascalCase` types and functions, `kPascalCase` constants,
+  `trailing_underscore_` data members, `ALL_CAPS` only for macros (the Google C++ Style Guide convention); see
+  [Naming Guidance](#naming-guidance).
+- **Language standard:** C++17, the standard ROOT 6.38 and 6.40 are built with. Take `-std` from
+  `root-config --cflags` (or `ROOT_CXX_STANDARD` in CMake) and do not add a second one; mark C++20 features
+  (`std::numbers`, `std::span`, ranges, designated initializers) as "C++20 only".
+- **Errors:** exceptions are allowed (ROOT, the STL and Cling throw); translate a ROOT failure at the boundary into an
+  exception or an explicit return value and keep one style per component; see [Error Handling](#error-handling).
+- **Paths:** `std::filesystem` (C++17) for path handling; the Google guide's ban on `<filesystem>` is not adopted.
+- **Non-owning members:** a pointer documented as non-owning and non-null, never a reference member; see
+  [Ownership Guidelines](#ownership-guidelines).
 
 ## Read only what the task needs
 
-This file is long (~1,300 lines); do not read it end to end. Jump to the section for the task:
-
 | Task | Section |
 |---|---|
-| Writing or fixing an RDataFrame/TTreeReader event loop, histograms, plots | [Concrete ROOT/RDataFrame Coding Patterns](#concrete-rootrdataframe-coding-patterns) |
-| Header comment block, naming | [Naming, Comments, and File Documentation](#naming-comments-and-file-documentation) |
-| Segfaults/leaks around TFile, histograms, `SetDirectory` | [RAII, Resource Management, and Ownership](#raii-resource-management-and-ownership) |
+| Writing or fixing an RDataFrame/TTreeReader event loop, RNTuple, histograms, plots | [Concrete ROOT/RDataFrame Coding Patterns](#concrete-rootrdataframe-coding-patterns) |
+| Header comment block, naming, comments (all languages) | [Naming, Comments, and File Documentation](#naming-comments-and-file-documentation) |
+| Segfaults/leaks around TFile, histograms, `SetDirectory` | [Ownership Guidelines](#ownership-guidelines) (and [crash and memory debugging](crash-and-memory-debugging.md)) |
 | Custom classes in a TTree, `ClassDef`, LinkDef, "no dictionary" errors | [Class Dictionaries and I/O](#class-dictionaries-and-io) (and [root-debugging.md](root-debugging.md)) |
-| Class vs struct vs free function, TObject inheritance, polymorphism | [Choosing Classes, Structs, and Free Functions](#choosing-classes-structs-and-free-functions), [Inheritance and Polymorphism](#inheritance-and-polymorphism) |
-| Reviewing a C++ design or diff | [Design Checklist](#design-checklist), [Anti-Patterns to Avoid](#anti-patterns-to-avoid-recap) |
-
-## Contents
-
-- [Core Principle](#core-principle)
-- [Choosing Classes, Structs, and Free Functions](#choosing-classes-structs-and-free-functions)
-- [Class Dictionaries and I/O](#class-dictionaries-and-io)
-- [RAII, Resource Management, and Ownership](#raii-resource-management-and-ownership)
-- [Inheritance and Polymorphism](#inheritance-and-polymorphism)
-- [Member Functions vs Free Functions](#member-functions-vs-free-functions)
-- [Encapsulation Guidelines](#encapsulation-guidelines)
-- [State Management and Global State](#state-management-and-global-state)
-- [Error Handling](#error-handling)
-- [Const-Correctness](#const-correctness)
-- [Templates and Generic Code](#templates-and-generic-code)
-- [Naming, Comments, and File Documentation](#naming-comments-and-file-documentation)
-- [File and Build Organization](#file-and-build-organization)
-- [Testing Guidance](#testing-guidance)
-- [Standard Library Preference](#standard-library-preference)
-- [Concrete ROOT/RDataFrame Coding Patterns](#concrete-rootrdataframe-coding-patterns)
-- [Design Checklist](#design-checklist)
-- [Anti-Patterns to Avoid (recap)](#anti-patterns-to-avoid-recap)
-- [Summary Rule](#summary-rule)
+| `TObject` or a plain class, flat branch structs | [TObject or Plain C++](#tobject-or-plain-c) |
+| Reviewing a C++/ROOT design or diff | [Design Checklist](#design-checklist), [Anti-Patterns to Avoid](#anti-patterns-to-avoid-recap) |
 
 ## Core Principle
 
-Use classes to protect state, lifetime, ownership, resources, and invariants. Use
-free functions to express algorithms, transformations, calculations, and procedural
-workflows. Do not force everything into classes, and do not write purely
-global-state procedural code either.
+Take on ROOT's object model (`TObject` inheritance, a dictionary, directory ownership) only for a type that needs
+one of ROOT's services: persistence through `TObject` APIs or ROOT containers, `TTree`/RNTuple storage of a class,
+ROOT's runtime type system (`TClass`, `IsA()`), or interactive introspection (`TBrowser`, `.ls`, the Cling prompt).
+Everything else (helper types, algorithm parameters, intermediate results, configuration) stays plain C++ and
+follows the [C++ guidelines](cpp-balanced-design-guidelines.md). Where ROOT's ownership or error model differs from
+general C++ practice, make the departure explicit and contained: one owner, a `SetDirectory(nullptr)`, a checked
+return value at the boundary.
 
-On top of that general C++ principle, only take on ROOT's object model —
-`TObject` inheritance, a dictionary, directory ownership — for a type that actually
-needs one of ROOT's services: persistence in a `TFile`, `TTree` branch storage,
-ROOT's runtime type system (`TClass`, `IsA()`), or interactive introspection
-(`TBrowser`, `.ls`, CINT/Cling command line). Everything else — helper types,
-algorithm parameters, intermediate results, config structs, anything that never
-crosses a ROOT I/O or reflection boundary — should stay a plain C++ type and follow
-the general guidance in this reference without the ROOT-specific additions.
-
-The preferred style is simple, idiomatic, testable C++, with ROOT's own
-conventions contained to the code that actually touches ROOT's I/O and object
-model.
-
----
-
-## Choosing Classes, Structs, and Free Functions
-
-### When to Use a Class
-
-Use a `class` when the code needs one or more of the following:
-
-- Encapsulated state
-- A clear lifetime
-- Ownership of a resource
-- Invariants that must be protected
-- RAII behavior
-- Runtime polymorphism through a stable interface
-
-Good examples:
-
-```cpp
-class File;
-class Socket;
-class BankAccount;
-class Parser;
-class Renderer;
-class Order;
-```
-
-A class should represent a real concept in the domain or architecture, not merely
-act as a folder for related functions. Prefer a `class` when there is something
-meaningful to hide, validate, protect, or manage.
-
-```cpp
-class BankAccount {
- public:
-  static std::optional<BankAccount> Create(int initial_balance) {
-    if (initial_balance < 0) {
-      return std::nullopt;
-    }
-    return BankAccount(initial_balance);
-  }
-
-  bool Deposit(int amount) {
-    if (amount <= 0) {
-      return false;
-    }
-
-    balance_ += amount;
-    return true;
-  }
-
-  bool Withdraw(int amount) {
-    if (amount <= 0 || amount > balance_) {
-      return false;
-    }
-
-    balance_ -= amount;
-    return true;
-  }
-
-  int balance() const { return balance_; }
-
- private:
-  explicit BankAccount(int initial_balance) : balance_(initial_balance) {}
-
-  int balance_;
-};
-```
-
-In this example, the class is justified because it protects the invariant that
-the balance must not become negative.
+## TObject or Plain C++
 
 ### When (Not) to Inherit from TObject
 
-Inherit from `TObject` when the type needs to be:
+Writing to a file does not need `TObject`: any class with a dictionary can be written with
+`file->WriteObject(&obj, "name")` and read back with `file->Get<MyType>("name")`, and a non-`TObject` class with a
+dictionary can be a `TTree` branch. Inherit from `TObject` only when the type needs one of:
 
-- Written to a `TFile` or read back by name (`file->Get<MyType>("name")`).
-- Stored as a `TTree` branch's object (as opposed to a branch of fundamental types
-  or a "flat" struct — see [Struct-Like Data for Branches](#struct-like-data-for-branches)).
-- Owned by a `TDirectory`/`TFile` so ROOT manages its lifetime and `.ls`/`TBrowser`
-  can see it.
-- Used somewhere that specifically requires `TObject*` (a ROOT container like
-  `TObjArray`/`TList`, an API that takes `TObject*`).
+- A ROOT container of `TObject*` (`TList`, `TObjArray`, `TClonesArray`) or an API that takes `TObject*`
+  (`TDirectory::Append`, `TCollection` algorithms, `TObject::Write` by its own name).
+- Directory registration so `.ls`/`TBrowser` list it and the directory deletes it, or `TObject` services such as
+  `Clone()`, `IsA()`, `Draw()` and `Print()` through the base class.
 
 Do **not** inherit from `TObject` for:
 
@@ -210,49 +105,6 @@ directory-ownership contract to get right (see
 [Directory-Based Ownership](#directory-based-ownership)), and a permanent I/O
 compatibility surface — do not inherit from `TObject` "just in case" or because a
 neighboring class in the codebase does.
-
-### When to Use a Struct
-
-Use a `struct` for simple passive data where public fields are clear, safe, and
-intentional.
-
-Prefer this:
-
-```cpp
-struct Point {
-  double x;
-  double y;
-};
-```
-
-Avoid unnecessary getters and setters when there is no invariant to protect. Avoid
-this unless validation or encapsulation is actually needed:
-
-```cpp
-class Point {
- public:
-  double x() const { return x_; }
-  void set_x(double x) { x_ = x; }
-  double y() const { return y_; }
-  void set_y(double y) { y_ = y; }
-
- private:
-  double x_;
-  double y_;
-};
-```
-
-A `struct` is not inferior to a `class`. In C++, it is often the clearest choice
-for simple data types. Use `struct` when:
-
-- The type is mainly a data carrier
-- The fields are safe to expose
-- There are no important invariants
-- The type has no complex ownership responsibility
-- The type benefits from aggregate initialization
-
-If later the data needs validation or lifecycle management, it can be refactored
-into a class.
 
 ### Struct-Like Data for Branches
 
@@ -316,80 +168,16 @@ file must hold one branch per member with the member's leaf type and length. Che
 broken copies (a member removed in the middle and at the end, one hidden in padding, two swapped); the producer above
 had such a check fail on each of the four.
 
-### When to Use Free Functions
-
-Use free functions for algorithms, calculations, conversions, and operations that
-do not need private access to an object.
-
-Prefer this:
-
-```cpp
-struct Point {
-  double x;
-  double y;
-};
-
-double Distance(Point a, Point b) {
-  const auto dx = a.x - b.x;
-  const auto dy = a.y - b.y;
-  return std::sqrt(dx * dx + dy * dy);
-}
-```
-
-Do not put a function inside a class only because it is related to a type. A
-function should usually remain a free function when:
-
-- It does not need private access
-- It does not modify object invariants
-- It represents an algorithm rather than object behavior
-- It can be tested independently
-- It can operate on multiple compatible types
-
-### Avoid Artificial Utility Classes
-
-Do not create classes that only wrap stateless helper functions.
-
-Avoid this:
-
-```cpp
-class MathHelper {
- public:
-  static int Add(int a, int b) { return a + b; }
-};
-```
-
-Prefer this:
-
-```cpp
-int Add(int a, int b) { return a + b; }
-```
-
-If grouping is needed, use a namespace:
-
-```cpp
-namespace math {
-
-int Add(int a, int b) { return a + b; }
-
-}  // namespace math
-```
-
-Avoid names like `Utils`, `Helper`, `Manager`, `Processor`, `Handler` unless there
-is a strong reason — they often indicate unclear responsibility. Prefer precise
-names that describe what the code owns, does, or represents:
-`HttpClient`, `FileReader`, `OrderBook`, `ImageDecoder`, `CommandParser`.
-
----
-
 ## Class Dictionaries and I/O
 
-A `TObject` subclass needs a ROOT dictionary (generated by `rootcling`/
+Any class ROOT streams, `TObject`-derived or not, needs a ROOT dictionary (generated by `rootcling`/
 `ROOT_GENERATE_DICTIONARY`, see [Build setup](cmake-and-build.md)) before ROOT can
 stream it. Design for the dictionary generator, not around it:
 
-- Add `ClassDef(ClassName, version)` in the class body and `ClassImp(ClassName)` in
-  the `.cxx` (or rely on `ClassDefOverride`/dictionary-only builds in newer ROOT —
-  match whatever the surrounding codebase already does).
+- Add `ClassDef(ClassName, version)` in the class body (`ClassDefOverride` is the same macro with `override` on the
+  virtual functions it declares; use it when the class marks its other overrides). `ClassImp` is no longer needed in
+  ROOT 6; drop it. A non-`TObject` class needs no `ClassDef` at all to be
+  written, only a dictionary entry; `ClassDef` adds the version number and `IsA()`.
 - Every persisted member must itself be streamable: a built-in type, a
   `TObject`-derived type, an STL container of either, or a type with its own
   dictionary entry in the project's `LinkDef.h`. A raw non-owning pointer to a
@@ -397,9 +185,10 @@ stream it. Design for the dictionary generator, not around it:
 - Provide a default constructor. ROOT's I/O layer default-constructs an object
   before filling its members from the stream; a class that cannot be
   default-constructed cannot be read back.
-- Bump the `ClassDef` version number when the persisted member layout changes, and
-  add a custom `Streamer()` (or a schema-evolution rule) if old files must remain
-  readable. Treat this the same as any other on-disk format migration: plan for
+- Bump the `ClassDef` version number when the persisted member layout changes. Old files stay readable through
+  automatic schema evolution (added, removed or reordered members, changed numeric types); for a rename or a
+  computed member write a `#pragma read` rule in `LinkDef.h` (`sourceClass`, `version`, `source`, `target`, `code`)
+  rather than a hand-written `Streamer()`, which disables automatic evolution and must be kept in step by hand. Treat this the same as any other on-disk format migration: plan for
   readers of the old version before shipping the new one.
 - Do not hand-edit the generated dictionary source (`*Dict.cxx`/`*Dict.h` or
   `G__*.cxx`) — it is build output, not a source file. If it looks wrong, the bug is
@@ -424,91 +213,38 @@ class CalibrationSet : public TObject {
 ```text
 # LinkDef.h
 #pragma link C++ class CalibrationSet+;
+// version 2 renamed constants_ to gains_: map the old member in files written with version 1
+#pragma read sourceClass="CalibrationSet" version="[1]" source="std::vector<double> constants_" \
+  target="gains_" code="{ gains_ = onfile.constants_; }"
 ```
 
----
+## Ownership Guidelines
 
-## RAII, Resource Management, and Ownership
-
-### RAII and Resource Management
-
-Use RAII for resources such as memory, files, sockets, locks, handles,
-transactions, temporary state that must be restored, and any resource that must
-be released reliably. Resource acquisition and release should be tied to object
-lifetime. Prefer standard library RAII types where possible:
-`std::unique_ptr<T>`, `std::shared_ptr<T>`, `std::lock_guard<std::mutex>`,
-`std::unique_lock<std::mutex>`, `std::fstream`, `std::vector<T>`, `std::string`.
-
-Avoid manual `new` and `delete` in normal application code. Prefer this:
-
-```cpp
-auto widget = std::make_unique<Widget>();
-```
-
-Avoid this:
-
-```cpp
-Widget* widget = new Widget();
-// ...
-delete widget;
-```
-
-Use custom RAII classes when the standard library does not already provide an
-appropriate abstraction. RAII classes should clearly express ownership (move-only,
-with the acquire/release symmetric in the constructor/destructor).
-
-### Ownership Guidelines
-
-Make ownership explicit. Use values when ownership is simple
-(`std::vector<Item> items;`). Use `std::unique_ptr` for exclusive dynamic
-ownership. Use `std::shared_ptr` only when ownership is genuinely shared. Use raw
-pointers for non-owning nullable references when the repository has no clearer
-observer type, and references for non-owning required dependencies. Do not infer
-ownership from a raw pointer — document non-obvious lifetime constraints and
-prefer values, references, or standard smart pointers when they express the
-contract more clearly:
-
-```cpp
-// Clear: a required, non-owning dependency expressed as a reference.
-class Renderer {
- public:
-  explicit Renderer(const TextureCache& texture_cache)
-      : texture_cache_(texture_cache) {}
-
- private:
-  const TextureCache& texture_cache_;
-};
-```
-
-```cpp
-// Unclear: does Renderer own texture_cache or just observe it?
-class Renderer {
- public:
-  explicit Renderer(TextureCache* texture_cache)
-      : texture_cache_(texture_cache) {}
-
- private:
-  TextureCache* texture_cache_;
-};
-```
+The general rules (RAII for every resource, `std::unique_ptr` by default, a documented non-owning pointer for
+a kept dependency, never a reference member) are in the [C++ guidelines](cpp-balanced-design-guidelines.md#ownership-and-lifetime).
+ROOT adds directory ownership:
 
 ### Directory-Based Ownership
 
-ROOT's default ownership model is not RAII: a histogram, tree, or other
-`TObject`-derived object created while a `TDirectory`/`TFile` is open is, by
-default, registered with and owned by that directory. Closing the file (or letting
-it go out of scope) deletes every object it owns — including ones your code still
-holds a raw pointer to.
+ROOT's default ownership model is not RAII: a histogram (`TH1` and derived), a `TTree`, a `TEventList` or a
+`TGraph2D` created while a `TDirectory`/`TFile` is the current directory (`gDirectory`) registers with it and is
+owned by it. Closing the file deletes every object it owns, including ones your code still holds a raw pointer to.
 
 ```cpp
+TH1D* h = nullptr;
 {
   auto file = std::unique_ptr<TFile>(TFile::Open("out.root", "RECREATE"));
-  auto* h = new TH1D("h_pt", "p_{T};p_{T} [GeV];Events", 50, 0, 200);
-  // h is now owned by file's TDirectory, NOT by the `new` caller.
-}  // file destructor closes the file and deletes h.
-
-h->Fill(30.0);  // use-after-free: h was deleted when file closed.
+  h = new TH1D("h_pt", "p_{T};p_{T} [GeV];Events", 50, 0, 200);  // registered with *file
+}  // the TFile destructor closes the file and deletes h
+h->Fill(30.0);  // use-after-free
 ```
+
+Not every object registers. `Get<T>` of a `TGraph`, `TF1`, `TCanvas`, `TVectorD`, a `TList` or a class of your own
+returns an object the file does not track: the caller owns it and must delete it (or hold it in a
+`std::unique_ptr`). Histograms and trees read with `Get<T>` do register with the file. To stop registration for
+the whole program, call `TH1::AddDirectory(kFALSE)` once at start-up (histograms only: a `TTree` always attaches to
+the current directory, so detach a tree with `SetDirectory(nullptr)` if it must outlive the file). `RResultPtr<TH1D>` from RDataFrame owns its histogram;
+do not delete `&*result` or hand it to a file without `SetDirectory`.
 
 Rules of thumb:
 
@@ -547,16 +283,18 @@ if (!file || file->IsZombie()) {
 }
 ```
 
-Do **not** wrap a directory-owned object (a histogram/tree fetched via
-`file->Get<T>(name)` without detaching it, or one you created while the file was
-open and did not detach) in an owning smart pointer — the file will delete it too,
-and you get a double-free:
+Do **not** let an owning smart pointer outlive the file that still owns the object. `~TH1` deregisters the
+histogram from its directory, so deleting it while the file is open is safe; whether the pair crashes depends on
+the order of destruction. The hazard is a smart pointer that outlives its file: the file deletes the histogram on
+close, and the smart pointer deletes it again later:
 
 ```cpp
-// Wrong: h is directory-owned; wrapping it in unique_ptr double-deletes it
-// when the file closes.
-auto file = std::unique_ptr<TFile>(TFile::Open("in.root", "READ"));
-auto h = std::unique_ptr<TH1D>(file->Get<TH1D>("h_pt"));
+// Wrong when h outlives file: file->Close() deletes the histogram, then ~unique_ptr deletes it again.
+std::unique_ptr<TH1D> h;
+{
+  auto file = std::unique_ptr<TFile>(TFile::Open("in.root", "READ"));
+  h.reset(file->Get<TH1D>("h_pt"));
+}
 
 // Right: either use a raw, non-owning observer pointer and keep the file
 // alive for as long as you use it...
@@ -574,73 +312,7 @@ tell the reader who owns the object — but with ROOT, "who owns it" is a
 `TDirectory`/`TFile` by default, and the smart pointer must not contradict that
 until you have explicitly transferred ownership away from it.
 
----
-
-## Inheritance and Polymorphism
-
-Do not introduce inheritance just to organize code. Use runtime polymorphism only
-when the code truly needs interchangeable behavior behind a common interface.
-
-Acceptable example:
-
-```cpp
-class Shape {
- public:
-  virtual ~Shape() = default;
-
-  virtual double Area() const = 0;
-};
-
-class Circle final : public Shape {
- public:
-  explicit Circle(double radius) : radius_(radius) {}
-
-  double Area() const override { return std::numbers::pi * radius_ * radius_; }
-
- private:
-  double radius_;
-};
-```
-
-Use this style when callers need to work with different concrete implementations
-through the same interface: `std::vector<std::unique_ptr<Shape>> shapes;`.
-
-Avoid deep inheritance hierarchies unless there is a clear architectural reason.
-Before adding inheritance, consider these alternatives: free functions,
-templates, `std::variant`, composition, strategy objects, function objects,
-lambdas, plain data plus algorithms. Prefer composition over inheritance when
-behavior can be assembled from smaller parts.
-
-Avoid this style unless there is a strong reason:
-
-```cpp
-class Animal {
- public:
-  virtual ~Animal() = default;
-  virtual void Speak() = 0;
-};
-
-class Dog : public Animal {};
-class Cat : public Animal {};
-class Bird : public Animal {};
-```
-
-A small number of cases may be better represented with `std::variant`:
-
-```cpp
-struct Circle {
-  double radius;
-};
-
-struct Rectangle {
-  double width;
-  double height;
-};
-
-using Shape = std::variant<Circle, Rectangle>;
-```
-
-### Inheritance and Polymorphism in ROOT
+## Inheritance in ROOT
 
 - `TObject` already provides virtual `Clone()`, `IsA()`, and RTTI-equivalent type
   queries through `TClass`; do not reinvent a parallel type-tag or `Clone()`
@@ -660,47 +332,7 @@ using Shape = std::variant<Circle, Rectangle>;
   (non-`TObject`) abstract base class rather than routing purely-analysis-internal
   polymorphism through `TObject`.
 
----
-
-## Member Functions vs Free Functions
-
-The rules are the same as for general C++; see [Member Functions vs Free Functions](cpp-balanced-design-guidelines.md#member-functions-vs-free-functions). ROOT adds nothing here beyond the ownership rules above.
-
-## Encapsulation Guidelines
-
-The rules are the same as for general C++; see [Encapsulation Guidelines](cpp-balanced-design-guidelines.md#encapsulation-guidelines). ROOT adds nothing here beyond the ownership rules above.
-
-## State Management and Global State
-
-### State Management
-
-Minimize mutable shared state. Prefer local variables, function parameters,
-return values, immutable values, clear ownership, and explicit dependencies.
-Avoid hidden global variables, singleton abuse, mutable global state, static
-state that makes testing difficult, and functions that secretly depend on
-external state.
-
-Avoid this:
-
-```cpp
-std::string g_current_user;
-
-bool CanAccessDocument(const Document& document) {
-  return document.owner() == g_current_user;
-}
-```
-
-Prefer this:
-
-```cpp
-bool CanAccessDocument(const Document& document, const User& user) {
-  return document.owner() == user.id();
-}
-```
-
-Pass dependencies explicitly unless there is a strong reason not to.
-
-### Global State and Testability
+## ROOT Global State and Testability
 
 ROOT exposes significant global state — `gROOT`, `gDirectory`, `gFile`, `gStyle`,
 `gRandom`, `gErrorIgnoreLevel` — that interactive ROOT sessions and macros rely on
@@ -709,7 +341,7 @@ pass or fail depending on what some other test left in `gDirectory` or `gStyle`.
 
 - Prefer passing a `TDirectory*`/`TFile*`/`TRandom*` explicitly into functions and
   constructors over reading the corresponding `g*` global inside them — the same
-  dependency-injection reasoning as [Testing Guidance](#testing-guidance) below,
+  explicit-dependency rule as in the [C++ guidelines](cpp-balanced-design-guidelines.md#design-rules),
   applied to ROOT's specific globals.
 - Where a function must touch global state (`gROOT->SetBatch(kTRUE)` for batch-mode
   plotting, see [Plotting](#plotting)), isolate that touch at the entry point of a
@@ -718,39 +350,11 @@ pass or fail depending on what some other test left in `gDirectory` or `gStyle`.
 - Reset any global state a test changes (`gDirectory`, `gRandom`'s seed, batch
   mode) at the end of that test, so test order does not affect results.
 
----
-
 ## Error Handling
 
-Use a clear error-handling strategy that is consistent with the surrounding
-component and repository conventions. Google-style code does not use C++
-exceptions; use a factory function when construction can fail and return a value
-that makes failure explicit:
-
-```cpp
-class Config {
- public:
-  static std::optional<Config> Load(std::filesystem::path path) {
-    if (!std::filesystem::exists(path)) {
-      return std::nullopt;
-    }
-    return Config(std::move(path));
-  }
-
- private:
-  explicit Config(std::filesystem::path path) : path_(std::move(path)) {}
-
-  std::filesystem::path path_;
-};
-```
-
-Use return values for expected failure paths (`std::optional<User> FindUserById(UserId id);`).
-Use `bool` when callers only need success/failure and no diagnostic value would be
-lost (`bool ContainsUser(UserId id);`). For failures that need diagnostics, prefer
-the repository's established status or result type. Avoid mixing multiple
-error-handling styles in the same component without a clear reason.
-
-### Error Handling at the ROOT Boundary
+Use one error-handling strategy per component, consistent with the repository. Exceptions are allowed (see the
+conventions at the top): throw for a failure the caller cannot handle locally (a missing input file, a broken
+tree), and use a function returning `std::optional` or a status when failure is an expected outcome.
 
 ROOT's own APIs generally do not throw C++ exceptions; failures are reported
 through null returns (`TFile::Open` returning `nullptr` or a zombie object),
@@ -773,18 +377,7 @@ through null returns (`TFile::Open` returning `nullptr` or a zombie object),
   not adopt ROOT's C-style reporting for code you control just because it is
   adjacent to ROOT calls.
 
----
-
-## Const-Correctness
-
-Use `const` to communicate intent: `int size() const { return size_; }`. Pass
-large objects by const reference when they do not need to be copied
-(`void Render(const Scene& scene);`); pass small value types by value
-(`double Distance(Point a, Point b);`); use `const` local variables when the value
-should not change (`const auto count = items.size();`). Const-correctness improves
-readability, correctness, and API design.
-
-### Const-Correctness Caveats
+## Const-Correctness in ROOT
 
 Some older ROOT APIs (particularly pre-ROOT6 holdovers still present for backward
 compatibility) are not fully const-correct — a getter that conceptually should be
@@ -800,30 +393,7 @@ your own code:
   single well-commented call site) rather than dropping `const` from your own
   interface to route around it.
 
----
-
-## Templates and Generic Code
-
-Use templates when the algorithm naturally works across multiple types:
-
-```cpp
-template <typename Range>
-typename Range::value_type Sum(const Range& values) {
-  typename Range::value_type result{};
-
-  for (const auto& value : values) {
-    result += value;
-  }
-
-  return result;
-}
-```
-
-Do not use templates only to avoid writing clear types, and do not over-generalize
-too early. Prefer simple concrete code first; introduce templates when repeated
-patterns are clear and the generic version remains readable.
-
-### Templates and Dictionary Limits
+## Templates and Dictionary Limits
 
 ROOT dictionaries require concrete, explicitly named types — you cannot generate a
 dictionary for an unbounded template. Two consequences for design:
@@ -844,8 +414,6 @@ dictionary for an unbounded template. Two consequences for design:
   instead when the logic is complex enough that JIT-string debugging becomes the
   bottleneck (see [RDataFrame patterns](#rdataframe-patterns)).
 
----
-
 ## Naming, Comments, and File Documentation
 
 Match the repository's existing conventions first wherever this analysis code
@@ -853,12 +421,8 @@ lives. Use the following as a default when no repository convention exists.
 
 ### Naming Guidance
 
-Use names that describe the responsibility clearly. Prefer nouns for types
-(`class HttpClient;`, `struct Point;`) and verbs or verb phrases for functions
-(`ParseConfig();`, `LoadImage();`, `CalculateTotal();`). Avoid vague names
-(`DoStuff();`, `HandleData();`, `Process();`, `Run();`, `Manage();`). Short names
-are acceptable for small scopes (`for (const auto& x : values) { ... }`); use more
-descriptive names for wider scopes.
+Nouns for types, verbs for functions; no vague names (`Process()`, `Manager`, `DoStuff()`). Short names only in
+small scopes.
 
 For this codebase specifically, C++/ROOT macros follow Google C++ style:
 `snake_case` variables/params, `PascalCase` types/functions, `kPascalCase` static
@@ -866,12 +430,13 @@ constants, `trailing_underscore_` members, `ALL_CAPS` only for macros. Use
 meaningful, descriptive physics names for histograms, canvases, and functions:
 `event_weight`, `signal_yield`, `mass_window`, `fit_range`, `mass_hist`,
 `fit_result`. Standard HEP abbreviations (`pt`, `eta`, `phi`, `met`, `pu`, `sf`,
-`mc`) are fine. Python naming follows Google/PEP 8 conventions instead — see
-[Python coding](python-hep-coding-patterns.md).
+`mc`) are fine. Python follows PEP 8 and Bash the Google Shell Style Guide; see the
+[Python](python-balanced-design-guidelines.md) and [Bash](bash-balanced-design-guidelines.md) guidelines.
 
 ### Comments and Documentation
 
-Write comments to explain why, not what. Avoid comments that repeat the code
+This is the one place for the comment rule in every language (C++, Python, Bash, CMake). Write comments to explain
+why, not what. Avoid comments that repeat the code
 (`// Increment i by 1.` above `++i;`). Prefer comments that explain intent,
 constraints, or non-obvious decisions. Public APIs should document what the
 function or type represents, ownership expectations, error behavior, and
@@ -903,40 +468,12 @@ incomplete or outdated. Keep it proportional to the file and do not let it drift
 from the code — this complements the inline-comment guidance above, it does not
 replace it.
 
----
-
-## File and Build Organization
-
-### File Organization
-
-Keep files focused. A file should usually contain one primary class or
-abstraction, closely related simple structs, closely related free functions, and
-implementation details hidden in an unnamed namespace when appropriate. Use
-namespaces to group related functionality:
-
-```cpp
-namespace geometry {
-
-struct Point {
-  double x;
-  double y;
-};
-
-double Distance(Point a, Point b);
-
-class Polygon;
-
-}  // namespace geometry
-```
-
-Avoid large files that mix unrelated responsibilities, and avoid catch-all files
-such as `utils.cc`, `helpers.cc`, `misc.cc`, `common.cc` — acceptable only for
-very small, clearly scoped collections.
+## Build Layout
 
 ### ROOT dictionary and build layout
 
 Keep a `TObject`-derived class's declaration (`.h`, with `ClassDef`) and
-definition (`.cxx`, with `ClassImp`) split the same way as any other C++ class in
+definition (`.cxx`) split the same way as any other C++ class in
 the codebase; add its `LinkDef.h` entry alongside it, not in a separate far-away
 file, so the three stay in sync when the class changes. Treat generated
 dictionary files as build artifacts: do not commit them unless the project's
@@ -950,7 +487,7 @@ hand-edit them; see [Build setup](cmake-and-build.md) for the CMake
 Single-file program:
 
 ```bash
-c++ -std=c++17 -O2 -Wall -Wextra analysis.cpp $(root-config --cflags --libs) -o analysis
+c++ -O2 -Wall -Wextra analysis.cpp $(root-config --cflags --libs) -o analysis  # -std comes from root-config
 ```
 
 Compiled macro:
@@ -960,63 +497,6 @@ root -l -q 'analysis.C+("input.root")'
 ```
 
 For CMake-based projects, see [Build setup](cmake-and-build.md).
-
----
-
-## Testing Guidance
-
-Prefer designs that are easy to test. Free functions should be deterministic when
-possible. Classes should expose behavior, not internal implementation details.
-Avoid hidden dependencies that make tests fragile; prefer dependency injection
-over hard-coded global dependencies:
-
-```cpp
-class ReportGenerator {
- public:
-  explicit ReportGenerator(const Clock& clock) : clock_(clock) {}
-
- private:
-  const Clock& clock_;
-};
-```
-
-Avoid this:
-
-```cpp
-class ReportGenerator {
- public:
-  Report Generate() {
-    const auto now = SystemClock::Now();
-    // ...
-  }
-};
-```
-
-Code should be designed so that core logic can be tested without file systems,
-networks, timers, or global state when possible — for ROOT's own globals
-specifically, see [Global State and Testability](#global-state-and-testability)
-above.
-
----
-
-## Standard Library Preference
-
-Prefer the C++ standard library over custom implementations: `std::vector`,
-`std::array`, `std::string`, `std::string_view`, `std::optional`, `std::variant`,
-`std::unique_ptr`, `std::shared_ptr`, `std::filesystem`, `std::chrono`,
-`std::span`, `std::ranges`. Do not write custom containers, smart pointers, string
-classes, or date/time utilities unless there is a strong project-specific reason.
-
-Prefer algorithms from the standard library when they improve clarity
-(`std::find`, `std::sort`, `std::transform`, `std::accumulate`, `std::any_of`,
-`std::all_of`, `std::none_of`). Use standard algorithms when they make intent
-clearer; use loops when they are more readable.
-
-Default to C++17 for this codebase's ROOT-facing code. Prefer RAII and
-standard-library containers; prefer `std::string` over `TString` unless a ROOT
-API specifically requires ROOT string behavior.
-
----
 
 ## Concrete ROOT/RDataFrame Coding Patterns
 
@@ -1102,6 +582,39 @@ std::cout << "Events: " << *n << "\n";
 h->Write();
 ```
 
+### RNTuple and current RDataFrame features
+
+Checked by running them with ROOT 6.38.04 (PyROOT) and uproot 5.7.6 on 2026-10-13; release facts from the
+[6.34](https://root.cern/doc/v634/release-notes.html) and [6.36](https://root.cern/doc/v636/release-notes.html)
+release notes (accessed 2026-10-13).
+
+- **RNTuple or TTree.** RNTuple is ROOT's columnar successor to `TTree`: its on-disk format 1.0 is final since ROOT
+  6.34 (later releases read it; experimental files from earlier releases are not readable), and its main types moved
+  from `ROOT::Experimental` to `ROOT` in 6.36 (`ROOT::RNTupleReader`, `ROOT::RNTupleModel`). Choose RNTuple for new
+  outputs whose readers are all on ROOT 6.34+ or uproot 5 (uproot 5.7.6 read a ROOT 6.38 RNTuple with a jagged
+  column); keep `TTree` when a reader is older, when an experiment framework writes or requires it, or when the
+  data need `TObject`-based classes. RDataFrame reads both with the same code: `ROOT::RDataFrame("Events", file)`
+  detects the format. To write one, set `RSnapshotOptions::fOutputFormat = ROOT::RDF::ESnapshotOutputFormat::kRNTuple`.
+  The branch-naming advice in [Branch names](#branch-names-and-one-list-of-fields) is about `TTree` leaves;
+  RNTuple fields are named by the model and have no leaf level.
+- **`Vary`** books systematic variations of a column in the same event loop:
+  `df.Vary("pt", "ROOT::RVecD{pt*0.98, pt*1.02}", {"down", "up"})`, then
+  `ROOT::RDF::Experimental::VariationsFor(result)` gives `nominal`, `pt:down`, `pt:up`. Prefer it to one event loop
+  per variation; every result downstream of the varied column is varied.
+- **`DefinePerSample`** computes a value once per input sample (a cross section, a luminosity weight from
+  `rdfsampleinfo_`), not once per event; **`ROOT::RDF::Experimental::FromSpec(spec.json)`** builds the dataframe from
+  a JSON list of samples with metadata (`rdfsampleinfo_.GetD("xsec")`). Use the spec for multi-sample analyses
+  instead of hand-written file loops.
+- **`DefineSlot`** passes the slot (thread) number as the first argument of a compiled callable; with implicit
+  multithreading use it for per-thread state such as one random generator per slot, seeded from a base seed and the
+  slot. A jitted string sees the same number as `rdfslot_`. `GetNSlots()` gives the number of slots to allocate.
+- **Distributed RDataFrame** runs the same graph on Dask or Spark: since 6.36 pass the cluster client with the
+  `executor` keyword (`ROOT.RDataFrame("Events", files, executor=client)`); the old
+  `ROOT.RDF.Experimental.Distributed` path warns in 6.36 and is removed in 6.38. Seeds, `Range` and actions that
+  need the whole dataset in one process (`Take` of large columns, `Foreach` with side effects) need rethinking there.
+- **NumPy bridges.** `df.AsNumpy(["x"])` returns NumPy arrays of the selected columns (materializes them: select
+  columns and filter first); `ROOT.RDF.FromNumpy({"w": array})` makes a dataframe from NumPy arrays.
+
 ### Input and object safety
 
 Validate every file, tree, and branch before building a large workflow, and fail
@@ -1150,31 +663,11 @@ data/MC; mask blinded data in both the main panel and any ratio (real inputs arr
 [Histograms and uncertainties](../../hep-analysis/references/histograms-efficiencies.md) for ratio/pull
 statistics).
 
----
-
 ## Design Checklist
 
-Before adding a new class, ask:
-
-1. Does it own state, protect an invariant, or manage a resource?
-2. Does it represent a real concept?
-3. Does it need polymorphic behavior?
-4. Would a simple `struct` plus free functions be clearer?
-5. Does it actually need `TObject`/a dictionary (I/O, `TTree` branch object,
-   `TBrowser`, a ROOT container), or is it purely analysis-internal?
-
-Before adding a new member function, ask whether it needs access to private
-state, preserves or modifies an invariant, is essential behavior of the object,
-or whether a free function would be more flexible and testable.
-
-Before adding a free function, ask whether it is mostly an algorithm or
-calculation, avoids unnecessary access to private state, can be tested
-independently, and makes the type simpler.
-
-Before adding inheritance, ask whether runtime polymorphism is required, whether
-callers will use different implementations through a common interface, whether
-composition or `std::variant` would be clearer, and whether the hierarchy is
-likely to remain shallow and stable.
+General class, function and inheritance questions are in the [C++ guidelines](cpp-balanced-design-guidelines.md#design-rules).
+Before adding a ROOT type, ask whether it actually needs `TObject` or a dictionary (I/O through `TObject` APIs, a
+ROOT container, `TBrowser`), or is purely analysis-internal.
 
 If a type does need a ROOT dictionary: is there a default constructor, are all
 persisted members themselves streamable, and does `LinkDef.h` name every
@@ -1197,6 +690,12 @@ Before writing or reviewing any ROOT-touching code, also check:
 - A cutflow or equivalent event-count validation exists.
 - All RDataFrame actions are booked before `.GetValue()`/`.Report()`/writing
   output.
+- With `ROOT::EnableImplicitMT()`: no `gRandom` (or any shared generator) inside `Define`, it is not thread-safe;
+  use `DefineSlot` with one generator per slot seeded from the slot number and a base seed. `Range` is not
+  supported with implicit multithreading. Entry order and floating-point sums differ from run to run, so compare
+  multithreaded outputs within a tolerance, not bit for bit (or run single-threaded for a byte comparison).
+- `Snapshot` runs the event loop at once unless `RSnapshotOptions::fLazy` is set; book it last, or lazily, so it does
+  not trigger a second pass over the data.
 - Inputs/trees/branch names are validated and documented; units are explicit;
   selections are named and traceable; weights are applied exactly once.
 - Histograms have names and axis labels; empty histograms are handled safely;
@@ -1204,20 +703,14 @@ Before writing or reviewing any ROOT-touching code, also check:
 - Build/run commands are documented; tests/validation are run, or their absence
   is stated with a reason.
 
----
-
 ## Anti-Patterns to Avoid (recap)
 
-- Excessive OOP (see [When to Use Free Functions](#when-to-use-free-functions)).
-- Stateless utility classes (see [Avoid Artificial Utility Classes](#avoid-artificial-utility-classes)).
-- Unnecessary inheritance (see [Inheritance and Polymorphism](#inheritance-and-polymorphism)).
-- Global mutable state (see [State Management](#state-management)).
-- Classes with unclear responsibility (see [Naming Guidance](#naming-guidance)).
 - Inheriting from `TObject` "just in case," for a type that never crosses an I/O
   or reflection boundary.
-- Wrapping a directory-owned object (an un-detached histogram/tree) in an owning
-  smart pointer, or deleting it manually — either double-frees it or fights the
-  directory for ownership.
+- An owning smart pointer to a directory-owned object (an un-detached histogram or tree) that outlives the file:
+  the file deletes it on close and the smart pointer deletes it again.
+- Leaking what `Get<T>` returns for types that do not register (`TGraph`, `TF1`, `TCanvas`, `TVectorD`): the
+  caller owns those.
 - Forgetting `SetDirectory(nullptr)` on a histogram/tree that must outlive the
   file it was created or read under, then hitting a use-after-free once that file
   closes.
@@ -1230,24 +723,3 @@ Before writing or reviewing any ROOT-touching code, also check:
 - Reading or writing `gDirectory`/`gRandom`/other ROOT globals from deep inside
   library code that a test might also exercise, instead of passing them in
   explicitly.
-
-## Summary Rule
-
-As a default: use `class` for state, ownership, lifetime, invariants, resources,
-RAII, and true runtime polymorphism; use `struct` for simple passive data
-(including flat `TTree` branch buffers); use free functions for algorithms,
-calculations, conversions, and procedural workflows. Avoid unnecessary
-inheritance, fake OOP such as stateless utility classes, and hidden global
-mutable state. Prefer explicit ownership, explicit dependencies, and standard
-library facilities over custom infrastructure.
-
-On top of that, take on `TObject`, a dictionary, and directory ownership only for
-types that actually need ROOT's I/O, branch-storage, or reflection services;
-write everything else as plain, RAII-friendly C++. Where ROOT's ownership or
-error-reporting model genuinely differs from general C++ practice, make the
-departure explicit and contained — an owner, a `SetDirectory(nullptr)`, or a
-checked return value at the boundary — rather than letting ROOT's conventions
-bleed into code that has no reason to follow them.
-
-When uncertain, choose the simpler design first. Add abstraction only when the
-code clearly benefits from it.

@@ -1,6 +1,6 @@
-Five worked Task Markdown outputs, one per category this skill distinguishes
+Six worked Task Markdown outputs, one per category this skill distinguishes
 beyond a plain feature request (bug, research, migration, agentic loop,
-data/ML), all written against this plugin (`plugins/hep-research/`) as the
+data/ML, physics code), all written against this plugin (`plugins/hep-research/`) as the
 inspected repository. Each follows [../assets/task-template.md](../assets/task-template.md)
 exactly and demonstrates the Confirmed / Inferred / Unresolved distinction from
 the [task authoring guide](../references/task-authoring-guide.md) with a
@@ -20,4 +20,5 @@ structure and for how they separate what was checked from what was not.
 | [research-task.md](research-task.md) | Research | Whether the report-writing and artifact scaffolding repeated across the twelve `examples/*/run.py` scripts should become one shared helper | Whether an example may import anything outside its own folder, given that each is meant to be read as a self-contained worked example |
 | [migration-task.md](migration-task.md) | Migration | Dropping the hand-written display fields `year_text`, `tier_text` and `locator_text` from the evidence source ledgers; irreversible for the text that is not derivable from the structured fields, so an export and a restore path are acceptance criteria | Whether the non-derivable texts (`5-6` tier ranges, dual-year entries) are content to keep in a structured form or display noise to drop |
 | [agentic-loop-task.md](agentic-loop-task.md) | Agentic loop | A bounded resubmit step inside `core/partition/campaign.py`'s `watch()` loop; names the pattern, termination, early-stop and cap | Whether a resubmission inside `watch` may ever be approved by configuration rather than by a flag on each run |
+| [physics-code-task.md](physics-code-task.md) | Physics code | Proving that the RDataFrame cutflow `adapters/root-uproot/assets/rdf_cutflow_analysis.cpp` reproduces a `TTreeReader` event loop: equal cutflow counts and bin-for-bin equal histogram contents and errors with zero tolerance, single-threaded and multithreaded, with deliberate mutations that must fail | Whether exact equality is the right bar once weights are not integers, and where the reference loop should live |
 | [data-ml-task.md](data-ml-task.md) | Data / ML | Gating `skills/physics-ml/assets/train_classifier.py` on `scripts/check_split_integrity.py` | The synthetic data has no sample IDs, so what a manifest ID refers to is unresolved |

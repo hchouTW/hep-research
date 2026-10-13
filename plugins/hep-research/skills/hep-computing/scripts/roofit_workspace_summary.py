@@ -1,82 +1,104 @@
 #!/usr/bin/env python3
+"""Summarize RooFit workspace contents (PyROOT).
+
+Usage: python3 roofit_workspace_summary.py --input file.root --workspace w [--verbose] [--json]
+Human-readable text by default (--verbose adds RooFit's own Print of each object); --json prints one JSON object
+with a "status" key ("ok", "error" or "missing-dependency") instead. Exit codes: 0 summarized, 2 bad input (missing
+or unreadable file, workspace not found or not a RooWorkspace), 3 PyROOT not importable.
+"""
 from __future__ import annotations
 
 import argparse
+import json
+import sys
 from pathlib import Path
 
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Summarize RooFit workspace contents.")
+class InputError(Exception):
+    pass
+
+
+def parse_args(argv=None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0], epilog=__doc__.split("\n\n", 1)[1],
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--input", required=True, type=Path)
     parser.add_argument("--workspace", required=True, help="RooWorkspace name inside the ROOT file")
-    parser.add_argument("--verbose", action="store_true", help="Print RooFit object details")
-    return parser.parse_args()
+    parser.add_argument("--verbose", action="store_true", help="Print RooFit object details (text mode)")
+    parser.add_argument("--json", action="store_true", help="print one JSON object instead of text")
+    return parser.parse_args(argv)
 
 
-def print_collection(title: str, collection: object, verbose: bool) -> None:
-    print(f"{title}:")
-    if collection.getSize() == 0:
-        print("  none")
-        return
-    for item in collection:
-        print(f"  {item.GetName()} [{item.ClassName()}]")
-        if verbose:
-            item.Print()
+def _items(collection) -> list:
+    return [{"name": item.GetName(), "class": item.ClassName()} for item in collection] if collection.getSize() else []
 
 
-def main() -> None:
-    args = parse_args()
-    if not args.input.exists():
-        raise FileNotFoundError(f"Input ROOT file does not exist: {args.input}")
-
-    try:
-        import ROOT
-    except ImportError as exc:
-        raise SystemExit("PyROOT is required to inspect RooFit workspaces with this script") from exc
-
+def summarize(args) -> dict:
+    import ROOT
     root_file = ROOT.TFile.Open(str(args.input), "READ")
     try:
         if not root_file or root_file.IsZombie():
-            raise OSError(f"Could not open ROOT file: {args.input}")
-        workspace = root_file.Get(args.workspace)
-        if not workspace:
-            raise KeyError(f"Workspace not found: {args.workspace}")
-        if not workspace.InheritsFrom("RooWorkspace"):
-            raise TypeError(f"Object is not a RooWorkspace: {args.workspace}")
-
-        print(f"file: {args.input}")
-        print(f"workspace: {args.workspace}")
-        print_collection("variables", workspace.allVars(), args.verbose)
-        print_collection("pdfs", workspace.allPdfs(), args.verbose)
-        print_collection("functions", workspace.allFunctions(), args.verbose)
-        print_collection("categories", workspace.allCats(), args.verbose)
-
-        print("datasets:")
-        data_names = [name.GetName() for name in workspace.allData()]
-        if not data_names:
-            print("  none")
-        for name in data_names:
-            data = workspace.data(name)
-            print(f"  {name} [{data.ClassName()}] entries={data.numEntries()}")
-            if args.verbose:
+            raise InputError(f"could not open ROOT file: {args.input}")
+        ws = root_file.Get(args.workspace)
+        if not ws:
+            raise InputError(f"workspace not found: {args.workspace}")
+        if not ws.InheritsFrom("RooWorkspace"):
+            raise InputError(f"{args.workspace} is a {ws.ClassName()}, not a RooWorkspace")
+        out = {"file": str(args.input), "workspace": args.workspace, "variables": _items(ws.allVars()),
+               "pdfs": _items(ws.allPdfs()), "functions": _items(ws.allFunctions()), "categories": _items(ws.allCats())}
+        out["datasets"] = []
+        for name in [d.GetName() for d in ws.allData()]:
+            data = ws.data(name)
+            out["datasets"].append({"name": name, "class": data.ClassName(), "entries": int(data.numEntries())})
+            if args.verbose and not args.json:
                 data.Print()
-
-        print("snapshots:")
-        snapshots = workspace.getSnapshots()
-        if not snapshots or snapshots.getSize() == 0:
-            print("  none")
-        else:
-            for item in snapshots:
-                print(f"  {item.GetName()}")
+        snaps = ws.getSnapshots()
+        out["snapshots"] = [s.GetName() for s in snaps] if snaps and snaps.getSize() else []
+        if args.verbose and not args.json:
+            for coll in (ws.allVars(), ws.allPdfs(), ws.allFunctions(), ws.allCats()):
+                for item in coll:
+                    item.Print()
+        return out
     finally:
         if root_file:
             root_file.Close()
 
 
-if __name__ == "__main__":
-    import sys as _sys
+def text(s: dict) -> str:
+    lines = [f"file: {s['file']}", f"workspace: {s['workspace']}"]
+    for title in ("variables", "pdfs", "functions", "categories"):
+        lines.append(f"{title}:")
+        lines += [f"  {i['name']} [{i['class']}]" for i in s[title]] or ["  none"]
+    lines.append("datasets:")
+    lines += [f"  {d['name']} [{d['class']}] entries={d['entries']}" for d in s["datasets"]] or ["  none"]
+    lines.append("snapshots:")
+    lines += [f"  {n}" for n in s["snapshots"]] or ["  none"]
+    return "\n".join(lines)
+
+
+def fail(args, status: str, message: str, code: int) -> int:
+    if args.json:
+        print(json.dumps({"status": status, "error": message}))
+    else:
+        print(f"roofit_workspace_summary.py: error: {message}", file=sys.stderr)
+    return code
+
+
+def main(argv=None) -> int:
+    args = parse_args(argv)
+    if not args.input.is_file():
+        return fail(args, "error", f"input ROOT file does not exist: {args.input}", 2)
     try:
-        main()
-    except OSError as _exc:  # a missing or unreadable input: one line, no traceback
-        print(f"roofit_workspace_summary.py: error: {_exc}", file=_sys.stderr)
-        raise SystemExit(2)
+        import ROOT  # noqa: F401
+    except (ImportError, OSError):
+        return fail(args, "missing-dependency", "PyROOT is not importable in this Python; find one with "
+                    "scripts/find_python.py", 3)
+    try:
+        summary = summarize(args)
+    except (InputError, OSError) as exc:
+        return fail(args, "error", str(exc), 2)
+    print(json.dumps(dict(summary, status="ok"), indent=1) if args.json else text(summary))
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

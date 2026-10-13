@@ -25,12 +25,15 @@ uproot adds one counter branch per jagged branch (`nJet_pt`, `nJet_eta`, ...) in
 single `nJet`; read the jagged `Jet_*` branches and ignore the counters.
 Requires numpy, awkward and uproot (uproot >= 5; tested with 5.7). Units: pt, mass in GeV,
 eta dimensionless, phi in radians. The same seed always gives the same file.
+Output: one JSON object with "status" ("written", "error" or "missing-dependency"). The parent folder of --out is
+created. Exit codes: 0 written, 2 bad input or unwritable output, 3 numpy, awkward or uproot missing.
 """
 
 import argparse
 import json
 import math
 import sys
+from pathlib import Path
 
 try:
     import numpy as np
@@ -47,8 +50,9 @@ def require_packages():
         except ImportError:
             missing.append(name)
     if missing:
-        sys.exit(f"error: missing required package(s): {', '.join(missing)}. "
-                 "Install them with: pip install numpy awkward 'uproot>=5'")
+        print(json.dumps({"status": "missing-dependency", "error": f"missing required package(s): {', '.join(missing)}. "
+                          "Install them with: pip install numpy awkward 'uproot>=5'"}))
+        sys.exit(3)
 
 
 def generate(n_events=400, seed=1, neg_frac=0.2):
@@ -124,8 +128,13 @@ def main(argv=None):
         ap.error("--events must be >= 1 and --neg-frac in [0, 1]")
     require_packages()
     pt, eta, phi, mass, weight = generate(args.events, args.seed, args.neg_frac)
-    write_file(args.out, pt, eta, phi, mass, weight)
-    summary = {"file": args.out, "synthetic": True, "events": args.events, "seed": args.seed,
+    try:
+        Path(args.out).parent.mkdir(parents=True, exist_ok=True)
+        write_file(args.out, pt, eta, phi, mass, weight)
+    except OSError as exc:
+        print(json.dumps({"status": "error", "error": f"cannot write {args.out}: {exc}"}))
+        return 2
+    summary = {"status": "written", "file": args.out, "synthetic": True, "events": args.events, "seed": args.seed,
                "selection": f"jet pt > {args.pt_min} GeV, |eta| < {args.eta_max}, >= 2 jets",
                "genEventSumw_full_sample": float(weight.astype(np.float64).sum()),
                "genEventCount_full_sample": args.events}
@@ -133,7 +142,8 @@ def main(argv=None):
     summary["note"] = "SYNTHETIC sample: not data; do not report these numbers as results"
     json.dump(summary, sys.stdout, indent=2)
     sys.stdout.write("\n")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

@@ -3,10 +3,14 @@
 prepare  renders assets/slurm-array.sbatch.template: --array=0-(n-1)[%throttle], --no-requeue, resources and site
          keys only from the configuration; the job runs the campaign's runner with the array index, which the
          runner maps to a chunk through the submission map (map.json) written with the script.
-submit   sbatch --parsable --output=<logs>/%A_%a.stdout.log --error=<logs>/%A_%a.stderr.log job.sbatch
+submit   preflight: scontrol show config gives MaxArraySize; an array whose largest index is MaxArraySize or more is
+         refused before sbatch (slurm.array.too_large, attempts not-submitted). Without a readable value (no scontrol
+         on the submit host) sbatch decides. Then
+         sbatch --parsable --output=<logs>/%A_%a.stdout.log --error=<logs>/%A_%a.stderr.log job.sbatch
 poll     sacct --jobs=<ids> --duplicates --parsable2 --noheader
-         --format=JobID,State,ExitCode,Elapsed,MaxRSS,NodeList,AllocCPUS,AllocTRES
-         (ExitCode is "exit:signal"; MaxRSS is taken from the job steps; AllocCPUS, 0 while pending, feeds the
+         --format=JobID,State,ExitCode,Elapsed,MaxRSS,NodeList,AllocCPUS,AllocTRES,DerivedExitCode
+         (ExitCode is "exit:signal"; DerivedExitCode, the highest exit code of the job's srun steps, makes a COMPLETED
+         0:0 allocation with a failed step 'failed' (exit code from DerivedExitCode, failure_reason 'derived-exit'); MaxRSS is taken from the job steps; AllocCPUS, 0 while pending, feeds the
          core-hour limit; gres/gpu=N in AllocTRES, empty while pending and absent for a CPU job, feeds the
          GPU-hour limit). If sacct fails, squeue plus the runner's
          meta files are used and the evidence is marked 'queue+outputs'; a task in neither is 'lost'.
@@ -24,10 +28,10 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from core.partition.executors import Executor, PollError, SubmitAmbiguous, _blank  # noqa: E402
+from core.partition.executors import Executor, PollError, SubmitAmbiguous, SubmitRefused, _blank  # noqa: E402
 
 TEMPLATE = Path(__file__).resolve().parent / "assets" / "slurm-array.sbatch.template"
-SACCT_FIELDS = "JobID,State,ExitCode,Elapsed,MaxRSS,NodeList,AllocCPUS,AllocTRES"
+SACCT_FIELDS = "JobID,State,ExitCode,Elapsed,MaxRSS,NodeList,AllocCPUS,AllocTRES,DerivedExitCode"
 STATES = {  # native State (first word; "CANCELLED by 123" -> CANCELLED) -> normalized
     "PENDING": "queued", "CONFIGURING": "queued", "REQUEUED": "queued", "REQUEUE_FED": "queued",
     "RUNNING": "running", "COMPLETING": "running", "STAGE_OUT": "running", "RESIZING": "running",
@@ -41,6 +45,7 @@ STATES = {  # native State (first word; "CANCELLED by 123" -> CANCELLED) -> norm
     "DEADLINE": "failed", "REVOKED": "cancelled",
 }
 TASK = re.compile(r"^(\d+)_(\d+)$")
+MAX_ARRAY = re.compile(r"^\s*MaxArraySize\s*=\s*(\d+)\s*$", re.M)
 PENDING_RANGE = re.compile(r"^(\d+)_\[(.+)\]$")
 
 
@@ -137,7 +142,21 @@ class SlurmExecutor(Executor):
                 "files": {"job.sbatch": text, "map.json": json.dumps(ctx["rows"], indent=1) + "\n"},
                 "submit_argv": argv, "rows": ctx["rows"]}
 
+    def max_array_size(self) -> int | None:
+        """MaxArraySize from scontrol show config (array indices must be below it), None when it cannot be read."""
+        try:
+            p = self.run_poll(["scontrol", "show", "config"])
+        except PollError:
+            return None
+        m = MAX_ARRAY.search(p.stdout or "") if p.returncode == 0 else None
+        return int(m.group(1)) if m else None
+
     def submit(self, plan: dict) -> list[dict]:
+        limit = self.max_array_size()
+        top = max((r["index"] for r in plan.get("rows", [])), default=-1)
+        if limit is not None and top >= limit:
+            raise SubmitRefused("slurm.array.too_large", f"array index {top} is not below this cluster's MaxArraySize "
+                                f"{limit}: split the campaign into submissions of at most {limit} chunks")
         p = self.run_submit(plan["submit_argv"], cwd=plan["submission_dir"])
         first = (p.stdout.strip().splitlines() or [""])[0]
         job = first.split(";")[0]
@@ -156,9 +175,11 @@ class SlurmExecutor(Executor):
             if not line.strip():
                 continue
             f = line.split("|")
-            if len(f) != 8:
-                raise PollError("slurm.sacct.unparsable", f"expected 8 '|' fields: {line[:200]!r}")
-            jid, state, exitc, elapsed, rss, nodes, alloc, tres = f
+            if len(f) == 8:  # recorded before DerivedExitCode was requested
+                f.append("")
+            if len(f) != 9:
+                raise PollError("slurm.sacct.unparsable", f"expected 9 '|' fields: {line[:200]!r}")
+            jid, state, exitc, elapsed, rss, nodes, alloc, tres, derived = f
             base, _, step = jid.partition(".")
             m, pr = TASK.match(base), PENDING_RANGE.match(base)
             if not (m or pr) or (pr and step):
@@ -168,11 +189,13 @@ class SlurmExecutor(Executor):
                 continue
             try:
                 code, sig = parse_exit(exitc)
+                dcode, dsig = parse_exit(derived) if derived.strip() else (None, None)
             except ValueError as exc:
                 raise PollError("slurm.sacct.unparsable", str(exc)) from None
             ids = [base] if m else [f"{pr.group(1)}_{i}" for i in expand_range(pr.group(2))]
             for t in ids:
-                tasks.setdefault(t, []).append({"state": state, "code": code, "sig": sig, "elapsed": elapsed, "nodes": nodes,
+                tasks.setdefault(t, []).append({"state": state, "code": code, "sig": sig, "dcode": dcode, "dsig": dsig,
+                                                "derived": derived.strip(), "elapsed": elapsed, "nodes": nodes,
                                                 "alloc": int(alloc) if alloc.isdigit() and int(alloc) > 0 else None,
                                                 "gpus": tres_gpus(tres)})
         out, missing = {}, []
@@ -184,8 +207,12 @@ class SlurmExecutor(Executor):
             last = hist[-1]
             rss = [parse_rss_mb(x) for x in steps.get(rec["job_id"], [])]
             rss = [x for x in rss if x is not None]
+            state, native_state, code, sig, reason = mapped(last["state"]), last["state"], last["code"], last["sig"], None
+            if state == "done" and (last["dcode"] or last["dsig"]):  # the script exited 0 but an srun step failed
+                state, code, sig, reason = "failed", last["dcode"], last["dsig"], "derived-exit"
+                native_state = f"{last['state']} (DerivedExitCode {last['derived']})"
             out[rec["attempt_id"]] = _blank(
-                state=mapped(last["state"]), native_state=last["state"], exit_code=last["code"], signal=last["sig"],
+                state=state, native_state=native_state, exit_code=code, signal=sig, failure_reason=reason,
                 host=last["nodes"] or None, elapsed_s=parse_elapsed(last["elapsed"]), max_rss_mb=max(rss) if rss else None,
                 alloc_cpus=last["alloc"], alloc_gpus=last["gpus"], restarts=len(hist) - 1, evidence="accounting (sacct)")
         if missing:  # not in accounting (yet): ask the queue, then the runner's records, before calling it lost

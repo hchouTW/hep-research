@@ -87,14 +87,7 @@ this section covers migration and integrity execution once ownership is settled.
 - Use benchmarks or profiling when performance is a stated acceptance criterion.
 - Describe performance assumptions and measurement limitations honestly.
 
-## Accessibility and Inclusive UX
-
-- Prefer semantic controls and content structure before custom interaction patterns.
-- Ensure keyboard navigation and visible focus remain usable.
-- Provide accessible names, labels, instructions, and error associations.
-- Do not rely on color alone to convey state or meaning.
-- Respect reduced-motion, contrast, localization, and assistive-technology considerations.
-- Validate altered user flows with existing accessibility tools or checks when available.
+Accessibility and inclusive UX for user interfaces moved to [web and delivery practices](../../../docs/dev/engineering/web-and-delivery-practices.md).
 
 ## Reviewing Someone Else's Change
 

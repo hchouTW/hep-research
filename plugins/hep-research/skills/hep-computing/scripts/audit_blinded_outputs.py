@@ -9,7 +9,8 @@ Two steps, so the blinded numbers never sit inside the audited outputs:
                 [--rtol 1e-9]
          hist.json / mc.json: {"edges": [...], "values": [...]}. Writes the numbers no output may contain, with the
          scan tolerance (at most 1e-6) and the list of quantities left unsealed. Prints only where it wrote them.
-         Bin edges must be finite and strictly increasing (exit 2 otherwise).
+         Bin edges must be finite and strictly increasing (exit 2 otherwise). Exact zero and numbers the unblinded
+         bins give alone (sideband sums) are not sealed; if nothing is left the file says nothing_sealable.
   scan:  python3 audit_blinded_outputs.py scan --sealed SEALED.json OUTPUT_DIR_OR_FILES... [--report REPORT.json]
                 [--strict] [--exempt PATH=REASON ...] [--outputs MANIFEST.json]
          Prints a fixed status only: pass, fail or incomplete, the unreadable files, and the limits of the scan. It
@@ -42,11 +43,14 @@ MAX_RTOL = 1e-6
 
 
 def load_sealed(path: Path) -> tuple[list[float], float]:
-    """The sealed numbers and tolerance; ValueError unless the file holds a non-empty list of finite numbers (an empty
-    or malformed sealed file would make every scan pass)."""
+    """The sealed numbers and tolerance; ValueError unless the file holds a list of finite numbers (a malformed sealed
+    file would make every scan pass). The list may be empty only when seal recorded nothing_sealable (every blinded
+    number is zero or follows from the public bins alone)."""
     doc = json.loads(path.read_text(encoding="utf-8"))
     nums = doc.get("sealed") if isinstance(doc, dict) else None
-    if not isinstance(nums, list) or not nums or not all(
+    if isinstance(nums, list) and not nums and doc.get("nothing_sealable") is True:
+        pass
+    elif not isinstance(nums, list) or not nums or not all(
             isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x) for x in nums):
         raise ValueError("the sealed file must hold a non-empty list of finite numbers under 'sealed'")
     rtol = doc.get("rtol", 1e-9)
@@ -87,14 +91,17 @@ def main(argv=None) -> int:
             if not 0 < args.rtol <= MAX_RTOL:
                 raise ValueError(f"--rtol must be in (0, {MAX_RTOL:g}]")
             nums = seal(h["edges"], h["values"], {"low": args.low, "high": args.high}, refs)
-            args.out.write_text(json.dumps({"sealed": nums, "rtol": args.rtol, "region": {"low": args.low, "high": args.high},
-                                            "not_sealed": list(NOT_SEALED)}) + "\n", encoding="utf-8")
+            doc = {"sealed": nums, "rtol": args.rtol, "region": {"low": args.low, "high": args.high},
+                   "not_sealed": list(NOT_SEALED)}
+            if not nums:  # every blinded number is zero or public (NOT_SEALED): the scan still checks readability
+                doc["nothing_sealable"] = True
+            args.out.write_text(json.dumps(doc) + "\n", encoding="utf-8")
             print(json.dumps({"status": "sealed", "out": str(args.out)}))  # no count: it depends on the values (N10)
             return 0
         sealed, rtol = load_sealed(args.sealed)
         for label, path in (("sealed file", args.sealed), ("report", args.report)):
             if path is not None and inside(path, args.paths):
-                print(json.dumps({"error": f"the {label} lies inside the audited outputs"}))
+                print(json.dumps({"status": "error", "error": f"the {label} lies inside the audited outputs"}))
                 return 2
         exemptions = {}
         for item in args.exempt:
@@ -112,7 +119,7 @@ def main(argv=None) -> int:
         print(json.dumps(view, indent=1))
         return {"pass": 0, "fail": 1, "incomplete": 3}[rep["status"]]
     except (OSError, ValueError, KeyError) as exc:
-        print(json.dumps({"error": str(exc)}))
+        print(json.dumps({"status": "error", "error": str(exc)}))
         return 2
 
 

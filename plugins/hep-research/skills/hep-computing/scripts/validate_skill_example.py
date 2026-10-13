@@ -50,6 +50,7 @@ Standard library only.
 from __future__ import annotations
 
 import argparse
+import json
 import re
 from pathlib import Path
 
@@ -403,6 +404,7 @@ def validate(text: str) -> list[str]:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Validate a filled-in canonical skill example.")
     parser.add_argument("file", type=Path, help="Markdown example file to check.")
+    parser.add_argument("--json", action="store_true", help='print {"status": "ok" | "problems" | "error", ...}')
     return parser.parse_args()
 
 
@@ -410,14 +412,15 @@ def main() -> int:
     args = parse_args()
     try:
         text = args.file.read_text(encoding="utf-8")
-    except FileNotFoundError:
-        print(f"{args.file}: file not found")
-        return 2
-    except OSError as exc:
-        print(f"{args.file}: could not read file ({exc})")
+    except (OSError, UnicodeDecodeError) as exc:
+        message = "file not found" if isinstance(exc, FileNotFoundError) else f"could not read file ({exc})"
+        print(json.dumps({"status": "error", "error": f"{args.file}: {message}"}) if args.json else f"{args.file}: {message}")
         return 2
 
     problems = validate(text)
+    if args.json:
+        print(json.dumps({"status": "problems" if problems else "ok", "file": str(args.file), "problems": problems}))
+        return 1 if problems else 0
     if problems:
         print(f"{args.file}: {len(problems)} problem(s) found:")
         for problem in problems:

@@ -3,7 +3,8 @@
 
 Run: python3 <plugin root>/skills/hep-computing/scripts/audit_histograms.py <plugin root>/skills/hep-computing/assets/histograms.example.json
 Standard library only. Input excludes flow bins; sumw2 is MC variance bookkeeping,
-not a general covariance matrix. Exit 1 for invalid content, 0 for warnings only.
+not a general covariance matrix. Output: JSON with "status" ("ok", "warnings", "invalid" or "error").
+Exit 0 valid (warnings allowed), 1 invalid content, 2 unreadable input.
 """
 import argparse
 import json
@@ -98,10 +99,12 @@ def main():
     try:
         with args.bundle.open(encoding='utf-8') as stream:
             bundle = json.load(stream)
-        errors, warnings = audit(bundle)
     except (OSError, ValueError, OverflowError) as exc:
-        errors, warnings = [str(exc)], []
-    print(json.dumps({'ok': not errors, 'errors': errors, 'warnings': warnings}, indent=2))
+        print(json.dumps({'status': 'error', 'ok': False, 'errors': [f'cannot read {args.bundle}: {exc}'], 'warnings': []}, indent=2))
+        return 2
+    errors, warnings = audit(bundle)
+    status = 'invalid' if errors else ('warnings' if warnings else 'ok')
+    print(json.dumps({'status': status, 'ok': not errors, 'errors': errors, 'warnings': warnings}, indent=2))
     return 1 if errors else 0
 
 

@@ -7,6 +7,9 @@
    optional dependency may be reported first; that is also a short message.
 The table below names, for every script, the arguments that point it at a missing file, or why it reads none. A new
 script without an entry fails the inventory test.
+3. hep-computing scripts (HC_CONTRACT, HC_SHELL; CMP-12): a missing input, a refused target and an unwritable output
+   each give one JSON object with a "status" key and the exit code SKILL.md invariant 5 documents; the .sh scripts are
+   run too. A new hep-computing script needs an entry there or in HC_EXEMPT.
 """
 import glob
 import json
@@ -155,6 +158,93 @@ class CliRobustnessTests(unittest.TestCase):
                 self.assertNotIn("Traceback", text)
                 if len(text.splitlines()) > 6:  # a JSON error report may span lines; anything else must be short
                     json.loads(res.stdout)
+
+
+HC = "skills/hep-computing/scripts/"
+# hep-computing script contract (SKILL.md invariant 5, CMP-08/12): (arguments, documented exit code). Every case must
+# print one JSON object with a "status" key on stdout and no traceback. {OUT} is an output path under a regular file,
+# so it cannot be created on any system (also as root); {HIST} is a valid synthetic histogram.
+HC_CONTRACT = {
+    "audit_blinded_outputs.py": [(["scan", "--sealed", M, "{TMP}"], 2),
+                                 (["seal", "--hist", "{HIST}", "--low", "1", "--high", "2", "--out", "{OUT}"], 2)],
+    "audit_histograms.py": [([M], 2)],
+    "check_example_diversity.py": [([M, "--json"], 2)],
+    "compare_root_histograms.py": [(["--reference", M, "--candidate", M, "--hist", "h"], 2)],
+    "create_story_card.py": [(["--actor", "a", "--capability", "c", "--outcome", "o", "--output", "{OUT}", "--json"], 2)],
+    "environment_manifest.py": [(["check", "--manifest", M], 2), (["record", "--packages", "pip", "--out", "{OUT}"], 2)],
+    "find_python.py": [(["--require", "surely_not_a_module_xyz", "--python", "/nonexistent/python"], 1)],
+    "generate_skill_example.py": [(["--archetype", "contrast", "--skill", "s", "--role", "r", "--use-case", "u",
+                                    "--output", "{OUT}", "--json"], 2)],
+    "inspect_root_file.py": [(["--input", M, "--json"], 2)],
+    "lint_task.py": [([M, "--json"], 2)],
+    "local_partition.py": [(["status", "--manifest", M, "--state", "{TMP}"], 2),
+                           (["plan", "--job", "j", "--items", "4", "--chunk-size", "2", "--seed", "1", "--out", "{OUT}"], 2)],
+    "make_synthetic_nanoaod.py": [(["--out", "{OUT}", "--events", "5"], None)],  # 2, or 3 without numpy/awkward/uproot
+    "roofit_workspace_summary.py": [(["--input", M, "--workspace", "w", "--json"], 2)],
+    "summarize_histogram_statistics.py": [(["--input", M, "--hist", "h", "--json"], 2)],
+    "validate_agile_notes.py": [([M, "--json"], 2)],
+    "validate_skill_bundle.py": [(["--json"], 0)],
+    "validate_skill_example.py": [([M, "--json"], 2)],
+}
+HC_SHELL = {  # bash scripts: (arguments, PATH override or None, documented exit code)
+    "new_root_cpp_project.sh": [(["--json", "bad name"], None, 2), (["--json", "--dir", "{FULL}", "demo"], None, 2)],
+    "check_root_cpp_env.sh": [(["--json"], "/usr/bin:/bin", 3)],
+}
+HC_EXEMPT = {"inspect_root_file.C": "ROOT macro, runs inside ROOT and prints text (SKILL.md invariant 5)"}
+
+
+class HepComputingScriptContractTests(unittest.TestCase):
+    """CMP-12: the hep-computing scripts print a JSON status and use the documented exit codes, also on an
+    unwritable output (four scripts gave a traceback there on c1d375c)."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        d = Path(self.tmp.name)
+        (d / "blocker").write_text("a regular file, so nothing can be created under it\n")
+        (d / "hist.json").write_text(json.dumps({"edges": [0, 1, 2, 3], "values": [5, 6, 7]}))
+        (d / "full").mkdir()
+        (d / "full" / "keep.txt").write_text("x")
+        self.subst = {"{OUT}": str(d / "blocker" / "out" / "x.json"), "{HIST}": str(d / "hist.json"), "{TMP}": str(d),
+                      "{FULL}": str(d / "full")}
+
+    def args(self, args):
+        return [self.subst.get(a, a) for a in args]
+
+    def check(self, label, res, code):
+        self.assertNotIn("Traceback", res.stdout + res.stderr, label)
+        try:
+            doc = json.loads(res.stdout)
+        except ValueError:
+            self.fail(f"{label}: stdout is not one JSON object: {res.stdout[-300:]!r} {res.stderr[-300:]!r}")
+        self.assertIsInstance(doc, dict, label)
+        self.assertIn("status", doc, label)
+        if code is None:
+            self.assertIn(res.returncode, (2, 3), label)
+        else:
+            self.assertEqual(res.returncode, code, f"{label}: {res.stdout[-300:]} {res.stderr[-300:]}")
+
+    def test_every_script_is_covered_or_exempt(self):
+        names = {Path(p).name for p in glob.glob(str(ROOT / HC / "*")) if Path(p).is_file()}
+        self.assertEqual(sorted(names - set(HC_CONTRACT) - set(HC_SHELL) - set(HC_EXEMPT)), [])
+        self.assertEqual(sorted((set(HC_CONTRACT) | set(HC_SHELL) | set(HC_EXEMPT)) - names), [])
+
+    def test_python_scripts_print_a_json_status_with_the_documented_exit(self):
+        for script, cases in sorted(HC_CONTRACT.items()):
+            for args, code in cases:
+                with self.subTest(script=script, args=args):
+                    self.check(f"{script} {args}", run(HC + script, self.args(args), timeout=300), code)
+
+    @unittest.skipUnless(os.path.exists("/bin/bash"), "bash not available")
+    def test_shell_scripts_print_a_json_status_with_the_documented_exit(self):
+        for script, cases in sorted(HC_SHELL.items()):
+            for args, path, code in cases:
+                with self.subTest(script=script, args=args):
+                    env = dict(os.environ, PATH=path) if path else None
+                    with tempfile.TemporaryDirectory() as cwd:
+                        res = subprocess.run(["/bin/bash", str(ROOT / HC / script), *self.args(args)], capture_output=True,
+                                             text=True, timeout=300, cwd=cwd, env=env)
+                    self.check(f"{script} {args}", res, code)
 
 
 if __name__ == "__main__":

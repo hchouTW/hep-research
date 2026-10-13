@@ -84,7 +84,7 @@ class SlurmShimTests(unittest.TestCase):
         self.assertIn("#SBATCH --export=NONE", script)  # the submitter's environment never reaches the job (X06)
         self.assertIn("#SBATCH --job-name=hepr-<UID>-s001", script)
         code, rep = h.cli("submit", "--submit")
-        self.assertEqual([c["tool"] for c in h.calls()], ["sbatch"])
+        self.assertEqual([c["tool"] for c in h.calls()], ["scontrol", "sbatch"])  # MaxArraySize preflight (CMP-22)
         self.assertEqual(len(h.state()["submissions"]), 1)
         self.assertEqual(rep["jobs"][9]["job_id"], "1000_9")
 

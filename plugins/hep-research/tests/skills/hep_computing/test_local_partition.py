@@ -71,6 +71,41 @@ class LocalPartitionCliTests(unittest.TestCase):
             lp.run(lp.make_manifest("x", 2, 1, 1), self.d / "s", lambda c: 1, {"max_attempts": 0})
         self.assertEqual(self.cli("status", "--manifest", "/nonexistent", "--state", str(self.d))[0], 2)
 
+    def raw_cli(self, *a):
+        return subprocess.run([sys.executable, str(ROOT / "local_partition.py"), *a], capture_output=True, text=True, timeout=600)
+
+    def test_bad_manifest_refused_by_every_subcommand_without_touching_state(self):
+        """CMP-03: status, merge and reset validated nothing; reset wrote state.json and then crashed."""
+        man, st = self.d / "manifest.json", self.d / "state"
+        self.assertEqual(self.cli("plan", "--job", "t", "--items", "4", "--chunk-size", "2", "--seed", "1", "--out", str(man))[0], 0)
+        self.assertEqual(self.cli("run", "--manifest", str(man), "--state", str(st), "--cmd", self.cmd)[0], 1)
+        before = (st / "state.json").read_bytes()
+        good = json.loads(man.read_text())
+        bad_list = self.d / "list.json"
+        bad_list.write_text(json.dumps(good["chunks"]))
+        no_chunks = self.d / "nochunks.json"
+        no_chunks.write_text(json.dumps({k: v for k, v in good.items() if k != "chunks"}))
+        for bad in (bad_list, no_chunks):
+            for sub in (["status"], ["merge"], ["reset", "--chunks", "c0001", "--reason", "x"]):
+                p = self.raw_cli(sub[0], "--manifest", str(bad), "--state", str(st), *sub[1:])
+                self.assertEqual(p.returncode, 2, (bad.name, sub, p.stdout, p.stderr))
+                self.assertNotIn("Traceback", p.stderr)
+                doc = json.loads(p.stdout)
+                self.assertIsInstance(doc.get("error"), str)
+                self.assertNotEqual(doc["error"], "'chunks'")
+                self.assertEqual((st / "state.json").read_bytes(), before)
+
+    def test_reset_refuses_a_state_of_another_manifest(self):
+        man, other, st = self.d / "m.json", self.d / "o.json", self.d / "state"
+        self.cli("plan", "--job", "t", "--items", "4", "--chunk-size", "2", "--seed", "1", "--out", str(man))
+        self.cli("plan", "--job", "u", "--items", "4", "--chunk-size", "2", "--seed", "1", "--out", str(other))
+        self.cli("run", "--manifest", str(man), "--state", str(st), "--cmd", self.cmd)
+        before = (st / "state.json").read_bytes()
+        code, out = self.cli("reset", "--manifest", str(other), "--state", str(st), "--chunks", "c0001", "--reason", "x")
+        self.assertEqual(code, 2)
+        self.assertIn("different manifest", out["error"])
+        self.assertEqual((st / "state.json").read_bytes(), before)
+
 
 if __name__ == "__main__":
     unittest.main()

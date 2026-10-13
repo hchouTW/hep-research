@@ -142,7 +142,7 @@ class Executor:
 def _blank(**kw) -> dict:
     base = {"state": "unknown", "native_state": None, "exit_code": None, "signal": None, "hold_reason": None,
             "hold_code": None, "host": None, "elapsed_s": None, "max_rss_mb": None, "alloc_cpus": None,
-            "alloc_gpus": None, "restarts": 0, "evidence": None}
+            "alloc_gpus": None, "restarts": 0, "evidence": None, "failure_reason": None}
     base.update(kw)
     return base
 

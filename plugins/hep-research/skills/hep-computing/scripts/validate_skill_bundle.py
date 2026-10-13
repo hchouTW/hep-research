@@ -19,6 +19,7 @@ location. `python3 <plugin root>/skills/hep-computing/scripts/validate_skill_bun
 from __future__ import annotations
 
 import argparse
+import json
 import re
 from pathlib import Path
 
@@ -96,57 +97,46 @@ def check_template_sections(text: str) -> list[str]:
     return problems
 
 
-def main(argv: list[str] | None = None) -> None:
-    argparse.ArgumentParser(description=__doc__.split("\n\n")[0],
-                            epilog="Takes no arguments; paths resolve relative to this script.").parse_args(argv)
-    root = Path(__file__).resolve().parents[1]
+def problems_of(root: Path) -> list[str]:
+    """Every problem with the bundle at root; empty when it is intact."""
     missing = [path for path in REQUIRED_PATHS if not (root / path).exists()]
-    empty = [
-        path
-        for path in REQUIRED_PATHS
-        if (root / path).exists() and (root / path).stat().st_size == 0
-    ]
-
+    empty = [path for path in REQUIRED_PATHS if (root / path).exists() and (root / path).stat().st_size == 0]
     if missing or empty:
-        if missing:
-            print("missing files:")
-            for path in missing:
-                print(f"  {path}")
-        if empty:
-            print("empty files:")
-            for path in empty:
-                print(f"  {path}")
-        raise SystemExit(1)
-
+        return [f"missing file: {p}" for p in missing] + [f"empty file: {p}" for p in empty]
     skill = (root / "SKILL.md").read_text(encoding="utf-8")
     if not skill.startswith("---\n"):
-        print("SKILL.md is missing YAML frontmatter")
-        raise SystemExit(1)
+        return ["SKILL.md is missing YAML frontmatter"]
     frontmatter = skill.split("---", 2)[1]
     for field in ("name:", "description:"):
         if field not in frontmatter:
-            print(f"SKILL.md frontmatter is missing {field}")
-            raise SystemExit(1)
-
+            return [f"SKILL.md frontmatter is missing {field}"]
     match = re.search(r'^description:\s*"?(.*?)"?\s*$', frontmatter, re.MULTILINE)
     if match and len(match.group(1)) > DESCRIPTION_LIMIT:
-        print(f"SKILL.md description is {len(match.group(1))} characters; limit is {DESCRIPTION_LIMIT}")
-        raise SystemExit(1)
-
+        return [f"SKILL.md description is {len(match.group(1))} characters; limit is {DESCRIPTION_LIMIT}"]
     template = (root / "assets/task-template.md").read_text(encoding="utf-8")
-    template_problems = check_template_sections(template)
-    if template_problems:
-        print("assets/task-template.md section contract violated:")
-        for problem in template_problems:
-            print(f"  {problem}")
-        raise SystemExit(1)
+    return [f"assets/task-template.md section contract violated: {p}" for p in check_template_sections(template)]
 
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0],
+                                 epilog="Paths resolve relative to this script. Exit 0 intact, 1 problems found.")
+    ap.add_argument("--json", action="store_true", help='print {"status": "ok" | "problems", "problems": [...]}')
+    args = ap.parse_args(argv)
+    root = Path(__file__).resolve().parents[1]
+    problems = problems_of(root)
+    if args.json:
+        print(json.dumps({"status": "problems" if problems else "ok", "problems": problems}))
+        return 1 if problems else 0
+    if problems:
+        for problem in problems:
+            print(problem)
+        return 1
     print(
         f"Bundle OK: {len(REQUIRED_PATHS)} files present and non-empty, "
         f"assets/task-template.md carries all {len(REQUIRED_TEMPLATE_SECTIONS)} "
         "required sections in order."
     )
-
+    return 0
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

@@ -86,6 +86,12 @@ misconfiguration.
   library built from the old header gave a stale answer (41 fields for a 40-member struct) until the macro was
   recompiled with `.C++`.
 
+## Crashes and memory growth
+
+Segmentation violations, aborts, use-after-free, leaks and jobs killed for memory: see
+[crash and memory debugging](crash-and-memory-debugging.md) (debuggers, valgrind with ROOT's suppressions,
+sanitizers, ACLiC `+g`, leak triage).
+
 ## Symptom table
 
 For yield/refactor/multithreading/fit symptoms beyond ROOT-specific build and I/O

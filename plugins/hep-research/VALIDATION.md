@@ -965,3 +965,28 @@ is recorded in the release commit; the tag `hep-research--v0.6.0` points at the 
 The companion ams02-research 1.3.1 declares hep-research `>=0.4.0,<0.6.0`, so its preflight refuses this release until
 the companion widens its range. Software checks establish consistency only; no host configuration is qualified for
 private or blinded data by this release.
+
+## CMP-REMEDIATION (2026-10-13, E2 + Homebrew ROOT 6.38.04, version 0.6.17 + unreleased): hep-computing remediation
+
+Branch `fix/hep-computing-remediation` from `c1d375c`, one commit per task CMP-01…CMP-28 (CMP-27 deferred by Q1)
+plus CMP-ANA-P2-7 (the `core/blinding` part of the hep-analysis audit item P2-7). Every bug-fix test was run against
+an export of `c1d375c` and failed there: `tests/core/test_partition_robustness.py` (8 of 8),
+`tests/core/test_blinding_regressions.py` (8 of 10; the two that pass on `c1d375c` check that nonzero blinded values
+stay sealed), `test_local_partition.py` (2 new), `test_compare_histograms.py` (10 of 10), the CMP-07 class of
+`test_environment_manifest.py` (7 of 7), `test_root_cpp_scripts.py` (5 of 6 new; the CMake build test passes on `c1d375c` too), `test_lint_task.py` (3 of 4 new),
+`tests/skills/test_cli_robustness.py` contract class (22 cases) and `tests/adapters/test_batch_cmp_regressions.py`
+(5 of 6).
+`tools/run_all_checks.py` with `~/.venvs/hep-research-e2` (Python 3.13.2) at `1606c04`: 20 pass, 0 fail, 0 skip;
+2535 unit tests in 191 modules, 0 failures, 56 skipped (55 at 0.6.17; the new skip is
+`test_root_integration.test_viewers_json_mode`, PyROOT). PyROOT-dependent tests run with
+`HEP_ROOT_PYTHON=/opt/homebrew/bin/python3.14` (Homebrew ROOT 6.38.04): `test_root_integration` 8 and
+`tests.adapters.test_root_cpp_assets` 5, all pass; the generated `new_root_cpp_project.sh` project and the
+`cmake-and-build.md` snippet configured and built with CMake 4.3.2; the parallel `check_root_cpp_env.sh` test ran.
+uproot 5.7.6 ran the uproot backend of `compare_root_histograms.py`. CI lint pins in a scratch venv: `ruff 0.16.10`
+`check core contracts` clean, `mypy 2.4.0` clean (55 files). Reference snippets were run where the tool exists:
+SymPy 1.14.0 and SciPy 1.18.1 (every number in `symbolic-and-numerical-computation.md`), PyROOT 6.38.04
+(`python-hep-coding-patterns.md`, the RDataFrame/RNTuple features, `GetNRuns`, `TTreePerfStats`, the directory
+"leak"), Bash 3.2.57 (`set -u` empty arrays, SIGTERM forwarding). Not run here: gdb, valgrind, perf, py-spy, the
+Linux LeakSanitizer, real Slurm or HTCondor (fakes only), and a live routing run (three static cases added). The
+`lint_task.py` run on the task order reports one error by design: it cites `references/product-framing.md`, which
+CMP-26 moved to `docs/dev/engineering/`. Contracts unchanged (2.5.0). Software checks only; no scientific validity.

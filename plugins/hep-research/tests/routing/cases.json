@@ -1225,6 +1225,42 @@
    "set": "T3"
   },
   {
+   "id": "co-cmp-crash-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My compiled ROOT analysis crashes with a segmentation violation; valgrind reports an invalid read in my code. Help me find it.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "crashes",
+    "ROOT/PyROOT"
+   ],
+   "set": "CMP"
+  },
+  {
+   "id": "co-cmp-perf-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Profile my RDataFrame job: it takes three hours per file and I need it under thirty minutes.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "RDataFrame",
+    "performance"
+   ],
+   "set": "CMP"
+  },
+  {
+   "id": "co-cmp-ode-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我用 solve_ivp 解這組 ODE，請幫我做 convergence and tolerance studies，確認結果穩定。",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "ODEs",
+    "convergence and tolerance studies"
+   ],
+   "set": "CMP"
+  },
+  {
    "id": "th-t3-1",
    "lang": "en",
    "kind": "direct",

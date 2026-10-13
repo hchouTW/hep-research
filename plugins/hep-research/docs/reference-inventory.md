@@ -10,7 +10,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 |---|---|---|---|
 | detector-response | 34 | 395 | 0 |
 | hep-analysis | 9 | 74 | 0 |
-| hep-computing | 29 | 338 | 0 |
+| hep-computing | 31 | 284 | 0 |
 | hep-statistics | 9 | 119 | 0 |
 | hep-theory | 8 | 42 | 0 |
 | physics-ml | 38 | 257 | 0 |
@@ -22,8 +22,6 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 
 | A | B | Jaccard | Containment | Shared shingles |
 |---|---|---|---|---|
-| `skills/hep-computing/references/cpp-balanced-design-guidelines.md` | `skills/hep-computing/references/root-balanced-design-guidelines.md` | 0.144 | 0.368 | 1316 |
-| `skills/hep-computing/references/cpp-balanced-design-guidelines.md` | `skills/hep-computing/references/python-balanced-design-guidelines.md` | 0.132 | 0.256 | 917 |
 | `skills/detector-response/references/core-detector-equations.md` | `skills/detector-response/references/detector-principles-summary.md` | 0.042 | 0.176 | 162 |
 
 ## Similar names (same skill, a shared name token in at most 4 files)
@@ -41,6 +39,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 - **code**: `code-review-report.md`, `code-to-methodology-synthesis.md`
 - **consistency**: `logical-consistency-and-argument-uniformity.md`, `manuscript-consistency-auditing.md`
 - **data**: `data-loading.md`, `data-strategy.md`
+- **debugging**: `crash-and-memory-debugging.md`, `root-debugging.md`
 - **detection**: `ground-based-detection-arrays.md`, `space-based-direct-detection.md`
 - **engineering**: `engineering-playbook.md`, `loop-engineering.md`, `prompt-engineering-and-token-optimization.md`
 - **evaluation**: `evaluation-metrics.md`, `evaluation-strategy.md`
@@ -56,6 +55,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 - **ml**: `ml-analysis.md`, `space-and-astroparticle-ml.md`
 - **model**: `generative-models.md`, `sequence-models.md`
 - **neutrino**: `neutrino-astronomy.md`, `noble-liquid-neutrino-and-rare-event-detectors.md`
+- **numerical**: `numerical-and-computational-methods.md`, `symbolic-and-numerical-computation.md`
 - **pattern**: `graphviz-patterns.md`, `mermaid-patterns.md`, `plantuml-patterns.md`, `tikz-patterns.md`
 - **performance**: `performance-metrics-and-residual-diagnostics.md`, `reconstruction-performance-and-truth-matching.md`
 - **principle**: `detector-principles-bibliography.md`, `detector-principles-summary.md`
@@ -126,34 +126,36 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `systematics.md` | hep-analysis | 5.9 | yes | 25 | detector-response, hep-statistics, hep-theory, physics-ml | 364918e 2026-10-09 |
 | `weights-normalization.md` | hep-analysis | 5.1 | yes | 7 | detector-response, hep-theory, physics-ml | 351029c 2026-10-07 |
 | `acceptance-criteria.md` | hep-computing | 3.7 | no | 3 | - | 351029c 2026-10-07 |
-| `agile-development-guide.md` | hep-computing | 10.7 | yes | 8 | physics-ml | 351029c 2026-10-07 |
-| `bash-balanced-design-guidelines.md` | hep-computing | 24.8 | yes | 2 | - | 351029c 2026-10-07 |
-| `batch-scheduling.md` | hep-computing | 29.3 | yes | 10 | - | 22ea71e 2026-10-12 |
+| `agile-development-guide.md` | hep-computing | 10.9 | yes | 8 | physics-ml | f437237 2026-10-13 |
+| `bash-balanced-design-guidelines.md` | hep-computing | 7.6 | yes | 3 | - | 8eefac0 2026-10-13 |
+| `batch-scheduling.md` | hep-computing | 30.1 | yes | 12 | - | a8efae4 2026-10-13 |
 | `batch-site-cern-htcondor.md` | hep-computing | 11.2 | no | 2 | - | 6815df4 2026-10-10 |
 | `batch-site-nstccore-slurm.md` | hep-computing | 11.5 | no | 1 | - | 22ea71e 2026-10-12 |
-| `cmake-and-build.md` | hep-computing | 2.1 | yes | 4 | hep-analysis | 351029c 2026-10-07 |
-| `cpp-balanced-design-guidelines.md` | hep-computing | 26.0 | yes | 6 | physics-ml | 351029c 2026-10-07 |
-| `design-and-estimation.md` | hep-computing | 7.5 | no | 3 | - | 351029c 2026-10-07 |
-| `engineering-playbook.md` | hep-computing | 10.6 | yes | 4 | - | 076eae1 2026-10-13 |
-| `environments-and-containers.md` | hep-computing | 3.6 | no | 2 | - | 9546574 2026-10-08 |
+| `cmake-and-build.md` | hep-computing | 2.9 | yes | 6 | hep-analysis | fe8f71e 2026-10-13 |
+| `cpp-balanced-design-guidelines.md` | hep-computing | 6.6 | yes | 4 | physics-ml | 8eefac0 2026-10-13 |
+| `crash-and-memory-debugging.md` | hep-computing | 8.2 | no | 6 | - | 80a8344 2026-10-13 |
+| `design-and-estimation.md` | hep-computing | 5.1 | no | 3 | - | f437237 2026-10-13 |
+| `engineering-playbook.md` | hep-computing | 9.0 | yes | 3 | - | f437237 2026-10-13 |
+| `environments-and-containers.md` | hep-computing | 4.0 | no | 3 | - | efa283c 2026-10-13 |
 | `example-authoring.md` | hep-computing | 20.0 | no | 8 | hep-analysis, physics-ml | 351029c 2026-10-07 |
 | `host-notes.md` | hep-computing | 5.6 | no | 2 | - | 364918e 2026-10-09 |
-| `implementation-discipline.md` | hep-computing | 7.6 | no | 3 | - | 351029c 2026-10-07 |
+| `implementation-discipline.md` | hep-computing | 7.6 | no | 3 | - | f437237 2026-10-13 |
 | `loop-engineering.md` | hep-computing | 6.7 | no | 7 | - | 351029c 2026-10-07 |
-| `numerical-and-computational-methods.md` | hep-computing | 8.3 | yes | 5 | hep-theory, research-communication | 351029c 2026-10-07 |
-| `product-framing.md` | hep-computing | 3.2 | no | 3 | - | 351029c 2026-10-07 |
+| `numerical-and-computational-methods.md` | hep-computing | 8.5 | yes | 7 | hep-theory, research-communication | 46cea2c 2026-10-13 |
+| `performance-profiling.md` | hep-computing | 6.7 | no | 4 | - | 7884639 2026-10-13 |
 | `prompt-engineering-and-token-optimization.md` | hep-computing | 9.4 | no | 3 | - | 351029c 2026-10-07 |
-| `python-balanced-design-guidelines.md` | hep-computing | 31.1 | yes | 3 | - | 351029c 2026-10-07 |
-| `python-hep-coding-patterns.md` | hep-computing | 3.9 | yes | 4 | hep-analysis | b0dce7a 2026-10-10 |
-| `risk-and-quality.md` | hep-computing | 7.7 | no | 3 | - | 351029c 2026-10-07 |
-| `root-balanced-design-guidelines.md` | hep-computing | 48.1 | yes | 3 | hep-analysis | 9546574 2026-10-08 |
-| `root-debugging.md` | hep-computing | 3.3 | yes | 4 | hep-analysis | 351029c 2026-10-07 |
+| `python-balanced-design-guidelines.md` | hep-computing | 5.7 | yes | 4 | - | 8eefac0 2026-10-13 |
+| `python-hep-coding-patterns.md` | hep-computing | 6.6 | yes | 7 | hep-analysis | 7884639 2026-10-13 |
+| `risk-and-quality.md` | hep-computing | 7.4 | no | 3 | - | f437237 2026-10-13 |
+| `root-balanced-design-guidelines.md` | hep-computing | 37.1 | yes | 9 | hep-analysis | 8eefac0 2026-10-13 |
+| `root-debugging.md` | hep-computing | 3.6 | yes | 5 | hep-analysis | 80a8344 2026-10-13 |
 | `software-architecture.md` | hep-computing | 7.8 | no | 4 | - | 351029c 2026-10-07 |
-| `status-updates-and-completion.md` | hep-computing | 2.0 | no | 3 | - | 351029c 2026-10-07 |
+| `status-updates-and-completion.md` | hep-computing | 2.0 | no | 2 | - | 351029c 2026-10-07 |
 | `storage-cern-eos.md` | hep-computing | 13.2 | yes | 3 | - | b0dce7a 2026-10-10 |
+| `symbolic-and-numerical-computation.md` | hep-computing | 7.0 | no | 3 | - | 46cea2c 2026-10-13 |
 | `task-authoring-guide.md` | hep-computing | 11.9 | yes | 8 | - | 351029c 2026-10-07 |
 | `task-quality-checklist.md` | hep-computing | 3.0 | no | 4 | - | 351029c 2026-10-07 |
-| `validation-and-done.md` | hep-computing | 3.7 | yes | 5 | - | 351029c 2026-10-07 |
+| `validation-and-done.md` | hep-computing | 3.7 | yes | 6 | - | 351029c 2026-10-07 |
 | `astroparticle-statistics.md` | hep-statistics | 8.6 | yes | 12 | detector-response, hep-analysis | 351029c 2026-10-07 |
 | `core-stats-guide.md` | hep-statistics | 38.4 | yes | 8 | - | 24b8216 2026-10-13 |
 | `inference-recipes.md` | hep-statistics | 14.7 | yes | 7 | detector-response, hep-analysis | 06b86c8 2026-10-12 |

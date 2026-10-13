@@ -65,32 +65,8 @@ Do not add comments that merely repeat the code. Prefer clearer names and simple
 5. Run regression checks after the structural change.
 6. Explain why the refactor improves delivery or reduces risk.
 
-## New Endpoint
-
-1. Confirm route conventions, authentication, authorization, schemas, and error formats.
-2. Define input validation and response behavior.
-3. Implement service and persistence interaction through existing patterns.
-4. Add unit or integration tests for permitted, invalid, and forbidden requests.
-5. Update API documentation or examples when required.
-6. Verify no sensitive data leaks through responses or logs.
-
-## UI Feature
-
-1. Find established component and state-management patterns.
-2. Define normal, loading, empty, error, disabled, and success states as needed.
-3. Implement an accessible minimal user journey.
-4. Cover behavior with appropriate component or end-to-end tests.
-5. Check keyboard behavior, responsive impact, and user-facing text.
-6. Report user-visible behavior and validation completed.
-
-## Database Migration
-
-1. Understand existing schema, migration tooling, deployment approach, and rollback constraints.
-2. Design for backward compatibility when old and new application versions may overlap.
-3. Make data transformation deterministic and failure-aware.
-4. Test migration behavior against representative data and edge cases.
-5. Document operational sequencing, risk, and rollback considerations.
-6. Avoid destructive deletion until retention and compatibility requirements are explicit.
+Web and service work (new endpoints, UI features, database migrations, incident response) moved to
+[web and delivery practices](../../../docs/dev/engineering/web-and-delivery-practices.md) in the plugin's developer documentation.
 
 ## Dependency Update
 
@@ -108,35 +84,6 @@ Do not add comments that merely repeat the code. Prefer clearer names and simple
 - Avoid destructive defaults; require explicit action for irreversible behavior.
 - Keep scripts portable within supported repository environments.
 - Update usage documentation and automation when command behavior changes.
-
-## Incident Response / Production Outage
-
-1. Establish severity and impact first (who/what is affected, since when) before
-   investigating root cause - the response shape (mitigate now vs. investigate
-   first) depends on this, and getting it wrong in either direction (over-reacting
-   to a minor issue, under-reacting to a major one) wastes the most valuable early
-   minutes.
-2. Mitigate before you fully understand: prefer the fastest safe way to stop user
-   impact - rollback, feature-flag disable, traffic shift, or a targeted kill
-   switch - over a root-cause fix, unless the mitigation itself carries comparable
-   risk (e.g. a rollback that reintroduces a different known bug). Root-causing
-   under active user impact trades their time for your understanding; don't make
-   that trade by default.
-3. Communicate on a fixed cadence (even "no update yet, still investigating" on
-   schedule beats silence) to whoever depends on the service being restored -
-   see [status-updates-and-completion.md](status-updates-and-completion.md) for tone and structure;
-   incident updates are terser and more frequent than a normal status update.
-4. Once mitigated, find the actual root cause with the same rigor as a bug fix
-   (see Bug Fix above) rather than stopping at the first plausible explanation -
-   a mitigation that only masks the symptom will recur.
-5. Write a blameless postmortem: timeline, impact, root cause, what worked in the
-   response, what didn't, and concrete follow-up actions with owners - "blameless"
-   means the document explains what about the system or process allowed the
-   incident, not who made the mistake; a person acting reasonably given what they
-   knew at the time is the default assumption unless evidence says otherwise.
-6. Track postmortem action items to completion like any other backlog item - a
-   postmortem whose action items are never done is analysis without the benefit
-   it was meant to produce, and predicts a repeat incident.
 
 ## Legacy Code Without Tests
 
@@ -164,10 +111,29 @@ Do not add comments that merely repeat the code. Prefer clearer names and simple
 5. Once characterization tests exist, treat the area as any other tested code for
    the rest of this playbook's guidance (see Refactor, Bug Fix above).
 
+## References of the hep-computing skill
+
+Debugging, performance and numerics references beyond this playbook (all in `skills/hep-computing/references/`):
+
+- [Crash and memory debugging](crash-and-memory-debugging.md): reproducer, ROOT stack traces, gdb/lldb, valgrind with
+  ROOT's suppressions, sanitizers, ACLiC `+g`, leak triage.
+- [Performance profiling](performance-profiling.md): target first, wall time and peak memory, perf, cProfile,
+  py-spy, RDataFrame `GetNRuns` and `RunGraphs`, `TTreePerfStats`, clusters and baskets, uproot `step_size` and
+  branch filters.
+- [Symbolic and numerical computation](symbolic-and-numerical-computation.md): SymPy assumptions, numeric identity
+  checks, `lambdify`, exact rationals; `quad` error estimates, singularities and narrow peaks; `solve_ivp` methods,
+  tolerances and events; root finding and minimization.
+
 ## Scripts of the hep-computing skill
 
-In `skills/hep-computing/scripts/`; read `--help` first. Each locates its files from its own path, takes an explicit
-output directory, emits an exit code plus a JSON status, and explains a missing optional dependency.
+In `skills/hep-computing/scripts/`; read `--help` first. Each locates its files from its own path (it does not depend
+on the working directory), writes only to the output paths it is given (missing folders are created, an unwritable
+path is a clean refusal with exit 2, never a traceback), prints a JSON object with a `status` key, explains a missing
+optional dependency, and exits 0 success, 1 negative verdict (drift, leak, outside tolerance, lint errors), 2 bad input,
+3 missing optional dependency or incomplete. The interactive ROOT viewers (`inspect_root_file.py`,
+`summarize_histogram_statistics.py`, `roofit_workspace_summary.py`) print text by default and JSON with `--json`; the
+maintenance validators and `lint_task.py` too. The `inspect_root_file.C` macro is exempt: it runs inside ROOT and
+prints text only. The per-script table is in the skill's `README.md`.
 
 - Interpreter choice for package-dependent work (SymPy): `find_python.py` (`--python`, then `HEP_RESEARCH_PYTHON`, the caller, `python3` on PATH).
 - ROOT file inspection and comparison: `inspect_root_file.py` (and the `inspect_root_file.C` macro), `compare_root_histograms.py`, `summarize_histogram_statistics.py`, `roofit_workspace_summary.py`, `audit_histograms.py`.

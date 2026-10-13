@@ -2,33 +2,75 @@
 set -euo pipefail
 
 usage() {
-  echo "Usage: $(basename "$0") [PROJECT_NAME]"
-  echo "Create a minimal CMake + ROOT RDataFrame C++ project in ./PROJECT_NAME (default: root_cpp_analysis)."
+  echo "Usage: $(basename "$0") [--dir DIR] [--force] [--json] [PROJECT_NAME]"
+  echo "Create a minimal CMake + ROOT RDataFrame C++ project in DIR (default: ./PROJECT_NAME)."
+  echo "PROJECT_NAME (default: root_cpp_analysis) must match ^[A-Za-z_][A-Za-z0-9_]*\$; it names the CMake project."
+  echo "An existing non-empty DIR is refused unless --force is given (then only the generated files are rewritten)."
+  echo "The generated program writes output.root and pt.pdf into an output folder (third argument, default output/)."
+  echo "--json: print one JSON object with \"status\" (created, error) instead of text."
+  echo "Exit codes: 0 created, 2 bad usage, invalid name or refused target."
 }
 
-case "${1:-}" in
-  -h|--help) usage; exit 0 ;;
-  -*) echo "ERROR: project name must not start with '-': $1" >&2; usage >&2; exit 2 ;;
-esac
+JSON=0
+FORCE=0
+DIR=""
+NAME=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -h|--help) usage; exit 0 ;;
+    --json) JSON=1; shift ;;
+    --force) FORCE=1; shift ;;
+    --dir)
+      [ $# -ge 2 ] || { echo "ERROR: --dir needs a value" >&2; usage >&2; exit 2; }
+      DIR="$2"; shift 2 ;;
+    --dir=*) DIR="${1#--dir=}"; shift ;;
+    -*) echo "ERROR: project name must not start with '-': $1" >&2; usage >&2; exit 2 ;;
+    *)
+      [ -z "$NAME" ] || { echo "ERROR: more than one project name: $NAME $1" >&2; exit 2; }
+      NAME="$1"; shift ;;
+  esac
+done
 
-PROJECT_NAME="${1:-root_cpp_analysis}"
-mkdir -p "$PROJECT_NAME/src"
+json_str() {
+  printf '"%s"' "$(printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' | tr '\n\t\r' '   ')"
+}
 
-cat > "$PROJECT_NAME/CMakeLists.txt" <<CMAKE
+refuse() {
+  if [ "$JSON" -eq 1 ]; then
+    printf '{"status": "error", "error": %s}\n' "$(json_str "$1")"
+  else
+    echo "ERROR: $1" >&2
+  fi
+  exit 2
+}
+
+PROJECT_NAME="${NAME:-root_cpp_analysis}"
+if ! printf '%s' "$PROJECT_NAME" | grep -Eq '^[A-Za-z_][A-Za-z0-9_]*$'; then
+  refuse "project name must match ^[A-Za-z_][A-Za-z0-9_]*\$ (letters, digits, underscore): $PROJECT_NAME"
+fi
+TARGET="${DIR:-./$PROJECT_NAME}"
+if [ -e "$TARGET" ] && [ ! -d "$TARGET" ]; then
+  refuse "target exists and is not a folder: $TARGET"
+fi
+if [ -d "$TARGET" ] && [ -n "$(ls -A "$TARGET" 2>/dev/null)" ] && [ "$FORCE" -ne 1 ]; then
+  refuse "target folder is not empty: $TARGET (use --force to rewrite the generated files)"
+fi
+mkdir -p "$TARGET/src" || refuse "cannot create $TARGET/src"
+
+cat > "$TARGET/CMakeLists.txt" <<CMAKE
 cmake_minimum_required(VERSION 3.16)
 project(${PROJECT_NAME} LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+find_package(ROOT REQUIRED COMPONENTS RIO Tree Hist Gpad ROOTDataFrame)
+# the C++ standard ROOT was built with (C++17 for ROOT 6.38); do not set a second one
+set(CMAKE_CXX_STANDARD \${ROOT_CXX_STANDARD})
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(ROOT REQUIRED COMPONENTS RIO Tree Hist Graf Graf3d Gpad ROOTDataFrame)
-
 add_executable(analysis src/analysis.cpp)
-target_include_directories(analysis PRIVATE \${ROOT_INCLUDE_DIRS})
-target_link_libraries(analysis PRIVATE \${ROOT_LIBRARIES})
+target_link_libraries(analysis PRIVATE ROOT::RIO ROOT::Tree ROOT::Hist ROOT::Gpad ROOT::ROOTDataFrame)
 CMAKE
 
-cat > "$PROJECT_NAME/src/analysis.cpp" <<'CPP'
+cat > "$TARGET/src/analysis.cpp" <<'CPP'
 #include <ROOT/RDataFrame.hxx>
 #include <TCanvas.h>
 #include <TFile.h>
@@ -41,22 +83,25 @@ cat > "$PROJECT_NAME/src/analysis.cpp" <<'CPP'
 
 int main(int argc, char** argv) {
     if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " input.root [output.root]\n";
-        return 1;
+        std::cerr << "Usage: " << argv[0] << " input.root [tree] [output_dir]\n";
+        return 2;
     }
 
     const std::string input = argv[1];
-    const std::string output = argc > 2 ? argv[2] : "output.root";
-    const std::string treeName = "Events";
+    const std::string treeName = argc > 2 ? argv[2] : "Events";
+    const std::filesystem::path outDir = argc > 3 ? argv[3] : "output";
     const std::string branchName = "pt";
 
     if (!std::filesystem::exists(input)) {
         std::cerr << "ERROR: input file does not exist: " << input << "\n";
-        return 1;
+        return 2;
     }
 
     try {
         gROOT->SetBatch(kTRUE);
+        std::filesystem::create_directories(outDir);
+        const std::string output = (outDir / "output.root").string();
+        const std::string figure = (outDir / "pt.pdf").string();
 
         ROOT::RDataFrame df(treeName, input);
         auto h = df.Histo1D(
@@ -73,20 +118,27 @@ int main(int argc, char** argv) {
 
         TCanvas c("c_pt", "c_pt", 800, 600);
         h->Draw("HIST");
-        c.SaveAs("pt.pdf");
+        c.SaveAs(figure.c_str());
         c.Write();
 
         out.Close();
         std::cout << "Wrote " << output << "\n";
-        std::cout << "Wrote pt.pdf\n";
+        std::cout << "Wrote " << figure << "\n";
     } catch (const std::exception& ex) {
         std::cerr << "ERROR: " << ex.what() << "\n";
-        return 2;
+        return 1;
     }
 
     return 0;
 }
 CPP
 
-echo "Created $PROJECT_NAME"
-echo "Build with: cmake -S $PROJECT_NAME -B $PROJECT_NAME/build && cmake --build $PROJECT_NAME/build -j"
+q() { printf '%q' "$1"; }
+BUILD="cmake -S $(q "$TARGET") -B $(q "$TARGET/build") && cmake --build $(q "$TARGET/build") -j"
+if [ "$JSON" -eq 1 ]; then
+  printf '{"status": "created", "project": %s, "dir": %s, "build": %s}\n' \
+    "$(json_str "$PROJECT_NAME")" "$(json_str "$TARGET")" "$(json_str "$BUILD")"
+else
+  echo "Created $TARGET"
+  echo "Build with: $BUILD"
+fi

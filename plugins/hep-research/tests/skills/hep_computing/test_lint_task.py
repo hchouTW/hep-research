@@ -109,6 +109,33 @@ class LintTests(unittest.TestCase):
         self.assertEqual(errors, [])
         self.assertTrue(any("app/ghost.py" in w for w in warnings))
 
+    def test_path_escaping_the_repo_is_an_error(self):
+        """CMP-11: src/ + 14 x ../ + etc/... was accepted as an existing path."""
+        escape = "app/" + "../" * 14 + "etc/asl.conf"
+        errors, _ = self.lint(GOOD.replace("`app/users_api.py` exists.", f"`{escape}` exists."))
+        self.assertTrue(any("leaves the repository" in e and escape in e for e in errors), errors)
+        errors, _ = lint_task.lint(GOOD.replace("`app/users_api.py` exists.", f"`{escape}` exists."), self.repo)
+        self.assertTrue(any("leaves the repository" in e for e in errors), errors)  # skill-root fallback too
+
+    def test_in_repo_path_with_dotdot_still_passes(self):
+        (self.repo / "lib").mkdir()
+        (self.repo / "lib" / "core.py").write_text("y = 2\n")
+        errors, _ = self.lint(GOOD.replace("`app/users_api.py` exists.", "`app/../lib/core.py` exists."))
+        self.assertEqual(errors, [])
+
+    def test_symlink_out_of_the_repo_is_an_error(self):
+        outside = Path(self._tmp.name) / "outside"
+        outside.mkdir()
+        (outside / "secret.txt").write_text("s")
+        (self.repo / "app" / "link").symlink_to(outside)
+        errors, _ = self.lint(GOOD.replace("`app/users_api.py` exists.", "`app/link/secret.txt` exists."))
+        self.assertTrue(any("leaves the repository" in e for e in errors), errors)
+
+    def test_leading_parent_path_is_a_warning(self):
+        errors, warnings = self.lint(GOOD.replace("`app/users_api.py` exists.", "`../sibling/file.py` exists."))
+        self.assertEqual(errors, [])
+        self.assertTrue(any("../sibling/file.py" in w and "not checked" in w for w in warnings), warnings)
+
     def test_without_repo_paths_are_warnings(self):
         errors, warnings = self.lint(GOOD, repo=False)
         self.assertEqual(errors, [])

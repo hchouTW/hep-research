@@ -6,15 +6,21 @@
 cmake_minimum_required(VERSION 3.16)
 project(root_analysis_cpp LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 17)
+find_package(ROOT REQUIRED COMPONENTS RIO Tree Hist Gpad ROOTDataFrame)
+# the standard ROOT was built with (ROOTConfig.cmake sets ROOT_CXX_STANDARD; 17 for ROOT 6.38 and 6.40)
+set(CMAKE_CXX_STANDARD ${ROOT_CXX_STANDARD})
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(ROOT REQUIRED COMPONENTS RIO Tree Hist Graf Graf3d Gpad ROOTDataFrame)
-
 add_executable(analysis src/analysis.cpp)
-target_include_directories(analysis PRIVATE ${ROOT_INCLUDE_DIRS})
-target_link_libraries(analysis PRIVATE ${ROOT_LIBRARIES})
+target_link_libraries(analysis PRIVATE ROOT::RIO ROOT::Tree ROOT::Hist ROOT::Gpad ROOT::ROOTDataFrame)
 ```
+
+Link the imported `ROOT::<component>` targets: they carry the include directories, the compile definitions and the
+`cxx_std_17` compile feature of the ROOT build, so no `include_directories` and no second `-std` are needed. The older
+form built from the include-directory and library-list variables still works but links every library and drops those usage requirements.
+ROOT-facing code is C++17 (the baseline of these references); a C++20 project needs a ROOT built with C++20. With a
+hand-written command line, take the flag from `root-config --cflags` and do not add another `-std`. Checked
+2026-10-13: configures and builds against Homebrew ROOT 6.38.04 (CMake 4.x, Apple clang).
 
 Build and run:
 
