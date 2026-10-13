@@ -104,7 +104,7 @@ Scripts in `<plugin root>/skills/hep-analysis/scripts/`; each takes `--status`, 
 
 Assets in `<plugin root>/skills/hep-analysis/assets/`: `measurement_spec.template.json` and its field guide, `worked-spec.cosmic-ray.synthetic.json`, `measurement-review-template.md`, `review-example.synthetic.json`, `systematics.csv`, `report-template.md`, `cosmic-ray-spectrum.example.json` (synthetic input for the power-law fit).
 
-Worked end to end (estimand, ledgers, spec, validation, review verdict): `<plugin root>/examples/collider-angular/` and `<plugin root>/examples/ams-flux-ratio/` (each run writes `review.md` with `review_measurement_spec.py`); specs with backgrounds, control regions, closure and an active blinding mask: `assets/measurement_spec.template.json` (collider) and `assets/worked-spec.cosmic-ray.synthetic.json` (cosmic ray).
+Worked end to end (estimand, ledgers, spec, validation, review verdict): `<plugin root>/examples/collider-angular/` and `<plugin root>/examples/ams-flux-ratio/` (each run writes `review.md` with `review_measurement_spec.py`, subtracts a sideband background with a closure test and masks a blinded bin with `mask_blinded_bins.py`); specs with backgrounds, control regions, closure and an active blinding mask: `assets/measurement_spec.template.json` (collider) and `assets/worked-spec.cosmic-ray.synthetic.json` (cosmic ray).
 
 ## Example requests
 
