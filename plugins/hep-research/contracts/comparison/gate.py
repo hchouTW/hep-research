@@ -56,6 +56,8 @@ if __package__ in (None, ""):
 from contracts.comparison.conventions import compare_conventions  # noqa: E402
 from contracts.validate import SHAPE_ERRORS, validate_artifact  # noqa: E402
 from contracts.vocab import Vocabulary  # noqa: E402
+from core.protected.guard import ProtectedUseRefused, guard, protected_main  # noqa: E402
+from contracts import KNOWN_CAPABILITIES  # noqa: E402
 
 KINDS = ("level-identification", "fiducial-restriction", "rebin", "variable-change", "unit-conversion",
          "bin-integrate", "multiply-by-normalization", "forward-fold", "apply-correction")
@@ -343,9 +345,27 @@ def _apply(st: dict, t: dict, i: int, mism: list) -> None:
         st["corrections"].append(eff)
 
 
+def protected_refusal(entry: str) -> dict | None:
+    """The gate's refusal shape when protected use is refused (core.protected.guard), else None."""
+    try:
+        guard(entry)
+    except ProtectedUseRefused as exc:
+        return {"comparable": False, "status": "refused", "refusal": "protected-use",
+                "findings": [{"path": r["path"], "code": r["code"], "message": r["message"]} for r in exc.refusals],
+                "mismatches": []}
+    return None
+
+
 def gate(prediction: dict, measurement: dict, transformations=(), mappings=(), measurement_conditions=None,
          vocab: Vocabulary | None = None) -> dict:
-    """prediction / measurement: sides from side_from_artifact (or dicts of the same shape)."""
+    """prediction / measurement: sides from side_from_artifact (or dicts of the same shape). In protected mode the
+    protected inputs are checked first (refusal 'protected-use'); check() is the entry point that also validates."""
+    return protected_refusal("contracts.comparison.gate.gate") or _gate(prediction, measurement, transformations,
+                                                                         mappings, measurement_conditions, vocab)
+
+
+def _gate(prediction: dict, measurement: dict, transformations=(), mappings=(), measurement_conditions=None,
+          vocab: Vocabulary | None = None) -> dict:
     mism: list[Any] = []
     notes, record = [], []
     problems = _plan_problems(transformations, mappings, measurement_conditions)
@@ -506,6 +526,9 @@ def check(prediction_doc, measurement_doc, plan=None, vocab: Vocabulary | None =
     "code", "message"}]}: the path names the side ("prediction:$...", "measurement:$...", "plan...") and the code is
     the validator's own code or a gate.* code. No artifact or plan, however malformed, raises.
     """
+    refused = protected_refusal("contracts.comparison.gate.check")
+    if refused:
+        return refused
     vocab = vocab or Vocabulary()
     findings = []
     for side, doc, allowed in (("prediction", prediction_doc, PREDICTION_TYPES),
@@ -524,10 +547,11 @@ def check(prediction_doc, measurement_doc, plan=None, vocab: Vocabulary | None =
         findings.append({"path": "plan", "code": "gate.malformed_plan", "message": "a plan must be a JSON object"})
     if findings:
         return {"comparable": False, "status": "refused", "refusal": "invalid-input", "findings": findings, "mismatches": []}
-    return gate(side_from_artifact(prediction_doc), side_from_artifact(measurement_doc), plan.get("transformations", []),
-                plan.get("mappings", []), plan.get("measurement_conditions"), vocab)
+    return _gate(side_from_artifact(prediction_doc), side_from_artifact(measurement_doc), plan.get("transformations", []),
+                 plan.get("mappings", []), plan.get("measurement_conditions"), vocab)
 
 
+@protected_main("contracts.comparison.gate", capabilities=KNOWN_CAPABILITIES)
 def main(argv=None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if len(args) < 2:

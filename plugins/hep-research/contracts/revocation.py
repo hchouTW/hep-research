@@ -2,7 +2,8 @@
 """Hash-chained revocation log, its head, and the reverse index from revoked subjects to their dependents (task P2,
 C07, F07). Revocation lives outside every artifact, so revoking changes no artifact bytes or hashes.
 
-The log is JSON Lines (contracts/schemas/revocation_event.json): a genesis record (seq 0, prev_sha256 all zeros, the
+The writers and the verifier are implemented in core/protected/revocation_log.py (the protected-use guard in core needs
+them) and re-exported here. The log is JSON Lines (contracts/schemas/revocation_event.json): a genesis record (seq 0, prev_sha256 all zeros, the
 log_id), then events {seq, prev_sha256, subject: {kind, ref and/or sha256}, reason, time, actor}, each binding the
 canonical SHA-256 of the record before it. The head (revocation_head.json) {head_version, log_id, count, last_sha256,
 as_of, source} is written by the custodian after every append and at least every status period. verify() trusts a log
@@ -12,7 +13,7 @@ future, and a head from another status source are all refusals. A refused log is
 RevocationStatus.ok is false and every lookup method refuses to answer.
 
 In protected use (load(..., protected=True)) the log and the head must also be protected inputs: regular files the
-running account neither owns, nor can write, nor can replace (contracts/trusted_input.py). The checks bind the content
+running account neither owns, nor can write, nor can replace (core/protected/trusted_input.py). The checks bind the content
 to the head and the head to a source; who may write that source (the custodian identity) is the deployment's trust
 anchor. A replayed older head that is still within the status age is not detected here: the age bounds that window.
 
@@ -36,7 +37,6 @@ path and a code, never a revoked subject's content.
 from __future__ import annotations
 
 import argparse
-import datetime
 import hashlib
 import json
 import os
@@ -49,209 +49,11 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from contracts.release_manifest import _ts, canonical_sha256  # noqa: E402
-from contracts.schema import Report, validate  # noqa: E402
-from contracts.trusted_input import Account, read_protected, read_unchecked  # noqa: E402
+from core.protected.revocation_log import (HEAD_VERSION, LOG_FORMAT, MAX_STATUS_AGE_S, SUBJECT_KINDS,  # noqa: E402,F401
+                                           ZERO, RevocationStatus, RevocationUnverified, encode, genesis, head_of,
+                                           is_chained_log, load, next_event, verify)
 
-LOG_FORMAT = "hep-research-revocation-log/1"
-HEAD_VERSION = "1.0.0"
-ZERO = "0" * 64
-MAX_STATUS_AGE_S = 86400  # the stalest head any caller may accept (as contracts.attestation)
-SUBJECT_KINDS = ("artifact", "release", "recipe", "source", "attestation")
 SKIP_DIRS = frozenset({".git", "__pycache__", "node_modules", ".venv"})
-
-
-def _now_text() -> str:
-    return datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
-
-
-def encode(rec: dict) -> bytes:
-    """One log line: canonical JSON and a newline."""
-    return json.dumps(rec, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8") + b"\n"
-
-
-def _no_duplicates(pairs):
-    keys = [k for k, _ in pairs]
-    if len(keys) != len(set(keys)):
-        raise ValueError("duplicate key")
-    return dict(pairs)
-
-
-# --- custodian-side writers (pure: they return records; the custodian writes them) ---------------------------------
-
-def genesis(log_id: str, actor: str, created: str | None = None) -> dict:
-    return {"seq": 0, "prev_sha256": ZERO,
-            "genesis": {"log_format": LOG_FORMAT, "log_id": log_id, "created": created or _now_text(), "actor": actor}}
-
-
-def next_event(records: list[dict], subject: dict, reason: str, actor: str, time: str | None = None) -> dict:
-    ev = {"seq": len(records), "prev_sha256": canonical_sha256(records[-1]), "subject": subject, "reason": reason,
-          "time": time or _now_text(), "actor": actor}
-    rep = validate(ev, "revocation_event.json")
-    if not rep.ok:
-        raise ValueError("; ".join(f"{f.path}: {f.code}" for f in rep.errors))
-    return ev
-
-
-def head_of(records: list[dict], source: str, as_of: str | None = None) -> dict:
-    return {"head_version": HEAD_VERSION, "log_id": records[0]["genesis"]["log_id"], "count": len(records),
-            "last_sha256": canonical_sha256(records[-1]), "as_of": as_of or _now_text(), "source": source}
-
-
-# --- verification ----------------------------------------------------------------------------------------------------
-
-class RevocationUnverified(RuntimeError):
-    """A lookup on a log that did not verify: there is no answer, in particular not 'nothing revoked'."""
-
-
-@dataclass
-class RevocationStatus:
-    ok: bool
-    findings: list[dict]
-    log_id: str | None = None
-    count: int = 0
-    as_of: str | None = None
-    source: str | None = None
-    events: list[dict] = field(default_factory=list)
-    log_sha256: str | None = None
-    head_sha256: str | None = None
-
-    def _require(self) -> None:
-        if not self.ok:
-            raise RevocationUnverified("the revocation log did not verify; its status is unknown")
-
-    def revoked(self, kind: str | None = None, ref: str | None = None, sha256: str | None = None) -> dict | None:
-        """The first event revoking a subject that matches (kind optional; ref or sha256), or None."""
-        self._require()
-        for ev in self.events:
-            s = ev["subject"]
-            if kind is not None and s["kind"] != kind:
-                continue
-            if (ref is not None and s.get("ref") == ref) or (sha256 is not None and s.get("sha256") == sha256):
-                return ev
-        return None
-
-    def revoked_digests(self) -> set[str]:
-        self._require()
-        return {ev["subject"]["sha256"] for ev in self.events if "sha256" in ev["subject"]}
-
-    def status_doc(self, kinds=SUBJECT_KINDS) -> dict:
-        """The {as_of, source, revoked: [{ref, time, reason}]} shape that release_manifest.py and attestation.py read,
-        for the given subject kinds; every ref and sha256 of a matching subject is listed as a ref."""
-        self._require()
-        revoked = []
-        for ev in self.events:
-            s = ev["subject"]
-            if s["kind"] in kinds:
-                for key in ("ref", "sha256"):
-                    if key in s:
-                        revoked.append({"ref": s[key], "time": ev["time"], "reason": ev["reason"]})
-        return {"as_of": self.as_of, "source": self.source, "revoked": revoked}
-
-    def summary(self) -> dict:
-        return {"ok": self.ok, "log_id": self.log_id, "count": self.count, "as_of": self.as_of, "source": self.source,
-                "log_sha256": self.log_sha256, "head_sha256": self.head_sha256, "findings": self.findings}
-
-
-def is_chained_log(data: bytes) -> bool:
-    """Whether the bytes start with a genesis record (the hash-chained format), as opposed to legacy JSON Lines."""
-    first = data.split(b"\n", 1)[0]
-    try:
-        rec = json.loads(first.decode("utf-8"))
-    except (UnicodeDecodeError, ValueError):
-        return False
-    return isinstance(rec, dict) and isinstance(rec.get("genesis"), dict)
-
-
-def verify(log_bytes: bytes | None, head, *, source: str, now: datetime.datetime | None = None,
-           max_age_s: int = MAX_STATUS_AGE_S) -> RevocationStatus:
-    """Verify a log against its head (both already read). See the module docstring."""
-    now = now or datetime.datetime.now(datetime.UTC)
-    rep = Report()
-    records: list[dict] = []
-    if not (isinstance(max_age_s, int) and not isinstance(max_age_s, bool) and 0 < max_age_s <= MAX_STATUS_AGE_S):
-        rep.add("error", "$max_age", "revocation.age_too_long", f"the allowed status age must be 1..{MAX_STATUS_AGE_S} s")
-    if not (isinstance(source, str) and source):
-        rep.add("error", "$source", "revocation.source_unchecked", "no expected status source: the head cannot be bound")
-    if log_bytes is None:
-        rep.add("error", "$log", "revocation.log_unreadable", "no revocation log")
-    elif not log_bytes.strip():
-        rep.add("error", "$log", "revocation.empty", "the log is empty: an empty file is not 'nothing revoked'")
-    else:
-        if not log_bytes.endswith(b"\n"):
-            rep.add("error", "$log", "revocation.truncated_line", "the last record is not terminated: the log was cut")
-        for n, line in enumerate(log_bytes.split(b"\n")[:-1] if log_bytes.endswith(b"\n") else log_bytes.split(b"\n"), 1):
-            where = f"$log:{n}"
-            try:
-                rec = json.loads(line.decode("utf-8"), object_pairs_hook=_no_duplicates)
-            except (UnicodeDecodeError, ValueError):
-                rep.add("error", where, "revocation.bad_record", "not one JSON object per line")
-                break
-            schema = {"$ref": "revocation_event.json#/$defs/genesis"} if n == 1 else "revocation_event.json"
-            srep = validate(rec, schema)
-            if not srep.ok:
-                code = "revocation.bad_genesis" if n == 1 else "revocation.bad_record"
-                rep.add("error", where, code, "; ".join(sorted({f.code for f in srep.errors})))
-                break
-            if n > 1:
-                if rec["seq"] != n - 1:
-                    rep.add("error", where, "revocation.seq_gap", f"seq {rec['seq']} where {n - 1} was expected")
-                    break
-                if rec["prev_sha256"] != canonical_sha256(records[-1]):
-                    rep.add("error", where, "revocation.chain_broken", "does not bind the record before it")
-                    break
-                if n > 2 and rec["time"] < records[-1]["time"]:
-                    rep.add("error", where, "revocation.time_order", "dated before the record before it")
-                    break
-            records.append(rec)
-    if not isinstance(head, dict) or not validate(head, "revocation_head.json").ok:
-        rep.add("error", "$head", "revocation.head_malformed", "no valid head: the log's completeness is unknown")
-        head = None
-    if head is not None and rep.ok:
-        as_of = _ts(head["as_of"])
-        if head["source"] != source:
-            rep.add("error", "$head.source", "revocation.other_source", "the head is not from the expected status source")
-        if as_of is None or as_of > now or (now - as_of).total_seconds() > max_age_s:
-            rep.add("error", "$head.as_of", "revocation.stale", f"the head is older than {max_age_s} s or dated in the future")
-        if head["log_id"] != records[0]["genesis"]["log_id"]:
-            rep.add("error", "$head.log_id", "revocation.head_other_log", "the head belongs to another log")
-        elif head["count"] > len(records):
-            rep.add("error", "$head.count", "revocation.truncated", "the log holds fewer records than the head counts")
-        elif head["count"] < len(records) or head["last_sha256"] != canonical_sha256(records[-1]):
-            rep.add("error", "$head", "revocation.head_mismatch", "the head does not describe this log")
-        elif len(records) > 1 and records[-1]["time"] > head["as_of"]:
-            rep.add("error", "$head.as_of", "revocation.event_after_head", "an event is dated after the head")
-    ok = rep.ok
-    return RevocationStatus(
-        ok=ok, findings=[f.as_dict() for f in rep.findings],
-        log_id=records[0]["genesis"]["log_id"] if ok else None, count=len(records) if ok else 0,
-        as_of=head["as_of"] if ok and head else None, source=head["source"] if ok and head else None,
-        events=records[1:] if ok else [],
-        log_sha256=hashlib.sha256(log_bytes).hexdigest() if ok and log_bytes is not None else None,
-        head_sha256=canonical_sha256(head) if ok and head else None)
-
-
-def _read(path, protected: bool, account: Account | None, where: str, rep: list) -> bytes | None:
-    chk = read_protected(path, account) if protected else read_unchecked(path)
-    for code, msg in chk.refusals:
-        rep.append({"severity": "error", "path": where, "code": code, "message": msg})
-    return chk.data
-
-
-def load(log_path, head_path, *, source: str, now: datetime.datetime | None = None, max_age_s: int = MAX_STATUS_AGE_S,
-         protected: bool = False, account: Account | None = None) -> RevocationStatus:
-    """Read and verify a log and its head from files; protected applies the source checks of trusted_input."""
-    refusals: list[dict] = []
-    log_bytes = None if log_path is None else _read(log_path, protected, account, "$log", refusals)
-    head_bytes = None if head_path is None else _read(head_path, protected, account, "$head", refusals)
-    if refusals:
-        return RevocationStatus(ok=False, findings=refusals)
-    head = None
-    if head_bytes is not None:
-        try:
-            head = json.loads(head_bytes.decode("utf-8"), object_pairs_hook=_no_duplicates)
-        except (UnicodeDecodeError, ValueError):
-            head = None
-    return verify(log_bytes, head, source=source, now=now, max_age_s=max_age_s)
 
 
 # --- reverse index ---------------------------------------------------------------------------------------------------

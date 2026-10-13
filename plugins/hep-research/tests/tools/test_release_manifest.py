@@ -97,6 +97,9 @@ class PublishedImmutabilityC10(unittest.TestCase):
         (self.plugin / "contracts").mkdir()
         for name in ("__init__.py", "identity.py"):
             shutil.copy2(ROOT / "contracts" / name, self.plugin / "contracts" / name)
+        (self.plugin / "core" / "protected").mkdir(parents=True, exist_ok=True)
+        for name in ("core/__init__.py", "core/protected/__init__.py", "core/protected/identity.py"):
+            shutil.copy2(ROOT / name, self.plugin / name)
         git(self.repo, "init", "-q")
         git(self.repo, "add", "-A")
         git(self.repo, "commit", "-qm", "release 9.9.9")

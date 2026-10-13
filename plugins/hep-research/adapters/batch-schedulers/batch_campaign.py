@@ -64,6 +64,7 @@ from core.partition import campaign as cp  # noqa: E402
 from core.partition import engine  # noqa: E402
 from core.partition import limits  # noqa: E402
 from core.partition.executors import PollError  # noqa: E402
+from core.protected.guard import protected_main  # noqa: E402
 
 
 def executor_for(cfg: dict, env=None):
@@ -140,6 +141,7 @@ def build_artifact(cdir: Path, cfg: dict, executor, labels: list[str], objective
         }}
 
 
+@protected_main("batch_campaign")
 def main(argv=None, env=None, sleep=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)

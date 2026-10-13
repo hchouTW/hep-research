@@ -34,6 +34,10 @@ RULES = [
     ("M17", r"unless the user supplies them", "internal material invited into the session (HC-13)"),
     ("M18", r"Upload the files a request needs", "unrestricted upload to an unqualified host (HC-13)"),
     ("M25", r"unblinding_authorization", "an agent-fillable field that reads as authorization (HC-04, HC-05)"),
+    ("P01", r"protected[- ]use (is |was |gets )?(allowed|authori[sz]ed|granted|approved)",
+     "an agent-run protected-use check described as authorization (HC-05, HC-09)"),
+    ("P02", r"formal_use_allowed[\"']?\s*[:=]\s*true", "formal use reported as allowed by agent-run code (HC-05)"),
+    ("P03", r"(skip|bypass|disable|turn off) (the )?protected[- ]mode", "an instruction to bypass protected mode (HC-09)"),
 ]
 # required text: (id, file, phrase)
 REQUIRED = [

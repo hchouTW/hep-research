@@ -183,6 +183,14 @@ Schema 1.1.0 adds `agent_policy`: which content may reach the model (`public`, `
 is agent-writable, so `contracts/project.py` only checks it (advisory); enforcement needs a host configuration that
 compares it with an authoritative copy, and none is qualified yet.
 
+A project with `agent_policy` runs in **protected mode** (as does any entry point given `--protected`): before it does
+anything, every formal-use entry point checks the revocation log, its head and the qualification record that the
+authoritative copy of the policy names (schema 1.2.0, `protected_inputs`), and refuses with exit 3 and
+`"status": "refused"` when they are missing, stale, altered or writable by the session's account, or when an input is
+revoked. `python3 "<plugin root>/contracts/protected_use.py" status <project-dir>` shows the state. These checks run
+in the agent's own process, so they are advisory too: they authorize nothing, and formal use stays refused until
+formal-use permits exist.
+
 ### Companion plugins
 
 A profile can also be shipped by a separate plugin that only authorized people can install. Such a plugin provides one

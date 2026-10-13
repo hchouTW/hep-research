@@ -59,6 +59,12 @@ Choose binning using resolution, MC statistics, background stability, systematic
   it. Keep three uses apart: independent performance evaluation, method selection, and the formal inference.
 - **Fix the outcome of the optimization** (cuts, categories, binning) before unblinding, and treat later changes with
   the change-review procedure (`review_analysis_change.py`).
+- **Record what was seen.** The custodian's exposure record (`exposure_record.json`: which releases reached which
+  session or relay, and the kinds of data seen) is the source of the `data_exposure` state: give it to
+  `review_analysis_change.py --exposure-record` and `batch_campaign.py freeze --exposure-record`, and record each
+  analysis decision in a decision record bound to the exposure entries seen (`contracts/lineage.py`). A missing record
+  is `unknown`, never `unexposed`, and a new session does not reset exposure. In a protected project the blinding
+  tools and the change review check the protected inputs first and refuse when they cannot be established.
 
 Worked example (synthetic): s = 10, b = 100 gives `s / sqrt(s + b)` = 0.953 and `Z_A` = 0.984; with a signal efficiency
 of 0.5 and a = 3, the Punzi figure is 0.5 / (1.5 + 10) = 0.0435.

@@ -39,6 +39,8 @@ sys.path.insert(0, str(PLUGIN))
 from contracts import CONTRACTS_VERSION  # noqa: E402
 from contracts.identity import plugin_release  # noqa: E402
 from contracts.validate import validate_artifact  # noqa: E402
+from core.protected.guard import guard, protected_main  # noqa: E402
+from contracts import KNOWN_CAPABILITIES  # noqa: E402
 
 
 def read_table(path: Path) -> dict:
@@ -148,6 +150,7 @@ def _require_psd(m):
 
 
 def build(opts) -> tuple[dict, dict | None]:
+    guard("hepdata_record.build")
     table = read_table(opts.table)
     observable = json.loads(opts.observable.read_text(encoding="utf-8"))
     edges, var_name, var_unit = bins(table)
@@ -195,6 +198,7 @@ def build(opts) -> tuple[dict, dict | None]:
     return doc, cov_doc
 
 
+@protected_main("hepdata_record", capabilities=KNOWN_CAPABILITIES)
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--table", type=Path, required=True)

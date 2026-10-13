@@ -32,6 +32,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from core.protected.guard import guard, protected_main  # noqa: E402
+
 ENV_VARS = ("LCG_VERSION", "BINARY_TAG", "CMTCONFIG", "ROOTSYS", "APPTAINER_CONTAINER", "SINGULARITY_CONTAINER",
             "CONDA_PREFIX", "CONDA_DEFAULT_ENV", "VIRTUAL_ENV", "HEP_CONTAINER_IMAGE")
 DEFAULT_PACKAGES = ("numpy", "scipy", "matplotlib", "sympy", "uproot", "awkward", "pyhf", "torch", "coffea")
@@ -93,6 +96,7 @@ def file_entry(path: Path) -> dict:
 
 
 def record(names, all_packages: bool = False, project: Path | None = None, inputs=()) -> dict:
+    guard("environment_manifest.record", paths=[project, *inputs] if project else list(inputs))
     env = {k: os.environ[k] for k in ENV_VARS if k in os.environ}
     pkgs = packages(names, all_packages)
     manifest = {"environment": {"python": platform.python_version(), "implementation": platform.python_implementation(),
@@ -162,6 +166,7 @@ def _load(path: Path) -> dict:
     return doc
 
 
+@protected_main("environment_manifest")
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = ap.add_subparsers(dest="command", required=True)

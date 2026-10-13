@@ -13,7 +13,8 @@ returned are the bytes checked.
 
 Codes (refusals; a path, never a value): source.missing, source.not_regular, source.hard_linked, source.owned_by_account,
 source.writable_by_account, source.replaceable, source.changed, source.link_loop, source.unreadable.
-The account defaults to the running process; tests pass another Account to model a custodian-owned file.
+The account defaults to the running process; tests pass another Account to model a custodian-owned file. Running as
+root refuses every input (root can replace anything).
 """
 from __future__ import annotations
 

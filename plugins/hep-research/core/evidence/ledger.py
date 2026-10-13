@@ -35,6 +35,11 @@ import sys
 from datetime import date, datetime
 from pathlib import Path
 
+if __package__ in (None, ""):  # run as a script: put the plugin root on sys.path
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from core.protected.guard import guard, protected_main  # noqa: E402
+
 STRENGTH = {"not-verified": 0, "not-opened": 0, "metadata-only": 1, "abstract+metadata": 2, "page": 2, "full-text": 3}
 CLAIM_TYPES = {"detector_fact", "performance_number", "analysis_method", "published_result", "general_method"}
 SUPPORT_KINDS = {"primary", "absence_search", "third_party_context", "general_method"}
@@ -284,6 +289,7 @@ def _stale(sources: dict, claims: dict, f: Findings, today: date, stale_days: in
 def check_ledger(sources: list, claims: list, today: date | None = None, stale_days: int = 365,
                  namespace: str | None = None) -> dict:
     """Validate parsed sources and claims. Returns a report dict with errors, warnings and notes."""
+    guard("core.evidence.ledger.check_ledger")
     today = today or date.today()
     f = Findings()
     if not isinstance(sources, list) or not isinstance(claims, list):
@@ -307,6 +313,7 @@ def load_ledger(sources_path: Path, claims_path: Path) -> tuple[list, list]:
             json.loads(Path(claims_path).read_text(encoding="utf-8")))
 
 
+@protected_main("core.evidence.ledger")
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0],
                                      formatter_class=argparse.RawDescriptionHelpFormatter, epilog=__doc__.split("\n\n", 1)[1])

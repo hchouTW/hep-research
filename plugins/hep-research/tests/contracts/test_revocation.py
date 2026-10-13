@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from contracts import revocation as rv  # noqa: E402
 from contracts.release_manifest import canonical_sha256  # noqa: E402
-from contracts.trusted_input import Account, file_refusals, read_protected  # noqa: E402
+from core.protected.trusted_input import Account, file_refusals, read_protected  # noqa: E402
 
 NOW = datetime.datetime(2026, 10, 14, 12, 0, 0, tzinfo=datetime.UTC)
 SRC = "custodian:synthetic-revocations"
@@ -395,21 +395,44 @@ class DependencyTests(unittest.TestCase):
         self.assertIn("dependency.revocations_unreadable", self.codes(rep))
         self.assertFalse(rep["dependency_consistency_ok"])
 
-    def test_legacy_format_warns_outside_and_is_refused_inside_protected(self):
+    def test_legacy_format_warns_outside_protected_mode(self):
         self.log.write_text(json.dumps({"subject_sha256": self.up_sha, "reason": "synthetic"}) + "\n")
         rep = self.deps()
         self.assertIn("dependency.revocations_legacy", self.codes(rep))
         self.assertIn("dependency.revoked", self.codes(rep))
-        rep = self.deps(protected=True)
-        self.assertIn("dependency.revocations_legacy", self.codes(rep))
-        self.assertEqual(rep["status"], "error")
 
-    def test_protected_source_checks(self):
+    def test_protected_flag_without_a_protected_project_is_refused(self):
         self.write_log([])
-        self.assertIn("dependency.revocations_unverified", self.codes(self.deps(protected=True)))
-        rep = self.deps(protected=True, account=other_account())
-        self.assertTrue(rep["dependency_consistency_ok"], rep["findings"])
+        rep = self.deps(protected=True)
+        self.assertIn("protected.policy_missing", self.codes(rep))
+        self.assertEqual((rep["status"], rep["checked"]), ("error", []))
 
+    def test_inside_protected_mode(self):
+        """With the protected inputs established: the authoritative log applies, a legacy --revocations is refused,
+        and an extra chained log must itself be a protected input."""
+        from tests.contracts.test_r5_contracts import run_doc
+        from tests.protected_fixture import ProtectedProject
+        from contracts.dependencies import validate_dependencies
+        pp = ProtectedProject(self.root / "prot").start()
+        self.addCleanup(pp.stop)
+        up = pp.artifact("up.json", run_doc(artifact_id="up"))
+        up_sha = hashlib.sha256(up.read_bytes()).hexdigest()
+        down = pp.artifact("down.json", run_doc(artifact_id="down", inputs=[
+            {"ref": "up.json", "sha256": up_sha, "status": ["synthetic", "unvalidated"]}]))
+        rep = validate_dependencies(down, pp.project)
+        self.assertTrue(rep["protected"])
+        self.assertTrue(rep["dependency_consistency_ok"], rep["findings"])
+        pp.revoke("artifact", sha256=up_sha)
+        self.assertIn("dependency.revoked", self.codes(validate_dependencies(down, pp.project)))
+        legacy = pp.project / "legacy.jsonl"
+        legacy.write_text(json.dumps({"subject_sha256": up_sha, "reason": "synthetic"}) + "\n")
+        self.assertIn("dependency.revocations_legacy", self.codes(validate_dependencies(down, pp.project, revocations=legacy)))
+        extra = pp.project / "extra.jsonl"
+        extra.write_bytes(blob(make_log(0)))
+        head = pp.project / "extra-head.json"
+        head.write_text(json.dumps(rv.head_of(make_log(0), SRC, "2026-10-14T11:00:00Z")))
+        rep = validate_dependencies(down, pp.project, revocations=extra, revocation_head=head, revocation_source=SRC)
+        self.assertIn("dependency.revocations_unverified", self.codes(rep))  # a file in the project is replaceable
 
 class CliTests(unittest.TestCase):
     def run_cli(self, *args):

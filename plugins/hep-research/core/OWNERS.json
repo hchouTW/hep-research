@@ -73,6 +73,18 @@
     "adapters/batch-schedulers"
    ],
    "source": "moved from skills/hep-computing/scripts/local_partition.py; behavior unchanged"
+  },
+  "protected": {
+   "steward": "hep-computing",
+   "status": "implemented",
+   "purpose": "Protected-use mode (task P1, HC-09, K08): mode detection from the project, protected-input source checks, revocation-log verification, qualification records, code identity; stdlib only, so every entry point in core, contracts, skills and adapters calls the same guard",
+   "files": [
+    "guard",
+    "identity",
+    "revocation_log",
+    "trusted_input"
+   ],
+   "source": "agentic-architecture.md §9, task P1/P2"
   }
  }
 }

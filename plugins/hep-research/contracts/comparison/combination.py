@@ -20,7 +20,8 @@ from itertools import combinations
 from typing import Any
 
 from contracts.comparison.composition import compose
-from contracts.comparison.gate import NON_GAUSSIAN, gate
+from contracts.comparison.gate import NON_GAUSSIAN, _gate
+from core.protected.guard import guard
 
 
 def _supported(c: dict) -> bool:
@@ -29,6 +30,7 @@ def _supported(c: dict) -> bool:
 
 
 def plan_combination(datasets, correlations=(), profiles=()) -> dict:
+    guard("contracts.comparison.combination.plan_combination")  # protected mode: refuse before planning
     problems, notes, blocks = [], [], {}
     if len(datasets) < 2:
         problems.append({"code": "combine.too_few", "message": "a combination needs at least two datasets"})
@@ -44,7 +46,7 @@ def plan_combination(datasets, correlations=(), profiles=()) -> dict:
         notes += comp["notes"]
 
     for a, b in combinations(datasets, 2):
-        g = gate({"observable": a["observable"], "parameter_point": {}, "allowed_transformations": None, "status": []},
+        g = _gate({"observable": a["observable"], "parameter_point": {}, "allowed_transformations": None, "status": []},
                  {"observable": b["observable"], "status": [], "corrections": []}, [], [], {})
         for m in g["mismatches"]:
             problems.append({"code": "combine.not_same_observable", "message": f"{a['id']} vs {b['id']}: {m['field']}: {m['reason']}"})

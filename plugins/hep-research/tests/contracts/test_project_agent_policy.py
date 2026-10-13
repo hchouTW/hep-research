@@ -1,9 +1,11 @@
-"""AGENTIC-R5 T1.3 (K05): agent_policy in the project config (schema 1.1.0), the schema_version check, the closed
+"""AGENTIC-R5 T1.3 (K05): agent_policy in the project config (schema 1.1.0; protected_inputs 1.2.0), the schema_version check, the closed
 blinding block, and blinding loads that fail closed. All results are advisory."""
 from __future__ import annotations
 
+import contextlib
 import copy
 import hashlib
+import io
 import json
 import subprocess
 import sys
@@ -15,24 +17,36 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from contracts.project import load_blinding, load_project  # noqa: E402
+from contracts.project import main as project_main  # noqa: E402
+from tests.protected_fixture import ProtectedProject  # noqa: E402
 from core.blinding.blinding import load_project_blinding  # noqa: E402
 
-BASE = {"schema_version": "1.1.0", "plugin_version": ">=0.1",
+BASE = {"schema_version": "1.2.0", "plugin_version": ">=0.1",
         "blinding": {"blinded": ["m_sr"], "allowed_outputs": [], "regions": [{"variable": "m", "low": 120, "high": 130}]},
         "agent_policy": {"policy_version": "1.0.0", "model_context_allowed": ["public", "synthetic"],
                          "protected_paths": ["private/", "data/unblinded/"], "unblinding": "outside-agent-session"}}
 
 
 class AgentPolicyTests(unittest.TestCase):
+    """agent_policy switches protected mode on (task P1, DP-2): every config here is anchored to a synthetic
+    authoritative copy with valid protected inputs (tests/protected_fixture.py), so the rules under test are the only
+    findings; ProtectedModeTests covers the refusals."""
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
-        self.d = Path(self.tmp.name)
+        self.pp = ProtectedProject(self.tmp.name).start()
+        self.d = self.pp.project
 
     def tearDown(self):
+        self.pp.stop()
+        self.pp.cleanup_modes()
         self.tmp.cleanup()
 
+    def write(self, cfg):
+        (self.d / "hep-research.project.json").write_text(json.dumps(self.pp.anchored(cfg)))
+
     def load(self, cfg):
-        (self.d / "hep-research.project.json").write_text(json.dumps(cfg))
+        self.write(cfg)
         return load_project(self.d)
 
     def codes(self, cfg):
@@ -48,7 +62,7 @@ class AgentPolicyTests(unittest.TestCase):
 
     def test_schema_version_is_checked(self):
         self.assertIn("project.policy_needs_schema", self.codes(self.edited(lambda c: c.update(schema_version="1.0.0"))))
-        for v in ("1.2.0", "2.0.0"):
+        for v in ("1.3.0", "2.0.0"):
             self.assertIn("project.unsupported_schema", self.codes(self.edited(lambda c: c.update(schema_version=v))))
 
     def test_old_reader_contract_is_unchanged_without_policy(self):
@@ -82,21 +96,44 @@ class AgentPolicyTests(unittest.TestCase):
         self.assertTrue(self.codes(self.edited(lambda c: c["agent_policy"].update(unblinding="agent-may-unblind"))))
 
     def test_blinding_loads_fail_closed(self):
-        (self.d / "hep-research.project.json").write_text(json.dumps(BASE))
+        self.write(BASE)
         self.assertEqual(load_blinding(self.d)["blinded"], ["m_sr"])
         no_block = self.edited(lambda c: c.pop("blinding"))
-        (self.d / "hep-research.project.json").write_text(json.dumps(no_block))
+        self.write(no_block)
         with self.assertRaises(ValueError):
             load_blinding(self.d)
         with self.assertRaises(ValueError):
             load_project_blinding(self.d / "hep-research.project.json")
 
     def test_cli_says_advisory(self):
-        (self.d / "hep-research.project.json").write_text(json.dumps(BASE))
+        self.write(BASE)
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            code = project_main([str(self.d)])
+        self.assertEqual(code, 0, out.getvalue())
+        self.assertIn("advisory", json.loads(out.getvalue())["note"])
+        # a separate process runs as the real account, which owns the synthetic custodian files: refused, still advisory
         p = subprocess.run([sys.executable, str(ROOT / "contracts" / "project.py"), str(self.d)], capture_output=True,
                            text=True, timeout=120)
-        self.assertEqual(p.returncode, 0, p.stdout)
+        self.assertEqual(p.returncode, 3, p.stdout)
+        self.assertEqual(json.loads(p.stdout)["status"], "refused")
         self.assertIn("advisory", json.loads(p.stdout)["note"])
+
+
+class ProtectedModeTests(unittest.TestCase):
+    """DP-2: agent_policy alone switches protected mode on; without its protected inputs the project load refuses."""
+
+    def test_unanchored_policy_is_refused(self):
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d) / "hep-research.project.json").write_text(json.dumps(BASE))
+            codes = {f.code for f in load_project(Path(d)).report.errors}
+        self.assertIn("protected.policy_unanchored", codes)
+
+    def test_without_policy_nothing_changes(self):
+        with tempfile.TemporaryDirectory() as d:
+            cfg = {k: v for k, v in BASE.items() if k != "agent_policy"}
+            (Path(d) / "hep-research.project.json").write_text(json.dumps(cfg))
+            self.assertTrue(load_project(Path(d)).report.ok)
 
 
 if __name__ == "__main__":

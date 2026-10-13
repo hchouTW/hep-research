@@ -15,8 +15,10 @@ false. The report is advisory: it never authorizes formal use. formal_use_allowe
 is decided only by a trusted gate outside the agent-run code (an artifact with no inputs, or '{}', is consistent but
 is not thereby allowed).
 
-Every source is also validated as a contract artifact (contracts/validate.py); --protected applies the stricter version
-policy for protected use.
+Every source is also validated as a contract artifact (contracts/validate.py). Protected mode (the project root
+declares agent_policy, or --protected; core.protected.guard) first checks the protected inputs and refuses before
+reading any source when they cannot be established; inside it the authoritative revocation log is always applied and
+the stricter version policy holds.
 
 Revocations: --revocations names the hash-chained revocation log (contracts/revocation.py), which needs --revocation-head
 and --revocation-source; it is verified before any lookup (an empty, cut, edited or stale log, or one whose head does
@@ -43,6 +45,8 @@ if __package__ in (None, ""):
 
 from contracts import revocation as rv  # noqa: E402
 from contracts.validate import STICKY_STATUSES, validate_artifact  # noqa: E402
+from core.protected.guard import ProtectedUseRefused, guard, protected_main  # noqa: E402
+from contracts import KNOWN_CAPABILITIES  # noqa: E402
 
 SCHEME = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:")
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
@@ -81,8 +85,9 @@ def load_revocations(path) -> tuple[dict, list[str]]:
 
 
 class _Checker:
-    def __init__(self, root: Path, base: Path, revoked: dict | None = None, protected: bool = False, vocab=None):
-        self.root, self.base, self.protected, self.vocab = root, base, protected, vocab
+    def __init__(self, root: Path, base: Path, revoked: dict | None = None, protected: bool = False, vocab=None,
+                 context=None):
+        self.root, self.base, self.protected, self.vocab, self.context = root, base, protected, vocab, context
         self.revoked = revoked or {}
         self.findings: list[dict] = []
         self.checked: list[str] = []
@@ -143,7 +148,7 @@ class _Checker:
                 continue
             # every source is itself a contract artifact: an invalid one, an unknown type or required capability, or
             # a newer contract version this reader cannot judge is not a dependency it can vouch for (K02, F08)
-            srep = validate_artifact(sdoc, self.vocab, protected=self.protected)
+            srep = validate_artifact(sdoc, self.vocab, protected=self.protected, context=self.context)
             bad = sorted({f.code for f in srep.errors})
             if bad:
                 self.add("error", where, "dependency.source_invalid", f"{ref!r} fails contract validation: {', '.join(bad)}")
@@ -199,18 +204,38 @@ def _revocation_findings(revocations, head, source, max_age_s, now, protected: b
 
 def validate_dependencies(artifact_path, project_root, base=None, revocations=None, protected: bool = False, vocab=None,
                           *, revocation_head=None, revocation_source=None, max_status_age_s: int = rv.MAX_STATUS_AGE_S,
-                          now=None, account=None) -> dict:
+                          now=None, account=None, context=None) -> dict:
     """See the module docstring. `vocab` (a contracts.vocab.Vocabulary, default the core vocabulary) lets sources that use
     a bound profile's namespaced terms validate; it is additive and changes nothing when omitted. `account`
-    (contracts.trusted_input.Account) replaces the running account in the protected source checks (tests)."""
+    (core.protected.trusted_input.Account) replaces the running account in the protected source checks (tests)."""
     root = Path(project_root).resolve()
     path = Path(artifact_path)
     path = (path if path.is_absolute() else Path.cwd() / path).resolve()
+    refusals: list = []
+    ctx = None
+    try:
+        ctx = guard("contracts.dependencies.validate_dependencies", paths=[path, root], flag=protected, project=root,
+                    context=context, capabilities=KNOWN_CAPABILITIES, now=now, account=account)
+    except ProtectedUseRefused as exc:
+        refusals = exc.refusals
+    protected = protected or bool(refusals) or (ctx is not None and ctx.protected)
     revoked, rfindings = (_revocation_findings(revocations, revocation_head, revocation_source, max_status_age_s, now,
-                                               protected, account) if revocations else ({}, []))
-    chk = _Checker(root, Path(base).resolve() if base else root, revoked, protected, vocab)
+                                               protected, account) if revocations and not refusals else ({}, []))
+    if ctx is not None and ctx.protected and ctx.revocations is not None:  # the authoritative log is always applied
+        for ev in reversed(ctx.revocations.events):
+            if "sha256" in ev["subject"]:
+                revoked.setdefault(ev["subject"]["sha256"], dict(ev, issued=ev["time"]))
+    chk = _Checker(root, Path(base).resolve() if base else root, revoked, protected, vocab,
+                   ctx if ctx is not None and ctx.protected else None)
     for severity, code, message in rfindings:
         chk.add(severity, "$revocations", code, message)
+    for r in refusals:
+        chk.add("error", r["path"], r["code"], r["message"])
+    if refusals:  # protected use refused: no source is read
+        return {"status": "error", "dependency_consistency_ok": False, "formal_use_allowed": False,
+                "formal_use": "decided only by the trusted gate, never by this advisory check",
+                "revocations_checked": False, "failed_upstream": False, "checked": [], "findings": chk.findings,
+                "protected": True, "note": "protected use refused before any dependency was read"}
     if not root.is_dir():
         chk.add("error", "$", "dependency.bad_root", f"project root {project_root} is not a directory")
     elif not _inside(path, root):
@@ -236,11 +261,13 @@ def validate_dependencies(artifact_path, project_root, base=None, revocations=No
     consistent = status == "ok" and not chk.failed_upstream
     return {"status": status, "dependency_consistency_ok": consistent,
             "formal_use_allowed": False, "formal_use": "decided only by the trusted gate, never by this advisory check",
-            "revocations_checked": bool(revocations),
+            "revocations_checked": bool(revocations) or (ctx is not None and ctx.protected),
+            "protected": protected,
             "failed_upstream": chk.failed_upstream, "checked": chk.checked, "findings": chk.findings,
             "note": "dependency consistency only: a resolved chain says nothing about the physical validity of any artifact"}
 
 
+@protected_main("contracts.dependencies", keep_flag=True, capabilities=KNOWN_CAPABILITIES)
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("artifact", type=Path)

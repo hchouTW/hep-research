@@ -10,17 +10,17 @@
   },
   "hep-analysis": {
    "references": 11,
-   "bytes": 80250,
+   "bytes": 80921,
    "uncited": 0
   },
   "hep-computing": {
    "references": 32,
-   "bytes": 295591,
+   "bytes": 296712,
    "uncited": 0
   },
   "hep-statistics": {
    "references": 11,
-   "bytes": 149150,
+   "bytes": 149592,
    "uncited": 0
   },
   "hep-theory": {
@@ -731,8 +731,8 @@
   {
    "path": "skills/hep-analysis/references/analysis-design.md",
    "owner": "hep-analysis",
-   "bytes": 9671,
-   "lines": 91,
+   "bytes": 10342,
+   "lines": 97,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/efficiency-acceptance-backgrounds.md",
@@ -1171,8 +1171,8 @@
   {
    "path": "skills/hep-computing/references/engineering-playbook.md",
    "owner": "hep-computing",
-   "bytes": 9258,
-   "lines": 147,
+   "bytes": 10379,
+   "lines": 148,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/README.md",
@@ -1529,8 +1529,8 @@
   {
    "path": "skills/hep-statistics/references/combinations.md",
    "owner": "hep-statistics",
-   "bytes": 4105,
-   "lines": 56,
+   "bytes": 4547,
+   "lines": 60,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-statistics/references/core-stats-guide.md"

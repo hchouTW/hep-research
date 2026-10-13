@@ -45,6 +45,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from core.partition.engine import (PartitionError, _hash, _load_state, _reduce, _sum, _write_atomic, check_template,  # noqa: E402,F401,E501
                                    make_manifest, merge, reset, run, status, validate_manifest)
 from core.partition.executors import allowed_env  # noqa: E402
+from core.protected.guard import protected_main  # noqa: E402
 
 
 class WorkerFailure(RuntimeError):
@@ -85,6 +86,7 @@ def _with_status(res: dict) -> dict:
     return {"status": "complete" if res["complete"] else "incomplete", **res}
 
 
+@protected_main("local_partition")
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)

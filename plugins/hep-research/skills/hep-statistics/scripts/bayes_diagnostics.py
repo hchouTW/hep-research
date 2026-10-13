@@ -36,6 +36,9 @@ import math
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from core.protected.guard import guard, protected_main  # noqa: E402
+
 try:
     import numpy as np
 except ImportError:  # pragma: no cover
@@ -202,6 +205,7 @@ def classify(res, rhat_max=1.01, min_ess_per_chain=100):
 
 
 def diagnose(chains, quantiles, rhat_max, min_ess_per_chain):
+    guard("bayes_diagnostics.diagnose")
     params = {}
     for name, x in chains.items():
         r = diagnose_param(x, quantiles)
@@ -309,6 +313,7 @@ def demo_sampler(n, b, chains, draws, seed, step=1.0, burn=1000):
     return out
 
 
+@protected_main("bayes_diagnostics")
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0],
                                 formatter_class=argparse.RawDescriptionHelpFormatter,

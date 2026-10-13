@@ -77,6 +77,9 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from core.protected.guard import protected_main  # noqa: E402
+
 # Any natbib/biblatex/plain citation command (\cite, \citep, \Citet, \citeauthor,
 # \parencite, \textcite, \autocite, \footcite, \nocite, ...) with up to two
 # optional arguments ([pre][post]) and a key list that may span lines.
@@ -591,6 +594,7 @@ def json_report(results, strict: bool, exit_code: int, style_findings=None) -> d
                                              "findings": len(findings)}}
 
 
+@protected_main("check_manuscript")
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("path", type=Path, nargs="?", help="Directory containing the manuscript's .tex/.bib files (directory mode)")

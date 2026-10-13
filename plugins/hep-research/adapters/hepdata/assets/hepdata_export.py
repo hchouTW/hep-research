@@ -40,6 +40,8 @@ from pathlib import Path
 PLUGIN = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(PLUGIN))
 from contracts.validate import validate_artifact  # noqa: E402
+from core.protected.guard import guard, protected_main  # noqa: E402
+from contracts import KNOWN_CAPABILITIES  # noqa: E402
 
 FLAGGED = ("synthetic", "asimov", "preliminary", "unvalidated", "failed")
 
@@ -117,6 +119,7 @@ def _errors(payload: dict, n: int, base: Path) -> tuple[list[list[dict]], dict |
 
 
 def build_tables(doc: dict, base: Path, table_name: str, description: str) -> tuple[str, list[tuple[dict, dict]]]:
+    guard("hepdata_export.build_tables", paths=[base], use="formal")
     rep = validate_artifact(doc)
     if not rep.ok:
         raise Refused("the artifact does not validate: " + "; ".join(f"{f.path} {f.code}" for f in rep.errors[:5]))
@@ -206,6 +209,7 @@ def write_hepdata_lib(out: Path, comment: str, entries) -> list[str]:
     return sorted(p.name for p in out.iterdir() if p.suffix == ".yaml")
 
 
+@protected_main("hepdata_export", use="formal", capabilities=KNOWN_CAPABILITIES)
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--artifact", type=Path, required=True, help="a dataset-record or binned prediction artifact")

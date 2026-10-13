@@ -61,6 +61,7 @@ from core.partition import bundle as bundles
 from core.partition import engine
 from core.partition import limits as lim
 from core.partition.executors import Executor, PollError, SubmitRefused
+from core.protected.guard import guard
 from core.partition.states import ACTIVE, NEEDS_PERSON, decide, normalize, repeated, same_resources, signature
 
 MIN_POLL_INTERVAL_S = 60
@@ -196,6 +197,7 @@ def submit(campaign_dir, executor, config: dict, chunk_ids=None, approved: bool 
     """Submit chunks that were never submitted (all of them, the given ones, or with pilot=True the first one).
     With bundle_digest (a bundle frozen by core.partition.bundle.freeze), the bundled files are re-hashed first and a
     change since freezing refuses the submission (bundle.changed); the digest is recorded with the submission."""
+    guard("core.partition.campaign.submit", paths=[campaign_dir])
     cdir = Path(campaign_dir)
     manifest, state = load(cdir)
     pending = unconfirmed(state)
@@ -362,6 +364,7 @@ def reconcile(campaign_dir, executor, submission_id: str) -> dict:
 def confirm_submission(campaign_dir, submission_id: str, job_ids: dict, executor=None) -> dict:
     """After an ambiguous or interrupted submit: a person found the jobs at the scheduler; record {attempt_id: job_id}.
     Every job ID must be one that reconcile() lists for the submission's tag (fabricated IDs are refused, X07)."""
+    guard("core.partition.campaign.confirm_submission", paths=[campaign_dir])
     cdir = Path(campaign_dir)
     _, state = load(cdir)
     sub = next((x for x in unconfirmed(state) if x["id"] == submission_id), None)
@@ -400,6 +403,7 @@ def abandon_submission(campaign_dir, submission_id: str, reason: str) -> dict:
 @_locked("resubmit")
 def resubmit(campaign_dir, executor, config: dict, approved: bool = False, clock=_now, bundle_digest: str | None = None) -> dict:
     """Resubmit the chunks whose decision is 'resubmit'; report every other not-done chunk with its decision."""
+    guard("core.partition.campaign.resubmit", paths=[campaign_dir])
     cdir = Path(campaign_dir)
     collect(cdir)
     manifest, state = load(cdir)
@@ -735,6 +739,7 @@ def merge(campaign_dir, combine=None) -> dict:
     attempt of a submission the scheduler accepted. A forged or replaced chunk file fails the merge (X04). This check
     reads agent-writable state: it catches mistakes and forged chunk files, not a forged state.json (that needs the
     trusted submitter)."""
+    guard("core.partition.campaign.merge", paths=[campaign_dir])
     cdir = Path(campaign_dir)
     manifest, state = load(cdir)
     problems, warnings = provenance_check(cdir, state)
