@@ -7,6 +7,24 @@ and this reference is used to state assumptions, degeneracies and what the data 
 work on a fit (likelihood, nuisance parameters, correlated data) belongs to hep-statistics; measured fluxes come from
 dataset records, never from memory.
 
+## Kinematics and units
+
+Conversions among rigidity R, momentum, total energy, kinetic energy and kinetic energy per nucleon, of bin edges
+(bin-average flux factor) and of point flux Jacobians are implemented once, in
+`<plugin root>/core/kinematics/relativistic.py` (steward hep-theory; `python3 core/kinematics/relativistic.py --help`).
+It takes |Z|, A and the mass from the caller and ships no particle constants; do not write a second converter.
+
+- p = |Z| R (c = 1, R in GV, p in GeV/c); the charge sign does not enter (module docstring).
+- Kinetic energy per nucleon is T / A with A the mass number: the force-field form E^TOA / A = E^IS / A - (|Z|/A) phi
+  divides the total energy by A (Ghelfi, Barao, Derome, Maurin, A&A 591 (2016) A94, arXiv:1511.08650, Sec. 2.1, Eq.
+  (1), read 2026-10-13).
+- The mass passed to the converter is a choice that must be stated: the nuclear (or ion) mass, A times a nucleon
+  mass, or A times the atomic mass unit differ at the per-mille level, and the difference shifts T/n at fixed R at
+  low energy (`unverified`: no opened source compares the conventions; state the one used and its source).
+- Flux in per-nucleon energy and flux in rigidity differ by the Jacobian dR / d(T/n); a bin-averaged flux converts
+  with the ratio of bin widths, not with the point Jacobian (both are in the module; tests in
+  `tests/core/test_kinematics_relativistic.py`).
+
 ## The model families
 
 - **Diffusion (transport) equation.** The standard description is a steady-state transport equation for each species
