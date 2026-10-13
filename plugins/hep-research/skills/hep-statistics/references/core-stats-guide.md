@@ -401,7 +401,16 @@ only where the import is guarded (the four marked "(needs NumPy; `--help` withou
 - `combine_measurements.py` (needs NumPy; `--help` without it): generalized least squares combination of one observable once the combination plan accepts the inputs (declared cross-dataset blocks, shared auxiliary measurements, no Gaussianized envelope); `combine_asymmetric.py`: Barlow's asymmetric errors.
 - `covariance_fit.py` (needs NumPy and SciPy): fits to published points with their covariance, with the Peelle diagnostics; `discrete_profile.py` (needs NumPy and SciPy): discrete profiling over a model family; `eft_scan.py` (needs NumPy and SciPy): EFT parameter scans; `pcl_efficiency_ratio.py` (needs NumPy and SciPy), `ratio_estimation.py` (needs NumPy): ratio and efficiency intervals; `sweighted_fit.py` (needs NumPy and SciPy): sWeighted fits with covering uncertainties.
 - `result_artifact.py`: writes a `statistical-result` artifact from a tool's output, with its status label.
-- The Poisson counting reference is `skills/hep-analysis/scripts/counting_reference.py`. pyhf and Combine starting points: `adapters/pyhf-combine/assets/` (with `pyhf_nuisance_diagnostics.py` for pulls, constraints and impacts); unbinned fits: `adapters/unbinned-fit/assets/unbinned_fit.py`.
+- Inference scripts owned by hep-analysis (read their `--help`: the hep-analysis skill may extend them). As shipped in
+  0.6.17, `skills/hep-analysis/scripts/cr_spectrum_powerlaw_fit.py` fits a (segmented) power law in log-log space
+  with per-point, diagonal errors only, and `particle_ratio_with_uncertainty.py` gives a ratio or fraction of two
+  yields by the first-order delta method with one optional correlation coefficient. Neither takes a full
+  covariance: with correlated points or bin-to-bin correlated systematics use `covariance_fit.py fit` or
+  `statistical_toys.py ratio-cov` / `ratio-measured` here, and at low counts an exact construction
+  (`pcl_efficiency_ratio.py ratio`, Fieller or Clopper-Pearson). Two different "counting references":
+  `skills/hep-analysis/scripts/counting_reference.py` is a flat-prior Bayesian upper bound with an exactly known
+  background (not CLs, no nuisances); the frequentist counting constructions are `core/stats/poisson_diagnostics.py`
+  (and `likelihood_limits.py` with an uncertain background). pyhf and Combine starting points: `adapters/pyhf-combine/assets/` (with `pyhf_nuisance_diagnostics.py` for pulls, constraints and impacts); unbinned fits: `adapters/unbinned-fit/assets/unbinned_fit.py`.
 
 ## Not implemented
 

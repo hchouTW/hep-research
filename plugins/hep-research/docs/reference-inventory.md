@@ -11,7 +11,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | detector-response | 34 | 395 | 0 |
 | hep-analysis | 9 | 74 | 0 |
 | hep-computing | 29 | 338 | 0 |
-| hep-statistics | 9 | 124 | 0 |
+| hep-statistics | 9 | 125 | 0 |
 | hep-theory | 8 | 42 | 0 |
 | physics-ml | 38 | 257 | 0 |
 | research-communication | 53 | 378 | 0 |
@@ -154,14 +154,14 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `task-authoring-guide.md` | hep-computing | 11.9 | yes | 8 | - | 351029c 2026-10-07 |
 | `task-quality-checklist.md` | hep-computing | 3.0 | no | 4 | - | 351029c 2026-10-07 |
 | `validation-and-done.md` | hep-computing | 3.7 | yes | 5 | - | 351029c 2026-10-07 |
-| `astroparticle-statistics.md` | hep-statistics | 8.7 | yes | 12 | detector-response, hep-analysis | 351029c 2026-10-07 |
-| `core-stats-guide.md` | hep-statistics | 41.5 | yes | 8 | - | 405f5b2 2026-10-13 |
-| `inference-recipes.md` | hep-statistics | 15.1 | yes | 7 | detector-response, hep-analysis | 405f5b2 2026-10-13 |
-| `likelihood-fitting.md` | hep-statistics | 9.1 | yes | 7 | detector-response, hep-analysis, hep-computing | 06b86c8 2026-10-12 |
+| `astroparticle-statistics.md` | hep-statistics | 8.7 | yes | 12 | detector-response, hep-analysis | 578c12f 2026-10-13 |
+| `core-stats-guide.md` | hep-statistics | 42.4 | yes | 8 | - | 578c12f 2026-10-13 |
+| `inference-recipes.md` | hep-statistics | 15.1 | yes | 7 | detector-response, hep-analysis | 578c12f 2026-10-13 |
+| `likelihood-fitting.md` | hep-statistics | 9.1 | yes | 7 | detector-response, hep-analysis, hep-computing | 578c12f 2026-10-13 |
 | `ml-assisted-inference.md` | hep-statistics | 6.2 | yes | 5 | physics-ml | 06b86c8 2026-10-12 |
-| `nuisance-modeling.md` | hep-statistics | 17.9 | yes | 6 | hep-analysis | 06b86c8 2026-10-12 |
-| `statistical-inference-for-physics.md` | hep-statistics | 12.9 | yes | 9 | hep-computing, hep-theory, research-communication | 351029c 2026-10-07 |
-| `statistical-tools.md` | hep-statistics | 9.6 | yes | 5 | hep-analysis, physics-ml | e375e7d 2026-10-12 |
+| `nuisance-modeling.md` | hep-statistics | 17.9 | yes | 6 | hep-analysis | 578c12f 2026-10-13 |
+| `statistical-inference-for-physics.md` | hep-statistics | 12.9 | yes | 9 | hep-computing, hep-theory, research-communication | 578c12f 2026-10-13 |
+| `statistical-tools.md` | hep-statistics | 9.6 | yes | 5 | hep-analysis, physics-ml | 578c12f 2026-10-13 |
 | `unfolding.md` | hep-statistics | 3.4 | yes | 22 | detector-response, hep-analysis | 24b8216 2026-10-13 |
 | `cosmic-ray-propagation.md` | hep-theory | 5.2 | yes | 1 | - | 351029c 2026-10-07 |
 | `dis-kinematics.md` | hep-theory | 4.8 | yes | 4 | - | 351029c 2026-10-07 |

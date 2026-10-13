@@ -20,7 +20,7 @@
   },
   "hep-statistics": {
    "references": 9,
-   "bytes": 124401,
+   "bytes": 125361,
    "uncited": 0
   },
   "hep-theory": {
@@ -1489,13 +1489,13 @@
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "578c12f 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 41457,
-   "lines": 440,
+   "bytes": 42417,
+   "lines": 449,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/inference-and-unfolding.md",
@@ -1508,7 +1508,7 @@
     "tests/skills/hep_statistics/test_core_stats_guide.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "405f5b2 2026-10-13"
+   "last_commit": "578c12f 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
@@ -1529,7 +1529,7 @@
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "405f5b2 2026-10-13"
+   "last_commit": "578c12f 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/likelihood-fitting.md",
@@ -1551,7 +1551,7 @@
     "hep-analysis",
     "hep-computing"
    ],
-   "last_commit": "06b86c8 2026-10-12"
+   "last_commit": "578c12f 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/ml-assisted-inference.md",
@@ -1588,7 +1588,7 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "06b86c8 2026-10-12"
+   "last_commit": "578c12f 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/statistical-inference-for-physics.md",
@@ -1612,7 +1612,7 @@
     "hep-theory",
     "research-communication"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "578c12f 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/statistical-tools.md",
@@ -1631,7 +1631,7 @@
     "hep-analysis",
     "physics-ml"
    ],
-   "last_commit": "e375e7d 2026-10-12"
+   "last_commit": "578c12f 2026-10-13"
   },
   {
    "path": "skills/hep-statistics/references/unfolding.md",
