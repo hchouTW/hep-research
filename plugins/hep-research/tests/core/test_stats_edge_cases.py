@@ -217,12 +217,13 @@ class BlindedLowCounts(unittest.TestCase):
 
     def test_zero_and_low_count_blinded_bins(self):
         sealed = bl.seal(self.EDGES, [12.0, 0.0, 3.0, 40.0], {"variable": "x", "low": 1.0, "high": 3.0})
-        self.assertIn(0.0, sealed)
+        # exact zero is not sealed (CMP-04, Q3 option a: "0 errors" in a log is not a leak); a low count still is
+        self.assertNotIn(0.0, sealed)
         self.assertIn(3.0, sealed)
         quiet = "run_0 step 3/10 v0.3 2026-03-01 seed=1234567\n"
         self.assertEqual(bl.scan_text(quiet, sealed), [])
         hits = bl.scan_text("blinded bin 2 count 3\nbin 1: 0 events\n", sealed)
-        self.assertEqual(sorted(h["sealed_value"] for h in hits), [0.0, 3.0])
+        self.assertEqual(sorted(h["sealed_value"] for h in hits), [3.0])
         self.assertTrue(all(h.get("weak") for h in hits))
 
     def test_logs_in_three_encodings(self):

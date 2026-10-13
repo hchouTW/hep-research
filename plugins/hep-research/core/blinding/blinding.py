@@ -99,7 +99,39 @@ SEALED_KINDS = ("each blinded bin value and its square root", "the blinded-regio
                 "in each blinded bin and for the blinded-region sums")
 NOT_SEALED = ("sums over bin ranges that do not include a blinded bin", "neighbour- or sideband-subtracted counts",
               "fit results, smoothed, rescaled or shifted values", "quantities derived from a reference not passed to seal",
-              "products or ratios of two blinded quantities other than those listed")
+              "products or ratios of two blinded quantities other than those listed",
+              "exact zero (it is in every log and table; a blinded zero cannot be scanned for)",
+              "any otherwise sealed number equal to one public data alone give: a sum over a run of unblinded bins, "
+              "the sideband total, or the square root of either (a blinded empty bin makes cumulative sums and the "
+              "grand total equal to public sideband sums)")
+PUBLIC_RTOL = 1e-9  # a sealed number this close to a public one is not sealed (rule of seal(), Q3 option a)
+
+
+def _public_numbers(vals: list[float], mask: list[bool]) -> list[float]:
+    """Sorted absolute values data outside the blinded bins give on their own: the sum over every contiguous run of
+    unblinded bins (single bins included), the sum of all unblinded bins, and the square roots of these."""
+    pub: set[float] = set()
+    run: list[float] = []
+    for v, b in list(zip(vals, mask)) + [(0.0, True)]:
+        if not b:
+            run.append(v)
+            continue
+        for i in range(len(run)):
+            acc = 0.0
+            for x in run[i:]:
+                acc += x
+                pub.add(abs(acc))
+        run = []
+    pub.add(abs(sum(v for v, b in zip(vals, mask) if not b)))
+    pub |= {math.sqrt(x) for x in list(pub) if x > 0}
+    return sorted(pub)
+
+
+def _is_public(x: float, public: list[float]) -> bool:
+    import bisect
+    a = abs(x)
+    i = bisect.bisect_left(public, a * (1 - PUBLIC_RTOL))
+    return i < len(public) and public[i] <= a * (1 + PUBLIC_RTOL)
 
 
 def seal(edges, values, region: dict, references=()) -> list[float]:
@@ -108,7 +140,9 @@ def seal(edges, values, region: dict, references=()) -> list[float]:
     blinded bin (integrated yields above or below a threshold, CDF tables), the blinded bins and sum as fractions of
     the total, and for each reference array (for example an MC prediction drawn next to data) the ratio both ways,
     the difference and the significance-like (N-B)/sqrt(B) in each blinded bin and of the blinded-region sums.
-    NOT_SEALED lists what stays unsealed. Raises ValueError on invalid edges (validate_edges)."""
+    Not sealed (Q3, option a): exact zero, and any number equal (relative 1e-9, sign ignored) to one the unblinded
+    bins give alone (_public_numbers): sealing those makes every log line "0 errors" or every public sideband table a
+    false leak, and protects nothing. NOT_SEALED lists what stays unsealed. Raises ValueError on invalid edges."""
     m = blinded_mask(edges, region)
     if len(values) != len(m):
         raise ValueError("values need one entry per bin")
@@ -140,7 +174,8 @@ def seal(edges, values, region: dict, references=()) -> list[float]:
                 out.append(r / v)
             if r > 0:
                 out.append((v - r) / math.sqrt(r))
-    return sorted(set(out))
+    public = _public_numbers(vals, m)
+    return sorted({x for x in out if x != 0 and not _is_public(x, public)})
 
 
 def _close(x: float, target: float, rtol: float) -> bool:

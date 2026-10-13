@@ -18,6 +18,12 @@ Software checks establish contract consistency only, not physical validity.
 - **CMP-03 manifest checked by every subcommand.** `local_partition.py status`, `merge` and `reset` validate the
   manifest first (a list or a dict without `chunks` exits 2 with a JSON `error`, no traceback); `reset` writes nothing
   before validation and refuses a state folder of another manifest (`engine.reset(..., manifest=)`) or an unknown chunk.
+- **CMP-04 seal only what public data do not reveal (Q3 option a).** `core/blinding` `seal()` drops exact zero and every
+  number equal (relative 1e-9, sign ignored) to one the unblinded bins give alone: a sum over any run of unblinded
+  bins, the sideband total, or their square roots. A blinded empty bin no longer makes `job finished: 0 errors` or a
+  public sideband CSV a leak; a nonzero blinded value is still found. When nothing is left, `audit_blinded_outputs.py
+  seal` writes `nothing_sealable: true` and `scan` accepts the empty list. `NOT_SEALED` names both exclusions.
+  `tests/core/test_stats_edge_cases.py` updated: 0 is no longer sealed. Tests: `tests/core/test_blinding_regressions.py`.
 
 ## 0.6.17 (2026-10-13)
 
