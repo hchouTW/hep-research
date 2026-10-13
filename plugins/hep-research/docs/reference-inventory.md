@@ -10,7 +10,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 |---|---|---|---|
 | detector-response | 34 | 395 | 0 |
 | hep-analysis | 9 | 74 | 0 |
-| hep-computing | 29 | 346 | 0 |
+| hep-computing | 30 | 355 | 0 |
 | hep-statistics | 9 | 119 | 0 |
 | hep-theory | 8 | 42 | 0 |
 | physics-ml | 38 | 257 | 0 |
@@ -41,6 +41,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 - **code**: `code-review-report.md`, `code-to-methodology-synthesis.md`
 - **consistency**: `logical-consistency-and-argument-uniformity.md`, `manuscript-consistency-auditing.md`
 - **data**: `data-loading.md`, `data-strategy.md`
+- **debugging**: `crash-and-memory-debugging.md`, `root-debugging.md`
 - **detection**: `ground-based-detection-arrays.md`, `space-based-direct-detection.md`
 - **engineering**: `engineering-playbook.md`, `loop-engineering.md`, `prompt-engineering-and-token-optimization.md`
 - **evaluation**: `evaluation-metrics.md`, `evaluation-strategy.md`
@@ -131,10 +132,11 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `batch-scheduling.md` | hep-computing | 29.3 | yes | 10 | - | 22ea71e 2026-10-12 |
 | `batch-site-cern-htcondor.md` | hep-computing | 11.2 | no | 2 | - | 6815df4 2026-10-10 |
 | `batch-site-nstccore-slurm.md` | hep-computing | 11.5 | no | 1 | - | 22ea71e 2026-10-12 |
-| `cmake-and-build.md` | hep-computing | 2.9 | yes | 4 | hep-analysis | fe8f71e 2026-10-13 |
+| `cmake-and-build.md` | hep-computing | 2.9 | yes | 5 | hep-analysis | fe8f71e 2026-10-13 |
 | `cpp-balanced-design-guidelines.md` | hep-computing | 26.6 | yes | 6 | physics-ml | fe8f71e 2026-10-13 |
+| `crash-and-memory-debugging.md` | hep-computing | 8.2 | no | 2 | - | untracked |
 | `design-and-estimation.md` | hep-computing | 7.5 | no | 3 | - | 351029c 2026-10-07 |
-| `engineering-playbook.md` | hep-computing | 11.3 | yes | 4 | - | 80ac12a 2026-10-13 |
+| `engineering-playbook.md` | hep-computing | 11.6 | yes | 4 | - | 80ac12a 2026-10-13 |
 | `environments-and-containers.md` | hep-computing | 4.0 | no | 2 | - | efa283c 2026-10-13 |
 | `example-authoring.md` | hep-computing | 20.0 | no | 8 | hep-analysis, physics-ml | 351029c 2026-10-07 |
 | `host-notes.md` | hep-computing | 5.6 | no | 2 | - | 364918e 2026-10-09 |
@@ -144,16 +146,16 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `product-framing.md` | hep-computing | 3.2 | no | 3 | - | 351029c 2026-10-07 |
 | `prompt-engineering-and-token-optimization.md` | hep-computing | 9.4 | no | 3 | - | 351029c 2026-10-07 |
 | `python-balanced-design-guidelines.md` | hep-computing | 31.1 | yes | 4 | - | 351029c 2026-10-07 |
-| `python-hep-coding-patterns.md` | hep-computing | 5.1 | yes | 4 | hep-analysis | b0dce7a 2026-10-10 |
+| `python-hep-coding-patterns.md` | hep-computing | 5.1 | yes | 5 | hep-analysis | 9add3f6 2026-10-13 |
 | `risk-and-quality.md` | hep-computing | 7.7 | no | 3 | - | 351029c 2026-10-07 |
-| `root-balanced-design-guidelines.md` | hep-computing | 50.9 | yes | 4 | hep-analysis | d257072 2026-10-13 |
-| `root-debugging.md` | hep-computing | 3.3 | yes | 4 | hep-analysis | 351029c 2026-10-07 |
+| `root-balanced-design-guidelines.md` | hep-computing | 50.9 | yes | 5 | hep-analysis | d257072 2026-10-13 |
+| `root-debugging.md` | hep-computing | 3.6 | yes | 5 | hep-analysis | 351029c 2026-10-07 |
 | `software-architecture.md` | hep-computing | 7.8 | no | 4 | - | 351029c 2026-10-07 |
 | `status-updates-and-completion.md` | hep-computing | 2.0 | no | 3 | - | 351029c 2026-10-07 |
 | `storage-cern-eos.md` | hep-computing | 13.2 | yes | 3 | - | b0dce7a 2026-10-10 |
 | `task-authoring-guide.md` | hep-computing | 11.9 | yes | 8 | - | 351029c 2026-10-07 |
 | `task-quality-checklist.md` | hep-computing | 3.0 | no | 4 | - | 351029c 2026-10-07 |
-| `validation-and-done.md` | hep-computing | 3.7 | yes | 5 | - | 351029c 2026-10-07 |
+| `validation-and-done.md` | hep-computing | 3.7 | yes | 6 | - | 351029c 2026-10-07 |
 | `astroparticle-statistics.md` | hep-statistics | 8.6 | yes | 12 | detector-response, hep-analysis | 351029c 2026-10-07 |
 | `core-stats-guide.md` | hep-statistics | 38.4 | yes | 8 | - | 24b8216 2026-10-13 |
 | `inference-recipes.md` | hep-statistics | 14.7 | yes | 7 | detector-response, hep-analysis | 06b86c8 2026-10-12 |

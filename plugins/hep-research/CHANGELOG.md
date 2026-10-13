@@ -94,6 +94,12 @@ Software checks establish contract consistency only, not physical validity.
 - **CMP-16 `python-hep-coding-patterns.md`.** P1: `with ROOT.TFile.Open(...) as f:` / `with uproot.recreate(...)`
   instead of "close output files explicitly", consistent with the Python guidelines. P2: `ROOT.SetOwnership` and the
   pitfall of a histogram drawn in a helper vanishing from the canvas. Checked with PyROOT 6.38.04.
+- **CMP-17 new reference `crash-and-memory-debugging.md`.** Decision rules (reproduce, shrink to one thread and few
+  events, first frame in own code, symbols, stop rule), ROOT's stack trace and `gDebug`, gdb/lldb on `root.exe`,
+  valgrind with `$(root-config --etcdir)/valgrind-root.supp`, ASan/UBSan through CMake and their limits with ROOT,
+  ACLiC `+g` and the stale-library pitfall, a crash-cause table, and leak triage (RSS against events with
+  `gSystem->GetProcInfo`, `gObjectTable`, the directory that holds histograms, jitted RDataFrame strings). Linked
+  from `root-debugging.md` and a new "References of the hep-computing skill" section in the playbook.
 
 ## 0.6.17 (2026-10-13)
 

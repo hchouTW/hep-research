@@ -14,8 +14,8 @@
    "uncited": 0
   },
   "hep-computing": {
-   "references": 29,
-   "bytes": 346204,
+   "references": 30,
+   "bytes": 355037,
    "uncited": 0
   },
   "hep-statistics": {
@@ -1111,6 +1111,7 @@
    "cited_by": [
     "skills/hep-analysis/references/hep-analysis-guide.md",
     "skills/hep-computing/SKILL.md",
+    "skills/hep-computing/references/crash-and-memory-debugging.md",
     "skills/hep-computing/references/root-balanced-design-guidelines.md",
     "skills/hep-computing/references/root-debugging.md"
    ],
@@ -1139,6 +1140,19 @@
    "last_commit": "fe8f71e 2026-10-13"
   },
   {
+   "path": "skills/hep-computing/references/crash-and-memory-debugging.md",
+   "owner": "hep-computing",
+   "bytes": 8235,
+   "lines": 116,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-computing/references/engineering-playbook.md",
+    "skills/hep-computing/references/root-debugging.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
    "path": "skills/hep-computing/references/design-and-estimation.md",
    "owner": "hep-computing",
    "bytes": 7493,
@@ -1155,8 +1169,8 @@
   {
    "path": "skills/hep-computing/references/engineering-playbook.md",
    "owner": "hep-computing",
-   "bytes": 11267,
-   "lines": 186,
+   "bytes": 11602,
+   "lines": 193,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/README.md",
@@ -1318,13 +1332,14 @@
    "cited_by": [
     "skills/hep-analysis/references/hep-analysis-guide.md",
     "skills/hep-computing/SKILL.md",
+    "skills/hep-computing/references/crash-and-memory-debugging.md",
     "skills/hep-computing/references/root-balanced-design-guidelines.md",
     "skills/hep-computing/references/storage-cern-eos.md"
    ],
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "b0dce7a 2026-10-10"
+   "last_commit": "9add3f6 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/risk-and-quality.md",
@@ -1350,6 +1365,7 @@
     "skills/hep-analysis/references/hep-analysis-guide.md",
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/references/cpp-balanced-design-guidelines.md",
+    "skills/hep-computing/references/crash-and-memory-debugging.md",
     "skills/hep-computing/references/python-hep-coding-patterns.md"
    ],
    "cited_by_other_skills": [
@@ -1360,13 +1376,14 @@
   {
    "path": "skills/hep-computing/references/root-debugging.md",
    "owner": "hep-computing",
-   "bytes": 3293,
-   "lines": 93,
+   "bytes": 3556,
+   "lines": 99,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-analysis/references/hep-analysis-guide.md",
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/references/cmake-and-build.md",
+    "skills/hep-computing/references/crash-and-memory-debugging.md",
     "skills/hep-computing/references/root-balanced-design-guidelines.md"
    ],
    "cited_by_other_skills": [
@@ -1461,6 +1478,7 @@
     "skills/hep-computing/README.md",
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/references/agile-development-guide.md",
+    "skills/hep-computing/references/crash-and-memory-debugging.md",
     "skills/hep-computing/references/implementation-discipline.md",
     "skills/hep-computing/references/software-architecture.md"
    ],
@@ -3357,6 +3375,10 @@
   "data": [
    "skills/physics-ml/references/data-loading.md",
    "skills/physics-ml/references/data-strategy.md"
+  ],
+  "debugging": [
+   "skills/hep-computing/references/crash-and-memory-debugging.md",
+   "skills/hep-computing/references/root-debugging.md"
   ],
   "detection": [
    "skills/detector-response/references/ground-based-detection-arrays.md",

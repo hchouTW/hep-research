@@ -164,6 +164,13 @@ Do not add comments that merely repeat the code. Prefer clearer names and simple
 5. Once characterization tests exist, treat the area as any other tested code for
    the rest of this playbook's guidance (see Refactor, Bug Fix above).
 
+## References of the hep-computing skill
+
+Debugging, performance and numerics references beyond this playbook (all in `skills/hep-computing/references/`):
+
+- [Crash and memory debugging](crash-and-memory-debugging.md): reproducer, ROOT stack traces, gdb/lldb, valgrind with
+  ROOT's suppressions, sanitizers, ACLiC `+g`, leak triage.
+
 ## Scripts of the hep-computing skill
 
 In `skills/hep-computing/scripts/`; read `--help` first. Each locates its files from its own path (it does not depend
