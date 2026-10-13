@@ -164,7 +164,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `astroparticle-statistics.md` | hep-statistics | 11.3 | no | 12 | detector-response, hep-analysis | 33d96a1 2026-10-13 |
 | `combinations.md` | hep-statistics | 4.1 | no | 1 | - | 591e7d0 2026-10-13 |
 | `core-stats-commands.md` | hep-statistics | 33.5 | no | 4 | hep-analysis | d058154 2026-10-13 |
-| `core-stats-guide.md` | hep-statistics | 16.9 | yes | 10 | hep-analysis | d058154 2026-10-13 |
+| `core-stats-guide.md` | hep-statistics | 16.9 | yes | 10 | hep-analysis | 1909d51 2026-10-13 |
 | `inference-recipes.md` | hep-statistics | 18.2 | no | 8 | detector-response, hep-analysis | 1386866 2026-10-13 |
 | `likelihood-fitting.md` | hep-statistics | 9.1 | no | 6 | detector-response, hep-computing | 578c12f 2026-10-13 |
 | `ml-assisted-inference.md` | hep-statistics | 6.2 | yes | 6 | physics-ml | 06b86c8 2026-10-12 |
