@@ -131,6 +131,11 @@ Software checks establish contract consistency only, not physical validity.
 - **CMP-24 HTCondor event 002.** `parse_event_log` maps event 002 (error in executable) to `failed` with
   `failure_reason` `executable-error` (signature `...|reason=executable-error`) instead of leaving the job queued and
   asking `condor_q`; a later hold event still wins. The fake `condor_submit` gains an `executable-error` fault.
+- **CMP-21 bookkeeping.** `SKILL.md` Owns names `core/blinding` and `core/partition`; skill README counts (thirty-two
+  references, twelve test modules) and links to the new references; three static routing cases (`co-cmp-crash-1`,
+  `co-cmp-perf-1`, `co-cmp-ode-1`, all hep-computing, triggers from the existing description) in
+  `tests/routing/make_cases.py`, `cases.json` regenerated; capability-matrix rows for blinding, local partition,
+  ROOT tools, task authoring and the environment manifest updated; VALIDATION section CMP-REMEDIATION.
 
 ## 0.6.17 (2026-10-13)
 

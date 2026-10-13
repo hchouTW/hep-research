@@ -11,7 +11,7 @@ Use when the deliverable is working, reproducible scientific software or its exe
 | Path | Content |
 |---|---|
 | `SKILL.md` | entry point |
-| `references/` | twenty-nine references: engineering playbook, agile delivery, task authoring, ROOT design and debugging, CMake, Python HEP patterns, storage, environments and containers, batch scheduling, numerical methods, design guidelines (Python, C++, Bash), validation and definition of done |
+| `references/` | thirty-two references: engineering playbook, agile delivery, task authoring, ROOT design and debugging, crash and memory debugging, performance profiling, symbolic and numerical computation, CMake, Python HEP patterns, storage, environments and containers, batch scheduling, numerical methods, design guidelines (Python, C++, Bash), validation and definition of done |
 | `scripts/` | twenty helpers: interpreter choice, ROOT inspection and comparison, environment manifests, synthetic NanoAOD, task and skill-bundle validation, local partition, blinding audits |
 | `assets/` | task template, story card, definition of done, completion summary, risk register, example configs |
 | `examples/` | worked research tasks (bug, migration, data/ML, agentic loop) with their own README |
@@ -51,7 +51,7 @@ State after the 2026-10 remediation (CMP-08); checked by `tests/skills/test_cli_
 
 ## References
 
-`references/engineering-playbook.md` and `references/validation-and-done.md` set the working discipline; `references/task-authoring-guide.md` with `assets/task-template.md` is the entry point for writing a task for a coding agent; `references/batch-scheduling.md` for campaigns; `references/environments-and-containers.md` for LCG views and containers.
+`references/engineering-playbook.md` and `references/validation-and-done.md` set the working discipline; `references/task-authoring-guide.md` with `assets/task-template.md` is the entry point for writing a task for a coding agent; `references/batch-scheduling.md` for campaigns; `references/environments-and-containers.md` for LCG views and containers; `references/crash-and-memory-debugging.md`, `references/performance-profiling.md` and `references/symbolic-and-numerical-computation.md` for crashes and leaks, speed, and SymPy/SciPy accuracy.
 
 ## Handoffs
 
@@ -64,7 +64,7 @@ State after the 2026-10 remediation (CMP-08); checked by `tests/skills/test_cli_
 
 ## Tests and validation
 
-`tests/skills/hep_computing/` (eleven modules), the `core/partition` and `core/blinding` tests under `tests/core/`, the `local-partition` and `batch-partition` examples under `examples/`, and `tests/skills/test_cli_robustness.py`, which runs every shipped script with a missing input. What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
+`tests/skills/hep_computing/` (twelve test modules), the `core/partition` and `core/blinding` tests under `tests/core/`, the `local-partition` and `batch-partition` examples under `examples/`, and `tests/skills/test_cli_robustness.py`, which runs every shipped script with a missing input and checks the JSON status and exit codes of this skill's scripts (the script contract above). What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
 
 ## How this folder is used
 

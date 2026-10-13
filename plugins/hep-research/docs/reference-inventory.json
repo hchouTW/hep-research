@@ -1076,7 +1076,7 @@
     "tools/check_instruction_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0602de3 2026-10-13"
+   "last_commit": "a8efae4 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/batch-site-cern-htcondor.md",
@@ -1147,6 +1147,7 @@
    "lines": 116,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-computing/README.md",
     "skills/hep-computing/references/engineering-playbook.md",
     "skills/hep-computing/references/performance-profiling.md",
     "skills/hep-computing/references/root-debugging.md"
@@ -1291,6 +1292,7 @@
    "lines": 97,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-computing/README.md",
     "skills/hep-computing/references/crash-and-memory-debugging.md",
     "skills/hep-computing/references/engineering-playbook.md",
     "skills/hep-computing/references/symbolic-and-numerical-computation.md"
@@ -1461,6 +1463,7 @@
    "lines": 97,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-computing/README.md",
     "skills/hep-computing/references/engineering-playbook.md",
     "skills/hep-computing/references/numerical-and-computational-methods.md"
    ],

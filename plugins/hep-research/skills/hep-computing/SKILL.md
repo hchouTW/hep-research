@@ -5,7 +5,7 @@ description: "Use when the deliverable is working, reproducible scientific softw
 
 # hep-computing: scientific software and execution
 
-**Owns:** scientific software, symbolic and numerical execution, builds, I/O, debugging, performance, manifests, partition/merge/recovery, reproducibility, advisory blinding checks of outputs, logs and caches (enforcement lies outside the agent), research-task authoring; stewardship of `core/blinding`.
+**Owns:** scientific software, symbolic and numerical execution, builds, I/O, debugging, performance, manifests, partition/merge/recovery, reproducibility, advisory blinding checks of outputs, logs and caches (enforcement lies outside the agent), research-task authoring; stewardship of `core/blinding` and `core/partition`.
 **Typical artifacts:** code, `computational-run` (inputs with checksums, tool versions, commands, environment, seeds, tolerances, exit status, output hashes), output audits.
 **Never:** treat a successful run as scientific validity; install software system-wide or fetch from the network without the user's approval or beyond the session's egress policy (queries never carry protected content).
 
