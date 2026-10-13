@@ -9,19 +9,43 @@ right check is the variation's effect on the final result (refit / sensitivity),
 
 Inputs: a ROOT file (`--input`, needs PyROOT) or a JSON file (`--json`) of the form
 {"nominal": [...], "up": [...], "down": [...]} with matching bin contents (no PyROOT needed).
-Add `--format json` for a machine-readable report.
+The report is JSON by default (`--format text` for a readable one) and carries `status` (--status, default
+unvalidated; one of the core artifact_statuses).
+Exit codes: 0 ok; 2 usage or invalid input (NaN or inf bin, malformed or incomplete JSON, missing file); 3 incomplete
+(PyROOT needed for --input but not installed).
 """
 from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 
 DEFAULT_TOL = 1e-6  # relative tolerance on the integral and on the normalized shape
+STATUSES = ("failed", "unvalidated", "preliminary", "synthetic", "asimov", "observed", "user-supplied",
+            "validated-in-scope")  # contracts/vocab/core.json artifact_statuses
+
+
+class InputError(ValueError):
+    """Invalid or malformed input (exit 2)."""
+
+
+def _reject_constant(token):
+    raise InputError(f"non-finite number {token} in the input")
+
+
+def _bins(doc, key):
+    values = doc.get(key) if isinstance(doc, dict) else None
+    if not isinstance(values, list) or not values:
+        raise InputError(f"JSON input needs a non-empty list '{key}' of bin contents")
+    for i, v in enumerate(values):
+        if isinstance(v, bool) or not isinstance(v, (int, float)) or v != v or v in (float('inf'), float('-inf')):
+            raise InputError(f"'{key}' bin {i} must be a finite number, got {v!r}")
+    return [float(v) for v in values]
 
 
 def parse_args(argv=None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Check nominal/up/down histogram systematics and classify their effect.")
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     src = parser.add_mutually_exclusive_group(required=True)
     src.add_argument("--input", type=Path, help="ROOT file (requires PyROOT)")
     src.add_argument("--json", type=Path, help='JSON file {"nominal": [...], "up": [...], "down": [...]} of bin contents')
@@ -30,10 +54,14 @@ def parse_args(argv=None) -> argparse.Namespace:
     parser.add_argument("--down", help="Down-variation histogram path (ROOT input)")
     parser.add_argument("--include-flow", action="store_true", help="Include underflow and overflow bins")
     parser.add_argument("--tolerance", type=float, default=DEFAULT_TOL, help="relative tolerance (default %(default)g)")
-    parser.add_argument("--format", choices=("text", "json"), default="text")
+    parser.add_argument("--format", choices=("text", "json"), default="json")
+    parser.add_argument("--status", choices=STATUSES, default="unvalidated",
+                        help="status label of the inputs, echoed as status (default unvalidated)")
     args = parser.parse_args(argv)
     if args.input and not (args.nominal and args.up and args.down):
         parser.error("--input needs --nominal, --up and --down")
+    if not (args.tolerance == args.tolerance and 0 < args.tolerance < float('inf')):
+        parser.error("--tolerance must be finite and greater than zero")
     return args
 
 
@@ -133,6 +161,7 @@ def report(result: dict, fmt: str, header: list[str]) -> None:
     if fmt == "json":
         print(json.dumps(result, indent=1))
         return
+    print(f"status: {result['status']}")
     for line in header:
         print(line)
     for label in ("up", "down"):
@@ -148,17 +177,25 @@ def report(result: dict, fmt: str, header: list[str]) -> None:
 def main(argv=None) -> int:
     args = parse_args(argv)
     if args.json:
-        doc = json.loads(args.json.read_text(encoding="utf-8"))
-        result = assess(doc["nominal"], doc["up"], doc["down"], args.tolerance)
-        report(result, args.format, [f"file: {args.json}"])
+        try:
+            doc = json.loads(args.json.read_text(encoding="utf-8"), parse_constant=_reject_constant)
+        except json.JSONDecodeError as exc:
+            raise InputError(f"malformed JSON in {args.json}: {exc}") from None
+        nominal, up, down = (_bins(doc, k) for k in ("nominal", "up", "down"))
+        try:
+            result = assess(nominal, up, down, args.tolerance)
+        except ValueError as exc:
+            raise InputError(str(exc)) from None
+        report({"status": args.status, **result}, args.format, [f"file: {args.json}"])
         return 0
     if not args.input.exists():
         raise FileNotFoundError(f"ROOT file does not exist: {args.input}")
 
     try:
         import ROOT
-    except ImportError as exc:
-        raise SystemExit("PyROOT is required to check ROOT histogram systematics") from exc
+    except ImportError:
+        print("check_systematic_variations.py: incomplete: PyROOT is required for --input (use --json)", file=sys.stderr)
+        return 3
 
     root_file = ROOT.TFile.Open(str(args.input), "READ")
     try:
@@ -179,7 +216,7 @@ def main(argv=None) -> int:
             header += [f"{label} max absolute bin difference: {max_abs}", f"{label} max relative bin difference: {max_rel}",
                        f"{label} bin with max difference: {max_bin}"]
         result = assess(contents(nominal, bins), contents(up, bins), contents(down, bins), args.tolerance)
-        report(result, args.format, header)
+        report({"status": args.status, **result}, args.format, header)
     finally:
         if root_file:
             root_file.Close()
@@ -187,9 +224,8 @@ def main(argv=None) -> int:
 
 
 if __name__ == "__main__":
-    import sys as _sys
     try:
         raise SystemExit(main())
-    except OSError as _exc:  # a missing or unreadable input: one line, no traceback
-        print(f"check_systematic_variations.py: error: {_exc}", file=_sys.stderr)
+    except (OSError, InputError, KeyError, TypeError, ValueError) as _exc:  # bad input: one line, no traceback
+        print(f"check_systematic_variations.py: error: {_exc}", file=sys.stderr)
         raise SystemExit(2)

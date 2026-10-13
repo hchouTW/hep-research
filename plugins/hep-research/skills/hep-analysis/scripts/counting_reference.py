@@ -4,11 +4,18 @@
 Returns exact P(N >= n | b), and a Bayesian upper credible bound on signal s >= 0
 with a flat prior in s. This is NOT CLs and includes no nuisance parameters.
 Standard library only; intentionally limited to 0 <= n <= 500, 0 <= b <= 500.
+Status: --status (default unvalidated; one of the core artifact_statuses) is echoed as status.
+Exit codes: 0 ok; 1 the computation failed; 2 usage or invalid input (NaN, inf, malformed file);
+3 incomplete or inconclusive.
 Run: python3 <plugin root>/skills/hep-analysis/scripts/counting_reference.py --observed 0 --background 0
 """
 import argparse
 import json
 import math
+import sys
+
+STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
+            'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
 
 
 def validate(n, b):
@@ -76,13 +83,19 @@ def main():
     parser.add_argument('--observed', type=int, required=True)
     parser.add_argument('--background', type=float, required=True)
     parser.add_argument('--level', type=float, default=0.95)
+    parser.add_argument('--status', choices=STATUSES, default='unvalidated',
+                        help='status label of the inputs, echoed as status (default unvalidated)')
     args = parser.parse_args()
     try:
         bound = bayesian_upper(args.observed, args.background, args.level)
         tail = poisson_upper_tail(args.observed, args.background)
-    except (ValueError, ArithmeticError) as exc:
+    except ValueError as exc:
         parser.error(str(exc))
+    except ArithmeticError as exc:
+        print(f'{parser.prog}: failed: {exc}', file=sys.stderr)
+        return 1
     print(json.dumps({
+        'status': args.status,
         'model': 'Poisson(n | s+b), known b, s>=0',
         'method': 'Bayesian upper credible bound; flat prior in s; NOT CLs',
         'observed': args.observed, 'background': args.background,
@@ -90,7 +103,8 @@ def main():
         'background_only_upper_tail_p': tail,
         'tail_note': 'Extreme tails can underflow to 0 in double precision; not proof of zero probability.',
     }, indent=2))
+    return 0
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

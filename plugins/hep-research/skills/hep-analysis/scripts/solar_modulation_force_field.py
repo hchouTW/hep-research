@@ -30,12 +30,18 @@ short-timescale transients (Forbush decreases, SEP events), all flagged in
 <plugin root>/skills/detector-response/references/space-based-direct-detection.md; do not use it to correct data taken
 during such a transient. Energies must be finite and positive; phi and mass must be
 finite and nonnegative; charge must be a positive integer.
+Status: --status (default unvalidated; one of the core artifact_statuses) is echoed as status.
+Exit codes: 0 ok; 1 the computation failed; 2 usage or invalid input (NaN, inf, malformed file);
+3 incomplete or inconclusive.
 Run: python3 <plugin root>/skills/hep-analysis/scripts/solar_modulation_force_field.py --modulate --energy 1.0 --mass 0.938272 --charge 1 --phi 0.5 --lis-normalization 1e4 --lis-index 2.7
      python3 <plugin root>/skills/hep-analysis/scripts/solar_modulation_force_field.py --demodulate --energy 1.0 --mass 0.938272 --charge 1 --phi 0.5 --toa-flux 123.4
 """
 import argparse
 import json
 import math
+
+STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
+            'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
 
 
 def _finite(value, name, allow_zero=True):
@@ -124,12 +130,17 @@ def main():
                         help='(--modulate only) LIS power-law index gamma')
     parser.add_argument('--toa-flux', type=float, dest='toa_flux',
                         help='(--demodulate only) the measured flux at 1 AU/TOA energy')
+    parser.add_argument('--status', choices=STATUSES, default='unvalidated',
+                        help='status label of the inputs, echoed as status (default unvalidated)')
     args = parser.parse_args()
 
     try:
         if args.modulate:
             if args.lis_normalization is None or args.lis_index is None:
                 raise ValueError('--modulate requires --lis-normalization and --lis-index')
+            _finite(args.lis_normalization, 'lis_normalization', allow_zero=False)
+            if isinstance(args.lis_index, bool) or not math.isfinite(args.lis_index):
+                raise ValueError('lis_index must be a finite number')
 
             def lis_flux_func(e):
                 return power_law_lis(e, args.lis_normalization, args.lis_index)
@@ -144,7 +155,7 @@ def main():
     except ValueError as exc:
         parser.error(str(exc))
 
-    print(json.dumps({'method': method, **result}, indent=2))
+    print(json.dumps({'status': args.status, 'method': method, **result}, indent=2))
 
 
 if __name__ == '__main__':

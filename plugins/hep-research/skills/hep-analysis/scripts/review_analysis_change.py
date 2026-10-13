@@ -27,9 +27,10 @@ Decision per change:
   needs-provenance  not exposed, but no independent evidence recorded yet
   exposure-unknown  not flagged, but what was looked at is unknown or incomplete: record it before accepting
 This review is advisory: it reads what the caller records and cannot see what was actually looked at.
-Output: JSON report. Exit codes: 0 nothing flagged, 1 any change flagged, 2 bad input (including a malformed
-data_exposure record).
-Run: python3 <plugin root>/skills/hep-analysis/scripts/review_analysis_change.py changes.json
+Output: JSON report with status (--status, default unvalidated; one of the core artifact_statuses). Exit codes:
+0 nothing flagged, 1 any change flagged, 2 bad input (including a malformed data_exposure record, NaN or inf, or
+malformed JSON; the error is also one line on stderr).
+Run: python3 <plugin root>/skills/hep-analysis/scripts/review_analysis_change.py changes.json [--status S]
 Standard library only.
 """
 from __future__ import annotations
@@ -53,10 +54,22 @@ CONTROL_ONLY = re.compile(
     r"|(cosmic ray )?calibration( (data|samples?|runs?))?( only)?)$")
 EXPOSURE_STATES = ("unexposed", "exposed", "unknown", "incomplete")
 RANK = {"unexposed": 0, "unknown": 1, "incomplete": 1, "exposed": 2}
+STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
+            'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
 
 
 class BadExposure(ValueError):
     pass
+
+
+def _reject_constant(token):
+    raise ValueError(f"non-finite number {token} in the input")
+
+
+def _fail(message: str) -> int:
+    print(json.dumps({"error": message}))
+    print(f"review_analysis_change.py: error: {message}", file=sys.stderr)
+    return 2
 
 
 def control_only(entry) -> bool:
@@ -127,24 +140,28 @@ def main(argv=None) -> int:
     if args and args[0] in ("-h", "--help"):
         print(__doc__)
         return 0
+    status = "unvalidated"
+    if "--status" in args:
+        k = args.index("--status")
+        if k + 1 >= len(args) or args[k + 1] not in STATUSES:
+            return _fail(f"--status needs one of {', '.join(STATUSES)}")
+        status = args[k + 1]
+        del args[k:k + 2]
     if len(args) != 1:
         print(__doc__)
         return 2
     try:
         with open(args[0], encoding="utf-8") as fh:
-            changes = json.load(fh)["changes"]
-    except (OSError, ValueError, KeyError) as exc:
-        print(json.dumps({"error": str(exc)}))
-        return 2
+            changes = json.load(fh, parse_constant=_reject_constant)["changes"]
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        return _fail(str(exc))
     if not isinstance(changes, list) or not all(isinstance(c, dict) for c in changes):
-        print(json.dumps({"error": "'changes' must be a list of objects"}))
-        return 2
+        return _fail("'changes' must be a list of objects")
     try:
         rows = [review(c) for c in changes]
     except BadExposure as exc:
-        print(json.dumps({"error": str(exc)}))
-        return 2
-    print(json.dumps({"changes": rows, "flagged": sum(r["decision"] == "flag" for r in rows),
+        return _fail(str(exc))
+    print(json.dumps({"status": status, "changes": rows, "flagged": sum(r["decision"] == "flag" for r in rows),
                       "exposure_unknown": sum(r["decision"] == "exposure-unknown" for r in rows)}, indent=1))
     return 1 if any(r["decision"] == "flag" for r in rows) else 0
 

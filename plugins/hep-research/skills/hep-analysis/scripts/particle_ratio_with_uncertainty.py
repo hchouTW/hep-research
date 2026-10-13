@@ -28,12 +28,18 @@ propagation, valid when sigma1/N1 and sigma2/N2 are both reasonably small (say, 
 full likelihood-based interval (as in <plugin root>/skills/detector-response/scripts/tag_and_probe_efficiency.py's exact
 binomial treatment, if the two yields are in fact from one binomial trial) is more
 reliable than this Gaussian approximation.
+Status: --status (default unvalidated; one of the core artifact_statuses) is echoed as status.
+Exit codes: 0 ok; 1 the computation failed; 2 usage or invalid input (NaN, inf, malformed file);
+3 incomplete or inconclusive.
 Run: python3 <plugin root>/skills/hep-analysis/scripts/particle_ratio_with_uncertainty.py --n1 1200 --sigma1 40 --n2 85000 --sigma2 300
      python3 <plugin root>/skills/hep-analysis/scripts/particle_ratio_with_uncertainty.py --n1 1200 --sigma1 40 --n2 85000 --sigma2 300 --correlation 0.2
 """
 import argparse
 import json
 import math
+
+STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
+            'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
 
 
 def _positive_finite(value, name):
@@ -97,6 +103,8 @@ def main():
     parser.add_argument('--sigma2', type=float, required=True, help='uncertainty on n2')
     parser.add_argument('--correlation', type=float, default=0.0,
                         help='correlation coefficient between n1 and n2 (default 0, independent)')
+    parser.add_argument('--status', choices=STATUSES, default='unvalidated',
+                        help='status label of the inputs, echoed as status (default unvalidated)')
     args = parser.parse_args()
 
     try:
@@ -105,6 +113,7 @@ def main():
         parser.error(str(exc))
 
     print(json.dumps({
+        'status': args.status,
         'method': 'first-order (delta-method) error propagation for two independent yields',
         **result,
         'caveat': 'Gaussian/delta-method approximation - not valid for large relative uncertainty on either yield.',

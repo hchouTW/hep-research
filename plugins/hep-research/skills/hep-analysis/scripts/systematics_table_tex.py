@@ -11,6 +11,8 @@ LaTeX comment; per-row statuses get their own column.
 Usage:
   python3 systematics_table_tex.py --input systematics.csv --status synthetic [--columns source,type,correlation_key]
          [--caption TEXT] [--label tab:systematics] [--out table.tex]
+Statuses: the core artifact_statuses plus `published` (a table-only value: a published table is a legitimate source).
+A cell that reads nan or inf is refused.
 Needs \\usepackage{booktabs} in the document. Exit codes: 0 written, 2 refused input. Standard library only.
 """
 from __future__ import annotations
@@ -24,8 +26,10 @@ DEFAULT_COLUMNS = ["source", "type", "process_scope", "region_scope", "correlati
 HEADERS = {"source": "Source", "type": "Type", "process_scope": "Processes", "era_scope": "Periods",
            "region_scope": "Regions", "correlation_key": "Correlation", "rate_shape": "Effect", "payload": "Payload",
            "validation": "Validation", "status": "Status"}
-STATUSES = ("synthetic", "asimov", "observed", "preliminary", "published", "unvalidated", "user-supplied")
-FLAGGED = ("synthetic", "asimov", "preliminary", "unvalidated")  # said in the caption itself
+STATUSES = ("failed", "unvalidated", "preliminary", "synthetic", "asimov", "observed", "user-supplied",
+            "validated-in-scope", "published")  # core artifact_statuses + published (tables only)
+FLAGGED = ("failed", "synthetic", "asimov", "preliminary", "unvalidated")  # said in the caption itself
+NON_FINITE = {"nan", "+nan", "-nan", "inf", "+inf", "-inf", "infinity", "+infinity", "-infinity"}
 SPECIAL = {"\\": r"\textbackslash{}", "&": r"\&", "%": r"\%", "$": r"\$", "#": r"\#", "_": r"\_", "{": r"\{",
            "}": r"\}", "~": r"\textasciitilde{}", "^": r"\textasciicircum{}"}
 
@@ -51,6 +55,10 @@ def render(rows: list[dict], columns: list[str], status: str | None, caption: st
             if s not in STATUSES:
                 raise Refused(f"row {i}: status {s!r} is not one of {', '.join(STATUSES)}")
             statuses.add(s)
+    for i, r in enumerate(rows, 1):
+        for c, v in r.items():
+            if isinstance(v, str) and v.strip().lower() in NON_FINITE:
+                raise Refused(f"row {i}, column {c!r}: non-finite value {v.strip()!r}")
     missing = [c for c in columns if c not in rows[0]]
     if missing:
         raise Refused(f"columns not in the CSV: {missing}")
@@ -70,7 +78,7 @@ def render(rows: list[dict], columns: list[str], status: str | None, caption: st
 
 
 def main(argv: list[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--input", type=Path, required=True, help="systematics CSV (assets/systematics.csv format)")
     ap.add_argument("--status", choices=STATUSES, help="status of the whole table (or give a status column)")
     ap.add_argument("--columns", default=",".join(DEFAULT_COLUMNS), help="comma-separated CSV columns, in order")

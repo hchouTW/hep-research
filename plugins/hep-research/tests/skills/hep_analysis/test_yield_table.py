@@ -17,7 +17,7 @@ def run(csv_text=None, path=None, *extra):
         if path is None:
             path = Path(tmp) / 'yields.csv'
             path.write_text(csv_text, encoding='utf-8')
-        return subprocess.run([sys.executable, str(SCRIPT), '--input', str(path), *extra],
+        return subprocess.run([sys.executable, str(SCRIPT), '--input', str(path), '--status', 'synthetic', *extra],
                               capture_output=True, text=True, timeout=600)
 
 
@@ -59,9 +59,9 @@ class YieldTableTests(unittest.TestCase):
     def test_errors_are_reported_without_traceback(self):
         for proc in (run(path=Path('/nonexistent/yields.csv')), run(''), run('region,sample\nSR,ttbar\n'),
                      run('region,sample,yield\nSR,ttbar,abc\n')):
-            self.assertNotEqual(proc.returncode, 0)
+            self.assertEqual(proc.returncode, 2)  # P2-0: invalid input is exit 2
             self.assertNotIn('Traceback', proc.stderr)
-            self.assertTrue(proc.stderr.startswith('error: '), proc.stderr)
+            self.assertTrue(proc.stderr.startswith('make_yield_table.py: error: '), proc.stderr)
 
 
 if __name__ == '__main__':

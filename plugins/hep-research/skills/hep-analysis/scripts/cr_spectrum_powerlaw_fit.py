@@ -26,12 +26,22 @@ as good as the assumption of comparable per-point scatter). This is a spectral-i
 fit only - it does not itself account for detector energy resolution/migration, so it
 should not be used as a substitute for forward-folding a spectral hypothesis through
 an instrument response (see <plugin root>/skills/hep-analysis/references/measurements-and-unfolding.md).
+Status: --status (default unvalidated; one of the core artifact_statuses) is echoed as status.
+Exit codes: 0 ok; 1 the computation failed; 2 usage or invalid input (NaN, inf, malformed file);
+3 incomplete or inconclusive.
 Run: python3 <plugin root>/skills/hep-analysis/scripts/cr_spectrum_powerlaw_fit.py --input <plugin root>/skills/hep-analysis/assets/cosmic-ray-spectrum.example.json
      python3 <plugin root>/skills/hep-analysis/scripts/cr_spectrum_powerlaw_fit.py --input <plugin root>/skills/hep-analysis/assets/cosmic-ray-spectrum.example.json --break-energy 4.5e15
 """
 import argparse
 import json
 import math
+
+STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
+            'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
+
+
+def _reject_constant(token):
+    raise ValueError(f'non-finite number {token} in the input')
 
 
 def _clean_points(points):
@@ -151,11 +161,13 @@ def main():
                         help='JSON file with {"points": [[energy, flux] or [energy, flux, sigma_flux], ...]}')
     parser.add_argument('--break-energy', type=float, default=None, dest='break_energy',
                         help='if given, fit two segments split at this energy instead of one power law')
+    parser.add_argument('--status', choices=STATUSES, default='unvalidated',
+                        help='status label of the inputs, echoed as status (default unvalidated)')
     args = parser.parse_args()
 
     try:
         with open(args.input, encoding='utf-8') as handle:
-            payload = json.load(handle)
+            payload = json.load(handle, parse_constant=_reject_constant)
         if not isinstance(payload, dict) or 'points' not in payload:
             raise ValueError('input must be a JSON object with a "points" list')
         if args.break_energy is not None:
@@ -167,7 +179,7 @@ def main():
     except (OSError, ValueError, json.JSONDecodeError) as exc:
         parser.error(str(exc))
 
-    print(json.dumps({'method': method, **result}, indent=2))
+    print(json.dumps({'status': args.status, 'method': method, **result}, indent=2))
 
 
 if __name__ == '__main__':

@@ -40,6 +40,7 @@ Bin-width unit: --bin-width-unit is required and is echoed as bin_width_unit. Th
 must be in the unit the flux is differential in (per GV: 600 for a 1.2-1.8 TV bin; never
 pass a width in TV when the flux is quoted per GV, which makes the flux 1000x too large).
 
+Status: --status (default unvalidated; one of the core artifact_statuses) is echoed as status.
 Exit codes: 0 ok; 1 the interval could not be computed (a core solve failed); 2 invalid
 input or usage (nothing on stdout, one line on stderr); 3 unsupported range (the method's
 grid or mean limit is exceeded; the message names the alternative).
@@ -70,6 +71,8 @@ from core.stats.poisson_diagnostics import central_interval, fc_interval  # noqa
 BIN_WIDTH_UNITS = ('GV', 'GeV', 'GeV/n', 'TeV', 'TV')
 METHODS = ('auto', 'garwood', 'feldman-cousins', 'cousins-highland', 'profile-fc', 'naive')
 APPROXIMATE_METHODS = ('naive', 'cousins-highland')
+STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
+            'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
 
 
 class UnsupportedRange(ValueError):
@@ -283,6 +286,8 @@ def main():
     parser.add_argument('--seed', type=int, default=None, help='seed for --method profile-fc')
     parser.add_argument('--exposure-rel-uncertainty', type=float, default=None, dest='exposure_rel_uncertainty',
                         help='relative exposure uncertainty, reported as flux_syst_exposure (not in the interval)')
+    parser.add_argument('--status', choices=STATUSES, default='unvalidated',
+                        help='status label of the inputs, echoed as status (default unvalidated)')
     args = parser.parse_args()
 
     try:
@@ -298,7 +303,7 @@ def main():
     except ValueError as exc:
         parser.error(str(exc))
 
-    print(json.dumps(result, indent=2))
+    print(json.dumps({'status': args.status, **result}, indent=2))
     return 0
 
 

@@ -53,6 +53,10 @@
      {
       "flag": "--exposure-rel-uncertainty",
       "input": "exposure_rel_uncertainty"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
      }
     ]
    },
@@ -137,9 +141,22 @@
      "unit": "1",
      "required": false,
      "constraint": "finite, >= 0; reported separately as flux_syst_exposure"
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status",
+     "default": "unvalidated"
     }
    ],
    "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
     {
      "name": "method_id",
      "kind": "label",

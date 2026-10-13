@@ -26,6 +26,9 @@ both are planning-level simplifications. It does NOT replace backtracing a real
 satellite ephemeris through a full geomagnetic field model (e.g. IGRF), which is
 required for a real mission's actual event-by-event cutoff, per the same caveat
 already stated for the single-latitude formula in geomagnetic_cutoff.py.
+Status: --status (default unvalidated; one of the core artifact_statuses) is echoed as status.
+Exit codes: 0 ok; 1 the computation failed; 2 usage or invalid input (NaN, inf, malformed file);
+3 incomplete or inconclusive.
 Run: python3 <plugin root>/skills/hep-analysis/scripts/orbit_averaged_geomagnetic_cutoff.py --inclination 51.6 --altitude-re 1.0627
 """
 import argparse
@@ -35,7 +38,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))  # the sibling script, also under python3 -I
-from geomagnetic_cutoff import DEFAULT_DIPOLE_MOMENT_G_CM3, stormer_cutoff_gv  # noqa: E402
+from geomagnetic_cutoff import DEFAULT_DIPOLE_MOMENT_G_CM3, STATUSES, stormer_cutoff_gv  # noqa: E402
 
 
 def _finite(value, name, positive=False):
@@ -105,6 +108,8 @@ def main():
                         help='dipole moment in G*cm^3 (default: approximate present epoch)')
     parser.add_argument('--n-samples', type=int, default=2000, dest='n_samples',
                         help='number of true-anomaly samples over the quarter-orbit (default 2000)')
+    parser.add_argument('--status', choices=STATUSES, default='unvalidated',
+                        help='status label of the inputs, echoed as status (default unvalidated)')
     args = parser.parse_args()
 
     try:
@@ -114,6 +119,7 @@ def main():
         parser.error(str(exc))
 
     print(json.dumps({
+        'status': args.status,
         'method': 'time-weighted quadrature over vertical Stormer dipole cutoff along an inclined circular orbit',
         **result,
     }, indent=2))

@@ -25,6 +25,9 @@ this formula replaces - see the docstring caveat repeated in the reference file.
 Rigidity in GV, distance in Earth radii (default 1.0 = sea level, ignoring altitude
 above the surface for simplicity), dipole moment in G*cm^3 (default value below is the
 approximate present-epoch value, not tied to a specific IGRF release).
+Status: --status (default unvalidated; one of the core artifact_statuses) is echoed as status.
+Exit codes: 0 ok; 1 the computation failed; 2 usage or invalid input (NaN, inf, malformed file);
+3 incomplete or inconclusive.
 Run: python3 <plugin root>/skills/hep-analysis/scripts/geomagnetic_cutoff.py --latitude 0
      python3 <plugin root>/skills/hep-analysis/scripts/geomagnetic_cutoff.py --latitude 41.5 --altitude-re 1.0009 --charge 1 --mass-number 1
 """
@@ -36,6 +39,8 @@ EARTH_RADIUS_CM = 6.371e8
 DEFAULT_DIPOLE_MOMENT_G_CM3 = 8.05e25
 PROTON_MASS_GEV = 0.938272  # PDG
 ATOMIC_MASS_UNIT_GEV = 0.9315  # nuclear mass ~ A * u for A > 1 (binding energy ignored)
+STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
+            'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
 
 
 def _finite(value, name):
@@ -105,6 +110,8 @@ def main():
     parser.add_argument('--charge', type=int, help='nucleus charge Z, for the energy conversion')
     parser.add_argument('--mass-number', type=int, dest='mass_number',
                         help='nucleus mass number A, for the energy conversion')
+    parser.add_argument('--status', choices=STATUSES, default='unvalidated',
+                        help='status label of the inputs, echoed as status (default unvalidated)')
     args = parser.parse_args()
 
     try:
@@ -125,6 +132,7 @@ def main():
         parser.error(str(exc))
 
     print(json.dumps({
+        'status': args.status,
         'method': 'vertical Stormer dipole cutoff (idealized; see docstring caveats)',
         **result,
     }, indent=2))
