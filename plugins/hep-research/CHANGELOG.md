@@ -39,6 +39,12 @@ Software checks establish contract consistency only, not physical validity.
   one JSON object with `status`; uproot backend when PyROOT is absent (`--backend`). Exit 0 within tolerance, 1 outside
   or shape/edge mismatch (no traceback), 2 bad input, 3 no backend. Tests: `tests/skills/hep_computing/test_compare_histograms.py`
   (uproot, E2); `test_root_integration.py` now parses the JSON (PyROOT).
+- **CMP-07 `environment_manifest.py` drift, inputs, project, output.** Records `system` (OS family, architecture,
+  libc: compared; kernel release: a note only) instead of comparing `platform.platform()`; also compares `executable`
+  and `machine`. `record --inputs FILE...` writes `input_manifest` (`path`, `sha256`, `size`; validates as a
+  `computational-run`), `check` reports changed or missing inputs and, with `--project`, a changed commit or a dirty
+  checkout. `--out` creates parent folders; an unwritable output is a JSON error, exit 2; `record` prints a JSON
+  `status` (`recorded`). `references/environments-and-containers.md` updated.
 
 ## 0.6.17 (2026-10-13)
 
