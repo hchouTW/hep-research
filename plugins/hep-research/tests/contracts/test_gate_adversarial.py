@@ -8,6 +8,7 @@ result_artifact.py wrote a converged fit from an output without a status. Each c
 the check, the expected verdict and its reason code. The statistical-result mutations start from the published sbottom
 likelihood artifact relabelled 'observed' with an analytic coverage justification (so the unmutated base passes the
 gate), as evidence/probes_t1.py of the hardening order does. All inputs are SYNTHETIC placeholders."""
+import copy
 import json
 import math
 import subprocess
@@ -25,10 +26,35 @@ from contracts.comparison.model_set import envelope  # noqa: E402
 from contracts.validate import publication_gate  # noqa: E402
 
 SBOTTOM = ROOT / "examples/stats-benchmarks/published-likelihood-sbottom/output/artifacts/statistical_result.json"
+# The sbottom artifact as committed on c1d375c, inlined so the test also runs in a copy without example outputs
+# (tools/check_ams_optional.py); SameAsCommitted checks the two agree where the outputs exist.
+SBOTTOM_DOC = {
+    "contract_version": "2.2.0", "bindings": {"experiments": [], "theory": []},
+    "versions": {"plugin": "0.6.17", "contracts": "2.2.0", "plugin_release": {"release": "unreleased", "digest": "unknown"},
+                 "profiles": {}},
+    "provenance": {"producer_skill": "hep-statistics", "created": "2026-10-12", "evidence_ids": ["hepstats:S09"]},
+    "outputs": [], "unresolved_inputs": [], "artifact_id": "atlas-susy-2018-31-srb-model-independent-limit",
+    "artifact_type": "statistical-result",
+    "objective": "SRB model-independent 95% CLs upper limit on the signal count, reproduced from the public likelihood",
+    "inputs": [{"ref": "artifacts/computational_run.json", "artifact_type": "computational-run", "status": ["observed"]}],
+    "status": ["observed", "unvalidated"], "required_capabilities": ["stats:result-semantics"],
+    "extension": {
+        "paradigm": "frequentist",
+        "likelihood": {"form": "HistFactory (pyhf JSON), RegionB without validation channels, unit signal in SR_cuts",
+                       "backend": "pyhf", "backend_version": "0.7.6", "model_ref": "HEPData resource 1935437:RegionB/BkgOnly.json",
+                       "model_sha256": "c425e741d8ab0adfbf8611ae86a92f24d7071ccaeb7bf3b2937bcc75a5712fa8"},
+        "parameters_of_interest": ["S (signal events in SRB)"], "nuisances": ["the workspace's 59 parameters"],
+        "test_statistic": "q-tilde", "construction": "asymptotic",
+        "coverage": {"check": "not-checked", "method": "not studied; CLs over-covers by design"},
+        "expected": {"median": 5.1350258383117335, "band_1sigma": [3.4314549407250112, 7.910181594950525],
+                     "band_2sigma": [2.4315197316423527, 11.912789154830808], "method": "asimov"},
+        "fit_status": "converged",
+        "results": {"S95_observed": 4.875722588506896, "CLb_at_S95_observed": 0.45128968408936976, "p0": 0.49968969912493844,
+                    "cl": 0.95, "comparison_ref": "results.json#asymptotic.comparison"}}}
 
 
 def _base() -> dict:
-    d = json.loads(SBOTTOM.read_text(encoding="utf-8"))
+    d = copy.deepcopy(SBOTTOM_DOC)
     d["status"] = ["observed"]
     d["extension"]["coverage"] = {"check": "analytic", "method": "CLs over-covers by construction (probe base)"}
     return d
@@ -96,6 +122,12 @@ BAYES_CASES = {
 
 def _codes(g) -> set:
     return {r["code"] for r in g["reasons"]}
+
+
+class SameAsCommitted(unittest.TestCase):
+    @unittest.skipUnless(SBOTTOM.exists(), "example outputs not present in this copy")
+    def test_inlined_base_is_the_committed_artifact(self):
+        self.assertEqual(json.loads(SBOTTOM.read_text(encoding="utf-8")), SBOTTOM_DOC)
 
 
 class BasesPass(unittest.TestCase):

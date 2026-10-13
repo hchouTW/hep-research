@@ -277,7 +277,7 @@ def _apply(st: dict, t: dict, i: int, mism: list) -> None:
             st["edges"] = sorted(float(x) for x in mapped)
             st["edge_map"] = {"from": list(cur), "to": list(mapped)}
     elif k == "unit-conversion":
-        f = t.get("factor")
+        f: Any = t.get("factor")
         if t.get("from") != st["unit"] or not _is_num(f):
             _mm(mism, where, st["unit"], t.get("to"), "unit conversion from a different unit or without a numeric factor", "fix 'from' and 'factor'")
             return

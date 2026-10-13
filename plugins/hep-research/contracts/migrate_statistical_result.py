@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Migrate a statistical-result written under contracts < 2.2.0 to the current contracts version (2.2.0 rules or later), with explicit diagnostics (audit T08).
+"""Migrate a statistical-result written under an older contract to the current contracts version, with explicit diagnostics (audit T08, STH-T1.8).
 
 Contracts 2.2.0 apply semantic rules to statistical-result artifacts (contracts.validate._stat_semantics) that older
 artifacts were never checked against. Old artifacts stay valid under their own version; this converter is how one is
@@ -14,8 +14,14 @@ change, each with a diagnostic:
 - a scan's global p-value without trials_method is kept and reported (stats.trials_method_missing stays unresolved);
   the converter never invents a trials method.
 
+A 2.2-2.5 artifact is brought to 2.6.0 (the hardening rules of contracts.validate._stat_hardening and
+_bayesian_hardening, STH-T1): only its version changes, and it is refused when it breaks a 2.6.0 error rule (a
+coverage interval wider than its counts allow, a p-value of 0, z and p that disagree, a construction with a test
+statistic it does not use, a malformed model_sha256, ...). Missing evidence stays unresolved and is reported; the
+converter never invents a seed, a toy count or an expected band.
+
 Usage: python3 contracts/migrate_statistical_result.py OLD.json [--out NEW.json]
-Exit codes: 0 migrated (or already 2.2.0 or newer), 1 refused, 2 unreadable input or not a statistical-result.
+Exit codes: 0 migrated (or already 2.6.0 or newer), 1 refused, 2 unreadable input or not a statistical-result.
 Output: JSON report {status, diagnostics, refusals} on stdout; the migrated artifact goes to --out.
 """
 from __future__ import annotations
@@ -29,7 +35,7 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from contracts import CONTRACTS_VERSION  # noqa: E402
-from contracts.validate import STAT_SEMANTICS_FROM, _at_least, validate_artifact  # noqa: E402
+from contracts.validate import STAT_HARDENING_FROM, STAT_SEMANTICS_FROM, _at_least, validate_artifact  # noqa: E402
 
 CAPABILITY = "stats:result-semantics"
 
@@ -40,7 +46,7 @@ def migrate(doc: dict) -> tuple[dict | None, dict]:
     if not isinstance(doc, dict) or doc.get("artifact_type") != "statistical-result":
         return None, {"status": "refused", "diagnostics": [], "refusals": [
             {"code": "migrate.not_statistical_result", "message": "only statistical-result artifacts are migrated"}]}
-    if _at_least(doc.get("contract_version"), STAT_SEMANTICS_FROM):
+    if _at_least(doc.get("contract_version"), STAT_HARDENING_FROM):
         return copy.deepcopy(doc), {"status": "unchanged", "diagnostics": [
             {"code": "migrate.already_current", "message": f"contract_version {doc.get('contract_version')} already applies the rules"}],
             "refusals": []}
@@ -61,7 +67,7 @@ def migrate(doc: dict) -> tuple[dict | None, dict]:
                                                               f"required capability {CAPABILITY} added"})
     ext = new.get("extension", {})
     cov = ext.get("coverage")
-    if isinstance(cov, dict) and cov and "check" not in cov:
+    if not _at_least(old_version, STAT_SEMANTICS_FROM) and isinstance(cov, dict) and cov and "check" not in cov:
         cov["check"] = "not-checked"
         diagnostics.append({"code": "migrate.coverage_untyped", "message": "untyped coverage marked check not-checked "
                                                                            "(fields kept): it is not coverage evidence"})

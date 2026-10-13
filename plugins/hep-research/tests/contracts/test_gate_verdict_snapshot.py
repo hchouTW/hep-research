@@ -69,6 +69,9 @@ class VerdictSnapshot(unittest.TestCase):
         problems = []
         for path in sorted(set(recorded) | set(now)):
             if path not in now:
+                parts = Path(path).parts
+                if "output" in parts and not (ROOT / Path(*parts[:parts.index("output") + 1])).exists():
+                    continue  # a copy without example outputs (tools/check_ams_optional.py copies none)
                 problems.append(f"{path}: in the snapshot but no longer committed")
                 continue
             if path not in recorded:

@@ -186,7 +186,40 @@ def ml_v25_splits(**splits):
                           **splits})
 
 
+def statres_v26(**extra):
+    """statistical-result under the 2.6.0 hardening rules: toy-calibrated profile limit with seeds, toy coverage whose
+    interval matches its counts, expected bands, z consistent with p, a well-formed model hash."""
+    from contracts import CONTRACTS_VERSION
+    ext = {"paradigm": "frequentist", "likelihood": {"form": "poisson (synthetic)", "backend": "core.stats.likelihood_limits",
+                                                      "model_sha256": "0" * 64},
+           "parameters_of_interest": ["mu"], "nuisances": [], "fit_status": "converged",
+           "test_statistic": "q_mu", "construction": "toy-calibrated-profile",
+           "coverage": {"check": "toys", "method": "seeded toys of the full procedure (synthetic)", "n_toys": 1000,
+                        "coverage": 0.951, "interval": [0.944, 0.957], "cl": 0.95},
+           "seeds": {"toys": 1, "coverage": 2},
+           "expected": {"median": 1.2, "band_1sigma": [0.9, 1.7], "band_2sigma": [0.7, 2.4], "method": "toys"},
+           "significance": {"local_p": 0.3, "local_z": 0.5244},
+           "goodness_of_fit": {"statistic": "saturated-deviance", "p_value": 0.4, "calibration": "toys", "n_toys": 1000},
+           "results": {"mu_95": 2.1, "cl": 0.95, "p0": 0.3}, **extra}
+    ext = {k: x for k, x in ext.items() if x is not None}  # extra key=None removes the field
+    return envelope("statistical-result", ext, "hep-statistics", contract_version=CONTRACTS_VERSION,
+                    versions={"plugin": "0.6.17", "contracts": CONTRACTS_VERSION, "profiles": {}},
+                    required_capabilities=["stats:result-semantics"])
+
+
+def statres_v26_bayes(**extra):
+    """Bayesian statistical-result under the 2.6.0 rules: a proper prior on the POI, chains recorded, ESS above floor."""
+    ext = {"paradigm": "bayesian", "priors": [{"parameter": "mu", "form": "uniform(0, 10)"}],
+           "sampler": {"name": "metropolis (synthetic)", "chains": 4, "draws": 4000},
+           "convergence": {"rhat": 1.002, "ess_bulk": 3000, "ess_tail": 2500}, "test_statistic": None,
+           "construction": None, "coverage": None, "seeds": {"chains": 7}, "expected": None, "significance": None,
+           "goodness_of_fit": None, "results": {"mu_median": 1.1}, **extra}
+    return statres_v26(**ext)
+
+
 VALID = {
+    "statres_v26.json": statres_v26(),
+    "statres_v26_bayesian.json": statres_v26_bayes(),
     "measurement_collider.json": measurement(),
     "measurement_exposure.json": measurement("exposure", observable=observable("exposure", level="detector", quantity="differential-flux", unit="m^-2 sr^-1 s^-1 GV^-1", variables=[{"name": "rigidity", "unit": "GV", "edges": [1, 2, 4]}])),
     "measurement_protons_on_target.json": measurement("protons-on-target", observable=observable("protons-on-target", level="detector", quantity="event-count", unit="1")),
@@ -280,6 +313,21 @@ d = communication_rich(); d["required_capabilities"] = []; bad["communication_tr
 d = communication_rich(); d["extension"]["claims"][1]["status"] = ["observed"]; d["extension"]["claims"][1]["assessment"]["currency"] = "stale"; bad["communication_claim_status_upgraded.json"] = (d, ["communication.status_upgraded"])
 d = communication_rich(); d["extension"]["claims"][2]["status"] = ["observed", "synthetic", "unvalidated"]; d["extension"]["claims"][2]["assessment"]["currency"] = "stale"; bad["communication_claim_status_conflict.json"] = (d, ["communication.claim_status_conflict"])
 
+# contracts 2.6.0 statistical-result hardening (STH-T1): one fixture per new error code
+_COV = {"check": "toys", "method": "seeded toys (synthetic)", "n_toys": 1000, "coverage": 0.951, "cl": 0.95}
+bad["statres_v26_coverage_cl_mismatch.json"] = (statres_v26(coverage={**_COV, "cl": 0.68, "coverage": 0.69}), ["stats.coverage_cl_mismatch"])
+bad["statres_v26_coverage_interval_wide.json"] = (statres_v26(coverage={**_COV, "interval": [0.5, 0.99]}), ["stats.coverage_interval_inconsistent"])
+bad["statres_v26_p_zero.json"] = (statres_v26(significance={"local_p": 0.0, "local_z": 8.0}), ["stats.p_zero_without_bound"])
+bad["statres_v26_results_p_out_of_range.json"] = (statres_v26(results={"mu_95": 2.1, "cl": 0.95, "p0": 1.7}), ["stats.p_out_of_range"])
+bad["statres_v26_z_p_inconsistent.json"] = (statres_v26(significance={"local_p": 0.5, "local_z": 5.0}), ["stats.z_p_inconsistent"])
+bad["statres_v26_global_z_above_local.json"] = (statres_v26(significance={"local_p": 0.3, "local_z": 0.5244, "global_p": 0.4,
+                                                                          "global_z": 0.9, "trials_method": "toys", "global_n_toys": 1000}),
+                                                ["stats.global_z_above_local"])
+bad["statres_v26_construction_statistic.json"] = (statres_v26(construction="feldman-cousins", test_statistic="q0"),
+                                                  ["stats.construction_statistic_mismatch"])
+bad["statres_v26_model_sha256_malformed.json"] = (statres_v26(likelihood={"form": "poisson (synthetic)", "backend": "core.stats",
+                                                                          "model_sha256": "abc"}), ["stats.model_sha256_malformed"])
+
 
 # Valid (no error) but not usable as a final result: the validator reports these codes as `unresolved`.
 UNRESOLVED = {"statres_scan_no_global.json": (statres_v11("frequentist", significance=dict(SCAN)), ["stats.lee_missing"])}
@@ -289,6 +337,23 @@ UNRESOLVED["communication_traceability_pending.json"] = (d, ["communication.asse
 UNRESOLVED["ml_domain_shift_missing.json"] = (ml_v25(domain_shift=None), ["ml.domain_shift_missing"])
 UNRESOLVED["ml_split_overlap_not_run.json"] = (ml_v25_splits(overlap_check={"tool": "check_split_integrity.py", "result": "not-run"}),
                                                ["ml.split_overlap_not_run"])
+# contracts 2.6.0 statistical-result hardening (STH-T1): one fixture per new unresolved code
+UNRESOLVED["statres_v26_coverage_toys_too_few.json"] = (statres_v26(coverage={**_COV, "n_toys": 50, "coverage": 0.96}),
+                                                        ["stats.coverage_toys_too_few"])
+UNRESOLVED["statres_v26_expected_missing.json"] = (statres_v26(expected={"median": 1.2, "method": "toys"}), ["stats.expected_bands_missing"])
+UNRESOLVED["statres_v26_global_z_without_p.json"] = (statres_v26(significance={"local_p": 0.3, "local_z": 0.5244, "global_z": 0.1}),
+                                                     ["stats.global_z_without_p"])
+UNRESOLVED["statres_v26_seed_missing.json"] = (statres_v26(seeds=None), ["stats.seed_missing"])
+UNRESOLVED["statres_v26_gof_toys_missing.json"] = (statres_v26(goodness_of_fit={"statistic": "saturated-deviance", "p_value": 0.4,
+                                                                               "calibration": "toys"}), ["stats.gof_toys_missing"])
+UNRESOLVED["statres_v26_bayes_propriety_unsupported.json"] = (
+    statres_v26_bayes(priors=[{"parameter": "mu", "form": "uniform(0, inf)", "propriety": "yes"}]), ["stats.propriety_unsupported"])
+UNRESOLVED["statres_v26_bayes_poi_prior_missing.json"] = (
+    statres_v26_bayes(priors=[{"parameter": "bkg_norm", "form": "lognormal(0, 0.1)"}]), ["stats.poi_prior_missing"])
+UNRESOLVED["statres_v26_bayes_ess_too_low.json"] = (statres_v26_bayes(convergence={"rhat": 1.0, "ess_bulk": 30, "ess_tail": 25}),
+                                                    ["stats.ess_too_low"])
+UNRESOLVED["statres_v26_bayes_chains_missing.json"] = (statres_v26_bayes(sampler={"name": "metropolis (synthetic)", "draws": 4000}),
+                                                       ["stats.chains_missing"])
 
 
 def main() -> None:

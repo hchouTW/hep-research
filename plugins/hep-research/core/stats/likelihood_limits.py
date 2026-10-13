@@ -1450,11 +1450,11 @@ def _root_increasing_in_domain(f, lo: float, hi: float, tol: float = 1e-7) -> fl
     """_root_increasing for an f that is +inf outside the likelihood's domain (STH-T1.6): hi is doubled until f(hi) > 0,
     then an infinite f(hi) is bisected back into the domain before the Illinois steps. A ray that meets the domain
     edge (some bin mean <= 0) before f crosses zero is refused, not closed at the edge."""
-    flo, fhi = f(lo), f(hi)
+    fhi = f(hi)
     for _ in range(20):
         if fhi > 0.0:
             break
-        lo, flo, hi = hi, fhi, 2.0 * hi
+        lo, hi = hi, 2.0 * hi
         fhi = f(hi)
     else:
         raise LikelihoodError("the contour level lies beyond the scan range")
@@ -1468,7 +1468,7 @@ def _root_increasing_in_domain(f, lo: float, hi: float, tol: float = 1e-7) -> fl
         if fm > 0.0:
             hi, fhi = mid, fm
         else:
-            lo, flo = mid, fm
+            lo = mid
     raise LikelihoodError("the ray reaches the edge of the domain (a bin mean <= 0) before the contour level")
 
 

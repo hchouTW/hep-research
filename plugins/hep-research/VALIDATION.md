@@ -965,3 +965,16 @@ is recorded in the release commit; the tag `hep-research--v0.6.0` points at the 
 The companion ams02-research 1.3.1 declares hep-research `>=0.4.0,<0.6.0`, so its preflight refuses this release until
 the companion widens its range. Software checks establish consistency only; no host configuration is qualified for
 private or blinded data by this release.
+
+## STATISTICS-HARDENING (2026-10-13, CI lock env: Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, pyhf 0.7.6, ArviZ 0.23.4; version 0.6.17 + unreleased, contracts 2.6.0)
+
+hep-statistics hardening order STH (audit on 0.6.15, re-checked on `c1d375c`). Contract checks establish consistency
+only, not statistical validity.
+
+| Item | Result | Evidence |
+|---|---|---|
+| Adversarial gate inputs (17 statistical-result mutations, 5 Bayesian, comparison-gate relabel, edge overwrite and unit factors -3/0/NaN/inf, duplicate combination id, unequal envelope rows, scaled covariance, contour domain, result_artifact refusals) | 36 failing (sub)tests on `c1d375c` (only the unmutated-bases control passed); all green on the branch, each with its own reason code | `tests/contracts/test_gate_adversarial.py` |
+| Verdict snapshot of the 90 committed artifacts of `c1d375c` | default and strict validator outcomes unchanged for every artifact; gate verdicts changed only through `gate.not_observed_data` (Q3): J9 passed -> failed, 11 synthetic/asimov examples and fixtures unresolved -> failed; the sbottom benchmark stays unresolved; 19 new 2.6.0 fixtures added | `tests/contracts/test_gate_verdict_snapshot.py`, `tests/contracts/gate_verdicts.json` |
+| Contracts 2.6.0 back-compatibility and migration | each new code fires natively at 2.6.0; a 2.5.0 copy of every new fixture keeps ok without `--strict` and reports the code with it; the migrator refuses each of the 8 new error fixtures and moves a 2.5.0 artifact to 2.6.0 without inventing a seed | `tests/contracts/test_statistical_semantics.py` (`Contracts26Hardening`) |
+| Covariance scale invariance | the rho/sigma matrix (correlation eigenvalue -0.80) fails with `not_psd` at sigma ratios 1, 1e4 and 1e12; diag(1e-20, 1e20) passes with rank 2, condition 1 | `tests/core/test_stats_covariance.py` |
+| Two-POI contour, 3-bin audit input | exit 0, status ok, 72 points on the level of an independent Poisson deviance within 1e-4; out-of-domain probes counted, not failed | `tests/core/test_stats_two_poi.py` |

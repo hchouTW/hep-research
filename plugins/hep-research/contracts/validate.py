@@ -13,9 +13,14 @@ calibration) and the response semantic rules of contracts 2.4.0 (controlled corr
 matrix_ref, normalization consistent with what sits inside the matrix, one unit per variable) and the ml-artifact
 rules of contracts 2.5.0 (non-blank grouping key, model hash, labels and features; training domain on the features
 with lo < hi; split-overlap result; calibration where the output must be calibrated, not evaluated on its fit sample;
-domain-shift check; seeds) to artifacts written under older contracts, which otherwise keep their outcome. --gate publication adds
-the publication gate of a statistical-result (publication_gate): passed, unresolved or failed, with reasons; an
-archived artifact may be valid and still not pass it. Passing the gate is a contract-level prerequisite for
+domain-shift check; seeds) and the statistical-result hardening rules of contracts 2.6.0 (coverage level and interval
+consistent with the toy counts, at least 200 coverage toys, no p-value of exactly 0, probability-like results in
+[0, 1], z consistent with p, construction and test statistic compatible, expected bands with an observed limit,
+recorded seeds for toys, a well-formed model_sha256; Bayesian: improper uniform forms, propriety with an argument and
+a reference, a prior on every parameter of interest, an ESS floor of 100 per chain) to artifacts written under older
+contracts, which otherwise keep their outcome. --gate publication adds
+the publication gate of a statistical-result (publication_gate): passed, unresolved or failed, with reasons (from
+2.6.0 a 'synthetic' or 'asimov' result fails it); an archived artifact may be valid and still not pass it. Passing the gate is a contract-level prerequisite for
 reporting a result as validated, not evidence of scientific validity.
 """
 from __future__ import annotations
@@ -711,7 +716,7 @@ def _bayesian_hardening(ext: dict, rep: Report) -> None:
             rep.add("unresolved", f"$.extension.priors[{i}].propriety", "stats.propriety_unsupported",
                     f"prior '{pr.get('form')}' on {pr.get('parameter')} is improper and propriety {prop!r} is a claim, not "
                     "an argument: give {argument (or derivation), ref} showing the posterior is proper")
-    names = {pr.get("parameter") for pr in priors}
+    names = {pr["parameter"] for pr in priors if isinstance(pr.get("parameter"), str)}
     for poi in ext.get("parameters_of_interest", []) or []:
         if isinstance(poi, str) and not (_poi_names(poi) & names):
             rep.add("unresolved", "$.extension.priors", "stats.poi_prior_missing",

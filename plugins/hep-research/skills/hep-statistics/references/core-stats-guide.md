@@ -366,6 +366,21 @@ Scripts are in `<plugin root>/skills/hep-statistics/scripts/` unless an adapter 
 Contract side: `contracts/validate.py --strict` and `--gate publication`, `contracts/migrate_statistical_result.py`, and
 `tools/run_required_backends.py` (a required backend missing fails, never skips).
 
+Publication-gate rules of contracts 2.6.0 (`_stat_hardening`, `_bayesian_hardening` in `contracts/validate.py`; the
+gate always applies them, the validator natively from 2.6.0 or with `--strict`). Failed: a `synthetic` or `asimov`
+label (`gate.not_observed_data`: a result on synthetic data is never a result on data); toy coverage whose 68.27%
+Clopper-Pearson upper end, from round(coverage x n_toys) of n_toys, lies more than 0.01 below nominal; `coverage.cl`
+different from `results.cl`; a recorded coverage interval the counts do not allow; a p-value of exactly 0 (record the
+bound); a probability-like `results` value (p0, p_value, CLs, CLb, CLs+b, `p_...`) outside [0, 1]; z and p that
+disagree by more than 0.01 one-sided (`significance.convention: "two-sided"` uses p/2); global_z above local_z; a
+construction and a recognized test statistic that do not belong together (Feldman-Cousins: likelihood ratio or chi2;
+CLs: q_mu, q-tilde, the LEP statistic, likelihood ratio, chi2; asymptotic and Wilks: q0, q_mu, q-tilde, likelihood
+ratio, chi2; Neyman and Feldman-Cousins do not produce CLs/CLb values); a `model_sha256` that is not 64 hex digits.
+Unresolved: fewer than 200 coverage toys; an observed limit without the expected median and both bands; global_z
+without global_p; toys (construction, coverage, goodness of fit, significance) without `extension.seeds` or
+`coverage.seed`; toy goodness of fit without `n_toys`; Bayesian: an improper prior whose propriety is not
+`{argument, ref}`, a parameter of interest without a prior, bulk or tail ESS below 100 per chain, no chain count.
+
 ## Skill scripts
 
 Command-line helpers in `skills/hep-statistics/scripts/` (read `--help` first); they call the modules above and never

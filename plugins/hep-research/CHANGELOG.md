@@ -3,6 +3,50 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+Contracts 2.6.0 (minor: statistical-result hardening rules, `STAT_HARDENING_FROM`; optional fields only; every 2.5.0
+artifact keeps its default outcome and gets the new rules with `validate.py --strict` and at the publication gate; no
+new capability).
+
+### hep-statistics
+
+- **Statistical-result hardening (contracts 2.6.0).** New errors: `stats.coverage_cl_mismatch`,
+  `stats.coverage_interval_inconsistent` (a recorded interval outside the 99.73% Clopper-Pearson interval of its toy
+  counts), `stats.p_zero_without_bound`, `stats.p_out_of_range` on probability-like `results` keys (p0, p_value, CLs,
+  CLb, ...), `stats.z_p_inconsistent` (one-sided, |Δz| > 0.01), `stats.global_z_above_local`,
+  `stats.construction_statistic_mismatch` (for example Feldman-Cousins with q0, CLs values from a Neyman
+  construction), `stats.model_sha256_malformed`. New unresolved: `stats.coverage_toys_too_few` (fewer than 200 toys),
+  `stats.expected_bands_missing` (an observed limit without median and both bands), `stats.global_z_without_p`,
+  `stats.seed_missing`, `stats.gof_toys_missing`; Bayesian `stats.propriety_unsupported` (propriety needs
+  {argument, ref}), `stats.poi_prior_missing`, `stats.ess_too_low` (100 per chain), `stats.chains_missing`; `stan`,
+  `pymc`, `numpyro` count as gradient samplers and `uniform(0, inf)` as improper. Optional fields `extension.seeds`,
+  `coverage.seed`, `goodness_of_fit.p_value_bound`, `significance.convention` (`ext_statistical_result_v2_6.json`).
+- **Publication gate.** A `synthetic` or `asimov` statistical-result now fails (`gate.not_observed_data`); toy
+  undercoverage is judged on the 68.27% Clopper-Pearson upper end computed from the counts; a blank backend or model
+  reference is missing provenance. Gate verdict changes on committed artifacts: the J9 example
+  (`examples/ml-classifier-to-inference`, `synthetic`) passed and now fails; 11 synthetic or asimov examples and
+  fixtures go from unresolved to failed for the same reason; default and strict validator outcomes are unchanged
+  for all of them (`tests/contracts/test_gate_verdict_snapshot.py`).
+- `migrate_statistical_result.py` brings a 2.2-2.5 artifact to 2.6.0 (version only) and refuses one that breaks a
+  2.6.0 error rule; it never repairs a number or invents a seed.
+- **Comparison gate.** `variable-change` needs `edges` (the image of every current edge, strictly monotonic,
+  recorded as `edge_map`) and a Jacobian that is a number or `{expression, ref}` (a bare word leaves the comparison
+  unresolved); `from == to` is refused (use `rebin`). `unit-conversion` needs a finite factor > 0, recorded as
+  `recorded_factor`. `plan_combination` refuses duplicate dataset ids (`combine.duplicate_id`); `envelope` refuses
+  rows of unequal length.
+- **`validate_covariance.py`** judges PSD, rank and conditioning on the correlation matrix D^-1/2 C D^-1/2: an
+  indefinite correlation structure fails whatever the units per bin, and disparate but uncorrelated variances are no
+  longer rank-deficient or ill-conditioned; metrics report scaled and unscaled eigenvalues.
+- **`likelihood_limits.py contour`**: probes where a bin mean is <= 0 are out of the domain (q = +inf, counted as
+  `out_of_domain_probes`), not failed fits; the 3-bin audit input now exits 0.
+- **`result_artifact.py`** refuses a CLI output without `status` unless `--assume-status` is given (recorded as
+  `results.cli_status_assumed`), refuses a coverage value or toy count under `--coverage-check not-checked`, and
+  refuses a JSON list input.
+- `examples/ml-classifier-to-inference/run.py` records the coverage toy seed and no longer crashes on an unresolved
+  finding (`Finding.severity`, not `.level`); J9 and `published-comparison` outputs regenerated (version strings,
+  the seed, the schema list read).
+
 ## 0.6.17 (2026-10-13)
 
 Contracts 2.5.0 (minor: ML semantics; every 2.4.0 artifact keeps its outcome and gets the new rules with

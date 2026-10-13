@@ -131,6 +131,46 @@
   "ok": false,
   "strict_ok": false
  },
+ "contracts/fixtures/artifacts/invalid/statres_v26_construction_statistic.json": {
+  "gate": "failed",
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/statres_v26_coverage_cl_mismatch.json": {
+  "gate": "failed",
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/statres_v26_coverage_interval_wide.json": {
+  "gate": "failed",
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/statres_v26_global_z_above_local.json": {
+  "gate": "failed",
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/statres_v26_model_sha256_malformed.json": {
+  "gate": "failed",
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/statres_v26_p_zero.json": {
+  "gate": "failed",
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/statres_v26_results_p_out_of_range.json": {
+  "gate": "failed",
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/statres_v26_z_p_inconsistent.json": {
+  "gate": "failed",
+  "ok": false,
+  "strict_ok": false
+ },
  "contracts/fixtures/artifacts/invalid/status_not_propagated.json": {
   "ok": false,
   "strict_ok": false
@@ -157,6 +197,51 @@
  },
  "contracts/fixtures/artifacts/unresolved/statres_scan_no_global.json": {
   "gate": "unresolved",
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/statres_v26_bayes_chains_missing.json": {
+  "gate": "failed",
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/statres_v26_bayes_ess_too_low.json": {
+  "gate": "failed",
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/statres_v26_bayes_poi_prior_missing.json": {
+  "gate": "failed",
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/statres_v26_bayes_propriety_unsupported.json": {
+  "gate": "failed",
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/statres_v26_coverage_toys_too_few.json": {
+  "gate": "failed",
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/statres_v26_expected_missing.json": {
+  "gate": "failed",
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/statres_v26_global_z_without_p.json": {
+  "gate": "failed",
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/statres_v26_gof_toys_missing.json": {
+  "gate": "failed",
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/statres_v26_seed_missing.json": {
+  "gate": "failed",
   "ok": true,
   "strict_ok": true
  },
@@ -241,6 +326,16 @@
  },
  "contracts/fixtures/artifacts/valid/statres_scan_global.json": {
   "gate": "unresolved",
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/statres_v26.json": {
+  "gate": "failed",
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/statres_v26_bayesian.json": {
+  "gate": "failed",
   "ok": true,
   "strict_ok": true
  },
