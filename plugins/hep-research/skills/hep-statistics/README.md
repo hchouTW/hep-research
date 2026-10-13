@@ -10,7 +10,7 @@ Use when the deliverable is a statistical inference or its diagnostics in physic
 
 | Path | Content |
 |---|---|
-| `SKILL.md` | entry point |
+| `SKILL.md` | entry point: invariants, Step 0 for a quick question and the task-to-tool table (default tool, fallback, or "no shipped tool"), workflow, context resolution |
 | `references/` | nine references: the `core/stats` guide, nuisance modeling, likelihood fitting (including sWeights and weighted unbinned fits), unfolding, inference recipes, statistical tools (pyhf, Combine), astroparticle statistics, ML-assisted inference, inference reasoning |
 | `scripts/` | fifteen helpers; the executable checks themselves (limits, template fits, unfolding diagnostics, Poisson diagnostics, toys, covariance and response validation) live in `core/stats/` |
 

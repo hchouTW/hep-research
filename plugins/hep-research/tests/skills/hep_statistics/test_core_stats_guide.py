@@ -87,7 +87,7 @@ class RunScriptsWhenAShellExists(unittest.TestCase):
     def test_skill_and_guide_say_to_run_the_script_and_label_hand_values(self):
         skill = (PLUGIN / "skills" / "hep-statistics" / "SKILL.md").read_text(encoding="utf-8")
         guide = GUIDE.read_text(encoding="utf-8")
-        self.assertIn("When a shell is available, run the matching script for exact limits and intervals", skill)
+        self.assertIn("when a shell is available, run its row's tool", skill)  # Step 0 (STH-T2.1)
         self.assertIn("label a value worked by hand as such", skill)
         self.assertIn("When a shell is available, run the matching subcommand", guide)
 
