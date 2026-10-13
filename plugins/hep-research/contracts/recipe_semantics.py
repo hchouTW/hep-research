@@ -32,6 +32,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -115,8 +116,15 @@ def upstream_effects(artifact) -> list[str] | None:
     return None if found is None else [e for e, _ in found]
 
 
+_KEY_PATTERNS = {"target_scope": re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:/+-]{0,127}"),
+                 "calibration_digest": re.compile(r"[0-9a-f]{64}|none"),
+                 "variation_id": re.compile(r"[a-z0-9][a-z0-9_-]{0,63}"), "stage": re.compile(r"[a-z0-9][a-z0-9_-]{0,63}")}
+
+
 def _complete(key) -> bool:
-    return isinstance(key, dict) and all(isinstance(key.get(f), str) and key[f] for f in KEY_FIELDS)
+    """All four key fields present and well formed (the recipe.json patterns); anything else is incomplete."""
+    return isinstance(key, dict) and all(isinstance(key.get(f), str) and _KEY_PATTERNS[f].fullmatch(key[f])
+                                         for f in KEY_FIELDS)
 
 
 def _same_application(a, b) -> bool | None:
@@ -204,6 +212,9 @@ def _walk(recipe: dict, table: dict, upstream: list, contracts: list | None, rep
             rep.add("error", "input.applied_effects", "semantics.undeclared_effect", f"effect '{e}' is not in the table")
         apply(e, "input.applied_effects", in_keys.get(e))
     recorded: set[str] = set()
+    # upstream records are cumulative: per effect, an identical key in several records is one application, and an
+    # unkeyed record (e.g. included_corrections) is subsumed by a keyed one of the same effect
+    up: dict[str, list[tuple[dict | None, str]]] = {}
     for i, art in enumerate(upstream):
         found = upstream_instances(art)
         if found is None:
@@ -215,14 +226,28 @@ def _walk(recipe: dict, table: dict, upstream: list, contracts: list | None, rep
             if e not in effects:
                 rep.add("error", f"upstream[{i}]", "semantics.upstream_unmapped",
                         f"upstream effect '{e}' is not in the table: a repeated correction cannot be excluded")
-            elif e in recipe["input"]["applied_effects"]:
-                # the recipe's input claims this application: the same one, not a repeat; its keys must agree
-                if key is not None and in_keys.get(e) is not None and key != in_keys[e]:
-                    rep.add("error", "input.effect_keys", "semantics.key_mismatch",
-                            f"the key of '{e}' differs from the one upstream[{i}] records")
-            elif not any(x["effect_id"] == e and x["where"].startswith("upstream") and x["key"] == key for x in instances):
-                # cumulative records: the same effect with the same key in several upstream artifacts is one application
-                apply(e, f"upstream[{i}]", key)
+                continue
+            recs = up.setdefault(e, [])
+            if key is None:
+                if not recs:
+                    recs.append((None, f"upstream[{i}]"))
+            elif all(k != key for k, _ in recs):
+                recs[:] = [r for r in recs if r[0] is not None]
+                recs.append((key, f"upstream[{i}]"))
+    for e, recs in up.items():
+        if e in recipe["input"]["applied_effects"]:
+            # the recipe's input claims one upstream application: the record with its key (else the first) is that
+            # same application, not a repeat; any further record is checked against it
+            own = next(x for x in instances if x["effect_id"] == e and x["where"] == "input.applied_effects")
+            match = next((r for r in recs if own["key"] is not None and r[0] == own["key"]), recs[0])
+            if own["key"] is None:
+                own["key"] = match[0]
+            elif match[0] is not None and match[0] != own["key"]:
+                rep.add("error", "input.effect_keys", "semantics.key_mismatch",
+                        f"the key of '{e}' differs from the one {match[1]} records")
+            recs = [r for r in recs if r is not match]
+        for key, where in recs:
+            apply(e, where, key)
     claimed = recipe["input"]["applied_effects"]
     if claimed and not upstream:
         rep.add("warning", "input.applied_effects", "semantics.input_effects_unverified",
