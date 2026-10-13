@@ -20,6 +20,25 @@ Specify identification, isolation, kinematic acceptance, overlap removal, primar
 
 Check era-dependent trigger menus, prescales, turn-ons, plateaus, and OR/overlap logic. Do not multiply efficiencies of correlated trigger paths as though they were independent. MC trigger scale factors must match the selection, run period, and object requirements.
 
+## Trigger efficiency from data
+
+- **Orthogonal reference trigger (collider).** Measure the efficiency of the signal trigger on events recorded by a
+  trigger that does not depend on the probed quantity (a muon trigger for a jet or missing-energy trigger), with the
+  offline selection applied: `eps = N(reference and signal trigger) / N(reference)`, binned in the offline variable.
+- **Bootstrap.** For a high threshold, chain the efficiencies: `eps(T2) = eps(T2 | T1) x eps(T1)`, each measured where
+  the looser trigger T1 (often prescaled) is itself efficient or measured.
+- **Unbiased or prescaled samples (space and fixed-target instruments).** A minimum-bias or unbiased trigger recorded
+  with a prescale p gives `eps = N(unbiased and physics) / N(unbiased)` on the recorded events; the prescale cancels in
+  the ratio, but every rate or exposure computed from the unbiased stream is multiplied by p, and the unbiased sample's
+  own selection (its acceptance, a different detector requirement) must be applied to both numerator and denominator.
+- **Trigger-bias checks.** The reference must not bias the probed variable: compare two different references, check the
+  efficiency versus variables the reference could correlate with (multiplicity, pileup, time), and use exact binomial
+  intervals near 0 or 1 (hep-statistics, or `core/stats/tail_estimation.py`).
+
+Worked example (synthetic): an unbiased stream with prescale 100 records 2000 events, 1900 of which also fire the
+physics trigger: eps = 0.950 with a 68% Clopper-Pearson interval of about [0.945, 0.955]; the unbiased stream stands for
+200000 triggers. A bootstrap with eps(T2 | T1) = 0.90 and eps(T1) = 0.98 gives eps(T2) = 0.882.
+
 ## Regions and categories
 
 Signal regions (SRs) drive signal inference, control regions (CRs) constrain backgrounds, and validation regions (VRs) test extrapolation. A sideband is a specified interval in an observable; it is not automatically background-only. Record region membership and test exclusivity. Events may appear in multiple diagnostic plots, but not in independent Poisson channels without accounting for overlap.

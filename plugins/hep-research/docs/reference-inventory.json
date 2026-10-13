@@ -10,7 +10,7 @@
   },
   "hep-analysis": {
    "references": 11,
-   "bytes": 71795,
+   "bytes": 73685,
    "uncited": 0
   },
   "hep-computing": {
@@ -731,10 +731,11 @@
   {
    "path": "skills/hep-analysis/references/analysis-design.md",
    "owner": "hep-analysis",
-   "bytes": 5282,
-   "lines": 38,
+   "bytes": 6984,
+   "lines": 57,
    "linked_from_skill_md": true,
    "cited_by": [
+    "profiles/experiments/ams-02/modules/methods/efficiency-acceptance-backgrounds.md",
     "skills/detector-response/references/detector-systems-overview.md",
     "skills/detector-response/references/noble-liquid-neutrino-and-rare-event-detectors.md",
     "skills/detector-response/references/physics-objects-jets-btagging-met.md",
@@ -745,7 +746,8 @@
     "skills/hep-analysis/references/histograms-efficiencies.md",
     "skills/hep-analysis/references/review-and-artifacts.md",
     "skills/hep-computing/references/analysis-data-pipelines.md",
-    "skills/hep-computing/references/root-balanced-design-guidelines.md"
+    "skills/hep-computing/references/root-balanced-design-guidelines.md",
+    "tests/skills/hep_analysis/test_method_references.py"
    ],
    "cited_by_other_skills": [
     "detector-response",
@@ -814,7 +816,7 @@
     "tests/skills/hep_analysis/test_method_references.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "298a7af 2026-10-13"
+   "last_commit": "da0f716 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/data-pipelines.md",
@@ -840,8 +842,8 @@
   {
    "path": "skills/hep-analysis/references/hep-analysis-guide.md",
    "owner": "hep-analysis",
-   "bytes": 18353,
-   "lines": 112,
+   "bytes": 18541,
+   "lines": 113,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
@@ -855,7 +857,7 @@
    "cited_by_other_skills": [
     "detector-response"
    ],
-   "last_commit": "633d6c9 2026-10-13"
+   "last_commit": "da0f716 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/histograms-efficiencies.md",

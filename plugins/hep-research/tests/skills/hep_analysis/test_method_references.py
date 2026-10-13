@@ -133,5 +133,18 @@ class NucleiTests(unittest.TestCase):
         self.assertIn('= 45 events', t)
 
 
+class TriggerEfficiencyTests(unittest.TestCase):
+    def test_unbiased_sample_and_bootstrap(self):
+        sys.path.insert(0, str(ROOT))
+        from core.stats.tail_estimation import clopper_pearson
+        lo, hi = clopper_pearson(1900, 2000, 0.6827)
+        self.assertAlmostEqual(lo, 0.945, delta=0.001)
+        self.assertAlmostEqual(hi, 0.955, delta=0.001)
+        self.assertAlmostEqual(0.90 * 0.98, 0.882)
+        t = text('analysis-design.md')
+        self.assertIn('[0.945, 0.955]', t)
+        self.assertIn('eps(T2) = 0.882', t)
+
+
 if __name__ == '__main__':
     unittest.main()
