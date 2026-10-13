@@ -66,6 +66,10 @@ Software checks establish contract consistency only, not physical validity.
   links followed) and must stay under `--repo` (or the skill root for the fallback); one that escapes is an error
   "path leaves the repository" (an `src/` + 14×`../` + `etc/asl.conf` path was accepted as existing). A path starting
   with `../` is a warning instead of a silent skip; in-repo paths with `..` still pass.
+- **CMP-12 robustness test asserts the contract.** `tests/skills/test_cli_robustness.py` gains
+  `HepComputingScriptContractTests`: every hep-computing script (both `.sh` included; `inspect_root_file.C` exempt by
+  name) must print one JSON object with `status` and the documented exit code for a missing input, a refused target
+  and an output path that cannot be created (22 cases fail on c1d375c, including the four output-path tracebacks).
 
 ## 0.6.17 (2026-10-13)
 
