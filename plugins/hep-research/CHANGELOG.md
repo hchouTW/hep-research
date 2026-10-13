@@ -35,6 +35,29 @@ Contracts 2.6.0 (minor: measurement-spec semantics; every 2.5.0 artifact keeps i
   `constraint`, `closure`, correction `exact_zero`, blinding `mask` and `unblinding_record_ref`. The 30-mutation probe
   went from 30 silent passes to 2 (both by design). `validate.py` accepts flags before the artifact path. Example
   specs gain an estimand and drop the double-listed luminosity and exposure corrections.
+- **Review procedure.** New `references/review-and-artifacts.md` (verdict scale `blocked` / `needs-work` /
+  `acceptable-with-open-inputs`, output order, checklist, measurement brief, worked review of a synthetic defective
+  spec) and `assets/measurement-review-template.md`; the AMS module links it.
+- **Correlations.** One rule in SKILL.md, README, references, routing contract (new ownership row `correlation
+  evidence`) and the hep-statistics handoff line: hep-analysis supplies the evidence and a proposed scheme,
+  hep-statistics encodes it and checks positive semidefiniteness.
+- **Guide re-scoped** (219 to 106 lines): code-level material (API selection, pipelines, code-file requirement, the
+  RDataFrame normalization code) moved to `skills/hep-computing/references/analysis-data-pipelines.md`;
+  `data-pipelines.md` is a pointer; link checker test for `skills/hep-analysis/**/*.md`.
+- **Physics corrections** with primary sources: solar cycle 24 phases (SILSO), cutoff selection rule and exposure
+  formula, sigma(Xmax) for p and Fe (Kampert & Unger 2012), ratio cancellation, trials (Gross & Vitells 2010), Garwood
+  N = 0 footnote, Barlow's rule, Peelle's Pertinent Puzzle.
+- **SKILL.md** 8157 to 7771 B; one home per invariant (blinding rules only in `analysis-design.md`); workflow step 5
+  names the `validate.py` command.
+- **Scripts.** Orbit cutoff: tilted-dipole ground-track mode with time fractions and an exposure-versus-cutoff table.
+  Geomagnetic cutoff: AME2020 nuclear masses, `--radius-re` (old `--altitude-re` deprecated). Force field:
+  `--energy-kind`, `--phi-unit`, `--phi-uncertainty`, `--lis-table`, conversions via core/kinematics, NaN exit 2.
+  Power-law fit: continuous sharp or smooth broken power law with a free break, chi2/ndf, p-value, covariance,
+  asymmetric errors, Lafferty-Wyatt centres, pivot normalization; `--break-energy` now fixes the break of the
+  continuous model. Systematic variations: statistical normalization and shape tests with bin uncertainties, flow
+  bins for JSON. Blinded-bin masking fails closed on length or type mismatches and masks errors and flow bins.
+  Change review: outcome and signal-region wording, strict booleans, new `needs-human-review` decision. Ratio:
+  exact `poisson-ratio` and `binomial-fraction` methods. Tables: escaping, `--totals`, safe LaTeX labels.
 
 ## 0.6.17 (2026-10-13)
 
