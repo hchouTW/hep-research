@@ -30,6 +30,7 @@ MISSING_FILE_ARGS = {
     "skills/hep-analysis/scripts/make_yield_table.py": ["--input", M, "--status", "synthetic"],
     "skills/hep-analysis/scripts/mask_blinded_bins.py": ["--hist", M, "--low", "1", "--high", "2"],
     "skills/hep-analysis/scripts/review_analysis_change.py": [M],
+    "skills/hep-analysis/scripts/review_measurement_spec.py": [M],
     "skills/hep-analysis/scripts/systematics_table_tex.py": ["--input", M, "--status", "synthetic"],
     "skills/hep-computing/scripts/audit_blinded_outputs.py": ["scan", "--sealed", M, "/tmp"],
     "skills/hep-computing/scripts/audit_histograms.py": [M],

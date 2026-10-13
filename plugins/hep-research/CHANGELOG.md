@@ -58,6 +58,13 @@ Contracts 2.6.0 (minor: measurement-spec semantics; every 2.5.0 artifact keeps i
   bins for JSON. Blinded-bin masking fails closed on length or type mismatches and masks errors and flow bins.
   Change review: outcome and signal-region wording, strict booleans, new `needs-human-review` decision. Ratio:
   exact `poisson-ratio` and `binomial-fraction` methods. Tables: escaping, `--totals`, safe LaTeX labels.
+- **Method content.** New `references/correction-chain.md` (factorized efficiencies with denominators, data/MC
+  ratios, time-dependent measurements, nuclei and isotopes, neutrino and fixed-target specifics); estimand and fiducial
+  definitions and steeply falling spectra in `measurements-and-unfolding.md`; systematics budget; antiparticle
+  backgrounds; trigger efficiency from data, unbiased optimization and look-elsewhere at the design stage in
+  `analysis-design.md`. Each has a synthetic worked example checked by `tests/skills/hep_analysis/test_method_references.py`.
+- **Spec review script.** New `scripts/review_measurement_spec.py` drafts a verdict-first review from the validator
+  findings; the collider and cosmic-ray examples run it and write `review.md`.
 
 ## 0.6.17 (2026-10-13)
 

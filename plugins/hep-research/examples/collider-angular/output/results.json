@@ -1,5 +1,10 @@
 {
  "label": "SYNTHETIC and ILLUSTRATIVE: invented inputs; describes no experiment",
+ "review": {
+  "verdict": "acceptable-with-open-inputs",
+  "defects": 0,
+  "unresolved": 0
+ },
  "profiles_loaded": [
   "experiment:synthetic-collider"
  ],
@@ -25,7 +30,8 @@
   "fiducial_toy_pull": true,
   "response_validation": true,
   "covariance_validation": true,
-  "contracts": true
+  "contracts": true,
+  "review_verdict": true
  },
  "config": {
   "label": "SYNTHETIC: invented run configuration for Path B; describes no experiment",

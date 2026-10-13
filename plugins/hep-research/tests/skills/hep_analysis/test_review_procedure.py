@@ -45,5 +45,19 @@ class ReviewProcedureTests(unittest.TestCase):
         self.assertIn('skills/hep-analysis/references/review-and-artifacts.md', text)
 
 
+class ReviewScriptTests(unittest.TestCase):
+    def test_draft_ranks_like_the_worked_review(self):
+        sys.path.insert(0, str(SKILL / 'scripts'))
+        import review_measurement_spec as rms
+        doc = json.loads((SKILL / 'assets' / 'review-example.synthetic.json').read_text(encoding='utf-8'))
+        out = rms.draft(doc)
+        self.assertEqual(out['verdict'], 'blocked')
+        self.assertEqual([d['code'] for d in out['defects']][:2],
+                         ['measurement.normalization_double_counted', 'measurement.blinding_mask_missing'])
+        template = json.loads((SKILL / 'assets' / 'measurement_spec.template.json').read_text(encoding='utf-8'))
+        self.assertEqual(rms.draft(template)['verdict'], 'acceptable-with-open-inputs')
+        self.assertIn('## Verdict', rms.markdown(out, 'x', 'synthetic'))
+
+
 if __name__ == '__main__':
     unittest.main()

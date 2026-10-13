@@ -10,7 +10,7 @@
   },
   "hep-analysis": {
    "references": 11,
-   "bytes": 78300,
+   "bytes": 78713,
    "uncited": 0
   },
   "hep-computing": {
@@ -753,7 +753,7 @@
     "detector-response",
     "hep-computing"
    ],
-   "last_commit": "118b172 2026-10-13"
+   "last_commit": "3210ab8 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/analysis-validation.md",
@@ -842,8 +842,8 @@
   {
    "path": "skills/hep-analysis/references/hep-analysis-guide.md",
    "owner": "hep-analysis",
-   "bytes": 19117,
-   "lines": 116,
+   "bytes": 19530,
+   "lines": 119,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
@@ -857,7 +857,7 @@
    "cited_by_other_skills": [
     "detector-response"
    ],
-   "last_commit": "57316ad 2026-10-13"
+   "last_commit": "3210ab8 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/histograms-efficiencies.md",
@@ -910,11 +910,14 @@
    "lines": 103,
    "linked_from_skill_md": true,
    "cited_by": [
+    "examples/ams-flux-ratio/run.py",
+    "examples/collider-angular/run.py",
     "profiles/experiments/ams-02/modules/methods/analysis-artifacts.md",
     "skills/hep-analysis/SKILL.md",
     "skills/hep-analysis/assets/measurement-review-template.md",
     "skills/hep-analysis/assets/review-example.synthetic.json",
     "skills/hep-analysis/references/hep-analysis-guide.md",
+    "skills/hep-analysis/scripts/review_measurement_spec.py",
     "tests/skills/hep_analysis/test_review_procedure.py"
    ],
    "cited_by_other_skills": [],

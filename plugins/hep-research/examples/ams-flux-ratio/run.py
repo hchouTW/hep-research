@@ -352,6 +352,15 @@ def artifacts(world, res, created):
     return docs, {k: {"ok": r.ok, "errors": [f.message for f in r.errors]} for k, r in reports.items()}
 
 
+def review_spec(spec, vocab, out):
+    """Verdict-first review draft of the spec with the hep-analysis review script (references/review-and-artifacts.md)."""
+    sys.path.insert(0, str(PLUGIN / "skills" / "hep-analysis" / "scripts"))
+    import review_measurement_spec
+    review = review_measurement_spec.draft(spec, vocab)
+    (out / "review.md").write_text(review_measurement_spec.markdown(review, spec["artifact_id"], "synthetic"))
+    return {"verdict": review["verdict"], "defects": len(review["defects"]), "unresolved": len(review["unresolved"])}
+
+
 def figures(world, res, out):
     import matplotlib
     matplotlib.use("Agg")
@@ -424,8 +433,11 @@ def main(argv=None) -> int:
         "covariance_checks": all(v != "fail" for v in cov_checks.values()),
         "contracts": all(c["ok"] for c in contract.values()),
     }
+    review = review_spec(docs["measurement_spec"], Vocabulary.with_profiles([PROFILE]), out)
+    passes["review_verdict"] = review["verdict"] == "acceptable-with-open-inputs"
     results = {
         "label": "SYNTHETIC: invented inputs; describes no experiment",
+        "review": review,
         "seed": args.seed, "toys": args.toys, "criteria": CRITERIA, "pass": passes,
         "edges_gv": EDGES.tolist(), "reported_bins": [REPORTED.start, REPORTED.stop],
         "synthetic_inputs": {"species": SPECIES, "periods": PERIODS, "cutoff_factor": CUTOFF_FACTOR, "resolution": RESOLUTION,

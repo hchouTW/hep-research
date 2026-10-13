@@ -56,6 +56,9 @@ CASES = {
     'review_analysis_change.py': ((['{f}'], json.dumps(CHANGES)),
                                   (['{f}'], '{"changes": [{"id": "c", "old": NaN}]}'),
                                   (['{f}'], '{"changes": ['), 'json'),
+    'review_measurement_spec.py': ((['{f}'], (ROOT / 'skills/hep-analysis/assets/measurement_spec.template.json').read_text()),
+                                   (['{f}'], '{"artifact_type": "measurement-spec", "x": NaN}'),
+                                   (['{f}'], '{"artifact_type": '), 'json'),
     'solar_modulation_force_field.py': ((['--modulate', '--energy', '1', '--mass', '0.938272', '--charge', '1',
                                           '--phi', '0.5', '--lis-normalization', '1e4', '--lis-index', '2.7'], None),
                                         (['--modulate', '--energy', '1', '--mass', '0.938272', '--charge', '1',
@@ -125,6 +128,7 @@ class CliContractTests(unittest.TestCase):
         import importlib
         for name in ('cosmic_ray_flux', 'counting_reference', 'cr_spectrum_powerlaw_fit', 'geomagnetic_cutoff',
                      'mask_blinded_bins', 'particle_ratio_with_uncertainty', 'review_analysis_change',
+                     'review_measurement_spec',
                      'solar_modulation_force_field', 'check_systematic_variations', 'make_yield_table'):
             with self.subTest(script=name):
                 self.assertEqual(sorted(importlib.import_module(name).STATUSES), CORE_STATUSES)
