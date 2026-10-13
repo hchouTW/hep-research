@@ -70,6 +70,28 @@ class AsimovSignificance(unittest.TestCase):
 
 
 @unittest.skipUnless(HAVE, "numpy/scipy not installed: goodness of fit unverified")
+@unittest.skipUnless(HAVE, "NumPy/SciPy not installed")
+class InfeasibleModelSTH38(unittest.TestCase):
+    """STH-T3.8: a bin with data where every template is zero is an infeasible model (exit 2, status infeasible),
+    not 'the fit did not converge'."""
+
+    def test_all_zero_bin_with_data(self):
+        doc = {"observed": [5, 7, 3, 4], "templates": {"a": [1.0, 2.0, 0.0, 1.0], "b": [0.5, 0.5, 0.0, 1.0]}}
+        res, code = sg.gof(doc, 50, 1)
+        self.assertEqual((code, res["status"]), (2, "infeasible"))
+        self.assertIn("[2]", res["error"])
+        with tempfile.TemporaryDirectory() as td:
+            f = Path(td) / "g.json"
+            f.write_text(json.dumps(doc))
+            code, out = run("gof", "--input", str(f), "--toys", "50", "--seed", "1")
+        self.assertEqual((code, out["status"]), (2, "infeasible"))
+
+    def test_all_zero_bin_without_data_is_fine(self):
+        doc = {"observed": [5, 7, 0, 4, 6], "templates": {"a": [1.0, 2.0, 0.0, 1.0, 1.0], "b": [0.5, 0.5, 0.0, 1.0, 0.2]}}
+        res, code = sg.gof(doc, 50, 1)
+        self.assertNotEqual(res.get("status"), "infeasible")
+
+
 class GoodnessOfFit(unittest.TestCase):
     def test_fit_matches_direct_maximization(self):
         bkg, sig = shapes()
