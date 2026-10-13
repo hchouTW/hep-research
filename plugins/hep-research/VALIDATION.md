@@ -539,6 +539,26 @@ A live run makes paid model calls and was not authorized for this branch; the st
 cases, 0 failed). The description changed only by dropping "space or ground-based" (925 to 897 characters, Q7), so the
 previous live routing baseline stays the reference until that run.
 
+| Item | Before (`c1d375c`) | After | Evidence |
+|---|---|---|---|
+| hep-analysis `SKILL.md` | 8,157 B, description 925 characters | 7,795 B, 897 characters | `tools/measure_entrypoints.py` |
+| Analysis guide | 219 lines | 118 lines | `tests/skills/hep_analysis/test_reference_links.py` |
+| Validator mutation probe (30 spec violations of the SKILL.md invariants, plain and `--strict`) | 30 silent passes (contracts 2.5.0) | 2 silent passes (contracts 2.6.0): `objective_x` (the estimand now lives in `estimand`; `estimand: "x"` fails) and `ratio_cancels_no_verification` (a warning by design) | audit probe, `tests/contracts/test_measurement_contract.py` |
+| `cosmic_ray_flux.py` (n = 3, b = 10 +- 1) | flux -7, interval [-8.9, -3.9] | lower bound 0, upper limit 0.2 (Cousins-Highland) | `test_cosmic_ray_flux.py` |
+| `cosmic_ray_flux.py` N = 480, 1000, 10000 | N = 480 exits 2 (500 ceiling) | Garwood bounds equal scipy chi2 to 1e-6 | same |
+| Orbit cutoff, 51.6 deg, 1.065 Re | min 1.96 GV (untilted) | tilted dipole (pole as input), 30 days: geomagnetic latitude +-60.9 deg, min 0.735 GV, mean 6.97 GV | `test_orbit_cutoff.py` |
+| Deuteron mass in the cutoff conversion | 1.863 GeV (A x u) | 1.875613 GeV (AME2020) | `test_nuclear_masses.py` |
+| Systematic check, +-1e-5 wiggle with 1% errors | "shape" | "none" (5% tilt: "shape") | `test_systematic_stat_test.py` |
+| Change review, four documented evasions | accepted, exit 0 | flagged or exit 2 | `test_review_analysis_change.py` |
+| Ratio 3/5 | 0.6 +- 0.438 | Poisson ratio [0.218, 1.564] at 68.27% | `test_ratio_intervals.py` |
+
+`tools/run_all_checks.py --out <scratch>` with the host CLIs and the E2 venv: all checks pass after the AMS-optional
+fix; unit tests 2,596 run, 0 failures, 55 skipped (201 modules). Lint with the CI pins (ruff 0.16.10, mypy 2.4.0) on
+`core/` and `contracts/`: clean. Physics statements corrected with sources opened on 2026-10-13: SILSO cycle table and
+news item (cycle 24), Kampert & Unger 2012 (sigma(X_max)), Gross & Vitells 2010 (trials), Barlow hep-ex/0207026
+(passed checks), AME2020 and CODATA 2022 (nuclear masses). Not done: simulated backgrounds and masked outputs inside
+the two example pipelines (P4-2 partial).
+
 ## 0.6.17 release check (2026-10-13, E2)
 
 Version 0.6.17: physics-ml enforcement and ML artifact semantics (contracts 2.5.0, PRs #59 and #60); partition engine

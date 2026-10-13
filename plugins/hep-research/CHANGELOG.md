@@ -65,6 +65,11 @@ Contracts 2.6.0 (minor: measurement-spec semantics; every 2.5.0 artifact keeps i
   `analysis-design.md`. Each has a synthetic worked example checked by `tests/skills/hep_analysis/test_method_references.py`.
 - **Spec review script.** New `scripts/review_measurement_spec.py` drafts a verdict-first review from the validator
   findings; the collider and cosmic-ray examples run it and write `review.md`.
+- **Tests and records.** Behavioural invariant tests replace the guide-wording test; 14 new routing cases (en and
+  zh-Hant) for the hep-analysis boundaries, live run pending; `test_ams02_helpers.py` renamed
+  `test_cosmic_ray_helpers.py`; a worked cosmic-ray spec with backgrounds and an active mask
+  (`assets/worked-spec.cosmic-ray.synthetic.json`); the flagship example documents the `--profiles-from`
+  validation command; capability-matrix title no longer carries a version.
 
 ## 0.6.17 (2026-10-13)
 
