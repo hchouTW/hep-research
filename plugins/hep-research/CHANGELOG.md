@@ -67,6 +67,14 @@ new capability).
   `sensitivity_and_gof.py` reports an infeasible model; `model_card.py` leaves validation regions out of the fit and
   uses constraint widths. Every statistics CLI refuses malformed input with exit 2 and JSON (no tracebacks) and
   prints `--help` without NumPy.
+- **References.** `unfolding.md` (SVD, TUnfold, iterative and fully Bayesian unfolding, OmniFold, purity and
+  stability, undercoverage of regularized intervals, publishing), new `combinations.md` (BLUE, negative weights,
+  Peelle's puzzle, likelihood-level combination), `inference-recipes.md` (Wald and sigma_A, Rolke-Lopez-Conrad,
+  Cousins-Highland, PCL, the conditional on/off test, Baker-Cousins, reference priors), `nuisance-modeling.md`
+  (`autoMCStats`, spurious signal, discrete profiling, non-additive breakdowns), `astroparticle-statistics.md`
+  (unbinned point-source likelihood, TS and Chernoff, Rayleigh/Z_m^2/H-test, Bayesian blocks). Every new source is in
+  `docs/evidence/statistics/sources.json` with its verification level (S15-S41), with claims C12-C17 and eight new
+  capability entries.
 - `examples/ml-classifier-to-inference/run.py` records the coverage toy seed and no longer crashes on an unresolved
   finding (`Finding.severity`, not `.level`); J9 and `published-comparison` outputs regenerated (version strings,
   the seed, the schema list read).

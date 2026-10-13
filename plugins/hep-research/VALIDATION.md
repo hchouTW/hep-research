@@ -984,6 +984,8 @@ only, not statistical validity.
 | Ratio covariance at 1e5-1e7 counts; D'Agostini data unfolding; asymptotic shape-limit vs pyhf; multi-bin q0 | within 5% per element of 200k toys; 15 x 15 variances within 10% of 1500 toys; CLs limit within 1% of pyhf 0.7.6 at 100 bins x 1000 events; q0 equal to `look_elsewhere.py local` to 1e-6 | `test_stats_statistical_toys.py`, `test_stats_unfolding_outer.py`, `test_backend_likelihood_equivalence.py`, `test_stats_likelihood_limits.py` |
 | Expected bands; MC ranges; shape-limit at n = b = 0; model card with pyhf | `cls-limit --n 2 --b 3.7` -2 sigma 2.996 (was 3.5595); `profile-cls --n 0 --b 3` range contains 3.00; n = b = 0 status ok, toy CLs range contains 2.996; a validation region moved mu_hat 0.70 -> -3.94 before the fix, none after | `test_stats_poisson.py`, `test_stats_toy_ensemble.py`, `test_stats_likelihood_limits.py`, `test_sr_cr_model_card.py` |
 
+| Reference sources (STH-T2.4, T4.1-T4.5) | 27 sources added to `docs/evidence/statistics/sources.json` (S15-S41): 15 arXiv abstract pages and, at page level, the iminuit reference and the HistFactory `Measurement.h` header read on 2026-10-13 (two Combine documentation pages update S14); 10 recorded metadata-only and cited only for what their titles and venues establish; the ledger check passes strictly | `tests/tools/test_statistics_evidence.py`, `tests/core/test_evidence_ledger.py` |
+
 Provenance moved here from `core-stats-guide.md` (STH-T2.3): the "Validation tools outside `core/stats`" table there
 (result_artifact, covariance_fit, sweighted_fit, bayes_calibration, the EXPERIMENTAL eft_scan, discrete_profile,
 global_significance, pcl_efficiency_ratio and ratio_estimation, the pyhf backend comparison and model card, the
