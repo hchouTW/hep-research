@@ -58,6 +58,9 @@ dataset records, never from memory.
 - Which data constrain which parameters, the rigidity range used, and correlated systematic uncertainties of the
   data (a fit with diagonal errors on a high-precision ratio is not credible).
 - Degenerate directions explicitly (for example only D0 / L quoted), and any parameter fixed rather than fitted.
+  In a `theory-spec` set `model.family` to `cosmic-ray-propagation` and list them in `degenerate_directions`
+  (strings such as `D0/L`); from contracts 2.6.0 the validator reports `theory.degeneracy_missing` when the family is
+  declared and the list is empty. The trigger is the declared family, never a pattern in `model.id`.
 
 ## Tool coverage (honest status)
 

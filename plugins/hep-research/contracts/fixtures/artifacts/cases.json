@@ -29,7 +29,8 @@
   "theory_spec_v26.json",
   "theory_spec_v26_analytic_checked.json",
   "theory_spec_v26_asymptotic.json",
-  "theory_spec_v26_inapplicable_listed.json"
+  "theory_spec_v26_inapplicable_listed.json",
+  "theory_spec_v26_propagation.json"
  ],
  "invalid": {
   "theory_experiment_field.json": [
@@ -164,6 +165,9 @@
   ],
   "theory_v26_validity_empty.json": [
    "theory.validity_empty"
+  ],
+  "theory_v26_propagation_no_degeneracy.json": [
+   "theory.degeneracy_missing"
   ]
  },
  "unresolved": {

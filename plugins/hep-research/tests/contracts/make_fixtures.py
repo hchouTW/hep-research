@@ -295,6 +295,9 @@ VALID = {
     "theory_spec_v26_analytic_checked.json": theory_v26(derivation_status="analytic-derivation"),
     "theory_spec_v26_inapplicable_listed.json": theory_v26(conventions={k: x for k, x in CONVENTIONS_ALL.items() if k != "frame"},
                                                           inapplicable=["frame"]),
+    "theory_spec_v26_propagation.json": theory_v26(model={"id": "synthetic-diffusion-model", "description": "structural fixture",
+                                                          "family": "cosmic-ray-propagation"},
+                                                   degenerate_directions=["D0/L (synthetic)"]),
     "prediction_v26.json": prediction_v26(),
     "prediction_v26_validated_linked.json": _v26(dict(prediction_v26(), status=["validated-in-scope", "synthetic"],
                                                       inputs=LINKED_SPEC)),
@@ -357,6 +360,9 @@ bad["theory_v26_unchecked_formal_proof.json"] = (theory_v26(derivation_status="f
 bad["theory_v26_check_result_vocab.json"] = (theory_v26(checks_run=[{"name": "units", "result": "looks fine"}]),
                                              ["theory.check_result_vocab"])
 bad["theory_v26_validity_empty.json"] = (theory_v26(validity_domain={}), ["theory.validity_empty"])
+bad["theory_v26_propagation_no_degeneracy.json"] = (theory_v26(model={"id": "synthetic-diffusion-model", "description": "structural fixture",
+                                                                       "family": "cosmic-ray-propagation"}),
+                                                    ["theory.degeneracy_missing"])
 
 # Valid but reported with a warning (the rule is advisory): cases.json "warning".
 WARNING = {"theory_v26_conventions_incomplete.json": (theory_v26(conventions={"hbar_c_one": True}), ["theory.conventions_incomplete"]),

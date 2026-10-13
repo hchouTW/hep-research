@@ -417,7 +417,7 @@ def _theory_semantics(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> N
     is unchanged.
     theory-spec: errors for a perturbative argument without an order, an asymptotic argument without a limit, a
     formal proof or analytic derivation with no check run, a check result outside check_results, an empty validity
-    domain; a warning for each core convention key
+    domain, and a cosmic-ray-propagation model without degenerate_directions; a warning for each core convention key
     that is neither given (a value or 'not-applicable') nor listed in 'inapplicable'.
     prediction: errors for 'observed', for 'validated-in-scope' without a linked theory-spec input that carries it,
     and for a scale envelope without an envelope_prescriptions term or with values that are not [min, max] (bounds
@@ -461,6 +461,12 @@ def _theory_spec_rules(ext: dict, vocab: Vocabulary, rep: Report) -> None:
     if ext.get("validity_domain") == {}:
         rep.add("error", "$.extension.validity_domain", "theory.validity_empty",
                 "the validity domain is empty: state where the result holds")
+    model: Any = ext.get("model") if isinstance(ext.get("model"), dict) else {}
+    if model.get("family") == "cosmic-ray-propagation" and not any(
+            not _blank(d) for d in ext.get("degenerate_directions") or []):
+        rep.add("error", "$.extension.degenerate_directions", "theory.degeneracy_missing",
+                "a cosmic-ray propagation model lists the parameter combinations the data cannot separate "
+                "(degenerate_directions, e.g. 'D0/L')")
 
 
 def _prediction_rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:

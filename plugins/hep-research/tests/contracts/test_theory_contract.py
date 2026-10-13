@@ -135,6 +135,11 @@ MUTATIONS = {
     "ts_check_result_vocab": ("theory", _ext(lambda e: e["checks_run"].append({"name": "limits", "result": "looks fine"})),
                               "error", "theory.check_result_vocab"),
     "ts_validity_empty": ("theory", _ext(lambda e: e.update(validity_domain={})), "error", "theory.validity_empty"),
+    "ts_degeneracy_missing": ("theory", _ext(lambda e: e["model"].update(family="cosmic-ray-propagation")), "error",
+                              "theory.degeneracy_missing"),
+    "ts_degeneracy_blank": ("theory", _ext(lambda e: (e["model"].update(family="cosmic-ray-propagation"),
+                                                      e.update(degenerate_directions=[" "]))), "error",
+                            "theory.degeneracy_missing"),
 }
 
 
@@ -179,6 +184,11 @@ class NativeRuleTests(unittest.TestCase):
         ok.append(("key listed in inapplicable", d))
         d = theory_base(); d["extension"].update(derivation_status="asymptotic-argument", limit="m_e -> 0")
         ok.append(("asymptotic with limit", d))
+        d = theory_base(); d["extension"]["model"]["family"] = "cosmic-ray-propagation"
+        d["extension"]["degenerate_directions"] = ["D0/L"]
+        ok.append(("propagation model with degeneracies", d))
+        d = theory_base(); d["extension"]["model"]["id"] = "cosmic-ray-propagation-diffusion"
+        ok.append(("trigger is model.family, not model.id (Q10)", d))
         for name, doc in ok:
             with self.subTest(name):
                 rep = v.validate_artifact(doc)
@@ -199,7 +209,8 @@ class FixtureTests(unittest.TestCase):
     CASES = json.loads((ART / "cases.json").read_text())
     RULES = {"prediction.status_upgraded", "theory.conventions_incomplete", "theory.order_missing", "theory.limit_missing",
              "theory.unchecked_strong_status", "theory.check_result_vocab", "theory.validity_empty",
-             "prediction.spec_unlinked", "prediction.envelope_prescription", "prediction.truncation_method"}
+             "prediction.spec_unlinked", "prediction.envelope_prescription", "prediction.truncation_method",
+             "theory.degeneracy_missing"}
 
     def test_warning_fixtures_are_valid_and_warn(self):
         self.assertTrue(self.CASES["warning"])
