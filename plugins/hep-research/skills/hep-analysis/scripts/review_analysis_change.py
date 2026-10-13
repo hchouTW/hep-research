@@ -19,6 +19,10 @@ of control-region, sideband, simulation, calibration or validation data, matchin
 example "control-region data", "simulation", "sideband (low mass)"), makes it unexposed; any other wording ("full
 data", "search region", "simulation and data"), an empty list, a looked_at that is not a list, or none at all (basis
 none) makes the exposure unknown, never unexposed. Give one entry per kind of data. With both, the more exposed wins.
+--exposure-record FILE (the analysis's exposure record, contracts/schemas/exposure_record.json) adds the state that
+contracts/lineage.py derives from it to every change, by the same rule: a missing, unreadable or invalid record is
+unknown, never unexposed, and the more exposed source wins. The record holds every entry so far, so it can only raise
+a change's exposure; the exposure at the time of a decision comes from its decision record (lineage.py decision).
 Decision per change:
   accept            independent provenance (control sample or evidence ids, independent of the signal region) and
                     data exposure 'unexposed'
@@ -38,6 +42,7 @@ Output: JSON report with status (--status, default unvalidated; one of the core 
 0 nothing flagged, 1 any change flagged or needing human review, 2 bad input (including a malformed data_exposure record, NaN or inf, or
 malformed JSON; the error is also one line on stderr).
 Run: python3 <plugin root>/skills/hep-analysis/scripts/review_analysis_change.py changes.json [--status S]
+         [--exposure-record FILE]
 Standard library only.
 """
 from __future__ import annotations
@@ -45,6 +50,7 @@ from __future__ import annotations
 import json
 import re
 import sys
+from pathlib import Path
 
 OUTCOME_SEEN = re.compile(r"signal[- ]region data|unblinded|observed result|fit result|outcome|significance|p-value", re.I)
 OUTCOME_MOTIVE = re.compile(
@@ -101,8 +107,9 @@ def control_only(entry) -> bool:
     return bool(CONTROL_ONLY.match(" ".join(entry.lower().replace("-", " ").split())))
 
 
-def exposure(change: dict) -> tuple[dict, list]:
-    """({"state", "basis"[, "record_ref"]}, outcome-revealing looked_at entries) for one change."""
+def exposure(change: dict, derived: dict | None = None) -> tuple[dict, list]:
+    """({"state", "basis"[, "record_ref"]}, outcome-revealing looked_at entries) for one change; `derived` is the state
+    contracts.lineage.derive_exposure gave for the analysis's exposure record."""
     rec = change.get("data_exposure")
     structured = None
     if rec is not None:
@@ -123,17 +130,22 @@ def exposure(change: dict) -> tuple[dict, list]:
         seen = [raw] if OUTCOME_SEEN.search(str(raw)) else []
         legacy = {"state": "exposed" if seen else "unknown", "basis": "legacy-text"}
     if structured is None:
-        return (legacy or {"state": "unknown", "basis": "none"}), seen
-    if legacy is not None and RANK[legacy["state"]] > RANK[structured["state"]]:
-        structured["state"] = legacy["state"]
-    return structured, seen
+        result = legacy or {"state": "unknown", "basis": "none"}
+    else:
+        if legacy is not None and RANK[legacy["state"]] > RANK[structured["state"]]:
+            structured["state"] = legacy["state"]
+        result = structured
+    if derived is not None and (RANK[derived["state"]] > RANK[result["state"]] or (
+            RANK[derived["state"]] == RANK[result["state"]] and result["basis"] != "structured-record")):
+        result = dict(derived)
+    return result, seen
 
 
-def review(change: dict) -> dict:
+def review(change: dict, derived: dict | None = None) -> dict:
     ev = change.get("evidence") or {}
     if not isinstance(ev, dict):
         raise BadExposure(f"change {change.get('id')!r}: evidence must be an object")
-    data_exposure, seen = exposure(change)
+    data_exposure, seen = exposure(change, derived)
     text = " ".join(str(change.get(k, "")) for k in ("motivation", "description"))
     motive = bool(OUTCOME_MOTIVE.search(text))
     region = bool(REGION_WORDS.search(text))
@@ -183,6 +195,15 @@ def main(argv=None) -> int:
             return _fail(f"--status needs one of {', '.join(STATUSES)}")
         status = args[k + 1]
         del args[k:k + 2]
+    derived = None
+    if "--exposure-record" in args:
+        k = args.index("--exposure-record")
+        if k + 1 >= len(args):
+            return _fail("--exposure-record needs a file")
+        sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+        from contracts.lineage import derive_exposure, load_exposure
+        derived = derive_exposure(load_exposure(args[k + 1]), args[k + 1])
+        del args[k:k + 2]
     if len(args) != 1:
         print(__doc__)
         return 2
@@ -194,7 +215,7 @@ def main(argv=None) -> int:
     if not isinstance(changes, list) or not all(isinstance(c, dict) for c in changes):
         return _fail("'changes' must be a list of objects")
     try:
-        rows = [review(c) for c in changes]
+        rows = [review(c, derived) for c in changes]
     except BadExposure as exc:
         return _fail(str(exc))
     print(json.dumps({"status": status, "changes": rows, "flagged": sum(r["decision"] == "flag" for r in rows),
