@@ -1,0 +1,174 @@
+{
+ "m_h_gev": 125.13,
+ "n_f": 5,
+ "alpha_s_at_MH": 0.11261898069499733,
+ "mb_at_MH_gev": 2.793236092616238,
+ "running": "four-loop beta and gamma_m, fixed n_f = 5, from alpha_s(m_Z) and mbar_b(mbar_b)",
+ "orders": [
+  {
+   "order_in_alpha_s": 0,
+   "Gamma_GeV_mu_eq_MH": 0.0019222622326805709,
+   "scale_envelope": {
+    "prescription": "scan-min-max over mu in [M_H/2, 2 M_H] (log scan, running mass and coupling)",
+    "min": 0.0017272086904035707,
+    "max": 0.0021669116146027906,
+    "three_point": {
+     "0.5": 0.0021669116146027906,
+     "1.0": 0.0019222622326805709,
+     "2.0": 0.0017272086904035707
+    },
+    "gaussian": false
+   },
+   "truncation_estimate": {
+    "method": "last-term",
+    "value": 0.0,
+    "gaussian": false
+   },
+   "parametric_alpha_s": {
+    "up": -2.0068987297130157e-05,
+    "down": 2.0032560376693955e-05,
+    "source": "alpha_s(m_Z) +- PDG uncertainty"
+   },
+   "parametric_mb": {
+    "up": 6.535136675121312e-06,
+    "down": -6.522874983748992e-06,
+    "source": "mbar_b(mbar_b) +- PDG summary-table uncertainty (printed at CL = 90%)"
+   }
+  },
+  {
+   "order_in_alpha_s": 1,
+   "Gamma_GeV_mu_eq_MH": 0.00231274513222043,
+   "scale_envelope": {
+    "prescription": "scan-min-max over mu in [M_H/2, 2 M_H] (log scan, running mass and coupling)",
+    "min": 0.0022024274269282916,
+    "max": 0.0024167092859543296,
+    "three_point": {
+     "0.5": 0.0024167092859543296,
+     "1.0": 0.00231274513222043,
+     "2.0": 0.0022024274269282916
+    },
+    "gaussian": false
+   },
+   "truncation_estimate": {
+    "method": "last-term",
+    "value": 0.0003904828995398592,
+    "gaussian": false
+   },
+   "parametric_alpha_s": {
+    "up": -2.1340514264984664e-05,
+    "down": 2.123535466304902e-05,
+    "source": "alpha_s(m_Z) +- PDG uncertainty"
+   },
+   "parametric_mb": {
+    "up": 7.86266580949475e-06,
+    "down": -7.847913312904967e-06,
+    "source": "mbar_b(mbar_b) +- PDG summary-table uncertainty (printed at CL = 90%)"
+   }
+  },
+  {
+   "order_in_alpha_s": 2,
+   "Gamma_GeV_mu_eq_MH": 0.0023847439851439885,
+   "scale_envelope": {
+    "prescription": "scan-min-max over mu in [M_H/2, 2 M_H] (log scan, running mass and coupling)",
+    "min": 0.0023441253899912184,
+    "max": 0.002403518096734198,
+    "three_point": {
+     "0.5": 0.002403518096734198,
+     "1.0": 0.0023847439851439885,
+     "2.0": 0.0023441253899912184
+    },
+    "gaussian": false
+   },
+   "truncation_estimate": {
+    "method": "last-term",
+    "value": 7.199885292355837e-05,
+    "gaussian": false
+   },
+   "parametric_alpha_s": {
+    "up": -2.105396865764676e-05,
+    "down": 2.093242215649594e-05,
+    "source": "alpha_s(m_Z) +- PDG uncertainty"
+   },
+   "parametric_mb": {
+    "up": 8.107441124906387e-06,
+    "down": -8.092229363342463e-06,
+    "source": "mbar_b(mbar_b) +- PDG summary-table uncertainty (printed at CL = 90%)"
+   }
+  },
+  {
+   "order_in_alpha_s": 3,
+   "Gamma_GeV_mu_eq_MH": 0.0023884416997386713,
+   "scale_envelope": {
+    "prescription": "scan-min-max over mu in [M_H/2, 2 M_H] (log scan, running mass and coupling)",
+    "min": 0.0023785081243654763,
+    "max": 0.0023889933869211343,
+    "three_point": {
+     "0.5": 0.002386119172697644,
+     "1.0": 0.0023884416997386713,
+     "2.0": 0.0023785081243654763
+    },
+    "gaussian": false
+   },
+   "truncation_estimate": {
+    "method": "last-term",
+    "value": 3.6977145946828945e-06,
+    "gaussian": false
+   },
+   "parametric_alpha_s": {
+    "up": -2.101230076235073e-05,
+    "down": 2.0890111975002592e-05,
+    "source": "alpha_s(m_Z) +- PDG uncertainty"
+   },
+   "parametric_mb": {
+    "up": 8.120012287077087e-06,
+    "down": -8.104776938598623e-06,
+    "source": "mbar_b(mbar_b) +- PDG summary-table uncertainty (printed at CL = 90%)"
+   }
+  },
+  {
+   "order_in_alpha_s": 4,
+   "Gamma_GeV_mu_eq_MH": 0.002385820610567637,
+   "scale_envelope": {
+    "prescription": "scan-min-max over mu in [M_H/2, 2 M_H] (log scan, running mass and coupling)",
+    "min": 0.0023838330137190117,
+    "max": 0.0023859801711540764,
+    "three_point": {
+     "0.5": 0.0023838330137190117,
+     "1.0": 0.002385820610567637,
+     "2.0": 0.0023846764956220417
+    },
+    "gaussian": false
+   },
+   "truncation_estimate": {
+    "method": "last-term",
+    "value": 2.621089171034232e-06,
+    "gaussian": false
+   },
+   "parametric_alpha_s": {
+    "up": -2.1061079646495732e-05,
+    "down": 2.093892839083499e-05,
+    "source": "alpha_s(m_Z) +- PDG uncertainty"
+   },
+   "parametric_mb": {
+    "up": 8.111101340548248e-06,
+    "down": -8.095882711425285e-06,
+    "source": "mbar_b(mbar_b) +- PDG summary-table uncertainty (printed at CL = 90%)"
+   }
+  }
+ ],
+ "scale_envelope_widths_GeV": [
+  0.0004397029241992199,
+  0.000214281859026038,
+  5.939270674297937e-05,
+  1.0485262555657952e-05,
+  2.1471574350646373e-06
+ ],
+ "checks": {
+  "mb_runs_down_toward_MH": true,
+  "alpha_s_falls_toward_MH": true,
+  "leading_correction_is_s1_a": true,
+  "scale_envelope_shrinks_from_LO_to_N4LO": true,
+  "central_inside_its_envelope": true
+ },
+ "status": "perturbative-argument; prediction, not a measurement; massless b at leading power, no electroweak or top-induced corrections"
+}

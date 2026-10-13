@@ -83,6 +83,19 @@ class ConversionTests(unittest.TestCase):
                 back = kin.convert(kin.convert(start, src, dst, sp), dst, "rigidity", sp)
                 self.assertAlmostEqual(back, 7.5, places=9, msg=f"{src}->{dst}")
 
+    def test_kinetic_energy_per_nucleon_rigidity_round_trip_for_p_he4_c12(self):
+        """THY-WP4.1: T/n -> R -> T/n to 1e-12 for p, He-4 and C-12 (masses are test inputs, not shipped constants),
+        and the point flux Jacobians of the two directions multiply to 1."""
+        for sp in (Species(Z=1, A=1, mass=M_P), Species(Z=2, A=4, mass=M_HE4), Species(Z=6, A=12, mass=11.1749)):
+            for tn in (0.01, 0.45, 1.0, 10.0, 2.0e3):
+                with self.subTest(Z=sp.Z, tn=tn):
+                    r = kin.convert(tn, "kinetic_energy_per_nucleon", "rigidity", sp)
+                    back = kin.convert(r, "rigidity", "kinetic_energy_per_nucleon", sp)
+                    self.assertAlmostEqual(back / tn, 1.0, delta=1e-12)
+                    j = kin.flux_jacobian(tn, "kinetic_energy_per_nucleon", "rigidity", sp)
+                    k = kin.flux_jacobian(r, "rigidity", "kinetic_energy_per_nucleon", sp)
+                    self.assertAlmostEqual(j * k, 1.0, delta=1e-12)
+
     def test_sign_of_rigidity_is_ignored(self):
         self.assertEqual(kin.rigidity_to_momentum(-12.0, 1), kin.rigidity_to_momentum(12.0, 1))
 

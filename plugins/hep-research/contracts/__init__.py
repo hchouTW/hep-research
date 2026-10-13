@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "2.5.0"
+CONTRACTS_VERSION = "2.6.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -12,5 +12,10 @@ CONTRACTS_VERSION = "2.5.0"
 # result, structured weights, domain_shift, environment, output_semantics); no capability: the new rules only refuse
 # incomplete or inconsistent declarations, and a 2.4 reader rejects a structured 'weights' object (its schema expects
 # a string) instead of misreading it.
+# 2.6.0 adds theory-spec and prediction semantics (contracts.validate, _theory_semantics, THEORY_SEMANTICS_FROM) and
+# optional fields (theory-spec limit, neglected, computational_run_ref, degenerate_directions, model.family,
+# checks_run[].tolerance, references_read[].date_read; prediction derivation_status; uncertainty prescription, method,
+# bounds); no capability: the new rules only refuse incomplete or inconsistent declarations, and a 2.5 reader of a
+# 2.6 theory-spec rejects the new top-level fields (additionalProperties) instead of misreading them.
 KNOWN_CAPABILITIES = frozenset({"core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1"})

@@ -1,5 +1,6 @@
 """DIS kinematics (hep-theory): the closed forms in references/dis-kinematics.md and scripts/dis_kinematics.py
 agree with four-vector arithmetic; unphysical inputs are refused; no experiment is named. All inputs are SYNTHETIC."""
+import decimal
 import json
 import math
 import random
@@ -146,6 +147,85 @@ class RefusalTests(unittest.TestCase):
         self.assertEqual(doc["conventions"]["hadron_energy"], "per nucleon; M is the mass the user supplied")
         for key in ("x", "y", "Q2", "nu", "W2", "W", "s", "sqrt_s"):
             self.assertIn(key, doc["outputs"])
+
+
+M_MU = 0.10566     # muon mass in GeV, a test input (the script ships no constant)
+
+
+def rest_frame_Q2_y(E, Ep, theta, m):
+    """Q^2 and y from four-vectors in the nucleon rest frame: k along z, k' at polar angle theta (float route)."""
+    P = (M, 0.0, 0.0, 0.0)
+    k = (E, 0.0, 0.0, math.sqrt(E**2 - m**2))
+    pp = math.sqrt(max(Ep**2 - m**2, 0.0))
+    kp = (Ep, pp * math.sin(theta), 0.0, pp * math.cos(theta))
+    r = dk.from_four_vectors(k, kp, P)
+    return r["Q2"], r["y"]
+
+
+def rest_frame_Q2_exact(E, Ep, cos_theta, m):
+    """Q^2 = -(k - k')^2 from the same four-vectors in 60-digit decimal arithmetic.
+
+    In double precision -(k - k')^2 loses about log10(E^2 / Q^2_min) digits (10 for a 5.9 TeV rest-frame muon), so
+    the 1e-9 comparison with the closed form uses this route; the float route of from_four_vectors is checked
+    against it at a looser tolerance."""
+    D = decimal.Decimal
+    with decimal.localcontext() as ctx:
+        ctx.prec = 60
+        E, Ep, m, c = D(E), D(Ep), D(m), D(cos_theta)
+        pk, pkp = (E * E - m * m).sqrt(), max(Ep * Ep - m * m, D(0)).sqrt()
+        k = (E, D(0), D(0), pk)
+        kp = (Ep, pkp * (1 - c * c).sqrt(), D(0), pkp * c)
+        q = [k[i] - kp[i] for i in range(4)]
+        return float(-(q[0] ** 2 - q[1] ** 2 - q[2] ** 2 - q[3] ** 2))
+
+
+class LeptonMassBoundTests(unittest.TestCase):
+    """THY-WP1.4: y_max = 1 - m_l / E and Q^2_min(y) at theta = 0 (E = k.P / M, the lepton energy in the nucleon rest
+    frame), compared with a numerical scan of the scattering angle through from_four_vectors."""
+    CONFIGS = (("collider", 10.0, 275.0), ("fixed-target", 160.0, M))
+
+    def test_closed_form_bounds_match_an_angle_scan(self):
+        for name, E_l, E_h in self.CONFIGS:
+            s = dk.beam_s(E_l, E_h, M, M_MU)
+            E = (s - M**2 - M_MU**2) / (2 * M)
+            b = dk.lepton_mass_bounds(s, M, M_MU)
+            # y_max: the outgoing lepton at rest in the nucleon rest frame (E' = m_l)
+            _, y_at_rest = rest_frame_Q2_y(E, M_MU, 0.0, M_MU)
+            self.assertAlmostEqual(b["y_max"] / y_at_rest, 1.0, delta=1e-9, msg=name)
+            for y in (0.01, 0.5, 0.9):
+                Ep = E * (1 - y)
+                scan = min(rest_frame_Q2_exact(E, Ep, math.cos(math.pi * i / 400), M_MU) for i in range(401))
+                closed = dk.q2_min(s, M, M_MU, y)
+                self.assertAlmostEqual(closed / scan, 1.0, delta=1e-9, msg=(name, y))
+                self.assertAlmostEqual(rest_frame_Q2_y(E, Ep, 0.0, M_MU)[0] / closed, 1.0, delta=1e-3, msg=(name, y))
+                self.assertLess(closed, rest_frame_Q2_exact(E, Ep, math.cos(1e-3), M_MU))
+
+    def test_massless_lepton_keeps_the_old_bounds(self):
+        s = dk.beam_s(10.0, 275.0, M)
+        self.assertEqual(dk.lepton_mass_bounds(s, M, 0.0)["y_max"], 1.0)
+        self.assertEqual(dk.q2_min(s, M, 0.0, 0.5), 0.0)
+
+    def test_audit_points_are_refused(self):
+        for args in (("--x", "0.1", "--y", "1.0"), ("--x", "1e-9", "--y", "0.5")):
+            code, out, _ = run("--E-lepton", "10", "--E-hadron", "275", "--M", str(M), "--m-lepton", str(M_MU), *args)
+            self.assertEqual(code, 1, args)
+            self.assertEqual(json.loads(out)["status"], "failed")
+
+    def test_ok_output_reports_the_bounds(self):
+        code, out, _ = run("--E-lepton", "10", "--E-hadron", "275", "--M", str(M), "--m-lepton", str(M_MU),
+                           "--x", "0.1", "--y", "0.5")
+        self.assertEqual(code, 0)
+        doc = json.loads(out)
+        for key in ("y_max", "Q2_min_at_y", "E_lepton_rest_frame"):
+            self.assertIn(key, doc["outputs"]["lepton_mass_bounds"])
+
+    def test_target_at_rest_is_allowed_and_below_mass_refused(self):
+        code, out, _ = run("--E-lepton", "160", "--E-hadron", str(M), "--M", str(M), "--m-lepton", str(M_MU),
+                           "--x", "0.1", "--y", "0.5")
+        self.assertEqual(code, 0, out)
+        doc = json.loads(out)
+        self.assertAlmostEqual(doc["outputs"]["s"], M_MU**2 + M**2 + 2 * 160.0 * M, delta=1e-9)
+        self.assertEqual(run("--E-lepton", "160", "--E-hadron", "0.9", "--M", str(M), "--x", "0.1", "--y", "0.5")[0], 2)
 
 
 class ContentTests(unittest.TestCase):

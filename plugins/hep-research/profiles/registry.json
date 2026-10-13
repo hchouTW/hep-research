@@ -35,6 +35,13 @@
    "version": "1.0.0",
    "scope": "R(e+e- -> hadrons) with massless QCD corrections to alpha_s^4: scale dependence, envelope, truncation",
    "path": "theory/qcd-r-ratio"
+  },
+  {
+   "id": "theory:higgs-bb-width",
+   "kind": "theory-domain",
+   "version": "0.1.0",
+   "scope": "Gamma(H -> b bbar) with the MS-bar running b mass, QCD to alpha_s^4: running, envelope, truncation",
+   "path": "theory/higgs-bb-width"
   }
  ]
 }

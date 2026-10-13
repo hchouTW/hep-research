@@ -31,8 +31,9 @@ class StatisticalResultV11(unittest.TestCase):
         # 2.1.0: plugin_release, required_capabilities, data_exposure (AGENTIC-R5 Q-04); 2.2.0: statistical-result
         # semantics, p-value bounds, typed coverage, publication gate (tests/contracts/test_statistical_semantics.py); 2.3.0:
         # communication traceability; 2.4.0: response semantics (tests/contracts/test_response_contract.py); 2.5.0:
-        # ml-artifact semantics (tests/contracts/test_ml_contract.py)
-        self.assertEqual(CONTRACTS_VERSION, "2.5.0")
+        # ml-artifact semantics (tests/contracts/test_ml_contract.py); 2.6.0: theory-spec and prediction semantics
+        # (tests/contracts/test_theory_contract.py)
+        self.assertEqual(CONTRACTS_VERSION, "2.6.0")
 
     def test_unresolved_fixtures(self):
         cases = load(ART / "cases.json")["unresolved"]

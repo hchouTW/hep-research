@@ -1,5 +1,5 @@
 {
- "contract_version": "2.5.0",
+ "contract_version": "2.6.0",
  "bindings": {
   "experiments": [
    {
@@ -16,7 +16,7 @@
  },
  "versions": {
   "plugin": "0.6.17",
-  "contracts": "2.5.0",
+  "contracts": "2.6.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -98,6 +98,7 @@
     "angle_definition": "theta between the incoming e- beam and the outgoing mu-"
    }
   },
+  "theory_spec_ref": "../qed-prediction/output/artifacts/theory_spec.json",
   "parameter_point": {
    "sqrt_s_gev": 10.0,
    "mu": 1.0
@@ -160,7 +161,8 @@
    {
     "name": "missing higher orders and Z exchange",
     "kind": "truncation",
-    "correlation": "unknown"
+    "correlation": "unknown",
+    "method": "not-estimated"
    }
   ],
   "allowed_transformations": []

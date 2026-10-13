@@ -14,6 +14,10 @@
   "ml_artifact.json",
   "ml_artifact_v25.json",
   "prediction.json",
+  "prediction_v26.json",
+  "prediction_v26_binned_envelope.json",
+  "prediction_v26_derivation_status.json",
+  "prediction_v26_validated_linked.json",
   "response.json",
   "response_parametrized.json",
   "response_v24.json",
@@ -21,7 +25,12 @@
   "statres_bayesian_rhat_warning.json",
   "statres_frequentist.json",
   "statres_scan_global.json",
-  "theory_spec.json"
+  "theory_spec.json",
+  "theory_spec_v26.json",
+  "theory_spec_v26_analytic_checked.json",
+  "theory_spec_v26_asymptotic.json",
+  "theory_spec_v26_inapplicable_listed.json",
+  "theory_spec_v26_propagation.json"
  ],
  "invalid": {
   "theory_experiment_field.json": [
@@ -129,6 +138,36 @@
   ],
   "communication_claim_status_conflict.json": [
    "communication.claim_status_conflict"
+  ],
+  "prediction_v26_observed.json": [
+   "prediction.status_upgraded"
+  ],
+  "prediction_v26_validated_unlinked.json": [
+   "prediction.status_upgraded"
+  ],
+  "prediction_v26_envelope_no_prescription.json": [
+   "prediction.envelope_prescription"
+  ],
+  "prediction_v26_envelope_inverted.json": [
+   "prediction.envelope_prescription"
+  ],
+  "theory_v26_order_missing.json": [
+   "theory.order_missing"
+  ],
+  "theory_v26_limit_missing.json": [
+   "theory.limit_missing"
+  ],
+  "theory_v26_unchecked_formal_proof.json": [
+   "theory.unchecked_strong_status"
+  ],
+  "theory_v26_check_result_vocab.json": [
+   "theory.check_result_vocab"
+  ],
+  "theory_v26_validity_empty.json": [
+   "theory.validity_empty"
+  ],
+  "theory_v26_propagation_no_degeneracy.json": [
+   "theory.degeneracy_missing"
   ]
  },
  "unresolved": {
@@ -144,6 +183,17 @@
   ],
   "ml_split_overlap_not_run.json": [
    "ml.split_overlap_not_run"
+  ],
+  "prediction_v26_unlinked.json": [
+   "prediction.spec_unlinked"
+  ]
+ },
+ "warning": {
+  "theory_v26_conventions_incomplete.json": [
+   "theory.conventions_incomplete"
+  ],
+  "prediction_v26_truncation_no_method.json": [
+   "prediction.truncation_method"
   ]
  }
 }

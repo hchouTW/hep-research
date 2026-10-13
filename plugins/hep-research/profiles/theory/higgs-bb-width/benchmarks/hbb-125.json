@@ -1,0 +1,14 @@
+{
+ "label": "Benchmark settings for theory:higgs-bb-width (theory only; no experiment resource). Inputs from PDG 2026, read 2026-10-13 (hbb:C06-C08)",
+ "m_h_gev": 125.13,
+ "g_f_gev_minus2": 1.1663785e-05,
+ "alpha_s_mz": 0.1180,
+ "alpha_s_mz_uncertainty": 0.0009,
+ "m_z_gev": 91.1879,
+ "mb_mb_gev": 4.186,
+ "mb_mb_uncertainty_gev": 0.006,
+ "n_f": 5,
+ "s4_nf5": -825.7,
+ "scale_factors": [0.5, 1.0, 2.0],
+ "scale_scan_points": 41
+}

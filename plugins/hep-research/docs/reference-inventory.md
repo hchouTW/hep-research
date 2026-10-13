@@ -12,7 +12,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-analysis | 9 | 74 | 0 |
 | hep-computing | 31 | 284 | 0 |
 | hep-statistics | 9 | 119 | 0 |
-| hep-theory | 8 | 42 | 0 |
+| hep-theory | 11 | 78 | 0 |
 | physics-ml | 38 | 257 | 0 |
 | research-communication | 53 | 378 | 0 |
 
@@ -165,14 +165,17 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `statistical-inference-for-physics.md` | hep-statistics | 12.7 | yes | 9 | hep-computing, hep-theory, research-communication | 351029c 2026-10-07 |
 | `statistical-tools.md` | hep-statistics | 9.4 | yes | 5 | hep-analysis, physics-ml | e375e7d 2026-10-12 |
 | `unfolding.md` | hep-statistics | 3.4 | yes | 22 | detector-response, hep-analysis | 24b8216 2026-10-13 |
-| `cosmic-ray-propagation.md` | hep-theory | 5.2 | yes | 1 | - | 351029c 2026-10-07 |
-| `dis-kinematics.md` | hep-theory | 4.8 | yes | 4 | - | 351029c 2026-10-07 |
-| `event-generation.md` | hep-theory | 9.2 | yes | 4 | detector-response, hep-analysis | 351029c 2026-10-07 |
+| `amplitudes-and-widths.md` | hep-theory | 8.3 | yes | 1 | - | untracked |
+| `cosmic-ray-propagation.md` | hep-theory | 13.0 | yes | 2 | - | 351029c 2026-10-07 |
+| `dis-kinematics.md` | hep-theory | 5.9 | yes | 4 | - | 351029c 2026-10-07 |
+| `event-generation.md` | hep-theory | 9.8 | yes | 4 | detector-response, hep-analysis | 351029c 2026-10-07 |
 | `higher-order-predictions.md` | hep-theory | 4.2 | yes | 1 | - | 351029c 2026-10-07 |
 | `mathematical-reasoning-and-proof.md` | hep-theory | 9.0 | yes | 7 | hep-statistics, research-communication | 351029c 2026-10-07 |
-| `pdfs-and-lhapdf.md` | hep-theory | 3.2 | yes | 2 | - | 351029c 2026-10-07 |
+| `pdfs-and-lhapdf.md` | hep-theory | 6.0 | yes | 2 | - | 351029c 2026-10-07 |
 | `recasting-toolchain.md` | hep-theory | 3.3 | yes | 2 | - | ae5e376 2026-10-08 |
-| `smeft-and-eft.md` | hep-theory | 2.8 | yes | 2 | - | 351029c 2026-10-07 |
+| `regularization-and-schemes.md` | hep-theory | 7.6 | yes | 3 | - | untracked |
+| `selection-rules.md` | hep-theory | 7.7 | yes | 1 | - | untracked |
+| `smeft-and-eft.md` | hep-theory | 3.4 | yes | 2 | - | 351029c 2026-10-07 |
 | `ablation-and-design-review.md` | physics-ml | 5.2 | no | 12 | research-communication | 351029c 2026-10-07 |
 | `architecture-selection.md` | physics-ml | 6.9 | no | 4 | - | 721d1ea 2026-10-13 |
 | `checkpointing.md` | physics-ml | 6.0 | no | 5 | - | 721d1ea 2026-10-13 |

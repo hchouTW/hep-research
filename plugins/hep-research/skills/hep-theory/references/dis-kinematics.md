@@ -29,6 +29,15 @@ q = k - k' for the exchanged boson (gamma, Z or W). Invariant quantities:
 - Exact: Q^2 = x y (s - M^2 - m_l^2), since x y = Q^2 / (2 k.P) and s = m_l^2 + M^2 + 2 k.P.
 - Exact: W^2 = M^2 + Q^2 (1 - x) / x and nu = Q^2 / (2 M x); so x = 1 is elastic scattering (W = M).
 - Ranges: 0 < x <= 1 and 0 < y <= 1 (k'.P >= 0), hence Q^2 <= s - M^2 - m_l^2.
+- Lepton-mass bounds (equal incoming and outgoing lepton mass m_l; status: analytic-derivation from the
+  definitions above, derived here on 2026-10-13 and checked in the tests against a 60-digit scan of the scattering
+  angle, relative 1e-9, for a muon at E_l = 10, E_h = 275 GeV and at E_l = 160 GeV on a target at rest). In the
+  nucleon rest frame E = k.P / M = (s - M^2 - m_l^2) / (2 M), nu = y E and E' = E (1 - y). E' >= m_l gives
+  y <= y_max = 1 - m_l / E. With Q^2 = 2 (E E' - m_l^2 - |k_vec| |k'_vec| cos theta), the smallest Q^2 at fixed
+  y is at theta = 0; since (E E' - m_l^2)^2 - |k_vec|^2 |k'_vec|^2 = m_l^2 nu^2,
+  Q^2_min(y) = 2 m_l^2 nu^2 / (E E' - m_l^2 + |k_vec| |k'_vec|) (the form without cancellation; for E' >> m_l it is
+  about m_l^2 y^2 / (1 - y)). For m_l = 0, y_max = 1 and Q^2_min = 0. The script refuses points outside these
+  bounds and reports them in every ok output (`lepton_mass_bounds`).
 - Beams: with the lepton momentum at a crossing angle theta_c to the reversed hadron momentum (theta_c = 0 head-on),
   s = m_l^2 + M^2 + 2 (E_l E_h + |k_vec| |P_vec| cos theta_c); with m_l = 0 and E_h >> M this is s ~ 4 E_l E_h.
   The crossing angle lowers s; the hadron energy is per nucleon when the beam is an ion, and M is then the
@@ -55,7 +64,8 @@ higher-twist effects: not derived here; name them as neglected in any theory-spe
 
 `<plugin root>/skills/hep-theory/scripts/dis_kinematics.py` builds s from the two beam energies and a crossing
 angle, computes the third of (x, y, Q^2) from the other two with the exact identity, and refuses unphysical inputs
-(exit 1, JSON reason). It ships no constants: the target mass is an input. Tests in
+(exit 1, JSON reason), including points outside the lepton-mass bounds. A target at rest (E_hadron = M, fixed-target
+configurations) is accepted; E_hadron < M is refused. It ships no constants: the target mass is an input. Tests in
 `<plugin root>/tests/skills/hep_theory/test_dis_kinematics.py` check every identity above against four-vector arithmetic.
 
 ## Source read

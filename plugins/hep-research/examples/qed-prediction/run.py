@@ -150,7 +150,8 @@ def artifacts(der: dict, pred: dict, created: str):
                                                  "values": [v * rel for v in vals], "correlation": "fully-correlated"},
                                                 {"name": "numerical integration", "kind": "numerical",
                                                  "values": [pred["convergence"]["quad_abs_error"] / 2.0] * len(vals), "correlation": "unknown"}]},
-                                 "uncertainties": [{"name": "missing higher orders and Z exchange", "kind": "truncation", "correlation": "unknown"}],
+                                 "uncertainties": [{"name": "missing higher orders and Z exchange", "kind": "truncation", "correlation": "unknown",
+                                                   "method": "not-estimated"}],
                                  "allowed_transformations": ["bin-integrate", "rebin", "fiducial-restriction", "unit-conversion",
                                                              "multiply-by-normalization", "level-identification", "forward-fold"]})
     docs = {"theory_spec": spec, "prediction": prediction}

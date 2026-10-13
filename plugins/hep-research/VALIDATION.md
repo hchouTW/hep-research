@@ -530,6 +530,33 @@ skipped. Not run: GPU, multi-GPU NCCL for FSDP2, a benchmark-dataset performance
 J9 example's fit uses private helpers of `core/stats/likelihood_limits.py` (`template_fit.py` refuses signed-weight
 templates).
 
+## THEORY-AUDIT (2026-10-13, E2 + SymPy 1.14.0, version 0.6.17 + unreleased, contracts 2.6.0): hep-theory audit THY-WP0 to WP5
+
+Each fix had its regression test seen failing on the `c1d375c` code first (counts in the commit messages).
+
+| Finding | Regression test | Before | After |
+|---|---|---|---|
+| `pdf_uncertainty.py` mixes the two alpha_s members into a `symmhessian` delta; `+as` types refused; NaN member ok | `tests/skills/hep_theory/test_pdf_uncertainty.py` | 43 members: delta 0.0443; `symmhessian+as` failed; NaN gave `ok` | `+as`: PDF delta 0.012649 (40 eigenvectors), separate `alphas.delta` 0.03; `num_members` mismatch, NaN refused (exit 1) |
+| `eft_truncation.py` sums `a*b` and `b*a`; empty conventions ok; `lambda_tev` 0 traceback; rescaling check absent | `test_eft_truncation.py` | quadratic 0.11, ok; `ZeroDivisionError` | refused with both spellings named; `rescaling_check: pass`; flag fraction with its source |
+| `event_weights.py`: index -1, 7, repeated indices; negative sigma and luminosity; NaN weight | `test_event_weights.py` | wrap-around, `IndexError`, fraction 1.5, ok | refused (exit 1, JSON); selected sum w, sum w^2, N_eff, relative uncertainty to 1e-12 |
+| `dis_kinematics.py` ignores the lepton mass in the bounds; target at rest refused | `test_dis_kinematics.py` (+5) | muon y = 1 and Q^2 below Q^2_min accepted | exact y_max, Q^2_min(y) against a 60-digit angle scan (1e-9, collider and fixed target); refused outside |
+| theory-spec / prediction invariants unchecked (six audit copies all `ok`, also with `--strict`) | `tests/contracts/test_theory_contract.py` (16 tests), fixtures from `make_fixtures.py` | no rule fired | eleven codes at their levels from 2.6.0; 2.5.0 artifacts keep their outcome, codes with `--strict` (API and CLI) |
+| Committed theory examples | same, `CommittedExampleTests` | 2.5.0, `folded_expectation` unlinked, truncation without method | 2.6.0, numbers byte-identical (word diff: versions and added fields only) |
+
+References `amplitudes-and-widths.md`, `selection-rules.md`, `regularization-and-schemes.md` and the cosmic-ray
+additions cite sources opened on 2026-10-13 (PDG 2026 reviews, arXiv papers, the Gleeson-Axford ADS scan) or say
+`unverified` (Furry's theorem, read only in a tertiary source; isospin and strangeness conservation by interaction;
+LHAPDF `.info` files, blocked). New profile `theory:higgs-bb-width`: 25 tests (derivation with exact mu-independence
+through alpha_s^4 and negative tests, prediction, convention mismatches, missing SymPy) pass in E2; in
+`sympy-py313` 25 run, 9 skipped (no scipy). Gamma(H -> b bbar) = 2.386 MeV at alpha_s^4 (scale envelope 2.384-2.386
+MeV), a perturbative argument conditional on the stated exclusions.
+
+`tools/run_all_checks.py` with the host CLIs and the E2 venv: 21 of 21 checks pass; 2,525 unit tests, 0 failures, 55
+skipped; profile suites ams-02 238, eic 43, synthetic-collider 9, qed-benchmark 18, qcd-r-ratio 21, higgs-bb-width
+25. `check_relocation.py`: pass. Lint with the CI pins (ruff 0.16.10, mypy 2.4.0) clean on `core/` and `contracts/`.
+`make_fixtures.py` and `make_cases.py` leave no diff on a second run. Not run: a live routing run (paid); CI on a PR
+(no PR opened); LHAPDF, MadGraph or any generator.
+
 ## 0.6.17 release check (2026-10-13, E2)
 
 Version 0.6.17: physics-ml enforcement and ML artifact semantics (contracts 2.5.0, PRs #59 and #60); partition engine
@@ -907,7 +934,8 @@ has no SymPy). `find_python.py` on E2 picks the calling interpreter (miniconda b
 skipped for optional tools); `check_relocation.py`: pass.
 
 Finding, not changed: the `theory-spec` extension has no field for tool versions. The skill text records the
-interpreter and the SymPy version in a `computational-run` (`tools`, `environment`) instead.
+interpreter and the SymPy version in a `computational-run` (`tools`, `environment`) instead. Closed 2026-10-13 (THEORY-AUDIT, THY-WP2.1): the
+extension has an optional `computational_run_ref` naming that `computational-run`.
 
 CI on the PR (Linux): the `checks` jobs on Python 3.11, 3.12 and 3.13 and every optional job pass.
 

@@ -33,6 +33,10 @@ C = [
  ("th-direct-2", "zh-Hant", "direct", "請說明這個 NLO 計算的 scale envelopes 該如何給出理論誤差。", "hep-theory", ["scale envelopes"], None, None, {}),
  ("th-neighbor-1", "en", "neighboring", "Fit the coupling of my model to these published data points with their covariance.", "hep-statistics", ["fits"], "hep-theory", None, {}),
  ("th-negative-1", "en", "negative", "Write the results section of the paper from these fit outputs.", "research-communication", ["drafting or revising paper sections"], "hep-theory", None, {}),
+ ("th-selection-1", "en", "direct", "Is pi0 -> gamma gamma gamma allowed? Which rule forbids it?", "hep-theory", ["selection rules"], None, None, {}),
+ ("th-selection-2", "zh-Hant", "direct", "π0 → γγγ 這個衰變允許嗎？是哪一條 selection rules 禁止它？", "hep-theory", ["selection rules"], None, None, {}),
+ ("th-scheme-1", "en", "direct", "Convert the MS-bar bottom mass m_b(m_b) to the pole mass; state the schemes and the loop order.", "hep-theory", ["schemes"], None, None, {}),
+ ("th-scheme-2", "zh-Hant", "direct", "請把 MS-bar 的 b 夸克質量換算成 pole mass，並說明使用的 schemes 與迴圈階數。", "hep-theory", ["schemes"], None, None, {}),
  # physics-ml
  ("ml-direct-1", "en", "direct", "Train a jet classifier in PyTorch with grouped splits by run so nothing leaks.", "physics-ml", ["grouped train/validation/test splits and leakage checks"], None, None, {}),
  ("ml-direct-2", "zh-Hant", "direct", "我的模擬太慢，想用 PyTorch 做 surrogates，並檢查 domain shift。", "physics-ml", ["surrogates", "domain shift"], None, None, {}),
