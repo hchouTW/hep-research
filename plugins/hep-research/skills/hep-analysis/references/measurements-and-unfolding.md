@@ -26,6 +26,6 @@ Differential measurements divide by bin widths: `d_sigma/dx_i=sigma_i/delta_x_i`
 
 ## Combinations
 
-Prefer joint likelihoods when available, with nonoverlapping events and compatible nuisance definitions. When only estimates and covariance are available, BLUE under linear Gaussian assumptions uses `w=V_inverse*1/(1^T*V_inverse*1)`. Check conditioning, positive semidefiniteness, and correlation sources. Negative BLUE weights alone are not evidence of an error.
+Prefer joint likelihoods when available, with nonoverlapping events and compatible nuisance definitions. When only estimates and covariance are available, BLUE under linear Gaussian assumptions uses `w=V_inverse*1/(1^T*V_inverse*1)`. Check conditioning, positive semidefiniteness, and correlation sources. Negative BLUE weights alone are not evidence of an error. Relative (multiplicative) errors scaled with the measured values bias BLUE low (Peelle's Pertinent Puzzle): iterate with the errors rescaled to the combined value; hep-statistics has the diagnostics (`covariance_fit.py`, [core statistics guide](../../hep-statistics/references/core-stats-guide.md)).
 
 Deliver edges, central values, statistical/systematic/total covariance, fiducial definitions, units, response conventions, regularization settings, and machine-readable tables. Explain whether covariance components can be added directly.

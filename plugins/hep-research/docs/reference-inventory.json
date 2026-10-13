@@ -5,12 +5,12 @@
  "by_skill": {
   "detector-response": {
    "references": 34,
-   "bytes": 394837,
+   "bytes": 395366,
    "uncited": 0
   },
   "hep-analysis": {
    "references": 10,
-   "bytes": 52689,
+   "bytes": 54583,
    "uncited": 0
   },
   "hep-computing": {
@@ -326,8 +326,8 @@
   {
    "path": "skills/detector-response/references/extensive-air-showers.md",
    "owner": "detector-response",
-   "bytes": 7969,
-   "lines": 126,
+   "bytes": 8223,
+   "lines": 128,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/cosmic-ray-spectrum-and-composition.md",
@@ -636,8 +636,8 @@
   {
    "path": "skills/detector-response/references/space-based-direct-detection.md",
    "owner": "detector-response",
-   "bytes": 16762,
-   "lines": 247,
+   "bytes": 17037,
+   "lines": 248,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -751,7 +751,7 @@
     "detector-response",
     "hep-computing"
    ],
-   "last_commit": "c180c4e 2026-10-13"
+   "last_commit": "7e34ef8 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/analysis-validation.md",
@@ -818,12 +818,12 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "7e34ef8 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/hep-analysis-guide.md",
    "owner": "hep-analysis",
-   "bytes": 16035,
+   "bytes": 17241,
    "lines": 107,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -837,7 +837,7 @@
    "cited_by_other_skills": [
     "detector-response"
    ],
-   "last_commit": "e085335 2026-10-13"
+   "last_commit": "7e34ef8 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/histograms-efficiencies.md",
@@ -863,7 +863,7 @@
   {
    "path": "skills/hep-analysis/references/measurements-and-unfolding.md",
    "owner": "hep-analysis",
-   "bytes": 2688,
+   "bytes": 2988,
    "lines": 32,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -902,8 +902,8 @@
   {
    "path": "skills/hep-analysis/references/systematics.md",
    "owner": "hep-analysis",
-   "bytes": 6279,
-   "lines": 59,
+   "bytes": 6667,
+   "lines": 63,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/ams-02/index.md",
@@ -962,7 +962,7 @@
     "hep-theory",
     "physics-ml"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "7e34ef8 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/acceptance-criteria.md",
@@ -1015,7 +1015,7 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "untracked"
+   "last_commit": "7e34ef8 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/bash-balanced-design-guidelines.md",
@@ -1462,6 +1462,7 @@
     "profiles/experiments/ams-02/modules/methods/inference-and-unfolding.md",
     "profiles/experiments/ams-02/modules/methods/statistical-diagnostics.md",
     "skills/hep-analysis/references/hep-analysis-guide.md",
+    "skills/hep-analysis/references/measurements-and-unfolding.md",
     "skills/hep-statistics/README.md",
     "skills/hep-statistics/SKILL.md",
     "skills/hep-statistics/references/inference-recipes.md",

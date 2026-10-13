@@ -102,9 +102,10 @@ monitor-count-rate proxy commonly used to track it) for each dataset compared.
 August 2012 (Voyager 2 in November 2018). Beyond it, the spacecraft measure the low-energy
 LIS directly. Demodulate only the 1 AU flux, not the Voyager data. Take the epoch's phase from
 the sunspot record instead of guessing. Solar cycle 24 began at a minimum in December 2008 and
-peaked in April 2014 (smoothed). It had a double maximum: a northern-hemisphere peak in
-November 2011, then a plateau from early 2012 to mid 2013. So 2011-2013 is **solar maximum**,
-not a declining phase, and the solar magnetic polarity reversed during it. In that period `phi` is higher than at the 2009 minimum,
+peaked in April 2014 (13-month smoothed). It had a double maximum: a first peak from the northern
+hemisphere (hemispheric maximum November 2011), a long plateau between the peaks (early 2012 to mid 2013), and the higher
+second peak from the southern hemisphere in early 2014. So about 2011-2014 is **solar maximum**,
+not a declining phase, and the solar magnetic polarity reversed during it ([SILSO cycle table](https://www.sidc.be/SILSO/cyclesmm), [SILSO news: 2014, maximum year for cycle 24](https://www.sidc.be/SILSO/news004)). In that period `phi` is higher than at the 2009 minimum,
 and it changes fast enough that a single `phi` for all three years is itself an approximation.
 
 **Forbush decreases** - sudden, transient flux depressions lasting days, caused by a

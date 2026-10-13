@@ -43,7 +43,11 @@ same bootstrap replicas of the simulated sample (paired bootstrap) and take the 
 simulation part out can make a stable variation look significant: in a synthetic test where simulation and data
 statistics were comparable, a data-only test flagged 8 of 22 bins of one variation, and the paired test 3 of 99 bins
 over all variations, the rate expected by chance at 2 sigma. A shift beyond these statistics is an effect to explain
-before it is quoted; one within them is not evidence that the source is absent.
+before it is quoted; one within them is not evidence that the source is absent. Barlow's operational rule for such
+checks: a shift consistent with its uncorrelated statistics is not added as a systematic (a passed check is not an
+evaluated effect; adding it penalizes diligence), and for raw nested yields, where the varied selection is a subset of
+the nominal one, Var(difference) = N_removed ([Barlow, hep-ex/0207026](https://arxiv.org/abs/hep-ex/0207026),
+Sec. 4).
 
 ## Template validation
 
