@@ -83,7 +83,7 @@ Exact 68.27% (Garwood) interval on the count N; divide by exposure times bin wid
 
 Scripts in `<plugin root>/skills/hep-analysis/scripts/`; each takes `--status`, prints JSON (tables: a labelled table) and exits 0 ok, 1 finding or failed computation, 2 invalid input, 3 incomplete. Read `--help` first.
 
-- `check_systematic_variations.py`: verify Up/Down variation histograms in a real ROOT file exist, aren't swapped, share nominal binning, and classify each variation's effect as normalization, shape or mixed (ROOT input requires PyROOT, a JSON bin-content input does not).
+- `check_systematic_variations.py`: check that Up/Down variation histograms exist and share the nominal binning, classify each variation's effect as normalization, shape or mixed with a statistical test when bin uncertainties are given, and flag same-direction integral shifts as a cue; the direction of a variation is established from its payloads and generation code, not from integrals (ROOT input requires PyROOT, a JSON bin-content input does not).
 - `make_yield_table.py`, `systematics_table_tex.py`: Markdown yield tables and a booktabs systematics table, both labelled with their status.
 - `counting_reference.py`: exact Poisson tails and a flat-prior Bayesian bound for one bin with known background; **not** CLs.
 - `particle_ratio_with_uncertainty.py`: ratio or fraction of two yields with delta-method propagation and an optional correlation.
