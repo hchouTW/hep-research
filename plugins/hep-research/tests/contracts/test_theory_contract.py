@@ -237,5 +237,75 @@ class FixtureTests(unittest.TestCase):
             self.assertTrue(strict.ok, strict.as_dict())
 
 
+def audit_copies():
+    """The six reproductions of the audit (fixture copies at contract 2.5.0), rebuilt here, with the codes expected at
+    2.6.0 (or under --strict)."""
+    out = {}
+    d = stamp(PREDICTION_1_0, "2.5.0"); d["status"] = ["observed"]
+    out["pred_observed"] = (d, {"prediction.status_upgraded"})
+    d = stamp(PREDICTION_1_0, "2.5.0"); d["extension"]["uncertainties"][0].pop("prescription", None)
+    d["extension"]["uncertainties"][0]["values"] = [1.2, 0.8, 1.0]
+    out["pred_envelope"] = (d, {"prediction.envelope_prescription"})
+    d = stamp(PREDICTION_1_0, "2.5.0")
+    out["pred_unlinked"] = (d, {"prediction.spec_unlinked"})
+    d = stamp(THEORY_1_0, "2.5.0"); d["extension"]["derivation_status"] = "asymptotic-argument"
+    out["ts_asymptotic_nolimit"] = (d, {"theory.limit_missing"})
+    d = stamp(THEORY_1_0, "2.5.0")
+    d["extension"].update(conventions={}, order="", derivation_status="perturbative-argument", validity_domain={},
+                          checks_run=[{"name": "units", "result": "looks fine"}])
+    out["ts_empty"] = (d, {"theory.conventions_incomplete", "theory.order_missing", "theory.validity_empty",
+                           "theory.check_result_vocab"})
+    d = stamp(THEORY_1_0, "2.5.0"); d["extension"].update(derivation_status="formal-proof", checks_run=[], checks_not_run=[])
+    out["ts_formalproof"] = (d, {"theory.unchecked_strong_status"})
+    return out
+
+
+def all_codes(rep):
+    return {f.code for f in rep.findings}
+
+
+class BackCompatibilityTests(unittest.TestCase):
+    """THY-WP2.4: an artifact written under contracts 2.5.0 keeps its outcome; --strict applies the 2.6.0 rules."""
+
+    def test_2_5_artifact_keeps_its_outcome_and_strict_reports(self):
+        for name, (_, _, level, code) in MUTATIONS.items():
+            with self.subTest(name):
+                doc = mutated(name, version="2.5.0")
+                rep = v.validate_artifact(doc)
+                self.assertNotIn(code, all_codes(rep))
+                self.assertTrue(rep.ok, rep.as_dict())
+                self.assertIn(code, codes(v.validate_artifact(doc, strict=True), level))
+
+    def test_audit_reproductions(self):
+        for name, (doc, expected) in audit_copies().items():
+            with self.subTest(name):
+                rep = v.validate_artifact(doc)
+                self.assertTrue(rep.ok, rep.as_dict())
+                self.assertFalse(expected & all_codes(rep))
+                self.assertTrue(expected <= all_codes(v.validate_artifact(doc, strict=True)))
+                self.assertTrue(expected <= all_codes(v.validate_artifact(stamp(doc, "2.6.0"))))
+
+    def test_legacy_1_0_fixtures_keep_their_outcome(self):
+        for doc in (THEORY_1_0, PREDICTION_1_0):
+            rep = v.validate_artifact(copy.deepcopy(doc))
+            self.assertTrue(rep.ok)
+            self.assertFalse({f.code for f in rep.findings if f.code.startswith(("theory.", "prediction."))})
+
+    def test_cli_strict_flag(self):
+        import io
+        import tempfile
+        from contextlib import redirect_stdout
+        with tempfile.TemporaryDirectory() as tmp:
+            for name in ("ts_validity_empty", "pred_observed", "pred_envelope_inverted"):
+                with self.subTest(name):
+                    path = Path(tmp) / f"{name}.json"
+                    path.write_text(json.dumps(mutated(name, version="2.5.0")))
+                    buf = io.StringIO()
+                    with redirect_stdout(buf):
+                        self.assertEqual(v.main([str(path)]), 0)
+                        self.assertEqual(v.main([str(path), "--strict"]), 1)
+                    self.assertIn(MUTATIONS[name][3], buf.getvalue())
+
+
 if __name__ == "__main__":
     unittest.main()
