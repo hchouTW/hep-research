@@ -173,6 +173,9 @@ Debugging, performance and numerics references beyond this playbook (all in `ski
 - [Performance profiling](performance-profiling.md): target first, wall time and peak memory, perf, cProfile,
   py-spy, RDataFrame `GetNRuns` and `RunGraphs`, `TTreePerfStats`, clusters and baskets, uproot `step_size` and
   branch filters.
+- [Symbolic and numerical computation](symbolic-and-numerical-computation.md): SymPy assumptions, numeric identity
+  checks, `lambdify`, exact rationals; `quad` error estimates, singularities and narrow peaks; `solve_ivp` methods,
+  tolerances and events; root finding and minimization.
 
 ## Scripts of the hep-computing skill
 

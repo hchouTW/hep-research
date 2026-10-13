@@ -9,6 +9,9 @@ engineering — code architecture, deployment, and service boundaries belong to
 `hep-statistics`/`physics-ml`. **A numerical result is not validated merely
 because the code runs.**
 
+Code-level checklists for SymPy and SciPy (assumptions, `quad`, `solve_ivp`, tolerances) are in
+[symbolic and numerical computation](symbolic-and-numerical-computation.md).
+
 ## Table of contents
 - [Numerical reliability](#numerical-reliability)
 - [Numerical validation workflow](#numerical-validation-workflow)

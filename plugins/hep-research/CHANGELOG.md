@@ -104,6 +104,12 @@ Software checks establish contract consistency only, not physical validity.
   and peak RSS first; `perf record -g`, `cProfile`, `py-spy`; RDataFrame one loop (`GetNRuns`, checked 1 then 2),
   `RunGraphs`, IMT and jitting caveats, lazy `Snapshot`; `TTreePerfStats`, cluster and basket sizes (default
   auto-flush 30 MB), branch selection, compression; uproot `expressions`/`filter_name` and `step_size`; batch sizing.
+- **CMP-19 new reference `symbolic-and-numerical-computation.md`.** SymPy assumptions, the limits of `simplify`, a
+  numeric identity check at random points, `lambdify`, exact rationals; `quad` error estimates, endpoint
+  singularities, `points`, a narrow peak missed silently (and still with `points`) until the range is split,
+  infinite and oscillatory ranges; `solve_ivp` method choice (RK45 729,668 against Radau 726 evaluations on a stiff
+  system), `rtol`/`atol`, the rtol/10 check, events, status; `brentq`, `minimize` status. Every number from a run
+  with SymPy 1.14.0 and SciPy 1.18.1; points to `find_python.py` and the validation ladder.
 
 ## 0.6.17 (2026-10-13)
 

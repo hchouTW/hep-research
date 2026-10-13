@@ -14,8 +14,8 @@
    "uncited": 0
   },
   "hep-computing": {
-   "references": 31,
-   "bytes": 361807,
+   "references": 32,
+   "bytes": 369246,
    "uncited": 0
   },
   "hep-statistics": {
@@ -1171,8 +1171,8 @@
   {
    "path": "skills/hep-computing/references/engineering-playbook.md",
    "owner": "hep-computing",
-   "bytes": 11842,
-   "lines": 196,
+   "bytes": 12129,
+   "lines": 199,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/README.md",
@@ -1181,7 +1181,7 @@
     "skills/hep-computing/references/design-and-estimation.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "80a8344 2026-10-13"
+   "last_commit": "f830fd9 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/environments-and-containers.md",
@@ -1266,12 +1266,13 @@
   {
    "path": "skills/hep-computing/references/numerical-and-computational-methods.md",
    "owner": "hep-computing",
-   "bytes": 8310,
-   "lines": 160,
+   "bytes": 8484,
+   "lines": 163,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/references/performance-profiling.md",
+    "skills/hep-computing/references/symbolic-and-numerical-computation.md",
     "skills/hep-theory/references/mathematical-reasoning-and-proof.md",
     "skills/research-communication/references/academic-papers-guide.md",
     "skills/research-communication/references/reading-papers.md",
@@ -1291,10 +1292,11 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-computing/references/crash-and-memory-debugging.md",
-    "skills/hep-computing/references/engineering-playbook.md"
+    "skills/hep-computing/references/engineering-playbook.md",
+    "skills/hep-computing/references/symbolic-and-numerical-computation.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "f830fd9 2026-10-13"
   },
   {
    "path": "skills/hep-computing/references/product-framing.md",
@@ -1451,6 +1453,19 @@
    ],
    "cited_by_other_skills": [],
    "last_commit": "b0dce7a 2026-10-10"
+  },
+  {
+   "path": "skills/hep-computing/references/symbolic-and-numerical-computation.md",
+   "owner": "hep-computing",
+   "bytes": 6978,
+   "lines": 97,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-computing/references/engineering-playbook.md",
+    "skills/hep-computing/references/numerical-and-computational-methods.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-computing/references/task-authoring-guide.md",
@@ -3463,6 +3478,10 @@
   "neutrino": [
    "skills/detector-response/references/neutrino-astronomy.md",
    "skills/detector-response/references/noble-liquid-neutrino-and-rare-event-detectors.md"
+  ],
+  "numerical": [
+   "skills/hep-computing/references/numerical-and-computational-methods.md",
+   "skills/hep-computing/references/symbolic-and-numerical-computation.md"
   ],
   "pattern": [
    "skills/research-communication/references/graphviz-patterns.md",
