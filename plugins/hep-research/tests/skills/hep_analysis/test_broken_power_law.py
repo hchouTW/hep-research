@@ -64,7 +64,10 @@ class BrokenPowerLawTests(unittest.TestCase):
         cov = [[(0.05 * POINTS[i][1]) ** 2 if i == j else 0.0 for j in range(n)] for i in range(n)]
         a = fit_spectrum([[e, f, 0.05 * f] for e, f in POINTS], 'broken', pivot=1e15)
         b = fit_spectrum([[e, f] for e, f in POINTS], 'broken', covariance=cov, pivot=1e15)
-        self.assertAlmostEqual(a['index_below_uncertainty'], b['index_below_uncertainty'], places=9)
+        # the linearized covariance has a central finite-difference column in log E_b (h = 1e-6), so the two paths
+        # agree to about eps/h relative: 1e-8 on Python 3.12+, 9e-8 on 3.11 (float sum() changed in 3.12)
+        self.assertAlmostEqual(a['index_below_uncertainty'], b['index_below_uncertainty'],
+                               delta=1e-6 * a['index_below_uncertainty'])
         c = fit_spectrum([[e, f, 0.04 * f, 0.06 * f] for e, f in POINTS], 'broken')
         self.assertAlmostEqual(c['index_below'], 2.7, places=6)
         self.assertGreater(a['pivot']['flux_relative_uncertainty'], 0)
