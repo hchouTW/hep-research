@@ -70,7 +70,7 @@ def _cmd_worker(template: str, state_dir: Path, timeout: float | None = None, pa
             if proc.returncode != 0:
                 raise WorkerFailure(f"exit={proc.returncode}", f"exit {proc.returncode}: {proc.stderr.strip()[-300:]}")
             if not out.is_file():
-                raise WorkerFailure("missing-output", "exit 0 but the command wrote no output to {out}")
+                raise WorkerFailure("missing-output", f"exit 0 but the command wrote no output to {out}")
             try:
                 return json.loads(out.read_text(encoding="utf-8"))
             except ValueError as exc:
