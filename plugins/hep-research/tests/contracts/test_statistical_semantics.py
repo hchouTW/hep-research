@@ -61,7 +61,8 @@ def current(doc):
 
 
 PUBLISHABLE = current(BASE)
-PUBLISHABLE["status"] = ["asimov"]
+PUBLISHABLE["status"] = ["observed"]  # 'asimov' fails the gate from contracts 2.6.0 (gate.not_observed_data)
+PUBLISHABLE["extension"]["seeds"] = {"toys": 1, "coverage": 2}
 PUBLISHABLE["extension"]["coverage"] = {"check": "toys", "method": "seeded toys of the full procedure", "n_toys": 20000, "coverage": 0.951, "interval": [0.948, 0.954],
                                         "cl": 0.95, "ensemble": "fixed-auxiliary", "failure_policy": "count-as-noncovering", "failures": 0}
 PUBLISHABLE["extension"]["likelihood"] = {"form": "poisson", "backend": "core.stats.likelihood_limits", "model_sha256": "0" * 64}
@@ -89,10 +90,11 @@ class T06Semantics(unittest.TestCase):
                 self.assertIn(code, codes(strict, level))
 
     def test_unmutated_fixture_in_strict_mode(self):
-        # no error; its coverage {"toys": 0, "note": "fixture"} is an untyped placeholder, which strict mode names
+        # no error; its coverage {"toys": 0, "note": "fixture"} is an untyped placeholder, which strict mode names, and
+        # (contracts 2.6.0) its toy-calibrated construction and toy goodness of fit record no seed
         rep = v.validate_artifact(BASE, strict=True)
         self.assertTrue(rep.ok)
-        self.assertEqual(codes(rep), {"stats.coverage_untyped"})
+        self.assertEqual(codes(rep), {"stats.coverage_untyped", "stats.seed_missing"})
 
     def test_non_finite_numbers_are_errors(self):
         for bad in (float("nan"), float("inf")):
@@ -128,7 +130,12 @@ class T07PublicationGate(unittest.TestCase):
 
     def test_archival_artifact_is_valid_but_not_publishable(self):
         self.assertTrue(v.validate_artifact(BASE).ok)
-        self.assertEqual(v.publication_gate(BASE)["status"], "unresolved")
+        g = v.publication_gate(BASE)  # an 'asimov' fixture: valid, and never a result on data (contracts 2.6.0)
+        self.assertEqual(g["status"], "failed")
+        self.assertIn("gate.not_observed_data", {r["code"] for r in g["reasons"]})
+        relabelled = copy.deepcopy(BASE)
+        relabelled["status"] = ["observed"]
+        self.assertEqual(v.publication_gate(relabelled)["status"], "unresolved")
 
     def test_each_gap_blocks(self):
         cases = {
@@ -244,6 +251,8 @@ class T08Migration(unittest.TestCase):
         self.assertEqual(new["extension"]["coverage"], {**BASE["extension"]["coverage"], "check": "not-checked"})
         self.assertIn("migrate.coverage_untyped", {x["code"] for x in rep["diagnostics"]})
         self.assertTrue(v.validate_artifact(new).ok)
+        self.assertEqual(v.publication_gate(new)["status"], "failed")  # the fixture is labelled 'asimov'
+        new["status"] = ["observed"]
         self.assertEqual(v.publication_gate(new)["status"], "unresolved")
 
     def test_migration_refuses_and_names_the_rule(self):

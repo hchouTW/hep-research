@@ -22,7 +22,27 @@ SNAPSHOT = Path(__file__).with_name("gate_verdicts.json")
 BASES = ("examples", "contracts/fixtures/artifacts")
 
 # path -> (field -> new value, reason). Recorded against the snapshot taken on main c1d375c (contracts 2.5.0).
-ALLOWED_CHANGES: dict[str, tuple[dict, str]] = {}
+_Q3 = ("contracts 2.6.0 (STH-T1.1, order question Q3): a 'synthetic' or 'asimov' statistical-result fails the "
+       "publication gate (gate.not_observed_data); the artifact stays valid under the validator, default and strict")
+_Q3_UNRESOLVED_TO_FAILED = (
+    "contracts/fixtures/artifacts/unresolved/statres_scan_no_global.json",
+    "contracts/fixtures/artifacts/valid/statres_bayesian.json",
+    "contracts/fixtures/artifacts/valid/statres_bayesian_rhat_warning.json",
+    "contracts/fixtures/artifacts/valid/statres_frequentist.json",
+    "contracts/fixtures/artifacts/valid/statres_scan_global.json",
+    "examples/ams-flux-ratio/output/artifacts/ratio_result.json",
+    "examples/collider-angular/output/artifacts/result.json",
+    "examples/detector-resolution/output/artifacts/width_fit.json",
+    "examples/published-comparison/output/artifacts/result.json",
+    "examples/recasting/output/artifacts/result.json",
+    "examples/theory-comparison/output/artifacts/result.json",
+)
+ALLOWED_CHANGES: dict[str, tuple[dict, str]] = {
+    # J9 (physics-ml example, status ["synthetic"]) was the one committed artifact that passed: the intended true
+    # positive of the audit's mutation 1a (order question Q6).
+    "examples/ml-classifier-to-inference/output/artifacts/statistical_result.json": ({"gate": "failed"}, _Q3 + " (Q6: J9)"),
+    **{p: ({"gate": "failed"}, _Q3) for p in _Q3_UNRESOLVED_TO_FAILED},
+}
 
 
 def collect() -> dict:

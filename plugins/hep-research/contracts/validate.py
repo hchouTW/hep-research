@@ -43,6 +43,8 @@ EXTENSION_SCHEMAS = {
 }
 # Statuses that must survive every handoff: a consumer of such an input carries the label.
 STICKY_STATUSES = ["failed", "unvalidated", "preliminary", "synthetic", "asimov", "user-supplied"]
+# Statuses under which a statistical-result is not a result on data: the publication gate fails them (contracts 2.6.0).
+NOT_OBSERVED_STATUSES = ("synthetic", "asimov")
 NON_GAUSSIAN_KINDS = {"scale-envelope", "model-alternative", "truncation"}
 UPGRADED = {"observed", "validated-in-scope"}
 SHAPE_ERRORS = {"schema.type", "schema.any_of"}
@@ -491,6 +493,174 @@ def _stat_semantics(doc: dict, ext: dict, rep: Report, strict: bool) -> None:
     if isinstance(fd, dict) and fd.get("status") == "failed" and ext.get("fit_status") in ("converged", "converged-with-warnings"):
         rep.add("error", "$.extension.fit_status", "stats.fit_status_mismatch",
                 "fit_diagnostics.status is failed but fit_status says converged")
+    if strict or _at_least(doc.get("contract_version"), STAT_HARDENING_FROM):
+        _stat_hardening(ext, rep)
+
+
+STAT_HARDENING_FROM = "2.6.0"  # hep-statistics hardening rules (STH-T1) apply natively from this contract version
+COVERAGE_MIN_TOYS = 200        # below this a toy coverage claim is unresolved (binomial sigma <= 0.035 at any level)
+COVERAGE_TOLERANCE = 0.01      # undercoverage fails when the Clopper-Pearson upper end is below nominal - 0.01
+COVERAGE_INTERVAL_CL = 0.6827  # the central Clopper-Pearson interval the gate computes from the toy counts
+COVERAGE_INTERVAL_MAX_CL = 0.9973  # a recorded interval wider than this exact interval does not describe the counts
+Z_P_TOLERANCE = 0.01           # |z - Phi^-1(1 - p)| allowed between a reported z and its p (one-sided)
+SHA256 = re.compile(r"^[0-9a-fA-F]{64}$")
+# Probability-like results keys: exact names, and prefixes (a key that names a limit, bound or band is not one).
+PROB_RESULT_KEYS = frozenset({"p0", "p_value", "pvalue", "cls", "clb", "clsb", "cl_s", "cl_b", "cl_sb"})
+PROB_RESULT_PREFIXES = ("cls_", "clb_", "clsb_", "p_", "p0_")
+NOT_PROB = re.compile(r"(limit|upper|lower|bound|band|_ul\b|^ul_|interval)", re.I)
+# Results keys that name an observed upper limit (S95_observed, mu_95, upper_limit, limit_obs, ...).
+LIMIT_KEY = re.compile(r"(limit|upper[_ ]?bound|^(s|mu|r|n|sigma|xs)_?\d{2}(_|$)|^ul(_|$)|_ul$)", re.I)
+# Test-statistic families recognized in the free-text test_statistic (first match wins; unrecognized text is not
+# judged), and the families each construction admits. A construction absent here admits any declared ordering.
+STATISTIC_FAMILIES = (("q0", re.compile(r"\bq_?\{?0\}?(?![\d.])|discovery", re.I)),
+                      ("q-tilde", re.compile(r"q[-_ ]?tilde|q̃|\\tilde\{?q|qtilde", re.I)),
+                      ("q_mu", re.compile(r"\bq_?\{?mu\}?\b|q\(\s*mu\s*\)|q_?μ", re.I)),
+                      ("lep", re.compile(r"\blep\b|q_lep|-2\s*ln\s*q\b", re.I)),
+                      ("lr", re.compile(r"likelihood[- ]ratio|\blambda\b|\bt_?mu\b|t[-_ ]?tilde|\blr\b|ordering", re.I)),
+                      ("chi2", re.compile(r"chi2|chi\^2|chi-squared?|chi squared|χ²", re.I)))
+CONSTRUCTION_STATISTICS = {
+    "feldman-cousins": frozenset({"lr", "chi2"}),  # the unified ordering is the two-sided likelihood ratio
+    "cls": frozenset({"q_mu", "q-tilde", "lep", "lr", "chi2"}),  # a limit statistic, never the discovery q0
+    "asymptotic": frozenset({"q0", "q_mu", "q-tilde", "lr", "chi2"}),
+    "profile-likelihood-wilks": frozenset({"q0", "q_mu", "q-tilde", "lr", "chi2"}),
+}
+NO_CLS_RESULTS = frozenset({"neyman", "feldman-cousins"})  # constructions that do not produce CLs/CLb values
+TOY_CONSTRUCTIONS = frozenset({"toy-calibrated-profile"})
+
+
+def statistic_family(text) -> str | None:
+    """Family of a free-text test statistic (q0, q-tilde, q_mu, lep, lr, chi2), or None when not recognized."""
+    for name, rx in STATISTIC_FAMILIES:
+        if isinstance(text, str) and rx.search(text):
+            return name
+    return None
+
+
+def _prob_key(key: str) -> bool:
+    k = key.lower()
+    return (k in PROB_RESULT_KEYS or k.startswith(PROB_RESULT_PREFIXES)) and not NOT_PROB.search(k)
+
+
+def _z_of_p(p: float, two_sided: bool) -> float:
+    from statistics import NormalDist
+    return -NormalDist().inv_cdf(p / 2.0 if two_sided else p)
+
+
+def _toy_based(ext: dict) -> list[str]:
+    """Parts of a statistical-result that rest on toys (each needs a recorded seed)."""
+    parts = []
+    if ext.get("construction") in TOY_CONSTRUCTIONS:
+        parts.append(f"construction {ext['construction']}")
+    cov: Any = ext.get("coverage")
+    if isinstance(cov, dict) and cov.get("check") == "toys":
+        parts.append("toy coverage")
+    gof: Any = ext.get("goodness_of_fit")
+    if isinstance(gof, dict) and gof.get("calibration") == "toys":
+        parts.append("toy goodness of fit")
+    sig: Any = ext.get("significance")
+    if isinstance(sig, dict) and (sig.get("trials_method") == "toys" or sig.get("method") == "toys"):
+        parts.append("toy-calibrated significance")
+    return parts
+
+
+def _stat_hardening(ext: dict, rep: Report) -> None:
+    """Statistical-result rules of contracts 2.6.0 (hep-statistics hardening STH-T1.1). Native for artifacts of
+    contract 2.6.0 or later; an older artifact gets them only in strict mode (and so at the publication gate), so its
+    default outcome is unchanged.
+    Errors: coverage.cl different from results.cl or extension.cl (stats.coverage_cl_mismatch); a recorded coverage
+    interval that is not inside the 99.73% Clopper-Pearson interval of round(coverage x n_toys) of n_toys or does not
+    contain the coverage (stats.coverage_interval_inconsistent); a local, global or goodness-of-fit p-value of exactly 0
+    (stats.p_zero_without_bound: give the *_p_bound the toys support); a probability-like results value (keys
+    PROB_RESULT_KEYS, prefixes PROB_RESULT_PREFIXES) outside [0, 1] (stats.p_out_of_range); a z that disagrees with its
+    p by more than Z_P_TOLERANCE under the one-sided convention Phi^-1(1 - p) (significance.convention 'two-sided' uses
+    p/2) (stats.z_p_inconsistent); global_z above local_z (stats.global_z_above_local); a recognized test statistic a
+    construction does not admit (CONSTRUCTION_STATISTICS), or CLs/CLb results from a Neyman or Feldman-Cousins
+    construction (stats.construction_statistic_mismatch); likelihood.model_sha256 that is not 64 hex digits
+    (stats.model_sha256_malformed).
+    Unresolved: toy coverage with fewer than COVERAGE_MIN_TOYS toys (stats.coverage_toys_too_few); an observed limit
+    (construction cls, or a results key matching LIMIT_KEY) without expected.median and both bands
+    (stats.expected_bands_missing); global_z without global_p or global_p_bound (stats.global_z_without_p); a toy-based
+    construction, coverage, goodness of fit or significance without extension.seeds or coverage.seed
+    (stats.seed_missing); toy goodness of fit without n_toys (stats.gof_toys_missing)."""
+    results: Any = ext.get("results") if isinstance(ext.get("results"), dict) else {}
+    cov: Any = ext.get("coverage") if isinstance(ext.get("coverage"), dict) else None
+    if cov is not None and _is_num(cov.get("cl")):
+        for path, other in (("$.extension.results.cl", results.get("cl")), ("$.extension.cl", ext.get("cl"))):
+            if _is_num(other) and abs(other - cov["cl"]) > 1e-9:
+                rep.add("error", "$.extension.coverage.cl", "stats.coverage_cl_mismatch",
+                        f"coverage was checked at cl {cov['cl']} but {path[2:]} is {other}: the coverage claim is about another interval")
+    if cov is not None and cov.get("check") == "toys":
+        n, value = cov.get("n_toys"), cov.get("coverage")
+        if _is_num(n) and 0 < n < COVERAGE_MIN_TOYS:
+            rep.add("unresolved", "$.extension.coverage.n_toys", "stats.coverage_toys_too_few",
+                    f"{n} toys cannot establish coverage: use at least {COVERAGE_MIN_TOYS} (binomial sigma <= 0.035)")
+        interval: Any = cov.get("interval")
+        if isinstance(n, int) and not isinstance(n, bool) and n > 0 and _is_num(value) and 0.0 <= value <= 1.0 \
+                and isinstance(interval, list) and len(interval) == 2 and all(_is_num(x) for x in interval):
+            from core.stats.tail_estimation import clopper_pearson
+            lo, hi = clopper_pearson(round(value * n), n, COVERAGE_INTERVAL_MAX_CL)
+            if interval[0] < lo - 1e-9 or interval[1] > hi + 1e-9 or not interval[0] - 1e-12 <= value <= interval[1] + 1e-12:
+                rep.add("error", "$.extension.coverage.interval", "stats.coverage_interval_inconsistent",
+                        f"interval {interval} does not describe {round(value * n)} of {n} toys (exact "
+                        f"{COVERAGE_INTERVAL_MAX_CL} interval [{lo:.4g}, {hi:.4g}]): a wide interval cannot hide undercoverage")
+    sig: Any = ext.get("significance") if isinstance(ext.get("significance"), dict) else {}
+    gof: Any = ext.get("goodness_of_fit") if isinstance(ext.get("goodness_of_fit"), dict) else {}
+    for path, v in (("significance.local_p", sig.get("local_p")), ("significance.global_p", sig.get("global_p")),
+                    ("goodness_of_fit.p_value", gof.get("p_value"))):
+        if _is_num(v) and v == 0:
+            rep.add("error", f"$.extension.{path}", "stats.p_zero_without_bound",
+                    f"{path} = 0 is not an estimate: toys with no exceedance only bound it (record the bound "
+                    "{kind, value, cl, convention}, for example from core/stats/tail_estimation.py)")
+    for key, v in results.items():
+        if not (isinstance(key, str) and _prob_key(key)):
+            continue
+        vals = v if isinstance(v, list) else [v]
+        bad = [x for x in vals if _is_num(x) and not 0.0 <= x <= 1.0]
+        if bad:
+            rep.add("error", f"$.extension.results.{key}", "stats.p_out_of_range",
+                    f"results.{key} = {bad[0]} is a probability outside [0, 1]")
+    two_sided = sig.get("convention") == "two-sided"
+    for zk, pk in (("local_z", "local_p"), ("global_z", "global_p")):
+        z, p = sig.get(zk), sig.get(pk)
+        if _is_num(z) and _is_num(p) and 0.0 < p < 1.0 and abs(z - _z_of_p(p, two_sided)) > Z_P_TOLERANCE:
+            rep.add("error", f"$.extension.significance.{zk}", "stats.z_p_inconsistent",
+                    f"{zk} = {z} but {pk} = {p} gives z = {_z_of_p(p, two_sided):.4g} "
+                    f"({'two' if two_sided else 'one'}-sided): one of them is wrong")
+    if _is_num(sig.get("global_z")) and _is_num(sig.get("local_z")) and sig["global_z"] > sig["local_z"] + 1e-9:
+        rep.add("error", "$.extension.significance.global_z", "stats.global_z_above_local",
+                f"global_z {sig['global_z']} exceeds local_z {sig['local_z']}: a trials correction cannot raise a significance")
+    if "global_z" in sig and "global_p" not in sig and "global_p_bound" not in sig:
+        rep.add("unresolved", "$.extension.significance.global_p", "stats.global_z_without_p",
+                "global_z is reported without global_p (or its bound): the global significance is not established")
+    cons, fam = ext.get("construction"), statistic_family(ext.get("test_statistic"))
+    allowed = CONSTRUCTION_STATISTICS.get(cons) if isinstance(cons, str) else None
+    if allowed is not None and fam is not None and fam not in allowed:
+        rep.add("error", "$.extension.test_statistic", "stats.construction_statistic_mismatch",
+                f"construction {cons} does not use a {fam} test statistic (admits {', '.join(sorted(allowed))})")
+    if cons in NO_CLS_RESULTS:
+        cls_keys = [k for k in results if isinstance(k, str) and k.lower().startswith(("cls", "clb"))]
+        if cls_keys:
+            rep.add("error", "$.extension.construction", "stats.construction_statistic_mismatch",
+                    f"construction {cons} does not produce CLs/CLb values, but results carry {', '.join(cls_keys)}")
+    if ext.get("paradigm") == "frequentist" and (cons == "cls" or any(isinstance(k, str) and LIMIT_KEY.search(k) for k in results)):
+        exp: Any = ext.get("expected") if isinstance(ext.get("expected"), dict) else {}
+        missing = [k for k in ("median",) + BAND_KEYS if k not in exp]
+        if missing:
+            rep.add("unresolved", "$.extension.expected", "stats.expected_bands_missing",
+                    f"an observed limit needs its expected median and both bands for comparison (missing {', '.join(missing)})")
+    toys = _toy_based(ext)
+    seeds: Any = ext.get("seeds")
+    if toys and not (isinstance(seeds, dict) and seeds) and not (cov is not None and "seed" in cov):
+        rep.add("unresolved", "$.extension.seeds", "stats.seed_missing",
+                f"{', '.join(toys)} without a recorded seed (extension.seeds or coverage.seed): the toys cannot be reproduced")
+    if gof.get("calibration") == "toys" and not _is_num(gof.get("n_toys")):
+        rep.add("unresolved", "$.extension.goodness_of_fit.n_toys", "stats.gof_toys_missing",
+                "a toy-calibrated goodness-of-fit p-value needs its toy count (n_toys)")
+    lik: Any = ext.get("likelihood") if isinstance(ext.get("likelihood"), dict) else {}
+    sha = lik.get("model_sha256")
+    if sha is not None and not (isinstance(sha, str) and SHA256.match(sha)):
+        rep.add("error", "$.extension.likelihood.model_sha256", "stats.model_sha256_malformed",
+                f"model_sha256 {sha!r} is not a SHA-256 digest (64 hexadecimal digits)")
 
 
 GRADIENT_SAMPLERS = re.compile(r"\b(nuts|hmc|hamiltonian)\b", re.I)
@@ -601,11 +771,14 @@ def _check_bands(exp: dict, rep: Report) -> None:
 def publication_gate(doc: dict, vocab: Vocabulary | None = None) -> dict:
     """Publication gate of a statistical-result (T07): status passed, unresolved or failed, with reasons.
 
-    failed: the artifact has errors under strict validation, carries the 'failed' status, its fit failed or was not
-    run, or its fit diagnostics failed. unresolved: anything not yet established: an 'unvalidated' or 'preliminary'
+    failed: the artifact has errors under strict validation, carries the 'failed' status, carries 'synthetic' or
+    'asimov' (gate.not_observed_data, contracts 2.6.0: nothing makes such a result publishable as data), its fit failed
+    or was not run, its fit diagnostics failed, or toy coverage is short: the upper end of the 68.27% Clopper-Pearson
+    interval of round(coverage x n_toys) of n_toys lies below the nominal level by more than 0.01 (gate.undercoverage;
+    without n_toys the recorded interval or value is used). unresolved: anything not yet established: an 'unvalidated' or 'preliminary'
     label, unresolved inputs, fit_status converged-with-warnings, untyped or not-checked coverage (frequentist), a scan
     without a global p-value and its trials_method, a Bayesian result without numeric R-hat and ESS, or no model and
-    backend provenance (likelihood.backend with likelihood.model_ref or model_sha256). Passing says the contract-level
+    backend provenance (a non-blank likelihood.backend with a non-blank model_ref or model_sha256). Passing says the contract-level
     prerequisites for reporting the result as validated are present; it is not a scientific validation."""
     reasons: list[dict] = []
 
@@ -624,6 +797,10 @@ def publication_gate(doc: dict, vocab: Vocabulary | None = None) -> dict:
     status = set(doc.get("status", []))
     if "failed" in status:
         add("failed", "gate.failed_label", "the artifact carries the 'failed' status")
+    for s in NOT_OBSERVED_STATUSES:
+        if s in status:
+            add("failed", "gate.not_observed_data", f"the artifact carries '{s}': no further evidence makes a result on "
+                                                    "synthetic or Asimov data publishable as a result on data")
     for s in ("unvalidated", "preliminary"):
         if s in status:
             add("unresolved", "gate.status_label", f"the artifact carries '{s}': an archival artifact, not a validated result")
@@ -644,11 +821,17 @@ def publication_gate(doc: dict, vocab: Vocabulary | None = None) -> dict:
         nominal: Any = cov.get("cl", (ext.get("results") or {}).get("cl") if isinstance(ext.get("results"), dict) else None)
         value: Any = cov.get("coverage")
         if cov.get("check") == "toys" and _is_num(value) and _is_num(nominal):
-            interval: Any = cov.get("interval")
-            upper = interval[1] if isinstance(interval, list) and len(interval) == 2 and _is_num(interval[1]) else value
-            if upper < nominal - 0.01:
-                add("failed", "gate.undercoverage", f"recorded coverage {value} (upper end {upper}) is below the nominal "
-                                                    f"{nominal} by more than 0.01")
+            n: Any = cov.get("n_toys")
+            if isinstance(n, int) and not isinstance(n, bool) and n > 0 and 0.0 <= value <= 1.0:
+                # the exact interval from the counts, not a recorded interval (which could be widened to hide a deficit)
+                from core.stats.tail_estimation import clopper_pearson
+                upper = clopper_pearson(round(value * n), n, COVERAGE_INTERVAL_CL)[1]
+            else:
+                interval: Any = cov.get("interval")
+                upper = interval[1] if isinstance(interval, list) and len(interval) == 2 and _is_num(interval[1]) else value
+            if upper < nominal - COVERAGE_TOLERANCE:
+                add("failed", "gate.undercoverage", f"recorded coverage {value} (upper end {upper:.4g}) is below the nominal "
+                                                    f"{nominal} by more than {COVERAGE_TOLERANCE}")
         elif cov.get("check") == "toys" and not _is_num(nominal):
             add("unresolved", "gate.coverage_nominal_missing", "toy coverage needs the nominal level (coverage.cl)")
     if ext.get("paradigm") == "bayesian":
@@ -659,7 +842,7 @@ def publication_gate(doc: dict, vocab: Vocabulary | None = None) -> dict:
     if isinstance(sig.get("scan"), dict) and not (("global_p" in sig or "global_p_bound" in sig) and sig.get("trials_method")):
         add("unresolved", "gate.global_not_established", "a scan needs a global p-value (or bound) with its trials_method")
     lik: Any = ext.get("likelihood") if isinstance(ext.get("likelihood"), dict) else {}
-    if not (lik.get("backend") and (lik.get("model_ref") or lik.get("model_sha256"))):
+    if _blank(lik.get("backend")) or (_blank(lik.get("model_ref")) and _blank(lik.get("model_sha256"))):
         add("unresolved", "gate.model_provenance_missing", "likelihood.backend and a model_ref or model_sha256 are required")
     levels = {r["level"] for r in reasons}
     status_out = "failed" if "failed" in levels else ("unresolved" if levels else "passed")
@@ -754,6 +937,8 @@ def validate_artifact(doc, vocab: Vocabulary | None = None, protected: bool = Fa
             if at == "statistical-result":
                 if strict or _at_least(doc.get("contract_version"), STAT_SEMANTICS_FROM):
                     validate(ext, "ext_statistical_result_v2_2.json", vocab, rep, "$.extension")
+                if strict or _at_least(doc.get("contract_version"), STAT_HARDENING_FROM):
+                    validate(ext, "ext_statistical_result_v2_6.json", vocab, rep, "$.extension")
                 if not any(f.code in SHAPE_ERRORS for f in rep.errors):
                     _stat_semantics(doc, ext, rep, strict)
     return rep

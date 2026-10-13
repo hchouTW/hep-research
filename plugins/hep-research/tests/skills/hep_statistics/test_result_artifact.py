@@ -48,8 +48,10 @@ class ResultArtifactStatus(unittest.TestCase):
             self.assertNotIn("failed", art["status"])
             self.assertTrue(validate_artifact(art).ok)
             self.assertEqual(len(art["extension"]["likelihood"]["model_sha256"]), 64)
-            # coverage was not checked by this run: the gate says unresolved, not passed
-            self.assertEqual(publication_gate(art)["status"], "unresolved")
+            # labelled synthetic: the gate fails it (contracts 2.6.0, gate.not_observed_data); relabelled as observed,
+            # coverage was still not checked by this run, so the gate says unresolved, not passed
+            self.assertEqual(publication_gate(art)["status"], "failed")
+            self.assertEqual(publication_gate({**art, "status": ["observed"]})["status"], "unresolved")
 
             orig = ll.newton_fit
             ll.newton_fit = lambda f, x0, fixed_first=False, max_iter=60: orig(f, x0, fixed_first, 0)
