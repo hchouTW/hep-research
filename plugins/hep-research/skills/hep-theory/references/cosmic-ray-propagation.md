@@ -77,7 +77,39 @@ It takes |Z|, A and the mass from the caller and ships no particle constants; do
   with the transport normalization.
 - **Source spectra and abundances** for each species, including whether species share one injection index.
 - **Antiparticle production** (antiprotons, positrons) from cosmic rays on gas needs pp, pA and AA production cross
-  sections, often extrapolated; the secondary prediction is a background estimate only as good as these inputs.
+  sections, often extrapolated; the secondary prediction is a background estimate only as good as these inputs
+  (antiproton conventions below).
+
+## Secondary antiprotons: source-term conventions
+
+- **Source term.** q_ij(T_pbar) = integral over the projectile kinetic energy per nucleon T_i of 4 pi n_ISM,j phi_i(T_i)
+  dsigma_ij / dT_pbar (Korsmeier, Donato, Di Mauro, PRD 97 (2018) 103019, arXiv:1802.03030v2, Sec. I, Eq. (1), read
+  2026-10-13); di Mauro et al. write the pp term with threshold 7 m_p and an ISM H:He:C = 1 : 0.1 : 5 x 10^-4
+  (PRD 90 (2014) 085017, arXiv:1408.0288v3, Sec. II.A, Eq. (1), read 2026-10-13). State the ISM composition and
+  which projectile and target species are summed.
+- **Channels.** pp gives "roughly 50-60%" of the spectrum and pHe and Hep "10-20% each" (Korsmeier et al., Sec. I,
+  p. 2); helium channels "easily" reach about 50% at low energies and heavier nuclei only a few percent (di Mauro et
+  al., Sec. I, p. 1). Winkler sums only p and He projectiles and targets, "the contribution from heavier nuclei is
+  negligible" (JCAP 02 (2017) 048, arXiv:1701.04866v1, Sec. 9, Eq. (19), read 2026-10-13). Nuclear channels are not
+  measured where they matter (pHe, HeHe) and are obtained by rescaling pp: Winkler Eq. (17) and Korsmeier et al.
+  Eqs. (15)-(17) give rescaling functions with free parameters fitted to pA data. Name the rescaling used.
+- **Antineutrons.** Antineutrons decay to antiprotons; their production is not measured and is estimated by isospin
+  arguments. The total is written sigma = sigma_pbar (2 + Delta_IS + 2 Delta_Lambda) with Delta_IS the antineutron
+  enhancement over antiprotons (Winkler Eq. (5); Korsmeier et al. Eq. (4), with Delta_IS parametrized in Eq. (5)).
+  di Mauro et al. note that the traditional factor 2 assumes sigma(pp -> nbar) = sigma(pp -> pbar) and that
+  kappa = 1.3 +- 0.2 "should encompass the data" (Sec. IV, p. 8, read 2026-10-13). State whether and how the
+  antineutron term is included.
+- **Hyperons.** Antiprotons from Lambda-bar and Sigma-bar decays are included through Delta_Lambda (Winkler Eqs.
+  (6)-(7): Delta_Lambda = (0.81 +- 0.04) (Lambda-bar / pbar), with Sigma-bar / Lambda-bar = 0.33 from symmetry and a
+  25% uncertainty; Korsmeier et al. Eq. (6)); data differ in whether hyperon feed-down was subtracted, so the
+  treatment of each data set must be stated (di Mauro et al., Sec. II.B, p. 3; Korsmeier et al., Sec. I).
+- **The parametrization is a model alternative.** Different cross-section parametrizations agree to 10-20% where
+  data exist and differ by up to 50% around 1 TeV in extrapolation (di Mauro et al., abstract); Korsmeier et al. give
+  up to +-20% on the total source term, dominated by p + p -> pbar + X and transmitted to all channels by the
+  rescaling (abstract; Sec. IV, p. 12), and warn that a rescaled di Mauro et al. parametrization deviates in shape at
+  high energy (Sec. III, p. 12). Treat a choice among parametrizations as a `model-alternative` uncertainty object,
+  and a fitted parametrization's own uncertainty with its correlation matrix (Winkler Sec. 10 provides one), never as
+  an independent Gaussian per bin.
 
 ## Degeneracies a fit cannot remove alone
 
@@ -108,3 +140,15 @@ It takes |Z|, A and the mass from the caller and ships no particle constants; do
 Common propagation codes include GALPROP, DRAGON and USINE. None of them is installed, run or verified in this
 plugin: they are named only so that a user can state which code produced a number. No propagation result in this
 plugin is tested, and no capability row claims one.
+
+## Sources read (for the kinematics, force-field and antiproton sections; all on 2026-10-13)
+
+- L.J. Gleeson and W.I. Axford, "Solar modulation of galactic cosmic rays", ApJ 154 (1968) 1011,
+  https://articles.adsabs.harvard.edu/pdf/1968ApJ...154.1011G (scan); Secs. I-III, Eqs. (5), (11), (13)-(16).
+- C. Ghelfi, F. Barao, L. Derome, D. Maurin, A&A 591 (2016) A94, arXiv:1511.08650; Sec. 2.1, Eq. (1).
+- I. Cholis, D. Hooper, T. Linden, arXiv:1511.01507v3; Sec. I, Eq. (1), pp. 1-2.
+- M. di Mauro, F. Donato, A. Goudelis, P.D. Serpico, PRD 90 (2014) 085017, arXiv:1408.0288v3; Secs. I, II, IV, V.
+- M.W. Winkler, JCAP 02 (2017) 048, arXiv:1701.04866v1; Secs. 2, 3, 8, 9, 10.
+- M. Korsmeier, F. Donato, M. Di Mauro, PRD 97 (2018) 103019, arXiv:1802.03030v2; Secs. I-V.
+
+The other sections of this file predate these sources and cite none; read them as guidance, not as verified claims.
