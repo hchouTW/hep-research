@@ -178,7 +178,11 @@ def brute(b, n, grid, t, param, toys, seed):
 
 
 def upcrossings(q, c0):
-    """Number of upcrossings of the level c0 along each scan (rows of q)."""
+    """Number of upcrossings of the level c0 along each scan (rows of q, or one scan as a 1D array): crossings from
+    <= c0 to > c0 between neighbouring grid points. A scan that already starts above c0 does not count an upcrossing
+    at its first point (Gross and Vitells 2010 count upcrossings of the process). global_significance.py uses this
+    same definition (STH-T3.4)."""
+    q = np.atleast_2d(q)
     above = q > c0
     return np.sum(~above[:, :-1] & above[:, 1:], axis=1) + 0  # crossings between grid points
 

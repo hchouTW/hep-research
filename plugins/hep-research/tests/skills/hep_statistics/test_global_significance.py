@@ -27,6 +27,30 @@ def doc(positions, widths=(1.5,), norm="fixed", variants=None, n=N):
             "scan": {"positions": list(positions), "widths": list(widths)}, "background_normalization": {"kind": norm, "sigma": 0.05}}
 
 
+class InputsAndConventionsSTH34(unittest.TestCase):
+    """STH-T3.4: input checks, the auxiliary redraw at the fitted scale, one upcrossing definition."""
+
+    def test_bad_inputs_are_refused(self):
+        bad_n = N.copy()
+        bad_n[3] = -1
+        for d in (doc([5.0], n=bad_n), doc([70.0]), doc([-3.0]), doc([10.0], widths=(0.0,))):
+            with self.subTest(d=str(d["scan"])), self.assertRaises(ValueError):
+                g.run(d, 10, 1)
+
+    def test_auxiliary_redraw_is_centered_at_the_fitted_scale(self):
+        # data with 30% more background than nominal: the background-only fit gives k0 > 1 (constrained, sigma 0.05)
+        n = np.random.default_rng(5).poisson(1.3 * B)
+        r = g.run(doc(np.arange(5, 56, 5.0), norm="constrained", n=n), 300, 2)
+        red = r["auxiliary_redraw"]
+        self.assertGreater(red["center"], 1.1)
+        self.assertLess(abs(red["mean_in_toys"] - red["center"]), 4 * 0.05 / np.sqrt(300))
+
+    def test_one_upcrossing_definition(self):
+        q = np.array([2.0, 0.5, 1.5, 1.8, 0.2, 3.0, 0.1])
+        self.assertEqual(int(le.upcrossings(q, 1.0)[0]), 2)       # the start above the level is not an upcrossing
+        self.assertIs(g.upcrossings, le.upcrossings)
+
+
 class GlobalSignificance(unittest.TestCase):
     def test_agrees_with_look_elsewhere_brute_force(self):
         ours = g.run(doc(np.arange(5, 56, 1.0)), 600, 1)
