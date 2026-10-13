@@ -5,8 +5,8 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
-Contracts 2.6.0 (minor: theory-spec and prediction semantics; every 2.5.0 artifact keeps its outcome and gets the new
-rules with `validate.py --strict`, at the same level; no new capability).
+Contracts 2.6.0 (minor: theory-spec, prediction and measurement-spec semantics; every 2.5.0 artifact keeps its outcome
+and gets the new rules with `validate.py --strict`, at the same level; no new capability).
 
 ### hep-theory
 
@@ -196,6 +196,69 @@ rules with `validate.py --strict`, at the same level; no new capability).
   reproduces a `TTreeReader` event loop bin for bin (zero-tolerance `compare_root_histograms.py`, bin errors
   compared separately, single- and multithreaded, deliberate mutations must fail); passes `lint_task.py --repo` and
   the example tests; listed in `examples/README.md`.
+
+### hep-analysis
+
+- **Flux bin-width unit.** `cosmic_ray_flux.py` requires `--bin-width-unit {GV,GeV,GeV/n,TeV,TV}` and echoes
+  `bin_width_unit`; the guide's check-first row passed a 1.2-1.8 TV bin as 0.6, which makes a flux per GV 1000x too
+  large (now: 600 GV). Detector-response commands and the tool contract follow.
+- **Bounded flux intervals.** `cosmic_ray_flux.py` now reports an interval on the signal mean s >= 0 from core/stats:
+  Garwood for any count (the 500 ceiling is gone), Feldman-Cousins for a known background, Cousins-Highland by
+  default for an uncertain one (labelled approximate), `--method profile-fc --toys --seed` for publication use. No
+  bound is negative; `flux_upper_limit` when the lower end is 0. The old subtraction is `--method naive`
+  (approximate, clipped at 0). Above the FC grid limit it exits 3 and names the alternative. New
+  `--exposure-rel-uncertainty` gives `flux_syst_exposure`.
+- **One CLI contract.** All twelve scripts take `--status` (core statuses; tables also `published`) and report it;
+  exit codes 0 ok, 1 finding or failed computation, 2 invalid input or usage (NaN, inf, malformed files), 3
+  incomplete; one-line errors, no tracebacks. `make_yield_table.py` requires `--status`;
+  `check_systematic_variations.py` defaults to JSON.
+- **One spec format.** `assets/analysis-contract.yaml` and `systematics-config.example.yaml` are removed; new
+  `assets/measurement_spec.template.json` (validates with `--strict`) and its field guide. `systematics.csv` uses the
+  spec's systematics ledger columns; `systematics_table_tex.py` renders them.
+- **measurement-spec semantics (contracts 2.6.0).** `MEASUREMENT_SEMANTICS_FROM = "2.6.0"`: estimand sentence,
+  complete observable (phase space, frame, unit and binning), conditional denominators, backgrounds with estimator,
+  control region or constraint and closure, each correction once from the controlled categories (factorized
+  efficiencies allowed), no zero for unknown, systematics with `applied_via` and unique names, missing markers listed
+  in `unresolved_inputs`, blinded specs with a mask and without `observed` status, ratio blocks, ordered periods,
+  misspelled keys. New optional schema fields: `estimand`, `no_backgrounds_reason`, background `control_region`,
+  `constraint`, `closure`, correction `exact_zero`, blinding `mask` and `unblinding_record_ref`. The 30-mutation probe
+  went from 30 silent passes to 2 (both by design). `validate.py` accepts flags before the artifact path. Example
+  specs gain an estimand and drop the double-listed luminosity and exposure corrections.
+- **Review procedure.** New `references/review-and-artifacts.md` (verdict scale `blocked` / `needs-work` /
+  `acceptable-with-open-inputs`, output order, checklist, measurement brief, worked review of a synthetic defective
+  spec) and `assets/measurement-review-template.md`; the AMS module links it.
+- **Correlations.** One rule in SKILL.md, README, references, routing contract (new ownership row `correlation
+  evidence`) and the hep-statistics handoff line: hep-analysis supplies the evidence and a proposed scheme,
+  hep-statistics encodes it and checks positive semidefiniteness.
+- **Guide re-scoped** (219 to 106 lines): code-level material (API selection, pipelines, code-file requirement, the
+  RDataFrame normalization code) moved to `skills/hep-computing/references/analysis-data-pipelines.md`;
+  `data-pipelines.md` is a pointer; link checker test for `skills/hep-analysis/**/*.md`.
+- **Physics corrections** with primary sources: solar cycle 24 phases (SILSO), cutoff selection rule and exposure
+  formula, sigma(Xmax) for p and Fe (Kampert & Unger 2012), ratio cancellation, trials (Gross & Vitells 2010), Garwood
+  N = 0 footnote, Barlow's rule, Peelle's Pertinent Puzzle.
+- **SKILL.md** 8157 to 7771 B; one home per invariant (blinding rules only in `analysis-design.md`); workflow step 5
+  names the `validate.py` command.
+- **Scripts.** Orbit cutoff: tilted-dipole ground-track mode with time fractions and an exposure-versus-cutoff table.
+  Geomagnetic cutoff: AME2020 nuclear masses, `--radius-re` (old `--altitude-re` deprecated). Force field:
+  `--energy-kind`, `--phi-unit`, `--phi-uncertainty`, `--lis-table`, conversions via core/kinematics, NaN exit 2.
+  Power-law fit: continuous sharp or smooth broken power law with a free break, chi2/ndf, p-value, covariance,
+  asymmetric errors, Lafferty-Wyatt centres, pivot normalization; `--break-energy` now fixes the break of the
+  continuous model. Systematic variations: statistical normalization and shape tests with bin uncertainties, flow
+  bins for JSON. Blinded-bin masking fails closed on length or type mismatches and masks errors and flow bins.
+  Change review: outcome and signal-region wording, strict booleans, new `needs-human-review` decision. Ratio:
+  exact `poisson-ratio` and `binomial-fraction` methods. Tables: escaping, `--totals`, safe LaTeX labels.
+- **Method content.** New `references/correction-chain.md` (factorized efficiencies with denominators, data/MC
+  ratios, time-dependent measurements, nuclei and isotopes, neutrino and fixed-target specifics); estimand and fiducial
+  definitions and steeply falling spectra in `measurements-and-unfolding.md`; systematics budget; antiparticle
+  backgrounds; trigger efficiency from data, unbiased optimization and look-elsewhere at the design stage in
+  `analysis-design.md`. Each has a synthetic worked example checked by `tests/skills/hep_analysis/test_method_references.py`.
+- **Spec review script.** New `scripts/review_measurement_spec.py` drafts a verdict-first review from the validator
+  findings; the collider and cosmic-ray examples run it and write `review.md`.
+- **Tests and records.** Behavioural invariant tests replace the guide-wording test; 14 new routing cases (en and
+  zh-Hant) for the hep-analysis boundaries, live run pending; `test_ams02_helpers.py` renamed
+  `test_cosmic_ray_helpers.py`; a worked cosmic-ray spec with backgrounds and an active mask
+  (`assets/worked-spec.cosmic-ray.synthetic.json`); the flagship example documents the `--profiles-from`
+  validation command; capability-matrix title no longer carries a version.
 
 ## 0.6.17 (2026-10-13)
 

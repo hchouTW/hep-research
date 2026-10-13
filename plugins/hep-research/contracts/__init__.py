@@ -17,5 +17,9 @@ CONTRACTS_VERSION = "2.6.0"
 # checks_run[].tolerance, references_read[].date_read; prediction derivation_status; uncertainty prescription, method,
 # bounds); no capability: the new rules only refuse incomplete or inconsistent declarations, and a 2.5 reader of a
 # 2.6 theory-spec rejects the new top-level fields (additionalProperties) instead of misreading them.
+# 2.6.0 also adds measurement-spec semantics (contracts.validate, _measurement_semantics, MEASUREMENT_SEMANTICS_FROM) and
+# optional measurement-spec fields (estimand, background control_region/constraint/closure, blinding mask,
+# no_backgrounds_reason, correction exact_zero); no capability: the new rules only refuse incomplete or inconsistent
+# declarations, and a 2.5 reader of a 2.6 measurement-spec misreads no field.
 KNOWN_CAPABILITIES = frozenset({"core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1"})

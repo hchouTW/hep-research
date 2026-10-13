@@ -1,9 +1,11 @@
-# Capability matrix (v0.6.0)
+# Capability matrix
 
 Status words: **tested** = exercised by a check that passed in the environment named below; **unverified** = code or
 guidance exists but its tool was not installed, so it was not run; **proposed** = a starting point or design, not
 executed; **not in v1** = outside scope, handled by the limited-support response. "Tested" never means qualified for private or blinded data: no host configuration is (Qualified: no, for every row). "Tested" means contract and
 software consistency only, not physical validity, proof, statistical coverage, or authorization to unblind.
+
+Each row carries its own environment and date; the title carries no plugin version, so a release does not make it stale (hep-analysis rows checked as of branch `fix/hep-analysis-audit`, 2026-10-13, contracts 2.6.0).
 
 Environment E1 (all "tested" rows): Claude Code cloud container, Linux 6.18 x86_64, Python 3.11.15, NumPy 2.4.6,
 SciPy 1.17.1, Matplotlib 3.11.2, SymPy 1.14.0, Claude Code CLI 2.1.287, 2026-10-02. Evidence: [VALIDATION.md](../VALIDATION.md).
@@ -20,10 +22,12 @@ results; they are listed in "E3 results" at the end. Evidence: VALIDATION FULLTE
 
 | Capability | Owner | Status | Evidence or reason |
 |---|---|---|---|
-| Measurement specs, correlated ratios, time-dependent exposure | hep-analysis | tested (E1) | Path A, T10, T11 |
-| Systematic-variation classification (shape vs normalization) | hep-analysis | tested (E1) | T12 |
+| Measurement specs, correlated ratios, time-dependent exposure | hep-analysis | tested (E1); spec semantics tested (E2, 2026-10-13) | Path A, T10, T11; contracts 2.6.0 measurement-spec rules (`tests/contracts/test_measurement_contract.py`, `tests/skills/hep_analysis/test_invariants.py`; mutation probe 2 of 30 silent passes, both by design) |
+| Verdict-first measurement review (procedure, template, draft from validator findings) | hep-analysis | tested (E2, 2026-10-13) | `references/review-and-artifacts.md`, `scripts/review_measurement_spec.py` on a synthetic defective spec and both examples (`tests/skills/hep_analysis/test_review_procedure.py`); the physics judgement is a human review |
+| Cosmic-ray flux from counts (bin-width unit, bounded intervals) and helpers (tilted-dipole orbit cutoff, AME2020 masses, force field, continuous broken power law) | hep-analysis | tested (E2, 2026-10-13) | `test_cosmic_ray_flux.py` (core FC and Garwood intervals, scipy cross-check), `test_orbit_cutoff.py`, `test_nuclear_masses.py`, `test_force_field.py`, `test_broken_power_law.py` (200 seeded toys); synthetic inputs only |
+| Systematic-variation classification (shape vs normalization) | hep-analysis | tested (E1); statistical test (E2, 2026-10-13) | T12; normalization pull and shape chi2 with bin uncertainties (`test_systematic_stat_test.py`) |
 | Blinding: masks, sealing, scans of plots, logs, CSV and caches (advisory checks, synthetic sentinels only; not enforcement) | hep-analysis, core | tested (E1) | T18; AUDIT T04: `.npy` caches read, scans report pass / fail / incomplete (an unreadable output is never a pass), strict publication mode with named exemptions. A pass cannot see transformed values. CMP-04/05 (E2, 2026-10-13): exact zero and numbers the public bins give alone are not sealed; unreadable `.npy`/`.npz` caches are unscanned (exit 3); masks refuse mismatched lengths, non-numbers, and handle flow bins and errors (`tests/core/test_blinding_regressions.py`) |
-| Analysis-change review (tuning after unblinding flagged) | hep-analysis | tested (E1) | T19 |
+| Analysis-change review (tuning after unblinding flagged) | hep-analysis | tested (E1); evasions closed (E2, 2026-10-13) | T19; the four audit evasions flag or exit 2, ambiguous text needs human review (`test_review_analysis_change.py`) |
 | Response objects, forward folding, double-counting checks | detector-response | tested (E1) | Path B, T07 |
 | Resolution and efficiency studies (detector level) | detector-response | tested (E1), synthetic detector | J2 example (`examples/detector-resolution/`) |
 | Unfolding | hep-statistics | demonstrated on synthetic data (E4) | `examples/unfolding-coverage/` (4,000 seeded toys, 10 bins): inversion unbiased with per-bin 68% coverage 0.675–0.69; Tikhonov at relative strength 1e-2 and 1e-1 undercovers (minimum 0.599 and 0.238) with largest bias 0.58 and 1.69 sigma; 6-of-10 TSVD bias up to 17.5 sigma; `core/stats/unfolding_diagnostics.py` closure, L-curve and cross-validation tests; `examples/collider-angular/` full-rank unfolding with toy closure; response exactly known, D'Agostini not in the example, no real data |
@@ -101,7 +105,7 @@ results; they are listed in "E3 results" at the end. Evidence: VALIDATION FULLTE
 | Lattice QCD, EFT global fits, cosmic-ray propagation, other domains | none | not in v1 | limited-support response (J12) |
 | Cosmic-ray propagation (model families, inputs, degeneracies) | hep-theory | guidance only; fits not in v1 | `skills/hep-theory/references/cosmic-ray-propagation.md`; no propagation code (GALPROP, DRAGON, USINE) installed or run, nothing tested |
 | Environment manifest and drift check for a run | hep-computing | tested (E2, 2026-10-08) | `environment_manifest.py`: Python, platform, origin (LCG view, container, conda, venv, system), package versions, a fixed list of variables (never others) and the git commit, in the `computational-run` shape; `check` reports every drift (`tests/skills/hep_computing/test_environment_manifest.py`); CMP-07 (E2, 2026-10-13): OS family, architecture and libc compared, kernel release a note, input checksums (`--inputs`) and `--project` commit/dirty checked |
-| Systematics table as booktabs LaTeX | hep-analysis | tested (E2, 2026-10-08) | `systematics_table_tex.py`: status label required and carried into the caption; output compiled with pdflatex (`tests/skills/hep_analysis/test_systematics_table_tex.py`) |
+| Systematics table as booktabs LaTeX | hep-analysis | tested (E2, 2026-10-08) | `systematics_table_tex.py`: status label required and carried into the caption; output compiled with pdflatex (`tests/skills/hep_analysis/test_systematics_table_tex.py`); spec-ledger columns, escaping and safe labels (E2, 2026-10-13, `test_table_escaping.py`) |
 
 ## Profiles
 

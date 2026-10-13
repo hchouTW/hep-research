@@ -1,5 +1,5 @@
 {
- "contract_version": "2.5.0",
+ "contract_version": "2.6.0",
  "bindings": {
   "experiments": [
    {
@@ -11,7 +11,7 @@
  },
  "versions": {
   "plugin": "0.6.17",
-  "contracts": "2.5.0",
+  "contracts": "2.6.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -37,6 +37,7 @@
   "synthetic"
  ],
  "extension": {
+  "estimand": "SYNTHETIC: the helium-to-proton flux ratio per rigidity bin (edges above, GV) at top of instrument, separately in each of two synthetic periods, for particles above the geomagnetic cutoff selection",
   "observable": {
    "quantity": "ratio",
    "species": [
@@ -111,15 +112,16 @@
    }
   ],
   "backgrounds": [],
+  "no_backgrounds_reason": "SYNTHETIC: the toy generates the two signal species only",
   "corrections": [
    {
     "effect_id": "trigger_efficiency",
-    "category": "efficiency",
+    "category": "trigger_efficiency",
     "applied_in": "estimator"
    },
    {
     "effect_id": "selection_efficiency",
-    "category": "efficiency",
+    "category": "selection_efficiency",
     "applied_in": "estimator"
    },
    {
@@ -128,13 +130,8 @@
     "applied_in": "estimator"
    },
    {
-    "effect_id": "livetime_and_cutoff",
-    "category": "exposure",
-    "applied_in": "estimator"
-   },
-   {
     "effect_id": "rigidity_migration",
-    "category": "response",
+    "category": "migration",
     "applied_in": "response_matrix"
    }
   ],

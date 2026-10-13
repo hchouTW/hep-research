@@ -103,7 +103,7 @@ A passing validator means the input is self-consistent under its declared metada
 
 ## Verdict-first review
 
-Structure, in this order: (1) **Verdict**: one of `blocked` (errors present), `needs work` (only warnings), `acceptable with open inputs` (only unresolved/proposals), with one sentence why. (2) **Defects in priority order**: each with the artifact path, why it changes the result, and the smallest fix. (3) **Proposals**, labeled `[Proposal]`. (4) **Unresolved inputs** and which would change the verdict. (5) **Evidence table**: each AMS statement with its label and claim ID. `audit_analysis_spec.py --markdown` drafts sections 1 to 4; a human review still writes the physics judgement.
+The verdict scale, output order and checklist are the generic ones in `<plugin root>/skills/hep-analysis/references/review-and-artifacts.md` (`blocked`, `needs-work`, `acceptable-with-open-inputs`). AMS additions: (1) after the generic sections, an **evidence table**: each AMS statement with its label and claim ID; (2) `audit_analysis_spec.py --markdown` drafts the verdict, defects, proposals and unresolved inputs from this profile's specification format (it prints the verdicts with spaces, `needs work` and `acceptable with open inputs`, which mean the same values); a human review still writes the physics judgement.
 
 ## Failure modes
 

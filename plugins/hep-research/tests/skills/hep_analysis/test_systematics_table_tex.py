@@ -31,7 +31,7 @@ class SystematicsTableTests(unittest.TestCase):
         self.assertIn(r"\caption{SYNTHETIC: Sources", tex)
         for cmd in (r"\toprule", r"\midrule", r"\bottomrule", r"\begin{tabular}{llllll}"):
             self.assertIn(cmd, tex)
-        self.assertIn(r"example\_detector & template & simulation", tex)  # underscores escaped
+        self.assertIn(r"example\_energy\_scale & detector energy calibration (synthetic placeholder) & migration", tex)
         self.assertEqual(tex.count(r" \\"), 3)  # header and two rows
 
     def test_observed_is_labelled_in_the_comment_not_flagged_in_the_caption(self):

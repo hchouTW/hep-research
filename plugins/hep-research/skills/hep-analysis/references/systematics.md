@@ -1,12 +1,12 @@
-# Systematic Uncertainties and Nuisance Correlations
+# Systematic Uncertainties and Correlation Evidence
 
-This file covers the physical sources, their payloads and correlations. How each source then enters the likelihood (constraint form, interpolation code, one-sided and two-point variations, MC-statistics modifiers, pruning criteria) and the post-fit pulls, impacts and breakdowns are owned by hep-statistics: [nuisance modeling](../../hep-statistics/references/nuisance-modeling.md).
+This file covers the physical sources, their payloads and the correlation evidence. hep-analysis supplies the physical correlation evidence and a proposed scheme with its justification; hep-statistics encodes it in the likelihood and checks positive semidefiniteness. How each source then enters the likelihood (constraint form, interpolation code, one-sided and two-point variations, MC-statistics modifiers, pruning criteria) and the post-fit pulls, impacts and breakdowns are owned by hep-statistics: [nuisance modeling](../../hep-statistics/references/nuisance-modeling.md).
 
 ## Source inventory
 
-Use `<plugin root>/skills/hep-analysis/assets/systematics.csv` to record source, type, affected processes/eras/regions, correlation key, rate/shape behavior, payload, and validation. Nuisance names have statistical meaning: sharing a name often shares a parameter. Do not reuse names solely for convenience. For a paper or note, `<plugin root>/skills/hep-analysis/scripts/systematics_table_tex.py` renders the registry as a booktabs LaTeX table and refuses one without a status label (synthetic, observed, ...).
+Use `<plugin root>/skills/hep-analysis/assets/systematics.csv` (the columns of the measurement-spec `systematics` ledger: name, source, effect, applied_via, affected_processes, correlation_key, payload, validation; effect is normalization, shape, migration or mixed) to record each source. Nuisance names have statistical meaning: sharing a name often shares a parameter. Do not reuse names solely for convenience. For a paper or note, `<plugin root>/skills/hep-analysis/scripts/systematics_table_tex.py` renders the registry as a booktabs LaTeX table and refuses one without a status label (synthetic, observed, ...).
 
-Correlations follow shared physical sources, measurement procedures, and documented prescriptions. Neither "all uncertainties in one year are correlated" nor "different years are independent" is a valid blanket rule. Decompose luminosity, JES, or object scale factors into justified components when prescribed. Represent partial Gaussian correlations with a covariance matrix or latent standard-normal variables; verify positive semidefiniteness and compatibility of pairwise correlations.
+Correlations follow shared physical sources, measurement procedures, and documented prescriptions. Neither "all uncertainties in one year are correlated" nor "different years are independent" is a valid blanket rule. Decompose luminosity, JES, or object scale factors into justified components when prescribed. Propose partial correlations with their justification and check that the pairwise values you propose are mutually compatible; hep-statistics encodes them (a covariance matrix or latent standard-normal variables) and checks positive semidefiniteness.
 
 ## Types and propagation
 
@@ -18,7 +18,7 @@ Correlations follow shared physical sources, measurement procedures, and documen
 
 ## Variation registry and implementation pattern
 
-Keep a central registry (`<plugin root>/skills/hep-analysis/assets/systematics.csv` or equivalent) recording, per
+Keep a central registry (the spec's `systematics` ledger, `<plugin root>/skills/hep-analysis/assets/systematics.csv`, or equivalent) recording, per
 source: variation name and downstream suffix; type (weight, shape,
 normalization-only, one-sided, envelope, theory set); samples affected; the data
 exclusion rule; the correlation model across eras/channels/bins/processes; the
@@ -43,7 +43,37 @@ same bootstrap replicas of the simulated sample (paired bootstrap) and take the 
 simulation part out can make a stable variation look significant: in a synthetic test where simulation and data
 statistics were comparable, a data-only test flagged 8 of 22 bins of one variation, and the paired test 3 of 99 bins
 over all variations, the rate expected by chance at 2 sigma. A shift beyond these statistics is an effect to explain
-before it is quoted; one within them is not evidence that the source is absent.
+before it is quoted; one within them is not evidence that the source is absent. Barlow's operational rule for such
+checks: a shift consistent with its uncorrelated statistics is not added as a systematic (a passed check is not an
+evaluated effect; adding it penalizes diligence), and for raw nested yields, where the varied selection is a subset of
+the nominal one, Var(difference) = N_removed ([Barlow, hep-ex/0207026](https://arxiv.org/abs/hep-ex/0207026),
+Sec. 4).
+
+## Systematics budget
+
+Build the budget source by source, each with how it was evaluated, its size per bin and its correlation evidence.
+
+- **Cut variation or efficiency ratio.** Varying a selection cut and quoting the shift mixes the systematic with the
+  statistical fluctuation of the events that move; prefer measuring the efficiency of the cut in data and simulation on
+  a control sample and propagating the data/simulation ratio and its uncertainty
+  ([correction chain](correction-chain.md#factorized-efficiency)). Use a cut variation as a check, judged with the
+  rule in [Is a variation's shift significant?](#is-a-variations-shift-significant), not as the evaluation.
+- **Variation ranges** come from evidence: the resolution or calibration uncertainty of the quantity cut on, or the
+  measured data/simulation difference, not from a round number. Say which.
+- **No double counting.** A source already inside the statistical uncertainty (for example the statistics of the
+  control sample that sets a transfer factor, when the fit also constrains it) is not added again; two sources that
+  vary the same underlying parameter (an energy scale entering both a jet and a missing-energy variation) are one
+  source with one nuisance.
+- **Envelope or RMS.** For a set of alternatives that are not a sampled distribution (generator or model choices), the
+  envelope (largest deviation) is the convention, stated as such; for replicas of a distribution (PDF replicas, toy
+  calibrations), the RMS. Do not take the envelope of replicas or the RMS of two alternatives.
+- **Correlations across bins and periods** are evidence for hep-statistics: record whether each source is common to
+  all bins, all periods, or independent, and why; hep-statistics encodes it.
+
+Worked example (synthetic): four alternative models shift a bin by +1.2%, -0.4%, +2.0% and +0.8%; the envelope is 2.0%,
+while their RMS about zero would be 1.25% and has no meaning for four choices. A budget with independent sources of
+2.0%, 1.5% and 0.5% gives a total of `sqrt(2.0^2 + 1.5^2 + 0.5^2)` = 2.55% for that bin; if the 1.5% source were the
+control-sample statistics already in the fit's statistical uncertainty, the systematic total is 2.06%.
 
 ## Template validation
 

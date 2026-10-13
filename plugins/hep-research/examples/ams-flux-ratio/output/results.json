@@ -1,5 +1,10 @@
 {
  "label": "SYNTHETIC: invented inputs; describes no experiment",
+ "review": {
+  "verdict": "acceptable-with-open-inputs",
+  "defects": 0,
+  "unresolved": 0
+ },
  "seed": 20261002,
  "toys": 400,
  "criteria": {
@@ -18,7 +23,8 @@
   "ratio_reference_agreement": true,
   "response_checks": true,
   "covariance_checks": true,
-  "contracts": true
+  "contracts": true,
+  "review_verdict": true
  },
  "edges_gv": [
   1.5,

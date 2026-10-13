@@ -10,6 +10,7 @@ import io
 import importlib.util
 import json
 import math
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -156,6 +157,25 @@ class PathATests(unittest.TestCase):
         params = spec["extension"]["experiment_fields"]["ams02:parameters"]
         self.assertEqual({p["provenance"] for p in params}, {"documented", "proposal"})
         self.assertIn("ams02:C31", spec["provenance"]["evidence_ids"])
+
+    def test_documented_profile_validation_command_works(self):
+        """P4-3: the report names the command; with a project config outside the plugin it exits 0."""
+        report = (self.out / "report.md").read_text()
+        self.assertIn("--profiles-from", report)
+        with tempfile.TemporaryDirectory() as proj:
+            cfg = Path(proj) / "hep-research.project.json"
+            profile = json.loads((PLUGIN / "profiles" / "experiments" / "ams-02" / "profile.json").read_text())
+            cfg.write_text(json.dumps({"schema_version": "1.0.0", "plugin_version": ">=0.6,<1.0",
+                                       "experiments": [{"profile": "experiment:ams-02", "version": profile["version"]}],
+                                       "theory": []}))
+            spec = self.out / "artifacts" / "measurement_spec.json"
+            plain = subprocess.run([sys.executable, str(PLUGIN / "contracts" / "validate.py"), str(spec)],
+                                   capture_output=True, text=True, timeout=120)
+            bound = subprocess.run([sys.executable, str(PLUGIN / "contracts" / "validate.py"), str(spec),
+                                    "--profiles-from", str(cfg)], capture_output=True, text=True, timeout=120)
+            self.assertEqual(plain.returncode, 1)
+            self.assertIn("--profiles-from", plain.stdout)
+            self.assertEqual(bound.returncode, 0, bound.stdout)
 
     def test_outputs_carry_synthetic_label(self):
         self.assertTrue(self.results["label"].startswith("SYNTHETIC"))

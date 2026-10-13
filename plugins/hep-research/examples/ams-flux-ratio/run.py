@@ -19,6 +19,9 @@ over periods -> Asimov closure and seeded toy closure -> contract artifacts, fig
 Usage (from the plugin root): python3 examples/ams-flux-ratio/run.py [--toys 400] [--seed 20261002] [--out DIR]
 Default output: examples/ams-flux-ratio/output/. Exit 0 when every pre-declared closure criterion passes,
 1 otherwise. Requires numpy and matplotlib (the D5 environment).
+Validating the spec by hand: its level `crflux:top-of-instrument` is a profile term, so plain validation reports
+vocab.unknown_term; bind experiment:ams-02 in a project config outside the plugin (with an artifacts_dir outside it)
+and run python3 "<plugin root>/contracts/validate.py" examples/ams-flux-ratio/output/artifacts/measurement_spec.json --profiles-from <your project>/hep-research.project.json.
 """
 from __future__ import annotations
 
@@ -284,15 +287,19 @@ def artifacts(world, res, created):
                 objective="SYNTHETIC Path A: He/p flux ratio per rigidity bin in two synthetic periods",
                 provenance={"producer_skill": "hep-analysis", "created": created, "evidence_ids": ["ams02:C31"]},
                 status=["synthetic"],
-                extension={"observable": obs, "species_or_process": "helium, proton (synthetic)", "period": periods,
+                extension={"estimand": ("SYNTHETIC: the helium-to-proton flux ratio per rigidity bin (edges above, GV) at top "
+                                        "of instrument, separately in each of two synthetic periods, for particles above the "
+                                        "geomagnetic cutoff selection"),
+                           "observable": obs, "species_or_process": "helium, proton (synthetic)", "period": periods,
                            "selections": [{"name": "geomagnetic", "definition": "bin lower edge > 1.2 x maximum cutoff", "conditional_denominator": "livetime"},
                                           {"name": "species selection", "definition": "synthetic per-species selection", "conditional_denominator": "triggered events in acceptance"}],
-                           "backgrounds": [], "corrections": [
-                               {"effect_id": "trigger_efficiency", "category": "efficiency", "applied_in": "estimator"},
-                               {"effect_id": "selection_efficiency", "category": "efficiency", "applied_in": "estimator"},
+                           "backgrounds": [],
+                           "no_backgrounds_reason": "SYNTHETIC: the toy generates the two signal species only",
+                           "corrections": [
+                               {"effect_id": "trigger_efficiency", "category": "trigger_efficiency", "applied_in": "estimator"},
+                               {"effect_id": "selection_efficiency", "category": "selection_efficiency", "applied_in": "estimator"},
                                {"effect_id": "acceptance", "category": "acceptance", "applied_in": "estimator"},
-                               {"effect_id": "livetime_and_cutoff", "category": "exposure", "applied_in": "estimator"},
-                               {"effect_id": "rigidity_migration", "category": "response", "applied_in": "response_matrix"}],
+                               {"effect_id": "rigidity_migration", "category": "migration", "applied_in": "response_matrix"}],
                            "systematics": [{"name": "trigger_efficiency", "source": "control sample", "effect": "normalization", "applied_via": "covariance (fully correlated across bins, shared by species)"},
                                            {"name": "selection_efficiency", "source": "control sample", "effect": "normalization", "applied_via": "covariance (per bin, per species)"}],
                            "blinding": {"blinded": False},
@@ -346,6 +353,15 @@ def artifacts(world, res, created):
             **{f"dataset_{p}": d for p, d in data.items()}}
     reports = {k: validate_artifact(v, vocab) for k, v in docs.items()}
     return docs, {k: {"ok": r.ok, "errors": [f.message for f in r.errors]} for k, r in reports.items()}
+
+
+def review_spec(spec, vocab, out):
+    """Verdict-first review draft of the spec with the hep-analysis review script (references/review-and-artifacts.md)."""
+    sys.path.insert(0, str(PLUGIN / "skills" / "hep-analysis" / "scripts"))
+    import review_measurement_spec
+    review = review_measurement_spec.draft(spec, vocab)
+    (out / "review.md").write_text(review_measurement_spec.markdown(review, spec["artifact_id"], "synthetic"))
+    return {"verdict": review["verdict"], "defects": len(review["defects"]), "unresolved": len(review["unresolved"])}
 
 
 def figures(world, res, out):
@@ -420,8 +436,11 @@ def main(argv=None) -> int:
         "covariance_checks": all(v != "fail" for v in cov_checks.values()),
         "contracts": all(c["ok"] for c in contract.values()),
     }
+    review = review_spec(docs["measurement_spec"], Vocabulary.with_profiles([PROFILE]), out)
+    passes["review_verdict"] = review["verdict"] == "acceptable-with-open-inputs"
     results = {
         "label": "SYNTHETIC: invented inputs; describes no experiment",
+        "review": review,
         "seed": args.seed, "toys": args.toys, "criteria": CRITERIA, "pass": passes,
         "edges_gv": EDGES.tolist(), "reported_bins": [REPORTED.start, REPORTED.stop],
         "synthetic_inputs": {"species": SPECIES, "periods": PERIODS, "cutoff_factor": CUTOFF_FACTOR, "resolution": RESOLUTION,
@@ -456,6 +475,11 @@ def write_report(out: Path, r: dict) -> None:
         "the proton flux analysis [Documented, ams02:C31] and applied to helium here as a [Proposal].",
         "",
         f"Reproduce: `python3 examples/ams-flux-ratio/run.py --toys {r['toys']} --seed {r['seed']}` (from the plugin root, D5 environment).",
+        "",
+        "Validate the spec (its level is a profile term, so the profile vocabulary is needed): bind `experiment:ams-02` in a "
+        "`hep-research.project.json` outside the plugin and run "
+        "`python3 \"<plugin root>/contracts/validate.py\" examples/ams-flux-ratio/output/artifacts/measurement_spec.json "
+        "--profiles-from <your project>/hep-research.project.json`.",
         "",
         "## Pre-declared criteria and outcome",
         "",

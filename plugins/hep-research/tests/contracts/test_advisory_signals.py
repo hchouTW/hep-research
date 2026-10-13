@@ -48,10 +48,12 @@ class NoFormalUseSignal(unittest.TestCase):
 
 
 class NoAuthorizationField(unittest.TestCase):
-    def test_analysis_contract_has_no_authorization_field(self):
-        text = (ROOT / "skills" / "hep-analysis" / "assets" / "analysis-contract.yaml").read_text(encoding="utf-8")
-        self.assertNotIn("unblinding_authorization", text)
-        self.assertIn("unblinding_record_ref", text)
+    def test_spec_template_has_no_authorization_field(self):
+        path = ROOT / "skills" / "hep-analysis" / "assets" / "measurement_spec.template.json"
+        self.assertNotIn("authorization", path.read_text(encoding="utf-8"))
+        blinding = json.loads(path.read_text(encoding="utf-8"))["extension"]["blinding"]
+        self.assertIn("unblinding_record_ref", blinding)
+        self.assertIsNone(blinding["unblinding_record_ref"])  # kept outside the session; the agent never fills it
 
 
 if __name__ == "__main__":

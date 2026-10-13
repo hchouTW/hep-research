@@ -60,7 +60,21 @@
     "required": [
      "name",
      "estimator"
-    ]
+    ],
+    "properties": {
+     "estimator": {
+      "type": "string"
+     },
+     "control_region": {
+      "type": "string"
+     },
+     "constraint": {
+      "type": "string"
+     },
+     "closure": {
+      "type": "string"
+     }
+    }
    }
   },
   "corrections": {
@@ -71,7 +85,13 @@
      "effect_id",
      "category",
      "applied_in"
-    ]
+    ],
+    "properties": {
+     "exact_zero": {
+      "type": "boolean",
+      "$comment": "true only when a value of 0 is exact, not unknown"
+     }
+    }
    }
   },
   "systematics": {
@@ -107,6 +127,34 @@
      "properties": {
       "blinded": {
        "type": "boolean"
+      },
+      "mask": {
+       "type": "object",
+       "$comment": "Blinded regions by name or observable intervals; the collaboration's blinding policy defines them",
+       "properties": {
+        "regions": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        },
+        "intervals": {
+         "type": "array",
+         "items": {
+          "type": "object",
+          "required": [
+           "variable"
+          ]
+         }
+        }
+       }
+      },
+      "unblinding_record_ref": {
+       "type": [
+        "string",
+        "null"
+       ],
+       "$comment": "Reference to an unblinding record kept outside the agent session by an authorized person; the agent never fills it"
       }
      }
     },
@@ -165,6 +213,14 @@
      }
     }
    }
+  },
+  "estimand": {
+   "type": "string",
+   "$comment": "One sentence: quantity, species or process, variable and range, level, frame, what is held fixed (required by the 2.6.0 rules)"
+  },
+  "no_backgrounds_reason": {
+   "type": "string",
+   "$comment": "Why the measurement has no background (an empty backgrounds list needs it from 2.6.0)"
   }
  }
 }

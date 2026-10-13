@@ -114,6 +114,168 @@
    }
   },
   {
+   "id": "an-b-eff-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "How should the trigger and selection efficiencies enter the correction chain of my flux measurement, each with its own denominator?",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "correction chains"
+   ],
+   "set": "ANA-P4-5"
+  },
+  {
+   "id": "an-b-eff-2",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "請用 tag-and-probe 量測這個 muon 的重建效率，並給出每個 bin 的不確定度。",
+   "expected_primary": "detector-response",
+   "trigger_terms": [
+    "tag-and-probe"
+   ],
+   "not": "hep-analysis",
+   "set": "ANA-P4-5"
+  },
+  {
+   "id": "an-b-blind-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Help me design the blinding policy for my search: which regions and observables stay masked until unblinding?",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "blinding policy"
+   ],
+   "set": "ANA-P4-5"
+  },
+  {
+   "id": "an-b-blind-2",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "請幫我檢查這些輸出、logs 和 caches 有沒有洩漏盲區的數值（advisory blinding checks）。",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "advisory blinding checks of outputs, logs and caches"
+   ],
+   "not": "hep-analysis",
+   "set": "ANA-P4-5"
+  },
+  {
+   "id": "an-b-closure-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Design the closure test for my ABCD background estimation in a validation region.",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "background estimation",
+    "ABCD"
+   ],
+   "set": "ANA-P4-5"
+  },
+  {
+   "id": "an-b-closure-2",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "我的 template fits 已經完成，請計算 goodness of fit 並給出 p 值。",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "template fits",
+    "goodness of fit"
+   ],
+   "not": "hep-analysis",
+   "set": "ANA-P4-5"
+  },
+  {
+   "id": "an-b-syst-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Write the evaluation plan for the physical sources of systematic uncertainties in my cross-section measurement.",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "systematic uncertainties and their evaluation plan"
+   ],
+   "set": "ANA-P4-5"
+  },
+  {
+   "id": "an-b-syst-2",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "請把這些系統誤差做 covariance assembly and validation，並檢查矩陣是否半正定。",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "covariance assembly and validation"
+   ],
+   "not": "hep-analysis",
+   "set": "ANA-P4-5"
+  },
+  {
+   "id": "an-b-cutflow-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Design the cutflows for my dimuon selection: which cuts, in which order, and with which denominators?",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "cutflows"
+   ],
+   "set": "ANA-P4-5"
+  },
+  {
+   "id": "an-b-cutflow-2",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "請用 RDataFrame 寫出這個 cutflow 的程式碼，並輸出每一步的加權事件數。",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "RDataFrame"
+   ],
+   "not": "hep-analysis",
+   "set": "ANA-P4-5"
+  },
+  {
+   "id": "an-b-level-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Should my spectrum be reported at detector level or unfolded to particle level? Help me with the observable definition.",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "observable definition"
+   ],
+   "set": "ANA-P4-5"
+  },
+  {
+   "id": "an-b-level-2",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "請幫我做帶正則化的 unfolding，並檢查結果的 coverage（unfolding with regularization and coverage）。",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "unfolding with regularization and coverage"
+   ],
+   "not": "hep-analysis",
+   "set": "ANA-P4-5"
+  },
+  {
+   "id": "an-b-review-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Here is our analysis note on the dilepton cross section; give me a verdict-first measurement review.",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "verdict-first measurement review"
+   ],
+   "set": "ANA-P4-5"
+  },
+  {
+   "id": "an-b-review-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "這是我們的分析筆記，請做 measurement review，先給結論再列出缺陷。",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "measurement review"
+   ],
+   "set": "ANA-P4-5"
+  },
+  {
    "id": "co-direct-1",
    "lang": "en",
    "kind": "direct",

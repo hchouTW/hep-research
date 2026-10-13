@@ -16,8 +16,14 @@ with lo < hi; split-overlap result; calibration where the output must be calibra
 domain-shift check; seeds) and the theory-spec and prediction rules of contracts 2.6.0 (conventions block, order of a
 perturbative argument, limit of an asymptotic one, checks behind a formal proof or analytic derivation, check-result
 vocabulary, non-empty validity domain, degenerate directions of a propagation model; no upgraded prediction status,
-a linked theory spec, envelope prescription and [min, max] values, truncation method) to artifacts written under older
-contracts, which otherwise keep their outcome; --strict never raises a rule's level. --gate publication adds
+a linked theory spec, envelope prescription and [min, max] values, truncation method) and the measurement-spec rules
+of contracts 2.6.0 (an estimand sentence; complete
+observable with phase space and frame; conditional denominators; backgrounds with estimator, control region or
+constraint, and closure; each correction once, from the controlled categories, not repeating the normalization or the
+observable's included corrections; no zero standing for unknown; systematics with applied_via and unique names; every
+missing marker listed in unresolved_inputs; blinded specs with a mask and without observed status; ratio blocks;
+ordered periods; misspelled keys) to artifacts written under older contracts, which otherwise keep their outcome;
+--strict never raises a rule's level. Flags may come before or after ARTIFACT.json. --gate publication adds
 the publication gate of a statistical-result (publication_gate): passed, unresolved or failed, with reasons; an
 archived artifact may be valid and still not pass it. Passing the gate is a contract-level prerequisite for
 reporting a result as validated, not evidence of scientific validity.
@@ -161,6 +167,8 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, strict: bool = 
         ids = [c.get("effect_id") for c in ext.get("corrections", [])]
         for dup in sorted({x for x in ids if ids.count(x) > 1}):
             rep.add("error", "$.extension.corrections", "measurement.duplicate_correction", f"effect '{dup}' applied twice")
+        if strict or _at_least(doc.get("contract_version"), MEASUREMENT_SEMANTICS_FROM):
+            _measurement_semantics(doc, ext, vocab, rep)
     elif t == "response":
         both = set(ext.get("includes", [])) & set(ext.get("applied_separately", []))
         for x in sorted(both):
@@ -514,6 +522,239 @@ def _prediction_rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> N
             rep.add("warning", f"{path}.method", "prediction.truncation_method",
                     f"a truncation estimate names its method, one of "
                     f"{sorted(vocab.core('truncation_methods'))}; got {u.get('method')!r}")
+MEASUREMENT_SEMANTICS_FROM = "2.6.0"  # measurement-spec semantic rules apply natively from this contract version
+MISSING_MARKERS = ("unknown", "not-provided")  # 'not-applicable' is a statement, not an open input
+NORMALIZATION_CORRECTIONS = {"luminosity": "integrated-luminosity", "exposure": "exposure", "livetime": "live-time"}
+ESTIMAND_MIN_WORDS = 5
+MEASUREMENT_KEYS = {
+    "extension": {"estimand", "observable", "species_or_process", "period", "selections", "backgrounds", "corrections",
+                  "systematics", "blinding", "experiment_fields", "ratio", "no_backgrounds_reason", "notes"},
+    "selections": {"name", "id", "definition", "conditional_denominator", "validation", "efficiency", "evidence_ids",
+                   "notes", "status", "order", "applied_in", "variable", "value", "unit", "ref", "region"},
+    "backgrounds": {"name", "id", "estimator", "control_region", "constraint", "closure", "normalization", "shape",
+                    "evidence_ids", "notes", "status", "processes", "method", "ref", "uncertainty", "value", "unit",
+                    "transfer_factor", "template"},
+    "corrections": {"effect_id", "category", "applied_in", "value", "unit", "exact_zero", "ref", "evidence_ids",
+                    "source", "notes", "uncertainty", "status", "conditional_denominator", "method", "definition",
+                    "name", "factor_of"},
+    "systematics": {"name", "source", "effect", "applied_via", "affected_processes", "correlation_key", "payload",
+                    "validation", "magnitude", "evidence_ids", "notes", "status", "correlation_evidence",
+                    "proposed_scheme", "ref", "periods", "regions", "value", "unit"},
+}
+_ISO_DATE = re.compile(r"^\d{4}(-\d{2}(-\d{2})?)?([T ].*)?$")
+
+
+def _norm_id(text) -> str:
+    """Comparison form of an identifier: case, '-', '_' and spaces ignored."""
+    return re.sub(r"[\s_-]+", "", str(text)).lower()
+
+
+def _key_checks(item, known: set[str], path: str, rep: Report) -> None:
+    """Unknown keys are warnings; a near-miss of a known key is an error (the field it should fill is missing)."""
+    import difflib
+    if not isinstance(item, dict):
+        return
+    for key in sorted(item):
+        if key in known or NAMESPACED.match(key):
+            continue
+        near = difflib.get_close_matches(key, sorted(known), n=1, cutoff=0.85)
+        if near:
+            rep.add("error", f"{path}.{key}", "measurement.misspelled_key",
+                    f"'{key}' is not a measurement-spec field; did you mean '{near[0]}'?")
+        else:
+            rep.add("warning", f"{path}.{key}", "measurement.unknown_key",
+                    f"'{key}' is not a measurement-spec field: no rule or consumer reads it (profile fields go under "
+                    "experiment_fields)")
+
+
+def _markers(value, path: str):
+    """(path, marker) for every string equal to a missing marker inside value."""
+    if isinstance(value, str) and value in MISSING_MARKERS:
+        yield path, value
+    elif isinstance(value, dict):
+        for k, v in value.items():
+            yield from _markers(v, f"{path}.{k}")
+    elif isinstance(value, list):
+        for i, v in enumerate(value):
+            yield from _markers(v, f"{path}[{i}]")
+
+
+def _listed(path: str, unresolved) -> bool:
+    """An unresolved_inputs entry names this field: it contains the field's key (or its path)."""
+    key = re.sub(r"\[\d+\]", "", path.rsplit(".", 1)[-1])
+    rel = path.replace("$.extension.", "")
+    entries = [str(e) for e in unresolved] if isinstance(unresolved, list) else []
+    return any(rel in e or re.search(rf"(^|[^A-Za-z0-9_]){re.escape(key)}([^A-Za-z0-9_]|$)", e) for e in entries)
+
+
+def _is_zero(v) -> bool:
+    return isinstance(v, (int, float)) and not isinstance(v, bool) and v == 0
+
+
+def _measurement_semantics(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:
+    """measurement-spec rules of contracts 2.6.0 (hep-analysis audit 2026-10-13): the SKILL.md invariants. Native for
+    artifacts of contract 2.6.0 or later; an older artifact gets them only in strict mode, so its promised outcome is
+    unchanged. Errors: no estimand sentence; a variable without unit and binning, no phase_space or frame; no
+    selection, or a blank conditional denominator; no background without no_backgrounds_reason, a background without
+    estimator or without control_region/constraint; a correction repeated (case and separators ignored), a category
+    outside response_corrections / '<x>_efficiency' / '<ns>:<term>', a repeated category or a bare 'efficiency' next to
+    a '<x>_efficiency', a chain item also in observable.included_corrections, a luminosity/exposure/livetime
+    correction next to the normalization of the same kind; a zero normalization or correction value without
+    exact_zero, a shape-only normalization with a numeric value; no systematic, a blank applied_via, a repeated
+    systematic name; a missing marker not named in unresolved_inputs; a blinded spec without mask, or blinded with
+    'observed' status; a ratio quantity without ratio block, a ratio of a quantity to itself, no cancellation entry; a
+    period ending before it starts; a misspelled key. Unresolved: a listed missing marker, a background without
+    closure. Warnings: partial selection validation, a 'cancels' entry without verification, unknown keys."""
+    obs: Any = ext.get("observable") if isinstance(ext.get("observable"), dict) else {}
+    x = "$.extension"
+    est = ext.get("estimand")
+    if not (isinstance(est, str) and est.strip()):
+        rep.add("error", f"{x}.estimand", "measurement.estimand_missing",
+                "state the estimand in one sentence: quantity, species or process, variable and range, level, frame, "
+                "what is held fixed")
+    elif est not in MISSING_MARKERS and len(est.split()) < ESTIMAND_MIN_WORDS:
+        rep.add("error", f"{x}.estimand", "measurement.estimand_not_a_sentence",
+                f"'{est}' is not an estimand sentence (quantity, species or process, variable, range, level)")
+    for i, var in enumerate(obs.get("variables", []) if isinstance(obs.get("variables"), list) else []):
+        if isinstance(var, dict) and not (str(var.get("unit", "")).strip() and ("edges" in var or "points" in var)):
+            rep.add("error", f"{x}.observable.variables[{i}]", "measurement.variable_incomplete",
+                    f"variable '{var.get('name')}' needs a unit and edges or points")
+    for key in ("phase_space", "frame"):
+        if key not in obs:
+            rep.add("error", f"{x}.observable.{key}", f"measurement.{key}_missing",
+                    f"the observable needs '{key}' (or a missing marker listed in unresolved_inputs)")
+    sels: Any = ext.get("selections")
+    if isinstance(sels, list) and not sels:
+        rep.add("error", f"{x}.selections", "measurement.selections_empty", "a measurement needs at least one selection")
+    for i, s in enumerate(sels if isinstance(sels, list) else []):
+        if not isinstance(s, dict):
+            continue
+        den = s.get("conditional_denominator")
+        if isinstance(den, str) and not den.strip():
+            rep.add("error", f"{x}.selections[{i}].conditional_denominator", "measurement.denominator_blank",
+                    f"selection '{s.get('name')}' needs its conditional denominator")
+        val = s.get("validation")
+        if isinstance(val, dict) and not all(not _blank(val.get(k)) for k in ("metric", "threshold", "action")):
+            rep.add("warning", f"{x}.selections[{i}].validation", "measurement.selection_validation_partial",
+                    "selection validation needs metric, threshold and action")
+        _key_checks(s, MEASUREMENT_KEYS["selections"], f"{x}.selections[{i}]", rep)
+    bkgs: Any = ext.get("backgrounds")
+    if isinstance(bkgs, list) and not bkgs and _blank(ext.get("no_backgrounds_reason")):
+        rep.add("error", f"{x}.backgrounds", "measurement.backgrounds_empty",
+                "no background listed: give each background, or state why there is none in no_backgrounds_reason")
+    for i, b in enumerate(bkgs if isinstance(bkgs, list) else []):
+        if not isinstance(b, dict):
+            continue
+        p = f"{x}.backgrounds[{i}]"
+        if _blank(b.get("estimator")):
+            rep.add("error", f"{p}.estimator", "measurement.background_estimator_missing",
+                    f"background '{b.get('name')}' needs an estimator")
+        if _blank(b.get("control_region")) and _blank(b.get("constraint")):
+            rep.add("error", p, "measurement.background_constraint_missing",
+                    f"background '{b.get('name')}' needs a control_region or a constraint")
+        if _blank(b.get("closure")):
+            rep.add("unresolved", f"{p}.closure", "measurement.background_closure_missing",
+                    f"background '{b.get('name')}' has no closure test yet")
+        _key_checks(b, MEASUREMENT_KEYS["backgrounds"], p, rep)
+    corrs = [c for c in ext.get("corrections", []) if isinstance(c, dict)] if isinstance(ext.get("corrections"), list) else []
+    seen: dict[str, str] = {}
+    for c in corrs:
+        eid = c.get("effect_id")
+        if isinstance(eid, str) and _norm_id(eid) in seen and seen[_norm_id(eid)] != eid:
+            rep.add("error", f"{x}.corrections", "measurement.duplicate_correction",
+                    f"'{eid}' and '{seen[_norm_id(eid)]}' are the same correction (case and separators ignored)")
+        elif isinstance(eid, str):
+            seen.setdefault(_norm_id(eid), eid)
+    cats = [str(c.get("category", "")) for c in corrs]
+    for i, cat in enumerate(cats):
+        if not (vocab.has("response_corrections", cat) or NAMESPACED.match(cat)
+                or re.fullmatch(r"[a-z][a-z0-9_]*_efficiency", cat)):
+            rep.add("error", f"{x}.corrections[{i}].category", "measurement.unknown_correction_category",
+                    f"'{cat}' is not a response_corrections term, a '<x>_efficiency' term or a namespaced '<ns>:<term>'")
+    normed = [_norm_id(cat) for cat in cats]
+    for cat in sorted({c for c in normed if normed.count(c) > 1}):
+        rep.add("error", f"{x}.corrections", "measurement.correction_category_repeated",
+                f"category '{cat}' appears twice: name each factor once (trigger_efficiency, selection_efficiency, ...)")
+    bare = [c.split(":", 1)[-1] for c in cats]
+    if "efficiency" in bare and any(c.endswith("_efficiency") for c in bare):
+        rep.add("error", f"{x}.corrections", "measurement.correction_category_repeated",
+                "a bare 'efficiency' next to a '<x>_efficiency' factor counts the efficiency twice")
+    included = obs.get("included_corrections") if isinstance(obs.get("included_corrections"), list) else []
+    chain = {_norm_id(c.get("effect_id", "")) for c in corrs} | set(normed)
+    for item in included:
+        if _norm_id(item) in chain:
+            rep.add("error", f"{x}.observable.included_corrections", "measurement.correction_in_observable_and_chain",
+                    f"'{item}' is already inside the observable and is applied again in the chain")
+    norm: Any = obs.get("normalization") if isinstance(obs.get("normalization"), dict) else {}
+    for i, cat in enumerate(bare):
+        if NORMALIZATION_CORRECTIONS.get(cat) == norm.get("kind"):
+            rep.add("error", f"{x}.corrections[{i}]", "measurement.normalization_double_counted",
+                    f"a '{cat}' correction next to a '{norm.get('kind')}' normalization applies it twice")
+    if _is_zero(norm.get("value")) and norm.get("exact_zero") is not True:
+        rep.add("error", f"{x}.observable.normalization.value", "measurement.zero_value",
+                "a normalization value of 0 needs \"exact_zero\": true; an unknown value is 'unknown', never 0")
+    if norm.get("kind") == "shape-only" and isinstance(norm.get("value"), (int, float)) and not isinstance(norm.get("value"), bool):
+        rep.add("error", f"{x}.observable.normalization.value", "measurement.shape_only_value",
+                "a shape-only normalization carries no absolute value")
+    for i, c in enumerate(corrs):
+        if _is_zero(c.get("value")) and c.get("exact_zero") is not True:
+            rep.add("error", f"{x}.corrections[{i}].value", "measurement.zero_value",
+                    f"correction '{c.get('effect_id')}' has value 0 without \"exact_zero\": true")
+        _key_checks(c, MEASUREMENT_KEYS["corrections"], f"{x}.corrections[{i}]", rep)
+    syst: Any = ext.get("systematics")
+    if isinstance(syst, list) and not syst:
+        rep.add("error", f"{x}.systematics", "measurement.systematics_empty",
+                "no systematic listed: every measurement has at least one source (state its physical effect)")
+    names = []
+    for i, s in enumerate(syst if isinstance(syst, list) else []):
+        if not isinstance(s, dict):
+            continue
+        if _blank(s.get("applied_via")):
+            rep.add("error", f"{x}.systematics[{i}].applied_via", "measurement.applied_via_missing",
+                    f"systematic '{s.get('name')}' needs applied_via (how the variation reaches the result)")
+        if _norm_id(s.get("name", "")) in names:
+            rep.add("error", f"{x}.systematics[{i}].name", "measurement.duplicate_systematic",
+                    f"systematic '{s.get('name')}' is listed twice")
+        names.append(_norm_id(s.get("name", "")))
+        _key_checks(s, MEASUREMENT_KEYS["systematics"], f"{x}.systematics[{i}]", rep)
+    for path, marker in _markers(ext, x):
+        if _listed(path, doc.get("unresolved_inputs")):
+            rep.add("unresolved", path, "measurement.input_unresolved", f"'{marker}': listed in unresolved_inputs")
+        else:
+            rep.add("error", path, "measurement.unresolved_not_listed",
+                    f"'{marker}' is not named in unresolved_inputs: list every open input explicitly")
+    bl: Any = ext.get("blinding")
+    if isinstance(bl, dict) and bl.get("blinded") is True:
+        mask: Any = bl.get("mask")
+        if not (isinstance(mask, dict) and (mask.get("regions") or mask.get("intervals"))):
+            rep.add("error", f"{x}.blinding.mask", "measurement.blinding_mask_missing",
+                    "a blinded measurement needs its mask (regions or observable intervals)")
+        if "observed" in set(doc.get("status", [])):
+            rep.add("error", "$.status", "measurement.blinded_observed",
+                    "a blinded spec cannot carry 'observed' results: only an authorized person unblinds, outside the "
+                    "agent session; label it preliminary or unvalidated until then")
+    ratio: Any = ext.get("ratio")
+    if obs.get("quantity") in ("ratio", "fraction") and not isinstance(ratio, dict):
+        rep.add("error", f"{x}.ratio", "measurement.ratio_block_missing",
+                f"a {obs.get('quantity')} needs the ratio block (numerator, denominator, cancellations)")
+    if isinstance(ratio, dict):
+        if _norm_id(ratio.get("numerator", "")) == _norm_id(ratio.get("denominator", "")):
+            rep.add("error", f"{x}.ratio", "measurement.ratio_self", "numerator and denominator are the same quantity")
+        canc: Any = ratio.get("cancellations")
+        if isinstance(canc, list) and not canc:
+            rep.add("error", f"{x}.ratio.cancellations", "measurement.ratio_cancellations_empty",
+                    "list each shared effect with its treatment ('independent' for one that does not cancel)")
+        for i, c in enumerate(canc if isinstance(canc, list) else []):
+            if isinstance(c, dict) and c.get("treatment") == "cancels" and _blank(c.get("verification")):
+                rep.add("warning", f"{x}.ratio.cancellations[{i}]", "measurement.cancellation_unverified",
+                        f"'{c.get('effect')}' is assumed to cancel without a verification")
+    periods: Any = ext.get("period")
+    for i, per in enumerate(periods if isinstance(periods, list) else [periods]):
+        if isinstance(per, dict) and all(isinstance(per.get(k), str) and _ISO_DATE.match(per[k]) for k in ("start", "end")) \
+                and per["end"][:10] < per["start"][:10]:
+            rep.add("error", f"{x}.period", "measurement.period_reversed",
+                    f"period {i}: end {per['end']} is before start {per['start']}")
+    _key_checks(ext, MEASUREMENT_KEYS["extension"], x, rep)
 
 
 STAT_SEMANTICS_FROM = "2.2.0"  # statistical-result semantic rules apply natively from this contract version
@@ -877,10 +1118,15 @@ def main(argv=None) -> int:
     if not args or args[0] in ("-h", "--help"):
         print(__doc__)
         return 0 if args else 2
+    takes_value = {"--profiles-from", "--gate"}
+    positional = [a for k, a in enumerate(args) if not a.startswith("--") and (k == 0 or args[k - 1] not in takes_value)]
+    if not positional:
+        print(json.dumps({"ok": False, "error": "no artifact path given"}))
+        return 2
     try:
-        doc = json.loads(Path(args[0]).read_text(encoding="utf-8"))
+        doc = json.loads(Path(positional[0]).read_text(encoding="utf-8"))
     except (OSError, ValueError) as exc:
-        print(json.dumps({"ok": False, "error": f"cannot read {args[0]}: {exc}"}))
+        print(json.dumps({"ok": False, "error": f"cannot read {positional[0]}: {exc}"}))
         return 2
     vocab, pre = Vocabulary(), Report()
     if "--profiles-from" in args:

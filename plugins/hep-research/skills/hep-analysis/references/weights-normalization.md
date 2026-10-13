@@ -8,30 +8,14 @@ A common MC event weight is
 
 This convention does not override production metadata. Do not multiply a k-factor, filter efficiency, or branching fraction twice if it is already included in the cross section. Luminosity in inverse femtobarns and cross section in picobarns require a factor of 1000. Document units rather than inferring them from magnitudes. The denominator must cover the corresponding production with the same generator-weight convention, normally from preselection metadata.
 
-### Denominator in a skimmed NanoAOD sample (RDataFrame)
+### Denominator in a skimmed NanoAOD sample
 
-A skim removes events, so neither `Events` entries nor a `genWeight` sum over skimmed events is the denominator. NanoAOD stores the pre-skim sums in the `Runs` tree (`genEventSumw`, `genEventSumw2`, `genEventCount`; check the branch names with `Runs->Print()`, since some older productions append `_`). Sum the tree over every file of the sample, including skim outputs that kept zero events. If the skim dropped `Runs` or empty files, recompute the sum with a pass over the unskimmed sample. Verified with PyROOT on synthetic files (2026-09-25):
+A skim removes events, so neither `Events` entries nor a `genWeight` sum over skimmed events is the denominator. NanoAOD stores the pre-skim sums in the `Runs` tree (`genEventSumw`, `genEventSumw2`, `genEventCount`; check the branch names with `Runs->Print()`, since some older productions append `_`). Sum the tree over every file of the sample, including skim outputs that kept zero events. If the skim dropped `Runs` or empty files, recompute the sum with a pass over the unskimmed sample. In formulas:
 
-```python
-import ROOT
-
-files = ["skim_0.root", "skim_1.root"]  # every file of the sample, including skim outputs with 0 events kept
-lumi_fb, xsec_pb = 59.8, 88.3
-
-# Denominator: signed generator-weight sum of the full produced sample, from the Runs tree
-# (filled before any skim). Not Events.GetEntries(), not a sum over post-skim events.
-sumw = ROOT.RDataFrame("Runs", files).Sum("genEventSumw").GetValue()
-norm = lumi_fb * 1000.0 * xsec_pb / sumw  # fb^-1 -> pb^-1
-
-df = ROOT.RDataFrame("Events", files).Define("w", f"genWeight * {norm}").Define("w2", "w * w")
-cuts = [("skim", "true"), ("1 muon", "nMuon >= 1"), ("4 jets", "nJet >= 4")]
-results, node = [], df
-for name, expr in cuts:
-    node = node.Filter(expr, name)
-    results.append((name, node.Count(), node.Sum("w"), node.Sum("w2")))  # booked lazily, one event loop
-for name, n, sw, sw2 in results:
-    print(f"{name:8s} N={n.GetValue():6d} sumw={sw.GetValue():10.1f} +- {sw2.GetValue() ** 0.5:.1f}")
-```
+`norm = L x sigma / sumw_full`, with `sumw_full = sum of genEventSumw over the Runs tree of every file of the sample`
+(`L` in pb^-1, so `lumi_fb x 1000`), and event weight `w = genWeight x norm` kept signed; the weighted cutflow reports
+`sum(w)` and `sqrt(sum(w^2))` at each node. The verified RDataFrame code is in hep-computing:
+[analysis data pipelines](../../hep-computing/references/analysis-data-pipelines.md#normalization-denominator-in-rdataframe-skimmed-nanoaod).
 
 The weights stay signed throughout. Do not use `abs(genWeight)`, and do not drop negative-weight events.
 

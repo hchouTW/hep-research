@@ -1,0 +1,161 @@
+{
+ "contract_version": "2.6.0",
+ "artifact_id": "synthetic-worked-spec-cosmic-ray",
+ "artifact_type": "measurement-spec",
+ "objective": "SYNTHETIC worked cosmic-ray measurement spec (estimand, ledgers, backgrounds with control regions and closure, an active blinding mask); every value is invented",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.6.17",
+  "contracts": "2.6.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-analysis",
+  "created": "2026-10-13",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [
+  "closure: the closure test of the charge-confusion background is not run yet"
+ ],
+ "extension": {
+  "estimand": "SYNTHETIC: the antiproton-to-proton flux ratio per rigidity bin from 10 to 400 GV at detector level, per period, for downward-going particles above the geomagnetic cutoff selection",
+  "observable": {
+   "quantity": "ratio",
+   "variables": [
+    {
+     "name": "rigidity",
+     "unit": "GV",
+     "edges": [
+      10.0,
+      20.0,
+      50.0,
+      100.0,
+      200.0,
+      400.0
+     ]
+    }
+   ],
+   "phase_space": {
+    "definition": "SYNTHETIC: downward-going particles inside the acceptance, bin lower edge above the cutoff selection",
+    "fiducial": true
+   },
+   "level": "detector",
+   "frame": "detector",
+   "normalization": {
+    "kind": "exposure",
+    "value": "not-applicable",
+    "convention": "ratio of exposure-normalized fluxes; the exposure cancels per period"
+   },
+   "bin_semantics": "bin-averaged",
+   "unit": "1"
+  },
+  "species_or_process": "antiproton, proton (synthetic)",
+  "period": [
+   {
+    "start": "synthetic-period-1",
+    "end": "synthetic-period-1"
+   }
+  ],
+  "selections": [
+   {
+    "name": "geomagnetic",
+    "definition": "SYNTHETIC: bin lower edge above f x maximum cutoff",
+    "conditional_denominator": "live time per second"
+   },
+   {
+    "name": "negative-charge track",
+    "definition": "SYNTHETIC: track with negative curvature and quality requirements",
+    "conditional_denominator": "triggered events in acceptance",
+    "validation": {
+     "metric": "charge-confusion rate from curvature-significance tails",
+     "threshold": "stable within its statistics per bin",
+     "action": "refit the confusion matrix per bin"
+    }
+   }
+  ],
+  "backgrounds": [
+   {
+    "name": "charge-confused protons",
+    "estimator": "2x2 charge migration matrix inverted per bin",
+    "control_region": "SYNTHETIC: high curvature-significance tail of positive tracks",
+    "closure": "unknown"
+   },
+   {
+    "name": "misidentified electrons",
+    "estimator": "template fit in the identification variable",
+    "control_region": "SYNTHETIC: inverted identification sample",
+    "closure": "SYNTHETIC: template closure in a validation band of the identification variable"
+   }
+  ],
+  "corrections": [
+   {
+    "effect_id": "trigger-efficiency",
+    "category": "trigger_efficiency",
+    "applied_in": "estimator"
+   },
+   {
+    "effect_id": "selection-efficiency",
+    "category": "selection_efficiency",
+    "applied_in": "estimator"
+   },
+   {
+    "effect_id": "charge-confusion",
+    "category": "migration",
+    "applied_in": "estimator"
+   }
+  ],
+  "systematics": [
+   {
+    "name": "charge-confusion-rate",
+    "source": "SYNTHETIC: tail modelling of the curvature significance",
+    "effect": "migration",
+    "applied_via": "vary the confusion matrix within its control-region uncertainty"
+   },
+   {
+    "name": "antiproton-acceptance",
+    "source": "SYNTHETIC: charge-dependent interaction cross sections",
+    "effect": "normalization",
+    "applied_via": "species-specific acceptance variation, not cancelling in the ratio"
+   }
+  ],
+  "blinding": {
+   "blinded": true,
+   "mask": {
+    "intervals": [
+     {
+      "variable": "rigidity",
+      "low": 200.0,
+      "high": 400.0
+     }
+    ]
+   },
+   "unblinding_record_ref": null
+  },
+  "ratio": {
+   "numerator": "antiproton flux",
+   "denominator": "proton flux",
+   "cancellations": [
+    {
+     "effect": "exposure",
+     "treatment": "cancels",
+     "correlation_model": "identical live time and cutoff per period",
+     "verification": "by construction of the per-period exposure"
+    },
+    {
+     "effect": "charge-confusion",
+     "treatment": "independent",
+     "correlation_model": "affects the antiproton sample only"
+    }
+   ]
+  }
+ }
+}

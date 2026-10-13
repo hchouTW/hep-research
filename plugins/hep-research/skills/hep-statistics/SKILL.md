@@ -50,7 +50,7 @@ Executable checks live in `<plugin root>/core/stats/` (likelihood limits, templa
 
 | Need | Hand to | Artifact |
 |---|---|---|
-| Missing systematic or correlation evidence | hep-analysis / detector-response | request in `unresolved_inputs` |
+| Missing systematic or correlation evidence (hep-analysis supplies the physical correlation evidence and a proposed scheme with its justification; hep-statistics encodes it in the likelihood and checks positive semidefiniteness) | hep-analysis / detector-response | request in `unresolved_inputs` |
 | Theory-uncertainty prescription | hep-theory | `prediction` |
 | Large toy campaigns, batch partitioning | hep-computing | `computational-run` |
 | Reporting the result | research-communication | `statistical-result` |

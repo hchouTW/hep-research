@@ -7,21 +7,61 @@ evidence that the variation failed to propagate: a shape-only (migration) variat
 Only `none` (no bin changed beyond tolerance) asks the analyst to confirm propagation, and even then the
 right check is the variation's effect on the final result (refit / sensitivity), which this script cannot see.
 
-Inputs: a ROOT file (`--input`, needs PyROOT) or a JSON file (`--json`) of the form
-{"nominal": [...], "up": [...], "down": [...]} with matching bin contents (no PyROOT needed).
-Add `--format json` for a machine-readable report.
+Inputs: a ROOT file (`--input`, needs PyROOT; bin errors give the variances) or a JSON file (`--json`) of the form
+{"nominal": [...], "up": [...], "down": [...]} with matching bin contents (no PyROOT needed), optionally with
+"nominal_sumw2", "up_sumw2", "down_sumw2" (per-bin variances) and "underflow"/"overflow" objects
+{"nominal": x, "up": y, "down": z} that --include-flow adds as bins.
+
+Statistical test: with per-bin uncertainties (sumw2, ROOT bin errors, or --stat-unc REL applied to the nominal),
+the effect comes from a normalization pull z = (sum varied - sum nominal) / sqrt(sum var) and a chi2 test of the
+unit-normalized shapes (ndf = bins - 1), each significant at --alpha (default 0.01); a variation computed on the same
+events should be given the variance of the difference (its uncorrelated part). Without uncertainties the old relative
+tolerance is used and the output says no statistical test was made. The direction of a variation (which one is up)
+cannot be inferred from integrals: establish it from the payloads and the generation code.
+The report is JSON by default (`--format text` for a readable one) and carries `status` (--status, default
+unvalidated; one of the core artifact_statuses).
+Exit codes: 0 ok; 2 usage or invalid input (NaN or inf bin, malformed or incomplete JSON, missing file); 3 incomplete
+(PyROOT needed for --input but not installed).
 """
 from __future__ import annotations
 
 import argparse
 import json
+import math
+import sys
 from pathlib import Path
 
-DEFAULT_TOL = 1e-6  # relative tolerance on the integral and on the normalized shape
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))  # the plugin root, also under python3 -I
+from core.stats.statistical_toys import chi2_sf  # noqa: E402
+
+DEFAULT_TOL = 1e-6  # relative tolerance on the integral and on the normalized shape (no-uncertainty fallback)
+DEFAULT_ALPHA = 0.01  # significance level of the normalization pull and the shape chi2
+DIRECTION_NOTE = ("the direction of a variation cannot be inferred from integrals: establish which is up from the "
+                  "payloads and the generation code")
+STATUSES = ("failed", "unvalidated", "preliminary", "synthetic", "asimov", "observed", "user-supplied",
+            "validated-in-scope")  # contracts/vocab/core.json artifact_statuses
+
+
+class InputError(ValueError):
+    """Invalid or malformed input (exit 2)."""
+
+
+def _reject_constant(token):
+    raise InputError(f"non-finite number {token} in the input")
+
+
+def _bins(doc, key):
+    values = doc.get(key) if isinstance(doc, dict) else None
+    if not isinstance(values, list) or not values:
+        raise InputError(f"JSON input needs a non-empty list '{key}' of bin contents")
+    for i, v in enumerate(values):
+        if isinstance(v, bool) or not isinstance(v, (int, float)) or v != v or v in (float('inf'), float('-inf')):
+            raise InputError(f"'{key}' bin {i} must be a finite number, got {v!r}")
+    return [float(v) for v in values]
 
 
 def parse_args(argv=None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Check nominal/up/down histogram systematics and classify their effect.")
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     src = parser.add_mutually_exclusive_group(required=True)
     src.add_argument("--input", type=Path, help="ROOT file (requires PyROOT)")
     src.add_argument("--json", type=Path, help='JSON file {"nominal": [...], "up": [...], "down": [...]} of bin contents')
@@ -29,11 +69,23 @@ def parse_args(argv=None) -> argparse.Namespace:
     parser.add_argument("--up", help="Up-variation histogram path (ROOT input)")
     parser.add_argument("--down", help="Down-variation histogram path (ROOT input)")
     parser.add_argument("--include-flow", action="store_true", help="Include underflow and overflow bins")
-    parser.add_argument("--tolerance", type=float, default=DEFAULT_TOL, help="relative tolerance (default %(default)g)")
-    parser.add_argument("--format", choices=("text", "json"), default="text")
+    parser.add_argument("--tolerance", type=float, default=DEFAULT_TOL,
+                        help="relative tolerance without uncertainties (default %(default)g)")
+    parser.add_argument("--stat-unc", type=float, default=None, dest="stat_unc",
+                        help="relative per-bin statistical uncertainty of the difference (JSON without sumw2)")
+    parser.add_argument("--alpha", type=float, default=DEFAULT_ALPHA, help="test level (default %(default)g)")
+    parser.add_argument("--format", choices=("text", "json"), default="json")
+    parser.add_argument("--status", choices=STATUSES, default="unvalidated",
+                        help="status label of the inputs, echoed as status (default unvalidated)")
     args = parser.parse_args(argv)
     if args.input and not (args.nominal and args.up and args.down):
         parser.error("--input needs --nominal, --up and --down")
+    if not (args.tolerance == args.tolerance and 0 < args.tolerance < float('inf')):
+        parser.error("--tolerance must be finite and greater than zero")
+    if not (args.alpha == args.alpha and 0 < args.alpha < 1):
+        parser.error("--alpha must lie in (0, 1)")
+    if args.stat_unc is not None and not (args.stat_unc == args.stat_unc and 0 < args.stat_unc < float('inf')):
+        parser.error("--stat-unc must be finite and greater than zero")
     return args
 
 
@@ -73,8 +125,41 @@ def classify_variation(nominal, varied, tol: float = DEFAULT_TOL) -> dict:
             "migration_fraction": migration, "bins_changed": bin_changed, "note": notes[effect]}
 
 
-def assess(nominal, up, down, tol: float = DEFAULT_TOL) -> dict:
+def stat_test(nominal, varied, variance, alpha: float = DEFAULT_ALPHA) -> dict:
+    """Normalization pull and shape chi2 of `varied` against `nominal` given the per-bin variance of the difference."""
+    if len(variance) != len(nominal) or any(not (math.isfinite(v) and v >= 0) for v in variance):
+        raise ValueError("variances must be finite, nonnegative and one per bin")
+    n_sum, v_sum, var_sum = math.fsum(nominal), math.fsum(varied), math.fsum(variance)
+    if var_sum <= 0 or n_sum == 0 or v_sum == 0:
+        raise ValueError("the statistical test needs positive variances and nonzero integrals")
+    z = (v_sum - n_sum) / math.sqrt(var_sum)
+    scale = n_sum / v_sum
+    terms = [(v * scale - n) ** 2 / var for n, v, var in zip(nominal, varied, variance) if var > 0]
+    ndf = max(len(terms) - 1, 1)
+    chi2 = math.fsum(terms)
+    p_shape = chi2_sf(chi2, ndf)
+    p_norm = math.erfc(abs(z) / math.sqrt(2.0))
+    norm_sig, shape_sig = p_norm < alpha, p_shape < alpha
+    effect = ("mixed" if norm_sig and shape_sig else "normalization" if norm_sig
+              else "shape" if shape_sig else "none")
+    return {"effect": effect, "normalization_pull": z, "normalization_p_value": p_norm, "shape_chi2": chi2,
+            "shape_ndf": ndf, "shape_p_value": p_shape, "alpha": alpha}
+
+
+def assess(nominal, up, down, tol: float = DEFAULT_TOL, variances=None, alpha: float = DEFAULT_ALPHA) -> dict:
+    """variances: None (tolerance only) or {"up": [...], "down": [...]} per-bin variances of each difference."""
     out = {"up": classify_variation(nominal, up, tol), "down": classify_variation(nominal, down, tol)}
+    if variances is not None:
+        for label, varied in (("up", up), ("down", down)):
+            test = stat_test(nominal, varied, variances[label], alpha)
+            out[label]["tolerance_effect"] = out[label]["effect"]
+            out[label]["effect"] = test.pop("effect")
+            out[label]["statistical_test"] = test
+            if out[label]["effect"] == "none" and out[label]["bins_changed"]:
+                out[label]["note"] = ("bins differ, but within their statistical uncertainty: no significant effect at "
+                                      f"alpha = {alpha:g}; confirm propagation, then check the effect on the result")
+    else:
+        out["statistical_test"] = "not made: no per-bin uncertainties (give sumw2, ROOT bin errors or --stat-unc)"
     warnings = []
     if out["up"]["effect"] == "none" and out["down"]["effect"] == "none":
         warnings.append("neither variation changes this histogram: confirm propagation, then judge by the effect on the result")
@@ -83,6 +168,7 @@ def assess(nominal, up, down, tol: float = DEFAULT_TOL) -> dict:
         warnings.append("up and down move the integral in the same direction: one-sided or possibly swapped/mislabelled variation")
     out["warnings"] = warnings
     out["sensitivity"] = "not assessed here: evaluate the variation's effect on the fitted result (refit or impact)"
+    out["direction"] = DIRECTION_NOTE
     return out
 
 
@@ -133,6 +219,7 @@ def report(result: dict, fmt: str, header: list[str]) -> None:
     if fmt == "json":
         print(json.dumps(result, indent=1))
         return
+    print(f"status: {result['status']}")
     for line in header:
         print(line)
     for label in ("up", "down"):
@@ -142,23 +229,48 @@ def report(result: dict, fmt: str, header: list[str]) -> None:
         print(f"{label}: {r['note']}")
     for w in result["warnings"]:
         print(f"warning: {w}")
+    print(f"direction: {result['direction']}")
     print(f"sensitivity: {result['sensitivity']}")
 
 
 def main(argv=None) -> int:
     args = parse_args(argv)
     if args.json:
-        doc = json.loads(args.json.read_text(encoding="utf-8"))
-        result = assess(doc["nominal"], doc["up"], doc["down"], args.tolerance)
-        report(result, args.format, [f"file: {args.json}"])
+        try:
+            doc = json.loads(args.json.read_text(encoding="utf-8"), parse_constant=_reject_constant)
+        except json.JSONDecodeError as exc:
+            raise InputError(f"malformed JSON in {args.json}: {exc}") from None
+        nominal, up, down = (_bins(doc, k) for k in ("nominal", "up", "down"))
+        sumw2 = {k: _bins(doc, f"{k}_sumw2") for k in ("nominal", "up", "down") if f"{k}_sumw2" in doc}
+        if args.include_flow:
+            flow = [doc.get("underflow"), doc.get("overflow")]
+            if not all(isinstance(f, dict) for f in flow):
+                raise InputError("--include-flow needs 'underflow' and 'overflow' objects {nominal, up, down} in the JSON")
+            nominal, up, down = ([_bins({"x": [flow[0].get(k)]}, "x")[0]] + h + [_bins({"x": [flow[1].get(k)]}, "x")[0]]
+                                 for k, h in (("nominal", nominal), ("up", up), ("down", down)))
+            if sumw2:
+                raise InputError("give flow-bin variances inside the sumw2 arrays only without --include-flow")
+        variances = None
+        if sumw2:
+            if set(sumw2) != {"nominal", "up", "down"}:
+                raise InputError("give nominal_sumw2, up_sumw2 and down_sumw2 together")
+            variances = {k: [a + b for a, b in zip(sumw2["nominal"], sumw2[k])] for k in ("up", "down")}
+        elif args.stat_unc is not None:
+            variances = {k: [(args.stat_unc * n) ** 2 for n in nominal] for k in ("up", "down")}
+        try:
+            result = assess(nominal, up, down, args.tolerance, variances, args.alpha)
+        except ValueError as exc:
+            raise InputError(str(exc)) from None
+        report({"status": args.status, **result}, args.format, [f"file: {args.json}"])
         return 0
     if not args.input.exists():
         raise FileNotFoundError(f"ROOT file does not exist: {args.input}")
 
     try:
         import ROOT
-    except ImportError as exc:
-        raise SystemExit("PyROOT is required to check ROOT histogram systematics") from exc
+    except ImportError:
+        print("check_systematic_variations.py: incomplete: PyROOT is required for --input (use --json)", file=sys.stderr)
+        return 3
 
     root_file = ROOT.TFile.Open(str(args.input), "READ")
     try:
@@ -178,8 +290,11 @@ def main(argv=None) -> int:
             max_abs, max_rel, max_bin = summarize_difference(nominal, hist, bins)
             header += [f"{label} max absolute bin difference: {max_abs}", f"{label} max relative bin difference: {max_rel}",
                        f"{label} bin with max difference: {max_bin}"]
-        result = assess(contents(nominal, bins), contents(up, bins), contents(down, bins), args.tolerance)
-        report(result, args.format, header)
+        var = {lbl: [float(nominal.GetBinError(i)) ** 2 + float(h.GetBinError(i)) ** 2 for i in bins]
+               for lbl, h in (("up", up), ("down", down))}
+        result = assess(contents(nominal, bins), contents(up, bins), contents(down, bins), args.tolerance,
+                        var if any(v > 0 for v in var["up"]) else None, args.alpha)
+        report({"status": args.status, **result}, args.format, header)
     finally:
         if root_file:
             root_file.Close()
@@ -187,9 +302,8 @@ def main(argv=None) -> int:
 
 
 if __name__ == "__main__":
-    import sys as _sys
     try:
         raise SystemExit(main())
-    except OSError as _exc:  # a missing or unreadable input: one line, no traceback
-        print(f"check_systematic_variations.py: error: {_exc}", file=_sys.stderr)
+    except (OSError, InputError, KeyError, TypeError, ValueError) as _exc:  # bad input: one line, no traceback
+        print(f"check_systematic_variations.py: error: {_exc}", file=sys.stderr)
         raise SystemExit(2)

@@ -26,10 +26,18 @@ Decision per change:
                     keep it only as a documented, separately reported variation with its effect on the result
   needs-provenance  not exposed, but no independent evidence recorded yet
   exposure-unknown  not flagged, but what was looked at is unknown or incomplete: record it before accepting
+  needs-human-review  the motivation or description names the signal region or unblinded data without a clear
+                    statement of what was seen; a person must read the change before it is accepted
+The motivation and description are scanned for outcome words (excess, bump, peak or signal made more prominent or
+significant, ...) and for signal-region or unblinded-data wording; "after seeing" a signal-region quantity makes the
+change exposed whatever looked_at says. Booleans (independent_of_signal_region, after_unblinding) must be JSON true or
+false: a string such as "no" is bad input. after_unblinding true together with an 'unexposed' record is flagged as a
+contradiction.
 This review is advisory: it reads what the caller records and cannot see what was actually looked at.
-Output: JSON report. Exit codes: 0 nothing flagged, 1 any change flagged, 2 bad input (including a malformed
-data_exposure record).
-Run: python3 <plugin root>/skills/hep-analysis/scripts/review_analysis_change.py changes.json
+Output: JSON report with status (--status, default unvalidated; one of the core artifact_statuses). Exit codes:
+0 nothing flagged, 1 any change flagged or needing human review, 2 bad input (including a malformed data_exposure record, NaN or inf, or
+malformed JSON; the error is also one line on stderr).
+Run: python3 <plugin root>/skills/hep-analysis/scripts/review_analysis_change.py changes.json [--status S]
 Standard library only.
 """
 from __future__ import annotations
@@ -39,8 +47,14 @@ import re
 import sys
 
 OUTCOME_SEEN = re.compile(r"signal[- ]region data|unblinded|observed result|fit result|outcome|significance|p-value", re.I)
-OUTCOME_MOTIVE = re.compile(r"(to|so that).{0,40}(agree|match|improve|increase|reduce|remove).{0,40}"
-                            r"(excess|deficit|significance|signal(?![- ]to[- ]background)|result|limit|tension)|(excess|tension|significance)", re.I)
+OUTCOME_MOTIVE = re.compile(
+    r"(to|so that|in order to).{0,40}(agree|match|improve|increase|reduce|remove|enhance|sharpen|boost).{0,40}"
+    r"(excess|deficit|significance|signal(?![- ]to[- ]background)|result|limit|tension|bump|peak)"
+    r"|(make|making|made|look|looks)\b.{0,40}\b(bump|peak|excess|deficit|signal)\b.{0,30}"
+    r"(more|less|bigger|smaller|stronger|weaker|sharper)?\s*(prominent|visible|significant|pronounced|clear)"
+    r"|(more|less) (prominent|pronounced|significant)|(excess|tension|significance)", re.I)
+REGION_WORDS = re.compile(r"\b(SRs?|signal[- ]regions?|unblinded|blinded region|search region)\b", re.I)
+SEEING = re.compile(r"\b(after (seeing|looking|inspecting)|saw|seen|looked at|noticed|observed|inspected)\b", re.I)
 # A legacy looked_at entry is read as unexposed only if the whole entry (lower case, hyphens as spaces) matches this
 # closed grammar: one kind of data a blinded analysis may see. Simulation entries never mention data; any other
 # wording ("data-MC distributions", "test sample", "full data", "search region", "and", "vs") is unknown (K06).
@@ -53,10 +67,31 @@ CONTROL_ONLY = re.compile(
     r"|(cosmic ray )?calibration( (data|samples?|runs?))?( only)?)$")
 EXPOSURE_STATES = ("unexposed", "exposed", "unknown", "incomplete")
 RANK = {"unexposed": 0, "unknown": 1, "incomplete": 1, "exposed": 2}
+STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
+            'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
 
 
 class BadExposure(ValueError):
     pass
+
+
+def _strict_bool(change: dict, where: dict, key: str) -> bool:
+    v = where.get(key)
+    if v is None:
+        return False
+    if not isinstance(v, bool):
+        raise BadExposure(f"change {change.get('id')!r}: {key} must be true or false, got {v!r}")
+    return v
+
+
+def _reject_constant(token):
+    raise ValueError(f"non-finite number {token} in the input")
+
+
+def _fail(message: str) -> int:
+    print(json.dumps({"error": message}))
+    print(f"review_analysis_change.py: error: {message}", file=sys.stderr)
+    return 2
 
 
 def control_only(entry) -> bool:
@@ -96,21 +131,35 @@ def exposure(change: dict) -> tuple[dict, list]:
 
 def review(change: dict) -> dict:
     ev = change.get("evidence") or {}
+    if not isinstance(ev, dict):
+        raise BadExposure(f"change {change.get('id')!r}: evidence must be an object")
     data_exposure, seen = exposure(change)
-    motive = bool(OUTCOME_MOTIVE.search(str(change.get("motivation", ""))))
-    independent = bool((ev.get("control_sample") or ev.get("evidence_ids")) and ev.get("independent_of_signal_region"))
+    text = " ".join(str(change.get(k, "")) for k in ("motivation", "description"))
+    motive = bool(OUTCOME_MOTIVE.search(text))
+    region = bool(REGION_WORDS.search(text))
+    seen_in_text = region and bool(SEEING.search(text))
+    after_unblinding = _strict_bool(change, change, "after_unblinding")
+    independent = bool((ev.get("control_sample") or ev.get("evidence_ids"))
+                       and _strict_bool(change, ev, "independent_of_signal_region"))
     reasons = []
+    if seen_in_text:
+        reasons.append("the motivation or description says signal-region or unblinded data were seen")
+    if after_unblinding and data_exposure["state"] == "unexposed":
+        reasons.append("after_unblinding is true but the data exposure record says unexposed: the records contradict")
     if seen:
         reasons.append(f"looked at {seen} before the change")
     elif data_exposure["state"] == "exposed":
         reasons.append("the data exposure record says data were seen before the change")
     if motive:
         reasons.append("motivation refers to the outcome")
-    if change.get("after_unblinding") and not independent:
+    if after_unblinding and not independent:
         reasons.append("made after unblinding without independent evidence")
     if reasons:
         decision, action = "flag", ("report as a separate, documented variation with its effect on the result; keep the "
                                     "pre-change result as the reference unless independent evidence supports the change")
+    elif region:
+        decision, action = "needs-human-review", ("the text names the signal region or unblinded data without saying "
+                                                  "what was seen: a person reads the change before it is accepted")
     elif data_exposure["state"] != "unexposed":
         decision, action = "exposure-unknown", ("record what was looked at before the change (a looked_at list or a "
                                                 "structured data_exposure record); unknown exposure is never treated as unexposed")
@@ -127,26 +176,31 @@ def main(argv=None) -> int:
     if args and args[0] in ("-h", "--help"):
         print(__doc__)
         return 0
+    status = "unvalidated"
+    if "--status" in args:
+        k = args.index("--status")
+        if k + 1 >= len(args) or args[k + 1] not in STATUSES:
+            return _fail(f"--status needs one of {', '.join(STATUSES)}")
+        status = args[k + 1]
+        del args[k:k + 2]
     if len(args) != 1:
         print(__doc__)
         return 2
     try:
         with open(args[0], encoding="utf-8") as fh:
-            changes = json.load(fh)["changes"]
-    except (OSError, ValueError, KeyError) as exc:
-        print(json.dumps({"error": str(exc)}))
-        return 2
+            changes = json.load(fh, parse_constant=_reject_constant)["changes"]
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        return _fail(str(exc))
     if not isinstance(changes, list) or not all(isinstance(c, dict) for c in changes):
-        print(json.dumps({"error": "'changes' must be a list of objects"}))
-        return 2
+        return _fail("'changes' must be a list of objects")
     try:
         rows = [review(c) for c in changes]
     except BadExposure as exc:
-        print(json.dumps({"error": str(exc)}))
-        return 2
-    print(json.dumps({"changes": rows, "flagged": sum(r["decision"] == "flag" for r in rows),
+        return _fail(str(exc))
+    print(json.dumps({"status": status, "changes": rows, "flagged": sum(r["decision"] == "flag" for r in rows),
+                      "needs_human_review": sum(r["decision"] == "needs-human-review" for r in rows),
                       "exposure_unknown": sum(r["decision"] == "exposure-unknown" for r in rows)}, indent=1))
-    return 1 if any(r["decision"] == "flag" for r in rows) else 0
+    return 1 if any(r["decision"] in ("flag", "needs-human-review") for r in rows) else 0
 
 
 if __name__ == "__main__":

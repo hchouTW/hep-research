@@ -66,13 +66,21 @@ class ClassifyTests(unittest.TestCase):
             self.assertEqual(out["down"]["effect"], "normalization")
 
 
-class GuideWordingTests(unittest.TestCase):
-    def test_entry_point_does_not_equate_unchanged_yields_with_failure(self):
-        guide = (PLUGIN / "skills/hep-analysis/references/hep-analysis-guide.md").read_text(encoding="utf-8")
-        self.assertNotIn("identical yields mean the variation did not propagate", guide)
-        self.assertIn("An unchanged integrated yield does not show the variation failed to propagate", guide)
-        skill = (PLUGIN / "skills/hep-analysis/SKILL.md").read_text(encoding="utf-8")
-        self.assertIn("An unchanged integrated yield does not show the systematic was not propagated", skill)
+class PropagationBehaviourTests(unittest.TestCase):
+    """P4-1: the invariant 'an unchanged integrated yield does not show the systematic was not propagated', as behaviour
+    (it replaces a test of the guide's wording)."""
+
+    def test_unchanged_integral_is_never_reported_as_not_propagated(self):
+        out = csv_.assess(NOMINAL, SHIFTED, [110.0, 210.0, 300.0, 185.0, 95.0])
+        for label in ("up", "down"):
+            self.assertAlmostEqual(out[label]["integral_rel_change"], 0.0, places=12)
+            self.assertNotEqual(out[label]["effect"], "none")
+            self.assertNotIn("confirm", out[label]["note"])
+
+    def test_only_a_histogram_unchanged_in_every_bin_asks_to_confirm_propagation(self):
+        out = csv_.assess(NOMINAL, list(NOMINAL), list(NOMINAL))
+        self.assertFalse(out["up"]["bins_changed"])
+        self.assertTrue(any("confirm propagation" in w for w in out["warnings"]))
 
 
 if __name__ == "__main__":

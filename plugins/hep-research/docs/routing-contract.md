@@ -26,6 +26,8 @@ line, in the "Use when" part of its description or in its README row, when the o
 when the named capability-matrix row lists a different owner. Terms are matched case-insensitively with hyphens read
 as spaces.
 
+Correlations: hep-analysis supplies the physical correlation evidence and a proposed scheme with its justification; hep-statistics encodes it in the likelihood and checks positive semidefiniteness.
+
 <!-- ownership-table: read by tools/check_ownership.py -->
 | Topic | Owner | Claim terms | Capability-matrix row |
 |---|---|---|---|
@@ -39,6 +41,7 @@ as spaces.
 | Training generative fast simulation | physics-ml | `fast simulation training` | — |
 | Calibration of ML model outputs (temperature, isotonic, reliability) | physics-ml | `calibration of model outputs` | — |
 | Validity and coverage of an inference built on an ML model | hep-statistics | `coverage` | — |
+| Correlation evidence and a proposed correlation scheme for systematics | hep-analysis | `correlation evidence` | — |
 | Detector calibration (energy scale, alignment constants, conditions) | detector-response | `detector calibration` | — |
 | Validation of a fast or learned simulation against full detector simulation | detector-response | `detector simulation` | — |
 <!-- /ownership-table -->

@@ -25,6 +25,7 @@
  ],
  "unresolved_inputs": [],
  "extension": {
+  "estimand": "SYNTHETIC: placeholder differential cross section in cos_theta at particle level",
   "observable": {
    "quantity": "ratio",
    "process": "synthetic e+ e- -> mu+ mu-",
@@ -71,7 +72,9 @@
   "backgrounds": [
    {
     "name": "placeholder-bkg",
-    "estimator": "sideband"
+    "estimator": "sideband",
+    "control_region": "synthetic sideband",
+    "closure": "synthetic validation region"
    }
   ],
   "corrections": [
