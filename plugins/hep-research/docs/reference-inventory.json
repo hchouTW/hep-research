@@ -10,7 +10,7 @@
   },
   "hep-analysis": {
    "references": 11,
-   "bytes": 65719,
+   "bytes": 67719,
    "uncited": 0
   },
   "hep-computing": {
@@ -813,7 +813,7 @@
     "tests/skills/hep_analysis/test_method_references.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b995ce7 2026-10-13"
+   "last_commit": "298a7af 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/data-pipelines.md",
@@ -839,8 +839,8 @@
   {
    "path": "skills/hep-analysis/references/hep-analysis-guide.md",
    "owner": "hep-analysis",
-   "bytes": 17805,
-   "lines": 109,
+   "bytes": 17992,
+   "lines": 110,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
@@ -854,7 +854,7 @@
    "cited_by_other_skills": [
     "detector-response"
    ],
-   "last_commit": "1638720 2026-10-13"
+   "last_commit": "298a7af 2026-10-13"
   },
   {
    "path": "skills/hep-analysis/references/histograms-efficiencies.md",
@@ -880,8 +880,8 @@
   {
    "path": "skills/hep-analysis/references/measurements-and-unfolding.md",
    "owner": "hep-analysis",
-   "bytes": 5625,
-   "lines": 65,
+   "bytes": 7438,
+   "lines": 87,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/cosmic-ray-spectrum-and-composition.md",
@@ -1458,6 +1458,7 @@
     "skills/detector-response/references/neutrino-astronomy.md",
     "skills/detector-response/references/performance-metrics-and-residual-diagnostics.md",
     "skills/detector-response/references/space-based-direct-detection.md",
+    "skills/hep-analysis/references/measurements-and-unfolding.md",
     "skills/hep-analysis/scripts/cosmic_ray_flux.py",
     "skills/hep-analysis/scripts/particle_ratio_with_uncertainty.py",
     "skills/hep-statistics/SKILL.md",

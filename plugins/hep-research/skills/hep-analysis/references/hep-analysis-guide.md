@@ -72,6 +72,7 @@ Exact 68.27% (Garwood) interval on the count N; divide by exposure times bin wid
 | Control regions, ABCD, fake rates, sidebands, transfer factors | [Background estimation](backgrounds.md) |
 | Physical sources of systematics, correlation evidence, variation registry | [Systematics](systematics.md) |
 | Estimand sentence, truth-level and fiducial definitions, result levels; cross sections, response, unfolding inputs, combinations | [Measurements and unfolding](measurements-and-unfolding.md) |
+| Steeply falling spectra: spillover, forward-fold or unfold, binning, resolution tails | [Measurements, spillover](measurements-and-unfolding.md#steeply-falling-spectra-and-spillover) |
 | Debugging, verification, preservation, review checks | [Validation](analysis-validation.md) |
 | Detector response, efficiencies, resolution, triggers, calibration, cosmic-ray detection | detector-response: [detector measurement framework](../../detector-response/references/detector-measurement-framework.md) |
 | Likelihoods, nuisance modeling, intervals, significance, unfolding, combinations | hep-statistics: [core statistics guide](../../hep-statistics/references/core-stats-guide.md) |

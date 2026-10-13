@@ -57,6 +57,28 @@ Differential measurements divide by bin widths: `d_sigma/dx_i=sigma_i/delta_x_i`
   with one nuisance.
 - The method, regularization criterion and coverage test are fixed in the plan and executed by hep-statistics.
 
+## Steeply falling spectra and spillover
+
+With finite resolution, a steeply falling spectrum feeds more events from lower true values into a bin than it loses to
+higher ones (spillover), so the measured spectrum sits above the true one, more so where the resolution degrades, as
+near the maximum detectable rigidity of a spectrometer. For a power law of index gamma and a Gaussian resolution of
+relative width s in log E, the measured-to-true ratio is about `exp((gamma - 1)^2 s^2 / 2)`.
+
+- **Forward-fold or unfold.** When the result will be compared with models, forward-folding a parametrized spectrum
+  through the response keeps the statistics simple and avoids regularization; unfold when a model-independent
+  truth-level spectrum is the deliverable, with the regularization and coverage fixed in advance. Either way the
+  computation belongs to hep-statistics ([astroparticle statistics](../../hep-statistics/references/astroparticle-statistics.md),
+  [unfolding](../../hep-statistics/references/unfolding.md)) and the response to detector-response.
+- **Binning.** Bin widths of about one to two resolution sigma; check the purity (fraction of reconstructed events in a
+  bin that come from the same true bin) and the stability (fraction of true events reconstructed in their own bin),
+  both well above one half, and merge bins where they are not.
+- **Resolution tails.** Non-Gaussian tails (charge or momentum mismeasurement, interactions) dominate the spillover at
+  the highest bins: measure the tail on data where possible, vary it as a systematic, and report the highest bin with
+  the tail treatment stated.
+
+Worked example (synthetic): gamma = 2.7 with s = 0.10 gives a 1.5% excess; with s = 0.30 (a bin near the maximum
+detectable rigidity) about 14%, far above a few-percent statistical error.
+
 ## Combinations
 
 Prefer joint likelihoods when available, with nonoverlapping events and compatible nuisance definitions. When only estimates and covariance are available, BLUE under linear Gaussian assumptions uses `w=V_inverse*1/(1^T*V_inverse*1)`. Check conditioning, positive semidefiniteness, and correlation sources. Negative BLUE weights alone are not evidence of an error. Relative (multiplicative) errors scaled with the measured values bias BLUE low (Peelle's Pertinent Puzzle): iterate with the errors rescaled to the combined value; hep-statistics has the diagnostics (`covariance_fit.py`, [core statistics guide](../../hep-statistics/references/core-stats-guide.md)).

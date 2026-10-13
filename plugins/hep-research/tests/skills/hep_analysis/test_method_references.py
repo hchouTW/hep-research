@@ -94,5 +94,19 @@ class TimeDependenceTests(unittest.TestCase):
         self.assertIn('1.083e-2', text('correction-chain.md'))
 
 
+class SpilloverTests(unittest.TestCase):
+    def test_power_law_smearing_factor(self):
+        import math
+        gamma = 2.7
+        for s, quoted in ((0.10, 0.015), (0.30, 0.14)):
+            # numerical: true dN/dx ~ exp(-(gamma-1) x) in x = ln E, Gaussian smearing in x
+            k = gamma - 1
+            h = s / 50
+            num = sum(math.exp(-k * (-i * h)) * math.exp(-0.5 * (i * h / s) ** 2) for i in range(-400, 401)) * h
+            ratio = num / (s * math.sqrt(2 * math.pi))
+            self.assertAlmostEqual(ratio, math.exp(k * k * s * s / 2), places=6)
+            self.assertAlmostEqual(ratio - 1, quoted, delta=0.003)
+
+
 if __name__ == '__main__':
     unittest.main()
