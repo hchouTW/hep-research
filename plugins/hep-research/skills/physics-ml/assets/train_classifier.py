@@ -1,42 +1,172 @@
 #!/usr/bin/env python3
-"""Complete PyTorch classifier training template.
+"""PyTorch classifier training template for physics events: grouped splits, event weights, held-out test.
 
-This script uses synthetic data so it runs immediately. Replace
-`make_dataloaders` with project-specific datasets for real training.
+Data, two ways:
+  --data events.csv --split-manifest splits.json
+      Real data. The CSV has an id column, feature columns, a label column (integer class index, or a name from
+      --label-names) and optionally a weight column. The manifest is the JSON that check_split_integrity.py reads
+      ({"train": [ids], "val": [ids], "test": [ids], "groups": {id: group}}); rows are matched by id.
+  (no --data)
+      Synthetic events in groups of --synthetic-group-size that share a latent offset (like events from one run
+      block or one generator job), split by group, never by row. The generated manifest is written to the output
+      directory and checked like a real one, so the script runs immediately.
+
+Before any model is built, scripts/check_split_integrity.py --strict runs on the manifest; training is refused
+(exit 1) unless it passes. --allow-unchecked-split overrides that, and the summary then records "fail" or "not-run".
+
+Event weights: evaluation weights are the signed input weights; training weights are derived from them
+(--negative-weights, --class-balancing) and recorded separately in the checkpoint. The loss is
+hep_losses.weighted_bce for two classes, a signed-weight cross-entropy otherwise; batches whose per-class net
+weight is not positive are counted (training_log.json). Model selection uses the validation split only; working
+points (thresholds at fixed signal efficiency) are fixed on validation and applied unchanged to the test split,
+which is evaluated once, after selection.
+
+Outputs in --output-dir: config.json, split_manifest.json (synthetic only), split_check.json, best.pt, last.pt,
+training_log.json, val_scores.csv (calibration fit sample), test_scores.csv, run_summary.json. Checkpoints hold
+plain types only and load with torch.load(..., weights_only=True).
+--config config.yaml supplies defaults; flags given on the command line override it.
+Exit codes: 0 done, 1 split check did not pass (training refused), 2 usage or input error, 3 PyTorch not available.
 """
 
 from __future__ import annotations
 
 import argparse
+import contextlib
+import csv
+import hashlib
 import json
+import math
 import os
 import random
+import subprocess
+import sys
 from pathlib import Path
 
 import numpy as np
-import torch
-from torch import nn
-from torch.utils.data import DataLoader, TensorDataset
+
+HERE = Path(__file__).resolve().parent
+CHECK_SCRIPT = HERE.parent / "scripts" / "check_split_integrity.py"
+SPLITS = ("train", "val", "test")
+CONFIG_RENAMES = {"learning_rate": "lr"}
 
 
-class MLPClassifier(nn.Module):
-    def __init__(self, input_dim: int, hidden_dim: int, num_classes: int, dropout: float = 0.2):
-        super().__init__()
-        self.net = nn.Sequential(
-            nn.Linear(input_dim, hidden_dim),
-            nn.ReLU(inplace=True),
-            nn.Dropout(dropout),
-            nn.Linear(hidden_dim, hidden_dim),
-            nn.ReLU(inplace=True),
-            nn.Dropout(dropout),
-            nn.Linear(hidden_dim, num_classes),
-        )
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--config", help="YAML file with defaults (sections data/model/training are flattened)")
+    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--device", default="auto")
+    data = parser.add_argument_group("data")
+    data.add_argument("--data", help="CSV of events (requires --split-manifest)")
+    data.add_argument("--split-manifest", help="JSON split manifest (check_split_integrity.py format)")
+    data.add_argument("--allow-unchecked-split", action="store_true",
+                      help="train even if the split check fails or cannot run (recorded in run_summary.json)")
+    data.add_argument("--id-col", default="id")
+    data.add_argument("--label-col", default="label")
+    data.add_argument("--weight-col", help="per-event weight column (signed weights allowed)")
+    data.add_argument("--features", help="comma-separated feature columns (default: every other column)")
+    data.add_argument("--label-names", help="comma-separated class names, in class-index order")
+    data.add_argument("--units", help="JSON file mapping feature name -> unit")
+    data.add_argument("--grouping-key", help="what the manifest groups are (run/lumi block, generator job, ...)")
+    synth = parser.add_argument_group("synthetic data (used without --data)")
+    synth.add_argument("--train-size", type=int, default=8000)
+    synth.add_argument("--val-size", type=int, default=2000)
+    synth.add_argument("--test-size", type=int, default=2000)
+    synth.add_argument("--input-dim", type=int, default=32)
+    synth.add_argument("--num-classes", type=int, default=2)
+    synth.add_argument("--synthetic-group-size", type=int, default=8)
+    synth.add_argument("--synthetic-negative-fraction", type=float, default=0.0,
+                       help="fraction of synthetic events with negative weight (like NLO generators)")
+    model = parser.add_argument_group("model")
+    model.add_argument("--hidden-dim", type=int, default=128)
+    model.add_argument("--dropout", type=float, default=0.2)
+    train = parser.add_argument_group("training")
+    train.add_argument("--batch-size", type=int, default=128)
+    train.add_argument("--num-workers", type=int, default=2)
+    train.add_argument("--epochs", type=int, default=10)
+    train.add_argument("--lr", type=float, default=1e-3)
+    train.add_argument("--weight-decay", type=float, default=1e-4)
+    train.add_argument("--grad-clip", type=float, default=1.0)
+    train.add_argument("--precision", choices=("fp32", "bf16", "fp16"), default="fp32",
+                       help="bf16 autocast on CPU or CUDA; fp16 (with a gradient scaler) on CUDA only")
+    train.add_argument("--negative-weights", choices=("signed", "dropped"), default="signed",
+                       help="training treatment of negative weights; evaluation always keeps them signed")
+    train.add_argument("--class-balancing", choices=("none", "equal-sum"), default="none",
+                       help="equal-sum: rescale training weights so every class has the same sum of weights")
+    train.add_argument("--working-points", type=float, nargs="+", default=[0.3, 0.5, 0.7],
+                       help="signal efficiencies for the working points (two-class only)")
+    train.add_argument("--ood-quantile", type=float, default=0.999,
+                       help="quantile of train+val Mahalanobis distances stored as the out-of-domain threshold")
+    train.add_argument("--output-dir", default="runs/example")
+    return parser
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.net(x)
+
+def config_defaults(path: str, parser: argparse.ArgumentParser) -> dict:
+    """Flatten a config YAML into argparse defaults; unknown keys are an error, not silently ignored."""
+    try:
+        import yaml
+    except ModuleNotFoundError as exc:
+        raise ValueError(f"--config needs PyYAML ({exc})") from exc
+    with open(path, encoding="utf-8") as handle:
+        raw = yaml.safe_load(handle) or {}
+    flat = {}
+    for key, value in raw.items():
+        if isinstance(value, dict):
+            flat.update(value)
+        else:
+            flat[key] = value
+    model_type = flat.pop("type", "mlp")
+    if model_type != "mlp":
+        raise ValueError(f"config model.type {model_type!r}: this template trains an MLP only")
+    dests = {action.dest for action in parser._actions} - {"help", "config"}
+    out = {}
+    for key, value in flat.items():
+        dest = CONFIG_RENAMES.get(key, key).replace("-", "_")
+        if dest not in dests:
+            raise ValueError(f"unknown config key {key!r} in {path}")
+        if dest in ("features", "label_names") and isinstance(value, list):
+            value = ",".join(map(str, value))
+        out[dest] = value
+    return out
 
 
-def seed_everything(seed: int) -> None:
+def parse_args(argv=None) -> argparse.Namespace:
+    parser = build_parser()
+    pre, _ = parser.parse_known_args(argv)
+    if pre.config:
+        try:
+            parser.set_defaults(**config_defaults(pre.config, parser))
+        except (OSError, ValueError) as exc:
+            parser.error(str(exc))
+    return parser.parse_args(argv)
+
+
+if __name__ == "__main__":
+    parse_args()  # --help and usage errors work without PyTorch
+
+try:
+    import torch
+    from torch.utils.data import DataLoader, TensorDataset
+except ModuleNotFoundError as _exc:
+    if __name__ != "__main__":
+        raise
+    print(f"{Path(__file__).name}: torch not available ({_exc}); check the environment with "
+          "scripts/check_pytorch_env.py", file=sys.stderr)
+    sys.exit(3)
+
+sys.path.insert(0, str(HERE))
+from hep_losses import batch_weight_report, weighted_bce  # noqa: E402
+from hep_metrics import (effective_entries, efficiency_with_uncertainty,  # noqa: E402
+                         rejection_at_signal_efficiency, weighted_auc)
+from models import MLPClassifier  # noqa: E402
+
+
+class InputError(Exception):
+    """Bad input data or arguments: exit 2 with a one-line message."""
+
+
+# ---------------------------------------------------------------- setup
+
+def seed_everything(seed: int) -> dict:
     random.seed(seed)
     np.random.seed(seed)
     os.environ["PYTHONHASHSEED"] = str(seed)
@@ -44,6 +174,7 @@ def seed_everything(seed: int) -> None:
     torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
+    return {"torch": seed, "numpy": seed, "python": seed}
 
 
 def get_device(name: str) -> torch.device:
@@ -56,182 +187,454 @@ def get_device(name: str) -> torch.device:
     return torch.device("cpu")
 
 
-def make_dataloaders(args):
-    generator = torch.Generator().manual_seed(args.seed)
-
-    x_train = torch.randn(args.train_size, args.input_dim, generator=generator)
-    w = torch.randn(args.input_dim, args.num_classes, generator=generator)
-    y_train = (x_train @ w).argmax(dim=1)
-
-    x_val = torch.randn(args.val_size, args.input_dim, generator=generator)
-    y_val = (x_val @ w).argmax(dim=1)
-
-    train_ds = TensorDataset(x_train, y_train)
-    val_ds = TensorDataset(x_val, y_val)
-
-    num_workers = args.num_workers
-    train_loader = DataLoader(
-        train_ds,
-        batch_size=args.batch_size,
-        shuffle=True,
-        num_workers=num_workers,
-        pin_memory=torch.cuda.is_available(),
-        persistent_workers=num_workers > 0,
-    )
-    val_loader = DataLoader(
-        val_ds,
-        batch_size=args.batch_size,
-        shuffle=False,
-        num_workers=num_workers,
-        pin_memory=torch.cuda.is_available(),
-        persistent_workers=num_workers > 0,
-    )
-    return train_loader, val_loader
+def autocast(device: torch.device, precision: str):
+    if precision == "fp32":
+        return contextlib.nullcontext()
+    dtype = torch.bfloat16 if precision == "bf16" else torch.float16
+    return torch.autocast(device_type=device.type, dtype=dtype)
 
 
-def train_one_epoch(model, loader, criterion, optimizer, device, scaler, use_amp: bool, grad_clip: float | None):
+# ---------------------------------------------------------------- data
+
+def make_synthetic(args, output_dir: Path) -> dict:
+    """Grouped synthetic events: each group shares a latent offset, and whole groups go to one split."""
+    rng = np.random.default_rng(args.seed)
+    n_classes, n_features, group_size = args.num_classes, args.input_dim, args.synthetic_group_size
+    sizes = (args.train_size, args.val_size, args.test_size)
+    if n_classes < 2 or min(sizes) <= 0 or group_size <= 0:
+        raise InputError("need --num-classes >= 2, positive split sizes and a positive --synthetic-group-size")
+    n = sum(sizes)
+    n_groups = math.ceil(n / group_size)
+    group = np.repeat(np.arange(n_groups), group_size)[:n]
+    y = rng.integers(0, n_classes, n)
+    class_means = rng.normal(0.0, 0.6, (n_classes, n_features))
+    group_offset = rng.normal(0.0, 0.5, (n_groups, n_features))
+    x = class_means[y] + group_offset[group] + rng.normal(size=(n, n_features))
+    w = np.abs(rng.normal(1.0, 0.2, n))
+    w[rng.random(n) < args.synthetic_negative_fraction] *= -1.0
+    ids = [f"evt{i:06d}" for i in range(n)]
+    group_names = [f"grp{g:05d}" for g in group]
+
+    # assign whole groups, in random order, until each split reaches its requested size
+    manifest = {"_comment": "Synthetic grouped split written by train_classifier.py", "train": [], "val": [], "test": []}
+    bounds = np.cumsum(sizes)
+    filled = 0
+    members = {g: np.flatnonzero(group == g) for g in range(n_groups)}
+    for g in rng.permutation(n_groups):
+        split = SPLITS[min(int(np.searchsorted(bounds, filled, side="right")), 2)]
+        manifest[split].extend(ids[i] for i in members[g])
+        filled += members[g].size
+    manifest["groups"] = dict(zip(ids, group_names))
+    path = output_dir / "split_manifest.json"
+    path.write_text(json.dumps(manifest, indent=1))
+
+    return {"ids": ids, "x": x, "y": y, "w": w, "features": [f"x{i:02d}" for i in range(n_features)],
+            "labels": ["background", "signal"] if n_classes == 2 else [f"class_{i}" for i in range(n_classes)],
+            "units": {f"x{i:02d}": "a.u." for i in range(n_features)}, "weight_source": "synthetic",
+            "grouping_key": "synthetic_group", "manifest": path}
+
+
+def read_events(args) -> dict:
+    """Read the CSV: ids, features (float64), integer labels, signed weights (1.0 without a weight column)."""
+    with open(args.data, newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        header = reader.fieldnames or []
+        rows = list(reader)
+    if not rows:
+        raise InputError(f"{args.data}: no rows")
+    for col in filter(None, (args.id_col, args.label_col, args.weight_col)):
+        if col not in header:
+            raise InputError(f"{args.data}: column {col!r} not found")
+    reserved = {args.id_col, args.label_col, args.weight_col}
+    features = args.features.split(",") if args.features else [c for c in header if c not in reserved]
+    missing = [f for f in features if f not in header]
+    if missing or not features:
+        raise InputError(f"{args.data}: feature columns missing: {missing or 'none selected'}")
+    label_names = args.label_names.split(",") if args.label_names else None
+    ids = [row[args.id_col] for row in rows]
+    if len(set(ids)) != len(ids):
+        raise InputError(f"{args.data}: duplicate ids in column {args.id_col!r}")
+    try:
+        x = np.array([[float(row[f]) for f in features] for row in rows])
+        raw_labels = [row[args.label_col] for row in rows]
+        if label_names and not all(v.lstrip("-").isdigit() for v in raw_labels):
+            y = np.array([label_names.index(v) for v in raw_labels])
+        else:
+            y = np.array([int(float(v)) for v in raw_labels])
+        w = np.array([float(row[args.weight_col]) for row in rows]) if args.weight_col else np.ones(len(rows))
+    except ValueError as exc:
+        raise InputError(f"{args.data}: {exc}") from exc
+    if not np.all(np.isfinite(x)) or not np.all(np.isfinite(w)):
+        raise InputError(f"{args.data}: non-finite feature or weight values")
+    n_classes = len(label_names) if label_names else int(y.max()) + 1
+    if y.min() < 0 or y.max() >= n_classes or n_classes < 2:
+        raise InputError(f"{args.data}: labels must be class indices 0..{n_classes - 1}, with at least two classes")
+    labels = label_names or (["background", "signal"] if n_classes == 2 else [f"class_{i}" for i in range(n_classes)])
+    units = {}
+    if args.units:
+        with open(args.units, encoding="utf-8") as handle:
+            units = json.load(handle)
+    return {"ids": ids, "x": x, "y": y, "w": w, "features": features, "labels": labels,
+            "units": {f: str(units.get(f, "unspecified")) for f in features},
+            "weight_source": f"column:{args.weight_col}" if args.weight_col else "none (unit weights)",
+            "grouping_key": args.grouping_key or "manifest groups", "manifest": Path(args.split_manifest)}
+
+
+def run_split_check(manifest: Path, output_dir: Path) -> dict:
+    """Run check_split_integrity.py --strict on the manifest; a non-zero exit (failed or incomplete) is a fail."""
+    report = output_dir / "split_check.json"
+    if not CHECK_SCRIPT.is_file():
+        return {"tool": "check_split_integrity.py", "result": "not-run", "report": None,
+                "detail": f"{CHECK_SCRIPT} not found"}
+    proc = subprocess.run([sys.executable, str(CHECK_SCRIPT), str(manifest), "--json", "--strict"],
+                          capture_output=True, text=True, timeout=600)
+    report.write_text(proc.stdout or proc.stderr)
+    detail = proc.stderr.strip()
+    with contextlib.suppress(json.JSONDecodeError):
+        parsed = json.loads(proc.stdout)
+        detail = f"status {parsed.get('status')}, failure {parsed.get('failure_kind')}"
+    return {"tool": "check_split_integrity.py", "result": "pass" if proc.returncode == 0 else "fail",
+            "report": str(report.resolve()), "detail": detail}
+
+
+def assign_splits(data: dict) -> dict:
+    """Index arrays for train/val/test from the manifest (rows matched by id)."""
+    with open(data["manifest"], encoding="utf-8") as handle:
+        manifest = json.load(handle)
+    position = {value: i for i, value in enumerate(data["ids"])}
+    out = {}
+    for split in SPLITS:
+        if split not in manifest:
+            raise InputError(f"{data['manifest']}: split {split!r} missing (need train, val and test)")
+        unknown = [value for value in map(str, manifest[split]) if value not in position]
+        if unknown:
+            raise InputError(f"{data['manifest']}: {len(unknown)} {split} id(s) not in the data, e.g. {unknown[:3]}")
+        out[split] = np.array([position[str(value)] for value in manifest[split]], dtype=int)
+        if out[split].size == 0:
+            raise InputError(f"{data['manifest']}: split {split!r} is empty")
+    out["unassigned"] = len(data["ids"]) - sum(out[s].size for s in SPLITS)
+    return out
+
+
+def training_weights(y: np.ndarray, w: np.ndarray, n_classes: int, args) -> tuple[np.ndarray, np.ndarray, dict]:
+    """Training weights from the signed evaluation weights; returns (keep mask, weights, record)."""
+    keep = np.ones(w.size, bool)
+    if args.negative_weights == "dropped":
+        keep = w >= 0
+    wt = w.copy()
+    if args.class_balancing == "equal-sum":
+        target = wt[keep].sum() / n_classes
+        for c in range(n_classes):
+            sel = keep & (y == c)
+            total = wt[sel].sum()
+            if total <= 0:
+                raise InputError(f"class {c} has non-positive training weight sum; cannot balance")
+            wt[sel] *= target / total
+    record = {"negative_weight_treatment": args.negative_weights, "class_balancing": args.class_balancing,
+              "n_events": int(keep.sum()), "n_dropped": int((~keep).sum()),
+              "sum_w_per_class": [float(wt[keep & (y == c)].sum()) for c in range(n_classes)],
+              "n_negative": int((wt[keep] < 0).sum())}
+    return keep, wt, record
+
+
+def domain_record(x_train: np.ndarray, x_ref: np.ndarray, quantile: float) -> dict:
+    """Per-feature range on train, and mean/covariance with a Mahalanobis threshold from train+val distances."""
+    mean = x_train.mean(axis=0)
+    cov = np.atleast_2d(np.cov(x_train, rowvar=False))
+    precision = np.linalg.pinv(cov)
+    diff = x_ref - mean
+    dist = np.sqrt(np.maximum(np.einsum("ij,jk,ik->i", diff, precision, diff), 0.0))
+    return {"min": x_train.min(axis=0).tolist(), "max": x_train.max(axis=0).tolist(), "mean": mean.tolist(),
+            "cov": cov.tolist(), "mahalanobis_threshold": float(np.quantile(dist, quantile)),
+            "mahalanobis_quantile": quantile, "mahalanobis_reference": "train+val"}
+
+
+# ---------------------------------------------------------------- training
+
+def loss_fn(logits: torch.Tensor, targets: torch.Tensor, weights: torch.Tensor) -> torch.Tensor:
+    logits = logits.float()
+    if logits.shape[1] == 1:
+        return weighted_bce(logits, targets, weights, norm="abs")
+    per_event = torch.nn.functional.cross_entropy(logits, targets, reduction="none")
+    return (weights * per_event).sum() / weights.abs().sum().clamp(min=torch.finfo(per_event.dtype).tiny)
+
+
+def nonpositive_classes(targets: torch.Tensor, weights: torch.Tensor, n_classes: int) -> list[int]:
+    """Classes present in the batch whose net weight is <= 0."""
+    if n_classes == 2:
+        report = batch_weight_report(targets, weights)
+        sums = [report["background"]["sum_w"], report["signal"]["sum_w"]]
+        present = [bool((targets == c).any()) for c in range(2)]
+    else:
+        sums = [float(weights[targets == c].sum()) for c in range(n_classes)]
+        present = [bool((targets == c).any()) for c in range(n_classes)]
+    return [c for c in range(n_classes) if present[c] and sums[c] <= 0]
+
+
+def train_one_epoch(model, loader, optimizer, device, scaler, args, n_classes):
     model.train()
-    total_loss = 0.0
-    total_correct = 0
-    total_examples = 0
-
-    for inputs, targets in loader:
-        inputs = inputs.to(device, non_blocking=True)
-        targets = targets.to(device, non_blocking=True)
-
+    total_loss, total_abs_w, bad_batches = 0.0, 0.0, 0
+    for inputs, targets, weights in loader:
+        inputs, targets, weights = (t.to(device, non_blocking=True) for t in (inputs, targets, weights))
+        if nonpositive_classes(targets, weights, n_classes):
+            bad_batches += 1
         optimizer.zero_grad(set_to_none=True)
-
-        with torch.amp.autocast("cuda", enabled=(use_amp and device.type == "cuda")):
+        with autocast(device, args.precision):
             logits = model(inputs)
-            loss = criterion(logits, targets)
-
+        loss = loss_fn(logits, targets, weights)
         scaler.scale(loss).backward()
-
-        if grad_clip is not None and grad_clip > 0:
+        if args.grad_clip and args.grad_clip > 0:
             scaler.unscale_(optimizer)
-            torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
-
+            torch.nn.utils.clip_grad_norm_(model.parameters(), args.grad_clip)
         scaler.step(optimizer)
         scaler.update()
-
-        batch_size = inputs.size(0)
-        total_loss += loss.item() * batch_size
-        total_correct += (logits.argmax(dim=1) == targets).sum().item()
-        total_examples += batch_size
-
-    return {
-        "loss": total_loss / max(total_examples, 1),
-        "accuracy": total_correct / max(total_examples, 1),
-    }
+        abs_w = float(weights.abs().sum())
+        total_loss += loss.item() * abs_w
+        total_abs_w += abs_w
+    return {"loss_weighted": total_loss / max(total_abs_w, 1e-300), "nonpositive_net_weight_batches": bad_batches,
+            "batches": len(loader)}
 
 
-def evaluate(model, loader, criterion, device):
+def predict(model, x: np.ndarray, device, args) -> np.ndarray:
+    """Scores: P(signal) [N] for two classes, class probabilities [N, C] otherwise."""
     model.eval()
-    total_loss = 0.0
-    total_correct = 0
-    total_examples = 0
-
+    out = []
     with torch.inference_mode():
-        for inputs, targets in loader:
-            inputs = inputs.to(device, non_blocking=True)
-            targets = targets.to(device, non_blocking=True)
-            logits = model(inputs)
-            loss = criterion(logits, targets)
-
-            batch_size = inputs.size(0)
-            total_loss += loss.item() * batch_size
-            total_correct += (logits.argmax(dim=1) == targets).sum().item()
-            total_examples += batch_size
-
-    return {
-        "loss": total_loss / max(total_examples, 1),
-        "accuracy": total_correct / max(total_examples, 1),
-    }
+        for start in range(0, len(x), 4096):
+            batch = torch.as_tensor(x[start:start + 4096], dtype=torch.float32, device=device)
+            with autocast(device, args.precision):
+                logits = model(batch).float()
+            out.append((torch.sigmoid(logits[:, 0]) if logits.shape[1] == 1 else torch.softmax(logits, 1)).cpu())
+    return torch.cat(out).numpy().astype(np.float64)
 
 
-def save_checkpoint(path, model, optimizer, scheduler, epoch, best_metric, args):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    torch.save(
-        {
-            "epoch": epoch,
-            "model_state_dict": model.state_dict(),
-            "optimizer_state_dict": optimizer.state_dict(),
-            "scheduler_state_dict": scheduler.state_dict() if scheduler is not None else None,
-            "best_metric": best_metric,
-            "config": vars(args),
-        },
-        path,
-    )
+def weighted_loss_np(scores: np.ndarray, y: np.ndarray, w: np.ndarray) -> float:
+    eps = 1e-12
+    if scores.ndim == 1:
+        per_event = -(y * np.log(scores + eps) + (1 - y) * np.log(1 - scores + eps))
+    else:
+        per_event = -np.log(scores[np.arange(y.size), y] + eps)
+    return float(np.sum(w * per_event) / np.sum(np.abs(w)))
 
 
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--device", default="auto")
-    parser.add_argument("--train-size", type=int, default=8000)
-    parser.add_argument("--val-size", type=int, default=2000)
-    parser.add_argument("--input-dim", type=int, default=32)
-    parser.add_argument("--hidden-dim", type=int, default=128)
-    parser.add_argument("--num-classes", type=int, default=4)
-    parser.add_argument("--dropout", type=float, default=0.2)
-    parser.add_argument("--batch-size", type=int, default=128)
-    parser.add_argument("--num-workers", type=int, default=2)
-    parser.add_argument("--epochs", type=int, default=10)
-    parser.add_argument("--lr", type=float, default=1e-3)
-    parser.add_argument("--weight-decay", type=float, default=1e-4)
-    parser.add_argument("--grad-clip", type=float, default=1.0)
-    parser.add_argument("--use-amp", action="store_true")
-    parser.add_argument("--output-dir", default="runs/example")
-    return parser.parse_args()
+def evaluate(scores: np.ndarray, y: np.ndarray, w: np.ndarray, labels: list[str]) -> dict:
+    """Weighted metrics (signed weights kept) on one split."""
+    pred = (scores >= 0.5).astype(int) if scores.ndim == 1 else scores.argmax(1)
+    out = {"n_events": int(y.size), "loss_weighted": weighted_loss_np(scores, y, w),
+           "accuracy_weighted": float(np.sum(w * (pred == y)) / np.sum(w)),
+           "sum_w_per_class": {name: float(w[y == c].sum()) for c, name in enumerate(labels)},
+           "n_eff_per_class": {name: effective_entries(w[y == c]) for c, name in enumerate(labels)}}
+    if scores.ndim == 1:
+        out["auc_weighted"] = _safe_auc(scores, y, w)
+    else:
+        out["auc_weighted_one_vs_rest"] = {name: _safe_auc(scores[:, c], (y == c).astype(int), w)
+                                           for c, name in enumerate(labels)}
+    return out
 
 
-def main():
-    args = parse_args()
-    seed_everything(args.seed)
+def _safe_auc(score, y, w):
+    try:
+        return weighted_auc(score, y, w)
+    except ValueError:  # a class with non-positive total weight: no AUC rather than a wrong one
+        return None
+
+
+def working_points_val(scores, y, w, targets) -> list[dict]:
+    points = []
+    for eff in targets:
+        try:
+            points.append(rejection_at_signal_efficiency(scores, y, w, eff))
+        except ValueError as exc:
+            points.append({"target_eff_s": eff, "error": str(exc)})
+    return points
+
+
+def working_points_test(scores, y, w, val_points) -> list[dict]:
+    """Apply the validation thresholds unchanged to the test split."""
+    points = []
+    for vp in val_points:
+        if "threshold" not in vp:
+            points.append(dict(vp))
+            continue
+        sel = scores >= vp["threshold"]
+        es, es_unc = efficiency_with_uncertainty(sel[y == 1], w[y == 1])
+        eb, eb_unc = efficiency_with_uncertainty(sel[y == 0], w[y == 0])
+        points.append({"target_eff_s": vp["target_eff_s"], "threshold_from": "val", "threshold": vp["threshold"],
+                       "eff_s": es, "eff_s_unc": es_unc, "eff_b": eb, "eff_b_unc": eb_unc,
+                       "rejection": 1.0 / eb if eb > 0 else None})
+    return points
+
+
+def save_checkpoint(path: Path, model, optimizer, scheduler, epoch, best, metadata, args) -> None:
+    torch.save({"epoch": epoch, "model_state_dict": model.state_dict(), "optimizer_state_dict": optimizer.state_dict(),
+                "scheduler_state_dict": scheduler.state_dict(), "best_metric": best["value"],
+                "best_metric_name": best["name"], "best_epoch": best["epoch"], "metadata": metadata,
+                "config": vars(args)}, path)
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for chunk in iter(lambda: handle.read(1 << 20), b""):
+            digest.update(chunk)
+    return "sha256:" + digest.hexdigest()
+
+
+def write_scores(path: Path, ids, y, w, scores, labels) -> None:
+    with open(path, "w", newline="", encoding="utf-8") as handle:
+        writer = csv.writer(handle)
+        score_cols = ["score"] if scores.ndim == 1 else [f"score_{name}" for name in labels]
+        writer.writerow(["id", "label", "weight", *score_cols])
+        for i in range(len(ids)):
+            row_scores = [scores[i]] if scores.ndim == 1 else list(scores[i])
+            writer.writerow([ids[i], int(y[i]), repr(float(w[i])), *(repr(float(s)) for s in row_scores)])
+
+
+def run(args) -> int:
+    seeds = seed_everything(args.seed)
     device = get_device(args.device)
+    if args.precision == "fp16" and device.type != "cuda":
+        raise InputError("--precision fp16 needs a CUDA device; use bf16 on CPU")
+    if args.data and not args.split_manifest:
+        raise InputError("--data needs --split-manifest (a grouped split; see scripts/make_grouped_splits.py)")
+    if args.split_manifest and not args.data:
+        raise InputError("--split-manifest needs --data (the synthetic path writes its own manifest)")
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / "config.json").write_text(json.dumps(vars(args), indent=2))
 
-    with (output_dir / "config.json").open("w") as f:
-        json.dump(vars(args), f, indent=2)
+    data = read_events(args) if args.data else make_synthetic(args, output_dir)
+    split_check = run_split_check(data["manifest"], output_dir)
+    if split_check["result"] != "pass":
+        message = f"split check {split_check['result']}: {split_check['detail']}"
+        if not args.allow_unchecked_split:
+            print(f"refusing to train: {message} (report: {split_check['report']}); fix the split, or pass "
+                  "--allow-unchecked-split to override (recorded in run_summary.json)", file=sys.stderr)
+            return 1
+        print(f"WARNING: training on an unchecked split ({message})", file=sys.stderr)
+    idx = assign_splits(data)
+    if idx["unassigned"]:
+        print(f"note: {idx['unassigned']} event(s) are in no split and are not used", file=sys.stderr)
 
-    train_loader, val_loader = make_dataloaders(args)
+    x, y, w, labels, features = data["x"], data["y"], data["w"], data["labels"], data["features"]
+    n_classes = len(labels)
+    tr, va, te = idx["train"], idx["val"], idx["test"]
+    keep, w_train_all, train_weight_record = training_weights(y[tr], w[tr], n_classes, args)
+    tr_fit = tr[keep]
+    mean = x[tr].mean(axis=0)
+    std = np.maximum(x[tr].std(axis=0), 1e-12)
+    preprocessing = [{"step": "standardize", "features": features, "mean": mean.tolist(), "std": std.tolist()}]
+    domain = domain_record(x[tr], x[np.r_[tr, va]], args.ood_quantile)
+    z = (x - mean) / std
 
-    model = MLPClassifier(args.input_dim, args.hidden_dim, args.num_classes, args.dropout).to(device)
-    criterion = nn.CrossEntropyLoss()
+    eval_has_negative = bool((w < 0).any())
+    unit_eval = bool(np.all(w == 1.0))
+    weights_summary = {
+        "source": data["weight_source"],
+        "negative_weight_treatment": ("none-present" if not eval_has_negative else args.negative_weights),
+        "class_balancing": args.class_balancing,
+        "used_in": ([] if unit_eval and args.class_balancing == "none" else ["loss"]) + ([] if unit_eval else ["metrics"]),
+    }
+    weights_metadata = {"training": {"source": data["weight_source"], **train_weight_record},
+                        "evaluation": {"source": data["weight_source"], "treatment": "signed, unmodified",
+                                       "n_negative": int((w < 0).sum())}}
+
+    out_dim = 1 if n_classes == 2 else n_classes
+    model_config = {"type": "MLPClassifier", "input_dim": len(features), "hidden_dim": args.hidden_dim,
+                    "num_classes": out_dim, "dropout": args.dropout}
+    metadata = {"task": "classification", "features": features, "units": data["units"], "labels": labels,
+                "model": model_config, "preprocessing": preprocessing, "training_domain": domain,
+                "weights": weights_metadata, "seeds": seeds, "precision": args.precision,
+                "grouping_key": data["grouping_key"], "split_manifest": str(Path(data["manifest"]).resolve())}
+
+    train_ds = TensorDataset(torch.as_tensor(z[tr_fit], dtype=torch.float32), torch.as_tensor(y[tr_fit]),
+                             torch.as_tensor(w_train_all[keep], dtype=torch.float32))
+    train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers,
+                              pin_memory=device.type == "cuda", persistent_workers=args.num_workers > 0,
+                              generator=torch.Generator().manual_seed(args.seed))
+    model = MLPClassifier(len(features), args.hidden_dim, out_dim, args.dropout).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
-    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs)
-    scaler = torch.amp.GradScaler("cuda", enabled=(args.use_amp and device.type == "cuda"))
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max(args.epochs, 1))
+    scaler = torch.amp.GradScaler("cuda", enabled=args.precision == "fp16")
 
-    best_val_acc = -1.0
+    best = {"name": "val_loss_weighted", "value": math.inf, "epoch": -1}
+    history = []
     for epoch in range(args.epochs):
-        train_metrics = train_one_epoch(
-            model,
-            train_loader,
-            criterion,
-            optimizer,
-            device,
-            scaler,
-            args.use_amp,
-            args.grad_clip,
-        )
-        val_metrics = evaluate(model, val_loader, criterion, device)
+        train_metrics = train_one_epoch(model, train_loader, optimizer, device, scaler, args, n_classes)
+        val_loss = weighted_loss_np(predict(model, z[va], device, args), y[va], w[va])
         scheduler.step()
+        history.append({"epoch": epoch, "train": train_metrics, "val_loss_weighted": val_loss})
+        print(f"epoch={epoch + 1:03d}/{args.epochs:03d} train_loss={train_metrics['loss_weighted']:.4f} "
+              f"val_loss={val_loss:.4f} nonpositive_net_weight_batches={train_metrics['nonpositive_net_weight_batches']}")
+        improved = val_loss < best["value"]
+        if improved:  # update first, so last.pt records the best value including this epoch
+            best = {"name": "val_loss_weighted", "value": val_loss, "epoch": epoch}
+        save_checkpoint(output_dir / "last.pt", model, optimizer, scheduler, epoch, best, metadata, args)
+        if improved:
+            save_checkpoint(output_dir / "best.pt", model, optimizer, scheduler, epoch, best, metadata, args)
+    if best["epoch"] < 0:
+        raise InputError("no epoch produced a finite validation loss; nothing to select")
+    bad = sum(h["train"]["nonpositive_net_weight_batches"] for h in history)
+    if bad:
+        print(f"WARNING: {bad} training batch(es) had a class with non-positive net weight; consider larger batches "
+              "or a resampling treatment (see the physics-ml guidance on negative weights)", file=sys.stderr)
+    (output_dir / "training_log.json").write_text(json.dumps(
+        {"epochs": history, "nonpositive_net_weight_batches": bad, "best": best,
+         "unassigned_events": idx["unassigned"]}, indent=2))
 
-        print(
-            f"epoch={epoch + 1:03d}/{args.epochs:03d} "
-            f"train_loss={train_metrics['loss']:.4f} train_acc={train_metrics['accuracy']:.4f} "
-            f"val_loss={val_metrics['loss']:.4f} val_acc={val_metrics['accuracy']:.4f}"
-        )
+    # selection is finished: reload the best model, fix working points on val, evaluate test once
+    best_path = output_dir / "best.pt"
+    model.load_state_dict(torch.load(best_path, map_location=device, weights_only=True)["model_state_dict"])
+    val_scores, test_scores = predict(model, z[va], device, args), predict(model, z[te], device, args)
+    metrics = {"val": evaluate(val_scores, y[va], w[va], labels), "test": evaluate(test_scores, y[te], w[te], labels)}
+    metrics["val"]["selection"] = dict(best)
+    if n_classes == 2:
+        metrics["val"]["working_points"] = working_points_val(val_scores, y[va], w[va], args.working_points)
+        metrics["test"]["working_points"] = working_points_test(test_scores, y[te], w[te],
+                                                                metrics["val"]["working_points"])
+    scores_path, val_scores_path = output_dir / "test_scores.csv", output_dir / "val_scores.csv"
+    write_scores(scores_path, [data["ids"][i] for i in te], y[te], w[te], test_scores, labels)
+    write_scores(val_scores_path, [data["ids"][i] for i in va], y[va], w[va], val_scores, labels)
 
-        save_checkpoint(output_dir / "last.pt", model, optimizer, scheduler, epoch, best_val_acc, args)
-        if val_metrics["accuracy"] > best_val_acc:
-            best_val_acc = val_metrics["accuracy"]
-            save_checkpoint(output_dir / "best.pt", model, optimizer, scheduler, epoch, best_val_acc, args)
+    summary = {
+        "task": "classification", "features": features, "units": data["units"], "labels": labels,
+        "grouping_key": data["grouping_key"], "split_manifest": str(Path(data["manifest"]).resolve()),
+        "split_check": {k: split_check[k] for k in ("tool", "result", "report")},
+        "training_domain": {f: [domain["min"][i], domain["max"][i]] for i, f in enumerate(features)},
+        "preprocessing": preprocessing, "weights": weights_summary,
+        "model_hash": sha256_file(best_path), "checkpoint": str(best_path.resolve()),
+        "environment": {"torch_version": torch.__version__, "device": str(device), "precision": args.precision,
+                        "seeds": seeds},
+        "metrics": metrics, "scores": {"val": str(val_scores_path.resolve()), "test": str(scores_path.resolve())},
+    }
+    (output_dir / "run_summary.json").write_text(json.dumps(_finite(summary), indent=2, allow_nan=False))
+    test = metrics["test"]
+    shown = test.get("auc_weighted", test.get("auc_weighted_one_vs_rest"))
+    print(f"best epoch {best['epoch'] + 1} ({best['name']}={best['value']:.4f}); test (held out): "
+          f"loss={test['loss_weighted']:.4f} auc={shown}")
+    print(f"run summary: {output_dir / 'run_summary.json'}")
+    return 0
 
-    print(f"Best validation accuracy: {best_val_acc:.4f}")
-    print(f"Checkpoints written to: {output_dir}")
+
+def _finite(o):
+    """Replace non-finite floats with None so run_summary.json is strict JSON."""
+    if isinstance(o, dict):
+        return {k: _finite(v) for k, v in o.items()}
+    if isinstance(o, list):
+        return [_finite(v) for v in o]
+    if isinstance(o, float) and not math.isfinite(o):
+        return None
+    return o
+
+
+def main(argv=None) -> int:
+    args = parse_args(argv)
+    try:
+        return run(args)
+    except (InputError, OSError, json.JSONDecodeError) as exc:
+        print(f"{Path(__file__).name}: error: {exc}", file=sys.stderr)
+        return 2
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

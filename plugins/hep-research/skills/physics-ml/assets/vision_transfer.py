@@ -7,17 +7,46 @@ Expected dataset layout:
       train/class_b/*.jpg
       val/class_a/*.jpg
       val/class_b/*.jpg
+
+With --freeze-backbone only the new head trains, and the backbone's BatchNorm layers stay in eval mode during
+training, so their running statistics stay the pretrained ones (model.train() would otherwise update them).
+--help works without PyTorch; exit code 3 when PyTorch or torchvision is missing.
 """
 
 from __future__ import annotations
 
 import argparse
+import sys
 from pathlib import Path
 
-import torch
-from torch import nn
-from torch.utils.data import DataLoader
-from torchvision import datasets, models, transforms
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Transfer learning: fine-tune a pretrained ResNet-18 on an "
+                                     "ImageFolder tree (data_dir/train/<class>/, data_dir/val/<class>/).")
+    parser.add_argument("data_dir", type=Path)
+    parser.add_argument("--epochs", type=int, default=5)
+    parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument("--num-workers", type=int, default=4)
+    parser.add_argument("--lr", type=float, default=1e-3)
+    parser.add_argument("--freeze-backbone", action="store_true",
+                        help="train only the new head; frozen BatchNorm layers stay in eval mode")
+    parser.add_argument("--output", type=Path, default=Path("transfer_best.pt"))
+    return parser
+
+
+if __name__ == "__main__":
+    build_parser().parse_args()  # --help works without PyTorch
+
+try:
+    import torch
+    from torch import nn
+    from torch.utils.data import DataLoader
+    from torchvision import datasets, models, transforms
+except ModuleNotFoundError as _exc:
+    if __name__ != "__main__":
+        raise
+    print(f"vision_transfer.py: {_exc.name or 'torch'} not available ({_exc})", file=sys.stderr)
+    sys.exit(3)
 
 
 def get_device() -> torch.device:
@@ -74,9 +103,25 @@ def make_loaders(data_dir: Path, batch_size: int, num_workers: int):
     return train_loader, val_loader, train_ds.classes
 
 
+def set_train_mode(model: nn.Module, training: bool) -> None:
+    """model.train(training), but BatchNorm layers whose parameters are all frozen stay in eval mode.
+
+    In train mode BatchNorm normalizes with batch statistics and updates its running mean/variance even when its
+    affine parameters do not train; for a frozen pretrained backbone that silently changes the backbone.
+    """
+    model.train(training)
+    if not training:
+        return
+    for module in model.modules():
+        if isinstance(module, nn.modules.batchnorm._BatchNorm):
+            params = list(module.parameters())
+            if params and not any(p.requires_grad for p in params):
+                module.eval()
+
+
 def run_epoch(model, loader, criterion, device, optimizer=None):
     training = optimizer is not None
-    model.train(training)
+    set_train_mode(model, training)
     total_loss = 0.0
     total_correct = 0
     total_examples = 0
@@ -106,15 +151,7 @@ def run_epoch(model, loader, criterion, device, optimizer=None):
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("data_dir", type=Path)
-    parser.add_argument("--epochs", type=int, default=5)
-    parser.add_argument("--batch-size", type=int, default=32)
-    parser.add_argument("--num-workers", type=int, default=4)
-    parser.add_argument("--lr", type=float, default=1e-3)
-    parser.add_argument("--freeze-backbone", action="store_true")
-    parser.add_argument("--output", type=Path, default=Path("transfer_best.pt"))
-    args = parser.parse_args()
+    args = build_parser().parse_args()
 
     device = get_device()
     train_loader, val_loader, classes = make_loaders(args.data_dir, args.batch_size, args.num_workers)

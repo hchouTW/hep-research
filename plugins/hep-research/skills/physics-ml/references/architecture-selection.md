@@ -57,13 +57,14 @@ sequence; see
   undertrained rather than the model too small. Train longer before growing it.
 
 At scale the sizing question becomes compute allocation rather than fit: for a fixed
-budget, a smaller model on more tokens and a bigger model on fewer tokens reach
-different losses, and the optimum is near 20 tokens per parameter. See
-[training-at-scale.md](training-at-scale.md).
+budget, a smaller model on more data and a bigger model on less data reach different
+losses. Measure the trade on your own data with a learning curve; ratios published for
+language models do not transfer. See [training-at-scale.md](training-at-scale.md).
 
-**Deployment cost is set by parameters, training cost by parameters times tokens.** A
-model served at high volume should usually be smaller and trained longer than
-compute-optimal. Decide this before training, not after.
+**Deployment cost is set by parameters, training cost by parameters times samples.** A
+model applied to every event in reconstruction or a trigger should usually be smaller
+than the best offline model, and is often a distilled version of it. Decide this before
+training, not after.
 
 ## Depth, width, and shape
 
@@ -89,8 +90,8 @@ Use them, with the caveats:
   data; a published constant is not transferable.
 - They predict **loss**, not downstream task performance, and the relationship between
   the two is not monotonic for every task.
-- They hold **within a regime**. Changing tokenizer, data mixture, or objective changes
-  the curve.
+- They hold **within a regime**. Changing the input representation, the data mixture
+  (processes, detector conditions), or the objective changes the curve.
 - Extrapolating more than about an order of magnitude beyond the fitted range is a
   guess with error bars, and should be stated as one.
 
@@ -123,4 +124,5 @@ Distinct from reviewing model code - see the code checklist in `deep-learning-gu
 - Parameter count, training FLOPs/cost, per-GPU memory, and inference latency.
 - Depth/width/head choices, with any non-standard shape justified.
 - If scaling laws were used: the runs they were fitted on and the extrapolation range.
-- Whether the model is deliberately off compute-optimal for inference reasons.
+- Whether the model is deliberately smaller than the best offline model for deployment
+  reasons (latency, trigger resources).

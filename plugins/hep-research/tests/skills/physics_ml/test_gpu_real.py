@@ -45,8 +45,8 @@ class GpuAssetTests(unittest.TestCase):
     def train(self, device: str, amp: bool) -> subprocess.CompletedProcess:
         out = self.dir / f"out-{device}{'-amp' if amp else ''}"
         args = [sys.executable, str(ASSETS / "train_classifier.py"), "--seed", "42", "--device", device,
-                "--train-size", "2000", "--val-size", "500", "--epochs", "3", "--num-workers", "0",
-                "--output-dir", str(out)] + (["--use-amp"] if amp else [])
+                "--train-size", "2000", "--val-size", "500", "--test-size", "500", "--epochs", "3",
+                "--num-workers", "0", "--output-dir", str(out)] + (["--precision", "fp16"] if amp else [])
         result = run(args, self.dir)
         self.assertEqual(result.returncode, 0, result.stderr[-2000:])
         self.assertTrue((out / "best.pt").exists())
@@ -63,10 +63,12 @@ class GpuAssetTests(unittest.TestCase):
 
     def test_inference_runs_on_a_cuda_checkpoint(self):
         self.train("cuda", amp=False)
+        features = ",".join(f"x{i:02d}" for i in range(32))
+        (self.dir / "in.csv").write_text(f"id,{features}\nr0,{','.join(['0.1'] * 32)}\n")
         result = run([sys.executable, str(ASSETS / "inference.py"), str(self.dir / "out-cuda" / "best.pt"),
-                      "--input-dim", "32", "--num-classes", "4"], self.dir)
+                      "--input", str(self.dir / "in.csv"), "--device", "cuda"], self.dir)
         self.assertEqual(result.returncode, 0, result.stderr[-2000:])
-        self.assertIn("prediction:", result.stdout)
+        self.assertIn('"n_rows": 1', result.stdout)
 
     def test_transformer_forward_backward_on_cuda_with_fp16_autocast(self):
         sys.path.insert(0, str(ASSETS))

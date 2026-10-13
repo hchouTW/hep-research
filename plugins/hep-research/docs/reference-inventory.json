@@ -30,7 +30,7 @@
   },
   "physics-ml": {
    "references": 38,
-   "bytes": 230630,
+   "bytes": 256540,
    "uncited": 0
   },
   "research-communication": {
@@ -1814,30 +1814,33 @@
   {
    "path": "skills/physics-ml/references/architecture-selection.md",
    "owner": "physics-ml",
-   "bytes": 6679,
-   "lines": 127,
+   "bytes": 6902,
+   "lines": 129,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/physics-ml/references/deep-learning-guide.md",
     "skills/physics-ml/references/geometric-and-equivariant-learning.md",
-    "skills/physics-ml/references/optimization-and-training-dynamics.md"
+    "skills/physics-ml/references/optimization-and-training-dynamics.md",
+    "skills/physics-ml/references/training-at-scale.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/checkpointing.md",
    "owner": "physics-ml",
-   "bytes": 1395,
-   "lines": 47,
+   "bytes": 6042,
+   "lines": 130,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/physics-ml/references/deep-learning-guide.md",
+    "skills/physics-ml/references/distributed-training.md",
     "skills/physics-ml/references/export-and-deployment.md",
+    "skills/physics-ml/references/mixed-precision.md",
     "skills/physics-ml/references/training-at-scale.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/custom-autograd-and-hooks.md",
@@ -1857,32 +1860,35 @@
   {
    "path": "skills/physics-ml/references/data-loading.md",
    "owner": "physics-ml",
-   "bytes": 875,
-   "lines": 51,
+   "bytes": 3037,
+   "lines": 87,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/physics-ml/references/data-strategy.md",
     "skills/physics-ml/references/deep-learning-guide.md",
+    "skills/physics-ml/references/distributed-training.md",
+    "skills/physics-ml/references/reproducibility.md",
     "skills/physics-ml/references/training-at-scale.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/data-strategy.md",
    "owner": "physics-ml",
-   "bytes": 5795,
-   "lines": 115,
+   "bytes": 5843,
+   "lines": 116,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/physics-ml/references/deep-learning-guide.md",
     "skills/physics-ml/references/evaluation-strategy.md",
     "skills/physics-ml/references/optimization-and-training-dynamics.md",
     "skills/physics-ml/references/robustness-and-distribution-shift.md",
+    "skills/physics-ml/references/training-at-scale.md",
     "skills/physics-ml/scripts/check_split_integrity.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/debugging-pytorch.md",
@@ -1903,14 +1909,16 @@
   {
    "path": "skills/physics-ml/references/deep-learning-guide.md",
    "owner": "physics-ml",
-   "bytes": 23261,
-   "lines": 336,
+   "bytes": 25733,
+   "lines": 354,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/examples/data-ml-task.md",
     "skills/physics-ml/README.md",
     "skills/physics-ml/SKILL.md",
     "skills/physics-ml/references/architecture-selection.md",
+    "skills/physics-ml/references/distributed-training.md",
+    "skills/physics-ml/references/mixed-precision.md",
     "skills/physics-ml/references/multivariate-analysis-bdt-nn.md",
     "skills/physics-ml/references/optimization-and-training-dynamics.md",
     "skills/physics-ml/references/scientific-machine-learning.md",
@@ -1920,26 +1928,27 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "03929e2 2026-10-11"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/distributed-training.md",
    "owner": "physics-ml",
-   "bytes": 876,
-   "lines": 29,
+   "bytes": 4827,
+   "lines": 89,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/physics-ml/references/checkpointing.md",
     "skills/physics-ml/references/deep-learning-guide.md",
     "skills/physics-ml/references/parallelism-strategy.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/efficient-finetuning.md",
    "owner": "physics-ml",
-   "bytes": 6197,
-   "lines": 115,
+   "bytes": 6771,
+   "lines": 122,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/physics-ml/assets/lora_finetune.py",
@@ -1947,11 +1956,10 @@
     "skills/physics-ml/references/deep-learning-guide.md",
     "skills/physics-ml/references/export-and-deployment.md",
     "skills/physics-ml/references/optimization-and-training-dynamics.md",
-    "skills/physics-ml/references/serving-architecture.md",
     "skills/physics-ml/references/uncertainty-and-calibration.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/evaluation-metrics.md",
@@ -1995,8 +2003,8 @@
   {
    "path": "skills/physics-ml/references/export-and-deployment.md",
    "owner": "physics-ml",
-   "bytes": 6844,
-   "lines": 133,
+   "bytes": 9043,
+   "lines": 168,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/physics-ml/references/deep-learning-guide.md",
@@ -2005,7 +2013,7 @@
     "skills/physics-ml/references/uncertainty-and-calibration.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/fast-simulation-validation.md",
@@ -2015,6 +2023,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/physics-ml/SKILL.md",
+    "skills/physics-ml/references/deep-learning-guide.md",
     "skills/physics-ml/references/generative-models.md",
     "skills/physics-ml/references/ml-analysis.md"
    ],
@@ -2069,20 +2078,24 @@
   {
    "path": "skills/physics-ml/references/mixed-precision.md",
    "owner": "physics-ml",
-   "bytes": 631,
-   "lines": 28,
+   "bytes": 4350,
+   "lines": 84,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/physics-ml/references/checkpointing.md",
     "skills/physics-ml/references/deep-learning-guide.md",
-    "skills/physics-ml/references/parallelism-strategy.md"
+    "skills/physics-ml/references/distributed-training.md",
+    "skills/physics-ml/references/ml-analysis.md",
+    "skills/physics-ml/references/parallelism-strategy.md",
+    "skills/physics-ml/references/performance-memory.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/ml-analysis.md",
    "owner": "physics-ml",
-   "bytes": 21564,
+   "bytes": 21607,
    "lines": 287,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -2090,23 +2103,37 @@
     "skills/hep-analysis/references/hep-analysis-guide.md",
     "skills/physics-ml/README.md",
     "skills/physics-ml/SKILL.md",
+    "skills/physics-ml/assets/calibration.py",
     "skills/physics-ml/assets/hep_losses.py",
+    "skills/physics-ml/assets/set_classifier.py",
+    "skills/physics-ml/references/data-loading.md",
+    "skills/physics-ml/references/deep-learning-guide.md",
+    "skills/physics-ml/references/efficient-finetuning.md",
+    "skills/physics-ml/references/export-and-deployment.md",
+    "skills/physics-ml/references/mixed-precision.md",
+    "skills/physics-ml/references/monitoring-and-lifecycle.md",
     "skills/physics-ml/references/multivariate-analysis-bdt-nn.md",
+    "skills/physics-ml/references/parallelism-strategy.md",
     "skills/physics-ml/references/particle-and-jet-architectures.md",
     "skills/physics-ml/references/sbi-training.md",
-    "skills/physics-ml/references/space-and-astroparticle-ml.md"
+    "skills/physics-ml/references/sequence-models.md",
+    "skills/physics-ml/references/serving-architecture.md",
+    "skills/physics-ml/references/space-and-astroparticle-ml.md",
+    "skills/physics-ml/references/training-at-scale.md",
+    "skills/physics-ml/references/transformer-architectures.md",
+    "skills/physics-ml/scripts/make_grouped_splits.py"
    ],
    "cited_by_other_skills": [
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "1497349 2026-10-13"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/monitoring-and-lifecycle.md",
    "owner": "physics-ml",
-   "bytes": 5593,
-   "lines": 111,
+   "bytes": 5506,
+   "lines": 101,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/physics-ml/references/deep-learning-guide.md",
@@ -2114,7 +2141,7 @@
     "skills/physics-ml/references/robustness-and-distribution-shift.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/multivariate-analysis-bdt-nn.md",
@@ -2128,6 +2155,7 @@
     "skills/detector-response/references/physics-objects-jets-btagging-met.md",
     "skills/hep-analysis/references/hep-analysis-guide.md",
     "skills/physics-ml/SKILL.md",
+    "skills/physics-ml/references/deep-learning-guide.md",
     "skills/physics-ml/references/ml-analysis.md",
     "skills/physics-ml/references/particle-and-jet-architectures.md"
    ],
@@ -2153,16 +2181,18 @@
   {
    "path": "skills/physics-ml/references/parallelism-strategy.md",
    "owner": "physics-ml",
-   "bytes": 6499,
-   "lines": 134,
+   "bytes": 7465,
+   "lines": 147,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/physics-ml/references/deep-learning-guide.md",
+    "skills/physics-ml/references/distributed-training.md",
+    "skills/physics-ml/references/mixed-precision.md",
     "skills/physics-ml/references/training-at-scale.md",
     "tests/skills/physics_ml/test_physics_ml_skill.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/particle-and-jet-architectures.md",
@@ -2172,7 +2202,11 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/physics-ml/SKILL.md",
-    "skills/physics-ml/references/ml-analysis.md"
+    "skills/physics-ml/references/data-loading.md",
+    "skills/physics-ml/references/deep-learning-guide.md",
+    "skills/physics-ml/references/ml-analysis.md",
+    "skills/physics-ml/references/sequence-models.md",
+    "skills/physics-ml/references/transformer-architectures.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "1497349 2026-10-13"
@@ -2180,32 +2214,35 @@
   {
    "path": "skills/physics-ml/references/performance-memory.md",
    "owner": "physics-ml",
-   "bytes": 1940,
-   "lines": 72,
+   "bytes": 3375,
+   "lines": 97,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/physics-ml/references/custom-autograd-and-hooks.md",
+    "skills/physics-ml/references/data-loading.md",
     "skills/physics-ml/references/deep-learning-guide.md",
     "skills/physics-ml/references/export-and-deployment.md",
     "skills/physics-ml/references/parallelism-strategy.md",
     "skills/physics-ml/references/training-at-scale.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/reproducibility.md",
    "owner": "physics-ml",
-   "bytes": 6314,
-   "lines": 146,
+   "bytes": 8302,
+   "lines": 170,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/physics-ml/references/checkpointing.md",
+    "skills/physics-ml/references/data-loading.md",
     "skills/physics-ml/references/deep-learning-guide.md",
     "skills/physics-ml/references/export-and-deployment.md",
     "skills/physics-ml/references/training-at-scale.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "03929e2 2026-10-11"
+   "last_commit": "c5ae767 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/robustness-and-distribution-shift.md",
@@ -2234,6 +2271,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/physics-ml/SKILL.md",
+    "skills/physics-ml/references/deep-learning-guide.md",
     "skills/physics-ml/references/ml-analysis.md"
    ],
    "cited_by_other_skills": [],
@@ -2264,8 +2302,8 @@
   {
    "path": "skills/physics-ml/references/sequence-models.md",
    "owner": "physics-ml",
-   "bytes": 5360,
-   "lines": 115,
+   "bytes": 5503,
+   "lines": 118,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/physics-ml/references/architecture-selection.md",
@@ -2274,13 +2312,13 @@
     "skills/physics-ml/references/transformer-architectures.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/serving-architecture.md",
    "owner": "physics-ml",
-   "bytes": 4238,
-   "lines": 92,
+   "bytes": 4189,
+   "lines": 91,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/physics-ml/references/architecture-selection.md",
@@ -2289,7 +2327,7 @@
     "skills/physics-ml/references/monitoring-and-lifecycle.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/space-and-astroparticle-ml.md",
@@ -2299,6 +2337,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/physics-ml/SKILL.md",
+    "skills/physics-ml/references/deep-learning-guide.md",
     "skills/physics-ml/references/ml-analysis.md"
    ],
    "cited_by_other_skills": [],
@@ -2319,17 +2358,18 @@
   {
    "path": "skills/physics-ml/references/training-at-scale.md",
    "owner": "physics-ml",
-   "bytes": 6804,
-   "lines": 141,
+   "bytes": 7121,
+   "lines": 142,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/physics-ml/references/architecture-selection.md",
+    "skills/physics-ml/references/checkpointing.md",
     "skills/physics-ml/references/deep-learning-guide.md",
     "skills/physics-ml/references/optimization-and-training-dynamics.md",
     "skills/physics-ml/references/reproducibility.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/training-loop.md",
@@ -2365,8 +2405,8 @@
   {
    "path": "skills/physics-ml/references/transformer-architectures.md",
    "owner": "physics-ml",
-   "bytes": 6989,
-   "lines": 154,
+   "bytes": 8148,
+   "lines": 171,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/physics-ml/assets/transformer_classifier.py",
@@ -2376,7 +2416,7 @@
     "skills/physics-ml/references/sequence-models.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "721d1ea 2026-10-13"
   },
   {
    "path": "skills/physics-ml/references/uncertainty-and-calibration.md",

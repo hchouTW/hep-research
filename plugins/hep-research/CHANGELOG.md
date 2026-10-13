@@ -5,6 +5,60 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+Contracts 2.5.0 (minor: ML semantics; every 2.4.0 artifact keeps its outcome and gets the new rules with
+`validate.py --strict`; no new capability).
+
+- **ml-artifact semantics (contracts 2.5.0).** `ext_ml_artifact.json` gains optional `splits.overlap_check`,
+  `splits.manifest`, `splits.test_groups_disjoint`, an object form of `weights` (source, negative-weight treatment,
+  class balancing, where the weights are used), `domain_shift`, `environment` and `output_semantics`. New checks
+  (native from 2.5.0): blank grouping key, empty model hash, labels or features, training-domain keys outside the
+  features or with lo >= hi, a failed split-overlap check, calibration missing for probability or density-ratio
+  outputs or for inference, calibration evaluated on its fit sample, or incomplete are errors; an overlap check not
+  run, a missing or failed domain-shift check on a model with downstream use are unresolved; no overlap check,
+  dropped negative weights and missing seeds are warnings. New `scripts/write_ml_artifact.py` builds and validates
+  the artifact from a training run summary, calibration, domain-shift and split-check results.
+- **physics-ml: the invariants are enforced in code.** New `scripts/make_grouped_splits.py` (by run, period, seed or
+  parameter point; random-groups, temporal or k-fold; null groups refused unless a policy is given; its manifest
+  passes `check_split_integrity.py`). `assets/train_classifier.py` trains from a data file with `--split-manifest`,
+  runs the split check first and refuses a leaky split, uses signed event weights in the loss and the metrics
+  (training and evaluation weights recorded separately), selects on validation and reports a test split used once,
+  stores features, units, standardization and the training domain in the checkpoint, and writes a run summary and
+  validation and test scores. `assets/inference.py` checks feature names, applies the stored preprocessing and flags
+  (or with `--on-out-of-domain reject` refuses) inputs outside the training domain. New `assets/calibration.py`:
+  temperature, Platt and weighted isotonic calibration, weighted reliability curves, ECE with its finite-sample floor,
+  fit and evaluation samples required to be disjoint. New `assets/set_classifier.py`: Deep Sets/PFN and a ParT-lite
+  with masks, ragged collation, phi wrapping and permutation, padding and empty-set tests.
+- **physics-ml: domain check rewritten.** `check_surrogate_domain.py` whitens the inputs and uses Mahalanobis and
+  k-nearest-neighbour distances with thresholds calibrated as quantiles on held-out training points, and reports the
+  false-positive rate. The per-feature box is a diagnostic only (`--box-strict` restores it as a criterion). The old
+  check called a 20-dimensional extrapolation (Mahalanobis 9.3) inside and could call an in-distribution point
+  outside; `--factor` is removed. Constant features no longer overflow, a dimension mismatch is an input error (exit
+  2) and numerical failure exits 3.
+- **physics-ml: fixes.** `check_split_integrity.py`: a null group is reported (it used to pass) and ids and groups
+  are compared after stripping and case folding (`--case-sensitive` to opt out). `compare_model_runs.py`: the
+  command-line `--lower-is-better` wins over the runs file. `metrics.py` refuses shape mismatches that broadcast;
+  `transformer_classifier.py` gives finite outputs for fully masked rows; `last.pt` records the current best value;
+  `vision_transfer.py` keeps a frozen backbone's BatchNorm in eval mode; `torch.load` uses `weights_only=True`; every
+  PyTorch asset answers `--help` without torch (exit 3 when run without it). `train_classifier.py`: `--use-amp` is
+  replaced by `--precision fp32|bf16|fp16`, `--num-classes` defaults to 2, `config.yaml` is read with `--config`.
+  `inference.py` takes `--input CSV` and reads the model shape from the checkpoint.
+- **physics-ml: references updated.** Grouped splits replace row-level `random_split` in the examples; bf16 and fp16
+  in one mixed-precision file with the fp16 range warning for inputs in MeV, keV or ADC counts; FSDP2 and distributed
+  checkpointing; ONNX export with `dynamo=True` and `dynamic_shapes`, `torch.export` and AOTInductor, TorchScript no
+  longer recommended; checkpoints save RNG, GradScaler and sampler state with an atomic write; deterministic
+  algorithms and worker seeding; `torch.compile` with dynamic shapes for variable multiplicity; each code section
+  states the torch version it was run with. The PyTorch guide routes to the physics references and no longer tells
+  BDT questions to skip them. Generic serving, monitoring, fine-tuning and large-model material is labelled as such
+  and LLM-only passages are cut; `assets/scaling-plan.example.json` (a 7B plan) is removed and
+  `dataset-splits.example.json` uses runs.
+- **Routing.** The ownership table gains ML rows (BDTs and classical MVA, ML-assisted inference training, fast
+  simulation training, calibration of model outputs to physics-ml; inference coverage to hep-statistics; detector
+  calibration and fast-simulation validation to detector-response). detector-response hands learned fast simulation
+  and ML response models to physics-ml; hep-analysis hands classifier or BDT training to physics-ml. Eight routing
+  cases (en, zh-Hant) for BDTs, negative weights, working points and an ECAL regression.
+- **Worked example (journey J9).** `examples/ml-classifier-to-inference/`: see VALIDATION.md. The synthetic-collider
+  profile lists physics-ml.
+
 - **physics-ml: HEP content and task routing (external review patch).** `ml-analysis.md` becomes the physics entry
   point (23 to about 290 lines, original content kept): grouping and k-fold, training versus evaluation weights, class
   balancing and prior correction, four treatments of negative weights and the optimization pathology, analysis

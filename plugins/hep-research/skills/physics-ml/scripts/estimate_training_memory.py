@@ -16,7 +16,7 @@ formulas follow Korthikanti et al. (arXiv:2205.05198) and assume 2-byte activati
 a standard pre-norm transformer block; they are estimates, not allocator accounting, and
 exclude fragmentation, communication buffers, and the CUDA context (add roughly 1-2 GB).
 Pipeline activation memory is the 1F1B worst case, held by the first stage.
-Run: python3 <plugin root>/skills/physics-ml/scripts/estimate_training_memory.py <plugin root>/skills/physics-ml/assets/scaling-plan.example.json
+Run: python3 <plugin root>/skills/physics-ml/scripts/estimate_training_memory.py plan.json   (keys: the flag names with underscores, e.g. "zero_stage")
      python3 <plugin root>/skills/physics-ml/scripts/estimate_training_memory.py --params 7e9 --gpus 8 --zero-stage 3
 """
 

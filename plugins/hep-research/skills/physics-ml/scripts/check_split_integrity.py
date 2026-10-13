@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Check train/validation/test splits for overlap, duplication, and group leakage.
 
-Purpose: catch the failure that metrics cannot show. If the same record, user, patient,
-or session appears in more than one split, the test set is measuring memorization - and
+Purpose: catch the failure that metrics cannot show. If the same event, run, simulation
+seed or parameter point appears in more than one split, the test set is measuring memorization - and
 nothing about the numbers looks wrong. Group leakage is the most common serious split
 error and is invisible in every metric.
 
@@ -12,16 +12,26 @@ violations (training records timestamped after validation or test records, when 
 split is meant to be chronological), and how many IDs carry the grouping and timestamp
 metadata those checks need. Outcome: "passed" only when every check ran on complete
 metadata and found nothing; "failed" when leakage is found (failure_kind "leakage");
-"incomplete" when metadata is missing (the missing IDs are listed). --strict, for a
+"incomplete" when metadata is missing (the missing IDs are listed). An ID whose group
+is null or empty (None, "", whitespace, NaN, or the strings nan/null/none/na) has no
+usable group: it is reported under "null_group_ids", counted as missing group metadata,
+and so can never pass silently. --strict, for a
 split that feeds a result, turns "incomplete" into "failed" (failure_kind
 "missing-metadata"). Exit codes: 0 passed, 1 failed, 3 incomplete, so it can gate a
 pipeline; "incomplete" is never a pass.
 
 Usage notes / assumptions: standard library only; PyTorch is not required. Input is a
 JSON object mapping split names to ID lists, optionally with "groups" (ID -> group) and
-"timestamps" (ID -> comparable number). IDs must be exact - this does not detect
-near-duplicates, which need a modality-appropriate similarity check (see
-<plugin root>/skills/physics-ml/references/data-strategy.md).
+"timestamps" (ID -> comparable number). IDs and group values are compared after
+normalization, so that a cosmetic difference cannot hide leakage: surrounding
+whitespace is stripped and, by default, case is folded ("Run7 " and "run7" are the
+same). Folding is the conservative default (it can only add matches); --case-sensitive
+turns it off for keys whose case is meaningful. Two keys of the "groups" or
+"timestamps" object that normalize to the same ID with different values are reported
+under "normalization_conflicts" and treated as missing metadata. Beyond that, IDs must
+be exact - this does not detect near-duplicates, which need a modality-appropriate
+similarity check (see <plugin root>/skills/physics-ml/references/data-strategy.md).
+Output: a text report, or the JSON report with --json (strict JSON).
 Run: python3 <plugin root>/skills/physics-ml/scripts/check_split_integrity.py <plugin root>/skills/physics-ml/assets/dataset-splits.example.json
 """
 
@@ -31,16 +41,32 @@ import json
 import sys
 
 RESERVED_KEYS = {"groups", "timestamps", "temporal_order", "_comment"}
+NULL_MARKERS = {"", "nan", "null", "none", "na"}
 
 
-def _split_ids(payload):
+def normalize_key(value, case_sensitive=False):
+    """Comparison form of an ID or group value: str, stripped, and case-folded unless case_sensitive."""
+    text = str(value).strip()
+    return text if case_sensitive else text.casefold()
+
+
+def is_null_group(value):
+    """True for a group value that carries no grouping: None, NaN, or an empty/null-marker string."""
+    if value is None:
+        return True
+    if isinstance(value, float) and value != value:
+        return True
+    return isinstance(value, str) and value.strip().casefold() in NULL_MARKERS
+
+
+def _split_ids(payload, case_sensitive=False):
     splits = {}
     for name, values in payload.items():
         if name in RESERVED_KEYS:
             continue
         if not isinstance(values, list):
             raise ValueError(f"split {name!r} must be a list of IDs")
-        splits[name] = [str(value) for value in values]
+        splits[name] = [normalize_key(value, case_sensitive) for value in values]
     if len(splits) < 2:
         raise ValueError("need at least two splits to check for leakage")
     return splits
@@ -74,8 +100,8 @@ def find_group_leakage(splits, groups):
     for name, ids in splits.items():
         for value in ids:
             group = groups.get(value)
-            if group is None:
-                continue
+            if is_null_group(group):
+                continue  # reported separately as a null group; never counted as checked
             placement.setdefault(str(group), set()).add(name)
     return {group: sorted(names) for group, names in sorted(placement.items())
             if len(names) > 1}
@@ -118,23 +144,44 @@ def _coverage(splits, mapping):
             "missing_ids": missing}
 
 
-def check(payload, strict=False):
+def _normalize_mapping(mapping, case_sensitive, value_key):
+    """Re-key an ID -> value object by normalized ID; keys colliding with different values are conflicts."""
+    out, conflicts = {}, set()
+    for key, value in mapping.items():
+        norm = normalize_key(key, case_sensitive)
+        if norm in out and value_key(out[norm]) != value_key(value):
+            conflicts.add(norm)
+        out.setdefault(norm, value)
+    for norm in conflicts:
+        del out[norm]
+    return out, sorted(conflicts)
+
+
+def check(payload, strict=False, case_sensitive=False):
     """Run every check and return a report with status passed / failed / incomplete."""
-    splits = _split_ids(payload)
+    splits = _split_ids(payload, case_sensitive)
     groups = payload.get("groups") or {}
     timestamps = payload.get("timestamps") or {}
     order = payload.get("temporal_order") or []
     if not isinstance(groups, dict) or not isinstance(timestamps, dict):
         raise ValueError("'groups' and 'timestamps' must be objects mapping ID -> value")
 
+    def group_value(value):
+        return None if is_null_group(value) else normalize_key(value, case_sensitive)
+
+    groups, group_conflicts = _normalize_mapping(groups, case_sensitive, group_value)
+    timestamps, time_conflicts = _normalize_mapping(timestamps, case_sensitive, lambda v: v)
+    groups = {key: group_value(value) for key, value in groups.items()}
+    all_ids = sorted({value for ids in splits.values() for value in ids})
+    null_groups = [value for value in all_ids if value in groups and groups[value] is None]
+
     duplicates = {name: found for name, ids in splits.items()
                   if (found := find_duplicates(ids))}
     overlaps = find_overlaps(splits)
-    group_leakage = find_group_leakage(splits, {str(k): v for k, v in groups.items()})
-    temporal = find_temporal_violations(
-        splits, {str(k): v for k, v in timestamps.items()}, order)
+    group_leakage = find_group_leakage(splits, groups)
+    temporal = find_temporal_violations(splits, timestamps, order)
 
-    group_cov = _coverage(splits, {str(k) for k in groups})
+    group_cov = _coverage(splits, {key for key, value in groups.items() if value is not None})
     time_splits = {name: ids for name, ids in splits.items() if name in order}
     time_cov = _coverage(time_splits, {str(k) for k in timestamps}) if order else None
     groups_complete = group_cov["covered"] == group_cov["total"]
@@ -158,6 +205,9 @@ def check(payload, strict=False):
         "group_leakage": group_leakage,
         "temporal_violations": temporal,
         "group_coverage": group_cov,
+        "null_group_ids": null_groups,
+        "normalization": {"strip_whitespace": True, "case_sensitive": case_sensitive},
+        "normalization_conflicts": {"groups": group_conflicts, "timestamps": time_conflicts},
         "timestamp_coverage": time_cov,
         "groups_checked": groups_complete,
         "timestamps_checked": bool(order) and times_complete,
@@ -193,6 +243,14 @@ def _format(report):
     section("group leakage across splits", report["group_leakage"],
             lambda k, v: f"group {k!r} appears in {', '.join(v)}")
     cov = report["group_coverage"]
+    if report["null_group_ids"]:
+        nulls = report["null_group_ids"]
+        lines.append(f"NULL  {len(nulls)} ID(s) have a null or empty group (e.g. {nulls[:3]}); "
+                     "they are not grouped, so leakage through them is unchecked")
+    conflicts = report["normalization_conflicts"]
+    if conflicts["groups"] or conflicts["timestamps"]:
+        lines.append(f"CONF  keys equal after normalization but with different values: "
+                     f"groups {conflicts['groups'][:3]}, timestamps {conflicts['timestamps'][:3]}")
     if not report["groups_checked"]:
         lines.append(f"MISS  group metadata: {cov['covered']}/{cov['total']} IDs have a group "
                      f"(missing e.g. {cov['missing_ids'][:3]}); group leakage is unchecked for the rest "
@@ -226,6 +284,8 @@ def main():
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--strict", action="store_true",
                         help="every sample needs grouping (and, with temporal_order, timestamp) metadata")
+    parser.add_argument("--case-sensitive", action="store_true",
+                        help="compare IDs and groups with case (default: case-folded; whitespace is always stripped)")
     args = parser.parse_args()
 
     try:
@@ -233,11 +293,12 @@ def main():
             payload = json.load(handle)
         if not isinstance(payload, dict):
             raise ValueError("splits file must contain a JSON object")
-        report = check(payload, strict=args.strict)
-    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        report = check(payload, strict=args.strict, case_sensitive=args.case_sensitive)
+        text = json.dumps(report, indent=2, allow_nan=False) if args.json else _format(report)
+    except (OSError, ValueError, TypeError, json.JSONDecodeError) as exc:
         sys.exit(f"error: {exc}")
 
-    print(json.dumps(report, indent=2) if args.json else _format(report))
+    print(text)
     sys.exit({"passed": 0, "failed": 1, "incomplete": 3}[report["status"]])
 
 

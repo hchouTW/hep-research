@@ -3,7 +3,10 @@
 ## When to read this file
 
 This file holds the routing and rules for PyTorch engineering work and ML
-engineering decisions; it routes to the other references in this folder.
+engineering decisions; it routes to the other references in this folder. For the
+physics side of an ML task (splits by run, event weights, working points, decorrelation,
+simulation-to-data checks) start at [ml-analysis.md](ml-analysis.md); the physics
+references are listed first under "When to Read a Reference" below.
 
 Produce practical, runnable, maintainable PyTorch code with strong defaults for
 correctness, reproducibility, debugging, and extensibility - code another engineer can
@@ -14,11 +17,16 @@ unless porting code into/out of PyTorch.
 
 ## Scope and Proportion
 
-- **Other stacks:** for Keras/TensorFlow/JAX or classical ML (scikit-learn, XGBoost, tabular
-  trees), answer in that stack's own idioms. Do not apply this guide's Workflow, templates,
-  naming conventions, file-header rule or Response Format, and do not read its references;
-  at most one line noting that it is outside PyTorch scope. Porting to/from PyTorch is the
-  exception.
+- **BDTs and classical MVA in physics analyses are in scope.** XGBoost, LightGBM, TMVA or
+  scikit-learn models for an event selection, a regression or a tagger belong to this skill:
+  read [multivariate-analysis-bdt-nn.md](multivariate-analysis-bdt-nn.md) (BDT practice,
+  BDT vs NN) and [ml-analysis.md](ml-analysis.md) (grouped splits, negative weights,
+  working points, systematics). The PyTorch-specific Workflow, templates, naming conventions,
+  file-header rule and Response Format below do not apply to them.
+- **Other deep-learning stacks:** for Keras/TensorFlow/JAX, answer in that stack's own
+  idioms, keep the physics rules of [ml-analysis.md](ml-analysis.md), and skip the PyTorch
+  engineering references; at most one line noting that the engineering advice here is
+  PyTorch-specific. Porting to/from PyTorch is the exception.
 - **Size the answer to the request.** A one-line shape error gets a short diagnosis and fix,
   not the full template.
 - **Vague requests** ("make it faster", "improve accuracy") with no code or numbers: ask what
@@ -50,6 +58,7 @@ unless porting code into/out of PyTorch.
   which case sharding weights (FSDP/ZeRO) does not help; recomputation or a smaller
   micro-batch does. Name what binds, use `<plugin root>/skills/physics-ml/scripts/estimate_training_memory.py` for numbers,
   prefer DDP when it fits, and say that the figures are estimates to confirm on the real job.
+  Most HEP taggers and regressors (well under 100M parameters) fit one GPU: DDP, not sharding.
 - **Comparisons need matched budgets and several seeds** before words like "better" or
   "state-of-the-art" go into text.
 
@@ -112,18 +121,16 @@ targets = targets.to(device, non_blocking=True)
   compare the build's list with the GPU (`nvidia-smi --query-gpu=name,compute_cap,driver_version --format=csv`).
   Read the list with `torch._C._cuda_getArchFlags()`: it works without a GPU, whereas `torch.cuda.get_arch_list()`
   returns `[]` wherever CUDA is unavailable (a login node). Old and new GPUs may need different builds of the same
-  torch version (observed with 2.14.1: the CUDA 12.6 build stops at sm_90, the CUDA 13.0 build starts at sm_75, so
-  V100 and Blackwell need one each). The driver must also support the build's CUDA version.
-  `scripts/check_pytorch_env.py` does this comparison on a GPU host and exits 3 when a visible GPU is not supported
-  by the installed build; run it as the first step of a GPU job.
-- **`torch.cuda.is_bf16_supported()` counts emulation** and is True even on GPUs without native bf16 (compute
-  capability below 8.0, such as V100); check the capability before choosing bf16 for speed.
+  torch version (observed with the torch 2.14.1 wheels, 2026-10: the CUDA 12.6 build stops at sm_90, the CUDA 13.0
+  build starts at sm_75, so V100 and Blackwell need one each). The driver must also support the build's CUDA version.
+  `<plugin root>/skills/physics-ml/scripts/check_pytorch_env.py` does this comparison on a GPU host and exits 3 when
+  a visible GPU is not supported by the installed build; run it as the first step of a GPU job.
+- **Mixed precision** (bf16 vs fp16, `GradScaler`, raw inputs in MeV or ADC counts overflowing fp16, emulated bf16
+  on V100, when it is not faster): [mixed-precision.md](mixed-precision.md).
 - **DDP with `torchrun`:** code that calls `torch.cuda.set_device(LOCAL_RANK)` needs at least `--nproc_per_node`
   visible GPUs; with fewer, the extra ranks fail with "invalid device ordinal". To run such a script as a CPU/gloo
   smoke test on a GPU host, hide the GPUs (`CUDA_VISIBLE_DEVICES=""`). With `NCCL_DEBUG=INFO` the log shows the
   transport chosen (P2P, SHM or network).
-- **Mixed precision is not always faster:** for very small models the casts dominate; measure with
-  `scripts/benchmark_model.py --amp` before turning it on for speed.
 - On a batch cluster, ask for CPUs and memory next to each GPU deliberately (data loading needs cores), and keep the
   environment in a venv run with `PYTHONNOUSERSITE=1` so packages in `~/.local` cannot leak in.
 - GPU tests for these assets: `tests/skills/physics_ml/test_gpu_real.py`, opt-in with `HEP_TORCH_GPU_TEST=1` on a
@@ -174,25 +181,36 @@ the code. Distinct from inline comments above - this describes the file as a who
 
 ## When to Read a Reference
 
+Physics first (the deliverable is a model or study for a physics result):
+
+- **Classifier or regressor in an analysis: grouped splits, event weights (including negative ones), working points, mass decorrelation, systematic-aware training, simulation-to-data checks, weak supervision, deployment in experiment software and triggers** -> [ml-analysis.md](ml-analysis.md)
+- **BDT vs NN, BDT practice (XGBoost, LightGBM, TMVA), regression targets** -> [multivariate-analysis-bdt-nn.md](multivariate-analysis-bdt-nn.md)
+- **Jets, particle sets, hits, point clouds, graphs; padding and masks** -> [particle-and-jet-architectures.md](particle-and-jet-architectures.md)
+- **Fast simulation: training generative models and validating them before use** -> [fast-simulation-validation.md](fast-simulation-validation.md) and [generative-models.md](generative-models.md)
+- **Space or ground-based astroparticle detectors** -> [space-and-astroparticle-ml.md](space-and-astroparticle-ml.md)
+- **Simulation-based inference: training the networks** -> [sbi-training.md](sbi-training.md); validity and coverage of the inference belong to `hep-statistics`
+
+PyTorch engineering:
+
 - **Training loop shape, grad clipping, accumulation** -> [references/training-loop.md](training-loop.md)
 - **Training loss not decreasing, instability, plateaus, vanishing/exploding gradients, LR/weight-decay behavior** -> [references/optimization-and-training-dynamics.md](optimization-and-training-dynamics.md)
 - **Debugging shape/device/dtype/NaN errors** -> [references/debugging-pytorch.md](debugging-pytorch.md)
   and [references/tensor-shapes.md](tensor-shapes.md)
-- **Dataset/DataLoader design, collate functions** -> [references/data-loading.md](data-loading.md)
-- **AMP / mixed precision** -> [references/mixed-precision.md](mixed-precision.md)
-- **Checkpoint save/load/resume** -> [references/checkpointing.md](checkpointing.md)
-- **DDP / multi-GPU** -> [references/distributed-training.md](distributed-training.md)
-- **Choosing a parallelism strategy (DDP vs. FSDP/ZeRO vs. tensor/pipeline/sequence), the memory equation, what is binding** -> [references/parallelism-strategy.md](parallelism-strategy.md)
-- **Metrics for classification/regression** -> [references/evaluation-metrics.md](evaluation-metrics.md)
-- **Speed/memory tuning** -> [references/performance-memory.md](performance-memory.md)
+- **Dataset/DataLoader design, collate functions, grouped splits** -> [references/data-loading.md](data-loading.md)
+- **AMP / mixed precision (bf16, fp16 and GradScaler, fp16 overflow of raw inputs)** -> [references/mixed-precision.md](mixed-precision.md)
+- **Checkpoint save/load/resume (RNG, scaler, data order, atomic writes)** -> [references/checkpointing.md](checkpointing.md)
+- **DDP / multi-GPU, FSDP2 and distributed checkpoints** -> [references/distributed-training.md](distributed-training.md)
+- **Choosing a parallelism strategy (DDP vs. FSDP/ZeRO vs. tensor/pipeline/sequence), the memory equation, what is binding** -> [references/parallelism-strategy.md](parallelism-strategy.md) (generic)
+- **Metrics for classification/regression** -> [references/evaluation-metrics.md](evaluation-metrics.md); physics-weighted metrics are in [ml-analysis.md](ml-analysis.md)
+- **Speed/memory tuning, `torch.compile` and variable particle multiplicity** -> [references/performance-memory.md](performance-memory.md)
 - **Seeding and determinism caveats** -> [references/reproducibility.md](reproducibility.md)
-- **Fine-tuning / freezing layers / vision backbones** -> [references/transfer-learning.md](transfer-learning.md)
-- **Parameter-efficient fine-tuning (LoRA), quantization** -> [references/efficient-finetuning.md](efficient-finetuning.md)
-- **Attention, multi-head attention, positional encoding, encoder/decoder design, KV caching** -> [references/transformer-architectures.md](transformer-architectures.md)
-- **RNN/LSTM/GRU, packed sequences, teacher forcing, seq2seq** -> [references/sequence-models.md](sequence-models.md)
-- **VAE/GAN/diffusion training loops and failure modes (posterior collapse, mode collapse)** -> [references/generative-models.md](generative-models.md)
+- **Fine-tuning / freezing layers / pretrained backbones** -> [references/transfer-learning.md](transfer-learning.md)
+- **Parameter-efficient fine-tuning (LoRA) of a large pretrained model, quantization** -> [references/efficient-finetuning.md](efficient-finetuning.md) (generic)
+- **Attention, multi-head attention, positional encoding, encoder/decoder design** -> [references/transformer-architectures.md](transformer-architectures.md) (generic; particle transformers are in particle-and-jet-architectures.md)
+- **RNN/LSTM/GRU, packed sequences, teacher forcing, seq2seq** -> [references/sequence-models.md](sequence-models.md) (generic)
+- **VAE/GAN/diffusion/flow training loops and failure modes (posterior collapse, mode collapse)** -> [references/generative-models.md](generative-models.md)
 - **Custom autograd.Function, hooks, activation/gradient checkpointing** -> [references/custom-autograd-and-hooks.md](custom-autograd-and-hooks.md)
-- **TorchScript/ONNX export, torch.compile deployment modes, inference serving** -> [references/export-and-deployment.md](export-and-deployment.md)
+- **ONNX, `torch.export` and AOTInductor export, TMVA SOFIE and hls4ml targets, `torch.compile` for inference** -> [references/export-and-deployment.md](export-and-deployment.md)
 - **LibTorch, custom ops, CUDA/C++ extensions** -> [hep-computing's C++ design guidelines](../../hep-computing/references/cpp-balanced-design-guidelines.md)
 - **Authoring a canonical worked example** (Contrast, Execution Trajectory,
   Gated Pipeline, Decision-Tree, Interactive Elicitation, Adversarial Audit,
@@ -204,9 +222,9 @@ Architect-level references - decisions made before or around the code:
 
 - **Choosing/sizing an architecture, inductive bias, scaling laws, reviewing a proposal** -> [references/architecture-selection.md](architecture-selection.md)
 - **Proving a change helped: seed variance, matched budgets, ablations, confounds** -> [references/ablation-and-design-review.md](ablation-and-design-review.md)
-- **MFU and throughput, compute/cost budgeting, batch-size and LR scaling, failure recovery, HP search** -> [references/training-at-scale.md](training-at-scale.md)
-- **Serving latency/throughput/cost budgets, batching, KV cache limits, capacity planning** -> [references/serving-architecture.md](serving-architecture.md)
-- **Drift and monitoring, regression suites, shadow/canary rollout, versioning, retraining triggers** -> [references/monitoring-and-lifecycle.md](monitoring-and-lifecycle.md)
+- **MFU and throughput, compute/cost budgeting, batch-size and LR scaling, failure recovery, HP search** -> [references/training-at-scale.md](training-at-scale.md) (generic)
+- **Inference latency and throughput budgets, batching, capacity planning for a service** -> [references/serving-architecture.md](serving-architecture.md) (generic; trigger deployment is in ml-analysis.md)
+- **Monitoring a deployed model, regression suites, versioning, retraining triggers** -> [references/monitoring-and-lifecycle.md](monitoring-and-lifecycle.md) (generic)
 - **Dataset design, label quality, splits, leakage, deduplication, imbalance** -> [references/data-strategy.md](data-strategy.md)
 - **Eval harness design, slices, behavioral tests, offline-online gap, ship criteria** -> [references/evaluation-strategy.md](evaluation-strategy.md)
 - **Training failure diagnosis: distinguishing implementation, optimization, capacity, data, generalization, numerical, and objective-mismatch failure; LR/batch-size/gradient interactions** -> [references/optimization-and-training-dynamics.md](optimization-and-training-dynamics.md)
@@ -218,53 +236,53 @@ Architect-level references - decisions made before or around the code:
 
 ## Helper Scripts & Templates
 
-Run diagnostics with `python3` before assuming a fix worked:
+Read `--help` first, and run diagnostics with `python3` before assuming a fix worked.
 
-- `<plugin root>/skills/physics-ml/scripts/check_pytorch_env.py` - verify torch version, CUDA/MPS availability, device count.
-- `<plugin root>/skills/physics-ml/scripts/inspect_checkpoint.py <path>` - print checkpoint keys, shapes, epoch, config.
-- `<plugin root>/skills/physics-ml/scripts/profile_dataloader.py` - time dataloader iteration to find I/O bottlenecks.
-- `<plugin root>/skills/physics-ml/scripts/check_dataset_contract.py` - verify a `Dataset` returns consistent shapes/dtypes.
-- `<plugin root>/skills/physics-ml/scripts/find_nan_batches.py` - scan a dataloader for non-finite inputs/targets.
-- `<plugin root>/skills/physics-ml/scripts/benchmark_model.py` - time forward/backward passes for a model.
-- `<plugin root>/skills/physics-ml/scripts/estimate_training_memory.py` - per-GPU training memory (params, grads,
-  optimizer states, activations) under a precision/optimizer/ZeRO/TP/PP configuration,
-  with the binding term and what to change.
-- `<plugin root>/skills/physics-ml/scripts/estimate_compute_budget.py` - training FLOPs, GPU-hours, wall-clock, cost,
-  and MFU, plus the tokens-per-parameter sizing regime.
-- `<plugin root>/skills/physics-ml/scripts/compare_model_runs.py` - paired comparison of two configurations across
-  seeds, with a bootstrap interval on the difference and the seed-noise floor.
-- `<plugin root>/skills/physics-ml/scripts/serving_capacity.py` - replicas, utilization, and estimated p99 latency for
-  an inference service against a latency budget.
-- `<plugin root>/skills/physics-ml/scripts/check_split_integrity.py` - train/val/test overlap, duplicates, group
-  leakage, and temporal violations; exits nonzero so it can gate a pipeline.
+Scripts in `<plugin root>/skills/physics-ml/scripts/`:
+
+- `check_pytorch_env.py` - verify torch version, CUDA/MPS availability, device count, and that the build supports the visible GPUs.
+- `inspect_checkpoint.py <path>` - print checkpoint keys, shapes, epoch, config.
+- `profile_dataloader.py` - time dataloader iteration to find I/O bottlenecks.
+- `check_dataset_contract.py` - verify a `Dataset` returns consistent shapes/dtypes.
+- `find_nan_batches.py` - scan a dataloader for non-finite inputs/targets.
+- `benchmark_model.py` - time forward/backward passes for a model (`--amp` to compare mixed precision).
+- `make_grouped_splits.py` - write a train/validation/test split manifest that keeps each group (run, period, event, simulation seed) in one split.
+- `check_split_integrity.py` - train/val/test overlap, duplicates, group leakage, and temporal violations; exits nonzero so it can gate a pipeline.
+- `check_surrogate_domain.py` - flag inputs outside a surrogate's declared training domain.
+- `compare_model_runs.py` - paired comparison of two configurations across seeds, with a bootstrap interval on the difference and the seed-noise floor.
+- `write_ml_artifact.py` - write the `ml-artifact` for a trained model (splits, weights, preprocessing, model hash, calibration).
+- `estimate_training_memory.py` - per-GPU training memory (params, grads, optimizer states, activations) under a precision/optimizer/ZeRO/TP/PP configuration, with the binding term and what to change.
+- `estimate_compute_budget.py` - training FLOPs, GPU-hours, wall-clock, cost and MFU (generic; its tokens-per-parameter regime applies to language-model-style training).
+- `serving_capacity.py` - replicas, utilization, and estimated p99 latency for an inference service against a latency budget (generic).
 
 When relaying output from these (profiler timings, NaN scan hits, training logs),
 report the top ~5 offending items, not the raw dump.
 
-The five scripts above are standard library only and do not require PyTorch.
+The first six scripts import PyTorch and exit with a clear message when it is missing;
+`check_split_integrity.py`, `check_surrogate_domain.py`, `compare_model_runs.py` and the
+three estimators are standard library only. Tests:
+
 - `<plugin root>/tests/skills/physics_ml/test_physics_ml_skill.py` - standard-library tests for the diagnostic
   scripts above, including their behavior when PyTorch is not installed. Run
   `python3 -m unittest discover -s tests -t .` from the plugin root.
-- `<plugin root>/tests/skills/physics_ml/test_assets_smoke.py` - CPU smoke tests that run the `<plugin root>/skills/physics-ml/assets/` templates on tiny
-  synthetic data (skipped when PyTorch is missing).
+- `<plugin root>/tests/skills/physics_ml/test_assets_smoke.py` - CPU smoke tests that run the
+  `<plugin root>/skills/physics-ml/assets/` templates on tiny synthetic data (skipped when PyTorch is missing).
 
-Starting points to copy and adapt:
+Starting points in `<plugin root>/skills/physics-ml/assets/` to copy and adapt:
 
-- `<plugin root>/skills/physics-ml/assets/models.py`, `<plugin root>/skills/physics-ml/assets/dataset_template.py`, `<plugin root>/skills/physics-ml/assets/train_classifier.py`,
-  `<plugin root>/skills/physics-ml/assets/inference.py`, `<plugin root>/skills/physics-ml/assets/metrics.py`, `<plugin root>/skills/physics-ml/assets/vision_transfer.py`,
-  `<plugin root>/skills/physics-ml/assets/ddp_train_skeleton.py`, `<plugin root>/skills/physics-ml/assets/config.yaml`.
-- `<plugin root>/skills/physics-ml/assets/transformer_classifier.py` - a from-scratch Transformer encoder
-  (multi-head attention, positional encoding, padding mask, mean-pooling) for
-  sequence classification.
-- `<plugin root>/skills/physics-ml/assets/lora_finetune.py` - LoRA adapter wrapper and a fine-tuning loop that
-  trains only the adapter parameters against a frozen base model.
-- `<plugin root>/skills/physics-ml/assets/scaling-plan.example.json` - synthetic 7B-class training plan for
-  `<plugin root>/skills/physics-ml/scripts/estimate_training_memory.py`.
-- `<plugin root>/skills/physics-ml/assets/eval-runs.example.json` - synthetic per-seed scores for
-  `<plugin root>/skills/physics-ml/scripts/compare_model_runs.py`.
-- `<plugin root>/skills/physics-ml/assets/dataset-splits.example.json` - synthetic split manifest, deliberately
-  containing a group leak and a temporal violation, for
-  `<plugin root>/skills/physics-ml/scripts/check_split_integrity.py`.
+- `hep_metrics.py` (signed-weight ROC, rejection at fixed signal efficiency, Asimov significance, distance correlation, mass-sculpting JSD; NumPy) and `hep_losses.py` (signed-weight BCE, DisCo penalty, NaN-safe masked softmax and mean).
+- `models.py`, `dataset_template.py`, `train_classifier.py`, `inference.py`, `metrics.py`,
+  `vision_transfer.py`, `ddp_train_skeleton.py`, `config.yaml`.
+- `set_classifier.py` - a permutation-invariant classifier for particle sets with padding masks.
+- `calibration.py` - post-hoc calibration of classifier scores on a held-out calibration split.
+- `transformer_classifier.py` - a from-scratch Transformer encoder (multi-head attention,
+  positional encoding, padding mask, mean-pooling) for sequence classification.
+- `lora_finetune.py` - LoRA adapter wrapper and a fine-tuning loop that trains only the
+  adapter parameters against a frozen pretrained model (for example a jet foundation model).
+- `eval-runs.example.json` - synthetic per-seed scores for `compare_model_runs.py`.
+- `dataset-splits.example.json` - synthetic split manifest of events grouped by run,
+  deliberately containing a run in both train and test and a time-order violation, for
+  `check_split_integrity.py`.
 
 ## Debugging Checklist
 
@@ -305,15 +323,15 @@ corrected snippet -> a quick diagnostic print/assert to confirm the fix.
 
 ## Example Prompts This Skill Handles Well
 
-- "Write a training loop for a ResNet18 fine-tune on a custom image dataset."
+- "Train a BDT for my event selection with negative generator weights, split by run."
+- "Write a PyTorch training loop for a particle-set jet tagger with padding masks."
 - "My loss goes to NaN after a few hundred steps - here's my training code."
 - "Add mixed precision and gradient accumulation to this script."
 - "Review this `Dataset`/`DataLoader` for correctness and performance."
 - "Convert this single-GPU training script to DDP."
-- "This 7B model OOMs on 8 A100s - should I use FSDP, tensor parallel, or something else?"
-- "How long and how much would it cost to train this model, and is it the right size?"
+- "My generative shower model OOMs on one A100 - DDP, FSDP2, or a smaller micro-batch?"
 - "Is this 0.4% accuracy gain real, or is it seed noise?"
-- "How many replicas do we need to serve 500 QPS under a 250 ms p99 budget?"
+- "Export this tagger to ONNX for the experiment's reconstruction software, with a variable number of particles."
 - "Review how this dataset is split before we trust the eval numbers."
 - "Is this classifier's 0.99 confidence actually a calibrated probability?"
 - "This surrogate model is accurate in its training range but we're running it outside that range - is that OK?"

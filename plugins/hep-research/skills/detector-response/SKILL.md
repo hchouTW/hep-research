@@ -1,11 +1,11 @@
 ---
 name: detector-response
-description: "Use when the deliverable is about how a detector responds: signal formation and readout, reconstruction (tracking, vertexing, calorimetry, particle identification, timing, Cherenkov/RICH, TRD, TOF, muon systems), calibration and alignment, efficiency and resolution measurement (tag-and-probe, truth matching), detector simulation (Geant4), data/MC agreement, conditions and their provenance, response matrices, folding a prediction through the response, and parametrized response for recasting. Works for collider, fixed-target, neutrino, rare-event and astroparticle instruments, with or without a profile. Load it first even for a quick question on a named experiment's detector or resolution: it reads the profile and asks which configuration is meant instead of quoting from memory. Not for: measurement design (hep-analysis); unfolding, fits, limits (hep-statistics); theory (hep-theory); generic code (hep-computing)."
+description: "Use when the deliverable is about how a detector responds: signal formation and readout, reconstruction (tracking, vertexing, calorimetry, particle identification, timing, Cherenkov/RICH, TRD, TOF, muon systems), calibration and alignment, efficiency and resolution measurement (tag-and-probe, truth matching), detector simulation (Geant4), data/MC agreement, conditions and their provenance, response matrices, folding a prediction through the response, and parametrized response for recasting. Works for collider, fixed-target, neutrino, rare-event and astroparticle instruments, with or without a profile. Load it first even for a quick question on a named experiment's detector or resolution: it reads the profile and asks which configuration is meant instead of quoting from memory. Not for: measurement design (hep-analysis); unfolding, fits, limits (hep-statistics); theory (hep-theory); generic code (hep-computing); training ML models (physics-ml)."
 ---
 
 # detector-response: detector performance and response
 
-**Owns:** signal formation, reconstruction, calibration, alignment, efficiency and resolution, truth matching, detector simulation, data/MC comparison, parametrized response for recasting, response matrices, forward folding of predictions, double-counting checks.
+**Owns:** signal formation, reconstruction, detector calibration, alignment, efficiency and resolution, truth matching, detector simulation, data/MC comparison, parametrized response for recasting, response matrices, forward folding of predictions, double-counting checks.
 **Typical artifacts:** `response` (truth/reco axes, orientation, normalization, what sits inside the matrix, intended use), folded `prediction`, performance reports, conditions provenance.
 **Never:** invent detector facts; detector specifics come from an experiment profile, the user, or are `unknown`. Inference on top of a response belongs to hep-statistics.
 
@@ -55,7 +55,7 @@ Scripts in `<plugin root>/skills/detector-response/scripts/` (read `--help` firs
 | Tag-and-probe pass/fail fit, pileup systematics | hep-statistics | performance report |
 | Measurement design using these numbers | hep-analysis | `response` / report |
 | Simulation production, conditions code | hep-computing | `computational-run` |
-| ML-based reconstruction or calibration | physics-ml | `ml-artifact` |
+| ML-based reconstruction or calibration; training a learned fast simulation or ML response model | physics-ml | `ml-artifact` |
 | Writing up results | research-communication | report |
 
 <!-- example: routing -->

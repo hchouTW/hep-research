@@ -150,7 +150,7 @@ statistical baseline next to each value: the JSD between two random halves of th
 - **DisCo:** add λ·dCor²(score, mass) computed on background events in each batch. It is a differentiable,
   non-adversarial single-objective penalty, typically much more stable than adversarial training (Kasieczka & Shih,
   PRL 125 (2020) 122001, arXiv:2001.05310). Cost is O(B²) per batch, the penalty needs batches of several hundred
-  events, and it should be computed in float32 even under mixed precision. Use |w| inside the penalty; distance
+  events, and it should be computed in float32 even under mixed precision ([mixed-precision.md](mixed-precision.md)). Use |w| inside the penalty; distance
   correlation is not defined for signed weights. Training on |w| decorrelates the |w|-weighted background, so check
   the sculpting afterwards with the signed weights. Implementation: `assets/hep_losses.py` (`disco_penalty`).
 - **Moment decomposition (MoDe):** constrains the score's conditional distribution to a chosen order in mass (flat,
