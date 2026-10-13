@@ -232,6 +232,89 @@
     "tests/skills/hep_statistics/test_ratio_estimation.py"
    ],
    "scope": "one analytic model; not a production SBI tool"
+  },
+  {
+   "id": "gate-hardening-2-6",
+   "capability": "contracts 2.6.0 statistical-result and Bayesian hardening rules; synthetic/asimov results fail the publication gate; comparison-gate edge maps and unit factors; combination ids; envelope rows",
+   "status": "supported",
+   "gate": "pr",
+   "tests": [
+    "tests/contracts/test_gate_adversarial.py",
+    "tests/contracts/test_gate_verdict_snapshot.py",
+    "tests/contracts/test_statistical_semantics.py",
+    "tests/contracts/test_comparison.py"
+   ],
+   "scope": "contract-level consistency of statistical-result artifacts and comparison plans"
+  },
+  {
+   "id": "covariance-scale-invariance",
+   "capability": "PSD, rank and conditioning of a covariance judged on its correlation matrix",
+   "status": "supported",
+   "gate": "pr",
+   "tests": [
+    "tests/core/test_stats_covariance.py"
+   ],
+   "scope": "validate_covariance.py"
+  },
+  {
+   "id": "broken-power-law-fits",
+   "capability": "sharp and smooth broken power laws and plug-in models in covariance fits; toy-calibrated break interval and no-break test",
+   "status": "supported",
+   "gate": "pr",
+   "tests": [
+    "tests/skills/hep_statistics/test_covariance_fit.py"
+   ],
+   "scope": "one validated truth (500-toy slow test); other truths need their own coverage study"
+  },
+  {
+   "id": "ratio-cov-analytic",
+   "capability": "full covariance of per-bin ratios at counts >= 1e4 without toys",
+   "status": "supported",
+   "gate": "pr",
+   "tests": [
+    "tests/core/test_stats_statistical_toys.py"
+   ],
+   "scope": "declared multiplicative systematics (full, none, exponential), counts 1e4-1e12"
+  },
+  {
+   "id": "dagostini-unfold",
+   "capability": "D'Agostini unfolding of data with first-order data and response covariance",
+   "status": "supported",
+   "gate": "pr",
+   "tests": [
+    "tests/core/test_stats_unfolding_outer.py"
+   ],
+   "scope": "up to 400 response cells; first order, so check with toys at small counts"
+  },
+  {
+   "id": "shape-limit-ordinary-sizes",
+   "capability": "asymptotic shape-limit at 100 bins x 1e4 events per bin; agreement with pyhf",
+   "status": "supported",
+   "gate": "pr",
+   "tests": [
+    "tests/adapters/test_backend_likelihood_equivalence.py"
+   ],
+   "scope": "asymptotic path only (no toys)"
+  },
+  {
+   "id": "shape-significance",
+   "capability": "multi-bin discovery q0 of the shape model with asymptotic and toy p-values",
+   "status": "supported",
+   "gate": "pr",
+   "tests": [
+    "tests/core/test_stats_likelihood_limits.py"
+   ],
+   "scope": "shape-limit model and caps"
+  },
+  {
+   "id": "cli-input-fuzz",
+   "capability": "malformed input refused with exit 2 and JSON by every statistics CLI; --help without NumPy",
+   "status": "supported",
+   "gate": "pr",
+   "tests": [
+    "tests/skills/hep_statistics/test_cli_input_fuzz.py"
+   ],
+   "scope": "the input classes listed in the test"
   }
  ]
 }

@@ -156,7 +156,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `task-authoring-guide.md` | hep-computing | 11.9 | yes | 8 | - | 351029c 2026-10-07 |
 | `task-quality-checklist.md` | hep-computing | 3.0 | no | 4 | - | 351029c 2026-10-07 |
 | `validation-and-done.md` | hep-computing | 3.7 | yes | 5 | - | 351029c 2026-10-07 |
-| `astroparticle-statistics.md` | hep-statistics | 11.3 | yes | 12 | detector-response, hep-analysis | 578c12f 2026-10-13 |
+| `astroparticle-statistics.md` | hep-statistics | 11.3 | yes | 12 | detector-response, hep-analysis | 33d96a1 2026-10-13 |
 | `combinations.md` | hep-statistics | 4.1 | yes | 1 | - | 591e7d0 2026-10-13 |
 | `core-stats-commands.md` | hep-statistics | 32.0 | yes | 4 | - | d648b8a 2026-10-13 |
 | `core-stats-guide.md` | hep-statistics | 16.3 | yes | 8 | - | d648b8a 2026-10-13 |
