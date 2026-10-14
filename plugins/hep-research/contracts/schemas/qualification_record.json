@@ -1,0 +1,18 @@
+{"$comment": "Qualification record (task P1.1, C07): the custodian's or launcher's record that a host configuration was qualified for a stage, for one plugin release and one authoritative agent_policy. A protected input: core.protected.guard reads it only from a file the running account neither owns nor can write or replace, and refuses protected use when it is malformed, not valid now, bound to another policy (canonical SHA-256 of the authoritative policy) or another plugin release (core.protected.identity), or revoked (revocation subject kind 'qualification'). The rules are written out in core.protected.guard.qualification_problem, which tests check against this schema. A qualification record authorizes nothing by itself.",
+ "type": "object",
+ "required": ["record_version", "qualification_id", "stage", "host", "plugin", "policy_sha256", "valid_from", "valid_until", "issued_by"],
+ "additionalProperties": false,
+ "properties": {
+  "record_version": {"type": "string", "const": "1.0.0"},
+  "qualification_id": {"type": "string", "minLength": 1},
+  "stage": {"type": "string", "enum": ["S1", "S2", "S3", "S4"]},
+  "host": {"type": "object", "required": ["surface", "effective_digest"], "additionalProperties": false, "properties": {
+   "surface": {"type": "string", "minLength": 1},
+   "effective_digest": {"$ref": "revocation_event.json#/$defs/sha256"}}},
+  "plugin": {"type": "object", "required": ["release", "digest"], "additionalProperties": false, "properties": {
+   "release": {"$ref": "common.json#/$defs/version"},
+   "digest": {"$ref": "revocation_event.json#/$defs/sha256"}}},
+  "policy_sha256": {"$ref": "revocation_event.json#/$defs/sha256"},
+  "valid_from": {"$ref": "revocation_event.json#/$defs/timestamp"},
+  "valid_until": {"$ref": "revocation_event.json#/$defs/timestamp"},
+  "issued_by": {"type": "string", "minLength": 1}}}

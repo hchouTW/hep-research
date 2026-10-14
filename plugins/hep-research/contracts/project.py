@@ -24,9 +24,12 @@ if __package__ in (None, ""):
 from contracts.registry import PLUGIN_ROOT, option_values, validate_registry  # noqa: E402
 from contracts.schema import Report, validate  # noqa: E402
 from contracts.semver import parse, satisfies, valid_spec  # noqa: E402
+from contracts.protected_use import guard_report  # noqa: E402
+from core.protected.guard import protected_main  # noqa: E402
 
 CONFIG_NAME = "hep-research.project.json"
-SCHEMA_VERSION = "1.1.0"  # the project-config schema this reader implements (1.1.0: agent_policy, closed blinding)
+SCHEMA_VERSION = "1.2.0"  # the project-config schema this reader implements (1.1.0: agent_policy, closed blinding;
+# 1.2.0: agent_policy.protected_inputs)
 DEFAULT_ARTIFACTS_DIR = "./hep-research-artifacts/"
 
 
@@ -54,6 +57,8 @@ def load_project(path: Path, registry_path: Path | None = None, extra_local: lis
     check_schema_version(cfg, rep)
     check_blinding_block(cfg, rep)
     check_agent_policy(cfg, proj_dir, rep)
+    # protected mode (the project declares agent_policy): the protected inputs must be established (core.protected.guard)
+    guard_report("contracts.project.load_project", rep, project=proj_dir)
     pv = cfg["plugin_version"]
     if not valid_spec(pv):
         rep.add("error", "config.plugin_version", "project.bad_version_range", f"cannot parse {pv!r}")
@@ -114,6 +119,9 @@ def check_schema_version(cfg: dict, rep: Report) -> None:
     elif "agent_policy" in cfg and have < (1, 1, 0):
         rep.add("error", "config.agent_policy", "project.policy_needs_schema",
                 "agent_policy needs schema_version 1.1.0 or later")
+    elif "protected_inputs" in (cfg.get("agent_policy") or {}) and have < (1, 2, 0):
+        rep.add("error", "config.agent_policy.protected_inputs", "project.policy_needs_schema",
+                "agent_policy.protected_inputs needs schema_version 1.2.0 or later")
 
 
 BLINDING_KEYS = {"blinded", "allowed_outputs", "regions"}
@@ -190,6 +198,7 @@ def resolve_context(request: dict, project: Project | None, needs_profile: bool)
     return {"decision": "none", "source": "none", "experiments": [], "theory": []}
 
 
+@protected_main("contracts.project")
 def main(argv=None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if not args:

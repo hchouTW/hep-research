@@ -3,6 +3,7 @@ missing required text is reported."""
 from __future__ import annotations
 
 import importlib.util
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -38,6 +39,20 @@ class InstructionTextTests(unittest.TestCase):
             self.assertEqual(sorted((f["rule"], f["file"]) for f in rep["findings"]),
                              [("M01", "skills/x/SKILL.md"), ("M10", "skills/x/SKILL.md"),
                               ("M16", "contracts/stanzas/context-resolution.md")])
+
+
+    def test_protected_mode_phrases_are_found(self):
+        """Task P7.3: wording that turns the protected-use checks into an authorization or a bypass is reported."""
+        planted = {"P01": "Once protected use is allowed, publish.", "P02": 'it returns "formal_use_allowed": true',
+                   "P03": "If it refuses, skip protected mode for this run."}
+        for rid, text in planted.items():
+            with self.subTest(rule=rid):
+                hits = [r for r in cit.RULES if r[0] == rid and re.search(r[1], text, re.I)]
+                self.assertTrue(hits, rid)
+        for fine in ("Passing these checks authorizes nothing.", 'formal_use_allowed is always false',
+                     "never reports a use as allowed"):
+            self.assertFalse([r for r in cit.RULES if r[0].startswith("P")
+                              and re.search(r[1], fine, re.I)], fine)
 
 
 if __name__ == "__main__":

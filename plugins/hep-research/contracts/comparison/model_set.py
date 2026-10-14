@@ -12,10 +12,12 @@ from __future__ import annotations
 from itertools import combinations
 from typing import Any
 
-from contracts.comparison.gate import gate, side_from_artifact
+from contracts.comparison.gate import _gate, side_from_artifact
+from core.protected.guard import guard
 
 
 def model_set(prediction_docs) -> dict:
+    guard("contracts.comparison.model_set.model_set")
     problems, alts = [], []
     seen_ids = set()
     seen_specs: dict[Any, Any] = {}
@@ -39,13 +41,14 @@ def model_set(prediction_docs) -> dict:
                      "experiment_bindings": d.get("bindings", {}).get("experiments", [])})
     sides = [side_from_artifact(d) for d in prediction_docs if d.get("artifact_type") == "prediction"]
     for a, b in combinations(sides, 2):
-        g = gate(dict(a, parameter_point={}, allowed_transformations=None), b, [], [], {})
+        g = _gate(dict(a, parameter_point={}, allowed_transformations=None), b, [], [], {})
         for m in g["mismatches"]:
             problems.append({"code": "models.different_observable", "message": f"{a['artifact_id']} vs {b['artifact_id']}: {m['field']}: {m['reason']}"})
     return {"ok": not problems, "problems": problems, "alternatives": alts}
 
 
 def envelope(ms: dict, values_by_id: dict, prescription: dict | None = None) -> dict:
+    guard("contracts.comparison.model_set.envelope")
     if not ms.get("ok"):
         return {"ok": False, "reason": "the model set itself is not valid"}
     if not prescription or prescription.get("owner") != "hep-theory" or not prescription.get("justification"):

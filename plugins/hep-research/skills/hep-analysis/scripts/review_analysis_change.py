@@ -52,6 +52,9 @@ import re
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from core.protected.guard import guard, protected_main  # noqa: E402
+
 OUTCOME_SEEN = re.compile(r"signal[- ]region data|unblinded|observed result|fit result|outcome|significance|p-value", re.I)
 OUTCOME_MOTIVE = re.compile(
     r"(to|so that|in order to).{0,40}(agree|match|improve|increase|reduce|remove|enhance|sharpen|boost).{0,40}"
@@ -142,6 +145,7 @@ def exposure(change: dict, derived: dict | None = None) -> tuple[dict, list]:
 
 
 def review(change: dict, derived: dict | None = None) -> dict:
+    guard("review_analysis_change.review")
     ev = change.get("evidence") or {}
     if not isinstance(ev, dict):
         raise BadExposure(f"change {change.get('id')!r}: evidence must be an object")
@@ -183,6 +187,7 @@ def review(change: dict, derived: dict | None = None) -> dict:
             "data_exposure": data_exposure}
 
 
+@protected_main("review_analysis_change")
 def main(argv=None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if args and args[0] in ("-h", "--help"):
@@ -200,7 +205,6 @@ def main(argv=None) -> int:
         k = args.index("--exposure-record")
         if k + 1 >= len(args):
             return _fail("--exposure-record needs a file")
-        sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
         from contracts.lineage import derive_exposure, load_exposure
         derived = derive_exposure(load_exposure(args[k + 1]), args[k + 1])
         del args[k:k + 2]

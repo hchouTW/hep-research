@@ -26,6 +26,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from core.blinding.blinding import mask_binned, mask_ratio  # noqa: E402
+from core.protected.guard import protected_main  # noqa: E402
 
 STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
             'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
@@ -53,6 +54,7 @@ def _number(v, what):
     return float(v)
 
 
+@protected_main("mask_blinded_bins")
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--hist", type=Path, required=True)

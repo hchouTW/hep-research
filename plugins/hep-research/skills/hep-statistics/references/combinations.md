@@ -8,6 +8,10 @@ uncertainties go through `combine_asymmetric.py`.
 
 ## Before any combination
 
+- In a protected project (`agent_policy` in the project config) `plan_combination`, the comparison gate and
+  `combine_measurements.py` first check the revocation and qualification inputs and refuse (exit 3, `"status":
+  "refused"`) when they cannot be established or an input is revoked. A combination meant for publication is formal
+  use, which needs a formal-use permit the plugin cannot check yet; passing the checks authorizes nothing.
 - The inputs measure the same thing: the comparison gate passes pairwise with no transformation (same quantity, units,
   binning, phase space, level, normalization, conventions). `plan_combination` refuses otherwise, and refuses a
   dataset entered twice (`combine.duplicate_id`).

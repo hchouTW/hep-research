@@ -5,8 +5,11 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
-Contracts 2.6.0 (unchanged; new capability IDs only; the data release manifest sidecar keeps `manifest_version` 1.0.0;
-new sidecars: revocation log and head, exposure and decision records).
+Contracts 2.7.0 (minor: the capability IDs `core:revocation-log`, `core:exposure-record`, `core:decision-lineage` and
+the warning `exposure.capability_not_declared`; a 2.6 artifact keeps its outcome; the data release manifest sidecar
+keeps `manifest_version` 1.0.0;
+new sidecars: revocation log and head, exposure and decision records, qualification record). Project config schema
+1.2.0 (`agent_policy.protected_inputs`). A project with `agent_policy` now runs in protected mode (see below).
 
 - **Custodian checks in the release-manifest checker (AGENTIC-R5 T1.2, deployment work package B).** The checks a
   custodian deployment ran on its own side move into `contracts/release_manifest.py`, so every custodian uses one
@@ -20,6 +23,37 @@ new sidecars: revocation log and head, exposure and decision records).
   objects without their structure keys: `release.sealed_value_present`; an artifact that cannot be scanned is
   `release.scan_incomplete`, fail closed). Findings name the artifact only, never a sealed value or a count. Passing
   still releases nothing. Tests in `tests/contracts/test_release_manifest.py` (`CustodianOptionTests`).
+- **Protected-use mode at the formal-use entry points (task P1; C07 plugin part, HC-09, K08, DP-2, DP-4).** A project
+  whose config declares `agent_policy`, or an entry point given `--protected`, now runs in protected mode; omitting a
+  flag cannot switch it off, and outside protected mode nothing changes. In protected mode every formal-use entry
+  point of the R5.4 code change map (validate, dependencies, comparison gate and check, combination plan, model set,
+  `combine_measurements.py`, HEPData export and record, `batch_campaign.py` and campaign submit/resubmit/confirm/merge,
+  the runner, `engine.run`/`merge`, `local_partition.py`, `bayes_diagnostics.py`, template fits, change review,
+  `mask_blinded_bins.py` and the `core.blinding` entry points, `project.load_project`, `environment_manifest.py`, the
+  evidence ledger, `check_manuscript.py`) first reads the authoritative copy of the policy named by
+  `agent_policy.authoritative_copy` and, from it, `protected_inputs` (project schema 1.2.0): the revocation log and
+  head (verified as in P2) and the new qualification record (`qualification_record.json`: valid now, bound to the
+  authoritative policy's digest and to the running plugin's code identity, not revoked). Each must be a protected input
+  the session's account neither owns, nor can write, nor can replace. A failure, a revoked input file or an input that
+  needs an unknown capability is a refusal: command lines exit 3 with `{"status": "refused", "refusals": [{code, path,
+  message}]}`, report-returning functions add `protected.*` error findings, other functions raise
+  `ProtectedUseRefused`. Formal use (HEPData export for publication) is refused in protected mode until formal-use
+  permits exist (release B). The guard is the new standard-library package `core/protected/` (`guard`,
+  `trusted_input`, `revocation_log`, `identity`, moved from `contracts/` so that `core/` functions call it; the
+  `contracts.identity` and `contracts.revocation` import paths are unchanged), with `contracts/protected_use.py` as the
+  public interface (`status` command). `comparison/gate.py`: the comparison logic is `_gate`; the public `gate` and
+  `check` check protected use first (refusal `protected-use`). The copied batch runner cannot check the inputs and
+  refuses in protected mode (exit 3; protected batch execution runs through the trusted submitter). Instruction-text
+  rules P01-P03 report wording that calls these checks an authorization or a bypass; skill references (hep-computing
+  engineering playbook, hep-analysis analysis design, hep-statistics combinations) describe protected mode and exposure
+  records. Bypass suite `tests/contracts/test_protected_entry_points.py`; fixture `tests/protected_fixture.py`.
+  Rules settled in review: a directory the session's account owns is replaceable even when read-only; an input is
+  revoked by its byte digest, its canonical JSON digest or its project-relative path, and an input that cannot be read
+  is refused (`protected.input_unreadable`); a qualification is revoked by id or digest; a link into a protected
+  project is followed when the mode is decided; a project config that cannot be read, or a malformed one that names
+  `agent_policy`, switches protected mode on (`protected.config_unreadable`); `authoritative_copy.sha256` is the canonical
+  JSON SHA-256 of the policy without `authoritative_copy`, as the deployment's launcher computes it; malformed protected inputs are refusals,
+  never crashes (`protected.input_malformed`); in protected mode an exposure record is read only as a protected input.
 - **Exposure and decision lineage (task P3; C12, T1.9, T4.3).** New sidecars `exposure_record.json` (per analysis and
   source snapshot: entries `{seq, release_id, via: session|relay, seen: [closed kinds], time, actor}`, each version
   naming the canonical SHA-256 of the previous one) and `decision_record.json` (decision, category, actor human or
@@ -32,8 +66,8 @@ new sidecars: revocation log and head, exposure and decision records).
   record knows but `related_releases` omits (`release.related_incomplete`) or the ledger does not know
   (`release.exposure_release_unknown`). The reverse index follows exposure records (release -> record) and decision
   records (recipe -> decision -> artifacts). Capability IDs `core:revocation-log`, `core:exposure-record` and
-  `core:decision-lineage` join `KNOWN_CAPABILITIES` (contracts stay 2.6.0: an older reader already refuses an unknown
-  required capability); the validator warns `exposure.capability_not_declared` when a structured `data_exposure` names
+  `core:decision-lineage` join `KNOWN_CAPABILITIES` (contracts 2.7.0; a 2.6 reader refuses an artifact that requires
+  one); the validator warns `exposure.capability_not_declared` when a structured `data_exposure` names
   a record without `core:exposure-record`. Tests in `tests/contracts/test_lineage.py`.
 - **Hash-chained revocation log and reverse index (task P2; C07, F07).** New `contracts/revocation.py` with the sidecar
   schemas `revocation_event.json` and `revocation_head.json`: a genesis record and events `{seq, prev_sha256, subject:
@@ -43,7 +77,7 @@ new sidecars: revocation log and head, exposure and decision records).
   for another log, from another source, stale or dated in the future (`revocation.*` codes); a refused log answers no
   lookup instead of "nothing revoked". `build_index()`/`affected()` follow envelope inputs, `data_exposure.record_ref`,
   release manifests, attestations, bundles and recipes to every dependent, transitively, without writing anything.
-  New `contracts/trusted_input.py`: in protected mode a protected input must be a regular file with one link that the
+  New `core/protected/trusted_input.py`: in protected mode a protected input must be a regular file with one link that the
   running account neither owns, nor can write, nor can replace along its path (`source.*` codes).
   `dependencies.py --revocations` now reads the chained log (`--revocation-head`, `--revocation-source`,
   `--max-status-age`, `--now`); the legacy JSON Lines format is a warning (`dependency.revocations_legacy`) and is

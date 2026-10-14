@@ -71,6 +71,7 @@ from pathlib import Path
 from typing import Any
 
 from core.stats._linalg import solve
+from core.protected.guard import guard, protected_main
 from core.stats.statistical_toys import ToyError, _num, _seed, _std, _toys, poisson_draw
 
 
@@ -308,6 +309,7 @@ def _overall(result: dict, diags, comparison=None) -> dict:
 
 
 def bb_fit(doc: dict) -> dict:
+    guard("core.stats.template_fit.bb_fit")
     names, data, m, mc = _load(doc)
     yn, cn, lln, dn = _fit_yields_full(data, m, mc, "naive")
     yb, cb, llb, db = _fit_yields_full(data, m, mc, "bb", yn)
@@ -332,6 +334,7 @@ def _mad_width(v):
 
 
 def bb_toys(doc: dict, toys: int, seed: int) -> dict:
+    guard("core.stats.template_fit.bb_toys")
     names, data, m, mc = _load(doc)
     toys, seed = _toys(toys, 20), _seed(seed)
     true = doc.get("true_yields")
@@ -649,6 +652,7 @@ def _fit_w_full(data, w, t_tot, c, nuis, kind, start=None):
 
 
 def wbb_fit(doc: dict) -> dict:
+    guard("core.stats.template_fit.wbb_fit")
     names, data, w, c, t_tot, nuis = _load_w(doc)
     yn, thn, cn, _, dn = _fit_w_full(data, w, t_tot, c, nuis, "naive")
     yb, thb, cb, _, db = _fit_w_full(data, w, t_tot, c, nuis, "bb", yn)
@@ -669,6 +673,7 @@ def wbb_fit(doc: dict) -> dict:
 
 
 def wbb_toys(doc: dict, toys: int, seed: int) -> dict:
+    guard("core.stats.template_fit.wbb_toys")
     names, data, w, c, t_tot, nuis = _load_w(doc)
     toys, seed = _toys(toys, 20), _seed(seed)
     true = doc.get("true_yields")
@@ -746,6 +751,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+@protected_main("core.stats.template_fit")
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:

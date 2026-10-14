@@ -42,6 +42,8 @@ from pathlib import Path
 from threading import local as _thread_state  # the packaging scan reads '.local' as a host name
 from typing import Any
 
+from core.protected.guard import guard
+
 
 class PartitionError(ValueError):
     """Refusal with a named code (exit 2 in a CLI)."""
@@ -252,6 +254,7 @@ def _max_attempts(config: dict | None) -> int:
 
 def run(manifest: dict, state_dir, worker, config: dict | None = None) -> dict:
     """Run every chunk without an output, each within max_attempts counted since its last reset() over all calls."""
+    guard("core.partition.engine.run", paths=[state_dir])
     state_dir = Path(state_dir)
     max_attempts = _max_attempts(config)
     with dir_lock(state_dir, "run"):
@@ -372,6 +375,7 @@ def _nonfinite(x, path="result") -> str | None:
 
 def merge(manifest: dict, state_dir, combine=None) -> dict:
     """Merge chunk outputs; combine(list_of_results) defaults to key-by-key summation."""
+    guard("core.partition.engine.merge", paths=[state_dir])
     with dir_lock(state_dir, "merge"):
         return _merge(manifest, Path(state_dir), combine)
 

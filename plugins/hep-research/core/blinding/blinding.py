@@ -55,6 +55,8 @@ import unicodedata
 from pathlib import Path
 from typing import Any
 
+from core.protected.guard import guard
+
 NUMBER = re.compile(r"[-+]?(?:\d+\.\d*|\.\d+|\d+)(?:[eE][-+]?\d+)?")
 TEXT_SUFFIXES = {".json", ".txt", ".log", ".csv", ".tsv", ".md", ".svg", ".yaml", ".yml", ".tex", ".html",
                  ".out", ".err", ".sh", ".sbatch", ".sub"}  # the last five: batch job logs and job descriptions
@@ -107,6 +109,7 @@ def mask_binned(edges, values, region: dict, errors=None, flow: bool = False) ->
     one finite number per bin (len(edges) - 1, or len(edges) + 1 with flow=True: underflow first, overflow last);
     a length mismatch or a non-number is a ValueError, never a silently shifted mask. Errors are masked with the
     values' mask, so no output pairs a masked value with its unmasked error."""
+    guard("core.blinding.mask_binned")
     n = len(edges) - 1 + (2 if flow else 0)
     if len(values) != n:
         raise ValueError("values need one entry per bin" + (" plus underflow and overflow" if flow else ""))
@@ -127,6 +130,7 @@ def mask_binned(edges, values, region: dict, errors=None, flow: bool = False) ->
 def mask_ratio(num, den, mask) -> list:
     """num/den per bin with every blinded bin (and every bin with a missing or zero denominator) None. The three lists
     must have the same length: zip would otherwise truncate them and misalign the mask (fail closed, ValueError)."""
+    guard("core.blinding.mask_ratio")
     n = len(mask)
     if len(num) != n or len(den) != n:
         raise ValueError(f"ratio inputs need one entry per bin: numerator {len(num)}, denominator {len(den)}, mask {n}")
@@ -185,6 +189,7 @@ def seal(edges, values, region: dict, references=(), flow: bool = False) -> list
     Not sealed (Q3, option a): exact zero, and any number equal (relative 1e-9, sign ignored) to one the unblinded
     bins give alone (_public_numbers): sealing those makes every log line "0 errors" or every public sideband table a
     false leak, and protects nothing. NOT_SEALED lists what stays unsealed. Raises ValueError on invalid edges."""
+    guard("core.blinding.seal")
     m = blinded_mask(edges, region, flow)
     if len(values) != len(m):
         raise ValueError("values need one entry per bin" + (" plus underflow and overflow" if flow else ""))
@@ -474,6 +479,7 @@ def scan_paths(paths, sealed, rtol: float = 1e-9, strict: bool = False, exemptio
 
     The report is detailed (files, lines, tokens, sealed values): it is for a custodian or a human outside the agent
     session. Agent-visible output must be agent_view(report), a fixed status only."""
+    guard("core.blinding.scan_paths", paths=list(paths) if isinstance(paths, (list, tuple)) else [])
     ex = {str(Path(k).resolve()): str(v or "").strip() for k, v in (exemptions or {}).items()}
     report: dict[str, Any] = {"leaks": [], "unscanned": [], "scanned": [], "exempted": [], "reasons": [], "strict": strict,
                               "limitation": LIMITATION}
@@ -536,6 +542,7 @@ def check_figure(fig, region: dict, sealed=None, rtol: float = 1e-9) -> list[dic
     fills, 2D histograms, images) and, when sealed numbers are given, any text in the figure (titles, axis labels,
     tick labels, legends, tables, colorbar labels, annotations) or line or marker y value that equals one. Findings
     name the artist, never the sealed value. check_figure_report also lists what was not checked."""
+    guard("core.blinding.check_figure")
     return _check_figure(fig, region, sealed, rtol, [])
 
 
@@ -671,6 +678,7 @@ def load_project_blinding(config_path) -> dict:
     Unvalidated (core cannot import contracts): use contracts.project.load_blinding for a validated read. Fails
     closed in the one case that matters here: with agent_policy present, a missing block is an error, never
     'nothing blinded'."""
+    guard("core.blinding.load_project_blinding", paths=[config_path])
     cfg = json.loads(Path(config_path).read_text(encoding="utf-8"))
     if "agent_policy" in cfg and not isinstance(cfg.get("blinding"), dict):
         raise ValueError("the project declares agent_policy but no blinding block")

@@ -30,6 +30,8 @@ except ImportError:  # --help works without numpy; combine() reports it
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from contracts.comparison.combination import plan_combination  # noqa: E402
+from core.protected.guard import guard, protected_main  # noqa: E402
+from contracts import KNOWN_CAPABILITIES  # noqa: E402
 
 
 def gls(values_list, cov):
@@ -71,6 +73,7 @@ def cross_block_conflicts(datasets, cov, plan) -> list:
 
 
 def combine(doc: dict) -> dict:
+    guard("combine_measurements.combine")
     if np is None:
         raise ImportError("numpy is required to combine measurements; install it (pip install numpy)")
     plan = plan_combination(doc["datasets"], doc.get("correlations", []))
@@ -87,6 +90,7 @@ def combine(doc: dict) -> dict:
     return {"status": "combined", "plan": plan, "values": x.tolist(), "covariance": cov.tolist(), "chi2": chi2, "ndf": ndf}
 
 
+@protected_main("combine_measurements", capabilities=KNOWN_CAPABILITIES)
 def main(argv=None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if args and args[0] in ("-h", "--help"):

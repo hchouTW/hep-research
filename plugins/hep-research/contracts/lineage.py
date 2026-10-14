@@ -17,7 +17,8 @@ leaves out ('seen' understated).
 derive_exposure(record) is the only mapping to the envelope data_exposure: no record, an unreadable or invalid record
 is {"state": "unknown", "basis": "none"} (never unexposed); a valid record is {"state": "exposed"} when any entry up to
 the given seq names an exposing kind (EXPOSING), otherwise "unexposed", with basis structured-record and the record_ref.
-Exposure only grows: entries are never removed, so a new session or a new record version never clears it.
+Exposure only grows: entries are never removed, so a new session or a new record version never clears it. In
+protected mode load_exposure() reads the record only as a protected input (custodian-written).
 
 Usage: python3 contracts/lineage.py exposure RECORD [--previous FILE] [--record-ref REF] [--through N]
        python3 contracts/lineage.py decision DECISION --exposure RECORD
@@ -89,11 +90,27 @@ def derive_exposure(rec, record_ref: str | None = None, through_seq: int | None 
     return out
 
 
-def load_exposure(path) -> dict | None:
-    """The record at path, or None when it is missing, unreadable or not a JSON object (derive_exposure: unknown)."""
+def load_exposure(path, protected: bool | None = None) -> dict | None:
+    """The record at path, or None when it is missing, unreadable or not a JSON object (derive_exposure: unknown). In
+    protected mode (the enclosing entry point's context, or protected=True) the record is a protected input written
+    by the custodian (core.protected.trusted_input): a record the session's account could have written is refused,
+    since it is the one input that can lower exposure."""
+    from core.protected.guard import CURRENT
+    from core.protected.trusted_input import read_protected
+    ctx = CURRENT.get()
+    if protected or (protected is None and ctx is not None and ctx.protected):
+        chk = read_protected(path)
+        if not chk.ok:
+            return None
+        data = chk.data or b""
+    else:
+        try:
+            data = Path(path).read_bytes()
+        except OSError:
+            return None
     try:
-        doc = json.loads(Path(path).read_text(encoding="utf-8"))
-    except (OSError, ValueError, UnicodeDecodeError):
+        doc = json.loads(data.decode("utf-8"))
+    except (ValueError, UnicodeDecodeError, RecursionError):
         return None
     return doc if isinstance(doc, dict) else None
 

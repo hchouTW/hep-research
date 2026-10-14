@@ -48,6 +48,9 @@ if __package__ in (None, ""):
 from contracts.schema import Report, validate  # noqa: E402
 from contracts.semver import parse  # noqa: E402
 from contracts.vocab import NAMESPACED, Vocabulary  # noqa: E402
+from contracts.protected_use import guard_report  # noqa: E402
+from core.protected.guard import protected_main  # noqa: E402
+from contracts import KNOWN_CAPABILITIES  # noqa: E402
 
 EXTENSION_SCHEMAS = {
     "measurement-spec": "ext_measurement_spec.json", "response": "ext_response.json",
@@ -1348,9 +1351,15 @@ def check_unknown_keys(doc: dict, rep: Report) -> None:
                 f"'{key}' is not an envelope field: no consumer reads or propagates it")
 
 
-def validate_artifact(doc, vocab: Vocabulary | None = None, protected: bool = False, strict: bool = False) -> Report:
+def validate_artifact(doc, vocab: Vocabulary | None = None, protected: bool = False, strict: bool = False, *,
+                      context=None) -> Report:
+    """Schema and semantic rules of one artifact. In protected mode (the project declares agent_policy, or protected is
+    true; core.protected.guard) the protected inputs are checked first, a refusal is an error finding, and the stricter
+    version policy applies. `context` reuses an established protected-use context (core.protected.guard.Context)."""
     vocab = vocab or Vocabulary()
     rep = validate(doc, "envelope.json", vocab)
+    ctx = guard_report("contracts.validate.validate_artifact", rep, flag=protected, context=context)
+    protected = protected or ctx is None or ctx.protected
     check_finite(doc, rep)
     if not isinstance(doc, dict):
         return rep
@@ -1377,6 +1386,7 @@ def validate_artifact(doc, vocab: Vocabulary | None = None, protected: bool = Fa
     return rep
 
 
+@protected_main("contracts.validate", keep_flag=True, capabilities=KNOWN_CAPABILITIES)
 def main(argv=None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if not args or args[0] in ("-h", "--help"):

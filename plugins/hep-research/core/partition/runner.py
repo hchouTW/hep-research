@@ -20,7 +20,12 @@ the same attempt (an eviction or a requeue that ran the job again) writes <attem
 collection records as a duplicate and never sums. A failed command leaves only the meta file.
 Exit codes: the command's exit code (128 + N when it died from signal N); 70 when the command succeeded but its result
 was missing or not JSON; 2 for bad arguments or a chunk not in the manifest, and for a command template that cannot be
-filled (then the meta file records the reason, so the attempt is 'failed', never 'lost').
+filled (then the meta file records the reason, so the attempt is 'failed', never 'lost'); 3 when protected use is
+refused (the meta file records it; the command does not run).
+Protected mode (task P1): when the spec, the output directory or the working directory lies in a project that declares
+agent_policy, the runner checks the protected inputs through the plugin's guard (core.protected.guard) when it runs
+from the plugin itself; a copy of the runner cannot check them, so it refuses: protected batch execution runs through
+the trusted submitter. This keeps the file self-contained: the detection below is standard library only.
 """
 from __future__ import annotations
 
@@ -72,6 +77,34 @@ def resolve(args) -> tuple[str, str]:
     return args.chunk, args.attempt
 
 
+def protected_refusal(paths) -> str | None:
+    """None outside protected mode; otherwise None only when the plugin's guard accepts the protected inputs."""
+    on = False
+    for start in [*(Path(p).absolute() for p in paths if p), Path.cwd()]:
+        cur = start if start.is_dir() else start.parent
+        for d in (cur, *cur.parents):
+            cfg = d / "hep-research.project.json"
+            if cfg.is_file():
+                try:
+                    on = on or "agent_policy" in json.loads(cfg.read_text(encoding="utf-8"))
+                except (OSError, ValueError, TypeError):
+                    pass
+                break
+    if not on:
+        return None
+    here = Path(__file__).resolve()
+    if not (here.parent.name == "partition" and here.parent.parent.name == "core"):
+        return ("protected mode: this copy of the runner cannot check the revocation and qualification inputs; "
+                "protected batch execution runs through the trusted submitter")
+    sys.path.insert(0, str(here.parents[2]))
+    from core.protected.guard import ProtectedUseRefused, guard
+    try:
+        guard("core.partition.runner", paths=[p for p in paths if p])
+    except ProtectedUseRefused as exc:
+        return str(exc)
+    return None
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--spec", required=True)
@@ -102,6 +135,11 @@ def main(argv=None) -> int:
             "start_time": _now(), "python": platform.python_version(),
             "container_image": spec.get("container_image") or os.environ.get("HEP_CONTAINER_IMAGE"),
             "signal": None, "runner_error": None, "run_file": None}
+    refused = protected_refusal([args.spec, str(out_dir)])
+    if refused:
+        meta.update(runner_error=refused, exit_code=3, end_time=_now())
+        _place(out_dir, aid, ".meta.json", meta, None)
+        return 3
     with tempfile.TemporaryDirectory(prefix=".run-", dir=out_dir) as td:
         out = Path(td) / "out.json"
         result = None
