@@ -4,12 +4,16 @@ attestation (contracts/schemas/attestation.json) on its own. Nothing here combin
 axis state authorizes a use: the trusted gate (T4.1) reads protected copies and decides (HC-05).
 
 Usage: python3 contracts/attestation.py ATTESTATION [--bundle FILE] [--recipe FILE] [--evidence-root DIR]
-           [--revocations FILE] [--required-roles FILE] [--use FILE] [--now YYYY-MM-DDTHH:MM:SSZ]
+           [--revocations FILE | --revocation-log FILE --revocation-head FILE] [--required-roles FILE] [--use FILE]
+           [--now YYYY-MM-DDTHH:MM:SSZ]
   --bundle         the frozen bundle document (bundles/<digest>.json): its digest must match its content and the subject
   --recipe         the recipe the scope names: its canonical digest must match scope.recipe.sha256
   --evidence-root  directory the reviews' evidence refs are relative to; each file is hashed (links refused)
   --revocations    {"as_of", "source", "revoked": [{"ref", ...}]} from lifecycle.status_source, no older than
                    max_status_age_s; the attestation_id or revocation_ref listed means revoked
+  --revocation-log, --revocation-head  instead of --revocations: the hash-chained revocation log and its head
+                   (contracts/revocation.py), verified against lifecycle.status_source and max_status_age_s; its
+                   attestation events are the status (a log that does not verify leaves the lifecycle unknown)
   --required-roles ["role", ...]: every role needs an accepted review bound to this bundle, scope and evidence
   --use            the scope of the intended use: it must equal the reviewed scope except purposes, and name one
                    reviewed purpose ({... scope fields ..., "purposes": ["<one purpose>"]})
@@ -181,6 +185,13 @@ def evaluate(att, bundle=None, recipe=None, evidence_root=None, revocations=None
     clock = "system" if now is None else "given"
     now = now or datetime.datetime.now(datetime.UTC)
     rep = validate(att, "attestation.json")
+    if revocations is not None and not isinstance(revocations, dict) and hasattr(revocations, "status_doc"):
+        if revocations.ok:
+            revocations = revocations.status_doc(("attestation",))
+        else:
+            rep.add("warning", "revocations", "attestation.status_unverified", "the revocation log did not verify: "
+                    + ", ".join(sorted({f["code"] for f in revocations.findings})))
+            revocations = None
     axes = None
     scope_sha = subject_sha = None
     if rep.ok:
@@ -221,7 +232,12 @@ def main(argv=None) -> int:
         ap.add_argument(f"--{name.replace('_', '-')}", dest=name, type=Path)
     ap.add_argument("--evidence-root", type=Path)
     ap.add_argument("--now")
+    ap.add_argument("--revocation-log", dest="revocation_log", type=Path)
+    ap.add_argument("--revocation-head", dest="revocation_head", type=Path)
     args = ap.parse_args(argv)
+    if args.revocation_log is not None and args.revocations is not None:
+        print(json.dumps({"status": "unreadable", "error": "give --revocations or --revocation-log, not both"}))
+        return 2
     try:
         docs = {n: None if getattr(args, n) is None else json.loads(getattr(args, n).read_text(encoding="utf-8"))
                 for n in ("attestation", "bundle", "recipe", "revocations", "required_roles", "use")}
@@ -238,7 +254,17 @@ def main(argv=None) -> int:
     use = docs["use"]
     if args.use is not None and use is None:
         use = "null"  # a --use file holding null is malformed, not "no intended use"
-    out = evaluate(docs["attestation"], docs["bundle"], docs["recipe"], args.evidence_root, docs["revocations"],
+    revocations = docs["revocations"]
+    if args.revocation_log is not None:
+        from contracts.revocation import MAX_STATUS_AGE_S, load
+        lc = docs["attestation"].get("lifecycle") if isinstance(docs["attestation"], dict) else None
+        lc = lc if isinstance(lc, dict) else {}
+        age = lc.get("max_status_age_s")
+        age = age if isinstance(age, int) and not isinstance(age, bool) and 0 < age <= MAX_STATUS_AGE_S else MAX_STATUS_AGE_S
+        source = lc.get("status_source")
+        revocations = load(args.revocation_log, args.revocation_head, now=now, max_age_s=age,
+                           source=source if isinstance(source, str) else "")
+    out = evaluate(docs["attestation"], docs["bundle"], docs["recipe"], args.evidence_root, revocations,
                    docs["required_roles"], use, now)
     print(json.dumps(out, indent=1))
     return 0 if out["evaluated"] else 1

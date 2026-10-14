@@ -402,7 +402,7 @@ Work may stop at S2 or S3 when only fixed, non-formal analysis is needed. New ho
 | Data and decision lineage | Identify immutable data snapshots, transforms, and shared calibrations; record data seen before recipe selection, human and agent decisions, and derivation relationships. A new session does not clear exposure | Envelope `data_exposure`; dependency resolution (`dependencies.py`); exposure bound into frozen bundles. Decision lineage across recipes is not yet implemented |
 | Execution bundle | Freeze physics definitions, code and environment, data and calibrations, seeds/precision, policy, and review. Each item has a resolvable identity and digest; a change after approval invalidates the original qualification. Container images are pinned by digest | `core/partition/bundle.py` for batch campaigns; physics scope, calibrations, and recipe digest in the attestation subject |
 | Required capabilities | Reject protected use if the reader does not recognize any required capability. Parsing an old artifact does not qualify it under new requirements. Newer contract versions are errors for protected use and warnings otherwise | Envelope `required_capabilities` against `KNOWN_CAPABILITIES`; `validate.py --protected` |
-| Revocation and qualification | Every entry point for protected use passes a trusted gate. Revocation events live outside artifacts so artifact bytes and hashes are unchanged; missing, empty, truncated, stale, or corrupted status is rejected; a reverse index propagates revocation through dependents | `dependencies.py --revocations` (JSON Lines events with `subject_sha256` and `reason`; malformed lines are errors); attestation lifecycle from a fresh status source; release-manifest revocation list. The append-only, hash-chained record, its reverse index, and the trusted gate are outside the plugin |
+| Revocation and qualification | Every entry point for protected use passes a trusted gate. Revocation events live outside artifacts so artifact bytes and hashes are unchanged; missing, empty, truncated, stale, or corrupted status is rejected; a reverse index propagates revocation through dependents | `contracts/revocation.py`: append-only, hash-chained log with a custodian-written head (`count`, `last_sha256`, `as_of`, `source`); an empty, cut, edited, reordered or truncated log, a head for another log, from another source or stale is refused and answers no lookup. `build_index`/`affected` propagate a revoked artifact, release, recipe, source or attestation to every dependent without changing bytes. The same verified log is the status source of `dependencies.py --revocations`, the attestation lifecycle and the release-manifest check; protected use reads it only from files the running account cannot write or replace (`contracts/trusted_input.py`). The trusted gate itself, and who writes the log, are outside the plugin |
 | Scientific review by scope | Review binds the observable, data, recipe, calibrations, assumptions, validation evidence, and purpose; use beyond that scope requires a new review | Attestation reviews bind bundle digest, scope digest, and evidence SHA-256; `--use` beyond the scope is `out-of-scope` |
 | Separate axes | Capability support, scientific review, and lifecycle/revocation are recorded separately and never collapsed into a single Boolean granting blanket authorization | `contracts/attestation.py` |
 
@@ -427,7 +427,7 @@ Supporting functions:
 ### 9.3 Contract Placement
 
 - Core envelope (contracts 2.1.0 and later): `versions.plugin_release`, `required_capabilities`, `data_exposure`. `inputs[].version` must be a version; `versions.contracts` must equal `contract_version`; unknown top-level keys are warnings.
-- Sidecars with their own versions: data release manifest (`manifest_version`), attestation (`attestation_version`), operator-semantics table, recipe (`recipe_version`), tool contract (`contract_version`). Revocation events are JSON Lines outside artifacts.
+- Sidecars with their own versions: data release manifest (`manifest_version`), attestation (`attestation_version`), operator-semantics table, recipe (`recipe_version`), tool contract (`contract_version`). Revocation is a hash-chained JSON Lines log (`revocation_event.json`) with a separate head (`revocation_head.json`, `head_version`), outside every artifact.
 - Project configuration (schema 1.1.0): `agent_policy`, a closed `blinding` block with `regions`, `schema_version` checked, and blinding configuration loaded only through the validated project loader.
 
 ---
@@ -520,7 +520,8 @@ These properties of hep-research are relied on by the architecture and must be p
 | Instruction-text conformance | `tools/check_instruction_text.py` | Implemented |
 | Code release identity | `tools/release_manifest.py`, `contracts/identity.py`, `release-manifests/` | Implemented |
 | Envelope `plugin_release`, `required_capabilities`, `data_exposure`; version policy | `contracts/schemas/envelope.json`, `contracts/validate.py` | Implemented (contracts 2.1.0+) |
-| Dependency consistency and revocation events | `contracts/dependencies.py` | Implemented (advisory) |
+| Dependency consistency and revocation events | `contracts/dependencies.py` | Implemented (advisory); reads the verified revocation log, the legacy format is refused in protected mode (Unreleased) |
+| Hash-chained revocation log, head and reverse index; protected-input source checks | `contracts/revocation.py`, `contracts/schemas/revocation_{event,head}.json`, `contracts/trusted_input.py` | Implemented (Unreleased); the custodian writes the log and head |
 | Run hash verification | `contracts/verify_run.py` | Implemented |
 | `agent_policy` and closed blinding block | `contracts/schemas/project_config.json`, `contracts/project.py` | Implemented (schema 1.1.0, advisory) |
 | Data release manifest and its checker, with the custodian options (code digest, destination sets, release history, sealed-value scan) | `contracts/schemas/release_manifest.json`, `contracts/release_manifest.py` | Implemented (options: Unreleased); to be run by the custodian |
@@ -530,7 +531,7 @@ These properties of hep-research are relied on by the architecture and must be p
 | Structured exposure in change review | `skills/hep-analysis/scripts/review_analysis_change.py` | Implemented |
 | Execution-bundle freezing | `core/partition/bundle.py`, `batch_campaign.py freeze`/`verify-bundle` | Implemented (batch campaigns) |
 | Campaign timeouts, ambiguity, tags, reconcile, limits, cancellation, provenance | `core/partition/`, `adapters/batch-schedulers/` | Implemented; demonstrated on synthetic data on real Slurm and HTCondor |
-| Trusted gate (S3 execution and formal use), hash-chained revocation record and reverse index | Outside the plugin | Design |
+| Trusted gate (S3 execution and formal use) | Outside the plugin | Design |
 | Decision lineage across recipes | Contracts (to extend) | Design |
 | Custodian identity, trusted preparation, release gate, sealed-value and scan services | Deployment repository (custodian) | Built outside this repository for synthetic data; see deployment-model.md |
 | Protected launcher and session qualification | Deployment repository (host adapter) | Built outside this repository for one host surface; see deployment-model.md |

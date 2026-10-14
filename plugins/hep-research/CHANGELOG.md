@@ -19,6 +19,22 @@ Contracts 2.6.0 (unchanged; the data release manifest sidecar keeps `manifest_ve
   objects without their structure keys: `release.sealed_value_present`; an artifact that cannot be scanned is
   `release.scan_incomplete`, fail closed). Findings name the artifact only, never a sealed value or a count. Passing
   still releases nothing. Tests in `tests/contracts/test_release_manifest.py` (`CustodianOptionTests`).
+- **Hash-chained revocation log and reverse index (task P2; C07, F07).** New `contracts/revocation.py` with the sidecar
+  schemas `revocation_event.json` and `revocation_head.json`: a genesis record and events `{seq, prev_sha256, subject:
+  {kind: artifact|release|recipe|source|attestation, ref and/or sha256}, reason, time, actor}`, each binding the
+  canonical SHA-256 of the record before it, and a head `{count, last_sha256, as_of, source}` written by the custodian.
+  `verify()`/`load()` refuse an empty or unterminated file, a gap, an edited or reordered record, a truncated log, a head
+  for another log, from another source, stale or dated in the future (`revocation.*` codes); a refused log answers no
+  lookup instead of "nothing revoked". `build_index()`/`affected()` follow envelope inputs, `data_exposure.record_ref`,
+  release manifests, attestations, bundles and recipes to every dependent, transitively, without writing anything.
+  New `contracts/trusted_input.py`: in protected mode a protected input must be a regular file with one link that the
+  running account neither owns, nor can write, nor can replace along its path (`source.*` codes).
+  `dependencies.py --revocations` now reads the chained log (`--revocation-head`, `--revocation-source`,
+  `--max-status-age`, `--now`); the legacy JSON Lines format is a warning (`dependency.revocations_legacy`) and is
+  refused with `--protected`; an empty legacy file is an error. `release_manifest.py` and `attestation.py` take a
+  verified log (`--revocation-log`, `--revocation-head`, or a `RevocationStatus` in `check()`/`evaluate()`) as their
+  status source, filtered by subject kind (`release.status_unverified`, `attestation.status_unverified`). Tests in
+  `tests/contracts/test_revocation.py`.
 - **Architecture and deployment documents.** New `docs/agentic-architecture.md` (objectives, constraints HC-01 to
   HC-18, planes, blinding modes, release manifest, host enforcement points, guard, stages, component roles, the
   scientific-integrity layer, batch architecture, and where each component lives) and `docs/deployment-model.md` (the

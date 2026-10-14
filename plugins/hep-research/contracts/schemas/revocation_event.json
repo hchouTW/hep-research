@@ -1,0 +1,29 @@
+{"$comment": "One record of the hash-chained, append-only revocation log (task P2.1, C07, F07): a sidecar outside every artifact, so revoking changes no artifact bytes. The log is JSON Lines, one canonical record per line ending in a newline. Line 1 is the genesis record (seq 0, prev_sha256 all zeros, $defs/genesis); every later line is an event (this schema) whose prev_sha256 is the canonical SHA-256 of the line before. The custodian appends and writes a separate head (revocation_head.json); contracts/revocation.py verifies chain and head together, so an empty, truncated or edited log is refused, never read as 'nothing revoked'.",
+ "type": "object",
+ "required": ["seq", "prev_sha256", "subject", "reason", "time", "actor"],
+ "additionalProperties": false,
+ "properties": {
+  "seq": {"type": "integer", "minimum": 1},
+  "prev_sha256": {"$ref": "#/$defs/sha256"},
+  "subject": {"$ref": "#/$defs/subject"},
+  "reason": {"type": "string", "minLength": 1},
+  "time": {"$ref": "#/$defs/timestamp"},
+  "actor": {"type": "string", "minLength": 1}},
+ "$defs": {
+  "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+  "timestamp": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"},
+  "subject": {"$comment": "what is revoked: an artifact (file SHA-256), a release (release_id or manifest digest), a recipe (canonical or file SHA-256), a source snapshot (snapshot_id or SHA-256) or an attestation (attestation_id or revocation_ref); at least one of ref and sha256",
+   "type": "object", "required": ["kind"], "additionalProperties": false,
+   "anyOf": [{"required": ["ref"]}, {"required": ["sha256"]}],
+   "properties": {
+    "kind": {"type": "string", "enum": ["artifact", "release", "recipe", "source", "attestation"]},
+    "ref": {"type": "string", "minLength": 1},
+    "sha256": {"$ref": "#/$defs/sha256"}}},
+  "genesis": {"type": "object", "required": ["seq", "prev_sha256", "genesis"], "additionalProperties": false, "properties": {
+   "seq": {"type": "integer", "const": 0},
+   "prev_sha256": {"type": "string", "const": "0000000000000000000000000000000000000000000000000000000000000000"},
+   "genesis": {"type": "object", "required": ["log_format", "log_id", "created", "actor"], "additionalProperties": false, "properties": {
+    "log_format": {"type": "string", "const": "hep-research-revocation-log/1"},
+    "log_id": {"type": "string", "minLength": 1},
+    "created": {"$ref": "#/$defs/timestamp"},
+    "actor": {"type": "string", "minLength": 1}}}}}}}

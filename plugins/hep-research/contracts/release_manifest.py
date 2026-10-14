@@ -20,6 +20,9 @@ Every input is required for a pass: a check that cannot run is a failure (fail c
                content is reuse
   --revocations {"as_of", "source", "revoked": [{"ref", "time", "reason"}]}: from validity.status_source and no older
                than validity.max_status_age_s; the release_id or revocation_ref listed means revoked
+  --revocation-log, --revocation-head  instead of --revocations: the hash-chained revocation log and its head
+               (contracts/revocation.py), verified against validity.status_source and validity.max_status_age_s; its
+               release events are the status (a log that does not verify: release.status_unverified)
   --effective  the effective destinations of the session: {"services": [{"service", "tenant", "region",
                "model_family", "model"}], "tools", "network", "recipients", "logging": {"transcripts", "telemetry"}};
                every key must be present (an absent list is not "none used") and every entry allowed by the manifest
@@ -335,12 +338,26 @@ def check_sealed(m: dict, root: Path | None, sealed_doc, rep: Report) -> None:
             rep.add("error", where, "release.sealed_value_present", "contains a sealed value")
 
 
+def status_from_log(revocations, kinds: tuple, rep: Report, where: str, code: str):
+    """A contracts.revocation.RevocationStatus as the {as_of, source, revoked} document of the given subject kinds, or
+    None (with an error) when it did not verify; any other value is returned unchanged."""
+    if revocations is None or isinstance(revocations, dict) or not hasattr(revocations, "status_doc"):
+        return revocations
+    if not revocations.ok:
+        rep.add("error", where, code, "the revocation log did not verify: "
+                + ", ".join(sorted({f["code"] for f in revocations.findings})))
+        return None
+    return revocations.status_doc(kinds)
+
+
 def check(manifest, root=None, approval=None, approvers=None, ledger=None, revocations=None, effective=None,
           now: datetime.datetime | None = None, *, code_digest=None, destination_sets=None, analysis=None,
           sealed=None) -> dict:
-    """The keyword-only arguments are the custodian options of the command line (module docstring); None skips them."""
+    """The keyword-only arguments are the custodian options of the command line (module docstring); None skips them.
+    `revocations` is the status document or a verified contracts.revocation.RevocationStatus."""
     now = now or datetime.datetime.now(datetime.UTC)
     rep = validate(manifest, "release_manifest.json")
+    revocations = status_from_log(revocations, ("release",), rep, "revocations", "release.status_unverified")
     if rep.ok:
         check_keys(manifest, rep)
         check_wildcards(manifest, rep)
@@ -366,6 +383,17 @@ def check(manifest, root=None, approval=None, approvers=None, ledger=None, revoc
             "findings": [f.as_dict() for f in rep.findings], "note": NOTE}
 
 
+def log_status(manifest, log, head, now):
+    """Load the revocation log against the manifest's own status source and age (malformed manifest: no source)."""
+    from contracts.revocation import MAX_STATUS_AGE_S, load
+    v = manifest.get("validity") if isinstance(manifest, dict) else None
+    v = v if isinstance(v, dict) else {}
+    age = v.get("max_status_age_s")
+    age = min(age, MAX_STATUS_AGE_S) if isinstance(age, int) and not isinstance(age, bool) and age > 0 else MAX_STATUS_AGE_S
+    source = v.get("status_source") if isinstance(v.get("status_source"), str) else ""
+    return load(log, head, source=source, now=now, max_age_s=age)
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("manifest", type=Path)
@@ -377,7 +405,12 @@ def main(argv=None) -> int:
     ap.add_argument("--destination-sets", dest="destination_sets", type=Path)
     ap.add_argument("--analysis")
     ap.add_argument("--sealed", type=Path)
+    ap.add_argument("--revocation-log", dest="revocation_log", type=Path)
+    ap.add_argument("--revocation-head", dest="revocation_head", type=Path)
     args = ap.parse_args(argv)
+    if args.revocation_log is not None and args.revocations is not None:
+        print(json.dumps({"status": "unreadable", "error": "give --revocations or --revocation-log, not both"}))
+        return 2
     try:
         docs = {name: None if getattr(args, name) is None else json.loads(getattr(args, name).read_text(encoding="utf-8"))
                 for name in ("manifest", "approval", "approvers", "ledger", "revocations", "effective",
@@ -392,8 +425,11 @@ def main(argv=None) -> int:
     if args.root is not None and (args.root.is_symlink() or not args.root.is_dir()):
         print(json.dumps({"status": "unreadable", "error": f"{args.root}: not a directory (a link is never followed)"}))
         return 2
+    revocations = docs["revocations"]
+    if args.revocation_log is not None:
+        revocations = log_status(docs["manifest"], args.revocation_log, args.revocation_head, now)
     try:
-        out = check(docs["manifest"], args.root, docs["approval"], docs["approvers"], docs["ledger"], docs["revocations"],
+        out = check(docs["manifest"], args.root, docs["approval"], docs["approvers"], docs["ledger"], revocations,
                     docs["effective"], now, code_digest=args.code_digest, destination_sets=docs["destination_sets"],
                     analysis=args.analysis, sealed=docs["sealed"])
     except (AttributeError, KeyError, TypeError, ValueError) as exc:  # an input of the wrong shape: never a pass
