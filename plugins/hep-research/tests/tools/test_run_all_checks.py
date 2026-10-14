@@ -51,6 +51,16 @@ class ModuleTimeoutTests(unittest.TestCase):
         self.assertNotIn("tests.tools.sleeping_module_fixture", mod.test_modules())
 
 
+    def test_a_hanging_check_script_fails_without_aborting_the_run(self):
+        mod = _load("run_all_checks", TOOL)
+        cmd = [sys.executable, "-c", "import time; time.sleep(30)"]
+        row = mod.run_script("sleeper", cmd, timeout=1)
+        self.assertEqual((row["status"], row["exit_code"]), ("fail", None))
+        self.assertEqual(row["reason"], "timed out after 1 s")
+        ok = mod.run_script("quick", [sys.executable, "-c", "print('{}')"], timeout=60)
+        self.assertEqual(ok["status"], "pass")
+
+
 def _load(name, path):
     import importlib.util
     spec = importlib.util.spec_from_file_location(name, path)

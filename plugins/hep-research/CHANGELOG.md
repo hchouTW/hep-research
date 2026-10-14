@@ -3,6 +3,13 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- `tools/run_all_checks.py`: a check script that does not finish within the timeout (`--module-timeout`, default 600 s,
+  now applied to the check scripts as well as the test modules) is a failure with the reason "timed out after N s";
+  the remaining checks still run. Before, the uncaught timeout aborted the whole run with a traceback (seen in the
+  0.10.0 release gate when two runs shared the CPU and `ams_optional` passed 600 s).
+
 ## 0.10.0 (2026-10-14)
 
 The detector-response, physics-ml and research-communication audits (PR #81). ams02-research needs no change

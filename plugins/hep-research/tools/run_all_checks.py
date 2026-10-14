@@ -7,6 +7,7 @@ Writes DIR/check-run-<UTC timestamp>.json when --out is given; always prints the
 Exit 0 when nothing failed (skips are reported, not hidden), 1 otherwise.
 Each test module runs in its own process with a timeout (default 600 s, or HEP_MODULE_TIMEOUT): a module that
 does not finish is a failure with its reason, never a hang, and every module's duration is in the JSON output.
+Each check script has the same timeout; one that does not finish fails with its reason and the other checks still run.
 Test modules start slowest first (tools/module_timings.json). --part and --shard split the work across CI runners:
 'units' runs the test modules (all of them, or shard K of N, balanced by the recorded timings), 'checks' runs the
 profile suites and the static and host checks; every module belongs to exactly one shard.
@@ -167,8 +168,17 @@ def run_profile_tests() -> list[dict]:
     return out
 
 
-def run_script(name: str, cmd: list[str], cwd: Path = ROOT) -> dict:
-    p = subprocess.run(cmd, capture_output=True, text=True, cwd=str(cwd), timeout=MODULE_TIMEOUT)
+def timed_out(name: str, cmd: list[str], exc: subprocess.TimeoutExpired) -> dict:
+    """A check that does not finish is a failure with its reason; it must not abort the remaining checks."""
+    return {"name": name, "command": " ".join(cmd), "exit_code": None, "status": "fail",
+            "reason": f"timed out after {exc.timeout:g} s"}
+
+
+def run_script(name: str, cmd: list[str], cwd: Path = ROOT, timeout: float = MODULE_TIMEOUT) -> dict:
+    try:
+        p = subprocess.run(cmd, capture_output=True, text=True, cwd=str(cwd), timeout=timeout)
+    except subprocess.TimeoutExpired as exc:
+        return timed_out(name, cmd, exc)
     try:
         detail = json.loads(p.stdout)
     except ValueError:
@@ -182,7 +192,11 @@ def host_validate() -> dict:
     exe = shutil.which("claude")
     if not exe:
         return {"name": "claude-plugin-validate", "status": "skip", "reason": "claude CLI not found"}
-    p = subprocess.run([exe, "plugin", "validate", str(ROOT), "--strict"], capture_output=True, text=True, timeout=MODULE_TIMEOUT)
+    cmd = [exe, "plugin", "validate", str(ROOT), "--strict"]
+    try:
+        p = subprocess.run(cmd, capture_output=True, text=True, timeout=MODULE_TIMEOUT)
+    except subprocess.TimeoutExpired as exc:
+        return timed_out("claude-plugin-validate", cmd, exc)
     return {"name": "claude-plugin-validate", "command": "claude plugin validate <plugin> --strict", "exit_code": p.returncode,
             "status": "pass" if p.returncode == 0 else "fail", "detail": p.stdout.strip()[-1500:]}
 
@@ -203,7 +217,10 @@ def codex_load() -> dict:
         steps = [[exe, "plugin", "marketplace", "add", str(repo)], [exe, "plugin", "add", f"hep-research@{market}"],
                  [exe, "plugin", "list"]]
         for cmd in steps:
-            p = subprocess.run(cmd, capture_output=True, text=True, env=env, stdin=subprocess.DEVNULL, timeout=120)
+            try:
+                p = subprocess.run(cmd, capture_output=True, text=True, env=env, stdin=subprocess.DEVNULL, timeout=120)
+            except subprocess.TimeoutExpired as exc:
+                return timed_out("codex-plugin-load", cmd, exc)
             if p.returncode:
                 return {"name": "codex-plugin-load", "command": " ".join(cmd[1:]), "exit_code": p.returncode, "status": "fail",
                         "detail": (p.stdout + p.stderr)[-1500:]}
@@ -217,7 +234,10 @@ def host_versions() -> dict:
     out = {}
     for host in ("claude", "codex"):
         exe = shutil.which(host)
-        out[host] = subprocess.run([exe, "--version"], capture_output=True, text=True, timeout=MODULE_TIMEOUT).stdout.strip() if exe else "not installed"
+        try:
+            out[host] = subprocess.run([exe, "--version"], capture_output=True, text=True, timeout=MODULE_TIMEOUT).stdout.strip() if exe else "not installed"
+        except subprocess.TimeoutExpired:
+            out[host] = "no answer to --version"
     return out
 
 
@@ -227,7 +247,7 @@ def parse_args(argv=None) -> argparse.Namespace:
     ap.add_argument("--out", metavar="DIR", type=Path, help="write DIR/check-run-<UTC timestamp>.json")
     ap.add_argument("--no-cli", action="store_true", help="skip the host CLI checks (claude plugin validate, codex plugin load)")
     ap.add_argument("--module-timeout", type=float, default=MODULE_TIMEOUT, metavar="S",
-                    help="seconds allowed per test module (default 600 or HEP_MODULE_TIMEOUT)")
+                    help="seconds allowed per test module and per check script (default 600 or HEP_MODULE_TIMEOUT)")
     ap.add_argument("--jobs", type=int, default=DEFAULT_JOBS, metavar="N",
                     help=f"test modules run in parallel (default {DEFAULT_JOBS}: CPU count, at most 8; 1 runs them serially)")
     ap.add_argument("--part", choices=("all", "units", "checks"), default="all",
@@ -245,21 +265,22 @@ def main(argv=None) -> int:
         print("--shard applies to the test modules; it cannot be combined with --part checks", file=sys.stderr)
         return 2
     py = sys.executable
+    t = opts.module_timeout
     units = [run_unittests(opts.module_timeout, opts.jobs, opts.shard)] if opts.part in ("all", "units") else []
     checks = units + ([] if opts.part == "units" else [
         *run_profile_tests(),
-        run_script("check_layering", [py, "tools/check_layering.py"]),
-        run_script("stanza_consistency", [py, "tools/build_stanzas.py", "--check"]),
-        run_script("registry", [py, "contracts/registry.py"]),
-        run_script("ams_optional", [py, "tools/check_ams_optional.py", "--jobs", str(opts.jobs)]),
-        run_script("routing_static", [py, "tools/check_routing_static.py"]),
-        run_script("ownership", [py, "tools/check_ownership.py"]),
-        run_script("reference_inventory", [py, "tools/reference_inventory.py", "--check"]),
-        run_script("packaging_scan", [py, "tools/check_packaging.py"]),
-        run_script("host_neutral", [py, "tools/check_host_neutral.py"]),
-        run_script("instruction_text", [py, "tools/check_instruction_text.py"]),
-        run_script("host_manifests", [py, "tools/check_host_manifests.py"]),
-        run_script("measure_entrypoints", [py, "tools/measure_entrypoints.py"] + (["--no-cli"] if opts.no_cli else [])),
+        run_script("check_layering", [py, "tools/check_layering.py"], timeout=t),
+        run_script("stanza_consistency", [py, "tools/build_stanzas.py", "--check"], timeout=t),
+        run_script("registry", [py, "contracts/registry.py"], timeout=t),
+        run_script("ams_optional", [py, "tools/check_ams_optional.py", "--jobs", str(opts.jobs)], timeout=t),
+        run_script("routing_static", [py, "tools/check_routing_static.py"], timeout=t),
+        run_script("ownership", [py, "tools/check_ownership.py"], timeout=t),
+        run_script("reference_inventory", [py, "tools/reference_inventory.py", "--check"], timeout=t),
+        run_script("packaging_scan", [py, "tools/check_packaging.py"], timeout=t),
+        run_script("host_neutral", [py, "tools/check_host_neutral.py"], timeout=t),
+        run_script("instruction_text", [py, "tools/check_instruction_text.py"], timeout=t),
+        run_script("host_manifests", [py, "tools/check_host_manifests.py"], timeout=t),
+        run_script("measure_entrypoints", [py, "tools/measure_entrypoints.py"] + (["--no-cli"] if opts.no_cli else []), timeout=t),
         host_validate() if not opts.no_cli else {"name": "claude-plugin-validate", "status": "skip", "reason": "--no-cli"},
         codex_load() if not opts.no_cli else {"name": "codex-plugin-load", "status": "skip", "reason": "--no-cli"},
     ])
