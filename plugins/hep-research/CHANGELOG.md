@@ -45,8 +45,9 @@ Research-communication adds one value to 2.8.0: `reporting_context.result_type` 
   PRL Comment length from the APS page; dated AMS-02 specifics removed from references (one sourced absence claim,
   `ams02:C185`, added to the public profile ledger instead); diagram logic (result from the fit, vertex checks,
   pileup stage); compile records and the LuaTeX warning; smaller wording fixes.
-- **Usability (RC-D1-D7).** A quick-questions block in SKILL.md (8098 B; description unchanged, a candidate awaits
-  the maintainer); one home per rule (significance and limit wording, venue facts, posters and talks, captions,
+- **Usability (RC-D1-D7).** A quick-questions block in SKILL.md and a trigger-first description (978 characters): the
+  quick literature questions and citations come first, with the instruction to load the skill even for a quick
+  question; every trigger phrase the routing cases use is kept (SKILL.md 8126 B). One home per rule (significance and limit wording, venue facts, posters and talks, captions,
   colour and raster); the papers guide cut to routing, rules and pointers; executable checks instead of
   "mentally desaturate"; a "Done when" line in every reference; reference link test.
 - **New content (RC-C1-C11).** `physics-plots.md` (status labels on figures, ratio panels, `pdf.fonttype = 42`,
