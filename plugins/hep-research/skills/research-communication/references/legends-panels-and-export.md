@@ -100,7 +100,7 @@ Never invent an equation number; leave "-" and flag it when the paper's numberin
 | SVG | - | `rsvg-convert -f pdf f.svg -o f.pdf` | `rsvg-convert -d 300 -p 300 f.svg -o f.png` |
 | TikZ | `pdftocairo -svg f.pdf f.svg` (run; text becomes glyph outlines), or `dvisvgm --pdf --no-fonts f.pdf -o f.svg` (run; faithful outlines; plain `dvisvgm --pdf` keeps `<text>` but only renders right where the viewer has the Computer Modern fonts; needs `mutool` or Ghostscript < 10.01; not the Tectonic `.xdv`, which loses the drawing) | `\documentclass[tikz,border=2pt]{standalone}` + `pdflatex`/`lualatex` | `pdftoppm -r 300 -png f.pdf f` |
 
-Prefer vector PDF for LaTeX manuscripts, SVG for web and editing, PNG only when a venue requires raster (>= 300 dpi at final size).
+Prefer vector PDF for LaTeX manuscripts, SVG for web and editing, PNG only when a venue requires raster (resolution: `physics-plots.md`; the venue rule wins).
 Do not export TikZ through Tectonic's `.xdv` with `dvisvgm` (drawing lost); `dvisvgm --pdf` needs `mutool` or
 Ghostscript < 10.01, and without `--no-fonts` its text renders correctly only where the viewer has the fonts. Prefer
 `dvisvgm --pdf --no-fonts` or `pdftocairo -svg`. How each route was checked is recorded in `VALIDATION.md` (RC-AUDIT-2).
