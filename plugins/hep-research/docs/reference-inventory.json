@@ -34,8 +34,8 @@
    "uncited": 0
   },
   "research-communication": {
-   "references": 53,
-   "bytes": 377891,
+   "references": 56,
+   "bytes": 397429,
    "uncited": 0
   }
  },
@@ -65,7 +65,7 @@
     "skills/detector-response/references/tracking-and-vertexing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b1fb312 2026-10-14"
+   "last_commit": "4a74e06 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/calorimetry-ecal-hcal.md",
@@ -147,7 +147,7 @@
     "hep-statistics",
     "research-communication"
    ],
-   "last_commit": "b1fb312 2026-10-14"
+   "last_commit": "4a74e06 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
@@ -165,7 +165,7 @@
     "skills/detector-response/references/performance-metrics-and-residual-diagnostics.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b1fb312 2026-10-14"
+   "last_commit": "4a74e06 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/detector-case-studies-and-checklists.md",
@@ -285,7 +285,7 @@
     "hep-theory",
     "physics-ml"
    ],
-   "last_commit": "b1fb312 2026-10-14"
+   "last_commit": "4a74e06 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/detector-systems-overview.md",
@@ -328,7 +328,7 @@
     "skills/detector-response/references/timing-detectors.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "4a74e06 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/extensive-air-showers.md",
@@ -410,7 +410,7 @@
     "skills/detector-response/references/noble-liquid-neutrino-and-rare-event-detectors.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b1fb312 2026-10-14"
+   "last_commit": "4a74e06 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/imaging-atmospheric-cherenkov.md",
@@ -435,7 +435,7 @@
     "physics-ml",
     "research-communication"
    ],
-   "last_commit": "b1fb312 2026-10-14"
+   "last_commit": "4a74e06 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/multimessenger-analysis.md",
@@ -488,7 +488,7 @@
    "cited_by_other_skills": [
     "hep-statistics"
    ],
-   "last_commit": "b1fb312 2026-10-14"
+   "last_commit": "4a74e06 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/noble-liquid-neutrino-and-rare-event-detectors.md",
@@ -558,7 +558,7 @@
     "skills/detector-response/references/response-and-forward-folding.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b1fb312 2026-10-14"
+   "last_commit": "4a74e06 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/physics-objects-jets-btagging-met.md",
@@ -578,7 +578,7 @@
    "cited_by_other_skills": [
     "physics-ml"
    ],
-   "last_commit": "b1fb312 2026-10-14"
+   "last_commit": "4a74e06 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/reconstruction-performance-and-truth-matching.md",
@@ -619,7 +619,7 @@
     "hep-analysis",
     "hep-statistics"
    ],
-   "last_commit": "b1fb312 2026-10-14"
+   "last_commit": "4a74e06 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/signal-formation-and-readout.md",
@@ -667,7 +667,7 @@
     "hep-statistics",
     "research-communication"
    ],
-   "last_commit": "cd6c92b 2026-10-14"
+   "last_commit": "4a74e06 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/timing-detectors.md",
@@ -735,7 +735,7 @@
     "skills/detector-response/scripts/tag_and_probe_efficiency.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "cd6c92b 2026-10-14"
+   "last_commit": "4a74e06 2026-10-14"
   },
   {
    "path": "skills/hep-analysis/references/analysis-design.md",
@@ -1689,6 +1689,7 @@
     "skills/research-communication/references/academic-papers-guide.md",
     "skills/research-communication/references/claim-evidence-mapping.md",
     "skills/research-communication/references/reading-papers.md",
+    "skills/research-communication/references/scientific-style.md",
     "tests/routing/test_theory_routing.py"
    ],
    "cited_by_other_skills": [
@@ -1930,7 +1931,7 @@
    "cited_by_other_skills": [
     "research-communication"
    ],
-   "last_commit": "cf6d783 2026-10-14"
+   "last_commit": "db40e84 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/architecture-selection.md",
@@ -1943,7 +1944,7 @@
     "skills/physics-ml/references/optimization-and-training-dynamics.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0ab5680 2026-10-14"
+   "last_commit": "50dcc55 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/checkpointing.md",
@@ -1973,7 +1974,7 @@
     "skills/physics-ml/references/optimization-and-training-dynamics.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0ab5680 2026-10-14"
+   "last_commit": "50dcc55 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/data-loading.md",
@@ -1987,7 +1988,7 @@
     "skills/physics-ml/references/training-at-scale.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0ab5680 2026-10-14"
+   "last_commit": "50dcc55 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/data-strategy.md",
@@ -2001,7 +2002,7 @@
     "skills/physics-ml/scripts/check_split_integrity.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b2bf7ef 2026-10-14"
+   "last_commit": "f5cc59a 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/debugging-pytorch.md",
@@ -2017,7 +2018,7 @@
     "skills/physics-ml/references/transformer-architectures.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0ab5680 2026-10-14"
+   "last_commit": "50dcc55 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/deep-learning-guide.md",
@@ -2039,7 +2040,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "0ab5680 2026-10-14"
+   "last_commit": "7a4f739 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/distributed-training.md",
@@ -2053,7 +2054,7 @@
     "skills/physics-ml/references/parallelism-strategy.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0ab5680 2026-10-14"
+   "last_commit": "50dcc55 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/efficient-finetuning.md",
@@ -2069,7 +2070,7 @@
     "skills/physics-ml/references/uncertainty-and-calibration.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0ab5680 2026-10-14"
+   "last_commit": "50dcc55 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/evaluation-metrics.md",
@@ -2084,7 +2085,7 @@
     "skills/physics-ml/references/uncertainty-and-calibration.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0ab5680 2026-10-14"
+   "last_commit": "50dcc55 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/evaluation-strategy.md",
@@ -2101,7 +2102,7 @@
    "cited_by_other_skills": [
     "research-communication"
    ],
-   "last_commit": "0ab5680 2026-10-14"
+   "last_commit": "7a4f739 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/export-and-deployment.md",
@@ -2115,7 +2116,7 @@
     "skills/physics-ml/references/serving-architecture.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0ab5680 2026-10-14"
+   "last_commit": "50dcc55 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/fast-simulation-validation.md",
@@ -2130,7 +2131,7 @@
     "skills/physics-ml/references/ml-analysis.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b2bf7ef 2026-10-14"
+   "last_commit": "f5cc59a 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/generative-models.md",
@@ -2146,7 +2147,7 @@
     "skills/physics-ml/references/optimization-and-training-dynamics.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b2bf7ef 2026-10-14"
+   "last_commit": "f5cc59a 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/geometric-and-equivariant-learning.md",
@@ -2161,7 +2162,7 @@
     "skills/physics-ml/references/scientific-machine-learning.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0ab5680 2026-10-14"
+   "last_commit": "50dcc55 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/interpretability-and-explainability.md",
@@ -2175,7 +2176,7 @@
     "skills/physics-ml/references/ml-analysis.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0ab5680 2026-10-14"
+   "last_commit": "50dcc55 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/mixed-precision.md",
@@ -2192,7 +2193,7 @@
     "skills/physics-ml/references/performance-memory.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0ab5680 2026-10-14"
+   "last_commit": "50dcc55 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/ml-analysis.md",
@@ -2234,7 +2235,7 @@
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "b2bf7ef 2026-10-14"
+   "last_commit": "f5cc59a 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/monitoring-and-lifecycle.md",
@@ -2248,7 +2249,7 @@
     "skills/physics-ml/references/robustness-and-distribution-shift.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0ab5680 2026-10-14"
+   "last_commit": "50dcc55 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/multivariate-analysis-bdt-nn.md",
@@ -2269,7 +2270,7 @@
    "cited_by_other_skills": [
     "detector-response"
    ],
-   "last_commit": "b2bf7ef 2026-10-14"
+   "last_commit": "f5cc59a 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/optimization-and-training-dynamics.md",
@@ -2281,7 +2282,7 @@
     "skills/physics-ml/references/deep-learning-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0ab5680 2026-10-14"
+   "last_commit": "50dcc55 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/parallelism-strategy.md",
@@ -2297,7 +2298,7 @@
     "tests/skills/physics_ml/test_physics_ml_skill.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0ab5680 2026-10-14"
+   "last_commit": "50dcc55 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/particle-and-jet-architectures.md",
@@ -2316,7 +2317,7 @@
     "skills/physics-ml/references/transformer-architectures.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b2bf7ef 2026-10-14"
+   "last_commit": "f5cc59a 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/performance-memory.md",
@@ -2350,7 +2351,7 @@
     "skills/physics-ml/references/training-at-scale.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0ab5680 2026-10-14"
+   "last_commit": "50dcc55 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/robustness-and-distribution-shift.md",
@@ -2369,7 +2370,7 @@
     "skills/physics-ml/references/uncertainty-and-calibration.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0ab5680 2026-10-14"
+   "last_commit": "50dcc55 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/sbi-training.md",
@@ -2384,7 +2385,7 @@
     "skills/physics-ml/references/scientific-machine-learning.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b2bf7ef 2026-10-14"
+   "last_commit": "f5cc59a 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/scientific-machine-learning.md",
@@ -2406,7 +2407,7 @@
     "hep-statistics",
     "hep-theory"
    ],
-   "last_commit": "0ab5680 2026-10-14"
+   "last_commit": "7a4f739 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/sequence-models.md",
@@ -2421,7 +2422,7 @@
     "skills/physics-ml/references/transformer-architectures.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0ab5680 2026-10-14"
+   "last_commit": "50dcc55 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/serving-architecture.md",
@@ -2434,7 +2435,7 @@
     "skills/physics-ml/references/deep-learning-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0ab5680 2026-10-14"
+   "last_commit": "50dcc55 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/space-and-astroparticle-ml.md",
@@ -2448,7 +2449,7 @@
     "skills/physics-ml/references/ml-analysis.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b2bf7ef 2026-10-14"
+   "last_commit": "f5cc59a 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/tensor-shapes.md",
@@ -2476,7 +2477,7 @@
     "skills/physics-ml/references/optimization-and-training-dynamics.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0ab5680 2026-10-14"
+   "last_commit": "50dcc55 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/training-loop.md",
@@ -2521,7 +2522,7 @@
     "skills/physics-ml/references/sequence-models.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0ab5680 2026-10-14"
+   "last_commit": "50dcc55 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/uncertainty-and-calibration.md",
@@ -2543,13 +2544,13 @@
    "cited_by_other_skills": [
     "hep-statistics"
    ],
-   "last_commit": "0ab5680 2026-10-14"
+   "last_commit": "50dcc55 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/academic-diagrams-guide.md",
    "owner": "research-communication",
-   "bytes": 10372,
-   "lines": 184,
+   "bytes": 10797,
+   "lines": 189,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/research-communication/README.md",
@@ -2563,15 +2564,20 @@
   {
    "path": "skills/research-communication/references/academic-papers-guide.md",
    "owner": "research-communication",
-   "bytes": 38384,
-   "lines": 495,
+   "bytes": 27986,
+   "lines": 359,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/research-communication/README.md",
     "skills/research-communication/SKILL.md",
     "skills/research-communication/references/academic-diagrams-guide.md",
+    "skills/research-communication/references/astroparticle-and-cosmic-ray-papers.md",
+    "skills/research-communication/references/citation-verification.md",
+    "skills/research-communication/references/citations-and-bibliography.md",
     "skills/research-communication/references/code-to-methodology-synthesis.md",
     "skills/research-communication/references/evidence-linked-writing.md",
+    "skills/research-communication/references/interpreting-scientific-graphics.md",
+    "skills/research-communication/references/literature-lookup-recipes.md",
     "skills/research-communication/references/submission-and-peer-review.md",
     "tests/skills/research_communication/test_handoff_text.py"
    ],
@@ -2581,8 +2587,8 @@
   {
    "path": "skills/research-communication/references/artifact-packaging-for-release.md",
    "owner": "research-communication",
-   "bytes": 2766,
-   "lines": 46,
+   "bytes": 2924,
+   "lines": 48,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -2595,8 +2601,8 @@
   {
    "path": "skills/research-communication/references/astroparticle-and-cosmic-ray-papers.md",
    "owner": "research-communication",
-   "bytes": 19537,
-   "lines": 291,
+   "bytes": 13387,
+   "lines": 210,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -2616,8 +2622,8 @@
   {
    "path": "skills/research-communication/references/citation-verification.md",
    "owner": "research-communication",
-   "bytes": 3605,
-   "lines": 64,
+   "bytes": 5640,
+   "lines": 89,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/research-communication/README.md",
@@ -2627,6 +2633,7 @@
     "skills/research-communication/references/claim-evidence-mapping.md",
     "skills/research-communication/references/evidence-linked-writing.md",
     "skills/research-communication/references/literature-discovery-and-search.md",
+    "skills/research-communication/references/literature-lookup-recipes.md",
     "skills/research-communication/references/literature-review.md",
     "skills/research-communication/references/plagiarism-and-text-reuse-checking.md",
     "tests/skills/research_communication/test_handoff_text.py"
@@ -2637,8 +2644,8 @@
   {
    "path": "skills/research-communication/references/citations-and-bibliography.md",
    "owner": "research-communication",
-   "bytes": 18053,
-   "lines": 296,
+   "bytes": 19863,
+   "lines": 320,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/research-communication/SKILL.md",
@@ -2659,8 +2666,8 @@
   {
    "path": "skills/research-communication/references/claim-evidence-mapping.md",
    "owner": "research-communication",
-   "bytes": 3270,
-   "lines": 60,
+   "bytes": 3973,
+   "lines": 70,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-statistics/references/statistical-inference-for-physics.md",
@@ -2682,8 +2689,8 @@
   {
    "path": "skills/research-communication/references/code-review-report.md",
    "owner": "research-communication",
-   "bytes": 5362,
-   "lines": 100,
+   "bytes": 5505,
+   "lines": 102,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -2696,8 +2703,8 @@
   {
    "path": "skills/research-communication/references/code-to-methodology-synthesis.md",
    "owner": "research-communication",
-   "bytes": 5596,
-   "lines": 99,
+   "bytes": 5721,
+   "lines": 101,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/assets/paper/code-to-methodology-manual-template.md",
@@ -2707,14 +2714,28 @@
    "last_commit": "351029c 2026-10-07"
   },
   {
-   "path": "skills/research-communication/references/comment-and-reply-exchange.md",
+   "path": "skills/research-communication/references/collaboration-results-lifecycle.md",
    "owner": "research-communication",
-   "bytes": 3047,
-   "lines": 49,
+   "bytes": 3683,
+   "lines": 58,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
-    "skills/research-communication/references/erratum-and-corrigendum-drafting.md"
+    "skills/research-communication/references/physics-plots.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
+   "path": "skills/research-communication/references/comment-and-reply-exchange.md",
+   "owner": "research-communication",
+   "bytes": 3355,
+   "lines": 53,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/research-communication/references/academic-papers-guide.md",
+    "skills/research-communication/references/erratum-and-corrigendum-drafting.md",
+    "skills/research-communication/references/latex-venue-setup.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "351029c 2026-10-07"
@@ -2722,8 +2743,8 @@
   {
    "path": "skills/research-communication/references/conflict-of-interest-and-ethics-statements.md",
    "owner": "research-communication",
-   "bytes": 2466,
-   "lines": 39,
+   "bytes": 2591,
+   "lines": 41,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md"
@@ -2734,11 +2755,12 @@
   {
    "path": "skills/research-communication/references/diagram-captions.md",
    "owner": "research-communication",
-   "bytes": 3345,
-   "lines": 55,
+   "bytes": 3692,
+   "lines": 60,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/research-communication/references/academic-diagrams-guide.md"
+    "skills/research-communication/references/academic-diagrams-guide.md",
+    "skills/research-communication/references/figures-and-tables.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "351029c 2026-10-07"
@@ -2746,11 +2768,13 @@
   {
    "path": "skills/research-communication/references/diagram-figure-style.md",
    "owner": "research-communication",
-   "bytes": 6067,
-   "lines": 93,
+   "bytes": 6670,
+   "lines": 99,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/research-communication/references/academic-diagrams-guide.md"
+    "skills/research-communication/references/academic-diagrams-guide.md",
+    "skills/research-communication/references/latex-venue-setup.md",
+    "skills/research-communication/references/physics-plots.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "351029c 2026-10-07"
@@ -2758,8 +2782,8 @@
   {
    "path": "skills/research-communication/references/diagrams-computer-science.md",
    "owner": "research-communication",
-   "bytes": 5485,
-   "lines": 95,
+   "bytes": 5620,
+   "lines": 97,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/assets/diagrams/ml-pipeline.md",
@@ -2771,8 +2795,8 @@
   {
    "path": "skills/research-communication/references/diagrams-hep.md",
    "owner": "research-communication",
-   "bytes": 5935,
-   "lines": 110,
+   "bytes": 7609,
+   "lines": 132,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/assets/diagrams/hep-analysis-pipeline.md",
@@ -2784,8 +2808,8 @@
   {
    "path": "skills/research-communication/references/diagrams-statistics.md",
    "owner": "research-communication",
-   "bytes": 6193,
-   "lines": 109,
+   "bytes": 6329,
+   "lines": 111,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/assets/diagrams/bayesian-model.md",
@@ -2797,8 +2821,8 @@
   {
    "path": "skills/research-communication/references/equation-and-notation-auditing.md",
    "owner": "research-communication",
-   "bytes": 3909,
-   "lines": 60,
+   "bytes": 4028,
+   "lines": 62,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-statistics/references/statistical-inference-for-physics.md",
@@ -2816,12 +2840,13 @@
   {
    "path": "skills/research-communication/references/erratum-and-corrigendum-drafting.md",
    "owner": "research-communication",
-   "bytes": 3058,
-   "lines": 50,
+   "bytes": 4549,
+   "lines": 67,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
-    "skills/research-communication/references/comment-and-reply-exchange.md"
+    "skills/research-communication/references/comment-and-reply-exchange.md",
+    "skills/research-communication/references/latex-venue-setup.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "351029c 2026-10-07"
@@ -2829,13 +2854,14 @@
   {
    "path": "skills/research-communication/references/evidence-linked-writing.md",
    "owner": "research-communication",
-   "bytes": 5168,
-   "lines": 67,
+   "bytes": 5403,
+   "lines": 69,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/research-communication/README.md",
     "skills/research-communication/SKILL.md",
     "skills/research-communication/references/academic-papers-guide.md",
+    "skills/research-communication/references/literature-lookup-recipes.md",
     "skills/research-communication/references/revision-impact-tracking.md"
    ],
    "cited_by_other_skills": [],
@@ -2844,16 +2870,18 @@
   {
    "path": "skills/research-communication/references/figures-and-tables.md",
    "owner": "research-communication",
-   "bytes": 9241,
-   "lines": 153,
+   "bytes": 9298,
+   "lines": 149,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-diagrams-guide.md",
     "skills/research-communication/references/academic-papers-guide.md",
     "skills/research-communication/references/astroparticle-and-cosmic-ray-papers.md",
+    "skills/research-communication/references/diagram-captions.md",
     "skills/research-communication/references/interpreting-scientific-graphics.md",
     "skills/research-communication/references/latex-mechanics-and-tooling.md",
     "skills/research-communication/references/paper-structure.md",
+    "skills/research-communication/references/physics-plots.md",
     "skills/research-communication/references/poster-and-talk-design.md"
    ],
    "cited_by_other_skills": [],
@@ -2862,12 +2890,12 @@
   {
    "path": "skills/research-communication/references/general-diagram-principles.md",
    "owner": "research-communication",
-   "bytes": 7671,
-   "lines": 138,
+   "bytes": 7812,
+   "lines": 140,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-diagrams-guide.md",
-    "skills/research-communication/references/legends-panels-and-export.md"
+    "skills/research-communication/references/poster-and-talk-design.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "351029c 2026-10-07"
@@ -2875,8 +2903,8 @@
   {
    "path": "skills/research-communication/references/grant-and-fellowship-proposal-writing.md",
    "owner": "research-communication",
-   "bytes": 2978,
-   "lines": 48,
+   "bytes": 4810,
+   "lines": 72,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md"
@@ -2887,8 +2915,8 @@
   {
    "path": "skills/research-communication/references/graphviz-patterns.md",
    "owner": "research-communication",
-   "bytes": 3366,
-   "lines": 77,
+   "bytes": 3460,
+   "lines": 79,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/examples/statistics/02-hierarchical-bayesian-model-plate.md",
@@ -2900,10 +2928,11 @@
   {
    "path": "skills/research-communication/references/interpreting-scientific-graphics.md",
    "owner": "research-communication",
-   "bytes": 7937,
-   "lines": 135,
+   "bytes": 8314,
+   "lines": 140,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/research-communication/references/academic-diagrams-guide.md",
     "skills/research-communication/references/academic-papers-guide.md",
     "skills/research-communication/references/figures-and-tables.md",
     "skills/research-communication/references/manuscript-consistency-auditing.md",
@@ -2915,8 +2944,8 @@
   {
    "path": "skills/research-communication/references/latex-mechanics-and-tooling.md",
    "owner": "research-communication",
-   "bytes": 13292,
-   "lines": 237,
+   "bytes": 13441,
+   "lines": 239,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -2933,14 +2962,16 @@
   {
    "path": "skills/research-communication/references/latex-venue-setup.md",
    "owner": "research-communication",
-   "bytes": 21579,
-   "lines": 344,
+   "bytes": 25696,
+   "lines": 378,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
     "skills/research-communication/references/astroparticle-and-cosmic-ray-papers.md",
+    "skills/research-communication/references/comment-and-reply-exchange.md",
     "skills/research-communication/references/latex-mechanics-and-tooling.md",
     "skills/research-communication/references/multi-venue-reformatting.md",
+    "skills/research-communication/references/paper-structure.md",
     "skills/research-communication/references/submission-and-peer-review.md"
    ],
    "cited_by_other_skills": [],
@@ -2949,8 +2980,8 @@
   {
    "path": "skills/research-communication/references/legends-panels-and-export.md",
    "owner": "research-communication",
-   "bytes": 8250,
-   "lines": 129,
+   "bytes": 6618,
+   "lines": 110,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-diagrams-guide.md",
@@ -2962,8 +2993,8 @@
   {
    "path": "skills/research-communication/references/literature-discovery-and-search.md",
    "owner": "research-communication",
-   "bytes": 4865,
-   "lines": 72,
+   "bytes": 5010,
+   "lines": 74,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md"
@@ -2972,10 +3003,24 @@
    "last_commit": "d47080b 2026-10-12"
   },
   {
+   "path": "skills/research-communication/references/literature-lookup-recipes.md",
+   "owner": "research-communication",
+   "bytes": 4452,
+   "lines": 80,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/research-communication/SKILL.md",
+    "skills/research-communication/references/academic-papers-guide.md",
+    "skills/research-communication/references/citation-verification.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
    "path": "skills/research-communication/references/literature-review.md",
    "owner": "research-communication",
-   "bytes": 7719,
-   "lines": 146,
+   "bytes": 7860,
+   "lines": 148,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -2990,8 +3035,8 @@
   {
    "path": "skills/research-communication/references/logical-consistency-and-argument-uniformity.md",
    "owner": "research-communication",
-   "bytes": 4797,
-   "lines": 85,
+   "bytes": 4919,
+   "lines": 87,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-theory/references/mathematical-reasoning-and-proof.md",
@@ -3008,8 +3053,8 @@
   {
    "path": "skills/research-communication/references/manuscript-consistency-auditing.md",
    "owner": "research-communication",
-   "bytes": 3470,
-   "lines": 62,
+   "bytes": 3594,
+   "lines": 64,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -3023,8 +3068,8 @@
   {
    "path": "skills/research-communication/references/mermaid-patterns.md",
    "owner": "research-communication",
-   "bytes": 8470,
-   "lines": 221,
+   "bytes": 4497,
+   "lines": 114,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/examples/computer-science/07-database-architecture.md",
@@ -3036,8 +3081,8 @@
   {
    "path": "skills/research-communication/references/multi-venue-reformatting.md",
    "owner": "research-communication",
-   "bytes": 2916,
-   "lines": 46,
+   "bytes": 3042,
+   "lines": 48,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md"
@@ -3048,8 +3093,8 @@
   {
    "path": "skills/research-communication/references/outreach-and-public-facing-summaries.md",
    "owner": "research-communication",
-   "bytes": 5081,
-   "lines": 91,
+   "bytes": 4202,
+   "lines": 73,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -3064,12 +3109,11 @@
   {
    "path": "skills/research-communication/references/paper-genre-variants.md",
    "owner": "research-communication",
-   "bytes": 4259,
-   "lines": 82,
+   "bytes": 5202,
+   "lines": 98,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
-    "skills/research-communication/references/astroparticle-and-cosmic-ray-papers.md",
     "skills/research-communication/references/paper-structure.md",
     "skills/research-communication/references/thesis-by-publication-assembly.md"
    ],
@@ -3079,13 +3123,14 @@
   {
    "path": "skills/research-communication/references/paper-structure.md",
    "owner": "research-communication",
-   "bytes": 9756,
-   "lines": 187,
+   "bytes": 11060,
+   "lines": 206,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
     "skills/research-communication/references/astroparticle-and-cosmic-ray-papers.md",
     "skills/research-communication/references/grant-and-fellowship-proposal-writing.md",
+    "skills/research-communication/references/latex-venue-setup.md",
     "skills/research-communication/references/literature-review.md",
     "skills/research-communication/references/logical-consistency-and-argument-uniformity.md",
     "skills/research-communication/references/multi-venue-reformatting.md",
@@ -3097,10 +3142,27 @@
    "last_commit": "351029c 2026-10-07"
   },
   {
+   "path": "skills/research-communication/references/physics-plots.md",
+   "owner": "research-communication",
+   "bytes": 6891,
+   "lines": 95,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/research-communication/references/academic-papers-guide.md",
+    "skills/research-communication/references/collaboration-results-lifecycle.md",
+    "skills/research-communication/references/diagrams-hep.md",
+    "skills/research-communication/references/figures-and-tables.md",
+    "skills/research-communication/references/latex-venue-setup.md",
+    "skills/research-communication/references/legends-panels-and-export.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
    "path": "skills/research-communication/references/plagiarism-and-text-reuse-checking.md",
    "owner": "research-communication",
-   "bytes": 2875,
-   "lines": 47,
+   "bytes": 3000,
+   "lines": 49,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -3112,8 +3174,8 @@
   {
    "path": "skills/research-communication/references/plantuml-patterns.md",
    "owner": "research-communication",
-   "bytes": 3505,
-   "lines": 94,
+   "bytes": 3587,
+   "lines": 96,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-diagrams-guide.md"
@@ -3124,11 +3186,14 @@
   {
    "path": "skills/research-communication/references/poster-and-talk-design.md",
    "owner": "research-communication",
-   "bytes": 3232,
-   "lines": 58,
+   "bytes": 6244,
+   "lines": 106,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/research-communication/references/academic-papers-guide.md"
+    "skills/research-communication/references/academic-diagrams-guide.md",
+    "skills/research-communication/references/academic-papers-guide.md",
+    "skills/research-communication/references/diagram-figure-style.md",
+    "skills/research-communication/references/legends-panels-and-export.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "a2a25ec 2026-10-12"
@@ -3136,8 +3201,8 @@
   {
    "path": "skills/research-communication/references/preprint-to-journal-reconciliation.md",
    "owner": "research-communication",
-   "bytes": 2644,
-   "lines": 44,
+   "bytes": 2900,
+   "lines": 47,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -3150,8 +3215,8 @@
   {
    "path": "skills/research-communication/references/preregistration-and-registered-reports.md",
    "owner": "research-communication",
-   "bytes": 3385,
-   "lines": 60,
+   "bytes": 3523,
+   "lines": 62,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md"
@@ -3162,8 +3227,8 @@
   {
    "path": "skills/research-communication/references/primary-sources-and-version-checks.md",
    "owner": "research-communication",
-   "bytes": 14817,
-   "lines": 101,
+   "bytes": 12700,
+   "lines": 90,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -3174,7 +3239,8 @@
     "skills/detector-response/scripts/multiple_scattering.py",
     "skills/detector-response/scripts/pid_separation_power.py",
     "skills/hep-analysis/references/hep-analysis-guide.md",
-    "skills/research-communication/SKILL.md"
+    "skills/research-communication/SKILL.md",
+    "skills/research-communication/references/academic-papers-guide.md"
    ],
    "cited_by_other_skills": [
     "detector-response",
@@ -3185,8 +3251,8 @@
   {
    "path": "skills/research-communication/references/reading-papers.md",
    "owner": "research-communication",
-   "bytes": 10116,
-   "lines": 172,
+   "bytes": 9838,
+   "lines": 169,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-statistics/references/statistical-inference-for-physics.md",
@@ -3206,8 +3272,8 @@
   {
    "path": "skills/research-communication/references/reproducibility-auditing.md",
    "owner": "research-communication",
-   "bytes": 2992,
-   "lines": 57,
+   "bytes": 3144,
+   "lines": 59,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-computing/references/numerical-and-computational-methods.md",
@@ -3228,8 +3294,8 @@
   {
    "path": "skills/research-communication/references/reviewer-style-assessment.md",
    "owner": "research-communication",
-   "bytes": 1965,
-   "lines": 35,
+   "bytes": 2068,
+   "lines": 37,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md"
@@ -3240,12 +3306,13 @@
   {
    "path": "skills/research-communication/references/revision-impact-tracking.md",
    "owner": "research-communication",
-   "bytes": 3911,
-   "lines": 66,
+   "bytes": 4024,
+   "lines": 68,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/README.md",
     "skills/research-communication/references/academic-papers-guide.md",
+    "skills/research-communication/references/collaboration-results-lifecycle.md",
     "skills/research-communication/references/erratum-and-corrigendum-drafting.md",
     "skills/research-communication/references/evidence-linked-writing.md",
     "skills/research-communication/references/latex-mechanics-and-tooling.md",
@@ -3262,17 +3329,21 @@
   {
    "path": "skills/research-communication/references/scientific-style.md",
    "owner": "research-communication",
-   "bytes": 9596,
-   "lines": 173,
+   "bytes": 11702,
+   "lines": 192,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-statistics/references/statistical-inference-for-physics.md",
+    "skills/research-communication/assets/reporting-policies.json",
     "skills/research-communication/references/academic-papers-guide.md",
     "skills/research-communication/references/astroparticle-and-cosmic-ray-papers.md",
+    "skills/research-communication/references/figures-and-tables.md",
     "skills/research-communication/references/grant-and-fellowship-proposal-writing.md",
     "skills/research-communication/references/latex-venue-setup.md",
     "skills/research-communication/references/outreach-and-public-facing-summaries.md",
+    "skills/research-communication/references/paper-genre-variants.md",
     "skills/research-communication/references/paper-structure.md",
+    "skills/research-communication/references/reading-papers.md",
     "skills/research-communication/references/statistics-and-ml-papers.md",
     "tests/skills/research_communication/test_handoff_text.py"
    ],
@@ -3284,8 +3355,8 @@
   {
    "path": "skills/research-communication/references/statistics-and-ml-papers.md",
    "owner": "research-communication",
-   "bytes": 14013,
-   "lines": 208,
+   "bytes": 14149,
+   "lines": 210,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -3303,8 +3374,8 @@
   {
    "path": "skills/research-communication/references/submission-and-peer-review.md",
    "owner": "research-communication",
-   "bytes": 13460,
-   "lines": 231,
+   "bytes": 15981,
+   "lines": 250,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -3312,6 +3383,7 @@
     "skills/research-communication/references/conflict-of-interest-and-ethics-statements.md",
     "skills/research-communication/references/grant-and-fellowship-proposal-writing.md",
     "skills/research-communication/references/latex-mechanics-and-tooling.md",
+    "skills/research-communication/references/latex-venue-setup.md",
     "skills/research-communication/references/reviewer-style-assessment.md",
     "skills/research-communication/references/revision-impact-tracking.md",
     "skills/research-communication/references/statistics-and-ml-papers.md",
@@ -3324,8 +3396,8 @@
   {
    "path": "skills/research-communication/references/supplementary-material-planning.md",
    "owner": "research-communication",
-   "bytes": 1995,
-   "lines": 33,
+   "bytes": 2107,
+   "lines": 35,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md"
@@ -3336,8 +3408,8 @@
   {
    "path": "skills/research-communication/references/systematic-review-screening.md",
    "owner": "research-communication",
-   "bytes": 3015,
-   "lines": 53,
+   "bytes": 3142,
+   "lines": 55,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -3349,8 +3421,8 @@
   {
    "path": "skills/research-communication/references/thesis-by-publication-assembly.md",
    "owner": "research-communication",
-   "bytes": 3761,
-   "lines": 60,
+   "bytes": 3938,
+   "lines": 62,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -3362,8 +3434,8 @@
   {
    "path": "skills/research-communication/references/tikz-patterns.md",
    "owner": "research-communication",
-   "bytes": 5344,
-   "lines": 125,
+   "bytes": 5879,
+   "lines": 130,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/assets/diagrams/bayesian-model.md",
@@ -3371,7 +3443,9 @@
     "skills/research-communication/examples/hep/03-simplified-detector-architecture.md",
     "skills/research-communication/examples/hep/07-feynman-style-interaction.md",
     "skills/research-communication/references/academic-diagrams-guide.md",
-    "skills/research-communication/references/diagrams-hep.md"
+    "skills/research-communication/references/diagrams-hep.md",
+    "skills/research-communication/references/poster-and-talk-design.md",
+    "skills/research-communication/scripts/check_diagram_sources.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "351029c 2026-10-07"
@@ -3497,6 +3571,7 @@
   ],
   "literature": [
    "skills/research-communication/references/literature-discovery-and-search.md",
+   "skills/research-communication/references/literature-lookup-recipes.md",
    "skills/research-communication/references/literature-review.md"
   ],
   "ml": [

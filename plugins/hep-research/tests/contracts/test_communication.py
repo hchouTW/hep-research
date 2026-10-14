@@ -390,3 +390,17 @@ class ReviewMinors(unittest.TestCase):
         rep = validate_artifact(d)
         self.assertTrue(rep.ok, [f.as_dict() for f in rep.errors])
         self.assertIn("communication.claim_unmapped", codes(rep, "unresolved"))
+
+
+class FluxMeasurementResultTypeTests(unittest.TestCase):
+    """RC-C3 (contracts 2.8.0, add-only): flux-measurement is a reporting_context result type."""
+
+    def test_flux_measurement_result_type_is_valid(self):
+        d = rich()
+        d["extension"]["reporting_context"] = {"result_type": "flux-measurement", "method": {"platform": "orbital"},
+                                               "fields": {"period": {"state": "provided", "value": "synthetic period"}}}
+        rep = validate_artifact(d)
+        self.assertNotIn("schema.enum", codes(rep, "error"), [f.as_dict() for f in rep.errors])
+        d["extension"]["reporting_context"]["result_type"] = "flux-measurment"
+        self.assertIn("schema.enum", codes(validate_artifact(d), "error"))
+

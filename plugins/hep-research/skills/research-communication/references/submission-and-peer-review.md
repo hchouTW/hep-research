@@ -16,7 +16,9 @@ arXiv submission, and how to structure a referee response once reviews come back
 
 ## Pre-submission checklist
 
-Run through this (and `<plugin root>/skills/research-communication/scripts/check_manuscript.py`) before the user submits:
+Run through this (and `<plugin root>/skills/research-communication/scripts/check_manuscript.py`) before the user submits.
+An item that needs a tool or access this session lacks (a TeX engine, an ADS token, paywalled
+full text) is reported as unverified with the reason, never ticked as done:
 
 - [ ] Every number in the abstract matches the corresponding number in Results
 - [ ] Every `\cite{}` resolves; every `.bib` entry is used (script-checkable)
@@ -29,8 +31,10 @@ Run through this (and `<plugin root>/skills/research-communication/scripts/check
       collaboration-approved list (for collaboration papers, do not
       hand-edit without the publications committee's sign-off)
 - [ ] No leftover `TODO`/`FIXME`/placeholder text (script-checkable)
+- [ ] AI-use disclosure drafted for the venue (see "Authorship and contributions"), raised even if the user did not ask
 - [ ] Compiles cleanly from a fresh directory (catches missing files that
-      happen to exist locally but weren't properly referenced)
+      happen to exist locally but weren't properly referenced); without a TeX
+      engine here, unverified
 
 ## Cover letters
 
@@ -69,8 +73,18 @@ authors; do not resolve an authorship dispute by choosing a side.
 
 For large collaborations, use the provided collaboration convention and approved
 boilerplate rather than forcing individual roles onto a collective author list.
-If an AI-use disclosure is requested or required by the venue, describe the actual
-assistance from known records without inventing tool versions or usage details.
+**AI-use disclosure: raise it unprompted.** The agent drafting the text is itself an AI tool, so before submission
+tell the user which disclosure the venue expects and draft it from what was actually done in the session (tool and
+version as reported by the host, what it was used for, how the authors checked it); never invent usage details, and
+never list an AI tool as an author. Policies as read on 2026-10-14 (recheck the live page before submitting):
+
+| Venue | Rule | Source |
+|---|---|---|
+| arXiv | authors report significant use of text-to-text generative AI, consistent with subject methodology standards; every author is responsible for the whole content | [arXiv moderation](https://info.arxiv.org/help/moderation/index.html) ("Policy for authors' use of generative AI language tools") |
+| APS | an AI program cannot be listed as an author; keep a record of AI use and disclose substantive use in the paper (tool name and version, how it assisted, how the authors directed and checked it); AI used for the research itself goes in the methods | [APS appropriate use of AI tools](https://journals.aps.org/authors/ai-based-writing-tools) |
+| Elsevier | a separate AI declaration statement in the manuscript (tool, purpose, extent of oversight), published with the article; AI tools are not authors | [Elsevier generative-AI policy](https://www.elsevier.com/about/policies-and-standards/generative-ai-policies-for-journals) |
+| IOP Publishing | a separate AI disclosure statement in the Acknowledgements naming the tool and how it was used | [IOP generative AI tools](https://publishingsupport.iopscience.iop.org/questions/generative-ai-tools/) |
+| Springer Nature (EPJC, JHEP) | not re-opened: the policy page redirected to a login on 2026-10-14; read it before submitting | [Springer Nature AI policy](https://www.springer.com/de/editorial-policies/artificial-intelligence--ai-/25428500) |
 
 Deliver the formatted statement, a role-to-author mapping when helpful, and
 unresolved factual questions. Distinguish draft wording from author-confirmed
@@ -91,6 +105,11 @@ publication committee or spokesperson signs off. When helping at this stage:
   needs the reviewers to approve it again; flag it rather than editing quietly.
 - Use the collaboration's author list, acknowledgments and boilerplate as
   supplied (see "Authorship and contributions"); never regenerate them.
+- Author lists of large collaborations come as exports from the collaboration's
+  author database (a LaTeX file with names, affiliations and, where collected,
+  ORCID iDs) and use the class's collaboration macro (REVTeX `\collaboration`,
+  `latex-venue-setup.md`); include them as delivered, and ask for ORCID iDs the
+  venue requires rather than looking them up.
 
 ## arXiv submission mechanics
 
@@ -105,14 +124,12 @@ publication committee or spokesperson signs off. When helping at this stage:
 - For collaboration papers, follow the collaboration's internal approval
   process before arXiv submission — arXiv submission is often the public
   step *after* internal review, not a substitute for it.
-<!-- example: experiment-specific illustration -->
 - Don't assume every collaboration posts an arXiv preprint at all — some
-  (e.g. AMS-02) publish directly to the journal with no arXiv companion, by
-  policy, not oversight. Confirm the collaboration's own practice (check its
-  recent papers on INSPIRE-HEP for a populated `arXiv:` field) before
-  defaulting to "submit to arXiv first." See
-  `astroparticle-and-cosmic-ray-papers.md`'s AMS-02 case study.
-<!-- /example -->
+  publish directly to the journal with no arXiv companion. Confirm the
+  collaboration's own practice (check its recent papers on INSPIRE-HEP for a
+  populated `arxiv_eprints` field) before defaulting to "submit to arXiv first";
+  see `astroparticle-and-cosmic-ray-papers.md` ("Checking a collaboration's
+  publication pattern").
 - **Licence** (checked 2026-09-27 on arXiv's help pages): arXiv offers CC BY 4.0,
   CC BY-SA 4.0, CC BY-NC-SA 4.0, CC BY-NC-ND 4.0, CC0, or its own perpetual,
   non-exclusive licence 1.0. The choice is irrevocable for that version, so check
@@ -228,3 +245,5 @@ a dependency ledger and distinguishes edits made from changes actually verified.
 - Version the `.bib` file alongside the `.tex` file in revisions — reference
   lists frequently need small additions in response to referee comments
   ("please cite prior measurement by...").
+
+**Done when:** every checklist item is ticked or reported unverified with its reason, and every referee point has a response tied to a change or a reason.

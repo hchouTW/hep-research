@@ -91,3 +91,5 @@ Put each member on its own line: a one-line body such as `class Sample { +id : i
 Every participant and component exists in the source system; async vs synchronous arrows are consistent with
 the code or API; return arrows are dashed; no lifeline is activated and never deactivated; the `alt` branches
 are mutually exclusive.
+
+**Done when:** `plantuml -tsvg` renders the source and the output was looked at.

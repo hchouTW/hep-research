@@ -10,7 +10,7 @@ flowchart LR
         UE[Underlying event] --> HAD
     end
     HAD --> DET
-    PU[Pileup overlay] --> DET
+    PU["Pileup overlay<br/>(stage is experiment-dependent)"] --> DIG
     subgraph DETLVL[Detector level]
         DET[Detector simulation<br/>full or fast] --> DIG[Digitization]
     end
@@ -22,4 +22,4 @@ flowchart LR
 **Notes:** full and fast simulation are *alternatives* for the DET box (state in caption).
 Truth quantities do not enter selection; they are used for labeling/truth matching only.
 Weights (generator, pileup, scale factors) attach to simulated events only.
-**Caption:** Simulation chain. Hard-process events are showered and hadronized at generator level, overlaid with underlying-event and pileup activity, passed through detector simulation and digitization, and reconstructed with the same software as collision data. Full or fast simulation may be used for the detector step; event weights (dashed) are applied at the analysis stage.
+**Caption:** Simulation chain. Hard-process events are showered and hadronized at generator level with the underlying event, passed through detector simulation and digitization, with pileup overlaid at the stage the experiment uses (commonly digitization), and reconstructed with the same software as collision data. Full or fast simulation may be used for the detector step; event weights (dashed) are applied at the analysis stage.

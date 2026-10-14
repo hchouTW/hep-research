@@ -29,7 +29,8 @@ design guidelines (P1), move only the web, sprint, feature-flag and accessibilit
 
 ## What the inventory shows
 
-- 169 references in 7 skills, 1.38 MB; every reference is cited by at least one plugin file (no orphans).
+- 193 references in 7 skills, 1.65 MB (inventory of 2026-10-14 on the research-communication audit branch; it was 169
+  and 1.38 MB when these proposals were written); every reference is cited by at least one plugin file (no orphans).
 - Textual overlap is low: only three pairs reach the listing thresholds (Jaccard >= 0.08 or 15% of the smaller file's
   8-word shingles found in the other). Similar names mostly mark different topics, not duplicates; the
   hypothesis of the review (overlap among similarly named references) holds for one family only.
@@ -49,7 +50,7 @@ design guidelines (P1), move only the web, sprint, feature-flag and accessibilit
 ## Not proposed
 
 - No reference is removed: none is uncited, and size alone is not a reason.
-- The `research-communication` (52 references) and `physics-ml` (34) counts are high, but their name families
+- The `research-communication` (56 references) and `physics-ml` (38) counts are high, but their name families
   (diagram patterns per tool, training topics, review types) are separate topics with low text overlap.
 
 ## Entry-point budgets

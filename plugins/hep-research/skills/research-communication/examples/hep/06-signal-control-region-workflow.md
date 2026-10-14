@@ -12,11 +12,10 @@ flowchart LR
     SPLIT --> VR["Validation region (VR)"]
     CR1 --> FIT
     CR2 --> FIT
-    SR --> FIT["Simultaneous likelihood fit<br/>shared parameters: μ, background normalizations, θ"]
+    SR --> FIT["Simultaneous likelihood fit<br/>shared parameters: μ, background normalizations, θ<br/>CR→SR transfer factors inside the model"]
     SYS[Systematic uncertainties] -.->|nuisance parameters| FIT
-    FIT --> EXT[Extrapolate background to SR<br/>via transfer factors]
-    EXT --> RES([Result])
-    EXT -.->|not fitted; tests extrapolation| VR
+    FIT --> RES(["Result: fitted μ"])
+    FIT -.->|post-fit prediction, not fitted| VR
 ```
-**Checks:** regions are mutually exclusive selections; CRs constrain background normalization; VR is not in the fit (dashed check); SR data blinded until the fit is frozen (state if true); shared, not duplicated, parameters across regions.
+**Checks:** regions are mutually exclusive selections; CRs constrain background normalization through transfer factors that are part of the fit model, so the result comes from the fit (μ), not from a separate extrapolation step; VR is not in the fit (dashed post-fit check); SR data blinded until the fit is frozen (state if true); shared, not duplicated, parameters across regions.
 **Caption:** Region-based analysis strategy. Events passing the preselection are divided into a signal region, two background-enriched control regions, and a validation region. The signal and control regions are fitted simultaneously with shared background normalizations and nuisance parameters; the validation region, which is not included in the fit, checks the background extrapolation.

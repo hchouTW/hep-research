@@ -82,3 +82,5 @@ Deliver a ledger (location, finding, classification, impact, proposed fix)
 and the scope actually checked. If the fix requires moving or restructuring
 text rather than a local edit, hand off to `paper-structure.md`'s
 argument-restructuring section rather than patching in place.
+
+**Done when:** every conclusion follows from a stated result, and each term keeps one meaning throughout the manuscript.

@@ -106,3 +106,5 @@ Do not add adjustment or identification statements (backdoor, front-door, "contr
 derive them from the graph: list the paths, mark which are open, say which nodes are colliders or mediators, and note that an
 unmeasured confounder cannot be adjusted for. Do not write sentences that conflate the effect being identified ("the effect of S
 on T->C"). When unsure, state only what the graph encodes (edges present and absent) and leave the estimation strategy out.
+
+**Done when:** the model diagram renders and every node, plate and arrow matches a variable, index or dependence in the written model.

@@ -94,7 +94,7 @@
                    "render_status": {"type": "string", "enum": ["rendered", "not-rendered", "failed", "unresolved"]},
                    "visual_inspection_status": {"type": "string", "enum": ["inspected", "pending", "failed", "unresolved"]}}},
   "reporting_context": {"type": "object", "required": ["result_type", "fields"],
-    "properties": {"result_type": {"type": "string", "enum": ["measurement", "search", "limit", "theory-prediction", "ml-result"]},
+    "properties": {"result_type": {"type": "string", "enum": ["measurement", "search", "limit", "theory-prediction", "ml-result", "flux-measurement"]},
                    "method": {"type": "object"},
                    "fields": {"type": "object", "additionalProperties": {"type": "object", "required": ["state"], "properties": {
                        "state": {"type": "string", "enum": ["provided", "missing", "not-applicable", "unresolved"]},

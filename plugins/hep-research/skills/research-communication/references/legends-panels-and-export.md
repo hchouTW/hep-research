@@ -1,7 +1,7 @@
-# Legends, Multi-Panel Figures, Talks, and Export
+# Legends, Multi-Panel Figures, and Export
 
-Covers the finishing work around a diagram: legends per format, multi-panel figures, posters and theses,
-Beamer overlays and talk simplification, equation placement, the symbol table, and export recipes.
+Covers the finishing work around a diagram: legends per format, multi-panel figures, equation placement, the symbol
+table, and export recipes. Posters, theses and talks: `poster-and-talk-design.md`.
 
 ## 1. Legends
 
@@ -68,35 +68,12 @@ Use panels (a), (b), (c) when one figure would carry more than one message or mo
 ```
 (needs `\usepackage{subcaption}`; venue classes may forbid it - follow the author kit.)
 
-## 3. Posters and theses
+## 3. Posters, theses and talks
 
-| Target | Adjust |
-|---|---|
-| Poster | fewer nodes (<= ~8), larger text (readable at ~1.5 m), one figure per poster section, no legends longer than 3 entries |
-| Thesis | one figure per concept, numbered by chapter, full detail allowed (technical level), a symbol table in the list of symbols, vector PDF at text width |
-| Slides | see section 4 |
+Diagram variants for posters, theses and talks (fewer nodes, larger text, Beamer overlays) are in
+`poster-and-talk-design.md` ("Diagrams on posters, in theses and in talks"), the single home for poster and talk rules.
 
-## 4. Beamer overlays and talk simplification
-
-Simplify by **abstraction level** (see `general-diagram-principles.md` section 6), not by shrinking: keep node identity
-so the audience can follow the paper figure. For a talk, reduce to <= ~7 boxes, labels <= 3 words, drop legends by using
-one edge style, and reveal the pipeline one stage at a time.
-
-Beamer with TikZ, reveal stage by stage using `visible on` (compiled with Tectonic: 3 overlay pages, boxes stay in place):
-
-```latex
-\begin{tikzpicture}[node distance=8mm]
-  \node[proc] (a) {Trigger};
-  \node[proc, right=of a, visible on=<2->] (b) {Reconstruction};
-  \node[proc, right=of b, visible on=<3->] (c) {Selection};
-  \draw[flow, visible on=<2->] (a) -- (b);
-  \draw[flow, visible on=<3->] (b) -- (c);
-\end{tikzpicture}
-```
-`visible on=<n->` needs `\usetikzlibrary{overlay-beamer-styles}`. Alternatives that avoid it: export one PDF per stage, or
-`\only<n>{\includegraphics{...}}`. Keep positions fixed across overlays so nothing jumps.
-
-## 5. Equation placement
+## 4. Equation placement
 
 - Put an equation **in a node** only when it *is* the object (e.g. a posterior `$p(\theta\mid x)$`); keep it to one short expression.
 - Put an equation on an **edge label** when it defines the transformation (e.g. `$\theta\to\hat\theta$`), and prefer a symbol plus a definition in the caption over a long formula.
@@ -104,7 +81,7 @@ Beamer with TikZ, reveal stage by stage using `visible on` (compiled with Tecton
 - Mermaid renders KaTeX in labels only in some hosts: `mmdc` renders `$$...$$` and shows single-`$` text raw (checked 2026-10-02). In DOT use HTML-like labels with entities (`&theta;`, `&sigma;<sub>stat</sub>`, `&radic;`, `&ge;`, `<i>`), which render correctly (checked); set `fontname` on edges as well as nodes or edge labels fall back to the default serif font, and there is no hat accent (a `<sup>^</sup>` is crude, prefer TikZ for that). TikZ takes LaTeX natively. State which is used.
 - Use the same symbols as the paper (see the symbol table below).
 
-## 6. Symbol table linking to the paper
+## 5. Symbol table linking to the paper
 
 Before drawing a model or statistical figure, write a table and keep it in the notes; reuse it for the caption and the paper.
 
@@ -114,7 +91,7 @@ Before drawing a model or statistical figure, write a table and keep it in the n
 
 Never invent an equation number; leave "-" and flag it when the paper's numbering is unknown. If a figure symbol differs from the paper's, either rename the figure or add a one-line note, so the reader is never left to guess.
 
-## 7. Export recipes
+## 6. Export recipes
 
 | Source | To SVG | To PDF | To PNG |
 |---|---|---|---|
@@ -123,6 +100,10 @@ Never invent an equation number; leave "-" and flag it when the paper's numberin
 | SVG | - | `rsvg-convert -f pdf f.svg -o f.pdf` | `rsvg-convert -d 300 -p 300 f.svg -o f.png` |
 | TikZ | `pdftocairo -svg f.pdf f.svg` (run; text becomes glyph outlines), or `dvisvgm --pdf --no-fonts f.pdf -o f.svg` (run; faithful outlines; plain `dvisvgm --pdf` keeps `<text>` but only renders right where the viewer has the Computer Modern fonts; needs `mutool` or Ghostscript < 10.01; not the Tectonic `.xdv`, which loses the drawing) | `\documentclass[tikz,border=2pt]{standalone}` + `pdflatex`/`lualatex` | `pdftoppm -r 300 -png f.pdf f` |
 
-Prefer vector PDF for LaTeX manuscripts, SVG for web and editing, PNG only when a venue requires raster (>= 300 dpi at final size).
-The Graphviz, `rsvg-convert`, and `mmdc` rows were run in this bundle's validation; the TikZ standalone compile (Tectonic; fonts embedded, `pdffonts`), `pdftoppm -r 300 -png` and `pdftocairo -svg` were run, and the `subcaption` `figure*` snippet compiled under `twocolumn` article with Tectonic (two panels (a)/(b) plus caption on a float page). `dvisvgm` 3.6.1 was run: on Tectonic's `.xdv` it warns "86 PDF specials ignored" and the SVG has the text overlapping with the boxes and arrow missing, so do not use that route; `dvisvgm --pdf` refuses to run with Ghostscript 10.08 and needs `mutool` or Ghostscript < 10.01 ; with `mutool` (`mupdf-tools`) installed, `dvisvgm --pdf` rendered the boxes, arrow and labels correctly, with text kept as `<text>` elements. With math labels and bold, italic, mono and small-caps text, plain `dvisvgm --pdf` rendered in rsvg with a fallback sans font (detached radical, lost bold and italic, overlapping words) while `--no-fonts` and `pdftocairo -svg` matched the PDF; `pdftoppm` matched too. Check any SVG export in the target viewer.
+Prefer vector PDF for LaTeX manuscripts, SVG for web and editing, PNG only when a venue requires raster (resolution: `physics-plots.md`; the venue rule wins).
+Do not export TikZ through Tectonic's `.xdv` with `dvisvgm` (drawing lost); `dvisvgm --pdf` needs `mutool` or
+Ghostscript < 10.01, and without `--no-fonts` its text renders correctly only where the viewer has the fonts. Prefer
+`dvisvgm --pdf --no-fonts` or `pdftocairo -svg`. How each route was checked is recorded in `VALIDATION.md` (RC-AUDIT-2).
 Check text is still selectable after export (fonts embedded) and that the export did not change the layout.
+
+**Done when:** every exported figure is vector (or raster at the resolution `physics-plots.md` sets, where the venue's rule wins), with text selectable or embedded and layout unchanged from the source.

@@ -54,7 +54,7 @@ class ShippedLedgerTests(unittest.TestCase):
     def test_shipped_ledger_is_valid(self):
         report = run(*ledger())
         self.assertEqual(report["status"], "pass", report["errors"] + report["warnings"])
-        self.assertEqual(report["counts"], {"sources": 60, "claims": 184})
+        self.assertEqual(report["counts"], {"sources": 60, "claims": 185})
 
     def test_c184_is_the_s06_break_fit(self):
         # transcribed from the cached S06 PDF, page 171103-6
@@ -64,6 +64,14 @@ class ShippedLedgerTests(unittest.TestCase):
         self.assertEqual(c["scope"]["range"], "45 GV-1.8 TV")
         for value in ("R0 = 336 +68/-44 (fit) +66/-28 (sys) +- 1 (sol) GV", "chi2/d.f. = 25/26", "gamma = -2.849"):
             self.assertIn(value, c["claim"])
+
+    def test_c185_is_a_search_limited_absence_claim(self):
+        # RC-B7: the absent arXiv version of PRL 126, 041104 is a dated INSPIRE absence claim, not a policy statement
+        _, claims = ledger()
+        c = [x for x in claims if x["id"] == q("C185")][0]
+        self.assertEqual((c["support_kind"], c["verification_strength"]), ("absence_search", "metadata-only"))
+        self.assertIn("1844651", c["claim"])
+        self.assertNotIn("policy", c["claim"].lower())
 
     def test_cosmic_ray_database_rows_stay_secondary_and_unverified_where_unread(self):
         sources, claims = ledger()
@@ -87,7 +95,7 @@ class ShippedLedgerTests(unittest.TestCase):
     def test_ledger_ids_are_contiguous(self):
         sources, claims = ledger()
         self.assertEqual([s["id"] for s in sources], [q(f"S{n:02d}") for n in range(1, 61)])
-        self.assertEqual(sorted(c["id"] for c in claims), sorted(q(f"C{n:02d}") for n in range(1, 185)))
+        self.assertEqual(sorted(c["id"] for c in claims), sorted(q(f"C{n:02d}") for n in range(1, 186)))
 
     def test_scope_and_limitation_text_are_kept(self):
         _, claims = ledger()

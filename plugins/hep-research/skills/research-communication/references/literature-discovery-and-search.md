@@ -69,3 +69,5 @@ direction/alert), and enough bibliographic detail to hand off to
 log alongside it so the search is reproducible later. Do not silently drop
 papers that seemed off-topic — note why they were excluded if a systematic
 record is being kept.
+
+**Done when:** the search log records every query with its source and date, and `manage_literature.py` imported it without unresolved findings.

@@ -36,3 +36,5 @@ Deliver each statement in the venue's required form and location (often a
 separate section or a submission-system field, not body text), with any
 unresolved disclosure marked rather than assumed absent. Do not represent a
 disclosure as complete when an author's response is still outstanding.
+
+**Done when:** every statement the venue requires is present in its wording, with facts supplied by the user, not inferred.

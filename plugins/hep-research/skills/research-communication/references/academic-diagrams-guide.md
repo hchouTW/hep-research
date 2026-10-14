@@ -124,8 +124,11 @@ Domain checklists: [HEP](diagrams-hep.md),
   [plantuml-patterns.md](plantuml-patterns.md),
   [tikz-patterns.md](tikz-patterns.md); SVG spec -> `../assets/diagrams/svg-spec.md`
 - Captions and in-text references -> [diagram-captions.md](diagram-captions.md)
-- Legends, multi-panel figures, posters/theses, Beamer overlays, equation placement, symbol table, export
-  (SVG/PDF/PNG) -> [legends-panels-and-export.md](legends-panels-and-export.md)
+- Legends, multi-panel figures, equation placement, symbol table, export (SVG/PDF/PNG) ->
+  [legends-panels-and-export.md](legends-panels-and-export.md)
+- Posters, theses, talks and Beamer overlays -> [poster-and-talk-design.md](poster-and-talk-design.md)
+- Reading someone else's plot (exclusion contours, posteriors, cutflows; values read off a figure) ->
+  [interpreting-scientific-graphics.md](interpreting-scientific-graphics.md)
 - Starting skeletons -> `../assets/diagrams/` (research-workflow, algorithm-flowchart,
   system-architecture, hep-analysis-pipeline, probabilistic-graphical-model,
   agentic-ai-architecture, ml-pipeline, bayesian-model, svg-spec)
@@ -181,3 +184,5 @@ For multi-figure papers, fix one `figure_style` block up front and reuse it; the
 - [ ] Grayscale-safe, readable at column width
 - [ ] Source is editable text; syntax checked when a renderer was available
 - [ ] Caption explains meaning and flow, not just box labels; no invented figure numbers
+
+**Done when:** the diagram source renders with `check_diagram_sources.py` (no source error), the rendered output was looked at, and the caption follows `diagram-captions.md`.

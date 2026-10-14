@@ -11,14 +11,14 @@ Use when the deliverable is scientific communication or literature work in physi
 | Path | Content |
 |---|---|
 | `SKILL.md` | entry point |
-| `references/` | fifty-three references: the papers guide and the diagrams guide route to the rest (reading, writing, citations, claims and evidence, revisions, reviews, venues, figures, diagrams per field, outreach, theses, proposals) |
+| `references/` | fifty-six references: the papers guide and the diagrams guide route to the rest (reading, writing, citations, claims and evidence, revisions, reviews, venues, figures, diagrams per field, outreach, theses, proposals) |
 | `scripts/` | nine command-line tools and the skill-local package `communication_lib/` behind six of them |
 | `assets/` | `paper/` (LaTeX skeleton, BibTeX, reading notes, methodology manual, adaptation manifest, audience templates, glossary and search-log templates), `diagrams/` (editable skeletons), `reporting-policies.json` |
 | `examples/` | worked diagram examples by field and the evidence-linked writing example (`evidence-linked/`, with byte-stable committed reports) |
 
 ## Scripts
 
-`build_lit_matrix.py` (a literature matrix from reading notes); `check_manuscript.py` (citations, labels, references and markers of a LaTeX manuscript; `--main` scans one document through its literal includes); `check_diagram_sources.py` (per-block render outcomes of the shipped diagram sources); and, for evidence-linked writing on a traceability record, `check_communication.py` (record, inputs, sources, manuscript occurrences), `audit_claims.py` (recorded assessments, read coverage, wording, numbers, reporting completeness; claim matrix and draft facts), `track_revision_impact.py` (baseline against revised record), `manage_literature.py` (offline import of ledgers, search logs and notices; never a lookup), `check_adaptation.py` (derived drafts against their manifest; referee replies from the action state) and `check_terminology.py` (glossary-scoped terminology and notation, English and Traditional Chinese). All are read-only, print one JSON report (markdown is a view) and use the exit precedence input-error 2, fail 1, incomplete 3, pass 0.
+`build_lit_matrix.py` (a literature matrix from reading notes); `check_manuscript.py` (citations, labels, references and markers of a LaTeX manuscript; `--main` scans one document through its literal includes); `check_diagram_sources.py` (per-block render outcomes of the shipped diagram sources); and, for evidence-linked writing on a traceability record, `check_communication.py` (record, inputs, sources, manuscript occurrences), `audit_claims.py` (recorded assessments, read coverage, wording, numbers, reporting completeness; claim matrix and draft facts), `track_revision_impact.py` (baseline against revised record), `manage_literature.py` (offline import of ledgers, search logs and notices; never a lookup), `check_adaptation.py` (derived drafts against their manifest; referee replies from the action state) and `check_terminology.py` (glossary-scoped terminology and notation, English and Traditional Chinese). The evidence-linked tools (`check_communication.py`, `audit_claims.py`, `track_revision_impact.py`, `check_adaptation.py`, `check_terminology.py`) are read-only, print one JSON report (markdown is a view) and use the exit precedence input-error 2, fail 1, incomplete 3, pass 0. `manage_literature.py` has the same report and codes but writes the new literature record to `--out` (never one of its inputs). `check_manuscript.py` and `check_diagram_sources.py` print text by default and one JSON report with `--format json`, with the same exit codes. `build_lit_matrix.py` prints or writes a Markdown table and exits 0, or 2 on bad input; it has no JSON report and no incomplete state.
 
 ## References
 
@@ -37,7 +37,7 @@ Use when the deliverable is scientific communication or literature work in physi
 
 ## Tests and validation
 
-`tests/skills/research_communication/` (fourteen modules, including the golden evidence-linked scenario), the contracts tests for the communication format under `tests/contracts/`, and the behavioral evaluation outside the plugin under `evals/research_communication/` (fixture-driven cases, a replay scorer with self-tests, and one recorded live run). What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
+`tests/skills/research_communication/` (sixteen test modules, including the golden evidence-linked scenario), the contracts tests for the communication format under `tests/contracts/`, and the behavioral evaluation outside the plugin under `evals/research_communication/` (fixture-driven cases, a replay scorer with self-tests, and one recorded live run). What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
 
 ## How this folder is used
 

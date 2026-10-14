@@ -205,3 +205,5 @@ critical-reading checklist with:
   effect being reported as significant only because of a very large sample size?
   See `scientific-style.md`'s statistical-reporting-language section for the
   phrasing conventions this implies.
+
+**Done when:** the venue's required sections and checklist are complete and every improvement claim reports its variance across seeds.

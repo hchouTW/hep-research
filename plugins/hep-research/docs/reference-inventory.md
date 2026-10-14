@@ -14,7 +14,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-statistics | 11 | 150 | 0 |
 | hep-theory | 11 | 78 | 0 |
 | physics-ml | 38 | 179 | 0 |
-| research-communication | 53 | 378 | 0 |
+| research-communication | 56 | 397 | 0 |
 
 ## Overlapping pairs
 
@@ -52,7 +52,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 - **inference**: `inference-recipes.md`, `ml-assisted-inference.md`, `statistical-inference-for-physics.md`
 - **latex**: `latex-mechanics-and-tooling.md`, `latex-venue-setup.md`
 - **learning**: `deep-learning-guide.md`, `geometric-and-equivariant-learning.md`, `scientific-machine-learning.md`, `transfer-learning.md`
-- **literature**: `literature-discovery-and-search.md`, `literature-review.md`
+- **literature**: `literature-discovery-and-search.md`, `literature-lookup-recipes.md`, `literature-review.md`
 - **ml**: `ml-analysis.md`, `space-and-astroparticle-ml.md`
 - **model**: `generative-models.md`, `sequence-models.md`
 - **neutrino**: `neutrino-astronomy.md`, `noble-liquid-neutrino-and-rare-event-detectors.md`
@@ -84,40 +84,40 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 
 | Reference | Owner | KB | In SKILL.md | Cited by (files) | Other skills citing | Last commit |
 |---|---|---|---|---|---|---|
-| `calibration-and-alignment.md` | detector-response | 10.8 | no | 16 | - | b1fb312 2026-10-14 |
+| `calibration-and-alignment.md` | detector-response | 10.8 | no | 16 | - | 4a74e06 2026-10-14 |
 | `calorimetry-ecal-hcal.md` | detector-response | 12.1 | no | 10 | - | b1fb312 2026-10-14 |
 | `cherenkov-imaging-variants-and-photosensors.md` | detector-response | 10.6 | no | 8 | research-communication | b1fb312 2026-10-14 |
 | `core-detector-equations.md` | detector-response | 6.9 | no | 3 | - | b1fb312 2026-10-14 |
-| `cosmic-ray-spectrum-and-composition.md` | detector-response | 12.5 | no | 11 | hep-analysis, hep-statistics, research-communication | b1fb312 2026-10-14 |
-| `data-mc-validation-and-detector-systematics.md` | detector-response | 12.8 | no | 7 | - | b1fb312 2026-10-14 |
+| `cosmic-ray-spectrum-and-composition.md` | detector-response | 12.5 | no | 11 | hep-analysis, hep-statistics, research-communication | 4a74e06 2026-10-14 |
+| `data-mc-validation-and-detector-systematics.md` | detector-response | 12.8 | no | 7 | - | 4a74e06 2026-10-14 |
 | `detector-case-studies-and-checklists.md` | detector-response | 14.1 | no | 3 | - | b1fb312 2026-10-14 |
 | `detector-comparison-tables.md` | detector-response | 14.6 | no | 2 | - | b1fb312 2026-10-14 |
 | `detector-glossary.md` | detector-response | 6.0 | no | 5 | - | b1fb312 2026-10-14 |
 | `detector-measurement-framework.md` | detector-response | 11.0 | no | 11 | hep-analysis, research-communication | b1fb312 2026-10-14 |
 | `detector-principles-bibliography.md` | detector-response | 14.9 | no | 2 | - | cd6c92b 2026-10-14 |
 | `detector-principles-summary.md` | detector-response | 19.5 | yes | 5 | - | b1fb312 2026-10-14 |
-| `detector-simulation.md` | detector-response | 13.0 | no | 9 | hep-theory, physics-ml | b1fb312 2026-10-14 |
+| `detector-simulation.md` | detector-response | 13.0 | no | 9 | hep-theory, physics-ml | 4a74e06 2026-10-14 |
 | `detector-systems-overview.md` | detector-response | 12.7 | no | 13 | hep-analysis | b1fb312 2026-10-14 |
-| `event-reconstruction.md` | detector-response | 11.4 | no | 6 | - | b944a23 2026-10-13 |
+| `event-reconstruction.md` | detector-response | 11.4 | no | 6 | - | 4a74e06 2026-10-14 |
 | `extensive-air-showers.md` | detector-response | 8.7 | no | 9 | research-communication | cd6c92b 2026-10-14 |
 | `front-end-electronics-and-signal-processing.md` | detector-response | 24.6 | no | 10 | - | b1fb312 2026-10-14 |
 | `gaseous-and-specialized-tracking-technologies.md` | detector-response | 15.8 | no | 8 | research-communication | b1fb312 2026-10-14 |
-| `ground-based-detection-arrays.md` | detector-response | 8.8 | no | 7 | - | b1fb312 2026-10-14 |
-| `imaging-atmospheric-cherenkov.md` | detector-response | 10.9 | no | 10 | hep-statistics, physics-ml, research-communication | b1fb312 2026-10-14 |
+| `ground-based-detection-arrays.md` | detector-response | 8.8 | no | 7 | - | 4a74e06 2026-10-14 |
+| `imaging-atmospheric-cherenkov.md` | detector-response | 10.9 | no | 10 | hep-statistics, physics-ml, research-communication | 4a74e06 2026-10-14 |
 | `multimessenger-analysis.md` | detector-response | 6.9 | no | 2 | - | cd6c92b 2026-10-14 |
 | `muon-systems.md` | detector-response | 8.4 | no | 7 | research-communication | b1fb312 2026-10-14 |
-| `neutrino-astronomy.md` | detector-response | 9.1 | no | 7 | hep-statistics | b1fb312 2026-10-14 |
+| `neutrino-astronomy.md` | detector-response | 9.1 | no | 7 | hep-statistics | 4a74e06 2026-10-14 |
 | `noble-liquid-neutrino-and-rare-event-detectors.md` | detector-response | 11.8 | no | 7 | - | b1fb312 2026-10-14 |
 | `particle-identification.md` | detector-response | 16.1 | no | 20 | - | b1fb312 2026-10-14 |
-| `performance-metrics-and-residual-diagnostics.md` | detector-response | 18.6 | no | 10 | - | b1fb312 2026-10-14 |
-| `physics-objects-jets-btagging-met.md` | detector-response | 7.4 | no | 7 | physics-ml | b1fb312 2026-10-14 |
+| `performance-metrics-and-residual-diagnostics.md` | detector-response | 18.6 | no | 10 | - | 4a74e06 2026-10-14 |
+| `physics-objects-jets-btagging-met.md` | detector-response | 7.4 | no | 7 | physics-ml | 4a74e06 2026-10-14 |
 | `reconstruction-performance-and-truth-matching.md` | detector-response | 10.7 | no | 9 | - | b1fb312 2026-10-14 |
-| `response-and-forward-folding.md` | detector-response | 10.4 | no | 7 | hep-analysis, hep-statistics | b1fb312 2026-10-14 |
+| `response-and-forward-folding.md` | detector-response | 10.4 | no | 7 | hep-analysis, hep-statistics | 4a74e06 2026-10-14 |
 | `signal-formation-and-readout.md` | detector-response | 16.9 | no | 8 | research-communication | b1fb312 2026-10-14 |
-| `space-based-direct-detection.md` | detector-response | 21.1 | no | 12 | hep-analysis, hep-statistics, research-communication | cd6c92b 2026-10-14 |
+| `space-based-direct-detection.md` | detector-response | 21.1 | no | 12 | hep-analysis, hep-statistics, research-communication | 4a74e06 2026-10-14 |
 | `timing-detectors.md` | detector-response | 8.6 | no | 7 | - | d8bec60 2026-10-13 |
 | `tracking-and-vertexing.md` | detector-response | 14.2 | no | 14 | research-communication | b1fb312 2026-10-14 |
-| `triggers-luminosity-pileup.md` | detector-response | 13.7 | no | 12 | - | cd6c92b 2026-10-14 |
+| `triggers-luminosity-pileup.md` | detector-response | 13.7 | no | 12 | - | 4a74e06 2026-10-14 |
 | `analysis-design.md` | hep-analysis | 10.9 | yes | 13 | detector-response, hep-computing | 317c39a 2026-10-14 |
 | `analysis-validation.md` | hep-analysis | 4.4 | no | 5 | detector-response, hep-computing | 351029c 2026-10-07 |
 | `backgrounds.md` | hep-analysis | 4.7 | no | 17 | detector-response | 633d6c9 2026-10-13 |
@@ -169,7 +169,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `likelihood-fitting.md` | hep-statistics | 9.5 | no | 6 | detector-response, hep-computing | 4665f43 2026-10-13 |
 | `ml-assisted-inference.md` | hep-statistics | 6.2 | yes | 7 | physics-ml | 06b86c8 2026-10-12 |
 | `nuisance-modeling.md` | hep-statistics | 19.8 | no | 7 | hep-analysis | 7c2abb1 2026-10-13 |
-| `statistical-inference-for-physics.md` | hep-statistics | 12.9 | no | 9 | hep-computing, hep-theory, research-communication | 578c12f 2026-10-13 |
+| `statistical-inference-for-physics.md` | hep-statistics | 12.9 | no | 10 | hep-computing, hep-theory, research-communication | 578c12f 2026-10-13 |
 | `statistical-tools.md` | hep-statistics | 9.6 | no | 3 | physics-ml | 578c12f 2026-10-13 |
 | `unfolding.md` | hep-statistics | 7.0 | no | 23 | detector-response, hep-analysis | 11a01b9 2026-10-13 |
 | `amplitudes-and-widths.md` | hep-theory | 8.3 | yes | 1 | - | 83ae4f6 2026-10-13 |
@@ -183,94 +183,97 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `regularization-and-schemes.md` | hep-theory | 7.6 | yes | 3 | - | 6c22fd5 2026-10-13 |
 | `selection-rules.md` | hep-theory | 7.7 | yes | 1 | - | 195e4d1 2026-10-13 |
 | `smeft-and-eft.md` | hep-theory | 3.4 | yes | 2 | - | fa29fcf 2026-10-13 |
-| `ablation-and-design-review.md` | physics-ml | 2.3 | no | 12 | research-communication | cf6d783 2026-10-14 |
-| `architecture-selection.md` | physics-ml | 3.4 | no | 2 | - | 0ab5680 2026-10-14 |
+| `ablation-and-design-review.md` | physics-ml | 2.3 | no | 12 | research-communication | db40e84 2026-10-14 |
+| `architecture-selection.md` | physics-ml | 3.4 | no | 2 | - | 50dcc55 2026-10-14 |
 | `checkpointing.md` | physics-ml | 6.0 | no | 5 | - | 721d1ea 2026-10-13 |
-| `custom-autograd-and-hooks.md` | physics-ml | 2.6 | no | 3 | - | 0ab5680 2026-10-14 |
-| `data-loading.md` | physics-ml | 1.8 | no | 3 | - | 0ab5680 2026-10-14 |
-| `data-strategy.md` | physics-ml | 3.0 | no | 3 | - | b2bf7ef 2026-10-14 |
-| `debugging-pytorch.md` | physics-ml | 1.2 | no | 5 | - | 0ab5680 2026-10-14 |
-| `deep-learning-guide.md` | physics-ml | 11.7 | yes | 9 | hep-computing | 0ab5680 2026-10-14 |
-| `distributed-training.md` | physics-ml | 4.6 | no | 3 | - | 0ab5680 2026-10-14 |
-| `efficient-finetuning.md` | physics-ml | 2.5 | no | 5 | - | 0ab5680 2026-10-14 |
-| `evaluation-metrics.md` | physics-ml | 2.0 | no | 4 | - | 0ab5680 2026-10-14 |
-| `evaluation-strategy.md` | physics-ml | 2.9 | no | 4 | research-communication | 0ab5680 2026-10-14 |
-| `export-and-deployment.md` | physics-ml | 7.8 | no | 3 | - | 0ab5680 2026-10-14 |
-| `fast-simulation-validation.md` | physics-ml | 6.4 | yes | 4 | - | b2bf7ef 2026-10-14 |
-| `generative-models.md` | physics-ml | 4.8 | yes | 5 | - | b2bf7ef 2026-10-14 |
-| `geometric-and-equivariant-learning.md` | physics-ml | 2.5 | no | 4 | - | 0ab5680 2026-10-14 |
-| `interpretability-and-explainability.md` | physics-ml | 2.5 | no | 3 | - | 0ab5680 2026-10-14 |
-| `mixed-precision.md` | physics-ml | 4.0 | no | 6 | - | 0ab5680 2026-10-14 |
-| `ml-analysis.md` | physics-ml | 28.0 | yes | 28 | detector-response, hep-analysis | b2bf7ef 2026-10-14 |
-| `monitoring-and-lifecycle.md` | physics-ml | 2.2 | no | 3 | - | 0ab5680 2026-10-14 |
-| `multivariate-analysis-bdt-nn.md` | physics-ml | 9.8 | yes | 8 | detector-response | b2bf7ef 2026-10-14 |
-| `optimization-and-training-dynamics.md` | physics-ml | 3.8 | no | 1 | - | 0ab5680 2026-10-14 |
-| `parallelism-strategy.md` | physics-ml | 3.5 | no | 5 | - | 0ab5680 2026-10-14 |
-| `particle-and-jet-architectures.md` | physics-ml | 8.5 | yes | 8 | - | b2bf7ef 2026-10-14 |
+| `custom-autograd-and-hooks.md` | physics-ml | 2.6 | no | 3 | - | 50dcc55 2026-10-14 |
+| `data-loading.md` | physics-ml | 1.8 | no | 3 | - | 50dcc55 2026-10-14 |
+| `data-strategy.md` | physics-ml | 3.0 | no | 3 | - | f5cc59a 2026-10-14 |
+| `debugging-pytorch.md` | physics-ml | 1.2 | no | 5 | - | 50dcc55 2026-10-14 |
+| `deep-learning-guide.md` | physics-ml | 11.7 | yes | 9 | hep-computing | 7a4f739 2026-10-14 |
+| `distributed-training.md` | physics-ml | 4.6 | no | 3 | - | 50dcc55 2026-10-14 |
+| `efficient-finetuning.md` | physics-ml | 2.5 | no | 5 | - | 50dcc55 2026-10-14 |
+| `evaluation-metrics.md` | physics-ml | 2.0 | no | 4 | - | 50dcc55 2026-10-14 |
+| `evaluation-strategy.md` | physics-ml | 2.9 | no | 4 | research-communication | 7a4f739 2026-10-14 |
+| `export-and-deployment.md` | physics-ml | 7.8 | no | 3 | - | 50dcc55 2026-10-14 |
+| `fast-simulation-validation.md` | physics-ml | 6.4 | yes | 4 | - | f5cc59a 2026-10-14 |
+| `generative-models.md` | physics-ml | 4.8 | yes | 5 | - | f5cc59a 2026-10-14 |
+| `geometric-and-equivariant-learning.md` | physics-ml | 2.5 | no | 4 | - | 50dcc55 2026-10-14 |
+| `interpretability-and-explainability.md` | physics-ml | 2.5 | no | 3 | - | 50dcc55 2026-10-14 |
+| `mixed-precision.md` | physics-ml | 4.0 | no | 6 | - | 50dcc55 2026-10-14 |
+| `ml-analysis.md` | physics-ml | 28.0 | yes | 28 | detector-response, hep-analysis | f5cc59a 2026-10-14 |
+| `monitoring-and-lifecycle.md` | physics-ml | 2.2 | no | 3 | - | 50dcc55 2026-10-14 |
+| `multivariate-analysis-bdt-nn.md` | physics-ml | 9.8 | yes | 8 | detector-response | f5cc59a 2026-10-14 |
+| `optimization-and-training-dynamics.md` | physics-ml | 3.8 | no | 1 | - | 50dcc55 2026-10-14 |
+| `parallelism-strategy.md` | physics-ml | 3.5 | no | 5 | - | 50dcc55 2026-10-14 |
+| `particle-and-jet-architectures.md` | physics-ml | 8.5 | yes | 8 | - | f5cc59a 2026-10-14 |
 | `performance-memory.md` | physics-ml | 3.4 | no | 6 | - | 721d1ea 2026-10-13 |
-| `reproducibility.md` | physics-ml | 5.1 | no | 6 | - | 0ab5680 2026-10-14 |
-| `robustness-and-distribution-shift.md` | physics-ml | 2.1 | yes | 8 | - | 0ab5680 2026-10-14 |
-| `sbi-training.md` | physics-ml | 4.9 | yes | 4 | - | b2bf7ef 2026-10-14 |
-| `scientific-machine-learning.md` | physics-ml | 3.1 | yes | 8 | hep-statistics, hep-theory | 0ab5680 2026-10-14 |
-| `sequence-models.md` | physics-ml | 2.2 | no | 4 | - | 0ab5680 2026-10-14 |
-| `serving-architecture.md` | physics-ml | 1.8 | no | 2 | - | 0ab5680 2026-10-14 |
-| `space-and-astroparticle-ml.md` | physics-ml | 8.6 | yes | 3 | - | b2bf7ef 2026-10-14 |
+| `reproducibility.md` | physics-ml | 5.1 | no | 6 | - | 50dcc55 2026-10-14 |
+| `robustness-and-distribution-shift.md` | physics-ml | 2.1 | yes | 8 | - | 50dcc55 2026-10-14 |
+| `sbi-training.md` | physics-ml | 4.9 | yes | 4 | - | f5cc59a 2026-10-14 |
+| `scientific-machine-learning.md` | physics-ml | 3.1 | yes | 8 | hep-statistics, hep-theory | 7a4f739 2026-10-14 |
+| `sequence-models.md` | physics-ml | 2.2 | no | 4 | - | 50dcc55 2026-10-14 |
+| `serving-architecture.md` | physics-ml | 1.8 | no | 2 | - | 50dcc55 2026-10-14 |
+| `space-and-astroparticle-ml.md` | physics-ml | 8.6 | yes | 3 | - | f5cc59a 2026-10-14 |
 | `tensor-shapes.md` | physics-ml | 1.9 | no | 1 | - | 351029c 2026-10-07 |
-| `training-at-scale.md` | physics-ml | 3.1 | no | 5 | - | 0ab5680 2026-10-14 |
+| `training-at-scale.md` | physics-ml | 3.1 | no | 5 | - | 50dcc55 2026-10-14 |
 | `training-loop.md` | physics-ml | 1.1 | no | 4 | - | 351029c 2026-10-07 |
 | `transfer-learning.md` | physics-ml | 1.6 | no | 4 | - | 351029c 2026-10-07 |
-| `transformer-architectures.md` | physics-ml | 5.5 | no | 4 | - | 0ab5680 2026-10-14 |
-| `uncertainty-and-calibration.md` | physics-ml | 6.9 | yes | 9 | hep-statistics | 0ab5680 2026-10-14 |
-| `academic-diagrams-guide.md` | research-communication | 10.4 | yes | 4 | - | 351029c 2026-10-07 |
-| `academic-papers-guide.md` | research-communication | 38.4 | yes | 7 | - | cd88e8f 2026-10-12 |
-| `artifact-packaging-for-release.md` | research-communication | 2.8 | no | 3 | - | 351029c 2026-10-07 |
-| `astroparticle-and-cosmic-ray-papers.md` | research-communication | 19.5 | no | 10 | - | 351029c 2026-10-07 |
-| `citation-verification.md` | research-communication | 3.6 | yes | 10 | - | 4665f43 2026-10-13 |
-| `citations-and-bibliography.md` | research-communication | 18.1 | yes | 11 | - | 9546574 2026-10-08 |
-| `claim-evidence-mapping.md` | research-communication | 3.3 | yes | 9 | hep-statistics, hep-theory | 351029c 2026-10-07 |
-| `code-review-report.md` | research-communication | 5.4 | no | 3 | - | d41501c 2026-10-12 |
-| `code-to-methodology-synthesis.md` | research-communication | 5.6 | no | 2 | - | 351029c 2026-10-07 |
-| `comment-and-reply-exchange.md` | research-communication | 3.0 | no | 2 | - | 351029c 2026-10-07 |
-| `conflict-of-interest-and-ethics-statements.md` | research-communication | 2.5 | no | 1 | - | 351029c 2026-10-07 |
-| `diagram-captions.md` | research-communication | 3.3 | no | 1 | - | 351029c 2026-10-07 |
-| `diagram-figure-style.md` | research-communication | 6.1 | no | 1 | - | 351029c 2026-10-07 |
-| `diagrams-computer-science.md` | research-communication | 5.5 | no | 2 | - | 351029c 2026-10-07 |
-| `diagrams-hep.md` | research-communication | 5.9 | no | 2 | - | 351029c 2026-10-07 |
-| `diagrams-statistics.md` | research-communication | 6.2 | no | 2 | - | 351029c 2026-10-07 |
-| `equation-and-notation-auditing.md` | research-communication | 3.9 | no | 5 | hep-statistics, hep-theory | d3212bd 2026-10-12 |
-| `erratum-and-corrigendum-drafting.md` | research-communication | 3.1 | no | 2 | - | 351029c 2026-10-07 |
-| `evidence-linked-writing.md` | research-communication | 5.2 | yes | 4 | - | 4ab1794 2026-10-12 |
-| `figures-and-tables.md` | research-communication | 9.2 | no | 7 | - | 351029c 2026-10-07 |
-| `general-diagram-principles.md` | research-communication | 7.7 | no | 2 | - | 351029c 2026-10-07 |
-| `grant-and-fellowship-proposal-writing.md` | research-communication | 3.0 | no | 1 | - | 351029c 2026-10-07 |
-| `graphviz-patterns.md` | research-communication | 3.4 | no | 2 | - | 351029c 2026-10-07 |
-| `interpreting-scientific-graphics.md` | research-communication | 7.9 | no | 4 | - | 351029c 2026-10-07 |
-| `latex-mechanics-and-tooling.md` | research-communication | 13.3 | no | 7 | - | 351029c 2026-10-07 |
-| `latex-venue-setup.md` | research-communication | 21.6 | no | 5 | - | 351029c 2026-10-07 |
-| `legends-panels-and-export.md` | research-communication | 8.2 | no | 2 | - | 351029c 2026-10-07 |
-| `literature-discovery-and-search.md` | research-communication | 4.9 | no | 1 | - | d47080b 2026-10-12 |
-| `literature-review.md` | research-communication | 7.7 | no | 5 | - | 351029c 2026-10-07 |
-| `logical-consistency-and-argument-uniformity.md` | research-communication | 4.8 | no | 5 | hep-theory | 351029c 2026-10-07 |
-| `manuscript-consistency-auditing.md` | research-communication | 3.5 | no | 4 | - | 351029c 2026-10-07 |
-| `mermaid-patterns.md` | research-communication | 8.5 | no | 2 | - | dee7155 2026-10-12 |
-| `multi-venue-reformatting.md` | research-communication | 2.9 | no | 1 | - | 351029c 2026-10-07 |
-| `outreach-and-public-facing-summaries.md` | research-communication | 5.1 | no | 5 | - | a2a25ec 2026-10-12 |
-| `paper-genre-variants.md` | research-communication | 4.3 | no | 4 | - | 351029c 2026-10-07 |
-| `paper-structure.md` | research-communication | 9.8 | no | 9 | - | 351029c 2026-10-07 |
-| `plagiarism-and-text-reuse-checking.md` | research-communication | 2.9 | no | 2 | - | 351029c 2026-10-07 |
-| `plantuml-patterns.md` | research-communication | 3.5 | no | 1 | - | 351029c 2026-10-07 |
-| `poster-and-talk-design.md` | research-communication | 3.2 | no | 1 | - | a2a25ec 2026-10-12 |
-| `preprint-to-journal-reconciliation.md` | research-communication | 2.6 | no | 3 | - | 351029c 2026-10-07 |
-| `preregistration-and-registered-reports.md` | research-communication | 3.4 | no | 1 | - | 351029c 2026-10-07 |
-| `primary-sources-and-version-checks.md` | research-communication | 14.8 | yes | 9 | detector-response, hep-analysis | 351029c 2026-10-07 |
-| `reading-papers.md` | research-communication | 10.1 | no | 8 | hep-statistics | 351029c 2026-10-07 |
-| `reproducibility-auditing.md` | research-communication | 3.0 | no | 9 | hep-computing | 351029c 2026-10-07 |
-| `reviewer-style-assessment.md` | research-communication | 2.0 | no | 1 | - | 351029c 2026-10-07 |
-| `revision-impact-tracking.md` | research-communication | 3.9 | no | 11 | - | d9916e8 2026-10-12 |
-| `scientific-style.md` | research-communication | 9.6 | no | 9 | hep-statistics | d41501c 2026-10-12 |
-| `statistics-and-ml-papers.md` | research-communication | 14.0 | no | 8 | - | 351029c 2026-10-07 |
-| `submission-and-peer-review.md` | research-communication | 13.5 | no | 10 | - | a2a25ec 2026-10-12 |
-| `supplementary-material-planning.md` | research-communication | 2.0 | no | 1 | - | 351029c 2026-10-07 |
-| `systematic-review-screening.md` | research-communication | 3.0 | no | 2 | - | 351029c 2026-10-07 |
-| `thesis-by-publication-assembly.md` | research-communication | 3.8 | no | 2 | - | 351029c 2026-10-07 |
-| `tikz-patterns.md` | research-communication | 5.3 | no | 6 | - | 351029c 2026-10-07 |
+| `transformer-architectures.md` | physics-ml | 5.5 | no | 4 | - | 50dcc55 2026-10-14 |
+| `uncertainty-and-calibration.md` | physics-ml | 6.9 | yes | 9 | hep-statistics | 50dcc55 2026-10-14 |
+| `academic-diagrams-guide.md` | research-communication | 10.8 | yes | 4 | - | 351029c 2026-10-07 |
+| `academic-papers-guide.md` | research-communication | 28.0 | yes | 12 | - | cd88e8f 2026-10-12 |
+| `artifact-packaging-for-release.md` | research-communication | 2.9 | no | 3 | - | 351029c 2026-10-07 |
+| `astroparticle-and-cosmic-ray-papers.md` | research-communication | 13.4 | no | 10 | - | 351029c 2026-10-07 |
+| `citation-verification.md` | research-communication | 5.6 | yes | 11 | - | 4665f43 2026-10-13 |
+| `citations-and-bibliography.md` | research-communication | 19.9 | yes | 11 | - | 9546574 2026-10-08 |
+| `claim-evidence-mapping.md` | research-communication | 4.0 | yes | 9 | hep-statistics, hep-theory | 351029c 2026-10-07 |
+| `code-review-report.md` | research-communication | 5.5 | no | 3 | - | d41501c 2026-10-12 |
+| `code-to-methodology-synthesis.md` | research-communication | 5.7 | no | 2 | - | 351029c 2026-10-07 |
+| `collaboration-results-lifecycle.md` | research-communication | 3.7 | no | 2 | - | untracked |
+| `comment-and-reply-exchange.md` | research-communication | 3.4 | no | 3 | - | 351029c 2026-10-07 |
+| `conflict-of-interest-and-ethics-statements.md` | research-communication | 2.6 | no | 1 | - | 351029c 2026-10-07 |
+| `diagram-captions.md` | research-communication | 3.7 | no | 2 | - | 351029c 2026-10-07 |
+| `diagram-figure-style.md` | research-communication | 6.7 | no | 3 | - | 351029c 2026-10-07 |
+| `diagrams-computer-science.md` | research-communication | 5.6 | no | 2 | - | 351029c 2026-10-07 |
+| `diagrams-hep.md` | research-communication | 7.6 | no | 2 | - | 351029c 2026-10-07 |
+| `diagrams-statistics.md` | research-communication | 6.3 | no | 2 | - | 351029c 2026-10-07 |
+| `equation-and-notation-auditing.md` | research-communication | 4.0 | no | 5 | hep-statistics, hep-theory | d3212bd 2026-10-12 |
+| `erratum-and-corrigendum-drafting.md` | research-communication | 4.5 | no | 3 | - | 351029c 2026-10-07 |
+| `evidence-linked-writing.md` | research-communication | 5.4 | yes | 5 | - | 4ab1794 2026-10-12 |
+| `figures-and-tables.md` | research-communication | 9.3 | no | 9 | - | 351029c 2026-10-07 |
+| `general-diagram-principles.md` | research-communication | 7.8 | no | 2 | - | 351029c 2026-10-07 |
+| `grant-and-fellowship-proposal-writing.md` | research-communication | 4.8 | no | 1 | - | 351029c 2026-10-07 |
+| `graphviz-patterns.md` | research-communication | 3.5 | no | 2 | - | 351029c 2026-10-07 |
+| `interpreting-scientific-graphics.md` | research-communication | 8.3 | no | 5 | - | 351029c 2026-10-07 |
+| `latex-mechanics-and-tooling.md` | research-communication | 13.4 | no | 7 | - | 351029c 2026-10-07 |
+| `latex-venue-setup.md` | research-communication | 25.7 | no | 7 | - | 351029c 2026-10-07 |
+| `legends-panels-and-export.md` | research-communication | 6.6 | no | 2 | - | 351029c 2026-10-07 |
+| `literature-discovery-and-search.md` | research-communication | 5.0 | no | 1 | - | d47080b 2026-10-12 |
+| `literature-lookup-recipes.md` | research-communication | 4.5 | yes | 3 | - | untracked |
+| `literature-review.md` | research-communication | 7.9 | no | 5 | - | 351029c 2026-10-07 |
+| `logical-consistency-and-argument-uniformity.md` | research-communication | 4.9 | no | 5 | hep-theory | 351029c 2026-10-07 |
+| `manuscript-consistency-auditing.md` | research-communication | 3.6 | no | 4 | - | 351029c 2026-10-07 |
+| `mermaid-patterns.md` | research-communication | 4.5 | no | 2 | - | dee7155 2026-10-12 |
+| `multi-venue-reformatting.md` | research-communication | 3.0 | no | 1 | - | 351029c 2026-10-07 |
+| `outreach-and-public-facing-summaries.md` | research-communication | 4.2 | no | 5 | - | a2a25ec 2026-10-12 |
+| `paper-genre-variants.md` | research-communication | 5.2 | no | 3 | - | 351029c 2026-10-07 |
+| `paper-structure.md` | research-communication | 11.1 | no | 10 | - | 351029c 2026-10-07 |
+| `physics-plots.md` | research-communication | 6.9 | no | 6 | - | untracked |
+| `plagiarism-and-text-reuse-checking.md` | research-communication | 3.0 | no | 2 | - | 351029c 2026-10-07 |
+| `plantuml-patterns.md` | research-communication | 3.6 | no | 1 | - | 351029c 2026-10-07 |
+| `poster-and-talk-design.md` | research-communication | 6.2 | no | 4 | - | a2a25ec 2026-10-12 |
+| `preprint-to-journal-reconciliation.md` | research-communication | 2.9 | no | 3 | - | 351029c 2026-10-07 |
+| `preregistration-and-registered-reports.md` | research-communication | 3.5 | no | 1 | - | 351029c 2026-10-07 |
+| `primary-sources-and-version-checks.md` | research-communication | 12.7 | yes | 10 | detector-response, hep-analysis | 351029c 2026-10-07 |
+| `reading-papers.md` | research-communication | 9.8 | no | 8 | hep-statistics | 351029c 2026-10-07 |
+| `reproducibility-auditing.md` | research-communication | 3.1 | no | 9 | hep-computing | 351029c 2026-10-07 |
+| `reviewer-style-assessment.md` | research-communication | 2.1 | no | 1 | - | 351029c 2026-10-07 |
+| `revision-impact-tracking.md` | research-communication | 4.0 | no | 12 | - | d9916e8 2026-10-12 |
+| `scientific-style.md` | research-communication | 11.7 | no | 13 | hep-statistics | d41501c 2026-10-12 |
+| `statistics-and-ml-papers.md` | research-communication | 14.1 | no | 8 | - | 351029c 2026-10-07 |
+| `submission-and-peer-review.md` | research-communication | 16.0 | no | 11 | - | a2a25ec 2026-10-12 |
+| `supplementary-material-planning.md` | research-communication | 2.1 | no | 1 | - | 351029c 2026-10-07 |
+| `systematic-review-screening.md` | research-communication | 3.1 | no | 2 | - | 351029c 2026-10-07 |
+| `thesis-by-publication-assembly.md` | research-communication | 3.9 | no | 2 | - | 351029c 2026-10-07 |
+| `tikz-patterns.md` | research-communication | 5.9 | no | 8 | - | 351029c 2026-10-07 |

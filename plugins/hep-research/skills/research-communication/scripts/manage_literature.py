@@ -23,6 +23,7 @@ import argparse
 import hashlib
 import json
 import sys
+from datetime import date
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -60,6 +61,11 @@ def main(argv=None) -> int:
         return fail("the only command is import")
     if not args.project_root.is_dir():
         return fail(f"--project-root {args.project_root} is not a directory")
+    if args.today is not None:
+        try:
+            date.fromisoformat(args.today)
+        except ValueError:
+            return fail(f"--today {args.today!r} is not a YYYY-MM-DD date; freshness checks need a real date")
     protected = [args.input] + ([args.into] if args.into else [])
     if output_aliases_input(args.out, protected):
         return fail(f"--out {args.out} names an input of this run; the import never edits its inputs")

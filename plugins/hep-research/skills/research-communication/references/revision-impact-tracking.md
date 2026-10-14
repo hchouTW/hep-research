@@ -63,3 +63,5 @@ final revised version. Do not say an experiment was run, a figure regenerated, o
 a concern resolved when it remains planned. Preserve open items and factual
 disagreements for the user. Deliver the updated artifacts, change ledger, and
 unresolved dependencies; submission or sending the response is a separate action.
+
+**Done when:** `track_revision_impact.py` reports no stale occurrence and every reopened assessment is re-done.

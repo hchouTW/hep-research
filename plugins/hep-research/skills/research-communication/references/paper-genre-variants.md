@@ -12,6 +12,7 @@ subsection rather than the whole file.
 - [Thesis chapters](#thesis-chapters)
 - [Proceedings](#proceedings)
 - [Astroparticle and cosmic-ray papers](#astroparticle-and-cosmic-ray-papers)
+- [Combination papers](#combination-papers)
 - [Statistics and ML papers](#statistics-and-ml-papers)
 
 ## Theory papers
@@ -56,14 +57,27 @@ a full paper's derivations.
 
 The same backbone applies, with "Detector" becoming "Instrument"/"Observatory"/
 "Array," "luminosity" becoming "exposure," and — for point-source or anisotropy
-searches — an arrival-direction section with its own pre-trial/post-trial
-significance treatment, separate from the energy-spectrum section. Atmospheric and
+searches — an arrival-direction section, separate from the energy-spectrum section,
+whose significances are quoted pre- and post-trial (`scientific-style.md`). Atmospheric and
 hadronic-interaction-model systematics (QGSJET, EPOS, Sibyll, ...) typically dominate
 the systematics section for air-shower analyses, in place of detector-alignment
 systematics. See `astroparticle-and-cosmic-ray-papers.md` for the full treatment,
 including venue-specific conventions (JCAP, ApJ/ApJL, Astroparticle Physics),
 collaboration author-list handling for ground arrays/IACTs/space detectors, and
 skymap/energy-spectrum figure conventions.
+
+## Combination papers
+
+A combination merges published or approved results of several analyses or experiments; the statistics are
+hep-statistics', the wording this skill's.
+
+- List every input result with its reference, dataset and status; a preliminary input keeps its label in the
+  combination.
+- State the correlation assumptions per uncertainty source (fully correlated, uncorrelated, partially with the
+  value used) and show how the result moves when they change; this is the part referees read first.
+- Say who owns the numbers: the combined value comes from the combination's own fit (a `statistical-result`),
+  not from averaging quoted values by hand.
+- Give each input's weight or pull and the compatibility of the inputs (χ²/ndf or p-value), with the method named.
 
 ## Statistics and ML papers
 
@@ -79,3 +93,5 @@ physics paper's supplemental material, which a referee may or may not open. See
 conventions (NeurIPS/ICML/ICLR/ACL vs. JMLR/TMLR vs. statistics journals),
 author-contribution statements, arXiv-first citation practice, and the
 single-shot rebuttal process that replaces a journal's multi-round revision.
+
+**Done when:** the draft follows the genre's backbone and its genre-specific sections are present.

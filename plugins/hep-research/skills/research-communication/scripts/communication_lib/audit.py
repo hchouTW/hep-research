@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from communication_lib import numbers as N
 from communication_lib import report as R
 from communication_lib.documents import check_occurrence
 from contracts.communication import format_of
@@ -143,10 +144,10 @@ def _manuscript(context: dict, ext: dict, fmt: str, occurrences: list, claims: l
         elif res["outcome"] == "unresolved":
             findings.append(R.finding("occurrence.locator_not_found", "unresolved", where, res["reason"],
                                       "check the locator against the current document", claim=occ.get("claim_id"), source="manuscript"))
-        elif isinstance(occ.get("value"), dict) and str(occ["value"].get("value", "")) not in res["current"]:
-            findings.append(R.finding("occurrence.value_not_in_passage", "warning", where,
-                                      f"declared display value {occ['value'].get('value')!r} does not appear in the located passage",
-                                      "review: the value, its rounding or the mapping may be stale; no automatic correction",
+        elif isinstance(occ.get("value"), dict) and not N.contains_value(res["current"], occ["value"].get("value", "")):
+            findings.append(R.finding("occurrence.value_not_in_passage", "error", where,
+                                      f"declared display value {occ['value'].get('value')!r} is not a number of the located passage",
+                                      "make the manuscript and the record agree (the value, its rounding or the mapping is stale); no automatic correction",
                                       claim=occ.get("claim_id"), source="manuscript"))
     if (ext.get("scope") or {}).get("occurrences"):
         for c in claims:

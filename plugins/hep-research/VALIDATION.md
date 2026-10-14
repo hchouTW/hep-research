@@ -1306,3 +1306,38 @@ C-E8 (prescale rewrite), C-E14 (Geant4 cuts), C-E15 table, C-Sec2, C-U4; D-F4 (I
 splitting length), D-F8, D-F13 image parameters, D-F14, D-F18, D-F22, D-N3, D-N4. The appendix's dE/dx resolution
 formula gave the sample length in m; PDG eq. 35.17 implies cm (applied as cm). `frontend_response.py` has no tool
 contract (needs a per-operation help check).
+
+## RC-AUDIT-2 (2026-10-14, E2: Python 3.13.2; version 0.9.0 + unreleased, contracts 2.8.0)
+
+Second research-communication audit (work order RC, tasks A1-E3), branch `fix/research-communication-audit`, rebased
+on PML-X0 (`2b439e7`, contracts 2.8.0). Every task has a regression test that failed on `84202aa` and passes here,
+unless the row says it is text only.
+
+| Item | Result | Evidence |
+|---|---|---|
+| A1 brace-less `\input` | followed; unresolvable one gives exit 3 (was exit 0, coverage complete) | `ReviewFixes2Includes` |
+| A2 value vs passage | `1.09` and `1.0` against a `1.02` passage fail in `check_communication` and `audit_claims` (were exit 0) | `ReviewFixes2ValueVsPassage`, updated `test_communication_audit` |
+| A3 adaptation numbers | `1.09.`, CJK-adjacent, signed, exponent, grouped numbers tokenized; 9.99 drafts fail in en and zh-Hant | `ReviewFixes2Numbers`, `ReviewFixes2Adaptation` |
+| A4 citation parsing | seven cases (capitalised, multicite, nested, `%` in `\url`, `.bib` depth, stripped blocks, crossref) | `ReviewFixes2Citations` |
+| A5, A6, A15 rounding | no-rule non-rounding is an error; half-up default with `:half-even`; malformed rules and NaN/inf are findings | `ReviewFixes2Rounding` |
+| A7, A9, A18 | `--bbl` outside root exit 2; 20,000 lines 10.3 s before, well under 1 s after; strict unused entries unresolved when coverage incomplete | `ReviewFixes2ManuscriptBounds` |
+| A8 locators | nested-brace titles, `\pm`/`±`, fenced code | `ReviewFixes2Locators` |
+| A10, A13, A17 Traditional Chinese | Chinese twins give the English findings; labels as words; declared terms mask parts; same-line early use | `ReviewFixes2Chinese*`, `ReviewFixes2LabelWords`, `ReviewFixes2TerminologyEdges` |
+| A11 TikZ | compiled (LuaHBTeX 1.24, TeX Live 2026); `\undefinedmacro` exit 1; no TeX + `--require-render` exit 3; no block exit 2; all shipped TikZ compiles under `HEP_SLOW_TESTS=1` | `ReviewFixes2Diagrams`, `RealBundle` |
+| A12, A14, A16, A19 | empty records and unmapped added claims flagged; bad `--today` and aliased output refused; README qualified | `ReviewFixes2RevisionImpact`, `ReviewFixes2SmallClis` |
+| B1-B13 text | Mermaid duplicate removed (5 blocks render instead of 10); SKILL.md read levels equal the vocabulary; other items text only | `ReviewFixes2SkillText`, `test_reference_links` |
+| B7 ledger | `ams02:C185` (absence claim, metadata-only, 2026-10-14) | profile `test_evidence_ledger.py` |
+| C1-C11 content | three new references, examples `hep/09`-`hep/11` render; `flux-measurement` policy and result type (contracts 2.8.0, add-only) | `ReviewFixes2FluxPolicy`, `FluxMeasurementResultTypeTests`, `test_reporting_completeness` |
+| D1-D7 usability | quick-questions block (SKILL.md 8098 B, description 950 unchanged); Done-when in all 56 references; links resolve | `test_reference_links`, `measure_entrypoints.py` |
+| A2b and review follow-ups (fresh-subagent checks) | fresh rerun of A1-A4 and B2 passed; it found that display `1.0` still matched a passage holding `Figure 1` (`Decimal("1.0") == Decimal("1")`): now the passage must show at least the declared digits (caption flagged, 3 of 3 occurrences); fresh source review: 0 high, 2 medium (F1 Type 1 fonts for ICML, F2 venue-facts home), 12 low, all fixed or marked unverified; LaTeX-set matplotlib text gives Type 1 fonts (matplotlib 3.11.2, checked 2026-10-14) | `ReviewFixes2Numbers.test_contains_value_needs_the_displayed_precision`, `ReviewFixes2ValueVsPassage`; `research-communication-audit/evidence/fresh-repro-rerun.md`, `fresh-source-review.md` (task folder, outside the plugin) |
+| Gate | `run_all_checks.py --no-cli` exit 0 (3026 tests, 0 failures, 58 skipped across the plugin; CLI checks skipped by `--no-cli`); `check_relocation.py` pass; ruff 0.16.10 and mypy 2.4.0 clean on `core/` and `contracts/`; worked example byte-identical on two runs | gate log of 2026-10-14 |
+
+**Not verified here.** The live routing rerun after D1 (paid; needs approval) and the trigger-first description
+candidate (kept outside the plugin for the maintainer). Springer Nature's AI policy page (login redirect). The
+ADS `citations()`/`references()` operators (not re-opened). NSTC form names come from university guides, not an
+NSTC page. The two fresh-reviewer reruns asked by the work order are left to the lead session.
+
+### Export-route checks (moved from `legends-panels-and-export.md`, RC-D4)
+
+Recorded when the export table was written (before 2026-10-14) and kept here, not in the reference: The Graphviz, `rsvg-convert`, and `mmdc` rows were run in this bundle's validation; the TikZ standalone compile (Tectonic; fonts embedded, `pdffonts`), `pdftoppm -r 300 -png` and `pdftocairo -svg` were run, and the `subcaption` `figure*` snippet compiled under `twocolumn` article with Tectonic (two panels (a)/(b) plus caption on a float page). `dvisvgm` 3.6.1 was run: on Tectonic's `.xdv` it warns "86 PDF specials ignored" and the SVG has the text overlapping with the boxes and arrow missing, so do not use that route; `dvisvgm --pdf` refuses to run with Ghostscript 10.08 and needs `mutool` or Ghostscript < 10.01 ; with `mutool` (`mupdf-tools`) installed, `dvisvgm --pdf` rendered the boxes, arrow and labels correctly, with text kept as `<text>` elements. With math labels and bold, italic, mono and small-caps text, plain `dvisvgm --pdf` rendered in rsvg with a fallback sans font (detached radical, lost bold and italic, overlapping words) while `--no-fonts` and `pdftocairo -svg` matched the PDF; `pdftoppm` matched too. Check any SVG export in the target viewer.
+

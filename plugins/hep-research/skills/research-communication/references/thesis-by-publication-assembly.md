@@ -57,3 +57,5 @@ Deliver the assembled thesis with connective material clearly distinguished
 from the reproduced papers, a per-chapter contribution/copyright-permission
 status table, and any cross-paper inconsistencies flagged rather than
 silently smoothed over.
+
+**Done when:** each included paper is cited with its status and the candidate's contribution statement, and the framing chapters do not restate results with different numbers.

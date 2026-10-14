@@ -1,6 +1,6 @@
 {
- "policy_version": "1.0.0",
- "$comment": "Conditional reporting policies per result type (research-communication plan T5). A policy checks the method metadata a record supplies; it never chooses the method or invents a default. `when` conditions compare dotted keys of reporting_context.method (equality, or {\"not\": value}); `when_absent` says what an absent key means: unknown (default: the field's applicability is unresolved), applicable, or not-applicable. `conflicts_with` marks a field that must not be provided under that method (error reporting.interval_kind_mismatch). Field states in a record: provided, missing, not-applicable (needs a reason), unresolved.",
+ "policy_version": "1.1.0",
+ "$comment": "Conditional reporting policies per result type (research-communication plan T5). A policy checks the method metadata a record supplies; it never chooses the method or invents a default. `when` conditions compare dotted keys of reporting_context.method (equality, or {\"not\": value}); `when_absent` says what an absent key means: unknown (default: the field's applicability is unresolved), applicable, or not-applicable. `conflicts_with` marks a field that must not be provided under that method (error reporting.interval_kind_mismatch). Field states in a record: provided, missing, not-applicable (needs a reason), unresolved. Version 1.1.0 (RC-C3) adds flux-measurement. Comparison and interpretation claims get no policy of their own: their completeness is that of the results they compare or interpret (each with its own reporting_context), and their wording rules are in references/scientific-style.md.",
  "result_types": {
   "measurement": {"description": "a measured quantity with its uncertainties", "fields": {
    "value": {"description": "the central value as reported"},
@@ -40,6 +40,17 @@
    "evaluation_split": {"description": "the evaluation split and its grouping (leakage control)"},
    "seed_variance": {"description": "the variance over seeds or retrainings"},
    "baseline": {"description": "the baseline compared against, with matched budget"},
-   "training_domain": {"description": "the domain the model was trained on (extrapolation control)"}}}
+   "training_domain": {"description": "the domain the model was trained on (extrapolation control)"}}},
+  "flux-measurement": {"description": "a differential flux (spectrum) per rigidity or energy bin, as measured by a cosmic-ray or astroparticle instrument", "fields": {
+   "quantity_and_unit": {"description": "what is binned (rigidity, kinetic energy per nucleon, total energy) and the flux unit, e.g. m^-2 sr^-1 s^-1 GV^-1"},
+   "binning": {"description": "the bin edges and where each point sits in its bin (e.g. Lafferty-Wyatt for an assumed spectral shape)"},
+   "exposure": {"description": "how the exposure was formed (acceptance times live time), each entering once"},
+   "acceptance": {"description": "the acceptance and its corrections (simulation, data-driven efficiency corrections)"},
+   "live_time": {"description": "the live time per bin, with the geomagnetic-cutoff treatment for an instrument in orbit", "when": {"method.platform": "orbital"}, "when_absent": "unknown"},
+   "unfolding": {"description": "how the rigidity or energy resolution was unfolded (method, regularisation)", "when": {"method.unfolded": true}, "when_absent": "unknown"},
+   "statistical_uncertainty": {"description": "the statistical component per bin"},
+   "systematic_uncertainty": {"description": "the systematic components per bin"},
+   "scale_systematic": {"description": "the rigidity- or energy-scale uncertainty and how it propagates to the flux"},
+   "period": {"description": "the data-taking period, which fixes the solar-modulation conditions"}}}
  }
 }
