@@ -18,7 +18,11 @@ itself, not how any one instrument measures it.
 ## The all-particle spectrum and its features
 
 The cosmic-ray flux falls as a power law spanning more than ten decades in energy,
-`dN/dE ~ E^-gamma`, with `gamma` around 2.7 below the knee and steepening above it.
+`dN/dE ~ E^-gamma`, with `gamma` around 2.7 below the knee and steepening above it. Below the knee the spectrum is
+not one power law: direct measurements find a hardening of proton, helium and heavier spectra at a few hundred GV
+and a softening at a few tens of TeV, and ground arrays now resolve a proton knee below the all-particle knee
+(LHAASO reports it at about 3 PeV, arXiv:2505.14447, read 2026-10-14). Take break positions and indices from the
+primary papers or the experiment profile, not from this file.
 Three named features mark changes in the underlying physics and are the primary
 targets of composition and origin measurements:
 

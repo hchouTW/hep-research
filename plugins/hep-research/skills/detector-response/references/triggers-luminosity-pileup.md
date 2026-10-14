@@ -5,7 +5,7 @@ Complements the trigger/luminosity cautions already listed in
 conventions in [weights-normalization.md](../../hep-analysis/references/weights-normalization.md)
 with the concrete measurement and reweighting methodology.
 
-## Trigger efficiency measurement: tag-and-probe
+## Tag-and-probe efficiency measurement
 
 <!-- example: source citation (experiment named as the source of a general method or number) -->
 The standard method for measuring a trigger's (or an object identification/isolation
@@ -53,6 +53,9 @@ the background subtraction (CMS, the same section). That fit is a statistical in
 hand it to hep-statistics.
 <!-- /example -->
 
+Trigger efficiencies have other data-driven methods - an orthogonal reference trigger, the bootstrap method, and
+prescaled unbiased streams - with their own bias checks: [analysis design](../../hep-analysis/references/analysis-design.md#trigger-efficiency-from-data).
+
 ## Trigger turn-on curves and plateau requirements
 
 A trigger's efficiency as a function of the relevant kinematic variable (typically pT)
@@ -64,7 +67,9 @@ State the plateau threshold used and confirm the analysis selection sits at or a
 plateau the efficiency is measured in data and simulation and its scale factor applied: on the
 plateau means insensitive to the turn-on shape, not free of correction); if it does not (e.g. because the analysis needs sensitivity below the plateau),
 the turn-on shape itself must be measured and applied as a pT-dependent efficiency,
-not a flat number, and its shape uncertainty documented explicitly.
+not a flat number, and its shape uncertainty documented explicitly. A turn-on is usually fitted with an error
+function (Gaussian CDF) or a similar sigmoid; its parameters are correlated, so propagate their covariance, not
+independent errors.
 
 ## Prescales
 
@@ -99,6 +104,23 @@ biases the normalization); reconcile this explicitly rather than assuming the
 production-level bookkeeping already guarantees it, per the run/luminosity-block
 duplicate-counting caution in
 [analysis-design.md](../../hep-analysis/references/analysis-design.md).
+
+### Luminosity calibration
+
+<!-- example: source citation (experiment named as the source of a general method) -->
+The absolute luminosity scale comes from a dedicated calibration (general method, described for example in ATLAS,
+Eur. Phys. J. C 76 (2016) 653, arXiv:1608.03953, sections 4-6; read 2026-10-14):
+
+- **van der Meer scans** separate the beams in steps in x and in y under special low-pileup conditions; the overlap
+  width and the peak rate give the visible cross section `sigma_vis = epsilon sigma_inel` of each luminometer and
+  algorithm.
+- **Corrections to the scan**: x-y factorization of the bunch densities (non-factorization), the length scale of the
+  beam separation, orbit drifts, and beam-beam deflection and dynamic-beta effects.
+- **Transfer to physics conditions**: the calibration is made at low pileup and applied at high pileup, so the
+  luminometer's linearity in `mu` is checked against independent algorithms.
+- **Long-term stability**: compare luminometers over the year; drifts between them are an uncertainty.
+- **Correlations**: state which uncertainty components are correlated across years and periods for a combination.
+<!-- /example -->
 
 ## Pileup reweighting
 

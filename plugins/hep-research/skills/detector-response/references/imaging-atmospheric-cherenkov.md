@@ -138,6 +138,12 @@ and energy migration ([astroparticle statistics](../../hep-statistics/references
 an energy-averaged effective area. Check that the OFF regions exclude every known source and
 the ON region.
 
+### Instrument response functions (checklist)
+
+State, with its version: the effective area versus energy and offset angle, after cuts; the energy threshold and the energy bias and resolution versus energy; the angular
+resolution (PSF, for example the 68% containment radius R68) versus energy; and the IRF set and its validity range
+(zenith, conditions). Numbers come from the experiment's IRF release or profile, not from this file.
+
 ## Deliverables
 
 - The classifier (Hillas cuts or a trained multivariate method) used for gamma/hadron

@@ -77,6 +77,24 @@ Every measurement sensitive to charge sign or to the high-rigidity spectrum shou
 state which of these constrains its charge-antisymmetric bias, and quote the resulting
 limit as a systematic. See [tracking and vertexing](tracking-and-vertexing.md).
 
+### Calibration standards and their pitfalls
+
+- **`E/p` with electrons**: bremsstrahlung lowers the track momentum and the track momentum scale enters directly;
+  use it with a bremsstrahlung-aware track fit, in bins where both are controlled.
+- **A resonance mass**: fit the line shape (natural width convolved with the resolution, with a final-state-radiation
+  tail), not the peak position; a peak position moves with the resolution and the radiation.
+- **Low-momentum scale**: the J/psi and Upsilon resonances anchor the scale at low transverse momentum, and the Z at
+  higher; the extrapolation between them in pT is part of the uncertainty
+  <!-- example: source citation -->
+  (CMS muon performance, JINST 7 (2012) P10002, arXiv:1206.4071, section 6; read 2026-10-14).
+  <!-- /example -->
+- **MIP calibration**: use the most probable value of the Landau-like deposit with a path-length correction
+  (`1/cos theta` for inclined tracks), not the mean, which is pulled by the tail (PDG RPP 2024, Passage of particles
+  through matter).
+- **Intercalibration**: pi0 and eta diphoton masses, or phi symmetry of the deposited energy, equalize channels; the
+  absolute scale still needs a reference.
+- **Hadronic calorimeters**: `E/p` of isolated single hadrons, with its own selection bias from the isolation cut.
+
 ## Time dependence and conditions data
 
 Detectors change: gains drift with temperature, sensors accumulate radiation damage,

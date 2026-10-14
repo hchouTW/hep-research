@@ -104,6 +104,12 @@ Both techniques treat the atmosphere as part of the detector, not as an inert me
   instrumental) systematic on `X_max` that composition analyses must account for
   when combining data across a full year.
 
+### Instrument response functions (checklist)
+
+State, with its version: the effective area or aperture (m^2 sr) above full trigger efficiency, the trigger efficiency below it for each primary; the energy threshold and the energy bias and resolution versus energy; the angular
+resolution (PSF, for example the 68% containment radius R68) versus energy; and the IRF set and its validity range
+(zenith, conditions). Numbers come from the experiment's IRF release or profile, not from this file.
+
 ## Deliverables
 
 - Which technique(s) contributed to a reported energy: surface-array density

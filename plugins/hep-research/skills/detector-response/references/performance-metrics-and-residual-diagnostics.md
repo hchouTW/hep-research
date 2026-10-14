@@ -192,6 +192,33 @@ tail fraction, and coverage across phase space, not just the core width.
   `conditional_on_selected`), and background `b_i`; model dependence enters through
   the truth spectrum used to build `R` ([data mc validation and detector systematics](data-mc-validation-and-detector-systematics.md)).
 
+### Resolution models and widths
+
+A resolution is a model or an estimator; name it. Common choices (general method):
+
+- **Double-sided Crystal Ball**: Gaussian core `sigma` with power-law tails on both sides (`alpha_L`, `n_L`,
+  `alpha_R`, `n_R`); quote the core and the tail parameters.
+- **Double Gaussian**: two widths and a fraction; define the effective width you quote (for example the fraction-
+  weighted quadrature mean, or `sigma_eff` below), since "the resolution" of a double Gaussian is otherwise ambiguous.
+- **`sigma_eff`**: half the width of the smallest interval containing 68.3% of the entries.
+- **RMS90**: the standard deviation of the central 90% of the entries; for a Gaussian it is `0.789 sigma`, so divide by
+  0.789 before comparing with a Gaussian `sigma`.
+- Uncertainties of quantile-based widths (`sigma_68`, `sigma_eff`, RMS90) come from a bootstrap, not from a Gaussian
+  formula.
+
+### Resolution measured in data
+
+Truth exists only in simulation; in data the resolution is inferred. Methods: fit the width of a narrow resonance
+with its natural width and final-state radiation in the line shape
+<!-- example: source citation -->
+(the CMS muon momentum scale fits the Z line shape convolved with a resolution function, JINST 7 (2012) P10002,
+arXiv:1206.4071, section 6; read 2026-10-14);
+<!-- /example -->
+split a track (or a cosmic crossing the detector) into two halves and compare them; compare overlapping modules;
+for jets and missing transverse momentum, balance against a well-measured reference (dijet asymmetry, Z or photon
+plus jet) and extrapolate away the soft radiation. The data/simulation ratio of these widths is the resolution scale
+factor.
+
 ## Common misconceptions and failure modes
 
 - **Efficiency, purity, and acceptance interchanged.** State each denominator.

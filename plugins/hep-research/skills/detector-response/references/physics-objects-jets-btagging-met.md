@@ -36,6 +36,12 @@ rather than a factorized analytic correction, see
 for training/validation/uncertainty-propagation guidance specific to a regressed
 correction.
 
+The jet energy scale is a chain of corrections, each with its own uncertainty (general method): a pileup offset; a
+simulated-response correction from truth matching; in-situ relative (eta intercalibration with dijets) and absolute
+(Z or photon plus jet, multijet balance) residual corrections for data; and flavour response and composition terms.
+The jet energy resolution in simulation is matched to data by scaling or by smearing (stochastic smearing for jets
+without a matched generator jet).
+
 ## b-tagging
 
 State the tagging algorithm, working point (loose/medium/tight or a numerical

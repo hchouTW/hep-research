@@ -123,6 +123,17 @@ that already contains the calibration uncertainty); arbitrary envelopes of unrel
 alternatives; noisy variations (finite MC) promoted to a shape effect; excessive
 smoothing that removes a real feature; unjustified decorrelation.
 
+### Systematic uncertainty of the response itself
+
+The response matrix carries the detector systematics of everything it folds. Build it again for each detector
+nuisance (scale, resolution, efficiency, alignment variation): one matrix per variation, with the nominal shape and the
+same binning, recorded in the artifact's `systematic_variations` (`nuisance`, `direction` up/down/alternative,
+`matrix` or `matrix_ref`), with nuisance names identical to those of the statistical model that consumes them.
+Model dependence is separate: reweight the truth spectrum inside each truth bin to an alternative shape and rebuild
+`R`; the difference is the response's dependence on the generator, not a detector effect. The finite-MC uncertainty of
+`R` is a third, statistical term ([response and forward folding](response-and-forward-folding.md)). The validator
+checks the shapes and that no (nuisance, direction) pair repeats.
+
 ## Detector combination and global reconstruction
 
 Associations: track-cluster, track-muon, track-ring, timing-track, vertex-object

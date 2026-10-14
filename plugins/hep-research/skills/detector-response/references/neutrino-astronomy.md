@@ -108,6 +108,12 @@ backgrounds, with normalizations and spectral shapes as nuisance parameters prof
 in the fit, constrained by priors from independent air-shower and flux calculations)
 plus a free astrophysical power law.
 
+### Instrument response functions (checklist)
+
+State, with its version: the effective area or volume versus neutrino energy, flavour and declination, after the event selection; the energy threshold and the energy bias and resolution versus energy; the angular
+resolution (PSF, for example the 68% containment radius R68) versus energy; and the IRF set and its validity range
+(zenith, conditions). Numbers come from the experiment's IRF release or profile, not from this file.
+
 ## Deliverables
 
 - The event topology (track, cascade, or double-bang) used, and its corresponding

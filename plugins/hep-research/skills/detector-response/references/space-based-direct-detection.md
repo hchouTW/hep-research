@@ -262,6 +262,15 @@ For 4 events in 1.3-2.0 TV with exposure 2.0e7 m^2 sr s
 - Count charge-confusion and interaction backgrounds before quoting the flux. With 4 events,
   even a background of 0.5 events changes the result.
 
+### Instrument response functions (checklist)
+
+State, with its version: the acceptance (geometric factor times selection efficiency, m^2 sr) versus rigidity or energy, per species; for a calorimeter also the energy response matrix; the energy threshold and the energy bias and resolution versus energy; the angular
+resolution (PSF, for example the 68% containment radius R68) versus energy; and the IRF set and its validity range
+(zenith, conditions). Numbers come from the experiment's IRF release or profile, not from this file.
+
+Also state the material above the instrument (balloon overburden, in g/cm^2, and the correction for secondaries
+made in it) and fragmentation of nuclei inside the instrument, which moves events between species.
+
 ## Deliverables
 
 - Whether the reported spectrum is quoted at the top of the atmosphere/instrument

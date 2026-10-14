@@ -5,7 +5,7 @@
  "by_skill": {
   "detector-response": {
    "references": 34,
-   "bytes": 411611,
+   "bytes": 425539,
    "uncited": 0
   },
   "hep-analysis": {
@@ -43,8 +43,8 @@
   {
    "path": "skills/detector-response/references/calibration-and-alignment.md",
    "owner": "detector-response",
-   "bytes": 9477,
-   "lines": 151,
+   "bytes": 10792,
+   "lines": 169,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -60,6 +60,7 @@
     "skills/detector-response/references/front-end-electronics-and-signal-processing.md",
     "skills/detector-response/references/gaseous-and-specialized-tracking-technologies.md",
     "skills/detector-response/references/muon-systems.md",
+    "skills/detector-response/references/response-and-forward-folding.md",
     "skills/detector-response/references/signal-formation-and-readout.md",
     "skills/detector-response/references/tracking-and-vertexing.md"
    ],
@@ -125,8 +126,8 @@
   {
    "path": "skills/detector-response/references/cosmic-ray-spectrum-and-composition.md",
    "owner": "detector-response",
-   "bytes": 12058,
-   "lines": 178,
+   "bytes": 12488,
+   "lines": 182,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -151,8 +152,8 @@
   {
    "path": "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
    "owner": "detector-response",
-   "bytes": 11914,
-   "lines": 173,
+   "bytes": 12833,
+   "lines": 184,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/detector-case-studies-and-checklists.md",
@@ -245,7 +246,7 @@
     "skills/detector-response/references/front-end-electronics-and-signal-processing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b1fb312 2026-10-14"
+   "last_commit": "cd6c92b 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/detector-principles-summary.md",
@@ -266,8 +267,8 @@
   {
    "path": "skills/detector-response/references/detector-simulation.md",
    "owner": "detector-response",
-   "bytes": 12488,
-   "lines": 206,
+   "bytes": 12970,
+   "lines": 214,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/calibration-and-alignment.md",
@@ -315,8 +316,8 @@
   {
    "path": "skills/detector-response/references/event-reconstruction.md",
    "owner": "detector-response",
-   "bytes": 10770,
-   "lines": 181,
+   "bytes": 11383,
+   "lines": 189,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/calibration-and-alignment.md",
@@ -349,7 +350,7 @@
    "cited_by_other_skills": [
     "research-communication"
    ],
-   "last_commit": "b1fb312 2026-10-14"
+   "last_commit": "cd6c92b 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/front-end-electronics-and-signal-processing.md",
@@ -396,8 +397,8 @@
   {
    "path": "skills/detector-response/references/ground-based-detection-arrays.md",
    "owner": "detector-response",
-   "bytes": 8289,
-   "lines": 124,
+   "bytes": 8782,
+   "lines": 130,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/cosmic-ray-spectrum-and-composition.md",
@@ -414,8 +415,8 @@
   {
    "path": "skills/detector-response/references/imaging-atmospheric-cherenkov.md",
    "owner": "detector-response",
-   "bytes": 10496,
-   "lines": 157,
+   "bytes": 10931,
+   "lines": 163,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/cosmic-ray-spectrum-and-composition.md",
@@ -447,7 +448,7 @@
     "skills/detector-response/references/noble-liquid-neutrino-and-rare-event-detectors.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b1fb312 2026-10-14"
+   "last_commit": "cd6c92b 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/muon-systems.md",
@@ -472,8 +473,8 @@
   {
    "path": "skills/detector-response/references/neutrino-astronomy.md",
    "owner": "detector-response",
-   "bytes": 8585,
-   "lines": 130,
+   "bytes": 9062,
+   "lines": 136,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/cherenkov-imaging-variants-and-photosensors.md",
@@ -541,8 +542,8 @@
   {
    "path": "skills/detector-response/references/performance-metrics-and-residual-diagnostics.md",
    "owner": "detector-response",
-   "bytes": 16862,
-   "lines": 217,
+   "bytes": 18551,
+   "lines": 244,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/cherenkov-imaging-variants-and-photosensors.md",
@@ -562,8 +563,8 @@
   {
    "path": "skills/detector-response/references/physics-objects-jets-btagging-met.md",
    "owner": "detector-response",
-   "bytes": 6896,
-   "lines": 110,
+   "bytes": 7393,
+   "lines": 116,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/calorimetry-ecal-hcal.md",
@@ -593,7 +594,8 @@
     "skills/detector-response/references/detector-simulation.md",
     "skills/detector-response/references/detector-systems-overview.md",
     "skills/detector-response/references/event-reconstruction.md",
-    "skills/detector-response/references/performance-metrics-and-residual-diagnostics.md"
+    "skills/detector-response/references/performance-metrics-and-residual-diagnostics.md",
+    "skills/detector-response/references/response-and-forward-folding.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "b1fb312 2026-10-14"
@@ -601,8 +603,8 @@
   {
    "path": "skills/detector-response/references/response-and-forward-folding.md",
    "owner": "detector-response",
-   "bytes": 6199,
-   "lines": 74,
+   "bytes": 10420,
+   "lines": 121,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
@@ -643,8 +645,8 @@
   {
    "path": "skills/detector-response/references/space-based-direct-detection.md",
    "owner": "detector-response",
-   "bytes": 20389,
-   "lines": 283,
+   "bytes": 21133,
+   "lines": 292,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -665,7 +667,7 @@
     "hep-statistics",
     "research-communication"
    ],
-   "last_commit": "b1fb312 2026-10-14"
+   "last_commit": "cd6c92b 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/timing-detectors.md",
@@ -715,8 +717,8 @@
   {
    "path": "skills/detector-response/references/triggers-luminosity-pileup.md",
    "owner": "detector-response",
-   "bytes": 12049,
-   "lines": 187,
+   "bytes": 13662,
+   "lines": 209,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
@@ -733,7 +735,7 @@
     "skills/detector-response/scripts/tag_and_probe_efficiency.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b1fb312 2026-10-14"
+   "last_commit": "cd6c92b 2026-10-14"
   },
   {
    "path": "skills/hep-analysis/references/analysis-design.md",
@@ -1552,12 +1554,14 @@
    "lines": 356,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/detector-response/references/response-and-forward-folding.md",
     "skills/hep-analysis/references/hep-analysis-guide.md",
     "skills/hep-statistics/references/core-stats-guide.md",
     "skills/hep-statistics/references/unfolding.md",
     "tests/skills/hep_statistics/test_core_stats_guide.py"
    ],
    "cited_by_other_skills": [
+    "detector-response",
     "hep-analysis"
    ],
    "last_commit": "d058154 2026-10-13"

@@ -129,6 +129,14 @@ legitimate and often necessary, but its validity is conditional:
   sample is not a substitute for the analysis in question, however good its agreement
   in inclusive distributions.
 
+### Validating a fast simulation
+
+Compare fast and full simulation on the analysis' own selection, observable by observable (including the
+reconstructed quantities the analysis cuts on); check that scale factors derived with full simulation close when
+applied to fast; compare tail fractions, not only cores; and for a learned generative fast simulation add
+multivariate checks (correlations, a two-sample classifier test with its power quoted). Training it belongs to
+physics-ml.
+
 ## Validating the simulation
 
 Simulation is a model to be tested, not a reference to be trusted. A useful validation

@@ -11,9 +11,30 @@ efficiency treatment, missed truth events, out-of-fiducial contributions/reconst
 sums normalized to unity (columns for `rows_reco_cols_truth`) no longer encode efficiency loss; do not mix that convention with one that includes
 losses.
 
-Check folding with a small hand-calculable matrix. Document purity and stability with their denominators (orientation `rows_reco_cols_truth`): purity `p_i = N_ii / sum_j N_ij`, the fraction of reco-bin-i events generated in truth bin i (state whether fakes are in the denominator); stability `s_j = N_jj / N_sel,j` (or `/ N_gen,j`; say which), the fraction of truth-bin-j events reconstructed in bin j. Bin purity is not the object purity of [performance metrics](performance-metrics-and-residual-diagnostics.md) and assess conditioning,
-rank, and identifiable truth bins. Signed MC contributions are not literal transition probabilities and need suitable
-response-estimation and uncertainty treatment.
+Check folding with a small hand-calculable matrix. Document purity and stability with their denominators (orientation `rows_reco_cols_truth`): purity `p_i = N_ii / sum_j N_ij`, the fraction of reco-bin-i events generated in truth bin i (state whether fakes are in the denominator); stability `s_j = N_jj / N_sel,j` (or `/ N_gen,j`; say which), the fraction of truth-bin-j events reconstructed in bin j. Bin purity is not the object purity of [performance metrics](performance-metrics-and-residual-diagnostics.md).
+Assess conditioning, rank, and identifiable truth bins. Signed MC contributions are not literal transition
+probabilities and need suitable response-estimation and uncertainty treatment.
+
+**Finite-MC uncertainty of the response.** The matrix is estimated from a finite simulated sample, so it is itself
+uncertain. Per truth bin `j`, the reco entries plus a "lost" class (not selected, or reconstructed outside the axes)
+are multinomial with `N_j` generated events, so `Cov(R_ij, R_kj) = (delta_ik R_ij - R_ij R_kj)/N_j`, and different
+truth bins are independent. With weights, use `sum w` and `sum w^2` per cell (effective counts). Propagate it with
+`core/stats/unfolding_diagnostics.py response-covariance` or `response-stat` (hep-statistics,
+[core statistics commands](../../hep-statistics/references/core-stats-commands.md)), and record the counts in the
+artifact's `mc_stat` (`kind: generated_counts` with `events_per_truth_bin`, or `sumw2`): from contracts 2.8.0 a
+response for unfolding without it is unresolved.
+
+**Fakes.** Reconstructed events with no truth match under the matching criterion of
+[reconstruction performance and truth matching](reconstruction-performance-and-truth-matching.md) form a reco-space
+vector `b_fake`, estimated from simulation with that criterion and validated in a control region; they belong in `b`,
+not in `R`. Keeping them as an extra truth column is possible if declared; the validator warns
+(`response.fakes_inside`) when `fakes` is listed in `includes`.
+
+**Time-dependent responses.** Conditions change, so a response built for one period does not describe another. Build
+one matrix per period with stable conditions and combine them with exposure (or luminosity) weights,
+`R_eff = sum_t w_t R_t / sum_t w_t`, or fold each period separately; record them in the artifact's `periods`
+(`id`, `exposure_weight`, `matrix` or `matrix_ref`) rather than in the free `conditions` string
+([calibration and alignment](calibration-and-alignment.md)).
 
 Truth and reco variables are named with units; if they differ (for example rigidity and its inverse), state the
 conversion. A binned response is a conditional distribution `p(reco bin | truth bin)` and needs no Jacobian; a Jacobian
@@ -39,7 +60,9 @@ nu = D_reco * R * D_truth * x + b
 
 Diagonal corrections in different spaces do not commute with `R`: a reco-binned efficiency moved into truth space, or
 the reverse, changes the result wherever migration is large. State for each correction its space, its position in the
-product, and whether it is inside `R`. Every correction is applied exactly once: one that sits inside the matrix is never
+product, and whether it is inside `R`; the artifact records this in `correction_space` (term ->
+`{space: truth | reco | global, binned_in, order}`; `global` for scalars such as luminosity, exposure or live time,
+`truth` or `reco` binned in a variable otherwise, never `reco` for acceptance or a fiducial correction). Every correction is applied exactly once: one that sits inside the matrix is never
 applied again outside it, and a detector-level prediction is never folded a second time.
 
 Declare the response's intended use (`intended_use`): `forward_folding`, `unfolding` or `parametric_fit`. Fewer reco
@@ -48,11 +71,35 @@ unfolding but are legitimate for forward folding, which only loses information t
 identifiable is the model parameters, not every truth bin. The folded prediction is a `prediction` in reco space with
 the response reference and its status; the fit that uses it is a hep-statistics deliverable.
 
+## Worked example: a 2x2 response checked by hand
+
+The fixture `contracts/fixtures/artifacts/valid/response_v28.json` (SYNTHETIC) declares a `cos_theta` response with
+the inefficiency inside (`conditional_on_generated`), the acceptance and the luminosity outside:
+
+```json
+{"orientation": "rows_reco_cols_truth", "normalization": "conditional_on_generated",
+ "inefficiency": "inside_matrix", "acceptance": "outside_matrix", "includes": ["migration", "efficiency"],
+ "applied_separately": ["acceptance", "luminosity"], "underflow_overflow": "not_represented",
+ "intended_use": "unfolding", "matrix": [[0.7, 0.1], [0.1, 0.6]],
+ "mc_stat": {"kind": "generated_counts", "events_per_truth_bin": [10000, 10000]},
+ "correction_space": {"acceptance": {"space": "truth", "binned_in": "cos_theta"}, "luminosity": {"space": "global"}}}
+```
+
+The truth-bin sums 0.8 and 0.7 are the efficiencies inside the matrix. Folding `x = (1000, 500)` (already corrected
+for acceptance and luminosity) with `b = (5, 5)`: `nu_1 = 0.7*1000 + 0.1*500 + 5 = 755`,
+`nu_2 = 0.1*1000 + 0.6*500 + 5 = 405`. `contracts.response_adapter.fold` gives the same numbers
+(`tests/contracts/test_response_contract.py`). With `N_j = 10000`, `sigma(R_11) = sqrt(0.7*0.3/10000) = 0.0046`.
+
 ## Double-counting checks
 
 Write the `response` artifact, then run `python3 "<plugin root>/contracts/validate.py" <artifact>` and
 `python3 "<plugin root>/contracts/response_adapter.py" <artifact> --validate`; both must pass before another skill
-consumes it. The first checks the declared metadata; the second checks the numbers.
+consumes it.
+
+| Tool | Checks | Does not check |
+|---|---|---|
+| `contracts/validate.py` (native from contracts 2.8.0, older artifacts with `--strict`) | declarations: vocabulary, misspelled keys, `intended_use` and `underflow_overflow` declared, placement against `includes` and normalization, exposure not listed with the acceptance or live time it contains, flow vectors with `explicit_bins`, `correction_space`, `mc_stat`, variation shapes, and the numbers of an *inline* matrix through the two tools below | the numbers behind a `matrix_ref` (it opens no other file: unresolved `response.numeric_unchecked`) |
+| `contracts/response_adapter.py ART --validate` | the numbers: orientation, sums against the normalization, signs, shape against the edges, rank and conditioning, lost probability with the flow vectors, closure when given; reads `matrix_ref` (`file.json` or `file.json#key` inside the artifact folder, an object with `matrix`, `underflow`, `overflow`) | physical validity |
 
 `<plugin root>/core/stats/validate_response.py` checks orientation, normalization against the declared convention,
 efficiency or acceptance counted twice or not at all, probability lost outside the axes, empty bins and phase-space
