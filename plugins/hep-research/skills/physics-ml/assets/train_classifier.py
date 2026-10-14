@@ -554,12 +554,16 @@ def save_checkpoint(path: Path, model, optimizer, scheduler, epoch, best, metada
                 "config": vars(args)}, path)
 
 
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with open(path, "rb") as handle:
-        for chunk in iter(lambda: handle.read(1 << 20), b""):
-            digest.update(chunk)
-    return "sha256:" + digest.hexdigest()
+def weights_hash(path: Path) -> str:
+    """sha256 over the model weights only (parameter names, dtypes, shapes and bytes, in name order): the hash names
+    the model, not the file, so it does not change with paths, optimizer state or the epoch counter."""
+    state = torch.load(path, map_location="cpu", weights_only=True)["model_state_dict"]
+    h = hashlib.sha256()
+    for name in sorted(state):
+        tensor = state[name].detach().cpu().contiguous()
+        h.update(f"{name}|{tensor.dtype}|{tuple(tensor.shape)}|".encode())
+        h.update(tensor.numpy().tobytes())
+    return "sha256:" + h.hexdigest()
 
 
 def write_scores(path: Path, ids, y, w, scores, labels) -> None:
@@ -604,7 +608,10 @@ def run(args) -> int:
     keep, w_train_all, train_weight_record = training_weights(y[tr], w[tr], n_classes, args, x[tr])
     tr_fit = tr[keep]
     mean = x[tr].mean(axis=0)
-    std = np.maximum(x[tr].std(axis=0), 1e-12)
+    std = x[tr].std(axis=0)
+    constant = [features[j] for j in np.flatnonzero(std <= 1e-12 * np.maximum(np.abs(mean), 1.0))]
+    if constant:  # standardizing by a floor of 1e-12 would amplify any deviation by 1e12 at inference
+        raise InputError(f"feature(s) {constant} are constant on the training split; drop them or fix the input")
     preprocessing = [{"step": "standardize", "features": features, "mean": mean.tolist(), "std": std.tolist()}]
     groups_train = [idx["groups"].get(canonical_key(data["ids"][i])) for i in tr]
     domain = domain_record(x[tr], groups_train, args.ood_quantile, args.seed)
@@ -688,7 +695,7 @@ def run(args) -> int:
         "split_check": {k: split_check[k] for k in ("tool", "result", "report")},
         "training_domain": {f: [domain["min"][i], domain["max"][i]] for i, f in enumerate(features)},
         "preprocessing": preprocessing, "weights": weights_summary,
-        "model_hash": sha256_file(best_path), "checkpoint": str(best_path.resolve()),
+        "model_hash": weights_hash(best_path), "checkpoint": str(best_path.resolve()),
         "environment": {"torch_version": torch.__version__, "device": str(device), "precision": args.precision,
                         "seeds": seeds},
         "metrics": metrics, "scores": {"val": str(val_scores_path.resolve()), "test": str(scores_path.resolve())},

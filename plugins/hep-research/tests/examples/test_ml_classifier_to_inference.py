@@ -73,6 +73,31 @@ class J9MlToInferenceTests(unittest.TestCase):
         committed = (SCRIPT.parent / "output" / "results.json").read_bytes()
         self.assertEqual((self.out / "results.json").read_bytes(), committed)
 
+    def test_committed_artifacts_match_within_tolerance(self):
+        """ML-K13: the committed ml_artifact.json and statistical_result.json, not only the rounded results.json, are
+        reproduced: every number within a relative tolerance of 1e-9 (last-bit BLAS differences), every other value
+        equal; digests and input hashes are skipped because they move with the artifact bytes."""
+        skip = {"sha256", "plugin_release", "digest"}
+
+        def close(a, b, path):
+            if isinstance(a, dict) and isinstance(b, dict):
+                self.assertEqual(set(a), set(b), path)
+                for k in a:
+                    if k not in skip:
+                        close(a[k], b[k], f"{path}.{k}")
+            elif isinstance(a, list) and isinstance(b, list):
+                self.assertEqual(len(a), len(b), path)
+                for i, (x, y) in enumerate(zip(a, b)):
+                    close(x, y, f"{path}[{i}]")
+            elif isinstance(a, float) or isinstance(b, float):
+                self.assertTrue(abs(a - b) <= 1e-9 * max(abs(a), abs(b), 1e-300), (path, a, b))
+            else:
+                self.assertEqual(a, b, path)
+
+        committed = SCRIPT.parent / "output" / "artifacts"
+        close(json.loads((committed / "ml_artifact.json").read_text()), self.ml, "ml_artifact")
+        close(json.loads((committed / "statistical_result.json").read_text()), self.stat, "statistical_result")
+
     def test_artifacts_validate(self):
         from contracts.validate import validate_artifact
         from contracts.vocab import Vocabulary

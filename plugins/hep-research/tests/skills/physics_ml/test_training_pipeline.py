@@ -158,8 +158,15 @@ class TrainClassifierPipelineTests(unittest.TestCase):
         self.assertEqual(summary["environment"]["precision"], "fp32")
         self.assertEqual(set(summary["environment"]["seeds"]), {"torch", "numpy", "python"})
         self.assertEqual(set(summary["metrics"]), {"val", "test"})
-        digest = hashlib.sha256(Path(summary["checkpoint"]).read_bytes()).hexdigest()
-        self.assertEqual(summary["model_hash"], f"sha256:{digest}")
+        # the model hash covers the weights only (names, dtypes, shapes, bytes), not the checkpoint file (ML-C26)
+        import torch
+        state = torch.load(summary["checkpoint"], map_location="cpu", weights_only=True)["model_state_dict"]
+        h = hashlib.sha256()
+        for name in sorted(state):
+            t = state[name].contiguous()
+            h.update(f"{name}|{t.dtype}|{tuple(t.shape)}|".encode())
+            h.update(t.numpy().tobytes())
+        self.assertEqual(summary["model_hash"], f"sha256:{h.hexdigest()}")
 
     def test_test_metrics_use_only_the_test_split(self):
         summary = self.summary()

@@ -202,7 +202,8 @@ def _jsd(p, q):
     return float(0.5 * kl(p, m) + 0.5 * kl(q, m))
 
 
-def mass_sculpting_jsd(mass, scores, threshold, weights=None, bins=40, mass_range=None, baseline=False, seed=0):
+def mass_sculpting_jsd(mass, scores, threshold, weights=None, bins=40, mass_range=None, baseline=False, seed=0,
+                       n_baseline=20):
     """JSD (base 2, in [0, 1]) between the background mass distributions passing and failing score >= threshold.
 
     Pass background events only. Report 1/JSD against background rejection at fixed signal efficiency; larger
@@ -210,8 +211,10 @@ def mass_sculpting_jsd(mass, scores, threshold, weights=None, bins=40, mass_rang
     number of clipped bins is returned so that the clipping is visible.
 
     The binned JSD is biased upward by statistical fluctuations (more bins, fewer passing events = larger bias).
-    baseline=True adds "jsd_baseline": the JSD between a random subset of the failing events, of the same size as
-    the passing set, and the remaining failing events, so the sculpting value can be compared with pure noise.
+    baseline=True adds the noise level: the JSD between a random subset of the failing events, of the same size as
+    the passing set, and the remaining failing events, repeated n_baseline times (at least 20; one draw is too
+    noisy): "jsd_baseline" is the median, "jsd_baseline_q95" the 95% quantile, so the sculpting value is compared
+    with a quantile of pure noise, not with one draw.
     """
     m = np.asarray(mass, dtype=float).ravel()
     sc = np.asarray(scores, dtype=float).ravel()
@@ -228,17 +231,25 @@ def mass_sculpting_jsd(mass, scores, threshold, weights=None, bins=40, mass_rang
     out = {"jsd": d, "inverse_jsd": (1.0 / d) if d > 0 else math.inf, "clipped_bins": clipped,
            "n_pass": int(sel.sum()), "n_fail": int((~sel).sum())}
     if baseline:
+        if n_baseline < 20:
+            raise ValueError("n_baseline must be at least 20: a single resampling is too noisy to compare with")
         fail_idx = np.flatnonzero(~sel)
         k = min(int(sel.sum()), fail_idx.size // 2)
-        if k > 0:
+        draws = []
+        gen = np.random.default_rng(seed)
+        for _ in range(n_baseline if k > 0 else 0):
             pick = np.zeros(fail_idx.size, bool)
-            pick[np.random.default_rng(seed).choice(fail_idx.size, k, replace=False)] = True
+            pick[gen.choice(fail_idx.size, k, replace=False)] = True
             a, b = fail_idx[pick], fail_idx[~pick]
             ha, _ = np.histogram(m[a], bins=bins, range=rng, weights=w[a])
             hb, _ = np.histogram(m[b], bins=bins, range=rng, weights=w[b])
             ha, hb = np.clip(ha, 0, None), np.clip(hb, 0, None)
             if ha.sum() > 0 and hb.sum() > 0:
-                out["jsd_baseline"] = _jsd(ha, hb)
+                draws.append(_jsd(ha, hb))
+        if draws:
+            out["jsd_baseline"] = float(np.median(draws))
+            out["jsd_baseline_q95"] = float(np.quantile(draws, 0.95))
+            out["n_baseline"] = len(draws)
     return out
 
 

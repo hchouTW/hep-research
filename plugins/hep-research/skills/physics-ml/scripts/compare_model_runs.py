@@ -7,7 +7,9 @@ gains are smaller than it. Reporting a single run, or the best of several, is no
 evidence.
 
 What it does: takes per-seed scores for a baseline and a variant, pairs them by seed
-where possible, and reports the mean difference with a bootstrap confidence interval,
+where possible, and reports the mean difference with a bootstrap confidence interval (with fewer than 10 seeds,
+an exact permutation test decides and the interval is Student's t on the seed means, because the bootstrap
+undercovers there),
 the seed spread of each arm, whether the interval excludes zero, and the minimum
 effect this many seeds could reliably detect. Also flags a best-of-N comparison, which
 is a biased estimator whose expectation rises with N.
@@ -95,6 +97,77 @@ def minimum_detectable_effect(stdev, n):
     return T_POWER_FACTOR.get(n, POWER_CONSTANT) * stdev / math.sqrt(n)
 
 
+SMALL_SAMPLE = 10  # below this many seeds the percentile bootstrap undercovers; an exact test decides instead
+
+
+def _betacf(a, b, x):
+    """Continued fraction of the regularized incomplete beta function (modified Lentz)."""
+    tiny, qab, qap, qam = 1e-300, a + b, a + 1.0, a - 1.0
+    c, d = 1.0, 1.0 - qab * x / qap
+    d = 1.0 / (d if abs(d) > tiny else tiny)
+    h = d
+    for m in range(1, 300):
+        m2 = 2 * m
+        for aa in (m * (b - m) * x / ((qam + m2) * (a + m2)), -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2))):
+            d = 1.0 + aa * d
+            d = 1.0 / (d if abs(d) > tiny else tiny)
+            c = 1.0 + aa / c
+            c = c if abs(c) > tiny else tiny
+            h *= d * c
+        if abs(d * c - 1.0) < 3e-15:
+            break
+    return h
+
+
+def _student_t_cdf(t, df):
+    """CDF of Student's t through the regularized incomplete beta function."""
+    if t == 0:
+        return 0.5
+    x = df / (df + t * t)
+    lbeta = math.lgamma(df / 2) + math.lgamma(0.5) - math.lgamma(df / 2 + 0.5)
+    front = math.exp(math.log(x) * df / 2 + math.log1p(-x) * 0.5 - lbeta)
+    if x < (df / 2 + 1) / (df / 2 + 2.5):
+        ib = front * _betacf(df / 2, 0.5, x) / (df / 2)
+    else:
+        ib = 1.0 - math.exp(math.log1p(-x) * 0.5 + math.log(x) * df / 2 - lbeta) * _betacf(0.5, df / 2, 1 - x) / 0.5
+    return 1.0 - 0.5 * ib if t > 0 else 0.5 * ib
+
+
+def student_t_quantile(p, df):
+    """Quantile of Student's t (bisection on the CDF); standard library only."""
+    lo, hi = -1e3, 1e3
+    for _ in range(200):
+        mid = 0.5 * (lo + hi)
+        if _student_t_cdf(mid, df) < p:
+            lo = mid
+        else:
+            hi = mid
+    return 0.5 * (lo + hi)
+
+
+def permutation_p_value(baseline, variant, paired, sign):
+    """Exact two-sided permutation p-value of the mean difference: all sign flips of the paired differences, or all
+    reassignments of the pooled scores to the two arms."""
+    import itertools
+    if paired:
+        diffs = [sign * (v - b) for b, v in zip(baseline, variant)]
+        observed = abs(sum(diffs))
+        flips = list(itertools.product((1, -1), repeat=len(diffs)))
+        hits = sum(1 for f in flips if abs(sum(x * y for x, y in zip(f, diffs))) >= observed - 1e-12)
+        return hits / len(flips)
+    pooled = list(baseline) + list(variant)
+    n_b = len(baseline)
+    observed = abs(statistics.fmean(variant) - statistics.fmean(baseline))
+    total = hits = 0
+    for idx in itertools.combinations(range(len(pooled)), n_b):
+        chosen = set(idx)
+        a = [pooled[i] for i in idx]
+        b = [pooled[i] for i in range(len(pooled)) if i not in chosen]
+        total += 1
+        hits += abs(statistics.fmean(b) - statistics.fmean(a)) >= observed - 1e-12
+    return hits / total
+
+
 def compare(baseline, variant, level=0.95, lower_is_better=False,
             resamples=DEFAULT_RESAMPLES, seed=0):
     """Paired (or unpaired) comparison of two arms, with the noise floor made explicit."""
@@ -134,10 +207,31 @@ def compare(baseline, variant, level=0.95, lower_is_better=False,
             difference_stdev, min(len(baseline), len(variant)))
 
     noise_floor = max(baseline_summary["spread"], variant_summary["spread"])
-    significant = (low > 0.0) or (high < 0.0)
+    method = "bootstrap"
+    p_value = None
+    if min(len(baseline), len(variant)) < SMALL_SAMPLE:
+        # With few seeds the percentile bootstrap undercovers (false "improvements" at 26%, 15%, 11% for 3, 5, 10
+        # seeds against a nominal 5% in the physics-ml audit's first pass): the exact permutation test decides, and
+        # the interval is Student's t on the seed means.
+        method = "exact permutation test with a Student-t interval (fewer than 10 seeds)"
+        p_value = permutation_p_value(baseline, variant, paired, sign)
+        if paired:
+            df, se = len(differences) - 1, difference_stdev / math.sqrt(len(differences))
+        else:
+            vb, vv = baseline_summary["stdev"] ** 2 / len(baseline), variant_summary["stdev"] ** 2 / len(variant)
+            se = math.sqrt(vb + vv)
+            df = (vb + vv) ** 2 / ((vb ** 2 / (len(baseline) - 1) if vb else 0) + (vv ** 2 / (len(variant) - 1) if vv else 0)
+                                   or 1.0)
+        t_crit = student_t_quantile(1.0 - (1.0 - level) / 2.0, df) if se > 0 else 0.0
+        low, high = mean_difference - t_crit * se, mean_difference + t_crit * se
+        significant = p_value < 1.0 - level
+    else:
+        significant = (low > 0.0) or (high < 0.0)
 
     return {
         "paired": paired,
+        "method": method,
+        "permutation_p_value": p_value,
         "level": level,
         "lower_is_better": lower_is_better,
         "baseline": baseline_summary,
@@ -159,6 +253,9 @@ def verdict(result):
     if not result["paired"]:
         lines.append("Arms are unpaired (different lengths); pairing by seed would be "
                      "substantially more sensitive.")
+    if result.get("permutation_p_value") is not None:
+        lines.append(f"Fewer than {SMALL_SAMPLE} seeds: decided by an exact permutation test "
+                     f"(p = {result['permutation_p_value']:.3g}); the interval is Student's t on the seed means.")
     if result["interval_excludes_zero"]:
         lines.append(f"Supported: the {result['level'] * 100:.0f}% interval on the "
                      f"difference excludes zero, so the variant is {direction}.")
