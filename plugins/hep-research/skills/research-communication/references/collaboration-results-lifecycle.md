@@ -37,10 +37,11 @@ these. Ask the user which rounds apply and who signs off. In the `communication`
 Proceedings of physics conferences commonly appear in:
 
 - *Proceedings of Science* (PoS, SISSA): for example ICRC 2021 is PoS volume 395 (37th International Cosmic Ray
-  Conference) and ICHEP 2022 volume 414 (41st International Conference on High Energy Physics) (pos.sissa.it, opened
-  2026-10-14);
-- *EPJ Web of Conferences* (EDP Sciences);
-- *Journal of Physics: Conference Series* (IOP Publishing).
+  Conference, https://pos.sissa.it/395/) and ICHEP 2022 volume 414 (41st International Conference on High Energy
+  Physics, https://pos.sissa.it/414/) (both opened 2026-10-14);
+- *EPJ Web of Conferences* (EDP Sciences; its site refused automated access on 2026-10-14, so unverified here);
+- *Journal of Physics: Conference Series* (IOP Publishing, https://iopscience.iop.org/journal/1742-6596, opened
+  2026-10-14).
 
 Take the template, page limit and deadline from the conference's own instructions; they differ by conference and
 year.
