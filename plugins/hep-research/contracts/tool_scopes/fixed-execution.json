@@ -1,0 +1,1 @@
+{"operations": ["cosmic-ray-flux:flux", "release-prepare:prepare", "mask-blinded-bins:mask"], "purpose": "fixed-execution"}

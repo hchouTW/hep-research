@@ -1,0 +1,126 @@
+{
+ "contract_version": "1.0.0",
+ "tool_id": "mask-blinded-bins",
+ "entry": "skills/hep-analysis/scripts/mask_blinded_bins.py",
+ "operations": [
+  {
+   "operation_id": "mask",
+   "summary": "Mask the bins of a histogram that overlap a blinded region (values, errors and variances with one mask; under- and overflow when reached) and, with a reference, the data/reference ratio with the same bins masked. With real data a custodian preparation step; agents use synthetic inputs only",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--hist",
+      "input": "hist"
+     },
+     {
+      "flag": "--low",
+      "input": "low"
+     },
+     {
+      "flag": "--high",
+      "input": "high"
+     },
+     {
+      "flag": "--reference",
+      "input": "reference"
+     },
+     {
+      "flag": "--out",
+      "input": "out"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "hist",
+     "kind": "histogram",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "JSON {edges, values} with optional errors, variances, underflow, overflow; finite numbers, edges strictly increasing"
+    },
+    {
+     "name": "low",
+     "kind": "variable_value",
+     "unit": "{V}",
+     "required": true,
+     "constraint": "lower bound of the blinded region, in the unit of the bin edges"
+    },
+    {
+     "name": "high",
+     "kind": "variable_value",
+     "unit": "{V}",
+     "required": true,
+     "constraint": "upper bound, > low"
+    },
+    {
+     "name": "reference",
+     "kind": "histogram",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "same binning as hist"
+    },
+    {
+     "name": "out",
+     "kind": "path",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "where the masked histogram is written"
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "values",
+     "kind": "counts",
+     "unit": "1"
+    },
+    {
+     "name": "blinded_bins",
+     "kind": "mask",
+     "unit": "n/a"
+    },
+    {
+     "name": "ratio",
+     "kind": "ratio",
+     "unit": "1"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "non-finite values, mismatched lengths, invalid edges or region; nothing is written"
+    },
+    {
+     "exit_code": 3,
+     "status": "incomplete",
+     "meaning": "protected use refused (status 'refused', core/protected/guard.py): the protected inputs could not be established"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": true,
+    "network": false,
+    "subprocess": false
+   }
+  }
+ ]
+}

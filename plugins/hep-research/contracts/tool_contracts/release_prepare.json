@@ -1,0 +1,162 @@
+{
+ "contract_version": "1.0.0",
+ "tool_id": "release-prepare",
+ "entry": "contracts/release_prepare.py",
+ "operations": [
+  {
+   "operation_id": "prepare",
+   "summary": "Write the release directory (released.json only), the sealed file outside it and a draft data release manifest from the output of a blinding transform (core.blinding.transforms); the draft releases nothing (custodian: approval, full check, publication)",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--release",
+      "input": "release"
+     },
+     {
+      "flag": "--meta",
+      "input": "meta"
+     },
+     {
+      "flag": "--ledger",
+      "input": "ledger"
+     },
+     {
+      "flag": "--exposure-record",
+      "input": "exposure_record"
+     },
+     {
+      "flag": "--out",
+      "input": "out"
+     },
+     {
+      "flag": "--sealed-out",
+      "input": "sealed_out"
+     },
+     {
+      "flag": "--manifest-out",
+      "input": "manifest_out"
+     },
+     {
+      "flag": "--analysis",
+      "input": "analysis"
+     },
+     {
+      "flag": "--code-digest",
+      "input": "code_digest"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "release",
+     "kind": "transform-output",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "JSON from core.blinding.transforms (mode, released, sealed, protected, retained, parameters without key-like names)"
+    },
+    {
+     "name": "meta",
+     "kind": "release-metadata",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "JSON with release_id, source, review, approval_ref, purposes, destinations, validity; optional composition_review"
+    },
+    {
+     "name": "ledger",
+     "kind": "release-ledger",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "the custodian's release ledger; earlier releases of the analysis or source become related_releases"
+    },
+    {
+     "name": "exposure_record",
+     "kind": "exposure-record",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "contracts/schemas/exposure_record.json; its releases become related_releases"
+    },
+    {
+     "name": "out",
+     "kind": "path",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "a new or empty directory"
+    },
+    {
+     "name": "sealed_out",
+     "kind": "path",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "a file outside the release directory"
+    },
+    {
+     "name": "manifest_out",
+     "kind": "path",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "outside the release directory; default next to it"
+    },
+    {
+     "name": "analysis",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "the analysis name used to match ledger entries"
+    },
+    {
+     "name": "code_digest",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "64 hex; default the running plugin's code identity (refused when unknown)"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "manifest",
+     "kind": "release-manifest-draft",
+     "unit": "n/a"
+    },
+    {
+     "name": "release_dir",
+     "kind": "path",
+     "unit": "n/a"
+    },
+    {
+     "name": "sealed_file",
+     "kind": "path",
+     "unit": "n/a"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "invalid-input",
+     "meaning": "refused: not a transform output, incomplete META, key-like parameters, sealed file or manifest inside the release, release directory not empty, unknown code identity"
+    },
+    {
+     "exit_code": 2,
+     "status": "unreadable",
+     "meaning": "an input file is unreadable or not JSON"
+    },
+    {
+     "exit_code": 3,
+     "status": "incomplete",
+     "meaning": "protected use refused (status 'refused', core/protected/guard.py): the protected inputs could not be established"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": true,
+    "network": false,
+    "subprocess": false
+   }
+  }
+ ]
+}

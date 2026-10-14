@@ -218,5 +218,27 @@ class ScopeTests(unittest.TestCase):
             self.assertEqual(p.returncode, 2)
 
 
+
+class ShippedScopeTests(unittest.TestCase):
+    """P5.4: every tool a shipped recipe uses, the blinding CLIs and release preparation have passing contracts."""
+
+    def test_shipped_scopes_pass(self):
+        scopes = sorted((ROOT / "contracts" / "tool_scopes").glob("*.json"))
+        self.assertEqual([p.stem for p in scopes], ["fixed-execution", "validation"])
+        for path in scopes:
+            with self.subTest(scope=path.stem):
+                p = subprocess.run([sys.executable, "-B", str(ROOT / "contracts" / "tool_contract.py"), "--scope", str(path)],
+                                   capture_output=True, text=True, timeout=600)
+                self.assertEqual(p.returncode, 0, p.stdout[-2000:])
+                self.assertEqual(json.loads(p.stdout)["scope"]["status"], "pass")
+
+    def test_every_shipped_recipe_tool_is_scoped(self):
+        scoped = set(json.loads((ROOT / "contracts" / "tool_scopes" / "fixed-execution.json").read_text())["operations"])
+        for recipe in sorted((ROOT / "contracts" / "semantics" / "recipes").glob("*.json")):
+            tools = {s["tool"] for s in json.loads(recipe.read_text()).get("steps", []) if isinstance(s, dict) and s.get("tool")}
+            with self.subTest(recipe=recipe.name):
+                self.assertTrue(tools, f"{recipe.name} names no tool")
+                self.assertEqual(sorted(tools - scoped), [])
+
 if __name__ == "__main__":
     unittest.main()

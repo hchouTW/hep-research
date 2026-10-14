@@ -49,6 +49,9 @@ jobs:
         run: python -m pip install -r requirements-ci.lock
       - name: ${{ matrix.part.name }}
         run: python tools/run_all_checks.py --no-cli --jobs 4 ${{ matrix.part.args }} --out ../../check-runs
+      - name: Tool-contract scopes (every scoped operation has a passing contract, task P5.4)
+        if: matrix.part.key == 'checks'
+        run: for s in contracts/tool_scopes/*.json; do python contracts/tool_contract.py --scope "$s" > /dev/null || exit 1; done
       - name: Routing-harness tests (fake CLI, no model calls)
         if: matrix.part.key == 'checks'
         working-directory: .
