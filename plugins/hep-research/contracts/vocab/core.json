@@ -146,6 +146,23 @@
    "pass": "The check was run and passed at its stated tolerance",
    "fail": "The check was run and failed",
    "inconclusive": "The check was run and neither passed nor failed (state why)"
+  },
+  "ml_downstream_metrics": {
+   "expected-limit": "Expected limit (or its change) of the analysis that uses the model",
+   "expected-uncertainty": "Expected uncertainty of the physics parameter measured with the model",
+   "working-point-efficiency": "Signal or background efficiency at the analysis working point, in the analysis region",
+   "data-sim-agreement": "Agreement of the model output (or its inputs) between data and simulation in a control region",
+   "closure": "Closure of the physics parameter on Asimov, injected or independent samples",
+   "coverage": "Coverage of the intervals of the physics parameter (toys)",
+   "pull": "Pull mean or width of the physics parameter (toys)",
+   "bias": "Bias or shift of the physics parameter (for example under a measured data/simulation difference)",
+   "resolution": "Resolution or response of a regressed quantity in bins of the true and of the reconstructed value",
+   "background-rejection": "Background rejection at the analysis working point",
+   "significance": "Expected significance of the analysis that uses the model",
+   "calibration-ece": "Expected calibration error on a held-out sample (an ML metric; not downstream evidence alone)",
+   "roc-auc": "Area under the ROC curve (an ML metric; not downstream evidence)",
+   "accuracy": "Classification accuracy (an ML metric; not downstream evidence)",
+   "loss": "Training or validation loss (an ML metric; not downstream evidence)"
   }
  }
 }

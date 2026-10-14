@@ -241,7 +241,10 @@ def ml_v25(**extra):
            "domain_shift": {"control_sample": "synthetic control region", "method": "score-shape comparison",
                             "result": {"ks_p": 0.4}, "status": "checked", "outcome": "no-shift"},
            "environment": {"torch_version": "synthetic", "device": "cpu", "precision": "fp32", "seeds": {"torch": 1, "split": 2}},
-           "downstream_validation": [{"metric": "working-point efficiency in the synthetic signal region"}], **extra}
+           "downstream_validation": [{"metric": "working-point-efficiency",
+                                      "quantity_affected": "signal efficiency in the synthetic signal region",
+                                      "value": 0.52, "uncertainty": 0.02, "criterion": ">= 0.5", "passed": True,
+                                      "ref": "synthetic"}], **extra}
     ext = {k: x for k, x in ext.items() if x is not None}  # extra key=None removes the field
     return envelope("ml-artifact", ext, "physics-ml", contract_version=CONTRACTS_VERSION,
                     versions={"plugin": "0.6.16", "contracts": CONTRACTS_VERSION, "profiles": {}})

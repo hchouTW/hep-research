@@ -37,7 +37,8 @@ CALIBRATION = {"calibration": {"method": "temperature", "params": {"T": 1.3}, "f
                                               "bins": 15, "binning": "equal-width"}}}
 DOMAIN_SHIFT = {"control_sample": "synthetic control region", "method": "score-shape comparison",
                 "result": {"ks_p": 0.3}, "status": "checked", "outcome": "no-shift"}
-DOWNSTREAM = [{"metric": "signal efficiency at the working point in the synthetic signal region"}]
+DOWNSTREAM = [{"metric": "working-point-efficiency", "quantity_affected": "signal efficiency in the synthetic signal region",
+               "value": 0.51, "uncertainty": 0.02, "criterion": ">= 0.5", "passed": True, "ref": "synthetic"}]
 
 
 class WriteMlArtifactTests(unittest.TestCase):

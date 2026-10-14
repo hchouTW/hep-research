@@ -87,7 +87,13 @@
   },
   "downstream_validation": [
    {
-    "metric": "working-point efficiency in the synthetic signal region"
+    "metric": "working-point-efficiency",
+    "quantity_affected": "signal efficiency in the synthetic signal region",
+    "value": 0.52,
+    "uncertainty": 0.02,
+    "criterion": ">= 0.5",
+    "passed": true,
+    "ref": "synthetic"
    }
   ]
  }

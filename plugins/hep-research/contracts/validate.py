@@ -465,6 +465,76 @@ def _ml_semantics_v2(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, nativ
             rep.add("error", "$.extension.calibration", "ml.calibration_on_fit_sample",
                     f"calibration evaluated on its fit sample: {same}; validate it on a disjoint sample")
     _ml_domain_shift_v2(ext, rep, native)
+    _ml_downstream_v2(ext, vocab, rep, native)
+
+
+PURE_ML_METRICS = {"roc-auc", "accuracy", "loss", "calibration-ece"}
+ML_ONLY_TEXT = re.compile(r"\b(auc|roc|accuracy|acc|loss|cross[ -]?entropy|log[ -]?loss|f1|precision|recall|ece|brier)\b", re.I)
+BARE_TEXT = re.compile(r"^\s*(validated|valid|pass(ed)?|ok|done|yes|true|checked|good)\s*$", re.I)
+DOWNSTREAM_KEYS = ("quantity_affected", "value", "criterion", "passed")
+CRITERION_RE = re.compile(r"^\s*(abs\s*)?(<=|>=|<|>|==)\s*([-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?)\s*$")
+CRITERION_RANGE_RE = re.compile(r"^\s*(abs\s+)?in\s*\[\s*([-+]?[\d.eE+-]+)\s*,\s*([-+]?[\d.eE+-]+)\s*\]\s*$")
+
+
+def _criterion_holds(value, criterion):
+    """True/False when a numeric value and a criterion such as '>= 0.68', 'abs < 0.001' or 'in [0.9, 1.1]' can be
+    compared, else None (the criterion is text, or the value is not a number)."""
+    if not _is_num(value) or not isinstance(criterion, str):
+        return None
+    m = CRITERION_RE.match(criterion)
+    if m:
+        v, op, t = (abs(value) if m.group(1) else value), m.group(2), float(m.group(3))
+        return {"<=": v <= t, ">=": v >= t, "<": v < t, ">": v > t, "==": v == t}[op]
+    m = CRITERION_RANGE_RE.match(criterion)
+    if m:
+        try:
+            lo, hi = float(m.group(2)), float(m.group(3))
+        except ValueError:
+            return None
+        v = abs(value) if m.group(1) else value
+        return lo <= v <= hi
+    return None
+
+
+def _ml_downstream_v2(ext: dict, vocab: Vocabulary, rep: Report, native: bool) -> None:
+    """Structured downstream validation (PML-WP1.1, ML-K02): items {metric, quantity_affected, value, uncertainty?,
+    criterion, passed, ref}, metric a term of ml_downstream_metrics. Errors: every item an ML metric or a bare pass
+    (any contract version, under --strict), a 'passed' that contradicts a numeric value and criterion. Free-text items
+    are errors from 2.8.0 and warnings for older artifacts under --strict."""
+    dv: Any = ext.get("downstream_validation")
+    if not isinstance(dv, list) or not dv:
+        return
+    p = "$.extension.downstream_validation"
+    level = "error" if native else "warning"
+    terms = vocab.core("ml_downstream_metrics")
+    evidence = 0
+    for i, item in enumerate(dv):
+        metric = item.get("metric") if isinstance(item, dict) else item
+        if isinstance(item, dict) and isinstance(metric, str) and metric in terms:
+            if metric not in PURE_ML_METRICS:
+                evidence += 1
+            missing = [k for k in DOWNSTREAM_KEYS if k not in item]
+            if missing:
+                rep.add(level, f"{p}[{i}]", "ml.downstream_incomplete",
+                        f"downstream item '{metric}' lacks {', '.join(missing)} ({{metric, quantity_affected, value, "
+                        "uncertainty?, criterion, passed, ref}})")
+            holds = _criterion_holds(item.get("value"), item.get("criterion"))
+            if holds is not None and isinstance(item.get("passed"), bool) and holds != item["passed"]:
+                rep.add("error", f"{p}[{i}]", "ml.downstream_passed_contradicts",
+                        f"'{metric}' is marked passed={item['passed']}, but value {item['value']} "
+                        f"{'meets' if holds else 'fails'} the criterion '{item['criterion']}'")
+            continue
+        text = " ".join(str(v) for v in item.values()) if isinstance(item, dict) else str(item)
+        if not (ML_ONLY_TEXT.search(str(metric)) or BARE_TEXT.match(str(metric))):
+            evidence += 1
+        rep.add(level, f"{p}[{i}]", "ml.downstream_unstructured",
+                f"downstream item {text[:60]!r} is free text: give {{metric (a term of ml_downstream_metrics), "
+                "quantity_affected, value, criterion, passed, ref}")
+    if not evidence:
+        rep.add("error", p, "ml.downstream_ml_only",
+                "every downstream item is an ML metric (AUC, accuracy, loss, ECE) or a bare pass: validate the effect "
+                "on the physics result (efficiency at the working point, expected limit or uncertainty, closure, "
+                "coverage, data/simulation agreement)")
 
 
 TRAINING_SAMPLE_NAMES = {"train", "training", "train split", "training split", "train sample", "training sample",

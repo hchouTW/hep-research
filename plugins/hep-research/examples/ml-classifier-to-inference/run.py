@@ -595,17 +595,30 @@ def main(argv=None) -> int:
         "status": "checked", "outcome": "bounded-by-nuisance",
         "nuisance": {"name": SHIFT_NUISANCE, "ref": "artifacts/statistical_result.json#extension.nuisances"}}},
         indent=1) + "\n")
+    cov_unc = math.sqrt(toy["coverage_68"] * (1 - toy["coverage_68"]) / max(toy["n"] - toy["failed"], 1))
+    lo_cov, hi_cov = CRITERIA["toy_coverage_68"]
+    lo_w, hi_w = CRITERIA["toy_pull_width"]
     downstream = rnd([
-        {"metric": "Asimov closure of the signal strength in the calibrated-score template fit",
-         "value": asimov["mu_hat"] - MU_TRUE, "criterion": f"abs < {CRITERIA['asimov_mu_abs_dev_max']}"},
-        {"metric": "toy pull mean and width of mu, and 68% interval coverage", "pull_mean": toy["pull_mean"],
-         "pull_width": toy["pull_width"], "coverage_68": toy["coverage_68"], "n_toys": toy["n"]},
-        {"metric": "expected uncertainty on mu (Asimov, profile likelihood)", "err_down": asimov["err_down"],
-         "err_up": asimov["err_up"]},
-        {"metric": f"shift of mu on Asimov when the background {SHIFT_FEATURE} scale is the one measured in the "
-                   "control sample (fit without the nuisance)", "delta_mu": asimov_shift["mu_hat"] - MU_TRUE,
-         "note": f"the fit carries this shift as the nuisance {SHIFT_NUISANCE}; the pseudo-data are generated "
-                 "without the shift"}])
+        {"metric": "closure", "quantity_affected": "signal strength mu, Asimov data at mu_true in the score template fit",
+         "value": asimov["mu_hat"] - MU_TRUE, "criterion": f"abs < {CRITERIA['asimov_mu_abs_dev_max']}",
+         "passed": abs(asimov["mu_hat"] - MU_TRUE) < CRITERIA["asimov_mu_abs_dev_max"], "ref": "results.json#asimov"},
+        {"metric": "coverage", "quantity_affected": "68.27% profile-likelihood interval of mu (toys)",
+         "value": toy["coverage_68"], "uncertainty": cov_unc, "criterion": f"in [{lo_cov}, {hi_cov}]",
+         "passed": lo_cov < toy["coverage_68"] < hi_cov, "ref": "results.json#toys", "n_toys": toy["n"]},
+        {"metric": "pull", "quantity_affected": "pull mean of mu (toys)", "value": toy["pull_mean"],
+         "criterion": f"abs < {CRITERIA['toy_mean_pull_abs']}",
+         "passed": abs(toy["pull_mean"]) < CRITERIA["toy_mean_pull_abs"], "ref": "results.json#toys"},
+        {"metric": "pull", "quantity_affected": "pull width of mu (toys)", "value": toy["pull_width"],
+         "criterion": f"in [{lo_w}, {hi_w}]", "passed": lo_w < toy["pull_width"] < hi_w, "ref": "results.json#toys"},
+        {"metric": "expected-uncertainty", "quantity_affected": "uncertainty on mu (Asimov, profile likelihood)",
+         "value": {"err_down": asimov["err_down"], "err_up": asimov["err_up"]},
+         "criterion": "reported (no target)", "passed": True, "ref": "results.json#asimov"},
+        {"metric": "bias", "quantity_affected": f"mu on Asimov with the background {SHIFT_FEATURE} scale measured in the "
+                                                "control sample, fit without the nuisance",
+         "value": asimov_shift["mu_hat"] - MU_TRUE,
+         "criterion": f"carried by the fit nuisance {SHIFT_NUISANCE} (domain_shift outcome bounded-by-nuisance)",
+         "passed": True, "ref": "results.json#domain_shift",
+         "note": "the pseudo-data are generated without the shift"}])
     (work / "downstream.json").write_text(json.dumps(downstream, indent=1) + "\n")
     code_ml, ml_out = write_ml_artifact(out, a.created)
     ml_path = out / "artifacts" / "ml_artifact.json"

@@ -255,26 +255,58 @@
   },
   "downstream_validation": [
    {
-    "metric": "Asimov closure of the signal strength in the calibrated-score template fit",
+    "metric": "closure",
+    "quantity_affected": "signal strength mu, Asimov data at mu_true in the score template fit",
     "value": 4.44089e-16,
-    "criterion": "abs < 0.001"
+    "criterion": "abs < 0.001",
+    "passed": true,
+    "ref": "results.json#asimov"
    },
    {
-    "metric": "toy pull mean and width of mu, and 68% interval coverage",
-    "pull_mean": -0.0325085,
-    "pull_width": 1.02836,
-    "coverage_68": 0.66,
+    "metric": "coverage",
+    "quantity_affected": "68.27% profile-likelihood interval of mu (toys)",
+    "value": 0.66,
+    "uncertainty": 0.01498,
+    "criterion": "in [0.635, 0.73]",
+    "passed": true,
+    "ref": "results.json#toys",
     "n_toys": 1000
    },
    {
-    "metric": "expected uncertainty on mu (Asimov, profile likelihood)",
-    "err_down": 0.256756,
-    "err_up": 0.271493
+    "metric": "pull",
+    "quantity_affected": "pull mean of mu (toys)",
+    "value": -0.0325085,
+    "criterion": "abs < 0.15",
+    "passed": true,
+    "ref": "results.json#toys"
    },
    {
-    "metric": "shift of mu on Asimov when the background pt_miss scale is the one measured in the control sample (fit without the nuisance)",
-    "delta_mu": -0.107539,
-    "note": "the fit carries this shift as the nuisance theta_pt_miss_scale; the pseudo-data are generated without the shift"
+    "metric": "pull",
+    "quantity_affected": "pull width of mu (toys)",
+    "value": 1.02836,
+    "criterion": "in [0.9, 1.1]",
+    "passed": true,
+    "ref": "results.json#toys"
+   },
+   {
+    "metric": "expected-uncertainty",
+    "quantity_affected": "uncertainty on mu (Asimov, profile likelihood)",
+    "value": {
+     "err_down": 0.256756,
+     "err_up": 0.271493
+    },
+    "criterion": "reported (no target)",
+    "passed": true,
+    "ref": "results.json#asimov"
+   },
+   {
+    "metric": "bias",
+    "quantity_affected": "mu on Asimov with the background pt_miss scale measured in the control sample, fit without the nuisance",
+    "value": -0.107539,
+    "criterion": "carried by the fit nuisance theta_pt_miss_scale (domain_shift outcome bounded-by-nuisance)",
+    "passed": true,
+    "ref": "results.json#domain_shift",
+    "note": "the pseudo-data are generated without the shift"
    }
   ],
   "source_files": [
@@ -300,7 +332,7 @@
    },
    {
     "ref": "work/downstream.json",
-    "sha256": "0d2e75fa1cc56fd6cfbf6140475f59c254e82345604d15a1aeaa8c0fe2ddeee9",
+    "sha256": "dd3808f681fb89f3cc079bd28228b28cf04c182b0d6b8d3e1949f87965e59848",
     "role": "downstream-validation"
    }
   ]
