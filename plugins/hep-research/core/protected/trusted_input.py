@@ -6,8 +6,12 @@ Nothing here verifies who that identity is; it verifies that the running account
 
 read_protected(path) walks the path one component at a time without trusting links: each component (a directory, a
 link, the file itself) must not be replaceable by the account, that is it must not sit in a directory the account can
-write or owns (an owner can make it writable), unless that directory is sticky and neither it nor the entry belongs to the account (a shared temporary directory). A
-link is followed only after its own entry passed that test. The file is opened without following a final link, checked
+write or owns (an owner can make it writable). The mode bits allow one exception, a sticky directory where neither it
+nor the entry belongs to the account (a shared temporary directory), but for the running account (Account.current(),
+real=True) a directory that os.access reports writable is refused as well, sticky or not: an ACL can grant a deletion
+the mode bits do not show. So a protected input never sits below a world-writable directory such as /tmp or the
+macOS shared folder (live C07 run of 2026-10-14: a release volume mounted there was refused); the exception only
+applies to a modelled account (tests). A link is followed only after its own entry passed that test. The file is opened without following a final link, checked
 on the open descriptor (regular, one link, not owned, not writable) and read from that descriptor, so the bytes
 returned are the bytes checked.
 

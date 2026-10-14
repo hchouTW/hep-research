@@ -5,6 +5,12 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Protected-input source checks: sticky directories documented as refused for the running account.**
+  `core/protected/trusted_input.py` refused a protected input below a world-writable sticky directory
+  (`/tmp`, the macOS shared folder) for the running account, because its `os.access` check ignores the sticky bit, while
+  its docstring promised the sticky exception. The behavior stays (an ACL can grant a deletion the mode bits do
+  not show); the docstring now says so. Found by the deployment's live C07 run (release volume under
+  the shared folder), which moved its mount point instead. Documentation only.
 - **Decision recorded: no capability IDs for permits and analysis-level bundles (task P3.4).** `core:formal-use-permit`
   and `core:analysis-bundle` are not added to `KNOWN_CAPABILITIES`: permits and bundles are sidecars read as protected
   inputs and verified by `contracts/permit.py` and `contracts/analysis_bundle.py`, and no artifact declares a dependency
