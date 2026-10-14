@@ -270,7 +270,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `reproducibility-auditing.md` | research-communication | 3.1 | no | 9 | hep-computing | ecc929c 2026-10-14 |
 | `reviewer-style-assessment.md` | research-communication | 2.1 | no | 1 | - | ecc929c 2026-10-14 |
 | `revision-impact-tracking.md` | research-communication | 4.0 | no | 12 | - | ecc929c 2026-10-14 |
-| `scientific-style.md` | research-communication | 11.5 | no | 13 | hep-statistics | ecc929c 2026-10-14 |
+| `scientific-style.md` | research-communication | 11.5 | no | 13 | hep-statistics | 96f737e 2026-10-14 |
 | `statistics-and-ml-papers.md` | research-communication | 14.1 | no | 8 | - | ecc929c 2026-10-14 |
 | `submission-and-peer-review.md` | research-communication | 15.6 | no | 10 | - | ecc929c 2026-10-14 |
 | `supplementary-material-planning.md` | research-communication | 2.1 | no | 1 | - | ecc929c 2026-10-14 |

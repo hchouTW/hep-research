@@ -31,6 +31,7 @@ full text) is reported as unverified with the reason, never ticked as done:
       collaboration-approved list (for collaboration papers, do not
       hand-edit without the publications committee's sign-off)
 - [ ] No leftover `TODO`/`FIXME`/placeholder text (script-checkable)
+- [ ] AI-use disclosure drafted for the venue (see "Authorship and contributions"), raised even if the user did not ask
 - [ ] Compiles cleanly from a fresh directory (catches missing files that
       happen to exist locally but weren't properly referenced); without a TeX
       engine here, unverified
@@ -72,8 +73,18 @@ authors; do not resolve an authorship dispute by choosing a side.
 
 For large collaborations, use the provided collaboration convention and approved
 boilerplate rather than forcing individual roles onto a collective author list.
-If an AI-use disclosure is requested or required by the venue, describe the actual
-assistance from known records without inventing tool versions or usage details.
+**AI-use disclosure: raise it unprompted.** The agent drafting the text is itself an AI tool, so before submission
+tell the user which disclosure the venue expects and draft it from what was actually done in the session (tool and
+version as reported by the host, what it was used for, how the authors checked it); never invent usage details, and
+never list an AI tool as an author. Policies as read on 2026-10-14 (recheck the live page before submitting):
+
+| Venue | Rule | Source |
+|---|---|---|
+| arXiv | authors report significant use of text-to-text generative AI, consistent with subject methodology standards; every author is responsible for the whole content | [arXiv moderation](https://info.arxiv.org/help/moderation/index.html) ("Policy for authors' use of generative AI language tools") |
+| APS | an AI program cannot be listed as an author; keep a record of AI use and disclose substantive use in the paper (tool name and version, how it assisted, how the authors directed and checked it); AI used for the research itself goes in the methods | [APS appropriate use of AI tools](https://journals.aps.org/authors/ai-based-writing-tools) |
+| Elsevier | a separate AI declaration statement in the manuscript (tool, purpose, extent of oversight), published with the article; AI tools are not authors | [Elsevier generative-AI policy](https://www.elsevier.com/about/policies-and-standards/generative-ai-policies-for-journals) |
+| IOP Publishing | a separate AI disclosure statement in the Acknowledgements naming the tool and how it was used | [IOP generative AI tools](https://publishingsupport.iopscience.iop.org/questions/generative-ai-tools/) |
+| Springer Nature (EPJC, JHEP) | not re-opened: the policy page redirected to a login on 2026-10-14; read it before submitting | [Springer Nature AI policy](https://www.springer.com/de/editorial-policies/artificial-intelligence--ai-/25428500) |
 
 Deliver the formatted statement, a role-to-author mapping when helpful, and
 unresolved factual questions. Distinguish draft wording from author-confirmed
