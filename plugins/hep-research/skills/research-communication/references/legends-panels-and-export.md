@@ -106,4 +106,4 @@ Ghostscript < 10.01, and without `--no-fonts` its text renders correctly only wh
 `dvisvgm --pdf --no-fonts` or `pdftocairo -svg`. How each route was checked is recorded in `VALIDATION.md` (RC-AUDIT-2).
 Check text is still selectable after export (fonts embedded) and that the export did not change the layout.
 
-**Done when:** every exported figure is vector (or raster at 300 dpi or more where required), with text selectable or embedded and layout unchanged from the source.
+**Done when:** every exported figure is vector (or raster at the resolution `physics-plots.md` sets, where the venue's rule wins), with text selectable or embedded and layout unchanged from the source.
