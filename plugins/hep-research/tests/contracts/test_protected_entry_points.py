@@ -365,6 +365,22 @@ class ReviewFindingTests(unittest.TestCase):
             return {r["code"] for r in exc.refusals}
         return set()
 
+    def test_anchor_digest_follows_the_launcher(self):
+        """hep-claude (deployment) anchors agent_policy by the canonical JSON SHA-256 of the policy without
+        authoritative_copy; the root-owned copy may be formatted freely and may name itself."""
+        import hashlib as hl
+        from core.protected.revocation_log import canonical_sha256 as csha
+        pol = dict(self.pp.policy)
+        self.pp._write(self.pp.policy_file, json.dumps(dict(pol, authoritative_copy={"location": "x", "sha256": "y"}),
+                                                       indent=4, sort_keys=False).encode())
+        self.assertEqual(self.guard_codes(paths=[self.env.art]), set())
+        cfg_path = self.pp.project / "hep-research.project.json"
+        cfg = json.loads(cfg_path.read_text())
+        cfg["agent_policy"]["authoritative_copy"]["sha256"] = hl.sha256(self.pp.policy_file.read_bytes()).hexdigest()
+        cfg_path.write_text(json.dumps(cfg))  # the byte digest is not the anchor
+        self.assertIn("protected.policy_anchor_mismatch", self.guard_codes(paths=[self.env.art]))
+        self.assertNotEqual(csha(pol), cfg["agent_policy"]["authoritative_copy"]["sha256"])
+
     def test_qualification_revoked_by_digest(self):
         from core.protected.revocation_log import canonical_sha256
         q = json.loads(self.pp.qual.read_text())

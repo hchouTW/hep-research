@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import contextlib
 import datetime
-import hashlib
 import json
 import os
 from pathlib import Path
@@ -57,12 +56,12 @@ class ProtectedProject:
         os.chmod(path, 0o644)
 
     def write_all(self) -> None:
-        body = json.dumps(self.policy, sort_keys=True).encode()
+        body = json.dumps(self.policy, indent=1).encode()  # any formatting: the digest is canonical
         self._write(self.policy_file, body)
         cfg = {"schema_version": "1.2.0", "plugin_version": ">=0.1",
                "blinding": {"blinded": [], "allowed_outputs": [], "regions": []},
                "agent_policy": dict(self.policy, authoritative_copy={"location": str(self.policy_file),
-                                                                     "sha256": hashlib.sha256(body).hexdigest()})}
+                                                                     "sha256": rl.canonical_sha256(self.policy)})}
         (self.project / "hep-research.project.json").write_text(json.dumps(cfg, indent=1))
         self.write_log()
         self.write_qualification()
@@ -86,11 +85,11 @@ class ProtectedProject:
             return cfg
         cfg = json.loads(json.dumps(cfg))
         self.policy = dict(cfg["agent_policy"], protected_inputs=self.policy["protected_inputs"])
-        body = json.dumps(self.policy, sort_keys=True).encode()
+        body = json.dumps(self.policy, indent=1).encode()
         self._write(self.policy_file, body)
         self.write_qualification()
         cfg["agent_policy"] = dict(self.policy, authoritative_copy={"location": str(self.policy_file),
-                                                                    "sha256": hashlib.sha256(body).hexdigest()})
+                                                                    "sha256": rl.canonical_sha256(self.policy)})
         return cfg
 
     def revoke(self, kind: str, ref: str | None = None, sha256: str | None = None) -> None:

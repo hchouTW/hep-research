@@ -24,7 +24,7 @@
      "release_manifests": {"type": "array", "items": {"type": "object", "required": ["ref", "sha256"], "additionalProperties": false, "properties": {
         "ref": {"type": "string", "minLength": 1}, "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}}},
      "unblinding": {"type": "string", "enum": ["outside-agent-session"]},
-     "authoritative_copy": {"$comment": "the launcher- or custodian-written copy: its bytes have this SHA-256 and its content is this agent_policy without authoritative_copy; in protected mode (core.protected.guard) it is read only as a protected input",
+     "authoritative_copy": {"$comment": "the launcher- or custodian-written copy: sha256 is the canonical JSON SHA-256 of its content without authoritative_copy (the launcher's convention), which must equal this agent_policy without authoritative_copy; in protected mode (core.protected.guard) it is read only as a protected input",
         "type": "object", "required": ["location", "sha256"], "additionalProperties": false, "properties": {
         "location": {"type": "string", "minLength": 1}, "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}},
      "protected_inputs": {"$comment": "schema 1.2.0 (task P1): where protected use reads its status from; absolute paths of files the custodian identity writes. Read from the authoritative copy only",

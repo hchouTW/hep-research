@@ -7,8 +7,9 @@ agent_policy switches the mode on. Omitting a flag cannot switch it off. Outside
 
 In protected mode establish() reads, as protected inputs (core.protected.trusted_input: regular files with one link
 that the running account neither owns, nor can write, nor can replace along their path):
-  1. the authoritative copy of agent_policy named by agent_policy.authoritative_copy {location, sha256}: its bytes must
-     have that SHA-256, and its content must equal the project's agent_policy without authoritative_copy;
+  1. the authoritative copy of agent_policy named by agent_policy.authoritative_copy {location, sha256}: the canonical
+     JSON SHA-256 of its content without authoritative_copy must be that digest (the launcher's convention), and the
+     content must equal the project's agent_policy without authoritative_copy;
   2. from it, protected_inputs {revocation_log, revocation_head, status_source, max_status_age_s,
      qualification_record}: the revocation log and head are verified (core.protected.revocation_log: an empty, cut,
      edited, truncated, replaced or stale log, or a head from another source, is refused);
@@ -236,12 +237,14 @@ def _establish(paths, flag, project, use, now, account) -> Context:
     if not chk.ok:
         ctx.refusals += _source_refusals(chk, "$policy")
         return ctx
-    auth = _json(chk.data or b"")
-    if chk.sha256 != anchor["sha256"]:
+    raw_auth = _json(chk.data or b"")
+    # the launcher's convention (hep-claude policy_digest): the digest is the canonical JSON SHA-256 of the policy
+    # without authoritative_copy, so the root-owned copy may be formatted freely and may name itself
+    auth = {k: v for k, v in raw_auth.items() if k != "authoritative_copy"} if isinstance(raw_auth, dict) else None
+    if auth is None or canonical_sha256(auth) != anchor["sha256"]:
         ctx.refusals.append(_refusal("protected.policy_anchor_mismatch", "$policy", "the authoritative copy has another digest"))
         return ctx
-    if not isinstance(auth, dict) or canonical_sha256(auth) != canonical_sha256(
-            {k: v for k, v in policy.items() if k != "authoritative_copy"}):
+    if canonical_sha256(auth) != canonical_sha256({k: v for k, v in policy.items() if k != "authoritative_copy"}):
         ctx.refusals.append(_refusal("protected.policy_differs", "$policy",
                                      "the project's agent_policy differs from the authoritative copy"))
         return ctx
