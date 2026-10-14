@@ -42,6 +42,8 @@ class ProvenanceGateTests(unittest.TestCase):
 
     def chain(self, ml_mut=None, st_mut=None):
         ml = relabel(copy.deepcopy(ML0))
+        # an 'observed' ml-artifact needs an observed input (PML-WP1.3): the relabelled model says it was checked on data
+        ml["inputs"] = [{"ref": "data/control_region.json", "external": True, "status": ["observed"]}]
         if ml_mut:
             ml_mut(ml)
         ml_path = self.dir / "artifacts" / "ml_artifact.json"

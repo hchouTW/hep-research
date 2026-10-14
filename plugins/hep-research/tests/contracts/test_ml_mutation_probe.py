@@ -141,8 +141,12 @@ VALID_ROWS = {
                                 _set(("sbi_validation",), {"coverage": {"method": "expected coverage (TARP)", "result": 0.68},
                                                            "handoff": "hep-statistics"})), "1.3"),
 }
-BY_DESIGN: dict = {}
-DONE = {"0.0", "0.1", "0.6", "1.1", "1.2"}  # work packages whose rows are enforced; extended as each package lands
+BY_DESIGN = {
+    "M47": "a dropped 'synthetic' label leaves no structured trace in the artifact itself: write_ml_artifact.py "
+           "refuses to write without the run summary's labels (PML-WP0.4) and dependencies.py reports a sticky label "
+           "that an input carries and the artifact drops; a text search for the word in the objective would be a guess",
+}
+DONE = {"0.0", "0.1", "0.6", "1.1", "1.2", "1.3"}  # work packages whose rows are enforced; extended as each package lands
 
 
 def apply(name, rows=ROWS):

@@ -2,7 +2,8 @@
  "type": "object",
  "required": ["task", "labels", "features", "splits", "training_domain", "preprocessing", "model_hash", "downstream_validation"],
  "properties": {
-  "task": {"type": "string", "enum": ["classification", "regression", "generation", "surrogate", "inference"]},
+  "task": {"type": "string", "enum": ["classification", "regression", "generation", "surrogate", "inference", "reweighting"],
+   "$comment": "2.8.0 adds reweighting (OmniFold, DCTR); each task other than classification needs its validation block (regression_validation, generative_validation, sbi_validation, extrapolation_policy, reweighting_validation)"},
   "labels": {"type": "array"}, "features": {"type": "array"},
   "splits": {"type": "object", "required": ["grouping_key"], "properties": {
    "grouping_key": {"type": "string", "minLength": 1},
@@ -39,6 +40,14 @@
     "torch_version": {"type": "string"}, "framework": {"type": "string"},
     "device": {"type": "string"}, "precision": {"type": "string"},
     "seeds": {"type": "object", "$comment": "missing or empty: ml.seeds_missing warning"}}},
+  "parameters": {"type": "array", "items": {"type": "string"}, "$comment": "2.8.0: model parameters (for example theta of simulation-based inference); training_domain may be declared on them"},
+  "supervision": {"type": "string", "enum": ["supervised", "weakly-supervised", "unsupervised"], "$comment": "2.8.0: unsupervised allows empty labels and needs anomaly_validation"},
+  "regression_validation": {"type": "object", "$comment": "2.8.0, task regression: response_vs_truth and response_vs_reco (response and resolution in bins of the true and of the reconstructed variable), closure_alt_spectrum (closure on a sample with another truth spectrum), outlier_fraction"},
+  "generative_validation": {"type": "object", "$comment": "2.8.0, task generation: observables (physics metrics per observable), two_sample_test {method, power, injected_distortion}, conditioning_range (equal to the training domain)"},
+  "sbi_validation": {"type": "object", "$comment": "2.8.0, task inference: coverage, sbc or tarp, and handoff (hep-statistics)"},
+  "extrapolation_policy": {"type": "object", "$comment": "2.8.0, task surrogate: action flag|reject|bounded, consumer of the flags"},
+  "anomaly_validation": {"type": "object", "$comment": "2.8.0, supervision unsupervised: background_only, signal_injection"},
+  "reweighting_validation": {"type": "object", "$comment": "2.8.0, task reweighting: closure, prior_dependence, unmatched_events"},
   "source_files": {"$comment": "2.8.0: tool outputs the artifact was written from (run summary, split report, calibration, domain-shift and downstream records); files, not contract artifacts, so they are not inputs[]",
    "type": "array", "items": {"type": "object", "required": ["ref", "sha256"], "properties": {
     "ref": {"type": "string", "minLength": 1}, "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},

@@ -366,11 +366,15 @@ def _ml_semantics(ext: dict, rep: Report) -> None:
     if _blank(ext.get("model_hash")):
         rep.add("error", "$.extension.model_hash", "ml.model_hash_missing", "model_hash is empty: the artifact names no model")
     for key in ("labels", "features"):
+        if key == "labels" and ext.get("supervision") == "unsupervised":
+            continue  # anomaly detection without labels (2.8.0); its validation block is checked in _ml_semantics_v2
         if not ext.get(key):
             rep.add("error", f"$.extension.{key}", f"ml.{key}_missing",
                     f"{key} is empty" + (": list the targets (class labels, regression targets or generated variables)"
                                          if key == "labels" else ": list the model inputs"))
     names = _feature_names(ext.get("features"))
+    # simulation-based inference declares its training domain on the parameters theta too (2.8.0)
+    names |= {x for x in ext.get("parameters") or [] if isinstance(x, str)} if isinstance(ext.get("parameters"), list) else set()
     dom: Any = ext.get("training_domain") if isinstance(ext.get("training_domain"), dict) else {}
     for var, rng in dom.items():
         if var not in names:
@@ -470,6 +474,7 @@ def _ml_semantics_v2(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, nativ
         rep.add("unresolved" if native else "warning", "$.extension.output_semantics", "ml.output_semantics_missing",
                 f"a {ext.get('task')} model must say what its output means (probability, score, density-ratio, "
                 "regression-value): a consumer cannot tell whether it may read it as a probability")
+    _ml_task_blocks_v2(doc, ext, rep, native)
     _key_checks(ext, ML_KEYS["extension"], "$.extension", rep, kind="ml")
     for block in ("splits", "calibration", "domain_shift", "weights", "environment"):
         if isinstance(ext.get(block), dict):
@@ -477,6 +482,167 @@ def _ml_semantics_v2(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, nativ
 
 
 SEMANTICS_REQUIRED_TASKS = {"classification", "inference", "regression"}
+TASK_SEMANTICS = {"classification": {"probability", "score"}, "regression": {"regression-value"},
+                  "generation": {"generated-sample"}, "surrogate": {"regression-value", "score", "probability", "density-ratio"},
+                  "inference": {"density-ratio", "probability", "score"}, "reweighting": {"density-ratio", "score"}}
+# task -> (block, required keys); a key may be satisfied by any of the alternatives in a tuple
+TASK_BLOCKS = {
+    "regression": ("regression_validation", ("response_vs_truth", "response_vs_reco", "closure_alt_spectrum",
+                                             "outlier_fraction")),
+    "generation": ("generative_validation", ("observables", "two_sample_test", "conditioning_range")),
+    "inference": ("sbi_validation", (("coverage", "sbc", "tarp"), "handoff")),
+    "surrogate": ("extrapolation_policy", ("action", "consumer")),
+    "reweighting": ("reweighting_validation", ("closure", "prior_dependence", "unmatched_events")),
+}
+KNOWN_SKILLS = {"hep-analysis", "hep-statistics", "hep-theory", "detector-response", "hep-computing", "physics-ml",
+                "research-communication"}
+MODEL_HASH_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
+UNBOUNDED = 1e30
+ROW_LEVEL_KEYS = {"row", "row_id", "rowid", "row index", "index", "idx", "entry", "entry_number", "sample_index",
+                  "none", "random"}
+PRECISIONS = {"fp64", "fp32", "tf32", "bf16", "fp16", "mixed-bf16", "mixed-fp16", "int8"}
+DEVICE_RE = re.compile(r"^(cpu|cuda(:\d+)?|mps|xpu(:\d+)?|tpu|gpu(:\d+)?|rocm(:\d+)?)$", re.I)
+CALIBRATION_SCOPES = {"top-label", "classwise", "all-classes"}
+
+
+def _walk_keys(value, key):
+    """Every value stored under `key` anywhere inside value."""
+    if isinstance(value, dict):
+        for k, v in value.items():
+            if k == key:
+                yield v
+            yield from _walk_keys(v, key)
+    elif isinstance(value, list):
+        for v in value:
+            yield from _walk_keys(v, key)
+
+
+def _ml_task_blocks_v2(doc: dict, ext: dict, rep: Report, native: bool) -> None:
+    """Task-specific validation and claim checks (PML-WP1.3: ML-K10, K08, K07, K12, K16)."""
+    level = "error" if native else "warning"
+    x = "$.extension"
+    task, sem = ext.get("task"), ext.get("output_semantics")
+    if task in TASK_SEMANTICS and sem is not None and sem not in TASK_SEMANTICS[task]:
+        rep.add("error", f"{x}.output_semantics", "ml.output_semantics_task_mismatch",
+                f"output_semantics '{sem}' does not fit task '{task}' (allowed: {sorted(TASK_SEMANTICS[task])})")
+    if task in TASK_BLOCKS:
+        block, keys = TASK_BLOCKS[task]
+        val: Any = ext.get(block)
+        if not isinstance(val, dict):
+            rep.add(level, f"{x}.{block}", "ml.task_validation_missing",
+                    f"a {task} model needs '{block}' ({', '.join('/'.join(k) if isinstance(k, tuple) else k for k in keys)})")
+        else:
+            missing = [("/".join(k) if isinstance(k, tuple) else k) for k in keys
+                       if not any(a in val for a in (k if isinstance(k, tuple) else (k,)))]
+            if missing:
+                rep.add(level, f"{x}.{block}", "ml.task_validation_incomplete", f"'{block}' lacks {', '.join(missing)}")
+            if task == "generation" and isinstance(val.get("two_sample_test"), dict) and \
+                    "power" not in val["two_sample_test"]:
+                rep.add(level, f"{x}.{block}.two_sample_test", "ml.two_sample_power_missing",
+                        "a classifier two-sample test needs its power, measured with an injected distortion: "
+                        "AUC 0.5 alone shows nothing")
+            if task == "surrogate" and val.get("action") not in (None, "flag", "reject", "bounded"):
+                rep.add("error", f"{x}.{block}.action", "ml.extrapolation_policy_action",
+                        f"extrapolation_policy.action must be flag, reject or bounded, not {val.get('action')!r}")
+    for handoff in _walk_keys(ext, "handoff"):
+        if isinstance(handoff, str) and handoff not in KNOWN_SKILLS:
+            rep.add("error", f"{x}", "ml.handoff_unknown",
+                    f"handoff '{handoff}' is not a skill of this plugin ({sorted(KNOWN_SKILLS)})")
+    if ext.get("supervision") == "unsupervised" and not isinstance(ext.get("anomaly_validation"), dict):
+        rep.add(level, f"{x}.anomaly_validation", "ml.task_validation_missing",
+                "an unsupervised (anomaly-detection) model needs 'anomaly_validation' (background_only, "
+                "signal_injection)")
+    # training domain covers every feature, with finite bounds
+    feats = _feature_names(ext.get("features"))
+    dom: Any = ext.get("training_domain")
+    if isinstance(dom, dict) and feats:
+        if not dom:
+            rep.add("unresolved", f"{x}.training_domain", "ml.training_domain_missing",
+                    "the training domain is empty: inputs outside it cannot be flagged at inference time")
+        else:
+            uncovered = sorted(feats - set(dom))
+            if uncovered:
+                rep.add("unresolved", f"{x}.training_domain", "ml.training_domain_partial",
+                        f"the training domain does not cover {uncovered}")
+            wide = sorted(k for k, r in dom.items() if isinstance(r, list) and any(_is_num(b) and abs(b) > UNBOUNDED for b in r))
+            if wide:
+                rep.add("unresolved", f"{x}.training_domain", "ml.training_domain_unbounded",
+                        f"the training domain of {wide} is effectively unbounded (|bound| > {UNBOUNDED:g}): declare the "
+                        "range the model was trained on")
+    mh = ext.get("model_hash")
+    if isinstance(mh, str) and mh.strip() and not MODEL_HASH_RE.match(mh):
+        rep.add("error", f"{x}.model_hash", "ml.model_hash_malformed",
+                f"model_hash {mh!r} is not 'sha256:' and 64 lower-case hex digits")
+    # inputs and labels (K16)
+    labels = ext.get("labels") if isinstance(ext.get("labels"), list) else []
+    if task == "classification" and len(labels) == 1:
+        rep.add("error", f"{x}.labels", "ml.single_label", "a classifier needs at least two classes")
+    raw = [f.get("name") if isinstance(f, dict) else f for f in ext.get("features") or []]
+    dups = sorted({f for f in raw if isinstance(f, str) and raw.count(f) > 1})
+    if dups:
+        rep.add("error", f"{x}.features", "ml.duplicate_features", f"features listed twice: {dups}")
+    same = sorted({str(lab) for lab in labels if isinstance(lab, str)} & feats)
+    if same:
+        rep.add("error", f"{x}.labels", "ml.label_is_feature", f"{same} is both a label and a feature (target leakage)")
+    for i, step in enumerate(ext.get("preprocessing") or []):
+        fit_on = step.get("fit_on") if isinstance(step, dict) else None
+        if isinstance(fit_on, str) and _sample_name(fit_on) not in TRAINING_SAMPLE_NAMES:
+            rep.add("error", f"{x}.preprocessing[{i}].fit_on", "ml.preprocessing_not_on_train",
+                    f"preprocessing fitted on '{fit_on}': fit it on the training split only, or the held-out metrics "
+                    "leak information from the samples they judge")
+    units: Any = ext.get("units")
+    if isinstance(units, dict) and feats:
+        extra = sorted(set(units) - feats - {p for p in ext.get("parameters") or [] if isinstance(p, str)})
+        if extra:
+            rep.add("error", f"{x}.units", "ml.units_unknown_feature", f"units given for {extra}, which are not features")
+    if any(isinstance(v, str) and _sample_name(v) == "test" for v in _walk_keys(ext.get("metrics"), "threshold_from")):
+        rep.add("error", f"{x}.metrics", "ml.threshold_from_test",
+                "a working-point threshold fixed on the test split: fix it on validation and apply it unchanged to test")
+    # splits (M06, M07)
+    splits: Any = ext.get("splits") if isinstance(ext.get("splits"), dict) else {}
+    gk = splits.get("grouping_key")
+    if isinstance(gk, str) and _sample_name(gk) in ROW_LEVEL_KEYS:
+        rep.add("unresolved", f"{x}.splits.grouping_key", "ml.grouping_row_level",
+                f"grouping key '{gk}' is row-level: rows of one run, event, period or seed are correlated; group by "
+                "that unit, or state why rows are independent")
+    oc: Any = splits.get("overlap_check")
+    if isinstance(oc, dict) and oc.get("result") == "pass" and _blank(oc.get("report")):
+        rep.add("unresolved", f"{x}.splits.overlap_check", "ml.split_check_unverified",
+                f"a split-overlap 'pass' from '{oc.get('tool')}' with no report behind it is a claim, not a check")
+    # environment (M32, M33)
+    env: Any = ext.get("environment")
+    if isinstance(env, dict):
+        if _blank(env.get("torch_version")) and _blank(env.get("framework")):
+            rep.add("warning", f"{x}.environment", "ml.framework_version_missing",
+                    "no framework and version recorded (torch_version or framework)")
+        prec, dev = env.get("precision"), env.get("device")
+        if isinstance(prec, str) and prec.lower() not in PRECISIONS:
+            rep.add("warning", f"{x}.environment.precision", "ml.precision_free_text",
+                    f"precision {prec!r} is not one of {sorted(PRECISIONS)}")
+        if isinstance(dev, str) and not DEVICE_RE.match(dev.strip()):
+            rep.add("warning", f"{x}.environment.device", "ml.device_free_text",
+                    f"device {dev!r} is not cpu, cuda[:n], mps, xpu, tpu or gpu")
+    # multiclass calibration (M59)
+    cal: Any = ext.get("calibration")
+    if isinstance(cal, dict) and task == "classification" and len(labels) > 2 and \
+            cal.get("scope") not in CALIBRATION_SCOPES:
+        rep.add(level, f"{x}.calibration.scope", "ml.multiclass_calibration_scope",
+                f"a {len(labels)}-class model calibrated without a scope: say whether the top label, each class or "
+                "all classes were calibrated and validated (one binary metric does not cover the others)")
+    # status claims (K12)
+    status = set(doc.get("status") or [])
+    observed_inputs = any("observed" in (i.get("status") or []) for i in doc.get("inputs") or [] if isinstance(i, dict))
+    if "observed" in status and not observed_inputs:
+        rep.add(level, "$.status", "ml.status_unsupported",
+                "'observed' on an ml-artifact needs an input that carries 'observed' (the model was trained, "
+                "calibrated or validated on data listed in inputs); a simulation-only model is not a result on data")
+    if "validated-in-scope" in status:
+        good = [d for d in ext.get("downstream_validation") or [] if isinstance(d, dict)
+                and d.get("metric") not in PURE_ML_METRICS and d.get("passed") is True]
+        if not (good and isinstance(splits.get("overlap_check"), dict) and splits["overlap_check"].get("result") == "pass"):
+            rep.add(level, "$.status", "ml.status_unsupported",
+                    "'validated-in-scope' needs a passed split check and at least one passed physics downstream item")
+
 ML_KEYS = {
     "extension": {"task", "labels", "features", "splits", "training_domain", "preprocessing", "weights", "model_hash",
                   "calibration", "downstream_validation", "domain_shift", "environment", "output_semantics",

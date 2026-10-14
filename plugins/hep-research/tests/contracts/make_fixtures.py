@@ -7,6 +7,7 @@ Usage: python3 tests/contracts/make_fixtures.py   (rewrites the fixture files an
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -330,7 +331,8 @@ VALID = {
                                                       convergence={"rhat": {"mu": 1.05}, "ess_bulk": {"mu": 900}}),
     "ml_artifact.json": envelope("ml-artifact", {"task": "classification", "labels": ["sig", "bkg"], "features": ["x"],
                                                  "splits": {"grouping_key": "run_id"}, "training_domain": {"x": [0, 1]},
-                                                 "preprocessing": [], "model_hash": "sha256:placeholder", "downstream_validation": []}, "physics-ml"),
+                                                 "preprocessing": [], "model_hash": "sha256:" + hashlib.sha256(b"SYNTHETIC fixture model").hexdigest(),
+                                                 "downstream_validation": []}, "physics-ml"),
     "computational_run.json": envelope("computational-run", {"input_manifest": [{"path": "in.json", "sha256": "placeholder"}],
                                                              "tools": [{"name": "python", "version": "3.11"}], "commands": ["placeholder"],
                                                              "environment": {}, "seeds": {"toys": 1}, "tolerances": {}, "exit_status": 0,
