@@ -3,7 +3,10 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.10.0 (2026-10-14)
+
+The detector-response, physics-ml and research-communication audits (PR #81). ams02-research needs no change
+(it requires hep-research >=0.4.0 and contracts >=2.0).
 
 Contracts 2.8.0 (minor: new rule families refuse false or incomplete declarations; new fields optional; no new
 capability; artifacts before 2.8.0 keep their default outcome and get the new rules under `--strict` and at the gate).

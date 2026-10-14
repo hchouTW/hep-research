@@ -1242,6 +1242,22 @@ passed every job on PR #74 (Python 3.11, 3.12, 3.13; ruff, mypy; optional ROOT a
 three jobs failed on one clock-dependent test (`test_scan_verdict`: the verdict's real timestamp 03:47 contained the
 sealed digits it asserts are absent); the test now uses a fixed time. Release manifest `release-manifests/0.9.0.json`.
 
+## 0.10.0 release check (2026-10-14, E2 and the CI lock)
+
+Version 0.10.0 carries the detector-response, physics-ml and research-communication audits (PR #81; evidence in
+PHYSICS-ML-AUDIT, DETECTOR-RESPONSE-AUDIT, RC-AUDIT-2 and THREE-AUDITS-LIVE-ROUTING below) and moves the contracts to
+2.8.0. For the release the examples were rerun with the E2 venv: only the plugin version string changed, and the ML
+example's statistical result records the new hash of its ML artifact (unfolding-coverage rerun and its 1e-13 float
+drift reverted; end-to-end-sample not rerun, as in earlier releases); the published-likelihood benchmark's two
+artifacts were rewritten with the new plugin version. The companion ams02-research (main `dc0e674`, 1.4.10) checker
+reports 0.10.0 `compatible` (it requires hep-research >=0.4.0 and contracts >=2.0, so no companion change).
+`tools/run_all_checks.py` with the host CLIs (Claude Code 2.1.299, codex-cli 0.160.0): with the E2 venv (PyTorch) 21 of
+21 checks pass, 3,162 unit tests in 237 modules, 0 failures, 58 skipped; with a venv built from
+`requirements-ci.lock` (no PyTorch, NumPy 2.4.6) 21 of 21 pass, 3,162 tests, 0 failures, 167 skipped. ruff 0.16.10 and
+mypy 2.4.0 clean on `core/` and `contracts/`. CI passed every job on PR #81 after three test fixes for environments the
+local gate had not covered (no-PyTorch exit code, the J9 framework version, and cross-platform float differences in
+the J9 calibration fit). Release manifest `release-manifests/0.10.0.json`.
+
 ## PHYSICS-ML-AUDIT (2026-10-14, E2: Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1, PyTorch 2.14.1 CPU; version 0.9.0 + unreleased, contracts 2.8.0)
 
 Physics-ml remediation brief (findings ML-C01…C28, ML-K01…K16, ML-R01…R36), executed on branches fix/physics-ml-p0,
