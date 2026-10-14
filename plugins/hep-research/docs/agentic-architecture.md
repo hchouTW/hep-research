@@ -1,6 +1,6 @@
 # hep-research Agentic Architecture: Functions and Design
 
-Status: 2026-10-14, this tree (0.7.1 plus the Unreleased entry of CHANGELOG.md; contracts 2.6.0, core 1.0.0, project config schema 1.1.0).
+Status: 2026-10-14, this tree (0.7.1 plus the Unreleased entry of CHANGELOG.md; contracts 2.7.0, core 1.0.0, project config schema 1.2.0).
 
 This document describes the agentic architecture of hep-research (AGENTIC-R5, from the R5.4 planning basis): its objectives, design principles, components, trust boundaries, data and execution flows, and the functions each part performs. Names of files, fields, commands, and states are those of this tree. Section 12 maps each architectural component to the plugin file that implements it, or marks it as a component outside the plugin. How the components outside the plugin are deployed, and how a host configuration is qualified, is in [deployment-model.md](deployment-model.md). Nothing here qualifies a host configuration or authorizes a use: no host configuration is qualified for private or blinded data.
 
@@ -41,7 +41,7 @@ Protecting the analyst and protecting the agent are different boundaries. An age
 | Composition | 7 skills, `core/` (shared code), `contracts/` (artifact contracts, sidecar schemas and validation), `profiles/`, `adapters/`, `examples/`, `tools/` (maintainer checks), and `release-manifests/` (recorded code release manifests, one per published version from 0.5.0) |
 | Execution model | No hooks, MCP server, commands, or background process; the agent runs scripts specified by skills with the user's privileges. Scripts locate the plugin root from `__file__`; skills name shared files relative to the plugin root (the folder two levels above each `SKILL.md`) |
 | Hosts | Install, discovery, and invocation tested on Claude Code (macOS and Linux) and Codex CLI (macOS). “Tested” does not mean qualified: no host configuration is qualified for private or blinded data |
-| Contracts | One `CONTRACTS_VERSION` (2.6.0) for every artifact schema family, validated by an in-repo schema engine (`contracts/schema.py`) restricted to a fixed keyword set. Sidecars carry their own versions: data release manifest, attestation, operator semantics, recipe, tool contract |
+| Contracts | One `CONTRACTS_VERSION` (2.7.0) for every artifact schema family, validated by an in-repo schema engine (`contracts/schema.py`) restricted to a fixed keyword set. Sidecars carry their own versions: data release manifest, attestation, operator semantics, recipe, tool contract |
 | Blinding tools | `core/blinding/blinding.py` (`mask_binned`, `mask_ratio`, `seal`, `scan_text`/`scan_file`/`scan_paths`, `agent_view`, `check_figure`, `check_figure_report`, `load_project_blinding`); CLIs `skills/hep-computing/scripts/audit_blinded_outputs.py` (`seal`, `scan`) and `skills/hep-analysis/scripts/mask_blinded_bins.py` |
 | Execution reliability | `core/partition`: manifests, exclusive state and campaign locks, atomic write-once chunk outputs, duplicate-safe merge, bounded retries, quarantine, dry-run by default, write-ahead `submitting` records, submission tags and reconciliation, resource limits (`limits.py`), execution-bundle freezing (`bundle.py`) |
 | Batch backends | Slurm and HTCondor adapters (`adapters/batch-schedulers`), demonstrated on synthetic data on real clusters (Slurm 24.05.1, HTCondor 24.12.16) |

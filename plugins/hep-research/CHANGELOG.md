@@ -5,7 +5,9 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
-Contracts 2.6.0 (unchanged; new capability IDs only; the data release manifest sidecar keeps `manifest_version` 1.0.0;
+Contracts 2.7.0 (minor: the capability IDs `core:revocation-log`, `core:exposure-record`, `core:decision-lineage` and
+the warning `exposure.capability_not_declared`; a 2.6 artifact keeps its outcome; the data release manifest sidecar
+keeps `manifest_version` 1.0.0;
 new sidecars: revocation log and head, exposure and decision records, qualification record). Project config schema
 1.2.0 (`agent_policy.protected_inputs`). A project with `agent_policy` now runs in protected mode (see below).
 
@@ -64,8 +66,8 @@ new sidecars: revocation log and head, exposure and decision records, qualificat
   record knows but `related_releases` omits (`release.related_incomplete`) or the ledger does not know
   (`release.exposure_release_unknown`). The reverse index follows exposure records (release -> record) and decision
   records (recipe -> decision -> artifacts). Capability IDs `core:revocation-log`, `core:exposure-record` and
-  `core:decision-lineage` join `KNOWN_CAPABILITIES` (contracts stay 2.6.0: an older reader already refuses an unknown
-  required capability); the validator warns `exposure.capability_not_declared` when a structured `data_exposure` names
+  `core:decision-lineage` join `KNOWN_CAPABILITIES` (contracts 2.7.0; a 2.6 reader refuses an artifact that requires
+  one); the validator warns `exposure.capability_not_declared` when a structured `data_exposure` names
   a record without `core:exposure-record`. Tests in `tests/contracts/test_lineage.py`.
 - **Hash-chained revocation log and reverse index (task P2; C07, F07).** New `contracts/revocation.py` with the sidecar
   schemas `revocation_event.json` and `revocation_head.json`: a genesis record and events `{seq, prev_sha256, subject:

@@ -71,7 +71,7 @@ PUBLISHABLE["extension"]["significance"]["global_n_toys"] = 10000
 
 class T06Semantics(unittest.TestCase):
     def test_contract_version_is_minor_bump(self):
-        self.assertEqual(CONTRACTS_VERSION, "2.6.0")
+        self.assertEqual(CONTRACTS_VERSION, "2.7.0")
 
     def test_audit_mutations_rejected_natively_at_2_2(self):
         for name, (_, level, code) in MUTATIONS.items():
@@ -268,7 +268,7 @@ class Contracts26Hardening(unittest.TestCase):
     def test_migrator_brings_2_5_to_2_6_without_inventing_evidence(self):
         d = self._as(json.loads((ART / "unresolved" / "statres_v26_seed_missing.json").read_text()), "2.5.0")
         new, rep = mig.migrate(d)
-        self.assertEqual((rep["status"], new["contract_version"], new["versions"]["contracts"]), ("migrated", "2.6.0", "2.6.0"))
+        self.assertEqual((rep["status"], new["contract_version"], new["versions"]["contracts"]), ("migrated", CONTRACTS_VERSION, CONTRACTS_VERSION))
         self.assertNotIn("seeds", new["extension"])
         self.assertIn("stats.seed_missing", {x["code"] for x in rep["diagnostics"]})
         self.assertEqual(new["extension"], d["extension"])  # only the version moved
