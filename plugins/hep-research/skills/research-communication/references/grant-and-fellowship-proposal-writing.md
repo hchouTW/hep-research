@@ -49,14 +49,15 @@ The structure above is US-style (NIH Specific Aims, NSF Broader Impacts); other 
   university guides the research plan is form CM03 (研究計畫內容) and the abstracts and keywords form CM02, with page
   limits that differ by department and by one-year or multi-year plans (guides found 2026-10-14; not an NSTC page).
   Read the year's call and the department's rules on [nstc.gov.tw](https://www.nstc.gov.tw/) before drafting.
-- **ERC** (European Research Council): the call documents on [erc.europa.eu](https://erc.europa.eu/apply-grant) set
-  the parts of the proposal and their limits per grant type.
+- **ERC** (European Research Council): the grant-type pages linked from
+  [erc.europa.eu/apply-grant](https://erc.europa.eu/apply-grant) (opened 2026-10-14) lead to the call documents that
+  set the parts of the proposal and their limits per grant type.
 - **JSPS** (Japan Society for the Promotion of Science): the programme pages on
-  [jsps.go.jp](https://www.jsps.go.jp/english/) and the year's application guidelines.
+  [jsps.go.jp](https://www.jsps.go.jp/english/) (opened 2026-10-14) and the year's application guidelines.
 
 ### Bilingual proposals (Traditional Chinese and English)
 
-- Use the term bank of the National Academy for Educational Research, [樂詞網](https://terms.naer.edu.tw/), for the
+- Use the term bank of the National Academy for Educational Research, [樂詞網](https://terms.naer.edu.tw/) (opened 2026-10-14), for the
   Chinese term of a technical concept, and keep one term per concept (the project glossary).
 - Numbers, units, identifiers (DOIs, arXiv ids, grant numbers) and status labels (`preliminary`, `synthetic`) stay
   exactly as in the source in both languages; a translation never rounds, converts or drops them.
