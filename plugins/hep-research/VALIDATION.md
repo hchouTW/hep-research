@@ -1192,7 +1192,7 @@ ams02-research (main `dc0e674`, 1.4.10) checker reports 0.8.0 `compatible` (requ
 pass; 2,918 unit tests in 216 modules, 0 failures, 58 skipped. CI passed every job on PRs #70-#73 (Python 3.11, 3.12,
 3.13; ruff, mypy; optional ROOT and columnar). Release manifest `release-manifests/0.8.0.json`.
 
-## AGENTIC-COMPLETION release B (2026-10-14, E2: Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1; version 0.7.1 + unreleased, contracts 2.6.0)
+## AGENTIC-COMPLETION release B (2026-10-14, E2: Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1; version 0.8.0 + unreleased, contracts 2.7.0)
 
 Packages P5.2, P5.1, P5.3, P4, P5.4 and P6.1 with P7 for them, stacked on release A. Synthetic data and sentinels only.
 
