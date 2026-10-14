@@ -35,7 +35,7 @@
   },
   "research-communication": {
    "references": 53,
-   "bytes": 379142,
+   "bytes": 375077,
    "uncited": 0
   }
  },
@@ -2575,7 +2575,7 @@
     "tests/skills/research_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "cd88e8f 2026-10-12"
+   "last_commit": "97f8206 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/artifact-packaging-for-release.md",
@@ -2909,7 +2909,7 @@
     "skills/research-communication/references/reading-papers.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "97f8206 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/latex-mechanics-and-tooling.md",
@@ -3022,8 +3022,8 @@
   {
    "path": "skills/research-communication/references/mermaid-patterns.md",
    "owner": "research-communication",
-   "bytes": 8470,
-   "lines": 221,
+   "bytes": 4405,
+   "lines": 112,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/examples/computer-science/07-database-architecture.md",

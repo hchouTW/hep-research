@@ -14,7 +14,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-statistics | 11 | 150 | 0 |
 | hep-theory | 11 | 78 | 0 |
 | physics-ml | 38 | 257 | 0 |
-| research-communication | 53 | 379 | 0 |
+| research-communication | 53 | 375 | 0 |
 
 ## Overlapping pairs
 
@@ -222,7 +222,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `transformer-architectures.md` | physics-ml | 8.1 | no | 5 | - | 721d1ea 2026-10-13 |
 | `uncertainty-and-calibration.md` | physics-ml | 6.3 | yes | 8 | hep-statistics | 351029c 2026-10-07 |
 | `academic-diagrams-guide.md` | research-communication | 10.4 | yes | 4 | - | 351029c 2026-10-07 |
-| `academic-papers-guide.md` | research-communication | 38.6 | yes | 8 | - | cd88e8f 2026-10-12 |
+| `academic-papers-guide.md` | research-communication | 38.6 | yes | 8 | - | 97f8206 2026-10-14 |
 | `artifact-packaging-for-release.md` | research-communication | 2.8 | no | 3 | - | 351029c 2026-10-07 |
 | `astroparticle-and-cosmic-ray-papers.md` | research-communication | 19.5 | no | 10 | - | 351029c 2026-10-07 |
 | `citation-verification.md` | research-communication | 3.6 | yes | 10 | - | 4665f43 2026-10-13 |
@@ -244,7 +244,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `general-diagram-principles.md` | research-communication | 7.7 | no | 2 | - | 351029c 2026-10-07 |
 | `grant-and-fellowship-proposal-writing.md` | research-communication | 3.0 | no | 1 | - | 351029c 2026-10-07 |
 | `graphviz-patterns.md` | research-communication | 3.4 | no | 2 | - | 351029c 2026-10-07 |
-| `interpreting-scientific-graphics.md` | research-communication | 8.2 | no | 4 | - | 351029c 2026-10-07 |
+| `interpreting-scientific-graphics.md` | research-communication | 8.2 | no | 4 | - | 97f8206 2026-10-14 |
 | `latex-mechanics-and-tooling.md` | research-communication | 13.3 | no | 7 | - | 351029c 2026-10-07 |
 | `latex-venue-setup.md` | research-communication | 21.6 | no | 5 | - | 351029c 2026-10-07 |
 | `legends-panels-and-export.md` | research-communication | 8.4 | no | 2 | - | a132044 2026-10-14 |
@@ -252,7 +252,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `literature-review.md` | research-communication | 7.7 | no | 5 | - | 351029c 2026-10-07 |
 | `logical-consistency-and-argument-uniformity.md` | research-communication | 4.8 | no | 5 | hep-theory | 351029c 2026-10-07 |
 | `manuscript-consistency-auditing.md` | research-communication | 3.5 | no | 4 | - | 351029c 2026-10-07 |
-| `mermaid-patterns.md` | research-communication | 8.5 | no | 2 | - | dee7155 2026-10-12 |
+| `mermaid-patterns.md` | research-communication | 4.4 | no | 2 | - | dee7155 2026-10-12 |
 | `multi-venue-reformatting.md` | research-communication | 2.9 | no | 1 | - | 351029c 2026-10-07 |
 | `outreach-and-public-facing-summaries.md` | research-communication | 5.1 | no | 5 | - | a2a25ec 2026-10-12 |
 | `paper-genre-variants.md` | research-communication | 4.3 | no | 4 | - | 351029c 2026-10-07 |
