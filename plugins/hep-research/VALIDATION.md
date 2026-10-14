@@ -1266,8 +1266,7 @@ Physics-ml remediation brief (findings ML-C01…C28, ML-K01…K16, ML-R01…R36)
 | References size | 257,182 B | 179,004 B | `docs/reference-inventory.json` |
 | physics-ml tests (E2, torch) | 269 run, 6 skipped | 322 run, 6 skipped (4 GPU, 2 only-without-torch) | `python -m unittest discover -s tests/skills/physics_ml -t .` |
 
-Not verified here: the live routing rerun of the 17 new cases (paid; pending the combined run of the three-audits
-plan); GPU behaviour of the changed assets; statements marked `unverified` in the references (numerical inversion,
+Live routing: see THREE-AUDITS-LIVE-ROUTING below (45/45 physics-ml cases). Not verified here: GPU behaviour of the changed assets; statements marked `unverified` in the references (numerical inversion,
 the in-situ term as the usual dominant one, square-root LR scaling for Adam, TMVA option strings, two-dimensional DDT
 maps, JetClass split, spurion attribution, journal details of Drnevich et al. and the CaloChallenge report, the
 OmniLearn name). The domain false-positive and calibration checks are statistical tests with fixed seeds.
@@ -1275,8 +1274,8 @@ OmniLearn name). The domain false-positive and calibration checks are statistica
 ## DETECTOR-RESPONSE-AUDIT (2026-10-14, E2, version 0.9.0 + unreleased, contracts 2.8.0)
 
 detector-response audit DR-WP1 to DR-WP4 on branch `fix/detector-response-audit` (rebased on PML-X0, contracts 2.8.0).
-Live routing for the SKILL.md change (workflow step 5; description unchanged): **pending**, joins the combined run of
-the three audits; `tools/check_routing_static.py` passes.
+Live routing for the SKILL.md change (workflow step 5; description unchanged): 23/24 detector-response cases, see
+THREE-AUDITS-LIVE-ROUTING below; `tools/check_routing_static.py` passes.
 
 | Item | Before (`84202aa`) | After | Evidence |
 |---|---|---|---|
@@ -1332,12 +1331,31 @@ unless the row says it is text only.
 | A2b and review follow-ups (fresh-subagent checks) | fresh rerun of A1-A4 and B2 passed; it found that display `1.0` still matched a passage holding `Figure 1` (`Decimal("1.0") == Decimal("1")`): now the passage must show at least the declared digits (caption flagged, 3 of 3 occurrences); fresh source review: 0 high, 2 medium (F1 Type 1 fonts for ICML, F2 venue-facts home), 12 low, all fixed or marked unverified; LaTeX-set matplotlib text gives Type 1 fonts (matplotlib 3.11.2, checked 2026-10-14) | `ReviewFixes2Numbers.test_contains_value_needs_the_displayed_precision`, `ReviewFixes2ValueVsPassage`; `research-communication-audit/evidence/fresh-repro-rerun.md`, `fresh-source-review.md` (task folder, outside the plugin) |
 | Gate | `run_all_checks.py --no-cli` exit 0 (3026 tests, 0 failures, 58 skipped across the plugin; CLI checks skipped by `--no-cli`); `check_relocation.py` pass; ruff 0.16.10 and mypy 2.4.0 clean on `core/` and `contracts/`; worked example byte-identical on two runs | gate log of 2026-10-14 |
 
-**Not verified here.** The live routing rerun after D1 (paid; needs approval) and the trigger-first description
-candidate (kept outside the plugin for the maintainer). Springer Nature's AI policy page (login redirect). The
+**Live routing.** The trigger-first description (RC-D1) was applied after maintainer approval; 20/20
+research-communication cases pass live, see THREE-AUDITS-LIVE-ROUTING below. **Not verified here.** Springer Nature's AI policy page (login redirect). The
 ADS `citations()`/`references()` operators (not re-opened). NSTC form names come from university guides, not an
-NSTC page. The two fresh-reviewer reruns asked by the work order are left to the lead session.
+NSTC page. The two fresh-reviewer reruns asked by the work order were run by the lead session (all high
+reproductions pass; source-review findings F1-F14 and the A2b precision gap fixed).
 
 ### Export-route checks (moved from `legends-panels-and-export.md`, RC-D4)
 
 Recorded when the export table was written (before 2026-10-14) and kept here, not in the reference: The Graphviz, `rsvg-convert`, and `mmdc` rows were run in this bundle's validation; the TikZ standalone compile (Tectonic; fonts embedded, `pdffonts`), `pdftoppm -r 300 -png` and `pdftocairo -svg` were run, and the `subcaption` `figure*` snippet compiled under `twocolumn` article with Tectonic (two panels (a)/(b) plus caption on a float page). `dvisvgm` 3.6.1 was run: on Tectonic's `.xdv` it warns "86 PDF specials ignored" and the SVG has the text overlapping with the boxes and arrow missing, so do not use that route; `dvisvgm --pdf` refuses to run with Ghostscript 10.08 and needs `mutool` or Ghostscript < 10.01 ; with `mutool` (`mupdf-tools`) installed, `dvisvgm --pdf` rendered the boxes, arrow and labels correctly, with text kept as `<text>` elements. With math labels and bold, italic, mono and small-caps text, plain `dvisvgm --pdf` rendered in rsvg with a fallback sans font (detached radical, lost bold and italic, overlapping words) while `--no-fonts` and `pdftocairo -svg` matched the PDF; `pdftoppm` matched too. Check any SVG export in the target viewer.
+
+## THREE-AUDITS-LIVE-ROUTING (2026-10-14, Claude Code 2.1.299, claude-sonnet-5-5)
+
+Paid live routing run `20261014T113734Z-claude-claude-sonnet-5-5` (`evals/routing/results/`, outside the plugin) of
+the 89 routing cases whose expected owner is detector-response, physics-ml or research-communication (92 prompt
+turns), plugin from `--plugin-dir` on `integrate/three-audits` at `71470cb` (the summary's `plugin_commit` field
+records the eval checkout, `84202aa`), isolation `setting-sources`, `--jobs 4`, max 6 turns, $0.50 per case.
+
+| Expected owner | Cases | Strict pass |
+|---|---|---|
+| detector-response | 24 | 23 |
+| physics-ml | 45 | 45 |
+| research-communication | 20 | 20 |
+| **all** | **89** | **88** (en 48/49, zh-Hant 34/34, ja, de, zh-Hans 2/2 each) |
+
+Cost $6.80 ($0.077 per case). The one miss, `t19-turns-1`, is the second turn of a handoff (unfold with the
+response just built) answered without a skill; the 2.1.293 baseline and the 2026-10-12 rerun missed it too. No
+contamination, 0 loading violations. Not run: the cases of the other four skills, Codex.
 

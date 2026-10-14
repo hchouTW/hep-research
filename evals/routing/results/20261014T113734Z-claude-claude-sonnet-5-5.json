@@ -1,0 +1,3798 @@
+{
+ "meta": {
+  "run_id": "20261014T113734Z-claude-claude-sonnet-5-5",
+  "date": "2026-10-14",
+  "cli": "claude",
+  "cli_version": "2.1.299",
+  "model": "claude-sonnet-5-5",
+  "models_reported": [
+   "claude-sonnet-5-5"
+  ],
+  "isolation": "setting-sources",
+  "plugin_commit": "84202aa7395027da32393a1e2761e3f1b603fec5",
+  "plugin_dirty": false,
+  "cases_file_sha256": "f83cce4e51b535a3b83347659a4b69c9440a65541fb636622aca678272ffeaca",
+  "selected": 89,
+  "completed": 89,
+  "full_set": false,
+  "max_turns": 6,
+  "case_budget_usd": 0.5,
+  "budget_usd": 8.0,
+  "stopped_early": false
+ },
+ "summary": {
+  "overall": {
+   "cases": 89,
+   "strict_pass": 88,
+   "lenient_pass": 88
+  },
+  "by_lang": {
+   "de": {
+    "cases": 2,
+    "strict_pass": 2,
+    "lenient_pass": 2
+   },
+   "en": {
+    "cases": 49,
+    "strict_pass": 48,
+    "lenient_pass": 48
+   },
+   "ja": {
+    "cases": 2,
+    "strict_pass": 2,
+    "lenient_pass": 2
+   },
+   "zh-Hans": {
+    "cases": 2,
+    "strict_pass": 2,
+    "lenient_pass": 2
+   },
+   "zh-Hant": {
+    "cases": 34,
+    "strict_pass": 34,
+    "lenient_pass": 34
+   }
+  },
+  "by_kind": {
+   "direct": {
+    "cases": 71,
+    "strict_pass": 71,
+    "lenient_pass": 71
+   },
+   "journey": {
+    "cases": 5,
+    "strict_pass": 5,
+    "lenient_pass": 5
+   },
+   "multi-turn": {
+    "cases": 3,
+    "strict_pass": 2,
+    "lenient_pass": 2
+   },
+   "negative": {
+    "cases": 5,
+    "strict_pass": 5,
+    "lenient_pass": 5
+   },
+   "neighboring": {
+    "cases": 5,
+    "strict_pass": 5,
+    "lenient_pass": 5
+   }
+  },
+  "by_variant": {
+   "-": {
+    "cases": 83,
+    "strict_pass": 82,
+    "lenient_pass": 82
+   },
+   "adversarial": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   },
+   "quick": {
+    "cases": 5,
+    "strict_pass": 5,
+    "lenient_pass": 5
+   }
+  },
+  "by_expected_primary": {
+   "detector-response": {
+    "cases": 24,
+    "strict_pass": 23,
+    "lenient_pass": 23
+   },
+   "physics-ml": {
+    "cases": 45,
+    "strict_pass": 45,
+    "lenient_pass": 45
+   },
+   "research-communication": {
+    "cases": 20,
+    "strict_pass": 20,
+    "lenient_pass": 20
+   }
+  },
+  "by_set": {
+   "-": {
+    "cases": 18,
+    "strict_pass": 18,
+    "lenient_pass": 18
+   },
+   "ANA-P4-5": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   },
+   "ML-OWN": {
+    "cases": 8,
+    "strict_pass": 8,
+    "lenient_pass": 8
+   },
+   "PML": {
+    "cases": 17,
+    "strict_pass": 17,
+    "lenient_pass": 17
+   },
+   "STH-T4.6": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   },
+   "T19": {
+    "cases": 12,
+    "strict_pass": 11,
+    "lenient_pass": 11
+   },
+   "T3": {
+    "cases": 28,
+    "strict_pass": 28,
+    "lenient_pass": 28
+   },
+   "T4": {
+    "cases": 4,
+    "strict_pass": 4,
+    "lenient_pass": 4
+   }
+  },
+  "outcomes": {
+   "pass": 88,
+   "no-skill": 1
+  },
+  "loading_violations": [],
+  "cost_usd": {
+   "total": 6.8047,
+   "per_case": 0.0765,
+   "per_turn": 0.0142
+  }
+ },
+ "cases": [
+  {
+   "id": "an-b-eff-2",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "variant": null,
+   "set": "ANA-P4-5",
+   "expected_primary": "detector-response",
+   "turns": [
+    {
+     "expected": "detector-response",
+     "first_skill": "detector-response",
+     "skills": [
+      "detector-response"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.05531,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "an-t3-neg",
+   "lang": "en",
+   "kind": "negative",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.049751,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "dr-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "detector-response",
+   "turns": [
+    {
+     "expected": "detector-response",
+     "first_skill": "detector-response",
+     "skills": [
+      "detector-response"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.072265,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "dr-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "detector-response",
+   "turns": [
+    {
+     "expected": "detector-response",
+     "first_skill": "detector-response",
+     "skills": [
+      "detector-response"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.069835,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "dr-t3-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "detector-response",
+   "turns": [
+    {
+     "expected": "detector-response",
+     "first_skill": "detector-response",
+     "skills": [
+      "detector-response"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.058844,
+   "n_turns": 3,
+   "loading_violation": false
+  },
+  {
+   "id": "dr-t3-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "detector-response",
+   "turns": [
+    {
+     "expected": "detector-response",
+     "first_skill": "detector-response",
+     "skills": [
+      "detector-response"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.060403,
+   "n_turns": 3,
+   "loading_violation": false
+  },
+  {
+   "id": "dr-t3-3",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "detector-response",
+   "turns": [
+    {
+     "expected": "detector-response",
+     "first_skill": "detector-response",
+     "skills": [
+      "detector-response"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.055271,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "dr-t3-4",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "detector-response",
+   "turns": [
+    {
+     "expected": "detector-response",
+     "first_skill": "detector-response",
+     "skills": [
+      "detector-response"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.064356,
+   "n_turns": 3,
+   "loading_violation": false
+  },
+  {
+   "id": "dr-t3-5",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "detector-response",
+   "turns": [
+    {
+     "expected": "detector-response",
+     "first_skill": "detector-response",
+     "skills": [
+      "detector-response"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.054616,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "dr-t3-6",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "detector-response",
+   "turns": [
+    {
+     "expected": "detector-response",
+     "first_skill": "detector-response",
+     "skills": [
+      "detector-response"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.102038,
+   "n_turns": 8,
+   "loading_violation": false
+  },
+  {
+   "id": "dr-t3-7",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "detector-response",
+   "turns": [
+    {
+     "expected": "detector-response",
+     "first_skill": "detector-response",
+     "skills": [
+      "detector-response"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.07126,
+   "n_turns": 3,
+   "loading_violation": false
+  },
+  {
+   "id": "dr-t3-8",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "detector-response",
+   "turns": [
+    {
+     "expected": "detector-response",
+     "first_skill": "detector-response",
+     "skills": [
+      "detector-response"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.070034,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "dr-t3-9",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "detector-response",
+   "turns": [
+    {
+     "expected": "detector-response",
+     "first_skill": "detector-response",
+     "skills": [
+      "detector-response"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.054723,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "epic-detector-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "detector-response",
+   "turns": [
+    {
+     "expected": "detector-response",
+     "first_skill": "detector-response",
+     "skills": [
+      "detector-response"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [
+    "profiles/experiments/eic",
+    "profiles/experiments/eic/index.md",
+    "profiles/experiments/eic/modules/detector/epic-detector-context.md",
+    "profiles/experiments/eic/modules/working-rules.md",
+    "profiles/registry.json"
+   ],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.085086,
+   "n_turns": 9,
+   "loading_violation": false
+  },
+  {
+   "id": "j02",
+   "lang": "zh-Hant",
+   "kind": "journey",
+   "variant": null,
+   "set": null,
+   "expected_primary": "detector-response",
+   "turns": [
+    {
+     "expected": "detector-response",
+     "first_skill": "detector-response",
+     "skills": [
+      "detector-response"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 1
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [
+    "profiles/experiments/ams-02",
+    "profiles/experiments/ams-02/evidence/index.md",
+    "profiles/experiments/ams-02/index.md",
+    "profiles/experiments/ams-02/modules/species/nuclei-and-isotopes.md",
+    "profiles/experiments/ams-02/modules/subsystems/detector-and-observables.md",
+    "profiles/registry.json"
+   ],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.131824,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "j05",
+   "lang": "en",
+   "kind": "journey",
+   "variant": null,
+   "set": null,
+   "expected_primary": "detector-response",
+   "turns": [
+    {
+     "expected": "detector-response",
+     "first_skill": "detector-response",
+     "skills": [
+      "detector-response"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.066409,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "j05-turn-fit",
+   "lang": "en",
+   "kind": "multi-turn",
+   "variant": null,
+   "set": "STH-T4.6",
+   "expected_primary": "detector-response",
+   "turns": [
+    {
+     "expected": "detector-response",
+     "first_skill": "detector-response",
+     "skills": [
+      "detector-response"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    },
+    {
+     "expected": "hep-statistics",
+     "first_skill": "hep-statistics",
+     "skills": [
+      "hep-statistics"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.16476,
+   "n_turns": 11,
+   "loading_violation": false
+  },
+  {
+   "id": "j09",
+   "lang": "zh-Hant",
+   "kind": "journey",
+   "variant": null,
+   "set": null,
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.069538,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "j10",
+   "lang": "en",
+   "kind": "journey",
+   "variant": null,
+   "set": null,
+   "expected_primary": "research-communication",
+   "turns": [
+    {
+     "expected": "research-communication",
+     "first_skill": "research-communication",
+     "skills": [
+      "research-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.091176,
+   "n_turns": 8,
+   "loading_violation": false
+  },
+  {
+   "id": "j11",
+   "lang": "en",
+   "kind": "journey",
+   "variant": null,
+   "set": null,
+   "expected_primary": "detector-response",
+   "turns": [
+    {
+     "expected": "detector-response",
+     "first_skill": "detector-response",
+     "skills": [
+      "detector-response"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.060467,
+   "n_turns": 8,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.073851,
+   "n_turns": 8,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.069035,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-own-bdt-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "variant": null,
+   "set": "ML-OWN",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.051055,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-own-bdt-2",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "variant": null,
+   "set": "ML-OWN",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.053127,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-own-ecal-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "variant": null,
+   "set": "ML-OWN",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.050821,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-own-ecal-2",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "variant": null,
+   "set": "ML-OWN",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.053214,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-own-negw-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "ML-OWN",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.08121,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-own-negw-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "ML-OWN",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.084061,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-own-quick-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": "quick",
+   "set": "ML-OWN",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.048414,
+   "n_turns": 3,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-own-quick-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": "quick",
+   "set": "ML-OWN",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.051413,
+   "n_turns": 3,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-pml-anomaly-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "PML",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.073721,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-pml-anomaly-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "PML",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.105967,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-pml-cwola-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "PML",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.137611,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-pml-cwola-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "PML",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.127784,
+   "n_turns": 8,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-pml-decor-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "PML",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.053012,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-pml-decor-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "PML",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.062957,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-pml-gen-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "PML",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.084292,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-pml-gnn-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "PML",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.050966,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-pml-gnn-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "PML",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.063202,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-pml-multi-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "PML",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.051965,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-pml-multi-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "PML",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.066469,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-pml-omnifold-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "PML",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.051426,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-pml-omnifold-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "PML",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.062372,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-pml-sbi-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "PML",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.072726,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-pml-surrogate-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "PML",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.051378,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-pml-syst-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "PML",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.052662,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-pml-syst-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "PML",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.108735,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-t3-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.192597,
+   "n_turns": 11,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-t3-10",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.149061,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-t3-11",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.064608,
+   "n_turns": 3,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-t3-12",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.054051,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-t3-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.095728,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-t3-3",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.113872,
+   "n_turns": 8,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-t3-4",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.072386,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-t3-5",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.114813,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-t3-6",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.060646,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-t3-7",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.095113,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-t3-8",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.080595,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "ml-t3-9",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.076512,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "rc-ams-exists-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "research-communication",
+   "turns": [
+    {
+     "expected": "research-communication",
+     "first_skill": "research-communication",
+     "skills": [
+      "research-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.055043,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "rc-ams-latest-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "research-communication",
+   "turns": [
+    {
+     "expected": "research-communication",
+     "first_skill": "research-communication",
+     "skills": [
+      "research-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [
+    "profiles/experiments/ams-02",
+    "profiles/experiments/ams-02/evidence/index.md",
+    "profiles/experiments/ams-02/evidence/papers_manifest.json",
+    "profiles/experiments/ams-02/evidence/sources.json",
+    "profiles/experiments/ams-02/index.md",
+    "profiles/registry.json"
+   ],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.2399,
+   "n_turns": 11,
+   "loading_violation": false
+  },
+  {
+   "id": "rc-ams-latest-2",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "research-communication",
+   "turns": [
+    {
+     "expected": "research-communication",
+     "first_skill": "research-communication",
+     "skills": [
+      "research-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [
+    "profiles/experiments/ams-02",
+    "profiles/experiments/ams-02/evidence/claims.json",
+    "profiles/experiments/ams-02/evidence/index.md"
+   ],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.169162,
+   "n_turns": 12,
+   "loading_violation": false
+  },
+  {
+   "id": "rc-ams-paper-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "research-communication",
+   "turns": [
+    {
+     "expected": "research-communication",
+     "first_skill": "research-communication",
+     "skills": [
+      "research-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [
+    "profiles/experiments/ams-02",
+    "profiles/experiments/ams-02/evidence/claims.json",
+    "profiles/experiments/ams-02/evidence/sources.json",
+    "profiles/experiments/ams-02/index.md",
+    "profiles/registry.json"
+   ],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.104672,
+   "n_turns": 10,
+   "loading_violation": false
+  },
+  {
+   "id": "rc-ams-support-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "research-communication",
+   "turns": [
+    {
+     "expected": "research-communication",
+     "first_skill": "research-communication",
+     "skills": [
+      "research-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.053668,
+   "n_turns": 3,
+   "loading_violation": false
+  },
+  {
+   "id": "rc-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "research-communication",
+   "turns": [
+    {
+     "expected": "research-communication",
+     "first_skill": "research-communication",
+     "skills": [
+      "research-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.058661,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "rc-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "research-communication",
+   "turns": [
+    {
+     "expected": "research-communication",
+     "first_skill": "research-communication",
+     "skills": [
+      "research-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.055819,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "rc-t3-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "research-communication",
+   "turns": [
+    {
+     "expected": "research-communication",
+     "first_skill": "research-communication",
+     "skills": [
+      "research-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.067738,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "rc-t3-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "research-communication",
+   "turns": [
+    {
+     "expected": "research-communication",
+     "first_skill": "research-communication",
+     "skills": [
+      "research-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.054294,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "rc-t3-3",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "research-communication",
+   "turns": [
+    {
+     "expected": "research-communication",
+     "first_skill": "research-communication",
+     "skills": [
+      "research-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.051106,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "rc-t3-4",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "research-communication",
+   "turns": [
+    {
+     "expected": "research-communication",
+     "first_skill": "research-communication",
+     "skills": [
+      "research-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.056609,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "rc-t3-5",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "research-communication",
+   "turns": [
+    {
+     "expected": "research-communication",
+     "first_skill": "research-communication",
+     "skills": [
+      "research-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.068197,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "rc-t3-6",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "research-communication",
+   "turns": [
+    {
+     "expected": "research-communication",
+     "first_skill": "research-communication",
+     "skills": [
+      "research-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.083697,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "rc-t4-det-1",
+   "lang": "en",
+   "kind": "negative",
+   "variant": null,
+   "set": "T4",
+   "expected_primary": "detector-response",
+   "turns": [
+    {
+     "expected": "detector-response",
+     "first_skill": "detector-response",
+     "skills": [
+      "detector-response"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.048782,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "rc-t4-ml-1",
+   "lang": "zh-Hant",
+   "kind": "negative",
+   "variant": null,
+   "set": "T4",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.052832,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "rc-t4-reuse-1",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": "T4",
+   "expected_primary": "research-communication",
+   "turns": [
+    {
+     "expected": "research-communication",
+     "first_skill": "research-communication",
+     "skills": [
+      "research-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.065815,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "rc-t4-review-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "T4",
+   "expected_primary": "research-communication",
+   "turns": [
+    {
+     "expected": "research-communication",
+     "first_skill": "research-communication",
+     "skills": [
+      "research-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.083268,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "t19-adv-4",
+   "lang": "en",
+   "kind": "negative",
+   "variant": "adversarial",
+   "set": "T19",
+   "expected_primary": "detector-response",
+   "turns": [
+    {
+     "expected": "detector-response",
+     "first_skill": "detector-response",
+     "skills": [
+      "detector-response"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.055212,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "t19-de-1",
+   "lang": "de",
+   "kind": "direct",
+   "variant": null,
+   "set": "T19",
+   "expected_primary": "detector-response",
+   "turns": [
+    {
+     "expected": "detector-response",
+     "first_skill": "detector-response",
+     "skills": [
+      "detector-response"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.053568,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "t19-de-5",
+   "lang": "de",
+   "kind": "direct",
+   "variant": null,
+   "set": "T19",
+   "expected_primary": "research-communication",
+   "turns": [
+    {
+     "expected": "research-communication",
+     "first_skill": "research-communication",
+     "skills": [
+      "research-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.056582,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "t19-ja-1",
+   "lang": "ja",
+   "kind": "direct",
+   "variant": null,
+   "set": "T19",
+   "expected_primary": "detector-response",
+   "turns": [
+    {
+     "expected": "detector-response",
+     "first_skill": "detector-response",
+     "skills": [
+      "detector-response"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.056068,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "t19-ja-4",
+   "lang": "ja",
+   "kind": "direct",
+   "variant": null,
+   "set": "T19",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.070711,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "t19-quick-3",
+   "lang": "en",
+   "kind": "direct",
+   "variant": "quick",
+   "set": "T19",
+   "expected_primary": "detector-response",
+   "turns": [
+    {
+     "expected": "detector-response",
+     "first_skill": "detector-response",
+     "skills": [
+      "detector-response"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.047867,
+   "n_turns": 3,
+   "loading_violation": false
+  },
+  {
+   "id": "t19-quick-5",
+   "lang": "en",
+   "kind": "direct",
+   "variant": "quick",
+   "set": "T19",
+   "expected_primary": "research-communication",
+   "turns": [
+    {
+     "expected": "research-communication",
+     "first_skill": "research-communication",
+     "skills": [
+      "research-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.048701,
+   "n_turns": 3,
+   "loading_violation": false
+  },
+  {
+   "id": "t19-quick-7",
+   "lang": "en",
+   "kind": "direct",
+   "variant": "quick",
+   "set": "T19",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.052984,
+   "n_turns": 3,
+   "loading_violation": false
+  },
+  {
+   "id": "t19-turns-1",
+   "lang": "en",
+   "kind": "multi-turn",
+   "variant": null,
+   "set": "T19",
+   "expected_primary": "detector-response",
+   "turns": [
+    {
+     "expected": "detector-response",
+     "first_skill": "detector-response",
+     "skills": [
+      "detector-response"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    },
+    {
+     "expected": "hep-statistics",
+     "first_skill": null,
+     "skills": [],
+     "outcome": "no-skill",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "no-skill",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.117005,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "t19-turns-4",
+   "lang": "zh-Hant",
+   "kind": "multi-turn",
+   "variant": null,
+   "set": "T19",
+   "expected_primary": "physics-ml",
+   "turns": [
+    {
+     "expected": "physics-ml",
+     "first_skill": "physics-ml",
+     "skills": [
+      "physics-ml"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    },
+    {
+     "expected": "hep-analysis",
+     "first_skill": "hep-analysis",
+     "skills": [
+      "hep-analysis"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.131831,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "t19-zhs-1",
+   "lang": "zh-Hans",
+   "kind": "direct",
+   "variant": null,
+   "set": "T19",
+   "expected_primary": "detector-response",
+   "turns": [
+    {
+     "expected": "detector-response",
+     "first_skill": "detector-response",
+     "skills": [
+      "detector-response"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.068073,
+   "n_turns": 6,
+   "loading_violation": false
+  },
+  {
+   "id": "t19-zhs-5",
+   "lang": "zh-Hans",
+   "kind": "direct",
+   "variant": null,
+   "set": "T19",
+   "expected_primary": "research-communication",
+   "turns": [
+    {
+     "expected": "research-communication",
+     "first_skill": "research-communication",
+     "skills": [
+      "research-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.046855,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "th-negative-1",
+   "lang": "en",
+   "kind": "negative",
+   "variant": null,
+   "set": null,
+   "expected_primary": "research-communication",
+   "turns": [
+    {
+     "expected": "research-communication",
+     "first_skill": "research-communication",
+     "skills": [
+      "research-communication"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.299",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.058538,
+   "n_turns": 5,
+   "loading_violation": false
+  }
+ ],
+ "contaminated": [],
+ "note": "scored summary only: prompts, answers and transcripts are not stored here (raw streams stay in runs/20261014T113734Z-claude-claude-sonnet-5-5/raw/, not committed)"
+}
