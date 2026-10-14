@@ -38,6 +38,7 @@ import json
 import math
 import os
 import random
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -164,6 +165,28 @@ class InputError(Exception):
     """Bad input data or arguments: exit 2 with a one-line message."""
 
 
+_ZERO_FRACTION = re.compile(r"^([+-]?\d+)\.0*$")
+
+
+def canonical_key(value, case_sensitive=False):
+    """ID comparison form shared with scripts/check_split_integrity.py and make_grouped_splits.py (copy; a test pins
+    the two copies together): stripped, a zero fraction dropped (1, 1.0, "1" are one key), case-folded unless
+    case_sensitive; booleans, lists and objects raise ValueError."""
+    if isinstance(value, bool) or isinstance(value, (list, dict, tuple, set)):
+        raise ValueError(f"{value!r} is not a valid ID or group value (booleans, lists and objects are refused)")
+    if isinstance(value, int):
+        return str(value)
+    if isinstance(value, float):
+        if math.isfinite(value) and value.is_integer():
+            return str(int(value))
+        return repr(value)
+    text = str(value).strip()
+    match = _ZERO_FRACTION.match(text)
+    if match:
+        text = str(int(match.group(1)))
+    return text if case_sensitive else text.casefold()
+
+
 # ---------------------------------------------------------------- setup
 
 def seed_everything(seed: int) -> dict:
@@ -252,8 +275,9 @@ def read_events(args) -> dict:
         raise InputError(f"{args.data}: feature columns missing: {missing or 'none selected'}")
     label_names = args.label_names.split(",") if args.label_names else None
     ids = [row[args.id_col] for row in rows]
-    if len(set(ids)) != len(ids):
-        raise InputError(f"{args.data}: duplicate ids in column {args.id_col!r}")
+    if len({canonical_key(value) for value in ids}) != len(ids):
+        raise InputError(f"{args.data}: duplicate ids in column {args.id_col!r} (after stripping whitespace, "
+                         "folding case and writing 1.0 as 1, as the split tools compare them)")
     try:
         x = np.array([[float(row[f]) for f in features] for row in rows])
         raw_labels = [row[args.label_col] for row in rows]
@@ -301,17 +325,28 @@ def assign_splits(data: dict) -> dict:
     """Index arrays for train/val/test from the manifest (rows matched by id)."""
     with open(data["manifest"], encoding="utf-8") as handle:
         manifest = json.load(handle)
-    position = {value: i for i, value in enumerate(data["ids"])}
+    position = {canonical_key(value): i for i, value in enumerate(data["ids"])}
     out = {}
     for split in SPLITS:
         if split not in manifest:
             raise InputError(f"{data['manifest']}: split {split!r} missing (need train, val and test)")
-        unknown = [value for value in map(str, manifest[split]) if value not in position]
+        try:
+            keys = [canonical_key(value) for value in manifest[split]]
+        except ValueError as exc:
+            raise InputError(f"{data['manifest']}: {split}: {exc}") from None
+        unknown = [value for value in keys if value not in position]
         if unknown:
             raise InputError(f"{data['manifest']}: {len(unknown)} {split} id(s) not in the data, e.g. {unknown[:3]}")
-        out[split] = np.array([position[str(value)] for value in manifest[split]], dtype=int)
+        out[split] = np.array([position[value] for value in keys], dtype=int)
         if out[split].size == 0:
             raise InputError(f"{data['manifest']}: split {split!r} is empty")
+    n_classes = len(data["labels"])
+    for split in SPLITS:
+        present = set(np.unique(data["y"][out[split]]).tolist())
+        missing = [data["labels"][c] for c in range(n_classes) if c not in present]
+        if missing:
+            raise InputError(f"{data['manifest']}: split {split!r} has no events of class(es) {missing}; it cannot "
+                             "be trained or evaluated (build the split with make_grouped_splits.py --label-column)")
     out["unassigned"] = len(data["ids"]) - sum(out[s].size for s in SPLITS)
     return out
 

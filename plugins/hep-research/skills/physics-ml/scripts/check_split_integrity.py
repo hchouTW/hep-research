@@ -17,14 +17,18 @@ is null or empty (None, "", whitespace, NaN, or the strings nan/null/none/na) ha
 usable group: it is reported under "null_group_ids", counted as missing group metadata,
 and so can never pass silently. --strict, for a
 split that feeds a result, turns "incomplete" into "failed" (failure_kind
-"missing-metadata"). Exit codes: 0 passed, 1 failed, 3 incomplete, so it can gate a
+"missing-metadata") and an empty split into "incomplete". Exit codes: 0 passed, 1 failed, 2 invalid input (a
+timestamp that is not a finite number or an ISO-8601 date, a temporal_order naming a split the file does not have or
+fewer than two, a boolean, list or object as ID or group, a misspelled reserved key), 3 incomplete, so it can gate a
 pipeline; "incomplete" is never a pass.
 
 Usage notes / assumptions: standard library only; PyTorch is not required. Input is a
-JSON object mapping split names to ID lists, optionally with "groups" (ID -> group) and
-"timestamps" (ID -> comparable number). IDs and group values are compared after
+JSON object mapping split names to ID lists, optionally with "groups" (ID -> group),
+"timestamps" (ID -> finite number or ISO-8601 date/time string, all of one kind) and
+"temporal_order" (at least two split names, each a split of the file). IDs and group values are compared after
 normalization, so that a cosmetic difference cannot hide leakage: surrounding
-whitespace is stripped and, by default, case is folded ("Run7 " and "run7" are the
+whitespace is stripped, a number with a zero fraction is written as an integer (1, 1.0, "1" and "1.0" are the
+same group) and, by default, case is folded ("Run7 " and "run7" are the
 same). Folding is the conservative default (it can only add matches); --case-sensitive
 turns it off for keys whose case is meaningful. Two keys of the "groups" or
 "timestamps" object that normalize to the same ID with different values are reported
@@ -36,18 +40,75 @@ Run: python3 <plugin root>/skills/physics-ml/scripts/check_split_integrity.py <p
 """
 
 import argparse
+import datetime
+import difflib
 import itertools
 import json
+import math
+import re
 import sys
 
 RESERVED_KEYS = {"groups", "timestamps", "temporal_order", "_comment"}
 NULL_MARKERS = {"", "nan", "null", "none", "na"}
 
 
-def normalize_key(value, case_sensitive=False):
-    """Comparison form of an ID or group value: str, stripped, and case-folded unless case_sensitive."""
+ZERO_FRACTION = re.compile(r"^([+-]?\d+)\.0*$")
+
+
+def canonical_key(value, case_sensitive=False):
+    """Comparison form of an ID or group value.
+
+    A number with a zero fraction becomes its integer string, so 1, 1.0, "1" and "1.0" are one key; any other float
+    keeps its repr. Strings are stripped and case-folded unless case_sensitive; a string of digits keeps them ("007").
+    Booleans, lists and objects are refused (ValueError): they are not keys.
+    """
+    if isinstance(value, bool) or isinstance(value, (list, dict, tuple, set)):
+        raise ValueError(f"{value!r} is not a valid ID or group value (booleans, lists and objects are refused)")
+    if isinstance(value, int):
+        return str(value)
+    if isinstance(value, float):
+        if math.isfinite(value) and value.is_integer():
+            return str(int(value))
+        return repr(value)
     text = str(value).strip()
+    match = ZERO_FRACTION.match(text)
+    if match:
+        text = str(int(match.group(1)))
     return text if case_sensitive else text.casefold()
+
+
+normalize_key = canonical_key  # name used by earlier callers
+
+
+def parse_timestamp(value, record):
+    """Comparable form of a timestamp: a finite number (or numeric text), or an ISO-8601 date/time (fromisoformat).
+
+    Anything else (NaN, infinity, booleans, "2024-1-10", free text) raises ValueError naming the record.
+    Returns (kind, key) with kind "number" or "datetime"; dates without a time are midnight, naive.
+    """
+    if isinstance(value, bool) or value is None or isinstance(value, (list, dict)):
+        raise ValueError(f"timestamp of {record!r} must be a finite number or an ISO-8601 date, not {value!r}")
+    if isinstance(value, (int, float)):
+        if not math.isfinite(value):
+            raise ValueError(f"timestamp of {record!r} is not finite ({value!r})")
+        return "number", value
+    text = str(value).strip()
+    try:
+        number = float(text)  # a CSV cell holds numbers as text
+    except ValueError:
+        number = None
+    if number is not None:
+        if not math.isfinite(number):
+            raise ValueError(f"timestamp of {record!r} is not finite ({text!r})")
+        return "number", number
+    try:
+        parsed = datetime.datetime.fromisoformat(text)
+    except ValueError:
+        raise ValueError(f"timestamp of {record!r} is not an ISO-8601 date or time ({text!r}; write e.g. "
+                         "2024-01-10 or 2024-01-10T08:00:00)") from None
+    if parsed.tzinfo is not None:
+        parsed = parsed.astimezone(datetime.timezone.utc).replace(tzinfo=None)
+    return "datetime", parsed
 
 
 def is_null_group(value):
@@ -64,9 +125,11 @@ def _split_ids(payload, case_sensitive=False):
     for name, values in payload.items():
         if name in RESERVED_KEYS:
             continue
-        if not isinstance(values, list):
-            raise ValueError(f"split {name!r} must be a list of IDs")
-        splits[name] = [normalize_key(value, case_sensitive) for value in values]
+        near = difflib.get_close_matches(str(name).casefold(), sorted(RESERVED_KEYS - {"_comment"}), n=1, cutoff=0.8)
+        if near or not isinstance(values, list):
+            hint = f" (did you mean {near[0]!r}?)" if near else ""
+            raise ValueError(f"split {name!r} must be a list of IDs{hint}")
+        splits[name] = [canonical_key(value, case_sensitive) for value in values]
     if len(splits) < 2:
         raise ValueError("need at least two splits to check for leakage")
     return splits
@@ -107,31 +170,32 @@ def find_group_leakage(splits, groups):
             if len(names) > 1}
 
 
-def find_temporal_violations(splits, timestamps, order):
+def find_temporal_violations(splits, timestamps, order, display=None):
     """Records in an earlier split timestamped after records in a later split.
 
-    `order` names the intended chronological sequence, e.g. ["train", "val", "test"].
+    `order` names the intended chronological sequence, e.g. ["train", "val", "test"]; every name must be a split
+    (check() refuses others). `timestamps` maps ID -> comparable key; `display` maps ID -> the value to report.
     """
     if not timestamps or not order:
         return {}
-    present = [name for name in order if name in splits]
+    display = display or timestamps
     bounds = {}
-    for name in present:
-        values = [timestamps[value] for value in splits[name] if value in timestamps]
+    for name in order:
+        values = [(timestamps[value], value) for value in splits[name] if value in timestamps]
         if values:
             bounds[name] = (min(values), max(values))
 
     violations = {}
-    for earlier, later in itertools.combinations(present, 2):
+    for earlier, later in itertools.combinations(order, 2):
         if earlier not in bounds or later not in bounds:
             continue
-        if bounds[earlier][1] > bounds[later][0]:
+        if bounds[earlier][1][0] > bounds[later][0][0]:
             violations[f"{earlier}|{later}"] = {
-                "latest_in_earlier": bounds[earlier][1],
-                "earliest_in_later": bounds[later][0],
+                "latest_in_earlier": display[bounds[earlier][1][1]],
+                "earliest_in_later": display[bounds[later][0][1]],
                 "overlapping_ids": sorted(
                     value for value in splits[earlier]
-                    if value in timestamps and timestamps[value] > bounds[later][0]),
+                    if value in timestamps and timestamps[value] > bounds[later][0][0]),
             }
     return violations
 
@@ -148,7 +212,7 @@ def _normalize_mapping(mapping, case_sensitive, value_key):
     """Re-key an ID -> value object by normalized ID; keys colliding with different values are conflicts."""
     out, conflicts = {}, set()
     for key, value in mapping.items():
-        norm = normalize_key(key, case_sensitive)
+        norm = canonical_key(key, case_sensitive)
         if norm in out and value_key(out[norm]) != value_key(value):
             conflicts.add(norm)
         out.setdefault(norm, value)
@@ -165,13 +229,27 @@ def check(payload, strict=False, case_sensitive=False):
     order = payload.get("temporal_order") or []
     if not isinstance(groups, dict) or not isinstance(timestamps, dict):
         raise ValueError("'groups' and 'timestamps' must be objects mapping ID -> value")
+    if not isinstance(order, list):
+        raise ValueError("'temporal_order' must be a list of split names")
+    if order:
+        unknown = [name for name in order if name not in splits]
+        if unknown:
+            raise ValueError(f"temporal_order names {unknown}, which are not splits of this file "
+                             f"(splits: {sorted(splits)})")
+        if len(order) < 2 or len(set(order)) != len(order):
+            raise ValueError("temporal_order must name at least two different splits")
 
     def group_value(value):
-        return None if is_null_group(value) else normalize_key(value, case_sensitive)
+        return None if is_null_group(value) else canonical_key(value, case_sensitive)
 
     groups, group_conflicts = _normalize_mapping(groups, case_sensitive, group_value)
     timestamps, time_conflicts = _normalize_mapping(timestamps, case_sensitive, lambda v: v)
     groups = {key: group_value(value) for key, value in groups.items()}
+    display = dict(timestamps)
+    parsed = {key: parse_timestamp(value, key) for key, value in timestamps.items()}
+    if len({kind for kind, _ in parsed.values()}) > 1:
+        raise ValueError("timestamps mix numbers and dates; they cannot be ordered")
+    timestamps = {key: value for key, (_, value) in parsed.items()}
     all_ids = sorted({value for ids in splits.values() for value in ids})
     null_groups = [value for value in all_ids if value in groups and groups[value] is None]
 
@@ -179,7 +257,8 @@ def check(payload, strict=False, case_sensitive=False):
                   if (found := find_duplicates(ids))}
     overlaps = find_overlaps(splits)
     group_leakage = find_group_leakage(splits, groups)
-    temporal = find_temporal_violations(splits, timestamps, order)
+    temporal = find_temporal_violations(splits, timestamps, order, display)
+    empty = sorted(name for name, ids in splits.items() if not ids)
 
     group_cov = _coverage(splits, {key for key, value in groups.items() if value is not None})
     time_splits = {name: ids for name, ids in splits.items() if name in order}
@@ -193,8 +272,8 @@ def check(payload, strict=False, case_sensitive=False):
         failure.append("missing-metadata")
     if "leakage" in failure or (strict and failure):
         status = "failed"
-    elif failure:
-        status = "incomplete"
+    elif failure or (strict and empty):
+        status = "incomplete"  # an empty split under --strict: nothing in it was checked
     else:
         status = "passed"
     return {
@@ -204,13 +283,15 @@ def check(payload, strict=False, case_sensitive=False):
         "overlaps_between_splits": overlaps,
         "group_leakage": group_leakage,
         "temporal_violations": temporal,
+        "empty_splits": empty,
         "group_coverage": group_cov,
         "null_group_ids": null_groups,
         "normalization": {"strip_whitespace": True, "case_sensitive": case_sensitive},
         "normalization_conflicts": {"groups": group_conflicts, "timestamps": time_conflicts},
         "timestamp_coverage": time_cov,
         "groups_checked": groups_complete,
-        "timestamps_checked": bool(order) and times_complete,
+        "timestamps_checked": bool(order) and times_complete and len(
+            [name for name in order if any(value in timestamps for value in splits[name])]) >= 2,
         "strict": strict,
         "status": status,
         "failure_kind": failure if status == "failed" else [],
@@ -295,8 +376,12 @@ def main():
             raise ValueError("splits file must contain a JSON object")
         report = check(payload, strict=args.strict, case_sensitive=args.case_sensitive)
         text = json.dumps(report, indent=2, allow_nan=False) if args.json else _format(report)
-    except (OSError, ValueError, TypeError, json.JSONDecodeError) as exc:
-        sys.exit(f"error: {exc}")
+    except OSError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        sys.exit(2)
+    except (ValueError, TypeError, json.JSONDecodeError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        sys.exit(2)
 
     print(text)
     sys.exit({"passed": 0, "failed": 1, "incomplete": 3}[report["status"]])
