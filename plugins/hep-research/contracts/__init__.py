@@ -34,6 +34,9 @@ CONTRACTS_VERSION = "2.7.0"
 # depends on the hash-chained revocation log and head (contracts.revocation); core:exposure-record: its data_exposure is
 # derived from an exposure record (contracts.lineage.derive_exposure, record_ref); core:decision-lineage: it is bound to
 # decision records (contracts.lineage.check_decision).
+# Not added (decision of 2026-10-14, task P3.4): core:formal-use-permit and core:analysis-bundle. Permits and bundles
+# are sidecars read as protected inputs and verified by contracts.permit and contracts.analysis_bundle; no artifact
+# declares a dependency on them. Add an ID when an artifact type starts to require one.
 KNOWN_CAPABILITIES = frozenset({"core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage"})
