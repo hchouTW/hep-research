@@ -3,26 +3,10 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## 0.8.0 (2026-10-14)
+## Unreleased
 
-Contracts 2.7.0 (minor: the capability IDs `core:revocation-log`, `core:exposure-record`, `core:decision-lineage` and
-the warning `exposure.capability_not_declared`; a 2.6 artifact keeps its outcome; the data release manifest sidecar
-keeps `manifest_version` 1.0.0;
-new sidecars: revocation log and head, exposure and decision records, qualification record). Project config schema
-1.2.0 (`agent_policy.protected_inputs`). A project with `agent_policy` now runs in protected mode (see below).
+Contracts 2.7.0 (unchanged).
 
-- **Custodian checks in the release-manifest checker (AGENTIC-R5 T1.2, deployment work package B).** The checks a
-  custodian deployment ran on its own side move into `contracts/release_manifest.py`, so every custodian uses one
-  tested implementation. Always on, from the manifest alone: a transform parameter name that looks like key material
-  (`KEY_LIKE`: key, secret, offset, scale, seed, password, token) is `release.keys_present`, a wildcard in a destination
-  is `release.destination_wildcard`. New options (keyword-only in `check()`, flags on the command line; each adds
-  checks and none is needed for a pass): `--code-digest` (`release.transform_code_mismatch`), `--destination-sets`
-  (`release.destination_set_unknown`: the destinations must equal one held set exactly), `--analysis` (release history:
-  `release.related_incomplete`, `release.related_unknown`, warning `release.related_revoked`; ledger entries may carry
-  `analysis` and `source_sha256`), `--sealed` (every artifact scanned for a sealed value with `core.blinding`, JSON
-  objects without their structure keys: `release.sealed_value_present`; an artifact that cannot be scanned is
-  `release.scan_incomplete`, fail closed). Findings name the artifact only, never a sealed value or a count. Passing
-  still releases nothing. Tests in `tests/contracts/test_release_manifest.py` (`CustodianOptionTests`).
 - **Formal-use permits, analysis-level bundles and the recipe-use review (tasks P5.1-P5.3; C15, C08).** New
   `contracts/analysis_bundle.py` (`analysis_bundle.json`): one digest over the measurement spec, recipes, semantics
   tables, calibrations, tool contracts, environment lock, reviews and the plugin release; `verify` reports each change;
@@ -55,6 +39,27 @@ new sidecars: revocation log and head, exposure and decision records, qualificat
 - **Scan-service interface (task P6.1).** New `contracts/scan_verdict.py` (`scan_submission.json`,
   `scan_verdict.json`): a closed agent-visible verdict (status and budget state only) and a per-analysis budget
   counted in candidate values tested, charged for every submission.
+
+## 0.8.0 (2026-10-14)
+
+Contracts 2.7.0 (minor: the capability IDs `core:revocation-log`, `core:exposure-record`, `core:decision-lineage` and
+the warning `exposure.capability_not_declared`; a 2.6 artifact keeps its outcome; the data release manifest sidecar
+keeps `manifest_version` 1.0.0;
+new sidecars: revocation log and head, exposure and decision records, qualification record). Project config schema
+1.2.0 (`agent_policy.protected_inputs`). A project with `agent_policy` now runs in protected mode (see below).
+
+- **Custodian checks in the release-manifest checker (AGENTIC-R5 T1.2, deployment work package B).** The checks a
+  custodian deployment ran on its own side move into `contracts/release_manifest.py`, so every custodian uses one
+  tested implementation. Always on, from the manifest alone: a transform parameter name that looks like key material
+  (`KEY_LIKE`: key, secret, offset, scale, seed, password, token) is `release.keys_present`, a wildcard in a destination
+  is `release.destination_wildcard`. New options (keyword-only in `check()`, flags on the command line; each adds
+  checks and none is needed for a pass): `--code-digest` (`release.transform_code_mismatch`), `--destination-sets`
+  (`release.destination_set_unknown`: the destinations must equal one held set exactly), `--analysis` (release history:
+  `release.related_incomplete`, `release.related_unknown`, warning `release.related_revoked`; ledger entries may carry
+  `analysis` and `source_sha256`), `--sealed` (every artifact scanned for a sealed value with `core.blinding`, JSON
+  objects without their structure keys: `release.sealed_value_present`; an artifact that cannot be scanned is
+  `release.scan_incomplete`, fail closed). Findings name the artifact only, never a sealed value or a count. Passing
+  still releases nothing. Tests in `tests/contracts/test_release_manifest.py` (`CustodianOptionTests`).
 - **Protected-use mode at the formal-use entry points (task P1; C07 plugin part, HC-09, K08, DP-2, DP-4).** A project
   whose config declares `agent_policy`, or an entry point given `--protected`, now runs in protected mode; omitting a
   flag cannot switch it off, and outside protected mode nothing changes. In protected mode every formal-use entry
