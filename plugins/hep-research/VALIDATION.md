@@ -1177,3 +1177,18 @@ An independent review of the first implementation reported eight findings; seven
 (`ReviewFindingTests`), and the eighth (custodian tools are not guarded) is a stated limit. `tools/run_all_checks.py`
 with the E2 venv: 21 of 21 checks pass; 2,917 unit tests in 216 modules, 0 failures, 58 skipped. ruff 0.16.10 and
 mypy 2.4.0 clean on `core` and `contracts`. Not run: CI, the host CLIs' live sessions, any carry-over.
+
+## 0.8.0 release check (2026-10-14, E2)
+
+Version 0.8.0 is release A of the plan "Complete the agentic architecture inside hep-research": the release-manifest
+custodian options and the architecture and deployment documents (PR #70), the hash-chained revocation log and reverse
+index (PR #71), exposure and decision lineage (PR #72), protected-use mode at the formal-use entry points and contracts
+2.7.0 (PR #73); evidence in "AGENTIC-COMPLETION release A" above. Project config schema 1.2.0. For the release the
+examples were rerun with the E2 venv: only the plugin version string changed, and the ML example's statistical result
+records the new hash of its ML artifact (unfolding-coverage and end-to-end-sample not rerun, as in earlier releases);
+the published-likelihood benchmark's two artifacts were rewritten with the new plugin version. The companion
+ams02-research (main `dc0e674`, 1.4.10) checker reports 0.8.0 `compatible` (requires `>=0.4.0`; contracts `>=2.0`).
+`tools/run_all_checks.py` with the host CLIs (Claude Code 2.1.296, codex-cli 0.160.0) and the E2 venv: 21 of 21 checks
+pass; 2,918 unit tests in 216 modules, 0 failures, 58 skipped. CI passed every job on PRs #70-#73 (Python 3.11, 3.12,
+3.13; ruff, mypy; optional ROOT and columnar). Release manifest `release-manifests/0.8.0.json`.
+

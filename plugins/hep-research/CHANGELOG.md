@@ -3,7 +3,7 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.8.0 (2026-10-14)
 
 Contracts 2.7.0 (minor: the capability IDs `core:revocation-log`, `core:exposure-record`, `core:decision-lineage` and
 the warning `exposure.capability_not_declared`; a 2.6 artifact keeps its outcome; the data release manifest sidecar
