@@ -406,5 +406,26 @@ class ReviewFixes2SmallClis(unittest.TestCase):
         self.assertEqual(csv_path.read_text(encoding="utf-8"), "key,year\na,2020\n")
 
 
+class ReviewFixes2TerminologyEdges(tt.Base):
+    """RC-A17: a disallowed CJK term inside a declared term is not flagged; a use before the definition on the same
+    line is."""
+
+    def test_disallowed_part_of_a_declared_term(self):
+        import copy
+        g = copy.deepcopy(tt.GLOSSARY)
+        g["entries"].append({"id": "term:reco-eff", "concept": "reconstruction efficiency", "preferred": {"zh-Hant": "重建效率"},
+                             "aliases": {}, "definition": "fraction of accepted events reconstructed", "abbreviations": [], "disallowed": []})
+        rep = self.run_check("# 偵測器\n\n幾何區域內的重建效率為 0.9。\n", glossary=g)
+        self.assertNotIn("terminology.concept_substitution", self.codes(rep))
+        rep = self.run_check("# 偵測器\n\n我們量測了偵測器的幾何效率。\n", glossary=g)
+        self.assertIn("terminology.concept_substitution", self.codes(rep))
+
+    def test_use_before_definition_on_the_same_line(self):
+        rep = self.run_check("# Results\n\nThe CL is 95%, a confidence interval (CL) construction.\n")
+        self.assertIn("terminology.abbreviation_undefined", self.codes(rep))
+        rep = self.run_check("# Results\n\nA confidence interval (CL) at 95% CL.\n")
+        self.assertNotIn("terminology.abbreviation_undefined", self.codes(rep))
+
+
 if __name__ == "__main__":
     unittest.main()

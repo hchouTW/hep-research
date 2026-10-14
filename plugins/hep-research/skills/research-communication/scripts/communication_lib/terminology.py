@@ -103,7 +103,27 @@ def check_terminology(record: dict, context: dict, glossary: dict) -> dict:
                       notes=notes, coverage={"documents": {"declared": len(docs_meta), "scanned": len(texts)}}, note=NOTE)
 
 
+def _declared_terms(glossary) -> list[str]:
+    """Every preferred term and alias of the glossary, longest first."""
+    terms = set()
+    for e in glossary.get("entries", []):
+        terms.update(str(v) for v in (e.get("preferred") or {}).values() if v)
+        for aliases in (e.get("aliases") or {}).values():
+            terms.update(str(a) for a in aliases or [] if a)
+    return sorted(terms, key=len, reverse=True)
+
+
+def _mask_declared(line: str, term: str, declared: list[str]) -> str:
+    """Blank declared terms that contain the disallowed term as a part (重建效率 contains 效率), so the part is not
+    flagged inside a term the glossary itself allows."""
+    for d in declared:
+        if d != term and term.lower() in d.lower():
+            line = re.sub(re.escape(d), lambda m: " " * len(m.group(0)), line, flags=re.I)
+    return line
+
+
 def _concepts(did, lines, glossary, findings, notes):
+    declared = _declared_terms(glossary)
     for e in glossary.get("entries", []):
         preferred = ", ".join(f"{v} ({k})" for k, v in (e.get("preferred") or {}).items())
         for rule in e.get("disallowed") or []:
@@ -112,7 +132,7 @@ def _concepts(did, lines, glossary, findings, notes):
             if not term:
                 continue
             for n, line in enumerate(lines, 1):
-                clean = _unquoted(line)
+                clean = _mask_declared(_unquoted(line), term, declared)
                 i = _contains(clean, term)
                 if i < 0:
                     continue
@@ -141,10 +161,12 @@ def _abbreviations(did, lines, glossary, findings):
                 for m in rx.finditer(_unquoted(line)):
                     raw = m.group(1).strip()
                     spans = [w.start() for w in re.finditer(r"[^\s\-]+", raw)]
-                    expansion = raw[spans[-n_words]:] if len(spans) >= n_words else raw  # the last len(abbr) words before the parenthesis
-                    defs.append((n, normalize(expansion).lower(), expansion))
+                    cut = spans[-n_words] if len(spans) >= n_words else 0  # the last len(abbr) words before the parenthesis
+                    expansion = raw[cut:]
+                    col = m.start(1) + (len(m.group(1)) - len(m.group(1).lstrip())) + cut
+                    defs.append((n, normalize(expansion).lower(), expansion, col))
             distinct = {}
-            for n, key, shown in defs:
+            for n, key, shown, _col in defs:
                 if CJK_RE.search(shown):
                     continue  # a CJK expansion has no word boundary to cut at: it counts as a definition, not for redefinition
                 distinct.setdefault(key, (n, shown))
@@ -153,12 +175,14 @@ def _abbreviations(did, lines, glossary, findings):
                 findings.append(R.finding("terminology.abbreviation_redefined", "error", f"{did} {where}",
                                           f"{abbr} is defined as " + " and as ".join(f"{s!r} (line {n})" for n, s in distinct.values()),
                                           "use one expansion per abbreviation, or two abbreviations", rule=e.get("id"), source="terminology"))
-            first_def = min((n for n, _, _ in defs), default=None)
+            first = min(((n, col) for n, _, _, col in defs), default=None)
+            first_def = first[0] if first else None
             use_rx = re.compile(r"(?<![A-Za-z])" + re.escape(str(abbr)) + r"(?![A-Za-z])")
             for n, line in enumerate(lines, 1):
-                if first_def is not None and n >= first_def:
+                if first is not None and n > first[0]:
                     break
-                if use_rx.search(_unquoted(line)):
+                scan = _unquoted(line)[:first[1]] if first is not None and n == first[0] else _unquoted(line)
+                if use_rx.search(scan):
                     findings.append(R.finding("terminology.abbreviation_undefined", "warning", f"{did} line {n}",
                                               f"{abbr} is used before it is defined" + (f" (definition at line {first_def})" if first_def else " (never defined)"),
                                               "define the abbreviation at first use", rule=e.get("id"), source="terminology"))
