@@ -13,7 +13,7 @@ prose structure.
 
 ## Posters
 
-1. Identify the single result the poster must land even from ten feet away
+1. Identify the single result the poster must land from a few metres away
    or a thirty-second glance — a poster is read by people walking past, not
    read start-to-finish like a paper. State that result in the title or a
    large top-line statement, not buried in an abstract block.
@@ -30,7 +30,22 @@ prose structure.
    result → takeaway, left-to-right/top-to-bottom, so someone can follow the
    logic without the presenter narrating it.
 
+### Formats and sizes
+
+| Item | Starting point | Check |
+|---|---|---|
+| A0 poster, 841 x 1189 mm | `\documentclass[final]{beamer}` + `\usepackage[orientation=portrait,size=a0,scale=1.4]{beamerposter}`, or `\documentclass[25pt,a0paper,portrait]{tikzposter}` (both on CTAN, both compiled to A0 pages here, 2026-10-14) | `pdfinfo poster.pdf` shows the page size |
+| US 48 x 36 in poster | set the paper size in the class options to the venue's stated size | the venue's poster instructions |
+| Text sizes (heuristic, not a venue rule) | title about 80-100 pt, headings 40-60 pt, body at least 24 pt, figure labels at least 24 pt on A0; scale with the paper size | measure on the PDF at 100% |
+
+Read the conference's poster instructions for the size and orientation; they override this table.
+
 ## Slide decks
+
+0. **Format and approval.** Use 16:9 unless the venue says 4:3: Beamer
+   `\documentclass[aspectratio=169]{beamer}` gives 160 x 90 mm pages (compiled 2026-10-14). Plan about one content
+   slide per minute of the slot (a heuristic; dense result slides take longer). A collaboration talk usually needs
+   the speaker's slides approved by the collaboration before it is given: ask which approval applies and record it.
 
 1. One idea per slide. If a slide needs the presenter to say "there are
    three things going on here," split it. A slide's job is to support what
@@ -87,4 +102,4 @@ figure/section in the paper, so a factual or numerical correction to the
 paper can be propagated to the derived materials — do not let poster/slide
 numbers drift from a since-revised paper value.
 
-**Done when:** every number on the poster or slides maps to its paper figure or section, text meets the size table, and the speaker or poster approval the collaboration requires is recorded.
+**Done when:** every number on the poster or slides maps to its paper figure or section, the page size and text sizes are checked on the PDF (`pdfinfo`, the size table), and the speaker or poster approval the collaboration requires is recorded.

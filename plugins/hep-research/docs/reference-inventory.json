@@ -35,7 +35,7 @@
   },
   "research-communication": {
    "references": 56,
-   "bytes": 392996,
+   "bytes": 395082,
    "uncited": 0
   }
  },
@@ -2636,7 +2636,7 @@
     "tests/skills/research_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ecc929c 2026-10-14"
+   "last_commit": "d5b1f1f 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/citations-and-bibliography.md",
@@ -3103,8 +3103,8 @@
   {
    "path": "skills/research-communication/references/paper-genre-variants.md",
    "owner": "research-communication",
-   "bytes": 4378,
-   "lines": 84,
+   "bytes": 5202,
+   "lines": 98,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -3178,8 +3178,8 @@
   {
    "path": "skills/research-communication/references/poster-and-talk-design.md",
    "owner": "research-communication",
-   "bytes": 4982,
-   "lines": 91,
+   "bytes": 6244,
+   "lines": 106,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-diagrams-guide.md",

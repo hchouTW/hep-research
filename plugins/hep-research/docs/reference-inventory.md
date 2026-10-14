@@ -14,7 +14,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-statistics | 11 | 150 | 0 |
 | hep-theory | 11 | 78 | 0 |
 | physics-ml | 38 | 257 | 0 |
-| research-communication | 56 | 393 | 0 |
+| research-communication | 56 | 395 | 0 |
 
 ## Overlapping pairs
 
@@ -225,7 +225,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `academic-papers-guide.md` | research-communication | 28.0 | yes | 12 | - | 573a631 2026-10-14 |
 | `artifact-packaging-for-release.md` | research-communication | 2.9 | no | 3 | - | ecc929c 2026-10-14 |
 | `astroparticle-and-cosmic-ray-papers.md` | research-communication | 13.4 | no | 10 | - | ecc929c 2026-10-14 |
-| `citation-verification.md` | research-communication | 5.3 | yes | 11 | - | ecc929c 2026-10-14 |
+| `citation-verification.md` | research-communication | 5.3 | yes | 11 | - | d5b1f1f 2026-10-14 |
 | `citations-and-bibliography.md` | research-communication | 19.9 | yes | 11 | - | 257b34b 2026-10-14 |
 | `claim-evidence-mapping.md` | research-communication | 4.0 | yes | 9 | hep-statistics, hep-theory | ecc929c 2026-10-14 |
 | `code-review-report.md` | research-communication | 5.5 | no | 3 | - | ecc929c 2026-10-14 |
@@ -257,12 +257,12 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `mermaid-patterns.md` | research-communication | 4.5 | no | 2 | - | ecc929c 2026-10-14 |
 | `multi-venue-reformatting.md` | research-communication | 3.0 | no | 1 | - | ecc929c 2026-10-14 |
 | `outreach-and-public-facing-summaries.md` | research-communication | 4.2 | no | 5 | - | ecc929c 2026-10-14 |
-| `paper-genre-variants.md` | research-communication | 4.4 | no | 3 | - | ecc929c 2026-10-14 |
+| `paper-genre-variants.md` | research-communication | 5.2 | no | 3 | - | ecc929c 2026-10-14 |
 | `paper-structure.md` | research-communication | 11.1 | no | 9 | - | ecc929c 2026-10-14 |
 | `physics-plots.md` | research-communication | 6.2 | no | 5 | - | e8e8b9f 2026-10-14 |
 | `plagiarism-and-text-reuse-checking.md` | research-communication | 3.0 | no | 2 | - | ecc929c 2026-10-14 |
 | `plantuml-patterns.md` | research-communication | 3.6 | no | 1 | - | ecc929c 2026-10-14 |
-| `poster-and-talk-design.md` | research-communication | 5.0 | no | 4 | - | ecc929c 2026-10-14 |
+| `poster-and-talk-design.md` | research-communication | 6.2 | no | 4 | - | ecc929c 2026-10-14 |
 | `preprint-to-journal-reconciliation.md` | research-communication | 2.9 | no | 3 | - | ecc929c 2026-10-14 |
 | `preregistration-and-registered-reports.md` | research-communication | 3.5 | no | 1 | - | ecc929c 2026-10-14 |
 | `primary-sources-and-version-checks.md` | research-communication | 12.5 | yes | 10 | detector-response, hep-analysis | ecc929c 2026-10-14 |
