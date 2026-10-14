@@ -95,7 +95,8 @@ Scientific corrections first (`sci-fix` commits; each with a regression test tha
 - **Small corrections (ML-C10, C24, C25, C26, K13).** `compare_model_runs.py` decides with a Student-t interval below
   10 seeds (false-improvement rate about 5%, was 26%/15%/11% at 3/5/10 seeds); the sculpting baseline is a quantile of
   20 resamplings; a constant training feature is exit 2; `model_hash` covers the weights only; the J9 test compares
-  the committed artifacts within 1e-9.
+  the committed artifacts within a relative 1e-7 (the calibration fit differs by 2-6e-9 between Linux and macOS BLAS;
+  digests over float bytes are skipped). Check runs now keep the traceback tail of each failing test.
 
 Contract and tooling:
 

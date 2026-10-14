@@ -75,10 +75,12 @@ class J9MlToInferenceTests(unittest.TestCase):
 
     def test_committed_artifacts_match_within_tolerance(self):
         """ML-K13: the committed ml_artifact.json and statistical_result.json, not only the rounded results.json, are
-        reproduced: every number within a relative tolerance of 1e-9 (last-bit BLAS differences), every other value
-        equal; digests and input hashes are skipped because they move with the artifact bytes, and the framework version
-        because it records the installed NumPy, not a result."""
-        skip = {"sha256", "plugin_release", "digest", "framework"}
+        reproduced: every number within a relative tolerance of 1e-7, every other value equal. The tolerance covers
+        last-bit BLAS differences between platforms after an iterative fit (Linux CI vs macOS: calibration temperature
+        and ECE differ by 2-6e-9 relative). Digests are skipped: input hashes move with the artifact bytes, and the
+        model hash and score-file hashes are taken over float bytes, so a last-bit difference changes them. The
+        framework version is skipped because it records the installed NumPy, not a result."""
+        skip = {"plugin_release", "digest", "framework", "model_hash"}
 
         bad: list = []
 
@@ -87,7 +89,7 @@ class J9MlToInferenceTests(unittest.TestCase):
                 if set(a) != set(b):
                     bad.append((path, sorted(set(a) ^ set(b))))
                 for k in set(a) & set(b):
-                    if k not in skip:
+                    if k not in skip and not k.endswith("sha256"):
                         close(a[k], b[k], f"{path}.{k}")
             elif isinstance(a, list) and isinstance(b, list):
                 if len(a) != len(b):
@@ -95,7 +97,7 @@ class J9MlToInferenceTests(unittest.TestCase):
                 for i, (x, y) in enumerate(zip(a, b)):
                     close(x, y, f"{path}[{i}]")
             elif isinstance(a, float) or isinstance(b, float):
-                if not abs(a - b) <= 1e-9 * max(abs(a), abs(b), 1e-300):
+                if not abs(a - b) <= 1e-7 * max(abs(a), abs(b), 1e-300):
                     bad.append((path, a, b))
             elif a != b:
                 bad.append((path, a, b))
