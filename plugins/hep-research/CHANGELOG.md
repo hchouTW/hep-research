@@ -5,6 +5,11 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Decision recorded: no capability IDs for permits and analysis-level bundles (task P3.4).** `core:formal-use-permit`
+  and `core:analysis-bundle` are not added to `KNOWN_CAPABILITIES`: permits and bundles are sidecars read as protected
+  inputs and verified by `contracts/permit.py` and `contracts/analysis_bundle.py`, and no artifact declares a dependency
+  on them. Stated in `docs/agentic-architecture.md` §9.3 and at `KNOWN_CAPABILITIES`. Documentation only; contracts
+  2.7.0 unchanged.
 - **Architecture and deployment documents brought to 0.9.0.** `docs/agentic-architecture.md`: status line names the
   release; §12 labels name the release that introduced each component instead of "Unreleased"; §3 and §9.3 list every
   sidecar (revocation log and head, exposure and decision records, qualification record, analysis-level bundle, permit,
