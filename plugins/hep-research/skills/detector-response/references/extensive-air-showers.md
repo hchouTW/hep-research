@@ -99,6 +99,7 @@ a systematic that must be quoted, not assumed away.
 
 ## The muon puzzle
 
+<!-- example: source citation (experiment named as the source of a general method or number) -->
 Most, but not all, experiments with independent muon measurements find more muons in air showers
 than simulations predict for the composition implied by `X_max`. The combined analysis of eight
 air-shower experiments (WHISP, as summarized by Gesualdi et al., PoS(ICRC2021)473,
@@ -111,6 +112,7 @@ effect, since, where the deficit is seen, no mixture of known primaries reconcil
 under current models. Any composition or hadronic-model conclusion
 drawn from muon content alone, without also checking consistency against `X_max`,
 should be treated as provisional given this open discrepancy.
+<!-- /example -->
 
 ## Deliverables
 

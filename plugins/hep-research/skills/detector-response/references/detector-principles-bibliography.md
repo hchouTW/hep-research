@@ -153,12 +153,14 @@ criteria as above.
 - T.-P. Li and Y.-Q. Ma, "Analysis methods for results in gamma-ray astronomy",
   Astrophys. J. 272 (1983) 317-324, DOI 10.1086/161295. ON/OFF significance.
 
+<!-- example: source citation (experiment named as the source of a general method or number) -->
 - **Read 2026-10-14 for the detector-response audit** (astroparticle corrections): Verzi for the Pierre Auger
   Collaboration, PoS(ICRC2019)231 (energy-scale budget); Gesualdi et al., PoS(ICRC2021)473 (WHISP muon-scale
   summary); LHAASO, arXiv:2505.14447 (proton knee); ANTARES, IceCube, LIGO and Virgo, arXiv:1703.06298 (+-500 s
   window); DAMPE, Sci. Adv. 5 (2019) eaax3793, arXiv:1909.12860 (calorimetric unfolding); R. Nolty, Caltech thesis,
   arXiv:hep-ex/0201015 (Störmer cutoff and the east-west effect); ECSS-E-ST-10-04C annex B.8 via SPENVIS; SIDC and
   the Royal Observatory of Belgium (solar cycle 25 minimum and maximum).
+<!-- /example -->
 
 ## Simulation and reconstruction ([event reconstruction](event-reconstruction.md), [detector simulation](detector-simulation.md))
 

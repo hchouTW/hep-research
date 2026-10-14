@@ -5,7 +5,7 @@
  "by_skill": {
   "detector-response": {
    "references": 34,
-   "bytes": 410576,
+   "bytes": 411611,
    "uncited": 0
   },
   "hep-analysis": {
@@ -64,7 +64,7 @@
     "skills/detector-response/references/tracking-and-vertexing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/calorimetry-ecal-hcal.md",
@@ -85,7 +85,7 @@
     "skills/detector-response/scripts/calorimeter_resolution.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "d8bec60 2026-10-13"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/cherenkov-imaging-variants-and-photosensors.md",
@@ -106,7 +106,7 @@
    "cited_by_other_skills": [
     "research-communication"
    ],
-   "last_commit": "70f7fbc 2026-10-14"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/core-detector-equations.md",
@@ -120,7 +120,7 @@
     "tests/skills/detector_response/test_reference_links.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "70f7fbc 2026-10-14"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/cosmic-ray-spectrum-and-composition.md",
@@ -146,7 +146,7 @@
     "hep-statistics",
     "research-communication"
    ],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
@@ -164,7 +164,7 @@
     "skills/detector-response/references/performance-metrics-and-residual-diagnostics.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "4665f43 2026-10-13"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/detector-case-studies-and-checklists.md",
@@ -178,7 +178,7 @@
     "skills/detector-response/references/timing-detectors.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/detector-comparison-tables.md",
@@ -191,7 +191,7 @@
     "skills/detector-response/references/detector-principles-summary.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/detector-glossary.md",
@@ -207,7 +207,7 @@
     "skills/detector-response/references/tracking-and-vertexing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/detector-measurement-framework.md",
@@ -232,20 +232,20 @@
     "hep-analysis",
     "research-communication"
    ],
-   "last_commit": "d8bec60 2026-10-13"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/detector-principles-bibliography.md",
    "owner": "detector-response",
-   "bytes": 14747,
-   "lines": 188,
+   "bytes": 14862,
+   "lines": 190,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/detector-principles-summary.md",
     "skills/detector-response/references/front-end-electronics-and-signal-processing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "7fdda0d 2026-10-13"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/detector-principles-summary.md",
@@ -261,7 +261,7 @@
     "tests/skills/detector_response/test_reference_links.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "70f7fbc 2026-10-14"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/detector-simulation.md",
@@ -284,7 +284,7 @@
     "hep-theory",
     "physics-ml"
    ],
-   "last_commit": "d8bec60 2026-10-13"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/detector-systems-overview.md",
@@ -310,7 +310,7 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/event-reconstruction.md",
@@ -332,8 +332,8 @@
   {
    "path": "skills/detector-response/references/extensive-air-showers.md",
    "owner": "detector-response",
-   "bytes": 8554,
-   "lines": 130,
+   "bytes": 8669,
+   "lines": 132,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/cosmic-ray-spectrum-and-composition.md",
@@ -349,7 +349,7 @@
    "cited_by_other_skills": [
     "research-communication"
    ],
-   "last_commit": "e9687b6 2026-10-13"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/front-end-electronics-and-signal-processing.md",
@@ -370,7 +370,7 @@
     "skills/detector-response/scripts/frontend_response.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "d8bec60 2026-10-13"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/gaseous-and-specialized-tracking-technologies.md",
@@ -391,7 +391,7 @@
    "cited_by_other_skills": [
     "research-communication"
    ],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/ground-based-detection-arrays.md",
@@ -409,7 +409,7 @@
     "skills/detector-response/references/noble-liquid-neutrino-and-rare-event-detectors.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/imaging-atmospheric-cherenkov.md",
@@ -434,20 +434,20 @@
     "physics-ml",
     "research-communication"
    ],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/multimessenger-analysis.md",
    "owner": "detector-response",
-   "bytes": 6775,
-   "lines": 106,
+   "bytes": 6890,
+   "lines": 108,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/detector-principles-summary.md",
     "skills/detector-response/references/noble-liquid-neutrino-and-rare-event-detectors.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/muon-systems.md",
@@ -467,7 +467,7 @@
    "cited_by_other_skills": [
     "research-communication"
    ],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/neutrino-astronomy.md",
@@ -487,7 +487,7 @@
    "cited_by_other_skills": [
     "hep-statistics"
    ],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/noble-liquid-neutrino-and-rare-event-detectors.md",
@@ -505,7 +505,7 @@
     "skills/detector-response/references/signal-formation-and-readout.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/particle-identification.md",
@@ -536,7 +536,7 @@
     "skills/detector-response/scripts/pid_separation_power.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/performance-metrics-and-residual-diagnostics.md",
@@ -557,7 +557,7 @@
     "skills/detector-response/references/response-and-forward-folding.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/physics-objects-jets-btagging-met.md",
@@ -577,7 +577,7 @@
    "cited_by_other_skills": [
     "physics-ml"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/reconstruction-performance-and-truth-matching.md",
@@ -596,7 +596,7 @@
     "skills/detector-response/references/performance-metrics-and-residual-diagnostics.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/response-and-forward-folding.md",
@@ -617,7 +617,7 @@
     "hep-analysis",
     "hep-statistics"
    ],
-   "last_commit": "df01a6a 2026-10-14"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/signal-formation-and-readout.md",
@@ -638,13 +638,13 @@
    "cited_by_other_skills": [
     "research-communication"
    ],
-   "last_commit": "70f7fbc 2026-10-14"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/space-based-direct-detection.md",
    "owner": "detector-response",
-   "bytes": 20159,
-   "lines": 279,
+   "bytes": 20389,
+   "lines": 283,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -665,7 +665,7 @@
     "hep-statistics",
     "research-communication"
    ],
-   "last_commit": "9b058ef 2026-10-14"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/timing-detectors.md",
@@ -710,13 +710,13 @@
    "cited_by_other_skills": [
     "research-communication"
    ],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/triggers-luminosity-pileup.md",
    "owner": "detector-response",
-   "bytes": 11589,
-   "lines": 179,
+   "bytes": 12049,
+   "lines": 187,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
@@ -733,7 +733,7 @@
     "skills/detector-response/scripts/tag_and_probe_efficiency.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "c8ade22 2026-10-14"
+   "last_commit": "b1fb312 2026-10-14"
   },
   {
    "path": "skills/hep-analysis/references/analysis-design.md",

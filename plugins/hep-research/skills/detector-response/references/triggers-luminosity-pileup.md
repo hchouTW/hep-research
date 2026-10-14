@@ -7,6 +7,7 @@ with the concrete measurement and reweighting methodology.
 
 ## Trigger efficiency measurement: tag-and-probe
 
+<!-- example: source citation (experiment named as the source of a general method or number) -->
 The standard method for measuring a trigger's (or an object identification/isolation
 requirement's) efficiency directly from data is tag-and-probe: select events with an
 unambiguous, tightly-identified "tag" object (typically satisfying an independent,
@@ -19,7 +20,9 @@ the method is only "almost unbiased", and its bias is measured by applying it to
 simulation and comparing with the truth-counted efficiency (CMS muon performance,
 JINST 7 (2012) P10002, arXiv:1206.4071, section 5.1; opened 2026-10-14). Name the
 tag-probe correlations the measurement must handle:
+<!-- /example -->
 
+<!-- example: source citation (experiment named as the source of a general method or number) -->
 - the probe may be the object that fired the event's trigger, so a trigger efficiency
   needs the tag (not the probe) to have fired it;
 - when both legs can serve as the tag, one event gives two pairs whose outcomes are
@@ -29,6 +32,7 @@ tag-probe correlations the measurement must handle:
   same way;
 - a nearby tag can change the probe's measured efficiency (CMS checks this by tightening
   the tag-probe separation, the same section).
+<!-- /example -->
 
 Efficiency is a ratio of counts (`pass / total`, both from data or side-by-side from
 data and MC for a scale factor), so its uncertainty is binomial, not a
@@ -38,6 +42,7 @@ Clopper-Pearson interval, which applies to unweighted, background-free, independ
 counts only - that is the script's scope. Cross-check any framework-provided efficiency
 uncertainty against it rather than assuming a naive `sqrt(N)/N` treatment was used.
 
+<!-- example: source citation (experiment named as the source of a general method or number) -->
 Background contamination in the probe sample (real tag paired with a misidentified or
 combinatorial probe) biases the measured efficiency, and a background-subtracted pass
 or fail count is no longer a binomial count: Clopper-Pearson does not apply to it. Fit
@@ -46,6 +51,7 @@ a shared signal shape and their own background shapes, and take the efficiency f
 two signal normalizations; its uncertainty then comes from the likelihood and includes
 the background subtraction (CMS, the same section). That fit is a statistical inference:
 hand it to hep-statistics.
+<!-- /example -->
 
 ## Trigger turn-on curves and plateau requirements
 
@@ -107,6 +113,7 @@ reweighting variable:
 weight = data_mu_pdf[mu] / mc_mu_pdf[mu]
 ```
 
+<!-- example: source citation (experiment named as the source of a general method or number) -->
 Why `mu` and not the per-event interaction count: in data, `mu` is what the luminosity
 measurement gives (`L_b = mu f_r / sigma_inel` per bunch, ATLAS, Eur. Phys. J. C 76 (2016)
 653, arXiv:1608.03953, eq. 1; opened 2026-10-14); the number of interactions in a given
@@ -117,6 +124,7 @@ pileup interactions"; CERN Open Data, "CMS pileup simulation",
 count has a wider distribution than the mean, so dividing the data `mu` profile by the
 simulated count profile reweights the wrong distribution. The reconstructed-vertex count
 is worse still: it is resolution- and efficiency-limited.
+<!-- /example -->
 
 `<plugin root>/skills/detector-response/scripts/pileup_reweight.py` implements this from two histograms (data profile, MC
 profile) with the usual failure modes guarded explicitly: a bin with zero MC

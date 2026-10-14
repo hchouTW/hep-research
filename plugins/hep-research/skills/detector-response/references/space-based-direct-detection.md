@@ -17,6 +17,7 @@ correct for, and that have no collider-physics analog.
 
 Space instruments are of two kinds, and they measure different things:
 
+<!-- example: source citation (experiment named as the source of a general method or number) -->
 - **Magnetic spectrometers** (see
   [detector-systems-overview.md](detector-systems-overview.md)) measure rigidity
   `R = pc/(Ze)` from the track curvature, the sign of the charge, and, with an
@@ -31,6 +32,7 @@ Space instruments are of two kinds, and they measure different things:
   arXiv:1909.12860, solves for the incident spectrum with a Bayesian unfolding of the
   deposited-energy bins; opened 2026-10-14). They have no MDR, measure no charge sign
   and so have no charge confusion, and do not separate isotopes.
+<!-- /example -->
 
 Every geomagnetic and solar effect below acts on rigidity, not on energy or momentum
 separately - because both the geomagnetic field's confinement and a Fermi-accelerated
@@ -186,6 +188,7 @@ task from fitting the time-averaged spectrum.
 
 ## Direct-detection composition and the local antiparticle excesses
 
+<!-- example: source citation (experiment named as the source of a general method or number) -->
 Because a space-based magnetic spectrometer measures the charge (with its sign) and,
 with a velocity measurement, the mass (through the PID chain in
 [particle-identification.md](particle-identification.md)), it gives a species and
@@ -212,6 +215,7 @@ excess alone. For numbers, significances and the current status read the bound e
 ledger (for AMS-02: the [antimatter and leptons
 module](../../../profiles/experiments/ams-02/modules/species/antimatter-and-leptons.md), claims C04
 and C96), not this file.
+<!-- /example -->
 
 ## Worked walkthrough: a proton flux point from counts (verified 2026-09-24)
 

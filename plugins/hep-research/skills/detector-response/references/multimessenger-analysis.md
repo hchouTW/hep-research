@@ -31,6 +31,7 @@ A coincidence search requires a **pre-defined time and pointing window**, fixed 
 looking at the data whenever possible (or, if defined afterward, with the
 look-elsewhere correction below applied to whatever choice was made):
 
+<!-- example: source citation (experiment named as the source of a general method or number) -->
 - **Time window**: set by the light-crossing or causality argument for the
   progenitor hypothesis (e.g. a window of +-500 s around a gravitational-wave merger is the common
   choice for prompt neutrino follow-up, from the expected emission duration, not from timing
@@ -46,6 +47,7 @@ look-elsewhere correction below applied to whatever choice was made):
   spatial coincidence must be evaluated against the **chance overlap rate** given both
   localization areas and the sky density of potential unrelated sources of the same
   apparent type, not just "the error regions overlap."
+<!-- /example -->
 
 ## Alert follow-up and public alerts
 
