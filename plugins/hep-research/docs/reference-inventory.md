@@ -133,7 +133,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `agile-development-guide.md` | hep-computing | 10.9 | yes | 8 | physics-ml | f437237 2026-10-13 |
 | `analysis-data-pipelines.md` | hep-computing | 9.8 | no | 5 | hep-analysis | 4665f43 2026-10-13 |
 | `bash-balanced-design-guidelines.md` | hep-computing | 7.6 | yes | 3 | - | 8eefac0 2026-10-13 |
-| `batch-scheduling.md` | hep-computing | 30.4 | yes | 12 | - | a8efae4 2026-10-13 |
+| `batch-scheduling.md` | hep-computing | 30.4 | yes | 12 | - | 6361630 2026-10-14 |
 | `batch-site-cern-htcondor.md` | hep-computing | 11.2 | no | 2 | - | 6815df4 2026-10-10 |
 | `batch-site-nstccore-slurm.md` | hep-computing | 11.5 | no | 1 | - | 22ea71e 2026-10-12 |
 | `cmake-and-build.md` | hep-computing | 2.9 | yes | 5 | - | fe8f71e 2026-10-13 |
@@ -227,7 +227,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `astroparticle-and-cosmic-ray-papers.md` | research-communication | 19.5 | no | 10 | - | 351029c 2026-10-07 |
 | `citation-verification.md` | research-communication | 3.6 | yes | 10 | - | 4665f43 2026-10-13 |
 | `citations-and-bibliography.md` | research-communication | 18.1 | yes | 11 | - | 9546574 2026-10-08 |
-| `claim-evidence-mapping.md` | research-communication | 3.3 | yes | 9 | hep-statistics, hep-theory | 351029c 2026-10-07 |
+| `claim-evidence-mapping.md` | research-communication | 3.8 | yes | 9 | hep-statistics, hep-theory | 351029c 2026-10-07 |
 | `code-review-report.md` | research-communication | 5.4 | no | 3 | - | d41501c 2026-10-12 |
 | `code-to-methodology-synthesis.md` | research-communication | 5.6 | no | 2 | - | 351029c 2026-10-07 |
 | `comment-and-reply-exchange.md` | research-communication | 3.0 | no | 2 | - | 351029c 2026-10-07 |

@@ -214,5 +214,61 @@ class ReviewFixes2Citations(Manuscript):
         self.assertEqual(code, 0, rep)
 
 
+class ReviewFixes2Rounding(Project):
+    """RC-A5, A6, A15: displays are checked against the source with or without a rule; round half up by default."""
+
+    def test_no_rule_accepts_only_a_rounding_of_the_source(self):
+        self.set_source("1.09")
+        self.set_c1_values("1.02", rounding=None)
+        rep = self.claims()
+        self.assertIn("occurrence.value_mismatch", codes(rep, "error"))
+        self.assertEqual(rep["exit_code"], 1)
+
+    def test_no_rule_rounding_is_a_warning_only(self):
+        from communication_lib.claims import _rounds_somehow
+        from decimal import Decimal
+        self.assertTrue(_rounds_somehow(Decimal("1.09"), Decimal("1.1")))
+        self.assertFalse(_rounds_somehow(Decimal("1.09"), Decimal("1.02")))
+        self.set_source("1.0237")
+        self.set_c1_values("1.02", rounding=None)
+        rep = self.claims()
+        self.assertIn("occurrence.value_unrounded_comparison", codes(rep, "warning"))
+        self.assertNotIn("occurrence.value_mismatch", codes(rep))
+
+    def test_malformed_rule_is_an_error(self):
+        for rule in ("decimals:x", "decimals:2:banker", "rounded:2", "decimals:999999"):
+            with self.subTest(rule=rule):
+                self.setUp()
+                self.set_c1_values("1.02", rounding=rule)
+                rep = self.claims()
+                self.assertIn("occurrence.rounding_malformed", codes(rep, "error"), rep["findings"])
+                self.assertEqual(rep["exit_code"], 1)
+
+    def test_default_rounding_is_half_up_and_half_even_is_opt_in(self):
+        from communication_lib.claims import _round
+        self.assertEqual(_round("1.025", "decimals:2"), "1.03")
+        self.assertEqual(_round("1.025", "decimals:2:half-even"), "1.02")
+        self.assertEqual(_round("1.025", "significant:3:half-up"), "1.03")
+        self.set_source("1.025")
+        self.set_c1_values("1.02", rounding="decimals:2")
+        self.assertIn("occurrence.value_mismatch", codes(self.claims(), "error"))
+        self.setUp()
+        self.set_source("1.025")
+        self.set_c1_values("1.02", rounding="decimals:2:half-even")
+        rep = self.claims()
+        self.assertNotIn("occurrence.value_mismatch", codes(rep))
+        self.assertEqual(rep["exit_code"], 0, rep["findings"])
+
+    def test_non_finite_values_are_record_findings(self):
+        for src, shown in (("Infinity", "1.02"), ("NaN", "NaN")):
+            with self.subTest(src=src):
+                self.setUp()
+                self.set_source(src)
+                self.set_c1_values(shown)
+                rep = self.claims()
+                self.assertIn("occurrence.value_not_finite", codes(rep, "error"), rep["findings"])
+                self.assertEqual(rep["exit_code"], 1)
+
+
 if __name__ == "__main__":
     unittest.main()

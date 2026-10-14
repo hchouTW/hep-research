@@ -35,7 +35,7 @@
   },
   "research-communication": {
    "references": 53,
-   "bytes": 377891,
+   "bytes": 378462,
    "uncited": 0
   }
  },
@@ -1077,7 +1077,7 @@
     "tools/check_instruction_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "a8efae4 2026-10-13"
+   "last_commit": "6361630 2026-10-14"
   },
   {
    "path": "skills/hep-computing/references/batch-site-cern-htcondor.md",
@@ -2657,8 +2657,8 @@
   {
    "path": "skills/research-communication/references/claim-evidence-mapping.md",
    "owner": "research-communication",
-   "bytes": 3270,
-   "lines": 60,
+   "bytes": 3800,
+   "lines": 68,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-statistics/references/statistical-inference-for-physics.md",
@@ -2827,7 +2827,7 @@
   {
    "path": "skills/research-communication/references/evidence-linked-writing.md",
    "owner": "research-communication",
-   "bytes": 5168,
+   "bytes": 5209,
    "lines": 67,
    "linked_from_skill_md": true,
    "cited_by": [

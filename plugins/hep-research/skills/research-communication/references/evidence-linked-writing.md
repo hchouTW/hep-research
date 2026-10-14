@@ -31,7 +31,7 @@ schema `<plugin root>/contracts/schemas/ext_communication_traceability.json`, va
 4. Read events (`sources_read`): source id, level, locators read, date. A value quoted from an abstract carries the
    abstract locator; a table not read cannot be cited as read.
 5. Occurrences: where each claim appears (`document_id`, `locator`, exact `passage`, display `value` with `unit` and
-   `rounding` such as `decimals:2`), so the manuscript can be checked against the record, not the record against itself.
+   `rounding` such as `decimals:2`, half up unless `:half-even` is appended), so the manuscript can be checked against the record, not the record against itself.
 6. Assessment, after inspecting the evidence: verdict, rationale, the edge ids relied on, assessor, date,
    `claim_digest` (`contracts.communication.claim_digest`) and `evidence_fingerprints` (`evidence_fingerprint`). A
    wording or scope change, or a changed input hash, makes it stale; re-inspect, then re-pin.

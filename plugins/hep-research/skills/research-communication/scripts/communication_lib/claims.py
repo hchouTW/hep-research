@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import json
 import re
-from decimal import Decimal, InvalidOperation, ROUND_HALF_EVEN
+from decimal import Decimal, InvalidOperation, ROUND_HALF_EVEN, ROUND_HALF_UP
 from pathlib import Path
 
 from communication_lib import numbers as N
@@ -57,27 +57,52 @@ def _locate(doc, locator: str):
     return node, True
 
 
-def _round(value: str, rounding: str | None):
-    """The display form of an exact value under a declared rounding rule, or None when the rule is unknown."""
+MODES = {"half-up": ROUND_HALF_UP, "half-even": ROUND_HALF_EVEN}
+
+
+def parse_rounding(rounding: str) -> tuple[str, int, str]:
+    """(kind, n, mode) of a rule 'decimals:n' or 'significant:n' with an optional ':half-up' (default) or ':half-even';
+    ValueError when malformed."""
+    parts = str(rounding).split(":")
+    if len(parts) not in (2, 3) or parts[0] not in ("decimals", "significant"):
+        raise ValueError(f"unknown rounding rule {rounding!r}: use decimals:n or significant:n[:half-up|half-even]")
     try:
-        d = Decimal(str(value))
-    except InvalidOperation:
-        return None
-    if rounding is None:
-        return None
-    kind, _, n = str(rounding).partition(":")
-    try:
-        n = int(n)
+        n = int(parts[1])
     except ValueError:
+        raise ValueError(f"rounding rule {rounding!r}: {parts[1]!r} is not an integer") from None
+    mode = parts[2] if len(parts) == 3 else "half-up"
+    if mode not in MODES:
+        raise ValueError(f"rounding rule {rounding!r}: mode must be half-up or half-even")
+    if (parts[0] == "significant" and n < 1) or (parts[0] == "decimals" and n < 0) or n > 20:
+        raise ValueError(f"rounding rule {rounding!r}: {parts[0]} must be between {1 if parts[0] == 'significant' else 0} and 20")
+    return parts[0], n, mode
+
+
+def _round(value: str, rounding: str | None):
+    """The display form of an exact value under a declared rounding rule (round half up unless the rule says
+    ':half-even'), or None when the rule is missing or malformed or the value is not a finite number."""
+    d = N.to_decimal(value)
+    if d is None or rounding is None:
         return None
-    if kind == "decimals":
-        return str(d.quantize(Decimal(1).scaleb(-n), rounding=ROUND_HALF_EVEN))
-    if kind == "significant" and n > 0:
+    try:
+        kind, n, mode = parse_rounding(rounding)
+        if kind == "decimals":
+            return str(d.quantize(Decimal(1).scaleb(-n), rounding=MODES[mode]))
         if d == 0:
             return "0"
-        exp = d.adjusted() - n + 1
-        return str(d.quantize(Decimal(1).scaleb(exp), rounding=ROUND_HALF_EVEN))
-    return None
+        return str(d.quantize(Decimal(1).scaleb(d.adjusted() - n + 1), rounding=MODES[mode]))
+    except (ValueError, InvalidOperation):
+        return None
+
+
+def _rounds_somehow(source: Decimal, shown: Decimal) -> bool:
+    """With no declared rule: the display equals the source rounded (half up or half even) to the display's own last
+    digit, so 1.1 is a rounding of 1.09 and 1.02 is not."""
+    try:
+        q = Decimal(1).scaleb(shown.as_tuple().exponent)
+        return any(source.quantize(q, rounding=m) == shown for m in MODES.values())
+    except InvalidOperation:
+        return False
 
 
 def _same_number(a: str, b: str) -> bool:
@@ -254,12 +279,35 @@ def audit_claims(record: dict, context: dict, policy: dict) -> dict:
                         f"occurrence {o.get('id')} displays unit {ov.get('unit')!r}, the source value is in {fact['unit']!r}; no conversion is recorded",
                         "record the conversion (factor, justification) or display the source unit")
                     continue
+                src_d, shown_d = N.to_decimal(val), N.to_decimal(ov.get("value"))
+                if src_d is None or shown_d is None:
+                    add("occurrence.value_not_finite", "error", owhere,
+                        f"occurrence {o.get('id')} compares display {ov.get('value')!r} with source {val!r}: both must be finite numbers",
+                        "record finite numbers; a NaN or an infinity is never a displayable result")
+                    continue
+                if ov.get("rounding") is None:
+                    if src_d == shown_d:
+                        continue
+                    if _rounds_somehow(src_d, shown_d):
+                        add("occurrence.value_unrounded_comparison", "warning", owhere,
+                            f"occurrence {o.get('id')} displays {ov.get('value')!r}, a rounding of the source value {val!r}, but no rounding rule is declared",
+                            "declare the rounding (decimals:n or significant:n) so the display can be checked")
+                    else:
+                        add("occurrence.value_mismatch", "error", owhere,
+                            f"occurrence {o.get('id')} displays {ov.get('value')!r}, which is no rounding of the source value {val!r}",
+                            "update the display value to the authoritative source value")
+                    continue
+                try:
+                    parse_rounding(ov.get("rounding"))
+                except ValueError as exc:
+                    add("occurrence.rounding_malformed", "error", owhere, f"occurrence {o.get('id')}: {exc}",
+                        "write the rule as decimals:n or significant:n, optionally :half-up (default) or :half-even")
+                    continue
                 shown = _round(str(val), ov.get("rounding"))
                 if shown is None:
-                    if not _same_number(str(ov.get("value")), str(val)):
-                        add("occurrence.value_unrounded_comparison", "warning", owhere,
-                            f"occurrence {o.get('id')} displays {ov.get('value')!r}, the source value is {val!r}, and no rounding rule is declared",
-                            "declare the rounding (decimals:n or significant:n) so the display can be checked; not corrected automatically")
+                    add("occurrence.rounding_malformed", "error", owhere,
+                        f"occurrence {o.get('id')}: the source value {val!r} cannot be rounded under {ov.get('rounding')!r}",
+                        "use a rule the value can be rounded to")
                 elif not _same_number(str(ov.get("value")), shown):
                     add("occurrence.value_mismatch", "error", owhere,
                         f"occurrence {o.get('id')} displays {ov.get('value')!r}, the source value {val!r} rounds to {shown!r} under {ov.get('rounding')}",

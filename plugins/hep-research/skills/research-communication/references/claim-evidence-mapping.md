@@ -27,6 +27,14 @@ assumptions; support verdict; gap; proposed action. Evidence may be a figure,
 table, derivation, controlled comparison, or external source. Its mere presence
 does not establish that it tests the claim.
 
+Displayed numbers: an occurrence records its display `value` and a `rounding`
+rule, `decimals:n` or `significant:n`, rounding half up by default (1.025 to two
+decimals is 1.03); append `:half-even` (`decimals:2:half-even`) when the venue or
+collaboration rounds half to even. A display without a rule passes only if it is
+a rounding of the source to its own last digit (1.1 for 1.09, not 1.02), and is
+then flagged so the rule gets declared. A malformed rule, or a NaN or infinite
+value, is an error, never a skipped comparison.
+
 ## Checking evidence against claim type
 
 Check whether the evidence addresses the exact claim:
