@@ -9,7 +9,7 @@ What it does: for a radiator of refractive index n it computes each species' thr
 momentum, the Cherenkov angle and its saturation value, the expected photon yield, the
 probability of no photon at all, the per-track angular resolution, and the resulting
 velocity and mass resolution, plus the separation in sigma between two species at one
-momentum. It does not scan momentum; for a separation ceiling pass the
+momentum (or rigidity). It does not scan momentum; for a separation ceiling pass the
 relative_beta_resolution to <plugin root>/skills/detector-response/scripts/pid_separation_power.py --mode velocity.
 
 Photon regimes (per species, from the expected photon number N): none for N < 0.5, few
@@ -21,9 +21,13 @@ relative_beta_resolution for the few-photon species.
 
 Usage notes / assumptions: standard library only. Momenta in GeV/c, masses in GeV/c^2,
 radiator length in cm, angles reported in both radians and milliradians. Photon yield
-uses the figure-of-merit form N = N0 * L * sin^2(theta_c), with N0 in cm^-1 folding in
-photon-detection efficiency and the accepted wavelength band - it is a design estimate,
-not a simulation. Per-track resolution is sqrt(sigma_photon^2/N + sigma_track^2); the
+uses the figure-of-merit form N = N0 * L * z^2 * sin^2(theta_c), with z the projectile charge
+number (Frank-Tamm: the yield scales with z^2) and N0 in cm^-1 folding in photon-detection
+efficiency and the accepted wavelength band - it is a design estimate, not a simulation.
+Species are a name (He3 and He4 carry z=2), a mass, or mass:charge (e.g. 3.727:2). With
+--rigidity R each species is evaluated at its own momentum p = zR; the threshold and the
+angle depend on beta only, so the threshold momentum m/sqrt(n^2-1) is charge-independent and
+the threshold rigidity is that momentum divided by z. Per-track resolution is sqrt(sigma_photon^2/N + sigma_track^2); the
 track term (--track-resolution, default 0) covers track direction and other errors that
 do not average down with N. Chromatic dispersion is represented only through the
 single-photon angular resolution supplied by the user; n is treated as a single number.
@@ -40,7 +44,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from pid_separation_power import MASSES_GEV, kinematics, resolve_mass  # noqa: E402
+from pid_separation_power import MASSES_GEV, kinematics, resolve_species  # noqa: E402
 
 # Expected-photon thresholds between the none / few / gaussian regimes (provisional).
 FEW_PHOTONS = 0.5
@@ -89,11 +93,18 @@ def cherenkov_angle(momentum_gev, mass_gev, index):
     return math.acos(cosine)
 
 
-def photon_yield(angle_rad, radiator_length_cm, figure_of_merit_per_cm):
-    """N = N0 * L * sin^2(theta_c), the standard design estimate."""
+def _charge(charge):
+    if isinstance(charge, bool) or not isinstance(charge, int) or charge < 1:
+        raise ValueError('charge must be an integer of at least 1')
+    return charge
+
+
+def photon_yield(angle_rad, radiator_length_cm, figure_of_merit_per_cm, charge=1):
+    """N = N0 * L * z^2 * sin^2(theta_c), the standard design estimate (z = charge number)."""
     radiator_length_cm = _positive(radiator_length_cm, 'radiator_length')
     figure_of_merit_per_cm = _positive(figure_of_merit_per_cm, 'figure_of_merit')
-    return figure_of_merit_per_cm * radiator_length_cm * math.sin(angle_rad) ** 2
+    charge = _charge(charge)
+    return figure_of_merit_per_cm * radiator_length_cm * charge * charge * math.sin(angle_rad) ** 2
 
 
 def photon_regime(photons):
@@ -128,16 +139,20 @@ def beta_resolution_from_angle(angle_rad, sigma_angle_rad):
 
 
 def describe_species(momentum_gev, mass_gev, index, radiator_length_cm,
-                     figure_of_merit_per_cm, single_photon_sigma_rad, track_sigma_rad=0.0):
-    """Full per-species RICH response at one momentum."""
+                     figure_of_merit_per_cm, single_photon_sigma_rad, track_sigma_rad=0.0, charge=1):
+    """Full per-species RICH response at one momentum, for a projectile of charge number z."""
+    charge = _charge(charge)
     kin = kinematics(momentum_gev, mass_gev)
     threshold = threshold_momentum(mass_gev, index)
     angle = cherenkov_angle(momentum_gev, mass_gev, index)
     record = {
         'mass_gev': mass_gev,
+        'charge': charge,
+        'momentum_gev': momentum_gev,
         'beta': kin['beta'],
         'gamma': kin['gamma'],
         'threshold_momentum_gev': threshold,
+        'threshold_rigidity_gv': threshold / charge,
         # Kinematic threshold only; whether a ring is seen depends on photon_regime.
         'above_threshold': angle is not None,
     }
@@ -146,7 +161,7 @@ def describe_species(momentum_gev, mass_gev, index, radiator_length_cm,
                        'note': 'below Cherenkov threshold in this radiator; no ring is produced'})
         return record
 
-    photons = photon_yield(angle, radiator_length_cm, figure_of_merit_per_cm)
+    photons = photon_yield(angle, radiator_length_cm, figure_of_merit_per_cm, charge)
     regime = photon_regime(photons)
     record.update({
         'cherenkov_angle_rad': angle,
@@ -183,8 +198,12 @@ def main():
     parser.add_argument('--index', type=float, required=True,
                         help='radiator refractive index (must exceed 1)')
     parser.add_argument('--species', nargs=2, required=True, metavar=('A', 'B'),
-                        help=f'two of {sorted(MASSES_GEV)}, or masses in GeV/c^2')
-    parser.add_argument('--momentum', type=float, default=10.0, help='GeV/c (default 10)')
+                        help=f'two of {sorted(MASSES_GEV)} (He3 and He4 carry z=2), masses in '
+                             'GeV/c^2, or mass:charge')
+    given = parser.add_mutually_exclusive_group()
+    given.add_argument('--momentum', type=float, default=None, help='GeV/c (default 10)')
+    given.add_argument('--rigidity', type=float, default=None,
+                       help='GV; each species then has p = z * R')
     parser.add_argument('--radiator-length', type=float, default=2.0,
                         dest='radiator_length', help='radiator thickness in cm (default 2)')
     parser.add_argument('--figure-of-merit', type=float, default=100.0,
@@ -204,18 +223,24 @@ def main():
 
     try:
         index = validate_index(args.index)
-        mass_a = resolve_mass(args.species[0])
-        mass_b = resolve_mass(args.species[1])
-        if mass_a == mass_b:
-            raise ValueError('the two species must have different masses')
+        mass_a, charge_a = resolve_species(args.species[0])
+        mass_b, charge_b = resolve_species(args.species[1])
+        if (mass_a, charge_a) == (mass_b, charge_b):
+            raise ValueError('the two species must differ in mass or charge')
+        if args.rigidity is not None:
+            rigidity = _positive(args.rigidity, 'rigidity')
+            momentum_a, momentum_b = charge_a * rigidity, charge_b * rigidity
+        else:
+            momentum = 10.0 if args.momentum is None else args.momentum
+            momentum_a = momentum_b = momentum
         sigma_photon = _positive(args.single_photon_resolution,
                                  'single_photon_resolution') / 1000.0
         if not math.isfinite(args.track_resolution) or args.track_resolution < 0:
             raise ValueError('track_resolution must be finite and nonnegative')
         common = (index, args.radiator_length, args.figure_of_merit, sigma_photon,
                   args.track_resolution / 1000.0)
-        record_a = describe_species(args.momentum, mass_a, *common)
-        record_b = describe_species(args.momentum, mass_b, *common)
+        record_a = describe_species(momentum_a, mass_a, *common, charge=charge_a)
+        record_b = describe_species(momentum_b, mass_b, *common, charge=charge_b)
     except ValueError as exc:
         parser.error(str(exc))
 
@@ -226,7 +251,9 @@ def main():
         convention, reference = 'delta_over_sigma_of_species_a', args.species[0]
     payload = {
         'refractive_index': index,
-        'momentum_gev': args.momentum,
+        'input_variable': 'rigidity' if args.rigidity is not None else 'momentum',
+        'momentum_gev': None if args.rigidity is not None else momentum_a,
+        'rigidity_gv': args.rigidity,
         'saturation_angle_mrad': saturation_angle(index) * 1000.0,
         'species_a': record_a,
         'species_b': record_b,

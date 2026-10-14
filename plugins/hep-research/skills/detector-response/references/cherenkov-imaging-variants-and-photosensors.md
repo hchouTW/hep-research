@@ -58,9 +58,9 @@ and ice (large volumes, optics dominated by absorption/scattering, e.g.
   per-track angle residual versus momentum.
 - **Scaling** (approximate; PDG Review of Particle Physics, "Passage of particles
   through matter", Cherenkov radiation, and "Particle detectors at accelerators",
-  Cherenkov detectors): photoelectron yield `N_pe = N_0 L sin^2 theta_C` for radiator
+  Cherenkov detectors): photoelectron yield `N_pe = N_0 L z^2 sin^2 theta_C` for radiator
   length `L` and detector figure of merit `N_0` (cm^-1; it folds in the photon yield,
-  optics and quantum efficiency), from a raw emission of about `490 sin^2 theta_C`
+  optics and quantum efficiency), from a raw emission of about `490 z^2 sin^2 theta_C`
   photons/cm between 400 and 700 nm; per-track angle resolution
   `sigma_theta = sqrt(sigma_photon^2/N_pe + sigma_trk^2)`, where `sigma_trk` is the
   contribution of the track direction and other terms common to all photons, which

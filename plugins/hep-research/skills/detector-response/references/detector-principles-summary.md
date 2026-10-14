@@ -65,7 +65,7 @@ defect bias a final physics result?
 | 4 | `theta_0 = (13.6 MeV/(beta c p)) z sqrt(x/X_0) [1 + 0.038 ln(x z^2/(X_0 beta^2))]` | Highland multiple scattering (approximate, ~11% for `1e-3 < x/X_0 < 100`); sets the low-momentum resolution floor |
 | 5 | Bethe-Bloch: `-<dE/dx> = K z^2 (Z/A)(1/beta^2)[0.5 ln(2 m_e c^2 beta^2 gamma^2 W_max/I^2) - beta^2 - delta/2]`, `K = 0.307 MeV mol^-1 cm^2` | Mean loss for heavy charged particles at intermediate energy (approximate). Fluctuations: Landau/Vavilov (asymmetric, long tail) for thin absorbers (`kappa = xi/W_max << 1`), Gaussian for thick ones |
 | 6 | `v_d = mu E`; `sigma = sqrt(2 D L/v_d) = C_D sqrt(L)` | Drift and diffusion (low-field, approximate; real gases need measured `v_d(E,B,T,P)` and `C_D`) |
-| 7 | `cos theta_C = 1/(n beta)`; `p_th = m c/sqrt(n^2-1)`; `d^2N/(dx dE) ≈ 370 sin^2 theta_C eV^-1 cm^-1` | Cherenkov angle, threshold, and yield before detection efficiency |
+| 7 | `cos theta_C = 1/(n beta)`; `p_th = m c/sqrt(n^2-1)`; `d^2N/(dx dE) ≈ 370 z^2 sin^2 theta_C eV^-1 cm^-1` (`z` projectile charge number) | Cherenkov angle, threshold, and yield before detection efficiency |
 | 8 | `beta = L/(c t)`; `m^2 = p^2 (1/beta^2 - 1)` | TOF; `L` is the track path length; separation falls as `1/p^2` |
 | 9 | `sigma_E/E = a/sqrt(E) ⊕ b/E ⊕ c` | Calorimeter resolution (⊕ = quadrature sum): stochastic, noise, constant (empirical) |
 | 10 | `sigma/N ≈ sqrt(F/N_pe)` | Photostatistics with excess-noise factor `F >= 1` (Poisson-limited) |

@@ -80,7 +80,7 @@ clusters in the waveform (rate, diffusion, and electronics limits).
 
 **Cherenkov radiation (exact kinematics; approximate yield)**: emission when
 `beta > 1/n` with `cos theta_C = 1/(n beta)`; threshold `p_th = m c/sqrt(n^2 - 1)`;
-number of photons per unit path per energy `d^2N/(dx dE) ≈ 370 sin^2 theta_C  eV^-1 cm^-1`
+number of photons per unit path per energy `d^2N/(dx dE) ≈ 370 z^2 sin^2 theta_C eV^-1 cm^-1` for a projectile of charge number `z`
 (before detection efficiency). In gas and aerogel RICH radiators the yield is small (of order
 tens of detected photons per track), so `N_pe` is the dominant performance limit there;
 thicker or denser radiators (water Cherenkov, lead glass, quartz bars) give more

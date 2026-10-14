@@ -5,7 +5,7 @@
  "by_skill": {
   "detector-response": {
    "references": 34,
-   "bytes": 395520,
+   "bytes": 395639,
    "uncited": 0
   },
   "hep-analysis": {
@@ -90,7 +90,7 @@
   {
    "path": "skills/detector-response/references/cherenkov-imaging-variants-and-photosensors.md",
    "owner": "detector-response",
-   "bytes": 10559,
+   "bytes": 10567,
    "lines": 154,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -111,7 +111,7 @@
   {
    "path": "skills/detector-response/references/core-detector-equations.md",
    "owner": "detector-response",
-   "bytes": 5918,
+   "bytes": 5953,
    "lines": 41,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -246,7 +246,7 @@
   {
    "path": "skills/detector-response/references/detector-principles-summary.md",
    "owner": "detector-response",
-   "bytes": 22527,
+   "bytes": 22562,
    "lines": 288,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -615,7 +615,7 @@
   {
    "path": "skills/detector-response/references/signal-formation-and-readout.md",
    "owner": "detector-response",
-   "bytes": 15333,
+   "bytes": 15374,
    "lines": 225,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -1077,7 +1077,7 @@
     "tools/check_instruction_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "a8efae4 2026-10-13"
+   "last_commit": "6361630 2026-10-14"
   },
   {
    "path": "skills/hep-computing/references/batch-site-cern-htcondor.md",
@@ -3379,9 +3379,9 @@
   {
    "a": "skills/detector-response/references/core-detector-equations.md",
    "b": "skills/detector-response/references/detector-principles-summary.md",
-   "jaccard": 0.042,
-   "containment": 0.176,
-   "shared_shingles": 162
+   "jaccard": 0.043,
+   "containment": 0.181,
+   "shared_shingles": 168
   }
  ],
  "name_groups": {

@@ -129,7 +129,6 @@ class CherenkovChargeTests(unittest.TestCase):
     HE4_PHOTONS = 68.07557496982115
     HE4_SIGMA_MRAD = 0.6060024015969153
 
-    @unittest.expectedFailure  # pending DR-WP1-01
     def test_helium_yield_scales_with_z_squared(self):
         payload = run_json(self, 'cherenkov_angle.py', '--index', '1.05', '--species', 'p', 'He4',
                            '--momentum', '40')
@@ -141,13 +140,11 @@ class CherenkovChargeTests(unittest.TestCase):
         self.assertAlmostEqual(he4['threshold_momentum_gev'], 11.642377257681904, delta=1e-9)
         self.assertAlmostEqual(he4['cherenkov_angle_rad'], 0.2960136491360844, delta=1e-12)
 
-    @unittest.expectedFailure  # pending DR-WP1-01
     def test_mass_colon_charge_syntax_is_accepted(self):
         payload = run_json(self, 'cherenkov_angle.py', '--index', '1.05', '--species', 'p',
                            '3.72737940:2', '--momentum', '40')
         self.assertAlmostEqual(payload['species_b']['expected_photons'], self.HE4_PHOTONS, delta=1e-9)
 
-    @unittest.expectedFailure  # pending DR-WP1-01
     def test_rigidity_input_gives_p_equals_z_r(self):
         payload = run_json(self, 'cherenkov_angle.py', '--index', '1.05', '--species', 'p', 'He4',
                            '--rigidity', '20')
