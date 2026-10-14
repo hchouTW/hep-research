@@ -23,7 +23,11 @@ K = 4 pi N_A r_e^2 m_e c^2 = 0.307075 MeV mol^-1 cm^2
 `z` projectile charge, `Z/A` medium (mol/g), `I` mean excitation energy, `W_max`
 maximum energy transfer, `delta` the density-effect correction. Parameters come from
 tabulated fits (PDG), not from data. It fails below `beta gamma ~ 0.05-0.1`
-(shell, Barkas, and charge-exchange corrections) and, for muons, above `~ 1000`
+(shell, Barkas, and charge-exchange corrections; PDG adds the shell term `-C/Z`, the
+Barkas term `z L1` and the Bloch term `z^2 L2` inside the bracket, so they scale as `z^3`
+and `z^4` overall and matter most for nuclei, and the corrected formula holds to about 1%
+down to `beta ≈ 0.05`; for slower protons and alphas use the NIST PSTAR and ASTAR
+stopping-power and range tables (PSTAR covers 1 keV to 10 GeV protons)) and, for muons, above `~ 1000`
 (PDG passage-of-particles review: radiative losses take over near the muon critical
 energy, a few hundred GeV in iron/copper). Electrons are not described by this formula
 at all (different kinematics; bremsstrahlung dominates above the electron critical energy, from
@@ -71,8 +75,12 @@ clusters in the waveform (rate, diffusion, and electronics limits).
 - **Scintillation.** Light yield `N_gamma = Y E` (photons/MeV; material dependent),
   decay-time spectrum (fast + slow components). **Quenching**: yield per unit energy is
   not linear at high `dE/dx` (Birks-type; `dL/dx = S (dE/dx)/(1 + kB dE/dx)`,
-  empirical), so heavy ions, alphas, and nuclear recoils give less light than electrons
-  of the same energy - the origin of "electron-equivalent" versus nuclear-recoil energy
+  empirical), so heavy ions and alphas give less light than electrons of the same
+  energy. For nuclear recoils the larger effect is Lindhard quenching: only a fraction
+  `L` of the recoil energy goes into electronic excitation (PDG RPP 2025, sec. 36: `L`
+  about 0.2-0.25 in liquid argon and 0.15-0.2 in liquid xenon for 3-100 keV recoils), and
+  in noble liquids recombination also changes the split between light and charge.
+  Together these are the origin of "electron-equivalent" versus nuclear-recoil energy
   scales ([noble liquid neutrino and rare event detectors](noble-liquid-neutrino-and-rare-event-detectors.md)).
 - **Attenuation.** Light reaching a photosensor at distance `L`: `~ exp(-L/lambda_att)`
   plus geometric losses; a position-dependent gain that must be measured or corrected;
@@ -93,8 +101,12 @@ thicker or denser radiators (water Cherenkov, lead glass, quartz bars) give more
 ([particle identification](particle-identification.md), [cherenkov imaging variants and photosensors](cherenkov-imaging-variants-and-photosensors.md)).
 
 **Transition radiation.** Emitted when a relativistic particle crosses interfaces
-between media of different dielectric constants; the yield rises with Lorentz factor
-`gamma` and onsets near `gamma ~ 10^3`, so it separates electrons from hadrons only at
+between media of different dielectric constants; the yield (proportional to `z^2`)
+rises with Lorentz factor `gamma`, with an onset near `gamma ~ 10^3` and, for a foil stack,
+saturation from interference above `gamma_sat`; both are set by the foil thickness, the
+spacing and the foil plasma frequency (`gamma_thr ~ l1 omega1/c`,
+`gamma_sat ~ 0.6 omega1 sqrt(l1 l2)/c`), and most detectors choose `gamma_sat ≈ 3000`
+(PDG RPP 2025, secs. 34.7.3 and 35.6.5). It separates electrons from hadrons only at
 momenta where the hadron is below threshold. X-rays are absorbed in the same gas as
 the ionization signal (mind the overlap in likelihood; [particle identification](particle-identification.md)).
 
@@ -122,7 +134,11 @@ position reconstruction and calibrated with tracks ([tracking and vertexing](tra
 [gaseous and specialized tracking technologies](gaseous-and-specialized-tracking-technologies.md)).
 
 **Avalanche gain.** In proportional gas, `G = exp(int alpha dx)` (Townsend `alpha`);
-gain fluctuates with a Polya (approximately exponential) distribution; gain depends
+gain fluctuates: the single-electron gain follows a Polya distribution with relative
+variance `1/(1+theta)`; the exponential (Furry, `theta = 0`) is its limit when ionization is
+memoryless, and measurements in Micromegas and GEMs at high `E/P` and gain need
+`theta > 0` (Micromegas: relative variance 0.31, Zerguerras et al., NIM A608 (2009) 397;
+form from NEWS-G, arXiv:1902.08960, eq. 1); `theta` depends on gas, geometry and field. Gain depends
 exponentially on voltage and, through the gas density (proportional to `P/T`; the
 gain follows the reduced field `E/N`, proportional to `E*T/P`), on temperature and pressure
 (the sensitivity is gas- and voltage-specific and must be measured) - hence
