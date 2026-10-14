@@ -118,7 +118,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `timing-detectors.md` | detector-response | 8.6 | no | 7 | - | d8bec60 2026-10-13 |
 | `tracking-and-vertexing.md` | detector-response | 13.1 | no | 14 | research-communication | b944a23 2026-10-13 |
 | `triggers-luminosity-pileup.md` | detector-response | 9.3 | no | 12 | - | d8bec60 2026-10-13 |
-| `analysis-design.md` | hep-analysis | 10.3 | yes | 13 | detector-response, hep-computing | 4665f43 2026-10-13 |
+| `analysis-design.md` | hep-analysis | 10.3 | yes | 13 | detector-response, hep-computing | 084c273 2026-10-14 |
 | `analysis-validation.md` | hep-analysis | 4.4 | no | 5 | detector-response, hep-computing | 351029c 2026-10-07 |
 | `backgrounds.md` | hep-analysis | 4.7 | no | 17 | detector-response | 633d6c9 2026-10-13 |
 | `correction-chain.md` | hep-analysis | 9.6 | no | 4 | - | 4665f43 2026-10-13 |
@@ -140,7 +140,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `cpp-balanced-design-guidelines.md` | hep-computing | 6.6 | yes | 4 | physics-ml | 8eefac0 2026-10-13 |
 | `crash-and-memory-debugging.md` | hep-computing | 8.2 | no | 6 | - | 80a8344 2026-10-13 |
 | `design-and-estimation.md` | hep-computing | 5.1 | no | 3 | - | f437237 2026-10-13 |
-| `engineering-playbook.md` | hep-computing | 10.4 | yes | 3 | - | 4665f43 2026-10-13 |
+| `engineering-playbook.md` | hep-computing | 10.4 | yes | 3 | - | 084c273 2026-10-14 |
 | `environments-and-containers.md` | hep-computing | 4.0 | no | 3 | - | efa283c 2026-10-13 |
 | `example-authoring.md` | hep-computing | 20.0 | no | 7 | physics-ml | 351029c 2026-10-07 |
 | `host-notes.md` | hep-computing | 5.6 | no | 2 | - | 364918e 2026-10-09 |
@@ -162,7 +162,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `task-quality-checklist.md` | hep-computing | 3.0 | no | 4 | - | 351029c 2026-10-07 |
 | `validation-and-done.md` | hep-computing | 3.7 | yes | 6 | - | 351029c 2026-10-07 |
 | `astroparticle-statistics.md` | hep-statistics | 11.3 | no | 12 | detector-response, hep-analysis | 33d96a1 2026-10-13 |
-| `combinations.md` | hep-statistics | 4.5 | no | 1 | - | 591e7d0 2026-10-13 |
+| `combinations.md` | hep-statistics | 4.5 | no | 1 | - | 084c273 2026-10-14 |
 | `core-stats-commands.md` | hep-statistics | 33.5 | no | 4 | hep-analysis | d058154 2026-10-13 |
 | `core-stats-guide.md` | hep-statistics | 16.9 | yes | 10 | hep-analysis | 1909d51 2026-10-13 |
 | `inference-recipes.md` | hep-statistics | 18.2 | no | 8 | detector-response, hep-analysis | 1386866 2026-10-13 |
