@@ -319,6 +319,7 @@ value comes from a search engine's copy of that official page.
 | Venue | Rule(s) checked | Source | Last verified |
 |---|---|---|---|
 | PRL / PRD / PRC | length limits, word equivalents | https://journals.aps.org/authors/length-guide | 2026-09 |
+| PRL / PRC / PRD | Comment or Reply: 750 / 1,500 / 3,500 words | https://journals.aps.org/authors/length-guide | 2026-10-14 |
 | PRL | 600-character abstract, 3,750 words | https://journals.aps.org/prl/info/infoL.html | 2026-09 |
 | APS | PACS dropped, PhySH | PRL editorial 10.1103/PhysRevLett.116.080001 (2016) | 2026-09 |
 | APS | run-in heads in PRL | APS Journals Style Guide for Authors (November 2024) | 2026-09 |

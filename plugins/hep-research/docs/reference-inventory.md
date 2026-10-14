@@ -238,7 +238,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `diagrams-hep.md` | research-communication | 5.9 | no | 2 | - | 351029c 2026-10-07 |
 | `diagrams-statistics.md` | research-communication | 6.2 | no | 2 | - | 351029c 2026-10-07 |
 | `equation-and-notation-auditing.md` | research-communication | 3.9 | no | 5 | hep-statistics, hep-theory | d3212bd 2026-10-12 |
-| `erratum-and-corrigendum-drafting.md` | research-communication | 4.4 | no | 2 | - | 351029c 2026-10-07 |
+| `erratum-and-corrigendum-drafting.md` | research-communication | 4.4 | no | 2 | - | cbadba4 2026-10-14 |
 | `evidence-linked-writing.md` | research-communication | 5.2 | yes | 4 | - | 03e1ac2 2026-10-14 |
 | `figures-and-tables.md` | research-communication | 9.2 | no | 7 | - | 351029c 2026-10-07 |
 | `general-diagram-principles.md` | research-communication | 7.7 | no | 2 | - | 351029c 2026-10-07 |
