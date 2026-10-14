@@ -14,7 +14,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-statistics | 11 | 150 | 0 |
 | hep-theory | 11 | 78 | 0 |
 | physics-ml | 38 | 257 | 0 |
-| research-communication | 56 | 388 | 0 |
+| research-communication | 56 | 390 | 0 |
 
 ## Overlapping pairs
 
@@ -226,7 +226,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `artifact-packaging-for-release.md` | research-communication | 2.9 | no | 3 | - | ecc929c 2026-10-14 |
 | `astroparticle-and-cosmic-ray-papers.md` | research-communication | 13.4 | no | 10 | - | ecc929c 2026-10-14 |
 | `citation-verification.md` | research-communication | 3.9 | yes | 11 | - | ecc929c 2026-10-14 |
-| `citations-and-bibliography.md` | research-communication | 18.6 | yes | 11 | - | ecc929c 2026-10-14 |
+| `citations-and-bibliography.md` | research-communication | 19.9 | yes | 11 | - | ecc929c 2026-10-14 |
 | `claim-evidence-mapping.md` | research-communication | 4.0 | yes | 9 | hep-statistics, hep-theory | ecc929c 2026-10-14 |
 | `code-review-report.md` | research-communication | 5.5 | no | 3 | - | ecc929c 2026-10-14 |
 | `code-to-methodology-synthesis.md` | research-communication | 5.7 | no | 2 | - | ecc929c 2026-10-14 |
@@ -272,7 +272,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `revision-impact-tracking.md` | research-communication | 4.0 | no | 12 | - | ecc929c 2026-10-14 |
 | `scientific-style.md` | research-communication | 11.5 | no | 13 | hep-statistics | 96f737e 2026-10-14 |
 | `statistics-and-ml-papers.md` | research-communication | 14.1 | no | 8 | - | ecc929c 2026-10-14 |
-| `submission-and-peer-review.md` | research-communication | 15.6 | no | 10 | - | ecc929c 2026-10-14 |
+| `submission-and-peer-review.md` | research-communication | 16.0 | no | 10 | - | d208b51 2026-10-14 |
 | `supplementary-material-planning.md` | research-communication | 2.1 | no | 1 | - | ecc929c 2026-10-14 |
 | `systematic-review-screening.md` | research-communication | 3.1 | no | 2 | - | ecc929c 2026-10-14 |
 | `thesis-by-publication-assembly.md` | research-communication | 3.9 | no | 2 | - | ecc929c 2026-10-14 |

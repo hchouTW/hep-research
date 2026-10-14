@@ -35,7 +35,7 @@
   },
   "research-communication": {
    "references": 56,
-   "bytes": 388475,
+   "bytes": 390132,
    "uncited": 0
   }
  },
@@ -2641,8 +2641,8 @@
   {
    "path": "skills/research-communication/references/citations-and-bibliography.md",
    "owner": "research-communication",
-   "bytes": 18570,
-   "lines": 303,
+   "bytes": 19863,
+   "lines": 320,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/research-communication/SKILL.md",
@@ -3366,8 +3366,8 @@
   {
    "path": "skills/research-communication/references/submission-and-peer-review.md",
    "owner": "research-communication",
-   "bytes": 15617,
-   "lines": 245,
+   "bytes": 15981,
+   "lines": 250,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -3382,7 +3382,7 @@
     "tests/skills/research_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ecc929c 2026-10-14"
+   "last_commit": "d208b51 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/supplementary-material-planning.md",

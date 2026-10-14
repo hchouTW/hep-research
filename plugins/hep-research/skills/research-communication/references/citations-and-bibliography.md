@@ -233,6 +233,23 @@ live:
   a collaboration data-release URL, or a Zenodo/institutional DOI) rather than a
   vague "data available upon request," which most venues now discourage or forbid.
 
+### Preparing a HEPData record
+
+Sources: [hepdata_lib](https://github.com/HEPData/hepdata_lib) and the
+[submission format](https://hepdata-submission.readthedocs.io/en/latest/submission_yaml.html) (opened 2026-10-14).
+
+- `hepdata_lib` (Python, MIT licence; installed only with the user's approval) builds the submission from
+  arrays or ROOT objects; the code that runs it is hep-computing's.
+- `submission.yaml` lists one entry per table: a `name` (64 characters or less), a `description` close to the
+  figure or table caption, `keywords`, the `data_file`, and optionally its `location` in the paper ("Figure 8A"),
+  a `data_license` and `additional_resources` (code, ROOT files, likelihoods in HistFactory format).
+- One table per figure panel or paper table, with the same binning and units as the paper; give the covariance
+  (or correlation) matrix of the bins as its own table when the paper's uncertainties are correlated.
+- The record is linked to the paper's INSPIRE record; cite the HEPData record (its DOI) in the paper's data
+  availability statement.
+- Analysis preservation and reinterpretation (Rivet routines, REANA workflows, CERN Analysis Preservation) are
+  hep-analysis's (the analysis logic) and hep-computing's (the workflow); this skill only cites and describes them.
+
 ## Citing an accompanying Viewpoint or Synopsis
 
 A result covered by an APS *Physics Magazine* Viewpoint/Synopsis, a Nature "News &

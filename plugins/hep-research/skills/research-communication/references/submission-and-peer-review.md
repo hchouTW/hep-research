@@ -105,6 +105,11 @@ publication committee or spokesperson signs off. When helping at this stage:
   needs the reviewers to approve it again; flag it rather than editing quietly.
 - Use the collaboration's author list, acknowledgments and boilerplate as
   supplied (see "Authorship and contributions"); never regenerate them.
+- Author lists of large collaborations come as exports from the collaboration's
+  author database (a LaTeX file with names, affiliations and, where collected,
+  ORCID iDs) and use the class's collaboration macro (REVTeX `\collaboration`,
+  `latex-venue-setup.md`); include them as delivered, and ask for ORCID iDs the
+  venue requires rather than looking them up.
 
 ## arXiv submission mechanics
 
