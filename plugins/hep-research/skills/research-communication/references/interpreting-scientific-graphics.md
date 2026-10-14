@@ -67,6 +67,10 @@ Each plot type has a specific thing readers most often misread:
   pixel-read value with more precision than the reading method supports.
   This is the same discipline `manuscript-consistency-auditing.md` requires
   when comparing a pixel-read value against a stated one.
+- Reading is not computing: a value the plot shows may be read (approximate,
+  method stated); a new significance, limit, interval or fit value derived
+  from plotted values may not, and goes to hep-statistics with the published
+  numbers or HEPData tables (rule 2 of `academic-papers-guide.md`).
 - For a log-scale axis, remember that visually equal distances are not
   equal differences — interpolate in log space, not linear space, when
   estimating a value between gridlines.

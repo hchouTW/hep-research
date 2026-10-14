@@ -49,14 +49,18 @@ are stated here in full.
 2. **No computed statistical results.** A limit, significance, fit value or interval
    the user did not supply is analysis output: hand it to `hep-statistics`
    (pyhf/Combine/RooStats) or `physics-ml`, and write `[VALUE NEEDED: 95% CL CLs
-   limit]`. Reading a plotted value is fine if labeled approximate (see
-   `interpreting-scientific-graphics.md`). A back-of-envelope result, if
-   given at all, is labeled approximate with its method and what it ignores. The
-   reporting sentence still names the method: confidence level and construction
-   (CLs, Feldman-Cousins), asymptotic or toys, and how each uncertainty enters
-   (e.g. "the background uncertainty is included as a constrained nuisance
-   parameter"); use a placeholder for any choice not yet made. **Never estimate a
-   σ, limit or fit value from a plot or a ratio panel, not even roughly.**
+   limit]`. **Plots: read, never compute.** Reading a value the plot shows
+   (a point, a published limit curve at a given mass) is allowed with the label
+   *approximate* and the reading method stated (digitiser, or interpolation
+   between gridlines; `interpreting-scientific-graphics.md`); prefer the
+   HEPData table when one exists. Computing a new σ, limit, interval or fit
+   value from plotted values (a ratio panel, a residual, two curves) is not
+   allowed, not even roughly: hand it to `hep-statistics` with the published
+   numbers or HEPData tables. The reporting sentence still names the method:
+   confidence level and construction (CLs, Feldman-Cousins), asymptotic or toys,
+   and how each uncertainty enters (e.g. "the background uncertainty is included
+   as a constrained nuisance parameter"); use a placeholder for any choice not
+   yet made.
 3. **Calibrate claims to the evidence.** In a search's significance statement,
    "evidence for" conventionally needs ≥ 3σ and "observation of" ≥ 5σ (a field
    convention, stated by the source's own community; `scientific-style.md` scopes

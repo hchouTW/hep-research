@@ -35,7 +35,7 @@
   },
   "research-communication": {
    "references": 53,
-   "bytes": 378598,
+   "bytes": 379142,
    "uncited": 0
   }
  },
@@ -2561,8 +2561,8 @@
   {
    "path": "skills/research-communication/references/academic-papers-guide.md",
    "owner": "research-communication",
-   "bytes": 38384,
-   "lines": 495,
+   "bytes": 38631,
+   "lines": 499,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/research-communication/README.md",
@@ -2570,6 +2570,7 @@
     "skills/research-communication/references/academic-diagrams-guide.md",
     "skills/research-communication/references/code-to-methodology-synthesis.md",
     "skills/research-communication/references/evidence-linked-writing.md",
+    "skills/research-communication/references/interpreting-scientific-graphics.md",
     "skills/research-communication/references/submission-and-peer-review.md",
     "tests/skills/research_communication/test_handoff_text.py"
    ],
@@ -2898,8 +2899,8 @@
   {
    "path": "skills/research-communication/references/interpreting-scientific-graphics.md",
    "owner": "research-communication",
-   "bytes": 7937,
-   "lines": 135,
+   "bytes": 8234,
+   "lines": 139,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -2955,7 +2956,7 @@
     "skills/research-communication/references/diagram-figure-style.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "a132044 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/literature-discovery-and-search.md",
