@@ -227,5 +227,48 @@ class MlV28FixtureTests(unittest.TestCase):
                     self.assertLessEqual(set(expected), found)
 
 
+class TaskValidationRegressionTests(unittest.TestCase):
+    """CHECK-0.10.0 D-1 (ML-K10, PML-WP1.3): an unsupervised (anomaly-detection) model needs anomaly_validation, a
+    reweighting model needs a complete reweighting_validation block; both rules are native at 2.8.0."""
+    ANOMALY = {"background_only": "control sample (synthetic)", "signal_injection": "injected signal (synthetic)"}
+    REWEIGHT = {"closure": "synthetic", "prior_dependence": "synthetic", "unmatched_events": "synthetic"}
+
+    def doc(self, **ext):
+        d = copy.deepcopy(CURRENT)
+        d["extension"].update(ext)
+        return d
+
+    def test_unsupervised_without_anomaly_validation_is_an_error(self):
+        rep = v.validate_artifact(self.doc(supervision="unsupervised", labels=[]))
+        self.assertFalse(rep.ok)
+        self.assertIn("ml.task_validation_missing", codes(rep))
+        self.assertTrue(any(f.path.endswith("anomaly_validation") for f in rep.findings), rep.as_dict())
+
+    def test_unsupervised_with_anomaly_validation_is_clean(self):
+        rep = v.validate_artifact(self.doc(supervision="unsupervised", labels=[], anomaly_validation=self.ANOMALY))
+        self.assertEqual(rep.findings, [], rep.as_dict())
+
+    def test_empty_labels_stay_an_error_when_supervised(self):
+        self.assertIn("ml.labels_missing", codes(v.validate_artifact(self.doc(labels=[], anomaly_validation=self.ANOMALY))))
+
+    def test_reweighting_without_block_is_an_error(self):
+        rep = v.validate_artifact(self.doc(task="reweighting", output_semantics="density-ratio"))
+        self.assertIn("ml.task_validation_missing", codes(rep))
+
+    def test_reweighting_with_block_is_clean(self):
+        rep = v.validate_artifact(self.doc(task="reweighting", output_semantics="density-ratio",
+                                           reweighting_validation=self.REWEIGHT))
+        self.assertEqual(rep.findings, [], rep.as_dict())
+
+    def test_reweighting_block_missing_any_key_is_incomplete(self):
+        for key in self.REWEIGHT:
+            with self.subTest(key):
+                block = {k: x for k, x in self.REWEIGHT.items() if k != key}
+                rep = v.validate_artifact(self.doc(task="reweighting", output_semantics="density-ratio",
+                                                   reweighting_validation=block))
+                self.assertIn("ml.task_validation_incomplete", codes(rep))
+                self.assertTrue(any(key in f.message for f in rep.findings), rep.as_dict())
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -114,6 +114,29 @@ class CalibrationWarningTests(unittest.TestCase):
         self.assertEqual(out.returncode, 0, out.stderr)
         warnings = json.loads(out.stdout)["calibration"]["warnings"]
         self.assertTrue(any("prior" in w for w in warnings))
+        self.assertFalse(any("search bound" in w for w in warnings), warnings)  # an interior minimum: no bound warning
+
+    def test_temperature_at_search_bound_warns_in_copied_block(self):
+        """ML-C21 / CHECK-0.10.0 D-1: perfectly separated synthetic scores drive the temperature to its lower search
+        bound (0.05); the warning must be in the calibration block that scripts/write_ml_artifact.py copies, not only in
+        fit_details."""
+        with tempfile.TemporaryDirectory() as td:
+            for name, n in (("fit.csv", 400), ("eval.csv", 402)):
+                with open(Path(td) / name, "w", newline="") as f:
+                    w = csv.writer(f)
+                    w.writerow(["score", "label"])
+                    for i in range(n):
+                        y = i % 2
+                        w.writerow([0.9 if y else 0.1, y])
+            out = subprocess.run([sys.executable, str(ASSETS / "calibration.py"), "--fit", str(Path(td) / "fit.csv"),
+                                  "--eval", str(Path(td) / "eval.csv"), "--no-id-check"], capture_output=True,
+                                 text=True, timeout=600)
+        self.assertEqual(out.returncode, 0, out.stderr)
+        rep = json.loads(out.stdout)
+        self.assertTrue(rep["fit_details"]["at_bound"], rep["fit_details"])
+        self.assertAlmostEqual(rep["calibration"]["params"]["temperature"], 0.05, delta=1e-3)
+        warnings = rep["calibration"]["warnings"]
+        self.assertTrue(any("search bound" in w for w in warnings), warnings)
 
 
 @unittest.skipUnless(TORCH, "PyTorch not installed")
