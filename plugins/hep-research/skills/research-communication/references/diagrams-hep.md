@@ -29,9 +29,12 @@ blinding places SR data after analysis freeze.
 
 ```text
 Physics process -> Matrix element (hard process) -> Parton shower -> Hadronization
-   -> (+ underlying event, + pileup overlay) -> Detector simulation (full/fast)
-   -> Digitization -> Reconstruction -> Analysis
+   -> (+ underlying event) -> Detector simulation (full/fast)
+   -> Digitization (+ pileup overlay) -> Reconstruction -> Analysis
 ```
+Where pileup enters is experiment-dependent: most LHC chains overlay it at digitization (simulated
+minimum-bias hits or pre-mixed hit libraries), some at the hit or event level; ask, and label the
+step in the diagram as the experiment's choice.
 Levels: **parton/generator (truth)**, **particle level** (stable particles), **detector level**
 (reco). Truth-level quantities never feed a data-like selection except for labeled truth matching or
 unfolding. Event weights (generator, pileup, scale factors) attach to simulated events only.
@@ -56,8 +59,9 @@ magnet position and the ordering of the solenoid relative to the calorimeters di
 | Correctness needs | listing of particles | Lagrangian / allowed interactions |
 
 Example decay chain: `pp -> H -> ZZ* -> 4l`, `t tbar -> (W+ b)(W- b-bar)`. Draw as a tree; write
-"simplified decay topology, not a Feynman diagram". Charge conservation, lepton number, and
-flavor should be checked on every vertex of a listed chain; if a step is not allowed, say so.
+"simplified decay topology, not a Feynman diagram". Check electric charge, lepton number, baryon
+number and colour at every vertex of a listed chain; flavour changes only at a W vertex (as in
+t -> W+ b). If a step is not allowed, say so; the physics check itself is hep-theory's.
 
 ### Feynman-style diagrams
 
