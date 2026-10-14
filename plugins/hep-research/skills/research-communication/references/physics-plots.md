@@ -43,7 +43,10 @@ A figure that drops the label of a non-published result misstates its status, wh
 - matplotlib's default `pdf.fonttype = 3` embeds Type 3 fonts, which some journals refuse; set
   `matplotlib.rcParams["pdf.fonttype"] = 42` (TrueType; checked 2026-10-14 with matplotlib 3.11: `pdffonts` shows
   `Type 3` by default and `CID TrueType` with 42). Check every figure with `pdffonts f.pdf`: no `Type 3`, all fonts
-  embedded (`emb` = yes).
+  embedded (`emb` = yes). **The venue's font rule wins:** a venue that accepts Type 1 fonts only (ICML; see
+  `diagram-figure-style.md`, "Column and page geometry") needs Type 1 output instead of TrueType: text set by LaTeX
+  (`text.usetex = True`, or the pgf backend with pdfLaTeX) gave embedded `Type 1` Computer Modern fonts in a check
+  on 2026-10-14 (matplotlib 3.11.2, TeX Live); `pdffonts` must show `Type 1` for every font.
 
 ## Colour and raster resolution
 
