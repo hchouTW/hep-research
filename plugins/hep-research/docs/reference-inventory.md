@@ -8,7 +8,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 
 | Skill | References | KB | Cited nowhere |
 |---|---|---|---|
-| detector-response | 34 | 396 | 0 |
+| detector-response | 34 | 398 | 0 |
 | hep-analysis | 11 | 81 | 0 |
 | hep-computing | 32 | 297 | 0 |
 | hep-statistics | 11 | 150 | 0 |
@@ -112,12 +112,12 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `performance-metrics-and-residual-diagnostics.md` | detector-response | 16.2 | no | 9 | - | b944a23 2026-10-13 |
 | `physics-objects-jets-btagging-met.md` | detector-response | 6.5 | no | 7 | physics-ml | 351029c 2026-10-07 |
 | `reconstruction-performance-and-truth-matching.md` | detector-response | 10.5 | no | 8 | - | b944a23 2026-10-13 |
-| `response-and-forward-folding.md` | detector-response | 5.4 | no | 7 | hep-analysis, hep-statistics | 24b8216 2026-10-13 |
+| `response-and-forward-folding.md` | detector-response | 5.4 | no | 7 | hep-analysis, hep-statistics | 41dd8e7 2026-10-14 |
 | `signal-formation-and-readout.md` | detector-response | 15.4 | no | 8 | research-communication | b97b338 2026-10-14 |
 | `space-based-direct-detection.md` | detector-response | 17.0 | no | 12 | hep-analysis, hep-statistics, research-communication | 1d020b8 2026-10-13 |
 | `timing-detectors.md` | detector-response | 8.6 | no | 7 | - | d8bec60 2026-10-13 |
 | `tracking-and-vertexing.md` | detector-response | 13.1 | no | 14 | research-communication | b944a23 2026-10-13 |
-| `triggers-luminosity-pileup.md` | detector-response | 9.3 | no | 12 | - | d8bec60 2026-10-13 |
+| `triggers-luminosity-pileup.md` | detector-response | 11.4 | no | 12 | - | d8bec60 2026-10-13 |
 | `analysis-design.md` | hep-analysis | 10.9 | yes | 13 | detector-response, hep-computing | 317c39a 2026-10-14 |
 | `analysis-validation.md` | hep-analysis | 4.4 | no | 5 | detector-response, hep-computing | 351029c 2026-10-07 |
 | `backgrounds.md` | hep-analysis | 4.7 | no | 17 | detector-response | 633d6c9 2026-10-13 |

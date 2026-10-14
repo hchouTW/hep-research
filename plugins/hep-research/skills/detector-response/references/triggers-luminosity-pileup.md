@@ -13,22 +13,39 @@ unambiguous, tightly-identified "tag" object (typically satisfying an independen
 well-understood trigger) alongside a "probe" object of the type whose efficiency is
 being measured, and measure the fraction of probes that additionally satisfy the
 requirement under study. The tag-and-probe pair is usually drawn from a resonance
-(e.g. Z -> ll) so that a mass-window requirement suppresses combinatorial background
-without biasing the probe's kinematics relative to the signal-selection phase space.
+(e.g. Z -> ll) so that a mass-window requirement suppresses combinatorial background.
+The window and the tag requirements are part of the probe definition and can bias it:
+the method is only "almost unbiased", and its bias is measured by applying it to
+simulation and comparing with the truth-counted efficiency (CMS muon performance,
+JINST 7 (2012) P10002, arXiv:1206.4071, section 5.1; opened 2026-10-14). Name the
+tag-probe correlations the measurement must handle:
+
+- the probe may be the object that fired the event's trigger, so a trigger efficiency
+  needs the tag (not the probe) to have fired it;
+- when both legs can serve as the tag, one event gives two pairs whose outcomes are
+  correlated (a pass-pass event contributes two passing probes), so the probes are not
+  independent binomial trials;
+- several probe candidates per tag (or several tags) in one event are correlated in the
+  same way;
+- a nearby tag can change the probe's measured efficiency (CMS checks this by tightening
+  the tag-probe separation, the same section).
 
 Efficiency is a ratio of counts (`pass / total`, both from data or side-by-side from
 data and MC for a scale factor), so its uncertainty is binomial, not a
-simple-Gaussian propagation of the numerator and denominator separately - see
-`<plugin root>/skills/detector-response/scripts/tag_and_probe_efficiency.py` for a worked Clopper-Pearson interval
-implementation, and cross-check any framework-provided efficiency uncertainty against
-it rather than assuming a naive `sqrt(N)/N` treatment was used.
+simple-Gaussian propagation of the numerator and denominator separately.
+`<plugin root>/skills/detector-response/scripts/tag_and_probe_efficiency.py` gives the
+Clopper-Pearson interval, which applies to unweighted, background-free, independent
+counts only - that is the script's scope. Cross-check any framework-provided efficiency
+uncertainty against it rather than assuming a naive `sqrt(N)/N` treatment was used.
 
 Background contamination in the probe sample (real tag paired with a misidentified or
-combinatorial probe) biases the measured efficiency; subtract it with a fit to the
-tag-probe invariant mass in a sideband or signal+background template fit before
-computing the pass/total ratio, and propagate the subtraction's own uncertainty into
-the efficiency uncertainty rather than treating the sideband-subtracted count as if it
-had no additional uncertainty.
+combinatorial probe) biases the measured efficiency, and a background-subtracted pass
+or fail count is no longer a binomial count: Clopper-Pearson does not apply to it. Fit
+the tag-probe invariant-mass spectra of passing and failing probes simultaneously, with
+a shared signal shape and their own background shapes, and take the efficiency from the
+two signal normalizations; its uncertainty then comes from the likelihood and includes
+the background subtraction (CMS, the same section). That fit is a statistical inference:
+hand it to hep-statistics.
 
 ## Trigger turn-on curves and plateau requirements
 
@@ -82,13 +99,23 @@ Simulated pileup (additional proton-proton interactions per bunch crossing) is
 generated against an assumed pileup profile that does not exactly match the profile
 actually recorded in data (the true instantaneous-luminosity conditions are only
 known after data-taking). Reweight MC event-by-event so its pileup distribution
-matches data's, using the number of true (not reconstructed - reconstructed pileup
-counting is itself resolution-limited) interactions per event as the reweighting
-variable:
+matches data's, using the Poisson mean `mu` of interactions per bunch crossing as the
+reweighting variable:
 
 ```python
-weight = data_pileup_pdf[n_true_interactions] / mc_pileup_pdf[n_true_interactions]
+weight = data_mu_pdf[mu] / mc_mu_pdf[mu]
 ```
+
+Why `mu` and not the per-event interaction count: in data, `mu` is what the luminosity
+measurement gives (`L_b = mu f_r / sigma_inel` per bunch, ATLAS, Eur. Phys. J. C 76 (2016)
+653, arXiv:1608.03953, eq. 1; opened 2026-10-14); the number of interactions in a given
+crossing is not observed. In simulation the generator draws a mean per event (recorded, for example, as
+CMS's "true number of interactions") and then a Poisson count around it ("number of
+pileup interactions"; CERN Open Data, "CMS pileup simulation",
+<https://opendata.cern.ch/about/CMS-Pileup-Simulation>, opened 2026-10-14). The Poisson
+count has a wider distribution than the mean, so dividing the data `mu` profile by the
+simulated count profile reweights the wrong distribution. The reconstructed-vertex count
+is worse still: it is resolution- and efficiency-limited.
 
 `<plugin root>/skills/detector-response/scripts/pileup_reweight.py` implements this from two histograms (data profile, MC
 profile) with the usual failure modes guarded explicitly: a bin with zero MC
@@ -97,11 +124,14 @@ condition the MC sample doesn't populate at all - this must be flagged, not sile
 turned into 0 or inf), and the data pileup profile itself carries a systematic
 uncertainty (from the minimum-bias cross section assumed to convert instantaneous
 luminosity into an expected interaction count) that should be propagated as an
-up/down variation of the reweighting target, not treated as exact. Confirm after
-reweighting that the mean/profile of pileup in reweighted MC actually matches data
-in a control region - a reweighting step that is applied but silently no-ops (e.g.
-from a units or binning mismatch between the two input histograms) is a common,
-easy-to-miss bug.
+up/down variation of the reweighting target, not treated as exact. After reweighting,
+the mean of `mu` in reweighted MC equals the data mean by construction (whenever every
+data-populated bin has a defined weight), so it tests nothing. Validate on a variable
+that was not reweighted: the number of reconstructed primary vertices (or another
+pileup-sensitive observable) in a control region, data against reweighted MC. A
+reweighting step that is applied but silently no-ops (e.g. from a units or binning
+mismatch between the two input histograms) is a common, easy-to-miss bug, and this
+closure is what catches it.
 
 ## Dead time and live time
 

@@ -5,7 +5,7 @@
  "by_skill": {
   "detector-response": {
    "references": 34,
-   "bytes": 395942,
+   "bytes": 398077,
    "uncited": 0
   },
   "hep-analysis": {
@@ -610,7 +610,7 @@
     "hep-analysis",
     "hep-statistics"
    ],
-   "last_commit": "24b8216 2026-10-13"
+   "last_commit": "41dd8e7 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/signal-formation-and-readout.md",
@@ -708,8 +708,8 @@
   {
    "path": "skills/detector-response/references/triggers-luminosity-pileup.md",
    "owner": "detector-response",
-   "bytes": 9274,
-   "lines": 148,
+   "bytes": 11409,
+   "lines": 178,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
