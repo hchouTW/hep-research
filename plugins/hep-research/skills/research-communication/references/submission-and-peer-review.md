@@ -16,7 +16,9 @@ arXiv submission, and how to structure a referee response once reviews come back
 
 ## Pre-submission checklist
 
-Run through this (and `<plugin root>/skills/research-communication/scripts/check_manuscript.py`) before the user submits:
+Run through this (and `<plugin root>/skills/research-communication/scripts/check_manuscript.py`) before the user submits.
+An item that needs a tool or access this session lacks (a TeX engine, an ADS token, paywalled
+full text) is reported as unverified with the reason, never ticked as done:
 
 - [ ] Every number in the abstract matches the corresponding number in Results
 - [ ] Every `\cite{}` resolves; every `.bib` entry is used (script-checkable)
@@ -30,7 +32,8 @@ Run through this (and `<plugin root>/skills/research-communication/scripts/check
       hand-edit without the publications committee's sign-off)
 - [ ] No leftover `TODO`/`FIXME`/placeholder text (script-checkable)
 - [ ] Compiles cleanly from a fresh directory (catches missing files that
-      happen to exist locally but weren't properly referenced)
+      happen to exist locally but weren't properly referenced); without a TeX
+      engine here, unverified
 
 ## Cover letters
 

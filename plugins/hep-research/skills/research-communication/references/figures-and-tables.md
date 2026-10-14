@@ -99,7 +99,8 @@ figure itself.
   `kCividis`) rather than default red/green distinctions.
 - Ensure figures remain interpretable in grayscale — many readers print or
   view PDFs without color; use distinct line styles (solid/dashed/dotted) in
-  addition to color for curves.
+  addition to color for curves. Check it on a rendered greyscale copy
+  (`pdftoppm -gray -r 150 -png f.pdf f_gray`), not by imagining one.
 - Do not rely on color alone to distinguish more than ~4-5 categories; add
   markers or hatching.
 

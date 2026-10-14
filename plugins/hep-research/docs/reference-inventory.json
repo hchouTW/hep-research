@@ -35,7 +35,7 @@
   },
   "research-communication": {
    "references": 54,
-   "bytes": 365656,
+   "bytes": 366322,
    "uncited": 0
   }
  },
@@ -2579,7 +2579,7 @@
     "tests/skills/research_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "be42040 2026-10-14"
+   "last_commit": "4d2bbeb 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/artifact-packaging-for-release.md",
@@ -2751,8 +2751,8 @@
   {
    "path": "skills/research-communication/references/diagram-figure-style.md",
    "owner": "research-communication",
-   "bytes": 6117,
-   "lines": 93,
+   "bytes": 6461,
+   "lines": 97,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-diagrams-guide.md"
@@ -2850,8 +2850,8 @@
   {
    "path": "skills/research-communication/references/figures-and-tables.md",
    "owner": "research-communication",
-   "bytes": 9469,
-   "lines": 155,
+   "bytes": 9576,
+   "lines": 156,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-diagrams-guide.md",
@@ -2966,7 +2966,7 @@
     "skills/research-communication/references/diagram-figure-style.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "be42040 2026-10-14"
+   "last_commit": "4d2bbeb 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/literature-discovery-and-search.md",
@@ -3116,7 +3116,7 @@
     "skills/research-communication/references/supplementary-material-planning.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "4d2bbeb 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/plagiarism-and-text-reuse-checking.md",
@@ -3331,8 +3331,8 @@
   {
    "path": "skills/research-communication/references/submission-and-peer-review.md",
    "owner": "research-communication",
-   "bytes": 13389,
-   "lines": 229,
+   "bytes": 13604,
+   "lines": 232,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",

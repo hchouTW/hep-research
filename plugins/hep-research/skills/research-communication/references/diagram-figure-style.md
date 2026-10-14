@@ -12,8 +12,12 @@
 
 ## Color
 
-- Grayscale-safe by default: verify by mentally (or actually) desaturating. Distinguish by
-  fill lightness + border/line style + shape + label.
+- Grayscale-safe by default: render a greyscale copy and look at it
+  (`pdftoppm -gray -r 150 -png f.pdf f_gray`, or `magick f.png -colorspace Gray f_gray.png`).
+  Distinguish by fill lightness + border/line style + shape + label. For colour-vision
+  deficiencies, run a simulator (for example the `colorspacious` package's CVD space, installed
+  only with the user's approval, or a viewer's built-in simulation) and say which; with no
+  simulator available, report the check as not done.
 - Color for semantic grouping only: data vs simulation, signal vs background, training vs
   inference, deterministic vs stochastic, detector subsystems, software layers.
 - Colorblind-safe palette, e.g. Okabe-Ito: `#000000 #E69F00 #56B4E9 #009E73 #F0E442 #0072B2 #D55E00 #CC79A7`
