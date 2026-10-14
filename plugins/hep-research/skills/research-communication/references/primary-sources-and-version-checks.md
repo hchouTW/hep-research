@@ -2,7 +2,6 @@
 
 This package is original operational guidance, not a complete summary of the manuals below. Apply formulas with their stated assumptions. Experiment-specific prescriptions must follow the formal sources supplied by the user. Links were consulted during preparation on 2026-09-05, with the astroparticle-physics entries added 2026-09-09; rolling/development pages do not pin an API version.
 
-<!-- example: experiment-specific illustration -->
 | Topic | Primary source | Purpose |
 |---|---|---|
 | HEP statistics | [PDG Statistics review](https://pdg.lbl.gov/2026/reviews/rpp2026-rev-statistics.pdf) | Check interval, likelihood, and inference terminology |
@@ -10,21 +9,17 @@ This package is original operational guidance, not a complete summary of the man
 | RooStats | [ROOT AsymptoticCalculator, version 6.26](https://root.cern.ch/doc/v626/classRooStats_1_1AsymptoticCalculator.html) | Historical API reference; use installed-version documentation for implementation |
 | pyhf models | [Likelihood specification](https://scikit-hep.org/pyhf/likelihood.html) | Schema, modifiers, and auxiliary data; may be a development page |
 | pyhf preservation | [pyhf paper](https://arxiv.org/abs/2211.15838) | Background on HistFactory serialization |
-| Combine | [Official documentation](https://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/latest/) | Match methods/options to the installed release |
 | uproot | [Official getting-started guide](https://uproot.readthedocs.io/en/latest/basic.html) | Chunked I/O and array APIs |
 | Passage of particles through matter | [PDG review](https://pdg.lbl.gov/2026/reviews/rpp2026-rev-passage-particles-matter.pdf) | Bethe-Bloch, Highland multiple scattering, radiation length, Cherenkov and transition radiation |
 | Particle detectors at accelerators | [PDG review](https://pdg.lbl.gov/2026/reviews/rpp2026-rev-particle-detectors-accel.pdf) | Detector technologies, resolution parameterizations, calorimeter terms |
 | Particle detectors for non-accelerator physics | [PDG review](https://pdg.lbl.gov/2026/reviews/rpp2026-rev-particle-detectors-non-accel.pdf) | Spectrometer, TOF, and Cherenkov practice outside collider geometries |
 | Particle masses and properties | [PDG Particle Listings](https://pdg.lbl.gov/) | Masses used by `pid_separation_power.py` and `cherenkov_angle.py` |
 | Geant4 physics | [Physics Reference Manual](https://geant4.web.cern.ch/support/user_documentation) | Physics lists, production cuts, hadronic model validity ranges |
-| Cosmic rays and particle physics (textbook) | Gaisser, Engel & Resconi, *Cosmic Rays and Particle Physics*, 2nd ed. (Cambridge University Press, 2016) | Acceleration, propagation, air-shower, and detection-technique background for the astroparticle references in detector-response ([air showers](../../detector-response/references/extensive-air-showers.md) to [space-based detection](../../detector-response/references/space-based-direct-detection.md)) and the AMS-02 profile |
+| Cosmic rays and particle physics (textbook) | Gaisser, Engel & Resconi, *Cosmic Rays and Particle Physics*, 2nd ed. (Cambridge University Press, 2016) | Acceleration, propagation, air-shower, and detection-technique background for the astroparticle references in detector-response ([air showers](../../detector-response/references/extensive-air-showers.md) to [space-based detection](../../detector-response/references/space-based-direct-detection.md)) and the cosmic-ray experiment profiles |
+| Combine | [Official documentation](https://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/latest/) | Match methods/options to the installed release |
 | Cosmic-ray astrophysics (textbook) | Longair, *High Energy Astrophysics*, 3rd ed. (Cambridge University Press, 2011) | Acceleration mechanisms, multi-messenger astrophysics context |
 | ON/OFF significance | Li & Ma, *Astrophysical Journal* 272, 317 (1983) | Derivation of the likelihood-ratio significance in `<plugin root>/skills/hep-statistics/scripts/li_ma_significance.py` |
 | Cosmic-ray and astroparticle physics reviews | [PDG](https://pdg.lbl.gov/) | Cosmic-ray, astrophysical-constants, and related review chapters; check the current edition's table of contents for the exact chapter |
-| Pierre Auger Observatory | [Official site](https://www.auger.org/) | Hybrid surface-array/fluorescence UHECR methodology and publications |
-| IceCube Neutrino Observatory | [Official site](https://icecube.wisc.edu/) | In-ice Cherenkov neutrino-telescope methodology and publications |
-| CTA Observatory | [Official site](https://www.cta-observatory.org/) | Imaging atmospheric Cherenkov technique and next-generation IACT array design |
-| Alpha Magnetic Spectrometer (AMS-02) | Aguilar et al., "The Alpha Magnetic Spectrometer (AMS) on the International Space Station: Part II - Results from the First Seven Years," Phys. Rept. 894 (2021) 1-116 | Primary cross-check for instrument parameters and results; mission status, servicing and upgrade facts live in the `experiment:ams-02` profile's evidence ledger with their verification dates, not here. |
 | Detector textbooks | Leo, *Techniques for Nuclear and Particle Physics Experiments*, 2nd ed. (Springer, 1994), [DOI 10.1007/978-3-642-57920-2](https://doi.org/10.1007/978-3-642-57920-2); Grupen & Shwartz, *Particle Detectors*, 2nd ed. (Cambridge University Press, 2008), [DOI 10.1017/CBO9780511534966](https://doi.org/10.1017/CBO9780511534966); Wigmans, *Calorimetry*, 2nd ed. (Oxford University Press, 2017), [DOI 10.1093/oso/9780198786351.001.0001](https://doi.org/10.1093/oso/9780198786351.001.0001); Blum, Riegler & Rolandi, *Particle Detection with Drift Chambers*, 2nd ed. (Springer, 2008), [DOI 10.1007/978-3-540-76684-1](https://doi.org/10.1007/978-3-540-76684-1) | Signal formation, drift/diffusion, calorimetry, gas detectors for the detector-response technique references ([measurement framework](../../detector-response/references/detector-measurement-framework.md) to [Cherenkov and photosensors](../../detector-response/references/cherenkov-imaging-variants-and-photosensors.md)) |
 | Track fitting | Fruhwirth, "Application of Kalman filtering to track and vertex fitting", Nucl. Instrum. Methods A262 (1987) 444, [DOI 10.1016/0168-9002(87)90887-4](https://doi.org/10.1016/0168-9002(87)90887-4) | Kalman track/vertex fit behind the [tracking](../../detector-response/references/tracking-and-vertexing.md), [gaseous tracking](../../detector-response/references/gaseous-and-specialized-tracking-technologies.md) and [muon systems](../../detector-response/references/muon-systems.md) references |
 | Multiple scattering | Highland, Nucl. Instrum. Methods 129 (1975) 497, [DOI 10.1016/0029-554X(75)90743-0](https://doi.org/10.1016/0029-554X(75)90743-0); Lynch & Dahl, Nucl. Instrum. Methods B58 (1991) 6, [DOI 10.1016/0168-583X(91)95671-Y](https://doi.org/10.1016/0168-583X(91)95671-Y) | Highland approximation used in [signal formation and readout](../../detector-response/references/signal-formation-and-readout.md) (PDG review above gives the current form) |
@@ -35,6 +30,16 @@ This package is original operational guidance, not a complete summary of the man
 | Longitudinal shower profile | Gaisser & Hillas, Proc. 15th ICRC (Plovdiv) 8 (1977) 353 | Functional form in `<plugin root>/skills/detector-response/scripts/xmax_gaisser_hillas.py` |
 | Detector-performance definitions | Experiment technical design reports and official performance papers for the apparatus in question (cite by name, configuration, and phase space; none is pinned here) | Any numeric performance claim in the detector-response references must come from one of these, not from this package |
 | Claude Code skills | [Official documentation](https://code.claude.com/docs/en/skills) | Skill directories and invocation |
+
+Experiment- and collaboration-specific sources (illustrations; facts about an experiment live in its profile):
+
+<!-- example: experiment-specific illustration -->
+| Topic | Primary source | Purpose |
+|---|---|---|
+| Pierre Auger Observatory | [Official site](https://www.auger.org/) | Hybrid surface-array/fluorescence UHECR methodology and publications |
+| IceCube Neutrino Observatory | [Official site](https://icecube.wisc.edu/) | In-ice Cherenkov neutrino-telescope methodology and publications |
+| CTA Observatory | [Official site](https://www.cta-observatory.org/) | Imaging atmospheric Cherenkov technique and next-generation IACT array design |
+| Alpha Magnetic Spectrometer (AMS-02) | Aguilar et al., "The Alpha Magnetic Spectrometer (AMS) on the International Space Station: Part II - Results from the First Seven Years," Phys. Rept. 894 (2021) 1-116 | Primary cross-check for instrument parameters and results; mission status, servicing and upgrade facts live in the `experiment:ams-02` profile's evidence ledger with their verification dates, not here. |
 <!-- /example -->
 
 Do not claim that an API is supported by the latest version without checking. Read local version/help output and lock files, then consult matching release documentation. Mark unverified points when network access is unavailable. Example luminosities, cross sections, and model parameters in documentation are not experimental inputs. The detector geometries, material budgets, and resolution values in this package's assets and examples are synthetic and illustrative; they are not measurements of any real apparatus.
