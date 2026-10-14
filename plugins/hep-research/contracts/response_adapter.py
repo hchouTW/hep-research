@@ -16,6 +16,7 @@ module is the one place where they meet:
                                            acceptance_applied_separately: 'acceptance' or 'exposure' listed
                                            (exposure = acceptance x live time)
   underflow_overflow (optional string)     required enum; absent -> 'not_represented', listed under assumptions
+                                           (from contracts 2.8.0, contract_version given: absent is an error)
   intended_use, variable_conversion        passed through
   matrix (inline) or matrix_ref            matrix: the `matrix` argument wins, then the inline matrix, then a JSON
                                            matrix_ref resolved against base_dir (a list, or an object with "matrix";
@@ -99,9 +100,20 @@ def _matrix_source(ext: dict, matrix, base_dir: Path | None, errors: list) -> tu
     return None, {}
 
 
+FLOW_REQUIRED_FROM = (2, 8, 0)  # contracts 2.8.0 (DR-WP2-04): a response matrix declares underflow_overflow
+
+
+def _version(text) -> tuple[int, ...] | None:
+    try:
+        return tuple(int(p) for p in str(text).split(".")[:3])
+    except ValueError:
+        return None
+
+
 def to_validator_input(ext: dict, matrix=None, *, base_dir: Path | None = None, generated_per_truth_bin=None,
-                       underflow=None, overflow=None, closure=None, tolerances=None) -> dict:
-    """Map a response extension (and its numbers) to validate_response input; see the module docstring."""
+                       underflow=None, overflow=None, closure=None, tolerances=None, contract_version=None) -> dict:
+    """Map a response extension (and its numbers) to validate_response input; see the module docstring.
+    contract_version is the artifact's; from 2.8.0 an undeclared underflow_overflow is an error, not an assumption."""
     errors: list[dict] = []
     assumptions: list[str] = []
     if not isinstance(ext, dict):
@@ -119,7 +131,11 @@ def to_validator_input(ext: dict, matrix=None, *, base_dir: Path | None = None, 
             errors.append({"field": effect, "message": f"{effect} {ext.get(effect)!r} must be inside_matrix or outside_matrix "
                            "for a numerical check"})
     flow = ext.get("underflow_overflow")
-    if flow is None:
+    version = _version(contract_version) if contract_version is not None else None
+    if flow is None and version is not None and version >= FLOW_REQUIRED_FROM:
+        errors.append({"field": "underflow_overflow", "message": "underflow_overflow is not declared; from contracts 2.8.0 "
+                       f"a response matrix declares one of {list(FLOW)}"})
+    elif flow is None:
         flow = "not_represented"
         assumptions.append("underflow_overflow not declared: taken as 'not_represented' (probability leaving the axes is lost)")
     elif flow not in FLOW:
@@ -173,7 +189,8 @@ def main(argv: list[str] | None = None) -> int:
     except (OSError, ValueError, KeyError) as exc:
         print(json.dumps({"ok": False, "error": f"unreadable: {exc}"}, indent=2))
         return 2
-    out = to_validator_input(ext, base_dir=Path(args[0]).resolve().parent)
+    version = doc.get("contract_version") if isinstance(doc, dict) else None
+    out = to_validator_input(ext, base_dir=Path(args[0]).resolve().parent, contract_version=version)
     code = 0 if out["ok"] else 2 if any(e.get("unreadable") for e in out["errors"]) else 1
     if out["ok"] and "--validate" in args:
         from core.stats.validate_response import validate_response
