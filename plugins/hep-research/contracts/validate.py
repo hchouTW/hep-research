@@ -634,7 +634,7 @@ def _ml_task_blocks_v2(doc: dict, ext: dict, rep: Report, native: bool) -> None:
         rep.add("error", f"{x}.model_hash", "ml.model_hash_malformed",
                 f"model_hash {mh!r} is not 'sha256:' and 64 lower-case hex digits")
     # inputs and labels (K16)
-    labels = ext.get("labels") if isinstance(ext.get("labels"), list) else []
+    labels: list = ext["labels"] if isinstance(ext.get("labels"), list) else []
     if task == "classification" and len(labels) == 1:
         rep.add("error", f"{x}.labels", "ml.single_label", "a classifier needs at least two classes")
     raw = [f.get("name") if isinstance(f, dict) else f for f in ext.get("features") or []]
