@@ -100,7 +100,8 @@ def build_parser() -> argparse.ArgumentParser:
     train.add_argument("--working-points", type=float, nargs="+", default=[0.3, 0.5, 0.7],
                        help="signal efficiencies for the working points (two-class only)")
     train.add_argument("--ood-quantile", type=float, default=0.999,
-                       help="quantile of train+val Mahalanobis distances stored as the out-of-domain threshold")
+                       help="target in-distribution acceptance of the training-domain model (thresholds calibrated on "
+                       "held-out training rows; scripts/check_surrogate_domain.py)")
     train.add_argument("--output-dir", default="runs/example")
     return parser
 
@@ -159,6 +160,7 @@ except ModuleNotFoundError as _exc:
     sys.exit(3)
 
 sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE.parent / "scripts"))  # check_surrogate_domain.DomainModel: one domain method (PML-WP0.7)
 from hep_losses import batch_weight_report, weighted_bce  # noqa: E402
 from hep_metrics import (effective_entries, efficiency_with_uncertainty,  # noqa: E402
                          rejection_at_signal_efficiency, weighted_auc)
@@ -352,6 +354,11 @@ def assign_splits(data: dict) -> dict:
             raise InputError(f"{data['manifest']}: split {split!r} has no events of class(es) {missing}; it cannot "
                              "be trained or evaluated (build the split with make_grouped_splits.py --label-column)")
     out["unassigned"] = len(data["ids"]) - sum(out[s].size for s in SPLITS)
+    groups = manifest.get("groups") if isinstance(manifest.get("groups"), dict) else {}
+    try:
+        out["groups"] = {canonical_key(k): v for k, v in groups.items()}
+    except ValueError as exc:
+        raise InputError(f"{data['manifest']}: groups: {exc}") from None
     return out
 
 
@@ -376,16 +383,32 @@ def training_weights(y: np.ndarray, w: np.ndarray, n_classes: int, args) -> tupl
     return keep, wt, record
 
 
-def domain_record(x_train: np.ndarray, x_ref: np.ndarray, quantile: float) -> dict:
-    """Per-feature range on train, and mean/covariance with a Mahalanobis threshold from train+val distances."""
-    mean = x_train.mean(axis=0)
-    cov = np.atleast_2d(np.cov(x_train, rowvar=False))
-    precision = np.linalg.pinv(cov)
-    diff = x_ref - mean
-    dist = np.sqrt(np.maximum(np.einsum("ij,jk,ik->i", diff, precision, diff), 0.0))
-    return {"min": x_train.min(axis=0).tolist(), "max": x_train.max(axis=0).tolist(), "mean": mean.tolist(),
-            "cov": cov.tolist(), "mahalanobis_threshold": float(np.quantile(dist, quantile)),
-            "mahalanobis_quantile": quantile, "mahalanobis_reference": "train+val"}
+DOMAIN_MAX_POINTS = 5000  # training points kept for the k-NN part of the domain model (seeded subsample beyond)
+
+
+def domain_record(x_train: np.ndarray, groups_train, quantile: float, seed: int) -> dict:
+    """The training domain as scripts/check_surrogate_domain.py's DomainModel, fitted on the training split only: the
+    thresholds are calibrated on held-out training rows (split by the manifest's groups when every row has one) that
+    the mean, covariance and neighbours were not fit on. The per-feature range is kept as a diagnostic."""
+    from check_surrogate_domain import DomainModel  # scripts/, on sys.path below
+
+    idx = np.arange(len(x_train))
+    if len(idx) > DOMAIN_MAX_POINTS:
+        idx = np.sort(np.random.default_rng(seed).choice(idx, DOMAIN_MAX_POINTS, replace=False))
+    groups = None
+    if groups_train is not None and all(g is not None for g in groups_train):
+        groups = [groups_train[i] for i in idx]
+    record = {"min": x_train.min(axis=0).tolist(), "max": x_train.max(axis=0).tolist(), "fit_on": "train",
+              "quantile": quantile}
+    try:
+        model = DomainModel.fit(x_train[idx], quantile=quantile, seed=seed, groups=groups)
+    except ValueError as exc:  # too few training rows to hold some out: only the range can be checked, and is said so
+        print(f"WARNING: training-domain model not fitted ({exc}); inference checks the per-feature range only",
+              file=sys.stderr)
+        return {**record, "method": "box-only (too few training rows to calibrate a domain model)", "model": None,
+                "range_role": "the only check"}
+    return {**record, "method": DomainModel.METHOD, "model": model.to_dict(),
+            "range_role": "diagnostic (a value outside the training range alone does not flag a row)"}
 
 
 # ---------------------------------------------------------------- training
@@ -563,7 +586,8 @@ def run(args) -> int:
     mean = x[tr].mean(axis=0)
     std = np.maximum(x[tr].std(axis=0), 1e-12)
     preprocessing = [{"step": "standardize", "features": features, "mean": mean.tolist(), "std": std.tolist()}]
-    domain = domain_record(x[tr], x[np.r_[tr, va]], args.ood_quantile)
+    groups_train = [idx["groups"].get(canonical_key(data["ids"][i])) for i in tr]
+    domain = domain_record(x[tr], groups_train, args.ood_quantile, args.seed)
     z = (x - mean) / std
 
     eval_has_negative = bool((w < 0).any())

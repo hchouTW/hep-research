@@ -3,11 +3,17 @@
 
 Reads the checkpoint metadata (feature names, preprocessing, training domain, labels, model shape), requires every
 training feature to be present in the input CSV by name (refuses otherwise; order does not matter, extra columns are
-ignored), applies the stored standardization, and checks each row against the training domain: outside the per-feature
-[min, max] of the training split, or a Mahalanobis distance above the threshold stored at training time (an empirical
-quantile of train+val distances). Rows with non-finite values are out of domain too.
+ignored), applies the stored standardization, and checks each row with the training-domain model stored at training
+time: scripts/check_surrogate_domain.py's DomainModel (whitened Mahalanobis, k-NN and subspace-residual distances,
+thresholds calibrated on held-out training rows; the same method the surrogate check uses). A row is 'outside' (far
+from the training cloud, off a linear constraint the training data obey, or non-finite) or 'sparse' (in a hole of the
+training data); both are out of domain. The per-feature training range is a diagnostic only. A row with a non-finite
+value gets no score. Checkpoints written before this domain model (a "mahalanobis_threshold" record) are read with the
+old per-feature range and pinv-Mahalanobis check, and the summary says "legacy domain record".
 --on-out-of-domain flag (default) writes a per-row out_of_domain field and counts them in the summary;
 --on-out-of-domain reject exits non-zero when any row is out of domain and writes no scores.
+--calibration FILE applies a calibration map recorded by calibration.py (its "calibration" block, and its
+"prior_shift" when present) to the two-class score: temperature, Platt or isotonic.
 
 The checkpoint is loaded with weights_only=True (tensors and plain containers only); --unsafe-full-unpickle runs a
 full unpickle, which can execute arbitrary code: only for files you trust.
@@ -36,6 +42,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--id-col", default="id", help="row id column, if present (default: id)")
     parser.add_argument("--output", help="per-row CSV to write (default: rows in the JSON summary)")
     parser.add_argument("--on-out-of-domain", choices=("flag", "reject"), default="flag")
+    parser.add_argument("--calibration", help="calibration.py output whose map is applied to the two-class score")
     parser.add_argument("--device", default="auto")
     parser.add_argument("--unsafe-full-unpickle", action="store_true",
                         help="load with weights_only=False (full pickle, can run arbitrary code); only for files you trust")
@@ -55,6 +62,8 @@ except ModuleNotFoundError as _exc:
     sys.exit(3)
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+from check_surrogate_domain import DomainModel  # noqa: E402  (one domain method; PML-WP0.7)
 from models import MLPClassifier  # noqa: E402
 
 
@@ -105,6 +114,20 @@ def read_inputs(path: str, features: list[str], id_col: str) -> tuple[list[str],
 
 def domain_flags(x: np.ndarray, features: list[str], domain: dict) -> list[list[str]]:
     """Reasons each row is outside the training domain (empty list = inside)."""
+    if "model" not in domain:
+        return legacy_domain_flags(x, features, domain)
+    if domain["model"] is None:  # too few training rows for a calibrated model: the range is the only check
+        lo, hi = np.asarray(domain["min"]), np.asarray(domain["max"])
+        return [["outside:non-finite"] if not np.all(np.isfinite(row)) else
+                [f"outside:range:{features[j]}" for j in np.flatnonzero((row < lo) | (row > hi))] for row in x]
+    model = DomainModel.from_dict(domain["model"])
+    status, reasons = model.classify(x)
+    # outside the per-feature training range alone is a diagnostic, not a flag (see the docstring)
+    return [[] if st == "inside" else [f"{st}:" + "; ".join(why)] for st, why in zip(status, reasons)]
+
+
+def legacy_domain_flags(x: np.ndarray, features: list[str], domain: dict) -> list[list[str]]:
+    """Checkpoints from before the shared domain model: per-feature range and pinv-Mahalanobis threshold."""
     lo, hi = np.asarray(domain["min"]), np.asarray(domain["max"])
     finite = np.all(np.isfinite(x), axis=1)
     precision = np.linalg.pinv(np.asarray(domain["cov"]))
@@ -123,6 +146,29 @@ def domain_flags(x: np.ndarray, features: list[str], domain: dict) -> list[list[
     return reasons
 
 
+def apply_calibration(p: np.ndarray, path: str) -> tuple[np.ndarray, dict]:
+    """Apply calibration.py's recorded map (prior shift first, then temperature, Platt or isotonic)."""
+    with open(path, encoding="utf-8") as handle:
+        doc = json.load(handle)
+    cal = doc.get("calibration") if isinstance(doc, dict) else None
+    if not isinstance(cal, dict) or not isinstance(cal.get("params"), dict):
+        raise InputError(f"{path}: needs a 'calibration' block with 'method' and 'params' (calibration.py output)")
+    z = np.log(np.clip(p, 1e-12, 1 - 1e-12)) - np.log(np.clip(1 - p, 1e-12, 1))
+    prior = doc.get("prior_shift") or {}
+    if prior.get("prior_ratio_change"):
+        z = z + math.log(float(prior["prior_ratio_change"]))
+    method, par = cal.get("method"), cal["params"]
+    if method == "temperature":
+        out = 1 / (1 + np.exp(-z / float(par["temperature"])))
+    elif method == "platt":
+        out = 1 / (1 + np.exp(-(float(par["a"]) * z + float(par["b"]))))
+    elif method == "isotonic":
+        out = np.interp(1 / (1 + np.exp(-z)), np.asarray(par["x"], float), np.asarray(par["y"], float))
+    else:
+        raise InputError(f"{path}: unknown calibration method {method!r}")
+    return out, {"file": path, "method": method, "prior_ratio_change": prior.get("prior_ratio_change")}
+
+
 def preprocess(x: np.ndarray, steps: list[dict], features: list[str]) -> np.ndarray:
     for step in steps:
         if step["step"] != "standardize" or step["features"] != features:
@@ -136,12 +182,16 @@ def run(args) -> int:
     meta = ckpt["metadata"]
     features, labels, cfg = meta["features"], meta["labels"], meta["model"]
     ids, x = read_inputs(args.input, features, args.id_col)
-    reasons = domain_flags(x, features, meta["training_domain"])
+    domain = meta["training_domain"]
+    reasons = domain_flags(x, features, domain)
+    finite = np.all(np.isfinite(x), axis=1)
     n_ood = sum(bool(r) for r in reasons)
     summary = {"checkpoint": args.checkpoint, "n_rows": len(ids), "n_out_of_domain": n_ood,
-               "n_outside_range": sum(any(s.startswith("range:") for s in r) for r in reasons),
-               "n_mahalanobis": sum(any(s.startswith("mahalanobis:") for s in r) for r in reasons),
-               "mahalanobis_threshold": meta["training_domain"]["mahalanobis_threshold"],
+               "n_outside": sum(any(s.startswith("outside:") or s.startswith("range:") for s in r) for r in reasons),
+               "n_sparse": sum(any(s.startswith("sparse:") for s in r) for r in reasons),
+               "n_mahalanobis": sum(any("ahalanobis" in s for s in r) for r in reasons),
+               "n_non_finite": int((~finite).sum()),
+               "domain_method": domain.get("method", "legacy domain record (per-feature range + pinv Mahalanobis)"),
                "on_out_of_domain": args.on_out_of_domain}
     if n_ood and args.on_out_of_domain == "reject":
         summary["out_of_domain_ids"] = [ids[i] for i, r in enumerate(reasons) if r][:50]
@@ -158,11 +208,17 @@ def run(args) -> int:
         logits = model(torch.as_tensor(z, dtype=torch.float32, device=device)).float()
         probs = torch.sigmoid(logits[:, 0]) if logits.shape[1] == 1 else torch.softmax(logits, dim=1)
     probs = probs.cpu().numpy()
+    if args.calibration:
+        if probs.ndim != 1:
+            raise InputError("--calibration applies to a two-class score only")
+        probs, summary["calibration"] = apply_calibration(probs, args.calibration)
     score_cols = ["score"] if probs.ndim == 1 else [f"score_{name}" for name in labels]
     rows = []
     for i, row_id in enumerate(ids):
         values = [probs[i]] if probs.ndim == 1 else list(probs[i])
-        rows.append({"id": row_id, **{c: float(v) for c, v in zip(score_cols, values)},
+        if not finite[i]:  # a row with a non-finite input gets no score, not one computed from a substituted 0
+            values = [None] * len(score_cols)
+        rows.append({"id": row_id, **{c: (None if v is None else float(v)) for c, v in zip(score_cols, values)},
                      "out_of_domain": int(bool(reasons[i])), "ood_reasons": ";".join(reasons[i])})
     if args.output:
         with open(args.output, "w", newline="", encoding="utf-8") as handle:

@@ -235,7 +235,7 @@
    "sparse": 0,
    "outside": 9,
    "n": 357,
-   "method": "whitened Mahalanobis + k-NN (cKDTree), thresholds calibrated on held-out training points",
+   "method": "whitened Mahalanobis + k-NN (cKDTree) + subspace residual, thresholds calibrated on held-out training points",
    "exit": 1
   }
  },

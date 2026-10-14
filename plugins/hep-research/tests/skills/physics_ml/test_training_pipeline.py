@@ -191,8 +191,9 @@ class TrainClassifierPipelineTests(unittest.TestCase):
         meta = best["metadata"]
         self.assertEqual(meta["features"], FEATURES)
         self.assertEqual(meta["units"]["mass"], "GeV")
-        self.assertIn("cov", meta["training_domain"])
-        self.assertGreater(meta["training_domain"]["mahalanobis_threshold"], 0)
+        # the shared domain model (PML-WP0.7), fitted on train with thresholds from held-out training rows
+        self.assertEqual(meta["training_domain"]["fit_on"], "train")
+        self.assertGreater(meta["training_domain"]["model"]["thresholds"]["mahalanobis"], 0)
         self.assertEqual(set(meta["weights"]), {"training", "evaluation"})
 
     def test_negative_weights_signed_with_net_weight_batch_report(self):
@@ -239,7 +240,7 @@ class TrainClassifierPipelineTests(unittest.TestCase):
         by_id = {row["id"]: row for row in report["rows"]}
         self.assertEqual(by_id["in"]["out_of_domain"], 0)
         self.assertEqual(by_id["out"]["out_of_domain"], 1)
-        self.assertIn("range:pt", by_id["out"]["ood_reasons"])
+        self.assertIn("outside:", by_id["out"]["ood_reasons"])
         self.assertTrue(0.0 <= by_id["in"]["score"] <= 1.0)
         rejected = self.inference([inside, outside], "--on-out-of-domain", "reject")
         self.assertNotEqual(rejected.returncode, 0)
@@ -253,7 +254,7 @@ class TrainClassifierPipelineTests(unittest.TestCase):
         dom = summary["training_domain"]
         corner = ["corner", dom["pt"][1] * 0.999, dom["eta"][0] * 0.999, dom["mass"][0] * 1.001, dom["iso"][1] * 0.999]
         report = json.loads(self.inference([corner]).stdout)
-        self.assertEqual(report["n_outside_range"], 0)
+        self.assertEqual(report["n_out_of_domain"], 1)
         self.assertEqual(report["n_mahalanobis"], 1)
 
     def test_inference_refuses_feature_name_mismatch(self):
