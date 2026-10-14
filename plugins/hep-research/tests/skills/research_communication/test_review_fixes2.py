@@ -13,6 +13,7 @@ from unittest import mock
 
 from tests.skills.research_communication import comm_fixtures as fx
 from tests.skills.research_communication import test_adaptation as ta
+from tests.skills.research_communication import test_terminology as tt
 
 SCRIPTS = fx.PLUGIN / "skills" / "research-communication" / "scripts"
 sys.path.insert(0, str(SCRIPTS))
@@ -326,6 +327,39 @@ class ReviewFixes2ManuscriptBounds(Manuscript):
         self.assertEqual({f["severity"] for f in rep["findings"] if f["code"] == "manuscript.unused_bib_entry"}, {"unresolved"})
         code, rep = self.run_main("\\cite{a}", "@article{a, title={x}}\n@article{b, title={x}}\n", "--strict")
         self.assertEqual(code, 1, rep)
+
+
+class ReviewFixes2Chinese(Project):
+    """RC-A10: status wording in Traditional Chinese gives the same finding as its English twin."""
+
+    def wording(self, text):
+        c1 = self.doc["extension"]["claims"][0]
+        c1["text"], c1["status"] = text, ["synthetic"]
+        return codes(self.claims(), "warning")
+
+    def test_status_promotion_in_both_languages(self):
+        self.assertIn("wording.status_promotion", self.wording("We measured the ratio R = 1.02 in data."))
+        self.setUp()
+        self.assertIn("wording.status_promotion", self.wording("我們在資料中測量到比值 R 為 1.02。"))
+
+    def test_negated_chinese_sentence_is_not_a_promotion(self):
+        self.assertNotIn("wording.status_promotion", self.wording("我們並未在資料中測量到比值 R。"))
+
+
+class ReviewFixes2ChineseTerminology(tt.Base):
+    """RC-A10: notation and abbreviation definitions in Traditional Chinese."""
+
+    def test_conflicting_symbol_definitions_in_one_section(self):
+        en = self.run_check("# Results\n\nR denotes the flux ratio.\n\nR denotes the rigidity.\n")
+        zh = self.run_check("# Results\n\nR 表示通量比。\n\nR 表示剛度。\n")
+        self.assertIn("terminology.conflicting_definitions", self.codes(en, "error"))
+        self.assertIn("terminology.conflicting_definitions", self.codes(zh, "error"))
+
+    def test_chinese_abbreviation_definition_counts(self):
+        rep = self.run_check("# Results\n\n我們使用信賴水準（CL）表示區間。\n\n此處 CL 為 95%。\n")
+        self.assertNotIn("terminology.abbreviation_undefined", self.codes(rep))
+        rep = self.run_check("# Results\n\n此處 CL 為 95%。\n")
+        self.assertIn("terminology.abbreviation_undefined", self.codes(rep))
 
 
 if __name__ == "__main__":

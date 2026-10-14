@@ -18,7 +18,8 @@ from communication_lib.documents import markdown_headings, normalize, strip_tex_
 from contracts.communication import format_of
 
 QUOTE_RE = re.compile(r"[\"“「『][^\"”」』]*[\"”」』]|so-called\s+\S+")
-ABBR_DEF_HEAD = r"([A-Za-z][A-Za-z\-\u4e00-\u9fff ]{2,80}?)\s*[\(\uff08]("
+ABBR_DEF_HEAD = r"([A-Za-z\u4e00-\u9fff][A-Za-z\-\u4e00-\u9fff ]{1,80}?)\s*[\(\uff08]("
+CJK_RE = re.compile(r"[\u4e00-\u9fff]")
 ABBR_DEF_TAIL = r")[\)\uff09]"
 NOTE = ("deterministic detection limited to glossary rules, explicit definitions and declared scopes; ambiguous usage and the "
         "meaning of prose or equations are the reader's semantic review; nothing is replaced or translated")
@@ -144,6 +145,8 @@ def _abbreviations(did, lines, glossary, findings):
                     defs.append((n, normalize(expansion).lower(), expansion))
             distinct = {}
             for n, key, shown in defs:
+                if CJK_RE.search(shown):
+                    continue  # a CJK expansion has no word boundary to cut at: it counts as a definition, not for redefinition
                 distinct.setdefault(key, (n, shown))
             if len(distinct) > 1:
                 where = "; ".join(f"line {n}" for n, _ in distinct.values())
@@ -167,7 +170,8 @@ def _notation(did, lines, sections, glossary, findings):
     for n in glossary.get("notation", []) or []:
         declared.setdefault(str(n["symbol"]), []).append(n)
     for sym, entries in declared.items():
-        rx = re.compile(r"(?<![A-Za-z\\])" + re.escape(sym) + r"(?![A-Za-z])\s+(?:denotes|is defined as|stands for|is the|be the|denote)\s+(.+?)(?:[.;]|$)")
+        rx = re.compile(r"(?<![A-Za-z\\])" + re.escape(sym) + r"(?![A-Za-z])(?:\s+(?:denotes|is defined as|stands for|is the|be the|denote)\s+"
+                        r"|\s*(?:表示|定義為|記為|代表)\s*)(.+?)(?:[.;。；]|$)")
         found = []
         for ln, line in enumerate(lines, 1):
             for m in rx.finditer(_unquoted(line)):

@@ -24,16 +24,21 @@ from contracts.evidence import STRENGTH
 NOTE = ("assessment recorded by its assessor and checked for consistency with the record; whether the evidence supports "
         "the wording is the reader's judgment, not established by this audit; wording findings are advisory")
 PROMOTED = {"synthetic", "asimov", "preliminary", "unvalidated", "failed", "user-supplied"}
-MEASURED_RE = re.compile(r"\b(we measure|measured|observed|observation of|in data|the data show|data show)\b", re.I)
-DISCOVERY_RE = re.compile(r"\b(observation of|evidence for|discover(?:y|ed)?|establish(?:es|ed)?)\b", re.I)
-UNIVERSAL_RE = re.compile(r"\b(for all|all energies|all masses|universal(?:ly)?|always|in general|any (?:energy|mass|regime))\b", re.I)
-NEGATION_RE = re.compile(r"\b(no evidence|not|neither|nor|fails? to|without|rule[sd]? out|disfavou?r)\b", re.I)
-ATTRIBUTION_RE = re.compile(r"\b(Ref\.|refs?\.|reported (?:by|in)|claims? that|according to|argue[sd]? that|et al\.)\b", re.I)
-QUOTE_RE = re.compile(r"[\"“][^\"”]*[\"”]")
+# English and Traditional Chinese (RC-A10). CJK alternatives carry no \\b: CJK characters are word characters.
+MEASURED_RE = re.compile(r"\b(we measure|measured|observed|observation of|in data|the data show|data show)\b"
+                         r"|測量到|量測到|測得|觀測到|觀察到|在資料中|資料顯示|數據顯示", re.I)
+DISCOVERY_RE = re.compile(r"\b(observation of|evidence for|discover(?:y|ed)?|establish(?:es|ed)?)\b|發現|證實|確立|觀測到.{0,6}訊號", re.I)
+UNIVERSAL_RE = re.compile(r"\b(for all|all energies|all masses|universal(?:ly)?|always|in general|any (?:energy|mass|regime))\b"
+                          r"|對所有|所有能量|所有質量|普遍|總是|一般而言|任何能區", re.I)
+NEGATION_RE = re.compile(r"\b(no evidence|not|neither|nor|fails? to|without|rule[sd]? out|disfavou?r)\b"
+                         r"|沒有|並未|並非|未能|無法|排除|不支持|不是", re.I)
+ATTRIBUTION_RE = re.compile(r"\b(Ref\.|refs?\.|reported (?:by|in)|claims? that|according to|argue[sd]? that|et al\.)\b"
+                            r"|根據|據.{0,10}報導|文獻\s*\[|等人", re.I)
+QUOTE_RE = re.compile(r"[\"“「『][^\"”」』]*[\"”」』]")
 
 
 def _sentences(text: str) -> list[str]:
-    return [s for s in re.split(r"(?<=[.!?;])\s+", text) if s.strip()]
+    return [s for s in re.split(r"(?<=[.!?;])\s+|(?<=[。！？；])", text) if s.strip()]
 
 
 def _scan_sentences(text: str):
