@@ -27,8 +27,8 @@ dominating the systematic.
 **DIRC (detection of internally reflected Cherenkov light).** Light is trapped by
 total internal reflection in a solid radiator bar and carried to a photosensor array
 at the end: the ring is imaged after propagation as a pattern of hit positions,
-requiring a reconstruction of the angle from position and (in TOP) **time of
-propagation**. **TOP** detectors add the photon arrival time, breaking degeneracies
+requiring a reconstruction of the angle from position and, in **time-of-propagation (TOP)**
+detectors, the photon arrival time, which breaks degeneracies
 in the path. Distinctive features: **multiple photon paths** with the same detected
 position (left/right bounces, mirror-image "ambiguities") that overlap in the
 image, correction for **chromatic dispersion** through timing, and the need to calibrate
@@ -40,7 +40,7 @@ finding, track-photon association, likelihood PID; contributions to the per-phot
 angle resolution: emission-point (radiator thickness), chromatic (dispersion `dn/d lambda`),
 optical aberration, pixelization, and (per track) division by `sqrt(N_pe)`
 ([particle identification](particle-identification.md)). Background hits from other tracks, delta rays,
-and noise enter the likelihood as a flat term. **Radiators**: aerogel (intermediate
+and noise enter the likelihood as a background term (often taken flat or smooth; state the model). **Radiators**: aerogel (intermediate
 `n`, Rayleigh scattering), gas (low `n`, high threshold, high `beta`), liquid, water,
 and ice (large volumes, optics dominated by absorption/scattering, e.g.
 [neutrino astronomy](neutrino-astronomy.md)).
@@ -58,9 +58,9 @@ and ice (large volumes, optics dominated by absorption/scattering, e.g.
   per-track angle residual versus momentum.
 - **Scaling** (approximate; PDG Review of Particle Physics, "Passage of particles
   through matter", Cherenkov radiation, and "Particle detectors at accelerators",
-  Cherenkov detectors): photoelectron yield `N_pe = N_0 L sin^2 theta_C` for radiator
+  Cherenkov detectors): photoelectron yield `N_pe = N_0 L z^2 sin^2 theta_C` for radiator
   length `L` and detector figure of merit `N_0` (cm^-1; it folds in the photon yield,
-  optics and quantum efficiency), from a raw emission of about `490 sin^2 theta_C`
+  optics and quantum efficiency), from a raw emission of about `490 z^2 sin^2 theta_C`
   photons/cm between 400 and 700 nm; per-track angle resolution
   `sigma_theta = sqrt(sigma_photon^2/N_pe + sigma_trk^2)`, where `sigma_trk` is the
   contribution of the track direction and other terms common to all photons, which
@@ -86,7 +86,7 @@ and ice (large volumes, optics dominated by absorption/scattering, e.g.
 | Photomultiplier tube (PMT) | dynode chain, gain `10^5-10^7` | low noise, large area, fast | gain drift, afterpulses, magnetic-field sensitivity, transit-time spread, single-photoelectron (SPE) response |
 | Silicon photomultiplier (SiPM) | Geiger-mode pixel array | compact, magnetic-field tolerant, photon counting | dark counts (temperature, dose), optical crosstalk, afterpulse, saturation (finite pixels) |
 | Avalanche photodiode (APD) | linear avalanche in silicon | high `QE`, compact | gain/temperature sensitivity, excess noise |
-| Hybrid photodetector | photocathode + silicon anode | good SPE resolution | high-voltage requirements |
+| Hybrid photodetector | photocathode + silicon anode | good SPE resolution | high-voltage requirements, magnetic-field sensitivity |
 | Microchannel plate (MCP) | channel electron multiplier | very fast, position sensitive | aging, ion feedback, rate/gain droop |
 | Gaseous photon detector | photoionization + gas gain | large area, magnetic-field tolerant | quantum efficiency (window/gas), aging, ion backflow |
 

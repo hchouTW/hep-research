@@ -1,0 +1,185 @@
+{
+ "$comment": "Owner: detector-response. Typed fields of a response since contracts 2.8.0 (detector-response audit), applied by contracts.validate on top of ext_response.json only to artifacts of contract 2.8.0 or later, or to older ones with --strict. All optional here; contracts.validate._response_hardening makes intended_use and underflow_overflow required for a matrix (R1) and underflow/overflow required for explicit_bins with an inline matrix (R6).",
+ "type": "object",
+ "properties": {
+  "underflow_overflow": {
+   "type": "string",
+   "enum": [
+    "explicit_bins",
+    "folded_into_edge_bins",
+    "not_represented"
+   ],
+   "$comment": "since 2.8.0 the enum of core/stats/validate_response.py FLOW; ext_response.json keeps the free string so a 2.7 artifact keeps its outcome"
+  },
+  "underflow": {
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "type": "number"
+   },
+   "$comment": "per truth bin, same normalization as matrix: probability (or counts) reconstructed below the reco axis"
+  },
+  "overflow": {
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "type": "number"
+   },
+   "$comment": "per truth bin, same normalization as matrix: probability (or counts) reconstructed above the reco axis"
+  },
+  "correction_space": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "object",
+    "required": [
+     "space"
+    ],
+    "properties": {
+     "space": {
+      "type": "string",
+      "enum": [
+       "truth",
+       "reco",
+       "global"
+      ]
+     },
+     "binned_in": {
+      "type": "string",
+      "minLength": 1
+     },
+     "order": {
+      "type": "integer",
+      "minimum": 1
+     }
+    }
+   },
+   "$comment": "term of applied_separately -> where it acts: truth (per truth bin, before folding), reco (per reco bin, after folding) or global (a scalar such as luminosity, exposure or live time); order is the position in D_reco R D_truth"
+  },
+  "mc_stat": {
+   "type": "object",
+   "required": [
+    "kind"
+   ],
+   "properties": {
+    "kind": {
+     "type": "string",
+     "enum": [
+      "generated_counts",
+      "effective_counts",
+      "sumw2",
+      "covariance_ref"
+     ]
+    },
+    "events_per_truth_bin": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "number",
+      "minimum": 0
+     }
+    },
+    "sumw2": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "array",
+      "items": {
+       "type": "number",
+       "minimum": 0
+      }
+     }
+    },
+    "ref": {
+     "type": "string",
+     "minLength": 1
+    },
+    "weighted": {
+     "type": "boolean"
+    },
+    "signed_weights": {
+     "type": "boolean"
+    }
+   },
+   "$comment": "finite-MC uncertainty of the response: generated_counts and effective_counts carry events_per_truth_bin (generated, or selected when the inefficiency is outside), sumw2 carries a matrix-shaped sumw2, covariance_ref carries ref"
+  },
+  "systematic_variations": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "nuisance",
+     "direction"
+    ],
+    "properties": {
+     "nuisance": {
+      "type": "string",
+      "minLength": 1
+     },
+     "direction": {
+      "type": "string",
+      "enum": [
+       "up",
+       "down",
+       "alternative"
+      ]
+     },
+     "matrix": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+       "type": "array",
+       "minItems": 1,
+       "items": {
+        "type": "number"
+       }
+      }
+     },
+     "matrix_ref": {
+      "type": "string",
+      "minLength": 1
+     },
+     "conditions": {
+      "type": "string"
+     }
+    }
+   },
+   "$comment": "response variations; nuisance names match the statistical model that consumes them"
+  },
+  "periods": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "exposure_weight"
+    ],
+    "properties": {
+     "id": {
+      "type": "string",
+      "minLength": 1
+     },
+     "exposure_weight": {
+      "type": "number",
+      "minimum": 0
+     },
+     "matrix": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+       "type": "array",
+       "minItems": 1,
+       "items": {
+        "type": "number"
+       }
+      }
+     },
+     "matrix_ref": {
+      "type": "string",
+      "minLength": 1
+     }
+    }
+   },
+   "$comment": "time-dependent responses: one matrix (or matrix_ref) per period with its exposure weight"
+  }
+ }
+}

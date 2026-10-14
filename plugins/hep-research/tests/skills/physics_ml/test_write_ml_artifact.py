@@ -27,7 +27,8 @@ SUMMARY = {
     "training_domain": {"x": [0.0, 10.0], "y": [-1.0, 1.0]},
     "preprocessing": [{"step": "standardize", "features": ["x", "y"], "mean": [5.0, 0.0], "std": [2.0, 0.5]}],
     "weights": {"source": "synthetic generator weights", "negative_weight_treatment": "none-present",
-                "class_balancing": None, "used_in": ["loss", "metrics"]},
+                "class_balancing": None, "used_in": ["loss", "metrics"],
+                "training": {"negative_weight_treatment": "none-present"}, "evaluation": {"treatment": "unmodified"}},
     "model_hash": "sha256:" + "ab" * 32, "checkpoint": "model.pt",
     "environment": {"torch_version": "synthetic", "device": "cpu", "precision": "fp32", "seeds": {"torch": 1, "split": 2}},
     "metrics": {"val": {"bce": 0.4}, "test": {"bce": 0.41}}, "scores": {"test": "scores_test.npz"},
@@ -36,8 +37,9 @@ CALIBRATION = {"calibration": {"method": "temperature", "params": {"T": 1.3}, "f
                                "validation": {"metric": "ece", "sample": "test", "before": 0.06, "after": 0.01,
                                               "bins": 15, "binning": "equal-width"}}}
 DOMAIN_SHIFT = {"control_sample": "synthetic control region", "method": "score-shape comparison",
-                "result": {"ks_p": 0.3}, "status": "checked"}
-DOWNSTREAM = [{"metric": "signal efficiency at the working point in the synthetic signal region"}]
+                "result": {"ks_p": 0.3}, "status": "checked", "outcome": "no-shift"}
+DOWNSTREAM = [{"metric": "working-point-efficiency", "quantity_affected": "signal efficiency in the synthetic signal region",
+               "value": 0.51, "uncertainty": 0.02, "criterion": ">= 0.5", "passed": True, "ref": "synthetic"}]
 
 
 class WriteMlArtifactTests(unittest.TestCase):
@@ -63,7 +65,11 @@ class WriteMlArtifactTests(unittest.TestCase):
                 "--output-semantics", "probability", "--status", "synthetic", "--status", "unvalidated"]
 
     def test_summary_with_calibration_validates(self):
-        code, out = self.run_main(*self.full_args())
+        # the overlap result comes from a report, never from the summary's own claim (PML-WP0.4)
+        splits = {"train": ["a", "b"], "test": ["c"], "groups": {"a": "r1", "b": "r1", "c": "r2"}}
+        proc = subprocess.run([sys.executable, str(SPLIT_SCRIPT), self.write("splits.json", splits), "--json"],
+                              capture_output=True, text=True, timeout=60)
+        code, out = self.run_main(*self.full_args(), "--split-report", self.write("rep.json", json.loads(proc.stdout)))
         self.assertEqual((code, out["status"]), (0, "written"), out)
         doc = json.loads((self.tmp / "ml.json").read_text())
         self.assertEqual(doc["contract_version"], CONTRACTS_VERSION)
@@ -72,7 +78,9 @@ class WriteMlArtifactTests(unittest.TestCase):
         self.assertEqual(doc["extension"]["calibration"]["validation"]["sample"], "test")
         self.assertEqual(doc["extension"]["splits"]["overlap_check"]["result"], "pass")
         self.assertEqual([o["ref"] for o in doc["outputs"]], ["model.pt", "scores_test.npz"])
-        self.assertTrue(all(len(i["sha256"]) == 64 for i in doc["inputs"]))
+        self.assertEqual(doc["inputs"], [])  # tool outputs are source files, not artifact inputs (PML-WP0.5)
+        self.assertTrue(all(len(i["sha256"]) == 64 for i in doc["extension"]["source_files"]))
+        self.assertTrue(doc["extension"]["splits"]["test_groups_disjoint"])
         rep = validate_artifact(doc)
         self.assertTrue(rep.ok, rep.as_dict())
         self.assertEqual([f.code for f in rep.findings], [])

@@ -12,8 +12,12 @@
 
 ## Color
 
-- Grayscale-safe by default: verify by mentally (or actually) desaturating. Distinguish by
-  fill lightness + border/line style + shape + label.
+- Grayscale-safe by default: render a greyscale copy and look at it
+  (`pdftoppm -gray -r 150 -png f.pdf f_gray`, or `magick f.png -colorspace Gray f_gray.png`).
+  Distinguish by fill lightness + border/line style + shape + label. For colour-vision
+  deficiencies, run a simulator (for example the `colorspacious` package's CVD space, installed
+  only with the user's approval, or a viewer's built-in simulation) and say which; with no
+  simulator available, report the check as not done.
 - Color for semantic grouping only: data vs simulation, signal vs background, training vs
   inference, deterministic vs stochastic, detector subsystems, software layers.
 - Colorblind-safe palette, e.g. Okabe-Ito: `#000000 #E69F00 #56B4E9 #009E73 #F0E442 #0072B2 #D55E00 #CC79A7`
@@ -47,8 +51,7 @@
 | NeurIPS 2026 | text width 5.5 in (13.97 cm), single column, 10 pt Times body (`neurips_2026.sty`) |
 | ICML 2026 | two columns; overall text width 6.75 in (17.1 cm), 0.25 in between columns, so each column is 3.25 in (8.26 cm); left margin 0.75 in |
 | ICLR 2026 | single column, text width 5.5 in (13.97 cm), 10 pt Times body (`iclr2026_conference.sty`; ICLR 2027's file sets the same) |
-| Beamer 16:9 | ~ full slide; text >= 14-18 pt |
-| Poster | text >= 24 pt for labels |
+| Beamer slides, posters | sizes in `poster-and-talk-design.md` (single home) |
 
 None of JHEP, NeurIPS, or ICLR sets a minimum font size for text inside figures: apply the 6-7 pt floor above and
 aim to match the caption size (JHEP `\small` = 10 pt; NeurIPS/ICLR captions are 10 pt with a 10 pt body). Their figure
@@ -59,7 +62,7 @@ sense printed in black and white; NeurIPS also requires Type 1 or embedded TrueT
 **JHEP** - caption below the figure; refer to "figure 2" in the text, never "fig. 2"; raster images at 150-250 dpi;
 vector images with fonts embedded; remove transparency layers; float figures to the top of a page.
 
-Venue figure-quality rules found in the same sources: APS - lettering at least 2 mm high after reproduction, lines at least 0.18 mm (0.5 pt), 600 dpi or more for raster art; ICML - lines at least 0.5 pt, no text on a gray background, Type-1 fonts only. (A 2 mm cap height is roughly an 8 pt font; the 6-7 pt minimum above is a floor, not a target.) Checked 2026-09-21 against: the ICML 2026 example paper (widths above, plus figure lines at least 0.5 pt thick, no text on a gray background, and Type-1 fonts only - avoid Type-3 fonts from exported figures), the NeurIPS 2026 formatting instructions, the JHEP `jheppub` documentation, and the APS RMP style guide
+Venue figure-quality rules found in the same sources: APS (RMP style guide; other APS journals not checked) - lettering at least 2 mm high after reproduction, lines at least 0.18 mm (0.5 pt), 600 dpi or more for raster art; ICML - lines at least 0.5 pt, no text on a gray background, Type-1 fonts only. (A 2 mm cap height is roughly an 8 pt font; the 6-7 pt minimum above is a floor, not a target.) Checked 2026-09-21 against: the ICML 2026 example paper (widths above, plus figure lines at least 0.5 pt thick, no text on a gray background, and Type-1 fonts only - avoid Type-3 fonts from exported figures), the NeurIPS 2026 formatting instructions, the JHEP `jheppub` documentation, and the APS RMP style guide
 (JHEP/NeurIPS/ICLR re-checked 2026-09-25 from the style files themselves). Re-check each year and for every journal. These are common defaults, not guarantees: read the venue's author kit. Design at final size;
 avoid scaling a large figure down until the text is unreadable. Prefer vector (PDF/SVG) output.
 
@@ -83,10 +86,13 @@ figure_style:
 
 ## Equations, talks, posters and export
 
-Equation placement, poster/thesis/talk variants (including Beamer overlays) and export recipes are in
-[legends-panels-and-export.md](legends-panels-and-export.md) (sections 3, 4, 5 and 7).
+Equation placement and export recipes are in [legends-panels-and-export.md](legends-panels-and-export.md)
+(sections 4 and 6); poster, thesis and talk variants, including Beamer overlays, in
+[poster-and-talk-design.md](poster-and-talk-design.md).
 
 ## Final readability check
 
 Grayscale test; column-width test; can a reader in the field name every arrow's meaning without
 the caption? Is anything in the figure absent from the text (or vice versa)?
+
+**Done when:** the figure passes the greyscale render, its smallest text meets the size floor at the printed width, and every style it uses is in its legend.

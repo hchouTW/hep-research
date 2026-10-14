@@ -58,6 +58,8 @@ slices usually communicates more.
 
 ## Caption writing
 
+This section is the home for captions of plots and tables; captions of diagrams
+(workflows, schematics, Feynman-style drawings) follow `diagram-captions.md`.
 A caption typically has three parts, in order:
 1. **What is shown** — plot type, what's on each axis, what the data source is.
 2. **How it was made**, briefly, if not obvious (selection applied, binning
@@ -71,7 +73,7 @@ Example:
 > background-only fit (solid line) and the signal-plus-background fit (dashed
 > line). The lower panel shows the fit residuals in units of the statistical
 > uncertainty. The excess near 750 GeV corresponds to a local significance of
-> 2.1σ.
+> 2.1σ (the global significance is given in the text; `scientific-style.md`).
 
 Keep captions self-contained but not redundant with the main text — the main
 text can discuss implications at length; the caption states facts about the
@@ -93,18 +95,8 @@ figure itself.
 
 ## Color and accessibility
 
-- Use colorblind-safe palettes (e.g. Okabe-Ito, or ROOT's `kViridis`/
-  `kCividis`) rather than default red/green distinctions.
-- Ensure figures remain interpretable in grayscale — many readers print or
-  view PDFs without color; use distinct line styles (solid/dashed/dotted) in
-  addition to color for curves.
-- Do not rely on color alone to distinguish more than ~4-5 categories; add
-  markers or hatching.
-
-For every scientifically meaningful distinction, provide a non-color cue when
-needed, even with only two categories. Inspect at the intended display/print size:
-text, markers, error bars, and line patterns must remain distinguishable. A palette
-name alone does not establish accessibility; check actual contrast and encodings.
+Colour palettes, greyscale and colour-vision checks and raster resolution for plots have one home:
+`physics-plots.md` ("Colour and raster resolution"), where the venue's rule overrides the default.
 
 ## Accessible descriptions
 
@@ -145,8 +137,12 @@ official requirements before claiming compliance with a named standard or venue.
 
 - Vector formats (PDF, EPS) for anything that's lines/text/histograms — they
   stay sharp at any zoom and keep file size small.
-- Raster (PNG at ≥300 dpi) only for genuinely raster content (detector event
-  displays, photographs, heatmaps with very many points where vector output
-  would bloat file size).
+- Raster only for genuinely raster content (detector event displays,
+  photographs, heatmaps with very many points where vector output would bloat
+  file size), at the resolution in `physics-plots.md` (the venue's rule wins).
+- Status labels, ratio panels, fonts (`pdf.fonttype = 42`, `pdffonts`) and
+  cosmic-ray/neutrino conventions for physics plots: `physics-plots.md`.
 - Avoid re-exporting a raster screenshot of a vector plot — regenerate from
   source (ROOT macro / matplotlib script) at the target format instead.
+
+**Done when:** every plot has axis labels with units, its uncertainty bands are named in the caption, its status label matches the result, and the greyscale render is readable.

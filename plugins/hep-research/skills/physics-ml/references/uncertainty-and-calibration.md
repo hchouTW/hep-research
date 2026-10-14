@@ -1,61 +1,26 @@
 # Uncertainty and Calibration Reference
 
-Whether a model's confidence and predictive uncertainty can be trusted as stated - a
-distinct question from whether its predictions are accurate. High priority for
-scientific ML, where a probability or interval is often the actual deliverable. For
-metric computation see [evaluation-metrics.md](evaluation-metrics.md); for evaluation
-design see [evaluation-strategy.md](evaluation-strategy.md); for behavior under shift
-see [robustness-and-distribution-shift.md](robustness-and-distribution-shift.md).
-
-This is predictive-probability calibration - a different sense of "calibration" from
-the quantization calibration data used in
-[efficient-finetuning.md](efficient-finetuning.md) and
-[export-and-deployment.md](export-and-deployment.md).
+Whether a model's confidence and predictive uncertainty can be trusted as stated, a question separate from accuracy.
+Metrics: [evaluation-metrics.md](evaluation-metrics.md); behaviour under shift:
+[robustness-and-distribution-shift.md](robustness-and-distribution-shift.md). (Predictive calibration, not the
+quantization calibration of [efficient-finetuning.md](efficient-finetuning.md).)
 
 ## Confidence is not calibration
 
-**A model's confidence score is not automatically a calibrated probability of
-correctness.** A softmax value of `0.99` means the model is confident, not that it is
-right 99% of the time it says so - those are only equal if the model is calibrated,
-which must be measured, not assumed. Neural networks are commonly overconfident,
-especially after heavy training or on inputs unlike the training distribution.
+A softmax of 0.99 means the model is confident, not that it is right 99% of the time; networks are commonly
+overconfident, most of all far from the training data. Better predictive performance does not imply better
+downstream inference (estimates, intervals, significance): each is a separate claim.
 
-**For scientific ML specifically: improved predictive performance does not
-automatically imply improved downstream scientific inference.** A classifier with
-higher AUC does not necessarily produce better parameter estimates, better confidence
-intervals, better discovery significance, or more reliable uncertainty - each of those
-is a separate claim requiring separate validation. Do not substitute a predictive
-metric for a downstream one; see the physics-ml/hep-statistics boundary in
-`deep-learning-guide.md`.
-
-## Aleatoric vs. epistemic uncertainty
-
-- **Aleatoric** - irreducible noise in the data-generating process itself. More data or
-  a better model does not remove it; a well-specified model should learn to predict it
-  (e.g. heteroscedastic regression), not eliminate it.
-- **Epistemic** - uncertainty from limited data or model knowledge. Should shrink with
-  more relevant data and should be *large* far from the training distribution - if it
-  is not, the epistemic-uncertainty estimate itself is untrustworthy.
-
-Conflating the two produces a single "uncertainty" number that cannot be acted on: a
-high-aleatoric, low-epistemic prediction (genuinely noisy, well-understood) calls for a
-different response than a low-aleatoric, high-epistemic one (looks confident, poorly
-covered by training data).
+**Aleatoric** uncertainty (irreducible noise; a well-specified model predicts it, for example a heteroscedastic
+regression) and **epistemic** uncertainty (limited data or knowledge; it must grow far from the training data, or the
+estimate is untrustworthy) call for different responses; do not merge them into one number.
 
 ## Measuring calibration
 
-- **Negative log-likelihood (NLL)** - a proper scoring rule; rewards both accuracy and
-  calibration jointly, so it can worsen even as accuracy improves if confidence grows
-  faster than correctness.
-- **Brier score** - mean squared error between predicted probability and the 0/1
-  outcome; another proper scoring rule, more interpretable at a glance than NLL.
-- **Expected calibration error (ECE)** bins predictions by confidence and compares
-  average confidence to average accuracy per bin. Known limitations: sensitive to bin
-  count/edges, can be near-zero for a model that is calibrated only in aggregate while
-  badly miscalibrated within a class or slice, and says nothing about sharpness (a
-  model that always predicts the base rate is "calibrated" and useless). Report a
-  reliability diagram alongside the scalar, and check calibration **per slice**, not
-  only in aggregate - see [evaluation-strategy.md](evaluation-strategy.md) on slices.
+NLL and the Brier score are proper scoring rules. ECE bins predictions by confidence and compares with the observed
+rate: it depends on the binning, can hide miscalibration within a class or slice, says nothing about sharpness (always
+predicting the base rate is "calibrated"), and has a finite-sample floor (`assets/calibration.py` reports it). Report a
+reliability diagram with the scalar, per slice. With event weights, compute all of them weighted.
 
 ## Calibration and uncertainty methods
 
@@ -79,10 +44,44 @@ needed:
   downstream use consumes the spread (error propagation, decision thresholds).
   Validate empirical coverage (does the true value fall inside the interval at the
   stated rate?) rather than trusting the interval's construction.
+- **Platt scaling** - a logistic fit sigmoid(a·logit + b) on the held-out sample; unlike
+  temperature scaling it also fits an offset, so it can absorb a class-prior shift.
+  `assets/calibration.py --method platt` (Platt's original reference is `unverified`
+  here: not opened).
+- **Isotonic regression** - a monotone, non-parametric map (pool-adjacent-violators);
+  needs more calibration data than a one- or two-parameter fit and is the most
+  optimistic when judged on its fit sample. `assets/calibration.py --method isotonic`
+  (it refuses negative weights unless cells are merged).
+- **Prior correction** - a classifier trained under one class ratio estimates p(s|x)
+  under that ratio; `f_phys = r·f / (r·f + 1 − f)` maps it to the physics ratio
+  ([ml-analysis.md](ml-analysis.md), "Class balancing and the prior";
+  `assets/hep_metrics.py undo_prior_shift`, `calibration.py --prior-ratio-change`).
+  Temperature scaling cannot do this.
+- **Conformal prediction** - wraps any trained model in prediction sets that contain the
+  true outcome at a chosen rate without distributional assumptions, given exchangeable
+  calibration and test samples (Angelopoulos & Bates, arXiv:2107.07511, abstract, read
+  2026-10-14). The guarantee is marginal and breaks under the data/simulation shift a
+  physics deployment usually has; check exchangeability first.
 - **Selective prediction / abstention** - allow the model to decline to predict below a
   confidence threshold. Only meaningful if the confidence used to gate is itself
   calibrated; an uncalibrated confidence produces an abstention policy that abstains on
   the wrong cases.
+
+## When an ML uncertainty is a measurement systematic
+
+- **A frozen score used as an observable** (a cut or a template variable) needs no
+  ensemble or seed nuisance: any fixed function of the inputs is a valid observable, and
+  the analysis calibrates the distribution of the score in data and simulation (its
+  systematics are those of the inputs, propagated through the fixed function). Seed or
+  ensemble spread measures how optimal the selection is, not a bias of the result.
+- **A learned quantity used inside the likelihood** (a density ratio, a likelihood ratio,
+  a posterior, a surrogate prediction) is part of the model: its training uncertainty
+  (ensemble spread, finite training statistics, calibration residual) biases the result
+  and must enter as a nuisance or a coverage-checked correction. Hand the treatment to
+  hep-statistics ([ml-assisted-inference.md](../../hep-statistics/references/ml-assisted-inference.md)).
+- **A regressed correction** (energy, momentum) carries its non-closure and the in-situ
+  data/simulation scale and resolution difference as systematics
+  ([multivariate-analysis-bdt-nn.md](multivariate-analysis-bdt-nn.md), "Regression targets").
 
 ## Uncertainty under distribution shift
 

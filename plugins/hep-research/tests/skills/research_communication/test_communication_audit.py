@@ -205,13 +205,18 @@ class ManuscriptOccurrences(Base):
         rep = self.audit(checks="manuscript")
         self.assertIn("occurrence.claim_without_occurrence", self.codes(rep, "unresolved"))
 
-    def test_value_not_in_passage_is_a_review_candidate(self):
+    def test_value_not_in_passage_is_an_error_compared_as_a_number(self):
         doc = fx.clone(self.p["doc"])
         doc["extension"]["occurrences"][1]["value"] = {"value": "1.020", "unit": "1", "rounding": "decimals:3"}
         fx.write(self.p["record"], doc)
         rep = self.audit(checks="manuscript")
-        self.assertIn("occurrence.value_not_in_passage", self.codes(rep, "warning"))
-        self.assertEqual(rep["status"], "pass", "a warning alone does not fail the mechanical check")
+        # RC-A2b: the passage shows 1.02, fewer digits than the declared 1.020 (decimals:3): the record is stale
+        self.assertIn("occurrence.value_not_in_passage", self.codes(rep, "error"), "1.02 does not display 1.020")
+        doc["extension"]["occurrences"][1]["value"] = {"value": "1.03", "unit": "1", "rounding": "decimals:2"}
+        fx.write(self.p["record"], doc)
+        rep = self.audit(checks="manuscript")
+        self.assertIn("occurrence.value_not_in_passage", self.codes(rep, "error"))
+        self.assertEqual(rep["status"], "fail", "a display value absent from its passage fails (RC-A2)")
 
 
 class Cli(Base):

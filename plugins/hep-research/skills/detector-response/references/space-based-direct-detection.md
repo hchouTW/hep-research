@@ -13,17 +13,35 @@ geomagnetic and solar effects that ground- and space-based measurements alike mu
 correct for, and that have no collider-physics analog.
 <!-- /example -->
 
-## Rigidity, not energy, is the natural variable
+## Rigidity, not energy, is the natural variable - for a spectrometer
 
-As in any magnetic spectrometer (see
-[detector-systems-overview.md](detector-systems-overview.md)), a
-space-based instrument directly measures rigidity `R = pc/(Ze)`, and every
-geomagnetic and solar effect below acts on rigidity, not on energy or momentum
+Space instruments are of two kinds, and they measure different things:
+
+<!-- example: source citation (experiment named as the source of a general method or number) -->
+- **Magnetic spectrometers** (see
+  [detector-systems-overview.md](detector-systems-overview.md)) measure rigidity
+  `R = pc/(Ze)` from the track curvature, the sign of the charge, and, with an
+  independent velocity measurement, the mass and so the isotope. Their resolution is
+  bounded by the maximum detectable rigidity (MDR), and charge confusion near it is a
+  background.
+- **Calorimetric instruments** (thick calorimeter plus charge detectors, without a
+  magnet) measure the energy deposited in the calorimeter and the charge magnitude.
+  Because the calorimeter does not contain the whole hadronic shower, the incident
+  energy is obtained by unfolding the deposited-energy spectrum with an energy response
+  matrix from simulation (the DAMPE proton spectrum, Sci. Adv. 5 (2019) eaax3793,
+  arXiv:1909.12860, solves for the incident spectrum with a Bayesian unfolding of the
+  deposited-energy bins; opened 2026-10-14). They have no MDR, measure no charge sign
+  and so have no charge confusion, and do not separate isotopes.
+<!-- /example -->
+
+Every geomagnetic and solar effect below acts on rigidity, not on energy or momentum
 separately - because both the geomagnetic field's confinement and a Fermi-accelerated
 source's maximum energy are set by how a particle's gyroradius compares to a length
-scale, which depends on `p/(Ze)`. Reporting a direct-detection flux in kinetic energy
-per nucleon rather than rigidity discards this natural scaling and makes comparison
-across species (which differ in `Z` and `A`) needlessly indirect.
+scale, which depends on `p/(Ze)`. A spectrometer flux is therefore reported in rigidity;
+reporting it only in kinetic energy per nucleon discards this scaling and makes
+comparison across species (which differ in `Z` and `A`) needlessly indirect. A
+calorimetric flux is reported in (kinetic) energy, and any comparison in rigidity needs
+an `A/Z` assumption.
 
 ## Geomagnetic cutoff
 
@@ -35,18 +53,26 @@ atmosphere (or a near-Earth satellite) if its rigidity exceeds a minimum, the
 
     R_c = C * cos^4(lambda_m) / (r^2 * (1 + sqrt(1 - sin(eps) sin(xi) cos^3(lambda_m)))^2)
 
-with zenith angle `eps`, azimuth `xi`, `C = 59.6 GV` (proportional to the Earth's dipole
+with zenith angle `eps`, azimuth `xi` measured clockwise from geomagnetic north (east = 90 deg; this sign is for a positive particle), `C = 59.6 GV` (proportional to the Earth's dipole
 moment `M`) and `r` the geocentric distance in Earth radii. For vertical arrival the
 square root is 1, so `R_c = 14.9 GV * cos^4(lambda_m) / r^2` (Smart & Shea 2005): about
 15 GV at the geomagnetic equator at the surface (~13 GV at ISS altitude), falling to
 essentially zero at the poles - the reason polar-orbit low-cutoff regions are preferred for measuring the
-lowest-rigidity cosmic rays, and why any flux measurement from a satellite in an
-inclined orbit must either restrict to high-cutoff geomagnetic regions for a clean
-low-energy cutoff or explicitly model the orbit-averaged, direction-dependent cutoff
-(off-vertical arrival directions have a higher, angle-dependent cutoff than the
-vertical Störmer value, and the real, non-dipolar field further complicates this into
-a "penumbra" of partially-forbidden trajectories requiring backtracing simulation
-rather than the analytic formula). `<plugin root>/skills/hep-analysis/scripts/geomagnetic_cutoff.py` evaluates the
+lowest-rigidity cosmic rays. A flux measurement from a satellite in an inclined orbit
+fills its low-rigidity bins only from the low-cutoff parts of the orbit (high
+geomagnetic latitude), and must model the orbit-averaged, direction-dependent cutoff.
+The cutoff is east-west asymmetric: for the positively charged majority of cosmic rays
+it is lower for arrival from the west and higher from the east (ECSS-E-ST-10-04C,
+annex B.8, "Geomagnetic shielding (Størmer theory)", via SPENVIS; formula and azimuth
+convention as in R. Nolty, Caltech thesis (2002), arXiv:hep-ex/0201015, section on the
+Störmer cutoff; both opened 2026-10-14). Off-vertical arrival is therefore not
+uniformly higher: in the eastern half of the sky horizontal particles have a higher
+cutoff than vertical ones, in the western half a lower one.
+From the formula above at the equator and the surface, horizontal arrival from the west
+(`sin(eps) sin(xi) = -1`) gives `59.6/(1 + sqrt(2))^2 ≈ 10.2 GV` against the vertical
+14.9 GV, and from the east (`sin(eps) sin(xi) = +1`) `59.6 GV`. The real, non-dipolar
+field further complicates this into a "penumbra" of partially-forbidden trajectories
+requiring backtracing simulation rather than the analytic formula. `<plugin root>/skills/hep-analysis/scripts/geomagnetic_cutoff.py` evaluates the
 analytic vertical Störmer cutoff as a first-order estimate; a rigorous cutoff for a
 specific orbit and epoch requires particle backtracing through a full geomagnetic
 field model and is not something the analytic formula replaces.
@@ -61,8 +87,10 @@ this rule. Using a different rule for events than for exposure biases the flux n
 
 Below its local geomagnetic cutoff, any flux an instrument records at that rigidity
 is not primary cosmic radiation reaching from outside the magnetosphere - it is
-**re-entrant/albedo** particles (secondaries produced in the atmosphere and reflected
-back upward) or trapped radiation-belt particles, and must be excluded from a
+albedo particles (atmospheric secondaries: splash albedo moving upward, re-entrant albedo guided to
+the conjugate point and arriving downward) or trapped radiation-belt particles; near the cutoff
+primaries also arrive through penumbral windows, and the transmission differs between charge signs,
+so treat e+/e- and antiproton/proton cutoffs separately. They and must be excluded from a
 primary-spectrum measurement rather than corrected for.
 
 ## Solar modulation
@@ -105,7 +133,7 @@ the sunspot record instead of guessing. Solar cycle 24 began at a minimum in Dec
 peaked in April 2014 (13-month smoothed). It had a double maximum: a first peak from the northern
 hemisphere (hemispheric maximum November 2011), a long plateau between the peaks (early 2012 to mid 2013), and the higher
 second peak from the southern hemisphere in early 2014. So about 2011-2014 is **solar maximum**,
-not a declining phase, and the solar magnetic polarity reversed during it ([SILSO cycle table](https://www.sidc.be/SILSO/cyclesmm), [SILSO news: 2014, maximum year for cycle 24](https://www.sidc.be/SILSO/news004)). In that period `phi` is higher than at the 2009 minimum,
+not a declining phase, and the solar magnetic polarity reversed during it ([SILSO cycle table](https://www.sidc.be/SILSO/cyclesmm), [SILSO news: 2014, maximum year for cycle 24](https://www.sidc.be/SILSO/news004)). Solar cycle 25 began at the December 2019 minimum ([Royal Observatory of Belgium, 15 September 2020](https://astro.oma.be/en/december-2019-confirmed-as-starting-point-of-the-new-solar-activity-cycle)) and reached its smoothed maximum in October 2024 ([SIDC](https://www.sidc.be/article/solar-cycle-25-reached-its-maximum-october-2024); both read 2026-10-14; smoothed values are revised, so re-check the cycle table). Data from 2020 on need their own phase and polarity statement. In that period `phi` is higher than at the 2009 minimum,
 and it changes fast enough that a single `phi` for all three years is itself an approximation.
 
 **Forbush decreases** - sudden, transient flux depressions lasting days, caused by a
@@ -160,10 +188,13 @@ task from fitting the time-averaged spectrum.
 
 ## Direct-detection composition and the local antiparticle excesses
 
-Because a space-based spectrometer measures charge and mass directly (through the
-PID chain in [particle-identification.md](particle-identification.md)),
-it gives an unambiguous species and isotope identification that no ground-based
-technique provides - the reason direct detection remains the reference measurement
+<!-- example: source citation (experiment named as the source of a general method or number) -->
+Because a space-based magnetic spectrometer measures the charge (with its sign) and,
+with a velocity measurement, the mass (through the PID chain in
+[particle-identification.md](particle-identification.md)), it gives a species and
+isotope identification that no ground-based technique provides; a calorimetric space
+instrument identifies the element by its charge magnitude but not the isotope or the
+charge sign - the reason direct detection remains the reference measurement
 for composition, isotopic ratios, and antiparticle fluxes, even though its
 geometric-factor-limited exposure caps its reach well below the knee. Two antiparticle
 results are often quoted together but differ in status. The measured **positron
@@ -178,9 +209,13 @@ not antiprotons. The **antiproton** spectrum at high rigidity is harder than som
 secondary-production predictions, but whether it exceeds the secondary expectation at
 all is still debated, because the prediction's uncertainties (production cross
 sections, propagation) are comparable to the difference. Distinguishing source
-hypotheses requires the spectral shape, an eventual high-energy cutoff or lack
-thereof, and consistency with other channels (gamma-ray, anisotropy), not an excess
-alone.
+hypotheses requires the spectral shape (including any published high-energy drop and its
+model-dependent significance) and consistency with other channels (gamma-ray, anisotropy), not an
+excess alone. For numbers, significances and the current status read the bound experiment profile's
+ledger (for AMS-02: the [antimatter and leptons
+module](../../../profiles/experiments/ams-02/modules/species/antimatter-and-leptons.md), claims C04
+and C96), not this file.
+<!-- /example -->
 
 ## Worked walkthrough: a proton flux point from counts (verified 2026-09-24)
 
@@ -203,7 +238,7 @@ python3 <plugin root>/skills/hep-analysis/scripts/solar_modulation_force_field.p
    [1.259, 1.412]e-3. Report the counts, exposure, and bin width separately. Plot the point at
    the spectrum-weighted rigidity, not at the bin center.
 3. **Solar modulation.** The flux is top-of-instrument (TOA). To compare it with a LIS,
-   convert to kinetic energy (5.5 GV -> T = 4.641 GeV for a proton), convert the flux per GV to
+   convert to kinetic energy (5.5 GV, the bin centre, is used here for simplicity; a real analysis uses the spectrum-weighted rigidity -> T = 4.641 GeV for a proton), convert the flux per GV to
    a flux per GeV, and demodulate. At phi = 0.6 GV the LIS flux is 1.233x the TOA flux, at
    T_LIS = 5.241 GeV. The force field is a one-parameter approximation, so state phi, the
    epoch, and the model.
@@ -226,6 +261,15 @@ For 4 events in 1.3-2.0 TV with exposure 2.0e7 m^2 sr s
   with unfolding or a forward-folded fit and state the resolution model.
 - Count charge-confusion and interaction backgrounds before quoting the flux. With 4 events,
   even a background of 0.5 events changes the result.
+
+### Instrument response functions (checklist)
+
+State, with its version: the acceptance (geometric factor times selection efficiency, m^2 sr) versus rigidity or energy, per species; for a calorimeter also the energy response matrix; the energy threshold and the energy bias and resolution versus energy; the angular
+resolution (PSF, for example the 68% containment radius R68) versus energy; and the IRF set and its validity range
+(zenith, conditions). Numbers come from the experiment's IRF release or profile, not from this file.
+
+Also state the material above the instrument (balloon overburden, in g/cm^2, and the correction for secondaries
+made in it) and fragmentation of nuclei inside the instrument, which moves events between species.
 
 ## Deliverables
 

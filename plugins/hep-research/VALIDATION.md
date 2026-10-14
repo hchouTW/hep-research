@@ -1242,3 +1242,120 @@ passed every job on PR #74 (Python 3.11, 3.12, 3.13; ruff, mypy; optional ROOT a
 three jobs failed on one clock-dependent test (`test_scan_verdict`: the verdict's real timestamp 03:47 contained the
 sealed digits it asserts are absent); the test now uses a fixed time. Release manifest `release-manifests/0.9.0.json`.
 
+## PHYSICS-ML-AUDIT (2026-10-14, E2: Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1, PyTorch 2.14.1 CPU; version 0.9.0 + unreleased, contracts 2.8.0)
+
+Physics-ml remediation brief (findings ML-C01…C28, ML-K01…K16, ML-R01…R36), executed on branches fix/physics-ml-p0,
+-p1, -p2 from main 84202aa. Every row's test failed on 84202aa and passes on the branch. Synthetic data only.
+
+| Item | Before (84202aa) | After | Evidence |
+|---|---|---|---|
+| A1 NaN timestamp | `passed`, exit 0 | exit 2 naming id `a` | `tests/skills/physics_ml/test_audit_split_tools.py` |
+| A2 unknown or single `temporal_order` names | `passed`, `timestamps_checked: true` | exit 2 | same |
+| A3 date `2024-1-10` in temporal mode | sorted as text into test; check `passed` | exit 2 naming row `a1`; ISO date lands in train | same |
+| A4 group values 1, 1.0, "1" | three groups, split across train/val/test | one group `1` | same |
+| A5 same-sample isotonic calibration | writer exit 0, validator no finding (ECE 6.5e-17) | writer exit 1, `ml.calibration_on_fit_sample` | `test_audit_calibration_identity.py` |
+| A6 gate on relabelled J9 (a) no ML input, (b) domain shift failed, (c) overlap not run | `passed` x3 | (a) failed `stats.observable_source_unlinked`; (b), (c) failed `gate.ml_input_invalid` (the relabelled ml-artifact is itself refused: 'observed' without an observed input); with an observed input, (b) and (c) unresolved `gate.ml_input_unresolved` | `tests/contracts/test_ml_provenance_gate.py` |
+| K06 `dependencies.py` on J9 | exit 1 (raw `work/` files as inputs) | exit 0; a source's unresolved findings propagate | same |
+| K02 downstream "ROC AUC = 0.93", ["weighted AUC","accuracy"], bare pass | no finding | errors (native 2.8.0; under `--strict` for older artifacts) | `tests/contracts/test_ml_mutation_probe.py` |
+| Appendix B mutation probe | 50 of 53 rows silent | 1 of 53 silent (M47, by design: listed in the test) | same |
+| J9 domain shift (Q3) | shift measured, not carried | `theta_pt_miss_scale` in the fit: mu 1.30738 +0.280857/-0.260727 -> 1.33104 +0.293293/-0.277051; Asimov +0.258174/-0.237781 -> +0.271493/-0.256756; toy pull mean -0.0547 -> -0.0325, width 0.984 -> 1.028, 68% coverage 0.693 -> 0.660 (1000 toys) | `examples/ml-classifier-to-inference/`; two runs byte-identical |
+| J9 calibration (Q5) | ECE 0.0159 -> 0.0176 recorded as a probability calibration | output_semantics score, outcome no-op-within-floor (floor 0.0158) | `tests/examples/test_ml_classifier_to_inference.py` |
+| Inference domain check, d = 32, n = 600 | about 10% of fresh in-distribution rows flagged (box) | near the nominal 1% | `test_audit_domain_method.py` |
+| Grouped domain calibration, 300 design points x 10 replicas | reported 4%, measured 100% flagged | reported 3-10%, measured 5-11% (nominal 5%) | same |
+| `compare_model_runs.py` false improvements at 3/5/9 seeds | 26%/15%/11% (first pass, 3/5/10) | 5.7%/5.3%/5.1% (1500 null comparisons each) | `test_audit_small_corrections.py` |
+| References size | 257,182 B | 179,004 B | `docs/reference-inventory.json` |
+| physics-ml tests (E2, torch) | 269 run, 6 skipped | 322 run, 6 skipped (4 GPU, 2 only-without-torch) | `python -m unittest discover -s tests/skills/physics_ml -t .` |
+
+Live routing: see THREE-AUDITS-LIVE-ROUTING below (45/45 physics-ml cases). Not verified here: GPU behaviour of the changed assets; statements marked `unverified` in the references (numerical inversion,
+the in-situ term as the usual dominant one, square-root LR scaling for Adam, TMVA option strings, two-dimensional DDT
+maps, JetClass split, spurion attribution, journal details of Drnevich et al. and the CaloChallenge report, the
+OmniLearn name). The domain false-positive and calibration checks are statistical tests with fixed seeds.
+
+## DETECTOR-RESPONSE-AUDIT (2026-10-14, E2, version 0.9.0 + unreleased, contracts 2.8.0)
+
+detector-response audit DR-WP1 to DR-WP4 on branch `fix/detector-response-audit` (rebased on PML-X0, contracts 2.8.0).
+Live routing for the SKILL.md change (workflow step 5; description unchanged): 23/24 detector-response cases, see
+THREE-AUDITS-LIVE-ROUTING below; `tools/check_routing_static.py` passes.
+
+| Item | Before (`84202aa`) | After | Evidence |
+|---|---|---|---|
+| Crafted broken responses refused by `validate.py` (30 cases, also `--strict`) | 5 of 30 | 28 of 30; cases 20 and 24 pass with warnings by design; the same artifacts stamped 2.6.0/2.7.0 keep their default outcome (5 fail) | `tests/contracts/test_response_contract.py` (ResponseHardeningTests), fixtures `invalid/response_2_8/`, `warning/response_2_8/` |
+| He4 Cherenkov photons, p = 40 GeV/c, n = 1.05, L = 2 cm, N0 = 100/cm | 17.02 (sigma_theta 1.212 mrad) | 68.08 (0.606 mrad) | `CherenkovChargeTests` |
+| Gaisser-Hillas, X_max = 1e20, lambda = 60 | no result within 10 s | FWHM 1.824036e11 in 0.03 s (Gaussian limit 1.8240358e11) | `GaisserHillasBracketingTests` |
+| Calorimeter constant term, 2000 toys, 2% scatter, true c = 0.0070 | unit weights: c^2 < 0 in 26% of fits, mean c 0.0083 in the rest | 1/r^4 weights: mean c 0.0070, sd 0.00013, no failed fit | `evidence/calo_toys_after.txt` of the task (script in the task folder), `CalorimeterFitDefaultTests` |
+| Audit regression suite (appendix, 30 methods) | 29 failing (32 failures, 15 errors with subtests) | 30 passing, plus 7 follow-up tests (N-*) | `tests/skills/detector_response/test_detector_response_audit.py` |
+| Shipped responses, `response_adapter.py --validate` | 3 of 3 fail (`matrix_ref` unreadable) | 5 of 5 pass (AMS: one per species and period) | `tests/examples/test_ams_flux_ratio.py`, `test_collider_angular.py` |
+| Proton crossover rigidity, prototype stack (B 0.5 T, L 0.5 m, 300 um, 4 layers, x/X0 0.3) | 1.3087 GV (beta = 1 assumed) | 1.534037 GV with beta(R) | `MultipleScatteringBetaTests` |
+| CLI errors | argparse text on stderr, empty stdout, no status label | JSON with `status: failed` and `error_kind` at exit 2; `status` echoed by all eight scripts | `UniformErrorTests`, `StatusLabelTests` |
+
+`tools/run_all_checks.py --out <scratch> --jobs 6` with the E2 venv: all checks pass; unit tests 3,037 run, 0
+failures, 58 skipped (224 modules); profile tests pass (AMS-02 238). Lint with the CI pins (ruff 0.16.10, mypy 2.4.0)
+on `core/` and `contracts/`: clean. SKILL.md 7,568 B.
+
+Sources opened on 2026-10-14 for the physics edits: PDG RPP 2024 Passage of particles through matter (rev. March
+2025), Particle detectors at accelerators, Cosmic rays; PDG Atomic and Nuclear Properties (water, liquid); CMS muon
+performance JINST 7 (2012) P10002; ATLAS luminosity EPJC 76 (2016) 653; CERN Open Data CMS pileup simulation;
+DAMPE Sci. Adv. 5 (2019) eaax3793; ECSS-E-ST-10-04C annex B.8 (SPENVIS); R. Nolty, arXiv:hep-ex/0201015; Auger
+PoS(ICRC2019)231; WHISP summary PoS(ICRC2021)473; LHAASO arXiv:2505.14447; arXiv:1703.06298; SIDC and the Royal
+Observatory of Belgium (cycle 25).
+
+**Not verified here (text left unchanged, appendix rows deferred):** AB-A10, A11, A12, A19, A29 (books beyond PDG),
+A32, A36, A38; AB-F3 (radiation damage), F10 (compensation, f_em, containment depth), F13 (SiPM/APD), F15, F23;
+C-E8 (prescale rewrite), C-E14 (Geant4 cuts), C-E15 table, C-Sec2, C-U4; D-F4 (IGRF dipole epoch), D-F5 (Heitler
+splitting length), D-F8, D-F13 image parameters, D-F14, D-F18, D-F22, D-N3, D-N4. The appendix's dE/dx resolution
+formula gave the sample length in m; PDG eq. 35.17 implies cm (applied as cm). `frontend_response.py` has no tool
+contract (needs a per-operation help check).
+
+## RC-AUDIT-2 (2026-10-14, E2: Python 3.13.2; version 0.9.0 + unreleased, contracts 2.8.0)
+
+Second research-communication audit (work order RC, tasks A1-E3), branch `fix/research-communication-audit`, rebased
+on PML-X0 (`2b439e7`, contracts 2.8.0). Every task has a regression test that failed on `84202aa` and passes here,
+unless the row says it is text only.
+
+| Item | Result | Evidence |
+|---|---|---|
+| A1 brace-less `\input` | followed; unresolvable one gives exit 3 (was exit 0, coverage complete) | `ReviewFixes2Includes` |
+| A2 value vs passage | `1.09` and `1.0` against a `1.02` passage fail in `check_communication` and `audit_claims` (were exit 0) | `ReviewFixes2ValueVsPassage`, updated `test_communication_audit` |
+| A3 adaptation numbers | `1.09.`, CJK-adjacent, signed, exponent, grouped numbers tokenized; 9.99 drafts fail in en and zh-Hant | `ReviewFixes2Numbers`, `ReviewFixes2Adaptation` |
+| A4 citation parsing | seven cases (capitalised, multicite, nested, `%` in `\url`, `.bib` depth, stripped blocks, crossref) | `ReviewFixes2Citations` |
+| A5, A6, A15 rounding | no-rule non-rounding is an error; half-up default with `:half-even`; malformed rules and NaN/inf are findings | `ReviewFixes2Rounding` |
+| A7, A9, A18 | `--bbl` outside root exit 2; 20,000 lines 10.3 s before, well under 1 s after; strict unused entries unresolved when coverage incomplete | `ReviewFixes2ManuscriptBounds` |
+| A8 locators | nested-brace titles, `\pm`/`±`, fenced code | `ReviewFixes2Locators` |
+| A10, A13, A17 Traditional Chinese | Chinese twins give the English findings; labels as words; declared terms mask parts; same-line early use | `ReviewFixes2Chinese*`, `ReviewFixes2LabelWords`, `ReviewFixes2TerminologyEdges` |
+| A11 TikZ | compiled (LuaHBTeX 1.24, TeX Live 2026); `\undefinedmacro` exit 1; no TeX + `--require-render` exit 3; no block exit 2; all shipped TikZ compiles under `HEP_SLOW_TESTS=1` | `ReviewFixes2Diagrams`, `RealBundle` |
+| A12, A14, A16, A19 | empty records and unmapped added claims flagged; bad `--today` and aliased output refused; README qualified | `ReviewFixes2RevisionImpact`, `ReviewFixes2SmallClis` |
+| B1-B13 text | Mermaid duplicate removed (5 blocks render instead of 10); SKILL.md read levels equal the vocabulary; other items text only | `ReviewFixes2SkillText`, `test_reference_links` |
+| B7 ledger | `ams02:C185` (absence claim, metadata-only, 2026-10-14) | profile `test_evidence_ledger.py` |
+| C1-C11 content | three new references, examples `hep/09`-`hep/11` render; `flux-measurement` policy and result type (contracts 2.8.0, add-only) | `ReviewFixes2FluxPolicy`, `FluxMeasurementResultTypeTests`, `test_reporting_completeness` |
+| D1-D7 usability | quick-questions block (SKILL.md 8098 B, description 950 unchanged); Done-when in all 56 references; links resolve | `test_reference_links`, `measure_entrypoints.py` |
+| A2b and review follow-ups (fresh-subagent checks) | fresh rerun of A1-A4 and B2 passed; it found that display `1.0` still matched a passage holding `Figure 1` (`Decimal("1.0") == Decimal("1")`): now the passage must show at least the declared digits (caption flagged, 3 of 3 occurrences); fresh source review: 0 high, 2 medium (F1 Type 1 fonts for ICML, F2 venue-facts home), 12 low, all fixed or marked unverified; LaTeX-set matplotlib text gives Type 1 fonts (matplotlib 3.11.2, checked 2026-10-14) | `ReviewFixes2Numbers.test_contains_value_needs_the_displayed_precision`, `ReviewFixes2ValueVsPassage`; `research-communication-audit/evidence/fresh-repro-rerun.md`, `fresh-source-review.md` (task folder, outside the plugin) |
+| Gate | `run_all_checks.py --no-cli` exit 0 (3026 tests, 0 failures, 58 skipped across the plugin; CLI checks skipped by `--no-cli`); `check_relocation.py` pass; ruff 0.16.10 and mypy 2.4.0 clean on `core/` and `contracts/`; worked example byte-identical on two runs | gate log of 2026-10-14 |
+
+**Live routing.** The trigger-first description (RC-D1) was applied after maintainer approval; 20/20
+research-communication cases pass live, see THREE-AUDITS-LIVE-ROUTING below. **Not verified here.** Springer Nature's AI policy page (login redirect). The
+ADS `citations()`/`references()` operators (not re-opened). NSTC form names come from university guides, not an
+NSTC page. The two fresh-reviewer reruns asked by the work order were run by the lead session (all high
+reproductions pass; source-review findings F1-F14 and the A2b precision gap fixed).
+
+### Export-route checks (moved from `legends-panels-and-export.md`, RC-D4)
+
+Recorded when the export table was written (before 2026-10-14) and kept here, not in the reference: The Graphviz, `rsvg-convert`, and `mmdc` rows were run in this bundle's validation; the TikZ standalone compile (Tectonic; fonts embedded, `pdffonts`), `pdftoppm -r 300 -png` and `pdftocairo -svg` were run, and the `subcaption` `figure*` snippet compiled under `twocolumn` article with Tectonic (two panels (a)/(b) plus caption on a float page). `dvisvgm` 3.6.1 was run: on Tectonic's `.xdv` it warns "86 PDF specials ignored" and the SVG has the text overlapping with the boxes and arrow missing, so do not use that route; `dvisvgm --pdf` refuses to run with Ghostscript 10.08 and needs `mutool` or Ghostscript < 10.01 ; with `mutool` (`mupdf-tools`) installed, `dvisvgm --pdf` rendered the boxes, arrow and labels correctly, with text kept as `<text>` elements. With math labels and bold, italic, mono and small-caps text, plain `dvisvgm --pdf` rendered in rsvg with a fallback sans font (detached radical, lost bold and italic, overlapping words) while `--no-fonts` and `pdftocairo -svg` matched the PDF; `pdftoppm` matched too. Check any SVG export in the target viewer.
+
+## THREE-AUDITS-LIVE-ROUTING (2026-10-14, Claude Code 2.1.299, claude-sonnet-5-5)
+
+Paid live routing run `20261014T113734Z-claude-claude-sonnet-5-5` (`evals/routing/results/`, outside the plugin) of
+the 89 routing cases whose expected owner is detector-response, physics-ml or research-communication (92 prompt
+turns), plugin from `--plugin-dir` on `integrate/three-audits` at `71470cb` (the summary's `plugin_commit` field
+records the eval checkout, `84202aa`), isolation `setting-sources`, `--jobs 4`, max 6 turns, $0.50 per case.
+
+| Expected owner | Cases | Strict pass |
+|---|---|---|
+| detector-response | 24 | 23 |
+| physics-ml | 45 | 45 |
+| research-communication | 20 | 20 |
+| **all** | **89** | **88** (en 48/49, zh-Hant 34/34, ja, de, zh-Hans 2/2 each) |
+
+Cost $6.80 ($0.077 per case). The one miss, `t19-turns-1`, is the second turn of a handoff (unfold with the
+response just built) answered without a skill; the 2.1.293 baseline and the 2026-10-12 rerun missed it too. No
+contamination, 0 loading violations. Not run: the cases of the other four skills, Codex.
+

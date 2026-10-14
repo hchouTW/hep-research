@@ -22,6 +22,7 @@
   "response.json",
   "response_parametrized.json",
   "response_v24.json",
+  "response_v28.json",
   "statres_bayesian.json",
   "statres_bayesian_rhat_warning.json",
   "statres_frequentist.json",

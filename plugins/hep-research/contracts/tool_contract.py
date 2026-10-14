@@ -46,7 +46,8 @@ USAGE_FLAG = re.compile(r"--[a-z0-9][a-z0-9-]*")
 
 def usage_flags(help_text: str) -> dict[str, bool] | None:
     """{flag: required} from argparse's usage block (up to the first blank line); required options stand outside
-    brackets. None when the text has no usage block."""
+    brackets. An option of a required mutually exclusive group '(--a X | --b)' is not required on its own. None when
+    the text has no usage block."""
     lines = help_text.splitlines()
     if not lines or not lines[0].startswith("usage:"):
         return None
@@ -57,16 +58,20 @@ def usage_flags(help_text: str) -> dict[str, bool] | None:
         block.append(line)
     text = " ".join(block)
     flags: dict[str, bool] = {}
-    depth = 0
+    depth = group = 0
     for i, ch in enumerate(text):
         if ch == "[":
             depth += 1
         elif ch == "]":
             depth = max(0, depth - 1)
-        elif ch == "-" and text.startswith("--", i) and (i == 0 or text[i - 1] in " [|"):
+        elif ch == "(":
+            group += 1
+        elif ch == ")":
+            group = max(0, group - 1)
+        elif ch == "-" and text.startswith("--", i) and (i == 0 or text[i - 1] in " [(|"):
             m = USAGE_FLAG.match(text, i)
             if m and m.group(0) != "--help":
-                flags[m.group(0)] = depth == 0
+                flags[m.group(0)] = depth == 0 and group == 0
     return flags
 
 

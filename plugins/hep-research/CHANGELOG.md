@@ -5,6 +5,125 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+Contracts 2.8.0 (minor: new rule families refuse false or incomplete declarations; new fields optional; no new
+capability; artifacts before 2.8.0 keep their default outcome and get the new rules under `--strict` and at the gate).
+Research-communication adds one value to 2.8.0: `reporting_context.result_type` accepts `flux-measurement`
+(`ext_communication_traceability.json`; add-only, RC-C3).
+
+### research-communication (RC-AUDIT-2)
+
+- **A displayed number that disagrees with its passage fails (RC-A2, sci-fix).** `check_communication` and
+  `audit_claims` compared a declared display value with its passage as a substring warning, so `1.0` passed inside
+  `1.02` and a record of 1.09 against a manuscript of 1.02 exited 0. One number tokenizer
+  (`communication_lib/numbers.py`: sign, exponent, grouping, `\pm`/`±`, LaTeX and Unicode forms, CJK adjacency)
+  now compares numbers as `Decimal`; absence is the error `occurrence.value_not_in_passage`.
+- **Adaptation drafts read numbers at a sentence end and next to Chinese text (RC-A3, sci-fix).** A 9.99 draft
+  against a 1.02 record passed `check_adaptation` in English (full stop) and Traditional Chinese.
+- **Every display is checked against its source (RC-A5, RC-A15, sci-fix).** Without a rounding rule a display that
+  is no rounding of the source is `occurrence.value_mismatch` (it was a warning); a malformed rule, NaN or infinity
+  is a record finding (exit 1), not an input error.
+- **Rounding rules round half up (RC-A6, sci-fix).** `decimals:2` turns 1.025 into 1.03; `:half-even` keeps the old
+  mode. Skill library only; no contracts change. The worked example's audit report shows policy version 1.1.0.
+- **`check_manuscript.py` reads LaTeX and BibTeX as TeX does (RC-A1, A4, A7, A9, A18).** Brace-less `\input name`
+  is followed; `\Citet`/`\Cite`, multicite groups, nested optional arguments, `%` inside `\url`, entries inside
+  `.bib` fields or `@comment`, `\iffalse`, the comment environment, `\verb` and crossref parents are handled; a
+  `--bbl` outside the project root is an input error; scans are linear (20,000 lines: 10 s to under 0.2 s);
+  `--strict` unused entries are unresolved while coverage is incomplete.
+- **Locators and normalisation (RC-A8).** Section titles with nested braces, `\pm`/`±`/math shifts/ties on both
+  sides, no headings inside fenced code.
+- **Traditional Chinese parity (RC-A10, A13, A17).** Status-promotion, discovery, scope, negation and attribution
+  scans, symbol and abbreviation definitions work in Traditional Chinese; status labels match as words; a
+  disallowed term inside a declared term is not flagged; an abbreviation used before its definition on the same
+  line is.
+- **`check_diagram_sources.py` compiles TikZ (RC-A11).** LuaLaTeX (else pdfLaTeX), standalone harness with
+  tikz-feynman and the file's setup fences, `--no-tikz`, a skip directive for fragments; a named file without a
+  block exits 2. The bundle test compiles TikZ only under `HEP_SLOW_TESTS=1`.
+- **Smaller checker fixes (RC-A12, A14, A16, A19).** Revision impact flags empty records and unmapped added claims;
+  `--today notadate` and an output aliasing the input are refused; the README says which tool prints what.
+- **Text facts (RC-B1-B13).** SKILL.md quotes the read-level vocabulary and names `user-supplied`; one rule for
+  values read off plots; deduplication on DOI, arXiv id, INSPIRE record id; correction labels follow the venue;
+  PRL Comment length from the APS page; dated AMS-02 specifics removed from references (one sourced absence claim,
+  `ams02:C185`, added to the public profile ledger instead); diagram logic (result from the fit, vertex checks,
+  pileup stage); compile records and the LuaTeX warning; smaller wording fixes.
+- **Usability (RC-D1-D7).** A quick-questions block in SKILL.md and a trigger-first description (978 characters): the
+  quick literature questions and citations come first, with the instruction to load the skill even for a quick
+  question; every trigger phrase the routing cases use is kept (SKILL.md 8126 B). One home per rule (significance and limit wording, venue facts, posters and talks, captions,
+  colour and raster); the papers guide cut to routing, rules and pointers; executable checks instead of
+  "mentally desaturate"; a "Done when" line in every reference; reference link test.
+- **New content (RC-C1-C11).** `physics-plots.md` (status labels on figures, ratio panels, `pdf.fonttype = 42`,
+  colour and raster, cosmic-ray flux and neutrino figures), examples `hep/09`-`hep/11`, limit and null wording,
+  the `flux-measurement` reporting policy, `collaboration-results-lifecycle.md`, AI-use disclosure raised
+  unprompted with a dated venue table, HEPData records, `literature-lookup-recipes.md` (INSPIRE, ADS, arXiv),
+  NSTC/ERC/JSPS and bilingual proposal rules, retraction and SCOAP3 licence checks, combination papers, poster and
+  talk formats.
+- **Records (RC-E1, E3).** The capability matrix records the live run of 2026-10-13 and where the evaluation files
+  live; reference counts updated.
+
+### physics-ml audit (ML-…)
+
+Scientific corrections first (`sci-fix` commits; each with a regression test that failed on 84202aa).
+
+- **Split tools check what they claim (ML-C02, C03, C04, C05, C14, C16, C28).** `check_split_integrity.py` refuses
+  (exit 2) a timestamp that is not a finite number or an ISO-8601 date (NaN, `2024-1-10`), a `temporal_order` naming a
+  split the file does not have or fewer than two, booleans, lists or objects as keys, and a misspelled reserved key;
+  an empty split is `incomplete` under `--strict`; `timestamps_checked` is true only when the comparison ran. One key
+  function for both split tools: 1, 1.0, "1" are one group. `make_grouped_splits.py --mode temporal` no longer sorts
+  dates as text; `--label-column` reports class counts and refuses a split without a class. `train_classifier.py`
+  matches case-folded manifests and reports a split without a class as exit 2.
+- **A calibration evaluated on its fit sample never validates (ML-C01, K03, C13).** `calibration.py` records both
+  sha256 values inside the calibration block and needs `--id-col` (or `--no-id-check`, recorded); from 2.8.0
+  `disjoint: false`, equal hashes or names equal after normalization are `ml.calibration_on_fit_sample`.
+- **Domain-shift outcome (ML-K05).** `domain_shift.outcome` (no-shift, corrected, bounded-by-nuisance, uncorrected) and
+  `nuisance`; a missing status or outcome, an uncorrected shift without a nuisance and a control sample equal to the
+  training sample are unresolved. J9 carries its measured pt_miss scale as the fit nuisance `theta_pt_miss_scale`:
+  mu 1.30738 +0.280857/-0.260727 -> 1.33104 +0.293293/-0.277051, toy coverage 0.693 -> 0.660 (criterion 0.635-0.73).
+- **One training-domain method (ML-C08, C09, C19, C18).** `check_surrogate_domain.py`'s method is the importable
+  `DomainModel` (grouped held-out calibration, categorical features, Clopper-Pearson interval on the false-positive
+  rate); `train_classifier.py` stores it fitted on train only and `inference.py` applies it (a broken linear
+  constraint is flagged, the per-feature range is a diagnostic, non-finite rows get no score, `--calibration`).
+- **Negative weights are never dropped; the metric layer flags or refuses (ML-R06, C11, C12, C15, C20, C21, C22).**
+  `--negative-weights {signed, abs, resample}` (cell resampling, Andersen & Maier, arXiv:2109.07851, eq. 2.2);
+  signed-weight values outside [0, 1] are flagged, fractional labels refused, `asimov_significance` refuses bad
+  sigma_b and keeps its precision at s/b < 1e-6, `undo_prior_shift` refuses r <= 0, temperature-scaling warnings,
+  `disco_penalty(check_weights=True)` by default.
+- **Physics references (ML-R01-R05, R12, R13, R17, R21, R25; WP2.2/2.3).** Regression prior dependence and the in-situ
+  scale and resolution systematic; when an ML uncertainty is a measurement systematic; Platt, isotonic, prior
+  correction, conformal; blinding when training on data; validating inputs before training; negative weights by
+  library; OmniFold unmatched events and prior dependence; ANODE; flows and flow matching; two-sample tests with power;
+  SBI sharpness and overconfidence; GNN tracking; label noise from truth matching; four contradictions resolved.
+  Sources opened on 2026-10-14 or marked `unverified`.
+- **Small corrections (ML-C10, C24, C25, C26, K13).** `compare_model_runs.py` decides with a Student-t interval below
+  10 seeds (false-improvement rate about 5%, was 26%/15%/11% at 3/5/10 seeds); the sculpting baseline is a quantile of
+  20 resamplings; a constant training feature is exit 2; `model_hash` covers the weights only; the J9 test compares
+  the committed artifacts within a relative 1e-7 (the calibration fit differs by 2-6e-9 between Linux and macOS BLAS;
+  digests over float bytes are skipped). Check runs now keep the traceback tail of each failing test.
+
+Contract and tooling:
+
+- **ml-artifact semantics v2 (ML_SEMANTICS_V2_FROM = 2.8.0; ML-K02, K04, K07-K12, K14, K16).** Structured
+  downstream validation (vocabulary `ml_downstream_metrics`; ML-only or bare-pass lists are errors; `passed` must
+  agree with a numeric value and criterion); `output_semantics` required for classification, inference and
+  regression (unresolved); misspelled keys are errors (`_key_checks` takes a `kind`); task blocks
+  (`regression_validation`, `generative_validation`, `sbi_validation`, `extrapolation_policy`,
+  `reweighting_validation`, `anomaly_validation`; new task `reweighting`; `parameters` and `supervision`); training
+  domain coverage, `model_hash` format, label/feature/preprocessing/threshold/unit checks; `observed` and
+  `validated-in-scope` need support; structured weights with `training` and `evaluation`; calibration outcomes.
+  The Appendix B mutation probe (`tests/contracts/test_ml_mutation_probe.py`) goes from 50 of 53 rows silent on
+  84202aa to 1 (M47, by design).
+- **ML provenance at the publication gate (ML-K01, K06).** Optional `extension.observable_source` in the
+  statistical-result schema (hep-statistics); the gate resolves, hashes and strictly validates every ml-artifact
+  input (`gate.ml_input_*`); `dependencies.py` propagates unresolved findings (`dependency.source_unresolved`);
+  `write_ml_artifact.py` records tool outputs in `extension.source_files`, not `inputs`. `dependencies.py` on J9: exit
+  1 -> 0.
+- **Writer does not trust self-reports (ML-C06, K11, C07).** The split verdict is recomputed from the report body; the
+  test split is the manifest's `roles.test`; a pass without a report is not-run; no status label is exit 2.
+- **CLI contract (ML-C17).** Invalid input exit 2 without traceback, missing PyTorch exit 3, `--status` echoed as
+  `status_label` on the data-report scripts.
+- **Routing, handoffs, size (ML-R19, K15, R20, R35).** 17 routing cases (en and zh-Hant) for task types without one; a
+  Task routes index in `ml-analysis.md`; handoff tests for hep-theory, hep-analysis, detector-response, hep-computing
+  and research-communication; references 257 KB -> 179 KB (nothing moved to hep-computing: it already had the
+  authoring rules). Live routing: pending.
+
 - **Batch commands refused in protected mode (HC-10, HC-16; review of deferred task P6.2).** In a project whose
   config carries `agent_policy`, `core/partition/campaign.py` refuses a real `submit`, `resubmit` or `cancel` and
   `confirm`, `abandon`, `reset` and `clear-orphans` in any form with `protected.batch_needs_trusted_submitter`, before
@@ -37,6 +156,44 @@ Software checks establish contract consistency only, not physical validity.
   and the protected-mode refusal of a copied batch runner; §9.1 names analysis-level bundles and the permit's review
   rule. `docs/deployment-model.md`: the release-manifest interface lists `exposure_record` and a verified revocation
   status. Documentation only.
+
+### detector-response (audit DR-WP1 to DR-WP4)
+
+- **Cherenkov photon yield carries z^2 (sci-fix, DR-WP1-01).** `cherenkov_angle.py` and four references: helium at
+  40 GeV/c, n = 1.05 gives 68.08 expected photons (was 17.02, 4x low); species take `mass:charge`, `--rigidity` sets
+  p = zR.
+- **Gaisser-Hillas profile stable at any X_max (sci-fix, DR-WP1-02).** log1p form without cancellation, doubling
+  bracket without the fixed 1e6 cap: X_max = 1e20 gives FWHM 1.824036e11 in 0.03 s (hung before).
+- **Script physics (sci-fix, DR-WP2-06).** Calorimeter fit weights by a constant relative error without per-point
+  errors (constant term unbiased in toys), refuses percentages and reports a negative squared term as a failure; PID
+  refuses electrons in the heavy-particle Bethe formula and uses water I = 79.7 eV; multiple scattering derives
+  beta(R) from mass and charge and solves crossover and MDR with it; tag-and-probe names its central interval;
+  pileup checks bin order and reports input totals; front-end `--channels`/`--cells` integers and a `leakage-scale`
+  subcommand.
+- **References corrected (sci-fix, DR-WP1-05, DR-WP1-06, DR-WP3).** Pileup reweighting on the Poisson mean mu;
+  background-subtracted tag-and-probe yields need a simultaneous pass/fail fit (hep-statistics); calorimetric space
+  instruments are not spectrometers; the Störmer cutoff is east-west asymmetric; the appendix edit list applied
+  where a source was opened (deferred rows listed in VALIDATION.md); one home each for the equations, the chain and
+  the fourteen questions; residual sign convention in the glossary (signed track coordinate).
+- **Every script prints a status label and JSON errors (DR-WP2-05).** `--status` (input file's status by default for
+  the three file-input scripts), JSON on stdout at exit 2, exit 1 for failed computations.
+- **Response hardening, contracts 2.8.0 (DR-WP2-01 to -04).** `validate.py` rules R1-R10 (`_response_hardening`,
+  overlay `ext_response_v2_8.json`): declared intended use and flow handling, misspelled keys, placement, exposure
+  contains acceptance and live time, flow vectors, correction space, finite-MC statistics for unfolding, variation
+  shapes, and the numbers of an inline matrix. Of 30 crafted broken responses `validate.py` now refuses 28 (5 before);
+  the two others pass with warnings by design. `response_adapter.py` reads `file.json#key` and flow vectors from the
+  ref, refuses refs outside the artifact folder and exits 2 on unreadable refs. SKILL.md step 5 names both checks.
+- **Shipped examples carry resolvable responses (DR-WP1-04).** `ams-flux-ratio` writes one response per species and
+  period with `matrices/response_<species>_<period>.json` and declares exposure once with its correction space;
+  `collider-angular` points at `matrices/response.json`. All five pass `response_adapter.py --validate`.
+- **Tool contracts (DR-WP2-07)** for tag-and-probe, PID separation, calorimeter resolution and pileup reweighting;
+  `tool_contract.py` reads options of a required mutually exclusive group.
+- **Coverage (DR-WP4).** Finite-MC response covariance, fakes, time-dependent responses, a worked 2x2 example and the
+  two-tool table; response systematics; resolution models and data-driven resolution; luminosity calibration (vdM);
+  calibration pitfalls; ML-reconstruction and fast-simulation validation; JES chain; spectral breaks and the proton
+  knee; instrument-response checklists. AMS-02 profile: Layer-0 status by claim ID, solar cycle 25 phase.
+- **Hep-analysis docstring (DR-Q1).** `geomagnetic_cutoff.py` states the east-west asymmetry; its dipole default is
+  unchanged (follow-up for hep-analysis).
 
 ## 0.9.0 (2026-10-14)
 

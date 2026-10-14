@@ -9,8 +9,10 @@ built for this, not a referee report or a preprint erratum. Use
 found the error rather than a third party disputing the result.
 
 1. Confirm the venue accepts this article type and check its current rules:
-   most physics journals cap Comments and Replies to a short length
-   (commonly ~1000–1500 words, often shorter than a normal letter), require
+   journals cap Comments and Replies at a venue-specific length, so read it
+   from the venue's page rather than assuming one (APS length guide, opened
+   2026-10-14: PRL Comment or Reply 750 words; PRC 1,500; PRD 3,500; see the
+   table in `latex-venue-setup.md`); journals also require
    the Comment to focus on a single specific point rather than a general
    critique, and route the Comment to the original authors for a Reply
    before either is published, typically together in the same issue.
@@ -46,3 +48,5 @@ Deliver the Comment or Reply as its own short, focused manuscript (not a
 patched version of the original paper), with the disputed claim's exact
 locator, the technical argument, and a clear statement of what — if
 anything — changes about the original result.
+
+**Done when:** the text meets the venue's length limit (from its page), addresses one specific point, and every number in it maps to the paper or a result artifact.

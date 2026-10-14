@@ -1,5 +1,5 @@
 {
- "contract_version": "2.7.0",
+ "contract_version": "2.8.0",
  "bindings": {
   "experiments": [
    {
@@ -11,7 +11,7 @@
  },
  "versions": {
   "plugin": "0.9.0",
-  "contracts": "2.7.0",
+  "contracts": "2.8.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -23,9 +23,9 @@
  "inputs": [],
  "outputs": [],
  "unresolved_inputs": [],
- "artifact_id": "synthetic-path-a-response-proton",
+ "artifact_id": "synthetic-path-a-response-proton-synthetic-period-1",
  "artifact_type": "response",
- "objective": "SYNTHETIC rigidity migration for proton",
+ "objective": "SYNTHETIC rigidity migration for proton, synthetic-period-1",
  "status": [
   "synthetic"
  ],
@@ -80,14 +80,26 @@
   "applied_separately": [
    "trigger_efficiency",
    "selection_efficiency",
-   "acceptance",
    "exposure"
   ],
+  "correction_space": {
+   "trigger_efficiency": {
+    "space": "truth"
+   },
+   "selection_efficiency": {
+    "space": "truth",
+    "binned_in": "rigidity"
+   },
+   "exposure": {
+    "space": "truth",
+    "binned_in": "rigidity"
+   }
+  },
   "underflow_overflow": "explicit_bins",
   "intended_use": "unfolding",
-  "conditions": "per synthetic period (spectral shape inside bins differs slightly)",
+  "conditions": "synthetic-period-1 (the spectral shape inside bins differs slightly between periods)",
   "provenance": "computed analytically from the synthetic resolution model; migration outside [1.5, 150] GV is kept in explicit underflow/overflow vectors; first and last bins are buffers",
-  "matrix_ref": "results.json",
+  "matrix_ref": "matrices/response_proton_synthetic-period-1.json",
   "form": "matrix"
  }
 }

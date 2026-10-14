@@ -12,18 +12,28 @@ points. The model is *linear* in the parameters (a^2, b^2, c^2) over the basis
 equations - no minimizer, no starting values, no local minima. A point may carry a third
 entry, the uncertainty of sigma_E/E; the fit is then weighted by 1/(2 r dr)^2 (the
 uncertainty of r^2) and the covariance of (a^2, b^2, c^2) is the inverse of the weighted
-normal matrix. Without uncertainties the fit is unweighted and the covariance is scaled
-by the residual variance, which needs more than three points. Also evaluates the
+normal matrix. Without uncertainties the fit assumes a constant relative uncertainty of
+sigma_E/E (dr proportional to r), so it is weighted by 1/r^4; unit weights would let the
+low-energy points, with the largest r^2, dominate and bias the constant term (2000 toys
+with 2% scatter on c = 0.0070: unit weights give c^2 < 0 in a quarter of the fits and a
+mean c of 0.0083 in the rest; 1/r^4 weights give 0.0070). The covariance is then
+scaled by the residual variance, which needs more than three points; 'weighting' in the
+output says which weights were used. Also evaluates the
 resolution and the term-crossover energies for given a, b, c.
 
 Usage notes / assumptions: standard library only. Energies in GeV; a in sqrt(GeV),
-b in GeV, c dimensionless; sigma_E/E is a fraction, not a percentage. Needs at least
+b in GeV, c dimensionless; sigma_E/E is a fraction, not a percentage (a value above 1 is
+refused). Needs at least
 three distinct energies to separate three terms; with exactly three points there are
 zero degrees of freedom and the output warns. A fitted squared coefficient can come
-out negative on noisy or narrow-range input - that is reported explicitly as a failed
-separation rather than square-rooted into a NaN. An evaluation energy outside the
+out negative on noisy or narrow-range input - that is a failed separation: all three
+roots are null, ok is false, the reason is in warnings and the exit code is 1. An evaluation energy outside the
 fitted range (or outside --valid-range in --evaluate mode) is marked extrapolated. See
 <plugin root>/skills/detector-response/references/calorimetry-ecal-hcal.md.
+Status: --status (default: the input file's "status", else unvalidated; one of the core artifact_statuses) is
+echoed as status.
+Exit codes: 0 ok; 1 the computation failed or the input file is unreadable or invalid (JSON with ok false);
+2 invalid input (JSON with error_kind invalid-input on stdout, the usage on stderr).
 Run: python3 <plugin root>/skills/detector-response/scripts/calorimeter_resolution.py --fit <plugin root>/skills/detector-response/assets/calorimeter-response.example.json
      python3 <plugin root>/skills/detector-response/scripts/calorimeter_resolution.py --evaluate --stochastic 0.10 --noise 0.20 --constant 0.007 --energy 100
 """
@@ -31,6 +41,19 @@ import argparse
 import json
 import math
 import sys
+
+STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
+            'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
+
+
+class JsonArgumentParser(argparse.ArgumentParser):
+    """argparse that also prints the reason as JSON on stdout: exit 2 = invalid input. Subparsers inherit it."""
+
+    def error(self, message):
+        print(json.dumps({'status': 'failed', 'ok': False, 'error_kind': 'invalid-input', 'error': message}, indent=2))
+        self.print_usage(sys.stderr)
+        self.exit(2, f'{self.prog}: error: {message}\n')
+
 
 TERM_NAMES = ('stochastic', 'noise', 'constant')
 
@@ -93,6 +116,9 @@ def fit_resolution(points):
                              'or a three-element [energy, resolution, uncertainty] triple')
         energy = _finite_positive(point[0], f'point {index} energy')
         resolution = _finite_positive(point[1], f'point {index} resolution')
+        if resolution > 1.0:
+            raise ValueError(f'point {index} resolution {resolution:g} > 1: sigma_E/E must be a fraction, '
+                             'not a percentage')
         uncertainty = (_finite_positive(point[2], f'point {index} uncertainty')
                        if len(point) == 3 else None)
         cleaned.append((energy, resolution, uncertainty))
@@ -104,13 +130,14 @@ def fit_resolution(points):
         raise ValueError('need at least three distinct energies to separate three terms')
 
     # Design row for each point: [1/E, 1/E^2, 1]; target y = (sigma/E)^2 with
-    # uncertainty 2 r dr, so weight 1/(2 r dr)^2 (unit weights when unweighted).
+    # uncertainty 2 r dr, so weight 1/(2 r dr)^2; without uncertainties dr is taken
+    # proportional to r, weight 1/r^4 (the scale cancels: the covariance is scaled by chi2/ndof).
     rows = []
     for energy, _, _ in cleaned:
         inverse = 1.0 / energy
         rows.append((inverse, inverse * inverse, 1.0))
     targets = [resolution * resolution for _, resolution, _ in cleaned]
-    variances = [(2.0 * r * dr) ** 2 if weighted else 1.0 for _, r, dr in cleaned]
+    variances = [(2.0 * r * dr) ** 2 if weighted else (r * r) ** 2 for _, r, dr in cleaned]
     numbers = [value for row in rows for value in row] + targets + variances
     if not all(math.isfinite(value) for value in numbers) or min(variances) <= 0.0:
         raise ValueError('an energy, resolution or uncertainty is too small or too large for '
@@ -128,17 +155,19 @@ def fit_resolution(points):
 
     negative = [name for name, value in zip(TERM_NAMES, squared) if value < 0]
     ndof = len(cleaned) - 3
+    roots = [None if negative else math.sqrt(value) for value in squared]
     result = {
         'points': len(cleaned),
         'weighted': weighted,
+        'weighting': 'input-uncertainties' if weighted else 'constant-relative',
         'ndof': ndof,
         'energy_range_gev': [min(e for e, _, _ in cleaned), max(e for e, _, _ in cleaned)],
         'stochastic_squared': squared[0],
         'noise_squared': squared[1],
         'constant_squared': squared[2],
-        'stochastic': math.sqrt(squared[0]) if squared[0] >= 0 else None,
-        'noise': math.sqrt(squared[1]) if squared[1] >= 0 else None,
-        'constant': math.sqrt(squared[2]) if squared[2] >= 0 else None,
+        'stochastic': roots[0],
+        'noise': roots[1],
+        'constant': roots[2],
         'negative_squared_terms': negative,
     }
     residuals = [
@@ -149,6 +178,11 @@ def fit_resolution(points):
     chi2 = math.fsum(w * r * r for w, r in zip(weights, residuals))
 
     warnings = []
+    if negative:
+        warnings.append(
+            f'squared coefficients fitted negative ({", ".join(negative)}): the three terms are not '
+            'separated by this input (too few energies, too narrow a range, or scatter larger than the term '
+            'being fitted); no term is reported')
     inverse_normal = _invert_3x3(matrix)
     if weighted:
         result['chi2'] = chi2
@@ -201,7 +235,7 @@ def evaluate(stochastic, noise, constant, energy_gev, valid_range=None):
         'relative_resolution': math.sqrt(total_squared),
         'absolute_resolution_gev': math.sqrt(total_squared) * energy_gev,
         'term_contributions_squared': terms,
-        'dominant_term': max(terms, key=terms.get),
+        'dominant_term': None if total_squared == 0 else max(terms, key=terms.get),
         'extrapolated': extrapolated,
     }
 
@@ -218,15 +252,27 @@ def crossover_energies(stochastic, noise, constant):
     return crossings
 
 
-def _fail(message):
-    print(json.dumps({'ok': False, 'error': message}, indent=2))
+def _resolve_status(given, document):
+    """--status when given, else the input file's 'status' (checked against STATUSES), else unvalidated."""
+    if given:
+        return given
+    status = document.get('status') if isinstance(document, dict) else None
+    if status is None:
+        return 'unvalidated'
+    if status not in STATUSES:
+        raise ValueError(f'input status {status!r} is not one of {list(STATUSES)}')
+    return status
+
+
+def _fail(message, kind='failed'):
+    print(json.dumps({'status': 'failed', 'ok': False, 'error_kind': kind, 'error': message}, indent=2))
     print(f'calorimeter_resolution.py: error: {message}', file=sys.stderr)
     return 1
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__,
-                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = JsonArgumentParser(description=__doc__,
+                                formatter_class=argparse.RawDescriptionHelpFormatter)
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument('--fit', metavar='JSON',
                       help='JSON file with {"points": [[energy_gev, sigma_over_e(, uncertainty)], ...]}')
@@ -239,8 +285,12 @@ def main():
     parser.add_argument('--valid-range', type=float, nargs=2, metavar=('LOW', 'HIGH'),
                         dest='valid_range',
                         help='evaluate: energy range (GeV) the coefficients were fitted over')
+    parser.add_argument('--status', choices=STATUSES, default=None,
+                        help="status label of the inputs, echoed as status (default: the input file's status, "
+                             'else unvalidated)')
     args = parser.parse_args()
 
+    status = args.status or 'unvalidated'
     if args.evaluate:
         try:
             valid_range = None
@@ -261,6 +311,7 @@ def main():
                 payload = json.load(handle)
             if not isinstance(payload, dict) or 'points' not in payload:
                 raise ValueError('fit input must be a JSON object with a "points" list')
+            status = _resolve_status(args.status, payload)
             result = fit_resolution(payload['points'])
             if not result['negative_squared_terms']:
                 result['at_requested_energy'] = evaluate(
@@ -272,18 +323,22 @@ def main():
                     result['warnings'].append(
                         'the requested energy is outside the fitted energy range; the value '
                         'is an extrapolation of the fitted model')
-            else:
-                result['warning'] = (
-                    'one or more squared coefficients fitted negative; the three terms are '
-                    'not separated by this input (too few energies, too narrow a range, or '
-                    'scatter larger than the term being fitted)')
         except (OSError, ValueError, TypeError, OverflowError, ZeroDivisionError) as exc:
             return _fail(str(exc))
-        method = ('weighted' if result['weighted'] else 'exact') + \
-            ' linear least squares in (a^2, b^2, c^2)'
+        if result['weighted']:
+            method = 'linear least squares in (a^2, b^2, c^2), weighted by the input uncertainties'
+        else:
+            method = ('linear least squares in (a^2, b^2, c^2), weighted by a constant relative uncertainty '
+                      'of sigma/E (no per-point uncertainties given)')
+        if result['negative_squared_terms']:
+            result['ok'] = False
+            text = json.dumps({'status': status, 'method': method, **result}, indent=2, allow_nan=False)
+            print(text)
+            print(f"calorimeter_resolution.py: error: {result['warnings'][0]}", file=sys.stderr)
+            return 1
 
     try:
-        text = json.dumps({'method': method, **result}, indent=2, allow_nan=False)
+        text = json.dumps({'status': status, 'method': method, **result}, indent=2, allow_nan=False)
     except ValueError:
         return _fail('result contains a non-finite number; check the input energies')
     print(text)

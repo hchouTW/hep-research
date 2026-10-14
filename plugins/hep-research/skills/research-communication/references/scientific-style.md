@@ -7,7 +7,7 @@ to scientific writing generally; a few items are physics-specific conventions.
 - [Tense and voice](#tense-and-voice)
 - [Hedging and precision](#hedging-and-precision)
 - [Significance language](#significance-language)
-- [Astroparticle-specific phrasing](#astroparticle-specific-phrasing)
+- [Reporting limits and nulls](#reporting-limits-and-nulls)
 - [Statistical and ML reporting language](#statistical-and-ml-reporting-language)
 - [Sentence and paragraph shape](#sentence-and-paragraph-shape)
 - [Common non-native-English pitfalls](#common-non-native-english-pitfalls)
@@ -72,21 +72,38 @@ mass, sky position, energy or time), the thresholds apply to the global
 usually quote local and global side by side. Astroparticle point-source searches
 say "pre-trial" and "post-trial" (see below).
 
-## Astroparticle-specific phrasing
+### Pre-trial and post-trial (scans of directions, energies, times)
 
-Extends the table above for astroparticle-physics and cosmic-ray writing (see
-`astroparticle-and-cosmic-ray-papers.md` for the full treatment):
+- When a search scanned more than one direction, energy bin, time window or source
+  candidate, state both the **pre-trial** (local) and the **post-trial** (global)
+  significance, and say which one each number is; a bare "5σ" for a point-source
+  search is ambiguous. "Detection", "hint" and "evidence" for a source or transient
+  follow the table above applied to the post-trial number: a "5σ pre-trial" excess
+  is not an observation if the trials factor brings it below 5σ post-trial.
+- For an ON/OFF count the pre-trial significance is usually Li & Ma's eq. 17
+  (T.-P. Li and Y.-Q. Ma, ApJ 272, 317 (1983), doi:10.1086/161295; checked
+  2026-09-26): cite it and state the ON/OFF exposure ratio α. Computing it, and any
+  trials correction, belongs to `hep-statistics`.
 
-- Always state whether a quoted significance is **pre-trial or post-trial** when a
-  search scanned more than one direction, energy bin, or source candidate — a bare
-  "5σ" for a point-source search is ambiguous and referees will ask which.
-- **"Exposure"** (area × solid angle × time, folding in geometric acceptance and duty
-  cycle) is not interchangeable with **"livetime"** (raw observing time) — use the
-  term that matches what the quoted uncertainty was actually derived from.
-- Composition claims ("proton-dominated," "mixed composition") should name the
-  hadronic-interaction model(s) used to infer them in the same sentence or the
-  immediately following one — these inferences are model-dependent, and omitting the
-  model reads as more certain than the result supports.
+This section is the single home for significance wording; other references point here.
+Astroparticle terms that are not about significance (exposure vs. livetime, composition
+language) are in `astroparticle-and-cosmic-ray-papers.md`.
+
+## Reporting limits and nulls
+
+The numbers (limits, intervals, significances) are hep-statistics'; the words are this skill's. One home: other
+references point here.
+
+| Situation | Write | Do not write |
+|---|---|---|
+| No excess | "No significant excess over the expected background is observed"; quote the largest local (and global) deviation | "no signal exists", "the model is excluded" (unless a limit says so) |
+| Observed vs. expected limit | both, with the expected median and its ±1σ and ±2σ bands; say which is stronger and by how much | an observed limit alone, or bands without saying they are the expected ones |
+| Confidence level | "95% CL upper limit" with the construction named (CLs, Feldman-Cousins, profile likelihood; asymptotic or toys) | "95% limit" with no level type or construction |
+| CLs | "CLs upper limit"; CLs is conservative by construction (it over-covers), so it is not a coverage statement (Junk 1999; Read 2002; see hep-statistics [Frequentist inference](../../hep-statistics/references/statistical-inference-for-physics.md#frequentist-inference)) | "excluded at 95% confidence" as if CLs were a frequentist coverage |
+| Bayesian | "95% credible upper limit" with the prior named | "confidence" for a credible interval |
+| One- vs. two-sided | state which; an upper limit is one-sided, a central interval two-sided; a switch decided from the data (flip-flopping) is named or avoided (Feldman-Cousins; Feldman & Cousins 1998, in the same hep-statistics reference) | an interval without its sidedness |
+| Significance of an excess | local and global, the look-elsewhere (trials) method named (Significance language above) | a bare "3σ" for a scan |
+| Parameter excluded | "values above X are excluded at 95% CL (CLs)", for the stated model and assumptions | "X is ruled out" without CL, model or assumptions |
 
 ## Statistical and ML reporting language
 
@@ -170,3 +187,5 @@ typically saves 10-20% of word count with no loss of meaning:
 - "Due to the fact that" → "because".
 - Redundant pairs: "past history," "future plans," "completely eliminate,"
   "each and every" → drop the redundant word.
+
+**Done when:** significance and limit wording follow the tables here, every hedge is quantified or removed, and status labels survive in text and captions.

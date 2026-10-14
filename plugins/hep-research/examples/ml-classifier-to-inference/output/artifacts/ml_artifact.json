@@ -1,8 +1,8 @@
 {
- "contract_version": "2.7.0",
+ "contract_version": "2.8.0",
  "artifact_id": "synthetic-j9-classifier",
  "artifact_type": "ml-artifact",
- "objective": "SYNTHETIC J9: calibrated event classifier whose probability feeds a template fit",
+ "objective": "SYNTHETIC J9: event classifier whose (prior-corrected, temperature-scaled) score feeds a template fit",
  "bindings": {
   "experiments": [
    {
@@ -14,7 +14,7 @@
  },
  "versions": {
   "plugin": "0.9.0",
-  "contracts": "2.7.0",
+  "contracts": "2.8.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -28,28 +28,7 @@
   "created": "2026-10-13",
   "evidence_ids": []
  },
- "inputs": [
-  {
-   "ref": "work/run_summary.json",
-   "sha256": "c81b865bb29048ce6bb7844898428ed5f4700a3d33fd4206df34ffb609e6d441"
-  },
-  {
-   "ref": "work/split_check.json",
-   "sha256": "27503d2c8f3938f80a2bda7cb4fa156e0a26e8f22e6031bf657517a84d409a5c"
-  },
-  {
-   "ref": "work/calibration.json",
-   "sha256": "38cfe1a2f97442ebdf742dc2e09131879ffaa57c5e274f760a9b7cbfb881d8ff"
-  },
-  {
-   "ref": "work/domain_shift.json",
-   "sha256": "6d64df1638dadc0045627a37c6207c2e6af620abac639183b2ea7d7111fdf12a"
-  },
-  {
-   "ref": "work/downstream.json",
-   "sha256": "914273dee6db614c4301b81e88fc22bab9fff3d9e8f5c15a37fc607f7d1b492b"
-  }
- ],
+ "inputs": [],
  "outputs": [
   {
    "ref": "work/model.json",
@@ -144,7 +123,16 @@
     "metrics",
     "calibration",
     "templates"
-   ]
+   ],
+   "training": {
+    "negative_weight_treatment": "signed",
+    "class_balancing": "per class, signed weights rescaled to equal sums (train split)",
+    "n_negative": 350
+   },
+   "evaluation": {
+    "treatment": "physics weights, signed and unmodified (metrics, calibration, templates)",
+    "n_negative": 600
+   }
   },
   "environment": {
    "framework": "numpy 2.5.3",
@@ -188,7 +176,7 @@
     }
    }
   },
-  "output_semantics": "probability",
+  "output_semantics": "score",
   "calibration": {
    "method": "temperature",
    "params": {
@@ -201,14 +189,32 @@
     "before": 0.015895708046126413,
     "after": 0.017558563686100273,
     "bins": 10,
-    "binning": "equal-width"
-   }
+    "binning": "equal-width",
+    "floor": 0.01584552894170525
+   },
+   "sample_check": {
+    "fit_sample": "work/val_scores.csv",
+    "eval_sample": "work/test_scores.csv",
+    "checks": [
+     "name",
+     "sha256",
+     "event-id"
+    ],
+    "disjoint": true,
+    "same_sample_allowed": false,
+    "fit_sha256": "707af439a24957293f878c5bd25154f4816298b594345856ab17d6cb2bda7aed",
+    "eval_sha256": "04e73e0b8f3d1665a6e59488eeba374e725e6cd1274d1b983f490890770f5d8b",
+    "id_overlap": 0,
+    "id_check": "column id"
+   },
+   "outcome": "no-op-within-floor",
+   "warnings": []
   },
   "domain_shift": {
    "control_sample": "SYNTHETIC data-like background control sample (10000 events, pt_miss scaled by 1.1 by construction)",
    "method": "weighted Kolmogorov-Smirnov, held-out simulation background versus control sample, noise floor = 95% quantile over 100 seeded unshifted replicas; inference-time domain flags on the pseudo-data (check_surrogate_domain.py)",
    "result": {
-    "verdict": "shift above the noise floor in pt_miss, score; not corrected, bounded downstream by the Asimov shift of mu from the measured scale",
+    "verdict": "shift above the noise floor in pt_miss, score; the measured pt_miss scale enters the template fit as the shape nuisance theta_pt_miss_scale",
     "variables_above_noise_floor": [
      "pt_miss",
      "score"
@@ -252,30 +258,94 @@
      "n": 357
     }
    },
-   "status": "checked"
+   "status": "checked",
+   "outcome": "bounded-by-nuisance",
+   "nuisance": {
+    "name": "theta_pt_miss_scale",
+    "ref": "artifacts/statistical_result.json#extension.nuisances"
+   }
   },
   "downstream_validation": [
    {
-    "metric": "Asimov closure of the signal strength in the calibrated-score template fit",
+    "metric": "closure",
+    "quantity_affected": "signal strength mu, Asimov data at mu_true in the score template fit",
     "value": 4.44089e-16,
-    "criterion": "abs < 0.001"
+    "criterion": "abs < 0.001",
+    "passed": true,
+    "ref": "results.json#asimov"
    },
    {
-    "metric": "toy pull mean and width of mu, and 68% interval coverage",
-    "pull_mean": -0.0546859,
-    "pull_width": 0.984352,
-    "coverage_68": 0.693,
+    "metric": "coverage",
+    "quantity_affected": "68.27% profile-likelihood interval of mu (toys)",
+    "value": 0.66,
+    "uncertainty": 0.01498,
+    "criterion": "in [0.635, 0.73]",
+    "passed": true,
+    "ref": "results.json#toys",
     "n_toys": 1000
    },
    {
-    "metric": "expected uncertainty on mu (Asimov, profile likelihood)",
-    "err_down": 0.237781,
-    "err_up": 0.258174
+    "metric": "pull",
+    "quantity_affected": "pull mean of mu (toys)",
+    "value": -0.0325085,
+    "criterion": "abs < 0.15",
+    "passed": true,
+    "ref": "results.json#toys"
    },
    {
-    "metric": "shift of mu on Asimov when the background pt_miss scale is the one measured in the control sample",
-    "delta_mu": -0.107539,
-    "note": "the pseudo-data here are generated without the shift; a real analysis would correct the scale or carry it as a nuisance"
+    "metric": "pull",
+    "quantity_affected": "pull width of mu (toys)",
+    "value": 1.02836,
+    "criterion": "in [0.9, 1.1]",
+    "passed": true,
+    "ref": "results.json#toys"
+   },
+   {
+    "metric": "expected-uncertainty",
+    "quantity_affected": "uncertainty on mu (Asimov, profile likelihood)",
+    "value": {
+     "err_down": 0.256756,
+     "err_up": 0.271493
+    },
+    "criterion": "reported (no target)",
+    "passed": true,
+    "ref": "results.json#asimov"
+   },
+   {
+    "metric": "bias",
+    "quantity_affected": "mu on Asimov with the background pt_miss scale measured in the control sample, fit without the nuisance",
+    "value": -0.107539,
+    "criterion": "carried by the fit nuisance theta_pt_miss_scale (domain_shift outcome bounded-by-nuisance)",
+    "passed": true,
+    "ref": "results.json#domain_shift",
+    "note": "the pseudo-data are generated without the shift"
+   }
+  ],
+  "source_files": [
+   {
+    "ref": "work/run_summary.json",
+    "sha256": "2d64af19198cb47373e6d21f7284f727cbf4562171aeb6e77fb86123b579ca7c",
+    "role": "run-summary"
+   },
+   {
+    "ref": "work/split_check.json",
+    "sha256": "34002e053a8ab2e850f0f7e3f9fc9a20e5ed000f6dd43dfb4acf7257ec3db8b3",
+    "role": "split-report"
+   },
+   {
+    "ref": "work/calibration.json",
+    "sha256": "cc5dbdbdc59b8a3e8be4879d81599b42e7c8234694fb6131420581f8f22f5b69",
+    "role": "calibration"
+   },
+   {
+    "ref": "work/domain_shift.json",
+    "sha256": "97daca1f8f21aad924c699c8b3cd93bbd3d40c98a9c3a4b3dff949fb0379a905",
+    "role": "domain-shift"
+   },
+   {
+    "ref": "work/downstream.json",
+    "sha256": "dd3808f681fb89f3cc079bd28228b28cf04c182b0d6b8d3e1949f87965e59848",
+    "role": "downstream-validation"
    }
   ]
  }

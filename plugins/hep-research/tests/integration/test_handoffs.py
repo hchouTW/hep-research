@@ -59,7 +59,10 @@ class DetectorToStatisticsT07(unittest.TestCase):
         self.assertIn("efficiency", r["mismatches"][0]["reason"])
 
 
-class MachineLearningT16(unittest.TestCase):
+class MachineLearningContractRulesT16(unittest.TestCase):
+    """Contract rules of the ml-artifact and the split and domain checks (the handoffs themselves are in
+    tests/integration/test_ml_handoffs.py)."""
+
     def test_group_leakage_detected(self):
         rep = check_split_integrity.check({"train": ["e1", "e2", "e3"], "test": ["e4", "e5"],
                                            "groups": {"e1": "run1", "e2": "run2", "e3": "run3", "e4": "run3", "e5": "run4"}})

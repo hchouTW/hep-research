@@ -42,11 +42,8 @@ targets = targets.float()
 
 ## Softmax or sigmoid in the wrong place
 
-Do not apply softmax before `CrossEntropyLoss`.
-
-Do not apply sigmoid before `BCEWithLogitsLoss`.
-
-Apply activation only for metrics or inference probabilities.
+The losses take logits: see the loss table in [deep-learning-guide.md](deep-learning-guide.md) (the one home of this
+rule); apply softmax or sigmoid only for metrics and inference.
 
 ## NaNs
 

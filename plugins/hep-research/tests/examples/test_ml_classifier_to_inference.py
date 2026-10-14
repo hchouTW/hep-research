@@ -73,6 +73,40 @@ class J9MlToInferenceTests(unittest.TestCase):
         committed = (SCRIPT.parent / "output" / "results.json").read_bytes()
         self.assertEqual((self.out / "results.json").read_bytes(), committed)
 
+    def test_committed_artifacts_match_within_tolerance(self):
+        """ML-K13: the committed ml_artifact.json and statistical_result.json, not only the rounded results.json, are
+        reproduced: every number within a relative tolerance of 1e-7, every other value equal. The tolerance covers
+        last-bit BLAS differences between platforms after an iterative fit (Linux CI vs macOS: calibration temperature
+        and ECE differ by 2-6e-9 relative). Digests are skipped: input hashes move with the artifact bytes, and the
+        model hash and score-file hashes are taken over float bytes, so a last-bit difference changes them. The
+        framework version is skipped because it records the installed NumPy, not a result."""
+        skip = {"plugin_release", "digest", "framework", "model_hash"}
+
+        bad: list = []
+
+        def close(a, b, path):
+            if isinstance(a, dict) and isinstance(b, dict):
+                if set(a) != set(b):
+                    bad.append((path, sorted(set(a) ^ set(b))))
+                for k in set(a) & set(b):
+                    if k not in skip and not k.endswith("sha256"):
+                        close(a[k], b[k], f"{path}.{k}")
+            elif isinstance(a, list) and isinstance(b, list):
+                if len(a) != len(b):
+                    bad.append((path, len(a), len(b)))
+                for i, (x, y) in enumerate(zip(a, b)):
+                    close(x, y, f"{path}[{i}]")
+            elif isinstance(a, float) or isinstance(b, float):
+                if not abs(a - b) <= 1e-7 * max(abs(a), abs(b), 1e-300):
+                    bad.append((path, a, b))
+            elif a != b:
+                bad.append((path, a, b))
+
+        committed = SCRIPT.parent / "output" / "artifacts"
+        close(json.loads((committed / "ml_artifact.json").read_text()), self.ml, "ml_artifact")
+        close(json.loads((committed / "statistical_result.json").read_text()), self.stat, "statistical_result")
+        self.assertEqual(bad, [], f"{len(bad)} differences (committed, rerun): {bad[:15]}")
+
     def test_artifacts_validate(self):
         from contracts.validate import validate_artifact
         from contracts.vocab import Vocabulary
@@ -89,7 +123,8 @@ class J9MlToInferenceTests(unittest.TestCase):
         self.assertEqual(ext["splits"]["overlap_check"]["result"], "pass")
         self.assertIs(ext["splits"]["test_groups_disjoint"], True)
         self.assertEqual(set(ext["training_domain"]), set(ext["features"]))
-        self.assertEqual(ext["output_semantics"], "probability")
+        self.assertEqual(ext["output_semantics"], "score")  # the calibration is a no-op within the ECE floor (PML Q5)
+        self.assertEqual(ext["calibration"]["outcome"], "no-op-within-floor")
         cal = ext["calibration"]
         self.assertEqual(cal["method"], "temperature")
         self.assertNotEqual(cal["fit_sample"], cal["validation"]["sample"])
@@ -97,9 +132,10 @@ class J9MlToInferenceTests(unittest.TestCase):
         self.assertIn(self.m.SHIFT_FEATURE, ext["domain_shift"]["result"]["variables_above_noise_floor"])
         self.assertEqual(ext["weights"]["negative_weight_treatment"], "signed")
         self.assertIn("templates", ext["weights"]["used_in"])
-        metrics = " ".join(d["metric"] for d in ext["downstream_validation"]).lower()
+        metrics = " ".join(d["metric"] + " " + d["quantity_affected"] for d in ext["downstream_validation"]).lower()
         self.assertIn("signal strength", metrics)
         self.assertNotIn("auc", metrics)
+        self.assertTrue({"closure", "coverage", "pull"} <= {d["metric"] for d in ext["downstream_validation"]})
 
     def test_rowlevel_split_is_caught(self):
         row = self.r["splits"]["rowlevel"]

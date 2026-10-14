@@ -26,9 +26,10 @@ already-existing, publicly citable versions afterward.
    that a reader citing only the preprint version would miss.
 4. Check what the venue and preprint server expect after publication: most
    journals expect the arXiv listing updated with the published DOI and a
-   journal-reference field; some fields' norms (e.g. HEP) treat the arXiv
-   version as the archival record even after publication, so check the
-   target venue's own norm rather than assuming a universal rule. Note if
+   journal-reference field. The journal DOI is the version of record; the arXiv
+   listing is the open copy (in HEP often the one readers use, and it should
+   carry the journal reference and DOI). Check the target venue's own norm for
+   what the preprint may contain after acceptance. Note if
    collaboration policy skips arXiv entirely, per an existing publication
    pattern the user has already told you about — do not add one that wasn't
    posted.
@@ -41,3 +42,5 @@ Deliver a version-diff table (location, preprint text/value, published
 text/value, classification) and the specific preprint-metadata updates
 needed (DOI, journal reference, version note). Do not claim a discrepancy is
 "just a copy-edit" without checking whether it changes a number or claim.
+
+**Done when:** every difference between the preprint and the journal version is listed with its effect on the results, and the arXiv record carries the journal reference and DOI.

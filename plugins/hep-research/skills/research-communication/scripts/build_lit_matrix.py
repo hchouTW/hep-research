@@ -22,6 +22,9 @@ import csv
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from contracts.communication_project import output_aliases_input  # noqa: E402
+
 
 def read_rows(csv_path: Path) -> tuple[list[str], list[dict[str, str]]]:
     # utf-8-sig drops the byte-order mark Excel writes, which would otherwise
@@ -85,6 +88,9 @@ def main(argv=None) -> int:
 
     if not args.csv_path.is_file():
         print(f"error: {args.csv_path} is not a file", file=sys.stderr)
+        return 2
+    if args.output is not None and output_aliases_input(args.output, [args.csv_path]):
+        print(f"error: --output {args.output} names the input CSV; the input is never overwritten", file=sys.stderr)
         return 2
 
     try:

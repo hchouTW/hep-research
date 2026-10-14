@@ -44,3 +44,5 @@ Deliver a ledger with: manuscript location, source location, overlap type
 available, verdict, and proposed fix. Keep the originality check separate
 from citation-identity verification — a passage can be correctly cited and
 still be an unattributed copy of its wording.
+
+**Done when:** every reused passage is quoted or rewritten with its citation, and the check's tool and coverage are stated.

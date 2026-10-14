@@ -10,7 +10,8 @@ placement, plates, Feynman diagrams. Always state the dependencies and the engin
 \usetikzlibrary{positioning, arrows.meta, shapes.geometric, fit, backgrounds, calc}
 % optional: \usepackage{pgfplots}   \usepackage{tikz-cd}   \usepackage{tikz-feynman}
 ```
-For standalone cropped output: `\documentclass[tikz,border=2pt]{standalone}`.
+For standalone cropped output: `\documentclass[tikz,border=2pt]{standalone}`. Under LuaLaTeX the class loads
+`luatex85` (TeX Live 2026 `standalone.cls`); an install without that package fails the build, so install it.
 
 ## Styles once, reuse everywhere
 
@@ -59,9 +60,10 @@ setting `node distance`/widths to fit the column.
 ## Feynman diagrams (tikz-feynman)
 
 Needs `\usepackage[compat=1.1.0]{tikz-feynman}` (without `compat` the package warns on every run).
-`\feynmandiagram` with automatic layout needs LuaLaTeX. Under pdfLaTeX/XeLaTeX it still compiles (exit 0,
-only a "LuaTeX is required" warning) but ignores the layout keys and draws overlapping, garbled lines -
-always inspect the output. For a portable result place vertices by hand:
+`\feynmandiagram` with automatic layout needs LuaLaTeX. Under pdfLaTeX/XeLaTeX it still compiles (exit 0)
+but ignores the layout keys and draws overlapping, garbled lines. The "LuaTeX is required" warning does not
+tell you which case you are in: pdfLaTeX prints it whenever tikz-feynman is loaded, also for a correct manual
+layout (checked 2026-10-14, TeX Live 2026). Only the rendered output shows whether the layout worked. For a portable result place vertices by hand:
 
 ```latex
 \begin{tikzpicture}
@@ -121,4 +123,7 @@ Use `\only<2->{...}`, `\onslide<2->` or `\visible` on nodes/edges for progressiv
 - Colors: define with `xcolor` names; verify grayscale.
 - Text in nodes: use `align=center` with `\\`, set `text width` for wrapping.
 - Externalize (`\usetikzlibrary{external}`) for large figures to speed compile.
-- The snippets here are unverified by compilation; compile and inspect before publishing.
+- The snippets here compile (`check_diagram_sources.py` with LuaHBTeX 1.24, TeX Live 2026, 2026-10-14);
+  compiling is not inspecting: look at the output before publishing.
+
+**Done when:** the snippet compiles (`check_diagram_sources.py` with a TeX engine) and the rendered output was looked at.

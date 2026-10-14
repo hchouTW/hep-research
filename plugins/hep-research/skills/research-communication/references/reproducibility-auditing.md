@@ -54,3 +54,5 @@ inspected, run performed, comparison criterion, observed outcome, blockers, and
 next action. Use explicit statuses such as inspected only, rerun agrees within
 criterion, rerun differs, or blocked. State which results were not tested and
 prioritize missing information that prevents an independent reader from proceeding.
+
+**Done when:** each audited result is either reproduced within a stated tolerance or its failure is described, with the run recorded by hep-computing.

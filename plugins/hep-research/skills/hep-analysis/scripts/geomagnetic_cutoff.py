@@ -16,8 +16,9 @@ the IGRF-epoch-averaged dipole moment as a default. Also converts a cutoff rigid
 the corresponding minimum kinetic energy per nucleon for a given (Z, A).
 
 Usage notes / assumptions: standard library only. This is the *vertical* cutoff for an
-idealized dipole - it does not capture off-vertical arrival directions (which have a
-higher, direction-dependent cutoff), the real non-dipolar field's "penumbra" of
+idealized dipole - it does not capture off-vertical arrival directions (the cutoff is
+east-west asymmetric: for positive particles lower from the west and higher from the
+east than the vertical value), the real non-dipolar field's "penumbra" of
 partially forbidden trajectories, or backscattered/re-entrant particles below cutoff.
 A rigorous cutoff for a specific orbit, epoch, and arrival direction requires particle
 backtracing through a full geomagnetic field model (e.g. IGRF) and is not something

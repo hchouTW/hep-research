@@ -57,3 +57,5 @@ intended meaning is unclear.
 Deliver findings with equation/line locator, issue, supporting calculation,
 scientific impact, and minimal proposed correction. Separate cosmetic notation
 changes from changes that could alter reported results.
+
+**Done when:** `check_terminology.py` has no unreviewed error and every symbol has one definition per declared scope.

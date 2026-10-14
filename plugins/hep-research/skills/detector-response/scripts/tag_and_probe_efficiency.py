@@ -12,18 +12,36 @@ efficiency as a parameter of a simultaneous pass/fail fit - hep-statistics), wei
 or signed-weight MC, or several correlated probes per event.
 
 Output: lower_bound and upper_bound are the interval's absolute ends at interval_level
-(default 0.95). At 0.95 they are not a +-1 sigma band; pass --level 0.6827 for a
+(default 0.95), of a central interval (interval_type "central": alpha/2 in each tail). At
+0.95 they are not a +-1 sigma band; pass --level 0.6827 for a
 one-sigma-equivalent interval. total = 0 leaves the efficiency undefined: the fields
 are null with a reason, not NaN.
 
 total is capped at 200000 because the exact tail sum is evaluated term by term, so the
-cost grows linearly with total (about 9 s near efficiency 0.5 at the cap); for larger
+cost grows linearly with total (about 15-20 s near efficiency 0.5 at the cap); for larger
 samples use a beta-quantile implementation (e.g. scipy.stats.beta.ppf).
+Status: --status (default unvalidated; one of the core artifact_statuses) is echoed as status.
+Exit codes: 0 ok; 2 invalid input (a JSON error with status failed and error_kind invalid-input on stdout, the usage
+on stderr).
 Run: python3 <plugin root>/skills/detector-response/scripts/tag_and_probe_efficiency.py --pass-count 92 --total 100
 """
 import argparse
 import json
 import math
+import sys
+
+STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
+            'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
+
+
+class JsonArgumentParser(argparse.ArgumentParser):
+    """argparse that also prints the reason as JSON on stdout: exit 2 = invalid input. Subparsers inherit it."""
+
+    def error(self, message):
+        print(json.dumps({'status': 'failed', 'ok': False, 'error_kind': 'invalid-input', 'error': message}, indent=2))
+        self.print_usage(sys.stderr)
+        self.exit(2, f'{self.prog}: error: {message}\n')
+
 
 MAX_TOTAL = 200000
 
@@ -106,6 +124,7 @@ def efficiency_bin(k, n, level=0.95):
     if n == 0:
         return {
             'pass_count': k, 'total': n, 'efficiency': None, 'interval_level': level,
+            'interval_type': 'central',
             'lower_bound': None, 'upper_bound': None,
             'distance_to_lower_bound': None, 'distance_to_upper_bound': None,
             'reason': 'total is zero: no probes, so the efficiency is undefined',
@@ -114,6 +133,7 @@ def efficiency_bin(k, n, level=0.95):
     lower, upper = clopper_pearson(k, n, level)
     return {
         'pass_count': k, 'total': n, 'efficiency': point, 'interval_level': level,
+        'interval_type': 'central',
         'lower_bound': lower, 'upper_bound': upper,
         # Distances from the point estimate to the interval ends, at interval_level.
         'distance_to_lower_bound': point - lower,
@@ -122,25 +142,30 @@ def efficiency_bin(k, n, level=0.95):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = JsonArgumentParser(description=__doc__)
     parser.add_argument('--pass-count', type=int, required=True, dest='pass_count')
     parser.add_argument('--total', type=int, required=True)
     parser.add_argument('--level', type=float, default=0.95,
                         help='coverage of the interval (default 0.95; 0.6827 for one-sigma)')
+    parser.add_argument('--status', choices=STATUSES, default='unvalidated',
+                        help='status label of the counts, echoed as status (default unvalidated)')
     args = parser.parse_args()
     try:
         result = efficiency_bin(args.pass_count, args.total, args.level)
     except ValueError as exc:
         parser.error(str(exc))
     print(json.dumps({
+        'status': args.status,
         'method': 'Clopper-Pearson exact binomial interval',
         **result,
         'note': ('Not a Gaussian/Wald interval; valid (if wide) near efficiency 0 or 1. '
                  'lower_bound/upper_bound are the interval ends at interval_level, not '
-                 '+-1 sigma. Only for unweighted, independent, non-background-subtracted '
-                 'counts.'),
+                 '+-1 sigma. The interval is central (alpha/2 in each tail); for k = 0 the one-sided '
+                 'upper limit at the same level is 1 - alpha^(1/n), smaller than the central upper end. '
+                 'Only for unweighted, independent, non-background-subtracted counts.'),
     }, indent=2))
+    return 0
 
 
 if __name__ == '__main__':
-    main()
+    raise SystemExit(main())

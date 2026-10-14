@@ -30,7 +30,7 @@ comparable.
 | PID efficiency & rejection | `epsilon_sig`, `1/epsilon_bkg` at a working point | truth species, phase space | binomial; ROC/AUC | quoting rejection without the signal efficiency |
 | Separation `N_sigma` | `|mu_a-mu_b| / sigma_a` (single-measurement, default) or `|mu_a-mu_b| / sqrt(sigma_a^2+sigma_b^2)` (quadrature); see below | Gaussian shapes (approximate); convention stated | from fits | mixing conventions (a factor `sqrt(2)`); applied to non-Gaussian tails ([particle identification](particle-identification.md)) |
 | Confusion matrix | `M_{ab} = P(ID=b | true=a)` rows normalized by truth | eligible truth per row | counts | wrong normalization axis |
-| Effective area / volume, exposure, containment, PSF | `A_eff = A_gen N_pass/N_gen`, `exposure = A_eff * T_live * Omega` | as defined for astroparticle | ratio/MC | quoting without energy/angle dependence ([space based direct detection](space-based-direct-detection.md), [astroparticle statistics](../../hep-statistics/references/astroparticle-statistics.md)) |
+| Effective area / volume, exposure, containment, PSF | point source: `A_eff = A_gen N_pass/N_gen` (m^2), exposure `sum_t A_eff T_live,t`; diffuse flux: acceptance `G = A_gen Omega_gen N_pass/N_gen` (m^2 sr), `Omega_gen = pi` for directions generated with a cosine law through the generation surface, exposure `sum_t G T_live,t`; never multiply a `G` that already integrates direction by a solid angle again | as defined for astroparticle | ratio/MC | quoting without energy/angle dependence ([space based direct detection](space-based-direct-detection.md), [astroparticle statistics](../../hep-statistics/references/astroparticle-statistics.md)) |
 
 Object-level versus event-level: a per-object probability `p` with `k` independent
 objects per event gives an event-level probability `1 - (1-p)^k` for "at least one";
@@ -67,7 +67,7 @@ often defined per eligible candidate, not per selected object, so its denominato
 differs.
 
 **Efficiency uncertainty.** Binomial, not Gaussian near 0 or 1: use exact
-Clopper-Pearson or Wilson/Bayesian intervals (`<plugin root>/skills/detector-response/scripts/tag_and_probe_efficiency.py`).
+Clopper-Pearson (`<plugin root>/skills/detector-response/scripts/tag_and_probe_efficiency.py`; conservative, it over-covers) or Wilson or Jeffreys intervals (not implemented in this skill's scripts).
 With weighted events, use effective counts `N_eff = (sum w)^2 / sum w^2`, and note
 correlated numerator/denominator when the pass sample is a subset. Rate-like counts
 without a denominator (dark counts, backgrounds) are Poisson.
@@ -111,23 +111,23 @@ single-electron-like particles.
 Uncertainty on `eps_S` (large `N`, `p` not near 0 or 1, so binomial ≈ Gaussian):
 `sqrt(0.9*0.1/7200) = 0.0035`.
 
-Selected sample: 6600 objects pass the ID cut, composed of 6420 true electrons (matched
+Selected sample: 6660 objects pass the ID cut, composed of 6480 true electrons (matched
 with correct identity), 60 real pions (matched, wrong species: *mis-ID*), and 120 with
-no truth match (*fakes*): `6420 + 60 + 120 = 6600`.
-- Purity (correct identity) `P = 6420/6600 = 0.973`.
-- Fake rate `= 120/6600 = 0.0182`; mis-ID share `= 60/6600 = 0.0091`. Here
-  `1 - P = 0.0273` = fake + mis-ID, *not* the fake rate alone.
+no truth match (*fakes*): `6480 + 60 + 120 = 6660` (the 6480 true electrons that pass ID are all correctly identified).
+- Purity (correct identity) `P = 6480/6660 = 0.973`.
+- Fake rate `= 120/6660 = 0.0180`; mis-ID share `= 60/6660 = 0.0090`. Here `1 - P = 0.0270` = fake +
+  mis-ID, *not* the fake rate alone.
 - The pion mis-ID *rate* as a property of pions needs the eligible pion count as the
-  denominator (e.g. 60 of 12000 pions = 0.005), a different number from `0.0091`.
+  denominator (e.g. 60 of 12000 pions = 0.005), a different number from `0.0090`.
 
 Resolution/bias of a relative energy residual `r = (E_reco - E_true)/E_true` (%) for
 20 matched electrons in one truth bin: values
 `-1.2, 0.5, 0.1, -0.4, 1.1, 0.3, -0.2, 0.8, -0.6, 0.4, -0.9, 0.2, 0.0, -0.3, 0.7, 6.5,
 -0.5, 0.6, -0.1, 0.9`.
-- Mean `= 0.395%`, sample RMS `= 1.56%`, median `= 0.15%`,
+- Mean `= 0.395%`, standard deviation `= 1.56%` (n-1; RMS `sqrt(<r^2>) = 1.57%`), median `= 0.15%`,
   `1.4826*MAD = 0.74%`.
 - One catastrophic entry (`6.5%`): tail fraction `|r| > 3% = 1/20 = 5%`.
-- Removing it: mean `0.074%`, RMS `0.63%`. The mean and RMS were dominated by a single
+- Removing it: mean `0.074%`, standard deviation `0.63%` (RMS `0.62%`). The mean and width were dominated by a single
   tail event; the core (`~0.6-0.7%`, bias `~0.1%`) is the detector; the 5% tail is a
   separate quantity. Quote `bias(core)`, `sigma(core)`, and tail fraction, never one
   number. (With 20 entries all of these have large statistical uncertainty; a real
@@ -187,9 +187,37 @@ tail fraction, and coverage across phase space, not just the core width.
   of the measurement; regularization is a choice in the inversion that smooths the
   result and introduces bias; they are separate widths and must not be conflated
   ([response and forward folding](response-and-forward-folding.md)). The response matrix
-  `n_i^reco = sum_j R_ij n_j^truth + b_i` encodes resolution (off-diagonal),
-  inefficiency (column sums `< 1`), and background `b_i`; model dependence enters through
+  `n_i^reco = sum_j R_ij n_j^truth + b_i` encodes migration (resolution and scale, off-diagonal),
+  the inefficiency when it is declared inside the matrix (truth-bin sums `< 1`; they equal 1 under
+  `conditional_on_selected`), and background `b_i`; model dependence enters through
   the truth spectrum used to build `R` ([data mc validation and detector systematics](data-mc-validation-and-detector-systematics.md)).
+
+### Resolution models and widths
+
+A resolution is a model or an estimator; name it. Common choices (general method):
+
+- **Double-sided Crystal Ball**: Gaussian core `sigma` with power-law tails on both sides (`alpha_L`, `n_L`,
+  `alpha_R`, `n_R`); quote the core and the tail parameters.
+- **Double Gaussian**: two widths and a fraction; define the effective width you quote (for example the fraction-
+  weighted quadrature mean, or `sigma_eff` below), since "the resolution" of a double Gaussian is otherwise ambiguous.
+- **`sigma_eff`**: half the width of the smallest interval containing 68.3% of the entries.
+- **RMS90**: the standard deviation of the central 90% of the entries; for a Gaussian it is `0.789 sigma`, so divide by
+  0.789 before comparing with a Gaussian `sigma`.
+- Uncertainties of quantile-based widths (`sigma_68`, `sigma_eff`, RMS90) come from a bootstrap, not from a Gaussian
+  formula.
+
+### Resolution measured in data
+
+Truth exists only in simulation; in data the resolution is inferred. Methods: fit the width of a narrow resonance
+with its natural width and final-state radiation in the line shape
+<!-- example: source citation -->
+(the CMS muon momentum scale fits the Z line shape convolved with a resolution function, JINST 7 (2012) P10002,
+arXiv:1206.4071, section 6; read 2026-10-14);
+<!-- /example -->
+split a track (or a cosmic crossing the detector) into two halves and compare them; compare overlapping modules;
+for jets and missing transverse momentum, balance against a well-measured reference (dijet asymmetry, Z or photon
+plus jet) and extrapolate away the soft radiation. The data/simulation ratio of these widths is the resolution scale
+factor.
 
 ## Common misconceptions and failure modes
 

@@ -17,6 +17,16 @@ else:
     _TORCH_IMPORT_ERROR = None
 
 
+
+def _count(minimum):
+    """argparse type: an integer >= minimum (a bad count is a usage error, exit 2, not a traceback)."""
+    def parse(text):
+        value = int(text)
+        if value < minimum:
+            raise argparse.ArgumentTypeError(f"must be an integer >= {minimum}, got {text}")
+        return value
+    return parse
+
 def create_dataset(num_examples: int = 10000):
     x = torch.randn(num_examples, 3, 224, 224)
     y = torch.randint(0, 10, (num_examples,))
@@ -25,13 +35,14 @@ def create_dataset(num_examples: int = 10000):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--batch-size", type=int, default=64)
-    parser.add_argument("--num-workers", type=int, default=4)
-    parser.add_argument("--batches", type=int, default=100)
+    parser.add_argument("--batch-size", type=_count(1), default=64)
+    parser.add_argument("--num-workers", type=_count(0), default=4)
+    parser.add_argument("--batches", type=_count(1), default=100)
     args = parser.parse_args()
 
     if torch is None:
-        sys.exit(f"PyTorch is required to run this script but could not be imported: {_TORCH_IMPORT_ERROR}")
+        print(f"PyTorch is required to run this script but could not be imported: {_TORCH_IMPORT_ERROR}", file=sys.stderr)
+        sys.exit(3)
 
     dataset = create_dataset()
     loader = DataLoader(

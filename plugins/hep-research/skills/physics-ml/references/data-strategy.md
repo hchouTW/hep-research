@@ -1,115 +1,47 @@
 # Data Strategy Reference
 
-Dataset design, quality, and splits - the decisions that set the ceiling on everything
-downstream. For `Dataset`/`DataLoader` implementation see
-[data-loading.md](data-loading.md); for evaluating on the result see
-[evaluation-strategy.md](evaluation-strategy.md).
+Dataset design, label quality and splits. Dataset and loader code: [data-loading.md](data-loading.md). The one home
+of grouped and temporal splits is [ml-analysis.md](ml-analysis.md), "Splits and leakage"; the tools are
+`<plugin root>/skills/physics-ml/scripts/make_grouped_splits.py` and `check_split_integrity.py` (missing group or
+timestamp metadata gives `incomplete`, never a pass).
 
-Use `<plugin root>/skills/physics-ml/scripts/check_split_integrity.py` to check splits for overlap, duplication, and
-group leakage. It reports how many IDs carry group (and timestamp) metadata; missing metadata gives `incomplete`, which is
-not a pass, and `--strict` makes it a failure for a split that feeds a result.
+## Labels from simulation truth
 
-## Data quality beats model choice
+In physics the labels usually come from simulation truth matching, not annotators, and their noise is systematic:
 
-Below a certain scale, effort spent on labels and curation returns more than effort
-spent on architecture. Label noise sets a hard ceiling no model can pass: if 5% of test
-labels are wrong, 95% accuracy is perfect performance and further gains are fitting the
-noise.
+- a truth-matching criterion (a cone radius, a hit-sharing fraction, a parton-to-jet assignment) mislabels a fraction
+  of objects that depends on kinematics and pileup; vary the criterion and show the effect on the downstream result;
+- labels inherit the generator: a different parton shower or hadronization model can change what "signal-like" means
+  (compare generators as a systematic);
+- the noise caps the measurable performance; a metric beyond the label purity is fitting the noise.
 
-**Measure label quality before optimizing against it.** Re-label a sample with multiple
-annotators, compute agreement, and inspect disagreements. Low agreement usually means
-the task definition is ambiguous, not that annotators are careless - and an ambiguous
-task cannot be fixed by a better model.
+Inspect the actual data as well: duplicated events, truncated branches, a corrupted file or a default value (-999,
+zero for a missing object) are obvious on sight and invisible in aggregate statistics.
 
-Inspect the actual data. Many dataset defects - duplicated records, truncated fields,
-a corrupted shard, a mislabeled class - are obvious on sight and invisible in
-aggregate statistics.
+## Leakage beyond splits
 
-## Splits that survive contact with reality
-
-The default random split is wrong for most real datasets. Choose the split from how
-the model will be used:
-
-| Situation | Split by | Random split gives |
-|---|---|---|
-| Predicting the future | Time | Optimistic - the model sees the future |
-| Repeated units (events with several candidates, runs, detector periods, simulation seeds) | Group | Optimistic - memorizes units |
-| Near-duplicate records | Deduplicate first | Optimistic - test items seen in training |
-| Nested structure (frames in a video) | Outer unit | Severely optimistic |
-| Genuinely i.i.d. samples | Random is correct | Correct |
-
-**Group leakage is the most common serious error.** If the same event, run, detector
-period or simulation seed appears in both train and test, the test set measures
-memorization. It is
-invisible in the metrics - the numbers just look good.
-
-**Temporal leakage** is the second most common: any feature computed using information
-unavailable at prediction time (an aggregate over the full dataset, a target-derived
-statistic, a label-informed normalization) inflates offline results and vanishes in
-production.
-
-Fit all preprocessing - normalization statistics, vocabularies, imputation values,
-encoders - on training data only, then apply to validation and test. Fitting on the
-full dataset first is a subtle, extremely common leak.
-
-## Deduplication and contamination
-
-Near-duplicates between train and test inflate results. Exact-match deduplication is
-not enough; use a similarity or hashing scheme appropriate to the modality.
-
-For anything using pretrained models or web-scale corpora, **benchmark contamination**
-is a live concern: the evaluation set may be in the pretraining data. Check where
-possible, and prefer held-out sets constructed after the pretraining cutoff for claims
-that matter.
-
-For scientific ML built on simulated data, also inspect whether metadata or
-simulation-specific artifacts (an exact generator seed, a preprocessing quirk, a
-detector-simulation shortcut) let the model solve an easier unintended problem instead
-of the intended physical one - this is target leakage's simulation-specific form. See
-[robustness-and-distribution-shift.md](robustness-and-distribution-shift.md)'s
-simulation-to-data section.
+- Fit all preprocessing (normalization, imputation, encoders) on the training split only.
+- Duplicated or overlapping simulated events (re-used generator seeds, overlapping production requests) between
+  training and test inflate results; deduplicate on event identifiers.
+- Simulation-specific artifacts (an exact generator seed, a preprocessing quirk, a detector-simulation shortcut, a
+  variable defined only in simulation) can let the model solve an unintended easier problem: target leakage in its
+  simulation form ([robustness-and-distribution-shift.md](robustness-and-distribution-shift.md)).
+- A pretrained model may have seen the evaluation sample (contamination): check the pre-training samples.
 
 ## Imbalance
 
-Class imbalance is a metric and threshold problem more often than a sampling problem.
-Before resampling:
+Imbalance is a metric and threshold problem before it is a sampling problem: use metrics that do not depend on the
+class prior (per-class efficiencies at a working point, background rejection; [ml-analysis.md](ml-analysis.md),
+"Analysis metrics"), set the working point from the analysis, balance class totals in the training weights
+("Class balancing and the prior"), and never resample validation or test: they keep the physics weights.
 
-- Use metrics that are meaningful under imbalance (precision/recall, PR-AUC) rather
-  than accuracy - see [evaluation-metrics.md](evaluation-metrics.md).
-- Set the decision threshold from the operating requirement, not at 0.5.
+## How much simulation
 
-If resampling or class weighting is used, note that it changes the predicted
-probabilities' calibration, which matters if the scores are consumed downstream rather
-than only argmaxed.
+Train on 25%, 50% and 100% of the sample and plot the validation metric (and, where it is cheap, the downstream
+uncertainty): a flat curve means more events of the same kind will not help. Target generation where the model fails
+(tails, low-statistics regions) rather than uniformly.
 
-**Never resample the validation or test sets.** They must reflect the deployment
-distribution, or every metric computed on them is answering a different question.
+## Record
 
-## Scaling the dataset
-
-More data helps until it doesn't, and the curve is measurable: train on 25%, 50%, and
-100% and plot. A flat curve means more data of the same kind will not help - the gain
-has to come from better labels, harder examples, or a different distribution. This
-measurement is far cheaper than collecting more data and discovering it was useless.
-
-Prefer **targeted** collection: examples from failing slices, near the decision
-boundary, or from underrepresented conditions. Uniform expansion mostly adds examples
-the model already handles.
-
-## Documentation
-
-Record for every dataset: provenance and collection method, labeling instructions and
-annotator agreement, known biases and gaps, preprocessing applied, the split rule and
-its rationale, and a version identifier. An undocumented dataset makes every model
-trained on it unauditable.
-
-## Deliverables
-
-- Label-quality measurement: annotator agreement and the estimated noise ceiling.
-- Split rule (temporal, group, or random) with its justification, and a verified
-  absence of group and temporal leakage.
-- Deduplication method, and a contamination check where pretrained models are involved.
-- Confirmation that preprocessing was fit on training data only.
-- Imbalance handling, with validation and test left at the deployment distribution.
-- A data-scaling curve showing whether more data would help.
-- Dataset documentation and a version identifier tied to each trained model.
+Provenance (generator, version, production campaign), truth-matching definition, known gaps, preprocessing, the split
+rule and the manifest, and a version identifier tied to each trained model (the `ml-artifact`).

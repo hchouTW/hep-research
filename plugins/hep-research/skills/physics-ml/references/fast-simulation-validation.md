@@ -20,7 +20,8 @@ model-side choices and the evidence the ML side must deliver. Citations were loo
 - **Point-cloud generators:** for sparse, high-granularity calorimeters, generating hits as a set avoids the cost of
   mostly empty voxel grids.
 
-The CaloChallenge 2022 report (Krause et al., Rep. Prog. Phys. 88 (2025) 116201, arXiv:2410.21611) compares these
+The CaloChallenge 2022 report (Krause et al., arXiv:2410.21611; the Rep. Prog. Phys. 88 (2025) 116201 details are
+`unverified`: not on the arXiv page) compares these
 families on common datasets and metrics. Use its datasets and metrics as the baseline vocabulary.
 
 ## Conditioning and the training domain
@@ -58,6 +59,10 @@ No single number validates a fast simulation. Report a set:
    CaloChallenge metrics, reported alongside the others; no single metric suffices.
    - **Calibrate the test:** report the AUC of the same classifier on two independent full-simulation samples, so
      the 0.5 floor includes finite-sample noise.
+   - **Report its power.** An AUC of 0.5 alone shows nothing: a weak classifier or a small sample also gives 0.5.
+     Inject a known distortion into a full-simulation sample (a few percent on a layer energy, a shifted shower
+     depth), rerun the same test, and report the smallest distortion it detects. Classifier two-sample tests:
+     Lopez-Paz & Oquab, arXiv:1610.06545 (abstract read 2026-10-14).
    - **Find where it fails:** inspect which events the classifier finds easiest to separate.
 3. **Fréchet and kernel physics distances (FPD, KPD)** on high-level features. These are sample-based metrics with
    defined uncertainties, preferred to image-based FID for physics (Kansal et al., PRD 107 (2023) 076017,

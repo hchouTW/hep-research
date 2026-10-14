@@ -5171,5 +5171,32 @@
     "numeric_quotation_allowed": true,
     "last_reviewed": "2026-10-05",
     "evidence_status": "public-fact"
+  },
+  {
+    "id": "ams02:C185",
+    "claim": "The INSPIRE-HEP record of the AMS iron PRL (PRL 126, 041104, 2021; INSPIRE record 1844651) carries no arxiv_eprints field: the letter has no arXiv version on INSPIRE",
+    "claim_types": [
+      "published_result"
+    ],
+    "claim_type_note": "absence claim about a publication record, not about the physics",
+    "support_kind": "absence_search",
+    "source_ids": [
+      "ams02:S57"
+    ],
+    "location": "INSPIRE REST record 1844651 (fields titles, dois, arxiv_eprints), queried 2026-10-14",
+    "scope": {
+      "text": "search-limited: one record on one date; says nothing about why no preprint exists",
+      "species": [
+        "iron"
+      ],
+      "range": null,
+      "data_period": null,
+      "analysis": "INSPIRE REST query 2026-10-14"
+    },
+    "limitations": "One record checked; other AMS letters are not covered by this claim. A preprint added later would change it. Added 2026-10-14 (research-communication audit RC-B7, which removed an unsourced 'deliberate policy' reading from the skill references).",
+    "verification_strength": "metadata-only",
+    "numeric_quotation_allowed": false,
+    "last_reviewed": "2026-10-14",
+    "evidence_status": "public-fact"
   }
 ]

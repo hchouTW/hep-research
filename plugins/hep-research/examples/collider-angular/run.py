@@ -279,7 +279,7 @@ def artifacts(res, resp, created):
                                    "conditions": "single synthetic run",
                                    "provenance": "analytic integration of the synthetic detector model; reco outside [-1, 1] is "
                                                  "kept in explicit underflow/overflow vectors; outer truth bins are buffers",
-                                   "matrix_ref": "results.json#response", "form": "matrix"})
+                                   "matrix_ref": "matrices/response.json", "form": "matrix"})
     stat = dict(base, artifact_id="synthetic-path-b-result", artifact_type="statistical-result", required_capabilities=["stats:result-semantics"],
                 objective="SYNTHETIC corrected angular distribution and fiducial cross section with covariance",
                 provenance={"producer_skill": "hep-statistics", "created": created}, status=["synthetic"],
@@ -375,6 +375,10 @@ def main(argv=None) -> int:
                                          "lumi": res["lumi"][REP, REP].tolist()}})
     for name, doc in docs.items():
         (out / "artifacts" / f"{name}.json").write_text(json.dumps(doc, indent=1) + "\n")
+    # the matrix_ref target: the matrix with its underflow/overflow vectors, inside the artifact folder
+    (out / "artifacts" / "matrices").mkdir(exist_ok=True)
+    (out / "artifacts" / "matrices" / "response.json").write_text(json.dumps(
+        {"matrix": m.tolist(), "underflow": resp["underflow"].tolist(), "overflow": resp["overflow"].tolist()}, indent=1) + "\n")
     fig_check = figures(res, expected, out)
 
     passes = {

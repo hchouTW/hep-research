@@ -50,3 +50,5 @@ Deliver the protocol/search log, deduplicated decision ledger, reconciled flow
 counts, included-study matrix, and unresolved cases. Synthesize only the evidence
 actually obtained and state coverage limitations. Do not pool incompatible results
 or start a meta-analysis merely because screening is complete.
+
+**Done when:** the screening log records each decision with its criterion, and the counts reconcile from search to inclusion.

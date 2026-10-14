@@ -43,3 +43,5 @@ kept as-is, cut, moved to supplement, or newly written) plus the venue's
 duplicate-publication disclosure text if required. Flag any content cut for
 length that changes the target version's own claims or conclusions rather
 than dropping it silently.
+
+**Done when:** each version compiles in its venue's class, meets its limits, and carries the same numbers and status labels.

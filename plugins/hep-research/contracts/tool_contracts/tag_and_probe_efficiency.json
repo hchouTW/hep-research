@@ -1,0 +1,140 @@
+{
+ "contract_version": "1.0.0",
+ "tool_id": "tag-and-probe-efficiency",
+ "entry": "skills/detector-response/scripts/tag_and_probe_efficiency.py",
+ "operations": [
+  {
+   "operation_id": "efficiency",
+   "summary": "Binomial efficiency pass_count/total of one tag-and-probe bin with the exact two-sided (central) Clopper-Pearson interval at interval_level, by bisection on the exact binomial tail sum. total = 0 gives null efficiency and bounds with a reason. Only unweighted, independent, non-background-subtracted probes",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--pass-count",
+      "input": "pass_count"
+     },
+     {
+      "flag": "--total",
+      "input": "total"
+     },
+     {
+      "flag": "--level",
+      "input": "level"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "pass_count",
+     "kind": "counts",
+     "unit": "1",
+     "required": true,
+     "constraint": "integer, 0 <= pass_count <= total"
+    },
+    {
+     "name": "total",
+     "kind": "counts",
+     "unit": "1",
+     "required": true,
+     "constraint": "integer, 0..200000 (the exact tail sum costs O(total); about 15-20 s near efficiency 0.5 at the cap)"
+    },
+    {
+     "name": "level",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "confidence level of the central interval, finite, strictly in (0, 1)",
+     "default": 0.95
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "method",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "pass_count",
+     "kind": "counts",
+     "unit": "1"
+    },
+    {
+     "name": "total",
+     "kind": "counts",
+     "unit": "1"
+    },
+    {
+     "name": "efficiency",
+     "kind": "efficiency",
+     "unit": "1"
+    },
+    {
+     "name": "interval_level",
+     "kind": "parameter",
+     "unit": "1"
+    },
+    {
+     "name": "lower_bound",
+     "kind": "efficiency",
+     "unit": "1"
+    },
+    {
+     "name": "upper_bound",
+     "kind": "efficiency",
+     "unit": "1"
+    },
+    {
+     "name": "distance_to_lower_bound",
+     "kind": "efficiency",
+     "unit": "1"
+    },
+    {
+     "name": "distance_to_upper_bound",
+     "kind": "efficiency",
+     "unit": "1"
+    },
+    {
+     "name": "interval_type",
+     "kind": "label",
+     "unit": "n/a"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, not an integer, or out of range (pass_count > total, total > 200000, level outside (0, 1)); stdout carries {\"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr one line"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   }
+  }
+ ]
+}

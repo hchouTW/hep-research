@@ -187,7 +187,8 @@ def main():
                       args.overhead_ms)
         tips = advise(result)
     except ValueError as exc:
-        sys.exit(f"error: {exc}")
+        print(f"error: {exc}", file=sys.stderr)
+        sys.exit(2)
     print(_format(result, tips))
 
 

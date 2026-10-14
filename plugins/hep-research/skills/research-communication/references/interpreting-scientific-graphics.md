@@ -55,10 +55,9 @@ Each plot type has a specific thing readers most often misread:
 <!-- example: experiment-specific illustration -->
 - Prefer a linked data table, HEPData record, or supplemental file over
   reading pixels off a figure whenever one exists — check for it first (see
-  `citations-and-bibliography.md`'s supplemental-material-linking guidance,
-  and the AMS-02 case study in `astroparticle-and-cosmic-ray-papers.md`,
-  where the underlying flux tables are often published as a separate
-  collaboration-site link rather than in the paper's own figure).
+  `citations-and-bibliography.md`'s supplemental-material-linking guidance;
+  some collaborations publish their tables on their own site rather than in
+  the paper or on HEPData (`astroparticle-and-cosmic-ray-papers.md`)).
 <!-- /example -->
 - If reading from an image is the only option, read against the plot's own
   gridlines/tick marks rather than eyeballing a fraction of the panel, and
@@ -67,6 +66,10 @@ Each plot type has a specific thing readers most often misread:
   pixel-read value with more precision than the reading method supports.
   This is the same discipline `manuscript-consistency-auditing.md` requires
   when comparing a pixel-read value against a stated one.
+- Reading is not computing: a value the plot shows may be read (approximate,
+  method stated); a new significance, limit, interval or fit value derived
+  from plotted values may not, and goes to hep-statistics with the published
+  numbers or HEPData tables (rule 2 of `academic-papers-guide.md`).
 - For a log-scale axis, remember that visually equal distances are not
   equal differences — interpolate in log space, not linear space, when
   estimating a value between gridlines.
@@ -132,3 +135,5 @@ Deliver findings the same way as the skill's other reading checks: the
 figure's locator, the specific concern, why it matters to the paper's
 claim, and what wasn't verified (e.g., no underlying data file was
 available, so any extracted value is approximate only).
+
+**Done when:** every value read off a figure is labelled approximate with its reading method, and nothing was computed from plotted values.

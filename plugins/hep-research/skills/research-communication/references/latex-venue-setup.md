@@ -8,6 +8,7 @@ PDF accessibility, diffing, build automation, bibliography engines,
 multi-file structuring, encoding) — this file is venue-specific setup only.
 
 ## Table of contents
+- [Quick reference](#quick-reference)
 - [Getting the right class file](#getting-the-right-class-file)
 - [REVTeX (PRL / PRD / PRX)](#revtex-prl--prd--prx)
 - [JHEP](#jhep)
@@ -19,6 +20,36 @@ multi-file structuring, encoding) — this file is venue-specific setup only.
 - [Common compile errors](#common-compile-errors)
 - [Length-limit tactics](#length-limit-tactics)
 - [Venue rules: sources and last-verified dates](#venue-rules-sources-and-last-verified-dates)
+
+## Quick reference
+
+The home for class files and length limits. Other venue facts have their own homes, which state the venue's rule
+with its source: AI-use disclosure (`submission-and-peer-review.md`), correction labels
+(`erratum-and-corrigendum-drafting.md`), Comment and Reply limits (`comment-and-reply-exchange.md`, mirrored in the
+table below), figure fonts, resolution and widths (`physics-plots.md`, `diagram-figure-style.md`), abstract limits
+(`paper-structure.md`). Sources
+and per-row dates are in [Venue rules: sources and last-verified dates](#venue-rules-sources-and-last-verified-dates);
+a row older than a year, or for a different conference year, is re-checked before it
+is quoted as a hard limit.
+
+| Venue | Class file | Length (dates in the sources table) | Notes |
+|---|---|---|---|
+| PRL | `revtex4-2` (`\documentclass[aps,prl,reprint]{revtex4-2}`) | 3,750 words (about 4 pages); abstract ≤ 600 characters | Run-in italic heads, not `\section`; no PACS (PhySH since 2016) |
+| PRD / PRX | `revtex4-2` (`\documentclass[aps,prd,reprint]{revtex4-2}`) | PRD regular articles: no fixed limit; PRD Letters 4,500 words | Numbered sections, full methods |
+| JHEP | `article` + SISSA's `jheppub.sty` (not a `.cls`) | No fixed limit | `\abstract{}` before `\begin{document}`; labeled `\author[a]`/`\affiliation[a]`, `\emailAdd`; `\flushbottom`; `\bibliographystyle{JHEP}`. REVTeX front matter does not carry over: read the reference before converting |
+| EPJC | Springer Nature template `sn-jnl.cls`, `[iicol]` option | No fixed limit | Old `svjour3` superseded; decimal headings, ≤ 3 levels |
+| Nature Physics | Nature LaTeX template or Word | Article: 3,000 words main text, ~200-word summary paragraph, ≤ 6 display items | Letters retired in 2022; check Nature itself separately |
+| JCAP (astroparticle) | `article` + SISSA's `jcappub.sty` | No fixed limit | Same front matter as JHEP; common for cosmic-ray/dark-matter theory and phenomenology |
+| ApJ / ApJL (astroparticle) | AASTeX v7 (`\documentclass{aastex7}`) | Abstract ≤ 250 words; ApJL 3,500 words and ≤ 5 figures+tables (soft) | natbib author-year citations |
+| Astroparticle Physics (Elsevier) | `elsarticle.cls` (v3.5) | Not verified (publisher pages blocked); read the journal's Guide for Authors | Elsevier house style |
+| A&A | A&A's own `aa.cls` | Not verified (publisher pages blocked) | Some multi-messenger and counterpart papers |
+| PRD (astroparticle results) | `revtex4-2`, as PRD above | As PRD | Common venue for astroparticle results |
+| NeurIPS / ICML / ICLR (2026) | Conference's current-year `.sty` | 9 / 8 / 9 pages main text including figures and tables; references, appendices (and NeurIPS's checklist) do not count; +1 page at camera-ready (ICLR: 10 pages at rebuttal and camera-ready) | Double-blind; NeurIPS checklist, ICML impact statement required; re-check every year |
+| ACL / EMNLP / NAACL (ARR) | Official ACL template, unmodified | Long 8 pages, short 4 | Required "Limitations" section, not counted; `natbib` author-year |
+| TMLR | Venue's own LaTeX template | No page limit (long papers review more slowly) | Journal-style open review, closer to a physics journal's process |
+| JMLR | `jmlr2e.sty` | No hard limit; > 35 pages (with appendices) risks rejection, > 50 pages needs a cover-letter justification; abstract ≤ 200 words | Journal review; non-JMLR style is rejected without review |
+| Statistics journals (JASA, Annals of Statistics, ...) | Usually plain `article`-based | Not verified | Journal-specific reference style; theorem/proof structure for theory papers |
+| arXiv preprint | Whatever the target journal uses, or `article` | Match target venue | arXiv runs BibTeX/biber itself; upload any `.sty`/`.cls` not in TeX Live; don't mix PS and PDF figures |
 
 ## Getting the right class file
 
@@ -319,6 +350,7 @@ value comes from a search engine's copy of that official page.
 | Venue | Rule(s) checked | Source | Last verified |
 |---|---|---|---|
 | PRL / PRD / PRC | length limits, word equivalents | https://journals.aps.org/authors/length-guide | 2026-09 |
+| PRL / PRC / PRD | Comment or Reply: 750 / 1,500 / 3,500 words | https://journals.aps.org/authors/length-guide | 2026-10-14 |
 | PRL | 600-character abstract, 3,750 words | https://journals.aps.org/prl/info/infoL.html | 2026-09 |
 | APS | PACS dropped, PhySH | PRL editorial 10.1103/PhysRevLett.116.080001 (2016) | 2026-09 |
 | APS | run-in heads in PRL | APS Journals Style Guide for Authors (November 2024) | 2026-09 |
@@ -341,3 +373,5 @@ value comes from a search engine's copy of that official page.
 | Astroparticle Physics (journal) | page/word limits, reference style, abstract length, highlights requirement: not verified (publisher pages returned HTTP 403). Take them from the journal's Guide for Authors | https://www.sciencedirect.com/journal/astroparticle-physics/publish/guide-for-authors (not fetchable) | 2026-10 |
 | A&A | `aa.cls`; Letters 3,000 words (search copy only, not verified); structured abstract optional (search copy). aanda.org returned HTTP 403; a "100-word Letter abstract" snippet conflicts and is unsourced | https://www.aanda.org/doc_journal/instructions/aadoc.pdf (not fetchable) | 2026-10 |
 | Statistics journals (JASA, Annals of Statistics) | not verified: the Annals page defers to a "Preparation of Manuscripts" page that was not followed, and tandfonline returned HTTP 403 | https://imstat.org/journals-and-publications/annals-of-statistics/annals-of-statistics-manuscript-submission/ | 2026-10 |
+
+**Done when:** the manuscript compiles in the venue's current class and meets the limits in the quick-reference table, rechecked when the row is older than a year.

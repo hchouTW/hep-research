@@ -12,7 +12,7 @@ schema `<plugin root>/contracts/schemas/ext_communication_traceability.json`, va
 
 | Statement | Established by | Never implies |
 |---|---|---|
-| Schema validity | `contracts/validate.py` | that a referenced file exists |
+| Schema validity | `<plugin root>/contracts/validate.py` | that a referenced file exists |
 | Dependency and source consistency | `check_communication.py --checks traceability` | that anything was read or supports a claim |
 | Scientific support | a reader who inspects the evidence and records a verdict with locators | truth: it is the assessor's recorded judgment |
 | Output readiness | `check_communication.py --checks manuscript`, rendering, review | that the science is right |
@@ -31,12 +31,12 @@ schema `<plugin root>/contracts/schemas/ext_communication_traceability.json`, va
 4. Read events (`sources_read`): source id, level, locators read, date. A value quoted from an abstract carries the
    abstract locator; a table not read cannot be cited as read.
 5. Occurrences: where each claim appears (`document_id`, `locator`, exact `passage`, display `value` with `unit` and
-   `rounding` such as `decimals:2`), so the manuscript can be checked against the record, not the record against itself.
+   `rounding` such as `decimals:2`, half up unless `:half-even` is appended), so the manuscript can be checked against the record, not the record against itself.
 6. Assessment, after inspecting the evidence: verdict, rationale, the edge ids relied on, assessor, date,
    `claim_digest` (`contracts.communication.claim_digest`) and `evidence_fingerprints` (`evidence_fingerprint`). A
    wording or scope change, or a changed input hash, makes it stale; re-inspect, then re-pin.
 7. `reporting_context`: result type, method metadata and field states (`provided`, `missing`, `not-applicable` with a
-   reason, `unresolved`) against `assets/reporting-policies.json`. A missing field is requested from the producing
+   reason, `unresolved`) against `<plugin root>/skills/research-communication/assets/reporting-policies.json`. A missing field is requested from the producing
    skill, never defaulted.
 
 ## Check it
@@ -64,3 +64,5 @@ included section file as its own document when its passages are checked.
 limitations, unresolved inputs). Draft from those facts; keep every status label in the sentence; put a missing number
 in a `[VALUE NEEDED: ...]` slot and its request in the claim's `unresolved_inputs`. Wording findings are advisory:
 quoted language, negations and another paper's claims are not the author's own assertion.
+
+**Done when:** `check_communication.py --checks manuscript` and `audit_claims.py` exit 0, or their open items are listed for the user.

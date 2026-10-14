@@ -205,7 +205,7 @@
   "format": "traceability",
   "policy": {
    "path": "<plugin root>/skills/research-communication/assets/reporting-policies.json",
-   "version": "1.0.0"
+   "version": "1.1.0"
   },
   "project_root": ".",
   "record": "artifacts/comm.json"

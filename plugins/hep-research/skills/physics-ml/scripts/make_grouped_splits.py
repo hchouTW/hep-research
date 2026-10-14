@@ -15,8 +15,11 @@ What it does: reads a table of rows, groups them by --group-column, and assigns 
                         "temporal_order" so the chronology is checked too;
   --folds K             (random-groups only) K grouped folds instead: shuffled groups are placed largest first into
                         the fold with the fewest rows; fold i is evaluated by the model trained on the other folds.
-Group and ID values are compared the way check_split_integrity.py compares them: surrounding whitespace stripped and
-case folded (--case-sensitive keeps case). A null group (missing, empty, NaN, or nan/null/none/na) is refused unless
+Group and ID values are compared the way check_split_integrity.py compares them (same function): surrounding whitespace
+stripped, a number with a zero fraction written as an integer (1, 1.0 and "1" are one group), case folded
+(--case-sensitive keeps case); booleans, lists and objects are refused. Time values must be numbers or ISO-8601
+dates (datetime.fromisoformat: 2024-01-10, not 2024-1-10, which would sort as text). With --label-column the summary
+gives class counts per split, and a split without events of a class is refused unless --allow-empty-class. A null group (missing, empty, NaN, or nan/null/none/na) is refused unless
 --null-group-policy says what to do: own-group (each such row is its own group) or drop (left out of the manifest).
 
 Input: a CSV file (header row), a JSON-lines file (.jsonl/.ndjson, one object per line), or a JSON file holding a list
@@ -26,7 +29,8 @@ Output: the split manifest (JSON) written to --out, in the format check_split_in
   "timestamps" (plus "temporal_order" in temporal mode). A summary (mode, seed, requested and achieved fractions,
   groups and rows per split, null-group handling) is printed to stdout as strict JSON.
 Exit codes: 0 manifest written, 2 bad input (unreadable table, missing column, duplicate ID, null groups without a
-  policy, too few groups for the requested splits, bad fractions).
+  policy, a time value that is not a number or ISO-8601 date, a boolean/list/object key, too few groups for the
+  requested splits, a split without a class, bad fractions).
 Usage notes / assumptions: standard library only; PyTorch is not required. The split is only as good as the key:
   choose the coarsest key that carries correlation (see <plugin root>/skills/physics-ml/references/ml-analysis.md).
 Run: python3 <plugin root>/skills/physics-ml/scripts/make_grouped_splits.py rows.csv --id-column event --group-column run --out splits.json --seed 1
@@ -41,6 +45,11 @@ import random
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from check_split_integrity import canonical_key, parse_timestamp  # noqa: E402  (one normalization for both tools)
+
+STATUSES = ("synthetic", "asimov", "observed", "preliminary", "failed", "unvalidated", "user-supplied",
+            "validated-in-scope")  # contracts/vocab/core.json artifact_statuses
 SPLITS = ("train", "val", "test")
 NULL_MARKERS = {"", "nan", "null", "none", "na"}
 
@@ -50,8 +59,10 @@ class InputError(ValueError):
 
 
 def normalize_key(value, case_sensitive=False):
-    text = str(value).strip()
-    return text if case_sensitive else text.casefold()
+    try:
+        return canonical_key(value, case_sensitive)
+    except ValueError as exc:
+        raise InputError(str(exc)) from None
 
 
 def is_null(value):
@@ -86,27 +97,23 @@ def read_rows(path, fmt=None):
 
 
 def _time_value(value, row_id):
+    """(sort key, value written to the manifest) for a time cell; refuses anything but numbers and ISO-8601 dates."""
     if is_null(value):
         raise InputError(f"row {row_id!r} has no time value")
-    if isinstance(value, bool):
-        raise InputError(f"row {row_id!r}: time must be a number or a sortable string")
-    if isinstance(value, (int, float)):
-        if not math.isfinite(value):
-            raise InputError(f"row {row_id!r}: time must be finite")
-        return value
-    text = str(value).strip()
     try:
-        number = float(text)
-    except ValueError:
-        return text  # ISO-8601 dates and similar sort as strings
-    if not math.isfinite(number):
-        raise InputError(f"row {row_id!r}: time must be finite")
-    return int(number) if number.is_integer() and "." not in text and "e" not in text.lower() else number
+        kind, key = parse_timestamp(value, row_id)
+    except ValueError as exc:
+        raise InputError(f"row {row_id!r}: {exc}") from None
+    if kind == "number":
+        shown = int(key) if isinstance(key, float) and key.is_integer() and isinstance(value, str) and \
+            "." not in value and "e" not in value.lower() else key
+        return key, shown
+    return key, str(value).strip()
 
 
 def collect_groups(rows, id_col, group_col, time_col=None, null_policy=None, case_sensitive=False):
     """Map group -> list of IDs (in input order), plus timestamps and null-group bookkeeping."""
-    groups, group_of, times = {}, {}, {}
+    groups, group_of, times, shown = {}, {}, {}, {}
     null_rows, dropped = [], []
     for index, row in enumerate(rows):
         if id_col not in row:
@@ -133,17 +140,17 @@ def collect_groups(rows, id_col, group_col, time_col=None, null_policy=None, cas
         if time_col is not None:
             if time_col not in row:
                 raise InputError(f"row {index} has no column {time_col!r}")
-            times[rid] = _time_value(row[time_col], rid)
+            times[rid], shown[rid] = _time_value(row[time_col], rid)
         group_of[rid] = group
         groups.setdefault(group, []).append(rid)
     if null_rows and null_policy is None:
         raise InputError(f"{len(null_rows)} row(s) have a null or empty group (e.g. {null_rows[:3]}); "
                          "pass --null-group-policy own-group or drop")
-    kinds = {type(t) is str for t in times.values()}
+    kinds = {isinstance(t, (int, float)) for t in times.values()}
     if len(kinds) > 1:
-        raise InputError("time values mix numbers and strings; they cannot be ordered")
+        raise InputError("time values mix numbers and dates; they cannot be ordered")
     return groups, group_of, times, {"null_group_rows": len(null_rows), "policy": null_policy,
-                                     "dropped_rows": len(dropped)}
+                                     "dropped_rows": len(dropped), "shown_times": shown}
 
 
 def _fill(ordered, groups, fractions):
@@ -178,7 +185,7 @@ def _folds(ordered, groups, k):
 
 
 def make_splits(rows, id_col, group_col, time_col=None, fractions=(0.6, 0.2, 0.2), seed=0, mode="random-groups",
-                folds=None, null_policy=None, case_sensitive=False):
+                folds=None, null_policy=None, case_sensitive=False, label_col=None, allow_empty_class=False):
     """Return (manifest, summary); raises InputError on bad input."""
     if mode not in ("random-groups", "temporal"):
         raise InputError(f"unknown mode {mode!r}")
@@ -198,6 +205,7 @@ def make_splits(rows, id_col, group_col, time_col=None, fractions=(0.6, 0.2, 0.2
             raise InputError("need a positive train fraction and at least one other positive fraction")
 
     groups, group_of, times, nulls = collect_groups(rows, id_col, group_col, time_col, null_policy, case_sensitive)
+    shown_times = nulls.pop("shown_times")
     if not groups:
         raise InputError("no rows left after applying the null-group policy")
     keys = sorted(groups)
@@ -223,13 +231,31 @@ def make_splits(rows, id_col, group_col, time_col=None, fractions=(0.6, 0.2, 0.2
     manifest = {name: [rid for g in gs for rid in groups[g]] for name, gs in assignment.items()}
     manifest["groups"] = dict(sorted(group_of.items()))
     if times:
-        manifest["timestamps"] = dict(sorted(times.items()))
+        manifest["timestamps"] = dict(sorted(shown_times.items()))
     if mode == "temporal":
         manifest["temporal_order"] = list(assignment)
 
     total = sum(len(ids) for ids in groups.values())
     per_split = {name: {"groups": len(gs), "rows": len(manifest[name]),
                         "fraction": len(manifest[name]) / total} for name, gs in assignment.items()}
+    empty_class = []
+    if label_col is not None:
+        label_of = {}
+        for index, row in enumerate(rows):
+            if label_col not in row:
+                raise InputError(f"row {index} has no column {label_col!r}")
+            label_of[normalize_key(row[id_col], case_sensitive)] = normalize_key(row[label_col], True)
+        classes = sorted({label_of[rid] for ids in groups.values() for rid in ids})
+        for name in assignment:
+            counts = {c: 0 for c in classes}
+            for rid in manifest[name]:
+                counts[label_of[rid]] += 1
+            per_split[name]["class_counts"] = counts
+            empty_class += [f"{name}:{c}" for c, n in counts.items() if n == 0]
+        if empty_class and not allow_empty_class:
+            raise InputError(f"split(s) without events of a class: {empty_class}; a classifier cannot be trained or "
+                             "evaluated on such a split. Use a finer grouping key or other fractions, or pass "
+                             "--allow-empty-class to accept it")
     overlapping_time = []
     if mode == "temporal":
         names = list(assignment)
@@ -246,6 +272,7 @@ def make_splits(rows, id_col, group_col, time_col=None, fractions=(0.6, 0.2, 0.2
         "input_rows": len(rows), "rows_assigned": total, "groups": len(groups),
         "null_groups": nulls, "splits": per_split,
         "time_ranges_overlap": overlapping_time,
+        "label_column": label_col, "empty_classes": empty_class,
         "note": ("groups span overlapping time ranges, so check_split_integrity.py will report a temporal violation"
                  if overlapping_time else "check the manifest with check_split_integrity.py --strict"),
     }
@@ -257,7 +284,11 @@ def main(argv=None) -> int:
     ap.add_argument("table", help="CSV, JSON-lines, or JSON list of rows")
     ap.add_argument("--id-column", required=True)
     ap.add_argument("--group-column", required=True, help="run, event, period, seed, parameter point, ...")
-    ap.add_argument("--time-column", help="time or period order (required by --mode temporal)")
+    ap.add_argument("--time-column", help="time or period order (required by --mode temporal): numbers or ISO-8601 "
+                    "dates (2024-01-10); anything else is refused")
+    ap.add_argument("--label-column", help="class label: report class counts per split and refuse a split that has "
+                    "no events of a class")
+    ap.add_argument("--allow-empty-class", action="store_true", help="accept a split without events of a class")
     ap.add_argument("--mode", choices=("random-groups", "temporal"), default="random-groups")
     ap.add_argument("--fractions", type=float, nargs=3, default=(0.6, 0.2, 0.2), metavar=("TRAIN", "VAL", "TEST"))
     ap.add_argument("--folds", type=int, help="K grouped folds instead of train/val/test")
@@ -266,15 +297,19 @@ def main(argv=None) -> int:
                     help="what to do with rows whose group is null or empty (default: refuse)")
     ap.add_argument("--case-sensitive", action="store_true", help="keep case when comparing IDs and groups")
     ap.add_argument("--format", choices=("csv", "jsonl", "json"), help="override the format from the extension")
+    ap.add_argument("--status", default="unvalidated", choices=STATUSES,
+                    help="status label of the input data, echoed as status_label in the output (default unvalidated)")
     ap.add_argument("--out", required=True, help="where to write the split manifest (JSON)")
     args = ap.parse_args(argv)
     try:
         rows = read_rows(args.table, args.format)
         manifest, summary = make_splits(rows, args.id_column, args.group_column, args.time_column,
                                         tuple(args.fractions), args.seed, args.mode, args.folds,
-                                        args.null_group_policy, args.case_sensitive)
+                                        args.null_group_policy, args.case_sensitive, args.label_column,
+                                        args.allow_empty_class)
         text = json.dumps(manifest, indent=1, allow_nan=False)
         summary["manifest"] = str(args.out)
+        summary["status_label"] = args.status
         try:
             Path(args.out).write_text(text + "\n", encoding="utf-8")
         except OSError as exc:

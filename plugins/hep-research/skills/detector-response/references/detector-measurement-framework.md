@@ -146,8 +146,8 @@ factorization and its pitfalls are in
 13. How are data/MC discrepancies corrected or assigned as uncertainties?
 14. How can a detector defect bias a final physics result?
 
-Each detector-family reference states its answers in a labeled subsection,
-**Distinctive but generalizable reconstruction and performance features**, covering:
+Most detector-family references state their answers in a subsection titled **Distinctive but
+generalizable reconstruction and performance features** (shortened to **Features (...)** in some), covering:
 information topology, unique inverse problem and degeneracies, natural local/global
 objects, the most informative residual or closure variable, scaling laws and floors,
 community efficiency/resolution conventions, dominant tails, occupancy/rate/aging

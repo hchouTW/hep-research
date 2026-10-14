@@ -105,7 +105,10 @@ Funding agencies and collaboration boilerplate go here; confirm current
 wording with the collaboration's publications committee rather than reusing
 an old paper's text verbatim.
 
-\bibliographystyle{plain} % swap for the venue's required style, e.g. apsrev4-2 or JHEP
+% plain is a placeholder that compiles anywhere, but it DROPS the eprint (arXiv) and doi
+% fields HEP readers expect. Swap for the venue's style before sharing a draft: apsrev4-2
+% with REVTeX (APS), JHEP.bst from the JHEP author pages (JHEP, JCAP), or the journal's own.
+\bibliographystyle{plain}
 \bibliography{references}
 
 \end{document}

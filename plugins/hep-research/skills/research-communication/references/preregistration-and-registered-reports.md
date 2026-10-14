@@ -57,3 +57,5 @@ Deliver the preregistration/Stage-1 document plus a compact commitment
 checklist (hypothesis, primary measure, sample-size rule, analysis, planned
 exclusions) that the eventual paper or Stage-2 report can be checked
 against.
+
+**Done when:** the plan states hypotheses, analysis and stopping rules before data are seen, with deviations listed if the work is done.

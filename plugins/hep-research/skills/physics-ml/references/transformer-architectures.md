@@ -32,32 +32,11 @@ masked softmax) or make sure every event keeps at least one real entry.
 
 ## Multi-head attention
 
-Split `embedding_dim` into `num_heads * head_dim`, project once, reshape, attend,
-then merge back:
-
-```python
-class MultiHeadAttention(nn.Module):
-    def __init__(self, embed_dim: int, num_heads: int):
-        super().__init__()
-        assert embed_dim % num_heads == 0
-        self.num_heads = num_heads
-        self.head_dim = embed_dim // num_heads
-        self.qkv = nn.Linear(embed_dim, 3 * embed_dim)
-        self.out = nn.Linear(embed_dim, embed_dim)
-
-    def forward(self, x, mask=None):
-        b, seq, dim = x.shape
-        qkv = self.qkv(x).reshape(b, seq, 3, self.num_heads, self.head_dim)
-        q, k, v = qkv.permute(2, 0, 3, 1, 4)  # each [b, heads, seq, head_dim]
-        attended, _ = scaled_dot_product_attention(q, k, v, mask)
-        attended = attended.transpose(1, 2).reshape(b, seq, dim)
-        return self.out(attended)
-```
-
-Prefer `torch.nn.functional.scaled_dot_product_attention` (fused, memory-efficient
-kernels on CUDA) over the hand-written version above once correctness is confirmed;
-keep the manual version only for teaching or when you need a non-standard mask/score
-modification it doesn't support.
+Split `embed_dim` into `num_heads x head_dim`, project q, k, v once (`nn.Linear(embed_dim, 3 * embed_dim)`), reshape to
+`[batch, heads, seq, head_dim]`, attend, merge back and project out. Once a hand-written version is checked, use
+`torch.nn.functional.scaled_dot_product_attention` (fused, memory-efficient kernels) or
+`torch.nn.TransformerEncoderLayer`; keep a manual version only to modify the attention itself (pairwise interaction
+features as attention biases, custom masks, sparse attention). The template is `assets/transformer_classifier.py`.
 
 ## Positional information
 
@@ -90,44 +69,17 @@ information:
   usually has a mask shape/broadcast bug, not a modeling problem - check it before
   tuning hyperparameters.
 
-## Encoder block and stacking
+## Encoder block
 
-```python
-class TransformerBlock(nn.Module):
-    def __init__(self, embed_dim, num_heads, ff_dim, dropout=0.1):
-        super().__init__()
-        self.attn = MultiHeadAttention(embed_dim, num_heads)
-        self.norm1 = nn.LayerNorm(embed_dim)
-        self.ff = nn.Sequential(
-            nn.Linear(embed_dim, ff_dim), nn.GELU(), nn.Linear(ff_dim, embed_dim)
-        )
-        self.norm2 = nn.LayerNorm(embed_dim)
-        self.dropout = nn.Dropout(dropout)
+A pre-norm residual block, `x + dropout(attn(norm1(x)))` then `x + dropout(ff(norm2(x)))` with a GELU feed-forward,
+trains far more stably than post-norm beyond a few layers.
 
-    def forward(self, x, mask=None):
-        x = x + self.dropout(self.attn(self.norm1(x), mask))  # pre-norm residual
-        x = x + self.dropout(self.ff(self.norm2(x)))
-        return x
-```
+## Encoder-only, decoder-only, encoder-decoder
 
-Prefer **pre-norm** (`LayerNorm` before the sublayer, as above) over post-norm for
-anything beyond a handful of layers - it trains far more stably without a learning-
-rate warmup, whereas post-norm often diverges early in deep stacks without one.
-
-## Encoder-only vs. decoder-only vs. encoder-decoder
-
-- **Encoder-only** (BERT-style): bidirectional attention, no causal mask; used for
-  classification/embedding tasks. Pool with the first token's representation (a
-  learned `[CLS]`-style token) or mean-pool over non-pad positions - never mean-pool
-  including pad positions.
-- **Decoder-only** (GPT-style): causal mask, autoregressive next-element objective;
-  used for autoregressive generation (for example of particles in a jet, after the
-  constituents are tokenized or ordered). Training computes all positions' loss in
-  parallel via teacher forcing (see [sequence-models.md](sequence-models.md)); inference
-  is sequential and needs a KV cache (below) to be tractable.
-- **Encoder-decoder** (T5/original Transformer-style): encoder attends bidirectionally
-  over the source; decoder self-attends causally over the target and cross-attends
-  (queries from the decoder, keys/values from the encoder output) to the source.
+Encoder-only (bidirectional, no causal mask) for classification and embeddings: pool with a learned class token or a
+mean over non-pad positions, never including pads. Decoder-only (causal) for autoregressive generation, for example of
+ordered or tokenized jet constituents: teacher-forced training ([sequence-models.md](sequence-models.md)), sequential
+inference with a KV cache. Encoder-decoder adds cross-attention from the decoder to the encoder output.
 
 ## KV caching for autoregressive generation
 
@@ -151,20 +103,7 @@ number of query heads); multiply by layers, sequence length and batch for the to
 
 ## Common failure modes
 
-| Symptom | Likely cause |
-|---|---|
-| Loss plateaus immediately at the chance level | Learning rate too high/low for warmup schedule, mask inverted or missing, or all inputs padded |
-| Works on short sequences, garbage on long ones | Positional encoding doesn't extrapolate past training `max_len`, or high-multiplicity events were rare in training |
-| NaN only for some events | A fully masked row (empty or all-padded event) in the attention softmax |
-| Attention weights uniform everywhere | Missing scale factor (`1/sqrt(head_dim)`), or all-zero mask |
-| NaNs after adding more layers | Missing pre-norm, or residual scale growing with depth - check `debugging-pytorch.md` for the NaN checklist |
-
-## When not to build from scratch
-
-For anything beyond a learning exercise or a highly custom architecture, prefer an
-existing, tested implementation (e.g. `torch.nn.TransformerEncoderLayer`, or a
-well-maintained model library) over hand-rolling attention - the failure modes above
-are easy to introduce and hard to notice until training quality quietly suffers.
-Building from scratch is still the right call when the point is to modify the
-attention mechanism itself (custom masking, pairwise interaction features as attention
-biases, sparse attention).
+Loss stuck at chance: a mask inverted or missing, or all inputs padded. Fine on short inputs, wrong on long ones:
+positions that do not extrapolate, or high-multiplicity events rare in training. NaN for some events: a fully masked
+row in the softmax. Uniform attention: a missing `1/sqrt(head_dim)` scale or an all-zero mask. NaN with more layers:
+post-norm without warmup ([debugging-pytorch.md](debugging-pytorch.md)).

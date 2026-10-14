@@ -29,9 +29,13 @@ blinding places SR data after analysis freeze.
 
 ```text
 Physics process -> Matrix element (hard process) -> Parton shower -> Hadronization
-   -> (+ underlying event, + pileup overlay) -> Detector simulation (full/fast)
-   -> Digitization -> Reconstruction -> Analysis
+   -> (+ underlying event) -> Detector simulation (full/fast)
+   -> Digitization (+ pileup overlay) -> Reconstruction -> Analysis
 ```
+Where pileup enters is experiment-dependent: most LHC chains overlay it at digitization (simulated
+minimum-bias hits or pre-mixed hit libraries), some at the hit or event level (practitioner convention, not
+checked against an experiment's simulation documentation here: unverified); ask, and label the
+step in the diagram as the experiment's choice.
 Levels: **parton/generator (truth)**, **particle level** (stable particles), **detector level**
 (reco). Truth-level quantities never feed a data-like selection except for labeled truth matching or
 unfolding. Event weights (generator, pileup, scale factors) attach to simulated events only.
@@ -56,8 +60,9 @@ magnet position and the ordering of the solenoid relative to the calorimeters di
 | Correctness needs | listing of particles | Lagrangian / allowed interactions |
 
 Example decay chain: `pp -> H -> ZZ* -> 4l`, `t tbar -> (W+ b)(W- b-bar)`. Draw as a tree; write
-"simplified decay topology, not a Feynman diagram". Charge conservation, lepton number, and
-flavor should be checked on every vertex of a listed chain; if a step is not allowed, say so.
+"simplified decay topology, not a Feynman diagram". Check electric charge, lepton number, baryon
+number and colour at every vertex of a listed chain; flavour changes only at a W vertex (as in
+t -> W+ b). If a step is not allowed, say so; the physics check itself is hep-theory's.
 
 ### Feynman-style diagrams
 
@@ -88,6 +93,21 @@ Signal/control-region workflow: SR and CRs are disjoint selections; CRs constrai
 normalization or shape via a transfer factor to the SR; validation regions test the extrapolation
 and are not fitted; state which is which.
 
+## 6a. Cosmic-ray, astroparticle and neutrino diagrams
+
+The collider examples above do not cover instruments in space, air-shower arrays or oscillation experiments:
+
+- **Stacked space-borne spectrometer**: subdetectors along one vertical axis in the order a particle crosses them,
+  each box naming what it measures (rigidity, charge, velocity, energy), never an instrument's parameters
+  (`../examples/hep/09-space-spectrometer-schematic.md`).
+- **Flux analysis chain**: counts, exposure (acceptance times live time above the geomagnetic cutoff), bin width,
+  unfolding with a response matrix, flux; systematics attach to their steps
+  (`../examples/hep/10-cosmic-ray-flux-analysis-chain.md`).
+- **Near/far oscillation chain**: the near detector constrains flux and cross-section parameters, oscillation enters
+  only the far prediction, the result names its interval construction
+  (`../examples/hep/11-neutrino-near-far-oscillation-chain.md`).
+- Plots of fluxes, ratios, time series and oscillation contours: `physics-plots.md`.
+
 ## 7. Validation checklist (run every time)
 
 - generator-level vs reconstruction-level quantities separated
@@ -107,3 +127,5 @@ info in a selection; drawing arrows from limit back to likelihood.
 
 For actual analysis code, cutflows, fits, and detector physics see the `hep-analysis` skill;
 for experiment specifics use the bound experiment profile (see the context-resolution steps in the skill's SKILL.md; profiles are listed in `<plugin root>/profiles/registry.json`).
+
+**Done when:** the diagram renders, every vertex of a listed chain passes the conservation checks (or the failing step is named), and physics correctness is handed to hep-theory when it matters.

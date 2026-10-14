@@ -1,5 +1,8 @@
 # Figure Captions and References
 
+The home for captions of diagrams (workflows, pipelines, schematics, Feynman-style drawings); captions of plots
+and tables follow `figures-and-tables.md` ("Caption writing").
+
 ## Caption anatomy
 
 1. **What it shows** (first sentence, standalone, complete - journals often use it as the short caption).
@@ -52,3 +55,5 @@ One or two sentences naming the structure ("Left-to-right pipeline of five stage
 - Caption claims match the source (no extra stages); direction words match arrow directions.
 - No unverified numbers; no "we show" for a figure that is a schematic of prior work without citation.
 - Length: 1-4 sentences for a workflow; more only for multi-panel or convention-heavy figures.
+
+**Done when:** the caption's first sentence stands alone, every non-obvious convention (line style, colour, arrow meaning) is explained, and no label is merely restated.

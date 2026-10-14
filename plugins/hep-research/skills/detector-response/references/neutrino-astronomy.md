@@ -71,7 +71,7 @@ air showers in the atmosphere above and around the detector (see
   that must also accept downward-going astrophysical directions.
 - **Atmospheric neutrinos** are an irreducible background even after the muon veto,
   since they arrive from the same directions as an astrophysical signal. They are
-  separated statistically, not by direction, using the facts that (a) the atmospheric
+  separated statistically, not by source direction, using the facts that (a) the atmospheric
   spectrum falls faster (~`E^-3.7` versus an astrophysical `~E^-2` to `E^-2.5`
   expectation from the same Fermi-acceleration argument as
   [cosmic-ray spectrum and composition](cosmic-ray-spectrum-and-composition.md)),
@@ -107,6 +107,12 @@ against a mixture of the atmospheric components (conventional, prompt, and muon
 backgrounds, with normalizations and spectral shapes as nuisance parameters profiled
 in the fit, constrained by priors from independent air-shower and flux calculations)
 plus a free astrophysical power law.
+
+### Instrument response functions (checklist)
+
+State, with its version: the effective area or volume versus neutrino energy, flavour and declination, after the event selection; the energy threshold and the energy bias and resolution versus energy; the angular
+resolution (PSF, for example the 68% containment radius R68) versus energy; and the IRF set and its validity range
+(zenith, conditions). Numbers come from the experiment's IRF release or profile, not from this file.
 
 ## Deliverables
 

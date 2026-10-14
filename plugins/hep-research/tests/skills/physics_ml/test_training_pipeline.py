@@ -149,7 +149,8 @@ class TrainClassifierPipelineTests(unittest.TestCase):
         (step,) = summary["preprocessing"]
         self.assertEqual(step["step"], "standardize")
         self.assertEqual(len(step["mean"]), 4)
-        self.assertEqual(set(summary["weights"]), {"source", "negative_weight_treatment", "class_balancing", "used_in"})
+        self.assertEqual(set(summary["weights"]), {"source", "negative_weight_treatment", "class_balancing", "used_in",
+                                                   "training", "evaluation"})
         self.assertEqual(summary["weights"]["negative_weight_treatment"], "none-present")
         self.assertEqual(summary["weights"]["source"], "column:weight")
         self.assertTrue(set(summary["weights"]["used_in"]) <= {"loss", "metrics", "calibration", "templates"})
@@ -157,8 +158,15 @@ class TrainClassifierPipelineTests(unittest.TestCase):
         self.assertEqual(summary["environment"]["precision"], "fp32")
         self.assertEqual(set(summary["environment"]["seeds"]), {"torch", "numpy", "python"})
         self.assertEqual(set(summary["metrics"]), {"val", "test"})
-        digest = hashlib.sha256(Path(summary["checkpoint"]).read_bytes()).hexdigest()
-        self.assertEqual(summary["model_hash"], f"sha256:{digest}")
+        # the model hash covers the weights only (names, dtypes, shapes, bytes), not the checkpoint file (ML-C26)
+        import torch
+        state = torch.load(summary["checkpoint"], map_location="cpu", weights_only=True)["model_state_dict"]
+        h = hashlib.sha256()
+        for name in sorted(state):
+            t = state[name].contiguous()
+            h.update(f"{name}|{t.dtype}|{tuple(t.shape)}|".encode())
+            h.update(t.numpy().tobytes())
+        self.assertEqual(summary["model_hash"], f"sha256:{h.hexdigest()}")
 
     def test_test_metrics_use_only_the_test_split(self):
         summary = self.summary()
@@ -191,8 +199,9 @@ class TrainClassifierPipelineTests(unittest.TestCase):
         meta = best["metadata"]
         self.assertEqual(meta["features"], FEATURES)
         self.assertEqual(meta["units"]["mass"], "GeV")
-        self.assertIn("cov", meta["training_domain"])
-        self.assertGreater(meta["training_domain"]["mahalanobis_threshold"], 0)
+        # the shared domain model (PML-WP0.7), fitted on train with thresholds from held-out training rows
+        self.assertEqual(meta["training_domain"]["fit_on"], "train")
+        self.assertGreater(meta["training_domain"]["model"]["thresholds"]["mahalanobis"], 0)
         self.assertEqual(set(meta["weights"]), {"training", "evaluation"})
 
     def test_negative_weights_signed_with_net_weight_batch_report(self):
@@ -213,11 +222,23 @@ class TrainClassifierPipelineTests(unittest.TestCase):
         self.assertGreater(best["metadata"]["weights"]["training"]["n_negative"], 0)
         self.assertEqual(best["metadata"]["weights"]["evaluation"]["treatment"], "signed, unmodified")
 
-        dropped = data_dir / "dropped"
-        result = run(train_cmd(data, manifest, dropped, "--epochs", "1", "--negative-weights", "dropped"), data_dir)
+        # dropping negative-weight events is no longer offered (ml-analysis.md forbids it; PML-WP1.5, ML-R06)
+        result = run(train_cmd(data, manifest, data_dir / "dropped", "--epochs", "1", "--negative-weights", "dropped"),
+                     data_dir)
+        self.assertEqual(result.returncode, 2)
+        absw = data_dir / "abs"
+        result = run(train_cmd(data, manifest, absw, "--epochs", "1", "--negative-weights", "abs"), data_dir)
         self.assertEqual(result.returncode, 0, result.stderr)
-        summary = json.loads((dropped / "run_summary.json").read_text())
-        self.assertEqual(summary["weights"]["negative_weight_treatment"], "dropped")
+        self.assertIn("|w|", result.stderr)
+        summary = json.loads((absw / "run_summary.json").read_text())
+        self.assertEqual(summary["weights"]["negative_weight_treatment"], "abs")
+        self.assertEqual(summary["weights"]["training"]["n_negative"], 0)
+        res = data_dir / "resample"
+        result = run(train_cmd(data, manifest, res, "--epochs", "1", "--negative-weights", "resample"), data_dir)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        summary = json.loads((res / "run_summary.json").read_text())
+        self.assertEqual(summary["weights"]["negative_weight_treatment"], "resampled")
+        self.assertIn("resampling", summary["weights"]["training"])
 
     def inference(self, csv_rows, *extra, header=None):
         path = self.dir / f"infer-{len(list(self.dir.iterdir()))}.csv"
@@ -239,7 +260,7 @@ class TrainClassifierPipelineTests(unittest.TestCase):
         by_id = {row["id"]: row for row in report["rows"]}
         self.assertEqual(by_id["in"]["out_of_domain"], 0)
         self.assertEqual(by_id["out"]["out_of_domain"], 1)
-        self.assertIn("range:pt", by_id["out"]["ood_reasons"])
+        self.assertIn("outside:", by_id["out"]["ood_reasons"])
         self.assertTrue(0.0 <= by_id["in"]["score"] <= 1.0)
         rejected = self.inference([inside, outside], "--on-out-of-domain", "reject")
         self.assertNotEqual(rejected.returncode, 0)
@@ -253,7 +274,7 @@ class TrainClassifierPipelineTests(unittest.TestCase):
         dom = summary["training_domain"]
         corner = ["corner", dom["pt"][1] * 0.999, dom["eta"][0] * 0.999, dom["mass"][0] * 1.001, dom["iso"][1] * 0.999]
         report = json.loads(self.inference([corner]).stdout)
-        self.assertEqual(report["n_outside_range"], 0)
+        self.assertEqual(report["n_out_of_domain"], 1)
         self.assertEqual(report["n_mahalanobis"], 1)
 
     def test_inference_refuses_feature_name_mismatch(self):
@@ -303,7 +324,8 @@ class TrainClassifierSyntheticTests(unittest.TestCase):
                 placement.setdefault(manifest["groups"][value], set()).add(split)
         self.assertTrue(all(len(s) == 1 for s in placement.values()))
         summary = json.loads((out / "run_summary.json").read_text())
-        self.assertEqual(set(summary), SUMMARY_KEYS)
+        self.assertEqual(set(summary), SUMMARY_KEYS | {"status"})
+        self.assertEqual(summary["status"], ["synthetic"])  # the writer keeps it without --status (PML-WP0.4)
         self.assertEqual(summary["split_check"]["result"], "pass")
         self.assertEqual(summary["grouping_key"], "synthetic_group")
 

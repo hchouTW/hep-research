@@ -20,16 +20,16 @@ import re
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
+from communication_lib import numbers as N
 from communication_lib import report as R
 from communication_lib.claims import PROMOTED, UNIVERSAL_RE, _locate
 from communication_lib.documents import normalize
 from contracts.communication import format_of
 
-NUMBER_RE = re.compile(r"(?<![\w.])\d+(?:\.\d+)?(?![\w.])")
 STATUS_WORDS = {"synthetic": ("synthetic", "合成", "模擬", "示意"), "asimov": ("asimov",), "preliminary": ("preliminary", "初步"),
                 "failed": ("failed", "失敗"), "unvalidated": ("unvalidated", "not validated", "not yet validated", "未驗證", "未經驗證"),
                 "user-supplied": ("user-supplied", "supplied by the user", "使用者提供")}
-NEGATED_RE = re.compile(r"\b(not yet|have not|has not|had not|haven't|hasn't|not been|will|are being|is being)\b|尚未|還沒|未", re.I)
+NEGATED_RE = re.compile(r"\b(not yet|have not|has not|had not|haven't|hasn't|not been|will|are being|is being)\b|尚未|還沒|並未|未曾|未完成", re.I)
 COMPLETION_RE = re.compile(r"\bwe (have|performed|reran|re-ran|updated|changed|added|revised|rerun)\b", re.I)
 NOTE_ADAPT = ("mechanical consistency of a derived draft with its record; keyword overlap is not a semantic check: the recorded "
               "semantic review is the reader's judgment")
@@ -37,7 +37,24 @@ NOTE_RESP = "wording generated from the recorded action state; a response assert
 
 
 def _numbers(text: str) -> set[str]:
-    return {m.group(0) for m in NUMBER_RE.finditer(text.replace("±", "+/-"))}
+    return set(N.tokens(text))
+
+
+def _has_label(text: str, word: str) -> bool:
+    """A status word as a word of the text: 'synthetic' is not found in 'non-synthetic', 'not synthetic' or
+    'synthetics', and a CJK label negated by 非, 不 or 無 (非合成) does not count."""
+    t, w = text.lower(), word.lower()
+    for m in re.finditer(re.escape(w), t):
+        before, after = t[:m.start()], t[m.end():m.end() + 1]
+        if w.isascii():
+            if before[-1:].isalnum() or before[-1:] in "-_" or (after.isascii() and (after.isalnum() or after == "_")):
+                continue
+            if re.search(r"\b(?:not|non)\s*$", before):
+                continue
+        elif before.endswith(("非", "不", "無")):
+            continue
+        return True
+    return False
 
 
 def _same(a: str, b: str) -> bool:
@@ -129,7 +146,7 @@ def check_adaptation(record: dict, context: dict, manifest: dict, draft: str) ->
             if cid not in number_cache:
                 number_cache[cid] = _claim_numbers(c, record, context, occ_by_claim.get(cid, []))
             sticky = [s for s in c.get("status", []) if s in PROMOTED]
-            if sticky and not any(w in text for s in sticky for w in STATUS_WORDS.get(s, (s,))):
+            if sticky and not any(_has_label(text, w) for s in sticky for w in STATUS_WORDS.get(s, (s,))):
                 findings.append(R.finding("adaptation.status_dropped", "error", where,
                                           f"statement {st.get('id')} draws on {cid} labeled {sticky} but carries no such label: {st.get('text')!r}",
                                           "say what the result is (synthetic, preliminary, ...) in the sentence; compression cannot drop it",
@@ -148,7 +165,7 @@ def check_adaptation(record: dict, context: dict, manifest: dict, draft: str) ->
                                               source="adaptation"))
     covered = " ".join(located_spans)
     for n in sorted(_numbers(draft), key=lambda x: (len(x), x)):
-        if not any(n in span for span in located_spans) and not any(_same(n, a) for a in _numbers(covered)):
+        if not any(_same(n, a) for a in _numbers(covered)):
             findings.append(R.finding("adaptation.unmapped_number", "warning", "draft", f"number {n} in the draft is outside every mapped statement",
                                       "map the sentence to a claim, or state why it carries no scientific content", source="adaptation"))
     lims = brief.get("indispensable_limitations") or []

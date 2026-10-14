@@ -38,6 +38,7 @@ import json
 import math
 import os
 import random
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -67,6 +68,10 @@ def build_parser() -> argparse.ArgumentParser:
     data.add_argument("--label-names", help="comma-separated class names, in class-index order")
     data.add_argument("--units", help="JSON file mapping feature name -> unit")
     data.add_argument("--grouping-key", help="what the manifest groups are (run/lumi block, generator job, ...)")
+    data.add_argument("--status", action="append",
+                      choices=("synthetic", "asimov", "observed", "preliminary", "unvalidated", "user-supplied"),
+                      help="status label of the input data, written to run_summary.json (repeatable); the synthetic "
+                      "path always records 'synthetic'")
     synth = parser.add_argument_group("synthetic data (used without --data)")
     synth.add_argument("--train-size", type=int, default=8000)
     synth.add_argument("--val-size", type=int, default=2000)
@@ -88,14 +93,20 @@ def build_parser() -> argparse.ArgumentParser:
     train.add_argument("--grad-clip", type=float, default=1.0)
     train.add_argument("--precision", choices=("fp32", "bf16", "fp16"), default="fp32",
                        help="bf16 autocast on CPU or CUDA; fp16 (with a gradient scaler) on CUDA only")
-    train.add_argument("--negative-weights", choices=("signed", "dropped"), default="signed",
-                       help="training treatment of negative weights; evaluation always keeps them signed")
+    train.add_argument("--negative-weights", choices=("signed", "abs", "resample"), default="signed",
+                       help="training treatment of negative weights; evaluation always keeps them signed. signed: "
+                       "keep them (large batches); abs: train on |w| (biased where negative weights cluster; the bias "
+                       "warning is recorded); resample: cell resampling per class in the standardized inputs "
+                       "(Andersen & Maier, arXiv:2109.07851). Dropping them is not offered: it biases the result.")
+    train.add_argument("--resample-max-cell", type=int, default=200,
+                       help="largest cell for --negative-weights resample (default 200 events)")
     train.add_argument("--class-balancing", choices=("none", "equal-sum"), default="none",
                        help="equal-sum: rescale training weights so every class has the same sum of weights")
     train.add_argument("--working-points", type=float, nargs="+", default=[0.3, 0.5, 0.7],
                        help="signal efficiencies for the working points (two-class only)")
     train.add_argument("--ood-quantile", type=float, default=0.999,
-                       help="quantile of train+val Mahalanobis distances stored as the out-of-domain threshold")
+                       help="target in-distribution acceptance of the training-domain model (thresholds calibrated on "
+                       "held-out training rows; scripts/check_surrogate_domain.py)")
     train.add_argument("--output-dir", default="runs/example")
     return parser
 
@@ -154,14 +165,37 @@ except ModuleNotFoundError as _exc:
     sys.exit(3)
 
 sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE.parent / "scripts"))  # check_surrogate_domain.DomainModel: one domain method (PML-WP0.7)
 from hep_losses import batch_weight_report, weighted_bce  # noqa: E402
-from hep_metrics import (effective_entries, efficiency_with_uncertainty,  # noqa: E402
+from hep_metrics import (cell_resample, effective_entries, efficiency_with_uncertainty,  # noqa: E402
                          rejection_at_signal_efficiency, weighted_auc)
 from models import MLPClassifier  # noqa: E402
 
 
 class InputError(Exception):
     """Bad input data or arguments: exit 2 with a one-line message."""
+
+
+_ZERO_FRACTION = re.compile(r"^([+-]?\d+)\.0*$")
+
+
+def canonical_key(value, case_sensitive=False):
+    """ID comparison form shared with scripts/check_split_integrity.py and make_grouped_splits.py (copy; a test pins
+    the two copies together): stripped, a zero fraction dropped (1, 1.0, "1" are one key), case-folded unless
+    case_sensitive; booleans, lists and objects raise ValueError."""
+    if isinstance(value, bool) or isinstance(value, (list, dict, tuple, set)):
+        raise ValueError(f"{value!r} is not a valid ID or group value (booleans, lists and objects are refused)")
+    if isinstance(value, int):
+        return str(value)
+    if isinstance(value, float):
+        if math.isfinite(value) and value.is_integer():
+            return str(int(value))
+        return repr(value)
+    text = str(value).strip()
+    match = _ZERO_FRACTION.match(text)
+    if match:
+        text = str(int(match.group(1)))
+    return text if case_sensitive else text.casefold()
 
 
 # ---------------------------------------------------------------- setup
@@ -252,8 +286,9 @@ def read_events(args) -> dict:
         raise InputError(f"{args.data}: feature columns missing: {missing or 'none selected'}")
     label_names = args.label_names.split(",") if args.label_names else None
     ids = [row[args.id_col] for row in rows]
-    if len(set(ids)) != len(ids):
-        raise InputError(f"{args.data}: duplicate ids in column {args.id_col!r}")
+    if len({canonical_key(value) for value in ids}) != len(ids):
+        raise InputError(f"{args.data}: duplicate ids in column {args.id_col!r} (after stripping whitespace, "
+                         "folding case and writing 1.0 as 1, as the split tools compare them)")
     try:
         x = np.array([[float(row[f]) for f in features] for row in rows])
         raw_labels = [row[args.label_col] for row in rows]
@@ -301,27 +336,58 @@ def assign_splits(data: dict) -> dict:
     """Index arrays for train/val/test from the manifest (rows matched by id)."""
     with open(data["manifest"], encoding="utf-8") as handle:
         manifest = json.load(handle)
-    position = {value: i for i, value in enumerate(data["ids"])}
+    position = {canonical_key(value): i for i, value in enumerate(data["ids"])}
     out = {}
     for split in SPLITS:
         if split not in manifest:
             raise InputError(f"{data['manifest']}: split {split!r} missing (need train, val and test)")
-        unknown = [value for value in map(str, manifest[split]) if value not in position]
+        try:
+            keys = [canonical_key(value) for value in manifest[split]]
+        except ValueError as exc:
+            raise InputError(f"{data['manifest']}: {split}: {exc}") from None
+        unknown = [value for value in keys if value not in position]
         if unknown:
             raise InputError(f"{data['manifest']}: {len(unknown)} {split} id(s) not in the data, e.g. {unknown[:3]}")
-        out[split] = np.array([position[str(value)] for value in manifest[split]], dtype=int)
+        out[split] = np.array([position[value] for value in keys], dtype=int)
         if out[split].size == 0:
             raise InputError(f"{data['manifest']}: split {split!r} is empty")
+    n_classes = len(data["labels"])
+    for split in SPLITS:
+        present = set(np.unique(data["y"][out[split]]).tolist())
+        missing = [data["labels"][c] for c in range(n_classes) if c not in present]
+        if missing:
+            raise InputError(f"{data['manifest']}: split {split!r} has no events of class(es) {missing}; it cannot "
+                             "be trained or evaluated (build the split with make_grouped_splits.py --label-column)")
     out["unassigned"] = len(data["ids"]) - sum(out[s].size for s in SPLITS)
+    groups = manifest.get("groups") if isinstance(manifest.get("groups"), dict) else {}
+    try:
+        out["groups"] = {canonical_key(k): v for k, v in groups.items()}
+    except ValueError as exc:
+        raise InputError(f"{data['manifest']}: groups: {exc}") from None
     return out
 
 
-def training_weights(y: np.ndarray, w: np.ndarray, n_classes: int, args) -> tuple[np.ndarray, np.ndarray, dict]:
+TREATMENT = {"signed": "signed", "abs": "abs", "resample": "resampled"}  # CLI choice -> ml-artifact vocabulary
+
+
+def training_weights(y: np.ndarray, w: np.ndarray, n_classes: int, args, x=None) -> tuple[np.ndarray, np.ndarray, dict]:
     """Training weights from the signed evaluation weights; returns (keep mask, weights, record)."""
     keep = np.ones(w.size, bool)
-    if args.negative_weights == "dropped":
-        keep = w >= 0
     wt = w.copy()
+    extra: dict = {}
+    if args.negative_weights == "abs" and (wt < 0).any():
+        wt = np.abs(wt)
+        extra["warning"] = ("trained on |w|: the learned density ratio is biased where negative weights cluster; "
+                            "compare with signed or resampled training before relying on it")
+        print(f"WARNING: {extra['warning']}", file=sys.stderr)
+    elif args.negative_weights == "resample" and (wt < 0).any():
+        reports = {}
+        scale = np.maximum(x.std(axis=0), 1e-12) if x is not None else None
+        for c in range(n_classes):
+            sel = np.flatnonzero(y == c)
+            if sel.size and (wt[sel] < 0).any():
+                wt[sel], reports[str(c)] = cell_resample(x[sel], wt[sel], scale, args.resample_max_cell)
+        extra["resampling"] = reports
     if args.class_balancing == "equal-sum":
         target = wt[keep].sum() / n_classes
         for c in range(n_classes):
@@ -330,23 +396,39 @@ def training_weights(y: np.ndarray, w: np.ndarray, n_classes: int, args) -> tupl
             if total <= 0:
                 raise InputError(f"class {c} has non-positive training weight sum; cannot balance")
             wt[sel] *= target / total
-    record = {"negative_weight_treatment": args.negative_weights, "class_balancing": args.class_balancing,
-              "n_events": int(keep.sum()), "n_dropped": int((~keep).sum()),
+    record = {"negative_weight_treatment": TREATMENT[args.negative_weights], "class_balancing": args.class_balancing,
+              "n_events": int(keep.sum()),
               "sum_w_per_class": [float(wt[keep & (y == c)].sum()) for c in range(n_classes)],
-              "n_negative": int((wt[keep] < 0).sum())}
+              "n_negative": int((wt[keep] < 0).sum()), **extra}
     return keep, wt, record
 
 
-def domain_record(x_train: np.ndarray, x_ref: np.ndarray, quantile: float) -> dict:
-    """Per-feature range on train, and mean/covariance with a Mahalanobis threshold from train+val distances."""
-    mean = x_train.mean(axis=0)
-    cov = np.atleast_2d(np.cov(x_train, rowvar=False))
-    precision = np.linalg.pinv(cov)
-    diff = x_ref - mean
-    dist = np.sqrt(np.maximum(np.einsum("ij,jk,ik->i", diff, precision, diff), 0.0))
-    return {"min": x_train.min(axis=0).tolist(), "max": x_train.max(axis=0).tolist(), "mean": mean.tolist(),
-            "cov": cov.tolist(), "mahalanobis_threshold": float(np.quantile(dist, quantile)),
-            "mahalanobis_quantile": quantile, "mahalanobis_reference": "train+val"}
+DOMAIN_MAX_POINTS = 5000  # training points kept for the k-NN part of the domain model (seeded subsample beyond)
+
+
+def domain_record(x_train: np.ndarray, groups_train, quantile: float, seed: int) -> dict:
+    """The training domain as scripts/check_surrogate_domain.py's DomainModel, fitted on the training split only: the
+    thresholds are calibrated on held-out training rows (split by the manifest's groups when every row has one) that
+    the mean, covariance and neighbours were not fit on. The per-feature range is kept as a diagnostic."""
+    from check_surrogate_domain import DomainModel  # scripts/, on sys.path below
+
+    idx = np.arange(len(x_train))
+    if len(idx) > DOMAIN_MAX_POINTS:
+        idx = np.sort(np.random.default_rng(seed).choice(idx, DOMAIN_MAX_POINTS, replace=False))
+    groups = None
+    if groups_train is not None and all(g is not None for g in groups_train):
+        groups = [groups_train[i] for i in idx]
+    record = {"min": x_train.min(axis=0).tolist(), "max": x_train.max(axis=0).tolist(), "fit_on": "train",
+              "quantile": quantile}
+    try:
+        model = DomainModel.fit(x_train[idx], quantile=quantile, seed=seed, groups=groups)
+    except ValueError as exc:  # too few training rows to hold some out: only the range can be checked, and is said so
+        print(f"WARNING: training-domain model not fitted ({exc}); inference checks the per-feature range only",
+              file=sys.stderr)
+        return {**record, "method": "box-only (too few training rows to calibrate a domain model)", "model": None,
+                "range_role": "the only check"}
+    return {**record, "method": DomainModel.METHOD, "model": model.to_dict(),
+            "range_role": "diagnostic (a value outside the training range alone does not flag a row)"}
 
 
 # ---------------------------------------------------------------- training
@@ -472,12 +554,16 @@ def save_checkpoint(path: Path, model, optimizer, scheduler, epoch, best, metada
                 "config": vars(args)}, path)
 
 
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with open(path, "rb") as handle:
-        for chunk in iter(lambda: handle.read(1 << 20), b""):
-            digest.update(chunk)
-    return "sha256:" + digest.hexdigest()
+def weights_hash(path: Path) -> str:
+    """sha256 over the model weights only (parameter names, dtypes, shapes and bytes, in name order): the hash names
+    the model, not the file, so it does not change with paths, optimizer state or the epoch counter."""
+    state = torch.load(path, map_location="cpu", weights_only=True)["model_state_dict"]
+    h = hashlib.sha256()
+    for name in sorted(state):
+        tensor = state[name].detach().cpu().contiguous()
+        h.update(f"{name}|{tensor.dtype}|{tuple(tensor.shape)}|".encode())
+        h.update(tensor.numpy().tobytes())
+    return "sha256:" + h.hexdigest()
 
 
 def write_scores(path: Path, ids, y, w, scores, labels) -> None:
@@ -519,25 +605,30 @@ def run(args) -> int:
     x, y, w, labels, features = data["x"], data["y"], data["w"], data["labels"], data["features"]
     n_classes = len(labels)
     tr, va, te = idx["train"], idx["val"], idx["test"]
-    keep, w_train_all, train_weight_record = training_weights(y[tr], w[tr], n_classes, args)
+    keep, w_train_all, train_weight_record = training_weights(y[tr], w[tr], n_classes, args, x[tr])
     tr_fit = tr[keep]
     mean = x[tr].mean(axis=0)
-    std = np.maximum(x[tr].std(axis=0), 1e-12)
+    std = x[tr].std(axis=0)
+    constant = [features[j] for j in np.flatnonzero(std <= 1e-12 * np.maximum(np.abs(mean), 1.0))]
+    if constant:  # standardizing by a floor of 1e-12 would amplify any deviation by 1e12 at inference
+        raise InputError(f"feature(s) {constant} are constant on the training split; drop them or fix the input")
     preprocessing = [{"step": "standardize", "features": features, "mean": mean.tolist(), "std": std.tolist()}]
-    domain = domain_record(x[tr], x[np.r_[tr, va]], args.ood_quantile)
+    groups_train = [idx["groups"].get(canonical_key(data["ids"][i])) for i in tr]
+    domain = domain_record(x[tr], groups_train, args.ood_quantile, args.seed)
     z = (x - mean) / std
 
     eval_has_negative = bool((w < 0).any())
     unit_eval = bool(np.all(w == 1.0))
     weights_summary = {
         "source": data["weight_source"],
-        "negative_weight_treatment": ("none-present" if not eval_has_negative else args.negative_weights),
+        "negative_weight_treatment": ("none-present" if not eval_has_negative else TREATMENT[args.negative_weights]),
         "class_balancing": args.class_balancing,
         "used_in": ([] if unit_eval and args.class_balancing == "none" else ["loss"]) + ([] if unit_eval else ["metrics"]),
     }
     weights_metadata = {"training": {"source": data["weight_source"], **train_weight_record},
                         "evaluation": {"source": data["weight_source"], "treatment": "signed, unmodified",
                                        "n_negative": int((w < 0).sum())}}
+    weights_summary.update(weights_metadata)  # training and evaluation weights recorded separately (contracts 2.8.0)
 
     out_dim = 1 if n_classes == 2 else n_classes
     model_config = {"type": "MLPClassifier", "input_dim": len(features), "hidden_dim": args.hidden_dim,
@@ -596,13 +687,15 @@ def run(args) -> int:
     write_scores(scores_path, [data["ids"][i] for i in te], y[te], w[te], test_scores, labels)
     write_scores(val_scores_path, [data["ids"][i] for i in va], y[va], w[va], val_scores, labels)
 
+    labels_out = list(dict.fromkeys((["synthetic"] if not args.data else []) + list(args.status or [])))
     summary = {
+        **({"status": labels_out} if labels_out else {}),
         "task": "classification", "features": features, "units": data["units"], "labels": labels,
         "grouping_key": data["grouping_key"], "split_manifest": str(Path(data["manifest"]).resolve()),
         "split_check": {k: split_check[k] for k in ("tool", "result", "report")},
         "training_domain": {f: [domain["min"][i], domain["max"][i]] for i, f in enumerate(features)},
         "preprocessing": preprocessing, "weights": weights_summary,
-        "model_hash": sha256_file(best_path), "checkpoint": str(best_path.resolve()),
+        "model_hash": weights_hash(best_path), "checkpoint": str(best_path.resolve()),
         "environment": {"torch_version": torch.__version__, "device": str(device), "precision": args.precision,
                         "seeds": seeds},
         "metrics": metrics, "scores": {"val": str(val_scores_path.resolve()), "test": str(scores_path.resolve())},

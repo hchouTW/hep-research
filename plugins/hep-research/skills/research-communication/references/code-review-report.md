@@ -97,3 +97,5 @@ stating whether any *blocking* alignment or correctness issue affects a
 specific reported claim or figure — that is the finding a reader most needs
 before trusting the result. State explicitly which parts of the codebase were
 out of scope for this pass.
+
+**Done when:** each finding names a file and line, what the paper says and what the code does, and the hand-off to hep-computing for any fix.

@@ -10,19 +10,24 @@ and gives every block one outcome:
   rendered          the renderer produced a nonempty SVG from the source;
   lint-only         structural check only (a Mermaid source when `mmdc` is absent: keyword and bracket lint, NOT a real
                     parse; an SVG source: XML well-formedness only, never its appearance);
-  skipped           no check was possible (DOT without `dot`, PlantUML without `plantuml`, TikZ/LaTeX, which this checker
-                    never compiles);
+  skipped           no check was possible (DOT without `dot`, PlantUML without `plantuml`, TikZ/LaTeX without a TeX
+                    engine or with --no-tikz);
   source-error      the renderer or the lint rejected the source (a parse or syntax error);
   environment-error the renderer could not do its job: not started, timed out, crashed at startup, or exited without
                     output. One preflight per renderer with a minimal diagram decides availability; a renderer that fails
                     its preflight, or times out on a block, is not launched again and its remaining blocks are
                     environment errors.
+TikZ/LaTeX blocks are compiled with LuaLaTeX (else pdfLaTeX) in a standalone harness that loads tikz and
+tikz-feynman (compat 1.1.0), as references/tikz-patterns.md does; a block with its own \\documentclass is compiled as it
+is. LaTeX fences above a block in the same file that only set up (packages, \\tikzset styles) go into its preamble.
+A missing package or class is an environment error, a TeX error in the block a source error. A fragment that cannot
+compile alone carries a line '% diagram-check: skip <reason>' and is reported as skipped with that reason.
 Rendering is not visual inspection: a rendered block may still have overlapping labels or a wrong layout, and nothing
 here checks the physics a diagram shows.
 
 Usage: `python3 <plugin root>/skills/research-communication/scripts/check_diagram_sources.py [path ...] [--format text|json]
-        [--require-render]` (default paths: the whole bundle).
-Exit codes: 1 at least one source error; 3 no source error but at least one environment error, or --require-render and
+        [--require-render] [--no-tikz]` (default paths: the whole bundle).
+Exit codes: 2 a named file holds no diagram block (nothing was checked) or cannot be read; 1 at least one source error; 3 no source error but at least one environment error, or --require-render and
 at least one block was not rendered (lint-only or skipped); 0 otherwise. Without --require-render, lint-only and
 skipped blocks keep the previous behavior (exit 0) and are reported as such; they are never counted as rendered.
 A renderer that does not finish within HEP_RENDER_TIMEOUT seconds (default 60) is an environment error; Mermaid's
@@ -56,12 +61,35 @@ OUTCOMES = ("rendered", "lint-only", "skipped", "source-error", "environment-err
 SOURCE_PATTERNS = re.compile(r"parse error|syntax error|lexical error|expecting|unexpected|syntax is|unknown diagram", re.I)
 ENV_PATTERNS = re.compile(r"chrom|could not find|failed to launch|enoent|spawn|cannot open display|no such file|"
                           r"command not found|java\.lang|unable to access jarfile|out of memory|killed|segmentation", re.I)
-PREFLIGHT = {"dot": "digraph G { a -> b; }", "mmdc": "flowchart LR\n  A --> B\n", "plantuml": "@startuml\na -> b\n@enduml\n"}
+PREFLIGHT = {"dot": "digraph G { a -> b; }", "mmdc": "flowchart LR\n  A --> B\n", "plantuml": "@startuml\na -> b\n@enduml\n",
+             "tex": "\\begin{tikzpicture}\\draw (0,0) -- (1,1);\\end{tikzpicture}\n"}
+TEX_HARNESS = ("\\documentclass[tikz,border=2pt]{standalone}\n\\usepackage{tikz}\n"
+               "\\usetikzlibrary{arrows.meta,positioning,shapes,calc,fit,backgrounds,decorations.pathmorphing}\n"
+               "\\usepackage[compat=1.1.0]{tikz-feynman}\n")
+PREAMBLE_LINE = re.compile(r"^\s*\\(?:usepackage|usetikzlibrary|usepgfplotslibrary|pgfplotsset|definecolor|tikzfeynmanset)\b")
+TEX_ENV_ERROR = re.compile(r"File `[^']+\.(?:sty|cls|cfg|def)' not found|I can't find file|Font .* not found", re.I)
+
+
+SKIP_DIRECTIVE = re.compile(r"^\s*%\s*diagram-check:\s*skip\b\s*(.*)$", re.M)
 
 
 def extract_blocks(text: str) -> list[tuple[str, str]]:
     """Return (language, source) pairs for every dot/mermaid/plantuml/svg/tikz/latex fence in text."""
-    return [(m.group(1), m.group(2)) for m in FENCE_RE.finditer(text) if m.group(1) != "latex" or "tikzpicture" in m.group(2)]
+    return [(lang, src) for lang, src, _ in extract_blocks_with_setup(text)]
+
+
+def extract_blocks_with_setup(text: str) -> list[tuple[str, str, str]]:
+    """(language, source, setup) for every diagram fence; setup is the text of the LaTeX fences above it in the same file
+    that set things up without drawing (package lines, \\tikzset styles), which a later snippet relies on."""
+    out, setup = [], []
+    for m in FENCE_RE.finditer(text):
+        lang, src = m.group(1), m.group(2)
+        if lang == "latex" and "tikzpicture" not in src:
+            if "\\documentclass" not in src:
+                setup.append(src)
+            continue
+        out.append((lang, src, "\n".join(setup) if lang in ("latex", "tikz") else ""))
+    return out
 
 
 def lint_mermaid(source: str) -> list[str]:
@@ -168,6 +196,38 @@ def render_plantuml(source: str, plantuml: str = "plantuml") -> dict:
     return {"outcome": "rendered", "reason": None, "output_format": "svg"}
 
 
+def tex_document(source: str, setup: str = "") -> str:
+    """A compilable document for one block: as is when it has a \\documentclass, else the standalone harness with the
+    file's setup fences and the block's package lines in the preamble."""
+    if "\\documentclass" in source:
+        return source
+    pre = [ln for ln in setup.splitlines()] + [ln for ln in source.splitlines() if PREAMBLE_LINE.match(ln)]
+    body = [ln for ln in source.splitlines() if not PREAMBLE_LINE.match(ln)]
+    if "tikzpicture" not in source:  # a ```tikz fence may hold only the picture's body
+        body = ["\\begin{tikzpicture}"] + body + ["\\end{tikzpicture}"]
+    return TEX_HARNESS + "\n".join(pre) + "\n\\begin{document}\n" + "\n".join(body) + "\n\\end{document}\n"
+
+
+def render_tex(source: str, engine: str = "lualatex", setup: str = "") -> dict:
+    """{"outcome", "reason", "output_format"} for one TikZ/LaTeX block compiled to PDF (no shell escape)."""
+    with tempfile.TemporaryDirectory() as tmp:
+        tex = Path(tmp) / "block.tex"
+        tex.write_text(tex_document(source, setup), encoding="utf-8")
+        try:
+            result = _run([engine, "-interaction=nonstopmode", "-halt-on-error", "-no-shell-escape", "block.tex"], cwd=tmp)
+        except RenderTimeout as exc:
+            return {"outcome": "environment-error", "reason": str(exc), "timeout": True}
+        except OSError as exc:
+            return {"outcome": "environment-error", "reason": f"cannot start {engine}: {exc}"}
+        log = (Path(tmp) / "block.log").read_text(encoding="utf-8", errors="replace") if (Path(tmp) / "block.log").exists() else result.stdout
+        if result.returncode == 0 and (Path(tmp) / "block.pdf").is_file():
+            return {"outcome": "rendered", "reason": None, "output_format": "pdf"}
+        first = next((ln.strip() for ln in log.splitlines() if ln.startswith("!")), None) or (result.stdout or "")[-300:]
+        if TEX_ENV_ERROR.search(log):
+            return {"outcome": "environment-error", "reason": TEX_ENV_ERROR.search(log).group(0)[:300]}
+        return {"outcome": "source-error", "reason": f"{Path(engine).name}: {first}"[:500]}
+
+
 def check_dot(source: str) -> str | None:
     """Return an error string if `dot` rejects the source, else None (rendered)."""
     r = render_dot(source)
@@ -204,10 +264,21 @@ def _version(cmd: list[str]) -> str | None:
     return line[:120] if line else None
 
 
-def preflight_renderers() -> dict:
-    """One minimal render per renderer on PATH: {"dot"|"mmdc"|"plantuml": {"available", "path", "version", "reason"}}.
-    A renderer that fails its preflight is unavailable for the run and is not launched again."""
+def preflight_renderers(tikz: bool = True) -> dict:
+    """One minimal render per renderer on PATH: {"dot"|"mmdc"|"plantuml"|"tex": {"available", "path", "version",
+    "reason"}}. A renderer that fails its preflight is unavailable for the run and is not launched again. "tex" is
+    LuaLaTeX, else pdfLaTeX; with tikz=False it is not looked for."""
     out = {}
+    engine = shutil.which("lualatex") or shutil.which("pdflatex")
+    if not tikz:
+        out["tex"] = {"available": False, "path": None, "version": None, "reason": "TikZ compile switched off (--no-tikz)"}
+    elif not engine:
+        out["tex"] = {"available": False, "path": None, "version": None, "reason": "neither `lualatex` nor `pdflatex` on PATH"}
+    else:
+        r = render_tex(PREFLIGHT["tex"], engine)
+        ok = r["outcome"] == "rendered"
+        out["tex"] = {"available": ok, "path": engine, "version": _version([engine, "--version"]) if ok else None,
+                      "reason": None if ok else f"preflight compile failed ({r['reason']}); not launched again"}
     for name, render, vcmd in (("dot", render_dot, ["-V"]), ("mmdc", render_mermaid, ["--version"]), ("plantuml", render_plantuml, ["-version"])):
         path = shutil.which(name)
         if not path:
@@ -220,8 +291,13 @@ def preflight_renderers() -> dict:
     return out
 
 
-def check_block(lang: str, source: str, renderers: dict) -> dict:
-    """Outcome of one block given the renderer states (which this function may update on a timeout)."""
+def check_block(lang: str, source: str, renderers: dict, setup: str = "") -> dict:
+    """Outcome of one block given the renderer states (which this function may update on a timeout). A block with a
+    '% diagram-check: skip <reason>' line (a fragment that cannot compile alone, such as a Beamer overlay) is skipped
+    with that reason."""
+    directive = SKIP_DIRECTIVE.search(source)
+    if directive:
+        return {"outcome": "skipped", "renderer": None, "reason": "marked in the source: " + (directive.group(1).strip() or "no reason given")}
     def unavailable(name: str) -> dict:
         state = renderers[name]
         if state["path"] is None:
@@ -247,7 +323,7 @@ def check_block(lang: str, source: str, renderers: dict) -> dict:
         return {"outcome": "source-error" if err else "lint-only", "renderer": "xml",
                 "reason": err or "XML well-formedness only; the SVG was not rendered or looked at"}
     if lang in ("tikz", "latex"):
-        return {"outcome": "skipped", "renderer": None, "reason": "TikZ/LaTeX is not compiled by this checker"}
+        return through("tex", lambda src, path: render_tex(src, path, setup))
     problems = lint_mermaid(source)
     if problems:
         return {"outcome": "source-error", "renderer": "lint", "reason": "; ".join(problems)}
@@ -259,18 +335,20 @@ def check_block(lang: str, source: str, renderers: dict) -> dict:
     return through("mmdc", render_mermaid)
 
 
-def run(paths: list[Path], require_render: bool = False) -> dict:
-    renderers = preflight_renderers()
+def run(paths: list[Path], require_render: bool = False, tikz: bool = True) -> dict:
+    renderers = preflight_renderers(tikz)
     blocks = []
     for path in paths:
-        for i, (lang, source) in enumerate(extract_blocks(path.read_text(encoding="utf-8"))):
-            r = check_block(lang, source, renderers)
+        for i, (lang, source, setup) in enumerate(extract_blocks_with_setup(path.read_text(encoding="utf-8"))):
+            r = check_block(lang, source, renderers, setup)
             blocks.append({"file": str(path), "block": i, "lang": lang, "renderer": r.get("renderer"), "outcome": r["outcome"],
                            "reason": r.get("reason"), "output_format": r.get("output_format")})
     counts = {o: sum(1 for b in blocks if b["outcome"] == o) for o in OUTCOMES}
     counts["total"] = len(blocks)
     not_rendered = counts["lint-only"] + counts["skipped"]
-    if counts["source-error"]:
+    if not blocks:
+        status, code = "input-error", 2
+    elif counts["source-error"]:
         status, code = "fail", 1
     elif counts["environment-error"] or (require_render and not_rendered):
         status, code = "incomplete", 3
@@ -278,6 +356,8 @@ def run(paths: list[Path], require_render: bool = False) -> dict:
         status, code = "pass", 0
     checks_not_run = [{"check": "visual-inspection", "reason": "rendering says nothing about layout or labels; look at the output", "required": False},
                       {"check": "physics-content", "reason": "what a diagram shows is reviewed by hep-theory or the owning skill", "required": False}]
+    if not blocks:
+        checks_not_run.append({"check": "render", "reason": "no diagram block in the named files: nothing was checked", "required": True})
     if not_rendered:
         checks_not_run.append({"check": "render", "reason": f"{not_rendered} block(s) were linted or skipped, not rendered",
                                "required": bool(require_render)})
@@ -310,10 +390,11 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--format", choices=("text", "json"), default="text", help="text (default) or one JSON report object")
     ap.add_argument("--require-render", action="store_true",
                     help="strict: a block that was only linted or skipped makes the run incomplete (exit 3)")
+    ap.add_argument("--no-tikz", action="store_true", help="do not compile TikZ/LaTeX blocks (they are reported as skipped)")
     args = ap.parse_args(argv)
     root = Path(__file__).resolve().parents[1]
     paths = args.paths or sorted(root.rglob("*.md"))
-    rep = run(paths, args.require_render)
+    rep = run(paths, args.require_render, tikz=not args.no_tikz)
     if args.format == "json":
         print(json.dumps(rep, indent=1))
     else:

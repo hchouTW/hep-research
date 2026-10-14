@@ -133,7 +133,7 @@ class CleanDegradationWithoutTorchTests(unittest.TestCase):
                     capture_output=True,
                     text=True, timeout=600
                 )
-                self.assertEqual(result.returncode, 1)
+                self.assertEqual(result.returncode, 3)  # 3: a missing dependency (CLI contract, ML-C17)
                 self.assertIn("PyTorch is required", result.stdout + result.stderr)
                 self.assertNotIn("Traceback", result.stderr)
 

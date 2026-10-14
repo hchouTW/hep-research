@@ -72,7 +72,7 @@ flowchart LR
     class GEN,DSIM sim;
 ```
 
-## 3. TikZ (same graph, for the paper; not compiled here)
+## 3. TikZ (same graph, for the paper; compiled 2026-10-14, not inspected)
 
 Packages: `tikz` with libraries `positioning, arrows.meta, fit, backgrounds`; engine pdfLaTeX or LuaLaTeX.
 
@@ -126,5 +126,5 @@ flowchart LR
     class S0,S1,S2,S3 sim;
 ```
 
-**Validation:** trigger precedes offline reconstruction; simulation goes through the *same* reconstruction (data-side trigger is emulated, not drawn); truth information does not reach selection; control regions feed the background estimate and both feed the fit; systematics enter as nuisance parameters, not as a processing step; the DOT graph was compiled, the Mermaid graphs were rendered with `mmdc`, the TikZ was not compiled. The dotted "scale factors" edge in the variant is a correction, not data flow - it is labeled for that reason.
+**Validation:** trigger precedes offline reconstruction; simulation goes through the *same* reconstruction (data-side trigger is emulated, not drawn); truth information does not reach selection; control regions feed the background estimate and both feed the fit; systematics enter as nuisance parameters, not as a processing step; the DOT graph was compiled, the Mermaid graphs were rendered with `mmdc`, the TikZ was compiled with LuaLaTeX by `check_diagram_sources.py` on 2026-10-14 but not inspected. The dotted "scale factors" edge in the variant is a correction, not data flow - it is labeled for that reason.
 **Caption:** Event-processing workflow of the analysis. Collision data (trigger, reconstruction) and simulated events (generation, detector simulation, dashed) are reconstructed and calibrated identically, then selected into signal and control regions. Control regions determine the background estimate; both enter the likelihood fit together with the systematic uncertainties (nuisance parameters, dotted). Arrows denote data flow.

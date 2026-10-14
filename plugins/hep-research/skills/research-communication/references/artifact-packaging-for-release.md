@@ -43,3 +43,5 @@ Deliver the packaged repository structure (or a concrete plan for one),
 README content, and the availability-statement text ready to hand to
 `citations-and-bibliography.md`. Flag anything claimed as reproducible that
 was not actually verified end-to-end.
+
+**Done when:** a fresh checkout runs the documented command and reproduces the paper's numbers, and every released file has a licence and a checksum listed.

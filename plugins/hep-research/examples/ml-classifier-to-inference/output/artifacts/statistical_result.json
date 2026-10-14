@@ -1,5 +1,5 @@
 {
- "contract_version": "2.7.0",
+ "contract_version": "2.8.0",
  "artifact_id": "synthetic-j9-signal-strength",
  "artifact_type": "statistical-result",
  "required_capabilities": [
@@ -17,7 +17,7 @@
  },
  "versions": {
   "plugin": "0.9.0",
-  "contracts": "2.7.0",
+  "contracts": "2.8.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -36,8 +36,8 @@
    "ref": "artifacts/ml_artifact.json",
    "artifact_type": "ml-artifact",
    "artifact_id": "synthetic-j9-classifier",
-   "sha256": "a65d3777bb8ad249333395357ccbb61855946053fd375b0e36b765d2615f89f2",
-   "version": "2.7.0",
+   "sha256": "9eece822391f1e56b33d5e4e25608d5c52d726f569f1757f0051cc4ebb922b2e",
+   "version": "2.8.0",
    "status": [
     "synthetic"
    ]
@@ -49,9 +49,13 @@
  ],
  "unresolved_inputs": [],
  "extension": {
+  "observable_source": {
+   "kind": "ml-score",
+   "ml_artifact": "artifacts/ml_artifact.json"
+  },
   "paradigm": "frequentist",
   "likelihood": {
-   "form": "extended binned Poisson in the calibrated classifier probability (7 bins), mean mu s_i + gamma_i b_i; gamma_i Gaussian-constrained MC-statistics factors (Barlow-Beeston-lite, width sqrt(sum w^2)/b of the signed-weight background template)",
+   "form": "extended binned Poisson in the transformed classifier score (7 bins), mean mu s_i + gamma_i b_i(theta); b_i(theta) interpolates the background template to its pt_miss-scale variation (code0, Gaussian theta); gamma_i Gaussian-constrained MC-statistics factors (Barlow-Beeston-lite, width sqrt(sum w^2)/b of the signed-weight background template)",
    "backend": "core.stats.likelihood_limits shape model (_ShapeModel)",
    "model_ref": "results.json#templates"
   },
@@ -59,6 +63,7 @@
    "mu (signal strength)"
   ],
   "nuisances": [
+   "theta_pt_miss_scale (background shape: template at the control-sample pt_miss scale as +1 sigma, mirrored for -1 sigma; Gaussian constraint)",
    "gamma_0 (background MC statistics, bin 0)",
    "gamma_1 (background MC statistics, bin 1)",
    "gamma_2 (background MC statistics, bin 2)",
@@ -73,7 +78,7 @@
    "check": "toys",
    "method": "seeded toys at mu_true from the template model with the MC-statistics auxiliary measurements redrawn; fraction of 68.27% profile intervals containing mu_true",
    "n_toys": 1000,
-   "coverage": 0.693,
+   "coverage": 0.66,
    "cl": 0.6827,
    "ensemble": "mu_true = 1.0, templates as fitted",
    "failures": 0,
@@ -86,10 +91,10 @@
   },
   "fit_status": "converged",
   "results": {
-   "mu_hat": 1.3073764723234396,
+   "mu_hat": 1.3310355700916248,
    "interval_68": [
-    1.046649465032274,
-    1.5882339006436932
+    1.053984459543275,
+    1.6243287047652113
    ],
    "data": "pseudo-data (SYNTHETIC)",
    "asimov_mu_hat": 1.0000000000000004,

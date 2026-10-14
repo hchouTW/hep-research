@@ -1,192 +1,97 @@
 # Multivariate Classifiers and Regression: BDTs and Neural Networks in Analysis
 
-Extends [ml-analysis.md](ml-analysis.md)'s splits/weights/validation
-principles with concrete guidance on training and choosing between classifier
-and regression model families. Read ml-analysis.md first; this file assumes
-it. Most sections below are written for a classification (signal/background
-score) task; where a continuous-target regression task (energy/mass/direction
-regression) differs, see [Regression targets](#regression-targets).
+Extends [ml-analysis.md](ml-analysis.md) (splits, weights, validation; read it first) with the choice between model
+families and their training. Sections are written for a signal/background score; regression differs in
+[Regression targets](#regression-targets).
 
 ## Choosing a classifier family
 
-- **Boosted decision trees** (XGBoost, LightGBM, or TMVA's BDT) remain a strong
-  default for tabular, engineered-feature inputs of the size typical in an analysis
-  (tens of features, thousands to low millions of weighted events): they need
-  comparatively little hyperparameter tuning to reach a reasonable operating point,
-  train quickly enough for iterative feature engineering, and their feature-importance
-  and single-tree outputs are easier to sanity-check against physical expectation
-  than a neural network's internal representations.
-- **Neural networks** are worth the additional complexity when the input is not
-  naturally tabular (raw or lightly processed detector images, point clouds of
-  reconstructed objects, sequences), when a specific architecture encodes a known
-  symmetry the analysis wants to exploit (permutation invariance over jets, for
-  example), or when combining many heterogeneous input types benefits from learned
-  rather than hand-engineered combination. A plain feed-forward network on the same
-  engineered features a BDT would use rarely outperforms a well-tuned BDT enough to
-  justify its extra tuning and validation burden.
-- Simple cuts remain preferable to either when the separating power comes from one or
-  two variables with an intuitive, easily-communicated physical origin, and when the
-  analysis's audience or later reinterpretation needs a transparent selection rather
-  than an opaque score. A classifier that only marginally beats a two-variable cut
-  is not automatically worth its added validation and correlation-with-mass burden.
-- Tree-based models are invariant to monotonic per-feature transforms and need no
-  input scaling; neural networks generally do (standardization or normalization per
-  feature, fit on the training partition only and reapplied identically at inference).
-  Skipping this step is a common reason an NN underperforms a BDT on the same features
-  for a data-preparation reason unrelated to model capacity.
+- **Boosted decision trees** (XGBoost, LightGBM, TMVA BDT) are the default for engineered tabular inputs of analysis
+  size (tens of features, thousands to millions of weighted events): little tuning, fast iteration, and feature
+  importances and single trees that can be checked against physics. They need no input scaling.
+- **Neural networks** pay off for non-tabular inputs (detector images, point clouds of objects, sequences), when an
+  architecture encodes a symmetry the analysis wants (permutation invariance over jets), or to combine heterogeneous
+  inputs. On the features a BDT would use, a plain MLP rarely beats a tuned BDT by enough to justify its validation
+  burden; it needs per-feature standardization fitted on the training split (a missing one is a common reason an NN
+  loses to a BDT).
+- **Simple cuts** remain preferable when one or two variables with a clear physical origin carry the separation, or
+  when reinterpretation needs a transparent selection.
 
 ## Feature engineering and selection
 
-Prefer physically motivated features (masses, angular separations, kinematic
-combinations with known discriminating power) over an undifferentiated dump of every
-available low-level variable - beyond making the model more interpretable, this
-reduces the chance of accidentally including a feature that encodes look-elsewhere
-information about the signal region definition itself (a variable correlated with the
-selection used to define signal/control regions can leak information across regions
-in ways that are easy to miss until a closure test fails). Check pairwise correlation
-and, more importantly, correlation of each candidate feature with the observable used
-in the final fit (typically a mass) before including it - a feature with strong
-correlation to the fit observable will sculpt the background shape after a selection
-on the classifier score, which is the mass-sculpting concern already raised in
-ml-analysis.md and needs the mitigation described there (decorrelation, or fitting
-in categories with re-derived background shapes).
+Prefer physically motivated features (masses, angular separations, known discriminants) over every available
+low-level variable. Exclude features that encode the region definitions or the target itself (target leakage: a
+variable built from the selection that defines signal and control regions leaks across them and shows up only when a
+closure test fails). Check each feature's correlation with the fitted observable (typically a mass): a correlated
+feature sculpts the background after a cut on the score ([ml-analysis.md](ml-analysis.md), "Mass sculpting and
+decorrelation").
 
 ## Training practicalities: BDTs
 
-- Tree depth and the minimum number of events per leaf are the primary
-  overtraining controls; with limited weighted MC statistics, a deep tree can
-  memorize individual high-weight events rather than learning a generalizable
-  boundary - check the effective (weighted) statistics per leaf, not just the raw
-  event count, especially in samples with large weight variance (see
-  [weights-normalization.md](../../hep-analysis/references/weights-normalization.md) on negative
-  and highly variable weights).
-- Use k-fold cross-training/application (train on k-1 folds, apply to the held-out
-  fold, rotate) rather than a single train/test split when MC statistics are limited
-  enough that a held-out test set would otherwise cost meaningful training statistics
-  - this lets every event contribute to both training and (out-of-fold) application
-  without any event being scored by a model that saw it during training.
-- Compare training and validation-fold loss/AUC curves versus boosting round to pick
-  the number of trees (early stopping on the validation fold) rather than a fixed
-  round count decided in advance; a round count picked once and reused across
-  reprocessing campaigns without rechecking silently drifts from optimal as input
-  samples change.
-- Tree libraries assume non-negative sample weights: a negative weight gives a negative
-  Hessian in gradient boosting. Since 1.3.0, XGBoost raises a fatal error on negative
-  instance weights (earlier versions trained on them with undefined behavior), so a
-  signed-weight sample needs a deliberate treatment before training. The options
-  (resampling to positive weights, |w| with a demonstrated effect, keeping signed weights
-  where the library allows) and their costs are in [ml-analysis.md](ml-analysis.md),
-  "Negative weights". Evaluate with the signed physics weights in every case
-  ([weights-normalization.md](../../hep-analysis/references/weights-normalization.md)),
-  and never silently drop the sign.
-- A hyperparameter search (grid, random, or Bayesian) must optimize the same
-  weighted, physics-relevant metric used elsewhere in the analysis - expected
-  sensitivity, not raw AUC or unweighted accuracy - or it can select an operating
-  point that looks best in training but underperforms on the metric the analysis
-  actually cares about.
+- Tree depth and minimum events per leaf control overtraining; check the effective weighted statistics per leaf, not
+  the raw count, in samples with large weight variance
+  ([weights-normalization.md](../../hep-analysis/references/weights-normalization.md)).
+- With limited simulation use k-fold cross-training: every event is scored by a model that never saw it, and every
+  event contributes to training.
+- Choose the number of trees by early stopping on the validation fold, rechecked when the input samples change.
+- Tree libraries assume non-negative weights (a negative weight gives a negative Hessian). Since 1.3.0, XGBoost
+  raises a fatal error on negative instance weights, so signed samples need a deliberate treatment before training
+  (options and costs: [ml-analysis.md](ml-analysis.md), "Negative weights"). Evaluate with the signed physics weights
+  and never drop the sign silently.
+- A hyperparameter search optimizes the analysis metric (expected sensitivity), not raw AUC or accuracy, with grouped
+  folds ([ml-analysis.md](ml-analysis.md), "Hyperparameter search").
 
 ## Training practicalities: neural networks
 
-- Class imbalance between signal and background is common and is usually handled
-  through the loss weighting scheme (matching the formal event weights - see
-  ml-analysis.md's "Weights and objectives") rather than naive oversampling of the
-  minority class, which can distort the effective statistical power of the training
-  sample.
-- Batch composition matters when using physics event weights: a batch that happens to
-  contain a small number of very high-weight events can dominate the gradient for that
-  step; monitor the effective sample size within batches (or pre-bin/cap extreme
-  weights, documenting the cap) rather than assuming standard-deep-learning batching
-  intuition transfers unchanged from unweighted computer-vision-style datasets. See
-  [deep-learning-guide.md](deep-learning-guide.md) for general PyTorch training-loop and debugging practices (NaN
-  losses, gradient clipping, evaluation-mode pitfalls) that apply here unchanged once
-  the physics-specific weighting above is handled correctly.
-- Prefer starting from a simple, shallow architecture and confirming it beats (or at
-  least matches) a well-tuned BDT baseline before investing in a deeper/more exotic
-  architecture - a complex network that underperforms a simple BDT baseline usually
-  indicates a data or training-procedure problem, not that more capacity is needed.
+- Balance the class totals in the training weights (rescale each class to equal summed weight) and keep the relative
+  physics weights within a class; never oversample or flatten inside a class ([ml-analysis.md](ml-analysis.md),
+  "Event weights" and "Class balancing and the prior").
+- A batch with a few very high-weight events can dominate a step: monitor the effective sample size per batch, or cap
+  extreme weights and document the cap. PyTorch practice: [deep-learning-guide.md](deep-learning-guide.md).
+- Start shallow and confirm the network at least matches a tuned BDT; a complex network that loses to it usually has
+  a data or procedure problem.
 
 ## Regression targets
 
-Many analyses regress a continuous physical quantity instead of (or alongside)
-classifying signal from background - jet/tau/electron energy corrections, missing
-transverse momentum estimators, invariant-mass regression, or direction/resolution
-estimators. The classifier guidance above (family choice, feature engineering,
-BDT/NN training practicalities, inference/deployment) still applies; regression
-changes these specific choices:
+Energy, momentum or mass regressions, MET estimators, direction or resolution estimators. The guidance above applies,
+with these changes:
 
-- Loss choice must match the physics use of the target: plain mean-squared error
-  optimizes the conditional mean, the right target for a correction applied
-  additively/multiplicatively before further use, but not automatically right if
-  the downstream use needs a different point estimate (median, via mean absolute
-  error or a Huber loss, when outliers or a long tail would dominate an MSE loss)
-  or a full predictive distribution (quantile regression, or a head predicting
-  both a mean and a heteroscedastic variance/negative-log-likelihood).
-- Weight the regression loss with the same formal event weights used elsewhere
-  (ml-analysis.md's "Weights and objectives"), not a naive unweighted loss - an
-  unweighted regression trained on MC with signed or highly variable weights can
-  be dominated by a small number of high-weight events the same way an unweighted
-  classifier can.
-- Validate calibration as linearity and closure of the regressed quantity against
-  truth (or an independent proxy), not merely an aggregate loss value: check the
-  response (predicted/true, or predicted-minus-true) in bins of pT, eta, and any
-  other variable the correction depends on, the same way a jet energy scale
-  correction is validated in
-  [physics-objects-jets-btagging-met.md](../../detector-response/references/physics-objects-jets-btagging-met.md)
-  - a regression with low aggregate loss can still be biased or non-linear in a
-  specific kinematic region the analysis relies on.
-- A regressed correction becomes a scale/resolution correction like any other
-  object correction: propagate its uncertainty (from training statistics and from
-  residual non-closure in each validation bin) through the same object-correction
-  and systematic-variation machinery as JES/JER, rather than treating it as a
-  fixed, uncertainty-free factor (see [systematics.md](../../hep-analysis/references/systematics.md)).
-- Report an uncertainty for the regressed value itself when a downstream fit uses
-  it per-event rather than only as a bin-averaged scale factor - e.g. a predicted
-  variance/quantile head, or an ensemble/bootstrap spread - and validate that
-  per-event uncertainty's coverage, since an uncalibrated per-event uncertainty is
-  easy to introduce silently.
+- **The loss picks the summary learned** (Cheong et al., JINST 15 (2020) P01030, arXiv:1910.03773, abstract, read
+  2026-10-14): MSE learns the conditional mean E[y_true | x]; mean absolute error or Huber the median, robust to
+  tails; quantile regression or a mean-and-variance head a predictive distribution. Match it to the downstream use.
+- **The training truth spectrum is part of the answer.** By Bayes' theorem p(y_true | x) is proportional to
+  p(x | y_true) p(y_true), so the conditional mean, and the correction, depend on the truth spectrum of the training
+  sample. A correction trained on one spectrum and applied to another (a steeper background, a resonance, data) is
+  biased. Check the response in bins of the true and of the reconstructed variable, and close on a sample with a
+  different truth spectrum. Prior-independent alternatives: learn the mode of the response (Cheong et al.), or
+  calibrate the response reco/true in bins of the true value and invert it numerically (`unverified`: no opened
+  source cited for numerical inversion here).
+- **Systematics of a regressed correction.** It is an object correction like JES/JER: propagate its uncertainty
+  (training statistics, residual non-closure per validation bin) through the usual systematic machinery
+  ([systematics.md](../../hep-analysis/references/systematics.md)), and add the in-situ data/simulation difference of
+  scale and resolution measured in a control sample (Z or J/psi resonances, balance methods). That difference is often
+  the dominant term (`unverified`: practice, no opened source cited); hand its evaluation to detector-response.
+- Weight the regression loss with the physics weights; validate linearity and closure in bins of pT, eta and every
+  variable the correction depends on, as for a jet energy scale
+  ([physics-objects-jets-btagging-met.md](../../detector-response/references/physics-objects-jets-btagging-met.md));
+  if a fit uses a per-event uncertainty, validate its coverage.
 
-## Calibration and combination
+## Calibration, combination, deployment
 
-A classifier's raw output score is not automatically a calibrated probability, and
-combining multiple classifiers' scores (or using a score as one input among several
-observables in a combined fit) requires either calibrating scores against a common
-reference (e.g. isotonic regression or Platt scaling against a validation sample) or
-using the score only through its rank/selection threshold rather than its literal
-value as though it were a probability. Document which convention is used, since
-downstream statistical combination methods
-([statistical-tools.md](../../hep-statistics/references/statistical-tools.md)) may implicitly assume
-one.
+A raw score is not a probability: calibrate it (Platt, isotonic, prior correction:
+[uncertainty-and-calibration.md](uncertainty-and-calibration.md)) or use it only through its rank and a threshold, and
+state which, since statistical combinations may assume one
+([statistical-tools.md](../../hep-statistics/references/statistical-tools.md)). Apply the model in the production event
+loop with the training preprocessing (feature order, units, scaling constants), for example
+`TMVA::Experimental::RBDT`/`RReader` or an ONNX model inside `RDataFrame::Define()`; version weights, preprocessing and
+library together, and keep comparing training and deployment scores on a held-out sample.
 
-## Inference and deployment
+## Validation beyond ml-analysis.md
 
-Training and validating a model is not sufficient until it is applied identically
-inside the production event loop. Score events through the same preprocessing
-(feature order, units, scaling/normalization constants) used in training, and
-integrate inference into the existing pipeline rather than a separate ad hoc pass -
-e.g. `TMVA::Experimental::RBDT`/`RReader` or an ONNX-exported model inside an
-`RDataFrame::Define()`, or the equivalent for a Python/uproot pipeline. Version the
-deployed model artifact (weights/graph file, preprocessing constants, library
-version) alongside the training config, and reproduce ml-analysis.md's
-training-vs-deployment score comparison on a held-out sample as an ongoing
-deliverable, not only during initial validation - a preprocessing or
-library-version mismatch between training and production is a common source of an
-unreproducible classifier score.
-
-## Validation beyond ml-analysis.md's checklist
-
-- Compare feature distributions and the classifier score itself between the
-  nominal MC sample and at least one systematic variation to confirm the classifier
-  hasn't learned to key on a feature that is itself unstable under systematics (e.g.
-  a variable whose modeling differs significantly between generators) - a classifier
-  can achieve good nominal separation while being unexpectedly sensitive to a
-  systematic uncertainty's variation, inflating that uncertainty's impact on the
-  final result in a way that a nominal-only validation would miss.
-- For a BDT, inspect feature importance and the highest-importance features' physical
-  plausibility as a sanity check before trusting the model, not as a substitute for
-  the statistical validation in ml-analysis.md - a feature importance ranking that
-  contradicts known physics (e.g. an ostensibly unrelated detector-region indicator
-  ranking above a kinematic variable expected to dominate) is a signal to investigate
-  for a labeling or leakage bug before proceeding.
+- Compare features and the score between the nominal simulation and at least one systematic variation: a classifier
+  that keys on a poorly modelled variable inflates that systematic.
+- For a BDT, a feature-importance ranking that contradicts known physics (a detector-region flag above the expected
+  kinematic discriminant) points to a labelling or leakage bug.
 
 ## Worked walkthrough: training a BDT without leakage (verified 2026-09-24)
 
@@ -221,38 +126,17 @@ for label in (True, False):                  # overtraining check per class
 print(f"AUC train fold {train_auc:.3f}, held-out fold {test_auc:.3f}")
 ```
 
-Observed:
-- With the default-sized model (`max_iter=200`, no depth limit) the checks flag
-  overtraining: AUC 0.93 on the training fold versus 0.71 held out, and KS p < 1e-3.
-- With the shallow configuration above: AUC 0.751 versus 0.739, KS p = 0.26 and 0.53, close
-  to this toy's Bayes-optimal AUC of Phi(0.943/sqrt(2)) = 0.748.
-
-Rules this encodes:
-- The split is by event identifier and fixed in advance.
-- The analysis uses only held-out scores.
-- Hyperparameters are tuned inside the training fold (nested CV or `early_stopping`), not by
-  looking at held-out results. Choosing the configuration by the held-out AUC, as this
-  illustration does, would itself leak.
-- The selection cut on the score is also fixed before the signal region is unblinded.
+Observed: with the default-sized model (`max_iter=200`, no depth limit) the checks flag overtraining (AUC 0.93 on the
+training fold against 0.71 held out, KS p < 1e-3); with the shallow configuration above, AUC 0.751 against 0.739, KS p
+= 0.26 and 0.53, close to this toy's Bayes-optimal AUC of Phi(0.943/sqrt(2)) = 0.748. The split is by event identifier
+and fixed in advance; the analysis uses only held-out scores; hyperparameters are tuned inside the training fold
+(choosing them by the held-out AUC, as this illustration does, would itself leak); the cut on the score is fixed before
+unblinding.
 
 ## Deliverables
 
-- Classifier family chosen and the comparison (if any) against a simpler baseline
-  that justified it.
-- Feature list with the physical motivation for each, and the correlation-with-fit-
-  observable check performed.
-- Cross-validation/k-folding scheme (or train/test split) and the effective
-  (weighted) statistics per fold.
-- Score calibration convention used, if scores are combined with other observables.
-- Systematic-variation stability check for the classifier score, alongside the
-  standard validation layers in ml-analysis.md.
-- Random seed(s) and library/framework versions (e.g. xgboost/lightgbm/pytorch)
-  pinned and recorded - training is not bitwise reproducible across versions or,
-  for GPU-trained networks, across hardware without them.
-- Deployed inference artifact (model file, preprocessing constants, library
-  version) versioned alongside the training config, with a training-vs-deployment
-  score comparison on a held-out sample.
-- For a regression target: loss function chosen and its match to the target's
-  downstream use, a linearity/closure check of predicted vs. true value across
-  the relevant kinematic range, and how the regressed correction's uncertainty is
-  propagated as a systematic.
+The family chosen against a simpler baseline; features with their motivation and the correlation with the fitted
+observable; the k-fold scheme with effective weighted statistics per fold; the score convention (calibrated or rank
+only); the systematic-variation stability check; seeds and library versions; the versioned deployment artifact with a
+training-versus-deployment score comparison; for a regression, the loss and its match to the use, the closure in bins
+of true and reconstructed value, and how the correction's uncertainty is propagated.

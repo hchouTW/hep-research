@@ -20,7 +20,7 @@ that physics is already worked out and focuses on how to write it up.
 - [Collaboration author lists and acknowledgments](#collaboration-author-lists-and-acknowledgments)
 - [Citations: ADS vs. INSPIRE-HEP](#citations-ads-vs-inspire-hep)
 <!-- example: experiment-specific illustration -->
-- [Worked example: AMS-02's publication pattern](#worked-example-ams-02s-publication-pattern)
+- [Checking a collaboration's publication pattern](#checking-a-collaborations-publication-pattern)
 <!-- /example -->
 - [Figures: spectra, skymaps, and exposure](#figures-spectra-skymaps-and-exposure)
 - [Phrasing conventions specific to this field](#phrasing-conventions-specific-to-this-field)
@@ -67,16 +67,9 @@ substitutions:
 
 ## Journals and venues
 
-In addition to the collider-physics venues in `latex-venue-setup.md` (sources and
-last-verified dates are in its final section; rows marked "Not checked" were not verified):
-
-| Venue | Class file | Typical length | Notes |
-|---|---|---|---|
-| PRD (astro-ph flavor) | `revtex4-2` (`\documentclass[aps,prd,reprint]{revtex4-2}`) | No fixed limit for regular articles (Letters 4,500 words) | Same class as collider PRD; astroparticle results commonly published here |
-| JCAP | `article` + SISSA's `jcappub.sty` | No fixed limit | JHEP-family house style; `\bibliographystyle{JHEP}` |
-| ApJ / ApJL | AASTeX v7 (`aastex7.cls`; TeX distributions may still ship `aastex631`) | ApJL: 3,500 words, ≤ 5 figures+tables (soft limits); abstract ≤ 250 words | Get the current class from the AAS journals author-resources page; natbib author-year citation is the house default |
-| Astroparticle Physics (Elsevier) | `elsarticle.cls` | Not checked | Elsevier house style; check current author guidelines for citation style option |
-| A&A | A&A's own `aa.cls` | Not checked | Used for some multi-messenger/counterpart papers | 
+Venue facts for astroparticle journals (JCAP, ApJ/ApJL, Astroparticle Physics,
+A&A, PRD) are in the quick-reference table of `latex-venue-setup.md`, with sources
+and verification dates; this section only adds what differs in practice.
 
 As with the collider-physics class files, always pull the current `.cls`/`.bst` from
 the publisher rather than reconstructing from memory — AASTeX in particular changes
@@ -126,108 +119,44 @@ astronomy (rather than particle-physics) readership:
   `Surname:2012abc`-style keys — keep ADS's key format for the same reason: collaborators
   and referees on astronomy-side venues expect it.
 - **A single paper may need both**: pull the HEP-side citations from INSPIRE and the
-  astronomy-side ones from ADS into the same `.bib` file. Deduplicate by DOI when a
-  paper appears in both databases with different keys, the same way
-  `citations-and-bibliography.md` recommends deduplicating by INSPIRE key.
+  astronomy-side ones from ADS into the same `.bib` file. A paper in both databases has
+  different keys: deduplicate by DOI, then arXiv identifier, then record id (rule 9 of
+  `academic-papers-guide.md`).
 - **Citation style**: ApJ/A&A/MNRAS commonly use `natbib` author-year citation
   (`\citep{}`/`\citet{}`) rather than the numbered style collider-physics venues use
   — check the specific venue's current style file rather than assuming numbered
   citations carry over.
 
-<!-- example: experiment-specific illustration -->
-## Worked example: AMS-02's publication pattern
-<!-- /example -->
+## Checking a collaboration's publication pattern
 
-<!-- example: experiment-specific illustration -->
-The Alpha Magnetic Spectrometer (AMS-02) collaboration (source: `ams02.space`,
-cross-checked against INSPIRE-HEP records) is a useful concrete illustration of
-several points above, precisely because it deviates from the "typical" pattern in a
-few visible ways:
-<!-- /example -->
+Collaborations differ in ways that change how their results are found, cited and
+built on. Check, for the specific collaboration and date, rather than assuming the
+collider pattern; record what you checked with its date (`citation-verification.md`):
 
-<!-- example: experiment-specific illustration -->
-- **Single-venue, letter-only publishing.** Of AMS-02's collaboration papers (31 as
-  of 2026-09-10, verified against `ams02.space/publications` and cross-checked
-  against raw page content — see the verification note below), essentially all are
-  Physical Review Letters — short, headline-result papers rather than long
-  PRD-style methods papers. Don't assume every large collaboration spreads results
-  across PRL *and* PRD the way collider experiments often do; check the specific
-  collaboration's own publication list rather than defaulting to the collider
-  pattern.
-- **No arXiv preprint, by design.** Checking INSPIRE-HEP directly (not just the
-  collaboration's own site) confirms AMS-02's PRL papers carry no `arxiv_eprints`
-  field at all — e.g. "Properties of Iron Primary Cosmic Rays" (PRL 126, 041104,
-  2021) and the 2016 antiproton-flux PRL are both published with no arXiv companion.
-  This is a deliberate collaboration policy, not a missing upload: **do not assume
-  every physics paper has, or will get, an arXiv preprint** — ask the user which
-  policy their own collaboration follows before defaulting to "post to arXiv first."
-<!-- /example -->
-- **One long review alongside many short letters.** "The Alpha Magnetic Spectrometer
-  on the International Space Station: Part II — Results from the First Seven Years"
-  is published in *Physics Reports*, not PRL — a single comprehensive review sitting
-  alongside dozens of individual-result letters. This is the review-article pattern
-  from `paper-genre-variants.md`'s "Review articles" section applied at collaboration
-  scale: a Phys. Rept. periodically consolidates and cross-references the individual
-  PRL results rather than duplicating their derivations.
-<!-- example: experiment-specific illustration -->
-- **A very large, structured author list.** AMS-02 is 44 institutions across the
-  Americas, Europe, and Asia, with one PI (Samuel C. C. Ting) and six named deputy
-  PIs, operating out of CERN (which hosts the Payload Operations Control Center) in
-  partnership with NASA and ESA. This is exactly the scale where
-  "Collaboration author lists and acknowledgments" above applies literally — get the
-  current author-list macro and acknowledgments boilerplate from the collaboration
-  rather than drafting anything by hand.
-- **Per-paper supplemental data links, separate from the journal.** AMS-02's own
-  publications page links "supplemental material and data" for each paper directly
-  from the collaboration website, alongside (not instead of) the journal's own DOI
-  and an INSPIRE-HEP citation-count link. When citing or building on an AMS-02
-  result, check the collaboration site for this supplemental link, not just the
-  journal page — the underlying flux tables are often published there rather than
-  (or in addition to) HEPData.
-- **A mixed-citability technical-progress genre — check each page, don't
-  generalize from one.** AMS-02's `ams02.space/advances-data-analysis` section
-  documents incremental analysis-method improvements, and checking three of them
-  directly shows a genuinely mixed picture, not a uniform one: the
-  coordinate-measurement-precision page resolves to a dedicated instrumentation
-  paper (G. Ambrosi et al., *Nucl. Instrum. Methods Phys. Res. A* **869**, 29
-  (2017)), and the ECAL-reconstruction page to another (A. Kounine et al.,
-  *Nucl. Instrum. Methods Phys. Res. A* **869**, 110 (2017)) — while the
-  tracker-charge-sign-identification page cites only an *older* PRL for
-  comparison, with no DOI, arXiv ID, or proceedings reference for the
-  improvement it actually describes. Don't assume a page's citability from
-  another page in the same site section, in either direction: some incremental
-  analysis improvements get a dedicated NIM A–style paper of their own, and some
-  stay web-only. Check the specific page: if it names a paper, cite that paper
-  directly (not the web page) for the technique; if it doesn't, either find
-  where a later peer-reviewed paper incorporates and describes it, or cite the
-  web page explicitly as a website (with an access date), never as if it were
-  peer-reviewed literature on its own. Ask the user's own collaboration whether
-  it maintains an equivalent "advances" page and what fraction of its entries
-  get a dedicated write-up before assuming either way.
-<!-- /example -->
-- **The `ams02.space/physics/*` "highlight" pages are not collaboration-authored
-  outreach**, despite living on the collaboration's own domain — see
-  `outreach-and-public-facing-summaries.md`'s "Collaboration voice vs.
-  syndicated commentary" section for the worked byline-by-byline breakdown (a journalist's
-  recap, an APS *Physics Magazine* Synopsis, and an APS *Physics Magazine*
-  Viewpoint, none written by the collaboration itself).
+- **Venue mix.** Some publish almost only short letters plus an occasional long
+  review that consolidates them; others split results across letters and long
+  methods papers. Read the collaboration's own publication list and INSPIRE-HEP.
+- **arXiv posting.** Not every collaboration posts preprints: check the INSPIRE-HEP
+  record's `arxiv_eprints` field before assuming a paper has, or will get, an arXiv
+  version, and ask the user which policy their own collaboration follows. An absent
+  preprint is a fact about the record; why it is absent is not, unless a source says.
+- **Author lists.** Large collaborations maintain the author-list macro and
+  acknowledgments boilerplate centrally; get them from the collaboration (see
+  "Collaboration author lists and acknowledgments" above), never draft them.
+- **Data tables outside the journal.** Flux tables and supplemental data may sit on
+  the collaboration's site rather than (or as well as) HEPData; look there before
+  reading values off a figure.
+- **Web-only technical notes.** A collaboration site's method or "advances" pages
+  may point to a peer-reviewed paper, or to none. Cite the paper when one is named;
+  otherwise cite the page as a website with an access date, never as peer-reviewed
+  literature.
+- **Highlight pages** on a collaboration's domain may be written by journalists or
+  journal magazines, not the collaboration: see `outreach-and-public-facing-summaries.md`
+  ("Collaboration voice vs. syndicated commentary").
 
-**Verification note (this is a live-changing fact, not a fixed one):** the counts
-above were checked by fetching the collaboration page directly and cross-checking
-against its raw content (not just an AI-summarized paraphrase of it — a first-pass
-summary claimed 42 publications, which was wrong; an itemized listing and an
-independent raw-content check both confirmed 31). This collaboration publishes a
-few papers a year, so this count will drift. Re-verify against
-`ams02.space/publications` (and INSPIRE-HEP) before citing an exact number, and
-update the stamped date above when you do — don't carry this specific number
-forward past its verification date as if it were still current. This is
-`citation-verification.md`'s "record the lookup date" requirement applied to a
-worked example rather than a manuscript claim.
-
-<!-- example: experiment-specific illustration -->
-For the physics/instrument content behind these papers (the AMS-02 detector,
-analysis techniques, and results themselves), see the bound experiment profile (see the context-resolution steps in the skill's SKILL.md; profiles are listed in `<plugin root>/profiles/registry.json`) — this section is only about the publication pattern.
-<!-- /example -->
+Counts, names and dated facts about a specific collaboration belong in its experiment
+profile's evidence ledger with a verification date (see the context-resolution steps
+in the skill's SKILL.md), not in this file.
 
 ## Figures: spectra, skymaps, and exposure
 
@@ -248,21 +177,9 @@ as a heatmap but mean very different things.
 
 ## Phrasing conventions specific to this field
 
-These extend, not replace, `scientific-style.md`'s significance-language table:
+Significance wording, including pre-trial vs. post-trial and "detection" vs. "hint",
+lives in `scientific-style.md` (Significance language). Specific to this field:
 
-- **Pre-trial vs. post-trial significance** must both be stated whenever a search
-  scanned more than one direction, energy bin, or source candidate — quoting only the
-  pre-trial number is the astroparticle-physics analogue of the look-elsewhere effect
-  in `reading-papers.md`, and referees will ask for the post-trial number if it's
-  missing. For an ON/OFF (source vs. background region) count, the pre-trial
-  significance is usually Li & Ma's eq. 17 (T.-P. Li and Y.-Q. Ma, ApJ 272, 317
-  (1983), doi:10.1086/161295; checked 2026-09-26): cite it and state the ON/OFF
-  exposure ratio alpha used. Computing it belongs to `hep-statistics`.
-- **"Detection" vs. "hint" vs. "evidence"** for a point source or transient
-  association follows the same σ-based conventions as `scientific-style.md`'s table,
-  but state explicitly whether the quoted significance is pre- or post-trial each
-  time — a "5σ pre-trial" claim is not an observation-level "detection" if the trials
-  factor brings it below 5σ post-trial.
 - **"Exposure" and "livetime"** are not interchangeable: exposure already folds in
   geometric acceptance and duty cycle; livetime is the raw observing time before
   those corrections. State which one a quoted uncertainty is derived from.
@@ -280,7 +197,7 @@ When reading someone else's astroparticle/cosmic-ray paper, extend
 - **Exposure/livetime and duty cycle**: stated explicitly, and consistent with the
   array's/instrument's known operating history for that period?
 - **Trials factor**: for any point-source or anisotropy search, is a post-trial
-  significance given, not just pre-trial?
+  significance given, not just pre-trial (`scientific-style.md`)?
 - **Hadronic-interaction-model dependence**: for composition or shower-based results,
   is the model-dependence of the result itself discussed, or only the model-driven
   systematic uncertainty band shown without comment on how much conclusions would
@@ -288,3 +205,5 @@ When reading someone else's astroparticle/cosmic-ray paper, extend
 - **Solar-cycle/epoch context**: for direct-detection flux results below the knee,
   is the solar activity period stated, and is it relevant to the comparison being
   drawn against another experiment's data taken in a different epoch?
+
+**Done when:** the draft states exposure (not just livetime), the solar-modulation period where relevant, the interaction models behind composition claims, and pre- and post-trial significances.

@@ -28,15 +28,18 @@ keys are recognized by collaborators and referees. Workflow:
 1. Search the paper on INSPIRE-HEP by title, author, or arXiv number.
 <!-- example: experiment-specific illustration -->
 2. Use INSPIRE's "Cite" / export feature to get a BibTeX entry with its
-   standard key format: first-author surname, year, three random letters
+   standard key format: first-author surname, year and a random suffix, three
+   letters in current keys (`Geller:2026xhh`) and two in older ones
    (`Cowan:2010js`); for a collaboration paper, the collaboration name instead
-   of a surname (the ATLAS Higgs discovery is `ATLAS:2012yve`). The same export
+   of a surname (the ATLAS Higgs discovery is `ATLAS:2012yve`; INSPIRE REST
+   `texkeys`, checked 2026-10-14). The same export
    is available from the REST API, e.g.
    `https://inspirehep.net/api/literature?q=arxiv:1207.7214&format=bibtex`.
    Older exports used first-author keys for collaboration papers
    (`Aad:2012tfa`); INSPIRE still resolves them as aliases, but a `.bib` that
-   mixes old and new keys holds the same paper twice — deduplicate on
-   `eprint`/`doi` when merging an older `.bib` (checked 2026-09-26).
+   mixes old and new keys holds the same paper twice (record 1124337 carries
+   both, checked 2026-10-14) — deduplicate by identifier, never by key; the
+   order and the renaming rule are rule 9 of `academic-papers-guide.md`.
 <!-- /example -->
 3. Paste the entry as-is into the `.bib` file rather than retyping it by
    hand — this preserves the `eprint`, `archivePrefix`, `doi`, and `journal`
@@ -121,9 +124,10 @@ incomplete. See `statistics-and-ml-papers.md` for the venue-specific citation
 - One `.bib` file per paper (or per collaboration-shared library), not one
   per section — makes deduplication and `check_manuscript.py`-style
   validation possible.
-- Deduplicate by INSPIRE key before dedup by title/author — two entries with
-  slightly different formatting for the same paper is the most common
-  bibliography bug. `<plugin root>/skills/research-communication/scripts/check_manuscript.py` flags a key defined twice
+- Deduplicate by DOI, then arXiv identifier (version stripped), then INSPIRE
+  record id — never by INSPIRE key, since one record can carry two keys
+  (rule 9 of `academic-papers-guide.md`). Two entries with slightly different
+  formatting for the same paper is the most common bibliography bug. `<plugin root>/skills/research-communication/scripts/check_manuscript.py` flags a key defined twice
   (BibTeX silently keeps the first); the same paper under two different keys
   still needs a title/DOI/eprint comparison.
 - Every entry in the `.bib` file should be cited at least once in the final
@@ -152,7 +156,8 @@ each paper's `.bib` by hand.
    less polished one-click web import than Zotero's connector.
 2. **Sync INSPIRE-HEP (or ADS) exports without creating duplicates.** Before
    importing a new BibTeX entry, check whether the library already has that
-   paper under its INSPIRE key or arXiv ID — not by title/author string match,
+   paper under its DOI, arXiv ID or INSPIRE record id — not by key or by
+   title/author string match,
    which misses formatting differences (see "Duplicate physical papers under
    different keys" below). Zotero: search by arXiv ID or DOI before adding: its
    built-in duplicate detector catches some but not all near-duplicates from
@@ -204,7 +209,7 @@ handle it; manual tweaks break on any bibliography addition/removal.
 - Cite Monte Carlo generators and tunes by version (e.g. Pythia 8.3 with a
   specific tune) — cite both the generator paper and the tune paper if they
   differ.
-- Avoid citation stuffing (a string of 5+ references for an uncontroversial
+- Avoid citation stuffing (a string of four or more references for an uncontroversial
   general statement) — pick the 1-2 most relevant/foundational.
 
 ## Linking supplemental material and data
@@ -227,6 +232,23 @@ live:
 - State clearly in the paper *which* venue holds the data (HEPData record number,
   a collaboration data-release URL, or a Zenodo/institutional DOI) rather than a
   vague "data available upon request," which most venues now discourage or forbid.
+
+### Preparing a HEPData record
+
+Sources: [hepdata_lib](https://github.com/HEPData/hepdata_lib) and the
+[submission format](https://hepdata-submission.readthedocs.io/en/latest/submission_yaml.html) (opened 2026-10-14).
+
+- `hepdata_lib` (Python, MIT licence; installed only with the user's approval) builds the submission from
+  arrays or ROOT objects; the code that runs it is hep-computing's.
+- `submission.yaml` lists one entry per table: a `name` (64 characters or less), a `description` close to the
+  figure or table caption, `keywords`, the `data_file`, and optionally its `location` in the paper ("Figure 8A"),
+  a `data_license` and `additional_resources` (code, ROOT files, likelihoods in HistFactory format).
+- One table per figure panel or paper table, with the same binning and units as the paper; give the covariance
+  (or correlation) matrix of the bins as its own table when the paper's uncertainties are correlated.
+- The record is linked to the paper's INSPIRE record; cite the HEPData record (its DOI) in the paper's data
+  availability statement.
+- Analysis preservation and reinterpretation (Rivet routines, REANA workflows, CERN Analysis Preservation) are
+  hep-analysis's (the analysis logic) and hep-computing's (the workflow); this skill only cites and describes them.
 
 ## Citing an accompanying Viewpoint or Synopsis
 
@@ -289,7 +311,9 @@ releasing restricted artifacts is outside the statement-writing task.
   from a typo in the key or an entry deleted during cleanup.
 - **Duplicate physical papers under different keys**: happens when co-authors
   independently pull the same INSPIRE entry with slightly different export
-  settings — dedupe by INSPIRE key or arXiv number, not by BibTeX key string.
+  settings — dedupe by DOI, arXiv number or INSPIRE record id, not by key.
 - **Self-citation imbalance**: a healthy reference list cites the field
   broadly, not disproportionately the authors' own prior work — referees
   notice and sometimes flag this explicitly.
+
+**Done when:** `check_manuscript.py --main` reports no missing or duplicate keys, and no two `.bib` entries share a DOI, arXiv id or INSPIRE record.

@@ -524,6 +524,197 @@
    }
   },
   {
+   "id": "ml-pml-anomaly-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Train an unsupervised anomaly detector on background-only events to search for new physics, with signal-injection tests.",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "weak supervision"
+   ],
+   "set": "PML"
+  },
+  {
+   "id": "ml-pml-anomaly-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "想用只含背景的事件訓練無監督的 anomaly detection 模型找新物理，並做訊號注入測試（weak supervision 相關）。",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "weak supervision"
+   ],
+   "set": "PML"
+  },
+  {
+   "id": "ml-pml-cwola-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Set up CWoLa weak supervision: train a classifier of signal region against sidebands in data, k-folded.",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "weak supervision"
+   ],
+   "set": "PML"
+  },
+  {
+   "id": "ml-pml-cwola-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "用 CWoLa（weak supervision）在資料中訓練訊號區對旁帶的分類器，並做 k-fold。",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "weak supervision"
+   ],
+   "set": "PML"
+  },
+  {
+   "id": "ml-pml-gnn-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Train a graph neural network that classifies hit-graph edges for ML track finding in our tracker.",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "classifiers and regressors"
+   ],
+   "set": "PML"
+  },
+  {
+   "id": "ml-pml-gnn-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "訓練一個圖神經網路對 hit 圖的邊做分類，用來做機器學習徑跡重建（classifiers and regressors）。",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "classifiers and regressors"
+   ],
+   "set": "PML"
+  },
+  {
+   "id": "ml-pml-decor-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "My jet tagger sculpts the background mass distribution; add mass decorrelation with DisCo and measure the sculpting.",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "mass decorrelation"
+   ],
+   "set": "PML"
+  },
+  {
+   "id": "ml-pml-decor-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我的 jet 標記器會扭曲背景質量分布，請加入 mass decorrelation（DisCo）並量化扭曲程度。",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "mass decorrelation"
+   ],
+   "set": "PML"
+  },
+  {
+   "id": "ml-pml-syst-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Make my classifier robust to the jet energy scale uncertainty with systematic-aware training.",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "systematic-aware training"
+   ],
+   "set": "PML"
+  },
+  {
+   "id": "ml-pml-syst-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請用 systematic-aware training 讓分類器對噴流能量標度的不確定度不敏感。",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "systematic-aware training"
+   ],
+   "set": "PML"
+  },
+  {
+   "id": "ml-pml-multi-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Train a multiclass PyTorch network that separates ttbar, W+jets and QCD events, with per-class working points.",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "classifiers and regressors",
+    "working points"
+   ],
+   "set": "PML"
+  },
+  {
+   "id": "ml-pml-multi-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "訓練一個多類別 PyTorch 分類器區分 ttbar、W+jets 與 QCD 事件，並為每個類別設定 working points。",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "classifiers and regressors",
+    "working points"
+   ],
+   "set": "PML"
+  },
+  {
+   "id": "ml-pml-omnifold-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Train the OmniFold classifiers that reweight my simulation to data at detector and particle level.",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "classifiers and regressors"
+   ],
+   "set": "PML",
+   "note": "training the reweighting classifiers is physics-ml; unfolding validity and coverage hand to hep-statistics (no neighbouring case: the hep-statistics description names no physics-ml exception, and changing it is out of scope)"
+  },
+  {
+   "id": "ml-pml-omnifold-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請訓練 OmniFold 的分類器（classifiers and regressors），在偵測器層與粒子層把模擬重新加權到資料。",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "classifiers and regressors"
+   ],
+   "set": "PML",
+   "note": "training the reweighting classifiers is physics-ml; unfolding validity and coverage hand to hep-statistics (no neighbouring case: the hep-statistics description names no physics-ml exception, and changing it is out of scope)"
+  },
+  {
+   "id": "ml-pml-surrogate-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Replace my slow detector simulation step with neural surrogates and flag queries outside the training domain.",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "surrogates"
+   ],
+   "set": "PML"
+  },
+  {
+   "id": "ml-pml-gen-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "用 normalizing flow 做量能器簇射的 generative models and fast simulation，並用物理量驗證。",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "generative models and fast simulation"
+   ],
+   "set": "PML"
+  },
+  {
+   "id": "ml-pml-sbi-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "用神經後驗估計做 ML-assisted or simulation-based inference (training side)，模型參數由模擬產生。",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "ML-assisted or simulation-based inference"
+   ],
+   "set": "PML"
+  },
+  {
    "id": "co-companion-ws-1",
    "lang": "en",
    "kind": "direct",

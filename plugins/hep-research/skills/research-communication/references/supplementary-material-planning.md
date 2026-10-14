@@ -30,3 +30,5 @@ Deliver a proposed outline and placement map, with a short list of missing input
 Do not invent supplementary results or move essential material silently. If asked
 to perform the reorganization, update both sides of every cross-reference and
 verify the rendered main paper and supplement using the available format tools.
+
+**Done when:** every item the main text points to exists in the supplement or data record, with a stable link.

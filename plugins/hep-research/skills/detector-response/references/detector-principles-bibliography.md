@@ -19,7 +19,10 @@ the textbooks are for principles.
 
 ## General and cross-cutting
 
-- **Particle Data Group reviews** (current edition, <https://pdg.lbl.gov/>):
+- **Particle Data Group reviews**: S. Navas et al. (Particle Data Group), Phys. Rev. D 110 (2024) 030001, and
+  later web updates (the 2025 URLs below; check <https://pdg.lbl.gov/> for a newer edition before citing). The
+  2024 *Passage of particles through matter* (revised March 2025) and *Particle detectors at accelerators* were
+  read 2026-10-14 for the detector-response audit corrections:
   *Passage of particles through matter* (<https://pdg.lbl.gov/2025/reviews/rpp2025-rev-passage-particles-matter.pdf>),
   *Particle detectors at accelerators* (<https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-accel.pdf>),
   *Particle detectors for non-accelerator physics* (<https://pdg.lbl.gov/2025/reviews/rpp2025-rev-particle-detectors-non-accel.pdf>),
@@ -149,6 +152,15 @@ criteria as above.
   2011), DOI 10.1017/CBO9780511778346. Astrophysical context.
 - T.-P. Li and Y.-Q. Ma, "Analysis methods for results in gamma-ray astronomy",
   Astrophys. J. 272 (1983) 317-324, DOI 10.1086/161295. ON/OFF significance.
+
+<!-- example: source citation (experiment named as the source of a general method or number) -->
+- **Read 2026-10-14 for the detector-response audit** (astroparticle corrections): Verzi for the Pierre Auger
+  Collaboration, PoS(ICRC2019)231 (energy-scale budget); Gesualdi et al., PoS(ICRC2021)473 (WHISP muon-scale
+  summary); LHAASO, arXiv:2505.14447 (proton knee); ANTARES, IceCube, LIGO and Virgo, arXiv:1703.06298 (+-500 s
+  window); DAMPE, Sci. Adv. 5 (2019) eaax3793, arXiv:1909.12860 (calorimetric unfolding); R. Nolty, Caltech thesis,
+  arXiv:hep-ex/0201015 (Störmer cutoff and the east-west effect); ECSS-E-ST-10-04C annex B.8 via SPENVIS; SIDC and
+  the Royal Observatory of Belgium (solar cycle 25 minimum and maximum).
+<!-- /example -->
 
 ## Simulation and reconstruction ([event reconstruction](event-reconstruction.md), [detector simulation](detector-simulation.md))
 

@@ -124,13 +124,16 @@ class PlantUmlRender(unittest.TestCase):
 
 
 class RealBundle(unittest.TestCase):
-    def run_script(self, name):
+    def run_script(self, name, *args):
         return subprocess.run(
-            [sys.executable, str(ROOT / "scripts" / name)], capture_output=True, text=True, timeout=600
+            [sys.executable, str(ROOT / "scripts" / name), *args], capture_output=True, text=True, timeout=600
         )
 
     def test_shipped_diagram_sources_pass(self):
-        result = self.run_script("check_diagram_sources.py")
+        """TikZ blocks are compiled only in the slow tier (HEP_SLOW_TESTS=1): CI runners may lack TeX (RC-A11, Q4)."""
+        import os
+        slow = os.environ.get("HEP_SLOW_TESTS") == "1"
+        result = self.run_script("check_diagram_sources.py", *([] if slow else ["--no-tikz"]))
         if result.returncode == 3:  # a renderer that cannot run here is not a defect in the sources: unverified, not failed
             self.skipTest("a diagram renderer is unavailable on this host: " + next(
                 (line for line in result.stdout.splitlines() if "environment" in line), result.stdout[-300:]))
@@ -229,7 +232,7 @@ class CoverageOutcomes(unittest.TestCase):
         self.assertEqual(outcomes, [("dot", "skipped"), ("mermaid", "lint-only"), ("mermaid", "source-error"),
                                     ("svg", "lint-only"), ("tikz", "skipped")])
         self.assertEqual(rep["blocks"][3]["renderer"], "xml")
-        self.assertIn("not compiled", rep["blocks"][4]["reason"])
+        self.assertIn("lualatex", rep["blocks"][4]["reason"], "no TeX engine on PATH: the TikZ block is skipped")
         self.assertEqual(rep["counts"]["total"], 5)
         self.assertEqual(sum(v for k, v in rep["counts"].items() if k != "total"), 5)
         self.assertEqual(rep["counts"]["rendered"], 0)

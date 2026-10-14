@@ -64,6 +64,7 @@ Everything below is **[General method]** or **[Proposal]** unless it carries a c
 
 ## Charge-sign-dependent modulation
 
+- **[General method; source SIDC]** Data from 2020 on fall in solar cycle 25 (minimum December 2019, Royal Observatory of Belgium, 15 September 2020; smoothed maximum October 2024, SIDC; both read 2026-10-14). State the solar-cycle phase and the heliospheric polarity state for every period in an analysis, and re-check the SILSO cycle table, since smoothed values are revised.
 - **[General method]** Solar modulation depends on the sign of the particle charge through drifts in the heliospheric magnetic field, whose polarity reverses over the solar cycle, so particles of opposite sign need not follow the same time variation. Comparing e⁺ with e⁻ or p̄ with p over time therefore requires the same time bins, rigidity or energy variable, exposure treatment, and sign-specific cutoff and charge-confusion handling.
 - **[General method]** A time-dependent ratio or fraction follows the ratio blueprint ([charged-cosmic-rays](../species/charged-cosmic-rays.md#ratio-or-fraction-blueprint)): cancellations are classified per effect and the numerator-denominator covariance is carried through time.
 - **[General method]** The measurement is the time dependence of the flux or ratio; a modulation model, a force-field parameter, or a drift interpretation is a separate model step with its own assumptions (see result interpretation in [source-policy](../sources/source-policy.md#result-interpretation)).

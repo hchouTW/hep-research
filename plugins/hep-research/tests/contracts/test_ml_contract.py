@@ -127,7 +127,10 @@ class MlSemanticsTests(unittest.TestCase):
     def test_weights_string_and_object_forms(self):
         doc = copy.deepcopy(CURRENT)
         doc["extension"]["weights"] = "generator weights"
-        self.assertTrue(v.validate_artifact(doc).ok)
+        self.assertIn("ml.weights_unstructured", codes(v.validate_artifact(doc)))  # free text: error from 2.8.0
+        legacy = copy.deepcopy(doc)
+        legacy["contract_version"] = legacy["versions"]["contracts"] = "2.7.0"
+        self.assertTrue(v.validate_artifact(legacy).ok)  # a 2.7 artifact keeps its outcome
         doc["extension"]["weights"] = {"source": "generator", "negative_weight_treatment": "clipped", "used_in": ["loss"]}
         self.assertIn("schema.any_of", codes(v.validate_artifact(doc)))
         doc["extension"]["weights"] = {"source": "generator", "negative_weight_treatment": "signed", "used_in": ["fit"]}
