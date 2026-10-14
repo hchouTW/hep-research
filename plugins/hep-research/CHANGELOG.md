@@ -49,7 +49,8 @@ new sidecars: revocation log and head, exposure and decision records, qualificat
   revoked by its byte digest, its canonical JSON digest or its project-relative path, and an input that cannot be read
   is refused (`protected.input_unreadable`); a qualification is revoked by id or digest; a link into a protected
   project is followed when the mode is decided; a project config that cannot be read, or a malformed one that names
-  `agent_policy`, switches protected mode on (`protected.config_unreadable`); malformed protected inputs are refusals,
+  `agent_policy`, switches protected mode on (`protected.config_unreadable`); `authoritative_copy.sha256` is the canonical
+  JSON SHA-256 of the policy without `authoritative_copy`, as the deployment's launcher computes it; malformed protected inputs are refusals,
   never crashes (`protected.input_malformed`); in protected mode an exposure record is read only as a protected input.
 - **Exposure and decision lineage (task P3; C12, T1.9, T4.3).** New sidecars `exposure_record.json` (per analysis and
   source snapshot: entries `{seq, release_id, via: session|relay, seen: [closed kinds], time, actor}`, each version
