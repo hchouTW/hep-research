@@ -35,22 +35,35 @@ class ScanVerdictTests(unittest.TestCase):
 
     def test_budget_arithmetic(self):
         budget = {"analysis": "ana", "limit": 100, "consumed": 0, "charges": []}
-        subs = [dict(sv.make_submission([self.output(f"o{i}.txt", " ".join("1" for _ in range(n)))], "ana", "rel-1", "s"),
-                     submission_id=f"sub-{i}") for i, n in enumerate((40, 40, 30, 20))]
-        budget, ok1 = sv.charge(budget, subs[0])
-        budget, ok2 = sv.charge(budget, subs[1])
-        refused, ok3 = sv.charge(budget, subs[2])  # 80 + 30 > 100: not scanned, not charged
+        files = [self.output(f"o{i}.txt", " ".join("1" for _ in range(n))) for i, n in enumerate((40, 40, 30, 20))]
+        subs = [dict(sv.make_submission([f], "ana", "rel-1", "s"), submission_id=f"sub-{i}") for i, f in enumerate(files)]
+        got = [{str(f): f.read_bytes()} for f in files]
+        budget, ok1 = sv.charge(budget, subs[0], got[0])
+        budget, ok2 = sv.charge(budget, subs[1], got[1])
+        refused, ok3 = sv.charge(budget, subs[2], got[2])  # 80 + 30 > 100: not scanned, not charged
         self.assertEqual((ok1, ok2, ok3), (True, True, False))
         self.assertEqual(budget["consumed"], 80)
         self.assertTrue(refused["exhausted"])
-        budget, ok4 = sv.charge(budget, subs[3])  # exactly reaches the limit
+        self.assertFalse(sv.charge(refused, subs[3], got[3])[1])  # exhausted stays exhausted
+        budget, ok4 = sv.charge(budget, subs[3], got[3])  # without the refused one: exactly reaches the limit
         self.assertTrue(ok4)
         self.assertTrue(budget["exhausted"])
         self.assertEqual([c["submission_id"] for c in budget["charges"]], ["sub-0", "sub-1", "sub-3"])
-        other, ok = sv.charge(budget, dict(subs[0], analysis="another"))
+        other, ok = sv.charge(budget, dict(subs[0], analysis="another"), got[0])
         self.assertFalse(ok)  # one analysis's budget never pays for another's
         with self.assertRaises(ValueError):
-            sv.charge({"analysis": "ana"}, subs[0])
+            sv.charge({"analysis": "ana"}, subs[0], got[0])
+
+    def test_the_service_recounts(self):
+        budget = {"analysis": "ana", "limit": 100, "consumed": 0, "charges": []}
+        f = self.output("o.txt", " ".join(str(i) for i in range(30)))
+        sub = sv.make_submission([f], "ana", "rel-1", "s")
+        lied = dict(sub, candidate_values=0)
+        new, ok = sv.charge(budget, lied, {str(f): f.read_bytes()})
+        self.assertTrue(ok)
+        self.assertEqual(new["consumed"], 30)  # charged by the recount, not by the claim
+        self.assertFalse(sv.charge(budget, sub, {str(f): b"0"})[1])  # bytes differ from the submitted digest
+        self.assertFalse(sv.charge(budget, sub, {})[1])
 
     def test_verdict_never_carries_detail(self):
         leak = self.output("table.txt", "bins: 12 30 47.0 25 9")

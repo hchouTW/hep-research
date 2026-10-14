@@ -78,6 +78,9 @@ class EventRemovalCounterexamples(unittest.TestCase):
         dropped = tf.event_removal(self.events, "m", REGION, drop_fields=["event_id"])
         self.assertNotIn("removal.index_fields", codes(dropped))
         self.assertTrue(all("event_id" not in e for e in dropped["released"]["events"]))
+        for name in ("run", "luminosityBlock", "eventNumber", "evtNo", "entry"):  # repeated or camelCase names too
+            evs = [{"m": e["m"], name: 7} for e in self.events]
+            self.assertIn("removal.index_fields", codes(tf.event_removal(evs, "m", REGION)), name)
         ms = [e["m"] for e in dropped["released"]["events"]]
         self.assertEqual(ms, sorted(ms))  # input order is not kept either
 
@@ -115,6 +118,10 @@ class CommonOffsetCounterexamples(unittest.TestCase):
         self.assertEqual(rel["released"]["uncertainties"], "withheld")
         self.assertIn("offset.uncertainties", codes(rel, uncertainties_released=True))
 
+    def test_integer_residue_at_large_values(self):
+        rel = tf.common_offset([1.0e7, 2.5e7 + 3, 4.0e7 + 11], SHIFT)
+        self.assertIn("offset.integer_residue", codes(rel))
+
     def test_two_offsets(self):
         xs = [1.5, 2.25, 4.0]
         a, b = tf.common_offset(xs, SHIFT), tf.common_offset(xs, SHIFT + 1.0)
@@ -129,7 +136,12 @@ class CommonScaleCounterexamples(unittest.TestCase):
         vals = rel["released"]["values"]
         self.assertAlmostEqual(min(vals) / 9.0, FACTOR)  # the smallest count is 9: its multiple gives the scale
         self.assertIn("scale.quantization", codes(rel))
-        self.assertNotIn("scale.quantization", codes(tf.common_scale([0.137, 0.522, 0.9013, 0.311], FACTOR)))
+        generic = [math.pi / 7, math.sqrt(2) / 3, math.e / 5, math.log(3) / 2]  # not multiples of a common unit
+        self.assertNotIn("scale.quantization", codes(tf.common_scale(generic, FACTOR)))
+        big = tf.common_scale([123457.0, 98765.0, 150001.0, 200003.0], FACTOR)  # high-statistics counts
+        self.assertIn("scale.quantization", codes(big))
+        # values printed to a few decimals are quantized too (multiples of 0.0001 times the scale): reported
+        self.assertIn("scale.quantization", codes(tf.common_scale([0.137, 0.522, 0.9013, 0.311], FACTOR)))
 
     def test_per_event_weights_are_refused(self):
         with self.assertRaises(ValueError):

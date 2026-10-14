@@ -317,5 +317,70 @@ class FormalEntryPointTests(unittest.TestCase):
         self.assertIn("permit.wrong_subject", {r["code"] for r in cm.exception.refusals})
 
 
+class ReviewFindingTests(unittest.TestCase):
+    """Regressions for the review of release B: each case failed open or raised before the fix."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.a = Analysis(Path(self.tmp.name)).start()
+
+    def tearDown(self):
+        self.a.stop()
+        self.tmp.cleanup()
+
+    def test_directory_and_empty_inputs(self):
+        a = self.a
+        self.assertIn("permit.wrong_subject", a.codes(inputs=[]))  # nothing compared is a refusal
+        self.assertEqual(a.codes(inputs=[a.art.parent]), set())  # a directory whose files are all covered
+        (a.art.parent / "extra.json").write_text('{"not": "covered"}')
+        self.assertIn("permit.wrong_subject", a.codes(inputs=[a.art.parent]))
+
+    def test_s3_execution_binds_the_execution_bundle(self):
+        a = self.a
+        a.write_permit(scope="s3-execution", use={"purpose": "fixed-execution", "description": "x"})
+        ctx = establish([a.art], project=a.proj)
+        got = {r["code"] for r in pm.verify(a.permit_path, ctx, scope="s3-execution", purpose="fixed-execution",
+                                            inputs=[a.art], execution_bundle_sha256="5" * 64)}
+        self.assertIn("permit.wrong_subject", got)
+        a.write_permit(scope="s3-execution", use={"purpose": "fixed-execution", "description": "x"},
+                       subject=dict(a.permit["subject"], execution_bundle_sha256="5" * 64))
+        got = {r["code"] for r in pm.verify(a.permit_path, ctx, scope="s3-execution", purpose="fixed-execution",
+                                            inputs=[a.art], execution_bundle_sha256="5" * 64)}
+        self.assertEqual(got, set())
+        got = {r["code"] for r in pm.verify(a.permit_path, ctx, scope="s3-execution", purpose="fixed-execution",
+                                            inputs=[a.art], execution_bundle_sha256="6" * 64)}
+        self.assertIn("permit.wrong_subject", got)
+
+    def test_every_recipe_in_the_bundle_is_the_attested_one(self):
+        a = self.a
+        other = dict(RECIPE, recipe_id="another-recipe")
+        a.pp.artifact("recipes/other.json", other)
+        a.bundle = ab.freeze(a.proj, "synthetic-analysis", ITEMS + [{"role": "recipe", "id": "another", "ref": "recipes/other.json"}])
+        (a.proj / "bundles" / "analysis.json").write_text(json.dumps(a.bundle))
+        a.write_attestation()
+        a.write_permit()
+        self.assertIn("permit.review_not_accepted", a.codes())
+
+    def test_relative_attestation_ref_is_read_from_the_project(self):
+        a = self.a
+        (a.proj / "att.json").write_text(json.dumps(a.att))
+        a.write_permit(review=dict(a.permit["review"], attestation_ref="att.json"))
+        cwd = os.getcwd()
+        os.chdir(self.tmp.name)
+        try:
+            self.assertEqual(a.codes(), set())
+        finally:
+            os.chdir(cwd)
+
+    def test_bad_refs_and_duplicate_keys_are_refusals(self):
+        a = self.a
+        broken = dict(a.bundle, items=[dict(it, ref="calib/efficiency.txt/x") if it["role"] == "calibration" else it
+                                       for it in a.bundle["items"]])
+        self.assertIn({"ref": "calib/efficiency.txt/x", "change": "unreadable"}, ab.verify(broken, a.proj)["differences"])
+        (a.proj / "dup.json").write_text('{"a": 1, "a": 2}')
+        with self.assertRaises(ab.BundleRefused):
+            ab.freeze(a.proj, "x", ITEMS + [{"role": "review", "id": "d", "ref": "dup.json"}])
+
+
 if __name__ == "__main__":
     unittest.main()

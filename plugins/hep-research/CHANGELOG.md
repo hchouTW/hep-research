@@ -43,6 +43,15 @@ new sidecars: revocation log and head, exposure and decision records, qualificat
 - **Tool contracts and scopes (task P5.4).** Contracts for `release_prepare.py`, `mask_blinded_bins.py` and
   `audit_blinded_outputs.py` (per-subcommand operations: `tool_contract.py` now compares each subcommand's own usage
   line); scopes `contracts/tool_scopes/{fixed-execution,validation}.json` checked in CI.
+- **Rules settled in the release-B review.** A formal-use permit must cover every input file, directories expanded
+  (links refused), and a use with no input file is refused; an S3-execution permit binds the frozen execution bundle
+  that runs; every recipe in the analysis bundle must be the attested one; a relative attestation path is read from
+  the project. Release preparation builds and checks everything before writing, creates files exclusively (the sealed
+  file owner-only, 0600), compares resolved paths, and refuses an existing sealed file, a `release_id` with path
+  characters and a manifest over the sealed file. The scan budget is charged by the service's recount of the received
+  bytes (never less than the submission states) and stays exhausted once refused. Residual checks recognize identifier
+  fields by name tokens (camelCase included), scaled counts up to 10^5 at float precision, and integer residues at
+  large values. Bad bundle refs and duplicate JSON keys are refusals.
 - **Scan-service interface (task P6.1).** New `contracts/scan_verdict.py` (`scan_submission.json`,
   `scan_verdict.json`): a closed agent-visible verdict (status and budget state only) and a per-analysis budget
   counted in candidate values tested, charged for every submission.

@@ -14,8 +14,8 @@ Response policy:
   - a submission that would exceed the budget is not scanned: refused-budget; after that the budget is exhausted.
 
 count_candidates(text) counts the numeric tokens of a text at the renderings the scanner reads (core.blinding NUMBER and
-grouped thousands); make_submission() digests the outputs and counts them. charge(budget, submission) is the service's
-budget arithmetic on a record {"analysis", "limit", "consumed", "charges": [{submission_id, candidate_values}]}: it
+grouped thousands); make_submission() digests the outputs and counts them. charge(budget, submission, contents) is the
+service's budget arithmetic, on its own recount of the received bytes, on a record {"analysis", "limit", "consumed", "charges": [{submission_id, candidate_values}]}: it
 returns the new record and whether the scan may run. Nothing here scans or authorizes anything.
 
 Usage: python3 contracts/scan_verdict.py submission --analysis A --release R --session S [--id ID] OUTPUT ...
@@ -67,16 +67,32 @@ def make_submission(outputs, analysis: str, release_id: str, session: str, submi
     return sub
 
 
-def charge(budget: dict, submission: dict) -> tuple[dict, bool]:
-    """(new budget record, scan allowed). Refuses (without charging) a submission that would exceed the limit, and
-    every submission of another analysis; a charged submission is charged whatever its result."""
+def recount(submission: dict, contents: dict) -> int | None:
+    """The service's own count of candidate values from the received bytes {ref: bytes}; None when an output is
+    missing or its bytes differ from the submitted SHA-256 (the submitter's own count is never trusted)."""
+    total = 0
+    for o in submission.get("outputs") or []:
+        data = contents.get(o.get("ref")) if isinstance(o, dict) else None
+        if not isinstance(data, bytes) or hashlib.sha256(data).hexdigest() != o.get("sha256"):
+            return None
+        total += count_candidates(data.decode("utf-8", "replace"))
+    return total
+
+
+def charge(budget: dict, submission: dict, contents: dict) -> tuple[dict, bool]:
+    """(new budget record, scan allowed). The charge is the service's recount from the received bytes (contents
+    {ref: bytes}), never less than the submission states. Refused without charging: another analysis, outputs that do
+    not match the submission, a budget already exhausted, or a submission that would exceed the limit (which marks the
+    budget exhausted for good). A charged submission is charged whatever its result."""
     if not isinstance(budget, dict) or not isinstance(budget.get("limit"), int) or budget["limit"] < 0:
         raise ValueError("a budget record needs an integer limit >= 0")
-    if submission.get("analysis") != budget.get("analysis"):
+    if submission.get("analysis") != budget.get("analysis") or budget.get("exhausted"):
         return dict(budget), False
-    n = submission.get("candidate_values")
-    if not isinstance(n, int) or isinstance(n, bool) or n < 0:
-        raise ValueError("candidate_values must be an integer >= 0")
+    n = recount(submission, contents)
+    declared = submission.get("candidate_values")
+    if n is None or not isinstance(declared, int) or isinstance(declared, bool) or declared < 0:
+        return dict(budget), False
+    n = max(n, declared)
     consumed = int(budget.get("consumed", 0))
     if consumed + n > budget["limit"]:
         return dict(budget, exhausted=True), False

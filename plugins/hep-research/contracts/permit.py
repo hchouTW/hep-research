@@ -16,10 +16,13 @@ purpose, an actor, a budget of uses, a validity window and a nonce. verify() ref
   permit.wrong_use               another purpose than the entry point's
   permit.bundle_changed          the analysis bundle at analysis_bundle_ref is missing, has another digest, or no longer
                                  verifies against the project (a changed spec, recipe, calibration or plugin release)
-  permit.wrong_subject           an input whose byte or canonical digest the permit does not list
+  permit.wrong_subject           an input (a file, or a file under an input directory) whose byte or canonical digest
+                                 the permit does not list; no input file at all; for s3-execution, another execution
+                                 bundle than the one bound
   permit.review_missing          formal-use permit without a review block
   permit.attestation_mismatch    the attestation file differs from the bound digest, or is about another bundle
-  permit.review_not_accepted     the review axis is not accepted-as-recorded for the required roles
+  permit.review_not_accepted     the review axis is not accepted-as-recorded for the required roles, or the bundle
+                                 holds a recipe that is not the attested one
   permit.review_out_of_scope     the use's purpose is not one the review covers (P5.3)
   permit.attestation_inactive    the lifecycle axis is not active (revoked, expired, superseded, unknown, ...)
   permit.attestation_unsupported a capability the attestation requires is not implemented by this reader
@@ -57,7 +60,7 @@ def _r(code: str, path: str, message: str) -> dict:
 
 def input_digests(path) -> set[str]:
     """The byte digest of a file and, for JSON, its canonical digest (either may be listed in a permit)."""
-    data = Path(path).read_bytes()
+    data = Path(path).read_bytes()  # OSError, or ValueError for an unusable path: the caller refuses
     out = {hashlib.sha256(data).hexdigest()}
     try:
         out.add(canonical_sha256(json.loads(data.decode("utf-8"))))
@@ -94,7 +97,8 @@ def _review(permit: dict, bundle: dict, root: Path, ctx: Context, purpose: str, 
     rv = permit.get("review")
     if not isinstance(rv, dict):
         return [_r("permit.review_missing", "$permit.review", "a formal-use permit binds the attestation the gate checked")]
-    chk = read_unchecked(rv["attestation_ref"])  # bound by its digest: where it is stored does not matter
+    ref = Path(rv["attestation_ref"])
+    chk = read_unchecked(ref if ref.is_absolute() else root / ref)  # bound by its digest: where it is stored does not matter
     att = None
     if chk.ok:
         try:
@@ -112,6 +116,10 @@ def _review(permit: dict, bundle: dict, root: Path, ctx: Context, purpose: str, 
                 recipe = json.loads((root / it["ref"]).read_text(encoding="utf-8"))
             except (OSError, ValueError):
                 recipe = None
+    other = sorted(it["ref"] for it in bundle["items"] if it["role"] == "recipe" and it["sha256"] != recipe_sha)
+    if other:
+        return [_r("permit.review_not_accepted", "$attestation.subject.scope.recipe",
+                   f"bundle recipes {other} are not the attested recipe: each recipe that can run needs its review")]
     use = dict({k: v for k, v in scope.items() if k != "purposes"}, purposes=[purpose]) if isinstance(scope, dict) else None
     status = ctx.revocations
     out = evaluate(att, bundle=bundle, recipe=recipe, evidence_root=root, revocations=status,
@@ -132,9 +140,30 @@ def _review(permit: dict, bundle: dict, root: Path, ctx: Context, purpose: str, 
     return refusals
 
 
+def _files(paths) -> tuple[list[Path], list[dict]]:
+    """The regular files a use reads: files as given, directories expanded (links inside refused)."""
+    files, refusals = [], []
+    for p in paths:
+        try:
+            path = Path(p)
+            if path.is_dir():
+                for q in sorted(path.rglob("*")):
+                    if q.is_symlink():
+                        refusals.append(_r("permit.wrong_subject", str(q), "a link inside an input directory is refused"))
+                    elif q.is_file():
+                        files.append(q)
+            else:
+                files.append(path)
+        except (OSError, ValueError):
+            refusals.append(_r("permit.wrong_subject", str(p), "this input cannot be read"))
+    return files, refusals
+
+
 def verify(permit_path, ctx: Context, *, scope: str = "formal-use", purpose: str = FORMAL_PURPOSE, inputs=(),
-           project_root=None, now: datetime.datetime | None = None, account: Account | None = None) -> list[dict]:
-    """The refusals of a permit for one use (empty when nothing is refused). See the module docstring."""
+           project_root=None, now: datetime.datetime | None = None, account: Account | None = None,
+           execution_bundle_sha256: str | None = None) -> list[dict]:
+    """The refusals of a permit for one use (empty when nothing is refused). See the module docstring. For scope
+    s3-execution the frozen execution bundle about to run must be given and equal the permit's."""
     from contracts.analysis_bundle import verify as verify_bundle
     now = now or datetime.datetime.now(datetime.UTC)
     if permit_path is None:
@@ -173,29 +202,41 @@ def verify(permit_path, ctx: Context, *, scope: str = "formal-use", purpose: str
         bundle = json.loads((root / permit["subject"]["analysis_bundle_ref"]).read_text(encoding="utf-8"))
     except (OSError, ValueError):
         bundle = None
-    if not isinstance(bundle, dict) or bundle.get("bundle_digest") != permit["subject"]["analysis_bundle_sha256"] \
-            or verify_bundle(bundle, root, check_plugin=True)["status"] != "identical":
+    try:
+        bundle_ok = isinstance(bundle, dict) and bundle.get("bundle_digest") == permit["subject"]["analysis_bundle_sha256"] \
+            and verify_bundle(bundle, root, check_plugin=True)["status"] == "identical"
+    except (OSError, ValueError, TypeError, KeyError):
+        bundle_ok = False
+    if not bundle_ok:
         refusals.append(_r("permit.bundle_changed", "$permit.subject",
                            "the analysis bundle is missing, another one, or no longer matches the project"))
         bundle = None
     allowed = set(permit["subject"]["artifacts"])
-    for p in inputs:
+    files, problems = _files(inputs)
+    refusals += problems
+    if not files:
+        refusals.append(_r("permit.wrong_subject", "$inputs", "no input file to compare with the permit's subject"))
+    for f in files:
         try:
-            if Path(p).is_dir():
-                continue
-            if not (input_digests(p) & allowed):
-                refusals.append(_r("permit.wrong_subject", str(p), "this input is not covered by the permit"))
-        except OSError:
-            refusals.append(_r("permit.wrong_subject", str(p), "this input cannot be read"))
+            if not (input_digests(f) & allowed):
+                refusals.append(_r("permit.wrong_subject", str(f), "this input is not covered by the permit"))
+        except (OSError, ValueError):
+            refusals.append(_r("permit.wrong_subject", str(f), "this input cannot be read"))
+    if scope == "s3-execution":
+        bound = permit["subject"].get("execution_bundle_sha256")
+        if not bound or bound != execution_bundle_sha256:
+            refusals.append(_r("permit.wrong_subject", "$permit.subject.execution_bundle_sha256",
+                               "an S3 execution permit binds the frozen execution bundle that runs"))
     if scope == "formal-use" and bundle is not None:
         refusals += _review(permit, bundle, root, ctx, purpose, now)
     return refusals
 
 
-def checker(permit_path, purpose: str = FORMAL_PURPOSE, scope: str = "formal-use"):
+def checker(permit_path, purpose: str = FORMAL_PURPOSE, scope: str = "formal-use", execution_bundle_sha256=None):
     """The formal_check for core.protected.guard.guard(): (ctx, paths) -> refusals."""
     def check(ctx, paths):
-        return verify(permit_path, ctx, scope=scope, purpose=purpose, inputs=paths)
+        return verify(permit_path, ctx, scope=scope, purpose=purpose, inputs=paths,
+                      execution_bundle_sha256=execution_bundle_sha256)
     return check
 
 

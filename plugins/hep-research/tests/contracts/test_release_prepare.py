@@ -137,5 +137,59 @@ class ReleasePrepareTests(unittest.TestCase):
                                       "--manifest-out", str(self.d / "r9" / "m.json")]), 1)
 
 
+class ReviewFindingTests(unittest.TestCase):
+    """Regressions for the review of release B (release preparation)."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.d = Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_sealed_file_is_private_and_never_overwritten_or_inside(self):
+        import os
+        rel = RELEASES["common-offset"]()
+        rp.prepare(rel, META, self.d / "r", self.d / "c" / "sealed.json", code_digest=CODE)
+        self.assertEqual(os.stat(self.d / "c" / "sealed.json").st_mode & 0o777, 0o600)
+        with self.assertRaises(rp.PrepareRefused) as cm:
+            rp.prepare(rel, META, self.d / "r2", self.d / "c" / "sealed.json", code_digest=CODE)
+        self.assertEqual(cm.exception.code, "prepare.sealed_exists")
+        (self.d / "other").mkdir()
+        alias = self.d / "other" / ".." / "r3" / "sealed.json"  # resolves into the release directory
+        with self.assertRaises(rp.PrepareRefused) as cm:
+            rp.prepare(rel, META, self.d / "r3", alias, code_digest=CODE)
+        self.assertEqual(cm.exception.code, "prepare.sealed_in_release")
+        (self.d / "link").symlink_to(self.d / "r4", target_is_directory=True)
+        (self.d / "r4").mkdir()
+        with self.assertRaises(rp.PrepareRefused) as cm:
+            rp.prepare(rel, META, self.d / "r4", self.d / "link" / "sealed.json", code_digest=CODE)
+        self.assertEqual(cm.exception.code, "prepare.sealed_in_release")
+
+    def test_checks_run_before_anything_is_written(self):
+        rel = dict(RELEASES["common-scale"]())
+        rel.pop("protected")
+        with self.assertRaises(rp.PrepareRefused):
+            rp.prepare(rel, META, self.d / "r", self.d / "s.json", code_digest=CODE)
+        self.assertFalse((self.d / "r").exists() or (self.d / "s.json").exists())
+        with self.assertRaises(rp.PrepareRefused) as cm:
+            rp.prepare(RELEASES["common-scale"](), dict(META, release_id="../../x"), self.d / "r", self.d / "s.json",
+                       code_digest=CODE)
+        self.assertEqual(cm.exception.code, "prepare.bad_release_id")
+
+    def test_manifest_never_replaces_the_sealed_file(self):
+        import contextlib
+        import io
+        rel_file, meta_file = self.d / "release.json", self.d / "meta.json"
+        rel_file.write_text(json.dumps(RELEASES["binned-mask"]()))
+        meta_file.write_text(json.dumps(META))
+        with contextlib.redirect_stdout(io.StringIO()):
+            code = rp.main(["--release", str(rel_file), "--meta", str(meta_file), "--out", str(self.d / "rel"),
+                            "--sealed-out", str(self.d / "s.json"), "--manifest-out", str(self.d / "s.json"),
+                            "--code-digest", CODE])
+        self.assertEqual(code, 1)
+        self.assertFalse((self.d / "rel").exists())
+
+
 if __name__ == "__main__":
     unittest.main()

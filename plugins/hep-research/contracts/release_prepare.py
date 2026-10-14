@@ -29,6 +29,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -66,7 +67,7 @@ def related(meta: dict, ledger, analysis, exposure_record) -> list[str]:
     rid, src = meta["release_id"], meta["source"]["sha256"]
     found = set()
     for e in ledger or []:
-        if isinstance(e, dict) and e.get("release_id") != rid and (
+        if isinstance(e, dict) and isinstance(e.get("release_id"), str) and e["release_id"] != rid and (
                 (analysis is not None and e.get("analysis") == analysis) or e.get("source_sha256") == src):
             found.add(e["release_id"])
     for e in (exposure_record or {}).get("entries") or []:
@@ -75,24 +76,48 @@ def related(meta: dict, ledger, analysis, exposure_record) -> list[str]:
     return sorted(found)
 
 
+RELEASE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
+
+
+def _write_new(path: Path, data: bytes, mode: int) -> None:
+    """Create a file that does not exist yet, without following a link (never overwrite)."""
+    fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0), mode)
+    with os.fdopen(fd, "wb") as fh:
+        fh.write(data)
+
+
+def _inside(path: Path, root: Path) -> bool:
+    return path == root or root in path.parents
+
+
 def prepare(release: dict, meta: dict, out_dir, sealed_out, *, ledger=None, analysis=None, exposure_record=None,
             code_digest=None, rtol: float = 1e-9) -> dict:
-    """Write the release directory and the sealed file; return the draft manifest. See the module docstring."""
+    """Write the release directory and the sealed file; return the draft manifest. See the module docstring. Every
+    check runs and every document is built before anything is written; files are created, never overwritten."""
     guard("contracts.release_prepare.prepare", paths=[out_dir, sealed_out])
     if not isinstance(release, dict) or release.get("mode") not in MODES or "released" not in release:
         raise PrepareRefused("prepare.not_a_release", f"not a transform output (mode one of {list(MODES)})")
+    if not (isinstance(release.get("protected"), list) and release["protected"] and isinstance(release.get("retained"), list)
+            and isinstance(release.get("sealed", []), list)):
+        raise PrepareRefused("prepare.not_a_release", "a transform output has protected, retained and sealed lists")
     missing = [k for k in META_KEYS if k not in meta]
     if missing:
         raise PrepareRefused("prepare.meta_incomplete", f"META needs {missing}")
+    if not (isinstance(meta["release_id"], str) and RELEASE_ID.match(meta["release_id"])):
+        raise PrepareRefused("prepare.bad_release_id", "release_id: letters, digits, '.', '_', '-' only")
+    if not (isinstance(meta["source"], dict) and isinstance(meta["source"].get("sha256"), str)):
+        raise PrepareRefused("prepare.meta_incomplete", "META source needs a sha256")
     bad = _keyish(release.get("parameters", {}))
     if bad:
         raise PrepareRefused("prepare.keys_present", f"key-like parameter names {bad}")
-    out = Path(out_dir).absolute()
-    sealed_path = Path(sealed_out).absolute()
-    if sealed_path == out or out in sealed_path.parents:
+    out = Path(out_dir).resolve()
+    sealed_path = Path(sealed_out).resolve()
+    if _inside(sealed_path, out):
         raise PrepareRefused("prepare.sealed_in_release", "the sealed file never goes into the release directory")
-    if out.exists() and (out.is_symlink() or not out.is_dir() or any(out.iterdir())):
+    if out.exists() and (Path(out_dir).is_symlink() or not out.is_dir() or any(out.iterdir())):
         raise PrepareRefused("prepare.out_not_empty", f"{out} exists and is not an empty directory")
+    if sealed_path.exists() or Path(sealed_out).is_symlink():
+        raise PrepareRefused("prepare.sealed_exists", "the sealed file exists: it is never overwritten")
     if code_digest is None:
         ident = plugin_release()
         code_digest = ident.get("digest")
@@ -100,19 +125,13 @@ def prepare(release: dict, meta: dict, out_dir, sealed_out, *, ledger=None, anal
         raise PrepareRefused("prepare.code_unknown", "the transform code has no recorded identity: give --code-digest")
     if not 0 < rtol <= MAX_SEALED_RTOL:
         raise PrepareRefused("prepare.bad_rtol", f"rtol must be in (0, {MAX_SEALED_RTOL:g}]")
-    out.mkdir(parents=True, exist_ok=True)
     top = dict(release["released"]) if isinstance(release["released"], dict) else {"released": release["released"]}
     # the transform's description sits under 'blinding', a structure key the sealed-value scan skips (bin edges and
     # region bounds are not data)
     top["blinding"] = dict(top.get("blinding") or {}, mode=release["mode"], parameters=release.get("parameters", {}))
     body = (json.dumps(top, indent=1, sort_keys=True) + "\n").encode("utf-8")
-    fd = os.open(out / "released.json", os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0), 0o644)
-    with os.fdopen(fd, "wb") as fh:
-        fh.write(body)
     sealed = [x for x in release.get("sealed", []) if x != 0]
     sealed_doc = {"sealed": sealed, "rtol": rtol} if sealed else {"sealed": [], "nothing_sealable": True, "rtol": rtol}
-    sealed_path.parent.mkdir(parents=True, exist_ok=True)
-    sealed_path.write_text(json.dumps(sealed_doc) + "\n", encoding="utf-8")
     manifest = {"manifest_version": "1.0.0", "release_id": meta["release_id"], "source": meta["source"],
                 "artifacts": [{"path": "released.json", "sha256": hashlib.sha256(body).hexdigest(), "size": len(body),
                                "format": "json"}],
@@ -125,6 +144,10 @@ def prepare(release: dict, meta: dict, out_dir, sealed_out, *, ledger=None, anal
                 "related_releases": related(meta, ledger, analysis, exposure_record)}
     if "composition_review" in meta:
         manifest["composition_review"] = meta["composition_review"]
+    out.mkdir(parents=True, exist_ok=True)
+    _write_new(out / "released.json", body, 0o644)
+    sealed_path.parent.mkdir(parents=True, exist_ok=True)
+    _write_new(sealed_path, (json.dumps(sealed_doc) + "\n").encode("utf-8"), 0o600)  # owner-only: it holds the secrets
     return manifest
 
 
@@ -149,10 +172,13 @@ def main(argv=None) -> int:
         print(json.dumps({"status": "unreadable", "error": str(exc)}))
         return 2
     rid = (docs["meta"] or {}).get("release_id") if isinstance(docs["meta"], dict) else None
-    mout = args.manifest_out or args.out.absolute().parent / f"{rid}.manifest.draft.json"
-    if mout.absolute() == args.out.absolute() or args.out.absolute() in mout.absolute().parents:
-        print(json.dumps({"status": "refused", "code": "prepare.manifest_in_release",
-                          "error": "the draft manifest is not a release artifact"}))
+    if not (isinstance(rid, str) and RELEASE_ID.match(rid)):
+        print(json.dumps({"status": "refused", "code": "prepare.bad_release_id", "error": "release_id: letters, digits, '.', '_', '-'"}))
+        return 1
+    mout = (args.manifest_out or args.out.absolute().parent / f"{rid}.manifest.draft.json").resolve()
+    if _inside(mout, args.out.resolve()) or mout == args.sealed_out.resolve() or mout.exists():
+        print(json.dumps({"status": "refused", "code": "prepare.manifest_misplaced",
+                          "error": "the draft manifest goes outside the release, not over the sealed file or an existing file"}))
         return 1
     if not (isinstance(docs["release"], dict) and isinstance(docs["meta"], dict)):
         print(json.dumps({"status": "unreadable", "error": "--release and --meta are JSON objects"}))
@@ -166,7 +192,7 @@ def main(argv=None) -> int:
     except (OSError, TypeError, KeyError) as exc:
         print(json.dumps({"status": "unreadable", "error": f"{type(exc).__name__}: {exc}"}))
         return 2
-    mout.write_text(json.dumps(manifest, indent=1) + "\n", encoding="utf-8")
+    _write_new(mout, (json.dumps(manifest, indent=1) + "\n").encode("utf-8"), 0o644)
     print(json.dumps({"status": "prepared", "manifest": str(mout), "release_dir": str(args.out),
                       "sealed_file": str(args.sealed_out), "related_releases": manifest["related_releases"],
                       "note": "a draft: approval, the full release_manifest.py check and publication are the custodian's"}))

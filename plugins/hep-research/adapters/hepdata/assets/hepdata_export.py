@@ -123,7 +123,7 @@ def build_tables(doc: dict, base: Path, table_name: str, description: str, permi
                  inputs=()) -> tuple[str, list[tuple[dict, dict]]]:
     # publication is formal use: in protected mode it needs a formal-use permit covering the inputs (contracts/permit.py)
     guard("hepdata_export.build_tables", paths=[base, *inputs], use="formal",
-          formal_check=permit_checker(permit) if permit else None)
+          formal_check=permit_checker(permit) if permit else None, formal_paths=list(inputs) or [base])
     rep = validate_artifact(doc)
     if not rep.ok:
         raise Refused("the artifact does not validate: " + "; ".join(f"{f.path} {f.code}" for f in rep.errors[:5]))
@@ -213,7 +213,8 @@ def write_hepdata_lib(out: Path, comment: str, entries) -> list[str]:
     return sorted(p.name for p in out.iterdir() if p.suffix == ".yaml")
 
 
-@protected_main("hepdata_export", use="formal", capabilities=KNOWN_CAPABILITIES, formal_check_factory=permit_checker)
+@protected_main("hepdata_export", use="formal", capabilities=KNOWN_CAPABILITIES, formal_check_factory=permit_checker,
+                formal_inputs=("--artifact",))
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--artifact", type=Path, required=True, help="a dataset-record or binned prediction artifact")

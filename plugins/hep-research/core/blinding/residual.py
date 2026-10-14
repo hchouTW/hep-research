@@ -5,7 +5,7 @@ knows about its context, and reports each way it can see that the release still 
 
   binned-mask      mask.region_mismatch_with_other (another release of the source masks another region)
   event-removal    removal.totals_elsewhere (a cutflow or metadata total of the source is agent-visible),
-                   removal.index_fields (a kept field looks like a sequential identifier with gaps),
+                   removal.index_fields (a kept integer field is named like an identifier or a sequence),
                    removal.region_mismatch_with_other
   common-offset    offset.boundary (a declared physical boundary or reference point bounds or fixes the offset),
                    offset.integer_residue (the released values share one fractional part: they were integers),
@@ -21,32 +21,41 @@ composition-review question; an empty result is not a proof that nothing leaks.
 """
 from __future__ import annotations
 
-import math
 import re
 
 from core.blinding.transforms import LIMITS
 
-ID_LIKE = re.compile(r"(^|_)(id|event|evt|run|lumi|block|index|idx|seq|number)($|_)", re.I)
+ID_TOKENS = frozenset({"id", "event", "evt", "run", "lumi", "luminosity", "block", "index", "idx", "seq", "number",
+                       "no", "num", "entry", "nr", "orbit", "bx", "bunch", "ls"})
+
+
+def _id_like(name: str) -> bool:
+    """A field name whose tokens (snake_case, camelCase, digits split off) name an identifier or a sequence."""
+    tokens = re.findall(r"[A-Z]?[a-z]+|[A-Z]+(?![a-z])|\d+", name)
+    return any(t.lower() in ID_TOKENS for t in tokens)
 
 
 def _risk(code: str, message: str) -> dict:
     return {"code": code, "message": message}
 
 
-MAX_COUNT = 1000  # smallest count tried: scaled counts up to this are recognized
+MAX_COUNT = 10 ** 5  # largest smallest-count recognized in scaled counts (a fraction closer than float precision)
 
 
-def _near_integer_multiples(values: list[float], tol: float = 1e-9) -> bool:
-    """True when every nonzero value is (close to) an integer multiple of one unit, the smallest nonzero magnitude
-    divided by an integer up to MAX_COUNT: the signature of scaled counts."""
+def _near_integer_multiples(values: list[float], tol: float = 1e-14) -> bool:
+    """True when every nonzero value is (close to) an integer multiple of one unit: each ratio to the smallest
+    magnitude is a fraction with a denominator up to MAX_COUNT, exact to float precision. Scaled counts n_i * a give
+    ratios n_i / n_min exactly; generic real numbers do not."""
+    from fractions import Fraction
     nz = sorted(abs(v) for v in values if v != 0)
     if len(nz) < 3:
         return False
-    for k in range(1, MAX_COUNT + 1):
-        unit = nz[0] / k
-        if all(abs(v / unit - round(v / unit)) < 1e-6 + tol * (v / unit) for v in nz):
-            return True
-    return False
+    for v in nz:
+        r = v / nz[0]
+        f = Fraction(r).limit_denominator(MAX_COUNT)
+        if abs(float(f) - r) > tol * max(1.0, r):
+            return False
+    return True
 
 
 def residual_checks(release: dict, context: dict | None = None) -> list[dict]:
@@ -72,15 +81,19 @@ def residual_checks(release: dict, context: dict | None = None) -> list[dict]:
         fields = {k for ev in events if isinstance(ev, dict) for k in ev}
         for f in sorted(fields):
             vals = [ev.get(f) for ev in events if isinstance(ev.get(f), int) and not isinstance(ev.get(f), bool)]
-            if ID_LIKE.search(f) and len(vals) == len(events) and len(set(vals)) == len(vals) and vals:
-                risks.append(_risk("removal.index_fields", f"field {f!r} looks like a sequential identifier: gaps reveal "
-                                                           "where events were removed (drop it)"))
+            if _id_like(f) and vals:
+                risks.append(_risk("removal.index_fields", f"field {f!r} looks like an identifier or sequence number: "
+                                                           "gaps and counts per value reveal where events were removed "
+                                                           "(drop it)"))
     if mode == "common-offset":
         vals = [v for v in rel.get("values") or [] if isinstance(v, (int, float))]
         if ctx.get("nonnegative") or ctx.get("reference_points"):
             risks.append(_risk("offset.boundary", "a physical boundary or reference point bounds or fixes the offset"))
-        fr = {round(math.modf(v)[0] % 1.0, 9) for v in vals}
-        if len(vals) >= 3 and len(fr) == 1:
+        fracs = [v % 1.0 for v in vals]
+        same = len(vals) >= 3 and all(
+            min(abs(f - fracs[0]), 1 - abs(f - fracs[0])) <= 8 * 2.2e-16 * max(1.0, abs(v)) + 1e-12
+            for f, v in zip(fracs, vals))
+        if same:
             risks.append(_risk("offset.integer_residue", "the released values share one fractional part: the inputs were "
                                                          "integers and the offset's fractional part is revealed"))
         if ctx.get("uncertainties_released") or rel.get("uncertainties") not in (None, "withheld"):

@@ -56,24 +56,36 @@ def _read(root: Path, ref: str) -> bytes:
     if rel.is_absolute() or ".." in rel.parts or not rel.parts:
         raise BundleRefused("bundle.bad_ref", f"{ref!r}: refs are relative to the project root, without '..'")
     cur = root
-    for part in rel.parts:
-        cur = cur / part
-        try:
-            st = os.lstat(cur)
-        except FileNotFoundError:
-            raise BundleRefused("bundle.missing", f"{ref!r} does not exist") from None
-        if stat.S_ISLNK(st.st_mode):
-            raise BundleRefused("bundle.link", f"{ref!r}: a link on the path is refused")
-    if not stat.S_ISREG(os.lstat(cur).st_mode):
-        raise BundleRefused("bundle.not_regular", f"{ref!r} is not a regular file")
-    return cur.read_bytes()
+    try:
+        for part in rel.parts:
+            cur = cur / part
+            try:
+                st = os.lstat(cur)
+            except FileNotFoundError:
+                raise BundleRefused("bundle.missing", f"{ref!r} does not exist") from None
+            if stat.S_ISLNK(st.st_mode):
+                raise BundleRefused("bundle.link", f"{ref!r}: a link on the path is refused")
+        if not stat.S_ISREG(os.lstat(cur).st_mode):
+            raise BundleRefused("bundle.not_regular", f"{ref!r} is not a regular file")
+        return cur.read_bytes()
+    except BundleRefused:
+        raise
+    except (OSError, ValueError) as exc:  # a file used as a folder, a NUL byte, no permission
+        raise BundleRefused("bundle.unreadable", f"{ref!r}: {type(exc).__name__}") from None
+
+
+def _no_duplicates(pairs):
+    keys = [k for k, _ in pairs]
+    if len(keys) != len(set(keys)):
+        raise ValueError("duplicate key: two files with different content could share one canonical digest")
+    return dict(pairs)
 
 
 def item_digest(root: Path, ref: str) -> tuple[str, str]:
     data = _read(root, ref)
     if ref.lower().endswith(".json"):
         try:
-            return canonical_sha256(json.loads(data.decode("utf-8"))), "canonical-json"
+            return canonical_sha256(json.loads(data.decode("utf-8"), object_pairs_hook=_no_duplicates)), "canonical-json"
         except (UnicodeError, ValueError, RecursionError):
             raise BundleRefused("bundle.bad_json", f"{ref!r} is not JSON") from None
     return hashlib.sha256(data).hexdigest(), "bytes"
