@@ -35,7 +35,7 @@
   },
   "research-communication": {
    "references": 56,
-   "bytes": 390132,
+   "bytes": 391659,
    "uncited": 0
   }
  },
@@ -2658,7 +2658,7 @@
     "skills/research-communication/references/statistics-and-ml-papers.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ecc929c 2026-10-14"
+   "last_commit": "257b34b 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/claim-evidence-mapping.md",
@@ -2897,8 +2897,8 @@
   {
    "path": "skills/research-communication/references/grant-and-fellowship-proposal-writing.md",
    "owner": "research-communication",
-   "bytes": 3166,
-   "lines": 50,
+   "bytes": 4693,
+   "lines": 71,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md"
@@ -3382,7 +3382,7 @@
     "tests/skills/research_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "d208b51 2026-10-14"
+   "last_commit": "257b34b 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/supplementary-material-planning.md",

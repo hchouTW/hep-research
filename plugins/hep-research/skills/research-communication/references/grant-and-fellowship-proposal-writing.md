@@ -41,6 +41,27 @@ argument around evidence; do not reuse a paper's section structure directly.
    funder's own resubmission rules (page limits on the introduction/response
    section are common and often stricter than a journal's).
 
+## Funders outside the US
+
+The structure above is US-style (NIH Specific Aims, NSF Broader Impacts); other funders have their own forms:
+
+- **Taiwan, NSTC (國家科學及技術委員會) research projects**: applications are assembled from numbered forms; in current
+  university guides the research plan is form CM03 (研究計畫內容) and the abstracts and keywords form CM02, with page
+  limits that differ by department and by one-year or multi-year plans (guides found 2026-10-14; not an NSTC page).
+  Read the year's call and the department's rules on [nstc.gov.tw](https://www.nstc.gov.tw/) before drafting.
+- **ERC** (European Research Council): the call documents on [erc.europa.eu](https://erc.europa.eu/apply-grant) set
+  the parts of the proposal and their limits per grant type.
+- **JSPS** (Japan Society for the Promotion of Science): the programme pages on
+  [jsps.go.jp](https://www.jsps.go.jp/english/) and the year's application guidelines.
+
+### Bilingual proposals (Traditional Chinese and English)
+
+- Use the term bank of the National Academy for Educational Research, [樂詞網](https://terms.naer.edu.tw/), for the
+  Chinese term of a technical concept, and keep one term per concept (the project glossary).
+- Numbers, units, identifiers (DOIs, arXiv ids, grant numbers) and status labels (`preliminary`, `synthetic`) stay
+  exactly as in the source in both languages; a translation never rounds, converts or drops them.
+- Run `check_terminology.py` on both language versions with the same glossary.
+
 Deliver the proposal section-by-section against the call's actual required
 outline, with `[VALUE NEEDED: ...]` markers for any budget, effort, or
 institutional figure not supplied. Do not fabricate letters of support,
