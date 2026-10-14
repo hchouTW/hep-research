@@ -377,5 +377,34 @@ class ReviewFixes2LabelWords(unittest.TestCase):
         self.assertIsNotNone(NEGATED_RE.search("we have not yet rerun it"))
 
 
+class ReviewFixes2SmallClis(unittest.TestCase):
+    """RC-A14 --today must be a date; RC-A16 build_lit_matrix never overwrites its input."""
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
+
+    def call(self, module, *args):
+        mod = __import__(module)
+        out, err = io.StringIO(), io.StringIO()
+        with mock.patch("sys.stdout", out), mock.patch("sys.stderr", err):
+            code = mod.main([str(a) for a in args])
+        return code, out.getvalue() + err.getvalue()
+
+    def test_today_must_be_a_date(self):
+        inp = self.tmp / "in.json"
+        inp.write_text("{}", encoding="utf-8")
+        code, out = self.call("manage_literature", "import", inp, "--project-root", self.tmp, "--out", self.tmp / "o.json", "--today", "notadate")
+        self.assertEqual(code, 2, out)
+        self.assertIn("notadate", out)
+
+    def test_matrix_output_cannot_alias_input(self):
+        csv_path = self.tmp / "n.csv"
+        csv_path.write_text("key,year\na,2020\n", encoding="utf-8")
+        code, out = self.call("build_lit_matrix", csv_path, "-o", csv_path)
+        self.assertEqual(code, 2, out)
+        self.assertEqual(csv_path.read_text(encoding="utf-8"), "key,year\na,2020\n")
+
+
 if __name__ == "__main__":
     unittest.main()
