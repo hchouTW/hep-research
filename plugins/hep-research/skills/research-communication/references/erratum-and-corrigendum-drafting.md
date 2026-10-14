@@ -62,3 +62,5 @@ short template), with the error, its correction, and its impact on
 conclusions stated explicitly and separately. Use the venue's label, but never
 soften the classification: an author error is described as the authors'
 error even when the venue calls the notice an Erratum.
+
+**Done when:** the notice uses the venue's label, states whose error it was, quotes the old and corrected values, and says whether the conclusions change.

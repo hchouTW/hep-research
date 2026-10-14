@@ -81,3 +81,4 @@ performance and mission status are superseded by later publications. Rules:
     context-resolution steps in the skill's SKILL.md). Removed from this file 2026-10-14.
 <!-- /example -->
 
+**Done when:** every source used for a formula or API names its version or date, and anything not checked is marked unverified.

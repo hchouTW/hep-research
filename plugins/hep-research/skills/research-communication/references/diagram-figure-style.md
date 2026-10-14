@@ -94,3 +94,5 @@ Equation placement and export recipes are in [legends-panels-and-export.md](lege
 
 Grayscale test; column-width test; can a reader in the field name every arrow's meaning without
 the caption? Is anything in the figure absent from the text (or vice versa)?
+
+**Done when:** the figure passes the greyscale render, its smallest text meets the size floor at the printed width, and every style it uses is in its legend.

@@ -201,3 +201,5 @@ For theory papers, review articles, thesis chapters, proceedings, and the
 astroparticle/statistics-ML variants of this backbone, see
 `paper-genre-variants.md`. For a plain-language public/outreach summary, see
 `outreach-and-public-facing-summaries.md`.
+
+**Done when:** every section of the backbone is present or deliberately omitted, and the abstract's numbers match the results.

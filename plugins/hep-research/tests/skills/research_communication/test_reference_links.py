@@ -57,6 +57,11 @@ class ReferenceLinkTests(unittest.TestCase):
                     missing.append(f'{path.relative_to(ROOT)} -> {name}')
         self.assertEqual(missing, [])
 
+    def test_every_reference_has_a_completion_condition(self):
+        """RC-D2: each reference ends its task with a checkable 'Done when' line."""
+        missing = [p.name for p in sorted((SKILL / 'references').glob('*.md')) if 'Done when' not in p.read_text(encoding='utf-8')]
+        self.assertEqual(missing, [])
+
     def test_slug_matches_github(self):
         self.assertEqual(slug("Checking a collaboration's publication pattern"), 'checking-a-collaborations-publication-pattern')
 

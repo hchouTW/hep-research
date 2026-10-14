@@ -79,3 +79,5 @@ physics paper's supplemental material, which a referee may or may not open. See
 conventions (NeurIPS/ICML/ICLR/ACL vs. JMLR/TMLR vs. statistics journals),
 author-contribution statements, arXiv-first citation practice, and the
 single-shot rebuttal process that replaces a journal's multi-round revision.
+
+**Done when:** the draft follows the genre's backbone and its genre-specific sections are present.

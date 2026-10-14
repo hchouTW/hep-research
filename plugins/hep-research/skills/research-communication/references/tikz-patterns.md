@@ -125,3 +125,5 @@ Use `\only<2->{...}`, `\onslide<2->` or `\visible` on nodes/edges for progressiv
 - Externalize (`\usetikzlibrary{external}`) for large figures to speed compile.
 - The snippets here compile (`check_diagram_sources.py` with LuaHBTeX 1.24, TeX Live 2026, 2026-10-14);
   compiling is not inspecting: look at the output before publishing.
+
+**Done when:** the snippet compiles (`check_diagram_sources.py` with a TeX engine) and the rendered output was looked at.

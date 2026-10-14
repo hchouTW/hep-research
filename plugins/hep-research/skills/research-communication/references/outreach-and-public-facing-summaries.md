@@ -69,3 +69,4 @@ Why this distinction matters when drafting one of these for a user:
   see `citations-and-bibliography.md`'s note on citing an accompanying Viewpoint
   or Synopsis.
 
+**Done when:** every number matches the paper, the status (preliminary, published) is stated, and the voice and byline are the ones the user asked for.

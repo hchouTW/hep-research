@@ -369,3 +369,5 @@ value comes from a search engine's copy of that official page.
 | Astroparticle Physics (journal) | page/word limits, reference style, abstract length, highlights requirement: not verified (publisher pages returned HTTP 403). Take them from the journal's Guide for Authors | https://www.sciencedirect.com/journal/astroparticle-physics/publish/guide-for-authors (not fetchable) | 2026-10 |
 | A&A | `aa.cls`; Letters 3,000 words (search copy only, not verified); structured abstract optional (search copy). aanda.org returned HTTP 403; a "100-word Letter abstract" snippet conflicts and is unsourced | https://www.aanda.org/doc_journal/instructions/aadoc.pdf (not fetchable) | 2026-10 |
 | Statistics journals (JASA, Annals of Statistics) | not verified: the Annals page defers to a "Preparation of Manuscripts" page that was not followed, and tandfonline returned HTTP 403 | https://imstat.org/journals-and-publications/annals-of-statistics/annals-of-statistics-manuscript-submission/ | 2026-10 |
+
+**Done when:** the manuscript compiles in the venue's current class and meets the limits in the quick-reference table, rechecked when the row is older than a year.

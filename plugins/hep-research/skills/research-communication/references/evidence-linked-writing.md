@@ -64,3 +64,5 @@ included section file as its own document when its passages are checked.
 limitations, unresolved inputs). Draft from those facts; keep every status label in the sentence; put a missing number
 in a `[VALUE NEEDED: ...]` slot and its request in the claim's `unresolved_inputs`. Wording findings are advisory:
 quoted language, negations and another paper's claims are not the author's own assertion.
+
+**Done when:** `check_communication.py --checks manuscript` and `audit_claims.py` exit 0, or their open items are listed for the user.

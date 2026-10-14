@@ -135,3 +135,5 @@ Deliver findings the same way as the skill's other reading checks: the
 figure's locator, the specific concern, why it matters to the paper's
 claim, and what wasn't verified (e.g., no underlying data file was
 available, so any extracted value is approximate only).
+
+**Done when:** every value read off a figure is labelled approximate with its reading method, and nothing was computed from plotted values.

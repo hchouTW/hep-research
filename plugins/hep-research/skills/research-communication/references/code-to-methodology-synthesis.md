@@ -96,3 +96,5 @@ formulation with no owner is still unverified, not implicitly checked.
 - If the code is expected to change faster than the documentation could
   reasonably track, say so rather than presenting the manual as permanently
   current.
+
+**Done when:** every method statement cites the function or file it was read from, and what the code does not do is listed.

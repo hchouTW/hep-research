@@ -35,7 +35,7 @@
   },
   "research-communication": {
    "references": 54,
-   "bytes": 366716,
+   "bytes": 374186,
    "uncited": 0
   }
  },
@@ -2546,8 +2546,8 @@
   {
    "path": "skills/research-communication/references/academic-diagrams-guide.md",
    "owner": "research-communication",
-   "bytes": 10621,
-   "lines": 187,
+   "bytes": 10797,
+   "lines": 189,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/research-communication/README.md",
@@ -2556,7 +2556,7 @@
     "skills/research-communication/references/figures-and-tables.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "be42040 2026-10-14"
+   "last_commit": "9239237 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/academic-papers-guide.md",
@@ -2579,13 +2579,13 @@
     "tests/skills/research_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "4d2bbeb 2026-10-14"
+   "last_commit": "9239237 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/artifact-packaging-for-release.md",
    "owner": "research-communication",
-   "bytes": 2766,
-   "lines": 46,
+   "bytes": 2924,
+   "lines": 48,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -2598,8 +2598,8 @@
   {
    "path": "skills/research-communication/references/astroparticle-and-cosmic-ray-papers.md",
    "owner": "research-communication",
-   "bytes": 13191,
-   "lines": 208,
+   "bytes": 13387,
+   "lines": 210,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -2619,8 +2619,8 @@
   {
    "path": "skills/research-communication/references/citation-verification.md",
    "owner": "research-communication",
-   "bytes": 3768,
-   "lines": 66,
+   "bytes": 3941,
+   "lines": 68,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/research-communication/README.md",
@@ -2641,8 +2641,8 @@
   {
    "path": "skills/research-communication/references/citations-and-bibliography.md",
    "owner": "research-communication",
-   "bytes": 18420,
-   "lines": 301,
+   "bytes": 18570,
+   "lines": 303,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/research-communication/SKILL.md",
@@ -2663,8 +2663,8 @@
   {
    "path": "skills/research-communication/references/claim-evidence-mapping.md",
    "owner": "research-communication",
-   "bytes": 3800,
-   "lines": 68,
+   "bytes": 3973,
+   "lines": 70,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-statistics/references/statistical-inference-for-physics.md",
@@ -2686,8 +2686,8 @@
   {
    "path": "skills/research-communication/references/code-review-report.md",
    "owner": "research-communication",
-   "bytes": 5362,
-   "lines": 100,
+   "bytes": 5505,
+   "lines": 102,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -2700,8 +2700,8 @@
   {
    "path": "skills/research-communication/references/code-to-methodology-synthesis.md",
    "owner": "research-communication",
-   "bytes": 5596,
-   "lines": 99,
+   "bytes": 5721,
+   "lines": 101,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/assets/paper/code-to-methodology-manual-template.md",
@@ -2713,8 +2713,8 @@
   {
    "path": "skills/research-communication/references/comment-and-reply-exchange.md",
    "owner": "research-communication",
-   "bytes": 3189,
-   "lines": 51,
+   "bytes": 3355,
+   "lines": 53,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -2726,8 +2726,8 @@
   {
    "path": "skills/research-communication/references/conflict-of-interest-and-ethics-statements.md",
    "owner": "research-communication",
-   "bytes": 2466,
-   "lines": 39,
+   "bytes": 2591,
+   "lines": 41,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md"
@@ -2738,8 +2738,8 @@
   {
    "path": "skills/research-communication/references/diagram-captions.md",
    "owner": "research-communication",
-   "bytes": 3521,
-   "lines": 58,
+   "bytes": 3692,
+   "lines": 60,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-diagrams-guide.md",
@@ -2751,8 +2751,8 @@
   {
    "path": "skills/research-communication/references/diagram-figure-style.md",
    "owner": "research-communication",
-   "bytes": 6461,
-   "lines": 97,
+   "bytes": 6620,
+   "lines": 99,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-diagrams-guide.md"
@@ -2763,8 +2763,8 @@
   {
    "path": "skills/research-communication/references/diagrams-computer-science.md",
    "owner": "research-communication",
-   "bytes": 5485,
-   "lines": 95,
+   "bytes": 5620,
+   "lines": 97,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/assets/diagrams/ml-pipeline.md",
@@ -2776,8 +2776,8 @@
   {
    "path": "skills/research-communication/references/diagrams-hep.md",
    "owner": "research-communication",
-   "bytes": 6275,
-   "lines": 114,
+   "bytes": 6471,
+   "lines": 116,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/assets/diagrams/hep-analysis-pipeline.md",
@@ -2789,8 +2789,8 @@
   {
    "path": "skills/research-communication/references/diagrams-statistics.md",
    "owner": "research-communication",
-   "bytes": 6193,
-   "lines": 109,
+   "bytes": 6329,
+   "lines": 111,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/assets/diagrams/bayesian-model.md",
@@ -2802,8 +2802,8 @@
   {
    "path": "skills/research-communication/references/equation-and-notation-auditing.md",
    "owner": "research-communication",
-   "bytes": 3909,
-   "lines": 60,
+   "bytes": 4028,
+   "lines": 62,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-statistics/references/statistical-inference-for-physics.md",
@@ -2821,8 +2821,8 @@
   {
    "path": "skills/research-communication/references/erratum-and-corrigendum-drafting.md",
    "owner": "research-communication",
-   "bytes": 4393,
-   "lines": 65,
+   "bytes": 4549,
+   "lines": 67,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -2834,8 +2834,8 @@
   {
    "path": "skills/research-communication/references/evidence-linked-writing.md",
    "owner": "research-communication",
-   "bytes": 5267,
-   "lines": 67,
+   "bytes": 5403,
+   "lines": 69,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/research-communication/README.md",
@@ -2850,8 +2850,8 @@
   {
    "path": "skills/research-communication/references/figures-and-tables.md",
    "owner": "research-communication",
-   "bytes": 9576,
-   "lines": 156,
+   "bytes": 9754,
+   "lines": 158,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-diagrams-guide.md",
@@ -2869,8 +2869,8 @@
   {
    "path": "skills/research-communication/references/general-diagram-principles.md",
    "owner": "research-communication",
-   "bytes": 7671,
-   "lines": 138,
+   "bytes": 7812,
+   "lines": 140,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-diagrams-guide.md",
@@ -2882,8 +2882,8 @@
   {
    "path": "skills/research-communication/references/grant-and-fellowship-proposal-writing.md",
    "owner": "research-communication",
-   "bytes": 2978,
-   "lines": 48,
+   "bytes": 3166,
+   "lines": 50,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md"
@@ -2894,8 +2894,8 @@
   {
    "path": "skills/research-communication/references/graphviz-patterns.md",
    "owner": "research-communication",
-   "bytes": 3366,
-   "lines": 77,
+   "bytes": 3460,
+   "lines": 79,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/examples/statistics/02-hierarchical-bayesian-model-plate.md",
@@ -2907,8 +2907,8 @@
   {
    "path": "skills/research-communication/references/interpreting-scientific-graphics.md",
    "owner": "research-communication",
-   "bytes": 8173,
-   "lines": 138,
+   "bytes": 8314,
+   "lines": 140,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-diagrams-guide.md",
@@ -2923,8 +2923,8 @@
   {
    "path": "skills/research-communication/references/latex-mechanics-and-tooling.md",
    "owner": "research-communication",
-   "bytes": 13292,
-   "lines": 237,
+   "bytes": 13441,
+   "lines": 239,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -2941,8 +2941,8 @@
   {
    "path": "skills/research-communication/references/latex-venue-setup.md",
    "owner": "research-communication",
-   "bytes": 25141,
-   "lines": 372,
+   "bytes": 25306,
+   "lines": 374,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -2959,8 +2959,8 @@
   {
    "path": "skills/research-communication/references/legends-panels-and-export.md",
    "owner": "research-communication",
-   "bytes": 6388,
-   "lines": 108,
+   "bytes": 6554,
+   "lines": 110,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-diagrams-guide.md",
@@ -2972,8 +2972,8 @@
   {
    "path": "skills/research-communication/references/literature-discovery-and-search.md",
    "owner": "research-communication",
-   "bytes": 4865,
-   "lines": 72,
+   "bytes": 5010,
+   "lines": 74,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md"
@@ -2998,8 +2998,8 @@
   {
    "path": "skills/research-communication/references/literature-review.md",
    "owner": "research-communication",
-   "bytes": 7727,
-   "lines": 146,
+   "bytes": 7860,
+   "lines": 148,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -3014,8 +3014,8 @@
   {
    "path": "skills/research-communication/references/logical-consistency-and-argument-uniformity.md",
    "owner": "research-communication",
-   "bytes": 4797,
-   "lines": 85,
+   "bytes": 4919,
+   "lines": 87,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-theory/references/mathematical-reasoning-and-proof.md",
@@ -3032,8 +3032,8 @@
   {
    "path": "skills/research-communication/references/manuscript-consistency-auditing.md",
    "owner": "research-communication",
-   "bytes": 3470,
-   "lines": 62,
+   "bytes": 3594,
+   "lines": 64,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -3047,8 +3047,8 @@
   {
    "path": "skills/research-communication/references/mermaid-patterns.md",
    "owner": "research-communication",
-   "bytes": 4405,
-   "lines": 112,
+   "bytes": 4497,
+   "lines": 114,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/examples/computer-science/07-database-architecture.md",
@@ -3060,8 +3060,8 @@
   {
    "path": "skills/research-communication/references/multi-venue-reformatting.md",
    "owner": "research-communication",
-   "bytes": 2916,
-   "lines": 46,
+   "bytes": 3042,
+   "lines": 48,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md"
@@ -3072,8 +3072,8 @@
   {
    "path": "skills/research-communication/references/outreach-and-public-facing-summaries.md",
    "owner": "research-communication",
-   "bytes": 4050,
-   "lines": 72,
+   "bytes": 4202,
+   "lines": 73,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -3088,8 +3088,8 @@
   {
    "path": "skills/research-communication/references/paper-genre-variants.md",
    "owner": "research-communication",
-   "bytes": 4278,
-   "lines": 82,
+   "bytes": 4378,
+   "lines": 84,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -3102,8 +3102,8 @@
   {
    "path": "skills/research-communication/references/paper-structure.md",
    "owner": "research-communication",
-   "bytes": 10932,
-   "lines": 204,
+   "bytes": 11060,
+   "lines": 206,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -3122,8 +3122,8 @@
   {
    "path": "skills/research-communication/references/plagiarism-and-text-reuse-checking.md",
    "owner": "research-communication",
-   "bytes": 2875,
-   "lines": 47,
+   "bytes": 3000,
+   "lines": 49,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -3135,8 +3135,8 @@
   {
    "path": "skills/research-communication/references/plantuml-patterns.md",
    "owner": "research-communication",
-   "bytes": 3505,
-   "lines": 94,
+   "bytes": 3587,
+   "lines": 96,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-diagrams-guide.md"
@@ -3147,8 +3147,8 @@
   {
    "path": "skills/research-communication/references/poster-and-talk-design.md",
    "owner": "research-communication",
-   "bytes": 4790,
-   "lines": 89,
+   "bytes": 4982,
+   "lines": 91,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-diagrams-guide.md",
@@ -3162,8 +3162,8 @@
   {
    "path": "skills/research-communication/references/preprint-to-journal-reconciliation.md",
    "owner": "research-communication",
-   "bytes": 2720,
-   "lines": 45,
+   "bytes": 2900,
+   "lines": 47,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -3176,8 +3176,8 @@
   {
    "path": "skills/research-communication/references/preregistration-and-registered-reports.md",
    "owner": "research-communication",
-   "bytes": 3385,
-   "lines": 60,
+   "bytes": 3523,
+   "lines": 62,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md"
@@ -3188,8 +3188,8 @@
   {
    "path": "skills/research-communication/references/primary-sources-and-version-checks.md",
    "owner": "research-communication",
-   "bytes": 12392,
-   "lines": 84,
+   "bytes": 12520,
+   "lines": 85,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -3212,8 +3212,8 @@
   {
    "path": "skills/research-communication/references/reading-papers.md",
    "owner": "research-communication",
-   "bytes": 9706,
-   "lines": 167,
+   "bytes": 9838,
+   "lines": 169,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-statistics/references/statistical-inference-for-physics.md",
@@ -3233,8 +3233,8 @@
   {
    "path": "skills/research-communication/references/reproducibility-auditing.md",
    "owner": "research-communication",
-   "bytes": 2992,
-   "lines": 57,
+   "bytes": 3144,
+   "lines": 59,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-computing/references/numerical-and-computational-methods.md",
@@ -3255,8 +3255,8 @@
   {
    "path": "skills/research-communication/references/reviewer-style-assessment.md",
    "owner": "research-communication",
-   "bytes": 1965,
-   "lines": 35,
+   "bytes": 2068,
+   "lines": 37,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md"
@@ -3267,8 +3267,8 @@
   {
    "path": "skills/research-communication/references/revision-impact-tracking.md",
    "owner": "research-communication",
-   "bytes": 3911,
-   "lines": 66,
+   "bytes": 4024,
+   "lines": 68,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/README.md",
@@ -3289,8 +3289,8 @@
   {
    "path": "skills/research-communication/references/scientific-style.md",
    "owner": "research-communication",
-   "bytes": 9635,
-   "lines": 173,
+   "bytes": 9792,
+   "lines": 175,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-statistics/references/statistical-inference-for-physics.md",
@@ -3314,8 +3314,8 @@
   {
    "path": "skills/research-communication/references/statistics-and-ml-papers.md",
    "owner": "research-communication",
-   "bytes": 14013,
-   "lines": 208,
+   "bytes": 14149,
+   "lines": 210,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -3333,8 +3333,8 @@
   {
    "path": "skills/research-communication/references/submission-and-peer-review.md",
    "owner": "research-communication",
-   "bytes": 13604,
-   "lines": 232,
+   "bytes": 13760,
+   "lines": 234,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -3354,8 +3354,8 @@
   {
    "path": "skills/research-communication/references/supplementary-material-planning.md",
    "owner": "research-communication",
-   "bytes": 1995,
-   "lines": 33,
+   "bytes": 2107,
+   "lines": 35,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md"
@@ -3366,8 +3366,8 @@
   {
    "path": "skills/research-communication/references/systematic-review-screening.md",
    "owner": "research-communication",
-   "bytes": 3015,
-   "lines": 53,
+   "bytes": 3142,
+   "lines": 55,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -3379,8 +3379,8 @@
   {
    "path": "skills/research-communication/references/thesis-by-publication-assembly.md",
    "owner": "research-communication",
-   "bytes": 3761,
-   "lines": 60,
+   "bytes": 3938,
+   "lines": 62,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -3392,8 +3392,8 @@
   {
    "path": "skills/research-communication/references/tikz-patterns.md",
    "owner": "research-communication",
-   "bytes": 5756,
-   "lines": 128,
+   "bytes": 5879,
+   "lines": 130,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/assets/diagrams/bayesian-model.md",

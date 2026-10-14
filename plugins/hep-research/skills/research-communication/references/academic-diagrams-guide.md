@@ -184,3 +184,5 @@ For multi-figure papers, fix one `figure_style` block up front and reuse it; the
 - [ ] Grayscale-safe, readable at column width
 - [ ] Source is editable text; syntax checked when a renderer was available
 - [ ] Caption explains meaning and flow, not just box labels; no invented figure numbers
+
+**Done when:** the diagram source renders with `check_diagram_sources.py` (no source error), the rendered output was looked at, and the caption follows `diagram-captions.md`.

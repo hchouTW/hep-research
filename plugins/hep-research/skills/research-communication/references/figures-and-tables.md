@@ -153,3 +153,5 @@ official requirements before claiming compliance with a named standard or venue.
   would bloat file size).
 - Avoid re-exporting a raster screenshot of a vector plot — regenerate from
   source (ROOT macro / matplotlib script) at the target format instead.
+
+**Done when:** every plot has axis labels with units, its uncertainty bands are named in the caption, its status label matches the result, and the greyscale render is readable.

@@ -234,3 +234,5 @@ international collaborations):
   collaboration paper — an encoding problem discovered at submission time,
   across dozens of institutions' worth of author names, is expensive to
   track down and fix under a deadline.
+
+**Done when:** the document compiles from a clean directory with the intended engine, with no undefined references and fonts embedded (`pdffonts`).

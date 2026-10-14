@@ -45,3 +45,5 @@ Deliver the proposal section-by-section against the call's actual required
 outline, with `[VALUE NEEDED: ...]` markers for any budget, effort, or
 institutional figure not supplied. Do not fabricate letters of support,
 collaborator commitments, or institutional matching funds.
+
+**Done when:** every section the funder's form requires is present within its limits (from the funder's current page), and every claim of prior results maps to a publication or artifact.

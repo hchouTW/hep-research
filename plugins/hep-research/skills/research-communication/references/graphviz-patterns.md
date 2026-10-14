@@ -74,3 +74,5 @@ acyclic; if a cycle is intended (fixed-point iteration) label it as iteration, n
 - The same layout may vary across Graphviz versions: pin the rendering in the paper repo (commit the SVG/PDF too).
 - Graphviz cannot draw Feynman diagrams or exact plate rectangles around only some rank members reliably; if a plate must
   enclose nodes not adjacent in the layout, use TikZ.
+
+**Done when:** `dot -Tsvg` renders the source without warnings and the output was looked at.

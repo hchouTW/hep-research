@@ -143,3 +143,5 @@ mark it unresolved rather than declaring the proposal novel or unoriginal.
   and identify gaps, not to exhaustively summarize every paper's abstract in
   sequence — if a paragraph could be replaced by "see refs. [1-8]" without losing
   information, it isn't yet doing a review's actual job.
+
+**Done when:** every paper in the matrix was read at the level recorded, and every synthesis sentence cites the papers it rests on.

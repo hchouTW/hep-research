@@ -170,3 +170,5 @@ typically saves 10-20% of word count with no loss of meaning:
 - "Due to the fact that" → "because".
 - Redundant pairs: "past history," "future plans," "completely eliminate,"
   "each and every" → drop the redundant word.
+
+**Done when:** significance and limit wording follow the tables here, every hedge is quantified or removed, and status labels survive in text and captions.

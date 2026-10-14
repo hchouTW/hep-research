@@ -63,3 +63,5 @@ items explicitly, including sources available only as abstracts.
 
 `check_manuscript.py` checks local reference consistency; it does not establish
 that a source exists, remains current, or supports a scientific claim.
+
+**Done when:** every audited citation has a recorded lookup (source, date, read level) and a verdict, and every mismatch has a proposed correction or is marked unverified.

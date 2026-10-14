@@ -86,3 +86,5 @@ Deliver poster/slide content mapped explicitly back to its source
 figure/section in the paper, so a factual or numerical correction to the
 paper can be propagated to the derived materials — do not let poster/slide
 numbers drift from a since-revised paper value.
+
+**Done when:** every number on the poster or slides maps to its paper figure or section, text meets the size table, and the speaker or poster approval the collaboration requires is recorded.

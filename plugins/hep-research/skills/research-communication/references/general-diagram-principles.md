@@ -135,3 +135,5 @@ from it and confirm before formalizing. Never silently "fix" the sketch.
 
 If the image cannot be read (illegible handwriting, blurry photo), say which parts, and ask for a retake or a typed list
 rather than guessing labels. Physical detail in a sketch (dimensions, geometry) is only reproduced when the user supplies it.
+
+**Done when:** the diagram answers the one question stated before drawing, and a reader can name every arrow's meaning without the caption.

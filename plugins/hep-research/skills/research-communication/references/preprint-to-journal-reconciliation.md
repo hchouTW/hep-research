@@ -42,3 +42,5 @@ Deliver a version-diff table (location, preprint text/value, published
 text/value, classification) and the specific preprint-metadata updates
 needed (DOI, journal reference, version note). Do not claim a discrepancy is
 "just a copy-edit" without checking whether it changes a number or claim.
+
+**Done when:** every difference between the preprint and the journal version is listed with its effect on the results, and the arXiv record carries the journal reference and DOI.

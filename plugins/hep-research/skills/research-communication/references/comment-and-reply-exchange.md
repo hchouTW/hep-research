@@ -48,3 +48,5 @@ Deliver the Comment or Reply as its own short, focused manuscript (not a
 patched version of the original paper), with the disputed claim's exact
 locator, the technical argument, and a clear statement of what — if
 anything — changes about the original result.
+
+**Done when:** the text meets the venue's length limit (from its page), addresses one specific point, and every number in it maps to the paper or a result artifact.

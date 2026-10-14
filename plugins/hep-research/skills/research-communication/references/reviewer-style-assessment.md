@@ -32,3 +32,5 @@ by the supplied rubric, together with confidence and limits of the review.
 Deliver a concise contribution summary, strengths, prioritized concerns, and
 actionable author questions. State whether supplements, code, and external
 literature were inspected; do not imply they were reviewed when unavailable.
+
+**Done when:** every point names its location in the manuscript, its severity and a concrete request.

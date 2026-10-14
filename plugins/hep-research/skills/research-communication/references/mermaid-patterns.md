@@ -109,3 +109,5 @@ Use `<br/>` inside a quoted label (`A["Line one<br/>line two"]`); it is the most
 inside a quoted label also rendered as a line break in the Mermaid CLI used to validate this bundle, but support
 varies by host (GitHub, Obsidian, older versions), so prefer `<br/>`. Unquoted labels with parentheses or `<`
 need quotes.
+
+**Done when:** `mmdc` renders the source (not only the lint) and the output was looked at.

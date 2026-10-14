@@ -205,3 +205,5 @@ When reading someone else's astroparticle/cosmic-ray paper, extend
 - **Solar-cycle/epoch context**: for direct-detection flux results below the knee,
   is the solar activity period stated, and is it relevant to the comparison being
   drawn against another experiment's data taken in a different epoch?
+
+**Done when:** the draft states exposure (not just livetime), the solar-modulation period where relevant, the interaction models behind composition claims, and pre- and post-trial significances.

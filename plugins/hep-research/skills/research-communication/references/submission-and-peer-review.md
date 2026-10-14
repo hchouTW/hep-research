@@ -229,3 +229,5 @@ a dependency ledger and distinguishes edits made from changes actually verified.
 - Version the `.bib` file alongside the `.tex` file in revisions — reference
   lists frequently need small additions in response to referee comments
   ("please cite prior measurement by...").
+
+**Done when:** every checklist item is ticked or reported unverified with its reason, and every referee point has a response tied to a change or a reason.

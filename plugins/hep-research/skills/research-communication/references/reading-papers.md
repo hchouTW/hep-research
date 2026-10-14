@@ -164,3 +164,5 @@ later — as the raw material for a literature-review comparison matrix
 (`<plugin root>/skills/research-communication/scripts/build_lit_matrix.py`), or as accurately-sourced material for a related-work
 paragraph — in a way that a vague memory of "a paper that did something like this" is
 not.
+
+**Done when:** the notes separate what the paper claims, what it shows and any interpretation added, with the read level recorded.

@@ -65,3 +65,5 @@ is not proof that a claim is false. For each gap, propose either narrower wordin
 an existing evidence link, or a specific additional analysis; do not fabricate
 results or perform new experiments merely to complete the matrix. Prioritize gaps
 that affect the central conclusion and state the mapping's coverage.
+
+**Done when:** every claim has a row with its evidence locator and a recorded verdict, and every display value is checked against its source with a declared rounding rule.

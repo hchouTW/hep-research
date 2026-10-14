@@ -59,3 +59,5 @@ If editing is authorized, propagate verified corrections to all affected locatio
 and reread the resulting sentences and captions. Deliver a compact discrepancy
 ledger, resolved changes, unresolved inputs, and scope of verification; do not
 equate internal agreement with external accuracy.
+
+**Done when:** every number in the abstract, conclusions and captions matches the results section and its source artifact.

@@ -298,3 +298,5 @@ releasing restricted artifacts is outside the statement-writing task.
 - **Self-citation imbalance**: a healthy reference list cites the field
   broadly, not disproportionately the authors' own prior work — referees
   notice and sometimes flag this explicitly.
+
+**Done when:** `check_manuscript.py --main` reports no missing or duplicate keys, and no two `.bib` entries share a DOI, arXiv id or INSPIRE record.

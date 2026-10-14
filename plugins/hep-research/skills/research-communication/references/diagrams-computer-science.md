@@ -92,3 +92,5 @@ against code when code exists; assumptions listed for anything inferred.
 
 For implementing or debugging the systems themselves see `physics-ml` (PyTorch) and
 `hep-computing` (architecture/ADR guidance).
+
+**Done when:** the diagram renders and every box and arrow corresponds to a component or dependency in the code or text it describes.

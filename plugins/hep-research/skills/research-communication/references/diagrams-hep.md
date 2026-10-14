@@ -111,3 +111,5 @@ info in a selection; drawing arrows from limit back to likelihood.
 
 For actual analysis code, cutflows, fits, and detector physics see the `hep-analysis` skill;
 for experiment specifics use the bound experiment profile (see the context-resolution steps in the skill's SKILL.md; profiles are listed in `<plugin root>/profiles/registry.json`).
+
+**Done when:** the diagram renders, every vertex of a listed chain passes the conservation checks (or the failing step is named), and physics correctness is handed to hep-theory when it matters.
