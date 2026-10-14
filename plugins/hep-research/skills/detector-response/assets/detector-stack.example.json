@@ -1,4 +1,5 @@
 {
+  "status": "synthetic",
   "name": "synthetic magnetic spectrometer (illustrative, not any real experiment)",
   "field_tesla": 0.8,
   "lever_arm_m": 1.0,

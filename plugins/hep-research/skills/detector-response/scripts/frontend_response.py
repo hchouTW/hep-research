@@ -27,11 +27,28 @@ ENC^2 = (i_n^2/2) int g^2 + C^2 (e_n^2/2) int g'^2 + C^2 A_f int |G'(f)|^2/f df,
 closed form for CR-(RC)^n. Units: capacitance pF, e_n nV/sqrt(Hz), leakage nA, times ns,
 rates Hz unless the option says otherwise. Standard library only.
 See <plugin root>/skills/detector-response/references/front-end-electronics-and-signal-processing.md.
+Status: --status (default unvalidated; one of the core artifact_statuses) is echoed as status.
+Exit codes: 0 ok; 1 the computation failed or the input file is unreadable or invalid (JSON with ok false);
+2 invalid input (JSON with error_kind invalid-input on stdout, the usage on stderr).
 Run: python3 <plugin root>/skills/detector-response/scripts/frontend_response.py enc --capacitance 10 --en 1 --leakage 1000 --peaking 25
 """
 import argparse
 import json
 import math
+import sys
+
+STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
+            'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
+
+
+class JsonArgumentParser(argparse.ArgumentParser):
+    """argparse that also prints the reason as JSON on stdout: exit 2 = invalid input. Subparsers inherit it."""
+
+    def error(self, message):
+        print(json.dumps({'status': 'failed', 'ok': False, 'error_kind': 'invalid-input', 'error': message}, indent=2))
+        self.print_usage(sys.stderr)
+        self.exit(2, f'{self.prog}: error: {message}\n')
+
 
 Q_E = 1.602176634e-19      # C
 K_B = 1.380649e-23         # J/K
@@ -452,8 +469,14 @@ def cluster_noise(channels, sigma, rho):
 
 # ---------------------------------------------------------------- cli
 
+def _fail(message, kind='failed'):
+    print(json.dumps({'status': 'failed', 'ok': False, 'error_kind': kind, 'error': message}, indent=2))
+    print(f'frontend_response.py: error: {message}', file=sys.stderr)
+    return 1
+
+
 def main():
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = JsonArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest='command', required=True)
 
     p = sub.add_parser('enc', help='equivalent noise charge')
@@ -522,6 +545,9 @@ def main():
     p.add_argument('--sigma', type=float, required=True)
     p.add_argument('--rho', type=float, required=True, help='pairwise correlation coefficient')
 
+    for p in sub.choices.values():
+        p.add_argument('--status', choices=STATUSES, default='unvalidated',
+                       help='status label of the inputs, echoed as status (default unvalidated)')
     args = parser.parse_args()
     try:
         if args.command == 'enc':
@@ -550,11 +576,16 @@ def main():
             result = deadtime(args.dead_time, args.rate, args.measured, args.model)
         else:
             result = cluster_noise(args.channels, args.sigma, args.rho)
-        text = json.dumps({'command': args.command, **result}, indent=2, allow_nan=False)
-    except (ValueError, OverflowError, ZeroDivisionError) as exc:
-        parser.error(f'{exc} (result not finite: check the input range)' if 'JSON' in str(exc) else str(exc))
+        text = json.dumps({'status': args.status, 'command': args.command, **result}, indent=2, allow_nan=False)
+    except (OverflowError, ZeroDivisionError) as exc:
+        return _fail(f'{exc} (result not finite: check the input range)')
+    except ValueError as exc:
+        if 'JSON' in str(exc):
+            return _fail('result not finite: check the input range')
+        parser.error(str(exc))
     print(text)
+    return 0
 
 
 if __name__ == '__main__':
-    main()
+    raise SystemExit(main())

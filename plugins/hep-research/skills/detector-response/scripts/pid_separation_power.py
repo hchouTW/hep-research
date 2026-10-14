@@ -34,12 +34,28 @@ reports below_threshold_intervals, the ceiling is the end of the first separated
 highest_separated is the top of the last separated range, and ceiling_is_lower_bound is
 true when the scan limit is reached still separated (the true end lies beyond it).
 See <plugin root>/skills/detector-response/references/particle-identification.md.
+Status: --status (default unvalidated; one of the core artifact_statuses) is echoed as status.
+Exit codes: 0 ok; 1 the computation failed or the input file is unreadable or invalid (JSON with ok false);
+2 invalid input (JSON with error_kind invalid-input on stdout, the usage on stderr).
 Run: python3 <plugin root>/skills/detector-response/scripts/pid_separation_power.py --mode tof --species pi K --momentum 2.0 --path 1.2 --time-resolution 60
 """
 import argparse
 import json
 import math
 import sys
+
+STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
+            'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
+
+
+class JsonArgumentParser(argparse.ArgumentParser):
+    """argparse that also prints the reason as JSON on stdout: exit 2 = invalid input. Subparsers inherit it."""
+
+    def error(self, message):
+        print(json.dumps({'status': 'failed', 'ok': False, 'error_kind': 'invalid-input', 'error': message}, indent=2))
+        self.print_usage(sys.stderr)
+        self.exit(2, f'{self.prog}: error: {message}\n')
+
 
 # Masses in GeV/c^2 (PDG); see <plugin root>/skills/research-communication/references/primary-sources-and-version-checks.md.
 MASSES_GEV = {
@@ -401,15 +417,15 @@ def separation_ceiling(mode, mass_a, mass_b, threshold_sigma=3.0,
                            **options)['ceiling']
 
 
-def _fail(message):
-    print(json.dumps({'ok': False, 'error': message}, indent=2))
+def _fail(message, kind='failed'):
+    print(json.dumps({'status': 'failed', 'ok': False, 'error_kind': kind, 'error': message}, indent=2))
     print(f'pid_separation_power.py: error: {message}', file=sys.stderr)
     return 1
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__,
-                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = JsonArgumentParser(description=__doc__,
+                                formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--mode', choices=('tof', 'dedx', 'velocity'), required=True)
     parser.add_argument('--species', nargs=2, required=True, metavar=('A', 'B'),
                         help=f'two of {sorted(MASSES_GEV)}, masses in GeV/c^2, or mass:charge')
@@ -431,6 +447,8 @@ def main():
     parser.add_argument('--convention', choices=CONVENTIONS, default='single',
                         help='single: delta/sigma of species A (default); quadrature: '
                              'delta/sqrt(sigma_A^2 + sigma_B^2)')
+    parser.add_argument('--status', choices=STATUSES, default='unvalidated',
+                        help='status label of the inputs, echoed as status (default unvalidated)')
     args = parser.parse_args()
 
     input_variable = 'rigidity' if args.rigidity is not None else 'momentum'
@@ -467,6 +485,7 @@ def main():
         result['below_threshold_intervals'] = scan['below_threshold_intervals']
         result['not_evaluable_intervals'] = scan['not_evaluable_intervals']
         text = json.dumps({
+            'status': args.status,
             **result,
             'note': ('n_sigma follows separation_convention (single: one measurement of the '
                      'reference species; quadrature: both widths). The ceiling is the end of '

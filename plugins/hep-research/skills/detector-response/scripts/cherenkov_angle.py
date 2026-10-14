@@ -34,6 +34,9 @@ single-photon angular resolution supplied by the user; n is treated as a single 
 Separation convention (--convention): single (default) divides by species A's per-track
 resolution; quadrature by sqrt(sigma_A^2 + sigma_B^2), symmetric in the species. See
 <plugin root>/skills/detector-response/references/particle-identification.md.
+Status: --status (default unvalidated; one of the core artifact_statuses) is echoed as status.
+Exit codes: 0 ok; 1 the computation failed or the input file is unreadable or invalid (JSON with ok false);
+2 invalid input (JSON with error_kind invalid-input on stdout, the usage on stderr).
 Run: python3 <plugin root>/skills/detector-response/scripts/cherenkov_angle.py --index 1.05 --species pi K --momentum 10
 """
 import argparse
@@ -45,6 +48,19 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from pid_separation_power import MASSES_GEV, kinematics, resolve_species  # noqa: E402
+
+STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
+            'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
+
+
+class JsonArgumentParser(argparse.ArgumentParser):
+    """argparse that also prints the reason as JSON on stdout: exit 2 = invalid input. Subparsers inherit it."""
+
+    def error(self, message):
+        print(json.dumps({'status': 'failed', 'ok': False, 'error_kind': 'invalid-input', 'error': message}, indent=2))
+        self.print_usage(sys.stderr)
+        self.exit(2, f'{self.prog}: error: {message}\n')
+
 
 # Expected-photon thresholds between the none / few / gaussian regimes (provisional).
 FEW_PHOTONS = 0.5
@@ -186,15 +202,15 @@ def describe_species(momentum_gev, mass_gev, index, radiator_length_cm,
     return record
 
 
-def _fail(message):
-    print(json.dumps({'ok': False, 'error': message}, indent=2))
+def _fail(message, kind='failed'):
+    print(json.dumps({'status': 'failed', 'ok': False, 'error_kind': kind, 'error': message}, indent=2))
     print(f'cherenkov_angle.py: error: {message}', file=sys.stderr)
     return 1
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__,
-                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = JsonArgumentParser(description=__doc__,
+                                formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--index', type=float, required=True,
                         help='radiator refractive index (must exceed 1)')
     parser.add_argument('--species', nargs=2, required=True, metavar=('A', 'B'),
@@ -219,6 +235,8 @@ def main():
     parser.add_argument('--convention', choices=CONVENTIONS, default='single',
                         help='single: delta/sigma of species A (default); quadrature: '
                              'delta/sqrt(sigma_A^2 + sigma_B^2)')
+    parser.add_argument('--status', choices=STATUSES, default='unvalidated',
+                        help='status label of the inputs, echoed as status (default unvalidated)')
     args = parser.parse_args()
 
     try:
@@ -250,6 +268,7 @@ def main():
     else:
         convention, reference = 'delta_over_sigma_of_species_a', args.species[0]
     payload = {
+        'status': args.status,
         'refractive_index': index,
         'input_variable': 'rigidity' if args.rigidity is not None else 'momentum',
         'momentum_gev': None if args.rigidity is not None else momentum_a,

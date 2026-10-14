@@ -20,6 +20,10 @@ mc_mean_after_reweight equals data_mean by construction whenever every data-popu
 bin has a defined weight: it is a bookkeeping identity, not an independent closure test.
 Validate the reweighting on a variable that was not reweighted (for example the number
 of reconstructed vertices in a control region).
+Status: --status (default: the input file's "status", else unvalidated; one of the core artifact_statuses) is
+echoed as status.
+Exit codes: 0 ok; 1 the computation failed or the input file is unreadable or invalid (JSON with ok false);
+2 invalid input (JSON with error_kind invalid-input on stdout, the usage on stderr).
 Run: python3 <plugin root>/skills/detector-response/scripts/pileup_reweight.py <plugin root>/skills/detector-response/assets/pileup-profiles.example.json
 """
 import argparse
@@ -27,6 +31,19 @@ import json
 import math
 import sys
 from pathlib import Path
+
+STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
+            'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
+
+
+class JsonArgumentParser(argparse.ArgumentParser):
+    """argparse that also prints the reason as JSON on stdout: exit 2 = invalid input. Subparsers inherit it."""
+
+    def error(self, message):
+        print(json.dumps({'status': 'failed', 'ok': False, 'error_kind': 'invalid-input', 'error': message}, indent=2))
+        self.print_usage(sys.stderr)
+        self.exit(2, f'{self.prog}: error: {message}\n')
+
 
 # Warn when the reweighting keeps less than this fraction of the MC statistics, or
 # when a single weight exceeds MAX_WEIGHT_WARNING.
@@ -151,22 +168,38 @@ def profile_mean(profile, bin_centers):
     return _finite_mean(zip(pdf, bin_centers))
 
 
-def _fail(message):
-    print(json.dumps({'ok': False, 'error': message}, indent=2))
+def _resolve_status(given, document):
+    """--status when given, else the input file's 'status' (checked against STATUSES), else unvalidated."""
+    if given:
+        return given
+    status = document.get('status') if isinstance(document, dict) else None
+    if status is None:
+        return 'unvalidated'
+    if status not in STATUSES:
+        raise ValueError(f'input status {status!r} is not one of {list(STATUSES)}')
+    return status
+
+
+def _fail(message, kind='failed'):
+    print(json.dumps({'status': 'failed', 'ok': False, 'error_kind': kind, 'error': message}, indent=2))
     print(f'pileup_reweight.py: error: {message}', file=sys.stderr)
     return 1
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__,
-                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = JsonArgumentParser(description=__doc__,
+                                formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('bundle', type=Path, help='JSON with data_profile, mc_profile, and bin_centers arrays')
+    parser.add_argument('--status', choices=STATUSES, default=None,
+                        help="status label of the inputs, echoed as status (default: the input file's status, "
+                             'else unvalidated)')
     args = parser.parse_args()
     try:
         with args.bundle.open(encoding='utf-8') as stream:
             bundle = json.load(stream)
         if not isinstance(bundle, dict):
             raise ValueError('bundle must be an object')
+        status = _resolve_status(args.status, bundle)
         data_profile = bundle.get('data_profile')
         mc_profile = bundle.get('mc_profile')
         bin_centers = bundle.get('bin_centers')
@@ -175,6 +208,7 @@ def main():
         nonfinite_bins = details['nonfinite_weight_bins']
         problems = bool(empty_mc_bins or nonfinite_bins)
         result = {
+            'status': status,
             'ok': not problems,
             'weights': weights,
             'empty_mc_bins_with_data': empty_mc_bins,

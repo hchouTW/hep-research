@@ -24,6 +24,10 @@ out negative on noisy or narrow-range input - that is reported explicitly as a f
 separation rather than square-rooted into a NaN. An evaluation energy outside the
 fitted range (or outside --valid-range in --evaluate mode) is marked extrapolated. See
 <plugin root>/skills/detector-response/references/calorimetry-ecal-hcal.md.
+Status: --status (default: the input file's "status", else unvalidated; one of the core artifact_statuses) is
+echoed as status.
+Exit codes: 0 ok; 1 the computation failed or the input file is unreadable or invalid (JSON with ok false);
+2 invalid input (JSON with error_kind invalid-input on stdout, the usage on stderr).
 Run: python3 <plugin root>/skills/detector-response/scripts/calorimeter_resolution.py --fit <plugin root>/skills/detector-response/assets/calorimeter-response.example.json
      python3 <plugin root>/skills/detector-response/scripts/calorimeter_resolution.py --evaluate --stochastic 0.10 --noise 0.20 --constant 0.007 --energy 100
 """
@@ -31,6 +35,19 @@ import argparse
 import json
 import math
 import sys
+
+STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
+            'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
+
+
+class JsonArgumentParser(argparse.ArgumentParser):
+    """argparse that also prints the reason as JSON on stdout: exit 2 = invalid input. Subparsers inherit it."""
+
+    def error(self, message):
+        print(json.dumps({'status': 'failed', 'ok': False, 'error_kind': 'invalid-input', 'error': message}, indent=2))
+        self.print_usage(sys.stderr)
+        self.exit(2, f'{self.prog}: error: {message}\n')
+
 
 TERM_NAMES = ('stochastic', 'noise', 'constant')
 
@@ -218,15 +235,27 @@ def crossover_energies(stochastic, noise, constant):
     return crossings
 
 
-def _fail(message):
-    print(json.dumps({'ok': False, 'error': message}, indent=2))
+def _resolve_status(given, document):
+    """--status when given, else the input file's 'status' (checked against STATUSES), else unvalidated."""
+    if given:
+        return given
+    status = document.get('status') if isinstance(document, dict) else None
+    if status is None:
+        return 'unvalidated'
+    if status not in STATUSES:
+        raise ValueError(f'input status {status!r} is not one of {list(STATUSES)}')
+    return status
+
+
+def _fail(message, kind='failed'):
+    print(json.dumps({'status': 'failed', 'ok': False, 'error_kind': kind, 'error': message}, indent=2))
     print(f'calorimeter_resolution.py: error: {message}', file=sys.stderr)
     return 1
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__,
-                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = JsonArgumentParser(description=__doc__,
+                                formatter_class=argparse.RawDescriptionHelpFormatter)
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument('--fit', metavar='JSON',
                       help='JSON file with {"points": [[energy_gev, sigma_over_e(, uncertainty)], ...]}')
@@ -239,8 +268,12 @@ def main():
     parser.add_argument('--valid-range', type=float, nargs=2, metavar=('LOW', 'HIGH'),
                         dest='valid_range',
                         help='evaluate: energy range (GeV) the coefficients were fitted over')
+    parser.add_argument('--status', choices=STATUSES, default=None,
+                        help="status label of the inputs, echoed as status (default: the input file's status, "
+                             'else unvalidated)')
     args = parser.parse_args()
 
+    status = args.status or 'unvalidated'
     if args.evaluate:
         try:
             valid_range = None
@@ -261,6 +294,7 @@ def main():
                 payload = json.load(handle)
             if not isinstance(payload, dict) or 'points' not in payload:
                 raise ValueError('fit input must be a JSON object with a "points" list')
+            status = _resolve_status(args.status, payload)
             result = fit_resolution(payload['points'])
             if not result['negative_squared_terms']:
                 result['at_requested_energy'] = evaluate(
@@ -283,7 +317,7 @@ def main():
             ' linear least squares in (a^2, b^2, c^2)'
 
     try:
-        text = json.dumps({'method': method, **result}, indent=2, allow_nan=False)
+        text = json.dumps({'status': status, 'method': method, **result}, indent=2, allow_nan=False)
     except ValueError:
         return _fail('result contains a non-finite number; check the input energies')
     print(text)

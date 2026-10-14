@@ -355,7 +355,7 @@ class GaisserHillasGuardTests(unittest.TestCase):
                    '--lambda-param', '60', '--depths', 'nan,inf')
         self.assertEqual(proc.returncode, 2)
         self.assertNotIn('Traceback', proc.stderr)
-        self.assertEqual(proc.stdout, '')
+        self.assertIs(json.loads(proc.stdout)['ok'], False)  # JSON error on stdout (DR-WP2-05)
 
 
 class EdgeCaseCliTests(_TempFiles, unittest.TestCase):

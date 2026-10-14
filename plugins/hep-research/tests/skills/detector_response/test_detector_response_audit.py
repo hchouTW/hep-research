@@ -316,22 +316,37 @@ class StatusLabelTests(_TempFiles, unittest.TestCase):
     """E-6: replicate cosmic_ray_flux.py: --status (choices = core artifact_statuses,
     default unvalidated) echoed as the top-level key 'status'."""
 
-    @unittest.expectedFailure  # pending DR-WP2-05
+    # The three file-input scripts read the status of their input; the shipped assets say "synthetic".
+    FILE_STATUS = {'calorimeter_resolution.py', 'multiple_scattering.py', 'pileup_reweight.py'}
+
     def test_every_script_echoes_status(self):
         self.assertEqual(set(STATUS_CASES), {p.name for p in SCRIPTS.glob('*.py')})
         for script, args in STATUS_CASES.items():
             with self.subTest(script=script):
                 default = run_json(self, script, *args)
-                self.assertEqual(default.get('status'), 'unvalidated')
+                self.assertEqual(default.get('status'), 'synthetic' if script in self.FILE_STATUS else 'unvalidated')
                 labelled = run_json(self, script, *args, '--status', 'synthetic')
                 self.assertEqual(labelled.get('status'), 'synthetic')
 
-    @unittest.expectedFailure  # pending DR-WP2-05
     def test_status_in_an_input_file_propagates(self):
         stack = json.loads((ASSETS / 'detector-stack.example.json').read_text(encoding='utf-8'))
         stack['status'] = 'synthetic'
         payload = run_json(self, 'multiple_scattering.py', self.write('s.json', stack))
         self.assertEqual(payload['status'], 'synthetic')
+
+
+    def test_statuses_tuple_matches_the_core_vocabulary(self):
+        import ast
+        vocab = json.loads((PLUGIN / 'contracts' / 'vocab' / 'core.json').read_text(encoding='utf-8'))
+        expected = set(vocab['vocabularies']['artifact_statuses'])
+        for path in sorted(SCRIPTS.glob('*.py')):
+            with self.subTest(script=path.name):
+                tree = ast.parse(path.read_text(encoding='utf-8'))
+                values = [ast.literal_eval(node.value) for node in tree.body if isinstance(node, ast.Assign)
+                          and any(getattr(t, 'id', None) == 'STATUSES' for t in node.targets)]
+                self.assertEqual(len(values), 1)
+                self.assertEqual(set(values[0]), expected)
+                self.assertEqual(len(values[0]), len(expected))
 
 
 # --------------------------------------------------------------------- E-17 uniform JSON errors
@@ -351,7 +366,6 @@ INVALID_CASES = [
 
 
 class UniformErrorTests(unittest.TestCase):
-    @unittest.expectedFailure  # pending DR-WP2-05
     def test_invalid_input_is_exit_2_with_a_json_error(self):
         for script, args in INVALID_CASES:
             with self.subTest(script=script, args=[str(a) for a in args]):

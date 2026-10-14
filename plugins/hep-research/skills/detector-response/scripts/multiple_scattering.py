@@ -24,12 +24,29 @@ Resolution-term convention: the scattering term of sigma(R)/R uses
 so the term stays independent of rigidity. The PDG tracking section writes the same term
 with 0.016 GeV/c instead; the two differ by about 15%, a convention difference within
 the precision of a design estimate. State which coefficient was used when comparing.
+Status: --status (default: the input file's "status", else unvalidated; one of the core artifact_statuses) is
+echoed as status.
+Exit codes: 0 ok; 1 the computation failed or the input file is unreadable or invalid (JSON with ok false);
+2 invalid input (JSON with error_kind invalid-input on stdout, the usage on stderr).
 Run: python3 <plugin root>/skills/detector-response/scripts/multiple_scattering.py <plugin root>/skills/detector-response/assets/detector-stack.example.json --rigidity 100
 """
 import argparse
 import json
 import math
 import sys
+
+STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
+            'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
+
+
+class JsonArgumentParser(argparse.ArgumentParser):
+    """argparse that also prints the reason as JSON on stdout: exit 2 = invalid input. Subparsers inherit it."""
+
+    def error(self, message):
+        print(json.dumps({'status': 'failed', 'ok': False, 'error_kind': 'invalid-input', 'error': message}, indent=2))
+        self.print_usage(sys.stderr)
+        self.exit(2, f'{self.prog}: error: {message}\n')
+
 
 # PDG Highland constant, in GeV; see <plugin root>/skills/research-communication/references/primary-sources-and-version-checks.md.
 HIGHLAND_MEV = 13.6
@@ -201,20 +218,35 @@ def summarize(stack, rigidity_gv, beta=1.0, charge=1):
     }
 
 
-def _fail(message):
-    print(json.dumps({'ok': False, 'error': message}, indent=2))
+def _resolve_status(given, document):
+    """--status when given, else the input file's 'status' (checked against STATUSES), else unvalidated."""
+    if given:
+        return given
+    status = document.get('status') if isinstance(document, dict) else None
+    if status is None:
+        return 'unvalidated'
+    if status not in STATUSES:
+        raise ValueError(f'input status {status!r} is not one of {list(STATUSES)}')
+    return status
+
+
+def _fail(message, kind='failed'):
+    print(json.dumps({'status': 'failed', 'ok': False, 'error_kind': kind, 'error': message}, indent=2))
     print(f'multiple_scattering.py: error: {message}', file=sys.stderr)
     return 1
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__,
-                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = JsonArgumentParser(description=__doc__,
+                                formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('stack', help='JSON stack description (see <plugin root>/skills/detector-response/assets/detector-stack.example.json)')
     parser.add_argument('--rigidity', type=float, default=100.0,
                         help='rigidity in GV at which to evaluate the resolution (default 100)')
     parser.add_argument('--beta', type=float, default=1.0, help='particle beta (default 1)')
     parser.add_argument('--charge', type=int, default=1, help='charge number z (default 1)')
+    parser.add_argument('--status', choices=STATUSES, default=None,
+                        help="status label of the inputs, echoed as status (default: the input file's status, "
+                             'else unvalidated)')
     args = parser.parse_args()
     try:
         _positive(args.rigidity, 'rigidity')
@@ -225,11 +257,13 @@ def main():
         parser.error(str(exc))
     try:
         stack = load_stack(args.stack)
+        status = _resolve_status(args.status, stack)
         result = summarize(stack, args.rigidity, args.beta, args.charge)
     except (OSError, ValueError, TypeError, OverflowError, ZeroDivisionError) as exc:
         return _fail(str(exc))
     try:
         text = json.dumps({
+            'status': status,
             'method': 'PDG Highland scattering with Gluckstern intrinsic term',
             **result,
             'note': ('Design-level estimate assuming equally spaced measuring layers and a '

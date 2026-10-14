@@ -33,12 +33,26 @@ Usage notes / assumptions: standard library only. Depths in g/cm^2. Requires
 X_max > X0 and lambda > 0; N(X) is defined and evaluated only for X > X0 (the model is
 not defined at or before the extrapolated first-interaction depth; the CLI reports null
 there). Depths must be finite.
+Status: --status (default unvalidated; one of the core artifact_statuses) is echoed as status.
+Exit codes: 0 ok; 1 the computation failed (JSON with ok false); 2 invalid input (JSON with error_kind invalid-input).
 Run: python3 <plugin root>/skills/detector-response/scripts/xmax_gaisser_hillas.py --n-max 2e7 --x-max 750 --x0 -60 --lambda-param 60 --depths 400,600,750,900,1100
 """
 import argparse
 import json
 import math
 import sys
+
+STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
+            'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
+
+
+class JsonArgumentParser(argparse.ArgumentParser):
+    """argparse that also prints the reason as JSON on stdout: exit 2 = invalid input. Subparsers inherit it."""
+
+    def error(self, message):
+        print(json.dumps({'status': 'failed', 'ok': False, 'error_kind': 'invalid-input', 'error': message}, indent=2))
+        self.print_usage(sys.stderr)
+        self.exit(2, f'{self.prog}: error: {message}\n')
 
 
 def _finite(value, name, positive=False):
@@ -142,8 +156,8 @@ def half_max_depths(n_max, x_max, x0, lam, fraction=0.5, tolerance=1e-6, max_ite
     return rising_depth, falling_depth
 
 
-def _fail(message):
-    print(json.dumps({'ok': False, 'error': message}, indent=2))
+def _fail(message, kind='failed'):
+    print(json.dumps({'status': 'failed', 'ok': False, 'error_kind': kind, 'error': message}, indent=2))
     print(f'xmax_gaisser_hillas.py: error: {message}', file=sys.stderr)
     return 1
 
@@ -153,8 +167,8 @@ def _none_if_nan(value):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__,
-                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = JsonArgumentParser(description=__doc__,
+                                formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--n-max', type=float, required=True, dest='n_max', help='peak particle number')
     parser.add_argument('--x-max', type=float, required=True, dest='x_max', help='depth of maximum, g/cm^2')
     parser.add_argument('--x0', type=float, required=True, help='depth offset (first-interaction), g/cm^2')
@@ -162,6 +176,8 @@ def main():
                         help='shape/attenuation length, g/cm^2')
     parser.add_argument('--depths', type=str, default=None,
                         help='comma-separated finite depths (g/cm^2) at which to evaluate N(X)')
+    parser.add_argument('--status', choices=STATUSES, default='unvalidated',
+                        help='status label of the parameters, echoed as status (default unvalidated)')
     args = parser.parse_args()
 
     try:
@@ -204,7 +220,7 @@ def main():
         rising, falling = half_max_depths(n_max, x_max, x0, lam)
         result['half_maximum_depths'] = {'rising_edge': rising, 'falling_edge': falling,
                                          'full_width_half_maximum': falling - rising}
-        text = json.dumps({'method': 'Gaisser-Hillas profile evaluation (closed-form, not a fit)',
+        text = json.dumps({'status': args.status, 'method': 'Gaisser-Hillas profile evaluation (closed-form, not a fit)',
                            **result}, indent=2, allow_nan=False)
     except OverflowError as exc:
         message = str(exc)
