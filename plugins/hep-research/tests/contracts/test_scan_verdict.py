@@ -70,7 +70,8 @@ class ScanVerdictTests(unittest.TestCase):
         report = scan_paths([str(leak)], [47.0])
         self.assertEqual(report["status"], "fail")
         budget = {"analysis": "ana", "limit": 100, "consumed": 5, "charges": []}
-        v = sv.verdict({"submission_id": "s-1"}, report, budget, True)
+        v = sv.verdict({"submission_id": "s-1"}, report, budget, True, time="2026-10-14T12:00:00Z")  # a fixed clock:
+        # a real one can itself contain the sealed digits (03:47 on a CI run)
         self.assertEqual(sv.check_verdict(v), [])
         self.assertEqual(set(v), {"verdict_version", "submission_id", "status", "budget", "time"})
         text = json.dumps(v)
