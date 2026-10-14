@@ -1,8 +1,7 @@
 # Space-Based and Balloon-Borne Direct Cosmic-Ray Detection
 
-<!-- example: experiment-specific illustration -->
 Covers cosmic-ray measurements made *above the atmosphere* (satellite or long-duration
-balloon magnetic spectrometers and calorimeters, e.g. AMS-02-class instruments), where
+balloon magnetic spectrometers and calorimeters), where
 individual nuclei are measured directly rather than inferred from an air shower. The
 detector technology - magnetic spectrometry, calorimetry, TOF, TRD, RICH - is exactly
 the material in
@@ -11,6 +10,9 @@ the material in
 unchanged; this file covers what is specific to the near-Earth space environment:
 geomagnetic and solar effects that ground- and space-based measurements alike must
 correct for, and that have no collider-physics analog.
+
+<!-- example: experiment-specific illustration -->
+Example: AMS-02-class instruments (a magnetic spectrometer on a space station).
 <!-- /example -->
 
 ## Rigidity, not energy, is the natural variable - for a spectrometer
@@ -54,7 +56,8 @@ atmosphere (or a near-Earth satellite) if its rigidity exceeds a minimum, the
     R_c = C * cos^4(lambda_m) / (r^2 * (1 + sqrt(1 - sin(eps) sin(xi) cos^3(lambda_m)))^2)
 
 with zenith angle `eps`, azimuth `xi` measured clockwise from geomagnetic north (east = 90 deg; this sign is for a positive particle), `C = 59.6 GV` (proportional to the Earth's dipole
-moment `M`) and `r` the geocentric distance in Earth radii. For vertical arrival the
+moment `M`; 59.6 GV corresponds to the IGRF-14 dipole of 1955, and the 2025 dipole gives
+values about 4.5% lower, from the degree-1 IGRF-14 coefficients) and `r` the geocentric distance in Earth radii. For vertical arrival the
 square root is 1, so `R_c = 14.9 GV * cos^4(lambda_m) / r^2` (Smart & Shea 2005): about
 15 GV at the geomagnetic equator at the surface (~13 GV at ISS altitude), falling to
 essentially zero at the poles - the reason polar-orbit low-cutoff regions are preferred for measuring the
