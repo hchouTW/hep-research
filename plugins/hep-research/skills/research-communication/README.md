@@ -11,7 +11,7 @@ Use when the deliverable is scientific communication or literature work in physi
 | Path | Content |
 |---|---|
 | `SKILL.md` | entry point |
-| `references/` | fifty-three references: the papers guide and the diagrams guide route to the rest (reading, writing, citations, claims and evidence, revisions, reviews, venues, figures, diagrams per field, outreach, theses, proposals) |
+| `references/` | fifty-six references: the papers guide and the diagrams guide route to the rest (reading, writing, citations, claims and evidence, revisions, reviews, venues, figures, diagrams per field, outreach, theses, proposals) |
 | `scripts/` | nine command-line tools and the skill-local package `communication_lib/` behind six of them |
 | `assets/` | `paper/` (LaTeX skeleton, BibTeX, reading notes, methodology manual, adaptation manifest, audience templates, glossary and search-log templates), `diagrams/` (editable skeletons), `reporting-policies.json` |
 | `examples/` | worked diagram examples by field and the evidence-linked writing example (`evidence-linked/`, with byte-stable committed reports) |
@@ -37,7 +37,7 @@ Use when the deliverable is scientific communication or literature work in physi
 
 ## Tests and validation
 
-`tests/skills/research_communication/` (fourteen modules, including the golden evidence-linked scenario), the contracts tests for the communication format under `tests/contracts/`, and the behavioral evaluation outside the plugin under `evals/research_communication/` (fixture-driven cases, a replay scorer with self-tests, and one recorded live run). What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
+`tests/skills/research_communication/` (sixteen test modules, including the golden evidence-linked scenario), the contracts tests for the communication format under `tests/contracts/`, and the behavioral evaluation outside the plugin under `evals/research_communication/` (fixture-driven cases, a replay scorer with self-tests, and one recorded live run). What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
 
 ## How this folder is used
 
