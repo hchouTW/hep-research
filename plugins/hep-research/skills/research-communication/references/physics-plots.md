@@ -70,7 +70,8 @@ A figure that drops the label of a non-published result misstates its status, wh
   assumption: hand the conversion to hep-theory and state the assumption in the caption.
 - **Bin positions.** In wide bins of a steeply falling spectrum, place each point at the abscissa where the spectrum
   takes its bin-average value (Lafferty and Wyatt, Nucl. Instrum. Meth. A 355 (1995) 541,
-  doi:10.1016/0168-9002(94)01112-5, INSPIRE `Lafferty:1994cj`), for an assumed spectral shape that the caption names
+  doi:10.1016/0168-9002(94)01112-5, INSPIRE `Lafferty:1994cj`; INSPIRE metadata opened 2026-10-14, read level
+  `metadata-only`), for an assumed spectral shape that the caption names
   (for example a flux ∝ R^-2.7). The calculation belongs with the analysis, not the plot.
 - **Ratios** (p̄/p, B/C, isotope ratios): plotted unmultiplied, on a linear or log axis chosen for the range, with the
   numerator and denominator binning stated when they differ.
