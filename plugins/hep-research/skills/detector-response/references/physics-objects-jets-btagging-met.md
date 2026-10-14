@@ -17,6 +17,8 @@ pileup-per-particle identification) before clustering - the same nominal algorit
 radius produce different jets depending on what fed it, and a scale-factor or
 calibration derived for one constituent definition does not transfer to another.
 
+**Check:** Algorithm, radius, recombination scheme, input constituents and constituent-level pileup mitigation are stated, and every calibration used was derived for that constituent definition.
+
 ## Jet energy scale and resolution
 
 Jet energy corrections are applied as a sequence of factorized steps (pileup offset,
@@ -42,6 +44,8 @@ simulated-response correction from truth matching; in-situ relative (eta interca
 The jet energy resolution in simulation is matched to data by scaling or by smearing (stochastic smearing for jets
 without a matched generator jet).
 
+**Check:** The JES is applied as its factorized chain with the uncertainty decomposed (eta, pT, period); a single overall nuisance is justified; JER smearing is a separate, varied correction.
+
 ## b-tagging
 
 State the tagging algorithm, working point (loose/medium/tight or a numerical
@@ -61,6 +65,8 @@ between the b, c and light SF uncertainties, and how jets outside the calibrated
 (typically extrapolated with an enlarged, explicitly flagged uncertainty rather than silently
 extended).
 
+**Check:** Algorithm, working point and flavour categories are stated; the event weight uses the tagged and untagged terms with the analysis' own MC efficiencies; jets outside the calibrated pT/eta range carry a flagged, enlarged uncertainty.
+
 ## Missing transverse momentum (MET)
 
 MET is a derived, whole-event quantity - propagate every applied object correction
@@ -79,6 +85,8 @@ substantially across the phase space (e.g. with pileup or jet multiplicity); doc
 which convention is used since the two are not directly comparable as selection
 thresholds.
 
+**Check:** Every object correction is propagated into a recomputed MET; the algorithm, the unclustered-energy treatment and the flat-cut or significance convention are stated.
+
 ## Pileup effects specific to jets and MET
 
 Low-pT jets from pileup interactions ("pileup jets") are suppressed with a dedicated
@@ -89,6 +97,8 @@ Pileup also broadens the unclustered-energy resolution component of MET; a MET
 resolution correction derived for one pileup regime (e.g. a different data-taking
 year with different average pileup) should not be assumed to transfer without
 validation.
+
+**Check:** The pileup-jet ID working point and its scale factor are stated; a MET resolution correction is validated for the pileup regime it is used in.
 
 ## Overlap removal
 
@@ -101,6 +111,8 @@ see the general caution on ordering in
 by analysis and object definitions) and the matching radius/criterion used, since
 applying removal before vs. after corrections, or with a different matching radius,
 changes both jet and lepton multiplicities.
+
+**Check:** The removal order, its position relative to the corrections, and the matching radius or criterion are stated.
 
 ## Deliverables
 
