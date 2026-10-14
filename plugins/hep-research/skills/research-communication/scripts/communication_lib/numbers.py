@@ -6,7 +6,9 @@ in math mode is not used in HEP; `{,}` is read as a thousands separator), thin a
 digits, `$` and `~`. A sign counts only at the start or after a space, an opening bracket or a relation sign, so
 `1.02-1.05` and dates give unsigned parts. A number touching CJK text or followed by sentence punctuation is a token;
 one glued to Latin letters, digits or underscores (identifiers such as `C1`, `x86`, `2nd`) is not. Values compare as
-`Decimal`; no rounding or tolerance is applied here.
+`Decimal`; no rounding or tolerance is applied here. A displayed value is found in a text only when a token has the
+same value and at least the declared precision (Decimal exponent no larger), so `1.0` is not found in `Figure 1` but
+`1.02` is found in `1.020` (RC-A2b).
 """
 from __future__ import annotations
 
@@ -61,8 +63,14 @@ def same(a, b) -> bool:
 
 
 def contains_value(text: str, value) -> bool:
-    """True when a number token of the text equals the value (as Decimal); '1.0' is not found in '1.02'."""
+    """True when a number token of the text equals the value and shows at least its digits (exponent no larger).
+    '1.0' is found neither in '1.02' nor in 'Figure 1'; '1.02' is found in '1.020'."""
     d = to_decimal(value)
     if d is None:
         return False
-    return any(to_decimal(t) == d for t in tokens(text))
+    exp = d.as_tuple().exponent
+    for t in tokens(text):
+        dt = to_decimal(t)
+        if dt is not None and dt == d and dt.as_tuple().exponent <= exp:
+            return True
+    return False

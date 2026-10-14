@@ -87,7 +87,15 @@ class ReviewFixes2Numbers(unittest.TestCase):
 
     def test_contains_value_is_numeric_not_substring(self):
         self.assertFalse(N.contains_value("R = 1.02 +/- 0.05", "1.0"))
+        self.assertTrue(N.contains_value("R = 1.02 +/- 0.05", "1.02"))
+
+    def test_contains_value_needs_the_displayed_precision(self):
+        """RC-A2b: the passage must show at least the declared digits: '1.0' is not found in 'Figure 1'."""
+        self.assertFalse(N.contains_value("Figure 1: the ratio R = 1.02", "1.0"))
+        self.assertFalse(N.contains_value("R = 1", "1.00"))
         self.assertTrue(N.contains_value("R = 1.020", "1.02"))
+        self.assertTrue(N.contains_value("R = 1.2e-3", "1.2e-3"))
+        self.assertTrue(N.contains_value("12,000 events", "12000"))
 
 
 class ReviewFixes2ValueVsPassage(Project):
@@ -105,6 +113,9 @@ class ReviewFixes2ValueVsPassage(Project):
                 rep = self.claims()
                 self.assertIn("occurrence.value_not_in_passage", codes(rep, "error"), rep["findings"])
                 self.assertEqual(rep["exit_code"], 1)
+                # RC-A2b: every C1 occurrence is flagged, including the caption whose passage holds "Figure 1"
+                n = sum(1 for f in rep["findings"] if f["code"] == "occurrence.value_not_in_passage")
+                self.assertEqual(n, 3, rep["findings"])
 
     def test_unchanged_record_still_passes(self):
         self.assertEqual(self.manuscript()["exit_code"], 0)

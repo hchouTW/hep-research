@@ -210,7 +210,8 @@ class ManuscriptOccurrences(Base):
         doc["extension"]["occurrences"][1]["value"] = {"value": "1.020", "unit": "1", "rounding": "decimals:3"}
         fx.write(self.p["record"], doc)
         rep = self.audit(checks="manuscript")
-        self.assertNotIn("occurrence.value_not_in_passage", self.codes(rep), "1.020 and 1.02 are the same number")
+        # RC-A2b: the passage shows 1.02, fewer digits than the declared 1.020 (decimals:3): the record is stale
+        self.assertIn("occurrence.value_not_in_passage", self.codes(rep, "error"), "1.02 does not display 1.020")
         doc["extension"]["occurrences"][1]["value"] = {"value": "1.03", "unit": "1", "rounding": "decimals:2"}
         fx.write(self.p["record"], doc)
         rep = self.audit(checks="manuscript")
