@@ -32,8 +32,10 @@ looking at the data whenever possible (or, if defined afterward, with the
 look-elsewhere correction below applied to whatever choice was made):
 
 - **Time window**: set by the light-crossing or causality argument for the
-  progenitor hypothesis (e.g. seconds around a gravitational-wave merger time for a
-  prompt electromagnetic or neutrino counterpart; longer, source-class-dependent
+  progenitor hypothesis (e.g. a window of +-500 s around a gravitational-wave merger is the common
+  choice for prompt neutrino follow-up, from the expected emission duration, not from timing
+  resolution - ANTARES, IceCube, LIGO and Virgo, arXiv:1703.06298, opened
+  2026-10-14; longer, source-class-dependent
   windows for other progenitor scenarios), and by each messenger's own timing
   resolution and latency. A window chosen after seeing where an interesting event
   happened to fall is exactly the look-elsewhere problem in time rather than in sky
@@ -74,8 +76,8 @@ that a single, offline dataset does not have:
 - **Absolute timing must be on a common clock/timescale** across instruments (e.g.
   UTC with stated leap-second handling and each instrument's own absolute timing
   systematic) before any timing-coincidence significance is meaningful; a
-  millisecond-scale timing offset between facilities is routinely larger than the
-  timing precision either instrument quotes internally.
+  an uncorrected offset between facilities' time bases (leap seconds, cable delays, clock
+  references) can exceed the timing precision either instrument quotes internally.
 - **Astrometric/pointing systematics are per-instrument** and must be added, not
   assumed identical, when comparing localizations from different technologies (an
   optical position with sub-arcsecond systematic, a neutrino-telescope position with

@@ -13,7 +13,7 @@ rather than treating any one experiment's resolution as universal.
 
 For the unified forward-model/inverse-problem framework and the technology-specific
 extensions (readout, gaseous/timing/muon/noble-liquid/photosensor detectors, metrics,
-validation, case studies), see [detector measurement framework](detector-measurement-framework.md) onward.
+validation, case studies), see the [detector measurement framework](detector-measurement-framework.md) and the files listed in section 11 of the [principles summary](detector-principles-summary.md).
 
 ## What a detector measures, and what it does not
 
@@ -67,7 +67,7 @@ is closer to `1/R` than to `R`. This has a consequence that propagates into ever
 analysis: measurement uncertainty is approximately Gaussian in curvature, not in
 rigidity or momentum. The relative rigidity resolution therefore grows roughly
 linearly with rigidity, `sigma(R)/R ~ R`, until it is no longer meaningful - at the
-**maximum detectable rigidity** (MDR), where `sigma(R)/R` reaches 100%, the sign of
+**maximum detectable rigidity** (MDR), where `sigma(R)/R` reaches 100% (the MDR is detector-specific: take it from the profile or the user), the sign of
 the curvature is no longer reliably determined. Charge-sign misassignment does not
 switch on at the MDR: it grows continuously as `R` approaches the MDR (for a purely
 Gaussian curvature error it is already about 0.1% at `R = MDR/3`), and in practice it
@@ -100,9 +100,12 @@ radiation lengths. Two consequences follow directly. First, scattering degrades
 angular and position measurements more severely at low momentum, so a spectrometer's
 rigidity resolution has a low-rigidity floor set by scattering that no improvement in
 sensor precision can remove. Second, because the intrinsic sensor-resolution
-contribution to `sigma(R)/R` grows with rigidity while the scattering contribution
-falls, every magnetic spectrometer has a characteristic rigidity at which the two
-cross, and a resolution curve that is worst at both ends. Locating that crossover is
+contribution to `sigma(R)/R` grows linearly with rigidity, while the scattering contribution is
+constant for `beta ≈ 1` and rises as `1/beta` only at low rigidity (`sigma(R)/R ≈ sqrt((a R)^2 +
+(b/beta)^2)`). Every magnetic spectrometer therefore has a crossover rigidity where the two terms
+are equal; the curve rises at high rigidity, and at low rigidity only for particles with `beta < 1`,
+so its minimum lies below the crossover and depends on the particle mass ([tracking and
+vertexing](tracking-and-vertexing.md)). Locating that crossover is
 the first thing to do when interpreting a spectrometer's performance;
 `<plugin root>/skills/detector-response/scripts/multiple_scattering.py` computes it from a material description.
 
@@ -156,8 +159,8 @@ Terms that are frequently conflated, and are worth stating precisely in any writ
   resolution problem - see [calibration and alignment](calibration-and-alignment.md).
 - **Linearity** - whether the response is a straight line through the origin, i.e.
   whether the ratio `<x_reco>/x_true` is constant across the measured range.
-- **Occupancy** - the fraction of readout channels hit per event, which drives
-  pattern-recognition difficulty and confusion, not resolution.
+- **Occupancy** - the fraction of readout channels hit per event, which drives pattern-recognition
+  difficulty and confusion, and, through merged or wrongly assigned hits, the resolution tails.
 
 Report the core-sigma, the tail fraction, and the bias separately. A single number
 labeled "resolution" is only interpretable if the definition (Gaussian fit range,

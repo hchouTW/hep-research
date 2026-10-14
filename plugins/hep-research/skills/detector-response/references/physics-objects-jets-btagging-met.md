@@ -42,14 +42,18 @@ State the tagging algorithm, working point (loose/medium/tight or a numerical
 threshold), and the calibrated flavor categories (b, c, light/gluon) explicitly - a
 working point's efficiency and mistag rate are calibrated for a specific algorithm
 version and analysis phase space, and reusing a scale factor outside its calibrated
-pT/eta range is a common, hard-to-notice source of bias. b-tagging scale factors are
-usually provided per-jet and combined multiplicatively (or via a full reweighting
-method for analyses selecting on the number of tagged jets); document which combination
-method was used and whether it correctly handles jets outside the calibrated range
-(typically extrapolated with an enlarged, explicitly flagged uncertainty rather than
-silently extended). Where the analysis selects a fixed number of tagged jets, prefer
-the reweighting method (which preserves the full jet-multiplicity information) over a
-simple efficiency-scaling method unless yields are shown to agree between the two.
+pT/eta range is a common, hard-to-notice source of bias. b-tagging scale factors are provided per
+jet and per truth flavour (b, c, light), binned in pT and eta, for one working point. For a
+selection on the number of tagged jets, the event weight uses MC tagging efficiencies `eps_i`
+measured in the analysis' own simulated sample per truth flavour: `w = prod_tagged SF_i *
+prod_untagged (1 - SF_i eps_i)/(1 - eps_i)` (the ratio of the data-like to the simulated probability
+of the observed tag pattern); multiplying only the tagged jets' SFs is wrong. When the discriminant
+shape or several working points enter the analysis, use the shape calibration (per-jet reweighting
+by discriminant value), which does not preserve yields by construction and needs a normalization
+check. State the truth-flavour labelling, the c- and light-mistag calibrations, the correlations
+between the b, c and light SF uncertainties, and how jets outside the calibrated range are handled
+(typically extrapolated with an enlarged, explicitly flagged uncertainty rather than silently
+extended).
 
 ## Missing transverse momentum (MET)
 

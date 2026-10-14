@@ -50,10 +50,10 @@ their time difference over the same path, which for relativistic particles scale
     dt ~ (L / 2c) * (m1^2 - m2^2) / p^2
 
 The `1/p^2` is decisive: TOF separation power falls as the square of momentum, so a
-system with a given timing resolution has a sharp practical ceiling - typically a few
-GeV/c for pion/kaon separation with sub-100-picosecond timing over a metre-scale path.
-Extending the reach requires a longer path or better timing, and both scale only
-linearly against a quadratic loss.
+system with a given timing resolution has a sharp practical ceiling - at 3 sigma about 1.1-1.6 GeV/c
+for pi/K with 50-100 ps over 1 m, and about 2-2.7 GeV/c over 3 m at 50-100 ps
+(`pid_separation_power.py --mode tof` evaluates it). Separation grows linearly with `L/sigma_t`, so
+the momentum reach grows only as `sqrt(L/sigma_t)`.
 
 Practical points that dominate real TOF performance:
 
@@ -93,8 +93,9 @@ estimator - it is dominated by the tail and has large variance. The standard rem
 a **truncated mean**: discard the highest-loss fraction of samples (commonly the top
 30-40%) and average the rest. This is why detectors with many samples (a TPC with
 hundreds of measurements) achieve far better dE/dx resolution than a few silicon
-layers, and why quoting "dE/dx resolution" without stating the number of samples and
-the truncation fraction is meaningless.
+layers, and why quoting "dE/dx resolution" without stating the number of samples and the truncation
+fraction is meaningless. Empirically `sigma_dE/dx ≈ 0.41 N^-0.43 (t P)^-0.32` for `N` samples of
+thickness `t` (cm) at pressure `P` (bar), 4.5-7.5% for typical TPCs (PDG RPP 2024, eq. 35.17).
 
 The relativistic rise gives some separation power above the minimum-ionizing region,
 and its size depends on the medium. In gases (for example argon-based mixtures) the
@@ -115,8 +116,8 @@ continues to grow, so a TRD keeps separating species long after TOF and dE/dx ha
 failed.
 
 Because yield per interface is tiny, a TRD stacks many radiator foils or fibre layers
-followed by an X-ray-absorbing gas chamber (typically xenon-based, for photoelectric
-absorption at the relevant few-keV energies). The signal is a *statistical excess* of
+followed by an X-ray-absorbing gas chamber (typically xenon-based, for photoelectric absorption of
+TR X-rays, which are soft (2-40 keV for `gamma = 10^3`, PDG) and radiator dependent). The signal is a *statistical excess* of
 high-energy deposits in some layers on top of ordinary ionization - not a distinct
 signature in any single layer. That has two direct consequences:
 
@@ -182,7 +183,7 @@ Because velocity precision is high, a RICH combined with rigidity gives mass pre
 good enough to separate **isotopes** of the same element (which have identical charge
 and nearly identical rigidity-vs-momentum behavior, differing only in mass). Isotope
 separation is the most demanding PID application and is worth treating as its own
-validation problem: the separation is a few percent in mass, so every systematic in
+validation problem: the mass difference is `Delta m/m ≈ 1/A` (about 25% for 3He/4He and 10% for 9Be/10Be, a few percent for heavy isotopes), so every systematic in
 `beta`, in `R`, and in the charge assignment enters directly.
 
 ## Muon systems

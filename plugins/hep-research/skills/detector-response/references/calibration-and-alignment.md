@@ -55,9 +55,10 @@ are invisible to it by construction, and internal fit quality gives no warning.
 The dangerous ones bias curvature. A deformation that adds a curvature offset shifts
 positive and negative particles in *opposite* directions - a charge-antisymmetric
 rigidity bias - which directly fakes any charge-ratio or antiparticle-fraction
-measurement, and which no amount of chi-square improvement will reveal. Related modes
-produce a rigidity scale error that grows with rigidity, mimicking or masking a
-spectral feature.
+measurement, and which no amount of chi-square improvement will reveal. Because the offset is
+additive in curvature, the relative bias `delta R/R ≈ -q R delta` grows linearly with rigidity,
+mimicking or masking a spectral feature; charge-symmetric modes (a radial expansion, a field-scale
+error) give a relative scale error constant in rigidity.
 
 Weak modes must be constrained with information the alignment fit does not use:
 
@@ -70,7 +71,7 @@ Weak modes must be constrained with information the alignment fit does not use:
   independent halves and compared; a coherent deformation appears as a mismatch.
 - **Comparison of independent subdetectors** measuring the same track.
 - **Field-reversal or detector-inversion running**, where available, which changes the
-  sign of the physics effect but not of the instrumental one.
+  sign of the physics effect but not of the instrumental one, in detector coordinates; in charge-signed curvature the instrumental bias is the term that flips.
 
 Every measurement sensitive to charge sign or to the high-rigidity spectrum should
 state which of these constrains its charge-antisymmetric bias, and quote the resulting

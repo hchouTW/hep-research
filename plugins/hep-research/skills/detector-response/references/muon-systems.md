@@ -11,9 +11,8 @@ alignment weak modes in [calibration and alignment](calibration-and-alignment.md
 
 Muons are close to minimum-ionizing, rarely shower below a few hundred GeV, and
 traverse the calorimeters, so the outermost layers see them nearly free of other
-particles. At TeV energies radiative losses (bremsstrahlung, pair production,
-photonuclear) become comparable to ionization (the muon critical energy in iron is a
-few hundred GeV), so catastrophic energy losses and accompanying showers in the
+particles. Radiative losses (bremsstrahlung, pair production, photonuclear) equal ionization near
+the muon critical energy (a few hundred GeV in iron) and dominate at TeV energies, so catastrophic energy losses and accompanying showers in the
 absorbers must be expected and modelled. A muon system therefore
 does two jobs: identification (it is the layer that survives absorbers) and an
 independent momentum measurement at large lever arm, often in its own field.
@@ -45,8 +44,8 @@ online track. Each type has its own efficiency, purity, and momentum resolution.
 
 ## Performance and scaling
 
-- **Resolution**: at low `p`, multiple scattering in absorbers and calorimeters
-  (energy-loss fluctuation before the muon system) dominates; at high `p`, spatial
+- **Resolution**: at low `p`, multiple scattering and energy-loss fluctuations in the absorbers and
+  calorimeters upstream of the muon system dominate; at high `p`, spatial
   resolution and alignment of the muon stations limits the *sagitta*
   `s ≈ 0.3 z B L^2/(8 p)`-like measurement (approximate, uniform field; `s` and `L`
   in m, `B` in T, `p` in GeV/c, `z` the charge number; momentum error `∝ p^2 sigma_s`). High-momentum resolution is a **weak-mode/alignment** problem

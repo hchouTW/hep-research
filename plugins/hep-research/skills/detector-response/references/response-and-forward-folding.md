@@ -7,11 +7,11 @@ uses the response belong to hep-statistics ([unfolding](../../hep-statistics/ref
 ## The response object
 
 Define `nu = D_reco * R * D_truth * x + b` (written out under forward folding below). Specify axis orientation,
-efficiency treatment, missed truth events, out-of-fiducial contributions/reconstruction fakes, and luminosity. Columns
-normalized to unity generally no longer encode efficiency loss; do not mix that convention with one that includes
+efficiency treatment, missed truth events, out-of-fiducial contributions/reconstruction fakes, and luminosity. Truth-bin
+sums normalized to unity (columns for `rows_reco_cols_truth`) no longer encode efficiency loss; do not mix that convention with one that includes
 losses.
 
-Check folding with a small hand-calculable matrix. Document purity/stability denominators and assess conditioning,
+Check folding with a small hand-calculable matrix. Document purity and stability with their denominators (orientation `rows_reco_cols_truth`): purity `p_i = N_ii / sum_j N_ij`, the fraction of reco-bin-i events generated in truth bin i (state whether fakes are in the denominator); stability `s_j = N_jj / N_sel,j` (or `/ N_gen,j`; say which), the fraction of truth-bin-j events reconstructed in bin j. Bin purity is not the object purity of [performance metrics](performance-metrics-and-residual-diagnostics.md) and assess conditioning,
 rank, and identifiable truth bins. Signed MC contributions are not literal transition probabilities and need suitable
 response-estimation and uncertainty treatment.
 
@@ -32,7 +32,7 @@ nu = D_reco * R * D_truth * x + b
 - `D_truth`: diagonal corrections in truth space, applied first: acceptance and fiducial fraction, and an efficiency
   that depends only on the truth variable, when they sit outside `R`.
 - `R`: the migration matrix, `R_ij = P(reco bin i | truth bin j)`, with or without the inefficiency inside it as
-  declared. From a counts table, `R_ij = N_ij / N_gen,j`.
+  declared. From a counts table, `R_ij = N_ij / N_gen,j` when the inefficiency is inside (`conditional_on_generated`), and `R_ij = N_ij / N_sel,j` when it is outside (`conditional_on_selected`), where `N_sel,j` counts the selected events of truth bin j including those reconstructed outside the reco axes (declare them as explicit underflow/overflow).
 - `D_reco`: diagonal corrections in reco space, applied after migration: a trigger or selection efficiency measured in
   the reconstructed variable, and data/MC scale factors binned in reco.
 - `b`: additive reco-space terms: fakes, out-of-fiducial truth that is reconstructed, and backgrounds.

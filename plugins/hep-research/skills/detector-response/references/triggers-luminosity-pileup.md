@@ -54,8 +54,9 @@ rises from zero to a plateau; analyses should select comfortably into the platea
 region (commonly required to be within a few percent of its asymptotic value) rather
 than on the rising edge, where efficiency changes rapidly with pT and small
 data/MC mismodeling of the turn-on shape becomes a large, hard-to-control systematic.
-State the plateau threshold used and confirm the analysis selection sits at or above
-it; if it does not (e.g. because the analysis needs sensitivity below the plateau),
+State the plateau threshold used and confirm the analysis selection sits at or above it (even on the
+plateau the efficiency is measured in data and simulation and its scale factor applied: on the
+plateau means insensitive to the turn-on shape, not free of correction); if it does not (e.g. because the analysis needs sensitivity below the plateau),
 the turn-on shape itself must be measured and applied as a pT-dependent efficiency,
 not a flat number, and its shape uncertainty documented explicitly.
 

@@ -59,15 +59,17 @@ composition-sensitive observable a fluorescence or hybrid detector can measure
 directly (see [ground-based detection arrays](ground-based-detection-arrays.md)),
 since it tracks the depth of first interaction and the subsequent cascade length,
 both of which are set by the primary's mass through the superposition argument above.
-`<plugin root>/skills/detector-response/scripts/xmax_gaisser_hillas.py` evaluates this profile and locates `X_max` from
-fitted or assumed parameters.
+`<plugin root>/skills/detector-response/scripts/xmax_gaisser_hillas.py` evaluates `N(X)`, the shower
+age and the half-maximum depths for a given parameter set (with `X_max` as an input); it does not
+fit a profile or locate `X_max` from samples. Fluorescence detectors fit the energy-deposit profile
+`dE/dX`, not `N(X)`.
 
 The **Greisen parameterization** is the equivalent closed-form profile specifically
 for pure electromagnetic (photon/electron-initiated) showers, expressed in radiation
 lengths rather than the Gaisser-Hillas form's atmospheric slant depth; it is the
 appropriate reference profile for gamma-ray-initiated showers (see
-[imaging Cherenkov](imaging-atmospheric-cherenkov.md)), which lack the hadronic
-component that broadens a nucleus-initiated shower's fluctuations.
+[imaging Cherenkov](imaging-atmospheric-cherenkov.md)), which lack the hadronic component of
+hadron-initiated showers (whose fluctuations are largest for protons).
 
 **`X_max` fluctuations, not just its mean, carry composition information.** A
 proton-initiated shower's depth of first interaction fluctuates with the full
@@ -97,16 +99,16 @@ a systematic that must be quoted, not assumed away.
 
 ## The muon puzzle
 
-Across all major hadronic interaction models and all ground-based experiments with
-independent muon measurements, the observed number of muons in air showers above
-roughly 10^17 eV exceeds the number predicted by simulation for a composition
-consistent with the corresponding `X_max` measurement - the same set of showers is
-"too muon-rich" relative to what its measured depth of maximum implies under any
-tested model. This is treated as evidence of a genuine gap in hadronic-interaction
+Most, but not all, experiments with independent muon measurements find more muons in air showers
+than simulations predict for the composition implied by `X_max`. The combined analysis of eight
+air-shower experiments (WHISP, as summarized by Gesualdi et al., PoS(ICRC2021)473,
+opened 2026-10-14) finds the deficit in simulations growing with energy, with a non-vanishing slope
+at 8 sigma, while EAS-MSU, KASCADE-Grande, IceCube and Yakutsk data are consistent with no deficit
+in their ranges. The size depends on the hadronic model and its version (name both). This is treated as evidence of a genuine gap in hadronic-interaction
 modeling at energies far above any accelerator calibration point (a shower's first few
 interactions can reach center-of-mass energies beyond the LHC), not as a composition
-effect, since no physical mixture of known primaries reconciles both observables
-simultaneously under current models. Any composition or hadronic-model conclusion
+effect, since, where the deficit is seen, no mixture of known primaries reconciles both observables
+under current models. Any composition or hadronic-model conclusion
 drawn from muon content alone, without also checking consistency against `X_max`,
 should be treated as provisional given this open discrepancy.
 

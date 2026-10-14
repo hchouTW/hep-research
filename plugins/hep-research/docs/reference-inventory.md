@@ -8,7 +8,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 
 | Skill | References | KB | Cited nowhere |
 |---|---|---|---|
-| detector-response | 34 | 400 | 0 |
+| detector-response | 34 | 411 | 0 |
 | hep-analysis | 11 | 81 | 0 |
 | hep-computing | 32 | 297 | 0 |
 | hep-statistics | 11 | 150 | 0 |
@@ -22,7 +22,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 
 | A | B | Jaccard | Containment | Shared shingles |
 |---|---|---|---|---|
-| `skills/detector-response/references/core-detector-equations.md` | `skills/detector-response/references/detector-principles-summary.md` | 0.043 | 0.181 | 168 |
+| none | | | |
 
 ## Similar names (same skill, a shared name token in at most 4 files)
 
@@ -84,40 +84,40 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 
 | Reference | Owner | KB | In SKILL.md | Cited by (files) | Other skills citing | Last commit |
 |---|---|---|---|---|---|---|
-| `calibration-and-alignment.md` | detector-response | 9.2 | no | 15 | - | b944a23 2026-10-13 |
-| `calorimetry-ecal-hcal.md` | detector-response | 11.8 | no | 10 | - | d8bec60 2026-10-13 |
-| `cherenkov-imaging-variants-and-photosensors.md` | detector-response | 10.6 | no | 8 | research-communication | b97b338 2026-10-14 |
-| `core-detector-equations.md` | detector-response | 6.0 | no | 2 | - | b97b338 2026-10-14 |
-| `cosmic-ray-spectrum-and-composition.md` | detector-response | 11.5 | no | 11 | hep-analysis, hep-statistics, research-communication | b944a23 2026-10-13 |
-| `data-mc-validation-and-detector-systematics.md` | detector-response | 11.7 | no | 7 | - | 4665f43 2026-10-13 |
-| `detector-case-studies-and-checklists.md` | detector-response | 13.9 | no | 3 | - | b944a23 2026-10-13 |
-| `detector-comparison-tables.md` | detector-response | 14.5 | no | 2 | - | b944a23 2026-10-13 |
-| `detector-glossary.md` | detector-response | 4.8 | no | 3 | - | b944a23 2026-10-13 |
-| `detector-measurement-framework.md` | detector-response | 11.0 | no | 10 | hep-analysis, research-communication | d8bec60 2026-10-13 |
-| `detector-principles-bibliography.md` | detector-response | 13.8 | no | 2 | - | 7fdda0d 2026-10-13 |
-| `detector-principles-summary.md` | detector-response | 22.6 | yes | 3 | - | b97b338 2026-10-14 |
-| `detector-simulation.md` | detector-response | 12.4 | no | 9 | hep-theory, physics-ml | d8bec60 2026-10-13 |
-| `detector-systems-overview.md` | detector-response | 12.2 | no | 13 | hep-analysis | b944a23 2026-10-13 |
+| `calibration-and-alignment.md` | detector-response | 9.5 | no | 15 | - | b944a23 2026-10-13 |
+| `calorimetry-ecal-hcal.md` | detector-response | 12.1 | no | 10 | - | d8bec60 2026-10-13 |
+| `cherenkov-imaging-variants-and-photosensors.md` | detector-response | 10.6 | no | 8 | research-communication | 70f7fbc 2026-10-14 |
+| `core-detector-equations.md` | detector-response | 6.9 | no | 3 | - | 70f7fbc 2026-10-14 |
+| `cosmic-ray-spectrum-and-composition.md` | detector-response | 12.1 | no | 11 | hep-analysis, hep-statistics, research-communication | b944a23 2026-10-13 |
+| `data-mc-validation-and-detector-systematics.md` | detector-response | 11.9 | no | 7 | - | 4665f43 2026-10-13 |
+| `detector-case-studies-and-checklists.md` | detector-response | 14.1 | no | 3 | - | b944a23 2026-10-13 |
+| `detector-comparison-tables.md` | detector-response | 14.6 | no | 2 | - | b944a23 2026-10-13 |
+| `detector-glossary.md` | detector-response | 6.0 | no | 5 | - | b944a23 2026-10-13 |
+| `detector-measurement-framework.md` | detector-response | 11.0 | no | 11 | hep-analysis, research-communication | d8bec60 2026-10-13 |
+| `detector-principles-bibliography.md` | detector-response | 14.7 | no | 2 | - | 7fdda0d 2026-10-13 |
+| `detector-principles-summary.md` | detector-response | 19.5 | yes | 5 | - | 70f7fbc 2026-10-14 |
+| `detector-simulation.md` | detector-response | 12.5 | no | 9 | hep-theory, physics-ml | d8bec60 2026-10-13 |
+| `detector-systems-overview.md` | detector-response | 12.7 | no | 13 | hep-analysis | b944a23 2026-10-13 |
 | `event-reconstruction.md` | detector-response | 10.8 | no | 6 | - | b944a23 2026-10-13 |
-| `extensive-air-showers.md` | detector-response | 8.2 | no | 9 | research-communication | e9687b6 2026-10-13 |
-| `front-end-electronics-and-signal-processing.md` | detector-response | 24.5 | no | 10 | - | d8bec60 2026-10-13 |
-| `gaseous-and-specialized-tracking-technologies.md` | detector-response | 15.3 | no | 8 | research-communication | b944a23 2026-10-13 |
-| `ground-based-detection-arrays.md` | detector-response | 8.0 | no | 7 | - | b944a23 2026-10-13 |
-| `imaging-atmospheric-cherenkov.md` | detector-response | 10.3 | no | 10 | hep-statistics, physics-ml, research-communication | b944a23 2026-10-13 |
-| `multimessenger-analysis.md` | detector-response | 6.6 | no | 2 | - | b944a23 2026-10-13 |
+| `extensive-air-showers.md` | detector-response | 8.6 | no | 9 | research-communication | e9687b6 2026-10-13 |
+| `front-end-electronics-and-signal-processing.md` | detector-response | 24.6 | no | 10 | - | d8bec60 2026-10-13 |
+| `gaseous-and-specialized-tracking-technologies.md` | detector-response | 15.8 | no | 8 | research-communication | b944a23 2026-10-13 |
+| `ground-based-detection-arrays.md` | detector-response | 8.3 | no | 7 | - | b944a23 2026-10-13 |
+| `imaging-atmospheric-cherenkov.md` | detector-response | 10.5 | no | 10 | hep-statistics, physics-ml, research-communication | b944a23 2026-10-13 |
+| `multimessenger-analysis.md` | detector-response | 6.8 | no | 2 | - | b944a23 2026-10-13 |
 | `muon-systems.md` | detector-response | 8.4 | no | 7 | research-communication | b944a23 2026-10-13 |
 | `neutrino-astronomy.md` | detector-response | 8.6 | no | 7 | hep-statistics | b944a23 2026-10-13 |
-| `noble-liquid-neutrino-and-rare-event-detectors.md` | detector-response | 11.6 | no | 7 | - | b944a23 2026-10-13 |
-| `particle-identification.md` | detector-response | 15.7 | no | 20 | - | b944a23 2026-10-13 |
-| `performance-metrics-and-residual-diagnostics.md` | detector-response | 16.2 | no | 9 | - | b944a23 2026-10-13 |
-| `physics-objects-jets-btagging-met.md` | detector-response | 6.5 | no | 7 | physics-ml | 351029c 2026-10-07 |
-| `reconstruction-performance-and-truth-matching.md` | detector-response | 10.5 | no | 8 | - | b944a23 2026-10-13 |
-| `response-and-forward-folding.md` | detector-response | 5.4 | no | 7 | hep-analysis, hep-statistics | 41dd8e7 2026-10-14 |
-| `signal-formation-and-readout.md` | detector-response | 15.4 | no | 8 | research-communication | b97b338 2026-10-14 |
-| `space-based-direct-detection.md` | detector-response | 19.1 | no | 12 | hep-analysis, hep-statistics, research-communication | 1d020b8 2026-10-13 |
+| `noble-liquid-neutrino-and-rare-event-detectors.md` | detector-response | 11.8 | no | 7 | - | b944a23 2026-10-13 |
+| `particle-identification.md` | detector-response | 16.1 | no | 20 | - | b944a23 2026-10-13 |
+| `performance-metrics-and-residual-diagnostics.md` | detector-response | 16.9 | no | 10 | - | b944a23 2026-10-13 |
+| `physics-objects-jets-btagging-met.md` | detector-response | 6.9 | no | 7 | physics-ml | 351029c 2026-10-07 |
+| `reconstruction-performance-and-truth-matching.md` | detector-response | 10.7 | no | 8 | - | b944a23 2026-10-13 |
+| `response-and-forward-folding.md` | detector-response | 6.2 | no | 7 | hep-analysis, hep-statistics | df01a6a 2026-10-14 |
+| `signal-formation-and-readout.md` | detector-response | 16.9 | no | 8 | research-communication | 70f7fbc 2026-10-14 |
+| `space-based-direct-detection.md` | detector-response | 20.2 | no | 12 | hep-analysis, hep-statistics, research-communication | 9b058ef 2026-10-14 |
 | `timing-detectors.md` | detector-response | 8.6 | no | 7 | - | d8bec60 2026-10-13 |
-| `tracking-and-vertexing.md` | detector-response | 13.1 | no | 14 | research-communication | b944a23 2026-10-13 |
-| `triggers-luminosity-pileup.md` | detector-response | 11.4 | no | 12 | - | f6739d9 2026-10-14 |
+| `tracking-and-vertexing.md` | detector-response | 14.2 | no | 14 | research-communication | b944a23 2026-10-13 |
+| `triggers-luminosity-pileup.md` | detector-response | 11.6 | no | 12 | - | c8ade22 2026-10-14 |
 | `analysis-design.md` | hep-analysis | 10.9 | yes | 13 | detector-response, hep-computing | 317c39a 2026-10-14 |
 | `analysis-validation.md` | hep-analysis | 4.4 | no | 5 | detector-response, hep-computing | 351029c 2026-10-07 |
 | `backgrounds.md` | hep-analysis | 4.7 | no | 17 | detector-response | 633d6c9 2026-10-13 |

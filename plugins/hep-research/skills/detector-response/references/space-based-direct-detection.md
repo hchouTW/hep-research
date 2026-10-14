@@ -85,8 +85,10 @@ this rule. Using a different rule for events than for exposure biases the flux n
 
 Below its local geomagnetic cutoff, any flux an instrument records at that rigidity
 is not primary cosmic radiation reaching from outside the magnetosphere - it is
-**re-entrant/albedo** particles (secondaries produced in the atmosphere and reflected
-back upward) or trapped radiation-belt particles, and must be excluded from a
+albedo particles (atmospheric secondaries: splash albedo moving upward, re-entrant albedo guided to
+the conjugate point and arriving downward) or trapped radiation-belt particles; near the cutoff
+primaries also arrive through penumbral windows, and the transmission differs between charge signs,
+so treat e+/e- and antiproton/proton cutoffs separately. They and must be excluded from a
 primary-spectrum measurement rather than corrected for.
 
 ## Solar modulation
@@ -129,7 +131,7 @@ the sunspot record instead of guessing. Solar cycle 24 began at a minimum in Dec
 peaked in April 2014 (13-month smoothed). It had a double maximum: a first peak from the northern
 hemisphere (hemispheric maximum November 2011), a long plateau between the peaks (early 2012 to mid 2013), and the higher
 second peak from the southern hemisphere in early 2014. So about 2011-2014 is **solar maximum**,
-not a declining phase, and the solar magnetic polarity reversed during it ([SILSO cycle table](https://www.sidc.be/SILSO/cyclesmm), [SILSO news: 2014, maximum year for cycle 24](https://www.sidc.be/SILSO/news004)). In that period `phi` is higher than at the 2009 minimum,
+not a declining phase, and the solar magnetic polarity reversed during it ([SILSO cycle table](https://www.sidc.be/SILSO/cyclesmm), [SILSO news: 2014, maximum year for cycle 24](https://www.sidc.be/SILSO/news004)). Solar cycle 25 began at the December 2019 minimum ([Royal Observatory of Belgium, 15 September 2020](https://astro.oma.be/en/december-2019-confirmed-as-starting-point-of-the-new-solar-activity-cycle)) and reached its smoothed maximum in October 2024 ([SIDC](https://www.sidc.be/article/solar-cycle-25-reached-its-maximum-october-2024); both read 2026-10-14; smoothed values are revised, so re-check the cycle table). Data from 2020 on need their own phase and polarity statement. In that period `phi` is higher than at the 2009 minimum,
 and it changes fast enough that a single `phi` for all three years is itself an approximation.
 
 **Forbush decreases** - sudden, transient flux depressions lasting days, caused by a
@@ -204,9 +206,12 @@ not antiprotons. The **antiproton** spectrum at high rigidity is harder than som
 secondary-production predictions, but whether it exceeds the secondary expectation at
 all is still debated, because the prediction's uncertainties (production cross
 sections, propagation) are comparable to the difference. Distinguishing source
-hypotheses requires the spectral shape, an eventual high-energy cutoff or lack
-thereof, and consistency with other channels (gamma-ray, anisotropy), not an excess
-alone.
+hypotheses requires the spectral shape (including any published high-energy drop and its
+model-dependent significance) and consistency with other channels (gamma-ray, anisotropy), not an
+excess alone. For numbers, significances and the current status read the bound experiment profile's
+ledger (for AMS-02: the [antimatter and leptons
+module](../../../profiles/experiments/ams-02/modules/species/antimatter-and-leptons.md), claims C04
+and C96), not this file.
 
 ## Worked walkthrough: a proton flux point from counts (verified 2026-09-24)
 
@@ -229,7 +234,7 @@ python3 <plugin root>/skills/hep-analysis/scripts/solar_modulation_force_field.p
    [1.259, 1.412]e-3. Report the counts, exposure, and bin width separately. Plot the point at
    the spectrum-weighted rigidity, not at the bin center.
 3. **Solar modulation.** The flux is top-of-instrument (TOA). To compare it with a LIS,
-   convert to kinetic energy (5.5 GV -> T = 4.641 GeV for a proton), convert the flux per GV to
+   convert to kinetic energy (5.5 GV, the bin centre, is used here for simplicity; a real analysis uses the spectrum-weighted rigidity -> T = 4.641 GeV for a proton), convert the flux per GV to
    a flux per GeV, and demodulate. At phi = 0.6 GV the LIS flux is 1.233x the TOA flux, at
    T_LIS = 5.241 GeV. The force field is a one-parameter approximation, so state phi, the
    epoch, and the model.

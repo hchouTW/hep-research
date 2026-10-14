@@ -71,7 +71,7 @@ air showers in the atmosphere above and around the detector (see
   that must also accept downward-going astrophysical directions.
 - **Atmospheric neutrinos** are an irreducible background even after the muon veto,
   since they arrive from the same directions as an astrophysical signal. They are
-  separated statistically, not by direction, using the facts that (a) the atmospheric
+  separated statistically, not by source direction, using the facts that (a) the atmospheric
   spectrum falls faster (~`E^-3.7` versus an astrophysical `~E^-2` to `E^-2.5`
   expectation from the same Fermi-acceleration argument as
   [cosmic-ray spectrum and composition](cosmic-ray-spectrum-and-composition.md)),

@@ -47,13 +47,13 @@ inverse problem; *inefficiency/fakes* lists the dominant loss and fake mechanism
 | Strips | 1D points | interpolation | ghosts | low | high | moderate | ghosts |
 | MAPS | 2D points | charge diffusion | integration time | very low | moderate | improving | timing |
 | Drift chamber | radii | drift time | left-right | low | limited | aging | late clusters |
-| TPC | 3D image | drift time + pads | `t_0` | very low | limited (ion backflow) | not for silicon dose | distortions |
+| TPC | 3D image | drift time + pads | `t_0` | very low | limited (ion backflow) | gas aging, space charge | distortions |
 | Straw | radii | drift time | left-right | low | moderate | aging | delta rays |
 | MWPC | wire hits | wire pitch | crossing | low | limited | aging | streamers |
 | RPC | strip hits | strip pitch | multi-hit | moderate | limited by resistivity | moderate | afterpulses |
 | GEM/Micromegas | pad images | centroid | angle | low | high | discharge | discharges |
 | Fibers | amplitude points | fiber pitch + sharing | stereo ghosts | moderate | high | SiPM dose | dark counts |
-| Emulsion | 3D micro image | grains | none (no time) | none | very low | fluence | overlap |
+| Emulsion | 3D micro image | grains | time association (no time stamp) | high (dense emulsion; ECC adds passive plates) | very low | fluence | overlap |
 
 ## Table 3: Timing-technology comparison
 
@@ -117,7 +117,7 @@ inverse problem; *inefficiency/fakes* lists the dominant loss and fake mechanism
 | Emulsion | slope/position agreement | link efficiency | fake links | scanning efficiency |
 | TOF/timing | time residual vs species | time vs amplitude/run | walk, offset | core width + tail |
 | RICH/DIRC | photon-angle residual | angle vs `p` | index shift | efficiency/mis-ID at a likelihood cut |
-| TRD | layer likelihood | `e`/`h` rejection vs efficiency | gas/gain drift | rejection at fixed efficiency |
+| TRD | layer likelihood | pion rejection vs electron efficiency (`e/pi`) | gas/gain drift | rejection at fixed efficiency |
 | ECAL | `E/p`, `Z->ee` mass | scale vs `eta`, `E` | material/nonlinearity | resolution from `Z` line shape |
 | HCAL/jets | response vs `pT`, flavor | JES closure | non-compensation | response and `sigma_68` |
 | Muon | mass/`q/p` vs `q*eta` | dimuon mass maps | weak modes | tag-and-probe; charge misID |

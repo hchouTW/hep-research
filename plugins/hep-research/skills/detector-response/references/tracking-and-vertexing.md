@@ -20,14 +20,16 @@ particles crossing a stereo pair produce four candidate intersections, only two 
 which are real. Ghost rate grows quadratically with occupancy, which is why strip
 detectors are placed outside the highest-density region.
 
-Silicon position resolution is set by pitch and by charge sharing. A binary readout
-(hit/no-hit) gives a resolution of pitch divided by the square root of twelve; analog
+Silicon position resolution is set by pitch and by charge sharing. A binary readout (hit/no-hit)
+gives about pitch divided by the square root of twelve for single-channel clusters; charge sharing
+into two-channel clusters does better even without amplitudes, depending on incidence angle,
+threshold and Lorentz drift; analog
 or multi-threshold readout that interpolates the charge division between neighboring
 channels does substantially better, at the cost of calibration complexity - the
 interpolation depends on the charge-sharing model, which is itself a calibration that
 drifts with radiation damage and bias voltage.
 
-Silicon also measures deposited charge, which is proportional to `Z^2` for a
+Silicon also measures deposited charge, which is approximately proportional to `Z^2` (before readout saturation, quenching and delta-ray escape) for a
 traversing nucleus. A silicon tracker is therefore simultaneously a charge (|Z|)
 measuring device, and multi-layer charge consistency is a powerful rejection tool
 against interactions and against tracks built from mismatched hits - see
@@ -38,8 +40,10 @@ measure ionization in a gas volume and reconstruct position from drift time, req
 a known drift velocity and a start time. They offer very low material budget per
 measurement and, in the TPC case, hundreds of samples along a track for excellent
 dE/dx, at the cost of slower response and a drift-velocity calibration sensitive to
-gas composition, temperature, and pressure. A drift-time measurement converts an
-uncertainty in the event start time directly into a position bias common to all hits,
+gas composition, temperature, and pressure. A drift-time measurement converts an uncertainty in the
+event start time into a common drift-*distance* bias: a common position shift along the drift
+direction in a TPC, and in a drift chamber a radius bias whose sign in track coordinates depends on
+the side of the wire ([glossary](detector-glossary.md), residual sign),
 which the track fit will partly absorb into the trajectory parameters rather than
 flagging - a class of error that shows up as an apparent alignment problem.
 
@@ -71,8 +75,11 @@ collimated decay.
 ## The track fit
 
 A track fit estimates trajectory parameters - typically a position and direction at a
-reference surface plus a curvature - from the collected hits. The **Kalman filter**
-formulation is standard because it handles multiple scattering naturally: rather than
+reference surface plus a curvature - from the collected hits. The **Kalman filter** formulation is
+standard because it handles multiple scattering naturally. It assumes Gaussian process noise;
+electron bremsstrahlung is not Gaussian, so electrons need a Gaussian-sum filter or a dedicated
+bremsstrahlung fit, and their track momentum is biased low with a long tail. Use the smoother for
+unbiased residuals at every layer and outlier down-weighting for wrong hits: rather than
 treating the trajectory as a single deterministic curve, it propagates the parameter
 estimate and its covariance layer by layer, inflating the covariance at each material
 crossing by the expected scattering. This makes the fit's own uncertainty estimate
@@ -141,8 +148,10 @@ At high rigidity, where `sigma(R)/R` approaches unity, the measured curvature ca
 change sign. The resulting **charge confusion** migrates particles into the
 oppositely-charged sample and is a background whose rate is set by the resolution
 function's tail, not its core. This is the practical reason a core-Gaussian resolution
-description is inadequate: the confusion probability is entirely a tail property, and
-a Gaussian extrapolation underestimates it, often by orders of magnitude.
+description is inadequate: the rate is set mainly by the resolution function's tail: a Gaussian
+extrapolation of the core underestimates it, often by orders of magnitude, except near the MDR,
+where the core itself contributes (the Gaussian core alone gives 0.135% at MDR/3, where `sigma(R)/R
+= 1/3`).
 
 Control it by measuring the tail directly rather than modeling it - using a
 independent estimate of the same track (an independent subset of layers, or a second
@@ -162,8 +171,10 @@ where scattering in that first layer matters most.
 
 The impact parameter - the distance of closest approach between a track and a
 reference point - underlies displaced-vertex identification and lifetime-based
-tagging. Its resolution has an approximately constant term from sensor precision plus
-a scattering term falling with momentum, and quoting it without the momentum
+tagging. Its resolution has an approximately constant term from sensor precision plus a scattering
+term falling with momentum (approximate: `sigma_d0 ≈ a ⊕ b/(p sin^{3/2} theta)` in the transverse
+plane; for two layers at `r1 < r2`, `sigma_d0^2 ≈ ((r2 sigma_1)^2 + (r1 sigma_2)^2)/(r2 - r1)^2`
+plus a scattering term `~ r1 theta_0`; take `a` and `b` from the profile), and quoting it without the momentum
 dependence hides the regime where it matters. Secondary vertex finding must also
 contend with material interactions producing genuine displaced vertices that are not
 signal; a map of reconstructed vertices reproduces the detector material layout, and

@@ -59,12 +59,14 @@ particles outside acceptance, and acceptance is a geometric property that should
 separated from efficiency - see
 [detector systems overview](detector-systems-overview.md).
 
-Efficiency is a ratio of counts and its uncertainty is **binomial**, not a Gaussian
-propagation of numerator and denominator - `<plugin root>/skills/detector-response/scripts/tag_and_probe_efficiency.py`
-computes the exact Clopper-Pearson interval, and it applies here exactly as it does for
-trigger efficiencies. When the events are weighted, the effective-sample-size
-correction matters and a naive binomial interval on weighted counts understates the
-uncertainty.
+Efficiency is a ratio of counts. For unweighted, background-free trials its uncertainty is
+**binomial**, not a Gaussian propagation of numerator and denominator - `<plugin
+root>/skills/detector-response/scripts/tag_and_probe_efficiency.py` computes the exact
+Clopper-Pearson interval for that case; background-subtracted yields need the simultaneous pass/fail
+fit of [triggers, luminosity and pileup](triggers-luminosity-pileup.md). With weighted events a
+binomial interval on the weighted counts is wrong, too small or too large depending on the weight
+scale: use `Var(eps) = [(1-eps)^2 sum_pass w^2 + eps^2 sum_fail w^2] / (sum w)^2`, or effective
+counts.
 
 Quote all of these **differentially** in the variables they depend on - momentum,
 direction, local density or pileup - not integrated. An integrated efficiency is a
