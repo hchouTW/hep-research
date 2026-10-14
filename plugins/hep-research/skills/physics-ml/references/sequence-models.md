@@ -1,117 +1,25 @@
 # Sequence Model Reference (RNN/LSTM/GRU)
 
-> Generic ML engineering; not physics-specific. For physics tasks start at
-> [ml-analysis.md](ml-analysis.md). Physics uses: digitized waveforms and pulse shapes,
-> time series of detector or accelerator conditions, and sequences of hits along a
-> track. Unordered particle sets should not be fed to an RNN in an arbitrary order; use
-> a set or graph model ([particle-and-jet-architectures.md](particle-and-jet-architectures.md)).
+> Generic ML engineering. Physics uses: digitized waveforms and pulse shapes, time series of detector or accelerator
+> conditions, sequences of hits along a track. Unordered particle sets are not fed to an RNN in an arbitrary order: use
+> a set or graph model ([particle-and-jet-architectures.md](particle-and-jet-architectures.md)). Attention models:
+> [transformer-architectures.md](transformer-architectures.md).
 
-For attention-based sequence models see
-[transformer-architectures.md](transformer-architectures.md). This file
-covers recurrent architectures, which remain a reasonable default for small
-datasets, strict latency/memory budgets, or strictly online/streaming inputs where
-a fixed-size recurrent state is a better fit than a growing attention context.
-
-## Choosing a cell
-
-- **LSTM**: two states (hidden, cell), gating tends to handle longer dependencies
-  than a plain RNN and is a safe default.
-- **GRU**: one state, fewer parameters, often matches LSTM quality with less
-  compute - a reasonable first try when compute/memory is tight.
-- **Plain `nn.RNN`**: rarely the right choice outside teaching; vanishing gradients
-  make it unreliable beyond short sequences.
-
-## Shapes
-
-`nn.LSTM`/`nn.GRU` default to `[seq, batch, features]`; pass `batch_first=True` to
-use `[batch, seq, features]` and match the rest of this skill's conventions. Hidden
-state shape is `[num_layers * num_directions, batch, hidden_dim]` regardless of
-`batch_first`.
-
-```python
-lstm = nn.LSTM(input_size=32, hidden_size=128, num_layers=2, batch_first=True, bidirectional=False)
-output, (h_n, c_n) = lstm(x)  # output: [batch, seq, hidden_dim]
-```
-
-## Packing variable-length sequences
-
-Padding alone wastes compute on pad positions and lets the recurrent state keep
-updating on padding, corrupting the final hidden state. Pack before feeding the
-RNN, unpack after:
-
-```python
-from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
-
-# lengths: [batch], true (unpadded) length of each sequence, sorted or not
-# enforce_sorted=False lets you skip sorting the batch yourself
-packed = pack_padded_sequence(x, lengths.cpu(), batch_first=True, enforce_sorted=False)
-packed_out, (h_n, c_n) = lstm(packed)
-output, out_lengths = pad_packed_sequence(packed_out, batch_first=True)
-```
-
-`h_n`/`c_n` from a packed input are already the correct final states per sequence
-(not corrupted by padding) - use them directly for a sequence-classification head
-rather than manually indexing `output` at each sequence's last real position, which
-is easy to get off-by-one wrong.
-
-## Sequence classification vs. sequence-to-sequence
-
-- **Classification** (one label per sequence): use the final hidden state `h_n`
-  (last layer, both directions if bidirectional, concatenated) as the pooled
-  representation into a linear head. Mean-pooling `output` over the true (unpadded)
-  positions is a reasonable alternative and sometimes outperforms last-hidden-state
-  pooling.
-- **Tagging** (one label per timestep): apply a linear head to every position of
-  `output`; mask the loss at pad positions (see below).
-- **Seq2seq** (encoder-decoder, different output length): encode the source with
-  one RNN, feed its final hidden state as the decoder RNN's initial state, and
-  decode autoregressively with teacher forcing during training (below).
-
-## Teacher forcing and exposure bias
-
-During training, feed the *ground-truth* previous element as the decoder's next
-input rather than its own prediction. At inference the model feeds back its own
-predictions, which it never saw during training (**exposure bias**), so generated
-sequences can look worse than the training loss suggests. Validate with the actual
-generation procedure, not only the teacher-forced loss; scheduled sampling is the usual
-mitigation.
-
-## Masking the loss at padded positions
-
-For per-timestep losses (tagging, seq2seq), padded target positions must not
-contribute to the loss or its averaging:
-
-```python
-loss_per_token = criterion(logits.reshape(-1, num_classes), targets.reshape(-1))  # reduction="none"
-mask = (targets != pad_index).reshape(-1).float()
-loss = (loss_per_token * mask).sum() / mask.sum().clamp(min=1)
-```
-
-Forgetting this mask is one of the most common silent bugs in sequence code:
-training still "works" (loss goes down) but converges slower and the model wastes
-capacity learning to predict the pad value. The same applies to padded hits or
-particles, and with event weights the mask multiplies the weight
-([ml-analysis.md](ml-analysis.md)).
-
-## Bidirectional and stacked layers
-
-`bidirectional=True` doubles the output feature dimension (concatenates forward and
-backward hidden states) - update any downstream `nn.Linear` input size accordingly.
-Bidirectional RNNs cannot be used for causal/autoregressive decoding (the backward
-pass looks at future tokens); use them only for encoders or classification, not
-inside a decoder.
-
-## Gradient clipping
-
-Recurrent nets are more prone to exploding gradients than feed-forward/attention
-nets because of repeated multiplication through time steps. Clip after
-`backward()`, before `optimizer.step()`:
-
-```python
-torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
-```
-
-If loss still explodes with clipping in place, suspect the learning rate, an
-unmasked padded loss contribution, or a missing gradient-zeroing call before
-`backward()` - see the debugging checklist in
-[debugging-pytorch.md](debugging-pytorch.md).
+- **Cell:** LSTM is the safe default; GRU (one state, fewer parameters) often matches it with less compute; a plain
+  `nn.RNN` is unreliable beyond short sequences. RNNs remain reasonable for small data, strict latency or memory, and
+  streaming inputs.
+- **Shapes:** `nn.LSTM`/`nn.GRU` default to `[seq, batch, features]`; use `batch_first=True`. Hidden states are
+  `[num_layers * num_directions, batch, hidden_dim]` regardless. Bidirectional doubles the output features and cannot
+  be used in a causal decoder.
+- **Variable lengths:** pack before the RNN and unpack after
+  (`pack_padded_sequence(x, lengths.cpu(), batch_first=True, enforce_sorted=False)`, `pad_packed_sequence`); padding
+  alone keeps updating the state on pads. With packed input `h_n` is the correct final state per sequence; use it for
+  a classification head instead of indexing `output`.
+- **Heads:** classification from `h_n` (both directions concatenated) or a mean over real positions; tagging applies
+  a head per position; seq2seq encodes, then decodes autoregressively.
+- **Masked loss:** compute per-position losses with `reduction="none"`, multiply by the real-position mask (times the
+  event weight when weighted) and divide by the mask sum. An unmasked pad loss still trains, slower and worse.
+- **Teacher forcing** trains on the true previous element; at inference the model feeds its own predictions (exposure
+  bias): validate with the real generation procedure; scheduled sampling mitigates.
+- **Clip gradients** after `backward()` (`clip_grad_norm_`, max norm about 1); if loss still explodes, suspect the
+  learning rate, an unmasked pad loss or a missing gradient reset ([debugging-pytorch.md](debugging-pytorch.md)).

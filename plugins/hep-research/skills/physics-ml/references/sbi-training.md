@@ -49,7 +49,12 @@ on 2026-10-13. For a review of the field, see Cranmer, Brehmer, Louppe, PNAS 117
    - **TARP**, an expected-coverage test that needs only samples from the estimated posterior (Lemos et al.,
      arXiv:2302.03026).
    - **Coverage as a function of θ:** report it per θ, because averaging over the prior can hide regions that fail.
-4. **Simulator misspecification:** posterior or likelihood predictive checks against data in control regions. SBC
+4. **Sharpness beside coverage.** A posterior can be calibrated and uninformative (the prior is calibrated); report
+   its width (for example the posterior standard deviation or the expected interval length per θ) next to coverage.
+   Neural posterior and ratio estimators can be overconfident: a benchmark found that NPE, NRE, NLE and ABC variants
+   all can yield overconfident approximations, and that ensembling reduces the problem (Hermans et al., arXiv:2110.06581,
+   TMLR version per its arXiv comment, abstract read 2026-10-14). Check coverage before trusting a sharp posterior.
+5. **Simulator misspecification:** posterior or likelihood predictive checks against data in control regions. SBC
    cannot detect a wrong simulator; this check can.
-5. **The handover:** these diagnostics, the training domain, and the ensemble spread go to hep-statistics in the
+6. **The handover:** these diagnostics, the training domain, and the ensemble spread go to hep-statistics in the
    `ml-artifact`. The coverage claim for the final interval is made there, with toys through the full pipeline.

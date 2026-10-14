@@ -7,6 +7,7 @@ Usage: python3 tests/contracts/make_fixtures.py   (rewrites the fixture files an
 from __future__ import annotations
 
 import copy
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -234,14 +235,19 @@ def ml_v25(**extra):
                       "overlap_check": {"tool": "check_split_integrity.py", "result": "pass", "report": "splits/report.json"}},
            "training_domain": {"x": [0.0, 1.0], "y": [-1.0, 1.0]}, "preprocessing": [],
            "weights": {"source": "generator weights (synthetic)", "negative_weight_treatment": "none-present",
-                       "class_balancing": "inverse class frequency", "used_in": ["loss", "metrics"]},
+                       "class_balancing": "inverse class frequency", "used_in": ["loss", "metrics"],
+                       "training": {"negative_weight_treatment": "none-present", "class_balancing": "inverse class frequency"},
+                       "evaluation": {"treatment": "physics weights, unmodified"}},
            "model_hash": "sha256:" + "0" * 64, "output_semantics": "probability",
            "calibration": {"method": "temperature", "fit_sample": "val",
                            "validation": {"metric": "ece", "sample": "test", "before": 0.05, "after": 0.01}},
            "domain_shift": {"control_sample": "synthetic control region", "method": "score-shape comparison",
-                            "result": {"ks_p": 0.4}, "status": "checked"},
+                            "result": {"ks_p": 0.4}, "status": "checked", "outcome": "no-shift"},
            "environment": {"torch_version": "synthetic", "device": "cpu", "precision": "fp32", "seeds": {"torch": 1, "split": 2}},
-           "downstream_validation": [{"metric": "working-point efficiency in the synthetic signal region"}], **extra}
+           "downstream_validation": [{"metric": "working-point-efficiency",
+                                      "quantity_affected": "signal efficiency in the synthetic signal region",
+                                      "value": 0.52, "uncertainty": 0.02, "criterion": ">= 0.5", "passed": True,
+                                      "ref": "synthetic"}], **extra}
     ext = {k: x for k, x in ext.items() if x is not None}  # extra key=None removes the field
     return envelope("ml-artifact", ext, "physics-ml", contract_version=CONTRACTS_VERSION,
                     versions={"plugin": "0.6.16", "contracts": CONTRACTS_VERSION, "profiles": {}})
@@ -327,7 +333,8 @@ VALID = {
                                                       convergence={"rhat": {"mu": 1.05}, "ess_bulk": {"mu": 900}}),
     "ml_artifact.json": envelope("ml-artifact", {"task": "classification", "labels": ["sig", "bkg"], "features": ["x"],
                                                  "splits": {"grouping_key": "run_id"}, "training_domain": {"x": [0, 1]},
-                                                 "preprocessing": [], "model_hash": "sha256:placeholder", "downstream_validation": []}, "physics-ml"),
+                                                 "preprocessing": [], "model_hash": "sha256:" + hashlib.sha256(b"SYNTHETIC fixture model").hexdigest(),
+                                                 "downstream_validation": []}, "physics-ml"),
     "computational_run.json": envelope("computational-run", {"input_manifest": [{"path": "in.json", "sha256": "placeholder"}],
                                                              "tools": [{"name": "python", "version": "3.11"}], "commands": ["placeholder"],
                                                              "environment": {}, "seeds": {"toys": 1}, "tolerances": {}, "exit_status": 0,

@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "2.7.0"
+CONTRACTS_VERSION = "2.8.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -37,6 +37,11 @@ CONTRACTS_VERSION = "2.7.0"
 # Not added (decision of 2026-10-14, task P3.4): core:formal-use-permit and core:analysis-bundle. Permits and bundles
 # are sidecars read as protected inputs and verified by contracts.permit and contracts.analysis_bundle; no artifact
 # declares a dependency on them. Add an ID when an artifact type starts to require one.
+# 2.8.0 adds rule families that only refuse false or incomplete declarations, each with its own *_FROM constant and
+# helper in contracts.validate: ml-artifact semantics v2 (ML_SEMANTICS_V2_FROM; physics-ml audit) and, joining the same
+# minor, response hardening (detector-response audit) and communication result types (research-communication audit).
+# New fields are optional and no capability is added: a 2.7 reader misreads no new field, it only does not apply the
+# new rules. Older artifacts get the new rules under --strict and at the gate.
 KNOWN_CAPABILITIES = frozenset({"core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage"})

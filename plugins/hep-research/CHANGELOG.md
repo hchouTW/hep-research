@@ -5,6 +5,73 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+Contracts 2.8.0 (minor: new rule families refuse false or incomplete declarations; new fields optional; no new
+capability; artifacts before 2.8.0 keep their default outcome and get the new rules under `--strict` and at the gate).
+
+### physics-ml audit (ML-…)
+
+Scientific corrections first (`sci-fix` commits; each with a regression test that failed on 84202aa).
+
+- **Split tools check what they claim (ML-C02, C03, C04, C05, C14, C16, C28).** `check_split_integrity.py` refuses
+  (exit 2) a timestamp that is not a finite number or an ISO-8601 date (NaN, `2024-1-10`), a `temporal_order` naming a
+  split the file does not have or fewer than two, booleans, lists or objects as keys, and a misspelled reserved key;
+  an empty split is `incomplete` under `--strict`; `timestamps_checked` is true only when the comparison ran. One key
+  function for both split tools: 1, 1.0, "1" are one group. `make_grouped_splits.py --mode temporal` no longer sorts
+  dates as text; `--label-column` reports class counts and refuses a split without a class. `train_classifier.py`
+  matches case-folded manifests and reports a split without a class as exit 2.
+- **A calibration evaluated on its fit sample never validates (ML-C01, K03, C13).** `calibration.py` records both
+  sha256 values inside the calibration block and needs `--id-col` (or `--no-id-check`, recorded); from 2.8.0
+  `disjoint: false`, equal hashes or names equal after normalization are `ml.calibration_on_fit_sample`.
+- **Domain-shift outcome (ML-K05).** `domain_shift.outcome` (no-shift, corrected, bounded-by-nuisance, uncorrected) and
+  `nuisance`; a missing status or outcome, an uncorrected shift without a nuisance and a control sample equal to the
+  training sample are unresolved. J9 carries its measured pt_miss scale as the fit nuisance `theta_pt_miss_scale`:
+  mu 1.30738 +0.280857/-0.260727 -> 1.33104 +0.293293/-0.277051, toy coverage 0.693 -> 0.660 (criterion 0.635-0.73).
+- **One training-domain method (ML-C08, C09, C19, C18).** `check_surrogate_domain.py`'s method is the importable
+  `DomainModel` (grouped held-out calibration, categorical features, Clopper-Pearson interval on the false-positive
+  rate); `train_classifier.py` stores it fitted on train only and `inference.py` applies it (a broken linear
+  constraint is flagged, the per-feature range is a diagnostic, non-finite rows get no score, `--calibration`).
+- **Negative weights are never dropped; the metric layer flags or refuses (ML-R06, C11, C12, C15, C20, C21, C22).**
+  `--negative-weights {signed, abs, resample}` (cell resampling, Andersen & Maier, arXiv:2109.07851, eq. 2.2);
+  signed-weight values outside [0, 1] are flagged, fractional labels refused, `asimov_significance` refuses bad
+  sigma_b and keeps its precision at s/b < 1e-6, `undo_prior_shift` refuses r <= 0, temperature-scaling warnings,
+  `disco_penalty(check_weights=True)` by default.
+- **Physics references (ML-R01-R05, R12, R13, R17, R21, R25; WP2.2/2.3).** Regression prior dependence and the in-situ
+  scale and resolution systematic; when an ML uncertainty is a measurement systematic; Platt, isotonic, prior
+  correction, conformal; blinding when training on data; validating inputs before training; negative weights by
+  library; OmniFold unmatched events and prior dependence; ANODE; flows and flow matching; two-sample tests with power;
+  SBI sharpness and overconfidence; GNN tracking; label noise from truth matching; four contradictions resolved.
+  Sources opened on 2026-10-14 or marked `unverified`.
+- **Small corrections (ML-C10, C24, C25, C26, K13).** `compare_model_runs.py` decides with a Student-t interval below
+  10 seeds (false-improvement rate about 5%, was 26%/15%/11% at 3/5/10 seeds); the sculpting baseline is a quantile of
+  20 resamplings; a constant training feature is exit 2; `model_hash` covers the weights only; the J9 test compares
+  the committed artifacts within 1e-9.
+
+Contract and tooling:
+
+- **ml-artifact semantics v2 (ML_SEMANTICS_V2_FROM = 2.8.0; ML-K02, K04, K07-K12, K14, K16).** Structured
+  downstream validation (vocabulary `ml_downstream_metrics`; ML-only or bare-pass lists are errors; `passed` must
+  agree with a numeric value and criterion); `output_semantics` required for classification, inference and
+  regression (unresolved); misspelled keys are errors (`_key_checks` takes a `kind`); task blocks
+  (`regression_validation`, `generative_validation`, `sbi_validation`, `extrapolation_policy`,
+  `reweighting_validation`, `anomaly_validation`; new task `reweighting`; `parameters` and `supervision`); training
+  domain coverage, `model_hash` format, label/feature/preprocessing/threshold/unit checks; `observed` and
+  `validated-in-scope` need support; structured weights with `training` and `evaluation`; calibration outcomes.
+  The Appendix B mutation probe (`tests/contracts/test_ml_mutation_probe.py`) goes from 50 of 53 rows silent on
+  84202aa to 1 (M47, by design).
+- **ML provenance at the publication gate (ML-K01, K06).** Optional `extension.observable_source` in the
+  statistical-result schema (hep-statistics); the gate resolves, hashes and strictly validates every ml-artifact
+  input (`gate.ml_input_*`); `dependencies.py` propagates unresolved findings (`dependency.source_unresolved`);
+  `write_ml_artifact.py` records tool outputs in `extension.source_files`, not `inputs`. `dependencies.py` on J9: exit
+  1 -> 0.
+- **Writer does not trust self-reports (ML-C06, K11, C07).** The split verdict is recomputed from the report body; the
+  test split is the manifest's `roles.test`; a pass without a report is not-run; no status label is exit 2.
+- **CLI contract (ML-C17).** Invalid input exit 2 without traceback, missing PyTorch exit 3, `--status` echoed as
+  `status_label` on the data-report scripts.
+- **Routing, handoffs, size (ML-R19, K15, R20, R35).** 17 routing cases (en and zh-Hant) for task types without one; a
+  Task routes index in `ml-analysis.md`; handoff tests for hep-theory, hep-analysis, detector-response, hep-computing
+  and research-communication; references 257 KB -> 179 KB (nothing moved to hep-computing: it already had the
+  authoring rules). Live routing: pending.
+
 - **Batch commands refused in protected mode (HC-10, HC-16; review of deferred task P6.2).** In a project whose
   config carries `agent_policy`, `core/partition/campaign.py` refuses a real `submit`, `resubmit` or `cancel` and
   `confirm`, `abandon`, `reset` and `clear-orphans` in any form with `protected.batch_needs_trusted_submitter`, before

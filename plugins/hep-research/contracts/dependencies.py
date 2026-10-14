@@ -8,7 +8,10 @@ project root) and checks, recursively through the sources' own inputs:
     never opened) and the file exists and is a JSON artifact;
   - the declared artifact_type, artifact_id and version (the source's contract_version) match the source;
   - sha256 is 64 hex digits and equals the file's digest (no hash: unresolved, a substitution cannot be detected);
-  - the sticky statuses the source really carries are declared on the input and carried by the consumer.
+  - the sticky statuses the source really carries are declared on the input and carried by the consumer;
+  - the source validates: its errors are dependency.source_invalid, and its unresolved findings (a domain-shift check
+    that failed, a split check that was not run, ...) are dependency.source_unresolved, so a chain is never more
+    established than its weakest source.
 An input with "external": true, or a ref with a scheme ('hepdata:...', 'https://...'), is not materialized in the
 project: it is reported 'unresolved', never read. Any error or unresolved finding sets dependency_consistency_ok
 false. The report is advisory: it never authorizes formal use. formal_use_allowed is always false, because formal use
@@ -155,7 +158,11 @@ class _Checker:
             bad = sorted({f.code for f in srep.errors})
             if bad:
                 self.add("error", where, "dependency.source_invalid", f"{ref!r} fails contract validation: {', '.join(bad)}")
-            elif any(f.code == "contract.newer_minor" for f in srep.findings):
+            elif any(f.severity == "unresolved" for f in srep.findings):
+                open_codes = sorted({f.code for f in srep.findings if f.severity == "unresolved"})
+                self.add("unresolved", where, "dependency.source_unresolved",
+                         f"{ref!r} is not established: {', '.join(open_codes)}")
+            if not bad and any(f.code == "contract.newer_minor" for f in srep.findings):
                 self.add("warning", where, "dependency.source_newer_minor",
                          f"{ref!r} uses contract {sdoc.get('contract_version')}, newer than this reader")
             for key, skey, code in (("artifact_type", "artifact_type", "dependency.type_mismatch"),

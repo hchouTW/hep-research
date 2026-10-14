@@ -20,7 +20,7 @@ decorrelation) are in [ml-analysis.md](ml-analysis.md).
 
 | Aspect | Collider analysis | Astroparticle flux or spectrum measurement |
 |---|---|---|
-| Signal and background | Process cross sections | Particle species in a cosmic-ray beam with steep spectra (flux ∝ E^−γ, γ ≈ 2.7 for protons and nuclei, steeper for electrons, with a spectral hardening at a few hundred GV) |
+| Signal and background | Process cross sections | Particle species in a cosmic-ray beam with steeply falling power-law spectra; spectral indices and features (hardenings, softenings) come from the bound profile with their sources |
 | Class imbalance | Set by cross sections | Often several orders of magnitude, varying with rigidity or energy (rare antimatter or γ against a proton or hadron background) |
 | Truth labels | Simulation truth | Simulation truth *and* data-driven pure samples tagged by other subdetectors |
 | Time | Run periods | Continuous operation over years: orbit, temperature, gas, gain and solar-modulation variations |

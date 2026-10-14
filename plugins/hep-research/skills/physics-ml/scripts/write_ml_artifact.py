@@ -8,10 +8,14 @@ features. The artifact says what was checked; it does not make the model valid f
 
 What it does: copies task, labels, features, units, grouping key, training domain, preprocessing, weights, model
 hash, environment and metrics from the run summary into the extension; takes the split-overlap result from
---split-report (the JSON of check_split_integrity.py --json: passed -> pass, failed -> fail, incomplete -> not-run,
-with test_groups_disjoint from its group leakage when the group metadata was complete) or else from the summary's
-split_check; adds the calibration, domain-shift check and downstream validations when given; lists every input
-file with its sha256 and the checkpoint and score files as outputs; fills the envelope (contract and plugin
+--split-report or else from the report file the summary's split_check names (the JSON of check_split_integrity.py
+--json: passed -> pass, failed -> fail, incomplete -> not-run). The verdict is recomputed from the report body
+(overlaps, duplicates, group leakage, temporal violations, coverage); a "passed" status the body contradicts is
+refused. test_groups_disjoint comes from its group leakage when the group metadata was complete, with the test split
+named by the manifest's "roles": {"test": NAME} (default "test", case-insensitive). A summary split_check with no
+report behind it is recorded as not-run, never as pass; adds the calibration, domain-shift check and downstream
+validations when given; lists every file it read with its sha256 in extension.source_files (tool outputs, not
+artifacts, so not inputs[]) and the checkpoint and score files as outputs; fills the envelope (contract and plugin
 versions, plugin_release identity, status labels). It then validates the artifact with contracts/validate.py
 (validate_artifact) and writes it only when there is no error. Warnings and unresolved findings are reported and
 kept: an unresolved artifact is valid but not yet usable as a final result.
@@ -27,7 +31,8 @@ Input:
   --domain-shift JSON {"control_sample", "method", "result", "status"} (or wrapped in "domain_shift")
   --downstream   JSON list of downstream validations ({"metric", ...} each)
   --split-report JSON output of check_split_integrity.py --json
-  --status       artifact status label, repeatable (synthetic, unvalidated, preliminary, ...; default unvalidated)
+  --status       artifact status label, repeatable (synthetic, unvalidated, preliminary, ...); added to the run
+                 summary's own "status"; with neither, the writer refuses (exit 2)
   --output-semantics probability|score|density-ratio|regression-value|generated-sample (probability and
                  density-ratio need a calibration)
 Output: the artifact at --out, and a JSON summary on stdout (status written or invalid, findings).
@@ -41,6 +46,7 @@ Run: python3 <plugin root>/skills/physics-ml/scripts/write_ml_artifact.py --run-
 from __future__ import annotations
 
 import argparse
+import contextlib
 import hashlib
 import json
 import sys
@@ -68,17 +74,69 @@ def _load(path: str):
         raise ValueError(f"{path} is not JSON: {exc}") from exc
 
 
-def overlap_from_report(report: dict, ref: str) -> tuple[dict, bool | None]:
-    """overlap_check and test_groups_disjoint from check_split_integrity.py --json output."""
+LEAK_KEYS = ("duplicates_within_split", "overlaps_between_splits", "group_leakage", "temporal_violations")
+
+
+def verdict_from_body(report: dict) -> str:
+    """The split verdict recomputed from the report body, not from its status line: failed when any leakage is listed,
+    incomplete when group or timestamp metadata is incomplete, passed otherwise."""
+    if any(report.get(key) for key in LEAK_KEYS):
+        return "failed"
+    cov = report.get("group_coverage") if isinstance(report.get("group_coverage"), dict) else {}
+    tcov = report.get("timestamp_coverage") if isinstance(report.get("timestamp_coverage"), dict) else None
+    complete = report.get("groups_checked") is True and cov.get("covered") == cov.get("total")
+    if tcov is not None and tcov.get("covered") != tcov.get("total"):
+        complete = False
+    return "passed" if complete else "incomplete"
+
+
+def overlap_from_report(report: dict, ref: str, test_split: str = "test") -> tuple[dict, bool | None]:
+    """overlap_check and test_groups_disjoint from check_split_integrity.py --json output.
+
+    The verdict is the worse of the report's status and the verdict recomputed from its body; a "passed" status that
+    the body contradicts is refused (ValueError). The test split is `test_split` (the manifest's roles.test, default
+    "test"), compared case-insensitively."""
     status = report.get("status")
     if status not in SPLIT_STATUS:
         raise ValueError(f"split report status {status!r} is not passed, failed or incomplete")
-    check = {"tool": "check_split_integrity.py", "result": SPLIT_STATUS[status], "report": ref}
+    body = verdict_from_body(report)
+    if status == "passed" and body != "passed":
+        raise ValueError(f"split report {ref} says passed but its body contradicts it ({body}: "
+                         f"{[k for k in LEAK_KEYS if report.get(k)] or 'incomplete group or timestamp metadata'})")
+    order = ("passed", "incomplete", "failed")
+    verdict = max(status, body, key=order.index)
+    check = {"tool": "check_split_integrity.py", "result": SPLIT_STATUS[verdict], "report": ref}
+    test = test_split.casefold()
     leak = report.get("group_leakage") or {}
-    if any(any("test" in str(s) for s in splits) for splits in leak.values()):
+    if any(any(str(s).casefold() == test for s in splits) for splits in leak.values()):
         return check, False
-    return check, (True if report.get("groups_checked") and any("test" in str(s) for s in report.get("splits", {}))
-                   else None)
+    names = {str(s).casefold() for s in report.get("splits", {})}
+    return check, (True if report.get("groups_checked") and test in names else None)
+
+
+def test_split_name(summary: dict) -> str:
+    """Name of the test split: roles.test of the split manifest when it can be read, else "test"."""
+    path = summary.get("split_manifest")
+    with contextlib.suppress(OSError, ValueError, TypeError, AttributeError):
+        roles = json.loads(Path(path).read_text(encoding="utf-8")).get("roles") or {}
+        if isinstance(roles.get("test"), str) and roles["test"].strip():
+            return roles["test"].strip()
+    return "test"
+
+
+def statuses(summary: dict, given) -> list:
+    """Status labels: the run summary's own labels (train_classifier.py writes "synthetic" on its synthetic path) plus
+    --status; with neither there is no basis for a label, and the writer refuses rather than default."""
+    own = summary.get("status")
+    own = [own] if isinstance(own, str) else list(own or [])
+    bad = [x for x in own if x not in LABELS]
+    if bad:
+        raise ValueError(f"the run summary carries unknown status labels {bad}")
+    labels = list(dict.fromkeys(own + list(given or [])))
+    if not labels:
+        raise ValueError("no status label: pass --status (synthetic, observed, ...) or record 'status' in the run "
+                         "summary; the writer no longer defaults to 'unvalidated', which would drop 'synthetic'")
+    return labels
 
 
 def build(a: argparse.Namespace) -> dict:
@@ -88,22 +146,31 @@ def build(a: argparse.Namespace) -> dict:
     missing = [k for k in REQUIRED if k not in summary]
     if missing:
         raise ValueError(f"the run summary lacks {', '.join(missing)}")
-    inputs = [{"ref": a.run_summary, "sha256": digest}]
+    # tool outputs are files, not contract artifacts: they go to extension.source_files, never inputs[] (which
+    # contracts/dependencies.py resolves and validates as artifacts)
+    inputs: list = []
+    sources = [{"ref": a.run_summary, "sha256": digest, "role": "run-summary"}]
     splits: dict = {"grouping_key": summary["grouping_key"]}
     if summary.get("split_manifest"):
         splits["manifest"] = summary["split_manifest"]
+    test_split = test_split_name(summary)
     sc = summary.get("split_check")
-    if isinstance(sc, dict) and sc.get("result"):
-        splits["overlap_check"] = {k: sc[k] for k in ("tool", "result", "report") if sc.get(k) is not None}
-        splits["overlap_check"].setdefault("tool", "unspecified")
-    if a.split_report:
-        report, h = _load(a.split_report)
+    report_path = a.split_report
+    if not report_path and isinstance(sc, dict) and sc.get("result"):
+        if sc.get("report") and Path(str(sc["report"])).is_file():
+            report_path = str(sc["report"])  # the report behind the summary's claim is read, not its result line
+        else:
+            # a pass with no report or manifest behind it is a claim, not a check
+            splits["overlap_check"] = {"tool": str(sc.get("tool") or "unspecified"),
+                                       "result": "fail" if sc["result"] == "fail" else "not-run"}
+    if report_path:
+        report, h = _load(report_path)
         if not isinstance(report, dict):
             raise ValueError("the split report must be a JSON object (check_split_integrity.py --json)")
-        splits["overlap_check"], disjoint = overlap_from_report(report, a.split_report)
+        splits["overlap_check"], disjoint = overlap_from_report(report, report_path, test_split)
         if disjoint is not None:
             splits["test_groups_disjoint"] = disjoint
-        inputs.append({"ref": a.split_report, "sha256": h})
+        sources.append({"ref": report_path, "sha256": h, "role": "split-report"})
     ext: dict = {"task": summary["task"], "labels": summary["labels"], "features": summary["features"],
                  "splits": splits, "training_domain": summary["training_domain"],
                  "preprocessing": summary.get("preprocessing") or [], "model_hash": summary["model_hash"]}
@@ -117,22 +184,25 @@ def build(a: argparse.Namespace) -> dict:
         cal, h = _load(a.calibration)
         if not (isinstance(cal, dict) and isinstance(cal.get("calibration"), dict)):
             raise ValueError("the calibration file needs a top-level 'calibration' object")
-        ext["calibration"] = cal["calibration"]
-        inputs.append({"ref": a.calibration, "sha256": h})
+        ext["calibration"] = dict(cal["calibration"])
+        if isinstance(cal.get("sample_check"), dict):  # older calibration.py output keeps it beside the block
+            ext["calibration"].setdefault("sample_check", cal["sample_check"])
+        sources.append({"ref": a.calibration, "sha256": h, "role": "calibration"})
     if a.domain_shift:
         ds, h = _load(a.domain_shift)
         ds = ds.get("domain_shift", ds) if isinstance(ds, dict) else ds
         if not isinstance(ds, dict):
             raise ValueError("the domain-shift file must be a JSON object")
         ext["domain_shift"] = ds
-        inputs.append({"ref": a.domain_shift, "sha256": h})
+        sources.append({"ref": a.domain_shift, "sha256": h, "role": "domain-shift"})
     ext["downstream_validation"] = []
     if a.downstream:
         dv, h = _load(a.downstream)
         if not isinstance(dv, list):
             raise ValueError("the downstream file must be a JSON list")
         ext["downstream_validation"] = dv
-        inputs.append({"ref": a.downstream, "sha256": h})
+        sources.append({"ref": a.downstream, "sha256": h, "role": "downstream-validation"})
+    ext["source_files"] = sources
     outputs = [{"ref": summary["checkpoint"], "kind": "checkpoint"}] if summary.get("checkpoint") else []
     for split, path in sorted((summary.get("scores") or {}).items()):
         if path:
@@ -144,7 +214,7 @@ def build(a: argparse.Namespace) -> dict:
             "versions": {"plugin": plugin_version, "contracts": CONTRACTS_VERSION, "plugin_release": plugin_release(),
                          "profiles": {}},
             "provenance": {"producer_skill": "physics-ml", "created": a.created, "evidence_ids": []},
-            "inputs": inputs, "outputs": outputs, "status": list(dict.fromkeys(a.status or ["unvalidated"])),
+            "inputs": inputs, "outputs": outputs, "status": statuses(summary, a.status),
             "unresolved_inputs": [], "extension": ext}
 
 

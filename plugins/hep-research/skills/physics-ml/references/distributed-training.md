@@ -20,19 +20,11 @@ if that does not resolve (common on laptops and home networks) the processes wai
 
 ## Essentials
 
-- Read `LOCAL_RANK`, `RANK`, and `WORLD_SIZE` from environment variables.
-- Use `torch.cuda.set_device(local_rank)`.
-- Initialize process group.
-- Wrap model in `DistributedDataParallel`.
-- Use `DistributedSampler`; split by run or event first ([data-loading.md](data-loading.md)),
-  the sampler only shards the training split across ranks.
-- Call `train_sampler.set_epoch(epoch)` every epoch.
-- Save checkpoints only on rank 0 ([checkpointing.md](checkpointing.md)); other ranks
-  wait at `dist.barrier()` before reading it.
-- Destroy process group at the end.
-
-GPU visibility, `CUDA_VISIBLE_DEVICES` for a CPU/gloo smoke test, and `NCCL_DEBUG` are
-in [deep-learning-guide.md](deep-learning-guide.md) ("GPU Builds, Clusters and DDP").
+Read `LOCAL_RANK`, `RANK`, `WORLD_SIZE` from the environment; `torch.cuda.set_device(local_rank)`; initialize the
+process group; wrap the model in `DistributedDataParallel`; shard the training split with a `DistributedSampler` (the
+grouped split comes first: [ml-analysis.md](ml-analysis.md), "Splits and leakage") and call `set_epoch(epoch)`; save
+checkpoints on rank 0 behind a `dist.barrier()` ([checkpointing.md](checkpointing.md)); destroy the process group at
+the end. GPU visibility and `NCCL_DEBUG`: [deep-learning-guide.md](deep-learning-guide.md).
 
 ## Metric aggregation
 

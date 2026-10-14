@@ -45,7 +45,7 @@ Read by task (all under `references/`); physics first, engineering when the task
 
 | Task | Read |
 |---|---|
-| Classifier or regressor for an analysis: splits, weights, metrics, working points, decorrelation, systematics, sim-to-data, weak supervision, OmniFold, deployment | [ml-analysis.md](references/ml-analysis.md) |
+| Classifier or regressor for an analysis: splits, weights, metrics, working points, decorrelation, systematics, sim-to-data, weak supervision, OmniFold, deployment; other tasks via its Task routes index | [ml-analysis.md](references/ml-analysis.md) |
 | Choosing BDT vs NN, BDT practice, regression targets | [multivariate-analysis-bdt-nn.md](references/multivariate-analysis-bdt-nn.md) |
 | Jets, particle sets, hits, point clouds, graphs | [particle-and-jet-architectures.md](references/particle-and-jet-architectures.md) |
 | Space or ground-based astroparticle detectors (with the bound profile) | [space-and-astroparticle-ml.md](references/space-and-astroparticle-ml.md) |

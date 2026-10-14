@@ -1,16 +1,13 @@
 # Mixed Precision Reference
 
-The one place in this skill for automatic mixed precision (AMP). Other files point here: the memory table in
-[parallelism-strategy.md](parallelism-strategy.md), the GPU notes in
-[deep-learning-guide.md](deep-learning-guide.md), and the float32 rule for decorrelation penalties in
-[ml-analysis.md](ml-analysis.md).
+The one place in this skill for automatic mixed precision (AMP).
 
 ## Choose the dtype
 
 | | bf16 | fp16 |
 |---|---|---|
 | Exponent range | same as fp32 (max about 3.4e38) | max 65504, smallest normal about 6.1e-5 |
-| Mantissa | 8 bits (about 3 significant digits) | 11 bits |
+| Significand | 8 bits with the implicit bit (8 log10 2, about 2.4 decimal digits) | 11 bits (about 3.3 decimal digits) |
 | `GradScaler` | not needed | required (gradients underflow without loss scaling) |
 | Hardware | native on compute capability 8.0 and newer (A100, H100, L40), and on recent CPUs | every CUDA GPU |
 
@@ -69,11 +66,7 @@ for inputs, targets in loader:
   (above) before blaming the optimizer.
 - Do not wrap `backward()` or `optimizer.step()` in autocast.
 
-## Memory
-
-Mixed precision does not halve training memory: with AdamW the fp32 master weights and moments keep model states at
-about 16 bytes per parameter. It saves activation memory, which is often the larger term. See the table in
-[parallelism-strategy.md](parallelism-strategy.md).
+Memory: mixed precision does not halve training memory ([parallelism-strategy.md](parallelism-strategy.md)).
 
 ## Checks before trusting a mixed-precision result
 

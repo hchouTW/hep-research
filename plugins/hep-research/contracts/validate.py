@@ -270,6 +270,8 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, strict: bool = 
             rep.add("error", "$.extension.training_domain", "ml.no_training_domain", "a surrogate needs its training domain to detect extrapolation")
         if strict or _at_least(doc.get("contract_version"), ML_SEMANTICS_FROM):
             _ml_semantics(ext, rep)
+        if strict or _at_least(doc.get("contract_version"), ML_SEMANTICS_V2_FROM):
+            _ml_semantics_v2(doc, ext, vocab, rep, native=_at_least(doc.get("contract_version"), ML_SEMANTICS_V2_FROM))
     elif t == "communication":
         from contracts.communication import validate_extension  # lazy: communication imports this module's constants
         validate_extension(doc, vocab, rep)
@@ -364,11 +366,15 @@ def _ml_semantics(ext: dict, rep: Report) -> None:
     if _blank(ext.get("model_hash")):
         rep.add("error", "$.extension.model_hash", "ml.model_hash_missing", "model_hash is empty: the artifact names no model")
     for key in ("labels", "features"):
+        if key == "labels" and ext.get("supervision") == "unsupervised":
+            continue  # anomaly detection without labels (2.8.0); its validation block is checked in _ml_semantics_v2
         if not ext.get(key):
             rep.add("error", f"$.extension.{key}", f"ml.{key}_missing",
                     f"{key} is empty" + (": list the targets (class labels, regression targets or generated variables)"
                                          if key == "labels" else ": list the model inputs"))
     names = _feature_names(ext.get("features"))
+    # simulation-based inference declares its training domain on the parameters theta too (2.8.0)
+    names |= {x for x in ext.get("parameters") or [] if isinstance(x, str)} if isinstance(ext.get("parameters"), list) else set()
     dom: Any = ext.get("training_domain") if isinstance(ext.get("training_domain"), dict) else {}
     for var, rng in dom.items():
         if var not in names:
@@ -429,6 +435,383 @@ def _ml_semantics(ext: dict, rep: Report) -> None:
         elif ds.get("status") == "failed":
             rep.add("unresolved", "$.extension.domain_shift", "ml.domain_shift_failed",
                     "the domain-shift check failed: correct or bound the data/simulation difference before use")
+
+
+ML_SEMANTICS_V2_FROM = "2.8.0"  # ml-artifact rules of the physics-ml audit (PML) apply natively from this version
+
+
+def _sample_name(value) -> str:
+    """Comparison form of a sample name or path: stripped, './' and repeated separators removed, case folded."""
+    text = str(value).strip().replace("\\", "/")
+    while text.startswith("./"):
+        text = text[2:]
+    return re.sub(r"/+", "/", text).casefold()
+
+
+def _ml_semantics_v2(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, native: bool = True) -> None:
+    """ml-artifact rules of contracts 2.8.0 (physics-ml audit, PML): the six SKILL.md invariants are checked as claims,
+    not as fields present. Native for artifacts of contract 2.8.0 or later; an older artifact gets them in strict
+    mode and at the gate (`native` is False there: rules that only a 2.8.0 field can satisfy are warnings)."""
+    cal: Any = ext.get("calibration") if isinstance(ext.get("calibration"), dict) else None
+    if cal is not None:
+        val: Any = cal.get("validation") if isinstance(cal.get("validation"), dict) else {}
+        sc: Any = cal.get("sample_check") if isinstance(cal.get("sample_check"), dict) else {}
+        fh, eh = sc.get("fit_sha256"), sc.get("eval_sha256")
+        same = None
+        if sc.get("disjoint") is False:
+            same = "the calibration tool recorded the fit and evaluation samples as not disjoint"
+        elif isinstance(fh, str) and isinstance(eh, str) and fh and fh == eh:
+            same = f"the fit and evaluation samples have the same sha256 ({fh[:12]}...)"
+        elif not (_blank(cal.get("fit_sample")) or _blank(val.get("sample"))) and \
+                _sample_name(cal["fit_sample"]) == _sample_name(val["sample"]):
+            same = f"'{cal['fit_sample']}' and '{val['sample']}' name the same sample"
+        if same and cal.get("fit_sample") != val.get("sample"):  # the exact-name case is reported by the 2.5.0 rule
+            rep.add("error", "$.extension.calibration", "ml.calibration_on_fit_sample",
+                    f"calibration evaluated on its fit sample: {same}; validate it on a disjoint sample")
+    _ml_domain_shift_v2(ext, rep, native)
+    _ml_downstream_v2(ext, vocab, rep, native)
+    if ext.get("task") in SEMANTICS_REQUIRED_TASKS and "output_semantics" not in ext:
+        rep.add("unresolved" if native else "warning", "$.extension.output_semantics", "ml.output_semantics_missing",
+                f"a {ext.get('task')} model must say what its output means (probability, score, density-ratio, "
+                "regression-value): a consumer cannot tell whether it may read it as a probability")
+    _ml_task_blocks_v2(doc, ext, rep, native)
+    _ml_weights_calibration_v2(ext, rep, native)
+    _key_checks(ext, ML_KEYS["extension"], "$.extension", rep, kind="ml")
+    for block in ("splits", "calibration", "domain_shift", "weights", "environment"):
+        if isinstance(ext.get(block), dict):
+            _key_checks(ext[block], ML_KEYS[block], f"$.extension.{block}", rep, kind="ml")
+
+
+SEMANTICS_REQUIRED_TASKS = {"classification", "inference", "regression"}
+TASK_SEMANTICS = {"classification": {"probability", "score"}, "regression": {"regression-value"},
+                  "generation": {"generated-sample"}, "surrogate": {"regression-value", "score", "probability", "density-ratio"},
+                  "inference": {"density-ratio", "probability", "score"}, "reweighting": {"density-ratio", "score"}}
+# task -> (block, required keys); a key may be satisfied by any of the alternatives in a tuple
+TASK_BLOCKS = {
+    "regression": ("regression_validation", ("response_vs_truth", "response_vs_reco", "closure_alt_spectrum",
+                                             "outlier_fraction")),
+    "generation": ("generative_validation", ("observables", "two_sample_test", "conditioning_range")),
+    "inference": ("sbi_validation", (("coverage", "sbc", "tarp"), "handoff")),
+    "surrogate": ("extrapolation_policy", ("action", "consumer")),
+    "reweighting": ("reweighting_validation", ("closure", "prior_dependence", "unmatched_events")),
+}
+KNOWN_SKILLS = {"hep-analysis", "hep-statistics", "hep-theory", "detector-response", "hep-computing", "physics-ml",
+                "research-communication"}
+MODEL_HASH_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
+UNBOUNDED = 1e30
+ROW_LEVEL_KEYS = {"row", "row_id", "rowid", "row index", "index", "idx", "entry", "entry_number", "sample_index",
+                  "none", "random"}
+PRECISIONS = {"fp64", "fp32", "tf32", "bf16", "fp16", "mixed-bf16", "mixed-fp16", "int8"}
+DEVICE_RE = re.compile(r"^(cpu|cuda(:\d+)?|mps|xpu(:\d+)?|tpu|gpu(:\d+)?|rocm(:\d+)?)$", re.I)
+CALIBRATION_SCOPES = {"top-label", "classwise", "all-classes"}
+
+
+BALANCING_NONE = {None, "", "none", "no", "unweighted"}
+
+
+def _ml_weights_calibration_v2(ext: dict, rep: Report, native: bool) -> None:
+    """Weights and calibration outcomes (PML-WP1.4: ML-K09, ML-K14, ML-C27)."""
+    level = "error" if native else "warning"
+    x = "$.extension"
+    w: Any = ext.get("weights")
+    if isinstance(w, str):
+        rep.add(level, f"{x}.weights", "ml.weights_unstructured",
+                f"weights {w!r} is free text: declare {{source, negative_weight_treatment, used_in, training, evaluation}}")
+    elif isinstance(w, dict):
+        used = w.get("used_in") if isinstance(w.get("used_in"), list) else None
+        if used is not None and not used:
+            rep.add("error", f"{x}.weights.used_in", "ml.weights_used_in_empty",
+                    "weights.used_in is empty: say where the weights enter (loss, metrics, calibration, templates)")
+        if used:
+            cb = w.get("class_balancing")
+            balanced = (cb not in BALANCING_NONE if isinstance(cb, str) or cb is None else bool(cb)) or \
+                isinstance(w.get("training"), dict)
+            if balanced and "loss" not in used:
+                rep.add("error", f"{x}.weights.used_in", "ml.weights_used_in_inconsistent",
+                        "training weights (class balancing or a training block) are declared but used_in has no 'loss'")
+            if "calibration" in used and not isinstance(ext.get("calibration"), dict):
+                rep.add("error", f"{x}.weights.used_in", "ml.weights_used_in_inconsistent",
+                        "used_in names 'calibration' but the artifact records no calibration")
+            if len(set(used)) != len(used):
+                rep.add("error", f"{x}.weights.used_in", "ml.weights_used_in_inconsistent", "used_in lists an entry twice")
+        top = w.get("negative_weight_treatment")
+        tr: Any = w.get("training") if isinstance(w.get("training"), dict) else {}
+        if top == "none-present" and (tr.get("negative_weight_treatment") not in (None, "none-present", "signed")
+                                      or (_is_num(tr.get("n_negative")) and tr["n_negative"] > 0)):
+            rep.add("error", f"{x}.weights", "ml.weights_contradiction",
+                    "negative_weight_treatment none-present, but the training weights treat or count negative weights")
+        if "abs" in (top, tr.get("negative_weight_treatment")):
+            rep.add("warning", f"{x}.weights.negative_weight_treatment", "ml.negative_weights_abs",
+                    "|w| training biases the learned density where negative weights matter; show the effect is small or "
+                    "use a resampling treatment")
+        if native and not (isinstance(w.get("training"), dict) and isinstance(w.get("evaluation"), dict)):
+            rep.add("warning", f"{x}.weights", "ml.weights_not_split",
+                    "record training and evaluation weights separately (weights.training, weights.evaluation)")
+    cal: Any = ext.get("calibration")
+    if isinstance(cal, dict):
+        val: Any = cal.get("validation") if isinstance(cal.get("validation"), dict) else {}
+        if "after" in val and not _is_num(val["after"]):
+            rep.add("error", f"{x}.calibration.validation.after", "ml.calibration_after_not_numeric",
+                    f"calibration.validation.after must be a number, got {val['after']!r}")
+        if isinstance(cal.get("fit_sample"), str) and _sample_name(cal["fit_sample"]) in TRAINING_SAMPLE_NAMES:
+            rep.add("error", f"{x}.calibration.fit_sample", "ml.calibration_on_training_sample",
+                    "calibration fitted on the training sample: fit it on validation (the model is overconfident there)")
+        before, after = val.get("before"), val.get("after")
+        if _is_num(before) and _is_num(after):
+            tol = max([v for v in (val.get("after_uncertainty"), val.get("floor"), 0.0) if _is_num(v)])
+            if after > before + tol:
+                rep.add("unresolved", f"{x}.calibration.validation", "ml.calibration_not_improving",
+                        f"{val.get('metric', 'metric')} after calibration ({after:.4g}) is worse than before ({before:.4g}) "
+                        f"by more than its uncertainty or floor ({tol:.4g}): the map does not calibrate on this sample")
+
+
+def _walk_keys(value, key):
+    """Every value stored under `key` anywhere inside value."""
+    if isinstance(value, dict):
+        for k, v in value.items():
+            if k == key:
+                yield v
+            yield from _walk_keys(v, key)
+    elif isinstance(value, list):
+        for v in value:
+            yield from _walk_keys(v, key)
+
+
+def _ml_task_blocks_v2(doc: dict, ext: dict, rep: Report, native: bool) -> None:
+    """Task-specific validation and claim checks (PML-WP1.3: ML-K10, K08, K07, K12, K16)."""
+    level = "error" if native else "warning"
+    x = "$.extension"
+    task, sem = ext.get("task"), ext.get("output_semantics")
+    if task in TASK_SEMANTICS and sem is not None and sem not in TASK_SEMANTICS[task]:
+        rep.add("error", f"{x}.output_semantics", "ml.output_semantics_task_mismatch",
+                f"output_semantics '{sem}' does not fit task '{task}' (allowed: {sorted(TASK_SEMANTICS[task])})")
+    if task in TASK_BLOCKS:
+        block, keys = TASK_BLOCKS[task]
+        val: Any = ext.get(block)
+        if not isinstance(val, dict):
+            rep.add(level, f"{x}.{block}", "ml.task_validation_missing",
+                    f"a {task} model needs '{block}' ({', '.join('/'.join(k) if isinstance(k, tuple) else k for k in keys)})")
+        else:
+            missing = [("/".join(k) if isinstance(k, tuple) else k) for k in keys
+                       if not any(a in val for a in (k if isinstance(k, tuple) else (k,)))]
+            if missing:
+                rep.add(level, f"{x}.{block}", "ml.task_validation_incomplete", f"'{block}' lacks {', '.join(missing)}")
+            if task == "generation" and isinstance(val.get("two_sample_test"), dict) and \
+                    "power" not in val["two_sample_test"]:
+                rep.add(level, f"{x}.{block}.two_sample_test", "ml.two_sample_power_missing",
+                        "a classifier two-sample test needs its power, measured with an injected distortion: "
+                        "AUC 0.5 alone shows nothing")
+            if task == "surrogate" and val.get("action") not in (None, "flag", "reject", "bounded"):
+                rep.add("error", f"{x}.{block}.action", "ml.extrapolation_policy_action",
+                        f"extrapolation_policy.action must be flag, reject or bounded, not {val.get('action')!r}")
+    for handoff in _walk_keys(ext, "handoff"):
+        if isinstance(handoff, str) and handoff not in KNOWN_SKILLS:
+            rep.add("error", f"{x}", "ml.handoff_unknown",
+                    f"handoff '{handoff}' is not a skill of this plugin ({sorted(KNOWN_SKILLS)})")
+    if ext.get("supervision") == "unsupervised" and not isinstance(ext.get("anomaly_validation"), dict):
+        rep.add(level, f"{x}.anomaly_validation", "ml.task_validation_missing",
+                "an unsupervised (anomaly-detection) model needs 'anomaly_validation' (background_only, "
+                "signal_injection)")
+    # training domain covers every feature, with finite bounds
+    feats = _feature_names(ext.get("features"))
+    dom: Any = ext.get("training_domain")
+    if isinstance(dom, dict) and feats:
+        if not dom:
+            rep.add("unresolved", f"{x}.training_domain", "ml.training_domain_missing",
+                    "the training domain is empty: inputs outside it cannot be flagged at inference time")
+        else:
+            uncovered = sorted(feats - set(dom))
+            if uncovered:
+                rep.add("unresolved", f"{x}.training_domain", "ml.training_domain_partial",
+                        f"the training domain does not cover {uncovered}")
+            wide = sorted(k for k, r in dom.items() if isinstance(r, list) and any(_is_num(b) and abs(b) > UNBOUNDED for b in r))
+            if wide:
+                rep.add("unresolved", f"{x}.training_domain", "ml.training_domain_unbounded",
+                        f"the training domain of {wide} is effectively unbounded (|bound| > {UNBOUNDED:g}): declare the "
+                        "range the model was trained on")
+    mh = ext.get("model_hash")
+    if isinstance(mh, str) and mh.strip() and not MODEL_HASH_RE.match(mh):
+        rep.add("error", f"{x}.model_hash", "ml.model_hash_malformed",
+                f"model_hash {mh!r} is not 'sha256:' and 64 lower-case hex digits")
+    # inputs and labels (K16)
+    labels: list = ext["labels"] if isinstance(ext.get("labels"), list) else []
+    if task == "classification" and len(labels) == 1:
+        rep.add("error", f"{x}.labels", "ml.single_label", "a classifier needs at least two classes")
+    raw = [f.get("name") if isinstance(f, dict) else f for f in ext.get("features") or []]
+    dups = sorted({f for f in raw if isinstance(f, str) and raw.count(f) > 1})
+    if dups:
+        rep.add("error", f"{x}.features", "ml.duplicate_features", f"features listed twice: {dups}")
+    same = sorted({str(lab) for lab in labels if isinstance(lab, str)} & feats)
+    if same:
+        rep.add("error", f"{x}.labels", "ml.label_is_feature", f"{same} is both a label and a feature (target leakage)")
+    for i, step in enumerate(ext.get("preprocessing") or []):
+        fit_on = step.get("fit_on") if isinstance(step, dict) else None
+        if isinstance(fit_on, str) and _sample_name(fit_on) not in TRAINING_SAMPLE_NAMES:
+            rep.add("error", f"{x}.preprocessing[{i}].fit_on", "ml.preprocessing_not_on_train",
+                    f"preprocessing fitted on '{fit_on}': fit it on the training split only, or the held-out metrics "
+                    "leak information from the samples they judge")
+    units: Any = ext.get("units")
+    if isinstance(units, dict) and feats:
+        extra = sorted(set(units) - feats - {p for p in ext.get("parameters") or [] if isinstance(p, str)})
+        if extra:
+            rep.add("error", f"{x}.units", "ml.units_unknown_feature", f"units given for {extra}, which are not features")
+    if any(isinstance(v, str) and _sample_name(v) == "test" for v in _walk_keys(ext.get("metrics"), "threshold_from")):
+        rep.add("error", f"{x}.metrics", "ml.threshold_from_test",
+                "a working-point threshold fixed on the test split: fix it on validation and apply it unchanged to test")
+    # splits (M06, M07)
+    splits: Any = ext.get("splits") if isinstance(ext.get("splits"), dict) else {}
+    gk = splits.get("grouping_key")
+    if isinstance(gk, str) and _sample_name(gk) in ROW_LEVEL_KEYS:
+        rep.add("unresolved", f"{x}.splits.grouping_key", "ml.grouping_row_level",
+                f"grouping key '{gk}' is row-level: rows of one run, event, period or seed are correlated; group by "
+                "that unit, or state why rows are independent")
+    oc: Any = splits.get("overlap_check")
+    if isinstance(oc, dict) and oc.get("result") == "pass" and _blank(oc.get("report")):
+        rep.add("unresolved", f"{x}.splits.overlap_check", "ml.split_check_unverified",
+                f"a split-overlap 'pass' from '{oc.get('tool')}' with no report behind it is a claim, not a check")
+    # environment (M32, M33)
+    env: Any = ext.get("environment")
+    if isinstance(env, dict):
+        if _blank(env.get("torch_version")) and _blank(env.get("framework")):
+            rep.add("warning", f"{x}.environment", "ml.framework_version_missing",
+                    "no framework and version recorded (torch_version or framework)")
+        prec, dev = env.get("precision"), env.get("device")
+        if isinstance(prec, str) and prec.lower() not in PRECISIONS:
+            rep.add("warning", f"{x}.environment.precision", "ml.precision_free_text",
+                    f"precision {prec!r} is not one of {sorted(PRECISIONS)}")
+        if isinstance(dev, str) and not DEVICE_RE.match(dev.strip()):
+            rep.add("warning", f"{x}.environment.device", "ml.device_free_text",
+                    f"device {dev!r} is not cpu, cuda[:n], mps, xpu, tpu or gpu")
+    # multiclass calibration (M59)
+    cal: Any = ext.get("calibration")
+    if isinstance(cal, dict) and task == "classification" and len(labels) > 2 and \
+            cal.get("scope") not in CALIBRATION_SCOPES:
+        rep.add(level, f"{x}.calibration.scope", "ml.multiclass_calibration_scope",
+                f"a {len(labels)}-class model calibrated without a scope: say whether the top label, each class or "
+                "all classes were calibrated and validated (one binary metric does not cover the others)")
+    # status claims (K12)
+    status = set(doc.get("status") or [])
+    observed_inputs = any("observed" in (i.get("status") or []) for i in doc.get("inputs") or [] if isinstance(i, dict))
+    if "observed" in status and not observed_inputs:
+        rep.add(level, "$.status", "ml.status_unsupported",
+                "'observed' on an ml-artifact needs an input that carries 'observed' (the model was trained, "
+                "calibrated or validated on data listed in inputs); a simulation-only model is not a result on data")
+    if "validated-in-scope" in status:
+        good = [d for d in ext.get("downstream_validation") or [] if isinstance(d, dict)
+                and d.get("metric") not in PURE_ML_METRICS and d.get("passed") is True]
+        if not (good and isinstance(splits.get("overlap_check"), dict) and splits["overlap_check"].get("result") == "pass"):
+            rep.add(level, "$.status", "ml.status_unsupported",
+                    "'validated-in-scope' needs a passed split check and at least one passed physics downstream item")
+
+ML_KEYS = {
+    "extension": {"task", "labels", "features", "splits", "training_domain", "preprocessing", "weights", "model_hash",
+                  "calibration", "downstream_validation", "domain_shift", "environment", "output_semantics",
+                  "source_files", "units", "metrics", "parameters", "supervision", "regression_validation",
+                  "generative_validation", "sbi_validation", "extrapolation_policy", "anomaly_validation",
+                  "reweighting_validation", "notes"},
+    "splits": {"grouping_key", "overlap_check", "manifest", "test_groups_disjoint", "roles", "temporal"},
+    "calibration": {"method", "params", "fit_sample", "validation", "sample_check", "outcome", "scope", "warnings"},
+    "domain_shift": {"control_sample", "method", "result", "status", "outcome", "nuisance"},
+    "weights": {"source", "negative_weight_treatment", "class_balancing", "used_in", "training", "evaluation"},
+    "environment": {"torch_version", "framework", "device", "precision", "seeds"},
+}
+
+
+PURE_ML_METRICS = {"roc-auc", "accuracy", "loss", "calibration-ece"}
+ML_ONLY_TEXT = re.compile(r"\b(auc|roc|accuracy|acc|loss|cross[ -]?entropy|log[ -]?loss|f1|precision|recall|ece|brier)\b", re.I)
+BARE_TEXT = re.compile(r"^\s*(validated|valid|pass(ed)?|ok|done|yes|true|checked|good)\s*$", re.I)
+DOWNSTREAM_KEYS = ("quantity_affected", "value", "criterion", "passed")
+CRITERION_RE = re.compile(r"^\s*(abs\s*)?(<=|>=|<|>|==)\s*([-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?)\s*$")
+CRITERION_RANGE_RE = re.compile(r"^\s*(abs\s+)?in\s*\[\s*([-+]?[\d.eE+-]+)\s*,\s*([-+]?[\d.eE+-]+)\s*\]\s*$")
+
+
+def _criterion_holds(value, criterion):
+    """True/False when a numeric value and a criterion such as '>= 0.68', 'abs < 0.001' or 'in [0.9, 1.1]' can be
+    compared, else None (the criterion is text, or the value is not a number)."""
+    if not _is_num(value) or not isinstance(criterion, str):
+        return None
+    m = CRITERION_RE.match(criterion)
+    if m:
+        v, op, t = (abs(value) if m.group(1) else value), m.group(2), float(m.group(3))
+        return {"<=": v <= t, ">=": v >= t, "<": v < t, ">": v > t, "==": v == t}[op]
+    m = CRITERION_RANGE_RE.match(criterion)
+    if m:
+        try:
+            lo, hi = float(m.group(2)), float(m.group(3))
+        except ValueError:
+            return None
+        v = abs(value) if m.group(1) else value
+        return lo <= v <= hi
+    return None
+
+
+def _ml_downstream_v2(ext: dict, vocab: Vocabulary, rep: Report, native: bool) -> None:
+    """Structured downstream validation (PML-WP1.1, ML-K02): items {metric, quantity_affected, value, uncertainty?,
+    criterion, passed, ref}, metric a term of ml_downstream_metrics. Errors: every item an ML metric or a bare pass
+    (any contract version, under --strict), a 'passed' that contradicts a numeric value and criterion. Free-text items
+    are errors from 2.8.0 and warnings for older artifacts under --strict."""
+    dv: Any = ext.get("downstream_validation")
+    if not isinstance(dv, list) or not dv:
+        return
+    p = "$.extension.downstream_validation"
+    level = "error" if native else "warning"
+    terms = vocab.core("ml_downstream_metrics")
+    evidence = 0
+    for i, item in enumerate(dv):
+        metric = item.get("metric") if isinstance(item, dict) else item
+        if isinstance(item, dict) and isinstance(metric, str) and metric in terms:
+            if metric not in PURE_ML_METRICS:
+                evidence += 1
+            missing = [k for k in DOWNSTREAM_KEYS if k not in item]
+            if missing:
+                rep.add(level, f"{p}[{i}]", "ml.downstream_incomplete",
+                        f"downstream item '{metric}' lacks {', '.join(missing)} ({{metric, quantity_affected, value, "
+                        "uncertainty?, criterion, passed, ref}})")
+            holds = _criterion_holds(item.get("value"), item.get("criterion"))
+            if holds is not None and isinstance(item.get("passed"), bool) and holds != item["passed"]:
+                rep.add("error", f"{p}[{i}]", "ml.downstream_passed_contradicts",
+                        f"'{metric}' is marked passed={item['passed']}, but value {item['value']} "
+                        f"{'meets' if holds else 'fails'} the criterion '{item['criterion']}'")
+            continue
+        text = " ".join(str(v) for v in item.values()) if isinstance(item, dict) else str(item)
+        if not (ML_ONLY_TEXT.search(str(metric)) or BARE_TEXT.match(str(metric))):
+            evidence += 1
+        rep.add(level, f"{p}[{i}]", "ml.downstream_unstructured",
+                f"downstream item {text[:60]!r} is free text: give {{metric (a term of ml_downstream_metrics), "
+                "quantity_affected, value, criterion, passed, ref}")
+    if not evidence:
+        rep.add("error", p, "ml.downstream_ml_only",
+                "every downstream item is an ML metric (AUC, accuracy, loss, ECE) or a bare pass: validate the effect "
+                "on the physics result (efficiency at the working point, expected limit or uncertainty, closure, "
+                "coverage, data/simulation agreement)")
+
+
+TRAINING_SAMPLE_NAMES = {"train", "training", "train split", "training split", "train sample", "training sample",
+                         "training set", "train set"}
+
+
+def _ml_domain_shift_v2(ext: dict, rep: Report, native: bool) -> None:
+    """Domain-shift record (PML-WP0.6, ML-K05): 'checked' says the check ran, outcome says what was done about it."""
+    ds: Any = ext.get("domain_shift")
+    if not isinstance(ds, dict):
+        return
+    p = "$.extension.domain_shift"
+    if "status" not in ds:
+        rep.add("unresolved", f"{p}.status", "ml.domain_shift_status_missing",
+                "the domain-shift record has no status: say whether the check ran (checked, not-checked, failed)")
+    control = ds.get("control_sample")
+    if isinstance(control, str) and _sample_name(control) in TRAINING_SAMPLE_NAMES:
+        rep.add("unresolved", f"{p}.control_sample", "ml.domain_shift_on_training_sample",
+                f"the control sample '{control}' is the training sample: a domain-shift check compares the model's "
+                "inputs or outputs on data (or a data-like control sample) with simulation")
+    outcome = ds.get("outcome")
+    if ds.get("status") == "checked" and outcome is None:
+        rep.add("unresolved" if native else "warning", f"{p}.outcome", "ml.domain_shift_outcome_missing",
+                "the check ran but its outcome is not recorded: no-shift, corrected, bounded-by-nuisance or uncorrected")
+    if outcome in ("bounded-by-nuisance", "uncorrected") and not ds.get("nuisance"):
+        rep.add("unresolved", f"{p}.nuisance", "ml.domain_shift_uncorrected",
+                f"outcome {outcome} without a nuisance: a shift that is neither corrected nor carried by a nuisance "
+                "parameter in the downstream likelihood biases the result")
 
 
 THEORY_SEMANTICS_FROM = "2.6.0"  # theory-spec and prediction rules apply natively from this contract version
@@ -561,22 +944,27 @@ def _norm_id(text) -> str:
     return re.sub(r"[\s_-]+", "", str(text)).lower()
 
 
-def _key_checks(item, known: set[str], path: str, rep: Report) -> None:
-    """Unknown keys are warnings; a near-miss of a known key is an error (the field it should fill is missing)."""
+KEY_CHECK_NOUNS = {"measurement": ("measurement-spec", " (profile fields go under experiment_fields)"),
+                   "ml": ("ml-artifact", " (namespaced keys '<ns>:<key>' are allowed for extra fields)")}
+
+
+def _key_checks(item, known: set[str], path: str, rep: Report, kind: str = "measurement") -> None:
+    """Unknown keys are warnings; a near-miss of a known key is an error (the field it should fill is missing).
+    `kind` names the artifact family: codes are <kind>.misspelled_key and <kind>.unknown_key."""
     import difflib
     if not isinstance(item, dict):
         return
+    noun, hint = KEY_CHECK_NOUNS.get(kind, (kind, ""))
     for key in sorted(item):
         if key in known or NAMESPACED.match(key):
             continue
         near = difflib.get_close_matches(key, sorted(known), n=1, cutoff=0.85)
         if near:
-            rep.add("error", f"{path}.{key}", "measurement.misspelled_key",
-                    f"'{key}' is not a measurement-spec field; did you mean '{near[0]}'?")
+            rep.add("error", f"{path}.{key}", f"{kind}.misspelled_key",
+                    f"'{key}' is not a {noun} field; did you mean '{near[0]}'?")
         else:
-            rep.add("warning", f"{path}.{key}", "measurement.unknown_key",
-                    f"'{key}' is not a measurement-spec field: no rule or consumer reads it (profile fields go under "
-                    "experiment_fields)")
+            rep.add("warning", f"{path}.{key}", f"{kind}.unknown_key",
+                    f"'{key}' is not a {noun} field: no rule or consumer reads it{hint}")
 
 
 def _markers(value, path: str):
@@ -775,6 +1163,30 @@ BAND_KEYS = ("band_1sigma", "band_2sigma")
 
 def _is_num(v) -> bool:
     return isinstance(v, (int, float)) and not isinstance(v, bool)
+
+
+def _observable_source(doc: dict, ext: dict, rep: Report) -> None:
+    """observable_source kind ml-score names an input of artifact_type ml-artifact (PML-WP0.5, ML-K01)."""
+    src: Any = ext.get("observable_source")
+    if not (isinstance(src, dict) and src.get("kind") == "ml-score"):
+        return
+    name = src.get("ml_artifact")
+    inp = _ml_input(doc, name)
+    if _blank(name) or inp is None:
+        rep.add("error", "$.extension.observable_source", "stats.observable_source_unlinked",
+                f"the observable is an ML score of '{name}', but no input names that ml-artifact: list it in inputs "
+                "(ref, artifact_type ml-artifact, sha256) so the chain can be checked")
+    elif inp.get("artifact_type") != "ml-artifact":
+        rep.add("error", "$.extension.observable_source", "stats.observable_source_unlinked",
+                f"the input '{name}' is declared as {inp.get('artifact_type')!r}, not an ml-artifact")
+
+
+def _ml_input(doc: dict, name) -> dict | None:
+    """The input whose ref or artifact_id is `name` (the ML artifact an observable_source names)."""
+    for inp in doc.get("inputs") or []:
+        if isinstance(inp, dict) and name is not None and name in (inp.get("ref"), inp.get("artifact_id")):
+            return inp
+    return None
 
 
 def _stat_semantics(doc: dict, ext: dict, rep: Report, strict: bool) -> None:
@@ -1200,7 +1612,7 @@ def _check_bands(exp: dict, rep: Report) -> None:
                     f"expected bands must satisfy -2sigma <= -1sigma <= median <= +1sigma <= +2sigma; {n1} = {v1} > {n2} = {v2}")
 
 
-def publication_gate(doc: dict, vocab: Vocabulary | None = None) -> dict:
+def publication_gate(doc: dict, vocab: Vocabulary | None = None, base_dir=None) -> dict:
     """Publication gate of a statistical-result (T07): status passed, unresolved or failed, with reasons.
 
     failed: the artifact has errors under strict validation, carries the 'failed' status, carries 'synthetic' or
@@ -1211,7 +1623,15 @@ def publication_gate(doc: dict, vocab: Vocabulary | None = None) -> dict:
     label, unresolved inputs, fit_status converged-with-warnings, untyped or not-checked coverage (frequentist), a scan
     without a global p-value and its trials_method, a Bayesian result without numeric R-hat and ESS, or no model and
     backend provenance (a non-blank likelihood.backend with a non-blank model_ref or model_sha256). Passing says the contract-level
-    prerequisites for reporting the result as validated are present; it is not a scientific validation."""
+    prerequisites for reporting the result as validated are present; it is not a scientific validation.
+
+    ML provenance (contracts 2.8.0, physics-ml audit WP0.5): every input of artifact_type ml-artifact, and the one
+    extension.observable_source names (kind ml-score), is resolved relative to base_dir (the folder of the artifact;
+    a ref may also be relative to up to three of its parent folders, as project-relative refs are), its sha256 is
+    checked and it is validated strictly: an error there fails the gate (gate.ml_input_invalid), an unresolved
+    finding leaves it unresolved (gate.ml_input_unresolved: for example a failed domain-shift check or a split check
+    that was not run). Without base_dir, or when the file cannot be found, the gate is unresolved
+    (gate.ml_input_unchecked)."""
     reasons: list[dict] = []
 
     def add(level, code, msg):
@@ -1276,9 +1696,58 @@ def publication_gate(doc: dict, vocab: Vocabulary | None = None) -> dict:
     lik: Any = ext.get("likelihood") if isinstance(ext.get("likelihood"), dict) else {}
     if _blank(lik.get("backend")) or (_blank(lik.get("model_ref")) and _blank(lik.get("model_sha256"))):
         add("unresolved", "gate.model_provenance_missing", "likelihood.backend and a model_ref or model_sha256 are required")
+    _gate_ml_inputs(doc, ext, vocab, base_dir, add)
     levels = {r["level"] for r in reasons}
     status_out = "failed" if "failed" in levels else ("unresolved" if levels else "passed")
     return {"gate": "publication", "status": status_out, "reasons": reasons}
+
+
+def _gate_ml_inputs(doc: dict, ext: dict, vocab, base_dir, add) -> None:
+    """Resolve and validate the ml-artifact inputs of a statistical result (see publication_gate)."""
+    import hashlib
+    src: Any = ext.get("observable_source") if isinstance(ext.get("observable_source"), dict) else {}
+    wanted = []
+    if src.get("kind") == "ml-score":
+        inp = _ml_input(doc, src.get("ml_artifact"))
+        if inp is not None and inp.get("artifact_type") == "ml-artifact":
+            wanted.append(inp)
+    wanted += [i for i in doc.get("inputs") or [] if isinstance(i, dict) and i.get("artifact_type") == "ml-artifact"
+               and i not in wanted]
+    for inp in wanted:
+        ref = inp.get("ref")
+        path = None
+        if base_dir is not None and isinstance(ref, str) and ref and not Path(ref).is_absolute():
+            base = Path(base_dir).resolve()
+            for folder in (base, *list(base.parents)[:3]):
+                cand = (folder / ref).resolve()
+                if (cand == folder or folder in cand.parents) and cand.is_file():
+                    path = cand
+                    break
+        if path is None:
+            add("unresolved", "gate.ml_input_unchecked",
+                f"the ml-artifact input {ref!r} could not be resolved here; check the chain with contracts/dependencies.py")
+            continue
+        data = path.read_bytes()
+        sha = inp.get("sha256")
+        if isinstance(sha, str) and sha != hashlib.sha256(data).hexdigest():
+            add("failed", "gate.ml_input_hash_mismatch", f"the ml-artifact input {ref!r} does not match its sha256")
+            continue
+        try:
+            mdoc = json.loads(data.decode("utf-8"))
+        except (UnicodeDecodeError, ValueError):
+            add("failed", "gate.ml_input_invalid", f"the ml-artifact input {ref!r} is not JSON")
+            continue
+        if not isinstance(mdoc, dict) or mdoc.get("artifact_type") != "ml-artifact":
+            add("failed", "gate.ml_input_invalid", f"the input {ref!r} is not an ml-artifact")
+            continue
+        mrep = validate_artifact(mdoc, vocab, strict=True)
+        errors = sorted({f.code for f in mrep.findings if f.severity == "error"})
+        unresolved = sorted({f.code for f in mrep.findings if f.severity == "unresolved"})
+        if errors:
+            add("failed", "gate.ml_input_invalid", f"the ml-artifact {ref!r} the result rests on has errors: {', '.join(errors)}")
+        elif unresolved:
+            add("unresolved", "gate.ml_input_unresolved",
+                f"the ml-artifact {ref!r} the result rests on is not established: {', '.join(unresolved)}")
 
 
 def _max_rhat(conv):
@@ -1386,6 +1855,8 @@ def validate_artifact(doc, vocab: Vocabulary | None = None, protected: bool = Fa
                     validate(ext, "ext_statistical_result_v2_6.json", vocab, rep, "$.extension")
                 if not any(f.code in SHAPE_ERRORS for f in rep.errors):
                     _stat_semantics(doc, ext, rep, strict)
+                    if strict or _at_least(doc.get("contract_version"), ML_SEMANTICS_V2_FROM):
+                        _observable_source(doc, ext, rep)
     return rep
 
 
@@ -1427,7 +1898,7 @@ def main(argv=None) -> int:
         if i >= len(args) or args[i] != "publication":
             print(json.dumps({"ok": False, "error": "--gate takes 'publication'"}))
             return 2
-        gate = publication_gate(doc, vocab)
+        gate = publication_gate(doc, vocab, base_dir=Path(positional[0]).resolve().parent)
     rep = validate_artifact(doc, vocab, protected="--protected" in args, strict="--strict" in args,
                             strict_versions="--strict-versions" in args)
     rep.findings[:0] = pre.findings

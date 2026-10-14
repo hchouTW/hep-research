@@ -1242,3 +1242,33 @@ passed every job on PR #74 (Python 3.11, 3.12, 3.13; ruff, mypy; optional ROOT a
 three jobs failed on one clock-dependent test (`test_scan_verdict`: the verdict's real timestamp 03:47 contained the
 sealed digits it asserts are absent); the test now uses a fixed time. Release manifest `release-manifests/0.9.0.json`.
 
+## PHYSICS-ML-AUDIT (2026-10-14, E2: Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1, PyTorch 2.14.1 CPU; version 0.9.0 + unreleased, contracts 2.8.0)
+
+Physics-ml remediation brief (findings ML-C01…C28, ML-K01…K16, ML-R01…R36), executed on branches fix/physics-ml-p0,
+-p1, -p2 from main 84202aa. Every row's test failed on 84202aa and passes on the branch. Synthetic data only.
+
+| Item | Before (84202aa) | After | Evidence |
+|---|---|---|---|
+| A1 NaN timestamp | `passed`, exit 0 | exit 2 naming id `a` | `tests/skills/physics_ml/test_audit_split_tools.py` |
+| A2 unknown or single `temporal_order` names | `passed`, `timestamps_checked: true` | exit 2 | same |
+| A3 date `2024-1-10` in temporal mode | sorted as text into test; check `passed` | exit 2 naming row `a1`; ISO date lands in train | same |
+| A4 group values 1, 1.0, "1" | three groups, split across train/val/test | one group `1` | same |
+| A5 same-sample isotonic calibration | writer exit 0, validator no finding (ECE 6.5e-17) | writer exit 1, `ml.calibration_on_fit_sample` | `test_audit_calibration_identity.py` |
+| A6 gate on relabelled J9 (a) no ML input, (b) domain shift failed, (c) overlap not run | `passed` x3 | (a) failed `stats.observable_source_unlinked`; (b), (c) failed `gate.ml_input_invalid` (the relabelled ml-artifact is itself refused: 'observed' without an observed input); with an observed input, (b) and (c) unresolved `gate.ml_input_unresolved` | `tests/contracts/test_ml_provenance_gate.py` |
+| K06 `dependencies.py` on J9 | exit 1 (raw `work/` files as inputs) | exit 0; a source's unresolved findings propagate | same |
+| K02 downstream "ROC AUC = 0.93", ["weighted AUC","accuracy"], bare pass | no finding | errors (native 2.8.0; under `--strict` for older artifacts) | `tests/contracts/test_ml_mutation_probe.py` |
+| Appendix B mutation probe | 50 of 53 rows silent | 1 of 53 silent (M47, by design: listed in the test) | same |
+| J9 domain shift (Q3) | shift measured, not carried | `theta_pt_miss_scale` in the fit: mu 1.30738 +0.280857/-0.260727 -> 1.33104 +0.293293/-0.277051; Asimov +0.258174/-0.237781 -> +0.271493/-0.256756; toy pull mean -0.0547 -> -0.0325, width 0.984 -> 1.028, 68% coverage 0.693 -> 0.660 (1000 toys) | `examples/ml-classifier-to-inference/`; two runs byte-identical |
+| J9 calibration (Q5) | ECE 0.0159 -> 0.0176 recorded as a probability calibration | output_semantics score, outcome no-op-within-floor (floor 0.0158) | `tests/examples/test_ml_classifier_to_inference.py` |
+| Inference domain check, d = 32, n = 600 | about 10% of fresh in-distribution rows flagged (box) | near the nominal 1% | `test_audit_domain_method.py` |
+| Grouped domain calibration, 300 design points x 10 replicas | reported 4%, measured 100% flagged | reported 3-10%, measured 5-11% (nominal 5%) | same |
+| `compare_model_runs.py` false improvements at 3/5/9 seeds | 26%/15%/11% (first pass, 3/5/10) | 5.7%/5.3%/5.1% (1500 null comparisons each) | `test_audit_small_corrections.py` |
+| References size | 257,182 B | 179,004 B | `docs/reference-inventory.json` |
+| physics-ml tests (E2, torch) | 269 run, 6 skipped | 322 run, 6 skipped (4 GPU, 2 only-without-torch) | `python -m unittest discover -s tests/skills/physics_ml -t .` |
+
+Not verified here: the live routing rerun of the 17 new cases (paid; pending the combined run of the three-audits
+plan); GPU behaviour of the changed assets; statements marked `unverified` in the references (numerical inversion,
+the in-situ term as the usual dominant one, square-root LR scaling for Adam, TMVA option strings, two-dimensional DDT
+maps, JetClass split, spurion attribution, journal details of Drnevich et al. and the CaloChallenge report, the
+OmniLearn name). The domain false-positive and calibration checks are statistical tests with fixed seeds.
+

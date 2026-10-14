@@ -73,6 +73,31 @@ class J9MlToInferenceTests(unittest.TestCase):
         committed = (SCRIPT.parent / "output" / "results.json").read_bytes()
         self.assertEqual((self.out / "results.json").read_bytes(), committed)
 
+    def test_committed_artifacts_match_within_tolerance(self):
+        """ML-K13: the committed ml_artifact.json and statistical_result.json, not only the rounded results.json, are
+        reproduced: every number within a relative tolerance of 1e-9 (last-bit BLAS differences), every other value
+        equal; digests and input hashes are skipped because they move with the artifact bytes."""
+        skip = {"sha256", "plugin_release", "digest"}
+
+        def close(a, b, path):
+            if isinstance(a, dict) and isinstance(b, dict):
+                self.assertEqual(set(a), set(b), path)
+                for k in a:
+                    if k not in skip:
+                        close(a[k], b[k], f"{path}.{k}")
+            elif isinstance(a, list) and isinstance(b, list):
+                self.assertEqual(len(a), len(b), path)
+                for i, (x, y) in enumerate(zip(a, b)):
+                    close(x, y, f"{path}[{i}]")
+            elif isinstance(a, float) or isinstance(b, float):
+                self.assertTrue(abs(a - b) <= 1e-9 * max(abs(a), abs(b), 1e-300), (path, a, b))
+            else:
+                self.assertEqual(a, b, path)
+
+        committed = SCRIPT.parent / "output" / "artifacts"
+        close(json.loads((committed / "ml_artifact.json").read_text()), self.ml, "ml_artifact")
+        close(json.loads((committed / "statistical_result.json").read_text()), self.stat, "statistical_result")
+
     def test_artifacts_validate(self):
         from contracts.validate import validate_artifact
         from contracts.vocab import Vocabulary
@@ -89,7 +114,8 @@ class J9MlToInferenceTests(unittest.TestCase):
         self.assertEqual(ext["splits"]["overlap_check"]["result"], "pass")
         self.assertIs(ext["splits"]["test_groups_disjoint"], True)
         self.assertEqual(set(ext["training_domain"]), set(ext["features"]))
-        self.assertEqual(ext["output_semantics"], "probability")
+        self.assertEqual(ext["output_semantics"], "score")  # the calibration is a no-op within the ECE floor (PML Q5)
+        self.assertEqual(ext["calibration"]["outcome"], "no-op-within-floor")
         cal = ext["calibration"]
         self.assertEqual(cal["method"], "temperature")
         self.assertNotEqual(cal["fit_sample"], cal["validation"]["sample"])
@@ -97,9 +123,10 @@ class J9MlToInferenceTests(unittest.TestCase):
         self.assertIn(self.m.SHIFT_FEATURE, ext["domain_shift"]["result"]["variables_above_noise_floor"])
         self.assertEqual(ext["weights"]["negative_weight_treatment"], "signed")
         self.assertIn("templates", ext["weights"]["used_in"])
-        metrics = " ".join(d["metric"] for d in ext["downstream_validation"]).lower()
+        metrics = " ".join(d["metric"] + " " + d["quantity_affected"] for d in ext["downstream_validation"]).lower()
         self.assertIn("signal strength", metrics)
         self.assertNotIn("auc", metrics)
+        self.assertTrue({"closure", "coverage", "pull"} <= {d["metric"] for d in ext["downstream_validation"]})
 
     def test_rowlevel_split_is_caught(self):
         row = self.r["splits"]["rowlevel"]

@@ -2,10 +2,8 @@
 
 ## Custom `autograd.Function`
 
-Use when you need a forward/backward pair that isn't expressible by composing
-existing differentiable ops - a non-differentiable operation you want a
-straight-through gradient for, a numerically stabilized backward that differs from
-naive differentiation, or an operation with no PyTorch primitive at all.
+For a forward/backward pair not expressible with differentiable ops: a straight-through gradient through a
+non-differentiable step, a numerically stabilized backward, an operation with no PyTorch primitive.
 
 ```python
 class ClampWithStraightThroughGrad(torch.autograd.Function):
@@ -18,113 +16,30 @@ class ClampWithStraightThroughGrad(torch.autograd.Function):
     @staticmethod
     def backward(ctx, grad_output):
         (x,) = ctx.saved_tensors
-        # Straight-through: pass the gradient through unchanged inside the clamp
-        # range, block it outside - this is a deliberate approximation, not the
-        # "true" gradient of clamp (which is 0 outside the range everywhere).
-        mask = (x >= ctx.low) & (x <= ctx.high)
-        return grad_output * mask, None, None
+        mask = (x >= ctx.low) & (x <= ctx.high)  # a deliberate approximation, not the true gradient
+        return grad_output * mask, None, None    # one gradient per forward input, None for non-tensors
 ```
 
-- `forward`/`backward` are `@staticmethod`; `ctx` carries state between them -
-  `ctx.save_for_backward(*tensors)` for tensors (participates correctly in
-  memory/version tracking), plain attributes (`ctx.low = low`) for non-tensor
-  config.
-- `backward` must return one gradient per **input** to `forward` (`x`, `low`,
-  `high` above), using `None` for inputs that don't require a gradient (here, the
-  two scalar bounds).
-- Call it via the `.apply` classmethod, not by instantiating: `ClampWithStraightThroughGrad.apply(x, 0.0, 1.0)`.
-- Verify a hand-written backward with `torch.autograd.gradcheck` on
-  double-precision (`dtype=torch.float64`) small inputs before trusting it in a
-  real model - a wrong analytic gradient often still trains "something" while
-  quietly producing a worse or wrong result.
+Call it as `ClampWithStraightThroughGrad.apply(x, 0.0, 1.0)`; tensors go through `ctx.save_for_backward`, other state
+on `ctx`. Check a hand-written backward once with `torch.autograd.gradcheck` on small float64 inputs: a wrong gradient
+often still trains, worse.
 
-## Hooks for inspection and debugging
+## Hooks for diagnosis
 
-Hooks let you observe or modify tensors/gradients without changing the model's
-forward code - useful for one-off debugging or lightweight instrumentation, not as
-a substitute for correct module design.
+`register_forward_hook(module, input, output)` reads or replaces a layer's output; `register_forward_pre_hook` its
+input; `register_full_backward_hook(module, grad_input, grad_output)` the gradients through it, the direct way to find
+where a NaN or a vanishing or exploding gradient first appears; `tensor.register_hook` the gradient of one
+intermediate tensor. Keep the returned handle and call `.remove()`: a forgotten hook keeps memory (for example a dict
+of stored activations) and distorts timings. Use hooks to diagnose, then fix the model code.
 
-```python
-activations = {}
+## Activation checkpointing
 
-def make_forward_hook(name):
-    def hook(module, inputs, output):
-        activations[name] = output.detach()
-    return hook
-
-handle = model.encoder.layer[0].register_forward_hook(make_forward_hook("layer0"))
-# ... run a forward pass; activations["layer0"] is now populated ...
-handle.remove()  # always remove when done, or it leaks for the model's lifetime
-```
-
-- **`register_forward_hook(module, input, output)`**: inspect/replace a layer's
-  output. Return a new tensor from the hook to replace the output; return `None`
-  to leave it unchanged.
-- **`register_forward_pre_hook(module, input)`**: inspect/modify a layer's input
-  before `forward` runs.
-- **`register_full_backward_hook(module, grad_input, grad_output)`**: inspect
-  gradients flowing through a module - the most direct way to find *where* in a
-  deep network a NaN or vanishing/exploding gradient first appears, by hooking
-  several layers and comparing `grad_output` magnitudes.
-- **`tensor.register_hook(fn)`**: inspect/modify the gradient of a specific
-  intermediate tensor (one not necessarily tied to a module boundary).
-- Always keep the handle returned by `register_*` and call `.remove()` once done;
-  an un-removed hook on a long-lived model silently keeps consuming memory
-  (accumulating entries in a dict like `activations` above) and can distort timing
-  measurements in performance profiling.
-- Prefer hooks for *diagnosis*. Once you know what's wrong, fix it by changing the
-  model/training code rather than leaving permanent hooks in the training path -
-  hooks add overhead and are easy to forget about.
-
-## Activation (gradient) checkpointing
-
-Trades compute for activation memory: instead of keeping every layer's activations
-in memory for the backward pass, checkpointed segments discard their activations
-after the forward pass and **recompute** them during backward.
-
-```python
-from torch.utils.checkpoint import checkpoint
-
-class CheckpointedBlock(nn.Module):
-    def __init__(self, block: nn.Module):
-        super().__init__()
-        self.block = block
-
-    def forward(self, x):
-        # use_reentrant=False is the modern, recommended mode - see note below
-        return checkpoint(self.block, x, use_reentrant=False)
-```
-
-- Use on the memory-heaviest segments first (typically transformer blocks or large
-  conv stages) rather than the whole model - checkpointing the entire model gives
-  the most memory savings but the most recompute overhead; profile to find the
-  actual bottleneck (see
-  [performance-memory.md](performance-memory.md)) rather than
-  checkpointing everything by default.
-- Expect roughly 20-30% slower training per step in exchange for a large reduction
-  in peak activation memory - this is the standard way to fit a larger batch size
-  or longer sequence length than would otherwise fit, not a free win.
-- `use_reentrant=False` avoids several sharp edges of the older reentrant
-  implementation (silent incorrect gradients with certain RNG/dropout usage inside
-  the checkpointed segment, inability to checkpoint a function with no
-  `requires_grad` inputs). Prefer it unless a specific compatibility constraint
-  forces the old behavior.
-- A checkpointed segment must be **deterministic** given the same inputs (recompute
-  during backward must match the forward exactly) - if it contains dropout or other
-  randomness, PyTorch handles RNG state save/restore automatically for
-  `torch.utils.checkpoint`, but a custom source of randomness (e.g. calling into a
-  non-PyTorch RNG) will silently break this and produce incorrect gradients.
-- Combine with mixed precision and PEFT (see
-  [efficient-finetuning.md](efficient-finetuning.md)) when a single
-  technique isn't enough to fit the target batch size/sequence length.
-
-## Debugging with `gradcheck` and anomaly detection
-
-- `torch.autograd.gradcheck(fn, inputs)` numerically verifies a custom
-  `autograd.Function`'s backward against finite differences - run once when
-  writing it, not on every training run (it's slow and needs double precision).
-- `torch.autograd.set_detect_anomaly(True)` (debugging only, slow) surfaces the
-  forward operation that produced a NaN/Inf during backward, rather than only
-  reporting where the NaN was noticed - see the NaN checklist in
-  [debugging-pytorch.md](debugging-pytorch.md) for the broader
-  workflow this fits into.
+`torch.utils.checkpoint.checkpoint(block, x, use_reentrant=False)` drops a segment's activations after forward and
+recomputes them in backward: about 20-30% slower steps for much lower peak activation memory. Checkpoint the heaviest
+segments first (transformer blocks, large convolution stages) after profiling
+([performance-memory.md](performance-memory.md)). `use_reentrant=False` avoids the old mode's silent wrong gradients
+with dropout and its failure on segments without `requires_grad` inputs. A recomputed segment must be deterministic:
+PyTorch restores its own RNG state, but a non-PyTorch random source breaks the gradients silently. Combine with mixed
+precision and LoRA ([efficient-finetuning.md](efficient-finetuning.md)) when one technique is not enough.
+`torch.autograd.set_detect_anomaly(True)` (slow, debugging only) names the forward operation that produced a NaN
+([debugging-pytorch.md](debugging-pytorch.md)).
