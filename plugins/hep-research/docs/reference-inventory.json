@@ -5,7 +5,7 @@
  "by_skill": {
   "detector-response": {
    "references": 34,
-   "bytes": 398077,
+   "bytes": 400111,
    "uncited": 0
   },
   "hep-analysis": {
@@ -636,8 +636,8 @@
   {
    "path": "skills/detector-response/references/space-based-direct-detection.md",
    "owner": "detector-response",
-   "bytes": 17035,
-   "lines": 248,
+   "bytes": 19069,
+   "lines": 274,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -726,7 +726,7 @@
     "skills/detector-response/scripts/tag_and_probe_efficiency.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "d8bec60 2026-10-13"
+   "last_commit": "f6739d9 2026-10-14"
   },
   {
    "path": "skills/hep-analysis/references/analysis-design.md",

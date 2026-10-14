@@ -13,17 +13,33 @@ geomagnetic and solar effects that ground- and space-based measurements alike mu
 correct for, and that have no collider-physics analog.
 <!-- /example -->
 
-## Rigidity, not energy, is the natural variable
+## Rigidity, not energy, is the natural variable - for a spectrometer
 
-As in any magnetic spectrometer (see
-[detector-systems-overview.md](detector-systems-overview.md)), a
-space-based instrument directly measures rigidity `R = pc/(Ze)`, and every
-geomagnetic and solar effect below acts on rigidity, not on energy or momentum
+Space instruments are of two kinds, and they measure different things:
+
+- **Magnetic spectrometers** (see
+  [detector-systems-overview.md](detector-systems-overview.md)) measure rigidity
+  `R = pc/(Ze)` from the track curvature, the sign of the charge, and, with an
+  independent velocity measurement, the mass and so the isotope. Their resolution is
+  bounded by the maximum detectable rigidity (MDR), and charge confusion near it is a
+  background.
+- **Calorimetric instruments** (thick calorimeter plus charge detectors, without a
+  magnet) measure the energy deposited in the calorimeter and the charge magnitude.
+  Because the calorimeter does not contain the whole hadronic shower, the incident
+  energy is obtained by unfolding the deposited-energy spectrum with an energy response
+  matrix from simulation (the DAMPE proton spectrum, Sci. Adv. 5 (2019) eaax3793,
+  arXiv:1909.12860, solves for the incident spectrum with a Bayesian unfolding of the
+  deposited-energy bins; opened 2026-10-14). They have no MDR, measure no charge sign
+  and so have no charge confusion, and do not separate isotopes.
+
+Every geomagnetic and solar effect below acts on rigidity, not on energy or momentum
 separately - because both the geomagnetic field's confinement and a Fermi-accelerated
 source's maximum energy are set by how a particle's gyroradius compares to a length
-scale, which depends on `p/(Ze)`. Reporting a direct-detection flux in kinetic energy
-per nucleon rather than rigidity discards this natural scaling and makes comparison
-across species (which differ in `Z` and `A`) needlessly indirect.
+scale, which depends on `p/(Ze)`. A spectrometer flux is therefore reported in rigidity;
+reporting it only in kinetic energy per nucleon discards this scaling and makes
+comparison across species (which differ in `Z` and `A`) needlessly indirect. A
+calorimetric flux is reported in (kinetic) energy, and any comparison in rigidity needs
+an `A/Z` assumption.
 
 ## Geomagnetic cutoff
 
@@ -35,18 +51,26 @@ atmosphere (or a near-Earth satellite) if its rigidity exceeds a minimum, the
 
     R_c = C * cos^4(lambda_m) / (r^2 * (1 + sqrt(1 - sin(eps) sin(xi) cos^3(lambda_m)))^2)
 
-with zenith angle `eps`, azimuth `xi`, `C = 59.6 GV` (proportional to the Earth's dipole
+with zenith angle `eps`, azimuth `xi` measured clockwise from geomagnetic north (east = 90 deg; this sign is for a positive particle), `C = 59.6 GV` (proportional to the Earth's dipole
 moment `M`) and `r` the geocentric distance in Earth radii. For vertical arrival the
 square root is 1, so `R_c = 14.9 GV * cos^4(lambda_m) / r^2` (Smart & Shea 2005): about
 15 GV at the geomagnetic equator at the surface (~13 GV at ISS altitude), falling to
 essentially zero at the poles - the reason polar-orbit low-cutoff regions are preferred for measuring the
-lowest-rigidity cosmic rays, and why any flux measurement from a satellite in an
-inclined orbit must either restrict to high-cutoff geomagnetic regions for a clean
-low-energy cutoff or explicitly model the orbit-averaged, direction-dependent cutoff
-(off-vertical arrival directions have a higher, angle-dependent cutoff than the
-vertical Störmer value, and the real, non-dipolar field further complicates this into
-a "penumbra" of partially-forbidden trajectories requiring backtracing simulation
-rather than the analytic formula). `<plugin root>/skills/hep-analysis/scripts/geomagnetic_cutoff.py` evaluates the
+lowest-rigidity cosmic rays. A flux measurement from a satellite in an inclined orbit
+fills its low-rigidity bins only from the low-cutoff parts of the orbit (high
+geomagnetic latitude), and must model the orbit-averaged, direction-dependent cutoff.
+The cutoff is east-west asymmetric: for the positively charged majority of cosmic rays
+it is lower for arrival from the west and higher from the east (ECSS-E-ST-10-04C,
+annex B.8, "Geomagnetic shielding (Størmer theory)", via SPENVIS; formula and azimuth
+convention as in R. Nolty, Caltech thesis (2002), arXiv:hep-ex/0201015, section on the
+Störmer cutoff; both opened 2026-10-14). Off-vertical arrival is therefore not
+uniformly higher: in the eastern half of the sky horizontal particles have a higher
+cutoff than vertical ones, in the western half a lower one.
+From the formula above at the equator and the surface, horizontal arrival from the west
+(`sin(eps) sin(xi) = -1`) gives `59.6/(1 + sqrt(2))^2 ≈ 10.2 GV` against the vertical
+14.9 GV, and from the east (`sin(eps) sin(xi) = +1`) `59.6 GV`. The real, non-dipolar
+field further complicates this into a "penumbra" of partially-forbidden trajectories
+requiring backtracing simulation rather than the analytic formula. `<plugin root>/skills/hep-analysis/scripts/geomagnetic_cutoff.py` evaluates the
 analytic vertical Störmer cutoff as a first-order estimate; a rigorous cutoff for a
 specific orbit and epoch requires particle backtracing through a full geomagnetic
 field model and is not something the analytic formula replaces.
@@ -160,10 +184,12 @@ task from fitting the time-averaged spectrum.
 
 ## Direct-detection composition and the local antiparticle excesses
 
-Because a space-based spectrometer measures charge and mass directly (through the
-PID chain in [particle-identification.md](particle-identification.md)),
-it gives an unambiguous species and isotope identification that no ground-based
-technique provides - the reason direct detection remains the reference measurement
+Because a space-based magnetic spectrometer measures the charge (with its sign) and,
+with a velocity measurement, the mass (through the PID chain in
+[particle-identification.md](particle-identification.md)), it gives a species and
+isotope identification that no ground-based technique provides; a calorimetric space
+instrument identifies the element by its charge magnitude but not the isotope or the
+charge sign - the reason direct detection remains the reference measurement
 for composition, isotopic ratios, and antiparticle fluxes, even though its
 geometric-factor-limited exposure caps its reach well below the knee. Two antiparticle
 results are often quoted together but differ in status. The measured **positron
