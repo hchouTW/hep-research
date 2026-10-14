@@ -54,8 +54,8 @@ curl -H "Authorization: Bearer $ADS_TOKEN" 'https://api.adsabs.harvard.edu/v1/se
 Source: [arXiv API terms of use](https://info.arxiv.org/help/api/tou.html) (opened 2026-10-14).
 
 ```bash
-curl -s 'http://export.arxiv.org/api/query?id_list=1007.1727'
-curl -s 'http://export.arxiv.org/api/query?search_query=ti:%22asymptotic%20formulae%22&max_results=5'
+curl -s 'https://export.arxiv.org/api/query?id_list=1007.1727'
+curl -s 'https://export.arxiv.org/api/query?search_query=ti:%22asymptotic%20formulae%22&max_results=5'
 ```
 
 - The response is Atom XML; the version is part of the id (`1007.1727v3`).
