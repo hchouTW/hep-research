@@ -14,6 +14,9 @@
   "measurement_v26.json",
   "ml_artifact.json",
   "ml_artifact_v25.json",
+  "ml_v28_inference_sbi.json",
+  "ml_v28_reweighting.json",
+  "ml_v28_unsupervised_anomaly.json",
   "prediction.json",
   "prediction_v26.json",
   "prediction_v26_binned_envelope.json",
@@ -29,6 +32,7 @@
   "statres_scan_global.json",
   "statres_v26.json",
   "statres_v26_bayesian.json",
+  "statres_v28_observable_source_linked.json",
   "theory_spec.json",
   "theory_spec_v26.json",
   "theory_spec_v26_analytic_checked.json",
@@ -286,6 +290,109 @@
   ],
   "statres_v26_model_sha256_malformed.json": [
    "stats.model_sha256_malformed"
+  ],
+  "ml_v28_downstream_unstructured.json": [
+   "ml.downstream_unstructured",
+   "ml.downstream_ml_only"
+  ],
+  "ml_v28_downstream_ml_only.json": [
+   "ml.downstream_ml_only"
+  ],
+  "ml_v28_downstream_passed_contradicts.json": [
+   "ml.downstream_passed_contradicts"
+  ],
+  "ml_v28_output_semantics_misspelled.json": [
+   "ml.misspelled_key"
+  ],
+  "ml_v28_calibration_misspelled.json": [
+   "ml.misspelled_key"
+  ],
+  "ml_v28_output_semantics_task_mismatch.json": [
+   "ml.output_semantics_task_mismatch"
+  ],
+  "ml_v28_surrogate_no_validation.json": [
+   "ml.task_validation_missing"
+  ],
+  "ml_v28_generation_no_validation.json": [
+   "ml.task_validation_missing"
+  ],
+  "ml_v28_inference_no_validation.json": [
+   "ml.task_validation_missing"
+  ],
+  "ml_v28_inference_handoff_unknown.json": [
+   "ml.handoff_unknown"
+  ],
+  "ml_v28_unsupervised_no_anomaly_validation.json": [
+   "ml.task_validation_missing"
+  ],
+  "ml_v28_reweighting_no_validation.json": [
+   "ml.task_validation_missing"
+  ],
+  "ml_v28_reweighting_validation_incomplete.json": [
+   "ml.task_validation_incomplete"
+  ],
+  "ml_v28_single_label.json": [
+   "ml.single_label"
+  ],
+  "ml_v28_duplicate_features.json": [
+   "ml.duplicate_features"
+  ],
+  "ml_v28_label_is_feature.json": [
+   "ml.label_is_feature"
+  ],
+  "ml_v28_preprocessing_fit_on_all.json": [
+   "ml.preprocessing_not_on_train"
+  ],
+  "ml_v28_multiclass_calibration_scope.json": [
+   "ml.multiclass_calibration_scope"
+  ],
+  "ml_v28_model_hash_placeholder.json": [
+   "ml.model_hash_malformed"
+  ],
+  "ml_v28_model_hash_short.json": [
+   "ml.model_hash_malformed"
+  ],
+  "ml_v28_weights_unstructured.json": [
+   "ml.weights_unstructured"
+  ],
+  "ml_v28_weights_used_in_empty.json": [
+   "ml.weights_used_in_empty"
+  ],
+  "ml_v28_weights_used_in_inconsistent.json": [
+   "ml.weights_used_in_inconsistent"
+  ],
+  "ml_v28_weights_contradiction.json": [
+   "ml.weights_contradiction"
+  ],
+  "ml_v28_calibration_same_sample_hash.json": [
+   "ml.calibration_on_fit_sample"
+  ],
+  "ml_v28_calibration_on_training_sample.json": [
+   "ml.calibration_on_training_sample"
+  ],
+  "ml_v28_calibration_after_not_numeric.json": [
+   "ml.calibration_after_not_numeric"
+  ],
+  "ml_v28_downstream_incomplete.json": [
+   "ml.downstream_incomplete"
+  ],
+  "ml_v28_surrogate_policy_action.json": [
+   "ml.extrapolation_policy_action"
+  ],
+  "ml_v28_generation_two_sample_power_missing.json": [
+   "ml.two_sample_power_missing"
+  ],
+  "ml_v28_units_unknown_feature.json": [
+   "ml.units_unknown_feature"
+  ],
+  "ml_v28_threshold_from_test.json": [
+   "ml.threshold_from_test"
+  ],
+  "ml_v28_status_observed_unsupported.json": [
+   "ml.status_unsupported"
+  ],
+  "statres_v28_observable_source_unlinked.json": [
+   "stats.observable_source_unlinked"
   ]
  },
  "unresolved": {
@@ -337,6 +444,39 @@
   ],
   "statres_v26_bayes_chains_missing.json": [
    "stats.chains_missing"
+  ],
+  "ml_v28_output_semantics_missing.json": [
+   "ml.output_semantics_missing"
+  ],
+  "ml_v28_grouping_row_level.json": [
+   "ml.grouping_row_level"
+  ],
+  "ml_v28_split_check_unverified.json": [
+   "ml.split_check_unverified"
+  ],
+  "ml_v28_training_domain_unbounded.json": [
+   "ml.training_domain_unbounded"
+  ],
+  "ml_v28_training_domain_partial.json": [
+   "ml.training_domain_partial"
+  ],
+  "ml_v28_domain_shift_on_training_sample.json": [
+   "ml.domain_shift_on_training_sample"
+  ],
+  "ml_v28_domain_shift_uncorrected.json": [
+   "ml.domain_shift_uncorrected"
+  ],
+  "ml_v28_domain_shift_outcome_missing.json": [
+   "ml.domain_shift_outcome_missing"
+  ],
+  "ml_v28_domain_shift_status_missing.json": [
+   "ml.domain_shift_status_missing"
+  ],
+  "ml_v28_training_domain_missing.json": [
+   "ml.training_domain_missing"
+  ],
+  "ml_v28_calibration_not_improving.json": [
+   "ml.calibration_not_improving"
   ]
  },
  "warning": {
@@ -345,6 +485,19 @@
   ],
   "prediction_v26_truncation_no_method.json": [
    "prediction.truncation_method"
+  ],
+  "ml_v28_framework_version_missing.json": [
+   "ml.framework_version_missing"
+  ],
+  "ml_v28_weights_not_split.json": [
+   "ml.weights_not_split"
+  ],
+  "ml_v28_negative_weights_abs.json": [
+   "ml.negative_weights_abs"
+  ],
+  "ml_v28_environment_free_text.json": [
+   "ml.precision_free_text",
+   "ml.device_free_text"
   ]
  }
 }
