@@ -108,7 +108,8 @@ needs: a converter that rewrites old artifacts with explicit refusal codes for w
 fixtures in `contracts/fixtures/`, and an entry in the changelog of the release.
 
 Readers apply a version policy (`contracts/validate.py`, since 2.1.0): a newer major is an error; a newer minor is a
-warning, or an error with `--protected`; `versions.contracts` must equal `contract_version`; an unknown entry in
+warning, or an error with `--strict-versions` or in protected mode (`--protected`, or a project with
+`agent_policy`); `versions.contracts` must equal `contract_version`; an unknown entry in
 `required_capabilities` is an error (add new capabilities to `contracts.KNOWN_CAPABILITIES` when a reader implements
 them). `contracts/dependencies.py` validates every source the same way. Artifacts record the code identity in
 `versions.plugin_release` through `contracts/identity.py`; older artifacts lack it and their identity is unknown.

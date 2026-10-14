@@ -7,6 +7,11 @@ Software checks establish contract consistency only, not physical validity.
 
 Contracts 2.7.0 (unchanged).
 
+- **`--strict-versions` (validate.py, dependencies.py).** The stricter version policy alone (a newer minor contract
+  version is an error, for the artifact and every source), which `--protected` meant before 0.8.0. It does not switch
+  protected mode on, so it needs no protected inputs and is never refused for their absence. `--protected` keeps its
+  0.8.0 meaning (protected mode); the library parameter is `strict_versions=`. Tests in
+  `tests/contracts/test_strict_versions.py`.
 - **Formal-use permits, analysis-level bundles and the recipe-use review (tasks P5.1-P5.3; C15, C08).** New
   `contracts/analysis_bundle.py` (`analysis_bundle.json`): one digest over the measurement spec, recipes, semantics
   tables, calibrations, tool contracts, environment lock, reviews and the plugin release; `verify` reports each change;

@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """Validate a hep-research artifact: common envelope + typed extension + semantic rules.
 
-Usage: python3 contracts/validate.py ARTIFACT.json [--profiles-from PROJECT_CONFIG.json] [--protected] [--strict]
-                                    [--gate publication]
+Usage: python3 contracts/validate.py ARTIFACT.json [--profiles-from PROJECT_CONFIG.json] [--protected]
+           [--strict-versions] [--strict] [--gate publication]
 Exit codes: 0 valid (and, with --gate, the gate passed), 1 findings with errors (or the gate failed or is unresolved),
 2 unreadable input or bad usage. Output: JSON report on stdout.
 A valid artifact is self-consistent under the contract; that says nothing about physical validity, and this check is
-advisory: it never authorizes a use. --protected applies the stricter version policy for protected use (a newer
-minor contract version is an error, not a warning). --strict applies the statistical-result semantic rules of
+advisory: it never authorizes a use. --protected switches protected mode on (core.protected.guard: the protected
+inputs of the project's authoritative agent_policy must be established, else the run is refused) and with it the
+stricter version policy; --strict-versions applies only that version policy (a newer minor contract version is an
+error, not a warning), without protected mode. --strict applies the statistical-result semantic rules of
 contracts 2.2.0 (p-values and confidence levels in range, ordered expected bands, typed coverage and global
 calibration) and the response semantic rules of contracts 2.4.0 (controlled correction vocabulary, a matrix or
 matrix_ref, normalization consistent with what sits inside the matrix, one unit per variable) and the ml-artifact
@@ -1352,10 +1354,11 @@ def check_unknown_keys(doc: dict, rep: Report) -> None:
 
 
 def validate_artifact(doc, vocab: Vocabulary | None = None, protected: bool = False, strict: bool = False, *,
-                      context=None) -> Report:
+                      context=None, strict_versions: bool = False) -> Report:
     """Schema and semantic rules of one artifact. In protected mode (the project declares agent_policy, or protected is
     true; core.protected.guard) the protected inputs are checked first, a refusal is an error finding, and the stricter
-    version policy applies. `context` reuses an established protected-use context (core.protected.guard.Context)."""
+    version policy applies. strict_versions applies only that version policy (a newer minor is an error), without
+    protected mode. `context` reuses an established protected-use context (core.protected.guard.Context)."""
     vocab = vocab or Vocabulary()
     rep = validate(doc, "envelope.json", vocab)
     ctx = guard_report("contracts.validate.validate_artifact", rep, flag=protected, context=context)
@@ -1363,7 +1366,7 @@ def validate_artifact(doc, vocab: Vocabulary | None = None, protected: bool = Fa
     check_finite(doc, rep)
     if not isinstance(doc, dict):
         return rep
-    check_contract_version(doc, rep, protected)
+    check_contract_version(doc, rep, protected or strict_versions)
     check_unknown_keys(doc, rep)
     at = doc.get("artifact_type")
     ext_schema = EXTENSION_SCHEMAS.get(at) if isinstance(at, str) else None  # a wrong type is already a finding
@@ -1425,7 +1428,8 @@ def main(argv=None) -> int:
             print(json.dumps({"ok": False, "error": "--gate takes 'publication'"}))
             return 2
         gate = publication_gate(doc, vocab)
-    rep = validate_artifact(doc, vocab, protected="--protected" in args, strict="--strict" in args)
+    rep = validate_artifact(doc, vocab, protected="--protected" in args, strict="--strict" in args,
+                            strict_versions="--strict-versions" in args)
     rep.findings[:0] = pre.findings
     out = rep.as_dict()
     if gate is not None:
