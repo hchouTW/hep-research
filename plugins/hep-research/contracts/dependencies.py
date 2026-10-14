@@ -18,7 +18,7 @@ is not thereby allowed).
 Every source is also validated as a contract artifact (contracts/validate.py). Protected mode (the project root
 declares agent_policy, or --protected; core.protected.guard) first checks the protected inputs and refuses before
 reading any source when they cannot be established; inside it the authoritative revocation log is always applied and
-the stricter version policy holds.
+the stricter version policy holds. --strict-versions applies only that version policy to every source.
 
 Revocations: --revocations names the hash-chained revocation log (contracts/revocation.py), which needs --revocation-head
 and --revocation-source; it is verified before any lookup (an empty, cut, edited or stale log, or one whose head does
@@ -29,6 +29,7 @@ file is an error.
 
 Usage: python3 contracts/dependencies.py ARTIFACT.json --root PROJECT_ROOT [--base DIR] [--revocations LOG
            --revocation-head HEAD --revocation-source SOURCE [--max-status-age S] [--now T]] [--protected]
+           [--strict-versions]
 Exit codes: 0 ok, 1 errors, 3 unresolved only, 2 unreadable input or bad usage. Output: JSON report on stdout.
 """
 from __future__ import annotations
@@ -86,8 +87,9 @@ def load_revocations(path) -> tuple[dict, list[str]]:
 
 class _Checker:
     def __init__(self, root: Path, base: Path, revoked: dict | None = None, protected: bool = False, vocab=None,
-                 context=None):
+                 context=None, strict_versions: bool = False):
         self.root, self.base, self.protected, self.vocab, self.context = root, base, protected, vocab, context
+        self.strict_versions = strict_versions
         self.revoked = revoked or {}
         self.findings: list[dict] = []
         self.checked: list[str] = []
@@ -148,7 +150,8 @@ class _Checker:
                 continue
             # every source is itself a contract artifact: an invalid one, an unknown type or required capability, or
             # a newer contract version this reader cannot judge is not a dependency it can vouch for (K02, F08)
-            srep = validate_artifact(sdoc, self.vocab, protected=self.protected, context=self.context)
+            srep = validate_artifact(sdoc, self.vocab, protected=self.protected, context=self.context,
+                                     strict_versions=self.strict_versions)
             bad = sorted({f.code for f in srep.errors})
             if bad:
                 self.add("error", where, "dependency.source_invalid", f"{ref!r} fails contract validation: {', '.join(bad)}")
@@ -216,7 +219,7 @@ def _revocation_findings(revocations, head, source, max_age_s, now, protected: b
 
 def validate_dependencies(artifact_path, project_root, base=None, revocations=None, protected: bool = False, vocab=None,
                           *, revocation_head=None, revocation_source=None, max_status_age_s: int = rv.MAX_STATUS_AGE_S,
-                          now=None, account=None, context=None) -> dict:
+                          now=None, account=None, context=None, strict_versions: bool = False) -> dict:
     """See the module docstring. `vocab` (a contracts.vocab.Vocabulary, default the core vocabulary) lets sources that use
     a bound profile's namespaced terms validate; it is additive and changes nothing when omitted. `account`
     (core.protected.trusted_input.Account) replaces the running account in the protected source checks (tests)."""
@@ -237,7 +240,7 @@ def validate_dependencies(artifact_path, project_root, base=None, revocations=No
         for key, ev in _event_keys(ctx.revocations.events).items():
             revoked.setdefault(key, ev)
     chk = _Checker(root, Path(base).resolve() if base else root, revoked, protected, vocab,
-                   ctx if ctx is not None and ctx.protected else None)
+                   ctx if ctx is not None and ctx.protected else None, strict_versions)
     for severity, code, message in rfindings:
         chk.add(severity, "$revocations", code, message)
     for r in refusals:
@@ -292,8 +295,12 @@ def main(argv=None) -> int:
     ap.add_argument("--max-status-age", dest="max_status_age", type=int, default=rv.MAX_STATUS_AGE_S,
                     help=f"seconds; at most {rv.MAX_STATUS_AGE_S}")
     ap.add_argument("--now", help="evaluate at another time (tests, replay), YYYY-MM-DDTHH:MM:SSZ")
-    ap.add_argument("--protected", action="store_true", help="stricter version policy (a newer minor contract is an "
-                                                             "error) and protected-source checks on the revocation input")
+    ap.add_argument("--protected", action="store_true", help="protected mode (core/protected/guard.py): the project's "
+                    "protected inputs must be established, the authoritative revocation log applies, and the stricter "
+                    "version policy holds")
+    ap.add_argument("--strict-versions", dest="strict_versions", action="store_true",
+                    help="only the stricter version policy for every source (a newer minor contract is an error), "
+                         "without protected mode")
     try:
         args = ap.parse_args(argv)
     except SystemExit as exc:
@@ -303,6 +310,7 @@ def main(argv=None) -> int:
         print(json.dumps({"status": "unreadable", "error": "--now must be YYYY-MM-DDTHH:MM:SSZ"}))
         return 2
     rep = validate_dependencies(args.artifact, args.root, args.base, args.revocations, args.protected,
+                                strict_versions=args.strict_versions,
                                 revocation_head=args.revocation_head, revocation_source=args.revocation_source,
                                 max_status_age_s=args.max_status_age, now=now)
     print(json.dumps(rep, indent=1))

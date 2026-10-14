@@ -1192,3 +1192,21 @@ ams02-research (main `dc0e674`, 1.4.10) checker reports 0.8.0 `compatible` (requ
 pass; 2,918 unit tests in 216 modules, 0 failures, 58 skipped. CI passed every job on PRs #70-#73 (Python 3.11, 3.12,
 3.13; ruff, mypy; optional ROOT and columnar). Release manifest `release-manifests/0.8.0.json`.
 
+## AGENTIC-COMPLETION release B (2026-10-14, E2: Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1; version 0.8.0 + unreleased, contracts 2.7.0)
+
+Packages P5.2, P5.1, P5.3, P4, P5.4 and P6.1 with P7 for them, stacked on release A. Synthetic data and sentinels only.
+
+| Package | Evidence |
+|---|---|
+| P5.2 analysis-level bundles | `tests/contracts/test_permits.py` `AnalysisBundleTests`: a changed spec, recipe, calibration, environment lock or plugin release changes the digest; reformatting JSON does not; duplicates, missing roles, escapes, links, bad refs and duplicate keys refused; attestations take the bundle as subject |
+| P5.1, P5.3 permits and recipe-use review | `PermitTests`, `FormalEntryPointTests`, `ReviewFindingTests`: every permit refusal code; budget counted in the nonce ledger; changed bundle invalidates; review out of scope, not accepted, missing roles, inactive or revoked refuse; HEPData export runs in protected mode only with a valid permit (command line and `build_tables`); directory and empty inputs, S3 execution binding, unattested recipes |
+| P4 transforms, preparation, residual checks | `tests/core/test_blinding_residual.py` (20 tests), `tests/contracts/test_release_prepare.py` (7 tests): every mode's draft passes `release_manifest.py` with every custodian option; a leaked sealed value fails; the §6.2 attacks are detected, refused or stated; the quantization check has 0 false positives in 5,000 random five-value sets and detects scaled counts up to 10^5 |
+| P5.4 tool contracts | `tests/contracts/test_tool_contract.py` `ShippedScopeTests`: four contracts pass with the help check (per subcommand for the output audit); both scopes pass; every recipe step's tool is scoped |
+| P6.1 scan interface | `tests/contracts/test_scan_verdict.py`: closed verdict; budget in candidate values from the service's recount; refusal past the limit is sticky |
+
+An independent review of the first release-B implementation reported findings in permits, release preparation, the
+scan budget, residual checks and malformed-input handling; all were fixed with regression tests. The package grew to
+15.0 MB (about 1430 files): the README size statement is updated. `tools/run_all_checks.py` with the E2 venv: 21 of 21
+checks pass; 2,966 unit tests in 220 modules, 0 failures, 58 skipped. ruff 0.16.10 and mypy 2.4.0 clean. Not run: CI,
+live sessions, any carry-over.
+

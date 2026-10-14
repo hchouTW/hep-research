@@ -1,0 +1,147 @@
+{
+ "$comment": "Formal-use and S3-execution permit (task P5.1, C15, DP-4): issued by the custodian's gate after its own checks, read by the plugin only as a protected input. It binds a subject (the analysis-level bundle digest and the digests of the artifacts the use covers), one use (an attestation purpose), an actor, a budget of uses counted in the custodian's nonce ledger, a validity window and, for formal use, the attestation whose review must cover the recipe and the use (P5.3). contracts/permit.py checks bindings and the source; signatures are a later option. A permit is not a result's validation, and the plugin never records a use: the custodian does.",
+ "type": "object",
+ "required": [
+  "permit_version",
+  "permit_id",
+  "scope",
+  "subject",
+  "use",
+  "actor",
+  "budget",
+  "not_before",
+  "expires",
+  "nonce",
+  "issued_by"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "permit_version": {
+   "type": "string",
+   "const": "1.0.0"
+  },
+  "permit_id": {
+   "type": "string",
+   "minLength": 1
+  },
+  "scope": {
+   "type": "string",
+   "enum": [
+    "s3-execution",
+    "formal-use"
+   ]
+  },
+  "subject": {
+   "type": "object",
+   "required": [
+    "analysis_bundle_sha256",
+    "analysis_bundle_ref",
+    "artifacts"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "analysis_bundle_sha256": {
+     "$ref": "revocation_event.json#/$defs/sha256"
+    },
+    "analysis_bundle_ref": {
+     "$comment": "project-relative path of the frozen analysis bundle; its digest is what binds it",
+     "type": "string",
+     "minLength": 1
+    },
+    "execution_bundle_sha256": {
+     "$comment": "s3-execution: the frozen execution bundle (core.partition.bundle)",
+     "$ref": "revocation_event.json#/$defs/sha256"
+    },
+    "artifacts": {
+     "$comment": "byte or canonical SHA-256 of every input the use may read; an input not listed is refused",
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "$ref": "revocation_event.json#/$defs/sha256"
+     }
+    }
+   }
+  },
+  "use": {
+   "type": "object",
+   "required": [
+    "purpose",
+    "description"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "purpose": {
+     "type": "string",
+     "enum": [
+      "exploration",
+      "fixed-execution",
+      "validation",
+      "formal-analysis"
+     ]
+    },
+    "description": {
+     "type": "string",
+     "minLength": 1
+    }
+   }
+  },
+  "actor": {
+   "type": "string",
+   "minLength": 1
+  },
+  "budget": {
+   "type": "object",
+   "required": [
+    "uses"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "uses": {
+     "type": "integer",
+     "minimum": 1
+    }
+   }
+  },
+  "not_before": {
+   "$ref": "revocation_event.json#/$defs/timestamp"
+  },
+  "expires": {
+   "$ref": "revocation_event.json#/$defs/timestamp"
+  },
+  "nonce": {
+   "type": "string",
+   "pattern": "^[0-9a-f]{32,64}$"
+  },
+  "issued_by": {
+   "type": "string",
+   "minLength": 1
+  },
+  "review": {
+   "$comment": "required for formal-use: the attestation the gate checked, bound by canonical SHA-256, and the roles whose accepted reviews are needed",
+   "type": "object",
+   "required": [
+    "attestation_ref",
+    "attestation_sha256",
+    "required_roles"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "attestation_ref": {
+     "type": "string",
+     "minLength": 1
+    },
+    "attestation_sha256": {
+     "$ref": "revocation_event.json#/$defs/sha256"
+    },
+    "required_roles": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "string",
+      "minLength": 1
+     }
+    }
+   }
+  }
+ }
+}

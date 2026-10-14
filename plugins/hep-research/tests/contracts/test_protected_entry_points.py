@@ -252,13 +252,13 @@ class ProtectedEntryPointTests(unittest.TestCase):
     def test_revoked_input_is_refused(self):
         sha = hashlib.sha256(self.env.art.read_bytes()).hexdigest()
         self.pp.revoke("artifact", sha256=sha)
-        for name, main, argv, _, formal in cli_entries(self.env):
+        for name, main, argv, _, _ in cli_entries(self.env):
             if str(self.env.art) not in argv:
                 continue
             with self.subTest(entry=name):
                 state, codes = outcome_cli(main, argv)
                 self.assertEqual(state, "refused")
-                self.assertIn("protected.formal_use_unavailable" if formal else "protected.input_revoked", codes)
+                self.assertIn("protected.input_revoked", codes)  # before formal use is even considered
         from contracts import dependencies
         rep = dependencies.validate_dependencies(self.env.art, self.env.proj)
         self.assertIn("protected.input_revoked", codes_of(rep))

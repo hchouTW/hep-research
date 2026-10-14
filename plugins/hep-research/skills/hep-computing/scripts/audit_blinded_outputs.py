@@ -25,7 +25,8 @@ Two steps, so the blinded numbers never sit inside the audited outputs:
          --strict (publication): an incomplete scan fails, every exemption needs a reason, and with --outputs (a JSON
          list of the files to publish) every listed output needs a scan record or an exemption.
 Exit codes: 0 pass (every output read, no leak found), 1 leak found or strict failure, 2 usage or input error,
-3 incomplete (no leak found, but not every output was read). A clean scan is not an authorization to unblind,
+3 incomplete (no leak found, but not every output was read), or protected use refused (then the JSON status is
+"refused", core/protected/guard.py). A clean scan is not an authorization to unblind,
 publish or share.
 """
 from __future__ import annotations
@@ -38,6 +39,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from core.blinding.blinding import NOT_SEALED, agent_view, scan_paths, seal  # noqa: E402
+from core.protected.guard import protected_main  # noqa: E402
 
 MAX_RTOL = 1e-6
 
@@ -64,6 +66,7 @@ def inside(path: Path, roots) -> bool:
     return any(p == r.resolve() or r.resolve() in p.parents for r in roots)
 
 
+@protected_main("audit_blinded_outputs")
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)

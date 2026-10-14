@@ -32,7 +32,8 @@
         "additionalProperties": false, "properties": {
         "revocation_log": {"type": "string", "minLength": 1}, "revocation_head": {"type": "string", "minLength": 1},
         "status_source": {"type": "string", "minLength": 1}, "max_status_age_s": {"type": "integer", "minimum": 1},
-        "qualification_record": {"type": "string", "minLength": 1}}}}},
+        "qualification_record": {"type": "string", "minLength": 1},
+        "nonce_ledger": {"$comment": "task P5.1: the custodian's record of permit uses (JSON Lines {nonce, permit_id, time}); needed for formal use", "type": "string", "minLength": 1}}}}},
   "private_evidence": {"type": "array", "items": {"type": "string"}},
   "overrides": {"type": "array", "items": {"type": "object", "required": ["target", "value", "provenance"], "properties": {
      "target": {"type": "string"}, "provenance": {"type": "string", "minLength": 1}, "variant_of": {"type": "string"}}}},

@@ -1,0 +1,215 @@
+{
+ "contract_version": "1.0.0",
+ "tool_id": "audit-blinded-outputs",
+ "entry": "skills/hep-computing/scripts/audit_blinded_outputs.py",
+ "operations": [
+  {
+   "operation_id": "seal",
+   "summary": "Write the numbers no output may contain (core.blinding.seal) with the scan tolerance and the unsealed quantities; prints only where it wrote them. With real data only the custodian or a person outside the session seals",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--hist",
+      "input": "hist"
+     },
+     {
+      "flag": "--low",
+      "input": "low"
+     },
+     {
+      "flag": "--high",
+      "input": "high"
+     },
+     {
+      "flag": "--reference",
+      "input": "reference"
+     },
+     {
+      "flag": "--out",
+      "input": "out"
+     },
+     {
+      "flag": "--rtol",
+      "input": "rtol"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "hist",
+     "kind": "histogram",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "JSON {edges, values}; finite, edges strictly increasing"
+    },
+    {
+     "name": "low",
+     "kind": "variable_value",
+     "unit": "{V}",
+     "required": true,
+     "constraint": "lower bound of the blinded region"
+    },
+    {
+     "name": "high",
+     "kind": "variable_value",
+     "unit": "{V}",
+     "required": true,
+     "constraint": "upper bound, > low"
+    },
+    {
+     "name": "reference",
+     "kind": "histogram",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "repeatable; same binning"
+    },
+    {
+     "name": "out",
+     "kind": "path",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "the sealed file, outside every audited output"
+    },
+    {
+     "name": "rtol",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "relative tolerance in (0, 1e-6]",
+     "default": 1e-09
+    }
+   ],
+   "outputs": [
+    {
+     "name": "sealed_file",
+     "kind": "path",
+     "unit": "n/a"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "usage or input error (edges, region, tolerance)"
+    },
+    {
+     "exit_code": 3,
+     "status": "incomplete",
+     "meaning": "protected use refused (status 'refused', core/protected/guard.py): the protected inputs could not be established"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": true,
+    "network": false,
+    "subprocess": false
+   }
+  },
+  {
+   "operation_id": "scan",
+   "summary": "Scan output files and directories (positional paths) for sealed values; prints a fixed status (pass, fail, incomplete) and the unreadable files, never a value, token, location or count; details only to --report for the custodian",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--sealed",
+      "input": "sealed"
+     },
+     {
+      "flag": "--report",
+      "input": "report"
+     },
+     {
+      "flag": "--strict",
+      "input": "strict"
+     },
+     {
+      "flag": "--exempt",
+      "input": "exempt"
+     },
+     {
+      "flag": "--outputs",
+      "input": "outputs"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "sealed",
+     "kind": "sealed-values",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "a sealed file from seal (custodian-held with real data)"
+    },
+    {
+     "name": "report",
+     "kind": "path",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "detailed report for the custodian or a person outside the session"
+    },
+    {
+     "name": "strict",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "publication mode: incomplete scans fail",
+     "default": false
+    },
+    {
+     "name": "exempt",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "repeatable PATH=REASON for outputs checked another way"
+    },
+    {
+     "name": "outputs",
+     "kind": "path",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "strict mode: JSON list of every output to publish"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "scan-status",
+     "unit": "n/a"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "a sealed value was found, or a strict-mode failure"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "usage or input error"
+    },
+    {
+     "exit_code": 3,
+     "status": "incomplete",
+     "meaning": "no leak found but not every output was read, or protected use refused (status 'refused')"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": true,
+    "network": false,
+    "subprocess": false
+   }
+  }
+ ]
+}

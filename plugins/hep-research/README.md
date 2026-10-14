@@ -188,8 +188,9 @@ anything, every formal-use entry point checks the revocation log, its head and t
 authoritative copy of the policy names (schema 1.2.0, `protected_inputs`), and refuses with exit 3 and
 `"status": "refused"` when they are missing, stale, altered or writable by the session's account, or when an input is
 revoked. `python3 "<plugin root>/contracts/protected_use.py" status <project-dir>` shows the state. These checks run
-in the agent's own process, so they are advisory too: they authorize nothing, and formal use stays refused until
-formal-use permits exist.
+in the agent's own process, so they are advisory too: they authorize nothing. Formal use (publication) also needs a
+formal-use permit issued by the custodian (`--permit`, `contracts/permit.py`), bound to the analysis-level bundle and
+to an attestation whose review covers the use.
 
 ### Companion plugins
 

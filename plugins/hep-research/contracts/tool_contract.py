@@ -14,7 +14,7 @@ input to one option; a default only on an optional input; exit codes unique with
 capability known to this reader (contracts.KNOWN_CAPABILITIES); every caller-bound unit symbol ({X}) in an output unit
 appears in an input unit; every listed operator is in a shipped operator-semantics table (contracts/semantics/tables/);
 with the help check, the tool's usage line lists exactly the declared options, the required
-ones outside brackets.
+ones outside brackets; for a tool with subcommands each operation_id is a subcommand and its own usage line is compared.
 Output: JSON {"status": "pass"|"fail", "contracts": [...], "scope": {...} or null, "note"}. Exit 0 pass, 1 fail,
 2 unreadable input. A passing contract states what the tool does; it authorizes nothing (HC-05), and checking it does
 not test the tool's numbers.
@@ -70,9 +70,16 @@ def usage_flags(help_text: str) -> dict[str, bool] | None:
     return flags
 
 
-def run_help(entry: Path) -> tuple[str | None, str]:
+def subcommands(help_text: str) -> set[str]:
+    """The subcommand choices '{a,b,...}' of an argparse usage line (empty when there are none)."""
+    first = help_text.splitlines()[0] if help_text else ""
+    m = re.search(r"\{([a-z0-9_,-]+)\}", first)
+    return set(m.group(1).split(",")) if m else set()
+
+
+def run_help(entry: Path, *sub: str) -> tuple[str | None, str]:
     try:
-        p = subprocess.run([sys.executable, "-I", "-B", str(entry), "--help"], capture_output=True, text=True,
+        p = subprocess.run([sys.executable, "-I", "-B", str(entry), *sub, "--help"], capture_output=True, text=True,
                            timeout=HELP_TIMEOUT_S, cwd=str(entry.parent))
     except (OSError, subprocess.TimeoutExpired) as exc:
         return None, f"--help did not run: {exc}"
@@ -154,17 +161,25 @@ def check(contract, root: Path = PLUGIN_ROOT, help_check: bool = True, operators
         ops = [o["operation_id"] for o in contract["operations"]]
         if len(set(ops)) != len(ops):
             rep.add("error", "operations", "tool.duplicate_operation", "an operation id is declared twice")
-        help_flags = None
+        per_op: dict[str, dict[str, bool] | None] = {o: None for o in ops}
         if help_check:
-            if len(contract["operations"]) != 1:
-                rep.add("error", "operations", "tool.help_unchecked", "a tool with several operations needs a per-operation help check")
+            text, why = run_help(entry)
+            subs = subcommands(text or "")
+            if subs and set(ops) <= subs:  # a tool with subcommands: each operation is one, checked on its own help
+                for op_id in ops:
+                    sub_text, sub_why = run_help(entry, op_id)
+                    per_op[op_id] = usage_flags(sub_text) if sub_text is not None else None
+                    if per_op[op_id] is None:
+                        rep.add("error", f"operations[{op_id}]", "tool.help_unchecked", sub_why or "no usage line")
+            elif len(contract["operations"]) != 1:
+                rep.add("error", "operations", "tool.help_unchecked",
+                        "several operations need subcommands named by their operation ids (per-operation help check)")
             else:
-                text, why = run_help(entry)
-                help_flags = usage_flags(text) if text is not None else None
-                if help_flags is None:
+                per_op[ops[0]] = usage_flags(text) if text is not None else None
+                if per_op[ops[0]] is None:
                     rep.add("error", "entry", "tool.help_unchecked", why or "no argparse usage line in --help")
         for k, op in enumerate(contract["operations"]):
-            check_operation(op, f"operations[{k}]", rep, help_flags, operators)
+            check_operation(op, f"operations[{k}]", rep, per_op.get(op["operation_id"]), operators)
     tool = contract.get("tool_id") if isinstance(contract, dict) else None
     return {"tool_id": tool, "status": "pass" if rep.ok else "fail", "findings": [f.as_dict() for f in rep.findings]}
 

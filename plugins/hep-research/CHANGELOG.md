@@ -3,6 +3,48 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+Contracts 2.7.0 (unchanged).
+
+- **`--strict-versions` (validate.py, dependencies.py).** The stricter version policy alone (a newer minor contract
+  version is an error, for the artifact and every source), which `--protected` meant before 0.8.0. It does not switch
+  protected mode on, so it needs no protected inputs and is never refused for their absence. `--protected` keeps its
+  0.8.0 meaning (protected mode); the library parameter is `strict_versions=`. Tests in
+  `tests/contracts/test_strict_versions.py`.
+- **Formal-use permits, analysis-level bundles and the recipe-use review (tasks P5.1-P5.3; C15, C08).** New
+  `contracts/analysis_bundle.py` (`analysis_bundle.json`): one digest over the measurement spec, recipes, semantics
+  tables, calibrations, tool contracts, environment lock, reviews and the plugin release; `verify` reports each change;
+  an attestation may take it as its subject. New `contracts/permit.py` (`permit.json`): a custodian-issued permit, read
+  only as a protected input, binding the bundle and the digests of the inputs, one purpose, an actor, a nonce counted
+  in the custodian's nonce ledger (`agent_policy.protected_inputs.nonce_ledger`), a validity window and the
+  attestation whose review must accept the recipe for the required roles and cover the use (`permit.*` codes;
+  revocation kind `permit`). Formal use in protected mode now runs with a valid permit (`hepdata_export.py --permit`,
+  `build_tables(..., permit=)`) and stays refused without one; the core guard takes the check as `formal_check`.
+- **Input-blinding transforms, release preparation and residual checks (task P4; C02).** New
+  `core/blinding/transforms.py` for the modes `binned-mask`, `event-removal`, `common-offset` (continuous quantities
+  only) and `common-scale` (no per-event weights): released data, sealed values and the `protected`/`retained` lists,
+  with keys as inputs only and input uncertainties masked or withheld. New `core/blinding/residual.py`
+  (`residual_checks`: codes such as `offset.boundary`, `scale.quantization`, `removal.totals_elsewhere`) and the
+  counterexample suite `tests/core/test_blinding_residual.py`; `core/blinding/README.md` states what each mode does not
+  protect. New `contracts/release_prepare.py`: the release directory, the sealed file outside it and a draft manifest
+  that passes `release_manifest.py` with every custodian option.
+- **Tool contracts and scopes (task P5.4).** Contracts for `release_prepare.py`, `mask_blinded_bins.py` and
+  `audit_blinded_outputs.py` (per-subcommand operations: `tool_contract.py` now compares each subcommand's own usage
+  line); scopes `contracts/tool_scopes/{fixed-execution,validation}.json` checked in CI.
+- **Rules settled in the release-B review.** A formal-use permit must cover every input file, directories expanded
+  (links refused), and a use with no input file is refused; an S3-execution permit binds the frozen execution bundle
+  that runs; every recipe in the analysis bundle must be the attested one; a relative attestation path is read from
+  the project. Release preparation builds and checks everything before writing, creates files exclusively (the sealed
+  file owner-only, 0600), compares resolved paths, and refuses an existing sealed file, a `release_id` with path
+  characters and a manifest over the sealed file. The scan budget is charged by the service's recount of the received
+  bytes (never less than the submission states) and stays exhausted once refused. Residual checks recognize identifier
+  fields by name tokens (camelCase included), scaled counts up to 10^5 at float precision, and integer residues at
+  large values. Bad bundle refs and duplicate JSON keys are refusals.
+- **Scan-service interface (task P6.1).** New `contracts/scan_verdict.py` (`scan_submission.json`,
+  `scan_verdict.json`): a closed agent-visible verdict (status and budget state only) and a per-analysis budget
+  counted in candidate values tested, charged for every submission.
+
 ## 0.8.0 (2026-10-14)
 
 Contracts 2.7.0 (minor: the capability IDs `core:revocation-log`, `core:exposure-record`, `core:decision-lineage` and

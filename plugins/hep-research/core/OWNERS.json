@@ -37,7 +37,9 @@
    "status": "implemented-M3",
    "purpose": "Masking of blinded values in outputs, logs, caches",
    "files": [
-    "blinding"
+    "blinding",
+    "residual",
+    "transforms"
    ],
    "consumers": [
     "skills/hep-computing/scripts/audit_blinded_outputs.py",
