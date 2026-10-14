@@ -80,24 +80,30 @@ class J9MlToInferenceTests(unittest.TestCase):
         because it records the installed NumPy, not a result."""
         skip = {"sha256", "plugin_release", "digest", "framework"}
 
+        bad: list = []
+
         def close(a, b, path):
             if isinstance(a, dict) and isinstance(b, dict):
-                self.assertEqual(set(a), set(b), path)
-                for k in a:
+                if set(a) != set(b):
+                    bad.append((path, sorted(set(a) ^ set(b))))
+                for k in set(a) & set(b):
                     if k not in skip:
                         close(a[k], b[k], f"{path}.{k}")
             elif isinstance(a, list) and isinstance(b, list):
-                self.assertEqual(len(a), len(b), path)
+                if len(a) != len(b):
+                    bad.append((path, len(a), len(b)))
                 for i, (x, y) in enumerate(zip(a, b)):
                     close(x, y, f"{path}[{i}]")
             elif isinstance(a, float) or isinstance(b, float):
-                self.assertTrue(abs(a - b) <= 1e-9 * max(abs(a), abs(b), 1e-300), (path, a, b))
-            else:
-                self.assertEqual(a, b, path)
+                if not abs(a - b) <= 1e-9 * max(abs(a), abs(b), 1e-300):
+                    bad.append((path, a, b))
+            elif a != b:
+                bad.append((path, a, b))
 
         committed = SCRIPT.parent / "output" / "artifacts"
         close(json.loads((committed / "ml_artifact.json").read_text()), self.ml, "ml_artifact")
         close(json.loads((committed / "statistical_result.json").read_text()), self.stat, "statistical_result")
+        self.assertEqual(bad, [], f"{len(bad)} differences (committed, rerun): {bad[:15]}")
 
     def test_artifacts_validate(self):
         from contracts.validate import validate_artifact

@@ -39,7 +39,8 @@ import io, json, sys, unittest
 suite = unittest.TestLoader().loadTestsFromName(sys.argv[1])
 res = unittest.TextTestRunner(stream=io.StringIO(), verbosity=2).run(suite)
 print(json.dumps({"run": res.testsRun, "failures": len(res.failures), "errors": len(res.errors), "skipped": len(res.skipped),
-                  "failed": [str(t) for t, _ in res.failures + res.errors], "skipped_list": [f"{t}: {r}" for t, r in res.skipped]}))
+                  "failed": [str(t) for t, _ in res.failures + res.errors], "skipped_list": [f"{t}: {r}" for t, r in res.skipped],
+                  "messages": {str(t): tb[-800:] for t, tb in res.failures + res.errors}}))
 """
 
 
@@ -112,7 +113,7 @@ def run_module(module: str, timeout: float) -> dict:
     counts = {k: r[k] for k in ("run", "failures", "errors", "skipped")}
     ok = not r["failures"] and not r["errors"]
     return {"module": module, "status": "pass" if ok else "fail", "seconds": seconds, "counts": counts,
-            "failed": r["failed"], "skipped": r["skipped_list"]}
+            "failed": r["failed"], "skipped": r["skipped_list"], "messages": r.get("messages") or {}}
 
 
 def run_unittests(timeout: float = MODULE_TIMEOUT, jobs: int = 1, shard: tuple[int, int] | None = None) -> dict:
@@ -133,6 +134,7 @@ def run_unittests(timeout: float = MODULE_TIMEOUT, jobs: int = 1, shard: tuple[i
             "module_timeout_seconds": timeout, "shard": f"{shard[0]}/{shard[1]}" if shard else None,
             "failed": [f for r in rows for f in r["failed"]] + [f"{r['module']}: {r['reason']}" for r in broken],
             "skipped": [s for r in rows for s in r["skipped"]],
+            "messages": {t: m for r in rows for t, m in (r.get("messages") or {}).items()},  # traceback tails of failures
             "slow_modules": [{"module": r["module"], "seconds": r["seconds"]} for r in slow],
             "modules": [{k: r.get(k) for k in ("module", "status", "seconds", "counts", "reason")} for r in rows]}
 
