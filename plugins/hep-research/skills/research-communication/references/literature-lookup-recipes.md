@@ -24,7 +24,7 @@ Source: [INSPIRE REST API documentation](https://github.com/inspirehep/rest-api-
 ```bash
 curl -s 'https://inspirehep.net/api/literature?q=arxiv:1007.1727&fields=titles,dois,arxiv_eprints,texkeys,control_number'
 curl -s 'https://inspirehep.net/api/literature?q=texkey%20Cowan:2010js&fields=titles,control_number'
-curl -s 'https://inspirehep.net/api/literature?q=collaboration:ATLAS&sort=mostrecent&size=5&fields=titles,dois,arxiv_eprints'
+curl -s 'https://inspirehep.net/api/literature?q=collaboration:NAME&sort=mostrecent&size=5&fields=titles,dois,arxiv_eprints'
 curl -s 'https://inspirehep.net/api/literature?q=refersto:recid:860907&size=1&fields=control_number'   # citing papers
 curl -s 'https://inspirehep.net/api/literature/860907?format=bibtex'
 ```

@@ -10,7 +10,7 @@ implies endorsement by any collaboration (SKILL.md invariant).
 | Stage | Typical form | Citable outside the collaboration? | Status label of its numbers |
 |---|---|---|---|
 | Internal note | analysis note, internal wiki or meeting slides | no; never quoted or shown outside | internal, not a result |
-| Approved preliminary | conference note (for example ATLAS CONF note, CMS PAS, or the collaboration's equivalent) and approved plots | yes, as the note, with its identifier | `preliminary` |
+| Approved preliminary | conference note (a CONF note, a physics analysis summary or the collaboration's equivalent) and approved plots | yes, as the note, with its identifier | `preliminary` |
 | Paper | journal article with arXiv preprint (where the collaboration posts one) | yes; supersedes the preliminary result | published (`observed` for measured data) |
 | Proceedings | conference proceedings summarising approved results | yes, but cite the paper or note it reports for the numbers | as the result it reports |
 

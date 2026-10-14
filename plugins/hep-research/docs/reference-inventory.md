@@ -257,12 +257,12 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `mermaid-patterns.md` | research-communication | 4.5 | no | 2 | - | ecc929c 2026-10-14 |
 | `multi-venue-reformatting.md` | research-communication | 3.0 | no | 1 | - | ecc929c 2026-10-14 |
 | `outreach-and-public-facing-summaries.md` | research-communication | 4.2 | no | 5 | - | ecc929c 2026-10-14 |
-| `paper-genre-variants.md` | research-communication | 5.2 | no | 3 | - | ecc929c 2026-10-14 |
+| `paper-genre-variants.md` | research-communication | 5.2 | no | 3 | - | 589ebf4 2026-10-14 |
 | `paper-structure.md` | research-communication | 11.1 | no | 9 | - | ecc929c 2026-10-14 |
 | `physics-plots.md` | research-communication | 6.2 | no | 5 | - | e8e8b9f 2026-10-14 |
 | `plagiarism-and-text-reuse-checking.md` | research-communication | 3.0 | no | 2 | - | ecc929c 2026-10-14 |
 | `plantuml-patterns.md` | research-communication | 3.6 | no | 1 | - | ecc929c 2026-10-14 |
-| `poster-and-talk-design.md` | research-communication | 6.2 | no | 4 | - | ecc929c 2026-10-14 |
+| `poster-and-talk-design.md` | research-communication | 6.2 | no | 4 | - | 462a6d1 2026-10-14 |
 | `preprint-to-journal-reconciliation.md` | research-communication | 2.9 | no | 3 | - | ecc929c 2026-10-14 |
 | `preregistration-and-registered-reports.md` | research-communication | 3.5 | no | 1 | - | ecc929c 2026-10-14 |
 | `primary-sources-and-version-checks.md` | research-communication | 12.5 | yes | 10 | detector-response, hep-analysis | ecc929c 2026-10-14 |

@@ -58,13 +58,16 @@ A figure that drops the label of a non-published result misstates its status, wh
 
 - **Flux spectra.** Against rigidity R, the flux in m⁻² sr⁻¹ s⁻¹ GV⁻¹ is usually multiplied by R^2.7 so that the
   spectrum is nearly flat (axis unit then m⁻² sr⁻¹ s⁻¹ GV^1.7); against kinetic energy per nucleon, Φ × E_K^2.7.
-  State the power in the axis label. (Convention seen in AMS PRL 126, 041104 (2021), INSPIRE 1844651, full text
-  opened 2026-10-14.) Converting between rigidity and kinetic energy per nucleon needs a mass-to-charge (isotope)
+  State the power in the axis label.
+<!-- example: experiment-specific illustration -->
+  (Convention seen in AMS PRL 126, 041104 (2021), INSPIRE 1844651, full text opened 2026-10-14.)
+<!-- /example -->
+  Converting between rigidity and kinetic energy per nucleon needs a mass-to-charge (isotope)
   assumption: hand the conversion to hep-theory and state the assumption in the caption.
 - **Bin positions.** In wide bins of a steeply falling spectrum, place each point at the abscissa where the spectrum
   takes its bin-average value (Lafferty and Wyatt, Nucl. Instrum. Meth. A 355 (1995) 541,
   doi:10.1016/0168-9002(94)01112-5, INSPIRE `Lafferty:1994cj`), for an assumed spectral shape that the caption names
-  (the AMS paper above uses a flux ∝ R^-2.7). The calculation belongs with the analysis, not the plot.
+  (for example a flux ∝ R^-2.7). The calculation belongs with the analysis, not the plot.
 - **Ratios** (p̄/p, B/C, isotope ratios): plotted unmultiplied, on a linear or log axis chosen for the range, with the
   numerator and denominator binning stated when they differ.
 - **Time-resolved fluxes**: time axis in the unit the data use (Bartels rotations of 27 days, months), with the

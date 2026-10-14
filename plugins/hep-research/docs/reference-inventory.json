@@ -35,7 +35,7 @@
   },
   "research-communication": {
    "references": 56,
-   "bytes": 395082,
+   "bytes": 395141,
    "uncited": 0
   }
  },
@@ -2713,7 +2713,7 @@
   {
    "path": "skills/research-communication/references/collaboration-results-lifecycle.md",
    "owner": "research-communication",
-   "bytes": 3500,
+   "bytes": 3502,
    "lines": 57,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -2999,7 +2999,7 @@
   {
    "path": "skills/research-communication/references/literature-lookup-recipes.md",
    "owner": "research-communication",
-   "bytes": 4451,
+   "bytes": 4450,
    "lines": 80,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -3112,7 +3112,7 @@
     "skills/research-communication/references/thesis-by-publication-assembly.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ecc929c 2026-10-14"
+   "last_commit": "589ebf4 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/paper-structure.md",
@@ -3137,8 +3137,8 @@
   {
    "path": "skills/research-communication/references/physics-plots.md",
    "owner": "research-communication",
-   "bytes": 6190,
-   "lines": 87,
+   "bytes": 6248,
+   "lines": 90,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -3188,7 +3188,7 @@
     "skills/research-communication/references/legends-panels-and-export.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ecc929c 2026-10-14"
+   "last_commit": "462a6d1 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/preprint-to-journal-reconciliation.md",
