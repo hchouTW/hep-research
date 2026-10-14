@@ -1315,12 +1315,38 @@ DAMPE Sci. Adv. 5 (2019) eaax3793; ECSS-E-ST-10-04C annex B.8 (SPENVIS); R. Nolt
 PoS(ICRC2019)231; WHISP summary PoS(ICRC2021)473; LHAASO arXiv:2505.14447; arXiv:1703.06298; SIDC and the Royal
 Observatory of Belgium (cycle 25).
 
-**Not verified here (text left unchanged, appendix rows deferred):** AB-A10, A11, A12, A19, A29 (books beyond PDG),
-A32, A36, A38; AB-F3 (radiation damage), F10 (compensation, f_em, containment depth), F13 (SiPM/APD), F15, F23;
-C-E8 (prescale rewrite), C-E14 (Geant4 cuts), C-E15 table, C-Sec2, C-U4; D-F4 (IGRF dipole epoch), D-F5 (Heitler
-splitting length), D-F8, D-F13 image parameters, D-F14, D-F18, D-F22, D-N3, D-N4. The appendix's dE/dx resolution
-formula gave the sample length in m; PDG eq. 35.17 implies cm (applied as cm). `frontend_response.py` has no tool
-contract (needs a per-operation help check).
+**Not verified here (text left unchanged, appendix rows deferred):** AB-A29 (books beyond PDG), A32, A38; AB-F23;
+the AB-F10 `f_em` power law and 95% longitudinal-containment rule; the rest of the C-E15 mode table; D-F5 (Heitler
+splitting length), D-F8, D-F18. The appendix's dE/dx resolution formula gave the sample length in m; PDG eq. 35.17
+implies cm (applied as cm). Rows done in the follow-up below are no longer listed here.
+
+**Gaisser-Hillas acceptance value:** the work order called 6271594.24 (case `--n-max 1 --x-max 5e6 --x0 -60 --lambda-param 2e5`)
+the "FWHM"; it is the falling half-maximum depth. The FWHM for that case is 2358463.01; the script reports both edges
+and the FWHM correctly, only the order's label was wrong.
+
+### DETECTOR-RESPONSE follow-ups to the 0.10.0 check (2026-10-15, E2, branch `fix/dr-followups` from `41871d1`)
+
+| Item | After | Evidence |
+|---|---|---|
+| F-DR1 front-end tool contract | `contracts/tool_contracts/frontend_response.json`, ten operations (one per subcommand) checked against each subcommand's help; the tool's top-level usage is one line so the first-line subcommand reader sees all ten | `tests/contracts/test_tool_contract.py` `FrontendResponseContractTests` (4 tests; fail on `41871d1`) |
+| F-DR2 AB-F2, AB-F18, AB-F22 tail | noble-liquid W values, pulse shape, VUV and TPB (PDG RPP 2025 sec. 36); Gluckstern validity N >= 10, N = 3 coefficient 9.8, projected L, X0 as a length (PDG sec. 35.12, arithmetic); `(heuristic)` | reference text; `tools/reference_inventory.py --check` |
+| F-DR3 D-F15 remainder | muon detectors, radio detection (PDG sec. 36.3.3), wide-field gamma-ray arrays (HAWC arXiv:1701.01778, LHAASO-KM2A arXiv:2010.06205, in an example block) in `ground-based-detection-arrays.md` | reference text; `tools/check_layering.py` |
+| F-DR4 C-U4 | one `Check:` line per section in the triggers, physics-objects and event-reconstruction references | reference text |
+| F-DR5 deferred rows | done: AB-A10, A11, A12, A19, A36, AB-F3, F13 (with N9), F15, C-E8, C-E14, C-Sec2, D-F13, D-F14, D-F22, D-N3, D-N4; partly: AB-F10, C-E15; still deferred: AB-F23 (PDG gives the silicon rise only as a figure) | sources per row in the task folder's FOLLOWUP-0.10.0.md |
+| F-DR6 NV-1 | the scattering term's `beta` power (first power) agrees with PDG RPP 2025 eq. 35.70; stated in `tracking-and-vertexing.md` | reference text |
+| F-DR7 IGRF dipole | `geomagnetic_cutoff.py` default 8.05e25 G cm^3 unchanged: it is the IGRF-14 1955 dipole (8.0507e25 from the degree-1 coefficients) and gives C = 59.6 GV; the 2025 dipole is 7.69e25 (4.5% lower cutoffs); one docstring statement, both scripts' help name the epoch | `tests/skills/hep_analysis/test_astroparticle.py` `GeomagneticDipoleDefaultTests` (docstring test fails on `41871d1`) |
+
+Sources opened on 2026-10-15: PDG RPP 2025 reviews 34 (Passage of particles, rev. Aug. 2023), 35 (Particle detectors at
+accelerators, rev. 2025) and 36 (Non-accelerator detectors, rev. Oct. 2025) as PDF from pdg.lbl.gov/2025/reviews/; NIST
+PSTAR page; Geant4 Book for Application Developers ("Production Threshold versus Tracking Cut", "Physics Processes:
+Production Cuts") and Physics Reference Manual ("Mean Energy Loss"); IGRF-14 coefficients
+(ngdc.noaa.gov/IAGA/vmod/coeffs/igrf14coeffs.txt); arXiv 0901.2882, 1902.08960, 1809.04346, 1102.0132, 0901.4118,
+2212.09379, 1403.2286, 1511.00463, 2110.15051, 2111.10299, 1604.03637, 1701.01778, 2010.06205; INSPIRE record of Riegler,
+NIM A535 (2004) 287; LST collaboration news of 2026-06-13 and IAC news of 2025-07-11. Tests run on the branch:
+`tests.contracts.test_tool_contract` (30), `tests/skills/detector_response` (200), `tests/skills/hep_analysis` (235),
+`tests/tools` (80), `tests.skills.test_cli_robustness`, `tests.skills.test_skill_resources`, AMS-02 profile (239): all
+pass; `check_routing_static`, `check_ownership`, `check_layering`, `measure_entrypoints`, `reference_inventory --check`,
+`build_stanzas --check`: pass. The full gate is run at integration.
 
 ## RC-AUDIT-2 (2026-10-14, E2: Python 3.13.2; version 0.9.0 + unreleased, contracts 2.8.0)
 
