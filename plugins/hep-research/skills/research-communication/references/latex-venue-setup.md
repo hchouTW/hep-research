@@ -23,7 +23,11 @@ multi-file structuring, encoding) — this file is venue-specific setup only.
 
 ## Quick reference
 
-The single home for venue facts in this skill; other references point here. Sources
+The home for class files and length limits. Other venue facts have their own homes, which state the venue's rule
+with its source: AI-use disclosure (`submission-and-peer-review.md`), correction labels
+(`erratum-and-corrigendum-drafting.md`), Comment and Reply limits (`comment-and-reply-exchange.md`, mirrored in the
+table below), figure fonts, resolution and widths (`physics-plots.md`, `diagram-figure-style.md`), abstract limits
+(`paper-structure.md`). Sources
 and per-row dates are in [Venue rules: sources and last-verified dates](#venue-rules-sources-and-last-verified-dates);
 a row older than a year, or for a different conference year, is re-checked before it
 is quoted as a hard limit.
