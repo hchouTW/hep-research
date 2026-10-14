@@ -99,9 +99,9 @@ references point here.
 | No excess | "No significant excess over the expected background is observed"; quote the largest local (and global) deviation | "no signal exists", "the model is excluded" (unless a limit says so) |
 | Observed vs. expected limit | both, with the expected median and its ±1σ and ±2σ bands; say which is stronger and by how much | an observed limit alone, or bands without saying they are the expected ones |
 | Confidence level | "95% CL upper limit" with the construction named (CLs, Feldman-Cousins, profile likelihood; asymptotic or toys) | "95% limit" with no level type or construction |
-| CLs | "CLs upper limit"; CLs is conservative by construction (it over-covers), so it is not a coverage statement | "excluded at 95% confidence" as if CLs were a frequentist coverage |
+| CLs | "CLs upper limit"; CLs is conservative by construction (it over-covers), so it is not a coverage statement (Junk 1999; Read 2002; see hep-statistics [Frequentist inference](../../hep-statistics/references/statistical-inference-for-physics.md#frequentist-inference)) | "excluded at 95% confidence" as if CLs were a frequentist coverage |
 | Bayesian | "95% credible upper limit" with the prior named | "confidence" for a credible interval |
-| One- vs. two-sided | state which; an upper limit is one-sided, a central interval two-sided; a switch decided from the data (flip-flopping) is named or avoided (Feldman-Cousins) | an interval without its sidedness |
+| One- vs. two-sided | state which; an upper limit is one-sided, a central interval two-sided; a switch decided from the data (flip-flopping) is named or avoided (Feldman-Cousins; Feldman & Cousins 1998, in the same hep-statistics reference) | an interval without its sidedness |
 | Significance of an excess | local and global, the look-elsewhere (trials) method named (Significance language above) | a bare "3σ" for a scan |
 | Parameter excluded | "values above X are excluded at 95% CL (CLs)", for the stated model and assumptions | "X is ruled out" without CL, model or assumptions |
 
