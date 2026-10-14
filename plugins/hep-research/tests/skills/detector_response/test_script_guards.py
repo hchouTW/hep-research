@@ -87,14 +87,25 @@ class PidChargeAndValidityTests(unittest.TestCase):
         self.assertFalse(payload['ceiling_is_lower_bound'])
 
     def test_scan_limit_is_flagged_as_a_lower_bound(self):
+        # p/He3 in argon (z^2 = 4 apart) stays separated up to the 1000 GeV/c scan limit, so the end
+        # of separation is only a lower bound. (e/pi was used before; electrons are outside the heavy-particle
+        # Bethe formula since the detector-response audit, E-P1.)
         payload = run_json(self, 'pid_separation_power.py', '--mode', 'dedx',
-                           '--species', 'e', 'pi', '--momentum', '0.5', '--material', 'argon')
-        # e/pi in argon stays separated up to the 1000 GeV/c scan limit, so the end of
-        # separation is only a lower bound. (It also dips below 3 sigma near 0.15 GeV/c,
-        # where the pion leaves the 1/beta^2 region - the old code reported 1000 alone.)
+                           '--species', 'p', 'He3', '--momentum', '2', '--material', 'argon')
         self.assertTrue(payload['ceiling_is_lower_bound'])
         self.assertEqual(payload['highest_separated_gev'], payload['scan_range'][1])
-        self.assertTrue(any(low <= 0.15 <= high for low, high in payload['below_threshold_intervals']))
+        self.assertEqual(payload['below_threshold_intervals'], [])
+
+    def test_separation_can_dip_and_recover(self):
+        # mu/p in argon: below 3 sigma between about 1.08 and 2.21 GeV/c, separated again above, and lost for good
+        # above about 58 GeV/c - the old code reported only the first ceiling.
+        payload = run_json(self, 'pid_separation_power.py', '--mode', 'dedx',
+                           '--species', 'mu', 'p', '--momentum', '0.5', '--material', 'argon')
+        intervals = payload['below_threshold_intervals']
+        self.assertEqual(len(intervals), 2)
+        self.assertAlmostEqual(intervals[0][0], 1.0833, delta=1e-3)
+        self.assertAlmostEqual(intervals[0][1], 2.2107, delta=1e-3)
+        self.assertAlmostEqual(intervals[1][0], 58.141, delta=1e-2)
 
     def test_bethe_bloch_refuses_low_beta_gamma(self):
         # He4 at 0.05 GeV/c in xenon (beta*gamma = 0.013) used to give -676.6 MeV g^-1 cm^2.

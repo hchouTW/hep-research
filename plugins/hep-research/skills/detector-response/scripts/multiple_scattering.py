@@ -14,8 +14,16 @@ contributions to sigma(R)/R. See <plugin root>/skills/detector-response/referenc
 Usage notes / assumptions: standard library only. Rigidity/momentum in GV or GeV/c,
 field in tesla, lengths in metres, point resolution in micrometres. The Gluckstern
 term assumes equally spaced measuring layers and a uniform field over the lever arm;
-it is a design-level estimate, not a substitute for a full track fit. beta defaults to
-1 (relativistic); pass --beta for slow particles, where the scattering term grows.
+it is a design-level estimate, not a substitute for a full track fit. beta: with --mass
+or --species (name or mass:charge) it is derived from the rigidity at every R,
+beta(R) = zR / sqrt((zR)^2 + m^2), and the crossover and the MDR are solved with beta(R)
+(beta_source "derived"); --beta fixes one value for every rigidity (and is refused when it
+contradicts the mass); without either, beta = 1 (relativistic). The scattering term grows
+as 1/beta for slow particles.
+Measuring layers: layers with "measuring": true are the points of the curvature fit; the
+flag must be a boolean. With no layer flagged, every layer is used and a warning says so.
+MDR: the rigidity where the total sigma(R)/R reaches 1 (mdr_definition); the intrinsic-only
+value 1/k is reported as mdr_intrinsic_only_gv.
 
 Validity: the Highland formula is a fit valid for 1e-3 < x/X0 < 100 of total material;
 outside that range the output carries highland_validity.inside = false and a warning.
@@ -34,6 +42,7 @@ import argparse
 import json
 import math
 import sys
+from pathlib import Path
 
 STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
             'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
@@ -47,6 +56,9 @@ class JsonArgumentParser(argparse.ArgumentParser):
         self.print_usage(sys.stderr)
         self.exit(2, f'{self.prog}: error: {message}\n')
 
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from pid_separation_power import resolve_species  # noqa: E402
 
 # PDG Highland constant, in GeV; see <plugin root>/skills/research-communication/references/primary-sources-and-version-checks.md.
 HIGHLAND_MEV = 13.6
@@ -149,6 +161,54 @@ def resolution_at(rigidity_gv, ms_term, slope):
     return math.hypot(ms_term, slope * rigidity_gv)
 
 
+def beta_of_rigidity(rigidity_gv, mass_gev, charge=1):
+    """beta = zR / sqrt((zR)^2 + m^2) for rigidity R (GV), mass m (GeV/c^2) and charge number z."""
+    momentum = charge * _positive(rigidity_gv, 'rigidity')
+    return momentum / math.hypot(momentum, _positive(mass_gev, 'mass'))
+
+
+def _bisect_log(f, low, high, iterations=200):
+    """Root of f on [low, high] (f(low) and f(high) of opposite sign), bisected in log R."""
+    f_low = f(low)
+    for _ in range(iterations):
+        mid = math.sqrt(low * high)
+        if mid in (low, high):
+            break
+        f_mid = f(mid)
+        if (f_mid > 0) == (f_low > 0):
+            low, f_low = mid, f_mid
+        else:
+            high = mid
+    return math.sqrt(low * high)
+
+
+def crossover_with_beta(ms1, slope, beta_of, low=1e-6, high=1e9):
+    """Rigidity where ms1/beta(R) = k R; ms1/beta(R) - k R decreases monotonically in R."""
+    def f(rigidity):
+        return ms1 / beta_of(rigidity) - slope * rigidity
+    if f(low) <= 0 or f(high) >= 0:
+        return None
+    return _bisect_log(f, low, high)
+
+
+def mdr_with_beta(ms1, slope, beta_of, high=1e12):
+    """Upper rigidity where hypot(ms1/beta(R), k R) = 1; None when the resolution never gets below 1."""
+    if ms1 >= 1.0:
+        return None
+
+    def g(rigidity):
+        return math.hypot(ms1 / beta_of(rigidity), slope * rigidity) - 1.0
+    start = math.sqrt(1.0 - ms1 * ms1) / slope  # the beta = 1 value; beta(R) <= 1 puts the root at or below it
+    if g(start) < 0:
+        return _bisect_log(g, start, high) if g(high) > 0 else None
+    low = start
+    for _ in range(400):
+        low /= 2.0
+        if g(low) < 0:
+            return _bisect_log(g, low, start)
+    return None
+
+
 def load_stack(path):
     with open(path, encoding='utf-8') as handle:
         stack = json.load(handle)
@@ -167,6 +227,8 @@ def load_stack(path):
             raise ValueError(f'layer {index} x_over_x0 must be a number')
         if not math.isfinite(layer['x_over_x0']) or layer['x_over_x0'] < 0:
             raise ValueError(f'layer {index} x_over_x0 must be finite and nonnegative')
+        if 'measuring' in layer and not isinstance(layer['measuring'], bool):
+            raise ValueError(f'layer {index} measuring must be true or false, not {layer["measuring"]!r}')
     return stack
 
 
@@ -176,7 +238,9 @@ def highland_validity(x_over_x0):
     return {'range_x_over_x0': [low, high], 'inside': low <= x_over_x0 <= high}
 
 
-def summarize(stack, rigidity_gv, beta=1.0, charge=1):
+def summarize(stack, rigidity_gv, beta=1.0, charge=1, mass_gev=None, beta_source=None):
+    """Material budget, resolution terms, crossover and MDR. With mass_gev, beta is derived from the rigidity at
+    every R (beta argument ignored); otherwise beta is the same at every rigidity."""
     layers = stack['layers']
     try:
         total_budget = math.fsum(layer['x_over_x0'] for layer in layers)
@@ -185,13 +249,33 @@ def summarize(stack, rigidity_gv, beta=1.0, charge=1):
     measuring = [layer for layer in layers if layer.get('measuring', False)]
     n_points = len(measuring) if measuring else len(layers)
 
-    ms_term = scattering_resolution_term(
-        total_budget, stack['field_tesla'], stack['lever_arm_m'], beta)
+    if mass_gev is not None:
+        def beta_of(rigidity):
+            return beta_of_rigidity(rigidity, mass_gev, charge)
+        beta = beta_of(rigidity_gv)
+        beta_source = beta_source or 'derived from rigidity, charge and mass'
+    else:
+        beta = _validate_beta(beta)
+
+        def beta_of(rigidity):
+            return beta
+        beta_source = beta_source or ('fixed: assumed at every rigidity' if beta != 1.0
+                                      else 'default 1 (relativistic)')
+    ms1 = scattering_resolution_term(total_budget, stack['field_tesla'], stack['lever_arm_m'], 1.0)
+    ms_term = ms1 / beta
     slope = intrinsic_resolution_slope(
         stack['point_resolution_um'], n_points, stack['field_tesla'], stack['lever_arm_m'])
-    mdr = maximum_detectable_rigidity(ms_term, slope)
+    if mass_gev is None:
+        crossover = crossover_rigidity(ms_term, slope)
+        mdr = maximum_detectable_rigidity(ms_term, slope)
+    else:
+        crossover = crossover_with_beta(ms1, slope, beta_of)
+        mdr = mdr_with_beta(ms1, slope, beta_of)
     validity = highland_validity(total_budget)
     warnings = []
+    if not measuring:
+        warnings.append(f'no layer is marked measuring: all {len(layers)} layers, passive ones included, are used '
+                        'as measuring points')
     if not validity['inside']:
         warnings.append(
             f'total x/X0 = {total_budget:.4g} is outside the Highland range '
@@ -205,6 +289,8 @@ def summarize(stack, rigidity_gv, beta=1.0, charge=1):
         'total_x_over_x0': total_budget,
         'highland_validity': validity,
         'beta': beta,
+        'beta_source': beta_source,
+        'mass_gev': mass_gev,
         'charge_number': charge,
         'scattering_angle_rad': highland_angle(rigidity_gv, total_budget, beta, charge),
         'rigidity_gv': rigidity_gv,
@@ -212,8 +298,10 @@ def summarize(stack, rigidity_gv, beta=1.0, charge=1):
         'intrinsic_term': slope * rigidity_gv,
         'total_relative_resolution': resolution_at(rigidity_gv, ms_term, slope),
         'dominant_term': 'scattering' if ms_term > slope * rigidity_gv else 'intrinsic',
-        'crossover_rigidity_gv': crossover_rigidity(ms_term, slope),
+        'crossover_rigidity_gv': crossover,
         'maximum_detectable_rigidity_gv': mdr,
+        'mdr_definition': 'rigidity where the total sigma(R)/R reaches 1 (scattering and intrinsic terms)',
+        'mdr_intrinsic_only_gv': 1.0 / slope,
         'warnings': warnings,
     }
 
@@ -242,23 +330,41 @@ def main():
     parser.add_argument('stack', help='JSON stack description (see <plugin root>/skills/detector-response/assets/detector-stack.example.json)')
     parser.add_argument('--rigidity', type=float, default=100.0,
                         help='rigidity in GV at which to evaluate the resolution (default 100)')
-    parser.add_argument('--beta', type=float, default=1.0, help='particle beta (default 1)')
-    parser.add_argument('--charge', type=int, default=1, help='charge number z (default 1)')
+    parser.add_argument('--beta', type=float, default=None,
+                        help='particle beta, the same at every rigidity (default 1, or derived with --mass)')
+    parser.add_argument('--charge', type=int, default=None, help='charge number z (default 1)')
+    particle = parser.add_mutually_exclusive_group()
+    particle.add_argument('--mass', type=float, default=None,
+                          help='particle mass in GeV/c^2: beta is derived from the rigidity')
+    particle.add_argument('--species', default=None,
+                          help='a name (p, He4, ...) or mass:charge: sets the mass and the charge number')
     parser.add_argument('--status', choices=STATUSES, default=None,
                         help="status label of the inputs, echoed as status (default: the input file's status, "
                              'else unvalidated)')
     args = parser.parse_args()
     try:
         _positive(args.rigidity, 'rigidity')
-        _validate_beta(args.beta)
-        if args.charge < 1:
+        charge, mass = (1 if args.charge is None else args.charge), args.mass
+        if args.species is not None:
+            mass, species_charge = resolve_species(args.species)
+            if args.charge is not None and args.charge != species_charge:
+                raise ValueError(f'--charge {args.charge} contradicts the charge {species_charge} of --species')
+            charge = species_charge
+        if charge < 1:
             raise ValueError('charge must be a positive integer charge number')
+        beta = 1.0 if args.beta is None else _validate_beta(args.beta)
+        if mass is not None:
+            _positive(mass, 'mass')
+            derived = beta_of_rigidity(args.rigidity, mass, charge)
+            if args.beta is not None and abs(args.beta - derived) > 1e-6 * derived:
+                raise ValueError(f'--beta {args.beta:g} conflicts with beta {derived:.6g} from the rigidity, charge and '
+                                 'mass; give one or the other')
     except ValueError as exc:
         parser.error(str(exc))
     try:
         stack = load_stack(args.stack)
         status = _resolve_status(args.status, stack)
-        result = summarize(stack, args.rigidity, args.beta, args.charge)
+        result = summarize(stack, args.rigidity, beta, charge, mass_gev=mass)
     except (OSError, ValueError, TypeError, OverflowError, ZeroDivisionError) as exc:
         return _fail(str(exc))
     try:

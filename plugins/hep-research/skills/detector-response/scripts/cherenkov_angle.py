@@ -253,6 +253,9 @@ def main():
             momentum_a = momentum_b = momentum
         sigma_photon = _positive(args.single_photon_resolution,
                                  'single_photon_resolution') / 1000.0
+        # Validated here as well: with both species below threshold photon_yield never runs.
+        _positive(args.radiator_length, 'radiator_length')
+        _positive(args.figure_of_merit, 'figure_of_merit')
         if not math.isfinite(args.track_resolution) or args.track_resolution < 0:
             raise ValueError('track_resolution must be finite and nonnegative')
         common = (index, args.radiator_length, args.figure_of_merit, sigma_photon,
@@ -267,8 +270,13 @@ def main():
         convention, reference = 'delta_over_quadrature_sum_of_both_sigmas', None
     else:
         convention, reference = 'delta_over_sigma_of_species_a', args.species[0]
+    warnings = [f'species {label}: relative beta resolution {rec["relative_beta_resolution"]:.3g} exceeds 0.1; the '
+                'small-error propagation dbeta/beta = tan(theta_c) sigma_theta is not reliable there'
+                for label, rec in (('a', record_a), ('b', record_b))
+                if rec.get('relative_beta_resolution') is not None and rec['relative_beta_resolution'] > 0.1]
     payload = {
         'status': args.status,
+        'warnings': warnings,
         'refractive_index': index,
         'input_variable': 'rigidity' if args.rigidity is not None else 'momentum',
         'momentum_gev': None if args.rigidity is not None else momentum_a,

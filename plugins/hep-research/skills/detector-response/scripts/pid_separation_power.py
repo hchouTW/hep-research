@@ -26,7 +26,10 @@ of the reference species A (for tof, the common timing sigma); quadrature is
 sqrt(2) smaller when the widths are equal. State the convention when comparing.
 dE/dx: the charge enters as z^2. The Bethe-Bloch evaluation is refused below
 beta*gamma = 0.1 (shell corrections and charge exchange dominate; the formula can go
-negative there): validity is then "outside" and no n_sigma is given. It also omits the
+negative there) and for electrons and positrons (mass below 10 MeV/c^2), whose collision loss
+differs (identical particles, Moller and Bhabha scattering): validity is then "outside" and
+no n_sigma is given. Inputs outside plausible ranges (time resolution 1 ps - 10 ns, relative
+dE/dx resolution 0.01-0.5, relative beta resolution above 0.1) add a warning. It also omits the
 density-effect correction, which suppresses the relativistic rise, so numbers with either
 species above beta*gamma = 4 are optimistic and flagged (n_sigma_optimistic). The dE/dx
 bands of two species can cross, so separation is not monotonic in momentum: the scan
@@ -74,6 +77,13 @@ CHARGES = {'He3': 2, 'He4': 2}
 
 # Bethe-Bloch is not evaluated below this beta*gamma (provisional limit; see docstring).
 BETHE_MIN_BETA_GAMMA = 0.1
+# Below this mass (between m_e and m_mu) the projectile is taken as an electron or positron, for which the
+# heavy-particle Bethe formula does not apply (PDG RPP 2024, rev. March 2025, sec. 34.4.1).
+ELECTRON_LIKE_MAX_GEV = 0.01
+# Plausible input ranges; outside them the output warns that the unit is probably wrong.
+TIME_RESOLUTION_RANGE_PS = (1.0, 1.0e4)
+DEDX_RESOLUTION_RANGE = (0.01, 0.5)
+BETA_RESOLUTION_MAX = 0.1
 # Scan range and density (points per decade) for the separation scan.
 SCAN_LOW = 0.05
 SCAN_HIGH = 1000.0
@@ -86,13 +96,14 @@ ELECTRON_MASS_MEV = 0.51099895
 # Bethe-Bloch coefficient, MeV mol^-1 cm^2.
 BETHE_K = 0.307075
 
-# (Z/A, mean excitation energy I in eV) for a few common detector materials.
+# (Z/A, mean excitation energy I in eV) for a few common detector materials, from the PDG Atomic and Nuclear
+# Properties tables (water: "water (liquid)", I = 79.7 eV, read 2026-10-14).
 MATERIALS = {
     'silicon': (0.49848, 173.0),
     'argon': (0.45059, 188.0),
     'xenon': (0.41129, 482.0),
     'neon': (0.49555, 137.0),
-    'water': (0.55508, 75.0),
+    'water': (0.55508, 79.7),
 }
 
 
@@ -208,6 +219,13 @@ def bethe_bloch_mev_per_g_cm2(momentum_gev, mass_gev, material='silicon', charge
         record['validity_reason'] = (
             f'beta*gamma = {kin["beta_gamma"]:.3g} is below {BETHE_MIN_BETA_GAMMA}, where '
             'shell corrections and charge exchange dominate')
+        return record
+    if mass_gev < ELECTRON_LIKE_MAX_GEV:
+        record['validity_reason'] = (
+            'electron or positron: the heavy-particle Bethe formula does not apply (identical particles for '
+            'electrons, Moller and Bhabha cross sections, a different maximum energy transfer, and bremsstrahlung); '
+            'use the electron stopping power of Seltzer and Berger, Int. J. Appl. Radiat. Isot. 33 (1982) 1189 '
+            '(PDG, Passage of particles through matter, sec. 34.4.1)')
         return record
     mass_mev = mass_gev * 1000.0
     mass_ratio = ELECTRON_MASS_MEV / mass_mev
@@ -469,7 +487,17 @@ def main():
     except (ValueError, KeyError) as exc:
         parser.error(str(exc))
 
+    warnings = []
+    if args.mode == 'tof' and not TIME_RESOLUTION_RANGE_PS[0] <= args.time_resolution <= TIME_RESOLUTION_RANGE_PS[1]:
+        warnings.append(f'time resolution {args.time_resolution:g} ps is outside 1 ps - 10 ns; check the unit (ps)')
+    if args.mode == 'dedx' and not DEDX_RESOLUTION_RANGE[0] <= args.relative_resolution <= DEDX_RESOLUTION_RANGE[1]:
+        warnings.append(f'relative dE/dx resolution {args.relative_resolution:g} is outside 0.01-0.5; it is a '
+                        'fraction, not a percentage')
+    if args.mode == 'velocity' and args.beta_resolution > BETA_RESOLUTION_MAX:
+        warnings.append(f'relative beta resolution {args.beta_resolution:g} is above {BETA_RESOLUTION_MAX:g}; '
+                        'it is a fraction, not a percentage')
     try:
+        result['warnings'] = warnings
         result['species_a']['name'] = args.species[0]
         result['species_b']['name'] = args.species[1]
         if result['reference_species'] == 'a':

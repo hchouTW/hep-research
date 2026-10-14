@@ -12,6 +12,10 @@ crossing, taken in data from luminosity times the inelastic cross section; the n
 interactions actually generated in an event is a Poisson draw around mu and is a
 different distribution. State which one the profiles hold.
 
+Input: data_profile and mc_profile (same binning), optional bin_centers (strictly
+increasing) and bin_edges (one more entry, strictly increasing, each center inside its bin).
+input_totals reports the raw sums before normalization: for a probability profile a total
+below 1 means probability outside the binning, which the normalization hides.
 Diagnostics: n_eff = (sum w)^2 / sum w^2 over the MC sample (computed with the MC
 distribution, so n_eff_fraction is the fraction of the MC statistics that survives the
 reweighting) and max_weight, with a warning when the weights are large. A non-finite
@@ -136,6 +140,24 @@ def _validate_centers(bin_centers, length):
     for index, center in enumerate(bin_centers):
         if isinstance(center, bool) or not isinstance(center, (int, float)) or not math.isfinite(center):
             raise ValueError(f'bin_centers[{index}] must be a finite number')
+    if any(b <= a for a, b in zip(bin_centers, bin_centers[1:])):
+        raise ValueError('bin_centers must be strictly increasing')
+
+
+def _validate_edges(bin_edges, bin_centers, length):
+    """Optional bin_edges: length + 1 strictly increasing finite numbers, each center inside its bin."""
+    if not isinstance(bin_edges, list) or len(bin_edges) != length + 1:
+        raise ValueError('bin_edges must be an array with one more entry than the profiles')
+    for index, edge in enumerate(bin_edges):
+        if isinstance(edge, bool) or not isinstance(edge, (int, float)) or not math.isfinite(edge):
+            raise ValueError(f'bin_edges[{index}] must be a finite number')
+    if any(b <= a for a, b in zip(bin_edges, bin_edges[1:])):
+        raise ValueError('bin_edges must be strictly increasing')
+    if bin_centers is not None:
+        for index, center in enumerate(bin_centers):
+            if not bin_edges[index] <= center < bin_edges[index + 1]:
+                raise ValueError(f'bin_centers[{index}] = {center:g} is outside its bin '
+                                 f'[{bin_edges[index]:g}, {bin_edges[index + 1]:g})')
 
 
 def _finite_mean(pairs):
@@ -204,6 +226,10 @@ def main():
         mc_profile = bundle.get('mc_profile')
         bin_centers = bundle.get('bin_centers')
         details = compute_weight_details(data_profile, mc_profile)
+        if bin_centers is not None:
+            _validate_centers(bin_centers, len(data_profile))
+        if bundle.get('bin_edges') is not None:
+            _validate_edges(bundle['bin_edges'], bin_centers, len(data_profile))
         weights, empty_mc_bins = details['weights'], details['empty_mc_bins']
         nonfinite_bins = details['nonfinite_weight_bins']
         problems = bool(empty_mc_bins or nonfinite_bins)
@@ -216,12 +242,15 @@ def main():
         }
         diagnostics = weight_diagnostics(weights, details['mc_pdf'])
         _, mc_total = normalize(mc_profile)
+        _, data_total = normalize(data_profile)
         result.update({
             'max_weight': diagnostics['max_weight'],
             'n_eff_fraction': diagnostics['n_eff_fraction'],
             # In the units of mc_profile: an event count when mc_profile holds unweighted
             # MC event counts per bin, otherwise only the fraction is meaningful.
             'n_eff': diagnostics['n_eff_fraction'] * mc_total,
+            # Raw sums before normalization: for a probability profile a total below 1 means mass outside the binning.
+            'input_totals': {'data': data_total, 'mc': mc_total},
         })
         warnings = []
         if diagnostics['n_eff_fraction'] < N_EFF_FRACTION_WARNING:

@@ -12,12 +12,13 @@ efficiency as a parameter of a simultaneous pass/fail fit - hep-statistics), wei
 or signed-weight MC, or several correlated probes per event.
 
 Output: lower_bound and upper_bound are the interval's absolute ends at interval_level
-(default 0.95). At 0.95 they are not a +-1 sigma band; pass --level 0.6827 for a
+(default 0.95), of a central interval (interval_type "central": alpha/2 in each tail). At
+0.95 they are not a +-1 sigma band; pass --level 0.6827 for a
 one-sigma-equivalent interval. total = 0 leaves the efficiency undefined: the fields
 are null with a reason, not NaN.
 
 total is capped at 200000 because the exact tail sum is evaluated term by term, so the
-cost grows linearly with total (about 9 s near efficiency 0.5 at the cap); for larger
+cost grows linearly with total (about 15-20 s near efficiency 0.5 at the cap); for larger
 samples use a beta-quantile implementation (e.g. scipy.stats.beta.ppf).
 Status: --status (default unvalidated; one of the core artifact_statuses) is echoed as status.
 Exit codes: 0 ok; 2 invalid input (a JSON error with status failed and error_kind invalid-input on stdout, the usage
@@ -123,6 +124,7 @@ def efficiency_bin(k, n, level=0.95):
     if n == 0:
         return {
             'pass_count': k, 'total': n, 'efficiency': None, 'interval_level': level,
+            'interval_type': 'central',
             'lower_bound': None, 'upper_bound': None,
             'distance_to_lower_bound': None, 'distance_to_upper_bound': None,
             'reason': 'total is zero: no probes, so the efficiency is undefined',
@@ -131,6 +133,7 @@ def efficiency_bin(k, n, level=0.95):
     lower, upper = clopper_pearson(k, n, level)
     return {
         'pass_count': k, 'total': n, 'efficiency': point, 'interval_level': level,
+        'interval_type': 'central',
         'lower_bound': lower, 'upper_bound': upper,
         # Distances from the point estimate to the interval ends, at interval_level.
         'distance_to_lower_bound': point - lower,
@@ -157,8 +160,9 @@ def main():
         **result,
         'note': ('Not a Gaussian/Wald interval; valid (if wide) near efficiency 0 or 1. '
                  'lower_bound/upper_bound are the interval ends at interval_level, not '
-                 '+-1 sigma. Only for unweighted, independent, non-background-subtracted '
-                 'counts.'),
+                 '+-1 sigma. The interval is central (alpha/2 in each tail); for k = 0 the one-sided '
+                 'upper limit at the same level is 1 - alpha^(1/n), smaller than the central upper end. '
+                 'Only for unweighted, independent, non-background-subtracted counts.'),
     }, indent=2))
     return 0
 

@@ -19,9 +19,12 @@ Subcommands (all numbers on the command line; JSON on stdout):
   ballistic    amplitude deficit for a rectangular current of finite duration
   deadtime     measured rate and live fraction (non-paralyzable or paralyzable), or the inverse
   cluster-noise  noise of a sum of N channels with pairwise correlation rho
+  leakage-scale  silicon leakage current at another temperature, I ~ T^2 exp(-E_eff / 2kT)
 
 Conventions: the shaper's response to a unit input charge is g(t) = (t/tau)^n exp(-t/tau),
-normalized to peak 1, with peaking time t_p = n tau. Noise densities are one-sided:
+normalized to peak 1, with peaking time t_p = n tau. The bipolar shape of the pileup
+subcommand is tau dg/dt, which is not peak-normalized; --mean-amp is the amplitude of the
+unipolar pulse. Noise densities are one-sided:
 i_n^2 = 2 q I_leak (+ 4kT/R_p), e_n^2 in V^2/Hz, 1/f density A_f/f in V^2/Hz. Then
 ENC^2 = (i_n^2/2) int g^2 + C^2 (e_n^2/2) int g'^2 + C^2 A_f int |G'(f)|^2/f df, all in
 closed form for CR-(RC)^n. Units: capacitance pF, e_n nV/sqrt(Hz), leakage nA, times ns,
@@ -156,7 +159,8 @@ def enc(capacitance_pf, peaking_ns, order=1, en_nv=0.0, leakage_na=0.0, rp_ohm=N
         'enc_electrons': total,
         'terms_electrons': {'parallel': math.sqrt(par2) / Q_E, 'series': math.sqrt(ser2) / Q_E,
                             'flicker': math.sqrt(flk2) / Q_E},
-        'dominant_term': max((('parallel', par2), ('series', ser2), ('flicker', flk2)), key=lambda x: x[1])[0],
+        'dominant_term': (None if par2 + ser2 + flk2 == 0 else
+                          max((('parallel', par2), ('series', ser2), ('flicker', flk2)), key=lambda x: x[1])[0]),
         'optimum_series_vs_parallel': optimum,
         'shaper': {'order': n, 'peaking_ns': tp * 1e9, 'tau_ns': tau * 1e9},
         'assumptions': ['charge-sensitive amplifier, ideal CR-(RC)^n shaper with equal time constants',
@@ -207,7 +211,9 @@ def noise_rate(threshold_sigma, peaking_ns, order=2, noise_type='series', series
            'assumptions': ['stationary Gaussian noise (Rice formula); white series/parallel noise through '
                            'CR-(RC)^n; 1/f, pickup and random-telegraph noise are not included'],
            'validity': validity}
-    nch = _num(channels, 'channels')
+    if isinstance(channels, bool) or not isinstance(channels, int) or channels < 1:
+        raise ValueError('channels must be a positive integer')
+    nch = channels
     if window_ns is not None:
         w = _num(window_ns, 'window') * 1e-9
         out['window_ns'] = w * 1e9
@@ -335,7 +341,9 @@ def sipm(cells, npe, crosstalk=0.0, dcr_hz=0.0, gate_ns=0.0):
     least one more; with Poisson secondaries the mean number per avalanche is
     lambda = -ln(1 - P_ct), and the total per primary is Borel(lambda).
     """
-    nc = _num(cells, 'number of cells')
+    if isinstance(cells, bool) or not isinstance(cells, int) or cells < 1:
+        raise ValueError('number of cells must be a positive integer')
+    nc = cells
     mu = _num(npe, 'photoelectrons', allow_zero=True)
     pct = _num(crosstalk, 'crosstalk probability', allow_zero=True)
     if pct >= 1:
@@ -496,7 +504,7 @@ def main():
     p.add_argument('--noise-type', choices=['series', 'parallel', 'mixed'], default='series', dest='noise_type')
     p.add_argument('--series-fraction', type=float, dest='series_fraction',
                    help='mixed only: fraction of the noise variance that is series noise')
-    p.add_argument('--channels', type=float, default=1.0, help='number of channels (default 1)')
+    p.add_argument('--channels', type=int, default=1, help='number of channels (default 1)')
     p.add_argument('--window', type=float, help='readout or integration window, ns')
 
     p = sub.add_parser('timing', help='jitter, walk, CFD, TDC')
@@ -521,7 +529,7 @@ def main():
     p.add_argument('--bipolar', action='store_true', help='bipolar shaping (tau dg/dt)')
 
     p = sub.add_parser('sipm', help='SiPM saturation and correlated noise')
-    p.add_argument('--cells', type=float, required=True)
+    p.add_argument('--cells', type=int, required=True, help='number of cells (an integer)')
     p.add_argument('--npe', type=float, required=True, help='expected primary photoelectrons (before saturation)')
     p.add_argument('--crosstalk', type=float, default=0.0,
                    help='crosstalk probability P_ct (an avalanche triggers at least one more), as on a datasheet')
@@ -539,6 +547,13 @@ def main():
     g.add_argument('--rate', type=float, help='true rate, Hz')
     g.add_argument('--measured', type=float, help='measured rate, Hz')
     p.add_argument('--model', choices=['nonparalyzable', 'paralyzable'], default='nonparalyzable')
+
+    p = sub.add_parser('leakage-scale', help='silicon leakage current at another temperature')
+    p.add_argument('--current', type=float, required=True, help='leakage current at --from-celsius, nA')
+    p.add_argument('--from-celsius', type=float, required=True, dest='from_celsius')
+    p.add_argument('--to-celsius', type=float, required=True, dest='to_celsius')
+    p.add_argument('--e-eff', type=float, default=E_EFF_SI, dest='e_eff',
+                   help=f'effective band gap in eV (default {E_EFF_SI})')
 
     p = sub.add_parser('cluster-noise', help='noise of a sum of correlated channels')
     p.add_argument('--channels', type=int, required=True)
@@ -574,6 +589,13 @@ def main():
             result = ballistic(args.collection, args.peaking, args.order)
         elif args.command == 'deadtime':
             result = deadtime(args.dead_time, args.rate, args.measured, args.model)
+        elif args.command == 'leakage-scale':
+            current = leakage_scale(args.current, args.from_celsius, args.to_celsius, args.e_eff)
+            result = {'leakage_na': current, 'scale_factor': current / args.current if args.current else None,
+                      'from_celsius': args.from_celsius, 'to_celsius': args.to_celsius, 'e_eff_ev': args.e_eff,
+                      'assumptions': ['bulk generation current, I ~ T^2 exp(-E_eff / 2kT), E_eff for silicon; '
+                                      'surface and breakdown currents do not scale this way'],
+                      'validity': []}
         else:
             result = cluster_noise(args.channels, args.sigma, args.rho)
         text = json.dumps({'status': args.status, 'command': args.command, **result}, indent=2, allow_nan=False)

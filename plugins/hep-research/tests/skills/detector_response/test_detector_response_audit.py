@@ -1,7 +1,8 @@
 """Regression tests for the second-pass (V4) audit of the detector-response scripts.
 
-Added from the detector-response audit appendix (2026-10-13); `expectedFailure` markers name
-the task that removes them.
+Added from the detector-response audit appendix (2026-10-13); every class passes since the
+fixes of DR-WP1 and DR-WP2. AuditFollowUpTests covers the second-pass findings (N-*) that the
+appendix only sketched.
 
 Each test pins one confirmed defect (IDs as in V4_E.md) and states the intended
 behaviour after the fix. Expected numbers were computed independently (closed forms,
@@ -160,7 +161,6 @@ class CalorimeterFitDefaultTests(_TempFiles, unittest.TestCase):
             points.append([float(e), r])
         return points
 
-    @unittest.expectedFailure  # pending DR-WP2-06
     def test_unweighted_default_uses_constant_relative_error(self):
         """E-K1: without per-point errors the fit must weight y=r^2 by 1/r^4 (dr proportional to r).
         numpy lstsq with that weight: a=0.0998441202, b=0.2009894690, c=0.0069524903.
@@ -172,7 +172,6 @@ class CalorimeterFitDefaultTests(_TempFiles, unittest.TestCase):
         self.assertAlmostEqual(payload['stochastic'], 0.09984412015741675, delta=1e-9)
         self.assertAlmostEqual(payload['noise'], 0.2009894690454992, delta=1e-9)
 
-    @unittest.expectedFailure  # pending DR-WP2-06
     def test_percent_input_is_refused(self):
         """E-K2: sigma_E/E given in percent (22.4 for 22.4 %) was fitted silently."""
         path = self.write('pct.json', {'points': [[1, 22.4], [10, 3.8], [100, 1.24], [1000, 0.77]]})
@@ -180,7 +179,6 @@ class CalorimeterFitDefaultTests(_TempFiles, unittest.TestCase):
         self.assertNotEqual(proc.returncode, 0)
         self.assertIn('fraction', strict_json(proc.stdout)['error'])
 
-    @unittest.expectedFailure  # pending DR-WP2-06
     def test_negative_squared_term_is_a_failure_with_one_warnings_list(self):
         """E-K3: exit 0, a stray 'warning' key, and a half-filled result."""
         path = self.write('negc.json', {'points': [[1, 0.1], [10, 0.0316228], [100, 0.009]]})
@@ -192,7 +190,6 @@ class CalorimeterFitDefaultTests(_TempFiles, unittest.TestCase):
         self.assertTrue(any('negative' in w for w in payload['warnings']))
         self.assertIsNone(payload['stochastic'])
 
-    @unittest.expectedFailure  # pending DR-WP2-06
     def test_evaluate_without_coefficients_has_no_dominant_term(self):
         """E-K4: --evaluate alone gave resolution 0 and dominant_term 'stochastic'."""
         proc = run(self, 'calorimeter_resolution.py', '--evaluate')
@@ -204,7 +201,6 @@ class CalorimeterFitDefaultTests(_TempFiles, unittest.TestCase):
 
 # --------------------------------------------------------------------- E-P1..E-P3
 class PidElectronAndUnitTests(unittest.TestCase):
-    @unittest.expectedFailure  # pending DR-WP2-06
     def test_electron_dedx_is_outside_the_heavy_particle_formula(self):
         """E-P1: e vs pi at 0.2 GeV/c gave n_sigma 3.39 with validity 'inside'."""
         for species in ('e', '0.00051099895'):
@@ -215,14 +211,12 @@ class PidElectronAndUnitTests(unittest.TestCase):
                 self.assertIsNone(payload['n_sigma'])
                 self.assertIn('electron', payload['observable']['validity_reason'])
 
-    @unittest.expectedFailure  # pending DR-WP2-06
     def test_sub_picosecond_timing_is_flagged(self):
         """E-P2: --time-resolution 0.06 (ns typed as ps) gave 1840 sigma silently."""
         payload = run_json(self, 'pid_separation_power.py', '--mode', 'tof', '--species', 'pi', 'K',
                            '--momentum', '2', '--path', '1.2', '--time-resolution', '0.06')
         self.assertTrue(any('ps' in w for w in payload.get('warnings', [])))
 
-    @unittest.expectedFailure  # pending DR-WP2-06
     def test_water_uses_the_pdg_mean_excitation_energy(self):
         """E-P3: PDG AtomicNuclearProperties lists I = 79.7 eV for liquid water. A muon at
         0.3 GeV/c then loses 2.03897040 MeV cm^2/g (closed form); with 75 eV, 2.05062."""
@@ -235,7 +229,6 @@ class PidElectronAndUnitTests(unittest.TestCase):
 class MultipleScatteringBetaTests(_TempFiles, unittest.TestCase):
     STACK = ASSETS / 'detector-stack.example.json'
 
-    @unittest.expectedFailure  # pending DR-WP2-06
     def test_beta_is_derived_from_rigidity_charge_and_mass(self):
         """E-M1: a proton at R = 1 GV has beta = 1/hypot(1, 0.93827209) = 0.7292562022;
         Highland with x/X0 = 0.0357: theta0 = 3.161971177e-3 rad."""
@@ -244,7 +237,6 @@ class MultipleScatteringBetaTests(_TempFiles, unittest.TestCase):
         self.assertAlmostEqual(payload['beta'], 0.7292562021748294, delta=1e-12)
         self.assertAlmostEqual(payload['scattering_angle_rad'], 0.003161971176904367, delta=1e-14)
 
-    @unittest.expectedFailure  # pending DR-WP2-06
     def test_helium_beta_uses_z_times_rigidity(self):
         z, rigidity, mass = 2, 2.0, 3.7273794
         expected = z * rigidity / math.hypot(z * rigidity, mass)
@@ -252,7 +244,6 @@ class MultipleScatteringBetaTests(_TempFiles, unittest.TestCase):
                            '--charge', str(z), '--mass', str(mass))
         self.assertAlmostEqual(payload['beta'], expected, delta=1e-12)
 
-    @unittest.expectedFailure  # pending DR-WP2-06
     def test_conflicting_beta_and_mass_are_refused(self):
         proc = run(self, 'multiple_scattering.py', self.STACK, '--rigidity', '100', '--beta', '0.5',
                    '--mass', '0.93827209')
@@ -262,7 +253,6 @@ class MultipleScatteringBetaTests(_TempFiles, unittest.TestCase):
         self.assertNotIn('unrecognized arguments', proc.stderr)
         self.assertIn('beta', strict_json(proc.stdout)['error'])
 
-    @unittest.expectedFailure  # pending DR-WP2-06
     def test_crossover_solves_with_beta_of_rigidity(self):
         """B=0.5 T, L=0.5 m, 300 um, 4 layers, x/X0=0.3, proton: ms(R) = 0.0993891/beta(R),
         k = 0.0759472/GV; ms(R) = k R at R = 1.534037342 GV (brentq). Fixed beta=1 gives 1.3087."""
@@ -273,7 +263,6 @@ class MultipleScatteringBetaTests(_TempFiles, unittest.TestCase):
                            '--mass', '0.93827209')
         self.assertAlmostEqual(payload['crossover_rigidity_gv'], 1.5340373422150493, delta=1e-6)
 
-    @unittest.expectedFailure  # pending DR-WP2-06
     def test_measuring_flag_must_be_boolean(self):
         """E-M2: "measuring": "no" counted as a measuring layer."""
         stack = self.write('str.json', {
@@ -283,7 +272,6 @@ class MultipleScatteringBetaTests(_TempFiles, unittest.TestCase):
         self.assertEqual(proc.returncode, 1)  # file-content error: JSON + exit 1, as pileup's NaN-center test
         self.assertIn('measuring', strict_json(proc.stdout)['error'])
 
-    @unittest.expectedFailure  # pending DR-WP2-06
     def test_missing_measuring_flags_warn(self):
         stack = self.write('noflag.json', {
             'field_tesla': 1, 'lever_arm_m': 1, 'point_resolution_um': 10,
@@ -291,7 +279,6 @@ class MultipleScatteringBetaTests(_TempFiles, unittest.TestCase):
         payload = run_json(self, 'multiple_scattering.py', stack)
         self.assertTrue(any('measuring' in w for w in payload['warnings']))
 
-    @unittest.expectedFailure  # pending DR-WP2-06
     def test_mdr_definition_is_named(self):
         """E-M3: MDR = sqrt(1 - ms^2)/k = 3096.065 GV here; 1/k = 3096.243 GV."""
         payload = run_json(self, 'multiple_scattering.py', self.STACK)
@@ -382,7 +369,6 @@ class UniformErrorTests(unittest.TestCase):
 
 # --------------------------------------------------------------------- E-T2, E-F1, E-U1
 class SmallCliTests(_TempFiles, unittest.TestCase):
-    @unittest.expectedFailure  # pending DR-WP2-06
     def test_tag_and_probe_names_the_interval_type(self):
         """E-T2: 0/50 at 0.95 gives the central upper end 0.0711217 (beta.ppf(0.975, 1, 50));
         the one-sided 95 % limit would be 1 - 0.05**(1/50) = 0.0581551."""
@@ -390,21 +376,18 @@ class SmallCliTests(_TempFiles, unittest.TestCase):
         self.assertEqual(payload['interval_type'], 'central')
         self.assertAlmostEqual(payload['upper_bound'], 0.07112173646419764, delta=1e-9)
 
-    @unittest.expectedFailure  # pending DR-WP2-06
     def test_channels_must_be_an_integer(self):
         """E-F1: --channels 2.5 was accepted."""
         proc = run(self, 'frontend_response.py', 'noise-rate', '--threshold', '4', '--peaking', '25',
                    '--channels', '2.5', '--window', '100')
         self.assertEqual(proc.returncode, 2)
 
-    @unittest.expectedFailure  # pending DR-WP2-06
     def test_leakage_scale_has_a_subcommand(self):
         """E-F1: (263.15/293.15)^2 exp(-1.21/(2k) (1/263.15 - 1/293.15)) = 0.0525378697."""
         payload = run_json(self, 'frontend_response.py', 'leakage-scale', '--current', '1',
                            '--from-celsius', '20', '--to-celsius', '-10')
         self.assertAlmostEqual(payload['leakage_na'], 0.05253786967313066, delta=1e-12)
 
-    @unittest.expectedFailure  # pending DR-WP2-06
     def test_unsorted_bin_centers_are_refused(self):
         """E-U1."""
         path = self.write('pu.json', {'data_profile': [1, 2, 3], 'mc_profile': [1, 2, 3],
@@ -415,11 +398,57 @@ class SmallCliTests(_TempFiles, unittest.TestCase):
         self.assertFalse(payload['ok'])
         self.assertIn('bin_centers', payload['error'])
 
-    @unittest.expectedFailure  # pending DR-WP2-06
     def test_raw_profile_totals_are_reported(self):
         """E-U1: the example data profile sums to 0.99964060 (mass lost above the last bin)."""
         payload = run_json(self, 'pileup_reweight.py', ASSETS / 'pileup-profiles.example.json')
         self.assertAlmostEqual(payload['input_totals']['data'], 0.9996405979750262, delta=1e-12)
+
+
+
+# --------------------------------------------------------------------- N-C1, N-F2, E-U1 edges, E-M1 species
+class AuditFollowUpTests(_TempFiles, unittest.TestCase):
+    def test_radiator_length_is_checked_below_threshold(self):
+        """N-C1: with both species below threshold the radiator length was never validated."""
+        proc = run(self, 'cherenkov_angle.py', '--index', '1.05', '--species', 'pi', 'K', '--momentum', '0.3',
+                   '--radiator-length', '-1')
+        self.assertEqual(proc.returncode, 2)
+        self.assertIn('radiator_length', strict_json(proc.stdout)['error'])
+
+    def test_large_velocity_resolution_warns(self):
+        payload = run_json(self, 'cherenkov_angle.py', '--index', '1.05', '--species', 'pi', 'K', '--momentum', '10',
+                           '--single-photon-resolution', '5000')
+        self.assertTrue(any('beta resolution' in w for w in payload['warnings']), payload['warnings'])
+
+    def test_enc_without_noise_has_no_dominant_term(self):
+        """N-F2."""
+        payload = run_json(self, 'frontend_response.py', 'enc', '--capacitance', '0', '--peaking', '25')
+        self.assertIsNone(payload['dominant_term'])
+
+    def test_bin_center_outside_its_edges_is_refused(self):
+        path = self.write('pu.json', {'data_profile': [1, 2, 3], 'mc_profile': [1, 2, 3],
+                                      'bin_centers': [0.5, 1.5, 3.5], 'bin_edges': [0, 1, 2, 3]})
+        proc = run(self, 'pileup_reweight.py', path)
+        self.assertEqual(proc.returncode, 1)
+        self.assertIn('outside its bin', strict_json(proc.stdout)['error'])
+
+    def test_species_sets_mass_and_charge_and_refuses_a_conflicting_charge(self):
+        stack = ASSETS / 'detector-stack.example.json'
+        by_species = run_json(self, 'multiple_scattering.py', stack, '--rigidity', '2', '--species', 'He4')
+        by_mass = run_json(self, 'multiple_scattering.py', stack, '--rigidity', '2', '--charge', '2',
+                           '--mass', str(pid_separation_power.MASSES_GEV['He4']))
+        self.assertAlmostEqual(by_species['beta'], by_mass['beta'], delta=1e-15)
+        self.assertEqual(by_species['charge_number'], 2)
+        proc = run(self, 'multiple_scattering.py', stack, '--species', 'He4', '--charge', '1')
+        self.assertEqual(proc.returncode, 2)
+
+    def test_mdr_with_derived_beta_is_close_to_the_relativistic_value(self):
+        """At a few TV a proton has beta = 1 to 1e-7, so the MDR solved with beta(R) equals the closed form."""
+        stack = ASSETS / 'detector-stack.example.json'
+        fixed = run_json(self, 'multiple_scattering.py', stack)
+        derived = run_json(self, 'multiple_scattering.py', stack, '--species', 'p')
+        self.assertEqual(derived['beta_source'], 'derived from rigidity, charge and mass')
+        self.assertAlmostEqual(derived['maximum_detectable_rigidity_gv'], fixed['maximum_detectable_rigidity_gv'],
+                               delta=1e-6 * fixed['maximum_detectable_rigidity_gv'])
 
 
 if __name__ == '__main__':
