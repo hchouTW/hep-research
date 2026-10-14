@@ -68,6 +68,10 @@ def build_parser() -> argparse.ArgumentParser:
     data.add_argument("--label-names", help="comma-separated class names, in class-index order")
     data.add_argument("--units", help="JSON file mapping feature name -> unit")
     data.add_argument("--grouping-key", help="what the manifest groups are (run/lumi block, generator job, ...)")
+    data.add_argument("--status", action="append",
+                      choices=("synthetic", "asimov", "observed", "preliminary", "unvalidated", "user-supplied"),
+                      help="status label of the input data, written to run_summary.json (repeatable); the synthetic "
+                      "path always records 'synthetic'")
     synth = parser.add_argument_group("synthetic data (used without --data)")
     synth.add_argument("--train-size", type=int, default=8000)
     synth.add_argument("--val-size", type=int, default=2000)
@@ -631,7 +635,9 @@ def run(args) -> int:
     write_scores(scores_path, [data["ids"][i] for i in te], y[te], w[te], test_scores, labels)
     write_scores(val_scores_path, [data["ids"][i] for i in va], y[va], w[va], val_scores, labels)
 
+    labels_out = list(dict.fromkeys((["synthetic"] if not args.data else []) + list(args.status or [])))
     summary = {
+        **({"status": labels_out} if labels_out else {}),
         "task": "classification", "features": features, "units": data["units"], "labels": labels,
         "grouping_key": data["grouping_key"], "split_manifest": str(Path(data["manifest"]).resolve()),
         "split_check": {k: split_check[k] for k in ("tool", "result", "report")},

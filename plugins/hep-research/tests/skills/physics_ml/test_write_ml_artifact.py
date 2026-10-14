@@ -63,7 +63,11 @@ class WriteMlArtifactTests(unittest.TestCase):
                 "--output-semantics", "probability", "--status", "synthetic", "--status", "unvalidated"]
 
     def test_summary_with_calibration_validates(self):
-        code, out = self.run_main(*self.full_args())
+        # the overlap result comes from a report, never from the summary's own claim (PML-WP0.4)
+        splits = {"train": ["a", "b"], "test": ["c"], "groups": {"a": "r1", "b": "r1", "c": "r2"}}
+        proc = subprocess.run([sys.executable, str(SPLIT_SCRIPT), self.write("splits.json", splits), "--json"],
+                              capture_output=True, text=True, timeout=60)
+        code, out = self.run_main(*self.full_args(), "--split-report", self.write("rep.json", json.loads(proc.stdout)))
         self.assertEqual((code, out["status"]), (0, "written"), out)
         doc = json.loads((self.tmp / "ml.json").read_text())
         self.assertEqual(doc["contract_version"], CONTRACTS_VERSION)
@@ -73,6 +77,7 @@ class WriteMlArtifactTests(unittest.TestCase):
         self.assertEqual(doc["extension"]["splits"]["overlap_check"]["result"], "pass")
         self.assertEqual([o["ref"] for o in doc["outputs"]], ["model.pt", "scores_test.npz"])
         self.assertTrue(all(len(i["sha256"]) == 64 for i in doc["inputs"]))
+        self.assertTrue(doc["extension"]["splits"]["test_groups_disjoint"])
         rep = validate_artifact(doc)
         self.assertTrue(rep.ok, rep.as_dict())
         self.assertEqual([f.code for f in rep.findings], [])

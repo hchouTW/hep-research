@@ -303,7 +303,8 @@ class TrainClassifierSyntheticTests(unittest.TestCase):
                 placement.setdefault(manifest["groups"][value], set()).add(split)
         self.assertTrue(all(len(s) == 1 for s in placement.values()))
         summary = json.loads((out / "run_summary.json").read_text())
-        self.assertEqual(set(summary), SUMMARY_KEYS)
+        self.assertEqual(set(summary), SUMMARY_KEYS | {"status"})
+        self.assertEqual(summary["status"], ["synthetic"])  # the writer keeps it without --status (PML-WP0.4)
         self.assertEqual(summary["split_check"]["result"], "pass")
         self.assertEqual(summary["grouping_key"], "synthetic_group")
 

@@ -25,7 +25,8 @@ pipeline; "incomplete" is never a pass.
 Usage notes / assumptions: standard library only; PyTorch is not required. Input is a
 JSON object mapping split names to ID lists, optionally with "groups" (ID -> group),
 "timestamps" (ID -> finite number or ISO-8601 date/time string, all of one kind) and
-"temporal_order" (at least two split names, each a split of the file). IDs and group values are compared after
+"temporal_order" (at least two split names, each a split of the file), and "roles" ({"test": NAME}, read by
+write_ml_artifact.py to find the test split). IDs and group values are compared after
 normalization, so that a cosmetic difference cannot hide leakage: surrounding
 whitespace is stripped, a number with a zero fraction is written as an integer (1, 1.0, "1" and "1.0" are the
 same group) and, by default, case is folded ("Run7 " and "run7" are the
@@ -48,7 +49,7 @@ import math
 import re
 import sys
 
-RESERVED_KEYS = {"groups", "timestamps", "temporal_order", "_comment"}
+RESERVED_KEYS = {"groups", "timestamps", "temporal_order", "roles", "_comment"}
 NULL_MARKERS = {"", "nan", "null", "none", "na"}
 
 
