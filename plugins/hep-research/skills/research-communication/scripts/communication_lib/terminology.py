@@ -14,7 +14,7 @@ import re
 from pathlib import Path
 
 from communication_lib import report as R
-from communication_lib.documents import HEADING_RE, TEX_SECTION_RE, normalize, strip_tex_comments
+from communication_lib.documents import markdown_headings, normalize, strip_tex_comments, tex_sections
 from contracts.communication import format_of
 
 QUOTE_RE = re.compile(r"[\"“「『][^\"”」』]*[\"”」』]|so-called\s+\S+")
@@ -42,12 +42,8 @@ def load_glossary(path) -> dict:
 
 def _sections(text: str, fmt: str) -> list[tuple[int, str]]:
     """(line number, section title) for every heading, in order."""
-    out = []
-    rx = TEX_SECTION_RE if fmt == "latex" else HEADING_RE
-    for m in rx.finditer(text):
-        title = m.group(2)
-        out.append((text.count("\n", 0, m.start()) + 1, normalize(title)))
-    return out
+    heads = [(pos, title) for pos, _, title in (tex_sections(text) if fmt == "latex" else markdown_headings(text))]
+    return [(text.count("\n", 0, pos) + 1, normalize(title)) for pos, title in heads]
 
 
 def _section_at(sections: list, line: int) -> str | None:

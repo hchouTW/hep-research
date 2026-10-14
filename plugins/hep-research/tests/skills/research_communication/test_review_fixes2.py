@@ -270,5 +270,27 @@ class ReviewFixes2Rounding(Project):
                 self.assertEqual(rep["exit_code"], 1)
 
 
+class ReviewFixes2Locators(unittest.TestCase):
+    """RC-A8: section titles with nested braces, notation-normalized passages, headings inside fenced code."""
+
+    def test_latex_section_title_with_nested_braces(self):
+        from communication_lib.documents import check_occurrence
+        tex = "\\section{Results at $\\sqrt{s}=13$~TeV}\nThe ratio is R = 1.02.\n\\section{Next}\nx\n"
+        res = check_occurrence(tex, "latex", {"locator": "section:Results at $\\sqrt{s}=13$~TeV", "passage": "The ratio is R = 1.02."})
+        self.assertEqual(res["outcome"], "located", res)
+
+    def test_plus_minus_notations_match(self):
+        from communication_lib.documents import check_occurrence
+        tex = "\\section{Results}\nWe find $R = 1.02 \\pm 0.05$.\n"
+        res = check_occurrence(tex, "latex", {"locator": "section:Results", "passage": "We find R = 1.02 \u00b1 0.05."})
+        self.assertEqual(res["outcome"], "located", res)
+
+    def test_heading_inside_fenced_code_is_not_a_section(self):
+        from communication_lib.documents import check_occurrence
+        md = "# Results\n\nR = 1.02.\n\n```bash\n# Results\necho\n```\n"
+        res = check_occurrence(md, "markdown", {"locator": "section:Results", "passage": "R = 1.02."})
+        self.assertEqual(res["outcome"], "located", res)
+
+
 if __name__ == "__main__":
     unittest.main()

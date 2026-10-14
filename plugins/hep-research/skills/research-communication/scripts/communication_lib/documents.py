@@ -6,7 +6,7 @@ or LaTeX sectioning command, by title), `env:<name>` (LaTeX environment), `label
 environment, else the text from the label to the next sectioning command), `anchor:<text>` (the paragraph containing
 the text), `line:<n>`, `document`. An ambiguous locator, an unsupported form or an absent region is unresolved; a
 located region without the passage is a mismatch, with the closest current sentence reported. Comparison is on
-whitespace-normalized text; no number is interpreted here.
+whitespace- and notation-normalized text (normalize); no number is interpreted here.
 """
 from __future__ import annotations
 
@@ -14,14 +14,56 @@ import difflib
 import re
 
 HEADING_RE = re.compile(r"^(#{1,6})\s+(.*?)\s*#*\s*$", re.M)
-TEX_SECTION_RE = re.compile(r"\\(part|chapter|section|subsection|subsubsection|paragraph)\*?\s*(?:\[[^\]]*\])?\{([^}]*)\}")
+TEX_SECTION_RE = re.compile(r"\\(part|chapter|section|subsection|subsubsection|paragraph)\*?\s*(?:\[[^\]]*\])?\{")
+FENCE_RE = re.compile(r"^ {0,3}(`{3,}|~{3,})", re.M)
 TEX_COMMENT_RE = re.compile(r"(?<!\\)%.*")
 TEX_ENV_RE = r"\\begin\{%s\}(.*?)\\end\{%s\}"
 INCLUDE_RE = re.compile(r"\\(?:(?:input|include|subfile|import|subimport)\s*\{|(?:input|include)(?![A-Za-z@])\s+[^\s\\{}%])")
 
 
 def normalize(text: str) -> str:
-    return re.sub(r"\s+", " ", text.replace("\u00b1", "+/-")).strip()
+    """Whitespace-normalized text with the plus-minus sign in one form (±, \\pm, +/-) and LaTeX math shifts, ties and
+    thin spaces read as plain spacing, so a passage typed in one notation is found in the other."""
+    t = re.sub(r"\\pm(?![A-Za-z])|\u00b1", "+/-", text)
+    t = re.sub(r"\\[,;: ]|[~\u2009\u202f]", " ", t).replace("$", "")
+    return re.sub(r"\s+", " ", t).strip()
+
+
+def _fenced_spans(text: str) -> list[tuple[int, int]]:
+    """Offsets of fenced code blocks (``` or ~~~) in Markdown; an unclosed fence runs to the end."""
+    spans, open_at, fence = [], None, ""
+    for m in FENCE_RE.finditer(text):
+        if open_at is None:
+            open_at, fence = m.start(), m.group(1)
+        elif m.group(1)[0] == fence[0] and len(m.group(1)) >= len(fence):
+            spans.append((open_at, m.end()))
+            open_at = None
+    if open_at is not None:
+        spans.append((open_at, len(text)))
+    return spans
+
+
+def markdown_headings(text: str) -> list[tuple[int, int, str]]:
+    """(offset, level, title) of every ATX heading outside fenced code blocks."""
+    fences = _fenced_spans(text)
+    return [(m.start(), len(m.group(1)), m.group(2)) for m in HEADING_RE.finditer(text)
+            if not any(a <= m.start() < b for a, b in fences)]
+
+
+def tex_sections(text: str) -> list[tuple[int, str, str]]:
+    """(offset, command, title) of every sectioning command; the title may hold nested braces ($\\sqrt{s}$)."""
+    out = []
+    for m in TEX_SECTION_RE.finditer(text):
+        depth, j = 1, m.end()
+        while j < len(text) and depth:
+            if text[j] == "\\":
+                j += 2
+                continue
+            depth += {"{": 1, "}": -1}.get(text[j], 0)
+            j += 1
+        if depth == 0:
+            out.append((m.start(), m.group(1), text[m.end():j - 1]))
+    return out
 
 
 def strip_tex_comments(text: str) -> str:
@@ -47,18 +89,18 @@ def _regions(text: str, fmt: str, locator: str) -> tuple[str, list[str], str | N
         return kind, [lines[n - 1]] if 1 <= n <= len(lines) else [], None
     if kind == "section":
         if fmt == "markdown":
-            heads = [(m.start(), len(m.group(1)), m.group(2)) for m in HEADING_RE.finditer(text)]
+            heads = markdown_headings(text)
             out = []
             for i, (pos, level, title) in enumerate(heads):
-                if normalize(title).lower() == arg.lower():
+                if normalize(title).lower() == normalize(arg).lower():
                     end = next((p for p, lv, _ in heads[i + 1:] if lv <= level), len(text))
                     out.append(text[pos:end])
             return kind, out, None
         if fmt == "latex":
-            secs = [(m.start(), m.group(1), m.group(2)) for m in TEX_SECTION_RE.finditer(text)]
+            secs = tex_sections(text)
             out = []
             for i, (pos, _cmd, title) in enumerate(secs):
-                if normalize(title).lower() == arg.lower():
+                if normalize(title).lower() == normalize(arg).lower():
                     end = next((p for p, _, _ in secs[i + 1:]), len(text))
                     out.append(text[pos:end])
             return kind, out, None
@@ -80,7 +122,7 @@ def _regions(text: str, fmt: str, locator: str) -> tuple[str, list[str], str | N
             if env is not None:
                 out.append(env)
                 continue
-            nxt = [m.start() for m in TEX_SECTION_RE.finditer(text) if m.start() > pos]
+            nxt = [p for p, _, _ in tex_sections(text) if p > pos]
             end = min(nxt + [text.find("\\end{document}") if "\\end{document}" in text else len(text)])
             out.append(text[pos:end if end > pos else len(text)])
         return kind, out, None
