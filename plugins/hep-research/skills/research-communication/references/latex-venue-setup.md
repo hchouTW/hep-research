@@ -32,7 +32,7 @@ and per-row dates are in [Venue rules: sources and last-verified dates](#venue-r
 a row older than a year, or for a different conference year, is re-checked before it
 is quoted as a hard limit.
 
-| Venue | Class file | Length (verified 2026-09) | Notes |
+| Venue | Class file | Length (dates in the sources table) | Notes |
 |---|---|---|---|
 | PRL | `revtex4-2` (`\documentclass[aps,prl,reprint]{revtex4-2}`) | 3,750 words (about 4 pages); abstract ≤ 600 characters | Run-in italic heads, not `\section`; no PACS (PhySH since 2016) |
 | PRD / PRX | `revtex4-2` (`\documentclass[aps,prd,reprint]{revtex4-2}`) | PRD regular articles: no fixed limit; PRD Letters 4,500 words | Numbered sections, full methods |
