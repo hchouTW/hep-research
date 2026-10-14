@@ -99,6 +99,14 @@ number of secondaries per avalanche, `lambda = -ln(1 - P_ct)`, a primary gives m
 SiPM saturation `N_cells (1 - exp(-N_pe/N_cells))` makes the response nonlinear
 ([front-end electronics](front-end-electronics-and-signal-processing.md));
 timing has transit-time spread and jitter ([timing detectors](timing-detectors.md)).
+SiPM gain `G = (C_d + C_q)(V_bias - V_off)/e` (pixel and quench capacitances; the
+turn-off voltage `V_off` is usually within 1 V of the breakdown voltage, so
+`G ≈ C (V_bias - V_bd)/e`); `PDE = FF * QE * P_T` (fill factor, quantum efficiency,
+Geiger-trigger probability, which depends on the bias and the wavelength) (R. Klanner, NIM A926
+(2019) 36, arXiv:1809.04346, eqs. 1-2). APD excess noise for electron injection in the
+local model (McIntyre): `F = k M + (1 - k)(2 - 1/M)`, `k` the hole-to-electron ionization
+coefficient ratio; dead-space effects make it an overestimate for thin multiplication
+regions (J. S. Marsland, arXiv:1102.0132, eq. 1).
 
 **Light transport elements.**
 - **Wavelength shifters** absorb short-wavelength (e.g. UV) light and re-emit at longer
