@@ -5,6 +5,16 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Batch commands refused in protected mode (HC-10, HC-16; review of deferred task P6.2).** In a project whose
+  config carries `agent_policy`, `core/partition/campaign.py` refuses a real `submit`, `resubmit` or `cancel` and
+  `confirm`, `abandon`, `reset` and `clear-orphans` in any form with `protected.batch_needs_trusted_submitter`, before
+  any scheduler call. Before, a protected project with valid inputs could submit in-process as in S0 (jobs failed on
+  the workers, where the copied runner refuses, but the submission itself ran). `abandon`, `reset`, `cancel` and
+  `clear-orphans` also check the protected inputs now. Dry runs, `plan`, `freeze`, `status`, `watch`, `reconcile`,
+  `merge` and `report` are unchanged; outside protected mode nothing changes. The switch is protected mode (DP-2), not
+  the campaign config; `docs/agentic-architecture.md` §10.2 now says the same for the trusted submitter. Tests:
+  `tests/core/test_partition_protected_batch.py`; the bypass suite lists these entry points and declares
+  `REFUSED_IN_CONTROL` for consumers such as the deployment's live C07 check.
 - **Protected-input source checks: sticky directories documented as refused for the running account.**
   `core/protected/trusted_input.py` refused a protected input below a world-writable sticky directory
   (`/tmp`, the macOS shared folder) for the running account, because its `os.access` check ignores the sticky bit, while

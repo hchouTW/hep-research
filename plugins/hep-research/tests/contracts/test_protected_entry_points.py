@@ -28,6 +28,12 @@ FIXTURE = ROOT / "contracts" / "fixtures" / "artifacts" / "valid" / "computation
 MODES = ("missing", "empty", "truncated", "replaced", "stale", "writable", "no-qualification", "expired-qualification",
          "edited-policy")
 REFUSAL_PREFIXES = ("protected.", "source.", "revocation.")
+# entry points refused even with valid protected inputs, and the one code expected there (consumers of this suite,
+# such as the deployment's live C07 check, read it): batch commands that reach a scheduler or settle a submission
+BATCH = "protected.batch_needs_trusted_submitter"
+REFUSED_IN_CONTROL = {f"lib:campaign.{n}": {BATCH} for n in
+                      ("submit(approved)", "confirm_submission", "abandon_submission", "reset", "cancel(approved)",
+                       "clear_orphan_risk")}
 
 
 def load_script(rel: str):
@@ -165,6 +171,11 @@ def lib_entries(env: Env):
         ("campaign.submit", lambda: campaign.submit(c, None, {}), False),
         ("campaign.resubmit", lambda: campaign.resubmit(c, None, {}), False),
         ("campaign.confirm_submission", lambda: campaign.confirm_submission(c, "s", {}), False),
+        ("campaign.submit(approved)", lambda: campaign.submit(c, None, {}, approved=True), False),
+        ("campaign.abandon_submission", lambda: campaign.abandon_submission(c, "s", "r"), False),
+        ("campaign.reset", lambda: campaign.reset(c, [], "r"), False),
+        ("campaign.cancel(approved)", lambda: campaign.cancel(c, None, approved=True), False),
+        ("campaign.clear_orphan_risk", lambda: campaign.clear_orphan_risk(c, None, "s", "r"), False),
         ("campaign.merge", lambda: campaign.merge(c), False),
         ("engine.run", lambda: engine.run({}, env.state, None), False),
         ("engine.merge", lambda: engine.merge({}, env.state), False),
@@ -235,6 +246,8 @@ class ProtectedEntryPointTests(unittest.TestCase):
             with self.subTest(entry=name):
                 if name in formal:
                     self.assertEqual((state, codes), ("refused", {"protected.formal_use_unavailable"}))
+                elif name in REFUSED_IN_CONTROL:
+                    self.assertEqual((state, codes), ("refused", REFUSED_IN_CONTROL[name]))
                 else:
                     self.assertEqual(state, "ran", f"{name} refused a valid protected context: {codes}")
 

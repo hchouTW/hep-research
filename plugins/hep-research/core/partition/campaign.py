@@ -61,13 +61,29 @@ from core.partition import bundle as bundles
 from core.partition import engine
 from core.partition import limits as lim
 from core.partition.executors import Executor, PollError, SubmitRefused
-from core.protected.guard import guard
+from core.protected.guard import ProtectedUseRefused, guard
 from core.partition.states import ACTIVE, NEEDS_PERSON, decide, normalize, repeated, same_resources, signature
 
 MIN_POLL_INTERVAL_S = 60
 MAX_OUTPUT_BYTES = 64 * 1024 * 1024  # a runner output larger than this is quarantined unread
 POLL_AGAIN = (None, "held", "unknown")  # a held or unknown job may still change; keep asking
 RUNNER = Path(__file__).resolve().parent / "runner.py"
+
+BATCH_REFUSAL = "protected.batch_needs_trusted_submitter"
+
+
+def _batch_guard(entry: str, campaign_dir, acts: bool = True):
+    """The protected-use guard for a batch command, then (HC-10, HC-16) the refusal of a command that reaches a
+    scheduler or settles a submission's outcome in protected mode: from there on only a trusted submitter outside the
+    agent's reach may do it (docs/agentic-architecture.md §10.2). acts=False (a dry run) is checked by the guard only.
+    The switch is protected mode itself (the project's agent_policy, DP-2), never the campaign config."""
+    ctx = guard(entry, paths=[campaign_dir])
+    if ctx.protected and acts:
+        raise ProtectedUseRefused(entry, [{"code": BATCH_REFUSAL, "path": "$campaign",
+                                           "message": "in protected mode batch submission, cancellation and the settling of "
+                                                      "submissions belong to a trusted submitter outside the agent's reach; "
+                                                      "plan, freeze, status, reconcile, merge and report stay available"}])
+    return ctx
 
 
 class CampaignError(ValueError):
@@ -197,7 +213,7 @@ def submit(campaign_dir, executor, config: dict, chunk_ids=None, approved: bool 
     """Submit chunks that were never submitted (all of them, the given ones, or with pilot=True the first one).
     With bundle_digest (a bundle frozen by core.partition.bundle.freeze), the bundled files are re-hashed first and a
     change since freezing refuses the submission (bundle.changed); the digest is recorded with the submission."""
-    guard("core.partition.campaign.submit", paths=[campaign_dir])
+    _batch_guard("core.partition.campaign.submit", campaign_dir, acts=approved)
     cdir = Path(campaign_dir)
     manifest, state = load(cdir)
     pending = unconfirmed(state)
@@ -364,7 +380,7 @@ def reconcile(campaign_dir, executor, submission_id: str) -> dict:
 def confirm_submission(campaign_dir, submission_id: str, job_ids: dict, executor=None) -> dict:
     """After an ambiguous or interrupted submit: a person found the jobs at the scheduler; record {attempt_id: job_id}.
     Every job ID must be one that reconcile() lists for the submission's tag (fabricated IDs are refused, X07)."""
-    guard("core.partition.campaign.confirm_submission", paths=[campaign_dir])
+    _batch_guard("core.partition.campaign.confirm_submission", campaign_dir)
     cdir = Path(campaign_dir)
     _, state = load(cdir)
     sub = next((x for x in unconfirmed(state) if x["id"] == submission_id), None)
@@ -390,6 +406,7 @@ def abandon_submission(campaign_dir, submission_id: str, reason: str) -> dict:
     """After an ambiguous or interrupted submit: the person found no jobs at the scheduler. The attempts become
     'abandoned' (not proof that nothing runs; their chunks need a reset to run again); an output that still appears
     for them is collected as usual."""
+    _batch_guard("core.partition.campaign.abandon_submission", campaign_dir)
     if not reason or not reason.strip():
         raise CampaignError("abandon.reason_missing", "abandoning a submission needs a reason")
     cdir = Path(campaign_dir)
@@ -403,7 +420,7 @@ def abandon_submission(campaign_dir, submission_id: str, reason: str) -> dict:
 @_locked("resubmit")
 def resubmit(campaign_dir, executor, config: dict, approved: bool = False, clock=_now, bundle_digest: str | None = None) -> dict:
     """Resubmit the chunks whose decision is 'resubmit'; report every other not-done chunk with its decision."""
-    guard("core.partition.campaign.resubmit", paths=[campaign_dir])
+    _batch_guard("core.partition.campaign.resubmit", campaign_dir, acts=approved)
     cdir = Path(campaign_dir)
     collect(cdir)
     manifest, state = load(cdir)
@@ -429,6 +446,7 @@ def resubmit(campaign_dir, executor, config: dict, approved: bool = False, clock
 def reset(campaign_dir, chunk_ids, reason: str, config: dict | None = None) -> dict:
     """After a person fixed the cause: allow the chunk to be resubmitted, with the reason recorded in 'resets'.
     With limits.max_resets_per_chunk in config, a reset beyond it is refused before anything is recorded (X08)."""
+    _batch_guard("core.partition.campaign.reset", campaign_dir)
     if not reason or not reason.strip():
         raise CampaignError("reset.reason_missing", "a reset needs a reason")
     cdir = Path(campaign_dir)
@@ -460,6 +478,7 @@ def cancel(campaign_dir, executor, chunk_ids=None, approved: bool = False, clock
     the submission tag, the jobs of unconfirmed (intent) or abandoned submissions (orphan risk, X09). Each command's
     exit is recorded per job. A request is not termination: an attempt is 'termination_observed' only when a later
     poll sees it in a final state; an orphan job stays a resource risk until a person checks the scheduler."""
+    _batch_guard("core.partition.campaign.cancel", campaign_dir, acts=approved)
     cdir = Path(campaign_dir)
     _, state = load(cdir)
     want = None if chunk_ids is None else set(chunk_ids)
@@ -522,6 +541,7 @@ def clear_orphan_risk(campaign_dir, executor, submission_id: str, reason: str) -
     """A person, with the scheduler's evidence, stops counting a submission's unknown or abandoned attempts as running
     (limits.max_concurrent_jobs). Refused unless every job the scheduler lists under the submission's tag is in a final
     state. The attempts keep their state and their resource_risk records; they still count as jobs and core-hours."""
+    _batch_guard("core.partition.campaign.clear_orphan_risk", campaign_dir)
     if not reason or not reason.strip():
         raise CampaignError("clear.reason_missing", "clearing orphan risk needs a reason")
     cdir = Path(campaign_dir)

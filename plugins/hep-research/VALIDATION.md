@@ -1210,6 +1210,23 @@ scan budget, residual checks and malformed-input handling; all were fixed with r
 checks pass; 2,966 unit tests in 220 modules, 0 failures, 58 skipped. ruff 0.16.10 and mypy 2.4.0 clean. Not run: CI,
 live sessions, any carry-over.
 
+
+## PROTECTED-BATCH (2026-10-14, E2: Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1; version 0.9.0 + unreleased, contracts 2.7.0)
+
+Review of deferred task P6.2 (trusted submitter, Q-07): Q-07 stays deferred; the agent-side refusal it called for is
+built for protected projects now, switched by protected mode (DP-2) instead of the campaign config. Synthetic data only.
+
+| Check | Evidence |
+|---|---|
+| Refused in protected mode before any scheduler call | `tests/core/test_partition_protected_batch.py` `ProtectedProjectRefuses`: real `submit`, `resubmit`, `cancel` and `confirm`, `abandon`, `reset`, `clear-orphans` refused with `protected.batch_needs_trusted_submitter`; the scripted executor records no call; campaign-config keys (`submitter`, `protected`) do not switch it off; with broken protected inputs the input refusal comes first |
+| Dry runs and observation unchanged | same file: dry-run `submit` and `cancel`, `poll`, `report` run in protected mode |
+| Outside protected mode unchanged | `OutsideProtectedModeNothingChanges`: a real submit reaches the executor; no guard refusal |
+| Bypass suite | `tests/contracts/test_protected_entry_points.py`: five more batch entry points; every broken-input mode refused at each; `REFUSED_IN_CONTROL` lists the entry points refused with valid inputs |
+
+Not changed: polling (`status`, `watch`) and `reconcile` still call the scheduler client from the agent side when one is
+reachable; on the qualified host the launcher's sandbox and egress rules block it. The trusted submitter itself (T3.5)
+and P6.2's request/sync interface stay unbuilt.
+
 ## 0.9.0 release check (2026-10-14, E2)
 
 Version 0.9.0 is release B of the plan "Complete the agentic architecture inside hep-research" (PR #74): analysis-level
