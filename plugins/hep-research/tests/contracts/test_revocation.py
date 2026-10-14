@@ -419,9 +419,12 @@ class DependencyTests(unittest.TestCase):
 
     def test_inside_protected_mode(self):
         """With the protected inputs established: the authoritative log applies, a legacy --revocations is refused,
-        and an extra chained log must itself be a protected input."""
+        and an extra chained log and its head are read through the protected-input checks."""
+        from unittest import mock
+
+        from core.protected import revocation_log as rl
         from tests.contracts.test_r5_contracts import run_doc
-        from tests.protected_fixture import ProtectedProject
+        from tests.protected_fixture import ProtectedProject, ts
         from contracts.dependencies import validate_dependencies
         pp = ProtectedProject(self.root / "prot").start()
         self.addCleanup(pp.stop)
@@ -440,9 +443,16 @@ class DependencyTests(unittest.TestCase):
         extra = pp.project / "extra.jsonl"
         extra.write_bytes(blob(make_log(0)))
         head = pp.project / "extra-head.json"
-        head.write_text(json.dumps(rv.head_of(make_log(0), SRC, "2026-10-14T11:00:00Z")))
-        rep = validate_dependencies(down, pp.project, revocations=extra, revocation_head=head, revocation_source=SRC)
-        self.assertIn("dependency.revocations_unverified", self.codes(rep))  # a file in the project is replaceable
+        head.write_text(json.dumps(rv.head_of(make_log(0), SRC, ts(-60))))  # fresh at any wall-clock time
+        # The fixture makes every file read as custodian-written, so the replaceability refusal itself is covered by
+        # the trusted_input tests; here the extra log and head must go through that protected read and then verify.
+        with mock.patch.object(rl, "read_protected", wraps=rl.read_protected) as spy:
+            rep = validate_dependencies(down, pp.project, revocations=extra, revocation_head=head,
+                                        revocation_source=SRC)
+        read = {Path(c.args[0]).resolve() for c in spy.call_args_list}
+        self.assertTrue({extra.resolve(), head.resolve()} <= read, read)
+        self.assertNotIn("dependency.revocations_unverified", self.codes(rep))
+        self.assertIn("dependency.revoked", self.codes(rep))  # the authoritative log still applies
 
 class CliTests(unittest.TestCase):
     def run_cli(self, *args):
