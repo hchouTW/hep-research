@@ -14,6 +14,7 @@ import re
 from decimal import Decimal, InvalidOperation, ROUND_HALF_EVEN
 from pathlib import Path
 
+from communication_lib import numbers as N
 from communication_lib import report as R
 from communication_lib.reporting import check_reporting
 from contracts.communication import evidence_fingerprint, format_of
@@ -228,6 +229,12 @@ def audit_claims(record: dict, context: dict, policy: dict) -> dict:
                     add("evidence.locator_not_found", "unresolved", f"{where}.evidence[{e.get('id')}]",
                         f"locator {e.get('locator')!r} does not resolve in {e.get('target')!r}: the source value cannot be read",
                         "fix the locator to the field that holds the value")
+        for o in occ_by_claim.get(cid, []):
+            ov = o.get("value") if isinstance(o.get("value"), dict) else None
+            if ov is not None and o.get("passage") and not N.contains_value(str(o["passage"]), ov.get("value", "")):
+                add("occurrence.value_not_in_passage", "error", f"$.extension.occurrences[{o.get('id')}]",
+                    f"occurrence {o.get('id')} declares display value {ov.get('value')!r}, which is not a number of its recorded passage",
+                    "make the passage and the declared display value agree; no automatic correction")
         fact = {"claim_id": cid, "text": text, "claim_type": c.get("claim_type"), "status": sorted(status), "value": None, "unit": None,
                 "uncertainty": {}, "source": None, "limitations": limitations, "unresolved_inputs": list(c.get("unresolved_inputs", []) or [])}
         if source_value is not None:
