@@ -127,6 +127,8 @@ Domain checklists: [HEP](diagrams-hep.md),
 - Legends, multi-panel figures, equation placement, symbol table, export (SVG/PDF/PNG) ->
   [legends-panels-and-export.md](legends-panels-and-export.md)
 - Posters, theses, talks and Beamer overlays -> [poster-and-talk-design.md](poster-and-talk-design.md)
+- Reading someone else's plot (exclusion contours, posteriors, cutflows; values read off a figure) ->
+  [interpreting-scientific-graphics.md](interpreting-scientific-graphics.md)
 - Starting skeletons -> `../assets/diagrams/` (research-workflow, algorithm-flowchart,
   system-architecture, hep-analysis-pipeline, probabilistic-graphical-model,
   agentic-ai-architecture, ml-pipeline, bayesian-model, svg-spec)

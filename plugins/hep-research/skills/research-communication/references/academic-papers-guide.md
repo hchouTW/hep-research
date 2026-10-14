@@ -120,6 +120,7 @@ Use these when requested or needed to substantiate claims — not for an ordinar
 
 **Verification and auditing**
 - **Literature lookups** — INSPIRE-HEP, ADS and arXiv queries, rate limits, and what to record (source, query, date, read level): `literature-lookup-recipes.md`
+- **Primary sources for statistics and detector methods** — PDG reviews, Cowan et al., pyhf, RooStats, exact-interval and shower-profile sources the plugin's tools rely on: `primary-sources-and-version-checks.md`
 - **Citation verification** — reference identity/version/status and whether cited text supports the claim (a resolving DOI/valid BibTeX entry alone doesn't verify it): `citation-verification.md`
 - **Systematic-review screening** — eligibility, reproducible search logs, deduplication, screening decisions; keep narrative reviews lightweight unless this is requested: `systematic-review-screening.md`
 - **Reproducibility auditing** — trace results to methods/data/code/config/execution evidence; distinguish documentation inspection from an actual rerun (hand execution to `hep-computing`; what a rerun's number means to `hep-statistics`, `hep-analysis` or `physics-ml` as the question demands): `reproducibility-auditing.md`
