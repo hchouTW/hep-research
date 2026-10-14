@@ -20,8 +20,8 @@ sys.path.insert(0, str(ROOT))
 from contracts import validate as v  # noqa: E402
 
 FIX = json.loads((ROOT / "contracts" / "fixtures" / "artifacts" / "valid" / "ml_artifact_v25.json").read_text())
-EX = json.loads((ROOT / "examples" / "ml-classifier-to-inference" / "output" / "artifacts" / "ml_artifact.json")
-                .read_text())
+_EX = ROOT / "examples" / "ml-classifier-to-inference" / "output" / "artifacts" / "ml_artifact.json"
+EX = json.loads(_EX.read_text()) if _EX.is_file() else None  # a copy without example outputs skips the EX rows
 RANK = {"warning": 1, "unresolved": 2, "error": 3}
 
 
@@ -159,13 +159,15 @@ def worst(rep):
 class MutationProbe(unittest.TestCase):
     def test_bases_are_clean(self):
         for name, doc in (("FIX", FIX), ("EX", EX)):
+            if doc is None:
+                continue
             with self.subTest(name):
                 rep = v.validate_artifact(copy.deepcopy(doc))
                 self.assertEqual([f for f in rep.findings if f.severity in ("error", "unresolved")], [], rep.as_dict())
 
     def test_rows_reach_their_level_natively(self):
         for name, row in ROWS.items():
-            if row[4] not in DONE or name in BY_DESIGN:
+            if row[4] not in DONE or name in BY_DESIGN or (row[0] == "EX" and EX is None):
                 continue
             with self.subTest(name):
                 rep = v.validate_artifact(apply(name))
@@ -181,7 +183,7 @@ class MutationProbe(unittest.TestCase):
 
     def test_legacy_artifacts_keep_their_outcome_and_strict_reports(self):
         for name, row in ROWS.items():
-            if row[4] not in DONE or name in BY_DESIGN or row[4] == "0.0":
+            if row[4] not in DONE or name in BY_DESIGN or row[4] == "0.0" or (row[0] == "EX" and EX is None):
                 continue
             with self.subTest(name):
                 doc = apply(name)
@@ -191,8 +193,9 @@ class MutationProbe(unittest.TestCase):
                 self.assertGreaterEqual(worst(v.validate_artifact(doc, strict=True)), RANK["warning"], name)
 
     def test_report_silent_count(self):
-        silent = sorted(name for name in ROWS if worst(v.validate_artifact(apply(name))) == 0)
-        print(f"\nml-artifact mutation probe: {len(silent)} of {len(ROWS)} rows silent: {silent}")
+        rows = [name for name in ROWS if not (ROWS[name][0] == "EX" and EX is None)]
+        silent = sorted(name for name in rows if worst(v.validate_artifact(apply(name))) == 0)
+        print(f"\nml-artifact mutation probe: {len(silent)} of {len(rows)} rows silent: {silent}")
         allowed = {n for n, r in ROWS.items() if r[4] not in DONE} | set(BY_DESIGN)
         self.assertLessEqual(set(silent), allowed)
 

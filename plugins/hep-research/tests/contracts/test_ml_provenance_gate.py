@@ -22,8 +22,9 @@ sys.path.insert(0, str(ROOT))
 from contracts import dependencies, validate  # noqa: E402
 
 J9 = ROOT / "examples" / "ml-classifier-to-inference" / "output"
-ML0 = json.loads((J9 / "artifacts" / "ml_artifact.json").read_text())
-ST0 = json.loads((J9 / "artifacts" / "statistical_result.json").read_text())
+HAVE_J9 = (J9 / "artifacts" / "ml_artifact.json").is_file()  # a copy without example outputs skips these tests
+ML0 = json.loads((J9 / "artifacts" / "ml_artifact.json").read_text()) if HAVE_J9 else {}
+ST0 = json.loads((J9 / "artifacts" / "statistical_result.json").read_text()) if HAVE_J9 else {}
 
 
 def relabel(doc):
@@ -31,6 +32,7 @@ def relabel(doc):
     return doc
 
 
+@unittest.skipUnless(HAVE_J9, "example outputs not present")
 class ProvenanceGateTests(unittest.TestCase):
     def setUp(self):
         self._td = tempfile.TemporaryDirectory()
@@ -121,6 +123,7 @@ class ProvenanceGateTests(unittest.TestCase):
         self.assertIn("dependency.source_unresolved", {f["code"] for f in rep["findings"]})
 
 
+@unittest.skipUnless(HAVE_J9, "example outputs not present")
 class J9ChainTests(unittest.TestCase):
     def test_dependencies_on_the_committed_j9_chain_exit_0(self):
         with tempfile.TemporaryDirectory() as td:
