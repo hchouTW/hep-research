@@ -362,5 +362,20 @@ class ReviewFixes2ChineseTerminology(tt.Base):
         self.assertIn("terminology.abbreviation_undefined", self.codes(rep))
 
 
+class ReviewFixes2LabelWords(unittest.TestCase):
+    """RC-A13: status words are matched as words; NEGATED_RE no longer fires on every 未."""
+
+    def test_status_word_boundaries(self):
+        from communication_lib.adaptation import NEGATED_RE, _has_label
+        self.assertTrue(_has_label("a synthetic sample", "synthetic"))
+        self.assertTrue(_has_label("R為1.09（合成資料）", "合成"))
+        self.assertFalse(_has_label("a non-synthetic sample", "synthetic"))
+        self.assertFalse(_has_label("the sample is not synthetic", "synthetic"))
+        self.assertFalse(_has_label("非合成樣本", "合成"))
+        self.assertTrue(_has_label("未經驗證的結果", "未經驗證"))
+        self.assertIsNone(NEGATED_RE.search("結果未驗證"))
+        self.assertIsNotNone(NEGATED_RE.search("we have not yet rerun it"))
+
+
 if __name__ == "__main__":
     unittest.main()
