@@ -48,6 +48,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from check_split_integrity import canonical_key, parse_timestamp  # noqa: E402  (one normalization for both tools)
 
+STATUSES = ("synthetic", "asimov", "observed", "preliminary", "failed", "unvalidated", "user-supplied",
+            "validated-in-scope")  # contracts/vocab/core.json artifact_statuses
 SPLITS = ("train", "val", "test")
 NULL_MARKERS = {"", "nan", "null", "none", "na"}
 
@@ -295,6 +297,8 @@ def main(argv=None) -> int:
                     help="what to do with rows whose group is null or empty (default: refuse)")
     ap.add_argument("--case-sensitive", action="store_true", help="keep case when comparing IDs and groups")
     ap.add_argument("--format", choices=("csv", "jsonl", "json"), help="override the format from the extension")
+    ap.add_argument("--status", default="unvalidated", choices=STATUSES,
+                    help="status label of the input data, echoed as status_label in the output (default unvalidated)")
     ap.add_argument("--out", required=True, help="where to write the split manifest (JSON)")
     args = ap.parse_args(argv)
     try:
@@ -305,6 +309,7 @@ def main(argv=None) -> int:
                                         args.allow_empty_class)
         text = json.dumps(manifest, indent=1, allow_nan=False)
         summary["manifest"] = str(args.out)
+        summary["status_label"] = args.status
         try:
             Path(args.out).write_text(text + "\n", encoding="utf-8")
         except OSError as exc:

@@ -195,7 +195,8 @@ def main():
             seq_len=args.seq_len, hidden=args.hidden,
             tokens_per_second=args.tokens_per_second)
     except ValueError as exc:
-        sys.exit(f"error: {exc}")
+        print(f"error: {exc}", file=sys.stderr)
+        sys.exit(2)
     print(_format(result))
 
 

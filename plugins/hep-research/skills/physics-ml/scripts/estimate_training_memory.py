@@ -22,6 +22,7 @@ Run: python3 <plugin root>/skills/physics-ml/scripts/estimate_training_memory.py
 
 import argparse
 import json
+import math
 import sys
 
 BYTES_PER_GB = 1024 ** 3
@@ -308,6 +309,15 @@ def main():
                 settings["layers"], settings["hidden"],
                 settings.get("vocab_size") or 0, settings.get("ffn_ratio") or 4.0)
 
+        for name in ("params", "gpu_memory_gb", "ffn_ratio"):
+            value = settings.get(name)
+            if value is not None and (not math.isfinite(float(value)) or float(value) <= 0):
+                raise ValueError(f"{name} must be a finite positive number, got {value!r}")
+        for name in ("layers", "hidden", "heads", "seq_len", "micro_batch", "microbatches", "gpus",
+                     "tensor_parallel", "pipeline_parallel"):
+            value = settings.get(name)
+            if value is not None and int(value) < 1:
+                raise ValueError(f"{name} must be a positive integer, got {value!r}")
         common = dict(
             params=float(settings["params"]), gpus=settings["gpus"],
             gpu_memory_gb=settings["gpu_memory_gb"], precision=settings["precision"],
@@ -323,7 +333,8 @@ def main():
         unsharded = estimate(**{**common, "zero_stage": 0})
         advice = advise(result, sum(unsharded["per_gpu_bytes"].values()))
     except (OSError, ValueError, KeyError, json.JSONDecodeError) as exc:
-        sys.exit(f"error: {exc}")
+        print(f"error: {exc}", file=sys.stderr)
+        sys.exit(2)
 
     if args.json:
         print(json.dumps({**result, "advice": advice}, indent=2))

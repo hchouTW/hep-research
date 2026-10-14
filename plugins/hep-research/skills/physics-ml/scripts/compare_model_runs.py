@@ -45,6 +45,9 @@ T_POWER_FACTOR = {
 }
 
 
+STATUSES = ("synthetic", "asimov", "observed", "preliminary", "failed", "unvalidated", "user-supplied",
+            "validated-in-scope")  # contracts/vocab/core.json artifact_statuses
+
 def _scores(values, name):
     if not isinstance(values, (list, tuple)) or len(values) < 2:
         raise ValueError(f"{name} must be a list of at least two per-seed scores")
@@ -209,6 +212,8 @@ def main():
                         help="score direction; overrides 'lower_is_better' in the runs file when given")
     parser.add_argument("--resamples", type=int, default=DEFAULT_RESAMPLES)
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--status", default="unvalidated", choices=STATUSES,
+                    help="status label of the input data, echoed as status_label in the output (default unvalidated)")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
 
@@ -241,10 +246,11 @@ def main():
         result["lower_is_better_source"] = source
         lines = verdict(result)
     except (OSError, ValueError, KeyError, json.JSONDecodeError) as exc:
-        sys.exit(f"error: {exc}")
+        print(f"error: {exc}", file=sys.stderr)
+        sys.exit(2)
 
     if args.json:
-        print(json.dumps({**result, "verdict": lines}, indent=2, allow_nan=False))
+        print(json.dumps({**result, "verdict": lines, "status_label": args.status}, indent=2, allow_nan=False))
     else:
         print(_format(result, lines))
 

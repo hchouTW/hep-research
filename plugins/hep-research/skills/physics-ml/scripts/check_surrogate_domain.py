@@ -52,6 +52,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))  # plugin root: core.stats for the interval
 
+STATUSES = ("synthetic", "asimov", "observed", "preliminary", "failed", "unvalidated", "user-supplied",
+            "validated-in-scope")  # contracts/vocab/core.json artifact_statuses
 MIN_HELD_OUT = 10
 EIGEN_RTOL = 1e-10  # eigenvalues below this fraction of the largest are treated as zero variance
 CONSTANT_RTOL = 1e-12  # a feature whose spread is below this (relative to its magnitude) is constant
@@ -483,6 +485,8 @@ def main(argv=None) -> int:
     ap.add_argument("--holdout-fraction", type=float, default=0.2,
                     help="fraction of training points held out to calibrate the thresholds (default 0.2)")
     ap.add_argument("--seed", type=int, default=0, help="seed for the fit/held-out split (default 0)")
+    ap.add_argument("--status", default="unvalidated", choices=STATUSES,
+                    help="status label of the input data, echoed as status_label in the output (default unvalidated)")
     ap.add_argument("--box-strict", action="store_true",
                     help="also mark a query 'outside' when any single coordinate leaves the training box")
     args = ap.parse_args(argv)
@@ -493,6 +497,7 @@ def main(argv=None) -> int:
 
         with np.errstate(over="ignore", invalid="ignore", divide="ignore"):  # overflow is caught as exit 3
             rep = check(payload, args.quantile, args.k, args.holdout_fraction, args.seed, args.box_strict)
+            rep["status_label"] = args.status
         try:
             text = json.dumps(rep, indent=1, allow_nan=False)
         except ValueError as exc:  # a non-finite number reached the report

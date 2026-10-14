@@ -40,13 +40,15 @@ def main():
     args = parser.parse_args()
 
     if torch is None:
-        sys.exit(f"PyTorch is required to run this script but could not be imported: {_TORCH_IMPORT_ERROR}")
+        print(f"PyTorch is required to run this script but could not be imported: {_TORCH_IMPORT_ERROR}", file=sys.stderr)
+        sys.exit(3)
 
     try:
         ckpt = torch.load(args.checkpoint, map_location="cpu", weights_only=not args.unsafe_full_unpickle)
     except pickle.UnpicklingError as exc:
-        sys.exit(f"Refused to load {args.checkpoint} with weights_only=True: {exc}\n"
-                 "Re-run with --unsafe-full-unpickle only if you trust this file.")
+        print(f"Refused to load {args.checkpoint} with weights_only=True: {exc}\n"
+              "Re-run with --unsafe-full-unpickle only if you trust this file.", file=sys.stderr)
+        sys.exit(2)
     describe_value(ckpt)
 
 

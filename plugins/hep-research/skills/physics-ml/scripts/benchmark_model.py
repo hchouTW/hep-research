@@ -21,6 +21,16 @@ else:
     _TORCH_IMPORT_ERROR = None
 
 
+
+def _count(minimum):
+    """argparse type: an integer >= minimum (a bad count is a usage error, exit 2, not a traceback)."""
+    def parse(text):
+        value = int(text)
+        if value < minimum:
+            raise argparse.ArgumentTypeError(f"must be an integer >= {minimum}, got {text}")
+        return value
+    return parse
+
 def get_device(name: str) -> torch.device:
     if name != "auto":
         return torch.device(name)
@@ -45,16 +55,17 @@ def synchronize(device: torch.device) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--device", default="auto")
-    parser.add_argument("--batch-size", type=int, default=256)
-    parser.add_argument("--input-dim", type=int, default=1024)
-    parser.add_argument("--num-classes", type=int, default=10)
-    parser.add_argument("--warmup", type=int, default=10)
-    parser.add_argument("--steps", type=int, default=100)
+    parser.add_argument("--batch-size", type=_count(1), default=256)
+    parser.add_argument("--input-dim", type=_count(1), default=1024)
+    parser.add_argument("--num-classes", type=_count(1), default=10)
+    parser.add_argument("--warmup", type=_count(0), default=10)
+    parser.add_argument("--steps", type=_count(1), default=100)
     parser.add_argument("--amp", action="store_true")
     args = parser.parse_args()
 
     if torch is None:
-        sys.exit(f"PyTorch is required to run this script but could not be imported: {_TORCH_IMPORT_ERROR}")
+        print(f"PyTorch is required to run this script but could not be imported: {_TORCH_IMPORT_ERROR}", file=sys.stderr)
+        sys.exit(3)
 
     device = get_device(args.device)
     model = build_model(args.input_dim, args.num_classes).to(device)

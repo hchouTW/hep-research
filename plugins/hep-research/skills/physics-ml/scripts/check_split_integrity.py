@@ -49,6 +49,8 @@ import math
 import re
 import sys
 
+STATUSES = ("synthetic", "asimov", "observed", "preliminary", "failed", "unvalidated", "user-supplied",
+            "validated-in-scope")  # contracts/vocab/core.json artifact_statuses
 RESERVED_KEYS = {"groups", "timestamps", "temporal_order", "roles", "_comment"}
 NULL_MARKERS = {"", "nan", "null", "none", "na"}
 
@@ -366,6 +368,8 @@ def main():
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--strict", action="store_true",
                         help="every sample needs grouping (and, with temporal_order, timestamp) metadata")
+    parser.add_argument("--status", default="unvalidated", choices=STATUSES,
+                    help="status label of the input data, echoed as status_label in the output (default unvalidated)")
     parser.add_argument("--case-sensitive", action="store_true",
                         help="compare IDs and groups with case (default: case-folded; whitespace is always stripped)")
     args = parser.parse_args()
@@ -376,6 +380,7 @@ def main():
         if not isinstance(payload, dict):
             raise ValueError("splits file must contain a JSON object")
         report = check(payload, strict=args.strict, case_sensitive=args.case_sensitive)
+        report["status_label"] = args.status
         text = json.dumps(report, indent=2, allow_nan=False) if args.json else _format(report)
     except OSError as exc:
         print(f"error: {exc}", file=sys.stderr)
