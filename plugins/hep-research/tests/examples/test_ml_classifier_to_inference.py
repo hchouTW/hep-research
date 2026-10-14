@@ -76,8 +76,9 @@ class J9MlToInferenceTests(unittest.TestCase):
     def test_committed_artifacts_match_within_tolerance(self):
         """ML-K13: the committed ml_artifact.json and statistical_result.json, not only the rounded results.json, are
         reproduced: every number within a relative tolerance of 1e-9 (last-bit BLAS differences), every other value
-        equal; digests and input hashes are skipped because they move with the artifact bytes."""
-        skip = {"sha256", "plugin_release", "digest"}
+        equal; digests and input hashes are skipped because they move with the artifact bytes, and the framework version
+        because it records the installed NumPy, not a result."""
+        skip = {"sha256", "plugin_release", "digest", "framework"}
 
         def close(a, b, path):
             if isinstance(a, dict) and isinstance(b, dict):
