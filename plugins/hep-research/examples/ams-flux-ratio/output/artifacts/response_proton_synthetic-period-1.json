@@ -80,10 +80,21 @@
   "applied_separately": [
    "trigger_efficiency",
    "selection_efficiency",
-   "acceptance",
-   "livetime",
-   "crflux:cutoff_fraction"
+   "exposure"
   ],
+  "correction_space": {
+   "trigger_efficiency": {
+    "space": "truth"
+   },
+   "selection_efficiency": {
+    "space": "truth",
+    "binned_in": "rigidity"
+   },
+   "exposure": {
+    "space": "truth",
+    "binned_in": "rigidity"
+   }
+  },
   "underflow_overflow": "explicit_bins",
   "intended_use": "unfolding",
   "conditions": "synthetic-period-1 (the spectral shape inside bins differs slightly between periods)",

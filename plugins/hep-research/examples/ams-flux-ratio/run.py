@@ -455,8 +455,12 @@ def artifacts(world, res, created):
                                       "reco_axis": {"name": "rigidity", "unit": "GV", "edges": EDGES.tolist()},
                                       "orientation": "rows_reco_cols_truth", "normalization": "conditional_on_selected",
                                       "inefficiency": "outside_matrix", "acceptance": "outside_matrix", "includes": ["migration"],
-                                      "applied_separately": ["trigger_efficiency", "selection_efficiency", "acceptance", "livetime",
-                                                             "crflux:cutoff_fraction"],
+                                      "applied_separately": ["trigger_efficiency", "selection_efficiency", "exposure"],
+                                      # analyse() divides the unfolded (truth-space) counts by the efficiencies and by
+                                      # the exposure per rigidity bin (acceptance x livetime x cutoff fraction)
+                                      "correction_space": {"trigger_efficiency": {"space": "truth"},
+                                                           "selection_efficiency": {"space": "truth", "binned_in": "rigidity"},
+                                                           "exposure": {"space": "truth", "binned_in": "rigidity"}},
                                       "underflow_overflow": "explicit_bins", "intended_use": "unfolding",
                                       "conditions": f"{pname} (the spectral shape inside bins differs slightly between periods)",
                                       "provenance": "computed analytically from the synthetic resolution model; migration outside "
