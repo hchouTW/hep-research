@@ -3,7 +3,7 @@
 Illustrative, not verified against any named experiment, codebase, or venue template. Each
 file shows: request, diagram type, assumptions, source (Mermaid/DOT/TikZ/ASCII), validation
 checks, caption. Mermaid sources were rendered with `mmdc`, DOT compiled with `dot`, and the SVG
-example rasterized and inspected, and the TikZ sources (`hep/07` manual-placement Feynman, `hep/08`, `statistics/02`) compiled with Tectonic and inspected (`hep/07` also with LuaLaTeX and pdfLaTeX); the PlantUML sources (`computer-science/09-10`) were rendered with PlantUML and inspected. Render and inspect before publishing.
+example rasterized and inspected, and the TikZ sources (`hep/07`, `hep/08`, `statistics/02`) compiled with LuaLaTeX by `check_diagram_sources.py` on 2026-10-14 (LuaHBTeX 1.24, TeX Live 2026; compiled, not inspected in that run; `hep/07` was earlier also compiled with Tectonic and pdfLaTeX and inspected); the PlantUML sources (`computer-science/09-10`) were rendered with PlantUML and inspected. Render and inspect before publishing.
 
 | Dir | Files |
 |---|---|

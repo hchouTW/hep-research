@@ -14,7 +14,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-statistics | 11 | 150 | 0 |
 | hep-theory | 11 | 78 | 0 |
 | physics-ml | 38 | 257 | 0 |
-| research-communication | 53 | 369 | 0 |
+| research-communication | 53 | 370 | 0 |
 
 ## Overlapping pairs
 
@@ -235,7 +235,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `diagram-captions.md` | research-communication | 3.3 | no | 1 | - | 351029c 2026-10-07 |
 | `diagram-figure-style.md` | research-communication | 6.1 | no | 1 | - | 351029c 2026-10-07 |
 | `diagrams-computer-science.md` | research-communication | 5.5 | no | 2 | - | 351029c 2026-10-07 |
-| `diagrams-hep.md` | research-communication | 6.3 | no | 2 | - | 351029c 2026-10-07 |
+| `diagrams-hep.md` | research-communication | 6.3 | no | 2 | - | 6de93ff 2026-10-14 |
 | `diagrams-statistics.md` | research-communication | 6.2 | no | 2 | - | 351029c 2026-10-07 |
 | `equation-and-notation-auditing.md` | research-communication | 3.9 | no | 5 | hep-statistics, hep-theory | d3212bd 2026-10-12 |
 | `erratum-and-corrigendum-drafting.md` | research-communication | 4.4 | no | 2 | - | cbadba4 2026-10-14 |
@@ -273,4 +273,4 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `supplementary-material-planning.md` | research-communication | 2.0 | no | 1 | - | 351029c 2026-10-07 |
 | `systematic-review-screening.md` | research-communication | 3.0 | no | 2 | - | 351029c 2026-10-07 |
 | `thesis-by-publication-assembly.md` | research-communication | 3.8 | no | 2 | - | 351029c 2026-10-07 |
-| `tikz-patterns.md` | research-communication | 5.3 | no | 8 | - | 351029c 2026-10-07 |
+| `tikz-patterns.md` | research-communication | 5.8 | no | 8 | - | 351029c 2026-10-07 |

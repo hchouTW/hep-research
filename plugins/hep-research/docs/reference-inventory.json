@@ -35,7 +35,7 @@
   },
   "research-communication": {
    "references": 53,
-   "bytes": 369493,
+   "bytes": 369905,
    "uncited": 0
   }
  },
@@ -2781,7 +2781,7 @@
     "skills/research-communication/references/academic-diagrams-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "6de93ff 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/diagrams-statistics.md",
@@ -3364,8 +3364,8 @@
   {
    "path": "skills/research-communication/references/tikz-patterns.md",
    "owner": "research-communication",
-   "bytes": 5344,
-   "lines": 125,
+   "bytes": 5756,
+   "lines": 128,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/assets/diagrams/bayesian-model.md",
