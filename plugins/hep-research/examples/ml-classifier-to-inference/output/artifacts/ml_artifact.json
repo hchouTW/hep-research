@@ -28,28 +28,7 @@
   "created": "2026-10-13",
   "evidence_ids": []
  },
- "inputs": [
-  {
-   "ref": "work/run_summary.json",
-   "sha256": "c81b865bb29048ce6bb7844898428ed5f4700a3d33fd4206df34ffb609e6d441"
-  },
-  {
-   "ref": "work/split_check.json",
-   "sha256": "ff19e40fe457f30d58b2e2f7cacc3cb614da6d3150cefc9f8f02d3425bcea089"
-  },
-  {
-   "ref": "work/calibration.json",
-   "sha256": "5f63df6bea2420461561e6c144a7511b528acf5f34fc8e00623b817a483e3e8d"
-  },
-  {
-   "ref": "work/domain_shift.json",
-   "sha256": "97daca1f8f21aad924c699c8b3cd93bbd3d40c98a9c3a4b3dff949fb0379a905"
-  },
-  {
-   "ref": "work/downstream.json",
-   "sha256": "0d2e75fa1cc56fd6cfbf6140475f59c254e82345604d15a1aeaa8c0fe2ddeee9"
-  }
- ],
+ "inputs": [],
  "outputs": [
   {
    "ref": "work/model.json",
@@ -296,6 +275,33 @@
     "metric": "shift of mu on Asimov when the background pt_miss scale is the one measured in the control sample (fit without the nuisance)",
     "delta_mu": -0.107539,
     "note": "the fit carries this shift as the nuisance theta_pt_miss_scale; the pseudo-data are generated without the shift"
+   }
+  ],
+  "source_files": [
+   {
+    "ref": "work/run_summary.json",
+    "sha256": "c81b865bb29048ce6bb7844898428ed5f4700a3d33fd4206df34ffb609e6d441",
+    "role": "run-summary"
+   },
+   {
+    "ref": "work/split_check.json",
+    "sha256": "ff19e40fe457f30d58b2e2f7cacc3cb614da6d3150cefc9f8f02d3425bcea089",
+    "role": "split-report"
+   },
+   {
+    "ref": "work/calibration.json",
+    "sha256": "5f63df6bea2420461561e6c144a7511b528acf5f34fc8e00623b817a483e3e8d",
+    "role": "calibration"
+   },
+   {
+    "ref": "work/domain_shift.json",
+    "sha256": "97daca1f8f21aad924c699c8b3cd93bbd3d40c98a9c3a4b3dff949fb0379a905",
+    "role": "domain-shift"
+   },
+   {
+    "ref": "work/downstream.json",
+    "sha256": "0d2e75fa1cc56fd6cfbf6140475f59c254e82345604d15a1aeaa8c0fe2ddeee9",
+    "role": "downstream-validation"
    }
   ]
  }

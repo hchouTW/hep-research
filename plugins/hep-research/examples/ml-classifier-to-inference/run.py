@@ -404,6 +404,7 @@ def stat_artifact(fit, asimov, toy, ml_doc, ml_ref, ml_sha, gof, created) -> dic
                         "sha256": ml_sha, "version": ml_doc["contract_version"], "status": ml_doc["status"]}],
             "outputs": [], "status": ["synthetic"], "unresolved_inputs": [],
             "extension": {
+                "observable_source": {"kind": "ml-score", "ml_artifact": ml_ref},
                 "paradigm": "frequentist",
                 "likelihood": {"form": "extended binned Poisson in the calibrated classifier probability "
                                        f"({len(EDGES) - 1} bins), mean mu s_i + gamma_i b_i(theta); b_i(theta) "

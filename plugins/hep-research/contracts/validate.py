@@ -841,6 +841,30 @@ def _is_num(v) -> bool:
     return isinstance(v, (int, float)) and not isinstance(v, bool)
 
 
+def _observable_source(doc: dict, ext: dict, rep: Report) -> None:
+    """observable_source kind ml-score names an input of artifact_type ml-artifact (PML-WP0.5, ML-K01)."""
+    src: Any = ext.get("observable_source")
+    if not (isinstance(src, dict) and src.get("kind") == "ml-score"):
+        return
+    name = src.get("ml_artifact")
+    inp = _ml_input(doc, name)
+    if _blank(name) or inp is None:
+        rep.add("error", "$.extension.observable_source", "stats.observable_source_unlinked",
+                f"the observable is an ML score of '{name}', but no input names that ml-artifact: list it in inputs "
+                "(ref, artifact_type ml-artifact, sha256) so the chain can be checked")
+    elif inp.get("artifact_type") != "ml-artifact":
+        rep.add("error", "$.extension.observable_source", "stats.observable_source_unlinked",
+                f"the input '{name}' is declared as {inp.get('artifact_type')!r}, not an ml-artifact")
+
+
+def _ml_input(doc: dict, name) -> dict | None:
+    """The input whose ref or artifact_id is `name` (the ML artifact an observable_source names)."""
+    for inp in doc.get("inputs") or []:
+        if isinstance(inp, dict) and name is not None and name in (inp.get("ref"), inp.get("artifact_id")):
+            return inp
+    return None
+
+
 def _stat_semantics(doc: dict, ext: dict, rep: Report, strict: bool) -> None:
     """Numerical and semantic invariants of a statistical-result (audit F04, T06, T07). They apply natively to
     artifacts of contract 2.2.0 or later; an older artifact gets them only in strict mode, so its promised outcome
@@ -1264,7 +1288,7 @@ def _check_bands(exp: dict, rep: Report) -> None:
                     f"expected bands must satisfy -2sigma <= -1sigma <= median <= +1sigma <= +2sigma; {n1} = {v1} > {n2} = {v2}")
 
 
-def publication_gate(doc: dict, vocab: Vocabulary | None = None) -> dict:
+def publication_gate(doc: dict, vocab: Vocabulary | None = None, base_dir=None) -> dict:
     """Publication gate of a statistical-result (T07): status passed, unresolved or failed, with reasons.
 
     failed: the artifact has errors under strict validation, carries the 'failed' status, carries 'synthetic' or
@@ -1275,7 +1299,15 @@ def publication_gate(doc: dict, vocab: Vocabulary | None = None) -> dict:
     label, unresolved inputs, fit_status converged-with-warnings, untyped or not-checked coverage (frequentist), a scan
     without a global p-value and its trials_method, a Bayesian result without numeric R-hat and ESS, or no model and
     backend provenance (a non-blank likelihood.backend with a non-blank model_ref or model_sha256). Passing says the contract-level
-    prerequisites for reporting the result as validated are present; it is not a scientific validation."""
+    prerequisites for reporting the result as validated are present; it is not a scientific validation.
+
+    ML provenance (contracts 2.8.0, physics-ml audit WP0.5): every input of artifact_type ml-artifact, and the one
+    extension.observable_source names (kind ml-score), is resolved relative to base_dir (the folder of the artifact;
+    a ref may also be relative to up to three of its parent folders, as project-relative refs are), its sha256 is
+    checked and it is validated strictly: an error there fails the gate (gate.ml_input_invalid), an unresolved
+    finding leaves it unresolved (gate.ml_input_unresolved: for example a failed domain-shift check or a split check
+    that was not run). Without base_dir, or when the file cannot be found, the gate is unresolved
+    (gate.ml_input_unchecked)."""
     reasons: list[dict] = []
 
     def add(level, code, msg):
@@ -1340,9 +1372,58 @@ def publication_gate(doc: dict, vocab: Vocabulary | None = None) -> dict:
     lik: Any = ext.get("likelihood") if isinstance(ext.get("likelihood"), dict) else {}
     if _blank(lik.get("backend")) or (_blank(lik.get("model_ref")) and _blank(lik.get("model_sha256"))):
         add("unresolved", "gate.model_provenance_missing", "likelihood.backend and a model_ref or model_sha256 are required")
+    _gate_ml_inputs(doc, ext, vocab, base_dir, add)
     levels = {r["level"] for r in reasons}
     status_out = "failed" if "failed" in levels else ("unresolved" if levels else "passed")
     return {"gate": "publication", "status": status_out, "reasons": reasons}
+
+
+def _gate_ml_inputs(doc: dict, ext: dict, vocab, base_dir, add) -> None:
+    """Resolve and validate the ml-artifact inputs of a statistical result (see publication_gate)."""
+    import hashlib
+    src: Any = ext.get("observable_source") if isinstance(ext.get("observable_source"), dict) else {}
+    wanted = []
+    if src.get("kind") == "ml-score":
+        inp = _ml_input(doc, src.get("ml_artifact"))
+        if inp is not None and inp.get("artifact_type") == "ml-artifact":
+            wanted.append(inp)
+    wanted += [i for i in doc.get("inputs") or [] if isinstance(i, dict) and i.get("artifact_type") == "ml-artifact"
+               and i not in wanted]
+    for inp in wanted:
+        ref = inp.get("ref")
+        path = None
+        if base_dir is not None and isinstance(ref, str) and ref and not Path(ref).is_absolute():
+            base = Path(base_dir).resolve()
+            for folder in (base, *list(base.parents)[:3]):
+                cand = (folder / ref).resolve()
+                if (cand == folder or folder in cand.parents) and cand.is_file():
+                    path = cand
+                    break
+        if path is None:
+            add("unresolved", "gate.ml_input_unchecked",
+                f"the ml-artifact input {ref!r} could not be resolved here; check the chain with contracts/dependencies.py")
+            continue
+        data = path.read_bytes()
+        sha = inp.get("sha256")
+        if isinstance(sha, str) and sha != hashlib.sha256(data).hexdigest():
+            add("failed", "gate.ml_input_hash_mismatch", f"the ml-artifact input {ref!r} does not match its sha256")
+            continue
+        try:
+            mdoc = json.loads(data.decode("utf-8"))
+        except (UnicodeDecodeError, ValueError):
+            add("failed", "gate.ml_input_invalid", f"the ml-artifact input {ref!r} is not JSON")
+            continue
+        if not isinstance(mdoc, dict) or mdoc.get("artifact_type") != "ml-artifact":
+            add("failed", "gate.ml_input_invalid", f"the input {ref!r} is not an ml-artifact")
+            continue
+        mrep = validate_artifact(mdoc, vocab, strict=True)
+        errors = sorted({f.code for f in mrep.findings if f.severity == "error"})
+        unresolved = sorted({f.code for f in mrep.findings if f.severity == "unresolved"})
+        if errors:
+            add("failed", "gate.ml_input_invalid", f"the ml-artifact {ref!r} the result rests on has errors: {', '.join(errors)}")
+        elif unresolved:
+            add("unresolved", "gate.ml_input_unresolved",
+                f"the ml-artifact {ref!r} the result rests on is not established: {', '.join(unresolved)}")
 
 
 def _max_rhat(conv):
@@ -1450,6 +1531,8 @@ def validate_artifact(doc, vocab: Vocabulary | None = None, protected: bool = Fa
                     validate(ext, "ext_statistical_result_v2_6.json", vocab, rep, "$.extension")
                 if not any(f.code in SHAPE_ERRORS for f in rep.errors):
                     _stat_semantics(doc, ext, rep, strict)
+                    if strict or _at_least(doc.get("contract_version"), ML_SEMANTICS_V2_FROM):
+                        _observable_source(doc, ext, rep)
     return rep
 
 
@@ -1491,7 +1574,7 @@ def main(argv=None) -> int:
         if i >= len(args) or args[i] != "publication":
             print(json.dumps({"ok": False, "error": "--gate takes 'publication'"}))
             return 2
-        gate = publication_gate(doc, vocab)
+        gate = publication_gate(doc, vocab, base_dir=Path(positional[0]).resolve().parent)
     rep = validate_artifact(doc, vocab, protected="--protected" in args, strict="--strict" in args,
                             strict_versions="--strict-versions" in args)
     rep.findings[:0] = pre.findings

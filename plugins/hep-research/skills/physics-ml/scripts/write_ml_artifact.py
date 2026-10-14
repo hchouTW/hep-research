@@ -13,8 +13,9 @@ hash, environment and metrics from the run summary into the extension; takes the
 (overlaps, duplicates, group leakage, temporal violations, coverage); a "passed" status the body contradicts is
 refused. test_groups_disjoint comes from its group leakage when the group metadata was complete, with the test split
 named by the manifest's "roles": {"test": NAME} (default "test", case-insensitive). A summary split_check with no
-report behind it is recorded as not-run, never as pass; adds the calibration, domain-shift check and downstream validations when given; lists every input
-file with its sha256 and the checkpoint and score files as outputs; fills the envelope (contract and plugin
+report behind it is recorded as not-run, never as pass; adds the calibration, domain-shift check and downstream
+validations when given; lists every file it read with its sha256 in extension.source_files (tool outputs, not
+artifacts, so not inputs[]) and the checkpoint and score files as outputs; fills the envelope (contract and plugin
 versions, plugin_release identity, status labels). It then validates the artifact with contracts/validate.py
 (validate_artifact) and writes it only when there is no error. Warnings and unresolved findings are reported and
 kept: an unresolved artifact is valid but not yet usable as a final result.
@@ -145,7 +146,10 @@ def build(a: argparse.Namespace) -> dict:
     missing = [k for k in REQUIRED if k not in summary]
     if missing:
         raise ValueError(f"the run summary lacks {', '.join(missing)}")
-    inputs = [{"ref": a.run_summary, "sha256": digest}]
+    # tool outputs are files, not contract artifacts: they go to extension.source_files, never inputs[] (which
+    # contracts/dependencies.py resolves and validates as artifacts)
+    inputs: list = []
+    sources = [{"ref": a.run_summary, "sha256": digest, "role": "run-summary"}]
     splits: dict = {"grouping_key": summary["grouping_key"]}
     if summary.get("split_manifest"):
         splits["manifest"] = summary["split_manifest"]
@@ -166,7 +170,7 @@ def build(a: argparse.Namespace) -> dict:
         splits["overlap_check"], disjoint = overlap_from_report(report, report_path, test_split)
         if disjoint is not None:
             splits["test_groups_disjoint"] = disjoint
-        inputs.append({"ref": report_path, "sha256": h})
+        sources.append({"ref": report_path, "sha256": h, "role": "split-report"})
     ext: dict = {"task": summary["task"], "labels": summary["labels"], "features": summary["features"],
                  "splits": splits, "training_domain": summary["training_domain"],
                  "preprocessing": summary.get("preprocessing") or [], "model_hash": summary["model_hash"]}
@@ -183,21 +187,22 @@ def build(a: argparse.Namespace) -> dict:
         ext["calibration"] = dict(cal["calibration"])
         if isinstance(cal.get("sample_check"), dict):  # older calibration.py output keeps it beside the block
             ext["calibration"].setdefault("sample_check", cal["sample_check"])
-        inputs.append({"ref": a.calibration, "sha256": h})
+        sources.append({"ref": a.calibration, "sha256": h, "role": "calibration"})
     if a.domain_shift:
         ds, h = _load(a.domain_shift)
         ds = ds.get("domain_shift", ds) if isinstance(ds, dict) else ds
         if not isinstance(ds, dict):
             raise ValueError("the domain-shift file must be a JSON object")
         ext["domain_shift"] = ds
-        inputs.append({"ref": a.domain_shift, "sha256": h})
+        sources.append({"ref": a.domain_shift, "sha256": h, "role": "domain-shift"})
     ext["downstream_validation"] = []
     if a.downstream:
         dv, h = _load(a.downstream)
         if not isinstance(dv, list):
             raise ValueError("the downstream file must be a JSON list")
         ext["downstream_validation"] = dv
-        inputs.append({"ref": a.downstream, "sha256": h})
+        sources.append({"ref": a.downstream, "sha256": h, "role": "downstream-validation"})
+    ext["source_files"] = sources
     outputs = [{"ref": summary["checkpoint"], "kind": "checkpoint"}] if summary.get("checkpoint") else []
     for split, path in sorted((summary.get("scores") or {}).items()):
         if path:

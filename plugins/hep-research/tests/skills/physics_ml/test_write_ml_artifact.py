@@ -36,7 +36,7 @@ CALIBRATION = {"calibration": {"method": "temperature", "params": {"T": 1.3}, "f
                                "validation": {"metric": "ece", "sample": "test", "before": 0.06, "after": 0.01,
                                               "bins": 15, "binning": "equal-width"}}}
 DOMAIN_SHIFT = {"control_sample": "synthetic control region", "method": "score-shape comparison",
-                "result": {"ks_p": 0.3}, "status": "checked"}
+                "result": {"ks_p": 0.3}, "status": "checked", "outcome": "no-shift"}
 DOWNSTREAM = [{"metric": "signal efficiency at the working point in the synthetic signal region"}]
 
 
@@ -76,7 +76,8 @@ class WriteMlArtifactTests(unittest.TestCase):
         self.assertEqual(doc["extension"]["calibration"]["validation"]["sample"], "test")
         self.assertEqual(doc["extension"]["splits"]["overlap_check"]["result"], "pass")
         self.assertEqual([o["ref"] for o in doc["outputs"]], ["model.pt", "scores_test.npz"])
-        self.assertTrue(all(len(i["sha256"]) == 64 for i in doc["inputs"]))
+        self.assertEqual(doc["inputs"], [])  # tool outputs are source files, not artifact inputs (PML-WP0.5)
+        self.assertTrue(all(len(i["sha256"]) == 64 for i in doc["extension"]["source_files"]))
         self.assertTrue(doc["extension"]["splits"]["test_groups_disjoint"])
         rep = validate_artifact(doc)
         self.assertTrue(rep.ok, rep.as_dict())
