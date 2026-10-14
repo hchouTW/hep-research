@@ -93,12 +93,20 @@ def diff_communication(before: dict, after: dict, context: dict) -> dict:
     for o in a_ext.get("occurrences", []) or []:
         if isinstance(o, dict):
             a_occ.setdefault(o.get("claim_id"), []).append(o)
+    if not a_claims:
+        findings.append(R.finding("revision.no_claims", "unresolved", "$.extension.claims",
+                                  "the revised record declares no claim: there is nothing whose impact could be traced",
+                                  "add the claims the document makes, or state why none is traceable", source="revisions"))
     content_complete = True
     stale_occurrences = 0
     for idx, (cid, ac) in enumerate(a_claims.items()):
         where = f"$.extension.claims[{idx}]"
         bc = b_claims.get(cid)
         if bc is None:
+            if (a_ext.get("scope") or {}).get("occurrences") and not a_occ.get(cid):
+                findings.append(R.finding("occurrence.claim_without_occurrence", "unresolved", where,
+                                          f"added claim {cid} has no declared occurrence although manuscript coverage is in scope",
+                                          "map where the claim appears, or record that it appears nowhere", claim=cid, source="revisions"))
             impacts.append({"claim_id": cid, "kind": "added", "evidence_changed": [], "value_change": None, "assessment": "none",
                             "occurrences": [{"id": o.get("id"), "state": "new"} for o in a_occ.get(cid, [])],
                             "required_actions": ["assess the new claim against its evidence"], "content_comparison": "n/a"})

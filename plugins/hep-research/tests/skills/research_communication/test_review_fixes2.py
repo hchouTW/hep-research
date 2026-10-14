@@ -14,6 +14,7 @@ from unittest import mock
 from tests.skills.research_communication import comm_fixtures as fx
 from tests.skills.research_communication import test_adaptation as ta
 from tests.skills.research_communication import test_terminology as tt
+from tests.skills.research_communication import test_revision_impact as tr
 
 SCRIPTS = fx.PLUGIN / "skills" / "research-communication" / "scripts"
 sys.path.insert(0, str(SCRIPTS))
@@ -425,6 +426,26 @@ class ReviewFixes2TerminologyEdges(tt.Base):
         self.assertIn("terminology.abbreviation_undefined", self.codes(rep))
         rep = self.run_check("# Results\n\nA confidence interval (CL) at 95% CL.\n")
         self.assertNotIn("terminology.abbreviation_undefined", self.codes(rep))
+
+
+class ReviewFixes2RevisionImpact(tr.Base):
+    """RC-A12: empty records and added claims without occurrences are not silent passes."""
+
+    def test_two_records_without_claims(self):
+        for doc in (self.before, self.after):
+            doc["extension"]["claims"], doc["extension"]["occurrences"] = [], []
+        self.baseline = fx.write(self.p["root"] / "artifacts" / "comm_v1.json", self.before)
+        self.baseline_bytes = self.baseline.read_bytes()
+        rep = self.diff()
+        self.assertIn("revision.no_claims", self.codes(rep, "unresolved"))
+        self.assertNotEqual(rep["exit_code"], 0)
+
+    def test_added_claim_without_occurrence(self):
+        c3 = fx.clone(self.after["extension"]["claims"][1])
+        c3["id"] = "claim:C3"
+        self.after["extension"]["claims"].append(c3)
+        rep = self.diff(refresh=True)
+        self.assertIn("occurrence.claim_without_occurrence", self.codes(rep, "unresolved"))
 
 
 if __name__ == "__main__":
