@@ -29,7 +29,8 @@ design guidelines (P1), move only the web, sprint, feature-flag and accessibilit
 
 ## What the inventory shows
 
-- 193 references in 7 skills, 1.65 MB (inventory of 2026-10-14 on the research-communication audit branch; it was 169
+- 193 references in 7 skills, 1.61 MB (inventory of 2026-10-14 after the detector-response, physics-ml and
+  research-communication audits were integrated; it was 169
   and 1.38 MB when these proposals were written); every reference is cited by at least one plugin file (no orphans).
 - Textual overlap is low: only three pairs reach the listing thresholds (Jaccard >= 0.08 or 15% of the smaller file's
   8-word shingles found in the other). Similar names mostly mark different topics, not duplicates; the
