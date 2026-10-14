@@ -12,11 +12,13 @@ from pathlib import Path
 from unittest import mock
 
 from tests.skills.research_communication import comm_fixtures as fx
+from tests.skills.research_communication import test_adaptation as ta
 
 SCRIPTS = fx.PLUGIN / "skills" / "research-communication" / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 
 from communication_lib import numbers as N  # noqa: E402
+from communication_lib.adaptation import _numbers  # noqa: E402
 from communication_lib.audit import audit_communication  # noqa: E402
 from communication_lib.claims import audit_claims  # noqa: E402
 from contracts.communication_project import resolve_context  # noqa: E402
@@ -74,6 +76,11 @@ class ReviewFixes2Numbers(unittest.TestCase):
         self.assertEqual(N.tokens("12\\,000 and 3{,}000 and −0.5"), ["12000", "3000", "-0.5"])
         self.assertEqual(N.tokens("claim C1 on x86, 2nd pass"), [])
 
+    def test_adaptation_numbers_use_the_shared_tokenizer(self):
+        self.assertEqual(_numbers("The ratio is 1.09."), {"1.09"})
+        self.assertEqual(_numbers("R為1.09（合成資料）"), {"1.09"})
+        self.assertEqual(_numbers("1.2e-3"), {"1.2e-3"})
+
     def test_contains_value_is_numeric_not_substring(self):
         self.assertFalse(N.contains_value("R = 1.02 +/- 0.05", "1.0"))
         self.assertTrue(N.contains_value("R = 1.020", "1.02"))
@@ -98,6 +105,20 @@ class ReviewFixes2ValueVsPassage(Project):
     def test_unchanged_record_still_passes(self):
         self.assertEqual(self.manuscript()["exit_code"], 0)
         self.assertEqual(self.claims()["exit_code"], 0)
+
+
+class ReviewFixes2Adaptation(ta.Base):
+    """RC-A3: a 9.99 draft against a 1.02 record fails in English and Traditional Chinese."""
+
+    def test_wrong_number_at_sentence_end_or_next_to_cjk_fails(self):
+        for draft, st in [("In this sample the ratio is 9.99. The uncertainty quoted is statistical only. Synthetic fixture.",
+                           "In this sample the ratio is 9.99."),
+                          ("在此樣本中比值為9.99。統計不確定度（statistical only），synthetic fixture。", "在此樣本中比值為9.99")]:
+            with self.subTest(draft=draft[:20]):
+                man = ta.manifest(self.p["record"], statements=[{"id": "st:1", "text": st, "claim_ids": ["claim:C1"], "kind": "quantitative"}])
+                rep = self.check(draft=draft, man=man)
+                self.assertIn("adaptation.number_mismatch", self.codes(rep, "error"), rep["findings"])
+                self.assertEqual(rep["exit_code"], 1)
 
 
 if __name__ == "__main__":
