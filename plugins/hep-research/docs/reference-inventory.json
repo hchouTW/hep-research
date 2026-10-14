@@ -35,7 +35,7 @@
   },
   "research-communication": {
    "references": 56,
-   "bytes": 397429,
+   "bytes": 398739,
    "uncited": 0
   }
  },
@@ -3005,8 +3005,8 @@
   {
    "path": "skills/research-communication/references/literature-lookup-recipes.md",
    "owner": "research-communication",
-   "bytes": 4452,
-   "lines": 80,
+   "bytes": 5006,
+   "lines": 86,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/research-communication/SKILL.md",
@@ -3014,7 +3014,7 @@
     "skills/research-communication/references/citation-verification.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "7c0c1c4 2026-10-14"
+   "last_commit": "893bc43 2026-10-15"
   },
   {
    "path": "skills/research-communication/references/literature-review.md",
@@ -3374,8 +3374,8 @@
   {
    "path": "skills/research-communication/references/submission-and-peer-review.md",
    "owner": "research-communication",
-   "bytes": 15981,
-   "lines": 250,
+   "bytes": 16737,
+   "lines": 251,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -3391,7 +3391,7 @@
     "tests/skills/research_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "257b34b 2026-10-14"
+   "last_commit": "0f390ff 2026-10-15"
   },
   {
    "path": "skills/research-communication/references/supplementary-material-planning.md",
