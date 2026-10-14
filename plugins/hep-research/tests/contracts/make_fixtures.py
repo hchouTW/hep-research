@@ -532,6 +532,148 @@ UNRESOLVED["statres_v26_bayes_chains_missing.json"] = (statres_v26_bayes(sampler
                                                        ["stats.chains_missing"])
 
 
+# contracts 2.8.0 ml-artifact rules (physics-ml audit, PML; CHECK-0.10.0 G-6): one committed fixture per rule family
+# (structured downstream validation, output semantics and near-miss keys, task blocks, model-hash format, weights split,
+# calibration outcome, domain-shift outcome, observable_source), named ml_v28_* / statres_v28_*.
+def ml_v28(mutate):
+    doc = ml_v25()
+    mutate(doc["extension"])
+    return doc
+
+
+def _upd(**kw):
+    return lambda e: e.update(kw)
+
+
+def _sub(key, **kw):
+    return lambda e: e[key].update(kw)
+
+
+def _all(*fs):
+    def f(e):
+        for g in fs:
+            g(e)
+    return f
+
+
+_ANOMALY = {"background_only": "score distribution on a background-only control sample (synthetic)",
+            "signal_injection": "injected synthetic signal recovered at the expected rate (synthetic)"}
+_REWEIGHT = {"closure": "reweighted source matches target in the input features (synthetic)",
+             "prior_dependence": "weights stable under a changed source prior (synthetic)",
+             "unmatched_events": "fraction of target events outside the source support (synthetic)"}
+_SBI = {"coverage": {"method": "expected coverage (TARP)", "result": 0.68}, "handoff": "hep-statistics"}
+_ML_DV = {"metric": "accuracy", "quantity_affected": "classifier", "value": 0.91, "criterion": ">= 0.9", "passed": True,
+          "ref": "synthetic"}
+_COVERAGE_DV = {"metric": "coverage", "quantity_affected": "mu 68% interval", "value": 0.40, "criterion": ">= 0.68",
+                "passed": True, "ref": "synthetic"}
+_NO_CAL = lambda e: e.pop("calibration")  # noqa: E731
+VALID["ml_v28_unsupervised_anomaly.json"] = ml_v28(_upd(supervision="unsupervised", labels=[], anomaly_validation=_ANOMALY))
+VALID["ml_v28_reweighting.json"] = ml_v28(_upd(task="reweighting", output_semantics="density-ratio",
+                                               reweighting_validation=_REWEIGHT))
+VALID["ml_v28_inference_sbi.json"] = ml_v28(_upd(task="inference", output_semantics="density-ratio", parameters=["theta"],
+                                                 training_domain={"x": [0.0, 1.0], "y": [-1.0, 1.0], "theta": [0.0, 2.0]},
+                                                 sbi_validation=_SBI))
+_d = statres_v26(observable_source={"kind": "ml-score", "ml_artifact": "classifier"})
+_d["inputs"] = [{"ref": "classifier", "artifact_type": "ml-artifact", "sha256": "0" * 64}]
+VALID["statres_v28_observable_source_linked.json"] = _d
+ML_V28_INVALID = {
+    # structured downstream validation (WP1.1)
+    "downstream_unstructured": (_upd(downstream_validation=["ROC AUC = 0.93 (synthetic)"]),
+                                ["ml.downstream_unstructured", "ml.downstream_ml_only"]),
+    "downstream_ml_only": (_upd(downstream_validation=[_ML_DV]), ["ml.downstream_ml_only"]),
+    "downstream_passed_contradicts": (_upd(downstream_validation=[_COVERAGE_DV]), ["ml.downstream_passed_contradicts"]),
+    # output semantics and near-miss keys (WP1.2)
+    "output_semantics_misspelled": (lambda e: e.update(output_semantic=e.pop("output_semantics")), ["ml.misspelled_key"]),
+    "calibration_misspelled": (lambda e: e.update(calibraton=e.pop("calibration")), ["ml.misspelled_key"]),
+    "output_semantics_task_mismatch": (_all(_upd(output_semantics="regression-value"), _NO_CAL),
+                                       ["ml.output_semantics_task_mismatch"]),
+    # task blocks and claim checks (WP1.3)
+    "surrogate_no_validation": (_all(_upd(task="surrogate", output_semantics="regression-value"), _NO_CAL),
+                                ["ml.task_validation_missing"]),
+    "generation_no_validation": (_all(_upd(task="generation", output_semantics="generated-sample"), _NO_CAL),
+                                 ["ml.task_validation_missing"]),
+    "inference_no_validation": (_upd(task="inference", output_semantics="density-ratio"), ["ml.task_validation_missing"]),
+    "inference_handoff_unknown": (_upd(task="inference", output_semantics="density-ratio",
+                                       sbi_validation={**_SBI, "handoff": "hep-statistic"}), ["ml.handoff_unknown"]),
+    "unsupervised_no_anomaly_validation": (_upd(supervision="unsupervised", labels=[]), ["ml.task_validation_missing"]),
+    "reweighting_no_validation": (_upd(task="reweighting", output_semantics="density-ratio"), ["ml.task_validation_missing"]),
+    "reweighting_validation_incomplete": (_upd(task="reweighting", output_semantics="density-ratio",
+                                               reweighting_validation={k: _REWEIGHT[k] for k in ("closure", "prior_dependence")}),
+                                          ["ml.task_validation_incomplete"]),
+    "single_label": (_upd(labels=["sig"]), ["ml.single_label"]),
+    "duplicate_features": (_upd(features=["x", "y", "x"]), ["ml.duplicate_features"]),
+    "label_is_feature": (_upd(labels=["sig", "x"]), ["ml.label_is_feature"]),
+    "preprocessing_fit_on_all": (_upd(preprocessing=[{"step": "standardize", "features": ["x", "y"], "fit_on": "all"}]),
+                                 ["ml.preprocessing_not_on_train"]),
+    "multiclass_calibration_scope": (_all(_upd(labels=["a", "b", "c"]),
+                                          lambda e: e["calibration"]["validation"].update(metric="brier (a vs rest)")),
+                                     ["ml.multiclass_calibration_scope"]),
+    # model-hash format (WP1.3)
+    "model_hash_placeholder": (_upd(model_hash="sha256:placeholder"), ["ml.model_hash_malformed"]),
+    "model_hash_short": (_upd(model_hash="sha256:" + "a" * 63), ["ml.model_hash_malformed"]),
+    # weights split between training and evaluation (WP1.4)
+    "weights_unstructured": (_upd(weights="unweighted"), ["ml.weights_unstructured"]),
+    "weights_used_in_empty": (_sub("weights", used_in=[]), ["ml.weights_used_in_empty"]),
+    "weights_used_in_inconsistent": (_sub("weights", used_in=["metrics"]), ["ml.weights_used_in_inconsistent"]),
+    "weights_contradiction": (_sub("weights", training={"negative_weight_treatment": "abs", "class_balancing": "none"}),
+                              ["ml.weights_contradiction"]),
+    # calibration outcome (WP0.1, WP1.4)
+    "calibration_same_sample_hash": (_sub("calibration", sample_check={"fit_sha256": "1" * 64, "eval_sha256": "1" * 64}),
+                                     ["ml.calibration_on_fit_sample"]),
+    "calibration_on_training_sample": (_sub("calibration", fit_sample="train"), ["ml.calibration_on_training_sample"]),
+    "calibration_after_not_numeric": (lambda e: e["calibration"]["validation"].update(after="good"),
+                                      ["ml.calibration_after_not_numeric"]),
+    # remaining 2.8.0 claim checks: downstream items, task-block payloads, status, units, working point
+    "downstream_incomplete": (_upd(downstream_validation=[{"metric": "working-point-efficiency", "value": 0.52, "ref": "synthetic"}]),
+                              ["ml.downstream_incomplete"]),
+    "surrogate_policy_action": (_all(_upd(task="surrogate", output_semantics="regression-value",
+                                          extrapolation_policy={"action": "ignore", "consumer": "hep-theory"}), _NO_CAL),
+                                ["ml.extrapolation_policy_action"]),
+    "generation_two_sample_power_missing": (_all(_upd(task="generation", output_semantics="generated-sample",
+                                                      generative_validation={"observables": ["x", "y"],
+                                                                             "two_sample_test": {"auc": 0.5},
+                                                                             "conditioning_range": "synthetic"}), _NO_CAL),
+                                            ["ml.two_sample_power_missing"]),
+    "units_unknown_feature": (_upd(units={"x": "GeV", "y": "1", "mass": "GeV"}), ["ml.units_unknown_feature"]),
+    "threshold_from_test": (_upd(metrics={"test": {"working_point": {"threshold_from": "test"}}}), ["ml.threshold_from_test"]),
+}
+for _name, (_fn, _codes) in ML_V28_INVALID.items():
+    bad[f"ml_v28_{_name}.json"] = (ml_v28(_fn), _codes)
+_d = ml_v25()
+_d["status"] = ["observed"]
+bad["ml_v28_status_observed_unsupported.json"] = (_d, ["ml.status_unsupported"])
+# observable_source kind ml-score names an ml-artifact input (WP0.5)
+bad["statres_v28_observable_source_unlinked.json"] = (statres_v26(observable_source={"kind": "ml-score", "ml_artifact": "classifier"}),
+                                                     ["stats.observable_source_unlinked"])
+ML_V28_UNRESOLVED = {
+    "output_semantics_missing": (_all(lambda e: e.pop("output_semantics"), _NO_CAL), ["ml.output_semantics_missing"]),
+    "grouping_row_level": (_sub("splits", grouping_key="row"), ["ml.grouping_row_level"]),
+    "split_check_unverified": (_sub("splits", overlap_check={"tool": "manual", "result": "pass"}), ["ml.split_check_unverified"]),
+    "training_domain_unbounded": (_sub("training_domain", x=[-1e308, 1e308]), ["ml.training_domain_unbounded"]),
+    "training_domain_partial": (lambda e: e["training_domain"].pop("y"), ["ml.training_domain_partial"]),
+    # domain-shift outcome (WP0.6)
+    "domain_shift_on_training_sample": (_sub("domain_shift", control_sample="training sample"),
+                                        ["ml.domain_shift_on_training_sample"]),
+    "domain_shift_uncorrected": (_sub("domain_shift", outcome="uncorrected"), ["ml.domain_shift_uncorrected"]),
+    "domain_shift_outcome_missing": (lambda e: e["domain_shift"].pop("outcome"), ["ml.domain_shift_outcome_missing"]),
+    "domain_shift_status_missing": (lambda e: e["domain_shift"].pop("status"), ["ml.domain_shift_status_missing"]),
+    "training_domain_missing": (_upd(training_domain={}), ["ml.training_domain_missing"]),
+    "calibration_not_improving": (lambda e: e["calibration"]["validation"].update(after=0.2), ["ml.calibration_not_improving"]),
+}
+for _name, (_fn, _codes) in ML_V28_UNRESOLVED.items():
+    UNRESOLVED[f"ml_v28_{_name}.json"] = (ml_v28(_fn), _codes)
+WARNING["ml_v28_framework_version_missing.json"] = (ml_v28(lambda e: e["environment"].pop("torch_version")),
+                                                    ["ml.framework_version_missing"])
+WARNING["ml_v28_weights_not_split.json"] = (ml_v28(lambda e: (e["weights"].pop("training"), e["weights"].pop("evaluation"))),
+                                            ["ml.weights_not_split"])
+WARNING["ml_v28_negative_weights_abs.json"] = (ml_v28(_sub("weights", negative_weight_treatment="abs",
+                                                           training={"negative_weight_treatment": "abs",
+                                                                     "class_balancing": "inverse class frequency"})),
+                                               ["ml.negative_weights_abs"])
+WARNING["ml_v28_environment_free_text.json"] = (ml_v28(_sub("environment", precision="high", device="my laptop")),
+                                                ["ml.precision_free_text", "ml.device_free_text"])
+
+
 def main() -> None:
     for sub in ("valid", "invalid", "unresolved", "warning"):
         (OUT / sub).mkdir(parents=True, exist_ok=True)
