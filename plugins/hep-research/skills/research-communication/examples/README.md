@@ -8,7 +8,7 @@ example rasterized and inspected, and the TikZ sources (`hep/07`, `hep/08`, `sta
 | Dir | Files |
 |---|---|
 | `general/` | research workflow, methodology pipeline (from a Methods excerpt), conceptual framework, experimental workflow, repository architecture (read a real repo first), Methods text -> workflow with the Known/Inferred/Assumed table, SVG-spec figure |
-| `hep/` | collider pipeline, MC chain, detector schematic, likelihood architecture, decay tree, SR/CR workflow, Feynman-style, LHC pipeline in DOT + Mermaid + TikZ with a two-lane variant |
+| `hep/` | collider pipeline, MC chain, detector schematic, likelihood architecture, decay tree, SR/CR workflow, Feynman-style, LHC pipeline in DOT + Mermaid + TikZ with a two-lane variant, stacked space spectrometer (`09`), cosmic-ray flux chain (`10`), neutrino near/far oscillation chain (`11`) |
 | `statistics/` | Bayesian workflow, hierarchical model (plates), causal DAG, MCMC, hypothesis test, bootstrap, HMM |
 | `computer-science/` | microservices, Transformer, RAG, agentic AI, distributed pipeline, API sequence, database platform, ML training pipeline, PlantUML component diagram, PlantUML sequence diagram |
 

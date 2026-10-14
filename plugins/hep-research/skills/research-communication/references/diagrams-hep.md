@@ -92,6 +92,21 @@ Signal/control-region workflow: SR and CRs are disjoint selections; CRs constrai
 normalization or shape via a transfer factor to the SR; validation regions test the extrapolation
 and are not fitted; state which is which.
 
+## 6a. Cosmic-ray, astroparticle and neutrino diagrams
+
+The collider examples above do not cover instruments in space, air-shower arrays or oscillation experiments:
+
+- **Stacked space-borne spectrometer**: subdetectors along one vertical axis in the order a particle crosses them,
+  each box naming what it measures (rigidity, charge, velocity, energy), never an instrument's parameters
+  (`../examples/hep/09-space-spectrometer-schematic.md`).
+- **Flux analysis chain**: counts, exposure (acceptance times live time above the geomagnetic cutoff), bin width,
+  unfolding with a response matrix, flux; systematics attach to their steps
+  (`../examples/hep/10-cosmic-ray-flux-analysis-chain.md`).
+- **Near/far oscillation chain**: the near detector constrains flux and cross-section parameters, oscillation enters
+  only the far prediction, the result names its interval construction
+  (`../examples/hep/11-neutrino-near-far-oscillation-chain.md`).
+- Plots of fluxes, ratios, time series and oscillation contours: `physics-plots.md`.
+
 ## 7. Validation checklist (run every time)
 
 - generator-level vs reconstruction-level quantities separated

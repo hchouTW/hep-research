@@ -35,7 +35,7 @@
   },
   "research-communication": {
    "references": 56,
-   "bytes": 383896,
+   "bytes": 384929,
    "uncited": 0
   }
  },
@@ -2579,7 +2579,7 @@
     "tests/skills/research_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9239237 2026-10-14"
+   "last_commit": "573a631 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/artifact-packaging-for-release.md",
@@ -2721,7 +2721,7 @@
     "skills/research-communication/references/physics-plots.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "573a631 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/comment-and-reply-exchange.md",
@@ -2790,8 +2790,8 @@
   {
    "path": "skills/research-communication/references/diagrams-hep.md",
    "owner": "research-communication",
-   "bytes": 6471,
-   "lines": 116,
+   "bytes": 7504,
+   "lines": 131,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/assets/diagrams/hep-analysis-pipeline.md",
@@ -2879,7 +2879,7 @@
     "skills/research-communication/references/poster-and-talk-design.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ecc929c 2026-10-14"
+   "last_commit": "e8e8b9f 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/general-diagram-principles.md",
@@ -2982,7 +2982,7 @@
     "skills/research-communication/references/diagram-figure-style.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ecc929c 2026-10-14"
+   "last_commit": "e8e8b9f 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/literature-discovery-and-search.md",
@@ -3143,11 +3143,12 @@
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
     "skills/research-communication/references/collaboration-results-lifecycle.md",
+    "skills/research-communication/references/diagrams-hep.md",
     "skills/research-communication/references/figures-and-tables.md",
     "skills/research-communication/references/legends-panels-and-export.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "e8e8b9f 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/plagiarism-and-text-reuse-checking.md",
