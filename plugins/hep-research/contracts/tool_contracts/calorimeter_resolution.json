@@ -1,0 +1,147 @@
+{
+ "contract_version": "1.0.0",
+ "tool_id": "calorimeter-resolution",
+ "entry": "skills/detector-response/scripts/calorimeter_resolution.py",
+ "operations": [
+  {
+   "operation_id": "resolution",
+   "summary": "Fit (sigma_E/E)^2 = a^2/E + b^2/E^2 + c^2 to (E, sigma_E/E[, uncertainty]) points by exact linear least squares (weighted by the input uncertainties, else by a constant relative uncertainty), or evaluate given a, b, c; reports the per-term breakdown, the dominant term and the crossover energies",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--fit",
+      "input": "fit"
+     },
+     {
+      "flag": "--evaluate",
+      "input": "evaluate"
+     },
+     {
+      "flag": "--stochastic",
+      "input": "stochastic"
+     },
+     {
+      "flag": "--noise",
+      "input": "noise"
+     },
+     {
+      "flag": "--constant",
+      "input": "constant"
+     },
+     {
+      "flag": "--energy",
+      "input": "energy"
+     },
+     {
+      "flag": "--valid-range",
+      "input": "valid_range"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "fit",
+     "kind": "path",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "JSON object with a points list [[E, sigma_E/E(, uncertainty)], ...]; sigma_E/E a fraction (<= 1); at least three distinct energies; excludes --evaluate"
+    },
+    {
+     "name": "evaluate",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "evaluate the given coefficients instead of fitting; excludes --fit"
+    },
+    {
+     "name": "stochastic",
+     "kind": "parameter",
+     "unit": "GeV^0.5",
+     "required": false,
+     "constraint": "evaluate: a, finite, >= 0",
+     "default": 0.0
+    },
+    {
+     "name": "noise",
+     "kind": "energy",
+     "unit": "GeV",
+     "required": false,
+     "constraint": "evaluate: b, finite, >= 0",
+     "default": 0.0
+    },
+    {
+     "name": "constant",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "evaluate: c, finite, >= 0",
+     "default": 0.0
+    },
+    {
+     "name": "energy",
+     "kind": "energy",
+     "unit": "GeV",
+     "required": false,
+     "constraint": "evaluation energy, finite, > 0",
+     "default": 100.0
+    },
+    {
+     "name": "valid_range",
+     "kind": "energy",
+     "unit": "GeV",
+     "required": false,
+     "constraint": "evaluate: LOW HIGH of the fitted range, LOW <= HIGH"
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status (default: the --fit file's status, else unvalidated)",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "method",
+     "kind": "label",
+     "unit": "n/a"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the fit input is unreadable or invalid, or a squared coefficient fitted negative (all roots null, ok false, the reason in warnings), or the result is not representable"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed or out of range; stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   }
+  }
+ ]
+}

@@ -164,6 +164,8 @@ class MutationTests(unittest.TestCase):
         flags = tc.usage_flags("usage: x.py [-h] --a A [--b B]\n          [--c-d C_D] --e E\n\nbody --z\n")
         self.assertEqual(flags, {"--a": True, "--b": False, "--c-d": False, "--e": True})
         self.assertIsNone(tc.usage_flags("no usage here"))
+        grouped = tc.usage_flags("usage: x.py [-h] (--fit JSON | --evaluate) [--energy E]\n")
+        self.assertEqual(grouped, {"--fit": False, "--evaluate": False, "--energy": False})
 
 
 class ScopeTests(unittest.TestCase):
@@ -239,6 +241,51 @@ class ShippedScopeTests(unittest.TestCase):
             with self.subTest(recipe=recipe.name):
                 self.assertTrue(tools, f"{recipe.name} names no tool")
                 self.assertEqual(sorted(tools - scoped), [])
+
+
+DR_ASSETS = ROOT / "skills" / "detector-response" / "assets"
+DR_CASES = {  # contract file -> (arguments that succeed, arguments that are invalid input)
+    "tag_and_probe_efficiency.json": (["--pass-count", "92", "--total", "100"], ["--pass-count", "5", "--total", "3"]),
+    "pid_separation_power.json": (["--mode", "tof", "--species", "pi", "K", "--momentum", "2"],
+                                  ["--mode", "tof", "--species", "pi", "pi"]),
+    "calorimeter_resolution.json": (["--fit", str(DR_ASSETS / "calorimeter-response.example.json")],
+                                    ["--evaluate", "--energy", "-1"]),
+    "pileup_reweight.json": ([str(DR_ASSETS / "pileup-profiles.example.json")], []),
+}
+
+
+class DetectorResponseContractTests(unittest.TestCase):
+    """detector-response audit DR-WP2-07: four tools behave as their contracts say: declared outputs present on
+    success, declared exit codes on failure, and JSON on stdout at exit 2 (unlike cosmic_ray_flux.json)."""
+
+    def test_declared_outputs_and_exits(self):
+        for name, (good, bad) in DR_CASES.items():
+            doc = json.loads((ROOT / "contracts" / "tool_contracts" / name).read_text(encoding="utf-8"))
+            op = doc["operations"][0]
+            with self.subTest(contract=name, case="ok"):
+                p = run_tool(doc["entry"], good)
+                self.assertEqual(p.returncode, 0, p.stderr)
+                out = json.loads(p.stdout)
+                for o in op["outputs"]:
+                    self.assertIn(o["name"], out)
+            if bad:
+                with self.subTest(contract=name, case="invalid"):
+                    p = run_tool(doc["entry"], bad)
+                    self.assertIn(p.returncode, {f["exit_code"] for f in op["failure_states"]})
+                    self.assertEqual(p.returncode, 2)
+                    self.assertEqual(json.loads(p.stdout)["error_kind"], "invalid-input")
+
+    def test_file_failures_exit_1_with_json(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            bad = Path(tmp) / "bad.json"
+            bad.write_text(json.dumps({"data_profile": [1, 0], "mc_profile": [1, 1], "bin_centers": [1, 0]}))
+            for entry, args in (("skills/detector-response/scripts/pileup_reweight.py", [str(bad)]),
+                                ("skills/detector-response/scripts/calorimeter_resolution.py", ["--fit", str(bad)])):
+                with self.subTest(entry=entry):
+                    p = run_tool(entry, args)
+                    self.assertEqual(p.returncode, 1)
+                    self.assertIs(json.loads(p.stdout)["ok"], False)
+
 
 if __name__ == "__main__":
     unittest.main()

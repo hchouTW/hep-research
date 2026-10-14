@@ -1,0 +1,101 @@
+{
+ "contract_version": "1.0.0",
+ "tool_id": "pileup-reweight",
+ "entry": "skills/detector-response/scripts/pileup_reweight.py",
+ "operations": [
+  {
+   "operation_id": "reweight",
+   "summary": "Per-bin pileup weights data_pdf/mc_pdf from two profiles over the same binning (usually of the Poisson mean mu per bunch crossing), with n_eff, max_weight, raw input totals, and the bins where a weight is undefined or not representable",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status (default: the bundle's status, else unvalidated)",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "ok",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "weights",
+     "kind": "weight",
+     "unit": "1"
+    },
+    {
+     "name": "empty_mc_bins_with_data",
+     "kind": "parameter",
+     "unit": "n/a"
+    },
+    {
+     "name": "nonfinite_weight_bins",
+     "kind": "parameter",
+     "unit": "n/a"
+    },
+    {
+     "name": "max_weight",
+     "kind": "weight",
+     "unit": "1"
+    },
+    {
+     "name": "n_eff_fraction",
+     "kind": "parameter",
+     "unit": "1"
+    },
+    {
+     "name": "input_totals",
+     "kind": "parameter",
+     "unit": "n/a"
+    },
+    {
+     "name": "warnings",
+     "kind": "label",
+     "unit": "n/a"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the bundle (positional JSON with data_profile, mc_profile, optional bin_centers and bin_edges) is unreadable or invalid, or a weight is undefined (MC empty where data is not) or not representable; stdout carries ok false and the reason"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed or out of range; stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   }
+  }
+ ]
+}
