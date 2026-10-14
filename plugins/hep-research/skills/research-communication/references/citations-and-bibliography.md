@@ -28,15 +28,18 @@ keys are recognized by collaborators and referees. Workflow:
 1. Search the paper on INSPIRE-HEP by title, author, or arXiv number.
 <!-- example: experiment-specific illustration -->
 2. Use INSPIRE's "Cite" / export feature to get a BibTeX entry with its
-   standard key format: first-author surname, year, three random letters
+   standard key format: first-author surname, year and a random suffix, three
+   letters in current keys (`Geller:2026xhh`) and two in older ones
    (`Cowan:2010js`); for a collaboration paper, the collaboration name instead
-   of a surname (the ATLAS Higgs discovery is `ATLAS:2012yve`). The same export
+   of a surname (the ATLAS Higgs discovery is `ATLAS:2012yve`; INSPIRE REST
+   `texkeys`, checked 2026-10-14). The same export
    is available from the REST API, e.g.
    `https://inspirehep.net/api/literature?q=arxiv:1207.7214&format=bibtex`.
    Older exports used first-author keys for collaboration papers
    (`Aad:2012tfa`); INSPIRE still resolves them as aliases, but a `.bib` that
-   mixes old and new keys holds the same paper twice — deduplicate on
-   `eprint`/`doi` when merging an older `.bib` (checked 2026-09-26).
+   mixes old and new keys holds the same paper twice (record 1124337 carries
+   both, checked 2026-10-14) — deduplicate by identifier, never by key; the
+   order and the renaming rule are rule 9 of `academic-papers-guide.md`.
 <!-- /example -->
 3. Paste the entry as-is into the `.bib` file rather than retyping it by
    hand — this preserves the `eprint`, `archivePrefix`, `doi`, and `journal`
@@ -121,9 +124,10 @@ incomplete. See `statistics-and-ml-papers.md` for the venue-specific citation
 - One `.bib` file per paper (or per collaboration-shared library), not one
   per section — makes deduplication and `check_manuscript.py`-style
   validation possible.
-- Deduplicate by INSPIRE key before dedup by title/author — two entries with
-  slightly different formatting for the same paper is the most common
-  bibliography bug. `<plugin root>/skills/research-communication/scripts/check_manuscript.py` flags a key defined twice
+- Deduplicate by DOI, then arXiv identifier (version stripped), then INSPIRE
+  record id — never by INSPIRE key, since one record can carry two keys
+  (rule 9 of `academic-papers-guide.md`). Two entries with slightly different
+  formatting for the same paper is the most common bibliography bug. `<plugin root>/skills/research-communication/scripts/check_manuscript.py` flags a key defined twice
   (BibTeX silently keeps the first); the same paper under two different keys
   still needs a title/DOI/eprint comparison.
 - Every entry in the `.bib` file should be cited at least once in the final
@@ -152,7 +156,8 @@ each paper's `.bib` by hand.
    less polished one-click web import than Zotero's connector.
 2. **Sync INSPIRE-HEP (or ADS) exports without creating duplicates.** Before
    importing a new BibTeX entry, check whether the library already has that
-   paper under its INSPIRE key or arXiv ID — not by title/author string match,
+   paper under its DOI, arXiv ID or INSPIRE record id — not by key or by
+   title/author string match,
    which misses formatting differences (see "Duplicate physical papers under
    different keys" below). Zotero: search by arXiv ID or DOI before adding: its
    built-in duplicate detector catches some but not all near-duplicates from
@@ -289,7 +294,7 @@ releasing restricted artifacts is outside the statement-writing task.
   from a typo in the key or an entry deleted during cleanup.
 - **Duplicate physical papers under different keys**: happens when co-authors
   independently pull the same INSPIRE entry with slightly different export
-  settings — dedupe by INSPIRE key or arXiv number, not by BibTeX key string.
+  settings — dedupe by DOI, arXiv number or INSPIRE record id, not by key.
 - **Self-citation imbalance**: a healthy reference list cites the field
   broadly, not disproportionately the authors' own prior work — referees
   notice and sometimes flag this explicitly.

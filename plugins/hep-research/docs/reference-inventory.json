@@ -35,7 +35,7 @@
   },
   "research-communication": {
    "references": 53,
-   "bytes": 375077,
+   "bytes": 375671,
    "uncited": 0
   }
  },
@@ -2561,13 +2561,16 @@
   {
    "path": "skills/research-communication/references/academic-papers-guide.md",
    "owner": "research-communication",
-   "bytes": 38631,
+   "bytes": 38819,
    "lines": 499,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/research-communication/README.md",
     "skills/research-communication/SKILL.md",
     "skills/research-communication/references/academic-diagrams-guide.md",
+    "skills/research-communication/references/astroparticle-and-cosmic-ray-papers.md",
+    "skills/research-communication/references/citation-verification.md",
+    "skills/research-communication/references/citations-and-bibliography.md",
     "skills/research-communication/references/code-to-methodology-synthesis.md",
     "skills/research-communication/references/evidence-linked-writing.md",
     "skills/research-communication/references/interpreting-scientific-graphics.md",
@@ -2594,7 +2597,7 @@
   {
    "path": "skills/research-communication/references/astroparticle-and-cosmic-ray-papers.md",
    "owner": "research-communication",
-   "bytes": 19537,
+   "bytes": 19516,
    "lines": 291,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -2615,8 +2618,8 @@
   {
    "path": "skills/research-communication/references/citation-verification.md",
    "owner": "research-communication",
-   "bytes": 3605,
-   "lines": 64,
+   "bytes": 3675,
+   "lines": 65,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/research-communication/README.md",
@@ -2636,8 +2639,8 @@
   {
    "path": "skills/research-communication/references/citations-and-bibliography.md",
    "owner": "research-communication",
-   "bytes": 18053,
-   "lines": 296,
+   "bytes": 18410,
+   "lines": 301,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/research-communication/SKILL.md",
@@ -3030,7 +3033,7 @@
     "skills/research-communication/references/academic-diagrams-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "dee7155 2026-10-12"
+   "last_commit": "6172a95 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/multi-venue-reformatting.md",

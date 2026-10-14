@@ -126,9 +126,9 @@ astronomy (rather than particle-physics) readership:
   `Surname:2012abc`-style keys — keep ADS's key format for the same reason: collaborators
   and referees on astronomy-side venues expect it.
 - **A single paper may need both**: pull the HEP-side citations from INSPIRE and the
-  astronomy-side ones from ADS into the same `.bib` file. Deduplicate by DOI when a
-  paper appears in both databases with different keys, the same way
-  `citations-and-bibliography.md` recommends deduplicating by INSPIRE key.
+  astronomy-side ones from ADS into the same `.bib` file. A paper in both databases has
+  different keys: deduplicate by DOI, then arXiv identifier, then record id (rule 9 of
+  `academic-papers-guide.md`).
 - **Citation style**: ApJ/A&A/MNRAS commonly use `natbib` author-year citation
   (`\citep{}`/`\citet{}`) rather than the numbered style collider-physics venues use
   — check the specific venue's current style file rather than assuming numbered

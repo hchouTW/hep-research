@@ -98,7 +98,7 @@ are stated here in full.
    after `\maketitle`. Before converting between classes, read
    `latex-venue-setup.md`.
 <!-- example: experiment-specific illustration -->
-9. **One INSPIRE record under two keys.** When two `.bib` entries share an `eprint`, they are one paper: keep the current key, update every `\cite` to it, and delete the other. For a collaboration paper the collaboration key (`ATLAS:2012yve`) is the current one and the first-author key (`Aad:2012tfa`) is the older export; say so, and tell the user to confirm on INSPIRE. A `.bib` year taken from arXiv may be the latest-version year, not the publication year.
+9. **One paper, one entry: identifiers decide, keys follow.** Two `.bib` entries are one paper when they share a DOI, else an arXiv identifier (version stripped), else an INSPIRE record id; never compare keys, because one INSPIRE record can carry two. Keep the current key, update every `\cite` to it, and delete the other; this is the only reason to rename a key. For a collaboration paper the collaboration key (`ATLAS:2012yve`) is the current one and the first-author key (`Aad:2012tfa`) is the older export; say so, and tell the user to confirm on INSPIRE. A `.bib` year taken from arXiv may be the latest-version year, not the publication year.
 <!-- /example -->
 10. **A single run is not a variance estimate.** In any ML audit or results review, state that one split or one seed gives no variance estimate. Besides fixing the seed, recommend several seeds or cross-validation and report the mean and the spread.
 

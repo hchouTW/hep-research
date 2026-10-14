@@ -33,8 +33,9 @@ behind manuscript claims. For export and formatting, use
    no notice exists. A notice requires assessing its effect on the specific claim,
    not silently deleting the citation.
 5. Propose the smallest correction: narrow the claim, fix metadata, cite the
-   relevant version, or supply a verified replacement. Preserve citation keys
-   unless renaming is necessary; update their callers together if changed.
+   relevant version, or supply a verified replacement. Keys: rename only to
+   merge one paper held under two keys, by rule 9 of `academic-papers-guide.md`
+   (keep the current key, update every `\cite`, delete the other).
 
 ## Reusing previously verified records
 
