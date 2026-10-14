@@ -21,7 +21,7 @@ The index of tasks this skill owns that have no row of their own in `SKILL.md`:
 | Task | Read |
 |---|---|
 | ML systematics: which ML uncertainty enters the measurement, systematic-aware training | [uncertainty-and-calibration.md](uncertainty-and-calibration.md) ("When an ML uncertainty is a measurement systematic"); this file, "Parameterized and systematic-aware training" |
-| Hyperparameter search: grouped or nested cross-validation, seeds, search budget | [optimization-and-training-dynamics.md](optimization-and-training-dynamics.md); grouped splits in "Splits and leakage" below |
+| Hyperparameter search: grouped or nested cross-validation, seeds, search budget | this file, "Hyperparameter search"; [training-at-scale.md](training-at-scale.md) |
 | Anomaly detection and weak supervision (CWoLa, CATHODE, autoencoders), training on data | this file, "Weak supervision and anomaly detection" and "Training on data and blinding" |
 | "Is this improvement real?": ablations, seed variance, model comparison | [ablation-and-design-review.md](ablation-and-design-review.md); `scripts/compare_model_runs.py` |
 | Interpretability of a physics model | [interpretability-and-explainability.md](interpretability-and-explainability.md) |
@@ -103,13 +103,22 @@ The options, in rough order of preference:
    weighted output distributions or the downstream sensitivity against option 1 or 2. Never use |w| for evaluation.
 4. **Dropping negative-weight events** biases both training and evaluation; do not.
 
-For likelihood-ratio estimation with signed weights, see Drnevich et al., Mach. Learn. Sci. Tech. 6 (2025) 045023,
-arXiv:2410.10216. For sWeighted training data, see Borisyak, J. Phys. Conf. Ser. 1525 (2020) 012088,
+For likelihood-ratio estimation with signed weights, see Drnevich, Jiggins, Katzy, Cranmer, arXiv:2410.10216 (the
+arXiv page, read 2026-10-14, gives no journal reference; the Mach. Learn. Sci. Tech. 6 (2025) 045023 details are
+`unverified`). For sWeighted training data, see Borisyak & Kazeev, J. Phys. Conf. Ser. 1525 (2020) 012088,
 arXiv:1912.02590.
 
-Library behavior differs. Since 1.3.0, XGBoost raises a fatal error on negative instance weights instead of training
-on them, so it needs one of options 2–3. A PyTorch weighted loss accepts them silently. A starting point is in
-`assets/hep_losses.py` (`weighted_bce`).
+Library behavior differs (documentation read 2026-10-14):
+
+- **XGBoost:** since 1.3.0 a fatal error on negative instance weights; it needs option 2 or 3.
+- **LightGBM:** its parameter documentation says weights "should be non-negative" and does not say what happens
+  otherwise; treat negative weights as unsupported (option 2 or 3).
+- **TMVA BDT:** the `MethodBDT` class reference lists treatments that ignore negative-weight events in training (both
+  are option 4 in effect), boost them with the inverse boost weight, or pair negative- with positive-weight events and
+  "annihilate" them; check the option strings (`NegWeightTreatment`) in the TMVA user guide before use (`unverified`:
+  the mapping of class members to option strings was not read).
+- **PyTorch:** a weighted loss accepts them silently; `assets/hep_losses.py` (`weighted_bce`) is a starting point, and
+  `assets/train_classifier.py --negative-weights resample` applies cell resampling.
 
 ## Analysis metrics
 
@@ -122,7 +131,8 @@ working point the analysis will use. `assets/hep_metrics.py` implements these in
 - **Statistical uncertainty of a weighted efficiency.** For ε = W_pass/W_tot,
   `Var(ε) ≈ [(1−ε)² Σ_pass w² + ε² Σ_fail w²] / W_tot²`. Quote it next to every efficiency; an efficiency from a few
   high-weight events is noise.
-- **Expected significance.** Use the Asimov formula `Z_A = sqrt(2[(s+b) ln(1+s/b) − s])` rather than `s/√b`, which
+- **Expected significance.** Use the Asimov formula `Z_A = sqrt(2[(s+b) ln(1+s/b) − s])` (Cowan, Cranmer, Gross,
+  Vitells, EPJC 71 (2011) 1554, arXiv:1007.1727, read 2026-10-14) rather than `s/√b`, which
   overestimates Z unless s ≪ b (by about 7 % at s/b = 0.5). With a background uncertainty, use the version with an
   absolute σ_b. It assumes σ_b comes from an auxiliary Poisson control measurement (b̂ = m/τ, σ_b² = b/τ; G. Cowan,
   "Discovery sensitivity for a counting experiment with background uncertainty", note, 2012). A theory or modeling
@@ -153,8 +163,9 @@ statistical baseline next to each value: the JSD between two random halves of th
 **Methods**, each a trade-off between rejection and decorrelation:
 
 - **Decorrelated taggers (DDT):** a transformation of a substructure variable that flattens its dependence on a
-  scaling variable such as ρ′. Simple and transparent, but one-dimensional (Dolen et al., JHEP 05 (2016) 156,
-  arXiv:1603.00027).
+  scaling variable such as ρ′ (Dolen et al., JHEP 05 (2016) 156, arXiv:1603.00027). Simple and transparent; later
+  uses build the correction as a map in (ρ, pT) rather than in one variable (`unverified`: no opened source cited for
+  the two-dimensional maps).
 - **Planing:** reweight the training samples so signal and background have the same mass distribution. This removes
   mass as a direct discriminant, but does not guarantee independence through correlated features (Chang, Cohen,
   Ostdiek, PRD 97 (2018) 056009, arXiv:1709.10106).
@@ -217,6 +228,15 @@ A model trained on simulation is applied to data whose input distributions diffe
   al., arXiv:1505.07818). It can hide a real mismodeling and puts data into the training. It still needs the
   control-region validation above and must respect blinding: no signal-region data in training.
 
+## Hyperparameter search
+
+Search with the analysis metric, not the training loss alone, and with folds that respect the grouping key (grouped
+k-fold, `make_grouped_splits.py --folds K`): an ungrouped search selects configurations that exploit leakage. When the
+selected model's performance is also reported, use nested cross-validation (an inner grouped search inside each outer
+grouped fold) or a test split never used in the search. Seed every trial, record all trials, and confirm the winner
+with more seeds ([reproducibility.md](reproducibility.md), [ablation-and-design-review.md](ablation-and-design-review.md));
+budget-saving strategies are in [training-at-scale.md](training-at-scale.md).
+
 ## Validate the inputs before training
 
 Before a simulation-trained model is trained, compare every input feature between data and simulation in a control
@@ -260,6 +280,15 @@ training record.
   - k-folding so no event is selected by a model trained on it;
   - background-only closure with the full selection;
   - look-elsewhere treatment, handed to hep-statistics.
+- **Density-based anomaly detection:** ANODE learns the data density in the sidebands and interpolates it into the
+  signal region to form a data-to-background likelihood ratio; its authors report robustness against systematic
+  differences between signal region and sidebands (Nachman & Shih, PRD 101 (2020) 075042, arXiv:2001.04990, abstract
+  read 2026-10-14). CATHODE (above) samples from such a density and classifies. Every weakly supervised method depends
+  on its background-modelling assumption (features independent of the resonant variable, or a correctly
+  interpolated density): test it with injection at zero signal and with features correlated with the mass.
+- **Unsupervised (background-only) anomaly detection:** train on background or on data dominated by it, score
+  departures; validate on background only (no false excess after the full selection) and with injected signals of
+  several types and sizes, because sensitivity depends on what the score rewards.
 - **Autoencoder anomaly scores** reward low complexity: they flag events that are hard to reconstruct, not events
   that are rare, so a simple signal can score as "normal". Define what "anomalous" means against a background model
   before trusting a reconstruction-error cut.
@@ -274,6 +303,12 @@ training record.
   generator carrying those weights and the generator with the previous iteration's weights; this turns per-event
   weights into a function of particle-level features. Push those weights forward to the next iteration.
 - **Iterations:** the number of iterations acts as the regularization.
+
+- **Unmatched events:** simulated events that pass the particle-level selection but not the detector-level one
+  (inefficiency) and the reverse (fakes, events with no particle-level match) must enter the iterations explicitly;
+  the unfolded result is otherwise biased by the simulation's efficiency and fake rate. State how they are handled.
+- **Prior dependence:** the result depends on the starting simulation at finite iterations; repeat with a reweighted
+  or alternative generator as the prior and carry the difference.
 
 This skill covers the classifier training, weight clipping and calibration, the ensemble over seeds, and bootstrap
 resampling of data for the statistical uncertainty. Choosing the regularization, coverage and bias tests, and the

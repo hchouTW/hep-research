@@ -45,17 +45,22 @@ wide one.
   learned feature space (Qu & Gouskos, PRD 101 (2020) 056019, arXiv:1902.08570). Cost grows with k·N.
 - **Particle Transformer (ParT).** Self-attention over particles. Pairwise interaction features are added as an
   attention bias: ln Δ, ln k_T, ln z and ln m² of each pair (Qu, Li, Qian, ICML 2022, arXiv:2202.03772). The same
-  paper introduced the JetClass dataset (100 M jets, 10 classes), used for pre-training and benchmarks. Without
+  paper introduced the JetClass dataset (100 M jets per its abstract, read 2026-10-14; how they divide into training,
+  validation and test sets is `unverified` here), used for pre-training and benchmarks. Without
   positional encoding, attention is permutation equivariant; pool with a class token or masked mean for invariance.
 - **Lorentz-equivariant networks.** LorentzNet (Gong et al., JHEP 07 (2022) 030, arXiv:2201.08187) and PELICAN
   (Bogatskiy et al., arXiv:2211.00454) build on Minkowski inner products p_i·p_j, so the output is exactly Lorentz
   invariant (or covariant). They are very data efficient and small. Check that the detector-level inputs actually
-  carry the symmetry: acceptance, η–φ segmentation and the beam axis break full Lorentz invariance. In practice these
-  networks add beam "spurion" inputs that deliberately reduce the symmetry to boosts along and rotations about the
-  beam axis, so exact Lorentz invariance is not what is deployed.
+  carry the symmetry: acceptance, η–φ segmentation and the beam axis break full Lorentz invariance. Detector-level
+  applications add beam "spurion" inputs that reduce the symmetry to boosts along and rotations about the beam axis,
+  so exact Lorentz invariance is not what is deployed (`unverified`: which of the two cited networks uses which
+  spurion inputs was not checked in an opened source; read each paper before attributing).
 - **Graph networks for hits and tracking.** Message passing on hit graphs (edge classification for track building,
-  node regression for energy). Graph construction (which edges exist) dominates both cost and efficiency; validate
-  it as part of the model.
+  node regression for energy). The Exa.TrkX pipeline uses metric learning and graph networks to group hits into track
+  candidates and filter them (Ju et al., EPJC, doi:10.1140/epjc/s10052-021-09675-8, arXiv:2103.06995, abstract read
+  2026-10-14). Graph construction (which edges exist) dominates both cost and efficiency; validate it as part of the
+  model, report tracking efficiency and fake rate per pT, eta and pileup like any tracking algorithm, and hand the
+  physics-performance statement to detector-response.
 
 Benchmarks: top tagging (Kasieczka et al., SciPost Phys. 7 (2019) 014, arXiv:1902.09914) and JetClass. A
 benchmark gain does not transfer automatically to a different detector, pileup or jet definition; re-establish the
@@ -65,7 +70,9 @@ baseline (a PFN or a BDT on substructure variables) on your own samples.
 
 Pre-training on large simulated jet samples, then fine-tuning, is an emerging option. Examples are OmniJet-α (Birk,
 Hallin, Kasieczka, Mach. Learn. Sci. Tech. 5 (2024) 035031, arXiv:2403.05618) and masked particle modeling (Golling
-et al., Mach. Learn. Sci. Tech. 5 (2024) 035074, arXiv:2401.13537).
+et al., Mach. Learn. Sci. Tech. 5 (2024) 035074, arXiv:2401.13537), and a foundation model for hadronic jets used
+for reconstruction development, uncertainty quantification and model-agnostic searches (Mikuni & Nachman, PRD 111
+(2025) L051504, arXiv:2404.16091, abstract read 2026-10-14; its name OmniLearn is `unverified` here).
 
 - **When it helps:** with a small labeled sample.
 - **What it inherits:** the pre-training simulation (generator, detector model, jet definition). Treat that as part
