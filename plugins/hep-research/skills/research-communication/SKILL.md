@@ -26,6 +26,18 @@ description: "Use when the deliverable is scientific communication or literature
 4. Write the `communication` artifact for durable deliverables and validate it.
 5. Depth follows the request: **quick** (a source-backed answer, inline, from the ledger or a stated lookup), **standard** (a durable deliverable with its `communication` record), **audit** (the traceability record checked with the scripts below). Never require a full dossier for a quick answer.
 
+## Quick questions
+
+Answer inline, never from memory: the bound profile's ledger first, else a primary source via [the lookup recipes](references/literature-lookup-recipes.md); state source, query, access date and read level.
+
+| Request | Action |
+|---|---|
+| Does paper X exist; its arXiv id or DOI | ledger, else INSPIRE `arxiv:`/`texkey` query |
+| What experiment X published; the latest result | ledger (note its verification date), else INSPIRE `collaboration:X` sorted newest |
+| What paper P states | read it (abstract or page); a metadata hit only shows it exists |
+| Does source S support claim C | read the cited passage, then [claim-evidence mapping](references/claim-evidence-mapping.md) |
+| Cite this | INSPIRE `format=bibtex`; dedupe by identifier, not key |
+
 <!-- BEGIN context-resolution: generated from contracts/stanzas/context-resolution.md by tools/build_stanzas.py; do not edit -->
 ## Context resolution
 
@@ -43,9 +55,9 @@ description: "Use when the deliverable is scientific communication or literature
 
 Folder guide for people: [README.md](README.md).
 
-Start with [the papers guide](references/academic-papers-guide.md) for reading, reviewing and writing, or [the diagrams guide](references/academic-diagrams-guide.md) for diagrams. Citation work: [citation verification](references/citation-verification.md), [citations and bibliography](references/citations-and-bibliography.md), [primary sources for statistics and detector methods](references/primary-sources-and-version-checks.md). Claims: [claim-evidence mapping](references/claim-evidence-mapping.md), [evidence-linked writing](references/evidence-linked-writing.md). Field-specific paper patterns, figures, talks, reviews and venue formatting have their own files under `references/`; diagram skeletons are in `assets/diagrams/`, paper templates (LaTeX skeleton, BibTeX, reading notes, methodology manual) in `assets/paper/`, worked diagram examples in `examples/`.
+Start with [the papers guide](references/academic-papers-guide.md) for reading, reviewing and writing, or [the diagrams guide](references/academic-diagrams-guide.md) for diagrams. Citation work: [citation verification](references/citation-verification.md), [citations and bibliography](references/citations-and-bibliography.md), [primary sources for statistics and detector methods](references/primary-sources-and-version-checks.md). Claims: [claim-evidence mapping](references/claim-evidence-mapping.md), [evidence-linked writing](references/evidence-linked-writing.md). Field-specific patterns, figures, talks, reviews and venues have their own files under `references/`; diagram skeletons in `assets/diagrams/`, paper templates in `assets/paper/`, worked diagrams in `examples/`.
 
-Scripts in `<plugin root>/skills/research-communication/scripts/` (read `--help` first): `build_lit_matrix.py`, `check_manuscript.py` (`--main` for one document), `check_diagram_sources.py`, and for evidence-linked writing ([guide](references/evidence-linked-writing.md)) `check_communication.py` (record, inputs, sources, manuscript occurrences), `audit_claims.py` (assessments, wording, numbers, reporting completeness; claim matrix and draft facts) `track_revision_impact.py` (baseline vs revised record: stale occurrences, reopened assessments) `manage_literature.py` (offline import of ledgers, search logs and notices; never a lookup) `check_adaptation.py` (derived drafts against their manifest; reviewer responses from the action state) and `check_terminology.py` (glossary-scoped terminology and notation, English and Traditional Chinese).
+Scripts in `<plugin root>/skills/research-communication/scripts/` (read `--help` first; what each checks: [README.md](README.md#scripts)): `check_manuscript.py`, `check_diagram_sources.py`, `build_lit_matrix.py`, and for evidence-linked writing ([guide](references/evidence-linked-writing.md)) `check_communication.py`, `audit_claims.py`, `track_revision_impact.py`, `manage_literature.py`, `check_adaptation.py`, `check_terminology.py`.
 
 ## Handoffs
 
