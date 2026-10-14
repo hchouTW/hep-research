@@ -47,8 +47,7 @@
 | NeurIPS 2026 | text width 5.5 in (13.97 cm), single column, 10 pt Times body (`neurips_2026.sty`) |
 | ICML 2026 | two columns; overall text width 6.75 in (17.1 cm), 0.25 in between columns, so each column is 3.25 in (8.26 cm); left margin 0.75 in |
 | ICLR 2026 | single column, text width 5.5 in (13.97 cm), 10 pt Times body (`iclr2026_conference.sty`; ICLR 2027's file sets the same) |
-| Beamer 16:9 | ~ full slide; text >= 14-18 pt |
-| Poster | text >= 24 pt for labels |
+| Beamer slides, posters | sizes in `poster-and-talk-design.md` (single home) |
 
 None of JHEP, NeurIPS, or ICLR sets a minimum font size for text inside figures: apply the 6-7 pt floor above and
 aim to match the caption size (JHEP `\small` = 10 pt; NeurIPS/ICLR captions are 10 pt with a 10 pt body). Their figure
@@ -83,8 +82,9 @@ figure_style:
 
 ## Equations, talks, posters and export
 
-Equation placement, poster/thesis/talk variants (including Beamer overlays) and export recipes are in
-[legends-panels-and-export.md](legends-panels-and-export.md) (sections 3, 4, 5 and 7).
+Equation placement and export recipes are in [legends-panels-and-export.md](legends-panels-and-export.md)
+(sections 4 and 6); poster, thesis and talk variants, including Beamer overlays, in
+[poster-and-talk-design.md](poster-and-talk-design.md).
 
 ## Final readability check
 

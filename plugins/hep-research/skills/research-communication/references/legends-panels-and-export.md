@@ -1,7 +1,7 @@
-# Legends, Multi-Panel Figures, Talks, and Export
+# Legends, Multi-Panel Figures, and Export
 
-Covers the finishing work around a diagram: legends per format, multi-panel figures, posters and theses,
-Beamer overlays and talk simplification, equation placement, the symbol table, and export recipes.
+Covers the finishing work around a diagram: legends per format, multi-panel figures, equation placement, the symbol
+table, and export recipes. Posters, theses and talks: `poster-and-talk-design.md`.
 
 ## 1. Legends
 
@@ -68,36 +68,12 @@ Use panels (a), (b), (c) when one figure would carry more than one message or mo
 ```
 (needs `\usepackage{subcaption}`; venue classes may forbid it - follow the author kit.)
 
-## 3. Posters and theses
+## 3. Posters, theses and talks
 
-| Target | Adjust |
-|---|---|
-| Poster | fewer nodes (<= ~8), larger text (readable at ~1.5 m), one figure per poster section, no legends longer than 3 entries |
-| Thesis | one figure per concept, numbered by chapter, full detail allowed (technical level), a symbol table in the list of symbols, vector PDF at text width |
-| Slides | see section 4 |
+Diagram variants for posters, theses and talks (fewer nodes, larger text, Beamer overlays) are in
+`poster-and-talk-design.md` ("Diagrams on posters, in theses and in talks"), the single home for poster and talk rules.
 
-## 4. Beamer overlays and talk simplification
-
-Simplify by **abstraction level** (see `general-diagram-principles.md` section 6), not by shrinking: keep node identity
-so the audience can follow the paper figure. For a talk, reduce to <= ~7 boxes, labels <= 3 words, drop legends by using
-one edge style, and reveal the pipeline one stage at a time.
-
-Beamer with TikZ, reveal stage by stage using `visible on` (compiled with Tectonic: 3 overlay pages, boxes stay in place):
-
-```latex
-% diagram-check: skip Beamer overlay fragment: needs a beamer frame, overlay-beamer-styles and the proc/flow styles of tikz-patterns.md
-\begin{tikzpicture}[node distance=8mm]
-  \node[proc] (a) {Trigger};
-  \node[proc, right=of a, visible on=<2->] (b) {Reconstruction};
-  \node[proc, right=of b, visible on=<3->] (c) {Selection};
-  \draw[flow, visible on=<2->] (a) -- (b);
-  \draw[flow, visible on=<3->] (b) -- (c);
-\end{tikzpicture}
-```
-`visible on=<n->` needs `\usetikzlibrary{overlay-beamer-styles}`. Alternatives that avoid it: export one PDF per stage, or
-`\only<n>{\includegraphics{...}}`. Keep positions fixed across overlays so nothing jumps.
-
-## 5. Equation placement
+## 4. Equation placement
 
 - Put an equation **in a node** only when it *is* the object (e.g. a posterior `$p(\theta\mid x)$`); keep it to one short expression.
 - Put an equation on an **edge label** when it defines the transformation (e.g. `$\theta\to\hat\theta$`), and prefer a symbol plus a definition in the caption over a long formula.
@@ -105,7 +81,7 @@ Beamer with TikZ, reveal stage by stage using `visible on` (compiled with Tecton
 - Mermaid renders KaTeX in labels only in some hosts: `mmdc` renders `$$...$$` and shows single-`$` text raw (checked 2026-10-02). In DOT use HTML-like labels with entities (`&theta;`, `&sigma;<sub>stat</sub>`, `&radic;`, `&ge;`, `<i>`), which render correctly (checked); set `fontname` on edges as well as nodes or edge labels fall back to the default serif font, and there is no hat accent (a `<sup>^</sup>` is crude, prefer TikZ for that). TikZ takes LaTeX natively. State which is used.
 - Use the same symbols as the paper (see the symbol table below).
 
-## 6. Symbol table linking to the paper
+## 5. Symbol table linking to the paper
 
 Before drawing a model or statistical figure, write a table and keep it in the notes; reuse it for the caption and the paper.
 
@@ -115,7 +91,7 @@ Before drawing a model or statistical figure, write a table and keep it in the n
 
 Never invent an equation number; leave "-" and flag it when the paper's numbering is unknown. If a figure symbol differs from the paper's, either rename the figure or add a one-line note, so the reader is never left to guess.
 
-## 7. Export recipes
+## 6. Export recipes
 
 | Source | To SVG | To PDF | To PNG |
 |---|---|---|---|

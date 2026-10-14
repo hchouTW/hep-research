@@ -8,6 +8,7 @@ PDF accessibility, diffing, build automation, bibliography engines,
 multi-file structuring, encoding) — this file is venue-specific setup only.
 
 ## Table of contents
+- [Quick reference](#quick-reference)
 - [Getting the right class file](#getting-the-right-class-file)
 - [REVTeX (PRL / PRD / PRX)](#revtex-prl--prd--prx)
 - [JHEP](#jhep)
@@ -19,6 +20,32 @@ multi-file structuring, encoding) — this file is venue-specific setup only.
 - [Common compile errors](#common-compile-errors)
 - [Length-limit tactics](#length-limit-tactics)
 - [Venue rules: sources and last-verified dates](#venue-rules-sources-and-last-verified-dates)
+
+## Quick reference
+
+The single home for venue facts in this skill; other references point here. Sources
+and per-row dates are in [Venue rules: sources and last-verified dates](#venue-rules-sources-and-last-verified-dates);
+a row older than a year, or for a different conference year, is re-checked before it
+is quoted as a hard limit.
+
+| Venue | Class file | Length (verified 2026-09) | Notes |
+|---|---|---|---|
+| PRL | `revtex4-2` (`\documentclass[aps,prl,reprint]{revtex4-2}`) | 3,750 words (about 4 pages); abstract ≤ 600 characters | Run-in italic heads, not `\section`; no PACS (PhySH since 2016) |
+| PRD / PRX | `revtex4-2` (`\documentclass[aps,prd,reprint]{revtex4-2}`) | PRD regular articles: no fixed limit; PRD Letters 4,500 words | Numbered sections, full methods |
+| JHEP | `article` + SISSA's `jheppub.sty` (not a `.cls`) | No fixed limit | `\abstract{}` before `\begin{document}`; labeled `\author[a]`/`\affiliation[a]`, `\emailAdd`; `\flushbottom`; `\bibliographystyle{JHEP}`. REVTeX front matter does not carry over: read the reference before converting |
+| EPJC | Springer Nature template `sn-jnl.cls`, `[iicol]` option | No fixed limit | Old `svjour3` superseded; decimal headings, ≤ 3 levels |
+| Nature Physics | Nature LaTeX template or Word | Article: 3,000 words main text, ~200-word summary paragraph, ≤ 6 display items | Letters retired in 2022; check Nature itself separately |
+| JCAP (astroparticle) | `article` + SISSA's `jcappub.sty` | No fixed limit | Same front matter as JHEP; common for cosmic-ray/dark-matter theory and phenomenology |
+| ApJ / ApJL (astroparticle) | AASTeX v7 (`\documentclass{aastex7}`) | Abstract ≤ 250 words; ApJL 3,500 words and ≤ 5 figures+tables (soft) | natbib author-year citations |
+| Astroparticle Physics (Elsevier) | `elsarticle.cls` (v3.5) | Not verified (publisher pages blocked); read the journal's Guide for Authors | Elsevier house style |
+| A&A | A&A's own `aa.cls` | Not verified (publisher pages blocked) | Some multi-messenger and counterpart papers |
+| PRD (astroparticle results) | `revtex4-2`, as PRD above | As PRD | Common venue for astroparticle results |
+| NeurIPS / ICML / ICLR (2026) | Conference's current-year `.sty` | 9 / 8 / 9 pages main text including figures and tables; references, appendices (and NeurIPS's checklist) do not count; +1 page at camera-ready (ICLR: 10 pages at rebuttal and camera-ready) | Double-blind; NeurIPS checklist, ICML impact statement required; re-check every year |
+| ACL / EMNLP / NAACL (ARR) | Official ACL template, unmodified | Long 8 pages, short 4 | Required "Limitations" section, not counted; `natbib` author-year |
+| TMLR | Venue's own LaTeX template | No page limit (long papers review more slowly) | Journal-style open review, closer to a physics journal's process |
+| JMLR | `jmlr2e.sty` | No hard limit; > 35 pages (with appendices) risks rejection, > 50 pages needs a cover-letter justification; abstract ≤ 200 words | Journal review; non-JMLR style is rejected without review |
+| Statistics journals (JASA, Annals of Statistics, ...) | Usually plain `article`-based | Not verified | Journal-specific reference style; theorem/proof structure for theory papers |
+| arXiv preprint | Whatever the target journal uses, or `article` | Match target venue | arXiv runs BibTeX/biber itself; upload any `.sty`/`.cls` not in TeX Live; don't mix PS and PDF figures |
 
 ## Getting the right class file
 

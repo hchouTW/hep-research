@@ -56,8 +56,8 @@ a full paper's derivations.
 
 The same backbone applies, with "Detector" becoming "Instrument"/"Observatory"/
 "Array," "luminosity" becoming "exposure," and — for point-source or anisotropy
-searches — an arrival-direction section with its own pre-trial/post-trial
-significance treatment, separate from the energy-spectrum section. Atmospheric and
+searches — an arrival-direction section, separate from the energy-spectrum section,
+whose significances are quoted pre- and post-trial (`scientific-style.md`). Atmospheric and
 hadronic-interaction-model systematics (QGSJET, EPOS, Sibyll, ...) typically dominate
 the systematics section for air-shower analyses, in place of detector-alignment
 systematics. See `astroparticle-and-cosmic-ray-papers.md` for the full treatment,

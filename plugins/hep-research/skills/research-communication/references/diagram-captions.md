@@ -1,5 +1,8 @@
 # Figure Captions and References
 
+The home for captions of diagrams (workflows, pipelines, schematics, Feynman-style drawings); captions of plots
+and tables follow `figures-and-tables.md` ("Caption writing").
+
 ## Caption anatomy
 
 1. **What it shows** (first sentence, standalone, complete - journals often use it as the short caption).

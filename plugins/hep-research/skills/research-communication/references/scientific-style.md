@@ -7,7 +7,6 @@ to scientific writing generally; a few items are physics-specific conventions.
 - [Tense and voice](#tense-and-voice)
 - [Hedging and precision](#hedging-and-precision)
 - [Significance language](#significance-language)
-- [Astroparticle-specific phrasing](#astroparticle-specific-phrasing)
 - [Statistical and ML reporting language](#statistical-and-ml-reporting-language)
 - [Sentence and paragraph shape](#sentence-and-paragraph-shape)
 - [Common non-native-English pitfalls](#common-non-native-english-pitfalls)
@@ -72,21 +71,22 @@ mass, sky position, energy or time), the thresholds apply to the global
 usually quote local and global side by side. Astroparticle point-source searches
 say "pre-trial" and "post-trial" (see below).
 
-## Astroparticle-specific phrasing
+### Pre-trial and post-trial (scans of directions, energies, times)
 
-Extends the table above for astroparticle-physics and cosmic-ray writing (see
-`astroparticle-and-cosmic-ray-papers.md` for the full treatment):
+- When a search scanned more than one direction, energy bin, time window or source
+  candidate, state both the **pre-trial** (local) and the **post-trial** (global)
+  significance, and say which one each number is; a bare "5σ" for a point-source
+  search is ambiguous. "Detection", "hint" and "evidence" for a source or transient
+  follow the table above applied to the post-trial number: a "5σ pre-trial" excess
+  is not an observation if the trials factor brings it below 5σ post-trial.
+- For an ON/OFF count the pre-trial significance is usually Li & Ma's eq. 17
+  (T.-P. Li and Y.-Q. Ma, ApJ 272, 317 (1983), doi:10.1086/161295; checked
+  2026-09-26): cite it and state the ON/OFF exposure ratio α. Computing it, and any
+  trials correction, belongs to `hep-statistics`.
 
-- Always state whether a quoted significance is **pre-trial or post-trial** when a
-  search scanned more than one direction, energy bin, or source candidate — a bare
-  "5σ" for a point-source search is ambiguous and referees will ask which.
-- **"Exposure"** (area × solid angle × time, folding in geometric acceptance and duty
-  cycle) is not interchangeable with **"livetime"** (raw observing time) — use the
-  term that matches what the quoted uncertainty was actually derived from.
-- Composition claims ("proton-dominated," "mixed composition") should name the
-  hadronic-interaction model(s) used to infer them in the same sentence or the
-  immediately following one — these inferences are model-dependent, and omitting the
-  model reads as more certain than the result supports.
+This section is the single home for significance wording; other references point here.
+Astroparticle terms that are not about significance (exposure vs. livetime, composition
+language) are in `astroparticle-and-cosmic-ray-papers.md`.
 
 ## Statistical and ML reporting language
 

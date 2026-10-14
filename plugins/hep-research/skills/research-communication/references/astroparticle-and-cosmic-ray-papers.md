@@ -67,16 +67,9 @@ substitutions:
 
 ## Journals and venues
 
-In addition to the collider-physics venues in `latex-venue-setup.md` (sources and
-last-verified dates are in its final section; rows marked "Not checked" were not verified):
-
-| Venue | Class file | Typical length | Notes |
-|---|---|---|---|
-| PRD (astro-ph flavor) | `revtex4-2` (`\documentclass[aps,prd,reprint]{revtex4-2}`) | No fixed limit for regular articles (Letters 4,500 words) | Same class as collider PRD; astroparticle results commonly published here |
-| JCAP | `article` + SISSA's `jcappub.sty` | No fixed limit | JHEP-family house style; `\bibliographystyle{JHEP}` |
-| ApJ / ApJL | AASTeX v7 (`aastex7.cls`; TeX distributions may still ship `aastex631`) | ApJL: 3,500 words, ≤ 5 figures+tables (soft limits); abstract ≤ 250 words | Get the current class from the AAS journals author-resources page; natbib author-year citation is the house default |
-| Astroparticle Physics (Elsevier) | `elsarticle.cls` | Not checked | Elsevier house style; check current author guidelines for citation style option |
-| A&A | A&A's own `aa.cls` | Not checked | Used for some multi-messenger/counterpart papers | 
+Venue facts for astroparticle journals (JCAP, ApJ/ApJL, Astroparticle Physics,
+A&A, PRD) are in the quick-reference table of `latex-venue-setup.md`, with sources
+and verification dates; this section only adds what differs in practice.
 
 As with the collider-physics class files, always pull the current `.cls`/`.bst` from
 the publisher rather than reconstructing from memory — AASTeX in particular changes
@@ -184,21 +177,9 @@ as a heatmap but mean very different things.
 
 ## Phrasing conventions specific to this field
 
-These extend, not replace, `scientific-style.md`'s significance-language table:
+Significance wording, including pre-trial vs. post-trial and "detection" vs. "hint",
+lives in `scientific-style.md` (Significance language). Specific to this field:
 
-- **Pre-trial vs. post-trial significance** must both be stated whenever a search
-  scanned more than one direction, energy bin, or source candidate — quoting only the
-  pre-trial number is the astroparticle-physics analogue of the look-elsewhere effect
-  in `reading-papers.md`, and referees will ask for the post-trial number if it's
-  missing. For an ON/OFF (source vs. background region) count, the pre-trial
-  significance is usually Li & Ma's eq. 17 (T.-P. Li and Y.-Q. Ma, ApJ 272, 317
-  (1983), doi:10.1086/161295; checked 2026-09-26): cite it and state the ON/OFF
-  exposure ratio alpha used. Computing it belongs to `hep-statistics`.
-- **"Detection" vs. "hint" vs. "evidence"** for a point source or transient
-  association follows the same σ-based conventions as `scientific-style.md`'s table,
-  but state explicitly whether the quoted significance is pre- or post-trial each
-  time — a "5σ pre-trial" claim is not an observation-level "detection" if the trials
-  factor brings it below 5σ post-trial.
 - **"Exposure" and "livetime"** are not interchangeable: exposure already folds in
   geometric acceptance and duty cycle; livetime is the raw observing time before
   those corrections. State which one a quoted uncertainty is derived from.
@@ -216,7 +197,7 @@ When reading someone else's astroparticle/cosmic-ray paper, extend
 - **Exposure/livetime and duty cycle**: stated explicitly, and consistent with the
   array's/instrument's known operating history for that period?
 - **Trials factor**: for any point-source or anisotropy search, is a post-trial
-  significance given, not just pre-trial?
+  significance given, not just pre-trial (`scientific-style.md`)?
 - **Hadronic-interaction-model dependence**: for composition or shower-based results,
   is the model-dependence of the result itself discussed, or only the model-driven
   systematic uncertainty band shown without comment on how much conclusions would

@@ -89,11 +89,9 @@ phrasing of it.
 - **Blinding**: was the analysis blinded (signal region hidden until the method was
   frozen)? Papers that skip this for a search are more vulnerable to
   look-elsewhere-effect-style bias, even unintentionally.
-- **Look-elsewhere effect**: for any reported local significance, check whether a
-  global significance (accounting for the number of places an excess could have
-  appeared) is also quoted — a "3σ local" excess is often much less significant
-  globally. See `../../hep-statistics/references/statistical-inference-for-physics.md`'s frequentist-inference
-  section for the actual trials-correction/global-significance check.
+- **Look-elsewhere effect**: for any reported local significance, is a global one
+  quoted too? A "3σ local" excess is often much less significant globally (wording:
+  `scientific-style.md`; the trials correction itself: hep-statistics).
 - **Systematics treatment**: are systematic uncertainties itemized by source (not
   just a single lumped number), and is it clear how they were evaluated (data-driven
   vs. simulation-based)? See `../../hep-statistics/references/statistical-inference-for-physics.md`'s systematic-
@@ -110,11 +108,8 @@ phrasing of it.
 - **Exposure and livetime**: stated explicitly, and consistent with the
   instrument's/array's known operating history for the quoted period?
 - **Trials factor**: for a point-source or anisotropy search, is a post-trial
-  (global) significance given alongside the pre-trial number — the same
-  look-elsewhere-effect concern as collider searches, but easy to miss since the
-  "trials" here are sky positions or energy bins rather than mass bins. See
-  `../../hep-statistics/references/statistical-inference-for-physics.md`'s frequentist-inference section for the
-  actual trials-correction/global-significance check.
+  significance given with the pre-trial one? The trials are sky positions or energy
+  bins rather than mass bins (wording: `scientific-style.md`; correction: hep-statistics).
 - **Hadronic-interaction-model dependence**: for shower-based composition results, is
   the model-dependence of the conclusion itself discussed (not just shown as a
   systematic-uncertainty band with no comment on whether the qualitative conclusion

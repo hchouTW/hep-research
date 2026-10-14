@@ -62,14 +62,13 @@ are stated here in full.
    and how each uncertainty enters (e.g. "the background uncertainty is included
    as a constrained nuisance parameter"); use a placeholder for any choice not
    yet made.
-3. **Calibrate claims to the evidence.** In a search's significance statement,
-   "evidence for" conventionally needs ≥ 3σ and "observation of" ≥ 5σ (a field
-   convention, stated by the source's own community; `scientific-style.md` scopes
-   it, and the everyday sense of "evidence", a source or result that supports a
-   claim, carries no threshold); whenever a look-elsewhere effect applies (a scan over mass, sky position,
-   energy or time), use the global (post-trial) significance, and always say which
-   one is quoted. If a claim is stronger than its source, say so and propose the
-   weaker wording explicitly, rather than silently softening it.
+3. **Calibrate claims to the evidence.** Significance words ("evidence for",
+   "observation of") are a field convention with thresholds, and the everyday
+   "evidence" (a source that supports a claim) carries none; they, local vs.
+   global (pre- vs. post-trial) wording and limit wording follow `scientific-style.md` (Significance language;
+   Reporting limits and nulls), their single home. If a claim is stronger than its
+   source, say so and propose the weaker wording explicitly, rather than silently
+   softening it.
 4. **Check the citation actually says it.** A number attributed to a paper must be
    the number that paper reports (a later combination or a PDG average is a different
    source). If what you know suggests a mismatch (a precision too good for the cited
@@ -94,10 +93,8 @@ are stated here in full.
 7. **Methodology from code describes only the code.** Say what it computes (binned vs.
    unbinned, what is fitted, what is fixed) and list what it does not (intervals,
    nuisance parameters, background estimation).
-8. **Venue rules from the table below, not memory.** PRL abstracts are ≤ 600
-   characters; JHEP/JCAP are `article` + `jheppub`/`jcappub` with `\flushbottom`
-   after `\maketitle`. Before converting between classes, read
-   `latex-venue-setup.md`.
+8. **Venue rules from `latex-venue-setup.md` (quick reference), not memory.**
+   Read it before quoting a limit or converting between classes.
 <!-- example: experiment-specific illustration -->
 9. **One paper, one entry: identifiers decide, keys follow.** Two `.bib` entries are one paper when they share a DOI, else an arXiv identifier (version stripped), else an INSPIRE record id; never compare keys, because one INSPIRE record can carry two. Keep the current key, update every `\cite` to it, and delete the other; this is the only reason to rename a key. For a collaboration paper the collaboration key (`ATLAS:2012yve`) is the current one and the first-author key (`Aad:2012tfa`) is the older export; say so, and tell the user to confirm on INSPIRE. A `.bib` year taken from arXiv may be the latest-version year, not the publication year.
 <!-- /example -->
@@ -290,28 +287,11 @@ rebuttals) is in `paper-genre-variants.md`,
 `astroparticle-and-cosmic-ray-papers.md`, and
 `statistics-and-ml-papers.md`.
 
-## Journal / venue conventions (quick reference)
+## Journal / venue conventions
 
-| Venue | Class file | Length (verified 2026-09) | Notes |
-|---|---|---|---|
-| PRL | `revtex4-2` (`\documentclass[aps,prl,reprint]{revtex4-2}`) | 3,750 words (about 4 pages); abstract ≤ 600 characters | Run-in italic heads, not `\section`; no PACS (PhySH since 2016) |
-| PRD / PRX | `revtex4-2` (`\documentclass[aps,prd,reprint]{revtex4-2}`) | PRD regular articles: no fixed limit; PRD Letters 4,500 words | Numbered sections, full methods |
-| JHEP | `article` + SISSA's `jheppub.sty` (not a `.cls`) | No fixed limit | `\abstract{}` before `\begin{document}`; labeled `\author[a]`/`\affiliation[a]`, `\emailAdd`; `\flushbottom`; `\bibliographystyle{JHEP}`. REVTeX front matter does not carry over: read the reference before converting |
-| EPJC | Springer Nature template `sn-jnl.cls`, `[iicol]` option | No fixed limit | Old `svjour3` superseded; decimal headings, ≤ 3 levels |
-| Nature Physics | Nature LaTeX template or Word | Article: 3,000 words main text, ~200-word summary paragraph, ≤ 6 display items | Letters retired in 2022; check Nature itself separately |
-| JCAP (astroparticle) | `article` + SISSA's `jcappub.sty` | No fixed limit | Same front matter as JHEP; common for cosmic-ray/dark-matter theory and phenomenology |
-| ApJ / ApJL (astroparticle) | AASTeX v7 (`\documentclass{aastex7}`) | Abstract ≤ 250 words; ApJL 3,500 words and ≤ 5 figures+tables (soft) | natbib author-year citations |
-| Astroparticle Physics (Elsevier) | `elsarticle.cls` (v3.5) | Not verified (publisher pages blocked); read the journal's Guide for Authors | Elsevier house style |
-| NeurIPS / ICML / ICLR (2026) | Conference's current-year `.sty` | 9 / 8 / 9 pages main text including figures and tables; references, appendices (and NeurIPS's checklist) do not count; +1 page at camera-ready (ICLR: 10 pages at rebuttal and camera-ready) | Double-blind; NeurIPS checklist, ICML impact statement required; re-check every year |
-| ACL / EMNLP / NAACL (ARR) | Official ACL template, unmodified | Long 8 pages, short 4 | Required "Limitations" section, not counted; `natbib` author-year |
-| TMLR | Venue's own LaTeX template | No page limit (long papers review more slowly) | Journal-style open review, closer to a physics journal's process |
-| JMLR | `jmlr2e.sty` | No hard limit; > 35 pages (with appendices) risks rejection, > 50 pages needs a cover-letter justification; abstract ≤ 200 words | Journal review; non-JMLR style is rejected without review |
-| Statistics journals (JASA, Annals of Statistics, ...) | Usually plain `article`-based | Not verified | Journal-specific reference style; theorem/proof structure for theory papers |
-| arXiv preprint | Whatever the target journal uses, or `article` | Match target venue | arXiv runs BibTeX/biber itself; upload any `.sty`/`.cls` not in TeX Live; don't mix PS and PDF figures |
-
-Sources and per-row dates are in `latex-venue-setup.md` ("Venue rules:
-sources and last-verified dates"). A row older than a year, or for a different
-conference year, must be re-checked before it is quoted as a hard limit.
+Venue facts (class files, length and abstract limits, front matter) have one home:
+the quick-reference table in `latex-venue-setup.md`, with its sources and
+last-verified dates; never quote a limit from memory.
 
 Details, obtaining the right class file, and common compile errors are in
 `latex-venue-setup.md`; astroparticle-specific venues and author-list

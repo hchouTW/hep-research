@@ -35,7 +35,7 @@
   },
   "research-communication": {
    "references": 54,
-   "bytes": 374809,
+   "bytes": 373804,
    "uncited": 0
   }
  },
@@ -2546,8 +2546,8 @@
   {
    "path": "skills/research-communication/references/academic-diagrams-guide.md",
    "owner": "research-communication",
-   "bytes": 10372,
-   "lines": 184,
+   "bytes": 10442,
+   "lines": 185,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/research-communication/README.md",
@@ -2556,13 +2556,13 @@
     "skills/research-communication/references/figures-and-tables.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "54734d7 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/academic-papers-guide.md",
    "owner": "research-communication",
-   "bytes": 39028,
-   "lines": 502,
+   "bytes": 35919,
+   "lines": 482,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/research-communication/README.md",
@@ -2579,7 +2579,7 @@
     "tests/skills/research_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "f653c12 2026-10-14"
+   "last_commit": "54734d7 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/artifact-packaging-for-release.md",
@@ -2598,8 +2598,8 @@
   {
    "path": "skills/research-communication/references/astroparticle-and-cosmic-ray-papers.md",
    "owner": "research-communication",
-   "bytes": 14981,
-   "lines": 227,
+   "bytes": 13191,
+   "lines": 208,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -2614,7 +2614,7 @@
     "skills/research-communication/references/submission-and-peer-review.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "429afb2 2026-10-14"
+   "last_commit": "54734d7 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/citation-verification.md",
@@ -2636,7 +2636,7 @@
     "tests/skills/research_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "c8df300 2026-10-14"
+   "last_commit": "2aa4c73 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/citations-and-bibliography.md",
@@ -2658,7 +2658,7 @@
     "skills/research-communication/references/statistics-and-ml-papers.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "f653c12 2026-10-14"
+   "last_commit": "7890247 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/claim-evidence-mapping.md",
@@ -2681,7 +2681,7 @@
     "hep-statistics",
     "hep-theory"
    ],
-   "last_commit": "03e1ac2 2026-10-14"
+   "last_commit": "7e0ee23 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/code-review-report.md",
@@ -2721,7 +2721,7 @@
     "skills/research-communication/references/erratum-and-corrigendum-drafting.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "2df2ef5 2026-10-14"
+   "last_commit": "cd7e04f 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/conflict-of-interest-and-ethics-statements.md",
@@ -2738,26 +2738,27 @@
   {
    "path": "skills/research-communication/references/diagram-captions.md",
    "owner": "research-communication",
-   "bytes": 3345,
-   "lines": 55,
+   "bytes": 3521,
+   "lines": 58,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/research-communication/references/academic-diagrams-guide.md"
+    "skills/research-communication/references/academic-diagrams-guide.md",
+    "skills/research-communication/references/figures-and-tables.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "54734d7 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/diagram-figure-style.md",
    "owner": "research-communication",
-   "bytes": 6067,
+   "bytes": 6117,
    "lines": 93,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-diagrams-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "54734d7 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/diagrams-computer-science.md",
@@ -2783,7 +2784,7 @@
     "skills/research-communication/references/academic-diagrams-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "6de93ff 2026-10-14"
+   "last_commit": "e159f93 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/diagrams-statistics.md",
@@ -2828,7 +2829,7 @@
     "skills/research-communication/references/comment-and-reply-exchange.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "cbadba4 2026-10-14"
+   "last_commit": "8f843ee 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/evidence-linked-writing.md",
@@ -2844,25 +2845,26 @@
     "skills/research-communication/references/revision-impact-tracking.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "f653c12 2026-10-14"
+   "last_commit": "7890247 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/figures-and-tables.md",
    "owner": "research-communication",
-   "bytes": 9241,
-   "lines": 153,
+   "bytes": 9469,
+   "lines": 155,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-diagrams-guide.md",
     "skills/research-communication/references/academic-papers-guide.md",
     "skills/research-communication/references/astroparticle-and-cosmic-ray-papers.md",
+    "skills/research-communication/references/diagram-captions.md",
     "skills/research-communication/references/interpreting-scientific-graphics.md",
     "skills/research-communication/references/latex-mechanics-and-tooling.md",
     "skills/research-communication/references/paper-structure.md",
     "skills/research-communication/references/poster-and-talk-design.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "54734d7 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/general-diagram-principles.md",
@@ -2872,7 +2874,7 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-diagrams-guide.md",
-    "skills/research-communication/references/legends-panels-and-export.md"
+    "skills/research-communication/references/poster-and-talk-design.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "351029c 2026-10-07"
@@ -2915,7 +2917,7 @@
     "skills/research-communication/references/reading-papers.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "429afb2 2026-10-14"
+   "last_commit": "7f8ec6a 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/latex-mechanics-and-tooling.md",
@@ -2938,8 +2940,8 @@
   {
    "path": "skills/research-communication/references/latex-venue-setup.md",
    "owner": "research-communication",
-   "bytes": 21706,
-   "lines": 345,
+   "bytes": 25141,
+   "lines": 372,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -2950,20 +2952,20 @@
     "skills/research-communication/references/submission-and-peer-review.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "2df2ef5 2026-10-14"
+   "last_commit": "54734d7 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/legends-panels-and-export.md",
    "owner": "research-communication",
-   "bytes": 8386,
-   "lines": 130,
+   "bytes": 7115,
+   "lines": 106,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-diagrams-guide.md",
     "skills/research-communication/references/diagram-figure-style.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "a132044 2026-10-14"
+   "last_commit": "54734d7 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/literature-discovery-and-search.md",
@@ -2982,13 +2984,14 @@
    "owner": "research-communication",
    "bytes": 4451,
    "lines": 80,
-   "linked_from_skill_md": false,
+   "linked_from_skill_md": true,
    "cited_by": [
+    "skills/research-communication/SKILL.md",
     "skills/research-communication/references/academic-papers-guide.md",
     "skills/research-communication/references/citation-verification.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "2aa4c73 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/literature-review.md",
@@ -3004,7 +3007,7 @@
     "skills/research-communication/references/thesis-by-publication-assembly.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "f653c12 2026-10-14"
+   "last_commit": "7890247 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/logical-consistency-and-argument-uniformity.md",
@@ -3050,7 +3053,7 @@
     "skills/research-communication/references/academic-diagrams-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "6172a95 2026-10-14"
+   "last_commit": "60f0c98 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/multi-venue-reformatting.md",
@@ -3078,12 +3081,12 @@
     "skills/research-communication/references/poster-and-talk-design.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "429afb2 2026-10-14"
+   "last_commit": "7f8ec6a 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/paper-genre-variants.md",
    "owner": "research-communication",
-   "bytes": 4259,
+   "bytes": 4278,
    "lines": 82,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -3092,7 +3095,7 @@
     "skills/research-communication/references/thesis-by-publication-assembly.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "54734d7 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/paper-structure.md",
@@ -3142,14 +3145,17 @@
   {
    "path": "skills/research-communication/references/poster-and-talk-design.md",
    "owner": "research-communication",
-   "bytes": 3232,
-   "lines": 58,
+   "bytes": 4790,
+   "lines": 89,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/research-communication/references/academic-papers-guide.md"
+    "skills/research-communication/references/academic-diagrams-guide.md",
+    "skills/research-communication/references/academic-papers-guide.md",
+    "skills/research-communication/references/diagram-figure-style.md",
+    "skills/research-communication/references/legends-panels-and-export.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "a2a25ec 2026-10-12"
+   "last_commit": "54734d7 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/preprint-to-journal-reconciliation.md",
@@ -3163,7 +3169,7 @@
     "skills/research-communication/references/thesis-by-publication-assembly.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "15757e4 2026-10-14"
+   "last_commit": "0da0c8f 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/preregistration-and-registered-reports.md",
@@ -3198,13 +3204,13 @@
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "102c03f 2026-10-14"
+   "last_commit": "ab01e9e 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/reading-papers.md",
    "owner": "research-communication",
-   "bytes": 10116,
-   "lines": 172,
+   "bytes": 9706,
+   "lines": 167,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-statistics/references/statistical-inference-for-physics.md",
@@ -3219,7 +3225,7 @@
    "cited_by_other_skills": [
     "hep-statistics"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "54734d7 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/reproducibility-auditing.md",
@@ -3280,24 +3286,27 @@
   {
    "path": "skills/research-communication/references/scientific-style.md",
    "owner": "research-communication",
-   "bytes": 9596,
+   "bytes": 9635,
    "lines": 173,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-statistics/references/statistical-inference-for-physics.md",
     "skills/research-communication/references/academic-papers-guide.md",
     "skills/research-communication/references/astroparticle-and-cosmic-ray-papers.md",
+    "skills/research-communication/references/figures-and-tables.md",
     "skills/research-communication/references/grant-and-fellowship-proposal-writing.md",
     "skills/research-communication/references/latex-venue-setup.md",
     "skills/research-communication/references/outreach-and-public-facing-summaries.md",
+    "skills/research-communication/references/paper-genre-variants.md",
     "skills/research-communication/references/paper-structure.md",
+    "skills/research-communication/references/reading-papers.md",
     "skills/research-communication/references/statistics-and-ml-papers.md",
     "tests/skills/research_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [
     "hep-statistics"
    ],
-   "last_commit": "d41501c 2026-10-12"
+   "last_commit": "54734d7 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/statistics-and-ml-papers.md",
@@ -3337,7 +3346,7 @@
     "tests/skills/research_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "429afb2 2026-10-14"
+   "last_commit": "7f8ec6a 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/supplementary-material-planning.md",
@@ -3390,11 +3399,11 @@
     "skills/research-communication/examples/hep/07-feynman-style-interaction.md",
     "skills/research-communication/references/academic-diagrams-guide.md",
     "skills/research-communication/references/diagrams-hep.md",
-    "skills/research-communication/references/legends-panels-and-export.md",
+    "skills/research-communication/references/poster-and-talk-design.md",
     "skills/research-communication/scripts/check_diagram_sources.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "c7f9b6f 2026-10-14"
+   "last_commit": "6086fff 2026-10-14"
   }
  ],
  "overlap_pairs": [

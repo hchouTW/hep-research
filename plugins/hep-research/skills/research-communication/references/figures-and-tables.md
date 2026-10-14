@@ -58,6 +58,8 @@ slices usually communicates more.
 
 ## Caption writing
 
+This section is the home for captions of plots and tables; captions of diagrams
+(workflows, schematics, Feynman-style drawings) follow `diagram-captions.md`.
 A caption typically has three parts, in order:
 1. **What is shown** — plot type, what's on each axis, what the data source is.
 2. **How it was made**, briefly, if not obvious (selection applied, binning
@@ -71,7 +73,7 @@ Example:
 > background-only fit (solid line) and the signal-plus-background fit (dashed
 > line). The lower panel shows the fit residuals in units of the statistical
 > uncertainty. The excess near 750 GeV corresponds to a local significance of
-> 2.1σ.
+> 2.1σ (the global significance is given in the text; `scientific-style.md`).
 
 Keep captions self-contained but not redundant with the main text — the main
 text can discuss implications at length; the caption states facts about the

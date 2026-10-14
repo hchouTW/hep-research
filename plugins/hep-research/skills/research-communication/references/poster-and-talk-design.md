@@ -51,6 +51,37 @@ prose structure.
    objections (e.g. the specific concern a referee raised) belong after the
    main deck's end, not inline.
 
+## Diagrams on posters, in theses and in talks
+
+### Format adjustments
+
+| Target | Adjust |
+|---|---|
+| Poster | fewer nodes (<= ~8), text sizes from the table under Posters, one figure per poster section, no legends longer than 3 entries |
+| Thesis | one figure per concept, numbered by chapter, full detail allowed (technical level), a symbol table in the list of symbols, vector PDF at text width |
+| Slides | see below |
+
+### Beamer overlays and talk simplification
+
+Simplify by **abstraction level** (see `general-diagram-principles.md` section 6), not by shrinking: keep node identity
+so the audience can follow the paper figure. For a talk, reduce to <= ~7 boxes, labels <= 3 words, drop legends by using
+one edge style, and reveal the pipeline one stage at a time.
+
+Beamer with TikZ, reveal stage by stage using `visible on` (compiled with Tectonic: 3 overlay pages, boxes stay in place):
+
+```latex
+% diagram-check: skip Beamer overlay fragment: needs a beamer frame, overlay-beamer-styles and the proc/flow styles of tikz-patterns.md
+\begin{tikzpicture}[node distance=8mm]
+  \node[proc] (a) {Trigger};
+  \node[proc, right=of a, visible on=<2->] (b) {Reconstruction};
+  \node[proc, right=of b, visible on=<3->] (c) {Selection};
+  \draw[flow, visible on=<2->] (a) -- (b);
+  \draw[flow, visible on=<3->] (b) -- (c);
+\end{tikzpicture}
+```
+`visible on=<n->` needs `\usetikzlibrary{overlay-beamer-styles}`. Alternatives that avoid it: export one PDF per stage, or
+`\only<n>{\includegraphics{...}}`. Keep positions fixed across overlays so nothing jumps.
+
 Deliver poster/slide content mapped explicitly back to its source
 figure/section in the paper, so a factual or numerical correction to the
 paper can be propagated to the derived materials — do not let poster/slide

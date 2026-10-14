@@ -124,8 +124,9 @@ Domain checklists: [HEP](diagrams-hep.md),
   [plantuml-patterns.md](plantuml-patterns.md),
   [tikz-patterns.md](tikz-patterns.md); SVG spec -> `../assets/diagrams/svg-spec.md`
 - Captions and in-text references -> [diagram-captions.md](diagram-captions.md)
-- Legends, multi-panel figures, posters/theses, Beamer overlays, equation placement, symbol table, export
-  (SVG/PDF/PNG) -> [legends-panels-and-export.md](legends-panels-and-export.md)
+- Legends, multi-panel figures, equation placement, symbol table, export (SVG/PDF/PNG) ->
+  [legends-panels-and-export.md](legends-panels-and-export.md)
+- Posters, theses, talks and Beamer overlays -> [poster-and-talk-design.md](poster-and-talk-design.md)
 - Starting skeletons -> `../assets/diagrams/` (research-workflow, algorithm-flowchart,
   system-architecture, hep-analysis-pipeline, probabilistic-graphical-model,
   agentic-ai-architecture, ml-pipeline, bayesian-model, svg-spec)
