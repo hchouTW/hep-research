@@ -35,7 +35,7 @@
   },
   "research-communication": {
    "references": 53,
-   "bytes": 369905,
+   "bytes": 370070,
    "uncited": 0
   }
  },
@@ -2561,8 +2561,8 @@
   {
    "path": "skills/research-communication/references/academic-papers-guide.md",
    "owner": "research-communication",
-   "bytes": 38819,
-   "lines": 499,
+   "bytes": 38833,
+   "lines": 501,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/research-communication/README.md",
@@ -2639,7 +2639,7 @@
   {
    "path": "skills/research-communication/references/citations-and-bibliography.md",
    "owner": "research-communication",
-   "bytes": 18410,
+   "bytes": 18420,
    "lines": 301,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -2831,7 +2831,7 @@
   {
    "path": "skills/research-communication/references/evidence-linked-writing.md",
    "owner": "research-communication",
-   "bytes": 5209,
+   "bytes": 5267,
    "lines": 67,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -2977,7 +2977,7 @@
   {
    "path": "skills/research-communication/references/literature-review.md",
    "owner": "research-communication",
-   "bytes": 7719,
+   "bytes": 7727,
    "lines": 146,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -3138,8 +3138,8 @@
   {
    "path": "skills/research-communication/references/preprint-to-journal-reconciliation.md",
    "owner": "research-communication",
-   "bytes": 2644,
-   "lines": 44,
+   "bytes": 2720,
+   "lines": 45,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -3164,8 +3164,8 @@
   {
    "path": "skills/research-communication/references/primary-sources-and-version-checks.md",
    "owner": "research-communication",
-   "bytes": 12393,
-   "lines": 85,
+   "bytes": 12392,
+   "lines": 84,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -3378,7 +3378,7 @@
     "skills/research-communication/scripts/check_diagram_sources.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "c7f9b6f 2026-10-14"
   }
  ],
  "overlap_pairs": [
