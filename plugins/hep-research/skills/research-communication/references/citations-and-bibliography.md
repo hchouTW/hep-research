@@ -209,7 +209,7 @@ handle it; manual tweaks break on any bibliography addition/removal.
 - Cite Monte Carlo generators and tunes by version (e.g. Pythia 8.3 with a
   specific tune) — cite both the generator paper and the tune paper if they
   differ.
-- Avoid citation stuffing (a string of 5+ references for an uncontroversial
+- Avoid citation stuffing (a string of four or more references for an uncontroversial
   general statement) — pick the 1-2 most relevant/foundational.
 
 ## Linking supplemental material and data

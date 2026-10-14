@@ -26,9 +26,10 @@ publishing conventions (NeurIPS/ICML/ICLR/ACL-family conferences, JMLR/TMLR,
 statistics journals) — but the reading strategies, prose guidance, and structural
 conventions apply to scientific writing generally.
 
-Pairs well with `hep-analysis` (the physics content: cutflows, fits, systematics,
-limits, and — for the astroparticle side — spectrum/composition/anisotropy analysis
-and astroparticle statistics) and `physics-ml` (the ML/statistical rigor itself:
+Pairs well with `hep-analysis` (the measurement design: selections, cutflows,
+backgrounds, corrections, systematics, and — for the astroparticle side —
+spectrum/composition/anisotropy measurements), `hep-statistics` (fits, limits,
+significances, unfolding) and `physics-ml` (the ML/statistical rigor itself:
 ablations, seed variance, matched-budget comparisons, evaluation-harness design —
 not just a methods section to read through). This skill owns the *reading and
 writing*, not the analysis itself — if the user still needs to run a fit or produce
@@ -152,8 +153,9 @@ Use it for any of:
 
 Do **not** reach for this skill for pure numerical/statistical work (fitting, limit
 setting, unfolding — `hep-statistics`; ablations, seed variance, proving an ML result
-is real — `physics-ml`), experiment-specific data analysis (the bound experiment profile (see the context-resolution steps in the skill's SKILL.md; profiles are listed in `<plugin root>/profiles/registry.json`)), or drawing a
-schematic or diagram ([academic-diagrams-guide.md](academic-diagrams-guide.md)). Do reach for it the moment that work needs to be
+is real — `physics-ml`), experiment-specific data analysis (`hep-analysis` with the
+bound experiment profile, read through the context-resolution steps in SKILL.md), or
+drawing a schematic or diagram ([academic-diagrams-guide.md](academic-diagrams-guide.md)). Do reach for it the moment that work needs to be
 understood from someone else's paper, or turned into English prose,
 a figure caption, or a formatted document of your own.
 

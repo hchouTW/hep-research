@@ -12,7 +12,7 @@ schema `<plugin root>/contracts/schemas/ext_communication_traceability.json`, va
 
 | Statement | Established by | Never implies |
 |---|---|---|
-| Schema validity | `contracts/validate.py` | that a referenced file exists |
+| Schema validity | `<plugin root>/contracts/validate.py` | that a referenced file exists |
 | Dependency and source consistency | `check_communication.py --checks traceability` | that anything was read or supports a claim |
 | Scientific support | a reader who inspects the evidence and records a verdict with locators | truth: it is the assessor's recorded judgment |
 | Output readiness | `check_communication.py --checks manuscript`, rendering, review | that the science is right |
@@ -36,7 +36,7 @@ schema `<plugin root>/contracts/schemas/ext_communication_traceability.json`, va
    `claim_digest` (`contracts.communication.claim_digest`) and `evidence_fingerprints` (`evidence_fingerprint`). A
    wording or scope change, or a changed input hash, makes it stale; re-inspect, then re-pin.
 7. `reporting_context`: result type, method metadata and field states (`provided`, `missing`, `not-applicable` with a
-   reason, `unresolved`) against `assets/reporting-policies.json`. A missing field is requested from the producing
+   reason, `unresolved`) against `<plugin root>/skills/research-communication/assets/reporting-policies.json`. A missing field is requested from the producing
    skill, never defaulted.
 
 ## Check it

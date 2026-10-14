@@ -132,7 +132,7 @@ mark it unresolved rather than declaring the proposal novel or unoriginal.
 - **Self-citation imbalance**: leaning heavily on the authors' own prior work rather
   than surveying the field broadly — referees notice and sometimes flag this
   explicitly (see also `citations-and-bibliography.md`).
-- **Citation stuffing**: a string of 4-5+ references for an uncontroversial general
+- **Citation stuffing**: a string of four or more references for an uncontroversial general
   statement, with no differentiation between them — pick the 1-2 most relevant/
   foundational instead, or briefly note how the grouped papers differ if they must
   all be cited together.
