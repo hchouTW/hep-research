@@ -50,6 +50,10 @@ the response reference and its status; the fit that uses it is a hep-statistics 
 
 ## Double-counting checks
 
+Write the `response` artifact, then run `python3 "<plugin root>/contracts/validate.py" <artifact>` and
+`python3 "<plugin root>/contracts/response_adapter.py" <artifact> --validate`; both must pass before another skill
+consumes it. The first checks the declared metadata; the second checks the numbers.
+
 `<plugin root>/core/stats/validate_response.py` checks orientation, normalization against the declared convention,
 efficiency or acceptance counted twice or not at all, probability lost outside the axes, empty bins and phase-space
 holes, and folds `closure` spectra when given (under `counts` it divides by `generated_per_truth_bin`, and without it

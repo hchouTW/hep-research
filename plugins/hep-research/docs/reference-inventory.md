@@ -86,8 +86,8 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 |---|---|---|---|---|---|---|
 | `calibration-and-alignment.md` | detector-response | 9.2 | no | 15 | - | b944a23 2026-10-13 |
 | `calorimetry-ecal-hcal.md` | detector-response | 11.8 | no | 10 | - | d8bec60 2026-10-13 |
-| `cherenkov-imaging-variants-and-photosensors.md` | detector-response | 10.6 | no | 8 | research-communication | d8bec60 2026-10-13 |
-| `core-detector-equations.md` | detector-response | 6.0 | no | 2 | - | b944a23 2026-10-13 |
+| `cherenkov-imaging-variants-and-photosensors.md` | detector-response | 10.6 | no | 8 | research-communication | b97b338 2026-10-14 |
+| `core-detector-equations.md` | detector-response | 6.0 | no | 2 | - | b97b338 2026-10-14 |
 | `cosmic-ray-spectrum-and-composition.md` | detector-response | 11.5 | no | 11 | hep-analysis, hep-statistics, research-communication | b944a23 2026-10-13 |
 | `data-mc-validation-and-detector-systematics.md` | detector-response | 11.7 | no | 7 | - | 4665f43 2026-10-13 |
 | `detector-case-studies-and-checklists.md` | detector-response | 13.9 | no | 3 | - | b944a23 2026-10-13 |
@@ -95,7 +95,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `detector-glossary.md` | detector-response | 4.8 | no | 3 | - | b944a23 2026-10-13 |
 | `detector-measurement-framework.md` | detector-response | 11.0 | no | 10 | hep-analysis, research-communication | d8bec60 2026-10-13 |
 | `detector-principles-bibliography.md` | detector-response | 13.8 | no | 2 | - | 7fdda0d 2026-10-13 |
-| `detector-principles-summary.md` | detector-response | 22.6 | yes | 3 | - | d8bec60 2026-10-13 |
+| `detector-principles-summary.md` | detector-response | 22.6 | yes | 3 | - | b97b338 2026-10-14 |
 | `detector-simulation.md` | detector-response | 12.4 | no | 9 | hep-theory, physics-ml | d8bec60 2026-10-13 |
 | `detector-systems-overview.md` | detector-response | 12.2 | no | 13 | hep-analysis | b944a23 2026-10-13 |
 | `event-reconstruction.md` | detector-response | 10.8 | no | 6 | - | b944a23 2026-10-13 |
@@ -112,8 +112,8 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `performance-metrics-and-residual-diagnostics.md` | detector-response | 16.2 | no | 9 | - | b944a23 2026-10-13 |
 | `physics-objects-jets-btagging-met.md` | detector-response | 6.5 | no | 7 | physics-ml | 351029c 2026-10-07 |
 | `reconstruction-performance-and-truth-matching.md` | detector-response | 10.5 | no | 8 | - | b944a23 2026-10-13 |
-| `response-and-forward-folding.md` | detector-response | 5.1 | no | 7 | hep-analysis, hep-statistics | 24b8216 2026-10-13 |
-| `signal-formation-and-readout.md` | detector-response | 15.4 | no | 8 | research-communication | d8bec60 2026-10-13 |
+| `response-and-forward-folding.md` | detector-response | 5.4 | no | 7 | hep-analysis, hep-statistics | 24b8216 2026-10-13 |
+| `signal-formation-and-readout.md` | detector-response | 15.4 | no | 8 | research-communication | b97b338 2026-10-14 |
 | `space-based-direct-detection.md` | detector-response | 17.0 | no | 12 | hep-analysis, hep-statistics, research-communication | 1d020b8 2026-10-13 |
 | `timing-detectors.md` | detector-response | 8.6 | no | 7 | - | d8bec60 2026-10-13 |
 | `tracking-and-vertexing.md` | detector-response | 13.1 | no | 14 | research-communication | b944a23 2026-10-13 |

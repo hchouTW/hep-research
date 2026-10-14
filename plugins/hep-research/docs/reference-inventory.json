@@ -5,7 +5,7 @@
  "by_skill": {
   "detector-response": {
    "references": 34,
-   "bytes": 395639,
+   "bytes": 395942,
    "uncited": 0
   },
   "hep-analysis": {
@@ -106,7 +106,7 @@
    "cited_by_other_skills": [
     "research-communication"
    ],
-   "last_commit": "d8bec60 2026-10-13"
+   "last_commit": "b97b338 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/core-detector-equations.md",
@@ -119,7 +119,7 @@
     "skills/detector-response/references/detector-principles-summary.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b944a23 2026-10-13"
+   "last_commit": "b97b338 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/cosmic-ray-spectrum-and-composition.md",
@@ -255,7 +255,7 @@
     "skills/detector-response/references/core-detector-equations.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "d8bec60 2026-10-13"
+   "last_commit": "b97b338 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/detector-simulation.md",
@@ -594,8 +594,8 @@
   {
    "path": "skills/detector-response/references/response-and-forward-folding.md",
    "owner": "detector-response",
-   "bytes": 5145,
-   "lines": 70,
+   "bytes": 5448,
+   "lines": 74,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
@@ -631,7 +631,7 @@
    "cited_by_other_skills": [
     "research-communication"
    ],
-   "last_commit": "d8bec60 2026-10-13"
+   "last_commit": "b97b338 2026-10-14"
   },
   {
    "path": "skills/detector-response/references/space-based-direct-detection.md",
