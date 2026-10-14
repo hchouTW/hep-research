@@ -119,8 +119,7 @@ ROWS = {
     "M46": ("FIX", "ext", _set(("labels",), ["sig", "x"]), "error", "1.3"),
     "M50": ("EX", "ext", _set(("calibration", "validation", "after"), 0.2), "unresolved", "1.4"),
     "M51": ("EX", "ext", _set(("metrics", "test", "working_point", "threshold_from"), "test"), "error", "1.3"),
-    "M52": ("EX", "ext", _set(("weights", "used_in"), ["loss", "metrics", "calibration", "templates", "calibration"]),
-            "error", "1.4"),
+    "M52": ("EX", "ext", _pop(("calibration",)), "error", "1.4"),  # used_in still names calibration
     "M53": ("EX", "ext", _set(("units",), {"m_ll": "GeV", "acop": "rad", "pt_miss": "GeV", "cos_theta": "1", "mass": "GeV"}),
             "error", "1.3"),
     "M54": ("EX", "ext", _set(("splits", "test_groups_disjoint"), False), "error", "0.0"),
@@ -146,7 +145,7 @@ BY_DESIGN = {
            "refuses to write without the run summary's labels (PML-WP0.4) and dependencies.py reports a sticky label "
            "that an input carries and the artifact drops; a text search for the word in the objective would be a guess",
 }
-DONE = {"0.0", "0.1", "0.6", "1.1", "1.2", "1.3"}  # work packages whose rows are enforced; extended as each package lands
+DONE = {"0.0", "0.1", "0.6", "1.1", "1.2", "1.3", "1.4"}  # work packages whose rows are enforced; extended as each package lands
 
 
 def apply(name, rows=ROWS):

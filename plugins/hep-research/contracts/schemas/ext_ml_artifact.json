@@ -20,9 +20,11 @@
     {"type": "object", "required": ["source", "negative_weight_treatment", "used_in"], "properties": {
      "source": {"type": "string", "minLength": 1},
      "negative_weight_treatment": {"type": "string",
-      "enum": ["none-present", "signed", "abs-with-correction", "reweighted-positive", "dropped"]},
+      "enum": ["none-present", "signed", "abs", "abs-with-correction", "resampled", "reweighted-positive", "dropped"]},
      "class_balancing": {"type": ["string", "object", "null"]},
-     "used_in": {"type": "array", "items": {"type": "string", "enum": ["loss", "metrics", "calibration", "templates"]}}}}]},
+     "used_in": {"type": "array", "items": {"type": "string", "enum": ["loss", "metrics", "calibration", "templates"]}},
+     "training": {"type": "object", "$comment": "2.8.0: training weights (treatment of negative weights, class balancing, counts)"},
+     "evaluation": {"type": "object", "$comment": "2.8.0: evaluation weights (physics weights, normally unmodified)"}}}]},
   "model_hash": {"type": "string"},
   "calibration": {"type": "object", "$comment": "shape {method, fit_sample, validation: {metric, sample, before?, after}} is checked semantically (2.5.0); 2.8.0: sample_check {disjoint, fit_sha256, eval_sha256, id_check} as assets/calibration.py records it; disjoint false, equal hashes or names equal after normalization are ml.calibration_on_fit_sample"},
   "downstream_validation": {"type": "array", "$comment": "2.8.0: items {metric (vocab ml_downstream_metrics), quantity_affected, value, uncertainty?, criterion, passed, ref}; free-text items are errors from 2.8.0 (warnings for older artifacts under --strict); every item an ML metric or a bare pass is ml.downstream_ml_only; passed must agree with a numeric value and criterion ('>= 0.68', 'abs < 0.001', 'in [0.9, 1.1]')"},

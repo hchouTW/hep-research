@@ -36,7 +36,7 @@
    "ref": "artifacts/ml_artifact.json",
    "artifact_type": "ml-artifact",
    "artifact_id": "synthetic-j9-classifier",
-   "sha256": "2951616daf6e1ee7c5896b09c1750b352d95eadb42f28ed90c789c833b47d9e6",
+   "sha256": "7cec0f4ec8c8b04d9d0f2072603d5fc79084d68f226e67a515fd1fa33e6f1b7b",
    "version": "2.8.0",
    "status": [
     "synthetic"
@@ -55,7 +55,7 @@
   },
   "paradigm": "frequentist",
   "likelihood": {
-   "form": "extended binned Poisson in the calibrated classifier probability (7 bins), mean mu s_i + gamma_i b_i(theta); b_i(theta) interpolates the background template to its pt_miss-scale variation (code0, Gaussian theta); gamma_i Gaussian-constrained MC-statistics factors (Barlow-Beeston-lite, width sqrt(sum w^2)/b of the signed-weight background template)",
+   "form": "extended binned Poisson in the transformed classifier score (7 bins), mean mu s_i + gamma_i b_i(theta); b_i(theta) interpolates the background template to its pt_miss-scale variation (code0, Gaussian theta); gamma_i Gaussian-constrained MC-statistics factors (Barlow-Beeston-lite, width sqrt(sum w^2)/b of the signed-weight background template)",
    "backend": "core.stats.likelihood_limits shape model (_ShapeModel)",
    "model_ref": "results.json#templates"
   },

@@ -475,6 +475,7 @@ def _ml_semantics_v2(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, nativ
                 f"a {ext.get('task')} model must say what its output means (probability, score, density-ratio, "
                 "regression-value): a consumer cannot tell whether it may read it as a probability")
     _ml_task_blocks_v2(doc, ext, rep, native)
+    _ml_weights_calibration_v2(ext, rep, native)
     _key_checks(ext, ML_KEYS["extension"], "$.extension", rep, kind="ml")
     for block in ("splits", "calibration", "domain_shift", "weights", "environment"):
         if isinstance(ext.get(block), dict):
@@ -503,6 +504,65 @@ ROW_LEVEL_KEYS = {"row", "row_id", "rowid", "row index", "index", "idx", "entry"
 PRECISIONS = {"fp64", "fp32", "tf32", "bf16", "fp16", "mixed-bf16", "mixed-fp16", "int8"}
 DEVICE_RE = re.compile(r"^(cpu|cuda(:\d+)?|mps|xpu(:\d+)?|tpu|gpu(:\d+)?|rocm(:\d+)?)$", re.I)
 CALIBRATION_SCOPES = {"top-label", "classwise", "all-classes"}
+
+
+BALANCING_NONE = {None, "", "none", "no", "unweighted"}
+
+
+def _ml_weights_calibration_v2(ext: dict, rep: Report, native: bool) -> None:
+    """Weights and calibration outcomes (PML-WP1.4: ML-K09, ML-K14, ML-C27)."""
+    level = "error" if native else "warning"
+    x = "$.extension"
+    w: Any = ext.get("weights")
+    if isinstance(w, str):
+        rep.add(level, f"{x}.weights", "ml.weights_unstructured",
+                f"weights {w!r} is free text: declare {{source, negative_weight_treatment, used_in, training, evaluation}}")
+    elif isinstance(w, dict):
+        used = w.get("used_in") if isinstance(w.get("used_in"), list) else None
+        if used is not None and not used:
+            rep.add("error", f"{x}.weights.used_in", "ml.weights_used_in_empty",
+                    "weights.used_in is empty: say where the weights enter (loss, metrics, calibration, templates)")
+        if used:
+            cb = w.get("class_balancing")
+            balanced = (cb not in BALANCING_NONE if isinstance(cb, str) or cb is None else bool(cb)) or \
+                isinstance(w.get("training"), dict)
+            if balanced and "loss" not in used:
+                rep.add("error", f"{x}.weights.used_in", "ml.weights_used_in_inconsistent",
+                        "training weights (class balancing or a training block) are declared but used_in has no 'loss'")
+            if "calibration" in used and not isinstance(ext.get("calibration"), dict):
+                rep.add("error", f"{x}.weights.used_in", "ml.weights_used_in_inconsistent",
+                        "used_in names 'calibration' but the artifact records no calibration")
+            if len(set(used)) != len(used):
+                rep.add("error", f"{x}.weights.used_in", "ml.weights_used_in_inconsistent", "used_in lists an entry twice")
+        top = w.get("negative_weight_treatment")
+        tr: Any = w.get("training") if isinstance(w.get("training"), dict) else {}
+        if top == "none-present" and (tr.get("negative_weight_treatment") not in (None, "none-present", "signed")
+                                      or (_is_num(tr.get("n_negative")) and tr["n_negative"] > 0)):
+            rep.add("error", f"{x}.weights", "ml.weights_contradiction",
+                    "negative_weight_treatment none-present, but the training weights treat or count negative weights")
+        if "abs" in (top, tr.get("negative_weight_treatment")):
+            rep.add("warning", f"{x}.weights.negative_weight_treatment", "ml.negative_weights_abs",
+                    "|w| training biases the learned density where negative weights matter; show the effect is small or "
+                    "use a resampling treatment")
+        if native and not (isinstance(w.get("training"), dict) and isinstance(w.get("evaluation"), dict)):
+            rep.add("warning", f"{x}.weights", "ml.weights_not_split",
+                    "record training and evaluation weights separately (weights.training, weights.evaluation)")
+    cal: Any = ext.get("calibration")
+    if isinstance(cal, dict):
+        val: Any = cal.get("validation") if isinstance(cal.get("validation"), dict) else {}
+        if "after" in val and not _is_num(val["after"]):
+            rep.add("error", f"{x}.calibration.validation.after", "ml.calibration_after_not_numeric",
+                    f"calibration.validation.after must be a number, got {val['after']!r}")
+        if isinstance(cal.get("fit_sample"), str) and _sample_name(cal["fit_sample"]) in TRAINING_SAMPLE_NAMES:
+            rep.add("error", f"{x}.calibration.fit_sample", "ml.calibration_on_training_sample",
+                    "calibration fitted on the training sample: fit it on validation (the model is overconfident there)")
+        before, after = val.get("before"), val.get("after")
+        if _is_num(before) and _is_num(after):
+            tol = max([v for v in (val.get("after_uncertainty"), val.get("floor"), 0.0) if _is_num(v)])
+            if after > before + tol:
+                rep.add("unresolved", f"{x}.calibration.validation", "ml.calibration_not_improving",
+                        f"{val.get('metric', 'metric')} after calibration ({after:.4g}) is worse than before ({before:.4g}) "
+                        f"by more than its uncertainty or floor ({tol:.4g}): the map does not calibrate on this sample")
 
 
 def _walk_keys(value, key):

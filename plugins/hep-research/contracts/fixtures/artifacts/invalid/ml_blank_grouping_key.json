@@ -59,7 +59,14 @@
    "used_in": [
     "loss",
     "metrics"
-   ]
+   ],
+   "training": {
+    "negative_weight_treatment": "none-present",
+    "class_balancing": "inverse class frequency"
+   },
+   "evaluation": {
+    "treatment": "physics weights, unmodified"
+   }
   },
   "model_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
   "output_semantics": "probability",

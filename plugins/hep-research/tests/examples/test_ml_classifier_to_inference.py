@@ -89,7 +89,8 @@ class J9MlToInferenceTests(unittest.TestCase):
         self.assertEqual(ext["splits"]["overlap_check"]["result"], "pass")
         self.assertIs(ext["splits"]["test_groups_disjoint"], True)
         self.assertEqual(set(ext["training_domain"]), set(ext["features"]))
-        self.assertEqual(ext["output_semantics"], "probability")
+        self.assertEqual(ext["output_semantics"], "score")  # the calibration is a no-op within the ECE floor (PML Q5)
+        self.assertEqual(ext["calibration"]["outcome"], "no-op-within-floor")
         cal = ext["calibration"]
         self.assertEqual(cal["method"], "temperature")
         self.assertNotEqual(cal["fit_sample"], cal["validation"]["sample"])
@@ -97,9 +98,10 @@ class J9MlToInferenceTests(unittest.TestCase):
         self.assertIn(self.m.SHIFT_FEATURE, ext["domain_shift"]["result"]["variables_above_noise_floor"])
         self.assertEqual(ext["weights"]["negative_weight_treatment"], "signed")
         self.assertIn("templates", ext["weights"]["used_in"])
-        metrics = " ".join(d["metric"] for d in ext["downstream_validation"]).lower()
+        metrics = " ".join(d["metric"] + " " + d["quantity_affected"] for d in ext["downstream_validation"]).lower()
         self.assertIn("signal strength", metrics)
         self.assertNotIn("auc", metrics)
+        self.assertTrue({"closure", "coverage", "pull"} <= {d["metric"] for d in ext["downstream_validation"]})
 
     def test_rowlevel_split_is_caught(self):
         row = self.r["splits"]["rowlevel"]

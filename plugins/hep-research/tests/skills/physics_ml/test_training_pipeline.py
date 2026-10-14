@@ -149,7 +149,8 @@ class TrainClassifierPipelineTests(unittest.TestCase):
         (step,) = summary["preprocessing"]
         self.assertEqual(step["step"], "standardize")
         self.assertEqual(len(step["mean"]), 4)
-        self.assertEqual(set(summary["weights"]), {"source", "negative_weight_treatment", "class_balancing", "used_in"})
+        self.assertEqual(set(summary["weights"]), {"source", "negative_weight_treatment", "class_balancing", "used_in",
+                                                   "training", "evaluation"})
         self.assertEqual(summary["weights"]["negative_weight_treatment"], "none-present")
         self.assertEqual(summary["weights"]["source"], "column:weight")
         self.assertTrue(set(summary["weights"]["used_in"]) <= {"loss", "metrics", "calibration", "templates"})

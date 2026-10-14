@@ -2,7 +2,7 @@
  "contract_version": "2.8.0",
  "artifact_id": "synthetic-j9-classifier",
  "artifact_type": "ml-artifact",
- "objective": "SYNTHETIC J9: calibrated event classifier whose probability feeds a template fit",
+ "objective": "SYNTHETIC J9: event classifier whose (prior-corrected, temperature-scaled) score feeds a template fit",
  "bindings": {
   "experiments": [
    {
@@ -123,7 +123,16 @@
     "metrics",
     "calibration",
     "templates"
-   ]
+   ],
+   "training": {
+    "negative_weight_treatment": "signed",
+    "class_balancing": "per class, signed weights rescaled to equal sums (train split)",
+    "n_negative": 350
+   },
+   "evaluation": {
+    "treatment": "physics weights, signed and unmodified (metrics, calibration, templates)",
+    "n_negative": 600
+   }
   },
   "environment": {
    "framework": "numpy 2.5.3",
@@ -167,7 +176,7 @@
     }
    }
   },
-  "output_semantics": "probability",
+  "output_semantics": "score",
   "calibration": {
    "method": "temperature",
    "params": {
@@ -180,7 +189,8 @@
     "before": 0.015895708046126413,
     "after": 0.017558563686100273,
     "bins": 10,
-    "binning": "equal-width"
+    "binning": "equal-width",
+    "floor": 0.01584552894170525
    },
    "sample_check": {
     "fit_sample": "work/val_scores.csv",
@@ -196,7 +206,8 @@
     "eval_sha256": "04e73e0b8f3d1665a6e59488eeba374e725e6cd1274d1b983f490890770f5d8b",
     "id_overlap": 0,
     "id_check": "column id"
-   }
+   },
+   "outcome": "no-op-within-floor"
   },
   "domain_shift": {
    "control_sample": "SYNTHETIC data-like background control sample (10000 events, pt_miss scaled by 1.1 by construction)",
@@ -312,7 +323,7 @@
   "source_files": [
    {
     "ref": "work/run_summary.json",
-    "sha256": "c81b865bb29048ce6bb7844898428ed5f4700a3d33fd4206df34ffb609e6d441",
+    "sha256": "2d64af19198cb47373e6d21f7284f727cbf4562171aeb6e77fb86123b579ca7c",
     "role": "run-summary"
    },
    {
@@ -322,7 +333,7 @@
    },
    {
     "ref": "work/calibration.json",
-    "sha256": "5f63df6bea2420461561e6c144a7511b528acf5f34fc8e00623b817a483e3e8d",
+    "sha256": "296596968f43cd13815cdab47adfa9e11da82b6c0efdfe3e40bdb973d0203c22",
     "role": "calibration"
    },
    {

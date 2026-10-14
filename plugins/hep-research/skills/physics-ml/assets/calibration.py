@@ -452,6 +452,17 @@ def sample_provenance(fit_sample, eval_sample, fit_ids=None, eval_ids=None, allo
     return rec
 
 
+def calibration_outcome(before, after, floor):
+    """improved, no-op-within-floor (both ECEs within the finite-sample floor of each other) or worse."""
+    if before is None or after is None:
+        return "not-evaluated"
+    if after < before - (floor or 0.0):
+        return "improved"
+    if after <= before + (floor or 0.0):
+        return "no-op-within-floor"
+    return "worse"
+
+
 # --------------------------------------------------------------------------- CLI
 
 def _read(path, id_col=None):
@@ -560,8 +571,9 @@ def main(argv=None):
             "calibration": {
                 "method": a.method, "params": params, "fit_sample": a.fit,
                 "validation": {"metric": "ece", "sample": a.eval, "before": rb["ece"], "after": ra["ece"],
-                               "bins": a.bins, "binning": a.binning},
+                               "bins": a.bins, "binning": a.binning, "floor": ra["ece_floor"]},
                 "sample_check": prov,
+                "outcome": calibration_outcome(rb["ece"], ra["ece"], ra["ece_floor"]),
             },
             "fit_details": extra,
             "sample_check": prov,

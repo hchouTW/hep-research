@@ -23,7 +23,9 @@ Chain:
  5. domain shift: weighted Kolmogorov-Smirnov of the score and of every feature, simulation background versus the
     control sample, against a noise floor from seeded unshifted replicas; inference-time domain flags on the
     pseudo-data (scripts/check_surrogate_domain.py).
- 6. ml-artifact (scripts/write_ml_artifact.py), status synthetic, output_semantics probability, downstream
+ 6. ml-artifact (scripts/write_ml_artifact.py), status synthetic, output_semantics score (decision Q5 of the
+    physics-ml audit: the calibration is recorded, but on this sample it is a no-op within the finite-sample ECE
+    floor, so the fitted variable is used as a monotone score, not read as a probability), downstream
     validation = effect on the signal strength (Asimov closure, toy pulls and coverage, shift from the measured
     control-sample scale), not AUC.
  7. hep-statistics: calibrated-score templates (signal; background with sum w^2 for MC statistics) -> extended
@@ -406,7 +408,7 @@ def stat_artifact(fit, asimov, toy, ml_doc, ml_ref, ml_sha, gof, created) -> dic
             "extension": {
                 "observable_source": {"kind": "ml-score", "ml_artifact": ml_ref},
                 "paradigm": "frequentist",
-                "likelihood": {"form": "extended binned Poisson in the calibrated classifier probability "
+                "likelihood": {"form": "extended binned Poisson in the transformed classifier score "
                                        f"({len(EDGES) - 1} bins), mean mu s_i + gamma_i b_i(theta); b_i(theta) "
                                        f"interpolates the background template to its {SHIFT_FEATURE}-scale variation "
                                        "(code0, Gaussian theta); gamma_i Gaussian-constrained MC-statistics factors "
@@ -436,9 +438,9 @@ def write_ml_artifact(out: Path, created: str) -> tuple[int, dict]:
     code, msg = tool(out, ML / "scripts" / "write_ml_artifact.py", "--run-summary", "work/run_summary.json",
                      "--calibration", "work/calibration.json", "--domain-shift", "work/domain_shift.json",
                      "--downstream", "work/downstream.json", "--split-report", "work/split_check.json",
-                     "--status", "synthetic", "--output-semantics", "probability",
+                     "--status", "synthetic", "--output-semantics", "score",
                      "--artifact-id", "synthetic-j9-classifier", "--created", created,
-                     "--objective", "SYNTHETIC J9: calibrated event classifier whose probability feeds a template fit",
+                     "--objective", "SYNTHETIC J9: event classifier whose (prior-corrected, temperature-scaled) score feeds a template fit",
                      "--out", "artifacts/ml_artifact.json")
     return code, json.loads(msg)
 
@@ -571,7 +573,12 @@ def main(argv=None) -> int:
                     "class_balancing": {"training": "per class, signed weights rescaled to equal sums (train split)",
                                         "evaluation": "physics weights unchanged (metrics, calibration, templates)",
                                         "prior_correction": f"logit + ln r, r = {prior_r:.6g} (physics S/B on the calibration fit sample)"},
-                    "used_in": ["loss", "metrics", "calibration", "templates"]},
+                    "used_in": ["loss", "metrics", "calibration", "templates"],
+                    "training": {"negative_weight_treatment": "signed",
+                                 "class_balancing": "per class, signed weights rescaled to equal sums (train split)",
+                                 "n_negative": int(np.sum(w_train < 0))},
+                    "evaluation": {"treatment": "physics weights, signed and unmodified (metrics, calibration, templates)",
+                                   "n_negative": int(np.sum(w < 0))}},
         "model_hash": ("sha256:" + hashlib.sha256((work / "model.json").read_bytes()).hexdigest()) if a.trainer == "numpy"
                       else tsum["model_hash"],
         "checkpoint": "work/model.json" if a.trainer == "numpy" else "work/torch/best.pt",
@@ -780,7 +787,9 @@ def write_report(out: Path, r: dict) -> None:
         f"then by temperature T = {c['params']['temperature']:.4f}, fitted on `{c['fit_sample']}` and evaluated on "
         f"`{c['eval_sample']}`. ECE (10 equal-width bins, weighted) {c['ece_before']:.4f} before and {c['ece_after']:.4f} "
         f"after the temperature, against a finite-sample floor of {c['ece_floor_after']:.4f}: differences at the level "
-        "of the floor are not resolved by this test sample.", "",
+        "of the floor are not resolved by this test sample. The calibration is therefore recorded as a no-op within "
+        "the floor, and the ml-artifact declares output_semantics score: the template fit uses the transformed score "
+        "as a monotone variable and never reads it as a probability.", "",
         "## Domain shift", "",
         "| Variable | KS D (simulation vs control) | noise floor (95%) | above floor |", "|---|---|---|---|"]
     for k, v in d["per_variable"].items():

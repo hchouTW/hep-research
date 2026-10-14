@@ -601,6 +601,7 @@ def run(args) -> int:
     weights_metadata = {"training": {"source": data["weight_source"], **train_weight_record},
                         "evaluation": {"source": data["weight_source"], "treatment": "signed, unmodified",
                                        "n_negative": int((w < 0).sum())}}
+    weights_summary.update(weights_metadata)  # training and evaluation weights recorded separately (contracts 2.8.0)
 
     out_dim = 1 if n_classes == 2 else n_classes
     model_config = {"type": "MLPClassifier", "input_dim": len(features), "hidden_dim": args.hidden_dim,
