@@ -14,7 +14,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-statistics | 11 | 150 | 0 |
 | hep-theory | 11 | 78 | 0 |
 | physics-ml | 38 | 257 | 0 |
-| research-communication | 53 | 378 | 0 |
+| research-communication | 53 | 379 | 0 |
 
 ## Overlapping pairs
 
@@ -227,7 +227,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `astroparticle-and-cosmic-ray-papers.md` | research-communication | 19.5 | no | 10 | - | 351029c 2026-10-07 |
 | `citation-verification.md` | research-communication | 3.6 | yes | 10 | - | 4665f43 2026-10-13 |
 | `citations-and-bibliography.md` | research-communication | 18.1 | yes | 11 | - | 9546574 2026-10-08 |
-| `claim-evidence-mapping.md` | research-communication | 3.8 | yes | 9 | hep-statistics, hep-theory | 351029c 2026-10-07 |
+| `claim-evidence-mapping.md` | research-communication | 3.8 | yes | 9 | hep-statistics, hep-theory | 03e1ac2 2026-10-14 |
 | `code-review-report.md` | research-communication | 5.4 | no | 3 | - | d41501c 2026-10-12 |
 | `code-to-methodology-synthesis.md` | research-communication | 5.6 | no | 2 | - | 351029c 2026-10-07 |
 | `comment-and-reply-exchange.md` | research-communication | 3.0 | no | 2 | - | 351029c 2026-10-07 |
@@ -239,7 +239,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `diagrams-statistics.md` | research-communication | 6.2 | no | 2 | - | 351029c 2026-10-07 |
 | `equation-and-notation-auditing.md` | research-communication | 3.9 | no | 5 | hep-statistics, hep-theory | d3212bd 2026-10-12 |
 | `erratum-and-corrigendum-drafting.md` | research-communication | 3.1 | no | 2 | - | 351029c 2026-10-07 |
-| `evidence-linked-writing.md` | research-communication | 5.2 | yes | 4 | - | 4ab1794 2026-10-12 |
+| `evidence-linked-writing.md` | research-communication | 5.2 | yes | 4 | - | 03e1ac2 2026-10-14 |
 | `figures-and-tables.md` | research-communication | 9.2 | no | 7 | - | 351029c 2026-10-07 |
 | `general-diagram-principles.md` | research-communication | 7.7 | no | 2 | - | 351029c 2026-10-07 |
 | `grant-and-fellowship-proposal-writing.md` | research-communication | 3.0 | no | 1 | - | 351029c 2026-10-07 |
@@ -247,7 +247,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `interpreting-scientific-graphics.md` | research-communication | 7.9 | no | 4 | - | 351029c 2026-10-07 |
 | `latex-mechanics-and-tooling.md` | research-communication | 13.3 | no | 7 | - | 351029c 2026-10-07 |
 | `latex-venue-setup.md` | research-communication | 21.6 | no | 5 | - | 351029c 2026-10-07 |
-| `legends-panels-and-export.md` | research-communication | 8.2 | no | 2 | - | 351029c 2026-10-07 |
+| `legends-panels-and-export.md` | research-communication | 8.4 | no | 2 | - | 351029c 2026-10-07 |
 | `literature-discovery-and-search.md` | research-communication | 4.9 | no | 1 | - | d47080b 2026-10-12 |
 | `literature-review.md` | research-communication | 7.7 | no | 5 | - | 351029c 2026-10-07 |
 | `logical-consistency-and-argument-uniformity.md` | research-communication | 4.8 | no | 5 | hep-theory | 351029c 2026-10-07 |
@@ -273,4 +273,4 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `supplementary-material-planning.md` | research-communication | 2.0 | no | 1 | - | 351029c 2026-10-07 |
 | `systematic-review-screening.md` | research-communication | 3.0 | no | 2 | - | 351029c 2026-10-07 |
 | `thesis-by-publication-assembly.md` | research-communication | 3.8 | no | 2 | - | 351029c 2026-10-07 |
-| `tikz-patterns.md` | research-communication | 5.3 | no | 6 | - | 351029c 2026-10-07 |
+| `tikz-patterns.md` | research-communication | 5.3 | no | 8 | - | 351029c 2026-10-07 |

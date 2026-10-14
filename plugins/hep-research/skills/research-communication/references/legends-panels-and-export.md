@@ -85,6 +85,7 @@ one edge style, and reveal the pipeline one stage at a time.
 Beamer with TikZ, reveal stage by stage using `visible on` (compiled with Tectonic: 3 overlay pages, boxes stay in place):
 
 ```latex
+% diagram-check: skip Beamer overlay fragment: needs a beamer frame, overlay-beamer-styles and the proc/flow styles of tikz-patterns.md
 \begin{tikzpicture}[node distance=8mm]
   \node[proc] (a) {Trigger};
   \node[proc, right=of a, visible on=<2->] (b) {Reconstruction};

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import io
 import json
+import os
+import subprocess
 import shutil
 import sys
 import tempfile
@@ -446,6 +448,54 @@ class ReviewFixes2RevisionImpact(tr.Base):
         self.after["extension"]["claims"].append(c3)
         rep = self.diff(refresh=True)
         self.assertIn("occurrence.claim_without_occurrence", self.codes(rep, "unresolved"))
+
+
+DIAGRAMS = SCRIPTS / "check_diagram_sources.py"
+TEX = shutil.which("lualatex") or shutil.which("pdflatex")
+
+
+class ReviewFixes2Diagrams(unittest.TestCase):
+    """RC-A11: TikZ is compiled when a TeX engine is present; a file with no block checks nothing (exit 2)."""
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
+
+    def run_diagrams(self, text, *args, env=None):
+        md = self.tmp / "d.md"
+        md.write_text(text, encoding="utf-8")
+        return subprocess.run([sys.executable, str(DIAGRAMS), str(md), "--format", "json", *args],
+                              capture_output=True, text=True, timeout=300, env=env)
+
+    BAD = "```latex\n\\begin{tikzpicture}\\undefinedmacro\\end{tikzpicture}\n```\n"
+
+    @unittest.skipUnless(TEX, "no TeX engine on PATH: the compile path cannot be exercised here")
+    def test_tikz_error_is_a_source_error(self):
+        r = self.run_diagrams(self.BAD)
+        self.assertEqual(r.returncode, 1, r.stdout + r.stderr)
+        self.assertEqual(json.loads(r.stdout)["counts"]["source-error"], 1)
+
+    def test_without_tex_and_require_render_is_incomplete(self):
+        env = dict(os.environ, PATH=str(Path(sys.executable).parent))
+        r = self.run_diagrams(self.BAD, "--require-render", env=env)
+        self.assertEqual(r.returncode, 3, r.stdout + r.stderr)
+
+    def test_no_block_is_an_input_error(self):
+        r = self.run_diagrams("# nothing to draw\n")
+        self.assertEqual(r.returncode, 2, r.stdout + r.stderr)
+        self.assertEqual(json.loads(r.stdout)["status"], "input-error")
+
+    def test_setup_fences_reach_later_snippets_and_skip_directive(self):
+        sys.path.insert(0, str(SCRIPTS))
+        import check_diagram_sources as cds
+        text = ("```latex\n\\tikzset{proc/.style={draw}}\n```\n\n```latex\n\\begin{tikzpicture}\\node[proc]{a};\\end{tikzpicture}\n```\n"
+                "```latex\n% diagram-check: skip beamer fragment\n\\begin{tikzpicture}\\end{tikzpicture}\n```\n")
+        blocks = cds.extract_blocks_with_setup(text)
+        self.assertEqual(len(blocks), 2)
+        self.assertIn("proc/.style", blocks[0][2])
+        self.assertIn("proc/.style", cds.tex_document(blocks[0][1], blocks[0][2]))
+        r = cds.check_block("latex", blocks[1][1], {})
+        self.assertEqual((r["outcome"], r["reason"]), ("skipped", "marked in the source: beamer fragment"))
 
 
 if __name__ == "__main__":
