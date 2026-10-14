@@ -7,6 +7,56 @@ Software checks establish contract consistency only, not physical validity.
 
 Contracts 2.8.0 (minor: new rule families refuse false or incomplete declarations; new fields optional; no new
 capability; artifacts before 2.8.0 keep their default outcome and get the new rules under `--strict` and at the gate).
+Research-communication adds one value to 2.8.0: `reporting_context.result_type` accepts `flux-measurement`
+(`ext_communication_traceability.json`; add-only, RC-C3).
+
+### research-communication (RC-AUDIT-2)
+
+- **A displayed number that disagrees with its passage fails (RC-A2, sci-fix).** `check_communication` and
+  `audit_claims` compared a declared display value with its passage as a substring warning, so `1.0` passed inside
+  `1.02` and a record of 1.09 against a manuscript of 1.02 exited 0. One number tokenizer
+  (`communication_lib/numbers.py`: sign, exponent, grouping, `\pm`/`±`, LaTeX and Unicode forms, CJK adjacency)
+  now compares numbers as `Decimal`; absence is the error `occurrence.value_not_in_passage`.
+- **Adaptation drafts read numbers at a sentence end and next to Chinese text (RC-A3, sci-fix).** A 9.99 draft
+  against a 1.02 record passed `check_adaptation` in English (full stop) and Traditional Chinese.
+- **Every display is checked against its source (RC-A5, RC-A15, sci-fix).** Without a rounding rule a display that
+  is no rounding of the source is `occurrence.value_mismatch` (it was a warning); a malformed rule, NaN or infinity
+  is a record finding (exit 1), not an input error.
+- **Rounding rules round half up (RC-A6, sci-fix).** `decimals:2` turns 1.025 into 1.03; `:half-even` keeps the old
+  mode. Skill library only; no contracts change. The worked example's audit report shows policy version 1.1.0.
+- **`check_manuscript.py` reads LaTeX and BibTeX as TeX does (RC-A1, A4, A7, A9, A18).** Brace-less `\input name`
+  is followed; `\Citet`/`\Cite`, multicite groups, nested optional arguments, `%` inside `\url`, entries inside
+  `.bib` fields or `@comment`, `\iffalse`, the comment environment, `\verb` and crossref parents are handled; a
+  `--bbl` outside the project root is an input error; scans are linear (20,000 lines: 10 s to under 0.2 s);
+  `--strict` unused entries are unresolved while coverage is incomplete.
+- **Locators and normalisation (RC-A8).** Section titles with nested braces, `\pm`/`±`/math shifts/ties on both
+  sides, no headings inside fenced code.
+- **Traditional Chinese parity (RC-A10, A13, A17).** Status-promotion, discovery, scope, negation and attribution
+  scans, symbol and abbreviation definitions work in Traditional Chinese; status labels match as words; a
+  disallowed term inside a declared term is not flagged; an abbreviation used before its definition on the same
+  line is.
+- **`check_diagram_sources.py` compiles TikZ (RC-A11).** LuaLaTeX (else pdfLaTeX), standalone harness with
+  tikz-feynman and the file's setup fences, `--no-tikz`, a skip directive for fragments; a named file without a
+  block exits 2. The bundle test compiles TikZ only under `HEP_SLOW_TESTS=1`.
+- **Smaller checker fixes (RC-A12, A14, A16, A19).** Revision impact flags empty records and unmapped added claims;
+  `--today notadate` and an output aliasing the input are refused; the README says which tool prints what.
+- **Text facts (RC-B1-B13).** SKILL.md quotes the read-level vocabulary and names `user-supplied`; one rule for
+  values read off plots; deduplication on DOI, arXiv id, INSPIRE record id; correction labels follow the venue;
+  PRL Comment length from the APS page; dated AMS-02 specifics removed from references (one sourced absence claim,
+  `ams02:C185`, added to the public profile ledger instead); diagram logic (result from the fit, vertex checks,
+  pileup stage); compile records and the LuaTeX warning; smaller wording fixes.
+- **Usability (RC-D1-D7).** A quick-questions block in SKILL.md (8098 B; description unchanged, a candidate awaits
+  the maintainer); one home per rule (significance and limit wording, venue facts, posters and talks, captions,
+  colour and raster); the papers guide cut to routing, rules and pointers; executable checks instead of
+  "mentally desaturate"; a "Done when" line in every reference; reference link test.
+- **New content (RC-C1-C11).** `physics-plots.md` (status labels on figures, ratio panels, `pdf.fonttype = 42`,
+  colour and raster, cosmic-ray flux and neutrino figures), examples `hep/09`-`hep/11`, limit and null wording,
+  the `flux-measurement` reporting policy, `collaboration-results-lifecycle.md`, AI-use disclosure raised
+  unprompted with a dated venue table, HEPData records, `literature-lookup-recipes.md` (INSPIRE, ADS, arXiv),
+  NSTC/ERC/JSPS and bilingual proposal rules, retraction and SCOAP3 licence checks, combination papers, poster and
+  talk formats.
+- **Records (RC-E1, E3).** The capability matrix records the live run of 2026-10-13 and where the evaluation files
+  live; reference counts updated.
 
 - **Batch commands refused in protected mode (HC-10, HC-16; review of deferred task P6.2).** In a project whose
   config carries `agent_policy`, `core/partition/campaign.py` refuses a real `submit`, `resubmit` or `cancel` and
