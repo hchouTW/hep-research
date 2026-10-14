@@ -23,6 +23,29 @@ new sidecars: revocation log and head, exposure and decision records, qualificat
   objects without their structure keys: `release.sealed_value_present`; an artifact that cannot be scanned is
   `release.scan_incomplete`, fail closed). Findings name the artifact only, never a sealed value or a count. Passing
   still releases nothing. Tests in `tests/contracts/test_release_manifest.py` (`CustodianOptionTests`).
+- **Formal-use permits, analysis-level bundles and the recipe-use review (tasks P5.1-P5.3; C15, C08).** New
+  `contracts/analysis_bundle.py` (`analysis_bundle.json`): one digest over the measurement spec, recipes, semantics
+  tables, calibrations, tool contracts, environment lock, reviews and the plugin release; `verify` reports each change;
+  an attestation may take it as its subject. New `contracts/permit.py` (`permit.json`): a custodian-issued permit, read
+  only as a protected input, binding the bundle and the digests of the inputs, one purpose, an actor, a nonce counted
+  in the custodian's nonce ledger (`agent_policy.protected_inputs.nonce_ledger`), a validity window and the
+  attestation whose review must accept the recipe for the required roles and cover the use (`permit.*` codes;
+  revocation kind `permit`). Formal use in protected mode now runs with a valid permit (`hepdata_export.py --permit`,
+  `build_tables(..., permit=)`) and stays refused without one; the core guard takes the check as `formal_check`.
+- **Input-blinding transforms, release preparation and residual checks (task P4; C02).** New
+  `core/blinding/transforms.py` for the modes `binned-mask`, `event-removal`, `common-offset` (continuous quantities
+  only) and `common-scale` (no per-event weights): released data, sealed values and the `protected`/`retained` lists,
+  with keys as inputs only and input uncertainties masked or withheld. New `core/blinding/residual.py`
+  (`residual_checks`: codes such as `offset.boundary`, `scale.quantization`, `removal.totals_elsewhere`) and the
+  counterexample suite `tests/core/test_blinding_residual.py`; `core/blinding/README.md` states what each mode does not
+  protect. New `contracts/release_prepare.py`: the release directory, the sealed file outside it and a draft manifest
+  that passes `release_manifest.py` with every custodian option.
+- **Tool contracts and scopes (task P5.4).** Contracts for `release_prepare.py`, `mask_blinded_bins.py` and
+  `audit_blinded_outputs.py` (per-subcommand operations: `tool_contract.py` now compares each subcommand's own usage
+  line); scopes `contracts/tool_scopes/{fixed-execution,validation}.json` checked in CI.
+- **Scan-service interface (task P6.1).** New `contracts/scan_verdict.py` (`scan_submission.json`,
+  `scan_verdict.json`): a closed agent-visible verdict (status and budget state only) and a per-analysis budget
+  counted in candidate values tested, charged for every submission.
 - **Protected-use mode at the formal-use entry points (task P1; C07 plugin part, HC-09, K08, DP-2, DP-4).** A project
   whose config declares `agent_policy`, or an entry point given `--protected`, now runs in protected mode; omitting a
   flag cannot switch it off, and outside protected mode nothing changes. In protected mode every formal-use entry

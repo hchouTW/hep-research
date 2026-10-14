@@ -59,6 +59,11 @@ Choose binning using resolution, MC statistics, background stability, systematic
   it. Keep three uses apart: independent performance evaluation, method selection, and the formal inference.
 - **Fix the outcome of the optimization** (cuts, categories, binning) before unblinding, and treat later changes with
   the change-review procedure (`review_analysis_change.py`).
+- **Choose the blinding mode for what it must hide.** Masking bins, removing events, a hidden common offset and a
+  hidden common scale each conceal one feature and keep others (`core/blinding/README.md`): an offset leaks through
+  physical boundaries and integer counts (offsets on counts are refused), a scale through scaled counts and unscaled
+  companions, a removal through totals shown elsewhere. Run on real data, preparation is the data custodian's
+  (`contracts/release_prepare.py`), and `core/blinding/residual.py` lists what a prepared release can still give away.
 - **Record what was seen.** The custodian's exposure record (`exposure_record.json`: which releases reached which
   session or relay, and the kinds of data seen) is the source of the `data_exposure` state: give it to
   `review_analysis_change.py --exposure-record` and `batch_campaign.py freeze --exposure-record`, and record each
