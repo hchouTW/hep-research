@@ -32,12 +32,13 @@ validation in independent samples distinct from those used to tune the simulatio
 - **Control / validation / signal regions**: tune in control, check in validation,
   measure in signal; keep them disjoint ([backgrounds](../../hep-analysis/references/backgrounds.md)).
 - **Closure** (same-model): apply the method to simulation where truth is known and recover the
-  input within uncertainty; non-closure is a quoted systematic, not something to tune away.
+  input within uncertainty; a non-closure is first diagnosed (statistical fluctuation, bug, method failure) and only the residual bias is quoted as a systematic, never tuned away.
   A pass cannot reveal an error the generator, the response and the method share: add a
   model-mismatch stress test or a real control sample.
 - **Tag-and-probe**: a resonance (`Z`, `J/psi`, `K_s`, `Lambda`) supplies a *tag* with tight
-  selection and an unbiased *probe*; efficiency = probes passing / probes, from a
-  background-subtracted sample (sideband or fit); biases from tag-probe correlation and
+  selection and an unbiased *probe*; efficiency = probes passing / probes; with background present,
+  from a simultaneous pass/fail fit with the efficiency as a parameter, not a binomial ratio of
+  subtracted yields; biases from tag-probe correlation and
   background shape ([triggers luminosity pileup](triggers-luminosity-pileup.md)).
 - **Standard candles and independent samples**: mono-energetic peaks (`pi^0`, `Z` line,
   Michel electrons, calibration lines), cosmic muons, redundancy of independent
@@ -121,6 +122,17 @@ combination's precision; over-correlating hides tension.
 that already contains the calibration uncertainty); arbitrary envelopes of unrelated
 alternatives; noisy variations (finite MC) promoted to a shape effect; excessive
 smoothing that removes a real feature; unjustified decorrelation.
+
+### Systematic uncertainty of the response itself
+
+The response matrix carries the detector systematics of everything it folds. Build it again for each detector
+nuisance (scale, resolution, efficiency, alignment variation): one matrix per variation, with the nominal shape and the
+same binning, recorded in the artifact's `systematic_variations` (`nuisance`, `direction` up/down/alternative,
+`matrix` or `matrix_ref`), with nuisance names identical to those of the statistical model that consumes them.
+Model dependence is separate: reweight the truth spectrum inside each truth bin to an alternative shape and rebuild
+`R`; the difference is the response's dependence on the generator, not a detector effect. The finite-MC uncertainty of
+`R` is a third, statistical term ([response and forward folding](response-and-forward-folding.md)). The validator
+checks the shapes and that no (nuisance, direction) pair repeats.
 
 ## Detector combination and global reconstruction
 

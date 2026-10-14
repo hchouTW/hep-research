@@ -100,7 +100,7 @@ class NoiseRate(unittest.TestCase):
         self.assertAlmostEqual(mixed, math.sqrt(0.5 * 0.2757 ** 2 + 0.5 * 0.0919 ** 2), delta=1e-4)
 
     def test_fake_hits_scale_with_channels_and_window(self):
-        r = fr.noise_rate(5, 25, 2, 'series', channels=1e8, window_ns=25)
+        r = fr.noise_rate(5, 25, 2, 'series', channels=10**8, window_ns=25)
         expected = 1e8 * fr.rice_nu0(2, 12.5e-9, 'series') * math.exp(-12.5) * 25e-9
         self.assertAlmostEqual(r['expected_fake_hits_per_event'], expected, delta=1e-9 * expected)
         self.assertGreater(r['expected_fake_hits_per_event'], 100)
@@ -201,7 +201,8 @@ class CommandLine(unittest.TestCase):
     CASES = (
         ['enc', '--capacitance', '10', '--peaking', '25', '--en', '1', '--leakage', '1000'],
         ['noise-rate', '--threshold', '4', '--peaking', '25', '--order', '1', '--noise-type', 'series'],
-        ['noise-rate', '--threshold', '5', '--peaking', '25', '--channels', '1e8', '--window', '25'],
+        ['noise-rate', '--threshold', '5', '--peaking', '25', '--channels', '100000000', '--window', '25'],
+        ['leakage-scale', '--current', '1', '--from-celsius', '20', '--to-celsius', '-10'],
         ['timing', '--rise', '1', '--snr', '3', '--threshold', '0.5', '--amplitudes', '0.6', '1',
          '--cfd-fraction', '0.3', '--cfd-delay', '0.5', '--tdc-lsb', '25'],
         ['quantize', '--noise-lsb', '0'],
@@ -218,6 +219,8 @@ class CommandLine(unittest.TestCase):
         ['deadtime', '--dead-time', '100', '--measured', '2e7'],
         ['timing', '--rise', '1', '--snr', '10', '--threshold', '0.5'],
         ['cluster-noise', '--channels', '0', '--sigma', '1', '--rho', '0'],
+        ['noise-rate', '--threshold', '4', '--peaking', '25', '--channels', '2.5'],
+        ['sipm', '--cells', '2.5', '--npe', '1'],
         ['enc', '--capacitance', '1e200', '--en', '1e200', '--peaking', '25'],
         ['enc', '--capacitance', '10', '--en', '1', '--leakage', '1', '--peaking', '1e-300'],
         ['noise-rate', '--threshold', '4', '--peaking', '25', '--series-fraction', '0.5'],

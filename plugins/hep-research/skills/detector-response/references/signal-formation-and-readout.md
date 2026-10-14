@@ -17,7 +17,7 @@ particles)**:
 ```
 -<dE/dx> = K z^2 (Z/A) (1/beta^2) [ 0.5 ln(2 m_e c^2 beta^2 gamma^2 W_max / I^2)
                                      - beta^2 - delta(beta*gamma)/2 ]
-K = 4 pi N_A r_e^2 m_e c^2 = 0.307 MeV mol^-1 cm^2
+K = 4 pi N_A r_e^2 m_e c^2 = 0.307075 MeV mol^-1 cm^2
 ```
 
 `z` projectile charge, `Z/A` medium (mol/g), `I` mean excitation energy, `W_max`
@@ -26,17 +26,21 @@ tabulated fits (PDG), not from data. It fails below `beta gamma ~ 0.05-0.1`
 (shell, Barkas, and charge-exchange corrections) and, for muons, above `~ 1000`
 (PDG passage-of-particles review: radiative losses take over near the muon critical
 energy, a few hundred GeV in iron/copper). Electrons are not described by this formula
-at all (different kinematics; bremsstrahlung dominates above the electron critical
-energy, tens of MeV). Shape: falls as `1/beta^2`, minimum at
-`beta gamma ~ 3-4` (minimum-ionizing, "MIP"), logarithmic relativistic rise, then a
-Fermi plateau from `delta`. The rise is *smaller in dense media and thin gas volumes
-than a naive mean suggests* because the density effect and delta-ray escape truncate it.
+at all (different kinematics; bremsstrahlung dominates above the electron critical energy, from
+about 7 MeV in lead to about 90 MeV in air: `E_c ≈ 610 MeV/(Z + 1.24)` for solids and liquids, `710
+MeV/(Z + 0.92)` for gases, PDG). Shape: falls as `1/beta^2`, minimum at
+`beta gamma ~ 3-4` (minimum-ionizing, "MIP"), logarithmic relativistic rise. With the density effect
+`delta` the *mean* keeps rising (more slowly); the *restricted* loss (transfers below a cut) and the
+most probable loss reach a Fermi plateau. A thin layer records roughly the restricted loss, because
+energetic delta rays escape, so the measured rise is *smaller than the mean suggests*. Most probable
+loss (PDG): `Delta_p = xi [ln(2 m_e c^2 beta^2 gamma^2/I) + ln(xi/I) + 0.200 - beta^2 - delta]`.
 
 **Fluctuations (regime by `kappa = xi/W_max`, `xi = (K/2)(Z/A) z^2 (x rho)/beta^2`)**:
 `kappa << 1` (thin absorber, gases, silicon of ~100 um): the Landau/Vavilov
 distribution - asymmetric with a long high tail from delta rays, most-probable value
-(MPV) below the mean, no finite variance in the pure Landau limit; `kappa >> 1`
-(thick absorbers): Gaussian. Consequences: use the truncated mean, MPV fit, or
+(MPV) below the mean, no finite mean or variance in the pure Landau limit; for thin silicon
+Bichsel's straggling functions (atomic binding included) describe the width better than
+Landau-Vavilov (PDG); `kappa >> 1` (thick absorbers): Gaussian. Consequences: use the truncated mean, MPV fit, or
 likelihood, not the raw mean, for thin-layer `dE/dx` ([particle identification](particle-identification.md));
 the fluctuation is a *physical, irreducible* per-layer term, reduced only by more layers
 or cluster counting.
@@ -45,10 +49,12 @@ or cluster counting.
 `theta_0 = (13.6 MeV / (beta c p)) z sqrt(x/X_0) [1 + 0.038 ln(x z^2/(X_0 beta^2))]`.
 It sets the low-momentum resolution floor of every tracker
 ([tracking and vertexing](tracking-and-vertexing.md)); the non-Gaussian large-angle tail
-(single-scatter) is why fit `chi^2` has heavy tails.
+(single-scatter) is why fit `chi^2` has heavy tails. `theta_0` is the rms of the projected angle (`theta_space,rms = sqrt(2) theta_0`); for a stack apply the formula once with the total `x/X_0`, since per-layer values added in quadrature come out too small (PDG).
+
+**Charge yield and intrinsic statistics** (approximate; PDG RPP 2024, particle detectors at accelerators): `N = E/W` carriers, with `W` = 3.65 eV in silicon, 2.96 eV in germanium, about 26 eV in argon gas and 23.6 eV in liquid argon; for a fixed deposit in a semiconductor the variance is reduced by the Fano factor, `sigma_N = sqrt(F N)` with `F ≈ 0.1` in Si and Ge, so `sigma_E/E = sqrt(F W/E)`, usually below the electronic noise. A minimum-ionizing particle leaves a most probable charge of about 23 000 electrons (3.7 fC) in 300 um of silicon, about 77 e-h pairs per um, against a mean of about 106 per um (3.88 MeV/cm over 3.65 eV): quote which.
 
 **Radiative and nuclear processes.** Bremsstrahlung (energy scale `~ X_0`, critical
-energy `E_c`), photon conversion (`~ 9/7 X_0` mean free path), delta rays (extended
+energy `E_c`), photon conversion (`~ 9/7 X_0` mean free path; at low energy the photoelectric effect and Compton scattering dominate the photon cross section, with attenuation `I = I_0 exp(-(mu/rho) rho x)` and `mu/rho` from the NIST XCOM tables), delta rays (extended
 clusters, tail of `dE/dx`), and nuclear interactions (interaction length
 `lambda_I`, produce kinks, secondary vertices, and the invisible energy of
 [calorimetry ecal hcal](calorimetry-ecal-hcal.md)). Each is a topological source of fakes and tails,
@@ -80,7 +86,7 @@ clusters in the waveform (rate, diffusion, and electronics limits).
 
 **Cherenkov radiation (exact kinematics; approximate yield)**: emission when
 `beta > 1/n` with `cos theta_C = 1/(n beta)`; threshold `p_th = m c/sqrt(n^2 - 1)`;
-number of photons per unit path per energy `d^2N/(dx dE) ≈ 370 sin^2 theta_C  eV^-1 cm^-1`
+number of photons per unit path per energy `d^2N/(dx dE) ≈ 370 z^2 sin^2 theta_C eV^-1 cm^-1` for a projectile of charge number `z`
 (before detection efficiency). In gas and aerogel RICH radiators the yield is small (of order
 tens of detected photons per track), so `N_pe` is the dominant performance limit there;
 thicker or denser radiators (water Cherenkov, lead glass, quartz bars) give more

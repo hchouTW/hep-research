@@ -18,7 +18,7 @@ merged clusters at high density; radiation damage lowers `CCE` and shifts thresh
 and depletion voltage.
 
 **Strips/microstrips**: 1D measurement; a 2D point needs a stereo pair, creating
-`n^2` ghost combinations for `n` hits; capacitive coupling, common-mode noise, and
+`n^2` candidate intersections for `n` hits, of which `n^2 - n` are ghosts; capacitive coupling, common-mode noise, and
 occupancy dominate ambiguity.
 
 **MAPS, depleted MAPS, CCD, DEPFET**: sensor and first amplification integrated, so
@@ -62,9 +62,12 @@ adjacent-layer staggering, by segment or track fit, or by wire signal timing.
 `(z, +-r)` circles with a two-fold ambiguity per layer), then linking segments to
 tracks.
 
-**Diagnostics.** Residual versus drift distance (the standard plot): a symmetric
-structure means the `r(t)` calibration or `t0` is wrong; a tilt versus distance means
-drift-velocity error; different left/right means alignment or `t0`. Residual versus
+**Diagnostics.** Residual versus drift distance (the standard plot): state the residual convention
+([glossary](detector-glossary.md): signed track coordinate). In the signed coordinate a `t0` offset
+gives opposite-sign residuals for left and right passages, a drift-velocity error a residual growing
+with distance, and a wire offset the same sign on both sides; in the unsigned drift radius the `t0`
+and wire-offset patterns swap. `t0` and alignment become degenerate when one side dominates the
+track population or the geometry is fixed. Residual versus
 angle and versus amplitude reveal time walk and crossing-angle effects.
 
 ### Distinctive but generalizable reconstruction and performance features (drift systems)
@@ -86,8 +89,8 @@ angle and versus amplitude reveal time walk and crossing-angle effects.
 - **Dependence**: rate/occupancy (space charge, deadtime), `T`/`P`/gas composition
   (drift velocity), aging (Malter effect, deposits on wires).
 - **Data sample**: cosmic rays and collision tracks for `r(t)` self-calibration.
-- **Transfers**: time-to-distance calibration to RPC, muon-tube, TOP-like timing
-  coordinates; does not transfer: charge-centroid interpolation.
+- **Transfers**: time-to-distance calibration to muon tubes, straws and TPC drift coordinates;
+time-difference coordinates (RPC strip ends, TOP) reuse the offset and velocity calibration logic; does not transfer: charge-centroid interpolation.
 
 ## Time projection chambers (TPC)
 

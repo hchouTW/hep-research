@@ -8,13 +8,8 @@ apparatus, configuration, phase space, conditions, and source.
 
 ## 1. The unified chain
 
-```
-particle & interaction -> detector response -> signal formation & transport
- -> electronics & raw data -> calibration & alignment -> local reconstruction
- -> pattern recognition & object reconstruction -> PID & detector fusion
- -> performance measurement -> data/MC validation -> systematic uncertainties
- -> physics-observable bias
-```
+The chain from particle and interaction to physics-observable bias is drawn once, in the
+[detector measurement framework](detector-measurement-framework.md#the-chain).
 
 Each arrow has its own model, parameters, failure modes, and validation sample. Diagnose
 a defect by finding where it first becomes visible; find its physics impact by pushing
@@ -42,40 +37,16 @@ truth matching (simulation only) vs data-accessible proxies.
 
 ## 2. The fourteen questions for any detector
 
-1. What enters the sensitive volume? 2. Which microscopic interaction makes the signal?
-3. What is the earliest physical signal (charge, light, heat, phonons, current, drift
-time)? 4. What is digitized (ADC, TDC, waveform, binary hit, time-over-threshold, image,
-trigger primitive)? 5. What is the forward model with nuisance and stochastic terms?
-6. Which calibrations, conditions, geometry, field maps, material are required?
-7. Which local objects are reconstructed? 8. Which pattern recognition, association, fit,
-or inversion follows? 9. Which ambiguities or degeneracies are characteristic?
-10. What causes inefficiency, fakes, duplicates, migrations, tails, catastrophic failures?
-11. How does performance scale with energy, momentum, angle, occupancy, pileup, dose,
-rate, time? 12. What is measurable in data, and what needs simulation truth?
-13. How are data/MC discrepancies corrected or assigned as uncertainties? 14. How can a
-defect bias a final physics result?
+The fourteen questions to answer for any detector are in the
+[detector measurement framework](detector-measurement-framework.md#the-fourteen-questions-template-for-any-detector).
 
 ## 3. Core equations
 
-| # | Relation | Meaning, units, validity |
-|---|---|---|
-| 1 | `y = f(x;theta) + epsilon` | Forward model (approximate if `epsilon` is taken Gaussian; Poisson and Landau-like noise violate it) |
-| 2 | `pT ≈ 0.3 |q| B rho` | `pT` in GeV/c, `B` in T, bending radius `rho` in m (exact in a uniform field, conventional HEP units); rigidity `R = p/q` is what a spectrometer measures |
-| 3 | `chi^2 = r^T V^{-1} r` | Least-squares objective; `V` must be the covariance of the residual vector |
-| 4 | `theta_0 = (13.6 MeV/(beta c p)) z sqrt(x/X_0) [1 + 0.038 ln(x z^2/(X_0 beta^2))]` | Highland multiple scattering (approximate, ~11% for `1e-3 < x/X_0 < 100`); sets the low-momentum resolution floor |
-| 5 | Bethe-Bloch: `-<dE/dx> = K z^2 (Z/A)(1/beta^2)[0.5 ln(2 m_e c^2 beta^2 gamma^2 W_max/I^2) - beta^2 - delta/2]`, `K = 0.307 MeV mol^-1 cm^2` | Mean loss for heavy charged particles at intermediate energy (approximate). Fluctuations: Landau/Vavilov (asymmetric, long tail) for thin absorbers (`kappa = xi/W_max << 1`), Gaussian for thick ones |
-| 6 | `v_d = mu E`; `sigma = sqrt(2 D L/v_d) = C_D sqrt(L)` | Drift and diffusion (low-field, approximate; real gases need measured `v_d(E,B,T,P)` and `C_D`) |
-| 7 | `cos theta_C = 1/(n beta)`; `p_th = m c/sqrt(n^2-1)`; `d^2N/(dx dE) ≈ 370 sin^2 theta_C eV^-1 cm^-1` | Cherenkov angle, threshold, and yield before detection efficiency |
-| 8 | `beta = L/(c t)`; `m^2 = p^2 (1/beta^2 - 1)` | TOF; `L` is the track path length; separation falls as `1/p^2` |
-| 9 | `sigma_E/E = a/sqrt(E) ⊕ b/E ⊕ c` | Calorimeter resolution (⊕ = quadrature sum): stochastic, noise, constant (empirical) |
-| 10 | `sigma/N ≈ sqrt(F/N_pe)` | Photostatistics with excess-noise factor `F >= 1` (Poisson-limited) |
-| 11 | `P(S) = P(A) P(R|A) P(S|R,A)` | Exact chain rule; a naive product of separately measured efficiencies is not |
-| 12 | `r = x_meas - x_pred`, `p = r/sigma_r`, `V_r = V_meas + V_pred - C - C^T` | Residual, pull, and residual covariance including measurement-prediction correlation `C` |
-| 13 | `SF = eps_data/eps_MC` | Efficiency scale factor |
-| 14 | `V_f ≃ J V_x J^T` | First-order propagation; fails for thresholds, migration, strong nonlinearity, asymmetric errors |
-| 15 | `n_i^reco = sum_j R_ij n_j^truth + b_i` | Response matrix: resolution (off-diagonal), inefficiency (column sums < 1), background `b_i`, model dependence via the truth spectrum |
-| 16 | `N_sigma` | PID separation; two conventions (single-measurement, quadrature; a factor `sqrt(2)` apart for equal widths) defined in [performance metrics](performance-metrics-and-residual-diagnostics.md); Gaussian approximation, unreliable with tails or few photons |
-| 17 | Binomial/Poisson intervals | Efficiencies: exact Clopper-Pearson or Wilson, not Gaussian near 0 or 1; counts: Poisson |
+The seventeen cross-cutting relations (forward model, curvature, `chi^2`, Highland, Bethe, drift and diffusion,
+Cherenkov, TOF, calorimeter resolution, photostatistics, efficiency chain, residuals and pulls, scale factors,
+error propagation, response matrix, `N_sigma`, binomial and Poisson intervals), with symbols, units, validity
+and parameter sources, are in [core detector equations](core-detector-equations.md); this file does not
+repeat them.
 
 ## 4. Detector families at a glance
 
@@ -107,7 +78,7 @@ error in a spatial residual. Timing systems have clock/reference terms that do n
 across channels. Emulsion has no intrinsic timing. Muon systems fail at high momentum
 through charge misidentification and alignment weak modes. Rare-event searches are
 dominated by threshold and fiducial-mass systematics. Astroparticle systems have
-the atmosphere or medium optics as the largest nuisance, and exposure replaces acceptance.
+the atmosphere or medium optics as the largest nuisance, and the normalization is exposure (acceptance integrated over live time).
 
 ## 5. Performance metrics
 
@@ -124,7 +95,7 @@ definitions (purity, fake, duplicate rate, `N_sigma`, width estimators) are in
   assigned the wrong species. **Duplicate rate**: truths matched by several objects,
   over matched truths (say which convention).
   `1 - P` = fakes + mis-ID + duplicates, so fake rate is not universally `1 - P`.
-- **Response/scale/bias**: central offset, binned in *truth*. **Resolution**: width
+- **Response** (`<x_reco>/x_true`) and **bias** (`<x_reco - x_true>`), binned in *truth*. **Resolution**: width
   of `x_reco - x_true` with an explicit estimator (core `sigma`, `sigma_68`,
   `IQR/1.349`, `1.4826 MAD`, RMS or std), quoted with the **tail fraction**.
 - **Selection sculpts resolution**: a cut on a reconstructed variable removes one side of
@@ -134,11 +105,12 @@ definitions (purity, fake, duplicate rate, `N_sigma`, width estimators) are in
 
 **Worked example (synthetic toy).** Generated 10000; in fiducial 8000 -> `A = 0.800`.
 Reconstructed 7200 of 8000 -> `eps_R = 0.900`. Pass ID 6480 of 7200 -> `eps_S = 0.900`.
-Total `= 0.810` of fiducial, `0.648` of generated (`0.8×0.9×0.9`). Selected 6600 =
-6420 correct + 60 mis-ID + 120 fake -> purity `0.973`, fake rate `0.0182`, mis-ID share
-`0.0091`; `1 - P = 0.0273` is fake plus mis-ID. Twenty relative energy residuals with one
-`6.5%` outlier: mean `0.395%`, RMS `1.56%`, median `0.15%`, `1.4826 MAD = 0.74%`, tail
-fraction `5%`; without the outlier mean `0.074%` and RMS `0.63%`. The mean and RMS were
+Total `= 0.810` of fiducial, `0.648` of generated (`0.8×0.9×0.9`). Selected 6660 = 6480 correct + 60
+mis-ID + 120 fake -> purity `0.973`, fake rate `0.0180`, mis-ID share `0.0090`; `1 - P = 0.0270` is
+fake plus mis-ID. Twenty relative energy residuals with one
+`6.5%` outlier: mean `0.395%`, std `1.56%` (RMS `1.57%`), median `0.15%`, `1.4826 MAD = 0.74%`, tail
+fraction `5%`; without the outlier mean `0.074%` and std `0.63%` (RMS `0.62%`), values in
+[performance metrics](performance-metrics-and-residual-diagnostics.md). The mean and width were
 driven by one event, so quote core bias, core width, and tail separately.
 
 ## 6. Residuals, pulls, and coverage
@@ -176,8 +148,8 @@ sideband, cosmic ray) whose own bias is part of the uncertainty.
 **Validation checklist.**
 - Compare normalization, shape, conditional and joint distributions, correlations,
   efficiencies, tails, and time dependence. Never accept 1D agreement alone.
-- Use independent samples for derivation and validation; check closure and quote any
-  non-closure as a systematic.
+- Use independent samples for derivation and validation; check closure, diagnose any non-closure,
+  and quote the residual as a systematic.
 - Scale factors: measure data and MC identically, in the analysis phase space, apply at
   the level of measurement, and state binning, correlations, smoothing, and
   extrapolation.
@@ -227,7 +199,7 @@ mode.
 | Symptom | First suspects |
 |---|---|
 | Dimuon mass shifts with `q*eta` | Alignment weak mode, field map |
-| Residual left/right offset vs drift distance | `t0`, `r(t)` |
+| Residual left/right structure vs drift distance | `t0`, `r(t)`, wire position (sign pattern depends on the residual convention, [glossary](detector-glossary.md)) |
 | Coherent residual trend with rate or radius | Space-charge distortion |
 | Energy scale wrong vs `eta` | Upstream material, intercalibration |
 | PID efficiency drifting with run | Refractive index, gain, clock |

@@ -28,7 +28,7 @@ production alternate, roughly doubling the number of particles every radiation l
 the **critical energy**, below which ionization loss overtakes radiative loss, and the
 remaining particles are absorbed.
 
-Approximate scales, with `Z`, `A` the absorber's atomic number and mass number (g/mol)
+Approximate scales, with `Z`, `A` the absorber's atomic number and atomic mass (g/mol)
 (empirical fits from the PDG Review of Particle Physics, "Passage of particles through
 matter", radiation length and electromagnetic cascades; use the PDG tabulated material
 values when they exist):
@@ -88,7 +88,7 @@ quadrature:
   Campbell's theorem ([front-end electronics and signal processing](front-end-electronics-and-signal-processing.md)).
 - **`c`, the constant term** - calibration non-uniformity, channel-to-channel
   intercalibration error, hardware non-uniformity (dead material, cracks, temperature
-  and light-collection variations), energy leakage, and in hadronic calorimeters the
+  and light-collection variations), energy leakage (only approximately: leakage grows with energy and adds a low-side tail that a constant term does not describe), and in hadronic calorimeters the
   fluctuations of the electromagnetic fraction when `e/h != 1` (non-compensation). It
   does not improve with energy and therefore *sets the ultimate high-energy
   performance*. A calorimeter's high-energy precision depends on calibration and
@@ -99,8 +99,9 @@ extrapolating it to high energy, which predicts an arbitrarily good resolution t
 the constant term forbids. `<plugin root>/skills/detector-response/scripts/calorimeter_resolution.py` fits all three terms
 from measured points and reports which one dominates at a given energy and where the
 crossovers lie; note that the parameterization is *linear* in `(a^2, b^2, c^2)` over
-the basis `{1/E, 1/E^2, 1}`, so the fit is an exact linear least squares with no
-minimizer and no starting values required.
+the basis `{1/E, 1/E^2, 1}`, so the fit is an exact linear least squares with no minimizer and no
+starting values required. A squared coefficient can come out negative on noisy or narrow-range data;
+the script reports it as a failure. Do not clip it to zero.
 
 Fitting fewer than three distinct energies cannot separate three terms, and fitting
 over a narrow energy range gives strongly correlated parameters even when it converges:
@@ -162,8 +163,9 @@ polar angle, and their residual uncertainty flows into the constant term.
 ## Calorimeter-based identification
 
 Beyond shower shape, the ratio of calorimeter energy to track momentum, `E/p`, is a
-powerful identifier: it is near 1 for electrons (which deposit all their energy
-electromagnetically and have a measured track) and much smaller for hadrons, which
+powerful identifier: it is near 1 for electrons (which deposit all their energy electromagnetically
+and have a measured track; without bremsstrahlung recovery the track momentum is biased low and
+`E/p` has a tail above 1) and much smaller for hadrons, which
 deposit only part of their energy in the electromagnetic section. `E/p` is also the
 standard in-situ handle for cross-calibrating the calorimeter energy scale against the
 tracker momentum scale - a check that is only as good as the tracker's own alignment,

@@ -344,6 +344,11 @@ VALID = {
                                                      "limitations": ["fixture"]}, "research-communication"),
     "communication_traceability.json": communication_rich(),
     "response_v24.json": response_v24(),
+    # contracts 2.8.0 response hardening (detector-response audit): finite-MC statistics and correction space declared
+    "response_v28.json": response_v24(intended_use="unfolding",
+                                      mc_stat={"kind": "generated_counts", "events_per_truth_bin": [10000, 10000]},
+                                      correction_space={"acceptance": {"space": "truth", "binned_in": "cos_theta"},
+                                                        "luminosity": {"space": "global"}}),
     "ml_artifact_v25.json": ml_v25(),
     "theory_spec_v26.json": theory_v26(),
     "theory_spec_v26_asymptotic.json": theory_v26(derivation_status="asymptotic-argument", limit="m / sqrt(s) -> 0 (synthetic)"),

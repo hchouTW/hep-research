@@ -18,7 +18,11 @@ itself, not how any one instrument measures it.
 ## The all-particle spectrum and its features
 
 The cosmic-ray flux falls as a power law spanning more than ten decades in energy,
-`dN/dE ~ E^-gamma`, with `gamma` around 2.7 below the knee and steepening above it.
+`dN/dE ~ E^-gamma`, with `gamma` around 2.7 below the knee and steepening above it. Below the knee the spectrum is
+not one power law: direct measurements find a hardening of proton, helium and heavier spectra at a few hundred GV
+and a softening at a few tens of TeV, and ground arrays now resolve a proton knee below the all-particle knee
+(LHAASO reports it at about 3 PeV, arXiv:2505.14447, read 2026-10-14). Take break positions and indices from the
+primary papers or the experiment profile, not from this file.
 Three named features mark changes in the underlying physics and are the primary
 targets of composition and origin measurements:
 
@@ -30,7 +34,7 @@ cosmic-ray review (revised March 2026); see the latest-results policy in
   The leading interpretation is a rigidity-dependent maximum energy of Galactic
   accelerators - light nuclei (proton, helium) cutting off first, heavier nuclei
   cutting off at proportionally higher energy per nucleus since acceleration and
-  confinement scale with rigidity, `R = E / (Z * e)`, not raw energy. This predicts a
+  confinement scale with rigidity, `R = pc/(Ze)` (about `E/(Ze)` at these energies), not raw energy. This predicts a
   "knee" for each species in sequence, sometimes called the composition unfolding into
   a "second knee" (~100 PeV, steepening to `gamma ~ 3.3`) as iron's cutoff is reached.
 <!-- example: experiment-specific illustration -->
@@ -46,7 +50,7 @@ cosmic-ray review (revised March 2026); see the latest-results policy in
 - **The GZK suppression** (starting around 5*10^19 eV = 50 EeV; whether it is a
   propagation (GZK) cutoff or the sources' maximum energy is still open): a cutoff from photopion production,
   `p + gamma_CMB -> Delta -> p/n + pi`, once a proton's energy exceeds the pion-
-  production threshold in the CMB rest frame. This limits the horizon from which the
+  production threshold in the CMB rest frame; for nuclei, photodisintegration on the CMB and the extragalactic background light shapes the spectrum in a similar way (PDG RPP 2024, Cosmic rays), which matters because the composition becomes heavier above the ankle. This limits the horizon from which the
   highest-energy cosmic rays can reach Earth to roughly 100 Mpc (the "GZK horizon"),
   making UHECR arrival directions a probe of the local (not cosmological) source
   distribution - and making source identification a matter of nearby-source
@@ -89,9 +93,9 @@ detectors and long-duration balloon-borne instruments). Two composition observab
   `A * (E0/A)^beta = A^(1-beta) * E0^beta` exceeds the proton value (see
   [extensive air showers](extensive-air-showers.md)). Every hadronic-interaction model used to
   predict this ratio is extrapolated far beyond its accelerator-calibrated energy
-  range, and current models under-predict the observed muon content at the highest
-  energies relative to what a pure-composition explanation would require (the
-  "muon puzzle") - treat any composition conclusion drawn from muon content as model-
+  range, and current models predict fewer muons than most experiments observe for the composition
+  inferred from `X_max` (the "muon puzzle"; not all experiments see it, [extensive air
+  showers](extensive-air-showers.md)) - treat any composition conclusion drawn from muon content as model-
   dependent until the interaction-model systematic is quoted alongside it.
 
 Composition inferences are always relative to a chosen hadronic interaction model
@@ -121,7 +125,7 @@ mechanism for the bulk of the spectrum.
 
 **Hillas criterion**: a source can confine (and hence accelerate) a particle only up
 to the rigidity at which its Larmor radius no longer fits inside the source region,
-`E_max ~ Z * e * B * L` for magnetic field `B` and source size `L`. Plotting candidate
+`E_max ~ Z e beta_s B L` for magnetic field `B`, source size `L` and shock speed `beta_s c`, about `0.9 EeV * Z * beta_s * (B / 1 muG) * (L / 1 kpc)`. Plotting candidate
 sources on a size-vs-field ("Hillas") plot is the standard first check of whether a
 proposed source class can plausibly reach a given energy at all, independent of any
 detailed acceleration model.
@@ -130,14 +134,11 @@ detailed acceleration model.
 
 Once accelerated, charged cosmic rays do not travel in straight lines - Galactic (and,
 for UHECRs, extragalactic) magnetic fields scatter them, and propagation is normally
-treated as diffusion. The steady-state diffusion-loss equation for a species'
-differential density `N(E)` is
+treated as diffusion. The transport equation for species `i` (set the time derivative to zero for the steady state) is
 
-    dN/dt = grad . (D(E) * grad N) - d/dE (b(E) * N) + Q(E)
+    dN_i/dt = div(D grad N_i) - div(V N_i) + d/dE (b_i N_i) - N_i/tau_i + Q_i + sum_{j>i} N_j/tau_{j->i}
 
-with diffusion coefficient `D(E)` (typically rising with rigidity), energy-loss rate
-`b(E)` (adiabatic, ionization, or - for extragalactic protons above the pion-
-production threshold - photopion losses on the CMB), and source term `Q(E)`.
+with diffusion coefficient `D(E)` (typically rising with rigidity), convection velocity `V`, loss rate `b = -dE/dt > 0` (adiabatic, ionization, or - for extragalactic protons above the pion-production threshold - photopion losses on the CMB), fragmentation (and decay) time `tau_i`, source term `Q_i` and, last, the secondary source from heavier parents; reacceleration adds a momentum-diffusion term.
 Consequences that matter for interpreting a measured spectrum:
 
 - **Secondary-to-primary ratios** (boron/carbon, or sub-iron/iron) measure the

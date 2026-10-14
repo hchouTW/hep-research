@@ -9,15 +9,23 @@ Where communities differ, one convention is adopted here and stated.
 | Symbol | Meaning | Units |
 |---|---|---|
 | `x`, `y`, `theta`, `epsilon` | latent properties, observables, nuisance parameters, noise | - |
-| `p`, `q`, `R = p/q` | momentum, charge, rigidity (`R` is used for rigidity only) | GeV/c, e, GV |
-| `rho` | bending radius of a track in a magnetic field | m |
-| `z`; `Z`, `A` | projectile charge number; atomic number and mass number of the traversed material (cosmic-ray texts also write a nucleus's own charge as `Z`; then `z = Z` of the projectile, so say which is meant) | e; -, g/mol |
+| `p`, `q`, `R = p/q` | momentum, charge, rigidity (`R` also denotes the response ratio, the response matrix `R_ij`, the noise autocorrelation matrix in front-end electronics, and resistances `R_s`, `R_p`; context fixes the meaning) | GeV/c, e, GV |
+| `rho` | bending radius (E2); density in `xi` (signal formation); noise correlation coefficient (front-end electronics) | m; g/cm^3; - |
+| `z`; `Z`, `A` | projectile charge number; atomic number and atomic mass (g/mol) of the traversed material (cosmic-ray texts also write a nucleus's own charge as `Z`; then `z = Z` of the projectile, so say which is meant) | e; -, g/mol |
 | `pT`, `eta`, `phi` | transverse momentum, pseudorapidity, azimuth | GeV/c, -, rad |
 | `B`, `E` | magnetic, electric field | T, V/cm |
 | `X_0`, `lambda_I`, `R_M`, `E_c` | radiation length, interaction length, Moliere radius, critical energy | g/cm^2 or cm, MeV |
 | `beta`, `gamma` | `v/c`, Lorentz factor | - |
 | `n`, `theta_C` | refractive index, Cherenkov angle | -, rad |
-| `v_d`, `D`, `C_D`, `tau_e` | drift velocity, diffusion, diffusion coefficient, electron lifetime | cm/us, cm^2/s, um/sqrt(cm), us |
+| `v_d`, `D`, `C_D`, `tau_e` | drift velocity, diffusion coefficient, diffusion constant `C_D = sqrt(2D/v_d)` (longitudinal and transverse values differ), electron lifetime | cm/us, cm^2/s, um/sqrt(cm), us |
+| `W_max`, `I`, `delta` | maximum energy transfer, mean excitation energy, density correction | MeV, eV, - |
+| `xi`, `kappa` | Landau scale `(K/2)(Z/A) z^2 rho x/beta^2`, `xi/W_max` | MeV, - |
+| `t_p`, `tau`, `tau_d` | peaking time, shaper constant, dead time | ns |
+| `E_w`, `phi_w` | weighting field, weighting potential | 1/cm, - |
+| `alpha` | Townsend coefficient (gas) or current-damage constant (silicon) | 1/cm; A/cm |
+| `n` | refractive index, shaper order, dynode count, or true rate (context) | - |
+| `F` | excess-noise factor (`F_Fano` for the Fano factor) | - |
+| residual sign | `r = x_meas - x_pred` in the signed track coordinate (convention of these references): a drift-chamber `t0` offset gives opposite-sign residuals for passages left and right of the wire, a wire-position offset the same sign; in the unsigned drift radius the two patterns swap | - |
 | `theta_L` | Lorentz angle | rad |
 | `N_pe`, `F`, `QE` | photoelectrons, excess-noise factor, quantum efficiency | -, -, - |
 | `A`, `eps`, `P` | acceptance, efficiency, purity (`A` alone, in metric context) | - |
@@ -54,8 +62,9 @@ TPC time projection chamber; TRD transition radiation detector; WLS wavelength s
 - **Fake** = selected object with no truth match; **mis-ID** = real particle with the
   wrong species; **duplicate** = truth matched by more than one object (rates and
   denominators in [performance metrics](performance-metrics-and-residual-diagnostics.md)).
-- **Response** = `<x_reco/x_true>` at fixed truth; **calibration** = the procedure that
-  corrects it; **scale** = central offset (bias); **alignment** = element positions,
+- **Response** = `<x_reco>/x_true` at fixed truth (in a finite truth bin, state mean of ratio or
+ratio of means); **bias** = `<x_reco - x_true>`; **scale** = the multiplicative part of the
+response; **calibration** = the procedure that corrects them; **alignment** = element positions,
   distinct from timing/drift calibration.
 - **Unbiased residual** = prediction excludes the measurement; **biased** = includes it.
 - **Muon types**: standalone, combined, segment-tagged, calorimeter-tagged, trigger-level

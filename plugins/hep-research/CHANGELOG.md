@@ -105,6 +105,44 @@ Contract and tooling:
   rule. `docs/deployment-model.md`: the release-manifest interface lists `exposure_record` and a verified revocation
   status. Documentation only.
 
+### detector-response (audit DR-WP1 to DR-WP4)
+
+- **Cherenkov photon yield carries z^2 (sci-fix, DR-WP1-01).** `cherenkov_angle.py` and four references: helium at
+  40 GeV/c, n = 1.05 gives 68.08 expected photons (was 17.02, 4x low); species take `mass:charge`, `--rigidity` sets
+  p = zR.
+- **Gaisser-Hillas profile stable at any X_max (sci-fix, DR-WP1-02).** log1p form without cancellation, doubling
+  bracket without the fixed 1e6 cap: X_max = 1e20 gives FWHM 1.824036e11 in 0.03 s (hung before).
+- **Script physics (sci-fix, DR-WP2-06).** Calorimeter fit weights by a constant relative error without per-point
+  errors (constant term unbiased in toys), refuses percentages and reports a negative squared term as a failure; PID
+  refuses electrons in the heavy-particle Bethe formula and uses water I = 79.7 eV; multiple scattering derives
+  beta(R) from mass and charge and solves crossover and MDR with it; tag-and-probe names its central interval;
+  pileup checks bin order and reports input totals; front-end `--channels`/`--cells` integers and a `leakage-scale`
+  subcommand.
+- **References corrected (sci-fix, DR-WP1-05, DR-WP1-06, DR-WP3).** Pileup reweighting on the Poisson mean mu;
+  background-subtracted tag-and-probe yields need a simultaneous pass/fail fit (hep-statistics); calorimetric space
+  instruments are not spectrometers; the Störmer cutoff is east-west asymmetric; the appendix edit list applied
+  where a source was opened (deferred rows listed in VALIDATION.md); one home each for the equations, the chain and
+  the fourteen questions; residual sign convention in the glossary (signed track coordinate).
+- **Every script prints a status label and JSON errors (DR-WP2-05).** `--status` (input file's status by default for
+  the three file-input scripts), JSON on stdout at exit 2, exit 1 for failed computations.
+- **Response hardening, contracts 2.8.0 (DR-WP2-01 to -04).** `validate.py` rules R1-R10 (`_response_hardening`,
+  overlay `ext_response_v2_8.json`): declared intended use and flow handling, misspelled keys, placement, exposure
+  contains acceptance and live time, flow vectors, correction space, finite-MC statistics for unfolding, variation
+  shapes, and the numbers of an inline matrix. Of 30 crafted broken responses `validate.py` now refuses 28 (5 before);
+  the two others pass with warnings by design. `response_adapter.py` reads `file.json#key` and flow vectors from the
+  ref, refuses refs outside the artifact folder and exits 2 on unreadable refs. SKILL.md step 5 names both checks.
+- **Shipped examples carry resolvable responses (DR-WP1-04).** `ams-flux-ratio` writes one response per species and
+  period with `matrices/response_<species>_<period>.json` and declares exposure once with its correction space;
+  `collider-angular` points at `matrices/response.json`. All five pass `response_adapter.py --validate`.
+- **Tool contracts (DR-WP2-07)** for tag-and-probe, PID separation, calorimeter resolution and pileup reweighting;
+  `tool_contract.py` reads options of a required mutually exclusive group.
+- **Coverage (DR-WP4).** Finite-MC response covariance, fakes, time-dependent responses, a worked 2x2 example and the
+  two-tool table; response systematics; resolution models and data-driven resolution; luminosity calibration (vdM);
+  calibration pitfalls; ML-reconstruction and fast-simulation validation; JES chain; spectral breaks and the proton
+  knee; instrument-response checklists. AMS-02 profile: Layer-0 status by claim ID, solar cycle 25 phase.
+- **Hep-analysis docstring (DR-Q1).** `geomagnetic_cutoff.py` states the east-west asymmetry; its dipole default is
+  unchanged (follow-up for hep-analysis).
+
 ## 0.9.0 (2026-10-14)
 
 Contracts 2.7.0 (unchanged). Release B of the agentic-completion plan (PR #74): formal-use permits and analysis-level

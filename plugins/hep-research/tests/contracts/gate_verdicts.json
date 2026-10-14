@@ -223,6 +223,114 @@
   "ok": false,
   "strict_ok": false
  },
+ "contracts/fixtures/artifacts/invalid/response_2_8/01_cos_cols_not_normalized.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_2_8/02_cog_colsum_gt1.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_2_8/03_negative_entries.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_2_8/04_shape_vs_edges.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_2_8/05_unfolding_singular.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_2_8/06_eff_class_double.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_2_8/07_eff_outside_not_applied.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_2_8/08_transposed.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_2_8/09_unnormalized_unfolding.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_2_8/10_nonmonotonic_edges.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_2_8/11_var_mismatch_noconv.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_2_8/12_bad_flow_string.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_2_8/13_cog_ineff_outside.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_2_8/14_nan_entry.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_2_8/15_acceptance_double.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_2_8/16_reco_edges_count.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_2_8/17_ragged.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_2_8/18_joint_counts_gen_lt_counts.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_2_8/19_no_use_singular.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_2_8/21_fakes_double.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_2_8/23_square_transposed_cog.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_2_8/25_explicit_bins_no_vectors.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_2_8/26_no_use_no_flow.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_2_8/27_includes_eff_but_outside.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_2_8/28_acceptance_and_exposure.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_2_8/29_matrix_axis_missing.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/response_2_8/30_misspelled_keys.json": {
+  "ok": false,
+  "strict_ok": false
+ },
  "contracts/fixtures/artifacts/invalid/response_double_counted.json": {
   "ok": false,
   "strict_ok": false
@@ -501,6 +609,10 @@
   "ok": true,
   "strict_ok": true
  },
+ "contracts/fixtures/artifacts/valid/response_v28.json": {
+  "ok": true,
+  "strict_ok": true
+ },
  "contracts/fixtures/artifacts/valid/statres_bayesian.json": {
   "gate": "unresolved",
   "ok": true,
@@ -559,6 +671,14 @@
   "ok": true,
   "strict_ok": true
  },
+ "contracts/fixtures/artifacts/warning/response_2_8/20_cog_eff_not_visible.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/warning/response_2_8/24_unfolding_near_singular.json": {
+  "ok": true,
+  "strict_ok": true
+ },
  "contracts/fixtures/artifacts/warning/theory_v26_conventions_incomplete.json": {
   "ok": true,
   "strict_ok": true
@@ -580,11 +700,19 @@
   "ok": true,
   "strict_ok": true
  },
- "examples/ams-flux-ratio/output/artifacts/response_helium.json": {
+ "examples/ams-flux-ratio/output/artifacts/response_helium_synthetic-period-1.json": {
   "ok": true,
   "strict_ok": true
  },
- "examples/ams-flux-ratio/output/artifacts/response_proton.json": {
+ "examples/ams-flux-ratio/output/artifacts/response_helium_synthetic-period-2.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/ams-flux-ratio/output/artifacts/response_proton_synthetic-period-1.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/ams-flux-ratio/output/artifacts/response_proton_synthetic-period-2.json": {
   "ok": true,
   "strict_ok": true
  },

@@ -17,7 +17,7 @@ Use when the deliverable is about how a detector responds: signal formation and 
 
 ## Scripts
 
-`calorimeter_resolution.py`, `cherenkov_angle.py`, `multiple_scattering.py`, `pid_separation_power.py`, `pileup_reweight.py`, `tag_and_probe_efficiency.py`, `xmax_gaisser_hillas.py`. Each reads `--help`; particle masses come from the caller or the primary-source table, never from a built-in constant presented as a measurement.
+`calorimeter_resolution.py`, `cherenkov_angle.py`, `frontend_response.py`, `multiple_scattering.py`, `pid_separation_power.py`, `pileup_reweight.py`, `tag_and_probe_efficiency.py`, `xmax_gaisser_hillas.py`. Each reads `--help`, echoes a `--status` label and prints JSON at every exit code (0 ok, 1 failed, 2 invalid input); four have tool contracts in `contracts/tool_contracts/`; particle masses come from the caller or the primary-source table, never from a built-in constant presented as a measurement.
 
 ## References
 
@@ -35,7 +35,7 @@ Start with `references/detector-principles-summary.md`, then the topic file the 
 
 ## Tests and validation
 
-`tests/skills/detector_response/` (four modules: the scripts, their validity-range guards, the front-end electronics script, and a coverage test that every bullet of the principles summary is backed by a reference) and the `detector-resolution` and `recasting` examples under `examples/`. What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
+`tests/skills/detector_response/` (six modules: the scripts, their validity-range guards, the front-end electronics script, reference values, the audit regression suite, and a link check of every reference), `tests/contracts/test_response_contract.py` for the response contract, and the `detector-resolution` and `recasting` examples under `examples/`. What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
 
 ## How this folder is used
 

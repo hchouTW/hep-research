@@ -145,6 +145,14 @@ applied consistently with the mitigation - reweighting to a data pileup profile 
 reconstructing with a mitigation tuned for a different profile leaves a residual that
 neither step catches.
 
+## Validating a learned reconstruction
+
+A machine-learned tracking, clustering or particle-flow step is validated like any reconstruction, plus: compare its
+outputs in data and simulation in control samples; check that its per-object uncertainties are calibrated (pull
+widths and coverage); test it under the domain shift between simulation and data, and under other conditions (pileup,
+time-dependent detector state); and check its behaviour outside the training range, where it must flag rather than
+extrapolate silently. Training belongs to physics-ml; the validation of the reconstructed objects stays here.
+
 ## Reproducibility of the reconstruction
 
 Reconstruction output depends on software version, calibration and alignment payloads,

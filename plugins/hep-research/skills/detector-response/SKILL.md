@@ -25,7 +25,7 @@ description: "Use when the deliverable is about how a detector responds: signal 
 2. State the quantity (efficiency, resolution, scale, response matrix) and its conditioning.
 3. Choose the reference: truth matching in simulation, tag-and-probe or control sample in data, or both with a data/MC comparison.
 4. Report central value, statistical and systematic parts, validity range, and conditions.
-5. Write and validate the `response` artifact when another skill consumes it.
+5. Write the `response` artifact, then run `python3 "<plugin root>/contracts/validate.py" <artifact>` and `python3 "<plugin root>/contracts/response_adapter.py" <artifact> --validate`; both must pass before another skill consumes it.
 
 <!-- BEGIN context-resolution: generated from contracts/stanzas/context-resolution.md by tools/build_stanzas.py; do not edit -->
 ## Context resolution

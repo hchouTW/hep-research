@@ -39,11 +39,10 @@ and shower shape. The lessons that generalize:
   detector configuration must be tracked per data-taking period, and an analysis spanning
   a documented hardware change must treat the eras separately or justify combining them
   - see [calibration and alignment](../../../../../skills/detector-response/references/calibration-and-alignment.md). Verify any specific
-  servicing or upgrade date and scope in a primary source before citing it. As of
-  2026-10-01, the Layer-0 tracker upgrade (an extra silicon layer on top, quoted ~300%
-  acceptance gain) was not yet installed. A CERN news item of 2026-08-21 plans launch to
-  the ISS in April 2027 with connections completed by May 2027 (planned dates, may have
-  slipped), which will create a new detector era (see [sources](../../../../../skills/research-communication/references/primary-sources-and-version-checks.md)).
+  servicing or upgrade date and scope in a primary source before citing it. The Tracker
+  Layer-0 upgrade is planned and not yet installed as of 2026-10-01 [Documented, ams02:C101;
+  Tier-6 context, ams02:C102]; once installed it starts a new detector era (see the
+  [evidence index](../../evidence/index.md)).
 - **Orbital environment.** The orbit sweeps a wide range of geomagnetic latitudes, so the
   cutoff is a per-event (or per-time-bin) quantity from spacecraft position and pointing,
   not one number; a "primary" selection uses a safety factor above it and varies that

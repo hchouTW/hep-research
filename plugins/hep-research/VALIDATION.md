@@ -1272,3 +1272,37 @@ the in-situ term as the usual dominant one, square-root LR scaling for Adam, TMV
 maps, JetClass split, spurion attribution, journal details of Drnevich et al. and the CaloChallenge report, the
 OmniLearn name). The domain false-positive and calibration checks are statistical tests with fixed seeds.
 
+## DETECTOR-RESPONSE-AUDIT (2026-10-14, E2, version 0.9.0 + unreleased, contracts 2.8.0)
+
+detector-response audit DR-WP1 to DR-WP4 on branch `fix/detector-response-audit` (rebased on PML-X0, contracts 2.8.0).
+Live routing for the SKILL.md change (workflow step 5; description unchanged): **pending**, joins the combined run of
+the three audits; `tools/check_routing_static.py` passes.
+
+| Item | Before (`84202aa`) | After | Evidence |
+|---|---|---|---|
+| Crafted broken responses refused by `validate.py` (30 cases, also `--strict`) | 5 of 30 | 28 of 30; cases 20 and 24 pass with warnings by design; the same artifacts stamped 2.6.0/2.7.0 keep their default outcome (5 fail) | `tests/contracts/test_response_contract.py` (ResponseHardeningTests), fixtures `invalid/response_2_8/`, `warning/response_2_8/` |
+| He4 Cherenkov photons, p = 40 GeV/c, n = 1.05, L = 2 cm, N0 = 100/cm | 17.02 (sigma_theta 1.212 mrad) | 68.08 (0.606 mrad) | `CherenkovChargeTests` |
+| Gaisser-Hillas, X_max = 1e20, lambda = 60 | no result within 10 s | FWHM 1.824036e11 in 0.03 s (Gaussian limit 1.8240358e11) | `GaisserHillasBracketingTests` |
+| Calorimeter constant term, 2000 toys, 2% scatter, true c = 0.0070 | unit weights: c^2 < 0 in 26% of fits, mean c 0.0083 in the rest | 1/r^4 weights: mean c 0.0070, sd 0.00013, no failed fit | `evidence/calo_toys_after.txt` of the task (script in the task folder), `CalorimeterFitDefaultTests` |
+| Audit regression suite (appendix, 30 methods) | 29 failing (32 failures, 15 errors with subtests) | 30 passing, plus 7 follow-up tests (N-*) | `tests/skills/detector_response/test_detector_response_audit.py` |
+| Shipped responses, `response_adapter.py --validate` | 3 of 3 fail (`matrix_ref` unreadable) | 5 of 5 pass (AMS: one per species and period) | `tests/examples/test_ams_flux_ratio.py`, `test_collider_angular.py` |
+| Proton crossover rigidity, prototype stack (B 0.5 T, L 0.5 m, 300 um, 4 layers, x/X0 0.3) | 1.3087 GV (beta = 1 assumed) | 1.534037 GV with beta(R) | `MultipleScatteringBetaTests` |
+| CLI errors | argparse text on stderr, empty stdout, no status label | JSON with `status: failed` and `error_kind` at exit 2; `status` echoed by all eight scripts | `UniformErrorTests`, `StatusLabelTests` |
+
+`tools/run_all_checks.py --out <scratch> --jobs 6` with the E2 venv: all checks pass; unit tests 3,037 run, 0
+failures, 58 skipped (224 modules); profile tests pass (AMS-02 238). Lint with the CI pins (ruff 0.16.10, mypy 2.4.0)
+on `core/` and `contracts/`: clean. SKILL.md 7,568 B.
+
+Sources opened on 2026-10-14 for the physics edits: PDG RPP 2024 Passage of particles through matter (rev. March
+2025), Particle detectors at accelerators, Cosmic rays; PDG Atomic and Nuclear Properties (water, liquid); CMS muon
+performance JINST 7 (2012) P10002; ATLAS luminosity EPJC 76 (2016) 653; CERN Open Data CMS pileup simulation;
+DAMPE Sci. Adv. 5 (2019) eaax3793; ECSS-E-ST-10-04C annex B.8 (SPENVIS); R. Nolty, arXiv:hep-ex/0201015; Auger
+PoS(ICRC2019)231; WHISP summary PoS(ICRC2021)473; LHAASO arXiv:2505.14447; arXiv:1703.06298; SIDC and the Royal
+Observatory of Belgium (cycle 25).
+
+**Not verified here (text left unchanged, appendix rows deferred):** AB-A10, A11, A12, A19, A29 (books beyond PDG),
+A32, A36, A38; AB-F3 (radiation damage), F10 (compensation, f_em, containment depth), F13 (SiPM/APD), F15, F23;
+C-E8 (prescale rewrite), C-E14 (Geant4 cuts), C-E15 table, C-Sec2, C-U4; D-F4 (IGRF dipole epoch), D-F5 (Heitler
+splitting length), D-F8, D-F13 image parameters, D-F14, D-F18, D-F22, D-N3, D-N4. The appendix's dE/dx resolution
+formula gave the sample length in m; PDG eq. 35.17 implies cm (applied as cm). `frontend_response.py` has no tool
+contract (needs a per-operation help check).

@@ -46,8 +46,9 @@ energy, since the shower footprint grows with energy). Each station records a si
   needing a shower simulation to normalize it.
 - **Duty cycle is effectively 100%**: a surface array runs continuously regardless of
   weather or moonlight, unlike fluorescence detectors below. This is why an array is
-  the workhorse for spectrum measurements (exposure is straightforward, being
-  essentially detector-area times live time times a geometric solid-angle factor) and
+  the workhorse for spectrum measurements (above the energy of full trigger efficiency for the
+  zenith range used, exposure is straightforward: array area times live time times the solid-angle
+  factor; below it the composition-dependent trigger efficiency enters) and
   why hybrid designs use fluorescence for calibration rather than as the primary
   exposure-defining detector.
 
@@ -56,8 +57,7 @@ energy, since the shower footprint grows with energy). Each station records a si
 As a shower's charged particles ionize atmospheric nitrogen, the nitrogen fluoresces,
 emitting isotropic UV light proportional to the local ionization energy deposit -
 which fluorescence telescopes (segmented mirrors with pixelated photomultiplier
-cameras) image from the side, reconstructing the shower's longitudinal profile
-`N(X)` directly, essentially independent of any hadronic interaction model, since the
+cameras) image from the side, reconstructing the shower's energy-deposit profile `dE/dX(X)` directly, essentially independent of any hadronic interaction model, since the
 fluorescence yield per unit deposited energy is a well-measured property of air
 rather than of the shower physics.
 
@@ -81,9 +81,10 @@ rather than of the shower physics.
   subsample to calibrate the surface array's density-to-energy conversion, then apply
   that calibration to the full, 100%-duty-cycle surface-only dataset for the spectrum
   measurement, tying the absolute energy scale to the fluorescence calorimetric
-  measurement's own systematic uncertainty (dominated by the fluorescence yield and
-  atmospheric transparency/aerosol content, both requiring independent atmospheric
-  monitoring instruments co-located with the telescopes).
+  measurement's own systematic uncertainty (in the published Auger budget, 14% in total, the
+  absolute telescope calibration is the largest term, 9.9%, with the atmosphere 3.4-6.2% and the
+  fluorescence yield 3.6%; Verzi for the Pierre Auger Collaboration, PoS ICRC2019 (2019) 231, opened
+  2026-10-14; take the budget from the experiment's energy-scale paper).
 <!-- /example -->
 
 ## Atmospheric monitoring
@@ -102,6 +103,12 @@ Both techniques treat the atmosphere as part of the detector, not as an inert me
   `X` in the Gaisser-Hillas fit, and its seasonal variation is a genuine (not purely
   instrumental) systematic on `X_max` that composition analyses must account for
   when combining data across a full year.
+
+### Instrument response functions (checklist)
+
+State, with its version: the effective area or aperture (m^2 sr) above full trigger efficiency, the trigger efficiency below it for each primary; the energy threshold and the energy bias and resolution versus energy; the angular
+resolution (PSF, for example the 68% containment radius R68) versus energy; and the IRF set and its validity range
+(zenith, conditions). Numbers come from the experiment's IRF release or profile, not from this file.
 
 ## Deliverables
 

@@ -356,7 +356,9 @@ class CalorimeterResolutionTests(unittest.TestCase):
 
     def test_fit_recovers_other_parameter_sets(self):
         for a, b, c in ((0.03, 0.05, 0.005), (0.50, 1.20, 0.030), (0.15, 0.00, 0.010)):
-            points = self._generate(a, b, c, [1.0, 3.0, 10.0, 30.0, 100.0, 300.0])
+            # From 3 GeV: at 1 GeV the second set has sigma_E/E = 1.3, which the fit now refuses as a
+            # likely percentage (detector-response audit E-K2).
+            points = self._generate(a, b, c, [3.0, 10.0, 30.0, 100.0, 300.0, 1000.0])
             result = fit_resolution(points)
             # Tolerance scales with the coefficient: a term that is genuinely zero is
             # recovered to ~1e-8 absolute, limited by the conditioning of the 1/E^2

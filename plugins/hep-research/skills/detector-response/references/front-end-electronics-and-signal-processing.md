@@ -99,7 +99,7 @@ unit-charge response `g(t)` is normalized to peak 1, with one-sided noise densit
 
 For CR-(RC)^n these integrals have closed forms (the script evaluates them). Rules of
 thumb for CR-RC (`n = 1`): parallel `ENC ≈ 107 √(I_leak[nA] · t_p[µs])` electrons;
-series with `R_s = 50 ohm`, `C = 10 pF`, `t_p = 1 µs`: 55 electrons. The optimum shaping
+series with `R_s = 50 ohm` at 300 K, `C = 10 pF`, `t_p = 1 µs`: 55 electrons. The optimum shaping
 time, where series and parallel terms are equal, is `t_p,opt = C e_n / i_n` for CR-RC
 (example: `C = 10 pF`, `e_n = 1 nV/√Hz`, `I_leak = 1 µA` gives 18 ns; at 1 nA it is
 0.56 µs). These coefficients are shaper-specific; quote the shaper.
@@ -143,8 +143,9 @@ distribution, not only its width, and its spectrum when tails appear.
   crossings of level `T` is `nu = nu_0 exp(-T^2 / 2 sigma^2)` with
   `nu_0 = (1/2pi) √(m_2/m_0)`, with `m_k = ∫ omega^k S(omega) d omega` the moments of
   the output noise spectrum in angular frequency. For CR-(RC)^n,
-  `nu_0 tau` is 0.092 (parallel) and 0.276 (series) for `n = 2`, 0.060 and 0.123 for
-  `n = 4`; for CR-RC (`n = 1`) with series noise `nu_0` is undefined without a further
+  `nu_0 tau` is 0.092 (parallel) and 0.276 (series) for `n = 2`, 0.060 and 0.123 for `n = 4` (per RC
+  constant `tau = t_p/n`; per peaking time, `nu_0 t_p` is 0.184 and 0.551 for `n = 2`, 0.241 and
+  0.493 for `n = 4`); for CR-RC (`n = 1`) with series noise `nu_0` is undefined without a further
   bandwidth limit. Fake hits per event = channels × window × `nu`. A "5 sigma threshold"
   is not "no fakes" for 10^8 channels.
 - **Zero suppression** with seed/neighbour thresholds keeps clusters but truncates
@@ -168,7 +169,7 @@ distribution, not only its width, and its spectrum when tails appear.
   - A template fit that ignores noise correlations can be *worse* than a single sample
     (example: CR-RC with `t_p = 25 ns`, 5 samples every 25 ns starting 15 ns before
     the peak, noise correlation `rho^|i-j|` with `rho = 0.6`: sigma 1.12 for the
-    uncorrelated template fit, 1.06 for the largest sample alone, 1.04 for the
+    uncorrelated template fit, 1.07 for the largest sample alone, 1.04 for the
     optimal filter, in units of the per-sample noise).
   - A fit with free time at low `S/N` follows the noise and is biased upward.
   - A phase error biases the amplitude. With white noise (CR-RC^4, `t_p = 45 ns`, 5

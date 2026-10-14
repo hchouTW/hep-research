@@ -1,4 +1,5 @@
 {
+  "status": "synthetic",
   "description": "Synthetic calorimeter resolution points for calorimeter_resolution.py. Generated exactly from a=0.10 sqrt(GeV), b=0.20 GeV, c=0.007 with no added scatter, so a correct fit recovers those values to numerical precision. Illustrative only - not measurements from any real calorimeter.",
   "generated_from": {
     "stochastic": 0.1,

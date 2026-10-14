@@ -129,6 +129,14 @@ legitimate and often necessary, but its validity is conditional:
   sample is not a substitute for the analysis in question, however good its agreement
   in inclusive distributions.
 
+### Validating a fast simulation
+
+Compare fast and full simulation on the analysis' own selection, observable by observable (including the
+reconstructed quantities the analysis cuts on); check that scale factors derived with full simulation close when
+applied to fast; compare tail fractions, not only cores; and for a learned generative fast simulation add
+multivariate checks (correlations, a two-sample classifier test with its power quoted). Training it belongs to
+physics-ml.
+
 ## Validating the simulation
 
 Simulation is a model to be tested, not a reference to be trusted. A useful validation
@@ -164,8 +172,9 @@ with the check that closes it.
    comparison is meaningful.
 2. **Physics list.** Pick the collaboration's validated list for the energy range (e.g. an
    `FTFP_BERT`-family list for hadron showers at test-beam energies). Record its name and
-   the Geant4 version. Run an alternative list (e.g. `QGSP_BIC`) for the model systematic,
-   never to choose the list that agrees best with the data.
+   the Geant4 version. Run an alternative list (e.g. `QGSP_BIC`) for the model systematic. Choosing
+   among lists by their agreement with independent test-beam data is legitimate; choosing by
+   agreement with the analysis observable is not.
 3. **Production cuts and step limits.** Scan the range cut (for example 0.7 mm, 0.35 mm,
    0.1 mm). Keep the coarsest cut at which the results have converged, i.e. finer cuts
    no longer change the response and resolution within statistics.

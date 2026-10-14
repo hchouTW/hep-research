@@ -28,7 +28,15 @@ rules of contracts 2.6.0 (coverage level and interval consistent with the toy co
 p-value of exactly 0, probability-like results in [0, 1], z consistent with p, construction and test statistic
 compatible, expected bands with an observed limit, recorded seeds for toys, a well-formed model_sha256; Bayesian:
 improper uniform forms, propriety with an argument and a reference, a prior on every parameter of interest, an ESS
-floor of 100 per chain) to artifacts written under older contracts, which otherwise keep their outcome; --strict
+floor of 100 per chain) and the response hardening rules of contracts 2.8.0 (declared intended_use and
+underflow_overflow for a matrix, misspelled keys, placement consistent with 'includes', a probability reading, exposure
+not listed with the acceptance or live time it contains, flow vectors with explicit bins, correction space, finite-MC
+statistics for unfolding, variation shapes, and the numerical check of an inline matrix through
+contracts.response_adapter and core/stats/validate_response.py) and the ml-artifact rules of contracts 2.8.0
+(calibration sample identity, structured downstream validation, required output semantics, misspelled keys,
+task-specific validation blocks, weights and calibration outcomes, domain-shift outcome) to artifacts written under
+older contracts, which
+otherwise keep their outcome; --strict
 never raises a rule's level. Flags may come before or after ARTIFACT.json. --gate publication adds the publication
 gate of a statistical-result (publication_gate): passed, unresolved or failed, with reasons (from 2.6.0 a
 'synthetic' or 'asimov' result fails it); an archived artifact may be valid and still not pass it. Passing the gate
@@ -47,7 +55,7 @@ from typing import Any
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from contracts.schema import Report, validate  # noqa: E402
+from contracts.schema import Report, load_schema, validate  # noqa: E402
 from contracts.semver import parse  # noqa: E402
 from contracts.vocab import NAMESPACED, Vocabulary  # noqa: E402
 from contracts.protected_use import guard_report  # noqa: E402
@@ -193,6 +201,8 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, strict: bool = 
             rep.add("error", "$.extension", "response.double_counted", "inefficiency inside the matrix and efficiency applied separately")
         if strict or _at_least(doc.get("contract_version"), RESPONSE_SEMANTICS_FROM):
             _response_semantics(ext, vocab, rep)
+        if strict or _at_least(doc.get("contract_version"), RESPONSE_HARDENING_FROM):
+            _response_hardening(ext, rep)
     elif t == "theory-spec":
         if doc.get("bindings", {}).get("experiments"):
             rep.add("error", "$.bindings.experiments", "theory.experiment_binding",
@@ -279,6 +289,9 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, strict: bool = 
 
 RHAT_MAX = 1.01  # [Proposal] threshold for stats.convergence_mismatch
 RESPONSE_SEMANTICS_FROM = "2.4.0"  # response semantic rules apply natively from this contract version
+RESPONSE_HARDENING_FROM = "2.8.0"  # response hardening rules (detector-response audit) apply natively from this version
+IMPLIED_CORRECTIONS = {"exposure": {"acceptance", "livetime"}}  # vocab response_corrections: exposure = acceptance x live time
+RESPONSE_EFFICIENCY_LIKE = {"efficiency", "acceptance", "fiducial"}  # classes whose correction_space must be stated
 
 
 def _correction_classes(terms) -> set[str]:
@@ -329,6 +342,172 @@ def _response_semantics(ext: dict, vocab: Vocabulary, rep: Report) -> None:
             and t_ax.get("unit") != r_ax.get("unit"):
         rep.add("error", "$.extension.reco_axis.unit", "response.unit_mismatch",
                 f"'{t_ax.get('name')}' is in {t_ax.get('unit')!r} on the truth axis and {r_ax.get('unit')!r} on the reco axis")
+
+
+
+def _truth_bins(ext: dict) -> int | None:
+    """Number of truth bins: from the truth-axis edges, else from an inline matrix and its orientation."""
+    axis = ext.get("truth_axis")
+    if isinstance(axis, dict) and isinstance(axis.get("edges"), list) and len(axis["edges"]) >= 2:
+        return len(axis["edges"]) - 1
+    m = ext.get("matrix")
+    if isinstance(m, list) and m and all(isinstance(row, list) for row in m):
+        return len(m[0]) if ext.get("orientation", "rows_reco_cols_truth") == "rows_reco_cols_truth" else len(m)
+    return None
+
+
+def _shape(m) -> tuple[int, ...] | None:
+    if isinstance(m, list) and m and all(isinstance(row, list) for row in m):
+        return (len(m), *sorted({len(row) for row in m}))
+    return None
+
+
+# Adapter conversion errors that the rules above already report under their own code.
+_ADAPTER_FIELDS_REPORTED = {"underflow_overflow", "normalization", "acceptance", "inefficiency", "truth_axis", "reco_axis",
+                            "intended_use", "form"}
+
+
+def _response_hardening(ext: dict, rep: Report) -> None:
+    """Response rules of contracts 2.8.0 (detector-response audit 2026-10-13, DR-WP2-03, rules R1-R10). Native for
+    artifacts of contract 2.8.0 or later; an older artifact gets them only in strict mode. R1 a matrix declares
+    intended_use and underflow_overflow; R2 misspelled keys (error) and unknown keys (warning); R3 what 'includes'
+    holds agrees with where inefficiency and acceptance sit; R4 a matrix has a probability reading and a placement of
+    the acceptance; R5 'exposure' already contains acceptance and live time; R6 explicit underflow/overflow bins come
+    with their vectors; R7 correction_space names terms of applied_separately, and acceptance or fiducial act in truth
+    space; R8 a response for unfolding states its finite-MC statistics (unresolved otherwise); R9 variations and periods
+    have the nominal shape and are not repeated; R10 an inline matrix passes core/stats/validate_response.py through
+    contracts.response_adapter (a matrix_ref is not opened here: unresolved, run the adapter). 'fakes' inside the
+    matrix is a warning (some analyses keep fakes as an extra truth column)."""
+    x = "$.extension"
+    form = ext.get("form", "matrix")
+    is_matrix = form == "matrix"
+    # R1
+    if is_matrix:
+        for key in ("intended_use", "underflow_overflow"):
+            if key not in ext:
+                rep.add("error", f"{x}.{key}", "response.declaration_missing",
+                        f"a response matrix declares '{key}' from contracts {RESPONSE_HARDENING_FROM}")
+    # R2
+    known = set(load_schema("ext_response.json")["properties"]) | set(load_schema("ext_response_v2_8.json")["properties"])
+    _key_checks(ext, known, x, rep, kind="response")
+    includes = ext.get("includes", []) if isinstance(ext.get("includes"), list) else []
+    separate = ext.get("applied_separately", []) if isinstance(ext.get("applied_separately"), list) else []
+    inside_cls = _correction_classes(t for t in includes if isinstance(t, str))
+    sep_bare = {t.split(":", 1)[-1] for t in separate if isinstance(t, str)}
+    # R3
+    if "efficiency" in inside_cls and ext.get("inefficiency") == "outside_matrix":
+        rep.add("error", f"{x}.includes", "response.placement_inconsistent",
+                "'includes' lists an efficiency, but the inefficiency is declared outside the matrix")
+    if "acceptance" in inside_cls and ext.get("acceptance") != "inside_matrix":
+        rep.add("error", f"{x}.includes", "response.placement_inconsistent",
+                "'includes' lists the acceptance, but the acceptance is not declared inside the matrix")
+    if ext.get("normalization") == "conditional_on_generated" and ext.get("inefficiency") == "outside_matrix":
+        rep.add("error", f"{x}.inefficiency", "response.normalization_inconsistent",
+                "'conditional_on_generated' puts the inefficiency inside the matrix, but it is declared outside")
+    if "fakes" in inside_cls:
+        rep.add("warning", f"{x}.includes", "response.fakes_inside",
+                "fakes are a reco-space vector, not a migration; keep them outside unless they are an explicit extra "
+                "truth column, and say so")
+    # R4
+    if is_matrix and ext.get("normalization") == "unnormalized":
+        rep.add("error", f"{x}.normalization", "response.normalization_unusable",
+                "an unnormalized matrix has no probability reading: declare conditional_on_selected, "
+                "conditional_on_generated or joint_counts")
+    if is_matrix and ext.get("acceptance") == "not-applicable":
+        rep.add("error", f"{x}.acceptance", "response.placement_missing",
+                "a response matrix places the acceptance inside or outside the matrix")
+    # R5
+    for term, implied in IMPLIED_CORRECTIONS.items():
+        if term not in sep_bare:
+            continue
+        for part in sorted(sep_bare & implied):
+            rep.add("error", f"{x}.applied_separately", "response.correction_overlap",
+                    f"'{term}' already contains '{part}': list one or the other")
+        if "acceptance" in implied and ext.get("acceptance") == "inside_matrix":
+            rep.add("error", f"{x}.applied_separately", "response.double_counted",
+                    f"'{term}' applied separately contains the acceptance, which is inside the matrix")
+    n_truth = _truth_bins(ext)
+    # R6
+    if ext.get("underflow_overflow") == "explicit_bins" and isinstance(ext.get("matrix"), list):
+        vectors = [ext.get(k) for k in ("underflow", "overflow")]
+        if not all(isinstance(vec, list) and (n_truth is None or len(vec) == n_truth) for vec in vectors):
+            rep.add("error", f"{x}.underflow", "response.flow_vectors_missing",
+                    f"'explicit_bins' with an inline matrix needs 'underflow' and 'overflow' with one entry per truth "
+                    f"bin ({n_truth})")
+    # R7
+    space = ext.get("correction_space")
+    if isinstance(space, dict):
+        for term, spec in space.items():
+            if term not in separate:
+                rep.add("error", f"{x}.correction_space.{term}", "response.correction_space_unknown_term",
+                        f"'{term}' is not in applied_separately")
+            elif isinstance(spec, dict) and term.split(":", 1)[-1] in ("acceptance", "fiducial") \
+                    and spec.get("space") == "reco":
+                rep.add("error", f"{x}.correction_space.{term}", "response.correction_space_inconsistent",
+                        f"'{term}' is a truth-level phase-space correction; it cannot act in reco space")
+    if isinstance(space, dict) or separate:
+        stated = space if isinstance(space, dict) else {}
+        for term in separate:
+            if isinstance(term, str) and term not in stated and _correction_classes([term]) & RESPONSE_EFFICIENCY_LIKE:
+                rep.add("warning", f"{x}.correction_space", "response.correction_space_missing",
+                        f"state where '{term}' acts (truth, reco or global) in correction_space")
+    # R8
+    mc = ext.get("mc_stat")
+    if ext.get("intended_use") == "unfolding" and is_matrix and not isinstance(mc, dict):
+        rep.add("unresolved", f"{x}.mc_stat", "response.mc_stat_missing",
+                "a response for unfolding states its finite-MC statistics (mc_stat): the response uncertainty cannot be "
+                "propagated without it")
+    if isinstance(mc, dict):
+        payload = {"generated_counts": "events_per_truth_bin", "effective_counts": "events_per_truth_bin",
+                   "sumw2": "sumw2", "covariance_ref": "ref"}.get(str(mc.get("kind")))
+        if payload and payload not in mc:
+            rep.add("error", f"{x}.mc_stat.{payload}", "response.mc_stat_payload_missing",
+                    f"mc_stat kind '{mc.get('kind')}' carries '{payload}'")
+        vec = mc.get("events_per_truth_bin")
+        if isinstance(vec, list) and n_truth is not None and len(vec) != n_truth:
+            rep.add("error", f"{x}.mc_stat.events_per_truth_bin", "response.mc_stat_payload_missing",
+                    f"events_per_truth_bin has {len(vec)} entries for {n_truth} truth bins")
+    # R9
+    nominal = _shape(ext.get("matrix"))
+    seen: set[tuple[Any, Any]] = set()
+    variations: list = ext["systematic_variations"] if isinstance(ext.get("systematic_variations"), list) else []
+    for i, var in enumerate(v for v in variations if isinstance(v, dict)):
+        pair = (var.get("nuisance"), var.get("direction"))
+        if pair in seen:
+            rep.add("error", f"{x}.systematic_variations[{i}]", "response.variation_duplicate",
+                    f"variation {pair} is listed twice")
+        seen.add(pair)
+        if nominal and _shape(var.get("matrix")) not in (None, nominal):
+            rep.add("error", f"{x}.systematic_variations[{i}].matrix", "response.variation_shape",
+                    f"variation {pair} has shape {_shape(var.get('matrix'))}, the nominal matrix {nominal}")
+    periods: list = ext["periods"] if isinstance(ext.get("periods"), list) else []
+    for i, per in enumerate(p for p in periods if isinstance(p, dict)):
+        if nominal and _shape(per.get("matrix")) not in (None, nominal):
+            rep.add("error", f"{x}.periods[{i}].matrix", "response.variation_shape",
+                    f"period '{per.get('id')}' has shape {_shape(per.get('matrix'))}, the nominal matrix {nominal}")
+    if periods and not sum(p.get("exposure_weight", 0) for p in periods
+                           if isinstance(p, dict) and isinstance(p.get("exposure_weight"), (int, float))) > 0:
+        rep.add("error", f"{x}.periods", "response.variation_shape", "the period exposure weights sum to zero")
+    # R10
+    if not is_matrix:
+        return
+    if isinstance(ext.get("matrix"), list):
+        from contracts.response_adapter import to_validator_input
+        from core.stats.validate_response import validate_response
+        conv = to_validator_input(ext)
+        if not conv["ok"]:
+            for e in conv["errors"]:
+                if e.get("field") not in _ADAPTER_FIELDS_REPORTED:
+                    rep.add("error", f"{x}.{e.get('field')}", "response.not_checkable", e["message"])
+            return
+        result = validate_response(conv["input"])
+        for level, items in (("error", result.get("errors", [])), ("warning", result.get("warnings", []))):
+            for item in items:
+                rep.add(level, f"{x}.matrix", f"response.numeric.{item['code']}", item["message"])
+    elif ext.get("matrix_ref"):
+        rep.add("unresolved", f"{x}.matrix_ref", "response.numeric_unchecked",
+                "the numbers behind matrix_ref are not checked here (validate.py opens no other file): run "
+                "python3 contracts/response_adapter.py <artifact> --validate")
 
 
 ML_SEMANTICS_FROM = "2.5.0"  # ml-artifact content rules apply natively from this contract version
@@ -945,7 +1124,8 @@ def _norm_id(text) -> str:
 
 
 KEY_CHECK_NOUNS = {"measurement": ("measurement-spec", " (profile fields go under experiment_fields)"),
-                   "ml": ("ml-artifact", " (namespaced keys '<ns>:<key>' are allowed for extra fields)")}
+                   "ml": ("ml-artifact", " (namespaced keys '<ns>:<key>' are allowed for extra fields)"),
+                   "response": ("response", " (namespaced '<ns>:<key>' fields are accepted)")}
 
 
 def _key_checks(item, known: set[str], path: str, rep: Report, kind: str = "measurement") -> None:
@@ -1845,6 +2025,8 @@ def validate_artifact(doc, vocab: Vocabulary | None = None, protected: bool = Fa
     ext: Any = doc.get("extension")
     if ext_schema and isinstance(ext, dict):
         validate(ext, ext_schema, vocab, rep, "$.extension")
+        if at == "response" and (strict or _at_least(doc.get("contract_version"), RESPONSE_HARDENING_FROM)):
+            validate(ext, "ext_response_v2_8.json", vocab, rep, "$.extension")
         # Semantic rules assume the value types the schema guarantees; on a type error report that alone.
         if not any(f.code in SHAPE_ERRORS for f in rep.errors):
             _rules(doc, ext, vocab, rep, strict)

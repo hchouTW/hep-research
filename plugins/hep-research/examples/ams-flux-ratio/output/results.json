@@ -4102,8 +4102,10 @@
   }
  },
  "response_validation": {
-  "proton": "pass",
-  "helium": "pass"
+  "proton/synthetic-period-1": "pass",
+  "proton/synthetic-period-2": "pass",
+  "helium/synthetic-period-1": "pass",
+  "helium/synthetic-period-2": "pass"
  },
  "covariance_validation": {
   "proton/synthetic-period-1": "warn",
@@ -4116,11 +4118,19 @@
    "ok": true,
    "errors": []
   },
-  "response_proton": {
+  "response_proton_synthetic-period-1": {
    "ok": true,
    "errors": []
   },
-  "response_helium": {
+  "response_proton_synthetic-period-2": {
+   "ok": true,
+   "errors": []
+  },
+  "response_helium_synthetic-period-1": {
+   "ok": true,
+   "errors": []
+  },
+  "response_helium_synthetic-period-2": {
    "ok": true,
    "errors": []
   },

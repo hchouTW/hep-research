@@ -87,7 +87,7 @@
   "intended_use": "unfolding",
   "conditions": "single synthetic run",
   "provenance": "analytic integration of the synthetic detector model; reco outside [-1, 1] is kept in explicit underflow/overflow vectors; outer truth bins are buffers",
-  "matrix_ref": "results.json#response",
+  "matrix_ref": "matrices/response.json",
   "form": "matrix"
  }
 }

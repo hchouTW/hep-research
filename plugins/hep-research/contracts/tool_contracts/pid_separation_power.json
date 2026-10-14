@@ -1,0 +1,240 @@
+{
+ "contract_version": "1.0.0",
+ "tool_id": "pid-separation-power",
+ "entry": "skills/detector-response/scripts/pid_separation_power.py",
+ "operations": [
+  {
+   "operation_id": "separation",
+   "summary": "Separation in sigma between two species at one momentum (or rigidity) by time of flight, mean dE/dx (Bethe formula without the density effect; heavy particles only, electrons are not evaluable) or a velocity measurement, plus a scan for the separation ceiling and the ranges below threshold",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--mode",
+      "input": "mode"
+     },
+     {
+      "flag": "--species",
+      "input": "species"
+     },
+     {
+      "flag": "--momentum",
+      "input": "momentum"
+     },
+     {
+      "flag": "--rigidity",
+      "input": "rigidity"
+     },
+     {
+      "flag": "--path",
+      "input": "path"
+     },
+     {
+      "flag": "--time-resolution",
+      "input": "time_resolution"
+     },
+     {
+      "flag": "--material",
+      "input": "material"
+     },
+     {
+      "flag": "--relative-resolution",
+      "input": "relative_resolution"
+     },
+     {
+      "flag": "--beta-resolution",
+      "input": "beta_resolution"
+     },
+     {
+      "flag": "--threshold",
+      "input": "threshold"
+     },
+     {
+      "flag": "--convention",
+      "input": "convention"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "mode",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "one of tof, dedx, velocity"
+    },
+    {
+     "name": "species",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "two species: a name (e, mu, pi, K, p, d, He3, He4), a mass in GeV/c^2, or mass:charge; they must differ in mass or charge"
+    },
+    {
+     "name": "momentum",
+     "kind": "momentum",
+     "unit": "GeV/c",
+     "required": false,
+     "constraint": "finite, > 0; excludes --rigidity",
+     "default": 2.0
+    },
+    {
+     "name": "rigidity",
+     "kind": "rigidity",
+     "unit": "GV",
+     "required": false,
+     "constraint": "finite, > 0; each species then has p = |z| R; excludes --momentum"
+    },
+    {
+     "name": "path",
+     "kind": "length",
+     "unit": "m",
+     "required": false,
+     "constraint": "tof: flight path, finite, > 0",
+     "default": 1.0
+    },
+    {
+     "name": "time_resolution",
+     "kind": "time",
+     "unit": "ps",
+     "required": false,
+     "constraint": "tof: finite, > 0; a warning outside 1 ps - 10 ns",
+     "default": 60.0
+    },
+    {
+     "name": "material",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "dedx: silicon, argon, xenon, neon or water",
+     "default": "silicon"
+    },
+    {
+     "name": "relative_resolution",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "dedx: relative dE/dx resolution, finite, > 0; a warning outside 0.01-0.5",
+     "default": 0.06
+    },
+    {
+     "name": "beta_resolution",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "velocity: relative dbeta/beta, finite, > 0; a warning above 0.1",
+     "default": 0.001
+    },
+    {
+     "name": "threshold",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "separation in sigma counted as separated, finite, > 0",
+     "default": 3.0
+    },
+    {
+     "name": "convention",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "single or quadrature",
+     "default": "single"
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "mode",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "n_sigma",
+     "kind": "parameter",
+     "unit": "1"
+    },
+    {
+     "name": "separation_convention",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "observable",
+     "kind": "parameter",
+     "unit": "n/a"
+    },
+    {
+     "name": "species_a",
+     "kind": "parameter",
+     "unit": "n/a"
+    },
+    {
+     "name": "species_b",
+     "kind": "parameter",
+     "unit": "n/a"
+    },
+    {
+     "name": "warnings",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "ceiling_is_lower_bound",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "below_threshold_intervals",
+     "kind": "parameter",
+     "unit": "n/a"
+    },
+    {
+     "name": "not_evaluable_intervals",
+     "kind": "parameter",
+     "unit": "n/a"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the result is not representable (a non-finite number for these inputs); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"failed\", \"error\": ...}"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed or out of range; stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   }
+  }
+ ]
+}

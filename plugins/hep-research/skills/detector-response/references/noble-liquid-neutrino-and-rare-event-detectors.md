@@ -4,8 +4,7 @@ Liquid-argon and liquid-xenon TPCs, dual-phase detectors, large water Cherenkov 
 liquid-scintillator detectors, neutrino near/far systems, cryogenic bolometers,
 semiconductor ionization detectors, dark-matter TPCs, and neutrinoless-double-beta-decay
 detectors. Air-shower arrays, imaging Cherenkov telescopes, and neutrino telescopes
-are treated in the astroparticle references ([air showers](extensive-air-showers.md) through [multimessenger analysis](multimessenger-analysis.md)) (experiment case studies: the bound experiment profile) and
-[neutrino astronomy](neutrino-astronomy.md); this file integrates them into the common framework
+are treated in the astroparticle references ([air showers](extensive-air-showers.md) through [multimessenger analysis](multimessenger-analysis.md)) and [neutrino astronomy](neutrino-astronomy.md); experiment specifics come from the bound profile; this file integrates them into the common framework
 ([detector measurement framework](detector-measurement-framework.md)). Signal formation (recombination,
 lifetime, quenching) is in [signal formation and readout](signal-formation-and-readout.md).
 
@@ -133,7 +132,7 @@ fiducialization, and energy scale** dominate the result.
   background, on a model-dependent energy scale.
 - **Informative residual/closure**: calibration-line energy scale and resolution;
   discrimination leakage versus energy; position reconstruction for uniform sources.
-- **Scaling**: threshold `~` noise; resolution `~ 1/sqrt(N_carriers)`; background scales
+- **Scaling**: threshold `~` noise; resolution `sigma_E/E ≈ sqrt(F/N_carriers) ⊕ noise/E` (`F` the Fano factor, about 0.1 in Si and Ge (PDG); photon counting and recombination in noble liquids are Poisson or worse); background scales
   with exposure and fiducial mass.
 - **Tails**: surface/wall events, pileup, low-energy noise excess.
 - **Dependence**: time-dependent noise, temperature stability, purity/lifetime.

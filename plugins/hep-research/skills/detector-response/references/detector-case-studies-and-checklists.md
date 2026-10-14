@@ -43,8 +43,10 @@ signature, (5) how data/MC or controls reveal it, (6) correction/model update,
 
 1. **Defect**: a `t0` shift (e.g. clock/cable offset) or a wrong drift velocity.
 2. **Low level**: measured drift times shifted by a constant/`E`-dependent amount.
-3. **Reconstruction**: apparent radius error; left and right hits pull to opposite sides
-   (a `t0` offset produces the same structure as a misalignment); segment `chi^2`
+3. **Reconstruction**: apparent radius error; left and right hits pull to opposite sides (the `t0`
+   signature in the signed track coordinate: a misalignment shifts both sides the same way, so the
+   residual sign on the two sides of the wire separates them; only without left/right information
+   can a `t0` offset mimic a misalignment); segment `chi^2`
    rises. 4. **Signature**: residual versus drift distance with a left/right offset
    and slope. 5. **Reveal**: residual versus drift distance, per-run `t0` fit, per-layer
    comparison. 6. **Correction**: refit `t0`/`r(t)` per period, decouple from alignment
