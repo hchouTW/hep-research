@@ -27,8 +27,13 @@ correct text, so they never change the exit code):
     "125 GeV"), where "125~GeV", "125\\,GeV" or siunitx keeps them together
 
 LaTeX comments (unescaped % to end of line) are ignored, except that TODO
-markers are still reported inside comments. A command's argument may wrap
-onto the next line.
+markers are still reported inside comments; % inside \\url, \\href and \\path
+arguments is literal. \\iffalse ... \\fi blocks, the comment environment,
+verbatim bodies and \\verb are not scanned. A command's argument may wrap
+onto the next line; optional arguments may nest brackets and braces, and the
+biblatex multicite commands (\\cites, \\textcites, ...) are read group by
+group. .bib files are read by brace depth: an entry inside a field or an
+@comment is not an entry, and a crossref parent counts as cited.
 
 Two modes, neither a compile nor a check of scientific content:
   - directory mode (positional DIR): a repository-wide source scan that merges
@@ -36,7 +41,8 @@ Two modes, neither a compile nor a check of scientific content:
     reference in any other, so a backup or an unused file can mask a missing
     reference; use it for a quick sweep of one paper's folder.
   - main mode (--main MAIN.tex): a selected-document scan. Only the files MAIN
-    reaches through literal \\input, \\include, \\subfile and \\import are scanned;
+    reaches through literal \\input (braced or plain-TeX \\input name), \\include,
+    \\subfile and \\import are scanned;
     their names are resolved against --build-root (default: MAIN's folder), as
     TeX does, never against the including file's folder, and nothing outside
     --project-root (default: the build root) is opened. Only the bibliography
@@ -81,13 +87,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from core.protected.guard import protected_main  # noqa: E402
 
 # Any natbib/biblatex/plain citation command (\cite, \citep, \Citet, \citeauthor,
-# \parencite, \textcite, \autocite, \footcite, \nocite, ...) with up to two
-# optional arguments ([pre][post]) and a key list that may span lines.
-CITE_RE = re.compile(r"\\(?:[A-Za-z]*cite[A-Za-z]*)\*?\s*(?:\[[^\]]*\]\s*){0,2}\{([^}]*)\}")
+# \parencite, \textcite, \autocite, \footcite, \nocite, ...). Arguments are read by
+# scan_citations: optional [..] arguments may nest brackets and braces, and the
+# biblatex multicite commands (\cites, \textcites, ...) take repeated groups.
+CITE_CMD_RE = re.compile(r"\\([A-Za-z]*[Cc]ite[A-Za-z]*)\*?")
 LABEL_RE = re.compile(r"\\label\{([^}]+)\}")
 REF_RE = re.compile(r"\\(ref|eqref|autoref|pageref|nameref|vref|Vref|cref|Cref|cpageref|Cpageref|labelcref)\*?\{([^}]+)\}")
 MULTI_REF_CMDS = {"cref", "Cref", "cpageref", "Cpageref", "labelcref", "vref", "Vref"}
-BIBENTRY_RE = re.compile(r"@(\w+)\s*[{(]\s*([^,\s]+)\s*,")
+BIB_AT_RE = re.compile(r"@(\w+)\s*([{(])")
+CROSSREF_RE = re.compile(r"\bcrossref\s*=\s*[{\"]?\s*([^,}\"\s]+)", re.I)
 BIBITEM_RE = re.compile(r"\\bibitem\s*(?:\[[^\]]*\]\s*)?\{([^}]+)\}")
 BBL_ENTRY_RE = re.compile(r"\\entry\{([^}]+)\}")  # biblatex .bbl
 NON_ENTRY_TYPES = {"string", "comment", "preamble"}
@@ -121,13 +129,39 @@ BIBLIOGRAPHY_RE = re.compile(r"\\bibliography\s*\{([^}]*)\}")
 ADDBIBRESOURCE_RE = re.compile(r"\\addbibresource\s*(?:\[[^\]]*\])?\{([^}]*)\}")
 THEBIBLIOGRAPHY_RE = re.compile(r"\\begin\{thebibliography\}")
 COND_RE = re.compile(r"\\(newif\s*\\if[A-Za-z@]*|if[A-Za-z@]*|else\b|fi\b)")
-VERBATIM_RE = re.compile(r"\\begin\{(verbatim\*?|Verbatim|lstlisting|minted|alltt)\}.*?\\end\{\1\}", re.S)
+VERBATIM_RE = re.compile(r"\\begin\{(verbatim\*?|Verbatim|lstlisting|minted|alltt|comment)\}.*?\\end\{\1\}", re.S)
+IFFALSE_RE = re.compile(r"\\iffalse(?![A-Za-z@])")
+URL_ARG_RE = re.compile(r"\\(?:url|href|path)\s*\{")
+VERB_RE = re.compile(r"\\verb\*?([^A-Za-z\s*])")
 TEX_SUFFIXES = (".tex", ".ltx", ".latex")
 
 
 def strip_verbatim(text: str) -> str:
-    """Blank verbatim/listing bodies (their \\cite, \\label and \\input are typeset, not executed), keeping line count."""
-    return VERBATIM_RE.sub(lambda m: "\n" * m.group(0).count("\n"), text)
+    """Blank what TeX typesets or skips but does not execute, keeping line count: verbatim and listing bodies, the
+    comment environment and \\iffalse ... \\fi blocks (their \\cite, \\label and \\input do not count)."""
+    text = VERBATIM_RE.sub(lambda m: "\n" * m.group(0).count("\n"), text)
+    out, pos = [], 0
+    for m in IFFALSE_RE.finditer(text):
+        if m.start() < pos:
+            continue
+        depth, end = 0, None
+        for c in COND_RE.finditer(text, m.start()):
+            tok = c.group(1)
+            if tok.startswith("newif"):
+                continue
+            if tok.startswith("if"):
+                depth += 1
+            elif tok.startswith("fi"):
+                depth -= 1
+                if depth == 0:
+                    end = c.end()
+                    break
+        end = len(text) if end is None else end
+        out.append(text[pos:m.start()])
+        out.append("\n" * text.count("\n", m.start(), end))
+        pos = end
+    out.append(text[pos:])
+    return "".join(out)
 
 
 def _inside(path: Path, root: Path) -> bool:
@@ -278,9 +312,112 @@ def split_keys(raw: str):
     return [k.strip() for k in raw.split(",") if k.strip() and "#" not in k]
 
 
+def _strip_comment_line(line: str) -> str:
+    """One line without its comment: % is literal inside \\url, \\href and \\path arguments, and a \\verb body is
+    blanked (typeset, never scanned)."""
+    out, i, n = [], 0, len(line)
+    while i < n:
+        ch = line[i]
+        if ch == "\\":
+            m = URL_ARG_RE.match(line, i)
+            if m:
+                depth, j = 1, m.end()
+                while j < n and depth:
+                    depth += {"{": 1, "}": -1}.get(line[j], 0)
+                    j += 1
+                out.append(line[i:j])
+                i = j
+                continue
+            m = VERB_RE.match(line, i)
+            if m:
+                close = line.find(m.group(1), m.end())
+                j = n if close < 0 else close + 1
+                out.append(" " * (j - i))
+                i = j
+                continue
+            out.append(line[i:i + 2])
+            i += 2
+            continue
+        if ch == "%":
+            break
+        out.append(ch)
+        i += 1
+    return "".join(out)
+
+
 def strip_comments(text: str) -> str:
     """Drop LaTeX comments (unescaped % to end of line), keeping the line count."""
-    return "\n".join(COMMENT_RE.sub("", line) for line in text.split("\n"))
+    return "\n".join(_strip_comment_line(line) for line in text.split("\n"))
+
+
+def _balanced(text: str, i: int, open_ch: str, close_ch: str) -> int | None:
+    """End offset (exclusive) of the group opening at text[i], counting nested braces and the group's own delimiter."""
+    j, n = i, len(text)
+    stack: list[str] = []
+    while j < n:
+        ch = text[j]
+        if ch == "\\":
+            j += 2
+            continue
+        if ch in "{[(" and (ch == "{" or ch == open_ch):
+            stack.append(ch)
+        elif ch in "}])" and stack and {"}": "{", "]": "[", ")": "("}[ch] == stack[-1]:
+            stack.pop()
+            if not stack:
+                return j + 1
+        j += 1
+    return None
+
+
+def scan_citations(code: str):
+    """(offset, [keys]) for each citation command: optional [..] arguments may nest; a multicite command (name ending
+    in 'cites') takes repeated ([..])([..]){keys} groups and optional (..) global notes."""
+    for m in CITE_CMD_RE.finditer(code):
+        multi = m.group(1).lower().endswith("cites")
+        i, n, keys, groups = m.end(), len(code), [], 0
+        while i < n:
+            while i < n and code[i] in " \t\n":
+                i += 1
+            if i >= n:
+                break
+            ch = code[i]
+            if ch == "[" or (ch == "(" and multi):
+                end = _balanced(code, i, ch, {"[": "]", "(": ")"}[ch])
+                if end is None:
+                    break
+                i = end
+                continue
+            if ch == "{":
+                end = _balanced(code, i, "{", "}")
+                if end is None:
+                    break
+                keys += split_keys(code[i + 1:end - 1])
+                groups += 1
+                i = end
+                if multi:
+                    continue
+            break
+        if groups:
+            yield m.start(), keys
+
+
+def iter_bib_entries(text: str):
+    """(type, key, offset, body) for each BibTeX entry at brace depth 0; @comment, @preamble and @string bodies and
+    anything inside a field are skipped, so an '@misc{' in a note is not an entry."""
+    i, n = 0, len(text)
+    while i < n:
+        m = BIB_AT_RE.search(text, i)
+        if not m:
+            return
+        end = _balanced(text, m.end() - 1, m.group(2), {"{": "}", "(": ")"}[m.group(2)])
+        end = n if end is None else end
+        body = text[m.end():end - 1]
+        kind = m.group(1).lower()
+        if kind not in NON_ENTRY_TYPES:
+            key = body.split(",", 1)[0].strip()
+            if key and "," in body:
+                yield kind, key, m.start(), body
+        i = end
 
 
 def line_of(text: str, offset: int) -> int:
@@ -337,9 +474,9 @@ def scan_files(tex_files, bib_files, bbl_files=(), external_bib: str | None = No
         text = tex.read_text(encoding="utf-8", errors="replace")
         code = strip_verbatim(strip_comments(text))
         inline_entries.update(m.group(1).strip() for m in BIBITEM_RE.finditer(code))
-        for m in CITE_RE.finditer(code):
-            for key in split_keys(m.group(1)):
-                cite_keys[key].append((tex, line_of(code, m.start())))
+        for pos, keys in scan_citations(code):
+            for key in keys:
+                cite_keys[key].append((tex, line_of(code, pos)))
         for m in LABEL_RE.finditer(code):
             if "#" not in m.group(1):
                 label_defs[m.group(1)].append((tex, line_of(code, m.start())))
@@ -359,15 +496,14 @@ def scan_files(tex_files, bib_files, bbl_files=(), external_bib: str | None = No
                 placeholders.append((tex, lineno, line.strip()))
 
     bib_entries = set()
+    crossref_targets = set()  # parents named by crossref fields count as used
     bib_defs = defaultdict(list)  # lower-cased key -> [(file, line, key)]
     for bib in bib_files:
         text = bib.read_text(encoding="utf-8", errors="replace")
-        for m in BIBENTRY_RE.finditer(text):
-            if m.group(1).lower() in NON_ENTRY_TYPES:
-                continue
-            key = m.group(2)
+        for _kind, key, pos, body in iter_bib_entries(text):
             bib_entries.add(key)
-            bib_defs[key.lower()].append((bib, line_of(text, m.start()), key))
+            bib_defs[key.lower()].append((bib, line_of(text, pos), key))
+            crossref_targets.update(c.lower() for c in CROSSREF_RE.findall(body))
     duplicate_bib = {locs[0][2]: [(f, ln) for f, ln, _ in locs]
                      for locs in bib_defs.values() if len(locs) > 1}
 
@@ -382,7 +518,7 @@ def scan_files(tex_files, bib_files, bbl_files=(), external_bib: str | None = No
     no_bibliography = bool(cite_keys) and not (bib_files or inline_entries)
     # With no bibliography at all every citation is missing; only a declared external bibliography defers them.
     missing_bib, unresolved_citations = ({}, unresolved) if external_bib else (unresolved, {})
-    cited_lower = {k.lower() for k in cite_keys}
+    cited_lower = {k.lower() for k in cite_keys} | crossref_targets
     unused_bib = [] if cite_all or not bib_files else sorted(
         locs[0][2] for lower, locs in bib_defs.items() if lower not in cited_lower)
     duplicate_labels = {k: v for k, v in label_defs.items() if len(v) > 1}

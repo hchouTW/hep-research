@@ -172,5 +172,47 @@ class ReviewFixes2Includes(Manuscript):
 BIB = "@article{a, title={x}}\n@article{b, title={x}}\n@article{c, title={x}}\n@article{d, title={x}}\n"
 
 
+class ReviewFixes2Citations(Manuscript):
+    """RC-A4: citation commands, arguments, comments and .bib structure parsed as TeX and BibTeX read them."""
+
+    def missing(self, body, bib=BIB, *extra):
+        code, rep = self.run_main(body, bib, *extra)
+        return code, self.found(rep, "manuscript.missing_bib_entry"), rep
+
+    def test_capitalised_cite_commands(self):
+        _, miss, _ = self.missing("\\Citet{x1} \\Cite{x2} \\Citeauthor{x3}", "")
+        self.assertEqual(miss, {"x1", "x2", "x3"})
+
+    def test_multicite_groups(self):
+        _, miss, _ = self.missing("\\textcites{a}{xb} \\cites[p.~1]{c}[p.~2]{xd}")
+        self.assertEqual(miss, {"xb", "xd"})
+
+    def test_nested_optional_argument(self):
+        _, miss, _ = self.missing("\\autocite[see][{p.~[3]}]{xa}")
+        self.assertEqual(miss, {"xa"})
+
+    def test_percent_inside_url_is_not_a_comment(self):
+        _, miss, _ = self.missing("\\url{http://x/a%20b} \\cite{xa}")
+        self.assertEqual(miss, {"xa"})
+
+    def test_bib_entries_inside_fields_or_comments_are_not_entries(self):
+        bib = "@article{real, note={see @misc{fake1, title={y}}}}\n@comment{@article{fake2, title={y}}}\n"
+        _, miss, _ = self.missing("\\cite{fake1,fake2,real}", bib)
+        self.assertEqual(miss, {"fake1", "fake2"})
+
+    def test_iffalse_comment_environment_and_verb_are_not_scanned(self):
+        body = ("\\iffalse \\cite{x1} \\label{l} \\fi\n\\begin{comment}\n\\cite{x2}\n\\end{comment}\n"
+                "\\verb|\\cite{x3}| \\label{l}")
+        code, miss, rep = self.missing(body)
+        self.assertEqual(miss, set())
+        self.assertEqual(self.found(rep, "manuscript.duplicate_label"), set())
+
+    def test_crossref_parent_is_used(self):
+        bib = "@inproceedings{child, crossref={parent}, title={x}}\n@proceedings{parent, title={y}}\n"
+        code, rep = self.run_main("\\cite{child}", bib, "--strict")
+        self.assertEqual(self.found(rep, "manuscript.unused_bib_entry"), set())
+        self.assertEqual(code, 0, rep)
+
+
 if __name__ == "__main__":
     unittest.main()
