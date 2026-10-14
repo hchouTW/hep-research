@@ -78,7 +78,9 @@ air showers in the atmosphere above and around the detector (see
   separated statistically, not by source direction, using the facts that (a) the atmospheric
   spectrum falls faster (~`E^-3.7` versus an astrophysical `~E^-2` to `E^-2.5`
   expectation from the same Fermi-acceleration argument as
-  [cosmic-ray spectrum and composition](cosmic-ray-spectrum-and-composition.md)),
+  [cosmic-ray spectrum and composition](cosmic-ray-spectrum-and-composition.md);
+  measured astrophysical indices are softer than 2, so take the index from the latest
+  diffuse-flux fit of the detector and channel used),
   so a hard energy cut or an energy-dependent likelihood weight enhances the
   astrophysical fraction at high energy, and (b) atmospheric neutrinos are
   accompanied by a correlated atmospheric-muon bundle from the same air shower for a
@@ -98,7 +100,9 @@ zenith angle and high energy. The Glashow resonance (`anti-nu_e e- -> W-`, peaki
 6.3 PeV antineutrino energy) tags electron antineutrinos.
 <!-- example: experiment-specific illustration -->
 IceCube observed a 6.05 ± 0.72 PeV shower consistent with it (Nature 591 (2021) 220,
-arXiv:2110.15051).
+arXiv:2110.15051). Example of a softer measured index: IceCube upgoing muon neutrinos,
+9.5 years, single power law `gamma = 2.37 ± 0.09` between 15 TeV and 5 PeV (ApJ 928 (2022)
+50, arXiv:2111.10299).
 <!-- /example -->
 
 ## Significance and exposure
