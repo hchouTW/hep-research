@@ -43,14 +43,8 @@ operators.
 
 ## Data splits
 
-Split by the grouping key (run, detector period, event, simulation seed, parameter
-point), never by row: the recipe is in [data-loading.md](data-loading.md) ("Grouped
-split"), and `make_grouped_splits.py` / `check_split_integrity.py` in
-`<plugin root>/skills/physics-ml/scripts/` write and check a split manifest. Seed the assignment, and persist the manifest (the list of groups in each
-split) with the run when comparisons must be exact.
-
-For distributed training, call `sampler.set_epoch(epoch)` so shuffling changes
-between epochs but remains coordinated across ranks.
+Split by the grouping key, never by row ([ml-analysis.md](ml-analysis.md), "Splits and leakage"); seed the assignment
+and persist the manifest with the run. In distributed training call `sampler.set_epoch(epoch)`.
 
 ## Worker seeds
 
@@ -93,79 +87,17 @@ software stack and the GPU, also record the run as a `computational-run` artifac
 
 ## Reproducibility levels
 
-"Reproducible" is not one property - distinguish what is actually being claimed:
-
-- **Rerunning the same checkpoint** - only requires the checkpoint and inference code.
-- **Reproducing evaluation** - requires the checkpoint plus the exact eval set,
-  preprocessing, and metric code.
-- **Reproducing training** - requires everything in Experiment records above: code
-  revision, config, dataset and split version, preprocessing version, seed,
-  environment.
-- **Reproducing across seeds** - requires training reproducibility plus running
-  multiple seeds and reporting the spread - see
-  [ablation-and-design-review.md](ablation-and-design-review.md).
-- **Reproducing across environments** - requires training reproducibility on
-  different hardware/library versions; exact numerical reproduction is not
-  guaranteed even then (see the determinism caveat above), so define what
-  "reproduces" means (same conclusion, not bit-identical numbers) before claiming it.
-- **Reproducing conclusions with an independent implementation** - the strongest
-  level; requires someone else's separately-written code to reach the same
-  qualitative conclusion. State what the implementations still share (inputs,
-  calibration, model assumptions, libraries, algorithms): agreement is evidence,
-  not proof of correctness.
-
-Do not claim a stronger level than was actually demonstrated - "we reproduced the
-result" after only reloading a checkpoint and reproducing evaluation is a narrower
-claim than it sounds.
-
-## Experiment provenance
-
-For results that matter, every number should be traceable to:
-
-```text
-Result
-├── code revision
-├── configuration
-├── dataset version
-├── split version
-├── preprocessing version
-├── random seed
-├── environment (library/hardware versions)
-├── checkpoint
-└── evaluation version (eval set + metric code version)
-```
-
-This is the same information as Experiment records above, organized as an explicit
-traceability chain rather than a save-this-list - use whatever recording mechanism
-already exists in the project (a config file, a flat log, a tracked spreadsheet); this
-does not require adopting a specific experiment-tracking vendor. See
-[training-at-scale.md](training-at-scale.md)'s "Experiment tracking" section for the
-scale-specific version of the same requirement.
+Say which level was shown: rerunning a checkpoint; reproducing evaluation (checkpoint, eval set, preprocessing, metric
+code); reproducing training (everything in Experiment records); across seeds (with the spread,
+[ablation-and-design-review.md](ablation-and-design-review.md)); across environments (define "reproduces": the same
+conclusion, not bit-identical numbers); and with an independent implementation, the strongest, where the shared parts
+(inputs, calibration, model assumptions, libraries, algorithms) are stated, because agreement is evidence, not proof.
+Every number of a result should trace to code revision, configuration, dataset, split and preprocessing versions,
+seed, environment, checkpoint and evaluation version.
 
 ## Hyperparameter sweeps
 
-A single held-out validation split reused across many configurations is itself a
-form of overfitting - the configuration that wins is partly selected for beating
-that specific split's noise. Keep sweep and reproducibility concerns tied together
-rather than treating tuning as a separate, unrecorded step:
-
-- Seed every run in a sweep with a value derived from a fixed base seed and the
-  run index (e.g. `seed_everything(base_seed + run_index)`), not the same seed for
-  every configuration and not an unseeded run - otherwise you cannot tell whether a
-  result difference came from the hyperparameter or from run-to-run noise.
-- For a small number of hyperparameters, prefer **random search** over grid search
-  at equal budget - it explores each dimension more effectively when only a few
-  hyperparameters actually matter, which is the common case.
-- Record every trial's full config and result (not just the best one) in a flat,
-  greppable format (one JSON object per line is enough; a dedicated experiment
-  tracker is not required to get this benefit) - this is what makes "why did we
-  pick these hyperparameters" answerable later, and what the Experiment records
-  section above assumes exists.
-- Use **early stopping within a trial** (stop a clearly-losing configuration early
-  based on a validation-metric trend) to spend more of the sweep budget on
-  promising regions, but record *why* a trial stopped early alongside its partial
-  result - a trial killed early for looking bad is a different kind of data point
-  than one that ran to completion and looked bad.
-- Re-run the winning configuration with at least one additional seed before
-  reporting a final number - a hyperparameter that wins by a margin comparable to
-  seed-to-seed variance has not actually been shown to be better.
+Seed every trial from a base seed and its index, record every trial's config and result (one JSON line each), record
+why a trial was stopped early, and rerun the winner with another seed before reporting it. A single validation split
+reused across many configurations is overfit by the selection: use grouped (or nested) cross-validation
+([ml-analysis.md](ml-analysis.md), "Hyperparameter search").

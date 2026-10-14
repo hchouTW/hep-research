@@ -1,84 +1,37 @@
 # Geometric and Equivariant Learning Reference
 
-Reasoning about symmetry in model design - sets, graphs, point clouds, and
-group/rotation/Lorentz equivariance. This is symmetry *reasoning*, not an
-architecture catalog; for choosing/sizing architectures generally see
-[architecture-selection.md](architecture-selection.md), and for when to enforce a
-constraint via architecture vs. objective vs. augmentation see
-[scientific-machine-learning.md](scientific-machine-learning.md)'s constraint table,
-which applies directly to symmetry constraints too.
+Symmetry reasoning for model design (sets, graphs, point clouds, rotation and Lorentz equivariance); where to encode a
+constraint: [scientific-machine-learning.md](scientific-machine-learning.md); architectures:
+[particle-and-jet-architectures.md](particle-and-jet-architectures.md).
 
 ## Symmetry reasoning
 
-Require the symmetry assumption to be scientifically justified, not assumed from the
-architecture literature. Work through:
+1. Which symmetry does the problem have (permutation of set elements, rotation, translation, the Lorentz group for
+   four-momenta)?
+2. Is the required mapping **invariant** (a jet label regardless of orientation) or **equivariant** (a per-particle
+   vector)? Forcing invariance on a task that needs equivariance discards what the output requires.
+3. Is it **exact** (a conservation law, a geometric fact) or **approximate** (idealized conditions the data do not
+   fully meet)?
+4. Enforce it in the architecture (hard), through augmentation or the objective (soft, needing coverage or a justified
+   weight), or leave it to the data?
+5. What is lost: an exactly invariant model cannot recover a quantity that depends on the variable it is invariant to.
 
-1. What symmetry does the problem actually have? (Permutation of a set's elements,
-   rotation of a point cloud, the Lorentz group for four-momenta, translation, etc.)
-2. Is the desired input-output mapping **invariant** (output unchanged under the
-   symmetry - e.g. classifying a jet regardless of detector orientation) or
-   **equivariant** (output transforms the same way the input does - e.g. predicting a
-   per-particle vector quantity)? Getting this wrong is a common design error: forcing
-   invariance onto a task that needs equivariance discards information the output
-   actually requires.
-3. Is the symmetry **exact** (a genuine conservation law or geometric fact) or
-   **approximate** (holds statistically, or only under idealized conditions the data
-   does not fully satisfy)?
-4. Should it be enforced **architecturally** (hard guarantee, e.g. a permutation-
-   invariant aggregation), **encouraged through data augmentation** (soft, requires
-   augmentation coverage to actually work), **encouraged through the objective** (soft,
-   requires the loss weight to be justified), or **learned from data** (no guarantee,
-   but no risk of over-constraining either)?
-5. What information might be lost by enforcing it? An exactly-invariant architecture
-   cannot recover a quantity that depends on the very variable it was made invariant
-   to, even if that dependence turns out to matter.
+Sets need permutation-invariant pooling (invariant outputs) or permutation-equivariant message passing (per-element
+outputs). Graphs help only when their edges encode a relation the task depends on; compare with a set model. Point
+clouds are sets with coordinates: a detector-frame-dependent quantity must not be made rotation invariant.
 
-## Permutation invariance and equivariance (sets, graphs, point clouds)
+## Lorentz symmetry
 
-- **Sets** (unordered collections, e.g. particles in an event with no meaningful
-  ordering) need permutation-invariant aggregation for invariant outputs (e.g. a
-  symmetric pooling over per-element embeddings) or permutation-equivariant layers
-  (message passing that updates each element using its neighbors, order-independent)
-  for per-element outputs.
-- **Graphs** add explicit relational structure (edges) to the set; message passing
-  operates on that structure. The inductive bias only helps when the graph's edges
-  encode a relation the task actually depends on - a graph built from an arbitrary or
-  uninformative adjacency is not obviously better than a set representation, and that
-  comparison is worth running.
-- **Point clouds** are sets with geometric coordinates attached; whether rotation/
-  translation equivariance should be enforced depends on question 1 above - a
-  detector-frame-dependent quantity should *not* be made rotation-invariant.
+Four-momenta transform under the Lorentz group, not only 3-D rotations: a model enforcing spatial rotations on
+relativistic kinematics enforces the wrong group. Lorentz-invariant models cannot recover frame-dependent quantities,
+which is sometimes the point (invariant mass) and sometimes not. At detector level the beam axis, the acceptance and
+the eta-phi segmentation break full Lorentz symmetry, so deployed Lorentz-equivariant taggers add beam "spurion" inputs
+that reduce the symmetry to boosts along and rotations about the beam axis
+([particle-and-jet-architectures.md](particle-and-jet-architectures.md)).
 
-## Domain-specific symmetries: Lorentz-aware modeling
+## Reviewing an exact-symmetry architecture
 
-For HEP and other relativistic settings, four-momenta transform under the Lorentz
-group, not merely under 3D rotation - a model that enforces only spatial rotational
-invariance/equivariance on relativistic kinematic inputs is enforcing the wrong group.
-Lorentz-equivariant architectures exist specifically for this; whether to use one
-follows the same reasoning as any other symmetry choice above, including question 5 -
-Lorentz-invariant architectures cannot recover frame-dependent quantities, which is
-sometimes exactly what is wanted (e.g. invariant mass) and sometimes not. At detector
-level the beam axis, the acceptance and the eta-phi segmentation break full Lorentz
-symmetry, so deployed Lorentz-equivariant taggers add beam "spurion" inputs that reduce
-the symmetry to boosts along and rotations about the beam axis; see
-[particle-and-jet-architectures.md](particle-and-jet-architectures.md).
-
-## Reviewing a proposed exact-symmetry architecture
-
-When a new architecture proposes exact symmetry enforcement, ask:
-
-- Is the symmetry actually exact for this data, or only approximately so?
-- Should the output be invariant or equivariant, and does the architecture match that?
-- Does enforcing it remove valid information the task needs?
-- Does it improve results relative to an unconstrained baseline given the same budget
-  - see [ablation-and-design-review.md](ablation-and-design-review.md)?
-
-## Deliverables
-
-- The symmetry identified, and whether the required mapping is invariant or
-  equivariant.
-- Whether the symmetry is treated as exact or approximate, and the justification.
-- Where it is enforced (architecture, augmentation, objective, or left to the data),
-  and why.
-- What information, if any, is lost by the chosen enforcement.
-- Comparison against an unconstrained baseline at matched budget.
+Is the symmetry exact for these data; invariant or equivariant output; what valid information does enforcement
+remove; does it beat an unconstrained baseline at matched budget
+([ablation-and-design-review.md](ablation-and-design-review.md))? Deliver the symmetry, exact or approximate with the
+justification, where it is enforced and why, what is lost, and the baseline comparison.

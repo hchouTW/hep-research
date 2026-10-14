@@ -11,15 +11,8 @@ file covers the PyTorch side of the export.
 
 ## Before exporting anything
 
-```python
-model.eval()
-for p in model.parameters():
-    p.requires_grad_(False)
-```
-
-Forgetting `model.eval()` before export is one of the most common export bugs -
-`Dropout`/`BatchNorm` stay in training-mode behavior, so the exported artifact gives
-different (and nondeterministic, for dropout) outputs than the model you validated.
+Call `model.eval()` (and freeze parameters): otherwise Dropout and BatchNorm export in training behaviour and the
+artifact differs from the validated model.
 
 ## Which format
 
@@ -83,18 +76,13 @@ with torch.inference_mode():
     np.testing.assert_allclose(onnx_out, model(x2, mask2).numpy(), rtol=1e-4, atol=1e-5)
 ```
 
-- `dynamo=True` is the default in torch 2.14.1 and needs the `onnx` and `onnxscript`
-  packages (`ModuleNotFoundError: onnxscript` otherwise); onnxruntime is needed only for
-  the check. The `dynamic_shapes` keys are the argument names of `forward`.
-- The exporter may print that a named axis "will not be used, since it shares the same
-  shape constraints with another axis": harmless, the ONNX inputs are still dynamic.
-- Pick the opset the deployment runtime supports (the experiment's ONNX Runtime
-  release, SOFIE or hls4ml) and record it with the model; a newer opset than the runtime
-  supports fails at load time in the experiment software, not at export.
-- Validate numerically against the PyTorch model, as above, on held-out events with
-  realistic multiplicities (including the smallest and the largest), not only on the
-  export example. Shape or operator-version problems sometimes give silently wrong
-  output rather than an error.
+- `dynamo=True` (the default in torch 2.14.1) needs `onnx` and `onnxscript`; the `dynamic_shapes` keys are the
+  argument names of `forward`. A message that a named axis "will not be used, since it shares the same shape
+  constraints with another axis" is harmless.
+- Pick and record the opset the deployment runtime supports (the experiment's ONNX Runtime, SOFIE or hls4ml): a newer
+  opset fails at load time in the experiment software, not at export.
+- Validate against PyTorch on held-out events with realistic multiplicities (smallest and largest), not only on the
+  export example: shape or operator-version problems can give silently wrong output.
 
 ## `torch.export` and AOTInductor
 
@@ -121,29 +109,13 @@ An AOTInductor package is compiled for one device type and is tied to the torch 
 that built it: rebuild it with the deployment environment's torch, and keep ONNX for
 targets that do not ship PyTorch.
 
-## `torch.compile` for in-process inference
+## `torch.compile` and quantization
 
-Beyond the basic `torch.compile(model)` and the dynamic-shape advice in
-[performance-memory.md](performance-memory.md):
-
-- `mode="reduce-overhead"` targets small-batch, latency-sensitive inference (uses CUDA
-  graphs where possible); `mode="max-autotune"` spends more compile time searching for
-  faster kernels and suits long jobs.
-- Expect a slow first call per new input shape. Warm up with representative shapes,
-  and either mark the particle axis dynamic or pad to a few fixed sizes.
-- `torch.compile`'s output is not a portable artifact - it compiles the same Python
-  model in-process. Use ONNX or `torch.export` when the deployment target is a
-  different process, language runtime, or device than the training environment.
-
-## Quantization for deployment
-
-For a fixed, known deployment target, static (calibrated) post-training quantization
-usually gives the best throughput/accuracy trade-off, and dynamic quantization is the
-fastest to try first. FPGA triggers use fixed-point arithmetic chosen per layer
-(quantization-aware training, for example with QKeras or Brevitas, before hls4ml);
-treat the bit widths as part of the model and validate the quantized scores, not only
-the float ones. See [efficient-finetuning.md](efficient-finetuning.md) for the
-quantization variants.
+`torch.compile` (`mode="reduce-overhead"` for small latency-bound batches, `"max-autotune"` for long jobs; warm up
+with representative shapes) compiles in-process and is not a portable artifact. For a fixed target, static
+post-training quantization usually gives the best throughput/accuracy trade; FPGA triggers use per-layer fixed point
+from quantization-aware training (QKeras, Brevitas) before hls4ml: the bit widths are part of the model, and the
+quantized scores are what must be validated ([efficient-finetuning.md](efficient-finetuning.md)).
 
 ## Deployment checklist
 

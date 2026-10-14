@@ -39,8 +39,8 @@ preds = probs >= threshold
 per_label_accuracy = (preds == targets.bool()).float().mean(dim=0)
 ```
 
-Do not apply softmax or sigmoid before `CrossEntropyLoss` or
-`BCEWithLogitsLoss`; use activations only for metrics and inference.
+Losses take logits ([deep-learning-guide.md](deep-learning-guide.md), loss table); activations are for metrics and
+inference only.
 
 ## Regression
 
