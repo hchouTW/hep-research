@@ -50,7 +50,8 @@ A figure that drops the label of a non-published result misstates its status, wh
 
 ## Colour and raster resolution
 
-- Palettes safe for colour-vision deficiencies (Okabe-Ito; viridis/cividis for maps); never red/green alone; a
+- Palettes safe for colour-vision deficiencies (Okabe-Ito: Okabe and Ito, "Color Universal Design",
+  https://jfly.uni-koeln.de/color/, opened 2026-10-14; viridis/cividis for maps); never red/green alone; a
   non-colour cue (marker, line style, hatching) for every meaningful distinction.
 - Check on renders, not by eye: a greyscale copy (`pdftoppm -gray -r 150 -png f.pdf f_gray`) and a colour-vision
   simulation (`diagram-figure-style.md`, "Color"); without a simulator the check is reported as not done.
@@ -73,7 +74,7 @@ A figure that drops the label of a non-published result misstates its status, wh
   (for example a flux ∝ R^-2.7). The calculation belongs with the analysis, not the plot.
 - **Ratios** (p̄/p, B/C, isotope ratios): plotted unmultiplied, on a linear or log axis chosen for the range, with the
   numerator and denominator binning stated when they differ.
-- **Time-resolved fluxes**: time axis in the unit the data use (Bartels rotations of 27 days, months), with the
+- **Time-resolved fluxes**: time axis in the unit the data use (Bartels rotations of 27 days, a standard convention not re-opened here, so unverified; months), with the
   solar-modulation period and, for charge-sign effects, the heliospheric polarity epoch stated.
 - **Systematic breakdown**: a table of the components per bin (`figures-and-tables.md`, "Tables") plus, where useful, a
   stacked or line plot of the relative contributions against R or E; the total equals the quadrature sum shown.
