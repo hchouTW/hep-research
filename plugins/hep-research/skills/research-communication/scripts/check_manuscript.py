@@ -77,6 +77,7 @@ entries than any single paper cites). --format json prints one report object
 from __future__ import annotations
 
 import argparse
+import bisect
 import json
 import re
 import sys
@@ -420,8 +421,14 @@ def iter_bib_entries(text: str):
         i = end
 
 
+_LINE_CACHE: list = [None, []]  # (text, newline offsets) of the last text asked about
+
+
 def line_of(text: str, offset: int) -> int:
-    return text.count("\n", 0, offset) + 1
+    """1-based line of an offset; newline offsets are computed once per text, so a scan is not quadratic."""
+    if _LINE_CACHE[0] is not text:
+        _LINE_CACHE[0], _LINE_CACHE[1] = text, [i for i, ch in enumerate(text) if ch == "\n"]
+    return bisect.bisect_left(_LINE_CACHE[1], offset) + 1
 
 
 def find_tex_and_bib(root: Path):
@@ -581,6 +588,11 @@ SCOPE_NOTE = {"directory": "repository-wide source scan: every .tex/.bib/.bbl un
                       "declares; not a compile or a check of scientific content"}
 
 
+def _coverage_incomplete(results) -> bool:
+    disc = results.get("discovery")
+    return bool(disc and disc["unresolved"])
+
+
 def report(results, strict: bool) -> int:
     n_tex = len(results["tex_files"])
     n_bib = len(results["bib_files"])
@@ -656,7 +668,9 @@ def report(results, strict: bool) -> int:
             print(f"  - {key}")
         if len(results["unused_bib"]) > 20:
             print(f"  ... and {len(results['unused_bib']) - 20} more")
-        if strict:
+        if strict and _coverage_incomplete(results):
+            print("  (--strict: not counted as issues while coverage is incomplete; an uncited entry may be cited in a file not scanned)")
+        elif strict:
             issues += len(results["unused_bib"])
         print()
 
@@ -703,7 +717,8 @@ def json_report(results, strict: bool, exit_code: int, style_findings=None) -> d
         findings.append({"code": "manuscript.no_bibliography", "severity": "error", "location": "-",
                          "message": "citations found but no bibliography", "suggested_action": "declare a bibliography or --external-bib"})
     for key in results["unused_bib"]:
-        findings.append({"code": "manuscript.unused_bib_entry", "severity": "error" if strict else "warning", "location": "-",
+        severity = ("unresolved" if _coverage_incomplete(results) else "error") if strict else "warning"
+        findings.append({"code": "manuscript.unused_bib_entry", "severity": severity, "location": "-",
                          "message": key, "suggested_action": "harmless in a shared .bib; check in a single-paper .bib"})
     for key, locs in sorted((results.get("unresolved_citations") or {}).items()):
         findings.append({"code": "manuscript.unresolved_citation", "severity": "unresolved", "location": fmt_locs(locs), "message": key,
@@ -769,6 +784,8 @@ def main(argv=None) -> int:
         project_root = args.project_root or build_root
         if args.bbl is not None and not args.bbl.is_file():
             return fail(f"--bbl {args.bbl} is not a file")
+        if args.bbl is not None and not _inside(args.bbl.resolve(), Path(project_root).resolve()):
+            return fail(f"--bbl {args.bbl} lies outside the project root {project_root}; not opened")
         results = scan_main(args.main, project_root, build_root, external_bib=args.external_bib, bbl=args.bbl)
         style_root = results["tex_files"]  # main mode: only the files the document includes
     else:

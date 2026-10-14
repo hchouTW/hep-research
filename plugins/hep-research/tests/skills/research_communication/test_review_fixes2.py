@@ -292,5 +292,41 @@ class ReviewFixes2Locators(unittest.TestCase):
         self.assertEqual(res["outcome"], "located", res)
 
 
+class ReviewFixes2ManuscriptBounds(Manuscript):
+    """RC-A7 --bbl inside the project root; RC-A9 linear scan time; RC-A18 --strict with incomplete coverage."""
+
+    def test_bbl_outside_project_root_is_an_input_error(self):
+        outside = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, outside, ignore_errors=True)
+        bbl = outside / "main.bbl"
+        bbl.write_text("\\bibitem{a} x\n", encoding="utf-8")
+        code, rep = self.run_main("\\cite{a}", None, "--bbl", bbl)
+        self.assertEqual(code, 2, rep)
+        inside = self.write("main.bbl", "\\bibitem{a} x\n")
+        code, rep = self.run_main("\\cite{a}", None, "--bbl", inside)
+        self.assertEqual(code, 0, rep)
+
+    def test_scan_time_is_linear_in_lines(self):
+        import time
+        import check_manuscript as cm
+
+        def timed(n):
+            body = "".join(f"\\cite{{k{i}}} \\label{{l{i}}} \\ref{{l{i}}}\n" for i in range(n))
+            f = self.write(f"m{n}.tex", body)
+            t0 = time.perf_counter()
+            cm.scan_files([f], [])
+            return time.perf_counter() - t0
+        small, large = timed(5000), timed(20000)
+        self.assertLess(large, 5.0)
+        self.assertLess(large / max(small, 1e-3), 8.0, f"5k lines {small:.2f} s, 20k lines {large:.2f} s: not linear")
+
+    def test_strict_unused_entries_are_incomplete_when_coverage_is(self):
+        code, rep = self.run_main("\\cite{a} \\input missing", "@article{a, title={x}}\n@article{b, title={x}}\n", "--strict")
+        self.assertEqual(code, 3, rep)
+        self.assertEqual({f["severity"] for f in rep["findings"] if f["code"] == "manuscript.unused_bib_entry"}, {"unresolved"})
+        code, rep = self.run_main("\\cite{a}", "@article{a, title={x}}\n@article{b, title={x}}\n", "--strict")
+        self.assertEqual(code, 1, rep)
+
+
 if __name__ == "__main__":
     unittest.main()
