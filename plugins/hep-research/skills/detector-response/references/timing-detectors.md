@@ -69,9 +69,14 @@ and tail fraction separately.
   achievable in principle by photostatistics, limited in practice by electronics,
   clock, position along the bar, and light-collection non-uniformity (quote only from a
   named apparatus). Position along the bar from time difference of two ends.
-- **LGAD / ultra-fast silicon**: internal gain of order 10-30 with a thin sensor gives
+- **LGAD / ultra-fast silicon**: internal gain of order 10-50 with a thin sensor gives
   a steep, low-jitter pulse; time resolution is limited by Landau fluctuations in
-  the thin depletion region and by the electronics; **radiation damage** reduces the
+  the thin depletion region and by the electronics (PDG RPP 2025 eq. 35.25: walk from
+  signal-height fluctuations at threshold, jitter `sigma_n/(dS/dt)`, an irreducible
+  arrival-time term from non-uniform charge deposition, weighting-field distortion and
+  TDC terms; 15-20 ps for minimum-ionizing particles reached with thin, high-gain
+  (> 40) LGADs, better only with several layers; walk, jitter and CFD formulas are in
+  [front-end electronics](front-end-electronics-and-signal-processing.md)); **radiation damage** reduces the
   effective doping (gain layer), so gain and time resolution degrade with fluence and
   operating voltage must be raised (single-event burnout limit); fill factor at
   pad boundaries is a design issue.

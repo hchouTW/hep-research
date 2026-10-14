@@ -174,7 +174,7 @@ effects** (space charge, gain drop), and time resolution set by gap and gas.
 - **Topology**: pad/strip images. **Ambiguity**: 2D projections (strips) and
   charge-sharing symmetry. **Informative residual**: residual vs incident angle
   (strong dependence for inclined tracks unless micro-TPC mode is used).
-- **Scaling**: position resolution ~ (pitch and diffusion)/`sqrt(cluster size)`;
+- **Scaling**: position resolution ~ (pitch and diffusion)/`sqrt(cluster size)` (heuristic);
   rate capability set by gain and space charge.
 - **Tails**: discharge events, gain-nonuniformity-induced position biases.
 - **Data sample**: cosmic/test-beam and in-situ tracks for gain map.

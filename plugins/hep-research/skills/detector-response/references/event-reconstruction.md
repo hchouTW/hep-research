@@ -33,6 +33,8 @@ the missing track would have changed jet clustering, isolation, or missing trans
 momentum - the same requirement stated as an analysis invariant for kinematic
 variations.
 
+**Check:** Each reconstruction-level variation is applied at the stage where the effect occurs and propagated forward, not as a flat event weight.
+
 ## Digitization boundary and calibration
 
 The first stage converts readout values into physical quantities using calibration
@@ -50,6 +52,8 @@ substitute, since `sum_t w_t R(theta_t) != R(sum_t w_t theta_t)` in general. And
 information irreversibly** at the readout, so a signal below threshold is not merely
 noisy, it is absent - which produces an efficiency turn-on that must be modeled rather
 than assumed flat.
+
+**Check:** Dead and noisy channel maps match between data and simulation period by period (luminosity-weighted), and threshold turn-ons are modeled.
 
 ## Clustering
 
@@ -72,6 +76,8 @@ nearby ones - is where nearby-particle resolution is set, and it fails in a
 characteristic way: two nearby particles merged into one cluster produce an object with
 roughly the summed energy and an intermediate position, which is not obviously wrong in
 any single-object distribution but distorts multiplicity and isolation.
+
+**Check:** Seed and growth thresholds are stated and shown to behave the same way across the periods combined; split and merged clusters are treated as reconstruction outcomes with rates.
 
 ## Track-cluster association and particle-flow reconstruction
 
@@ -103,6 +109,8 @@ The failure modes follow directly from the subtraction:
   depends on the calorimeter response - so tracking and calorimeter systematics are
   *correlated* in a particle-flow analysis and must not be varied independently.
 
+**Check:** With particle flow, tracking and calorimeter systematics are varied together (correlated), and over-subtraction, under-subtraction and double counting are checked.
+
 ## Ambiguity resolution across the event
 
 Reconstruction produces overlapping interpretations that must be reduced to a
@@ -118,6 +126,8 @@ specified at the analysis level and is covered in
 what matters here is that the reconstruction-level and analysis-level removals must be
 consistent with each other, and that the ordering of removal steps changes the result.
 
+**Check:** Reconstruction-level and analysis-level removals are consistent and applied in the same order in data and simulation.
+
 ## Timing and event association
 
 Where the detector has adequate timing, associating deposits and tracks by arrival time
@@ -127,6 +137,8 @@ purity trade like any other, with the added subtlety that a timing window is onl
 good as the time calibration and the assumed time-of-flight to the measurement point
 - which depends on the assumed particle velocity, and therefore on the species
 hypothesis.
+
+**Check:** Timing windows are stated with the time calibration and the time-of-flight (species) hypothesis they assume.
 
 ## Reconstruction under pileup
 
@@ -145,6 +157,8 @@ applied consistently with the mitigation - reweighting to a data pileup profile 
 reconstructing with a mitigation tuned for a different profile leaves a residual that
 neither step catches.
 
+**Check:** Pileup mitigation carries a residual systematic, and it is consistent with the pileup profile used for reweighting.
+
 ## Validating a learned reconstruction
 
 A machine-learned tracking, clustering or particle-flow step is validated like any reconstruction, plus: compare its
@@ -152,6 +166,8 @@ outputs in data and simulation in control samples; check that its per-object unc
 widths and coverage); test it under the domain shift between simulation and data, and under other conditions (pileup,
 time-dependent detector state); and check its behaviour outside the training range, where it must flag rather than
 extrapolate silently. Training belongs to physics-ml; the validation of the reconstructed objects stays here.
+
+**Check:** Data/simulation agreement in control samples, calibrated per-object uncertainties, behaviour under domain shift and out-of-range flagging are each shown.
 
 ## Reproducibility of the reconstruction
 
@@ -162,6 +178,8 @@ processings within one measurement is a defect unless explicitly justified and
 validated. Multithreaded reconstruction can also introduce ordering-dependent results
 where algorithms are not order-invariant - check that a rerun reproduces the same
 output before attributing a difference to anything physical.
+
+**Check:** Software, payload, geometry and configuration versions are recorded, one processing per measurement, and a rerun reproduces the output.
 
 ## Common misconceptions and failure modes
 

@@ -11,8 +11,9 @@ and how that becomes an energy and a composition estimate.
 
 ## Surface detector arrays
 
-A surface array is a grid of individual detector stations - historically scintillator
-panels, and in water-Cherenkov form (used because water is cheap, robust outdoors, and
+A surface array is a grid of individual detector stations - scintillator panels (still
+used, for example as an upper layer on water-Cherenkov stations added to improve the
+mass-composition determination), and in water-Cherenkov form (used because water is cheap, robust outdoors, and
 efficiently converts shower particles including a good fraction of the muon and
 electromagnetic content into detectable Cherenkov light) a tank of water instrumented
 with photomultipliers - spaced over a wide area (hundreds to thousands of meters
@@ -103,6 +104,44 @@ Both techniques treat the atmosphere as part of the detector, not as an inert me
   `X` in the Gaisser-Hillas fit, and its seasonal variation is a genuine (not purely
   instrumental) systematic on `X_max` that composition analyses must account for
   when combining data across a full year.
+
+## Muon detectors, radio detection and wide-field gamma-ray arrays
+
+- **Muon detectors** are particle counters shielded by an overburden (soil, rock,
+  water) thick enough to absorb the electromagnetic component, so the signal is almost
+  entirely muons except near the core of very energetic showers, where some
+  electromagnetic particles punch through. The muon-to-electron ratio separates
+  muon-poor gamma-ray showers from muon-rich hadronic ones; state the per-counter efficiency, the single-muon resolution, the
+  punch-through region excluded and the shielding depth.
+- **Radio detection** of air showers measures the coherent radio emission of the
+  shower's electromagnetic component (geomagnetic emission dominates in air, Askaryan
+  Cherenkov-like emission in dense media). It is calorimetric: the field amplitude is
+  proportional to the shower energy and the energy fluence to its square, falling with
+  distance as `1/R` and `1/R^2` plus absorption; the arrival direction comes from the
+  antenna timing with a curved (hyperbolic) wavefront. Backgrounds are anthropogenic
+  and instrument noise, atmospheric effects (lightning, blowing snow) and Galactic
+  radio emission at low frequency, and narrow-band and impulsive noise make triggering
+  on the radio signal itself a challenge (PDG RPP 2025, sec. 36.3.3).
+- **Wide-field ground gamma-ray arrays** (dense water-Cherenkov ponds or tanks, and
+  scintillator plus muon-detector arrays at high altitude) observe continuously, day and
+  night, over a field of view of about 2 sr. Gamma/hadron separation uses the lateral
+  hit pattern (isolated high-charge hits far from the core from penetrating particles of
+  hadronic showers, and a less smooth lateral distribution) or the muon content; the background rejection, angular resolution, energy bias and their
+  dependence on energy and zenith are the instrument response to state.
+
+<!-- example: experiment-specific illustration -->
+Examples (sources opened 2026-10-15): HAWC, 300 water-Cherenkov tanks over 22 000 m^2
+at 4100 m, field of view nearly 2 sr, gamma/hadron parameters "compactness" and
+"PINCness" from the hit pattern (ApJ 843 (2017) 39, arXiv:1701.01778). LHAASO-KM2A,
+5195 scintillator detectors (1 m^2, 15 m spacing) and 1188 water-Cherenkov muon
+detectors (36 m^2, under 2.5 m of soil, efficiency above 95%) over 1.3 km^2, field of
+view about 2 sr, operating day and night; gamma/hadron cut on `log(N_mu/N_e)`, with
+`N_e/N_mu` about 10 for proton and about 1000 for gamma-ray showers, rejection better
+than 4e3 above 100 TeV at 48-93% gamma survival (Chin. Phys. C 45 (2021) 025002,
+arXiv:2010.06205). The Pierre Auger Observatory upgrade adds radio antennas and 4 m^2
+scintillators on its water-Cherenkov stations (PDG RPP 2025, sec. 36.2.1;
+arXiv:1604.03637).
+<!-- /example -->
 
 ### Instrument response functions (checklist)
 

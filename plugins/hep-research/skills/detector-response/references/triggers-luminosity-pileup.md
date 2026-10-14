@@ -56,6 +56,8 @@ hand it to hep-statistics.
 Trigger efficiencies have other data-driven methods - an orthogonal reference trigger, the bootstrap method, and
 prescaled unbiased streams - with their own bias checks: [analysis design](../../hep-analysis/references/analysis-design.md#trigger-efficiency-from-data).
 
+**Check:** The tag fired the trigger, tag-probe correlations are handled, the method bias is measured in simulation, and a background-subtracted count is fitted (pass and fail together) rather than given a Clopper-Pearson interval.
+
 ## Trigger turn-on curves and plateau requirements
 
 A trigger's efficiency as a function of the relevant kinematic variable (typically pT)
@@ -71,28 +73,39 @@ not a flat number, and its shape uncertainty documented explicitly. A turn-on is
 function (Gaussian CDF) or a similar sigmoid; its parameters are correlated, so propagate their covariance, not
 independent errors.
 
+**Check:** The selection sits on the measured plateau with its scale factor applied, or the measured turn-on is applied as a pT-dependent efficiency with a shape uncertainty.
+
 ## Prescales
 
-A prescaled trigger accepts only a random subset (1-in-N) of events that would
-otherwise pass, to control output rate; each accepted event's *effective* weight must
-account for this. Do not apply a flat luminosity-normalization weight (as in
+A prescaled (downscaled) trigger keeps on average one of every `d` events that would
+otherwise pass, to control output rate; the downscaling is done by a counter
+(deterministic) or by random selection. Prescales are kept constant within a run (or
+luminosity block) and changed between them as the instantaneous luminosity and
+background rates change. Each kept event's weight must account for the prescale: the
+run-dependent weight is `w = d_k/eps` (prescale of the run, trigger efficiency), and the
+averaged weight, which uses the effective luminosity `sum_k L_k/d_k` over runs, gives a
+smaller statistical uncertainty; with any weights, take the uncertainty of the
+corrected count from `sqrt(sum w^2)`, not from the weighted count. Do not apply a flat
+luminosity-normalization weight (as in
 [weights-normalization.md](../../hep-analysis/references/weights-normalization.md)) to data
-collected with a prescaled trigger without folding in the prescale, and be aware that
-prescale values are frequently time-dependent (changed run-by-run or by
-luminosity-block as instantaneous luminosity varies over a fill) - a single
-run-averaged prescale is an approximation that can be wrong enough to matter for
-precision measurements; verify against the per-lumi-block record when precision
-requires it. Combining several differently-prescaled trigger paths (an OR of paths
-covering different pT ranges, say) requires either using only the lowest-threshold
-unprescaled path in each region or a formally correct combination that accounts for
-each path's prescale and their overlap - simply summing raw counts across paths
-double-counts events that fired more than one.
+collected with a prescaled trigger without folding in the prescale; a single
+run-averaged prescale is an approximation, so use the per-run or per-lumi-block record
+when precision requires it. To combine several differently prescaled paths (an OR of
+paths covering different pT ranges, say), either use one path per region of the offline
+variable, efficient there, with its own prescale record (division method), or a
+combination that weights each event by all considered paths' prescales and overlaps
+(exclusion or inclusion method); simply summing raw counts across paths double-counts
+events that fired more than one (V. Lendermann et al., "Combining triggers in HEP data
+analysis", NIM A604 (2009) 707, arXiv:0901.4118, eqs. 3-5).
+
+**Check:** Prescaled data are normalized with the per-run or per-block prescale record, uncertainties come from the sum of squared weights, and several paths are combined by one documented method without double counting.
 
 ## Luminosity
 
 The integrated luminosity normalizing a data-driven yield or MC-to-data comparison
-carries its own measurement uncertainty (typically a couple of percent, but stated by
-each experiment's luminosity measurement for the relevant data-taking period) that is
+carries its own measurement uncertainty (about 1% or below for recent LHC
+measurements, larger for other periods and experiments; take it from the
+experiment's luminosity measurement for the relevant data-taking period) that is
 usually treated as a fully correlated normalization nuisance across all
 luminosity-normalized processes in the fit - do not treat it as negligible or omit it
 because "it's small," since a normalization-only nuisance can still dominate the total
@@ -104,6 +117,10 @@ biases the normalization); reconcile this explicitly rather than assuming the
 production-level bookkeeping already guarantees it, per the run/luminosity-block
 duplicate-counting caution in
 [analysis-design.md](../../hep-analysis/references/analysis-design.md).
+<!-- example: experiment-specific illustration -->
+Example of a luminosity uncertainty: 0.83% for the full ATLAS Run-2 13 TeV dataset, 0.9-1.1% per year (EPJC 83 (2023) 982,
+arXiv:2212.09379).
+<!-- /example -->
 
 ### Luminosity calibration
 
@@ -121,6 +138,8 @@ Eur. Phys. J. C 76 (2016) 653, arXiv:1608.03953, sections 4-6; read 2026-10-14):
 - **Long-term stability**: compare luminometers over the year; drifts between them are an uncertainty.
 - **Correlations**: state which uncertainty components are correlated across years and periods for a combination.
 <!-- /example -->
+
+**Check:** The luminosity value, its uncertainty and its correlations across periods come from the experiment's calibration, and the certified run and block lists match the event selection.
 
 ## Pileup reweighting
 
@@ -164,6 +183,8 @@ reweighting step that is applied but silently no-ops (e.g. from a units or binni
 mismatch between the two input histograms) is a common, easy-to-miss bug, and this
 closure is what catches it.
 
+**Check:** The weights use the Poisson mean `mu` (not the per-event count or the vertex count), empty MC bins are flagged, the target carries its cross-section variation, and closure is shown on a variable that was not reweighted.
+
 ## Dead time and live time
 
 Every readout and trigger system is blind for part of the time: busy front ends,
@@ -189,6 +210,8 @@ live*.
   preferentially on large or closely spaced events, so they are an efficiency that
   depends on the event, not only a time fraction; check with random triggers whether
   the lost fraction depends on occupancy.
+
+**Check:** The live fraction is measured per block and enters the luminosity or exposure block by block, and event-dependent losses are checked with random triggers.
 
 ## Deliverables
 

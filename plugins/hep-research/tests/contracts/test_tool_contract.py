@@ -287,5 +287,75 @@ class DetectorResponseContractTests(unittest.TestCase):
                     self.assertIs(json.loads(p.stdout)["ok"], False)
 
 
+FRONTEND_OPS = {  # operation id -> (arguments that succeed, arguments that are invalid input)
+    "enc": (["--capacitance", "10", "--en", "1", "--leakage", "1000", "--peaking", "25", "--rp", "1e7", "--af", "1e-12"],
+            ["--capacitance", "10", "--peaking", "25", "--rp", "0"]),
+    "noise-rate": (["--threshold", "4", "--peaking", "25", "--window", "100", "--channels", "10"],
+                   ["--threshold", "4", "--peaking", "25", "--noise-type", "white"]),
+    "timing": (["--rise", "1", "--snr", "50", "--threshold", "0.1", "--amplitudes", "1", "2", "--cfd-fraction", "0.3",
+                "--cfd-delay", "1", "--tdc-lsb", "25"], ["--rise", "1", "--snr", "50", "--threshold", "0.1"]),
+    "quantize": (["--noise-lsb", "0.5"], ["--noise-lsb", "x"]),
+    "pileup": (["--rate", "1e6", "--mean-amp", "1", "--peaking", "25"], ["--rate", "1e6", "--peaking", "25"]),
+    "sipm": (["--cells", "1000", "--npe", "100", "--crosstalk", "0.1", "--dcr", "1e5", "--gate", "100"],
+             ["--cells", "1.5", "--npe", "100"]),
+    "ballistic": (["--collection", "10", "--peaking", "25"], ["--collection", "10"]),
+    "deadtime": (["--dead-time", "100", "--rate", "1e5"], ["--dead-time", "100", "--rate", "1e5", "--measured", "9e4"]),
+    "leakage-scale": (["--current", "100", "--from-celsius", "20", "--to-celsius", "-10"],
+                      ["--current", "100", "--from-celsius", "20"]),
+    "cluster-noise": (["--channels", "3", "--sigma", "1", "--rho", "0.2"], ["--channels", "3", "--sigma", "1", "--rho", "2"]),
+}
+
+
+class FrontendResponseContractTests(unittest.TestCase):
+    """detector-response follow-up F-DR1: frontend_response.py has one contracted operation per subcommand, checked
+    against each subcommand's own help, and every subcommand behaves as contracted: declared outputs present at exit 0,
+    JSON with error_kind invalid-input on stdout at exit 2, JSON with ok false at exit 1."""
+
+    PATH = ROOT / "contracts" / "tool_contracts" / "frontend_response.json"
+
+    def setUp(self):
+        self.assertTrue(self.PATH.is_file(), "contracts/tool_contracts/frontend_response.json is missing")
+        self.doc = json.loads(self.PATH.read_text(encoding="utf-8"))
+
+    def test_contract_covers_every_subcommand_and_passes(self):
+        ops = [o["operation_id"] for o in self.doc["operations"]]
+        self.assertEqual(sorted(ops), sorted(FRONTEND_OPS))
+        help_text, _ = tc.run_help(ROOT / self.doc["entry"])
+        self.assertEqual(tc.subcommands(help_text or ""), set(FRONTEND_OPS))
+        res = tc.check(self.doc)
+        self.assertEqual(res["status"], "pass", res["findings"])
+
+    def test_a_dropped_option_is_caught_per_subcommand(self):
+        doc = copy.deepcopy(self.doc)
+        op = next(o for o in doc["operations"] if o["operation_id"] == "sipm")
+        op["invocation"]["options"] = [o for o in op["invocation"]["options"] if o["flag"] != "--gate"]
+        op["inputs"] = [i for i in op["inputs"] if i["name"] != "gate"]
+        self.assertIn("tool.option_undeclared", codes(tc.check(doc)))
+
+    def test_every_operation_behaves_as_contracted(self):
+        for op in self.doc["operations"]:
+            good, bad = FRONTEND_OPS[op["operation_id"]]
+            exits = {f["exit_code"]: f["status"] for f in op["failure_states"]}
+            self.assertEqual(exits, {1: "failed", 2: "invalid-input"})
+            with self.subTest(operation=op["operation_id"], case="ok"):
+                p = run_tool(self.doc["entry"], [op["operation_id"], *good])
+                self.assertEqual(p.returncode, 0, p.stderr)
+                out = json.loads(p.stdout)
+                for o in op["outputs"]:
+                    self.assertIn(o["name"], out)
+                self.assertEqual(out["status"], "unvalidated")
+            with self.subTest(operation=op["operation_id"], case="invalid"):
+                p = run_tool(self.doc["entry"], [op["operation_id"], *bad])
+                self.assertEqual(p.returncode, 2, p.stdout)
+                out = json.loads(p.stdout)
+                self.assertEqual((out["status"], out["ok"], out["error_kind"]), ("failed", False, "invalid-input"))
+
+    def test_non_finite_result_exits_1_with_json(self):
+        p = run_tool(self.doc["entry"], ["pileup", "--rate", "1e308", "--mean-amp", "1e308", "--peaking", "1e300"])
+        self.assertEqual(p.returncode, 1)
+        out = json.loads(p.stdout)
+        self.assertEqual((out["ok"], out["error_kind"]), (False, "failed"))
+
+
 if __name__ == "__main__":
     unittest.main()

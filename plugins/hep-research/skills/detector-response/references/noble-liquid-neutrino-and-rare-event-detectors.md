@@ -14,9 +14,17 @@ lifetime, quenching) is in [signal formation and readout](signal-formation-and-r
 ionization (-> electrons, `S2` after drift and, in dual phase, extraction and
 electroluminescence in the gas). Ionization electrons and scintillation photons
 **anticorrelate** through recombination: for fixed deposited energy, more charge means
-less light, and the combined estimator (`E ∝ n_gamma + n_e`) has better resolution than
-either alone. Recombination depends on `dE/dx` and drift field, giving electron/nuclear
-recoil discrimination.
+less light, and the combined estimator `E = W (n_gamma + n_e)` has better resolution than
+either alone. `W` is the mean energy per detectable quantum (photon or electron): PDG
+quotes (19.5 ± 1.0) eV for liquid argon and the widely adopted (13.7 ± 0.2) eV for liquid
+xenon, with recent xenon measurements near 11.5 eV, so state the value used; `n_gamma` and
+`n_e` come from `S1` and `S2` through detector-specific gains calibrated with
+mono-energetic lines. Recombination depends on `dE/dx` and drift field, giving
+electron/nuclear recoil discrimination in the charge-to-light ratio; in argon the
+stronger discriminant is the scintillation pulse shape (singlet about 6 ns, triplet about
+1500 ns; in xenon 2.2 ns and 27 ns are too close for the same power). The scintillation is
+vacuum ultraviolet (about 128 nm in argon, 175 nm in xenon), so argon detectors use a
+wavelength shifter such as TPB (PDG RPP 2025, sec. 36, noble liquids).
 
 **Reconstruction.**
 - **Pulse finding** in the waveform (`S1`, `S2`, multiple scatters, single-electron
@@ -120,7 +128,7 @@ fiducialization, and energy scale** dominate the result.
   resolution and wall-event leakage determine the fiducial mass and the residual
   background. Fiducial-mass uncertainty enters the rate limit directly.
 - **Yield/quenching model**: electron-equivalent to nuclear-recoil energy conversion
-  (a model with uncertainty) maps to the physics variable.
+  (a model with uncertainty, for example Lindhard) maps to the physics variable.
 - **Discrimination and background leakage**: leakage fraction versus acceptance measured
   with calibration sources; extrapolation to low energy is the dominant uncertainty.
 - **Blind analysis**: masked signal regions ([analysis design](../../hep-analysis/references/analysis-design.md)).

@@ -45,6 +45,10 @@ question, first establish:
   `v` induces on an electrode the current `i = q v · E_w`, where `E_w` is that
   electrode's weighting field (unit potential on it, zero on all others, space charge
   ignored). The induced charge between two points is `q (phi_w(x2) - phi_w(x1))`.
+  (PDG RPP 2025 eq. 35.20 writes the same form.) With resistive elements, as in
+  resistive plate chambers or underdepleted silicon, the signal also follows the
+  time-dependent reaction of the materials, described by time-dependent weighting
+  fields (W. Riegler, NIM A535 (2004) 287).
 - Consequences: the signal flows *while charges move*, not when they arrive; in a
   pad or pixel much smaller than the sensor thickness the weighting field is
   concentrated near the electrode, so the charge drifting toward it dominates the

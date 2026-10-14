@@ -65,9 +65,17 @@ Practical requirements:
 
 ## Production cuts and stepping
 
-Full simulation is expensive, and cost is controlled by **production cuts** - a
-threshold, usually expressed as a range rather than an energy, below which secondary
-particles are not produced and their energy is deposited locally instead. This is an
+Full simulation is expensive, and cost is controlled by **production cuts**: a range
+cut that Geant4 converts at initialisation into per-material energy thresholds for
+secondary gamma, electron, positron and proton production (the proton cut applies to
+recoil ions in elastic scattering). Below the threshold the energy-loss processes
+(ionisation, bremsstrahlung) do not produce the soft secondaries but count their energy
+in the parent's continuous energy loss along its step; above it they produce them, and
+every particle produced is tracked to zero range. Processes such as decay ignore the
+threshold. Reference physics lists use 0.7 mm by default, and the energy threshold is
+never below 990 eV unless the low edge is lowered (Geant4 Book for Application
+Developers, "Production Threshold versus Tracking Cut" and "Production Cuts"; Physics
+Reference Manual, "Mean Energy Loss"). This is an
 approximation with a physics consequence: too coarse a cut removes the low-energy
 secondaries that carry the signal in a thin detector, distorting deposits in exactly
 the sensitive volumes that matter. Cuts must be set per region, tighter in sensitive
@@ -175,7 +183,7 @@ with the check that closes it.
    the Geant4 version. Run an alternative list (e.g. `QGSP_BIC`) for the model systematic. Choosing
    among lists by their agreement with independent test-beam data is legitimate; choosing by
    agreement with the analysis observable is not.
-3. **Production cuts and step limits.** Scan the range cut (for example 0.7 mm, 0.35 mm,
+3. **Production cuts and step limits.** Scan the range cut (for example 0.7 mm, the default of the Geant4 reference lists, 0.35 mm,
    0.1 mm). Keep the coarsest cut at which the results have converged, i.e. finer cuts
    no longer change the response and resolution within statistics.
 4. **Digitization.** Apply Birks saturation, photostatistics, noise, and the readout

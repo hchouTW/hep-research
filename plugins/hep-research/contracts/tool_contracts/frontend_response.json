@@ -1,0 +1,1441 @@
+{
+ "contract_version": "1.0.0",
+ "tool_id": "frontend-response",
+ "entry": "skills/detector-response/scripts/frontend_response.py",
+ "operations": [
+  {
+   "operation_id": "enc",
+   "summary": "Equivalent noise charge of a charge-sensitive amplifier with a CR-(RC)^n shaper from capacitance, series white, parallel (leakage and R_p) and 1/f noise and the peaking time, with the per-term split, the dominant term and the optimum series-parallel peaking time",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--capacitance",
+      "input": "capacitance"
+     },
+     {
+      "flag": "--peaking",
+      "input": "peaking"
+     },
+     {
+      "flag": "--order",
+      "input": "order"
+     },
+     {
+      "flag": "--en",
+      "input": "en"
+     },
+     {
+      "flag": "--leakage",
+      "input": "leakage"
+     },
+     {
+      "flag": "--rp",
+      "input": "rp"
+     },
+     {
+      "flag": "--af",
+      "input": "af"
+     },
+     {
+      "flag": "--temperature",
+      "input": "temperature"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "capacitance",
+     "kind": "capacitance",
+     "unit": "pF",
+     "required": true,
+     "constraint": "total input capacitance, > 0"
+    },
+    {
+     "name": "peaking",
+     "kind": "time",
+     "unit": "ns",
+     "required": true,
+     "constraint": "peaking time t_p = n tau, > 0"
+    },
+    {
+     "name": "order",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "shaper order n of CR-(RC)^n, integer >= 1",
+     "default": 1
+    },
+    {
+     "name": "en",
+     "kind": "noise_density",
+     "unit": "nV/sqrt(Hz)",
+     "required": false,
+     "constraint": "series white noise density, >= 0",
+     "default": 0.0
+    },
+    {
+     "name": "leakage",
+     "kind": "current",
+     "unit": "nA",
+     "required": false,
+     "constraint": "leakage current, >= 0",
+     "default": 0.0
+    },
+    {
+     "name": "rp",
+     "kind": "resistance",
+     "unit": "ohm",
+     "required": false,
+     "constraint": "parallel (bias or feedback) resistance, > 0; omitted means no R_p noise"
+    },
+    {
+     "name": "af",
+     "kind": "noise_coefficient",
+     "unit": "V^2",
+     "required": false,
+     "constraint": "1/f coefficient A_f (density A_f/f), >= 0",
+     "default": 0.0
+    },
+    {
+     "name": "temperature",
+     "kind": "temperature",
+     "unit": "K",
+     "required": false,
+     "constraint": "temperature of R_p for its thermal noise, > 0",
+     "default": 300.0
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "command",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "assumptions",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "validity",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "enc_electrons",
+     "kind": "charge",
+     "unit": "e"
+    },
+    {
+     "name": "terms_electrons",
+     "kind": "charge",
+     "unit": "e"
+    },
+    {
+     "name": "dominant_term",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "optimum_series_vs_parallel",
+     "kind": "parameter",
+     "unit": "n/a"
+    },
+    {
+     "name": "shaper",
+     "kind": "parameter",
+     "unit": "n/a"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the result is not finite for these inputs (overflow or division by zero); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"failed\", \"error\": ...} and stderr one line"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed or out of range (including a relation the subcommand checks, such as R_p > 0 or rho within [-1/(N-1), 1]); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   }
+  },
+  {
+   "operation_id": "noise-rate",
+   "summary": "Rice up-crossing rate of shaped Gaussian noise above a threshold in units of the noise sigma, per channel, and with a window and channel count the expected fake hits per event",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--threshold",
+      "input": "threshold"
+     },
+     {
+      "flag": "--peaking",
+      "input": "peaking"
+     },
+     {
+      "flag": "--order",
+      "input": "order"
+     },
+     {
+      "flag": "--noise-type",
+      "input": "noise_type"
+     },
+     {
+      "flag": "--series-fraction",
+      "input": "series_fraction"
+     },
+     {
+      "flag": "--channels",
+      "input": "channels"
+     },
+     {
+      "flag": "--window",
+      "input": "window"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "threshold",
+     "kind": "parameter",
+     "unit": "1",
+     "required": true,
+     "constraint": "threshold in units of the noise sigma"
+    },
+    {
+     "name": "peaking",
+     "kind": "time",
+     "unit": "ns",
+     "required": true,
+     "constraint": "peaking time, > 0"
+    },
+    {
+     "name": "order",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "shaper order, integer >= 1",
+     "default": 2
+    },
+    {
+     "name": "noise_type",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "series, parallel or mixed",
+     "default": "series"
+    },
+    {
+     "name": "series_fraction",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "mixed only: fraction of the noise variance that is series noise, in [0, 1]"
+    },
+    {
+     "name": "channels",
+     "kind": "counts",
+     "unit": "1",
+     "required": false,
+     "constraint": "number of channels, integer >= 1",
+     "default": 1
+    },
+    {
+     "name": "window",
+     "kind": "time",
+     "unit": "ns",
+     "required": false,
+     "constraint": "readout or integration window, > 0"
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "command",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "assumptions",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "validity",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "nu0_hz",
+     "kind": "rate",
+     "unit": "Hz"
+    },
+    {
+     "name": "nu0_times_tau",
+     "kind": "parameter",
+     "unit": "1"
+    },
+    {
+     "name": "nu0_times_peaking",
+     "kind": "parameter",
+     "unit": "1"
+    },
+    {
+     "name": "rate_per_channel_hz",
+     "kind": "rate",
+     "unit": "Hz"
+    },
+    {
+     "name": "threshold_sigma",
+     "kind": "parameter",
+     "unit": "1"
+    },
+    {
+     "name": "noise_type",
+     "kind": "label",
+     "unit": "n/a"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the result is not finite for these inputs (overflow or division by zero); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"failed\", \"error\": ...} and stderr one line"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed or out of range (including a relation the subcommand checks, such as R_p > 0 or rho within [-1/(N-1), 1]); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   }
+  },
+  {
+   "operation_id": "timing",
+   "summary": "Timing jitter t_r/(S/N), and optionally leading-edge walk between two amplitudes, the constant-fraction mode for a fraction and delay, and the TDC quantization of a bin",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--rise",
+      "input": "rise"
+     },
+     {
+      "flag": "--snr",
+      "input": "snr"
+     },
+     {
+      "flag": "--threshold",
+      "input": "threshold"
+     },
+     {
+      "flag": "--amplitudes",
+      "input": "amplitudes"
+     },
+     {
+      "flag": "--cfd-fraction",
+      "input": "cfd_fraction"
+     },
+     {
+      "flag": "--cfd-delay",
+      "input": "cfd_delay"
+     },
+     {
+      "flag": "--tdc-lsb",
+      "input": "tdc_lsb"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "rise",
+     "kind": "time",
+     "unit": "ns",
+     "required": true,
+     "constraint": "rise time, > 0"
+    },
+    {
+     "name": "snr",
+     "kind": "parameter",
+     "unit": "1",
+     "required": true,
+     "constraint": "signal-to-noise ratio (amplitude over noise sigma), > 0"
+    },
+    {
+     "name": "threshold",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "leading-edge threshold in the units of --amplitudes; needs --amplitudes"
+    },
+    {
+     "name": "amplitudes",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "two amplitudes compared for walk; needs --threshold"
+    },
+    {
+     "name": "cfd_fraction",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "CFD fraction in (0, 1); needs --cfd-delay"
+    },
+    {
+     "name": "cfd_delay",
+     "kind": "time",
+     "unit": "ns",
+     "required": false,
+     "constraint": "CFD delay; needs --cfd-fraction"
+    },
+    {
+     "name": "tdc_lsb",
+     "kind": "time",
+     "unit": "ps",
+     "required": false,
+     "constraint": "TDC bin, > 0"
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "command",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "assumptions",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "validity",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "jitter_ps",
+     "kind": "time",
+     "unit": "ps"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the result is not finite for these inputs (overflow or division by zero); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"failed\", \"error\": ...} and stderr one line"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed or out of range (including a relation the subcommand checks, such as R_p > 0 or rho within [-1/(N-1), 1]); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   }
+  },
+  {
+   "operation_id": "quantize",
+   "summary": "Effective quantization error of an ADC for a noise sigma in LSB and the largest bias that survives averaging",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--noise-lsb",
+      "input": "noise_lsb"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "noise_lsb",
+     "kind": "parameter",
+     "unit": "LSB",
+     "required": true,
+     "constraint": "noise sigma in LSB, >= 0"
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "command",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "assumptions",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "validity",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "noise_lsb",
+     "kind": "parameter",
+     "unit": "LSB"
+    },
+    {
+     "name": "sigma_effective_lsb",
+     "kind": "parameter",
+     "unit": "LSB"
+    },
+    {
+     "name": "max_abs_bias_lsb",
+     "kind": "parameter",
+     "unit": "LSB"
+    },
+    {
+     "name": "at_true_fraction_of_lsb",
+     "kind": "parameter",
+     "unit": "1"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the result is not finite for these inputs (overflow or division by zero); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"failed\", \"error\": ...} and stderr one line"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed or out of range (including a relation the subcommand checks, such as R_p > 0 or rho within [-1/(N-1), 1]); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   }
+  },
+  {
+   "operation_id": "pileup",
+   "summary": "Campbell mean and sigma of a shaped Poisson pulse train (unipolar g(t) or bipolar tau dg/dt) and the occupancy per peaking time",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--rate",
+      "input": "rate"
+     },
+     {
+      "flag": "--mean-amp",
+      "input": "mean_amp"
+     },
+     {
+      "flag": "--second-moment",
+      "input": "second_moment"
+     },
+     {
+      "flag": "--peaking",
+      "input": "peaking"
+     },
+     {
+      "flag": "--order",
+      "input": "order"
+     },
+     {
+      "flag": "--bipolar",
+      "input": "bipolar"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "rate",
+     "kind": "rate",
+     "unit": "Hz",
+     "required": true,
+     "constraint": "pulse rate per channel, >= 0"
+    },
+    {
+     "name": "mean_amp",
+     "kind": "parameter",
+     "unit": "{A}",
+     "required": true,
+     "constraint": "mean pulse amplitude <a> of the unipolar pulse"
+    },
+    {
+     "name": "second_moment",
+     "kind": "parameter",
+     "unit": "{A}^2",
+     "required": false,
+     "constraint": "<a^2> (default <a>^2, a fixed amplitude)"
+    },
+    {
+     "name": "peaking",
+     "kind": "time",
+     "unit": "ns",
+     "required": true,
+     "constraint": "peaking time, > 0"
+    },
+    {
+     "name": "order",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "shaper order, integer >= 1",
+     "default": 1
+    },
+    {
+     "name": "bipolar",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "bipolar shaping (tau dg/dt)",
+     "default": false
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "command",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "assumptions",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "validity",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "mean",
+     "kind": "parameter",
+     "unit": "{A}"
+    },
+    {
+     "name": "sigma",
+     "kind": "parameter",
+     "unit": "{A}"
+    },
+    {
+     "name": "occupancy_per_peaking_time",
+     "kind": "parameter",
+     "unit": "1"
+    },
+    {
+     "name": "shape",
+     "kind": "label",
+     "unit": "n/a"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the result is not finite for these inputs (overflow or division by zero); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"failed\", \"error\": ...} and stderr one line"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed or out of range (including a relation the subcommand checks, such as R_p > 0 or rho within [-1/(N-1), 1]); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   }
+  },
+  {
+   "operation_id": "sipm",
+   "summary": "SiPM fired cells under saturation and the linearity fraction, crosstalk (Borel) cells per primary, and dark-count mean and variance in a gate",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--cells",
+      "input": "cells"
+     },
+     {
+      "flag": "--npe",
+      "input": "npe"
+     },
+     {
+      "flag": "--crosstalk",
+      "input": "crosstalk"
+     },
+     {
+      "flag": "--dcr",
+      "input": "dcr"
+     },
+     {
+      "flag": "--gate",
+      "input": "gate"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "cells",
+     "kind": "counts",
+     "unit": "1",
+     "required": true,
+     "constraint": "number of cells, integer >= 1"
+    },
+    {
+     "name": "npe",
+     "kind": "counts",
+     "unit": "1",
+     "required": true,
+     "constraint": "expected primary photoelectrons before saturation, >= 0"
+    },
+    {
+     "name": "crosstalk",
+     "kind": "probability",
+     "unit": "1",
+     "required": false,
+     "constraint": "crosstalk probability P_ct as on a datasheet, in [0, 1)",
+     "default": 0.0
+    },
+    {
+     "name": "dcr",
+     "kind": "rate",
+     "unit": "Hz",
+     "required": false,
+     "constraint": "dark count rate, >= 0",
+     "default": 0.0
+    },
+    {
+     "name": "gate",
+     "kind": "time",
+     "unit": "ns",
+     "required": false,
+     "constraint": "integration gate, >= 0",
+     "default": 0.0
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "command",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "assumptions",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "validity",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "fired_cells",
+     "kind": "counts",
+     "unit": "1"
+    },
+    {
+     "name": "linearity_fraction",
+     "kind": "parameter",
+     "unit": "1"
+    },
+    {
+     "name": "crosstalk_cells_per_primary",
+     "kind": "parameter",
+     "unit": "n/a"
+    },
+    {
+     "name": "dark_counts_in_gate",
+     "kind": "parameter",
+     "unit": "n/a"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the result is not finite for these inputs (overflow or division by zero); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"failed\", \"error\": ...} and stderr one line"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed or out of range (including a relation the subcommand checks, such as R_p > 0 or rho within [-1/(N-1), 1]); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   }
+  },
+  {
+   "operation_id": "ballistic",
+   "summary": "Ballistic deficit: relative peak amplitude of a CR-(RC)^n shaper for a rectangular current of finite collection time, the time of the peak and the small-T_c approximation",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--collection",
+      "input": "collection"
+     },
+     {
+      "flag": "--peaking",
+      "input": "peaking"
+     },
+     {
+      "flag": "--order",
+      "input": "order"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "collection",
+     "kind": "time",
+     "unit": "ns",
+     "required": true,
+     "constraint": "charge-collection time T_c, >= 0"
+    },
+    {
+     "name": "peaking",
+     "kind": "time",
+     "unit": "ns",
+     "required": true,
+     "constraint": "peaking time, > 0"
+    },
+    {
+     "name": "order",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "shaper order, integer >= 1",
+     "default": 1
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "command",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "assumptions",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "validity",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "relative_amplitude",
+     "kind": "parameter",
+     "unit": "1"
+    },
+    {
+     "name": "deficit",
+     "kind": "parameter",
+     "unit": "1"
+    },
+    {
+     "name": "time_of_peak_ns",
+     "kind": "time",
+     "unit": "ns"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the result is not finite for these inputs (overflow or division by zero); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"failed\", \"error\": ...} and stderr one line"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed or out of range (including a relation the subcommand checks, such as R_p > 0 or rho within [-1/(N-1), 1]); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   }
+  },
+  {
+   "operation_id": "deadtime",
+   "summary": "Measured rate and live fraction from a true rate, or the true rate from a measured rate, for a non-paralyzable or paralyzable dead time",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--dead-time",
+      "input": "dead_time"
+     },
+     {
+      "flag": "--rate",
+      "input": "rate"
+     },
+     {
+      "flag": "--measured",
+      "input": "measured"
+     },
+     {
+      "flag": "--model",
+      "input": "model"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "dead_time",
+     "kind": "time",
+     "unit": "ns",
+     "required": true,
+     "constraint": "dead time per event, > 0"
+    },
+    {
+     "name": "rate",
+     "kind": "rate",
+     "unit": "Hz",
+     "required": false,
+     "constraint": "true rate; exactly one of --rate and --measured"
+    },
+    {
+     "name": "measured",
+     "kind": "rate",
+     "unit": "Hz",
+     "required": false,
+     "constraint": "measured rate; exactly one of --rate and --measured"
+    },
+    {
+     "name": "model",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "nonparalyzable or paralyzable",
+     "default": "nonparalyzable"
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "command",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "assumptions",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "validity",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "model",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "dead_time_ns",
+     "kind": "time",
+     "unit": "ns"
+    },
+    {
+     "name": "true_rate_hz",
+     "kind": "rate",
+     "unit": "Hz"
+    },
+    {
+     "name": "measured_rate_hz",
+     "kind": "rate",
+     "unit": "Hz"
+    },
+    {
+     "name": "live_fraction",
+     "kind": "parameter",
+     "unit": "1"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the result is not finite for these inputs (overflow or division by zero); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"failed\", \"error\": ...} and stderr one line"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed or out of range (including a relation the subcommand checks, such as R_p > 0 or rho within [-1/(N-1), 1]); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   }
+  },
+  {
+   "operation_id": "leakage-scale",
+   "summary": "Silicon bulk leakage current scaled to another temperature, I ~ T^2 exp(-E_eff/2kT)",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--current",
+      "input": "current"
+     },
+     {
+      "flag": "--from-celsius",
+      "input": "from_celsius"
+     },
+     {
+      "flag": "--to-celsius",
+      "input": "to_celsius"
+     },
+     {
+      "flag": "--e-eff",
+      "input": "e_eff"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "current",
+     "kind": "current",
+     "unit": "nA",
+     "required": true,
+     "constraint": "leakage current at --from-celsius, >= 0"
+    },
+    {
+     "name": "from_celsius",
+     "kind": "temperature",
+     "unit": "degC",
+     "required": true,
+     "constraint": "temperature of the given current, above absolute zero"
+    },
+    {
+     "name": "to_celsius",
+     "kind": "temperature",
+     "unit": "degC",
+     "required": true,
+     "constraint": "target temperature, above absolute zero"
+    },
+    {
+     "name": "e_eff",
+     "kind": "energy",
+     "unit": "eV",
+     "required": false,
+     "constraint": "effective band gap for silicon",
+     "default": 1.21
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "command",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "assumptions",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "validity",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "leakage_na",
+     "kind": "current",
+     "unit": "nA"
+    },
+    {
+     "name": "scale_factor",
+     "kind": "parameter",
+     "unit": "1"
+    },
+    {
+     "name": "from_celsius",
+     "kind": "temperature",
+     "unit": "degC"
+    },
+    {
+     "name": "to_celsius",
+     "kind": "temperature",
+     "unit": "degC"
+    },
+    {
+     "name": "e_eff_ev",
+     "kind": "energy",
+     "unit": "eV"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the result is not finite for these inputs (overflow or division by zero); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"failed\", \"error\": ...} and stderr one line"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed or out of range (including a relation the subcommand checks, such as R_p > 0 or rho within [-1/(N-1), 1]); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   }
+  },
+  {
+   "operation_id": "cluster-noise",
+   "summary": "Noise of a sum of N channels with equal sigma and one pairwise correlation coefficient, and its ratio to the independent case",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--channels",
+      "input": "channels"
+     },
+     {
+      "flag": "--sigma",
+      "input": "sigma"
+     },
+     {
+      "flag": "--rho",
+      "input": "rho"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "channels",
+     "kind": "counts",
+     "unit": "1",
+     "required": true,
+     "constraint": "number of channels, integer >= 1"
+    },
+    {
+     "name": "sigma",
+     "kind": "parameter",
+     "unit": "{S}",
+     "required": true,
+     "constraint": "per-channel noise sigma, >= 0"
+    },
+    {
+     "name": "rho",
+     "kind": "parameter",
+     "unit": "1",
+     "required": true,
+     "constraint": "pairwise correlation coefficient in [-1/(N-1), 1]"
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "command",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "assumptions",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "validity",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "sigma_sum",
+     "kind": "parameter",
+     "unit": "{S}"
+    },
+    {
+     "name": "sigma_sum_if_independent",
+     "kind": "parameter",
+     "unit": "{S}"
+    },
+    {
+     "name": "ratio_to_independent",
+     "kind": "parameter",
+     "unit": "1"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the result is not finite for these inputs (overflow or division by zero); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"failed\", \"error\": ...} and stderr one line"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed or out of range (including a relation the subcommand checks, such as R_p > 0 or rho within [-1/(N-1), 1]); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   }
+  }
+ ]
+}

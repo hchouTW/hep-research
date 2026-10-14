@@ -146,13 +146,25 @@ transverse momentum - which is why jet energy scale and resolution get their own
 variation treatment in
 [systematics.md](../../hep-analysis/references/systematics.md).
 
+**Routes to compensation** (PDG RPP 2025, sec. 35.10.3): a high-Z absorber, which
+lowers the electromagnetic response, with a hydrogenous active medium (organic
+scintillator) whose sensitivity to spallation neutrons tracks the invisible energy,
+at a carefully chosen sampling fraction and integration time; fission in uranium
+absorbers adds signal; dual readout uses Cherenkov light, produced mainly by the
+electromagnetic component, next to scintillation to estimate `f_em` per event; offline
+(software) weighting uses longitudinal or fine-grained shower information; particle flow
+replaces calorimeter measurements of charged hadrons by tracks. Intrinsically compensating
+calorimeters are not used in current large collider experiments.
+
 ## Leakage, dead material, and containment
 
 Energy that escapes the calorimeter is not measured. **Longitudinal leakage** (punch
 through the back) produces a low-side tail that grows with energy and is the practical
 limit on how far a calorimeter's calibration can be extrapolated. **Lateral leakage**
 outside the reconstruction cluster is a clustering choice, and trades against the noise
-and pileup term - a larger cluster recovers energy but collects more noise. **Dead
+and pileup term - a larger cluster recovers energy but collects more noise. For
+electromagnetic showers about 90% of the energy lies on average within one Molière
+radius `R_M` and about 99% within `3.5 R_M` (PDG RPP 2025, sec. 34.5). **Dead
 material** upstream or between compartments absorbs energy invisibly and must be
 corrected using the observed energy sharing between compartments.
 
