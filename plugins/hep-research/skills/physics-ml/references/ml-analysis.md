@@ -14,6 +14,20 @@ hep-analysis' ([weights-normalization.md](../../hep-analysis/references/weights-
 Citations give arXiv identifiers looked up on INSPIRE-HEP or arXiv on 2026-10-13. They point to the method, not to
 a validated recipe for any experiment.
 
+## Task routes
+
+The index of tasks this skill owns that have no row of their own in `SKILL.md`:
+
+| Task | Read |
+|---|---|
+| ML systematics: which ML uncertainty enters the measurement, systematic-aware training | [uncertainty-and-calibration.md](uncertainty-and-calibration.md) ("When an ML uncertainty is a measurement systematic"); this file, "Parameterized and systematic-aware training" |
+| Hyperparameter search: grouped or nested cross-validation, seeds, search budget | [optimization-and-training-dynamics.md](optimization-and-training-dynamics.md); grouped splits in "Splits and leakage" below |
+| Anomaly detection and weak supervision (CWoLa, CATHODE, autoencoders), training on data | this file, "Weak supervision and anomaly detection" and "Training on data and blinding" |
+| "Is this improvement real?": ablations, seed variance, model comparison | [ablation-and-design-review.md](ablation-and-design-review.md); `scripts/compare_model_runs.py` |
+| Interpretability of a physics model | [interpretability-and-explainability.md](interpretability-and-explainability.md) |
+| Reweighting and ML unfolding (OmniFold, DCTR) | this file, "ML unfolding (training side)"; the `reweighting` task of the ml-artifact |
+| ML tracking and graph networks on hits | [particle-and-jet-architectures.md](particle-and-jet-architectures.md) |
+
 ## Splits and leakage
 
 Split by event and production relationships, not merely by random rows. Multiple candidates, systematic variants,
