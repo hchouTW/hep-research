@@ -39,7 +39,7 @@ class SmallSeedComparisonTests(unittest.TestCase):
     def test_method_is_reported_and_a_real_effect_is_found(self):
         base = [0.80, 0.81, 0.79, 0.80, 0.82, 0.80, 0.81]
         res = cmr.compare(base, [b + 0.05 for b in base])
-        self.assertIn("permutation", res["method"])
+        self.assertIn("Student-t", res["method"])
         self.assertLess(res["permutation_p_value"], 0.05)
         self.assertTrue(res["interval_excludes_zero"])
         big = cmr.compare([random.Random(1).gauss(0, 1) for _ in range(12)], [random.Random(2).gauss(0, 1) for _ in range(12)])

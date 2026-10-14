@@ -7,8 +7,8 @@ gains are smaller than it. Reporting a single run, or the best of several, is no
 evidence.
 
 What it does: takes per-seed scores for a baseline and a variant, pairs them by seed
-where possible, and reports the mean difference with a bootstrap confidence interval (with fewer than 10 seeds,
-an exact permutation test decides and the interval is Student's t on the seed means, because the bootstrap
+where possible, and reports the mean difference with a bootstrap confidence interval (with fewer than 10 seeds a
+Student-t interval on the seed means, with the exact permutation p-value beside it, because the bootstrap
 undercovers there),
 the seed spread of each arm, whether the interval excludes zero, and the minimum
 effect this many seeds could reliably detect. Also flags a best-of-N comparison, which
@@ -211,9 +211,9 @@ def compare(baseline, variant, level=0.95, lower_is_better=False,
     p_value = None
     if min(len(baseline), len(variant)) < SMALL_SAMPLE:
         # With few seeds the percentile bootstrap undercovers (false "improvements" at 26%, 15%, 11% for 3, 5, 10
-        # seeds against a nominal 5% in the physics-ml audit's first pass): the exact permutation test decides, and
-        # the interval is Student's t on the seed means.
-        method = "exact permutation test with a Student-t interval (fewer than 10 seeds)"
+        # seeds against a nominal 5% in the physics-ml audit's first pass): a Student-t interval on the seed means
+        # decides, and the exact permutation p-value is reported beside it.
+        method = "Student-t test on the seed means, with the exact permutation p-value (fewer than 10 seeds)"
         p_value = permutation_p_value(baseline, variant, paired, sign)
         if paired:
             df, se = len(differences) - 1, difference_stdev / math.sqrt(len(differences))
@@ -224,7 +224,7 @@ def compare(baseline, variant, level=0.95, lower_is_better=False,
                                    or 1.0)
         t_crit = student_t_quantile(1.0 - (1.0 - level) / 2.0, df) if se > 0 else 0.0
         low, high = mean_difference - t_crit * se, mean_difference + t_crit * se
-        significant = p_value < 1.0 - level
+        significant = (low > 0.0) or (high < 0.0)  # the t test decides; the permutation p-value is reported beside it
     else:
         significant = (low > 0.0) or (high < 0.0)
 
@@ -254,8 +254,9 @@ def verdict(result):
         lines.append("Arms are unpaired (different lengths); pairing by seed would be "
                      "substantially more sensitive.")
     if result.get("permutation_p_value") is not None:
-        lines.append(f"Fewer than {SMALL_SAMPLE} seeds: decided by an exact permutation test "
-                     f"(p = {result['permutation_p_value']:.3g}); the interval is Student's t on the seed means.")
+        lines.append(f"Fewer than {SMALL_SAMPLE} seeds: decided by a Student-t interval on the seed means (the "
+                     "bootstrap undercovers here); exact permutation p-value "
+                     f"{result['permutation_p_value']:.3g} (with very few seeds it cannot reach small values).")
     if result["interval_excludes_zero"]:
         lines.append(f"Supported: the {result['level'] * 100:.0f}% interval on the "
                      f"difference excludes zero, so the variant is {direction}.")

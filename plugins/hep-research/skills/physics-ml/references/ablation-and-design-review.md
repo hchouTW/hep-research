@@ -2,7 +2,7 @@
 
 Establishing that a change helped. Most reported improvements are confounded, within seed noise, or bought by a budget
 the baseline did not get. Test: `<plugin root>/skills/physics-ml/scripts/compare_model_runs.py` (paired comparison
-across seeds; with fewer than 10 seeds it uses an exact test on seed means and says so).
+across seeds; with fewer than 10 seeds it decides with a Student-t interval on the seed means and reports the exact permutation p-value).
 
 - **Seed variance is the floor.** Run the baseline more than once; an improvement smaller than the spread of an
   unchanged configuration is unsupported. Report the distribution, never best-of-N (its expectation rises with N).

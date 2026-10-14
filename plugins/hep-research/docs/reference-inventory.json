@@ -30,7 +30,7 @@
   },
   "physics-ml": {
    "references": 38,
-   "bytes": 179004,
+   "bytes": 179053,
    "uncited": 0
   },
   "research-communication": {
@@ -1899,7 +1899,7 @@
   {
    "path": "skills/physics-ml/references/ablation-and-design-review.md",
    "owner": "physics-ml",
-   "bytes": 2280,
+   "bytes": 2329,
    "lines": 31,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -1919,7 +1919,7 @@
    "cited_by_other_skills": [
     "research-communication"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "0ab5680 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/architecture-selection.md",
@@ -1932,7 +1932,7 @@
     "skills/physics-ml/references/optimization-and-training-dynamics.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0946691 2026-10-14"
+   "last_commit": "0ab5680 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/checkpointing.md",
@@ -1962,7 +1962,7 @@
     "skills/physics-ml/references/optimization-and-training-dynamics.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "0ab5680 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/data-loading.md",
@@ -1976,7 +1976,7 @@
     "skills/physics-ml/references/training-at-scale.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "721d1ea 2026-10-13"
+   "last_commit": "0ab5680 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/data-strategy.md",
@@ -1990,7 +1990,7 @@
     "skills/physics-ml/scripts/check_split_integrity.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0946691 2026-10-14"
+   "last_commit": "b2bf7ef 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/debugging-pytorch.md",
@@ -2006,7 +2006,7 @@
     "skills/physics-ml/references/transformer-architectures.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "0ab5680 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/deep-learning-guide.md",
@@ -2028,7 +2028,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "721d1ea 2026-10-13"
+   "last_commit": "0ab5680 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/distributed-training.md",
@@ -2042,7 +2042,7 @@
     "skills/physics-ml/references/parallelism-strategy.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "721d1ea 2026-10-13"
+   "last_commit": "0ab5680 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/efficient-finetuning.md",
@@ -2058,7 +2058,7 @@
     "skills/physics-ml/references/uncertainty-and-calibration.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "721d1ea 2026-10-13"
+   "last_commit": "0ab5680 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/evaluation-metrics.md",
@@ -2073,7 +2073,7 @@
     "skills/physics-ml/references/uncertainty-and-calibration.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0946691 2026-10-14"
+   "last_commit": "0ab5680 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/evaluation-strategy.md",
@@ -2090,7 +2090,7 @@
    "cited_by_other_skills": [
     "research-communication"
    ],
-   "last_commit": "4665f43 2026-10-13"
+   "last_commit": "0ab5680 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/export-and-deployment.md",
@@ -2104,7 +2104,7 @@
     "skills/physics-ml/references/serving-architecture.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "721d1ea 2026-10-13"
+   "last_commit": "0ab5680 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/fast-simulation-validation.md",
@@ -2119,7 +2119,7 @@
     "skills/physics-ml/references/ml-analysis.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "1497349 2026-10-13"
+   "last_commit": "b2bf7ef 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/generative-models.md",
@@ -2135,7 +2135,7 @@
     "skills/physics-ml/references/optimization-and-training-dynamics.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "1497349 2026-10-13"
+   "last_commit": "b2bf7ef 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/geometric-and-equivariant-learning.md",
@@ -2150,7 +2150,7 @@
     "skills/physics-ml/references/scientific-machine-learning.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "0946691 2026-10-14"
+   "last_commit": "0ab5680 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/interpretability-and-explainability.md",
@@ -2164,7 +2164,7 @@
     "skills/physics-ml/references/ml-analysis.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "0ab5680 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/mixed-precision.md",
@@ -2181,7 +2181,7 @@
     "skills/physics-ml/references/performance-memory.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "721d1ea 2026-10-13"
+   "last_commit": "0ab5680 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/ml-analysis.md",
@@ -2223,7 +2223,7 @@
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "1f0c825 2026-10-14"
+   "last_commit": "b2bf7ef 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/monitoring-and-lifecycle.md",
@@ -2237,7 +2237,7 @@
     "skills/physics-ml/references/robustness-and-distribution-shift.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "721d1ea 2026-10-13"
+   "last_commit": "0ab5680 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/multivariate-analysis-bdt-nn.md",
@@ -2258,7 +2258,7 @@
    "cited_by_other_skills": [
     "detector-response"
    ],
-   "last_commit": "0946691 2026-10-14"
+   "last_commit": "b2bf7ef 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/optimization-and-training-dynamics.md",
@@ -2270,7 +2270,7 @@
     "skills/physics-ml/references/deep-learning-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "0ab5680 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/parallelism-strategy.md",
@@ -2286,7 +2286,7 @@
     "tests/skills/physics_ml/test_physics_ml_skill.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "721d1ea 2026-10-13"
+   "last_commit": "0ab5680 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/particle-and-jet-architectures.md",
@@ -2305,7 +2305,7 @@
     "skills/physics-ml/references/transformer-architectures.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "1497349 2026-10-13"
+   "last_commit": "b2bf7ef 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/performance-memory.md",
@@ -2339,7 +2339,7 @@
     "skills/physics-ml/references/training-at-scale.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "4665f43 2026-10-13"
+   "last_commit": "0ab5680 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/robustness-and-distribution-shift.md",
@@ -2358,7 +2358,7 @@
     "skills/physics-ml/references/uncertainty-and-calibration.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "0ab5680 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/sbi-training.md",
@@ -2373,7 +2373,7 @@
     "skills/physics-ml/references/scientific-machine-learning.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "1497349 2026-10-13"
+   "last_commit": "b2bf7ef 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/scientific-machine-learning.md",
@@ -2395,7 +2395,7 @@
     "hep-statistics",
     "hep-theory"
    ],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "0ab5680 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/sequence-models.md",
@@ -2410,7 +2410,7 @@
     "skills/physics-ml/references/transformer-architectures.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "721d1ea 2026-10-13"
+   "last_commit": "0ab5680 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/serving-architecture.md",
@@ -2423,7 +2423,7 @@
     "skills/physics-ml/references/deep-learning-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "721d1ea 2026-10-13"
+   "last_commit": "0ab5680 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/space-and-astroparticle-ml.md",
@@ -2437,7 +2437,7 @@
     "skills/physics-ml/references/ml-analysis.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "1497349 2026-10-13"
+   "last_commit": "b2bf7ef 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/tensor-shapes.md",
@@ -2465,7 +2465,7 @@
     "skills/physics-ml/references/optimization-and-training-dynamics.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "721d1ea 2026-10-13"
+   "last_commit": "0ab5680 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/training-loop.md",
@@ -2510,7 +2510,7 @@
     "skills/physics-ml/references/sequence-models.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "721d1ea 2026-10-13"
+   "last_commit": "0ab5680 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/uncertainty-and-calibration.md",
@@ -2532,7 +2532,7 @@
    "cited_by_other_skills": [
     "hep-statistics"
    ],
-   "last_commit": "0946691 2026-10-14"
+   "last_commit": "0ab5680 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/academic-diagrams-guide.md",
