@@ -36,12 +36,16 @@ ADS, arXiv), `literature-lookup-recipes.md`.
    - INSPIRE-HEP: the record's `withdrawn` field (query `withdrawn:true` works) and
      linked erratum records;
    - arXiv: the abstract page and version history (a withdrawal is a new version
-     with a withdrawal comment; see arXiv moderation, "Withdraw / Retract a Submission");
+     with a withdrawal comment; see arXiv, "Withdraw / Retract a Submission",
+     https://info.arxiv.org/help/withdraw.html);
    - Crossref: `https://api.crossref.org/works?filter=updates:<DOI>` lists notices
      (erratum, correction, retraction) that update a DOI; each carries `update-to`
      with its `type`, and retractions may come from the Retraction Watch data
      (`source: retraction-watch`). An empty result means no notice is registered
-     there, not that none exists.
+     there, not that none exists. Documentation: Crossref REST API filters
+     (https://www.crossref.org/documentation/retrieve-metadata/rest-api/rest-api-filters/, `updates`: "is an
+     update to the given DOI") and Retraction Watch in the REST API
+     (https://www.crossref.org/documentation/retrieve-metadata/retraction-watch/), both opened 2026-10-14.
 5. Propose the smallest correction: narrow the claim, fix metadata, cite the
    relevant version, or supply a verified replacement. Keys: rename only to
    merge one paper held under two keys, by rule 9 of `academic-papers-guide.md`
