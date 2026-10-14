@@ -10,6 +10,32 @@ Software checks establish contract consistency only, not physical validity.
   the remaining checks still run. Before, the uncaught timeout aborted the whole run with a traceback (seen in the
   0.10.0 release gate when two runs shared the CPU and `ams_optional` passed 600 s).
 
+Follow-ups to the check of the three audit orders on 0.10.0 (every rerun item verified, no regressions; the open
+items below were fixed, sources opened 2026-10-15).
+
+- detector-response: tool contract for `frontend_response.py` (`contracts/tool_contracts/frontend_response.json`, ten
+  operations checked against each subcommand's `--help`; exits 1 and 2 print JSON); its top-level usage is one line so
+  the checker sees every subcommand. Tests: `FrontendResponseContractTests`.
+- detector-response references, from PDG RPP 2025 reviews 34-36, NIST PSTAR, the Geant4 manuals and the arXiv papers
+  named in the text: noble-liquid W values and pulse shapes; Gluckstern validity (N >= 10) and the `beta` power of the
+  scattering term (PDG eq. 35.70, unchanged); silicon response; Lindhard quenching; transition radiation; stopping-power
+  corrections; Polya gain; resistive induction; SiPM and APD noise; LGAD timing (15-20 ps); compensation and
+  containment; Geant4 production cuts; prescale handling; luminosity uncertainty; tracker weak modes; Hillas
+  parameters; CTAO LST status; neutrino telescopes; new notes on muon detectors, radio detection and wide-field
+  gamma-ray arrays (HAWC, LHAASO-KM2A); a `Check:` line per section in the triggers, physics-objects and
+  event-reconstruction references. Rows still without an openable source stay deferred in VALIDATION.
+- hep-analysis `geomagnetic_cutoff.py`: the default dipole moment 8.05e25 G cm^3 is stated once as the IGRF-14 1955
+  dipole (C = 59.6 GV); the 2025 dipole is 7.69e25 G cm^3 (cutoffs about 4.5% lower). Default and outputs unchanged.
+  Test: `GeomagneticDipoleDefaultTests`.
+- Contracts: committed fixtures for the 2.8.0 ml-artifact rules (53 files, `ml_v28_*`, `statres_v28_*`) and a test
+  that every 2.8.0 ML code has one; `gate_verdicts.json` gains rows, no verdict changed. No contract version change.
+- physics-ml: regression tests for `anomaly_validation`, `reweighting_validation` and the temperature-at-bound warning.
+- research-communication: the Springer Nature AI-use row states what the public policy page says (an "AI Declaration"
+  in the manuscript, disclosure in captions for AI visuals; AI not an author); the ADS `citations()`/`references()`
+  operators are stated from the ADS help source instead of marked unverified.
+- VALIDATION: detector-response deferred list updated (and the work order's "FWHM" 6271594.24 is the falling
+  half-maximum depth; FWHM is 2358463.01); physics-ml references size 179,135 B.
+
 ## 0.10.0 (2026-10-14)
 
 The detector-response, physics-ml and research-communication audits (PR #81). ams02-research needs no change
