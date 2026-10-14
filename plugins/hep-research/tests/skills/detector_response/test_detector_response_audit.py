@@ -69,7 +69,6 @@ class _TempFiles:
 
 # --------------------------------------------------------------------- E-X1, E-X2, N-X1
 class GaisserHillasBracketingTests(unittest.TestCase):
-    @unittest.expectedFailure  # pending DR-WP1-02
     def test_huge_x_max_terminates(self):
         """E-X1: x_max = 1e20 hung forever (upper += step is a no-op). After the fix the
         script must finish: either a JSON error (exit 1) or a correct width. For
@@ -95,7 +94,6 @@ class GaisserHillasBracketingTests(unittest.TestCase):
         self.assertAlmostEqual(payload['half_maximum_depths']['falling_edge'], 213208.505291,
                                delta=1e-3)
 
-    @unittest.expectedFailure  # pending DR-WP1-02
     def test_wide_profile_is_not_refused_by_the_fixed_cap(self):
         """N-X2: the guard upper > x_max + 1e6 refuses a valid profile whose falling half
         maximum lies more than 1e6 g/cm^2 past x_max. x_max=5e6, x0=-60, lambda=2e5:
@@ -105,7 +103,6 @@ class GaisserHillasBracketingTests(unittest.TestCase):
         self.assertAlmostEqual(payload['half_maximum_depths']['falling_edge'], 6271594.238044,
                                delta=1e-3)
 
-    @unittest.expectedFailure  # pending DR-WP1-02
     def test_tiny_lambda_names_the_cause(self):
         """E-X2: lambda = 1e-300 gave 'math range error'."""
         proc = run(self, 'xmax_gaisser_hillas.py', '--n-max', '1', '--x-max', '750',
@@ -113,7 +110,6 @@ class GaisserHillasBracketingTests(unittest.TestCase):
         self.assertNotEqual(proc.returncode, 0)
         self.assertIn('lambda', strict_json(proc.stdout)['error'])
 
-    @unittest.expectedFailure  # pending DR-WP1-02
     def test_profile_is_accurate_far_from_the_origin(self):
         """N-X1: exponent*log(base) + (x_max-X)/lambda cancels catastrophically when
         x_max >> lambda. With u = (X-x_max)/(x_max-x0), N/N_max = exp(e (log1p(u) - u)).

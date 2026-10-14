@@ -15,7 +15,10 @@ three-term model is linear in its parameters and so is fit exactly).
 
 What it does: evaluates
     N(X) = N_max * ((X - X0)/(X_max - X0))^((X_max - X0)/lambda) * exp((X_max - X)/lambda)
-at one or more depths (in log space, so a small lambda cannot overflow), confirms
+at one or more depths, written with u = (X - X_max)/(X_max - X0) as
+    N(X) = N_max * exp(((X_max - X0)/lambda) * (log1p(u) - u)),
+which is the same function in exact arithmetic but has an exponent that is never positive
+and no cancellation between two large terms when X_max >> lambda; it confirms
 N(X_max) == N_max as a self-consistency check, and computes two shower ages, both equal
 to 1 at X = X_max:
   shower_age          s(X) = 3*(X - X0) / ((X - X0) + 2*(X_max - X0)), the version
@@ -49,18 +52,22 @@ def _finite(value, name, positive=False):
 def gaisser_hillas(depth, n_max, x_max, x0, lam):
     """N(X) at a single depth; nan for depth <= x0 (model undefined there).
 
-    Evaluated as N_max * exp(e * ln(base) + (X_max - X)/lambda) with e = (X_max - X0)/lambda:
-    the two factors can each overflow for small lambda although N(X) <= N_max always.
+    Evaluated as N_max * exp(e * (log1p(u) - u)) with e = (X_max - X0)/lambda and
+    u = (X - X_max)/(X_max - X0). This equals N_max * base^e * exp((X_max - X)/lambda) with
+    base = 1 + u, but log1p(u) - u <= 0 for u > -1, so the exponent never overflows, and the
+    two terms e*ln(base) and (X_max - X)/lambda, each of order e*u, no longer cancel
+    numerically when X_max >> lambda.
     """
     if depth <= x0:
         return float('nan')
     if x_max <= x0:
         raise ValueError('x_max must be greater than x0')
-    exponent = (x_max - x0) / lam
+    span = x_max - x0
+    exponent = span / lam
     if not math.isfinite(exponent):
-        raise ValueError('(x_max - x0)/lambda is not representable; lambda is too small')
-    base = (depth - x0) / (x_max - x0)
-    return n_max * math.exp(exponent * math.log(base) + (x_max - depth) / lam)
+        raise OverflowError('lambda is too small relative to (x_max - x0)')
+    u = (depth - x_max) / span
+    return n_max * math.exp(exponent * (math.log1p(u) - u))
 
 
 def shower_age(depth, x_max, x0):
@@ -87,6 +94,10 @@ def half_max_depths(n_max, x_max, x0, lam, fraction=0.5, tolerance=1e-6, max_ite
     n_max, by monotonic bisection (N(X) is unimodal: rising for X<x_max, falling for
     X>x_max)."""
     target = fraction * n_max
+    if math.sqrt(lam * (x_max - x0)) < 100.0 * tolerance:
+        raise OverflowError('lambda is too small relative to (x_max - x0): the profile width '
+                            'sqrt(lambda (x_max - x0)) is below the depth resolution of the '
+                            'half-maximum search')
 
     def n_of(depth):
         return gaisser_hillas(depth, n_max, x_max, x0, lam)
@@ -95,6 +106,8 @@ def half_max_depths(n_max, x_max, x0, lam, fraction=0.5, tolerance=1e-6, max_ite
     lo, hi = x0 + 1e-9 * max(abs(x0), 1.0), x_max
     for _ in range(max_iterations):
         mid = (lo + hi) / 2.0
+        if mid in (lo, hi):
+            break
         if n_of(mid) < target:
             lo = mid
         else:
@@ -103,16 +116,21 @@ def half_max_depths(n_max, x_max, x0, lam, fraction=0.5, tolerance=1e-6, max_ite
             break
     rising_depth = (lo + hi) / 2.0
 
-    # Falling side: expand outward from x_max until N drops below target, then bisect.
-    step = max(lam, 1.0)
+    # Falling side: expand outward from x_max with a doubling step (starting near the profile
+    # width sqrt(lambda (x_max - x0))) until N drops below target, then bisect.
+    step = max(lam, math.sqrt(lam * (x_max - x0)), abs(x_max) * 1e-12, 1.0)
     upper = x_max + step
     while n_of(upper) > target:
-        upper += step
-        if upper > x_max + 1e6:
+        step *= 2.0
+        following = x_max + step
+        if following == upper or not math.isfinite(following):
             raise ValueError('could not bracket the falling half-maximum depth; check parameters')
+        upper = following
     lo, hi = x_max, upper
     for _ in range(max_iterations):
         mid = (lo + hi) / 2.0
+        if mid in (lo, hi):
+            break
         if n_of(mid) > target:
             lo = mid
         else:
@@ -154,7 +172,7 @@ def main():
         if x_max <= x0:
             raise ValueError('x_max must be greater than x0')
         if not math.isfinite((x_max - x0) / lam):
-            raise ValueError('(x_max - x0)/lambda is not representable; lambda is too small')
+            raise ValueError('lambda is too small relative to (x_max - x0)')
         depths = []
         if args.depths:
             for text in args.depths.split(','):
@@ -188,7 +206,12 @@ def main():
                                          'full_width_half_maximum': falling - rising}
         text = json.dumps({'method': 'Gaisser-Hillas profile evaluation (closed-form, not a fit)',
                            **result}, indent=2, allow_nan=False)
-    except (ValueError, OverflowError, ZeroDivisionError) as exc:
+    except OverflowError as exc:
+        message = str(exc)
+        if not message.startswith('lambda'):
+            message = 'lambda is too small relative to (x_max - x0)'
+        return _fail(message)
+    except (ValueError, ZeroDivisionError) as exc:
         message = str(exc)
         if 'JSON compliant' in message:
             message = 'result contains a non-finite number for these parameters'
