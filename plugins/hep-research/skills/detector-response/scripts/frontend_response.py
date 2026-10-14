@@ -560,6 +560,8 @@ def main():
     p.add_argument('--sigma', type=float, required=True)
     p.add_argument('--rho', type=float, required=True, help='pairwise correlation coefficient')
 
+    # one unwrapped usage line, so a reader of the first line (contracts/tool_contract.py) sees every subcommand
+    parser.usage = '%(prog)s [-h] {' + ','.join(sub.choices) + '} ...'
     for p in sub.choices.values():
         p.add_argument('--status', choices=STATUSES, default='unvalidated',
                        help='status label of the inputs, echoed as status (default unvalidated)')

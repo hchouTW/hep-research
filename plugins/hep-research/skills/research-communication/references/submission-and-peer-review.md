@@ -76,7 +76,8 @@ boilerplate rather than forcing individual roles onto a collective author list.
 **AI-use disclosure: raise it unprompted.** The agent drafting the text is itself an AI tool, so before submission
 tell the user which disclosure the venue expects and draft it from what was actually done in the session (tool and
 version as reported by the host, what it was used for, how the authors checked it); never invent usage details, and
-never list an AI tool as an author. Policies as read on 2026-10-14 (recheck the live page before submitting):
+never list an AI tool as an author. Policies as read on 2026-10-14, Springer Nature on 2026-10-15 (recheck the live
+page before submitting):
 
 | Venue | Rule | Source |
 |---|---|---|
@@ -84,7 +85,7 @@ never list an AI tool as an author. Policies as read on 2026-10-14 (recheck the 
 | APS | an AI program cannot be listed as an author; keep a record of AI use and disclose substantive use in the paper (tool name and version, how it assisted, how the authors directed and checked it); AI used for the research itself goes in the methods | [APS appropriate use of AI tools](https://journals.aps.org/authors/ai-based-writing-tools) |
 | Elsevier | a separate AI declaration statement in the manuscript (tool, purpose, extent of oversight), published with the article; AI tools are not authors | [Elsevier generative-AI policy](https://www.elsevier.com/about/policies-and-standards/generative-ai-policies-for-journals) |
 | IOP Publishing | a separate AI disclosure statement in the Acknowledgements naming the tool and how it was used | [IOP generative AI tools](https://publishingsupport.iopscience.iop.org/questions/generative-ai-tools/) |
-| Springer Nature (EPJC, JHEP) | not re-opened: the policy page redirected to a login on 2026-10-14; read it before submitting | [Springer Nature AI policy](https://www.springer.com/de/editorial-policies/artificial-intelligence--ai-/25428500) |
+| Springer Nature (EPJC, JHEP) | risk-based: grammar and language editing, readability, formatting and translation (Green) and outlines, drafting from author input, reference-management support (Amber) are allowed with the declaration "Clearly describe use and confirm author accountability"; listing AI as an author, AI writing results or discussion independently, and visuals created without verifiable source data are not permitted (Red); for published AI-generated or AI-assisted visuals, the AI system, purpose and extent of contribution go "in an AI Declaration in your manuscript", with specific disclosure "within the caption or legend". The page names no section for text-only use and no journal; check the journal's own instructions too | [Springer Nature AI use in manuscript preparation](https://www.springernature.com/gp/policies/editorial-policies/ai-manuscript-preparation) (accessed 2026-10-15, read level `page`, no login; no update date on the page) |
 
 Deliver the formatted statement, a role-to-author mapping when helpful, and
 unresolved factual questions. Distinguish draft wording from author-confirmed

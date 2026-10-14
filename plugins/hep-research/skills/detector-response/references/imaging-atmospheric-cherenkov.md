@@ -31,9 +31,12 @@ duty cycle. Dark time alone gives a duty cycle comparable to fluorescence detect
 around 10-15%, and observing time is the main limitation on exposure for any IACT
 source measurement.
 
-**Hillas parameters** are the classical image-shape description: the ellipse's
-length and width, its orientation, and its distance from the assumed source position
-in the camera plane. A gamma-ray-initiated shower produces a narrow, well-collimated
+**Hillas parameters** are the classical image-shape description, from the first and
+second moments of the light in the camera: the image centre of gravity, the ellipse's
+length and width, the size (total photoelectron charge, the energy proxy), the nominal
+distance from the camera centre, the azimuth of the main axis, and the orientation angle
+`alpha` (M. de Naurois and D. Mazin, C. R. Physique 16 (2015) 610, arXiv:1511.00463,
+sec. on the imaging technique). A gamma-ray-initiated shower produces a narrow, well-collimated
 image pointing back toward the source, while a hadron-initiated shower - which
 develops a broader, more irregular cascade because of its hadronic sub-showers and
 higher-multiplicity muon content - produces a wider, less regular image with no
@@ -50,8 +53,10 @@ shower from different ground positions intersects each telescope's image axis to
 reconstruct the shower's true (not just camera-projected) arrival direction and
 impact point, dramatically improving angular resolution and background rejection
 relative to a single telescope - the reason all current-generation instruments
-(H.E.S.S., MAGIC, VERITAS, and CTAO, which is under construction with its first
-Large-Sized Telescope, LST-1, already operating) are arrays rather than single
+(H.E.S.S., MAGIC, VERITAS, and CTAO, under construction: LST-1 operating at La Palma, and
+with the LST-2 camera installed on 12 June 2026 all four Large-Sized Telescopes there are
+mechanically complete and in commissioning; LST collaboration news, 13 June 2026; re-check
+before citing) are arrays rather than single
 telescopes.
 <!-- /example -->
 

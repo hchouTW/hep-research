@@ -203,6 +203,138 @@
   "ok": false,
   "strict_ok": false
  },
+ "contracts/fixtures/artifacts/invalid/ml_v28_calibration_after_not_numeric.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_calibration_misspelled.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_calibration_on_training_sample.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_calibration_same_sample_hash.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_downstream_incomplete.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_downstream_ml_only.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_downstream_passed_contradicts.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_downstream_unstructured.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_duplicate_features.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_generation_no_validation.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_generation_two_sample_power_missing.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_inference_handoff_unknown.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_inference_no_validation.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_label_is_feature.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_model_hash_placeholder.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_model_hash_short.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_multiclass_calibration_scope.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_output_semantics_misspelled.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_output_semantics_task_mismatch.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_preprocessing_fit_on_all.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_reweighting_no_validation.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_reweighting_validation_incomplete.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_single_label.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_status_observed_unsupported.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_surrogate_no_validation.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_surrogate_policy_action.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_threshold_from_test.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_units_unknown_feature.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_unsupervised_no_anomaly_validation.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_weights_contradiction.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_weights_unstructured.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_weights_used_in_empty.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/ml_v28_weights_used_in_inconsistent.json": {
+  "ok": false,
+  "strict_ok": false
+ },
  "contracts/fixtures/artifacts/invalid/prediction_gaussian_envelope.json": {
   "ok": false,
   "strict_ok": false
@@ -415,6 +547,11 @@
   "ok": false,
   "strict_ok": false
  },
+ "contracts/fixtures/artifacts/invalid/statres_v28_observable_source_unlinked.json": {
+  "gate": "failed",
+  "ok": false,
+  "strict_ok": false
+ },
  "contracts/fixtures/artifacts/invalid/status_not_propagated.json": {
   "ok": false,
   "strict_ok": false
@@ -468,6 +605,50 @@
   "strict_ok": true
  },
  "contracts/fixtures/artifacts/unresolved/ml_split_overlap_not_run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/ml_v28_calibration_not_improving.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/ml_v28_domain_shift_on_training_sample.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/ml_v28_domain_shift_outcome_missing.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/ml_v28_domain_shift_status_missing.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/ml_v28_domain_shift_uncorrected.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/ml_v28_grouping_row_level.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/ml_v28_output_semantics_missing.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/ml_v28_split_check_unverified.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/ml_v28_training_domain_missing.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/ml_v28_training_domain_partial.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/unresolved/ml_v28_training_domain_unbounded.json": {
   "ok": true,
   "strict_ok": true
  },
@@ -577,6 +758,18 @@
   "ok": true,
   "strict_ok": true
  },
+ "contracts/fixtures/artifacts/valid/ml_v28_inference_sbi.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/ml_v28_reweighting.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/ml_v28_unsupervised_anomaly.json": {
+  "ok": true,
+  "strict_ok": true
+ },
  "contracts/fixtures/artifacts/valid/prediction.json": {
   "ok": true,
   "strict_ok": true
@@ -643,6 +836,11 @@
   "ok": true,
   "strict_ok": true
  },
+ "contracts/fixtures/artifacts/valid/statres_v28_observable_source_linked.json": {
+  "gate": "failed",
+  "ok": true,
+  "strict_ok": true
+ },
  "contracts/fixtures/artifacts/valid/theory_spec.json": {
   "ok": true,
   "strict_ok": true
@@ -664,6 +862,22 @@
   "strict_ok": true
  },
  "contracts/fixtures/artifacts/valid/theory_spec_v26_propagation.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/warning/ml_v28_environment_free_text.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/warning/ml_v28_framework_version_missing.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/warning/ml_v28_negative_weights_abs.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/warning/ml_v28_weights_not_split.json": {
   "ok": true,
   "strict_ok": true
  },

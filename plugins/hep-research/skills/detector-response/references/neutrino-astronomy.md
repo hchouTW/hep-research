@@ -1,8 +1,7 @@
 # High-Energy Neutrino Astronomy
 
-<!-- example: experiment-specific illustration -->
-Covers large-volume Cherenkov neutrino telescopes (IceCube in glacial ice, KM3NeT in
-seawater, and similar designs) - how a neutrino interaction becomes a detectable light
+Covers large-volume Cherenkov neutrino telescopes (in glacial ice or in deep water) -
+how a neutrino interaction becomes a detectable light
 pattern, the backgrounds that dominate any astrophysical search, and how significance
 and exposure are computed. Shares its ON/OFF and trials-factor statistical machinery
 with [imaging Cherenkov](imaging-atmospheric-cherenkov.md) and
@@ -10,6 +9,9 @@ with [imaging Cherenkov](imaging-atmospheric-cherenkov.md) and
 physics (though in a very different regime - a natural medium, kilometer-scale
 baselines, not a dense radiator) with
 [particle identification](particle-identification.md).
+
+<!-- example: experiment-specific illustration -->
+Examples: IceCube in glacial ice, KM3NeT in seawater.
 <!-- /example -->
 
 ## Detection principle
@@ -41,9 +43,11 @@ computed from full detector simulation, not treated as constant.
   neutral-current interactions regardless of flavor, deposit their energy in a
   roughly spherical light pattern localized near the interaction vertex. Cascades
   give good **energy resolution** (most of the neutrino energy is contained and
-  visible) but poor angular resolution (typically several degrees to tens of degrees,
-  since a point-like light source constrains direction far more weakly than an
-  extended track) - the complementary trade-off to tracks, which is why a full
+  visible) but poorer angular resolution, which depends on the medium: above 100 TeV
+  the average direction accuracy is better than about 10 degrees in polar ice and 2
+  degrees in seawater, because light scatters more in ice (PDG RPP 2025, sec. 36.3.2;
+  state the detector's own value), and a point-like light source constrains direction
+  far more weakly than an extended track - the complementary trade-off to tracks, which is why a full
   point-source-plus-diffuse-flux program uses both topologies rather than either
   alone.
 - **Double bang / double pulse**: a distinctive tau-neutrino signature at
@@ -74,7 +78,9 @@ air showers in the atmosphere above and around the detector (see
   separated statistically, not by source direction, using the facts that (a) the atmospheric
   spectrum falls faster (~`E^-3.7` versus an astrophysical `~E^-2` to `E^-2.5`
   expectation from the same Fermi-acceleration argument as
-  [cosmic-ray spectrum and composition](cosmic-ray-spectrum-and-composition.md)),
+  [cosmic-ray spectrum and composition](cosmic-ray-spectrum-and-composition.md);
+  measured astrophysical indices are softer than 2, so take the index from the latest
+  diffuse-flux fit of the detector and channel used),
   so a hard energy cut or an energy-dependent likelihood weight enhances the
   astrophysical fraction at high energy, and (b) atmospheric neutrinos are
   accompanied by a correlated atmospheric-muon bundle from the same air shower for a
@@ -86,6 +92,18 @@ air showers in the atmosphere above and around the detector (see
   not yet firmly detected; their predicted rate is a leading systematic uncertainty on
   the purely-atmospheric-background normalization used in any diffuse-flux
   measurement.
+
+Upgoing selections lose the highest energies, because the Earth absorbs neutrinos: for
+vertically upgoing neutrinos the survival probability is about 74%, 27% and below 2% at
+10, 100 and 1000 TeV (PDG RPP 2025, sec. 36.3.2), so the effective area falls at large
+zenith angle and high energy. The Glashow resonance (`anti-nu_e e- -> W-`, peaking at
+6.3 PeV antineutrino energy) tags electron antineutrinos.
+<!-- example: experiment-specific illustration -->
+IceCube observed a 6.05 ± 0.72 PeV shower consistent with it (Nature 591 (2021) 220,
+arXiv:2110.15051). Example of a softer measured index: IceCube upgoing muon neutrinos,
+9.5 years, single power law `gamma = 2.37 ± 0.09` between 15 TeV and 5 PeV (ApJ 928 (2022)
+50, arXiv:2111.10299).
+<!-- /example -->
 
 ## Significance and exposure
 

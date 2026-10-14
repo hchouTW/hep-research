@@ -29,6 +29,21 @@ channels does substantially better, at the cost of calibration complexity - the
 interpolation depends on the charge-sharing model, which is itself a calibration that
 drifts with radiation damage and bias voltage.
 
+**Silicon response and radiation damage** (approximate; PDG RPP 2025, sec. 35.8). A
+pair costs `w_i ≈ 3.65 eV`; a minimum-ionizing particle deposits most probably about
+23 000 electrons (3.7 fC) in 300 um. The depletion depth is
+`d = sqrt(2 eps (V + V_bi)/(N e))`, so full depletion of a thickness `d` needs about
+`V ≈ e |N_eff| d^2/(2 eps)`. Bulk damage scales, to first order, with non-ionizing energy
+loss expressed as 1 MeV neutron-equivalent fluence (`n_eq/cm^2`): the leakage current
+grows as `alpha_I Phi_eq V` (`alpha_I ≈ 4e-17 A/cm` after the standard anneal), trapping
+cuts the collected charge (effective trapping times of order 1 ns near `1e15 n_eq/cm^2`,
+so electron collection is favoured), and space charge changes the depletion voltage,
+with beneficial and then reverse annealing over months at room temperature. In a
+magnetic field carriers drift at the Lorentz angle `tan alpha_L = r_H mu B` (`r_H` about
+1.15 for electrons and 0.8 for holes at room temperature and small `B`). Leakage current
+and its temperature scaling: [front-end electronics](front-end-electronics-and-signal-processing.md).
+Treat damage constants as conditions data, not as these reference values.
+
 Silicon also measures deposited charge, which is approximately proportional to `Z^2` (before readout saturation, quenching and delta-ray escape) for a
 traversing nucleus. A silicon tracker is therefore simultaneously a charge (|Z|)
 measuring device, and multi-layer charge consistency is a powerful rejection tool
@@ -128,6 +143,14 @@ measurement) are, with `p_T` in GeV/c, `B` in T and lengths in m, for unit charg
 
     measurement: sigma(p_T)/p_T ~= sigma_x * p_T / (0.3 * B * L^2) * sqrt(720/(N+4))
     scattering:  sigma(p_T)/p_T ~= 0.016 / (0.3 * beta * B * L) * sqrt(L/X0)
+
+PDG states the measurement term for many (N >= 10) uniformly spaced points; for N = 3
+the exact coefficient is `8 sqrt(3/2) = 9.8`, not `sqrt(720/7) = 10.1`. `L` in the
+measurement term is the track length projected onto the bending plane, and `X0` is a
+length (the radiation length in g/cm^2 divided by the density, here in m). The
+scattering term carries `beta` to the first power: PDG eq. 35.70 gives
+`delta k_ms ~= 0.016 z / (L p beta cos^2 lambda) * sqrt(L/X0)`, and dividing by
+`k = 0.3 z B / p_T` gives the line above at `lambda = 0` (PDG RPP 2025, sec. 35.12).
 
 The scattering coefficient 0.016 GeV/c is the PDG value for this fit term; it differs
 from the Highland 13.6 MeV coefficient (without its log factor) that

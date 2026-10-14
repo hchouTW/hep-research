@@ -60,6 +60,21 @@ additive in curvature, the relative bias `delta R/R ≈ -q R delta` grows linear
 mimicking or masking a spectral feature; charge-symmetric modes (a radial expansion, a field-scale
 error) give a relative scale error constant in rigidity.
 
+<!-- example: experiment-specific illustration -->
+Three weak modes named in the CMS tracker alignment (JINST 9 (2014) P06009,
+arXiv:1403.2286, sec. 4.4 and the summary) `[General method]`:
+
+| Mode | Deformation | What the paper reports |
+|---|---|---|
+| twist | `Delta phi = tau z` | biases the track curvature `q/p_T`; controlled mainly by Z-boson decays (resonance mass with a common vertex) |
+| sagitta (off-centring of layers and rings) | `(Delta x, Delta y) = sigma r (sin phi_sigma, cos phi_sigma)` | among the distortions most difficult to control; only partly recovered |
+| skew | `Delta z = omega sin(phi + phi_omega)` | among the distortions most difficult to control |
+
+Cosmic-ray tracks (which break the cylindrical symmetry), straight tracks taken with the
+field off, vertex knowledge and resonance masses are the inputs the paper uses against
+weak modes; the cosmic tracks have limited power against a twist.
+<!-- /example -->
+
 Weak modes must be constrained with information the alignment fit does not use:
 
 - **A resonance of known mass**, whose reconstructed mass must not depend on the

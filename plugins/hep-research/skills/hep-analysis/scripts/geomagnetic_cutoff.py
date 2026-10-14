@@ -11,8 +11,10 @@ What it does: evaluates the vertical (zenith angle 0) case of the Stormer formul
 where the square root is 1 for vertical arrival, so
     R_c = (C / 4) * cos^4(lambda_m) / r^2 = 14.9 GV * cos^4(lambda_m) / r^2   (r in Earth radii)
 (Smart & Shea 2005, Adv. Space Res. 36, 2012). C = 59.6 GV scales with dipole moment M;
-geocentric distance r, geomagnetic latitude lambda_m. Uses
-the IGRF-epoch-averaged dipole moment as a default. Also converts a cutoff rigidity to
+geocentric distance r, geomagnetic latitude lambda_m. The default M = 8.05e25 G cm^3 is the
+IGRF-14 dipole of 1955 (DGRF 1955 degree-1 coefficients), which gives the textbook C = 59.6 GV;
+the IGRF-14 2025 dipole is 7.69e25 G cm^3 (cutoffs about 4.5% lower). Pass --dipole-moment
+for the epoch of the data. Also converts a cutoff rigidity to
 the corresponding minimum kinetic energy per nucleon for a given (Z, A).
 
 Usage notes / assumptions: standard library only. This is the *vertical* cutoff for an
@@ -24,8 +26,7 @@ A rigorous cutoff for a specific orbit, epoch, and arrival direction requires pa
 backtracing through a full geomagnetic field model (e.g. IGRF) and is not something
 this formula replaces - see the docstring caveat repeated in the reference file.
 Rigidity in GV, geocentric distance in Earth radii (--radius-re, default 1.0 = the surface; the old name
---altitude-re is a deprecated alias, since the value is a distance from the Earth's centre, not an altitude), dipole moment in G*cm^3 (default value below is the
-approximate present-epoch value, not tied to a specific IGRF release).
+--altitude-re is a deprecated alias, since the value is a distance from the Earth's centre, not an altitude), dipole moment in G*cm^3 (default: the IGRF-14 1955 dipole, see above).
 Status: --status (default unvalidated; one of the core artifact_statuses) is echoed as status.
 Exit codes: 0 ok; 1 the computation failed; 2 usage or invalid input (NaN, inf, malformed file);
 3 incomplete or inconclusive.
@@ -40,7 +41,7 @@ import math
 import sys
 
 EARTH_RADIUS_CM = 6.371e8
-DEFAULT_DIPOLE_MOMENT_G_CM3 = 8.05e25
+DEFAULT_DIPOLE_MOMENT_G_CM3 = 8.05e25  # IGRF-14 1955 dipole (igrf14coeffs.txt, NOAA/IAGA, read 2026-10-15)
 PROTON_MASS_GEV = 0.93827208943  # CODATA 2022 m_p c^2
 # Atomic masses in u from AME2020 (Wang et al., Chinese Phys. C 45 (2021) 030003; file mass.mas20, read
 # 2026-10-13 from https://www-nds.iaea.org/amdc/ame2020/mass_1.mas20.txt). Nuclear mass = atomic mass x m_u c^2 -
@@ -149,7 +150,7 @@ def main():
     parser.add_argument('--altitude-re', type=float, default=None, dest='altitude_re',
                         help='deprecated alias of --radius-re (the value is a geocentric distance)')
     parser.add_argument('--dipole-moment', type=float, default=DEFAULT_DIPOLE_MOMENT_G_CM3,
-                        help='dipole moment in G*cm^3 (default: approximate present epoch)')
+                        help='dipole moment in G*cm^3 (default 8.05e25, the IGRF-14 1955 dipole; 7.69e25 for 2025)')
     parser.add_argument('--charge', type=int, help='nucleus charge Z, for the energy conversion')
     parser.add_argument('--mass-number', type=int, dest='mass_number',
                         help='nucleus mass number A, for the energy conversion')
