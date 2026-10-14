@@ -27,5 +27,11 @@ CONTRACTS_VERSION = "2.6.0"
 # capability: the rules only refuse inconsistent or incomplete results, and a 2.5 reader accepts the new optional
 # keys without misreading any field (it simply does not apply the new rules). Other rule families joining 2.6.0 add
 # their own *_SEMANTICS_FROM constant and helper.
+# Three capabilities for the agentic-architecture sidecars (task P3.4). core:revocation-log: the artifact's status
+# depends on the hash-chained revocation log and head (contracts.revocation); core:exposure-record: its data_exposure is
+# derived from an exposure record (contracts.lineage.derive_exposure, record_ref); core:decision-lineage: it is bound to
+# decision records (contracts.lineage.check_decision). Contracts stay 2.6.0: a reader without these capabilities already
+# refuses an artifact that requires one (validate.py, F08), so no version step is needed for the refusal.
 KNOWN_CAPABILITIES = frozenset({"core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
-                                "communication:traceability-v1"})
+                                "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
+                                "core:decision-lineage"})

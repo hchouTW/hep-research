@@ -1,0 +1,29 @@
+{"$comment": "Exposure record (task P3.1, C12, T1.9): which released data reached whom, per analysis and source snapshot. A sidecar with its own record_version, written append-only by the custodian at every release and relay; each new version names the canonical SHA-256 of the version before it (previous_sha256) and keeps its entries unchanged, so a new session never clears exposure. contracts/lineage.py checks ordering and appends and derives the envelope data_exposure from it: an entry whose 'seen' holds an exposing kind (signal-region, unblinded-result, sealed-value) makes the analysis exposed from that entry on.",
+ "type": "object",
+ "required": ["record_version", "analysis", "source", "previous_sha256", "entries"],
+ "additionalProperties": false,
+ "properties": {
+  "record_version": {"type": "string", "const": "1.0.0"},
+  "analysis": {"type": "string", "minLength": 1},
+  "source": {"$comment": "the source snapshot, as in a release manifest's source", "type": "object", "required": ["snapshot_id", "sha256"],
+   "additionalProperties": false, "properties": {
+    "snapshot_id": {"type": "string", "minLength": 1},
+    "sha256": {"$ref": "revocation_event.json#/$defs/sha256"}}},
+  "previous_sha256": {"$comment": "canonical SHA-256 of the previous version of this record; null only for the first version",
+   "anyOf": [{"type": "null"}, {"$ref": "revocation_event.json#/$defs/sha256"}]},
+  "entries": {"type": "array", "items": {"$ref": "#/$defs/entry"}}},
+ "$defs": {
+  "seen_kind": {"type": "string", "enum": ["synthetic", "public", "simulation", "calibration", "control-region", "sideband",
+                                            "validation-region", "blinded-derivative", "signal-region", "unblinded-result",
+                                            "sealed-value"]},
+  "entry": {"type": "object", "required": ["seq", "release_id", "via", "seen", "time", "actor"], "additionalProperties": false,
+   "properties": {
+    "seq": {"type": "integer", "minimum": 1},
+    "release_id": {"type": "string", "minLength": 1},
+    "via": {"$comment": "the session the release was opened in, or the relay that passed it on", "type": "object",
+     "required": ["kind", "id"], "additionalProperties": false, "properties": {
+      "kind": {"type": "string", "enum": ["session", "relay"]},
+      "id": {"type": "string", "minLength": 1}}},
+    "seen": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/seen_kind"}},
+    "time": {"$ref": "revocation_event.json#/$defs/timestamp"},
+    "actor": {"$comment": "the person or agent the data reached", "type": "string", "minLength": 1}}}}}

@@ -18,8 +18,9 @@ anchor. A replayed older head that is still within the status age is not detecte
 
 The reverse index (build_index, affected) maps project files and the subjects they name to their dependents:
 envelope inputs (by SHA-256 and by resolved ref), data_exposure.record_ref, release manifests (source -> release ->
-every file with a released SHA-256), attestations (bundle and recipe -> attestation), frozen bundles (files ->
-bundle) and recipes (canonical digest). affected() returns the transitive closure; nothing is written.
+every file with a released SHA-256), exposure records (release -> record), decision records (recipe -> decision ->
+the artifacts it produced), attestations (bundle and recipe -> attestation), frozen bundles (files -> bundle) and
+recipes (canonical digest). affected() returns the transitive closure; nothing is written.
 
 Usage:
   revocation.py init LOG --log-id ID --actor NAME [--time T]            create a log with its genesis record
@@ -358,6 +359,16 @@ def build_index(root) -> Index:
             recipe = _obj(_obj(subj.get("scope")).get("recipe"))
             if isinstance(recipe.get("sha256"), str):
                 idx.link(f"sha256:{recipe['sha256']}", aid)
+        elif "record_version" in doc and "decision_id" in doc:
+            if isinstance(doc.get("recipe_sha256"), str):
+                idx.link(f"sha256:{doc['recipe_sha256']}", node)
+            for a in doc.get("artifacts") or []:
+                if isinstance(a, dict) and isinstance(a.get("sha256"), str):
+                    idx.link(node, f"sha256:{a['sha256']}")
+        elif "record_version" in doc and isinstance(doc.get("entries"), list) and "analysis" in doc:
+            for e in doc["entries"]:
+                if isinstance(e, dict) and isinstance(e.get("release_id"), str):
+                    idx.link(f"release:{e['release_id']}", node)
         elif doc.get("format") == "hep-research-bundle/1":
             try:
                 idx.same(node, f"sha256:{digest_of(doc)}")

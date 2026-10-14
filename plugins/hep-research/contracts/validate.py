@@ -1328,6 +1328,12 @@ def check_contract_version(doc: dict, rep: Report, protected: bool = False) -> N
             if isinstance(cap, str) and cap not in KNOWN_CAPABILITIES:
                 rep.add("error", f"$.required_capabilities[{k}]", "contract.unknown_capability",
                         f"required capability '{cap}' is not implemented by this reader (contracts {CONTRACTS_VERSION})")
+    exp = doc.get("data_exposure")
+    if (isinstance(exp, dict) and exp.get("basis") == "structured-record" and exp.get("record_ref")
+            and "core:exposure-record" not in (caps if isinstance(caps, list) else [])):
+        rep.add("warning", "$.required_capabilities", "exposure.capability_not_declared",
+                "data_exposure names an exposure record; declare 'core:exposure-record' so that a reader without the "
+                "record check refuses the artifact in protected use")
 
 
 ENVELOPE_KEYS = {"contract_version", "artifact_id", "artifact_type", "objective", "bindings", "versions", "provenance",

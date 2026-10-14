@@ -5,7 +5,7 @@ advisory only, and passing it never releases data (the trusted release gate does
 
 Usage: python3 contracts/release_manifest.py MANIFEST --root DIR --approval FILE --approvers FILE --ledger FILE
            --revocations FILE --effective FILE [--now YYYY-MM-DDTHH:MM:SSZ]
-           [--code-digest HEX] [--destination-sets FILE] [--analysis NAME] [--sealed FILE]
+           [--code-digest HEX] [--destination-sets FILE] [--analysis NAME [--exposure-record FILE]] [--sealed FILE]
 Every input is required for a pass: a check that cannot run is a failure (fail closed), never a skip.
 
   manifest     the release manifest (contracts/schemas/release_manifest.json)
@@ -39,6 +39,10 @@ Custodian options (each one adds checks; none is needed for a pass, and a custod
                       source (ledger entries may carry "analysis" and "source_sha256") must be listed in
                       related_releases, and every listed release must be in the ledger (a revoked one is a warning: the
                       composition review must cover it)
+  --exposure-record   with --analysis: the analysis's exposure record (contracts/schemas/exposure_record.json) for this
+                      release's source; it must be valid and for this analysis and source, and every release it records
+                      (other than this one) must be in related_releases and in the ledger, so earlier releases are known
+                      from both the ledger and the record
   --sealed            the sealed file of this release (audit_blinded_outputs.py seal: {"sealed": [...], "rtol"}, or
                       nothing_sealable); needs --root. Every artifact is scanned for a sealed value: a JSON object
                       without its declared structure keys (STRUCTURE_KEYS: bin edges, masks, region), other files as
@@ -291,6 +295,29 @@ def check_history(m: dict, ledger, analysis, revocations, rep: Report) -> None:
                 f"related release {rid} is revoked; the composition review must cover it")
 
 
+def check_exposure_history(m: dict, ledger, analysis, record, rep: Report) -> None:
+    """Earlier releases known from the exposure record must be listed and known to the ledger as well."""
+    from contracts.lineage import check_exposure
+    if not (isinstance(analysis, str) and analysis.strip()):
+        rep.add("error", "exposure_record", "release.exposure_without_analysis", "an exposure record needs --analysis")
+        return
+    if not isinstance(record, dict) or not check_exposure(record).ok:
+        rep.add("error", "exposure_record", "release.exposure_invalid", "the exposure record is not a valid exposure record")
+        return
+    if record["analysis"] != analysis or record["source"] != m["source"]:
+        rep.add("error", "exposure_record", "release.exposure_other_record", "the record is for another analysis or source")
+        return
+    seen = {e["release_id"] for e in record["entries"]} - {m["release_id"]}
+    missing = seen - set(m["related_releases"])
+    if missing:
+        rep.add("error", "related_releases", "release.related_incomplete",
+                f"releases in the exposure record not listed: {sorted(missing)}")
+    known = {e.get("release_id") for e in ledger if isinstance(e, dict)} if isinstance(ledger, list) else set()
+    if seen - known:
+        rep.add("error", "exposure_record", "release.exposure_release_unknown",
+                f"releases in the exposure record the ledger does not know: {sorted(seen - known)}")
+
+
 def load_sealed(doc) -> tuple[list[float], float]:
     """The sealed numbers and tolerance of a sealed file (audit_blinded_outputs.py seal); ValueError when malformed,
     since a malformed sealed file would make every scan pass. An empty list only with nothing_sealable."""
@@ -352,7 +379,7 @@ def status_from_log(revocations, kinds: tuple, rep: Report, where: str, code: st
 
 def check(manifest, root=None, approval=None, approvers=None, ledger=None, revocations=None, effective=None,
           now: datetime.datetime | None = None, *, code_digest=None, destination_sets=None, analysis=None,
-          sealed=None) -> dict:
+          sealed=None, exposure_record=None) -> dict:
     """The keyword-only arguments are the custodian options of the command line (module docstring); None skips them.
     `revocations` is the status document or a verified contracts.revocation.RevocationStatus."""
     now = now or datetime.datetime.now(datetime.UTC)
@@ -367,6 +394,8 @@ def check(manifest, root=None, approval=None, approvers=None, ledger=None, revoc
             check_destination_sets(manifest, destination_sets, rep)
         if analysis is not None:
             check_history(manifest, ledger, analysis, revocations, rep)
+        if exposure_record is not None:
+            check_exposure_history(manifest, ledger, analysis, exposure_record, rep)
         if sealed is not None:
             check_sealed(manifest, None if root is None else Path(root), sealed, rep)
         if manifest["related_releases"] and "composition_review" not in manifest:
@@ -405,6 +434,7 @@ def main(argv=None) -> int:
     ap.add_argument("--destination-sets", dest="destination_sets", type=Path)
     ap.add_argument("--analysis")
     ap.add_argument("--sealed", type=Path)
+    ap.add_argument("--exposure-record", dest="exposure_record", type=Path)
     ap.add_argument("--revocation-log", dest="revocation_log", type=Path)
     ap.add_argument("--revocation-head", dest="revocation_head", type=Path)
     args = ap.parse_args(argv)
@@ -414,7 +444,7 @@ def main(argv=None) -> int:
     try:
         docs = {name: None if getattr(args, name) is None else json.loads(getattr(args, name).read_text(encoding="utf-8"))
                 for name in ("manifest", "approval", "approvers", "ledger", "revocations", "effective",
-                             "destination_sets", "sealed")}
+                             "destination_sets", "sealed", "exposure_record")}
     except (OSError, ValueError) as exc:
         print(json.dumps({"status": "unreadable", "error": str(exc)}))
         return 2
@@ -431,7 +461,7 @@ def main(argv=None) -> int:
     try:
         out = check(docs["manifest"], args.root, docs["approval"], docs["approvers"], docs["ledger"], revocations,
                     docs["effective"], now, code_digest=args.code_digest, destination_sets=docs["destination_sets"],
-                    analysis=args.analysis, sealed=docs["sealed"])
+                    analysis=args.analysis, sealed=docs["sealed"], exposure_record=docs["exposure_record"])
     except (AttributeError, KeyError, TypeError, ValueError) as exc:  # an input of the wrong shape: never a pass
         print(json.dumps({"status": "unreadable", "error": f"malformed input: {type(exc).__name__}: {exc}"}))
         return 2

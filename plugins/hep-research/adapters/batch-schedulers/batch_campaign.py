@@ -7,7 +7,7 @@ cancel needs --approve-cancel. Nothing here releases a held job, raises a resour
   check-config --config C [--example]
   plan     --config C (--manifest M | --job ID --items N --chunk-size K --seed S) --cmd "worker ... {start} {stop} {seed} {out}"
            [--container-image IMAGE]                     writes the manifest and the runner spec into campaign_dir
-  freeze   --config C [--worker-root DIR] [--env-lock FILE] [--scope TEXT] [--exposure JSON]
+  freeze   --config C [--worker-root DIR] [--env-lock FILE] [--scope TEXT] [--exposure JSON | --exposure-record FILE]
            writes bundles/<digest>.json: manifest, spec, runner, worker tree, interpreter, environment lock and the
            container image (pinned by digest) with full SHA-256, and an approval request; it approves nothing
   verify-bundle --config C --bundle DIGEST               re-hashes the bundled files: identical or the differences
@@ -167,6 +167,9 @@ def main(argv=None, env=None, sleep=None) -> int:
             s.add_argument("--env-lock", type=Path)
             s.add_argument("--scope")
             s.add_argument("--exposure", type=json.loads, help='structured data exposure, e.g. {"state": "unknown", "basis": "none"}')
+            s.add_argument("--exposure-record", dest="exposure_record", type=Path,
+                           help="the analysis's exposure record: data_exposure is derived from it (contracts/lineage.py); "
+                                "a missing or invalid record is unknown")
         if name == "submit":
             s.add_argument("--pilot", action="store_true")
             s.add_argument("--plan-digest", help="the plan_digest of the reviewed dry run: refuse if the job files changed")
@@ -228,7 +231,13 @@ def main(argv=None, env=None, sleep=None) -> int:
         if args.cmd == "reconcile":
             return emit(cp.reconcile(cdir, ex, args.submission), 0)
         if args.cmd == "freeze":
-            doc = bundles.freeze(cdir, args.worker_root, args.env_lock, args.exposure, cfg, args.scope, batch_config.config_hash(cfg))
+            exposure = args.exposure
+            if args.exposure_record is not None:
+                if exposure is not None:
+                    raise ValueError("give --exposure or --exposure-record, not both")
+                from contracts.lineage import derive_exposure, load_exposure
+                exposure = derive_exposure(load_exposure(args.exposure_record), str(args.exposure_record))
+            doc = bundles.freeze(cdir, args.worker_root, args.env_lock, exposure, cfg, args.scope, batch_config.config_hash(cfg))
             return emit({"bundle_digest": doc["bundle_digest"], "path": doc["path"], "reused": doc["reused"],
                          "files": len(doc["files"]), "approval_request": doc["approval_request"]}, 0)
         if args.cmd == "verify-bundle":

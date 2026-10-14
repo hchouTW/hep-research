@@ -5,7 +5,8 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
-Contracts 2.6.0 (unchanged; the data release manifest sidecar keeps `manifest_version` 1.0.0).
+Contracts 2.6.0 (unchanged; new capability IDs only; the data release manifest sidecar keeps `manifest_version` 1.0.0;
+new sidecars: revocation log and head, exposure and decision records).
 
 - **Custodian checks in the release-manifest checker (AGENTIC-R5 T1.2, deployment work package B).** The checks a
   custodian deployment ran on its own side move into `contracts/release_manifest.py`, so every custodian uses one
@@ -19,6 +20,21 @@ Contracts 2.6.0 (unchanged; the data release manifest sidecar keeps `manifest_ve
   objects without their structure keys: `release.sealed_value_present`; an artifact that cannot be scanned is
   `release.scan_incomplete`, fail closed). Findings name the artifact only, never a sealed value or a count. Passing
   still releases nothing. Tests in `tests/contracts/test_release_manifest.py` (`CustodianOptionTests`).
+- **Exposure and decision lineage (task P3; C12, T1.9, T4.3).** New sidecars `exposure_record.json` (per analysis and
+  source snapshot: entries `{seq, release_id, via: session|relay, seen: [closed kinds], time, actor}`, each version
+  naming the canonical SHA-256 of the previous one) and `decision_record.json` (decision, category, actor human or
+  agent, `seen: {through_seq, entries_sha256}`, artifacts, `recipe_sha256`), checked by the new `contracts/lineage.py`
+  (`lineage.*` codes; command line `lineage.py exposure|decision`). `derive_exposure()` is the one mapping to the
+  envelope `data_exposure`: `exposed` once an entry names `signal-region`, `unblinded-result` or `sealed-value`,
+  `unknown` (never `unexposed`) for a missing or invalid record; appends cannot clear exposure. Producers use it:
+  `review_analysis_change.py --exposure-record FILE` and `batch_campaign.py freeze --exposure-record FILE`.
+  `release_manifest.py --analysis ... --exposure-record FILE` (`check(..., exposure_record=...)`) refuses a release the
+  record knows but `related_releases` omits (`release.related_incomplete`) or the ledger does not know
+  (`release.exposure_release_unknown`). The reverse index follows exposure records (release -> record) and decision
+  records (recipe -> decision -> artifacts). Capability IDs `core:revocation-log`, `core:exposure-record` and
+  `core:decision-lineage` join `KNOWN_CAPABILITIES` (contracts stay 2.6.0: an older reader already refuses an unknown
+  required capability); the validator warns `exposure.capability_not_declared` when a structured `data_exposure` names
+  a record without `core:exposure-record`. Tests in `tests/contracts/test_lineage.py`.
 - **Hash-chained revocation log and reverse index (task P2; C07, F07).** New `contracts/revocation.py` with the sidecar
   schemas `revocation_event.json` and `revocation_head.json`: a genesis record and events `{seq, prev_sha256, subject:
   {kind: artifact|release|recipe|source|attestation, ref and/or sha256}, reason, time, actor}`, each binding the
