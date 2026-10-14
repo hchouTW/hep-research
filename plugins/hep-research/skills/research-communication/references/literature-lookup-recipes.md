@@ -46,8 +46,14 @@ curl -H "Authorization: Bearer $ADS_TOKEN" 'https://api.adsabs.harvard.edu/v1/se
 
 - Every request needs a personal token in an `Authorization: Bearer` header; without one, the lookup is not made:
   say so, never guess. Limits are per endpoint and reported in the `X-RateLimit-*` response headers (a daily quota).
-- Second-order operators `citations()` and `references()` exist in the ADS search syntax; their exact behaviour was
-  not re-opened here (unverified): check the ADS search help before relying on them.
+- Second-order operators: `citations(query)` returns the records citing the results of `query`, and
+  `references(query)` the records cited by them, for example `citations(author:"huchra, john")` or
+  `references(bibcode:2003AJ....125..525J)`; they combine with other terms, as in
+  `citations(bibcode:2006SSRv..123..485G) OR abstract:(Webb OR JWST)`. Source: [ADS search help, citations and
+  references](https://ui.adsabs.harvard.edu/help/search/citations-and-references), read through its
+  [source file](https://raw.githubusercontent.com/adsabs/adsabs.github.io/master/_includes/_help/search/_posts/citations-and-references.md)
+  (accessed 2026-10-15, read level `page`; the help page itself returned an empty HTTP 202 response to a plain
+  request).
 
 ## arXiv
 
