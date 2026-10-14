@@ -62,5 +62,8 @@ metrics.
 - Avoid fitting scalers, tokenizers, vocabularies, or normalization statistics on
   validation or test data.
 - Track the checkpoint selection metric separately from the final test metric.
-- For imbalanced classes, report class counts and prefer balanced metrics such as
-  macro F1, per-class recall, ROC AUC, or PR AUC when appropriate.
+- For imbalanced classes, report class counts and per-class efficiencies. For a physics
+  selection classifier use the analysis metrics of ml-analysis.md ("Analysis metrics":
+  efficiency at the working point, background rejection, expected sensitivity): macro
+  F1, PR AUC and accuracy depend on the class prior, which the training normalization
+  sets arbitrarily, so they carry no physics meaning there.

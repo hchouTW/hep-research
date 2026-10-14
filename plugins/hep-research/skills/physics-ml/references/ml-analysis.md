@@ -203,6 +203,29 @@ A model trained on simulation is applied to data whose input distributions diffe
   al., arXiv:1505.07818). It can hide a real mismodeling and puts data into the training. It still needs the
   control-region validation above and must respect blinding: no signal-region data in training.
 
+## Validate the inputs before training
+
+Before a simulation-trained model is trained, compare every input feature between data and simulation in a control
+region (shapes, correlations between pairs, out-of-range and default values such as -999 or zero-filled missing
+objects). A feature the simulation mismodels becomes a model the simulation mismodels, and a domain-shift check after
+training cannot say which input caused it. Drop, correct or carry as a nuisance any input that fails, and record the
+comparison with the training record.
+
+## Training on data and blinding
+
+Weakly supervised and data-driven methods train on data, so the training itself can unblind. Classification without
+labels (CWoLa: a classifier trained to separate two mixed samples, for example a signal region and a sideband;
+Metodiev, Nachman & Thaler, JHEP 10 (2017) 174, arXiv:1708.02949, read 2026-10-14) and CATHODE (a density estimator
+trained outside the signal region, interpolated into it and used to sample background, then a classifier of data
+against those samples; Hallin et al., PRD 106 (2022) 055006, arXiv:2109.00546, read 2026-10-14) both look at
+signal-region data; DCTR (a classifier-based full phase-space reweighting, also used to tune simulation to data;
+Andreassen & Nachman, PRD 101 (2020) 091901, arXiv:1907.08209, read 2026-10-14) does when it is trained on data.
+Before such a training, the blinding policy (hep-analysis) must say which data the training may see, and the training,
+selection and test samples must keep the signal region's results hidden until unblinding: k-fold over the signal
+region with the score of each event from a model that never saw it, no hyperparameter tuning on the signal region,
+and checks run first on sidebands or on simulation with an injected signal. Record what data the model saw in the
+training record.
+
 ## Weak supervision and anomaly detection
 
 - **CWoLa (classification without labels):** train on two mixed samples with different signal fractions. If the

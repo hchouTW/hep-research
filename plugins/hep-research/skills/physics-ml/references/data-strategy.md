@@ -74,8 +74,10 @@ simulation-to-data section.
 Class imbalance is a metric and threshold problem more often than a sampling problem.
 Before resampling:
 
-- Use metrics that are meaningful under imbalance (precision/recall, PR-AUC) rather
-  than accuracy - see [evaluation-metrics.md](evaluation-metrics.md).
+- Use metrics that do not depend on the class prior: per-class efficiencies at a working
+  point and background rejection (ml-analysis.md, "Analysis metrics"); precision, F1 and
+  PR-AUC move with the class prior and are not physics metrics - see
+  [evaluation-metrics.md](evaluation-metrics.md).
 - Set the decision threshold from the operating requirement, not at 0.5.
 
 If resampling or class weighting is used, note that it changes the predicted

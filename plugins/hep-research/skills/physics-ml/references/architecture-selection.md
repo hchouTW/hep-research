@@ -11,9 +11,11 @@ implementation of specific architectures see
 
 In order of what usually wins:
 
-1. **A pretrained model, fine-tuned.** Almost always beats a custom architecture
-   trained from scratch on a task-sized dataset. This should be the default and the
-   thing a novel architecture must beat.
+1. **A pretrained model, fine-tuned.** For images and text it almost always beats a
+   custom architecture trained from scratch on a task-sized dataset. For particle and
+   detector data the default is the opposite: train from scratch on your own samples and
+   use a pre-trained physics model (which inherits its pre-training simulation) as an
+   ablation - see [particle-and-jet-architectures.md](particle-and-jet-architectures.md).
 2. **A standard architecture at the right size.** Established blocks with a sensible
    parameter count.
 3. **A custom architecture.** Justified when the data has structure no standard model

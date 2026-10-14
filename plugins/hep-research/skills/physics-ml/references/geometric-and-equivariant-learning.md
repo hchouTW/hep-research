@@ -57,7 +57,11 @@ invariance/equivariance on relativistic kinematic inputs is enforcing the wrong 
 Lorentz-equivariant architectures exist specifically for this; whether to use one
 follows the same reasoning as any other symmetry choice above, including question 5 -
 Lorentz-invariant architectures cannot recover frame-dependent quantities, which is
-sometimes exactly what is wanted (e.g. invariant mass) and sometimes not.
+sometimes exactly what is wanted (e.g. invariant mass) and sometimes not. At detector
+level the beam axis, the acceptance and the eta-phi segmentation break full Lorentz
+symmetry, so deployed Lorentz-equivariant taggers add beam "spurion" inputs that reduce
+the symmetry to boosts along and rotations about the beam axis; see
+[particle-and-jet-architectures.md](particle-and-jet-architectures.md).
 
 ## Reviewing a proposed exact-symmetry architecture
 

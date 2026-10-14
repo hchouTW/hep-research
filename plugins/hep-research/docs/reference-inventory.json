@@ -30,7 +30,7 @@
   },
   "physics-ml": {
    "references": 38,
-   "bytes": 257182,
+   "bytes": 263907,
    "uncited": 0
   },
   "research-communication": {
@@ -1077,7 +1077,7 @@
     "tools/check_instruction_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "a8efae4 2026-10-13"
+   "last_commit": "6361630 2026-10-14"
   },
   {
    "path": "skills/hep-computing/references/batch-site-cern-htcondor.md",
@@ -1632,6 +1632,7 @@
     "skills/physics-ml/references/ml-analysis.md",
     "skills/physics-ml/references/sbi-training.md",
     "skills/physics-ml/references/scientific-machine-learning.md",
+    "skills/physics-ml/references/uncertainty-and-calibration.md",
     "tests/routing/test_ml_inference_routing.py"
    ],
    "cited_by_other_skills": [
@@ -1920,8 +1921,8 @@
   {
    "path": "skills/physics-ml/references/architecture-selection.md",
    "owner": "physics-ml",
-   "bytes": 6902,
-   "lines": 129,
+   "bytes": 7131,
+   "lines": 131,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/physics-ml/references/deep-learning-guide.md",
@@ -1982,8 +1983,8 @@
   {
    "path": "skills/physics-ml/references/data-strategy.md",
    "owner": "physics-ml",
-   "bytes": 5843,
-   "lines": 116,
+   "bytes": 5986,
+   "lines": 118,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/physics-ml/references/deep-learning-guide.md",
@@ -2070,8 +2071,8 @@
   {
    "path": "skills/physics-ml/references/evaluation-metrics.md",
    "owner": "physics-ml",
-   "bytes": 1745,
-   "lines": 67,
+   "bytes": 2003,
+   "lines": 70,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/physics-ml/references/ablation-and-design-review.md",
@@ -2155,8 +2156,8 @@
   {
    "path": "skills/physics-ml/references/geometric-and-equivariant-learning.md",
    "owner": "physics-ml",
-   "bytes": 4689,
-   "lines": 81,
+   "bytes": 5013,
+   "lines": 85,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/physics-ml/references/architecture-selection.md",
@@ -2201,8 +2202,8 @@
   {
    "path": "skills/physics-ml/references/ml-analysis.md",
    "owner": "physics-ml",
-   "bytes": 21607,
-   "lines": 287,
+   "bytes": 23451,
+   "lines": 310,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/detector-response/references/imaging-atmospheric-cherenkov.md",
@@ -2213,8 +2214,10 @@
     "skills/physics-ml/assets/hep_losses.py",
     "skills/physics-ml/assets/set_classifier.py",
     "skills/physics-ml/references/data-loading.md",
+    "skills/physics-ml/references/data-strategy.md",
     "skills/physics-ml/references/deep-learning-guide.md",
     "skills/physics-ml/references/efficient-finetuning.md",
+    "skills/physics-ml/references/evaluation-metrics.md",
     "skills/physics-ml/references/export-and-deployment.md",
     "skills/physics-ml/references/mixed-precision.md",
     "skills/physics-ml/references/monitoring-and-lifecycle.md",
@@ -2227,7 +2230,9 @@
     "skills/physics-ml/references/space-and-astroparticle-ml.md",
     "skills/physics-ml/references/training-at-scale.md",
     "skills/physics-ml/references/transformer-architectures.md",
-    "skills/physics-ml/scripts/make_grouped_splits.py"
+    "skills/physics-ml/references/uncertainty-and-calibration.md",
+    "skills/physics-ml/scripts/make_grouped_splits.py",
+    "tests/skills/physics_ml/test_training_pipeline.py"
    ],
    "cited_by_other_skills": [
     "detector-response",
@@ -2252,8 +2257,8 @@
   {
    "path": "skills/physics-ml/references/multivariate-analysis-bdt-nn.md",
    "owner": "physics-ml",
-   "bytes": 16365,
-   "lines": 259,
+   "bytes": 17746,
+   "lines": 277,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/detector-response/references/calibration-and-alignment.md",
@@ -2262,7 +2267,8 @@
     "skills/physics-ml/SKILL.md",
     "skills/physics-ml/references/deep-learning-guide.md",
     "skills/physics-ml/references/ml-analysis.md",
-    "skills/physics-ml/references/particle-and-jet-architectures.md"
+    "skills/physics-ml/references/particle-and-jet-architectures.md",
+    "skills/physics-ml/references/uncertainty-and-calibration.md"
    ],
    "cited_by_other_skills": [
     "detector-response"
@@ -2306,8 +2312,10 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/physics-ml/SKILL.md",
+    "skills/physics-ml/references/architecture-selection.md",
     "skills/physics-ml/references/data-loading.md",
     "skills/physics-ml/references/deep-learning-guide.md",
+    "skills/physics-ml/references/geometric-and-equivariant-learning.md",
     "skills/physics-ml/references/ml-analysis.md",
     "skills/physics-ml/references/sequence-models.md",
     "skills/physics-ml/references/transformer-architectures.md"
@@ -2525,8 +2533,8 @@
   {
    "path": "skills/physics-ml/references/uncertainty-and-calibration.md",
    "owner": "physics-ml",
-   "bytes": 6307,
-   "lines": 108,
+   "bytes": 8853,
+   "lines": 142,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-statistics/references/ml-assisted-inference.md",

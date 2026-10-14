@@ -79,10 +79,44 @@ needed:
   downstream use consumes the spread (error propagation, decision thresholds).
   Validate empirical coverage (does the true value fall inside the interval at the
   stated rate?) rather than trusting the interval's construction.
+- **Platt scaling** - a logistic fit sigmoid(a·logit + b) on the held-out sample; unlike
+  temperature scaling it also fits an offset, so it can absorb a class-prior shift.
+  `assets/calibration.py --method platt` (Platt's original reference is `unverified`
+  here: not opened).
+- **Isotonic regression** - a monotone, non-parametric map (pool-adjacent-violators);
+  needs more calibration data than a one- or two-parameter fit and is the most
+  optimistic when judged on its fit sample. `assets/calibration.py --method isotonic`
+  (it refuses negative weights unless cells are merged).
+- **Prior correction** - a classifier trained under one class ratio estimates p(s|x)
+  under that ratio; `f_phys = r·f / (r·f + 1 − f)` maps it to the physics ratio
+  ([ml-analysis.md](ml-analysis.md), "Class balancing and the prior";
+  `assets/hep_metrics.py undo_prior_shift`, `calibration.py --prior-ratio-change`).
+  Temperature scaling cannot do this.
+- **Conformal prediction** - wraps any trained model in prediction sets that contain the
+  true outcome at a chosen rate without distributional assumptions, given exchangeable
+  calibration and test samples (Angelopoulos & Bates, arXiv:2107.07511, abstract, read
+  2026-10-14). The guarantee is marginal and breaks under the data/simulation shift a
+  physics deployment usually has; check exchangeability first.
 - **Selective prediction / abstention** - allow the model to decline to predict below a
   confidence threshold. Only meaningful if the confidence used to gate is itself
   calibrated; an uncalibrated confidence produces an abstention policy that abstains on
   the wrong cases.
+
+## When an ML uncertainty is a measurement systematic
+
+- **A frozen score used as an observable** (a cut or a template variable) needs no
+  ensemble or seed nuisance: any fixed function of the inputs is a valid observable, and
+  the analysis calibrates the distribution of the score in data and simulation (its
+  systematics are those of the inputs, propagated through the fixed function). Seed or
+  ensemble spread measures how optimal the selection is, not a bias of the result.
+- **A learned quantity used inside the likelihood** (a density ratio, a likelihood ratio,
+  a posterior, a surrogate prediction) is part of the model: its training uncertainty
+  (ensemble spread, finite training statistics, calibration residual) biases the result
+  and must enter as a nuisance or a coverage-checked correction. Hand the treatment to
+  hep-statistics ([ml-assisted-inference.md](../../hep-statistics/references/ml-assisted-inference.md)).
+- **A regressed correction** (energy, momentum) carries its non-closure and the in-situ
+  data/simulation scale and resolution difference as systematics
+  ([multivariate-analysis-bdt-nn.md](multivariate-analysis-bdt-nn.md), "Regression targets").
 
 ## Uncertainty under distribution shift
 

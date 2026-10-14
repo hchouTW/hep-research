@@ -87,11 +87,11 @@ in categories with re-derived background shapes).
 
 ## Training practicalities: neural networks
 
-- Class imbalance between signal and background is common and is usually handled
-  through the loss weighting scheme (matching the formal event weights - see
-  ml-analysis.md's "Weights and objectives") rather than naive oversampling of the
-  minority class, which can distort the effective statistical power of the training
-  sample.
+- Class imbalance between signal and background is handled by balancing the class
+  totals in the training weights (rescale each class so that its summed weight is
+  equal) while keeping the relative physics weights within a class, never by
+  oversampling or flattening inside a class: see ml-analysis.md's "Event weights"
+  and "Class balancing and the prior".
 - Batch composition matters when using physics event weights: a batch that happens to
   contain a small number of very high-weight events can dominate the gradient for that
   step; monitor the effective sample size within batches (or pre-bin/cap extreme
@@ -121,8 +121,26 @@ changes these specific choices:
   error or a Huber loss, when outliers or a long tail would dominate an MSE loss)
   or a full predictive distribution (quantile regression, or a head predicting
   both a mean and a heteroscedastic variance/negative-log-likelihood).
+- **The training truth spectrum is part of the answer.** The loss decides which
+  summary of p(y_true | x) is learned (Cheong et al., JINST 15 (2020) P01030,
+  arXiv:1910.03773, abstract, read 2026-10-14): MSE learns the conditional mean
+  E[y_true | x]. By Bayes' theorem p(y_true | x) is proportional to
+  p(x | y_true) p(y_true), so that mean, and the correction, depend on the truth
+  spectrum of the training sample. A correction trained on one spectrum and applied
+  to a sample with another (a steeper background, a resonance, data) is biased.
+  Check the response both in bins of the true and of the reconstructed variable, and
+  close on a sample with a different truth spectrum. Prior-independent alternatives:
+  learn the mode of the response (Cheong et al., above), or calibrate the response
+  reco/true in bins of the true value and invert it numerically (`unverified`: no
+  opened source cited for numerical inversion here).
+- **Systematics of a regressed correction.** Carry the residual simulation
+  non-closure as an uncertainty, and add the in-situ data/simulation difference of
+  the scale and resolution of the regressed quantity (measured in a control sample:
+  Z or J/psi resonances, balance methods). That difference is often the dominant
+  term (`unverified`: practice, no opened source cited); hand its evaluation to
+  detector-response.
 - Weight the regression loss with the same formal event weights used elsewhere
-  (ml-analysis.md's "Weights and objectives"), not a naive unweighted loss - an
+  (ml-analysis.md's "Event weights"), not a naive unweighted loss - an
   unweighted regression trained on MC with signed or highly variable weights can
   be dominated by a small number of high-weight events the same way an unweighted
   classifier can.
