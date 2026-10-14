@@ -498,5 +498,18 @@ class ReviewFixes2Diagrams(unittest.TestCase):
         self.assertEqual((r["outcome"], r["reason"]), ("skipped", "marked in the source: beamer fragment"))
 
 
+class ReviewFixes2SkillText(unittest.TestCase):
+    """RC-B2: SKILL.md quotes the contract's read-level vocabulary exactly."""
+
+    def test_read_levels_equal_the_vocabulary(self):
+        import re
+        skill = (SCRIPTS.parent / "SKILL.md").read_text(encoding="utf-8")
+        line = next(ln for ln in skill.splitlines() if ln.startswith("- Every quantitative claim"))
+        quoted = re.findall(r"`([^`]+)`", line.split("actually read", 1)[1].split(". ", 1)[0])
+        vocab = json.loads((fx.PLUGIN / "contracts" / "vocab" / "core.json").read_text(encoding="utf-8"))["vocabularies"]["verification_levels"]
+        self.assertEqual(quoted, list(vocab))
+        self.assertIn("user-supplied", next(ln for ln in skill.splitlines() if ln.startswith("- Status survives writing")))
+
+
 if __name__ == "__main__":
     unittest.main()
