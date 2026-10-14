@@ -19,7 +19,7 @@ LOG_FORMAT = "hep-research-revocation-log/1"
 HEAD_VERSION = "1.0.0"
 ZERO = "0" * 64
 MAX_STATUS_AGE_S = 86400  # the stalest head any caller may accept (as contracts.attestation)
-SUBJECT_KINDS = ("artifact", "release", "recipe", "source", "attestation", "qualification")
+SUBJECT_KINDS = ("artifact", "release", "recipe", "source", "attestation", "qualification", "permit")
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
 TIMESTAMP = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
 

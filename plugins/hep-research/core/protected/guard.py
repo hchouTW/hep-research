@@ -15,8 +15,8 @@ that the running account neither owns, nor can write, nor can replace along thei
      edited, truncated, replaced or stale log, or a head from another source, is refused);
   3. the qualification record (contracts/schemas/qualification_record.json): valid now, bound to the canonical SHA-256
      of the authoritative policy and to the running plugin's code identity (core.protected.identity), not revoked.
-Formal use (use="formal": publication and other formal-analysis entry points) is refused in protected mode until
-formal-use permits exist (task P5).
+Formal use (use="formal": publication and other formal-analysis entry points) additionally needs a formal-use permit:
+the entry point passes a check (contracts.permit.checker, task P5) that verifies it; without one it is refused.
 
 guard() runs establish() (or reuses the context of the enclosing command, see protected_main) and then refuses an input
 file or digest that the verified log revokes, and, when the caller gives its known capabilities, a JSON artifact among
@@ -288,9 +288,6 @@ def _establish(paths, flag, project, use, now, account) -> Context:
             if rev.ok and any(rev.revoked(kind="qualification", ref=q["qualification_id"], sha256=d)
                               for d in (qchk.sha256, canonical_sha256(q))):
                 ctx.refusals.append(_refusal("protected.qualification_revoked", "$qualification", "the qualification is revoked"))
-    if use == "formal":
-        ctx.refusals.append(_refusal("protected.formal_use_unavailable", "$use",
-                                     "formal use in protected mode needs a formal-use permit, which this release cannot check"))
     return ctx
 
 
@@ -350,21 +347,26 @@ def input_refusals(ctx: Context, paths=(), digests=(), capabilities=None) -> lis
 
 
 def guard(entry: str, *, paths=(), flag: bool = False, project=None, use: str = "protected", context: Context | None = None,
-          digests=(), capabilities=None, now: datetime.datetime | None = None, account: Account | None = None) -> Context:
+          digests=(), capabilities=None, now: datetime.datetime | None = None, account: Account | None = None,
+          formal_check=None) -> Context:
     """The context for one call of an entry point; raises ProtectedUseRefused in protected mode when anything is refused.
-    Outside protected mode it returns an off context and changes nothing."""
+    Outside protected mode it returns an off context and changes nothing. For use="formal", formal_check(ctx, paths)
+    returns the refusals of the formal-use permit (contracts.permit.checker); without it formal use is refused."""
     paths = [p for p in paths if p is not None]
     ctx = context if context is not None else CURRENT.get()
     if ctx is None or not ctx.protected:  # an off context is re-decided for these paths: they may lie in a project
         ctx = establish(paths, flag, project, use, now, account)
     if not ctx.protected:
         return ctx
-    refusals = list(ctx.refusals)
-    if use == "formal" and not any(r["code"] == "protected.formal_use_unavailable" for r in refusals):
-        refusals.append(_refusal("protected.formal_use_unavailable", "$use",
-                                 "formal use in protected mode needs a formal-use permit, which this release cannot check"))
+    refusals = [r for r in ctx.refusals if r["code"] != "protected.formal_use_unavailable"]
     if not refusals:
         refusals = input_refusals(ctx, paths, digests, capabilities)
+    if use == "formal" and not refusals:
+        if formal_check is None:
+            refusals.append(_refusal("protected.formal_use_unavailable", "$use",
+                                     "formal use in protected mode needs a formal-use permit (--permit)"))
+        else:
+            refusals = list(formal_check(ctx, paths))
     if refusals:
         raise ProtectedUseRefused(entry, refusals)
     return ctx
@@ -388,10 +390,12 @@ def _argv_paths(args: list[str]) -> list[str]:
     return out
 
 
-def protected_main(entry: str, *, use: str = "protected", capabilities=None, keep_flag: bool = False):
+def protected_main(entry: str, *, use: str = "protected", capabilities=None, keep_flag: bool = False,
+                   formal_check_factory=None):
     """Wrap a command-line main(argv): establish the context from the paths in argv and --protected (removed from argv
     unless keep_flag), refuse with exit 3 and a fixed JSON report, otherwise run main with the context set for the
-    library calls it makes. Outside protected mode main runs unchanged."""
+    library calls it makes. Outside protected mode main runs unchanged. For use="formal", formal_check_factory(path)
+    builds the permit check from the value of --permit in argv (None when absent)."""
     def deco(main):
         @functools.wraps(main)
         def wrapper(argv=None, *extra, **kw):
@@ -399,8 +403,13 @@ def protected_main(entry: str, *, use: str = "protected", capabilities=None, kee
             flag = "--protected" in args
             if flag and not keep_flag:
                 args = [a for a in args if a != "--protected"]
+            permit = None
+            if "--permit" in args and args.index("--permit") + 1 < len(args):
+                permit = args[args.index("--permit") + 1]
+            check = formal_check_factory(permit) if (use == "formal" and formal_check_factory and permit) else None
+            paths = [p for p in _argv_paths(args) if p != permit]
             try:
-                ctx = guard(entry, paths=_argv_paths(args), flag=flag, use=use, capabilities=capabilities)
+                ctx = guard(entry, paths=paths, flag=flag, use=use, capabilities=capabilities, formal_check=check)
             except ProtectedUseRefused as exc:
                 print(json.dumps(exc.report(), indent=1))
                 return 3

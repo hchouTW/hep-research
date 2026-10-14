@@ -6,7 +6,8 @@ axis state authorizes a use: the trusted gate (T4.1) reads protected copies and 
 Usage: python3 contracts/attestation.py ATTESTATION [--bundle FILE] [--recipe FILE] [--evidence-root DIR]
            [--revocations FILE | --revocation-log FILE --revocation-head FILE] [--required-roles FILE] [--use FILE]
            [--now YYYY-MM-DDTHH:MM:SSZ]
-  --bundle         the frozen bundle document (bundles/<digest>.json): its digest must match its content and the subject
+  --bundle         the frozen bundle document: an execution bundle (bundles/<digest>.json) or an analysis-level bundle
+                   (contracts/analysis_bundle.py); its digest must match its content and the subject
   --recipe         the recipe the scope names: its canonical digest must match scope.recipe.sha256
   --evidence-root  directory the reviews' evidence refs are relative to; each file is hashed (links refused)
   --revocations    {"as_of", "source", "revoked": [{"ref", ...}]} from lifecycle.status_source, no older than
@@ -56,6 +57,13 @@ NOTE = ("each axis is reported on its own and none authorizes a use; the trusted
         "(HC-05). Software consistency only, not scientific validity (HC-12)")
 PURPOSES = ("exploration", "fixed-execution", "validation", "formal-analysis")
 MAX_STATUS_AGE_S = 86400  # the stalest revocation status any attestation may accept
+
+
+def _bundle_digest(bundle: dict) -> str:
+    """The digest of an execution bundle (core.partition.bundle) or an analysis-level bundle (contracts.analysis_bundle):
+    either can be an attestation's subject."""
+    from contracts.analysis_bundle import FORMAT as ANALYSIS_FORMAT, digest_of as analysis_digest_of
+    return analysis_digest_of(bundle) if bundle.get("format") == ANALYSIS_FORMAT else digest_of(bundle)
 
 
 def capability_axis(att: dict, rep: Report) -> dict:
@@ -198,7 +206,7 @@ def evaluate(att, bundle=None, recipe=None, evidence_root=None, revocations=None
         scope_sha = canonical_sha256(att["subject"]["scope"])
         subject_sha = canonical_sha256(att["subject"])
         if bundle is not None:
-            if not isinstance(bundle, dict) or digest_of(bundle) != bundle.get("bundle_digest"):
+            if not isinstance(bundle, dict) or _bundle_digest(bundle) != bundle.get("bundle_digest"):
                 rep.add("error", "bundle", "attestation.bundle_changed", "the bundle document does not match its own digest")
             elif bundle["bundle_digest"] != att["subject"]["bundle_sha256"]:
                 rep.add("error", "bundle", "attestation.bundle_other", "the attestation is about another bundle")

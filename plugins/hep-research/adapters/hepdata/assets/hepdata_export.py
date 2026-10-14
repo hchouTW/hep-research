@@ -40,6 +40,7 @@ from pathlib import Path
 PLUGIN = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(PLUGIN))
 from contracts.validate import validate_artifact  # noqa: E402
+from contracts.permit import checker as permit_checker  # noqa: E402
 from core.protected.guard import guard, protected_main  # noqa: E402
 from contracts import KNOWN_CAPABILITIES  # noqa: E402
 
@@ -118,8 +119,11 @@ def _errors(payload: dict, n: int, base: Path) -> tuple[list[list[dict]], dict |
     return errors, cov
 
 
-def build_tables(doc: dict, base: Path, table_name: str, description: str) -> tuple[str, list[tuple[dict, dict]]]:
-    guard("hepdata_export.build_tables", paths=[base], use="formal")
+def build_tables(doc: dict, base: Path, table_name: str, description: str, permit=None,
+                 inputs=()) -> tuple[str, list[tuple[dict, dict]]]:
+    # publication is formal use: in protected mode it needs a formal-use permit covering the inputs (contracts/permit.py)
+    guard("hepdata_export.build_tables", paths=[base, *inputs], use="formal",
+          formal_check=permit_checker(permit) if permit else None)
     rep = validate_artifact(doc)
     if not rep.ok:
         raise Refused("the artifact does not validate: " + "; ".join(f"{f.path} {f.code}" for f in rep.errors[:5]))
@@ -209,7 +213,7 @@ def write_hepdata_lib(out: Path, comment: str, entries) -> list[str]:
     return sorted(p.name for p in out.iterdir() if p.suffix == ".yaml")
 
 
-@protected_main("hepdata_export", use="formal", capabilities=KNOWN_CAPABILITIES)
+@protected_main("hepdata_export", use="formal", capabilities=KNOWN_CAPABILITIES, formal_check_factory=permit_checker)
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--artifact", type=Path, required=True, help="a dataset-record or binned prediction artifact")
@@ -217,10 +221,12 @@ def main(argv=None) -> int:
     ap.add_argument("--table-name", default="Table 1")
     ap.add_argument("--description", default="", help="table description (default: the artifact's objective)")
     ap.add_argument("--engine", choices=("plain", "hepdata_lib"), default="plain")
+    ap.add_argument("--permit", type=Path, help="formal-use permit (protected mode only; contracts/permit.py)")
     args = ap.parse_args(argv)
     try:
         doc = json.loads(args.artifact.read_text(encoding="utf-8"))
-        comment, entries = build_tables(doc, args.artifact.parent, args.table_name, args.description)
+        comment, entries = build_tables(doc, args.artifact.parent, args.table_name, args.description, args.permit,
+                                        [args.artifact])
         if args.engine == "hepdata_lib":
             try:
                 import hepdata_lib  # noqa: F401

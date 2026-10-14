@@ -1,0 +1,22 @@
+{"$comment": "Analysis-level bundle (task P5.2, C08, C15): one digest over everything a formal result of an analysis depends on: the measurement spec, its recipes and operator-semantics tables, calibrations, tool contracts, the environment lock, review records, and the plugin release. Each item is bound by SHA-256: the canonical JSON digest for a .json file (the digest an attestation's scope uses for a recipe), the byte digest otherwise. bundle_digest is the canonical SHA-256 of every field except itself; a changed spec, recipe, calibration, tool contract, environment or plugin release gives another digest, so attestations (subject.bundle_sha256) and formal-use permits (subject.analysis_bundle_sha256) bound to the old one no longer apply. contracts/analysis_bundle.py freezes and verifies it; freezing approves nothing.",
+ "type": "object",
+ "required": ["bundle_version", "format", "analysis", "items", "plugin_release", "bundle_digest"],
+ "additionalProperties": false,
+ "properties": {
+  "bundle_version": {"type": "string", "const": "1.0.0"},
+  "format": {"type": "string", "const": "hep-research-analysis-bundle/1"},
+  "analysis": {"type": "string", "minLength": 1},
+  "items": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/item"}},
+  "plugin_release": {"type": "object", "required": ["release", "digest"], "additionalProperties": false, "properties": {
+   "release": {"type": "string", "minLength": 1},
+   "digest": {"type": "string", "minLength": 1}}},
+  "data_exposure": {"$comment": "optional: the exposure known at freezing (contracts.lineage.derive_exposure)", "type": "object"},
+  "bundle_digest": {"$ref": "revocation_event.json#/$defs/sha256"}},
+ "$defs": {
+  "item": {"type": "object", "required": ["role", "id", "ref", "sha256", "digest_kind"], "additionalProperties": false, "properties": {
+   "role": {"type": "string", "enum": ["measurement-spec", "recipe", "semantics-table", "calibration", "tool-contract",
+                                        "environment-lock", "review"]},
+   "id": {"type": "string", "minLength": 1},
+   "ref": {"$comment": "relative to the project root, no '..'", "type": "string", "minLength": 1},
+   "sha256": {"$ref": "revocation_event.json#/$defs/sha256"},
+   "digest_kind": {"type": "string", "enum": ["canonical-json", "bytes"]}}}}}

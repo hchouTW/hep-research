@@ -12,11 +12,11 @@
  "$defs": {
   "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
   "timestamp": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"},
-  "subject": {"$comment": "what is revoked: an artifact (file SHA-256), a release (release_id or manifest digest), a recipe (canonical or file SHA-256), a source snapshot (snapshot_id or SHA-256) an attestation (attestation_id or revocation_ref) or a qualification record (qualification_id); at least one of ref and sha256",
+  "subject": {"$comment": "what is revoked: an artifact (file SHA-256), a release (release_id or manifest digest), a recipe (canonical or file SHA-256), a source snapshot (snapshot_id or SHA-256) an attestation (attestation_id or revocation_ref) a qualification record (qualification_id) or a formal-use permit (permit_id); at least one of ref and sha256",
    "type": "object", "required": ["kind"], "additionalProperties": false,
    "anyOf": [{"required": ["ref"]}, {"required": ["sha256"]}],
    "properties": {
-    "kind": {"type": "string", "enum": ["artifact", "release", "recipe", "source", "attestation", "qualification"]},
+    "kind": {"type": "string", "enum": ["artifact", "release", "recipe", "source", "attestation", "qualification", "permit"]},
     "ref": {"type": "string", "minLength": 1},
     "sha256": {"$ref": "#/$defs/sha256"}}},
   "genesis": {"type": "object", "required": ["seq", "prev_sha256", "genesis"], "additionalProperties": false, "properties": {
