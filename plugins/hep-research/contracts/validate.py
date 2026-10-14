@@ -466,6 +466,29 @@ def _ml_semantics_v2(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, nativ
                     f"calibration evaluated on its fit sample: {same}; validate it on a disjoint sample")
     _ml_domain_shift_v2(ext, rep, native)
     _ml_downstream_v2(ext, vocab, rep, native)
+    if ext.get("task") in SEMANTICS_REQUIRED_TASKS and "output_semantics" not in ext:
+        rep.add("unresolved" if native else "warning", "$.extension.output_semantics", "ml.output_semantics_missing",
+                f"a {ext.get('task')} model must say what its output means (probability, score, density-ratio, "
+                "regression-value): a consumer cannot tell whether it may read it as a probability")
+    _key_checks(ext, ML_KEYS["extension"], "$.extension", rep, kind="ml")
+    for block in ("splits", "calibration", "domain_shift", "weights", "environment"):
+        if isinstance(ext.get(block), dict):
+            _key_checks(ext[block], ML_KEYS[block], f"$.extension.{block}", rep, kind="ml")
+
+
+SEMANTICS_REQUIRED_TASKS = {"classification", "inference", "regression"}
+ML_KEYS = {
+    "extension": {"task", "labels", "features", "splits", "training_domain", "preprocessing", "weights", "model_hash",
+                  "calibration", "downstream_validation", "domain_shift", "environment", "output_semantics",
+                  "source_files", "units", "metrics", "parameters", "supervision", "regression_validation",
+                  "generative_validation", "sbi_validation", "extrapolation_policy", "anomaly_validation",
+                  "reweighting_validation", "notes"},
+    "splits": {"grouping_key", "overlap_check", "manifest", "test_groups_disjoint", "roles", "temporal"},
+    "calibration": {"method", "params", "fit_sample", "validation", "sample_check", "outcome", "scope"},
+    "domain_shift": {"control_sample", "method", "result", "status", "outcome", "nuisance"},
+    "weights": {"source", "negative_weight_treatment", "class_balancing", "used_in", "training", "evaluation"},
+    "environment": {"torch_version", "framework", "device", "precision", "seeds"},
+}
 
 
 PURE_ML_METRICS = {"roc-auc", "accuracy", "loss", "calibration-ece"}
@@ -695,22 +718,27 @@ def _norm_id(text) -> str:
     return re.sub(r"[\s_-]+", "", str(text)).lower()
 
 
-def _key_checks(item, known: set[str], path: str, rep: Report) -> None:
-    """Unknown keys are warnings; a near-miss of a known key is an error (the field it should fill is missing)."""
+KEY_CHECK_NOUNS = {"measurement": ("measurement-spec", " (profile fields go under experiment_fields)"),
+                   "ml": ("ml-artifact", " (namespaced keys '<ns>:<key>' are allowed for extra fields)")}
+
+
+def _key_checks(item, known: set[str], path: str, rep: Report, kind: str = "measurement") -> None:
+    """Unknown keys are warnings; a near-miss of a known key is an error (the field it should fill is missing).
+    `kind` names the artifact family: codes are <kind>.misspelled_key and <kind>.unknown_key."""
     import difflib
     if not isinstance(item, dict):
         return
+    noun, hint = KEY_CHECK_NOUNS.get(kind, (kind, ""))
     for key in sorted(item):
         if key in known or NAMESPACED.match(key):
             continue
         near = difflib.get_close_matches(key, sorted(known), n=1, cutoff=0.85)
         if near:
-            rep.add("error", f"{path}.{key}", "measurement.misspelled_key",
-                    f"'{key}' is not a measurement-spec field; did you mean '{near[0]}'?")
+            rep.add("error", f"{path}.{key}", f"{kind}.misspelled_key",
+                    f"'{key}' is not a {noun} field; did you mean '{near[0]}'?")
         else:
-            rep.add("warning", f"{path}.{key}", "measurement.unknown_key",
-                    f"'{key}' is not a measurement-spec field: no rule or consumer reads it (profile fields go under "
-                    "experiment_fields)")
+            rep.add("warning", f"{path}.{key}", f"{kind}.unknown_key",
+                    f"'{key}' is not a {noun} field: no rule or consumer reads it{hint}")
 
 
 def _markers(value, path: str):

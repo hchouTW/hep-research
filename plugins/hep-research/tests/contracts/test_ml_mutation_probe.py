@@ -142,7 +142,7 @@ VALID_ROWS = {
                                                            "handoff": "hep-statistics"})), "1.3"),
 }
 BY_DESIGN: dict = {}
-DONE = {"0.0", "0.1", "0.6", "1.1"}  # work packages whose rows are enforced; extended as each package lands
+DONE = {"0.0", "0.1", "0.6", "1.1", "1.2"}  # work packages whose rows are enforced; extended as each package lands
 
 
 def apply(name, rows=ROWS):
