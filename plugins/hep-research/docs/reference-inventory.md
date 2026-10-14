@@ -14,7 +14,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-statistics | 11 | 150 | 0 |
 | hep-theory | 11 | 78 | 0 |
 | physics-ml | 38 | 257 | 0 |
-| research-communication | 56 | 392 | 0 |
+| research-communication | 56 | 393 | 0 |
 
 ## Overlapping pairs
 
@@ -225,7 +225,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `academic-papers-guide.md` | research-communication | 28.0 | yes | 12 | - | 573a631 2026-10-14 |
 | `artifact-packaging-for-release.md` | research-communication | 2.9 | no | 3 | - | ecc929c 2026-10-14 |
 | `astroparticle-and-cosmic-ray-papers.md` | research-communication | 13.4 | no | 10 | - | ecc929c 2026-10-14 |
-| `citation-verification.md` | research-communication | 3.9 | yes | 11 | - | ecc929c 2026-10-14 |
+| `citation-verification.md` | research-communication | 5.3 | yes | 11 | - | ecc929c 2026-10-14 |
 | `citations-and-bibliography.md` | research-communication | 19.9 | yes | 11 | - | 257b34b 2026-10-14 |
 | `claim-evidence-mapping.md` | research-communication | 4.0 | yes | 9 | hep-statistics, hep-theory | ecc929c 2026-10-14 |
 | `code-review-report.md` | research-communication | 5.5 | no | 3 | - | ecc929c 2026-10-14 |
@@ -243,7 +243,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `evidence-linked-writing.md` | research-communication | 5.4 | yes | 5 | - | ecc929c 2026-10-14 |
 | `figures-and-tables.md` | research-communication | 9.3 | no | 9 | - | e8e8b9f 2026-10-14 |
 | `general-diagram-principles.md` | research-communication | 7.8 | no | 2 | - | ecc929c 2026-10-14 |
-| `grant-and-fellowship-proposal-writing.md` | research-communication | 4.7 | no | 1 | - | ecc929c 2026-10-14 |
+| `grant-and-fellowship-proposal-writing.md` | research-communication | 4.7 | no | 1 | - | 2aa1729 2026-10-14 |
 | `graphviz-patterns.md` | research-communication | 3.5 | no | 2 | - | ecc929c 2026-10-14 |
 | `interpreting-scientific-graphics.md` | research-communication | 8.3 | no | 5 | - | ecc929c 2026-10-14 |
 | `latex-mechanics-and-tooling.md` | research-communication | 13.4 | no | 7 | - | ecc929c 2026-10-14 |

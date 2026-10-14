@@ -32,11 +32,28 @@ ADS, arXiv), `literature-lookup-recipes.md`.
    version changes. Record the lookup date and sources consulted. If access or
    network limits prevent a check, mark it unverified rather than inferring that
    no notice exists. A notice requires assessing its effect on the specific claim,
-   not silently deleting the citation.
+   not silently deleting the citation. Where to look (checked 2026-10-14):
+   - INSPIRE-HEP: the record's `withdrawn` field (query `withdrawn:true` works) and
+     linked erratum records;
+   - arXiv: the abstract page and version history (a withdrawal is a new version
+     with a withdrawal comment; see arXiv moderation, "Withdraw / Retract a Submission");
+   - Crossref: `https://api.crossref.org/works?filter=updates:<DOI>` lists notices
+     (erratum, correction, retraction) that update a DOI; each carries `update-to`
+     with its `type`, and retractions may come from the Retraction Watch data
+     (`source: retraction-watch`). An empty result means no notice is registered
+     there, not that none exists.
 5. Propose the smallest correction: narrow the claim, fix metadata, cite the
    relevant version, or supply a verified replacement. Keys: rename only to
    merge one paper held under two keys, by rule 9 of `academic-papers-guide.md`
    (keep the current key, update every `\cite`, delete the other).
+
+## Licence and open access
+
+Before reusing a figure or text, read the article's licence on its journal page. HEP articles in journals covered
+by SCOAP3 are immediately open access with authors keeping copyright (the article states its licence): for 2025-2027 SCOAP3 lists EPJC, JHEP, NPB and PLB at 100% coverage, while for
+PRL, PRD and PRC only articles submitted to a high-energy-physics arXiv category are covered (13%, 56% and 9% of HEP
+articles in its 2022-2023 coverage figures) ([SCOAP3 journals 2025-2027](https://scoap3.org/journals-2025-2027/),
+opened 2026-10-14). Coverage of one article is checked on the article, not inferred from the journal.
 
 ## Reusing previously verified records
 

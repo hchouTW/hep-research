@@ -35,7 +35,7 @@
   },
   "research-communication": {
    "references": 56,
-   "bytes": 391659,
+   "bytes": 392996,
    "uncited": 0
   }
  },
@@ -2619,8 +2619,8 @@
   {
    "path": "skills/research-communication/references/citation-verification.md",
    "owner": "research-communication",
-   "bytes": 3941,
-   "lines": 68,
+   "bytes": 5278,
+   "lines": 85,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/research-communication/README.md",
@@ -2904,7 +2904,7 @@
     "skills/research-communication/references/academic-papers-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ecc929c 2026-10-14"
+   "last_commit": "2aa1729 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/graphviz-patterns.md",
