@@ -17,8 +17,10 @@ plus the reliability tables before and after. A successful run is a software che
 evaluated on the samples given, not that the calibration holds on data or under a domain shift.
 
 Separate samples. The map is fit on --fit and judged on --eval. The CLI refuses identical files (same path or same
-content hash) and overlapping event ids (with --id-col) unless --allow-same-sample is given; the override is
-recorded in the output. An ECE measured on the fit sample is optimistic, most of all for isotonic regression.
+content hash) and overlapping event ids (--id-col, required unless --no-id-check) unless --allow-same-sample is
+given; the override is recorded in the output. The record of that check ("sample_check": names, both sha256 values,
+the id check, "disjoint") sits inside the "calibration" block, so the ml-artifact carries it and the validator refuses
+a calibration evaluated on its fit sample. An ECE measured on the fit sample is optimistic, most of all for isotonic regression.
 
 Negative weights (NLO generators, sWeights, subtraction):
   * temperature and Platt: signed weights are kept. A one- or two-parameter fit cannot isolate single events, so
@@ -434,7 +436,8 @@ def sample_provenance(fit_sample, eval_sample, fit_ids=None, eval_ids=None, allo
     same = str(fit_sample) == str(eval_sample)
     rec["checks"].append("name")
     if os.path.isfile(str(fit_sample)) and os.path.isfile(str(eval_sample)):
-        same = same or os.path.samefile(fit_sample, eval_sample) or _sha256(fit_sample) == _sha256(eval_sample)
+        rec["fit_sha256"], rec["eval_sha256"] = _sha256(fit_sample), _sha256(eval_sample)
+        same = same or os.path.samefile(fit_sample, eval_sample) or rec["fit_sha256"] == rec["eval_sha256"]
         rec["checks"].append("sha256")
     overlap = 0
     if fit_ids is not None and eval_ids is not None:
@@ -501,7 +504,10 @@ def main(argv=None):
                     help="whether 'score' is a probability in [0, 1] or a logit")
     ap.add_argument("--bins", type=int, default=15)
     ap.add_argument("--binning", choices=("equal-width", "equal-mass"), default="equal-width")
-    ap.add_argument("--id-col", help="event-id column to check that fit and eval do not overlap")
+    ap.add_argument("--id-col", help="event-id column to check that fit and eval do not overlap (required unless "
+                    "--no-id-check: a file hash alone misses a copy with one byte changed)")
+    ap.add_argument("--no-id-check", action="store_true",
+                    help="samples have no event ids; disjointness rests on names and hashes only (recorded)")
     ap.add_argument("--allow-same-sample", action="store_true",
                     help="allow fit == eval (optimistic ECE); recorded in the output")
     ap.add_argument("--isotonic-negative-weights", choices=("refuse", "merge"), default="refuse")
@@ -511,9 +517,13 @@ def main(argv=None):
     try:
         if a.bins < 1:
             raise ValueError("--bins must be >= 1")
+        if not a.id_col and not a.no_id_check:
+            raise ValueError("--id-col is required to check that fit and eval share no event (pass --no-id-check "
+                             "when the samples have no ids; it is recorded)")
         fs, fy, fw, fid = _read(a.fit, a.id_col)
         es, ey, ew, eid = _read(a.eval, a.id_col)
         prov = sample_provenance(a.fit, a.eval, fid, eid, a.allow_same_sample)
+        prov["id_check"] = f"column {a.id_col}" if a.id_col else "skipped (--no-id-check)"
 
         def to_logit(s):
             return s if a.score_kind == "logit" else logit(s)
@@ -551,6 +561,7 @@ def main(argv=None):
                 "method": a.method, "params": params, "fit_sample": a.fit,
                 "validation": {"metric": "ece", "sample": a.eval, "before": rb["ece"], "after": ra["ece"],
                                "bins": a.bins, "binning": a.binning},
+                "sample_check": prov,
             },
             "fit_details": extra,
             "sample_check": prov,

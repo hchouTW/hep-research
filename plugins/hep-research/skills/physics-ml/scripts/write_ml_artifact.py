@@ -117,7 +117,9 @@ def build(a: argparse.Namespace) -> dict:
         cal, h = _load(a.calibration)
         if not (isinstance(cal, dict) and isinstance(cal.get("calibration"), dict)):
             raise ValueError("the calibration file needs a top-level 'calibration' object")
-        ext["calibration"] = cal["calibration"]
+        ext["calibration"] = dict(cal["calibration"])
+        if isinstance(cal.get("sample_check"), dict):  # older calibration.py output keeps it beside the block
+            ext["calibration"].setdefault("sample_check", cal["sample_check"])
         inputs.append({"ref": a.calibration, "sha256": h})
     if a.domain_shift:
         ds, h = _load(a.domain_shift)

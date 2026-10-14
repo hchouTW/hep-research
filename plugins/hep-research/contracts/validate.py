@@ -270,6 +270,8 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, strict: bool = 
             rep.add("error", "$.extension.training_domain", "ml.no_training_domain", "a surrogate needs its training domain to detect extrapolation")
         if strict or _at_least(doc.get("contract_version"), ML_SEMANTICS_FROM):
             _ml_semantics(ext, rep)
+        if strict or _at_least(doc.get("contract_version"), ML_SEMANTICS_V2_FROM):
+            _ml_semantics_v2(doc, ext, vocab, rep, native=_at_least(doc.get("contract_version"), ML_SEMANTICS_V2_FROM))
     elif t == "communication":
         from contracts.communication import validate_extension  # lazy: communication imports this module's constants
         validate_extension(doc, vocab, rep)
@@ -429,6 +431,39 @@ def _ml_semantics(ext: dict, rep: Report) -> None:
         elif ds.get("status") == "failed":
             rep.add("unresolved", "$.extension.domain_shift", "ml.domain_shift_failed",
                     "the domain-shift check failed: correct or bound the data/simulation difference before use")
+
+
+ML_SEMANTICS_V2_FROM = "2.8.0"  # ml-artifact rules of the physics-ml audit (PML) apply natively from this version
+
+
+def _sample_name(value) -> str:
+    """Comparison form of a sample name or path: stripped, './' and repeated separators removed, case folded."""
+    text = str(value).strip().replace("\\", "/")
+    while text.startswith("./"):
+        text = text[2:]
+    return re.sub(r"/+", "/", text).casefold()
+
+
+def _ml_semantics_v2(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, native: bool = True) -> None:
+    """ml-artifact rules of contracts 2.8.0 (physics-ml audit, PML): the six SKILL.md invariants are checked as claims,
+    not as fields present. Native for artifacts of contract 2.8.0 or later; an older artifact gets them in strict
+    mode and at the gate (`native` is False there: rules that only a 2.8.0 field can satisfy are warnings)."""
+    cal: Any = ext.get("calibration") if isinstance(ext.get("calibration"), dict) else None
+    if cal is not None:
+        val: Any = cal.get("validation") if isinstance(cal.get("validation"), dict) else {}
+        sc: Any = cal.get("sample_check") if isinstance(cal.get("sample_check"), dict) else {}
+        fh, eh = sc.get("fit_sha256"), sc.get("eval_sha256")
+        same = None
+        if sc.get("disjoint") is False:
+            same = "the calibration tool recorded the fit and evaluation samples as not disjoint"
+        elif isinstance(fh, str) and isinstance(eh, str) and fh and fh == eh:
+            same = f"the fit and evaluation samples have the same sha256 ({fh[:12]}...)"
+        elif not (_blank(cal.get("fit_sample")) or _blank(val.get("sample"))) and \
+                _sample_name(cal["fit_sample"]) == _sample_name(val["sample"]):
+            same = f"'{cal['fit_sample']}' and '{val['sample']}' name the same sample"
+        if same and cal.get("fit_sample") != val.get("sample"):  # the exact-name case is reported by the 2.5.0 rule
+            rep.add("error", "$.extension.calibration", "ml.calibration_on_fit_sample",
+                    f"calibration evaluated on its fit sample: {same}; validate it on a disjoint sample")
 
 
 THEORY_SEMANTICS_FROM = "2.6.0"  # theory-spec and prediction rules apply natively from this contract version

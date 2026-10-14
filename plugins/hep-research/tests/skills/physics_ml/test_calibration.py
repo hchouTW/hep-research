@@ -186,6 +186,8 @@ class Cli(unittest.TestCase):
         return path
 
     def run_cli(self, *args):
+        # these samples carry no event ids; the id check is declined explicitly (PML-WP0.1)
+        args = (*args, "--no-id-check") if "--id-col" not in map(str, args) else args
         return subprocess.run([sys.executable, str(ASSET), *map(str, args)], capture_output=True, text=True,
                               timeout=120)
 
@@ -196,7 +198,7 @@ class Cli(unittest.TestCase):
             self.assertEqual(r.returncode, 0, r.stderr)
             out = json.loads(r.stdout, parse_constant=lambda c: self.fail(f"non-strict JSON constant {c}"))
             c = out["calibration"]
-            self.assertEqual(set(c), {"method", "params", "fit_sample", "validation"})
+            self.assertEqual(set(c), {"method", "params", "fit_sample", "validation", "sample_check"})
             self.assertEqual(c["method"], method)
             self.assertEqual(c["fit_sample"], str(fit))
             self.assertEqual(set(c["validation"]), {"metric", "sample", "before", "after", "bins", "binning"})
