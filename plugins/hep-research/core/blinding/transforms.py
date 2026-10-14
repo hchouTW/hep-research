@@ -72,10 +72,14 @@ def event_removal(events, variable: str, region: dict, drop_fields=()) -> dict:
     drop_fields (identifiers, run or block numbers), are sorted by `variable` (input order can carry the removed
     positions), and carry no total. Sealed: the removed count, the input total, the removed events' values."""
     guard("core.blinding.transforms.event_removal")
-    lo, hi = region.get("low"), region.get("high")
-    if not (isinstance(lo, numbers.Real) and isinstance(hi, numbers.Real) and lo < hi):
+    bounds = region.get("low"), region.get("high")
+    if not all(isinstance(b, numbers.Real) and not isinstance(b, bool) for b in bounds):
         raise ValueError("region needs low < high")
-    kept, removed = [], []
+    lo, hi = float(bounds[0]), float(bounds[1])  # type: ignore[arg-type]
+    if not lo < hi:
+        raise ValueError("region needs low < high")
+    kept: list[dict] = []
+    removed: list[dict] = []
     for i, ev in enumerate(events):
         if not isinstance(ev, dict) or variable not in ev:
             raise ValueError(f"event {i} has no {variable!r}")
@@ -83,7 +87,7 @@ def event_removal(events, variable: str, region: dict, drop_fields=()) -> dict:
         (removed if lo <= x < hi else kept).append(ev)
     drop = set(drop_fields)
     released = sorted(({k: v for k, v in ev.items() if k not in drop} for ev in kept), key=lambda e: e[variable])
-    sealed = [len(removed), len(events)] + [float(ev[variable]) for ev in removed]
+    sealed: list[float] = [float(len(removed)), float(len(events))] + [float(ev[variable]) for ev in removed]
     return _release("event-removal", {"variable": variable, "events": released}, sealed,
                     ["events in the blinded region", "the number of removed events"],
                     ["every event outside the blinded region (without the dropped fields)"],
@@ -122,8 +126,9 @@ def common_scale(values, factor, weights=None) -> dict:
 
 def apply(mode: str, **kw: Any) -> dict:
     """Dispatch by mode name (the custodian's preparation step)."""
-    fn = {"binned-mask": binned_mask, "event-removal": event_removal, "common-offset": common_offset,
-          "common-scale": common_scale}.get(mode)
+    fns: dict[str, Any] = {"binned-mask": binned_mask, "event-removal": event_removal, "common-offset": common_offset,
+                           "common-scale": common_scale}
+    fn = fns.get(mode)
     if fn is None:
         raise ValueError(f"unknown blinding mode {mode!r}; one of {list(MODES)}")
     return fn(**kw)

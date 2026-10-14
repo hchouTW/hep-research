@@ -154,6 +154,9 @@ def main(argv=None) -> int:
         print(json.dumps({"status": "refused", "code": "prepare.manifest_in_release",
                           "error": "the draft manifest is not a release artifact"}))
         return 1
+    if not (isinstance(docs["release"], dict) and isinstance(docs["meta"], dict)):
+        print(json.dumps({"status": "unreadable", "error": "--release and --meta are JSON objects"}))
+        return 2
     try:
         manifest = prepare(docs["release"], docs["meta"], args.out, args.sealed_out, ledger=docs["ledger"],
                            analysis=args.analysis, exposure_record=docs["exposure_record"], code_digest=args.code_digest)
