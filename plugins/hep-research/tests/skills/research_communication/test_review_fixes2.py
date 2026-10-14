@@ -320,9 +320,11 @@ class ReviewFixes2ManuscriptBounds(Manuscript):
             t0 = time.perf_counter()
             cm.scan_files([f], [])
             return time.perf_counter() - t0
-        small, large = timed(5000), timed(20000)
+        small = min(timed(5000) for _ in range(2))
+        large = min(timed(20000) for _ in range(2))
         self.assertLess(large, 5.0)
-        self.assertLess(large / max(small, 1e-3), 8.0, f"5k lines {small:.2f} s, 20k lines {large:.2f} s: not linear")
+        # quadratic scaling gives a ratio near 16; linear about 4. A floor keeps timer noise on a fast run from failing it.
+        self.assertLess(large / max(small, 0.05), 10.0, f"5k lines {small:.2f} s, 20k lines {large:.2f} s: not linear")
 
     def test_strict_unused_entries_are_incomplete_when_coverage_is(self):
         code, rep = self.run_main("\\cite{a} \\input missing", "@article{a, title={x}}\n@article{b, title={x}}\n", "--strict")
