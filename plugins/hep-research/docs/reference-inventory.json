@@ -753,7 +753,7 @@
     "detector-response",
     "hep-computing"
    ],
-   "last_commit": "084c273 2026-10-14"
+   "last_commit": "317c39a 2026-10-14"
   },
   {
    "path": "skills/hep-analysis/references/analysis-validation.md",
@@ -1180,7 +1180,7 @@
     "skills/hep-computing/references/agile-development-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "084c273 2026-10-14"
+   "last_commit": "317c39a 2026-10-14"
   },
   {
    "path": "skills/hep-computing/references/environments-and-containers.md",
@@ -1536,7 +1536,7 @@
     "skills/hep-statistics/references/core-stats-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "084c273 2026-10-14"
+   "last_commit": "317c39a 2026-10-14"
   },
   {
    "path": "skills/hep-statistics/references/core-stats-commands.md",
