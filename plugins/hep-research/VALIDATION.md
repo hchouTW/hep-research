@@ -1210,3 +1210,18 @@ scan budget, residual checks and malformed-input handling; all were fixed with r
 checks pass; 2,966 unit tests in 220 modules, 0 failures, 58 skipped. ruff 0.16.10 and mypy 2.4.0 clean. Not run: CI,
 live sessions, any carry-over.
 
+## 0.9.0 release check (2026-10-14, E2)
+
+Version 0.9.0 is release B of the plan "Complete the agentic architecture inside hep-research" (PR #74): analysis-level
+bundles, formal-use permits and the recipe-use review, input-blinding transforms with release preparation and residual
+checks, tool contracts and scopes, the scan-service interface, and `--strict-versions`; evidence in
+"AGENTIC-COMPLETION release B" above. Contracts stay 2.7.0. For the release the examples were rerun with the E2 venv:
+only the plugin version string changed, and the ML example's statistical result records the new hash of its ML
+artifact (unfolding-coverage and end-to-end-sample not rerun, as in earlier releases); the published-likelihood
+benchmark's two artifacts were rewritten with the new plugin version. The companion ams02-research (main `dc0e674`,
+1.4.10) checker reports 0.9.0 `compatible`. `tools/run_all_checks.py` with the host CLIs (Claude Code 2.1.296,
+codex-cli 0.160.0) and the E2 venv: 21 of 21 checks pass; 2,971 unit tests in 221 modules, 0 failures, 58 skipped. CI
+passed every job on PR #74 (Python 3.11, 3.12, 3.13; ruff, mypy; optional ROOT and columnar). On the release PR #76
+three jobs failed on one clock-dependent test (`test_scan_verdict`: the verdict's real timestamp 03:47 contained the
+sealed digits it asserts are absent); the test now uses a fixed time. Release manifest `release-manifests/0.9.0.json`.
+

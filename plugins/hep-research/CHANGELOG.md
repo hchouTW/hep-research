@@ -3,9 +3,10 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.9.0 (2026-10-14)
 
-Contracts 2.7.0 (unchanged).
+Contracts 2.7.0 (unchanged). Release B of the agentic-completion plan (PR #74): formal-use permits and analysis-level
+bundles, blinding transforms and release preparation, tool contracts, the scan-service interface, `--strict-versions`.
 
 - **`--strict-versions` (validate.py, dependencies.py).** The stricter version policy alone (a newer minor contract
   version is an error, for the artifact and every source), which `--protected` meant before 0.8.0. It does not switch
