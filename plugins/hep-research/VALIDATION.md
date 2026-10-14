@@ -1279,7 +1279,7 @@ Physics-ml remediation brief (findings ML-C01…C28, ML-K01…K16, ML-R01…R36)
 | Inference domain check, d = 32, n = 600 | about 10% of fresh in-distribution rows flagged (box) | near the nominal 1% | `test_audit_domain_method.py` |
 | Grouped domain calibration, 300 design points x 10 replicas | reported 4%, measured 100% flagged | reported 3-10%, measured 5-11% (nominal 5%) | same |
 | `compare_model_runs.py` false improvements at 3/5/9 seeds | 26%/15%/11% (first pass, 3/5/10) | 5.7%/5.3%/5.1% (1500 null comparisons each) | `test_audit_small_corrections.py` |
-| References size | 257,182 B | 179,004 B | `docs/reference-inventory.json` |
+| References size | 257,182 B | 179,135 B (38 files; re-measured 2026-10-15 on 41871d1 with `cat skills/physics-ml/references/*.md \| wc -c`; the 179,004 B first recorded here predates `7a4f739`, +131 B) | `docs/reference-inventory.json` |
 | physics-ml tests (E2, torch) | 269 run, 6 skipped | 322 run, 6 skipped (4 GPU, 2 only-without-torch) | `python -m unittest discover -s tests/skills/physics_ml -t .` |
 
 Live routing: see THREE-AUDITS-LIVE-ROUTING below (45/45 physics-ml cases). Not verified here: GPU behaviour of the changed assets; statements marked `unverified` in the references (numerical inversion,
