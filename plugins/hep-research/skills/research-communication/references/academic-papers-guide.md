@@ -119,6 +119,8 @@ are stated here in full.
 Use these when requested or needed to substantiate claims — not for an ordinary summary.
 
 **Verification and auditing**
+- **Collaboration results lifecycle** — internal note, approved preliminary (CONF note/PAS), paper, proceedings; what is citable at each stage, approved plots, review rounds and the frozen-number sign-off record: `collaboration-results-lifecycle.md`
+- **Physics plots** — status labels on figures, ratio panels and bands, fonts and vector output, colour and raster resolution, cosmic-ray flux and neutrino figure conventions: `physics-plots.md`
 - **Literature lookups** — INSPIRE-HEP, ADS and arXiv queries, rate limits, and what to record (source, query, date, read level): `literature-lookup-recipes.md`
 - **Primary sources for statistics and detector methods** — PDG reviews, Cowan et al., pyhf, RooStats, exact-interval and shower-profile sources the plugin's tools rely on: `primary-sources-and-version-checks.md`
 - **Citation verification** — reference identity/version/status and whether cited text supports the claim (a resolving DOI/valid BibTeX entry alone doesn't verify it): `citation-verification.md`
