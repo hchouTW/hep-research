@@ -28,6 +28,6 @@ Designing an evaluation that predicts how a model behaves where it is used and s
   downstream (physics) validity. A model behind a physics result needs the whole chain
   ([uncertainty-and-calibration.md](uncertainty-and-calibration.md),
   [robustness-and-distribution-shift.md](robustness-and-distribution-shift.md); statistical validity of the result:
-  hep-statistics).
+  `hep-statistics`).
 - **Decide with criteria written before the results:** metric threshold with uncertainty, slice floors, regression
   suite, budget, and an explicit list of what got worse.

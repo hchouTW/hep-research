@@ -95,7 +95,7 @@ Physics first:
 - Jets, particle sets, hits, point clouds, graphs -> [particle-and-jet-architectures.md](particle-and-jet-architectures.md)
 - Fast simulation -> [fast-simulation-validation.md](fast-simulation-validation.md), [generative-models.md](generative-models.md)
 - Astroparticle detectors -> [space-and-astroparticle-ml.md](space-and-astroparticle-ml.md)
-- SBI training -> [sbi-training.md](sbi-training.md) (validity and coverage: hep-statistics)
+- SBI training -> [sbi-training.md](sbi-training.md) (validity and coverage: `hep-statistics`)
 - Calibration, uncertainty, systematics -> [uncertainty-and-calibration.md](uncertainty-and-calibration.md); shift
   and OOD -> [robustness-and-distribution-shift.md](robustness-and-distribution-shift.md); surrogates and physics
   constraints -> [scientific-machine-learning.md](scientific-machine-learning.md); symmetries ->
@@ -146,5 +146,5 @@ checkpoints, `torch.load` without `map_location`, train/validation leakage.
 - Guard `torch.compile` behind `hasattr(torch, "compile")`; deterministic cuDNN trades speed for reproducibility.
 - Engineering process (scoping, testing, review): hep-computing
   ([agile-development-guide.md](../../hep-computing/references/agile-development-guide.md)).
-- Statistical validity of conclusions drawn from model outputs: hep-statistics (and research-communication for the
+- Statistical validity of conclusions drawn from model outputs: `hep-statistics` (and `research-communication` for the
   write-up); this guide covers whether the model is trained, evaluated, calibrated and robust.

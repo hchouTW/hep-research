@@ -30,7 +30,7 @@
   },
   "physics-ml": {
    "references": 38,
-   "bytes": 179053,
+   "bytes": 179135,
    "uncited": 0
   },
   "research-communication": {
@@ -1919,7 +1919,7 @@
    "cited_by_other_skills": [
     "research-communication"
    ],
-   "last_commit": "0ab5680 2026-10-14"
+   "last_commit": "cf6d783 2026-10-14"
   },
   {
    "path": "skills/physics-ml/references/architecture-selection.md",
@@ -2011,7 +2011,7 @@
   {
    "path": "skills/physics-ml/references/deep-learning-guide.md",
    "owner": "physics-ml",
-   "bytes": 11693,
+   "bytes": 11699,
    "lines": 151,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -2078,7 +2078,7 @@
   {
    "path": "skills/physics-ml/references/evaluation-strategy.md",
    "owner": "physics-ml",
-   "bytes": 2859,
+   "bytes": 2861,
    "lines": 34,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -2378,7 +2378,7 @@
   {
    "path": "skills/physics-ml/references/scientific-machine-learning.md",
    "owner": "physics-ml",
-   "bytes": 3012,
+   "bytes": 3086,
    "lines": 43,
    "linked_from_skill_md": true,
    "cited_by": [

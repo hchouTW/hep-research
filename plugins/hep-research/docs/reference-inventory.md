@@ -183,7 +183,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `regularization-and-schemes.md` | hep-theory | 7.6 | yes | 3 | - | 6c22fd5 2026-10-13 |
 | `selection-rules.md` | hep-theory | 7.7 | yes | 1 | - | 195e4d1 2026-10-13 |
 | `smeft-and-eft.md` | hep-theory | 3.4 | yes | 2 | - | fa29fcf 2026-10-13 |
-| `ablation-and-design-review.md` | physics-ml | 2.3 | no | 12 | research-communication | 0ab5680 2026-10-14 |
+| `ablation-and-design-review.md` | physics-ml | 2.3 | no | 12 | research-communication | cf6d783 2026-10-14 |
 | `architecture-selection.md` | physics-ml | 3.4 | no | 2 | - | 0ab5680 2026-10-14 |
 | `checkpointing.md` | physics-ml | 6.0 | no | 5 | - | 721d1ea 2026-10-13 |
 | `custom-autograd-and-hooks.md` | physics-ml | 2.6 | no | 3 | - | 0ab5680 2026-10-14 |
@@ -211,7 +211,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `reproducibility.md` | physics-ml | 5.1 | no | 6 | - | 0ab5680 2026-10-14 |
 | `robustness-and-distribution-shift.md` | physics-ml | 2.1 | yes | 8 | - | 0ab5680 2026-10-14 |
 | `sbi-training.md` | physics-ml | 4.9 | yes | 4 | - | b2bf7ef 2026-10-14 |
-| `scientific-machine-learning.md` | physics-ml | 3.0 | yes | 8 | hep-statistics, hep-theory | 0ab5680 2026-10-14 |
+| `scientific-machine-learning.md` | physics-ml | 3.1 | yes | 8 | hep-statistics, hep-theory | 0ab5680 2026-10-14 |
 | `sequence-models.md` | physics-ml | 2.2 | no | 4 | - | 0ab5680 2026-10-14 |
 | `serving-architecture.md` | physics-ml | 1.8 | no | 2 | - | 0ab5680 2026-10-14 |
 | `space-and-astroparticle-ml.md` | physics-ml | 8.6 | yes | 3 | - | b2bf7ef 2026-10-14 |

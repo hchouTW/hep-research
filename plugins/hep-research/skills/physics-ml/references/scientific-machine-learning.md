@@ -34,8 +34,8 @@ at inference; and measure how much surrogate error moves the final quantity of i
 A neural likelihood or posterior is an estimate: validate coverage with simulated ground truth (simulation-based
 calibration), treat simulator misspecification as the simulation-to-data problem of inference
 ([robustness-and-distribution-shift.md](robustness-and-distribution-shift.md)), and distinguish interpolation from
-extrapolation in parameter space. Ratio calibration, closure, toy coverage and systematics through the network are
-hep-statistics work.
+extrapolation in parameter space. Whether the resulting interval, limit or posterior is statistically valid (ratio
+calibration, closure, toy coverage, systematics through the network) is `hep-statistics` work.
 
 Deliver, per constraint, the walkthrough above and its unconstrained baseline; per surrogate, its coverage, error over
 that range and whether the use is interpolation; for SBI, a coverage result; and what would make the assumption or the
