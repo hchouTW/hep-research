@@ -28,11 +28,14 @@ def codes(findings, severity=None):
 
 
 class PolicyFile(unittest.TestCase):
-    def test_policy_file_loads_and_covers_the_five_result_types(self):
+    def test_policy_file_loads_and_covers_the_result_types(self):
         self.assertIsNotNone(load_policy, "communication_lib.reporting does not exist")
         pol = load_policy(POLICY)
-        self.assertEqual(pol["policy_version"], "1.0.0")
-        self.assertEqual(set(pol["result_types"]), {"measurement", "search", "limit", "theory-prediction", "ml-result"})
+        self.assertEqual(pol["policy_version"], "1.1.0")
+        self.assertEqual(set(pol["result_types"]), {"measurement", "search", "limit", "theory-prediction", "ml-result", "flux-measurement"})
+        schema = json.loads((POLICY.parents[3] / "contracts" / "schemas" / "ext_communication_traceability.json").read_text(encoding="utf-8"))
+        enum = schema["$defs"]["reporting_context"]["properties"]["result_type"]["enum"]
+        self.assertEqual(set(enum), set(pol["result_types"]), "every policy result type is a contract result type")
         for rt, spec in pol["result_types"].items():
             for name, field in spec["fields"].items():
                 self.assertIn("description", field, (rt, name))

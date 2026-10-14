@@ -511,5 +511,20 @@ class ReviewFixes2SkillText(unittest.TestCase):
         self.assertIn("user-supplied", next(ln for ln in skill.splitlines() if ln.startswith("- Status survives writing")))
 
 
+class ReviewFixes2FluxPolicy(Project):
+    """RC-C3: the flux-measurement reporting policy asks for exposure, live time and unfolding by method."""
+
+    def test_flux_policy_fields_and_applicability(self):
+        from communication_lib.reporting import check_reporting
+        pol = json.loads(POLICY.read_text(encoding="utf-8"))
+        self.assertIn("flux-measurement", pol["result_types"])
+        rep = check_reporting({"result_type": "flux-measurement", "method": {}, "fields": {}}, pol)
+        self.assertEqual(rep["fields"]["live_time"]["state"], "unresolved", "orbital or not is not stated")
+        self.assertIn("reporting.applicability_unknown", codes(rep, "unresolved"))
+        rep = check_reporting({"result_type": "flux-measurement", "method": {"platform": "ground", "unfolded": False}, "fields": {}}, pol)
+        self.assertEqual((rep["fields"]["live_time"]["state"], rep["fields"]["unfolding"]["state"]), ("not-applicable", "not-applicable"))
+        self.assertEqual(rep["fields"]["exposure"]["state"], "missing")
+
+
 if __name__ == "__main__":
     unittest.main()

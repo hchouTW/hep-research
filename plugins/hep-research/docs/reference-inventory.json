@@ -35,7 +35,7 @@
   },
   "research-communication": {
    "references": 56,
-   "bytes": 384929,
+   "bytes": 388475,
    "uncited": 0
   }
  },
@@ -2798,7 +2798,7 @@
     "skills/research-communication/references/academic-diagrams-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ecc929c 2026-10-14"
+   "last_commit": "7e2ae3b 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/diagrams-statistics.md",
@@ -3321,11 +3321,12 @@
   {
    "path": "skills/research-communication/references/scientific-style.md",
    "owner": "research-communication",
-   "bytes": 9792,
-   "lines": 175,
+   "bytes": 11481,
+   "lines": 192,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-statistics/references/statistical-inference-for-physics.md",
+    "skills/research-communication/assets/reporting-policies.json",
     "skills/research-communication/references/academic-papers-guide.md",
     "skills/research-communication/references/astroparticle-and-cosmic-ray-papers.md",
     "skills/research-communication/references/figures-and-tables.md",
@@ -3365,8 +3366,8 @@
   {
    "path": "skills/research-communication/references/submission-and-peer-review.md",
    "owner": "research-communication",
-   "bytes": 13760,
-   "lines": 234,
+   "bytes": 15617,
+   "lines": 245,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
