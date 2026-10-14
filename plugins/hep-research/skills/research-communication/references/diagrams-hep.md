@@ -33,7 +33,8 @@ Physics process -> Matrix element (hard process) -> Parton shower -> Hadronizati
    -> Digitization (+ pileup overlay) -> Reconstruction -> Analysis
 ```
 Where pileup enters is experiment-dependent: most LHC chains overlay it at digitization (simulated
-minimum-bias hits or pre-mixed hit libraries), some at the hit or event level; ask, and label the
+minimum-bias hits or pre-mixed hit libraries), some at the hit or event level (practitioner convention, not
+checked against an experiment's simulation documentation here: unverified); ask, and label the
 step in the diagram as the experiment's choice.
 Levels: **parton/generator (truth)**, **particle level** (stable particles), **detector level**
 (reco). Truth-level quantities never feed a data-like selection except for labeled truth matching or
