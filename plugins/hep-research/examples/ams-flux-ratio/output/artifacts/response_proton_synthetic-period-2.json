@@ -1,0 +1,94 @@
+{
+ "contract_version": "2.7.0",
+ "bindings": {
+  "experiments": [
+   {
+    "profile": "experiment:ams-02",
+    "version": "2.0.0"
+   }
+  ],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.9.0",
+  "contracts": "2.7.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  },
+  "profiles": {
+   "experiment:ams-02": "2.0.0"
+  }
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "artifact_id": "synthetic-path-a-response-proton-synthetic-period-2",
+ "artifact_type": "response",
+ "objective": "SYNTHETIC rigidity migration for proton, synthetic-period-2",
+ "status": [
+  "synthetic"
+ ],
+ "provenance": {
+  "producer_skill": "detector-response",
+  "created": "2026-10-02"
+ },
+ "extension": {
+  "truth_axis": {
+   "name": "rigidity",
+   "unit": "GV",
+   "edges": [
+    1.5,
+    2.0,
+    3.0,
+    4.5,
+    7.0,
+    10.0,
+    15.0,
+    25.0,
+    40.0,
+    60.0,
+    100.0,
+    150.0
+   ]
+  },
+  "reco_axis": {
+   "name": "rigidity",
+   "unit": "GV",
+   "edges": [
+    1.5,
+    2.0,
+    3.0,
+    4.5,
+    7.0,
+    10.0,
+    15.0,
+    25.0,
+    40.0,
+    60.0,
+    100.0,
+    150.0
+   ]
+  },
+  "orientation": "rows_reco_cols_truth",
+  "normalization": "conditional_on_selected",
+  "inefficiency": "outside_matrix",
+  "acceptance": "outside_matrix",
+  "includes": [
+   "migration"
+  ],
+  "applied_separately": [
+   "trigger_efficiency",
+   "selection_efficiency",
+   "acceptance",
+   "livetime",
+   "crflux:cutoff_fraction"
+  ],
+  "underflow_overflow": "explicit_bins",
+  "intended_use": "unfolding",
+  "conditions": "synthetic-period-2 (the spectral shape inside bins differs slightly between periods)",
+  "provenance": "computed analytically from the synthetic resolution model; migration outside [1.5, 150] GV is kept in explicit underflow/overflow vectors; first and last bins are buffers",
+  "matrix_ref": "matrices/response_proton_synthetic-period-2.json",
+  "form": "matrix"
+ }
+}

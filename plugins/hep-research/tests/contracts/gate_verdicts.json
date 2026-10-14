@@ -580,11 +580,19 @@
   "ok": true,
   "strict_ok": true
  },
- "examples/ams-flux-ratio/output/artifacts/response_helium.json": {
+ "examples/ams-flux-ratio/output/artifacts/response_helium_synthetic-period-1.json": {
   "ok": true,
   "strict_ok": true
  },
- "examples/ams-flux-ratio/output/artifacts/response_proton.json": {
+ "examples/ams-flux-ratio/output/artifacts/response_helium_synthetic-period-2.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/ams-flux-ratio/output/artifacts/response_proton_synthetic-period-1.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/ams-flux-ratio/output/artifacts/response_proton_synthetic-period-2.json": {
   "ok": true,
   "strict_ok": true
  },

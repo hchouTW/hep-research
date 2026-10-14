@@ -23,9 +23,9 @@
  "inputs": [],
  "outputs": [],
  "unresolved_inputs": [],
- "artifact_id": "synthetic-path-a-response-proton",
+ "artifact_id": "synthetic-path-a-response-helium-synthetic-period-2",
  "artifact_type": "response",
- "objective": "SYNTHETIC rigidity migration for proton",
+ "objective": "SYNTHETIC rigidity migration for helium, synthetic-period-2",
  "status": [
   "synthetic"
  ],
@@ -81,13 +81,14 @@
    "trigger_efficiency",
    "selection_efficiency",
    "acceptance",
-   "exposure"
+   "livetime",
+   "crflux:cutoff_fraction"
   ],
   "underflow_overflow": "explicit_bins",
   "intended_use": "unfolding",
-  "conditions": "per synthetic period (spectral shape inside bins differs slightly)",
+  "conditions": "synthetic-period-2 (the spectral shape inside bins differs slightly between periods)",
   "provenance": "computed analytically from the synthetic resolution model; migration outside [1.5, 150] GV is kept in explicit underflow/overflow vectors; first and last bins are buffers",
-  "matrix_ref": "results.json",
+  "matrix_ref": "matrices/response_helium_synthetic-period-2.json",
   "form": "matrix"
  }
 }

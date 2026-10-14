@@ -143,7 +143,9 @@
    {
     "effect_id": "acceptance",
     "category": "acceptance",
-    "applied_in": "estimator"
+    "applied_in": "normalization",
+    "factor_of": "exposure",
+    "notes": "acceptance enters once, inside the exposure normalization (acceptance x livetime x cutoff fraction)"
    },
    {
     "effect_id": "rigidity_migration",

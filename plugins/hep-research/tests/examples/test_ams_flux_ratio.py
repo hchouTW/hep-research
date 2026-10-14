@@ -149,7 +149,7 @@ class PathATests(unittest.TestCase):
     def test_artifacts_valid_and_labeled_synthetic(self):
         self.assertTrue(all(c["ok"] for c in self.results["contract_validation"].values()), self.results["contract_validation"])
         files = sorted((self.out / "artifacts").glob("*.json"))
-        self.assertEqual(len(files), 6)
+        self.assertEqual(len(files), 8)  # spec, four responses (species x period), ratio result, two datasets
         for f in files:
             doc = json.loads(f.read_text())
             self.assertIn("synthetic", doc["status"], f.name)

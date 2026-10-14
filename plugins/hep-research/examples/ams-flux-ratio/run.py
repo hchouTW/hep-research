@@ -422,7 +422,8 @@ def artifacts(world, res, created):
                            "corrections": [
                                {"effect_id": "trigger_efficiency", "category": "trigger_efficiency", "applied_in": "estimator"},
                                {"effect_id": "selection_efficiency", "category": "selection_efficiency", "applied_in": "estimator"},
-                               {"effect_id": "acceptance", "category": "acceptance", "applied_in": "estimator"},
+                               {"effect_id": "acceptance", "category": "acceptance", "applied_in": "normalization", "factor_of": "exposure",
+                                "notes": "acceptance enters once, inside the exposure normalization (acceptance x livetime x cutoff fraction)"},
                                {"effect_id": "rigidity_migration", "category": "migration", "applied_in": "response_matrix"}],
                            "systematics": [{"name": "trigger_efficiency", "source": "control sample", "effect": "normalization", "applied_via": "covariance (fully correlated across bins, shared by species)"},
                                            {"name": "selection_efficiency", "source": "control sample", "effect": "normalization", "applied_via": "covariance (per bin, per species)"},
@@ -446,20 +447,21 @@ def artifacts(world, res, created):
                                {"name": "geomagnetic cutoff safety factor", "value": CUTOFF_FACTOR, "provenance": "proposal", "claim_ids": [], "applies_to": {"species": ["helium"]}}],
                                "ams02:note": "SYNTHETIC: every number except the documented cutoff factor is invented"}})
     resp = {}
-    for sname in SPECIES:
-        resp[sname] = dict(base, artifact_id=f"synthetic-path-a-response-{sname}", artifact_type="response",
-                           objective=f"SYNTHETIC rigidity migration for {sname}", status=["synthetic"],
+    for sname, pname in ((s, p) for s in SPECIES for p in PERIODS):
+        resp[(sname, pname)] = dict(base, artifact_id=f"synthetic-path-a-response-{sname}-{pname}", artifact_type="response",
+                           objective=f"SYNTHETIC rigidity migration for {sname}, {pname}", status=["synthetic"],
                            provenance={"producer_skill": "detector-response", "created": created},
                            extension={"truth_axis": {"name": "rigidity", "unit": "GV", "edges": EDGES.tolist()},
                                       "reco_axis": {"name": "rigidity", "unit": "GV", "edges": EDGES.tolist()},
                                       "orientation": "rows_reco_cols_truth", "normalization": "conditional_on_selected",
                                       "inefficiency": "outside_matrix", "acceptance": "outside_matrix", "includes": ["migration"],
-                                      "applied_separately": ["trigger_efficiency", "selection_efficiency", "acceptance", "exposure"],
+                                      "applied_separately": ["trigger_efficiency", "selection_efficiency", "acceptance", "livetime",
+                                                             "crflux:cutoff_fraction"],
                                       "underflow_overflow": "explicit_bins", "intended_use": "unfolding",
-                                      "conditions": "per synthetic period (spectral shape inside bins differs slightly)",
+                                      "conditions": f"{pname} (the spectral shape inside bins differs slightly between periods)",
                                       "provenance": "computed analytically from the synthetic resolution model; migration outside "
                                                     "[1.5, 150] GV is kept in explicit underflow/overflow vectors; first and last "
-                                                    "bins are buffers", "matrix_ref": "results.json",
+                                                    "bins are buffers", "matrix_ref": f"matrices/response_{sname}_{pname}.json",
                                       "form": "matrix"})
     stat = dict(base, artifact_id="synthetic-path-a-ratio-result", artifact_type="statistical-result", required_capabilities=["stats:result-semantics"],
                 objective="SYNTHETIC He/p ratio per bin and period with covariance",
@@ -485,7 +487,7 @@ def artifacts(world, res, created):
                                                                   "uncertainties": [{"name": "total", "kind": "statistical", "correlation": "covariance", "covariance_ref": f"results.json#ratio/{pname}/covariance"}]},
                                       "covariance": {"status": "present", "ref": f"results.json#ratio/{pname}/covariance"},
                                       "period": {"start": pname, "end": pname}, "status": "synthetic", "experiment_profile": PROFILE["id"]})
-    docs = {"measurement_spec": spec, "response_proton": resp["proton"], "response_helium": resp["helium"], "ratio_result": stat,
+    docs = {"measurement_spec": spec, **{f"response_{s}_{p}": d for (s, p), d in resp.items()}, "ratio_result": stat,
             **{f"dataset_{p}": d for p, d in data.items()}}
     reports = {k: validate_artifact(v, vocab) for k, v in docs.items()}
     return docs, {k: {"ok": r.ok, "errors": [f.message for f in r.errors]} for k, r in reports.items()}
@@ -565,10 +567,11 @@ def main(argv=None) -> int:
     refs = {p: ratio_reference(res, p) for p in PERIODS}
     docs, contract = artifacts(world, res, args.created)
     # the validator input comes from each response artifact (contracts.response_adapter), not a second declaration
-    resp_checks = {s: validate_response(to_validator_input(docs[f"response_{s}"]["extension"], matrix=world[s][p]["response"].tolist(),
-                                                           underflow=world[s][p]["underflow"].tolist(),
-                                                           overflow=world[s][p]["overflow"].tolist())["input"])["status"]
-                   for s in SPECIES for p in list(PERIODS)[:1]}
+    # each response artifact points at its own matrix file (matrix, underflow, overflow); every period is checked
+    matrices = {(s, p): {"matrix": world[s][p]["response"].tolist(), "underflow": world[s][p]["underflow"].tolist(),
+                         "overflow": world[s][p]["overflow"].tolist()} for s in SPECIES for p in PERIODS}
+    resp_checks = {f"{s}/{p}": validate_response(to_validator_input(docs[f"response_{s}_{p}"]["extension"], **m)["input"])["status"]
+                   for (s, p), m in matrices.items()}
     cov_checks = {}
     for (k, p), b in res.items():
         if k in SPECIES and p in PERIODS:
@@ -581,6 +584,9 @@ def main(argv=None) -> int:
                                                           "blocks": blocks})["status"]
     for name, doc in docs.items():
         (out / "artifacts" / f"{name}.json").write_text(json.dumps(doc, indent=1) + "\n")
+    (out / "artifacts" / "matrices").mkdir(exist_ok=True)
+    for (s, p), m in matrices.items():
+        (out / "artifacts" / "matrices" / f"response_{s}_{p}.json").write_text(json.dumps(m, indent=1) + "\n")
     fig_check = figures(world, res, out)
 
     def pub(v, species="helium"):
