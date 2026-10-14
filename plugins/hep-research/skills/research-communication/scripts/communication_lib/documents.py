@@ -17,7 +17,7 @@ HEADING_RE = re.compile(r"^(#{1,6})\s+(.*?)\s*#*\s*$", re.M)
 TEX_SECTION_RE = re.compile(r"\\(part|chapter|section|subsection|subsubsection|paragraph)\*?\s*(?:\[[^\]]*\])?\{([^}]*)\}")
 TEX_COMMENT_RE = re.compile(r"(?<!\\)%.*")
 TEX_ENV_RE = r"\\begin\{%s\}(.*?)\\end\{%s\}"
-INCLUDE_RE = re.compile(r"\\(?:input|include|subfile|import|subimport)\s*\{")
+INCLUDE_RE = re.compile(r"\\(?:(?:input|include|subfile|import|subimport)\s*\{|(?:input|include)(?![A-Za-z@])\s+[^\s\\{}%])")
 
 
 def normalize(text: str) -> str:

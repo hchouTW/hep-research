@@ -121,5 +121,56 @@ class ReviewFixes2Adaptation(ta.Base):
                 self.assertEqual(rep["exit_code"], 1)
 
 
+class Manuscript(unittest.TestCase):
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
+
+    def write(self, name, text):
+        p = self.tmp / name
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(text, encoding="utf-8")
+        return p
+
+    def run_main(self, body, bib=None, *extra):
+        import check_manuscript as cm
+        bibline = "\\bibliography{refs}\n" if bib is not None else ""
+        if bib is not None:
+            self.write("refs.bib", bib)
+        main = self.write("main.tex", "\\documentclass{article}\\begin{document}\n" + body + "\n" + bibline + "\\end{document}\n")
+        out = io.StringIO()
+        with mock.patch("sys.stdout", out), mock.patch("sys.stderr", io.StringIO()):
+            code = cm.main(["--main", str(main), "--format", "json", *[str(e) for e in extra]])
+        rep = json.loads(out.getvalue())
+        return code, rep
+
+    @staticmethod
+    def found(rep, code):
+        return {f["message"] for f in rep["findings"] if f["code"] == code}
+
+
+class ReviewFixes2Includes(Manuscript):
+    """RC-A1: a brace-less \\input is followed; an unresolvable one leaves coverage incomplete."""
+
+    def test_braceless_input_is_followed(self):
+        self.write("sec1.tex", "See \\ref{nolabel} and \\cite{ghost}.\n")
+        code, rep = self.run_main("\\input sec1", "@article{real, title={x}}\n")
+        self.assertEqual(code, 1, rep)
+        self.assertIn("ghost", self.found(rep, "manuscript.missing_bib_entry"))
+        self.assertIn("nolabel", self.found(rep, "manuscript.undefined_ref"))
+
+    def test_occurrence_region_with_braceless_input_is_not_followed(self):
+        from communication_lib.documents import check_occurrence
+        res = check_occurrence("\\section{Results}\n\\input sec1\n", "latex", {"locator": "section:Results", "passage": "R = 1.02"})
+        self.assertEqual(res["outcome"], "include", res)
+
+    def test_unresolvable_braceless_input_is_incomplete(self):
+        code, rep = self.run_main("\\input nofile")
+        self.assertEqual((code, rep["coverage"]), (3, "incomplete"), rep)
+
+
+BIB = "@article{a, title={x}}\n@article{b, title={x}}\n@article{c, title={x}}\n@article{d, title={x}}\n"
+
+
 if __name__ == "__main__":
     unittest.main()

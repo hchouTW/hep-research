@@ -113,6 +113,8 @@ LAYOUT_LINE_RE = re.compile(r"\\(?:[vh]space|[vh]skip|vertex|node|draw|includegr
 DEFINITION_RE = re.compile(r"\\(?:(?:re|provide)?newcommand|DeclareRobustCommand|def)\b")
 # Main mode: literal include mechanisms the scanner follows, and the ones it only reports.
 INPUT_RE = re.compile(r"\\(input|include|subfile|InputIfFileExists)\s*\{([^}]*)\}")
+# Plain-TeX form without braces: \input sec1 (the name ends at a space, brace, backslash or comment sign).
+INPUT_BARE_RE = re.compile(r"\\(input|include)(?![A-Za-z@])\s+([^\s\\{}%]+)")
 IMPORT_RE = re.compile(r"\\(?:sub)?import\s*\{([^}]*)\}\s*\{([^}]*)\}")
 INCLUDEONLY_RE = re.compile(r"\\includeonly\s*\{([^}]*)\}")
 BIBLIOGRAPHY_RE = re.compile(r"\\bibliography\s*\{([^}]*)\}")
@@ -216,6 +218,7 @@ def discover_manuscript_files(main: Path, project_root: Path, build_root: Path) 
         if THEBIBLIOGRAPHY_RE.search(code):
             state["inline"] = True
         includes = [(m.start(), m.group(1), m.group(2), "") for m in INPUT_RE.finditer(code)]
+        includes += [(m.start(), m.group(1), m.group(2), "") for m in INPUT_BARE_RE.finditer(code)]
         includes += [(m.start(), "import", m.group(2), m.group(1)) for m in IMPORT_RE.finditer(code)]
         for pos, cmd, raw, directory in sorted(includes):
             line = line_of(code, pos)
