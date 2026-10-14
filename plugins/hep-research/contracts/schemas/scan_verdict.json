@@ -1,0 +1,42 @@
+{
+ "$comment": "Scan verdict (task P6.1): the only answer of the custodian's scan service that may reach an agent. A fixed status and the budget state; closed, so no sealed value, matching token, location, file name of a hit or count of hits can travel in it (HC-08). Details stay in the custodian's report.",
+ "type": "object",
+ "required": [
+  "verdict_version",
+  "submission_id",
+  "status",
+  "budget",
+  "time"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "verdict_version": {
+   "type": "string",
+   "const": "1.0.0"
+  },
+  "submission_id": {
+   "type": "string",
+   "minLength": 1
+  },
+  "status": {
+   "type": "string",
+   "enum": [
+    "pass",
+    "fail",
+    "incomplete",
+    "refused-budget",
+    "refused"
+   ]
+  },
+  "budget": {
+   "type": "string",
+   "enum": [
+    "available",
+    "exhausted"
+   ]
+  },
+  "time": {
+   "$ref": "revocation_event.json#/$defs/timestamp"
+  }
+ }
+}
