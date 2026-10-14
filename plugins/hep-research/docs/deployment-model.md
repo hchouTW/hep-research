@@ -35,7 +35,7 @@ interfaces it uses. A change to any of them is called out in CHANGELOG.md, and a
 | Interface | Used by | Contract |
 |---|---|---|
 | Code-release identity: format `hep-research-code-release-manifest/1` (`contracts/identity.py`, `tools/release_manifest.py`, `release-manifests/<version>.json`) | Both installers (pinning); custodian preflight | Paths, full SHA-256, size and mode of every regular file except caches and `release-manifests/`; digest of the canonical JSON. A deployment may re-implement it independently so that root never runs code from an unverified archive |
-| `contracts.release_manifest.check(...)` with the keyword-only options `code_digest`, `destination_sets`, `analysis`, `sealed` | Custodian `check`, `approve`, `release` | Fail closed; findings never name a sealed value or a count; passing releases nothing |
+| `contracts.release_manifest.check(...)` with the keyword-only options `code_digest`, `destination_sets`, `analysis`, `sealed`, `exposure_record`, and a verified revocation status (`revocations=` a `RevocationStatus`) | Custodian `check`, `approve`, `release` | Fail closed; findings never name a sealed value or a count; passing releases nothing |
 | `contracts/schemas/release_manifest.json` (`destinations` block) | Custodian destination sets | Same structure as a manifest's `destinations` |
 | `core.blinding` (`mask_binned`, `mask_ratio`, `seal`, `scan_text`, `scan_file`, `scan_paths`, `agent_view`) | Custodian preparation and output scanning | Fail closed on invalid input; `agent_view` is the only agent-visible form of a scan |
 | `contracts.attestation`, `core.partition.bundle` | Trusted gate, trusted submitter (when built) | Report axes and bundle digests; authorize nothing |

@@ -3,6 +3,20 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **Architecture and deployment documents brought to 0.9.0.** `docs/agentic-architecture.md`: status line names the
+  release; §12 labels name the release that introduced each component instead of "Unreleased"; §3 and §9.3 list every
+  sidecar (revocation log and head, exposure and decision records, qualification record, analysis-level bundle, permit,
+  scan submission and verdict) and the protected-use package; §4 defines protected mode, protected input, revocation log
+  and head, qualification record, exposure and decision records, analysis-level bundle and permit; §6.3 adds the
+  release-manifest inputs `--revocation-log`/`--revocation-head` and `--exposure-record`, and the project-config example
+  is schema 1.2.0 with `nonce_ledger`; §6.5 names the scan-service interface; §8 adds the roles of the transforms,
+  release preparation, protected-use guard, lineage and revocation tools, bundles and permits, and the scan interface,
+  and the protected-mode refusal of a copied batch runner; §9.1 names analysis-level bundles and the permit's review
+  rule. `docs/deployment-model.md`: the release-manifest interface lists `exposure_record` and a verified revocation
+  status. Documentation only.
+
 ## 0.9.0 (2026-10-14)
 
 Contracts 2.7.0 (unchanged). Release B of the agentic-completion plan (PR #74): formal-use permits and analysis-level
