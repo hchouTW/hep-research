@@ -1,5 +1,5 @@
 {
- "contract_version": "2.7.0",
+ "contract_version": "2.8.0",
  "artifact_id": "synthetic-j9-classifier",
  "artifact_type": "ml-artifact",
  "objective": "SYNTHETIC J9: calibrated event classifier whose probability feeds a template fit",
@@ -14,7 +14,7 @@
  },
  "versions": {
   "plugin": "0.9.0",
-  "contracts": "2.7.0",
+  "contracts": "2.8.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"

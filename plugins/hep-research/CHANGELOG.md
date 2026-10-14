@@ -5,6 +5,9 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+Contracts 2.8.0 (minor: new rule families refuse false or incomplete declarations; new fields optional; no new
+capability; artifacts before 2.8.0 keep their default outcome and get the new rules under `--strict` and at the gate).
+
 - **Batch commands refused in protected mode (HC-10, HC-16; review of deferred task P6.2).** In a project whose
   config carries `agent_policy`, `core/partition/campaign.py` refuses a real `submit`, `resubmit` or `cancel` and
   `confirm`, `abandon`, `reset` and `clear-orphans` in any form with `protected.batch_needs_trusted_submitter`, before

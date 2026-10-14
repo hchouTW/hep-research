@@ -12,16 +12,20 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-from contracts import dependencies, validate  # noqa: E402
+from contracts import CONTRACTS_VERSION, dependencies, validate  # noqa: E402
 
 FIXTURE = json.loads((ROOT / "contracts" / "fixtures" / "artifacts" / "valid" / "computational_run.json").read_text())
 
 
+_MAJOR, _MINOR, _ = CONTRACTS_VERSION.split(".")
+NEWER_MINOR = f"{_MAJOR}.{int(_MINOR) + 1}.0"  # one minor above the reader, whatever the current version is
+
+
 def newer(doc):
     d = json.loads(json.dumps(doc))
-    d["contract_version"] = "2.8.0"
+    d["contract_version"] = NEWER_MINOR
     if isinstance(d.get("versions"), dict) and "contracts" in d["versions"]:
-        d["versions"]["contracts"] = "2.8.0"
+        d["versions"]["contracts"] = NEWER_MINOR
     return d
 
 
