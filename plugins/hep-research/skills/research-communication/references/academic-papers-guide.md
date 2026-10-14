@@ -4,7 +4,7 @@
 
 | Task | Minimum inputs | Load | Output | Done when |
 |---|---|---|---|---|
-| Quick source-backed answer | the question; ledger or a reachable primary source | `citation-verification.md` | an inline answer naming the source, its version and read level | the source and date are stated; nothing from memory |
+| Quick source-backed answer | the question; ledger or a reachable primary source | `literature-lookup-recipes.md`, `citation-verification.md` | an inline answer naming the source, its version and read level | the source and date are stated; nothing from memory |
 | Draft or revise a section | result artifacts or supplied numbers; target venue | this guide, `scientific-style.md` | the text with status labels and `[VALUE NEEDED]` slots | every number links to an artifact or a source |
 | Evidence-linked manuscript (audit depth) | a traceability `communication` record and the documents | `evidence-linked-writing.md` | `check_communication.py` and `audit_claims.py` reports, draft facts | both reports pass or their open items are listed |
 | Changed result during revision | baseline and revised records | `revision-impact-tracking.md` | `track_revision_impact.py` report, reopened assessments | stale occurrences fixed and re-checked |
@@ -194,6 +194,7 @@ a figure caption, or a formatted document of your own.
 Use these when requested or needed to substantiate claims — not for an ordinary summary.
 
 **Verification and auditing**
+- **Literature lookups** — INSPIRE-HEP, ADS and arXiv queries, rate limits, and what to record (source, query, date, read level): `literature-lookup-recipes.md`
 - **Citation verification** — reference identity/version/status and whether cited text supports the claim (a resolving DOI/valid BibTeX entry alone doesn't verify it): `citation-verification.md`
 - **Systematic-review screening** — eligibility, reproducible search logs, deduplication, screening decisions; keep narrative reviews lightweight unless this is requested: `systematic-review-screening.md`
 - **Reproducibility auditing** — trace results to methods/data/code/config/execution evidence; distinguish documentation inspection from an actual rerun (hand execution to `hep-computing`; what a rerun's number means to `hep-statistics`, `hep-analysis` or `physics-ml` as the question demands): `reproducibility-auditing.md`

@@ -2,7 +2,8 @@
 
 Use for a reference audit, questionable attribution, or checking the evidence
 behind manuscript claims. For export and formatting, use
-`citations-and-bibliography.md`.
+`citations-and-bibliography.md`; for the lookup queries themselves (INSPIRE-HEP,
+ADS, arXiv), `literature-lookup-recipes.md`.
 
 ## Table of contents
 - [Verification steps](#verification-steps)

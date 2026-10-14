@@ -34,8 +34,8 @@
    "uncited": 0
   },
   "research-communication": {
-   "references": 53,
-   "bytes": 370070,
+   "references": 54,
+   "bytes": 374809,
    "uncited": 0
   }
  },
@@ -2561,8 +2561,8 @@
   {
    "path": "skills/research-communication/references/academic-papers-guide.md",
    "owner": "research-communication",
-   "bytes": 38833,
-   "lines": 501,
+   "bytes": 39028,
+   "lines": 502,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/research-communication/README.md",
@@ -2574,11 +2574,12 @@
     "skills/research-communication/references/code-to-methodology-synthesis.md",
     "skills/research-communication/references/evidence-linked-writing.md",
     "skills/research-communication/references/interpreting-scientific-graphics.md",
+    "skills/research-communication/references/literature-lookup-recipes.md",
     "skills/research-communication/references/submission-and-peer-review.md",
     "tests/skills/research_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "c8df300 2026-10-14"
+   "last_commit": "f653c12 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/artifact-packaging-for-release.md",
@@ -2618,8 +2619,8 @@
   {
    "path": "skills/research-communication/references/citation-verification.md",
    "owner": "research-communication",
-   "bytes": 3675,
-   "lines": 65,
+   "bytes": 3768,
+   "lines": 66,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/research-communication/README.md",
@@ -2629,6 +2630,7 @@
     "skills/research-communication/references/claim-evidence-mapping.md",
     "skills/research-communication/references/evidence-linked-writing.md",
     "skills/research-communication/references/literature-discovery-and-search.md",
+    "skills/research-communication/references/literature-lookup-recipes.md",
     "skills/research-communication/references/literature-review.md",
     "skills/research-communication/references/plagiarism-and-text-reuse-checking.md",
     "tests/skills/research_communication/test_handoff_text.py"
@@ -2656,7 +2658,7 @@
     "skills/research-communication/references/statistics-and-ml-papers.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "c8df300 2026-10-14"
+   "last_commit": "f653c12 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/claim-evidence-mapping.md",
@@ -2838,10 +2840,11 @@
     "skills/research-communication/README.md",
     "skills/research-communication/SKILL.md",
     "skills/research-communication/references/academic-papers-guide.md",
+    "skills/research-communication/references/literature-lookup-recipes.md",
     "skills/research-communication/references/revision-impact-tracking.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "03e1ac2 2026-10-14"
+   "last_commit": "f653c12 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/figures-and-tables.md",
@@ -2975,6 +2978,19 @@
    "last_commit": "d47080b 2026-10-12"
   },
   {
+   "path": "skills/research-communication/references/literature-lookup-recipes.md",
+   "owner": "research-communication",
+   "bytes": 4451,
+   "lines": 80,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/research-communication/references/academic-papers-guide.md",
+    "skills/research-communication/references/citation-verification.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "untracked"
+  },
+  {
    "path": "skills/research-communication/references/literature-review.md",
    "owner": "research-communication",
    "bytes": 7727,
@@ -2988,7 +3004,7 @@
     "skills/research-communication/references/thesis-by-publication-assembly.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "f653c12 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/logical-consistency-and-argument-uniformity.md",
@@ -3147,7 +3163,7 @@
     "skills/research-communication/references/thesis-by-publication-assembly.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "351029c 2026-10-07"
+   "last_commit": "15757e4 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/preregistration-and-registered-reports.md",
@@ -3182,7 +3198,7 @@
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "429afb2 2026-10-14"
+   "last_commit": "102c03f 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/reading-papers.md",
@@ -3509,6 +3525,7 @@
   ],
   "literature": [
    "skills/research-communication/references/literature-discovery-and-search.md",
+   "skills/research-communication/references/literature-lookup-recipes.md",
    "skills/research-communication/references/literature-review.md"
   ],
   "ml": [
