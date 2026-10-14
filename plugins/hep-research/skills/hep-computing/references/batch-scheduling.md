@@ -20,7 +20,9 @@ on worker nodes with the user's permissions, so submitting runs code the agent j
 sandbox gives. Until a trusted submitter is qualified (one that runs only frozen bundles verified by full digest), use
 `submit` and `resubmit` only in a disposable test environment, on synthetic data, with each submission explicitly
 approved by the user from a configuration the user has reviewed. With protected data the agent prepares a bundle and a
-trusted submitter outside the agent's reach submits it; `confirm`, `abandon` and `cancel` are then not agent commands.
+trusted submitter outside the agent's reach submits it. In a protected project (one whose config carries `agent_policy`) the
+plugin already refuses a real `submit`, `resubmit` or `cancel`, and `confirm`, `abandon`, `reset` and `clear-orphans`
+(`protected.batch_needs_trusted_submitter`); `plan`, `freeze`, `status`, `reconcile`, `merge`, `report` and dry runs stay.
 
 ## When to batch, and when not
 
