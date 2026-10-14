@@ -60,14 +60,15 @@ def batch_weight_report(targets: torch.Tensor, weights: torch.Tensor) -> dict:
 
 
 def disco_penalty(score: torch.Tensor, protected: torch.Tensor, weights: torch.Tensor | None = None,
-                  eps: float = 1e-12, check_weights: bool = False) -> torch.Tensor:
+                  eps: float = 1e-12, check_weights: bool = True) -> torch.Tensor:
     """Weighted squared distance correlation dCor^2(score, protected) (Kasieczka & Shih, arXiv:2001.05310).
 
     Call it on background events of the batch only: loss = bce + lam * disco_penalty(score[bkg], mass[bkg], |w|).
     Weights must be non-negative (use |w|); they are normalized to mean one inside. Memory is O(B^2).
     Computed in at least float32 (half precision loses the double-centering cancellation). eps sits inside the
-    square root so a degenerate batch (constant scores) gives a finite gradient. check_weights=True validates the
-    weight signs at the cost of a device synchronization; use it while debugging.
+    square root so a degenerate batch (constant scores) gives a finite gradient. check_weights=True (the default)
+    refuses negative weights at the cost of a device synchronization; pass False only once the weights are known to
+    be non-negative and the synchronization matters.
     """
     x = score.reshape(-1)
     if x.dtype in (torch.float16, torch.bfloat16):

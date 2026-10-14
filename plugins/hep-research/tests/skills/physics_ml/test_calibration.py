@@ -198,7 +198,8 @@ class Cli(unittest.TestCase):
             self.assertEqual(r.returncode, 0, r.stderr)
             out = json.loads(r.stdout, parse_constant=lambda c: self.fail(f"non-strict JSON constant {c}"))
             c = out["calibration"]
-            self.assertEqual(set(c), {"method", "params", "fit_sample", "validation", "sample_check", "outcome"})
+            self.assertEqual(set(c), {"method", "params", "fit_sample", "validation", "sample_check", "outcome",
+                                      "warnings"})
             self.assertEqual(c["method"], method)
             self.assertEqual(c["fit_sample"], str(fit))
             self.assertEqual(set(c["validation"]), {"metric", "sample", "before", "after", "bins", "binning", "floor"})

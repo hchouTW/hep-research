@@ -207,7 +207,8 @@
     "id_overlap": 0,
     "id_check": "column id"
    },
-   "outcome": "no-op-within-floor"
+   "outcome": "no-op-within-floor",
+   "warnings": []
   },
   "domain_shift": {
    "control_sample": "SYNTHETIC data-like background control sample (10000 events, pt_miss scaled by 1.1 by construction)",
@@ -333,7 +334,7 @@
    },
    {
     "ref": "work/calibration.json",
-    "sha256": "296596968f43cd13815cdab47adfa9e11da82b6c0efdfe3e40bdb973d0203c22",
+    "sha256": "cc5dbdbdc59b8a3e8be4879d81599b42e7c8234694fb6131420581f8f22f5b69",
     "role": "calibration"
    },
    {

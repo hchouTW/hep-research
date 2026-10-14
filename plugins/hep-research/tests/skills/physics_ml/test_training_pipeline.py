@@ -215,11 +215,23 @@ class TrainClassifierPipelineTests(unittest.TestCase):
         self.assertGreater(best["metadata"]["weights"]["training"]["n_negative"], 0)
         self.assertEqual(best["metadata"]["weights"]["evaluation"]["treatment"], "signed, unmodified")
 
-        dropped = data_dir / "dropped"
-        result = run(train_cmd(data, manifest, dropped, "--epochs", "1", "--negative-weights", "dropped"), data_dir)
+        # dropping negative-weight events is no longer offered (ml-analysis.md forbids it; PML-WP1.5, ML-R06)
+        result = run(train_cmd(data, manifest, data_dir / "dropped", "--epochs", "1", "--negative-weights", "dropped"),
+                     data_dir)
+        self.assertEqual(result.returncode, 2)
+        absw = data_dir / "abs"
+        result = run(train_cmd(data, manifest, absw, "--epochs", "1", "--negative-weights", "abs"), data_dir)
         self.assertEqual(result.returncode, 0, result.stderr)
-        summary = json.loads((dropped / "run_summary.json").read_text())
-        self.assertEqual(summary["weights"]["negative_weight_treatment"], "dropped")
+        self.assertIn("|w|", result.stderr)
+        summary = json.loads((absw / "run_summary.json").read_text())
+        self.assertEqual(summary["weights"]["negative_weight_treatment"], "abs")
+        self.assertEqual(summary["weights"]["training"]["n_negative"], 0)
+        res = data_dir / "resample"
+        result = run(train_cmd(data, manifest, res, "--epochs", "1", "--negative-weights", "resample"), data_dir)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        summary = json.loads((res / "run_summary.json").read_text())
+        self.assertEqual(summary["weights"]["negative_weight_treatment"], "resampled")
+        self.assertIn("resampling", summary["weights"]["training"])
 
     def inference(self, csv_rows, *extra, header=None):
         path = self.dir / f"infer-{len(list(self.dir.iterdir()))}.csv"

@@ -710,7 +710,7 @@ ML_KEYS = {
                   "generative_validation", "sbi_validation", "extrapolation_policy", "anomaly_validation",
                   "reweighting_validation", "notes"},
     "splits": {"grouping_key", "overlap_check", "manifest", "test_groups_disjoint", "roles", "temporal"},
-    "calibration": {"method", "params", "fit_sample", "validation", "sample_check", "outcome", "scope"},
+    "calibration": {"method", "params", "fit_sample", "validation", "sample_check", "outcome", "scope", "warnings"},
     "domain_shift": {"control_sample", "method", "result", "status", "outcome", "nuisance"},
     "weights": {"source", "negative_weight_treatment", "class_balancing", "used_in", "training", "evaluation"},
     "environment": {"torch_version", "framework", "device", "precision", "seeds"},

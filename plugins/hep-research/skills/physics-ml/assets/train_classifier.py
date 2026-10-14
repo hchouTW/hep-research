@@ -93,8 +93,13 @@ def build_parser() -> argparse.ArgumentParser:
     train.add_argument("--grad-clip", type=float, default=1.0)
     train.add_argument("--precision", choices=("fp32", "bf16", "fp16"), default="fp32",
                        help="bf16 autocast on CPU or CUDA; fp16 (with a gradient scaler) on CUDA only")
-    train.add_argument("--negative-weights", choices=("signed", "dropped"), default="signed",
-                       help="training treatment of negative weights; evaluation always keeps them signed")
+    train.add_argument("--negative-weights", choices=("signed", "abs", "resample"), default="signed",
+                       help="training treatment of negative weights; evaluation always keeps them signed. signed: "
+                       "keep them (large batches); abs: train on |w| (biased where negative weights cluster; the bias "
+                       "warning is recorded); resample: cell resampling per class in the standardized inputs "
+                       "(Andersen & Maier, arXiv:2109.07851). Dropping them is not offered: it biases the result.")
+    train.add_argument("--resample-max-cell", type=int, default=200,
+                       help="largest cell for --negative-weights resample (default 200 events)")
     train.add_argument("--class-balancing", choices=("none", "equal-sum"), default="none",
                        help="equal-sum: rescale training weights so every class has the same sum of weights")
     train.add_argument("--working-points", type=float, nargs="+", default=[0.3, 0.5, 0.7],
@@ -162,7 +167,7 @@ except ModuleNotFoundError as _exc:
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent / "scripts"))  # check_surrogate_domain.DomainModel: one domain method (PML-WP0.7)
 from hep_losses import batch_weight_report, weighted_bce  # noqa: E402
-from hep_metrics import (effective_entries, efficiency_with_uncertainty,  # noqa: E402
+from hep_metrics import (cell_resample, effective_entries, efficiency_with_uncertainty,  # noqa: E402
                          rejection_at_signal_efficiency, weighted_auc)
 from models import MLPClassifier  # noqa: E402
 
@@ -362,12 +367,27 @@ def assign_splits(data: dict) -> dict:
     return out
 
 
-def training_weights(y: np.ndarray, w: np.ndarray, n_classes: int, args) -> tuple[np.ndarray, np.ndarray, dict]:
+TREATMENT = {"signed": "signed", "abs": "abs", "resample": "resampled"}  # CLI choice -> ml-artifact vocabulary
+
+
+def training_weights(y: np.ndarray, w: np.ndarray, n_classes: int, args, x=None) -> tuple[np.ndarray, np.ndarray, dict]:
     """Training weights from the signed evaluation weights; returns (keep mask, weights, record)."""
     keep = np.ones(w.size, bool)
-    if args.negative_weights == "dropped":
-        keep = w >= 0
     wt = w.copy()
+    extra: dict = {}
+    if args.negative_weights == "abs" and (wt < 0).any():
+        wt = np.abs(wt)
+        extra["warning"] = ("trained on |w|: the learned density ratio is biased where negative weights cluster; "
+                            "compare with signed or resampled training before relying on it")
+        print(f"WARNING: {extra['warning']}", file=sys.stderr)
+    elif args.negative_weights == "resample" and (wt < 0).any():
+        reports = {}
+        scale = np.maximum(x.std(axis=0), 1e-12) if x is not None else None
+        for c in range(n_classes):
+            sel = np.flatnonzero(y == c)
+            if sel.size and (wt[sel] < 0).any():
+                wt[sel], reports[str(c)] = cell_resample(x[sel], wt[sel], scale, args.resample_max_cell)
+        extra["resampling"] = reports
     if args.class_balancing == "equal-sum":
         target = wt[keep].sum() / n_classes
         for c in range(n_classes):
@@ -376,10 +396,10 @@ def training_weights(y: np.ndarray, w: np.ndarray, n_classes: int, args) -> tupl
             if total <= 0:
                 raise InputError(f"class {c} has non-positive training weight sum; cannot balance")
             wt[sel] *= target / total
-    record = {"negative_weight_treatment": args.negative_weights, "class_balancing": args.class_balancing,
-              "n_events": int(keep.sum()), "n_dropped": int((~keep).sum()),
+    record = {"negative_weight_treatment": TREATMENT[args.negative_weights], "class_balancing": args.class_balancing,
+              "n_events": int(keep.sum()),
               "sum_w_per_class": [float(wt[keep & (y == c)].sum()) for c in range(n_classes)],
-              "n_negative": int((wt[keep] < 0).sum())}
+              "n_negative": int((wt[keep] < 0).sum()), **extra}
     return keep, wt, record
 
 
@@ -581,7 +601,7 @@ def run(args) -> int:
     x, y, w, labels, features = data["x"], data["y"], data["w"], data["labels"], data["features"]
     n_classes = len(labels)
     tr, va, te = idx["train"], idx["val"], idx["test"]
-    keep, w_train_all, train_weight_record = training_weights(y[tr], w[tr], n_classes, args)
+    keep, w_train_all, train_weight_record = training_weights(y[tr], w[tr], n_classes, args, x[tr])
     tr_fit = tr[keep]
     mean = x[tr].mean(axis=0)
     std = np.maximum(x[tr].std(axis=0), 1e-12)
@@ -594,7 +614,7 @@ def run(args) -> int:
     unit_eval = bool(np.all(w == 1.0))
     weights_summary = {
         "source": data["weight_source"],
-        "negative_weight_treatment": ("none-present" if not eval_has_negative else args.negative_weights),
+        "negative_weight_treatment": ("none-present" if not eval_has_negative else TREATMENT[args.negative_weights]),
         "class_balancing": args.class_balancing,
         "used_in": ([] if unit_eval and args.class_balancing == "none" else ["loss"]) + ([] if unit_eval else ["metrics"]),
     }

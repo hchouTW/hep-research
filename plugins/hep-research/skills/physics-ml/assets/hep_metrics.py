@@ -10,7 +10,9 @@ Functions:
   effective_entries             (sum w)^2 / sum w^2
   distance_correlation_sq       weighted dCor^2 (the DisCo penalty, NumPy reference implementation)
   mass_sculpting_jsd            Jensen-Shannon divergence of background mass passing vs failing a score cut
-  undo_prior_shift              convert a classifier probability trained under one class prior to another
+  undo_prior_shift              convert a classifier probability trained under one class prior to another (r > 0)
+  signed_weight_out_of_range    flag efficiencies, ROC points or an AUC outside [0, 1] (signed weights; never clipped)
+  cell_resample                 remove negative weights locally (cell resampling, arXiv:2109.07851)
 
 CLI: python3 hep_metrics.py events.csv --eff-s 0.3 0.5 0.7 [--mass-col m]
 The CSV needs columns score,label (1 = signal) and optionally weight and a mass column. Output is JSON.
@@ -117,6 +119,13 @@ def rejection_at_signal_efficiency(scores, labels, weights=None, eff_s=0.5):
     return out
 
 
+def _asimov_g(x):
+    """(1 + x) ln(1 + x) - x without cancellation: the series x^2/2 - x^3/6 + x^4/12 below 1e-6."""
+    if x < 1e-6:
+        return x * x / 2 - x ** 3 / 6 + x ** 4 / 12
+    return (1 + x) * math.log1p(x) - x
+
+
 def asimov_significance(s, b, sigma_b=None):
     """Median expected discovery significance in the Asimov approximation.
 
@@ -126,10 +135,17 @@ def asimov_significance(s, b, sigma_b=None):
     measurement (b_hat = m/tau, sigma_b^2 = b/tau):
     Z = sqrt(2[(s+b) ln((s+b)(b+sb2)/(b^2+(s+b)sb2)) - (b^2/sb2) ln(1 + sb2 s/(b(b+sb2)))]).
     """
+    for name, v in (("s", s), ("b", b)):
+        if not isinstance(v, (int, float)) or isinstance(v, bool) or not math.isfinite(v):
+            raise ValueError(f"{name} must be a finite number, got {v!r}")
     if b <= 0 or s < 0:
         raise ValueError("need b > 0 and s >= 0")
+    if sigma_b is not None and (not isinstance(sigma_b, (int, float)) or isinstance(sigma_b, bool)
+                                or not math.isfinite(sigma_b) or sigma_b < 0):
+        raise ValueError(f"sigma_b must be a finite non-negative number, got {sigma_b!r}")
     if not sigma_b:
-        return math.sqrt(2 * ((s + b) * math.log1p(s / b) - s))
+        # Z^2 = 2[(s+b) ln(1+s/b) - s] = 2 b g(s/b); written through g so that s/b < 1e-6 keeps its precision
+        return math.sqrt(2 * b * _asimov_g(s / b))
     v = sigma_b ** 2
     t1 = (s + b) * math.log((s + b) * (b + v) / (b * b + (s + b) * v))
     t2 = (b * b / v) * math.log1p(v * s / (b * (b + v)))
@@ -230,7 +246,76 @@ def undo_prior_shift(prob, prior_ratio_change):
     """Map p(s|x) learned with class-odds pi_s/pi_b = O_train to odds O_phys: r = O_phys / O_train."""
     p = np.asarray(prob, dtype=float)
     r = float(prior_ratio_change)
+    if not math.isfinite(r) or r <= 0:
+        raise ValueError(f"prior_ratio_change must be a finite positive odds ratio, got {prior_ratio_change!r}")
     return r * p / (r * p + 1.0 - p)
+
+
+def signed_weight_out_of_range(*values):
+    """True when any efficiency, ROC point or AUC lies outside [0, 1]: signed weights (net negative weight in part of
+    the sample) can do that, and the value is then reported as it is, with this flag, never clipped."""
+    for v in values:
+        a = np.asarray(v, dtype=float)
+        if a.size and (np.any(a < 0.0) or np.any(a > 1.0)):
+            return True
+    return False
+
+
+def read_label(value, where=""):
+    """A 0/1 class label from a CSV cell; a fractional or other value is refused, never truncated."""
+    x = float(value)
+    if x not in (0.0, 1.0):
+        raise ValueError(f"label {value!r}{where} is not 0 or 1 (a fractional label is not truncated)")
+    return int(x)
+
+
+def cell_resample(x, w, metric_scale=None, max_cell=None):
+    """Cell resampling of signed event weights (Andersen & Maier, EPJC 82 (2022) 433, arXiv:2109.07851, sect. 2.2,
+    eq. 2.2): for each event with negative weight (the seed), add the nearest events (Euclidean distance in x,
+    scaled by metric_scale) until the cell's summed weight is non-negative, then replace every weight in the cell by
+    |w_i| * sum_C w / sum_C |w|. The sum of weights in each cell, and so every observable coarser than the cells, is
+    preserved. With max_cell a cell stops at that many events even if its sum is still negative (the seed's weight
+    is then only partly absorbed). Returns (new weights, report).
+
+    The distance here is in the model's (standardized) input features; the paper defines a phase-space distance on
+    physics objects. Choose features in which nearby events are experimentally indistinguishable."""
+    from scipy.spatial import cKDTree
+
+    x = np.asarray(x, dtype=float)
+    w = np.asarray(w, dtype=float).copy()
+    if x.ndim != 2 or len(x) != len(w):
+        raise ValueError("x must be (n, d) and w length n")
+    z = x / (np.asarray(metric_scale, dtype=float) if metric_scale is not None else 1.0)
+    tree = cKDTree(z)
+    n = len(w)
+    cap = n if max_cell is None else int(max_cell)
+    sizes, unresolved = [], 0
+    for seed in np.flatnonzero(w < 0):
+        if w[seed] >= 0:
+            continue  # absorbed by an earlier cell
+        k = 2
+        while True:
+            k = min(k, n)
+            _, idx = tree.query(z[seed], k=k)
+            idx = np.atleast_1d(idx)
+            csum = np.cumsum(w[idx])
+            ok = np.flatnonzero(csum >= 0)
+            if ok.size and ok[0] + 1 <= cap:
+                cell = idx[: ok[0] + 1]
+                break
+            if k >= min(n, cap):
+                cell = idx[:min(k, cap)]
+                unresolved += 1
+                break
+            k *= 2
+        total, absolute = w[cell].sum(), np.abs(w[cell]).sum()
+        if absolute > 0:
+            w[cell] = np.abs(w[cell]) * total / absolute
+        sizes.append(len(cell))
+    return w, {"method": "cell resampling (Andersen & Maier, arXiv:2109.07851, eq. 2.2)",
+               "cells": len(sizes), "median_cell_size": float(np.median(sizes)) if sizes else 0.0,
+               "max_cell_size": int(max(sizes)) if sizes else 0, "cells_still_negative": unresolved,
+               "n_negative_after": int(np.sum(w < 0))}
 
 
 def _read_csv(path, mass_col):
@@ -239,7 +324,7 @@ def _read_csv(path, mass_col):
     if not rows or "score" not in rows[0] or "label" not in rows[0]:
         raise ValueError("CSV needs columns 'score' and 'label'")
     s = np.array([float(r["score"]) for r in rows])
-    y = np.array([int(float(r["label"])) for r in rows])
+    y = np.array([read_label(r["label"], f" in row {i}") for i, r in enumerate(rows)])
     w = np.array([float(r["weight"]) for r in rows]) if "weight" in rows[0] else None
     m = np.array([float(r[mass_col]) for r in rows]) if mass_col else None
     return s, y, w, m
@@ -280,6 +365,9 @@ def main(argv=None):
             out["working_points"].append(wp)
         if w is not None and np.any(w < 0):
             out["note"] = "signed weights present: curves may be locally non-monotonic; not clipped"
+            _, es, eb = weighted_roc(s, y, w)
+            out["signed_weight_out_of_range"] = signed_weight_out_of_range(
+                es, eb, out["auc_weighted"], *[[p["eff_s"], p["eff_b"]] for p in out["working_points"]])
     except (OSError, ValueError, KeyError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 2

@@ -478,12 +478,20 @@ def _read(path, id_col=None):
     if "score" not in d or "label" not in d:
         raise ValueError(f"{path}: needs 'score' and 'label'")
     s = np.array([float(v) for v in d["score"]])
-    y = np.array([int(float(v)) for v in d["label"]])
+    y = np.array([_label(v, path) for v in d["label"]])
     w = np.array([float(v) for v in d["weight"]]) if "weight" in d else None
     if id_col and id_col not in d:
         raise ValueError(f"{path}: id column {id_col!r} missing")
     ids = list(d[id_col]) if id_col else None
     return s, y, w, ids
+
+
+def _label(value, path):
+    """0/1 class label; a fractional label is refused, never truncated (the same rule as hep_metrics.py)."""
+    x = float(value)
+    if x not in (0.0, 1.0):
+        raise ValueError(f"{path}: label {value!r} is not 0 or 1 (a fractional label is not truncated)")
+    return int(x)
 
 
 def _sanitize(o):
@@ -543,8 +551,8 @@ def main(argv=None):
         prior = None
         if a.prior_ratio_change is not None:
             r = a.prior_ratio_change
-            if r <= 0:
-                raise ValueError("--prior-ratio-change must be positive")
+            if not math.isfinite(r) or r <= 0:
+                raise ValueError("--prior-ratio-change must be a finite positive odds ratio")
             fz, ez = fz + math.log(r), ez + math.log(r)     # r p/(r p + 1 - p) == sigmoid(logit p + ln r)
             prior = {"applied": "hep_metrics.undo_prior_shift", "prior_ratio_change": r,
                      "note": "applied to fit and eval scores before calibration"}
@@ -565,6 +573,14 @@ def main(argv=None):
             params = dict(fmap.params(), input="probability")
             after_p = fmap(sigmoid(ez))
             extra = info
+        warnings = []
+        if a.method == "temperature":
+            if extra.get("at_bound"):
+                warnings.append(f"the temperature {params['temperature']:.4g} sits at its search bound: the map is "
+                                "not a minimum of the loss; check the scores or use Platt")
+            if prior is None:
+                warnings.append("temperature scaling rescales the logit only: it cannot correct a prior (class-ratio) "
+                                "shift; give --prior-ratio-change or use Platt, which also fits an offset")
         rb = calibration_report(before_p, ey, ew, a.bins, a.binning)
         ra = calibration_report(after_p, ey, ew, a.bins, a.binning)
         out = {
@@ -574,6 +590,7 @@ def main(argv=None):
                                "bins": a.bins, "binning": a.binning, "floor": ra["ece_floor"]},
                 "sample_check": prov,
                 "outcome": calibration_outcome(rb["ece"], ra["ece"], ra["ece_floor"]),
+                "warnings": warnings,
             },
             "fit_details": extra,
             "sample_check": prov,
