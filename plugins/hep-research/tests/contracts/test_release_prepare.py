@@ -191,5 +191,43 @@ class ReviewFindingTests(unittest.TestCase):
         self.assertFalse((self.d / "rel").exists())
 
 
+class PrepareManyTests(unittest.TestCase):
+    """Several outputs of one mode as one release (the custodian releases several histograms at once)."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.d = Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_two_histograms_pass_the_full_check(self):
+        a = tf.binned_mask([0, 10, 20, 30, 40, 50], [12.0, 30.0, 47.0, 25.0, 9.0], REGION)
+        b = tf.binned_mask([0, 10, 20, 30, 40, 50], [21.0, 33.0, 58.0, 27.0, 11.0], REGION)
+        m = rp.prepare_many({"spectrum": a, "control": b}, META, self.d / "rel", self.d / "c" / "sealed.json",
+                            parameters={"mode": "binned-mask", "histograms": ["spectrum", "control"]},
+                            ledger=LEDGER, analysis="synthetic-analysis", exposure_record=EXPOSURE, code_digest=CODE)
+        self.assertEqual([x["path"] for x in m["artifacts"]], ["control.json", "spectrum.json"])
+        sealed = json.loads((self.d / "c" / "sealed.json").read_text())
+        self.assertIn(47.0, sealed["sealed"])
+        self.assertIn(58.0, sealed["sealed"])
+        rep = ReleasePrepareTests.full_check(self, m, self.d / "rel", sealed)
+        self.assertEqual(rep["status"], "pass", rep["findings"])
+
+    def test_one_mode_per_release_and_names(self):
+        a = RELEASES["common-scale"]()
+        b = RELEASES["common-offset"]()
+        with self.assertRaises(rp.PrepareRefused) as cm:
+            rp.prepare_many({"a": a, "b": b}, META, self.d / "r", self.d / "s.json", parameters={}, code_digest=CODE)
+        self.assertEqual(cm.exception.code, "prepare.mixed_modes")
+        with self.assertRaises(rp.PrepareRefused) as cm:
+            rp.prepare_many({"../x": a}, META, self.d / "r", self.d / "s.json", parameters={}, code_digest=CODE)
+        self.assertEqual(cm.exception.code, "prepare.bad_name")
+        with self.assertRaises(rp.PrepareRefused) as cm:
+            rp.prepare_many({"a": a}, META, self.d / "r", self.d / "s.json", parameters={"offset_used": 1},
+                            code_digest=CODE)
+        self.assertEqual(cm.exception.code, "prepare.keys_present")
+
+
 if __name__ == "__main__":
     unittest.main()

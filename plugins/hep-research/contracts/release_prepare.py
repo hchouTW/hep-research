@@ -5,8 +5,8 @@ custodian keeps for output scans. Run by the custodian from its own copies; run 
 exercise, and a draft manifest releases nothing: approval, the full check (release_manifest.py with every custodian
 option) and publication are the custodian's.
 
-  release directory   released.json only: the released data, with the mode and parameters under "blinding" (no
-                      sealed value, no key)
+  release directory   released.json only (prepare_many: one <name>.json per transform output): the released data,
+                      with the mode and parameters under "blinding" (no sealed value, no key)
   sealed file         {"sealed": [...], "rtol"} or {"sealed": [], "nothing_sealable": true}, written OUTSIDE the
                       release directory (refused inside it)
   draft manifest      artifacts with SHA-256 and size; transform.code_sha256 = the given code digest, else the running
@@ -90,16 +90,49 @@ def _inside(path: Path, root: Path) -> bool:
     return path == root or root in path.parents
 
 
+ARTIFACT_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
+
+
+def _check_release(release, name: str) -> None:
+    if not isinstance(release, dict) or release.get("mode") not in MODES or "released" not in release:
+        raise PrepareRefused("prepare.not_a_release", f"{name}: not a transform output (mode one of {list(MODES)})")
+    if not (isinstance(release.get("protected"), list) and release["protected"] and isinstance(release.get("retained"), list)
+            and isinstance(release.get("sealed", []), list)):
+        raise PrepareRefused("prepare.not_a_release", f"{name}: a transform output has protected, retained and sealed lists")
+
+
+def _body(release: dict) -> bytes:
+    top = dict(release["released"]) if isinstance(release["released"], dict) else {"released": release["released"]}
+    # the transform's description sits under 'blinding', a structure key the sealed-value scan skips (bin edges and
+    # region bounds are not data)
+    top["blinding"] = dict(top.get("blinding") or {}, mode=release["mode"], parameters=release.get("parameters", {}))
+    return (json.dumps(top, indent=1, sort_keys=True) + "\n").encode("utf-8")
+
+
 def prepare(release: dict, meta: dict, out_dir, sealed_out, *, ledger=None, analysis=None, exposure_record=None,
             code_digest=None, rtol: float = 1e-9) -> dict:
     """Write the release directory and the sealed file; return the draft manifest. See the module docstring. Every
     check runs and every document is built before anything is written; files are created, never overwritten."""
+    _check_release(release, "release")
+    return prepare_many({"released": release}, meta, out_dir, sealed_out, parameters=release.get("parameters", {}),
+                        ledger=ledger, analysis=analysis, exposure_record=exposure_record, code_digest=code_digest,
+                        rtol=rtol)
+
+
+def prepare_many(releases: dict, meta: dict, out_dir, sealed_out, *, parameters: dict,
+                 ledger=None, analysis=None, exposure_record=None, code_digest=None, rtol: float = 1e-9) -> dict:
+    """Several transform outputs of one mode as one release: {name: release} becomes <name>.json each; protected and
+    retained are the union in order; the sealed file holds every artifact's sealed values; transform.parameters is the
+    caller's description (no key-like names). Otherwise as prepare()."""
     guard("contracts.release_prepare.prepare", paths=[out_dir, sealed_out])
-    if not isinstance(release, dict) or release.get("mode") not in MODES or "released" not in release:
-        raise PrepareRefused("prepare.not_a_release", f"not a transform output (mode one of {list(MODES)})")
-    if not (isinstance(release.get("protected"), list) and release["protected"] and isinstance(release.get("retained"), list)
-            and isinstance(release.get("sealed", []), list)):
-        raise PrepareRefused("prepare.not_a_release", "a transform output has protected, retained and sealed lists")
+    if not isinstance(releases, dict) or not releases:
+        raise PrepareRefused("prepare.not_a_release", "no transform output")
+    for name, rel in releases.items():
+        if not (isinstance(name, str) and ARTIFACT_NAME.match(name)):
+            raise PrepareRefused("prepare.bad_name", f"artifact name {name!r}: letters, digits, '.', '_', '-' only")
+        _check_release(rel, name)
+    if len({r["mode"] for r in releases.values()}) != 1:
+        raise PrepareRefused("prepare.mixed_modes", "one release, one blinding mode")
     missing = [k for k in META_KEYS if k not in meta]
     if missing:
         raise PrepareRefused("prepare.meta_incomplete", f"META needs {missing}")
@@ -107,7 +140,7 @@ def prepare(release: dict, meta: dict, out_dir, sealed_out, *, ledger=None, anal
         raise PrepareRefused("prepare.bad_release_id", "release_id: letters, digits, '.', '_', '-' only")
     if not (isinstance(meta["source"], dict) and isinstance(meta["source"].get("sha256"), str)):
         raise PrepareRefused("prepare.meta_incomplete", "META source needs a sha256")
-    bad = _keyish(release.get("parameters", {}))
+    bad = _keyish(parameters) + [b for r in releases.values() for b in _keyish(r.get("parameters", {}))]
     if bad:
         raise PrepareRefused("prepare.keys_present", f"key-like parameter names {bad}")
     out = Path(out_dir).resolve()
@@ -125,27 +158,29 @@ def prepare(release: dict, meta: dict, out_dir, sealed_out, *, ledger=None, anal
         raise PrepareRefused("prepare.code_unknown", "the transform code has no recorded identity: give --code-digest")
     if not 0 < rtol <= MAX_SEALED_RTOL:
         raise PrepareRefused("prepare.bad_rtol", f"rtol must be in (0, {MAX_SEALED_RTOL:g}]")
-    top = dict(release["released"]) if isinstance(release["released"], dict) else {"released": release["released"]}
-    # the transform's description sits under 'blinding', a structure key the sealed-value scan skips (bin edges and
-    # region bounds are not data)
-    top["blinding"] = dict(top.get("blinding") or {}, mode=release["mode"], parameters=release.get("parameters", {}))
-    body = (json.dumps(top, indent=1, sort_keys=True) + "\n").encode("utf-8")
-    sealed = [x for x in release.get("sealed", []) if x != 0]
+    bodies = {f"{name}.json": _body(rel) for name, rel in sorted(releases.items())}
+    sealed = sorted({float(x) for r in releases.values() for x in r.get("sealed", []) if x != 0})
     sealed_doc = {"sealed": sealed, "rtol": rtol} if sealed else {"sealed": [], "nothing_sealable": True, "rtol": rtol}
+
+    def union(key):
+        seen: list = []
+        for r in releases.values():
+            seen += [x for x in r[key] if x not in seen]
+        return seen
     manifest = {"manifest_version": "1.0.0", "release_id": meta["release_id"], "source": meta["source"],
-                "artifacts": [{"path": "released.json", "sha256": hashlib.sha256(body).hexdigest(), "size": len(body),
-                               "format": "json"}],
+                "artifacts": [{"path": path, "sha256": hashlib.sha256(b).hexdigest(), "size": len(b), "format": "json"}
+                              for path, b in bodies.items()],
                 "artifact_rules": {"symlinks": "refused", "unlisted_files": "refused"},
-                "transform": {"code_sha256": code_digest, "parameters": release.get("parameters", {}),
-                              "keys_recorded": False},
-                "protected": list(release["protected"]), "retained": list(release["retained"]),
+                "transform": {"code_sha256": code_digest, "parameters": dict(parameters), "keys_recorded": False},
+                "protected": union("protected"), "retained": union("retained"),
                 "review": meta["review"], "approval_ref": meta["approval_ref"], "purposes": meta["purposes"],
                 "destinations": meta["destinations"], "validity": meta["validity"],
                 "related_releases": related(meta, ledger, analysis, exposure_record)}
     if "composition_review" in meta:
         manifest["composition_review"] = meta["composition_review"]
     out.mkdir(parents=True, exist_ok=True)
-    _write_new(out / "released.json", body, 0o644)
+    for path, b in bodies.items():
+        _write_new(out / path, b, 0o644)
     sealed_path.parent.mkdir(parents=True, exist_ok=True)
     _write_new(sealed_path, (json.dumps(sealed_doc) + "\n").encode("utf-8"), 0o600)  # owner-only: it holds the secrets
     return manifest
