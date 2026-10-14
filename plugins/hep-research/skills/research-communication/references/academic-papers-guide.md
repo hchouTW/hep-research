@@ -15,27 +15,11 @@
 
 This file holds the routing and rules for work on scientific papers. Read it when a research-communication task falls in its scope; the reference files it routes to are linked relative to this file.
 
-A skill for the full lifecycle around scientific papers: reading and critically
-understanding one or many papers, synthesizing them into a literature review or a
-paper's own related-work section, and then drafting, formatting, and submitting a
-manuscript of your own. It is written with physics conventions front and center —
-collider/high-energy-physics (HEP) and astroparticle physics/cosmic-ray science
-(ground-based air-shower arrays, imaging Cherenkov telescopes, neutrino
-observatories, space-based direct detection), plus statistics and machine-learning
-publishing conventions (NeurIPS/ICML/ICLR/ACL-family conferences, JMLR/TMLR,
-statistics journals) — but the reading strategies, prose guidance, and structural
-conventions apply to scientific writing generally.
-
-Pairs well with `hep-analysis` (the measurement design: selections, cutflows,
-backgrounds, corrections, systematics, and — for the astroparticle side —
-spectrum/composition/anisotropy measurements), `hep-statistics` (fits, limits,
-significances, unfolding) and `physics-ml` (the ML/statistical rigor itself:
-ablations, seed variance, matched-budget comparisons, evaluation-harness design —
-not just a methods section to read through). This skill owns the *reading and
-writing*, not the analysis itself — if the user still needs to run a fit or produce
-a limit, hand that to `hep-statistics` first; to prove an improvement is real, to
-`physics-ml`; to debug the code behind a plot or table, to `hep-computing`; to
-design a selection or a correction, to `hep-analysis`.
+Scope: reading, reviewing and writing physics papers (collider, astroparticle and
+cosmic-ray, statistics and ML venues). This skill owns the *reading and writing*, not
+the analysis: a fit or a limit goes to `hep-statistics`; proving an improvement is real
+to `physics-ml`; the code behind a plot or table to `hep-computing`; a selection or a
+correction to `hep-analysis`; a diagram to [academic-diagrams-guide.md](academic-diagrams-guide.md).
 
 ## Rules for every task
 
@@ -99,62 +83,6 @@ are stated here in full.
 9. **One paper, one entry: identifiers decide, keys follow.** Two `.bib` entries are one paper when they share a DOI, else an arXiv identifier (version stripped), else an INSPIRE record id; never compare keys, because one INSPIRE record can carry two. Keep the current key, update every `\cite` to it, and delete the other; this is the only reason to rename a key. For a collaboration paper the collaboration key (`ATLAS:2012yve`) is the current one and the first-author key (`Aad:2012tfa`) is the older export; say so, and tell the user to confirm on INSPIRE. A `.bib` year taken from arXiv may be the latest-version year, not the publication year.
 <!-- /example -->
 10. **A single run is not a variance estimate.** In any ML audit or results review, state that one split or one seed gives no variance estimate. Besides fixing the seed, recommend several seeds or cross-validation and report the mean and the spread.
-
-## When to use this skill
-
-Use it for any of:
-
-**Reading side**
-- Summarizing a single paper, or extracting its method/dataset/result for reuse
-- Critically evaluating a paper's claims, evidence, statistics, and comparisons
-- Comparing several papers against each other (methods, datasets, results)
-- Building a literature review, a "related work" section, or a paper's Introduction
-- Triaging a reading backlog / arXiv listing to decide what's worth reading deeply
-- Taking structured reading notes for later reuse in the user's own writing
-
-**Writing side**
-- Drafting a paper from scratch, given results/notes/plots the user already has
-- Structuring or restructuring a section (abstract, intro, results, discussion, conclusion)
-- Converting an internal analysis note into a paper draft, or a paper into a talk/proceedings
-- Writing a plain-language public/outreach summary of a published result for a
-  collaboration or institution website
-- LaTeX formatting: REVTeX (PRL/PRD/PRX), JHEP (`jheppub`), EPJC/Springer Nature, JCAP, AASTeX
-  (ApJ/ApJL), Elsevier `elsarticle` (Astroparticle Physics journal), NeurIPS/ICML/
-  ICLR/AAAI/ACL-family style files, JMLR/TMLR, general `article`
-- Building, cleaning, or deduplicating a BibTeX file; fixing INSPIRE-HEP citation
-  keys, pulling ADS/bibcode entries for astronomy-facing venues, or sourcing
-  arXiv/DBLP/ACL-Anthology entries for statistics/ML venues
-- Designing or captioning figures and tables for publication (including learning
-  curves, ablation tables, and leaderboard tables)
-- Tightening prose: cutting hedging, fixing tense/voice consistency, trimming
-  length, or getting statistical/ML reporting language right (p-values, effect
-  sizes, multiple-comparison correction)
-- Drafting responses to referee reports, a cover letter to an editor, or a
-  single-shot conference rebuttal
-- A pre-submission pass: checking length limits, undefined references, missing
-  labels, or a reproducibility checklist
-
-**Adjacent document types** (related genres, not paper sections themselves)
-- Converting a paper's results into a conference poster or a talk's slide deck
-- Drafting a preregistration document or a registered report's Stage 1/Stage 2
-- Packaging the user's own code and data for public release alongside a paper
-- Drafting a grant or fellowship proposal (Specific Aims, budget justification,
-  broader-impacts sections) — a related but distinct genre from a paper
-- Assembling a thesis or dissertation from the user's own already-published papers
-- Reverse-engineering research/algorithmic source code with no existing
-  paper — code that implements a mathematical, statistical, or algorithmic
-  method — into a Methodology + Technical Manual document; not for generic
-  software with no such content (a CRUD API, a UI library) — see
-  `code-to-methodology-synthesis.md`; distinct from reviewing
-  code against an already-written paper (`code-review-report.md`, below)
-
-Do **not** reach for this skill for pure numerical/statistical work (fitting, limit
-setting, unfolding — `hep-statistics`; ablations, seed variance, proving an ML result
-is real — `physics-ml`), experiment-specific data analysis (`hep-analysis` with the
-bound experiment profile, read through the context-resolution steps in SKILL.md), or
-drawing a schematic or diagram ([academic-diagrams-guide.md](academic-diagrams-guide.md)). Do reach for it the moment that work needs to be
-understood from someone else's paper, or turned into English prose,
-a figure caption, or a formatted document of your own.
 
 ## Core workflow: reading
 
@@ -262,29 +190,13 @@ Use these when requested or needed to substantiate claims — not for an ordinar
    structure a referee response and cover letter, or a single-shot conference
    rebuttal if the venue uses that process instead.
 
-## Physics/HEP paper structure (quick reference)
+## Paper structure
 
-A typical experimental HEP paper (PRL/PRD/JHEP style) runs, roughly:
-
-| Section | Purpose | Typical length |
-|---|---|---|
-| Title | States the result, not the method | ≤ 15 words |
-| Abstract | Self-contained summary: context, method, result, significance | 150–250 words (PRL: ≤ 600 characters incl. spaces, about 90 words) |
-| Introduction | Physics motivation, prior measurements, what's new here | 0.5–1.5 pages |
-| Detector & Dataset | What data, what detector, what luminosity/energy | 0.25–0.75 pages |
-| Analysis / Event Selection | Cuts, reconstruction, background estimation | 1–3 pages |
-| Systematic Uncertainties | Sources, sizes, correlations, how propagated | 0.5–1.5 pages |
-| Results | The number(s), with statistical + systematic uncertainty, comparison to theory/prior results | 0.5–1.5 pages |
-| Summary / Conclusion | Restate result, implications, outlook — no new claims | 3–8 sentences |
-| Acknowledgments | Funding agencies, collaboration boilerplate | fixed by collaboration |
-
-Full guidance for this backbone is in `paper-structure.md`. How it
-differs for theory papers, review articles, thesis chapters, astroparticle/
-cosmic-ray papers (exposure instead of luminosity, arrival-direction/anisotropy
-sections, multi-messenger context), and statistics/ML papers (required
-Limitations/Broader-Impact sections, reproducibility checklists, single-shot
-rebuttals) is in `paper-genre-variants.md`,
-`astroparticle-and-cosmic-ray-papers.md`, and
+The section backbone of an experimental HEP paper (title, abstract, introduction,
+detector and dataset, analysis, systematics, results, summary, acknowledgments) with
+purposes and typical lengths is in `paper-structure.md`; how it differs for theory
+papers, reviews, theses, astroparticle and statistics/ML papers is in
+`paper-genre-variants.md`, `astroparticle-and-cosmic-ray-papers.md` and
 `statistics-and-ml-papers.md`.
 
 ## Journal / venue conventions
@@ -293,15 +205,8 @@ Venue facts (class files, length and abstract limits, front matter) have one hom
 the quick-reference table in `latex-venue-setup.md`, with its sources and
 last-verified dates; never quote a limit from memory.
 
-Details, obtaining the right class file, and common compile errors are in
-`latex-venue-setup.md`; astroparticle-specific venues and author-list
-conventions are in `astroparticle-and-cosmic-ray-papers.md`;
-statistics/ML-specific venues, reproducibility checklists, and rebuttal mechanics
-are in `statistics-and-ml-papers.md`. A generic starting skeleton (not
-tied to any journal's copyrighted class file) is in
-`../assets/paper/paper-skeleton.tex`, paired with an example INSPIRE-HEP-formatted
-entry in `../assets/paper/references.bib` — copy the actual class file from the
-journal/APS/SISSA/Springer/AAS/Elsevier/conference site once the venue is fixed.
+A generic starting skeleton (no copyrighted class file) is
+`../assets/paper/paper-skeleton.tex` with `../assets/paper/references.bib`.
 
 ## Reference files
 
@@ -346,11 +251,8 @@ review. Grouped by function; within a group, order roughly follows the workflow.
   and cosmic-ray papers (ground arrays, IACTs, neutrino observatories, space-based
   direct detection): exposure vs. luminosity, arrival-direction/anisotropy sections,
   JCAP/ApJ/Astroparticle Physics venues, ADS/bibcode citations, skymap conventions,
-  pre-trial vs. post-trial significance, and a worked AMS-02 publication-pattern
-  case study (letter-only/no-arXiv publishing, a Phys. Rept. review alongside PRL
-  letters, 44-institution author-list scale, a web-only non-citable
-  "advances-in-data-analysis" technical-progress genre, and syndicated vs.
-  collaboration-authored outreach pages)
+  and how to check a collaboration's publication pattern (venue mix, arXiv practice,
+  author lists, off-journal data tables, web-only notes, highlight-page bylines)
 <!-- /example -->
 - `statistics-and-ml-papers.md` — how structure, venues, author-
   contribution statements, citations, and review process shift for statistics and
@@ -434,38 +336,10 @@ review. Grouped by function; within a group, order roughly follows the workflow.
 
 ## Bundled scripts
 
-- `<plugin root>/skills/research-communication/scripts/build_lit_matrix.py` — turns a CSV of reading notes (one row per paper:
-  key, year, method, dataset, result, notes — columns are flexible) into a formatted
-  markdown comparison table, ready to drop into a literature review or related-work
-  draft. Standard library only.
-
-  ```
-  python3 <plugin root>/skills/research-communication/scripts/build_lit_matrix.py <notes.csv> [--sort-by year] [-o out.md]
-  ```
-
-- `<plugin root>/skills/research-communication/scripts/check_manuscript.py` — reports undefined
-  `\ref`/`\cref`/`\pageref` targets, duplicate `\label`s, citation keys (natbib, biblatex and
-  `\nocite`) missing from the bibliography (`.bib`, inline `\bibitem`s, or a built `.bbl`),
-  duplicate `.bib` keys, unused `.bib` entries, and leftover TODO/FIXME/placeholder markers.
-  Comments and verbatim/listing bodies are ignored. Two modes: a directory (repository-wide
-  source scan: every file under it is merged, so a backup file can satisfy a reference) or
-  `--main MAIN.tex` (selected-document scan: only the files the main document reaches through
-  literal `\input`/`\include`/`\subfile`/`\import`, resolved against `--build-root` as TeX does,
-  bounded by `--project-root`; only the bibliography the document declares counts, and a built
-  `.bbl` only when associated with `--bbl`). Prefer `--main` for a submission check. Citations
-  with no bibliography at all are missing; a bibliography built elsewhere is named with
-  `--external-bib`, and keys not found locally are unresolved (exit 3), not checked. An include
-  the scanner cannot follow (macro-generated name, conditional, `\includeonly`, missing file,
-  outside the root, cycle) is reported as incomplete coverage (exit 3), never guessed. An empty
-  directory is a no-input error (exit 2), not a clean manuscript. `--style` adds two advisory
-  typography checks that never change the exit code; `--format json` prints one report object.
-  Neither mode compiles the document or checks its scientific content. Read-only; standard
-  library only. Run it near the end of a drafting session, not after every sentence.
-
-  ```
-  python3 <plugin root>/skills/research-communication/scripts/check_manuscript.py --main paper/main.tex [--format json]
-  python3 <plugin root>/skills/research-communication/scripts/check_manuscript.py <path-to-manuscript-dir>
-  ```
+`build_lit_matrix.py` (reading notes to a comparison table) and `check_manuscript.py`
+(`--main MAIN.tex` for a submission check: references, labels, citation keys, `.bib`
+entries, markers, include coverage) are described in the skill's README ("Scripts");
+read `--help` first.
 
 ## Working style within this skill
 

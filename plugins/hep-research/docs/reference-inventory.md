@@ -14,7 +14,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-statistics | 11 | 150 | 0 |
 | hep-theory | 11 | 78 | 0 |
 | physics-ml | 38 | 257 | 0 |
-| research-communication | 54 | 374 | 0 |
+| research-communication | 54 | 366 | 0 |
 
 ## Overlapping pairs
 
@@ -221,10 +221,10 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `transfer-learning.md` | physics-ml | 1.6 | no | 4 | - | 351029c 2026-10-07 |
 | `transformer-architectures.md` | physics-ml | 8.1 | no | 5 | - | 721d1ea 2026-10-13 |
 | `uncertainty-and-calibration.md` | physics-ml | 6.3 | yes | 8 | hep-statistics | 351029c 2026-10-07 |
-| `academic-diagrams-guide.md` | research-communication | 10.4 | yes | 4 | - | 54734d7 2026-10-14 |
-| `academic-papers-guide.md` | research-communication | 35.9 | yes | 12 | - | 54734d7 2026-10-14 |
+| `academic-diagrams-guide.md` | research-communication | 10.4 | yes | 4 | - | be42040 2026-10-14 |
+| `academic-papers-guide.md` | research-communication | 27.3 | yes | 12 | - | be42040 2026-10-14 |
 | `artifact-packaging-for-release.md` | research-communication | 2.8 | no | 3 | - | 351029c 2026-10-07 |
-| `astroparticle-and-cosmic-ray-papers.md` | research-communication | 13.2 | no | 10 | - | 54734d7 2026-10-14 |
+| `astroparticle-and-cosmic-ray-papers.md` | research-communication | 13.2 | no | 10 | - | be42040 2026-10-14 |
 | `citation-verification.md` | research-communication | 3.8 | yes | 11 | - | 2aa4c73 2026-10-14 |
 | `citations-and-bibliography.md` | research-communication | 18.4 | yes | 11 | - | 7890247 2026-10-14 |
 | `claim-evidence-mapping.md` | research-communication | 3.8 | yes | 9 | hep-statistics, hep-theory | 7e0ee23 2026-10-14 |
@@ -232,22 +232,22 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `code-to-methodology-synthesis.md` | research-communication | 5.6 | no | 2 | - | 351029c 2026-10-07 |
 | `comment-and-reply-exchange.md` | research-communication | 3.2 | no | 2 | - | cd7e04f 2026-10-14 |
 | `conflict-of-interest-and-ethics-statements.md` | research-communication | 2.5 | no | 1 | - | 351029c 2026-10-07 |
-| `diagram-captions.md` | research-communication | 3.5 | no | 2 | - | 54734d7 2026-10-14 |
-| `diagram-figure-style.md` | research-communication | 6.1 | no | 1 | - | 54734d7 2026-10-14 |
+| `diagram-captions.md` | research-communication | 3.5 | no | 2 | - | be42040 2026-10-14 |
+| `diagram-figure-style.md` | research-communication | 6.1 | no | 1 | - | be42040 2026-10-14 |
 | `diagrams-computer-science.md` | research-communication | 5.5 | no | 2 | - | 351029c 2026-10-07 |
 | `diagrams-hep.md` | research-communication | 6.3 | no | 2 | - | e159f93 2026-10-14 |
 | `diagrams-statistics.md` | research-communication | 6.2 | no | 2 | - | 351029c 2026-10-07 |
 | `equation-and-notation-auditing.md` | research-communication | 3.9 | no | 5 | hep-statistics, hep-theory | d3212bd 2026-10-12 |
 | `erratum-and-corrigendum-drafting.md` | research-communication | 4.4 | no | 2 | - | 8f843ee 2026-10-14 |
 | `evidence-linked-writing.md` | research-communication | 5.3 | yes | 5 | - | 7890247 2026-10-14 |
-| `figures-and-tables.md` | research-communication | 9.5 | no | 8 | - | 54734d7 2026-10-14 |
+| `figures-and-tables.md` | research-communication | 9.5 | no | 8 | - | be42040 2026-10-14 |
 | `general-diagram-principles.md` | research-communication | 7.7 | no | 2 | - | 351029c 2026-10-07 |
 | `grant-and-fellowship-proposal-writing.md` | research-communication | 3.0 | no | 1 | - | 351029c 2026-10-07 |
 | `graphviz-patterns.md` | research-communication | 3.4 | no | 2 | - | 351029c 2026-10-07 |
 | `interpreting-scientific-graphics.md` | research-communication | 8.2 | no | 4 | - | 7f8ec6a 2026-10-14 |
 | `latex-mechanics-and-tooling.md` | research-communication | 13.3 | no | 7 | - | 351029c 2026-10-07 |
-| `latex-venue-setup.md` | research-communication | 25.1 | no | 6 | - | 54734d7 2026-10-14 |
-| `legends-panels-and-export.md` | research-communication | 7.1 | no | 2 | - | 54734d7 2026-10-14 |
+| `latex-venue-setup.md` | research-communication | 25.1 | no | 7 | - | be42040 2026-10-14 |
+| `legends-panels-and-export.md` | research-communication | 6.4 | no | 2 | - | be42040 2026-10-14 |
 | `literature-discovery-and-search.md` | research-communication | 4.9 | no | 1 | - | d47080b 2026-10-12 |
 | `literature-lookup-recipes.md` | research-communication | 4.5 | yes | 3 | - | 2aa4c73 2026-10-14 |
 | `literature-review.md` | research-communication | 7.7 | no | 5 | - | 7890247 2026-10-14 |
@@ -256,19 +256,19 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `mermaid-patterns.md` | research-communication | 4.4 | no | 2 | - | 60f0c98 2026-10-14 |
 | `multi-venue-reformatting.md` | research-communication | 2.9 | no | 1 | - | 351029c 2026-10-07 |
 | `outreach-and-public-facing-summaries.md` | research-communication | 4.0 | no | 5 | - | 7f8ec6a 2026-10-14 |
-| `paper-genre-variants.md` | research-communication | 4.3 | no | 3 | - | 54734d7 2026-10-14 |
-| `paper-structure.md` | research-communication | 9.8 | no | 9 | - | 351029c 2026-10-07 |
+| `paper-genre-variants.md` | research-communication | 4.3 | no | 3 | - | be42040 2026-10-14 |
+| `paper-structure.md` | research-communication | 10.9 | no | 9 | - | 351029c 2026-10-07 |
 | `plagiarism-and-text-reuse-checking.md` | research-communication | 2.9 | no | 2 | - | 351029c 2026-10-07 |
 | `plantuml-patterns.md` | research-communication | 3.5 | no | 1 | - | 351029c 2026-10-07 |
-| `poster-and-talk-design.md` | research-communication | 4.8 | no | 4 | - | 54734d7 2026-10-14 |
+| `poster-and-talk-design.md` | research-communication | 4.8 | no | 4 | - | be42040 2026-10-14 |
 | `preprint-to-journal-reconciliation.md` | research-communication | 2.7 | no | 3 | - | 0da0c8f 2026-10-14 |
 | `preregistration-and-registered-reports.md` | research-communication | 3.4 | no | 1 | - | 351029c 2026-10-07 |
 | `primary-sources-and-version-checks.md` | research-communication | 12.4 | yes | 9 | detector-response, hep-analysis | ab01e9e 2026-10-14 |
-| `reading-papers.md` | research-communication | 9.7 | no | 8 | hep-statistics | 54734d7 2026-10-14 |
+| `reading-papers.md` | research-communication | 9.7 | no | 8 | hep-statistics | be42040 2026-10-14 |
 | `reproducibility-auditing.md` | research-communication | 3.0 | no | 9 | hep-computing | 351029c 2026-10-07 |
 | `reviewer-style-assessment.md` | research-communication | 2.0 | no | 1 | - | 351029c 2026-10-07 |
 | `revision-impact-tracking.md` | research-communication | 3.9 | no | 11 | - | d9916e8 2026-10-12 |
-| `scientific-style.md` | research-communication | 9.6 | no | 12 | hep-statistics | 54734d7 2026-10-14 |
+| `scientific-style.md` | research-communication | 9.6 | no | 12 | hep-statistics | be42040 2026-10-14 |
 | `statistics-and-ml-papers.md` | research-communication | 14.0 | no | 8 | - | 351029c 2026-10-07 |
 | `submission-and-peer-review.md` | research-communication | 13.4 | no | 10 | - | 7f8ec6a 2026-10-14 |
 | `supplementary-material-planning.md` | research-communication | 2.0 | no | 1 | - | 351029c 2026-10-07 |

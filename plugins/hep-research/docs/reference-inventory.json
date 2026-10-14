@@ -35,7 +35,7 @@
   },
   "research-communication": {
    "references": 54,
-   "bytes": 373804,
+   "bytes": 365656,
    "uncited": 0
   }
  },
@@ -2556,13 +2556,13 @@
     "skills/research-communication/references/figures-and-tables.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "54734d7 2026-10-14"
+   "last_commit": "be42040 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/academic-papers-guide.md",
    "owner": "research-communication",
-   "bytes": 35919,
-   "lines": 482,
+   "bytes": 27322,
+   "lines": 356,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/research-communication/README.md",
@@ -2579,7 +2579,7 @@
     "tests/skills/research_communication/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "54734d7 2026-10-14"
+   "last_commit": "be42040 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/artifact-packaging-for-release.md",
@@ -2614,7 +2614,7 @@
     "skills/research-communication/references/submission-and-peer-review.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "54734d7 2026-10-14"
+   "last_commit": "be42040 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/citation-verification.md",
@@ -2746,7 +2746,7 @@
     "skills/research-communication/references/figures-and-tables.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "54734d7 2026-10-14"
+   "last_commit": "be42040 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/diagram-figure-style.md",
@@ -2758,7 +2758,7 @@
     "skills/research-communication/references/academic-diagrams-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "54734d7 2026-10-14"
+   "last_commit": "be42040 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/diagrams-computer-science.md",
@@ -2864,7 +2864,7 @@
     "skills/research-communication/references/poster-and-talk-design.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "54734d7 2026-10-14"
+   "last_commit": "be42040 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/general-diagram-principles.md",
@@ -2949,23 +2949,24 @@
     "skills/research-communication/references/comment-and-reply-exchange.md",
     "skills/research-communication/references/latex-mechanics-and-tooling.md",
     "skills/research-communication/references/multi-venue-reformatting.md",
+    "skills/research-communication/references/paper-structure.md",
     "skills/research-communication/references/submission-and-peer-review.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "54734d7 2026-10-14"
+   "last_commit": "be42040 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/legends-panels-and-export.md",
    "owner": "research-communication",
-   "bytes": 7115,
-   "lines": 106,
+   "bytes": 6388,
+   "lines": 108,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-diagrams-guide.md",
     "skills/research-communication/references/diagram-figure-style.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "54734d7 2026-10-14"
+   "last_commit": "be42040 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/literature-discovery-and-search.md",
@@ -3095,13 +3096,13 @@
     "skills/research-communication/references/thesis-by-publication-assembly.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "54734d7 2026-10-14"
+   "last_commit": "be42040 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/paper-structure.md",
    "owner": "research-communication",
-   "bytes": 9756,
-   "lines": 187,
+   "bytes": 10932,
+   "lines": 204,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/research-communication/references/academic-papers-guide.md",
@@ -3155,7 +3156,7 @@
     "skills/research-communication/references/legends-panels-and-export.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "54734d7 2026-10-14"
+   "last_commit": "be42040 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/preprint-to-journal-reconciliation.md",
@@ -3225,7 +3226,7 @@
    "cited_by_other_skills": [
     "hep-statistics"
    ],
-   "last_commit": "54734d7 2026-10-14"
+   "last_commit": "be42040 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/reproducibility-auditing.md",
@@ -3306,7 +3307,7 @@
    "cited_by_other_skills": [
     "hep-statistics"
    ],
-   "last_commit": "54734d7 2026-10-14"
+   "last_commit": "be42040 2026-10-14"
   },
   {
    "path": "skills/research-communication/references/statistics-and-ml-papers.md",
