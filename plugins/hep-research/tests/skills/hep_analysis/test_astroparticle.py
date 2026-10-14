@@ -85,6 +85,40 @@ class LiMaSignificanceTests(unittest.TestCase):
         self.assertNotIn('Traceback', proc.stderr)
 
 
+class GeomagneticDipoleDefaultTests(unittest.TestCase):
+    """detector-response follow-up F-DR7 (D-F4, D-N1): the default dipole moment is the IGRF-14 1955 dipole (which
+    gives the textbook C = 59.6 GV), stated once, not called a present-epoch value. Degree-1 Schmidt coefficients
+    (nT) from igrf14coeffs.txt, https://www.ngdc.noaa.gov/IAGA/vmod/coeffs/igrf14coeffs.txt, read 2026-10-15;
+    M = sqrt(g10^2 + g11^2 + h11^2) a^3 / (mu0/4pi), a = 6371.2 km."""
+
+    IGRF14 = {1955: (-30500.0, -2215.0, 5820.0), 2025: (-29350.0, -1410.3, 4545.5)}
+
+    @staticmethod
+    def dipole_g_cm3(g10, g11, h11):
+        return math.sqrt(g10 ** 2 + g11 ** 2 + h11 ** 2) * 1e-9 * 6371.2e3 ** 3 / 1e-7 * 1e3
+
+    def test_default_is_the_igrf14_1955_dipole(self):
+        import geomagnetic_cutoff as gc
+        self.assertAlmostEqual(gc.DEFAULT_DIPOLE_MOMENT_G_CM3 / self.dipole_g_cm3(*self.IGRF14[1955]), 1.0, delta=1e-3)
+        ratio_2025 = self.dipole_g_cm3(*self.IGRF14[2025]) / gc.DEFAULT_DIPOLE_MOMENT_G_CM3
+        self.assertAlmostEqual(ratio_2025, 0.955, delta=1e-3)  # the 2025 dipole gives a cutoff about 4.5% lower
+        self.assertAlmostEqual(stormer_cutoff_gv(0.0, dipole_moment_g_cm3=7.69e25), 14.9 * 7.69e25 / 8.05e25, places=6)
+
+    def test_docstring_and_help_state_one_epoch(self):
+        import geomagnetic_cutoff as gc
+        self.assertNotIn('present-epoch', gc.__doc__)
+        self.assertNotIn('epoch-averaged', gc.__doc__)
+        self.assertIn('IGRF-14', gc.__doc__)
+        self.assertIn('1955', gc.__doc__)
+        for script in ('geomagnetic_cutoff.py', 'orbit_averaged_geomagnetic_cutoff.py'):
+            with self.subTest(script=script):
+                proc = subprocess.run([sys.executable, str(PLUGIN / 'skills' / 'hep-analysis' / 'scripts' / script),
+                                       '--help'], capture_output=True, text=True, timeout=60)
+                self.assertEqual(proc.returncode, 0)
+                self.assertNotIn('present epoch', proc.stdout)
+                self.assertIn('1955', proc.stdout)
+
+
 class GeomagneticCutoffTests(unittest.TestCase):
     def test_equatorial_cutoff_matches_known_dipole_value(self):
         # Vertical Stormer cutoff, Smart & Shea 2005 (Adv. Space Res. 36, 2012):

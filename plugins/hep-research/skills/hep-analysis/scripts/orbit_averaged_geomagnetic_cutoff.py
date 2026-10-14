@@ -172,7 +172,7 @@ def main():
     parser.add_argument('--altitude-re', type=float, default=None, dest='altitude_re',
                         help='deprecated alias of --radius-re (the value is a geocentric distance)')
     parser.add_argument('--dipole-moment', type=float, default=DEFAULT_DIPOLE_MOMENT_G_CM3,
-                        help='dipole moment in G*cm^3 (default: approximate present epoch)')
+                        help='dipole moment in G*cm^3 (default 8.05e25, the IGRF-14 1955 dipole; 7.69e25 for 2025)')
     parser.add_argument('--n-samples', type=int, default=2000, dest='n_samples',
                         help='number of true-anomaly samples over the quarter-orbit (default 2000, untilted mode)')
     parser.add_argument('--pole-lat', type=float, dest='pole_lat',
