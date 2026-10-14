@@ -54,8 +54,8 @@ A figure that drops the label of a non-published result misstates its status, wh
   non-colour cue (marker, line style, hatching) for every meaningful distinction.
 - Check on renders, not by eye: a greyscale copy (`pdftoppm -gray -r 150 -png f.pdf f_gray`) and a colour-vision
   simulation (`diagram-figure-style.md`, "Color"); without a simulator the check is reported as not done.
-- Raster at 300 dpi or more at the printed size by default; **the venue's rule wins**: APS asks 600 dpi or more for
-  raster art, JHEP 150-250 dpi (sources and dates in `diagram-figure-style.md`, "Column and page geometry").
+- Raster at 300 dpi or more at the printed size by default; **the venue's rule wins**: APS (RMP style guide) asks 600 dpi or
+  more for raster art, JHEP 150-250 dpi (sources and dates in `diagram-figure-style.md`, "Column and page geometry").
 
 ## Cosmic-ray and astroparticle figures
 
