@@ -13,11 +13,15 @@ module is the one place where they meet:
                 unnormalized               error: no probability interpretation
   acceptance    not-applicable             error: the validator needs inside or outside
   applied_separately [terms]               efficiency_applied_separately: any 'efficiency' or '<x>_efficiency' term;
-                                           acceptance_applied_separately: 'acceptance' listed
+                                           acceptance_applied_separately: 'acceptance' or 'exposure' listed
+                                           (exposure = acceptance x live time)
   underflow_overflow (optional string)     required enum; absent -> 'not_represented', listed under assumptions
   intended_use, variable_conversion        passed through
   matrix (inline) or matrix_ref            matrix: the `matrix` argument wins, then the inline matrix, then a JSON
-                                           matrix_ref resolved against base_dir (a list, or an object with "matrix")
+                                           matrix_ref resolved against base_dir (a list, or an object with "matrix";
+                                           'file.json#key' selects a member). The ref must stay inside base_dir.
+  underflow, overflow,                     arguments win, then the extension, then the matrix_ref object
+  generated_per_truth_bin
 
 Values that cannot be mapped are errors, never guesses: to_validator_input returns
 {"ok": bool, "input": dict | None, "errors": [{"field", "message"}], "assumptions": [...]}.
@@ -25,7 +29,7 @@ A converted response that passes the validator is self-consistent under its decl
 
 Usage: python3 contracts/response_adapter.py ARTIFACT.json [--validate]
 Exit codes: 0 converted (and, with --validate, not 'fail'); 1 conversion errors or a failed validation;
-2 unreadable input. Output: JSON on stdout.
+2 unreadable input (the artifact or its matrix_ref). Output: JSON on stdout.
 """
 from __future__ import annotations
 
@@ -57,21 +61,42 @@ def _axis(ext: dict, key: str, errors: list) -> dict | None:
     return {"variable": axis["name"], "unit": axis["unit"], "edges": list(axis["edges"])}
 
 
-def _matrix(ext: dict, matrix, base_dir: Path | None, errors: list):
+def _matrix_source(ext: dict, matrix, base_dir: Path | None, errors: list) -> tuple[Any, dict]:
+    """(matrix, object the matrix came from). The object supplies underflow, overflow and generated_per_truth_bin
+    when the caller and the extension do not."""
     if matrix is not None:
-        return matrix
+        return matrix, {}
     if isinstance(ext.get("matrix"), list):
-        return ext["matrix"]
+        return ext["matrix"], {}
     ref = ext.get("matrix_ref")
     if not ref:
         errors.append({"field": "matrix", "message": "neither matrix nor matrix_ref is present"})
-        return None
-    path = Path(ref) if base_dir is None else Path(base_dir) / ref
+        return None, {}
+    file_part, _, key = str(ref).partition("#")
+    path = Path(file_part) if base_dir is None else Path(base_dir) / file_part
+    if base_dir is not None and not path.resolve().is_relative_to(Path(base_dir).resolve()):
+        errors.append({"field": "matrix_ref", "message": f"matrix_ref {ref!r} resolves outside the artifact folder"})
+        return None, {}
     if path.suffix != ".json" or not path.is_file():
         errors.append({"field": "matrix_ref", "message": f"matrix_ref {ref!r} is not a readable JSON file; load it and pass matrix="})
-        return None
-    data = json.loads(path.read_text(encoding="utf-8"))
-    return data.get("matrix") if isinstance(data, dict) else data
+        return None, {}
+    try:
+        data: Any = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        errors.append({"field": "matrix_ref", "unreadable": True, "message": f"matrix_ref {ref!r} is not valid JSON: {exc}"})
+        return None, {}
+    if key:
+        if not isinstance(data, dict) or key not in data:
+            errors.append({"field": "matrix_ref", "message": f"matrix_ref {ref!r}: no member {key!r} in {file_part!r}"})
+            return None, {}
+        data = data[key]
+    if isinstance(data, list):
+        return data, {}
+    if isinstance(data, dict) and isinstance(data.get("matrix"), list):
+        return data["matrix"], data
+    errors.append({"field": "matrix_ref", "message": f"matrix_ref {ref!r} holds no 'matrix' list (expected a list of rows "
+                   "or an object with 'matrix', and optionally 'underflow', 'overflow', 'generated_per_truth_bin')"})
+    return None, {}
 
 
 def to_validator_input(ext: dict, matrix=None, *, base_dir: Path | None = None, generated_per_truth_bin=None,
@@ -102,7 +127,7 @@ def to_validator_input(ext: dict, matrix=None, *, base_dir: Path | None = None, 
     use = ext.get("intended_use")
     if use is not None and use not in INTENDED_USES:
         errors.append({"field": "intended_use", "message": f"intended_use {use!r} must be one of {list(INTENDED_USES)}"})
-    m = _matrix(ext, matrix, base_dir, errors)
+    m, source = _matrix_source(ext, matrix, base_dir, errors)
     if errors:
         return {"ok": False, "input": None, "errors": errors, "assumptions": assumptions}
     separate = ext.get("applied_separately", [])
@@ -111,14 +136,17 @@ def to_validator_input(ext: dict, matrix=None, *, base_dir: Path | None = None, 
         "normalization": NORMALIZATION[str(norm)], "inefficiency": ext["inefficiency"], "acceptance": ext["acceptance"],
         "underflow_overflow": flow,
         "efficiency_applied_separately": any(_is_efficiency(t) for t in separate),
-        "acceptance_applied_separately": "acceptance" in [t.split(":", 1)[-1] for t in separate]}
+        "acceptance_applied_separately": bool({"acceptance", "exposure"} & {t.split(":", 1)[-1] for t in separate})}
     if use is not None:
         meta["intended_use"] = use
     if ext.get("variable_conversion"):
         meta["variable_conversion"] = ext["variable_conversion"]
     doc: dict[str, Any] = {"metadata": meta, "matrix": m}
-    gen = generated_per_truth_bin if generated_per_truth_bin is not None else ext.get("generated_per_truth_bin")
-    for key, value in (("generated_per_truth_bin", gen), ("underflow", underflow), ("overflow", overflow),
+    def given(name: str, value):
+        return value if value is not None else ext.get(name, source.get(name))
+
+    for key, value in (("generated_per_truth_bin", given("generated_per_truth_bin", generated_per_truth_bin)),
+                       ("underflow", given("underflow", underflow)), ("overflow", given("overflow", overflow)),
                        ("closure", closure), ("tolerances", tolerances)):
         if value is not None:
             doc[key] = value
@@ -146,7 +174,7 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps({"ok": False, "error": f"unreadable: {exc}"}, indent=2))
         return 2
     out = to_validator_input(ext, base_dir=Path(args[0]).resolve().parent)
-    code = 0 if out["ok"] else 1
+    code = 0 if out["ok"] else 2 if any(e.get("unreadable") for e in out["errors"]) else 1
     if out["ok"] and "--validate" in args:
         from core.stats.validate_response import validate_response
         out["validation"] = validate_response(out["input"])

@@ -164,5 +164,78 @@ class AdapterTests(unittest.TestCase):
             self.assertLess(abs(a - b), 1e-12)
 
 
+
+class AdapterMatrixRefTests(unittest.TestCase):
+    """detector-response audit DR-WP2-04: matrix_ref objects, fragments, folder boundary and unreadable refs."""
+
+    def setUp(self):
+        import tempfile
+        self._tmp = tempfile.TemporaryDirectory()
+        self.dir = Path(self._tmp.name) / "artifacts"
+        self.dir.mkdir()
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def ext(self, ref, **extra):
+        fields = dict(normalization="conditional_on_selected", inefficiency="outside_matrix", acceptance="outside_matrix",
+                      includes=["migration"], applied_separately=["efficiency", "acceptance"],
+                      underflow_overflow="explicit_bins")
+        e = current(**{**fields, **extra})["extension"]
+        e.pop("matrix")
+        e["matrix_ref"] = ref
+        return e
+
+    def write(self, name, payload):
+        path = self.dir / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(payload if isinstance(payload, str) else json.dumps(payload))
+        return path
+
+    def test_flow_vectors_come_from_the_matrix_ref_object(self):
+        self.write("m.json", {"matrix": [[0.8, 0.1], [0.1, 0.7]], "underflow": [0.1, 0.0], "overflow": [0.0, 0.2]})
+        out = ra.to_validator_input(self.ext("m.json"), base_dir=self.dir)
+        self.assertTrue(out["ok"], out)
+        self.assertEqual((out["input"]["underflow"], out["input"]["overflow"]), ([0.1, 0.0], [0.0, 0.2]))
+        self.assertEqual(validate_response(out["input"])["status"], "pass", validate_response(out["input"]))
+
+    def test_fragment_selects_a_member(self):
+        self.write("r.json", {"response": {"matrix": [[0.8, 0.1], [0.1, 0.7]], "underflow": [0.1, 0.0],
+                                           "overflow": [0.0, 0.2]}})
+        out = ra.to_validator_input(self.ext("r.json#response"), base_dir=self.dir)
+        self.assertTrue(out["ok"], out)
+        self.assertEqual(out["input"]["overflow"], [0.0, 0.2])
+
+    def test_object_without_matrix_is_named(self):
+        self.write("r.json", {"response": [[1.0]]})
+        out = ra.to_validator_input(self.ext("r.json"), base_dir=self.dir)
+        self.assertFalse(out["ok"])
+        self.assertTrue(any("holds no 'matrix'" in e["message"] for e in out["errors"]), out)
+
+    def test_ref_outside_the_artifact_folder_is_refused(self):
+        (self.dir.parent / "outside.json").write_text(json.dumps({"matrix": [[1.0, 0.0], [0.0, 1.0]]}))
+        out = ra.to_validator_input(self.ext("../outside.json"), base_dir=self.dir)
+        self.assertFalse(out["ok"])
+        self.assertTrue(any("outside the artifact folder" in e["message"] for e in out["errors"]), out)
+
+    def test_malformed_ref_exits_2_with_json(self):
+        import subprocess
+        self.write("bad.json", "{not json")
+        art = self.write("response.json", {"extension": self.ext("bad.json")})
+        proc = subprocess.run([sys.executable, str(ROOT / "contracts" / "response_adapter.py"), str(art), "--validate"],
+                              capture_output=True, text=True, timeout=60)
+        self.assertEqual(proc.returncode, 2, proc.stdout + proc.stderr)
+        self.assertNotIn("Traceback", proc.stderr)
+        self.assertFalse(json.loads(proc.stdout)["ok"])
+
+    def test_exposure_counts_as_acceptance_applied_separately(self):
+        e = self.ext("m.json", applied_separately=["efficiency", "exposure"])
+        self.write("m.json", {"matrix": [[0.8, 0.1], [0.1, 0.7]], "underflow": [0.1, 0.0], "overflow": [0.0, 0.2]})
+        out = ra.to_validator_input(e, base_dir=self.dir)
+        self.assertIs(out["input"]["metadata"]["acceptance_applied_separately"], True)
+        self.assertNotIn("bookkeeping.acceptance_not_applied",
+                         {x["code"] for x in validate_response(out["input"])["errors"]})
+
+
 if __name__ == "__main__":
     unittest.main()
