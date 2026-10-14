@@ -30,7 +30,10 @@
     "control_sample": {"type": "string", "minLength": 1},
     "method": {"type": "string", "minLength": 1},
     "result": {"type": ["string", "object"]},
-    "status": {"type": "string", "enum": ["checked", "not-checked", "failed"]}}},
+    "status": {"type": "string", "enum": ["checked", "not-checked", "failed"], "$comment": "whether the check ran; what it found is outcome (2.8.0)"},
+    "outcome": {"type": "string", "enum": ["no-shift", "corrected", "bounded-by-nuisance", "uncorrected"],
+     "$comment": "2.8.0: what was done about the shift; bounded-by-nuisance and uncorrected need nuisance"},
+    "nuisance": {"type": ["string", "object"], "$comment": "2.8.0: the nuisance parameter (name or {name, ref}) that carries the shift in the downstream likelihood"}}},
   "environment": {"$comment": "2.5.0: software, device, numerical precision and seeds of the training run",
    "type": "object", "required": ["device", "precision"], "properties": {
     "torch_version": {"type": "string"}, "framework": {"type": "string"},

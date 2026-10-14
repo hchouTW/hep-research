@@ -239,7 +239,7 @@ def ml_v25(**extra):
            "calibration": {"method": "temperature", "fit_sample": "val",
                            "validation": {"metric": "ece", "sample": "test", "before": 0.05, "after": 0.01}},
            "domain_shift": {"control_sample": "synthetic control region", "method": "score-shape comparison",
-                            "result": {"ks_p": 0.4}, "status": "checked"},
+                            "result": {"ks_p": 0.4}, "status": "checked", "outcome": "no-shift"},
            "environment": {"torch_version": "synthetic", "device": "cpu", "precision": "fp32", "seeds": {"torch": 1, "split": 2}},
            "downstream_validation": [{"metric": "working-point efficiency in the synthetic signal region"}], **extra}
     ext = {k: x for k, x in ext.items() if x is not None}  # extra key=None removes the field

@@ -79,7 +79,8 @@
    "result": {
     "ks_p": 0.4
    },
-   "status": "checked"
+   "status": "checked",
+   "outcome": "no-shift"
   },
   "environment": {
    "torch_version": "synthetic",

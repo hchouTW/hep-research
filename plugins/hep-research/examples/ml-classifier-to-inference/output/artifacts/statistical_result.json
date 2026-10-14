@@ -36,7 +36,7 @@
    "ref": "artifacts/ml_artifact.json",
    "artifact_type": "ml-artifact",
    "artifact_id": "synthetic-j9-classifier",
-   "sha256": "8bbef148013404e36bee84ff561e1d2d9f70ac667780a34b9b92e8cf180cd925",
+   "sha256": "0ca7b658c32afb607b485201c6f1d054f6ebea5bc450e94fa854aca6aec6c23d",
    "version": "2.8.0",
    "status": [
     "synthetic"
@@ -51,7 +51,7 @@
  "extension": {
   "paradigm": "frequentist",
   "likelihood": {
-   "form": "extended binned Poisson in the calibrated classifier probability (7 bins), mean mu s_i + gamma_i b_i; gamma_i Gaussian-constrained MC-statistics factors (Barlow-Beeston-lite, width sqrt(sum w^2)/b of the signed-weight background template)",
+   "form": "extended binned Poisson in the calibrated classifier probability (7 bins), mean mu s_i + gamma_i b_i(theta); b_i(theta) interpolates the background template to its pt_miss-scale variation (code0, Gaussian theta); gamma_i Gaussian-constrained MC-statistics factors (Barlow-Beeston-lite, width sqrt(sum w^2)/b of the signed-weight background template)",
    "backend": "core.stats.likelihood_limits shape model (_ShapeModel)",
    "model_ref": "results.json#templates"
   },
@@ -59,6 +59,7 @@
    "mu (signal strength)"
   ],
   "nuisances": [
+   "theta_pt_miss_scale (background shape: template at the control-sample pt_miss scale as +1 sigma, mirrored for -1 sigma; Gaussian constraint)",
    "gamma_0 (background MC statistics, bin 0)",
    "gamma_1 (background MC statistics, bin 1)",
    "gamma_2 (background MC statistics, bin 2)",
@@ -73,7 +74,7 @@
    "check": "toys",
    "method": "seeded toys at mu_true from the template model with the MC-statistics auxiliary measurements redrawn; fraction of 68.27% profile intervals containing mu_true",
    "n_toys": 1000,
-   "coverage": 0.693,
+   "coverage": 0.66,
    "cl": 0.6827,
    "ensemble": "mu_true = 1.0, templates as fitted",
    "failures": 0,
@@ -86,10 +87,10 @@
   },
   "fit_status": "converged",
   "results": {
-   "mu_hat": 1.3073764723234396,
+   "mu_hat": 1.3310355700916248,
    "interval_68": [
-    1.046649465032274,
-    1.5882339006436932
+    1.053984459543275,
+    1.6243287047652113
    ],
    "data": "pseudo-data (SYNTHETIC)",
    "asimov_mu_hat": 1.0000000000000004,

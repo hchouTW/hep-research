@@ -77,6 +77,7 @@ PERIODS, RUNS_PER_PERIOD = 4, 6                  # 24 runs; the run is the group
 MC_PER_RUN = {"signal": 150, "background": 200, "counter": 25}  # counter-events: 25 at +w and 25 at -w per run
 RUN_SCALE_SIGMA = 0.004                          # run-to-run momentum-scale offset (correlates events in a run)
 SHIFT_FEATURE, SHIFT = "pt_miss", 1.10           # deliberate scale shift of the data-like control sample
+SHIFT_NUISANCE = "theta_pt_miss_scale"           # fit nuisance: background template at the measured control-sample scale
 CONTROL_SIZE, NULL_REPLICAS = 10000, 100
 MU_TRUE = 1.0
 FRACTIONS = (0.6, 0.2, 0.2)
@@ -325,9 +326,17 @@ def templates(score, x, y, w, scale_by_class) -> dict:
     return h
 
 
-def shape_model(t: dict, counts) -> _ShapeModel:
+def shape_model(t: dict, counts, b_up=None) -> _ShapeModel:
+    """Shape model; with b_up, the background template at the control-sample pt_miss scale is a +1 sigma shape
+    variation (mirrored for -1 sigma) of a Gaussian-constrained nuisance: the measured domain shift is carried by the
+    fit (domain_shift outcome bounded-by-nuisance), not left uncorrected."""
     doc = {"bins": [{"n": int(n), "b": b, "s": s, "mc_stat": math.sqrt(v)} for n, b, s, v in
                     zip(counts, t["background"]["sumw"], t["signal"]["sumw"], t["background"]["sumw2"])]}
+    if b_up is not None:
+        b0 = np.array(t["background"]["sumw"])
+        doc["nuisances"] = [{"kind": "background_shape", "name": SHIFT_NUISANCE, "up": [float(v) for v in b_up],
+                             "down": [float(v) for v in np.maximum(2 * b0 - np.asarray(b_up), 0.0)],
+                             "interpolation": "code0"}]
     bins, nuis, chol = _load_shape(doc)  # the core input checks (ranges, positive background where mc_stat is set)
     return _ShapeModel(bins, nuis, chol)
 
@@ -353,8 +362,9 @@ def toys(model: _ShapeModel, t: dict, n_toys: int, seed: int) -> dict:
     for _ in range(n_toys):
         ns = rng.poisson(MU_TRUE * s + b)
         aux = np.maximum(1.0 + rel * rng.normal(size=b.size), 1e-3)  # auxiliary MC-statistics measurement redrawn
+        theta_aux = rng.normal(size=model.k).tolist()  # auxiliary measurement of each Gaussian nuisance redrawn
         try:
-            r = fit_mu(model, ns.tolist(), aux.tolist())
+            r = fit_mu(model, ns.tolist(), theta_aux + aux.tolist())
         except (ValueError, RuntimeError):
             failed += 1
             continue
@@ -396,13 +406,17 @@ def stat_artifact(fit, asimov, toy, ml_doc, ml_ref, ml_sha, gof, created) -> dic
             "extension": {
                 "paradigm": "frequentist",
                 "likelihood": {"form": "extended binned Poisson in the calibrated classifier probability "
-                                       f"({len(EDGES) - 1} bins), mean mu s_i + gamma_i b_i; gamma_i Gaussian-constrained "
-                                       "MC-statistics factors (Barlow-Beeston-lite, width sqrt(sum w^2)/b of the "
-                                       "signed-weight background template)",
+                                       f"({len(EDGES) - 1} bins), mean mu s_i + gamma_i b_i(theta); b_i(theta) "
+                                       f"interpolates the background template to its {SHIFT_FEATURE}-scale variation "
+                                       "(code0, Gaussian theta); gamma_i Gaussian-constrained MC-statistics factors "
+                                       "(Barlow-Beeston-lite, width sqrt(sum w^2)/b of the signed-weight background "
+                                       "template)",
                                "backend": "core.stats.likelihood_limits shape model (_ShapeModel)",
                                "model_ref": "results.json#templates"},
                 "parameters_of_interest": ["mu (signal strength)"],
-                "nuisances": [f"gamma_{i} (background MC statistics, bin {i})" for i in range(len(EDGES) - 1)],
+                "nuisances": [f"{SHIFT_NUISANCE} (background shape: template at the control-sample {SHIFT_FEATURE} "
+                              "scale as +1 sigma, mirrored for -1 sigma; Gaussian constraint)"]
+                             + [f"gamma_{i} (background MC statistics, bin {i})" for i in range(len(EDGES) - 1)],
                 "test_statistic": "-2 ln lambda(mu), profile likelihood ratio with mu >= 0",
                 "construction": "profile-likelihood-wilks",
                 "coverage": {"check": "toys", "method": "seeded toys at mu_true from the template model with the "
@@ -529,15 +543,16 @@ def main(argv=None) -> int:
     t = templates(score, x[te], y[te], w[te], scale_by_class)
     s_t, b_t = np.array(t["signal"]["sumw"]), np.array(t["background"]["sumw"])
     counts = np.histogram(score(pd_["x"]), EDGES)[0]
-    model_fit = shape_model(t, counts)
-    aux0 = model_fit.aux_obs()
-    asimov = fit_mu(model_fit, (MU_TRUE * s_t + b_t).tolist(), aux0)
-    toy = toys(model_fit, t, a.toys, a.seed + 3)
-    # effect of the measured control-sample scale on mu: Asimov data with the background template rebuilt at that scale
+    # effect of the measured control-sample scale on mu: the background template rebuilt at that scale
     xs = x[te].copy()
     xs[:, FEATURES.index(SHIFT_FEATURE)] *= ds["measured_scale"]["control_over_simulation_mean"]
     b_shift = np.array(templates(score, xs, y[te], w[te], scale_by_class)["background"]["sumw"])
-    asimov_shift = fit_mu(model_fit, (MU_TRUE * s_t + b_shift).tolist(), aux0)
+    nominal_only = shape_model(t, counts)  # without the nuisance: the size of the shift on mu (Asimov)
+    asimov_shift = fit_mu(nominal_only, (MU_TRUE * s_t + b_shift).tolist(), nominal_only.aux_obs())
+    model_fit = shape_model(t, counts, b_up=b_shift)  # the fit carries the shift as a nuisance
+    aux0 = model_fit.aux_obs()
+    asimov = fit_mu(model_fit, (MU_TRUE * s_t + b_t).tolist(), aux0)
+    toy = toys(model_fit, t, a.toys, a.seed + 3)
 
     # 6. ml-artifact (downstream validation = effect on the fitted signal strength)
     split_ok = split_report["status"] == "passed"
@@ -570,13 +585,15 @@ def main(argv=None) -> int:
         "method": f"weighted Kolmogorov-Smirnov, held-out simulation background versus control sample, noise floor = "
                   f"95% quantile over {NULL_REPLICAS} seeded unshifted replicas; inference-time domain flags on the "
                   "pseudo-data (check_surrogate_domain.py)",
-        "result": rnd({"verdict": f"shift above the noise floor in {', '.join(flagged)}; not corrected, bounded "
-                                  "downstream by the Asimov shift of mu from the measured scale",
+        "result": rnd({"verdict": f"shift above the noise floor in {', '.join(flagged)}; the measured {SHIFT_FEATURE} "
+                                  f"scale enters the template fit as the shape nuisance {SHIFT_NUISANCE}",
                        "variables_above_noise_floor": flagged, "per_variable": ds["per_variable"],
                        "measured_scale": ds["measured_scale"],
                        "delta_mu_asimov_from_measured_scale": asimov_shift["mu_hat"] - MU_TRUE,
                        "pseudo_data_domain_flags": dict(ood_counts, n=n_q)}),
-        "status": "checked"}}, indent=1) + "\n")
+        "status": "checked", "outcome": "bounded-by-nuisance",
+        "nuisance": {"name": SHIFT_NUISANCE, "ref": "artifacts/statistical_result.json#extension.nuisances"}}},
+        indent=1) + "\n")
     downstream = rnd([
         {"metric": "Asimov closure of the signal strength in the calibrated-score template fit",
          "value": asimov["mu_hat"] - MU_TRUE, "criterion": f"abs < {CRITERIA['asimov_mu_abs_dev_max']}"},
@@ -585,9 +602,9 @@ def main(argv=None) -> int:
         {"metric": "expected uncertainty on mu (Asimov, profile likelihood)", "err_down": asimov["err_down"],
          "err_up": asimov["err_up"]},
         {"metric": f"shift of mu on Asimov when the background {SHIFT_FEATURE} scale is the one measured in the "
-                   "control sample", "delta_mu": asimov_shift["mu_hat"] - MU_TRUE,
-         "note": "the pseudo-data here are generated without the shift; a real analysis would correct the scale or "
-                 "carry it as a nuisance"}])
+                   "control sample (fit without the nuisance)", "delta_mu": asimov_shift["mu_hat"] - MU_TRUE,
+         "note": f"the fit carries this shift as the nuisance {SHIFT_NUISANCE}; the pseudo-data are generated "
+                 "without the shift"}])
     (work / "downstream.json").write_text(json.dumps(downstream, indent=1) + "\n")
     code_ml, ml_out = write_ml_artifact(out, a.created)
     ml_path = out / "artifacts" / "ml_artifact.json"
@@ -758,7 +775,9 @@ def write_report(out: Path, r: dict) -> None:
         "", f"The control sample was built with {r['config']['shift'][0]} x {r['config']['shift'][1]}; the measured "
         f"scale (control over simulation mean) is {d['measured_scale']['control_over_simulation_mean']:.4f}. Rebuilding "
         f"the background template at that scale moves mu on Asimov data by {d['delta_mu_asimov_from_measured_scale']:+.4f}. "
-        "That shift is reported, not fitted: the pseudo-data here are generated without it.", "",
+        f"The fit carries that shift as the Gaussian-constrained shape nuisance `{SHIFT_NUISANCE}` (background template "
+        "at the measured scale as +1 sigma), so the ml-artifact records the domain-shift outcome bounded-by-nuisance; "
+        "the pseudo-data are generated without the shift.", "",
         "## Limitations (by construction)", "",
         "- One invented model generates simulation, control sample and pseudo-data; mismodeling of the simulation is "
         "studied only through the injected scale shift.",

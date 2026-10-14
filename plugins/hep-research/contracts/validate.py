@@ -464,6 +464,35 @@ def _ml_semantics_v2(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, nativ
         if same and cal.get("fit_sample") != val.get("sample"):  # the exact-name case is reported by the 2.5.0 rule
             rep.add("error", "$.extension.calibration", "ml.calibration_on_fit_sample",
                     f"calibration evaluated on its fit sample: {same}; validate it on a disjoint sample")
+    _ml_domain_shift_v2(ext, rep, native)
+
+
+TRAINING_SAMPLE_NAMES = {"train", "training", "train split", "training split", "train sample", "training sample",
+                         "training set", "train set"}
+
+
+def _ml_domain_shift_v2(ext: dict, rep: Report, native: bool) -> None:
+    """Domain-shift record (PML-WP0.6, ML-K05): 'checked' says the check ran, outcome says what was done about it."""
+    ds: Any = ext.get("domain_shift")
+    if not isinstance(ds, dict):
+        return
+    p = "$.extension.domain_shift"
+    if "status" not in ds:
+        rep.add("unresolved", f"{p}.status", "ml.domain_shift_status_missing",
+                "the domain-shift record has no status: say whether the check ran (checked, not-checked, failed)")
+    control = ds.get("control_sample")
+    if isinstance(control, str) and _sample_name(control) in TRAINING_SAMPLE_NAMES:
+        rep.add("unresolved", f"{p}.control_sample", "ml.domain_shift_on_training_sample",
+                f"the control sample '{control}' is the training sample: a domain-shift check compares the model's "
+                "inputs or outputs on data (or a data-like control sample) with simulation")
+    outcome = ds.get("outcome")
+    if ds.get("status") == "checked" and outcome is None:
+        rep.add("unresolved" if native else "warning", f"{p}.outcome", "ml.domain_shift_outcome_missing",
+                "the check ran but its outcome is not recorded: no-shift, corrected, bounded-by-nuisance or uncorrected")
+    if outcome in ("bounded-by-nuisance", "uncorrected") and not ds.get("nuisance"):
+        rep.add("unresolved", f"{p}.nuisance", "ml.domain_shift_uncorrected",
+                f"outcome {outcome} without a nuisance: a shift that is neither corrected nor carried by a nuisance "
+                "parameter in the downstream likelihood biases the result")
 
 
 THEORY_SEMANTICS_FROM = "2.6.0"  # theory-spec and prediction rules apply natively from this contract version

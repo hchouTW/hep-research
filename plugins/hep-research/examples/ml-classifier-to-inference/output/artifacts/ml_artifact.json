@@ -35,19 +35,19 @@
   },
   {
    "ref": "work/split_check.json",
-   "sha256": "27503d2c8f3938f80a2bda7cb4fa156e0a26e8f22e6031bf657517a84d409a5c"
+   "sha256": "ff19e40fe457f30d58b2e2f7cacc3cb614da6d3150cefc9f8f02d3425bcea089"
   },
   {
    "ref": "work/calibration.json",
-   "sha256": "38cfe1a2f97442ebdf742dc2e09131879ffaa57c5e274f760a9b7cbfb881d8ff"
+   "sha256": "5f63df6bea2420461561e6c144a7511b528acf5f34fc8e00623b817a483e3e8d"
   },
   {
    "ref": "work/domain_shift.json",
-   "sha256": "6d64df1638dadc0045627a37c6207c2e6af620abac639183b2ea7d7111fdf12a"
+   "sha256": "97daca1f8f21aad924c699c8b3cd93bbd3d40c98a9c3a4b3dff949fb0379a905"
   },
   {
    "ref": "work/downstream.json",
-   "sha256": "914273dee6db614c4301b81e88fc22bab9fff3d9e8f5c15a37fc607f7d1b492b"
+   "sha256": "0d2e75fa1cc56fd6cfbf6140475f59c254e82345604d15a1aeaa8c0fe2ddeee9"
   }
  ],
  "outputs": [
@@ -202,13 +202,28 @@
     "after": 0.017558563686100273,
     "bins": 10,
     "binning": "equal-width"
+   },
+   "sample_check": {
+    "fit_sample": "work/val_scores.csv",
+    "eval_sample": "work/test_scores.csv",
+    "checks": [
+     "name",
+     "sha256",
+     "event-id"
+    ],
+    "disjoint": true,
+    "same_sample_allowed": false,
+    "fit_sha256": "707af439a24957293f878c5bd25154f4816298b594345856ab17d6cb2bda7aed",
+    "eval_sha256": "04e73e0b8f3d1665a6e59488eeba374e725e6cd1274d1b983f490890770f5d8b",
+    "id_overlap": 0,
+    "id_check": "column id"
    }
   },
   "domain_shift": {
    "control_sample": "SYNTHETIC data-like background control sample (10000 events, pt_miss scaled by 1.1 by construction)",
    "method": "weighted Kolmogorov-Smirnov, held-out simulation background versus control sample, noise floor = 95% quantile over 100 seeded unshifted replicas; inference-time domain flags on the pseudo-data (check_surrogate_domain.py)",
    "result": {
-    "verdict": "shift above the noise floor in pt_miss, score; not corrected, bounded downstream by the Asimov shift of mu from the measured scale",
+    "verdict": "shift above the noise floor in pt_miss, score; the measured pt_miss scale enters the template fit as the shape nuisance theta_pt_miss_scale",
     "variables_above_noise_floor": [
      "pt_miss",
      "score"
@@ -252,7 +267,12 @@
      "n": 357
     }
    },
-   "status": "checked"
+   "status": "checked",
+   "outcome": "bounded-by-nuisance",
+   "nuisance": {
+    "name": "theta_pt_miss_scale",
+    "ref": "artifacts/statistical_result.json#extension.nuisances"
+   }
   },
   "downstream_validation": [
    {
@@ -262,20 +282,20 @@
    },
    {
     "metric": "toy pull mean and width of mu, and 68% interval coverage",
-    "pull_mean": -0.0546859,
-    "pull_width": 0.984352,
-    "coverage_68": 0.693,
+    "pull_mean": -0.0325085,
+    "pull_width": 1.02836,
+    "coverage_68": 0.66,
     "n_toys": 1000
    },
    {
     "metric": "expected uncertainty on mu (Asimov, profile likelihood)",
-    "err_down": 0.237781,
-    "err_up": 0.258174
+    "err_down": 0.256756,
+    "err_up": 0.271493
    },
    {
-    "metric": "shift of mu on Asimov when the background pt_miss scale is the one measured in the control sample",
+    "metric": "shift of mu on Asimov when the background pt_miss scale is the one measured in the control sample (fit without the nuisance)",
     "delta_mu": -0.107539,
-    "note": "the pseudo-data here are generated without the shift; a real analysis would correct the scale or carry it as a nuisance"
+    "note": "the fit carries this shift as the nuisance theta_pt_miss_scale; the pseudo-data are generated without the shift"
    }
   ]
  }
