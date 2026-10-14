@@ -17,7 +17,7 @@ Use when the deliverable is about how a detector responds: signal formation and 
 
 ## Scripts
 
-`calorimeter_resolution.py`, `cherenkov_angle.py`, `frontend_response.py`, `multiple_scattering.py`, `pid_separation_power.py`, `pileup_reweight.py`, `tag_and_probe_efficiency.py`, `xmax_gaisser_hillas.py`. Each reads `--help`, echoes a `--status` label and prints JSON at every exit code (0 ok, 1 failed, 2 invalid input); four have tool contracts in `contracts/tool_contracts/`; particle masses come from the caller or the primary-source table, never from a built-in constant presented as a measurement.
+`calorimeter_resolution.py`, `cherenkov_angle.py`, `frontend_response.py`, `multiple_scattering.py`, `pid_separation_power.py`, `pileup_reweight.py`, `tag_and_probe_efficiency.py`, `xmax_gaisser_hillas.py`. Each reads `--help`, echoes a `--status` label and prints JSON at every exit code (0 ok, 1 failed, 2 invalid input); five have tool contracts in `contracts/tool_contracts/` (`frontend_response.json` with one operation per subcommand); particle masses come from the caller or the primary-source table, never from a built-in constant presented as a measurement.
 
 ## References
 
