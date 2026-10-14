@@ -1,6 +1,7 @@
 """T1.2: data release manifest schema and its semantic checker. A valid synthetic release passes only with every input
 present; missing fields, forged or unbound approvals, content mismatches, destination mismatches, reused IDs, stale or
-revoked status all fail. Synthetic data only."""
+revoked status all fail. The custodian options (code digest, destination sets, release history, sealed-value scan) and
+the always-on key and wildcard rules are covered by CustodianOptionTests. Synthetic data and sentinels only."""
 import copy
 import datetime
 import hashlib
@@ -203,6 +204,129 @@ class ReleaseManifestTests(unittest.TestCase):
         self.assertNotIn("Traceback", p.stderr)
         files["approval"].write_text("{not json")
         self.assertEqual(run(argv).returncode, 2)
+
+
+class CustodianOptionTests(unittest.TestCase):
+    """Checks moved from the deployment's custodian into the plugin: each one fails closed, and none is needed for a
+    pass when its option is not given (backward compatible)."""
+    setUp, tearDown, run_check = ReleaseManifestTests.setUp, ReleaseManifestTests.tearDown, ReleaseManifestTests.run_check
+
+    def resign(self, m):
+        """A manifest edit invalidates the approval binding; re-bind it so only the rule under test can fail."""
+        return dict(self.approval, manifest_sha256=rm.manifest_digest(m), destinations_sha256=rm.canonical_sha256(m["destinations"]))
+
+    def write_histogram(self, doc, name="hists/masked.json"):
+        body = json.dumps(doc).encode()
+        (self.root / name).write_bytes(body)
+        m = copy.deepcopy(self.m)
+        m["artifacts"].append({"path": name, "sha256": hashlib.sha256(body).hexdigest(), "size": len(body), "format": "json"})
+        return m
+
+    def test_keys_never_travel(self):
+        m = copy.deepcopy(self.m)
+        m["transform"]["keys_recorded"] = True
+        self.assertIn("schema.const", codes(self.run_check(m, approval=self.resign(m))))
+        for name in ("offset", "blinding_key", "Scale_factor", "seed"):
+            with self.subTest(parameter=name):
+                m = copy.deepcopy(self.m)
+                m["transform"]["parameters"] = {"region": {"low": 1, "high": 2}, "nested": [{name: 3}]}
+                self.assertIn("release.keys_present", codes(self.run_check(m, approval=self.resign(m))))
+
+    def test_wildcard_destination(self):
+        m = copy.deepcopy(self.m)
+        m["destinations"]["network"] = ["*.example.org"]
+        self.assertIn("release.destination_wildcard", codes(self.run_check(m, approval=self.resign(m))))
+
+    def test_code_digest(self):
+        self.assertEqual(self.run_check(code_digest="2" * 64)["status"], "pass")
+        self.assertIn("release.transform_code_mismatch", codes(self.run_check(code_digest="9" * 64)))
+        self.assertIn("release.code_digest_malformed", codes(self.run_check(code_digest="2" * 63)))
+
+    def test_destination_sets(self):
+        held = {"s1": copy.deepcopy(self.m["destinations"])}
+        self.assertEqual(self.run_check(destination_sets=held)["status"], "pass")
+        other = copy.deepcopy(held)
+        other["s1"]["tools"] = ["Read", "Bash"]  # a superset is not the same set
+        self.assertIn("release.destination_set_unknown", codes(self.run_check(destination_sets=other)))
+        for bad in ({}, [], {"s1": "not-an-object"}):
+            self.assertIn("release.destination_sets_malformed", codes(self.run_check(destination_sets=bad)))
+
+    def test_history(self):
+        ledger = [{"release_id": "synthetic-release-000", "manifest_sha256": "3" * 64, "analysis": "bc-twin"},
+                  {"release_id": "other-analysis-000", "manifest_sha256": "4" * 64, "analysis": "elsewhere",
+                   "source_sha256": "8" * 64}]
+        self.assertEqual(self.run_check(ledger=ledger, analysis="elsewhere-2")["status"], "pass")
+        self.assertIn("release.related_incomplete", codes(self.run_check(ledger=ledger, analysis="bc-twin")))
+        same_source = [dict(ledger[1], source_sha256="1" * 64)]
+        self.assertIn("release.related_incomplete", codes(self.run_check(ledger=same_source, analysis="bc-twin")))
+        m = copy.deepcopy(self.m)
+        m["related_releases"] = ["synthetic-release-000"]
+        m["composition_review"] = {"reviewer": "synthetic reviewer", "date": "2026-10-07", "conclusion": "no combination"}
+        self.assertEqual(self.run_check(m, approval=self.resign(m), ledger=ledger, analysis="bc-twin")["status"], "pass")
+        m["related_releases"] = ["synthetic-release-000", "never-published"]
+        self.assertIn("release.related_unknown", codes(self.run_check(m, approval=self.resign(m), ledger=ledger, analysis="bc-twin")))
+        m["related_releases"] = ["synthetic-release-000"]
+        rev = dict(self.inputs["revocations"], revoked=[{"ref": "synthetic-release-000", "time": "2026-10-08T10:00:00Z", "reason": "x"}])
+        out = self.run_check(m, approval=self.resign(m), ledger=ledger, analysis="bc-twin", revocations=rev)
+        self.assertEqual(out["status"], "pass", out)
+        self.assertIn("release.related_revoked", {f["code"] for f in out["findings"] if f["severity"] == "warning"})
+        self.assertIn("release.history_unchecked", codes(self.run_check(ledger=None, analysis="bc-twin")))
+        self.assertIn("release.analysis_malformed", codes(self.run_check(analysis=" ")))
+
+    def test_sealed_scan(self):
+        sealed = {"sealed": [1234.5678, 17.25], "rtol": 1e-9}
+        clean = {"edges": [0, 7, 17.25, 30], "values": [5, None, 9], "blinded_bins": [False, True, False],
+                 "region": {"low": 7, "high": 17.25}}
+        m = self.write_histogram(clean)
+        out = self.run_check(m, approval=self.resign(m), sealed=sealed)
+        self.assertEqual(out["status"], "pass", out)  # 17.25 as an edge and a region bound is structure, not data
+        leak = dict(clean, values=[5, 1234.5678, 9])
+        m = self.write_histogram(leak)
+        out = self.run_check(m, approval=self.resign(m), sealed=sealed)
+        self.assertIn("release.sealed_value_present", codes(out))
+        msg = json.dumps(out["findings"])
+        self.assertNotIn("1234", msg)  # no sealed value, token or count in a finding
+        ratio_leak = dict(clean, ratio_to_reference=[1.0, 17.25, 1.1])
+        m = self.write_histogram(ratio_leak)
+        self.assertIn("release.sealed_value_present", codes(self.run_check(m, approval=self.resign(m), sealed=sealed)))
+
+    def test_sealed_scan_fails_closed(self):
+        sealed = {"sealed": [1234.5678], "rtol": 1e-9}
+        self.assertIn("release.scan_incomplete", codes(self.run_check(sealed=sealed, root=None)))
+        for bad in ({"sealed": []}, {"sealed": ["x"]}, {"sealed": [1.0], "rtol": 1e-3}, {"sealed": [1.0], "rtol": True}, []):
+            with self.subTest(sealed=bad):
+                self.assertIn("release.sealed_malformed", codes(self.run_check(sealed=bad)))
+        self.assertEqual(self.run_check(sealed={"sealed": [], "nothing_sealable": True})["status"], "pass")
+        body = b"\x89PNG\r\n\x1a\n binary"
+        (self.root / "hists" / "plot.png").write_bytes(body)
+        m = copy.deepcopy(self.m)
+        m["artifacts"].append({"path": "hists/plot.png", "sha256": hashlib.sha256(body).hexdigest(), "size": len(body), "format": "png"})
+        self.assertIn("release.scan_incomplete", codes(self.run_check(m, approval=self.resign(m), sealed=sealed)))
+        (self.root / "hists" / "broken.json").write_bytes(b"{not json")
+        m = copy.deepcopy(self.m)
+        m["artifacts"].append({"path": "hists/broken.json", "sha256": hashlib.sha256(b"{not json").hexdigest(), "size": 9, "format": "json"})
+        self.assertIn("release.scan_incomplete", codes(self.run_check(m, approval=self.resign(m), sealed=sealed)))
+
+    def test_cli_custodian_options(self):
+        d = Path(self.tmp.name)
+        names = ("approval", "approvers", "ledger", "revocations", "effective")
+        files = {"manifest": d / "manifest.json"}
+        files["manifest"].write_text(json.dumps(self.m))
+        for n in names:
+            files[n] = d / f"{n}.json"
+            files[n].write_text(json.dumps(self.approval if n == "approval" else self.inputs[n]))
+        (d / "sets.json").write_text(json.dumps({"s1": self.m["destinations"]}))
+        (d / "sealed.json").write_text(json.dumps({"sealed": [1234.5678], "rtol": 1e-9}))
+        argv = [sys.executable, str(ROOT / "contracts" / "release_manifest.py"), str(files["manifest"]), "--root", str(self.root),
+                "--now", "2026-10-08T12:00:00Z", "--code-digest", "2" * 64, "--destination-sets", str(d / "sets.json"),
+                "--analysis", "bc-twin", "--sealed", str(d / "sealed.json")] + [x for n in names for x in (f"--{n}", str(files[n]))]
+        p = subprocess.run(argv, capture_output=True, text=True, timeout=600)
+        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+        p = subprocess.run([a if a != "2" * 64 else "9" * 64 for a in argv], capture_output=True, text=True, timeout=600)
+        self.assertEqual(p.returncode, 1)
+        self.assertIn("release.transform_code_mismatch", p.stdout)
+        (d / "sealed.json").write_text("{not json")
+        self.assertEqual(subprocess.run(argv, capture_output=True, text=True, timeout=600).returncode, 2)
 
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@ advisory only, and passing it never releases data (the trusted release gate does
 
 Usage: python3 contracts/release_manifest.py MANIFEST --root DIR --approval FILE --approvers FILE --ledger FILE
            --revocations FILE --effective FILE [--now YYYY-MM-DDTHH:MM:SSZ]
+           [--code-digest HEX] [--destination-sets FILE] [--analysis NAME] [--sealed FILE]
 Every input is required for a pass: a check that cannot run is a failure (fail closed), never a skip.
 
   manifest     the release manifest (contracts/schemas/release_manifest.json)
@@ -22,8 +23,26 @@ Every input is required for a pass: a check that cannot run is a failure (fail c
   --effective  the effective destinations of the session: {"services": [{"service", "tenant", "region",
                "model_family", "model"}], "tools", "network", "recipients", "logging": {"transcripts", "telemetry"}};
                every key must be present (an absent list is not "none used") and every entry allowed by the manifest
+Always checked, from the manifest alone: no transform parameter name may look like key material (KEY_LIKE: key,
+secret, offset, scale, seed, password, token; the schema already requires transform.keys_recorded to be false), and no
+destination may contain a wildcard '*'.
+
+Custodian options (each one adds checks; none is needed for a pass, and a custodian should give all of them):
+  --code-digest       the code-release digest of the transform code the custodian runs (64 hex); transform.code_sha256
+                      must equal it
+  --destination-sets  {name: destinations}: the destination sets the custodian holds (one per qualified
+                      configuration); the manifest's destinations must equal one of them exactly
+  --analysis          the analysis this release belongs to: every ledger entry of the same analysis or of the same
+                      source (ledger entries may carry "analysis" and "source_sha256") must be listed in
+                      related_releases, and every listed release must be in the ledger (a revoked one is a warning: the
+                      composition review must cover it)
+  --sealed            the sealed file of this release (audit_blinded_outputs.py seal: {"sealed": [...], "rtol"}, or
+                      nothing_sealable); needs --root. Every artifact is scanned for a sealed value: a JSON object
+                      without its declared structure keys (STRUCTURE_KEYS: bin edges, masks, region), other files as
+                      core.blinding.scan_file reads them. An artifact that cannot be scanned fails (fail closed)
 Output: JSON {"status": "pass"|"fail", "manifest_sha256", "findings", "note"}. Exit 0 pass, 1 fail, 2 unreadable input.
-Rejection details are for the custodian; what an agent sees of a refusal is a fixed status (HC-08).
+Rejection details are for the custodian; what an agent sees of a refusal is a fixed status (HC-08). A finding never
+names a sealed value or a count of matches.
 """
 from __future__ import annotations
 
@@ -31,7 +50,9 @@ import argparse
 import datetime
 import hashlib
 import json
+import math
 import os
+import re
 import stat
 import sys
 from pathlib import Path
@@ -42,6 +63,12 @@ if __package__ in (None, ""):
 from contracts.schema import Report, validate  # noqa: E402
 
 RELEASE_AUTHORITY = "data-release"
+KEY_LIKE = re.compile(r"key|secret|offset|scale|seed|password|token", re.IGNORECASE)
+HEX64 = re.compile(r"^[0-9a-f]{64}$")
+MAX_SEALED_RTOL = 1e-6  # as audit_blinded_outputs.py
+# top-level keys of a JSON artifact that hold declared structure, not data: bin edges collide with low-digit sealed
+# values (a difference of 7 counts against an edge at 7.0); masks are booleans; the region is retained by definition
+STRUCTURE_KEYS = frozenset({"edges", "blinded_bins", "region", "blinding", "flow", "status"})
 NOTE = ("advisory unless run by the custodian from protected copies; passing does not release data, and the approval "
         "trust anchor (who may write approval records) is outside this check")
 
@@ -198,11 +225,133 @@ def check_destinations(m: dict, eff: dict | None, rep: Report) -> None:
         rep.add("error", "effective.logging", "release.destination_mismatch", "logging or telemetry differs from the manifest")
 
 
+def check_keys(m: dict, rep: Report) -> None:
+    """Key material never travels with a release: no parameter name may look like a key (keys_recorded is false by the
+    schema)."""
+    tr = m["transform"]
+
+    def walk(obj, path: str) -> None:
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                if KEY_LIKE.search(str(k)):
+                    rep.add("error", f"{path}.{k}", "release.keys_present", "a transform parameter name looks like key material")
+                walk(v, f"{path}.{k}")
+        elif isinstance(obj, list):
+            for i, v in enumerate(obj):
+                walk(v, f"{path}[{i}]")
+    walk(tr["parameters"], "transform.parameters")
+
+
+def check_wildcards(m: dict, rep: Report) -> None:
+    if "*" in json.dumps(m["destinations"], ensure_ascii=False):
+        rep.add("error", "destinations", "release.destination_wildcard", "a destination contains a wildcard")
+
+
+def check_code_digest(m: dict, code_digest, rep: Report) -> None:
+    if not (isinstance(code_digest, str) and HEX64.match(code_digest)):
+        rep.add("error", "code_digest", "release.code_digest_malformed", "the expected code digest is not 64 lower-case hex")
+    elif m["transform"]["code_sha256"] != code_digest:
+        rep.add("error", "transform.code_sha256", "release.transform_code_mismatch",
+                "the transform code is not the code release the custodian runs")
+
+
+def check_destination_sets(m: dict, sets, rep: Report) -> None:
+    if not (isinstance(sets, dict) and sets and all(isinstance(v, dict) for v in sets.values())):
+        rep.add("error", "destination_sets", "release.destination_sets_malformed", "expected {name: destinations}, not empty")
+    elif m["destinations"] not in sets.values():
+        rep.add("error", "destinations", "release.destination_set_unknown",
+                "the destinations are not exactly one destination set the custodian holds")
+
+
+def check_history(m: dict, ledger, analysis, revocations, rep: Report) -> None:
+    """related_releases must name every earlier release of this analysis or source, and only releases the ledger knows."""
+    if not (isinstance(analysis, str) and analysis.strip()):
+        rep.add("error", "analysis", "release.analysis_malformed", "the analysis name is empty")
+        return
+    if not isinstance(ledger, list) or not all(isinstance(e, dict) and isinstance(e.get("release_id"), str) for e in ledger):
+        rep.add("error", "ledger", "release.history_unchecked", "no readable ledger: the release history cannot be checked")
+        return
+    src = m["source"]["sha256"]
+    known = {e["release_id"] for e in ledger if e["release_id"] != m["release_id"]}
+    expected = {e["release_id"] for e in ledger if e["release_id"] != m["release_id"]
+                and (e.get("analysis") == analysis or e.get("source_sha256") == src)}
+    listed = set(m["related_releases"])
+    if expected - listed:
+        rep.add("error", "related_releases", "release.related_incomplete",
+                f"earlier releases of this analysis or source not listed: {sorted(expected - listed)}")
+    if listed - known:
+        rep.add("error", "related_releases", "release.related_unknown",
+                f"related releases the ledger does not know: {sorted(listed - known)}")
+    revoked = {r.get("ref") for r in (revocations or {}).get("revoked") or [] if isinstance(r, dict)}
+    for rid in sorted(listed & revoked):
+        rep.add("warning", "related_releases", "release.related_revoked",
+                f"related release {rid} is revoked; the composition review must cover it")
+
+
+def load_sealed(doc) -> tuple[list[float], float]:
+    """The sealed numbers and tolerance of a sealed file (audit_blinded_outputs.py seal); ValueError when malformed,
+    since a malformed sealed file would make every scan pass. An empty list only with nothing_sealable."""
+    nums = doc.get("sealed") if isinstance(doc, dict) else None
+    if isinstance(nums, list) and not nums and doc.get("nothing_sealable") is True:
+        pass
+    elif not isinstance(nums, list) or not nums or not all(
+            isinstance(x, (int, float)) and not isinstance(x, bool) and math.isfinite(x) for x in nums):
+        raise ValueError("the sealed file must hold a non-empty list of finite numbers under 'sealed'")
+    rtol = doc.get("rtol", 1e-9)
+    if isinstance(rtol, bool) or not isinstance(rtol, (int, float)) or not 0 < rtol <= MAX_SEALED_RTOL:
+        raise ValueError(f"the sealed file's rtol must be in (0, {MAX_SEALED_RTOL:g}]")
+    return [float(x) for x in nums], float(rtol)
+
+
+def check_sealed(m: dict, root: Path | None, sealed_doc, rep: Report) -> None:
+    """Scan every artifact for a sealed value. The messages name the artifact only: no value, token or count."""
+    from core.blinding.blinding import scan_file, scan_text
+    try:
+        sealed, rtol = load_sealed(sealed_doc)
+    except ValueError as exc:
+        rep.add("error", "sealed", "release.sealed_malformed", str(exc))
+        return
+    if root is None:
+        rep.add("error", "sealed", "release.scan_incomplete", "no release directory given: the artifacts cannot be scanned")
+        return
+    for a in m["artifacts"]:
+        p = root / a["path"]
+        where = f"artifacts[{a['path']}]"
+        try:
+            if os.path.islink(p) or not p.is_file():
+                raise ValueError("not a regular file")
+            if p.suffix.lower() == ".json":
+                doc = json.loads(p.read_text(encoding="utf-8"))
+                data = {k: v for k, v in doc.items() if k not in STRUCTURE_KEYS} if isinstance(doc, dict) else doc
+                hits = scan_text(json.dumps(data, indent=1), sealed, rtol)
+            else:
+                hits = scan_file(p, sealed, rtol)
+                if hits and hits[0].get("unscanned"):
+                    raise ValueError(hits[0]["reason"])
+        except (OSError, ValueError) as exc:
+            rep.add("error", where, "release.scan_incomplete", f"cannot be scanned (fail closed): {type(exc).__name__}")
+            continue
+        if hits:
+            rep.add("error", where, "release.sealed_value_present", "contains a sealed value")
+
+
 def check(manifest, root=None, approval=None, approvers=None, ledger=None, revocations=None, effective=None,
-          now: datetime.datetime | None = None) -> dict:
+          now: datetime.datetime | None = None, *, code_digest=None, destination_sets=None, analysis=None,
+          sealed=None) -> dict:
+    """The keyword-only arguments are the custodian options of the command line (module docstring); None skips them."""
     now = now or datetime.datetime.now(datetime.UTC)
     rep = validate(manifest, "release_manifest.json")
     if rep.ok:
+        check_keys(manifest, rep)
+        check_wildcards(manifest, rep)
+        if code_digest is not None:
+            check_code_digest(manifest, code_digest, rep)
+        if destination_sets is not None:
+            check_destination_sets(manifest, destination_sets, rep)
+        if analysis is not None:
+            check_history(manifest, ledger, analysis, revocations, rep)
+        if sealed is not None:
+            check_sealed(manifest, None if root is None else Path(root), sealed, rep)
         if manifest["related_releases"] and "composition_review" not in manifest:
             rep.add("error", "composition_review", "release.composition_unreviewed", "related releases need a composition review")
         if len({a["path"] for a in manifest["artifacts"]}) != len(manifest["artifacts"]):
@@ -224,10 +373,15 @@ def main(argv=None) -> int:
         ap.add_argument(f"--{name}", type=Path)
     ap.add_argument("--root", type=Path)
     ap.add_argument("--now")
+    ap.add_argument("--code-digest", dest="code_digest")
+    ap.add_argument("--destination-sets", dest="destination_sets", type=Path)
+    ap.add_argument("--analysis")
+    ap.add_argument("--sealed", type=Path)
     args = ap.parse_args(argv)
     try:
         docs = {name: None if getattr(args, name) is None else json.loads(getattr(args, name).read_text(encoding="utf-8"))
-                for name in ("manifest", "approval", "approvers", "ledger", "revocations", "effective")}
+                for name in ("manifest", "approval", "approvers", "ledger", "revocations", "effective",
+                             "destination_sets", "sealed")}
     except (OSError, ValueError) as exc:
         print(json.dumps({"status": "unreadable", "error": str(exc)}))
         return 2
@@ -240,7 +394,8 @@ def main(argv=None) -> int:
         return 2
     try:
         out = check(docs["manifest"], args.root, docs["approval"], docs["approvers"], docs["ledger"], docs["revocations"],
-                    docs["effective"], now)
+                    docs["effective"], now, code_digest=args.code_digest, destination_sets=docs["destination_sets"],
+                    analysis=args.analysis, sealed=docs["sealed"])
     except (AttributeError, KeyError, TypeError, ValueError) as exc:  # an input of the wrong shape: never a pass
         print(json.dumps({"status": "unreadable", "error": f"malformed input: {type(exc).__name__}: {exc}"}))
         return 2
