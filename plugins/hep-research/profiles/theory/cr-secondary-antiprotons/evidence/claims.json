@@ -1,0 +1,125 @@
+[
+ {
+  "id": "crpb:C01",
+  "claim": "The secondary antiproton source term is q_ij(T_pbar) = int dT_i 4 pi n_ISM,j phi_i(T_i) dsigma_ij/dT_pbar, summed over projectile and target species.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "crpb:S01"
+  ],
+  "location": "Sec. I, Eq. (1) (as recorded in the hep-theory reference)",
+  "scope": {
+   "text": "definition used by this profile"
+  },
+  "limitations": "as recorded in skills/hep-theory/references/cosmic-ray-propagation.md (source read there 2026-10-13); not re-opened in this session",
+  "verification_strength": "not-opened",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-15"
+ },
+ {
+  "id": "crpb:C02",
+  "claim": "The pp term is written with a production threshold at total projectile energy 7 m_p, and the interstellar medium as H : He : C = 1 : 0.1 : 5e-4.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "crpb:S02"
+  ],
+  "location": "Sec. II.A, Eq. (1) (as recorded in the hep-theory reference)",
+  "scope": {
+   "text": "threshold and He/H ratio used by this profile; carbon neglected"
+  },
+  "limitations": "as recorded in skills/hep-theory/references/cosmic-ray-propagation.md (source read there 2026-10-13); not re-opened in this session",
+  "verification_strength": "not-opened",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-15"
+ },
+ {
+  "id": "crpb:C03",
+  "claim": "Only p and He projectiles and targets are summed; the contribution from heavier nuclei is stated to be negligible. Nuclear channels are obtained by rescaling pp with functions fitted to pA data.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "crpb:S03",
+   "crpb:S01"
+  ],
+  "location": "Winkler Sec. 9, Eq. (19) and Eq. (17); Korsmeier et al. Eqs. (15)-(17) (as recorded in the hep-theory reference)",
+  "scope": {
+   "text": "the profile keeps the four channels; its constant rescaling factors are ILLUSTRATIVE, not the fitted functions"
+  },
+  "limitations": "as recorded in skills/hep-theory/references/cosmic-ray-propagation.md (source read there 2026-10-13); not re-opened in this session",
+  "verification_strength": "not-opened",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-15"
+ },
+ {
+  "id": "crpb:C04",
+  "claim": "Antineutrons and hyperons enter the total as sigma = sigma_pbar (2 + Delta_IS + 2 Delta_Lambda), with Delta_IS the antineutron enhancement and Delta_Lambda = 0.81 (Lambda-bar / pbar) (with an uncertainty of 0.04 on 0.81).",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "crpb:S03",
+   "crpb:S01"
+  ],
+  "location": "Winkler Eqs. (5)-(7); Korsmeier et al. Eqs. (4)-(6) (as recorded in the hep-theory reference)",
+  "scope": {
+   "text": "the factor's form; the profile's Delta_IS and Lambda-bar/pbar values are ILLUSTRATIVE constants"
+  },
+  "limitations": "as recorded in skills/hep-theory/references/cosmic-ray-propagation.md (source read there 2026-10-13); not re-opened in this session",
+  "verification_strength": "not-opened",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-15"
+ },
+ {
+  "id": "crpb:C05",
+  "claim": "Different antiproton cross-section parametrizations differ (10-20% where data exist, more in extrapolation), so the choice among parametrizations is a model alternative rather than an independent Gaussian per bin.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": [
+   "crpb:S02",
+   "crpb:S01"
+  ],
+  "location": "di Mauro et al. abstract; Korsmeier et al. abstract and Sec. IV (as recorded in the hep-theory reference)",
+  "scope": {
+   "text": "how alternatives are represented; no published parametrization is reproduced in this profile"
+  },
+  "limitations": "as recorded in skills/hep-theory/references/cosmic-ray-propagation.md (source read there 2026-10-13); not re-opened in this session",
+  "verification_strength": "not-opened",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-15"
+ },
+ {
+  "id": "crpb:C06",
+  "claim": "Proton mass m_p c^2 = 0.93827208816 GeV.",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "public-fact",
+  "source_ids": [
+   "crpb:S04"
+  ],
+  "location": "not checked",
+  "scope": {
+   "text": "threshold only"
+  },
+  "limitations": "value used from background knowledge; source not opened in this session",
+  "verification_strength": "not-opened",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-15"
+ }
+]

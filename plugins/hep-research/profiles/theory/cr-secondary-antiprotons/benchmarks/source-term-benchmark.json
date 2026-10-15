@@ -1,0 +1,50 @@
+{
+ "label": "Benchmark settings for theory:cr-secondary-antiprotons (ILLUSTRATIVE primary fluxes, gas density and toy cross sections; theory only, no experiment resource)",
+ "illustrative": true,
+ "ism": {
+  "n_H_cm3": 1.0,
+  "He_to_H": 0.1
+ },
+ "primaries": {
+  "p": {
+   "form": "power-law",
+   "K": 1.0,
+   "T0_gev": 1.0,
+   "gamma": 2.8
+  },
+  "He": {
+   "form": "power-law",
+   "K": 0.05,
+   "T0_gev": 1.0,
+   "gamma": 2.7
+  }
+ },
+ "antineutrons": "included",
+ "hyperons": "included",
+ "cross_section_set": "models/xs-toy-A.json",
+ "alternative_cross_section_sets": [
+  "models/xs-toy-B.json"
+ ],
+ "energies_gev": [
+  1.0,
+  2.0,
+  5.0,
+  10.0,
+  20.0,
+  50.0,
+  100.0,
+  200.0,
+  500.0
+ ],
+ "energy_bin_edges_gev": [
+  1.0,
+  2.0,
+  5.0,
+  10.0,
+  20.0,
+  50.0,
+  100.0,
+  200.0,
+  500.0
+ ]
+}
