@@ -4,7 +4,7 @@
 
 | Setting | mean rel. sigma | max abs(bias)/sigma (model) | min coverage (model) | max abs(bias)/sigma (test) | min coverage (test) |
 |---|---|---|---|---|---|
-| inversion (TSVD, all 10 singular values) | 0.297571 | 2.39114e-13 | 0.67725 | 2.47042e-13 | 0.67525 |
+| inversion (TSVD, all 10 singular values) | 0.297571 | 5.45005e-13 | 0.67725 | 5.46806e-13 | 0.67525 |
 | TSVD, 6 singular values | 0.0796463 | 17.5404 | 0.0 | 13.0141 | 0.0 |
 | Tikhonov 1e-4 | 0.268536 | 0.00987658 | 0.67475 | 0.00444603 | 0.67325 |
 | Tikhonov 1e-3 | 0.181479 | 0.0899997 | 0.67375 | 0.0408596 | 0.67825 |
