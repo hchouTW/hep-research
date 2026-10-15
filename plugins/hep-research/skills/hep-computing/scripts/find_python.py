@@ -19,6 +19,8 @@ tried with its reason. Record python, python_version and the module versions wit
 """
 from __future__ import annotations
 
+# This script is started as `python3 find_python.py`, and that python3 may be older than the floor (macOS ships 3.9):
+# keep the file parseable by Python 3.9 (tests/tools/test_python_compat.py checks it on any runner).
 import argparse
 import json
 import os
