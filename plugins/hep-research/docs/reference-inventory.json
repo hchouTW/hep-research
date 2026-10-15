@@ -20,7 +20,7 @@
   },
   "hep-statistics": {
    "references": 12,
-   "bytes": 170004,
+   "bytes": 169967,
    "uncited": 0
   },
   "hep-theory": {
@@ -1628,7 +1628,7 @@
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 17034,
+   "bytes": 16997,
    "lines": 175,
    "linked_from_skill_md": true,
    "cited_by": [
