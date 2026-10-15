@@ -124,5 +124,21 @@ class PyprojectTests(unittest.TestCase):
             self.assertEqual(v, "3.13", "every setup-python step uses the floor")
 
 
+    @unittest.skipUnless((ROOT.parents[1] / ".github" / "workflows" / "tests.yml").is_file(),
+                         "repository checkout only (an installed plugin tree has no .github)")
+    def test_slow_tier_job_has_a_larger_module_timeout(self):
+        """The weekly `latest` job runs the slow tier, where tests.examples.test_stats_benchmarks alone takes about
+        525-545 s, near the default 600 s module limit: the job sets HEP_MODULE_TIMEOUT to at least 1800 s, and the
+        maintenance notes say so."""
+        workflow = (ROOT.parents[1] / ".github" / "workflows" / "tests.yml").read_text(encoding="utf-8")
+        job = re.search(r"(?ms)^  latest:\n(.*?)(?=^  [A-Za-z0-9_-]+:\n|\Z)", workflow).group(1)
+        self.assertRegex(job, r'HEP_SLOW_TESTS: "1"')
+        timeout = re.search(r'HEP_MODULE_TIMEOUT: "?([0-9]+)"?', job)
+        self.assertIsNotNone(timeout, "the latest job sets HEP_MODULE_TIMEOUT")
+        self.assertGreaterEqual(int(timeout.group(1)), 1800)
+        notes = " ".join((ROOT / "docs" / "maintenance.md").read_text(encoding="utf-8").split())
+        self.assertIn(f"HEP_MODULE_TIMEOUT={timeout.group(1)}", notes)
+
+
 if __name__ == "__main__":
     unittest.main()
