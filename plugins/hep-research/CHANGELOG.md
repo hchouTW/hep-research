@@ -3,7 +3,10 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.10.1 (2026-10-15)
+
+Follow-ups to the 0.10.0 check (PR #84) and the `run_all_checks.py` timeout fix (PR #83). ams02-research needs no
+change (it requires hep-research >=0.4.0 and contracts >=2.0). Contracts stay 2.8.0.
 
 - `tools/run_all_checks.py`: a check script that does not finish within the timeout (`--module-timeout`, default 600 s,
   now applied to the check scripts as well as the test modules) is a failure with the reason "timed out after N s";

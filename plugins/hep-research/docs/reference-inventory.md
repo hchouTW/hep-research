@@ -106,7 +106,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `imaging-atmospheric-cherenkov.md` | detector-response | 11.4 | no | 10 | hep-statistics, physics-ml, research-communication | 42bd455 2026-10-15 |
 | `multimessenger-analysis.md` | detector-response | 6.9 | no | 2 | - | cd6c92b 2026-10-14 |
 | `muon-systems.md` | detector-response | 8.4 | no | 7 | research-communication | b1fb312 2026-10-14 |
-| `neutrino-astronomy.md` | detector-response | 10.2 | no | 7 | hep-statistics | 42bd455 2026-10-15 |
+| `neutrino-astronomy.md` | detector-response | 10.2 | no | 7 | hep-statistics | 6c5fc26 2026-10-15 |
 | `noble-liquid-neutrino-and-rare-event-detectors.md` | detector-response | 12.5 | no | 7 | - | f95c6f2 2026-10-15 |
 | `particle-identification.md` | detector-response | 16.1 | no | 20 | - | b1fb312 2026-10-14 |
 | `performance-metrics-and-residual-diagnostics.md` | detector-response | 18.6 | no | 10 | - | 4a74e06 2026-10-14 |
