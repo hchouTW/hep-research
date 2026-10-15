@@ -5,6 +5,9 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+<!-- wp4 -->
+- hep-analysis: `references/cosmic-ray-measurements.md`, an index of cosmic-ray measurement types (absolute flux, flux ratios, isotope ratios, time-dependent flux, rare-event searches) that links existing sections in hep-analysis, detector-response, hep-statistics and research-communication, plus new anisotropy measurement design: estimand (first harmonic, equatorial dipole projection, 3D dipole), directional exposure and its non-uniformity (simulated vs data-driven, east-west method), harmonic and full-sky dipole estimators, partial-sky multipole coupling, amplitude bias, solar/sidereal/anti-sidereal checks, and upper limits on the amplitude with the limit construction handed to hep-statistics (Linsley 1975, Sommers 2001, Billoir & Deligny 2008, Ahlers & Mertsch 2017, Compton & Getting 1935, Farley & Storey 1954, Alexandreas et al. 1993, Bonino et al. 2011). Linked from `SKILL.md` Resources and the analysis guide's routing table; capability matrix row `documented`.
+
 <!-- wp15 -->
 - detector-response: `references/charge-confusion.md`, a synthesis note on charge-sign confusion: the mechanisms (finite curvature resolution toward the maximum detectable rigidity, non-Gaussian scattering and interactions, wrong hit association; alignment weak modes making the two signs' rates differ), how detector-response measures the rate (simulation validated on data, templates in a confusion-sensitive variable, known-sign control samples) and the handoff to hep-analysis, which subtracts it as a background; linked from the principles-summary reference index and task-routing table and from the tracking reference. Capability-matrix row at `documented` (WP15).
 
