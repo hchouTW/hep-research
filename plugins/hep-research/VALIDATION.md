@@ -1478,3 +1478,23 @@ Conclusion: quick verification questions route (20/20); short drafting, terminol
 fixtures still skip the skill. That decision is taken before `SKILL.md` is read, from the description alone, so
 the WP6 remedy (reordering the body, description byte-identical) cannot change it; `SKILL.md` was not changed.
 Open: a description change (needs approval and a routing rerun) or a scorer fix for plugin reference paths.
+
+## PY313-FLOOR (2026-10-15, Python 3.13.2 conda-forge on macOS 26.5 arm64 with the CI lock; CI ubuntu-latest Python 3.13.16 and the ROOT 6.38.00 container's Python 3.13.7)
+
+Validation-first migration to Python 3.13 as the minimum. Gate 1 (trial `b8aa140` on base `21506da`; CI on the PR
+merge `2675f22`, run 38689427002, draft PR #97 not for merging) passed before any CI or documentation change:
+
+| Obligation | Result |
+|---|---|
+| Floor tests (3.11/3.12 rejected from every candidate source, 3.13 selected in order, all-old fails, lower `--min-python` refused, stricter kept; metadata, Ruff and mypy targets) | 20/20 on Python 3.13.2; 8 failed first on the old code |
+| Full suite and checks, clean venv from `requirements-ci.lock` (`pip check` clean) | 3259 tests, 0 failures, 168 skipped, 242 modules; the same modules and skip reasons as the clean baseline at `21506da` (3250 tests; +9 floor tests) |
+| CI on 3.13: units 1/2, 2/2, static and profiles, AMS optional | pass, skip counts equal to the baseline run 38687423557 |
+| Backends on 3.13 (CI): ROOT container (3.13.7), pyhf, uproot + awkward, coffea columnar, hepdata, PyTorch CPU; stats-backends with pyhf 0.7.6 and ArviZ 0.23.4 required | all pass, skip counts equal to the baseline; required backends 153 tests, no problems |
+| Tool-contract scopes, routing-harness and replay-scorer tests, release manifests, Ruff 0.16.10 (`py313`), mypy 2.4.0 (`3.13`) | pass |
+| Slow tier once (`HEP_SLOW_TESTS=1`) | 241 of 242 modules pass; `tests.examples.test_stats_benchmarks` timed out at 600 s under 6 parallel jobs, then passed alone (525 s; the baseline takes 544 s): a load effect near the module limit, the same on the baseline |
+| CI on 3.11 / 3.12 (the trial still ran them) | 6 failures each, all in `test_find_python` (the calling interpreter is below the floor): the intended withdrawal |
+
+Every backend already ran on Python 3.13 at the baseline, so none blocks the floor. The repository has no rulesets or
+branch protection on `main`, so removing the 3.11/3.12 jobs needs no required-status change. **Not verified here:**
+Python 3.14 (installable, not tested); Windows; the slow tier in CI (the weekly `latest` job last failed on
+2026-10-12 for an older runner timeout).

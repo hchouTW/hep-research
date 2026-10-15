@@ -72,7 +72,7 @@ flowchart LR
    from the archive, and require it to equal `release-manifests/<version>.json`. Record the tag and digest in every
    installer of the deployment (launcher and custodian pin the same release).
 2. **Test.** Run the deployment's unit tests (fake root, fake identity). Optionally run the plugin suite with the
-   session interpreter: the plugin declares Python ≥ 3.11 and its package minimums, and the session environment must
+   session interpreter: the plugin declares Python ≥ 3.13 (tested on 3.13) and its package minimums, and the session environment must
    meet them.
 3. **Install.** A person runs the installers with `sudo`. Each installer verifies the extracted tree against the pinned
    digest and refuses on any difference; the installed tree verifies `identical` with `tools/release_manifest.py verify`.
