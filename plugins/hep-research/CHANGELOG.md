@@ -5,6 +5,40 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+<!-- wp12 -->
+- **Four skills renamed** (rename release 0.11.0; contracts 2.9.0). Skill folders, `SKILL.md` `name` fields, test
+  folders (`tests/skills/<underscored>`), descriptions' "Not for" lists, handoff tables, READMEs, profiles'
+  `related_skills`, the capability matrix, routing cases and docs use the new names:
+
+  | Old name | New name | Test folder |
+  | --- | --- | --- |
+  | `hep-analysis` | `hep-measurement` | `tests/skills/hep_measurement` |
+  | `detector-response` | `hep-detector` | `tests/skills/hep_detector` |
+  | `research-communication` | `hep-communication` | `tests/skills/hep_communication` |
+  | `physics-ml` | `hep-ml` | `tests/skills/hep_ml` |
+
+  `hep-statistics`, `hep-theory` and `hep-computing` are unchanged. Files named after a skill follow the same rule:
+  `references/hep-measurement-guide.md` (was `hep-analysis-guide.md`), `assets/diagrams/hep-measurement-pipeline.md`,
+  `tests/skills/hep_detector/test_hep_detector_audit.py`, `tests/skills/hep_ml/test_hep_ml_skill.py`. Release
+  manifests, past CHANGELOG entries, dated VALIDATION.md sections and past eval results keep the old names.
+- **Contracts 2.9.0: deprecated skill-name aliases.** `contracts/schemas/skill_names.json` (referenced by
+  `envelope.json` `provenance.producer_skill` and `profile.json` `related_skills`) and `contracts/skill_names.py`
+  accept the seven names plus the four old names as deprecated aliases. An old name in `provenance.producer_skill`,
+  `handoff.to_skill` or an extension `handoff` is the warning `skill.deprecated_name`; in a profile's
+  `related_skills`, `profile.deprecated_skill_name`. Under the version and name policy (`--strict-versions` of
+  `contracts/validate.py`, `contracts/dependencies.py` and, new, `contracts/registry.py`; and protected use) each is
+  an error. A 2.8 reader rejects a new name (schema enum) instead of misreading it; no capability is added. The
+  aliases are removed one or two releases later.
+- **`contracts/migrate_skill_names.py OLD.json [--out NEW.json]`** rewrites `provenance.producer_skill` and
+  `handoff.to_skill` to the new names and nothing else (not `contract_version`, not the extension); remaining
+  findings are reported, never repaired. Exit 0 migrated or unchanged, 2 unreadable or not an object. Fixture
+  `contracts/fixtures/skill_aliases/response_old_skill_names.json`; tests
+  `tests/contracts/test_skill_name_aliases.py` (old name warns, fails under `--strict-versions`, validates cleanly
+  after migration; registry warning and strict error for `related_skills`).
+- Contract fixtures, example outputs (contracts version and producer names) and the gate-verdict snapshot
+  regenerated; `docs/maintenance.md` documents the name policy. ams02-research 1.5.0 requires `hep-research
+  >=0.11.0` and names the new skills in its profile.
+
 <!-- py313 -->
 - **Python 3.13 is the minimum** (validation-first migration; Gate 1 evidence in VALIDATION PY313-FLOOR): `requires-python = ">=3.13"`, Ruff `py313`, mypy `3.13`; `skills/hep-computing/scripts/find_python.py` selects only Python 3.13 or newer (default and lowest allowed `--min-python` 3.13: a lower value is bad usage, exit 2; `find()` raises `ValueError`), with 3.11/3.12 rejection, fallback and all-old tests. CI's checks matrix runs on Python 3.13 only (4 jobs instead of 12; the backend jobs already ran on 3.13 and are unchanged), and `checks-complete` reconciles 3.13 only. **Migration:** Python 3.11 and 3.12 are no longer supported or tested; create the environment with Python 3.13 (`python3.13 -m venv ...`, then `pip install -r requirements-core.txt`) and point `HEP_RESEARCH_PYTHON` at it. Scripts run directly are not stopped by `requires-python`; the skills choose the interpreter with `find_python.py`. Python 3.14 is installable but not tested. Dependency pins are unchanged (the 3.11-era upper bounds in `requirements-ci-constraints.txt` stay until a separate dependency change).
 <!-- wp10 -->
