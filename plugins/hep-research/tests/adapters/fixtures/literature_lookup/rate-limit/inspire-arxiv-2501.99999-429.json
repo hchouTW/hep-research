@@ -1,0 +1,13 @@
+{
+ "source": "inspire",
+ "url": "https://inspirehep.net/api/literature?q=arxiv%3A2501.99999&size=2&fields=titles%2Cauthors.full_name%2Cdois%2Carxiv_eprints%2Ctexkeys%2Ccontrol_number%2Cpublication_info%2Ccollaborations",
+ "recorded_at": "2026-10-15T02:31:48Z",
+ "http_status": 429,
+ "headers": {
+  "content-type": "text/html",
+  "retry-after": "5"
+ },
+ "body": "Too Many Requests",
+ "synthetic": true,
+ "note": "INSPIRE 429 constructed from the documented limit (15 requests per 5 s window, HTTP 429; literature-lookup-recipes.md); not recorded, to avoid exceeding the limit on purpose"
+}

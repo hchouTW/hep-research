@@ -1,0 +1,16 @@
+{
+  "_comment": "Synthetic split manifest frozen before training (see references/ml-analysis.md, 'Training on data and blinding'): simulated events (sim-NN) and sideband data events (sb-NN) grouped by run, timestamps in hours since the start of the period. No group crosses splits and the splits are in time order, so check_split_integrity.py passes. Its file SHA-256 is named in pretraining-decision.example.json. Illustrative only, not from any experiment.",
+  "train": ["sim-01", "sim-02", "sim-03", "sb-01", "sb-02", "sb-03"],
+  "val": ["sim-04", "sb-04"],
+  "test": ["sim-05", "sb-05"],
+  "groups": {
+    "sim-01": "run-2001", "sim-02": "run-2001", "sim-03": "run-2002", "sb-01": "run-2001",
+    "sb-02": "run-2002", "sb-03": "run-2002", "sim-04": "run-2003", "sb-04": "run-2003",
+    "sim-05": "run-2004", "sb-05": "run-2004"
+  },
+  "timestamps": {
+    "sim-01": 1, "sim-02": 2, "sim-03": 3, "sb-01": 1, "sb-02": 4, "sb-03": 5,
+    "sim-04": 7, "sb-04": 8, "sim-05": 10, "sb-05": 11
+  },
+  "temporal_order": ["train", "val", "test"]
+}
