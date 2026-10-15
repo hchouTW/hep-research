@@ -1,0 +1,12 @@
+{
+ "source": "ads",
+ "url": "https://api.adsabs.harvard.edu/v1/search/query?q=arxiv%3A%221007.1727%22&fl=bibcode%2Ctitle%2Cauthor%2Cdoi%2Cidentifier%2Cpub%2Cyear%2Cpubdate&rows=2",
+ "recorded_at": "2026-10-15T00:00:00Z",
+ "http_status": 200,
+ "headers": {
+  "content-type": "application/json"
+ },
+ "body": "{\"responseHeader\": {\"status\": 0, \"QTime\": 1, \"params\": {\"q\": \"arxiv:\\\"1007.1727\\\"\", \"fl\": \"bibcode,title,author,doi,identifier,pub,year,pubdate\", \"rows\": \"2\"}}, \"response\": {\"numFound\": 1, \"start\": 0, \"docs\": [{\"bibcode\": \"2011EPJC...71.1554C\", \"title\": [\"Asymptotic formulae for likelihood-based tests of new physics\"], \"author\": [\"Cowan, Glen\", \"Cranmer, Kyle\", \"Gross, Eilam\", \"Vitells, Ofer\"], \"doi\": [\"10.1140/epjc/s10052-011-1554-0\"], \"identifier\": [\"arXiv:1007.1727\", \"10.1140/epjc/s10052-011-1554-0\", \"2011EPJC...71.1554C\"], \"pub\": \"European Physical Journal C\", \"year\": \"2011\", \"pubdate\": \"2011-02-00\"}]}}",
+ "synthetic": true,
+ "note": "ADS response constructed in the documented search-API layout (responseHeader, response.docs; github.com/adsabs/adsabs-dev-api); title, authors and DOI copied from the recorded arXiv and INSPIRE responses, bibcode built from the journal reference by the ADS bibcode rule; no ADS token was available, so nothing was recorded from ADS"
+}

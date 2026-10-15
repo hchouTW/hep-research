@@ -5,6 +5,16 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+<!-- wp5 -->
+- `adapters/literature-lookup` 0.1.0 (optional, owned by research-communication, standard library only): `literature_lookup.py` looks up an arXiv id (with or without version), DOI, INSPIRE record id or ADS bibcode in INSPIRE-HEP, arXiv and ADS and prints one record per source with source URL, UTC retrieval time, read level and an arXiv version check; HTTP 429 reported as `rate-limited` and never retried; ADS token from `ADS_API_TOKEN`/`ADS_TOKEN`, never printed or recorded, `not-verified` without it; `--replay`/`--record` for recorded responses. Exit 0 found, 1 not found, 2 bad input, 3 incomplete. Status `demonstrated-on-synthetic-data` (INSPIRE-HEP and arXiv `tested-in-declared-environment`, ADS on a constructed response only).
+- `tests/adapters/test_literature_lookup.py` with fixtures recorded from INSPIRE-HEP and arXiv on 2026-10-15 (found, not found, HTTP 404, a real arXiv HTTP 429, version mismatch) and constructed INSPIRE 429 and ADS responses; offline (urlopen patched to fail); live smoke only with `HEP_LIVE_LOOKUP_TEST=1`.
+
+- Capability matrix: "Literature and citation verification online" raised from `unverified` to `tested-in-declared-environment` for INSPIRE-HEP and arXiv (E2, live 2026-10-15), ADS `demonstrated-on-synthetic-data`; new Adapters row. VALIDATION LITERATURE-LOOKUP.
+- `literature-lookup-recipes.md`: optional lookup-client section; arXiv answered HTTP 429 to a nonexistent id (observed 2026-10-15). research-communication README and `docs/adapter-authoring.md` (network declaration) updated.
+
+<!-- wp11 -->
+- Routing: 27 new cases (set `WP11`, 13 en / 14 zh-Hant) in `tests/routing/make_cases.py` for cosmic-ray interpretation, propagation fits (hep-statistics, limited support until WP10), time-series inference, cross-experiment comparison, CRDB queries, a custom e/p classifier in a measurement (physics-ml, handoff to hep-analysis), and the dark-matter-interpretation (hep-theory, limited support) and latest-B/C-paper (research-communication) boundaries; `cases.json` regenerated (241 cases). The live harness in `evals/routing/` reads the same `cases.json`, so it picks them up unchanged.
+
 <!-- wp2 -->
 - `skills/hep-statistics/references/time-series-inference.md` (documented): inference on **binned** time series:
   time-bin covariance as statistical + fully correlated time-independent + time-dependent blocks (valid exponential or

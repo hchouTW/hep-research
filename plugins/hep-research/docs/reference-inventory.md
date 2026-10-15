@@ -14,7 +14,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-statistics | 12 | 166 | 0 |
 | hep-theory | 11 | 78 | 0 |
 | physics-ml | 38 | 181 | 0 |
-| research-communication | 56 | 399 | 0 |
+| research-communication | 56 | 400 | 0 |
 
 ## Overlapping pairs
 
@@ -124,7 +124,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `analysis-validation.md` | hep-analysis | 4.4 | no | 5 | detector-response, hep-computing | 351029c 2026-10-07 |
 | `backgrounds.md` | hep-analysis | 4.7 | no | 19 | detector-response | 633d6c9 2026-10-13 |
 | `correction-chain.md` | hep-analysis | 9.6 | no | 5 | - | 4665f43 2026-10-13 |
-| `cosmic-ray-measurements.md` | hep-analysis | 16.2 | yes | 3 | - | 22fffa1 2026-10-15 |
+| `cosmic-ray-measurements.md` | hep-analysis | 16.2 | yes | 3 | - | 628aed7 2026-10-15 |
 | `data-pipelines.md` | hep-analysis | 0.4 | no | 8 | hep-computing | 7e34ef8 2026-10-13 |
 | `hep-analysis-guide.md` | hep-analysis | 20.6 | yes | 7 | detector-response | 22fffa1 2026-10-15 |
 | `histograms-efficiencies.md` | hep-analysis | 3.1 | no | 7 | detector-response, hep-computing | c180c4e 2026-10-13 |
@@ -254,7 +254,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `latex-venue-setup.md` | research-communication | 25.7 | no | 7 | - | 9254a25 2026-10-14 |
 | `legends-panels-and-export.md` | research-communication | 6.6 | no | 2 | - | 2878ab4 2026-10-14 |
 | `literature-discovery-and-search.md` | research-communication | 5.0 | no | 1 | - | ecc929c 2026-10-14 |
-| `literature-lookup-recipes.md` | research-communication | 5.0 | yes | 3 | - | 893bc43 2026-10-15 |
+| `literature-lookup-recipes.md` | research-communication | 5.9 | yes | 6 | - | 5bdebcd 2026-10-15 |
 | `literature-review.md` | research-communication | 7.9 | no | 5 | - | ecc929c 2026-10-14 |
 | `logical-consistency-and-argument-uniformity.md` | research-communication | 4.9 | no | 5 | hep-theory | ecc929c 2026-10-14 |
 | `manuscript-consistency-auditing.md` | research-communication | 3.6 | no | 4 | - | ecc929c 2026-10-14 |
