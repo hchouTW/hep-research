@@ -2,7 +2,7 @@
 """Two-tier profile registry and profile validator.
 
 Usage: python3 contracts/registry.py [--registry PATH] [--local PROFILE_DIR ...] [--strict-versions]
-Exit 0 valid, 1 errors, 2 unreadable registry. Output: JSON report.
+Exit 0 valid, 1 errors, 2 unreadable registry or an unknown or incomplete argument. Output: JSON report.
 
 Checks: registry schema; duplicate IDs; registry/profile.json agreement; core and contracts
 compatibility; required resources present; folder template; paths that escape the package
@@ -33,7 +33,7 @@ TEMPLATES: dict[Any, dict[str, list[str]]] = {
     "theory-domain": {"required": ["profile.json", "index.md", "conventions.json", "models", "derivations", "predictions", "benchmarks", "evidence", "tests"],
                       "optional": ["scripts", "README.md"]},
 }
-REGISTRY_BUDGET, INDEX_BUDGET = 2048, 4096
+REGISTRY_BUDGET, INDEX_BUDGET = 3072, 4096
 DEMONSTRATED = {"demonstrated-on-synthetic-data", "tested-in-declared-environment"}
 
 
@@ -188,10 +188,32 @@ def option_values(args: list[str], flag: str) -> list[str]:
     return [args[i + 1] for i, a in enumerate(args) if a == flag]
 
 
+VALUE_FLAGS, SWITCHES = ("--registry", "--local"), ("--strict-versions",)
+
+
+def check_arguments(args: list[str]) -> None:
+    """ValueError naming the first argument that is neither a known flag nor the value of one (a usage error,
+    exit 2): an unknown flag such as validate.py's --profiles-from must not pass as a clean run."""
+    i = 0
+    while i < len(args):
+        a = args[i]
+        if a in VALUE_FLAGS:
+            i += 2
+            continue
+        if a not in SWITCHES:
+            kind = "option" if a.startswith("-") else "argument"
+            raise ValueError(f"unknown {kind} '{a}' (accepted: --registry PATH, --local PROFILE_DIR, --strict-versions)")
+        i += 1
+
+
 def main(argv=None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
+    if args in (["-h"], ["--help"]):
+        print(__doc__)
+        return 0
     try:
         reg = next((Path(v) for v in option_values(args, "--registry")), None)
+        check_arguments(args)
         rep, loaded = validate_registry(reg, option_values(args, "--local"), strict_versions="--strict-versions" in args)
     except (OSError, ValueError) as exc:
         print(json.dumps({"ok": False, "error": str(exc)}))

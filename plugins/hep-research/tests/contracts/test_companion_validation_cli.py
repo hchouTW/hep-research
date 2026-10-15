@@ -117,6 +117,28 @@ class CompanionCLI(unittest.TestCase):
                 self.assertNotIn("Traceback", err)
                 self.assertEqual(out["ok"], False)
 
+    def test_unknown_argument_is_a_usage_error(self):
+        # an unknown flag (for example validate.py's --profiles-from) or a stray positional used to be ignored
+        # with exit 0, so a companion check that misspelled its flag looked clean
+        for args, bad in ((["--bogus"], "--bogus"), (["--profiles-from", "x.json"], "--profiles-from"),
+                          (["--strict-versions", "--bogus"], "--bogus"),
+                          (["--local", str(self.base / "x"), "stray"], "stray")):
+            with self.subTest(args=args):
+                rc, out, err = run("registry.py", *args)
+                self.assertEqual(rc, 2, err)
+                self.assertNotIn("Traceback", err)
+                self.assertEqual(out["ok"], False)
+                self.assertIn(bad, out["error"])
+
+    def test_known_arguments_still_accepted(self):
+        companion = str(self.write_companion())
+        rc, out, err = run("registry.py", "--strict-versions", "--local", companion, "--local", companion,
+                           "--registry", str(ROOT / "profiles" / "registry.json"))
+        self.assertEqual((rc, out["ok"]), (0, True), err)
+        self.assertIn(PID, out["profiles"])
+        rc, _, err = run("registry.py", "--help")
+        self.assertEqual(rc, 0, err)
+
     # --- explicit project validation ---
 
     def test_project_with_companion(self):

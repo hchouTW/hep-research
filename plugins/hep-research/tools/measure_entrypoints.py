@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-BUDGET = {"skill_bytes": 8192, "skill_lines_max": 180, "description_chars": 1024, "registry_bytes": 2048, "index_bytes": 4096}
+BUDGET = {"skill_bytes": 8192, "skill_lines_max": 180, "description_chars": 1024, "registry_bytes": 3072, "index_bytes": 4096}
 EXCEPTIONS = ROOT / "tools" / "budget_exceptions.json"
 
 

@@ -12,7 +12,11 @@ Decision record: one decision, its actor (human or agent), what had been seen (t
 record, bound by the canonical SHA-256 of exactly those entries), the artifacts produced and the recipe chosen.
 check_decision(decision, exposure) verifies the binding against the current record (later appends do not break it, an
 edited history does) and refuses a decision that predates entries it claims to have seen, or postdates entries it
-leaves out ('seen' understated).
+leaves out ('seen' understated). Given base_dir (the CLI passes the decision record's folder, or --artifacts-root), it
+also opens each artifacts[].ref (relative refs resolve against base_dir, absolute ones are used as they are) and
+compares its file SHA-256 with artifacts[].sha256: a different hash is lineage.artifact_mismatch, a ref that is not a
+readable file lineage.artifact_missing or lineage.artifact_unreadable, all errors (as a missing exposure record is).
+Without base_dir (an in-memory record with no location) artifacts are not opened.
 
 derive_exposure(record) is the only mapping to the envelope data_exposure: no record, an unreadable or invalid record
 is {"state": "unknown", "basis": "none"} (never unexposed); a valid record is {"state": "exposed"} when any entry up to
@@ -21,13 +25,14 @@ Exposure only grows: entries are never removed, so a new session or a new record
 protected mode load_exposure() reads the record only as a protected input (custodian-written).
 
 Usage: python3 contracts/lineage.py exposure RECORD [--previous FILE] [--record-ref REF] [--through N]
-       python3 contracts/lineage.py decision DECISION --exposure RECORD
+       python3 contracts/lineage.py decision DECISION --exposure RECORD [--artifacts-root DIR]
 Exit codes: 0 valid, 1 invalid, 2 unreadable input. Output: JSON {"status", "findings", ...}; exposure also prints the
 derived data_exposure, decision the exposure at decision time.
 """
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -119,10 +124,38 @@ def entries_digest(rec: dict, through_seq: int) -> str:
     return canonical_sha256(rec["entries"][:through_seq])
 
 
-def check_decision(dec, exposure=None) -> Report:
+def file_sha256(path: Path) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def check_artifacts(dec: dict, base_dir: Path, rep: Report) -> None:
+    """Each artifacts[].sha256 against the file's SHA-256 (ref resolved against base_dir unless absolute)."""
+    for i, art in enumerate(dec["artifacts"]):
+        path = Path(base_dir) / art["ref"]
+        where = f"$.artifacts[{i}]"
+        if not path.is_file():
+            rep.add("error", f"{where}.ref", "lineage.artifact_missing", f"no file at {path}: its SHA-256 is not verified")
+            continue
+        try:
+            actual = file_sha256(path)
+        except OSError as exc:
+            rep.add("error", f"{where}.ref", "lineage.artifact_unreadable", f"cannot read {path}: {exc}")
+            continue
+        if actual != art["sha256"]:
+            rep.add("error", f"{where}.sha256", "lineage.artifact_mismatch",
+                    f"{art['ref']}: file SHA-256 {actual} differs from the record")
+
+
+def check_decision(dec, exposure=None, base_dir: Path | None = None) -> Report:
     rep = validate(dec, "decision_record.json")
     if not rep.ok:
         return rep
+    if base_dir is not None:
+        check_artifacts(dec, base_dir, rep)
     if exposure is None:
         rep.add("error", "$.seen", "lineage.exposure_unchecked", "no exposure record: what had been seen is not verified")
         return rep
@@ -167,6 +200,8 @@ def main(argv=None) -> int:
     p = sub.add_parser("decision")
     p.add_argument("decision", type=Path)
     p.add_argument("--exposure", type=Path, required=True)
+    p.add_argument("--artifacts-root", dest="artifacts_root", type=Path,
+                   help="folder that relative artifacts[].ref resolve against (default: the decision record's folder)")
     try:
         args = ap.parse_args(argv)
     except SystemExit as exc:
@@ -178,11 +213,17 @@ def main(argv=None) -> int:
     except (OSError, ValueError, UnicodeDecodeError) as exc:
         print(json.dumps({"status": "unreadable", "error": str(exc)}))
         return 2
+    base = None
+    if args.cmd == "decision":
+        base = args.artifacts_root if args.artifacts_root is not None else args.decision.resolve().parent
+        if not base.is_dir():
+            print(json.dumps({"status": "unreadable", "error": f"--artifacts-root {base} is not a folder"}))
+            return 2
     if args.cmd == "exposure":
         rep = check_exposure(first) if other is None else check_append(other, first)
         out = {"data_exposure": derive_exposure(first, args.record_ref, args.through)}
     else:
-        rep = check_decision(first, other)
+        rep = check_decision(first, other, base)
         out = {"exposure_at_decision": decision_exposure(first, other)}
     print(json.dumps({"status": "valid" if rep.ok else "invalid", **out,
                       "findings": [f.as_dict() for f in rep.findings]}, indent=1))

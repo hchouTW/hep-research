@@ -531,6 +531,10 @@ class ReviewFixes2Diagrams(unittest.TestCase):
     @unittest.skipUnless(TEX, "no TeX engine on PATH: the compile path cannot be exercised here")
     def test_tikz_error_is_a_source_error(self):
         r = self.run_diagrams(self.BAD)
+        if r.returncode == 3:
+            tex = json.loads(r.stdout)["renderers"]["tex"]
+            if not tex["available"]:  # an engine is on PATH but the install fails the preflight (a missing package)
+                self.skipTest(f"TeX install incomplete, the compile path cannot be exercised here: {tex['reason']}")
         self.assertEqual(r.returncode, 1, r.stdout + r.stderr)
         self.assertEqual(json.loads(r.stdout)["counts"]["source-error"], 1)
 
@@ -538,6 +542,26 @@ class ReviewFixes2Diagrams(unittest.TestCase):
         env = dict(os.environ, PATH=str(Path(sys.executable).parent))
         r = self.run_diagrams(self.BAD, "--require-render", env=env)
         self.assertEqual(r.returncode, 3, r.stdout + r.stderr)
+
+    def test_incomplete_tex_skips_the_source_error_case(self):
+        # a TeX install that fails the preflight (here a stand-in engine missing luatex85.sty) cannot exercise the
+        # compile path: the source-error case skips with the preflight's reason instead of failing
+        if os.name == "nt":
+            self.skipTest("the stand-in engine is a POSIX shell script")
+        bindir = self.tmp / "bin"
+        bindir.mkdir()
+        fake = bindir / "lualatex"
+        fake.write_text("#!/bin/sh\necho \"! LaTeX Error: File \\`luatex85.sty' not found.\" > block.log\nexit 1\n")
+        fake.chmod(0o755)
+        result = unittest.TestResult()
+        path = os.pathsep.join([str(bindir), str(Path(sys.executable).parent), "/usr/bin", "/bin"])
+        with mock.patch.dict(os.environ, {"PATH": path}):
+            ReviewFixes2Diagrams("test_tikz_error_is_a_source_error").run(result)
+        self.assertEqual((result.failures, result.errors), ([], []))
+        self.assertEqual(len(result.skipped), 1)
+        if TEX:  # without any engine at import time the decorator's no-TeX skip applies instead
+            self.assertIn("incomplete", result.skipped[0][1])
+            self.assertIn("luatex85.sty", result.skipped[0][1])
 
     def test_no_block_is_an_input_error(self):
         r = self.run_diagrams("# nothing to draw\n")

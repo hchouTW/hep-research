@@ -25,7 +25,7 @@
   },
   "hep-ml": {
    "references": 38,
-   "bytes": 180700,
+   "bytes": 180844,
    "uncited": 0
   },
   "hep-statistics": {
@@ -35,7 +35,7 @@
   },
   "hep-theory": {
    "references": 11,
-   "bytes": 80441,
+   "bytes": 80694,
    "uncited": 0
   }
  },
@@ -2764,8 +2764,8 @@
   {
    "path": "skills/hep-ml/references/ml-analysis.md",
    "owner": "hep-ml",
-   "bytes": 29628,
-   "lines": 378,
+   "bytes": 29772,
+   "lines": 379,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/imaging-atmospheric-cherenkov.md",
@@ -3334,6 +3334,10 @@
    "lines": 194,
    "linked_from_skill_md": true,
    "cited_by": [
+    "profiles/theory/heliospheric-modulation/README.md",
+    "profiles/theory/heliospheric-modulation/index.md",
+    "profiles/theory/heliospheric-modulation/models/heliospheric-modulation-models.md",
+    "profiles/theory/heliospheric-modulation/profile.json",
     "skills/hep-measurement/README.md",
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
     "skills/hep-statistics/SKILL.md",
@@ -3400,8 +3404,8 @@
   {
    "path": "skills/hep-theory/references/cosmic-ray-propagation.md",
    "owner": "hep-theory",
-   "bytes": 15255,
-   "lines": 178,
+   "bytes": 15508,
+   "lines": 181,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/theory/cr-secondary-antiprotons/README.md",
@@ -3410,6 +3414,8 @@
     "profiles/theory/cr-secondary-antiprotons/evidence/sources.json",
     "profiles/theory/cr-secondary-antiprotons/index.md",
     "profiles/theory/cr-secondary-antiprotons/scripts/predict.py",
+    "profiles/theory/heliospheric-modulation/derivations/derivation-record.md",
+    "profiles/theory/heliospheric-modulation/evidence/sources.json",
     "skills/hep-theory/README.md",
     "skills/hep-theory/SKILL.md"
    ],
