@@ -65,7 +65,8 @@ class BrokenPowerLawTests(unittest.TestCase):
         a = fit_spectrum([[e, f, 0.05 * f] for e, f in POINTS], 'broken', pivot=1e15)
         b = fit_spectrum([[e, f] for e, f in POINTS], 'broken', covariance=cov, pivot=1e15)
         # the linearized covariance has a central finite-difference column in log E_b (h = 1e-6), so the two paths
-        # agree to about eps/h relative: 1e-8 on Python 3.12+, 9e-8 on 3.11 (float sum() changed in 3.12)
+        # agree to about eps/h relative: about 1e-8 on the supported Pythons (3.13+). Historical: 9e-8 was seen on 3.11,
+        # before float sum() became compensated in 3.12; 3.11 is no longer supported and the tolerance is unchanged.
         self.assertAlmostEqual(a['index_below_uncertainty'], b['index_below_uncertainty'],
                                delta=1e-6 * a['index_below_uncertainty'])
         c = fit_spectrum([[e, f, 0.04 * f, 0.06 * f] for e, f in POINTS], 'broken')
