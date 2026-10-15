@@ -136,6 +136,32 @@ class ReviewFixes2Adaptation(ta.Base):
                 self.assertEqual(rep["exit_code"], 1)
 
 
+LINEAR_RATIO_LIMIT = 10.0  # CPU time for 4x the input: linear about 4, n log n about 5, quadratic about 16
+RATIO_FLOOR_SECONDS = 0.01  # below this the smaller timing is mostly timer resolution
+
+
+def cpu_seconds(fn, repeats=3):
+    """Minimum CPU time of this process over `repeats` calls of `fn`, with the garbage collector off: other processes
+    on a loaded machine, and waits for them, do not count."""
+    import gc
+    import time
+    best = float("inf")
+    for _ in range(repeats):
+        gc.collect()
+        gc.disable()
+        try:
+            t0 = time.process_time()
+            fn()
+            best = min(best, time.process_time() - t0)
+        finally:
+            gc.enable()
+    return best
+
+
+def scaling_ratio(small, large):
+    return large / max(small, RATIO_FLOOR_SECONDS)
+
+
 class Manuscript(unittest.TestCase):
     def setUp(self):
         self.tmp = Path(tempfile.mkdtemp())
@@ -322,20 +348,37 @@ class ReviewFixes2ManuscriptBounds(Manuscript):
         self.assertEqual(code, 0, rep)
 
     def test_scan_time_is_linear_in_lines(self):
-        import time
-        import check_manuscript as cm
+        """Regression for a quadratic manuscript scan: 4x the lines must cost well under 16x the CPU time.
 
-        def timed(n):
-            body = "".join(f"\\cite{{k{i}}} \\label{{l{i}}} \\ref{{l{i}}}\n" for i in range(n))
-            f = self.write(f"m{n}.tex", body)
-            t0 = time.perf_counter()
-            cm.scan_files([f], [])
-            return time.perf_counter() - t0
-        small = min(timed(5000) for _ in range(2))
-        large = min(timed(20000) for _ in range(2))
-        self.assertLess(large, 5.0)
-        # quadratic scaling gives a ratio near 16; linear about 4. A floor keeps timer noise on a fast run from failing it.
-        self.assertLess(large / max(small, 0.05), 10.0, f"5k lines {small:.2f} s, 20k lines {large:.2f} s: not linear")
+        Robust to machine load: the clock is this process's CPU time (time off the CPU on a busy machine does not
+        count), each size is timed three times with the garbage collector off and the minimum kept, and the bound is
+        on the scaling ratio (linear about 4, quadratic about 16, limit 10), with only a generous absolute ceiling.
+        test_scaling_check_rejects_a_quadratic_scan shows that the same measurement fails a quadratic scan."""
+        import check_manuscript as cm
+        files = {}
+        for n in (10000, 40000):
+            files[n] = self.write(f"m{n}.tex", "".join(f"\\cite{{k{i}}} \\label{{l{i}}} \\ref{{l{i}}}\n"
+                                                       for i in range(n)))
+        small = cpu_seconds(lambda: cm.scan_files([files[10000]], []))
+        large = cpu_seconds(lambda: cm.scan_files([files[40000]], []))
+        self.assertLess(large, 60.0, "absolute ceiling (CPU seconds) for 40k lines; about 0.4 s on a laptop")
+        self.assertLess(scaling_ratio(small, large), LINEAR_RATIO_LIMIT,
+                        f"10k lines {small:.3f} s, 40k lines {large:.3f} s CPU: not linear")
+
+    def test_scaling_check_rejects_a_quadratic_scan(self):
+        """The measurement above is a real regression test: a scan that rereads all earlier text for every line
+        (quadratic) gives a ratio near 16 for 4x the lines and fails the same limit."""
+        def quadratic(n):
+            text = "".join(f"\\cite{{k{i}}} \\label{{l{i}}} \\ref{{l{i}}}\n" for i in range(n))
+            step = len(text) // n
+            return lambda: [text.count("\\ref", 0, i * step) for i in range(n)]
+        small, large = cpu_seconds(quadratic(2000)), cpu_seconds(quadratic(8000))
+        self.assertGreater(scaling_ratio(small, large), LINEAR_RATIO_LIMIT, f"{small:.3f} s, {large:.3f} s")
+
+    def test_cpu_clock_ignores_time_off_the_cpu(self):
+        """What made the wall-clock version load-sensitive: time spent descheduled (here, asleep) is not counted."""
+        import time
+        self.assertLess(cpu_seconds(lambda: time.sleep(0.3), repeats=1), 0.1)
 
     def test_strict_unused_entries_are_incomplete_when_coverage_is(self):
         code, rep = self.run_main("\\cite{a} \\input missing", "@article{a, title={x}}\n@article{b, title={x}}\n", "--strict")

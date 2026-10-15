@@ -3021,6 +3021,9 @@
    "trigger_terms": [],
    "set": "WP11",
    "limited_support": true,
+   "also_accept": [
+    "hep-communication"
+   ],
    "note": "interpretation beyond the validated profiles: hep-theory gives the limited-support notice"
   },
   {
