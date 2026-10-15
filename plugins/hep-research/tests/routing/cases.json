@@ -2753,47 +2753,44 @@
   {
    "id": "wp11-prop-1",
    "lang": "en",
-   "kind": "out-of-v1",
+   "kind": "direct",
    "prompt": "Fit the diffusion coefficient D0 and halo height L to the AMS-02 B/C ratio with its covariance, using precomputed propagation-code predictions on a parameter grid.",
    "expected_primary": "hep-statistics",
    "trigger_terms": [
     "fits of model parameters to published data points with their covariance"
    ],
    "set": "WP11",
-   "limited_support": true,
    "profiles": [
     "experiment:ams-02"
    ],
-   "note": "propagation fit; limited support until WP10"
+   "note": "propagation fit on tabulated predictions (WP10: in v1, synthetic-data status)"
   },
   {
    "id": "wp11-prop-2",
    "lang": "zh-Hant",
-   "kind": "out-of-v1",
+   "kind": "direct",
    "prompt": "請用 B/C 與 Be/B 比值擬合宇宙線傳播參數（擴散係數與暈高度），並說明 D0/L 的簡併。",
    "expected_primary": "hep-statistics",
    "trigger_terms": [],
    "set": "WP11",
-   "limited_support": true,
-   "note": "propagation fit; limited support until WP10"
+   "note": "propagation fit on tabulated predictions (WP10: in v1, synthetic-data status)"
   },
   {
    "id": "wp11-prop-3",
    "lang": "zh-Hant",
-   "kind": "out-of-v1",
+   "kind": "direct",
    "prompt": "我想對宇宙線傳播模型的參數（擴散指數與 Alfvén 速度）做 Bayesian posteriors 抽樣，先驗與收斂要怎麼處理？",
    "expected_primary": "hep-statistics",
    "trigger_terms": [
     "bayesian posteriors"
    ],
    "set": "WP11",
-   "limited_support": true,
-   "note": "propagation fit; limited support until WP10"
+   "note": "propagation fit on tabulated predictions (WP10: in v1, synthetic-data status)"
   },
   {
    "id": "wp11-prop-4",
    "lang": "en",
-   "kind": "out-of-v1",
+   "kind": "direct",
    "prompt": "Run a profile likelihood scan of the diffusion slope in a cosmic-ray propagation fit to secondary-to-primary ratios, with the nuclear cross-section uncertainties as nuisance parameters.",
    "expected_primary": "hep-statistics",
    "trigger_terms": [
@@ -2801,8 +2798,7 @@
     "nuisance parameters"
    ],
    "set": "WP11",
-   "limited_support": true,
-   "note": "propagation fit; limited support until WP10"
+   "note": "propagation fit on tabulated predictions (WP10: in v1, synthetic-data status)"
   },
   {
    "id": "wp11-ts-1",

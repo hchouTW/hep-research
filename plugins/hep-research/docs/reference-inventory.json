@@ -25,7 +25,7 @@
   },
   "hep-theory": {
    "references": 11,
-   "bytes": 78189,
+   "bytes": 78902,
    "uncited": 0
   },
   "physics-ml": {
@@ -1646,7 +1646,7 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "443955d 2026-10-15"
+   "last_commit": "f971c7f 2026-10-15"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
@@ -1846,8 +1846,8 @@
   {
    "path": "skills/hep-theory/references/cosmic-ray-propagation.md",
    "owner": "hep-theory",
-   "bytes": 12970,
-   "lines": 155,
+   "bytes": 13683,
+   "lines": 161,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/theory/cr-secondary-antiprotons/README.md",
