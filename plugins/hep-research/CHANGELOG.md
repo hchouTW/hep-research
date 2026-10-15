@@ -5,6 +5,9 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+<!-- wp10 -->
+- Capability statements for cosmic-ray propagation rewritten to the achieved status (WP10): guidance, the two narrow theory-domain profiles, the `tabulated-grid` fit and `examples/bc-propagation-fit` are demonstrated on synthetic data; only global fits that run a propagation code stay outside v1 (capability matrix, `cosmic-ray-propagation.md`, hep-theory README). The hep-statistics description's out-of-v1 example is now "global propagation fits" (1,016 characters) and the shared context-resolution stanza says "global cosmic-ray propagation fits" in all seven SKILL.md files; the four WP11 propagation-fit routing cases are direct cases now (static routing passes).
+
 <!-- wp8 -->
 - Profile `theory:cr-secondary-antiprotons` 0.1.0: the secondary antiproton source term q(T_pbar) for the channels
   pp, pHe, Hep and HeHe with the antineutron and hyperon factor (2 + Delta_IS + 2 Delta_Lambda), following the
