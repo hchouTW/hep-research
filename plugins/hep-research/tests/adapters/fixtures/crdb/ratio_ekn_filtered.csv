@@ -1,0 +1,42 @@
+# Data export from CRDB [http://lpsc.in2p3.fr/crdb]
+# Please cite CRDB publications:
+#  - Maurin, Melot, Taillet, A&A 569, A32 (2014) [https://ui.adsabs.harvard.edu/abs/2014A%26A...569A..32M]
+#  - Maurin, Dembinski, Gonzalez et al., Univ. 6, 102 (2020) [https://ui.adsabs.harvard.edu/abs/2020Univ....6..102M]
+#  - Maurin, Ahlers, Dembinski et al., EPJC 83, 971 (2023) [https://ui.adsabs.harvard.edu/abs/2023EPJC...83..971M]
+# Date: 2026/10/15-03:04:09
+# Format: CSV code (as import, with extra column for modulation)
+# Col.1  - EXP-NAME
+# Col.2  - EXP-TYPE
+# Col.3  - EXP-HTML
+# Col.4  - EXP-STARTYEAR
+# Col.5  - SUBEXP-NAME
+# Col.6  - SUBEXP-DESCRIPTION
+# Col.7  - SUBEXP-ESCALE_RELERR
+# Col.8  - SUBEXP-INFO
+# Col.9  - SUBEXP-DISTANCE
+# Col.10  - SUBEXP-DATES
+# Col.11  - PUBLI-HTML
+# Col.12  - PUBLI-DATAORIGIN
+# Col.13  - DATA-QTY
+# Col.14  - DATA-EAXIS
+# Col.15  - DATA-E_MEAN
+# Col.16  - DATA-E_BIN_L
+# Col.17  - DATA-E_BIN_U
+# Col.18  - DATA-VAL
+# Col.19  - DATA-VAL_ERRSTAT_L
+# Col.20  - DATA-VAL_ERRSTAT_U
+# Col.21  - DATA-VAL_ERRSYST_L
+# Col.22  - DATA-VAL_ERRSYST_U
+# Col.23  - DATA-ISUPPERLIM
+# Col.24  - phi [MV]
+#
+"AMS01","space","https://ams02.space/what-is-ams/ams-01","1998","AMS01 (1998/06)","Permanent magnet, 6 plane tracker, TOF hodoscopes, Cerenkov counter, anticoincidence counters","0","Space shuttle (Discovery), 6 days flight in 1998","1","1998/06/02-000000:1998/06/12-000000","2010ApJ...724..329A","Tables 1, 2, and 3","B/C","EKN","13.36","10.5","17","0.17499999701976776","0.018999999389052","0.018999999389052","0.013000000268221","0.013000000268221","0","629.6"
+"AMS02","space","https://ams02.space/","2011","AMS02 (2011/05-2016/05)","9 planes of precision silicon tracker, TRD, 4 planes of TOF counters, permanent magnet, array of anticoincidence counters surrounding the inner tracker, ring imaging Cerenkov detector, electromagnetic calorimeter detector","0","AMS on ISS, 5 years data 2011-2016","1","2011/05/19-000000:2016/05/26-000000","2016PhRvL.117w1102A","Table 1 (Supp. Mat.)","B/C","EKN","10.0712","9.66","10.5","0.20550000667572021","0.0012000000569969","0.0012000000569969","0.0048000002279878","0.0048000002279878","0","678.6"
+"AMS02","space","https://ams02.space/","2011","AMS02 (2011/05-2016/05)","9 planes of precision silicon tracker, TRD, 4 planes of TOF counters, permanent magnet, array of anticoincidence counters surrounding the inner tracker, ring imaging Cerenkov detector, electromagnetic calorimeter detector","0","AMS on ISS, 5 years data 2011-2016","1","2011/05/19-000000:2016/05/26-000000","2016PhRvL.117w1102A","Table 1 (Supp. Mat.)","B/C","EKN","10.9886","10.5","11.5","0.20399999618530273","0.0012000000569969","0.0012000000569969","0.0048000002279878","0.0048000002279878","0","678.6"
+"AMS02","space","https://ams02.space/","2011","AMS02 (2011/05-2016/05)","9 planes of precision silicon tracker, TRD, 4 planes of TOF counters, permanent magnet, array of anticoincidence counters surrounding the inner tracker, ring imaging Cerenkov detector, electromagnetic calorimeter detector","0","AMS on ISS, 5 years data 2011-2016","1","2011/05/19-000000:2016/05/26-000000","2016PhRvL.117w1102A","Table 1 (Supp. Mat.)","B/C","EKN","11.9896","11.5","12.5","0.19699999690055847","0.001300000003539","0.001300000003539","0.0046999999321997","0.0046999999321997","0","678.6"
+"AMS02","space","https://ams02.space/","2011","AMS02 (2011/05-2016/05)","9 planes of precision silicon tracker, TRD, 4 planes of TOF counters, permanent magnet, array of anticoincidence counters surrounding the inner tracker, ring imaging Cerenkov detector, electromagnetic calorimeter detector","0","AMS on ISS, 5 years data 2011-2016","1","2011/05/19-000000:2016/05/26-000000","2016PhRvL.117w1102A","Table 1 (Supp. Mat.)","B/C","EKN","12.9904","12.5","13.5","0.18950000405311584","0.001300000003539","0.001300000003539","0.0044999998062849","0.0044999998062849","0","678.6"
+"AMS02","space","https://ams02.space/","2011","AMS02 (2011/05-2016/05)","9 planes of precision silicon tracker, TRD, 4 planes of TOF counters, permanent magnet, array of anticoincidence counters surrounding the inner tracker, ring imaging Cerenkov detector, electromagnetic calorimeter detector","0","AMS on ISS, 5 years data 2011-2016","1","2011/05/19-000000:2016/05/26-000000","2016PhRvL.117w1102A","Table 1 (Supp. Mat.)","B/C","EKN","14.0392","13.5","14.6","0.18539999425411224","0.0013999999500811","0.0013999999500811","0.0044999998062849","0.0044999998062849","0","678.6"
+"AMS02","space","https://ams02.space/","2011","AMS02 (2011/05-2016/05)","9 planes of precision silicon tracker, TRD, 4 planes of TOF counters, permanent magnet, array of anticoincidence counters surrounding the inner tracker, ring imaging Cerenkov detector, electromagnetic calorimeter detector","0","AMS on ISS, 5 years data 2011-2016","1","2011/05/19-000000:2016/05/26-000000","2016PhRvL.117w1102A","Table 1 (Supp. Mat.)","B/C","EKN","15.1882","14.6","15.8","0.1817999929189682","0.0015000000130385","0.0015000000130385","0.0043999999761581","0.0043999999761581","0","678.6"
+"AMS02","space","https://ams02.space/","2011","AMS02 (2011/05-2016/05)","9 planes of precision silicon tracker, TRD, 4 planes of TOF counters, permanent magnet, array of anticoincidence counters surrounding the inner tracker, ring imaging Cerenkov detector, electromagnetic calorimeter detector","0","AMS on ISS, 5 years data 2011-2016","1","2011/05/19-000000:2016/05/26-000000","2016PhRvL.117w1102A","Table 1 (Supp. Mat.)","B/C","EKN","16.4371","15.8","17.1","0.17249999940395355","0.0015000000130385","0.0015000000130385","0.0041999998502433","0.0041999998502433","0","678.6"
+"AMS02","space","https://ams02.space/","2011","AMS02 (2011/05-2016/05)","9 planes of precision silicon tracker, TRD, 4 planes of TOF counters, permanent magnet, array of anticoincidence counters surrounding the inner tracker, ring imaging Cerenkov detector, electromagnetic calorimeter detector","0","AMS on ISS, 5 years data 2011-2016","1","2011/05/19-000000:2016/05/26-000000","2016PhRvL.117w1102A","Table 1 (Supp. Mat.)","B/C","EKN","17.7862","17.1","18.5","0.17059999704360962","0.0015999999595806","0.0015999999595806","0.0041999998502433","0.0041999998502433","0","678.6"
+"AMS02","space","https://ams02.space/","2011","AMS02 (2011/05-2016/05)","9 planes of precision silicon tracker, TRD, 4 planes of TOF counters, permanent magnet, array of anticoincidence counters surrounding the inner tracker, ring imaging Cerenkov detector, electromagnetic calorimeter detector","0","AMS on ISS, 5 years data 2011-2016","1","2011/05/19-000000:2016/05/26-000000","2016PhRvL.117w1102A","Table 1 (Supp. Mat.)","B/C","EKN","19.2354","18.5","20","0.16820000112056732","0.001700000022538","0.001700000022538","0.0041999998502433","0.0041999998502433","0","678.6"
