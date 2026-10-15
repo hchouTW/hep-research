@@ -5,6 +5,9 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+<!-- fu-routing -->
+- Routing: hep-communication's "Not for" clause says "even with published data" and names CRDB queries (hep-theory) and compatibility results (hep-statistics), so requests that name experiments but ask for a result go to the owner; live (2026-10-15): `wp11-crdb-1` 3/3, `wp11-xexp-2` 2/3 (both 0/1 before), all 25 hep-communication cases still pass; `wp11-bound-dm-1` (dark-matter interpretation) also accepts hep-communication. Known misses: `wp11-xexp-3` (underspecified comparison loads hep-communication instead of asking), `rc-t3-neg`, `co-companion-ws-1` (no skill).
+
 <!-- wp12 -->
 - **Four skills renamed** (rename release 0.11.0; contracts 2.9.0). Skill folders, `SKILL.md` `name` fields, test
   folders (`tests/skills/<underscored>`), descriptions' "Not for" lists, handoff tables, READMEs, profiles'
