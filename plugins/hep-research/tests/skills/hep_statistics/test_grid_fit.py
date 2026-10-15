@@ -343,5 +343,27 @@ class GridRefusals(unittest.TestCase):
             cf.grid_fit(dict(self.base, predictions=grid_ab()[:-1]))
 
 
+class JacobianStepsStayInsideTheGrid(unittest.TestCase):
+    """A best fit inside the last (or first) cell of an axis: the Fisher-matrix steps must stay inside the grid. Before
+    the fix the one-sided difference stepped two cells inward from a point inside the edge cell and left the grid (a
+    3-node axis with the minimum near its upper edge crashed with 'outside the grid'). The model is linear in a, so the
+    multilinear interpolation is exact along a and the error on a must match the fit on the 11-node a axis."""
+
+    def _fit(self, a_nodes, truth_a):
+        y = model_ab(truth_a, 0.3)
+        preds = [prediction({"a": float(a), "b": float(b)}, model_ab(a, b)) for a in a_nodes for b in B_NODES]
+        return cf.grid_fit({"model": "tabulated-grid", "measurement": measurement(y, components(y)),
+                            "predictions": preds, "grid": AB_GRID})["fits"][0]
+
+    def test_minimum_inside_an_edge_cell(self):
+        for a_nodes, truth_a in (([0.5, 1.0, 1.5], 1.3), ([0.5, 1.0, 1.5], 0.7), ([0.5, 1.2, 1.4, 1.5], 1.45),
+                                 ([0.5, 0.6, 1.0, 1.5], 0.55)):
+            with self.subTest(nodes=a_nodes, truth=truth_a):
+                ref = {p["name"]: p for p in self._fit(A_NODES, truth_a)["parameters"]}
+                pars = {p["name"]: p for p in self._fit(np.array(a_nodes), truth_a)["parameters"]}
+                self.assertAlmostEqual(pars["a"]["best_fit"], truth_a, delta=0.1 * pars["a"]["error_coordinate"])
+                self.assertAlmostEqual(pars["a"]["error_coordinate"] / ref["a"]["error_coordinate"], 1.0, delta=0.02)
+
+
 if __name__ == "__main__":
     unittest.main()

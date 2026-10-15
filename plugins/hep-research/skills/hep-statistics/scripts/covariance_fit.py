@@ -701,13 +701,20 @@ def _grid_one(grid: _Grid, names, scales, y, cov, u, start, monomials, declared)
         return grid(z[:k]) * ((1.0 + z[k] * u) if nz else 1.0)
     for j in range(k):
         h = min(grid.cell(j, p[j]), 0.5 * (grid.hi[j] - grid.lo[j]))
-        up, down = p[j] + h <= grid.hi[j] + 1e-12 * h, p[j] - h >= grid.lo[j] - 1e-12 * h
-        if up and down:
-            jac[:, j] = (at(j, h) - at(j, -h)) / (2 * h)
+        # every step is cut at the grid edges: a point inside an edge cell has less than one cell on one side
+        hu, hd = min(h, grid.hi[j] - p[j]), min(h, p[j] - grid.lo[j])
+        if min(hu, hd) > 1e-6 * h:
+            # three-point central difference with unequal steps (second order; hu = hd gives the symmetric one)
+            jac[:, j] = (hd ** 2 * at(j, hu) - hu ** 2 * at(j, -hd) - (hd ** 2 - hu ** 2) * pred0) / (hu * hd * (hu + hd))
         else:   # at an edge: second-order one-sided difference (a first-order one is biased by the curvature)
-            sgn = 1.0 if up else -1.0
-            jac[:, j] = sgn * (-3 * pred0 + 4 * at(j, sgn * h) - at(j, 2 * sgn * h)) / (2 * h) if len(grid.axes[j]) > 2 \
-                else sgn * (at(j, sgn * h) - pred0) / h
+            sgn = 1.0 if hu >= hd else -1.0
+            room = max(hu, hd)
+            if len(grid.axes[j]) > 2:
+                s = min(h, 0.5 * room)
+                jac[:, j] = sgn * (-3 * pred0 + 4 * at(j, sgn * s) - at(j, 2 * sgn * s)) / (2 * s)
+            else:
+                s = min(h, room)
+                jac[:, j] = sgn * (at(j, sgn * s) - pred0) / s
     if nz:
         jac[:, k] = grid(p[:k]) * u
     wj = solve_triangular(chol, jac, lower=True)
