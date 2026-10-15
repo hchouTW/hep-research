@@ -11,7 +11,7 @@ Use when the deliverable is a statistical inference or its diagnostics in physic
 | Path | Content |
 |---|---|
 | `SKILL.md` | entry point: invariants, Step 0 for a quick question and the task-to-tool table (default tool, fallback, or "no shipped tool"), workflow, context resolution |
-| `references/` | eleven references: the `core/stats` decision guide and its command reference, combinations (BLUE, Peelle, likelihood-level), nuisance modeling, likelihood fitting (including sWeights and weighted unbinned fits), unfolding, inference recipes, statistical tools (pyhf, Combine), astroparticle statistics, ML-assisted inference, inference reasoning |
+| `references/` | twelve references: the `core/stats` decision guide and its command reference, combinations (BLUE, Peelle, likelihood-level), nuisance modeling, likelihood fitting (including sWeights and weighted unbinned fits), unfolding, inference recipes, statistical tools (pyhf, Combine), astroparticle statistics, binned time series (documented; its time-bin covariance recipe demonstrated on synthetic data by `test_time_series_covariance.py`), ML-assisted inference, inference reasoning |
 | `assets/` | `combine.example.json`: SYNTHETIC input for `combine_measurements.py` (two experiments, shared luminosity) |
 | `scripts/` | fifteen helpers; the executable checks themselves (limits, template fits, unfolding diagnostics, Poisson diagnostics, toys, covariance and response validation) live in `core/stats/` |
 
@@ -35,7 +35,7 @@ Use when the deliverable is a statistical inference or its diagnostics in physic
 
 ## Tests and validation
 
-`tests/skills/hep_statistics/` (seventeen modules) plus the `core/stats` tests under `tests/core/`, the statistics benchmarks under `examples/stats-benchmarks/`, the `unfolding-coverage` example, and the GitHub `stats-backends` and `statistics-validation` jobs (pyhf, ArviZ, Combine) recorded in `VALIDATION.md`. What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
+`tests/skills/hep_statistics/` (nineteen modules) plus the `core/stats` tests under `tests/core/`, the statistics benchmarks under `examples/stats-benchmarks/`, the `unfolding-coverage` example, and the GitHub `stats-backends` and `statistics-validation` jobs (pyhf, ArviZ, Combine) recorded in `VALIDATION.md`. What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
 
 ## How this folder is used
 
