@@ -5,6 +5,9 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+<!-- wp15 -->
+- detector-response: `references/charge-confusion.md`, a synthesis note on charge-sign confusion: the mechanisms (finite curvature resolution toward the maximum detectable rigidity, non-Gaussian scattering and interactions, wrong hit association; alignment weak modes making the two signs' rates differ), how detector-response measures the rate (simulation validated on data, templates in a confusion-sensitive variable, known-sign control samples) and the handoff to hep-analysis, which subtracts it as a background; linked from the principles-summary reference index and task-routing table and from the tracking reference. Capability-matrix row at `documented` (WP15).
+
 <!-- wp7 -->
 - physics-ml: pre-training freeze procedure in `references/ml-analysis.md` ("Training on data and blinding"): before training, a `decision_record` (category `other`) states labels, features, training domain and the split manifest's file SHA-256, lists the manifest in `artifacts`, and binds `seen` to the analysis's exposure record; checked with `contracts/lineage.py decision`, plus a manual file-hash comparison since `lineage.py` does not open artifacts (WP7).
 - physics-ml: synthetic example `assets/pretraining-decision.example.json` with `pretraining-exposure.example.json` and `pretraining-split.example.json`; `tests/skills/physics_ml/test_pretraining_freeze.py` checks it (lineage exit 0, exposure at decision `unexposed`) and shows that an edited exposure history, an understated `seen`, a decision dated before what it counts, a changed split manifest and a hash that disagrees between `artifacts` and the text fail (WP7).
