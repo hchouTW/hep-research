@@ -191,6 +191,37 @@ class PythonFloorTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             load_module().find(["json"], min_python="3.12")
 
+    def test_cli_names_the_flag_in_the_floor_error(self):
+        """At the command line the error names the option the user typed, not the Python parameter."""
+        proc, out = run("--require", "json", "--min-python", "3.12", path_dir=self.dir)
+        self.assertEqual(proc.returncode, 2, proc.stdout)
+        self.assertIn("--min-python 3.12 is below the supported minimum 3.13", proc.stderr)
+
+    def test_min_python_format_is_dotted_non_negative_integers(self):
+        """--min-python must match ^[0-9]+(\\.[0-9]+)*$: no signs, blanks, underscores or empty components."""
+        for bad in ("3.13.-5", "3.-13", "+3.14", "3_14", " 3.14", "3.14 ", "3..13", "3.13.", "3.x", ""):
+            with self.subTest(bad=bad):
+                proc, out = run("--require", "json", "--min-python", bad, path_dir=self.dir)
+                self.assertEqual(proc.returncode, 2, proc.stdout)
+                self.assertIn("--min-python must look like 3.13", proc.stderr)
+        p313 = fake_version(self.dir, "py313", [3, 13, 1])
+        for good in ("3.13", "3.13.0", "3.13.1"):
+            with self.subTest(good=good):
+                proc, out = run("--require", "json", "--min-python", good, "--python", str(p313), path_dir=self.dir)
+                self.assertEqual(proc.returncode, 0, proc.stderr)
+        with self.assertRaises(ValueError):
+            load_module().find(["json"], min_python="3.13.-5")
+
+    def test_cli_does_not_turn_other_value_errors_into_usage_errors(self):
+        """Only the --min-python checks are bad usage (exit 2); a ValueError from inside find() is a bug and propagates."""
+        mod = load_module()
+
+        def broken(*args, **kwargs):
+            raise ValueError("internal failure")
+        with unittest.mock.patch.object(mod, "find", broken):
+            with self.assertRaisesRegex(ValueError, "internal failure"):
+                mod.main(["--require", "json"])
+
     def test_stricter_minimum_is_kept(self):
         p314 = fake_version(self.dir, "py314", [3, 14, 0])
         proc, out = run("--require", "json", "--min-python", "3.14", "--python", str(p314), path_dir=self.dir)

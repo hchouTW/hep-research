@@ -22,6 +22,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -30,6 +31,7 @@ from pathlib import Path
 
 ENV_VAR = "HEP_RESEARCH_PYTHON"
 MIN_PYTHON = "3.13"  # pyproject.toml requires-python: the supported floor
+VERSION_FORMAT = re.compile(r"[0-9]+(\.[0-9]+)*")  # --min-python, matched whole: 3, 3.13, 3.13.1
 # runs inside the candidate, possibly an old Python: keep it to syntax every Python 3 parses
 PROBE = """
 import json, sys
@@ -97,9 +99,21 @@ def probe(path: str, required: list[str], min_python: tuple[int, ...], timeout: 
     return {**out, "accepted": True, "reason": "ok", "modules": info.get("modules", {})}
 
 
-def find(required: list[str], explicit: str | None = None, min_python: str = MIN_PYTHON, timeout: float = 60.0) -> dict:
-    minimum = tuple(int(x) for x in min_python.split("."))
-    if minimum < tuple(int(x) for x in MIN_PYTHON.split(".")):
+def version_tuple(text: str) -> tuple[int, ...]:
+    """'3.13.1' -> (3, 13, 1); ValueError unless `text` is dotted non-negative integers."""
+    if not VERSION_FORMAT.fullmatch(text):
+        raise ValueError(f"min_python must look like {MIN_PYTHON}, got {text!r}")
+    return tuple(int(x) for x in text.split("."))
+
+
+def below_floor(min_python: str) -> bool:
+    return version_tuple(min_python) < version_tuple(MIN_PYTHON)
+
+
+def find(required: list[str], explicit: str | None = None, min_python: str = MIN_PYTHON,
+         timeout: float = 60.0) -> dict:
+    minimum = version_tuple(min_python)
+    if below_floor(min_python):
         raise ValueError(f"min_python {min_python} is below the supported minimum {MIN_PYTHON}")
     tried, seen = [], {}
     for source, path in candidates(explicit):
@@ -128,17 +142,16 @@ def main(argv=None) -> int:
     ap.add_argument("--require", action="append", metavar="PKG",
                     help="importable package the interpreter must have (repeatable; default: sympy)")
     ap.add_argument("--python", help="interpreter to try first")
-    ap.add_argument("--min-python", default=MIN_PYTHON, help=f"minimum Python version (default and lowest allowed: {MIN_PYTHON})")
+    ap.add_argument("--min-python", default=MIN_PYTHON,
+                    help=f"minimum Python version (default and lowest allowed: {MIN_PYTHON})")
     ap.add_argument("--timeout", type=float, default=60.0, help="seconds allowed per probe (default 60)")
     args = ap.parse_args(argv)
-    try:
-        tuple(int(x) for x in args.min_python.split("."))
-    except ValueError:
+    # bad usage is decided here, before find(): any ValueError raised inside find() is a bug and propagates
+    if not VERSION_FORMAT.fullmatch(args.min_python):
         ap.error(f"--min-python must look like {MIN_PYTHON}, got {args.min_python!r}")
-    try:
-        out = find(args.require or ["sympy"], args.python, args.min_python, args.timeout)
-    except ValueError as exc:
-        ap.error(str(exc))
+    if below_floor(args.min_python):
+        ap.error(f"--min-python {args.min_python} is below the supported minimum {MIN_PYTHON}")
+    out = find(args.require or ["sympy"], args.python, args.min_python, args.timeout)
     print(json.dumps(out, indent=1))
     return 0 if out["status"] == "found" else 1
 
