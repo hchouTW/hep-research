@@ -16,6 +16,32 @@ def requirement_lines(path: Path) -> list[str]:
             if l.split("#")[0].strip() and not l.startswith("-r")]
 
 
+# "Python 3.12", "Python >= 3.11", "Python ≥ 3.9", "Python 3.11.15": a Python version named in prose
+PYTHON_MENTION = re.compile(r"Python\s*(?:>=|≥)?\s*3\.([0-9]+)")
+# Dated history the capability matrix keeps on purpose: results measured on Pythons that are no longer supported.
+# Each entry is the start of one paragraph or table row; it is excluded from the old-floor check, and must still exist.
+CAPABILITY_MATRIX_HISTORY = ("Environment E1 ", "Environment E3 ", "Python floor (2026-10-15):",
+                             "| ROOT, PyROOT tools | tested (E3 + ")
+
+
+def statements(text: str) -> list[str]:
+    """Paragraphs of a Markdown file, with each table row its own statement."""
+    out = []
+    for para in re.split(r"\n\s*\n", text):
+        lines = [line for line in para.strip().splitlines() if line.strip()]
+        if lines and all(line.startswith("|") for line in lines):
+            out.extend(lines)
+        elif lines:
+            out.append(" ".join(lines))
+    return out
+
+
+def old_python_mentions(text: str, history: tuple[str, ...] = ()) -> list[str]:
+    """Statements (outside `history`) that name a Python 3 version below the 3.13 floor."""
+    return [st for st in statements(text) if not st.startswith(history)
+            and any(int(minor) < 13 for minor in PYTHON_MENTION.findall(st))]
+
+
 def name(req: str) -> str:
     return re.split(r"[<>=!~\[ ]", req, maxsplit=1)[0].lower()
 
@@ -59,6 +85,32 @@ class PyprojectTests(unittest.TestCase):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
         self.assertIn("Python 3.13 or newer", readme)
         self.assertNotRegex(readme, r"Python (>= ?)?3\.1[12]( or newer)?\b")
+        self.assertEqual(old_python_mentions(readme), [])
+
+    def test_deployment_model_states_the_floor(self):
+        text = (ROOT / "docs" / "deployment-model.md").read_text(encoding="utf-8")
+        self.assertRegex(text, r"Python ≥ 3\.13\b")
+        self.assertEqual(old_python_mentions(text), [])
+
+    def test_capability_matrix_states_the_floor_and_keeps_its_history(self):
+        """Current statements name no Python below 3.13; the dated E1/E3 environment lines, the dated floor note and
+        the E3 ROOT row are history, excluded by name here and kept in the file."""
+        text = (ROOT / "docs" / "capability-matrix.md").read_text(encoding="utf-8")
+        self.assertIn("the plugin requires Python 3.13", text)
+        for start in CAPABILITY_MATRIX_HISTORY:
+            matching = [st for st in statements(text) if st.startswith(start)]
+            self.assertEqual(len(matching), 1, f"historical statement {start!r} is missing or ambiguous")
+        self.assertEqual(old_python_mentions(text, CAPABILITY_MATRIX_HISTORY), [])
+
+    def test_old_python_mentions_finds_current_old_floor_statements(self):
+        """The check itself: old floors in any spelling are found; the 3.13 floor and history are not."""
+        for bad in ("needs Python 3.11 or newer", "Python >= 3.12", "Python ≥ 3.9 (tested on 3.11)",
+                    "| Tool | tested under Python 3.12.4 |"):
+            self.assertEqual(len(old_python_mentions(bad)), 1, bad)
+        for good in ("Python 3.13 or newer", "Python ≥ 3.13 (tested on 3.13)", "Python 3.14.0",
+                     "3.11 and 3.12 are no longer supported"):
+            self.assertEqual(old_python_mentions(good), [], good)
+        self.assertEqual(old_python_mentions("Environment E1 : Python 3.11.15", ("Environment E1 ",)), [])
 
     @unittest.skipUnless((ROOT.parents[1] / ".github" / "workflows" / "tests.yml").is_file(),
                          "repository checkout only (an installed plugin tree has no .github)")
@@ -70,6 +122,22 @@ class PyprojectTests(unittest.TestCase):
         self.assertRegex(workflow, r"reconcile_check_runs\.py \S+ --python 3\.13 ")
         for v in re.findall(r'python-version: "?([0-9.]+)', workflow):
             self.assertEqual(v, "3.13", "every setup-python step uses the floor")
+
+
+    @unittest.skipUnless((ROOT.parents[1] / ".github" / "workflows" / "tests.yml").is_file(),
+                         "repository checkout only (an installed plugin tree has no .github)")
+    def test_slow_tier_job_has_a_larger_module_timeout(self):
+        """The weekly `latest` job runs the slow tier, where tests.examples.test_stats_benchmarks alone takes about
+        525-545 s, near the default 600 s module limit: the job sets HEP_MODULE_TIMEOUT to at least 1800 s, and the
+        maintenance notes say so."""
+        workflow = (ROOT.parents[1] / ".github" / "workflows" / "tests.yml").read_text(encoding="utf-8")
+        job = re.search(r"(?ms)^  latest:\n(.*?)(?=^  [A-Za-z0-9_-]+:\n|\Z)", workflow).group(1)
+        self.assertRegex(job, r'HEP_SLOW_TESTS: "1"')
+        timeout = re.search(r'HEP_MODULE_TIMEOUT: "?([0-9]+)"?', job)
+        self.assertIsNotNone(timeout, "the latest job sets HEP_MODULE_TIMEOUT")
+        self.assertGreaterEqual(int(timeout.group(1)), 1800)
+        notes = " ".join((ROOT / "docs" / "maintenance.md").read_text(encoding="utf-8").split())
+        self.assertIn(f"HEP_MODULE_TIMEOUT={timeout.group(1)}", notes)
 
 
 if __name__ == "__main__":

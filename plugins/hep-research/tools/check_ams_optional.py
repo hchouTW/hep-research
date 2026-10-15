@@ -10,10 +10,27 @@ Usage: python3 tools/check_ams_optional.py [--keep] [--jobs N]
 """
 from __future__ import annotations
 
+import sys
+
+# The supported floor (pyproject.toml requires-python). This guard and everything above it must stay parseable and
+# runnable by old Pythons (tests/tools/test_python_compat.py parses this file as Python 3.9), so an unsupported
+# interpreter gets one clear message and exit 2 instead of version-dependent failures.
+MIN_PYTHON = (3, 13)
+
+
+def require_supported_python(version_info=sys.version_info) -> None:
+    if tuple(version_info[:2]) < MIN_PYTHON:
+        need, got = "%d.%d" % MIN_PYTHON, "%d.%d" % tuple(version_info[:2])
+        print(f"Python {need} or newer is required (running {got})", file=sys.stderr)
+        raise SystemExit(2)
+
+
+if __name__ == "__main__":
+    require_supported_python()
+
 import json
 import shutil
 import subprocess
-import sys
 import tempfile
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path

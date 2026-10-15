@@ -11,7 +11,8 @@ from unittest import mock
 
 
 def fake_python(folder: Path, name: str, major_minor: str) -> Path:
-    """Answers every `-c` probe with exit 0 and prints `major_minor` ("3 12"): it 'imports ROOT' and reports that version."""
+    """Answers every `-c` probe with exit 0 and prints `major_minor` ("3 12"): it 'imports ROOT' and reports that
+    version."""
     path = folder / name
     path.write_text(f"#!/bin/sh\necho '{major_minor}'\nexit 0\n", encoding="utf-8")
     path.chmod(path.stat().st_mode | stat.S_IXUSR)
