@@ -152,6 +152,95 @@ class DecisionRecordTests(unittest.TestCase):
         self.assertIn("schema.enum", codes(ln.check_decision(dict(self.dec, actor={"kind": "robot", "id": "x"}), self.exp)))
 
 
+class DecisionArtifactHashTests(unittest.TestCase):
+    """artifacts[].sha256 is compared with the file's SHA-256 when the record has a location (base_dir; the CLI
+    passes the decision record's folder, or --artifacts-root). Without a base_dir the library check is unchanged."""
+
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.d = Path(tmp.name)
+        (self.d / "records").mkdir()
+        (self.d / "art").mkdir()
+        self.body = b'{"synthetic": "split manifest"}'
+        (self.d / "records" / "split.json").write_bytes(self.body)
+        (self.d / "art" / "out.json").write_bytes(self.body)
+        self.exp = record(entry(1, "rel-000", ["control-region"], "2026-10-10T10:00:00Z"))
+        self.dec = {"record_version": "1.0.0", "decision_id": "dec-1", "analysis": "synthetic-analysis",
+                    "decision": "freeze the synthetic split", "category": "other",
+                    "actor": {"kind": "human", "id": "synthetic analyst"}, "time": "2026-10-11T10:00:00Z",
+                    "seen": {"through_seq": 1, "entries_sha256": ln.entries_digest(self.exp, 1)},
+                    "artifacts": [{"ref": "split.json", "sha256": hashlib.sha256(self.body).hexdigest()}]}
+
+    def check(self, dec, base="records"):
+        return ln.check_decision(dec, self.exp, base_dir=self.d / base)
+
+    def test_matching_file_is_valid(self):
+        self.assertEqual(self.check(self.dec).findings, [])
+        absolute = copy.deepcopy(self.dec)
+        absolute["artifacts"][0]["ref"] = str(self.d / "art" / "out.json")
+        self.assertEqual(self.check(absolute).findings, [])
+
+    def test_mismatch_is_an_error(self):
+        (self.d / "records" / "split.json").write_bytes(self.body + b" ")
+        rep = self.check(self.dec)
+        self.assertFalse(rep.ok)
+        self.assertEqual(codes(rep), {"lineage.artifact_mismatch"})
+        self.assertEqual(rep.errors[0].path, "$.artifacts[0].sha256")
+
+    def test_missing_file_is_an_error(self):
+        gone = copy.deepcopy(self.dec)
+        gone["artifacts"][0]["ref"] = "absent.json"
+        self.assertEqual(codes(self.check(gone)), {"lineage.artifact_missing"})
+        folder = copy.deepcopy(self.dec)
+        folder["artifacts"][0]["ref"] = "."
+        self.assertEqual(codes(self.check(folder)), {"lineage.artifact_missing"})
+
+    def test_relative_refs_resolve_against_the_base(self):
+        rooted = copy.deepcopy(self.dec)
+        rooted["artifacts"][0]["ref"] = "art/out.json"
+        self.assertEqual(codes(self.check(rooted)), {"lineage.artifact_missing"})  # not under records/
+        self.assertEqual(self.check(rooted, base=".").findings, [])
+
+    def test_without_base_dir_artifacts_are_not_opened(self):
+        gone = copy.deepcopy(self.dec)
+        gone["artifacts"][0]["ref"] = "absent.json"
+        self.assertTrue(ln.check_decision(gone, self.exp).ok)
+        self.assertEqual(ln.decision_exposure(gone, self.exp)["state"], "unexposed")
+
+    def test_artifact_findings_do_not_hide_exposure_findings(self):
+        gone = copy.deepcopy(self.dec)
+        gone["artifacts"][0]["ref"] = "absent.json"
+        rep = ln.check_decision(gone, None, base_dir=self.d / "records")
+        self.assertEqual(codes(rep), {"lineage.artifact_missing", "lineage.exposure_unchecked"})
+
+    def test_cli(self):
+        exp_path = self.d / "records" / "exposure.json"
+        exp_path.write_text(json.dumps(self.exp))
+        dec_path = self.d / "records" / "decision.json"
+        run = lambda *a: subprocess.run([sys.executable, str(ROOT / "contracts" / "lineage.py"), "decision",
+                                         str(dec_path), "--exposure", str(exp_path), *a],
+                                        capture_output=True, text=True, timeout=60)
+        dec_path.write_text(json.dumps(self.dec))
+        p = run()
+        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+        bad = copy.deepcopy(self.dec)
+        bad["artifacts"][0]["sha256"] = "0" * 64
+        dec_path.write_text(json.dumps(bad))
+        p = run()
+        self.assertEqual(p.returncode, 1, p.stdout + p.stderr)
+        out = json.loads(p.stdout)
+        self.assertEqual(out["status"], "invalid")
+        self.assertEqual({f["code"] for f in out["findings"]}, {"lineage.artifact_mismatch"})
+        rooted = copy.deepcopy(self.dec)
+        rooted["artifacts"][0]["ref"] = "art/out.json"
+        dec_path.write_text(json.dumps(rooted))
+        self.assertEqual(run().returncode, 1)
+        p = run("--artifacts-root", str(self.d))
+        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+        self.assertEqual(run("--artifacts-root", str(self.d / "absent")).returncode, 2)
+
+
 class ProducerTests(unittest.TestCase):
     """P3.2: the change review and the bundle freezing derive data_exposure with the same function."""
 

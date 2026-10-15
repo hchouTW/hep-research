@@ -273,9 +273,10 @@ training record.
 Check it with `python3 contracts/lineage.py decision <record> --exposure <exposure record>` (exit 0 = the binding holds;
 it also prints the exposure at decision time, which should be `unexposed` for a training that must not see the signal
 region). Later appends to the exposure record keep the binding; an edited history, a `seen` that leaves out entries
-dated before the decision, or a decision dated before entries it counts fail. `lineage.py` does not open the artifacts:
-recompute the split manifest's SHA-256 (`shasum -a 256 <manifest>`) and compare it with `artifacts` and the `decision`
-text before training, and refuse a split that no longer matches. A changed split, feature list or training domain is a
+dated before the decision, or a decision dated before entries it counts fail. It also opens each `artifacts[].ref`
+(relative to the record's folder, or to `--artifacts-root DIR`) and fails when the file's SHA-256 differs or the file
+is missing (`lineage.artifact_mismatch`, `lineage.artifact_missing`). It does not read the `decision` text: check that
+the SHA-256 written there is the one in `artifacts`, and refuse a split that no longer matches. A changed split, feature list or training domain is a
 new decision record (`supersedes` the old one), not an edit. Example: `assets/pretraining-decision.example.json` with
 `assets/pretraining-exposure.example.json` and `assets/pretraining-split.example.json` (synthetic).
 
