@@ -5,6 +5,25 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+<!-- wp13 -->
+- New optional adapter `adapters/cr-propagation` 0.1.0 (owner hep-computing, required by no skill; adapter status
+  `proposed` because GALPROP and USINE are `proposed`). DRAGON2 is `tested-in-declared-environment`: commit cd588707 of
+  cosmicrays/DRAGON2-Beta_version built from source on E2 (Homebrew GCC 15.2.0, GSL 2.8, CFITSIO 4.6.4; no system-wide
+  installation). `dragon2_run.py` builds a run directory from a JSON run spec (XML, source.param, links to the data
+  tables, an optional replacement production-cross-section table), runs DRAGON2 and records a `computational-run`
+  (input hashes, program and commit, command, environment manifest, exit status, output hash); exit 3 without the
+  binary or data. `dragon2_to_prediction.py` turns one run into one grid-node `prediction` (`representation: "grid"`,
+  the node in `parameter_point`, a ratio of summed species averaged uniformly in ln(E/n) over the requested bins, no
+  extrapolation) that the comparison gate and `covariance_fit.py` model `tabulated-grid` use unchanged.
+- Limit benchmark of DRAGON2 against the 1D thin-disc closed form of `theory:cr-secondary-ratio` (convection,
+  reacceleration, energy losses and decay off; the profile's illustrative production cross sections substituted through
+  DRAGON2's data table), criteria committed before the comparison: the B/C slope over 100–1000 GeV/n agrees (0.006,
+  tolerance 0.05) and a five-node D0 grid of DRAGON2 runs recovers a sixth run's D0 within 2% through `tabulated-grid`;
+  the absolute B/C does not agree (DRAGON2 32–34% higher, tolerance 30%: DRAGON2's fixed helium target accounts for a
+  factor 1.14, the rest is not isolated) and the D0/L degeneracy fails at L = 8 kpc (15–18%, tolerance 10%; moving the
+  radial boundary from 20 to 30 kpc reduces it to 6–7%). The tests replay nine recorded runs offline and assert what is
+  established; a live rerun runs with `HEP_DRAGON2_LIVE_TEST=1`. Global propagation fits that run a code stay outside v1.
+
 - Routing: hep-computing's description says to load it first even for a quick build or code fix (`co-companion-ws-1`,
   a CMake fix in a project that binds a companion profile, now loads hep-computing in 3/3 live runs, was 1/3), and
   hep-communication's description says to ask first when a comparison names no observable or experiments (it was
