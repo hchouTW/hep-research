@@ -49,4 +49,10 @@ Combine 11.1.0 (conda-forge, ROOT 6.40.04 and 6.36.14 builds), which the Combine
 `adapters/batch-schedulers` is `demonstrated-on-synthetic-data`: HTCondor 24.12.16 (CERN) and Slurm 24.05.1 (NSTCCore)
 each ran synthetic campaigns; the fake schedulers in `tests/adapters/batch_shims/` alone cannot raise a tool above
 `documented`; real-tool tests are gated by `HEP_SLURM_TEST=1` / `HEP_HTCONDOR_TEST=1` plus `HEP_SLURM_CONFIG` /
-`HEP_HTCONDOR_CONFIG` naming a user-reviewed configuration. Python code in an adapter may import only `core` and `contracts`.
+`HEP_HTCONDOR_CONFIG` naming a user-reviewed configuration. `adapters/literature-lookup` (owned by research-communication) opens
+network connections: it states the hosts in `environment`, reaches them only when run live
+(never under `--replay` or in its offline tests, which patch `urlopen` to fail), reads the ADS token from the
+environment and never records it; its live smoke test runs only with `HEP_LIVE_LOOKUP_TEST=1`. `adapters/crdb` (owned by hep-theory, `tested-in-declared-environment` on CRDB V4.2) also opens network
+connections, to `lpsc.in2p3.fr` and only in its `fetch` command; it has no default experiment filter (an experiment profile
+passes its own), labels every row secondary and writes a provenance sidecar. CRDB is a secondary compilation: HEPData
+records or the paper's tables are primary, and a CRDB value is a cross-check or a fallback labelled secondary. Python code in an adapter may import only `core` and `contracts`.

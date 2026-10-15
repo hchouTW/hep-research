@@ -1,0 +1,29 @@
+{
+  "label": "secondary: CRDB transcription; the primary source is the paper's table or its HEPData record",
+  "source_role": "secondary",
+  "primary_sources": "HEPData records or the paper's own tables are primary; use a CRDB value as a cross-check of the primary number, or as a fallback labelled secondary (with CRDB version and retrieval date) when no primary table is available.",
+  "adapter": "adapter:crdb 0.1.0",
+  "request": {
+    "params": {
+      "num": "e+",
+      "den": "",
+      "energy_type": "EK",
+      "exp_dates": "AMS02",
+      "combo_level": "0",
+      "energy_convert_level": "0",
+      "energy_start": "100",
+      "energy_stop": "150"
+    },
+    "url": "https://lpsc.in2p3.fr/crdb/rest.php?num=e%2B&den=&energy_type=EK&exp_dates=AMS02&combo_level=0&energy_convert_level=0&energy_start=100&energy_stop=150",
+    "user_agent": "hep-research-crdb-adapter/0.1.0 (hep-research plugin; https://github.com/hchouTW/hep-research; single query; no credentials; honors blocks)"
+  },
+  "final_url": "https://lpsc.in2p3.fr/crdb/_dialog_result.php?num=e%2B&den=&energy_type=EK&exp_dates=AMS02&combo_level=0&energy_convert_level=0&energy_start=100&energy_stop=150",
+  "retrieved_utc": "2026-10-15T03:04:34Z",
+  "http_status": 200,
+  "bytes": 5223,
+  "sha256": "d163d787b480495e88d6291f0952cee2ca1c6506384f7856019c3abf7cf61c2e",
+  "crdb_export_date": "2026/10/15-03:04:36",
+  "crdb_version": "V4.2 (September 2026)",
+  "crdb_version_note": null,
+  "n_rows": 8
+}

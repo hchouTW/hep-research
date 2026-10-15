@@ -47,6 +47,30 @@ class PyprojectTests(unittest.TestCase):
         self.assertIn("F", PYPROJECT["tool"]["ruff"]["lint"]["select"])
         self.assertEqual(PYPROJECT["tool"]["setuptools"]["packages"], [])  # the plugin is not an installable package
 
+    def test_python_floor_is_313_everywhere(self):
+        """requires-python, the Ruff and mypy targets and the interpreter finder's default name the same floor."""
+        self.assertEqual(PYPROJECT["project"]["requires-python"], ">=3.13")
+        self.assertEqual(PYPROJECT["tool"]["ruff"]["target-version"], "py313")
+        self.assertEqual(PYPROJECT["tool"]["mypy"]["python_version"], "3.13")
+        finder = (ROOT / "skills" / "hep-computing" / "scripts" / "find_python.py").read_text(encoding="utf-8")
+        self.assertIn('MIN_PYTHON = "3.13"', finder)
+
+    def test_readme_states_the_floor(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn("Python 3.13 or newer", readme)
+        self.assertNotRegex(readme, r"Python (>= ?)?3\.1[12]( or newer)?\b")
+
+    @unittest.skipUnless((ROOT.parents[1] / ".github" / "workflows" / "tests.yml").is_file(),
+                         "repository checkout only (an installed plugin tree has no .github)")
+    def test_ci_follows_the_floor(self):
+        """CI tests the supported floor only (Python 3.13: the checks matrix and the reconciliation gate agree)."""
+        workflow = (ROOT.parents[1] / ".github" / "workflows" / "tests.yml").read_text(encoding="utf-8")
+        matrix = re.search(r'python: \[([^\]]*)\]', workflow).group(1)
+        self.assertEqual([v.strip(' "') for v in matrix.split(",")], ["3.13"])
+        self.assertRegex(workflow, r"reconcile_check_runs\.py \S+ --python 3\.13 ")
+        for v in re.findall(r'python-version: "?([0-9.]+)', workflow):
+            self.assertEqual(v, "3.13", "every setup-python step uses the floor")
+
 
 if __name__ == "__main__":
     unittest.main()

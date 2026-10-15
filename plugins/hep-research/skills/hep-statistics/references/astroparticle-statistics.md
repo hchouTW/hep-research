@@ -133,6 +133,10 @@ function, energy dispersion, effective area) belongs to hep-detector.
   simulations of a constant source). A change point is not by itself a significant flare: report the rate change and
   its significance with the trials of the segmentation.
 
+These tests are for event times. A **binned** series (a flux per time bin, with time-correlated systematics and a
+red-noise background) needs other methods: time-bin covariance, an AR(1) red-noise null, trials across periods and
+energy bins, and joint fits of several periods are in [time-series inference](time-series-inference.md).
+
 ## Deliverables
 
 - The counting method (Li & Ma or an equivalent likelihood-based statistic, not a

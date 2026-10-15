@@ -2689,6 +2689,380 @@
     "response.json": "{\"_note\": \"SYNTHETIC routing fixture: invented values, not data from any experiment.\", \"level_in\": \"particle\", \"level_out\": \"detector\", \"matrix\": [[0.9,0.05],[0.05,0.9]], \"efficiency_included\": true}\n",
     "observed.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nbin,counts\n0,3410\n1,3460\n"
    }
+  },
+  {
+   "id": "wp11-interp-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Compute the B/C prediction of a simple leaky-box model, stating the spallation cross-section conventions, so I can compare it with the published AMS-02 B/C data.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "predictions",
+    "conventions"
+   ],
+   "set": "WP11",
+   "profiles": [
+    "experiment:ams-02"
+   ],
+   "note": "cosmic-ray interpretation: model prediction for a published comparison"
+  },
+  {
+   "id": "wp11-interp-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "高能宇宙線正電子比例上升：請比較純次級產生與 pulsar 來源的 model alternatives，並給出理論不確定度（theory uncertainties）。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "model alternatives",
+    "theory uncertainties"
+   ],
+   "set": "WP11",
+   "note": "cosmic-ray interpretation"
+  },
+  {
+   "id": "wp11-interp-3",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "有人宣稱 AMS-02 的反質子/質子比支持暗物質的解釋，這個結果真的支持這種說法嗎？",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "whether a result supports a claim or interpretation"
+   ],
+   "set": "WP11",
+   "profiles": [
+    "experiment:ams-02"
+   ],
+   "note": "cosmic-ray interpretation: claim-support question"
+  },
+  {
+   "id": "wp11-interp-4",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Is my diffusion-model prediction a good description of the published AMS-02 lithium flux? Compute the chi-square with the published covariance and its p-value.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "goodness of fit"
+   ],
+   "not": "hep-theory",
+   "set": "WP11",
+   "profiles": [
+    "experiment:ams-02"
+   ],
+   "note": "cosmic-ray interpretation: the prediction exists, the goodness of fit is inference"
+  },
+  {
+   "id": "wp11-prop-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Fit the diffusion coefficient D0 and halo height L to the AMS-02 B/C ratio with its covariance, using precomputed propagation-code predictions on a parameter grid.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "fits of model parameters to published data points with their covariance"
+   ],
+   "set": "WP11",
+   "profiles": [
+    "experiment:ams-02"
+   ],
+   "note": "propagation fit on tabulated predictions (WP10: in v1, synthetic-data status)"
+  },
+  {
+   "id": "wp11-prop-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請用 B/C 與 Be/B 比值擬合宇宙線傳播參數（擴散係數與暈高度），並說明 D0/L 的簡併。",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [],
+   "set": "WP11",
+   "note": "propagation fit on tabulated predictions (WP10: in v1, synthetic-data status)"
+  },
+  {
+   "id": "wp11-prop-3",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "我想對宇宙線傳播模型的參數（擴散指數與 Alfvén 速度）做 Bayesian posteriors 抽樣，先驗與收斂要怎麼處理？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "bayesian posteriors"
+   ],
+   "set": "WP11",
+   "note": "propagation fit on tabulated predictions (WP10: in v1, synthetic-data status)"
+  },
+  {
+   "id": "wp11-prop-4",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Run a profile likelihood scan of the diffusion slope in a cosmic-ray propagation fit to secondary-to-primary ratios, with the nuclear cross-section uncertainties as nuisance parameters.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "profile likelihood",
+    "nuisance parameters"
+   ],
+   "set": "WP11",
+   "note": "propagation fit on tabulated predictions (WP10: in v1, synthetic-data status)"
+  },
+  {
+   "id": "wp11-ts-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "For the AMS-02 proton flux per Bartels rotation, build the covariance between rotations from the time-correlated systematics and test whether the variation over time is significant.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "covariance assembly and validation",
+    "significance"
+   ],
+   "set": "WP11",
+   "profiles": [
+    "experiment:ams-02"
+   ],
+   "note": "time-series inference"
+  },
+  {
+   "id": "wp11-ts-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "每個太陽自轉週期的通量之間有時間相關的系統誤差，要怎麼建立相關矩陣，並檢驗通量的變化是否真實？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [],
+   "set": "WP11",
+   "natural": true,
+   "note": "time-series inference"
+  },
+  {
+   "id": "wp11-ts-3",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請把每日質子通量的時間序列對中子監測器計數做線性擬合，並給出 goodness of fit。",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "goodness of fit"
+   ],
+   "set": "WP11",
+   "note": "time-series inference"
+  },
+  {
+   "id": "wp11-ts-4",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Fit a periodic modulation (amplitude and phase) to a daily cosmic-ray flux series with correlated errors, scanning the period, and quote the global significance of the best period.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "significance and look-elsewhere effects"
+   ],
+   "set": "WP11",
+   "note": "time-series inference"
+  },
+  {
+   "id": "wp11-ts-5",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "請設計時間相關通量量測的時間分段，以及每個時段的 exposure 與 live time 修正。",
+   "expected_primary": "hep-analysis",
+   "trigger_terms": [
+    "exposure",
+    "live time"
+   ],
+   "not": "hep-statistics",
+   "set": "WP11",
+   "note": "time-series boundary: binning and corrections are measurement design, not inference"
+  },
+  {
+   "id": "wp11-xexp-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Combine the AMS-02 and PAMELA proton fluxes in their overlapping rigidity range, with a correlated normalization uncertainty, and test whether they are consistent.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "combinations across datasets or experiments"
+   ],
+   "set": "WP11",
+   "profiles": [
+    "experiment:ams-02"
+   ],
+   "note": "cross-experiment comparison"
+  },
+  {
+   "id": "wp11-xexp-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "AMS-02 與 DAMPE 的質子通量在 TeV 附近看起來不一致，考慮各自的能量標度誤差後，兩者的相容程度（p 值）是多少？",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [],
+   "set": "WP11",
+   "natural": true,
+   "profiles": [
+    "experiment:ams-02"
+   ],
+   "note": "cross-experiment comparison"
+  },
+  {
+   "id": "wp11-xexp-3",
+   "lang": "zh-Hant",
+   "kind": "underspecified",
+   "prompt": "比較 AMS-02 和其他實驗的通量。",
+   "expected_primary": "ask",
+   "trigger_terms": [],
+   "set": "WP11",
+   "note": "ask which species, observable, energy range and experiments; never pick them"
+  },
+  {
+   "id": "wp11-xexp-4",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Build a literature matrix of the published proton spectral-hardening measurements from AMS-02, PAMELA, CREAM and DAMPE with the break rigidity and its uncertainty.",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "literature matrices and reviews"
+   ],
+   "set": "WP11",
+   "profiles": [
+    "experiment:ams-02"
+   ],
+   "note": "cross-experiment comparison: literature work"
+  },
+  {
+   "id": "wp11-crdb-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Pull the published AMS-02 and PAMELA B/C points from CRDB, labelled as secondary, so I can compare my propagation-model prediction with them.",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "comparing a model with an experiment's published data"
+   ],
+   "set": "WP11",
+   "profiles": [
+    "experiment:ams-02"
+   ],
+   "note": "CRDB query for a model comparison"
+  },
+  {
+   "id": "wp11-crdb-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "從 CRDB 取得 AMS-02 的 Li/C 資料點並標為次級來源，用來和我的模型預測（predictions）比較。",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [
+    "predictions"
+   ],
+   "set": "WP11",
+   "profiles": [
+    "experiment:ams-02"
+   ],
+   "note": "CRDB query for a model comparison"
+  },
+  {
+   "id": "wp11-crdb-3",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "A CRDB entry for the AMS-02 positron flux looks different from what I remember. Which paper is it transcribed from, and what does that paper state?",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "what a paper states"
+   ],
+   "set": "WP11",
+   "profiles": [
+    "experiment:ams-02"
+   ],
+   "note": "CRDB value checked against its primary paper"
+  },
+  {
+   "id": "wp11-crdb-4",
+   "lang": "zh-Hant",
+   "kind": "ams-computing",
+   "prompt": "我的 CRDB 查詢腳本在解析 AMS-02 匯出 csv 的標頭時 crashes，請幫我除錯。",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "crashes"
+   ],
+   "not": "hep-theory",
+   "set": "WP11",
+   "note": "CRDB code problem: the code, not the database, routes"
+  },
+  {
+   "id": "wp11-ml-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Train an e/p classifier on TRD and ECAL variables and pick a working point for my positron flux measurement.",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "classifiers and regressors",
+    "working points"
+   ],
+   "not": "hep-analysis",
+   "set": "WP11",
+   "chain": [
+    "physics-ml",
+    "hep-analysis"
+   ],
+   "note": "the trained model and working point are physics-ml; the selection and proton-background estimate hand to hep-analysis"
+  },
+  {
+   "id": "wp11-ml-2",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "請用 TRD 與 ECAL 的變數訓練電子/質子分類器並選定 working points，之後用在正電子通量量測的事件選擇。",
+   "expected_primary": "physics-ml",
+   "trigger_terms": [
+    "working points"
+   ],
+   "not": "hep-analysis",
+   "set": "WP11",
+   "chain": [
+    "physics-ml",
+    "hep-analysis"
+   ],
+   "note": "the trained model and working point are physics-ml; the selection hands to hep-analysis"
+  },
+  {
+   "id": "wp11-bound-dm-1",
+   "lang": "en",
+   "kind": "out-of-v1",
+   "prompt": "Which dark-matter model explains the positron excess?",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "WP11",
+   "limited_support": true,
+   "note": "interpretation beyond the validated profiles: hep-theory gives the limited-support notice"
+  },
+  {
+   "id": "wp11-bound-dm-2",
+   "lang": "zh-Hant",
+   "kind": "out-of-v1",
+   "prompt": "哪一種暗物質模型可以解釋正電子超出？",
+   "expected_primary": "hep-theory",
+   "trigger_terms": [],
+   "set": "WP11",
+   "limited_support": true,
+   "note": "interpretation beyond the validated profiles: hep-theory gives the limited-support notice"
+  },
+  {
+   "id": "wp11-bound-bc-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Which is AMS's latest B/C paper?",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "which result is the latest"
+   ],
+   "set": "WP11",
+   "profiles": [
+    "experiment:ams-02"
+   ],
+   "note": "publication-record question"
+  },
+  {
+   "id": "wp11-bound-bc-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "AMS 最新的 B/C 論文是哪一篇？",
+   "expected_primary": "research-communication",
+   "trigger_terms": [
+    "which result is the latest"
+   ],
+   "set": "WP11",
+   "profiles": [
+    "experiment:ams-02"
+   ],
+   "note": "publication-record question"
   }
  ]
 }

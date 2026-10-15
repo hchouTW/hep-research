@@ -1,0 +1,83 @@
+{
+ "id": "theory:cr-secondary-ratio",
+ "kind": "theory-domain",
+ "version": "0.1.0",
+ "scope": "First narrow cosmic-ray propagation domain: the stable secondary-to-primary ratio B/C (from C and O) in a weighted-slab (leaky-box) model and in a 1D diffusion-halo model with a thin disc and no convection, with the closed forms derived and checked in SymPy, their equivalence lambda_esc = n_H m_H h v L / D (so the ratio constrains only D0/L), a benchmark against the profile's own numerical solutions (slab ODEs averaged over the path-length distribution; finite-thickness disc solved exactly and by finite volumes), a theory-spec with degenerate_directions [D0/L], and a prediction callable at any parameter point for grids. Cross-section sets are inputs and model alternatives; the shipped sets and transport values are ILLUSTRATIVE.",
+ "exclusions": [
+  "Convection, reacceleration, energy losses, radioactive decay and unstable secondaries (10Be clocks)",
+  "Energy-dependent or published cross-section parametrizations; ghost-nucleus networks and tertiaries; helium in the gas",
+  "Solar modulation, rigidity-binned ratios of bin-averaged fluxes, and 2D (radial) geometry",
+  "Any experiment, detector, data or blinding field; no comparison with measured B/C; no propagation code (GALPROP, DRAGON, USINE) run",
+  "Claims that the illustrative parameter values describe the Galaxy"
+ ],
+ "compatible": {
+  "core": ">=1.0,<2.0",
+  "contracts": ">=2.6,<3.0"
+ },
+ "related_skills": [
+  "hep-theory",
+  "hep-statistics",
+  "hep-computing"
+ ],
+ "resources": {
+  "index": "index.md",
+  "conventions": "conventions.json",
+  "model": "models/secondary-ratio-models.md",
+  "derivation": "derivations/derivation-record.md",
+  "theory_spec": "derivations/theory-spec.json",
+  "predictions": "predictions/",
+  "benchmarks": "benchmarks/",
+  "evidence": "evidence/",
+  "cross_sections": "models/xs-illustrative-A.json"
+ },
+ "vocabulary_namespaces": [
+  "crsr"
+ ],
+ "vocabulary_extensions": {
+  "levels": [
+   "crsr:local-interstellar"
+  ],
+  "conventions": [
+   "crsr:observable",
+   "crsr:cross_sections",
+   "crsr:bin_average",
+   "crsr:transport_model"
+  ]
+ },
+ "adapters": {
+  "required": [],
+  "optional": []
+ },
+ "depends_on": [],
+ "evidence_namespace": "crsr",
+ "maintainer": "hchouTW",
+ "capabilities": [
+  {
+   "name": "secondary-ratio-derivation",
+   "status": "demonstrated-on-synthetic-data",
+   "scope": "SymPy checks of the weighted-slab and thin-disc closed forms, their equivalence through lambda_esc = n_H m_H h v L / D, the D0/L invariance, and the finite-disc solution (analytic derivation, not formal proof)",
+   "tests": [
+    "tests/test_derivation.py",
+    "tests/test_missing_dependency.py"
+   ]
+  },
+  {
+   "name": "secondary-ratio-benchmark",
+   "status": "demonstrated-on-synthetic-data",
+   "scope": "closed forms against the profile's own numerical solutions on ILLUSTRATIVE inputs: slab ODE + path-length average (1e-7), finite-volume vs exact finite disc (1e-6), thin-disc limit as h/L -> 0",
+   "tests": [
+    "tests/test_benchmark.py"
+   ]
+  },
+  {
+   "name": "secondary-ratio-prediction",
+   "status": "demonstrated-on-synthetic-data",
+   "scope": "B/C at any parameter point and on (D0, L) grids, bin-averaged prediction artifact with a cross-section model alternative; theory-spec and prediction validate, and a theory-spec without degenerate_directions fails with theory.degeneracy_missing",
+   "tests": [
+    "tests/test_prediction.py",
+    "tests/test_artifacts.py",
+    "tests/test_convention_mismatch.py"
+   ]
+  }
+ ]
+}

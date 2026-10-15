@@ -11,13 +11,13 @@ Use when the deliverable is a statistical inference or its diagnostics in physic
 | Path | Content |
 |---|---|
 | `SKILL.md` | entry point: invariants, Step 0 for a quick question and the task-to-tool table (default tool, fallback, or "no shipped tool"), workflow, context resolution |
-| `references/` | eleven references: the `core/stats` decision guide and its command reference, combinations (BLUE, Peelle, likelihood-level), nuisance modeling, likelihood fitting (including sWeights and weighted unbinned fits), unfolding, inference recipes, statistical tools (pyhf, Combine), astroparticle statistics, ML-assisted inference, inference reasoning |
+| `references/` | twelve references: the `core/stats` decision guide and its command reference, combinations (BLUE, Peelle, likelihood-level), nuisance modeling, likelihood fitting (including sWeights and weighted unbinned fits), unfolding, inference recipes, statistical tools (pyhf, Combine), astroparticle statistics, binned time series (documented; its time-bin covariance recipe demonstrated on synthetic data by `test_time_series_covariance.py`), ML-assisted inference, inference reasoning |
 | `assets/` | `combine.example.json`: SYNTHETIC input for `combine_measurements.py` (two experiments, shared luminosity) |
 | `scripts/` | fifteen helpers; the executable checks themselves (limits, template fits, unfolding diagnostics, Poisson diagnostics, toys, covariance and response validation) live in `core/stats/` |
 
 ## Scripts
 
-`li_ma_significance.py` (ON/OFF significance, exact conditional p-values at low counts), `look_elsewhere.py` (global significance of a 1D scan), `sensitivity_and_gof.py` (Asimov discovery sensitivity, toy-calibrated goodness of fit), `global_significance.py`, `bayes_diagnostics.py` (R-hat, ESS, MCSE, prior reweighting), `bayes_calibration.py`, `combine_measurements.py` (generalized least squares once a combination plan accepts the inputs), `combine_asymmetric.py` (Barlow's asymmetric errors), `covariance_fit.py`, `discrete_profile.py`, `eft_scan.py`, `pcl_efficiency_ratio.py`, `ratio_estimation.py`, `sweighted_fit.py`, `result_artifact.py` (writes a `statistical-result` from a tool's output). When a shell is available, run the matching check and report its output; a value worked by hand is labeled as such. pyhf and Combine starting points are under `adapters/pyhf-combine/assets/`, unbinned fits under `adapters/unbinned-fit/assets/`.
+`li_ma_significance.py` (ON/OFF significance, exact conditional p-values at low counts), `look_elsewhere.py` (global significance of a 1D scan), `sensitivity_and_gof.py` (Asimov discovery sensitivity, toy-calibrated goodness of fit), `global_significance.py`, `bayes_diagnostics.py` (R-hat, ESS, MCSE, prior reweighting), `bayes_calibration.py`, `combine_measurements.py` (generalized least squares once a combination plan accepts the inputs), `combine_asymmetric.py` (Barlow's asymmetric errors), `covariance_fit.py` (its `tabulated-grid` model fits parameters tabulated on a grid of predictions, one gated `prediction` per node, and reports degenerate directions; exit 3 when a data covariance is missing), `discrete_profile.py`, `eft_scan.py`, `pcl_efficiency_ratio.py`, `ratio_estimation.py`, `sweighted_fit.py`, `result_artifact.py` (writes a `statistical-result` from a tool's output). When a shell is available, run the matching check and report its output; a value worked by hand is labeled as such. pyhf and Combine starting points are under `adapters/pyhf-combine/assets/`, unbinned fits under `adapters/unbinned-fit/assets/`.
 
 ## References
 
@@ -35,7 +35,7 @@ Use when the deliverable is a statistical inference or its diagnostics in physic
 
 ## Tests and validation
 
-`tests/skills/hep_statistics/` (seventeen modules) plus the `core/stats` tests under `tests/core/`, the statistics benchmarks under `examples/stats-benchmarks/`, the `unfolding-coverage` example, and the GitHub `stats-backends` and `statistics-validation` jobs (pyhf, ArviZ, Combine) recorded in `VALIDATION.md`. What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
+`tests/skills/hep_statistics/` (nineteen modules) plus the `core/stats` tests under `tests/core/`, the statistics benchmarks under `examples/stats-benchmarks/`, the `unfolding-coverage` example, and the GitHub `stats-backends` and `statistics-validation` jobs (pyhf, ArviZ, Combine) recorded in `VALIDATION.md`. What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
 
 ## How this folder is used
 

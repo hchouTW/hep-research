@@ -1,6 +1,6 @@
 ---
 name: hep-statistics
-description: "Use when the deliverable is a statistical inference or its diagnostics in physics: likelihoods, binned and unbinned fits, template fits, fits of model parameters to published data points with their covariance (stating when no shipped tool covers the model), frequentist intervals and limits (Neyman, Feldman-Cousins, CLs, profile likelihood, asymptotics), Bayesian posteriors (priors, samplers, convergence), significance and look-elsewhere effects, low or zero counts, nuisance parameters, covariance assembly and validation, unfolding with regularization and coverage, fits that use a folded prediction, toys and Asimov datasets, goodness of fit, model comparison, and combinations across datasets or experiments. Load it first even for a quick interval, limit or fit, and for inference outside v1 (for example cosmic-ray propagation fits), where it says what it cannot cover. Not for: producing missing physics inputs (hep-measurement, hep-detector, hep-theory); selections (hep-measurement); predictions (hep-theory)."
+description: "Use when the deliverable is a statistical inference or its diagnostics in physics: likelihoods, binned and unbinned fits, template fits, fits of model parameters to published data points with their covariance (stating when no shipped tool covers the model), frequentist intervals and limits (Neyman, Feldman-Cousins, CLs, profile likelihood, asymptotics), Bayesian posteriors (priors, samplers, convergence), significance and look-elsewhere effects, low or zero counts, nuisance parameters, covariance assembly and validation, unfolding with regularization and coverage, fits that use a folded prediction, toys and Asimov datasets, goodness of fit, model comparison, and combinations across datasets or experiments. Load it first even for a quick interval, limit or fit, and for inference outside v1 (for example global propagation fits), where it says what it cannot cover. Not for: producing missing physics inputs (hep-analysis, detector-response, hep-theory); selections (hep-analysis); predictions (hep-theory)."
 ---
 
 # hep-statistics: inference
@@ -46,7 +46,7 @@ One number: when a shell is available, run its row's tool, state the constructio
 
 ## Resources
 
-Start at the [core/stats guide](references/core-stats-guide.md): its reference index links every topic file ([ML-assisted](references/ml-assisted-inference.md) among them), its Skill scripts table every script. Adapters (pyhf, Combine, unbinned fits): `<plugin root>/adapters/`. Folder guide: [README.md](README.md).
+Start at the [core/stats guide](references/core-stats-guide.md): its reference index links every topic file ([ML-assisted](references/ml-assisted-inference.md), [binned time series](references/time-series-inference.md) among them), its Skill scripts table every script. Adapters (pyhf, Combine, unbinned fits): `<plugin root>/adapters/`. Folder guide: [README.md](README.md).
 
 <!-- BEGIN context-resolution: generated from contracts/stanzas/context-resolution.md by tools/build_stanzas.py; do not edit -->
 ## Context resolution
@@ -56,11 +56,11 @@ Start at the [core/stats guide](references/core-stats-guide.md): its reference i
 1. Before any answer, even a quick one: use the profiles the user names, else those bound in `hep-research.project.json` at the project root; read a bound profile before answering about its experiment. Never infer an experiment or a model from vague wording; if a needed profile cannot be determined, ask which one.
 2. Only when a profile is needed, read `<plugin root>/profiles/registry.json`, then that profile's `index.md`, then only the modules or dataset records the task needs. Never load an unrelated experiment or theory profile.
 3. Local profiles live in the project (`local_profile_paths`), never in the plugin; check them with `python3 "<plugin root>/contracts/project.py" <project-dir>`. A bound profile in neither place, or at a local path known to be a companion's, is used only via the installed `<plugin>:profile` skill that names it, after its preflight, from its folder; never scan for companions. If none is installed, the preflight fails, or a non-public profile lacks `agent_policy` approval for this host (none has it yet), say it is unavailable, do other work; never answer its topics from memory.
-4. No profile needed: use general methods. Domain without a validated profile (for example lattice QCD, EFT global fits, cosmic-ray propagation): say so, then apply this skill's general discipline.
+4. No profile needed: use general methods. Domain without a validated profile (for example lattice QCD, EFT global fits, global cosmic-ray propagation fits): say so, then apply this skill's general discipline.
 5. Durable results and handoffs are files in the project's `artifacts_dir` (default `./hep-research-artifacts/`), never in the plugin; check them with `python3 "<plugin root>/contracts/validate.py" <artifact.json>`. Keep every status label (`synthetic`, `asimov`, `observed`, `preliminary`, `failed`, `unvalidated`, `user-supplied`) on everything derived from it.
 6. Answer in the user's language; keep artifact fields, identifiers and file names in English.
 <!-- END context-resolution -->
 
 ## Handoffs
 
-Missing systematic or correlation evidence: hep-measurement, hep-detector (`unresolved_inputs`); theory-uncertainty prescriptions: hep-theory; toy campaigns, batch jobs: hep-computing; reporting: hep-communication; SBI, neural likelihoods: hep-ml.
+Missing systematic or correlation evidence: hep-analysis, detector-response (`unresolved_inputs`); theory-uncertainty prescriptions: hep-theory; toy campaigns, batch jobs: hep-computing; reporting: research-communication; SBI, neural likelihoods: physics-ml.

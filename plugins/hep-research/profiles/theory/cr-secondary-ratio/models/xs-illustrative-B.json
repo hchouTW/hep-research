@@ -1,0 +1,11 @@
+{
+ "label": "ILLUSTRATIVE cross-section set B for theory:cr-secondary-ratio: set A with production raised by 15% and the boron inelastic cross section lowered by 5%, a constructed model alternative, not a published set",
+ "illustrative": true,
+ "status": "synthetic",
+ "unit": "mb",
+ "target": "hydrogen (1H) at rest",
+ "energy_dependence": "none (energy-independent placeholders; real cross sections vary with energy)",
+ "meaning": "production_mb: effective cumulative production cross section of the secondary from each parent (ghost nuclei assumed included); inelastic_mb: total inelastic (destruction) cross section of each species",
+ "production_mb": {"C->B": 80.5, "O->B": 40.25},
+ "inelastic_mb": {"B": 237.5, "C": 270.0, "O": 310.0}
+}

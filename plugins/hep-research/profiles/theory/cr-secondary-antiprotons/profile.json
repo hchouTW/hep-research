@@ -1,0 +1,84 @@
+{
+ "id": "theory:cr-secondary-antiprotons",
+ "kind": "theory-domain",
+ "version": "0.1.0",
+ "scope": "Narrow cosmic-ray theory domain: the secondary antiproton source term q(T_pbar) = sum_ij 4 pi n_j int phi_i dsigma_ij/dT dT_i for the channels pp, pHe, Hep and HeHe, with the antineutron and hyperon factor (2 + Delta_IS + 2 Delta_Lambda) and alternative cross-section sets as model alternatives, following the conventions of the hep-theory cosmic-ray reference. The shipped cross sections are a TOY x-scaling form with ILLUSTRATIVE values, chosen because the source integral then has a closed form (incomplete beta functions) that benchmarks the profile's numerical integration; no published parametrization is reproduced, and no published source-term value is used (open question B2). model.family is a source term, not a propagation family.",
+ "exclusions": [
+  "Published antiproton cross-section parametrizations and their fitted rescaling functions; energy-dependent Delta_IS or Lambda-bar/pbar",
+  "Projectiles or targets heavier than helium; tertiary antiprotons; nuclear threshold lowering",
+  "Propagation of the source term, solar modulation, and any comparison with measured antiproton fluxes",
+  "Any experiment, detector, data or blinding field; no external program run",
+  "Claims that the illustrative values describe the Galaxy, and comparison with published source-term values (B2 open)"
+ ],
+ "compatible": {
+  "core": ">=1.0,<2.0",
+  "contracts": ">=2.6,<3.0"
+ },
+ "related_skills": [
+  "hep-theory",
+  "hep-statistics",
+  "hep-computing"
+ ],
+ "resources": {
+  "index": "index.md",
+  "conventions": "conventions.json",
+  "model": "models/source-term-models.md",
+  "derivation": "derivations/derivation-record.md",
+  "theory_spec": "derivations/theory-spec.json",
+  "predictions": "predictions/",
+  "benchmarks": "benchmarks/",
+  "evidence": "evidence/",
+  "cross_sections": "models/xs-toy-A.json"
+ },
+ "vocabulary_namespaces": [
+  "crpb"
+ ],
+ "vocabulary_extensions": {
+  "levels": [
+   "crpb:interstellar-source"
+  ],
+  "conventions": [
+   "crpb:source_term",
+   "crpb:ism",
+   "crpb:antineutrons_hyperons",
+   "crpb:cross_sections",
+   "crpb:bin_average"
+  ]
+ },
+ "adapters": {
+  "required": [],
+  "optional": []
+ },
+ "depends_on": [],
+ "evidence_namespace": "crpb",
+ "maintainer": "hchouTW",
+ "capabilities": [
+  {
+   "name": "source-term-derivation",
+   "status": "demonstrated-on-synthetic-data",
+   "scope": "SymPy checks that the source integral for a power-law primary and the toy x-scaling cross section is an incomplete beta function (above and below threshold, broken power laws by pieces) and of the antineutron/hyperon bookkeeping (analytic derivation for the toy form, not formal proof)",
+   "tests": [
+    "tests/test_derivation.py",
+    "tests/test_missing_dependency.py"
+   ]
+  },
+  {
+   "name": "source-term-benchmark",
+   "status": "demonstrated-on-synthetic-data",
+   "scope": "internal benchmark: the profile's numerical quadrature against the closed form for four channels, power-law and broken power-law primaries, energies on both sides of the threshold (1e-8), and a hand-computed point (1e-10); no published source-term value (B2 open)",
+   "tests": [
+    "tests/test_benchmark.py"
+   ]
+  },
+  {
+   "name": "source-term-prediction",
+   "status": "demonstrated-on-synthetic-data",
+   "scope": "q(T_pbar) per channel and in total, channel fractions, antineutron and hyperon switches, bin-averaged prediction artifact with a cross-section set and an antineutron treatment as model alternatives; theory-spec and prediction validate, and the theory-spec needs no degenerate_directions (source-term family)",
+   "tests": [
+    "tests/test_prediction.py",
+    "tests/test_artifacts.py",
+    "tests/test_convention_mismatch.py"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,26 @@
+{
+ "label": "ILLUSTRATIVE toy cross-section set B for theory:cr-secondary-antiprotons: an alternative set of round placeholder values in the same x-scaling form, used as a model alternative; not a published parametrization",
+ "illustrative": true,
+ "status": "synthetic",
+ "pp_prompt": {
+  "form": "x-scaling-beta",
+  "meaning": "dsigma/dT_pbar (T_p, T_pbar) = (sigma0 / T_p) (1 - T_pbar / T_p)^n above threshold, prompt antiprotons only",
+  "sigma0_mb": 50.0,
+  "n": 8.0
+ },
+ "threshold_total_energy_mp": 7.0,
+ "channel_factors": {
+  "pp": 1.0,
+  "pHe": 3.5,
+  "Hep": 3.5,
+  "HeHe": 11.0
+ },
+ "channel_factor_meaning": "dsigma_ij/dT = f_ij dsigma_pp/dT at the same kinetic energy per nucleon of the projectile; constant ILLUSTRATIVE factors standing in for the fitted rescaling functions of the literature",
+ "antineutron": {
+  "Delta_IS": 0.4
+ },
+ "hyperon": {
+  "Lambdabar_over_pbar": 0.3,
+  "Delta_Lambda_coefficient": 0.81
+ }
+}

@@ -57,7 +57,7 @@ periods, resolutions) come from the bound profile, never from this file.
 | Solar modulation and the epoch to state | hep-detector: [solar modulation](../../hep-detector/references/space-based-direct-detection.md#solar-modulation); script `solar_modulation_force_field.py`; the solar-phase rule in the [analysis guide](hep-measurement-guide.md#astroparticle-and-cosmic-ray) |
 | Periodicity in a flux time series (known vs unknown period, binning, charge-sign comparison) | hep-detector: [periodicity](../../hep-detector/references/space-based-direct-detection.md#searching-for-periodicity-and-time-structure-in-a-flux-time-series) |
 | Event-level periodicity tests and variability | hep-statistics: [astroparticle statistics](../../hep-statistics/references/astroparticle-statistics.md#point-sources-test-statistics-periodicity-and-variability) |
-| Time-bin covariance and binned-series inference | hep-statistics (hands off the period-correlated evidence from the correction chain) |
+| Time-bin covariance and binned-series inference | [hep-statistics time-series inference](../../hep-statistics/references/time-series-inference.md) (hands off the period-correlated evidence from the correction chain) |
 
 ## Rare-event searches
 

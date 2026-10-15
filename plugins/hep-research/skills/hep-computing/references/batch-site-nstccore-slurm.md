@@ -43,7 +43,8 @@ priority_multifactor. Site support: the contact block at the end of the guide.
 - `slurm.partition`: a `*_serial` partition (for example `edr1-al9_short_serial`) for one-CPU chunks, not the default
   partition; `slurm.account`: the account `sacctmgr show assoc user=$USER` lists; no `slurm.qos`.
 - `worker_python`: an absolute interpreter the nodes have, for example the `anaconda3` module's `bin/python3`
-  (3.12.7). The template's `--export=NONE` and `exec` of that interpreter in the batch step (no `srun`) ran without
+  (3.12.7). It runs only the batch-worker runner, which supports Python 3.9 or newer; the plugin's own scripts need
+  Python 3.13. The template's `--export=NONE` and `exec` of that interpreter in the batch step (no `srun`) ran without
   any environment problem; a worker that needs ROOT must apply the `libxxhash` workaround itself.
 - `campaign_dir` in group space; the adapter records it under `/ceph/sharedfs/work/...` (the link target).
 - GPU chunks: `resources.gpus` (`--gpus=N`) works on `v100-al9_short` like `--gres=gpu:N`; give `worker_python` the

@@ -1403,6 +1403,47 @@ reproductions pass; source-review findings F1-F14 and the A2b precision gap fixe
 
 Recorded when the export table was written (before 2026-10-14) and kept here, not in the reference: The Graphviz, `rsvg-convert`, and `mmdc` rows were run in this bundle's validation; the TikZ standalone compile (Tectonic; fonts embedded, `pdffonts`), `pdftoppm -r 300 -png` and `pdftocairo -svg` were run, and the `subcaption` `figure*` snippet compiled under `twocolumn` article with Tectonic (two panels (a)/(b) plus caption on a float page). `dvisvgm` 3.6.1 was run: on Tectonic's `.xdv` it warns "86 PDF specials ignored" and the SVG has the text overlapping with the boxes and arrow missing, so do not use that route; `dvisvgm --pdf` refuses to run with Ghostscript 10.08 and needs `mutool` or Ghostscript < 10.01 ; with `mutool` (`mupdf-tools`) installed, `dvisvgm --pdf` rendered the boxes, arrow and labels correctly, with text kept as `<text>` elements. With math labels and bold, italic, mono and small-caps text, plain `dvisvgm --pdf` rendered in rsvg with a fallback sans font (detached radical, lost bold and italic, overlapping words) while `--no-fonts` and `pdftocairo -svg` matched the PDF; `pdftoppm` matched too. Check any SVG export in the target viewer.
 
+## LITERATURE-LOOKUP (2026-10-15, E2: Python 3.13.2, OpenSSL 3.6.4, macOS 26.5 arm64; version 0.10.1 + unreleased, branch `wp5-literature-lookup` from `f2039c7`)
+
+Work order ams02-skill-upgrade WP5 (decision D5: optional adapter). New `adapters/literature-lookup` 0.1.0
+(`assets/literature_lookup.py`, standard library only, owned by research-communication, required by no skill).
+Network approved by the maintainer for this WP: fixture recording and one live smoke. Endpoints:
+`https://inspirehep.net/api/literature` (search and record), `https://export.arxiv.org/api/query` (`id_list`);
+`https://api.adsabs.harvard.edu/v1/search/query` not contacted (no `ADS_API_TOKEN` or `ADS_TOKEN` set). User-Agent
+`hep-research-literature-lookup/0.1.0 (hep-research plugin; https://github.com/hchouTW/hep-research)`. Requests
+02:31-02:37 UTC: 12 in total (INSPIRE 5, arXiv 7, ADS 0), no automatic retry.
+
+| Item | Result | Evidence |
+|---|---|---|
+| Recording (`--record`) of public identifiers | INSPIRE: `arxiv:1007.1727` found (record 860907, texkey `Cowan:2010js`), `arxiv:2501.99999` total 0, record 860907 found, record 999999999 HTTP 404. arXiv: `1007.1727` found, latest `v3`; one request timed out after 20 s; `2501.99999` answered HTTP 429 "Rate exceeded." four times (02:31:49, 02:32:31, 02:34:44, 02:36:45) while `1007.1727` resolved at 02:32:11 and 02:36:38, so no arXiv not-found response was recorded | `tests/adapters/fixtures/literature_lookup/recorded/`, `rate-limit/arxiv-2501.99999-429.json` |
+| Constructed fixtures (marked `synthetic` in the file; the record says so in its notes) | an INSPIRE HTTP 429 with `Retry-After: 5` (from the documented limit, not provoked) and an ADS search response in the documented layout | `rate-limit/inspire-arxiv-2501.99999-429.json`, `constructed/ads-arxiv-1007.1727.json` |
+| Offline tests (no network: `urlopen` patched to fail) | 20 pass, 1 skipped (live): found in both sources; retrieval time = recording time in replay; erratum skipped in the journal reference; version mismatch (`v1` cited, `v3` latest, exit 3), latest version (exit 0), nonexistent `v9`; not found (INSPIRE total 0 and HTTP 404, exit 1); rate limit (real arXiv 429, constructed INSPIRE 429, one request per source, exit 3); ADS without a token makes no request (`not-verified`), the token goes only into the Authorization header and never into the output or a recorded file, a rejected token is `not-verified`; bad identifier and missing replay directory exit 2 | `python -m unittest tests.adapters.test_literature_lookup` |
+| Live smoke (`HEP_LIVE_LOOKUP_TEST=1`, 02:36:36 UTC) | pass: `arxiv:1007.1727v1` found in INSPIRE (HTTP 200, record 860907, retrieved 02:36:36Z) and arXiv (HTTP 200, retrieved 02:36:38Z, latest `v3`, version mismatch reported); 2 requests, 3.0 s | `LiveSmokeTests` |
+| CLI robustness, declarations | `--help` under `-I`, missing replay directory a short error; adapter status `demonstrated-on-synthetic-data` (ADS), INSPIRE and arXiv `tested-in-declared-environment` | `tests/skills/test_cli_robustness.py`, `tests/adapters/test_adapter_declarations.py` |
+
+**Not verified here.** No ADS request was made (no token); the ADS parser and the token handling ran on a constructed
+response only. An arXiv not-found reply (an empty feed or an error entry) was not observed. The INSPIRE 429 was not
+provoked.
+
+## CRDB-ADAPTER (2026-10-15, E2: Python 3.13.2, OpenSSL 3.6.4, macOS 26.5 arm64; version 0.10.1 + unreleased, branch `wp9-crdb-adapter` from `f2039c7`)
+
+Work order ams02-skill-upgrade WP9 (decision D2: owner hep-theory). New `adapters/crdb` 0.1.0 (`assets/crdb_query.py`,
+standard library only, required by no skill), promoted from the ams-02 profile's `scripts/crdb_query.py`, which is
+removed; the profile lists `adapter:crdb` as optional and passes `--exp-dates AMS` explicitly. Network approved by the
+maintainer for recording: 6 requests to `lpsc.in2p3.fr` between 03:03:51 and 03:04:36 UTC, no retry (`--retries 0`),
+User-Agent `hep-research-crdb-adapter/0.1.0 (hep-research plugin; https://github.com/hchouTW/hep-research; ...)`.
+
+| Item | Result | Evidence |
+|---|---|---|
+| CRDB version | the welcome page (`welcome.php`, 03:03:59 UTC) states "Current version: V4.2 (September 2026)", code last change 13/10/2026, 143 experiments from 614 publications (4429 sub-experiments, 452456 data points); the export header names the 2014, 2020 and 2023 CRDB papers and no release, so the version is passed with `--crdb-version` | `tests/adapters/fixtures/crdb/recording.json` |
+| Live `fetch` runs of the adapter (recorded as fixtures) | all HTTP 200, redirected to `_dialog_result.php` with the same query: a ratio on kinetic energy per nucleon (10 rows, two experiments: the filter is not an exact-name match), a rigidity flux (6 rows, two sub-experiments with different data-taking ranges), a positron flux sent as `num=e%2B` (8 rows), a filter matching nothing (header only, exit 1, `no-data-rows`); `energy_start` and `energy_stop` restricted the bins | `tests/adapters/fixtures/crdb/*.csv` and their `.meta.json` sidecars |
+| Offline tests (urlopen patched to fail) | 24 pass: no default experiment filter (`url` and `fetch` without `--exp-dates` or `--all-experiments` exit 2, no request; an empty filter exits 2; `build_params` has no default; a source check fails if a default is added, mutation-checked); every summarized row and sub-experiment group is `secondary: true`; the sidecar holds request (parameters, URL, User-Agent), UTC retrieval time, CRDB version, export date and SHA-256 of the saved file; replay writes the recorded bytes and the rebuilt URLs equal the live ones; blocks never retried, one retry of a transient error, size cap, https only; no experiment name in the adapter's code or declaration | `python -m unittest tests.adapters.test_crdb_query` |
+| Declarations, CLI robustness, profile | `test_adapter_declarations` 2 pass (status `tested-in-declared-environment`, matrix row matches); `test_cli_robustness` 6 pass with the new inventory entry; ams-02 profile tests 213 pass after removing `test_crdb_query.py` | `tests/adapters/test_adapter_declarations.py`, `tests/skills/test_cli_robustness.py`, `profiles/experiments/ams-02/tests/` |
+
+**Not verified here.** No CRDB value was compared with a paper or a HEPData record; the matching rule of `exp_dates`
+is not documented by this run (observed once); HTTP 429, 5xx and a timeout were not provoked (synthetic responses only);
+the `crdb` Python library was not used.
+
 ## THREE-AUDITS-LIVE-ROUTING (2026-10-14, Claude Code 2.1.299, claude-sonnet-5-5)
 
 Paid live routing run `20261014T113734Z-claude-claude-sonnet-5-5` (`evals/routing/results/`, outside the plugin) of
@@ -1437,3 +1478,23 @@ Conclusion: quick verification questions route (20/20); short drafting, terminol
 fixtures still skip the skill. That decision is taken before `SKILL.md` is read, from the description alone, so
 the WP6 remedy (reordering the body, description byte-identical) cannot change it; `SKILL.md` was not changed.
 Open: a description change (needs approval and a routing rerun) or a scorer fix for plugin reference paths.
+
+## PY313-FLOOR (2026-10-15, Python 3.13.2 conda-forge on macOS 26.5 arm64 with the CI lock; CI ubuntu-latest Python 3.13.16 and the ROOT 6.38.00 container's Python 3.13.7)
+
+Validation-first migration to Python 3.13 as the minimum. Gate 1 (trial `b8aa140` on base `21506da`; CI on the PR
+merge `2675f22`, run 38689427002, draft PR #97 not for merging) passed before any CI or documentation change:
+
+| Obligation | Result |
+|---|---|
+| Floor tests (3.11/3.12 rejected from every candidate source, 3.13 selected in order, all-old fails, lower `--min-python` refused, stricter kept; metadata, Ruff and mypy targets) | 20/20 on Python 3.13.2; 8 failed first on the old code |
+| Full suite and checks, clean venv from `requirements-ci.lock` (`pip check` clean) | 3259 tests, 0 failures, 168 skipped, 242 modules; the same modules and skip reasons as the clean baseline at `21506da` (3250 tests; +9 floor tests) |
+| CI on 3.13: units 1/2, 2/2, static and profiles, AMS optional | pass, skip counts equal to the baseline run 38687423557 |
+| Backends on 3.13 (CI): ROOT container (3.13.7), pyhf, uproot + awkward, coffea columnar, hepdata, PyTorch CPU; stats-backends with pyhf 0.7.6 and ArviZ 0.23.4 required | all pass, skip counts equal to the baseline; required backends 153 tests, no problems |
+| Tool-contract scopes, routing-harness and replay-scorer tests, release manifests, Ruff 0.16.10 (`py313`), mypy 2.4.0 (`3.13`) | pass |
+| Slow tier once (`HEP_SLOW_TESTS=1`) | 241 of 242 modules pass; `tests.examples.test_stats_benchmarks` timed out at 600 s under 6 parallel jobs, then passed alone (525 s; the baseline takes 544 s): a load effect near the module limit, the same on the baseline |
+| CI on 3.11 / 3.12 (the trial still ran them) | 6 failures each, all in `test_find_python` (the calling interpreter is below the floor): the intended withdrawal |
+
+Every backend already ran on Python 3.13 at the baseline, so none blocks the floor. The repository has no rulesets or
+branch protection on `main`, so removing the 3.11/3.12 jobs needs no required-status change. **Not verified here:**
+Python 3.14 (installable, not tested); Windows; the slow tier in CI (the weekly `latest` job last failed on
+2026-10-12 for an older runner timeout).

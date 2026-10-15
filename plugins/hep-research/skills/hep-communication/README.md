@@ -1,4 +1,4 @@
-# hep-communication
+# research-communication
 
 Use when the deliverable is scientific communication or literature work in physics: finding and verifying literature and citations, literature matrices and reviews, checking whether a source supports a claim, drafting or revising paper sections, abstracts and captions, figures and tables, diagrams as editable sources, talks and posters, referee reports, theses, proposals, handover notes, and packaging results with claim-to-result links and honest status. It answers questions about what a named experiment published from the evidence ledger, not memory.
 
@@ -20,6 +20,8 @@ Use when the deliverable is scientific communication or literature work in physi
 
 `build_lit_matrix.py` (a literature matrix from reading notes); `check_manuscript.py` (citations, labels, references and markers of a LaTeX manuscript; `--main` scans one document through its literal includes); `check_diagram_sources.py` (per-block render outcomes of the shipped diagram sources); and, for evidence-linked writing on a traceability record, `check_communication.py` (record, inputs, sources, manuscript occurrences), `audit_claims.py` (recorded assessments, read coverage, wording, numbers, reporting completeness; claim matrix and draft facts), `track_revision_impact.py` (baseline against revised record), `manage_literature.py` (offline import of ledgers, search logs and notices; never a lookup), `check_adaptation.py` (derived drafts against their manifest; referee replies from the action state) and `check_terminology.py` (glossary-scoped terminology and notation, English and Traditional Chinese). The evidence-linked tools (`check_communication.py`, `audit_claims.py`, `track_revision_impact.py`, `check_adaptation.py`, `check_terminology.py`) are read-only, print one JSON report (markdown is a view) and use the exit precedence input-error 2, fail 1, incomplete 3, pass 0. `manage_literature.py` has the same report and codes but writes the new literature record to `--out` (never one of its inputs). `check_manuscript.py` and `check_diagram_sources.py` print text by default and one JSON report with `--format json`, with the same exit codes. `build_lit_matrix.py` prints or writes a Markdown table and exits 0, or 2 on bad input; it has no JSON report and no incomplete state.
 
+Optional, outside this folder and required by nothing here: the adapter `adapters/literature-lookup` (owned by this skill) runs the INSPIRE-HEP, arXiv and ADS identifier lookups of `references/literature-lookup-recipes.md` and prints a metadata record per source with source URL, UTC retrieval time, read level and an arXiv version check. INSPIRE-HEP and arXiv are `tested-in-declared-environment` (E2, live smoke 2026-10-15); ADS is `demonstrated-on-synthetic-data` (no token was available); without the adapter or network a citation stays `not-verified`.
+
 ## References
 
 `references/academic-papers-guide.md` (its routing table names the minimum inputs, references and completion condition per task), `references/academic-diagrams-guide.md`, `references/evidence-linked-writing.md` for the traceability record and the three checks that go with it, `references/citation-verification.md` for sources, `references/revision-impact-tracking.md` for a changed result.
@@ -31,13 +33,13 @@ Use when the deliverable is scientific communication or literature work in physi
 | A missing or unclear result | the producing skill |
 | Physics correctness of a diagram or equation | hep-theory |
 | Statistical wording of a claim | hep-statistics |
-| Measurement design or selection behind a claim | hep-measurement |
-| Detector performance numbers | hep-detector |
+| Measurement design or selection behind a claim | hep-analysis |
+| Detector performance numbers | detector-response |
 | Code or scripts behind a figure or table | hep-computing |
 
 ## Tests and validation
 
-`tests/skills/hep_communication/` (sixteen test modules, including the golden evidence-linked scenario), the contracts tests for the communication format under `tests/contracts/`, and the behavioral evaluation outside the plugin under `evals/hep_communication/` (fixture-driven cases, a replay scorer with self-tests, and one recorded live run). What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
+`tests/skills/research_communication/` (sixteen test modules, including the golden evidence-linked scenario), the contracts tests for the communication format under `tests/contracts/`, the optional lookup adapter's offline tests `tests/adapters/test_literature_lookup.py` (recorded responses; a live smoke only with `HEP_LIVE_LOOKUP_TEST=1`), and the behavioral evaluation outside the plugin under `evals/research_communication/` (fixture-driven cases, a replay scorer with self-tests, and one recorded live run). What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
 
 ## How this folder is used
 

@@ -16,7 +16,7 @@ This README is for people. The skills route through [index.md](index.md); the ru
   is quoted only from a claim whose species, range, period and selection cover the statement. `evidence/index.md` is
   generated.
 - **Dataset records** of published measurements (`datasets/`), metadata only.
-- **Scripts** (`scripts/`): analysis-spec audit, paper-manifest and CRDB helpers.
+- **Scripts** (`scripts/`): analysis-spec audit and paper-manifest helpers; CRDB queries use the optional adapter `adapters/crdb` (`--exp-dates AMS` passed explicitly).
 
 It does not hold AMS internal data, notes, calibration constants, pass names, trigger bits, good-run rules or cuts.
 Do not give them to the agent unless your project's `agent_policy` allows that content on a qualified host configuration
@@ -51,7 +51,7 @@ Name AMS-02 in a request, or pin the profile in `hep-research.project.json` at y
 ```
 
 Networked scripts (`scripts/fetch_papers.py`: INSPIRE-HEP, arXiv, OpenAlex and the publisher or repository hosts its PDF
-links name; `scripts/crdb_query.py`: CRDB at `lpsc.in2p3.fr`) run only with your approval, over https, and only where the
+links name; the adapter `adapters/crdb/assets/crdb_query.py`: CRDB at `lpsc.in2p3.fr`) run only with your approval, over https, and only where the
 session's egress policy allows those destinations. They are maintainer tools, not for protected sessions.
 
 ## Tests

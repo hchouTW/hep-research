@@ -293,6 +293,7 @@ Scripts are in `<plugin root>/skills/hep-statistics/scripts/` unless an adapter 
 |---|---|---|
 | `result_artifact.py` | write a `statistical-result` that keeps a CLI's status | failed fit -> `failed` label; zero-exceedance bound typed (`test_result_artifact.py`) |
 | `covariance_fit.py` | fits with a declared covariance: constrained spectra, C(theta) with ln det, multiplicative (Peelle) | closed forms; diagonal approximation and data-scaled covariance detected (`test_covariance_fit.py`) |
+| `covariance_fit.py fit` (`tabulated-grid`) | parameters on a grid of gated predictions (multilinear, no extrapolation), cross sections as a nuisance or a model set, degenerate directions compared with the theory spec | synthetic grids: recovery (Asimov and 200 toys), the flat direction of a model that depends on D0/L only, refusals, exit 3 for a missing covariance (`test_grid_fit.py`) |
 | `sweighted_fit.py` | sWeighted fits: naive, SumW2, sandwich, asymptotic, bootstrap; sPlot independence check | RooFit AsymptoticError, toys and bootstrap; broken factorization flagged invalid (`test_sweighted_fit.py`) |
 | `bayes_calibration.py` | posterior quantiles vs a conjugate posterior; SBC with stated power (not PPC, not coverage) | missing Jacobian and mis-scaled posteriors fail (`test_bayes_calibration.py`); `bayes_diagnostics.py` matches ArviZ 0.23.4 (`test_bayes_arviz_oracle.py`) |
 | `eft_scan.py` (EXPERIMENTAL) | quadratic (EFT-like) models: disconnected sets, joint vs profiled, toy belt | closed-form boundaries; hull never reported (`test_eft_scan.py`) |
@@ -340,7 +341,7 @@ Benchmarks: `<plugin root>/examples/stats-benchmarks/` (coverage grid of the cou
 ## Broken power law
 
 `broken_power_law.py` (helper, no CLI) is the plugin's one parametrization, used by
-`covariance_fit.py` here and by hep-measurement `cr_spectrum_powerlaw_fit.py`, which give identical model values
+`covariance_fit.py` here and by hep-analysis `cr_spectrum_powerlaw_fit.py`, which give identical model values
 (`tests/core/test_stats_broken_power_law.py`). Parameters `[ln A, gamma1, gamma2, ln x_b]`;
 `ln F = ln A - gamma1 (u - h) - gamma2 h`, `u = ln(x / x_b)`, with `h = max(u, 0)` for a sharp break and
 `h = s ln((1 + e^(u/s)) / 2)` for a smooth one: `F = A (x/x_b)^-gamma1` below and `A (x/x_b)^-gamma2` above a
@@ -352,4 +353,56 @@ form written as `[1 + (x/x_b)^(Delta gamma / s)]^s` uses another s and another n
 comparing. The two tools minimize different objectives (chi2 in ln F with the linearized covariance; chi2 in F
 with the full covariance), so on the same points their fits agree to a fraction of sigma (0.17 sigma at most on
 40 seeded toys), and exactly on Asimov points. A sharp break makes the chi2 kinked in ln x_b: start
-`covariance_fit.py fit` from a profiled break (the hep-measurement fit or `break-scan`), not from a guess.
+`covariance_fit.py fit` from a profiled break (the hep-analysis fit or `break-scan`), not from a guess.
+
+## Fits on a grid of predictions (`tabulated-grid`)
+
+`covariance_fit.py fit` with `"model": "tabulated-grid"` fits parameters that a prediction code tabulates on a grid
+(for example D0 and L of a diffusion model, or a slab model's escape grammage) to one measurement, without running
+user code. Grid representation (no schema change): **one `prediction` artifact per grid node**, with
+`"representation": "grid"`, the node in `parameter_point` and the observable's bins in `values`; a single artifact
+cannot carry the parameter axes. A grid over (D0, L):
+
+```json
+{"model": "tabulated-grid",
+ "measurement": "ratio-data.json",
+ "predictions": ["pred-D0_1.0-L_2.0.json", "pred-D0_1.0-L_4.0.json", "..."],
+ "grid": {"parameters": [{"name": "D0", "scale": "log"}, {"name": "L", "scale": "log"}]},
+ "theory_spec": "theory-spec.json",
+ "combinations": ["D0/L"],
+ "multiplicative": {"relative_cov": [[0.0025, "..."]], "mode": "nuisance"},
+ "model_set": {"alternative_key": "xs_set",
+               "prescription": {"kind": "min-max", "owner": "hep-theory", "justification": "..."}},
+ "gate_plan": {"measurement_conditions": {"phi": 0.5}}}
+```
+
+Each node's `parameter_point` holds `D0` and `L` (numbers; `scale: "log"` interpolates and fits in ln D0, ln L, which
+makes a D0/L degeneracy a straight line; use the same log spacing on both axes), the alternative key when cross-section
+sets are model alternatives, and any fixed parameter, which must then appear in `gate_plan.measurement_conditions`.
+The nodes must form the full rectilinear grid, at least two per axis. Paths are relative to the input file.
+
+- **Gate first.** Every prediction goes through `contracts/comparison/gate.py` `check()` against the measurement
+  (a `dataset-record` with data); one that is not comparable, or a fit without a measurement, is refused (exit 1).
+  The grid parameters are what is fitted, so they are passed to the gate as conditions equal to the node's values.
+- **Data covariance** from the measurement's uncertainty components (`uncorrelated`, `fully-correlated`,
+  `covariance` with `covariance_ref`, a JSON `{"matrix"}`); a component with correlation `unknown`, an unreadable
+  ref, or no covariance at all is listed under `missing` with `"status": "incomplete"`, exit 3. No diagonal matrix
+  is assumed.
+- **Cross sections:** a common normalization as a constrained nuisance (`multiplicative`, mode `nuisance`, the form
+  recommended for a common normalization in `combinations.md`), and/or alternative sets fitted one by one, with `model_set()` and
+  `envelope()` (min-max, a hep-theory prescription, never Gaussian) over the fitted parameters and combinations.
+  `cross_section_uncertainty.mode` records `none`, `nuisance`, `model-set` or `nuisance+model-set`.
+- **No extrapolation:** interpolation is multilinear in the fit coordinates; a start or an evaluation outside the
+  grid, or a best fit on an edge with chi2 still falling outward, is refused (exit 1).
+- **Degenerate directions:** the Fisher matrix J^T C^-1 J (J over one grid cell; the nuisance profiled) is
+  diagonalized; a direction whose 1-sigma half-width exceeds half the grid chord along it is reported with its
+  eigenvector and the condition number, and compared with the theory spec's `degenerate_directions` (`"D0/L"`
+  predicts the flat direction (1, 1) in (ln D0, ln L)); a mismatch is a warning. Parameters along a flat direction
+  get no error; `combinations` such as `D0/L` get a value and `sigma_ln` when they are orthogonal to it. The best
+  fit along a flat direction is not a measurement.
+
+Measured on synthetic grids (`tests/skills/hep_statistics/test_grid_fit.py`): Asimov recovery within 0.1 sigma;
+200 toys give pulls with mean within 4 standard errors of 0 and width within 0.15 of 1; a ratio that depends on L/D0
+only gives one flat direction along (1, 1)/sqrt(2), matched to `D0/L`, with D0/L recovered within 2%. Not validated:
+grids from a real propagation code, more than a few parameters (the start scans every node), and interval coverage
+along a near-flat direction.

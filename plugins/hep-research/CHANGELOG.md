@@ -5,6 +5,99 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+<!-- py313 -->
+- **Python 3.13 is the minimum** (validation-first migration; Gate 1 evidence in VALIDATION PY313-FLOOR): `requires-python = ">=3.13"`, Ruff `py313`, mypy `3.13`; `skills/hep-computing/scripts/find_python.py` selects only Python 3.13 or newer (default and lowest allowed `--min-python` 3.13: a lower value is bad usage, exit 2; `find()` raises `ValueError`), with 3.11/3.12 rejection, fallback and all-old tests. CI's checks matrix runs on Python 3.13 only (4 jobs instead of 12; the backend jobs already ran on 3.13 and are unchanged), and `checks-complete` reconciles 3.13 only. **Migration:** Python 3.11 and 3.12 are no longer supported or tested; create the environment with Python 3.13 (`python3.13 -m venv ...`, then `pip install -r requirements-core.txt`) and point `HEP_RESEARCH_PYTHON` at it. Scripts run directly are not stopped by `requires-python`; the skills choose the interpreter with `find_python.py`. Python 3.14 is installable but not tested. Dependency pins are unchanged (the 3.11-era upper bounds in `requirements-ci-constraints.txt` stay until a separate dependency change).
+<!-- wp10 -->
+- Capability statements for cosmic-ray propagation rewritten to the achieved status (WP10): guidance, the two narrow theory-domain profiles, the `tabulated-grid` fit and `examples/bc-propagation-fit` are demonstrated on synthetic data; only global fits that run a propagation code stay outside v1 (capability matrix, `cosmic-ray-propagation.md`, hep-theory README). The hep-statistics description's out-of-v1 example is now "global propagation fits" (1,016 characters) and the shared context-resolution stanza says "global cosmic-ray propagation fits" in all seven SKILL.md files; the four WP11 propagation-fit routing cases are direct cases now (static routing passes).
+
+<!-- wp8 -->
+- Profile `theory:cr-secondary-antiprotons` 0.1.0: the secondary antiproton source term q(T_pbar) for the channels
+  pp, pHe, Hep and HeHe with the antineutron and hyperon factor (2 + Delta_IS + 2 Delta_Lambda), following the
+  hep-theory cosmic-ray reference conventions. TOY x-scaling cross sections with ILLUSTRATIVE values (no published
+  parametrization reproduced); the closed-form source integral (incomplete beta functions, checked in SymPy) is the
+  internal benchmark of the numerical quadrature (agreement 3e-15, criterion 1e-8). `model.family` is
+  `cosmic-ray-secondary-source-term`, so `theory.degeneracy_missing` does not apply. 36 profile tests, capabilities at
+  `demonstrated-on-synthetic-data`. Published source-term values as a benchmark remain open (B2). Registry 2,001 bytes.
+- Example `examples/bc-propagation-fit/`: a 21 x 21 log-spaced (D0, L) grid of `theory:cr-secondary-ratio`
+  predictions (882 gated artifacts, two illustrative cross-section sets), SYNTHETIC B/C points with a full covariance,
+  and `covariance_fit.py` `tabulated-grid`: D0/L recovered (Asimov within 0.25 sigma, pseudo-data pull -0.41, 100 toys
+  with pull mean 0.02 and width 0.95), D0 and L unconstrained, one degenerate direction along (1, 1) matched to the
+  theory spec's `D0/L`, cross sections as a model set; ungated, rigidity-binned, unfolded-level and
+  unknown-correlation inputs refused. Test `tests/examples/test_bc_propagation_fit.py`.
+
+<!-- wp9 -->
+- `adapters/crdb` 0.1.0 (owner hep-theory, optional, `tested-in-declared-environment` on E2 with CRDB V4.2): one query of the CRDB (LPSC) REST interface, promoted from the ams-02 profile's `scripts/crdb_query.py`. No default experiment filter (`url`/`fetch` without `--exp-dates` or `--all-experiments` exit 2); every summarized row and sub-experiment group carries `secondary: true`; the `.meta.json` sidecar holds the request (parameters, URL, User-Agent), UTC retrieval time, CRDB version, export date and the SHA-256 of the saved file. HEPData or the paper's tables are primary; a CRDB value is a cross-check or a fallback labelled secondary. Offline tests replay four CRDB exports recorded live on 2026-10-15 (`tests/adapters/test_crdb_query.py`, VALIDATION CRDB-ADAPTER).
+
+- ams-02 profile: `scripts/crdb_query.py` and `tests/test_crdb_query.py` removed; the profile lists `adapter:crdb` as optional and its cross-check step passes `--exp-dates AMS` explicitly; capability `papers-manifest-and-crdb-query` renamed `papers-manifest`. `cosmic-ray-databases.md` records that `exp_dates=AMS` also returned an AMS01 row (2026-10-15). Rules and claims C125-C129 unchanged.
+
+<!-- wp3 -->
+# WP3 changelog bullets (for "Unreleased")
+
+- Profile `theory:cr-secondary-ratio` 0.1.0, the first narrow cosmic-ray propagation domain: B/C (from C and O) in a
+  weighted-slab (leaky-box) model and a 1D thin-disc diffusion model without convection. SymPy checks of the closed
+  forms, of their equivalence through lambda_esc = n_H m_H h v L / D and of the resulting D0/L invariance
+  (`scripts/derive.py`); a benchmark of the closed forms against the profile's own numerical solutions (slab ODEs
+  averaged over the path-length distribution, a finite-thickness disc solved exactly and by finite volumes, and its
+  thin-disc limit; `scripts/predict.py --benchmark`); a theory-spec artifact with `model.family`
+  `cosmic-ray-propagation` and `degenerate_directions: ["D0/L"]`; a bin-averaged prediction artifact with a
+  cross-section model alternative; and a prediction callable at any parameter point and on (D0, L) grids
+  (`predict.evaluate`, `predict.grid`, `predict.bin_averaged`, CLI `--set` / `--grid`) for the grid fit of WP1/WP8.
+  Cross sections and transport values are ILLUSTRATIVE; references are cited but were not opened (no network).
+  Status `demonstrated-on-synthetic-data`, 37 profile tests, including one showing that a theory-spec without
+  `degenerate_directions` fails `contracts/validate.py` with `theory.degeneracy_missing`.
+- Capability matrix: a "Profiles" row for `theory:cr-secondary-ratio`.
+
+- `examples/eic-profile-routing/output/` regenerated: the run lists every registered `profile.json` it opens, which now
+  includes the new profile.
+
+<!-- ci2 -->
+- CI: a new commit on a pull request cancels that PR's superseded `tests` run (pushes to main, the weekly and manual runs are never cancelled); pip downloads are cached by `setup-python`, keyed on `requirements-ci.lock` (installs and tests still run in full every time). Batch 2 (low-risk part) of the CI improvement proposal.
+
+<!-- wp1 -->
+- hep-statistics: `covariance_fit.py fit` model `tabulated-grid`: fits grid parameters (for example D0 and L) to a
+  `dataset-record` from one `prediction` artifact per grid node (`representation: "grid"`, node in `parameter_point`;
+  no schema change). Every prediction passes `contracts/comparison/gate.py` first (ungated or not comparable: exit 1);
+  multilinear interpolation in the fit coordinates (`scale: "log"` or `"linear"`), no extrapolation (a start outside
+  the grid or a minimum beyond its edge is refused); cross-section uncertainty as a rank-one normalization nuisance
+  (`multiplicative`, mode `nuisance`) and/or alternative sets through `model_set()` and `envelope()`, the mode recorded
+  in `cross_section_uncertainty.mode`; degenerate directions from the Fisher matrix reported with eigenvector and
+  condition number and compared with the theory spec's `degenerate_directions` (mismatch: warning); `combinations`
+  such as `D0/L` reported with `sigma_ln`. Tests: `tests/skills/hep_statistics/test_grid_fit.py` (synthetic only).
+  Status: demonstrated on synthetic data (E2, 2026-10-15).
+- `covariance_fit.py`: exit code 3 (`"status": "incomplete"`, `missing`) when a data covariance or an uncertainty
+  correlation is missing; a diagonal matrix is never assumed.
+
+- `covariance_fit.py`: a field of the wrong JSON type now gives exit 2 with a JSON error instead of a traceback.
+
+<!-- ci1 -->
+- CI (batch 1 of the CI improvement proposal, test obligations unchanged): `tools/run_all_checks.py` records seconds for every check, prints failed test ids with their traceback tails (profile suites and `check_ams_optional` included) and writes a Markdown job summary with `--summary FILE`; `--part static` and `--part ams-optional` split `--part checks` so the AMS-optionality check (about 75 % of the old "static and profiles" job) runs as its own CI job. Each units run records its plan (full module list with SHA-256, the shard's modules, the timings digest).
+- CI: new `tools/reconcile_check_runs.py` and required-in-practice `checks-complete` job: every expected checks run (Python 3.11-3.13 × units 1/2, 2/2, static, ams-optional) present once, of the tested commit, passing, with only the host CLI checks skipped, every planned check reported, and the shards partitioning this tree's module list (planned from the same timings); runs after failures (`always()`), and a missing record fails it. Fault-injection tests in `tests/tools/test_reconcile_check_runs.py`. Its first local run caught shards planned from two different timing files (a module in two shards, others in none) at equal test counts.
+- `tools/module_timings.json` refreshed from GitHub Actions run 38680162693 (median of the 6 units-shard samples per module; 53 modules had no record, `test_stats_statistical_toys` was recorded at 70 s and now takes 177 s): the planned 2-shard split of the measured time goes from 1028 s / 845 s to 937 s / 937 s.
+
+<!-- wp5 -->
+- `adapters/literature-lookup` 0.1.0 (optional, owned by research-communication, standard library only): `literature_lookup.py` looks up an arXiv id (with or without version), DOI, INSPIRE record id or ADS bibcode in INSPIRE-HEP, arXiv and ADS and prints one record per source with source URL, UTC retrieval time, read level and an arXiv version check; HTTP 429 reported as `rate-limited` and never retried; ADS token from `ADS_API_TOKEN`/`ADS_TOKEN`, never printed or recorded, `not-verified` without it; `--replay`/`--record` for recorded responses. Exit 0 found, 1 not found, 2 bad input, 3 incomplete. Status `demonstrated-on-synthetic-data` (INSPIRE-HEP and arXiv `tested-in-declared-environment`, ADS on a constructed response only).
+- `tests/adapters/test_literature_lookup.py` with fixtures recorded from INSPIRE-HEP and arXiv on 2026-10-15 (found, not found, HTTP 404, a real arXiv HTTP 429, version mismatch) and constructed INSPIRE 429 and ADS responses; offline (urlopen patched to fail); live smoke only with `HEP_LIVE_LOOKUP_TEST=1`.
+
+- Capability matrix: "Literature and citation verification online" raised from `unverified` to `tested-in-declared-environment` for INSPIRE-HEP and arXiv (E2, live 2026-10-15), ADS `demonstrated-on-synthetic-data`; new Adapters row. VALIDATION LITERATURE-LOOKUP.
+- `literature-lookup-recipes.md`: optional lookup-client section; arXiv answered HTTP 429 to a nonexistent id (observed 2026-10-15). research-communication README and `docs/adapter-authoring.md` (network declaration) updated.
+
+<!-- wp11 -->
+- Routing: 27 new cases (set `WP11`, 13 en / 14 zh-Hant) in `tests/routing/make_cases.py` for cosmic-ray interpretation, propagation fits (hep-statistics, limited support until WP10), time-series inference, cross-experiment comparison, CRDB queries, a custom e/p classifier in a measurement (physics-ml, handoff to hep-analysis), and the dark-matter-interpretation (hep-theory, limited support) and latest-B/C-paper (research-communication) boundaries; `cases.json` regenerated (241 cases). The live harness in `evals/routing/` reads the same `cases.json`, so it picks them up unchanged.
+
+<!-- wp2 -->
+- `skills/hep-statistics/references/time-series-inference.md` (documented): inference on **binned** time series:
+  time-bin covariance as statistical + fully correlated time-independent + time-dependent blocks (valid exponential or
+  epoch correlations, positive-definiteness, correlation-time limits, no averaging down, cancellation in ratios,
+  rigidity x time Kronecker structure, Peelle); periodicity against an AR(1) red-noise null fitted with the measurement
+  covariance and why Rayleigh/Z_m^2 (event-level, white noise) do not apply; trials across periods and energy bins by
+  toys of the complete procedure (pattern of `look_elsewhere.py` and `global_significance.py`, which are not periodogram
+  tools; the shipped Gross-Vitells bound is one degree of freedom); joint multi-period fits with one modulation
+  parameter per period, shared parameters and nuisances for time-independent sources via `covariance_fit.py` plug-in.
+  Linked from `SKILL.md` Resources, the core-stats-guide reference index and `astroparticle-statistics.md`.
+- `tests/skills/hep_statistics/test_time_series_covariance.py`: the covariance recipe on a synthetic series
+  (demonstrated-on-synthetic-data); a nearest-neighbour correlation of 0.7 is refused by `validate_covariance.py` as
+  not PSD.
+
 <!-- wp4 -->
 - hep-measurement: `references/cosmic-ray-measurements.md`, an index of cosmic-ray measurement types (absolute flux, flux ratios, isotope ratios, time-dependent flux, rare-event searches) that links existing sections in hep-measurement, hep-detector, hep-statistics and hep-communication, plus new anisotropy measurement design: estimand (first harmonic, equatorial dipole projection, 3D dipole), directional exposure and its non-uniformity (simulated vs data-driven, east-west method), harmonic and full-sky dipole estimators, partial-sky multipole coupling, amplitude bias, solar/sidereal/anti-sidereal checks, and upper limits on the amplitude with the limit construction handed to hep-statistics (Linsley 1975, Sommers 2001, Billoir & Deligny 2008, Ahlers & Mertsch 2017, Compton & Getting 1935, Farley & Storey 1954, Alexandreas et al. 1993, Bonino et al. 2011). Linked from `SKILL.md` Resources and the analysis guide's routing table; capability matrix row `documented`.
 

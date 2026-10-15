@@ -1,0 +1,269 @@
+{
+ "label": "SYNTHETIC end-to-end B/C grid fit with theory:cr-secondary-ratio (ILLUSTRATIVE inputs)",
+ "profile": {
+  "id": "theory:cr-secondary-ratio",
+  "version": "0.1.0"
+ },
+ "grid": {
+  "D0_cm2_s": [
+   1e+28,
+   1e+29
+  ],
+  "L_kpc": [
+   1.0,
+   10.0
+  ],
+  "nodes_per_axis": 21,
+  "log_step_dex": 0.05,
+  "cross_section_sets": [
+   "models/xs-illustrative-A.json",
+   "models/xs-illustrative-B.json"
+  ],
+  "nodes_total": 882,
+  "combined_sha256": "34b9e3fedb9ca551ddb08f7c15e57cd53ce3d34a4573db13d18b4e18053b2a3b"
+ },
+ "data": {
+  "edges_gev_per_n": [
+   1.0,
+   1.77827941004,
+   3.16227766017,
+   5.6234132519,
+   10.0,
+   17.7827941004,
+   31.6227766017,
+   56.234132519,
+   100.0,
+   177.827941004,
+   316.227766017,
+   562.34132519,
+   1000.0
+  ],
+  "truth": {
+   "D0": 3e+28,
+   "L": 4.0,
+   "D0_over_L": 7.5e+27,
+   "cross_section_set": "models/xs-illustrative-A.json"
+  },
+  "truth_values": [
+   0.125297229645,
+   0.107561552275,
+   0.0901109638703,
+   0.0737270629092,
+   0.0590862558133,
+   0.0465658216152,
+   0.0362282386337,
+   0.0279151080288,
+   0.0213570915626,
+   0.0162545990017,
+   0.0123237844687,
+   0.00931719555435
+  ],
+  "pseudo_values": [
+   0.127412296536,
+   0.103572975517,
+   0.0842501050065,
+   0.0711347568104,
+   0.0581985460216,
+   0.0464947731216,
+   0.0362656390065,
+   0.028033474653,
+   0.021750061662,
+   0.0169253446224,
+   0.0126528098662,
+   0.00997744551946
+  ],
+  "seed": 20261015,
+  "level": "crsr:local-interstellar",
+  "covariance": "3% uncorrelated + 2% correlated (exp(-|d ln E| / 1.5))"
+ },
+ "asimov": {
+  "alternative": null,
+  "chi2": 0.000389029454299,
+  "dof": 11,
+  "D0_over_L": 7.50972777992e+27,
+  "ln_D0_over_L": 64.1859967283,
+  "sigma_ln_D0_over_L": 0.0165952506857,
+  "D0_over_L_constrained": true,
+  "parameters": {
+   "D0": {
+    "best_fit": 2.66455195388e+28,
+    "constrained": false
+   },
+   "L": {
+    "best_fit": 3.54813387645,
+    "constrained": false
+   }
+  },
+  "degenerate_directions": [
+   {
+    "eigenvector": {
+     "D0": 0.707106781186,
+     "L": 0.707106781187
+    },
+    "matches_theory_spec": "D0/L",
+    "condition_number_log10": 16.2
+   }
+  ]
+ },
+ "pseudo_data": {
+  "fits": {
+   "models/xs-illustrative-A.json": {
+    "alternative": "models/xs-illustrative-A.json",
+    "chi2": 9.37295513242,
+    "dof": 11,
+    "D0_over_L": 7.4490556484e+27,
+    "ln_D0_over_L": 64.1778847766,
+    "sigma_ln_D0_over_L": 0.0164856636077,
+    "D0_over_L_constrained": true,
+    "parameters": {
+     "D0": {
+      "best_fit": 2.89101481318e+28,
+      "constrained": false
+     },
+     "L": {
+      "best_fit": 3.88104875253,
+      "constrained": false
+     }
+    },
+    "degenerate_directions": [
+     {
+      "eigenvector": {
+       "D0": 0.707106781187,
+       "L": 0.707106781186
+      },
+      "matches_theory_spec": "D0/L",
+      "condition_number_log10": 17.2
+     }
+    ]
+   },
+   "models/xs-illustrative-B.json": {
+    "alternative": "models/xs-illustrative-B.json",
+    "chi2": 16.5180138932,
+    "dof": 11,
+    "D0_over_L": 8.77534892934e+27,
+    "ln_D0_over_L": 64.3417440434,
+    "sigma_ln_D0_over_L": 0.0161618274917,
+    "D0_over_L_constrained": true,
+    "parameters": {
+     "D0": {
+      "best_fit": 3.13784897583e+28,
+      "constrained": false
+     },
+     "L": {
+      "best_fit": 3.57575408237,
+      "constrained": false
+     }
+    },
+    "degenerate_directions": [
+     {
+      "eigenvector": {
+       "D0": 0.707106781186,
+       "L": 0.707106781187
+      },
+      "matches_theory_spec": "D0/L",
+      "condition_number_log10": null
+     }
+    ]
+   }
+  },
+  "chi2_p_set_A": 0.587508583369,
+  "pull_ln_D0_over_L_set_A": -0.413435269801,
+  "cross_section_uncertainty": {
+   "mode": "model-set",
+   "alternative_key": "cross_section_set",
+   "alternatives": [
+    "models/xs-illustrative-A.json",
+    "models/xs-illustrative-B.json"
+   ]
+  },
+  "envelope": {
+   "D0_over_L_lower": 7.4490556484e+27,
+   "D0_over_L_upper": 8.77534892934e+27,
+   "kind": "model-alternative",
+   "gaussian": false,
+   "prescription": {
+    "kind": "min-max",
+    "owner": "hep-theory",
+    "justification": "two ILLUSTRATIVE cross-section sets of the profile; their spread is a model alternative, not a Gaussian uncertainty"
+   }
+  },
+  "theory_spec_degenerate_directions": [
+   "D0/L"
+  ],
+  "warnings": [],
+  "carried_statuses": [
+   "synthetic",
+   "unvalidated"
+  ]
+ },
+ "toys": {
+  "n": 100,
+  "seed": 20261015,
+  "mean_pull": 0.015890433616,
+  "sd_pull": 0.952059607406,
+  "standard_error_of_mean": 0.0952059607406
+ },
+ "negative_variants": [
+  {
+   "name": "ungated-no-measurement",
+   "exit": 1,
+   "expected_exit": 1,
+   "refused": true,
+   "status": "refused",
+   "error": "ungated: no measurement artifact to gate the predictions against; a grid prediction is fitted only after contracts/comparison/gate.py finds it comparable with the measurement",
+   "missing": null
+  },
+  {
+   "name": "rigidity-bins",
+   "exit": 1,
+   "expected_exit": 1,
+   "refused": true,
+   "status": "refused",
+   "error": "441 of 441 prediction(s) did not pass the comparison gate; they are not fitted: [{\"prediction\": \"bcfit-node-xsA-D0_1e+28-L_1\", \"status\": \"not-comparable\", \"mismatches\": [{\"field\": \"variable\", \"reason\": \"variable differs after the declared transformations\"}, {\"field\": \"variable_unit\", \"reason\": \"vari",
+   "missing": null
+  },
+  {
+   "name": "unfolded-level",
+   "exit": 1,
+   "expected_exit": 1,
+   "refused": true,
+   "status": "refused",
+   "error": "441 of 441 prediction(s) did not pass the comparison gate; they are not fitted: [{\"prediction\": \"bcfit-node-xsA-D0_1e+28-L_1\", \"status\": \"not-comparable\", \"mismatches\": [{\"field\": \"level\", \"reason\": \"levels differ after the declared transformations\"}], \"findings\": []}, {\"prediction\": \"bcfit-node-xsA",
+   "missing": null
+  },
+  {
+   "name": "unknown-correlation",
+   "exit": 3,
+   "expected_exit": 3,
+   "refused": true,
+   "status": "incomplete",
+   "error": "the data covariance is incomplete; it is recorded as missing, never replaced by a diagonal matrix",
+   "missing": [
+    {
+     "component": "systematic of unknown correlation",
+     "reason": "correlation 'unknown': no covariance can be built"
+    }
+   ]
+  }
+ ],
+ "criteria": {
+  "all_nodes_gated_comparable": true,
+  "asimov_one_degenerate_direction_along_1_1_matched_D0_over_L": true,
+  "asimov_D0_and_L_unconstrained": true,
+  "asimov_ln_D0_over_L_within_0.25_sigma": true,
+  "pseudo_ln_D0_over_L_within_3_sigma": true,
+  "pseudo_chi2_p_above_0.001": true,
+  "pseudo_degenerate_direction_matched": true,
+  "toys_mean_pull_within_4_standard_errors": true,
+  "toys_pull_sd_within_0.2_of_1": true,
+  "model_set_mode_and_envelope": true,
+  "negatives_refused_with_expected_exit": true,
+  "unknown_correlation_incomplete": true
+ },
+ "pass": true,
+ "environment": {
+  "python": "3.13.2",
+  "numpy": "2.5.3",
+  "scipy": "1.18.1"
+ }
+}
