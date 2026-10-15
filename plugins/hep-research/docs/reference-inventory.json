@@ -30,7 +30,7 @@
   },
   "physics-ml": {
    "references": 38,
-   "bytes": 179135,
+   "bytes": 180786,
    "uncited": 0
   },
   "research-communication": {
@@ -2199,8 +2199,8 @@
   {
    "path": "skills/physics-ml/references/ml-analysis.md",
    "owner": "physics-ml",
-   "bytes": 27974,
-   "lines": 359,
+   "bytes": 29625,
+   "lines": 378,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/detector-response/references/imaging-atmospheric-cherenkov.md",
@@ -2209,6 +2209,7 @@
     "skills/physics-ml/SKILL.md",
     "skills/physics-ml/assets/calibration.py",
     "skills/physics-ml/assets/hep_losses.py",
+    "skills/physics-ml/assets/pretraining-split.example.json",
     "skills/physics-ml/assets/set_classifier.py",
     "skills/physics-ml/references/data-loading.md",
     "skills/physics-ml/references/data-strategy.md",
@@ -2230,6 +2231,7 @@
     "skills/physics-ml/references/transformer-architectures.md",
     "skills/physics-ml/references/uncertainty-and-calibration.md",
     "skills/physics-ml/scripts/make_grouped_splits.py",
+    "tests/skills/physics_ml/test_pretraining_freeze.py",
     "tests/skills/physics_ml/test_training_pipeline.py"
    ],
    "cited_by_other_skills": [
