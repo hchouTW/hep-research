@@ -1,0 +1,169 @@
+{
+ "contract_version": "2.8.0",
+ "artifact_id": "crpb-theory-spec-source-term",
+ "artifact_type": "theory-spec",
+ "objective": "Theory spec of the secondary antiproton source term of theory:cr-secondary-antiprotons (pp, pHe, Hep, HeHe; antineutrons and hyperons) with an ILLUSTRATIVE toy cross section",
+ "bindings": {
+  "experiments": [],
+  "theory": [
+   {
+    "profile": "theory:cr-secondary-antiprotons",
+    "version": "0.1.0"
+   }
+  ]
+ },
+ "versions": {
+  "plugin": "0.10.1",
+  "contracts": "2.8.0",
+  "profiles": {
+   "theory:cr-secondary-antiprotons": "0.1.0"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-theory",
+  "created": "2026-10-15",
+  "evidence_ids": [
+   "crpb:C01",
+   "crpb:C02",
+   "crpb:C04",
+   "crpb:C05",
+   "crpb:C06"
+  ]
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "model": {
+   "id": "crpb-source-term-toy-xscaling",
+   "description": "secondary antiproton source term q(T) = sum_ij 4 pi n_j int phi_i dsigma_ij/dT dT_i for p and He projectiles on H and He gas, prompt antiprotons times the antineutron and hyperon factor; toy x-scaling pp cross section with constant channel rescaling",
+   "family": "cosmic-ray-secondary-source-term"
+  },
+  "domain_profile": "theory:cr-secondary-antiprotons",
+  "assumptions": [
+   "steady, spatially uniform gas and primary fluxes (a local source term, before propagation)",
+   "projectiles p and He, targets H and He; heavier nuclei neglected",
+   "nuclear channels obtained from pp by constant factors at the same energy per nucleon (ILLUSTRATIVE)",
+   "antineutrons and hyperon feed-down as multiplicative factors on the prompt antiproton cross section",
+   "cross sections are inputs: a toy x-scaling form with ILLUSTRATIVE parameters, not a published parametrization",
+   "primary fluxes are inputs: ILLUSTRATIVE power laws in kinetic energy per nucleon"
+  ],
+  "conventions": {
+   "unit_system": "CGS for the source term: q in cm^-3 s^-1 GeV^-1, gas densities in cm^-3, primary fluxes in cm^-2 s^-1 sr^-1 (GeV/n)^-1, cross sections in mb (1 mb = 1e-27 cm^2) and dsigma/dT in mb/GeV; energies in GeV [crpb:C06]",
+   "hbar_c_one": false,
+   "metric_signature": "not-applicable (no relativistic amplitude is computed)",
+   "coupling_normalization": "not-applicable",
+   "renormalization_scheme": "not-applicable",
+   "scales": "reference energy T0 of the primary power laws (benchmark T0 = 1 GeV/n); production threshold T_th = (k_th - 1) m_p per nucleon with k_th = 7 [crpb:C02]",
+   "energy_variable": "antiproton kinetic energy T_pbar in GeV; projectiles by kinetic energy per nucleon T_i in GeV/n",
+   "frame": "Galactic rest frame (interstellar gas at rest)",
+   "angle_definition": "not-applicable (isotropic, angle-integrated source term)",
+   "spin_treatment": "not-applicable",
+   "mass_approximation": "proton mass m_p = 0.93827208816 GeV (CODATA 2018) for the threshold; nuclear binding and Fermi motion neglected [crpb:C06]",
+   "crpb:source_term": "q_ij(T) = 4 pi n_j int_{T_th}^{oo} dT_i phi_i(T_i) dsigma_ij/dT(T_i, T), summed over projectiles i in {p, He} and targets j in {H, He} (channels pp, pHe, Hep, HeHe; projectile first) [crpb:C01]",
+   "crpb:ism": "interstellar gas of hydrogen and helium only, n_He / n_H = 0.1; heavier targets and projectiles neglected [crpb:C02, crpb:C03]",
+   "crpb:antineutrons_hyperons": "total = prompt antiprotons x (2 + Delta_IS + 2 Delta_Lambda) with both included, booked as (1 + Delta_Lambda) for antiprotons plus (1 + Delta_IS + Delta_Lambda) for antineutrons; Delta_Lambda = c_Lambda (Lambda-bar / pbar); each part can be excluded and the choice is stated [crpb:C04, crpb:C05]",
+   "crpb:cross_sections": "input sets under models/ (xs-toy-*.json): an ILLUSTRATIVE toy x-scaling prompt pp cross section, constant ILLUSTRATIVE channel rescaling factors, Delta_IS and Lambda-bar/pbar; not a published parametrization; a choice between sets is a model-alternative uncertainty object, never a Gaussian per bin [crpb:C05]",
+   "crpb:bin_average": "a binned value is the total source term averaged linearly in T_pbar over the bin, (1/Delta T) int q dT (Gauss-Legendre, 8 nodes per piece, split at T_th)"
+  },
+  "order": "not-applicable (source integral over a parametrized cross section, no perturbative expansion)",
+  "parameters": {
+   "n_H_cm3": 1.0,
+   "He_to_H": 0.1,
+   "primaries": {
+    "p": {
+     "form": "power-law",
+     "K": 1.0,
+     "T0_gev": 1.0,
+     "gamma": 2.8
+    },
+    "He": {
+     "form": "power-law",
+     "K": 0.05,
+     "T0_gev": 1.0,
+     "gamma": 2.7
+    }
+   },
+   "antineutrons": "included",
+   "hyperons": "included",
+   "cross_section_set": "models/xs-toy-A.json",
+   "threshold_gev_per_n": 5.62963252896
+  },
+  "scales": {
+   "T0_gev": 1.0,
+   "meaning": "reference energy per nucleon of the primary power laws"
+  },
+  "derivation_status": "analytic-derivation",
+  "validity_domain": {
+   "antiproton_kinetic_energy_gev": [
+    1.0,
+    500.0
+   ],
+   "physics": "the toy cross section is a placeholder: the result tests the source-integral machinery and its bookkeeping, it is not a physical antiproton source term"
+  },
+  "checks_run": [
+   {
+    "name": "substitution x = T/T_i maps the source integral to an incomplete beta function (SymPy)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "above threshold: beta function B(gamma, n + 1) for symbolic gamma, n = 0, 1, 2, 3, 7 (SymPy)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "below threshold: incomplete beta B(T/T_th; gamma, n + 1), n = 2 (SymPy)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "antineutron and hyperon bookkeeping equals 2 + Delta_IS + 2 Delta_Lambda (SymPy)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "numerical quadrature vs closed form, four channels, power-law and broken power-law primaries, energies on both sides of the threshold",
+    "result": "pass",
+    "tolerance": 1e-08
+   },
+   {
+    "name": "hand-computed point (n = 0, pure power law)",
+    "result": "pass",
+    "tolerance": 1e-10
+   },
+   {
+    "name": "units and dimensions (q in cm^-3 s^-1 GeV^-1)",
+    "result": "pass",
+    "tolerance": "exact"
+   }
+  ],
+  "checks_not_run": [
+   "comparison with published source-term values (open question B2: which table or figure, and whether digitizing a figure is acceptable)",
+   "any published cross-section parametrization (none is reproduced; the toy sets are ILLUSTRATIVE)",
+   "propagation of the source term and comparison with measured antiproton fluxes",
+   "degenerate-direction analysis: not applicable, model.family is a source term, not cosmic-ray-propagation, so contracts/validate.py does not require degenerate_directions"
+  ],
+  "references_read": [],
+  "derivation_record": "derivations/derivation-record.md",
+  "inapplicable": [
+   "metric_signature",
+   "coupling_normalization",
+   "renormalization_scheme",
+   "angle_definition",
+   "spin_treatment"
+  ],
+  "neglected": [
+   "energy dependence of the channel rescaling",
+   "nuclear threshold lowering (Fermi motion)",
+   "projectiles and targets heavier than helium",
+   "tertiary antiprotons",
+   "energy dependence of Delta_IS and Lambda-bar/pbar",
+   "kinematic dependence of the threshold on T_pbar"
+  ]
+ }
+}

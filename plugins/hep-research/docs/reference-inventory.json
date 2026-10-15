@@ -1850,6 +1850,12 @@
    "lines": 155,
    "linked_from_skill_md": true,
    "cited_by": [
+    "profiles/theory/cr-secondary-antiprotons/README.md",
+    "profiles/theory/cr-secondary-antiprotons/derivations/derivation-record.md",
+    "profiles/theory/cr-secondary-antiprotons/evidence/claims.json",
+    "profiles/theory/cr-secondary-antiprotons/evidence/sources.json",
+    "profiles/theory/cr-secondary-antiprotons/index.md",
+    "profiles/theory/cr-secondary-antiprotons/scripts/predict.py",
     "skills/hep-theory/README.md",
     "skills/hep-theory/SKILL.md"
    ],

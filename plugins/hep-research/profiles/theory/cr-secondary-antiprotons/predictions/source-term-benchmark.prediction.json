@@ -1,0 +1,194 @@
+{
+ "contract_version": "2.8.0",
+ "artifact_id": "crpb-prediction-source-term-benchmark",
+ "artifact_type": "prediction",
+ "objective": "Secondary antiproton source term at the ILLUSTRATIVE benchmark point (toy cross sections; not a statement about the Galaxy)",
+ "bindings": {
+  "experiments": [],
+  "theory": [
+   {
+    "profile": "theory:cr-secondary-antiprotons",
+    "version": "0.1.0"
+   }
+  ]
+ },
+ "versions": {
+  "plugin": "0.10.1",
+  "contracts": "2.8.0",
+  "profiles": {
+   "theory:cr-secondary-antiprotons": "0.1.0"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-theory",
+  "created": "2026-10-15",
+  "evidence_ids": [
+   "crpb:C01",
+   "crpb:C02",
+   "crpb:C04",
+   "crpb:C05",
+   "crpb:C06"
+  ]
+ },
+ "inputs": [
+  {
+   "ref": "derivations/theory-spec.json",
+   "artifact_type": "theory-spec",
+   "artifact_id": "crpb-theory-spec-source-term",
+   "status": [
+    "synthetic",
+    "unvalidated"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "observable": {
+   "quantity": "rate",
+   "process": "secondary antiproton production (prompt, from antineutrons and from hyperons) by cosmic-ray p and He on interstellar H and He",
+   "species": [
+    {
+     "name": "antiproton"
+    }
+   ],
+   "variables": [
+    {
+     "name": "antiproton_kinetic_energy",
+     "unit": "GeV",
+     "edges": [
+      1.0,
+      2.0,
+      5.0,
+      10.0,
+      20.0,
+      50.0,
+      100.0,
+      200.0,
+      500.0
+     ]
+    }
+   ],
+   "phase_space": {
+    "definition": "local interstellar source term per unit volume, before propagation",
+    "fiducial": false
+   },
+   "level": "crpb:interstellar-source",
+   "frame": "Galactic rest frame (interstellar gas at rest)",
+   "normalization": {
+    "kind": "exposure",
+    "value": "not-applicable",
+    "convention": "absolute production rate per unit volume and energy; no instrument normalization applies"
+   },
+   "bin_semantics": "bin-averaged",
+   "unit": "cm^-3 s^-1 GeV^-1",
+   "conventions": {
+    "unit_system": "CGS for the source term: q in cm^-3 s^-1 GeV^-1, gas densities in cm^-3, primary fluxes in cm^-2 s^-1 sr^-1 (GeV/n)^-1, cross sections in mb (1 mb = 1e-27 cm^2) and dsigma/dT in mb/GeV; energies in GeV [crpb:C06]",
+    "energy_variable": "antiproton kinetic energy T_pbar in GeV; projectiles by kinetic energy per nucleon T_i in GeV/n",
+    "frame": "Galactic rest frame (interstellar gas at rest)",
+    "mass_approximation": "proton mass m_p = 0.93827208816 GeV (CODATA 2018) for the threshold; nuclear binding and Fermi motion neglected [crpb:C06]",
+    "crpb:source_term": "q_ij(T) = 4 pi n_j int_{T_th}^{oo} dT_i phi_i(T_i) dsigma_ij/dT(T_i, T), summed over projectiles i in {p, He} and targets j in {H, He} (channels pp, pHe, Hep, HeHe; projectile first) [crpb:C01]",
+    "crpb:ism": "interstellar gas of hydrogen and helium only, n_He / n_H = 0.1; heavier targets and projectiles neglected [crpb:C02, crpb:C03]",
+    "crpb:antineutrons_hyperons": "total = prompt antiprotons x (2 + Delta_IS + 2 Delta_Lambda) with both included, booked as (1 + Delta_Lambda) for antiprotons plus (1 + Delta_IS + Delta_Lambda) for antineutrons; Delta_Lambda = c_Lambda (Lambda-bar / pbar); each part can be excluded and the choice is stated [crpb:C04, crpb:C05]",
+    "crpb:cross_sections": "input sets under models/ (xs-toy-*.json): an ILLUSTRATIVE toy x-scaling prompt pp cross section, constant ILLUSTRATIVE channel rescaling factors, Delta_IS and Lambda-bar/pbar; not a published parametrization; a choice between sets is a model-alternative uncertainty object, never a Gaussian per bin [crpb:C05]",
+    "crpb:bin_average": "a binned value is the total source term averaged linearly in T_pbar over the bin, (1/Delta T) int q dT (Gauss-Legendre, 8 nodes per piece, split at T_th)"
+   },
+   "validity_range": {
+    "antiproton_kinetic_energy": [
+     1.0,
+     500.0
+    ]
+   }
+  },
+  "theory_spec_ref": "derivations/theory-spec.json",
+  "derivation_status": "analytic-derivation",
+  "parameter_point": {
+   "n_H_cm3": 1.0,
+   "He_to_H": 0.1,
+   "primaries": {
+    "p": {
+     "form": "power-law",
+     "K": 1.0,
+     "T0_gev": 1.0,
+     "gamma": 2.8
+    },
+    "He": {
+     "form": "power-law",
+     "K": 0.05,
+     "T0_gev": 1.0,
+     "gamma": 2.7
+    }
+   },
+   "antineutrons": "included",
+   "hyperons": "included",
+   "cross_section_set": "models/xs-toy-A.json"
+  },
+  "representation": "numerical",
+  "values": {
+   "edges": [
+    1.0,
+    2.0,
+    5.0,
+    10.0,
+    20.0,
+    50.0,
+    100.0,
+    200.0,
+    500.0
+   ],
+   "values": [
+    1.521199955578499e-27,
+    3.1988421446120054e-28,
+    3.5836141080969737e-29,
+    5.20987953534204e-30,
+    5.733475575432894e-31,
+    5.935544656137239e-32,
+    8.650913268069579e-33,
+    9.54769115089827e-34
+   ],
+   "unit": "cm^-3 s^-1 GeV^-1"
+  },
+  "uncertainties": [
+   {
+    "name": "cross-section set xs-toy-B",
+    "kind": "model-alternative",
+    "correlation": "fully-correlated",
+    "gaussian": false,
+    "values": [
+     2.357452588988073e-28,
+     1.5026776597428726e-29,
+     7.6793675354216475e-31,
+     1.193844663208307e-31,
+     1.4110456551097077e-32,
+     1.580194199406476e-33,
+     2.450898282139037e-34,
+     2.8901121161921274e-35
+    ]
+   },
+   {
+    "name": "antineutrons without isospin enhancement (Delta_IS = 0, traditional factor 2)",
+    "kind": "model-alternative",
+    "correlation": "fully-correlated",
+    "gaussian": false,
+    "values": [
+     -1.6380473319222906e-28,
+     -3.444553637414222e-29,
+     -3.858880949135296e-30,
+     -5.610064108408521e-31,
+     -6.173878939805707e-32,
+     -6.391469478970474e-33,
+     -9.315412707899774e-34,
+     -1.028107446256096e-34
+    ]
+   }
+  ],
+  "allowed_transformations": [
+   "propagation (outside this profile)",
+   "rebin (recompute the linear average; never merge averaged values without widths)"
+  ]
+ }
+}
