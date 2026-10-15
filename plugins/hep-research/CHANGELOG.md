@@ -5,6 +5,16 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- Fix: `covariance_fit.py` model `tabulated-grid` no longer crashes when the best fit lies inside the first or last
+  cell of a grid axis. The Fisher-matrix step was one cell, and where a full cell did not fit on one side it took a
+  one-sided second-order difference two cells inward, which could leave the grid (`CovFitError` "outside the grid";
+  found by WP13, where a three-node D0 grid of DRAGON2 runs with the truth in the upper cell could not be fitted).
+  Steps are now cut at the grid edges: a three-point central difference with unequal steps inside the grid, and on
+  an edge a one-sided step no longer than half the room left. Where a full cell fits on both sides the step is as
+  before. New test `JacobianStepsStayInsideTheGrid` (four axes with the truth in an edge cell, uniform and
+  non-uniform; the error on a parameter the model is linear in matches the 11-node fit within 2%) failed before the
+  fix. Rerun of the WP13 three-node grid with the fix: D0 = 3.664e28 for a truth of 3.6e28 (|ln| = 0.018, error
+  0.023), the same best fit as the five-node grid.
 - New theory profile `theory:heliospheric-modulation` 0.1.0 (WP14): force-field solar modulation by reference to
   `skills/hep-measurement/scripts/solar_modulation_force_field.py`, which the profile runs as a separate process and
   does not reimplement (profiles may import only core and contracts). `scripts/derive.py` checks in SymPy that
