@@ -1,0 +1,38 @@
+# Data export from CRDB [http://lpsc.in2p3.fr/crdb]
+# Please cite CRDB publications:
+#  - Maurin, Melot, Taillet, A&A 569, A32 (2014) [https://ui.adsabs.harvard.edu/abs/2014A%26A...569A..32M]
+#  - Maurin, Dembinski, Gonzalez et al., Univ. 6, 102 (2020) [https://ui.adsabs.harvard.edu/abs/2020Univ....6..102M]
+#  - Maurin, Ahlers, Dembinski et al., EPJC 83, 971 (2023) [https://ui.adsabs.harvard.edu/abs/2023EPJC...83..971M]
+# Date: 2026/10/15-03:04:24
+# Format: CSV code (as import, with extra column for modulation)
+# Col.1  - EXP-NAME
+# Col.2  - EXP-TYPE
+# Col.3  - EXP-HTML
+# Col.4  - EXP-STARTYEAR
+# Col.5  - SUBEXP-NAME
+# Col.6  - SUBEXP-DESCRIPTION
+# Col.7  - SUBEXP-ESCALE_RELERR
+# Col.8  - SUBEXP-INFO
+# Col.9  - SUBEXP-DISTANCE
+# Col.10  - SUBEXP-DATES
+# Col.11  - PUBLI-HTML
+# Col.12  - PUBLI-DATAORIGIN
+# Col.13  - DATA-QTY
+# Col.14  - DATA-EAXIS
+# Col.15  - DATA-E_MEAN
+# Col.16  - DATA-E_BIN_L
+# Col.17  - DATA-E_BIN_U
+# Col.18  - DATA-VAL
+# Col.19  - DATA-VAL_ERRSTAT_L
+# Col.20  - DATA-VAL_ERRSTAT_U
+# Col.21  - DATA-VAL_ERRSYST_L
+# Col.22  - DATA-VAL_ERRSYST_U
+# Col.23  - DATA-ISUPPERLIM
+# Col.24  - phi [MV]
+#
+"AMS02","space","https://ams02.space/","2011","AMS02 (2011/05-2013/11)","9 planes of precision silicon tracker, TRD, 4 planes of TOF counters, permanent magnet, array of anticoincidence counters surrounding the inner tracker, ring imaging Cerenkov detector, electromagnetic calorimeter detector","0","AMS on ISS, 30 months data 2011-2013","1","2011/05/19-000000:2013/11/26-000000","2015PhRvL.114q1103A","Table 1 (Supp. Mat.)","H","R","50.3081","48.5","52.2","0.3128","0.0003","0.0003","0.0042","0.0042","0","660.8"
+"AMS02","space","https://ams02.space/","2011","AMS02 (2011/05-2013/11)","9 planes of precision silicon tracker, TRD, 4 planes of TOF counters, permanent magnet, array of anticoincidence counters surrounding the inner tracker, ring imaging Cerenkov detector, electromagnetic calorimeter detector","0","AMS on ISS, 30 months data 2011-2013","1","2011/05/19-000000:2013/11/26-000000","2015PhRvL.114q1103A","Table 1 (Supp. Mat.)","H","R","54.1067","52.2","56.1","0.2549","0.0003","0.0003","0.0034","0.0034","0","660.8"
+"AMS02","space","https://ams02.space/","2011","AMS02 (2011/05-2013/11)","9 planes of precision silicon tracker, TRD, 4 planes of TOF counters, permanent magnet, array of anticoincidence counters surrounding the inner tracker, ring imaging Cerenkov detector, electromagnetic calorimeter detector","0","AMS on ISS, 30 months data 2011-2013","1","2011/05/19-000000:2013/11/26-000000","2015PhRvL.114q1103A","Table 1 (Supp. Mat.)","H","R","58.1533","56.1","60.3","0.208","0.0002","0.0002","0.0028","0.0028","0","660.8"
+"AMS02","space","https://ams02.space/","2011","AMS02 (2011/05-2018/05)","9 planes of precision silicon tracker, TRD, 4 planes of TOF counters, permanent magnet, array of anticoincidence counters surrounding the inner tracker, ring imaging Cerenkov detector, electromagnetic calorimeter detector","0","AMS on ISS, 7 years data 2011-2018","1","2011/05/19-000000:2018/05/26-120000","2021PhR...894....1A","Tables 1-24","H","R","50.316","48.5","52.2","0.3074","0.0002","0.0002","0.0031","0.0031","0","636.6"
+"AMS02","space","https://ams02.space/","2011","AMS02 (2011/05-2018/05)","9 planes of precision silicon tracker, TRD, 4 planes of TOF counters, permanent magnet, array of anticoincidence counters surrounding the inner tracker, ring imaging Cerenkov detector, electromagnetic calorimeter detector","0","AMS on ISS, 7 years data 2011-2018","1","2011/05/19-000000:2018/05/26-120000","2021PhR...894....1A","Tables 1-24","H","R","54.1149","52.2","56.1","0.2508","0.0001","0.0001","0.0026","0.0026","0","636.6"
+"AMS02","space","https://ams02.space/","2011","AMS02 (2011/05-2018/05)","9 planes of precision silicon tracker, TRD, 4 planes of TOF counters, permanent magnet, array of anticoincidence counters surrounding the inner tracker, ring imaging Cerenkov detector, electromagnetic calorimeter detector","0","AMS on ISS, 7 years data 2011-2018","1","2011/05/19-000000:2018/05/26-120000","2021PhR...894....1A","Tables 1-24","H","R","58.1621","56.1","60.3","0.2048","0.0001","0.0001","0.0021","0.0021","0","636.6"
