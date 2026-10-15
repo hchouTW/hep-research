@@ -3,6 +3,20 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- Routing: hep-computing's description says to load it first even for a quick build or code fix (`co-companion-ws-1`,
+  a CMake fix in a project that binds a companion profile, now loads hep-computing in 3/3 live runs, was 1/3), and
+  hep-communication's description says to ask first when a comparison names no observable or experiments (it was
+  shortened to stay under 1024 characters; every trigger phrase the routing cases rely on is kept). The routing case
+  `rc-t3-neg` ("is this Feynman diagram allowed at tree level?") now has a synthetic `diagram.tex` (a three-photon
+  vertex) as its input: without it the model rightly asked for the diagram; with it hep-theory loads in 3/3 runs.
+  `wp11-xexp-3` (an underspecified flux comparison) still loads hep-communication before asking, so the harness still
+  counts it as a miss, but the model now asks for the observable and experiments straight away in 3/3 runs instead of
+  exploring the tree until it ran out of turns (2/3 before). Live check on the 72 cases that involve either skill or
+  ask for a question: 69/72, with the other two misses (`eic-underspec-1`, `t19-turns-3`) the same as in the
+  2026-10-08 baseline.
+
 ## 0.11.0 (2026-10-15)
 
 AMS-02 skill upgrade (work order WP1–WP12, WP15), four skills renamed, Python 3.13 as the minimum, and CI

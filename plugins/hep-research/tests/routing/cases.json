@@ -1936,7 +1936,10 @@
     "Feynman diagram is allowed"
    ],
    "not": "hep-communication",
-   "set": "T3"
+   "set": "T3",
+   "inputs": {
+    "diagram.tex": "% SYNTHETIC routing fixture: invented values, not data from any experiment.\n\\begin{tikzpicture}\n  \\begin{feynman}\n    \\vertex (a) {\\(e^-\\)};\n    \\vertex [below=2cm of a] (b) {\\(e^+\\)};\n    \\vertex [below right=1cm and 1.5cm of a] (v1);\n    \\vertex [right=2cm of v1] (v2);\n    \\vertex [above right=1cm and 1.5cm of v2] (c) {\\(\\gamma\\)};\n    \\vertex [below right=1cm and 1.5cm of v2] (d) {\\(\\gamma\\)};\n    \\diagram* {\n      (a) -- [fermion] (v1) -- [fermion] (b),\n      (v1) -- [photon, edge label=\\(\\gamma^*\\)] (v2),\n      (v2) -- [photon] (c),\n      (v2) -- [photon] (d),\n    };\n  \\end{feynman}\n\\end{tikzpicture}\n"
+   }
   },
   {
    "id": "co-t3-neg",
