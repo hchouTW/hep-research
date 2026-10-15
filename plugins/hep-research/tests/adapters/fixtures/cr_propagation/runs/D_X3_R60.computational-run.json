@@ -1,0 +1,67 @@
+{
+ "contract_version": "2.9.0",
+ "artifact_id": "dragon2-run-D_X3_R60",
+ "artifact_type": "computational-run",
+ "objective": "DRAGON2 run 'D_X3_R60' from a run spec (adapters/cr-propagation/assets/dragon2_run.py)",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.11.0",
+  "contracts": "2.9.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-computing",
+  "created": "2026-10-16",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "status": [
+  "unvalidated"
+ ],
+ "extension": {
+  "input_manifest": [
+   {
+    "path": "D_X3_R60.xml",
+    "sha256": "fcdcfc7aa63c184d0765e99ee0832c21fd461fa604e39db8fae0293ec841f10a"
+   },
+   {
+    "path": "D_X3_R60.source.param",
+    "sha256": "c391c8bf7f2627f562269f4c5b6c2c9404124f530c4ef1e62117431f3f09373f"
+   },
+   {
+    "path": "data/crxsecs_fragmentation_Evoli2019_cumulative_modified.dat",
+    "sha256": "a0f56932d3fc04203b866c656aa62e424b4e16825153d2cde90816b6deb81faa"
+   }
+  ],
+  "tools": [
+   {
+    "name": "DRAGON2",
+    "version": "DRAGON2-Beta_version git cd588707fe03c76f19bda1b8092e136dcbe3fe90 (configure.ac DRAGON 3.1.0)",
+    "binary": "~/hep-work/dragon2/install/bin/DRAGON",
+    "binary_sha256": "d26dbb857a2c06182bd7b754ce963888670ceaa5932d0efa58b0ca202a9a6c34"
+   }
+  ],
+  "commands": [
+   "~/hep-work/dragon2/install/bin/DRAGON D_X3_R60.xml"
+  ],
+  "environment": {},
+  "seeds": {
+   "note": "DRAGON2 is deterministic: no random numbers are drawn"
+  },
+  "tolerances": {
+   "note": "none applied by the run; DRAGON2 time-step schedule Dtmax 64 Myr to Dtmin 0.001 Myr, factor 0.25, 30 steps per level (written into the XML)"
+  },
+  "resources": {
+   "wall_seconds": 1042.0
+  },
+  "exit_status": 0,
+  "output_hashes": {
+   "output/D_X3_R60.txt": "ae2398f8d64c21be4870b28d123a52c1552ef32fc6afba540bcc7c3047e64e1c"
+  }
+ }
+}

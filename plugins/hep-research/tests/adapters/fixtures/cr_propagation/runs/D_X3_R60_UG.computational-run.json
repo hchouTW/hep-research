@@ -1,0 +1,67 @@
+{
+ "contract_version": "2.9.0",
+ "artifact_id": "dragon2-run-D_X3_R60_UG",
+ "artifact_type": "computational-run",
+ "objective": "DRAGON2 run 'D_X3_R60_UG' from a run spec (adapters/cr-propagation/assets/dragon2_run.py)",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.11.0",
+  "contracts": "2.9.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-computing",
+  "created": "2026-10-16",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "status": [
+  "unvalidated"
+ ],
+ "extension": {
+  "input_manifest": [
+   {
+    "path": "D_X3_R60_UG.xml",
+    "sha256": "fcdcfc7aa63c184d0765e99ee0832c21fd461fa604e39db8fae0293ec841f10a"
+   },
+   {
+    "path": "D_X3_R60_UG.source.param",
+    "sha256": "c391c8bf7f2627f562269f4c5b6c2c9404124f530c4ef1e62117431f3f09373f"
+   },
+   {
+    "path": "data/crxsecs_fragmentation_Evoli2019_cumulative_modified.dat",
+    "sha256": "a0f56932d3fc04203b866c656aa62e424b4e16825153d2cde90816b6deb81faa"
+   }
+  ],
+  "tools": [
+   {
+    "name": "DRAGON2",
+    "version": "DRAGON2-Beta_version git cd588707fe03c76f19bda1b8092e136dcbe3fe90 (configure.ac DRAGON 3.1.0) + local diagnostic patch dragon2-gas-fixed-r.patch (gas.cc: BronfFerr gas evaluated at R = DRAGON_GAS_FIXED_R = 8.3 kpc at every radius)",
+    "binary": "~/hep-work/dragon2/install-diag/bin/DRAGON",
+    "binary_sha256": "435e4b30ffb1228f7daeb5cc01928084bc4e7a2ef6867503b7dad931d57ba1e1"
+   }
+  ],
+  "commands": [
+   "~/hep-work/dragon2/install-diag/bin/DRAGON D_X3_R60_UG.xml"
+  ],
+  "environment": {},
+  "seeds": {
+   "note": "DRAGON2 is deterministic: no random numbers are drawn"
+  },
+  "tolerances": {
+   "note": "none applied by the run; DRAGON2 time-step schedule Dtmax 64 Myr to Dtmin 0.001 Myr, factor 0.25, 30 steps per level (written into the XML)"
+  },
+  "resources": {
+   "wall_seconds": 1041.2
+  },
+  "exit_status": 0,
+  "output_hashes": {
+   "output/D_X3_R60_UG.txt": "634b72e2d0db6543ef82f7b4b4d902d786372979b5fbf2bfb19b4cdd03b84d71"
+  }
+ }
+}

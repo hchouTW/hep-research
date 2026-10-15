@@ -2,7 +2,9 @@
 the limit benchmark against the closed-form 1D thin-disc model of theory:cr-secondary-ratio.
 
 Offline (CI-safe, no DRAGON2, no network): everything runs on DRAGON2 outputs recorded on E2 on 2026-10-15
-(tests/adapters/fixtures/cr_propagation/: nine runs, their run specs and computational-run records, the build record).
+(tests/adapters/fixtures/cr_propagation/: nine runs, their run specs and computational-run records, the build record),
+plus five diagnostic runs recorded on 2026-10-16 (radial boundary at 60 kpc; three of them with a local gas patch,
+dragon2-gas-fixed-r.patch).
 Live (HEP_DRAGON2_LIVE_TEST=1 with HEP_DRAGON2_BIN and HEP_DRAGON2_DATA): run X1 is rerun through dragon2_run.py and its
 output must equal the recorded one (DRAGON2 is deterministic; relative 1e-6 allows for printf rounding only).
 
@@ -14,7 +16,9 @@ with the closed form; the tolerances are not changed here):
 - C4 grid fit: tabulated-grid on D0 in {2, 3, 4.5}e28 (L = 4 kpc) recovers the T_truth run's D0 = 3.6e28 within 0.05
   in ln D0, every node gated.
 A check that fails is reported in benchmark-results.json and VALIDATION.md with its likely cause; its test then
-asserts what is established (see the class docstrings), never a widened tolerance.
+asserts what is established (see the class docstrings), never a widened tolerance. Amendment of 2026-10-16 (a unit
+correction, not a tolerance change): DRAGON2's columns are per total kinetic energy, and the converter now multiplies
+each by its mass number A; C1 and C3 were recomputed on the same runs.
 """
 import json
 import math
@@ -56,7 +60,8 @@ DEN = ["NUC_6012", "NUC_6013", "NUC_6014"]
 OXY = ["NUC_8016", "NUC_8017", "NUC_8018"]
 EDGES = [10.0, 17.7827941004, 31.6227766017, 56.2341325190, 100.0, 177.827941004, 316.227766017, 562.341325190, 1000.0]
 LEVEL = "crsr:local-interstellar"
-RUNS = ("X1", "X2", "X3", "G_low2", "G_low", "G_high", "G_high2", "T_truth", "D_X3_R30")
+RUNS = ("X1", "X2", "X3", "G_low2", "G_low", "G_high", "G_high2", "T_truth", "D_X3_R30",
+        "D_X1_R60", "D_X3_R60", "D_X1_R60_UG", "D_X2_R60_UG", "D_X3_R60_UG")
 GRID = ("G_low2", "G_low", "X1", "G_high", "G_high2")
 KPC_DZ = 0.02
 
@@ -347,6 +352,24 @@ class Converter(unittest.TestCase):
             self.assertEqual(proc.returncode, 0, proc.stdout)
             self.assertTrue(json.loads(proc.stdout)["ok"], proc.stdout)
 
+    def test_ratio_is_per_nucleon(self):
+        """DRAGON2's ASCII output is its internal density per total kinetic energy (dragon.cc writes
+        GetFluxAtSunPosition, which computes weight = A but does not apply it; particle.cc scales the spallation source
+        by A_parent / A_daughter). A ratio at equal E/n weights every NUC column by its mass number A."""
+        cols = {"NUC_5011": [1.0, 2.0], "NUC_6012": [4.0, 4.0], "NUC_6013": [0.0, 1.0], "Pri_p": [3.0, 3.0]}
+        self.assertEqual(conv.ratio(cols, ["NUC_5011"], ["NUC_6012", "NUC_6013"]),
+                         [11.0 / 48.0, 22.0 / (48.0 + 13.0)])
+        self.assertEqual(conv.ratio(cols, ["Pri_p"], ["NUC_6012"]), [3.0 / 48.0, 3.0 / 48.0])
+        with self.assertRaisesRegex(conv.ConvertError, "mass number"):
+            conv.ratio({"Sec_e+": [1.0], "NUC_6012": [1.0]}, ["Sec_e+"], ["NUC_6012"])
+        e, raw = conv.read_output(output("X1"))
+        unweighted = [sum(cols_) for cols_ in zip(*(raw[c] for c in NUM))]
+        den = [sum(cols_) for cols_ in zip(*(raw[c] for c in DEN))]
+        _, r = ratio_at_nodes("X1", lo=0.0, hi=1e9)
+        # boron is 11B only here, carbon almost all 12C: the per-nucleon B/C is 11/12 of the raw column ratio
+        for a, n, d in zip(r, unweighted, den):
+            self.assertAlmostEqual(a / (n / d), 11.0 / 12.0, delta=2e-3)
+
     def test_bin_average_matches_nodes(self):
         e, r = ratio_at_nodes("X1", lo=0.0, hi=1e9)
         lo, hi = e[10], e[11]
@@ -389,16 +412,16 @@ class Converter(unittest.TestCase):
 @unittest.skipUnless(HAVE_NUMPY, "numpy and scipy are needed")
 class LimitBenchmark(unittest.TestCase):
     """C1-C3 of limit-benchmark-plan.json on the recorded runs. The numbers this code computes must equal the recorded
-    benchmark-results.json, and each verdict must be what the declared tolerance gives. Outcome on E2 (2026-10-15):
-    C3 passes; C1 and C2 fail their declared tolerances. For those the tests assert what is established instead:
-    C1: DRAGON2 lies above the closed form at every node, and DRAGON2's own helium term accounts for only part of the
-    excess (the residual after dividing it out still exceeds 10%); C2: the L = 2 run agrees within 2% while the L = 8
-    run is low, and the diagnostic run with the radial boundary moved from 20 to 30 kpc moves it towards X1."""
+    benchmark-results.json, and each verdict must be what the declared tolerance gives. Outcome on E2 (2026-10-15,
+    C1 and C3 recomputed 2026-10-16 after the per-nucleon correction): C1 and C3 pass; C2 fails its declared
+    tolerance, and its test asserts what is established instead: the L = 2 run agrees within 2% while the L = 8 run is
+    low, and the diagnostic run with the radial boundary moved from 20 to 30 kpc moves it towards X1 (the attribution
+    is in Diagnostics)."""
 
     def test_plan_was_declared_first(self):
         self.assertTrue(PLAN["declared_before_comparison"])
         self.assertEqual([c["id"] for c in PLAN["checks"]], ["C1-absolute", "C2-degeneracy", "C3-slope", "C4-grid-fit"])
-        self.assertEqual([a["check"] for a in PLAN.get("amendments", [])], ["C4-grid-fit"])
+        self.assertEqual([a["check"] for a in PLAN.get("amendments", [])], ["C4-grid-fit", "C1-absolute"])
 
     def test_c1_absolute(self):
         e, rel, _, _ = check_c1()
@@ -439,6 +462,47 @@ class LimitBenchmark(unittest.TestCase):
         """The verdicts committed with the adapter; changing one needs a new recorded run and report."""
         self.assertEqual({k: RESULTS[k]["passed"] for k in ("C1-absolute", "C2-degeneracy", "C3-slope", "C4-grid-fit")},
                          RESULTS["expected_verdicts"])
+
+
+@unittest.skipUnless(HAVE_NUMPY, "numpy and scipy are needed")
+class Diagnostics(unittest.TestCase):
+    """Diagnostic runs of 2026-10-16 (no tolerance declared in advance; they attribute the C2 failure and test the 1D
+    limit). With the radial boundary at 60 kpc and the gas uniform in R (local patch dragon2-gas-fixed-r.patch, so not
+    DRAGON2 as released), DRAGON2 reaches the thin-disc closed form: X2/X1 and X3/X1 within 2%, and DRAGON2 / closed
+    form within 5% after its helium production term at L = 2, 4 and 8. With the real gas and the boundary at 60 kpc,
+    X3/X1 is within 10%: the radial boundary at 20 kpc is the main cause of the C2 failure."""
+
+    def ratios(self, a, b):
+        return [x / y for x, y in zip(ratio_at_nodes(a)[1], ratio_at_nodes(b)[1])]
+
+    def test_recorded_numbers(self):
+        rec = RESULTS["diagnostics"]
+        for a, b in zip(self.ratios("D_X3_R60", "D_X1_R60"), rec["real_gas_rmax60"]["X3_over_X1"]):
+            self.assertAlmostEqual(a, b, places=6)
+        for key, num in (("X2_over_X1", "D_X2_R60_UG"), ("X3_over_X1", "D_X3_R60_UG")):
+            for a, b in zip(self.ratios(num, "D_X1_R60_UG"), rec["uniform_gas_rmax60"][key]):
+                self.assertAlmostEqual(a, b, places=6)
+
+    def test_radial_boundary_is_the_main_cause_of_c2(self):
+        self.assertTrue(all(abs(x - 1) <= 0.10 for x in self.ratios("D_X3_R60", "D_X1_R60")))
+
+    def test_one_dimensional_limit(self):
+        for n in ("D_X2_R60_UG", "D_X3_R60_UG"):
+            self.assertTrue(all(abs(x - 1) <= 0.02 for x in self.ratios(n, "D_X1_R60_UG")), n)
+        for n in ("D_X1_R60_UG", "D_X2_R60_UG", "D_X3_R60_UG"):
+            e, bc = ratio_at_nodes(n)
+            _, oc = ratio_at_nodes(n, OXY, DEN)
+            after = [b / c / helium_production_factor(en, r) for b, c, en, r in zip(bc, closed_form(n, e, oc), e, oc)]
+            for a, b in zip(after, RESULTS["diagnostics"]["uniform_gas_rmax60"]["after_dividing_dragon2_helium_production_term"][n]):
+                self.assertAlmostEqual(a, b, places=6)
+            self.assertTrue(all(abs(x - 1) <= 0.05 for x in after), n)
+
+    def test_gas_patch_is_recorded(self):
+        patch = (FIX / "dragon2-gas-fixed-r.patch").read_text(encoding="utf-8")
+        self.assertEqual(patch.count("DRAGON_GAS_FIXED_R"), 4)
+        for n in ("D_X1_R60_UG", "D_X2_R60_UG", "D_X3_R60_UG"):
+            tools = json.loads(record(n).read_text(encoding="utf-8"))["extension"]["tools"]
+            self.assertIn("dragon2-gas-fixed-r.patch", tools[0]["version"])
 
 
 def grid_fit_c4(td):

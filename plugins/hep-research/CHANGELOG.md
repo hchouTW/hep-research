@@ -17,11 +17,19 @@ Software checks establish contract consistency only, not physical validity.
 - Limit benchmark of DRAGON2 against the 1D thin-disc closed form of `theory:cr-secondary-ratio` (convection,
   reacceleration, energy losses and decay off; the profile's illustrative production cross sections substituted through
   DRAGON2's data table), criteria committed before the comparison: the B/C slope over 100–1000 GeV/n agrees (0.006,
-  tolerance 0.05) and a five-node D0 grid of DRAGON2 runs recovers a sixth run's D0 within 2% through `tabulated-grid`;
-  the absolute B/C does not agree (DRAGON2 32–34% higher, tolerance 30%: DRAGON2's fixed helium target accounts for a
-  factor 1.14, the rest is not isolated) and the D0/L degeneracy fails at L = 8 kpc (15–18%, tolerance 10%; moving the
-  radial boundary from 20 to 30 kpc reduces it to 6–7%). The tests replay nine recorded runs offline and assert what is
-  established; a live rerun runs with `HEP_DRAGON2_LIVE_TEST=1`. Global propagation fits that run a code stay outside v1.
+  tolerance 0.05), the absolute B/C agrees within the declared 30% (DRAGON2 9–12% higher, mostly its fixed helium
+  target) and a five-node D0 grid of DRAGON2 runs recovers a sixth run's D0 within 2% through `tabulated-grid`; the D0/L
+  degeneracy fails at L = 8 kpc (15–18%, tolerance 10%) because of the radial boundary at 20 kpc and the radial gas
+  structure. Diagnostic runs with the boundary at 60 kpc and the gas made uniform in R (a local patch of DRAGON2,
+  recorded with the runs) reach the closed form: within 2% between L = 2, 4 and 8 kpc and within 5% in absolute B/C
+  once DRAGON2's helium production term is divided out. The tests replay fourteen recorded runs offline and assert what
+  is established; a live rerun runs with `HEP_DRAGON2_LIVE_TEST=1`. Global propagation fits that run a code stay
+  outside v1.
+- `dragon2_to_prediction.py` multiplies each DRAGON2 column by its mass number A before forming a ratio: DRAGON2 writes
+  its internal density per total kinetic energy (`GetFluxAtSunPosition` computes `weight = A` but does not apply it;
+  the spallation source carries A_parent / A_daughter), so a ratio of species with different A was wrong (B/C 12/11
+  too high, O/C 12/16 too low). The first version of the limit benchmark reported this as an unexplained 32–34% B/C
+  excess (C1 failing); C1 now passes with its declared tolerance (plan amendment of 2026-10-16, a unit correction).
 - Fix: `covariance_fit.py` model `tabulated-grid` no longer crashes when the best fit lies inside the first or last
   cell of a grid axis. The Fisher-matrix step was one cell, and where a full cell did not fit on one side it took a
   one-sided second-order difference two cells inward, which could leave the grid (`CovFitError` "outside the grid";

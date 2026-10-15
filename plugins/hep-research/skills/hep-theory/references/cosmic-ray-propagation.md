@@ -155,11 +155,14 @@ What the DRAGON2 runs establish is narrow (convection, reacceleration, energy lo
 ILLUSTRATIVE production cross sections substituted through DRAGON2's data table; recorded outputs replayed in
 `tests/adapters/test_cr_propagation.py`, criteria fixed before the comparison). Against the 1D thin-disc closed form of
 the secondary-ratio theory profile: the high-energy slope of B/C agrees (difference 0.006, tolerance 0.05); the absolute B/C
-does not (DRAGON2 is 32-34% higher at 10-1000 GeV/n, tolerance 30%): DRAGON2's fixed helium target (He/H = 0.11)
-explains a factor 1.14, the rest is not isolated (Inferred: 2D gas and source geometry); the D0/L degeneracy holds within
-2% between L = 2 and 4 kpc but fails at L = 8 kpc (15-18% low), mostly from the radial boundary (moving it from 20 to
-30 kpc reduces the gap to 6-7%). A five-node D0 grid of DRAGON2 runs recovers the D0 of a sixth run within 2% through
-`tabulated-grid`. So results from DRAGON2 and from the closed form are different models: compare them only with the
+agrees within the declared 30% (DRAGON2 9-12% higher at 10-1000 GeV/n, mostly its fixed helium target, He/H = 0.11);
+the D0/L degeneracy holds within 2% between L = 2 and 4 kpc but fails at L = 8 kpc (15-18% low, tolerance 10%) because
+of the radial boundary at 20 kpc and the radial gas structure, which the closed form does not have. With the boundary at
+60 kpc and the gas made uniform in R (a local diagnostic patch of DRAGON2), DRAGON2 reaches the closed form: within 2%
+between L = 2, 4 and 8 kpc and within 5% in absolute B/C once its helium production term is divided out. A five-node D0
+grid of DRAGON2 runs recovers the D0 of a sixth run within 2% through `tabulated-grid`. DRAGON2's ASCII columns are per
+total kinetic energy, not per nucleon: a ratio of species with different mass numbers needs each column multiplied by
+A, which `dragon2_to_prediction.py` does (a first version did not, and reported a 32-34% B/C excess that was this unit). So results from DRAGON2 and from the closed form are different models: compare them only with the
 geometry, gas, target and cross sections stated. No propagation code is used in a fit to real data, and a global fit
 that runs a propagation code stays outside v1.
 

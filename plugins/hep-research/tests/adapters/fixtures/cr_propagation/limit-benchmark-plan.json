@@ -61,6 +61,31 @@
    "D0_1e28": 6.0,
    "L_kpc": 8.0,
    "note": "diagnostic only (no tolerance): X3 with Rmax = 30 kpc, DimR = 61, sources to 30 kpc, run after C2 failed, to test whether the radial boundary causes the X3 deviation"
+  },
+  "D_X1_R60": {
+   "D0_1e28": 3.0,
+   "L_kpc": 4.0,
+   "note": "diagnostic only (no tolerance): X1 with Rmax = 60 kpc, DimR = 121, sources to 60 kpc"
+  },
+  "D_X3_R60": {
+   "D0_1e28": 6.0,
+   "L_kpc": 8.0,
+   "note": "diagnostic only (no tolerance): X3 with Rmax = 60 kpc, DimR = 121, sources to 60 kpc"
+  },
+  "D_X1_R60_UG": {
+   "D0_1e28": 3.0,
+   "L_kpc": 4.0,
+   "note": "diagnostic only: as D_X1_R60 with DRAGON2 patched (dragon2-gas-fixed-r.patch) so that the BronfFerr gas is evaluated at R = 8.3 kpc at every radius"
+  },
+  "D_X2_R60_UG": {
+   "D0_1e28": 1.5,
+   "L_kpc": 2.0,
+   "note": "diagnostic only: X2 with Rmax = 60 kpc and the gas patch"
+  },
+  "D_X3_R60_UG": {
+   "D0_1e28": 6.0,
+   "L_kpc": 8.0,
+   "note": "diagnostic only: X3 with Rmax = 60 kpc and the gas patch"
   }
  },
  "checks": [
@@ -96,6 +121,11 @@
    "check": "C4-grid-fit",
    "why": "as declared (three nodes 2, 3, 4.5 x 1e28) the fit could not run: covariance_fit.py raised CovFitError 'point [64.96] (fit coordinates) lies outside the grid [65.17 - 65.98]'. Its Fisher-matrix step is one grid cell, and near the upper edge it takes a second-order one-sided difference that evaluates the model at 2h without checking that 2h stays inside the grid; with three nodes that point leaves the grid. No fit value was obtained, so nothing was compared. The covariance_fit.py behaviour is reported, not changed here (outside this work package)",
    "change": "two more nodes with the same spacing (factor 1.5): runs G_low2 (D0 = 1.333333e28) and G_high2 (D0 = 6.75e28), L = 4 kpc; the grid is D0 in {1.333333, 2, 3, 4.5, 6.75} x 1e28. Measurement, components and tolerance unchanged: |ln(D0_fit / 3.6e28)| <= 0.05"
+  },
+  {
+   "declared_utc": "2026-10-16T00:00:00Z",
+   "check": "C1-absolute",
+   "why": "not a tolerance change: a unit correction found when checking the C1 failure. DRAGON2's ASCII output is its internal density per total kinetic energy (dragon.cc writes GetFluxAtSunPosition, which computes weight = A but does not apply it; particle.cc scales the spallation source by A_parent / A_daughter), and dragon2_to_prediction.py now multiplies each column by its mass number A. C1 and C3 were recomputed on the same recorded runs with the same tolerances: C1 now passes (max |ratio - 1| = 0.120 <= 0.30), C3 still passes; C2 is unchanged (same species in numerator and denominator) and still fails. Diagnostic runs D_X1_R60, D_X3_R60 and, with a local gas patch, D_X1_R60_UG, D_X2_R60_UG, D_X3_R60_UG attribute the C2 failure to the radial boundary and radial gas structure"
   }
  ]
 }
