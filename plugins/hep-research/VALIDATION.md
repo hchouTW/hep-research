@@ -1425,6 +1425,25 @@ Network approved by the maintainer for this WP: fixture recording and one live s
 response only. An arXiv not-found reply (an empty feed or an error entry) was not observed. The INSPIRE 429 was not
 provoked.
 
+## CRDB-ADAPTER (2026-10-15, E2: Python 3.13.2, OpenSSL 3.6.4, macOS 26.5 arm64; version 0.10.1 + unreleased, branch `wp9-crdb-adapter` from `f2039c7`)
+
+Work order ams02-skill-upgrade WP9 (decision D2: owner hep-theory). New `adapters/crdb` 0.1.0 (`assets/crdb_query.py`,
+standard library only, required by no skill), promoted from the ams-02 profile's `scripts/crdb_query.py`, which is
+removed; the profile lists `adapter:crdb` as optional and passes `--exp-dates AMS` explicitly. Network approved by the
+maintainer for recording: 6 requests to `lpsc.in2p3.fr` between 03:03:51 and 03:04:36 UTC, no retry (`--retries 0`),
+User-Agent `hep-research-crdb-adapter/0.1.0 (hep-research plugin; https://github.com/hchouTW/hep-research; ...)`.
+
+| Item | Result | Evidence |
+|---|---|---|
+| CRDB version | the welcome page (`welcome.php`, 03:03:59 UTC) states "Current version: V4.2 (September 2026)", code last change 13/10/2026, 143 experiments from 614 publications (4429 sub-experiments, 452456 data points); the export header names the 2014, 2020 and 2023 CRDB papers and no release, so the version is passed with `--crdb-version` | `tests/adapters/fixtures/crdb/recording.json` |
+| Live `fetch` runs of the adapter (recorded as fixtures) | all HTTP 200, redirected to `_dialog_result.php` with the same query: a ratio on kinetic energy per nucleon (10 rows, two experiments: the filter is not an exact-name match), a rigidity flux (6 rows, two sub-experiments with different data-taking ranges), a positron flux sent as `num=e%2B` (8 rows), a filter matching nothing (header only, exit 1, `no-data-rows`); `energy_start` and `energy_stop` restricted the bins | `tests/adapters/fixtures/crdb/*.csv` and their `.meta.json` sidecars |
+| Offline tests (urlopen patched to fail) | 24 pass: no default experiment filter (`url` and `fetch` without `--exp-dates` or `--all-experiments` exit 2, no request; an empty filter exits 2; `build_params` has no default; a source check fails if a default is added, mutation-checked); every summarized row and sub-experiment group is `secondary: true`; the sidecar holds request (parameters, URL, User-Agent), UTC retrieval time, CRDB version, export date and SHA-256 of the saved file; replay writes the recorded bytes and the rebuilt URLs equal the live ones; blocks never retried, one retry of a transient error, size cap, https only; no experiment name in the adapter's code or declaration | `python -m unittest tests.adapters.test_crdb_query` |
+| Declarations, CLI robustness, profile | `test_adapter_declarations` 2 pass (status `tested-in-declared-environment`, matrix row matches); `test_cli_robustness` 6 pass with the new inventory entry; ams-02 profile tests 213 pass after removing `test_crdb_query.py` | `tests/adapters/test_adapter_declarations.py`, `tests/skills/test_cli_robustness.py`, `profiles/experiments/ams-02/tests/` |
+
+**Not verified here.** No CRDB value was compared with a paper or a HEPData record; the matching rule of `exp_dates`
+is not documented by this run (observed once); HTTP 429, 5xx and a timeout were not provoked (synthetic responses only);
+the `crdb` Python library was not used.
+
 ## THREE-AUDITS-LIVE-ROUTING (2026-10-14, Claude Code 2.1.299, claude-sonnet-5-5)
 
 Paid live routing run `20261014T113734Z-claude-claude-sonnet-5-5` (`evals/routing/results/`, outside the plugin) of

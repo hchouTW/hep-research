@@ -5,6 +5,34 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+<!-- wp9 -->
+- `adapters/crdb` 0.1.0 (owner hep-theory, optional, `tested-in-declared-environment` on E2 with CRDB V4.2): one query of the CRDB (LPSC) REST interface, promoted from the ams-02 profile's `scripts/crdb_query.py`. No default experiment filter (`url`/`fetch` without `--exp-dates` or `--all-experiments` exit 2); every summarized row and sub-experiment group carries `secondary: true`; the `.meta.json` sidecar holds the request (parameters, URL, User-Agent), UTC retrieval time, CRDB version, export date and the SHA-256 of the saved file. HEPData or the paper's tables are primary; a CRDB value is a cross-check or a fallback labelled secondary. Offline tests replay four CRDB exports recorded live on 2026-10-15 (`tests/adapters/test_crdb_query.py`, VALIDATION CRDB-ADAPTER).
+
+- ams-02 profile: `scripts/crdb_query.py` and `tests/test_crdb_query.py` removed; the profile lists `adapter:crdb` as optional and its cross-check step passes `--exp-dates AMS` explicitly; capability `papers-manifest-and-crdb-query` renamed `papers-manifest`. `cosmic-ray-databases.md` records that `exp_dates=AMS` also returned an AMS01 row (2026-10-15). Rules and claims C125-C129 unchanged.
+
+<!-- wp3 -->
+# WP3 changelog bullets (for "Unreleased")
+
+- Profile `theory:cr-secondary-ratio` 0.1.0, the first narrow cosmic-ray propagation domain: B/C (from C and O) in a
+  weighted-slab (leaky-box) model and a 1D thin-disc diffusion model without convection. SymPy checks of the closed
+  forms, of their equivalence through lambda_esc = n_H m_H h v L / D and of the resulting D0/L invariance
+  (`scripts/derive.py`); a benchmark of the closed forms against the profile's own numerical solutions (slab ODEs
+  averaged over the path-length distribution, a finite-thickness disc solved exactly and by finite volumes, and its
+  thin-disc limit; `scripts/predict.py --benchmark`); a theory-spec artifact with `model.family`
+  `cosmic-ray-propagation` and `degenerate_directions: ["D0/L"]`; a bin-averaged prediction artifact with a
+  cross-section model alternative; and a prediction callable at any parameter point and on (D0, L) grids
+  (`predict.evaluate`, `predict.grid`, `predict.bin_averaged`, CLI `--set` / `--grid`) for the grid fit of WP1/WP8.
+  Cross sections and transport values are ILLUSTRATIVE; references are cited but were not opened (no network).
+  Status `demonstrated-on-synthetic-data`, 37 profile tests, including one showing that a theory-spec without
+  `degenerate_directions` fails `contracts/validate.py` with `theory.degeneracy_missing`.
+- Capability matrix: a "Profiles" row for `theory:cr-secondary-ratio`.
+
+- `examples/eic-profile-routing/output/` regenerated: the run lists every registered `profile.json` it opens, which now
+  includes the new profile.
+
+<!-- ci2 -->
+- CI: a new commit on a pull request cancels that PR's superseded `tests` run (pushes to main, the weekly and manual runs are never cancelled); pip downloads are cached by `setup-python`, keyed on `requirements-ci.lock` (installs and tests still run in full every time). Batch 2 (low-risk part) of the CI improvement proposal.
+
 <!-- wp1 -->
 - hep-statistics: `covariance_fit.py fit` model `tabulated-grid`: fits grid parameters (for example D0 and L) to a
   `dataset-record` from one `prediction` artifact per grid node (`representation: "grid"`, node in `parameter_point`;

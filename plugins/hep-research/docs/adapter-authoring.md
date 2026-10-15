@@ -52,4 +52,7 @@ each ran synthetic campaigns; the fake schedulers in `tests/adapters/batch_shims
 `HEP_HTCONDOR_CONFIG` naming a user-reviewed configuration. `adapters/literature-lookup` (owned by research-communication) opens
 network connections: it states the hosts in `environment`, reaches them only when run live
 (never under `--replay` or in its offline tests, which patch `urlopen` to fail), reads the ADS token from the
-environment and never records it; its live smoke test runs only with `HEP_LIVE_LOOKUP_TEST=1`. Python code in an adapter may import only `core` and `contracts`.
+environment and never records it; its live smoke test runs only with `HEP_LIVE_LOOKUP_TEST=1`. `adapters/crdb` (owned by hep-theory, `tested-in-declared-environment` on CRDB V4.2) also opens network
+connections, to `lpsc.in2p3.fr` and only in its `fetch` command; it has no default experiment filter (an experiment profile
+passes its own), labels every row secondary and writes a provenance sidecar. CRDB is a secondary compilation: HEPData
+records or the paper's tables are primary, and a CRDB value is a cross-check or a fallback labelled secondary. Python code in an adapter may import only `core` and `contracts`.

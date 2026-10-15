@@ -42,6 +42,13 @@
    "version": "0.1.0",
    "scope": "Gamma(H -> b bbar) with the MS-bar running b mass, QCD to alpha_s^4: running, envelope, truncation",
    "path": "theory/higgs-bb-width"
+  },
+  {
+   "id": "theory:cr-secondary-ratio",
+   "kind": "theory-domain",
+   "version": "0.1.0",
+   "scope": "B/C in weighted-slab and 1D thin-disc diffusion models; ILLUSTRATIVE cross sections; D0/L degeneracy",
+   "path": "theory/cr-secondary-ratio"
   }
  ]
 }

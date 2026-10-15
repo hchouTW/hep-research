@@ -1,31 +1,36 @@
 #!/usr/bin/env python3
-"""Build, run and summarize ONE CRDB (LPSC) REST query for cross-checking a published AMS number.
+"""Build, run and summarize ONE query of the CRDB cosmic-ray database (LPSC) REST interface.
 
-CRDB (https://lpsc.in2p3.fr/crdb/) is a Tier 6 secondary compilation: values are
-transcriptions of publications. This helper never makes a CRDB value an AMS result: every
-row it prints is labelled `secondary`, every saved export gets a sidecar `.meta.json`
-with the request, the retrieval time (UTC), the CRDB export date from the file header,
-a SHA-256, and the CRDB version only if YOU pass it (the export header names the CRDB
-papers, not a release number, so the version is recorded as null otherwise).
-See modules/cosmic-ray-databases.md and ledger claims C125-C130.
+CRDB (https://lpsc.in2p3.fr/crdb/) is a SECONDARY compilation: its values are transcriptions of
+publications, made by the CRDB team. The primary source of a published number is the paper's own table
+or its HEPData record; a CRDB value is a cross-check of that number, or a fallback that stays labelled
+secondary when no primary table is available. This adapter therefore:
 
-Defaults follow the cross-check procedure of that reference: native axis (`--energy-type`
-is required, no default), `combo_level=0` and `energy_convert_level=0` (no query-time
-combinations or conversions) and `exp_dates=AMS`. `time_series` is sent only when you
-ask for it: CRDB excludes time series (for example per-Bartels-rotation fluxes) by
-default (C128). Parameter names and ranges are those of C128 and may change.
+- labels every output row and every sub-experiment group `secondary: true`;
+- writes, next to each saved export, a sidecar `<file>.meta.json` with the request (parameters and URL),
+  the retrieval time (UTC), the CRDB version (only if you pass `--crdb-version`: the export header names
+  the CRDB papers, not a release, so it is null otherwise, with a note), the CRDB export date read from
+  the file header, and the SHA-256 of the saved file;
+- has NO default for the experiment filter: `url` and `fetch` need `--exp-dates VALUE` (a sub-experiment
+  filter in CRDB's syntax) or an explicit `--all-experiments`; a call with neither exits 2.
 
-Rules: one request per `fetch` run, identifying User-Agent, no credentials, https only,
-a size cap, one retry of a transient error (HTTP 5xx or a network failure) and none of a
-refusal (401, 403, 429): a block is reported, never worked around.
+Defaults are the native-axis cross-check settings: `--energy-type` is required (no default),
+`combo_level=0` (no query-time ratios or products) and `energy_convert_level=0` (no axis conversion).
+`time_series` is sent only when asked for (CRDB excludes time series by default). Parameter names and
+ranges follow the CRDB REST page and may change with a CRDB release.
 
-Usage (from the skill directory; every command has --help):
-  python3 profiles/experiments/ams-02/scripts/crdb_query.py url --num H --energy-type R [--den ...] [--exp-dates AMS ...]
-  python3 profiles/experiments/ams-02/scripts/crdb_query.py fetch --num H --energy-type R --out DIR/name.csv [--crdb-version V4.2]
-  python3 profiles/experiments/ams-02/scripts/crdb_query.py summarize DIR/name.csv [--rows]
-Exit codes: 0 ok; 1 request refused or failed, or an export with no data rows; 2 usage error or
-unreadable file. Standard library only. Importable: `build_params`, `build_url`, `Fetcher`,
-`parse_export`, `summarize` (the HTTP layer is injectable for tests).
+Request rules: one request per `fetch`, an identifying User-Agent, no credentials, https only, a size
+cap, one retry of a transient error (HTTP 5xx or a network failure) and none of a refusal (401, 403,
+429): a block is reported, never worked around.
+
+Usage (from the plugin root; every command has --help):
+  python3 adapters/crdb/assets/crdb_query.py url --num B --den C --energy-type EKN --exp-dates NAME
+  python3 adapters/crdb/assets/crdb_query.py fetch --num H --energy-type R --exp-dates NAME --out DIR/x.csv [--crdb-version V]
+  python3 adapters/crdb/assets/crdb_query.py summarize DIR/x.csv [--rows]
+NAME is the experiment or sub-experiment filter of the project (an experiment profile says which).
+Exit codes: 0 ok; 1 request refused or failed, or an export with no data rows; 2 usage error (including
+a missing experiment filter) or unreadable file. Standard library only. Importable: `build_params`,
+`build_url`, `Fetcher`, `parse_export`, `summarize`, `sidecar` (the HTTP layer is injectable for tests).
 """
 from __future__ import annotations
 
@@ -44,15 +49,21 @@ import urllib.request
 from dataclasses import dataclass
 from pathlib import Path
 
+VERSION = "0.1.0"
 BASE_URL = "https://lpsc.in2p3.fr/crdb/rest.php"
-USER_AGENT = "hep-research-crdb-query/1 (single query; no credentials; honors blocks)"
+USER_AGENT = (f"hep-research-crdb-adapter/{VERSION} (hep-research plugin; https://github.com/hchouTW/hep-research; "
+              "single query; no credentials; honors blocks)")
 ENERGY_TYPES = ("EKN", "EK", "R", "ETOT", "ETOTN")
 FORMATS = ("csv", "csv-asimport", "usine", "galprop")
 MODULATIONS = ("USO05", "USO17", "GHE17")
 TIME_SERIES = ("no", "only", "all")
 BLOCKED_STATUS = {401, 403, 429}
 DEFAULT_MAX_MB = 20
-LABEL = "secondary: CRDB transcription, check against the primary paper"
+LABEL = "secondary: CRDB transcription; the primary source is the paper's table or its HEPData record"
+SOURCE_ROLE = "secondary"
+PRIMARY_NOTE = ("HEPData records or the paper's own tables are primary; use a CRDB value as a cross-check of the "
+                "primary number, or as a fallback labelled secondary (with CRDB version and retrieval date) when "
+                "no primary table is available.")
 
 
 class UsageError(ValueError):
@@ -65,18 +76,23 @@ def _level(name: str, v) -> int:
     return int(v)
 
 
-def build_params(num: str, energy_type: str, den: str = "", exp_dates: str | None = "AMS",
+def build_params(num: str, energy_type: str, exp_dates: str | None, den: str = "",
                  combo_level: int = 0, energy_convert_level: int = 0, energy_start=None, energy_stop=None,
                  time_start: str | None = None, time_stop: str | None = None, time_series: str | None = None,
                  fmt: str | None = None, modulation: str | None = None, flux_rescaling=None) -> dict:
-    """Return the query parameters as an ordered dict of strings; raise UsageError on a bad value."""
+    """Return the query parameters as an ordered dict of strings; raise UsageError on a bad value.
+
+    `exp_dates` has no default: pass the sub-experiment filter, or None to query every experiment
+    explicitly. An empty or blank string is refused (it would silently mean "no filter")."""
     if not num or not num.strip():
         raise UsageError("num (numerator, for example H, 1H-BAR, e-, O-group) is required")
     if energy_type not in ENERGY_TYPES:
         raise UsageError(f"energy_type must be one of {', '.join(ENERGY_TYPES)}, got {energy_type!r}")
+    if exp_dates is not None and not str(exp_dates).strip():
+        raise UsageError("exp_dates is empty: give the sub-experiment filter, or None (--all-experiments) for no filter")
     p = {"num": num.strip(), "den": (den or "").strip(), "energy_type": energy_type}
-    if exp_dates:
-        p["exp_dates"] = exp_dates
+    if exp_dates is not None:
+        p["exp_dates"] = str(exp_dates).strip()
     p["combo_level"] = str(_level("combo_level", combo_level))
     p["energy_convert_level"] = str(_level("energy_convert_level", energy_convert_level))
     for name, v in (("energy_start", energy_start), ("energy_stop", energy_stop), ("flux_rescaling", flux_rescaling)):
@@ -149,18 +165,16 @@ class Fetcher:
         self.http, self.max_bytes = http or Http(), max_mb * (1 << 20)
         self.retries, self.retry_wait, self.sleep, self.clock = retries, retry_wait, sleep, clock
 
-    def fetch(self, url: str) -> tuple[str, str, Response | None]:
+    def fetch(self, url: str) -> tuple[str, str, Response]:
         """Return (outcome, detail, response); outcome is ok | blocked | too-large | http-error | not-an-export."""
-        resp = None
-        for attempt in range(self.retries + 1):
+        resp = self.http.get(url, self.max_bytes)
+        for _ in range(self.retries):
+            if resp.status in BLOCKED_STATUS or not (resp.status == 0 or resp.status >= 500):
+                break
+            self.sleep(self.retry_wait)
             resp = self.http.get(url, self.max_bytes)
-            if resp.status in BLOCKED_STATUS:
-                return "blocked", f"HTTP {resp.status} (not retried, not bypassed)", resp
-            transient = resp.status == 0 or resp.status >= 500
-            if transient and attempt < self.retries:
-                self.sleep(self.retry_wait)
-                continue
-            break
+        if resp.status in BLOCKED_STATUS:
+            return "blocked", f"HTTP {resp.status} (not retried, not bypassed)", resp
         if resp.status == 0 or resp.status >= 400:
             return "http-error", f"HTTP {resp.status}", resp
         if len(resp.data) > self.max_bytes:
@@ -204,16 +218,18 @@ def summarize(parsed: dict, include_rows: bool = False) -> dict:
         groups[k] = groups.get(k, 0) + 1
     out = {
         "label": LABEL,
+        "source_role": SOURCE_ROLE,
+        "primary_sources": PRIMARY_NOTE,
         "export_date": parsed["export_date"],
         "columns": parsed["columns"],
         "n_rows": len(parsed["rows"]),
         "sub_experiments": [
             {"subexp_name": k[0], "data_taking_dates": k[1], "quantity": k[2], "energy_axis": k[3],
-             "data_origin": k[4], "n_rows": n} for k, n in groups.items()],
+             "data_origin": k[4], "n_rows": n, "secondary": True} for k, n in groups.items()],
         "notes": [
-            "Several sub-experiments can describe the same AMS data (different periods, analyses or time resolution): do not merge or average them.",
-            "A systematic error of 0 means 'not separately quoted' for old data, not an AMS statement.",
-            "Match each sub-experiment to its AMS paper through its name and data-taking dates, then compare with the ledger claim.",
+            "Several sub-experiments can describe the same instrument's data (different periods, analyses or time resolution): do not merge or average them.",
+            "A systematic error of 0 means 'not separately quoted' in the compilation, not a statement of the publication.",
+            "Match each sub-experiment to its publication through its name and data-taking dates, then compare with the primary table (paper or HEPData).",
         ],
     }
     if include_rows:
@@ -221,11 +237,14 @@ def summarize(parsed: dict, include_rows: bool = False) -> dict:
     return out
 
 
-def sidecar(url: str, final_url: str, resp: Response, parsed: dict, crdb_version: str | None, retrieved: str) -> dict:
+def sidecar(params: dict, url: str, resp: Response, parsed: dict, crdb_version: str | None, retrieved: str) -> dict:
     return {
         "label": LABEL,
-        "requested_url": url,
-        "final_url": final_url,
+        "source_role": SOURCE_ROLE,
+        "primary_sources": PRIMARY_NOTE,
+        "adapter": f"adapter:crdb {VERSION}",
+        "request": {"params": params, "url": url, "user_agent": USER_AGENT},
+        "final_url": resp.url,
         "retrieved_utc": retrieved,
         "http_status": resp.status,
         "bytes": len(resp.data),
@@ -239,7 +258,8 @@ def sidecar(url: str, final_url: str, resp: Response, parsed: dict, crdb_version
 
 # ---------------------------------------------------------------- commands
 def _params_from(args) -> dict:
-    return build_params(args.num, args.energy_type, den=args.den, exp_dates=args.exp_dates or None,
+    exp = None if args.all_experiments else args.exp_dates
+    return build_params(args.num, args.energy_type, exp, den=args.den,
                         combo_level=args.combo_level, energy_convert_level=args.energy_convert_level,
                         energy_start=args.energy_start, energy_stop=args.energy_stop,
                         time_start=args.time_start, time_stop=args.time_stop, time_series=args.time_series,
@@ -252,7 +272,8 @@ def cmd_url(args) -> int:
 
 
 def cmd_fetch(args, http=None) -> int:
-    url = build_url(_params_from(args))
+    params = _params_from(args)
+    url = build_url(params)
     out = Path(args.out)
     if out.exists() and not args.overwrite:
         print(f"{out} exists; use --overwrite", file=sys.stderr)
@@ -269,11 +290,16 @@ def cmd_fetch(args, http=None) -> int:
     except ValueError as e:
         print(json.dumps({"status": "unparsable", "detail": str(e), "requested_url": url}, indent=2))
         return 1
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_bytes(resp.data)
-    meta = sidecar(url, resp.url, resp, parsed, args.crdb_version, retrieved)
-    out.with_name(out.name + ".meta.json").write_text(json.dumps(meta, indent=2) + "\n")
-    print(json.dumps({"status": "ok", "file": str(out), **{k: meta[k] for k in ("retrieved_utc", "crdb_export_date", "crdb_version", "n_rows", "sha256")},
+    try:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_bytes(resp.data)
+        meta = sidecar(params, url, resp, parsed, args.crdb_version, retrieved)
+        out.with_name(out.name + ".meta.json").write_text(json.dumps(meta, indent=2) + "\n")
+    except OSError as e:
+        print(f"cannot write {out}: {e}", file=sys.stderr)
+        return 2
+    print(json.dumps({"status": "ok" if parsed["rows"] else "no-data-rows", "file": str(out),
+                      **{k: meta[k] for k in ("retrieved_utc", "crdb_export_date", "crdb_version", "n_rows", "sha256")},
                       "label": LABEL}, indent=2))
     return 0 if parsed["rows"] else 1
 
@@ -290,6 +316,7 @@ def cmd_summarize(args) -> int:
     if meta.exists():
         try:
             s["sidecar"] = json.loads(meta.read_text())
+            s["sha256_matches_sidecar"] = s["sidecar"].get("sha256") == hashlib.sha256(p.read_bytes()).hexdigest()
         except (OSError, ValueError):
             s["sidecar"] = "unreadable"
     print(json.dumps(s, indent=2))
@@ -300,11 +327,15 @@ def add_query_args(sp):
     sp.add_argument("--num", required=True, help="numerator, e.g. H, 1H-BAR, e-, e+, O-group")
     sp.add_argument("--den", default="", help="denominator (empty for a flux)")
     sp.add_argument("--energy-type", required=True, choices=ENERGY_TYPES, help="native axis of the quantity; no default on purpose")
-    sp.add_argument("--exp-dates", default="AMS", help="sub-experiment filter (default AMS; pass '' for no filter), e.g. 'AMS' or 'PAMELA(2006:2008)'")
+    exp = sp.add_mutually_exclusive_group(required=True)
+    exp.add_argument("--exp-dates", help="sub-experiment filter in CRDB syntax, NAME or NAME(YYYY:YYYY); no default on purpose")
+    exp.add_argument("--all-experiments", action="store_true", help="query every experiment (explicit; there is no default filter)")
     sp.add_argument("--combo-level", type=int, default=0, help="0 native only (default), 1 within 5%% in energy, 2 within 20%%")
     sp.add_argument("--energy-convert-level", type=int, default=0, help="0 queried axis only (default), 1 exact conversions, 2 approximate (avoid)")
-    sp.add_argument("--energy-start"); sp.add_argument("--energy-stop")
-    sp.add_argument("--time-start", help="YYYY or YYYY/MM"); sp.add_argument("--time-stop", help="YYYY or YYYY/MM")
+    sp.add_argument("--energy-start")
+    sp.add_argument("--energy-stop")
+    sp.add_argument("--time-start", help="YYYY or YYYY/MM")
+    sp.add_argument("--time-stop", help="YYYY or YYYY/MM")
     sp.add_argument("--time-series", choices=TIME_SERIES, help="CRDB default is no (time series excluded)")
     sp.add_argument("--format", choices=FORMATS, help="CRDB default is csv-asimport; summarize needs a csv export with a column header")
     sp.add_argument("--modulation", choices=MODULATIONS)
@@ -318,7 +349,7 @@ def main(argv=None, http=None) -> int:
     add_query_args(u)
     fch = sub.add_parser("fetch", help="run ONE query and save the export plus a sidecar .meta.json")
     add_query_args(fch)
-    fch.add_argument("--out", required=True, help="output file, e.g. cache/ams_p_R.csv")
+    fch.add_argument("--out", required=True, help="output file, e.g. cache/crdb_H_R.csv")
     fch.add_argument("--crdb-version", help="the CRDB release you read on the website (recorded as given)")
     fch.add_argument("--max-mb", type=int, default=DEFAULT_MAX_MB)
     fch.add_argument("--retries", type=int, default=1, help="retries of a transient error (5xx, network); a block is never retried")

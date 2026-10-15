@@ -14,7 +14,8 @@
 #              blocking a merge for now, but their results are shown on the run
 #   release-manifests  published release bundles unchanged (C10); required
 #   latest     weekly and on demand: the latest releases (no lock) and the slow tier (HEP_SLOW_TESTS=1)
-# Actions are pinned to commit SHAs; the comment names the release.
+# Actions are pinned to commit SHAs; the comment names the release. pip downloads are cached (setup-python, keyed on
+# the lock file); a cache hit only saves downloads: the pinned set is installed and every test runs on every run.
 name: tests
 on:
   push:
@@ -26,6 +27,13 @@ on:
 
 permissions:
   contents: read
+
+# A new commit on a pull request cancels that PR's older, superseded run: only the newest revision can be merged, and a
+# cancelled run never passes (checks-complete stays cancelled). Pushes to main, the weekly run and manual runs are
+# never cancelled (each has its own group: the ref plus the run id).
+concurrency:
+  group: tests-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || format('{0}-{1}', github.ref, github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 defaults:
   run:
@@ -50,6 +58,8 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
           python-version: ${{ matrix.python }}
+          cache: pip  # downloaded wheels only, keyed on the lock; every install and test still runs
+          cache-dependency-path: plugins/hep-research/requirements-ci.lock
       - name: Install the pinned set
         run: python -m pip install -r requirements-ci.lock
       - name: ${{ matrix.part.name }}
@@ -103,6 +113,8 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
           python-version: "3.13"
+          cache: pip
+          cache-dependency-path: plugins/hep-research/requirements-ci.lock
       - name: Install the pinned set with pyhf and ArviZ
         run: python -m pip install -r requirements-ci.lock "pyhf==0.7.6" "arviz==0.23.4"
       - name: Statistics and backend tests, no skip allowed for a required backend
@@ -179,6 +191,8 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
         with:
           python-version: "3.13"
+          cache: pip
+          cache-dependency-path: plugins/hep-research/requirements-ci.lock
       - name: Install the pinned set and ${{ matrix.extra }}
         run: |
           python -m pip install -r requirements-ci.lock
