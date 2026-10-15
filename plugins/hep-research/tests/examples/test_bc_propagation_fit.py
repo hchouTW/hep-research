@@ -35,7 +35,8 @@ except ImportError:
 # bit-reproducible is compared for what it states. The grid hash covers the text of 882 floating-point artifacts and is
 # platform dependent (the grid content is compared through every fit result below); a log10 condition number at or
 # above 12 only says "flat direction", and its value is rounding noise; toy summaries carry the last-digit
-# differences of 100 fits, so they are compared to 1e-4 relative. The physics assertions are the other tests.
+# differences of 100 fits, so they are compared to 1e-4 relative or 1e-4 absolute (pulls are in units of sigma, and
+# a mean pull near zero has no useful relative scale). The physics assertions are the other tests.
 FLAT_LOG10_CONDITION = 12.0
 TOY_REL = 1e-4
 
@@ -47,7 +48,7 @@ def differences(a, b, path="$", rel=1e-6, abs_tol=1e-9) -> list[str]:
             and min(a, b) >= FLAT_LOG10_CONDITION:
         return []
     if path.startswith("$.toys"):
-        rel = max(rel, TOY_REL)
+        rel, abs_tol = max(rel, TOY_REL), max(abs_tol, TOY_REL)
     if isinstance(a, bool) or isinstance(b, bool):
         return [] if a == b else [f"{path}: {a!r} != {b!r}"]
     if isinstance(a, (int, float)) and isinstance(b, (int, float)) and (isinstance(a, float) or isinstance(b, float)):
