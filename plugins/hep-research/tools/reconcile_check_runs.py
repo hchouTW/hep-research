@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Reconcile the check-run records of one CI run: the gate that says the required checks all ran and passed.
 
-Usage: python3 tools/reconcile_check_runs.py RUNS_DIR --python 3.11,3.12,3.13 --shards N
+Usage: python3 tools/reconcile_check_runs.py RUNS_DIR --python 3.13 --shards N
                                              [--parts static,ams-optional] [--sha SHA] [--summary FILE]
 
 RUNS_DIR holds the check-run-*.json files written by tools/run_all_checks.py --out (any depth, e.g. one folder per
@@ -144,7 +144,7 @@ def markdown(report: dict) -> str:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("runs", type=Path, metavar="RUNS_DIR")
-    ap.add_argument("--python", required=True, help="comma-separated Python versions, e.g. 3.11,3.12,3.13")
+    ap.add_argument("--python", required=True, help="comma-separated Python versions, e.g. 3.13")
     ap.add_argument("--shards", type=int, required=True, help="units shards per Python version")
     ap.add_argument("--parts", default="static,ams-optional", help="other parts expected per Python version")
     ap.add_argument("--sha", help="the commit every run must have tested")

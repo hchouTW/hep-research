@@ -17,6 +17,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from tests.skills.hep_computing.pyroot_floor import meets_floor
+
 ROOT_DIR = Path(__file__).resolve().parents[2]
 ASSETS = ROOT_DIR / "adapters" / "root-uproot" / "assets"
 FIXTURES = ROOT_DIR / "tests" / "skills" / "hep_computing" / "make_root_fixtures.py"
@@ -39,7 +41,8 @@ BIN = Path(ROOT_CONFIG).parent if ROOT_CONFIG else None
 def _pyroot_python():
     """First interpreter that can `import ROOT`: $HEP_ROOT_PYTHON, python next to root-config, the Python ROOT was
     built for (`root-config --python-version`), this interpreter, python3. None if none can (e.g. Homebrew ROOT
-    built for 3.14 while python3 is 3.13, where the import fails at dlopen)."""
+    built for 3.14 while python3 is 3.13, where the import fails at dlopen). A candidate older than the plugin's
+    Python floor (3.13) is never used."""
     cands = [os.environ.get("HEP_ROOT_PYTHON"), str(BIN / "python") if BIN else None]
     if ROOT_CONFIG:
         try:
@@ -49,6 +52,8 @@ def _pyroot_python():
             pass
     cands += [sys.executable, shutil.which("python3")]
     for py in dict.fromkeys(c for c in cands if c and Path(c).exists()):
+        if not meets_floor(py):
+            continue
         try:
             if subprocess.run([py, "-c", "import ROOT"], capture_output=True, timeout=120, env=_env()).returncode == 0:
                 return py

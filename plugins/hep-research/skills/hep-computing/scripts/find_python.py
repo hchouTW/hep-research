@@ -8,10 +8,11 @@ Candidates, in this order; the first that qualifies wins:
   4. python3 on PATH
 Nothing else is searched: conda environments and virtual environments are used only when named through 1 or 2.
 Each candidate is probed in a subprocess (from an empty temporary directory) that imports the required packages and
-reports its version; it qualifies if it is Python >= --min-python and every package imports. Point the plugin at an
+reports its version; it qualifies if it is Python >= --min-python and every package imports. The plugin supports
+Python 3.13 and newer: --min-python may raise that minimum, never lower it (a lower value is bad usage). Point the plugin at an
 interpreter with, for example, `export HEP_RESEARCH_PYTHON=~/miniconda3/envs/sympy-py313/bin/python`.
 
-Usage: python3 find_python.py [--require PKG ...] [--python PATH] [--min-python 3.11] [--timeout SECONDS]
+Usage: python3 find_python.py [--require PKG ...] [--python PATH] [--min-python 3.13] [--timeout SECONDS]
 Exit 0 found, 1 no candidate qualifies (status failed), 2 bad usage.
 Output: JSON with status, python (path), python_version, modules (package -> version), source, and every candidate
 tried with its reason. Record python, python_version and the module versions with the result that uses them.
@@ -28,7 +29,7 @@ import tempfile
 from pathlib import Path
 
 ENV_VAR = "HEP_RESEARCH_PYTHON"
-MIN_PYTHON = "3.11"  # pyproject.toml requires-python
+MIN_PYTHON = "3.13"  # pyproject.toml requires-python: the supported floor
 # runs inside the candidate, possibly an old Python: keep it to syntax every Python 3 parses
 PROBE = """
 import json, sys
@@ -98,6 +99,8 @@ def probe(path: str, required: list[str], min_python: tuple[int, ...], timeout: 
 
 def find(required: list[str], explicit: str | None = None, min_python: str = MIN_PYTHON, timeout: float = 60.0) -> dict:
     minimum = tuple(int(x) for x in min_python.split("."))
+    if minimum < tuple(int(x) for x in MIN_PYTHON.split(".")):
+        raise ValueError(f"min_python {min_python} is below the supported minimum {MIN_PYTHON}")
     tried, seen = [], {}
     for source, path in candidates(explicit):
         key = os.path.realpath(os.path.expanduser(path))
@@ -125,14 +128,17 @@ def main(argv=None) -> int:
     ap.add_argument("--require", action="append", metavar="PKG",
                     help="importable package the interpreter must have (repeatable; default: sympy)")
     ap.add_argument("--python", help="interpreter to try first")
-    ap.add_argument("--min-python", default=MIN_PYTHON, help=f"minimum Python version (default {MIN_PYTHON})")
+    ap.add_argument("--min-python", default=MIN_PYTHON, help=f"minimum Python version (default and lowest allowed: {MIN_PYTHON})")
     ap.add_argument("--timeout", type=float, default=60.0, help="seconds allowed per probe (default 60)")
     args = ap.parse_args(argv)
     try:
         tuple(int(x) for x in args.min_python.split("."))
     except ValueError:
-        ap.error(f"--min-python must look like 3.11, got {args.min_python!r}")
-    out = find(args.require or ["sympy"], args.python, args.min_python, args.timeout)
+        ap.error(f"--min-python must look like {MIN_PYTHON}, got {args.min_python!r}")
+    try:
+        out = find(args.require or ["sympy"], args.python, args.min_python, args.timeout)
+    except ValueError as exc:
+        ap.error(str(exc))
     print(json.dumps(out, indent=1))
     return 0 if out["status"] == "found" else 1
 

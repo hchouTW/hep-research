@@ -18,6 +18,11 @@ Environment E3 (rows marked "E3" below): Linux (EL9), x86_64, Python 3.11.13, Nu
 Matplotlib 3.11.2, SymPy 1.14.0, Claude Code CLI 2.1.287, codex-cli 0.160.0, 2026-10-05 at `e296b9b` (plugin 0.2.1). E3 results do not replace E1 or E2
 results; they are listed in "E3 results" at the end. Evidence: VALIDATION FULLTEST-E3.
 
+Python floor (2026-10-15): the plugin requires Python 3.13. E1 and E3 ran Python 3.11, and the E3 ROOT row ran PyROOT
+under Python 3.9.25: those results were measured on versions that are no longer supported and are kept as history.
+Python 3.13 evidence is E2, CI on Python 3.13.16 and the CI ROOT container's Python 3.13.7 (VALIDATION PY313-FLOOR);
+the PyROOT tests now refuse an interpreter older than 3.13.
+
 ## Capabilities
 
 | Capability | Owner | Status | Evidence or reason |
@@ -190,7 +195,7 @@ results; they are listed in "E3 results" at the end. Evidence: VALIDATION FULLTE
 | Core checks, profile suites, examples | tested (E3) with one failure | 17 of 18 aggregate checks pass at `e296b9b`; unit 1281 run, 1253 pass, 1 fail, 27 skip; profile suites 265, 43, 9, 16 pass. The failure: `theory-comparison` committed output, q at μ = 1.15 is 2.5e-9 against 0.0 (abs 1e-12). Ten of eleven examples rerun byte-identically; `qed-prediction` differs between a cold and a warm bytecode cache (`profile_files_read`) |
 | pyhf workflows | tested (E3 + pyhf 0.7.6) | adapter tests pass |
 | uproot/awkward tools | tested (E3 + uproot 5.7.6, awkward 2.14.0) | `test_uproot_awkward_asset` passes |
-| ROOT, PyROOT tools | tested (E3 + ROOT 6.40.04, EL9 system package, C++17, g++ 11.5.0, PyROOT under Python 3.9.25 via `HEP_ROOT_PYTHON`) | ROOT C++ assets (5) and PyROOT integration (7) pass |
+| ROOT, PyROOT tools | tested (E3 + ROOT 6.40.04, EL9 system package, C++17, g++ 11.5.0, PyROOT under Python 3.9.25 via `HEP_ROOT_PYTHON`; that Python is below the 3.13 floor, see the note above) | ROOT C++ assets (5) and PyROOT integration (7) pass |
 | CMS Combine | unverified (E3) | no `combine`; no CMSSW area set up |
 | PyTorch assets | tested (E3 + PyTorch 2.14.1, torchvision 0.29.1, CPU; FULLTEST-E3-FOLLOWUPS) | physics-ml tests 130 run, 128 pass, 2 skip (meaningful only without PyTorch; they pass without it), including the 2-process gloo DDP run; FULLTEST-E3 itself ran without PyTorch (17 tests skipped) |
 | Diagram source checks | partly (E3: Graphviz 2.44.0); Mermaid CLI, PlantUML, tectonic unverified | not installed (3 tests skip) |

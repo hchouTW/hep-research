@@ -224,16 +224,19 @@ read a companion's package manifest or need access to a private repository. Beha
 
 ## Environments
 
-- **Core (needed by most scripts and all examples):** Python 3.11 or newer with the packages in
+- **Core (needed by most scripts and all examples):** Python 3.13 or newer (tested on 3.13; 3.11 and 3.12 are no
+  longer supported, and a newer series is installable but not tested) with the packages in
   [requirements-core.txt](requirements-core.txt) (NumPy, SciPy, Matplotlib, SymPy). Install them in a virtual
   environment, for example `python3 -m venv ~/.venvs/hep && ~/.venvs/hep/bin/pip install -r requirements-core.txt`;
   an interpreter used by anything that runs outside the agent sandbox must live outside agent-writable paths.
   Contract, registry and blinding checks need only the standard library.
 - **Which interpreter:** before SymPy work the skills run `skills/hep-computing/scripts/find_python.py`, which picks
-  the first Python >= 3.11 that has the packages from `--python`, the `HEP_RESEARCH_PYTHON` environment variable, the
+  the first Python >= 3.13 that has the packages from `--python`, the `HEP_RESEARCH_PYTHON` environment variable, the
   calling interpreter, then `python3` on PATH. To use a dedicated environment, set the variable, for example
   `export HEP_RESEARCH_PYTHON=~/miniconda3/envs/sympy-py313/bin/python`. Nothing else is searched, and nothing is
-  installed: if no candidate qualifies, the script reports a `failed` status.
+  installed: if no candidate qualifies, the script reports a `failed` status. The scripts are run directly
+  (`python3 script.py`), so `requires-python` in `pyproject.toml` does not stop an older interpreter: choose it with
+  `find_python.py`, which never selects a Python older than 3.13 (a lower `--min-python` is refused).
 - **Optional (skipped in the v1 handover run; each was installed and verified afterwards, see the `*-RUN` sections of
   `VALIDATION.md`, except the tectonic paper build):** PyTorch (`physics-ml` assets), ROOT/PyROOT, uproot and awkward (`hep-computing`
   ROOT tools, `adapters/root-uproot`), pyhf and CMS Combine (`adapters/pyhf-combine`, the end-to-end sample),
