@@ -1,0 +1,54 @@
+{
+ "label": "Limit benchmark plan: DRAGON2 B/C against the closed-form 1D thin-disc model of theory:cr-secondary-ratio (profiles/theory/cr-secondary-ratio/scripts/predict.py). Declared before any DRAGON2 B/C value was compared with predict.py.",
+ "declared_utc": "2026-10-15T14:40:40Z",
+ "declared_before_comparison": true,
+ "illustrative": true,
+ "status": ["synthetic", "unvalidated"],
+ "program": {"name": "DRAGON2", "source": "https://github.com/cosmicrays/DRAGON2-Beta_version", "commit": "cd588707fe03c76f19bda1b8092e136dcbe3fe90", "code_version": "configure.ac DRAGON 3.1.0 (README: DRAGON2 beta)"},
+ "common_settings": {
+  "grid": "2D (R, z), Rmax = 20 kpc, DimR = 41, z equidistant with dz = 0.02 kpc (DimZ = 2 L / 0.02 + 1), observer at (8.3, 0, 0) kpc",
+  "energy_grid": "Ek per nucleon 0.5 to 2000 GeV/n, factor 1.2",
+  "nuclear_chain": "Z = 5 to 8",
+  "flags": "diffusion on, convection off, reacceleration off, energy losses off, radioactive decay off (Flags block, child elements)",
+  "diffusion": "Constant: D = D0 beta^etaT (R / DiffRefRig)^delta with etaT = 1, DiffRefRig = 1 GV, delta = 0.5 (same form as predict.py with R0 = 1 GV)",
+  "gas": "BronfFerr (analytic HI and H2; HII = 0); the closed form gets h n_H from the same formulas summed on DRAGON2's own z grid at R = 8.3 kpc (h = 0.1 kpc, n_H = column / (2 h))",
+  "sources": "OneRing with RingMin = 0, RingMax = Rmax: uniform in R, |z| <= 0.2 kpc",
+  "cross_sections": "type DRAGON2 with its production table replaced in the run's data directory by the profile's ILLUSTRATIVE set A: 6012 -> 5011 = 70 mb and 8016 -> 5011 = 35 mb at every tabulated energy, every other channel absent (8016 -> 6012 present at 0 mb only to define the table's energy grid). Inelastic cross sections stay DRAGON2's own parametrization (not replaceable through data), and the helium target (He/H = 0.11, constants.h) stays on (not switchable without changing the code)",
+  "observed_parent_ratio": "the closed form takes r_O = N_O / N_C from the same DRAGON2 run at each energy (an input of the closed form, not a fitted value)"
+ },
+ "runs": {
+  "X1": {"D0_1e28": 3.0, "L_kpc": 4.0},
+  "X2": {"D0_1e28": 1.5, "L_kpc": 2.0},
+  "X3": {"D0_1e28": 6.0, "L_kpc": 8.0},
+  "G_low": {"D0_1e28": 2.0, "L_kpc": 4.0},
+  "G_high": {"D0_1e28": 4.5, "L_kpc": 4.0},
+  "T_truth": {"D0_1e28": 3.6, "L_kpc": 4.0}
+ },
+ "checks": [
+  {
+   "id": "C1-absolute",
+   "what": "B/C of run X1 divided by the closed form at the same E/n nodes (DRAGON2's own energy nodes between 10 and 1000 GeV/n)",
+   "tolerance": "|ratio - 1| <= 0.30 at every node",
+   "reason": "not like-for-like in four known ways that this test cannot remove: (1) the helium target (He/H = 0.11) raises both production and destruction, expected to raise B/C by of order 10-20% where escape dominates; (2) DRAGON2's own energy-dependent inelastic cross sections replace the profile's 250/270/310 mb; (3) 2D geometry: radially varying gas (H2 peak near 8 kpc), a finite radial boundary at 20 kpc and sources uniform in R; (4) finite thickness of gas (HWHM 0.06-0.12 kpc) and sources (|z| <= 0.2 kpc) against the thin-disc limit. 30% is the sum of rough magnitudes of these effects, chosen before the comparison; it is a consistency check, not a validation of either code"
+  },
+  {
+   "id": "C2-degeneracy",
+   "what": "B/C of X2 and X3 divided by B/C of X1 (same D0/L) at DRAGON2's energy nodes between 10 and 1000 GeV/n",
+   "tolerance": "|ratio - 1| <= 0.10 at every node",
+   "reason": "the 1D thin-disc model depends on D0 and L only through D0/L exactly; DRAGON2 breaks this through the finite gas and source thickness (h/L from about 0.1 at L = 2 to 0.025 at L = 8) and radial escape (boundary 11.7 kpc from the observer against L up to 8 kpc); 10% bounds corrections of order h/L plus the radial term"
+  },
+  {
+   "id": "C3-slope",
+   "what": "least-squares slope of ln(B/C) against ln(E/n) over DRAGON2's nodes in 100-1000 GeV/n, run X1 against the closed form on the same nodes",
+   "tolerance": "|slope difference| <= 0.05",
+   "reason": "both use delta = 0.5; the slope is -delta times the escape fraction, so a 20% difference in effective destruction shifts it by about 0.025; DRAGON2's inelastic cross sections and He/H ratios vary little above 100 GeV/n"
+  },
+  {
+   "id": "C4-grid-fit",
+   "what": "covariance_fit.py fit, model tabulated-grid, one-axis grid D0 in {2, 3, 4.5} x 1e28 cm^2/s (runs G_low, X1, G_high, L = 4 kpc), measurement = run T_truth (D0 = 3.6e28) bin-averaged in the same bins, with 3% uncorrelated and 2% fully correlated components; every node must pass the comparison gate",
+   "tolerance": "|ln(D0_fit / 3.6e28)| <= 0.05",
+   "reason": "multilinear interpolation in ln D0 of a ratio close to D0^-1 between nodes 1.5 apart in D0 biases the interpolated ratio by about (ln 1.5)^2 / 8 = 2%, which maps to about 2% in D0; the data are a DRAGON2 run without noise"
+  }
+ ],
+ "never": "the tolerances above are not changed after the comparison; a failing check is reported with its likely cause and the test asserts what is established"
+}
