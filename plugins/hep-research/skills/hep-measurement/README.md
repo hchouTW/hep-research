@@ -3,14 +3,16 @@
 Measurement design and review for particle and astroparticle physics. What the skill owns, never does, and its
 invariants are stated once, in [SKILL.md](SKILL.md); this page is a folder guide for people. Correlations: hep-measurement supplies the physical correlation evidence and a proposed scheme with its justification; hep-statistics encodes it in the likelihood and checks positive semidefiniteness.
 
+Formerly `hep-analysis`; the old name is a deprecated alias in contracts 2.9.0.
+
 ## Folder map
 
 | Path | Content |
 |---|---|
 | `SKILL.md` | entry point: invariants, workflow, context resolution, resources, handoffs |
-| `references/` | method references, routed from `hep-measurement-guide.md` (`data-pipelines.md` is a pointer: the code-level pipeline material moved to hep-computing's `analysis-data-pipelines.md`) |
+| `references/` | twelve method references, routed from `hep-measurement-guide.md` (`data-pipelines.md` is a pointer: the code-level pipeline material moved to hep-computing's `analysis-data-pipelines.md`) |
 | `scripts/` | thirteen command-line helpers (systematic variations, yield and systematics tables, counting reference, blinded-bin masking, analysis-change and spec review, cosmic-ray helpers) |
-| `assets/` | the `measurement-spec` template and its field guide, the systematics ledger (CSV), the report template, a synthetic cosmic-ray spectrum example |
+| `assets/` | the `measurement-spec` template and its field guide, a synthetic cosmic-ray worked spec, the systematics ledger (CSV), the report template, the measurement-review template and a synthetic review example, a synthetic cosmic-ray spectrum example |
 
 ## Scripts
 
@@ -18,7 +20,7 @@ invariants are stated once, in [SKILL.md](SKILL.md); this page is a folder guide
 
 ## References
 
-Start with `references/hep-measurement-guide.md`, which routes to one reference per question: analysis design, review and deliverables, weights and normalization, histograms and efficiencies, backgrounds, systematics, measurement definitions (unfolding and combination methods belong to hep-statistics), analysis validation. `references/cosmic-ray-measurements.md` indexes the cosmic-ray measurement types (absolute flux, flux and isotope ratios, time-dependent flux, rare-event searches) by linking existing sections, and adds the anisotropy measurement design (dipole amplitude and phase, directional exposure, upper limits on the amplitude, whose statistics belong to hep-statistics); status `documented`. Detector data/MC validation lives in hep-detector.
+Start with `references/hep-measurement-guide.md`, which routes to one reference per question: analysis design, review and deliverables, weights and normalization, histograms and efficiencies, backgrounds, systematics, measurement definitions (unfolding and combination methods belong to hep-statistics), analysis validation. `references/cosmic-ray-measurements.md` indexes the cosmic-ray measurement types (absolute flux, flux and isotope ratios, time-dependent flux, rare-event searches) by linking existing sections, and adds the anisotropy measurement design (dipole amplitude and phase, directional exposure, upper limits on the amplitude, whose statistics belong to hep-statistics; time-bin covariance and binned-series inference link to hep-statistics' `time-series-inference.md`); status `documented`. Detector data/MC validation lives in hep-detector.
 
 ## Handoffs
 
@@ -33,7 +35,7 @@ Start with `references/hep-measurement-guide.md`, which routes to one reference 
 
 ## Tests and validation
 
-`tests/skills/hep_measurement/` (one module per script or reference family, including the CLI contract, the reference links and the worked examples of the method references) and the journey examples under `examples/` (the synthetic flux-ratio and collider-angular examples start here). What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
+`tests/skills/hep_measurement/` (twenty-one test modules: one per script or reference family, including the CLI contract, the reference links and the worked examples of the method references) and the journey examples under `examples/` (the synthetic flux-ratio and collider-angular examples start here). What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
 
 ## How this folder is used
 

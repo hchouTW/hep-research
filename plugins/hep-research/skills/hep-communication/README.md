@@ -2,6 +2,8 @@
 
 Use when the deliverable is scientific communication or literature work in physics: finding and verifying literature and citations, literature matrices and reviews, checking whether a source supports a claim, drafting or revising paper sections, abstracts and captions, figures and tables, diagrams as editable sources, talks and posters, referee reports, theses, proposals, handover notes, and packaging results with claim-to-result links and honest status. It answers questions about what a named experiment published from the evidence ledger, not memory.
 
+Formerly `research-communication`; the old name is a deprecated alias in contracts 2.9.0.
+
 **Owns:** literature discovery and verification workflow, writing, diagrams and their rendering, talks, referee replies, handover, packaging; stewardship of `core/evidence`. Typical artifacts: `communication` (claims linked to results and sources, read levels, figure inputs, limitations; the traceability format adds evidence edges, occurrences and assessments), literature matrices, manuscripts, figures with captions.
 
 **Never:** invent a result, a number or a citation; upgrade a derivation or result status; describe synthetic or Asimov results as measurements.
@@ -39,7 +41,7 @@ Optional, outside this folder and required by nothing here: the adapter `adapter
 
 ## Tests and validation
 
-`tests/skills/hep_communication/` (sixteen test modules, including the golden evidence-linked scenario), the contracts tests for the communication format under `tests/contracts/`, the optional lookup adapter's offline tests `tests/adapters/test_literature_lookup.py` (recorded responses; a live smoke only with `HEP_LIVE_LOOKUP_TEST=1`), and the behavioral evaluation outside the plugin under `evals/hep_communication/` (fixture-driven cases, a replay scorer with self-tests, and one recorded live run). What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
+`tests/skills/hep_communication/` (sixteen test modules, including the golden evidence-linked scenario), the contracts tests for the communication format under `tests/contracts/`, the optional lookup adapter's offline tests `tests/adapters/test_literature_lookup.py` (recorded responses; a live smoke only with `HEP_LIVE_LOOKUP_TEST=1`), and the behavioral evaluation outside the plugin under `evals/research_communication/` at the repository root (the folder keeps the former skill name; fixture-driven cases, a replay scorer with self-tests, and two recorded live runs, 2026-10-13 and 2026-10-15). What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
 
 ## How this folder is used
 

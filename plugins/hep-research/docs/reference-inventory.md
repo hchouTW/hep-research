@@ -269,7 +269,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `nuisance-modeling.md` | hep-statistics | 19.9 | no | 8 | hep-measurement | 9257d7b 2026-10-15 |
 | `statistical-inference-for-physics.md` | hep-statistics | 12.9 | no | 10 | hep-communication, hep-computing, hep-theory | 9257d7b 2026-10-15 |
 | `statistical-tools.md` | hep-statistics | 9.6 | no | 3 | hep-ml | 578c12f 2026-10-13 |
-| `time-series-inference.md` | hep-statistics | 15.5 | yes | 5 | hep-measurement | 7487999 2026-10-15 |
+| `time-series-inference.md` | hep-statistics | 15.5 | yes | 6 | hep-measurement | 7487999 2026-10-15 |
 | `unfolding.md` | hep-statistics | 7.0 | no | 25 | hep-detector, hep-measurement | 9257d7b 2026-10-15 |
 | `amplitudes-and-widths.md` | hep-theory | 8.3 | yes | 1 | - | 83ae4f6 2026-10-13 |
 | `cosmic-ray-propagation.md` | hep-theory | 13.7 | yes | 8 | - | 14eeda4 2026-10-15 |

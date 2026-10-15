@@ -3334,6 +3334,7 @@
    "lines": 194,
    "linked_from_skill_md": true,
    "cited_by": [
+    "skills/hep-measurement/README.md",
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
     "skills/hep-statistics/SKILL.md",
     "skills/hep-statistics/references/astroparticle-statistics.md",
