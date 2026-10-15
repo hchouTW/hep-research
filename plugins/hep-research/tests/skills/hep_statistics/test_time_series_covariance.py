@@ -76,7 +76,7 @@ def run_validator(matrix, blocks=None):
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / "cov.json"
         path.write_text(json.dumps(doc), encoding="utf-8")
-        proc = subprocess.run([sys.executable, str(VALIDATOR), str(path)], capture_output=True, text=True)
+        proc = subprocess.run([sys.executable, str(VALIDATOR), str(path)], capture_output=True, text=True, timeout=120)
     return proc.returncode, json.loads(proc.stdout)
 
 
