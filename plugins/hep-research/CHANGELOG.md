@@ -5,6 +5,21 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- `contracts/registry.py` rejects an unknown flag or a stray argument with exit 2 and a JSON error naming it
+  (`{"ok": false, "error": "unknown option '--bogus' ..."}`). Before, an unknown flag such as validate.py's
+  `--profiles-from` was ignored and the run reported `ok`, so a companion check with the wrong flag looked clean.
+  `--registry`, `--local` (repeatable) and `--strict-versions` work as before; `--help` prints the usage.
+- Test robustness: `test_tikz_error_is_a_source_error` (hep-communication diagram check) skips with the preflight's
+  reason when a TeX engine is on PATH but the install fails the renderer preflight (for example a missing
+  `luatex85.sty`, exit 3), as its no-TeX neighbour does; with a complete install it still asserts exit 1 and one
+  source error. A stand-in engine covers the skip. No plugin code changed.
+- `contracts/lineage.py decision` now compares each `artifacts[].sha256` with the file it names: relative refs resolve
+  against the decision record's folder (or `--artifacts-root DIR`), absolute refs are used as they are. A different
+  hash is `lineage.artifact_mismatch`, a missing file `lineage.artifact_missing`, an unreadable one
+  `lineage.artifact_unreadable`, all errors (exit 1), as a missing exposure record is. `check_decision()` gains an
+  optional `base_dir`; without it the library check is unchanged. No schema change. The hep-ml pre-training freeze
+  example passes as shipped; a changed split manifest now fails `lineage.py` itself, and only the hash written in the
+  `decision` text is still compared by hand (`ml-analysis.md`, capability matrix updated).
 - Registry budget raised from 2,048 to 3,072 bytes (`REGISTRY_BUDGET` in `contracts/registry.py` and
   `registry_bytes` in `tools/measure_entrypoints.py`; decision D3 of the WP13–WP16 order). The registry was at 2,001
   bytes with 8 entries, and one more theory profile costs about 163 bytes plus its scope, so no further profile fit.
