@@ -22,6 +22,7 @@ subcommands, inputs and outputs, validation tools outside `core/stats`, publicat
 [nuisance modeling](nuisance-modeling.md), [likelihood fitting](likelihood-fitting.md) (with sWeights),
 [unfolding](unfolding.md), [combinations](combinations.md), [inference recipes](inference-recipes.md),
 [pyhf and Combine](statistical-tools.md), [astroparticle](astroparticle-statistics.md),
+[binned time series](time-series-inference.md),
 [ML-assisted inference](ml-assisted-inference.md), [inference reasoning](statistical-inference-for-physics.md).
 
 ## Common conventions
