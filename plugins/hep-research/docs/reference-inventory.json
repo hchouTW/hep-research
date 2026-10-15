@@ -20,7 +20,7 @@
   },
   "hep-statistics": {
    "references": 11,
-   "bytes": 149620,
+   "bytes": 154105,
    "uncited": 0
   },
   "hep-theory": {
@@ -1546,6 +1546,7 @@
    "lines": 61,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-statistics/references/core-stats-commands.md",
     "skills/hep-statistics/references/core-stats-guide.md"
    ],
    "cited_by_other_skills": [],
@@ -1554,8 +1555,8 @@
   {
    "path": "skills/hep-statistics/references/core-stats-commands.md",
    "owner": "hep-statistics",
-   "bytes": 33543,
-   "lines": 356,
+   "bytes": 37986,
+   "lines": 409,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/response-and-forward-folding.md",
@@ -1573,7 +1574,7 @@
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 16944,
+   "bytes": 16986,
    "lines": 174,
    "linked_from_skill_md": true,
    "cited_by": [
