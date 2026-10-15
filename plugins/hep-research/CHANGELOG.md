@@ -16,6 +16,11 @@ Software checks establish contract consistency only, not physical validity.
   exploring the tree until it ran out of turns (2/3 before). Live check on the 72 cases that involve either skill or
   ask for a question: 69/72, with the other two misses (`eic-underspec-1`, `t19-turns-3`) the same as in the
   2026-10-08 baseline.
+- Test robustness: `test_scaling_check_rejects_a_quadratic_scan` (hep-communication manuscript scan) models the
+  quadratic rescan as a Python loop over the earlier lines instead of `str.count` over the earlier text. On a CI runner
+  the `str.count` byte rate grew with the text, giving a ratio of 7.4 instead of about 16 and a spurious failure (PR
+  #108, job `optional (root-uproot)`; passed on rerun); the loop's cost per step is interpreter work, so the ratio
+  stays near 16 (14.5–16.6 in five repeats each on an idle and on a loaded laptop). No plugin code changed.
 
 ## 0.11.0 (2026-10-15)
 
