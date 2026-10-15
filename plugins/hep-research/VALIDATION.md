@@ -1403,6 +1403,28 @@ reproductions pass; source-review findings F1-F14 and the A2b precision gap fixe
 
 Recorded when the export table was written (before 2026-10-14) and kept here, not in the reference: The Graphviz, `rsvg-convert`, and `mmdc` rows were run in this bundle's validation; the TikZ standalone compile (Tectonic; fonts embedded, `pdffonts`), `pdftoppm -r 300 -png` and `pdftocairo -svg` were run, and the `subcaption` `figure*` snippet compiled under `twocolumn` article with Tectonic (two panels (a)/(b) plus caption on a float page). `dvisvgm` 3.6.1 was run: on Tectonic's `.xdv` it warns "86 PDF specials ignored" and the SVG has the text overlapping with the boxes and arrow missing, so do not use that route; `dvisvgm --pdf` refuses to run with Ghostscript 10.08 and needs `mutool` or Ghostscript < 10.01 ; with `mutool` (`mupdf-tools`) installed, `dvisvgm --pdf` rendered the boxes, arrow and labels correctly, with text kept as `<text>` elements. With math labels and bold, italic, mono and small-caps text, plain `dvisvgm --pdf` rendered in rsvg with a fallback sans font (detached radical, lost bold and italic, overlapping words) while `--no-fonts` and `pdftocairo -svg` matched the PDF; `pdftoppm` matched too. Check any SVG export in the target viewer.
 
+## LITERATURE-LOOKUP (2026-10-15, E2: Python 3.13.2, OpenSSL 3.6.4, macOS 26.5 arm64; version 0.10.1 + unreleased, branch `wp5-literature-lookup` from `f2039c7`)
+
+Work order ams02-skill-upgrade WP5 (decision D5: optional adapter). New `adapters/literature-lookup` 0.1.0
+(`assets/literature_lookup.py`, standard library only, owned by research-communication, required by no skill).
+Network approved by the maintainer for this WP: fixture recording and one live smoke. Endpoints:
+`https://inspirehep.net/api/literature` (search and record), `https://export.arxiv.org/api/query` (`id_list`);
+`https://api.adsabs.harvard.edu/v1/search/query` not contacted (no `ADS_API_TOKEN` or `ADS_TOKEN` set). User-Agent
+`hep-research-literature-lookup/0.1.0 (hep-research plugin; https://github.com/hchouTW/hep-research)`. Requests
+02:31-02:37 UTC: 12 in total (INSPIRE 5, arXiv 7, ADS 0), no automatic retry.
+
+| Item | Result | Evidence |
+|---|---|---|
+| Recording (`--record`) of public identifiers | INSPIRE: `arxiv:1007.1727` found (record 860907, texkey `Cowan:2010js`), `arxiv:2501.99999` total 0, record 860907 found, record 999999999 HTTP 404. arXiv: `1007.1727` found, latest `v3`; one request timed out after 20 s; `2501.99999` answered HTTP 429 "Rate exceeded." four times (02:31:49, 02:32:31, 02:34:44, 02:36:45) while `1007.1727` resolved at 02:32:11 and 02:36:38, so no arXiv not-found response was recorded | `tests/adapters/fixtures/literature_lookup/recorded/`, `rate-limit/arxiv-2501.99999-429.json` |
+| Constructed fixtures (marked `synthetic` in the file; the record says so in its notes) | an INSPIRE HTTP 429 with `Retry-After: 5` (from the documented limit, not provoked) and an ADS search response in the documented layout | `rate-limit/inspire-arxiv-2501.99999-429.json`, `constructed/ads-arxiv-1007.1727.json` |
+| Offline tests (no network: `urlopen` patched to fail) | 20 pass, 1 skipped (live): found in both sources; retrieval time = recording time in replay; erratum skipped in the journal reference; version mismatch (`v1` cited, `v3` latest, exit 3), latest version (exit 0), nonexistent `v9`; not found (INSPIRE total 0 and HTTP 404, exit 1); rate limit (real arXiv 429, constructed INSPIRE 429, one request per source, exit 3); ADS without a token makes no request (`not-verified`), the token goes only into the Authorization header and never into the output or a recorded file, a rejected token is `not-verified`; bad identifier and missing replay directory exit 2 | `python -m unittest tests.adapters.test_literature_lookup` |
+| Live smoke (`HEP_LIVE_LOOKUP_TEST=1`, 02:36:36 UTC) | pass: `arxiv:1007.1727v1` found in INSPIRE (HTTP 200, record 860907, retrieved 02:36:36Z) and arXiv (HTTP 200, retrieved 02:36:38Z, latest `v3`, version mismatch reported); 2 requests, 3.0 s | `LiveSmokeTests` |
+| CLI robustness, declarations | `--help` under `-I`, missing replay directory a short error; adapter status `demonstrated-on-synthetic-data` (ADS), INSPIRE and arXiv `tested-in-declared-environment` | `tests/skills/test_cli_robustness.py`, `tests/adapters/test_adapter_declarations.py` |
+
+**Not verified here.** No ADS request was made (no token); the ADS parser and the token handling ran on a constructed
+response only. An arXiv not-found reply (an empty feed or an error entry) was not observed. The INSPIRE 429 was not
+provoked.
+
 ## THREE-AUDITS-LIVE-ROUTING (2026-10-14, Claude Code 2.1.299, claude-sonnet-5-5)
 
 Paid live routing run `20261014T113734Z-claude-claude-sonnet-5-5` (`evals/routing/results/`, outside the plugin) of

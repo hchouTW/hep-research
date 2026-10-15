@@ -81,6 +81,7 @@ MISSING_FILE_ARGS = {
     "adapters/hepdata/assets/hepdata_export.py": ["--artifact", M, "--out", OUT],
     "adapters/hepdata/assets/hepdata_record.py": ["--table", M, "--observable", M, "--record", "r", "--table-name", "t",
                                                   "--out", OUT],
+    "adapters/literature-lookup/assets/literature_lookup.py": ["arxiv:1007.1727", "--replay", M],
     "adapters/pyhf-combine/assets/backend_comparison.py": ["--model", M],
     "adapters/pyhf-combine/assets/model_card.py": ["--card", M],
     "adapters/pyhf-combine/assets/pyhf_nuisance_diagnostics.py": [M],
