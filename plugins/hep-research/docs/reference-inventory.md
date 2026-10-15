@@ -9,7 +9,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | Skill | References | KB | Cited nowhere |
 |---|---|---|---|
 | detector-response | 35 | 454 | 0 |
-| hep-analysis | 11 | 81 | 0 |
+| hep-analysis | 12 | 98 | 0 |
 | hep-computing | 32 | 297 | 0 |
 | hep-statistics | 11 | 150 | 0 |
 | hep-theory | 11 | 78 | 0 |
@@ -53,6 +53,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 - **latex**: `latex-mechanics-and-tooling.md`, `latex-venue-setup.md`
 - **learning**: `deep-learning-guide.md`, `geometric-and-equivariant-learning.md`, `scientific-machine-learning.md`, `transfer-learning.md`
 - **literature**: `literature-discovery-and-search.md`, `literature-lookup-recipes.md`, `literature-review.md`
+- **measurement**: `cosmic-ray-measurements.md`, `measurements-and-unfolding.md`
 - **ml**: `ml-analysis.md`, `space-and-astroparticle-ml.md`
 - **model**: `generative-models.md`, `sequence-models.md`
 - **neutrino**: `neutrino-astronomy.md`, `noble-liquid-neutrino-and-rare-event-detectors.md`
@@ -89,7 +90,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `charge-confusion.md` | detector-response | 11.2 | no | 2 | - | 400c300 2026-10-15 |
 | `cherenkov-imaging-variants-and-photosensors.md` | detector-response | 11.3 | no | 8 | research-communication | 2e19336 2026-10-15 |
 | `core-detector-equations.md` | detector-response | 6.9 | no | 3 | - | b1fb312 2026-10-14 |
-| `cosmic-ray-spectrum-and-composition.md` | detector-response | 12.5 | no | 11 | hep-analysis, hep-statistics, research-communication | 4a74e06 2026-10-14 |
+| `cosmic-ray-spectrum-and-composition.md` | detector-response | 12.5 | no | 12 | hep-analysis, hep-statistics, research-communication | 4a74e06 2026-10-14 |
 | `data-mc-validation-and-detector-systematics.md` | detector-response | 12.8 | no | 8 | - | 4a74e06 2026-10-14 |
 | `detector-case-studies-and-checklists.md` | detector-response | 14.1 | no | 3 | - | b1fb312 2026-10-14 |
 | `detector-comparison-tables.md` | detector-response | 14.6 | no | 2 | - | b1fb312 2026-10-14 |
@@ -109,26 +110,27 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `muon-systems.md` | detector-response | 8.4 | no | 8 | research-communication | b1fb312 2026-10-14 |
 | `neutrino-astronomy.md` | detector-response | 10.2 | no | 7 | hep-statistics | 6c5fc26 2026-10-15 |
 | `noble-liquid-neutrino-and-rare-event-detectors.md` | detector-response | 12.5 | no | 7 | - | f95c6f2 2026-10-15 |
-| `particle-identification.md` | detector-response | 16.1 | no | 20 | - | b1fb312 2026-10-14 |
+| `particle-identification.md` | detector-response | 16.1 | no | 21 | hep-analysis | b1fb312 2026-10-14 |
 | `performance-metrics-and-residual-diagnostics.md` | detector-response | 18.6 | no | 11 | - | 4a74e06 2026-10-14 |
 | `physics-objects-jets-btagging-met.md` | detector-response | 8.5 | no | 7 | physics-ml | b6f3b18 2026-10-15 |
 | `reconstruction-performance-and-truth-matching.md` | detector-response | 10.7 | no | 10 | - | b1fb312 2026-10-14 |
 | `response-and-forward-folding.md` | detector-response | 10.4 | no | 8 | hep-analysis, hep-statistics | 4a74e06 2026-10-14 |
 | `signal-formation-and-readout.md` | detector-response | 18.3 | no | 8 | research-communication | f95c6f2 2026-10-15 |
-| `space-based-direct-detection.md` | detector-response | 21.3 | no | 13 | hep-analysis, hep-statistics, research-communication | 42bd455 2026-10-15 |
+| `space-based-direct-detection.md` | detector-response | 21.3 | no | 14 | hep-analysis, hep-statistics, research-communication | 42bd455 2026-10-15 |
 | `timing-detectors.md` | detector-response | 9.1 | no | 7 | - | 2e19336 2026-10-15 |
 | `tracking-and-vertexing.md` | detector-response | 16.1 | no | 15 | research-communication | 400c300 2026-10-15 |
 | `triggers-luminosity-pileup.md` | detector-response | 15.7 | no | 12 | - | b6f3b18 2026-10-15 |
-| `analysis-design.md` | hep-analysis | 10.9 | yes | 13 | detector-response, hep-computing | 317c39a 2026-10-14 |
+| `analysis-design.md` | hep-analysis | 10.9 | yes | 14 | detector-response, hep-computing | 317c39a 2026-10-14 |
 | `analysis-validation.md` | hep-analysis | 4.4 | no | 5 | detector-response, hep-computing | 351029c 2026-10-07 |
-| `backgrounds.md` | hep-analysis | 4.7 | no | 18 | detector-response | 633d6c9 2026-10-13 |
-| `correction-chain.md` | hep-analysis | 9.6 | no | 4 | - | 4665f43 2026-10-13 |
+| `backgrounds.md` | hep-analysis | 4.7 | no | 19 | detector-response | 633d6c9 2026-10-13 |
+| `correction-chain.md` | hep-analysis | 9.6 | no | 5 | - | 4665f43 2026-10-13 |
+| `cosmic-ray-measurements.md` | hep-analysis | 16.1 | yes | 3 | - | 22fffa1 2026-10-15 |
 | `data-pipelines.md` | hep-analysis | 0.4 | no | 8 | hep-computing | 7e34ef8 2026-10-13 |
-| `hep-analysis-guide.md` | hep-analysis | 20.4 | yes | 6 | detector-response | 3ace2aa 2026-10-13 |
+| `hep-analysis-guide.md` | hep-analysis | 20.6 | yes | 7 | detector-response | 22fffa1 2026-10-15 |
 | `histograms-efficiencies.md` | hep-analysis | 3.1 | no | 7 | detector-response, hep-computing | c180c4e 2026-10-13 |
-| `measurements-and-unfolding.md` | hep-analysis | 7.4 | no | 10 | detector-response, hep-statistics | 4fb4d83 2026-10-13 |
+| `measurements-and-unfolding.md` | hep-analysis | 7.4 | no | 11 | detector-response, hep-statistics | 4fb4d83 2026-10-13 |
 | `review-and-artifacts.md` | hep-analysis | 7.2 | yes | 9 | - | e085335 2026-10-13 |
-| `systematics.md` | hep-analysis | 8.9 | no | 26 | detector-response, hep-statistics, hep-theory, physics-ml | 839bbd1 2026-10-13 |
+| `systematics.md` | hep-analysis | 8.9 | no | 27 | detector-response, hep-statistics, hep-theory, physics-ml | 839bbd1 2026-10-13 |
 | `weights-normalization.md` | hep-analysis | 4.5 | no | 9 | detector-response, hep-computing, hep-theory, physics-ml | 7e34ef8 2026-10-13 |
 | `acceptance-criteria.md` | hep-computing | 3.7 | no | 3 | - | 351029c 2026-10-07 |
 | `agile-development-guide.md` | hep-computing | 10.9 | yes | 8 | physics-ml | f437237 2026-10-13 |
@@ -162,17 +164,17 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `task-authoring-guide.md` | hep-computing | 11.9 | yes | 8 | - | 351029c 2026-10-07 |
 | `task-quality-checklist.md` | hep-computing | 3.0 | no | 4 | - | 351029c 2026-10-07 |
 | `validation-and-done.md` | hep-computing | 3.7 | yes | 6 | - | 351029c 2026-10-07 |
-| `astroparticle-statistics.md` | hep-statistics | 11.3 | no | 12 | detector-response, hep-analysis | 33d96a1 2026-10-13 |
+| `astroparticle-statistics.md` | hep-statistics | 11.3 | no | 13 | detector-response, hep-analysis | 33d96a1 2026-10-13 |
 | `combinations.md` | hep-statistics | 4.6 | no | 1 | - | 317c39a 2026-10-14 |
 | `core-stats-commands.md` | hep-statistics | 33.5 | no | 5 | detector-response, hep-analysis | d058154 2026-10-13 |
 | `core-stats-guide.md` | hep-statistics | 16.9 | yes | 10 | hep-analysis | 1909d51 2026-10-13 |
-| `inference-recipes.md` | hep-statistics | 18.2 | no | 8 | detector-response, hep-analysis | 1386866 2026-10-13 |
+| `inference-recipes.md` | hep-statistics | 18.2 | no | 9 | detector-response, hep-analysis | 1386866 2026-10-13 |
 | `likelihood-fitting.md` | hep-statistics | 9.5 | no | 6 | detector-response, hep-computing | 4665f43 2026-10-13 |
 | `ml-assisted-inference.md` | hep-statistics | 6.2 | yes | 7 | physics-ml | 06b86c8 2026-10-12 |
 | `nuisance-modeling.md` | hep-statistics | 19.8 | no | 7 | hep-analysis | 7c2abb1 2026-10-13 |
 | `statistical-inference-for-physics.md` | hep-statistics | 12.9 | no | 10 | hep-computing, hep-theory, research-communication | 578c12f 2026-10-13 |
 | `statistical-tools.md` | hep-statistics | 9.6 | no | 3 | physics-ml | 578c12f 2026-10-13 |
-| `unfolding.md` | hep-statistics | 7.0 | no | 24 | detector-response, hep-analysis | 11a01b9 2026-10-13 |
+| `unfolding.md` | hep-statistics | 7.0 | no | 25 | detector-response, hep-analysis | 11a01b9 2026-10-13 |
 | `amplitudes-and-widths.md` | hep-theory | 8.3 | yes | 1 | - | 83ae4f6 2026-10-13 |
 | `cosmic-ray-propagation.md` | hep-theory | 13.0 | yes | 2 | - | 87ee57c 2026-10-13 |
 | `dis-kinematics.md` | hep-theory | 5.9 | yes | 4 | - | 9b8406c 2026-10-13 |
@@ -225,7 +227,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `academic-diagrams-guide.md` | research-communication | 10.8 | yes | 4 | - | ecc929c 2026-10-14 |
 | `academic-papers-guide.md` | research-communication | 28.0 | yes | 12 | - | 573a631 2026-10-14 |
 | `artifact-packaging-for-release.md` | research-communication | 2.9 | no | 3 | - | ecc929c 2026-10-14 |
-| `astroparticle-and-cosmic-ray-papers.md` | research-communication | 13.4 | no | 10 | - | ecc929c 2026-10-14 |
+| `astroparticle-and-cosmic-ray-papers.md` | research-communication | 13.4 | no | 11 | hep-analysis | ecc929c 2026-10-14 |
 | `citation-verification.md` | research-communication | 5.6 | yes | 11 | - | 7627e23 2026-10-14 |
 | `citations-and-bibliography.md` | research-communication | 19.9 | yes | 11 | - | 257b34b 2026-10-14 |
 | `claim-evidence-mapping.md` | research-communication | 4.0 | yes | 9 | hep-statistics, hep-theory | ecc929c 2026-10-14 |

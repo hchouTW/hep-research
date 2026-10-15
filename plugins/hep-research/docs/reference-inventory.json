@@ -873,7 +873,7 @@
     "skills/hep-analysis/references/hep-analysis-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "22fffa1 2026-10-15"
   },
   {
    "path": "skills/hep-analysis/references/data-pipelines.md",
@@ -914,7 +914,7 @@
    "cited_by_other_skills": [
     "detector-response"
    ],
-   "last_commit": "3ace2aa 2026-10-13"
+   "last_commit": "22fffa1 2026-10-15"
   },
   {
    "path": "skills/hep-analysis/references/histograms-efficiencies.md",
