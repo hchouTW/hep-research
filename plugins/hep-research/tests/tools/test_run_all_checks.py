@@ -124,5 +124,73 @@ class AmsOptionalSuiteTests(unittest.TestCase):
         self.assertEqual(mod.merge_suite("s", [])["status"], "fail", "a suite with no modules is not a pass")
 
 
+
+def old_interpreters() -> list[str]:
+    """Real Pythons below 3.13 on this machine (none on CI; macOS ships /usr/bin/python3 3.9)."""
+    import shutil
+    found = []
+    for name in ("python3.9", "python3.10", "python3.11", "python3.12", "/usr/bin/python3"):
+        exe = shutil.which(name)
+        if not exe or exe in found:
+            continue
+        try:
+            v = subprocess.run([exe, "-c", "import sys; print(sys.version_info[1])"], capture_output=True,
+                               text=True, timeout=30).stdout.strip()
+        except (OSError, subprocess.TimeoutExpired):
+            continue
+        if v.isdigit() and int(v) < 13:
+            found.append(exe)
+    return found
+
+
+class UnsupportedPythonTests(unittest.TestCase):
+    """On a Python below the 3.13 floor the runners stop at once with exit 2 and one clear message, instead of
+    running the suite into version-dependent test failures."""
+    TOOLS = ("run_all_checks.py", "check_ams_optional.py")
+    # arguments that stop each tool at once on a supported Python, with a different exit or message than the guard's:
+    # check_ams_optional.py has no --help (it would run everything), a bad --jobs exits 2 before any work
+    QUICK = {"run_all_checks.py": ["--help"], "check_ams_optional.py": ["--jobs", "x"]}
+
+    def test_guard_function(self):
+        import contextlib
+        import io
+        for tool in self.TOOLS:
+            mod = _load(tool[:-3], TOOL.parent / tool)
+            for old in ((3, 12, 7, "final", 0), (3, 11, 9), (3, 9, 6)):
+                with self.subTest(tool=tool, version=old):
+                    err = io.StringIO()
+                    with contextlib.redirect_stderr(err), self.assertRaises(SystemExit) as cm:
+                        mod.require_supported_python(old)
+                    self.assertEqual(cm.exception.code, 2)
+                    self.assertEqual(err.getvalue().strip(),
+                                     f"Python 3.13 or newer is required (running {old[0]}.{old[1]})")
+            for ok in ((3, 13, 0), (3, 14, 1), (4, 0, 0)):
+                with self.subTest(tool=tool, version=ok):
+                    self.assertIsNone(mod.require_supported_python(ok))
+
+    def test_guard_runs_before_anything_else(self):
+        """The script, run with an old sys.version_info, exits 2 with the floor message before its own argument
+        handling (run_all_checks.py --help otherwise exits 0; check_ams_optional.py --jobs x prints its own error)."""
+        driver = ("import runpy, sys; sys.version_info = (3, 12, 1, 'final', 0); sys.argv = sys.argv[1:]; "
+                  "runpy.run_path(sys.argv[0], run_name='__main__')")
+        for tool in self.TOOLS:
+            with self.subTest(tool=tool), tempfile.TemporaryDirectory() as td:
+                p = subprocess.run([sys.executable, "-c", driver, str(TOOL.parent / tool), *self.QUICK[tool]],
+                                   capture_output=True,
+                                   text=True, cwd=td, timeout=60)
+                self.assertEqual(p.returncode, 2, p.stdout[-300:] + p.stderr[-300:])
+                self.assertEqual(p.stderr.strip(), "Python 3.13 or newer is required (running 3.12)")
+                self.assertEqual(list(Path(td).iterdir()), [])
+
+    @unittest.skipUnless(old_interpreters(), "no Python below 3.13 on this machine")
+    def test_real_old_interpreter_gets_the_message(self):
+        for exe in old_interpreters():
+            for tool in self.TOOLS:
+                with self.subTest(exe=exe, tool=tool), tempfile.TemporaryDirectory() as td:
+                    p = subprocess.run([exe, str(TOOL.parent / tool), *self.QUICK[tool]], capture_output=True,
+                                       text=True, cwd=td, timeout=60)
+                    self.assertEqual(p.returncode, 2, p.stderr[-300:])
+                    self.assertRegex(p.stderr.strip(), r"^Python 3\.13 or newer is required \(running 3\.\d+\)$")
+
 if __name__ == "__main__":
     unittest.main()
