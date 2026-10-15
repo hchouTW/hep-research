@@ -35,8 +35,9 @@ except ImportError:
 # bit-reproducible is compared for what it states. The grid hash covers the text of 882 floating-point artifacts and is
 # platform dependent (the grid content is compared through every fit result below); a log10 condition number at or
 # above 12 only says "flat direction", and its value is rounding noise; toy summaries carry the last-digit
-# differences of 100 fits, so they are compared to 1e-4 relative or 1e-4 absolute (pulls are in units of sigma, and
-# a mean pull near zero has no useful relative scale). The physics assertions are the other tests.
+# differences of 100 fits, so they and every pull are compared to 1e-4 relative or 1e-4 absolute (pulls are in units
+# of sigma, and a pull near zero has no useful relative scale); a condition number of None (exactly singular) is flat
+# too. The physics assertions are the other tests.
 FLAT_LOG10_CONDITION = 12.0
 TOY_REL = 1e-4
 
@@ -44,10 +45,11 @@ TOY_REL = 1e-4
 def differences(a, b, path="$", rel=1e-6, abs_tol=1e-9) -> list[str]:
     if path.endswith(".combined_sha256"):
         return []
-    if path.endswith(".condition_number_log10") and isinstance(a, (int, float)) and isinstance(b, (int, float)) \
-            and min(a, b) >= FLAT_LOG10_CONDITION:
-        return []
-    if path.startswith("$.toys"):
+    if path.endswith(".condition_number_log10"):
+        flat = [x is None or (isinstance(x, (int, float)) and x >= FLAT_LOG10_CONDITION) for x in (a, b)]
+        if all(flat):  # None: an exactly singular direction (infinite condition number), also flat
+            return []
+    if path.startswith("$.toys") or path.rsplit(".", 1)[-1].startswith("pull"):
         rel, abs_tol = max(rel, TOY_REL), max(abs_tol, TOY_REL)
     if isinstance(a, bool) or isinstance(b, bool):
         return [] if a == b else [f"{path}: {a!r} != {b!r}"]
