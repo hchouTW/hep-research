@@ -68,5 +68,19 @@
   "verification_strength": "not-opened",
   "numeric_quotation_allowed": false,
   "last_reviewed": "2026-10-15"
+ },
+ {
+  "id": "crsr:C06",
+  "claim": "No examined publication prints B/C or the escape grammage in a table for fully specified inputs: the arXiv versions of Jones et al. 2001, Genolini et al. 2015 and 2019 and Schroer, Evoli & Blasi 2025 tabulate fit parameters or cross sections and show B/C in figures only, and the PDF text of Webber & Villa 2016 contains no table. Open question B1 therefore stays open (record: benchmarks/external-benchmark-search.json).",
+  "claim_types": ["published_result"],
+  "support_kind": "absence_search",
+  "evidence_status": "public-fact",
+  "source_ids": ["crsr:S02", "crsr:S04", "crsr:S05", "crsr:S08", "crsr:S09"],
+  "location": "table and figure captions of the arXiv sources (S02, S04, S05, S08); PDF text search (S09)",
+  "scope": {"text": "search for a tabulated external B/C benchmark, 2026-10-15; five publications, not a literature survey"},
+  "limitations": "Absence in the examined publications only; journal supplements were not searched.",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-15"
  }
 ]
