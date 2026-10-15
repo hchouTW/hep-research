@@ -75,8 +75,8 @@ class FindPythonTests(unittest.TestCase):
         self.assertIn("HEP_RESEARCH_PYTHON", out["hint"])
 
     def test_unusable_candidates_fall_through(self):
-        old = fake_python(self.dir, "old-python", json.dumps({"version": [3, 9, 6], "executable": "x", "modules": {"json": "x"},
-                                                              "missing": []}))
+        old = fake_python(self.dir, "old-python", json.dumps({"version": [3, 9, 6], "executable": "x",
+                                                              "modules": {"json": "x"}, "missing": []}))
         garbage = fake_python(self.dir, "garbage-python", "not json")
         proc, out = run("--require", "json", "--python", "/nonexistent/python",
                         env_extra={"HEP_RESEARCH_PYTHON": str(old)}, path_dir=self.dir)
@@ -92,7 +92,8 @@ class FindPythonTests(unittest.TestCase):
         proc, out = run("--require", NOT_INSTALLED, "--python", sys.executable,
                         env_extra={"HEP_RESEARCH_PYTHON": sys.executable}, path_dir=self.dir)
         self.assertEqual(proc.returncode, 1)
-        self.assertEqual([c["reason"] for c in out["candidates"][1:]], ["duplicate of --python", "duplicate of --python"])
+        self.assertEqual([c["reason"] for c in out["candidates"][1:]],
+                         ["duplicate of --python", "duplicate of --python"])
 
     def test_help(self):
         proc = subprocess.run([sys.executable, str(SCRIPT), "--help"], capture_output=True, text=True, timeout=60)
@@ -160,8 +161,8 @@ class PythonFloorTests(unittest.TestCase):
         mod = load_module()
         p311 = fake_version(self.dir, "py311", [3, 11, 9])
         p313 = fake_version(self.dir, "python3", [3, 13, 0])
-        with unittest.mock.patch.object(mod, "candidates",
-                                        lambda explicit: [("--python", str(p311)), ("caller", str(p311)), ("PATH", str(p313))]):
+        order = [("--python", str(p311)), ("caller", str(p311)), ("PATH", str(p313))]
+        with unittest.mock.patch.object(mod, "candidates", lambda explicit: order):
             out = mod.find(["json"], explicit=str(p311))
         self.assertEqual((out["status"], out["source"]), ("found", "PATH"))
 
@@ -213,7 +214,8 @@ class PythonFloorTests(unittest.TestCase):
             load_module().find(["json"], min_python="3.13.-5")
 
     def test_cli_does_not_turn_other_value_errors_into_usage_errors(self):
-        """Only the --min-python checks are bad usage (exit 2); a ValueError from inside find() is a bug and propagates."""
+        """Only the --min-python checks are bad usage (exit 2); a ValueError from inside find() is a bug and
+        propagates."""
         mod = load_module()
 
         def broken(*args, **kwargs):

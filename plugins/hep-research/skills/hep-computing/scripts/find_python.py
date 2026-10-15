@@ -9,8 +9,8 @@ Candidates, in this order; the first that qualifies wins:
 Nothing else is searched: conda environments and virtual environments are used only when named through 1 or 2.
 Each candidate is probed in a subprocess (from an empty temporary directory) that imports the required packages and
 reports its version; it qualifies if it is Python >= --min-python and every package imports. The plugin supports
-Python 3.13 and newer: --min-python may raise that minimum, never lower it (a lower value is bad usage). Point the plugin at an
-interpreter with, for example, `export HEP_RESEARCH_PYTHON=~/miniconda3/envs/sympy-py313/bin/python`.
+Python 3.13 and newer: --min-python may raise that minimum, never lower it (a lower value is bad usage). Point the
+plugin at an interpreter with, for example, `export HEP_RESEARCH_PYTHON=~/miniconda3/envs/sympy-py313/bin/python`.
 
 Usage: python3 find_python.py [--require PKG ...] [--python PATH] [--min-python 3.13] [--timeout SECONDS]
 Exit 0 found, 1 no candidate qualifies (status failed), 2 bad usage.
