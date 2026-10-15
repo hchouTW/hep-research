@@ -1,0 +1,106 @@
+{
+ "contract_version": "2.9.0",
+ "artifact_id": "dragon2-run-X1",
+ "artifact_type": "computational-run",
+ "objective": "DRAGON2 run 'X1' from a run spec (adapters/cr-propagation/assets/dragon2_run.py)",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.11.0",
+  "contracts": "2.9.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-computing",
+  "created": "2026-10-15",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "status": [
+  "unvalidated"
+ ],
+ "extension": {
+  "input_manifest": [
+   {
+    "path": "X1.xml",
+    "sha256": "eafd4d5dff0835b17abb8e23734379f57a5ef3ea70f8485cb1697df645ffd269"
+   },
+   {
+    "path": "X1.source.param",
+    "sha256": "c391c8bf7f2627f562269f4c5b6c2c9404124f530c4ef1e62117431f3f09373f"
+   },
+   {
+    "path": "data/crxsecs_fragmentation_Evoli2019_cumulative_modified.dat",
+    "sha256": "a0f56932d3fc04203b866c656aa62e424b4e16825153d2cde90816b6deb81faa"
+   }
+  ],
+  "tools": [
+   {
+    "name": "DRAGON2",
+    "version": "DRAGON2-Beta_version git cd588707fe03c76f19bda1b8092e136dcbe3fe90 (configure.ac DRAGON 3.1.0)",
+    "binary": "~/hep-work/dragon2/install/bin/DRAGON",
+    "binary_sha256": "d26dbb857a2c06182bd7b754ce963888670ceaa5932d0efa58b0ca202a9a6c34"
+   },
+   {
+    "name": "python",
+    "version": "3.13.2"
+   },
+   {
+    "name": "numpy",
+    "version": "2.5.3"
+   },
+   {
+    "name": "scipy",
+    "version": "1.18.1"
+   }
+  ],
+  "commands": [
+   "~/hep-work/dragon2/install/bin/DRAGON X1.xml"
+  ],
+  "environment": {
+   "python": "3.13.2",
+   "implementation": "CPython",
+   "executable": "~/.venvs/hep-research-e2/bin/python",
+   "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+   "machine": "arm64",
+   "system": {
+    "os": "Darwin",
+    "arch": "arm64",
+    "libc": "macOS 26.5",
+    "kernel": "25.5.0"
+   },
+   "origin": "venv",
+   "variables": {
+    "ROOTSYS": "/opt/homebrew/Cellar/root/6.38.04_1",
+    "CONDA_PREFIX": "~/miniconda3",
+    "CONDA_DEFAULT_ENV": "base"
+   },
+   "packages": {
+    "numpy": "2.5.3",
+    "scipy": "1.18.1"
+   },
+   "project": {
+    "path": "~/hep-work/dragon2/src",
+    "commit": "cd588707fe03c76f19bda1b8092e136dcbe3fe90",
+    "dirty": false
+   }
+  },
+  "seeds": {
+   "note": "DRAGON2 is deterministic: no random numbers are drawn"
+  },
+  "tolerances": {
+   "note": "none applied by the run; DRAGON2 time-step schedule Dtmax 64 Myr to Dtmin 0.001 Myr, factor 0.25, 30 steps per level (written into the XML)"
+  },
+  "resources": {
+   "wall_seconds": 156.7
+  },
+  "exit_status": 0,
+  "output_hashes": {
+   "output/X1.txt": "ad2e27e2f740f87ad916dd953051d419614c5ac531c59c0ef9486081731377b4"
+  }
+ }
+}

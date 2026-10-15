@@ -1,0 +1,35 @@
+{
+ "id": "adapter:cr-propagation",
+ "version": "0.1.0",
+ "status": "proposed",
+ "purpose": "Run a cosmic-ray propagation code from a JSON run spec in a recorded environment and turn each run into one grid-node prediction (representation grid, the node in parameter_point) that the comparison gate and covariance_fit.py model tabulated-grid consume unchanged; optional, required by no skill",
+ "tools": [
+  {
+   "name": "DRAGON2 (https://github.com/cosmicrays/DRAGON2-Beta_version): run spec to XML and data directory, local-spectrum ASCII output to bin-averaged ratio predictions",
+   "status": "tested-in-declared-environment",
+   "tested_versions": [
+    "DRAGON2-Beta_version git cd588707fe03c76f19bda1b8092e136dcbe3fe90 (2021-09-30; configure.ac DRAGON 3.1.0), built 2026-10-15 on E2 with Homebrew GCC 15.2.0, GSL 2.8, CFITSIO 4.6.4 (autoconf 2.72, libtool 2.6.2): six runs recorded (B/C with convection, reacceleration, energy losses and decay off; illustrative production cross sections) and replayed offline (VALIDATION CR-PROPAGATION-DRAGON2)"
+   ]
+  },
+  {
+   "name": "GALPROP",
+   "status": "proposed",
+   "tested_versions": []
+  },
+  {
+   "name": "USINE",
+   "status": "proposed",
+   "tested_versions": []
+  }
+ ],
+ "environment": "E2 (docs/capability-matrix.md): macOS 26.5 arm64, Python 3.13.2 with numpy 2.5.3 and scipy 1.18.1; DRAGON2 built from source in a user work directory (no system-wide installation) with Homebrew GCC 15.2.0 (g++, gcc, gfortran), GSL 2.8 and CFITSIO 4.6.4, serial (no OpenMP); the build and each run are recorded as computational-run artifacts under tests/adapters/fixtures/cr_propagation/. No network at run time; the source was cloned once from GitHub (user-approved). GALPROP and USINE were not obtained or run",
+ "assets": [
+  "assets/dragon2_run.py",
+  "assets/dragon2_to_prediction.py"
+ ],
+ "tests": [
+  "../../tests/adapters/test_cr_propagation.py"
+ ],
+ "owner_skill": "hep-computing",
+ "status_rule": "the adapter status is the lowest of its tools' statuses, so it stays proposed while GALPROP and USINE are proposed; DRAGON2 stays tested-in-declared-environment only while its recorded runs and the live rerun (HEP_DRAGON2_LIVE_TEST=1) pass on the declared build; another DRAGON2 commit or build is a new test; a run that terminates is not a validated prediction, and the limit benchmark is a consistency check against a closed form, not a validation of the code"
+}
