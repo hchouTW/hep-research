@@ -1,0 +1,151 @@
+{
+ "contract_version": "2.9.0",
+ "artifact_id": "dragon2-build-cd588707",
+ "artifact_type": "computational-run",
+ "objective": "Build DRAGON2 (cosmicrays/DRAGON2-Beta_version, commit cd588707) from source in ~/hep-work/dragon2 without system-wide installation, for adapters/cr-propagation",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.11.0",
+  "contracts": "2.9.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-computing",
+  "created": "2026-10-15",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "status": [
+  "unvalidated"
+ ],
+ "extension": {
+  "input_manifest": [
+   {
+    "path": "DRAGON2-Beta_version@cd588707fe03c76f19bda1b8092e136dcbe3fe90/configure.ac",
+    "sha256": "ee08cf4e00c733fc08113fe07669df1bf81a3f295659e4e4a48f073541e6113f"
+   },
+   {
+    "path": "DRAGON2-Beta_version@cd588707fe03c76f19bda1b8092e136dcbe3fe90/Makefile.am",
+    "sha256": "5ed9cc1314d86dc6d0c5aac6d28e14274f5a3b0ab5473aac10a8a3517e5d315e"
+   },
+   {
+    "path": "DRAGON2-Beta_version@cd588707fe03c76f19bda1b8092e136dcbe3fe90/Makefile.in",
+    "sha256": "682403753cb6b9a74327a632aa93822d299a5cbf7800404104d8394a90019eb4"
+   },
+   {
+    "path": "DRAGON2-Beta_version@cd588707fe03c76f19bda1b8092e136dcbe3fe90/aclocal.m4",
+    "sha256": "6d26ce7ecf9b692265e188739e2153ffa7c187385028ffb53c6d8a4f2d2ed66a"
+   },
+   {
+    "path": "DRAGON2-Beta_version@cd588707fe03c76f19bda1b8092e136dcbe3fe90/config.h.in",
+    "sha256": "0d81f635ef2a2e64787d120c62912c3226fb68d9fcdbd328b4e767f86277d20b"
+   },
+   {
+    "path": "DRAGON2-Beta_version@cd588707fe03c76f19bda1b8092e136dcbe3fe90/cparamlib/Makefile.in",
+    "sha256": "52a87ca34d61333479ed29cb62d1149f7e10a0d1cb9fe9bdf3fd3a3f1e978ee0"
+   },
+   {
+    "path": "DRAGON2-Beta_version@cd588707fe03c76f19bda1b8092e136dcbe3fe90/ltmain.sh",
+    "sha256": "0d404f35780a8e2d9d82a9a34b122f0b26c8c423a2f8bf066fa5a28d1feb83ff"
+   },
+   {
+    "path": "DRAGON2-Beta_version@cd588707fe03c76f19bda1b8092e136dcbe3fe90/m4/ltversion.m4",
+    "sha256": "a27b754709de61575197bf5a980696c98ae49da3f92f0de8ee7f42dd543b7465"
+   }
+  ],
+  "tools": [
+   {
+    "name": "DRAGON2",
+    "version": "DRAGON2-Beta_version git cd588707fe03c76f19bda1b8092e136dcbe3fe90 (2021-09-30; configure.ac DRAGON 3.1.0)",
+    "source": "https://github.com/cosmicrays/DRAGON2-Beta_version"
+   },
+   {
+    "name": "g++-15 / gcc-15 / gfortran-15",
+    "version": "Homebrew GCC 15.2.0_1"
+   },
+   {
+    "name": "GSL",
+    "version": "2.8 (Homebrew)"
+   },
+   {
+    "name": "CFITSIO",
+    "version": "4.6.4 (Homebrew)"
+   },
+   {
+    "name": "GNU Autoconf",
+    "version": "2.72"
+   },
+   {
+    "name": "GNU libtool (glibtoolize)",
+    "version": "2.6.2"
+   },
+   {
+    "name": "python",
+    "version": "3.13.2"
+   },
+   {
+    "name": "numpy",
+    "version": "2.5.3"
+   },
+   {
+    "name": "scipy",
+    "version": "1.18.1"
+   }
+  ],
+  "commands": [
+   "git clone https://github.com/cosmicrays/DRAGON2-Beta_version ~/hep-work/dragon2/src  # HEAD cd588707",
+   "attempt 1: cp -R src build; cd build; autoconf; ./configure --prefix=$HOME/hep-work/dragon2/install --with-cfitsio=/opt/homebrew --with-gsl-path=/opt/homebrew/bin CXX=g++-15 CC=gcc-15 F77=gfortran-15; make -j8  -> failed: 'libtool: Version mismatch error. This is libtool 2.4.2, but the definition of this LT_INIT comes from libtool 2.4.6' (the repository's ltmain.sh and m4/ltversion.m4 disagree); automake/aclocal are not installed, so ./startMAC.sh cannot run",
+   "attempt 2: cp -R src build; cd build; glibtoolize -c -f; autoconf; cp ../src/missing ../src/depcomp .  # glibtoolize 2.6.2 removed them; configure needs 'missing'",
+   "touch aclocal.m4 m4/*; touch configure; touch Makefile.in cparamlib/Makefile.in config.h.in  # keep make from re-running automake",
+   "./configure --prefix=$HOME/hep-work/dragon2/install --with-cfitsio=/opt/homebrew --with-gsl-path=/opt/homebrew/bin CXX=g++-15 CC=gcc-15 F77=gfortran-15",
+   "make -j8 && make install"
+  ],
+  "environment": {
+   "python": "3.13.2",
+   "implementation": "CPython",
+   "executable": "~/.venvs/hep-research-e2/bin/python",
+   "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+   "machine": "arm64",
+   "system": {
+    "os": "Darwin",
+    "arch": "arm64",
+    "libc": "macOS 26.5",
+    "kernel": "25.5.0"
+   },
+   "origin": "venv",
+   "variables": {
+    "ROOTSYS": "/opt/homebrew/Cellar/root/6.38.04_1",
+    "CONDA_PREFIX": "~/miniconda3",
+    "CONDA_DEFAULT_ENV": "base"
+   },
+   "packages": {
+    "numpy": "2.5.3",
+    "scipy": "1.18.1"
+   },
+   "project": {
+    "path": "~/hep-work/dragon2/src",
+    "commit": "cd588707fe03c76f19bda1b8092e136dcbe3fe90",
+    "dirty": false
+   },
+   "build_notes": "no OpenMP: configure adds -fopenmp only when CXX is literally g++; serial build. ROOT, FFTW and DarkSUSY not used (DRAGON2 options off). Built 2026-10-15 on macOS 26.5 arm64."
+  },
+  "seeds": {
+   "note": "not applicable: a compilation"
+  },
+  "tolerances": {
+   "note": "not applicable: a compilation"
+  },
+  "resources": {},
+  "exit_status": 0,
+  "output_hashes": {
+   "install/bin/DRAGON": "d26dbb857a2c06182bd7b754ce963888670ceaa5932d0efa58b0ca202a9a6c34",
+   "install/lib/libDRAGON.0.dylib": "13ed18076652c7bdf1b48021ac2a9f71b649bfe8f8301d862bd7c2835ae6c423",
+   "install/lib/libTiXML.0.dylib": "d6b2039f2ec237462c1ee6c77414a7e5e77e42718258851ca86b29ed91d11875"
+  }
+ }
+}

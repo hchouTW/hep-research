@@ -1,0 +1,48 @@
+{
+ "name": "X2",
+ "grid": {
+  "Rmax_kpc": 20,
+  "DimR": 41,
+  "L_kpc": 2.0,
+  "dz_kpc": 0.02,
+  "observer_kpc": [
+   8.3,
+   0.0,
+   0.0
+  ],
+  "Ekmin_GeV": 0.5,
+  "Ekmax_GeV": 2000.0,
+  "Ekfactor": 1.2,
+  "Zmin": 5,
+  "Zmax": 8
+ },
+ "diffusion": {
+  "D0_1e28": 1.5,
+  "DiffRefRig_GV": 1.0,
+  "delta": 0.5,
+  "etaT": 1.0
+ },
+ "galaxy": {
+  "gas": "BronfFerr",
+  "sources": {
+   "type": "OneRing",
+   "RingMin": 0.0,
+   "RingMax": 20.0
+  }
+ },
+ "flags": {
+  "diff_flag": 1,
+  "conv_flag": 0,
+  "reacc_flag": 0,
+  "eloss_flag": 0,
+  "decay_flag": 0,
+  "spall_flag": 1
+ },
+ "production_table": {
+  "channels_mb": {
+   "6012->5011": 70.0,
+   "8016->5011": 35.0
+  },
+  "grid_channel": "8016->6012"
+ }
+}
