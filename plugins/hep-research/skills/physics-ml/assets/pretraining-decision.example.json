@@ -1,0 +1,22 @@
+{
+ "record_version": "1.0.0",
+ "decision_id": "freeze-classifier-v1",
+ "analysis": "synthetic-resonance-search",
+ "decision": "Pre-training freeze of the signal-versus-background classifier. Labels: 1 = simulated signal, 0 = sideband data (background). Features: leading-object transverse momentum, pseudorapidity difference, missing transverse energy, track multiplicity; the resonance mass is excluded. Training domain: simulation and sideband data only, no signal-region data; mass outside the signal window. Split manifest pretraining-split.example.json, file SHA-256 c6a4514198c9eee9aa9d3e9b12893b48db66932c30c8b919049ec5c970af7b01, grouped by run.",
+ "category": "other",
+ "actor": {
+  "kind": "human",
+  "id": "synthetic analyst"
+ },
+ "time": "2026-10-03T12:00:00Z",
+ "seen": {
+  "through_seq": 2,
+  "entries_sha256": "7e8d983d27a28c69193717717c1bc08ad0f08e77c431880020f9bff641ca5365"
+ },
+ "artifacts": [
+  {
+   "ref": "pretraining-split.example.json",
+   "sha256": "c6a4514198c9eee9aa9d3e9b12893b48db66932c30c8b919049ec5c970af7b01"
+  }
+ ]
+}
