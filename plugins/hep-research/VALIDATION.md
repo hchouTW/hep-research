@@ -1498,3 +1498,16 @@ Every backend already ran on Python 3.13 at the baseline, so none blocks the flo
 branch protection on `main`, so removing the 3.11/3.12 jobs needs no required-status change. **Not verified here:**
 Python 3.14 (installable, not tested); Windows; the slow tier in CI (the weekly `latest` job last failed on
 2026-10-12 for an older runner timeout).
+
+## WP12-LIVE-ROUTING (2026-10-15, Claude Code 2.1.300, claude-sonnet-5-5, rename tree of PR #102)
+
+Paid live routing run approved for WP12 (`evals/routing/results/20261015T083754Z-claude-claude-sonnet-5-5.json`, outside
+the plugin): 229/241 cases ($18.55). On the 150 cases of the 2.1.293 baseline: 143/150, the same total; per case,
+`rc-t3-neg` and `j12` passed before and missed now, `rc-t3-4` and `t19-quick-6` missed before and pass now.
+Diagnosis by repeats: `rc-t3-neg` (a short Traditional Chinese Feynman-diagram question) loads no skill on main with
+the old names too (0/3), so it is not a rename effect; `j12` ("Set up a lattice QCD global analysis of form factors")
+went to hep-statistics in 3 of 9 runs on the rename tree against 11 of 11 with the old names. Fix: hep-theory's
+out-of-v1 example reads "lattice QCD and its global analyses, EFT global fits" (description 1,005 characters); after it
+`j12` passed 9/9 and the 34 hep-theory cases plus the propagation and out-of-v1 cases passed 36/39 (misses
+`rc-t3-neg`, `wp11-bound-dm-1`, `wp11-bound-dm-2`). Cases added since the baseline: 86/91. **Not verified here:** a
+full 241-case rerun after the fix; Codex.
