@@ -10,7 +10,7 @@
   },
   "hep-analysis": {
    "references": 12,
-   "bytes": 97831,
+   "bytes": 97913,
    "uncited": 0
   },
   "hep-computing": {
@@ -864,7 +864,7 @@
   {
    "path": "skills/hep-analysis/references/cosmic-ray-measurements.md",
    "owner": "hep-analysis",
-   "bytes": 16110,
+   "bytes": 16192,
    "lines": 178,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -1780,12 +1780,15 @@
    "lines": 194,
    "linked_from_skill_md": true,
    "cited_by": [
+    "skills/hep-analysis/references/cosmic-ray-measurements.md",
     "skills/hep-statistics/SKILL.md",
     "skills/hep-statistics/references/astroparticle-statistics.md",
     "skills/hep-statistics/references/core-stats-guide.md",
     "tests/skills/hep_statistics/test_time_series_covariance.py"
    ],
-   "cited_by_other_skills": [],
+   "cited_by_other_skills": [
+    "hep-analysis"
+   ],
    "last_commit": "386c00a 2026-10-15"
   },
   {
