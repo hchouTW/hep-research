@@ -2803,7 +2803,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "9257d7b 2026-10-15"
+   "last_commit": "0b00352 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/monitoring-and-lifecycle.md",
@@ -3420,7 +3420,7 @@
     "skills/hep-theory/SKILL.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "d2d4982 2026-10-15"
+   "last_commit": "b5c3e03 2026-10-15"
   },
   {
    "path": "skills/hep-theory/references/dis-kinematics.md",
