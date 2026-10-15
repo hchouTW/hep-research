@@ -2,7 +2,7 @@
 the limit benchmark against the closed-form 1D thin-disc model of theory:cr-secondary-ratio.
 
 Offline (CI-safe, no DRAGON2, no network): everything runs on DRAGON2 outputs recorded on E2 on 2026-10-15
-(tests/adapters/fixtures/cr_propagation/: six runs, their run specs and computational-run records, the build record).
+(tests/adapters/fixtures/cr_propagation/: nine runs, their run specs and computational-run records, the build record).
 Live (HEP_DRAGON2_LIVE_TEST=1 with HEP_DRAGON2_BIN and HEP_DRAGON2_DATA): run X1 is rerun through dragon2_run.py and its
 output must equal the recorded one (DRAGON2 is deterministic; relative 1e-6 allows for printf rounding only).
 
@@ -229,7 +229,7 @@ def check_c3():
 # ------------------------------------------------------------------ tests
 
 class RecordedEvidence(unittest.TestCase):
-    """The fixtures are what the adapter declares: six runs with specs, outputs whose SHA-256 match their run records,
+    """The fixtures are what the adapter declares: nine runs with specs, outputs whose SHA-256 match their run records,
     a build record, and every record a valid computational-run with the program version and commit in tools."""
 
     def test_records_validate_and_match_outputs(self):
