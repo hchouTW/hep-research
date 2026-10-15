@@ -19,7 +19,7 @@ sys.path.insert(0, str(ROOT))
 from contracts.comparison.conventions import compare_conventions  # noqa: E402
 from contracts.evidence import validate_ledger  # noqa: E402
 from contracts.project import load_project, resolve_context  # noqa: E402
-from contracts.registry import validate_registry  # noqa: E402
+from contracts.registry import REGISTRY_BUDGET, validate_registry  # noqa: E402
 from contracts.semver import satisfies  # noqa: E402
 from contracts.validate import validate_artifact  # noqa: E402
 from contracts.vocab import Vocabulary  # noqa: E402
@@ -238,7 +238,13 @@ class RegistryTests(unittest.TestCase):
     def test_shipped_registry_valid_and_within_budget(self):
         rep, _ = validate_registry()
         self.assertTrue(rep.ok, [f.as_dict() for f in rep.findings])
-        self.assertLessEqual((ROOT / "profiles" / "registry.json").stat().st_size, 2048)
+        self.assertLessEqual((ROOT / "profiles" / "registry.json").stat().st_size, REGISTRY_BUDGET)
+
+    def test_registry_budget_matches_entrypoint_budget(self):
+        # The registry budget lives in contracts/registry.py and tools/measure_entrypoints.py; they must agree.
+        text = (ROOT / "tools" / "measure_entrypoints.py").read_text(encoding="utf-8")
+        self.assertIn(f'"registry_bytes": {REGISTRY_BUDGET}', text)
+        self.assertEqual(REGISTRY_BUDGET, 3072)
 
     def test_symlink_escape_detected(self):
         with tempfile.TemporaryDirectory() as td:

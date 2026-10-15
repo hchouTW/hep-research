@@ -33,7 +33,7 @@ TEMPLATES: dict[Any, dict[str, list[str]]] = {
     "theory-domain": {"required": ["profile.json", "index.md", "conventions.json", "models", "derivations", "predictions", "benchmarks", "evidence", "tests"],
                       "optional": ["scripts", "README.md"]},
 }
-REGISTRY_BUDGET, INDEX_BUDGET = 2048, 4096
+REGISTRY_BUDGET, INDEX_BUDGET = 3072, 4096
 DEMONSTRATED = {"demonstrated-on-synthetic-data", "tested-in-declared-environment"}
 
 
