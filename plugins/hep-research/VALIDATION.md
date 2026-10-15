@@ -1526,3 +1526,18 @@ read off a figure). Every source, version, table and read level is in the profil
 Profile tests: `cr-secondary-antiprotons` 48 pass, `cr-secondary-ratio` 41 pass (`python -m unittest discover -s tests
 -t tests`); both ledgers pass `core/evidence/ledger.py --strict`. **Not verified here:** the journal supplemental
 cross-section tables of 1802.03030; the Tan & Ng and Duperray et al. columns of Table VI; any figure.
+
+## 0.11.0 release check (2026-10-15, E2 and the CI lock)
+
+Release branch `release/0.11.0` from main `f142d8b` (AMS-02 upgrade WP1–WP12 and WP15, the four-skill rename with
+contracts 2.9.0, the Python 3.13 floor, CI batches 1 and 2, and the follow-ups PRs #103–#106). Version 0.11.0 in both
+manifests, `pyproject.toml` and the README; CHANGELOG "Unreleased" became 0.11.0. Examples regenerated with the E2 venv
+(version strings; the bc-propagation-fit grid hash, which covers version-stamped artifacts); unfolding-coverage drift
+(about 1e-14) reverted; the sbottom benchmark artifacts' `plugin` string rewritten by hand; both new theory profiles
+stamp 0.11.0 / contracts 2.9.0 and their artifacts were regenerated with their own scripts.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli`, E2 (Python 3.13.2, NumPy 2.5.3) | 21 pass, 0 fail, 2 skipped (CLI checks); 3332 tests, 0 failures, 60 skipped, 247 modules |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 21 pass, 0 fail; 3332 tests, 0 failures, 169 skipped |
+| Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |

@@ -10,7 +10,7 @@
   ]
  },
  "versions": {
-  "plugin": "0.10.1",
+  "plugin": "0.11.0",
   "contracts": "2.9.0",
   "plugin_release": {
    "release": "unreleased",

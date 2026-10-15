@@ -3,10 +3,15 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.11.0 (2026-10-15)
 
-<!-- fu-readmes -->
-<!-- skill READMEs -->
+AMS-02 skill upgrade (work order WP1–WP12, WP15), four skills renamed, Python 3.13 as the minimum, and CI
+improvements. **Contracts 2.9.0** (skill-name aliases). **Breaking for users:** the skills `hep-analysis`,
+`detector-response`, `research-communication` and `physics-ml` are now `hep-measurement`, `hep-detector`,
+`hep-communication` and `hep-ml` (old names in artifacts and profiles are accepted with a deprecation warning, an error
+under `--strict-versions`; `contracts/migrate_skill_names.py` rewrites them), and Python 3.11 and 3.12 are no longer
+supported. The companion ams02-research 1.5.0 follows the rename (it requires hep-research >=0.11.0).
+
 - Skill READMEs brought up to date with the tree (no SKILL.md or capability change): hep-computing counts 32
   references and 13 test modules (PyROOT floor test), and `find_python.py` is described with its Python 3.13 floor;
   hep-statistics counts 20 test modules and names the `tabulated-grid` status (demonstrated on synthetic data), its
@@ -18,7 +23,6 @@ Software checks establish contract consistency only, not physical validity.
   READMEs say in one line which old name is a deprecated alias (contracts 2.9.0).
 - `docs/reference-inventory.{json,md}` regenerated (the hep-measurement README now cites `time-series-inference.md`).
 
-<!-- fu-benchmarks -->
 - `theory:cr-secondary-antiprotons`: external benchmark for open question B2. `scripts/published_benchmark.py`
   recomputes the pp-induced source term of di Mauro, Donato, Goudelis and Serpico, PRD 90 (2014) 085017
   (arXiv:1408.0288v3), Table VI, from the same paper's closed-form parametrizations (Eqs. (11)-(13), (B1)-(B2);
@@ -36,8 +40,6 @@ Software checks establish contract consistency only, not physical validity.
   `benchmarks/external-benchmark-search.json`, absence claim `crsr:C06`, read levels updated, 4 new tests.
 - `docs/capability-matrix.md` Profiles rows and `VALIDATION.md` (CR-BENCHMARKS-B1-B2) updated.
 
-<!-- fu-test-robustness -->
-<!-- Bullets for CHANGELOG.md (branch fu-test-robustness); not yet merged into the changelog. -->
 - `find_python.py`: `--min-python` bad usage is decided in `main()` before `find()` runs, so only the format and floor checks exit 2 and any other `ValueError` from `find()` propagates; the CLI error names `--min-python` (not `min_python`); `--min-python` must be dotted non-negative integers (`^[0-9]+(\.[0-9]+)*$`), so `3.13.-5`, `3_14`, `+3.14` and padded values are refused.
 - `tools/run_all_checks.py` and `tools/check_ams_optional.py` stop at once with exit 2 and "Python 3.13 or newer is required (running X.Y)" on an older interpreter, instead of running into version-dependent test failures.
 - CI: the weekly `latest` job (slow tier) sets `HEP_MODULE_TIMEOUT=1800`: `tests.examples.test_stats_benchmarks` takes about 525-545 s alone there, near the default 600 s limit (toys, seeds and tolerances unchanged); documented in `docs/maintenance.md`.
@@ -48,10 +50,8 @@ Software checks establish contract consistency only, not physical validity.
 - `test_stricter_minimum_is_kept` checks the rejection reason with a fake 3.13 interpreter on any runner (it asserted nothing on 3.14+).
 - Long lines wrapped in `find_python.py` and the floor tests; the `test_broken_power_law` tolerance comment describes 3.11 as history.
 
-<!-- fu-routing -->
 - Routing: hep-communication's "Not for" clause says "even with published data" and names CRDB queries (hep-theory) and compatibility results (hep-statistics), so requests that name experiments but ask for a result go to the owner; live (2026-10-15): `wp11-crdb-1` 3/3, `wp11-xexp-2` 2/3 (both 0/1 before), all 25 hep-communication cases still pass; `wp11-bound-dm-1` (dark-matter interpretation) also accepts hep-communication. Known misses: `wp11-xexp-3` (underspecified comparison loads hep-communication instead of asking), `rc-t3-neg`, `co-companion-ws-1` (no skill).
 
-<!-- wp12 -->
 - **Four skills renamed** (rename release 0.11.0; contracts 2.9.0). Skill folders, `SKILL.md` `name` fields, test
   folders (`tests/skills/<underscored>`), descriptions' "Not for" lists, handoff tables, READMEs, profiles'
   `related_skills`, the capability matrix, routing cases and docs use the new names:
@@ -85,12 +85,9 @@ Software checks establish contract consistency only, not physical validity.
   regenerated; `docs/maintenance.md` documents the name policy. ams02-research 1.5.0 requires `hep-research
   >=0.11.0` and names the new skills in its profile.
 
-<!-- py313 -->
 - **Python 3.13 is the minimum** (validation-first migration; Gate 1 evidence in VALIDATION PY313-FLOOR): `requires-python = ">=3.13"`, Ruff `py313`, mypy `3.13`; `skills/hep-computing/scripts/find_python.py` selects only Python 3.13 or newer (default and lowest allowed `--min-python` 3.13: a lower value is bad usage, exit 2; `find()` raises `ValueError`), with 3.11/3.12 rejection, fallback and all-old tests. CI's checks matrix runs on Python 3.13 only (4 jobs instead of 12; the backend jobs already ran on 3.13 and are unchanged), and `checks-complete` reconciles 3.13 only. **Migration:** Python 3.11 and 3.12 are no longer supported or tested; create the environment with Python 3.13 (`python3.13 -m venv ...`, then `pip install -r requirements-core.txt`) and point `HEP_RESEARCH_PYTHON` at it. Scripts run directly are not stopped by `requires-python`; the skills choose the interpreter with `find_python.py`. Python 3.14 is installable but not tested. Dependency pins are unchanged (the 3.11-era upper bounds in `requirements-ci-constraints.txt` stay until a separate dependency change).
-<!-- wp10 -->
 - Capability statements for cosmic-ray propagation rewritten to the achieved status (WP10): guidance, the two narrow theory-domain profiles, the `tabulated-grid` fit and `examples/bc-propagation-fit` are demonstrated on synthetic data; only global fits that run a propagation code stay outside v1 (capability matrix, `cosmic-ray-propagation.md`, hep-theory README). The hep-statistics description's out-of-v1 example is now "global propagation fits" (1,016 characters) and the shared context-resolution stanza says "global cosmic-ray propagation fits" in all seven SKILL.md files; the four WP11 propagation-fit routing cases are direct cases now (static routing passes).
 
-<!-- wp8 -->
 - Profile `theory:cr-secondary-antiprotons` 0.1.0: the secondary antiproton source term q(T_pbar) for the channels
   pp, pHe, Hep and HeHe with the antineutron and hyperon factor (2 + Delta_IS + 2 Delta_Lambda), following the
   hep-theory cosmic-ray reference conventions. TOY x-scaling cross sections with ILLUSTRATIVE values (no published
@@ -105,12 +102,10 @@ Software checks establish contract consistency only, not physical validity.
   theory spec's `D0/L`, cross sections as a model set; ungated, rigidity-binned, unfolded-level and
   unknown-correlation inputs refused. Test `tests/examples/test_bc_propagation_fit.py`.
 
-<!-- wp9 -->
 - `adapters/crdb` 0.1.0 (owner hep-theory, optional, `tested-in-declared-environment` on E2 with CRDB V4.2): one query of the CRDB (LPSC) REST interface, promoted from the ams-02 profile's `scripts/crdb_query.py`. No default experiment filter (`url`/`fetch` without `--exp-dates` or `--all-experiments` exit 2); every summarized row and sub-experiment group carries `secondary: true`; the `.meta.json` sidecar holds the request (parameters, URL, User-Agent), UTC retrieval time, CRDB version, export date and the SHA-256 of the saved file. HEPData or the paper's tables are primary; a CRDB value is a cross-check or a fallback labelled secondary. Offline tests replay four CRDB exports recorded live on 2026-10-15 (`tests/adapters/test_crdb_query.py`, VALIDATION CRDB-ADAPTER).
 
 - ams-02 profile: `scripts/crdb_query.py` and `tests/test_crdb_query.py` removed; the profile lists `adapter:crdb` as optional and its cross-check step passes `--exp-dates AMS` explicitly; capability `papers-manifest-and-crdb-query` renamed `papers-manifest`. `cosmic-ray-databases.md` records that `exp_dates=AMS` also returned an AMS01 row (2026-10-15). Rules and claims C125-C129 unchanged.
 
-<!-- wp3 -->
 # WP3 changelog bullets (for "Unreleased")
 
 - Profile `theory:cr-secondary-ratio` 0.1.0, the first narrow cosmic-ray propagation domain: B/C (from C and O) in a
@@ -130,10 +125,8 @@ Software checks establish contract consistency only, not physical validity.
 - `examples/eic-profile-routing/output/` regenerated: the run lists every registered `profile.json` it opens, which now
   includes the new profile.
 
-<!-- ci2 -->
 - CI: a new commit on a pull request cancels that PR's superseded `tests` run (pushes to main, the weekly and manual runs are never cancelled); pip downloads are cached by `setup-python`, keyed on `requirements-ci.lock` (installs and tests still run in full every time). Batch 2 (low-risk part) of the CI improvement proposal.
 
-<!-- wp1 -->
 - hep-statistics: `covariance_fit.py fit` model `tabulated-grid`: fits grid parameters (for example D0 and L) to a
   `dataset-record` from one `prediction` artifact per grid node (`representation: "grid"`, node in `parameter_point`;
   no schema change). Every prediction passes `contracts/comparison/gate.py` first (ungated or not comparable: exit 1);
@@ -149,22 +142,18 @@ Software checks establish contract consistency only, not physical validity.
 
 - `covariance_fit.py`: a field of the wrong JSON type now gives exit 2 with a JSON error instead of a traceback.
 
-<!-- ci1 -->
 - CI (batch 1 of the CI improvement proposal, test obligations unchanged): `tools/run_all_checks.py` records seconds for every check, prints failed test ids with their traceback tails (profile suites and `check_ams_optional` included) and writes a Markdown job summary with `--summary FILE`; `--part static` and `--part ams-optional` split `--part checks` so the AMS-optionality check (about 75 % of the old "static and profiles" job) runs as its own CI job. Each units run records its plan (full module list with SHA-256, the shard's modules, the timings digest).
 - CI: new `tools/reconcile_check_runs.py` and required-in-practice `checks-complete` job: every expected checks run (Python 3.11-3.13 × units 1/2, 2/2, static, ams-optional) present once, of the tested commit, passing, with only the host CLI checks skipped, every planned check reported, and the shards partitioning this tree's module list (planned from the same timings); runs after failures (`always()`), and a missing record fails it. Fault-injection tests in `tests/tools/test_reconcile_check_runs.py`. Its first local run caught shards planned from two different timing files (a module in two shards, others in none) at equal test counts.
 - `tools/module_timings.json` refreshed from GitHub Actions run 38680162693 (median of the 6 units-shard samples per module; 53 modules had no record, `test_stats_statistical_toys` was recorded at 70 s and now takes 177 s): the planned 2-shard split of the measured time goes from 1028 s / 845 s to 937 s / 937 s.
 
-<!-- wp5 -->
 - `adapters/literature-lookup` 0.1.0 (optional, owned by hep-communication, standard library only): `literature_lookup.py` looks up an arXiv id (with or without version), DOI, INSPIRE record id or ADS bibcode in INSPIRE-HEP, arXiv and ADS and prints one record per source with source URL, UTC retrieval time, read level and an arXiv version check; HTTP 429 reported as `rate-limited` and never retried; ADS token from `ADS_API_TOKEN`/`ADS_TOKEN`, never printed or recorded, `not-verified` without it; `--replay`/`--record` for recorded responses. Exit 0 found, 1 not found, 2 bad input, 3 incomplete. Status `demonstrated-on-synthetic-data` (INSPIRE-HEP and arXiv `tested-in-declared-environment`, ADS on a constructed response only).
 - `tests/adapters/test_literature_lookup.py` with fixtures recorded from INSPIRE-HEP and arXiv on 2026-10-15 (found, not found, HTTP 404, a real arXiv HTTP 429, version mismatch) and constructed INSPIRE 429 and ADS responses; offline (urlopen patched to fail); live smoke only with `HEP_LIVE_LOOKUP_TEST=1`.
 
 - Capability matrix: "Literature and citation verification online" raised from `unverified` to `tested-in-declared-environment` for INSPIRE-HEP and arXiv (E2, live 2026-10-15), ADS `demonstrated-on-synthetic-data`; new Adapters row. VALIDATION LITERATURE-LOOKUP.
 - `literature-lookup-recipes.md`: optional lookup-client section; arXiv answered HTTP 429 to a nonexistent id (observed 2026-10-15). hep-communication README and `docs/adapter-authoring.md` (network declaration) updated.
 
-<!-- wp11 -->
 - Routing: 27 new cases (set `WP11`, 13 en / 14 zh-Hant) in `tests/routing/make_cases.py` for cosmic-ray interpretation, propagation fits (hep-statistics, limited support until WP10), time-series inference, cross-experiment comparison, CRDB queries, a custom e/p classifier in a measurement (hep-ml, handoff to hep-measurement), and the dark-matter-interpretation (hep-theory, limited support) and latest-B/C-paper (hep-communication) boundaries; `cases.json` regenerated (241 cases). The live harness in `evals/routing/` reads the same `cases.json`, so it picks them up unchanged.
 
-<!-- wp2 -->
 - `skills/hep-statistics/references/time-series-inference.md` (documented): inference on **binned** time series:
   time-bin covariance as statistical + fully correlated time-independent + time-dependent blocks (valid exponential or
   epoch correlations, positive-definiteness, correlation-time limits, no averaging down, cancellation in ratios,
@@ -178,13 +167,10 @@ Software checks establish contract consistency only, not physical validity.
   (demonstrated-on-synthetic-data); a nearest-neighbour correlation of 0.7 is refused by `validate_covariance.py` as
   not PSD.
 
-<!-- wp4 -->
 - hep-measurement: `references/cosmic-ray-measurements.md`, an index of cosmic-ray measurement types (absolute flux, flux ratios, isotope ratios, time-dependent flux, rare-event searches) that links existing sections in hep-measurement, hep-detector, hep-statistics and hep-communication, plus new anisotropy measurement design: estimand (first harmonic, equatorial dipole projection, 3D dipole), directional exposure and its non-uniformity (simulated vs data-driven, east-west method), harmonic and full-sky dipole estimators, partial-sky multipole coupling, amplitude bias, solar/sidereal/anti-sidereal checks, and upper limits on the amplitude with the limit construction handed to hep-statistics (Linsley 1975, Sommers 2001, Billoir & Deligny 2008, Ahlers & Mertsch 2017, Compton & Getting 1935, Farley & Storey 1954, Alexandreas et al. 1993, Bonino et al. 2011). Linked from `SKILL.md` Resources and the analysis guide's routing table; capability matrix row `documented`.
 
-<!-- wp15 -->
 - hep-detector: `references/charge-confusion.md`, a synthesis note on charge-sign confusion: the mechanisms (finite curvature resolution toward the maximum detectable rigidity, non-Gaussian scattering and interactions, wrong hit association; alignment weak modes making the two signs' rates differ), how hep-detector measures the rate (simulation validated on data, templates in a confusion-sensitive variable, known-sign control samples) and the handoff to hep-measurement, which subtracts it as a background; linked from the principles-summary reference index and task-routing table and from the tracking reference. Capability-matrix row at `documented` (WP15).
 
-<!-- wp7 -->
 - hep-ml: pre-training freeze procedure in `references/ml-analysis.md` ("Training on data and blinding"): before training, a `decision_record` (category `other`) states labels, features, training domain and the split manifest's file SHA-256, lists the manifest in `artifacts`, and binds `seen` to the analysis's exposure record; checked with `contracts/lineage.py decision`, plus a manual file-hash comparison since `lineage.py` does not open artifacts (WP7).
 - hep-ml: synthetic example `assets/pretraining-decision.example.json` with `pretraining-exposure.example.json` and `pretraining-split.example.json`; `tests/skills/hep_ml/test_pretraining_freeze.py` checks it (lineage exit 0, exposure at decision `unexposed`) and shows that an edited exposure history, an understated `seen`, a decision dated before what it counts, a changed split manifest and a hash that disagrees between `artifacts` and the text fail (WP7).
 
