@@ -5,6 +5,24 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+<!-- fu-benchmarks -->
+- `theory:cr-secondary-antiprotons`: external benchmark for open question B2. `scripts/published_benchmark.py`
+  recomputes the pp-induced source term of di Mauro, Donato, Goudelis and Serpico, PRD 90 (2014) 085017
+  (arXiv:1408.0288v3), Table VI, from the same paper's closed-form parametrizations (Eqs. (11)-(13), (B1)-(B2);
+  Tables III-V, VII; `models/xs-dimauro2014-pp.json`, benchmark use only) and the proton flux of arXiv:1402.0321v2
+  Sec. 2.3. Tolerance per entry is the paper's own Table VI error: 12 of 15 entries reproduced (within 2.5% at 5 and
+  10 GeV); Eq. (11) at 1000 GeV and Eq. (13) at 500 and 1000 GeV (unstated projectile-energy upper limit), plus the
+  spline, Tan & Ng and Duperray et al. columns, documented as not reproduced
+  (`benchmarks/published-source-term-dimauro2014.json`). New capability `source-term-external-benchmark`
+  (tested-in-declared-environment, E2); 12 new tests (48 in the profile).
+- `theory:cr-secondary-antiprotons` evidence: di Mauro et al. 2014 read in full (title corrected), Korsmeier et al.
+  2018 and Winkler 2017 opened for tables and ancillary files (no tabulated source term), new source `crpb:S05`
+  (arXiv:1402.0321v2) and claims `crpb:C07`-`C11`.
+- `theory:cr-secondary-ratio`: open question B1 stays open. Five papers examined on 2026-10-15 tabulate fit
+  parameters or cross sections and show B/C in figures only; search record
+  `benchmarks/external-benchmark-search.json`, absence claim `crsr:C06`, read levels updated, 4 new tests.
+- `docs/capability-matrix.md` Profiles rows and `VALIDATION.md` (CR-BENCHMARKS-B1-B2) updated.
+
 <!-- fu-test-robustness -->
 <!-- Bullets for CHANGELOG.md (branch fu-test-robustness); not yet merged into the changelog. -->
 - `find_python.py`: `--min-python` bad usage is decided in `main()` before `find()` runs, so only the format and floor checks exit 2 and any other `ValueError` from `find()` propagates; the CLI error names `--min-python` (not `min_python`); `--min-python` must be dotted non-negative integers (`^[0-9]+(\.[0-9]+)*$`), so `3.13.-5`, `3_14`, `+3.14` and padded values are refused.
