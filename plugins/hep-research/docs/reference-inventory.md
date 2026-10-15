@@ -13,7 +13,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-computing | 32 | 297 | 0 |
 | hep-statistics | 11 | 150 | 0 |
 | hep-theory | 11 | 78 | 0 |
-| physics-ml | 38 | 179 | 0 |
+| physics-ml | 38 | 181 | 0 |
 | research-communication | 56 | 399 | 0 |
 
 ## Overlapping pairs
@@ -201,7 +201,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `geometric-and-equivariant-learning.md` | physics-ml | 2.5 | no | 4 | - | 50dcc55 2026-10-14 |
 | `interpretability-and-explainability.md` | physics-ml | 2.5 | no | 3 | - | 50dcc55 2026-10-14 |
 | `mixed-precision.md` | physics-ml | 4.0 | no | 6 | - | 50dcc55 2026-10-14 |
-| `ml-analysis.md` | physics-ml | 28.0 | yes | 28 | detector-response, hep-analysis | f5cc59a 2026-10-14 |
+| `ml-analysis.md` | physics-ml | 29.6 | yes | 30 | detector-response, hep-analysis | 426cb5c 2026-10-15 |
 | `monitoring-and-lifecycle.md` | physics-ml | 2.2 | no | 3 | - | 50dcc55 2026-10-14 |
 | `multivariate-analysis-bdt-nn.md` | physics-ml | 9.8 | yes | 8 | detector-response | f5cc59a 2026-10-14 |
 | `optimization-and-training-dynamics.md` | physics-ml | 3.8 | no | 1 | - | 50dcc55 2026-10-14 |
