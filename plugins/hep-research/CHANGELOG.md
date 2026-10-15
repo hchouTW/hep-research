@@ -5,6 +5,9 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+<!-- wp11 -->
+- Routing: 27 new cases (set `WP11`, 13 en / 14 zh-Hant) in `tests/routing/make_cases.py` for cosmic-ray interpretation, propagation fits (hep-statistics, limited support until WP10), time-series inference, cross-experiment comparison, CRDB queries, a custom e/p classifier in a measurement (physics-ml, handoff to hep-analysis), and the dark-matter-interpretation (hep-theory, limited support) and latest-B/C-paper (research-communication) boundaries; `cases.json` regenerated (241 cases). The live harness in `evals/routing/` reads the same `cases.json`, so it picks them up unchanged.
+
 <!-- wp2 -->
 - `skills/hep-statistics/references/time-series-inference.md` (documented): inference on **binned** time series:
   time-bin covariance as statistical + fully correlated time-independent + time-dependent blocks (valid exponential or
