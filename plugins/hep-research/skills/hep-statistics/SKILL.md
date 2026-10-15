@@ -46,7 +46,7 @@ One number: when a shell is available, run its row's tool, state the constructio
 
 ## Resources
 
-Start at the [core/stats guide](references/core-stats-guide.md): its reference index links every topic file ([ML-assisted](references/ml-assisted-inference.md) among them), its Skill scripts table every script. Adapters (pyhf, Combine, unbinned fits): `<plugin root>/adapters/`. Folder guide: [README.md](README.md).
+Start at the [core/stats guide](references/core-stats-guide.md): its reference index links every topic file ([ML-assisted](references/ml-assisted-inference.md), [binned time series](references/time-series-inference.md) among them), its Skill scripts table every script. Adapters (pyhf, Combine, unbinned fits): `<plugin root>/adapters/`. Folder guide: [README.md](README.md).
 
 <!-- BEGIN context-resolution: generated from contracts/stanzas/context-resolution.md by tools/build_stanzas.py; do not edit -->
 ## Context resolution

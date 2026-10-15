@@ -3,6 +3,49 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+<!-- ci1 -->
+- CI (batch 1 of the CI improvement proposal, test obligations unchanged): `tools/run_all_checks.py` records seconds for every check, prints failed test ids with their traceback tails (profile suites and `check_ams_optional` included) and writes a Markdown job summary with `--summary FILE`; `--part static` and `--part ams-optional` split `--part checks` so the AMS-optionality check (about 75 % of the old "static and profiles" job) runs as its own CI job. Each units run records its plan (full module list with SHA-256, the shard's modules, the timings digest).
+- CI: new `tools/reconcile_check_runs.py` and required-in-practice `checks-complete` job: every expected checks run (Python 3.11-3.13 × units 1/2, 2/2, static, ams-optional) present once, of the tested commit, passing, with only the host CLI checks skipped, every planned check reported, and the shards partitioning this tree's module list (planned from the same timings); runs after failures (`always()`), and a missing record fails it. Fault-injection tests in `tests/tools/test_reconcile_check_runs.py`. Its first local run caught shards planned from two different timing files (a module in two shards, others in none) at equal test counts.
+- `tools/module_timings.json` refreshed from GitHub Actions run 38680162693 (median of the 6 units-shard samples per module; 53 modules had no record, `test_stats_statistical_toys` was recorded at 70 s and now takes 177 s): the planned 2-shard split of the measured time goes from 1028 s / 845 s to 937 s / 937 s.
+
+<!-- wp5 -->
+- `adapters/literature-lookup` 0.1.0 (optional, owned by research-communication, standard library only): `literature_lookup.py` looks up an arXiv id (with or without version), DOI, INSPIRE record id or ADS bibcode in INSPIRE-HEP, arXiv and ADS and prints one record per source with source URL, UTC retrieval time, read level and an arXiv version check; HTTP 429 reported as `rate-limited` and never retried; ADS token from `ADS_API_TOKEN`/`ADS_TOKEN`, never printed or recorded, `not-verified` without it; `--replay`/`--record` for recorded responses. Exit 0 found, 1 not found, 2 bad input, 3 incomplete. Status `demonstrated-on-synthetic-data` (INSPIRE-HEP and arXiv `tested-in-declared-environment`, ADS on a constructed response only).
+- `tests/adapters/test_literature_lookup.py` with fixtures recorded from INSPIRE-HEP and arXiv on 2026-10-15 (found, not found, HTTP 404, a real arXiv HTTP 429, version mismatch) and constructed INSPIRE 429 and ADS responses; offline (urlopen patched to fail); live smoke only with `HEP_LIVE_LOOKUP_TEST=1`.
+
+- Capability matrix: "Literature and citation verification online" raised from `unverified` to `tested-in-declared-environment` for INSPIRE-HEP and arXiv (E2, live 2026-10-15), ADS `demonstrated-on-synthetic-data`; new Adapters row. VALIDATION LITERATURE-LOOKUP.
+- `literature-lookup-recipes.md`: optional lookup-client section; arXiv answered HTTP 429 to a nonexistent id (observed 2026-10-15). research-communication README and `docs/adapter-authoring.md` (network declaration) updated.
+
+<!-- wp11 -->
+- Routing: 27 new cases (set `WP11`, 13 en / 14 zh-Hant) in `tests/routing/make_cases.py` for cosmic-ray interpretation, propagation fits (hep-statistics, limited support until WP10), time-series inference, cross-experiment comparison, CRDB queries, a custom e/p classifier in a measurement (physics-ml, handoff to hep-analysis), and the dark-matter-interpretation (hep-theory, limited support) and latest-B/C-paper (research-communication) boundaries; `cases.json` regenerated (241 cases). The live harness in `evals/routing/` reads the same `cases.json`, so it picks them up unchanged.
+
+<!-- wp2 -->
+- `skills/hep-statistics/references/time-series-inference.md` (documented): inference on **binned** time series:
+  time-bin covariance as statistical + fully correlated time-independent + time-dependent blocks (valid exponential or
+  epoch correlations, positive-definiteness, correlation-time limits, no averaging down, cancellation in ratios,
+  rigidity x time Kronecker structure, Peelle); periodicity against an AR(1) red-noise null fitted with the measurement
+  covariance and why Rayleigh/Z_m^2 (event-level, white noise) do not apply; trials across periods and energy bins by
+  toys of the complete procedure (pattern of `look_elsewhere.py` and `global_significance.py`, which are not periodogram
+  tools; the shipped Gross-Vitells bound is one degree of freedom); joint multi-period fits with one modulation
+  parameter per period, shared parameters and nuisances for time-independent sources via `covariance_fit.py` plug-in.
+  Linked from `SKILL.md` Resources, the core-stats-guide reference index and `astroparticle-statistics.md`.
+- `tests/skills/hep_statistics/test_time_series_covariance.py`: the covariance recipe on a synthetic series
+  (demonstrated-on-synthetic-data); a nearest-neighbour correlation of 0.7 is refused by `validate_covariance.py` as
+  not PSD.
+
+<!-- wp4 -->
+- hep-analysis: `references/cosmic-ray-measurements.md`, an index of cosmic-ray measurement types (absolute flux, flux ratios, isotope ratios, time-dependent flux, rare-event searches) that links existing sections in hep-analysis, detector-response, hep-statistics and research-communication, plus new anisotropy measurement design: estimand (first harmonic, equatorial dipole projection, 3D dipole), directional exposure and its non-uniformity (simulated vs data-driven, east-west method), harmonic and full-sky dipole estimators, partial-sky multipole coupling, amplitude bias, solar/sidereal/anti-sidereal checks, and upper limits on the amplitude with the limit construction handed to hep-statistics (Linsley 1975, Sommers 2001, Billoir & Deligny 2008, Ahlers & Mertsch 2017, Compton & Getting 1935, Farley & Storey 1954, Alexandreas et al. 1993, Bonino et al. 2011). Linked from `SKILL.md` Resources and the analysis guide's routing table; capability matrix row `documented`.
+
+<!-- wp15 -->
+- detector-response: `references/charge-confusion.md`, a synthesis note on charge-sign confusion: the mechanisms (finite curvature resolution toward the maximum detectable rigidity, non-Gaussian scattering and interactions, wrong hit association; alignment weak modes making the two signs' rates differ), how detector-response measures the rate (simulation validated on data, templates in a confusion-sensitive variable, known-sign control samples) and the handoff to hep-analysis, which subtracts it as a background; linked from the principles-summary reference index and task-routing table and from the tracking reference. Capability-matrix row at `documented` (WP15).
+
+<!-- wp7 -->
+- physics-ml: pre-training freeze procedure in `references/ml-analysis.md` ("Training on data and blinding"): before training, a `decision_record` (category `other`) states labels, features, training domain and the split manifest's file SHA-256, lists the manifest in `artifacts`, and binds `seen` to the analysis's exposure record; checked with `contracts/lineage.py decision`, plus a manual file-hash comparison since `lineage.py` does not open artifacts (WP7).
+- physics-ml: synthetic example `assets/pretraining-decision.example.json` with `pretraining-exposure.example.json` and `pretraining-split.example.json`; `tests/skills/physics_ml/test_pretraining_freeze.py` checks it (lineage exit 0, exposure at decision `unexposed`) and shows that an edited exposure history, an understated `seen`, a decision dated before what it counts, a changed split manifest and a hash that disagrees between `artifacts` and the text fail (WP7).
+
+- WP6: research-communication quick-question routing re-measured live on 0.10.1 (routing 29/31, research-communication 20/20; communication eval 5 of 11 cases still answered without a skill, a description-level decision); `SKILL.md` unchanged; recorded in VALIDATION (WP6-QUICK-ROUTING) and capability matrix.
+
 ## 0.10.1 (2026-10-15)
 
 Follow-ups to the 0.10.0 check (PR #84) and the `run_all_checks.py` timeout fix (PR #83). ams02-research needs no

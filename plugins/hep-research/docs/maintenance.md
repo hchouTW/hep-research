@@ -17,10 +17,18 @@ Feldman-Cousins tables, the 10,000-mutation contract fuzz and the full theory-co
 runs each test module in its own process with a time limit (`--module-timeout`, default 600 s) and records every
 module's duration; a fast-tier module listed under `slow_modules` (over 60 s) belongs in the slow tier. Modules start
 slowest first, using the durations recorded in `tools/module_timings.json`. CI splits the run into parallel jobs:
-`--part units --shard K/N` runs one of N shards of the test modules, balanced by those durations, and `--part checks`
-runs the profile suites and the static and host checks. Refresh the durations from a CI check-run with
-`--write-timings tools/module_timings.json` when the balance drifts; a module with no record gets the median. Every
-subprocess call in the tests and tools has a timeout (`tests/tools/test_subprocess_timeouts.py`).
+`--part units --shard K/N` runs one of N shards of the test modules, balanced by those durations, `--part static`
+runs the profile suites and the static and host checks, and `--part ams-optional` runs `tools/check_ams_optional.py`
+(the generic suites again in a copy without the AMS-02 profile; the slowest check, so it has its own job).
+`--part checks` is `static` plus `ams-optional`. Refresh the durations from the CI check-runs (the median per module
+over the units shards of one run on main) when the balance drifts; a module with no record gets the median and still
+runs. Every check records its seconds; failed test ids with their traceback tails are printed and, with
+`--summary FILE` (CI: `$GITHUB_STEP_SUMMARY`), written as Markdown. Each units run records its plan (the full module
+list, its SHA-256 and the shard's modules), and the `checks-complete` job runs `tools/reconcile_check_runs.py` over
+every checks record of the run: each expected run present once, of the tested commit, passing, with only the host CLI
+checks skipped, every planned check reported, and the shards partitioning the module list of this tree. A missing
+record fails the gate; equal test counts are never taken as evidence. Every subprocess call in the tests and tools
+has a timeout (`tests/tools/test_subprocess_timeouts.py`).
 
 Software checks show contract consistency only, not physical validity. Report pass, fail, skip and unverified
 separately; a skipped test (missing tool) is unverified, never passing.

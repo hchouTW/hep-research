@@ -260,6 +260,25 @@ region with the score of each event from a model that never saw it, no hyperpara
 and checks run first on sidebands or on simulation with an injected signal. Record what data the model saw in the
 training record.
 
+**Freeze before training.** Before the first training run, write a `decision_record`
+(`contracts/schemas/decision_record.json`) that fixes the training set-up:
+
+- `category`: `"other"` (the closed list has no ML category);
+- `decision`: the labels, the features (and any variable deliberately excluded, such as the resonance mass), the
+  training domain (which samples and regions the training may see) and the SHA-256 of the split manifest file;
+- `artifacts`: the split manifest as `{ref, sha256}`, with the same file SHA-256;
+- `seen`: bound to the analysis's exposure record: `through_seq` = the number of entries that existed at decision
+  time, `entries_sha256` = the canonical SHA-256 of exactly those entries.
+
+Check it with `python3 contracts/lineage.py decision <record> --exposure <exposure record>` (exit 0 = the binding holds;
+it also prints the exposure at decision time, which should be `unexposed` for a training that must not see the signal
+region). Later appends to the exposure record keep the binding; an edited history, a `seen` that leaves out entries
+dated before the decision, or a decision dated before entries it counts fail. `lineage.py` does not open the artifacts:
+recompute the split manifest's SHA-256 (`shasum -a 256 <manifest>`) and compare it with `artifacts` and the `decision`
+text before training, and refuse a split that no longer matches. A changed split, feature list or training domain is a
+new decision record (`supersedes` the old one), not an edit. Example: `assets/pretraining-decision.example.json` with
+`assets/pretraining-exposure.example.json` and `assets/pretraining-split.example.json` (synthetic).
+
 ## Weak supervision and anomaly detection
 
 - **CWoLa (classification without labels):** train on two mixed samples with different signal fractions. If the
