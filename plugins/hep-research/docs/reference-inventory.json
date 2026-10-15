@@ -4,8 +4,8 @@
  "threshold": 0.08,
  "by_skill": {
   "detector-response": {
-   "references": 34,
-   "bytes": 442517,
+   "references": 35,
+   "bytes": 454116,
    "uncited": 0
   },
   "hep-analysis": {
@@ -30,7 +30,7 @@
   },
   "physics-ml": {
    "references": 38,
-   "bytes": 179135,
+   "bytes": 180786,
    "uncited": 0
   },
   "research-communication": {
@@ -49,6 +49,7 @@
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
     "skills/detector-response/references/calorimetry-ecal-hcal.md",
+    "skills/detector-response/references/charge-confusion.md",
     "skills/detector-response/references/cherenkov-imaging-variants-and-photosensors.md",
     "skills/detector-response/references/detector-case-studies-and-checklists.md",
     "skills/detector-response/references/detector-measurement-framework.md",
@@ -87,6 +88,19 @@
    ],
    "cited_by_other_skills": [],
    "last_commit": "9bc9983 2026-10-15"
+  },
+  {
+   "path": "skills/detector-response/references/charge-confusion.md",
+   "owner": "detector-response",
+   "bytes": 11184,
+   "lines": 136,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/detector-response/references/detector-principles-summary.md",
+    "skills/detector-response/references/tracking-and-vertexing.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "400c300 2026-10-15"
   },
   {
    "path": "skills/detector-response/references/cherenkov-imaging-variants-and-photosensors.md",
@@ -157,6 +171,7 @@
    "lines": 184,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/detector-response/references/charge-confusion.md",
     "skills/detector-response/references/detector-case-studies-and-checklists.md",
     "skills/detector-response/references/detector-comparison-tables.md",
     "skills/detector-response/references/detector-measurement-framework.md",
@@ -243,6 +258,7 @@
    "lines": 190,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/detector-response/references/charge-confusion.md",
     "skills/detector-response/references/detector-principles-summary.md",
     "skills/detector-response/references/front-end-electronics-and-signal-processing.md"
    ],
@@ -252,8 +268,8 @@
   {
    "path": "skills/detector-response/references/detector-principles-summary.md",
    "owner": "detector-response",
-   "bytes": 19506,
-   "lines": 260,
+   "bytes": 19833,
+   "lines": 261,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/detector-response/README.md",
@@ -263,7 +279,7 @@
     "tests/skills/detector_response/test_reference_links.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b1fb312 2026-10-14"
+   "last_commit": "400c300 2026-10-15"
   },
   {
    "path": "skills/detector-response/references/detector-simulation.md",
@@ -297,6 +313,7 @@
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
     "skills/detector-response/references/calorimetry-ecal-hcal.md",
+    "skills/detector-response/references/charge-confusion.md",
     "skills/detector-response/references/cosmic-ray-spectrum-and-composition.md",
     "skills/detector-response/references/detector-measurement-framework.md",
     "skills/detector-response/references/detector-principles-summary.md",
@@ -459,6 +476,7 @@
    "lines": 130,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/detector-response/references/charge-confusion.md",
     "skills/detector-response/references/detector-case-studies-and-checklists.md",
     "skills/detector-response/references/detector-glossary.md",
     "skills/detector-response/references/detector-principles-bibliography.md",
@@ -551,6 +569,7 @@
    "lines": 244,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/detector-response/references/charge-confusion.md",
     "skills/detector-response/references/cherenkov-imaging-variants-and-photosensors.md",
     "skills/detector-response/references/core-detector-equations.md",
     "skills/detector-response/references/detector-comparison-tables.md",
@@ -592,6 +611,7 @@
    "lines": 181,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/detector-response/references/charge-confusion.md",
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
     "skills/detector-response/references/detector-measurement-framework.md",
     "skills/detector-response/references/detector-principles-bibliography.md",
@@ -612,6 +632,7 @@
    "lines": 121,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/detector-response/references/charge-confusion.md",
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
     "skills/detector-response/references/detector-principles-summary.md",
     "skills/detector-response/references/detector-systems-overview.md",
@@ -655,6 +676,7 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
+    "skills/detector-response/references/charge-confusion.md",
     "skills/detector-response/references/cosmic-ray-spectrum-and-composition.md",
     "skills/detector-response/references/detector-principles-bibliography.md",
     "skills/detector-response/references/detector-principles-summary.md",
@@ -696,11 +718,12 @@
   {
    "path": "skills/detector-response/references/tracking-and-vertexing.md",
    "owner": "detector-response",
-   "bytes": 15979,
-   "lines": 243,
+   "bytes": 16067,
+   "lines": 244,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/calibration-and-alignment.md",
+    "skills/detector-response/references/charge-confusion.md",
     "skills/detector-response/references/detector-case-studies-and-checklists.md",
     "skills/detector-response/references/detector-principles-bibliography.md",
     "skills/detector-response/references/detector-principles-summary.md",
@@ -718,7 +741,7 @@
    "cited_by_other_skills": [
     "research-communication"
    ],
-   "last_commit": "5a3ce4a 2026-10-15"
+   "last_commit": "400c300 2026-10-15"
   },
   {
    "path": "skills/detector-response/references/triggers-luminosity-pileup.md",
@@ -808,6 +831,7 @@
     "profiles/experiments/ams-02/modules/species/charged-cosmic-rays.md",
     "profiles/experiments/ams-02/modules/subsystems/detector-and-observables.md",
     "profiles/experiments/ams-02/modules/working-rules.md",
+    "skills/detector-response/references/charge-confusion.md",
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
     "skills/detector-response/references/particle-identification.md",
     "skills/detector-response/references/tracking-and-vertexing.md",
@@ -920,6 +944,7 @@
    "lines": 87,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/detector-response/references/charge-confusion.md",
     "skills/detector-response/references/cosmic-ray-spectrum-and-composition.md",
     "skills/detector-response/references/imaging-atmospheric-cherenkov.md",
     "skills/detector-response/references/noble-liquid-neutrino-and-rare-event-detectors.md",
@@ -975,6 +1000,7 @@
     "profiles/experiments/ams-02/modules/working-rules.md",
     "skills/detector-response/references/calibration-and-alignment.md",
     "skills/detector-response/references/calorimetry-ecal-hcal.md",
+    "skills/detector-response/references/charge-confusion.md",
     "skills/detector-response/references/data-mc-validation-and-detector-systematics.md",
     "skills/detector-response/references/detector-case-studies-and-checklists.md",
     "skills/detector-response/references/detector-comparison-tables.md",
@@ -1761,6 +1787,7 @@
     "profiles/experiments/ams-02/modules/species/charged-cosmic-rays.md",
     "profiles/experiments/ams-02/modules/species/nuclei-and-isotopes.md",
     "profiles/experiments/ams-02/modules/working-rules.md",
+    "skills/detector-response/references/charge-confusion.md",
     "skills/detector-response/references/cosmic-ray-spectrum-and-composition.md",
     "skills/detector-response/references/imaging-atmospheric-cherenkov.md",
     "skills/detector-response/references/noble-liquid-neutrino-and-rare-event-detectors.md",
@@ -2227,8 +2254,8 @@
   {
    "path": "skills/physics-ml/references/ml-analysis.md",
    "owner": "physics-ml",
-   "bytes": 27974,
-   "lines": 359,
+   "bytes": 29625,
+   "lines": 378,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/detector-response/references/imaging-atmospheric-cherenkov.md",
@@ -2237,6 +2264,7 @@
     "skills/physics-ml/SKILL.md",
     "skills/physics-ml/assets/calibration.py",
     "skills/physics-ml/assets/hep_losses.py",
+    "skills/physics-ml/assets/pretraining-split.example.json",
     "skills/physics-ml/assets/set_classifier.py",
     "skills/physics-ml/references/data-loading.md",
     "skills/physics-ml/references/data-strategy.md",
@@ -2258,13 +2286,14 @@
     "skills/physics-ml/references/transformer-architectures.md",
     "skills/physics-ml/references/uncertainty-and-calibration.md",
     "skills/physics-ml/scripts/make_grouped_splits.py",
+    "tests/skills/physics_ml/test_pretraining_freeze.py",
     "tests/skills/physics_ml/test_training_pipeline.py"
    ],
    "cited_by_other_skills": [
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "f5cc59a 2026-10-14"
+   "last_commit": "426cb5c 2026-10-15"
   },
   {
    "path": "skills/physics-ml/references/monitoring-and-lifecycle.md",
@@ -2473,11 +2502,14 @@
    "lines": 119,
    "linked_from_skill_md": true,
    "cited_by": [
+    "skills/detector-response/references/charge-confusion.md",
     "skills/physics-ml/SKILL.md",
     "skills/physics-ml/references/deep-learning-guide.md",
     "skills/physics-ml/references/ml-analysis.md"
    ],
-   "cited_by_other_skills": [],
+   "cited_by_other_skills": [
+    "detector-response"
+   ],
    "last_commit": "f5cc59a 2026-10-14"
   },
   {
