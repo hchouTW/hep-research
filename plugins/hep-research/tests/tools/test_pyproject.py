@@ -47,6 +47,14 @@ class PyprojectTests(unittest.TestCase):
         self.assertIn("F", PYPROJECT["tool"]["ruff"]["lint"]["select"])
         self.assertEqual(PYPROJECT["tool"]["setuptools"]["packages"], [])  # the plugin is not an installable package
 
+    def test_python_floor_is_313_everywhere(self):
+        """requires-python, the Ruff and mypy targets and the interpreter finder's default name the same floor."""
+        self.assertEqual(PYPROJECT["project"]["requires-python"], ">=3.13")
+        self.assertEqual(PYPROJECT["tool"]["ruff"]["target-version"], "py313")
+        self.assertEqual(PYPROJECT["tool"]["mypy"]["python_version"], "3.13")
+        finder = (ROOT / "skills" / "hep-computing" / "scripts" / "find_python.py").read_text(encoding="utf-8")
+        self.assertIn('MIN_PYTHON = "3.13"', finder)
+
 
 if __name__ == "__main__":
     unittest.main()
