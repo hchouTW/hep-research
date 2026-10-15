@@ -35,7 +35,7 @@
   },
   "research-communication": {
    "references": 56,
-   "bytes": 398739,
+   "bytes": 399638,
    "uncited": 0
   }
  },
@@ -3006,13 +3006,16 @@
   {
    "path": "skills/research-communication/references/literature-lookup-recipes.md",
    "owner": "research-communication",
-   "bytes": 5006,
-   "lines": 86,
+   "bytes": 5905,
+   "lines": 97,
    "linked_from_skill_md": true,
    "cited_by": [
+    "adapters/literature-lookup/assets/literature_lookup.py",
+    "skills/research-communication/README.md",
     "skills/research-communication/SKILL.md",
     "skills/research-communication/references/academic-papers-guide.md",
-    "skills/research-communication/references/citation-verification.md"
+    "skills/research-communication/references/citation-verification.md",
+    "tests/adapters/fixtures/literature_lookup/rate-limit/inspire-arxiv-2501.99999-429.json"
    ],
    "cited_by_other_skills": [],
    "last_commit": "893bc43 2026-10-15"
