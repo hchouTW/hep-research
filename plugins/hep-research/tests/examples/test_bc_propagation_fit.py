@@ -1,7 +1,7 @@
 """End-to-end B/C grid fit (examples/bc-propagation-fit, ams02-skill-upgrade WP8): theory:cr-secondary-ratio grid
 predictions, SYNTHETIC B/C data with a full covariance, covariance_fit.py tabulated-grid.
 
-One run with the default seed and toys (about 35 s): every pre-declared criterion passes, D0/L is recovered and the
+One run with the default seed and toys (about 35 s; envelope artifacts kept in a temporary --keep directory): every pre-declared criterion passes, D0/L is recovered and the
 degenerate direction is matched to the theory spec, the result matches the committed output (floats to rel 1e-6,
 since fit outputs are minimizer results; environment versions are not compared), and the committed artifacts are
 consistent with the profile. The byte-for-byte rerun is slow-gated (HEP_SLOW_TESTS=1)."""
@@ -63,8 +63,9 @@ class BCPropagationFitTests(unittest.TestCase):
         cls.m = load_run_module()
         cls.tmp = tempfile.TemporaryDirectory()
         cls.out = Path(cls.tmp.name) / "run"
+        cls.work = Path(cls.tmp.name) / "work"
         with contextlib.redirect_stdout(io.StringIO()):
-            cls.code = cls.m.main(["--out", str(cls.out)])
+            cls.code = cls.m.main(["--out", str(cls.out), "--keep", str(cls.work)])
         cls.r = json.loads((cls.out / "results.json").read_text())
 
     @classmethod
@@ -109,9 +110,8 @@ class BCPropagationFitTests(unittest.TestCase):
         self.assertIn("level", neg["unfolded-level"]["error"])
 
     def test_data_binning_and_level_match_the_prediction(self):
-        art = self.out / "artifacts"
-        meas = json.loads((art / "measurement.json").read_text())
-        node = json.loads(next((self.out / "grid").glob("node-xsA-*.json")).read_text())
+        meas = json.loads((self.work / "measurement.json").read_text())
+        node = json.loads(next((self.work / "grid").glob("node-xsA-*.json")).read_text())
         mo, po = meas["extension"]["observable"], node["extension"]["observable"]
         self.assertEqual(mo["variables"], po["variables"])
         self.assertEqual(mo["level"], "crsr:local-interstellar")
@@ -127,7 +127,7 @@ class BCPropagationFitTests(unittest.TestCase):
         self.assertEqual(man["nodes"], 2 * 21 * 21)
 
     def test_theory_spec_a_is_the_profiles(self):
-        mine = json.loads((self.out / "artifacts" / "theory-spec-xs-A.json").read_text())
+        mine = json.loads((self.work / "theory-spec-xs-A.json").read_text())
         stored = json.loads((PLUGIN / "profiles/theory/cr-secondary-ratio/derivations/theory-spec.json").read_text())
         mine["artifact_id"] = stored["artifact_id"]
         self.assertEqual(mine, stored)
@@ -135,7 +135,7 @@ class BCPropagationFitTests(unittest.TestCase):
     def test_reproduces_committed_output(self):
         diffs = differences(self.r, json.loads(COMMITTED.read_text()))
         self.assertEqual(diffs, [], "\n".join(diffs[:20]))
-        for name in ("measurement.json", "covariance.json", "fit-input.json", "grid-manifest.json"):
+        for name in self.m.COMMITTED:
             fresh = json.loads((self.out / "artifacts" / name).read_text())
             committed = json.loads((EXAMPLE / "output" / "artifacts" / name).read_text())
             self.assertEqual(differences(fresh, committed, rel=1e-9), [], name)
@@ -145,14 +145,28 @@ class BCPropagationFitTests(unittest.TestCase):
         project = Path(self.tmp.name) / "hep-research.project.json"
         project.write_text(json.dumps({"schema_version": "1.0.0", "plugin_version": ">=0.10,<1.0", "experiments": [],
                                        "theory": [{"profile": "theory:cr-secondary-ratio", "version": "0.1.0"}]}))
-        art = self.out / "artifacts"
-        paths = [art / n for n in ("measurement.json", "theory-spec-xs-A.json", "theory-spec-xs-B.json")]
-        paths.append(next((self.out / "grid").glob("node-xsB-*.json")))
+        paths = [self.work / n for n in ("measurement.json", "theory-spec-xs-A.json", "theory-spec-xs-B.json")]
+        paths.append(next((self.work / "grid").glob("node-xsB-*.json")))
         for p in paths:
             proc = subprocess.run([sys.executable, str(PLUGIN / "contracts" / "validate.py"), str(p),
                                    "--profiles-from", str(project)], capture_output=True, text=True, timeout=120)
             with self.subTest(artifact=p.name):
                 self.assertEqual(proc.returncode, 0, proc.stdout)
+
+    def test_kept_inputs_rerun_through_the_cli(self):
+        import subprocess
+        proc = subprocess.run([sys.executable, str(PLUGIN / "skills/hep-statistics/scripts/covariance_fit.py"), "fit",
+                               "--input", str(self.work / "fit-input-asimov.json")], capture_output=True, text=True,
+                              timeout=300)
+        self.assertEqual(proc.returncode, 0, proc.stdout[-500:])
+        comb = next(c for c in json.loads(proc.stdout)["fits"][0]["combinations"] if c["name"] == "D0/L")
+        self.assertAlmostEqual(comb["ln_value"], self.r["asimov"]["ln_D0_over_L"], delta=1e-9)
+
+    def test_committed_output_holds_no_envelope_artifact(self):
+        # the grid nodes, theory-specs and data records are regenerated (--keep), not committed: the committed
+        # examples/ artifacts are snapshotted by tests/contracts/test_gate_verdict_snapshot.py
+        for p in (EXAMPLE / "output").rglob("*.json"):
+            self.assertNotIn("artifact_type", json.loads(p.read_text()), p.name)
 
     def test_report_is_labelled_synthetic(self):
         text = (self.out / "report.md").read_text()
