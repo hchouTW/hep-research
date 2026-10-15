@@ -5,6 +5,11 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+<!-- wp9 -->
+- `adapters/crdb` 0.1.0 (owner hep-theory, optional, `tested-in-declared-environment` on E2 with CRDB V4.2): one query of the CRDB (LPSC) REST interface, promoted from the ams-02 profile's `scripts/crdb_query.py`. No default experiment filter (`url`/`fetch` without `--exp-dates` or `--all-experiments` exit 2); every summarized row and sub-experiment group carries `secondary: true`; the `.meta.json` sidecar holds the request (parameters, URL, User-Agent), UTC retrieval time, CRDB version, export date and the SHA-256 of the saved file. HEPData or the paper's tables are primary; a CRDB value is a cross-check or a fallback labelled secondary. Offline tests replay four CRDB exports recorded live on 2026-10-15 (`tests/adapters/test_crdb_query.py`, VALIDATION CRDB-ADAPTER).
+
+- ams-02 profile: `scripts/crdb_query.py` and `tests/test_crdb_query.py` removed; the profile lists `adapter:crdb` as optional and its cross-check step passes `--exp-dates AMS` explicitly; capability `papers-manifest-and-crdb-query` renamed `papers-manifest`. `cosmic-ray-databases.md` records that `exp_dates=AMS` also returned an AMS01 row (2026-10-15). Rules and claims C125-C129 unchanged.
+
 <!-- wp3 -->
 # WP3 changelog bullets (for "Unreleased")
 
