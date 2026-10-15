@@ -168,7 +168,7 @@ class ProducerTests(unittest.TestCase):
         self.tmp.cleanup()
 
     def review(self, *extra):
-        p = subprocess.run([sys.executable, str(ROOT / "skills" / "hep-analysis" / "scripts" / "review_analysis_change.py"),
+        p = subprocess.run([sys.executable, str(ROOT / "skills" / "hep-measurement" / "scripts" / "review_analysis_change.py"),
                             str(self.changes), *extra], capture_output=True, text=True, timeout=60)
         return p.returncode, json.loads(p.stdout)
 

@@ -1,7 +1,7 @@
 {
  "contract_version": "1.0.0",
  "tool_id": "cosmic-ray-flux",
- "entry": "skills/hep-analysis/scripts/cosmic_ray_flux.py",
+ "entry": "skills/hep-measurement/scripts/cosmic_ray_flux.py",
  "operations": [
   {
    "operation_id": "flux",

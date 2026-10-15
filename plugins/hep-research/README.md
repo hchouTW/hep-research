@@ -12,13 +12,13 @@ labeled synthetic in file names and metadata. What is and is not validated is li
 
 | Skill | Use it when the deliverable is |
 |---|---|
-| `hep-analysis` | the design or review of a measurement: estimand, selection, backgrounds, corrections, systematics, blinding |
-| `detector-response` | detector response: reconstruction, calibration, resolution, efficiency, response matrices and forward folding, simulation |
+| `hep-measurement` | the design or review of a measurement: estimand, selection, backgrounds, corrections, systematics, blinding |
+| `hep-detector` | detector response: reconstruction, calibration, resolution, efficiency, response matrices and forward folding, simulation |
 | `hep-theory` | a theory or phenomenology result: model, conventions, derivation, predictions, recasting |
 | `hep-statistics` | an inference: likelihoods, fits, intervals, limits, unfolding, combinations, comparisons with data |
 | `hep-computing` | working, reproducible software and its execution, including task files for coding agents |
-| `physics-ml` | a machine-learning model or study for physics (PyTorch) |
-| `research-communication` | papers, figures, diagrams, talks, literature and citation checks, claims traced to results and sources |
+| `hep-ml` | a machine-learning model or study for physics (PyTorch) |
+| `hep-communication` | papers, figures, diagrams, talks, literature and citation checks, claims traced to results and sources |
 
 Each skill folder under `skills/` has a `README.md` (purpose, folder map, scripts, references, handoffs, tests); `SKILL.md` is the entry point the host loads. Skills are chosen by what you want produced, not by the experiment you name. Results that another skill continues
 from are written as JSON artifacts in your project's `artifacts_dir` (default `./hep-research-artifacts/`).
@@ -235,7 +235,7 @@ read a companion's package manifest or need access to a private repository. Beha
   `export HEP_RESEARCH_PYTHON=~/miniconda3/envs/sympy-py313/bin/python`. Nothing else is searched, and nothing is
   installed: if no candidate qualifies, the script reports a `failed` status.
 - **Optional (skipped in the v1 handover run; each was installed and verified afterwards, see the `*-RUN` sections of
-  `VALIDATION.md`, except the tectonic paper build):** PyTorch (`physics-ml` assets), ROOT/PyROOT, uproot and awkward (`hep-computing`
+  `VALIDATION.md`, except the tectonic paper build):** PyTorch (`hep-ml` assets), ROOT/PyROOT, uproot and awkward (`hep-computing`
   ROOT tools, `adapters/root-uproot`), pyhf and CMS Combine (`adapters/pyhf-combine`, the end-to-end sample),
   Graphviz, Mermaid, PlantUML and tectonic (diagrams and papers). Slurm and HTCondor (`adapters/batch-schedulers`)
   have each run synthetic campaigns on one site (Slurm 24.05.1 at NSTCCore, HTCondor 24.12.16 at CERN): that adapter is

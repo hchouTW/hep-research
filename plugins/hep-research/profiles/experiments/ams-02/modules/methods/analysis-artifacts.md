@@ -1,6 +1,6 @@
 # Analysis Artifacts: Specification, Ledgers, Response Card, and Review Report
 
-> Method owner: [hep-analysis](../../../../../skills/hep-analysis/SKILL.md) defines the general method (measurement specifications (schemas: `contracts/`)); implementation in `contracts/`. This module records how AMS-02 analyses apply it. Where a general statement here differs from the owner, the owner's text applies.
+> Method owner: [hep-measurement](../../../../../skills/hep-measurement/SKILL.md) defines the general method (measurement specifications (schemas: `contracts/`)); implementation in `contracts/`. This module records how AMS-02 analyses apply it. Where a general statement here differs from the owner, the owner's text applies.
 
 ## When to read this file
 
@@ -103,7 +103,7 @@ A passing validator means the input is self-consistent under its declared metada
 
 ## Verdict-first review
 
-The verdict scale, output order and checklist are the generic ones in `<plugin root>/skills/hep-analysis/references/review-and-artifacts.md` (`blocked`, `needs-work`, `acceptable-with-open-inputs`). AMS additions: (1) after the generic sections, an **evidence table**: each AMS statement with its label and claim ID; (2) `audit_analysis_spec.py --markdown` drafts the verdict, defects, proposals and unresolved inputs from this profile's specification format (it prints the verdicts with spaces, `needs work` and `acceptable with open inputs`, which mean the same values); a human review still writes the physics judgement.
+The verdict scale, output order and checklist are the generic ones in `<plugin root>/skills/hep-measurement/references/review-and-artifacts.md` (`blocked`, `needs-work`, `acceptable-with-open-inputs`). AMS additions: (1) after the generic sections, an **evidence table**: each AMS statement with its label and claim ID; (2) `audit_analysis_spec.py --markdown` drafts the verdict, defects, proposals and unresolved inputs from this profile's specification format (it prints the verdicts with spaces, `needs work` and `acceptable with open inputs`, which mean the same values); a human review still writes the physics judgement.
 
 ## Failure modes
 

@@ -17,8 +17,8 @@ for the eight generation prompts and format spec, and
 
 Usage: `python3 <plugin root>/skills/hep-computing/scripts/generate_skill_example.py --archetype
 {contrast,trajectory,gated-pipeline,decision-tree,elicitation,adversarial-audit,test-first,postmortem}
---skill hep-analysis --role "Senior Experimental Particle Physicist"
-<scenario-flag> "..." [--output ../hep-analysis/examples/01-slug.md]`. The
+--skill hep-measurement --role "Senior Experimental Particle Physicist"
+<scenario-flag> "..." [--output ../hep-measurement/examples/01-slug.md]`. The
 scenario flag depends on the archetype: `--use-case` (contrast),
 `--problem-input` (trajectory), `--high-stakes-task` (gated-pipeline),
 `--scenario` (decision-tree), `--user-request` (elicitation),
@@ -307,7 +307,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         description="Scaffold an empty canonical example skeleton for a skill's examples/ directory."
     )
     parser.add_argument("--archetype", required=True, choices=ARCHETYPES, help="Example archetype to scaffold.")
-    parser.add_argument("--skill", required=True, help="Target skill folder name, e.g. hep-analysis.")
+    parser.add_argument("--skill", required=True, help="Target skill folder name, e.g. hep-measurement.")
     parser.add_argument("--role", required=True, help="Role to author as, e.g. 'Staff Software Engineer'.")
     parser.add_argument("--use-case", dest="use_case", help="Contrast only: realistic, narrow domain scenario.")
     parser.add_argument("--problem-input", dest="problem_input", help="Trajectory only: realistic, raw problem input.")

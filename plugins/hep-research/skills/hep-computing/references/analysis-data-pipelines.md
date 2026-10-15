@@ -1,10 +1,10 @@
 # Analysis data pipelines: ROOT, columnar processing and analysis code
 
-Code-level companion of the hep-analysis skill (moved here from `skills/hep-analysis/references/data-pipelines.md`
+Code-level companion of the hep-measurement skill (moved here from `skills/hep-measurement/references/data-pipelines.md`
 and the code sections of its guide). The physics rules these pipelines implement (stable event keys, duplicate
 removal across streams, signed weights, the normalization denominator) are stated in
-[hep-analysis analysis design](../../hep-analysis/references/analysis-design.md) and
-[weights and normalization](../../hep-analysis/references/weights-normalization.md); this file covers interfaces,
+[hep-measurement analysis design](../../hep-measurement/references/analysis-design.md) and
+[weights and normalization](../../hep-measurement/references/weights-normalization.md); this file covers interfaces,
 I/O and code. Related: [Python coding](python-hep-coding-patterns.md),
 [C++, ROOT, and balanced design guidelines](root-balanced-design-guidelines.md).
 

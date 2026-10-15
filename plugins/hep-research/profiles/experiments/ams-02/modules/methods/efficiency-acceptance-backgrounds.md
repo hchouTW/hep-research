@@ -1,6 +1,6 @@
 # Efficiency, Acceptance, Exposure, Backgrounds, and Template-Fit Design
 
-> Method owner: [hep-analysis](../../../../../skills/hep-analysis/SKILL.md) defines the general method (correction chains and background estimation (efficiency methods themselves: detector-response)). This module records how AMS-02 analyses apply it. Where a general statement here differs from the owner, the owner's text applies.
+> Method owner: [hep-measurement](../../../../../skills/hep-measurement/SKILL.md) defines the general method (correction chains and background estimation (efficiency methods themselves: hep-detector)). This module records how AMS-02 analyses apply it. Where a general statement here differs from the owner, the owner's text applies.
 
 ## When to read this file
 
@@ -48,7 +48,7 @@ Procedure to combine factors:
 ## Efficiency methods
 
 - **Tag-and-probe.** Select a probe with an independent tag; measure the fraction passing. Requires: probe independence from the tested selection, tag bias evaluated, background subtraction in the probe sample (with its own uncertainty), purity of the tag, migration of the probe's kinematic variable between bins.
-- **Unbiased or prescaled triggers.** The generic method (prescale, the unbiased sample's own selection, bias checks) is in `<plugin root>/skills/hep-analysis/references/analysis-design.md` (Trigger efficiency from data). AMS-specific: trigger internals are not public beyond what sources give; use only user-supplied definitions.
+- **Unbiased or prescaled triggers.** The generic method (prescale, the unbiased sample's own selection, bias checks) is in `<plugin root>/skills/hep-measurement/references/analysis-design.md` (Trigger efficiency from data). AMS-specific: trigger internals are not public beyond what sources give; use only user-supplied definitions.
 - **Orthogonal selectors.** A control sample selected by a different subsystem (e.g. TOF/TRD/RICH information when testing a Tracker cut). Independence of the two subsystems for the population must be argued.
 - **MC-based with data/MC scale factors.** `ε_data = SF · ε_MC` where `SF = ε_data/ε_MC` from a control; scale factors depend on the same variables as the efficiency and carry their own statistical and systematic uncertainty; do not apply a scale factor measured on one species or period to another without justification.
 - **Interval estimation.** Efficiencies from finite samples are binomial (or Poisson-ratio with background subtraction): use exact/Bayesian binomial intervals near 0 or 1, not Wald.

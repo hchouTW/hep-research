@@ -3,13 +3,13 @@
 Use when evaluating or constructing a mathematical derivation or argument —
 checking whether a paper's result actually follows from its stated assumptions,
 or reasoning through one's own derivation before writing it up. Distinct from
-`../../research-communication/references/equation-and-notation-auditing.md`, which checks the algebra's internal
+`../../hep-communication/references/equation-and-notation-auditing.md`, which checks the algebra's internal
 consistency (dimensions, indices, sign/normalization conventions) once a
 derivation is written down; this file checks the argument's *validity and
 justified strength* — whether the assumptions are sound, whether the proof
 status matches what's claimed, and how to verify the result independently of
 the derivation itself. Also distinct from
-`../../research-communication/references/logical-consistency-and-argument-uniformity.md`, which checks a paper's prose
+`../../hep-communication/references/logical-consistency-and-argument-uniformity.md`, which checks a paper's prose
 argument for cross-section contradictions; this file is about a specific
 mathematical derivation's own soundness.
 
@@ -38,7 +38,7 @@ For each step, identify:
   independence, a regime where a series converges).
 - **Definitions** — is every symbol introduced before use, with a consistent
   meaning throughout (delegate the symbol-ledger mechanics to
-  `../../research-communication/references/equation-and-notation-auditing.md`)?
+  `../../hep-communication/references/equation-and-notation-auditing.md`)?
 - **Necessary vs. sufficient conditions** — does the argument establish that a
   condition is required for the result, or merely that the result holds when
   the condition is met (these are not interchangeable when the conclusion is
@@ -167,7 +167,7 @@ independent rules.
 
 ## Evidence-strength ladder
 
-When recording a theoretical claim in `../../research-communication/references/claim-evidence-mapping.md`'s evidence
+When recording a theoretical claim in `../../hep-communication/references/claim-evidence-mapping.md`'s evidence
 matrix, state its justified strength using the proof-status categories above
 (formal proof, analytic derivation, perturbative argument, asymptotic
 argument, heuristic argument, numerical evidence, empirical observation,

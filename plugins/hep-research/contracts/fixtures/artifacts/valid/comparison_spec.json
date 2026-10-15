@@ -38,7 +38,7 @@
   "transformations": [
    {
     "kind": "forward-fold",
-    "owner": "detector-response"
+    "owner": "hep-detector"
    }
   ],
   "correlations": [],

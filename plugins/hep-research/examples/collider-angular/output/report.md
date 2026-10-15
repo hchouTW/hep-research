@@ -22,7 +22,7 @@ The covariance validator warns that the luminosity and background blocks have ra
 
 ## Blinding (synthetic policy)
 
-The forward signal-region bin cos theta >= 0.9 (x_vis >= 0.9), outside the reported fiducial range, is blinded for a separate synthetic forward analysis. A custodian step (`skills/hep-analysis/scripts/mask_blinded_bins.py`) masks its count before the analysis reads the histogram; the released file is `blinded/signal_region_counts.masked.json`. The unfolding fills the blinded bin with the simulated signal expectation and zero variance, so no published number depends on its count, and every value in that bin is null in `results.json`. The control and validation sidebands stay open: the background estimate needs them. Nothing here unblinds; that is done by an authorized person outside the agent session.
+The forward signal-region bin cos theta >= 0.9 (x_vis >= 0.9), outside the reported fiducial range, is blinded for a separate synthetic forward analysis. A custodian step (`skills/hep-measurement/scripts/mask_blinded_bins.py`) masks its count before the analysis reads the histogram; the released file is `blinded/signal_region_counts.masked.json`. The unfolding fills the blinded bin with the simulated signal expectation and zero variance, so no published number depends on its count, and every value in that bin is null in `results.json`. The control and validation sidebands stay open: the background estimate needs them. Nothing here unblinds; that is done by an authorized person outside the agent session.
 
 ## Result on the synthetic sample
 

@@ -1,4 +1,4 @@
-"""ml-artifact mutation probe (physics-ml audit, source brief Appendix B; PML).
+"""ml-artifact mutation probe (hep-ml audit, source brief Appendix B; PML).
 
 Each row applies one physically or procedurally wrong change to a valid ml-artifact and states the least severe level
 the validator must report natively at contract 2.8.0. Before the audit (0.9.0) 47 of 54 such artifacts passed with no

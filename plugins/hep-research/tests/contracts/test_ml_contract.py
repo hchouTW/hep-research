@@ -1,4 +1,4 @@
-"""ml-artifact content semantics (physics-ml review 2026-10-13, part D).
+"""ml-artifact content semantics (hep-ml review 2026-10-13, part D).
 
 The review found that contracts/validate.py checked only that ml-artifact fields exist: it passed a blank grouping key,
 an empty model_hash, empty labels or features, a training domain keyed on variables that are not features or with
@@ -166,7 +166,7 @@ class MlSemanticsTests(unittest.TestCase):
 
 
 
-ML_V28_RULES = {  # every ml-artifact code contracts 2.8.0 added (physics-ml audit, PML), plus the statistical-result link
+ML_V28_RULES = {  # every ml-artifact code contracts 2.8.0 added (hep-ml audit, PML), plus the statistical-result link
     "ml.calibration_after_not_numeric", "ml.calibration_not_improving", "ml.calibration_on_training_sample",
     "ml.device_free_text", "ml.domain_shift_on_training_sample", "ml.domain_shift_outcome_missing",
     "ml.domain_shift_status_missing", "ml.domain_shift_uncorrected", "ml.downstream_incomplete", "ml.downstream_ml_only",

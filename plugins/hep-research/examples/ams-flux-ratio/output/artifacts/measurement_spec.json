@@ -1,5 +1,5 @@
 {
- "contract_version": "2.8.0",
+ "contract_version": "2.9.0",
  "bindings": {
   "experiments": [
    {
@@ -11,7 +11,7 @@
  },
  "versions": {
   "plugin": "0.10.1",
-  "contracts": "2.8.0",
+  "contracts": "2.9.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -27,7 +27,7 @@
  "artifact_type": "measurement-spec",
  "objective": "SYNTHETIC Path A: He/p flux ratio per rigidity bin in two synthetic periods",
  "provenance": {
-  "producer_skill": "hep-analysis",
+  "producer_skill": "hep-measurement",
   "created": "2026-10-02",
   "evidence_ids": [
    "ams02:C31"

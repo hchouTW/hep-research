@@ -49,20 +49,20 @@ class OwnershipCheckTests(unittest.TestCase):
         self.assertTrue(any("in its use_when" in p for p in co.check(self.root)))
 
     def test_not_for_clause_is_not_a_claim(self):
-        self.mutate("skills/hep-analysis/SKILL.md", "Not for: detector performance", "Not for: forward folding, detector performance")
+        self.mutate("skills/hep-measurement/SKILL.md", "Not for: detector performance", "Not for: forward folding, detector performance")
         self.assertEqual(co.check(self.root), [])
 
     def test_readme_row_claim_fails(self):
         self.mutate("README.md", "response matrices and forward folding, simulation", "unfolding, simulation")
         problems = co.check(self.root)
-        self.assertTrue(any("detector-response claims ['unfolding'] in its readme" in p for p in problems), problems)
+        self.assertTrue(any("hep-detector claims ['unfolding'] in its readme" in p for p in problems), problems)
 
     def test_capability_matrix_owner_mismatch_fails(self):
-        self.mutate("docs/capability-matrix.md", "| Unfolding | hep-statistics |", "| Unfolding | detector-response |")
+        self.mutate("docs/capability-matrix.md", "| Unfolding | hep-statistics |", "| Unfolding | hep-detector |")
         self.assertTrue(any("capability-matrix row 'Unfolding'" in p for p in co.check(self.root)))
 
     def test_owner_that_does_not_claim_fails(self):
-        self.mutate("skills/detector-response/SKILL.md", "forward folding of predictions, ", "")
+        self.mutate("skills/hep-detector/SKILL.md", "forward folding of predictions, ", "")
         self.assertTrue(any("does not claim it" in p for p in co.check(self.root)))
 
     def test_missing_table_fails(self):

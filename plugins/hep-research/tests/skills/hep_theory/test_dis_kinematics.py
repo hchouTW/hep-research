@@ -241,7 +241,7 @@ class ContentTests(unittest.TestCase):
             self.assertIsNone(re.search(r"\b(EIC|ePIC|HERA|AMS|ATLAS|CMS|LHC)\b", path.read_text(encoding="utf-8")), path.name)
 
     def test_reference_hands_off_what_it_does_not_own(self):
-        for owner in ("detector-response", "hep-analysis", "hep-statistics"):
+        for owner in ("hep-detector", "hep-measurement", "hep-statistics"):
             self.assertIn(owner, self.TEXT)
         self.assertIn("not derived here", self.TEXT)
 

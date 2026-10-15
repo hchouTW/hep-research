@@ -10,7 +10,7 @@ from pathlib import Path
 PLUGIN = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PLUGIN))
 sys.path.insert(0, str(PLUGIN / "skills" / "hep-computing" / "scripts"))
-sys.path.insert(0, str(PLUGIN / "skills" / "hep-analysis" / "scripts"))
+sys.path.insert(0, str(PLUGIN / "skills" / "hep-measurement" / "scripts"))
 from core.blinding import blinding as bl  # noqa: E402
 
 try:

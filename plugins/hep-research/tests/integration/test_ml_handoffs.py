@@ -1,4 +1,4 @@
-"""physics-ml handoffs (PML-WP2.1, ML-K15): one test per SKILL.md handoff row that had none. hep-statistics has its
+"""hep-ml handoffs (PML-WP2.1, ML-K15): one test per SKILL.md handoff row that had none. hep-statistics has its
 own (tests/contracts/test_ml_provenance_gate.py). Each test passes an ml-artifact (or a check it records) across the
 boundary and shows that the receiving side sees what it needs, or that a broken handoff is refused. All SYNTHETIC."""
 import contextlib
@@ -13,7 +13,7 @@ from pathlib import Path
 
 PLUGIN = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PLUGIN))
-sys.path.insert(0, str(PLUGIN / "skills" / "physics-ml" / "scripts"))
+sys.path.insert(0, str(PLUGIN / "skills" / "hep-ml" / "scripts"))
 import check_surrogate_domain  # noqa: E402
 from contracts import dependencies  # noqa: E402
 from contracts.validate import validate_artifact  # noqa: E402
@@ -47,7 +47,7 @@ class TheoryHandoff(unittest.TestCase):
 
 
 class AnalysisHandoff(unittest.TestCase):
-    """hep-analysis: the working point of a selection built on the score must come from validation."""
+    """hep-measurement: the working point of a selection built on the score must come from validation."""
 
     def test_working_point_from_validation_only(self):
         doc = copy.deepcopy(ML)
@@ -58,7 +58,7 @@ class AnalysisHandoff(unittest.TestCase):
 
 
 class DetectorResponseHandoff(unittest.TestCase):
-    """detector-response: a fast-simulation (generative) model hands over its physics validation, with the power of
+    """hep-detector: a fast-simulation (generative) model hands over its physics validation, with the power of
     its two-sample test, for detector-level validation against full simulation."""
 
     def test_generative_model_needs_physics_validation_with_power(self):
@@ -82,7 +82,7 @@ def write(path, doc):
 
 
 class ComputingAndCommunicationHandoff(unittest.TestCase):
-    """hep-computing (a computational-run that used the model) and research-communication (a write-up that cites
+    """hep-computing (a computational-run that used the model) and hep-communication (a write-up that cites
     it): the downstream artifact resolves the ml-artifact by hash and must carry its 'synthetic' label."""
 
     def chain(self, consumer_name, carry_label):

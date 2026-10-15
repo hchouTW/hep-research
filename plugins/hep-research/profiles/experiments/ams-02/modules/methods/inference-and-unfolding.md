@@ -138,7 +138,7 @@ Define discriminant bins, component yields, normalized vs unnormalized shapes, f
 
 ## Required source classes
 
-Tier 4: Cowan-Cranmer-Gross-Vitells (asymptotics), Feldman-Cousins, Read/Junk (CLs), Barlow-Beeston and Conway (templates), D'Agostini and Schmitt (unfolding), Gross-Vitells (trial factors); the `hep-analysis` inference and unfolding references for general methodology. AMS-specific statements about how a result was unfolded or how its uncertainties were combined need Tier 1 sources.
+Tier 4: Cowan-Cranmer-Gross-Vitells (asymptotics), Feldman-Cousins, Read/Junk (CLs), Barlow-Beeston and Conway (templates), D'Agostini and Schmitt (unfolding), Gross-Vitells (trial factors); the `hep-measurement` inference and unfolding references for general methodology. AMS-specific statements about how a result was unfolded or how its uncertainties were combined need Tier 1 sources.
 
 ## Questions to ask the user
 

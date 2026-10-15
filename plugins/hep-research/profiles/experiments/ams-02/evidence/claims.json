@@ -1319,7 +1319,7 @@
   },
   {
     "id": "ams02:C48",
-    "claim": "Bartels-rotation lepton fluxes in energy: the exposure time T_i(E) for each rotation is determined by counting livetime-weighted seconds at each location above the geomagnetic cutoff, with the detector in normal operating conditions, the AMS pointing within 40 degrees of the local zenith and the ISS outside the South Atlantic Anomaly; the effective acceptance is A_geom eps [1+delta(E)(1+deltahat_i)] with delta a time-independent data/MC correction and deltahat_i small time-dependent detector-response corrections at the level of 0.0 +- 0.4%; the trigger efficiency is found stable over time",
+    "claim": "Bartels-rotation lepton fluxes in energy: the exposure time T_i(E) for each rotation is determined by counting livetime-weighted seconds at each location above the geomagnetic cutoff, with the detector in normal operating conditions, the AMS pointing within 40 degrees of the local zenith and the ISS outside the South Atlantic Anomaly; the effective acceptance is A_geom eps [1+delta(E)(1+deltahat_i)] with delta a time-independent data/MC correction and deltahat_i small time-dependent hep-detector corrections at the level of 0.0 +- 0.4%; the trigger efficiency is found stable over time",
     "claim_types": [
       "analysis_method"
     ],
@@ -5193,7 +5193,7 @@
       "data_period": null,
       "analysis": "INSPIRE REST query 2026-10-14"
     },
-    "limitations": "One record checked; other AMS letters are not covered by this claim. A preprint added later would change it. Added 2026-10-14 (research-communication audit RC-B7, which removed an unsourced 'deliberate policy' reading from the skill references).",
+    "limitations": "One record checked; other AMS letters are not covered by this claim. A preprint added later would change it. Added 2026-10-14 (hep-communication audit RC-B7, which removed an unsourced 'deliberate policy' reading from the skill references).",
     "verification_strength": "metadata-only",
     "numeric_quotation_allowed": false,
     "last_reviewed": "2026-10-14",

@@ -243,7 +243,7 @@ class ShippedScopeTests(unittest.TestCase):
                 self.assertEqual(sorted(tools - scoped), [])
 
 
-DR_ASSETS = ROOT / "skills" / "detector-response" / "assets"
+DR_ASSETS = ROOT / "skills" / "hep-detector" / "assets"
 DR_CASES = {  # contract file -> (arguments that succeed, arguments that are invalid input)
     "tag_and_probe_efficiency.json": (["--pass-count", "92", "--total", "100"], ["--pass-count", "5", "--total", "3"]),
     "pid_separation_power.json": (["--mode", "tof", "--species", "pi", "K", "--momentum", "2"],
@@ -255,7 +255,7 @@ DR_CASES = {  # contract file -> (arguments that succeed, arguments that are inv
 
 
 class DetectorResponseContractTests(unittest.TestCase):
-    """detector-response audit DR-WP2-07: four tools behave as their contracts say: declared outputs present on
+    """hep-detector audit DR-WP2-07: four tools behave as their contracts say: declared outputs present on
     success, declared exit codes on failure, and JSON on stdout at exit 2 (unlike cosmic_ray_flux.json)."""
 
     def test_declared_outputs_and_exits(self):
@@ -279,8 +279,8 @@ class DetectorResponseContractTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             bad = Path(tmp) / "bad.json"
             bad.write_text(json.dumps({"data_profile": [1, 0], "mc_profile": [1, 1], "bin_centers": [1, 0]}))
-            for entry, args in (("skills/detector-response/scripts/pileup_reweight.py", [str(bad)]),
-                                ("skills/detector-response/scripts/calorimeter_resolution.py", ["--fit", str(bad)])):
+            for entry, args in (("skills/hep-detector/scripts/pileup_reweight.py", [str(bad)]),
+                                ("skills/hep-detector/scripts/calorimeter_resolution.py", ["--fit", str(bad)])):
                 with self.subTest(entry=entry):
                     p = run_tool(entry, args)
                     self.assertEqual(p.returncode, 1)
@@ -307,7 +307,7 @@ FRONTEND_OPS = {  # operation id -> (arguments that succeed, arguments that are 
 
 
 class FrontendResponseContractTests(unittest.TestCase):
-    """detector-response follow-up F-DR1: frontend_response.py has one contracted operation per subcommand, checked
+    """hep-detector follow-up F-DR1: frontend_response.py has one contracted operation per subcommand, checked
     against each subcommand's own help, and every subcommand behaves as contracted: declared outputs present at exit 0,
     JSON with error_kind invalid-input on stdout at exit 2, JSON with ok false at exit 1."""
 

@@ -1,7 +1,7 @@
 # EIC facility context
 
 > Scope: EIC facility (the collider), not any one experiment.
-> Method owner: [hep-analysis](../../../../../skills/hep-analysis/SKILL.md) for how configuration facts enter a measurement design; [hep-theory](../../../../../skills/hep-theory/SKILL.md) owns DIS kinematics and QCD.
+> Method owner: [hep-measurement](../../../../../skills/hep-measurement/SKILL.md) for how configuration facts enter a measurement design; [hep-theory](../../../../../skills/hep-theory/SKILL.md) owns DIS kinematics and QCD.
 
 Every bullet cites a claim; every number would need a claim read at page level or better, and this profile has none for beam parameters, so it quotes none.
 

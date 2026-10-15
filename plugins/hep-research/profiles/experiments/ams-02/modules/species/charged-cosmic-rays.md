@@ -74,7 +74,7 @@ background fixed before the fit; at low counts a fixed subtraction biases the in
 
 **Same fiducial, not same selection.** For different species (e.g. He/O) share the time interval, variable, bins, geometry, track configuration and cutoff treatment, but keep every `|Z|`-dependent element species-specific: charge-estimator windows, adjacent-element leakage, charge-migration matrix, trigger and selection efficiencies, and survival/fragmentation.
 
-**Cancellation depends on compatible fiducial definitions and response conventions**; ratio bins must use the same variable (`R` for both, or the same energy/nucleon assumption). Do not assume complete cancellation: propagate the combined covariance `Var(N/D) ≈ f² [ (σ_N/N)² + (σ_D/D)² - 2 ρ σ_N σ_D /(N D) ]` (first-order delta method; valid when relative uncertainties are small and Gaussian; use toys otherwise). The `hep-analysis` script `particle_ratio_with_uncertainty.py` implements the two-yield delta method. For a **secondary-to-primary** ratio, the physics (propagation) interpretation is a model step beyond the measurement (see result interpretation in [source-policy](../sources/source-policy.md)).
+**Cancellation depends on compatible fiducial definitions and response conventions**; ratio bins must use the same variable (`R` for both, or the same energy/nucleon assumption). Do not assume complete cancellation: propagate the combined covariance `Var(N/D) ≈ f² [ (σ_N/N)² + (σ_D/D)² - 2 ρ σ_N σ_D /(N D) ]` (first-order delta method; valid when relative uncertainties are small and Gaussian; use toys otherwise). The `hep-measurement` script `particle_ratio_with_uncertainty.py` implements the two-yield delta method. For a **secondary-to-primary** ratio, the physics (propagation) interpretation is a model step beyond the measurement (see result interpretation in [source-policy](../sources/source-policy.md)).
 
 ## Geomagnetic selection
 
@@ -82,7 +82,7 @@ background fixed before the fit; at low counts a fixed subtraction biases the in
 
 **Procedure.** (1) State model and version (user-supplied). (2) Compute `R_c` per event from position/attitude, or the exposure-weighted transmission per bin. (3) Choose the cut/transmission scheme and its validity range (below the cutoff, secondary/albedo populations appear; near cutoff the measured spectrum is sensitive to model error). (4) Vary model and safety factor and propagate as a systematic. (5) Validate with the rigidity distribution vs cutoff (below cutoff the primary rate drops; residual counts are secondary).
 
-`hep-analysis` scripts `geomagnetic_cutoff.py` and `orbit_averaged_geomagnetic_cutoff.py` provide a dipole-level planning estimate only; a real analysis needs full-field back-tracing.
+`hep-measurement` scripts `geomagnetic_cutoff.py` and `orbit_averaged_geomagnetic_cutoff.py` provide a dipole-level planning estimate only; a real analysis needs full-field back-tracing.
 
 ## Variable conversion
 

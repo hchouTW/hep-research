@@ -13,7 +13,7 @@
   "profiles": {}
  },
  "provenance": {
-  "producer_skill": "physics-ml",
+  "producer_skill": "hep-ml",
   "created": "2026-10-02",
   "evidence_ids": []
  },

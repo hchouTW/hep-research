@@ -290,7 +290,7 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, strict: bool = 
 
 RHAT_MAX = 1.01  # [Proposal] threshold for stats.convergence_mismatch
 RESPONSE_SEMANTICS_FROM = "2.4.0"  # response semantic rules apply natively from this contract version
-RESPONSE_HARDENING_FROM = "2.8.0"  # response hardening rules (detector-response audit) apply natively from this version
+RESPONSE_HARDENING_FROM = "2.8.0"  # response hardening rules (hep-detector audit) apply natively from this version
 IMPLIED_CORRECTIONS = {"exposure": {"acceptance", "livetime"}}  # vocab response_corrections: exposure = acceptance x live time
 RESPONSE_EFFICIENCY_LIKE = {"efficiency", "acceptance", "fiducial"}  # classes whose correction_space must be stated
 
@@ -305,7 +305,7 @@ def _correction_classes(terms) -> set[str]:
 
 
 def _response_semantics(ext: dict, vocab: Vocabulary, rep: Report) -> None:
-    """Response rules of contracts 2.4.0 (detector-response review 2026-10-12). Native for artifacts of contract 2.4.0
+    """Response rules of contracts 2.4.0 (hep-detector review 2026-10-12). Native for artifacts of contract 2.4.0
     or later; an older artifact gets them only in strict mode, so its promised outcome is unchanged."""
     includes, separate = ext.get("includes", []), ext.get("applied_separately", [])
     for field, terms in (("includes", includes), ("applied_separately", separate)):
@@ -369,7 +369,7 @@ _ADAPTER_FIELDS_REPORTED = {"underflow_overflow", "normalization", "acceptance",
 
 
 def _response_hardening(ext: dict, rep: Report) -> None:
-    """Response rules of contracts 2.8.0 (detector-response audit 2026-10-13, DR-WP2-03, rules R1-R10). Native for
+    """Response rules of contracts 2.8.0 (hep-detector audit 2026-10-13, DR-WP2-03, rules R1-R10). Native for
     artifacts of contract 2.8.0 or later; an older artifact gets them only in strict mode. R1 a matrix declares
     intended_use and underflow_overflow; R2 misspelled keys (error) and unknown keys (warning); R3 what 'includes'
     holds agrees with where inefficiency and acceptance sit; R4 a matrix has a probability reading and a placement of
@@ -531,7 +531,7 @@ def _blank(v) -> bool:
 
 
 def _ml_semantics(ext: dict, rep: Report) -> None:
-    """ml-artifact content rules of contracts 2.5.0 (physics-ml review 2026-10-13). Native for artifacts of contract
+    """ml-artifact content rules of contracts 2.5.0 (hep-ml review 2026-10-13). Native for artifacts of contract
     2.5.0 or later; an older artifact gets them only in strict mode, so its promised outcome is unchanged.
     Errors: blank grouping key, empty model_hash, labels or features, training_domain keyed on a variable that is not a
     feature or with a range that is not [lo, hi] with lo < hi, a failed split-overlap check or test groups that are
@@ -617,7 +617,7 @@ def _ml_semantics(ext: dict, rep: Report) -> None:
                     "the domain-shift check failed: correct or bound the data/simulation difference before use")
 
 
-ML_SEMANTICS_V2_FROM = "2.8.0"  # ml-artifact rules of the physics-ml audit (PML) apply natively from this version
+ML_SEMANTICS_V2_FROM = "2.8.0"  # ml-artifact rules of the hep-ml audit (PML) apply natively from this version
 
 
 def _sample_name(value) -> str:
@@ -629,7 +629,7 @@ def _sample_name(value) -> str:
 
 
 def _ml_semantics_v2(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, native: bool = True) -> None:
-    """ml-artifact rules of contracts 2.8.0 (physics-ml audit, PML): the six SKILL.md invariants are checked as claims,
+    """ml-artifact rules of contracts 2.8.0 (hep-ml audit, PML): the six SKILL.md invariants are checked as claims,
     not as fields present. Native for artifacts of contract 2.8.0 or later; an older artifact gets them in strict
     mode and at the gate (`native` is False there: rules that only a 2.8.0 field can satisfy are warnings)."""
     cal: Any = ext.get("calibration") if isinstance(ext.get("calibration"), dict) else None
@@ -1172,7 +1172,7 @@ def _is_zero(v) -> bool:
 
 
 def _measurement_semantics(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:
-    """measurement-spec rules of contracts 2.6.0 (hep-analysis audit 2026-10-13): the SKILL.md invariants. Native for
+    """measurement-spec rules of contracts 2.6.0 (hep-measurement audit 2026-10-13): the SKILL.md invariants. Native for
     artifacts of contract 2.6.0 or later; an older artifact gets them only in strict mode, so its promised outcome is
     unchanged. Errors: no estimand sentence; a variable without unit and binning, no phase_space or frame; no
     selection, or a blank conditional denominator; no background without no_backgrounds_reason, a background without
@@ -1805,7 +1805,7 @@ def publication_gate(doc: dict, vocab: Vocabulary | None = None, base_dir=None) 
     backend provenance (a non-blank likelihood.backend with a non-blank model_ref or model_sha256). Passing says the contract-level
     prerequisites for reporting the result as validated are present; it is not a scientific validation.
 
-    ML provenance (contracts 2.8.0, physics-ml audit WP0.5): every input of artifact_type ml-artifact, and the one
+    ML provenance (contracts 2.8.0, hep-ml audit WP0.5): every input of artifact_type ml-artifact, and the one
     extension.observable_source names (kind ml-score), is resolved relative to base_dir (the folder of the artifact;
     a ref may also be relative to up to three of its parent folders, as project-relative refs are), its sha256 is
     checked and it is validated strictly: an error there fails the gate (gate.ml_input_invalid), an unresolved

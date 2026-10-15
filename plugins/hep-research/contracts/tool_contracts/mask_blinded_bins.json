@@ -1,7 +1,7 @@
 {
  "contract_version": "1.0.0",
  "tool_id": "mask-blinded-bins",
- "entry": "skills/hep-analysis/scripts/mask_blinded_bins.py",
+ "entry": "skills/hep-measurement/scripts/mask_blinded_bins.py",
  "operations": [
   {
    "operation_id": "mask",

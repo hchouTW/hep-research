@@ -1,7 +1,7 @@
 {
  "contract_version": "1.0.0",
  "tool_id": "frontend-response",
- "entry": "skills/detector-response/scripts/frontend_response.py",
+ "entry": "skills/hep-detector/scripts/frontend_response.py",
  "operations": [
   {
    "operation_id": "enc",

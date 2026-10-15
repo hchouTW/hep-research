@@ -49,7 +49,7 @@ class NoFormalUseSignal(unittest.TestCase):
 
 class NoAuthorizationField(unittest.TestCase):
     def test_spec_template_has_no_authorization_field(self):
-        path = ROOT / "skills" / "hep-analysis" / "assets" / "measurement_spec.template.json"
+        path = ROOT / "skills" / "hep-measurement" / "assets" / "measurement_spec.template.json"
         self.assertNotIn("authorization", path.read_text(encoding="utf-8"))
         blinding = json.loads(path.read_text(encoding="utf-8"))["extension"]["blinding"]
         self.assertIn("unblinding_record_ref", blinding)

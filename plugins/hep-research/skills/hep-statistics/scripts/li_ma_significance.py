@@ -10,7 +10,7 @@ standard-normal deviate is asymptotic (Wilks): at small N_on or N_off the normal
 can be several times too small, so for low counts calibrate it with --toys or
 --exact-conditional. See
 <plugin root>/skills/hep-statistics/references/astroparticle-statistics.md and
-<plugin root>/skills/detector-response/references/imaging-atmospheric-cherenkov.md.
+<plugin root>/skills/hep-detector/references/imaging-atmospheric-cherenkov.md.
 
 What it does: computes the signed Li & Ma significance
     S = sqrt(2) * sqrt(N_on * ln[((1+alpha)/alpha) * N_on/(N_on+N_off)]
@@ -35,7 +35,7 @@ integers; alpha is the ON/OFF exposure or normalization ratio, a finite positive
 number (not necessarily 1). This is a significance for one already-chosen ON region
 and time/energy window - it does not include a trials/look-elsewhere correction for a
 scan over multiple positions, bins, or windows (see
-<plugin root>/skills/hep-statistics/references/astroparticle-statistics.md and <plugin root>/skills/hep-analysis/scripts/counting_reference.py's
+<plugin root>/skills/hep-statistics/references/astroparticle-statistics.md and <plugin root>/skills/hep-measurement/scripts/counting_reference.py's
 docstring for the analogous single-bin caveat).
 Run: python3 <plugin root>/skills/hep-statistics/scripts/li_ma_significance.py --on 15 --off 5 --alpha 0.5
 """

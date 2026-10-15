@@ -43,7 +43,7 @@ A refactor that must not change results needs evidence at the level of the resul
 - **Coverage of the reference:** the reference job proves only the code paths its input reaches. Run one sample of each
   kind the code treats differently (simulation and data, each run period with its own conditions); a simulation-only
   reference once hid a data-only change for seventeen refactoring steps (see
-  [Validation](../../hep-analysis/references/analysis-validation.md)).
+  [Validation](../../hep-measurement/references/analysis-validation.md)).
 
 ## Failure Handling
 

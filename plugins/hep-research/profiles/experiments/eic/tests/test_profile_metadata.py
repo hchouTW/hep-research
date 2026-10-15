@@ -11,7 +11,7 @@ from contracts.registry import validate_registry  # noqa: E402
 
 PROFILE = json.loads((ROOT / "profile.json").read_text(encoding="utf-8"))
 REGISTRY = PLUGIN / "profiles" / "registry.json"
-SKILLS = {"hep-analysis", "detector-response", "hep-theory", "hep-statistics", "hep-computing", "physics-ml", "research-communication"}
+SKILLS = {"hep-measurement", "hep-detector", "hep-theory", "hep-statistics", "hep-computing", "hep-ml", "hep-communication"}
 
 
 class IdentityTests(unittest.TestCase):

@@ -1,0 +1,21 @@
+{
+ "$comment": "SYNTHETIC template of the companion manifest of a derived draft (hep-communication, check_adaptation.py). The published-facing prose carries none of these fields; the manifest keeps the claim ids, the omissions and the review. Every value is a placeholder.",
+ "manifest_version": "1.0.0",
+ "brief": {
+  "audience": "public | collaboration | referees | conference | funding panel",
+  "format": "paragraph | meeting-abstract | talk-outline | poster | public-summary",
+  "length_budget": "<words, minutes or panels>",
+  "central_claim": "<claim id>",
+  "record_ref": "<project-relative path of the communication record>",
+  "record_sha256": "<sha256 of the record the draft was written from>",
+  "indispensable_limitations": ["<condition that changes the scientific meaning>", {"text": "<condition>", "as_written": "<the phrase in the draft that states it>"}]
+ },
+ "statements": [
+  {"id": "st:1", "text": "<sentence exactly as written in the draft>", "claim_ids": ["<claim id>"], "kind": "quantitative | conclusion | context"}
+ ],
+ "omissions": [
+  {"what": "<what the draft leaves out>", "reason": "<why that does not change the meaning for this audience>"}
+ ],
+ "unresolved_inputs": ["<missing number or fact and who produces it>"],
+ "semantic_review": {"by": "<reader>", "date": "<YYYY-MM-DD>", "verdict": "consistent | inconsistent | pending"}
+}

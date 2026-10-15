@@ -38,11 +38,11 @@ CONTRACTS_VERSION = "2.9.0"
 # are sidecars read as protected inputs and verified by contracts.permit and contracts.analysis_bundle; no artifact
 # declares a dependency on them. Add an ID when an artifact type starts to require one.
 # 2.8.0 adds rule families that only refuse false or incomplete declarations, each with its own *_FROM constant and
-# helper in contracts.validate: ml-artifact semantics v2 (ML_SEMANTICS_V2_FROM; physics-ml audit) and, joining the same
-# minor, response hardening (detector-response audit) and communication result types (research-communication audit).
+# helper in contracts.validate: ml-artifact semantics v2 (ML_SEMANTICS_V2_FROM; hep-ml audit) and, joining the same
+# minor, response hardening (hep-detector audit) and communication result types (hep-communication audit).
 # New fields are optional and no capability is added: a 2.7 reader misreads no new field, it only does not apply the
 # new rules. Older artifacts get the new rules under --strict and at the gate.
-# Response hardening (contracts.validate, _response_hardening, RESPONSE_HARDENING_FROM; detector-response audit DR-WP2)
+# Response hardening (contracts.validate, _response_hardening, RESPONSE_HARDENING_FROM; hep-detector audit DR-WP2)
 # adds the overlay ext_response_v2_8.json (underflow_overflow enum, underflow/overflow vectors, correction_space, mc_stat,
 # systematic_variations, periods) and rules R1-R10; contracts.response_adapter treats a missing underflow_overflow of a
 # 2.8.0 artifact as an error. A 2.7 response that passed keeps its default outcome.

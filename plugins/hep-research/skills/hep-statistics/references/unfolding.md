@@ -1,10 +1,10 @@
 # Unfolding: algorithms, regularization and coverage
 
 This is the one place for unfolding methods in the plugin (ownership table in `docs/routing-contract.md`). The response
-object, forward folding of a prediction and the double-counting checks belong to detector-response
-([response and forward folding](../../detector-response/references/response-and-forward-folding.md)); whether a
-measurement should be unfolded at all, and at which level it is published, is a design question for hep-analysis
-([measurement definitions](../../hep-analysis/references/measurements-and-unfolding.md)).
+object, forward folding of a prediction and the double-counting checks belong to hep-detector
+([response and forward folding](../../hep-detector/references/response-and-forward-folding.md)); whether a
+measurement should be unfolded at all, and at which level it is published, is a design question for hep-measurement
+([measurement definitions](../../hep-measurement/references/measurements-and-unfolding.md)).
 
 Executable validation: `<plugin root>/core/stats/unfolding_diagnostics.py outer-coverage` repeats data, MC response and
 efficiency draws and the regularization choice inside every outer toy and reports bias, marginal and simultaneous
@@ -35,7 +35,7 @@ variations, not visual smoothness alone.
   a non-constant prior; report the prior and a prior-sensitivity study (as for any Bayesian result).
 - **OmniFold** (Andreassen et al., PRL 124 (2020) 182001, arXiv:1911.09107): iterative reweighting of simulated events
   by classifiers, unbinned and in many observables at once; its uncertainty and coverage need the same toy validation
-  as the binned methods, and the trained models are physics-ml artifacts.
+  as the binned methods, and the trained models are hep-ml artifacts.
 
 ### Binning: purity and stability
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """End-to-end synthetic analysis: ntuple -> cutflow -> histograms -> pyhf fit -> yield table.
 
-Purpose: one small, runnable chain that exercises the hep-analysis conventions (skills/hep-analysis) together
+Purpose: one small, runnable chain that exercises the hep-measurement conventions (skills/hep-measurement) together
 (signed generator weights normalized to the full production, sumw/sumw2 at every cut,
 orthogonal signal and control regions, MC-stat nuisances from sumw2, a labelled
 pseudo-data set, and a yield table), so it doubles as a smoke test and a template.
@@ -18,7 +18,7 @@ What it does:
    regions, per-bin MC-stat staterror from sumw2, 2.5% lumi normsys), fits it, and
    computes the observed and expected 95% CLs upper limit on mu.
 6. Writes cutflow.csv, yields.csv, workspace.json, summary.json into --outdir and
-   prints the yield table via skills/hep-analysis/scripts/make_yield_table.py.
+   prints the yield table via skills/hep-measurement/scripts/make_yield_table.py.
 
 Usage:
     python3 examples/end-to-end-sample/run.py --outdir demo_out   (from the plugin root) [--seed 1] [--mu-injected 1.0]
@@ -44,7 +44,7 @@ SAMPLES = {
     "signal": (0.002, 50_000, 0.0, "peak"),
 }
 MASS_EDGES = np.linspace(100.0, 300.0, 11)  # GeV, 10 bins
-SKILL_DIR = Path(__file__).resolve().parents[2] / "skills" / "hep-analysis"
+SKILL_DIR = Path(__file__).resolve().parents[2] / "skills" / "hep-measurement"
 
 
 def generate(name: str, rng: np.random.Generator) -> dict[str, np.ndarray]:

@@ -52,7 +52,7 @@ def measurement(kind="integrated-luminosity", **extra):
            "systematics": [{"name": "energy-scale", "source": "calibration", "effect": "migration", "applied_via": "migration"}],
            "blinding": {"blinded": False}}
     ext.update(extra)
-    return envelope("measurement-spec", ext, "hep-analysis")
+    return envelope("measurement-spec", ext, "hep-measurement")
 
 
 CONVENTIONS_ALL = {"unit_system": "natural units (synthetic)", "hbar_c_one": True, "metric_signature": "+---",
@@ -144,7 +144,7 @@ def dataset(status="synthetic", did="synthetic-collider:synthetic-angular-1", **
                     "uncertainties": [{"name": "stat", "kind": "statistical", "values": [0.1, 0.1, 0.1, 0.1], "correlation": "uncorrelated"}]},
            "covariance": {"status": "absent"}, "status": status, "experiment_profile": "experiment:synthetic-collider"}
     ext.update(extra)
-    return envelope("dataset-record", ext, "hep-analysis")
+    return envelope("dataset-record", ext, "hep-measurement")
 
 
 def statres(paradigm, **extra):
@@ -189,7 +189,7 @@ def communication_rich(**extra):
                     [edge("ev:C2-b", "artifacts/syn.json")]),
               claim("claim:C3", "The synthetic illustration is compatible with the ratio (synthetic fixture).", "comparison",
                     ["synthetic", "unvalidated"], [edge("ev:C3-a", "artifacts/obs.json"), edge("ev:C3-b", "artifacts/syn.json", "qualifies")])]
-    doc = envelope("communication", {}, "research-communication", contract_version=CONTRACTS_VERSION,
+    doc = envelope("communication", {}, "hep-communication", contract_version=CONTRACTS_VERSION,
                    versions={"plugin": "0.6.12", "contracts": CONTRACTS_VERSION, "profiles": {}},
                    required_capabilities=["communication:traceability-v1"], inputs=inputs)
     for c in claims:
@@ -222,7 +222,7 @@ def response_v24(**extra):
            "intended_use": "forward_folding", "matrix": [[0.7, 0.1], [0.1, 0.6]],
            "conditions": "synthetic", "provenance": SYN, **extra}
     ext = {k: x for k, x in ext.items() if x is not None}  # extra key=None removes the field
-    return envelope("response", ext, "detector-response", contract_version=CONTRACTS_VERSION,
+    return envelope("response", ext, "hep-detector", contract_version=CONTRACTS_VERSION,
                     versions={"plugin": "0.6.14", "contracts": CONTRACTS_VERSION, "profiles": {}})
 
 
@@ -249,7 +249,7 @@ def ml_v25(**extra):
                                       "value": 0.52, "uncertainty": 0.02, "criterion": ">= 0.5", "passed": True,
                                       "ref": "synthetic"}], **extra}
     ext = {k: x for k, x in ext.items() if x is not None}  # extra key=None removes the field
-    return envelope("ml-artifact", ext, "physics-ml", contract_version=CONTRACTS_VERSION,
+    return envelope("ml-artifact", ext, "hep-ml", contract_version=CONTRACTS_VERSION,
                     versions={"plugin": "0.6.16", "contracts": CONTRACTS_VERSION, "profiles": {}})
 
 
@@ -301,12 +301,12 @@ VALID = {
                                            "orientation": "rows_reco_cols_truth", "normalization": "conditional_on_generated",
                                            "inefficiency": "inside_matrix", "acceptance": "inside_matrix",
                                            "includes": ["efficiency", "acceptance"], "applied_separately": [],
-                                           "conditions": "synthetic", "provenance": SYN}, "detector-response"),
+                                           "conditions": "synthetic", "provenance": SYN}, "hep-detector"),
     "response_parametrized.json": envelope("response", {"form": "parametrized", "truth_axis": "not-applicable", "reco_axis": "not-applicable",
                                                         "orientation": "rows_reco_cols_truth", "normalization": "unnormalized",
                                                         "inefficiency": "inside_matrix", "acceptance": "inside_matrix", "includes": ["efficiency"],
                                                         "parametrization": {"variables": ["pt"], "function_ref": "synthetic-eff.json", "validity_range": {"pt": [10, 1000]}},
-                                                        "conditions": "synthetic", "provenance": SYN}, "detector-response"),
+                                                        "conditions": "synthetic", "provenance": SYN}, "hep-detector"),
     "measurement_ratio.json": measurement("exposure", observable=observable("exposure", level="detector", quantity="ratio", unit="1",
                                                                             variables=[{"name": "rigidity", "unit": "GV", "edges": [1, 2, 4]}]),
                                           ratio={"numerator": "species-A", "denominator": "species-B",
@@ -317,7 +317,7 @@ VALID = {
     "comparison_spec.json": envelope("comparison-spec", {"dataset_bindings": ["synthetic-collider:synthetic-angular-1"],
                                                          "prediction_bindings": ["fixture-synthetic-prediction"],
                                                          "gate_result": {"comparable": True, "mismatches": []},
-                                                         "transformations": [{"kind": "forward-fold", "owner": "detector-response"}],
+                                                         "transformations": [{"kind": "forward-fold", "owner": "hep-detector"}],
                                                          "correlations": [], "inference_assumptions": ["placeholder"]}, "hep-statistics"),
     "statres_frequentist.json": statres("frequentist"),
     "statres_bayesian.json": statres("bayesian"),
@@ -334,17 +334,17 @@ VALID = {
     "ml_artifact.json": envelope("ml-artifact", {"task": "classification", "labels": ["sig", "bkg"], "features": ["x"],
                                                  "splits": {"grouping_key": "run_id"}, "training_domain": {"x": [0, 1]},
                                                  "preprocessing": [], "model_hash": "sha256:" + hashlib.sha256(b"SYNTHETIC fixture model").hexdigest(),
-                                                 "downstream_validation": []}, "physics-ml"),
+                                                 "downstream_validation": []}, "hep-ml"),
     "computational_run.json": envelope("computational-run", {"input_manifest": [{"path": "in.json", "sha256": "placeholder"}],
                                                              "tools": [{"name": "python", "version": "3.11"}], "commands": ["placeholder"],
                                                              "environment": {}, "seeds": {"toys": 1}, "tolerances": {}, "exit_status": 0,
                                                              "output_hashes": {}}, "hep-computing"),
     "communication.json": envelope("communication", {"claims": [{"text": "placeholder", "result_ref": "x.json", "status": "synthetic"}],
                                                      "sources_read": [{"id": "user:S1", "level": "full-text"}],
-                                                     "limitations": ["fixture"]}, "research-communication"),
+                                                     "limitations": ["fixture"]}, "hep-communication"),
     "communication_traceability.json": communication_rich(),
     "response_v24.json": response_v24(),
-    # contracts 2.8.0 response hardening (detector-response audit): finite-MC statistics and correction space declared
+    # contracts 2.8.0 response hardening (hep-detector audit): finite-MC statistics and correction space declared
     "response_v28.json": response_v24(intended_use="unfolding",
                                       mc_stat={"kind": "generated_counts", "events_per_truth_bin": [10000, 10000]},
                                       correction_space={"acceptance": {"space": "truth", "binned_in": "cos_theta"},
@@ -431,7 +431,7 @@ WARNING = {"theory_v26_conventions_incomplete.json": (theory_v26(conventions={"h
                {"name": "missing higher orders", "kind": "truncation", "correlation": "unknown"}]), ["prediction.truncation_method"])}
 
 
-# measurement-spec rules of contracts 2.6.0 (hep-analysis audit): one invalid fixture per rule
+# measurement-spec rules of contracts 2.6.0 (hep-measurement audit): one invalid fixture per rule
 MEAS_INVALID = {
     "estimand_missing": (lambda d, e: e.pop("estimand"), "measurement.estimand_missing"),
     "estimand_not_a_sentence": (lambda d, e: e.update(estimand="flux"), "measurement.estimand_not_a_sentence"),
@@ -532,7 +532,7 @@ UNRESOLVED["statres_v26_bayes_chains_missing.json"] = (statres_v26_bayes(sampler
                                                        ["stats.chains_missing"])
 
 
-# contracts 2.8.0 ml-artifact rules (physics-ml audit, PML; CHECK-0.10.0 G-6): one committed fixture per rule family
+# contracts 2.8.0 ml-artifact rules (hep-ml audit, PML; CHECK-0.10.0 G-6): one committed fixture per rule family
 # (structured downstream validation, output semantics and near-miss keys, task blocks, model-hash format, weights split,
 # calibration outcome, domain-shift outcome, observable_source), named ml_v28_* / statres_v28_*.
 def ml_v28(mutate):

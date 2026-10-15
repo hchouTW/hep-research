@@ -1,4 +1,4 @@
-"""STH Q8: one broken-power-law parametrization (core/stats/broken_power_law.py) shared by hep-analysis
+"""STH Q8: one broken-power-law parametrization (core/stats/broken_power_law.py) shared by hep-measurement
 cr_spectrum_powerlaw_fit.py and hep-statistics covariance_fit.py. Both tools give identical model values, and on the
 same synthetic points with a full covariance their fitted parameters agree within a stated tolerance."""
 import math
@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 
 PLUGIN = Path(__file__).resolve().parents[2]
-sys.path[:0] = [str(PLUGIN), str(PLUGIN / "skills" / "hep-analysis" / "scripts"),
+sys.path[:0] = [str(PLUGIN), str(PLUGIN / "skills" / "hep-measurement" / "scripts"),
                 str(PLUGIN / "skills" / "hep-statistics" / "scripts")]
 from core.stats import broken_power_law as bpl  # noqa: E402
 

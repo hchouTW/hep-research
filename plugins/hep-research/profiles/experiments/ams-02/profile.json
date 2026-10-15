@@ -15,13 +15,13 @@
   "contracts": ">=2.0,<3.0"
  },
  "related_skills": [
-  "hep-analysis",
-  "detector-response",
+  "hep-measurement",
+  "hep-detector",
   "hep-statistics",
   "hep-theory",
-  "research-communication",
+  "hep-communication",
   "hep-computing",
-  "physics-ml"
+  "hep-ml"
  ],
  "resources": {
   "index": "index.md",

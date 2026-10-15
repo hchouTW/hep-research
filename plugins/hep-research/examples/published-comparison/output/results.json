@@ -64,6 +64,7 @@
   "contracts/schemas/ext_statistical_result.json",
   "contracts/schemas/ext_statistical_result_v2_2.json",
   "contracts/schemas/ext_statistical_result_v2_6.json",
+  "contracts/schemas/skill_names.json",
   "contracts/vocab/core.json",
   "examples/published-comparison/synthetic-published-covariance.json",
   "examples/published-comparison/synthetic-published-record.json",

@@ -1,5 +1,5 @@
 {
- "contract_version": "2.8.0",
+ "contract_version": "2.9.0",
  "artifact_id": "synthetic-j9-classifier",
  "artifact_type": "ml-artifact",
  "objective": "SYNTHETIC J9: event classifier whose (prior-corrected, temperature-scaled) score feeds a template fit",
@@ -14,7 +14,7 @@
  },
  "versions": {
   "plugin": "0.10.1",
-  "contracts": "2.8.0",
+  "contracts": "2.9.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -24,7 +24,7 @@
   }
  },
  "provenance": {
-  "producer_skill": "physics-ml",
+  "producer_skill": "hep-ml",
   "created": "2026-10-13",
   "evidence_ids": []
  },

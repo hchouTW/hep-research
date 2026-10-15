@@ -81,7 +81,7 @@ Results at the 0.1.0 handover (E1); every listed test is in the 0.3.0 tree.
 | T09 | pass | Missing covariance reported and kept missing; a scale envelope is marked not Gaussian and not quantified |
 | T10 | pass | Path A He/p sigma equals an independent linear propagation with the shared trigger term to < 1e-15; treating it as independent overstates sigma by 1.00–1.17 |
 | T11 | pass | Period average = sum of corrected counts / sum of per-period exposures; an equal live-time split mis-states low-rigidity exposure by up to 7.9% (synthetic) |
-| T12 | pass | `tests/skills/hep_analysis/test_check_systematic_variations.py`: unchanged integral with changed shape classified as shape |
+| T12 | pass | `tests/skills/hep_measurement/test_check_systematic_variations.py`: unchanged integral with changed shape classified as shape |
 | T13 | pass | `profiles/theory/qed-benchmark/tests/test_convention_mismatch.py`: coupling normalization, angle definition, mass approximation (even at 1e-6) and a missing namespaced key reported as mismatches |
 | T14 | pass | `test_derivation.py`: status `analytic-derivation` (not proof) stored apart from the numerical checks; `test_prediction.py` records tolerances |
 | T15 | pass | `test_prediction.py::test_convergence_study`: trapezoid refinement 3…257 points, observed order within 0.05 of 2, error reduced > 1000×; Simpson and `scipy.integrate.quad` errors recorded |

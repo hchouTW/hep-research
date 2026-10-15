@@ -129,13 +129,13 @@ def cli_entries(env: Env):
         ("local_partition.py", load_script("skills/hep-computing/scripts/local_partition.py").main, [a], False, False),
         ("bayes_diagnostics.py", load_script("skills/hep-statistics/scripts/bayes_diagnostics.py").main, [a], False, False),
         ("core/stats/template_fit.py", load_script("core/stats/template_fit.py").main, [a], False, False),
-        ("mask_blinded_bins.py", load_script("skills/hep-analysis/scripts/mask_blinded_bins.py").main, [a], False, False),
-        ("review_analysis_change.py", load_script("skills/hep-analysis/scripts/review_analysis_change.py").main,
+        ("mask_blinded_bins.py", load_script("skills/hep-measurement/scripts/mask_blinded_bins.py").main, [a], False, False),
+        ("review_analysis_change.py", load_script("skills/hep-measurement/scripts/review_analysis_change.py").main,
          [str(env.changes)], False, False),
         ("environment_manifest.py", load_script("skills/hep-computing/scripts/environment_manifest.py").main,
          ["record", "--inputs", a], False, False),
         ("core/evidence/ledger.py", load_script("core/evidence/ledger.py").main, [a], False, False),
-        ("check_manuscript.py", load_script("skills/research-communication/scripts/check_manuscript.py").main,
+        ("check_manuscript.py", load_script("skills/hep-communication/scripts/check_manuscript.py").main,
          [str(env.proj)], False, False),
     ]
 
@@ -153,7 +153,7 @@ def lib_entries(env: Env):
     hx = load_script("adapters/hepdata/assets/hepdata_export.py")
     hr = load_script("adapters/hepdata/assets/hepdata_record.py")
     bd = load_script("skills/hep-statistics/scripts/bayes_diagnostics.py")
-    rac = load_script("skills/hep-analysis/scripts/review_analysis_change.py")
+    rac = load_script("skills/hep-measurement/scripts/review_analysis_change.py")
     em = load_script("skills/hep-computing/scripts/environment_manifest.py")
     region = {"variable": "m", "low": 1.0, "high": 2.0}
     c = env.campaign

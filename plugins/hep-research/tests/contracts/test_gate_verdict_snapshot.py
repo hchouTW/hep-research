@@ -38,7 +38,7 @@ _Q3_UNRESOLVED_TO_FAILED = (
     "examples/theory-comparison/output/artifacts/result.json",
 )
 ALLOWED_CHANGES: dict[str, tuple[dict, str]] = {
-    # J9 (physics-ml example, status ["synthetic"]) was the one committed artifact that passed: the intended true
+    # J9 (hep-ml example, status ["synthetic"]) was the one committed artifact that passed: the intended true
     # positive of the audit's mutation 1a (order question Q6).
     "examples/ml-classifier-to-inference/output/artifacts/statistical_result.json": ({"gate": "failed"}, _Q3 + " (Q6: J9)"),
     **{p: ({"gate": "failed"}, _Q3) for p in _Q3_UNRESOLVED_TO_FAILED},

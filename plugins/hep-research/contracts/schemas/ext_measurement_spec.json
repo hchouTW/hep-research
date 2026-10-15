@@ -1,5 +1,5 @@
 {
- "$comment": "Owner: hep-analysis. Experiment-neutral: the normalization kind decides which exposure field is needed. Ratios and fractions list every effect assumed to cancel, with a correlation model.",
+ "$comment": "Owner: hep-measurement. Experiment-neutral: the normalization kind decides which exposure field is needed. Ratios and fractions list every effect assumed to cancel, with a correlation model.",
  "type": "object",
  "required": [
   "observable",

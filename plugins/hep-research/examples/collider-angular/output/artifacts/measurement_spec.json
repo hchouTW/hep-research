@@ -1,5 +1,5 @@
 {
- "contract_version": "2.8.0",
+ "contract_version": "2.9.0",
  "bindings": {
   "experiments": [
    {
@@ -11,7 +11,7 @@
  },
  "versions": {
   "plugin": "0.10.1",
-  "contracts": "2.8.0",
+  "contracts": "2.9.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -27,7 +27,7 @@
  "artifact_type": "measurement-spec",
  "objective": "SYNTHETIC Path B: corrected d sigma / d cos theta in the fiducial region (illustrative profile)",
  "provenance": {
-  "producer_skill": "hep-analysis",
+  "producer_skill": "hep-measurement",
   "created": "2026-10-02"
  },
  "status": [

@@ -4,7 +4,7 @@ Owner: hep-theory (generic kinematics and conventions). This file defines the in
 scattering l N -> l' X and the identities that follow from the definitions, with every assumption named. It
 holds no experiment, detector or dataset: facility configurations (beam species, energies, polarization) come
 from an experiment profile or the user; which estimator reconstructs x, y and Q^2 from measured quantities and
-with what resolution belongs to detector-response; selections and binning in these variables to hep-analysis;
+with what resolution belongs to hep-detector; selections and binning in these variables to hep-measurement;
 unfolding to hep-statistics; structure functions and cross sections to the PDG review this file cites, not to
 this file.
 
@@ -51,11 +51,11 @@ The invariants are frame-independent. E, E', theta and nu as "energy loss" refer
 at a collider the laboratory frame is neither the rest frame nor the lepton-nucleon center-of-mass frame unless
 the beams collide head-on with equal and opposite momenta, so every boost and the sign convention for the beam axis are stated per configuration
 and never assumed. Charged-current exchange leaves the outgoing lepton unobserved; the invariants are the same,
-but their reconstruction is an estimator question for detector-response.
+but their reconstruction is an estimator question for hep-detector.
 
 ## What is not derived here
 
-Reconstruction estimators (electron, hadron and double-angle methods) and their resolutions: detector-response.
+Reconstruction estimators (electron, hadron and double-angle methods) and their resolutions: hep-detector.
 Structure functions F_i, g_i and the cross-section formulae of PDG 18.1.1 onward: theory predictions to be derived
 per request with their own derivation status. Polarized observables, radiative corrections, target-mass and
 higher-twist effects: not derived here; name them as neglected in any theory-spec that uses this file.

@@ -91,6 +91,6 @@ the run record (`computational-run`). A speed-up without an output comparison is
 
 ## Handoffs
 
-- Training throughput and GPU utilization: physics-ml.
+- Training throughput and GPU utilization: hep-ml.
 - Whether a faster approximate method is accurate enough: [numerical and computational methods](numerical-and-computational-methods.md),
   hep-statistics for inference.

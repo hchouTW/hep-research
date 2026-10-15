@@ -6,10 +6,10 @@ SYNTHETIC and ILLUSTRATIVE. The "published" record (observed count, background a
 luminosity, efficiency map) and the toy model are invented in this file and describe no experiment, search or
 physical model. No experiment or theory profile is loaded: a recast needs only the record and its efficiency map.
 
-Chain (hep-theory -> detector-response -> hep-statistics):
+Chain (hep-theory -> hep-detector -> hep-statistics):
 1. hep-theory: toy prediction sigma(m_X; g) = g^2 sigma_ref (m_ref / m_X)^4 for the fiducial signal region, at
    particle level, as a prediction artifact in the published observable space.
-2. detector-response: the record's efficiency map as a response with form "parametrized",
+2. hep-detector: the record's efficiency map as a response with form "parametrized",
    eps(m_X) = a + b (m_X - m_ref), valid only for m_X in [200, 800] GeV. Points outside are refused, never extrapolated.
 3. Comparison gate: the prediction is multiplied by the integrated luminosity and forward-folded with the parametrized
    response, then compared with the record's detector-level count; a variant that applies the efficiency twice is
@@ -131,7 +131,7 @@ def prediction_doc(m, created):
 
 def response_doc(created):
     em = RECORD["efficiency_map"]
-    return dict(base(created, "detector-response"), artifact_id="synthetic-j7-efficiency-map", artifact_type="response",
+    return dict(base(created, "hep-detector"), artifact_id="synthetic-j7-efficiency-map", artifact_type="response",
                 objective="SYNTHETIC published efficiency map as a parametrized response (recasting)",
                 extension={"truth_axis": "not-applicable", "reco_axis": "not-applicable", "orientation": "rows_reco_cols_truth",
                            "normalization": "conditional_on_generated", "inefficiency": "inside_matrix", "acceptance": "inside_matrix",
@@ -148,7 +148,7 @@ def transforms(extra=()):
     return [*extra,
             {"kind": "multiply-by-normalization", "owner": "hep-statistics", "normalization_kind": "integrated-luminosity",
              "unit_in": "pb", "unit_out": "1"},
-            {"kind": "forward-fold", "owner": "detector-response", "truth_level": "particle-fiducial", "truth_edges": e, "reco_edges": e,
+            {"kind": "forward-fold", "owner": "hep-detector", "truth_level": "particle-fiducial", "truth_edges": e, "reco_edges": e,
              "includes": ["efficiency", "acceptance"],
              "justification": "the record's efficiency map gives the probability that a fiducial signal event is selected in the region"}]
 
@@ -172,7 +172,7 @@ def main(argv=None) -> int:
     variant = prediction_doc(300.0, a.created)  # a producer that allows a separate efficiency correction
     variant["extension"]["allowed_transformations"] = ["apply-correction", "multiply-by-normalization", "forward-fold"]
     double = gate(side_from_artifact(variant), side_from_artifact(rec),
-                  transforms([{"kind": "apply-correction", "owner": "detector-response", "effect": "efficiency",
+                  transforms([{"kind": "apply-correction", "owner": "hep-detector", "effect": "efficiency",
                                "justification": "variant: efficiency applied before folding"}]), [], cond)
     try:
         efficiency(OUTSIDE)

@@ -1,7 +1,7 @@
 # AMS-02 profile
 
 Profile `experiment:ams-02`, version 2.0.0. It adds knowledge of the Alpha Magnetic Spectrometer on the ISS to the
-core skills (`hep-analysis`, `detector-response`, `hep-statistics`, `hep-theory`, `research-communication`,
+core skills (`hep-measurement`, `hep-detector`, `hep-statistics`, `hep-theory`, `hep-communication`,
 `hep-computing`). It is never an entry point: a skill reads it when you name AMS-02 or your project config lists it.
 Not endorsed by the AMS Collaboration.
 

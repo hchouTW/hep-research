@@ -1,4 +1,4 @@
-# Behavioral evaluation of research-communication
+# Behavioral evaluation of hep-communication
 
 Fixture-driven cases that measure what an agent answers, not only which skill it loads. `cases/cases.json` lists
 every case with its inputs (under `fixtures/`), the facts a useful answer states, the limitations it must keep, the
@@ -39,7 +39,7 @@ A live run (paid model calls; run only with approval and a budget, like `evals/r
 
 ```json
 {"meta": {"run": "...", "live": true, "model": "...", "prompt_version": "...", "plugin_commit": "...", "tool_access": ["Skill", "Read", "Bash"], "coverage": "11 of 11 cases"},
- "outputs": [{"case_id": "rc-eval-01-trace", "skill_loaded": "research-communication", "prose": "...", "structured": {}, "unresolved": [],
+ "outputs": [{"case_id": "rc-eval-01-trace", "skill_loaded": "hep-communication", "prose": "...", "structured": {}, "unresolved": [],
               "judgments": {"semantic": "unjudged"}}]}
 ```
 

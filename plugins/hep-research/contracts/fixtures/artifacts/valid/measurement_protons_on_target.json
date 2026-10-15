@@ -13,7 +13,7 @@
   "profiles": {}
  },
  "provenance": {
-  "producer_skill": "hep-analysis",
+  "producer_skill": "hep-measurement",
   "created": "2026-10-02",
   "evidence_ids": []
  },

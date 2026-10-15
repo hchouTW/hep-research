@@ -1,7 +1,7 @@
 # EIC profile
 
 Profile `experiment:eic`, version 0.1.0. It adds Electron-Ion Collider facility context and ePIC experiment context
-to the core skills (`hep-analysis`, `detector-response`, `hep-theory`, `hep-computing`), from public documents only.
+to the core skills (`hep-measurement`, `hep-detector`, `hep-theory`, `hep-computing`), from public documents only.
 It is never an entry point. Not endorsed by the EIC project, BNL, Jefferson Lab or the ePIC Collaboration.
 
 This README is for people. The skills route through [index.md](index.md); read

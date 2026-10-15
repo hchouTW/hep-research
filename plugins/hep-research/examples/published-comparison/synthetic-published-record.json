@@ -4,7 +4,7 @@
  "artifact_type": "dataset-record",
  "objective": "SYNTHETIC record shaped like a published differential cross-section table (T24)",
  "provenance": {
-  "producer_skill": "hep-analysis",
+  "producer_skill": "hep-measurement",
   "created": "2026-10-02"
  },
  "status": [

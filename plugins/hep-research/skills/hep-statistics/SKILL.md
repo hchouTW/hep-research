@@ -1,6 +1,6 @@
 ---
 name: hep-statistics
-description: "Use when the deliverable is a statistical inference or its diagnostics in physics: likelihoods, binned and unbinned fits, template fits, fits of model parameters to published data points with their covariance (stating when no shipped tool covers the model), frequentist intervals and limits (Neyman, Feldman-Cousins, CLs, profile likelihood, asymptotics), Bayesian posteriors (priors, samplers, convergence), significance and look-elsewhere effects, low or zero counts, nuisance parameters, covariance assembly and validation, unfolding with regularization and coverage, fits that use a folded prediction, toys and Asimov datasets, goodness of fit, model comparison, and combinations across datasets or experiments. Load it first even for a quick interval, limit or fit, and for inference outside v1 (for example cosmic-ray propagation fits), where it says what it cannot cover. Not for: producing missing physics inputs (hep-analysis, detector-response, hep-theory); selections (hep-analysis); predictions (hep-theory)."
+description: "Use when the deliverable is a statistical inference or its diagnostics in physics: likelihoods, binned and unbinned fits, template fits, fits of model parameters to published data points with their covariance (stating when no shipped tool covers the model), frequentist intervals and limits (Neyman, Feldman-Cousins, CLs, profile likelihood, asymptotics), Bayesian posteriors (priors, samplers, convergence), significance and look-elsewhere effects, low or zero counts, nuisance parameters, covariance assembly and validation, unfolding with regularization and coverage, fits that use a folded prediction, toys and Asimov datasets, goodness of fit, model comparison, and combinations across datasets or experiments. Load it first even for a quick interval, limit or fit, and for inference outside v1 (for example cosmic-ray propagation fits), where it says what it cannot cover. Not for: producing missing physics inputs (hep-measurement, hep-detector, hep-theory); selections (hep-measurement); predictions (hep-theory)."
 ---
 
 # hep-statistics: inference
@@ -63,4 +63,4 @@ Start at the [core/stats guide](references/core-stats-guide.md): its reference i
 
 ## Handoffs
 
-Missing systematic or correlation evidence: hep-analysis, detector-response (`unresolved_inputs`); theory-uncertainty prescriptions: hep-theory; toy campaigns, batch jobs: hep-computing; reporting: research-communication; SBI, neural likelihoods: physics-ml.
+Missing systematic or correlation evidence: hep-measurement, hep-detector (`unresolved_inputs`); theory-uncertainty prescriptions: hep-theory; toy campaigns, batch jobs: hep-computing; reporting: hep-communication; SBI, neural likelihoods: hep-ml.

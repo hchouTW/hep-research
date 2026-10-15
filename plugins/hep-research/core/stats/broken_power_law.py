@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The one broken-power-law parametrization of the plugin (STH Q8).
 
-Used by skills/hep-analysis/scripts/cr_spectrum_powerlaw_fit.py and skills/hep-statistics/scripts/covariance_fit.py,
+Used by skills/hep-measurement/scripts/cr_spectrum_powerlaw_fit.py and skills/hep-statistics/scripts/covariance_fit.py,
 so both tools give the same model value for the same parameters:
 
     ln F(x) = ln A - gamma1 (u - h(u)) - gamma2 h(u),   u = ln(x / x_b)

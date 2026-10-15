@@ -1,6 +1,6 @@
 # Calibration, Monte Carlo, and Systematic Uncertainties
 
-> Method owner: [detector-response](../../../../../skills/detector-response/SKILL.md) defines the general method (calibration, simulation and response systematics). This module records how AMS-02 analyses apply it. Where a general statement here differs from the owner, the owner's text applies.
+> Method owner: [hep-detector](../../../../../skills/hep-detector/SKILL.md) defines the general method (calibration, simulation and response systematics). This module records how AMS-02 analyses apply it. Where a general statement here differs from the owner, the owner's text applies.
 
 ## When to read this file
 

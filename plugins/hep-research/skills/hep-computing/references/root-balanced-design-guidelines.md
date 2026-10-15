@@ -6,7 +6,7 @@ hep-computing reference shares. General C++ design (classes, structs, RAII, owne
 checklist in [C++ guidelines](cpp-balanced-design-guidelines.md); Python is in
 [Python guidelines](python-balanced-design-guidelines.md) and [Python HEP coding](python-hep-coding-patterns.md),
 Bash in [Bash guidelines](bash-balanced-design-guidelines.md). Not the statistical treatment of pipelines: see
-[Data pipelines](../../hep-analysis/references/data-pipelines.md). Follow established repository conventions when
+[Data pipelines](../../hep-measurement/references/data-pipelines.md). Follow established repository conventions when
 they intentionally differ from this reference.
 
 Conventions used in every example, decided once here (and in the C++ guidelines, which link back):
@@ -644,7 +644,7 @@ h.Sumw2();  // before filling manually with weights
 
 Use explicit axis titles and units; check entries and integrals before scaling,
 dividing, or fitting; state the underflow/overflow policy when reporting
-integrals. See [Histograms and uncertainties](../../hep-analysis/references/histograms-efficiencies.md) for
+integrals. See [Histograms and uncertainties](../../hep-measurement/references/histograms-efficiencies.md) for
 the statistical treatment of sumw/sumw2 and covariance.
 
 ### Plotting
@@ -659,8 +659,8 @@ c.SaveAs("plot.pdf");
 
 Include luminosity, sqrt(s), and region/channel labels; use ratio panels for
 data/MC; mask blinded data in both the main panel and any ratio (real inputs arrive already blinded; see
-[Analysis design](../../hep-analysis/references/analysis-design.md) for blinding rules and
-[Histograms and uncertainties](../../hep-analysis/references/histograms-efficiencies.md) for ratio/pull
+[Analysis design](../../hep-measurement/references/analysis-design.md) for blinding rules and
+[Histograms and uncertainties](../../hep-measurement/references/histograms-efficiencies.md) for ratio/pull
 statistics).
 
 ## Design Checklist

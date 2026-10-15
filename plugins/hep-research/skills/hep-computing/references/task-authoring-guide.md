@@ -179,7 +179,7 @@ task:
 - "Turn this bug report into an implementation-ready task doc."
 - "Draft a research task investigating whether we can deduplicate the C++
   design guidelines shared between two skills."
-- "Generate a canonical `examples/` entry for the `hep-analysis` skill contrasting a
+- "Generate a canonical `examples/` entry for the `hep-measurement` skill contrasting a
   weak vs. expert systematics writeup." (Contrast archetype)
 - "Walk the cart-total discount-code bug report through a full triage-to-verified-fix
   trajectory for `hep-computing/examples/`." (Execution Trajectory archetype)
@@ -187,7 +187,7 @@ task:
   feature-flagged rollout." (Gated Pipeline archetype)
 - "Author a decision-tree example for triaging an ambiguous production incident page."
   (Decision-Tree archetype)
-- "Generate a Grill-Me elicitation example for `hep-analysis` starting from
+- "Generate a Grill-Me elicitation example for `hep-measurement` starting from
   'can you check if there's a signal in this dataset?'" (Elicitation archetype)
 - "Red-team this 'SOTA accuracy' training writeup for leakage or a cherry-picked
   seed." (Adversarial Audit archetype)

@@ -18,7 +18,7 @@
    "explicit_profiles": ["experiment:eic"],
    "needs_profile": true,
    "expected_decision": "use",
-   "expected_owner": "hep-analysis",
+   "expected_owner": "hep-measurement",
    "triggers": ["measurement", "correction chains"],
    "index_row_keyword": "Beam species",
    "expected_eic_files": ["modules/facility/eic-facility-context.md"]
@@ -29,7 +29,7 @@
    "explicit_profiles": ["experiment:eic"],
    "needs_profile": true,
    "expected_decision": "use",
-   "expected_owner": "detector-response",
+   "expected_owner": "hep-detector",
    "triggers": ["tracking", "calorimetry", "particle identification"],
    "index_row_keyword": "ePIC detector concept",
    "expected_eic_files": ["modules/detector/epic-detector-context.md"]
@@ -40,7 +40,7 @@
    "explicit_profiles": [],
    "needs_profile": true,
    "expected_decision": "ask",
-   "expected_owner": "detector-response",
+   "expected_owner": "hep-detector",
    "triggers": ["resolution"],
    "index_row_keyword": "Detector performance",
    "expected_eic_files": [],
@@ -52,7 +52,7 @@
    "explicit_profiles": ["experiment:ams-02"],
    "needs_profile": true,
    "expected_decision": "use",
-   "expected_owner": "detector-response",
+   "expected_owner": "hep-detector",
    "triggers": ["resolution"],
    "index_row_keyword": "",
    "expected_eic_files": []

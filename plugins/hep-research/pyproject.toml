@@ -27,7 +27,7 @@ root-uproot = ["uproot>=5.7,<6", "awkward>=2.14,<3", "PyYAML>=6"]
 columnar = ["coffea>=2026.9", "pyarrow>=20", "uproot>=5.7,<6", "awkward>=2.14,<3"]
 # adapters/hepdata: the optional hepdata_lib engine and the submission check
 hepdata = ["hepdata_lib>=0.21", "hepdata-validator>=0.3.6", "PyYAML>=6"]
-# skills/physics-ml scripts and assets (CPU wheels are enough for the tests)
+# skills/hep-ml scripts and assets (CPU wheels are enough for the tests)
 torch = ["torch>=2.4"]
 # diagram checks need system tools, not Python packages: Graphviz `dot`, the Mermaid CLI `mmdc` (npm) and PlantUML
 diagrams = []

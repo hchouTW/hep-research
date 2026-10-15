@@ -1,4 +1,4 @@
-"""Response artifact semantics and the artifact -> validator adapter (detector-response review 2026-10-12, WP1).
+"""Response artifact semantics and the artifact -> validator adapter (hep-detector review 2026-10-12, WP1).
 
 The review found that contracts/validate.py passed a response with no matrix, with 'conditional_on_selected' and
 inefficiency or acceptance inside the matrix, 'joint_counts' with inefficiency inside, one variable in two units, and
@@ -101,7 +101,7 @@ class ResponseSemanticsTests(unittest.TestCase):
         self.assertTrue(v.validate_artifact(doc, strict=True).ok, v.validate_artifact(doc, strict=True).as_dict())
 
 
-# Contracts 2.8.0 response hardening (detector-response audit DR-WP2-03): one mutation per error rule R1-R6.
+# Contracts 2.8.0 response hardening (hep-detector audit DR-WP2-03): one mutation per error rule R1-R6.
 MUTATIONS_V28 = {
     "R1_intended_use_missing": (lambda e: e.pop("intended_use", None), "response.declaration_missing"),
     "R2_misspelled_key": (lambda e: e.update(intended_usage=e.pop("intended_use", "forward_folding")), "response.misspelled_key"),
@@ -159,7 +159,7 @@ def stamped(doc, version):
 
 
 class ResponseHardeningTests(unittest.TestCase):
-    """Contracts 2.8.0 response hardening (detector-response audit 2026-10-13, DR-WP2): rules R1-R10."""
+    """Contracts 2.8.0 response hardening (hep-detector audit 2026-10-13, DR-WP2): rules R1-R10."""
 
     def test_each_v28_mutation_is_reported_natively(self):
         for name, (fn, code) in MUTATIONS_V28.items():
@@ -322,7 +322,7 @@ class AdapterTests(unittest.TestCase):
 
 
 class AdapterMatrixRefTests(unittest.TestCase):
-    """detector-response audit DR-WP2-04: matrix_ref objects, fragments, folder boundary and unreadable refs."""
+    """hep-detector audit DR-WP2-04: matrix_ref objects, fragments, folder boundary and unreadable refs."""
 
     def setUp(self):
         import tempfile

@@ -242,7 +242,7 @@ def artifacts(pred_doc, gate_res, fold_counts, r, counts, obs_fit, toy_res, crea
     obs = measurement_observable()
     data = dict(base, artifact_id="synthetic-path-d-reco-counts", artifact_type="dataset-record", inputs=[],
                 objective="SYNTHETIC reconstructed cos theta counts generated at mu = 1 (sigma_gen = sigma_pred)",
-                provenance={"producer_skill": "hep-analysis", "created": created}, status=["synthetic"],
+                provenance={"producer_skill": "hep-measurement", "created": created}, status=["synthetic"],
                 extension={"dataset_id": "synthcol:synthetic-path-d-reco-counts", "source_evidence_ids": [], "observable": obs,
                            "data": {"edges": RE.tolist(), "values": counts.tolist(), "unit": "1",
                                     "uncertainties": [{"name": "Poisson counts", "kind": "statistical", "correlation": "uncorrelated"}]},

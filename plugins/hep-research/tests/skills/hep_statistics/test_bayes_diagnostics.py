@@ -13,7 +13,7 @@ PLUGIN = Path(__file__).resolve().parents[3]
 SCRIPT = PLUGIN / "skills" / "hep-statistics" / "scripts" / "bayes_diagnostics.py"
 sys.path.insert(0, str(SCRIPT.parent))
 sys.path.insert(0, str(PLUGIN))
-sys.path.insert(0, str(PLUGIN / "skills" / "hep-analysis" / "scripts"))
+sys.path.insert(0, str(PLUGIN / "skills" / "hep-measurement" / "scripts"))
 
 try:
     import numpy as np
@@ -115,7 +115,7 @@ class Reweighting(unittest.TestCase):
 @unittest.skipUnless(HAVE_NP, "numpy not installed: demonstration sampler unverified")
 class DemoSampler(unittest.TestCase):
     def test_upper_bound_matches_counting_reference(self):
-        from counting_reference import bayesian_upper  # skills/hep-analysis/scripts
+        from counting_reference import bayesian_upper  # skills/hep-measurement/scripts
         exact = bayesian_upper(0, 0.0, 0.95)
         self.assertAlmostEqual(exact, -math.log(0.05), places=5)
         with tempfile.TemporaryDirectory() as tmp:

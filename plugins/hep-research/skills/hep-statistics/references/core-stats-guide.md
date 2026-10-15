@@ -88,7 +88,7 @@ subcommands, inputs and outputs, validation tools outside `core/stats`, publicat
 - **Toy ensembles** (`toy_ensemble.py`, helper, no CLI): every toy study states its ensemble, counts every toy's
   outcome and never pools ensembles; details in the [command reference](core-stats-commands.md#toy-ensembles).
 - **Broken power law** (`broken_power_law.py`, helper, no CLI): one parametrization for `covariance_fit.py` and
-  hep-analysis `cr_spectrum_powerlaw_fit.py` ([conventions](core-stats-commands.md#broken-power-law)).
+  hep-measurement `cr_spectrum_powerlaw_fit.py` ([conventions](core-stats-commands.md#broken-power-law)).
 - **Covariance and correlation matrices** go through one strict Cholesky (`_linalg.py`, private, no CLI). It works
   on the matrix scaled to a unit diagonal, so units never change the verdict. A pivot below -1e-10 is an error
   that names the matrix, a fit refuses a singular matrix, and toy sampling accepts a semi-definite one and records
@@ -126,14 +126,14 @@ without NumPy (and SciPy) with exit 2 and a JSON message, and every script print
 - `combine_measurements.py` (needs NumPy): generalized least squares combination of one observable once the combination plan accepts the inputs (declared cross-dataset blocks, shared auxiliary measurements, no Gaussianized envelope); a worked SYNTHETIC input (two experiments, three bins, a shared luminosity term) is `skills/hep-statistics/assets/combine.example.json`; `combine_asymmetric.py`: Barlow's asymmetric errors.
 - `covariance_fit.py` (needs NumPy and SciPy): fits to published points with their covariance, with the Peelle diagnostics (constant, line, normalized exponential, sharp or smooth broken power law, plug-in `function(theta, x)`); `break-scan`: toy-calibrated break interval and no-break test (no Wilks); `discrete_profile.py` (needs NumPy and SciPy): discrete profiling over a model family; `eft_scan.py` (needs NumPy and SciPy): EFT parameter scans; `pcl_efficiency_ratio.py` (needs NumPy and SciPy), `ratio_estimation.py` (needs NumPy): ratio and efficiency intervals; `sweighted_fit.py` (needs NumPy and SciPy): sWeighted fits with covering uncertainties.
 - `result_artifact.py`: writes a `statistical-result` artifact from a tool's output, with its status label.
-- Inference scripts owned by hep-analysis (read their `--help`). `cr_spectrum_powerlaw_fit.py` fits a single or
+- Inference scripts owned by hep-measurement (read their `--help`). `cr_spectrum_powerlaw_fit.py` fits a single or
   continuous broken power law in log flux (a full covariance, linearized); a free break is calibrated here
   (`break-scan`, `global_significance.py`). `particle_ratio_with_uncertainty.py` gives a ratio or fraction of two yields by the
   delta method with one optional correlation coefficient: with correlated points or bin-to-bin correlated
   systematics use `covariance_fit.py fit` or
   `statistical_toys.py ratio-cov` / `ratio-measured` here, and at low counts an exact construction
   (`pcl_efficiency_ratio.py ratio`, Fieller or Clopper-Pearson). Two different "counting references":
-  `skills/hep-analysis/scripts/counting_reference.py` is a flat-prior Bayesian upper bound with an exactly known
+  `skills/hep-measurement/scripts/counting_reference.py` is a flat-prior Bayesian upper bound with an exactly known
   background (not CLs, no nuisances); the frequentist counting constructions are `core/stats/poisson_diagnostics.py`
   (and `likelihood_limits.py` with an uncertain background). pyhf and Combine starting points: `adapters/pyhf-combine/assets/` (with `pyhf_nuisance_diagnostics.py` for pulls, constraints and impacts); unbinned fits: `adapters/unbinned-fit/assets/unbinned_fit.py`.
 

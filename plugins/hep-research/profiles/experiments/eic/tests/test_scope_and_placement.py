@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PLUGIN = ROOT.parents[2]
 MODULES = sorted(p for p in (ROOT / "modules").rglob("*.md") if p.name != "placement-inventory.md")
 INVENTORY = (ROOT / "modules" / "placement-inventory.md").read_text(encoding="utf-8")
-SKILLS = {"hep-analysis", "detector-response", "hep-theory", "hep-statistics", "hep-computing", "physics-ml", "research-communication"}
+SKILLS = {"hep-measurement", "hep-detector", "hep-theory", "hep-statistics", "hep-computing", "hep-ml", "hep-communication"}
 PLACEMENTS = {"general HEP method", "EIC facility context", "ePIC configuration", "project-local"}
 
 

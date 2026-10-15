@@ -29,7 +29,7 @@
   "sampler": {"type": "object"}, "convergence": {"type": "object"},
   "fit_status": {"type": "string", "enum": ["converged", "failed", "not-run", "converged-with-warnings"]},
   "results": {"type": "object"},
-  "observable_source": {"$comment": "2.8.0 (physics-ml audit WP0.5): what the fitted observable is. kind ml-score: the observable is the output of the ml-artifact named by ml_artifact (an inputs[].ref or artifact_id); the publication gate then validates that artifact",
+  "observable_source": {"$comment": "2.8.0 (hep-ml audit WP0.5): what the fitted observable is. kind ml-score: the observable is the output of the ml-artifact named by ml_artifact (an inputs[].ref or artifact_id); the publication gate then validates that artifact",
    "type": "object", "required": ["kind"], "properties": {
     "kind": {"type": "string", "enum": ["ml-score", "measured-observable", "other"]},
     "ml_artifact": {"type": "string", "minLength": 1}}}

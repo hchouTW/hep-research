@@ -62,22 +62,22 @@ class LayeringTests(unittest.TestCase):
         self.assertViolation(v, "direction", "core/bootstrap.py", 1)
 
     def test_hard_coded_profile_id_in_skill_text(self):
-        v = self.run_case({"skills/hep-analysis/SKILL.md": "# x\n\nAlways use experiment:ams-02 defaults.\n"})
-        self.assertViolation(v, "hard-coded-profile-id", "skills/hep-analysis/SKILL.md", 3)
+        v = self.run_case({"skills/hep-measurement/SKILL.md": "# x\n\nAlways use experiment:ams-02 defaults.\n"})
+        self.assertViolation(v, "hard-coded-profile-id", "skills/hep-measurement/SKILL.md", 3)
 
     def test_profile_path_in_skill_text(self):
-        v = self.run_case({"skills/hep-analysis/scripts/s.py": '"""See <plugin root>/profiles/experiments/foo-1/index.md."""\n'})
-        self.assertViolation(v, "hard-coded-profile-path", "skills/hep-analysis/scripts/s.py", 1)
+        v = self.run_case({"skills/hep-measurement/scripts/s.py": '"""See <plugin root>/profiles/experiments/foo-1/index.md."""\n'})
+        self.assertViolation(v, "hard-coded-profile-path", "skills/hep-measurement/scripts/s.py", 1)
 
     def test_experiment_name_in_skill_text(self):
-        v = self.run_case({"skills/hep-analysis/SKILL.md": "line\nAMS-02 uses rigidity.\n"})
-        self.assertViolation(v, "hard-coded-experiment-name", "skills/hep-analysis/SKILL.md", 2)
+        v = self.run_case({"skills/hep-measurement/SKILL.md": "line\nAMS-02 uses rigidity.\n"})
+        self.assertViolation(v, "hard-coded-experiment-name", "skills/hep-measurement/SKILL.md", 2)
 
     def test_eic_and_epic_names_are_flagged(self):
         md = "intro\nePIC tracking uses silicon.\nEIC beams are polarized.\n"
-        v = self.run_case({"skills/hep-analysis/SKILL.md": md})
-        self.assertViolation(v, "hard-coded-experiment-name", "skills/hep-analysis/SKILL.md", 2)
-        self.assertViolation(v, "hard-coded-experiment-name", "skills/hep-analysis/SKILL.md", 3)
+        v = self.run_case({"skills/hep-measurement/SKILL.md": md})
+        self.assertViolation(v, "hard-coded-experiment-name", "skills/hep-measurement/SKILL.md", 2)
+        self.assertViolation(v, "hard-coded-experiment-name", "skills/hep-measurement/SKILL.md", 3)
 
     def test_lowercase_epic_word_is_not_an_experiment_name(self):
         self.assertEqual(self.run_case({"skills/a/SKILL.md": "An epic derivation, not an experiment.\n"}), [])

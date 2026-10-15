@@ -19,7 +19,7 @@ TH_DIRS = ["models", "derivations", "predictions", "benchmarks", "evidence", "te
 
 def profile(pid, kind, ns, **kw):
     p = {"id": pid, "kind": kind, "version": "1.0.0", "scope": "structural fixture", "exclusions": [],
-         "compatible": {"core": ">=1.0,<2.0", "contracts": ">=2.0,<3.0"}, "related_skills": ["hep-analysis"],
+         "compatible": {"core": ">=1.0,<2.0", "contracts": ">=2.0,<3.0"}, "related_skills": ["hep-measurement"],
          "resources": {"index": "index.md", "conventions": "conventions.json"},
          "vocabulary_extensions": {}, "adapters": {"required": [], "optional": []}, "depends_on": [],
          "evidence_namespace": ns, "maintainer": "fixture", "capabilities": [

@@ -1,6 +1,6 @@
 # ML-Assisted Inference: Validity and Handoff
 
-What has to be shown before a machine-learned quantity enters a likelihood, a test, an interval or a posterior. Training, architecture, data loading and model calibration in the ML sense belong to `physics-ml` (see [scientific-machine-learning.md](../../physics-ml/references/scientific-machine-learning.md) and [uncertainty-and-calibration.md](../../physics-ml/references/uncertainty-and-calibration.md)); this file covers the inferential validity of the scientific claim built on the trained model.
+What has to be shown before a machine-learned quantity enters a likelihood, a test, an interval or a posterior. Training, architecture, data loading and model calibration in the ML sense belong to `hep-ml` (see [scientific-machine-learning.md](../../hep-ml/references/scientific-machine-learning.md) and [uncertainty-and-calibration.md](../../hep-ml/references/uncertainty-and-calibration.md)); this file covers the inferential validity of the scientific claim built on the trained model.
 
 ## Classifier or regressor outputs as observables
 
@@ -36,7 +36,7 @@ For neural posterior or likelihood estimation used in a Bayesian analysis:
 
 - **Simulation-based calibration (SBC).** Draw parameters from the prior, simulate, compute the posterior rank of the true value; ranks must be uniform (Talts et al., arXiv:1804.06788, preprint). Non-uniform ranks reveal over- or under-dispersed or biased posteriors.
 - **Coverage across the prior.** Report coverage as a function of the parameter, not only averaged over the prior; averaging can hide regions where intervals fail.
-- **Simulator mismatch.** SBC tests the estimator against the simulator, not the simulator against nature. Simulator misspecification is a physics-ml and analysis question (`physics-ml` robustness and distribution-shift guidance); here it must appear as a systematic or an explicit limitation.
+- **Simulator mismatch.** SBC tests the estimator against the simulator, not the simulator against nature. Simulator misspecification is a hep-ml and analysis question (`hep-ml` robustness and distribution-shift guidance); here it must appear as a systematic or an explicit limitation.
 - **MCMC on a learned likelihood** still needs the convergence diagnostics in [inference-recipes.md](inference-recipes.md) (R-hat, ESS).
 
 ## Deliverables checklist

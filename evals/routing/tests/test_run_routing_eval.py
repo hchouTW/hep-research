@@ -13,19 +13,19 @@ import run_routing_eval as rre
 
 FAKE = HERE / "fake_claude.py"
 CASES = {"note": "test", "cases": [
-    {"id": "a", "lang": "en", "kind": "direct", "prompt": "ALPHA tag-and-probe", "expected_primary": "detector-response", "trigger_terms": [],
+    {"id": "a", "lang": "en", "kind": "direct", "prompt": "ALPHA tag-and-probe", "expected_primary": "hep-detector", "trigger_terms": [],
      "inputs": {"sub/dir/in.csv": "x,y\n"}},
     {"id": "b", "lang": "de", "kind": "negative", "prompt": "BETA limits", "expected_primary": "hep-statistics", "not": "hep-theory", "trigger_terms": []},
     {"id": "c", "lang": "en", "kind": "direct", "variant": "quick", "prompt": "GAMMA quick", "expected_primary": "hep-theory", "trigger_terms": []},
     {"id": "d", "lang": "en", "kind": "underspecified", "prompt": "DELTA compare", "expected_primary": "ask", "trigger_terms": []},
-    {"id": "e", "lang": "en", "kind": "multi-turn", "prompt": "EPS first", "expected_primary": "physics-ml", "trigger_terms": [],
-     "turns": [{"prompt": "ZETA second", "expected": "hep-analysis", "trigger_terms": []}]},
-    {"id": "f", "lang": "en", "kind": "theory-no-experiment", "prompt": "ETA theory", "expected_primary": "hep-analysis", "profiles": [], "trigger_terms": []},
+    {"id": "e", "lang": "en", "kind": "multi-turn", "prompt": "EPS first", "expected_primary": "hep-ml", "trigger_terms": [],
+     "turns": [{"prompt": "ZETA second", "expected": "hep-measurement", "trigger_terms": []}]},
+    {"id": "f", "lang": "en", "kind": "theory-no-experiment", "prompt": "ETA theory", "expected_primary": "hep-measurement", "profiles": [], "trigger_terms": []},
 ]}
-ROUTES = {"ALPHA": [["hep-research:detector-response"], "ANSWER-ALPHA"], "BETA": [["hep-research:hep-theory", "hep-research:hep-statistics"], "ANSWER-BETA"],
+ROUTES = {"ALPHA": [["hep-research:hep-detector"], "ANSWER-ALPHA"], "BETA": [["hep-research:hep-theory", "hep-research:hep-statistics"], "ANSWER-BETA"],
           "GAMMA": [[], "ANSWER-GAMMA from memory"], "DELTA": [[], "Which two experiments do you mean?"],
-          "EPS": [["hep-research:physics-ml"], "ANSWER-EPS"], "ZETA": [["hep-research:hep-analysis"], "ANSWER-ZETA"],
-          "ETA": [["hep-research:hep-analysis"], "ANSWER-ETA"]}
+          "EPS": [["hep-research:hep-ml"], "ANSWER-EPS"], "ZETA": [["hep-research:hep-measurement"], "ANSWER-ZETA"],
+          "ETA": [["hep-research:hep-measurement"], "ANSWER-ETA"]}
 
 
 class HarnessTests(unittest.TestCase):
@@ -64,7 +64,7 @@ class HarnessTests(unittest.TestCase):
         self.assertEqual(rows["d"]["outcome"], "pass")
         self.assertTrue(rows["d"]["turns"][0]["heuristic"])
         self.assertEqual(rows["e"]["outcome"], "pass")
-        self.assertEqual([t["skills"] for t in rows["e"]["turns"]], [["physics-ml"], ["hep-analysis"]])
+        self.assertEqual([t["skills"] for t in rows["e"]["turns"]], [["hep-ml"], ["hep-measurement"]])
         self.assertTrue(rows["f"]["loading_violation"])
         self.assertEqual(res["summary"]["loading_violations"], ["f"])
         self.assertEqual(res["summary"]["overall"], {"cases": 6, "strict_pass": 4, "lenient_pass": 5})

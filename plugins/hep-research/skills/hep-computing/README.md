@@ -57,10 +57,10 @@ State after the 2026-10 remediation (CMP-08); checked by `tests/skills/test_cli_
 
 | Need | Hand to |
 |---|---|
-| Physics meaning of a numerical result | hep-theory or hep-analysis |
+| Physics meaning of a numerical result | hep-theory or hep-measurement |
 | Statistical interpretation | hep-statistics |
-| Model training issues | physics-ml |
-| Reports, figures, write-ups | research-communication |
+| Model training issues | hep-ml |
+| Reports, figures, write-ups | hep-communication |
 
 ## Tests and validation
 

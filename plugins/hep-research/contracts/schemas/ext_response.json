@@ -1,5 +1,5 @@
 {
- "$comment": "Owner: detector-response. form=parametrized (recasting): axes may be 'not-applicable'; a parametrization with validity range is required. form=matrix: matrix (inline) or matrix_ref. includes / applied_separately use the response_corrections vocabulary (or namespaced terms); contracts.response_adapter converts the extension into core/stats/validate_response.py input.",
+ "$comment": "Owner: hep-detector. form=parametrized (recasting): axes may be 'not-applicable'; a parametrization with validity range is required. form=matrix: matrix (inline) or matrix_ref. includes / applied_separately use the response_corrections vocabulary (or namespaced terms); contracts.response_adapter converts the extension into core/stats/validate_response.py input.",
  "type": "object",
  "required": [
   "truth_axis",

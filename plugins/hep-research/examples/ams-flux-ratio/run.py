@@ -22,7 +22,7 @@ factor from the synthetic tail shape (10% fully correlated uncertainty), subtrac
 checked in the validation band 1.6 <= Q < 1.7 and by Asimov closure.
 
 Blinding (SYNTHETIC policy): the helium signal-region count in the bin 60-100 GV is blinded in both periods. A
-custodian step (skills/hep-analysis/scripts/mask_blinded_bins.py) masks it before the analysis reads the counts; the
+custodian step (skills/hep-measurement/scripts/mask_blinded_bins.py) masks it before the analysis reads the counts; the
 unfolding fills it with the simulated helium expectation and zero variance, so no published number depends on it,
 and the helium flux, the He/p ratio and the period average are null in that bin in every output. The charge sidebands
 and the proton counts stay open. Unblinding is not done here.
@@ -88,7 +88,7 @@ BLIND = {"variable": "rigidity", "low": 60.0, "high": 100.0}  # synthetic blindi
 CRITERIA = {"asimov_max_rel_dev": 1e-9, "toy_mean_pull_abs": 0.2, "toy_pull_width": (0.85, 1.15),
             "reference_rel_agreement": 1e-9, "background_asimov_max_rel_dev": 1e-12, "validation_band_abs_pull": 3.0,
             "validation_band_chi2_p_min": 1e-3, "validation_band_min_predicted": 5.0}
-MASK_SCRIPT = PLUGIN / "skills" / "hep-analysis" / "scripts" / "mask_blinded_bins.py"
+MASK_SCRIPT = PLUGIN / "skills" / "hep-measurement" / "scripts" / "mask_blinded_bins.py"
 
 NB = len(EDGES) - 1
 WIDTH = np.diff(EDGES)
@@ -400,7 +400,7 @@ def artifacts(world, res, created):
            "conventions": {"energy_variable": "rigidity", "ams02:rigidity_definition": "R = pc/(Ze) in GV; p = |Z|R/c; rigidity is not momentum"}}
     spec = dict(base, artifact_id="synthetic-path-a-measurement-spec", artifact_type="measurement-spec",
                 objective="SYNTHETIC Path A: He/p flux ratio per rigidity bin in two synthetic periods",
-                provenance={"producer_skill": "hep-analysis", "created": created, "evidence_ids": ["ams02:C31"]},
+                provenance={"producer_skill": "hep-measurement", "created": created, "evidence_ids": ["ams02:C31"]},
                 status=["synthetic"],
                 extension={"estimand": ("SYNTHETIC: the helium-to-proton flux ratio per rigidity bin (edges above, GV) at top "
                                         "of instrument, separately in each of two synthetic periods, for particles above the "
@@ -450,7 +450,7 @@ def artifacts(world, res, created):
     for sname, pname in ((s, p) for s in SPECIES for p in PERIODS):
         resp[(sname, pname)] = dict(base, artifact_id=f"synthetic-path-a-response-{sname}-{pname}", artifact_type="response",
                            objective=f"SYNTHETIC rigidity migration for {sname}, {pname}", status=["synthetic"],
-                           provenance={"producer_skill": "detector-response", "created": created},
+                           provenance={"producer_skill": "hep-detector", "created": created},
                            extension={"truth_axis": {"name": "rigidity", "unit": "GV", "edges": EDGES.tolist()},
                                       "reco_axis": {"name": "rigidity", "unit": "GV", "edges": EDGES.tolist()},
                                       "orientation": "rows_reco_cols_truth", "normalization": "conditional_on_selected",
@@ -485,7 +485,7 @@ def artifacts(world, res, created):
         r, c = res[("ratio", pname)]
         data[pname] = dict(base, artifact_id=f"synthetic-path-a-ratio-{pname}", artifact_type="dataset-record",
                            objective=f"SYNTHETIC He/p ratio, {pname}, unblinded bins", status=["synthetic"],
-                           provenance={"producer_skill": "hep-analysis", "created": created},
+                           provenance={"producer_skill": "hep-measurement", "created": created},
                            extension={"dataset_id": f"ams02:synthetic-path-a-ratio-{pname}", "source_evidence_ids": [],
                                       "observable": pub_obs, "data": {"edges": pub_edges, "values": r[PUBLISHED].tolist(), "unit": "1",
                                                                   "uncertainties": [{"name": "total", "kind": "statistical", "correlation": "covariance", "covariance_ref": f"results.json#ratio/{pname}/covariance"}]},
@@ -498,8 +498,8 @@ def artifacts(world, res, created):
 
 
 def review_spec(spec, vocab, out):
-    """Verdict-first review draft of the spec with the hep-analysis review script (references/review-and-artifacts.md)."""
-    sys.path.insert(0, str(PLUGIN / "skills" / "hep-analysis" / "scripts"))
+    """Verdict-first review draft of the spec with the hep-measurement review script (references/review-and-artifacts.md)."""
+    sys.path.insert(0, str(PLUGIN / "skills" / "hep-measurement" / "scripts"))
     import review_measurement_spec
     review = review_measurement_spec.draft(spec, vocab)
     (out / "review.md").write_text(review_measurement_spec.markdown(review, spec["artifact_id"], "synthetic"))
@@ -714,7 +714,7 @@ def write_report(out: Path, r: dict) -> None:
         "## Blinding (synthetic policy)",
         "",
         "The helium signal-region count in the bin 60-100 GV is blinded in both periods. A custodian step "
-        "(`skills/hep-analysis/scripts/mask_blinded_bins.py`) masks it before the analysis reads the histograms; the released "
+        "(`skills/hep-measurement/scripts/mask_blinded_bins.py`) masks it before the analysis reads the histograms; the released "
         f"files are {', '.join('`' + f + '`' for f in r['blinding']['released_helium_histograms'].values())}. The unfolding fills the "
         "blinded bin with the simulated helium expectation and zero variance, so no published number depends on its count. "
         "The helium flux, the He/p ratio and the period average are null in that bin in `results.json`, the dataset records stop "
