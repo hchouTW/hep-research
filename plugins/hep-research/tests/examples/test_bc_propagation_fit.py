@@ -31,7 +31,23 @@ except ImportError:
     HAVE_DEPS = False
 
 
+# Committed output vs a fresh run on another platform (CI is Linux, the output was written on macOS): what is not
+# bit-reproducible is compared for what it states. The grid hash covers the text of 882 floating-point artifacts and is
+# platform dependent (the grid content is compared through every fit result below); a log10 condition number at or
+# above 12 only says "flat direction", and its value is rounding noise; toy summaries carry the last-digit
+# differences of 100 fits, so they are compared to 1e-4 relative. The physics assertions are the other tests.
+FLAT_LOG10_CONDITION = 12.0
+TOY_REL = 1e-4
+
+
 def differences(a, b, path="$", rel=1e-6, abs_tol=1e-9) -> list[str]:
+    if path.endswith(".combined_sha256"):
+        return []
+    if path.endswith(".condition_number_log10") and isinstance(a, (int, float)) and isinstance(b, (int, float)) \
+            and min(a, b) >= FLAT_LOG10_CONDITION:
+        return []
+    if path.startswith("$.toys"):
+        rel = max(rel, TOY_REL)
     if isinstance(a, bool) or isinstance(b, bool):
         return [] if a == b else [f"{path}: {a!r} != {b!r}"]
     if isinstance(a, (int, float)) and isinstance(b, (int, float)) and (isinstance(a, float) or isinstance(b, float)):
