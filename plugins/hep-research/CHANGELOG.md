@@ -5,6 +5,22 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+<!-- wp1 -->
+- hep-statistics: `covariance_fit.py fit` model `tabulated-grid`: fits grid parameters (for example D0 and L) to a
+  `dataset-record` from one `prediction` artifact per grid node (`representation: "grid"`, node in `parameter_point`;
+  no schema change). Every prediction passes `contracts/comparison/gate.py` first (ungated or not comparable: exit 1);
+  multilinear interpolation in the fit coordinates (`scale: "log"` or `"linear"`), no extrapolation (a start outside
+  the grid or a minimum beyond its edge is refused); cross-section uncertainty as a rank-one normalization nuisance
+  (`multiplicative`, mode `nuisance`) and/or alternative sets through `model_set()` and `envelope()`, the mode recorded
+  in `cross_section_uncertainty.mode`; degenerate directions from the Fisher matrix reported with eigenvector and
+  condition number and compared with the theory spec's `degenerate_directions` (mismatch: warning); `combinations`
+  such as `D0/L` reported with `sigma_ln`. Tests: `tests/skills/hep_statistics/test_grid_fit.py` (synthetic only).
+  Status: demonstrated on synthetic data (E2, 2026-10-15).
+- `covariance_fit.py`: exit code 3 (`"status": "incomplete"`, `missing`) when a data covariance or an uncertainty
+  correlation is missing; a diagonal matrix is never assumed.
+
+- `covariance_fit.py`: a field of the wrong JSON type now gives exit 2 with a JSON error instead of a traceback.
+
 <!-- ci1 -->
 - CI (batch 1 of the CI improvement proposal, test obligations unchanged): `tools/run_all_checks.py` records seconds for every check, prints failed test ids with their traceback tails (profile suites and `check_ams_optional` included) and writes a Markdown job summary with `--summary FILE`; `--part static` and `--part ams-optional` split `--part checks` so the AMS-optionality check (about 75 % of the old "static and profiles" job) runs as its own CI job. Each units run records its plan (full module list with SHA-256, the shard's modules, the timings digest).
 - CI: new `tools/reconcile_check_runs.py` and required-in-practice `checks-complete` job: every expected checks run (Python 3.11-3.13 × units 1/2, 2/2, static, ams-optional) present once, of the tested commit, passing, with only the host CLI checks skipped, every planned check reported, and the shards partitioning this tree's module list (planned from the same timings); runs after failures (`always()`), and a missing record fails it. Fault-injection tests in `tests/tools/test_reconcile_check_runs.py`. Its first local run caught shards planned from two different timing files (a module in two shards, others in none) at equal test counts.

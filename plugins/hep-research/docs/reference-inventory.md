@@ -11,7 +11,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | detector-response | 35 | 454 | 0 |
 | hep-analysis | 12 | 98 | 0 |
 | hep-computing | 32 | 297 | 0 |
-| hep-statistics | 12 | 166 | 0 |
+| hep-statistics | 12 | 170 | 0 |
 | hep-theory | 11 | 78 | 0 |
 | physics-ml | 38 | 181 | 0 |
 | research-communication | 56 | 400 | 0 |
@@ -165,9 +165,9 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `task-quality-checklist.md` | hep-computing | 3.0 | no | 4 | - | 351029c 2026-10-07 |
 | `validation-and-done.md` | hep-computing | 3.7 | yes | 6 | - | 351029c 2026-10-07 |
 | `astroparticle-statistics.md` | hep-statistics | 11.6 | no | 14 | detector-response, hep-analysis | 386c00a 2026-10-15 |
-| `combinations.md` | hep-statistics | 4.6 | no | 2 | - | 317c39a 2026-10-14 |
-| `core-stats-commands.md` | hep-statistics | 33.5 | no | 5 | detector-response, hep-analysis | d058154 2026-10-13 |
-| `core-stats-guide.md` | hep-statistics | 17.0 | yes | 10 | hep-analysis | cafbc08 2026-10-15 |
+| `combinations.md` | hep-statistics | 4.6 | no | 3 | - | 317c39a 2026-10-14 |
+| `core-stats-commands.md` | hep-statistics | 38.0 | no | 5 | detector-response, hep-analysis | 8a4de6c 2026-10-15 |
+| `core-stats-guide.md` | hep-statistics | 17.0 | yes | 10 | hep-analysis | 443955d 2026-10-15 |
 | `inference-recipes.md` | hep-statistics | 18.2 | no | 9 | detector-response, hep-analysis | 1386866 2026-10-13 |
 | `likelihood-fitting.md` | hep-statistics | 9.5 | no | 7 | detector-response, hep-computing | 4665f43 2026-10-13 |
 | `ml-assisted-inference.md` | hep-statistics | 6.2 | yes | 7 | physics-ml | 06b86c8 2026-10-12 |
@@ -177,7 +177,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `time-series-inference.md` | hep-statistics | 15.5 | yes | 5 | hep-analysis | 386c00a 2026-10-15 |
 | `unfolding.md` | hep-statistics | 7.0 | no | 25 | detector-response, hep-analysis | 11a01b9 2026-10-13 |
 | `amplitudes-and-widths.md` | hep-theory | 8.3 | yes | 1 | - | 83ae4f6 2026-10-13 |
-| `cosmic-ray-propagation.md` | hep-theory | 13.0 | yes | 2 | - | 87ee57c 2026-10-13 |
+| `cosmic-ray-propagation.md` | hep-theory | 13.0 | yes | 8 | - | 87ee57c 2026-10-13 |
 | `dis-kinematics.md` | hep-theory | 5.9 | yes | 4 | - | 9b8406c 2026-10-13 |
 | `event-generation.md` | hep-theory | 9.8 | yes | 4 | detector-response, hep-analysis | a38fad5 2026-10-13 |
 | `higher-order-predictions.md` | hep-theory | 4.2 | yes | 1 | - | 351029c 2026-10-07 |
