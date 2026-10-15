@@ -223,13 +223,18 @@ class PythonFloorTests(unittest.TestCase):
                 mod.main(["--require", "json"])
 
     def test_stricter_minimum_is_kept(self):
+        """A stricter --min-python rejects a 3.13 with its reason and accepts a 3.14, on any runner: both candidates are
+        fakes, so the rejection is checked even when the runner itself is 3.14 or newer."""
+        p313 = fake_version(self.dir, "py313", [3, 13, 1])
         p314 = fake_version(self.dir, "py314", [3, 14, 0])
-        proc, out = run("--require", "json", "--min-python", "3.14", "--python", str(p314), path_dir=self.dir)
+        proc, out = run("--require", "json", "--min-python", "3.14", "--python", str(p313),
+                        env_extra={"HEP_RESEARCH_PYTHON": str(p314)}, path_dir=self.dir)
         self.assertEqual(proc.returncode, 0, proc.stderr)
-        self.assertEqual((out["min_python"], out["python_version"]), ("3.14", "3.14.0"))
-        proc, out = run("--require", "json", "--min-python", "3.14", path_dir=self.dir)
-        if sys.version_info[:2] < (3, 14):
-            self.assertEqual(out["candidates"][0]["reason"], f"Python {'.'.join(map(str, sys.version_info[:3]))} < 3.14")
+        self.assertEqual(out["candidates"][0], {"source": "--python", "path": str(p313), "accepted": False,
+                                                "reason": "Python 3.13.1 < 3.14", "python_version": "3.13.1",
+                                                "executable": "py313"})
+        self.assertEqual((out["min_python"], out["source"], out["python_version"]),
+                         ("3.14", "HEP_RESEARCH_PYTHON", "3.14.0"))
 
 
 if __name__ == "__main__":
