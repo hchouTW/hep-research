@@ -341,7 +341,7 @@ Benchmarks: `<plugin root>/examples/stats-benchmarks/` (coverage grid of the cou
 ## Broken power law
 
 `broken_power_law.py` (helper, no CLI) is the plugin's one parametrization, used by
-`covariance_fit.py` here and by hep-analysis `cr_spectrum_powerlaw_fit.py`, which give identical model values
+`covariance_fit.py` here and by hep-measurement `cr_spectrum_powerlaw_fit.py`, which give identical model values
 (`tests/core/test_stats_broken_power_law.py`). Parameters `[ln A, gamma1, gamma2, ln x_b]`;
 `ln F = ln A - gamma1 (u - h) - gamma2 h`, `u = ln(x / x_b)`, with `h = max(u, 0)` for a sharp break and
 `h = s ln((1 + e^(u/s)) / 2)` for a smooth one: `F = A (x/x_b)^-gamma1` below and `A (x/x_b)^-gamma2` above a
@@ -353,7 +353,7 @@ form written as `[1 + (x/x_b)^(Delta gamma / s)]^s` uses another s and another n
 comparing. The two tools minimize different objectives (chi2 in ln F with the linearized covariance; chi2 in F
 with the full covariance), so on the same points their fits agree to a fraction of sigma (0.17 sigma at most on
 40 seeded toys), and exactly on Asimov points. A sharp break makes the chi2 kinked in ln x_b: start
-`covariance_fit.py fit` from a profiled break (the hep-analysis fit or `break-scan`), not from a guess.
+`covariance_fit.py fit` from a profiled break (the hep-measurement fit or `break-scan`), not from a guess.
 
 ## Fits on a grid of predictions (`tabulated-grid`)
 

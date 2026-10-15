@@ -42,7 +42,7 @@ def _envelope(aid, atype, status):
     return {"contract_version": "2.8.0", "artifact_id": aid, "artifact_type": atype,
             "objective": "SYNTHETIC grid-fit test input", "bindings": {"experiments": [], "theory": []},
             "versions": {"plugin": "0.10.1", "contracts": "2.8.0", "profiles": {}},
-            "provenance": {"producer_skill": "hep-theory" if atype == "prediction" else "hep-analysis",
+            "provenance": {"producer_skill": "hep-theory" if atype == "prediction" else "hep-measurement",
                            "created": "2026-10-15", "evidence_ids": []},
             "inputs": [], "outputs": [], "status": status, "unresolved_inputs": []}
 

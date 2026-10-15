@@ -138,7 +138,7 @@ def prediction(cfg: dict, conventions: dict, overrides: dict | None = None) -> d
         "representation": "numerical",
         "values": {"edges": edges, "values": nominal, "unit": "1"},
         "uncertainties": alts,
-        "allowed_transformations": ["solar modulation (outside this profile; force field in hep-analysis)",
+        "allowed_transformations": ["solar modulation (outside this profile; force field in hep-measurement)",
                                     "rebin (recompute the ln(E/n) average; never merge averaged values)"],
     }
     spec_ref = "derivations/theory-spec.json"

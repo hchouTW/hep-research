@@ -13,7 +13,7 @@ Status: **documented** (guidance; no shipped tool runs a periodogram search or a
 construction below is **demonstrated-on-synthetic-data** by `tests/skills/hep_statistics/test_time_series_covariance.py`
 (synthetic series only; it shows the recipe is internally consistent, not that any experiment's systematics are
 modeled correctly). Which systematic sources are time-independent, and their correlation times, are physics inputs
-from hep-analysis and detector-response; this file never supplies them.
+from hep-measurement and hep-detector; this file never supplies them.
 
 ## Contents
 
@@ -156,8 +156,8 @@ together rather than one at a time:
   `multiplicative` mode `nuisance` fits one common normalization and needs a rank-one relative covariance (constant
   fractions add into one); several sources with different time or rigidity shapes need the `model` mode or explicit
   nuisances in the plug-in. A force-field modulation model is in
-  `<plugin root>/skills/hep-analysis/scripts/solar_modulation_force_field.py`; the physics of the model and its
-  validity range belong to hep-analysis and hep-theory.
+  `<plugin root>/skills/hep-measurement/scripts/solar_modulation_force_field.py`; the physics of the model and its
+  validity range belong to hep-measurement and hep-theory.
 - **Closure first.** Generate synthetic series from known `phi_p` and `theta` with the full covariance, fit them, and
   check bias and pull widths before any fit to data (the skill's injection-and-closure invariant).
 

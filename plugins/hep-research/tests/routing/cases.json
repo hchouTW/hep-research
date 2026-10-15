@@ -2724,7 +2724,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "有人宣稱 AMS-02 的反質子/質子比支持暗物質的解釋，這個結果真的支持這種說法嗎？",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "whether a result supports a claim or interpretation"
    ],
@@ -2856,7 +2856,7 @@
    "lang": "zh-Hant",
    "kind": "neighboring",
    "prompt": "請設計時間相關通量量測的時間分段，以及每個時段的 exposure 與 live time 修正。",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "exposure",
     "live time"
@@ -2909,7 +2909,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Build a literature matrix of the published proton spectral-hardening measurements from AMS-02, PAMELA, CREAM and DAMPE with the break rigidity and its uncertainty.",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "literature matrices and reviews"
    ],
@@ -2954,7 +2954,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "A CRDB entry for the AMS-02 positron flux looks different from what I remember. Which paper is it transcribed from, and what does that paper state?",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "what a paper states"
    ],
@@ -2982,35 +2982,35 @@
    "lang": "en",
    "kind": "neighboring",
    "prompt": "Train an e/p classifier on TRD and ECAL variables and pick a working point for my positron flux measurement.",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "classifiers and regressors",
     "working points"
    ],
-   "not": "hep-analysis",
+   "not": "hep-measurement",
    "set": "WP11",
    "chain": [
-    "physics-ml",
-    "hep-analysis"
+    "hep-ml",
+    "hep-measurement"
    ],
-   "note": "the trained model and working point are physics-ml; the selection and proton-background estimate hand to hep-analysis"
+   "note": "the trained model and working point are hep-ml; the selection and proton-background estimate hand to hep-measurement"
   },
   {
    "id": "wp11-ml-2",
    "lang": "zh-Hant",
    "kind": "neighboring",
    "prompt": "請用 TRD 與 ECAL 的變數訓練電子/質子分類器並選定 working points，之後用在正電子通量量測的事件選擇。",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "working points"
    ],
-   "not": "hep-analysis",
+   "not": "hep-measurement",
    "set": "WP11",
    "chain": [
-    "physics-ml",
-    "hep-analysis"
+    "hep-ml",
+    "hep-measurement"
    ],
-   "note": "the trained model and working point are physics-ml; the selection hands to hep-analysis"
+   "note": "the trained model and working point are hep-ml; the selection hands to hep-measurement"
   },
   {
    "id": "wp11-bound-dm-1",
@@ -3039,7 +3039,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Which is AMS's latest B/C paper?",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "which result is the latest"
    ],
@@ -3054,7 +3054,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "AMS 最新的 B/C 論文是哪一篇？",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "which result is the latest"
    ],
