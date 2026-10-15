@@ -5,6 +5,20 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+<!-- wp2 -->
+- `skills/hep-statistics/references/time-series-inference.md` (documented): inference on **binned** time series:
+  time-bin covariance as statistical + fully correlated time-independent + time-dependent blocks (valid exponential or
+  epoch correlations, positive-definiteness, correlation-time limits, no averaging down, cancellation in ratios,
+  rigidity x time Kronecker structure, Peelle); periodicity against an AR(1) red-noise null fitted with the measurement
+  covariance and why Rayleigh/Z_m^2 (event-level, white noise) do not apply; trials across periods and energy bins by
+  toys of the complete procedure (pattern of `look_elsewhere.py` and `global_significance.py`, which are not periodogram
+  tools; the shipped Gross-Vitells bound is one degree of freedom); joint multi-period fits with one modulation
+  parameter per period, shared parameters and nuisances for time-independent sources via `covariance_fit.py` plug-in.
+  Linked from `SKILL.md` Resources, the core-stats-guide reference index and `astroparticle-statistics.md`.
+- `tests/skills/hep_statistics/test_time_series_covariance.py`: the covariance recipe on a synthetic series
+  (demonstrated-on-synthetic-data); a nearest-neighbour correlation of 0.7 is refused by `validate_covariance.py` as
+  not PSD.
+
 <!-- wp4 -->
 - hep-analysis: `references/cosmic-ray-measurements.md`, an index of cosmic-ray measurement types (absolute flux, flux ratios, isotope ratios, time-dependent flux, rare-event searches) that links existing sections in hep-analysis, detector-response, hep-statistics and research-communication, plus new anisotropy measurement design: estimand (first harmonic, equatorial dipole projection, 3D dipole), directional exposure and its non-uniformity (simulated vs data-driven, east-west method), harmonic and full-sky dipole estimators, partial-sky multipole coupling, amplitude bias, solar/sidereal/anti-sidereal checks, and upper limits on the amplitude with the limit construction handed to hep-statistics (Linsley 1975, Sommers 2001, Billoir & Deligny 2008, Ahlers & Mertsch 2017, Compton & Getting 1935, Farley & Storey 1954, Alexandreas et al. 1993, Bonino et al. 2011). Linked from `SKILL.md` Resources and the analysis guide's routing table; capability matrix row `documented`.
 
