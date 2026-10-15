@@ -1,0 +1,72 @@
+[
+ {
+  "id": "helmod:C01",
+  "claim": "For a spherically symmetric heliosphere with a separable diffusion coefficient and negligible streaming, J(r, E, t) / (E^2 - E_0^2) = J(infinity, E + Phi) / ((E + Phi)^2 - E_0^2), with E the total energy, E_0 the rest energy and, for kappa_2 proportional to rigidity, Phi = |Z| e phi(r, t).",
+  "claim_types": ["formula"],
+  "support_kind": "reference formula",
+  "evidence_status": "public-fact",
+  "source_ids": ["helmod:S01"],
+  "location": "Sec. III, Eqs. (15)-(16), pp. 1015-1016",
+  "scope": {"text": "force-field approximation; steady state; spherical symmetry"},
+  "limitations": "restated from the repository record of 2026-10-13; the zero-streaming equation is written in this profile's own notation (derive.py), not copied equation by equation",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-15"
+ },
+ {
+  "id": "helmod:C02",
+  "claim": "phi is a single parameter describing the modulation and has the units of a potential (a fitted shift of -80 MV is quoted; Fig. 2 abscissa in BV).",
+  "claim_types": ["formula"],
+  "support_kind": "reference definition",
+  "evidence_status": "public-fact",
+  "source_ids": ["helmod:S01"],
+  "location": "Eq. (13), p. 1014; p. 1015; Fig. 2",
+  "scope": {"text": "definition of the modulation potential"},
+  "limitations": "restated from the repository record of 2026-10-13",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-15"
+ },
+ {
+  "id": "helmod:C03",
+  "claim": "The force-field approximation breaks down below about 300 MeV per nucleon for protons and 250 MeV per nucleon for alpha particles, where streaming is no longer negligible.",
+  "claim_types": ["numeric"],
+  "support_kind": "reference statement",
+  "evidence_status": "public-fact",
+  "source_ids": ["helmod:S01"],
+  "location": "p. 1016",
+  "scope": {"text": "protons and alpha particles; other species not stated"},
+  "limitations": "approximate thresholds as stated by the authors for their model; not a sharp boundary",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-15"
+ },
+ {
+  "id": "helmod:C04",
+  "claim": "Per nucleon, E^TOA / A = E^IS / A - (|Z| / A) phi and J^TOA(E^TOA) = (p^TOA / p^IS)^2 J^IS(E^IS), with J the flux per kinetic energy per nucleon and phi of the dimension of rigidity.",
+  "claim_types": ["formula"],
+  "support_kind": "reference formula",
+  "evidence_status": "public-fact",
+  "source_ids": ["helmod:S02"],
+  "location": "Sec. 2.1, Eq. (1)",
+  "scope": {"text": "force field in kinetic energy per nucleon"},
+  "limitations": "restated from the repository record of 2026-10-13",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-15"
+ },
+ {
+  "id": "helmod:C05",
+  "claim": "The force field does not allow for any rigidity dependent effects and cannot predict the time dependence of the potential; studies often use different phi for positive and negative charges to allow charge-sign effects; phi is degenerate with injection and transport parameters.",
+  "claim_types": ["general_method"],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": ["helmod:S03"],
+  "location": "Sec. I, around Eq. (1), pp. 1-2",
+  "scope": {"text": "limits of the force-field approximation"},
+  "limitations": "restated from the repository record of 2026-10-13; the drift and charge-sign models themselves were not read",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-15"
+ }
+]

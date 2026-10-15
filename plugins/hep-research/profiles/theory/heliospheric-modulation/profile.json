@@ -1,0 +1,88 @@
+{
+ "id": "theory:heliospheric-modulation",
+ "kind": "theory-domain",
+ "version": "0.1.0",
+ "scope": "Solar (heliospheric) modulation of galactic cosmic rays in the force-field approximation, by reference to the hep-measurement force-field script (not reimplemented): the force-field solution derived and checked in SymPy, its validity range and known limits with sources, and a closed-form benchmark of a power-law local interstellar spectrum modulated in total kinetic energy, kinetic energy per nucleon and rigidity against the script. Convection-diffusion, drift and 1D-3D numerical models, the neutron-monitor link and multi-period phi fits are documented only.",
+ "exclusions": [
+  "Any numerical heliospheric transport, drift, or charge-sign dependent modulation model (documented, not run)",
+  "Reconstruction of phi from neutron monitors or any published phi series",
+  "Fitted values of phi; fits over periods belong to hep-statistics (time-series inference)",
+  "Source terms (dark matter, pulsars) and galactic propagation; geomagnetic cutoffs; transients (Forbush decreases, solar energetic particles)",
+  "Any experiment, detector, data or blinding field; no comparison with measured fluxes"
+ ],
+ "compatible": {
+  "core": ">=1.0,<2.0",
+  "contracts": ">=2.6,<3.0"
+ },
+ "related_skills": [
+  "hep-theory",
+  "hep-measurement",
+  "hep-statistics"
+ ],
+ "resources": {
+  "index": "index.md",
+  "conventions": "conventions.json",
+  "model": "models/heliospheric-modulation-models.md",
+  "derivation": "derivations/derivation-record.md",
+  "theory_spec": "derivations/theory-spec.json",
+  "predictions": "predictions/",
+  "benchmarks": "benchmarks/",
+  "evidence": "evidence/"
+ },
+ "vocabulary_namespaces": [
+  "helmod"
+ ],
+ "vocabulary_extensions": {
+  "conventions": [
+   "helmod:modulation_model",
+   "helmod:observable"
+  ]
+ },
+ "adapters": {
+  "required": [],
+  "optional": []
+ },
+ "depends_on": [],
+ "evidence_namespace": "helmod",
+ "maintainer": "hchouTW",
+ "capabilities": [
+  {
+   "name": "force-field-derivation",
+   "status": "demonstrated-on-synthetic-data",
+   "scope": "SymPy: F(T + |Z| phi) solves the zero-streaming equation with kappa proportional to rigidity, the characteristic invariant, the p^2 flux relation, the power-law closed forms in three energy kinds and their limits (analytic derivation, not formal proof)",
+   "tests": [
+    "tests/test_derivation.py",
+    "tests/test_missing_dependency.py"
+   ]
+  },
+  {
+   "name": "power-law-closed-form-benchmark",
+   "status": "demonstrated-on-synthetic-data",
+   "scope": "the hep-measurement force-field script (run as a process) against the closed forms: 90 synthetic points, 2 species, phi 0-1 GV, Ek_total, Ek_per_nucleon, rigidity, relative tolerance 1e-10; phi = 0 and demodulate round trip",
+   "tests": [
+    "tests/test_benchmark.py",
+    "tests/test_convention_mismatch.py"
+   ]
+  },
+  {
+   "name": "validity-and-limits",
+   "status": "documented",
+   "scope": "low-energy breakdown (about 300 MeV/n protons, 250 MeV/n alpha), no rigidity-dependent, time-dependent or charge-sign effects, phi-LIS degeneracy; sources read 2026-10-13 (models/heliospheric-modulation-models.md)"
+  },
+  {
+   "name": "other-modulation-models",
+   "status": "documented",
+   "scope": "convection-diffusion transport, drift and 1D-3D numerical models named and contrasted with the force field; none implemented or run; unverified context"
+  },
+  {
+   "name": "neutron-monitor-link",
+   "status": "documented",
+   "scope": "phi time series reconstructed from neutron monitors depend on the assumed LIS; unverified context, no method or series opened"
+  },
+  {
+   "name": "multi-period-phi-fits",
+   "status": "documented",
+   "scope": "by reference to skills/hep-statistics/references/time-series-inference.md (joint fits of several periods); this profile supplies conventions and validity"
+  }
+ ]
+}

@@ -91,6 +91,7 @@
   "profiles/registry.json",
   "profiles/theory/cr-secondary-antiprotons/profile.json",
   "profiles/theory/cr-secondary-ratio/profile.json",
+  "profiles/theory/heliospheric-modulation/profile.json",
   "profiles/theory/higgs-bb-width/profile.json",
   "profiles/theory/qcd-r-ratio/profile.json",
   "profiles/theory/qed-benchmark/profile.json"

@@ -1,0 +1,33 @@
+{
+ "label": "theory:heliospheric-modulation force field and power-law closed forms (SymPy 1.14.0)",
+ "status": "analytic-derivation",
+ "assumptions": [
+  "zero radial streaming (force-field equation), spherical symmetry, steady state",
+  "diffusion coefficient separable and proportional to rigidity: kappa = kappa_1(r) beta R",
+  "phi(r) = int_r^r_b V / (3 kappa_1) dr', phi(r_b) = 0 at the modulation boundary",
+  "J per unit kinetic energy = p^2 f; c = 1, e = 1; phi in GV, Z phi in GeV",
+  "the LIS power law is written in the variable of each energy kind (Ek_total, Ek_per_nucleon, rigidity)"
+ ],
+ "results": {
+  "solution": "f(r, T) = F(T + Z phi(r)); J_TOA(T) = p(T)^2 / p(T + Z phi)^2 J_LIS(T + Z phi)",
+  "closed_forms": {
+   "Ek_total": "A*T*(T + 2*m)/((T + Z*phi)*(T + Z*phi)**gamma*(T + Z*phi + 2*m))",
+   "Ek_per_nucleon": "A*t*(t + 2*m/A_n)/((t + Z*phi/A_n)*(t + Z*phi/A_n)**gamma*(t + Z*phi/A_n + 2*m/A_n))",
+   "rigidity": "A*R**3*Z**3*(Z*phi + sqrt(R**2*Z**2 + m**2))/((sqrt(-m**2 + (Z*phi + sqrt(R**2*Z**2 + m**2))**2)/Z)**gamma*(-m**2 + (Z*phi + sqrt(R**2*Z**2 + m**2))**2)**(3/2)*sqrt(R**2*Z**2 + m**2))"
+  },
+  "high_energy_ratio": "u*(Z*phi*(-gamma - 1) - Z*phi) + 1",
+  "low_energy_slope": "2*A*m*(1/(Z*phi))**gamma/(Z*phi*(Z*phi + 2*m))"
+ },
+ "checks": {
+  "force_field_solution_F_of_T_plus_Z_phi": true,
+  "wrong_sign_F_of_T_minus_Z_phi_fails": true,
+  "T_plus_Z_phi_constant_on_characteristic": true,
+  "p2_equals_T_T_plus_2m_equals_E2_minus_m2": true,
+  "per_nucleon_form_equals_total_energy_relation": true,
+  "rigidity_form_equals_total_energy_relation": true,
+  "rigidity_shift_is_Z_phi_in_kinetic_energy": true,
+  "phi_zero_returns_the_lis": true,
+  "high_energy_ratio_1_minus_gamma_plus_2_Z_phi_over_T": true,
+  "low_energy_flux_linear_in_T": true
+ }
+}

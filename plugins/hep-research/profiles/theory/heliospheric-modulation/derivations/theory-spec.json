@@ -1,0 +1,157 @@
+{
+ "contract_version": "2.9.0",
+ "artifact_id": "helmod-theory-spec-force-field",
+ "artifact_type": "theory-spec",
+ "objective": "Theory spec of force-field solar modulation in theory:heliospheric-modulation, with its validity range, its limits and the power-law closed-form benchmark",
+ "bindings": {
+  "experiments": [],
+  "theory": [
+   {
+    "profile": "theory:heliospheric-modulation",
+    "version": "0.1.0"
+   }
+  ]
+ },
+ "versions": {
+  "plugin": "0.11.0",
+  "contracts": "2.9.0",
+  "profiles": {
+   "theory:heliospheric-modulation": "0.1.0"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-theory",
+  "created": "2026-10-15",
+  "evidence_ids": [
+   "helmod:C01",
+   "helmod:C03",
+   "helmod:C04",
+   "helmod:C05"
+  ]
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "model": {
+   "id": "helmod-force-field",
+   "description": "Force-field approximation of solar modulation: zero radial streaming, spherical symmetry, steady state, diffusion coefficient kappa_1(r) beta R; J_TOA(T) = p(T)^2 / p(T + |Z| phi)^2 J_LIS(T + |Z| phi). Numbers come from the hep-measurement force-field script; the closed forms for a power-law LIS are the benchmark",
+   "family": "heliospheric-modulation"
+  },
+  "domain_profile": "theory:heliospheric-modulation",
+  "assumptions": [
+   "zero radial streaming (force-field equation); spherical symmetry; steady state within a period",
+   "diffusion coefficient separable and proportional to rigidity: kappa = kappa_1(r) beta R",
+   "phi(r) = int_r^r_b V / (3 kappa_1) dr', zero at the modulation boundary r_b",
+   "one modulation potential phi per period; no charge-sign, drift, latitude or transient effects",
+   "LIS given as input (power law in the benchmark, synthetic normalization and index)"
+  ],
+  "conventions": {
+   "unit_system": "natural-HEP with c = 1 and e = 1: energies and momenta in GeV, rigidity in GV, modulation potential phi in GV (|Z| phi in GeV); fluxes per unit of the energy variable of the chosen kind, arbitrary normalization in the benchmark",
+   "hbar_c_one": true,
+   "metric_signature": "not-applicable (no relativistic amplitude is computed)",
+   "coupling_normalization": "not-applicable",
+   "renormalization_scheme": "not-applicable",
+   "scales": "not-applicable (no renormalization or factorization scale); one modulation potential phi per period",
+   "energy_variable": "one of: total kinetic energy T of the nucleus (GeV, shift |Z| phi); kinetic energy per nucleon T/A (GeV/n, shift (|Z|/A) phi) [helmod:C04]; rigidity R = p/|Z| (GV); the LIS power law and the flux are per unit of the same variable",
+   "frame": "heliocentric; LIS at the modulation boundary, TOA at 1 AU",
+   "angle_definition": "not-applicable (isotropic, angle-integrated fluxes)",
+   "spin_treatment": "not-applicable",
+   "mass_approximation": "rest mass of the whole nucleus given by the caller (no particle constants shipped); per-nucleon mass m/A",
+   "helmod:modulation_model": "force field (Gleeson-Axford): zero streaming, spherical symmetry, steady state, diffusion coefficient proportional to rigidity; J_TOA(T) = p(T)^2 / p(T + |Z| phi)^2 J_LIS(T + |Z| phi) [helmod:C01]",
+   "helmod:observable": "differential flux at 1 AU (top of the atmosphere) predicted from a LIS; no charge-sign, drift, latitude or transient effects"
+  },
+  "order": "not-applicable (closed-form solution of the force-field equation, no perturbative expansion)",
+  "parameters": {
+   "phi_gv": [
+    0.0,
+    0.5,
+    1.0
+   ],
+   "lis_normalization": 10000.0,
+   "lis_index": 2.7,
+   "species": [
+    "proton-like",
+    "helium-4-like"
+   ]
+  },
+  "scales": "not-applicable",
+  "derivation_status": "analytic-derivation",
+  "validity_domain": {
+   "kinetic_energy_per_nucleon_gev": "above about 0.30 (protons) and 0.25 (alpha particles) [helmod:C03]; other species not stated",
+   "physics": "steady modulation within a period; charge-sign, drift and transient effects absent [helmod:C05]"
+  },
+  "checks_run": [
+   {
+    "name": "f = F(T + Z phi) solves the force-field equation; F(T - Z phi) does not (SymPy)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "T + Z phi constant along the characteristic (SymPy)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "p^2 = T (T + 2m) = E^2 - m^2, the Gleeson-Axford invariant (SymPy)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "per-nucleon and rigidity closed forms equal the total-energy relation times the Jacobians (SymPy)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "limits: phi -> 0 returns the LIS; ratio 1 - (gamma + 2) Z phi / T at large T; flux linear in T as T -> 0 (SymPy)",
+    "result": "pass",
+    "tolerance": "exact"
+   },
+   {
+    "name": "hep-measurement force-field script vs closed form, 90 synthetic points (2 species, 3 phi, 3 energy kinds)",
+    "result": "pass",
+    "tolerance": 1e-10
+   },
+   {
+    "name": "script demodulate inverts its own modulate (round trip)",
+    "result": "pass",
+    "tolerance": 1e-10
+   },
+   {
+    "name": "units: phi in GV, |Z| phi in GeV with e = 1; flux ratio dimensionless",
+    "result": "pass",
+    "tolerance": "exact"
+   }
+  ],
+  "checks_not_run": [
+   "comparison with a numerical transport solution (with streaming) or a drift model",
+   "comparison with a published modulated spectrum or phi series",
+   "comparison with measured fluxes"
+  ],
+  "references_read": [],
+  "derivation_record": "derivations/derivation-record.md",
+  "inapplicable": [
+   "metric_signature",
+   "coupling_normalization",
+   "renormalization_scheme",
+   "scales",
+   "angle_definition",
+   "spin_treatment",
+   "order"
+  ],
+  "neglected": [
+   "radial streaming (adiabatic and convective terms beyond the force-field limit)",
+   "gradient, curvature and current-sheet drifts (charge-sign dependence)",
+   "latitude dependence and non-spherical heliosphere",
+   "time dependence within a period",
+   "Forbush decreases and solar energetic particle events"
+  ],
+  "degenerate_directions": [
+   "phi vs LIS spectral shape (injection and transport parameters)"
+  ]
+ }
+}

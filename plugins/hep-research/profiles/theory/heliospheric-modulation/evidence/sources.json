@@ -1,0 +1,74 @@
+[
+ {
+  "id": "helmod:S01",
+  "title": "Solar modulation of galactic cosmic rays",
+  "authors": "L.J. Gleeson and W.I. Axford",
+  "year": 1968,
+  "identifiers": {
+   "dois": [],
+   "arxiv_ids": [],
+   "inspire_record_id": null,
+   "url": "https://articles.adsabs.harvard.edu/pdf/1968ApJ...154.1011G",
+   "journal_ref": "ApJ 154 (1968) 1011"
+  },
+  "tier": 1,
+  "verification_level": "page",
+  "verification_date": "2026-10-13",
+  "publication_date": "1968",
+  "data_taking_period": null,
+  "formal_status": "published",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": null,
+  "notes": "Read on 2026-10-13 from the ADS scan for skills/hep-theory/references/cosmic-ray-propagation.md (Secs. I-III, Eqs. (5), (11), (13)-(16)); the claims below restate that record. Not re-opened for this profile (no network approved for WP14)."
+ },
+ {
+  "id": "helmod:S02",
+  "title": "Ghelfi, Barao, Derome and Maurin, A&A 591 (2016) A94 (title not recorded in the repository)",
+  "authors": "C. Ghelfi, F. Barao, L. Derome, D. Maurin",
+  "year": 2016,
+  "identifiers": {
+   "dois": [],
+   "arxiv_ids": [
+    "1511.08650"
+   ],
+   "inspire_record_id": null,
+   "url": null,
+   "journal_ref": "A&A 591 (2016) A94"
+  },
+  "tier": 1,
+  "verification_level": "page",
+  "verification_date": "2026-10-13",
+  "publication_date": "2016",
+  "data_taking_period": null,
+  "formal_status": "published",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": null,
+  "notes": "Sec. 2.1, Eq. (1) read on 2026-10-13 for skills/hep-theory/references/cosmic-ray-propagation.md; not re-opened for this profile (no network approved for WP14). The repository record names the paper by authors, journal and arXiv number only, so no title is quoted."
+ },
+ {
+  "id": "helmod:S03",
+  "title": "Cholis, Hooper and Linden, arXiv:1511.01507v3 (title not recorded in the repository)",
+  "authors": "I. Cholis, D. Hooper, T. Linden",
+  "year": null,
+  "identifiers": {
+   "dois": [],
+   "arxiv_ids": [
+    "1511.01507"
+   ],
+   "inspire_record_id": null,
+   "url": null
+  },
+  "tier": 1,
+  "verification_level": "page",
+  "verification_date": "2026-10-13",
+  "publication_date": null,
+  "data_taking_period": null,
+  "formal_status": "unknown",
+  "supersedes": [],
+  "superseded_by": [],
+  "attribution": null,
+  "notes": "Sec. I, Eq. (1), pp. 1-2 of v3 read on 2026-10-13 for skills/hep-theory/references/cosmic-ray-propagation.md; not re-opened for this profile. Title, year and journal reference are not recorded in the repository, so none is quoted."
+ }
+]
