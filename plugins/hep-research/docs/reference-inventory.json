@@ -1569,7 +1569,7 @@
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "d058154 2026-10-13"
+   "last_commit": "8a4de6c 2026-10-15"
   },
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
@@ -1592,7 +1592,7 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "1909d51 2026-10-13"
+   "last_commit": "8a4de6c 2026-10-15"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
@@ -1773,6 +1773,12 @@
    "lines": 155,
    "linked_from_skill_md": true,
    "cited_by": [
+    "profiles/theory/cr-secondary-antiprotons/README.md",
+    "profiles/theory/cr-secondary-antiprotons/derivations/derivation-record.md",
+    "profiles/theory/cr-secondary-antiprotons/evidence/claims.json",
+    "profiles/theory/cr-secondary-antiprotons/evidence/sources.json",
+    "profiles/theory/cr-secondary-antiprotons/index.md",
+    "profiles/theory/cr-secondary-antiprotons/scripts/predict.py",
     "skills/hep-theory/README.md",
     "skills/hep-theory/SKILL.md"
    ],

@@ -163,8 +163,8 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `validation-and-done.md` | hep-computing | 3.7 | yes | 6 | - | 351029c 2026-10-07 |
 | `astroparticle-statistics.md` | hep-statistics | 11.3 | no | 12 | detector-response, hep-analysis | 33d96a1 2026-10-13 |
 | `combinations.md` | hep-statistics | 4.6 | no | 2 | - | 317c39a 2026-10-14 |
-| `core-stats-commands.md` | hep-statistics | 38.0 | no | 5 | detector-response, hep-analysis | d058154 2026-10-13 |
-| `core-stats-guide.md` | hep-statistics | 17.0 | yes | 10 | hep-analysis | 1909d51 2026-10-13 |
+| `core-stats-commands.md` | hep-statistics | 38.0 | no | 5 | detector-response, hep-analysis | 8a4de6c 2026-10-15 |
+| `core-stats-guide.md` | hep-statistics | 17.0 | yes | 10 | hep-analysis | 8a4de6c 2026-10-15 |
 | `inference-recipes.md` | hep-statistics | 18.2 | no | 8 | detector-response, hep-analysis | 1386866 2026-10-13 |
 | `likelihood-fitting.md` | hep-statistics | 9.5 | no | 6 | detector-response, hep-computing | 4665f43 2026-10-13 |
 | `ml-assisted-inference.md` | hep-statistics | 6.2 | yes | 7 | physics-ml | 06b86c8 2026-10-12 |
@@ -173,7 +173,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `statistical-tools.md` | hep-statistics | 9.6 | no | 3 | physics-ml | 578c12f 2026-10-13 |
 | `unfolding.md` | hep-statistics | 7.0 | no | 23 | detector-response, hep-analysis | 11a01b9 2026-10-13 |
 | `amplitudes-and-widths.md` | hep-theory | 8.3 | yes | 1 | - | 83ae4f6 2026-10-13 |
-| `cosmic-ray-propagation.md` | hep-theory | 13.0 | yes | 2 | - | 87ee57c 2026-10-13 |
+| `cosmic-ray-propagation.md` | hep-theory | 13.0 | yes | 8 | - | 87ee57c 2026-10-13 |
 | `dis-kinematics.md` | hep-theory | 5.9 | yes | 4 | - | 9b8406c 2026-10-13 |
 | `event-generation.md` | hep-theory | 9.8 | yes | 4 | detector-response, hep-analysis | a38fad5 2026-10-13 |
 | `higher-order-predictions.md` | hep-theory | 4.2 | yes | 1 | - | 351029c 2026-10-07 |
