@@ -14,8 +14,12 @@ runs 0 tests, because the test packages have empty `__init__.py` files.
 
 Tests come in two tiers. The fast tier is the default. `HEP_SLOW_TESTS=1` adds the slow tier (for example the full
 Feldman-Cousins tables, the 10,000-mutation contract fuzz and the full theory-comparison example). `run_all_checks.py`
-runs each test module in its own process with a time limit (`--module-timeout`, default 600 s) and records every
-module's duration; a fast-tier module listed under `slow_modules` (over 60 s) belongs in the slow tier. Modules start
+runs each test module in its own process with a time limit (`--module-timeout`, default 600 s, or the
+`HEP_MODULE_TIMEOUT` environment variable) and records every module's duration. The slow tier needs more:
+`tests.examples.test_stats_benchmarks` alone takes about 525-545 s there and timed out under parallel load, so the
+weekly `latest` CI job, which runs the slow tier, sets `HEP_MODULE_TIMEOUT=1800`; do the same for a local slow-tier
+run (`HEP_SLOW_TESTS=1 HEP_MODULE_TIMEOUT=1800 python3 tools/run_all_checks.py`) rather than reducing toys, seeds or
+tolerances. A fast-tier module listed under `slow_modules` (over 60 s) belongs in the slow tier. Modules start
 slowest first, using the durations recorded in `tools/module_timings.json`. CI splits the run into parallel jobs:
 `--part units --shard K/N` runs one of N shards of the test modules, balanced by those durations, `--part static`
 runs the profile suites and the static and host checks, and `--part ams-optional` runs `tools/check_ams_optional.py`

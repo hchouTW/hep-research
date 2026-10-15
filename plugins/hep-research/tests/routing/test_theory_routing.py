@@ -32,8 +32,8 @@ class OwnershipTests(unittest.TestCase):
         self.assertRegex(theory, r"fits and limits \(hep-statistics\)")
         self.assertRegex(theory, r"manuscripts \(hep-communication\)")
         self.assertRegex(stats, r"predictions \(hep-theory\)")
-        self.assertRegex(comm, r"hep-theory \(derivations\)")
-        self.assertRegex(comm, r"hep-statistics \(fits, limits\)")
+        self.assertRegex(comm, r"hep-theory \(derivations[,)]")
+        self.assertRegex(comm, r"hep-statistics \(fits, limits[,)]")
 
 
 class ReferenceRoutingTests(unittest.TestCase):

@@ -87,6 +87,8 @@ sigma_js (effective, cumulative) and inelastic sigma_i; 1/lambda_i = sigma_i / m
 
 ## Checks not run
 
-Formal proof; comparison with a published numerical B/C benchmark (open question B1); comparison with any
+Formal proof; comparison with a published numerical B/C benchmark (open question B1: the search of 2026-10-15 found
+no B/C or grammage printed in a table for inputs this profile can reproduce; record in
+`benchmarks/external-benchmark-search.json`, claim `crsr:C06`); comparison with any
 propagation code; comparison with measured data; energy-dependent cross sections; any model term excluded in
 `profile.json`.

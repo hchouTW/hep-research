@@ -13,7 +13,8 @@ and transport values are ILLUSTRATIVE.
 | Stored prediction artifact | `predictions/bc-benchmark.prediction.json` (regenerate with `scripts/make_artifacts.py`) |
 | Benchmark: closed forms vs the profile's numerical solutions | `scripts/predict.py --benchmark`; settings `benchmarks/bc-benchmark.json` |
 | Cross-section sets (inputs, model alternatives) | `models/xs-illustrative-A.json`, `models/xs-illustrative-B.json` |
-| References and what is attributed to them (not opened) | `evidence/sources.json`, `evidence/claims.json` |
+| References and what is attributed to them (read level per source) | `evidence/sources.json`, `evidence/claims.json` |
+| External benchmark (B1): open; search record and reasons | `benchmarks/external-benchmark-search.json` |
 
 Conventions: `conventions.json`. The level `crsr:local-interstellar` is this profile's vocabulary: validate its
 artifacts with `contracts/validate.py <artifact> --profiles-from <project config binding theory:cr-secondary-ratio>`.

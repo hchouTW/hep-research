@@ -13,7 +13,8 @@
 #   optional-* the same unit tests with pyhf, uproot + awkward, hepdata_lib + hepdata-validator, PyTorch (CPU) or ROOT; they may fail without
 #              blocking a merge for now, but their results are shown on the run
 #   release-manifests  published release bundles unchanged (C10); required
-#   latest     weekly and on demand: the latest releases (no lock) and the slow tier (HEP_SLOW_TESTS=1)
+#   latest     weekly and on demand: the latest releases (no lock) and the slow tier (HEP_SLOW_TESTS=1), with a
+#              1800 s module limit (HEP_MODULE_TIMEOUT): the slowest slow-tier module takes about 545 s alone
 # Actions are pinned to commit SHAs; the comment names the release. pip downloads are cached (setup-python, keyed on
 # the lock file); a cache hit only saves downloads: the pinned set is installed and every test runs on every run.
 name: tests
@@ -244,6 +245,9 @@ jobs:
       - name: Unit tests including the slow tier
         env:
           HEP_SLOW_TESTS: "1"
+          # tests.examples.test_stats_benchmarks alone takes about 525-545 s in the slow tier, near the default 600 s
+          # per-module limit; under parallel load it timed out. A larger limit, not fewer toys or looser tolerances.
+          HEP_MODULE_TIMEOUT: "1800"
         run: python tools/run_all_checks.py --no-cli --jobs 4 --out ../../check-runs
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         if: always()

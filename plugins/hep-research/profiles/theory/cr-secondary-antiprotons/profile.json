@@ -2,13 +2,13 @@
  "id": "theory:cr-secondary-antiprotons",
  "kind": "theory-domain",
  "version": "0.1.0",
- "scope": "Narrow cosmic-ray theory domain: the secondary antiproton source term q(T_pbar) = sum_ij 4 pi n_j int phi_i dsigma_ij/dT dT_i for the channels pp, pHe, Hep and HeHe, with the antineutron and hyperon factor (2 + Delta_IS + 2 Delta_Lambda) and alternative cross-section sets as model alternatives, following the conventions of the hep-theory cosmic-ray reference. The shipped cross sections are a TOY x-scaling form with ILLUSTRATIVE values, chosen because the source integral then has a closed form (incomplete beta functions) that benchmarks the profile's numerical integration; no published parametrization is reproduced, and no published source-term value is used (open question B2). model.family is a source term, not a propagation family.",
+ "scope": "Narrow cosmic-ray theory domain: the secondary antiproton source term q(T_pbar) = sum_ij 4 pi n_j int phi_i dsigma_ij/dT dT_i for the channels pp, pHe, Hep and HeHe, with the antineutron and hyperon factor (2 + Delta_IS + 2 Delta_Lambda) and alternative cross-section sets as model alternatives, following the conventions of the hep-theory cosmic-ray reference. The shipped cross sections are a TOY x-scaling form with ILLUSTRATIVE values, chosen because the source integral then has a closed form (incomplete beta functions) that benchmarks the profile's numerical integration; an external benchmark (B2) reproduces the pp source term of Table VI of di Mauro et al. 2014 with that paper's own closed-form parametrizations, which are used for the benchmark only. model.family is a source term, not a propagation family.",
  "exclusions": [
-  "Published antiproton cross-section parametrizations and their fitted rescaling functions; energy-dependent Delta_IS or Lambda-bar/pbar",
+  "Published antiproton cross-section parametrizations as nominal inputs (the di Mauro et al. 2014 pp forms serve the external benchmark only) and fitted nuclear rescaling functions; energy-dependent Delta_IS or Lambda-bar/pbar",
   "Projectiles or targets heavier than helium; tertiary antiprotons; nuclear threshold lowering",
   "Propagation of the source term, solar modulation, and any comparison with measured antiproton fluxes",
   "Any experiment, detector, data or blinding field; no external program run",
-  "Claims that the illustrative values describe the Galaxy, and comparison with published source-term values (B2 open)"
+  "Claims that the illustrative values describe the Galaxy; published source terms beyond the pp channel of di Mauro et al. 2014 Table VI (the spline, Tan & Ng and Duperray et al. columns and three entries are documented, not reproduced)"
  ],
  "compatible": {
   "core": ">=1.0,<2.0",
@@ -28,7 +28,8 @@
   "predictions": "predictions/",
   "benchmarks": "benchmarks/",
   "evidence": "evidence/",
-  "cross_sections": "models/xs-toy-A.json"
+  "cross_sections": "models/xs-toy-A.json",
+  "published_cross_sections": "models/xs-dimauro2014-pp.json"
  },
  "vocabulary_namespaces": [
   "crpb"
@@ -65,9 +66,17 @@
   {
    "name": "source-term-benchmark",
    "status": "demonstrated-on-synthetic-data",
-   "scope": "internal benchmark: the profile's numerical quadrature against the closed form for four channels, power-law and broken power-law primaries, energies on both sides of the threshold (1e-8), and a hand-computed point (1e-10); no published source-term value (B2 open)",
+   "scope": "internal benchmark: the profile's numerical quadrature against the closed form for four channels, power-law and broken power-law primaries, energies on both sides of the threshold (1e-8), and a hand-computed point (1e-10)",
    "tests": [
     "tests/test_benchmark.py"
+   ]
+  },
+  {
+   "name": "source-term-external-benchmark",
+   "status": "tested-in-declared-environment",
+   "scope": "external benchmark (B2): the pp source term of di Mauro et al., PRD 90 (2014) 085017, Table VI, recomputed from the same paper's closed forms Eqs. (11)-(13), (B1)-(B2) and its proton flux input; 12 of 15 entries within the paper's own 1-sigma errors (within 2.5% at 5 and 10 GeV), the other 3 and the non-closed-form columns documented, not reproduced (E2, 2026-10-15)",
+   "tests": [
+    "tests/test_published_benchmark.py"
    ]
   },
   {

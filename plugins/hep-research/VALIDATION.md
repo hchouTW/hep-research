@@ -1511,3 +1511,18 @@ out-of-v1 example reads "lattice QCD and its global analyses, EFT global fits" (
 `j12` passed 9/9 and the 34 hep-theory cases plus the propagation and out-of-v1 cases passed 36/39 (misses
 `rc-t3-neg`, `wp11-bound-dm-1`, `wp11-bound-dm-2`). Cases added since the baseline: 86/91. **Not verified here:** a
 full 241-case rerun after the fix; Codex.
+
+## CR-BENCHMARKS-B1-B2 (2026-10-15, E2: Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1, SymPy 1.14.0, macOS 26.5 arm64)
+
+Open questions B1 and B2 of the ams02-skill-upgrade order; network approved for reading papers, tables only (no value
+read off a figure). Every source, version, table and read level is in the profiles' `evidence/` ledgers (access date
+2026-10-15).
+
+| Question | Source | Result |
+|---|---|---|
+| B2, `theory:cr-secondary-antiprotons` | di Mauro, Donato, Goudelis, Serpico, PRD 90 (2014) 085017, arXiv:1408.0288v3, **Table VI** (pp-induced source term at T = 5, 10, 100, 500, 1000 GeV), read in full (`crpb:S02`, claims `crpb:C07`-`C08`); proton flux input from arXiv:1402.0321v2 Sec. 2.3, running text, not a table (`crpb:S05`, `crpb:C09`) | `scripts/published_benchmark.py` implements the paper's closed forms (Eqs. (2), (11)-(13), (A15), (B1)-(B2); Tables III-V, VII) for the benchmark only. Tolerance per entry: the paper's own Table VI 1-sigma error. **12 of 15** entries of the three closed-form columns reproduced (within 2.5% at 5 and 10 GeV, within 6.5% up to 500 GeV); documented, not reproduced: Eq. (11) at 1000 GeV (+9.3% against 6.9%, cause not identified), Eq. (13) at 500 and 1000 GeV (depends on the unstated upper limit of the projectile-energy integral), and the spline, Tan & Ng and Duperray et al. columns. `tests/test_published_benchmark.py` (12 tests, including a wrong flux index that must fail). Korsmeier et al. 2018 (1802.03030v2) and Winkler 2017 (1701.04866v1) tabulate no source term (`crpb:C11`) |
+| B1, `theory:cr-secondary-ratio` | Jones et al. 2001 (astro-ph/0007293v1), Genolini et al. 2015 (1504.03134v2) and 2019 (1904.08917v2), Schroer, Evoli, Blasi 2025 (2502.15115v1): table and figure captions of the arXiv sources; Webber, Villa 2016 (1606.03031v1): PDF text searched for tables | **stays open**: the tables hold fit parameters or cross sections and B/C appears in figures only, so there is no tabulated B/C or grammage for inputs the profile can reproduce. Record and reasons in `benchmarks/external-benchmark-search.json` (claim `crsr:C06`, `tests/test_external_benchmark_search.py`) |
+
+Profile tests: `cr-secondary-antiprotons` 48 pass, `cr-secondary-ratio` 41 pass (`python -m unittest discover -s tests
+-t tests`); both ledgers pass `core/evidence/ledger.py --strict`. **Not verified here:** the journal supplemental
+cross-section tables of 1802.03030; the Tan & Ng and Duperray et al. columns of Table VI; any figure.

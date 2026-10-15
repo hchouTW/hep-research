@@ -1,0 +1,42 @@
+{
+ "label": "PUBLISHED pp -> pbar X invariant cross-section parametrizations of di Mauro, Donato, Goudelis and Serpico, Phys. Rev. D 90 (2014) 085017, arXiv:1408.0288v3: closed forms Eqs. (11), (12), (13) with the inelastic cross section of Eqs. (B1)-(B2); parameter values transcribed from Tables III, IV, V and VII (printed tables, read 2026-10-15). Used only by scripts/published_benchmark.py for the external benchmark; not a nominal set of predict.py.",
+ "illustrative": false,
+ "status": "published-parametrization",
+ "source": "crpb:S02",
+ "claims": ["crpb:C08"],
+ "access_date": "2026-10-15",
+ "units": "E d3sigma/dp3 in mb GeV^-2 c^3 (sigma_in in mb, C_i of the bracket in GeV^-2, p_T in GeV); s in GeV^2",
+ "kinematics": {
+  "x_R": "E*_pbar / E*_pbar,max with E*_pbar,max = (s - 8 m_p^2) / (2 sqrt(s)) (Eqs. (4), (A13))",
+  "s": "2 m_p (E_p + m_p) (text after Eq. (3))",
+  "lab_angle": "cos(theta_max) = [E_pbar (E_p + m_p) - m_p (E_p - 3 m_p)] / [p_pbar p_p] (Eq. (A15)); E*_pbar = gamma_CM (E_pbar - v_CM p_pbar cos(theta)) (Eqs. (A3)-(A4))",
+  "dsigma_dE": "dsigma/dE_pbar = 2 pi p_pbar int_{cos(theta_max)}^{1} E d3sigma/dp3 d(cos theta) (Eq. (2))"
+ },
+ "sigma_in": {
+  "equation": "sigma_in = sigma_tot - sigma_el (Eq. (B1)); each = Z + B log^2(s/s_M) + Y1 (s_M/s)^eta1 - Y2 (s_M/s)^eta2 with B = pi (hbar c)^2 / M^2, s_M = (2 m_p + M)^2 (Eq. (B2)); GeV and mb",
+  "table": "Table VII",
+  "total": {"M": 2.06, "Z": 33.44, "Y1": 13.53, "Y2": 6.38, "eta1": 0.324, "eta2": 0.324},
+  "elastic": {"M": 3.06, "Z": 144.98, "Y1": 2.64, "Y2": 137.27, "eta1": 1.57, "eta2": -4.65e-3}
+ },
+ "parametrizations": {
+  "eq11": {
+   "equation": "sigma_in (1 - x_R)^C1 exp(-C2 x_R) [C3 exp(-C4 p_T) + C5 exp(-C6 p_T^2)]",
+   "fit": "NA49 data only",
+   "table": "Table III",
+   "C": [7.56, 0.245, 0.0164, 2.37, 0.0352, 2.902]
+  },
+  "eq12": {
+   "equation": "sigma_in (1 - x_R)^C1 exp(-C2 x_R) [C3 sqrt(s)^C4 exp(-C5 p_T) + C6 sqrt(s)^C7 exp(-C8 p_T^2)]",
+   "fit": "all data sets of Table I",
+   "table": "Table IV",
+   "C": [4.499, 3.41, 0.00942, 0.445, 3.502, 0.0622, -0.247, 2.576]
+  },
+  "eq13": {
+   "equation": "sigma_in (1 - x_R)^C1 exp(-C2 x_R) |C3 sqrt(s)^C4 exp(-C5 p_T) + C6 sqrt(s)^C7 exp(-C8 p_T^2) + C9 sqrt(s)^C10 exp(-C11 p_T^3)|",
+   "fit": "all data sets of Table I",
+   "table": "Table V",
+   "C": [4.448, 3.735, 0.00502, 0.708, 3.527, 0.236, -0.729, 2.517, -1.822e-11, 3.527, 0.384]
+  }
+ },
+ "not_included": "the spline interpolation, the Tan & Ng and the Duperray et al. evaluations of Table VI (no closed form with parameters in this paper for the first two; for Duperray et al. the paper does not say whether Table VI uses its Table II refit or the original parameters with D1 and D2 exchanged); antineutrons, hyperons, helium channels"
+}
