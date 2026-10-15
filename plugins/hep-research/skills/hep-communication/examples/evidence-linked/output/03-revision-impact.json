@@ -128,8 +128,8 @@
   }
  ],
  "inputs": {
-  "after_sha256": "aa83d797b5a594258b0854f1ab2d06921f1ae8fcc2782befba9ebe51f30af782",
-  "record_sha256": "7b2c1433442a2a85316bc4535dc429bec8fb719dc6e475df6f15fea15c5e3e69"
+  "after_sha256": "38ecaeda9164da898f66a5bfb7cc10356c5f894a588e5853723e1abcbacc4f5b",
+  "record_sha256": "39af6b5fdfce5d8f45986517884adafc87ba012b9069cbda9eca1a975782fe56"
  },
  "note": "impact from recorded identities and the recorded occurrences; a reopened assessment or item is stale, not wrong; whole-manuscript coverage is not claimed",
  "notes": [
@@ -150,7 +150,7 @@
  "scope": {
   "after": "artifacts/comm_v2.json",
   "after_format": "traceability",
-  "after_sha256": "aa83d797b5a594258b0854f1ab2d06921f1ae8fcc2782befba9ebe51f30af782",
+  "after_sha256": "38ecaeda9164da898f66a5bfb7cc10356c5f894a588e5853723e1abcbacc4f5b",
   "before": "artifacts/comm.json",
   "before_format": "traceability",
   "project_root": ".",

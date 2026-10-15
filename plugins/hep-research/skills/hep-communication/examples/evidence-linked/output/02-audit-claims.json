@@ -151,7 +151,7 @@
  "findings": [],
  "handoffs": [],
  "inputs": {
-  "record_sha256": "7b2c1433442a2a85316bc4535dc429bec8fb719dc6e475df6f15fea15c5e3e69"
+  "record_sha256": "39af6b5fdfce5d8f45986517884adafc87ba012b9069cbda9eca1a975782fe56"
  },
  "note": "assessment recorded by its assessor and checked for consistency with the record; whether the evidence supports the wording is the reader's judgment, not established by this audit; wording findings are advisory",
  "notes": [],
