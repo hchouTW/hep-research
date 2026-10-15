@@ -367,12 +367,15 @@ class ReviewFixes2ManuscriptBounds(Manuscript):
 
     def test_scaling_check_rejects_a_quadratic_scan(self):
         """The measurement above is a real regression test: a scan that rereads all earlier text for every line
-        (quadratic) gives a ratio near 16 for 4x the lines and fails the same limit."""
+        (quadratic) gives a ratio near 16 for 4x the lines and fails the same limit.
+
+        The rescan is a Python loop over the earlier lines, so its cost per step is interpreter work and the ratio
+        stays near 16. A str.count over the earlier text ran at a byte rate that grew with the text on a CI runner
+        (ratio 7.4: 0.047 s vs 0.351 s), which made this check flaky."""
         def quadratic(n):
-            text = "".join(f"\\cite{{k{i}}} \\label{{l{i}}} \\ref{{l{i}}}\n" for i in range(n))
-            step = len(text) // n
-            return lambda: [text.count("\\ref", 0, i * step) for i in range(n)]
-        small, large = cpu_seconds(quadratic(2000)), cpu_seconds(quadratic(8000))
+            lines = [f"\\cite{{k{i}}} \\label{{l{i}}} \\ref{{l{i}}}" for i in range(n)]
+            return lambda: [sum(1 for earlier in lines[:i] if "\\ref" in earlier) for i in range(n)]
+        small, large = cpu_seconds(quadratic(1500)), cpu_seconds(quadratic(6000))
         self.assertGreater(scaling_ratio(small, large), LINEAR_RATIO_LIMIT, f"{small:.3f} s, {large:.3f} s")
 
     def test_cpu_clock_ignores_time_off_the_cpu(self):
