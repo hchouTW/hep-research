@@ -1,0 +1,150 @@
+{
+ "contract_version": "2.8.0",
+ "artifact_id": "bcfit-synthetic-data-pseudo",
+ "artifact_type": "dataset-record",
+ "objective": "SYNTHETIC B/C points generated from the profile's prediction at an ILLUSTRATIVE truth point",
+ "bindings": {
+  "experiments": [],
+  "theory": [
+   {
+    "profile": "theory:cr-secondary-ratio",
+    "version": "0.1.0"
+   }
+  ]
+ },
+ "versions": {
+  "plugin": "0.10.1",
+  "contracts": "2.8.0",
+  "profiles": {
+   "theory:cr-secondary-ratio": "0.1.0"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-statistics",
+  "created": "2026-10-15",
+  "evidence_ids": [
+   "crsr:C01",
+   "crsr:C02",
+   "crsr:C04",
+   "crsr:C05"
+  ]
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "dataset_id": "synthetic:bcfit-pseudo",
+  "source_evidence_ids": [],
+  "observable": {
+   "quantity": "ratio",
+   "process": "secondary-to-primary ratio B/C from spallation of C and O on interstellar hydrogen",
+   "species": [
+    {
+     "name": "boron"
+    },
+    {
+     "name": "carbon"
+    }
+   ],
+   "variables": [
+    {
+     "name": "kinetic_energy_per_nucleon",
+     "unit": "GeV/n",
+     "edges": [
+      1.0,
+      1.77827941004,
+      3.16227766017,
+      5.6234132519,
+      10.0,
+      17.7827941004,
+      31.6227766017,
+      56.234132519,
+      100.0,
+      177.827941004,
+      316.227766017,
+      562.34132519,
+      1000.0
+     ]
+    }
+   ],
+   "phase_space": {
+    "definition": "local interstellar ratio at the Galactic mid-plane (z = 0), before solar modulation",
+    "fiducial": false
+   },
+   "level": "crsr:local-interstellar",
+   "frame": "Galactic rest frame (interstellar gas at rest)",
+   "normalization": {
+    "kind": "exposure",
+    "value": "not-applicable",
+    "convention": "ratio of two fluxes at the same E/n; the normalization cancels"
+   },
+   "bin_semantics": "bin-averaged",
+   "unit": "1",
+   "conventions": {
+    "unit_system": "CGS for transport (cm, s, g; D in cm^2/s, n_H in cm^-3, grammage in g/cm^2); lengths L and h given in kpc (1 pc = 648000/pi au); kinetic energy per nucleon in GeV/n; rigidity in GV; cross sections in mb (1 mb = 1e-27 cm^2) [crsr:C05]",
+    "energy_variable": "kinetic energy per nucleon E/n in GeV/n, conserved in fragmentation (straight-ahead); the ratio compares fluxes at the same E/n",
+    "frame": "Galactic rest frame (interstellar gas at rest); observer at the disc mid-plane z = 0",
+    "mass_approximation": "nucleus mass = A x atomic mass unit (0.93149410242 GeV; binding energy neglected), so all species share beta at fixed E/n; rigidity R = (A/|Z|) p_per_nucleon via core/kinematics/relativistic.py; target hydrogen mass m_H = proton mass 1.67262192369e-24 g (electron and binding neglected) [crsr:C05]",
+    "crsr:observable": "B/C = N_B / N_C, interstellar fluxes of an effective single boron species (A = 11, Z = 5) and carbon (A = 12, Z = 6) at the same E/n, at z = 0, before solar modulation",
+    "crsr:cross_sections": "input sets under models/ (xs-*.json): effective cumulative production sigma(j -> B) and inelastic sigma_i on hydrogen, energy independent; the shipped sets are ILLUSTRATIVE placeholders; a choice between sets is a model-alternative uncertainty object",
+    "crsr:bin_average": "a binned value is the ratio averaged uniformly in ln(E/n) over the bin (Gauss-Legendre, 8 nodes), not the ratio of bin-averaged fluxes",
+    "crsr:transport_model": "diffusion-1d: thin disc of half-thickness h and density n_H in a halo |z| < L with N(+-L) = 0, D(R) = D0 beta (R/R0)^delta, no convection, reacceleration, losses or decay; weighted-slab: exponential path-length distribution with mean lambda_esc"
+   },
+   "validity_range": {
+    "variable": "kinetic_energy_per_nucleon",
+    "min": 1.0,
+    "max": 1000.0,
+    "unit": "GeV/n"
+   }
+  },
+  "data": {
+   "edges": [
+    1.0,
+    1.77827941004,
+    3.16227766017,
+    5.6234132519,
+    10.0,
+    17.7827941004,
+    31.6227766017,
+    56.234132519,
+    100.0,
+    177.827941004,
+    316.227766017,
+    562.34132519,
+    1000.0
+   ],
+   "values": [
+    0.127412296536,
+    0.103572975517,
+    0.0842501050065,
+    0.0711347568104,
+    0.0581985460216,
+    0.0464947731216,
+    0.0362656390065,
+    0.028033474653,
+    0.021750061662,
+    0.0169253446224,
+    0.0126528098662,
+    0.00997744551946
+   ],
+   "unit": "1",
+   "uncertainties": [
+    {
+     "name": "total (3% statistical uncorrelated + 2% systematic, correlation length 1.5 in ln E)",
+     "kind": "systematic",
+     "correlation": "covariance",
+     "covariance_ref": "covariance.json"
+    }
+   ]
+  },
+  "covariance": {
+   "status": "present",
+   "ref": "covariance.json"
+  },
+  "status": "synthetic"
+ }
+}
