@@ -1,0 +1,51 @@
+{
+ "record_version": "1.0.0",
+ "analysis": "synthetic-resonance-search",
+ "source": {
+  "snapshot_id": "synthetic-snapshot-1",
+  "sha256": "5555555555555555555555555555555555555555555555555555555555555555"
+ },
+ "previous_sha256": null,
+ "entries": [
+  {
+   "seq": 1,
+   "release_id": "rel-sim-001",
+   "via": {
+    "kind": "session",
+    "id": "session-01"
+   },
+   "seen": [
+    "simulation"
+   ],
+   "time": "2026-10-01T09:00:00Z",
+   "actor": "synthetic analyst"
+  },
+  {
+   "seq": 2,
+   "release_id": "rel-sb-001",
+   "via": {
+    "kind": "session",
+    "id": "session-02"
+   },
+   "seen": [
+    "sideband",
+    "control-region"
+   ],
+   "time": "2026-10-02T09:00:00Z",
+   "actor": "synthetic analyst"
+  },
+  {
+   "seq": 3,
+   "release_id": "rel-unblind-001",
+   "via": {
+    "kind": "relay",
+    "id": "relay-01"
+   },
+   "seen": [
+    "unblinded-result"
+   ],
+   "time": "2026-10-09T09:00:00Z",
+   "actor": "synthetic analyst"
+  }
+ ]
+}

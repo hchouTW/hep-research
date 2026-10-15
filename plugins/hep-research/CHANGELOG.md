@@ -3,6 +3,20 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+<!-- wp4 -->
+- hep-analysis: `references/cosmic-ray-measurements.md`, an index of cosmic-ray measurement types (absolute flux, flux ratios, isotope ratios, time-dependent flux, rare-event searches) that links existing sections in hep-analysis, detector-response, hep-statistics and research-communication, plus new anisotropy measurement design: estimand (first harmonic, equatorial dipole projection, 3D dipole), directional exposure and its non-uniformity (simulated vs data-driven, east-west method), harmonic and full-sky dipole estimators, partial-sky multipole coupling, amplitude bias, solar/sidereal/anti-sidereal checks, and upper limits on the amplitude with the limit construction handed to hep-statistics (Linsley 1975, Sommers 2001, Billoir & Deligny 2008, Ahlers & Mertsch 2017, Compton & Getting 1935, Farley & Storey 1954, Alexandreas et al. 1993, Bonino et al. 2011). Linked from `SKILL.md` Resources and the analysis guide's routing table; capability matrix row `documented`.
+
+<!-- wp15 -->
+- detector-response: `references/charge-confusion.md`, a synthesis note on charge-sign confusion: the mechanisms (finite curvature resolution toward the maximum detectable rigidity, non-Gaussian scattering and interactions, wrong hit association; alignment weak modes making the two signs' rates differ), how detector-response measures the rate (simulation validated on data, templates in a confusion-sensitive variable, known-sign control samples) and the handoff to hep-analysis, which subtracts it as a background; linked from the principles-summary reference index and task-routing table and from the tracking reference. Capability-matrix row at `documented` (WP15).
+
+<!-- wp7 -->
+- physics-ml: pre-training freeze procedure in `references/ml-analysis.md` ("Training on data and blinding"): before training, a `decision_record` (category `other`) states labels, features, training domain and the split manifest's file SHA-256, lists the manifest in `artifacts`, and binds `seen` to the analysis's exposure record; checked with `contracts/lineage.py decision`, plus a manual file-hash comparison since `lineage.py` does not open artifacts (WP7).
+- physics-ml: synthetic example `assets/pretraining-decision.example.json` with `pretraining-exposure.example.json` and `pretraining-split.example.json`; `tests/skills/physics_ml/test_pretraining_freeze.py` checks it (lineage exit 0, exposure at decision `unexposed`) and shows that an edited exposure history, an understated `seen`, a decision dated before what it counts, a changed split manifest and a hash that disagrees between `artifacts` and the text fail (WP7).
+
+- WP6: research-communication quick-question routing re-measured live on 0.10.1 (routing 29/31, research-communication 20/20; communication eval 5 of 11 cases still answered without a skill, a description-level decision); `SKILL.md` unchanged; recorded in VALIDATION (WP6-QUICK-ROUTING) and capability matrix.
+
 ## 0.10.1 (2026-10-15)
 
 Follow-ups to the 0.10.0 check (PR #84) and the `run_all_checks.py` timeout fix (PR #83). ams02-research needs no

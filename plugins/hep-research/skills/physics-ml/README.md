@@ -13,7 +13,7 @@ Use when the deliverable is a machine-learning model or study for physics: class
 | `SKILL.md` | entry point |
 | `references/` | thirty-eight references: ML in analyses (weights, metrics, decorrelation, systematics, sim-to-data, weak supervision), multivariate analysis, particle and jet architectures, space and astroparticle detectors, fast-simulation validation, SBI training, scientific ML, the PyTorch engineering guide, data strategy, evaluation, uncertainty and calibration, robustness and distribution shift, reproducibility, training, scaling, debugging, deployment |
 | `scripts/` | fourteen helpers: grouped split builder, split integrity, ml-artifact writer, surrogate domain, dataset contract, run comparison, NaN batches, checkpoints, PyTorch environment, compute and memory budgets, dataloader profiling, serving capacity, benchmarking |
-| `assets/` | code starting points: HEP metrics with signed weights (`hep_metrics.py`, NumPy) and losses (`hep_losses.py`: signed-weight BCE, DisCo, NaN-safe masking), output calibration (`calibration.py`: temperature, Platt, weighted isotonic, reliability, ECE), set classifiers (`set_classifier.py`: Deep Sets/PFN, ParT-lite), the classifier training pipeline (`train_classifier.py`: grouped split manifest, signed weights, run summary) and `inference.py` (out-of-domain flags), dataset template, models, other training loops (DDP skeleton, LoRA fine-tune, vision transfer, transformer classifier), metrics, config, example split and run records |
+| `assets/` | code starting points: HEP metrics with signed weights (`hep_metrics.py`, NumPy) and losses (`hep_losses.py`: signed-weight BCE, DisCo, NaN-safe masking), output calibration (`calibration.py`: temperature, Platt, weighted isotonic, reliability, ECE), set classifiers (`set_classifier.py`: Deep Sets/PFN, ParT-lite), the classifier training pipeline (`train_classifier.py`: grouped split manifest, signed weights, run summary) and `inference.py` (out-of-domain flags), dataset template, models, other training loops (DDP skeleton, LoRA fine-tune, vision transfer, transformer classifier), metrics, config, example split and run records, and a pre-training freeze example (`pretraining-decision.example.json` with its exposure record and split manifest) |
 
 ## Scripts
 
@@ -40,7 +40,7 @@ Start with `references/ml-analysis.md` for physics work and `references/deep-lea
 
 ## Tests and validation
 
-`tests/skills/physics_ml/` (thirteen modules, including analytic checks of the HEP metrics, calibration and the domain check and, with PyTorch, of the losses, the set classifiers and the training pipeline; the GPU module runs only with `HEP_TORCH_GPU_TEST=1` on hardware the maintainer may use) and the `optional (torch-cpu)` CI job. What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
+`tests/skills/physics_ml/` (twenty-two modules, including the pre-training freeze check (`test_pretraining_freeze.py`), analytic checks of the HEP metrics, calibration and the domain check and, with PyTorch, of the losses, the set classifiers and the training pipeline; the GPU module runs only with `HEP_TORCH_GPU_TEST=1` on hardware the maintainer may use) and the `optional (torch-cpu)` CI job. What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
 
 ## How this folder is used
 
