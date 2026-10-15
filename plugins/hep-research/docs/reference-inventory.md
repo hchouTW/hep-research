@@ -124,7 +124,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `analysis-validation.md` | hep-analysis | 4.4 | no | 5 | detector-response, hep-computing | 351029c 2026-10-07 |
 | `backgrounds.md` | hep-analysis | 4.7 | no | 19 | detector-response | 633d6c9 2026-10-13 |
 | `correction-chain.md` | hep-analysis | 9.6 | no | 5 | - | 4665f43 2026-10-13 |
-| `cosmic-ray-measurements.md` | hep-analysis | 16.2 | yes | 3 | - | 22fffa1 2026-10-15 |
+| `cosmic-ray-measurements.md` | hep-analysis | 16.2 | yes | 3 | - | 628aed7 2026-10-15 |
 | `data-pipelines.md` | hep-analysis | 0.4 | no | 8 | hep-computing | 7e34ef8 2026-10-13 |
 | `hep-analysis-guide.md` | hep-analysis | 20.6 | yes | 7 | detector-response | 22fffa1 2026-10-15 |
 | `histograms-efficiencies.md` | hep-analysis | 3.1 | no | 7 | detector-response, hep-computing | c180c4e 2026-10-13 |
