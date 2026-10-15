@@ -7,6 +7,20 @@ Software checks establish contract consistency only, not physical validity.
 
 <!-- py313 -->
 - **Python 3.13 is the minimum** (validation-first migration; Gate 1 evidence in VALIDATION PY313-FLOOR): `requires-python = ">=3.13"`, Ruff `py313`, mypy `3.13`; `skills/hep-computing/scripts/find_python.py` selects only Python 3.13 or newer (default and lowest allowed `--min-python` 3.13: a lower value is bad usage, exit 2; `find()` raises `ValueError`), with 3.11/3.12 rejection, fallback and all-old tests. CI's checks matrix runs on Python 3.13 only (4 jobs instead of 12; the backend jobs already ran on 3.13 and are unchanged), and `checks-complete` reconciles 3.13 only. **Migration:** Python 3.11 and 3.12 are no longer supported or tested; create the environment with Python 3.13 (`python3.13 -m venv ...`, then `pip install -r requirements-core.txt`) and point `HEP_RESEARCH_PYTHON` at it. Scripts run directly are not stopped by `requires-python`; the skills choose the interpreter with `find_python.py`. Python 3.14 is installable but not tested. Dependency pins are unchanged (the 3.11-era upper bounds in `requirements-ci-constraints.txt` stay until a separate dependency change).
+<!-- wp8 -->
+- Profile `theory:cr-secondary-antiprotons` 0.1.0: the secondary antiproton source term q(T_pbar) for the channels
+  pp, pHe, Hep and HeHe with the antineutron and hyperon factor (2 + Delta_IS + 2 Delta_Lambda), following the
+  hep-theory cosmic-ray reference conventions. TOY x-scaling cross sections with ILLUSTRATIVE values (no published
+  parametrization reproduced); the closed-form source integral (incomplete beta functions, checked in SymPy) is the
+  internal benchmark of the numerical quadrature (agreement 3e-15, criterion 1e-8). `model.family` is
+  `cosmic-ray-secondary-source-term`, so `theory.degeneracy_missing` does not apply. 36 profile tests, capabilities at
+  `demonstrated-on-synthetic-data`. Published source-term values as a benchmark remain open (B2). Registry 2,001 bytes.
+- Example `examples/bc-propagation-fit/`: a 21 x 21 log-spaced (D0, L) grid of `theory:cr-secondary-ratio`
+  predictions (882 gated artifacts, two illustrative cross-section sets), SYNTHETIC B/C points with a full covariance,
+  and `covariance_fit.py` `tabulated-grid`: D0/L recovered (Asimov within 0.25 sigma, pseudo-data pull -0.41, 100 toys
+  with pull mean 0.02 and width 0.95), D0 and L unconstrained, one degenerate direction along (1, 1) matched to the
+  theory spec's `D0/L`, cross sections as a model set; ungated, rigidity-binned, unfolded-level and
+  unknown-correlation inputs refused. Test `tests/examples/test_bc_propagation_fit.py`.
 
 <!-- wp9 -->
 - `adapters/crdb` 0.1.0 (owner hep-theory, optional, `tested-in-declared-environment` on E2 with CRDB V4.2): one query of the CRDB (LPSC) REST interface, promoted from the ams-02 profile's `scripts/crdb_query.py`. No default experiment filter (`url`/`fetch` without `--exp-dates` or `--all-experiments` exit 2); every summarized row and sub-experiment group carries `secondary: true`; the `.meta.json` sidecar holds the request (parameters, URL, User-Agent), UTC retrieval time, CRDB version, export date and the SHA-256 of the saved file. HEPData or the paper's tables are primary; a CRDB value is a cross-check or a fallback labelled secondary. Offline tests replay four CRDB exports recorded live on 2026-10-15 (`tests/adapters/test_crdb_query.py`, VALIDATION CRDB-ADAPTER).

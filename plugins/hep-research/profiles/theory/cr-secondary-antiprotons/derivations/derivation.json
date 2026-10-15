@@ -1,0 +1,27 @@
+{
+ "label": "theory:cr-secondary-antiprotons source integral for the toy cross section (SymPy 1.14.0)",
+ "status": "analytic-derivation",
+ "assumptions": [
+  "projectile flux a power law (or sharp broken power law) in kinetic energy per nucleon",
+  "toy prompt cross section (sigma0 / T_i) (1 - T/T_i)^n above a threshold T_th, zero for T >= T_i",
+  "nuclear channels: constant rescaling of pp at the same energy per nucleon",
+  "antineutron and hyperon contributions as multiplicative factors on the prompt cross section"
+ ],
+ "results": {
+  "above_threshold": "4 pi n_j f_ij sigma0 C T^-gamma B(gamma, n + 1)",
+  "general": "4 pi n_j f_ij sigma0 C T^-gamma B(min(1, T/T_th); gamma, n + 1)",
+  "factor": "(1 + Delta_Lambda) + (1 + Delta_IS + Delta_Lambda) = 2 + Delta_IS + 2 Delta_Lambda"
+ },
+ "checks": {
+  "substitution_x_equals_T_over_Ti": true,
+  "above_threshold_beta_function_n0": true,
+  "above_threshold_beta_function_n1": true,
+  "above_threshold_beta_function_n2": true,
+  "above_threshold_beta_function_n3": true,
+  "above_threshold_beta_function_n7": true,
+  "below_threshold_incomplete_beta_n2": true,
+  "above_threshold_direct_equals_beta_n2": true,
+  "broken_power_law_pieces_add_n2": true,
+  "antineutron_hyperon_bookkeeping": true
+ }
+}

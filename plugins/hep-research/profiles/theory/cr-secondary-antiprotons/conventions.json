@@ -1,0 +1,18 @@
+{
+ "unit_system": "CGS for the source term: q in cm^-3 s^-1 GeV^-1, gas densities in cm^-3, primary fluxes in cm^-2 s^-1 sr^-1 (GeV/n)^-1, cross sections in mb (1 mb = 1e-27 cm^2) and dsigma/dT in mb/GeV; energies in GeV [crpb:C06]",
+ "hbar_c_one": false,
+ "metric_signature": "not-applicable (no relativistic amplitude is computed)",
+ "coupling_normalization": "not-applicable",
+ "renormalization_scheme": "not-applicable",
+ "scales": "reference energy T0 of the primary power laws (benchmark T0 = 1 GeV/n); production threshold T_th = (k_th - 1) m_p per nucleon with k_th = 7 [crpb:C02]",
+ "energy_variable": "antiproton kinetic energy T_pbar in GeV; projectiles by kinetic energy per nucleon T_i in GeV/n",
+ "frame": "Galactic rest frame (interstellar gas at rest)",
+ "angle_definition": "not-applicable (isotropic, angle-integrated source term)",
+ "spin_treatment": "not-applicable",
+ "mass_approximation": "proton mass m_p = 0.93827208816 GeV (CODATA 2018) for the threshold; nuclear binding and Fermi motion neglected [crpb:C06]",
+ "crpb:source_term": "q_ij(T) = 4 pi n_j int_{T_th}^{oo} dT_i phi_i(T_i) dsigma_ij/dT(T_i, T), summed over projectiles i in {p, He} and targets j in {H, He} (channels pp, pHe, Hep, HeHe; projectile first) [crpb:C01]",
+ "crpb:ism": "interstellar gas of hydrogen and helium only, n_He / n_H = 0.1; heavier targets and projectiles neglected [crpb:C02, crpb:C03]",
+ "crpb:antineutrons_hyperons": "total = prompt antiprotons x (2 + Delta_IS + 2 Delta_Lambda) with both included, booked as (1 + Delta_Lambda) for antiprotons plus (1 + Delta_IS + Delta_Lambda) for antineutrons; Delta_Lambda = c_Lambda (Lambda-bar / pbar); each part can be excluded and the choice is stated [crpb:C04, crpb:C05]",
+ "crpb:cross_sections": "input sets under models/ (xs-toy-*.json): an ILLUSTRATIVE toy x-scaling prompt pp cross section, constant ILLUSTRATIVE channel rescaling factors, Delta_IS and Lambda-bar/pbar; not a published parametrization; a choice between sets is a model-alternative uncertainty object, never a Gaussian per bin [crpb:C05]",
+ "crpb:bin_average": "a binned value is the total source term averaged linearly in T_pbar over the bin, (1/Delta T) int q dT (Gauss-Legendre, 8 nodes per piece, split at T_th)"
+}

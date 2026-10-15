@@ -1,0 +1,96 @@
+[
+ {
+  "id": "crpb:S01",
+  "title": "Production cross sections of cosmic antiprotons in the light of new data from the NA61 and LHCb experiments",
+  "authors": "M. Korsmeier, F. Donato, M. Di Mauro",
+  "year": 2018,
+  "identifiers": {
+   "dois": [],
+   "arxiv_ids": [
+    "1802.03030"
+   ],
+   "inspire_record_id": null,
+   "journal_ref": "Phys. Rev. D 97 (2018) 103019"
+  },
+  "tier": 1,
+  "verification_level": "not-opened",
+  "verification_date": null,
+  "publication_date": "2018",
+  "data_taking_period": null,
+  "formal_status": "published",
+  "supersedes": [],
+  "superseded_by": [],
+  "notes": "Cited through the hep-theory reference (arXiv:1802.03030v2 read there 2026-10-13): source-term definition Sec. I Eq. (1); antineutron factor Eqs. (4)-(5); hyperons Eq. (6); nuclear rescaling Eqs. (15)-(17). Title from background knowledge.",
+  "verification_limitations": "not opened in this session (no network approved for WP8); the bibliographic details, section and equation numbers are those recorded in skills/hep-theory/references/cosmic-ray-propagation.md, whose author read the source on 2026-10-13; check against the source before any stronger use"
+ },
+ {
+  "id": "crpb:S02",
+  "title": "Novel evaluation of the production cross section of secondary antiprotons in cosmic rays",
+  "authors": "M. di Mauro, F. Donato, A. Goudelis, P.D. Serpico",
+  "year": 2014,
+  "identifiers": {
+   "dois": [],
+   "arxiv_ids": [
+    "1408.0288"
+   ],
+   "inspire_record_id": null,
+   "journal_ref": "Phys. Rev. D 90 (2014) 085017"
+  },
+  "tier": 1,
+  "verification_level": "not-opened",
+  "verification_date": null,
+  "publication_date": "2014",
+  "data_taking_period": null,
+  "formal_status": "published",
+  "supersedes": [],
+  "superseded_by": [],
+  "notes": "Cited through the hep-theory reference (arXiv:1408.0288v3 read there 2026-10-13): pp threshold 7 m_p and ISM H:He:C = 1 : 0.1 : 5e-4 in Sec. II.A Eq. (1). Title from background knowledge.",
+  "verification_limitations": "not opened in this session (no network approved for WP8); the bibliographic details, section and equation numbers are those recorded in skills/hep-theory/references/cosmic-ray-propagation.md, whose author read the source on 2026-10-13; check against the source before any stronger use"
+ },
+ {
+  "id": "crpb:S03",
+  "title": "Cosmic ray antiprotons at high energies",
+  "authors": "M.W. Winkler",
+  "year": 2017,
+  "identifiers": {
+   "dois": [],
+   "arxiv_ids": [
+    "1701.04866"
+   ],
+   "inspire_record_id": null,
+   "journal_ref": "JCAP 02 (2017) 048"
+  },
+  "tier": 1,
+  "verification_level": "not-opened",
+  "verification_date": null,
+  "publication_date": "2017",
+  "data_taking_period": null,
+  "formal_status": "published",
+  "supersedes": [],
+  "superseded_by": [],
+  "notes": "Cited through the hep-theory reference (arXiv:1701.04866v1 read there 2026-10-13): antineutron factor Eq. (5), hyperons Eqs. (6)-(7), nuclear rescaling Eq. (17), p and He only Sec. 9 Eq. (19). Title from background knowledge.",
+  "verification_limitations": "not opened in this session (no network approved for WP8); the bibliographic details, section and equation numbers are those recorded in skills/hep-theory/references/cosmic-ray-propagation.md, whose author read the source on 2026-10-13; check against the source before any stronger use"
+ },
+ {
+  "id": "crpb:S04",
+  "title": "CODATA recommended values of the fundamental physical constants: 2018",
+  "authors": "E. Tiesinga, P.J. Mohr, D.B. Newell, B.N. Taylor",
+  "year": 2021,
+  "identifiers": {
+   "dois": [],
+   "arxiv_ids": [],
+   "inspire_record_id": null,
+   "journal_ref": "Rev. Mod. Phys. 93 (2021) 025010"
+  },
+  "tier": 1,
+  "verification_level": "not-opened",
+  "verification_date": null,
+  "publication_date": "2021",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "notes": "Proton mass m_p c^2 = 938.27208816 MeV, used from background knowledge (the same value as theory:cr-secondary-ratio); not opened in this session.",
+  "verification_limitations": "not opened in this session; value used from background knowledge"
+ }
+]
