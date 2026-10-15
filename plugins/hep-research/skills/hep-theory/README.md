@@ -16,11 +16,11 @@ Use when the deliverable is a theoretical or phenomenological result: model defi
 
 ## Scripts
 
-`dis_kinematics.py` (invariants, beam relations, Jacobians, frames; lepton-mass bounds), `pdf_uncertainty.py` (`+as` alpha_s members, `num_members`), `event_weights.py` (signed weights pass unclipped; selected-event statistics), `eft_truncation.py` (cross-term convention, rescaling check). Each refuses non-finite or ambiguous input with exit 1 and a JSON reason. The SymPy interpreter for derivations is chosen by `skills/hep-computing/scripts/find_python.py`. A HEPData table becomes a dataset record through `adapters/hepdata/assets/hepdata_record.py`. Compiled cosmic-ray data from CRDB (LPSC) come through the optional `adapters/crdb/assets/crdb_query.py` (`tested-in-declared-environment`, CRDB V4.2): a secondary source, so HEPData or the paper's tables stay primary and a CRDB value is a cross-check or a fallback labelled secondary; the experiment filter has no default and every row is labelled secondary. Cosmic-ray kinematics (rigidity, momentum, total and kinetic energy, kinetic energy per nucleon, bin edges and flux Jacobians) is `core/kinematics/relativistic.py` (steward hep-theory), and force-field solar modulation is `skills/hep-measurement/scripts/solar_modulation_force_field.py`; `references/cosmic-ray-propagation.md` states their conventions.
+`dis_kinematics.py` (invariants, beam relations, Jacobians, frames; lepton-mass bounds), `pdf_uncertainty.py` (`+as` alpha_s members, `num_members`), `event_weights.py` (signed weights pass unclipped; selected-event statistics), `eft_truncation.py` (cross-term convention, rescaling check). Each refuses non-finite or ambiguous input with exit 1 and a JSON reason. The SymPy interpreter for derivations is chosen by `skills/hep-computing/scripts/find_python.py` (Python 3.13 or newer). A HEPData table becomes a dataset record through `adapters/hepdata/assets/hepdata_record.py`. Compiled cosmic-ray data from CRDB (LPSC) come through the optional `adapters/crdb/assets/crdb_query.py` (`tested-in-declared-environment`, CRDB V4.2): a secondary source, so HEPData or the paper's tables stay primary and a CRDB value is a cross-check or a fallback labelled secondary; the experiment filter has no default and every row is labelled secondary. Cosmic-ray kinematics (rigidity, momentum, total and kinetic energy, kinetic energy per nucleon, bin edges and flux Jacobians) is `core/kinematics/relativistic.py` (steward hep-theory), and force-field solar modulation is `skills/hep-measurement/scripts/solar_modulation_force_field.py`; `references/cosmic-ray-propagation.md` states their conventions.
 
 ## References
 
-`references/mathematical-reasoning-and-proof.md` gives the proof-status ladder (formal, analytic, perturbative, asymptotic, heuristic, numerical, empirical, conjecture) that every derivation record states; the other files are topic references. Shipped theory-domain profiles are listed in `profiles/registry.json`.
+`references/mathematical-reasoning-and-proof.md` gives the proof-status ladder (formal, analytic, perturbative, asymptotic, heuristic, numerical, empirical, conjecture) that every derivation record states; the other files are topic references. Shipped theory-domain profiles are listed in `profiles/registry.json`. Outside v1 (lattice QCD and its global analyses, EFT global fits, global cosmic-ray propagation fits that run a propagation code), the skill says what it cannot cover.
 
 ## Handoffs
 
@@ -34,7 +34,7 @@ Use when the deliverable is a theoretical or phenomenological result: model defi
 
 ## Tests and validation
 
-`tests/skills/hep_theory/` (six modules), the `qed-prediction`, `theory-comparison`, `published-comparison` and `recasting` examples under `examples/`, and the theory routing tests under `tests/routing/`. What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
+`tests/skills/hep_theory/` (six modules), the `qed-prediction`, `theory-comparison`, `published-comparison`, `recasting` and `bc-propagation-fit` examples under `examples/`, and the theory routing tests under `tests/routing/`. What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
 
 ## How this folder is used
 

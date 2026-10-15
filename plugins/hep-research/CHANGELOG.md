@@ -5,6 +5,19 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+<!-- fu-readmes -->
+<!-- skill READMEs -->
+- Skill READMEs brought up to date with the tree (no SKILL.md or capability change): hep-computing counts 32
+  references and 13 test modules (PyROOT floor test), and `find_python.py` is described with its Python 3.13 floor;
+  hep-statistics counts 20 test modules and names the `tabulated-grid` status (demonstrated on synthetic data), its
+  exit 3 for a missing covariance or correlation, and `examples/bc-propagation-fit`; hep-theory lists the
+  `bc-propagation-fit` example, the 3.13 interpreter floor and its out-of-v1 domains; hep-measurement counts its 12
+  references and 21 test modules, lists all its assets and the link to the hep-statistics time-series reference;
+  hep-detector states the charge-confusion note's `documented` status; hep-communication points at the behavioral
+  evaluation's real folder (`evals/research_communication/`) and its two recorded live runs. The four renamed skills'
+  READMEs say in one line which old name is a deprecated alias (contracts 2.9.0).
+- `docs/reference-inventory.{json,md}` regenerated (the hep-measurement README now cites `time-series-inference.md`).
+
 <!-- fu-benchmarks -->
 - `theory:cr-secondary-antiprotons`: external benchmark for open question B2. `scripts/published_benchmark.py`
   recomputes the pp-induced source term of di Mauro, Donato, Goudelis and Serpico, PRD 90 (2014) 085017

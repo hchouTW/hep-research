@@ -2,6 +2,8 @@
 
 Use when the deliverable is a machine-learning model or study for physics: classifiers and regressors for events, particles or detector signals, generative models and fast simulation, surrogates of expensive simulations or predictions, ML-assisted or simulation-based inference, calibration of model outputs, grouped train/validation/test splits and leakage checks, domain shift between simulation and data, uncertainty estimation, and the PyTorch engineering behind them. Neural networks in PyTorch; BDT and classical MVA guidance for analyses.
 
+Formerly `physics-ml`; the old name is a deprecated alias in contracts 2.9.0.
+
 **Owns:** classification and regression, generation, surrogates, ML-assisted inference, calibration, domain shift, and PyTorch engineering. Typical artifact: `ml-artifact` (labels, features, grouped splits, training domain, preprocessing, weights, model hash, calibration, downstream validation).
 
 **Never:** let a metric such as AUC stand in for physics validity; extrapolate a surrogate outside its declared domain without saying so.

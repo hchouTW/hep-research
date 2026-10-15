@@ -11,14 +11,14 @@ Use when the deliverable is working, reproducible scientific software or its exe
 | Path | Content |
 |---|---|
 | `SKILL.md` | entry point |
-| `references/` | thirty-one references: engineering playbook, agile delivery, task authoring, ROOT design and debugging, crash and memory debugging, performance profiling, symbolic and numerical computation, CMake, Python HEP patterns, storage, environments and containers, batch scheduling, numerical methods, design guidelines (Python, C++, Bash), validation and definition of done |
+| `references/` | thirty-two references: engineering playbook, agile delivery, task authoring, ROOT design and debugging, crash and memory debugging, performance profiling, symbolic and numerical computation, CMake, Python HEP patterns, analysis data pipelines, storage, environments and containers, batch scheduling, numerical methods, design guidelines (Python, C++, Bash), validation and definition of done |
 | `scripts/` | twenty helpers: interpreter choice, ROOT inspection and comparison, environment manifests, synthetic NanoAOD, task and skill-bundle validation, local partition, blinding audits |
 | `assets/` | task template, story card, definition of done, completion summary, risk register, example configs |
 | `examples/` | worked research tasks (bug, research, migration, agentic loop, data/ML, physics code) with their own README |
 
 ## Scripts
 
-`find_python.py` picks the interpreter for package-dependent work; `inspect_root_file.py`, `compare_root_histograms.py`, `summarize_histogram_statistics.py`, `roofit_workspace_summary.py` and `audit_histograms.py` inspect ROOT files (PyROOT or uproot when installed, skipped otherwise); `check_root_cpp_env.sh` and `new_root_cpp_project.sh` set up C++ work; `environment_manifest.py` records and checks a run's environment; `make_synthetic_nanoaod.py`; `lint_task.py`, `validate_skill_bundle.py`, `validate_skill_example.py`, `validate_agile_notes.py`, `create_story_card.py`, `generate_skill_example.py` and `check_example_diversity.py` support task authoring; `local_partition.py` partitions work with bounded resubmission and a duplicate-safe merge (engine in `core/partition`); `audit_blinded_outputs.py` scans outputs for synthetic blinding sentinels (with real data, sealing and scanning belong to the data custodian). Batch campaigns on Slurm and HTCondor use `adapters/batch-schedulers/batch_campaign.py`, tested only against fake schedulers.
+`find_python.py` picks the interpreter for package-dependent work (Python 3.13 or newer only; a `--min-python` below 3.13 is bad usage, exit 2); `inspect_root_file.py`, `compare_root_histograms.py`, `summarize_histogram_statistics.py`, `roofit_workspace_summary.py` and `audit_histograms.py` inspect ROOT files (PyROOT or uproot when installed, skipped otherwise); `check_root_cpp_env.sh` and `new_root_cpp_project.sh` set up C++ work; `environment_manifest.py` records and checks a run's environment; `make_synthetic_nanoaod.py`; `lint_task.py`, `validate_skill_bundle.py`, `validate_skill_example.py`, `validate_agile_notes.py`, `create_story_card.py`, `generate_skill_example.py` and `check_example_diversity.py` support task authoring; `local_partition.py` partitions work with bounded resubmission and a duplicate-safe merge (engine in `core/partition`); `audit_blinded_outputs.py` scans outputs for synthetic blinding sentinels (with real data, sealing and scanning belong to the data custodian). Batch campaigns on Slurm and HTCondor use `adapters/batch-schedulers/batch_campaign.py`, tested only against fake schedulers.
 
 ## Script contract
 
@@ -64,7 +64,7 @@ State after the 2026-10 remediation (CMP-08); checked by `tests/skills/test_cli_
 
 ## Tests and validation
 
-`tests/skills/hep_computing/` (twelve test modules), the `core/partition` and `core/blinding` tests under `tests/core/`, the `local-partition` and `batch-partition` examples under `examples/`, and `tests/skills/test_cli_robustness.py`, which runs every shipped script with a missing input and checks the JSON status and exit codes of this skill's scripts (the script contract above). What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
+`tests/skills/hep_computing/` (thirteen test modules, including `test_pyroot_floor.py`: a PyROOT interpreter older than Python 3.13 is not used as ROOT evidence), the `core/partition` and `core/blinding` tests under `tests/core/`, the `local-partition` and `batch-partition` examples under `examples/`, and `tests/skills/test_cli_robustness.py`, which runs every shipped script with a missing input and checks the JSON status and exit codes of this skill's scripts (the script contract above). What is and is not validated is listed in `docs/capability-matrix.md`; the evidence is in `VALIDATION.md`.
 
 ## How this folder is used
 
