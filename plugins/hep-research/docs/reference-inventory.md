@@ -177,7 +177,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `time-series-inference.md` | hep-statistics | 15.5 | yes | 5 | hep-analysis | 386c00a 2026-10-15 |
 | `unfolding.md` | hep-statistics | 7.0 | no | 25 | detector-response, hep-analysis | 11a01b9 2026-10-13 |
 | `amplitudes-and-widths.md` | hep-theory | 8.3 | yes | 1 | - | 83ae4f6 2026-10-13 |
-| `cosmic-ray-propagation.md` | hep-theory | 13.7 | yes | 8 | - | 87ee57c 2026-10-13 |
+| `cosmic-ray-propagation.md` | hep-theory | 13.7 | yes | 8 | - | 8ba49d8 2026-10-15 |
 | `dis-kinematics.md` | hep-theory | 5.9 | yes | 4 | - | 9b8406c 2026-10-13 |
 | `event-generation.md` | hep-theory | 9.8 | yes | 4 | detector-response, hep-analysis | a38fad5 2026-10-13 |
 | `higher-order-predictions.md` | hep-theory | 4.2 | yes | 1 | - | 351029c 2026-10-07 |
