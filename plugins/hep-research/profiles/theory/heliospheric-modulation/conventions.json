@@ -1,0 +1,15 @@
+{
+ "unit_system": "natural-HEP with c = 1 and e = 1: energies and momenta in GeV, rigidity in GV, modulation potential phi in GV (|Z| phi in GeV); fluxes per unit of the energy variable of the chosen kind, arbitrary normalization in the benchmark",
+ "hbar_c_one": true,
+ "metric_signature": "not-applicable (no relativistic amplitude is computed)",
+ "coupling_normalization": "not-applicable",
+ "renormalization_scheme": "not-applicable",
+ "scales": "not-applicable (no renormalization or factorization scale); one modulation potential phi per period",
+ "energy_variable": "one of: total kinetic energy T of the nucleus (GeV, shift |Z| phi); kinetic energy per nucleon T/A (GeV/n, shift (|Z|/A) phi) [helmod:C04]; rigidity R = p/|Z| (GV); the LIS power law and the flux are per unit of the same variable",
+ "frame": "heliocentric; LIS at the modulation boundary, TOA at 1 AU",
+ "angle_definition": "not-applicable (isotropic, angle-integrated fluxes)",
+ "spin_treatment": "not-applicable",
+ "mass_approximation": "rest mass of the whole nucleus given by the caller (no particle constants shipped); per-nucleon mass m/A",
+ "helmod:modulation_model": "force field (Gleeson-Axford): zero streaming, spherical symmetry, steady state, diffusion coefficient proportional to rigidity; J_TOA(T) = p(T)^2 / p(T + |Z| phi)^2 J_LIS(T + |Z| phi) [helmod:C01]",
+ "helmod:observable": "differential flux at 1 AU (top of the atmosphere) predicted from a LIS; no charge-sign, drift, latitude or transient effects"
+}

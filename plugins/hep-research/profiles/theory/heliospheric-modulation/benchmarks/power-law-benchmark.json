@@ -1,0 +1,17 @@
+{
+ "label": "Closed-form benchmark settings for theory:heliospheric-modulation (synthetic inputs; theory only, no experiment resource)",
+ "note": "Species masses are synthetic test inputs near the proton and helium-4 masses, not quoted constants. The points include energies below the Gleeson-Axford breakdown energy on purpose: the benchmark checks the implementation against the closed form, not the physical validity of the force field there.",
+ "species": [
+  {"name": "proton-like", "mass_gev": 0.938272, "charge": 1, "mass_number": 1},
+  {"name": "helium-4-like", "mass_gev": 3.7273794, "charge": 2, "mass_number": 4}
+ ],
+ "lis": {"normalization": 10000.0, "index": 2.7},
+ "phi_gv": [0.0, 0.5, 1.0],
+ "round_trip_phi_gv": 0.5,
+ "points": {
+  "Ek_total": [0.1, 0.5, 2.0, 20.0, 200.0],
+  "Ek_per_nucleon": [0.1, 0.5, 2.0, 20.0, 200.0],
+  "rigidity": [0.5, 1.5, 5.0, 30.0, 300.0]
+ },
+ "relative_tolerance": 1e-10
+}
