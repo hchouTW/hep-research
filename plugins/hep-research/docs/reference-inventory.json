@@ -3103,7 +3103,7 @@
     "tests/adapters/fixtures/literature_lookup/rate-limit/inspire-arxiv-2501.99999-429.json"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "893bc43 2026-10-15"
+   "last_commit": "5bdebcd 2026-10-15"
   },
   {
    "path": "skills/research-communication/references/literature-review.md",
