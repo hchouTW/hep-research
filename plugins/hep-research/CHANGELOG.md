@@ -5,6 +5,25 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+<!-- wp14 -->
+- New theory profile `theory:heliospheric-modulation` 0.1.0 (WP14): force-field solar modulation by reference to
+  `skills/hep-measurement/scripts/solar_modulation_force_field.py`, which the profile runs as a separate process and
+  does not reimplement (profiles may import only core and contracts). `scripts/derive.py` checks in SymPy that
+  F(T + |Z| phi) solves the zero-streaming equation with a diffusion coefficient proportional to rigidity (the opposite
+  sign does not), that T + |Z| phi is constant along the characteristic, the p^2 flux relation, the closed forms of a
+  power-law local interstellar spectrum in total kinetic energy, kinetic energy per nucleon and rigidity, and their
+  limits (`analytic-derivation`). `scripts/predict.py --benchmark` compares the script with those closed forms on 90
+  synthetic points (two species, phi 0 to 1 GV, three energy kinds) to a relative 1e-10 (largest difference 2.4e-15),
+  with phi = 0 and a demodulate round trip; `demonstrated-on-synthetic-data`, 25 profile tests. The validity range
+  (breakdown below about 300 MeV/n for protons and 250 MeV/n for alpha particles) and the known limits (no rigidity-,
+  time- or charge-sign-dependent effects; phi degenerate with the spectrum) cite Gleeson and Axford 1968, Ghelfi et al.
+  2016 and Cholis et al. as read on 2026-10-13 for the hep-theory cosmic-ray reference. Convection-diffusion, drift and
+  1D-3D numerical models and the neutron-monitor link are documented only, as unverified context; multi-period fits of
+  phi point to `skills/hep-statistics/references/time-series-inference.md`. No source-term profiles (dark matter,
+  pulsars). Registry: 2,264 of 3,072 bytes.
+- `skills/hep-theory/references/cosmic-ray-propagation.md` no longer says the force-field script's rigidity and
+  tabulated-spectrum inputs are planned (they shipped earlier), and names the new profile's role without its ID.
+
 - New theory profile `theory:heliospheric-modulation` 0.1.0 (WP14): force-field solar modulation by reference to
   `skills/hep-measurement/scripts/solar_modulation_force_field.py`, which the profile runs as a separate process and
   does not reimplement (profiles may import only core and contracts). `scripts/derive.py` checks in SymPy that
