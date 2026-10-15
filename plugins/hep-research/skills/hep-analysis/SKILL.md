@@ -43,7 +43,7 @@ description: "Use when the deliverable is the design or review of an experimenta
 
 ## Resources
 
-Folder guide: [README.md](README.md). Start with [the analysis guide](references/hep-analysis-guide.md): it routes to one reference per question (design and blinding, weights, histograms and efficiencies, backgrounds, systematics, measurement definitions, validation). Unfolding and combination methods belong to hep-statistics; detector data/MC validation to detector-response.
+Folder guide: [README.md](README.md). Start with [the analysis guide](references/hep-analysis-guide.md): it routes to one reference per question (design and blinding, weights, histograms and efficiencies, backgrounds, systematics, measurement definitions, validation); cosmic-ray measurement types and anisotropy: [index](references/cosmic-ray-measurements.md). Unfolding and combination methods belong to hep-statistics; detector data/MC validation to detector-response.
 
 Scripts in `<plugin root>/skills/hep-analysis/scripts/` (read `--help` first; the README describes each): `check_systematic_variations.py`, `make_yield_table.py`, `systematics_table_tex.py`, `counting_reference.py`, `particle_ratio_with_uncertainty.py`, `mask_blinded_bins.py` (synthetic data and tests only), `review_analysis_change.py`, `review_measurement_spec.py`, and cosmic-ray helpers (`cosmic_ray_flux.py`, `cr_spectrum_powerlaw_fit.py`, `geomagnetic_cutoff.py`, `orbit_averaged_geomagnetic_cutoff.py`, `solar_modulation_force_field.py`). Spec template and field guide: `assets/measurement_spec.template.{json,md}`.
 

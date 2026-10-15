@@ -18,7 +18,7 @@ invariants are stated once, in [SKILL.md](SKILL.md); this page is a folder guide
 
 ## References
 
-Start with `references/hep-analysis-guide.md`, which routes to one reference per question: analysis design, review and deliverables, weights and normalization, histograms and efficiencies, backgrounds, systematics, measurement definitions (unfolding and combination methods belong to hep-statistics), analysis validation. Detector data/MC validation lives in detector-response.
+Start with `references/hep-analysis-guide.md`, which routes to one reference per question: analysis design, review and deliverables, weights and normalization, histograms and efficiencies, backgrounds, systematics, measurement definitions (unfolding and combination methods belong to hep-statistics), analysis validation. `references/cosmic-ray-measurements.md` indexes the cosmic-ray measurement types (absolute flux, flux and isotope ratios, time-dependent flux, rare-event searches) by linking existing sections, and adds the anisotropy measurement design (dipole amplitude and phase, directional exposure, upper limits on the amplitude, whose statistics belong to hep-statistics); status `documented`. Detector data/MC validation lives in detector-response.
 
 ## Handoffs
 
