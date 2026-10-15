@@ -3,8 +3,16 @@
  "declared_utc": "2026-10-15T14:40:40Z",
  "declared_before_comparison": true,
  "illustrative": true,
- "status": ["synthetic", "unvalidated"],
- "program": {"name": "DRAGON2", "source": "https://github.com/cosmicrays/DRAGON2-Beta_version", "commit": "cd588707fe03c76f19bda1b8092e136dcbe3fe90", "code_version": "configure.ac DRAGON 3.1.0 (README: DRAGON2 beta)"},
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "program": {
+  "name": "DRAGON2",
+  "source": "https://github.com/cosmicrays/DRAGON2-Beta_version",
+  "commit": "cd588707fe03c76f19bda1b8092e136dcbe3fe90",
+  "code_version": "configure.ac DRAGON 3.1.0 (README: DRAGON2 beta)"
+ },
  "common_settings": {
   "grid": "2D (R, z), Rmax = 20 kpc, DimR = 41, z equidistant with dz = 0.02 kpc (DimZ = 2 L / 0.02 + 1), observer at (8.3, 0, 0) kpc",
   "energy_grid": "Ek per nucleon 0.5 to 2000 GeV/n, factor 1.2",
@@ -17,12 +25,43 @@
   "observed_parent_ratio": "the closed form takes r_O = N_O / N_C from the same DRAGON2 run at each energy (an input of the closed form, not a fitted value)"
  },
  "runs": {
-  "X1": {"D0_1e28": 3.0, "L_kpc": 4.0},
-  "X2": {"D0_1e28": 1.5, "L_kpc": 2.0},
-  "X3": {"D0_1e28": 6.0, "L_kpc": 8.0},
-  "G_low": {"D0_1e28": 2.0, "L_kpc": 4.0},
-  "G_high": {"D0_1e28": 4.5, "L_kpc": 4.0},
-  "T_truth": {"D0_1e28": 3.6, "L_kpc": 4.0}
+  "X1": {
+   "D0_1e28": 3.0,
+   "L_kpc": 4.0
+  },
+  "X2": {
+   "D0_1e28": 1.5,
+   "L_kpc": 2.0
+  },
+  "X3": {
+   "D0_1e28": 6.0,
+   "L_kpc": 8.0
+  },
+  "G_low": {
+   "D0_1e28": 2.0,
+   "L_kpc": 4.0
+  },
+  "G_high": {
+   "D0_1e28": 4.5,
+   "L_kpc": 4.0
+  },
+  "T_truth": {
+   "D0_1e28": 3.6,
+   "L_kpc": 4.0
+  },
+  "G_low2": {
+   "D0_1e28": 1.333333,
+   "L_kpc": 4.0
+  },
+  "G_high2": {
+   "D0_1e28": 6.75,
+   "L_kpc": 4.0
+  },
+  "D_X3_R30": {
+   "D0_1e28": 6.0,
+   "L_kpc": 8.0,
+   "note": "diagnostic only (no tolerance): X3 with Rmax = 30 kpc, DimR = 61, sources to 30 kpc, run after C2 failed, to test whether the radial boundary causes the X3 deviation"
+  }
  },
  "checks": [
   {
@@ -50,5 +89,13 @@
    "reason": "multilinear interpolation in ln D0 of a ratio close to D0^-1 between nodes 1.5 apart in D0 biases the interpolated ratio by about (ln 1.5)^2 / 8 = 2%, which maps to about 2% in D0; the data are a DRAGON2 run without noise"
   }
  ],
- "never": "the tolerances above are not changed after the comparison; a failing check is reported with its likely cause and the test asserts what is established"
+ "never": "the tolerances above are not changed after the comparison; a failing check is reported with its likely cause and the test asserts what is established",
+ "amendments": [
+  {
+   "declared_utc": "2026-10-15T14:50:43Z",
+   "check": "C4-grid-fit",
+   "why": "as declared (three nodes 2, 3, 4.5 x 1e28) the fit could not run: covariance_fit.py raised CovFitError 'point [64.96] (fit coordinates) lies outside the grid [65.17 - 65.98]'. Its Fisher-matrix step is one grid cell, and near the upper edge it takes a second-order one-sided difference that evaluates the model at 2h without checking that 2h stays inside the grid; with three nodes that point leaves the grid. No fit value was obtained, so nothing was compared. The covariance_fit.py behaviour is reported, not changed here (outside this work package)",
+   "change": "two more nodes with the same spacing (factor 1.5): runs G_low2 (D0 = 1.333333e28) and G_high2 (D0 = 6.75e28), L = 4 kpc; the grid is D0 in {1.333333, 2, 3, 4.5, 6.75} x 1e28. Measurement, components and tolerance unchanged: |ln(D0_fit / 3.6e28)| <= 0.05"
+  }
+ ]
 }
