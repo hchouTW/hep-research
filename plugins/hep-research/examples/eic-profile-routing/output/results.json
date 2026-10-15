@@ -89,6 +89,7 @@
   "profiles/experiments/eic/profile.json",
   "profiles/experiments/synthetic-collider/profile.json",
   "profiles/registry.json",
+  "profiles/theory/cr-secondary-antiprotons/profile.json",
   "profiles/theory/cr-secondary-ratio/profile.json",
   "profiles/theory/higgs-bb-width/profile.json",
   "profiles/theory/qcd-r-ratio/profile.json",
