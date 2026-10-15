@@ -182,7 +182,8 @@ tracking system), or a sample of known charge sign. Analyses of charge ratios,
 antiparticle fractions, or any rare oppositely-signed species should treat charge
 confusion as a dedicated background component in the likelihood, with its own
 nuisance parameter, following
-[backgrounds.md](../../hep-analysis/references/backgrounds.md).
+[backgrounds.md](../../hep-analysis/references/backgrounds.md). How the rate is measured and handed over:
+[charge-sign confusion](charge-confusion.md).
 
 ## Vertexing
 

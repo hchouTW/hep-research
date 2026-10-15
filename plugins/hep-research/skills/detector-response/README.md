@@ -11,7 +11,7 @@ Use when the deliverable is about how a detector responds: signal formation and 
 | Path | Content |
 |---|---|
 | `SKILL.md` | entry point |
-| `references/` | thirty-four references: a principles summary that indexes the rest, one file per subsystem or topic, astroparticle instruments, case studies, comparison tables, glossary, bibliography |
+| `references/` | thirty-five references: a principles summary that indexes the rest, one file per subsystem or topic, astroparticle instruments, case studies, comparison tables, glossary, bibliography |
 | `scripts/` | eight helpers: calorimeter resolution, Cherenkov angle, front-end electronics (noise, thresholds, timing, quantization, pileup, SiPM, dead time), multiple scattering, PID separation power, pileup reweighting, tag-and-probe efficiency, the Gaisser-Hillas longitudinal profile |
 | `assets/` | synthetic example inputs: a calorimeter response, a detector stack, pileup profiles |
 
@@ -21,7 +21,7 @@ Use when the deliverable is about how a detector responds: signal formation and 
 
 ## References
 
-Start with `references/detector-principles-summary.md`, then the topic file the task needs (front-end electronics and signal processing, tracking, calorimetry, PID, timing, muon systems, noble-liquid and rare-event detectors, physics objects, triggers and pileup, reconstruction, truth matching, performance metrics, response and forward folding, data/MC validation, simulation, calibration and alignment). Astroparticle instruments have their own files (cosmic-ray spectrum and composition, air showers, ground arrays, imaging atmospheric Cherenkov telescopes, neutrino telescopes, space-based direct detection, multimessenger analysis).
+Start with `references/detector-principles-summary.md`, then the topic file the task needs (front-end electronics and signal processing, tracking, calorimetry, PID, timing, muon systems, noble-liquid and rare-event detectors, physics objects, triggers and pileup, reconstruction, truth matching, performance metrics, response and forward folding, charge-sign confusion (a synthesis note: mechanisms, how the rate is measured, handoff to hep-analysis), data/MC validation, simulation, calibration and alignment). Astroparticle instruments have their own files (cosmic-ray spectrum and composition, air showers, ground arrays, imaging atmospheric Cherenkov telescopes, neutrino telescopes, space-based direct detection, multimessenger analysis).
 
 ## Handoffs
 
