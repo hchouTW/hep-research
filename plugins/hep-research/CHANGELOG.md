@@ -5,6 +5,11 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- Registry budget raised from 2,048 to 3,072 bytes (`REGISTRY_BUDGET` in `contracts/registry.py` and
+  `registry_bytes` in `tools/measure_entrypoints.py`; decision D3 of the WP13–WP16 order). The registry was at 2,001
+  bytes with 8 entries, and one more theory profile costs about 163 bytes plus its scope, so no further profile fit.
+  The registry is read only when a profile is needed, so this does not change the always-on description cost. The
+  tests now take the budget from `contracts/registry.py`, and a new test checks that the two constants agree.
 - Routing: hep-computing's description says to load it first even for a quick build or code fix (`co-companion-ws-1`,
   a CMake fix in a project that binds a companion profile, now loads hep-computing in 3/3 live runs, was 1/3), and
   hep-communication's description says to ask first when a comparison names no observable or experiments (it was

@@ -7,7 +7,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]          # the eic profile folder
 PLUGIN = ROOT.parents[2]
 sys.path.insert(0, str(PLUGIN))
-from contracts.registry import validate_registry  # noqa: E402
+from contracts.registry import REGISTRY_BUDGET, validate_registry  # noqa: E402
 
 PROFILE = json.loads((ROOT / "profile.json").read_text(encoding="utf-8"))
 REGISTRY = PLUGIN / "profiles" / "registry.json"
@@ -29,7 +29,7 @@ class IdentityTests(unittest.TestCase):
         self.assertEqual((e["id"], e["kind"], e["version"], e["path"]), (PROFILE["id"], "experiment", PROFILE["version"], "experiments/eic"))
 
     def test_budgets(self):
-        self.assertLessEqual(REGISTRY.stat().st_size, 2048)
+        self.assertLessEqual(REGISTRY.stat().st_size, REGISTRY_BUDGET)
         self.assertLessEqual((ROOT / "index.md").stat().st_size, 4096)
 
     def test_registry_validator_accepts_the_profile(self):
