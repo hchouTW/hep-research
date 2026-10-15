@@ -1,0 +1,63 @@
+{
+ "label": "Benchmark settings for theory:cr-secondary-ratio (ILLUSTRATIVE transport values and cross sections; theory only, no experiment resource)",
+ "illustrative": true,
+ "model": "diffusion-1d",
+ "secondary": {
+  "name": "B",
+  "Z": 5,
+  "A": 11
+ },
+ "reference_primary": "C",
+ "parents": [
+  {
+   "name": "C",
+   "Z": 6,
+   "A": 12,
+   "observed_ratio_to_reference": 1.0
+  },
+  {
+   "name": "O",
+   "Z": 8,
+   "A": 16,
+   "observed_ratio_to_reference": 0.9
+  }
+ ],
+ "transport": {
+  "D0_cm2_s": 3e+28,
+  "R0_GV": 1.0,
+  "delta": 0.5,
+  "L_kpc": 4.0,
+  "h_kpc": 0.1,
+  "n_H_cm3": 1.0
+ },
+ "leaky_box": {
+  "lambda0_g_cm2": 10.0,
+  "R0_GV": 1.0,
+  "delta": 0.5
+ },
+ "cross_section_set": "models/xs-illustrative-A.json",
+ "alternative_cross_section_sets": [
+  "models/xs-illustrative-B.json"
+ ],
+ "energies_gev_per_n": [
+  1.0,
+  2.0,
+  5.0,
+  10.0,
+  20.0,
+  50.0,
+  100.0,
+  200.0,
+  500.0,
+  1000.0
+ ],
+ "energy_bin_edges_gev_per_n": [
+  1.0,
+  3.0,
+  10.0,
+  30.0,
+  100.0,
+  300.0,
+  1000.0
+ ]
+}

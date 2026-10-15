@@ -1,0 +1,72 @@
+[
+ {
+  "id": "crsr:C01",
+  "claim": "Leaky-box / weighted-slab descriptions and diffusion-halo models are both used for stable secondary-to-primary ratios; such ratios (B/C) constrain the ratio of the diffusion coefficient to the halo height, while the halo height itself needs other information such as radioactive secondaries (10Be).",
+  "claim_types": ["general_method"],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": ["crsr:S03"],
+  "location": "not checked (sections on propagation models and on propagation parameters)",
+  "scope": {"text": "stable secondaries; plain-diffusion halo models"},
+  "limitations": "unverified: attributed from background knowledge, source not opened in this session",
+  "verification_strength": "not-opened",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-15"
+ },
+ {
+  "id": "crsr:C02",
+  "claim": "A two-zone (thin disc plus diffusive halo of half-height L) diffusion model fitted to B/C leaves the diffusion normalization K0 and L strongly correlated, with K0/L the combination the ratio determines.",
+  "claim_types": ["general_method"],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": ["crsr:S01", "crsr:S05"],
+  "location": "not checked",
+  "scope": {"text": "two-zone and 1D diffusion models, with or without convection and reacceleration"},
+  "limitations": "unverified: attributed from background knowledge; the full models include convection and reacceleration, which this profile excludes",
+  "verification_strength": "not-opened",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-15"
+ },
+ {
+  "id": "crsr:C03",
+  "claim": "The weighted-slab technique (a path-length distribution applied to the slab solution) reproduces the diffusion-model result for stable nuclei under conditions on energy changes and spatial structure; its modified form and its limits are discussed against diffusion models.",
+  "claim_types": ["general_method"],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": ["crsr:S02"],
+  "location": "not checked",
+  "scope": {"text": "stable nuclei"},
+  "limitations": "unverified: attributed from background knowledge; this profile derives its own exact equivalence for the thin-disc pure-diffusion case (derivation record) and does not rely on the paper's conditions",
+  "verification_strength": "not-opened",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-15"
+ },
+ {
+  "id": "crsr:C04",
+  "claim": "In the 1D thin-disc diffusion model without convection the B/C ratio equals a leaky-box ratio with escape grammage proportional to (gas surface density) x v x L / K, and the leaky-box and 1D descriptions are compared as sources of theoretical uncertainty in extracting diffusion parameters.",
+  "claim_types": ["general_method"],
+  "support_kind": "general_method",
+  "evidence_status": "general-method",
+  "source_ids": ["crsr:S04"],
+  "location": "not checked",
+  "scope": {"text": "1D model, thin disc, no convection"},
+  "limitations": "unverified: attributed from background knowledge; the profile's form lambda_esc = n_H m_H h v L / D is derived and checked here (derive.py), not quoted",
+  "verification_strength": "not-opened",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-15"
+ },
+ {
+  "id": "crsr:C05",
+  "claim": "Constants used by the code: c = 2.99792458e10 cm/s (exact), atomic mass unit u = 0.93149410242 GeV = 1.66053906660e-24 g, proton mass 1.67262192369e-24 g, au = 149597870700 m (exact), 1 pc = 648000/pi au.",
+  "claim_types": ["general_method"],
+  "support_kind": "general_method",
+  "evidence_status": "public-fact",
+  "source_ids": ["crsr:S06", "crsr:S07"],
+  "location": "not checked",
+  "scope": {"text": "unit conversions only; every transport and cross-section value in the profile is illustrative"},
+  "limitations": "values used from background knowledge; source not opened in this session",
+  "verification_strength": "not-opened",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-15"
+ }
+]
