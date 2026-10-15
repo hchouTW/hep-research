@@ -30,7 +30,7 @@
   },
   "hep-statistics": {
    "references": 12,
-   "bytes": 169882,
+   "bytes": 169870,
    "uncited": 0
   },
   "hep-theory": {
@@ -3176,12 +3176,12 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "8a4de6c 2026-10-15"
+   "last_commit": "7487999 2026-10-15"
   },
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 17006,
+   "bytes": 16994,
    "lines": 175,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -3343,7 +3343,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "386c00a 2026-10-15"
+   "last_commit": "7487999 2026-10-15"
   },
   {
    "path": "skills/hep-statistics/references/unfolding.md",
