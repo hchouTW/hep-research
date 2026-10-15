@@ -1,9 +1,13 @@
 # Galactic cosmic-ray propagation: models, inputs and what a fit can constrain
 
 Purpose: give propagation questions (secondary-to-primary ratios, antiparticle backgrounds, spectral breaks, solar
-modulation) a structured answer instead of memory. Propagation fits are outside v1: there is no validated propagation
-profile and no propagation code in the plugin, so a request for a fit gets the "no validated domain profile" notice
-and this reference is used to state assumptions, degeneracies and what the data can and cannot decide. Statistical
+modulation) a structured answer instead of memory. Two narrow theory-domain profiles exist (secondary-to-primary
+ratios in a weighted-slab and a 1D thin-disc diffusion model; the secondary antiproton source term), and hep-statistics
+fits grid parameters to a measurement from tabulated predictions (`covariance_fit.py`, model `tabulated-grid`, with the
+degenerate directions reported); both are demonstrated on synthetic data only (`docs/capability-matrix.md`). There is
+no propagation code in the plugin: a global fit that runs one (many species, reacceleration, convection, a code's own
+nuclear network) gets the "no validated domain profile" notice, and this reference is used to state assumptions,
+degeneracies and what the data can and cannot decide. Statistical
 work on a fit (likelihood, nuisance parameters, correlated data) belongs to hep-statistics; measured fluxes come from
 dataset records, never from memory.
 
@@ -138,8 +142,10 @@ It takes |Z|, A and the mass from the caller and ships no particle constants; do
 ## Tool coverage (honest status)
 
 Common propagation codes include GALPROP, DRAGON and USINE. None of them is installed, run or verified in this
-plugin: they are named only so that a user can state which code produced a number. No propagation result in this
-plugin is tested, and no capability row claims one.
+plugin: they are named only so that a user can state which code produced a number. What is tested is narrower: the
+closed-form secondary-ratio and source-term benchmarks of the two theory-domain profiles, and the grid fit with its
+end-to-end example (`examples/bc-propagation-fit`, synthetic B/C data, D0/L recovered and the flat direction reported),
+all at demonstrated-on-synthetic-data. No result from a propagation code and no fit to real data is tested.
 
 ## Sources read (for the kinematics, force-field and antiproton sections; all on 2026-10-13)
 
