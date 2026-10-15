@@ -1,13 +1,15 @@
 """Pre-training freeze (ml-analysis.md, "Training on data and blinding"): the shipped example decision record binds
 its exposure record (contracts/lineage.py decision exits 0, exposure at decision time unexposed) and names the split
 manifest by its file SHA-256 in both `artifacts` and the `decision` text. Tampered copies fail: an edited exposure
-history, an understated `seen`, a decision dated before what it counts as seen (lineage.py, exit 1), and a changed
-split manifest or a hash that disagrees between `artifacts` and the text (the file-hash comparison the reference asks
-for, since lineage.py does not open artifacts). Synthetic values only."""
+history, an understated `seen`, a decision dated before what it counts as seen, a changed split manifest or an
+`artifacts` hash that disagrees with the file (lineage.py, exit 1, which compares artifacts[].sha256 with the file
+next to the record), and a hash in the text that is not an artifact's (the text check the reference asks for).
+Synthetic values only."""
 import copy
 import hashlib
 import json
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -28,8 +30,8 @@ def lineage(decision: Path, exposure: Path) -> subprocess.CompletedProcess:
 
 
 def freeze_findings(decision: dict, base: Path) -> list[str]:
-    """The artifact check lineage.py leaves to the analyst: each artifact's file hash matches `artifacts`, and every
-    SHA-256 the decision text names is one of the artifacts' hashes, with the split manifest named."""
+    """The reference's freeze check: each artifact's file hash matches `artifacts` (lineage.py decision checks this
+    too), and every SHA-256 the decision text names is one of the artifacts' hashes, with the split manifest named."""
     out = []
     hashes = set()
     for art in decision["artifacts"]:
@@ -56,6 +58,7 @@ class PretrainingFreezeTests(unittest.TestCase):
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         self.tmp = Path(tmp.name)
+        shutil.copyfile(SPLIT, self.tmp / SPLIT.name)  # copies of the record find the manifest next to them
 
     def write(self, name, doc) -> Path:
         path = self.tmp / name
@@ -111,14 +114,14 @@ class PretrainingFreezeTests(unittest.TestCase):
         (self.tmp / SPLIT.name).write_text(json.dumps(manifest, indent=2), encoding="utf-8")
         found = freeze_findings(self.decision, self.tmp)
         self.assertTrue(any("differs from the record" in f for f in found), found)
+        self.assert_lineage_fails(self.decision, self.exposure, "lineage.artifact_mismatch")
 
     def test_hash_in_text_and_artifacts_disagree_fails(self):
         dec = copy.deepcopy(self.decision)
         dec["artifacts"][0]["sha256"] = "0" * 64
-        # still schema-valid lineage (lineage.py does not open artifacts) ...
-        res = lineage(self.write("d.json", dec), EXPOSURE)
-        self.assertEqual(res.returncode, 0, res.stdout)
-        # ... so the freeze check is what catches it
+        # lineage.py opens the split manifest next to the record and refuses the hash ...
+        self.assert_lineage_fails(dec, self.exposure, "lineage.artifact_mismatch")
+        # ... and the freeze check also finds the text naming a hash that is no artifact's
         found = freeze_findings(dec, ASSETS)
         self.assertTrue(any("differs from the record" in f for f in found), found)
         self.assertTrue(any("not an artifact's" in f for f in found), found)
