@@ -1421,3 +1421,19 @@ Cost $6.80 ($0.077 per case). The one miss, `t19-turns-1`, is the second turn of
 response just built) answered without a skill; the 2.1.293 baseline and the 2026-10-12 rerun missed it too. No
 contamination, 0 loading violations. Not run: the cases of the other four skills, Codex.
 
+
+## WP6-QUICK-ROUTING (2026-10-15, Claude Code 2.1.300, claude-sonnet-5-5, plugin 0.10.1 at `f2039c7`)
+
+Re-measurement of the research-communication "Quick questions" block (RC-D1) on the released 0.10.1 tree, paid
+runs approved by the maintainer (order TASK-ams02-skill-upgrade, WP6). Both runs live outside the plugin
+(`evals/`).
+
+| Run | Cases | Result | Cost |
+|---|---|---|---|
+| routing `20261015T022722Z-claude-claude-sonnet-5-5` | 31: every research-communication case (20), every `quick` case, and the three quick cases missed on 2026-10-12 (`st-sensitivity-1`, `co-companion-ws-1`, `rc-t4-code-1`) | 29/31 strict; research-communication 20/20; misses `t19-quick-3` (detector-response, no skill; missed in the 2.1.293 baseline, passed on 2026-10-12) and `co-companion-ws-1` (quick code question, no skill, as on 2026-10-12) | $2.04 |
+| communication eval `live-20261015-0227-sonnet` | 11 of 11 | 0 pass, 6 fail, 1 critical-fail, 4 unjudged (semantic judgments not yet recorded). Routing: 5 cases answered without a plugin skill (`rc-eval-04` abstract draft, `-06` Traditional Chinese status, `-09` Traditional Chinese terminology, `-10` public summary, `-11` injection), against 4 on 2026-10-13. The critical failure (`rc-eval-07`) is a scorer artifact: it counts the plugin reference path `references/evidence-linked-writing.md`, which the answer names as its method, as a fabricated identifier | $0.69 |
+
+Conclusion: quick verification questions route (20/20); short drafting, terminology and summary requests with
+fixtures still skip the skill. That decision is taken before `SKILL.md` is read, from the description alone, so
+the WP6 remedy (reordering the body, description byte-identical) cannot change it; `SKILL.md` was not changed.
+Open: a description change (needs approval and a routing rerun) or a scorer fix for plugin reference paths.
