@@ -5,6 +5,45 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+<!-- wp3 -->
+# WP3 changelog bullets (for "Unreleased")
+
+- Profile `theory:cr-secondary-ratio` 0.1.0, the first narrow cosmic-ray propagation domain: B/C (from C and O) in a
+  weighted-slab (leaky-box) model and a 1D thin-disc diffusion model without convection. SymPy checks of the closed
+  forms, of their equivalence through lambda_esc = n_H m_H h v L / D and of the resulting D0/L invariance
+  (`scripts/derive.py`); a benchmark of the closed forms against the profile's own numerical solutions (slab ODEs
+  averaged over the path-length distribution, a finite-thickness disc solved exactly and by finite volumes, and its
+  thin-disc limit; `scripts/predict.py --benchmark`); a theory-spec artifact with `model.family`
+  `cosmic-ray-propagation` and `degenerate_directions: ["D0/L"]`; a bin-averaged prediction artifact with a
+  cross-section model alternative; and a prediction callable at any parameter point and on (D0, L) grids
+  (`predict.evaluate`, `predict.grid`, `predict.bin_averaged`, CLI `--set` / `--grid`) for the grid fit of WP1/WP8.
+  Cross sections and transport values are ILLUSTRATIVE; references are cited but were not opened (no network).
+  Status `demonstrated-on-synthetic-data`, 37 profile tests, including one showing that a theory-spec without
+  `degenerate_directions` fails `contracts/validate.py` with `theory.degeneracy_missing`.
+- Capability matrix: a "Profiles" row for `theory:cr-secondary-ratio`.
+
+- `examples/eic-profile-routing/output/` regenerated: the run lists every registered `profile.json` it opens, which now
+  includes the new profile.
+
+<!-- ci2 -->
+- CI: a new commit on a pull request cancels that PR's superseded `tests` run (pushes to main, the weekly and manual runs are never cancelled); pip downloads are cached by `setup-python`, keyed on `requirements-ci.lock` (installs and tests still run in full every time). Batch 2 (low-risk part) of the CI improvement proposal.
+
+<!-- wp1 -->
+- hep-statistics: `covariance_fit.py fit` model `tabulated-grid`: fits grid parameters (for example D0 and L) to a
+  `dataset-record` from one `prediction` artifact per grid node (`representation: "grid"`, node in `parameter_point`;
+  no schema change). Every prediction passes `contracts/comparison/gate.py` first (ungated or not comparable: exit 1);
+  multilinear interpolation in the fit coordinates (`scale: "log"` or `"linear"`), no extrapolation (a start outside
+  the grid or a minimum beyond its edge is refused); cross-section uncertainty as a rank-one normalization nuisance
+  (`multiplicative`, mode `nuisance`) and/or alternative sets through `model_set()` and `envelope()`, the mode recorded
+  in `cross_section_uncertainty.mode`; degenerate directions from the Fisher matrix reported with eigenvector and
+  condition number and compared with the theory spec's `degenerate_directions` (mismatch: warning); `combinations`
+  such as `D0/L` reported with `sigma_ln`. Tests: `tests/skills/hep_statistics/test_grid_fit.py` (synthetic only).
+  Status: demonstrated on synthetic data (E2, 2026-10-15).
+- `covariance_fit.py`: exit code 3 (`"status": "incomplete"`, `missing`) when a data covariance or an uncertainty
+  correlation is missing; a diagonal matrix is never assumed.
+
+- `covariance_fit.py`: a field of the wrong JSON type now gives exit 2 with a JSON error instead of a traceback.
+
 <!-- ci1 -->
 - CI (batch 1 of the CI improvement proposal, test obligations unchanged): `tools/run_all_checks.py` records seconds for every check, prints failed test ids with their traceback tails (profile suites and `check_ams_optional` included) and writes a Markdown job summary with `--summary FILE`; `--part static` and `--part ams-optional` split `--part checks` so the AMS-optionality check (about 75 % of the old "static and profiles" job) runs as its own CI job. Each units run records its plan (full module list with SHA-256, the shard's modules, the timings digest).
 - CI: new `tools/reconcile_check_runs.py` and required-in-practice `checks-complete` job: every expected checks run (Python 3.11-3.13 × units 1/2, 2/2, static, ams-optional) present once, of the tested commit, passing, with only the host CLI checks skipped, every planned check reported, and the shards partitioning this tree's module list (planned from the same timings); runs after failures (`always()`), and a missing record fails it. Fault-injection tests in `tests/tools/test_reconcile_check_runs.py`. Its first local run caught shards planned from two different timing files (a module in two shards, others in none) at equal test counts.

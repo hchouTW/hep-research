@@ -1,0 +1,34 @@
+{
+ "label": "theory:cr-secondary-ratio slab and 1D thin-disc ratios (SymPy 1.14.0)",
+ "status": "analytic-derivation",
+ "assumptions": [
+  "steady state; one stable secondary; parents are pure primaries (no parent-to-parent feeding)",
+  "kinetic energy per nucleon conserved in fragmentation (straight-ahead); same v for all species",
+  "no convection, reacceleration, energy losses or radioactive decay; free escape at |z| = L",
+  "thin disc: gas and sources in 2 h delta(z); finite disc: uniform in |z| < h",
+  "cross sections are inputs (effective, cumulative); hydrogen target only"
+ ],
+ "results": {
+  "slab_ratio": "1/(lambda_Ps*(1/lambda_s + 1/lambda))",
+  "thin_disc_ratio": "sigma_Ps/(D_s/(L*h*n*v) + sigma_s)",
+  "escape_grammage": "L*h*m_H*n*v/D_s",
+  "finite_disc_parent_mid_plane": "q*(k_P*(L - h)*sinh(h*k_P) + cosh(h*k_P) - 1)/(D_P*k_P**2*(k_P*(L - h)*sinh(h*k_P) + cosh(h*k_P)))"
+ },
+ "checks": {
+  "slab_average_equals_closed_form": true,
+  "thin_disc_jump_solution": true,
+  "thin_disc_halo_profile_linear_and_zero_at_L": true,
+  "thin_disc_equals_slab_with_grammage_nmhvL_over_D": true,
+  "ratio_invariant_under_D_and_L_scaled_together": true,
+  "ratio_changes_with_D_alone": true,
+  "finite_disc_parent_disc_equation": true,
+  "finite_disc_parent_value_continuous_at_h": true,
+  "finite_disc_parent_derivative_continuous_at_h": true,
+  "finite_disc_parent_symmetric_at_0": true,
+  "finite_disc_secondary_disc_equation": true,
+  "finite_disc_secondary_value_continuous_at_h": true,
+  "finite_disc_secondary_derivative_continuous_at_h": true,
+  "finite_disc_halo_vanishes_at_L": true,
+  "finite_disc_halo_profiles_linear": true
+ }
+}

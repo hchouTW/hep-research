@@ -33,10 +33,52 @@ Input (break-scan): {"y", "cov", "x", "smoothness": 0 (sharp), "break_range": [l
   chi2 over ln x_b, a toy-calibrated interval for the break (not Wilks: the break is not a regular parameter) and the
   toy-calibrated no-break test.
 
+Input (fit, "model": "tabulated-grid"): a fit of parameters tabulated on a grid of predictions (for example propagation
+  parameters D0 and L), multilinear interpolation between nodes, no extrapolation, no user code. Grid representation:
+  ONE prediction artifact PER GRID NODE (contracts/schemas/ext_prediction.json admits this without a schema change:
+  "representation": "grid", the node in "parameter_point", the observable's bins in "values"); a single artifact cannot
+  carry the parameter axes, since its "values" are binned in the observable's variables only.
+  {"model": "tabulated-grid",
+   "measurement": "data.json" | {dataset-record},        data, bins and uncertainty components (paths: relative to the
+   "predictions": ["node-1.json", ...] | [{...}, ...],    input file); every node of the full grid, once
+   "grid": {"parameters": [{"name": "D0", "scale": "log"}, {"name": "L", "scale": "log"}]},   names: parameter_point
+          keys; scale "log" interpolates and fits in ln p (p > 0), "linear" in p; >= 2 nodes per axis
+   "gate_plan": {"transformations", "mappings", "measurement_conditions"} (optional; contracts/comparison/gate.py),
+   "multiplicative": {"relative_cov": [[...]], "mode": "nuisance"} (optional: a common cross-section normalization of
+          the prediction, rank one, fitted as a constrained nuisance as in "fit"; only "nuisance" for a grid),
+   "model_set": {"alternative_key": "xs_set", "prescription": {"kind": "min-max", "owner": "hep-theory",
+          "justification": "..."}} (optional: the parameter_point key that names a cross-section set; each set is a full
+          grid, fitted separately; contracts/comparison/model_set.py model_set() and envelope() give the spread),
+   "theory_spec": "spec.json" | {theory-spec} (optional; its degenerate_directions are compared with the fit),
+   "combinations": ["D0/L"] (optional monomials of grid parameters to report, e.g. "D0/L", "D0*L^2"),
+   "start": {"D0": 3.0, "L": 4.0} (optional, inside the grid)}
+  Every prediction is gated (contracts/comparison/gate.py check()) against the measurement first; one that is not
+  comparable, or a fit without a measurement to gate against, is refused (exit 1). The grid parameters (and the
+  alternative key) are what is fitted, so the gate is given them as measurement conditions equal to the node's own
+  values; every other parameter_point key must be stated in gate_plan.measurement_conditions and match.
+  Data covariance: assembled from the measurement's uncertainty components (uncorrelated: diagonal; fully-correlated:
+  outer product; covariance: the matrix in covariance_ref, a JSON {"matrix"} or bare matrix, each file added once); with
+  no components, the dataset's covariance ref (status "present"). A component with correlation "unknown" or an
+  unreadable ref, or no covariance at all, is recorded under "missing" with status "incomplete" (exit 3): a diagonal
+  matrix is never assumed.
+  Degenerate directions: eigen-decomposition of the Fisher matrix J^T C^-1 J in the fit coordinates (nuisance
+  profiled), J by central differences; a direction is degenerate when its 1-sigma half-width exceeds half the grid
+  chord along it or its eigenvalue is below 1e-10 of the largest. Each is reported with its eigenvector and the
+  condition number and compared with the theory spec's degenerate_directions (a monomial such as "D0/L" predicts a flat
+  direction along which it is constant); a mismatch is a warning. Parameters along a degenerate direction get no error;
+  combinations orthogonal to it get one (pseudo-inverse over the constrained directions).
+  Output: "fits" (one per cross-section set: parameters, chi2, dof, fisher, degenerate_directions, combinations),
+  "cross_section_uncertainty" {"mode": "none" | "nuisance" | "model-set" | "nuisance+model-set"}, "envelope" (model
+  set), "gate", "warnings", "carried_statuses".
+  A best fit on the grid edge with chi2 still falling outward (more than 1e-3 per cell) is refused: the minimum is not
+  inside the grid and nothing is extrapolated.
+
 Usage: covariance_fit.py fit --input FILE
        covariance_fit.py break-scan --input FILE [--toys 200 --seed 1 --cl 0.6827]
 Exit codes: 0 fitted; 1 refused (covariance singular beyond the declared constraints, a declared constraint that is not a
-null direction, no convergence); 2 bad input. Output JSON labelled [General method].
+null direction, no convergence; for a grid: a prediction not gated, not comparable or refused by the gate, a minimum outside the grid);
+2 bad input; 3 incomplete (a data covariance or uncertainty correlation is missing: "status": "incomplete" with
+"missing"). Output JSON labelled [General method].
 """
 from __future__ import annotations
 
@@ -151,6 +193,9 @@ def model_fn(name, x, options=None):
     if name == "plugin":
         _plugin_x = x
         return _plugin(options.get("plugin"), len(x))
+    if name == "tabulated-grid":
+        raise CovFitInputError("tabulated-grid takes predictions and a measurement, not y and cov: use grid_fit(doc) or "
+                               "the fit command with the tabulated-grid input")
     if name == "constant":
         return (lambda th: np.full(len(x), th[0])), 1
     if name == "line":
@@ -207,6 +252,33 @@ def _cov_at(cov_add, rel, mode, y, pred, f_scale=None):
     return cov_add + rel * np.outer(base, base)
 
 
+def _relative_cov(relative_cov, n):
+    """STH-T3.6: n x n, finite, symmetric and positive semidefinite on its correlation scale (the validate_covariance.py
+    rule); a 1 x 1 matrix is never broadcast to every pair of points."""
+    rel = np.asarray(relative_cov, dtype=float)
+    if rel.shape != (n, n) or not np.all(np.isfinite(rel)):
+        raise CovFitInputError(f"multiplicative.relative_cov must be a finite {n} x {n} matrix, got shape {list(rel.shape)}")
+    if not np.allclose(rel, rel.T, rtol=1e-10, atol=1e-15 * max(float(np.max(np.abs(rel))), 1e-300)):
+        raise CovFitInputError("multiplicative.relative_cov must be symmetric")
+    d = np.sqrt(np.clip(np.diag(rel), 0.0, None))
+    if np.any(np.diag(rel) < 0):
+        raise CovFitInputError("multiplicative.relative_cov has a negative variance")
+    nz = d > 0
+    if nz.any():
+        corr = rel[np.ix_(nz, nz)] / np.outer(d[nz], d[nz])
+        if np.linalg.eigvalsh(corr)[0] < -1e-8 * max(1.0, float(np.linalg.eigvalsh(corr)[-1])):
+            raise CovFitInputError("multiplicative.relative_cov is not positive semidefinite")
+    return rel
+
+
+def _rank_one(rel):
+    """The relative shift per unit of a common normalization nuisance: rel must be rank one."""
+    ev, evec = np.linalg.eigh(rel)
+    if ev[-1] <= 0 or np.sum(ev > 1e-12 * ev[-1]) != 1:
+        raise CovFitError("nuisance mode needs a rank-one relative covariance (one common normalization)")
+    return evec[:, -1] * math.sqrt(ev[-1])
+
+
 def fit(y, cov, model="constant", x=None, constraints=None, start=None, multiplicative=None, logdet=True,
         model_options=None) -> dict:
     y = np.asarray(y, dtype=float)
@@ -218,21 +290,7 @@ def fit(y, cov, model="constant", x=None, constraints=None, start=None, multipli
     f, npar = model_fn(model, x, model_options)
     rel, mode = None, None
     if multiplicative:
-        rel = np.asarray(multiplicative["relative_cov"], dtype=float)
-        # STH-T3.6: n x n, finite, symmetric and positive semidefinite on its correlation scale (the
-        # validate_covariance.py rule); a 1 x 1 matrix is never broadcast to every pair of points
-        if rel.shape != (n, n) or not np.all(np.isfinite(rel)):
-            raise CovFitInputError(f"multiplicative.relative_cov must be a finite {n} x {n} matrix, got shape {list(rel.shape)}")
-        if not np.allclose(rel, rel.T, rtol=1e-10, atol=1e-15 * max(float(np.max(np.abs(rel))), 1e-300)):
-            raise CovFitInputError("multiplicative.relative_cov must be symmetric")
-        d = np.sqrt(np.clip(np.diag(rel), 0.0, None))
-        if np.any(np.diag(rel) < 0):
-            raise CovFitInputError("multiplicative.relative_cov has a negative variance")
-        nz = d > 0
-        if nz.any():
-            corr = rel[np.ix_(nz, nz)] / np.outer(d[nz], d[nz])
-            if np.linalg.eigvalsh(corr)[0] < -1e-8 * max(1.0, float(np.linalg.eigvalsh(corr)[-1])):
-                raise CovFitInputError("multiplicative.relative_cov is not positive semidefinite")
+        rel = _relative_cov(multiplicative["relative_cov"], n)
         mode = multiplicative.get("mode")
         if mode not in ("data", "model", "nuisance"):
             raise CovFitError("multiplicative.mode must be data, model or nuisance (no default)")
@@ -243,10 +301,7 @@ def fit(y, cov, model="constant", x=None, constraints=None, start=None, multipli
 
     if mode == "nuisance":
         # one multiplicative factor f per independent component of rel (here: rel must be rank one, a common scale)
-        ev, evec = np.linalg.eigh(rel)
-        if ev[-1] <= 0 or np.sum(ev > 1e-12 * ev[-1]) != 1:
-            raise CovFitError("nuisance mode needs a rank-one relative covariance (one common normalization)")
-        u = evec[:, -1] * math.sqrt(ev[-1])        # relative shift per unit of the nuisance
+        u = _rank_one(rel)                         # relative shift per unit of the nuisance
 
         def m2ll(p):
             th, z = p[:npar], p[npar]
@@ -441,6 +496,501 @@ def break_scan(doc: dict, toys: int = 200, seed: int = 1, cl: float = 0.6827) ->
                     "on the boundary): its interval is calibrated with toys, never by Wilks; ends are known to one grid step"}
 
 
+# --------------------------------------------------------------------------- tabulated-grid fits (ams02 order, WP1)
+class CovFitIncomplete(CovFitError):
+    """A needed input is missing (a data covariance, an uncertainty correlation): status "incomplete", exit 3."""
+
+    def __init__(self, message, missing):
+        super().__init__(message)
+        self.missing = missing
+
+
+GRID_EDGE_SLOPE = 1e-3     # chi2 rise per grid cell, moving inward from an edge, above which the minimum is outside
+DEGENERATE_EIG = 1e-10     # eigenvalue / largest eigenvalue below which a direction is degenerate regardless of sigma
+MATCH_COS = 0.1            # |g . v| / (|g| |v|) below which a flat direction v keeps the monomial with gradient g constant
+
+
+def _load_json(ref, base: Path, what: str):
+    if isinstance(ref, dict):
+        return ref
+    if not isinstance(ref, str):
+        raise CovFitInputError(f"{what} must be a JSON object or a path, got {type(ref).__name__}")
+    path = Path(ref) if Path(ref).is_absolute() else base / ref
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        raise CovFitInputError(f"cannot read {what} {path}: {exc}") from None
+
+
+def _matrix_from(obj, n):
+    m = obj.get("matrix") if isinstance(obj, dict) else obj
+    if isinstance(obj, dict) and obj.get("kind", "absolute") != "absolute":
+        raise CovFitInputError("a covariance file must hold an absolute matrix (kind 'absolute')")
+    m = np.asarray(m, dtype=float)
+    if m.shape != (n, n) or not np.all(np.isfinite(m)) or not np.allclose(m, m.T, rtol=1e-10, atol=0):
+        raise CovFitInputError(f"a covariance must be a finite symmetric {n} x {n} matrix, got shape {list(m.shape)}")
+    return m
+
+
+def data_covariance(ext: dict, base: Path, n: int) -> tuple[np.ndarray, dict]:
+    """The data covariance from a dataset-record extension, assembled from its uncertainty components; never diagonal
+    by assumption. Raises CovFitIncomplete listing what is missing."""
+    comps = (ext.get("data") or {}).get("uncertainties") or []
+    total, missing, used, files = np.zeros((n, n)), [], [], {}
+    for i, c in enumerate(comps):
+        name = c.get("name", f"component {i}") if isinstance(c, dict) else f"component {i}"
+        if not isinstance(c, dict):
+            raise CovFitInputError(f"uncertainty component {i} is not an object")
+        corr, vals = c.get("correlation"), c.get("values")
+        if corr in ("uncorrelated", "fully-correlated"):
+            v = np.asarray(vals if vals is not None else [], dtype=float)
+            if v.shape != (n,) or not np.all(np.isfinite(v)):
+                missing.append({"component": name, "reason": f"'{corr}' needs {n} finite values"})
+                continue
+            total += np.diag(v ** 2) if corr == "uncorrelated" else np.outer(v, v)
+            used.append({"component": name, "correlation": corr})
+        elif corr == "covariance":
+            ref = c.get("covariance_ref")
+            if not ref:
+                missing.append({"component": name, "reason": "correlation 'covariance' without covariance_ref"})
+                continue
+            if ref not in files:
+                path = base / ref
+                try:
+                    files[ref] = _matrix_from(json.loads(path.read_text(encoding="utf-8")), n)
+                except (OSError, ValueError) as exc:
+                    missing.append({"component": name, "reason": f"covariance_ref {ref} unreadable: {exc}"})
+                    continue
+                total += files[ref]
+            used.append({"component": name, "correlation": "covariance", "ref": ref})
+        else:
+            missing.append({"component": name, "reason": f"correlation {corr!r}: no covariance can be built"})
+    block = ext.get("covariance") or {}
+    if not comps:
+        if block.get("status") == "present" and block.get("ref"):
+            try:
+                total = _matrix_from(json.loads((base / block["ref"]).read_text(encoding="utf-8")), n)
+                used.append({"component": "dataset covariance", "correlation": "covariance", "ref": block["ref"]})
+            except (OSError, ValueError) as exc:
+                missing.append({"component": "dataset covariance", "reason": f"ref {block['ref']} unreadable: {exc}"})
+        else:
+            missing.append({"component": "dataset covariance",
+                            "reason": f"no uncertainty components and covariance status {block.get('status')!r}"})
+    if missing:
+        raise CovFitIncomplete("the data covariance is incomplete; it is recorded as missing, never replaced by a "
+                               "diagonal matrix", missing)
+    return total, {"source": "uncertainty components" if comps else "dataset covariance ref", "components": used,
+                   "dataset_covariance_status": block.get("status")}
+
+
+def _monomial(text, names):
+    """'D0/L', 'D0*L^2', 'D0 / L (note)' -> {name: exponent}; None when it names no grid parameter or cannot be read."""
+    import re
+    s = re.sub(r"\(.*?\)", "", str(text)).replace(" ", "")
+    if not s:
+        return None
+    out, sign = {}, 1.0
+    for tok in re.split(r"([*/])", s):
+        if tok in ("*", "/"):
+            sign = 1.0 if tok == "*" else -1.0
+            continue
+        m = re.fullmatch(r"([A-Za-z_][\w.]*)(?:\^(-?\d+(?:\.\d+)?))?", tok)
+        if not m or m.group(1) not in names:
+            return None
+        out[m.group(1)] = out.get(m.group(1), 0.0) + sign * float(m.group(2) or 1.0)
+    return {k: v for k, v in out.items() if v != 0} or None
+
+
+class _Grid:
+    """Values on a rectilinear grid in fit coordinates (ln p for log axes): V[i1, ..., ik, bin]; multilinear
+    interpolation; outside the grid it refuses."""
+
+    def __init__(self, axes, values):
+        self.axes = [np.asarray(a, dtype=float) for a in axes]
+        self.V = np.asarray(values, dtype=float)
+        self.lo = np.array([a[0] for a in self.axes])
+        self.hi = np.array([a[-1] for a in self.axes])
+
+    def inside(self, t, tol=1e-12):
+        span = self.hi - self.lo
+        return bool(np.all(t >= self.lo - tol * span) and np.all(t <= self.hi + tol * span))
+
+    def __call__(self, t):
+        t = np.asarray(t, dtype=float)
+        if not self.inside(t):
+            raise CovFitError(f"point {t.tolist()} (fit coordinates) lies outside the grid {self.lo.tolist()} - "
+                              f"{self.hi.tolist()}: the grid is not extrapolated")
+        idx, w = [], []
+        for a, x in zip(self.axes, np.clip(t, self.lo, self.hi)):
+            i = int(min(max(np.searchsorted(a, x, side="right") - 1, 0), len(a) - 2))
+            idx.append(i)
+            w.append((x - a[i]) / (a[i + 1] - a[i]))
+        out = np.zeros(self.V.shape[-1])
+        for corner in range(2 ** len(idx)):
+            weight, sel = 1.0, []
+            for k, (i, wk) in enumerate(zip(idx, w)):
+                bit = (corner >> k) & 1
+                weight *= wk if bit else 1.0 - wk
+                sel.append(i + bit)
+            if weight:
+                out += weight * self.V[tuple(sel)]
+        return out
+
+    def cell(self, k, x):
+        a = self.axes[k]
+        i = int(min(max(np.searchsorted(a, x, side="right") - 1, 0), len(a) - 2))
+        return float(a[i + 1] - a[i])
+
+
+def _grid_one(grid: _Grid, names, scales, y, cov, u, start, monomials, declared):
+    """Fit one grid (one cross-section set): best fit, Fisher matrix, degenerate directions, combinations."""
+    k, n = len(names), len(y)
+    _, info = subspace(cov, None)                 # refuses a singular covariance, reports its condition number
+    chol = np.linalg.cholesky(cov)
+    from scipy.linalg import solve_triangular
+    nz = 1 if u is not None else 0
+
+    def m2ll(p):
+        pred = grid(p[:k])
+        if nz:
+            pred = pred * (1.0 + p[k] * u)
+        r = solve_triangular(chol, y - pred, lower=True)
+        return float(r @ r) + (float(p[k]) ** 2 if nz else 0.0)
+
+    if start is None:
+        # start at the best node; among nodes tied with it (a flat valley) the one nearest the grid centre
+        nodes = [np.array([a[i] for a, i in zip(grid.axes, node)]) for node in np.ndindex(*[len(a) for a in grid.axes])]
+        vals = np.array([m2ll(np.append(t, [0.0] * nz)) for t in nodes])
+        tied = np.flatnonzero(vals <= vals.min() + 1e-9 * (1.0 + abs(vals.min())))
+        centre = 0.5 * (grid.lo + grid.hi)
+        start = min((nodes[i] for i in tied), key=lambda t: float(np.sum(((t - centre) / (grid.hi - grid.lo)) ** 2)))
+    p0 = np.append(start, [0.0] * nz)
+    bounds = [(lo, hi) for lo, hi in zip(grid.lo, grid.hi)] + [(None, None)] * nz
+    res = optimize.minimize(m2ll, p0, method="L-BFGS-B", bounds=bounds, options={"ftol": 1e-14, "gtol": 1e-10, "maxiter": 2000})
+    p = np.asarray(res.x, dtype=float)
+    p[:k] = np.clip(p[:k], grid.lo, grid.hi)
+    chi2 = m2ll(p)
+    if not np.isfinite(chi2):
+        raise CovFitError("the grid fit did not converge (non-finite chi2)")
+    at_edge = []
+    for j in range(k):
+        span = grid.hi[j] - grid.lo[j]
+        side = -1 if p[j] - grid.lo[j] <= 1e-6 * span else (1 if grid.hi[j] - p[j] <= 1e-6 * span else 0)
+        if not side:
+            continue
+        cellw = grid.cell(j, p[j])
+        h = 0.01 * cellw
+        z1, z2 = p.copy(), p.copy()
+        z1[j] -= side * h
+        z2[j] -= 2 * side * h
+        # one-sided first derivative inward, second order (the curvature term cancels): chi2 change per cell
+        slope = (4 * m2ll(z1) - m2ll(z2) - 3 * chi2) / (2 * h) * cellw
+        at_edge.append(names[j])
+        if slope > GRID_EDGE_SLOPE:
+            raise CovFitError(f"the best fit lies on the {'lower' if side < 0 else 'upper'} grid edge of {names[j]} with "
+                              f"chi2 still falling outward ({slope:.3g} per cell): the minimum is outside the grid; extend "
+                              "the grid (nothing is extrapolated)")
+    # Fisher matrix J^T C^-1 J in the fit coordinates (+1 for the constrained nuisance). J by central differences over
+    # one grid cell (one-sided at an edge): a finer step sees the kinks of the multilinear interpolation at the nodes,
+    # which would invent a constraint along a direction the tabulated model does not constrain
+    pred0 = grid(p[:k]) * ((1.0 + p[k] * u) if nz else 1.0)
+    jac = np.zeros((n, k + nz))
+    def at(j, step):
+        z = p.copy()
+        z[j] += step
+        return grid(z[:k]) * ((1.0 + z[k] * u) if nz else 1.0)
+    for j in range(k):
+        h = min(grid.cell(j, p[j]), 0.5 * (grid.hi[j] - grid.lo[j]))
+        up, down = p[j] + h <= grid.hi[j] + 1e-12 * h, p[j] - h >= grid.lo[j] - 1e-12 * h
+        if up and down:
+            jac[:, j] = (at(j, h) - at(j, -h)) / (2 * h)
+        else:   # at an edge: second-order one-sided difference (a first-order one is biased by the curvature)
+            sgn = 1.0 if up else -1.0
+            jac[:, j] = sgn * (-3 * pred0 + 4 * at(j, sgn * h) - at(j, 2 * sgn * h)) / (2 * h) if len(grid.axes[j]) > 2 \
+                else sgn * (at(j, sgn * h) - pred0) / h
+    if nz:
+        jac[:, k] = grid(p[:k]) * u
+    wj = solve_triangular(chol, jac, lower=True)
+    fisher = wj.T @ wj
+    if nz:
+        fisher[k, k] += 1.0
+        fk = fisher[:k, :k] - np.outer(fisher[:k, k], fisher[k, :k]) / fisher[k, k]     # nuisance profiled
+    else:
+        fk = fisher
+    ev, evec = np.linalg.eigh(0.5 * (fk + fk.T))
+    lam_max = max(float(ev[-1]), 1e-300)
+    cond = float(lam_max / ev[0]) if ev[0] > 0 else None
+    span = grid.hi - grid.lo
+    eig, degenerate, keep = [], [], []
+    for lam, v in zip(ev, evec.T):
+        v = v * (1 if v[np.argmax(np.abs(v))] > 0 else -1)
+        sigma = float(1 / math.sqrt(lam)) if lam > 0 else None
+        chord = float(min(span[i] / abs(v[i]) for i in range(k) if abs(v[i]) > 1e-12))
+        flat = lam <= DEGENERATE_EIG * lam_max or sigma is None or sigma > chord / 2
+        entry = {"eigenvalue": float(lam), "eigenvector": dict(zip(names, map(float, v))), "sigma": sigma,
+                 "grid_chord": chord, "degenerate": bool(flat)}
+        eig.append(entry)
+        (degenerate if flat else keep).append((entry, v, lam))
+    warnings = []
+    g_of = {}
+    for text, mono in monomials.items():
+        if mono is None:
+            continue
+        if any(scales[names.index(nm)] == "linear" and p[names.index(nm)] <= 0 for nm in mono):
+            warnings.append(f"combination {text!r} needs positive parameters at the best fit; not reported")
+            continue
+        # gradient of ln(monomial) in the fit coordinates: e for a log axis, e / p for a linear one
+        g_of[text] = np.array([mono.get(nm, 0.0) * (1.0 if sc == "log" else 1.0 / p[i]) for i, (nm, sc) in enumerate(zip(names, scales))])
+    for entry, v, _ in degenerate:
+        entry["condition_number"] = cond
+        entry["matches_theory_spec"] = None
+        for text in declared:
+            g = g_of.get(text)
+            if g is None:
+                continue
+            mentioned = np.array([1.0 if names[i] in monomials[text] else 0.0 for i in range(k)])
+            if abs(g @ v) / (np.linalg.norm(g) * np.linalg.norm(v)) < MATCH_COS and np.linalg.norm(v * mentioned) >= 0.9:
+                entry["matches_theory_spec"] = text
+                break
+    # parameters and combinations: covariance from the constrained directions only
+    pinv = sum((np.outer(v, v) / lam for _, v, lam in keep), np.zeros((k, k)))
+    params = []
+    for i, (nm, sc) in enumerate(zip(names, scales)):
+        along = [e for e, v, _ in degenerate if abs(v[i]) > 0.1]
+        t = float(p[i])
+        params.append({"name": nm, "scale": sc, "fit_coordinate": f"ln {nm}" if sc == "log" else nm,
+                       "best_fit": math.exp(t) if sc == "log" else t, "best_fit_coordinate": t,
+                       "error_coordinate": None if along else float(math.sqrt(max(pinv[i, i], 0.0))),
+                       "constrained": not along, "grid_range": [float(math.exp(grid.lo[i]) if sc == "log" else grid.lo[i]),
+                                                                float(math.exp(grid.hi[i]) if sc == "log" else grid.hi[i])],
+                       "at_grid_edge": nm in at_edge})
+    combos = []
+    for text, g in g_of.items():
+        mono = monomials[text]
+        ln_val = sum(e * (p[names.index(nm)] if scales[names.index(nm)] == "log" else math.log(p[names.index(nm)]))
+                     for nm, e in mono.items())
+        along = [e for e, v, _ in degenerate if abs(g @ v) / (np.linalg.norm(g) * np.linalg.norm(v)) >= MATCH_COS]
+        sig = None if along else float(math.sqrt(max(g @ pinv @ g, 0.0)))
+        combos.append({"name": text, "value": float(math.exp(ln_val)), "ln_value": float(ln_val), "sigma_ln": sig,
+                       "constrained": not along})
+    for nm in at_edge:
+        warnings.append(f"the best fit lies on the grid edge of {nm} along a flat direction; its position there is not "
+                        "a measurement")
+    n_constrained = len(keep)
+    dof = n - n_constrained
+    from scipy.stats import chi2 as chi2_dist
+    out = {"parameters": params, "chi2": float(chi2), "dof": int(dof),
+           "p_value": float(chi2_dist.sf(chi2, dof)) if dof > 0 else None,
+           "covariance": info,
+           "fisher": {"coordinates": [pr["fit_coordinate"] for pr in params], "matrix": fk.tolist(),
+                      "condition_number": cond, "eigen": eig,
+                      "method": "J^T C^-1 J at the best fit, J by central differences over one grid cell"
+                                + ("; the normalization nuisance profiled (Schur complement)" if nz else "")},
+           "degenerate_directions": [e for e, _, _ in degenerate], "combinations": combos, "warnings": warnings,
+           "prediction_at_best_fit": pred0.tolist(), "converged": bool(res.success), "optimizer_message": str(res.message)}
+    if nz:
+        out["normalization_nuisance"] = float(p[k])
+    return out
+
+
+def grid_fit(doc: dict, base: Path | str = ".") -> dict:
+    """Fit grid parameters to a measurement from one gated prediction artifact per grid node (see the module doc)."""
+    from contracts.comparison.gate import check as gate_check
+    base = Path(base)
+    if doc.get("measurement") is None:
+        raise CovFitError("ungated: no measurement artifact to gate the predictions against; a grid prediction is fitted "
+                          "only after contracts/comparison/gate.py finds it comparable with the measurement")
+    meas = _load_json(doc["measurement"], base, "measurement")
+    preds_in = doc.get("predictions")
+    if not isinstance(preds_in, list) or not preds_in:
+        raise CovFitInputError("predictions must be a non-empty list (one prediction artifact per grid node)")
+    preds = [_load_json(r, base, f"prediction {i}") for i, r in enumerate(preds_in)]
+    gspec = doc.get("grid")
+    if not isinstance(gspec, dict) or not isinstance(gspec.get("parameters"), list) or not gspec["parameters"]:
+        raise CovFitInputError('grid.parameters must list the grid axes: [{"name": ..., "scale": "log" | "linear"}]')
+    names, scales = [], []
+    for a in gspec["parameters"]:
+        if not isinstance(a, dict) or not isinstance(a.get("name"), str) or a.get("scale", "linear") not in ("log", "linear"):
+            raise CovFitInputError('each grid parameter is {"name": str, "scale": "log" | "linear"}')
+        names.append(a["name"])
+        scales.append(a.get("scale", "linear"))
+    if len(set(names)) != len(names):
+        raise CovFitInputError("grid parameter names must be unique")
+    ms_spec = doc.get("model_set")
+    alt_key = ms_spec.get("alternative_key") if isinstance(ms_spec, dict) else None
+    if ms_spec is not None and not (isinstance(alt_key, str) and alt_key and alt_key not in names):
+        raise CovFitInputError("model_set.alternative_key must name a parameter_point key that is not a grid axis")
+    plan = doc.get("gate_plan") or {}
+    if not isinstance(plan, dict):
+        raise CovFitInputError("gate_plan must be an object")
+
+    # 1. gate every prediction against the measurement
+    failures, statuses, gate_ok = [], set(), 0
+    for i, pr in enumerate(preds):
+        ext = pr.get("extension") if isinstance(pr, dict) else None
+        if not isinstance(ext, dict) or ext.get("representation") != "grid":
+            raise CovFitInputError(f"prediction {i} must be a prediction artifact with representation 'grid'")
+        pp = ext.get("parameter_point") or {}
+        cond = dict(plan.get("measurement_conditions") or {})
+        for key in names + ([alt_key] if alt_key else []):
+            if key in pp:
+                cond[key] = pp[key]
+        res = gate_check(pr, meas, dict(plan, measurement_conditions=cond))
+        statuses.update(res.get("carried_statuses") or [])
+        if not res.get("comparable"):
+            failures.append({"prediction": pr.get("artifact_id"), "status": res.get("status"),
+                             "mismatches": [{k: m.get(k) for k in ("field", "reason")} for m in res.get("mismatches", [])][:5],
+                             "findings": res.get("findings", [])[:5]})
+        else:
+            gate_ok += 1
+    if failures:
+        raise CovFitError(f"{len(failures)} of {len(preds)} prediction(s) did not pass the comparison gate; they are not "
+                          "fitted: " + json.dumps(failures[:3]))
+
+    # 2. data and covariance (from the gated measurement only)
+    if meas.get("artifact_type") != "dataset-record" or not isinstance((meas.get("extension") or {}).get("data"), dict):
+        raise CovFitInputError("the measurement must be a dataset-record with data values to fit")
+    mext = meas["extension"]
+    y = np.asarray(mext["data"].get("values"), dtype=float)
+    n = len(y)
+    edges = mext["data"].get("edges")
+    cov, cov_info = data_covariance(mext, base, n)
+
+    # 3. nodes -> grids, one per cross-section set
+    by_alt: dict = {}
+    for i, pr in enumerate(preds):
+        ext = pr["extension"]
+        pp = ext.get("parameter_point") or {}
+        vals = ext.get("values") or {}
+        v = np.asarray(vals.get("values"), dtype=float)
+        if v.shape != (n,) or not np.all(np.isfinite(v)):
+            raise CovFitInputError(f"prediction {i} has {list(v.shape)} values, the measurement {n}")
+        if vals.get("edges") is not None and edges is not None and (len(vals["edges"]) != len(edges) or not np.allclose(vals["edges"], edges, rtol=1e-12)):
+            raise CovFitInputError(f"prediction {i} values are binned differently from the measurement data")
+        node = []
+        for nm, sc in zip(names, scales):
+            x = pp.get(nm)
+            if not isinstance(x, (int, float)) or isinstance(x, bool) or not math.isfinite(x) or (sc == "log" and x <= 0):
+                raise CovFitInputError(f"prediction {i}: parameter_point.{nm} must be a finite number{' > 0' if sc == 'log' else ''}")
+            node.append(math.log(x) if sc == "log" else float(x))
+        alt = pp.get(alt_key) if alt_key else None
+        if alt_key and alt is None:
+            raise CovFitInputError(f"prediction {i} has no parameter_point.{alt_key}")
+        by_alt.setdefault(json.dumps(alt), []).append((tuple(node), v, pr))
+    grids = {}
+    for alt, rows in by_alt.items():
+        axes = [sorted({r[0][j] for r in rows}) for j in range(len(names))]
+        if any(len(a) < 2 for a in axes):
+            raise CovFitInputError("every grid axis needs at least two nodes")
+        shape = [len(a) for a in axes]
+        if len(rows) != int(np.prod(shape)) or len({r[0] for r in rows}) != len(rows):
+            raise CovFitInputError(f"cross-section set {json.loads(alt)!r}: {len(rows)} predictions do not form a full "
+                                   f"grid of {shape} distinct nodes")
+        V = np.zeros(shape + [n])
+        for node, v, _ in rows:
+            V[tuple(a.index(x) for a, x in zip(axes, node))] = v
+        grids[alt] = (_Grid(axes, V), rows[0][2])
+
+    # 4. cross-section uncertainty
+    u = None
+    mult = doc.get("multiplicative")
+    if mult is not None:
+        if not isinstance(mult, dict) or mult.get("mode") != "nuisance":
+            raise CovFitInputError("for a grid, multiplicative.mode must be 'nuisance' (a common normalization fitted with "
+                                   "its Gaussian constraint); the data- and model-scaled forms are biased (Peelle)")
+        u = _rank_one(_relative_cov(mult.get("relative_cov"), n))
+    mode = "+".join(m for m, on in (("nuisance", u is not None), ("model-set", ms_spec is not None)) if on) or "none"
+    warnings = []
+    if mode == "none":
+        warnings.append("no cross-section uncertainty was declared (multiplicative nuisance or model_set); the fit "
+                        "treats the predictions as exact")
+    if ms_spec is not None and len(grids) < 2:
+        raise CovFitInputError("model_set needs predictions for at least two values of the alternative key")
+    if ms_spec is None and len(grids) > 1:
+        raise CovFitInputError("predictions repeat grid nodes; declare model_set.alternative_key if they are alternatives")
+
+    # 5. theory spec and combinations
+    declared = []
+    if doc.get("theory_spec") is not None:
+        spec = _load_json(doc["theory_spec"], base, "theory_spec")
+        declared = [d for d in ((spec.get("extension") or {}).get("degenerate_directions") or []) if isinstance(d, str)]
+    else:
+        warnings.append("no theory spec given: degenerate directions are reported but not compared")
+    wanted = list(dict.fromkeys(declared + [c for c in (doc.get("combinations") or []) if isinstance(c, str)]))
+    monomials = {t: _monomial(t, names) for t in wanted}
+    for t in declared:
+        if monomials.get(t) is None or len(monomials[t]) < 2:
+            warnings.append(f"theory-spec degenerate direction {t!r} does not name two or more grid parameters "
+                            f"{names}; not compared")
+    for t in wanted:
+        if t not in declared and monomials.get(t) is None:
+            warnings.append(f"combination {t!r} is not a monomial of the grid parameters; not reported")
+    start = doc.get("start")
+    t0 = None
+    if start is not None:
+        if not isinstance(start, dict) or set(start) != set(names):
+            raise CovFitInputError(f"start must give every grid parameter: {names}")
+        if not all(isinstance(start[nm], (int, float)) and not isinstance(start[nm], bool) and math.isfinite(start[nm])
+                   and (sc == "linear" or start[nm] > 0) for nm, sc in zip(names, scales)):
+            raise CovFitInputError("start values must be finite numbers (> 0 on a log axis)")
+        t0 = np.array([math.log(start[nm]) if sc == "log" else float(start[nm]) for nm, sc in zip(names, scales)])
+
+    # 6. fit each cross-section set
+    fits = []
+    for alt, (grid, _) in grids.items():
+        if t0 is not None and not grid.inside(t0):
+            raise CovFitError(f"start {start} lies outside the grid: nothing is extrapolated")
+        r = _grid_one(grid, names, scales, y, cov, u, t0, monomials, [t for t in declared if monomials.get(t) and len(monomials[t]) >= 2])
+        r["alternative"] = json.loads(alt)
+        r["covariance"].update(cov_info)
+        found = [e for e in r["degenerate_directions"]]
+        for e in found:
+            if e["matches_theory_spec"] is None and declared:
+                r["warnings"].append(f"degenerate direction {e['eigenvector']} is not among the theory spec's "
+                                     f"degenerate_directions {declared}")
+            elif e["matches_theory_spec"] is None and doc.get("theory_spec") is not None:
+                r["warnings"].append(f"degenerate direction {e['eigenvector']} found; the theory spec lists none")
+        matched = {e["matches_theory_spec"] for e in found}
+        for t in declared:
+            if monomials.get(t) and len(monomials[t]) >= 2 and t not in matched:
+                r["warnings"].append(f"the theory spec lists {t!r} as degenerate, but the data constrain the direction "
+                                     "it predicts in this fit")
+        fits.append(r)
+
+    # 7. model alternatives and their spread
+    envelope_out = None
+    if ms_spec is not None:
+        from contracts.comparison.model_set import envelope, model_set
+        reps = [rep for _, rep in grids.values()]
+        ms = model_set(reps)
+        if not ms.get("ok"):
+            raise CovFitError("the cross-section alternatives are not a valid model set: " + json.dumps(ms.get("problems")))
+        cols = [f"{pr['name']}" for pr in fits[0]["parameters"]] + [c["name"] for c in fits[0]["combinations"]]
+        rows = {rep.get("artifact_id"): [pr["best_fit"] for pr in f["parameters"]] + [c["value"] for c in f["combinations"]]
+                for rep, f in zip(reps, fits)}
+        env = envelope(ms, rows, ms_spec.get("prescription"))
+        if not env.get("ok"):
+            raise CovFitInputError(f"envelope over the cross-section sets refused: {env.get('reason')}")
+        envelope_out = {"columns": cols, **env["uncertainty"],
+                        "note": "min-max over the separate fits of each cross-section set; a model-alternative object, "
+                                "never Gaussian. Along a degenerate direction a parameter's spread is not meaningful; "
+                                "read the constrained combinations"}
+    for f in fits:
+        warnings += [w for w in f.pop("warnings") if w not in warnings]
+    return {"label": LABEL, "model": "tabulated-grid",
+            "grid_representation": "one prediction artifact per grid node (representation 'grid', node in parameter_point)",
+            "grid": {"parameters": [{"name": nm, "scale": sc} for nm, sc in zip(names, scales)],
+                     "nodes_per_set": int(np.prod([len(a) for a in next(iter(grids.values()))[0].axes])),
+                     "interpolation": "multilinear in the fit coordinates; no extrapolation"},
+            "gate": {"predictions_gated": len(preds), "comparable": gate_ok},
+            "cross_section_uncertainty": {"mode": mode, "alternative_key": alt_key,
+                                          "alternatives": [f["alternative"] for f in fits] if alt_key else None},
+            "fits": fits, "envelope": envelope_out, "theory_spec_degenerate_directions": declared,
+            "warnings": warnings, "carried_statuses": sorted(statuses),
+            "note": ("predictions gated against the measurement before fitting; data covariance assembled from declared "
+                     "components only; the best-fit position along a degenerate direction is not a measurement")}
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = ap.add_subparsers(dest="command", required=True)
@@ -465,6 +1015,8 @@ def main(argv=None) -> int:
     try:
         if a.command == "break-scan":
             out = break_scan(doc, a.toys, a.seed, a.cl)
+        elif doc.get("model") == "tabulated-grid":
+            out = grid_fit(doc, Path(a.input).resolve().parent)
         else:
             out = fit(doc["y"], doc["cov"], doc.get("model", "constant"), doc.get("x"), doc.get("constraints"),
                       doc.get("start"), doc.get("multiplicative"), model_options=doc.get("model_options"))
@@ -474,9 +1026,15 @@ def main(argv=None) -> int:
     except CovFitInputError as exc:
         print(json.dumps({"status": "rejected", "error": str(exc)}))
         return 2
+    except CovFitIncomplete as exc:
+        print(json.dumps({"label": LABEL, "status": "incomplete", "error": str(exc), "missing": exc.missing}, indent=1))
+        return 3
     except CovFitError as exc:
         print(json.dumps({"label": LABEL, "status": "refused", "error": str(exc)}))
         return 1
+    except (TypeError, ValueError, AttributeError) as exc:     # a field of the wrong JSON type
+        print(json.dumps({"status": "rejected", "error": f"bad input: {type(exc).__name__}: {exc}"}))
+        return 2
     out["status"] = "ok"
     print(json.dumps(out, indent=1))
     return 0
