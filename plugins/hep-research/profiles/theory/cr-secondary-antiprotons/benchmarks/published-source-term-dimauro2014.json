@@ -1,0 +1,58 @@
+{
+ "label": "External benchmark (open question B2): published pp-induced secondary antiproton source term, Table VI of di Mauro, Donato, Goudelis and Serpico, Phys. Rev. D 90 (2014) 085017, arXiv:1408.0288v3, against the profile's implementation of the same paper's closed-form parametrizations (scripts/published_benchmark.py)",
+ "illustrative": false,
+ "source": {
+  "citation": "M. di Mauro, F. Donato, A. Goudelis, P. D. Serpico, A new evaluation of the antiproton production cross section for cosmic ray studies, Phys. Rev. D 90 (2014) 085017",
+  "arxiv": "1408.0288v3 (26 Jul 2018)",
+  "ledger": "crpb:S02",
+  "claims": ["crpb:C07", "crpb:C08"],
+  "table": "Table VI",
+  "access_date": "2026-10-15",
+  "read_level": "full-text: arXiv v3 LaTeX source and PDF; Table VI numbers transcribed from the printed table (LaTeX tabular, cross-checked against the PDF text); no value read off a figure"
+ },
+ "inputs": {
+  "definition": "q_pp(T) = int_{E_th}^{oo} dsigma_pp->pbar/dE_pbar(E_p, E_pbar) n_H 4 pi Phi_p(E_p) dE_p (Eq. (1)); prompt pbar from pp only, no antineutrons, no helium",
+  "n_H_cm3": 1.0,
+  "n_H_source": "crpb:S02 Sec. II A: ISM composition H:He:C = 1:0.1:5e-4 cm^-3",
+  "proton_flux": {
+   "form": "Phi = A beta^P1 R^-P2 (interstellar, R = p c / Z e in GV), per kinetic energy per nucleon",
+   "A_m2_s_sr_GeV": 22450.0,
+   "P1": 2.32,
+   "P2": 2.8232,
+   "source": "crpb:S05 (Di Mauro, Donato, Fornengo, Lineros, Vittino, JCAP 04 (2014) 006, arXiv:1402.0321v2, Sec. 2.3, printed in the running text, not in a table); claim crpb:C09",
+   "use_in_table_vi": "crpb:S02 Sec. II A: 'Whenever needed for illustrative purposes, we will fix Phi_p to the fit to the preliminary AMS-02 data [...] reported in' arXiv:1402.0321; that Table VI uses this flux is inferred from that sentence (the table caption does not restate it)"
+  },
+  "cross_sections": "models/xs-dimauro2014-pp.json",
+  "projectile_kinetic_energy_max_gev": 1e7,
+  "projectile_kinetic_energy_max_note": "not stated in the paper; the profile's choice. Eq. (11) and (12) values change by < 0.2% between 1e6 and 1e7 GeV; Eq. (13) does not converge at high T (its |C9 sqrt(s)^C10| term grows with s), so its 500 and 1000 GeV values depend on this unstated limit"
+ },
+ "unit": "GeV^-1 cm^-3 s^-1",
+ "energies_gev": [5.0, 10.0, 100.0, 500.0, 1000.0],
+ "table_vi": {
+  "eq11": {"q": [1.23e-30, 4.31e-31, 1.70e-33, 2.42e-35, 3.13e-36], "rel_error_percent": [4.9, 4.2, 5.9, 6.2, 6.9]},
+  "eq12": {"q": [1.47e-30, 4.87e-31, 1.82e-33, 2.82e-35, 4.16e-36], "rel_error_percent": [6.1, 3.0, 8.7, 9.5, 11.0]},
+  "eq13": {"q": [1.67e-30, 5.17e-31, 1.77e-33, 3.39e-35, 6.83e-36], "rel_error_percent": [5.4, 4.8, 6.8, 8.8, 10.0]},
+  "spline": {"q": [1.38e-30, 4.34e-31, 2.03e-33, 3.26e-35, 7.02e-36], "rel_error_percent": [2.7, 2.5, 3.2, 5.2, 5.8]},
+  "tan_ng": {"q": [1.42e-30, 4.96e-31, 1.82e-33, 2.38e-35, 3.29e-36]},
+  "duperray": {"q": [1.40e-30, 4.74e-31, 2.04e-33, 3.27e-35, 4.93e-36]}
+ },
+ "tolerance": {
+  "rule": "|q_profile / q_table - 1| <= the entry's own Table VI relative error (the paper's 1-sigma fit uncertainty of that value)",
+  "justification": "the paper states each value with this precision (Table VI '% error'); the printed values have three significant figures (rounding <= 0.4%), far below the tolerance; the paper itself calls the 1-sigma band underestimated, so the criterion is not tighter than its stated precision"
+ },
+ "expected_status": {
+  "reproduced": {
+   "eq11": [5.0, 10.0, 100.0, 500.0],
+   "eq12": [5.0, 10.0, 100.0, 500.0, 1000.0],
+   "eq13": [5.0, 10.0, 100.0]
+  },
+  "documented_not_reproduced": {
+   "eq11@1000": "outside tolerance (+9.3% against 6.9%); cause not identified (the paper does not state its integration grid or upper limit)",
+   "eq13@500": "depends on the unstated projectile-energy upper limit (-27% at 1e4 GeV, -8.5% at 1e7 GeV); within tolerance only by the choice of limit, so not counted",
+   "eq13@1000": "depends on the unstated projectile-energy upper limit (-14.2% at 1e7 GeV, -21% at 1e6 GeV); outside tolerance",
+   "spline": "an interpolation of the data, no closed form",
+   "tan_ng": "parametrization not given in this paper",
+   "duperray": "the paper does not state whether this column uses its Table II refit or the original parameters with D1 and D2 exchanged; no error quoted, so no tolerance"
+  }
+ }
+}

@@ -121,5 +121,106 @@
   "verification_strength": "not-opened",
   "numeric_quotation_allowed": false,
   "last_reviewed": "2026-10-15"
+ },
+ {
+  "id": "crpb:C07",
+  "claim": "Table VI gives the pp-induced secondary antiproton source term (GeV^-1 cm^-3 s^-1) with percentage errors at T = 5, 10, 100, 500, 1000 GeV for the parametrizations of Eqs. (11), (12), (13), a spline interpolation, Tan & Ng and Duperray et al.; e.g. Eq. (12): 1.47e-30 (6.1%), 4.87e-31 (3.0%), 1.82e-33 (8.7%), 2.82e-35 (9.5%), 4.16e-36 (11%). All values are transcribed in benchmarks/published-source-term-dimauro2014.json.",
+  "claim_types": [
+   "published_result"
+  ],
+  "support_kind": "primary",
+  "evidence_status": "public-fact",
+  "source_ids": [
+   "crpb:S02"
+  ],
+  "location": "Table VI (Sec. V A)",
+  "scope": {
+   "text": "pp channel only, prompt antiprotons, n_H = 1 cm^-3, proton flux of crpb:C09 (inferred from Sec. II A, not restated in the caption)"
+  },
+  "limitations": "The table caption does not restate the proton flux or the integration limits; the paper calls its nominal 1-sigma errors underestimated.",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-15"
+ },
+ {
+  "id": "crpb:C08",
+  "claim": "The invariant pp -> pbar X cross section is parametrized as sigma_in(s) (1 - x_R)^C1 exp(-C2 x_R) times [C3 e^(-C4 pT) + C5 e^(-C6 pT^2)] (Eq. (11), Table III, NA49 only), [C3 s^(C4/2) e^(-C5 pT) + C6 s^(C7/2) e^(-C8 pT^2)] (Eq. (12), Table IV) or |... + C9 s^(C10/2) e^(-C11 pT^3)| (Eq. (13), Table V), with sigma_in = sigma_tot - sigma_el from the PDG-type form of Eq. (B2) and Table VII; x_R and the angular limit from Eqs. (4), (A13), (A15); dsigma/dE from Eq. (2).",
+  "claim_types": [
+   "published_result"
+  ],
+  "support_kind": "primary",
+  "evidence_status": "public-fact",
+  "source_ids": [
+   "crpb:S02"
+  ],
+  "location": "Eqs. (2), (4), (11)-(13), (A13), (A15), (B1)-(B2); Tables III, IV, V, VII",
+  "scope": {
+   "text": "parameter values transcribed in models/xs-dimauro2014-pp.json"
+  },
+  "limitations": "Best-fit values only (the errors in the tables are not used).",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-15"
+ },
+ {
+  "id": "crpb:C09",
+  "claim": "Interstellar proton flux fit Phi = A beta^P1 R^-P2 with A = 22450 +- 560 m^-2 s^-1 sr^-1 (GeV/n)^-1, P1 = 2.32 +- 0.56, P2 = 2.8232 +- 0.0053 (force-field modulation, 615 +- 30 MV).",
+  "claim_types": [
+   "published_result"
+  ],
+  "support_kind": "primary",
+  "evidence_status": "public-fact",
+  "source_ids": [
+   "crpb:S05"
+  ],
+  "location": "Sec. 2.3, running text",
+  "scope": {
+   "text": "fit to preliminary data; used here only as the input crpb:S02 names for its illustrative source terms"
+  },
+  "limitations": "Printed in running text, not in a table (a deviation from the tables-only rule for benchmark values, accepted for an input because it is printed, not read off a figure).",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-10-15"
+ },
+ {
+  "id": "crpb:C10",
+  "claim": "(hbar c)^2 = 0.389379372 GeV^2 mb (from hbar c = 0.197326980 GeV fm), used in B = pi (hbar c)^2 / M^2 of crpb:S02 Eq. (B2).",
+  "claim_types": [
+   "general_method"
+  ],
+  "support_kind": "general_method",
+  "evidence_status": "public-fact",
+  "source_ids": [
+   "crpb:S04"
+  ],
+  "location": "not checked",
+  "scope": {
+   "text": "unit conversion in scripts/published_benchmark.py only"
+  },
+  "limitations": "value used from background knowledge; source not opened in this session",
+  "verification_strength": "not-opened",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-15"
+ },
+ {
+  "id": "crpb:C11",
+  "claim": "Neither Korsmeier, Donato & Di Mauro 2018 nor Winkler 2017 tabulates source-term values in its arXiv version: their tables hold data sets, fit parameters, multiplicities and propagation parameters, and their machine-readable ancillary material gives differential cross sections (Winkler: dsigma/dT grids for pp, pHe, Hep, HeHe) or points to journal supplemental cross-section tables (Korsmeier et al.); source terms appear in figures only.",
+  "claim_types": [
+   "published_result"
+  ],
+  "support_kind": "absence_search",
+  "evidence_status": "public-fact",
+  "source_ids": [
+   "crpb:S01",
+   "crpb:S03"
+  ],
+  "location": "arXiv:1802.03030v2 and arXiv:1701.04866v1: table captions and ancillary files",
+  "scope": {
+   "text": "search for a tabulated source term (open question B2), 2026-10-15"
+  },
+  "limitations": "Captions and ancillary headers only; the journal supplemental material of 1802.03030 was not downloaded. The dsigma/dT grids could drive a future benchmark of a source term but give no published q(T) to compare with.",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-10-15"
  }
 ]

@@ -13,19 +13,20 @@
    "journal_ref": "Phys. Rev. D 97 (2018) 103019"
   },
   "tier": 1,
-  "verification_level": "not-opened",
-  "verification_date": null,
+  "verification_level": "page",
+  "verification_date": "2026-10-15",
   "publication_date": "2018",
   "data_taking_period": null,
   "formal_status": "published",
   "supersedes": [],
   "superseded_by": [],
   "notes": "Cited through the hep-theory reference (arXiv:1802.03030v2 read there 2026-10-13): source-term definition Sec. I Eq. (1); antineutron factor Eqs. (4)-(5); hyperons Eq. (6); nuclear rescaling Eqs. (15)-(17). Title from background knowledge.",
-  "verification_limitations": "not opened in this session (no network approved for WP8); the bibliographic details, section and equation numbers are those recorded in skills/hep-theory/references/cosmic-ray-propagation.md, whose author read the source on 2026-10-13; check against the source before any stronger use"
+  "verification_limitations": "Captions, table list and ancillary-file header only (2026-10-15); the equation and section locations in crpb:C01-C05 are those recorded in skills/hep-theory/references/cosmic-ray-propagation.md (read there 2026-10-13) and were not re-checked.",
+  "verification_note": "B2 search 2026-10-15: arXiv:1802.03030v2 (4 Jun 2018) LaTeX source opened; every table and figure caption and the ancillary file anc/XS_tables.txt read. The tables give data sets, fit parameters, fit quality and correlation matrices; source terms appear in figures only. anc/XS_tables.txt is a header that points to the journal supplemental material for the cross-section tables (not downloaded). No source-term value is taken from this paper."
  },
  {
   "id": "crpb:S02",
-  "title": "Novel evaluation of the production cross section of secondary antiprotons in cosmic rays",
+  "title": "A new evaluation of the antiproton production cross section for cosmic ray studies",
   "authors": "M. di Mauro, F. Donato, A. Goudelis, P.D. Serpico",
   "year": 2014,
   "identifiers": {
@@ -37,15 +38,16 @@
    "journal_ref": "Phys. Rev. D 90 (2014) 085017"
   },
   "tier": 1,
-  "verification_level": "not-opened",
-  "verification_date": null,
+  "verification_level": "full-text",
+  "verification_date": "2026-10-15",
   "publication_date": "2014",
   "data_taking_period": null,
   "formal_status": "published",
   "supersedes": [],
   "superseded_by": [],
-  "notes": "Cited through the hep-theory reference (arXiv:1408.0288v3 read there 2026-10-13): pp threshold 7 m_p and ISM H:He:C = 1 : 0.1 : 5e-4 in Sec. II.A Eq. (1). Title from background knowledge.",
-  "verification_limitations": "not opened in this session (no network approved for WP8); the bibliographic details, section and equation numbers are those recorded in skills/hep-theory/references/cosmic-ray-propagation.md, whose author read the source on 2026-10-13; check against the source before any stronger use"
+  "notes": "External benchmark of this profile (open question B2): Table VI (crpb:C07) with the closed forms and parameter tables (crpb:C08); also cited through the hep-theory reference for the pp threshold 7 m_p and the ISM H:He:C = 1 : 0.1 : 5e-4 (Sec. II A, Eq. (1)).",
+  "verification_limitations": "Full text read for the parts listed; the data sets of Table I and the spline method were not checked. Numbers transcribed from printed tables (LaTeX tabular cross-checked against the PDF text), none read off a figure.",
+  "verification_note": "arXiv:1408.0288v3 (26 Jul 2018) read on 2026-10-15 from the LaTeX source and the PDF: Sec. II A (Eqs. (1)-(4)), Sec. III (Eqs. (9)-(13), Tables II-V), Sec. IV, Sec. V A (Table VI), Appendix A (Eqs. (A3), (A4), (A13), (A15)) and Appendix B (Eqs. (B1), (B2), Table VII). Title corrected from the arXiv record (the earlier entry carried a title from background knowledge)."
  },
  {
   "id": "crpb:S03",
@@ -61,15 +63,16 @@
    "journal_ref": "JCAP 02 (2017) 048"
   },
   "tier": 1,
-  "verification_level": "not-opened",
-  "verification_date": null,
+  "verification_level": "page",
+  "verification_date": "2026-10-15",
   "publication_date": "2017",
   "data_taking_period": null,
   "formal_status": "published",
   "supersedes": [],
   "superseded_by": [],
   "notes": "Cited through the hep-theory reference (arXiv:1701.04866v1 read there 2026-10-13): antineutron factor Eq. (5), hyperons Eqs. (6)-(7), nuclear rescaling Eq. (17), p and He only Sec. 9 Eq. (19). Title from background knowledge.",
-  "verification_limitations": "not opened in this session (no network approved for WP8); the bibliographic details, section and equation numbers are those recorded in skills/hep-theory/references/cosmic-ray-propagation.md, whose author read the source on 2026-10-13; check against the source before any stronger use"
+  "verification_limitations": "Captions and ancillary-file headers only (2026-10-15); the equation locations in crpb:C03-C04 are those recorded in the hep-theory reference (read there 2026-10-13) and were not re-checked.",
+  "verification_note": "B2 search 2026-10-15: arXiv:1701.04866v1 (17 Jan 2017) LaTeX source opened; table and figure captions and the ancillary files read. Tables: antiproton multiplicity in pp (Table 1) and propagation parameters (Table 2); ancillary files pp_cross.dat, pHe_cross.dat, Hep_cross.dat, HeHe_cross.dat give dsigma/dT (mb/GeV) on (T', T) grids, plus a cross-section uncertainty and its correlation matrix in the bins of a published antiproton flux. No source-term value is tabulated."
  },
  {
   "id": "crpb:S04",
@@ -92,5 +95,30 @@
   "superseded_by": [],
   "notes": "Proton mass m_p c^2 = 938.27208816 MeV, used from background knowledge (the same value as theory:cr-secondary-ratio); not opened in this session.",
   "verification_limitations": "not opened in this session; value used from background knowledge"
+ },
+ {
+  "id": "crpb:S05",
+  "title": "Interpretation of AMS-02 electrons and positrons data",
+  "authors": "M. Di Mauro, F. Donato, N. Fornengo, R. Lineros, A. Vittino",
+  "year": 2014,
+  "identifiers": {
+   "dois": [],
+   "arxiv_ids": [
+    "1402.0321"
+   ],
+   "inspire_record_id": null,
+   "journal_ref": "JCAP 04 (2014) 006"
+  },
+  "tier": 1,
+  "verification_level": "page",
+  "verification_date": "2026-10-15",
+  "verification_note": "arXiv:1402.0321v2 (7 Apr 2014): Sec. 2.3 'Secondary positron and electrons', the paragraph with the interstellar proton and helium flux fit, read in the LaTeX source and the PDF on 2026-10-15.",
+  "publication_date": "2014",
+  "data_taking_period": null,
+  "formal_status": "published",
+  "supersedes": [],
+  "superseded_by": [],
+  "notes": "Proton flux used by crpb:S02 for its illustrative source terms (S02 Sec. II A); input of the external benchmark (crpb:C09).",
+  "verification_limitations": "One paragraph read; the fit parameters are printed in running text, not in a table; the rest of the paper was not read."
  }
 ]

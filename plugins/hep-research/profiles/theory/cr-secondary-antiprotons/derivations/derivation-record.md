@@ -12,7 +12,9 @@ definition, the threshold, the ISM composition, the channels and the antineutron
 `skills/hep-theory/references/cosmic-ray-propagation.md`, whose author read Korsmeier, Donato and Di Mauro (PRD 97
 (2018) 103019, arXiv:1802.03030v2), di Mauro, Donato, Goudelis and Serpico (PRD 90 (2014) 085017, arXiv:1408.0288v3)
 and Winkler (JCAP 02 (2017) 048, arXiv:1701.04866v1) on 2026-10-13 (claims `crpb:C01`-`C05`). The toy cross section
-and every number in the shipped sets are this profile's own placeholders, not taken from those papers.
+and every number in the shipped sets are this profile's own placeholders, not taken from those papers. The external
+benchmark added on 2026-10-15 read di Mauro et al. 2014 in full (claims `crpb:C07`-`C08`); it does not change this
+derivation.
 
 ## Model and notation
 
@@ -49,9 +51,12 @@ q = (sum_ij q_ij) [(1 + Delta_Lambda) + (1 + Delta_IS + Delta_Lambda)] = (sum_ij
 
 ## Checks not run
 
-- Published source-term values (open question B2: which table or figure, and whether digitizing a figure is
-  acceptable). No published number is used anywhere in this profile.
-- Any published cross-section parametrization (di Mauro et al., Winkler, Korsmeier et al.): none is reproduced.
+- Published source-term values for the toy model: none exists. The external benchmark (open question B2, 2026-10-15)
+  is a separate path: `scripts/published_benchmark.py` recomputes Table VI of di Mauro et al. 2014 (arXiv:1408.0288v3)
+  from that paper's closed forms and reproduces 12 of 15 entries within the paper's own errors (see the README and
+  `benchmarks/published-source-term-dimauro2014.json`); no value is read off a figure.
+- The Winkler and Korsmeier et al. parametrizations: not implemented (only differential cross-section grids or
+  journal supplements, no tabulated source term to compare with; claim crpb:C11).
 - Propagation and comparison with measured antiproton fluxes (outside this profile).
 
 ## Not a propagation model
