@@ -141,11 +141,28 @@ It takes |Z|, A and the mass from the caller and ships no particle constants; do
 
 ## Tool coverage (honest status)
 
-Common propagation codes include GALPROP, DRAGON and USINE. None of them is installed, run or verified in this
-plugin: they are named only so that a user can state which code produced a number. What is tested is narrower: the
-closed-form secondary-ratio and source-term benchmarks of the two theory-domain profiles, and the grid fit with its
+Common propagation codes include GALPROP, DRAGON and USINE. One of them now runs through the optional
+`adapters/cr-propagation` (owned by hep-computing): DRAGON2 (cosmicrays/DRAGON2-Beta_version, commit cd588707, built
+from source on E2) is `tested-in-declared-environment` for running a JSON run spec and converting the local spectrum
+into one grid-node `prediction` per run, which the comparison gate and `covariance_fit.py` model `tabulated-grid`
+consume unchanged. GALPROP and USINE are `proposed`: not installed, run or verified, named only so that a user can
+state which code produced a number.
+
+What the DRAGON2 runs establish is narrow (convection, reacceleration, energy losses and decay off; the profile's
+ILLUSTRATIVE production cross sections substituted through DRAGON2's data table; recorded outputs replayed in
+`tests/adapters/test_cr_propagation.py`, criteria fixed before the comparison). Against the 1D thin-disc closed form of
+the secondary-ratio theory profile: the high-energy slope of B/C agrees (difference 0.006, tolerance 0.05); the absolute B/C
+does not (DRAGON2 is 32-34% higher at 10-1000 GeV/n, tolerance 30%): DRAGON2's fixed helium target (He/H = 0.11)
+explains a factor 1.14, the rest is not isolated (Inferred: 2D gas and source geometry); the D0/L degeneracy holds within
+2% between L = 2 and 4 kpc but fails at L = 8 kpc (15-18% low), mostly from the radial boundary (moving it from 20 to
+30 kpc reduces the gap to 6-7%). A five-node D0 grid of DRAGON2 runs recovers the D0 of a sixth run within 2% through
+`tabulated-grid`. So results from DRAGON2 and from the closed form are different models: compare them only with the
+geometry, gas, target and cross sections stated. No propagation code is used in a fit to real data, and a global fit
+that runs a propagation code stays outside v1.
+
+The closed-form secondary-ratio and source-term benchmarks of the two theory-domain profiles, and the grid fit with its
 end-to-end example (`examples/bc-propagation-fit`, synthetic B/C data, D0/L recovered and the flat direction reported),
-all at demonstrated-on-synthetic-data. No result from a propagation code and no fit to real data is tested.
+remain at demonstrated-on-synthetic-data. No fit to real data is tested.
 
 ## Sources read (for the kinematics, force-field and antiproton sections; all on 2026-10-13)
 
