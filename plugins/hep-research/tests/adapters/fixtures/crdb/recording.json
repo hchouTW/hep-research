@@ -1,0 +1,52 @@
+{
+ "what": "CRDB (LPSC) REST exports recorded for the offline tests of adapters/crdb; each .csv is the export as served, each .csv.meta.json the sidecar the adapter wrote when it fetched it",
+ "recorded_utc": "2026-10-15T03:03:51Z/2026-10-15T03:04:36Z",
+ "recorded_by": "adapters/crdb/assets/crdb_query.py 0.1.0 fetch --retries 0 (work order ams02-skill-upgrade WP9, network approved by the maintainer)",
+ "environment": "E2: macOS 26.5 arm64, Python 3.13.2 (conda-forge), OpenSSL 3.6.4; standard library only",
+ "crdb_version": "V4.2 (September 2026), read from https://lpsc.in2p3.fr/crdb/welcome.php at 2026-10-15T03:03:59Z (page also states: code last change 13/10/2026; 143 exps from 614 publications, 4429 sub-exps, 452456 data points)",
+ "requests": [
+  {
+   "utc": "2026-10-15T03:03:51Z",
+   "url": "https://lpsc.in2p3.fr/crdb/",
+   "status": 200,
+   "purpose": "front page (version is loaded from welcome.php)"
+  },
+  {
+   "utc": "2026-10-15T03:03:59Z",
+   "url": "https://lpsc.in2p3.fr/crdb/welcome.php",
+   "status": 200,
+   "purpose": "CRDB version"
+  },
+  {
+   "utc": "2026-10-15T03:04:07Z",
+   "file": "ratio_ekn_filtered.csv",
+   "status": 200,
+   "rows": 10
+  },
+  {
+   "utc": "2026-10-15T03:04:22Z",
+   "file": "flux_r_filtered.csv",
+   "status": 200,
+   "rows": 6
+  },
+  {
+   "utc": "2026-10-15T03:04:27Z",
+   "file": "no_match.csv",
+   "status": 200,
+   "rows": 0
+  },
+  {
+   "utc": "2026-10-15T03:04:34Z",
+   "file": "positron_ek_filtered.csv",
+   "status": 200,
+   "rows": 8
+  }
+ ],
+ "observations": [
+  "The REST endpoint redirects to _dialog_result.php with the same query string (final_url in each sidecar).",
+  "exp_dates is not an exact-name match: a filter on a short name also returned rows of a second experiment whose name begins with it (ratio_ekn_filtered.csv holds two experiments; observed once, matching rule not documented here); check EXP-NAME and SUBEXP-NAME of every row.",
+  "energy_start and energy_stop restrict the returned bins.",
+  "A filter that matches nothing returns HTTP 200 and an export with the full header and no data rows.",
+  "The export header lists the 2014, 2020 and 2023 CRDB papers and no release number."
+ ]
+}

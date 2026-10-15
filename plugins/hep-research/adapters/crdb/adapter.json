@@ -1,0 +1,24 @@
+{
+ "id": "adapter:crdb",
+ "version": "0.1.0",
+ "status": "tested-in-declared-environment",
+ "purpose": "Build, run and summarize one query of the CRDB cosmic-ray database (LPSC) REST interface as a secondary cross-check of a primary table (the paper's or its HEPData record), or as a fallback labelled secondary: no default experiment filter, native axis, no query-time combinations or conversions, every row marked secondary and a provenance sidecar (request, UTC retrieval time, CRDB version, export date, SHA-256); optional, network only on fetch",
+ "tools": [
+  {
+   "name": "CRDB REST interface (https://lpsc.in2p3.fr/crdb/rest.php, csv export)",
+   "status": "tested-in-declared-environment",
+   "tested_versions": [
+    "CRDB V4.2 (September 2026) as served 2026-10-15: four live fetch runs on E2 (a ratio on kinetic energy per nucleon, a flux on rigidity with two sub-experiments, a positron flux with the e%2B encoding, a filter matching nothing) recorded and replayed offline (VALIDATION CRDB-ADAPTER)"
+   ]
+  }
+ ],
+ "environment": "E2 (docs/capability-matrix.md): macOS 26.5 arm64, Python 3.13.2, OpenSSL 3.6.4, standard library only. Network: HTTPS GET to lpsc.in2p3.fr, only for the fetch command, one request per run, User-Agent naming the plugin, no credentials, one retry of a transient error and none of a block (401, 403, 429); url and summarize are offline, and the offline tests patch urlopen to fail",
+ "assets": [
+  "assets/crdb_query.py"
+ ],
+ "tests": [
+  "../../tests/adapters/test_crdb_query.py"
+ ],
+ "owner_skill": "hep-theory",
+ "status_rule": "the adapter status is the lowest of its tools' statuses; it stays tested-in-declared-environment only while a live fetch on the declared environment is recorded in VALIDATION.md; a new CRDB release that changes the export layout is a new test; no skill requires this adapter"
+}
