@@ -56,6 +56,13 @@
    "version": "0.1.0",
    "scope": "Antiproton source term (pp, pHe, Hep, HeHe; antineutrons, hyperons); ILLUSTRATIVE toy cross sections",
    "path": "theory/cr-secondary-antiprotons"
+  },
+  {
+   "id": "theory:heliospheric-modulation",
+   "kind": "theory-domain",
+   "version": "0.1.0",
+   "scope": "Force-field solar modulation (via the hep-measurement script): validity, limits, power-law benchmark",
+   "path": "theory/heliospheric-modulation"
   }
  ]
 }

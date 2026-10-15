@@ -1,8 +1,9 @@
 # Galactic cosmic-ray propagation: models, inputs and what a fit can constrain
 
 Purpose: give propagation questions (secondary-to-primary ratios, antiparticle backgrounds, spectral breaks, solar
-modulation) a structured answer instead of memory. Two narrow theory-domain profiles exist (secondary-to-primary
-ratios in a weighted-slab and a 1D thin-disc diffusion model; the secondary antiproton source term), and hep-statistics
+modulation) a structured answer instead of memory. Three narrow theory-domain profiles exist (secondary-to-primary
+ratios in a weighted-slab and a 1D thin-disc diffusion model; the secondary antiproton source term; force-field solar
+modulation, derived and benchmarked against the hep-measurement script), and hep-statistics
 fits grid parameters to a measurement from tabulated predictions (`covariance_fit.py`, model `tabulated-grid`, with the
 degenerate directions reported); both are demonstrated on synthetic data only (`docs/capability-matrix.md`). There is
 no propagation code in the plugin: a global fit that runs one (many species, reacceleration, convection, a code's own
@@ -68,9 +69,11 @@ It takes |Z|, A and the mass from the caller and ships no particle constants; do
   is degenerate with injection and transport parameters (Cholis, Hooper, Linden, arXiv:1511.01507v3, pp. 1-2, read
   2026-10-13). Drift (charge-sign) effects are absent from the formula: one phi per period and per charge sign at most.
 - Code: `<plugin root>/skills/hep-measurement/scripts/solar_modulation_force_field.py` implements it in total kinetic
-  energy with the shift |Z| phi (owned by hep-measurement; its extension to rigidity input and tabulated local
-  interstellar spectra is planned there). Convert rigidity or per-nucleon inputs with
-  `core/kinematics/relativistic.py` first. Do not add a second implementation under hep-theory.
+  energy with the shift |Z| phi, and takes kinetic energy per nucleon or rigidity input and a tabulated local
+  interstellar spectrum (owned by hep-measurement; conversions through `core/kinematics/relativistic.py`). A
+  theory-domain profile in `profiles/registry.json` holds the derivation, the validity table and a closed-form
+  benchmark of a power-law spectrum against this script (synthetic). Do not add a second implementation under
+  hep-theory.
 
 ## Inputs that dominate the uncertainty
 
