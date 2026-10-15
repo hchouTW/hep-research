@@ -1,7 +1,7 @@
 # Python Coding Patterns: PyROOT, uproot, and awkward
 
 Use this reference for concrete Python code and CLI conventions. See
-[Data pipelines](../../hep-analysis/references/data-pipelines.md) for the design-level treatment of chunked
+[Data pipelines](../../hep-measurement/references/data-pipelines.md) for the design-level treatment of chunked
 reads, schema audits, and ownership; this file covers the code-level idioms.
 
 ## Naming
@@ -50,7 +50,7 @@ histogram keeps its entries, and a histogram drawn in a helper is gone from the 
 - Read only the branches required for the event processing at hand.
 - Use awkward masks for jagged collections; check multiplicities before indexing
   `[:, 0]`. With object cuts, count *after* the cuts (see the ordered pattern in
-  [data pipelines](../../hep-analysis/references/data-pipelines.md)).
+  [data pipelines](../../hep-measurement/references/data-pipelines.md)).
 - Convert to NumPy only at plotting or histogram-filling boundaries.
 - Preserve event weights as arrays aligned with the final selected event mask.
 - Document whether a systematic affects weights, object kinematics, or both.
@@ -104,7 +104,7 @@ installed in the plugin's test environment, so no version is claimed here: recor
 - Save plots with explicit paths and `bbox_inches="tight"`.
 - Include luminosity, energy, channel, and region labels when known.
 - Use ratio panels for data/MC comparisons; see
-  [Histograms and uncertainties](../../hep-analysis/references/histograms-efficiencies.md) for what the ratio and
+  [Histograms and uncertainties](../../hep-measurement/references/histograms-efficiencies.md) for what the ratio and
   its uncertainty should represent.
 
 ## Tests
@@ -119,5 +119,5 @@ python -m pytest
 
 For regression validation, compare selected event counts, cutflow counts, histogram
 integrals, maximum absolute/relative bin differences, and fit parameters/uncertainties
-against a reference — see [Validation](../../hep-analysis/references/analysis-validation.md) for the full regression
+against a reference — see [Validation](../../hep-measurement/references/analysis-validation.md) for the full regression
 checklist.

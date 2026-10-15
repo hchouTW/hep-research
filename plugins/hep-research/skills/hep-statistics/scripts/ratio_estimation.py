@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Likelihood-ratio estimation by classification, checked against an analytic oracle (audit T30). EXPERIMENTAL.
 Needs NumPy. A calibratable example, not a production simulation-based-inference tool: model training beyond this
-belongs to physics-ml (ml-artifact handoff), and its use in an inference to hep-statistics with this check.
+belongs to hep-ml (ml-artifact handoff), and its use in an inference to hep-statistics with this check.
 
 Model: x ~ Normal(theta + nu, 1) with a nuisance nu ~ Normal(0, sigma_nu) marginalized; hypotheses theta0 = 0 and
 theta1. The exact marginal densities are Normal(theta, 1 + sigma_nu^2), so the exact log-ratio is quadratic in x (here

@@ -4,13 +4,13 @@
 
 ## Background
 
-`skills/physics-ml/assets/train_classifier.py` is a training template that
+`skills/hep-ml/assets/train_classifier.py` is a training template that
 "uses synthetic data so it runs immediately"; `make_dataloaders(args)` builds
 `--train-size` (default 8000) and `--val-size` (default 2000) samples with no
-sample IDs. `skills/physics-ml/scripts/check_split_integrity.py` checks a JSON
+sample IDs. `skills/hep-ml/scripts/check_split_integrity.py` checks a JSON
 manifest of split IDs for exact overlap, duplicates within a split, group
 leakage and temporal ordering, and exits nonzero on failure; its example
-manifest `skills/physics-ml/assets/dataset-splits.example.json` fails on
+manifest `skills/hep-ml/assets/dataset-splits.example.json` fails on
 purpose (one run, `run-1002`, in train and test, and one timestamp violation).
 Nothing connects the two, so a user who replaces the synthetic data with a real
 dataset can train on leaked splits without the check ever running.
@@ -40,18 +40,18 @@ behaves as today.
 
 Verified by inspection on 2026-10-07:
 
-- `skills/physics-ml/assets/train_classifier.py` is 237 lines, has argparse
+- `skills/hep-ml/assets/train_classifier.py` is 237 lines, has argparse
   options including `--train-size`, `--val-size`, `--output-dir`, `--seed`,
   `--epochs`, `--device` and `--num-workers`, and no manifest option; it saves
   `last.pt` every epoch and `best.pt` on improvement.
-- `skills/physics-ml/scripts/check_split_integrity.py` exposes
+- `skills/hep-ml/scripts/check_split_integrity.py` exposes
   `check(payload, strict=False)`, which returns a report whose status is
   `passed`, `failed` or `incomplete`, plus `find_overlaps`,
   `find_duplicates`, `find_group_leakage` and `find_temporal_violations`.
-- `tests/skills/physics_ml/test_physics_ml_skill.py` imports `check` and the
+- `tests/skills/hep_ml/test_hep_ml_skill.py` imports `check` and the
   `find_*` functions and runs the script as a subprocess on the example
   manifest, asserting exit code 1 and `FAILED` and `group leakage` in the
-  output; `tests/skills/physics_ml/test_assets_smoke.py` runs
+  output; `tests/skills/hep_ml/test_assets_smoke.py` runs
   `train_classifier.py` on CPU (`--train-size 200 --val-size 50 --epochs 1`)
   and asserts that `best.pt` exists, skipping without PyTorch.
 - `assets/` and `scripts/` are sibling folders of the skill; no file in
@@ -72,15 +72,15 @@ Verified by inspection on 2026-10-07:
 
 ## Deliverables
 
-- Updated `skills/physics-ml/assets/train_classifier.py`.
-- New tests in `tests/skills/physics_ml/`.
-- A line naming the flag in `skills/physics-ml/references/deep-learning-guide.md`
+- Updated `skills/hep-ml/assets/train_classifier.py`.
+- New tests in `tests/skills/hep_ml/`.
+- A line naming the flag in `skills/hep-ml/references/deep-learning-guide.md`
   where the template is listed, if that list documents arguments (not checked
   here).
 
 ## Acceptance Criteria
 
-- `python3 skills/physics-ml/assets/train_classifier.py --split-manifest skills/physics-ml/assets/dataset-splits.example.json`
+- `python3 skills/hep-ml/assets/train_classifier.py --split-manifest skills/hep-ml/assets/dataset-splits.example.json`
   exits nonzero before the first epoch and the output names the group leak and
   the temporal violation.
 - A manifest that passes the check allows training to start and finish a
@@ -89,7 +89,7 @@ Verified by inspection on 2026-10-07:
 - Without `--split-manifest`, the existing smoke test passes unchanged.
 - No logic from `check_split_integrity.py` is duplicated in the training
   script.
-- The pre-existing tests in `tests/skills/physics_ml/` still pass, with and
+- The pre-existing tests in `tests/skills/hep_ml/` still pass, with and
   without PyTorch installed (the new tests skip without it, like the smoke
   test).
 
@@ -117,8 +117,8 @@ Verified by inspection on 2026-10-07:
 
 ## References
 
-- `skills/physics-ml/assets/train_classifier.py`
-- `skills/physics-ml/scripts/check_split_integrity.py`
-- `skills/physics-ml/assets/dataset-splits.example.json`
-- `tests/skills/physics_ml/test_assets_smoke.py`
-- `tests/skills/physics_ml/test_physics_ml_skill.py`
+- `skills/hep-ml/assets/train_classifier.py`
+- `skills/hep-ml/scripts/check_split_integrity.py`
+- `skills/hep-ml/assets/dataset-splits.example.json`
+- `tests/skills/hep_ml/test_assets_smoke.py`
+- `tests/skills/hep_ml/test_hep_ml_skill.py`

@@ -24,7 +24,7 @@ which beats a hand-tuned one.
 - Particle-level analysis: the paper and its cutflow, object definitions, overlap removal and signal regions as
   implemented; the Rivet or MA5 version.
 - Detector: the Delphes version and the exact card (copied, not referenced by name), or the published efficiency map
-  and its validity range (detector-response); never both for the same effect.
+  and its validity range (hep-detector); never both for the same effect.
 - Statistics: how the limit was set (the tool's own CLs, a published likelihood, or core.stats) and the background and
   its uncertainty taken from the paper (hep-statistics).
 

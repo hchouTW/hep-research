@@ -40,15 +40,15 @@ on hardware the maintainer may use:
 
 | Variable | Test | Needs |
 |---|---|---|
-| `HEP_TORCH_GPU_TEST=1` | `tests/skills/physics_ml/test_gpu_real.py` | a CUDA GPU; two visible GPUs for the NCCL test |
+| `HEP_TORCH_GPU_TEST=1` | `tests/skills/hep_ml/test_gpu_real.py` | a CUDA GPU; two visible GPUs for the NCCL test |
 | `HEP_SLURM_TEST=1` + `HEP_SLURM_CONFIG` | `RealSlurmTests` in `tests/adapters/test_batch_slurm.py` | `sbatch`, a reviewed batch configuration |
 | `HEP_HTCONDOR_TEST=1` + `HEP_HTCONDOR_CONFIG` | `RealHTCondorTests` in `tests/adapters/test_batch_htcondor.py` | `condor_submit`, a reviewed batch configuration |
 
 Setting a variable is the approval to use that hardware or account. Without it the tests skip, and a skip is
 unverified, never passing.
 
-- **Before a release that changes `physics-ml` GPU paths** (assets, `scripts/check_pytorch_env.py`,
-  `test_gpu_real.py`): run `check_pytorch_env.py` and the physics-ml test modules with `HEP_TORCH_GPU_TEST=1` on
+- **Before a release that changes `hep-ml` GPU paths** (assets, `scripts/check_pytorch_env.py`,
+  `test_gpu_real.py`): run `check_pytorch_env.py` and the hep-ml test modules with `HEP_TORCH_GPU_TEST=1` on
   every GPU type claimed in the capability matrix (each with a torch build compiled for it; the script exits 3 when
   the build cannot use the GPU), one job with two GPUs. Before a release that changes the batch adapter, run the
   matching scheduler test. Record the result in `VALIDATION.md`; a type not rerun stays at its last recorded date.
@@ -62,7 +62,7 @@ unverified, never passing.
 
 Every `SKILL.md` must stay at or under 8,192 bytes (`tools/measure_entrypoints.py`, run by `run_all_checks.py`).
 On 2026-10-13 the three files that sat at the limit were trimmed by moving their reference and script lists into index
-sections of their primary reference (`detector-response`: section 11 of the principles summary; `hep-statistics`:
+sections of their primary reference (`hep-detector`: section 11 of the principles summary; `hep-statistics`:
 "Skill scripts" in the core/stats guide; `hep-computing`: "Scripts" in the engineering playbook); they now measure
 6,566, 7,545 and 7,598 bytes. Keep new material in those index sections, not in `SKILL.md`. A change to what a skill
 reads before it acts needs the routing checks (`check_routing_static.py`, `check_ownership.py`) and a live routing
@@ -119,7 +119,13 @@ Readers apply a version policy (`contracts/validate.py`, since 2.1.0): a newer m
 warning, or an error with `--strict-versions` or in protected mode (`--protected`, or a project with
 `agent_policy`); `versions.contracts` must equal `contract_version`; an unknown entry in
 `required_capabilities` is an error (add new capabilities to `contracts.KNOWN_CAPABILITIES` when a reader implements
-them). `contracts/dependencies.py` validates every source the same way. Artifacts record the code identity in
+them). `contracts/dependencies.py` validates every source the same way. The same flag carries the name policy
+(contracts 2.9.0, "version and name policy"): a deprecated skill name (the four names renamed in 0.11.0, listed in
+`contracts/skill_names.py` and `contracts/schemas/skill_names.json`) in `provenance.producer_skill`, `handoff.to_skill`
+or an extension `handoff` is a warning (`skill.deprecated_name`), an error with `--strict-versions` or in protected
+mode; in a profile's `related_skills` it is `profile.deprecated_skill_name` (`contracts/registry.py
+--strict-versions`). `contracts/migrate_skill_names.py OLD.json --out NEW.json` rewrites `producer_skill` and
+`to_skill` and nothing else. The aliases are removed one or two releases after the rename. Artifacts record the code identity in
 `versions.plugin_release` through `contracts/identity.py`; older artifacts lack it and their identity is unknown.
 
 Communication records come in two formats. A legacy record (claims with `result_ref` and a status) stays valid and

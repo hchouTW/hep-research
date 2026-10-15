@@ -23,14 +23,14 @@ design guidelines (P1), move only the web, sprint, feature-flag and accessibilit
   `design-and-estimation.md` and the Accessibility section of `risk-and-quality.md` moved to
   [dev/engineering/web-and-delivery-practices.md](dev/engineering/web-and-delivery-practices.md). Each old place keeps
   a one-line pointer; the skill's links point to the new paths. Kept in the skill: `agile-development-guide.md`
-  (cited by physics-ml), `prompt-engineering-and-token-optimization.md` and `loop-engineering.md` (required by
+  (cited by hep-ml), `prompt-engineering-and-token-optimization.md` and `loop-engineering.md` (required by
   `scripts/validate_skill_bundle.py` and the task guide), and the six task- and example-authoring scripts (CMP-27
   deferred).
 
 ## What the inventory shows
 
-- 193 references in 7 skills, 1.61 MB (inventory of 2026-10-14 after the detector-response, physics-ml and
-  research-communication audits were integrated; it was 169
+- 193 references in 7 skills, 1.61 MB (inventory of 2026-10-14 after the hep-detector, hep-ml and
+  hep-communication audits were integrated; it was 169
   and 1.38 MB when these proposals were written); every reference is cited by at least one plugin file (no orphans).
 - Textual overlap is low: only three pairs reach the listing thresholds (Jaccard >= 0.08 or 15% of the smaller file's
   8-word shingles found in the other). Similar names mostly mark different topics, not duplicates; the
@@ -43,15 +43,15 @@ design guidelines (P1), move only the web, sprint, feature-flag and accessibilit
 | # | References | Evidence | Proposal | Why, and what it would change |
 |---|---|---|---|---|
 | P1 | `hep-computing`: `cpp-balanced-design-guidelines.md` (26 KB), `root-balanced-design-guidelines.md` (48 KB), `python-balanced-design-guidelines.md` (31 KB) | containment 0.37 (C++ in ROOT) and 0.26 (C++ in Python); 14 paragraphs of more than 80 characters are word-identical between the C++ and ROOT guides; same section skeleton | **Merge the shared part**: one `balanced-design-core.md` (core principle, class/struct/free-function choice, encapsulation, state, error handling, checklist) and keep each language file as its deltas | The repeated text is maintained three times and can drift; about 15–25 KB less. Changes 13 citing files' links; no routing change. Medium effort, low risk |
-| P2 | `hep-computing`: `agile-development-guide.md`, `product-framing.md`, `prompt-engineering-and-token-optimization.md`, `loop-engineering.md`, `engineering-playbook.md` (web features: endpoints, UI, database migrations) | general software process, no physics content; 39 KB; `agile-development-guide.md` is cited from `physics-ml` | **Move to a separate plugin** (for example a general engineering plugin), leaving one sentence in `hep-computing` that points to it | Keeps `hep-computing` on research code. Reverses the 2026-10-03 keep decision, so it is the maintainer's call; it would also need the links in about 20 citing files replaced, among them `task-authoring-guide.md`, `assets/task-template.md` and `scripts/validate_skill_bundle.py`, which requires `loop-engineering.md` and `prompt-engineering-and-token-optimization.md` in the bundle. Not recommended |
-| P3 | `research-communication`: `academic-diagrams-guide.md` (router), `general-diagram-principles.md` (modelling), `diagram-figure-style.md` (typography, color, geometry), `diagram-captions.md` | no textual overlap above 0.05 between any two; distinct sections; only the guide is linked from SKILL.md, the others through it | **Keep separate; no merge.** Optionally rename `diagram-figure-style.md` to `figure-style.md`, since it also covers non-diagram figures | The names suggest duplication that the text does not have. A rename touches 2 links. Low value; optional |
-| P4 | `detector-response`: `core-detector-equations.md` (6 KB) and `detector-principles-summary.md` (19 KB) | containment 0.18 (equations quoted in the summary) | **Keep both**; replace the equations repeated in the summary with links to `core-detector-equations.md` | The equations file is the single place a formula is checked; a copy in the summary can diverge. Small edit, no routing change |
+| P2 | `hep-computing`: `agile-development-guide.md`, `product-framing.md`, `prompt-engineering-and-token-optimization.md`, `loop-engineering.md`, `engineering-playbook.md` (web features: endpoints, UI, database migrations) | general software process, no physics content; 39 KB; `agile-development-guide.md` is cited from `hep-ml` | **Move to a separate plugin** (for example a general engineering plugin), leaving one sentence in `hep-computing` that points to it | Keeps `hep-computing` on research code. Reverses the 2026-10-03 keep decision, so it is the maintainer's call; it would also need the links in about 20 citing files replaced, among them `task-authoring-guide.md`, `assets/task-template.md` and `scripts/validate_skill_bundle.py`, which requires `loop-engineering.md` and `prompt-engineering-and-token-optimization.md` in the bundle. Not recommended |
+| P3 | `hep-communication`: `academic-diagrams-guide.md` (router), `general-diagram-principles.md` (modelling), `diagram-figure-style.md` (typography, color, geometry), `diagram-captions.md` | no textual overlap above 0.05 between any two; distinct sections; only the guide is linked from SKILL.md, the others through it | **Keep separate; no merge.** Optionally rename `diagram-figure-style.md` to `figure-style.md`, since it also covers non-diagram figures | The names suggest duplication that the text does not have. A rename touches 2 links. Low value; optional |
+| P4 | `hep-detector`: `core-detector-equations.md` (6 KB) and `detector-principles-summary.md` (19 KB) | containment 0.18 (equations quoted in the summary) | **Keep both**; replace the equations repeated in the summary with links to `core-detector-equations.md` | The equations file is the single place a formula is checked; a copy in the summary can diverge. Small edit, no routing change |
 | P5 | `hep-computing`: `task-authoring-guide.md` and `task-quality-checklist.md` (3 KB) | the checklist is reached only through the guide | **Keep**, no change | The checklist is a short separate tool the guide loads on demand; merging would only lengthen the guide |
 
 ## Not proposed
 
 - No reference is removed: none is uncited, and size alone is not a reason.
-- The `research-communication` (56 references) and `physics-ml` (38) counts are high, but their name families
+- The `hep-communication` (56 references) and `hep-ml` (38) counts are high, but their name families
   (diagram patterns per tool, training topics, review types) are separate topics with low text overlap.
 
 ## Entry-point budgets

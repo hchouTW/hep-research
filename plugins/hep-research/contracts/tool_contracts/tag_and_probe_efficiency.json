@@ -1,7 +1,7 @@
 {
  "contract_version": "1.0.0",
  "tool_id": "tag-and-probe-efficiency",
- "entry": "skills/detector-response/scripts/tag_and_probe_efficiency.py",
+ "entry": "skills/hep-detector/scripts/tag_and_probe_efficiency.py",
  "operations": [
   {
    "operation_id": "efficiency",

@@ -1,4 +1,4 @@
-"""Journey J9 (physics-ml -> hep-statistics): SYNTHETIC classifier to signal-strength fit. One run with the default
+"""Journey J9 (hep-ml -> hep-statistics): SYNTHETIC classifier to signal-strength fit. One run with the default
 seed and toys, with PyTorch made unimportable (the default trainer is NumPy); it must pass every pre-declared
 criterion, reproduce the committed results.json byte for byte, and write an ml-artifact and a statistical-result
 that validate, with the ml-artifact's grouping key, split check, calibration and domain-shift check recorded and the

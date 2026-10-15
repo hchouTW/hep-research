@@ -571,7 +571,7 @@
     "tier_range": null,
     "tier_text": "2",
     "verification_level": "not-verified",
-    "verification_note": "carried from `hep-analysis` reference 38",
+    "verification_note": "carried from `hep-measurement` reference 38",
     "verification_date": "unknown",
     "publication_date": "2017",
     "data_taking_period": null,
@@ -579,7 +579,7 @@
     "superseded_by": [],
     "supersession_note": null,
     "notes": null,
-    "verification_limitations": "Not verified this session (carried from hep-analysis reference 38).",
+    "verification_limitations": "Not verified this session (carried from hep-measurement reference 38).",
     "formal_status": "official-document"
   },
   {

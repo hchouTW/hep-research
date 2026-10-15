@@ -67,8 +67,8 @@ It takes |Z|, A and the mass from the caller and ships no particle constants; do
   potential; studies often use different phi for positive and negative charges to allow charge-sign effects, and phi
   is degenerate with injection and transport parameters (Cholis, Hooper, Linden, arXiv:1511.01507v3, pp. 1-2, read
   2026-10-13). Drift (charge-sign) effects are absent from the formula: one phi per period and per charge sign at most.
-- Code: `<plugin root>/skills/hep-analysis/scripts/solar_modulation_force_field.py` implements it in total kinetic
-  energy with the shift |Z| phi (owned by hep-analysis; its extension to rigidity input and tabulated local
+- Code: `<plugin root>/skills/hep-measurement/scripts/solar_modulation_force_field.py` implements it in total kinetic
+  energy with the shift |Z| phi (owned by hep-measurement; its extension to rigidity input and tabulated local
   interstellar spectra is planned there). Convert rigidity or per-nucleon inputs with
   `core/kinematics/relativistic.py` first. Do not add a second implementation under hep-theory.
 

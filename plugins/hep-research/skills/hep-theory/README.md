@@ -16,7 +16,7 @@ Use when the deliverable is a theoretical or phenomenological result: model defi
 
 ## Scripts
 
-`dis_kinematics.py` (invariants, beam relations, Jacobians, frames; lepton-mass bounds), `pdf_uncertainty.py` (`+as` alpha_s members, `num_members`), `event_weights.py` (signed weights pass unclipped; selected-event statistics), `eft_truncation.py` (cross-term convention, rescaling check). Each refuses non-finite or ambiguous input with exit 1 and a JSON reason. The SymPy interpreter for derivations is chosen by `skills/hep-computing/scripts/find_python.py`. A HEPData table becomes a dataset record through `adapters/hepdata/assets/hepdata_record.py`. Compiled cosmic-ray data from CRDB (LPSC) come through the optional `adapters/crdb/assets/crdb_query.py` (`tested-in-declared-environment`, CRDB V4.2): a secondary source, so HEPData or the paper's tables stay primary and a CRDB value is a cross-check or a fallback labelled secondary; the experiment filter has no default and every row is labelled secondary. Cosmic-ray kinematics (rigidity, momentum, total and kinetic energy, kinetic energy per nucleon, bin edges and flux Jacobians) is `core/kinematics/relativistic.py` (steward hep-theory), and force-field solar modulation is `skills/hep-analysis/scripts/solar_modulation_force_field.py`; `references/cosmic-ray-propagation.md` states their conventions.
+`dis_kinematics.py` (invariants, beam relations, Jacobians, frames; lepton-mass bounds), `pdf_uncertainty.py` (`+as` alpha_s members, `num_members`), `event_weights.py` (signed weights pass unclipped; selected-event statistics), `eft_truncation.py` (cross-term convention, rescaling check). Each refuses non-finite or ambiguous input with exit 1 and a JSON reason. The SymPy interpreter for derivations is chosen by `skills/hep-computing/scripts/find_python.py`. A HEPData table becomes a dataset record through `adapters/hepdata/assets/hepdata_record.py`. Compiled cosmic-ray data from CRDB (LPSC) come through the optional `adapters/crdb/assets/crdb_query.py` (`tested-in-declared-environment`, CRDB V4.2): a secondary source, so HEPData or the paper's tables stay primary and a CRDB value is a cross-check or a fallback labelled secondary; the experiment filter has no default and every row is labelled secondary. Cosmic-ray kinematics (rigidity, momentum, total and kinetic energy, kinetic energy per nucleon, bin edges and flux Jacobians) is `core/kinematics/relativistic.py` (steward hep-theory), and force-field solar modulation is `skills/hep-measurement/scripts/solar_modulation_force_field.py`; `references/cosmic-ray-propagation.md` states their conventions.
 
 ## References
 
@@ -28,9 +28,9 @@ Use when the deliverable is a theoretical or phenomenological result: model defi
 |---|---|
 | Fit, interval, limit, model comparison | hep-statistics |
 | Numerical convergence, symbolic/numeric cross-check code | hep-computing |
-| Folding into detector space | detector-response, then hep-statistics |
-| Surrogate of an expensive prediction | physics-ml |
-| Paper section or Feynman-diagram rendering | research-communication |
+| Folding into detector space | hep-detector, then hep-statistics |
+| Surrogate of an expensive prediction | hep-ml |
+| Paper section or Feynman-diagram rendering | hep-communication |
 
 ## Tests and validation
 

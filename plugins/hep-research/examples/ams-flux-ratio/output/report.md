@@ -28,7 +28,7 @@ A synthetic 5% of the selected Z=1 events has a charge estimator Q above 1.3 wit
 
 ## Blinding (synthetic policy)
 
-The helium signal-region count in the bin 60-100 GV is blinded in both periods. A custodian step (`skills/hep-analysis/scripts/mask_blinded_bins.py`) masks it before the analysis reads the histograms; the released files are `blinded/helium_signal_region_synthetic-period-1.masked.json`, `blinded/helium_signal_region_synthetic-period-2.masked.json`. The unfolding fills the blinded bin with the simulated helium expectation and zero variance, so no published number depends on its count. The helium flux, the He/p ratio and the period average are null in that bin in `results.json`, the dataset records stop at 60 GV, and the figures show 2-60 GV. Proton counts and the charge sidebands stay open. Nothing here unblinds; that is done by an authorized person outside the agent session.
+The helium signal-region count in the bin 60-100 GV is blinded in both periods. A custodian step (`skills/hep-measurement/scripts/mask_blinded_bins.py`) masks it before the analysis reads the histograms; the released files are `blinded/helium_signal_region_synthetic-period-1.masked.json`, `blinded/helium_signal_region_synthetic-period-2.masked.json`. The unfolding fills the blinded bin with the simulated helium expectation and zero variance, so no published number depends on its count. The helium flux, the He/p ratio and the period average are null in that bin in `results.json`, the dataset records stop at 60 GV, and the figures show 2-60 GV. Proton counts and the charge sidebands stay open. Nothing here unblinds; that is done by an authorized person outside the agent session.
 
 ## What the chain does
 

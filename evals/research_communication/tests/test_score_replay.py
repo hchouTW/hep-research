@@ -22,7 +22,7 @@ CASES = json.loads((EVAL / "cases" / "cases.json").read_text(encoding="utf-8"))
 BY_ID = {c["id"]: c for c in CASES["cases"]}
 
 
-def output(case_id, prose, *, skill="research-communication", structured=None, semantic="pass", unresolved=None):
+def output(case_id, prose, *, skill="hep-communication", structured=None, semantic="pass", unresolved=None):
     return {"case_id": case_id, "skill_loaded": skill, "prose": prose, "structured": structured or {},
             "unresolved": unresolved if unresolved is not None else [], "judgments": {"semantic": semantic}}
 
@@ -202,7 +202,7 @@ class LiveRunner(unittest.TestCase):
         fake = EVAL.parent / "routing" / "tests" / "fake_claude.py"
         with tempfile.TemporaryDirectory() as td:
             routes = Path(td) / "routes.json"
-            routes.write_text(json.dumps({"ratio R": [["hep-research:research-communication"],
+            routes.write_text(json.dumps({"ratio R": [["hep-research:hep-communication"],
                                                       "The ratio R is 1.02 +/- 0.05 (claim:C1); 0.98 (claim:C2) is a synthetic illustration."]}))
             env = dict(os.environ, FAKE_ROUTES=str(routes), FAKE_LOG=str(Path(td) / "calls.log"), FAKE_COST="0.05", FAKE_PLUGINS="hep-research")
             run = subprocess.run([sys.executable, str(EVAL / "run_live_eval.py"), "--model", "fake-model", "--ids", "rc-eval-01-trace",
@@ -216,7 +216,7 @@ class LiveRunner(unittest.TestCase):
             shutil.rmtree(EVAL / "runs" / "test-fake", ignore_errors=True)
         self.assertEqual(out["meta"]["live"], True)
         self.assertEqual(out["meta"]["tool_access"], ["Skill", "Read", "Glob", "Grep"])
-        self.assertEqual(out["outputs"][0]["skill_loaded"], "research-communication")
+        self.assertEqual(out["outputs"][0]["skill_loaded"], "hep-communication")
         self.assertEqual(out["outputs"][0]["judgments"], {"semantic": "unjudged"})
         self.assertEqual(res["counts"]["unjudged"], 1, res["counts"])
         self.assertEqual(res["live_run"], True)

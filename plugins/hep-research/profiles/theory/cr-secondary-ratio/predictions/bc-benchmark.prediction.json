@@ -153,7 +153,7 @@
    }
   ],
   "allowed_transformations": [
-   "solar modulation (outside this profile; force field in hep-analysis)",
+   "solar modulation (outside this profile; force field in hep-measurement)",
    "rebin (recompute the ln(E/n) average; never merge averaged values)"
   ]
  }

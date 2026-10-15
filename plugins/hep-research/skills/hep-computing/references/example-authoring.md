@@ -125,7 +125,7 @@ Monitoring Rules.
 Common blanks:
 - `{role}` - a specific seniority + specialty (e.g. "Staff Software Engineer",
   "Senior Experimental Particle Physicist"), not a generic "expert."
-- `{skill}` - the target skill's folder name (e.g. `hep-analysis`).
+- `{skill}` - the target skill's folder name (e.g. `hep-measurement`).
 - `{domain_use_case}` / `{problem_input}` / `{high_stakes_task}` /
   `{challenging_scenario_with_edge_cases}` / `{user_request}` /
   `{candidate_artifact}` / `{target}` / `{incident}` - a concrete, narrow
@@ -306,8 +306,8 @@ and timestamps identical wherever they recur (header, timeline, body, 5-Whys).
 
 The validator enforces structure, per-archetype rules (gate lines, table
 shape, code-fence presence), and rejects placeholders; it cannot verify that a
-`hep-analysis` systematics example is physically correct, that a
-`physics-ml` example's code actually runs, or that Gated Pipeline's Phase 2
+`hep-measurement` systematics example is physically correct, that a
+`hep-ml` example's code actually runs, or that Gated Pipeline's Phase 2
 cites a genuinely specific regulatory/evaluation criterion rather than a vague
 "industry best practices" - that specificity check is a review responsibility,
 not a mechanical one. Treat all of this as a review step, not something to

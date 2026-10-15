@@ -1,6 +1,6 @@
 # Reconstruction, Selection, and Data Quality
 
-> Method owner: [detector-response](../../../../../skills/detector-response/SKILL.md) defines the general method (reconstruction and data-quality methods). This module records how AMS-02 analyses apply it. Where a general statement here differs from the owner, the owner's text applies.
+> Method owner: [hep-detector](../../../../../skills/hep-detector/SKILL.md) defines the general method (reconstruction and data-quality methods). This module records how AMS-02 analyses apply it. Where a general statement here differs from the owner, the owner's text applies.
 
 ## When to read this file
 

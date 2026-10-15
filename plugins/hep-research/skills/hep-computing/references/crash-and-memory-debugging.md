@@ -110,6 +110,6 @@ shell. In a batch job, enable core files (`ulimit -c unlimited`) and analyse the
 
 ## Handoffs
 
-- Wrong numbers without a crash: [validation and done](validation-and-done.md) and hep-analysis.
+- Wrong numbers without a crash: [validation and done](validation-and-done.md) and hep-measurement.
 - Slow but correct: [performance profiling](performance-profiling.md).
-- A model's training memory: physics-ml.
+- A model's training memory: hep-ml.

@@ -1,5 +1,5 @@
 {
- "contract_version": "2.8.0",
+ "contract_version": "2.9.0",
  "bindings": {
   "experiments": [
    {
@@ -16,7 +16,7 @@
  },
  "versions": {
   "plugin": "0.10.1",
-  "contracts": "2.8.0",
+  "contracts": "2.9.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -33,7 +33,7 @@
  "inputs": [],
  "objective": "SYNTHETIC reconstructed cos theta counts generated at mu = 1 (sigma_gen = sigma_pred)",
  "provenance": {
-  "producer_skill": "hep-analysis",
+  "producer_skill": "hep-measurement",
   "created": "2026-10-02"
  },
  "status": [

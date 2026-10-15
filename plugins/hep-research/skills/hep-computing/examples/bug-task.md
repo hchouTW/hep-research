@@ -50,7 +50,7 @@ a warning), or suffix matching is limited to the cases the docstring names
 ### Out of Scope
 
 - `PATH_RE`, which only matches paths with a file extension; directory paths
-  such as `skills/physics-ml/assets/` and extension-less files are never
+  such as `skills/hep-ml/assets/` and extension-less files are never
   checked. That is a separate gap, noted here and not fixed.
 - The section, placeholder and loop-limit checks of the linter.
 - `validate_skill_bundle.py` and `check_template_sections()`, which the linter

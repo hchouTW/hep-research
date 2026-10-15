@@ -302,7 +302,7 @@ class FitStatusAuditT03(unittest.TestCase):
                     extension={"paradigm": "likelihood-only", "likelihood": {"form": "extended Poisson, Barlow-Beeston"},
                                "parameters_of_interest": ["sig"], "nuisances": [], "fit_status": res["artifact_fit_status"]})
         self.assertTrue(validate_artifact(stat).ok, validate_artifact(stat).as_dict())
-        comm = dict(env, artifact_type="communication", status=["synthetic"], provenance={"producer_skill": "research-communication", "created": "2026-10-03"},
+        comm = dict(env, artifact_type="communication", status=["synthetic"], provenance={"producer_skill": "hep-communication", "created": "2026-10-03"},
                     inputs=[{"ref": "fit.json", "artifact_type": "statistical-result", "status": stat["status"]}],
                     extension={"claims": [{"text": "sig yield", "result_ref": "fit.json", "status": ["synthetic"]}], "sources_read": [], "limitations": []})
         self.assertFalse(validate_artifact(comm).ok, "a claim from a failed fit must carry 'failed'")

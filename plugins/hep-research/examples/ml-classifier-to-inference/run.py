@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""J9 (physics-ml -> hep-statistics): SYNTHETIC classifier with grouped splits, calibration and a domain-shift check,
+"""J9 (hep-ml -> hep-statistics): SYNTHETIC classifier with grouped splits, calibration and a domain-shift check,
 whose calibrated score feeds a binned template fit of a signal strength.
 
 SYNTHETIC and ILLUSTRATIVE. Every sample is invented here: a toy e+e- -> mu+mu- "signal" against a broad
@@ -24,7 +24,7 @@ Chain:
     control sample, against a noise floor from seeded unshifted replicas; inference-time domain flags on the
     pseudo-data (scripts/check_surrogate_domain.py).
  6. ml-artifact (scripts/write_ml_artifact.py), status synthetic, output_semantics score (decision Q5 of the
-    physics-ml audit: the calibration is recorded, but on this sample it is a no-op within the finite-sample ECE
+    hep-ml audit: the calibration is recorded, but on this sample it is a no-op within the finite-sample ECE
     floor, so the fitted variable is used as a monotone score, not read as a probability), downstream
     validation = effect on the signal strength (Asimov closure, toy pulls and coverage, shift from the measured
     control-sample scale), not AUC.
@@ -55,7 +55,7 @@ import numpy as np
 from scipy import optimize
 
 PLUGIN = Path(__file__).resolve().parents[2]
-ML = PLUGIN / "skills" / "physics-ml"
+ML = PLUGIN / "skills" / "hep-ml"
 PROFILE_DIR = PLUGIN / "profiles" / "experiments" / "synthetic-collider"
 sys.path.insert(0, str(PLUGIN))
 sys.path.insert(0, str(ML / "assets"))

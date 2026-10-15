@@ -1,5 +1,5 @@
 {
- "contract_version": "2.8.0",
+ "contract_version": "2.9.0",
  "artifact_id": "fixture-synthetic-communication",
  "artifact_type": "communication",
  "objective": "SYNTHETIC structural fixture; values are placeholders, not physics",
@@ -9,11 +9,11 @@
  },
  "versions": {
   "plugin": "0.6.12",
-  "contracts": "2.8.0",
+  "contracts": "2.9.0",
   "profiles": {}
  },
  "provenance": {
-  "producer_skill": "research-communication",
+  "producer_skill": "hep-communication",
   "created": "2026-10-02",
   "evidence_ids": []
  },

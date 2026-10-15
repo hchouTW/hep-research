@@ -26,7 +26,7 @@ print(json.dumps({"type": "system", "subtype": "init", "session_id": session, "m
                   "claude_code_version": "9.9.9", "plugins": plugins, "tools": ["Skill", "Read"]}))
 for s in skills:
     print(json.dumps({"type": "assistant", "message": {"content": [{"type": "tool_use", "name": "Skill", "input": {"skill": s}}]}}))
-    if s.endswith("hep-analysis"):
+    if s.endswith("hep-measurement"):
         print(json.dumps({"type": "assistant", "message": {"content": [{"type": "tool_use", "name": "Read",
               "input": {"file_path": "/plug/profiles/experiments/x/index.md"}}]}}))
 print("not json: progress line")

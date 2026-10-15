@@ -13,7 +13,7 @@ not a restatement of general HEP statistics.
 
 For the flux and interval of a few-count spectral bin (why `sqrt(N)` is wrong, units,
 resolution spillover, background), read
-[low-count, high-rigidity bins](../../detector-response/references/space-based-direct-detection.md#low-count-high-rigidity-bins).
+[low-count, high-rigidity bins](../../hep-detector/references/space-based-direct-detection.md#low-count-high-rigidity-bins).
 
 ## The ON/OFF counting problem and Li & Ma significance
 
@@ -21,8 +21,8 @@ The canonical astroparticle measurement is a Poisson counting experiment with si
 region counts `N_on` (source direction/energy/time window) and a background estimate
 `N_off` drawn from a region with no expected signal but `alpha` times less (or more)
 exposure/normalization than the ON region - used throughout
-[imaging Cherenkov](../../detector-response/references/imaging-atmospheric-cherenkov.md) and
-[neutrino astronomy](../../detector-response/references/neutrino-astronomy.md) alike. The **Li & Ma (1983)**
+[imaging Cherenkov](../../hep-detector/references/imaging-atmospheric-cherenkov.md) and
+[neutrino astronomy](../../hep-detector/references/neutrino-astronomy.md) alike. The **Li & Ma (1983)**
 significance, derived from the likelihood ratio between the signal-plus-background and
 background-only hypotheses under this model, is
 
@@ -52,8 +52,8 @@ recur in review of this statistic:
   nuisance and conservative for discrete data). Name the method next to the number.
 - `alpha` must be measured or modeled correctly for the exposure/acceptance actually
   achieved by each region (see the background-estimation discussion in
-  [imaging Cherenkov](../../detector-response/references/imaging-atmospheric-cherenkov.md) and
-  [neutrino astronomy](../../detector-response/references/neutrino-astronomy.md)); an `alpha` that silently drifts
+  [imaging Cherenkov](../../hep-detector/references/imaging-atmospheric-cherenkov.md) and
+  [neutrino astronomy](../../hep-detector/references/neutrino-astronomy.md)); an `alpha` that silently drifts
   with time, zenith angle, or camera radius while being treated as constant biases
   every significance computed from it.
 
@@ -76,7 +76,7 @@ specific, recurring forms in this domain that are easy to under-count:
   not a detection either way. Estimating the correct global
   p-value from pixel-level local p-values is standard practice done via simulated
   background-only sky maps (scrambled data, per
-  [neutrino astronomy](../../detector-response/references/neutrino-astronomy.md)'s RA-scrambling) rather than an
+  [neutrino astronomy](../../hep-detector/references/neutrino-astronomy.md)'s RA-scrambling) rather than an
   analytic pixel-count correction, precisely because of this correlation.
 - **Multiple energy bins, time windows, or source catalogs tested and not fully
   reported**: an analysis that quotes the single most significant bin/window/catalog
@@ -99,8 +99,8 @@ energy**, not as a single flat number, and combined with the instrument's energy
 migration matrix by forward-folding an assumed spectral model rather than dividing
 counts by a single acceptance and unfolding bin-by-bin - the same steep-spectrum
 argument stated in
-[cosmic-ray spectrum and composition](../../detector-response/references/cosmic-ray-spectrum-and-composition.md),
-[imaging Cherenkov](../../detector-response/references/imaging-atmospheric-cherenkov.md), and
+[cosmic-ray spectrum and composition](../../hep-detector/references/cosmic-ray-spectrum-and-composition.md),
+[imaging Cherenkov](../../hep-detector/references/imaging-atmospheric-cherenkov.md), and
 [unfolding.md](unfolding.md). A quoted
 upper limit or best-fit flux that does not state the assumed spectral shape used in
 the exposure weighting is not reproducible, because a harder or softer assumed
@@ -109,7 +109,7 @@ spectrum shifts the effective exposure (and hence the limit) systematically.
 ## Point sources, test statistics, periodicity and variability
 
 These are statistical methods and belong here (order question Q15); the instrument response they use (point-spread
-function, energy dispersion, effective area) belongs to detector-response.
+function, energy dispersion, effective area) belongs to hep-detector.
 
 - **Unbinned point-source likelihood** (Braun et al., Astropart. Phys. 29 (2008) 299, arXiv:0801.1604): each event
   enters with a signal density (the point-spread function around the source position, times an energy term for the

@@ -117,7 +117,7 @@ class UnreadableArrayTests(unittest.TestCase):
 
 
 class MaskInputTests(unittest.TestCase):
-    """hep-analysis audit P2-7, core part: mask_ratio truncated mismatched inputs with zip (a 2-entry reference
+    """hep-measurement audit P2-7, core part: mask_ratio truncated mismatched inputs with zip (a 2-entry reference
     against 4 bins gave a 2-entry ratio); non-numbers passed; there was no underflow/overflow or error masking."""
 
     E = [0.0, 1.0, 2.0, 3.0, 4.0]

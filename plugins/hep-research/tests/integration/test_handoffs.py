@@ -13,7 +13,7 @@ from pathlib import Path
 
 PLUGIN = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(PLUGIN))
-for s in ("physics-ml", "hep-analysis"):
+for s in ("hep-ml", "hep-measurement"):
     sys.path.insert(0, str(PLUGIN / "skills" / s / "scripts"))
 import check_split_integrity  # noqa: E402
 import check_surrogate_domain  # noqa: E402
@@ -50,7 +50,7 @@ class DetectorToStatisticsT07(unittest.TestCase):
     def test_fold_with_efficiency_inside_and_outside_rejected(self):
         o = {"quantity": "event-count", "variables": [{"name": "x", "unit": "1", "edges": [0.0, 1.0, 2.0]}], "level": "parton",
              "normalization": {"kind": "integrated-luminosity"}, "bin_semantics": "bin-integrated", "unit": "1"}
-        t = [{"kind": "apply-correction", "owner": "detector-response", "effect": "efficiency", "justification": "test"},
+        t = [{"kind": "apply-correction", "owner": "hep-detector", "effect": "efficiency", "justification": "test"},
              {"kind": "forward-fold", "owner": "hep-statistics", "truth_edges": [0.0, 1.0, 2.0], "reco_edges": [0.0, 1.0, 2.0],
               "truth_level": "parton", "includes": ["efficiency", "migration"]}]
         r = gate({"observable": o, "parameter_point": {}, "allowed_transformations": None, "status": []},
@@ -143,7 +143,7 @@ class FailurePropagationT20(unittest.TestCase):
         comm_in = [{"ref": "result.json", "artifact_type": "statistical-result", "status": ["failed", "synthetic"]}]
         comm = envelope("communication", {"claims": [{"text": "mu = 1.02", "result_ref": "result.json", "status": ["synthetic"]}],
                                           "sources_read": [], "limitations": []}, status=["failed", "synthetic"], inputs=comm_in,
-                        producer="research-communication")
+                        producer="hep-communication")
         self.assertIn("communication.status_upgraded", codes(validate_artifact(comm)))
         comm["extension"]["claims"][0]["status"] = ["failed", "synthetic"]
         self.assertTrue(validate_artifact(comm).ok)
@@ -166,7 +166,7 @@ class FailurePropagationT20(unittest.TestCase):
     def test_synthetic_result_cannot_be_communicated_as_observed(self):
         ins = [{"ref": "r.json", "artifact_type": "statistical-result", "status": ["synthetic"]}]
         comm = envelope("communication", {"claims": [{"text": "x", "result_ref": "r.json", "status": ["observed", "synthetic"]}],
-                                          "sources_read": [], "limitations": []}, inputs=ins, producer="research-communication")
+                                          "sources_read": [], "limitations": []}, inputs=ins, producer="hep-communication")
         self.assertIn("communication.status_upgraded", codes(validate_artifact(comm)))
 
 

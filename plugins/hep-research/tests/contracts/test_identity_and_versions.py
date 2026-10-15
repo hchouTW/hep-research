@@ -17,6 +17,9 @@ from contracts import CONTRACTS_VERSION, KNOWN_CAPABILITIES  # noqa: E402
 from contracts import identity  # noqa: E402
 from contracts.dependencies import validate_dependencies  # noqa: E402
 from contracts.validate import validate_artifact  # noqa: E402
+
+_MAJOR, _MINOR, _ = CONTRACTS_VERSION.split(".")
+NEWER_MINOR = f"{_MAJOR}.{int(_MINOR) + 1}.0"  # one minor above the reader, whatever the current version is
 from core.partition import campaign, states  # noqa: E402
 
 THEORY = json.loads((ROOT / "contracts/fixtures/artifacts/valid/theory_spec.json").read_text())
@@ -83,7 +86,7 @@ class ReleaseIdentityT03(unittest.TestCase):
 
 class VersionPolicyT04(unittest.TestCase):
     def test_newer_minor_warns_and_fails_for_protected_use(self):
-        doc = at("2.9.0")
+        doc = at(NEWER_MINOR)
         self.assertIn("contract.newer_minor", codes(validate_artifact(doc), "warning"))
         self.assertTrue(validate_artifact(doc).ok)
         self.assertIn("contract.newer_minor", codes(validate_artifact(doc, protected=True), "error"))
@@ -165,10 +168,10 @@ class DependencySourcesT04(unittest.TestCase):
                 self.assertEqual(rep["status"], "error")
 
     def test_newer_minor_source(self):
-        rep = self.chain(at("2.9.0"))
+        rep = self.chain(at(NEWER_MINOR))
         self.assertIn("dependency.source_newer_minor", {f["code"] for f in rep["findings"]})
         self.assertEqual(rep["status"], "ok")
-        self.assertEqual(self.chain(at("2.9.0"), protected=True)["status"], "error")
+        self.assertEqual(self.chain(at(NEWER_MINOR), protected=True)["status"], "error")
 
 
 if __name__ == "__main__":

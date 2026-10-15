@@ -1,0 +1,5 @@
+{"$comment": "Skill names a contract may record (contracts 2.9.0). The enum lists the seven current names, then the four deprecated names of the hep-research 0.11.0 rename (hep-analysis -> hep-measurement, detector-response -> hep-detector, research-communication -> hep-communication, physics-ml -> hep-ml). A deprecated name passes the schema; contracts.skill_names reports it (warning, or an error under --strict-versions and protected use), and contracts/migrate_skill_names.py rewrites it. Keep in step with contracts/skill_names.py.",
+ "$defs": {
+  "skill_name": {"type": "string", "enum": ["hep-measurement", "hep-detector", "hep-theory", "hep-statistics", "hep-computing", "hep-ml", "hep-communication",
+                                            "hep-analysis", "detector-response", "research-communication", "physics-ml"]}
+ }}

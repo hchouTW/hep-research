@@ -3,7 +3,7 @@
 How systematic effects enter a likelihood: constraint terms, interpolation between variations, two-point and
 one-sided variations, alternative models, MC statistics, smoothing and pruning, the correlation scheme, and the
 post-fit diagnostics that check all of it. The physical inventory of sources (what varies, by how much, from which
-evidence) belongs to hep-analysis ([systematics](../../hep-analysis/references/systematics.md)) and detector-response;
+evidence) belongs to hep-measurement ([systematics](../../hep-measurement/references/systematics.md)) and hep-detector;
 theory prescriptions belong to hep-theory. This file starts once those are provided, and never invents a variation,
 a correlation or a constraint width.
 
@@ -109,7 +109,7 @@ for an asymmetric one by 3%. The difference grows with the asymmetry and with ho
 - **One-sided variations** (both up and down move the same way, or only one exists): a symmetric Gaussian nuisance
   built from `max(|up|, |down|)` fits a direction the data cannot reach and can double-count when the same physics
   appears elsewhere. Keep the sign information; if both shifts go the same way, the variation is not a `+-1 sigma`
-  pair and needs a source-level explanation from hep-analysis.
+  pair and needs a source-level explanation from hep-measurement.
 - **Symmetrization** (`(up - down)/2` around the nominal, or the larger shift both ways) changes the curvature and the
   center of the nuisance. It is a modeling choice: quantify its effect on the POI (fit with and without) and record it.
 - "Max of up and down" applied per bin mixes directions bin by bin and destroys the correlation across bins: never.
@@ -173,7 +173,7 @@ for an asymmetric one by 3%. The difference grows with the asymmetry and with ho
   and compare the POI with the raw and the smoothed variation.
 - Decide pruning by criteria stated before unblinding, for example: the variation is below a stated fraction of the
   statistical error in every bin **and** removing it changes the expected POI uncertainty by less than a stated
-  amount. A small post-fit impact alone does not justify removal ([systematics](../../hep-analysis/references/systematics.md)):
+  amount. A small post-fit impact alone does not justify removal ([systematics](../../hep-measurement/references/systematics.md)):
   a nuisance can matter through its correlation with others.
 - After pruning, smoothing or symmetrization, rerun the post-fit diagnostics below and report the POI shift of each
   step.
@@ -182,7 +182,7 @@ for an asymmetric one by 3%. The difference grows with the asymmetry and with ho
 
 - In pyhf and Combine a nuisance **name** is a correlation: the same name across channels, samples or datasets is
   100% correlated, different names are independent. The naming table is part of the model and must match the
-  correlation inventory from hep-analysis.
+  correlation inventory from hep-measurement.
 - A source with partial correlation is decomposed: a shared component plus independent components (`theta_common`,
   `theta_A`, `theta_B`), with the split taken from evidence. A latent-variable form with a stated correlation is
   equivalent when the constraint is multivariate Gaussian.

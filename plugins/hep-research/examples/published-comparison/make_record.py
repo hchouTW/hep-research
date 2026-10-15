@@ -34,7 +34,7 @@ def main() -> int:
            "external_ids": {"hepdata": "none (synthetic record, not published)"}}
     record = {"contract_version": "1.0.0", "artifact_id": "synthetic-published-dsigma", "artifact_type": "dataset-record",
               "objective": "SYNTHETIC record shaped like a published differential cross-section table (T24)",
-              "provenance": {"producer_skill": "hep-analysis", "created": "2026-10-02"}, "status": ["synthetic"],
+              "provenance": {"producer_skill": "hep-measurement", "created": "2026-10-02"}, "status": ["synthetic"],
               "bindings": {"experiments": [], "theory": []},
               "versions": {"plugin": "0.1.0", "contracts": "1.0.0", "profiles": {}},
               "inputs": [], "outputs": [], "unresolved_inputs": [],

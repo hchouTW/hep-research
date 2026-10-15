@@ -146,7 +146,7 @@ def bpl_log(theta, x, smoothness=0.0):
     """ln F of the broken power law, theta = [ln A, gamma1, gamma2, ln x_b]:
     ln F = ln A - gamma1 (u - h(u)) - gamma2 h(u), u = ln(x / x_b) (STH-T3.13). F(x_b) = A for the sharp and the
     smooth form; the index is gamma1 below and gamma2 above the break. The plugin's one parametrization (STH Q8),
-    shared with hep-analysis cr_spectrum_powerlaw_fit.py through core/stats/broken_power_law.py."""
+    shared with hep-measurement cr_spectrum_powerlaw_fit.py through core/stats/broken_power_law.py."""
     return _bpl.log_flux(np.asarray(x, dtype=float), theta[0], theta[1], theta[2], theta[3], smoothness)
 
 

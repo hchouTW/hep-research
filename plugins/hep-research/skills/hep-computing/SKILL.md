@@ -1,6 +1,6 @@
 ---
 name: hep-computing
-description: "Use when the deliverable is working, reproducible scientific software or its execution: writing, debugging and reviewing physics code (Python, C++, ROOT/PyROOT, uproot/awkward, RDataFrame), crashes and memory leaks, CMake builds, data I/O and formats, performance, symbolic and numerical computation (SymPy, integration, ODEs, convergence and tolerance studies), environment and run manifests, partitioning, batch submission, merging and recovery (Slurm and HTCondor job arrays, held or evicted jobs, pilot sizing), advisory blinding checks of outputs, logs and caches, experiment software environments and build chains, and authoring an implementation-ready research task. Also small, verified, reviewable code changes. Applies even when the code belongs to a named experiment. Not for deciding the physics or statistics: hep-analysis, detector-response, hep-theory (derivations), hep-statistics (inference), physics-ml."
+description: "Use when the deliverable is working, reproducible scientific software or its execution: writing, debugging and reviewing physics code (Python, C++, ROOT/PyROOT, uproot/awkward, RDataFrame), crashes and memory leaks, CMake builds, data I/O and formats, performance, symbolic and numerical computation (SymPy, integration, ODEs, convergence and tolerance studies), environment and run manifests, partitioning, batch submission, merging and recovery (Slurm and HTCondor job arrays, held or evicted jobs, pilot sizing), advisory blinding checks of outputs, logs and caches, experiment software environments and build chains, and authoring an implementation-ready research task. Also small, verified, reviewable code changes. Applies even when the code belongs to a named experiment. Not for deciding the physics or statistics: hep-measurement, hep-detector, hep-theory (derivations), hep-statistics (inference), hep-ml."
 ---
 
 # hep-computing: scientific software and execution
@@ -49,10 +49,10 @@ Scripts in `<plugin root>/skills/hep-computing/scripts/` (read `--help` first): 
 
 | Need | Hand to | Artifact |
 |---|---|---|
-| Physics meaning of a numerical result | hep-theory / hep-analysis | `computational-run` |
+| Physics meaning of a numerical result | hep-theory / hep-measurement | `computational-run` |
 | Statistical interpretation | hep-statistics | `computational-run` |
-| Model training issues | physics-ml | `ml-artifact` |
-| Reports, figures, write-ups | research-communication | `computational-run` |
+| Model training issues | hep-ml | `ml-artifact` |
+| Reports, figures, write-ups | hep-communication | `computational-run` |
 
 <!-- example: routing -->
 - "Memory leak in my AMS-02 ntuple script" → this skill; the AMS profile is read only if the data format matters.

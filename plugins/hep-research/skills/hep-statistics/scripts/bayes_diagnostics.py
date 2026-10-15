@@ -22,7 +22,7 @@ Subcommands:
              --min-ess-fraction (10% [Proposal]) of the draws, or the new prior puts mass where the old one had none,
              the result says a rerun is required: reweighting cannot represent it.
   demo-sampler  a seeded random-walk Metropolis sampler for the counting model n ~ Pois(s + b), known b, flat prior
-             on s >= 0 (the model of skills/hep-analysis/scripts/counting_reference.py). A DEMONSTRATION and test
+             on s >= 0 (the model of skills/hep-measurement/scripts/counting_reference.py). A DEMONSTRATION and test
              oracle only, not a production sampler. Prints the upper credible bound with its MCSE and the diagnostics;
              --artifact FILE writes a statistical-result (paradigm bayesian, status synthetic) with them.
 

@@ -5,6 +5,40 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+<!-- wp12 -->
+- **Four skills renamed** (rename release 0.11.0; contracts 2.9.0). Skill folders, `SKILL.md` `name` fields, test
+  folders (`tests/skills/<underscored>`), descriptions' "Not for" lists, handoff tables, READMEs, profiles'
+  `related_skills`, the capability matrix, routing cases and docs use the new names:
+
+  | Old name | New name | Test folder |
+  | --- | --- | --- |
+  | `hep-analysis` | `hep-measurement` | `tests/skills/hep_measurement` |
+  | `detector-response` | `hep-detector` | `tests/skills/hep_detector` |
+  | `research-communication` | `hep-communication` | `tests/skills/hep_communication` |
+  | `physics-ml` | `hep-ml` | `tests/skills/hep_ml` |
+
+  `hep-statistics`, `hep-theory` and `hep-computing` are unchanged. Files named after a skill follow the same rule:
+  `references/hep-measurement-guide.md` (was `hep-analysis-guide.md`), `assets/diagrams/hep-measurement-pipeline.md`,
+  `tests/skills/hep_detector/test_hep_detector_audit.py`, `tests/skills/hep_ml/test_hep_ml_skill.py`. Release
+  manifests, past CHANGELOG entries, dated VALIDATION.md sections and past eval results keep the old names.
+- **Contracts 2.9.0: deprecated skill-name aliases.** `contracts/schemas/skill_names.json` (referenced by
+  `envelope.json` `provenance.producer_skill` and `profile.json` `related_skills`) and `contracts/skill_names.py`
+  accept the seven names plus the four old names as deprecated aliases. An old name in `provenance.producer_skill`,
+  `handoff.to_skill` or an extension `handoff` is the warning `skill.deprecated_name`; in a profile's
+  `related_skills`, `profile.deprecated_skill_name`. Under the version and name policy (`--strict-versions` of
+  `contracts/validate.py`, `contracts/dependencies.py` and, new, `contracts/registry.py`; and protected use) each is
+  an error. A 2.8 reader rejects a new name (schema enum) instead of misreading it; no capability is added. The
+  aliases are removed one or two releases later.
+- **`contracts/migrate_skill_names.py OLD.json [--out NEW.json]`** rewrites `provenance.producer_skill` and
+  `handoff.to_skill` to the new names and nothing else (not `contract_version`, not the extension); remaining
+  findings are reported, never repaired. Exit 0 migrated or unchanged, 2 unreadable or not an object. Fixture
+  `contracts/fixtures/skill_aliases/response_old_skill_names.json`; tests
+  `tests/contracts/test_skill_name_aliases.py` (old name warns, fails under `--strict-versions`, validates cleanly
+  after migration; registry warning and strict error for `related_skills`).
+- Contract fixtures, example outputs (contracts version and producer names) and the gate-verdict snapshot
+  regenerated; `docs/maintenance.md` documents the name policy. ams02-research 1.5.0 requires `hep-research
+  >=0.11.0` and names the new skills in its profile.
+
 <!-- py313 -->
 - **Python 3.13 is the minimum** (validation-first migration; Gate 1 evidence in VALIDATION PY313-FLOOR): `requires-python = ">=3.13"`, Ruff `py313`, mypy `3.13`; `skills/hep-computing/scripts/find_python.py` selects only Python 3.13 or newer (default and lowest allowed `--min-python` 3.13: a lower value is bad usage, exit 2; `find()` raises `ValueError`), with 3.11/3.12 rejection, fallback and all-old tests. CI's checks matrix runs on Python 3.13 only (4 jobs instead of 12; the backend jobs already ran on 3.13 and are unchanged), and `checks-complete` reconciles 3.13 only. **Migration:** Python 3.11 and 3.12 are no longer supported or tested; create the environment with Python 3.13 (`python3.13 -m venv ...`, then `pip install -r requirements-core.txt`) and point `HEP_RESEARCH_PYTHON` at it. Scripts run directly are not stopped by `requires-python`; the skills choose the interpreter with `find_python.py`. Python 3.14 is installable but not tested. Dependency pins are unchanged (the 3.11-era upper bounds in `requirements-ci-constraints.txt` stay until a separate dependency change).
 <!-- wp10 -->
@@ -75,14 +109,14 @@ Software checks establish contract consistency only, not physical validity.
 - `tools/module_timings.json` refreshed from GitHub Actions run 38680162693 (median of the 6 units-shard samples per module; 53 modules had no record, `test_stats_statistical_toys` was recorded at 70 s and now takes 177 s): the planned 2-shard split of the measured time goes from 1028 s / 845 s to 937 s / 937 s.
 
 <!-- wp5 -->
-- `adapters/literature-lookup` 0.1.0 (optional, owned by research-communication, standard library only): `literature_lookup.py` looks up an arXiv id (with or without version), DOI, INSPIRE record id or ADS bibcode in INSPIRE-HEP, arXiv and ADS and prints one record per source with source URL, UTC retrieval time, read level and an arXiv version check; HTTP 429 reported as `rate-limited` and never retried; ADS token from `ADS_API_TOKEN`/`ADS_TOKEN`, never printed or recorded, `not-verified` without it; `--replay`/`--record` for recorded responses. Exit 0 found, 1 not found, 2 bad input, 3 incomplete. Status `demonstrated-on-synthetic-data` (INSPIRE-HEP and arXiv `tested-in-declared-environment`, ADS on a constructed response only).
+- `adapters/literature-lookup` 0.1.0 (optional, owned by hep-communication, standard library only): `literature_lookup.py` looks up an arXiv id (with or without version), DOI, INSPIRE record id or ADS bibcode in INSPIRE-HEP, arXiv and ADS and prints one record per source with source URL, UTC retrieval time, read level and an arXiv version check; HTTP 429 reported as `rate-limited` and never retried; ADS token from `ADS_API_TOKEN`/`ADS_TOKEN`, never printed or recorded, `not-verified` without it; `--replay`/`--record` for recorded responses. Exit 0 found, 1 not found, 2 bad input, 3 incomplete. Status `demonstrated-on-synthetic-data` (INSPIRE-HEP and arXiv `tested-in-declared-environment`, ADS on a constructed response only).
 - `tests/adapters/test_literature_lookup.py` with fixtures recorded from INSPIRE-HEP and arXiv on 2026-10-15 (found, not found, HTTP 404, a real arXiv HTTP 429, version mismatch) and constructed INSPIRE 429 and ADS responses; offline (urlopen patched to fail); live smoke only with `HEP_LIVE_LOOKUP_TEST=1`.
 
 - Capability matrix: "Literature and citation verification online" raised from `unverified` to `tested-in-declared-environment` for INSPIRE-HEP and arXiv (E2, live 2026-10-15), ADS `demonstrated-on-synthetic-data`; new Adapters row. VALIDATION LITERATURE-LOOKUP.
-- `literature-lookup-recipes.md`: optional lookup-client section; arXiv answered HTTP 429 to a nonexistent id (observed 2026-10-15). research-communication README and `docs/adapter-authoring.md` (network declaration) updated.
+- `literature-lookup-recipes.md`: optional lookup-client section; arXiv answered HTTP 429 to a nonexistent id (observed 2026-10-15). hep-communication README and `docs/adapter-authoring.md` (network declaration) updated.
 
 <!-- wp11 -->
-- Routing: 27 new cases (set `WP11`, 13 en / 14 zh-Hant) in `tests/routing/make_cases.py` for cosmic-ray interpretation, propagation fits (hep-statistics, limited support until WP10), time-series inference, cross-experiment comparison, CRDB queries, a custom e/p classifier in a measurement (physics-ml, handoff to hep-analysis), and the dark-matter-interpretation (hep-theory, limited support) and latest-B/C-paper (research-communication) boundaries; `cases.json` regenerated (241 cases). The live harness in `evals/routing/` reads the same `cases.json`, so it picks them up unchanged.
+- Routing: 27 new cases (set `WP11`, 13 en / 14 zh-Hant) in `tests/routing/make_cases.py` for cosmic-ray interpretation, propagation fits (hep-statistics, limited support until WP10), time-series inference, cross-experiment comparison, CRDB queries, a custom e/p classifier in a measurement (hep-ml, handoff to hep-measurement), and the dark-matter-interpretation (hep-theory, limited support) and latest-B/C-paper (hep-communication) boundaries; `cases.json` regenerated (241 cases). The live harness in `evals/routing/` reads the same `cases.json`, so it picks them up unchanged.
 
 <!-- wp2 -->
 - `skills/hep-statistics/references/time-series-inference.md` (documented): inference on **binned** time series:
@@ -99,16 +133,16 @@ Software checks establish contract consistency only, not physical validity.
   not PSD.
 
 <!-- wp4 -->
-- hep-analysis: `references/cosmic-ray-measurements.md`, an index of cosmic-ray measurement types (absolute flux, flux ratios, isotope ratios, time-dependent flux, rare-event searches) that links existing sections in hep-analysis, detector-response, hep-statistics and research-communication, plus new anisotropy measurement design: estimand (first harmonic, equatorial dipole projection, 3D dipole), directional exposure and its non-uniformity (simulated vs data-driven, east-west method), harmonic and full-sky dipole estimators, partial-sky multipole coupling, amplitude bias, solar/sidereal/anti-sidereal checks, and upper limits on the amplitude with the limit construction handed to hep-statistics (Linsley 1975, Sommers 2001, Billoir & Deligny 2008, Ahlers & Mertsch 2017, Compton & Getting 1935, Farley & Storey 1954, Alexandreas et al. 1993, Bonino et al. 2011). Linked from `SKILL.md` Resources and the analysis guide's routing table; capability matrix row `documented`.
+- hep-measurement: `references/cosmic-ray-measurements.md`, an index of cosmic-ray measurement types (absolute flux, flux ratios, isotope ratios, time-dependent flux, rare-event searches) that links existing sections in hep-measurement, hep-detector, hep-statistics and hep-communication, plus new anisotropy measurement design: estimand (first harmonic, equatorial dipole projection, 3D dipole), directional exposure and its non-uniformity (simulated vs data-driven, east-west method), harmonic and full-sky dipole estimators, partial-sky multipole coupling, amplitude bias, solar/sidereal/anti-sidereal checks, and upper limits on the amplitude with the limit construction handed to hep-statistics (Linsley 1975, Sommers 2001, Billoir & Deligny 2008, Ahlers & Mertsch 2017, Compton & Getting 1935, Farley & Storey 1954, Alexandreas et al. 1993, Bonino et al. 2011). Linked from `SKILL.md` Resources and the analysis guide's routing table; capability matrix row `documented`.
 
 <!-- wp15 -->
-- detector-response: `references/charge-confusion.md`, a synthesis note on charge-sign confusion: the mechanisms (finite curvature resolution toward the maximum detectable rigidity, non-Gaussian scattering and interactions, wrong hit association; alignment weak modes making the two signs' rates differ), how detector-response measures the rate (simulation validated on data, templates in a confusion-sensitive variable, known-sign control samples) and the handoff to hep-analysis, which subtracts it as a background; linked from the principles-summary reference index and task-routing table and from the tracking reference. Capability-matrix row at `documented` (WP15).
+- hep-detector: `references/charge-confusion.md`, a synthesis note on charge-sign confusion: the mechanisms (finite curvature resolution toward the maximum detectable rigidity, non-Gaussian scattering and interactions, wrong hit association; alignment weak modes making the two signs' rates differ), how hep-detector measures the rate (simulation validated on data, templates in a confusion-sensitive variable, known-sign control samples) and the handoff to hep-measurement, which subtracts it as a background; linked from the principles-summary reference index and task-routing table and from the tracking reference. Capability-matrix row at `documented` (WP15).
 
 <!-- wp7 -->
-- physics-ml: pre-training freeze procedure in `references/ml-analysis.md` ("Training on data and blinding"): before training, a `decision_record` (category `other`) states labels, features, training domain and the split manifest's file SHA-256, lists the manifest in `artifacts`, and binds `seen` to the analysis's exposure record; checked with `contracts/lineage.py decision`, plus a manual file-hash comparison since `lineage.py` does not open artifacts (WP7).
-- physics-ml: synthetic example `assets/pretraining-decision.example.json` with `pretraining-exposure.example.json` and `pretraining-split.example.json`; `tests/skills/physics_ml/test_pretraining_freeze.py` checks it (lineage exit 0, exposure at decision `unexposed`) and shows that an edited exposure history, an understated `seen`, a decision dated before what it counts, a changed split manifest and a hash that disagrees between `artifacts` and the text fail (WP7).
+- hep-ml: pre-training freeze procedure in `references/ml-analysis.md` ("Training on data and blinding"): before training, a `decision_record` (category `other`) states labels, features, training domain and the split manifest's file SHA-256, lists the manifest in `artifacts`, and binds `seen` to the analysis's exposure record; checked with `contracts/lineage.py decision`, plus a manual file-hash comparison since `lineage.py` does not open artifacts (WP7).
+- hep-ml: synthetic example `assets/pretraining-decision.example.json` with `pretraining-exposure.example.json` and `pretraining-split.example.json`; `tests/skills/hep_ml/test_pretraining_freeze.py` checks it (lineage exit 0, exposure at decision `unexposed`) and shows that an edited exposure history, an understated `seen`, a decision dated before what it counts, a changed split manifest and a hash that disagrees between `artifacts` and the text fail (WP7).
 
-- WP6: research-communication quick-question routing re-measured live on 0.10.1 (routing 29/31, research-communication 20/20; communication eval 5 of 11 cases still answered without a skill, a description-level decision); `SKILL.md` unchanged; recorded in VALIDATION (WP6-QUICK-ROUTING) and capability matrix.
+- WP6: hep-communication quick-question routing re-measured live on 0.10.1 (routing 29/31, hep-communication 20/20; communication eval 5 of 11 cases still answered without a skill, a description-level decision); `SKILL.md` unchanged; recorded in VALIDATION (WP6-QUICK-ROUTING) and capability matrix.
 
 ## 0.10.1 (2026-10-15)
 

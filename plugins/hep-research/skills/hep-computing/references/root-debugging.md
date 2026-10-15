@@ -95,4 +95,4 @@ sanitizers, ACLiC `+g`, leak triage).
 ## Symptom table
 
 For yield/refactor/multithreading/fit symptoms beyond ROOT-specific build and I/O
-errors, see the broader symptom table in [Validation](../../hep-analysis/references/analysis-validation.md).
+errors, see the broader symptom table in [Validation](../../hep-measurement/references/analysis-validation.md).

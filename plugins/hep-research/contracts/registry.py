@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Two-tier profile registry and profile validator.
 
-Usage: python3 contracts/registry.py [--registry PATH] [--local PROFILE_DIR ...]
+Usage: python3 contracts/registry.py [--registry PATH] [--local PROFILE_DIR ...] [--strict-versions]
 Exit 0 valid, 1 errors, 2 unreadable registry. Output: JSON report.
 
 Checks: registry schema; duplicate IDs; registry/profile.json agreement; core and contracts
 compatibility; required resources present; folder template; paths that escape the package
 (including via symlinks); dependency existence and cycles; namespaced vocabulary extensions;
-capability claims backed by existing tests. Metadata is read; module content is not.
+capability claims backed by existing tests; deprecated skill names in related_skills (contracts.skill_names: a
+warning, an error with --strict-versions, the version and name policy). Metadata is read; module content is not.
 """
 from __future__ import annotations
 
@@ -19,7 +20,7 @@ from typing import Any
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from contracts import CONTRACTS_VERSION  # noqa: E402
+from contracts import CONTRACTS_VERSION, skill_names  # noqa: E402
 from contracts.schema import Report, validate  # noqa: E402
 from contracts.semver import satisfies, valid_spec  # noqa: E402
 from contracts.vocab import Vocabulary, declared_namespaces  # noqa: E402
@@ -44,7 +45,8 @@ def _inside(path: Path, root: Path) -> bool:
         return False
 
 
-def check_profile_dir(pdir: Path, boundary: Path, rep: Report, where: str, expect: dict | None = None) -> dict | None:
+def check_profile_dir(pdir: Path, boundary: Path, rep: Report, where: str, expect: dict | None = None,
+                      strict_versions: bool = False) -> dict | None:
     """Validate one profile folder. `boundary` is the directory nothing may escape."""
     if not _inside(pdir, boundary):
         rep.add("error", where, "profile.path_escapes", f"profile path {pdir} escapes {boundary}")
@@ -66,6 +68,7 @@ def check_profile_dir(pdir: Path, boundary: Path, rep: Report, where: str, expec
     sub = validate(prof, "profile.json", Vocabulary())
     for f in sub.findings:
         rep.add(f.severity, f"{where}{f.path[1:]}", f.code, f.message)
+    skill_names.check_profile(prof, rep, where, strict_versions)
     if expect:
         for k in ("id", "kind", "version"):
             if k in expect and prof.get(k) != expect[k]:
@@ -145,8 +148,10 @@ def find_cycles(profiles: dict[str, dict]) -> list[list[str]]:
     return cycles
 
 
-def validate_registry(registry_path: Path | None = None, local_dirs=(), package_root: Path | None = None) -> tuple[Report, dict]:
-    """Validate the registry plus optional local profile folders. Returns (report, {id: profile})."""
+def validate_registry(registry_path: Path | None = None, local_dirs=(), package_root: Path | None = None,
+                      strict_versions: bool = False) -> tuple[Report, dict]:
+    """Validate the registry plus optional local profile folders. Returns (report, {id: profile}). strict_versions:
+    a deprecated skill name in related_skills is an error, not a warning."""
     registry_path = Path(registry_path or PLUGIN_ROOT / "profiles" / "registry.json")
     package_root = Path(package_root or registry_path.parent.parent)
     rep = Report()
@@ -160,7 +165,7 @@ def validate_registry(registry_path: Path | None = None, local_dirs=(), package_
     unique = list(dict.fromkeys(Path(d).resolve() for d in local_dirs))  # one folder given twice is one profile
     entries += [(None, d, d, f"local[{i}]") for i, d in enumerate(unique)]
     for expect, pdir, boundary, where in entries:
-        prof = check_profile_dir(pdir, boundary, rep, where, expect)
+        prof = check_profile_dir(pdir, boundary, rep, where, expect, strict_versions)
         if prof is None or not isinstance(prof.get("id"), str):
             continue    # a missing or malformed id is already a schema finding
         if prof["id"] in loaded:
@@ -187,7 +192,7 @@ def main(argv=None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     try:
         reg = next((Path(v) for v in option_values(args, "--registry")), None)
-        rep, loaded = validate_registry(reg, option_values(args, "--local"))
+        rep, loaded = validate_registry(reg, option_values(args, "--local"), strict_versions="--strict-versions" in args)
     except (OSError, ValueError) as exc:
         print(json.dumps({"ok": False, "error": str(exc)}))
         return 2

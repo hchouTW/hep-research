@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "2.8.0"
+CONTRACTS_VERSION = "2.9.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -38,14 +38,20 @@ CONTRACTS_VERSION = "2.8.0"
 # are sidecars read as protected inputs and verified by contracts.permit and contracts.analysis_bundle; no artifact
 # declares a dependency on them. Add an ID when an artifact type starts to require one.
 # 2.8.0 adds rule families that only refuse false or incomplete declarations, each with its own *_FROM constant and
-# helper in contracts.validate: ml-artifact semantics v2 (ML_SEMANTICS_V2_FROM; physics-ml audit) and, joining the same
-# minor, response hardening (detector-response audit) and communication result types (research-communication audit).
+# helper in contracts.validate: ml-artifact semantics v2 (ML_SEMANTICS_V2_FROM; hep-ml audit) and, joining the same
+# minor, response hardening (hep-detector audit) and communication result types (hep-communication audit).
 # New fields are optional and no capability is added: a 2.7 reader misreads no new field, it only does not apply the
 # new rules. Older artifacts get the new rules under --strict and at the gate.
-# Response hardening (contracts.validate, _response_hardening, RESPONSE_HARDENING_FROM; detector-response audit DR-WP2)
+# Response hardening (contracts.validate, _response_hardening, RESPONSE_HARDENING_FROM; hep-detector audit DR-WP2)
 # adds the overlay ext_response_v2_8.json (underflow_overflow enum, underflow/overflow vectors, correction_space, mc_stat,
 # systematic_variations, periods) and rules R1-R10; contracts.response_adapter treats a missing underflow_overflow of a
 # 2.8.0 artifact as an error. A 2.7 response that passed keeps its default outcome.
+# 2.9.0 (hep-research 0.11.0) renames four skills: provenance.producer_skill and profile related_skills take the names
+# of contracts/schemas/skill_names.json, which also keeps the four old names as deprecated aliases (contracts.skill_names).
+# An old name is a warning (skill.deprecated_name, profile.deprecated_skill_name), an error under the version and name
+# policy (--strict-versions, protected use); contracts/migrate_skill_names.py rewrites producer_skill and
+# handoff.to_skill. No capability and no other rule change: a 2.8 artifact keeps its outcome apart from that warning,
+# and a 2.8 reader rejects a new skill name in producer_skill (schema enum) instead of misreading it.
 KNOWN_CAPABILITIES = frozenset({"core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage"})

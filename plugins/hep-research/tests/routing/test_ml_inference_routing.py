@@ -1,5 +1,5 @@
-"""S09 static routing checks: physics-ml hands the inferential validity of ML-based results to hep-statistics, and
-hep-statistics hands training to physics-ml; the hep-statistics SKILL.md links ml-assisted-inference.md; routing case
+"""S09 static routing checks: hep-ml hands the inferential validity of ML-based results to hep-statistics, and
+hep-statistics hands training to hep-ml; the hep-statistics SKILL.md links ml-assisted-inference.md; routing case
 ml-neighbor-1 still expects hep-statistics. Reads files only; nothing is executed."""
 import json
 import re
@@ -16,18 +16,18 @@ class MlInferenceRouting(unittest.TestCase):
         self.assertTrue(REF.is_file())
         self.assertIn("](references/ml-assisted-inference.md)", (SKILLS / "hep-statistics/SKILL.md").read_text(encoding="utf-8"))
 
-    def test_physics_ml_points_validity_to_hep_statistics(self):
-        t = (SKILLS / "physics-ml/references/scientific-machine-learning.md").read_text(encoding="utf-8")
+    def test_hep_ml_points_validity_to_hep_statistics(self):
+        t = (SKILLS / "hep-ml/references/scientific-machine-learning.md").read_text(encoding="utf-8")
         self.assertRegex(t, r"statistically valid[^`]*`hep-statistics` work")
         self.assertIn("../../hep-statistics/references/ml-assisted-inference.md", t)
 
-    def test_hep_statistics_points_training_to_physics_ml(self):
+    def test_hep_statistics_points_training_to_hep_ml(self):
         head = REF.read_text(encoding="utf-8")[:900]
-        self.assertRegex(head, r"Training[^.]*belong to `physics-ml`")
-        self.assertIn("../../physics-ml/references/scientific-machine-learning.md", head)
+        self.assertRegex(head, r"Training[^.]*belong to `hep-ml`")
+        self.assertIn("../../hep-ml/references/scientific-machine-learning.md", head)
 
     def test_links_resolve(self):
-        for p in (REF, SKILLS / "physics-ml/references/scientific-machine-learning.md"):
+        for p in (REF, SKILLS / "hep-ml/references/scientific-machine-learning.md"):
             for link in re.findall(r"\]\(([^)#]+\.md)\)", p.read_text(encoding="utf-8")):
                 self.assertTrue((p.parent / link).resolve().is_file(), f"{p.name}: {link}")
 

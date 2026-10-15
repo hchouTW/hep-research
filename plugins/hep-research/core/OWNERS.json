@@ -43,12 +43,12 @@
    ],
    "consumers": [
     "skills/hep-computing/scripts/audit_blinded_outputs.py",
-    "skills/hep-analysis/scripts/mask_blinded_bins.py"
+    "skills/hep-measurement/scripts/mask_blinded_bins.py"
    ],
    "source": "new in this plugin"
   },
   "evidence": {
-   "steward": "research-communication",
+   "steward": "hep-communication",
    "status": "implemented-M2",
    "purpose": "Evidence-ledger validation and index rendering",
    "files": [

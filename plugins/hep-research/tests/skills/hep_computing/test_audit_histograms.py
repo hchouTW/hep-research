@@ -1,4 +1,4 @@
-"""Tests for skills/hep-computing/scripts/audit_histograms.py (moved from the detector-response tests, T11): the
+"""Tests for skills/hep-computing/scripts/audit_histograms.py (moved from the hep-detector tests, T11): the
 shipped synthetic bundle passes unchanged, and each histogram defect is reported."""
 import copy
 import json

@@ -1,6 +1,6 @@
-"""measurement-spec content semantics (hep-analysis audit 2026-10-13, ANA-P1-1).
+"""measurement-spec content semantics (hep-measurement audit 2026-10-13, ANA-P1-1).
 
-The audit found that contracts/validate.py enforced almost none of the hep-analysis SKILL.md invariants: 30 specs that
+The audit found that contracts/validate.py enforced almost none of the hep-measurement SKILL.md invariants: 30 specs that
 break them passed with and without --strict. Contracts 2.6.0 report them natively; a 2.5.0 artifact keeps its outcome
 and gets them with --strict. All fixtures SYNTHETIC."""
 import copy
@@ -22,7 +22,7 @@ CASES = json.loads((ART / "cases.json").read_text())
 CURRENT = json.loads((ART / "valid" / "measurement_v26.json").read_text())
 MEAS_INVALID = sorted(n for n in CASES["invalid"] if n.startswith("measurement_v26_"))
 MEAS_UNRESOLVED = sorted(n for n in CASES["unresolved"] if n.startswith("measurement_v26_"))
-TEMPLATE = ROOT / "skills" / "hep-analysis" / "assets" / "measurement_spec.template.json"
+TEMPLATE = ROOT / "skills" / "hep-measurement" / "assets" / "measurement_spec.template.json"
 
 
 def load(path):

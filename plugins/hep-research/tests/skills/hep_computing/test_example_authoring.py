@@ -960,7 +960,7 @@ class DiversityCheckerTests(unittest.TestCase):
             tmp_path = Path(tmp)
             a = self._write(tmp_path, "a.md", GOOD_ADVERSARIAL_AUDIT)  # skill: deep-learning
             b = self._write(
-                tmp_path, "b.md", GOOD_ADVERSARIAL_AUDIT.replace("skill: deep-learning", "skill: hep-analysis")
+                tmp_path, "b.md", GOOD_ADVERSARIAL_AUDIT.replace("skill: deep-learning", "skill: hep-measurement")
             )
             violations = check_example_diversity.find_violations([a, b])
             self.assertEqual(violations, [])
@@ -984,7 +984,7 @@ class DiversityCheckerTests(unittest.TestCase):
             tmp_path = Path(tmp)
             a = self._write(tmp_path, "a.md", GOOD_ADVERSARIAL_AUDIT)
             b = self._write(
-                tmp_path, "b.md", GOOD_ADVERSARIAL_AUDIT.replace("skill: deep-learning", "skill: hep-analysis")
+                tmp_path, "b.md", GOOD_ADVERSARIAL_AUDIT.replace("skill: deep-learning", "skill: hep-measurement")
             )
             result = subprocess.run(
                 [sys.executable, str(ROOT / "scripts/check_example_diversity.py"), str(a), str(b)],

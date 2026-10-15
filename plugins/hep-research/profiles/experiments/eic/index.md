@@ -11,6 +11,6 @@ Profile `experiment:eic` adds Electron-Ion Collider (EIC) facility context and e
 | Which sources count, how to quote them, "latest" | `modules/sources/source-policy.md`, then `evidence/index.md` |
 | Detector performance (resolution, efficiency, PID separation) | not shipped: say so, then ask for the detector concept, geometry release and whether a projection or a measurement is meant (`modules/working-rules.md`) |
 | Generic DIS kinematics, QCD, cross sections | not this profile: `hep-theory` with no experiment profile |
-| Selection, backgrounds, corrections, systematics for an EIC measurement | `hep-analysis` general method plus the facility module for configuration facts; cuts and samples come from the project |
+| Selection, backgrounds, corrections, systematics for an EIC measurement | `hep-measurement` general method plus the facility module for configuration facts; cuts and samples come from the project |
 
 Conventions: `conventions.json` (asymmetric beams, lab is not CM, per-nucleon ion energies, beam-direction and polarization signs unknown until a release or analysis states them). Evidence: `evidence/sources.json`, `evidence/claims.json` (ids `eic:S01`, `eic:C01`; prose uses `S01`, `C01`), `evidence/index.md` (generated). Datasets: none (`datasets/README.md`). Routing scenarios used by the tests: `benchmarks/routing-scenarios.json`.

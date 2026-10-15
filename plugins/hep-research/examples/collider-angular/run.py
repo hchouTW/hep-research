@@ -9,7 +9,7 @@ profile is loaded; no AMS or theory resource is read.
 Chain: seeded synthetic signal and background events (profile generator) -> reconstructed cos theta histograms of
 selected events in the signal region (x_vis >= 0.9), the control sideband (0.5 <= x_vis < 0.8) and the validation
 band (0.8 <= x_vis < 0.9) -> blinding: the signal-region bin cos theta >= 0.9 is masked by the custodian step
-(skills/hep-analysis/scripts/mask_blinded_bins.py) before the analysis reads the counts, and the analysis fills it
+(skills/hep-measurement/scripts/mask_blinded_bins.py) before the analysis reads the counts, and the analysis fills it
 with its simulated expectation -> background = transfer factor x control-sideband counts, subtracted per reco bin,
 with a closure test in the validation band -> full-rank unfolding with an analytic response that includes the
 efficiency (core.stats linear_matrix) -> d sigma / d cos theta = unfolded truth counts / (integrated luminosity x
@@ -75,7 +75,7 @@ TF_VR = generate_events.xvis_fraction(CFG, *VALIDATION_REGION, "background") / g
 TF_REL = 0.10  # synthetic: modelling of the background x_vis shape, fully correlated across bins
 BLIND = {"variable": "cos_theta", "low": 0.9, "high": 1.0}
 BLINDED = np.array(blinded_mask(RE, BLIND))  # reco bins (same edges as truth) whose signal-region count is masked
-MASK_SCRIPT = PLUGIN / "skills" / "hep-analysis" / "scripts" / "mask_blinded_bins.py"
+MASK_SCRIPT = PLUGIN / "skills" / "hep-measurement" / "scripts" / "mask_blinded_bins.py"
 
 
 def expected_dsigma(sigma, a, b):
@@ -235,7 +235,7 @@ def artifacts(res, resp, created):
                            "synthcol:fiducial_definition": "|cos theta| < 0.9 at particle level"}}
     spec = dict(base, artifact_id="synthetic-path-b-measurement-spec", artifact_type="measurement-spec",
                 objective="SYNTHETIC Path B: corrected d sigma / d cos theta in the fiducial region (illustrative profile)",
-                provenance={"producer_skill": "hep-analysis", "created": created}, status=["synthetic"],
+                provenance={"producer_skill": "hep-measurement", "created": created}, status=["synthetic"],
                 extension={"estimand": ("SYNTHETIC: the differential cross section d sigma / d cos theta of e+e- -> mu+mu- at "
                                         "fixed sqrt(s) = 10 GeV, at particle level in the fiducial region |cos theta| < 0.9, "
                                         "center-of-mass frame"),
@@ -269,7 +269,7 @@ def artifacts(res, resp, created):
                            "experiment_fields": {"synthcol:note": "ILLUSTRATIVE and SYNTHETIC; every number is invented"}})
     response_doc = dict(base, artifact_id="synthetic-path-b-response", artifact_type="response",
                         objective="SYNTHETIC cos theta response including the efficiency", status=["synthetic"],
-                        provenance={"producer_skill": "detector-response", "created": created},
+                        provenance={"producer_skill": "hep-detector", "created": created},
                         extension={"truth_axis": {"name": "cos_theta", "unit": "1", "edges": TE.tolist()},
                                    "reco_axis": {"name": "cos_theta", "unit": "1", "edges": RE.tolist()},
                                    "orientation": "rows_reco_cols_truth", "normalization": "conditional_on_generated",
@@ -293,7 +293,7 @@ def artifacts(res, resp, created):
                            "fit_status": "converged", "results": {"ref": "results.json#dsigma"}})
     data = dict(base, artifact_id="synthetic-path-b-dsigma", artifact_type="dataset-record",
                 objective="SYNTHETIC corrected d sigma / d cos theta (illustrative)", status=["synthetic"],
-                provenance={"producer_skill": "hep-analysis", "created": created},
+                provenance={"producer_skill": "hep-measurement", "created": created},
                 extension={"dataset_id": "synthcol:synthetic-path-b-dsigma", "source_evidence_ids": [], "observable": obs,
                            "data": {"edges": edges, "values": res["dsigma"][REP].tolist(), "unit": "pb",
                                     "uncertainties": [{"name": "total", "kind": "statistical", "correlation": "covariance",
@@ -323,8 +323,8 @@ def figures(res, expected, out):
 
 
 def review_spec(spec, vocab, out):
-    """Verdict-first review draft of the spec with the hep-analysis review script (references/review-and-artifacts.md)."""
-    sys.path.insert(0, str(PLUGIN / "skills" / "hep-analysis" / "scripts"))
+    """Verdict-first review draft of the spec with the hep-measurement review script (references/review-and-artifacts.md)."""
+    sys.path.insert(0, str(PLUGIN / "skills" / "hep-measurement" / "scripts"))
     import review_measurement_spec
     review = review_measurement_spec.draft(spec, vocab)
     (out / "review.md").write_text(review_measurement_spec.markdown(review, spec["artifact_id"], "synthetic"))
@@ -476,7 +476,7 @@ def write_report(out: Path, r: dict) -> None:
         "## Blinding (synthetic policy)",
         "",
         "The forward signal-region bin cos theta >= 0.9 (x_vis >= 0.9), outside the reported fiducial range, is blinded for a "
-        "separate synthetic forward analysis. A custodian step (`skills/hep-analysis/scripts/mask_blinded_bins.py`) masks its count "
+        "separate synthetic forward analysis. A custodian step (`skills/hep-measurement/scripts/mask_blinded_bins.py`) masks its count "
         f"before the analysis reads the histogram; the released file is `{r['blinding']['released_signal_region_histogram']}`. The "
         "unfolding fills the blinded bin with the simulated signal expectation and zero variance, so no published number depends "
         "on its count, and every value in that bin is null in `results.json`. The control and validation sidebands stay open: the "

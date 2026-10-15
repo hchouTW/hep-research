@@ -8,7 +8,7 @@
   "scope": {"type": "string", "minLength": 1}, "exclusions": {"type": "array", "items": {"type": "string"}},
   "illustrative": {"type": "boolean"},
   "compatible": {"type": "object", "required": ["core", "contracts"], "properties": {"core": {"type": "string"}, "contracts": {"type": "string"}}},
-  "related_skills": {"type": "array", "items": {"type": "string", "enum": ["hep-analysis", "detector-response", "hep-theory", "hep-statistics", "hep-computing", "physics-ml", "research-communication"]}},
+  "related_skills": {"type": "array", "items": {"$ref": "skill_names.json#/$defs/skill_name"}},
   "resources": {"type": "object", "required": ["index", "conventions"], "additionalProperties": {"type": "string"}},
   "vocabulary_namespaces": {"type": "array", "items": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"}},
   "vocabulary_extensions": {"type": "object", "additionalProperties": {"type": "array", "items": {"type": "string"}}},

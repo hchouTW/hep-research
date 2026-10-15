@@ -2,12 +2,12 @@
 
 Covers the layer upstream of the detector: producing the particle-level events that
 detector simulation then propagates. Deliberately complements rather than repeats
-[weights-normalization.md](../../hep-analysis/references/weights-normalization.md), which owns
+[weights-normalization.md](../../hep-measurement/references/weights-normalization.md), which owns
 luminosity, cross-section normalization, and the sum-of-weights convention, and
-[systematics.md](../../hep-analysis/references/systematics.md), which owns how theory variations
+[systematics.md](../../hep-measurement/references/systematics.md), which owns how theory variations
 enter the likelihood. What is added here is the structure of the generation chain and
 the failure modes specific to it. The downstream stage is
-[detector simulation](../../detector-response/references/detector-simulation.md).
+[detector simulation](../../hep-detector/references/detector-simulation.md).
 
 ## The generation chain
 
@@ -72,7 +72,7 @@ Handling them correctly is a hard requirement:
   a genuine modeling problem, and treat the bin properly in the likelihood.
 - **Normalization uses the sum of weights of the full production**, not the selected
   entry count. This is the rule in
-  [weights-normalization.md](../../hep-analysis/references/weights-normalization.md) and it is
+  [weights-normalization.md](../../hep-measurement/references/weights-normalization.md) and it is
   violated most often when a sample is split across production batches or partially
   reprocessed.
 - **Selected-event statistics** (`<plugin root>/skills/hep-theory/scripts/event_weights.py`

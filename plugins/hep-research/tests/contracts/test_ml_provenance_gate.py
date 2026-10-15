@@ -1,4 +1,4 @@
-"""physics-ml audit (PML-WP0.5: ML-K01, ML-K06): the publication gate of a statistical result built on an ML score
+"""hep-ml audit (PML-WP0.5: ML-K01, ML-K06): the publication gate of a statistical result built on an ML score
 checks the ml-artifact it rests on, and dependencies.py propagates a source's unresolved findings.
 
 Before the fix (0.9.0, source brief A6): J9's statistical result relabelled 'observed' passed the gate (a) with no ML

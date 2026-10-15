@@ -1,7 +1,7 @@
 {
  "contract_version": "1.0.0",
  "tool_id": "calorimeter-resolution",
- "entry": "skills/detector-response/scripts/calorimeter_resolution.py",
+ "entry": "skills/hep-detector/scripts/calorimeter_resolution.py",
  "operations": [
   {
    "operation_id": "resolution",

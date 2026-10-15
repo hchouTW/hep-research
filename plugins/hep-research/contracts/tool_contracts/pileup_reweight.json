@@ -1,7 +1,7 @@
 {
  "contract_version": "1.0.0",
  "tool_id": "pileup-reweight",
- "entry": "skills/detector-response/scripts/pileup_reweight.py",
+ "entry": "skills/hep-detector/scripts/pileup_reweight.py",
  "operations": [
   {
    "operation_id": "reweight",

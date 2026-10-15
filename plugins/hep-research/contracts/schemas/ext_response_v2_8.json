@@ -1,5 +1,5 @@
 {
- "$comment": "Owner: detector-response. Typed fields of a response since contracts 2.8.0 (detector-response audit), applied by contracts.validate on top of ext_response.json only to artifacts of contract 2.8.0 or later, or to older ones with --strict. All optional here; contracts.validate._response_hardening makes intended_use and underflow_overflow required for a matrix (R1) and underflow/overflow required for explicit_bins with an inline matrix (R6).",
+ "$comment": "Owner: hep-detector. Typed fields of a response since contracts 2.8.0 (hep-detector audit), applied by contracts.validate on top of ext_response.json only to artifacts of contract 2.8.0 or later, or to older ones with --strict. All optional here; contracts.validate._response_hardening makes intended_use and underflow_overflow required for a matrix (R1) and underflow/overflow required for explicit_bins with an inline matrix (R6).",
  "type": "object",
  "properties": {
   "underflow_overflow": {

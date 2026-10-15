@@ -6,7 +6,7 @@ SYNTHETIC and ILLUSTRATIVE. The detector model (efficiency e0 - e1 c^4, Gaussian
 number come from profiles/experiments/synthetic-collider/benchmarks/path-b.json and describe no real experiment.
 Only that profile is loaded; no AMS or theory resource is read.
 
-Chain (detector-response -> hep-statistics):
+Chain (hep-detector -> hep-statistics):
 1. Seeded synthetic events from the profile generator and detector.
 2. Per truth bin of |cos theta| in [0, 0.9] (away from the acceptance edge, so smearing is not truncated):
    resolution = maximum-likelihood Gaussian width of (reco - truth) for selected events, with its large-sample
@@ -113,7 +113,7 @@ def artifacts(m, fit, exp_eff, created):
 
     def record(aid, quantity, values, errors, unit, conv, objective, key):
         return dict(base, artifact_id=aid, artifact_type="dataset-record", objective=objective,
-                    provenance={"producer_skill": "detector-response", "created": created},
+                    provenance={"producer_skill": "hep-detector", "created": created},
                     extension={"dataset_id": f"synthcol:{aid}", "source_evidence_ids": [],
                                "observable": {"quantity": quantity, "process": "e+e- -> mu+mu- (synthetic generator)", "variables": var,
                                               "phase_space": ps, "level": "detector", "frame": "center-of-mass",

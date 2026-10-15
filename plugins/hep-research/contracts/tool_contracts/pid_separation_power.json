@@ -1,7 +1,7 @@
 {
  "contract_version": "1.0.0",
  "tool_id": "pid-separation-power",
- "entry": "skills/detector-response/scripts/pid_separation_power.py",
+ "entry": "skills/hep-detector/scripts/pid_separation_power.py",
  "operations": [
   {
    "operation_id": "separation",

@@ -13,7 +13,7 @@
   "profiles": {}
  },
  "provenance": {
-  "producer_skill": "detector-response",
+  "producer_skill": "hep-detector",
   "created": "2026-10-02",
   "evidence_ids": []
  },

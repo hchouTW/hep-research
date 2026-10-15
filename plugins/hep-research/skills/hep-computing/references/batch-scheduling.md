@@ -33,7 +33,7 @@ configuration. Do not use this for:
 - multi-stage pipelines with dependencies between stages (generate, reconstruct, fill, merge): use a workflow system
   or the scheduler's dependency features yourself; this adapter submits one stage;
 - grid or experiment workload systems, Kubernetes or cloud batch services (out of scope);
-- multi-node distributed training: `physics-ml`'s distributed-training reference owns that.
+- multi-node distributed training: `hep-ml`'s distributed-training reference owns that.
 
 ## The workflow
 
@@ -226,8 +226,8 @@ with the configuration in force (refused as `bundle.request_differs` when none w
 
 - `hep-statistics` toy campaigns: a dropped chunk can bias a coverage study the same way dropped failed fits do. Merge
   only complete campaigns, or report the missing chunks with the result; never rescale a partial merge silently.
-- `physics-ml` single-node GPU training: one job per configuration with `gpus` in the resources; the model, its
-  training and its validation stay with `physics-ml`. `resources.gpus` renders `#SBATCH --gpus=N` (accepted as
+- `hep-ml` single-node GPU training: one job per configuration with `gpus` in the resources; the model, its
+  training and its validation stay with `hep-ml`. `resources.gpus` renders `#SBATCH --gpus=N` (accepted as
   `gres/gpu=N` on Slurm 24.05.1); a site that requires another form takes it in `slurm.gres` instead. Use a
   `worker_python` with a torch build compiled for the partition's GPUs (`check_pytorch_env.py` exits 3 otherwise),
   and give the chunk result an additive device counter (for example `on_cuda: 1`): the merged value then proves how

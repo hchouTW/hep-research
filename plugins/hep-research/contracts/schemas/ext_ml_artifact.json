@@ -1,4 +1,4 @@
-{"$comment": "Owner: physics-ml. 2.5.0 adds optional splits.overlap_check/manifest/test_groups_disjoint, a structured weights object (a string stays valid), domain_shift, environment and output_semantics. Rules that would change an older artifact's outcome (blank grouping key, empty model_hash, labels or features, training_domain keys and ranges, calibration shape and sample) are semantic checks in contracts/validate.py (_ml_semantics), native from 2.5.0 and applied to older artifacts with --strict.",
+{"$comment": "Owner: hep-ml. 2.5.0 adds optional splits.overlap_check/manifest/test_groups_disjoint, a structured weights object (a string stays valid), domain_shift, environment and output_semantics. Rules that would change an older artifact's outcome (blank grouping key, empty model_hash, labels or features, training_domain keys and ranges, calibration shape and sample) are semantic checks in contracts/validate.py (_ml_semantics), native from 2.5.0 and applied to older artifacts with --strict.",
  "type": "object",
  "required": ["task", "labels", "features", "splits", "training_domain", "preprocessing", "model_hash", "downstream_validation"],
  "properties": {

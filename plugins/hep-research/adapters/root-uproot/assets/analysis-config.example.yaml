@@ -1,9 +1,9 @@
-# Template analysis configuration for <plugin root>/skills/hep-analysis/references/hep-analysis-guide.md workflows.
+# Template analysis configuration for <plugin root>/skills/hep-measurement/references/hep-measurement-guide.md workflows.
 #
 # Copy this file and replace placeholder values before running an analysis.
 
 analysis:
-  name: example_hep_analysis
+  name: example_hep_measurement
   era: "2022"
   luminosity_fb: 35.9
   collision_energy_tev: 13.6

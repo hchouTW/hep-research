@@ -6,7 +6,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Measure the muon trigger efficiency with tag-and-probe and give me the per-bin uncertainty.",
-   "expected_primary": "detector-response",
+   "expected_primary": "hep-detector",
    "trigger_terms": [
     "tag-and-probe"
    ],
@@ -19,7 +19,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "請幫我建立這個量能器的響應矩陣，並檢查 data/MC agreement。",
-   "expected_primary": "detector-response",
+   "expected_primary": "hep-detector",
    "trigger_terms": [
     "response matrices",
     "data/MC agreement"
@@ -37,7 +37,7 @@
    "trigger_terms": [
     "unfolding"
    ],
-   "not": "detector-response",
+   "not": "hep-detector",
    "inputs": {
     "measured_spectrum.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nbin,lo,hi,counts\n0,0,10,520\n1,10,20,310\n2,20,40,140\n",
     "response_matrix.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nreco_bin,true0,true1,true2\n0,0.80,0.12,0.01\n1,0.15,0.75,0.10\n2,0.01,0.10,0.82\n"
@@ -48,12 +48,12 @@
    "lang": "en",
    "kind": "negative",
    "prompt": "Design the background estimate for my dilepton measurement using control regions.",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "background estimation",
     "control regions"
    ],
-   "not": "detector-response",
+   "not": "hep-detector",
    "inputs": {
     "analysis_note.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\n# Dilepton measurement (draft)\nSignal region: two opposite-sign muons, m_ll in 200-1000 GeV.\nMain backgrounds: Drell-Yan, ttbar, fakes. No background method chosen yet.\n"
    }
@@ -63,7 +63,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Review this measurement spec: is the estimand clear and are the systematic uncertainties complete?",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "estimand",
     "systematic uncertainties",
@@ -78,7 +78,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "我要設計一個中微子截面量測的事件選擇與 cutflows，還有 blinding policy。",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "cutflows",
     "blinding policy"
@@ -93,7 +93,7 @@
    "trigger_terms": [
     "CLs"
    ],
-   "not": "hep-analysis",
+   "not": "hep-measurement",
    "inputs": {
     "yields.json": "{\"_note\": \"SYNTHETIC routing fixture: invented values, not data from any experiment.\", \"observed\": 7, \"background\": 4.2, \"background_unc\": 0.9, \"signal_mu1\": 3.1}\n"
    }
@@ -108,7 +108,7 @@
     "crashes",
     "ROOT/PyROOT"
    ],
-   "not": "hep-analysis",
+   "not": "hep-measurement",
    "inputs": {
     "read_tree.py": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nimport ROOT\nf = ROOT.TFile.Open('events.root')\nt = f.Get('Events')\nfor ev in t:\n    print(ev.Muon_pt[0])  # crashes on events with no muon\n"
    }
@@ -118,7 +118,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "How should the trigger and selection efficiencies enter the correction chain of my flux measurement, each with its own denominator?",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "correction chains"
    ],
@@ -129,11 +129,11 @@
    "lang": "zh-Hant",
    "kind": "neighboring",
    "prompt": "請用 tag-and-probe 量測這個 muon 的重建效率，並給出每個 bin 的不確定度。",
-   "expected_primary": "detector-response",
+   "expected_primary": "hep-detector",
    "trigger_terms": [
     "tag-and-probe"
    ],
-   "not": "hep-analysis",
+   "not": "hep-measurement",
    "set": "ANA-P4-5"
   },
   {
@@ -141,7 +141,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Help me design the blinding policy for my search: which regions and observables stay masked until unblinding?",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "blinding policy"
    ],
@@ -156,7 +156,7 @@
    "trigger_terms": [
     "advisory blinding checks of outputs, logs and caches"
    ],
-   "not": "hep-analysis",
+   "not": "hep-measurement",
    "set": "ANA-P4-5"
   },
   {
@@ -164,7 +164,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Design the closure test for my ABCD background estimation in a validation region.",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "background estimation",
     "ABCD"
@@ -181,7 +181,7 @@
     "template fits",
     "goodness of fit"
    ],
-   "not": "hep-analysis",
+   "not": "hep-measurement",
    "set": "ANA-P4-5"
   },
   {
@@ -189,7 +189,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Write the evaluation plan for the physical sources of systematic uncertainties in my cross-section measurement.",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "systematic uncertainties and their evaluation plan"
    ],
@@ -204,7 +204,7 @@
    "trigger_terms": [
     "covariance assembly and validation"
    ],
-   "not": "hep-analysis",
+   "not": "hep-measurement",
    "set": "ANA-P4-5"
   },
   {
@@ -212,7 +212,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Design the cutflows for my dimuon selection: which cuts, in which order, and with which denominators?",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "cutflows"
    ],
@@ -227,7 +227,7 @@
    "trigger_terms": [
     "RDataFrame"
    ],
-   "not": "hep-analysis",
+   "not": "hep-measurement",
    "set": "ANA-P4-5"
   },
   {
@@ -235,7 +235,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Should my spectrum be reported at detector level or unfolded to particle level? Help me with the observable definition.",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "observable definition"
    ],
@@ -250,7 +250,7 @@
    "trigger_terms": [
     "unfolding with regularization and coverage"
    ],
-   "not": "hep-analysis",
+   "not": "hep-measurement",
    "set": "ANA-P4-5"
   },
   {
@@ -258,7 +258,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Here is our analysis note on the dilepton cross section; give me a verdict-first measurement review.",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "verdict-first measurement review"
    ],
@@ -269,7 +269,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "這是我們的分析筆記，請做 measurement review，先給結論再列出缺陷。",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "measurement review"
    ],
@@ -357,7 +357,7 @@
    "lang": "en",
    "kind": "neighboring",
    "prompt": "Which selection cuts should define my signal region?",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "event/candidate selection"
    ],
@@ -422,7 +422,7 @@
    "lang": "en",
    "kind": "negative",
    "prompt": "Write the results section of the paper from these fit outputs.",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "drafting or revising paper sections"
    ],
@@ -476,7 +476,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Train a jet classifier in PyTorch with grouped splits by run so nothing leaks.",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "grouped train/validation/test splits and leakage checks"
    ],
@@ -489,7 +489,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "我的模擬太慢，想用 PyTorch 做 surrogates，並檢查 domain shift。",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "surrogates",
     "domain shift"
@@ -504,7 +504,7 @@
    "trigger_terms": [
     "coverage"
    ],
-   "not": "physics-ml",
+   "not": "hep-ml",
    "inputs": {
     "lfi_notes.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\nA neural ratio estimator trained on 1e5 simulated samples gives a 68% interval for theta of [0.8, 1.3]. No coverage test yet.\n"
    }
@@ -518,7 +518,7 @@
    "trigger_terms": [
     "CMake builds"
    ],
-   "not": "physics-ml",
+   "not": "hep-ml",
    "inputs": {
     "CMakeLists.txt": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\ncmake_minimum_required(VERSION 3.16)\nproject(ana CXX)\nadd_executable(ana main.cpp)\n"
    }
@@ -528,7 +528,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Train an unsupervised anomaly detector on background-only events to search for new physics, with signal-injection tests.",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "weak supervision"
    ],
@@ -539,7 +539,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "想用只含背景的事件訓練無監督的 anomaly detection 模型找新物理，並做訊號注入測試（weak supervision 相關）。",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "weak supervision"
    ],
@@ -550,7 +550,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Set up CWoLa weak supervision: train a classifier of signal region against sidebands in data, k-folded.",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "weak supervision"
    ],
@@ -561,7 +561,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "用 CWoLa（weak supervision）在資料中訓練訊號區對旁帶的分類器，並做 k-fold。",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "weak supervision"
    ],
@@ -572,7 +572,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Train a graph neural network that classifies hit-graph edges for ML track finding in our tracker.",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "classifiers and regressors"
    ],
@@ -583,7 +583,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "訓練一個圖神經網路對 hit 圖的邊做分類，用來做機器學習徑跡重建（classifiers and regressors）。",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "classifiers and regressors"
    ],
@@ -594,7 +594,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "My jet tagger sculpts the background mass distribution; add mass decorrelation with DisCo and measure the sculpting.",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "mass decorrelation"
    ],
@@ -605,7 +605,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "我的 jet 標記器會扭曲背景質量分布，請加入 mass decorrelation（DisCo）並量化扭曲程度。",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "mass decorrelation"
    ],
@@ -616,7 +616,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Make my classifier robust to the jet energy scale uncertainty with systematic-aware training.",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "systematic-aware training"
    ],
@@ -627,7 +627,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "請用 systematic-aware training 讓分類器對噴流能量標度的不確定度不敏感。",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "systematic-aware training"
    ],
@@ -638,7 +638,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Train a multiclass PyTorch network that separates ttbar, W+jets and QCD events, with per-class working points.",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "classifiers and regressors",
     "working points"
@@ -650,7 +650,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "訓練一個多類別 PyTorch 分類器區分 ttbar、W+jets 與 QCD 事件，並為每個類別設定 working points。",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "classifiers and regressors",
     "working points"
@@ -662,31 +662,31 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Train the OmniFold classifiers that reweight my simulation to data at detector and particle level.",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "classifiers and regressors"
    ],
    "set": "PML",
-   "note": "training the reweighting classifiers is physics-ml; unfolding validity and coverage hand to hep-statistics (no neighbouring case: the hep-statistics description names no physics-ml exception, and changing it is out of scope)"
+   "note": "training the reweighting classifiers is hep-ml; unfolding validity and coverage hand to hep-statistics (no neighbouring case: the hep-statistics description names no hep-ml exception, and changing it is out of scope)"
   },
   {
    "id": "ml-pml-omnifold-2",
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "請訓練 OmniFold 的分類器（classifiers and regressors），在偵測器層與粒子層把模擬重新加權到資料。",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "classifiers and regressors"
    ],
    "set": "PML",
-   "note": "training the reweighting classifiers is physics-ml; unfolding validity and coverage hand to hep-statistics (no neighbouring case: the hep-statistics description names no physics-ml exception, and changing it is out of scope)"
+   "note": "training the reweighting classifiers is hep-ml; unfolding validity and coverage hand to hep-statistics (no neighbouring case: the hep-statistics description names no hep-ml exception, and changing it is out of scope)"
   },
   {
    "id": "ml-pml-surrogate-1",
    "lang": "en",
    "kind": "direct",
    "prompt": "Replace my slow detector simulation step with neural surrogates and flag queries outside the training domain.",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "surrogates"
    ],
@@ -697,7 +697,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "用 normalizing flow 做量能器簇射的 generative models and fast simulation，並用物理量驗證。",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "generative models and fast simulation"
    ],
@@ -708,7 +708,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "用神經後驗估計做 ML-assisted or simulation-based inference (training side)，模型參數由模擬產生。",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "ML-assisted or simulation-based inference"
    ],
@@ -737,7 +737,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Check whether this INSPIRE citation really supports the 2.1% number in my draft.",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "citations",
     "INSPIRE-HEP"
@@ -751,7 +751,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "請幫我回覆審稿人的 referee reports，並修改摘要。",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "referee reports",
     "abstracts"
@@ -765,7 +765,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "What data period and rigidity range does the AMS-02 nitrogen flux paper report?",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "what a paper states"
    ],
@@ -779,7 +779,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "A colleague cites an AMS-02 paper observing antihelium-4. Is that paper real?",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "whether a paper exists"
    ],
@@ -793,7 +793,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "What has AMS-02 published most recently on cosmic-ray nuclei?",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "what a named experiment published"
    ],
@@ -807,7 +807,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Is the 2016 AMS-02 boron-to-carbon ratio paper still the latest result I should cite?",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "which result is the latest"
    ],
@@ -821,7 +821,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Does the AMS-02 hardening of the proton and helium spectra prove a second source population?",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "whether a result supports a claim or interpretation"
    ],
@@ -839,7 +839,7 @@
    "trigger_terms": [
     "amplitudes"
    ],
-   "not": "research-communication",
+   "not": "hep-communication",
    "inputs": {
     "diagram.md": "<!-- SYNTHETIC routing fixture: invented values, not data from any experiment. -->\nDiagram: e- e+ annihilate into a photon, which produces a single muon (no antimuon) at tree level.\n"
    }
@@ -853,7 +853,7 @@
    "trigger_terms": [
     "template fits"
    ],
-   "not": "research-communication",
+   "not": "hep-communication",
    "inputs": {
     "fit_config.json": "{\"_note\": \"SYNTHETIC routing fixture: invented values, not data from any experiment.\", \"templates\": [\"signal.csv\", \"background.csv\"], \"data\": \"data.csv\", \"poi\": \"mu\"}\n",
     "signal.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nbin,count\n0,3\n1,8\n2,4\n",
@@ -926,7 +926,7 @@
    "trigger_terms": [
     "unbinned fits"
    ],
-   "not": "hep-analysis"
+   "not": "hep-measurement"
   },
   {
    "id": "st-nsbi-1",
@@ -937,7 +937,7 @@
    "trigger_terms": [
     "coverage"
    ],
-   "not": "physics-ml"
+   "not": "hep-ml"
   },
   {
    "id": "st-publish-1",
@@ -948,7 +948,7 @@
    "trigger_terms": [
     "likelihoods"
    ],
-   "not": "research-communication"
+   "not": "hep-communication"
   },
   {
    "id": "co-batch-sbatch-1",
@@ -1012,9 +1012,9 @@
    ],
    "chain": [
     "hep-computing",
-    "physics-ml"
+    "hep-ml"
    ],
-   "note": "submission is hep-computing; the model, training and validation hand to physics-ml"
+   "note": "submission is hep-computing; the model, training and validation hand to hep-ml"
   },
   {
    "id": "co-batch-negative-1",
@@ -1033,7 +1033,7 @@
    "lang": "en",
    "kind": "journey",
    "prompt": "Plan the time-dependent helium flux and He/p ratio measurement for AMS-02 across two periods.",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "exposure"
    ],
@@ -1042,10 +1042,10 @@
     "experiment:ams-02"
    ],
    "chain": [
-    "hep-analysis",
-    "detector-response",
+    "hep-measurement",
+    "hep-detector",
     "hep-statistics",
-    "research-communication"
+    "hep-communication"
    ]
   },
   {
@@ -1053,7 +1053,7 @@
    "lang": "zh-Hant",
    "kind": "journey",
    "prompt": "研究 AMS-02 RICH 的速度解析度隨電荷的變化。",
-   "expected_primary": "detector-response",
+   "expected_primary": "hep-detector",
    "trigger_terms": [
     "Cherenkov/RICH",
     "resolution"
@@ -1063,7 +1063,7 @@
     "experiment:ams-02"
    ],
    "chain": [
-    "detector-response",
+    "hep-detector",
     "hep-statistics"
    ]
   },
@@ -1072,14 +1072,14 @@
    "lang": "en",
    "kind": "journey",
    "prompt": "Measure the corrected angular distribution at my e+e- collider with its own luminosity and response.",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "luminosity"
    ],
    "journey": "J3",
    "chain": [
-    "hep-analysis",
-    "detector-response",
+    "hep-measurement",
+    "hep-detector",
     "hep-statistics"
    ]
   },
@@ -1109,15 +1109,15 @@
    "lang": "en",
    "kind": "journey",
    "prompt": "Fold my prediction through the detector response and fit a normalization scale.",
-   "expected_primary": "detector-response",
+   "expected_primary": "hep-detector",
    "trigger_terms": [
     "folding a prediction through the response"
    ],
    "journey": "J5",
    "chain": [
-    "detector-response",
+    "hep-detector",
     "hep-statistics",
-    "research-communication"
+    "hep-communication"
    ],
    "note": "T1: the prediction exists, so the chain starts at the fold (routing-contract ownership table)",
    "inputs": {
@@ -1154,7 +1154,7 @@
    "journey": "J7",
    "chain": [
     "hep-theory",
-    "detector-response",
+    "hep-detector",
     "hep-statistics"
    ]
   },
@@ -1181,13 +1181,13 @@
    "lang": "zh-Hant",
    "kind": "journey",
    "prompt": "訓練一個分類器並宣告 surrogates 的有效範圍，之後用於推論。",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "surrogates"
    ],
    "journey": "J9",
    "chain": [
-    "physics-ml",
+    "hep-ml",
     "hep-statistics"
    ]
   },
@@ -1196,13 +1196,13 @@
    "lang": "en",
    "kind": "journey",
    "prompt": "Draft the paper section and figures with claim-to-result links and honest status.",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "claim-to-result links"
    ],
    "journey": "J10",
    "chain": [
-    "research-communication"
+    "hep-communication"
    ],
    "inputs": {
     "results.json": "{\"_note\": \"SYNTHETIC routing fixture: invented values, not data from any experiment.\", \"status\": [\"synthetic\"], \"sigma_pb\": 745.6, \"stat\": 6.6, \"syst\": 14.9}\n"
@@ -1213,13 +1213,13 @@
    "lang": "en",
    "kind": "journey",
    "prompt": "Use our collaboration's private calibration constants from my local profile in the efficiency study.",
-   "expected_primary": "detector-response",
+   "expected_primary": "hep-detector",
    "trigger_terms": [
     "calibration"
    ],
    "journey": "J11",
    "chain": [
-    "detector-response"
+    "hep-detector"
    ],
    "note": "local profile via project config; nothing enters the plugin",
    "inputs": {
@@ -1251,7 +1251,7 @@
    "trigger_terms": [
     "crashes"
    ],
-   "not": "hep-analysis",
+   "not": "hep-measurement",
    "note": "experiment name does not route; the code problem does",
    "inputs": {
     "reco_ntuple.py": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nimport ctypes\nbuf = (ctypes.c_float * 10)()\nfor i in range(100):\n    buf[i] = 0.0  # writes past the buffer\n"
@@ -1266,7 +1266,7 @@
    "trigger_terms": [
     "batch submission, merging and recovery"
    ],
-   "not": "hep-analysis",
+   "not": "hep-measurement",
    "inputs": {
     "merge.sh": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\ncat out/job_*.txt out/job_*_retry.txt > merged.txt\n"
    }
@@ -1293,7 +1293,7 @@
    ],
    "chain": [
     "hep-theory",
-    "detector-response",
+    "hep-detector",
     "hep-statistics"
    ]
   },
@@ -1340,7 +1340,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Which beam species and polarizations does the EIC provide, and where are its design energies specified? I am planning a measurement there.",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "measurement"
    ],
@@ -1354,7 +1354,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "請說明 EIC 的 ePIC 偵測器概念：磁鐵、tracking、calorimetry、particle identification 與資料擷取。",
-   "expected_primary": "detector-response",
+   "expected_primary": "hep-detector",
    "trigger_terms": [
     "tracking",
     "calorimetry",
@@ -1392,7 +1392,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "How should I align the silicon tracker with cosmic-ray and collision tracks, and check that the alignment did not bias the momentum scale?",
-   "expected_primary": "detector-response",
+   "expected_primary": "hep-detector",
    "trigger_terms": [
     "calibration and alignment"
    ],
@@ -1403,7 +1403,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "TOF 的時間解析度要怎麼從資料中量測？請分開核心和尾巴。",
-   "expected_primary": "detector-response",
+   "expected_primary": "hep-detector",
    "trigger_terms": [
     "TOF",
     "timing"
@@ -1415,7 +1415,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Set up a Geant4 detector simulation of a lead-glass calorimeter test beam and compare it with the beam data.",
-   "expected_primary": "detector-response",
+   "expected_primary": "hep-detector",
    "trigger_terms": [
     "detector simulation (Geant4)"
    ],
@@ -1426,7 +1426,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "如何用 truth matching 評估 tracking 的效率與假徑跡率？",
-   "expected_primary": "detector-response",
+   "expected_primary": "hep-detector",
    "trigger_terms": [
     "truth matching",
     "tracking"
@@ -1438,7 +1438,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Which conditions tag and calibration version produced my reconstructed sample, and how do I record that provenance?",
-   "expected_primary": "detector-response",
+   "expected_primary": "hep-detector",
    "trigger_terms": [
     "conditions and their provenance"
    ],
@@ -1449,7 +1449,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "TRD 的電子與質子分離能力（particle identification）要怎麼評估？",
-   "expected_primary": "detector-response",
+   "expected_primary": "hep-detector",
    "trigger_terms": [
     "TRD",
     "particle identification"
@@ -1461,7 +1461,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Explain signal formation and readout in a silicon strip sensor, including charge sharing between strips.",
-   "expected_primary": "detector-response",
+   "expected_primary": "hep-detector",
    "trigger_terms": [
     "signal formation and readout"
    ],
@@ -1472,7 +1472,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "請說明 muon systems 的觸發與重建，以及 muon 動量解析度如何量測。",
-   "expected_primary": "detector-response",
+   "expected_primary": "hep-detector",
    "trigger_terms": [
     "muon systems"
    ],
@@ -1483,7 +1483,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Give me a parametrized electron efficiency and smearing so a theorist can recast our search.",
-   "expected_primary": "detector-response",
+   "expected_primary": "hep-detector",
    "trigger_terms": [
     "parametrized response for recasting"
    ],
@@ -1494,7 +1494,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Set up an ABCD background estimate for the multijet background in my search and say which closure checks it needs.",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "background estimation",
     "ABCD"
@@ -1506,7 +1506,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "我的宇宙線通量量測要怎麼計算 exposure 與 live time？",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "exposure",
     "live time"
@@ -1518,7 +1518,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Which systematic uncertainties should my W cross-section measurement evaluate, and how should each one be evaluated?",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "systematic uncertainties",
     "evaluation plan"
@@ -1530,7 +1530,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "請幫我定義 Z→ee 量測的 estimand 與 observable definition。",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "estimand",
     "observable definition"
@@ -1542,7 +1542,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Use mass sidebands to estimate the combinatorial background under my peak.",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "sidebands",
     "background estimation"
@@ -1554,7 +1554,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "我們要在解盲前先定 blinding policy，哪些區域要保持盲化？",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "blinding policy"
    ],
@@ -1565,7 +1565,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Lay out the correction chain from raw counts to a fiducial cross section: efficiency, acceptance and luminosity.",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "correction chains",
     "acceptance"
@@ -1577,7 +1577,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Give me a verdict-first measurement review of a plan in which the analyst who tunes the selection also sees the blinded offset.",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "measurement review"
    ],
@@ -1681,7 +1681,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Build a generative model for fast simulation of calorimeter showers in PyTorch.",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "generative models and fast simulation"
    ],
@@ -1692,7 +1692,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "我的 PyTorch 訓練在第 3 個 epoch 出現 NaN，請幫我 debugging NaNs and shapes。",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "debugging NaNs and shapes"
    ],
@@ -1703,7 +1703,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Set up distributed training across four GPUs for my particle-flow network in PyTorch.",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "distributed training"
    ],
@@ -1714,7 +1714,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "分類器輸出的機率沒有校準，該怎麼做 calibration of model outputs？",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "calibration of model outputs"
    ],
@@ -1725,7 +1725,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Train a regressor in PyTorch that predicts the jet energy correction from the jet constituents.",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "classifiers and regressors"
    ],
@@ -1736,7 +1736,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Export my trained PyTorch tagger to ONNX and make sure the checkpoint reloads identically.",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "checkpoints",
     "export"
@@ -1748,7 +1748,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "我的 DataLoader 很慢，GPU 一直在等資料，PyTorch 的 data loading 該怎麼優化？",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "data loading"
    ],
@@ -1759,7 +1759,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Turn on mixed precision for my transformer jet tagger without breaking the loss.",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "mixed precision"
    ],
@@ -1770,7 +1770,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "神經網路回歸的 uncertainty estimation 要用 ensemble 還是 MC dropout？",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "uncertainty estimation"
    ],
@@ -1781,7 +1781,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Set up simulation-based inference with a neural posterior estimator for my model parameters in PyTorch.",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "ML-assisted or simulation-based inference"
    ],
@@ -1792,7 +1792,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "PyTorch 的 training loops 要怎麼寫才能完全重現？",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "training loops"
    ],
@@ -1803,7 +1803,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "My classifier trained on simulation underperforms on data; measure the domain shift and suggest a fix.",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "domain shift"
    ],
@@ -1814,7 +1814,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Build a literature matrix of recent W mass measurements with their methods and uncertainties.",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "literature matrices and reviews"
    ],
@@ -1825,7 +1825,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "請幫我把分析流程畫成 diagrams，輸出可編輯的原始檔。",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "diagrams"
    ],
@@ -1836,7 +1836,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Turn my thesis results into a 15-minute conference talk and a poster version.",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "talks and posters"
    ],
@@ -1847,7 +1847,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "幫我寫研究計畫書（proposals）的動機與方法章節。",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "proposals"
    ],
@@ -1858,7 +1858,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Write handover notes for the student who takes over my analysis next month.",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "handover notes"
    ],
@@ -1869,7 +1869,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Improve the captions and layout of the figures and tables in chapter 4 of my thesis.",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "captions",
     "figures and tables"
@@ -1886,7 +1886,7 @@
     "unfolding",
     "coverage"
    ],
-   "not": "detector-response",
+   "not": "hep-detector",
    "set": "T3"
   },
   {
@@ -1923,7 +1923,7 @@
    "trigger_terms": [
     "CMake builds"
    ],
-   "not": "physics-ml",
+   "not": "hep-ml",
    "set": "T3"
   },
   {
@@ -1935,7 +1935,7 @@
    "trigger_terms": [
     "Feynman diagram is allowed"
    ],
-   "not": "research-communication",
+   "not": "hep-communication",
    "set": "T3"
   },
   {
@@ -1943,7 +1943,7 @@
    "lang": "en",
    "kind": "negative",
    "prompt": "My code runs fine; which event selection cuts should define the signal region of my dimuon search?",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "event/candidate selection"
    ],
@@ -1955,11 +1955,11 @@
    "lang": "en",
    "kind": "negative",
    "prompt": "Train a PyTorch classifier for my signal selection with grouped train/validation/test splits by run.",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "grouped train/validation/test splits and leakage checks"
    ],
-   "not": "hep-analysis",
+   "not": "hep-measurement",
    "set": "T3"
   },
   {
@@ -1971,7 +1971,7 @@
    "trigger_terms": [
     "crashes"
    ],
-   "not": "research-communication",
+   "not": "hep-communication",
    "set": "T4"
   },
   {
@@ -1983,7 +1983,7 @@
    "trigger_terms": [
     "significance and look-elsewhere effects"
    ],
-   "not": "research-communication",
+   "not": "hep-communication",
    "set": "T4"
   },
   {
@@ -1991,11 +1991,11 @@
    "lang": "zh-Hant",
    "kind": "negative",
    "prompt": "論文裡宣稱分類器比基線好 3%，請用不同 seed 做 uncertainty estimation，檢查這個改善是否真實。",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "uncertainty estimation"
    ],
-   "not": "research-communication",
+   "not": "hep-communication",
    "set": "T4"
   },
   {
@@ -2003,11 +2003,11 @@
    "lang": "en",
    "kind": "negative",
    "prompt": "For the detector section of the paper, measure the tracking resolution of our silicon tracker from the data.",
-   "expected_primary": "detector-response",
+   "expected_primary": "hep-detector",
    "trigger_terms": [
     "resolution"
    ],
-   "not": "research-communication",
+   "not": "hep-communication",
    "set": "T4"
   },
   {
@@ -2015,7 +2015,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Write the code-review part of my referee report: does the released repository do what the paper says it does?",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "referee reports"
    ],
@@ -2026,7 +2026,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "上次已經查證過這篇 citations 的 INSPIRE-HEP 紀錄，這次改稿能直接沿用嗎？",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "citations",
     "INSPIRE-HEP"
@@ -2039,7 +2039,7 @@
    "lang": "zh-Hans",
    "kind": "direct",
    "prompt": "请用 tag-and-probe 测量 muon 触发效率，并给出每个 bin 的不确定度。",
-   "expected_primary": "detector-response",
+   "expected_primary": "hep-detector",
    "trigger_terms": [
     "tag-and-probe"
    ],
@@ -2085,7 +2085,7 @@
    "lang": "zh-Hans",
    "kind": "direct",
    "prompt": "请帮我改写论文的摘要（abstracts）和图注（captions）。",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "abstracts",
     "captions"
@@ -2097,7 +2097,7 @@
    "lang": "ja",
    "kind": "direct",
    "prompt": "tag-and-probe でミューオン・トリガー効率を測定し、ビンごとの不確かさを出してください。",
-   "expected_primary": "detector-response",
+   "expected_primary": "hep-detector",
    "trigger_terms": [
     "tag-and-probe"
    ],
@@ -2120,7 +2120,7 @@
    "lang": "ja",
    "kind": "direct",
    "prompt": "コントロール領域（control regions）を使って、ダイレプトン測定のバックグラウンド推定（background estimation）を設計してください。",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "control regions",
     "background estimation"
@@ -2132,7 +2132,7 @@
    "lang": "ja",
    "kind": "direct",
    "prompt": "PyTorch でジェット分類器を学習し、run ごとに分けた grouped train/validation/test splits でリークを防いでください。",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "grouped train/validation/test splits and leakage checks"
    ],
@@ -2154,7 +2154,7 @@
    "lang": "de",
    "kind": "direct",
    "prompt": "Miss die Myon-Triggereffizienz mit tag-and-probe und gib die Unsicherheit pro Bin an.",
-   "expected_primary": "detector-response",
+   "expected_primary": "hep-detector",
    "trigger_terms": [
     "tag-and-probe"
    ],
@@ -2199,7 +2199,7 @@
    "lang": "de",
    "kind": "direct",
    "prompt": "Prüfe, ob dieses INSPIRE-Zitat (citations) die 2,1 % in meinem Entwurf wirklich stützt.",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "citations",
     "INSPIRE-HEP"
@@ -2216,7 +2216,7 @@
     "Feldman-Cousins",
     "low or zero counts"
    ],
-   "not": "physics-ml",
+   "not": "hep-ml",
    "set": "T19",
    "variant": "adversarial"
   },
@@ -2225,7 +2225,7 @@
    "lang": "en",
    "kind": "negative",
    "prompt": "In ROOT, decide which control regions and ABCD regions should estimate the multijet background in my search.",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "control regions",
     "ABCD",
@@ -2254,7 +2254,7 @@
    "lang": "en",
    "kind": "negative",
    "prompt": "With uproot already reading my ntuples, measure the electron reconstruction efficiency with tag-and-probe and the data/MC agreement.",
-   "expected_primary": "detector-response",
+   "expected_primary": "hep-detector",
    "trigger_terms": [
     "tag-and-probe",
     "data/MC agreement"
@@ -2281,12 +2281,12 @@
    "lang": "en",
    "kind": "negative",
    "prompt": "In LaTeX, decide which systematic uncertainties my W cross-section measurement must evaluate and how.",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "systematic uncertainties",
     "evaluation plan"
    ],
-   "not": "research-communication",
+   "not": "hep-communication",
    "set": "T19",
    "variant": "adversarial"
   },
@@ -2321,7 +2321,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Quick: what's the denominator in tag-and-probe?",
-   "expected_primary": "detector-response",
+   "expected_primary": "hep-detector",
    "trigger_terms": [
     "tag-and-probe"
    ],
@@ -2333,7 +2333,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Quick question: should my signal region stay blinded? What blinding policy?",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "blinding policy"
    ],
@@ -2345,7 +2345,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Quick: does arXiv:2405.01234 really exist?",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "whether a paper exists"
    ],
@@ -2369,7 +2369,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Quick: NaN loss after a few PyTorch steps, where do I look?",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "debugging NaNs and shapes"
    ],
@@ -2381,7 +2381,7 @@
    "lang": "en",
    "kind": "multi-turn",
    "prompt": "I have truth and reconstructed energies from my calorimeter simulation; build the response matrix and state its orientation and normalization.",
-   "expected_primary": "detector-response",
+   "expected_primary": "hep-detector",
    "trigger_terms": [
     "response matrices"
    ],
@@ -2431,7 +2431,7 @@
    "turns": [
     {
      "prompt": "Write the results paragraph for the paper from that fit, keeping its status labels.",
-     "expected": "research-communication",
+     "expected": "hep-communication",
      "trigger_terms": [
       "drafting or revising paper sections"
      ]
@@ -2443,7 +2443,7 @@
    "lang": "zh-Hant",
    "kind": "multi-turn",
    "prompt": "用 PyTorch 訓練我的訊號分類器，依 run 做 grouped train/validation/test splits。",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "grouped train/validation/test splits and leakage checks"
    ],
@@ -2451,7 +2451,7 @@
    "turns": [
     {
      "prompt": "接著把分類器輸出加進事件選擇（event/candidate selection），並用 control regions 估計背景。",
-     "expected": "hep-analysis",
+     "expected": "hep-measurement",
      "trigger_terms": [
       "event/candidate selection",
       "control regions"
@@ -2464,12 +2464,12 @@
    "lang": "en",
    "kind": "neighboring",
    "prompt": "Train a BDT for my event selection and pick the working point.",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "BDTs in analyses",
     "working points"
    ],
-   "not": "hep-analysis",
+   "not": "hep-measurement",
    "set": "ML-OWN"
   },
   {
@@ -2477,12 +2477,12 @@
    "lang": "zh-Hant",
    "kind": "neighboring",
    "prompt": "請幫我為事件選擇訓練一個 BDT（BDTs in analyses），並決定 working points。",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "BDTs in analyses",
     "working points"
    ],
-   "not": "hep-analysis",
+   "not": "hep-measurement",
    "set": "ML-OWN"
   },
   {
@@ -2490,7 +2490,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "My XGBoost BDT misbehaves with the negative event weights of my NLO samples; how should I train and evaluate it?",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "event weights including negative ones",
     "BDTs in analyses"
@@ -2502,7 +2502,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "我的 XGBoost 遇到 NLO 樣本的負權重（event weights including negative ones）就出問題，BDT 該怎麼訓練與評估？",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "event weights including negative ones",
     "BDTs in analyses"
@@ -2514,7 +2514,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Quick: is AUC enough to choose my jet classifier's working point?",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "working points"
    ],
@@ -2526,7 +2526,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "快速問一下：分類器的 working points 要怎麼選，只看 AUC 可以嗎？",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "working points"
    ],
@@ -2538,27 +2538,27 @@
    "lang": "en",
    "kind": "neighboring",
    "prompt": "Train a neural-network energy regression to calibrate ECAL clusters from their cell energies.",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "classifiers and regressors",
     "detector signals"
    ],
-   "not": "detector-response",
+   "not": "hep-detector",
    "set": "ML-OWN",
-   "note": "the deliverable is a trained regression model, which physics-ml owns; the detector calibration chain and its validation in data stay with detector-response"
+   "note": "the deliverable is a trained regression model, which hep-ml owns; the detector calibration chain and its validation in data stay with hep-detector"
   },
   {
    "id": "ml-own-ecal-2",
    "lang": "zh-Hant",
    "kind": "neighboring",
    "prompt": "請用神經網路訓練 ECAL 能量回歸（classifiers and regressors），從 cell 能量校正 cluster 能量。",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "classifiers and regressors"
    ],
-   "not": "detector-response",
+   "not": "hep-detector",
    "set": "ML-OWN",
-   "note": "the deliverable is a trained regression model, which physics-ml owns; the detector calibration chain and its validation in data stay with detector-response"
+   "note": "the deliverable is a trained regression model, which hep-ml owns; the detector calibration chain and its validation in data stay with hep-detector"
   },
   {
    "id": "st-t46-nat-1",
@@ -2669,7 +2669,7 @@
    "lang": "en",
    "kind": "multi-turn",
    "prompt": "Fold my prediction through the detector response.",
-   "expected_primary": "detector-response",
+   "expected_primary": "hep-detector",
    "trigger_terms": [
     "folding a prediction through the response"
    ],
@@ -2683,7 +2683,7 @@
      ]
     }
    ],
-   "note": "Q9: the fold belongs to detector-response, the fit that uses the folded prediction to hep-statistics (routing contract row 36); the inputs of j05, so the folded prediction can exist",
+   "note": "Q9: the fold belongs to hep-detector, the fit that uses the folded prediction to hep-statistics (routing contract row 36); the inputs of j05, so the folded prediction can exist",
    "inputs": {
     "prediction.csv": "# SYNTHETIC routing fixture: invented values, not data from any experiment.\nbin,lo,hi,sigma_pb\n0,-1,0,370\n1,0,1,375\n",
     "response.json": "{\"_note\": \"SYNTHETIC routing fixture: invented values, not data from any experiment.\", \"level_in\": \"particle\", \"level_out\": \"detector\", \"matrix\": [[0.9,0.05],[0.05,0.9]], \"efficiency_included\": true}\n",
@@ -2724,7 +2724,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "有人宣稱 AMS-02 的反質子/質子比支持暗物質的解釋，這個結果真的支持這種說法嗎？",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "whether a result supports a claim or interpretation"
    ],
@@ -2856,7 +2856,7 @@
    "lang": "zh-Hant",
    "kind": "neighboring",
    "prompt": "請設計時間相關通量量測的時間分段，以及每個時段的 exposure 與 live time 修正。",
-   "expected_primary": "hep-analysis",
+   "expected_primary": "hep-measurement",
    "trigger_terms": [
     "exposure",
     "live time"
@@ -2909,7 +2909,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Build a literature matrix of the published proton spectral-hardening measurements from AMS-02, PAMELA, CREAM and DAMPE with the break rigidity and its uncertainty.",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "literature matrices and reviews"
    ],
@@ -2954,7 +2954,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "A CRDB entry for the AMS-02 positron flux looks different from what I remember. Which paper is it transcribed from, and what does that paper state?",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "what a paper states"
    ],
@@ -2982,35 +2982,35 @@
    "lang": "en",
    "kind": "neighboring",
    "prompt": "Train an e/p classifier on TRD and ECAL variables and pick a working point for my positron flux measurement.",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "classifiers and regressors",
     "working points"
    ],
-   "not": "hep-analysis",
+   "not": "hep-measurement",
    "set": "WP11",
    "chain": [
-    "physics-ml",
-    "hep-analysis"
+    "hep-ml",
+    "hep-measurement"
    ],
-   "note": "the trained model and working point are physics-ml; the selection and proton-background estimate hand to hep-analysis"
+   "note": "the trained model and working point are hep-ml; the selection and proton-background estimate hand to hep-measurement"
   },
   {
    "id": "wp11-ml-2",
    "lang": "zh-Hant",
    "kind": "neighboring",
    "prompt": "請用 TRD 與 ECAL 的變數訓練電子/質子分類器並選定 working points，之後用在正電子通量量測的事件選擇。",
-   "expected_primary": "physics-ml",
+   "expected_primary": "hep-ml",
    "trigger_terms": [
     "working points"
    ],
-   "not": "hep-analysis",
+   "not": "hep-measurement",
    "set": "WP11",
    "chain": [
-    "physics-ml",
-    "hep-analysis"
+    "hep-ml",
+    "hep-measurement"
    ],
-   "note": "the trained model and working point are physics-ml; the selection hands to hep-analysis"
+   "note": "the trained model and working point are hep-ml; the selection hands to hep-measurement"
   },
   {
    "id": "wp11-bound-dm-1",
@@ -3039,7 +3039,7 @@
    "lang": "en",
    "kind": "direct",
    "prompt": "Which is AMS's latest B/C paper?",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "which result is the latest"
    ],
@@ -3054,7 +3054,7 @@
    "lang": "zh-Hant",
    "kind": "direct",
    "prompt": "AMS 最新的 B/C 論文是哪一篇？",
-   "expected_primary": "research-communication",
+   "expected_primary": "hep-communication",
    "trigger_terms": [
     "which result is the latest"
    ],
