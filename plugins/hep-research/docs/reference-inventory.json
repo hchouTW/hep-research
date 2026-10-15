@@ -10,7 +10,7 @@
   },
   "hep-analysis": {
    "references": 12,
-   "bytes": 97831,
+   "bytes": 97913,
    "uncited": 0
   },
   "hep-computing": {
@@ -19,8 +19,8 @@
    "uncited": 0
   },
   "hep-statistics": {
-   "references": 11,
-   "bytes": 149620,
+   "references": 12,
+   "bytes": 165519,
    "uncited": 0
   },
   "hep-theory": {
@@ -864,7 +864,7 @@
   {
    "path": "skills/hep-analysis/references/cosmic-ray-measurements.md",
    "owner": "hep-analysis",
-   "bytes": 16110,
+   "bytes": 16192,
    "lines": 178,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -1567,8 +1567,8 @@
   {
    "path": "skills/hep-statistics/references/astroparticle-statistics.md",
    "owner": "hep-statistics",
-   "bytes": 11287,
-   "lines": 155,
+   "bytes": 11622,
+   "lines": 159,
    "linked_from_skill_md": false,
    "cited_by": [
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
@@ -1582,6 +1582,7 @@
     "skills/hep-analysis/scripts/particle_ratio_with_uncertainty.py",
     "skills/hep-statistics/references/core-stats-guide.md",
     "skills/hep-statistics/references/inference-recipes.md",
+    "skills/hep-statistics/references/time-series-inference.md",
     "skills/hep-statistics/scripts/li_ma_significance.py",
     "tests/skills/hep_statistics/test_li_ma_significance.py"
    ],
@@ -1589,7 +1590,7 @@
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "33d96a1 2026-10-13"
+   "last_commit": "386c00a 2026-10-15"
   },
   {
    "path": "skills/hep-statistics/references/combinations.md",
@@ -1598,7 +1599,8 @@
    "lines": 61,
    "linked_from_skill_md": false,
    "cited_by": [
-    "skills/hep-statistics/references/core-stats-guide.md"
+    "skills/hep-statistics/references/core-stats-guide.md",
+    "skills/hep-statistics/references/time-series-inference.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "317c39a 2026-10-14"
@@ -1625,8 +1627,8 @@
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 16944,
-   "lines": 174,
+   "bytes": 16992,
+   "lines": 175,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/inference-and-unfolding.md",
@@ -1643,7 +1645,7 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "1909d51 2026-10-13"
+   "last_commit": "cafbc08 2026-10-15"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
@@ -1680,6 +1682,7 @@
     "skills/hep-statistics/references/astroparticle-statistics.md",
     "skills/hep-statistics/references/core-stats-guide.md",
     "skills/hep-statistics/references/nuisance-modeling.md",
+    "skills/hep-statistics/references/time-series-inference.md",
     "tests/skills/hep_statistics/test_weighted_unbinned_fit.py"
    ],
    "cited_by_other_skills": [
@@ -1721,6 +1724,7 @@
     "skills/hep-statistics/references/core-stats-commands.md",
     "skills/hep-statistics/references/core-stats-guide.md",
     "skills/hep-statistics/references/statistical-tools.md",
+    "skills/hep-statistics/references/time-series-inference.md",
     "tests/adapters/test_nuisance_interpolation.py"
    ],
    "cited_by_other_skills": [
@@ -1768,6 +1772,24 @@
     "physics-ml"
    ],
    "last_commit": "578c12f 2026-10-13"
+  },
+  {
+   "path": "skills/hep-statistics/references/time-series-inference.md",
+   "owner": "hep-statistics",
+   "bytes": 15516,
+   "lines": 194,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-analysis/references/cosmic-ray-measurements.md",
+    "skills/hep-statistics/SKILL.md",
+    "skills/hep-statistics/references/astroparticle-statistics.md",
+    "skills/hep-statistics/references/core-stats-guide.md",
+    "tests/skills/hep_statistics/test_time_series_covariance.py"
+   ],
+   "cited_by_other_skills": [
+    "hep-analysis"
+   ],
+   "last_commit": "386c00a 2026-10-15"
   },
   {
    "path": "skills/hep-statistics/references/unfolding.md",
@@ -3621,7 +3643,8 @@
   "inference": [
    "skills/hep-statistics/references/inference-recipes.md",
    "skills/hep-statistics/references/ml-assisted-inference.md",
-   "skills/hep-statistics/references/statistical-inference-for-physics.md"
+   "skills/hep-statistics/references/statistical-inference-for-physics.md",
+   "skills/hep-statistics/references/time-series-inference.md"
   ],
   "latex": [
    "skills/research-communication/references/latex-mechanics-and-tooling.md",
