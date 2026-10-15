@@ -1,0 +1,10 @@
+{
+ "source": "inspire",
+ "url": "https://inspirehep.net/api/literature?q=arxiv%3A2501.99999&size=2&fields=titles%2Cauthors.full_name%2Cdois%2Carxiv_eprints%2Ctexkeys%2Ccontrol_number%2Cpublication_info%2Ccollaborations",
+ "recorded_at": "2026-10-15T02:31:48Z",
+ "http_status": 200,
+ "headers": {
+  "content-type": "application/json"
+ },
+ "body": "{\"hits\":{\"hits\":[],\"total\":0},\"links\":{\"self\":\"https://inspirehep.net/api/literature/?q=arxiv%3A2501.99999&size=2&page=1&fields=titles,authors.full_name,dois,arxiv_eprints,texkeys,control_number,publication_info,collaborations\",\"bibtex\":\"https://inspirehep.net/api/literature/?q=arxiv%3A2501.99999&size=2&page=1&format=bibtex\",\"latex-eu\":\"https://inspirehep.net/api/literature/?q=arxiv%3A2501.99999&size=2&page=1&format=latex-eu\",\"latex-us\":\"https://inspirehep.net/api/literature/?q=arxiv%3A2501.99999&size=2&page=1&format=latex-us\",\"json\":\"https://inspirehep.net/api/literature/?q=arxiv%3A2501.99999&size=2&page=1&fields=titles,authors.full_name,dois,arxiv_eprints,texkeys,control_number,publication_info,collaborations&format=json\",\"json-expanded\":\"https://inspirehep.net/api/literature/?q=arxiv%3A2501.99999&size=2&page=1&format=json-expanded\",\"cv\":\"https://inspirehep.net/api/literature/?q=arxiv%3A2501.99999&size=2&page=1&format=cv\"}}"
+}
