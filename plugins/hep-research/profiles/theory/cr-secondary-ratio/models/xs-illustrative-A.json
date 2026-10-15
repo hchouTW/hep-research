@@ -1,0 +1,11 @@
+{
+ "label": "ILLUSTRATIVE cross-section set A for theory:cr-secondary-ratio: round placeholder values, not taken from any measurement or parametrization",
+ "illustrative": true,
+ "status": "synthetic",
+ "unit": "mb",
+ "target": "hydrogen (1H) at rest",
+ "energy_dependence": "none (energy-independent placeholders; real cross sections vary with energy)",
+ "meaning": "production_mb: effective cumulative production cross section of the secondary from each parent (ghost nuclei assumed included); inelastic_mb: total inelastic (destruction) cross section of each species",
+ "production_mb": {"C->B": 70.0, "O->B": 35.0},
+ "inelastic_mb": {"B": 250.0, "C": 270.0, "O": 310.0}
+}

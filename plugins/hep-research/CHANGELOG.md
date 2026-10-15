@@ -5,6 +5,26 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+<!-- wp3 -->
+# WP3 changelog bullets (for "Unreleased")
+
+- Profile `theory:cr-secondary-ratio` 0.1.0, the first narrow cosmic-ray propagation domain: B/C (from C and O) in a
+  weighted-slab (leaky-box) model and a 1D thin-disc diffusion model without convection. SymPy checks of the closed
+  forms, of their equivalence through lambda_esc = n_H m_H h v L / D and of the resulting D0/L invariance
+  (`scripts/derive.py`); a benchmark of the closed forms against the profile's own numerical solutions (slab ODEs
+  averaged over the path-length distribution, a finite-thickness disc solved exactly and by finite volumes, and its
+  thin-disc limit; `scripts/predict.py --benchmark`); a theory-spec artifact with `model.family`
+  `cosmic-ray-propagation` and `degenerate_directions: ["D0/L"]`; a bin-averaged prediction artifact with a
+  cross-section model alternative; and a prediction callable at any parameter point and on (D0, L) grids
+  (`predict.evaluate`, `predict.grid`, `predict.bin_averaged`, CLI `--set` / `--grid`) for the grid fit of WP1/WP8.
+  Cross sections and transport values are ILLUSTRATIVE; references are cited but were not opened (no network).
+  Status `demonstrated-on-synthetic-data`, 37 profile tests, including one showing that a theory-spec without
+  `degenerate_directions` fails `contracts/validate.py` with `theory.degeneracy_missing`.
+- Capability matrix: a "Profiles" row for `theory:cr-secondary-ratio`.
+
+- `examples/eic-profile-routing/output/` regenerated: the run lists every registered `profile.json` it opens, which now
+  includes the new profile.
+
 <!-- ci2 -->
 - CI: a new commit on a pull request cancels that PR's superseded `tests` run (pushes to main, the weekly and manual runs are never cancelled); pip downloads are cached by `setup-python`, keyed on `requirements-ci.lock` (installs and tests still run in full every time). Batch 2 (low-risk part) of the CI improvement proposal.
 

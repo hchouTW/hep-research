@@ -1,0 +1,17 @@
+{
+ "unit_system": "CGS for transport (cm, s, g; D in cm^2/s, n_H in cm^-3, grammage in g/cm^2); lengths L and h given in kpc (1 pc = 648000/pi au); kinetic energy per nucleon in GeV/n; rigidity in GV; cross sections in mb (1 mb = 1e-27 cm^2) [crsr:C05]",
+ "hbar_c_one": false,
+ "metric_signature": "not-applicable (no relativistic amplitude is computed)",
+ "coupling_normalization": "not-applicable",
+ "renormalization_scheme": "not-applicable",
+ "scales": "reference rigidity R0 in D(R) = D0 beta (R/R0)^delta (benchmark R0 = 1 GV); weighted slab: lambda_esc(R) = lambda0 (R/R0)^-delta",
+ "energy_variable": "kinetic energy per nucleon E/n in GeV/n, conserved in fragmentation (straight-ahead); the ratio compares fluxes at the same E/n",
+ "frame": "Galactic rest frame (interstellar gas at rest); observer at the disc mid-plane z = 0",
+ "angle_definition": "not-applicable (isotropic, angle-integrated fluxes)",
+ "spin_treatment": "not-applicable",
+ "mass_approximation": "nucleus mass = A x atomic mass unit (0.93149410242 GeV; binding energy neglected), so all species share beta at fixed E/n; rigidity R = (A/|Z|) p_per_nucleon via core/kinematics/relativistic.py; target hydrogen mass m_H = proton mass 1.67262192369e-24 g (electron and binding neglected) [crsr:C05]",
+ "crsr:observable": "B/C = N_B / N_C, interstellar fluxes of an effective single boron species (A = 11, Z = 5) and carbon (A = 12, Z = 6) at the same E/n, at z = 0, before solar modulation",
+ "crsr:cross_sections": "input sets under models/ (xs-*.json): effective cumulative production sigma(j -> B) and inelastic sigma_i on hydrogen, energy independent; the shipped sets are ILLUSTRATIVE placeholders; a choice between sets is a model-alternative uncertainty object",
+ "crsr:bin_average": "a binned value is the ratio averaged uniformly in ln(E/n) over the bin (Gauss-Legendre, 8 nodes), not the ratio of bin-averaged fluxes",
+ "crsr:transport_model": "diffusion-1d: thin disc of half-thickness h and density n_H in a halo |z| < L with N(+-L) = 0, D(R) = D0 beta (R/R0)^delta, no convection, reacceleration, losses or decay; weighted-slab: exponential path-length distribution with mean lambda_esc"
+}

@@ -1,0 +1,165 @@
+[
+ {
+  "id": "crsr:S01",
+  "title": "Cosmic rays below Z=30 in a diffusion model: new constraints on propagation parameters",
+  "authors": "D. Maurin, F. Donato, R. Taillet, P. Salati",
+  "year": 2001,
+  "identifiers": {
+   "dois": [],
+   "arxiv_ids": [
+    "astro-ph/0101231"
+   ],
+   "inspire_record_id": null,
+   "journal_ref": "ApJ 555 (2001) 585"
+  },
+  "tier": 1,
+  "verification_level": "not-opened",
+  "verification_date": null,
+  "publication_date": "2001",
+  "data_taking_period": null,
+  "formal_status": "published",
+  "supersedes": [],
+  "superseded_by": [],
+  "notes": "Cited from the author's background knowledge; not opened in this session (no network approved for WP3). Bibliographic details and the content attributed in crsr:C02 are to be checked against the paper before any stronger use.",
+  "verification_limitations": "not opened in this session (no network approved for WP3); bibliographic details and attributed content come from background knowledge and must be checked against the source before any stronger use"
+ },
+ {
+  "id": "crsr:S02",
+  "title": "The modified weighted slab technique: models and results",
+  "authors": "F.C. Jones, A. Lukasiak, V. Ptuskin, W. Webber",
+  "year": 2001,
+  "identifiers": {
+   "dois": [],
+   "arxiv_ids": [
+    "astro-ph/0007293"
+   ],
+   "inspire_record_id": null,
+   "journal_ref": "ApJ 547 (2001) 264"
+  },
+  "tier": 1,
+  "verification_level": "not-opened",
+  "verification_date": null,
+  "publication_date": "2001",
+  "data_taking_period": null,
+  "formal_status": "published",
+  "supersedes": [],
+  "superseded_by": [],
+  "notes": "Cited from background knowledge; not opened in this session.",
+  "verification_limitations": "not opened in this session (no network approved for WP3); bibliographic details and attributed content come from background knowledge and must be checked against the source before any stronger use"
+ },
+ {
+  "id": "crsr:S03",
+  "title": "Cosmic-ray propagation and interactions in the Galaxy",
+  "authors": "A.W. Strong, I.V. Moskalenko, V.S. Ptuskin",
+  "year": 2007,
+  "identifiers": {
+   "dois": [],
+   "arxiv_ids": [
+    "astro-ph/0701517"
+   ],
+   "inspire_record_id": null,
+   "journal_ref": "Annu. Rev. Nucl. Part. Sci. 57 (2007) 285"
+  },
+  "tier": 1,
+  "verification_level": "not-opened",
+  "verification_date": null,
+  "publication_date": "2007",
+  "data_taking_period": null,
+  "formal_status": "published",
+  "supersedes": [],
+  "superseded_by": [],
+  "notes": "Review. Cited from background knowledge; not opened in this session.",
+  "verification_limitations": "not opened in this session (no network approved for WP3); bibliographic details and attributed content come from background knowledge and must be checked against the source before any stronger use"
+ },
+ {
+  "id": "crsr:S04",
+  "title": "Theoretical uncertainties in extracting cosmic-ray diffusion parameters: the boron-to-carbon ratio",
+  "authors": "Y. Genolini, A. Putze, P. Salati, P.D. Serpico",
+  "year": 2015,
+  "identifiers": {
+   "dois": [],
+   "arxiv_ids": [
+    "1504.03134"
+   ],
+   "inspire_record_id": null,
+   "journal_ref": "A&A 580 (2015) A9"
+  },
+  "tier": 1,
+  "verification_level": "not-opened",
+  "verification_date": null,
+  "publication_date": "2015",
+  "data_taking_period": null,
+  "formal_status": "published",
+  "supersedes": [],
+  "superseded_by": [],
+  "notes": "Cited from background knowledge; not opened in this session.",
+  "verification_limitations": "not opened in this session (no network approved for WP3); bibliographic details and attributed content come from background knowledge and must be checked against the source before any stronger use"
+ },
+ {
+  "id": "crsr:S05",
+  "title": "Cosmic-ray transport from AMS-02 boron to carbon data: benchmark models and interpretation",
+  "authors": "Y. Genolini, M. Boudaud, P.-I. Batista, S. Caroff, L. Derome, J. Lavalle, A. Marcowith, D. Maurin, V. Poireau, V. Poulin, S. Rosier, P. Salati, P.D. Serpico, M. Vecchi",
+  "year": 2019,
+  "identifiers": {
+   "dois": [],
+   "arxiv_ids": [
+    "1904.08917"
+   ],
+   "inspire_record_id": null,
+   "journal_ref": "Phys. Rev. D 99 (2019) 123028"
+  },
+  "tier": 1,
+  "verification_level": "not-opened",
+  "verification_date": null,
+  "publication_date": "2019",
+  "data_taking_period": null,
+  "formal_status": "published",
+  "supersedes": [],
+  "superseded_by": [],
+  "notes": "Cited from background knowledge; not opened in this session. Named for its use of a 1D diffusion model and the K0/L degeneracy only; no data value from it is used in this profile.",
+  "verification_limitations": "not opened in this session (no network approved for WP3); bibliographic details and attributed content come from background knowledge and must be checked against the source before any stronger use"
+ },
+ {
+  "id": "crsr:S06",
+  "title": "CODATA recommended values of the fundamental physical constants: 2018",
+  "authors": "E. Tiesinga, P.J. Mohr, D.B. Newell, B.N. Taylor",
+  "year": 2021,
+  "identifiers": {
+   "dois": [],
+   "arxiv_ids": [],
+   "inspire_record_id": null,
+   "journal_ref": "Rev. Mod. Phys. 93 (2021) 025010"
+  },
+  "tier": 1,
+  "verification_level": "not-opened",
+  "verification_date": null,
+  "publication_date": "2021",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "notes": "Values used from background knowledge (c exact; u = 931.49410242 MeV = 1.66053906660e-27 kg; m_p = 1.67262192369e-27 kg); not opened in this session.",
+  "verification_limitations": "not opened in this session (no network approved for WP3); bibliographic details and attributed content come from background knowledge and must be checked against the source before any stronger use"
+ },
+ {
+  "id": "crsr:S07",
+  "title": "IAU 2012 Resolution B2: re-definition of the astronomical unit of length",
+  "authors": "International Astronomical Union",
+  "year": 2012,
+  "identifiers": {
+   "dois": [],
+   "arxiv_ids": [],
+   "inspire_record_id": null
+  },
+  "tier": 1,
+  "verification_level": "not-opened",
+  "verification_date": null,
+  "publication_date": "2012",
+  "data_taking_period": null,
+  "formal_status": "reference",
+  "supersedes": [],
+  "superseded_by": [],
+  "notes": "au = 149597870700 m exactly; the parsec is taken as 648000/pi au. From background knowledge; not opened in this session.",
+  "verification_limitations": "not opened in this session (no network approved for WP3); bibliographic details and attributed content come from background knowledge and must be checked against the source before any stronger use"
+ }
+]
