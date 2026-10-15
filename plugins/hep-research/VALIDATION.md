@@ -1258,6 +1258,26 @@ mypy 2.4.0 clean on `core/` and `contracts/`. CI passed every job on PR #81 afte
 local gate had not covered (no-PyTorch exit code, the J9 framework version, and cross-platform float differences in
 the J9 calibration fit). Release manifest `release-manifests/0.10.0.json`.
 
+## 0.10.1 release check (2026-10-15, E2 and the CI lock)
+
+Version 0.10.1 is a patch release: the follow-ups to the check of the three audit orders on 0.10.0 (PR #84; evidence
+in DETECTOR-RESPONSE-AUDIT, PHYSICS-ML-AUDIT and RC-AUDIT-2 below) and the `tools/run_all_checks.py` timeout fix
+(PR #83). Contracts stay 2.8.0. For the release the examples were rerun with the E2 venv: only the plugin version
+string changed, and the ML example's statistical result records the new hash of its ML artifact (unfolding-coverage
+rerun and its 1e-13 float drift reverted; end-to-end-sample not rerun, as in earlier releases); the published-likelihood
+benchmark's two artifacts were rewritten with the new plugin version. The companion ams02-research (main `dc0e674`,
+1.4.10) checker reports 0.10.1 `compatible` (it requires hep-research >=0.4.0 and contracts >=2.0, so no companion
+change). `tools/run_all_checks.py` (on the release tree before the manifest and documentation edits) with the host CLIs (Claude Code 2.1.300, codex-cli 0.160.0): with the E2 venv
+(PyTorch) 21 of 21 checks pass, 3,179 unit tests in 237 modules, 0 failures, 59 skipped; with a venv built from
+`requirements-ci.lock` (no PyTorch, NumPy 2.4.6) 21 of 21 pass, 3,179 tests, 0 failures, 167 skipped. ruff 0.16.10 and
+mypy 2.4.0 clean on `core/` and `contracts/`. CI passed every job on PR #83 and PR #84. After the manifest was written
+`check_packaging.py` found the README size statement out of its 10% margin (15.1 MB stated, 16.8 MB measured); it now
+says about 1560 files, 16.8 MB; `check_packaging.py` and `tests/tools` (80 tests) then pass. A local rerun of the
+gate's check part (`--part checks`, E2) after these documentation edits gave 19 of 20 passing and `ams_optional` timed
+out after 600 s (it passed in both full runs above; the machine was under background load). A standalone rerun of
+`check_ams_optional.py` was stopped and no further local gate was run at the user's request; GitHub CI on the release
+PR is the gate for the final tree. Release manifest `release-manifests/0.10.1.json`.
+
 ## PHYSICS-ML-AUDIT (2026-10-14, E2: Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1, PyTorch 2.14.1 CPU; version 0.9.0 + unreleased, contracts 2.8.0)
 
 Physics-ml remediation brief (findings ML-C01…C28, ML-K01…K16, ML-R01…R36), executed on branches fix/physics-ml-p0,
