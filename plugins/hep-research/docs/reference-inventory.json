@@ -20,7 +20,7 @@
   },
   "hep-statistics": {
    "references": 12,
-   "bytes": 165519,
+   "bytes": 169967,
    "uncited": 0
   },
   "hep-theory": {
@@ -1599,6 +1599,7 @@
    "lines": 61,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-statistics/references/core-stats-commands.md",
     "skills/hep-statistics/references/core-stats-guide.md",
     "skills/hep-statistics/references/time-series-inference.md"
    ],
@@ -1608,8 +1609,8 @@
   {
    "path": "skills/hep-statistics/references/core-stats-commands.md",
    "owner": "hep-statistics",
-   "bytes": 33543,
-   "lines": 356,
+   "bytes": 37986,
+   "lines": 409,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/detector-response/references/response-and-forward-folding.md",
@@ -1622,12 +1623,12 @@
     "detector-response",
     "hep-analysis"
    ],
-   "last_commit": "d058154 2026-10-13"
+   "last_commit": "8a4de6c 2026-10-15"
   },
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 16992,
+   "bytes": 16997,
    "lines": 175,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -1645,7 +1646,7 @@
    "cited_by_other_skills": [
     "hep-analysis"
    ],
-   "last_commit": "cafbc08 2026-10-15"
+   "last_commit": "63f33b4 2026-10-15"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
