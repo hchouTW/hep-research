@@ -5,6 +5,18 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+<!-- fu-test-robustness -->
+<!-- Bullets for CHANGELOG.md (branch fu-test-robustness); not yet merged into the changelog. -->
+- `find_python.py`: `--min-python` bad usage is decided in `main()` before `find()` runs, so only the format and floor checks exit 2 and any other `ValueError` from `find()` propagates; the CLI error names `--min-python` (not `min_python`); `--min-python` must be dotted non-negative integers (`^[0-9]+(\.[0-9]+)*$`), so `3.13.-5`, `3_14`, `+3.14` and padded values are refused.
+- `tools/run_all_checks.py` and `tools/check_ams_optional.py` stop at once with exit 2 and "Python 3.13 or newer is required (running X.Y)" on an older interpreter, instead of running into version-dependent test failures.
+- CI: the weekly `latest` job (slow tier) sets `HEP_MODULE_TIMEOUT=1800`: `tests.examples.test_stats_benchmarks` takes about 525-545 s alone there, near the default 600 s limit (toys, seeds and tolerances unchanged); documented in `docs/maintenance.md`.
+
+- `test_scan_time_is_linear_in_lines` measures CPU time (minimum of three, garbage collector off) and bounds the 10k -> 40k line scaling ratio (limit 10; linear about 4, quadratic about 16) with a generous absolute ceiling; it no longer fails on a loaded machine, and a synthetic quadratic scan is shown to fail the same check.
+- New `tests/tools/test_python_compat.py`: `core/partition/runner.py`, `find_python.py` and the two suite runners parse as Python 3.9, the `PROBE` string as 3.7 (`ast.parse` feature_version plus PEP 701 f-string, starred-subscript and `datetime.UTC` checks); a real old interpreter compiles them when present.
+- The old-floor check now covers `docs/deployment-model.md` and the current statements of `docs/capability-matrix.md`; the matrix's dated E1/E3 environment lines, floor note and E3 ROOT row are excluded by name and must still exist.
+- `test_stricter_minimum_is_kept` checks the rejection reason with a fake 3.13 interpreter on any runner (it asserted nothing on 3.14+).
+- Long lines wrapped in `find_python.py` and the floor tests; the `test_broken_power_law` tolerance comment describes 3.11 as history.
+
 <!-- fu-routing -->
 - Routing: hep-communication's "Not for" clause says "even with published data" and names CRDB queries (hep-theory) and compatibility results (hep-statistics), so requests that name experiments but ask for a result go to the owner; live (2026-10-15): `wp11-crdb-1` 3/3, `wp11-xexp-2` 2/3 (both 0/1 before), all 25 hep-communication cases still pass; `wp11-bound-dm-1` (dark-matter interpretation) also accepts hep-communication. Known misses: `wp11-xexp-3` (underspecified comparison loads hep-communication instead of asking), `rc-t3-neg`, `co-companion-ws-1` (no skill).
 
