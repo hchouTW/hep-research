@@ -55,18 +55,21 @@ class PyprojectTests(unittest.TestCase):
         finder = (ROOT / "skills" / "hep-computing" / "scripts" / "find_python.py").read_text(encoding="utf-8")
         self.assertIn('MIN_PYTHON = "3.13"', finder)
 
-    def test_ci_and_readme_follow_the_floor(self):
-        """CI tests the supported floor only (Python 3.13: the checks matrix and the reconciliation gate agree), and the
-        README states the floor, not an older one."""
+    def test_readme_states_the_floor(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn("Python 3.13 or newer", readme)
+        self.assertNotRegex(readme, r"Python (>= ?)?3\.1[12]( or newer)?\b")
+
+    @unittest.skipUnless((ROOT.parents[1] / ".github" / "workflows" / "tests.yml").is_file(),
+                         "repository checkout only (an installed plugin tree has no .github)")
+    def test_ci_follows_the_floor(self):
+        """CI tests the supported floor only (Python 3.13: the checks matrix and the reconciliation gate agree)."""
         workflow = (ROOT.parents[1] / ".github" / "workflows" / "tests.yml").read_text(encoding="utf-8")
         matrix = re.search(r'python: \[([^\]]*)\]', workflow).group(1)
         self.assertEqual([v.strip(' "') for v in matrix.split(",")], ["3.13"])
         self.assertRegex(workflow, r"reconcile_check_runs\.py \S+ --python 3\.13 ")
         for v in re.findall(r'python-version: "?([0-9.]+)', workflow):
             self.assertEqual(v, "3.13", "every setup-python step uses the floor")
-        readme = (ROOT / "README.md").read_text(encoding="utf-8")
-        self.assertIn("Python 3.13 or newer", readme)
-        self.assertNotRegex(readme, r"Python (>= ?)?3\.1[12]( or newer)?\b")
 
 
 if __name__ == "__main__":

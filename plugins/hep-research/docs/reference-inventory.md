@@ -138,7 +138,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `bash-balanced-design-guidelines.md` | hep-computing | 7.6 | yes | 3 | - | 8eefac0 2026-10-13 |
 | `batch-scheduling.md` | hep-computing | 30.4 | yes | 12 | - | 6361630 2026-10-14 |
 | `batch-site-cern-htcondor.md` | hep-computing | 11.2 | no | 2 | - | 6815df4 2026-10-10 |
-| `batch-site-nstccore-slurm.md` | hep-computing | 11.5 | no | 1 | - | 22ea71e 2026-10-12 |
+| `batch-site-nstccore-slurm.md` | hep-computing | 11.7 | no | 1 | - | 22ea71e 2026-10-12 |
 | `cmake-and-build.md` | hep-computing | 2.9 | yes | 5 | - | fe8f71e 2026-10-13 |
 | `cpp-balanced-design-guidelines.md` | hep-computing | 6.6 | yes | 4 | physics-ml | 8eefac0 2026-10-13 |
 | `crash-and-memory-debugging.md` | hep-computing | 8.2 | no | 6 | - | 80a8344 2026-10-13 |

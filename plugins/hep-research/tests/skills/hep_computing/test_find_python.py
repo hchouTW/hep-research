@@ -116,7 +116,8 @@ def load_module():
 
 @unittest.skipUnless(os.name == "posix", "fake interpreters are shell scripts")
 class PythonFloorTests(unittest.TestCase):
-    """Python 3.13 is the supported minimum: 3.11 and 3.12 are rejected with their reason from every candidate source,
+    """Python 3.13 is the supported minimum: 3.11 and 3.12 are rejected with their reason from every candidate source
+    (--python and HEP_RESEARCH_PYTHON through the CLI; the caller and PATH in the all-old test),
     an eligible 3.13 is selected in the documented order, all-old candidates fail, and a lower --min-python cannot
     lower the floor (a stricter one is kept)."""
 
@@ -165,17 +166,16 @@ class PythonFloorTests(unittest.TestCase):
         self.assertEqual((out["status"], out["source"]), ("found", "PATH"))
 
     def test_all_old_candidates_fail_with_the_minimum_in_the_hint(self):
+        """Four distinct old interpreters, one per source, so the caller and PATH are probed and rejected too."""
         mod = load_module()
-        p311 = fake_version(self.dir, "py311", [3, 11, 9])
-        p312 = fake_version(self.dir, "py312", [3, 12, 7])
-        with unittest.mock.patch.object(mod, "candidates",
-                                        lambda explicit: [("--python", str(p311)), (mod.ENV_VAR, str(p312)),
-                                                          ("caller", str(p311)), ("PATH", str(p312))]):
-            out = mod.find(["json"], explicit=str(p311))
+        olds = {"--python": [3, 11, 9], mod.ENV_VAR: [3, 12, 7], "caller": [3, 12, 0], "PATH": [3, 11, 2]}
+        paths = {src: str(fake_version(self.dir, f"old-{i}", v)) for i, (src, v) in enumerate(olds.items())}
+        with unittest.mock.patch.object(mod, "candidates", lambda explicit: list(paths.items())):
+            out = mod.find(["json"], explicit=paths["--python"])
         self.assertEqual(out["status"], "failed")
         self.assertIsNone(out["python"])
-        self.assertEqual([c["reason"] for c in out["candidates"]],
-                         ["Python 3.11.9 < 3.13", "Python 3.12.7 < 3.13", "duplicate of --python", "duplicate of HEP_RESEARCH_PYTHON"])
+        self.assertEqual({c["source"]: c["reason"] for c in out["candidates"]},
+                         {src: f"Python {'.'.join(map(str, v))} < 3.13" for src, v in olds.items()})
         self.assertIn("Python >= 3.13", out["hint"])
 
     def test_missing_package_still_reported_on_an_accepted_version(self):

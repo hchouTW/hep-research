@@ -1,6 +1,6 @@
 """End-to-end runs of the PyROOT scripts and assets on synthetic ROOT fixtures.
 
-Skipped unless a Python that can `import ROOT` is available. The interpreter is
+Skipped unless a Python 3.13 or newer (the plugin's floor) that can `import ROOT` is available. The interpreter is
 $HEP_ROOT_PYTHON if set (e.g. /opt/homebrew/bin/python3.14 for Homebrew ROOT, whose
 PyROOT does not load under a conda python), else the one running the tests.
 Fixtures come from <plugin root>/tests/skills/hep_computing/make_root_fixtures.py.
@@ -13,18 +13,22 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from tests.skills.hep_computing.pyroot_floor import meets_floor
+
 ROOT_DIR = Path(__file__).resolve().parents[3]  # plugin root (tests/skills/<skill>/<this file>)
 PYTHON = os.environ.get('HEP_ROOT_PYTHON', sys.executable)
 
 
 def _has_pyroot():
+    if not meets_floor(PYTHON):
+        return False
     try:
         return subprocess.run([PYTHON, '-c', 'import ROOT'], capture_output=True, timeout=120).returncode == 0
     except (OSError, subprocess.TimeoutExpired):
         return False
 
 
-@unittest.skipUnless(_has_pyroot(), 'PyROOT not importable (set HEP_ROOT_PYTHON)')
+@unittest.skipUnless(_has_pyroot(), 'no PyROOT on Python >= 3.13 (set HEP_ROOT_PYTHON)')
 class RootIntegrationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
