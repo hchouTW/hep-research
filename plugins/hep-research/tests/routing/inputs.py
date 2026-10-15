@@ -18,6 +18,7 @@ INPUTS = {
                                            "experiments": [{"profile": "experiment:ams-02-private", "version": "1.1.0"}], "theory": []}, indent=1) + "\n",
   "profiles/ams-02-private/profile.json": json.dumps({"_note": TAG + " A stand-in for a companion-managed local profile; no companion content.",
                                                       "id": "experiment:ams-02-private", "kind": "experiment", "version": "1.1.0"}, indent=1) + "\n"},
+ "rc-t3-neg": {"diagram.tex": f"% {TAG}\n\\begin{{tikzpicture}}\n  \\begin{{feynman}}\n    \\vertex (a) {{\\(e^-\\)}};\n    \\vertex [below=2cm of a] (b) {{\\(e^+\\)}};\n    \\vertex [below right=1cm and 1.5cm of a] (v1);\n    \\vertex [right=2cm of v1] (v2);\n    \\vertex [above right=1cm and 1.5cm of v2] (c) {{\\(\\gamma\\)}};\n    \\vertex [below right=1cm and 1.5cm of v2] (d) {{\\(\\gamma\\)}};\n    \\diagram* {{\n      (a) -- [fermion] (v1) -- [fermion] (b),\n      (v1) -- [photon, edge label=\\(\\gamma^*\\)] (v2),\n      (v2) -- [photon] (c),\n      (v2) -- [photon] (d),\n    }};\n  \\end{{feynman}}\n\\end{{tikzpicture}}\n"},
  "dr-direct-1": {"tnp_counts.csv": _csv("pt_lo,pt_hi,probes,passing_probes", ["20,30,1200,1104", "30,50,2400,2280", "50,100,900,873"])},
  "dr-direct-2": {"calo_scan.csv": _csv("beam_energy_GeV,mean_reco_GeV,sigma_reco_GeV,data_or_mc", ["10,9.6,0.62,data", "10,9.7,0.58,mc", "50,48.9,1.71,data", "50,49.2,1.60,mc"])},
  "dr-neighbor-1": {"measured_spectrum.csv": _csv("bin,lo,hi,counts", ["0,0,10,520", "1,10,20,310", "2,20,40,140"]),

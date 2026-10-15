@@ -1,0 +1,237 @@
+{
+ "meta": {
+  "run_id": "base-misses-2",
+  "date": "2026-10-15",
+  "cli": "claude",
+  "cli_version": "2.1.300",
+  "model": "claude-sonnet-5-5",
+  "models_reported": [
+   "claude-sonnet-5-5"
+  ],
+  "isolation": "setting-sources",
+  "plugin_commit": "6572020fb472e7ba4e0e57c5ee8264914a8e50cf",
+  "plugin_dirty": false,
+  "cases_file_sha256": "a2040fc8959be56e7627e3e0f35a747a7c36af87080f22a779e290a27f725e2c",
+  "selected": 3,
+  "completed": 3,
+  "full_set": false,
+  "max_turns": 6,
+  "case_budget_usd": 0.5,
+  "budget_usd": 1.0,
+  "stopped_early": false
+ },
+ "summary": {
+  "overall": {
+   "cases": 3,
+   "strict_pass": 0,
+   "lenient_pass": 0
+  },
+  "by_lang": {
+   "en": {
+    "cases": 1,
+    "strict_pass": 0,
+    "lenient_pass": 0
+   },
+   "zh-Hant": {
+    "cases": 2,
+    "strict_pass": 0,
+    "lenient_pass": 0
+   }
+  },
+  "by_kind": {
+   "direct": {
+    "cases": 1,
+    "strict_pass": 0,
+    "lenient_pass": 0
+   },
+   "negative": {
+    "cases": 1,
+    "strict_pass": 0,
+    "lenient_pass": 0
+   },
+   "underspecified": {
+    "cases": 1,
+    "strict_pass": 0,
+    "lenient_pass": 0
+   }
+  },
+  "by_variant": {
+   "-": {
+    "cases": 3,
+    "strict_pass": 0,
+    "lenient_pass": 0
+   }
+  },
+  "by_expected_primary": {
+   "ask": {
+    "cases": 1,
+    "strict_pass": 0,
+    "lenient_pass": 0
+   },
+   "hep-computing": {
+    "cases": 1,
+    "strict_pass": 0,
+    "lenient_pass": 0
+   },
+   "hep-theory": {
+    "cases": 1,
+    "strict_pass": 0,
+    "lenient_pass": 0
+   }
+  },
+  "by_set": {
+   "-": {
+    "cases": 1,
+    "strict_pass": 0,
+    "lenient_pass": 0
+   },
+   "T3": {
+    "cases": 1,
+    "strict_pass": 0,
+    "lenient_pass": 0
+   },
+   "WP11": {
+    "cases": 1,
+    "strict_pass": 0,
+    "lenient_pass": 0
+   }
+  },
+  "outcomes": {
+   "no-skill": 2,
+   "skill-instead-of-question": 1
+  },
+  "loading_violations": [],
+  "cost_usd": {
+   "total": 0.243,
+   "per_case": 0.081,
+   "per_turn": 0.0187
+  }
+ },
+ "cases": [
+  {
+   "id": "co-companion-ws-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-computing",
+   "turns": [
+    {
+     "expected": "hep-computing",
+     "first_skill": null,
+     "skills": [],
+     "outcome": "no-skill",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "no-skill",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.300",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.046395,
+   "n_turns": 4,
+   "loading_violation": false
+  },
+  {
+   "id": "rc-t3-neg",
+   "lang": "zh-Hant",
+   "kind": "negative",
+   "variant": null,
+   "set": "T3",
+   "expected_primary": "hep-theory",
+   "turns": [
+    {
+     "expected": "hep-theory",
+     "first_skill": null,
+     "skills": [],
+     "outcome": "no-skill",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "no-skill",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.300",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.040475,
+   "n_turns": 2,
+   "loading_violation": false
+  },
+  {
+   "id": "wp11-xexp-3",
+   "lang": "zh-Hant",
+   "kind": "underspecified",
+   "variant": null,
+   "set": "WP11",
+   "expected_primary": "ask",
+   "turns": [
+    {
+     "expected": "ask",
+     "first_skill": "hep-communication",
+     "skills": [
+      "hep-communication"
+     ],
+     "outcome": "skill-instead-of-question",
+     "strict": false,
+     "lenient": false,
+     "heuristic": true,
+     "exit_code": 1
+    }
+   ],
+   "outcome": "skill-instead-of-question",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [
+    "profiles/experiments/ams-02/evidence/index.md",
+    "profiles/experiments/ams-02/index.md",
+    "profiles/experiments/ams-02/modules/sources/cosmic-ray-databases.md",
+    "profiles/experiments/ams-02/modules/species/charged-cosmic-rays.md",
+    "profiles/experiments/ams-02/modules/working-rules.md",
+    "profiles/registry.json"
+   ],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.300",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.156175,
+   "n_turns": 7,
+   "loading_violation": false
+  }
+ ],
+ "contaminated": [],
+ "note": "scored summary only: prompts, answers and transcripts are not stored here (raw streams stay in runs/base-misses-2/raw/, not committed)"
+}
