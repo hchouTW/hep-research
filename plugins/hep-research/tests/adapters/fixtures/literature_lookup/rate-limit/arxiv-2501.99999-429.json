@@ -1,0 +1,10 @@
+{
+ "source": "arxiv",
+ "url": "https://export.arxiv.org/api/query?id_list=2501.99999&max_results=1",
+ "recorded_at": "2026-10-15T02:32:31Z",
+ "http_status": 429,
+ "headers": {
+  "content-type": "text/html"
+ },
+ "body": "Rate exceeded."
+}

@@ -2,7 +2,8 @@
 """Aggregate runner: every check in one JSON summary, with pass / fail / skip kept separate.
 
 Usage: python3 tools/run_all_checks.py [--out DIR] [--no-cli] [--module-timeout S] [--jobs N]
-                                       [--part all|units|checks] [--shard K/N] [--write-timings FILE]
+                                       [--part all|units|checks|static|ams-optional] [--shard K/N]
+                                       [--write-timings FILE] [--summary FILE]
 Writes DIR/check-run-<UTC timestamp>.json when --out is given; always prints the summary.
 Exit 0 when nothing failed (skips are reported, not hidden), 1 otherwise.
 Each test module runs in its own process with a timeout (default 600 s, or HEP_MODULE_TIMEOUT): a module that
@@ -10,12 +11,18 @@ does not finish is a failure with its reason, never a hang, and every module's d
 Each check script has the same timeout; one that does not finish fails with its reason and the other checks still run.
 Test modules start slowest first (tools/module_timings.json). --part and --shard split the work across CI runners:
 'units' runs the test modules (all of them, or shard K of N, balanced by the recorded timings), 'checks' runs the
-profile suites and the static and host checks; every module belongs to exactly one shard.
+profile suites and the static and host checks; every module belongs to exactly one shard. 'checks' is 'static' (profile
+suites, static and host checks) plus 'ams-optional' (tools/check_ams_optional.py, the generic suites in a copy without
+the AMS-02 profile), so CI can run the two in parallel jobs.
+Every check records its seconds; a units run records its plan (the full module list with its digest and the modules
+of this shard), which tools/reconcile_check_runs.py checks across shards. Failed test ids and traceback tails are
+printed, and written as Markdown to --summary FILE (CI passes $GITHUB_STEP_SUMMARY).
 Passing checks shows software consistency only, not physical validity or statistical coverage.
 """
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import platform
 import os
@@ -87,6 +94,11 @@ def shard_modules(modules: list[str], k: int, n: int, timings: dict[str, float])
     return parts[k - 1]
 
 
+def modules_digest(modules: list[str]) -> str:
+    """SHA-256 of the sorted module list, one name per line: every shard of one revision must report the same."""
+    return hashlib.sha256("".join(m + "\n" for m in sorted(modules)).encode()).hexdigest()
+
+
 def parse_shard(text: str) -> tuple[int, int]:
     try:
         k, n = (int(x) for x in text.split("/"))
@@ -119,24 +131,28 @@ def run_module(module: str, timeout: float) -> dict:
 
 def run_unittests(timeout: float = MODULE_TIMEOUT, jobs: int = 1, shard: tuple[int, int] | None = None) -> dict:
     timings = load_timings()
-    modules = test_modules()
-    if shard:
-        modules = shard_modules(modules, *shard, timings)
+    every = test_modules()
+    modules = shard_modules(every, *shard, timings) if shard else list(every)
+    plan = {"all_modules": every, "all_modules_sha256": modules_digest(every), "modules": sorted(modules),
+            "shard": f"{shard[0]}/{shard[1]}" if shard else "1/1",
+            "timings_sha256": hashlib.sha256(json.dumps(timings, sort_keys=True).encode()).hexdigest()}
     modules = slowest_first(modules, timings)  # a long module started last would hold up the whole run
+    start = time.monotonic()
     with ThreadPoolExecutor(max_workers=max(1, jobs)) as pool:
         rows = list(pool.map(lambda m: run_module(m, timeout), modules))
+    seconds = round(time.monotonic() - start, 2)
     total = {k: sum((r["counts"] or {}).get(k, 0) for r in rows) for k in ("run", "failures", "errors", "skipped")}
     total["passed"] = total["run"] - total["failures"] - total["errors"] - total["skipped"]
     broken = [r for r in rows if r["counts"] is None]
     slow = sorted((r for r in rows if r["seconds"] > SLOW_MODULE_SECONDS), key=lambda r: -r["seconds"])
     return {"name": "unittest", "command": "python3 -m unittest <module>, one process per module under tests/",
-            "status": "pass" if all(r["status"] == "pass" for r in rows) else "fail",
+            "status": "pass" if all(r["status"] == "pass" for r in rows) else "fail", "seconds": seconds,
             "counts": dict(total, modules=len(rows), modules_failed_to_finish=len(broken)),
             "module_timeout_seconds": timeout, "shard": f"{shard[0]}/{shard[1]}" if shard else None,
             "failed": [f for r in rows for f in r["failed"]] + [f"{r['module']}: {r['reason']}" for r in broken],
             "skipped": [s for r in rows for s in r["skipped"]],
             "messages": {t: m for r in rows for t, m in (r.get("messages") or {}).items()},  # traceback tails of failures
-            "slow_modules": [{"module": r["module"], "seconds": r["seconds"]} for r in slow],
+            "slow_modules": [{"module": r["module"], "seconds": r["seconds"]} for r in slow], "plan": plan,
             "modules": [{k: r.get(k) for k in ("module", "status", "seconds", "counts", "reason")} for r in rows]}
 
 
@@ -147,7 +163,8 @@ res = unittest.TextTestRunner(stream=io.StringIO(), verbosity=2).run(suite)
 print(json.dumps({"status": "pass" if res.wasSuccessful() else "fail",
   "counts": {"run": res.testsRun, "failures": len(res.failures), "errors": len(res.errors), "skipped": len(res.skipped),
              "passed": res.testsRun - len(res.failures) - len(res.errors) - len(res.skipped)},
-  "failed": [str(t) for t, _ in res.failures + res.errors], "skipped": [f"{t}: {r}" for t, r in res.skipped]}))
+  "failed": [str(t) for t, _ in res.failures + res.errors], "skipped": [f"{t}: {r}" for t, r in res.skipped],
+  "messages": {str(t): tb[-800:] for t, tb in res.failures + res.errors}}))
 sys.exit(0 if res.wasSuccessful() else 1)  # run_script reads the exit code; without this a failing suite counted as pass
 """
 
@@ -175,17 +192,18 @@ def timed_out(name: str, cmd: list[str], exc: subprocess.TimeoutExpired) -> dict
 
 
 def run_script(name: str, cmd: list[str], cwd: Path = ROOT, timeout: float = MODULE_TIMEOUT) -> dict:
+    start = time.monotonic()
     try:
         p = subprocess.run(cmd, capture_output=True, text=True, cwd=str(cwd), timeout=timeout)
     except subprocess.TimeoutExpired as exc:
-        return timed_out(name, cmd, exc)
+        return dict(timed_out(name, cmd, exc), seconds=round(time.monotonic() - start, 2))
     try:
         detail = json.loads(p.stdout)
     except ValueError:
         detail = {"stdout": p.stdout[-2000:], "stderr": p.stderr[-2000:]}
     status = "pass" if p.returncode == 0 else ("skip" if isinstance(detail, dict) and detail.get("status") == "skip" else "fail")
     return {"name": name, "command": " ".join(cmd), "exit_code": p.returncode, "status": status, "detail": detail,
-            **({"reason": detail.get("reason")} if status == "skip" else {})}
+            "seconds": round(time.monotonic() - start, 2), **({"reason": detail.get("reason")} if status == "skip" else {})}
 
 
 def host_validate() -> dict:
@@ -241,6 +259,43 @@ def host_versions() -> dict:
     return out
 
 
+STATIC_SCRIPTS = [  # (name, command after the interpreter): the static checks of --part static, in run order
+    ("check_layering", ["tools/check_layering.py"]),
+    ("stanza_consistency", ["tools/build_stanzas.py", "--check"]),
+    ("registry", ["contracts/registry.py"]),
+    ("routing_static", ["tools/check_routing_static.py"]),
+    ("ownership", ["tools/check_ownership.py"]),
+    ("reference_inventory", ["tools/reference_inventory.py", "--check"]),
+    ("packaging_scan", ["tools/check_packaging.py"]),
+    ("host_neutral", ["tools/check_host_neutral.py"]),
+    ("instruction_text", ["tools/check_instruction_text.py"]),
+    ("host_manifests", ["tools/check_host_manifests.py"]),
+    ("measure_entrypoints", ["tools/measure_entrypoints.py"]),
+]
+HOST_CHECKS = ["claude-plugin-validate", "codex-plugin-load"]
+
+
+def planned_scripts(part: str, py: str, jobs: int, no_cli: bool) -> list[tuple[str, list[str]]]:
+    """The check scripts a run of this part executes, in order (profile suites and host checks are added by main)."""
+    out = []
+    if part in ("all", "checks", "ams-optional"):
+        out.append(("ams_optional", [py, "tools/check_ams_optional.py", "--jobs", str(jobs)]))
+    if part in ("all", "checks", "static"):
+        for name, args in STATIC_SCRIPTS:
+            out.append((name, [py, *args] + (["--no-cli"] if name == "measure_entrypoints" and no_cli else [])))
+    return out
+
+
+def planned_check_names(part: str) -> list[str]:
+    """Every check name a run of this part must report (besides 'unittest' for units): what
+    tools/reconcile_check_runs.py expects, computed from this tree rather than taken from the run."""
+    names = [name for name, _ in planned_scripts(part, "python", 1, True)]
+    if part in ("all", "checks", "static"):
+        reg = json.loads((ROOT / "profiles" / "registry.json").read_text(encoding="utf-8"))
+        names = [f"profile-tests:{p['id']}" for p in reg["profiles"]] + names + HOST_CHECKS
+    return names
+
+
 def parse_args(argv=None) -> argparse.Namespace:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0],
                                  epilog="Passing checks shows software consistency only, not physical validity or statistical coverage.")
@@ -250,10 +305,14 @@ def parse_args(argv=None) -> argparse.Namespace:
                     help="seconds allowed per test module and per check script (default 600 or HEP_MODULE_TIMEOUT)")
     ap.add_argument("--jobs", type=int, default=DEFAULT_JOBS, metavar="N",
                     help=f"test modules run in parallel (default {DEFAULT_JOBS}: CPU count, at most 8; 1 runs them serially)")
-    ap.add_argument("--part", choices=("all", "units", "checks"), default="all",
-                    help="units: the test modules only; checks: profile suites, static and host checks only (default all)")
+    ap.add_argument("--part", choices=("all", "units", "checks", "static", "ams-optional"), default="all",
+                    help="units: the test modules only; checks: static plus ams-optional; static: profile suites, static and "
+                         "host checks; ams-optional: tools/check_ams_optional.py only (default all)")
     ap.add_argument("--shard", type=parse_shard, metavar="K/N",
                     help="run only shard K of N of the test modules, balanced by tools/module_timings.json")
+    ap.add_argument("--summary", type=Path, metavar="FILE",
+                    help="append a Markdown summary (status and seconds per check, failed tests with traceback tails, "
+                         "slowest modules) to FILE, e.g. $GITHUB_STEP_SUMMARY")
     ap.add_argument("--write-timings", type=Path, metavar="FILE",
                     help="also write the measured seconds per test module to FILE (the format of tools/module_timings.json)")
     return ap.parse_args(argv)
@@ -261,29 +320,19 @@ def parse_args(argv=None) -> argparse.Namespace:
 
 def main(argv=None) -> int:
     opts = parse_args(argv)
-    if opts.shard and opts.part == "checks":
-        print("--shard applies to the test modules; it cannot be combined with --part checks", file=sys.stderr)
+    if opts.shard and opts.part not in ("all", "units"):
+        print(f"--shard applies to the test modules; it cannot be combined with --part {opts.part}", file=sys.stderr)
         return 2
     py = sys.executable
     t = opts.module_timeout
     units = [run_unittests(opts.module_timeout, opts.jobs, opts.shard)] if opts.part in ("all", "units") else []
-    checks = units + ([] if opts.part == "units" else [
-        *run_profile_tests(),
-        run_script("check_layering", [py, "tools/check_layering.py"], timeout=t),
-        run_script("stanza_consistency", [py, "tools/build_stanzas.py", "--check"], timeout=t),
-        run_script("registry", [py, "contracts/registry.py"], timeout=t),
-        run_script("ams_optional", [py, "tools/check_ams_optional.py", "--jobs", str(opts.jobs)], timeout=t),
-        run_script("routing_static", [py, "tools/check_routing_static.py"], timeout=t),
-        run_script("ownership", [py, "tools/check_ownership.py"], timeout=t),
-        run_script("reference_inventory", [py, "tools/reference_inventory.py", "--check"], timeout=t),
-        run_script("packaging_scan", [py, "tools/check_packaging.py"], timeout=t),
-        run_script("host_neutral", [py, "tools/check_host_neutral.py"], timeout=t),
-        run_script("instruction_text", [py, "tools/check_instruction_text.py"], timeout=t),
-        run_script("host_manifests", [py, "tools/check_host_manifests.py"], timeout=t),
-        run_script("measure_entrypoints", [py, "tools/measure_entrypoints.py"] + (["--no-cli"] if opts.no_cli else []), timeout=t),
-        host_validate() if not opts.no_cli else {"name": "claude-plugin-validate", "status": "skip", "reason": "--no-cli"},
-        codex_load() if not opts.no_cli else {"name": "codex-plugin-load", "status": "skip", "reason": "--no-cli"},
-    ])
+    static = opts.part in ("all", "checks", "static")
+    checks = units + (run_profile_tests() if static else [])
+    for name, cmd in planned_scripts(opts.part, py, opts.jobs, opts.no_cli):
+        checks.append(run_script(name, cmd, timeout=t))
+    if static:
+        checks += [host_validate() if not opts.no_cli else {"name": "claude-plugin-validate", "status": "skip", "reason": "--no-cli"},
+                   codex_load() if not opts.no_cli else {"name": "codex-plugin-load", "status": "skip", "reason": "--no-cli"}]
     if opts.write_timings and units:
         old = json.loads(TIMINGS.read_text(encoding="utf-8")) if TIMINGS.is_file() else {}
         record = {"note": old.get("note", ""),
@@ -297,7 +346,10 @@ def main(argv=None) -> int:
         "environment": {"python": platform.python_version(), "platform": platform.platform(), "executable": py,
                         "hosts": host_versions()},
         "git_commit": subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True, text=True, cwd=str(ROOT), timeout=MODULE_TIMEOUT).stdout.strip() or "unknown",
+        "ci": {k: os.environ[v] for k, v in (("run_id", "GITHUB_RUN_ID"), ("run_attempt", "GITHUB_RUN_ATTEMPT"),
+                                              ("sha", "GITHUB_SHA"), ("job", "GITHUB_JOB")) if os.environ.get(v)},
         "part": opts.part,
+        "shard": f"{opts.shard[0]}/{opts.shard[1]}" if opts.shard else None,
         "counts": {s: sum(1 for c in checks if c["status"] == s) for s in ("pass", "fail", "skip")},
         "checks": checks,
         "caveat": "Software checks only; not physical validity, proof, statistical coverage, or authorization to unblind.",
@@ -307,8 +359,60 @@ def main(argv=None) -> int:
         out = opts.out
         out.mkdir(parents=True, exist_ok=True)
         (out / f"check-run-{summary['timestamp_utc'].replace(':', '')}.json").write_text(text + "\n")
-    print(json.dumps({"counts": summary["counts"], "checks": [{k: c.get(k) for k in ("name", "status", "counts", "exit_code", "reason")} for c in checks]}, indent=1))
+    print(json.dumps({"counts": summary["counts"], "checks": [{k: c.get(k) for k in ("name", "status", "seconds", "counts", "exit_code", "reason")} for c in checks]}, indent=1))
+    report = failure_report(checks)
+    if report:
+        print(report, file=sys.stderr)
+    if opts.summary:
+        with opts.summary.open("a", encoding="utf-8") as fh:
+            fh.write(markdown_summary(summary, report))
     return 0 if summary["counts"]["fail"] == 0 else 1
+
+
+def failure_details(check: dict) -> list[tuple[str, str]]:
+    """(failed item, traceback or output tail) for one failing check: test ids with their traceback tails for the
+    unit tests, the failed tests of a profile suite, else the check's reason or output tail."""
+    if check.get("status") != "fail":
+        return []
+    detail = check.get("detail") if isinstance(check.get("detail"), dict) else {}
+    messages = check.get("messages") or detail.get("messages") or {}
+    failed = check.get("failed") or detail.get("failed") or []
+    nested = [c for c in detail.get("checks") or [] if isinstance(c, dict) and c.get("status") == "fail"]
+    if not failed and nested:  # check_ams_optional: one row per failing suite or entry, with its output tail
+        return [(c.get("name", "?"), str(c.get("tail") or c.get("reason") or "")) for c in nested]
+    if failed:
+        return [(f, messages.get(f, "")) for f in failed]
+    tail = check.get("reason") or detail.get("stderr") or detail.get("stdout") or json.dumps(detail)[-800:]
+    return [(check["name"], str(tail)[-800:])]
+
+
+def failure_report(checks: list[dict]) -> str:
+    lines = []
+    for c in checks:
+        for item, tail in failure_details(c):
+            lines.append(f"FAILED [{c['name']}] {item}")
+            lines += [f"    {line}" for line in tail.strip().splitlines()[-12:]]
+    return "\n".join(lines)
+
+
+def markdown_summary(summary: dict, report: str) -> str:
+    def cell(text) -> str:
+        return str(text).replace("|", "\\|")
+    head = f"### run_all_checks: part {summary['part']}" + (f", shard {summary['shard']}" if summary.get("shard") else "")
+    rows = ["| check | status | seconds | tests run / failed / skipped |", "|---|---|---|---|"]
+    for c in summary["checks"]:
+        n = c.get("counts") or {}
+        tests = f"{n.get('run', '')} / {n.get('failures', 0) + n.get('errors', 0) if n else ''} / {n.get('skipped', '')}" if n else ""
+        rows.append(f"| {cell(c['name'])} | {c['status']} | {c.get('seconds', '')} | {tests} |")
+    out = [head, "", f"commit `{summary['git_commit']}`, Python {summary['environment']['python']}; "
+           f"pass {summary['counts']['pass']}, fail {summary['counts']['fail']}, skip {summary['counts']['skip']}", "", *rows]
+    unit = next((c for c in summary["checks"] if c["name"] == "unittest"), None)
+    if unit:
+        slow = sorted(unit.get("modules") or [], key=lambda r: -(r.get("seconds") or 0))[:10]
+        out += ["", "Slowest test modules: " + ", ".join(f"`{r['module']}` {r['seconds']} s" for r in slow)]
+    if report:
+        out += ["", "<details open><summary>Failures</summary>", "", "```", report, "```", "", "</details>"]
+    return "\n".join(out) + "\n\n"
 
 
 if __name__ == "__main__":

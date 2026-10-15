@@ -66,6 +66,17 @@ curl -s 'https://export.arxiv.org/api/query?search_query=ti:%22asymptotic%20form
 
 - The response is Atom XML; the version is part of the id (`1007.1727v3`).
 - At most one request every three seconds, one connection at a time.
+- On 2026-10-15 the API answered HTTP 429 ("Rate exceeded.") four times to `id_list` with a nonexistent id, while
+  an existing id resolved minutes apart: a 429 says neither that the id exists nor that it does not.
+
+## Optional lookup client
+
+`<plugin root>/adapters/literature-lookup/assets/literature_lookup.py` runs the identifier lookups above (INSPIRE,
+arXiv, ADS) and prints one record per source with the source URL, the UTC retrieval time, the read level and an arXiv
+version check (cited `v1` against the latest), for example `literature_lookup.py arxiv:1007.1727v1`. It is optional:
+nothing here requires it, and the `curl` recipes give the same answer. The ADS token comes from `ADS_API_TOKEN` (or
+`ADS_TOKEN`) and is never printed; without it the ADS result is `not-verified`. Exit 0 found, 1 not found, 2 bad
+input, 3 incomplete (rate limit, network error, no token, version mismatch).
 
 ## What to record after a lookup
 
