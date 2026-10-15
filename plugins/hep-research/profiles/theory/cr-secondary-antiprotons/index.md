@@ -13,10 +13,13 @@ profile. Paths are relative to this folder. The shipped cross sections are a TOY
 | Stored prediction artifact | `predictions/source-term-benchmark.prediction.json` (regenerate with `scripts/make_artifacts.py`) |
 | Benchmark: numerical integration vs the closed form | `scripts/predict.py --benchmark`; settings `benchmarks/source-term-benchmark.json` |
 | Cross-section sets (inputs, model alternatives) | `models/xs-toy-A.json`, `models/xs-toy-B.json` |
-| References and what is attributed to them (not opened) | `evidence/sources.json`, `evidence/claims.json` |
+| External benchmark (B2): published pp source term, di Mauro et al. 2014 Table VI | `scripts/published_benchmark.py`; reference values `benchmarks/published-source-term-dimauro2014.json`; published closed forms `models/xs-dimauro2014-pp.json` |
+| References and what is attributed to them (read levels per source) | `evidence/sources.json`, `evidence/claims.json` |
 
 Conventions: `conventions.json`; they follow `skills/hep-theory/references/cosmic-ray-propagation.md`, section
 "Secondary antiprotons: source-term conventions". The level `crpb:interstellar-source` is this profile's vocabulary:
 validate its artifacts with `contracts/validate.py <artifact> --profiles-from <project config binding the profile>`.
 This is a source term, not a propagation model: it cannot drive a propagation-parameter fit, and its theory-spec
-needs no `degenerate_directions`. No published source-term value is used as a benchmark (open question B2).
+needs no `degenerate_directions`. The published pp parametrizations serve the external benchmark only; the prediction
+artifact still uses the toy sets. 12 of 15 Table VI entries are reproduced within the paper's errors; the rest are
+documented in the benchmark file with the reason.

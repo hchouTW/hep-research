@@ -36,8 +36,11 @@ about the size of real parametrization differences.
 
 - Can: evaluate q per channel and in total for any primary flux given as (broken) power laws, with any cross-section
   set in the toy form; check the numerical integration against the closed form; produce artifacts that validate.
-- Cannot: give a physical antiproton source term (toy cross sections), be compared with published source-term values
-  (open question B2), propagate the source term, or constrain propagation parameters. `model.family` is
+- Cannot: give a physical antiproton source term (toy cross sections), propagate the source term, or constrain
+  propagation parameters.
+- External benchmark (B2): `../scripts/published_benchmark.py` evaluates the pp channel with the published closed
+  forms of di Mauro et al. 2014 (`xs-dimauro2014-pp.json`, claims crpb:C07-C09) and compares with that paper's
+  Table VI; this path is not used by the prediction artifact. `model.family` is
   `cosmic-ray-secondary-source-term`, so no degenerate directions are declared or required.
 
 ## Validity

@@ -25,7 +25,12 @@ This README is for people. The skills route through [index.md](index.md); the ma
 - **Benchmark** (`predict.py --benchmark`, settings in `benchmarks/bc-benchmark.json`): the closed forms against the
   profile's own numerical solutions (slab ODEs averaged over the path-length distribution; finite-thickness disc
   solved exactly and by finite volumes, and its thin-disc limit).
-- **References** (`evidence/`, namespace `crsr`), cited but not opened in this release.
+- **References** (`evidence/`, namespace `crsr`), cited from background knowledge; four of them opened on 2026-10-15
+  for their tables and captions only, in the search for an external benchmark.
+- **External benchmark: open (B1).** No publication examined on 2026-10-15 prints B/C or the escape grammage in a
+  table for inputs this profile can reproduce (they tabulate fit parameters or cross sections and show B/C in
+  figures only). The search, the reason per paper and what would close it are recorded in
+  `benchmarks/external-benchmark-search.json` (claim `crsr:C06`); no value is read off a figure.
 
 ## Using it
 

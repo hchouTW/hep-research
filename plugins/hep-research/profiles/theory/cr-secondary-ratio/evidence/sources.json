@@ -37,15 +37,16 @@
    "journal_ref": "ApJ 547 (2001) 264"
   },
   "tier": 1,
-  "verification_level": "not-opened",
-  "verification_date": null,
+  "verification_level": "page",
+  "verification_date": "2026-10-15",
   "publication_date": "2001",
   "data_taking_period": null,
   "formal_status": "published",
   "supersedes": [],
   "superseded_by": [],
-  "notes": "Cited from background knowledge; not opened in this session.",
-  "verification_limitations": "not opened in this session (no network approved for WP3); bibliographic details and attributed content come from background knowledge and must be checked against the source before any stronger use"
+  "notes": "Title and arXiv id checked against the arXiv record on 2026-10-15; the general-method content attributed to it is from background knowledge.",
+  "verification_limitations": "Captions and table list only (2026-10-15); the content attributed in the general-method claims was not re-checked against the text.",
+  "verification_note": "B1 search 2026-10-15: arXiv:astro-ph/0007293v1 (19 Jul 2000) source opened; table and figure captions read. Tables give best-fit parameters of the propagation models; B/C appears in figures only."
  },
  {
   "id": "crsr:S03",
@@ -85,15 +86,16 @@
    "journal_ref": "A&A 580 (2015) A9"
   },
   "tier": 1,
-  "verification_level": "not-opened",
-  "verification_date": null,
+  "verification_level": "page",
+  "verification_date": "2026-10-15",
   "publication_date": "2015",
   "data_taking_period": null,
   "formal_status": "published",
   "supersedes": [],
   "superseded_by": [],
-  "notes": "Cited from background knowledge; not opened in this session.",
-  "verification_limitations": "not opened in this session (no network approved for WP3); bibliographic details and attributed content come from background knowledge and must be checked against the source before any stronger use"
+  "notes": "Title and arXiv id checked against the arXiv record on 2026-10-15; the general-method content attributed to it is from background knowledge.",
+  "verification_limitations": "Captions and table list only (2026-10-15); the content attributed in the general-method claims was not re-checked against the text.",
+  "verification_note": "B1 search 2026-10-15: arXiv:1504.03134v2 (21 Jul 2015) LaTeX source opened; table and figure captions read. Tables give best-fit parameters (benchmark 1D/slab model), relative parameter shifts, geometry comparison and a summary of systematics; B/C appears in figures only."
  },
  {
   "id": "crsr:S05",
@@ -109,15 +111,16 @@
    "journal_ref": "Phys. Rev. D 99 (2019) 123028"
   },
   "tier": 1,
-  "verification_level": "not-opened",
-  "verification_date": null,
+  "verification_level": "page",
+  "verification_date": "2026-10-15",
   "publication_date": "2019",
   "data_taking_period": null,
   "formal_status": "published",
   "supersedes": [],
   "superseded_by": [],
-  "notes": "Cited from background knowledge; not opened in this session. Named for its use of a 1D diffusion model and the K0/L degeneracy only; no data value from it is used in this profile.",
-  "verification_limitations": "not opened in this session (no network approved for WP3); bibliographic details and attributed content come from background knowledge and must be checked against the source before any stronger use"
+  "notes": "Title and arXiv id checked against the arXiv record on 2026-10-15; the general-method content attributed to it is from background knowledge. Named for its use of a 1D diffusion model and the K0/L degeneracy only; no data value from it is used in this profile.",
+  "verification_limitations": "Captions and table list only (2026-10-15); the content attributed in the general-method claims was not re-checked against the text.",
+  "verification_note": "B1 search 2026-10-15: arXiv:1904.08917v2 (25 Apr 2019) LaTeX source opened; table and figure captions read. Tables give best-fit parameter values; the best-fit B/C curves are in a figure only."
  },
  {
   "id": "crsr:S06",
@@ -161,5 +164,55 @@
   "superseded_by": [],
   "notes": "au = 149597870700 m exactly; the parsec is taken as 648000/pi au. From background knowledge; not opened in this session.",
   "verification_limitations": "not opened in this session (no network approved for WP3); bibliographic details and attributed content come from background knowledge and must be checked against the source before any stronger use"
+ },
+ {
+  "id": "crsr:S08",
+  "title": "A Critical Examination of the Nested Leaky Box Model for Galactic Cosmic Ray Transport",
+  "authors": "B. Schroer, C. Evoli, P. Blasi",
+  "year": 2025,
+  "identifiers": {
+   "dois": [],
+   "arxiv_ids": [
+    "2502.15115"
+   ],
+   "inspire_record_id": null,
+   "journal_ref": null
+  },
+  "tier": 1,
+  "verification_level": "page",
+  "verification_date": "2026-10-15",
+  "verification_note": "arXiv:2502.15115v1 (21 Feb 2025) LaTeX source opened; table and figure captions read (Table I: cross sections; B/C compared with data in a figure).",
+  "publication_date": "2025-02",
+  "data_taking_period": null,
+  "formal_status": "preprint",
+  "supersedes": [],
+  "superseded_by": [],
+  "notes": "Examined for open question B1 only.",
+  "verification_limitations": "Captions only; journal status not checked."
+ },
+ {
+  "id": "crsr:S09",
+  "title": "A Study of the B/C Ratio Between 10 MeV/nuc and 1 TeV/nuc in Cosmic Rays Using New Voyager and AMS-2 Data and a Comparison with the Predictions of Leaky Box Propagation Models",
+  "authors": "W. R. Webber, T. L. Villa",
+  "year": 2016,
+  "identifiers": {
+   "dois": [],
+   "arxiv_ids": [
+    "1606.03031"
+   ],
+   "inspire_record_id": null,
+   "journal_ref": null
+  },
+  "tier": 1,
+  "verification_level": "metadata-only",
+  "verification_date": "2026-10-15",
+  "verification_note": "arXiv:1606.03031v1 (9 Jun 2016) record read; the PDF text was searched for tables and none was found.",
+  "publication_date": "2016-06",
+  "data_taking_period": null,
+  "formal_status": "preprint",
+  "supersedes": [],
+  "superseded_by": [],
+  "notes": "Examined for open question B1 only.",
+  "verification_limitations": "Metadata and a text search for tables only; content not read."
  }
 ]

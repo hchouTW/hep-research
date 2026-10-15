@@ -1,0 +1,50 @@
+{
+ "label": "Open question B1 (external benchmark for B/C): search record, 2026-10-15. No published B/C or grammage value printed in a table for fully specified inputs within this profile's models was found, so no external benchmark is implemented; nothing here is a reference value.",
+ "status": "open",
+ "access_date": "2026-10-15",
+ "rule": "tables only: a benchmark value must be printed in a table or in machine-readable data published by the authors, never read off a figure; the setup must be reproducible within this profile's models (weighted slab, 1D thin disc without convection, energy-independent effective cross sections, one effective secondary, hydrogen target)",
+ "examined": [
+  {
+   "ledger": "crsr:S04",
+   "citation": "Y. Genolini, A. Putze, P. Salati, P. D. Serpico, A&A 580 (2015) A9",
+   "arxiv": "1504.03134v2",
+   "read_level": "page: arXiv LaTeX source, table captions",
+   "tables": "best-fit propagation parameters of the 1D/slab model (benchmark table), relative parameter shifts, geometry comparison, summary of systematics",
+   "why_not_usable": "B/C values appear in figures only; the tables give best-fit parameters of fits to measured B/C, which yield no B/C value to compare with unless the fit's published cross-section inputs are reproduced, and published cross sections are excluded from this profile"
+  },
+  {
+   "ledger": "crsr:S05",
+   "citation": "Y. Genolini et al., Phys. Rev. D 99 (2019) 123028",
+   "arxiv": "1904.08917v2",
+   "read_level": "page: arXiv LaTeX source, table and figure captions",
+   "tables": "best-fit transport parameters of the benchmark models",
+   "why_not_usable": "best-fit B/C curves in a figure only (caption: results for the best-fit parameter values are given in the table); a parameter table gives no B/C value to compare with"
+  },
+  {
+   "ledger": "crsr:S02",
+   "citation": "F. C. Jones, A. Lukasiak, V. Ptuskin, W. Webber, ApJ 547 (2001) 264",
+   "arxiv": "astro-ph/0007293v1",
+   "read_level": "page: arXiv source, table and figure captions",
+   "tables": "best-fit parameters of the propagation models for secondary/primary ratios",
+   "why_not_usable": "B/C in figures only; the tabulated models (diffusion, wind, turbulent, reacceleration) are fits to data, not B/C values"
+  },
+  {
+   "ledger": "crsr:S08",
+   "citation": "B. Schroer, C. Evoli, P. Blasi, A critical examination of the nested leaky box model for Galactic cosmic ray transport (arXiv preprint)",
+   "arxiv": "2502.15115v1",
+   "read_level": "page: arXiv LaTeX source, table and figure captions",
+   "tables": "Table I: relevant cross sections in the model (caption)",
+   "why_not_usable": "B/C of the best-fit nested leaky-box model is shown in a figure only (caption: compared with our best-fit model predictions); the cross-section table alone gives no B/C to compare with"
+  },
+  {
+   "ledger": "crsr:S09",
+   "citation": "W. R. Webber, T. L. Villa, arXiv preprint (2016) on B/C between 10 MeV/nuc and 1 TeV/nuc compared with leaky-box propagation models (full title in crsr:S09)",
+   "arxiv": "1606.03031v1",
+   "read_level": "metadata-only: arXiv record; PDF text searched for tables, none found",
+   "tables": "none",
+   "why_not_usable": "no table in the PDF text; not read further"
+  }
+ ],
+ "what_would_close_it": "a publication that prints B/C (or the escape grammage) in a table for stated transport parameters, gas column and energy-independent cross sections, or authors' machine-readable model output for such a setup; then implement the comparison in tests/ with the paper's stated precision as tolerance",
+ "internal_benchmark": "unchanged: bc-benchmark.json (closed forms against the profile's own slab-ODE and finite-disc solvers)"
+}
