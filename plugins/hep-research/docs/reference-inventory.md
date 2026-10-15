@@ -239,7 +239,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `geometric-and-equivariant-learning.md` | hep-ml | 2.5 | no | 4 | - | 9257d7b 2026-10-15 |
 | `interpretability-and-explainability.md` | hep-ml | 2.5 | no | 3 | - | 9257d7b 2026-10-15 |
 | `mixed-precision.md` | hep-ml | 4.0 | no | 6 | - | 9257d7b 2026-10-15 |
-| `ml-analysis.md` | hep-ml | 29.8 | yes | 30 | hep-detector, hep-measurement | 9257d7b 2026-10-15 |
+| `ml-analysis.md` | hep-ml | 29.8 | yes | 30 | hep-detector, hep-measurement | 0b00352 2026-10-15 |
 | `monitoring-and-lifecycle.md` | hep-ml | 2.1 | no | 3 | - | 9257d7b 2026-10-15 |
 | `multivariate-analysis-bdt-nn.md` | hep-ml | 9.8 | yes | 8 | hep-detector | 9257d7b 2026-10-15 |
 | `optimization-and-training-dynamics.md` | hep-ml | 3.8 | no | 1 | - | 9257d7b 2026-10-15 |
