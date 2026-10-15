@@ -5,7 +5,6 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
-<!-- fu-small -->
 - `contracts/registry.py` rejects an unknown flag or a stray argument with exit 2 and a JSON error naming it
   (`{"ok": false, "error": "unknown option '--bogus' ..."}`). Before, an unknown flag such as validate.py's
   `--profiles-from` was ignored and the run reported `ok`, so a companion check with the wrong flag looked clean.
@@ -21,7 +20,6 @@ Software checks establish contract consistency only, not physical validity.
   optional `base_dir`; without it the library check is unchanged. No schema change. The hep-ml pre-training freeze
   example passes as shipped; a changed split manifest now fails `lineage.py` itself, and only the hash written in the
   `decision` text is still compared by hand (`ml-analysis.md`, capability matrix updated).
-
 - Registry budget raised from 2,048 to 3,072 bytes (`REGISTRY_BUDGET` in `contracts/registry.py` and
   `registry_bytes` in `tools/measure_entrypoints.py`; decision D3 of the WP13–WP16 order). The registry was at 2,001
   bytes with 8 entries, and one more theory profile costs about 163 bytes plus its scope, so no further profile fit.
