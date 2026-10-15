@@ -1,0 +1,38 @@
+{
+ "id": "adapter:literature-lookup",
+ "version": "0.1.0",
+ "status": "demonstrated-on-synthetic-data",
+ "purpose": "Look up one literature identifier (arXiv id with or without version, DOI, INSPIRE record id, ADS bibcode) in INSPIRE-HEP, arXiv and ADS and print a metadata record per source with its source URL, UTC retrieval time, read level and an arXiv version check; optional, network only when run live",
+ "tools": [
+  {
+   "name": "INSPIRE-HEP literature REST API (inspirehep.net/api/literature)",
+   "status": "tested-in-declared-environment",
+   "tested_versions": [
+    "inspirehep.net REST API as served 2026-10-15: search by arXiv id (found, total 0) and record by id (found, HTTP 404) recorded on E2 and replayed offline; live smoke on E2 2026-10-15 (VALIDATION LITERATURE-LOOKUP)"
+   ]
+  },
+  {
+   "name": "arXiv export API (export.arxiv.org/api/query, Atom)",
+   "status": "tested-in-declared-environment",
+   "tested_versions": [
+    "export.arxiv.org API as served 2026-10-15: id_list lookup with the latest version (v3) and a real HTTP 429 recorded on E2 and replayed offline; live smoke on E2 2026-10-15 (VALIDATION LITERATURE-LOOKUP)"
+   ]
+  },
+  {
+   "name": "ADS search API v1 (api.adsabs.harvard.edu/v1/search/query, token from ADS_API_TOKEN or ADS_TOKEN)",
+   "status": "demonstrated-on-synthetic-data",
+   "tested_versions": [
+    "a constructed response in the documented search-API layout and the no-token, rejected-token and header paths; no real ADS request (no token on E2, 2026-10-15)"
+   ]
+  }
+ ],
+ "environment": "E2 (docs/capability-matrix.md): macOS 26.5 arm64, Python 3.13.2, standard library only. Network: HTTPS GET to inspirehep.net, export.arxiv.org and api.adsabs.harvard.edu, only when run without --replay, one request per source, User-Agent naming the plugin, no automatic retry; the offline tests replay recorded responses and patch urlopen to fail",
+ "assets": [
+  "assets/literature_lookup.py"
+ ],
+ "tests": [
+  "../../tests/adapters/test_literature_lookup.py"
+ ],
+ "owner_skill": "research-communication",
+ "status_rule": "the adapter status is the lowest of its tools' statuses; a source is raised to tested-in-declared-environment only by a live run recorded in VALIDATION.md; ADS stays demonstrated-on-synthetic-data until a run with a token; no skill requires this adapter"
+}

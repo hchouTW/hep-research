@@ -1,0 +1,10 @@
+{
+ "source": "inspire",
+ "url": "https://inspirehep.net/api/literature/999999999?fields=titles,authors.full_name,dois,arxiv_eprints,texkeys,control_number,publication_info,collaborations",
+ "recorded_at": "2026-10-15T02:31:50Z",
+ "http_status": 404,
+ "headers": {
+  "content-type": "application/json"
+ },
+ "body": "{\n  \"message\": \"PIDDoesNotExistRESTError: PID does not exist.\", \n  \"status\": 404\n}\n"
+}
