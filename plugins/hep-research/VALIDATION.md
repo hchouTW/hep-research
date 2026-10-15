@@ -1425,6 +1425,22 @@ Network approved by the maintainer for this WP: fixture recording and one live s
 response only. An arXiv not-found reply (an empty feed or an error entry) was not observed. The INSPIRE 429 was not
 provoked.
 
+## CR-PROPAGATION-DRAGON2-UNITS (2026-10-16, E2: macOS 26.5 arm64, Python 3.13.2, numpy 2.5.3, scipy 1.18.1; main `31ee717` + branch `fix-dragon2-per-nucleon`)
+
+Check of the two failing WP13 limit-benchmark checks (C1 absolute B/C, C2 D0/L degeneracy). Local DRAGON2 runs only, no
+network. Diagnostic binary: the same commit rebuilt with a two-line gas patch (`dragon2-gas-fixed-r.patch`: with
+`DRAGON_GAS_FIXED_R` set, the BronfFerr H2 and HI densities are evaluated at that radius at every R); without the
+variable it reproduced X1 byte for byte.
+
+| Item | Result | Evidence |
+|---|---|---|
+| Cause of C1 | a unit error in the converter, not physics. DRAGON2's ASCII output is its internal density per total kinetic energy: `dragon.cc` writes `GetFluxAtSunPosition`, which computes `weight = A` and returns the density without it, and `particle.cc` scales the spallation source by `A_parent / A_daughter` "to convert between kinetic energy per nucleon ... to momentum". Read as per E/n, B/C was 12/11 too high and the closed form's O/C input 12/16 too low (together about 1.19, the "unattributed" 15-17%) | `dragon2_to_prediction.py` `mass_number`, `ratio`; `Converter.test_ratio_is_per_nucleon` (failed before the fix) |
+| C1, C3 recomputed (same runs, same tolerances; plan amendment "C1-absolute") | C1: DRAGON2 / closed form 1.094-1.120 (tolerance 0.30) **pass**; 0.956-0.979 after dividing out DRAGON2's helium production term (the low-energy deficit fits its helium term on destruction, not ported). C3: -0.4727 against -0.4783 **pass**. C4 unchanged (a common factor) | `benchmark-results.json`; `LimitBenchmark` |
+| C2 attribution (unchanged verdict: **fail**) | radial gas varied, boundary 20 kpc: no effect at L = 4 (gas fixed at 8.3 kpc changes C1 by < 0.1%). Boundary and sources at 60 kpc, real gas: X3/X1 0.928-0.948 (was 0.82-0.85). Boundary at 60 kpc and gas uniform in R: X2/X1 0.989-0.996, X3/X1 0.982-0.994, and DRAGON2 / closed form after the helium production term 0.972-0.998 (L = 2), 0.976-1.009 (L = 4), 0.960-1.001 (L = 8). The D0/L degeneracy and the absolute B/C of the thin-disc model are reached in DRAGON2's 1D limit; the C2 failure is the 2D geometry (boundary 11.7 kpc from the observer) and gas structure the closed form does not have | runs D_X1_R60, D_X3_R60 (released binary), D_X1_R60_UG, D_X2_R60_UG, D_X3_R60_UG (patched binary, version string names the patch); `Diagnostics` in `tests/adapters/test_cr_propagation.py` |
+
+**Not verified here.** DRAGON2's inelastic cross sections and the helium term on destruction are not ported, so the
+1D-limit agreement is within 5%, not exact. The patched binary is a diagnostic, not DRAGON2 as released.
+
 ## CR-PROPAGATION-DRAGON2 (2026-10-15, E2: macOS 26.5 arm64, Python 3.13.2, numpy 2.5.3, scipy 1.18.1; version 0.11.0 + unreleased, branch `wp13-cr-propagation` from `d95fd7c`)
 
 Work order ams02-wp13-wp16 WP13 (decision D4: DRAGON2 first; download and build approved). New `adapters/cr-propagation`
@@ -1443,7 +1459,7 @@ one `git clone` of https://github.com/cosmicrays/DRAGON2-Beta_version (HEAD `cd5
 
 **Not verified here.** GALPROP and USINE were not obtained. DRAGON2's helium target and inelastic cross sections cannot
 be replaced without changing its code, so no run is a like-for-like reproduction of the closed form; the C1 residual is
-not attributed by a run. No DRAGON2 default cross-section set, reacceleration, convection, energy losses or decay were
+not attributed by a run (superseded 2026-10-16: a converter unit error, see CR-PROPAGATION-DRAGON2-UNITS). No DRAGON2 default cross-section set, reacceleration, convection, energy losses or decay were
 exercised; no OpenMP build; no fit to real data.
 
 ## CRDB-ADAPTER (2026-10-15, E2: Python 3.13.2, OpenSSL 3.6.4, macOS 26.5 arm64; version 0.10.1 + unreleased, branch `wp9-crdb-adapter` from `f2039c7`)

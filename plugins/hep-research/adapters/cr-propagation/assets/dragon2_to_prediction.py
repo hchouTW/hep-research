@@ -3,7 +3,8 @@
 
 One DRAGON2 run is one node of a parameter grid: this script reads the run's ASCII output (output/<name>.txt: a header
 "Energy [GeV]" followed by one column per species, e.g. NUC_5011 for 1000 Z + A, fluxes at the observer on DRAGON2's
-kinetic-energy-per-nucleon grid), forms a ratio of summed columns (for B/C: NUC_5010,NUC_5011 over
+kinetic-energy-per-nucleon grid, each column per total kinetic energy, so it is multiplied by its mass number A to
+put it per nucleon), forms a ratio of summed columns (for B/C: NUC_5010,NUC_5011 over
 NUC_6012,NUC_6013,NUC_6014), averages it over the requested bins and writes a prediction whose parameter_point is the
 node. Many such artifacts form the grid that skills/hep-statistics/scripts/covariance_fit.py (model "tabulated-grid")
 fits; each must pass contracts/comparison/gate.py against the measurement first.
@@ -69,12 +70,25 @@ def read_output(path: Path) -> tuple[list[float], dict[str, list[float]]]:
     return energies, cols
 
 
+def mass_number(column: str) -> int:
+    """Mass number A of an output column: NUC_<1000 Z + A> gives A, Pri_p and Sec_p give 1."""
+    if column in ("Pri_p", "Sec_p"):
+        return 1
+    if column.startswith("NUC_") and column[4:].isdigit() and int(column[4:]) % 1000 > 0:
+        return int(column[4:]) % 1000
+    raise ConvertError(f"column {column!r}: no mass number, so it cannot be put per nucleon (use NUC_<1000 Z + A>, "
+                       "Pri_p or Sec_p)")
+
+
 def ratio(cols: dict, numerator: list[str], denominator: list[str]) -> list[float]:
+    """Ratio of summed columns at equal E/n. DRAGON2 writes its internal density per total kinetic energy (dragon.cc
+    writes GetFluxAtSunPosition, which computes weight = A but does not apply it, and particle.cc scales the spallation
+    source by A_parent / A_daughter), so every column is multiplied by its mass number A to put it per nucleon."""
     for c in numerator + denominator:
         if c not in cols:
             raise ConvertError(f"column {c!r} not in the output (have: {', '.join(sorted(cols))})")
-    num = [sum(v) for v in zip(*(cols[c] for c in numerator))]
-    den = [sum(v) for v in zip(*(cols[c] for c in denominator))]
+    num = [sum(v) for v in zip(*([mass_number(c) * x for x in cols[c]] for c in numerator))]
+    den = [sum(v) for v in zip(*([mass_number(c) * x for x in cols[c]] for c in denominator))]
     return [n / d if d > 0 else float("nan") for n, d in zip(num, den)]
 
 
@@ -136,7 +150,8 @@ def default_observable(numerator: list[str], denominator: list[str]) -> dict:
                           "convention": "ratio of two fluxes at the same E/n; the normalization cancels"},
         "frame": "Galactic rest frame (interstellar gas at rest)",
         "conventions": {
-            "energy_variable": "kinetic energy per nucleon E/n in GeV/n (DRAGON2's energy grid), the ratio at equal E/n",
+            "energy_variable": "kinetic energy per nucleon E/n in GeV/n (DRAGON2's energy grid), the ratio at equal E/n "
+                               "of fluxes per E/n (DRAGON2's columns, per total kinetic energy, times A)",
             "frame": "Galactic rest frame (interstellar gas at rest); observer position as in the run's XML",
             "mass_approximation": "DRAGON2: beta and momentum per nucleon from E/n with the proton mass; rigidity "
                                   "(A/|Z|) times momentum per nucleon",

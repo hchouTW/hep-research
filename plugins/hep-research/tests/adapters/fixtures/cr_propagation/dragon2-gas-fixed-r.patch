@@ -1,0 +1,25 @@
+--- ../build/gas.cc	2026-10-15 22:29:10
++++ gas.cc	2026-10-16 00:46:32
+@@ -1,3 +1,4 @@
++#include <cstdlib>
+ /**
+  * @file gas.cc
+  * @author Luca Maccione
+@@ -30,7 +31,7 @@
+     dimz = z.size();
+       
+     for (int k = 0; k < dimx; k++) {
+-      double r = x[k];
++      double r = getenv("DRAGON_GAS_FIXED_R") ? atof(getenv("DRAGON_GAS_FIXED_R")) : x[k];  // DIAGNOSTIC
+          
+       for (int l = 0; l < dimz; l++) {
+ 	double DeltaZ = Coord->GetDeltaZ(l);
+@@ -127,7 +128,7 @@
+     dimz = z.size();
+     for (int k = 0; k < dimx; k++) {
+          
+-      double r = x[k];
++      double r = getenv("DRAGON_GAS_FIXED_R") ? atof(getenv("DRAGON_GAS_FIXED_R")) : x[k];  // DIAGNOSTIC
+          
+       for (int l = 0; l < dimz; l++) {
+ 	double DeltaZ = Coord->GetDeltaZ(l);
