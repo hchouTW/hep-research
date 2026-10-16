@@ -1764,3 +1764,20 @@ was read.
 | Registry | V30 passing (68 of 80 V parts) |
 | `run_all_checks.py`, then the CI lock | first run: 23 pass, 2 fail. The packaging scan read the old argument destination as a site fact (a `.local` host name); it was renamed to `run_time_dirs`. The final-tree run is recorded below (V63-M2C-PROPOSAL). |
 | Ruff, mypy | clean |
+
+## V63-M2C-PROPOSAL (2026-10-16; final tree of steps 1–3 on branch `v63/m2c-proposal`)
+
+Step 3 of the decision change is `docs/dev/v6.3/m2c-proposal.md`, which is docs only and stops for the owner's
+decision. Gate on the final tree (model part, V30 and the proposal):
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py` (miniconda Python 3.13.2) | 25 pass, 0 fail; 3563 tests, 0 failures, 107 skipped |
+| Same with the CI lock (no torch) | 25 pass, 0 fail; 3563 tests, 0 failures, 170 skipped |
+| `check_relocation.py` | pass |
+| Registry | 68 of 80 V parts passing. Not run: the 11 M2c parts and V32 (post-execution) |
+
+Two timing-sensitive tests failed once each under a parallel full run and passed in isolation (three times each)
+and in this run:
+- `test_batch_hardening.SubmissionOutcomesT31` (CI lock);
+- `test_run_all_checks.ModuleTimeoutTests` (earlier).
