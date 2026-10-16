@@ -47,6 +47,26 @@ version bump. Every analysis-check rule stays in shadow mode.
   found that `validate_covariance.py` and `validate_response.py` did not label their output `[General method]` as the
   core/stats guide says; their CLI output now carries the label (also on a refused input).
 
+Upgrade plan v1.3, batch 0b (B-01 to B-05): budgets and entry points (VALIDATION UPGRADE-0B). Live routing has not
+been run for the new descriptions and routing tables (gate G2).
+
+- Budget (B-01): `tools/measure_entrypoints.py` warns above a 12,288-byte SKILL.md target (waivable in
+  `tools/budget_exceptions.json`) and fails above 16,384 bytes or 500 lines; descriptions stay at 1,024 characters
+  (Agent Skills specification), the registry at 3,072 bytes. Output gains `warnings`; `--root`.
+- Routing tables (B-02): every SKILL.md has a 1.7-2.0 KB "request -> file or script" table under `## Resources`;
+  SKILL.md files are 7,895-9,322 bytes.
+- Lighter entry references (B-03): the hep-measurement guide puts routing first and moves the cosmic-ray invariants
+  to `cosmic-ray-measurements.md`; the detector principles summary links instead of repeating the comparison tables
+  and checklists; `ml-analysis.md` is a 7 KB core with four subfiles; the papers guide keeps the method (review modes
+  and the reference index move to `papers-review-modes-and-reference-index.md`); the core/stats guide's failure
+  modes move to the command reference. SKILL.md plus entry reference is at most 25,321 bytes for every skill.
+- Descriptions (B-04): six descriptions from the plan's Appendix J (hep-measurement unchanged; hep-communication
+  keeps "compatibility", a recorded routing fix); 18 routing cases (259 in all).
+- Reference soft budget (B-05): `tools/reference_inventory.py` warns, without failing, on an entry reference's
+  routing part above 4 KB and on any reference above 24 KB.
+- `validate_covariance.py` and `validate_response.py` label their CLI output `[General method]`, as the core/stats
+  guide says (follow-up to the F-15 audit).
+
 ## 0.13.1 (2026-10-17)
 
 G-ENFORCE inputs completed for the full v6.3 suite set, and README updates. Contracts stay 2.11.0, and every
