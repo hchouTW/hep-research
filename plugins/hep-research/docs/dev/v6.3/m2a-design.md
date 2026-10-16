@@ -98,3 +98,10 @@ them. `ratio_roots[]` names a ratio of two chain roots (`numerator`, `denominato
 
 Calibration items give a factor as `scalar`, per-bin `values`, or `by_scope` rows keyed by instance scope. Model
 cards (`model-card/v1`) are not built: a context selecting that suite is refused (O03).
+
+## D11b snapshots and migration
+
+Snapshots are files `<canonical sha256>.json` in a store the caller names (`--snapshots DIR`); O07 (where the store
+lives and how long it is kept) stays open, so nothing is stored inside the plugin or the bundle. Reproduction rebuilds
+coverage contracts, catalog and suites from the store by the lock's digests only. `contracts/migrate.py` writes the
+migrated analysis to a new folder; the completion marker is the last file written.

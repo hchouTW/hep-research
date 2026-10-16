@@ -986,7 +986,7 @@
       "D11b"
      ],
      "host": "migration test",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d11b.V19Migration.test_leaf_to_root",
       "tests.contracts.test_v63_d11b.V19Migration.test_failure_leaves_no_marker"
@@ -1740,7 +1740,7 @@
       "D11b"
      ],
      "host": "LOCK-SNAPSHOT",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d11b.V57Snapshots.test_reproduced_from_the_old_snapshot",
       "tests.contracts.test_v63_d11b.V57Snapshots.test_missing_snapshot",
@@ -2095,6 +2095,7 @@
    "patterns": [
     "contracts/analysis_check.py",
     "contracts/analysis_checks/**",
+    "contracts/migrate.py",
     "contracts/resolve.py",
     "contracts/rules/suites/**",
     "tests/contracts/v63_cases.py"
@@ -2106,6 +2107,7 @@
     "tests.contracts.test_v63_d06",
     "tests.contracts.test_v63_d07",
     "tests.contracts.test_v63_d11a",
+    "tests.contracts.test_v63_d11b",
     "tests.contracts.test_v63_d17",
     "tests.contracts.test_v63_review_fixes"
    ],

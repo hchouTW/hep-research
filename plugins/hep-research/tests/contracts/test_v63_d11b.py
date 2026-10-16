@@ -52,7 +52,6 @@ class V57Snapshots(unittest.TestCase):
         (c.root / "bundle.json").write_text(json.dumps(bundle))
         return c.root / "bundle.json", c.root
 
-    @unittest.expectedFailure  # V57 (D11b)
     def test_reproduced_from_the_old_snapshot(self):
         b, root = self.frozen()
         view, diags = ac().load_subject(b, root)
@@ -66,7 +65,6 @@ class V57Snapshots(unittest.TestCase):
         self.assertTrue(rep["installed_differences"])
         self.assertEqual(rep["lock_differences"], [])
 
-    @unittest.expectedFailure  # V57 (D11b): no fallback to the latest definitions
     def test_missing_snapshot(self):
         b, root = self.frozen()
         view, diags = ac().load_subject(b, root)
@@ -78,7 +76,6 @@ class V57Snapshots(unittest.TestCase):
         self.assertIn(lock_cov["digest"], rep["snapshot_missing"])
         self.assertIn("check.semantics_unreproducible", {o["reason"] for o in rep["obligations"]})
 
-    @unittest.expectedFailure  # V57 (D11b): a rewritten snapshot is a digest failure
     def test_rewritten_snapshot(self):
         b, root = self.frozen()
         view, diags = ac().load_subject(b, root)
@@ -92,7 +89,6 @@ class V57Snapshots(unittest.TestCase):
         self.assertEqual(rep["input_validity"], "invalid")
         self.assertIn("snapshot.digest", {d["code"] for d in rep["input_diagnostics"]})
 
-    @unittest.expectedFailure  # V57 (D11b): unchanged definitions need no snapshot
     def test_unchanged_definitions(self):
         b, root = self.frozen()
         view, diags = ac().load_subject(b, root)
@@ -113,7 +109,6 @@ class V19Migration(unittest.TestCase):
         self.bundle = cases.positive_case(self.base / "src")
         self.before = {p: sha(p) for p in sorted((self.base / "src").rglob("*")) if p.is_file()}
 
-    @unittest.expectedFailure  # V19 (D11b)
     def test_leaf_to_root(self):
         from contracts import migrate
         res = migrate.migrate(self.base / "src", self.bundle, self.base / "dst",
@@ -130,7 +125,6 @@ class V19Migration(unittest.TestCase):
         self.assertFalse([d for d in diags if d["kind"] == "input-invalid"])
         self.assertEqual([c["item"] for c in marker["conversions"]], ["flux-reduced"])
 
-    @unittest.expectedFailure  # V19 (D11b): no completion marker on failure; originals kept
     def test_failure_leaves_no_marker(self):
         from contracts import migrate
 
