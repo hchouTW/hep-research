@@ -1578,3 +1578,26 @@ stamp 0.11.0 / contracts 2.9.0 and their artifacts were regenerated with their o
 | `run_all_checks.py --no-cli`, E2 (Python 3.13.2, NumPy 2.5.3) | 21 pass, 0 fail, 2 skipped (CLI checks); 3332 tests, 0 failures, 60 skipped, 247 modules |
 | Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 21 pass, 0 fail; 3332 tests, 0 failures, 169 skipped |
 | Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
+
+## V63-M0 (2026-10-16, Python 3.13.2 on macOS 26.5 arm64; base main `982af52`, plugin 0.11.0)
+
+Phase M0 of the v6.3 analysis-check programme: D01 baseline and gap runs, D02 evidence query, D12a rule registry, on
+the stacked branches `v63/d01-baseline`, `v63/d02-evidence-query`, `v63/d12a-rule-registry`. Records:
+`docs/dev/v6.3/m0-baseline.md`, `m0-budget.md`, `decision-m0.md`. Each gate run below used a clean worktree of the
+branch head.
+
+| Check | Result |
+|---|---|
+| Baseline `run_all_checks.py`, main `982af52` | 24 pass, 0 fail, 0 skip; 3366 tests, 0 failures, 107 skipped, 248 modules |
+| Same, `v63/d01-baseline` `954f1d1` | 24 pass, 0 fail; 3380 tests, 0 failures, 107 skipped |
+| Same, `v63/d02-evidence-query` `a37cd47` | 24 pass, 0 fail; 3391 tests, 0 failures, 107 skipped |
+| Same, `v63/d12a-rule-registry` `4a81884` (adds the static check `rule_registry`) | 25 pass, 0 fail; 3417 tests, 0 failures, 107 skipped |
+| Same with the CI lock (no torch), `4a81884` | 25 pass, 0 fail; 3417 tests, 0 failures, 170 skipped |
+| `check_relocation.py`, `4a81884` | pass (codex-plugin-load skipped in the relocated copy) |
+| Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
+| Gap runs 1–5 (`tests.contracts.test_v63_baseline_gaps`) | all reproduce today's behaviour; gap 4 is a cross-artifact contradiction that L1, L2 and bundle verify all pass |
+
+Two failures met on the way, both caused by the new files and fixed before the runs above: a subprocess call in the
+gap tests had no timeout (T14), and the baseline record named a local path (packaging scan). No legacy entry point
+changed output, verdict or exit code; V cases V01–V71 are registered as `not-run`. Software checks only: these runs
+say nothing about physical validity.
