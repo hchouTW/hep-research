@@ -43,8 +43,9 @@ version bump. Every analysis-check rule stays in shadow mode.
   --no-mermaid`; the CERN EOS note says to ask before writing.
 - Vocabulary (F-14): core levels `top-of-instrument` and `top-of-atmosphere`; the synthetic cosmic-ray spec uses the
   first.
-- Documentation-claim tests (F-15) for the hep-statistics and hep-detector statements about script output; the core/stats
-  guide no longer says the two validators label their output `[General method]`.
+- Documentation-claim tests (F-15) for the hep-statistics and hep-detector statements about script output. The audit
+  found that `validate_covariance.py` and `validate_response.py` did not label their output `[General method]` as the
+  core/stats guide says; their CLI output now carries the label (also on a refused input).
 
 ## 0.13.1 (2026-10-17)
 
