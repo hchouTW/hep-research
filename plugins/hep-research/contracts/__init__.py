@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "2.10.0"
+CONTRACTS_VERSION = "2.11.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -59,6 +59,11 @@ CONTRACTS_VERSION = "2.10.0"
 # formats read only by contracts.analysis_check and its readers (analysis bundle /2, check context, semantic lock,
 # check report, validation record, effect catalog, operator coverage, rule registry); no artifact type changes, and a
 # 2.9 artifact keeps its outcome under a 2.10 reader. The checks are advisory and in shadow mode.
+# 2.11.0 (v6.3 M2b model part, D12b, M2c) adds sidecar formats only: the analysis bundle mode "model" with model-card
+# items and the model context fields (models, evaluations, model_roots, the observes binding), the pairing contract
+# contracts/semantics/model_pairings.json, the result binding (contracts/schemas/result_binding.json) and the
+# post-execution report fields. No artifact type changes and no capability is added; a 2.10 artifact keeps its outcome,
+# and a 2.10 reader refuses the new bundle mode and context fields (schema enum, additionalProperties).
 KNOWN_CAPABILITIES = frozenset({"core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})
