@@ -1,6 +1,6 @@
 # Decision record after M2b (ratio) and D11b (v6.3 analysis-check programme)
 
-Status: **awaiting the maintainer's decision.** Written 2026-10-16 after the ratio part of M2b (D07 ratio, D08 ratio
+Status: **decided 2026-10-16: M3 for the chain and ratio suites, D09 first** (see Decision). Written 2026-10-16 after the ratio part of M2b (D07 ratio, D08 ratio
 cases) and D11b, as decided at G-M2a (`decision-m2a.md`). Labels: **Confirmed**, **Inferred**, **Unresolved**.
 
 ## Analysis question
@@ -55,4 +55,7 @@ self-reviewed; no new gate condition is enabled.
 
 ## Decision
 
-*(maintainer)* Option: — · Date: — · Conditions: —
+**M3 for chain and ratio, starting with D09**, 2026-10-16: the maintainer's instruction in the session was to follow
+the recommendation. D10 follows D09; it may be built and self-reviewed, but no new gate condition is enabled while
+O04 and O14 are open, and the permit and attestation schemas stay unchanged (G-SCHEMA). The model part waits for O03,
+and M2c stays paused.
