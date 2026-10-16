@@ -41,9 +41,24 @@ description: "Use when the deliverable is working, reproducible scientific softw
 
 ## Resources
 
-Guides under `references/`: [engineering playbook](references/engineering-playbook.md) and [agile delivery](references/agile-development-guide.md); [research task authoring](references/task-authoring-guide.md) with `assets/task-template.md` and worked tasks in `examples/`; [ROOT design](references/root-balanced-design-guidelines.md), [CMake](references/cmake-and-build.md), [ROOT debugging](references/root-debugging.md), [Python HEP coding](references/python-hep-coding-patterns.md) and [CERN EOS](references/storage-cern-eos.md); [numerical and computational methods](references/numerical-and-computational-methods.md); design guidelines: [Python](references/python-balanced-design-guidelines.md), [C++](references/cpp-balanced-design-guidelines.md), [Bash](references/bash-balanced-design-guidelines.md); [validation and definition of done](references/validation-and-done.md).
+| Request | Read or run |
+|---|---|
+| Implementation scenario: bug fix, feature, refactor, review | [engineering playbook](references/engineering-playbook.md) |
+| ROOT and PyROOT design | [ROOT design](references/root-balanced-design-guidelines.md) |
+| Crashes, memory leaks | [crash and memory debugging](references/crash-and-memory-debugging.md), [ROOT debugging](references/root-debugging.md) |
+| uproot, awkward, RDataFrame, analysis pipelines | [Python HEP coding](references/python-hep-coding-patterns.md), [analysis pipelines](references/analysis-data-pipelines.md) |
+| Slow or large code | [performance profiling](references/performance-profiling.md) |
+| CMake and root-config builds | [CMake](references/cmake-and-build.md); `check_root_cpp_env.sh`, `new_root_cpp_project.sh` |
+| SymPy, integrals, ODEs, convergence | [symbolic and numerical computation](references/symbolic-and-numerical-computation.md), [numerical methods](references/numerical-and-computational-methods.md) |
+| Environments, containers, run manifests; interpreter for package-dependent work | [environments](references/environments-and-containers.md); `environment_manifest.py`; `find_python.py` (`--python`, then `HEP_RESEARCH_PYTHON`, the caller, `python3` on PATH) |
+| Inspect or compare ROOT files and histograms | `inspect_root_file.py`, `compare_root_histograms.py`, `summarize_histogram_statistics.py` |
+| Partition, resubmit, merge | `local_partition.py`; Slurm and HTCondor: [batch scheduling](references/batch-scheduling.md) |
+| CERN EOS storage | [CERN EOS](references/storage-cern-eos.md) |
+| Blinding checks of outputs, logs, caches | `audit_blinded_outputs.py` (synthetic sentinels only) |
+| Implementation-ready research task | [task authoring](references/task-authoring-guide.md); `lint_task.py` |
+| Agile delivery, definition of done | [agile delivery](references/agile-development-guide.md), [validation and done](references/validation-and-done.md) |
 
-Scripts in `<plugin root>/skills/hep-computing/scripts/` (read `--help` first): interpreter choice for package-dependent work (`find_python.py`: `--python`, then `HEP_RESEARCH_PYTHON`, the caller, `python3` on PATH), ROOT file inspection and comparison, environment and project checks (`environment_manifest.py`), synthetic inputs, task checks (`lint_task.py`), local partition with bounded resubmission and duplicate-safe merge (`local_partition.py`), and advisory blinding checks (`audit_blinded_outputs.py`: synthetic sentinels only; with real data, sealing and scanning belong to the data custodian); each is described in the [engineering playbook](references/engineering-playbook.md). Batch campaigns: [batch scheduling](references/batch-scheduling.md). Submission is unsandboxed execution: synthetic test environments only, each submission user-approved. Folder guide for people: [README.md](README.md).
+Scripts in `<plugin root>/skills/hep-computing/scripts/` (read `--help` first; each is described in the [engineering playbook](references/engineering-playbook.md)); design guidelines: [Python](references/python-balanced-design-guidelines.md), [C++](references/cpp-balanced-design-guidelines.md), [Bash](references/bash-balanced-design-guidelines.md). Submission is unsandboxed execution: synthetic test environments only, each submission user-approved. Folder guide for people: [README.md](README.md).
 
 ## Handoffs
 

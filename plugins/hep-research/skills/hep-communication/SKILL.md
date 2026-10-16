@@ -53,11 +53,24 @@ Answer inline, never from memory: the bound profile's ledger first, else a prima
 
 ## Resources
 
-Folder guide for people: [README.md](README.md).
+| Request | Read or run |
+|---|---|
+| Reading, reviewing, writing papers | [papers guide](references/academic-papers-guide.md) |
+| Paper structure and genres | [paper structure](references/paper-structure.md), [genre variants](references/paper-genre-variants.md) |
+| Verify a citation, latest result, what a paper states | [citation verification](references/citation-verification.md), [literature recipes](references/literature-lookup-recipes.md) |
+| Bibliography and citation style; primary sources for statistics and detector methods | [citations and bibliography](references/citations-and-bibliography.md), [primary sources](references/primary-sources-and-version-checks.md) |
+| Literature search, matrix, review | [literature discovery](references/literature-discovery-and-search.md); `build_lit_matrix.py` |
+| Claims linked to results | [claim-evidence mapping](references/claim-evidence-mapping.md), [evidence-linked writing](references/evidence-linked-writing.md); `audit_claims.py`, `check_communication.py` |
+| Figures, tables, physics plots | [figures and tables](references/figures-and-tables.md), [physics plots](references/physics-plots.md) |
+| Diagrams as editable sources | [diagrams guide](references/academic-diagrams-guide.md); `check_diagram_sources.py` |
+| LaTeX checks and venues | [LaTeX venues](references/latex-venue-setup.md); `check_manuscript.py` |
+| Talks and posters | [posters and talks](references/poster-and-talk-design.md) |
+| Referee reports and replies | [reviewer assessment](references/reviewer-style-assessment.md), [comment exchange](references/comment-and-reply-exchange.md) |
+| Audience adaptation, terminology | [outreach summaries](references/outreach-and-public-facing-summaries.md); `check_adaptation.py`, `check_terminology.py` |
+| Revisions and literature records | `track_revision_impact.py`, `manage_literature.py` |
+| Statistics and astroparticle papers | [statistics and ML papers](references/statistics-and-ml-papers.md), [astroparticle papers](references/astroparticle-and-cosmic-ray-papers.md) |
 
-Start with [the papers guide](references/academic-papers-guide.md) for reading, reviewing and writing, or [the diagrams guide](references/academic-diagrams-guide.md) for diagrams. Citation work: [citation verification](references/citation-verification.md), [citations and bibliography](references/citations-and-bibliography.md), [primary sources for statistics and detector methods](references/primary-sources-and-version-checks.md). Claims: [claim-evidence mapping](references/claim-evidence-mapping.md), [evidence-linked writing](references/evidence-linked-writing.md). Field-specific patterns, figures, talks, reviews and venues have their own files under `references/`; diagram skeletons in `assets/diagrams/`, paper templates in `assets/paper/`, worked diagrams in `examples/`.
-
-Scripts in `<plugin root>/skills/hep-communication/scripts/` (read `--help` first; what each checks: [README.md](README.md#scripts)): `check_manuscript.py`, `check_diagram_sources.py`, `build_lit_matrix.py`, and for evidence-linked writing ([guide](references/evidence-linked-writing.md)) `check_communication.py`, `audit_claims.py`, `track_revision_impact.py`, `manage_literature.py`, `check_adaptation.py`, `check_terminology.py`.
+Scripts in `<plugin root>/skills/hep-communication/scripts/` (read `--help` first; what each checks: [README.md](README.md#scripts)). Field-specific patterns, venues and reviews have their own files under `references/`; diagram skeletons in `assets/diagrams/`, paper templates in `assets/paper/`, worked diagrams in `examples/`. Folder guide for people: [README.md](README.md).
 
 ## Handoffs
 

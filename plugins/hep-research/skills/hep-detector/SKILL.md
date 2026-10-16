@@ -42,9 +42,25 @@ description: "Use when the deliverable is about how a detector responds: signal 
 
 ## Resources
 
-Start with [the principles summary](references/detector-principles-summary.md); its reference index (section 11) names every topic file: framework and equations, front-end electronics, subsystems, reconstruction and performance, folding, data/MC validation, simulation, calibration and alignment, case studies, comparison tables, glossary, bibliography, and the astroparticle instruments (cosmic-ray spectrum, air showers, ground arrays, imaging atmospheric Cherenkov telescopes, neutrino telescopes, space-based direct detection, multimessenger analysis). Folder guide for people: [README.md](README.md).
+| Request | Read or run |
+|---|---|
+| Any detector question: the chain, the fourteen questions, task routing | [principles summary](references/detector-principles-summary.md) (section 11 indexes every file) |
+| Resolution, efficiency, tag-and-probe, truth matching | [reconstruction performance](references/reconstruction-performance-and-truth-matching.md); `tag_and_probe_efficiency.py` |
+| Tracking, vertexing, multiple scattering | [tracking and vertexing](references/tracking-and-vertexing.md); `multiple_scattering.py` |
+| Calorimeter response and resolution | [calorimetry](references/calorimetry-ecal-hcal.md); `calorimeter_resolution.py` |
+| Particle identification, TOF, dE/dx, RICH | [particle identification](references/particle-identification.md); `pid_separation_power.py`, `cherenkov_angle.py` |
+| Signal formation, readout, front-end electronics | [front-end electronics](references/front-end-electronics-and-signal-processing.md); `frontend_response.py` |
+| Response matrices, forward folding | [response and folding](references/response-and-forward-folding.md) |
+| Data/MC agreement, detector systematics | [data/MC validation](references/data-mc-validation-and-detector-systematics.md) |
+| Calibration, alignment, conditions | [calibration and alignment](references/calibration-and-alignment.md) |
+| Triggers, luminosity, pileup | [triggers and pileup](references/triggers-luminosity-pileup.md); `pileup_reweight.py` |
+| Simulation (Geant4) | [detector simulation](references/detector-simulation.md) |
+| Charge-sign confusion | [charge confusion](references/charge-confusion.md) |
+| Space-based and balloon instruments | [space-based direct detection](references/space-based-direct-detection.md) |
+| Air showers, X_max | [extensive air showers](references/extensive-air-showers.md); `xmax_gaisser_hillas.py` |
+| A named experiment's detector | the bound profile; ask which configuration is meant |
 
-Scripts in `<plugin root>/skills/hep-detector/scripts/` (read `--help` first): `calorimeter_resolution.py`, `cherenkov_angle.py`, `frontend_response.py`, `multiple_scattering.py`, `pid_separation_power.py`, `pileup_reweight.py`, `tag_and_probe_efficiency.py`, `xmax_gaisser_hillas.py`. Example inputs: `assets/`.
+Scripts in `<plugin root>/skills/hep-detector/scripts/` (read `--help` first); example inputs in `assets/`. Folder guide for people: [README.md](README.md).
 
 ## Handoffs
 

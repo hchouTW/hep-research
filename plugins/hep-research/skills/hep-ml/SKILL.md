@@ -41,17 +41,19 @@ description: "Use when the deliverable is a machine-learning model or study for 
 
 ## Resources
 
-Read by task (all under `references/`); physics first, engineering when the task needs it:
-
-| Task | Read |
+| Request | Read or run |
 |---|---|
-| Classifier or regressor for an analysis: splits, weights, metrics, working points, decorrelation, systematics, sim-to-data, weak supervision, OmniFold, deployment; other tasks via its Task routes index | [ml-analysis.md](references/ml-analysis.md) |
-| Choosing BDT vs NN, BDT practice, regression targets | [multivariate-analysis-bdt-nn.md](references/multivariate-analysis-bdt-nn.md) |
+| Classifier or regressor for an analysis: splits, weights, metrics, working points, decorrelation, systematics, sim-to-data; other tasks via its Task routes index | [ml-analysis.md](references/ml-analysis.md) |
+| BDT vs NN, BDT practice, regression targets | [multivariate-analysis-bdt-nn.md](references/multivariate-analysis-bdt-nn.md) |
 | Jets, particle sets, hits, point clouds, graphs | [particle-and-jet-architectures.md](references/particle-and-jet-architectures.md) |
 | Space or ground-based astroparticle detectors (with the bound profile) | [space-and-astroparticle-ml.md](references/space-and-astroparticle-ml.md) |
 | Fast simulation, generative models | [fast-simulation-validation.md](references/fast-simulation-validation.md), [generative-models.md](references/generative-models.md) |
 | Surrogates, SBI training | [scientific-machine-learning.md](references/scientific-machine-learning.md), [sbi-training.md](references/sbi-training.md) |
 | Calibration, uncertainty, distribution shift | [uncertainty-and-calibration.md](references/uncertainty-and-calibration.md), [robustness-and-distribution-shift.md](references/robustness-and-distribution-shift.md) |
+| Grouped splits and leakage checks | `make_grouped_splits.py`, `check_split_integrity.py` |
+| Train, calibrate, infer | `assets/train_classifier.py`, `assets/calibration.py`, `assets/inference.py` |
+| Record the model for inference | `write_ml_artifact.py` |
+| Surrogate training domain | `check_surrogate_domain.py` |
 | PyTorch engineering (training, data, debugging, scaling, export) | [deep-learning-guide.md](references/deep-learning-guide.md), which routes to the rest |
 
 Pipeline (scripts in `<plugin root>/skills/hep-ml/scripts/`, assets in `assets/`; read `--help` first): `make_grouped_splits.py` → `check_split_integrity.py` → `assets/train_classifier.py --split-manifest` (refuses a leaky split; signed weights) → `assets/calibration.py` (fit on validation, evaluate on test) → `assets/inference.py` (flags out-of-domain inputs) → `write_ml_artifact.py` (validated `ml-artifact`). Worked example: `<plugin root>/examples/ml-classifier-to-inference/`. Also `assets/hep_metrics.py`, `assets/hep_losses.py`, `assets/set_classifier.py` (Deep Sets, ParT-lite), `check_surrogate_domain.py` (whitened Mahalanobis and kNN, calibrated threshold), debugging and budget scripts. Folder guide: [README.md](README.md).

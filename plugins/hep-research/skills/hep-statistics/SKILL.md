@@ -46,7 +46,24 @@ One number: when a shell is available, run its row's tool, state the constructio
 
 ## Resources
 
-Start at the [core/stats guide](references/core-stats-guide.md): its reference index links every topic file ([ML-assisted](references/ml-assisted-inference.md), [binned time series](references/time-series-inference.md) among them), its Skill scripts table every script. Adapters (pyhf, Combine, unbinned fits): `<plugin root>/adapters/`. Folder guide: [README.md](README.md).
+| Request | Read or run |
+|---|---|
+| Which core/stats tool, conventions, caps, exit codes | [core/stats guide](references/core-stats-guide.md); per module: [command reference](references/core-stats-commands.md) |
+| Hypotheses, p-values, intervals, what a result means | [inference recipes](references/inference-recipes.md), [inference reasoning](references/statistical-inference-for-physics.md) |
+| Likelihood construction, template and weighted fits | [likelihood fitting](references/likelihood-fitting.md); `covariance_fit.py`, `sweighted_fit.py` |
+| Systematics in the likelihood: constraints, interpolation | [nuisance modeling](references/nuisance-modeling.md) |
+| pyhf, HistFactory, Combine | [statistical tools](references/statistical-tools.md); `<plugin root>/adapters/pyhf-combine/` |
+| Unfolding, regularization, coverage | [unfolding](references/unfolding.md) |
+| Combining measurements or experiments | [combinations](references/combinations.md); `combine_measurements.py`, `combine_asymmetric.py` |
+| ON/OFF counting, trials, exposure | [astroparticle statistics](references/astroparticle-statistics.md); `li_ma_significance.py`, `look_elsewhere.py` |
+| Binned time series, periodicity, multi-period fits | [time-series inference](references/time-series-inference.md) |
+| ML-assisted inference, SBC | [ML-assisted inference](references/ml-assisted-inference.md); `bayes_calibration.py` |
+| MCMC convergence, prior reweighting | `bayes_diagnostics.py` |
+| Write the statistical-result artifact | `result_artifact.py` |
+| Unbinned fits | `<plugin root>/adapters/unbinned-fit/` |
+| Outside v1 (global propagation fits, EFT global fits) | say so; general discipline |
+
+Scripts in `<plugin root>/skills/hep-statistics/scripts/`, modules in `<plugin root>/core/stats/` (read `--help` first). Folder guide: [README.md](README.md).
 
 <!-- BEGIN context-resolution: generated from contracts/stanzas/context-resolution.md by tools/build_stanzas.py; do not edit -->
 ## Context resolution

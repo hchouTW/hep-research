@@ -42,9 +42,25 @@ description: "Use when the deliverable is a theoretical or phenomenological resu
 
 ## Resources
 
-Folder guide for people: [README.md](README.md).
+| Request | Read or run |
+|---|---|
+| Derivation status, proof, approximation validity, checks | [mathematical reasoning and proof](references/mathematical-reasoning-and-proof.md) |
+| NLO/NNLO predictions, scale envelopes, truncation | [higher-order predictions](references/higher-order-predictions.md) |
+| PDF sets, LHAPDF, PDF uncertainty from members | [PDFs and LHAPDF](references/pdfs-and-lhapdf.md); `pdf_uncertainty.py` |
+| SMEFT and EFT conventions, truncation | [SMEFT and EFT](references/smeft-and-eft.md); `eft_truncation.py` |
+| Cosmic-ray propagation models, degeneracies (fits outside v1) | [cosmic-ray propagation](references/cosmic-ray-propagation.md) |
+| Event-generation physics (ME order, shower, matching), event weights | [event generation](references/event-generation.md); `event_weights.py` |
+| Recasting a published analysis (MadGraph, Rivet, Delphes, SModelS) | [recasting toolchain](references/recasting-toolchain.md) (documented, not run) |
+| DIS invariants, beam relations, Jacobians, frames | [DIS kinematics](references/dis-kinematics.md); `dis_kinematics.py` |
+| Phase space, decay widths, narrow width, Breit-Wigner | [amplitudes and widths](references/amplitudes-and-widths.md) |
+| Is a process or diagram allowed | [selection rules](references/selection-rules.md) |
+| Schemes, running masses, regularization | [schemes](references/regularization-and-schemes.md) |
+| HEPData table to a dataset record, or a record back to HEPData | `<plugin root>/adapters/hepdata/assets/hepdata_record.py`, `<plugin root>/adapters/hepdata/assets/hepdata_export.py` |
+| Scientific-ML boundaries (surrogates of a theory) | `<plugin root>/skills/hep-ml/references/scientific-machine-learning.md` |
+| Shipped theory-domain profiles | `<plugin root>/profiles/registry.json` |
+| Outside v1 (lattice QCD, EFT global fits, global propagation fits) | say so; general discipline |
 
-References under `references/`: [mathematical reasoning and proof status](references/mathematical-reasoning-and-proof.md) (derivation validity, approximation domains), [higher-order predictions](references/higher-order-predictions.md) (scale envelopes, truncation), [PDFs and LHAPDF](references/pdfs-and-lhapdf.md), [SMEFT and EFT conventions](references/smeft-and-eft.md), [cosmic-ray propagation](references/cosmic-ray-propagation.md) (models, degeneracies; fits outside v1), [event-generation physics](references/event-generation.md), [recasting toolchain](references/recasting-toolchain.md) (MadGraph, Rivet, Delphes, SModelS, MadAnalysis 5; templates documented, not run) [DIS kinematics](references/dis-kinematics.md) (invariants, beam relations, Jacobians, frames), [amplitudes and widths](references/amplitudes-and-widths.md), [selection rules](references/selection-rules.md) and [schemes](references/regularization-and-schemes.md). Scripts in `<plugin root>/skills/hep-theory/scripts/`: `dis_kinematics.py`, `pdf_uncertainty.py`, `event_weights.py`, `eft_truncation.py`. A HEPData table becomes a dataset record with `<plugin root>/adapters/hepdata/assets/hepdata_record.py` (tested on synthetic tables); `<plugin root>/adapters/hepdata/assets/hepdata_export.py` writes a binned record back as a HEPData submission. Scientific-ML boundaries are in `<plugin root>/skills/hep-ml/references/scientific-machine-learning.md`. Shipped theory-domain profiles are listed in `<plugin root>/profiles/registry.json`.
+Folder guide for people: [README.md](README.md).
 
 ## Handoffs
 
