@@ -534,7 +534,7 @@ def difference_review(view: dict, report: dict) -> dict:
     undetermined with unverified), new-decides (an undetermined L2 repetition that the new suite decides as violated
     from data flow), new-only (a new violation with no legacy error on the items it rests on: a cross-artifact
     finding)."""
-    insts_of = {}
+    insts_of: dict[str, set] = {}
     for i in (view.get("context") or {}).get("recipe_instances", []):
         insts_of.setdefault(i.get("recipe"), set()).add(i.get("instance_id"))
     rep_state: dict[str, set] = {}
