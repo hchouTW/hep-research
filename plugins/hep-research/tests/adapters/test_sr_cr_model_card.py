@@ -150,5 +150,22 @@ class ModelCardContract(unittest.TestCase):
         self.assertIn("schema.required", {f.code for f in self.result(bad).errors})
 
 
+class UnmappedPairings(unittest.TestCase):
+    """O03 gaps (docs/dev/v6.3/o03-model-pairings.md): the converter maps a constrained normalization only with a
+    Gaussian constraint, and fixes the parameter bounds itself; no pyhf needed (to_pyhf builds the spec only)."""
+
+    def test_poisson_and_lognormal_constraints_are_refused(self):
+        for form in ("poisson", "lognormal"):
+            doc = card()
+            doc["constraints"][0]["form"] = form
+            with self.subTest(form=form), self.assertRaises(mc.CardRefused) as cm:
+                mc.to_pyhf(doc)
+            self.assertIn("gaussian only", str(cm.exception))
+
+    def test_bounds_are_fixed_by_the_converter(self):
+        params = {p["name"]: p["bounds"] for p in mc.to_pyhf(card())["measurements"][0]["config"]["parameters"]}
+        self.assertEqual(params, {"mu": [[-10.0, 50.0]], "k_bkg": [[0.0, 50.0]]})
+
+
 if __name__ == "__main__":
     unittest.main()
