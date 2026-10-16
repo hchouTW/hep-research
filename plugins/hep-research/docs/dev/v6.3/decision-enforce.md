@@ -82,3 +82,12 @@ section.
 
 **Every rule therefore stays in shadow mode.** The programme is complete for this round. What remains is either
 deferred (O03, M2c, V30, V32) or depends on a non-author reviewer or the custodian.
+
+## Follow-up (2026-10-16)
+
+- **Correction to the table above:** `crflux:local-interstellar` is declared by `experiment:ams-02`, which is part of
+  this plugin, not of the companion. It is retired here (`crflux-review.md`, Decision), and the companion needs no
+  change.
+- **Companion namespace check:** run against main `c1ab70b`. It reported `ok` with no findings, so there is no
+  `profile.namespace_collision`. Rerun it before the release if either repository changes its namespaces.
+- **Contracts 2.10.0:** bumped on branch `contracts-2.10.0`, ahead of the release.

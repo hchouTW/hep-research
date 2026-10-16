@@ -37,8 +37,7 @@
  ],
  "vocabulary_extensions": {
   "levels": [
-   "crflux:top-of-instrument",
-   "crflux:local-interstellar"
+   "crflux:top-of-instrument"
   ],
   "conventions": [
    "ams02:rigidity_definition",
