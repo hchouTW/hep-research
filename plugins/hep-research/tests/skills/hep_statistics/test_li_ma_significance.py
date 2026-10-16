@@ -75,8 +75,23 @@ class PValues(unittest.TestCase):
         code, out, _ = run("--on", "15", "--off", "5", "--alpha", "0.5")
         self.assertEqual(code, 0)
         d = json.loads(out)
-        self.assertEqual(list(d), ["method", "n_on", "n_off", "alpha", "excess", "significance", "on_term",
-                                   "off_term", "caveat"])
+        # F-03 added status, method_kind and warnings; the numbers and their keys are unchanged
+        self.assertEqual(list(d), ["status", "method", "method_kind", "n_on", "n_off", "alpha", "excess", "significance",
+                                   "on_term", "off_term", "caveat", "warnings"])
+        code, out, _ = run("--on", "120", "--off", "80", "--alpha", "0.5")
+        self.assertEqual(json.loads(out)["warnings"], [])       # large counts: no low-count warning
+
+    def test_status_and_asymptotic_label_at_low_counts(self):
+        """F-03: the default output names its status and that the statistic is asymptotic, and at low counts warns
+        and points to the toy or exact conditional p-value (before the fix it printed neither)."""
+        code, out, _ = run("--on", "4", "--off", "2", "--alpha", "1")
+        self.assertEqual(code, 0)
+        d = json.loads(out)
+        self.assertEqual(d["status"], "ok")
+        self.assertEqual(d["method_kind"], "asymptotic")
+        self.assertEqual(len(d["warnings"]), 1)
+        self.assertIn("--toys", d["warnings"][0])
+        self.assertIn("--exact-conditional", d["warnings"][0])
 
     def test_exact_conditional(self):
         code, out, _ = run("--on", "4", "--off", "2", "--alpha", "0.25", "--exact-conditional")

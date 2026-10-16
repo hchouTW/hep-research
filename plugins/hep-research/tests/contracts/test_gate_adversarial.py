@@ -309,6 +309,7 @@ class ResultArtifactRefusals(unittest.TestCase):
         cp = subprocess.run([sys.executable, self.LM, "--on", "30", "--off", "100", "--alpha", "0.1"],
                             capture_output=True, text=True, timeout=120)
         out = json.loads(cp.stdout)
+        out.pop("status")       # since F-03 the script prints a status; the probe needs an output without one
         if status is not None:
             out["status"] = status
         p = Path(td) / "lm.json"

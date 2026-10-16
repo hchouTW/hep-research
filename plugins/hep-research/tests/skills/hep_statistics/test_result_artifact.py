@@ -85,7 +85,7 @@ class ResultArtifactStatus(unittest.TestCase):
             self.assertEqual((code, art), (2, None))
 
     def test_missing_status_needs_an_explicit_assumption(self):
-        """STH-T1.7: li_ma_significance.py prints no status; that is not a converged fit."""
+        """STH-T1.7: an output without a status (li_ma_significance.py's before F-03) is not a converged fit."""
         li_ma = {"method": "Li-Ma", "significance": 2.1, "n_on": 30, "n_off": 100, "alpha": 0.1}
         with tempfile.TemporaryDirectory() as tmp:
             self.assertEqual(self.write(tmp, li_ma), (2, None))

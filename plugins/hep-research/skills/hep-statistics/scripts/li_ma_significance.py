@@ -27,8 +27,14 @@ Optional one-sided p-values for an excess, each labeled with its method:
   --exact-conditional    the conditional binomial test N_on | N_on+N_off ~
                          Bin(N_on+N_off, alpha/(1+alpha)); free of the background
                          nuisance and conservative for discrete data.
-With either flag the asymptotic (Wilks) p-value is listed too. Without them the output
-is unchanged.
+With either flag the asymptotic (Wilks) p-value is listed too.
+
+Output: JSON with "status" ("ok"; "rejected" on bad input), "method_kind": "asymptotic"
+(the significance is read as a standard-normal deviate), the significance and its terms,
+and "warnings": when N_on or N_off is below LOW_COUNT (10, a [Proposal] threshold, not a
+value from Li & Ma) and neither --toys nor --exact-conditional was given, a warning that
+points to them.
+Exit codes: 0 computed; 2 rejected input.
 
 Usage notes / assumptions: standard library only. N_on and N_off are nonnegative
 integers; alpha is the ON/OFF exposure or normalization ratio, a finite positive
@@ -45,6 +51,8 @@ import json
 import math
 import random
 import sys
+
+LOW_COUNT = 10  # [Proposal]: below this N_on or N_off the asymptotic reading is flagged, not refused
 
 
 def _nonnegative_int(value, name):
@@ -210,10 +218,18 @@ def main():
             if args.toys or args.exact_conditional else None
     except ValueError as exc:
         _refuse(str(exc))
+    warnings = []
+    if min(args.n_on, args.n_off) < LOW_COUNT and rows is None:
+        warnings.append(f'low counts (N_on = {args.n_on}, N_off = {args.n_off}, below {LOW_COUNT}): the asymptotic '
+                        'standard-normal reading of S can understate the p-value; quote a calibrated p-value with '
+                        '--toys N --seed S or --exact-conditional')
     out = {
+        'status': 'ok',
         'method': 'Li & Ma (1983) likelihood-ratio significance',
+        'method_kind': 'asymptotic',
         **result,
         'caveat': 'No trials/look-elsewhere correction applied; see <plugin root>/skills/hep-statistics/references/astroparticle-statistics.md.',
+        'warnings': warnings,
     }
     if rows is not None:
         out['p_values'] = rows

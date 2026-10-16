@@ -52,7 +52,7 @@ LABELS = ("synthetic", "asimov", "observed", "preliminary", "unvalidated", "user
 
 
 def effective_status(cli, a: argparse.Namespace) -> str:
-    """The CLI's own status; an output without one (for example li_ma_significance.py) is refused unless the caller
+    """The CLI's own status; an output without one (for example from an older tool) is refused unless the caller
     states it with --assume-status, which is then recorded in results.cli_status_assumed (STH-T1.7)."""
     if not isinstance(cli, dict):
         raise ValueError(f"the CLI output must be a JSON object, got {type(cli).__name__}")
