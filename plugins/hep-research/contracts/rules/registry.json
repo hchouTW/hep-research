@@ -743,7 +743,7 @@
       "D04"
      ],
      "host": "effect catalog and coverage contract (definition part)",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d04.V35Definition.test_class_alone_is_not_coverage",
       "tests.contracts.test_v63_d04.V35Definition.test_listed_members_are_covered"
@@ -893,7 +893,7 @@
       "D04"
      ],
      "host": "effect catalog and coverage contract (definition part)",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d04.V43Definition.test_new_member_is_not_covered",
       "tests.contracts.test_v63_d04.V43Definition.test_unknown_effect_or_operator_is_unsupported",
@@ -1162,7 +1162,7 @@
       "D04"
      ],
      "host": "effect catalog and coverage contract (definition part)",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d04.V58Definition.test_member_closure"
      ]
@@ -1453,12 +1453,14 @@
     "contracts/recipe_semantics.py",
     "contracts/schemas/recipe.json",
     "contracts/schemas/operator_semantics.json",
-    "contracts/vocab/effects.json"
+    "contracts/vocab/effects.json",
+    "contracts/effect_catalog.py"
    ],
    "checks": [
     "tests.contracts.test_recipe_semantics",
     "tests.contracts.test_v63_baseline_gaps",
-    "tests.contracts.test_r5_contracts"
+    "tests.contracts.test_r5_contracts",
+    "tests.contracts.test_v63_d04"
    ],
    "not_available": [
     "L3 chain rules (D06)",

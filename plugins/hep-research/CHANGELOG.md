@@ -5,6 +5,16 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- New effect catalog `contracts/vocab/effects.json` and operator coverage contract
+  `contracts/semantics/coverage/differential-flux.coverage.json`, checked by `contracts/effect_catalog.py` (schemas
+  `effect_catalog.json`, `operator_coverage.json`; v6.3 D04). The catalog classifies effects (an efficiency class with
+  listed members) and states conditional compositions (exposure = acceptance × live time only under its listed
+  conditions). The coverage contract binds the existing `differential-flux` table by its digest and lists, per
+  operator, its stage, the effects and class members it covers and its factor powers; where the table leaves the
+  efficiency members of an operator undefined (`unfold_with_efficiency`, `divide_effective_exposure`), every member is
+  unverified rather than inferred from the class. `coverage_state` and `resolve_members` (member closure with its
+  dependencies and digest) are for the later chain checks. The legacy table, its digest, `IMPLIED_CORRECTIONS` and
+  the `<x>_efficiency` rule are unchanged, and no existing entry point reads the new files.
 - Profile loading respects load errors everywhere (v6.3 D03a). New `contracts.registry.load_registry` separates usable
   profiles from rejected ones (a profile with an error of its own, such as `profile.incompatible_version`, a namespace
   collision, or a missing or rejected dependency); `validate_registry` and the `registry.py` CLI output are unchanged.

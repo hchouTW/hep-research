@@ -30,7 +30,6 @@ def coverage():
 
 
 class ShippedDefinitions(unittest.TestCase):
-    @unittest.expectedFailure  # D04: no catalog or coverage contract yet
     def test_catalog_and_coverage_check_clean(self):
         cat, cov = catalog(), coverage()
         self.assertEqual(ec().check_catalog(cat), [])
@@ -42,14 +41,12 @@ class ShippedDefinitions(unittest.TestCase):
         self.assertEqual(canonical_sha256(TABLE), LEGACY_TABLE_SHA)
         self.assertEqual(IMPLIED_CORRECTIONS, {"exposure": {"acceptance", "livetime"}})
 
-    @unittest.expectedFailure  # D04
     def test_composition_is_conditional(self):
         comp = [c for c in catalog()["compositions"] if c["parent"] == "exposure"]
         self.assertTrue(comp)
         for c in comp:
             self.assertTrue(c["conditions"], "never claim every exposure equals acceptance x live time")
 
-    @unittest.expectedFailure  # D04
     def test_classification_and_legacy_adapter_are_separate(self):
         cat = catalog()
         self.assertEqual(ec().classify(cat, "trigger_efficiency"), {"class": "efficiency", "basis": "catalog"})
@@ -62,13 +59,11 @@ class V35Definition(unittest.TestCase):
     """V35 (definition part): trigger and selection efficiency against an effective exposure are realized only with
     listed operator coverage; the efficiency classification alone is not enough."""
 
-    @unittest.expectedFailure  # V35 (D04)
     def test_class_alone_is_not_coverage(self):
         cat, cov = catalog(), coverage()
         for member in ("trigger_efficiency", "selection_efficiency"):
             self.assertEqual(ec().coverage_state(cov, "divide_effective_exposure", member, cat)["state"], "unverified")
 
-    @unittest.expectedFailure  # V35 (D04)
     def test_listed_members_are_covered(self):
         cat, cov = catalog(), copy.deepcopy(coverage())
         op = next(o for o in cov["operators"] if o["operator_id"] == "divide_effective_exposure")
@@ -83,7 +78,6 @@ class V43Definition(unittest.TestCase):
     """V43 (definition part): a new efficiency member not in an operator's coverage cannot be realized
     automatically."""
 
-    @unittest.expectedFailure  # V43 (D04)
     def test_new_member_is_not_covered(self):
         cat = copy.deepcopy(catalog())
         cat["effects"].append({"effect_id": "tracking_efficiency", "class": "efficiency",
@@ -96,13 +90,11 @@ class V43Definition(unittest.TestCase):
         self.assertEqual(ec().coverage_state(cov, "correct_efficiency", "tracking_efficiency", cat)["state"],
                          "not_covered")
 
-    @unittest.expectedFailure  # V43 (D04)
     def test_unknown_effect_or_operator_is_unsupported(self):
         cat, cov = catalog(), coverage()
         self.assertEqual(ec().coverage_state(cov, "correct_efficiency", "unheard_of", cat)["state"], "unsupported")
         self.assertEqual(ec().coverage_state(cov, "no_such_operator", "trigger_efficiency", cat)["state"], "unsupported")
 
-    @unittest.expectedFailure  # V43 (D04): bare efficiency keeps its legacy behaviour
     def test_bare_efficiency_keeps_legacy_coverage(self):
         cat, cov = catalog(), coverage()
         res = ec().coverage_state(cov, "divide_effective_exposure", "efficiency", cat)
@@ -113,7 +105,6 @@ class V58Definition(unittest.TestCase):
     """V58 (definition part): resolving a class's member set records its dependencies; an updated class set changes
     the closure, an unrelated definition does not."""
 
-    @unittest.expectedFailure  # V58 (D04)
     def test_member_closure(self):
         cat = catalog()
         base = ec().resolve_members(cat, "efficiency")
@@ -132,7 +123,6 @@ class V58Definition(unittest.TestCase):
 
 
 class CatalogChecks(unittest.TestCase):
-    @unittest.expectedFailure  # D04
     def test_defects_are_reported(self):
         cat = copy.deepcopy(catalog())
         cat["effects"].append(copy.deepcopy(cat["effects"][0]))
@@ -143,7 +133,6 @@ class CatalogChecks(unittest.TestCase):
         codes = {f["code"] for f in ec().check_catalog(cat)}
         self.assertTrue({"catalog.duplicate_effect", "catalog.unknown_member", "catalog.unknown_effect"} <= codes, codes)
 
-    @unittest.expectedFailure  # D04
     def test_coverage_bound_to_the_table(self):
         cat, cov = catalog(), copy.deepcopy(coverage())
         cov["table_sha256"] = "0" * 64
