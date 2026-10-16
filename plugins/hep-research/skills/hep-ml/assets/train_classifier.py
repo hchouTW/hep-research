@@ -169,7 +169,7 @@ sys.path.insert(0, str(HERE.parent / "scripts"))  # check_surrogate_domain.Domai
 from hep_losses import batch_weight_report, weighted_bce  # noqa: E402
 from hep_metrics import (cell_resample, effective_entries, efficiency_with_uncertainty,  # noqa: E402
                          rejection_at_signal_efficiency, weighted_auc)
-from models import MLPClassifier  # noqa: E402
+from models import MLPClassifier, state_dict_hash  # noqa: E402
 
 
 class InputError(Exception):
@@ -557,13 +557,7 @@ def save_checkpoint(path: Path, model, optimizer, scheduler, epoch, best, metada
 def weights_hash(path: Path) -> str:
     """sha256 over the model weights only (parameter names, dtypes, shapes and bytes, in name order): the hash names
     the model, not the file, so it does not change with paths, optimizer state or the epoch counter."""
-    state = torch.load(path, map_location="cpu", weights_only=True)["model_state_dict"]
-    h = hashlib.sha256()
-    for name in sorted(state):
-        tensor = state[name].detach().cpu().contiguous()
-        h.update(f"{name}|{tensor.dtype}|{tuple(tensor.shape)}|".encode())
-        h.update(tensor.numpy().tobytes())
-    return "sha256:" + h.hexdigest()
+    return state_dict_hash(torch.load(path, map_location="cpu", weights_only=True)["model_state_dict"])
 
 
 def write_scores(path: Path, ids, y, w, scores, labels) -> None:
@@ -591,6 +585,8 @@ def run(args) -> int:
 
     data = read_events(args) if args.data else make_synthetic(args, output_dir)
     split_check = run_split_check(data["manifest"], output_dir)
+    # F-08: the manifest's bytes as trained on; inference.py --split-manifest compares a manifest with it
+    manifest_sha256 = "sha256:" + hashlib.sha256(Path(data["manifest"]).read_bytes()).hexdigest()
     if split_check["result"] != "pass":
         message = f"split check {split_check['result']}: {split_check['detail']}"
         if not args.allow_unchecked_split:
@@ -636,7 +632,8 @@ def run(args) -> int:
     metadata = {"task": "classification", "features": features, "units": data["units"], "labels": labels,
                 "model": model_config, "preprocessing": preprocessing, "training_domain": domain,
                 "weights": weights_metadata, "seeds": seeds, "precision": args.precision,
-                "grouping_key": data["grouping_key"], "split_manifest": str(Path(data["manifest"]).resolve())}
+                "grouping_key": data["grouping_key"], "split_manifest": str(Path(data["manifest"]).resolve()),
+                "split_manifest_sha256": manifest_sha256}
 
     train_ds = TensorDataset(torch.as_tensor(z[tr_fit], dtype=torch.float32), torch.as_tensor(y[tr_fit]),
                              torch.as_tensor(w_train_all[keep], dtype=torch.float32))
@@ -692,6 +689,7 @@ def run(args) -> int:
         **({"status": labels_out} if labels_out else {}),
         "task": "classification", "features": features, "units": data["units"], "labels": labels,
         "grouping_key": data["grouping_key"], "split_manifest": str(Path(data["manifest"]).resolve()),
+        "split_manifest_sha256": manifest_sha256,
         "split_check": {k: split_check[k] for k in ("tool", "result", "report")},
         "training_domain": {f: [domain["min"][i], domain["max"][i]] for i, f in enumerate(features)},
         "preprocessing": preprocessing, "weights": weights_summary,

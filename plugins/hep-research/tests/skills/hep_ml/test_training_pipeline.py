@@ -25,7 +25,7 @@ TORCH = importlib.util.find_spec("torch") is not None
 TORCHVISION = TORCH and importlib.util.find_spec("torchvision") is not None
 YAML = importlib.util.find_spec("yaml") is not None
 
-SUMMARY_KEYS = {"task", "features", "units", "labels", "grouping_key", "split_manifest", "split_check",
+SUMMARY_KEYS = {"task", "features", "units", "labels", "grouping_key", "split_manifest", "split_manifest_sha256", "split_check",
                 "training_domain", "preprocessing", "weights", "model_hash", "checkpoint", "environment", "metrics",
                 "scores"}
 FEATURES = ["pt", "eta", "mass", "iso"]
@@ -105,6 +105,47 @@ class TrainClassifierPipelineTests(unittest.TestCase):
     def summary(self):
         self.assertEqual(self.result.returncode, 0, self.result.stderr)
         return json.loads((self.out / "run_summary.json").read_text())
+
+    def test_split_manifest_hash_recorded_and_change_detected(self):
+        """F-08: training records split_manifest_sha256; inference compares it with the manifest it is given."""
+        summary = self.summary()
+        digest = "sha256:" + hashlib.sha256(self.manifest_path.read_bytes()).hexdigest()
+        self.assertEqual(summary["split_manifest_sha256"], digest)
+        row = [["in", 50.0, 0.1, 100.0, 0.08]]
+        same = json.loads(self.inference(row, "--split-manifest", self.manifest_path).stdout)
+        self.assertTrue(same["split_manifest_check"]["match"])
+        changed = self.dir / "changed-splits.json"
+        doc = json.loads(self.manifest_path.read_text())
+        doc["test"].append(doc["train"].pop(0))
+        changed.write_text(json.dumps(doc))
+        result = self.inference(row, "--split-manifest", changed)
+        self.assertEqual(result.returncode, 0, result.stdout)
+        out = json.loads(result.stdout)
+        self.assertFalse(out["split_manifest_check"]["match"])
+        self.assertEqual(out["split_manifest_check"]["recorded"], digest)
+        self.assertTrue(any("split manifest" in w for w in out["warnings"]))
+
+    def test_calibration_for_another_model_is_refused(self):
+        """F-08: calibration.py records the model hash; inference refuses a calibration made for another model."""
+        summary = self.summary()
+        val, test = self.out / "val_scores.csv", self.out / "test_scores.csv"
+        cal_ok, cal_other = self.dir / "cal-ok.json", self.dir / "cal-other.json"
+        for path, model_hash in ((cal_ok, summary["model_hash"]), (cal_other, "sha256:" + "0" * 64)):
+            res = run([sys.executable, ASSETS / "calibration.py", "--fit", val, "--eval", test, "--id-col", "id",
+                       "--model-hash", model_hash], self.dir)
+            self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
+            doc = json.loads(res.stdout)
+            self.assertEqual(doc["model_hash"], model_hash)
+            path.write_text(res.stdout)
+        row = [["in", 50.0, 0.1, 100.0, 0.08]]
+        ok = self.inference(row, "--calibration", cal_ok)
+        self.assertEqual(ok.returncode, 0, ok.stdout)
+        self.assertEqual(json.loads(ok.stdout)["calibration"]["model_hash"], summary["model_hash"])
+        other = self.inference(row, "--calibration", cal_other)
+        self.assertEqual(other.returncode, 2, other.stdout)
+        refused = json.loads(other.stdout)
+        self.assertEqual(refused["status"], "rejected")
+        self.assertIn("another model", refused["error"])
 
     def test_leaky_manifest_refused_before_training(self):
         leaky, _ = write_manifest(self.dir, self.rows, self.groups, leak=True, name="leaky.json")

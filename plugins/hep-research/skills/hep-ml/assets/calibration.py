@@ -13,8 +13,11 @@ Functions:
 CLI: python3 calibration.py --fit fit.csv --eval eval.csv --method temperature [--bins 15 --binning equal-mass]
 Inputs are CSV (columns score,label[,weight][,id]) or JSON ({"score": [...], "label": [...], "weight": [...]} or a
 list of such records). Output is strict JSON with a top-level "calibration" block (copy it into the ml-artifact)
-plus the reliability tables before and after. A successful run is a software check: it says the map was fit and
-evaluated on the samples given, not that the calibration holds on data or under a domain shift.
+plus the reliability tables before and after, "status" (ok or rejected; core/status.py), "status_label" (--status) and
+"model_hash": the model the scores came from (--model-hash, or --run-summary of train_classifier.py; null when not
+given). inference.py --calibration refuses a calibration whose model_hash names another model (F-08).
+A successful run is a software check: it says the map was fit and evaluated on the samples given, not that the
+calibration holds on data or under a domain shift. Exit codes: 0 written; 2 bad input.
 
 Separate samples. The map is fit on --fit and judged on --eval. The CLI refuses identical files (same path or same
 content hash) and overlapping event ids (--id-col, required unless --no-id-check) unless --allow-same-sample is
@@ -535,6 +538,10 @@ def main(argv=None):
     ap.add_argument("--allow-same-sample", action="store_true",
                     help="allow fit == eval (optimistic ECE); recorded in the output")
     ap.add_argument("--isotonic-negative-weights", choices=("refuse", "merge"), default="refuse")
+    model = ap.add_mutually_exclusive_group()
+    model.add_argument("--model-hash", help="model_hash of the model whose scores are calibrated (train_classifier.py "
+                       "run_summary.json); inference.py refuses the calibration for any other model")
+    model.add_argument("--run-summary", help="train_classifier.py run_summary.json: its model_hash is recorded")
     ap.add_argument("--prior-ratio-change", type=float,
                     help="apply hep_metrics.undo_prior_shift with this r to the scores before calibration")
     a = ap.parse_args(argv)
@@ -553,6 +560,12 @@ def main(argv=None):
             return s if a.score_kind == "logit" else logit(s)
 
         fz, ez = to_logit(fs), to_logit(es)
+        model_hash = a.model_hash
+        if a.run_summary:
+            with open(a.run_summary, encoding="utf-8") as handle:
+                model_hash = json.load(handle).get("model_hash")
+            if not isinstance(model_hash, str):
+                raise ValueError(f"{a.run_summary} has no model_hash")
         prior = None
         if a.prior_ratio_change is not None:
             r = a.prior_ratio_change
@@ -589,6 +602,7 @@ def main(argv=None):
         rb = calibration_report(before_p, ey, ew, a.bins, a.binning)
         ra = calibration_report(after_p, ey, ew, a.bins, a.binning)
         out = {
+            "model_hash": model_hash,
             "calibration": {
                 "method": a.method, "params": params, "fit_sample": a.fit,
                 "validation": {"metric": "ece", "sample": a.eval, "before": rb["ece"], "after": ra["ece"],

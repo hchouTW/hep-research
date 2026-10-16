@@ -13,7 +13,10 @@ old per-feature range and pinv-Mahalanobis check, and the summary says "legacy d
 --on-out-of-domain flag (default) writes a per-row out_of_domain field and counts them in the summary;
 --on-out-of-domain reject exits non-zero when any row is out of domain and writes no scores.
 --calibration FILE applies a calibration map recorded by calibration.py (its "calibration" block, and its
-"prior_shift" when present) to the two-class score: temperature, Platt or isotonic.
+"prior_shift" when present) to the two-class score: temperature, Platt or isotonic. A calibration whose model_hash
+names another model is refused (exit 2); one without a model_hash is applied with a warning (F-08).
+--split-manifest FILE compares a manifest with the split_manifest_sha256 recorded at training and reports a
+difference (split_manifest_check, warnings). The summary carries the checkpoint's model_hash.
 
 The checkpoint is loaded with weights_only=True (tensors and plain containers only); --unsafe-full-unpickle runs a
 full unpickle, which can execute arbitrary code: only for files you trust.
@@ -28,6 +31,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import math
 import pickle
@@ -48,7 +52,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--id-col", default="id", help="row id column, if present (default: id)")
     parser.add_argument("--output", help="per-row CSV to write (default: rows in the JSON summary)")
     parser.add_argument("--on-out-of-domain", choices=("flag", "reject"), default="flag")
-    parser.add_argument("--calibration", help="calibration.py output whose map is applied to the two-class score")
+    parser.add_argument("--calibration", help="calibration.py output whose map is applied to the two-class score; "
+                        "refused when its model_hash names another model")
+    parser.add_argument("--split-manifest", help="split manifest to compare with the one the model was trained on "
+                        "(split_manifest_sha256 in the checkpoint); a difference is reported")
     parser.add_argument("--device", default="auto")
     parser.add_argument("--unsafe-full-unpickle", action="store_true",
                         help="load with weights_only=False (full pickle, can run arbitrary code); only for files you trust")
@@ -71,7 +78,7 @@ except ModuleNotFoundError as _exc:
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 from check_surrogate_domain import DomainModel  # noqa: E402  (one domain method; PML-WP0.7)
-from models import MLPClassifier  # noqa: E402
+from models import MLPClassifier, state_dict_hash  # noqa: E402
 
 
 class InputError(Exception):
@@ -153,13 +160,20 @@ def legacy_domain_flags(x: np.ndarray, features: list[str], domain: dict) -> lis
     return reasons
 
 
-def apply_calibration(p: np.ndarray, path: str) -> tuple[np.ndarray, dict]:
-    """Apply calibration.py's recorded map (prior shift first, then temperature, Platt or isotonic)."""
+def apply_calibration(p: np.ndarray, path: str, model_hash: str, warnings: list) -> tuple[np.ndarray, dict]:
+    """Apply calibration.py's recorded map (prior shift first, then temperature, Platt or isotonic). A calibration that
+    names another model (its model_hash differs from the checkpoint's) is refused (F-08)."""
     with open(path, encoding="utf-8") as handle:
         doc = json.load(handle)
     cal = doc.get("calibration") if isinstance(doc, dict) else None
     if not isinstance(cal, dict) or not isinstance(cal.get("params"), dict):
         raise InputError(f"{path}: needs a 'calibration' block with 'method' and 'params' (calibration.py output)")
+    made_for = doc.get("model_hash")
+    if made_for is None:
+        warnings.append(f"{path} does not name the model it was made for (no model_hash): it cannot be checked "
+                        "against this checkpoint; rerun calibration.py with --model-hash or --run-summary")
+    elif made_for != model_hash:
+        raise InputError(f"{path} was made for another model ({made_for}); this checkpoint is {model_hash}")
     z = np.log(np.clip(p, 1e-12, 1 - 1e-12)) - np.log(np.clip(1 - p, 1e-12, 1))
     prior = doc.get("prior_shift") or {}
     if prior.get("prior_ratio_change"):
@@ -173,7 +187,8 @@ def apply_calibration(p: np.ndarray, path: str) -> tuple[np.ndarray, dict]:
         out = np.interp(1 / (1 + np.exp(-z)), np.asarray(par["x"], float), np.asarray(par["y"], float))
     else:
         raise InputError(f"{path}: unknown calibration method {method!r}")
-    return out, {"file": path, "method": method, "prior_ratio_change": prior.get("prior_ratio_change")}
+    return out, {"file": path, "method": method, "prior_ratio_change": prior.get("prior_ratio_change"),
+                 "model_hash": made_for}
 
 
 def preprocess(x: np.ndarray, steps: list[dict], features: list[str]) -> np.ndarray:
@@ -199,7 +214,18 @@ def run(args) -> int:
                "n_mahalanobis": sum(any("ahalanobis" in s for s in r) for r in reasons),
                "n_non_finite": int((~finite).sum()),
                "domain_method": domain.get("method", "legacy domain record (per-feature range + pinv Mahalanobis)"),
-               "on_out_of_domain": args.on_out_of_domain, "status_label": args.status}
+               "on_out_of_domain": args.on_out_of_domain, "status_label": args.status,
+               "model_hash": state_dict_hash(ckpt["model_state_dict"]), "warnings": []}
+    recorded = meta.get("split_manifest_sha256")
+    if args.split_manifest:
+        current = "sha256:" + hashlib.sha256(Path(args.split_manifest).read_bytes()).hexdigest()
+        summary["split_manifest_check"] = {"manifest": args.split_manifest, "recorded": recorded, "current": current,
+                                           "match": recorded == current if recorded else None}
+        if recorded is None:
+            summary["warnings"].append("the checkpoint records no split_manifest_sha256 (trained before F-08)")
+        elif recorded != current:
+            summary["warnings"].append(f"split manifest {args.split_manifest} differs from the one the model was "
+                                       "trained on: the train/val/test assignment may have changed")
     if n_ood and args.on_out_of_domain == "reject":
         summary["out_of_domain_ids"] = [ids[i] for i, r in enumerate(reasons) if r][:50]
         summary["status"] = "refused"
@@ -219,7 +245,8 @@ def run(args) -> int:
     if args.calibration:
         if probs.ndim != 1:
             raise InputError("--calibration applies to a two-class score only")
-        probs, summary["calibration"] = apply_calibration(probs, args.calibration)
+        probs, summary["calibration"] = apply_calibration(probs, args.calibration, summary["model_hash"],
+                                                          summary["warnings"])
     score_cols = ["score"] if probs.ndim == 1 else [f"score_{name}" for name in labels]
     rows = []
     for i, row_id in enumerate(ids):
