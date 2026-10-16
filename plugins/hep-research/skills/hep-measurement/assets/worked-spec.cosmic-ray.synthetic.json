@@ -48,7 +48,7 @@
     "definition": "SYNTHETIC: downward-going particles inside the acceptance, bin lower edge above the cutoff selection",
     "fiducial": true
    },
-   "level": "detector",
+   "level": "top-of-instrument",
    "frame": "detector",
    "normalization": {
     "kind": "exposure",

@@ -20,7 +20,7 @@
   },
   "hep-measurement": {
    "references": 12,
-   "bytes": 98222,
+   "bytes": 98291,
    "uncited": 0
   },
   "hep-ml": {
@@ -1398,7 +1398,7 @@
     "tests/core/test_side_effects_f13.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b0dce7a 2026-10-10"
+   "last_commit": "50decbd 2026-10-17"
   },
   {
    "path": "skills/hep-computing/references/symbolic-and-numerical-computation.md",
@@ -2366,8 +2366,8 @@
   {
    "path": "skills/hep-measurement/references/measurements-and-unfolding.md",
    "owner": "hep-measurement",
-   "bytes": 7423,
-   "lines": 87,
+   "bytes": 7492,
+   "lines": 88,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/charge-confusion.md",

@@ -6,7 +6,9 @@
    "parton": "Partons/leptons of the hard process before showering or hadronization",
    "particle-fiducial": "Stable final-state particles inside a declared fiducial phase space",
    "detector": "Reconstructed quantities, including detector effects",
-   "unfolded": "Detector effects removed by an unfolding procedure; the target level must be declared separately"
+   "unfolded": "Detector effects removed by an unfolding procedure; the target level must be declared separately",
+   "top-of-instrument": "Flux or rate at the entrance of the instrument (space or balloon), detector effects corrected, before any propagation outside the instrument",
+   "top-of-atmosphere": "Flux or rate at the top of the atmosphere, corrected for the atmosphere above the instrument (balloon) or with none to cross (space)"
   },
   "normalization_kinds": {
    "integrated-luminosity": "Collider luminosity (e.g. pb^-1)",

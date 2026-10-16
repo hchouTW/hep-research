@@ -169,7 +169,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `root-debugging.md` | hep-computing | 3.6 | yes | 4 | - | 9257d7b 2026-10-15 |
 | `software-architecture.md` | hep-computing | 7.8 | no | 4 | - | 351029c 2026-10-07 |
 | `status-updates-and-completion.md` | hep-computing | 2.0 | no | 2 | - | 351029c 2026-10-07 |
-| `storage-cern-eos.md` | hep-computing | 13.4 | yes | 4 | - | b0dce7a 2026-10-10 |
+| `storage-cern-eos.md` | hep-computing | 13.4 | yes | 4 | - | 50decbd 2026-10-17 |
 | `symbolic-and-numerical-computation.md` | hep-computing | 7.0 | no | 3 | - | 46cea2c 2026-10-13 |
 | `task-authoring-guide.md` | hep-computing | 11.9 | yes | 8 | - | 9257d7b 2026-10-15 |
 | `task-quality-checklist.md` | hep-computing | 3.0 | no | 4 | - | 351029c 2026-10-07 |
@@ -217,7 +217,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `data-pipelines.md` | hep-measurement | 0.4 | no | 8 | hep-computing | 9257d7b 2026-10-15 |
 | `hep-measurement-guide.md` | hep-measurement | 20.6 | yes | 8 | hep-detector | db0a9cc 2026-10-17 |
 | `histograms-efficiencies.md` | hep-measurement | 3.1 | no | 7 | hep-computing, hep-detector | 9257d7b 2026-10-15 |
-| `measurements-and-unfolding.md` | hep-measurement | 7.4 | no | 11 | hep-detector, hep-statistics | 9257d7b 2026-10-15 |
+| `measurements-and-unfolding.md` | hep-measurement | 7.5 | no | 11 | hep-detector, hep-statistics | 9257d7b 2026-10-15 |
 | `review-and-artifacts.md` | hep-measurement | 7.7 | yes | 9 | - | 77d2607 2026-10-16 |
 | `systematics.md` | hep-measurement | 8.9 | no | 27 | hep-detector, hep-ml, hep-statistics, hep-theory | 9257d7b 2026-10-15 |
 | `weights-normalization.md` | hep-measurement | 4.5 | no | 9 | hep-computing, hep-detector, hep-ml, hep-theory | 9257d7b 2026-10-15 |
