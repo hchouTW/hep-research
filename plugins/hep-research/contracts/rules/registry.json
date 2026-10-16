@@ -986,8 +986,11 @@
       "D11b"
      ],
      "host": "migration test",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d11b.V19Migration.test_leaf_to_root",
+      "tests.contracts.test_v63_d11b.V19Migration.test_failure_leaves_no_marker"
+     ]
     }
    ]
   },
@@ -1737,8 +1740,12 @@
       "D11b"
      ],
      "host": "LOCK-SNAPSHOT",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d11b.V57Snapshots.test_reproduced_from_the_old_snapshot",
+      "tests.contracts.test_v63_d11b.V57Snapshots.test_missing_snapshot",
+      "tests.contracts.test_v63_d11b.V57Snapshots.test_rewritten_snapshot"
+     ]
     }
    ]
   },
