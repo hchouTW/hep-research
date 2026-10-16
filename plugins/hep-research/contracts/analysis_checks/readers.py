@@ -12,7 +12,8 @@ READERS = {"1.0.0": "differential-flux-1.0.0-via-coverage"}
 
 def read_table(table: dict, coverage: dict | None, pinned: str | None) -> dict:
     reader = READERS.get(str(table.get("table_version")))
-    out = {"reader": reader, "table_id": table.get("table_id"), "status": "pinned", "operators": {}}
+    ops: dict[str, dict] = {}
+    out: dict = {"reader": reader, "table_id": table.get("table_id"), "status": "pinned", "operators": ops}
     if reader is None:
         return dict(out, status="unsupported_version")
     if not isinstance(coverage, dict):
@@ -28,7 +29,7 @@ def read_table(table: dict, coverage: dict | None, pinned: str | None) -> dict:
         c = cov_ops.get(op.get("operator_id"))
         if c is None:
             continue
-        out["operators"][op["operator_id"]] = {
+        ops[op["operator_id"]] = {
             "operator_id": op["operator_id"], "applies": list(op.get("applies", [])), "input_kind": op.get("input_kind"),
             "output_kind": op.get("output_kind"), "stage": c.get("stage"), "covers": list(c.get("covers", [])),
             "class_coverage": dict(c.get("class_coverage", {})), "factors": list(c.get("factors", []))}
