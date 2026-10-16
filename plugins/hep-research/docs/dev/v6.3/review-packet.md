@@ -35,4 +35,10 @@ One row per reviewer and item. A review by the implementer counts as `self-revie
 
 | Reviewer | Role | Date | Item | Conclusion (accepted / changes requested / rejected) | Notes |
 | --- | --- | --- | --- | --- | --- |
-| | | | | | |
+| implementer (Claude Code session) | none (author) | 2026-10-16 | Chain rules | self-reviewed | C15: public and synthetic diagnostics only; owner accepted this status (`decision-enforce.md`) |
+| implementer (Claude Code session) | none (author) | 2026-10-16 | Ratio rules | self-reviewed | C15: public and synthetic diagnostics only; owner accepted this status (`decision-enforce.md`) |
+| implementer (Claude Code session) | none (author) | 2026-10-16 | Coverage contract | self-reviewed | C15: public and synthetic diagnostics only; owner accepted this status (`decision-enforce.md`) |
+| implementer (Claude Code session) | none (author) | 2026-10-16 | Effect catalog | self-reviewed | C15: public and synthetic diagnostics only; owner accepted this status (`decision-enforce.md`) |
+| implementer (Claude Code session) | none (author) | 2026-10-16 | Custodian requirement | self-reviewed | C15: public and synthetic diagnostics only; owner accepted this status (`decision-enforce.md`) |
+| implementer (Claude Code session) | none (author) | 2026-10-16 | `dependencies.py` row | self-reviewed | C15: public and synthetic diagnostics only; owner accepted this status (`decision-enforce.md`) |
+| implementer (Claude Code session) | none (author) | 2026-10-16 | crflux proposal | self-reviewed | C15: public and synthetic diagnostics only; owner accepted this status (`decision-enforce.md`) |

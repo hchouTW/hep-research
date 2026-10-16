@@ -56,3 +56,29 @@ are the maintainer's and custodian's.
   until a non-author reviewer accepts the rationale (`refusal-matrix.md`).
 
 The reader-matrix condition therefore waits on step 2, like the review condition.
+
+## Maintainer answers to the open questions (2026-10-16)
+
+The maintainer answered three questions in the session and asked the implementer to decide the rest by its
+recommendation. Those are recorded as such (**Inferred**); the maintainer may replace any of them with a new dated
+section.
+
+| Item | Answer | By |
+| --- | --- | --- |
+| Programme owner | **hchouTW (the maintainer)**. This fills the owner line of every earlier record. | maintainer |
+| Reviewers (O04) and roles (O14) | **Self-reviewed** for now. No non-author reviewer is named, so C15 limits the work to public and synthetic diagnostics. No role may yet accept a check report as evidence. | maintainer |
+| Branches | **Stacked PRs, one per phase**: M0, M1, M2a, M2b-ratio with D11b, M3 with G-ENFORCE step 1. Merged in that order, each after its own CI. | maintainer |
+| Custodian (O17) | The requirement stays a proposal. The custodian's gate does not adopt it yet. **No purpose accepts a pre-execution report** (the default). Revisit when a non-author reviewer exists. | recommendation |
+| `dependencies.py` | **Keep the documented behaviour** ("consistent but not allowed"), with no change to its output or tests. The refusal-matrix row stays marked as non-refusing; that is a fact about the reader, not a defect. | recommendation |
+| Model part (O03) | **Deferred.** It is not built until an analysis uses a model card with this checker; then the implementer proposes the supported pairings from the pyhf-combine adapter for the owner to approve. | recommendation |
+| M2c run lineage | **Stays paused.** No analysis cites a campaign result through the batch adapter. | recommendation |
+| Companion namespace check | **Pre-release step.** The maintainer runs `contracts/registry.py --local "<companion root>/profile"` before the next hep-research release. A `profile.namespace_collision` blocks that release. | recommendation |
+| `crflux:local-interstellar` | **Retire it in the companion** at its next release, since nothing uses it. This is the companion's change, made in its own repository. | recommendation |
+| Contracts version | **Bump 2.9.0 → 2.10.0 at the next release**, because the release adds schemas and a capability. No bump on these branches. | recommendation |
+
+**Effect on G-ENFORCE (Confirmed against the conditions table):**
+- A review record now exists, though it is a self-review, not the preferred non-author one.
+- The reader and gate matrix condition is still **not met**, because the custodian has not adopted the requirement.
+
+**Every rule therefore stays in shadow mode.** The programme is complete for this round. What remains is either
+deferred (O03, M2c, V30, V32) or depends on a non-author reviewer or the custodian.
