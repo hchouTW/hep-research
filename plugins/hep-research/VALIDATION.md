@@ -1686,3 +1686,17 @@ D10 advisory report check in `permit.py`, scoped exceptions and the custodian-ga
 
 Not run: V32 (post-execution, needs run lineage) and V30 (needs ownership metadata no reader has). No rule enforces:
 the G-ENFORCE record recommends shadow mode. Software checks only.
+
+## V63 G-ENFORCE step 1 (2026-10-16, Python 3.13.2 on macOS 26.5 arm64)
+
+After the decision to keep every rule in shadow mode: `recipe_semantics.py` refuses an upstream artifact with an
+unknown capability; the `dependencies.py` row of the refusal matrix is documented as intended and awaits review.
+Branch `v63/refusal-blockers`, head `bbed3ec`, clean worktree.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py` | 25 pass, 0 fail; 3542 tests, 0 failures, 107 skipped |
+| Same with the CI lock (no torch) | 25 pass, 0 fail; 3542 tests, 0 failures, 170 skipped |
+| `check_relocation.py` | pass |
+| Ruff 0.16.10, mypy 2.4.0 | clean |
+| Legacy capture (132 old-CLI runs) | unchanged |
