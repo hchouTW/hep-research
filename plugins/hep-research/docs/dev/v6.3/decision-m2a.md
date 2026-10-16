@@ -1,6 +1,6 @@
 # Decision record G-M2a (v6.3 analysis-check programme)
 
-Status: **awaiting the maintainer's decision.** Written 2026-10-16 at the end of Phase M2a (D05a, D05b, D05c, D06,
+Status: **decided 2026-10-16: continue to M2b, ratio subset first; M2c paused** (see Decision). Written 2026-10-16 at the end of Phase M2a (D05a, D05b, D05c, D06,
 D11a, D17, D08 chain). Labels: **Confirmed**, **Inferred**, **Unresolved**. Convention: `README.md`.
 
 ## Analysis question
@@ -99,4 +99,6 @@ is not reviewed; author-only review would be `self-reviewed` (C15).
 
 ## Decision
 
-*(maintainer)* Option: — · Date: — · Conditions: —
+**Continue to M2b, ratio subset first; M2c paused**, 2026-10-16: the maintainer's instruction in the session was to
+follow the recommendation. The model-card part of M2b waits for an answer to O03 (supported modifier-constraint
+pairings); D11b follows as planned.
