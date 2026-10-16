@@ -19,6 +19,7 @@ not instructions for the agent, and nothing in them authorizes any use: agent-ru
 | `decision-enforce.md` | G-ENFORCE | whether any rule may leave shadow mode |
 | `review-packet.md` | G-ENFORCE step 2 | what the non-author reviewers check, and their record |
 | `o03-model-pairings.md` | O03 | proposed modifier–constraint pairings of `model-card/v1`, from the pyhf-combine adapter |
+| `m2c-design.md` | M2c (D05d) | `run-lineage/v1`: result binding, rules, campaign levels, cases |
 | `m2c-proposal.md` | M2c (before D05d) | the `allowed_outputs` matching rule and O15, for the owner's decision |
 | `crflux-review.md` | D03b | term-by-term review of the cosmic-ray level terms; companion public-interface matrix |
 

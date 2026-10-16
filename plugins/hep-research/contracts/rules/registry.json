@@ -791,6 +791,249 @@
    "review_status": "unreviewed",
    "lifecycle": "shadow",
    "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+  },
+  {
+   "rule_id": "r-run.binding",
+   "version": "1.0.0",
+   "layer": "L3",
+   "suites": [
+    "run-lineage/v1"
+   ],
+   "kind": "new",
+   "prerequisites": [
+    "result binding",
+    "chain root intent",
+    "semantic lock item"
+   ],
+   "applicability": "the root's result is bound to this analysis bundle and its lock, with the root's unit, scope and binning; the binding is agent-written, so the attribution is a declaration (C12)",
+   "outcome_contract": {
+    "satisfied": [
+     "check.result_bound"
+    ],
+    "violated": [
+     "check.binding_wrong_subject",
+     "check.semantic_drift",
+     "check.result_digest",
+     "check.result_identity"
+    ],
+    "not_applicable": [
+     "check.root_not_required"
+    ],
+    "unverified": [
+     "check.not_executed",
+     "check.result_unbound"
+    ],
+    "unsupported": [
+     "check.binding_unsupported"
+    ]
+   },
+   "legacy_codes": [],
+   "native_from": null,
+   "v_cases": [
+    "V20",
+    "V32"
+   ],
+   "waivable": false,
+   "accepted_applicability_facts": [],
+   "owner": "hep-computing",
+   "review_status": "unreviewed",
+   "lifecycle": "shadow",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed)"
+  },
+  {
+   "rule_id": "r-run.status",
+   "version": "1.0.0",
+   "layer": "L3",
+   "suites": [
+    "run-lineage/v1"
+   ],
+   "kind": "new",
+   "prerequisites": [
+    "result binding",
+    "computational-runs or campaign record"
+   ],
+   "applicability": "the producer is one named, successful terminal run or a complete campaign merge, and no run on its lineage failed",
+   "outcome_contract": {
+    "satisfied": [
+     "check.producer_succeeded"
+    ],
+    "violated": [
+     "check.failed_promoted",
+     "check.failed_upstream",
+     "check.producer_ambiguous",
+     "check.run_cycle"
+    ],
+    "not_applicable": [
+     "check.status_not_required"
+    ],
+    "unverified": [
+     "check.not_executed",
+     "check.producer_unbound"
+    ],
+    "unsupported": [
+     "check.producer_unsupported"
+    ]
+   },
+   "legacy_codes": [],
+   "native_from": null,
+   "v_cases": [
+    "V54",
+    "V55"
+   ],
+   "waivable": false,
+   "accepted_applicability_facts": [],
+   "owner": "hep-computing",
+   "review_status": "unreviewed",
+   "lifecycle": "shadow",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed)"
+  },
+  {
+   "rule_id": "r-run.closure",
+   "version": "1.0.0",
+   "layer": "L3",
+   "suites": [
+    "run-lineage/v1"
+   ],
+   "kind": "new",
+   "prerequisites": [
+    "result binding input sources",
+    "run input manifests",
+    "frozen items, external manifests, execution bundle"
+   ],
+   "applicability": "R-CLOSE: every input of every run on the root's lineage maps by explicit reference to a frozen item, a frozen external-data manifest entry or a bound upstream product, with equal bytes digests",
+   "outcome_contract": {
+    "satisfied": [
+     "check.closure_complete"
+    ],
+    "violated": [
+     "check.closure_mismatch",
+     "check.closure_open"
+    ],
+    "not_applicable": [
+     "check.closure_not_required"
+    ],
+    "unverified": [
+     "check.not_executed",
+     "check.closure_unbound",
+     "check.closure_reserialized"
+    ],
+    "unsupported": [
+     "check.closure_unsupported"
+    ]
+   },
+   "legacy_codes": [],
+   "native_from": null,
+   "v_cases": [
+    "V33",
+    "V38",
+    "V53",
+    "V55",
+    "V56"
+   ],
+   "waivable": false,
+   "accepted_applicability_facts": [],
+   "owner": "hep-computing",
+   "review_status": "unreviewed",
+   "lifecycle": "shadow",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed)"
+  },
+  {
+   "rule_id": "r-run.campaign",
+   "version": "1.0.0",
+   "layer": "L3",
+   "suites": [
+    "run-lineage/v1"
+   ],
+   "kind": "new",
+   "prerequisites": [
+    "campaign computational-run (batch adapter)",
+    "state.json collection records",
+    "execution bundle"
+   ],
+   "applicability": "a campaign producer is campaign-recorded: collected chunks match the interface record, one common recorded execution bundle that verifies and belongs to the campaign, equal to the binding's",
+   "outcome_contract": {
+    "satisfied": [
+     "check.campaign_recorded"
+    ],
+    "violated": [
+     "check.campaign_mismatch",
+     "check.chunk_digest_conflict",
+     "check.execution_bundle_mismatch",
+     "check.merge_mismatch"
+    ],
+    "not_applicable": [
+     "check.no_campaign"
+    ],
+    "unverified": [
+     "check.not_executed",
+     "check.campaign_uncollected",
+     "check.campaign_orphan",
+     "check.campaign_bundle_unrecorded",
+     "check.campaign_bundle_invalid",
+     "check.campaign_unreadable"
+    ],
+    "unsupported": [
+     "check.campaign_unsupported"
+    ]
+   },
+   "legacy_codes": [],
+   "native_from": null,
+   "v_cases": [
+    "V61",
+    "V62",
+    "V63"
+   ],
+   "waivable": false,
+   "accepted_applicability_facts": [],
+   "owner": "hep-computing",
+   "review_status": "unreviewed",
+   "lifecycle": "shadow",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed)"
+  },
+  {
+   "rule_id": "r-run.blinding",
+   "version": "1.0.0",
+   "layer": "L3",
+   "suites": [
+    "run-lineage/v1"
+   ],
+   "kind": "new",
+   "prerequisites": [
+    "spec blinding",
+    "result status labels",
+    "project blinding.allowed_outputs"
+   ],
+   "applicability": "a blinded spec's binding cites only asimov or synthetic results, or outputs a prefixed exact allowed_outputs entry names (m2c-proposal.md)",
+   "outcome_contract": {
+    "satisfied": [
+     "check.blinding_permitted"
+    ],
+    "violated": [
+     "check.blinded_result_cited"
+    ],
+    "not_applicable": [
+     "check.not_blinded"
+    ],
+    "unverified": [
+     "check.not_executed",
+     "check.allowed_output_ambiguous",
+     "check.blinding_policy_unknown"
+    ],
+    "unsupported": [
+     "check.blinding_unsupported"
+    ]
+   },
+   "legacy_codes": [],
+   "native_from": null,
+   "v_cases": [
+    "V70"
+   ],
+   "waivable": false,
+   "accepted_applicability_facts": [],
+   "owner": "hep-computing",
+   "review_status": "unreviewed",
+   "lifecycle": "shadow",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule; before execution every run-lineage obligation is unverified (check.not_executed)"
   }
  ],
  "v_cases": [
@@ -1213,8 +1456,10 @@
       "D05d"
      ],
      "host": "CASE-CHAIN post-execution",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d05d.RunChain.test_v20_results_after_execution"
+     ]
     }
    ]
   },
@@ -1471,8 +1716,10 @@
       "D10"
      ],
      "host": "gate integration",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d05d.RunChain.test_v32_lock_drift"
+     ]
     }
    ]
   },
@@ -1488,8 +1735,10 @@
       "D05d"
      ],
      "host": "CASE-CHAIN post-execution",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d05d.RunChain.test_v33_input_neither_frozen_nor_produced"
+     ]
     }
    ]
   },
@@ -1597,8 +1846,10 @@
       "D05d"
      ],
      "host": "CASE-CHAIN post-execution",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d05d.RunChain.test_v38_json_inside_the_bundle"
+     ]
     }
    ]
   },
@@ -1895,8 +2146,10 @@
       "D05d"
      ],
      "host": "RUN-CHAIN",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d05d.RunChain.test_v53_v56_positive_declared_level"
+     ]
     }
    ]
   },
@@ -1912,8 +2165,11 @@
       "D05d"
      ],
      "host": "RUN-STATUS",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d05d.RunChain.test_v54_failed_run_and_retries",
+      "tests.contracts.test_v63_d05d.RunChain.test_failure_propagates_downstream"
+     ]
     }
    ]
   },
@@ -1929,8 +2185,10 @@
       "D05d"
      ],
      "host": "RUN-LINEAGE",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d05d.RunChain.test_v55_ambiguous_producer_cycle_and_role"
+     ]
     }
    ]
   },
@@ -1946,8 +2204,10 @@
       "D05d"
      ],
      "host": "RUN-EVIDENCE",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d05d.RunChain.test_v53_v56_positive_declared_level"
+     ]
     }
    ]
   },
@@ -2055,8 +2315,10 @@
       "D05d"
      ],
      "host": "CASE-CHAIN campaign (fake schedulers)",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d05d.RunCampaign.test_v61_only_the_collected_output_is_adopted"
+     ]
     }
    ]
   },
@@ -2072,8 +2334,10 @@
       "D05d"
      ],
      "host": "RUN-CAMPAIGN",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d05d.RunCampaign.test_v62_digest_conflict_uncollected_and_orphan"
+     ]
     }
    ]
   },
@@ -2089,8 +2353,10 @@
       "D05d"
      ],
      "host": "RUN-CAMPAIGN",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d05d.RunCampaign.test_v63_submission_bundle_digests"
+     ]
     }
    ]
   },
@@ -2236,8 +2502,10 @@
       "D05d"
      ],
      "host": "CASE-CHAIN blinded variant",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d05d.Blinding.test_v70"
+     ]
     }
    ]
   },
@@ -2335,7 +2603,8 @@
     "contracts/migrate.py",
     "contracts/resolve.py",
     "contracts/rules/suites/**",
-    "tests/contracts/v63_cases.py"
+    "tests/contracts/v63_cases.py",
+    "tests/contracts/v63_runs.py"
    ],
    "checks": [
     "tests.contracts.test_v63_d05a",
@@ -2347,7 +2616,8 @@
     "tests.contracts.test_v63_d11b",
     "tests.contracts.test_v63_d17",
     "tests.contracts.test_v63_review_fixes",
-    "tests.contracts.test_v63_d07_model"
+    "tests.contracts.test_v63_d07_model",
+    "tests.contracts.test_v63_d05d"
    ],
    "not_available": [],
    "full": false
