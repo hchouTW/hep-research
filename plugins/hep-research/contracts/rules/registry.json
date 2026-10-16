@@ -1431,8 +1431,11 @@
       "D12b"
      ],
      "host": "project",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d12b.CustodyInventory.test_v30_stage1_statuses",
+      "tests.contracts.test_v63_d12b.CustodyInventory.test_v30_refusals_unchanged"
+     ]
     }
    ]
   },
@@ -2272,7 +2275,8 @@
     "contracts/comparison/composition.py",
     "contracts/communication_project.py",
     "skills/hep-measurement/scripts/review_measurement_spec.py",
-    "contracts/resolve.py"
+    "contracts/resolve.py",
+    "contracts/custody.py"
    ],
    "checks": [
     "tests.contracts.test_contracts",
@@ -2286,7 +2290,8 @@
     "tests.contracts.test_companion_validation_cli",
     "tests.skills.hep_measurement.test_review_procedure",
     "tests.skills.hep_measurement.test_cli_contract",
-    "tests.skills.test_cli_robustness"
+    "tests.skills.test_cli_robustness",
+    "tests.contracts.test_v63_d12b"
    ],
    "not_available": [],
    "full": false
