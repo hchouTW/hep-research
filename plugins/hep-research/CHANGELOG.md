@@ -3,6 +3,22 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- `permit.py check-report` (advisory, v6.3 G-ENFORCE inputs):
+  - It refuses a report whose roots fall below the purpose policy's new optional `min_evidence_level` (`declared` or
+    `campaign-recorded`; O15).
+  - It treats a per-root evidence level that does not follow from the report's `r-run.campaign` outcomes as a hand
+    edit (`permit.report_inconsistent`).
+  - It never counts a model-only bundle toward formal use (`permit.report_model_only`; O13).
+- The shadow difference review (`analysis_check.difference_review`) covers the model and run cases.
+  - A legacy model-card error and the new rule deciding the same question are classified as agreeing:
+    `stats.duplicate_auxiliary` with `r-aux.use`, and an unconstrained parameter or POI mismatch with
+    `r-model.pairing`.
+  - No case leaves a difference unclassified (`docs/dev/v6.3/shadow-review.md`).
+- `docs/dev/v6.3/custodian-gate-requirement.md` adds the post-execution conditions, the evidence floor, the
+  integrity of evidence levels and the model-only rule for the custodian's gate.
+
 ## 0.13.0 (2026-10-16)
 
 v6.3 analysis-check programme completed on synthetic cases. The release adds:

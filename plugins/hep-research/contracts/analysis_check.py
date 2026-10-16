@@ -578,6 +578,9 @@ def evidence_levels(view: dict, outcomes: list[dict], results: dict | None):
     return levels
 
 
+# model cards (model-card/v1): the legacy card rule and the new rule that decides the same question
+MODEL_AGREEMENT = {"stats.duplicate_auxiliary": "r-aux.use", "stats.model_unconstrained_parameter": "r-model.pairing",
+                   "stats.model_poi_mismatch": "r-model.pairing"}
 L2_REPEAT_ERRORS = {"semantics.repeated_correction"}
 L2_REPEAT_CONSERVATIVE = {"semantics.repeat_undetermined", "semantics.repeat_distinct_instance"}
 
@@ -591,7 +594,15 @@ def difference_review(view: dict, report: dict) -> dict:
     finding and the new repetition outcome on the same recipe's instances say the same: violated with violated,
     undetermined with unverified), new-decides (an undetermined L2 repetition that the new suite decides as violated
     from data flow), new-only (a new violation with no legacy error on the items it rests on: a cross-artifact
-    finding)."""
+    finding). For model cards, a legacy check_model_card error and a new violation of the rule that decides the same
+    question (MODEL_AGREEMENT) on the same model 'agree'; other legacy card findings are artifact-local."""
+    model_of = {m.get("item"): m.get("model_id") for m in (view.get("context") or {}).get("models", []) if isinstance(m, dict)}
+    violated_on: dict[tuple, bool] = {}
+    for o in report.get("obligations", []):
+        if o["state"] == "violated":
+            for e in o.get("evidence", []):
+                if "model" in e:
+                    violated_on[(o["rule_id"], e["model"])] = True
     insts_of: dict[str, set] = {}
     for i in (view.get("context") or {}).get("recipe_instances", []):
         insts_of.setdefault(i.get("recipe"), set()).add(i.get("instance_id"))
@@ -605,7 +616,8 @@ def difference_review(view: dict, report: dict) -> dict:
     for f in report.get("legacy_findings", []):
         code, cls = f.get("code"), "unclassified"
         if f.get("entry") == "contracts/validate.py":
-            cls = "artifact-local"
+            rule = MODEL_AGREEMENT.get(code)
+            cls = "agrees" if rule and violated_on.get((rule, model_of.get(f.get("item")))) else "artifact-local"
         elif f.get("entry") == "contracts/recipe_semantics.py":
             states = set().union(*(rep_state.get(i, set()) for i in insts_of.get(f.get("item"), ())))
             if code in L2_REPEAT_ERRORS:
@@ -622,6 +634,11 @@ def difference_review(view: dict, report: dict) -> dict:
             continue
         recipes = {r for r, insts in insts_of.items() for e in o.get("evidence", []) if e.get("instance") in insts}
         cls = "agrees" if o["rule_id"] == "r-rep.repetition" and recipes & legacy_items else "new-only"
+        models = {e["model"] for e in o.get("evidence", []) if "model" in e}
+        legacy_model = {model_of.get(f.get("item")) for f in report.get("legacy_findings", [])
+                        if MODEL_AGREEMENT.get(f.get("code")) == o["rule_id"]}
+        if models & legacy_model:
+            cls = "agrees"
         rows.append({"side": "new", "obligation_id": o["obligation_id"], "code": o["reason"], "class": cls})
     counts: dict[str, int] = {}
     for r in rows:

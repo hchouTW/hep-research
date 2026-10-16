@@ -281,19 +281,18 @@ class Blinding(Base):
 
 class PostExecutionPermit(Base):
     """The post-execution part of V60 (D10): the permit's artifacts list the cited results, and its execution bundle
-    is the binding's."""
+    is the binding's; the purpose policy's evidence floor (O15); model-only bundles (O13)."""
 
-    def test_v60_post_execution_bindings(self):
+    def scaffold(self, post, rep, policy_extra=None):
+        """codes(permit) -> refusal codes of permit.report_check for this report under an accepted synthetic review."""
         import datetime
         import hashlib
 
         from contracts.permit import report_check
         from contracts.release_manifest import canonical_sha256
-        post = runs.run_campaign(self.root())
-        rep = post.check()
         recipe = json.loads((post.root / "recipe.json").read_text())
         ev = post.root / "evidence"
-        ev.mkdir()
+        ev.mkdir(exist_ok=True)
         (ev / "report.json").write_text(json.dumps(rep))
         scope = {"observable": "synthetic flux", "data": ["synthetic"],
                  "recipe": {"recipe_id": recipe["recipe_id"], "sha256": canonical_sha256(recipe)},
@@ -307,10 +306,9 @@ class PostExecutionPermit(Base):
                "capability": {"required_capabilities": []}, "review": {"reviews": [review]},
                "lifecycle": {"state": "active", "effective": "2026-10-15T00:00:00Z", "expires": "2026-11-15T00:00:00Z",
                              "revocation_ref": "rev-att", "status_source": "synthetic-gate", "max_status_age_s": 3600}}
-        policy = {"policy_version": "1.0.0", "purposes": {"formal-analysis": {
+        policy = {"policy_version": "1.0.0", "purposes": {"formal-analysis": dict({
             "suites": [{"id": "counting-chain", "version": "1.0.0"}, {"id": "run-lineage", "version": "1.0.0"}],
-            "checker_digests": [rep["assessment"]["checker"]], "accept_pre_execution_only": False}}}
-        result_sha = post.binding["results"][0]["sha256"]
+            "checker_digests": [rep["assessment"]["checker"]], "accept_pre_execution_only": False}, **(policy_extra or {}))}}
 
         def codes(permit):
             out = report_check(att, post.bundle, post.root, post.root, policy, "formal-analysis", permit=permit,
@@ -318,13 +316,50 @@ class PostExecutionPermit(Base):
                                revocations={"as_of": "2026-10-16T11:30:00Z", "source": "synthetic-gate", "revoked": []},
                                roles=["analysis-reviewer"])
             return {r["code"] for r in out}
-        good = {"analysis_bundle_sha256": post.bundle["bundle_digest"], "analysis_bundle_ref": "bundle.json",
-                "execution_bundle_sha256": post.exec_digest, "artifacts": [result_sha]}
+        return codes
+
+    def permit(self, post, **over):
+        return {"subject": dict({"analysis_bundle_sha256": post.bundle["bundle_digest"], "analysis_bundle_ref": "bundle.json",
+                                 "artifacts": [post.binding["results"][0]["sha256"]]}, **over)}
+
+    def test_v60_post_execution_bindings(self):
+        post = runs.run_campaign(self.root())
+        codes = self.scaffold(post, post.check())
+        good = self.permit(post, execution_bundle_sha256=post.exec_digest)
         self.assertFalse({"permit.report_result_unlisted", "permit.report_execution_bundle_mismatch",
-                          "permit.report_pre_execution_only"} & codes({"subject": good}))
-        self.assertIn("permit.report_result_unlisted", codes({"subject": dict(good, artifacts=["0" * 64])}))
-        self.assertIn("permit.report_execution_bundle_mismatch",
-                      codes({"subject": dict(good, execution_bundle_sha256="e" * 64)}))
+                          "permit.report_pre_execution_only", "permit.report_inconsistent"} & codes(good))
+        self.assertIn("permit.report_result_unlisted", codes(self.permit(post, execution_bundle_sha256=post.exec_digest,
+                                                                         artifacts=["0" * 64])))
+        self.assertIn("permit.report_execution_bundle_mismatch", codes(self.permit(post, execution_bundle_sha256="e" * 64)))
+
+    def test_evidence_floor_by_purpose(self):
+        # O15: the purpose policy, not the checker, says which evidence level a root needs
+        floor = {"min_evidence_level": "campaign-recorded"}
+        camp = runs.run_campaign(self.root())
+        self.assertNotIn("permit.report_evidence_level",
+                         self.scaffold(camp, camp.check(), floor)(self.permit(camp, execution_bundle_sha256=camp.exec_digest)))
+        chain = runs.run_chain(self.root())
+        self.assertIn("permit.report_evidence_level", self.scaffold(chain, chain.check(), floor)(self.permit(chain)))
+        self.assertNotIn("permit.report_evidence_level",
+                         self.scaffold(chain, chain.check(), {"min_evidence_level": "declared"})(self.permit(chain)))
+
+    def test_hand_raised_evidence_level_is_inconsistent(self):
+        # a level that does not follow from the r-run.campaign outcomes is a hand edit (V60)
+        chain = runs.run_chain(self.root())
+        rep = chain.check()
+        forged = dict(rep, execution_evidence_level={runs.ROOT_ID: "campaign-recorded"})
+        self.assertIn("permit.report_inconsistent",
+                      self.scaffold(chain, forged, {"min_evidence_level": "campaign-recorded"})(self.permit(chain)))
+
+    def test_model_only_bundle_is_diagnostics_only(self):
+        # O13: a model-only bundle never counts toward formal use
+        import v63_cases as cases
+        from contracts.permit import report_check
+        root = self.root()
+        bundle = json.loads(cases.model_case(root).read_text())
+        out = report_check({}, bundle, root, root, {"purposes": {}}, "formal-analysis",
+                           permit={"subject": {"analysis_bundle_sha256": bundle["bundle_digest"]}})
+        self.assertIn("permit.report_model_only", {r["code"] for r in out})
 
 
 if __name__ == "__main__":

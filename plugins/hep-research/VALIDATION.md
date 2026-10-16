@@ -1831,3 +1831,26 @@ against main `4b90c71` reported no findings.
 | `run_all_checks.py`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail; 3580 tests, 0 failures, 61 skipped, 268 modules |
 | Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 25 pass, 0 fail; 3580 tests, 0 failures, 170 skipped |
 | Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
+
+## V63-ENFORCE-INPUTS (2026-10-17, Python 3.13.2 on macOS 26.5 arm64; branch `v63/enforce-inputs` on main `bce13af`)
+
+The G-ENFORCE inputs were completed for the full suite set.
+
+**Shadow difference review** (`docs/dev/v6.3/shadow-review.md`): extended to 12 model and run cases, with zero
+unclassified differences (`test_v63_d09.ModelAndRunShadowReview`). Legacy model-card errors agree with the new rule
+that decides the same question.
+
+**Custodian-gate requirement** (dated update), with matching advisory checks in `permit.py check-report`
+(`test_v63_d05d.PostExecutionPermit`, 4 tests):
+- the post-execution conditions;
+- `min_evidence_level` per purpose (O15);
+- per-root evidence levels must follow from the obligations, so a raised level is inconsistent;
+- model-only bundles are diagnostics only (O13).
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py` | 25 pass, 0 fail; 3584 tests, 0 failures, 107 skipped |
+| Same with the CI lock (no torch) | 25 pass, 0 fail; 3584 tests, 0 failures, 170 skipped |
+| `check_relocation.py` | pass |
+| Ruff 0.16.10, mypy 2.4.0 | clean |
+| Registry | 80 of 80 V parts passing |

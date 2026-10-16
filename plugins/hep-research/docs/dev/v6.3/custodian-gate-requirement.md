@@ -45,3 +45,45 @@ must check before it counts an analysis-check report toward formal use. The plug
   `s3-execution` should require an assessment.
 
 Until these are settled, the gate does not adopt these conditions, and no new gate condition is enabled.
+
+## Update 2026-10-17: the complete suite set (0.13.0)
+
+The model-card suite, the custody inventory and run lineage (M2c) were built after this requirement was first
+written. The checks above stay; the following items are added or made concrete. `permit.py check-report` performs
+each of them as an advisory diagnostic (`tests/contracts/test_v63_d05d.py`, `PostExecutionPermit`).
+
+**The purpose policy gains one field:**
+- `min_evidence_level`: `declared` or `campaign-recorded`, the level every root of a post-execution report must
+  reach.
+  - This is the approved O15 answer: which executions must go through a campaign is the custodian's purpose policy,
+    not a checker rule.
+  - Without the field, the gate requires no particular level.
+  - `trusted-submitter` is reserved: it has no reader, and no report shows it.
+
+**Check 7 (Execution) now reads:**
+- **A pre-execution report** has no result binding, and its evidence level reads "not checked". It passes only if
+  the policy's `accept_pre_execution_only` is true. The default is false.
+- **A post-execution report** has `phase` `post-execution` and a `result_binding` section. The gate requires all of:
+  1. every result digest the binding cites is in the permit's `artifacts` (`report_result_unlisted` otherwise);
+  2. the binding's execution bundle digest equals the permit's `execution_bundle_sha256`, when the permit names one
+     (`report_execution_bundle_mismatch`);
+  3. every root's evidence level reaches the policy's `min_evidence_level` (`report_evidence_level`);
+  4. the policy's `suites` include `run-lineage/1.0.0` whenever results are used formally.
+- **The binding's attribution is a declaration** (C12): it is agent-written. It counts only because the accepted
+  review lists the report (check 6).
+- **"campaign-recorded" rests on agent-writable records.** It guards against mistakes and forged chunk files, not
+  against a forged `state.json`. A gate that needs more must rely on a trusted submitter's records, which do not
+  exist yet.
+
+**Check 4 (Integrity) now also covers evidence levels:** each root's level must follow from its `r-run.campaign`
+outcome. A level raised by hand is inconsistent (`report_inconsistent`).
+
+**New check 9 (Mode):** a report about a model-only bundle (bundle mode `model`) never counts toward formal use
+(`report_model_only`). This is the approved O13 default: model-only bundles are diagnostics only, and no recipe is
+fabricated to obtain a permit.
+
+**Blinding** (part of check 6): a blinded spec's `r-run.blinding` must be satisfied. A satisfied outcome that rests
+on an `allowed_outputs` entry is declaration-based, because the project config is agent-writable. It counts only
+through the accepted review, and the blinding policy owner should be among the reviewers.
+
+**Open conditions:** unchanged (O14, O04, O17). The gate adopts none of this until they are settled.
