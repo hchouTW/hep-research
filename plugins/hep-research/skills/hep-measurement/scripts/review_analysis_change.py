@@ -31,7 +31,8 @@ Decision per change:
   needs-provenance  not exposed, but no independent evidence recorded yet
   exposure-unknown  not flagged, but what was looked at is unknown or incomplete: record it before accepting
   needs-human-review  the motivation or description names the signal region or unblinded data without a clear
-                    statement of what was seen; a person must read the change before it is accepted
+                    statement of what was seen, or is written (in part) in a script other than Latin, which the
+                    English-only patterns below cannot read (F-05); a person must read the change before it is accepted
 The motivation and description are scanned for outcome words (excess, bump, peak or signal made more prominent or
 significant, ...) and for signal-region or unblinded-data wording; "after seeing" a signal-region quantity makes the
 change exposed whatever looked_at says. Booleans (independent_of_signal_region, after_unblinding) must be JSON true or
@@ -39,7 +40,7 @@ false: a string such as "no" is bad input. after_unblinding true together with a
 contradiction.
 This review is advisory: it reads what the caller records and cannot see what was actually looked at.
 Output: JSON report with status (--status, default unvalidated; one of the core artifact_statuses). Exit codes:
-0 nothing flagged, 1 any change flagged or needing human review, 2 bad input (including a malformed data_exposure record, NaN or inf, or
+0 every change accepted, 1 any other verdict (flag, needs-human-review, needs-provenance, exposure-unknown), 2 bad input (including a malformed data_exposure record, NaN or inf, or
 malformed JSON; the error is also one line on stderr).
 Run: python3 <plugin root>/skills/hep-measurement/scripts/review_analysis_change.py changes.json [--status S]
          [--exposure-record FILE]
@@ -50,6 +51,7 @@ from __future__ import annotations
 import json
 import re
 import sys
+import unicodedata
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
@@ -78,6 +80,11 @@ EXPOSURE_STATES = ("unexposed", "exposed", "unknown", "incomplete")
 RANK = {"unexposed": 0, "unknown": 1, "incomplete": 1, "exposed": 2}
 STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
             'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
+
+
+def unreadable_text(text: str) -> bool:
+    """True when the text has letters outside the Latin script: the patterns above are English-only (F-05)."""
+    return any(ch.isalpha() and not unicodedata.name(ch, "").startswith("LATIN") for ch in text)
 
 
 class BadExposure(ValueError):
@@ -153,6 +160,7 @@ def review(change: dict, derived: dict | None = None) -> dict:
     text = " ".join(str(change.get(k, "")) for k in ("motivation", "description"))
     motive = bool(OUTCOME_MOTIVE.search(text))
     region = bool(REGION_WORDS.search(text))
+    unreadable = unreadable_text(text)
     seen_in_text = region and bool(SEEING.search(text))
     after_unblinding = _strict_bool(change, change, "after_unblinding")
     independent = bool((ev.get("control_sample") or ev.get("evidence_ids"))
@@ -176,6 +184,10 @@ def review(change: dict, derived: dict | None = None) -> dict:
     elif region:
         decision, action = "needs-human-review", ("the text names the signal region or unblinded data without saying "
                                                   "what was seen: a person reads the change before it is accepted")
+    elif unreadable:
+        reasons.append("the patterns cannot read the motivation or description (letters outside the Latin script)")
+        decision, action = "needs-human-review", ("the outcome and signal-region patterns are English-only: a person "
+                                                  "reads the change before it is accepted")
     elif data_exposure["state"] != "unexposed":
         decision, action = "exposure-unknown", ("record what was looked at before the change (a looked_at list or a "
                                                 "structured data_exposure record); unknown exposure is never treated as unexposed")
@@ -225,7 +237,7 @@ def main(argv=None) -> int:
     print(json.dumps({"status": status, "changes": rows, "flagged": sum(r["decision"] == "flag" for r in rows),
                       "needs_human_review": sum(r["decision"] == "needs-human-review" for r in rows),
                       "exposure_unknown": sum(r["decision"] == "exposure-unknown" for r in rows)}, indent=1))
-    return 1 if any(r["decision"] in ("flag", "needs-human-review") for r in rows) else 0
+    return 1 if any(r["decision"] != "accept" for r in rows) else 0
 
 
 if __name__ == "__main__":
