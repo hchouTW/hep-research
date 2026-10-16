@@ -1389,7 +1389,8 @@
     "contracts/project.py",
     "contracts/comparison/composition.py",
     "contracts/communication_project.py",
-    "skills/hep-measurement/scripts/review_measurement_spec.py"
+    "skills/hep-measurement/scripts/review_measurement_spec.py",
+    "contracts/resolve.py"
    ],
    "checks": [
     "tests.contracts.test_contracts",
@@ -1398,13 +1399,11 @@
     "tests.contracts.test_strict_versions",
     "tests.contracts.test_communication_project",
     "tests.contracts.test_v63_baseline_gaps",
-    "part:static"
+    "part:static",
+    "tests.contracts.test_v63_d03a",
+    "tests.contracts.test_companion_validation_cli"
    ],
-   "not_available": [
-    "namespace ownership over the visible closure (D03a)",
-    "alias contract (D03a)",
-    "failing-profile test per consumer (D03a)"
-   ],
+   "not_available": [],
    "full": false
   },
   {
