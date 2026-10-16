@@ -1,0 +1,81 @@
+{
+ "matrix_version": "1.0.0",
+ "$comment": "v6.3 D09 reader refusal matrix: what each old entry point does with each new format. 'current' is tested on this tree (tests/contracts/test_v63_d09.py); 'release_0_11_0' was measured on the 0.11.0 release tree (docs/dev/v6.3/refusal-matrix.md). A row that accepts or exposes is a release blocker until a real refusal exists.",
+ "rows": [
+  {
+   "format": "analysis bundle 2.0.0",
+   "entry_point": "contracts/analysis_bundle.py verify",
+   "current": "refuses",
+   "evidence": "status invalid (schema.const on format and bundle_version)",
+   "release_0_11_0": "refuses",
+   "blocker": false
+  },
+  {
+   "format": "check-context 1.0.0",
+   "entry_point": "contracts/validate.py",
+   "current": "refuses",
+   "evidence": "schema.required (not an artifact envelope)",
+   "release_0_11_0": "refuses",
+   "blocker": false
+  },
+  {
+   "format": "semantic-lock 1.0.0",
+   "entry_point": "contracts/validate.py",
+   "current": "refuses",
+   "evidence": "schema.required",
+   "release_0_11_0": "refuses",
+   "blocker": false
+  },
+  {
+   "format": "check report 1.0.0",
+   "entry_point": "contracts/validate.py",
+   "current": "refuses",
+   "evidence": "schema.required",
+   "release_0_11_0": "refuses",
+   "blocker": false
+  },
+  {
+   "format": "validation record 1.0.0",
+   "entry_point": "contracts/validate.py",
+   "current": "refuses",
+   "evidence": "schema.required",
+   "release_0_11_0": "refuses",
+   "blocker": false
+  },
+  {
+   "format": "check-context 1.0.0",
+   "entry_point": "skills/hep-measurement/scripts/review_measurement_spec.py",
+   "current": "refuses",
+   "evidence": "exit 2: not a measurement-spec",
+   "release_0_11_0": "refuses",
+   "blocker": false
+  },
+  {
+   "format": "check-context 1.0.0",
+   "entry_point": "contracts/dependencies.py",
+   "current": "accepts",
+   "evidence": "status ok, exit 0: a file without inputs passes",
+   "release_0_11_0": "accepts",
+   "blocker": true,
+   "note": "does not misread a field (it finds no inputs), but reports a non-artifact as dependency-consistent; refuse non-envelopes before any release that ships v2 bundles"
+  },
+  {
+   "format": "measurement-spec with measurement:correction-keys-v1",
+   "entry_point": "contracts/recipe_semantics.py --upstream",
+   "current": "exposes",
+   "evidence": "reads the correction keys without checking required_capabilities (V59)",
+   "release_0_11_0": "exposes",
+   "blocker": true,
+   "note": "upstream_instances reads target_scope and the other keys from any artifact; give recipe_semantics a capability check, or document that keys are read only from artifacts it is given, before release"
+  },
+  {
+   "format": "measurement-spec with measurement:correction-keys-v1",
+   "entry_point": "contracts/validate.py",
+   "current": "implements",
+   "evidence": "knows the keys under the capability",
+   "release_0_11_0": "refuses",
+   "blocker": false,
+   "note": "the 0.11.0 reader rejects the spec with contract.unknown_capability"
+  }
+ ]
+}
