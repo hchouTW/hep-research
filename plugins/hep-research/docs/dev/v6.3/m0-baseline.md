@@ -8,11 +8,11 @@ Status: record of work package D01 of the v6.3 analysis-check programme (Phase M
 
 | Item | Value |
 | --- | --- |
-| Precondition | git development checkout `/Users/hchou/hep-research` (repository root; plugin root `plugins/hep-research`), not an installed plugin copy. **Confirmed** |
+| Precondition | git development checkout of the hep-research repository (plugin root `plugins/hep-research`), not an installed plugin copy. **Confirmed** |
 | Base commit | `982af5202c4635ded0cec50b3cc223b92d83da62` on `main` (merge of PR #115), working tree clean |
 | Work branches | `v63/d01-baseline`, `v63/d02-evidence-query`, `v63/d12a-rule-registry`, stacked in that order |
 | `.claude-plugin/plugin.json` version | `0.11.0` |
-| Python | 3.13.2 (`/Users/hchou/miniconda3/bin/python3`), macOS 26.5 arm64 |
+| Python | 3.13.2 (miniconda), macOS 26.5 arm64 |
 | Hosts seen by the gate | Claude Code 2.1.301, codex-cli 0.160.0 |
 
 **Digest alignment** (`python3 tools/release_manifest.py verify --manifest release-manifests/0.11.0.json`, exit 1):
