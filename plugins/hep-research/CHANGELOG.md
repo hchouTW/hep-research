@@ -5,6 +5,10 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- `review_measurement_spec.py` takes `--check-bundle BUNDLE --check-root DIR` (opt-in, v6.3 D17): the review then
+  carries `analysis_check`, a bounded summary of the cross-artifact check (status, coverage, consistency, missing
+  bindings, one row per violated or unverified obligation with its next step), capped at 8 KiB per page. The verdict
+  and exit code are unchanged, and without the flags the output is identical. The review reference names the call.
 - Old-table reader `contracts/analysis_checks/readers.py` (v6.3 D11a): the chain rules read the 1.0.0 operator-semantics
   table through the coverage contract the semantic lock pins; an unpinned or changed contract, or a table that no
   longer matches the contract, gives no operators (unsupported). The table file is never upgraded.

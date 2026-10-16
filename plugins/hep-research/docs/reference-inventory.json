@@ -20,7 +20,7 @@
   },
   "hep-measurement": {
    "references": 12,
-   "bytes": 97718,
+   "bytes": 98209,
    "uncited": 0
   },
   "hep-ml": {
@@ -2389,8 +2389,8 @@
   {
    "path": "skills/hep-measurement/references/review-and-artifacts.md",
    "owner": "hep-measurement",
-   "bytes": 7245,
-   "lines": 103,
+   "bytes": 7736,
+   "lines": 108,
    "linked_from_skill_md": true,
    "cited_by": [
     "examples/ams-flux-ratio/run.py",
@@ -3420,7 +3420,7 @@
     "skills/hep-theory/SKILL.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b5c3e03 2026-10-15"
+   "last_commit": "b723a52 2026-10-16"
   },
   {
    "path": "skills/hep-theory/references/dis-kinematics.md",

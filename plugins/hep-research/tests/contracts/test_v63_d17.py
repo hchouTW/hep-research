@@ -24,7 +24,6 @@ def run(*args):
 
 @unittest.skipUnless(cases.HAVE_AMS, "the AMS example is not in this copy")
 class V71ReviewCallsTheCheck(unittest.TestCase):
-    @unittest.expectedFailure  # V71 (D17)
     def test_summary_within_budget_names_missing_bindings(self):
         from contracts.analysis_check import SUMMARY_BYTES
         with tempfile.TemporaryDirectory() as td:

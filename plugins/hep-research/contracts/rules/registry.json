@@ -1873,7 +1873,7 @@
       "D17"
      ],
      "host": "skill integration",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d17.V71ReviewCallsTheCheck.test_summary_within_budget_names_missing_bindings",
       "tests.contracts.test_v63_d17.V71ReviewCallsTheCheck.test_summary_pages"
