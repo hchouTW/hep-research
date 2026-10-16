@@ -5,6 +5,15 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- New opt-in `contracts/analysis_check.py` with analysis bundle 2.0.0 (`hep-research-analysis-bundle/2`, schema
+  `analysis_bundle_v2.json`; v6.3 D05b): per-mode roles (chain: one spec, environment lock, check context and semantic
+  lock, at least one recipe), unique item IDs, and for JSON items both the canonical and the bytes digest. New roles
+  `response`, `dataset-record`, `context`, `semantic-lock`, `coverage-contract`. `freeze` completes the check context
+  (schema `check_context.json`) with the obligation inventory of the suite (`contracts/rules/suites/`), generated
+  deterministically by `contracts/analysis_checks/obligations.py` from roots, instances and spec corrections only, and
+  records the semantic lock (`semantic_lock.json`, `contracts/analysis_checks/lock.py`: definitions in use with their
+  digests and member-set closures). Bundle 1.0.0 and `contracts/analysis_bundle.py` are unchanged; that reader refuses
+  a v2 bundle by its schema.
 - New capability `measurement:correction-keys-v1` (v6.3 D05a): a measurement-spec that declares it may give each
   correction the R4 keys `target_scope`, `calibration_digest`, `variation_id`, `stage` and an `application_id` (a
   recipe `step_id`); `validate.py` then knows them and rejects a malformed one (`measurement.bad_correction_key`). A

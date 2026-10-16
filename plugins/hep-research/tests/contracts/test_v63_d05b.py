@@ -30,7 +30,6 @@ class Tmp(unittest.TestCase):
 
 @NEEDS_AMS
 class BundleV2(Tmp):
-    @unittest.expectedFailure  # D05b
     def test_freeze_and_verify(self):
         path = cases.chain_case(self.root / "c")
         bundle = json.loads(path.read_text())
@@ -44,13 +43,11 @@ class BundleV2(Tmp):
         self.assertNotIn("bytes_sha256", env)
         self.assertEqual(ac().verify(bundle, self.root / "c")["status"], "identical")
 
-    @unittest.expectedFailure  # D05b
     def test_v1_reader_refuses_v2_and_v1_is_unchanged(self):
         from contracts import analysis_bundle as ab
         bundle = json.loads(cases.chain_case(self.root / "c").read_text())
         self.assertEqual(ab.verify(bundle, self.root / "c")["status"], "invalid")
 
-    @unittest.expectedFailure  # D05b
     def test_roles_and_ids(self):
         def no_recipe(c):
             c.remove("flux-from-counts")
@@ -64,7 +61,6 @@ class BundleV2(Tmp):
             cases.chain_case(self.root / "b", twin)
         self.assertEqual(ctx.exception.code, "bundle.duplicate_id")
 
-    @unittest.expectedFailure  # D05b: the context names item IDs and pointers only, never its own bundle digest
     def test_context_and_lock_are_items(self):
         path = cases.chain_case(self.root / "c")
         bundle = json.loads(path.read_text())
@@ -77,7 +73,6 @@ class BundleV2(Tmp):
 
 @NEEDS_AMS
 class Inventory(Tmp):
-    @unittest.expectedFailure  # V67 (D05b): regeneration under the same suite version is byte-identical
     def test_regeneration_is_byte_identical_and_order_free(self):
         from contracts.analysis_checks.obligations import generate
         c = cases.chain_case(self.root / "c", freeze=False)
@@ -92,7 +87,6 @@ class Inventory(Tmp):
         self.assertEqual(ids, sorted(ids))
         self.assertEqual(len(ids), len(set(ids)))
 
-    @unittest.expectedFailure  # V67 (D05b)
     def test_a_differing_inventory_is_invalid_input(self):
         path = cases.chain_case(self.root / "c")
         bundle = json.loads(path.read_text())
@@ -102,7 +96,6 @@ class Inventory(Tmp):
         self.assertIn("inventory.mismatch", {d["code"] for d in ac().check_inventory(view)})
         self.assertTrue(bundle["bundle_digest"])
 
-    @unittest.expectedFailure  # D05b: masking a binding or declaration cannot remove an obligation (V24 basis)
     def test_inventory_ignores_bindings_and_declarations(self):
         from contracts.analysis_checks.obligations import generate
         c = cases.chain_case(self.root / "c", freeze=False)
@@ -115,7 +108,6 @@ class Inventory(Tmp):
 
 @NEEDS_AMS
 class SemanticLock(Tmp):
-    @unittest.expectedFailure  # V14 (D05b): a new catalog or coverage version is a new lock; the old subject differs
     def test_definition_change_is_a_lock_difference(self):
         from contracts.analysis_checks.lock import compare
         path = cases.chain_case(self.root / "c")
@@ -126,7 +118,6 @@ class SemanticLock(Tmp):
         diffs = compare(view["lock"], ac().current_lock(view))
         self.assertEqual([(d["kind"], d["id"]) for d in diffs], [("coverage-contract", "differential-flux")])
 
-    @unittest.expectedFailure  # V58 (D05b part): member-set closures are in the lock; unrelated definitions are not
     def test_member_sets(self):
         from contracts.analysis_checks.lock import compare
         path = cases.chain_case(self.root / "c")
@@ -143,7 +134,6 @@ class SemanticLock(Tmp):
 
 @NEEDS_AMS
 class Subjects(Tmp):
-    @unittest.expectedFailure  # V50 (D05b): a smaller re-frozen analysis is a new subject with a scope delta
     def test_deleting_a_root(self):
         from contracts.analysis_checks.obligations import diff
         a = json.loads(cases.chain_case(self.root / "a").read_text())
@@ -159,7 +149,6 @@ class Subjects(Tmp):
         self.assertTrue(d["removed"])
         self.assertTrue(all("flux-helium-p2" in o for o in d["removed"]))
 
-    @unittest.expectedFailure  # V68 (D05b part): a new suite version adds obligations, listed as added
     def test_new_suite_version(self):
         from contracts.analysis_checks.obligations import diff, generate
         c = cases.chain_case(self.root / "c", freeze=False)
