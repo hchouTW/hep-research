@@ -2404,7 +2404,7 @@
     "tests/skills/hep_measurement/test_review_procedure.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b 2026-10-15"
+   "last_commit": "77d2607 2026-10-16"
   },
   {
    "path": "skills/hep-measurement/references/systematics.md",

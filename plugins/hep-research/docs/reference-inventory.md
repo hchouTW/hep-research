@@ -218,7 +218,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `hep-measurement-guide.md` | hep-measurement | 20.6 | yes | 7 | hep-detector | 9257d7b 2026-10-15 |
 | `histograms-efficiencies.md` | hep-measurement | 3.1 | no | 7 | hep-computing, hep-detector | 9257d7b 2026-10-15 |
 | `measurements-and-unfolding.md` | hep-measurement | 7.4 | no | 11 | hep-detector, hep-statistics | 9257d7b 2026-10-15 |
-| `review-and-artifacts.md` | hep-measurement | 7.7 | yes | 9 | - | 9257d7b 2026-10-15 |
+| `review-and-artifacts.md` | hep-measurement | 7.7 | yes | 9 | - | 77d2607 2026-10-16 |
 | `systematics.md` | hep-measurement | 8.9 | no | 27 | hep-detector, hep-ml, hep-statistics, hep-theory | 9257d7b 2026-10-15 |
 | `weights-normalization.md` | hep-measurement | 4.5 | no | 9 | hep-computing, hep-detector, hep-ml, hep-theory | 9257d7b 2026-10-15 |
 | `ablation-and-design-review.md` | hep-ml | 2.3 | no | 12 | hep-communication | 9257d7b 2026-10-15 |

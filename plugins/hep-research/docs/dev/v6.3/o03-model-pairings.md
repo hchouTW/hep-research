@@ -1,6 +1,6 @@
 # O03 proposal: supported modifier–constraint pairings of `model-card/v1` (v6.3 analysis-check programme)
 
-Status: **proposal, 2026-10-16; the owner decides** (see Decision). Written by the implementer at the owner's request.
+Status: **approved as written 2026-10-16; build deferred** (see Decision). Written by the implementer at the owner's request.
 O03 asks which modifier–constraint pairings, and which joint evaluations, the model-card suite may treat as
 supported. The brief's rule applies: an unlisted pairing is `unsupported`, and cross-model sharing is never guessed.
 A combination is not supported just because each of its terms appears on some list. Labels: **Confirmed**,
@@ -92,3 +92,8 @@ Programme owner: hchouTW (`decision-enforce.md`, 2026-10-16). Implementer: Claud
 *To be completed by the owner:*
 - approve, change or reject P1–P3 and the unsupported list;
 - say whether to build the model part now, or keep it deferred until an analysis needs it (the current decision).
+
+**Decided 2026-10-16 by the owner (hchouTW):**
+- P1–P3 and the unsupported list are **approved as written**.
+- The model part of M2b stays **deferred** until an analysis uses a model card with the checker. When it is built, it
+  implements exactly this set and closes the three gaps above.
