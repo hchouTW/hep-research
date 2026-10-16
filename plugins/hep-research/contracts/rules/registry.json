@@ -1926,16 +1926,19 @@
     "contracts/effect_catalog.py"
    ],
    "checks": [
+    "tests.contracts.test_r5_contracts",
     "tests.contracts.test_recipe_semantics",
     "tests.contracts.test_v63_baseline_gaps",
-    "tests.contracts.test_r5_contracts",
-    "tests.contracts.test_v63_d04"
+    "tests.contracts.test_v63_d04",
+    "tests.contracts.test_v63_d05a",
+    "tests.contracts.test_v63_d05b",
+    "tests.contracts.test_v63_d05c",
+    "tests.contracts.test_v63_d06",
+    "tests.contracts.test_v63_d11a",
+    "tests.contracts.test_v63_d17"
    ],
    "not_available": [
-    "L3 chain rules (D06)",
-    "old-version readers (D11a)",
-    "semantic lock closure (D05b)",
-    "CASE-CHAIN and CASE-MODEL (D08)"
+    "CASE-MODEL (D08, M2b)"
    ],
    "full": false
   },
@@ -1943,17 +1946,21 @@
    "id": "context-obligations",
    "change": "context, roots, obligations, declarations",
    "patterns": [
-    "contracts/analysis_checks/**",
     "contracts/analysis_check.py",
-    "contracts/resolve.py"
+    "contracts/analysis_checks/**",
+    "contracts/resolve.py",
+    "contracts/rules/suites/**",
+    "tests/contracts/v63_cases.py"
    ],
-   "checks": [],
-   "not_available": [
-    "masking tests on a fixed subject (D05b)",
-    "regeneration comparison (D05b)",
-    "scope delta for a new subject (D05b)",
-    "declaration flags (D05c)"
+   "checks": [
+    "tests.contracts.test_v63_d05a",
+    "tests.contracts.test_v63_d05b",
+    "tests.contracts.test_v63_d05c",
+    "tests.contracts.test_v63_d06",
+    "tests.contracts.test_v63_d11a",
+    "tests.contracts.test_v63_d17"
    ],
+   "not_available": [],
    "full": false
   },
   {
@@ -1961,17 +1968,19 @@
    "change": "bundle, result binding",
    "patterns": [
     "contracts/analysis_bundle.py",
+    "contracts/release_manifest.py",
     "contracts/schemas/analysis_bundle.json",
-    "contracts/verify_run.py",
-    "contracts/release_manifest.py"
+    "contracts/schemas/analysis_bundle_v2.json",
+    "contracts/verify_run.py"
    ],
    "checks": [
     "tests.contracts.test_permits",
     "tests.contracts.test_r5_contracts",
-    "tests.contracts.test_v63_baseline_gaps"
+    "tests.contracts.test_v63_baseline_gaps",
+    "tests.contracts.test_v63_d05b",
+    "tests.contracts.test_v63_d05c"
    ],
    "not_available": [
-    "bytes and canonical digests of the new bundle (D05b)",
     "run dependencies and status propagation (D05d)",
     "digest cycles (D05d)",
     "compatibility matrix (D09)"
@@ -2021,7 +2030,6 @@
     "tests.contracts.test_protected_entry_points"
    ],
    "not_available": [
-    "assessment binding (D05c)",
     "forged or wrong-version reports (D10)",
     "attestation evidence path for reports (D10)",
     "permit.py advisory report check (D10)",
@@ -2040,13 +2048,12 @@
     "README.md"
    ],
    "checks": [
+    "part:static",
+    "tests.contracts.test_v63_d17",
     "tests.routing.test_routing_static",
-    "tests.tools.test_check_instruction_text",
-    "part:static"
+    "tests.tools.test_check_instruction_text"
    ],
-   "not_available": [
-    "agent summary size (D17)"
-   ],
+   "not_available": [],
    "full": false
   },
   {
