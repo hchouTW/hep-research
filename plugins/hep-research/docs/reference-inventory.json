@@ -10,7 +10,7 @@
   },
   "hep-computing": {
    "references": 32,
-   "bytes": 297461,
+   "bytes": 297694,
    "uncited": 0
   },
   "hep-detector": {
@@ -1388,13 +1388,14 @@
   {
    "path": "skills/hep-computing/references/storage-cern-eos.md",
    "owner": "hep-computing",
-   "bytes": 13194,
-   "lines": 112,
+   "bytes": 13427,
+   "lines": 114,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/references/batch-site-cern-htcondor.md",
-    "skills/hep-computing/references/python-hep-coding-patterns.md"
+    "skills/hep-computing/references/python-hep-coding-patterns.md",
+    "tests/core/test_side_effects_f13.py"
    ],
    "cited_by_other_skills": [],
    "last_commit": "b0dce7a 2026-10-10"
@@ -2339,7 +2340,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "9257d7b 2026-10-15"
+   "last_commit": "db0a9cc 2026-10-17"
   },
   {
    "path": "skills/hep-measurement/references/histograms-efficiencies.md",
@@ -3245,7 +3246,7 @@
     "hep-computing",
     "hep-detector"
    ],
-   "last_commit": "4665f43 2026-10-13"
+   "last_commit": "db0a9cc 2026-10-17"
   },
   {
    "path": "skills/hep-statistics/references/ml-assisted-inference.md",
@@ -3489,7 +3490,7 @@
     "hep-communication",
     "hep-statistics"
    ],
-   "last_commit": "9257d7b 2026-10-15"
+   "last_commit": "db0a9cc 2026-10-17"
   },
   {
    "path": "skills/hep-theory/references/pdfs-and-lhapdf.md",

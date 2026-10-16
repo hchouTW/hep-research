@@ -26,12 +26,14 @@ Rendering is not visual inspection: a rendered block may still have overlapping 
 here checks the physics a diagram shows.
 
 Usage: `python3 <plugin root>/skills/hep-communication/scripts/check_diagram_sources.py [path ...] [--format text|json]
-        [--require-render] [--no-tikz]` (default paths: the whole bundle).
+        [--require-render] [--no-tikz] [--no-mermaid]` (default paths: the whole bundle).
 Exit codes: 2 a named file holds no diagram block (nothing was checked) or cannot be read; 1 at least one source error; 3 no source error but at least one environment error, or --require-render and
 at least one block was not rendered (lint-only or skipped); 0 otherwise. Without --require-render, lint-only and
 skipped blocks keep the previous behavior (exit 0) and are reported as such; they are never counted as rendered.
 A renderer that does not finish within HEP_RENDER_TIMEOUT seconds (default 60) is an environment error; Mermaid's
-`mmdc` starts Chromium, which can hang where Chromium cannot start. --format json prints one report object
+`mmdc` starts a headless Chromium, which can hang where Chromium cannot start. Network use: that browser can open
+network connections and this script does not restrict them; --no-mermaid never starts `mmdc` (Mermaid blocks are then
+lint-only), for sessions whose egress policy forbids it or where a browser must not start. --format json prints one report object
 (report_version 1.0.0) with per-block outcomes, renderer availability and versions, and reconciled counts.
 Standard library only.
 """
@@ -264,7 +266,7 @@ def _version(cmd: list[str]) -> str | None:
     return line[:120] if line else None
 
 
-def preflight_renderers(tikz: bool = True) -> dict:
+def preflight_renderers(tikz: bool = True, mermaid: bool = True) -> dict:
     """One minimal render per renderer on PATH: {"dot"|"mmdc"|"plantuml"|"tex": {"available", "path", "version",
     "reason"}}. A renderer that fails its preflight is unavailable for the run and is not launched again. "tex" is
     LuaLaTeX, else pdfLaTeX; with tikz=False it is not looked for."""
@@ -280,6 +282,10 @@ def preflight_renderers(tikz: bool = True) -> dict:
         out["tex"] = {"available": ok, "path": engine, "version": _version([engine, "--version"]) if ok else None,
                       "reason": None if ok else f"preflight compile failed ({r['reason']}); not launched again"}
     for name, render, vcmd in (("dot", render_dot, ["-V"]), ("mmdc", render_mermaid, ["--version"]), ("plantuml", render_plantuml, ["-version"])):
+        if name == "mmdc" and not mermaid:
+            out[name] = {"available": False, "path": None, "version": None,
+                         "reason": "Mermaid CLI switched off (--no-mermaid): it starts a headless browser"}
+            continue
         path = shutil.which(name)
         if not path:
             out[name] = {"available": False, "path": None, "version": None, "reason": f"`{name}` not on PATH"}
@@ -335,8 +341,8 @@ def check_block(lang: str, source: str, renderers: dict, setup: str = "") -> dic
     return through("mmdc", render_mermaid)
 
 
-def run(paths: list[Path], require_render: bool = False, tikz: bool = True) -> dict:
-    renderers = preflight_renderers(tikz)
+def run(paths: list[Path], require_render: bool = False, tikz: bool = True, mermaid: bool = True) -> dict:
+    renderers = preflight_renderers(tikz, mermaid)
     blocks = []
     for path in paths:
         for i, (lang, source, setup) in enumerate(extract_blocks_with_setup(path.read_text(encoding="utf-8"))):
@@ -391,10 +397,12 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--require-render", action="store_true",
                     help="strict: a block that was only linted or skipped makes the run incomplete (exit 3)")
     ap.add_argument("--no-tikz", action="store_true", help="do not compile TikZ/LaTeX blocks (they are reported as skipped)")
+    ap.add_argument("--no-mermaid", action="store_true",
+                    help="never start the Mermaid CLI, which launches a headless browser (Mermaid blocks are lint-only)")
     args = ap.parse_args(argv)
     root = Path(__file__).resolve().parents[1]
     paths = args.paths or sorted(root.rglob("*.md"))
-    rep = run(paths, args.require_render, tikz=not args.no_tikz)
+    rep = run(paths, args.require_render, tikz=not args.no_tikz, mermaid=not args.no_mermaid)
     if args.format == "json":
         print(json.dumps(rep, indent=1))
     else:
