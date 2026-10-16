@@ -1,6 +1,6 @@
 # Decision record G-ENFORCE (v6.3 analysis-check programme)
 
-Status: **awaiting the maintainer's decision.** Written 2026-10-16 after M3 for the chain and ratio suites (D09
+Status: **decided 2026-10-16: every rule stays in shadow mode** (see Decision). Written 2026-10-16 after M3 for the chain and ratio suites (D09
 shadow review and refusal matrix, D10 advisory report check). Labels: **Confirmed**, **Inferred**, **Unresolved**.
 
 ## Analysis question
@@ -46,4 +46,6 @@ limits to public and synthetic diagnostics).
 
 ## Decision
 
-*(maintainer)* Option: — · Date: — · Conditions: —
+**Keep every rule in shadow mode**, 2026-10-16: the maintainer's instruction in the session was to follow the
+recommendation. The implementer works on step 1 (non-refusing readers). Steps 2 and 3 (reviewers, custodian adoption)
+are the maintainer's and custodian's.
