@@ -1,5 +1,6 @@
 """v6.3 D01 gap runs: characterization tests that pin today's behaviour of the known gaps. Each test names the work
-package expected to flip it; until then it asserts the current behaviour so the gate stays green. Public and synthetic
+package expected to flip it; until then it asserts the current behaviour so the gate stays green. Gaps 2 and 3 are
+flipped (D03a) and now assert the fixed behaviour. Public and synthetic
 inputs only (examples/ams-flux-ratio artifacts, the registry fixtures, throwaway campaigns in a temporary folder).
 The cases built on the AMS example skip in the AMS-optional copy (tools/check_ams_optional.py), which removes it.
 Nothing here changes core/partition: campaigns are synthetic ones these tests create."""
@@ -92,48 +93,54 @@ class Gap1UnknownR4Keys(unittest.TestCase):
 
 
 class Gap2ReviewIgnoresLoadReport(unittest.TestCase):
-    """Gap 2 (flipped by D03a): review_measurement_spec.py builds its vocabulary from load_project(...).profiles
-    without checking the load report, so it proceeds with a profile the registry reports as incompatible."""
+    """Gap 2, flipped by D03a: review_measurement_spec.py used to build its vocabulary from load_project(...).profiles
+    without checking the load report. It now refuses a project whose profiles did not load cleanly (exit 2)."""
 
-    def test_review_proceeds_with_an_incompatible_profile(self):
+    def test_review_refuses_an_incompatible_profile(self):
         with tempfile.TemporaryDirectory() as td:
             cfg = incompatible_project(Path(td))
             proj = load_project(cfg)
             self.assertIn("profile.incompatible_version", {f.code for f in proj.report.errors})
             spec = Path(td) / "spec.json"
             shutil.copy(ANY_SPEC, spec)
-            code, out = run(ROOT / "skills" / "hep-measurement" / "scripts" / "review_measurement_spec.py", spec,
-                            "--profiles-from", cfg)
-        self.assertNotEqual(code, 2, "today the incompatible profile is not a usage or input error")
-        codes = {d["code"] for d in out["defects"]} | {w["code"] for w in out["warnings"]}
-        self.assertNotIn("profile.incompatible_version", codes, "today the load report never reaches the review")
+            p = subprocess.run([sys.executable, str(ROOT / "skills" / "hep-measurement" / "scripts" /
+                                                    "review_measurement_spec.py"), str(spec), "--profiles-from", str(cfg)],
+                               capture_output=True, text=True, cwd=ROOT, timeout=300)
+        self.assertEqual(p.returncode, 2, p.stdout)
+        self.assertIn("profile.incompatible_version", p.stderr)
 
 
 class Gap3IncompatibleProfilesKept(unittest.TestCase):
-    """Gap 3 (flipped by D03a): the registry adds an error for an incompatible profile and still returns it as
-    loaded; load_project binds it, and communication_project lists it with only a warning."""
+    """Gap 3, flipped by D03a: an incompatible profile used to be kept by the registry, bound by load_project and
+    listed by communication_project with a warning only. The legacy validate_registry listing still includes it (the
+    registry CLI output is unchanged); load_registry rejects it, load_project does not bind it, and
+    communication_project reports an error and binds nothing."""
 
-    def test_registry_keeps_an_incompatible_profile(self):
+    def test_registry_rejects_an_incompatible_profile(self):
+        from contracts.registry import load_registry
         reg = INCOMPATIBLE.parents[1] / "registry.json"
         rep, loaded = validate_registry(reg)
         self.assertIn("profile.incompatible_version", {f.code for f in rep.errors})
-        self.assertIn("experiment:fixture-exp-a", loaded)
+        self.assertIn("experiment:fixture-exp-a", loaded)  # legacy listing
+        res = load_registry(reg)
+        self.assertNotIn("experiment:fixture-exp-a", res.profiles)
+        self.assertEqual(res.rejected["experiment:fixture-exp-a"], ["profile.incompatible_version"])
 
-    def test_load_project_binds_an_incompatible_profile(self):
+    def test_load_project_does_not_bind_an_incompatible_profile(self):
         with tempfile.TemporaryDirectory() as td:
             proj = load_project(incompatible_project(Path(td)))
         self.assertFalse(proj.report.ok)
-        self.assertEqual([p["id"] for p in proj.profiles], ["experiment:fixture-exp-a"])
+        self.assertEqual(proj.profiles, [])
 
-    def test_communication_project_lists_it_with_a_warning_only(self):
+    def test_communication_project_reports_an_error_and_binds_nothing(self):
         with tempfile.TemporaryDirectory() as td:
             root = Path(td)
             incompatible_project(root)
             (root / "record.json").write_text("{}", encoding="utf-8")
             ctx = cproj.resolve_context(root / "record.json", root)
-        self.assertEqual(ctx["profiles"], ["experiment:fixture-exp-a"])
+        self.assertEqual(ctx["profiles"], [])
         sev = {f["code"]: f["severity"] for f in ctx["findings"]}
-        self.assertEqual(sev.get("resolution.project_config_invalid"), "warning")
+        self.assertEqual(sev.get("resolution.project_config_invalid"), "error")
 
 
 @NEEDS_AMS

@@ -6,7 +6,8 @@ Exit 0 valid, 1 errors, 2 unreadable registry or an unknown or incomplete argume
 
 Checks: registry schema; duplicate IDs; registry/profile.json agreement; core and contracts
 compatibility; required resources present; folder template; paths that escape the package
-(including via symlinks); dependency existence and cycles; namespaced vocabulary extensions;
+(including via symlinks); dependency existence and cycles; namespaced vocabulary extensions; one owner per
+namespace across the registry and the local profiles (profile.namespace_collision);
 capability claims backed by existing tests; deprecated skill names in related_skills (contracts.skill_names: a
 warning, an error with --strict-versions, the version and name policy). Metadata is read; module content is not.
 """
@@ -14,6 +15,7 @@ from __future__ import annotations
 
 import json
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -22,6 +24,7 @@ if __package__ in (None, ""):
 
 from contracts import CONTRACTS_VERSION, skill_names  # noqa: E402
 from contracts.schema import Report, validate  # noqa: E402
+from contracts.resolve import namespace_owners  # noqa: E402
 from contracts.semver import satisfies, valid_spec  # noqa: E402
 from contracts.vocab import Vocabulary, declared_namespaces  # noqa: E402
 from core import CORE_VERSION  # noqa: E402
@@ -148,10 +151,31 @@ def find_cycles(profiles: dict[str, dict]) -> list[list[str]]:
     return cycles
 
 
+@dataclass
+class RegistryLoad:
+    """The outcome of loading the visible closure: profiles holds only profiles that loaded without an error of their
+    own (usable); rejected maps every other loaded id to the error codes that keep it out; every_profile is the legacy
+    {id: profile} of validate_registry, rejected ones included."""
+    report: Report
+    profiles: dict[str, dict]
+    rejected: dict[str, list[str]]
+    every_profile: dict[str, dict]
+
+
 def validate_registry(registry_path: Path | None = None, local_dirs=(), package_root: Path | None = None,
                       strict_versions: bool = False) -> tuple[Report, dict]:
-    """Validate the registry plus optional local profile folders. Returns (report, {id: profile}). strict_versions:
-    a deprecated skill name in related_skills is an error, not a warning."""
+    """Validate the registry plus optional local profile folders. Returns (report, {id: profile}), every loaded
+    profile included even when it has errors (the CLI's listing); consumers that use profiles call load_registry and
+    take only its usable profiles. strict_versions: a deprecated skill name in related_skills is an error."""
+    res = load_registry(registry_path, local_dirs, package_root, strict_versions)
+    return res.report, res.every_profile
+
+
+def load_registry(registry_path: Path | None = None, local_dirs=(), package_root: Path | None = None,
+                  strict_versions: bool = False) -> RegistryLoad:
+    """Validate the registry plus optional local profile folders (the visible closure) and separate the usable
+    profiles from the rejected ones: a profile with an error of its own (incompatible version, missing resource,
+    namespace collision, missing or rejected dependency, ...) is rejected, never handed to a consumer."""
     registry_path = Path(registry_path or PLUGIN_ROOT / "profiles" / "registry.json")
     package_root = Path(package_root or registry_path.parent.parent)
     rep = Report()
@@ -164,21 +188,49 @@ def validate_registry(registry_path: Path | None = None, local_dirs=(), package_
                for i, e in enumerate(reg.get("profiles", []) if isinstance(reg, dict) else [])]
     unique = list(dict.fromkeys(Path(d).resolve() for d in local_dirs))  # one folder given twice is one profile
     entries += [(None, d, d, f"local[{i}]") for i, d in enumerate(unique)]
+    rejected: dict[str, list[str]] = {}
+
+    def reject(pid: str, code: str) -> None:
+        if code not in rejected.setdefault(pid, []):
+            rejected[pid].append(code)
     for expect, pdir, boundary, where in entries:
+        before = len(rep.findings)
         prof = check_profile_dir(pdir, boundary, rep, where, expect, strict_versions)
         if prof is None or not isinstance(prof.get("id"), str):
             continue    # a missing or malformed id is already a schema finding
         if prof["id"] in loaded:
+            # the first copy stays loaded (the listing companions read); the report error already stops every consumer
             rep.add("error", where, "registry.duplicate_id", f"duplicate profile id '{prof['id']}' (also at {loaded[prof['id']]['_dir']})")
             continue
         loaded[prof["id"]] = prof
+        for f in rep.findings[before:]:
+            if f.severity == "error":
+                reject(prof["id"], f.code)
     for pid, prof in sorted(loaded.items()):
         for dep in prof.get("depends_on", []):
             if dep not in loaded:
                 rep.add("error", pid, "profile.missing_dependency", f"depends on '{dep}', which is not registered")
+                reject(pid, "profile.missing_dependency")
     for cyc in find_cycles(loaded):
         rep.add("error", cyc[0], "profile.dependency_cycle", "dependency cycle: " + " -> ".join(cyc))
-    return rep, loaded
+        for pid in cyc:
+            reject(pid, "profile.dependency_cycle")
+    # namespace ownership over the visible closure (C13): each namespace has exactly one owner
+    _, collisions = namespace_owners(loaded[k] for k in sorted(loaded))
+    for c in collisions:
+        rep.add("error", c["owners"][1], "profile.namespace_collision",
+                f"namespace '{c['namespace']}' is declared by {c['owners']}: each namespace has exactly one owner")
+        for pid in c["owners"]:
+            reject(pid, "profile.namespace_collision")
+    changed = True
+    while changed:  # a profile that depends on a rejected one is rejected too
+        changed = False
+        for pid, prof in sorted(loaded.items()):
+            if pid not in rejected and any(d in rejected for d in prof.get("depends_on", []) if isinstance(d, str)):
+                reject(pid, "profile.dependency_rejected")
+                changed = True
+    usable = {k: v for k, v in loaded.items() if k not in rejected}
+    return RegistryLoad(rep, usable, {k: rejected[k] for k in sorted(rejected)}, loaded)
 
 
 def option_values(args: list[str], flag: str) -> list[str]:

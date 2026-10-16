@@ -320,7 +320,7 @@
       "D03a"
      ],
      "host": "resolver unit test",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d03a.V13AliasKeys.test_equal_values_merge_and_conflicts_are_rejected"
      ]
@@ -636,7 +636,7 @@
       "D03a"
      ],
      "host": "resolver unit test",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d03a.V29AliasContract.test_cross_owner_takeover",
       "tests.contracts.test_v63_d03a.V29AliasContract.test_cycle",

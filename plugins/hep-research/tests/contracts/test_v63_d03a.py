@@ -65,7 +65,6 @@ class V13AliasKeys(unittest.TestCase):
     """V13: old and new alias keys with equal values resolve the same; a conflict is rejected with both sources; the
     input and its file are unchanged."""
 
-    @unittest.expectedFailure  # V13 (D03a): contracts.resolve does not exist yet
     def test_equal_values_merge_and_conflicts_are_rejected(self):
         from contracts import resolve
         aliases = [alias()]
@@ -100,24 +99,20 @@ class V29AliasContract(unittest.TestCase):
         from contracts import resolve
         return {f["code"] for f in resolve.check_aliases(aliases, owners(), vocab())}
 
-    @unittest.expectedFailure  # V29 (D03a): contracts.resolve does not exist yet
     def test_cross_owner_takeover(self):
         self.assertIn("alias.cross_owner", self.codes([alias(owner="experiment:fixture-exp-b")]))
         self.assertIn("alias.cross_owner", self.codes([alias(alias="frame", target="fxa:new_key")]))
 
-    @unittest.expectedFailure  # V29 (D03a)
     def test_cycle(self):
         self.assertIn("alias.cycle", self.codes([alias(alias="fxa:old_key", target="fxa:other"),
                                                  alias(alias="fxa:other", target="fxa:old_key")]))
 
-    @unittest.expectedFailure  # V29 (D03a)
     def test_ambiguous_missing_target_conversion_and_malformed(self):
         self.assertIn("alias.ambiguous", self.codes([alias(), alias(target="fxa:other")]))
         self.assertIn("alias.target_missing", self.codes([alias(target="fxa:absent")]))
         self.assertIn("alias.needs_conversion", self.codes([alias(conversion={"factor": 2})]))
         self.assertIn("alias.bad_record", self.codes([{"alias": "fxa:old_key"}]))
 
-    @unittest.expectedFailure  # V29 (D03a)
     def test_a_promotion_by_the_owner_passes(self):
         # the original owner aliases its namespaced term to a base term (the D03b promotion pattern)
         self.assertEqual(self.codes([alias(vocabulary="levels", alias="fxa:instrument", target="detector")]), set())
@@ -127,7 +122,6 @@ class NamespaceOwnership(unittest.TestCase):
     """Each namespace of the visible closure (public registry, project local profiles, --local profiles) has exactly
     one owner; a second declaring profile is reported as profile.namespace_collision and neither is used."""
 
-    @unittest.expectedFailure  # D03a: no ownership check at load time yet
     def test_two_local_profiles_sharing_a_namespace(self):
         from contracts.registry import load_registry
         with tempfile.TemporaryDirectory() as td:
@@ -150,7 +144,6 @@ class NamespaceOwnership(unittest.TestCase):
 class ConsumersRespectLoadErrors(unittest.TestCase):
     """One failing-profile case per consumer of the D01 inventory."""
 
-    @unittest.expectedFailure  # D03a: validate_registry keeps the profile as loaded
     def test_registry_resolver_returns_an_explicit_failure(self):
         from contracts.registry import load_registry
         res = load_registry(INCOMPATIBLE.parents[1] / "registry.json")
@@ -162,7 +155,6 @@ class ConsumersRespectLoadErrors(unittest.TestCase):
         doc = json.loads(out)
         self.assertEqual((code, doc["ok"], doc["profiles"]), (1, False, [BAD_ID]))
 
-    @unittest.expectedFailure  # D03a: load_project binds the incompatible profile
     def test_load_project_does_not_bind_it(self):
         from contracts.project import load_project
         with tempfile.TemporaryDirectory() as td:
@@ -171,7 +163,6 @@ class ConsumersRespectLoadErrors(unittest.TestCase):
         self.assertIn("project.profile_rejected", {f.code for f in proj.report.errors})
         self.assertEqual(proj.bound_ids, [BAD_ID])
 
-    @unittest.expectedFailure  # D03a: resolve_context returns the configured IDs of an invalid project
     def test_project_resolve_context(self):
         from contracts.project import load_project, resolve_context
         with tempfile.TemporaryDirectory() as td:
@@ -179,7 +170,6 @@ class ConsumersRespectLoadErrors(unittest.TestCase):
         r = resolve_context({}, proj, needs_profile=True)
         self.assertEqual((r["decision"], r["experiments"]), ("invalid", []))
 
-    @unittest.expectedFailure  # D03a: review_measurement_spec.py ignores the load report
     def test_review_measurement_spec_refuses(self):
         with tempfile.TemporaryDirectory() as td:
             code, out, err = run(REVIEW, SPEC, "--profiles-from", project(Path(td)))
@@ -192,7 +182,6 @@ class ConsumersRespectLoadErrors(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertIn("profile.incompatible_version", {f["code"] for f in json.loads(out)["findings"]})
 
-    @unittest.expectedFailure  # D03a: communication_project downgrades the load errors to warnings
     def test_communication_project_fails_and_binds_nothing(self):
         from contracts import communication_project as cproj
         with tempfile.TemporaryDirectory() as td:
