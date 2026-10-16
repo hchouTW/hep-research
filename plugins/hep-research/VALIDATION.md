@@ -1832,7 +1832,7 @@ against main `4b90c71` reported no findings.
 | Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 25 pass, 0 fail; 3580 tests, 0 failures, 170 skipped |
 | Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
 
-## V63-ENFORCE-INPUTS (2026-10-17, Python 3.13.2 on macOS 26.5 arm64; branch `v63/enforce-inputs` on main `aa2d1f8`)
+## V63-ENFORCE-INPUTS (2026-10-17, Python 3.13.2 on macOS 26.5 arm64; branch `v63/enforce-inputs` on main `bce13af`)
 
 The G-ENFORCE inputs were completed for the full suite set.
 
