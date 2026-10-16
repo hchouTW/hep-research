@@ -34,6 +34,9 @@ single-photon angular resolution supplied by the user; n is treated as a single 
 Separation convention (--convention): single (default) divides by species A's per-track
 resolution; quadrature by sqrt(sigma_A^2 + sigma_B^2), symmetric in the species. See
 <plugin root>/skills/hep-detector/references/particle-identification.md.
+Defaults (F-06): the output lists the values used ("inputs") and those taken by default ("defaults_used"); a
+defaulted detector parameter (radiator length 2 cm, N0 100 /cm, single-photon resolution 5 mrad, track term 0) is
+also a warning, because the default describes no particular detector.
 Status: --status (default unvalidated; one of the core artifact_statuses) is echoed as status.
 Exit codes: 0 ok; 1 the computation failed or the input file is unreadable or invalid (JSON with ok false);
 2 invalid input (JSON with error_kind invalid-input on stdout, the usage on stderr).
@@ -49,6 +52,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from pid_separation_power import MASSES_GEV, kinematics, resolve_species  # noqa: E402
 
+DEFAULTS = {'radiator_length': 2.0, 'figure_of_merit': 100.0, 'single_photon_resolution': 5.0,
+            'track_resolution': 0.0, 'convention': 'single'}
+DETECTOR_PARAMETERS = ('radiator_length', 'figure_of_merit', 'single_photon_resolution', 'track_resolution')  # F-06
 STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
             'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
 
@@ -220,25 +226,33 @@ def main():
     given.add_argument('--momentum', type=float, default=None, help='GeV/c (default 10)')
     given.add_argument('--rigidity', type=float, default=None,
                        help='GV; each species then has p = z * R')
-    parser.add_argument('--radiator-length', type=float, default=2.0,
-                        dest='radiator_length', help='radiator thickness in cm (default 2)')
-    parser.add_argument('--figure-of-merit', type=float, default=100.0,
+    parser.add_argument('--radiator-length', type=float, default=None,
+                        dest='radiator_length', help='radiator thickness in cm (default 2, warned)')
+    parser.add_argument('--figure-of-merit', type=float, default=None,
                         dest='figure_of_merit',
-                        help='N0 in cm^-1, folding in detection efficiency (default 100)')
-    parser.add_argument('--single-photon-resolution', type=float, default=5.0,
+                        help='N0 in cm^-1, folding in detection efficiency (default 100, warned)')
+    parser.add_argument('--single-photon-resolution', type=float, default=None,
                         dest='single_photon_resolution',
-                        help='single-photon angular resolution in mrad (default 5)')
-    parser.add_argument('--track-resolution', type=float, default=0.0,
+                        help='single-photon angular resolution in mrad (default 5, warned)')
+    parser.add_argument('--track-resolution', type=float, default=None,
                         dest='track_resolution',
                         help='per-track angular term in mrad that does not shrink with N '
-                             '(default 0)')
-    parser.add_argument('--convention', choices=CONVENTIONS, default='single',
+                             '(default 0, warned)')
+    parser.add_argument('--convention', choices=CONVENTIONS, default=None,
                         help='single: delta/sigma of species A (default); quadrature: '
                              'delta/sqrt(sigma_A^2 + sigma_B^2)')
     parser.add_argument('--status', choices=STATUSES, default='unvalidated',
                         help='status label of the inputs, echoed as status (default unvalidated)')
     args = parser.parse_args()
 
+    # F-06: defaults are reported in defaults_used; a defaulted detector parameter is also a warning
+    defaults_used = {}
+    for name, default in DEFAULTS.items():
+        if getattr(args, name) is None:
+            setattr(args, name, default)
+            defaults_used[name] = default
+    if args.rigidity is None and args.momentum is None:
+        defaults_used['momentum'] = 10.0
     try:
         index = validate_index(args.index)
         mass_a, charge_a = resolve_species(args.species[0])
@@ -270,12 +284,18 @@ def main():
         convention, reference = 'delta_over_quadrature_sum_of_both_sigmas', None
     else:
         convention, reference = 'delta_over_sigma_of_species_a', args.species[0]
-    warnings = [f'species {label}: relative beta resolution {rec["relative_beta_resolution"]:.3g} exceeds 0.1; the '
+    warnings = [f'{name} not given: the default {defaults_used[name]!r} describes no particular detector; give the '
+                'value of yours' for name in DETECTOR_PARAMETERS if name in defaults_used]
+    warnings += [f'species {label}: relative beta resolution {rec["relative_beta_resolution"]:.3g} exceeds 0.1; the '
                 'small-error propagation dbeta/beta = tan(theta_c) sigma_theta is not reliable there'
                 for label, rec in (('a', record_a), ('b', record_b))
                 if rec.get('relative_beta_resolution') is not None and rec['relative_beta_resolution'] > 0.1]
     payload = {
         'status': args.status,
+        'inputs': {'index': index, 'species': list(args.species),
+                   **({'rigidity': args.rigidity} if args.rigidity is not None else {'momentum': momentum_a}),
+                   **{name: getattr(args, name) for name in DEFAULTS}},
+        'defaults_used': defaults_used,
         'warnings': warnings,
         'refractive_index': index,
         'input_variable': 'rigidity' if args.rigidity is not None else 'momentum',

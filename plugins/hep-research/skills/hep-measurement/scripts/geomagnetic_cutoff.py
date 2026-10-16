@@ -27,6 +27,9 @@ backtracing through a full geomagnetic field model (e.g. IGRF) and is not someth
 this formula replaces - see the docstring caveat repeated in the reference file.
 Rigidity in GV, geocentric distance in Earth radii (--radius-re, default 1.0 = the surface; the old name
 --altitude-re is a deprecated alias, since the value is a distance from the Earth's centre, not an altitude), dipole moment in G*cm^3 (default: the IGRF-14 1955 dipole, see above).
+--epoch names the epoch of the dipole moment. The output reports the moment and epoch used ("dipole"), all inputs
+("inputs") and those taken by default ("defaults_used"); a defaulted moment, or a moment without an epoch, is a warning
+(F-06).
 Status: --status (default unvalidated; one of the core artifact_statuses) is echoed as status.
 Exit codes: 0 ok; 1 the computation failed; 2 usage or invalid input (NaN, inf, malformed file);
 3 incomplete or inconclusive.
@@ -42,6 +45,7 @@ import sys
 
 EARTH_RADIUS_CM = 6.371e8
 DEFAULT_DIPOLE_MOMENT_G_CM3 = 8.05e25  # IGRF-14 1955 dipole (igrf14coeffs.txt, NOAA/IAGA, read 2026-10-15)
+DEFAULT_DIPOLE_EPOCH = '1955'  # the epoch of DEFAULT_DIPOLE_MOMENT_G_CM3
 PROTON_MASS_GEV = 0.93827208943  # CODATA 2022 m_p c^2
 # Atomic masses in u from AME2020 (Wang et al., Chinese Phys. C 45 (2021) 030003; file mass.mas20, read
 # 2026-10-13 from https://www-nds.iaea.org/amdc/ame2020/mass_1.mas20.txt). Nuclear mass = atomic mass x m_u c^2 -
@@ -149,8 +153,11 @@ def main():
                         help='geocentric distance in Earth radii (default 1.0, the surface)')
     parser.add_argument('--altitude-re', type=float, default=None, dest='altitude_re',
                         help='deprecated alias of --radius-re (the value is a geocentric distance)')
-    parser.add_argument('--dipole-moment', type=float, default=DEFAULT_DIPOLE_MOMENT_G_CM3,
-                        help='dipole moment in G*cm^3 (default 8.05e25, the IGRF-14 1955 dipole; 7.69e25 for 2025)')
+    parser.add_argument('--dipole-moment', type=float, default=None,
+                        help='dipole moment in G*cm^3 (default 8.05e25, the IGRF-14 1955 dipole, warned; 7.69e25 for 2025)')
+    parser.add_argument('--epoch', default=None,
+                        help='epoch of the dipole moment, e.g. 2025 (reported with the moment; default: 1955 when the '
+                             'moment is defaulted, "not stated" when it is given)')
     parser.add_argument('--charge', type=int, help='nucleus charge Z, for the energy conversion')
     parser.add_argument('--mass-number', type=int, dest='mass_number',
                         help='nucleus mass number A, for the energy conversion')
@@ -165,6 +172,25 @@ def main():
             print('geomagnetic_cutoff.py: warning: --altitude-re is deprecated; use --radius-re (a geocentric distance)',
                   file=sys.stderr)
         radius = args.radius_re if args.radius_re is not None else (args.altitude_re if args.altitude_re is not None else 1.0)
+        # F-06: the dipole moment and its epoch are reported; a defaulted moment is a warning
+        defaults_used, warnings = {}, []
+        if args.radius_re is None and args.altitude_re is None:
+            defaults_used['radius_re'] = 1.0
+        if args.dipole_moment is None:
+            args.dipole_moment = DEFAULT_DIPOLE_MOMENT_G_CM3
+            defaults_used['dipole_moment_g_cm3'] = DEFAULT_DIPOLE_MOMENT_G_CM3
+            if args.epoch is None:
+                args.epoch = DEFAULT_DIPOLE_EPOCH
+                defaults_used['epoch'] = DEFAULT_DIPOLE_EPOCH
+            elif args.epoch != DEFAULT_DIPOLE_EPOCH:
+                raise ValueError(f'--epoch {args.epoch} without --dipole-moment: give the dipole moment of that epoch '
+                                 f'(the default moment is the {DEFAULT_DIPOLE_EPOCH} one)')
+            warnings.append(f'dipole moment not given: the IGRF-14 {DEFAULT_DIPOLE_EPOCH} dipole '
+                            f'({DEFAULT_DIPOLE_MOMENT_G_CM3:.3g} G cm^3) was used; pass --dipole-moment and --epoch for '
+                            'the epoch of the data (2025: 7.69e25, cutoffs about 4.5% lower)')
+        elif args.epoch is None:
+            args.epoch = 'not stated'
+            warnings.append('--dipole-moment given without --epoch: state the epoch the moment belongs to')
         cutoff_gv = stormer_cutoff_gv(args.latitude_deg, radius, args.dipole_moment)
         result = {
             'latitude_deg': args.latitude_deg,
@@ -185,6 +211,12 @@ def main():
     print(json.dumps({
         'status': args.status,
         'method': 'vertical Stormer dipole cutoff (idealized; see docstring caveats)',
+        'inputs': {'latitude_deg': args.latitude_deg, 'radius_re': radius,
+                   'dipole_moment_g_cm3': args.dipole_moment, 'epoch': args.epoch,
+                   'charge': args.charge, 'mass_number': args.mass_number},
+        'defaults_used': defaults_used,
+        'dipole': {'moment_g_cm3': args.dipole_moment, 'epoch': args.epoch},
+        'warnings': warnings,
         **result,
     }, indent=2))
 
