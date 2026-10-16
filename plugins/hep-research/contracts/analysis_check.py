@@ -14,7 +14,7 @@ input diagnostics, each of kind input-invalid (schema, references, digests, a fr
 dependency-missing (a definition the check needs is not available).
 
 Usage: python3 contracts/analysis_check.py freeze --root DIR --analysis NAME --items ITEMS.json --context CONTEXT.json --out FILE
-                                            [--snapshots DIR]
+                                            [--snapshots DIR] [--mode chain|model]
        python3 contracts/analysis_check.py check BUNDLE --root DIR [--out REPORT] [--previous REPORT] [--snapshots DIR]
                                             [--exceptions FILE]
        python3 contracts/analysis_check.py summary REPORT [--cursor N] [--max-bytes N]
@@ -45,11 +45,14 @@ from core.protected.identity import plugin_release  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 FORMAT2 = "hep-research-analysis-bundle/2"
 ROLES2 = ("measurement-spec", "recipe", "semantics-table", "calibration", "tool-contract", "environment-lock", "review",
-          "response", "dataset-record", "context", "semantic-lock", "coverage-contract", "validation-record")
+          "response", "dataset-record", "context", "semantic-lock", "coverage-contract", "validation-record", "model-card")
 MODE_ROLES = {"chain": {"exactly_one": ("measurement-spec", "environment-lock", "context", "semantic-lock"),
-                       "at_least_one": ("recipe",)}}
+                       "at_least_one": ("recipe",)},
+              # model-only diagnostics (O13): a model and a root intent; nothing is fabricated to fill a chain's roles
+              "model": {"exactly_one": ("context", "semantic-lock"), "at_least_one": ("model-card",)}}
 SUITE_DIR = ROOT / "contracts" / "rules" / "suites"
 COVERAGE_DIR = ROOT / "contracts" / "semantics" / "coverage"
+PAIRINGS = ROOT / "contracts" / "semantics" / "model_pairings.json"
 REGISTRY = ROOT / "contracts" / "rules" / "registry.json"
 CONTEXT_REF, LOCK_REF = "check-context.json", "semantic-lock.json"
 CHECKER_FILES = ("contracts/analysis_check.py", "contracts/analysis_checks/__init__.py",
@@ -57,6 +60,7 @@ CHECKER_FILES = ("contracts/analysis_check.py", "contracts/analysis_checks/__ini
                  "contracts/analysis_checks/context.py", "contracts/analysis_checks/obligations.py",
                  "contracts/analysis_checks/lock.py", "contracts/analysis_checks/rules.py",
                  "contracts/analysis_checks/outcomes.py", "contracts/analysis_checks/readers.py",
+                 "contracts/analysis_checks/model.py",
                  "contracts/effect_catalog.py", "contracts/recipe_semantics.py")
 
 
@@ -130,11 +134,17 @@ def _view(items: dict, context: dict) -> tuple[dict, list[dict]]:
             diags.append({"kind": "dependency-missing", "code": "definition.coverage_missing",
                           "message": f"no operator coverage contract for table '{tid}'"})
     view = {"items": items, "context": context, "tables": tables, "coverage": coverage, "catalog": load_catalog()}
+    if any(it.get("role") == "model-card" for it in items.values()):
+        try:
+            view["pairings"] = json.loads(PAIRINGS.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            diags.append({"kind": "dependency-missing", "code": "definition.pairings_missing",
+                          "message": "the model-card pairing contract is not installed"})
     return view, diags
 
 
 JSON_ROLES = ("measurement-spec", "recipe", "semantics-table", "response", "dataset-record", "context", "semantic-lock",
-              "coverage-contract", "validation-record")
+              "coverage-contract", "validation-record", "model-card")
 SHAPES = {"recipe": "recipe.json", "semantics-table": "operator_semantics.json", "coverage-contract": "operator_coverage.json",
           "validation-record": "validation_record.json"}
 
@@ -154,6 +164,12 @@ def shape_diagnostics(items: dict) -> list[dict]:
         if role in JSON_ROLES and not isinstance(doc, dict):
             diags.append({"kind": "input-invalid", "code": "item.not_an_object", "message": f"{iid}: a {role} is a JSON object"})
             it["doc"] = None
+        elif role == "model-card":
+            from contracts.analysis_checks.model import card_shape
+            problems = card_shape(doc)
+            if problems:
+                diags.append({"kind": "input-invalid", "code": "item.schema:model-card", "message": f"{iid}: " + "; ".join(problems[:5])})
+                it["doc"] = None
         elif role in SHAPES:
             res = validate(doc, SHAPES[role])
             if not res.ok:
@@ -287,6 +303,9 @@ def freeze(root, analysis: str, items: list, context: dict, mode: str = "chain",
         suites = [load_suite(s["id"], s["version"]) for s in context_suites(context)]
     except (OSError, ValueError) as exc:
         raise BundleRefused("bundle.suite_missing", f"a selected suite is not installed: {exc}") from None
+    for s in suites:
+        if s.get("mode", "chain") != mode:
+            raise BundleRefused("bundle.suite_mode", f"suite {s.get('suite_id')!r} checks {s.get('mode')} bundles, not {mode}")
     full = dict(context, obligations=obl.generate_all(suites, view))
     view["context"] = full
     view["suites"] = suites
@@ -432,6 +451,13 @@ def legacy_findings(view: dict, vocab=None) -> list[dict]:
             if f.severity in ("error", "warning"):
                 out.append({"entry": "contracts/validate.py", "item": spec_id, **f.as_dict(), "maps_to": map_legacy(f.as_dict())})
     for iid, it in sorted(view["items"].items()):
+        if it.get("role") == "model-card" and isinstance(it.get("doc"), dict):
+            from contracts.schema import Report
+            from contracts.validate import check_model_card
+            rep = Report()
+            check_model_card(it["doc"], "frequentist", rep, "$")
+            for f in rep.findings:
+                out.append({"entry": "contracts/validate.py", "item": iid, **f.as_dict(), "maps_to": map_legacy(f.as_dict())})
         if it.get("role") == "recipe" and isinstance(it.get("doc"), dict):
             res = check_recipe(it["doc"], view.get("tables", {}), [], None)
             for f in res["findings"]:
@@ -456,6 +482,8 @@ def evaluate(view: dict, diags: list[dict], previous: dict | None = None, vocab=
         if defs is not None and not missing:
             view = dict(view, coverage=defs["coverage"], catalog=defs["catalog"], suites=defs["suites"],
                         suite=defs["suites"][0] if defs["suites"] else None)
+            if defs.get("pairings") is not None:
+                view["pairings"] = defs["pairings"]
             locked_registry = next((d["digest"] for d in (view.get("lock") or {}).get("definitions", [])
                                     if d["kind"] == "rule-registry"), None)
             lock_diff = compare(view.get("lock") or {}, build_lock(view.get("suite") or {}, generator_code_digest() or "",
@@ -635,6 +663,11 @@ NEXT_STEPS = {
     "check.semantics_unreproducible": "re-freeze against the current definitions (a new subject) or restore them",
     "check.rule_not_run": "use a checker that implements this rule",
     "check.input_invalid": "fix the input diagnostics first",
+    "check.aux_unbound": "bind the constraint's auxiliary measurement to its observation (an observes binding: item and pointer)",
+    "check.aux_repeat_unknown": "bind every other constraint of the evaluation to its observation",
+    "check.aux_overlap_unknown": "bind each constraint to a component pointer that does not contain another",
+    "check.model_root_incomplete": "name an evaluation of the context and the card's POI",
+    "check.share_unbound": "name members that exist in the evaluation's model cards",
 }
 
 
@@ -684,6 +717,7 @@ def main(argv=None) -> int:
     f.add_argument("--context", type=Path, required=True)
     f.add_argument("--out", type=Path, required=True)
     f.add_argument("--snapshots", type=Path, help="store the pinned definitions content-addressed here (D11b)")
+    f.add_argument("--mode", choices=sorted(MODE_ROLES), default="chain", help="bundle mode (model: model-only diagnostics)")
     c = sub.add_parser("check")
     c.add_argument("bundle", type=Path)
     c.add_argument("--root", type=Path, required=True)
@@ -711,7 +745,7 @@ def main(argv=None) -> int:
             if not args.out.parent.is_dir():
                 raise UsageError(f"{args.out.parent} is not a directory")
             try:
-                doc = freeze(args.root, args.analysis, items, context, snapshots=args.snapshots)
+                doc = freeze(args.root, args.analysis, items, context, mode=args.mode, snapshots=args.snapshots)
             except BundleRefused as exc:
                 print(json.dumps({"status": "refused", "code": exc.code, "error": str(exc)}, indent=1))
                 return 1

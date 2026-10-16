@@ -2,7 +2,8 @@
 declarations. The structure itself is checked against contracts/schemas/check_context.json by the I/O layer.
 
 Typed bindings: input_of (data flow between instances), response_used_by (a response used by an instance step, or by a
-prediction for folding), variation_of (an instance that varies a nominal one). Any other type is unsupported.
+prediction for folding), variation_of (an instance that varies a nominal one), observes (an observation component,
+item and pointer, encoded by a model's auxiliary measurement; model-card/v1). Any other type is unsupported.
 Declarations carry their author (asserted_by) and basis and no confirmation field; their types are listed below. A
 declaration that says a rule does not apply is never counted (declaration.rule_waiver_not_counted): only typed facts
 can change an applicability judgement."""
@@ -10,7 +11,7 @@ from __future__ import annotations
 
 from contracts.analysis_checks.scope import parse_scope
 
-BINDING_TYPES = ("input_of", "response_used_by", "variation_of")
+BINDING_TYPES = ("input_of", "response_used_by", "variation_of", "observes")
 DECLARATION_TYPES = ("instance_mapping", "partition_exclusive", "partition_coverage", "variation_role", "correlation",
                      "applicability_fact", "provenance_binding", "execution_attribution")
 AUTHOR_KINDS = ("person", "agent", "tool")
@@ -32,12 +33,14 @@ def check_context(ctx: dict, item_roles: dict) -> list[dict]:
     instances = {i.get("instance_id"): i for i in ctx.get("recipe_instances", []) if isinstance(i, dict)}
     ids: list[tuple[str, object]] = []
     for kind, key in (("roots", "root_id"), ("recipe_instances", "instance_id"), ("bindings", "binding_id"),
-                      ("declarations", "declaration_id"), ("ratio_roots", "root_id")):
+                      ("declarations", "declaration_id"), ("ratio_roots", "root_id"), ("models", "model_id"),
+                      ("evaluations", "evaluation_id"), ("model_roots", "root_id")):
         ids += [(kind, r.get(key)) for r in ctx.get(kind, []) if isinstance(r, dict)]
     names = [i for _, i in ids]
     for d in sorted({i for i in names if names.count(i) > 1 and isinstance(i, str)}):
         out.append(_f("context.duplicate_id", "$", f"id '{d}' is used twice in the context"))
-    if item_roles.get(ctx.get("spec")) != "measurement-spec":
+    models = {m.get("model_id") for m in ctx.get("models", []) if isinstance(m, dict)}
+    if ("spec" in ctx or not models) and item_roles.get(ctx.get("spec")) != "measurement-spec":
         out.append(_f("context.unknown_reference", "$.spec", f"{ctx.get('spec')!r} is not the bundle's measurement-spec"))
 
     def ref_ok(ref, where: str) -> None:
@@ -49,8 +52,10 @@ def check_context(ctx: dict, item_roles: dict) -> list[dict]:
             out.append(_f("context.unknown_reference", where, f"item {ref['item']!r} is not in the bundle"))
         elif "prediction" in ref and ref["prediction"] not in item_roles:
             out.append(_f("context.unknown_reference", where, f"prediction {ref['prediction']!r} is not in the bundle"))
-        elif not ({"instance", "item", "prediction"} & set(ref)):
-            out.append(_f("context.unknown_reference", where, "a reference names an instance, an item or a prediction"))
+        elif "model" in ref and ref["model"] not in models:
+            out.append(_f("context.unknown_reference", where, f"model {ref['model']!r} is not in the context"))
+        elif not ({"instance", "item", "prediction", "model"} & set(ref)):
+            out.append(_f("context.unknown_reference", where, "a reference names an instance, an item, a prediction or a model"))
 
     for k, root in enumerate(ctx.get("roots", [])):
         where = f"$.roots[{k}]"
@@ -78,6 +83,23 @@ def check_context(ctx: dict, item_roles: dict) -> list[dict]:
         res = parse_scope(inst.get("scope"), axes)
         if not res["ok"]:
             out.append(_f("context.bad_scope", f"{where}.scope", f"{inst.get('scope')!r}: {res['errors']}"))
+    for k, m in enumerate(ctx.get("models", [])):
+        if item_roles.get(m.get("item")) != "model-card":
+            out.append(_f("context.unknown_reference", f"$.models[{k}].item", f"{m.get('item')!r} is not a model-card item"))
+    evals = {}
+    for k, e in enumerate(ctx.get("evaluations", [])):
+        evals[e.get("evaluation_id")] = e
+        for x in e.get("models", []):
+            if x not in models:
+                out.append(_f("context.unknown_reference", f"$.evaluations[{k}].models", f"model {x!r} is not in the context"))
+        for j, sp in enumerate(e.get("shared_parameters", []) or []):
+            for mem in sp.get("members", []):
+                if mem.get("model") not in e.get("models", []):
+                    out.append(_f("context.unknown_reference", f"$.evaluations[{k}].shared_parameters[{j}]",
+                                  f"member model {mem.get('model')!r} is not in this evaluation"))
+    for k, r in enumerate(ctx.get("model_roots", [])):
+        if r.get("evaluation") not in evals:
+            out.append(_f("context.unknown_reference", f"$.model_roots[{k}].evaluation", f"{r.get('evaluation')!r} is not an evaluation"))
     for k, b in enumerate(ctx.get("bindings", [])):
         where = f"$.bindings[{k}]"
         if b.get("type") not in BINDING_TYPES:
@@ -85,6 +107,9 @@ def check_context(ctx: dict, item_roles: dict) -> list[dict]:
             continue
         ref_ok(b.get("from"), f"{where}.from")
         ref_ok(b.get("to"), f"{where}.to")
+        if b.get("type") == "observes" and not ("item" in (b.get("from") or {}) and "model" in (b.get("to") or {})
+                                                and (b.get("to") or {}).get("aux_id")):
+            out.append(_f("context.unknown_reference", where, "an observes binding goes from an item to a model's aux_id"))
     for k, d in enumerate(ctx.get("declarations", [])):
         where = f"$.declarations[{k}]"
         if _is_waiver(d):

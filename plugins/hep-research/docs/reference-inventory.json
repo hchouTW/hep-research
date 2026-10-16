@@ -30,7 +30,7 @@
   },
   "hep-statistics": {
    "references": 12,
-   "bytes": 169870,
+   "bytes": 170349,
    "uncited": 0
   },
   "hep-theory": {
@@ -3268,8 +3268,8 @@
   {
    "path": "skills/hep-statistics/references/nuisance-modeling.md",
    "owner": "hep-statistics",
-   "bytes": 19852,
-   "lines": 246,
+   "bytes": 20331,
+   "lines": 250,
    "linked_from_skill_md": false,
    "cited_by": [
     "adapters/pyhf-combine/assets/pyhf_nuisance_diagnostics.py",

@@ -3,7 +3,7 @@ against. It records the suite and generator identity, every definition in use (s
 the catalog effects and compositions they reference, the rule registry) and the member-set closure of each class a
 rule resolves, so a change to a class's members is a difference and an unrelated catalog entry is not. The lock names
 neither itself nor the bundle digest. A difference means the old subject's semantics cannot be reproduced from the
-current definitions (unverified in M2a; snapshot reproduction is D11b)."""
+current definitions (unverified in M2a; snapshot reproduction is D11b). A model suite also pins the model-card pairing contract."""
 from __future__ import annotations
 
 from contracts.effect_catalog import resolve_members
@@ -53,6 +53,10 @@ def build_lock(suite: dict, generator_code_digest: str, view: dict, registry_dig
         if s:
             defs.append({"kind": "suite", "id": f"{s.get('suite_id')}@{s.get('version')}", "version": s.get("version"),
                          "digest": canonical_sha256(s), "owner": "core"})
+    if view.get("pairings") is not None and any((s or {}).get("mode") == "model" for s in view.get("suites") or [suite]):
+        pc = view["pairings"]
+        defs.append({"kind": "pairing-contract", "id": "contracts/semantics/model_pairings.json",
+                     "version": pc.get("pairings_version"), "digest": canonical_sha256(pc), "owner": pc.get("owner")})
     if registry_digest is not None:
         defs.append({"kind": "rule-registry", "id": "contracts/rules/registry.json", "version": None,
                      "digest": registry_digest, "owner": "core"})
@@ -112,6 +116,8 @@ def snapshot_entries(view: dict, lock: dict, registry: dict | None = None) -> di
             out[canonical_sha256(closure)] = closure
     for s in view.get("suites") or []:
         out[canonical_sha256(s)] = s
+    if view.get("pairings") is not None:
+        out[canonical_sha256(view["pairings"])] = view["pairings"]
     if registry is not None:
         out[canonical_sha256(registry)] = registry
     wanted = {d["digest"] for d in lock.get("definitions", []) if d.get("digest")} | \
@@ -131,6 +137,7 @@ def rebuild(lock: dict, lookup) -> tuple[dict, list[str]]:
             missing.append(str(digest))
         return doc
     coverage, effects, comps, classes, suites, version, owner = {}, {}, [], [], [], None, None
+    pairings = None
     for d in lock.get("definitions", []):
         if d["kind"] == "coverage-contract":
             doc = get(d["digest"])
@@ -149,6 +156,8 @@ def rebuild(lock: dict, lookup) -> tuple[dict, list[str]]:
             doc = get(d["digest"])
             if doc is not None:
                 suites.append(doc)
+        elif d["kind"] == "pairing-contract":
+            pairings = get(d["digest"])
         elif d["kind"] == "rule-registry":
             get(d["digest"])
     for m in lock.get("member_sets", []):
@@ -161,4 +170,4 @@ def rebuild(lock: dict, lookup) -> tuple[dict, list[str]]:
     suites.sort(key=lambda s: order.get(f"{s.get('suite_id')}@{s.get('version')}", 99))
     catalog = {"catalog_version": version, "owner": owner, "classes": classes,
                "effects": [effects[k] for k in sorted(effects)], "compositions": comps}
-    return {"coverage": coverage, "catalog": catalog, "suites": suites}, missing
+    return {"coverage": coverage, "catalog": catalog, "suites": suites, "pairings": pairings}, missing

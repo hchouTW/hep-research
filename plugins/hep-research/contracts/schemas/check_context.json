@@ -4,10 +4,7 @@
  "required": [
   "context_version",
   "suite",
-  "spec",
   "scope_axes",
-  "roots",
-  "recipe_instances",
   "bindings",
   "declarations"
  ],
@@ -334,6 +331,134 @@
      }
     }
    }
+  },
+  "models": {
+   "$comment": "model instances (model-card/v1): a model-card item under a context id",
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "type": "object",
+    "required": [
+     "model_id",
+     "item"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "model_id": {
+      "$ref": "#/$defs/id"
+     },
+     "item": {
+      "type": "string",
+      "minLength": 1
+     }
+    }
+   }
+  },
+  "evaluations": {
+   "$comment": "likelihoods evaluated as a whole: one model, or several multiplied, with explicit cross-model shared parameters",
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "type": "object",
+    "required": [
+     "evaluation_id",
+     "models"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "evaluation_id": {
+      "$ref": "#/$defs/id"
+     },
+     "models": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+       "type": "string",
+       "minLength": 1
+      }
+     },
+     "shared_parameters": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "required": [
+        "parameter_id",
+        "members"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "parameter_id": {
+         "type": "string",
+         "minLength": 1
+        },
+        "members": {
+         "type": "array",
+         "minItems": 1,
+         "items": {
+          "type": "object",
+          "required": [
+           "model",
+           "parameter"
+          ],
+          "additionalProperties": false,
+          "properties": {
+           "model": {
+            "type": "string",
+            "minLength": 1
+           },
+           "parameter": {
+            "type": "string",
+            "minLength": 1
+           }
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "model_roots": {
+   "$comment": "the root intent of a model bundle: an evaluation and its POI",
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "type": "object",
+    "required": [
+     "root_id",
+     "evaluation",
+     "poi"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "root_id": {
+      "$ref": "#/$defs/id"
+     },
+     "evaluation": {
+      "type": "string",
+      "minLength": 1
+     },
+     "poi": {
+      "type": "object",
+      "required": [
+       "model",
+       "parameter"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "model": {
+        "type": "string",
+        "minLength": 1
+       },
+       "parameter": {
+        "type": "string",
+        "minLength": 1
+       }
+      }
+     }
+    }
+   }
   }
  },
  "$defs": {
@@ -359,8 +484,32 @@
     },
     "prediction": {
      "type": "string"
+    },
+    "model": {
+     "type": "string"
+    },
+    "aux_id": {
+     "type": "string"
     }
    }
   }
- }
+ },
+ "anyOf": [
+  {
+   "$comment": "a chain context (counting-chain, ratio-subset)",
+   "required": [
+    "spec",
+    "roots",
+    "recipe_instances"
+   ]
+  },
+  {
+   "$comment": "a model context (model-card/v1): models, evaluations and the root intent",
+   "required": [
+    "models",
+    "evaluations",
+    "model_roots"
+   ]
+  }
+ ]
 }

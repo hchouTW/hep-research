@@ -22,7 +22,12 @@ PREREQUISITES = {
     "ratio_cancellation": ["spec ratio cancellation claim", "factor instance per side (calibration binding, selector)",
                            "factor power per side (coverage contract)"],
     "ratio_correlation": ["spec ratio correlation claim", "validation record or sourced correlation declaration"],
+    "model_root": ["model root intent", "evaluation", "model card POI"],
+    "model_parameter": ["model card", "pairing contract"],
+    "aux_constraint": ["model card constraint", "evaluation", "observes binding (item and pointer)"],
+    "shared_parameter": ["evaluation with several models", "shared_parameters members", "model cards"],
 }
+MODEL_KINDS = ("model_root", "model_parameter", "aux_constraint", "shared_parameter")
 
 
 def spec_ratio(view: dict) -> dict:
@@ -69,6 +74,9 @@ def instance_effects(view: dict, inst: dict) -> set[str]:
 
 
 def _subjects(kind: str, view: dict, structural: bool) -> list[tuple[str, dict]]:
+    if kind in MODEL_KINDS:
+        from contracts.analysis_checks.model import subjects
+        return subjects(kind, view)
     ctx = view["context"]
     insts = {i["instance_id"]: i for i in ctx.get("recipe_instances", []) if isinstance(i, dict) and "instance_id" in i}
     roots = [r for r in ctx.get("roots", []) if isinstance(r, dict) and "root_id" in r]

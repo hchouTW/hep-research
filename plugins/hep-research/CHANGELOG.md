@@ -3,6 +3,29 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- Model suite `model-card/v1` (v6.3 M2b model part; design `docs/dev/v6.3/m2b-model-design.md`), opt-in and in shadow
+  mode.
+  - **New bundle mode `model`**, for model-only diagnostics: `analysis_check.py freeze --mode model`. It takes one or
+    more `model-card` items. The context names `models`, `evaluations` (one likelihood each, with explicit
+    cross-model `shared_parameters`) and `model_roots`. A new binding type, `observes`, ties a model's `aux_id` to one
+    observation, identified as an item plus a JSON pointer.
+  - **Four rules**, owner hep-statistics:
+    - `r-model.root`: the root intent.
+    - `r-model.pairing`: exactly the O03 pairings P1–P3 of the new pairing contract
+      `contracts/semantics/model_pairings.json`, which the semantic lock pins. Anything else is `unsupported`.
+    - `r-aux.use` (R-AUX): an observation encoded by two constraint terms of one evaluation is violated; an unbound
+      constraint leaves the others unverified; two components of one file stay distinct.
+    - `r-share.parameters`: incompatible cross-model shared parameters are violated; compatible ones and joint
+      evaluations of several cards are unsupported, because the adapter has no combiner.
+  - **Other changes:**
+    - A chain bundle that selects a model suite is refused (`bundle.suite_mode`).
+    - The pyhf-combine adapter's refusal of Poisson and log-normal constraints, and its fixed parameter bounds, are
+      now tested.
+    - hep-statistics' nuisance-modeling reference names the check.
+  - V06, V07, V08, V46, V47 and the model parts of V11, V15, V18, V24, V25 and V64 pass (67 of 80 V parts).
+
 ## 0.12.0 (2026-10-16)
 
 v6.3 analysis-check programme (M0–M3, opt-in and advisory), the cosmic-ray propagation adapter and heliospheric

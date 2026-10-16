@@ -1727,3 +1727,27 @@ reported no findings.
 | `run_all_checks.py`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail; 3542 tests, 0 failures, 61 skipped, 265 modules |
 | Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 25 pass, 0 fail; 3542 tests, 0 failures, 170 skipped |
 | Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
+
+## V63-M2b-MODEL (2026-10-16, Python 3.13.2 on macOS 26.5 arm64; base main `f3089da`, plugin 0.12.0)
+
+The model part of M2b on branch `v63/m2b-model`: suite `model-card/v1`, bundle mode `model` and the pairing contract
+`contracts/semantics/model_pairings.json` (the O03 set). Design in `docs/dev/v6.3/m2b-model-design.md`.
+
+How it was built:
+- Red tests first, as expected failures: `593b4a6`.
+- Then the implementation, with the decorators removed.
+- All cases are synthetic: CASE-MODEL, MODEL-USAGE and MODEL-SHARING in `tests/contracts/v63_cases.py`.
+- The adapter `to_pyhf` confirms the structural mapping of CASE-MODEL (V06): one `normsys` for `lumi` across SR and CR.
+
+| Check | Result |
+|---|---|
+| `tests/contracts/test_v63_d07_model.py` | 16 tests pass. V06, V07, V08, V46, V47 and the model parts of V11, V15, V18, V24, V25 and V64 are passing in the registry (67 of 80 V parts). |
+| O03 gap tests (`tests/adapters/test_sr_cr_model_card.py`, `UnmappedPairings`) | pass: Poisson and log-normal constraints are refused, and the bounds are the converter's fixed ones |
+| A chain bundle selecting `model-card` | refused with `bundle.suite_mode` (`test_v63_d07`) |
+| `run_all_checks.py` | 25 pass, 0 fail; 3560 tests, 0 failures, 107 skipped |
+| Same with the CI lock (no torch) | 25 pass, 0 fail; 3560 tests, 0 failures, 170 skipped |
+| `check_relocation.py` | pass |
+| Ruff 0.16.10, mypy 2.4.0 | clean |
+
+One failure seen once and not reproduced: `test_a_hanging_module_fails_with_a_reason` failed during a parallel full
+run. It passed alone and in both full reruns, so it is timing under load.

@@ -44,7 +44,6 @@ class ModelCase(unittest.TestCase):
         view, diags = ac().load_subject(b, root)
         return ac().evaluate(view, diags)
 
-    @unittest.expectedFailure  # red until model-card/v1 exists (D07 model)
     def test_v06_positive_shared_parameter(self):
         # V06: a shared parameter acts on several channels with one auxiliary observation: satisfied
         rep = self.run_case()
@@ -60,7 +59,6 @@ class ModelCase(unittest.TestCase):
         self.assertEqual(get(rep, "r-model.pairing:sr-cr#mu_b")["pairing"], "P2")
         self.assertEqual(get(rep, "r-aux.use:fit#sr-cr/lumi-2026")["reason"], "check.aux_single_use")
 
-    @unittest.expectedFailure  # red until model-card/v1 exists (D07 model)
     def test_v06_consistent_with_the_adapter(self):
         # V06: the adapter's structural mapping agrees: one normsys per shared constrained parameter, one per channel
         sys.path.insert(0, str(ROOT / "adapters" / "pyhf-combine" / "assets"))
@@ -76,7 +74,6 @@ class ModelCase(unittest.TestCase):
         backend = {"P1": "normfactor", "P2": "normfactor", "P3": "normsys"}
         self.assertEqual({k: backend[o["pairing"]] for k, o in pairing.items()}, {n: t for _, n, t in mods})
 
-    @unittest.expectedFailure  # red until model-card/v1 exists (D07 model)
     def test_v07_two_aux_ids_one_observation(self):
         # V07: the same observation enters one likelihood under two aux IDs: violated; a missing binding: unverified
         def twice(c):
@@ -97,7 +94,6 @@ class ModelCase(unittest.TestCase):
         self.assertEqual(states(rep)["r-aux.use:fit#sr-cr/lumi-copy"], ("unverified", "check.aux_unbound"))
         self.assertEqual(states(rep)["r-aux.use:fit#sr-cr/lumi-2026"], ("unverified", "check.aux_repeat_unknown"))
 
-    @unittest.expectedFailure  # red until model-card/v1 exists (D07 model)
     def test_v07_same_aux_id_twice(self):
         # one aux_id constraining two parameters is the same observation entering twice
         def dup(c):
@@ -108,7 +104,6 @@ class ModelCase(unittest.TestCase):
         rep = self.run_case(dup)
         self.assertEqual(states(rep)["r-aux.use:fit#sr-cr/lumi-2026"], ("violated", "check.aux_repeated"))
 
-    @unittest.expectedFailure  # red until model-card/v1 exists (D07 model)
     def test_v08_two_components_of_one_file(self):
         # V08: two different observation components of one file (one digest) are not merged
         def two(c):
@@ -128,7 +123,6 @@ class ModelCase(unittest.TestCase):
         rep = self.run_case(overlap)
         self.assertEqual(states(rep)["r-aux.use:fit#sr-cr/trig-2026"], ("unverified", "check.aux_overlap_unknown"))
 
-    @unittest.expectedFailure  # red until model-card/v1 exists (D07 model)
     def test_v46_alternative_models_versus_joint(self):
         # V46: alternative models reusing an observation are not a repeat; a joint likelihood multiplying it again is
         rep = self.run_case(lambda c: cases.two_models(c, joint=False))
@@ -146,7 +140,6 @@ class ModelCase(unittest.TestCase):
         self.assertEqual(states(rep)["r-aux.use:joint#alt-a/lumi-2026"], ("unverified", "check.aux_repeat_unknown"))
         self.assertEqual(states(rep)["r-aux.use:joint#alt-b/lumi-2026"], ("unverified", "check.aux_unbound"))
 
-    @unittest.expectedFailure  # red until model-card/v1 exists (D07 model)
     def test_v47_cross_model_sharing(self):
         # V47: incompatible shared parameters: merge rejected; compatible: unsupported (no combiner); unknown: unverified
         rep = self.run_case(lambda c: cases.two_models(c, joint=True, width_b=0.05, shared=cases.shared_lumi()))
@@ -159,7 +152,6 @@ class ModelCase(unittest.TestCase):
         self.assertEqual(states(rep)["r-share.parameters:joint#lumi"], ("unverified", "check.share_unbound"))
         self.assertNotEqual(rep["status"], "complete")
 
-    @unittest.expectedFailure  # red until model-card/v1 exists (D07 model)
     def test_v18_unsupported_pairings(self):
         # V18: an unlisted pairing is unsupported, never a pass inferred from the absence of a legacy finding
         def shape(c):
@@ -175,7 +167,6 @@ class ModelCase(unittest.TestCase):
         self.assertEqual(states(rep)["r-model.pairing:sr-cr#lumi"], ("unsupported", "check.pairing_unsupported"))
         self.assertEqual(states(rep)["r-aux.use:fit#sr-cr/lumi-2026"], ("not_applicable", "check.aux_prior"))
 
-    @unittest.expectedFailure  # red until model-card/v1 exists (D07 model)
     def test_pairing_violations(self):
         def unconstrained(c):
             c.doc("card-sr-cr")["constraints"] = []
@@ -190,7 +181,6 @@ class ModelCase(unittest.TestCase):
         rep = self.run_case(disagree)
         self.assertEqual(states(rep)["r-model.pairing:sr-cr#lumi"], ("violated", "check.pairing_invalid"))
 
-    @unittest.expectedFailure  # red until model-card/v1 exists (D07 model)
     def test_root_intent(self):
         def wrong_poi(c):
             c.context["model_roots"][0]["poi"]["parameter"] = "mu_b"
@@ -210,7 +200,6 @@ class ModelVParts(unittest.TestCase):
         view, diags = ac().load_subject(b, root)
         return ac().evaluate(view, diags)
 
-    @unittest.expectedFailure  # red until model-card/v1 exists (D07 model)
     def test_v11_missing_observation_binding(self):
         # V11: the obligation is kept and coverage is partial; a deleted frozen file is invalid input
         rep = self.check(Path(self.td.name) / "a", lambda c: c.context.update(bindings=[]))
@@ -223,7 +212,6 @@ class ModelVParts(unittest.TestCase):
         rep = ac().evaluate(view, diags)
         self.assertEqual(rep["input_validity"], "invalid")
 
-    @unittest.expectedFailure  # red until model-card/v1 exists (D07 model)
     def test_v15_renaming_and_reordering(self):
         # V15: renamed files and reordered enumerations keep the verdict and the obligation IDs
         base = self.check(Path(self.td.name) / "a")
@@ -242,7 +230,6 @@ class ModelVParts(unittest.TestCase):
         self.assertEqual(states(rep), states(base))
         self.assertEqual(rep["inventory_digest"], base["inventory_digest"])
 
-    @unittest.expectedFailure  # red until model-card/v1 exists (D07 model)
     def test_v24_masking_a_binding(self):
         # V24: masking a binding keeps every obligation and never raises coverage; removing a listed file fails integrity
         base = self.check(Path(self.td.name) / "a")
@@ -255,7 +242,6 @@ class ModelVParts(unittest.TestCase):
         view, diags = ac().load_subject(b, root)
         self.assertEqual(ac().evaluate(view, diags)["input_validity"], "invalid")
 
-    @unittest.expectedFailure  # red until model-card/v1 exists (D07 model)
     def test_v25_waiver_not_counted(self):
         # V25: a context declaration that a rule does not apply is not counted
         def waiver(c):
@@ -267,7 +253,6 @@ class ModelVParts(unittest.TestCase):
         self.assertEqual(states(rep)["r-aux.use:fit#sr-cr/lumi-2026"], ("unverified", "check.aux_unbound"))
         self.assertIn("declaration.rule_waiver_not_counted", {f["code"] for f in rep["context_findings"]})
 
-    @unittest.expectedFailure  # red until model-card/v1 exists (D07 model)
     def test_v64_declaration_based_binding(self):
         # V64: an observation bound only by an agent's declaration is flagged and is unverified for formal use
         def declared(c):
@@ -284,7 +269,6 @@ class ModelVParts(unittest.TestCase):
 
 
 class ModelBundle(unittest.TestCase):
-    @unittest.expectedFailure  # red until model-card/v1 exists (D07 model)
     def test_roles_and_lock(self):
         from contracts.analysis_bundle import BundleRefused
         with tempfile.TemporaryDirectory() as td:
