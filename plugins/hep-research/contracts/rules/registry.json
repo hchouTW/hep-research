@@ -467,6 +467,137 @@
    "review_status": "unreviewed",
    "lifecycle": "shadow",
    "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+  },
+  {
+   "rule_id": "r-ratio.operands",
+   "version": "1.0.0",
+   "layer": "L3",
+   "suites": [
+    "ratio-subset/v1"
+   ],
+   "kind": "new",
+   "prerequisites": [
+    "ratio root operands (chain roots)",
+    "their binning and scopes"
+   ],
+   "applicability": "R-RATIO: numerator and denominator are chain results with a compatible quantity, unit, binning and scope",
+   "outcome_contract": {
+    "satisfied": [
+     "check.ratio_operands_compatible"
+    ],
+    "violated": [
+     "check.ratio_operands_incompatible"
+    ],
+    "not_applicable": [
+     "check.ratio_not_required"
+    ],
+    "unverified": [
+     "check.ratio_operands_unbound"
+    ],
+    "unsupported": [
+     "check.ratio_operand_unsupported"
+    ]
+   },
+   "legacy_codes": [],
+   "native_from": null,
+   "v_cases": [
+    "V28"
+   ],
+   "waivable": false,
+   "accepted_applicability_facts": [],
+   "owner": "hep-statistics",
+   "review_status": "unreviewed",
+   "lifecycle": "shadow",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+  },
+  {
+   "rule_id": "r-ratio.cancellation",
+   "version": "1.0.0",
+   "layer": "L3",
+   "suites": [
+    "ratio-subset/v1"
+   ],
+   "kind": "new",
+   "prerequisites": [
+    "spec ratio cancellation claim",
+    "factor instance per side",
+    "factor power per side"
+   ],
+   "applicability": "R-RATIO: a claimed cancellation is exact only for the same factor instance, selection, evaluation point and power, with a nonzero factor",
+   "outcome_contract": {
+    "satisfied": [
+     "check.cancellation_exact"
+    ],
+    "violated": [
+     "check.cancellation_not_exact",
+     "check.cancellation_domain"
+    ],
+    "not_applicable": [
+     "check.cancellation_not_claimed"
+    ],
+    "unverified": [
+     "check.cancellation_unbound",
+     "check.cancellation_approximate"
+    ],
+    "unsupported": [
+     "check.factor_undefined"
+    ]
+   },
+   "legacy_codes": [],
+   "native_from": null,
+   "v_cases": [
+    "V44"
+   ],
+   "waivable": false,
+   "accepted_applicability_facts": [],
+   "owner": "hep-statistics",
+   "review_status": "unreviewed",
+   "lifecycle": "shadow",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+  },
+  {
+   "rule_id": "r-ratio.correlation",
+   "version": "1.0.0",
+   "layer": "L3",
+   "suites": [
+    "ratio-subset/v1"
+   ],
+   "kind": "new",
+   "prerequisites": [
+    "spec ratio correlation claim",
+    "validation record or correlation declaration"
+   ],
+   "applicability": "R-RATIO: an independence or correlation claim rests on a validation record binding both operands, or on a sourced or scoped declaration",
+   "outcome_contract": {
+    "satisfied": [
+     "check.correlation_evidenced",
+     "check.correlation_declared"
+    ],
+    "violated": [
+     "check.correlation_contradicted"
+    ],
+    "not_applicable": [
+     "check.correlation_not_claimed"
+    ],
+    "unverified": [
+     "check.correlation_unsupported_claim",
+     "check.correlation_evidence_incomplete"
+    ],
+    "unsupported": [
+     "check.correlation_relation_unsupported"
+    ]
+   },
+   "legacy_codes": [],
+   "native_from": null,
+   "v_cases": [
+    "V45"
+   ],
+   "waivable": false,
+   "accepted_applicability_facts": [],
+   "owner": "hep-statistics",
+   "review_status": "unreviewed",
+   "lifecycle": "shadow",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
   }
  ],
  "v_cases": [
@@ -1043,8 +1174,10 @@
       "D07"
      ],
      "host": "CASE-CHAIN old version",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d07.Ratio.test_v28_free_text_ratio"
+     ]
     }
    ]
   },
@@ -1369,8 +1502,10 @@
       "D07"
      ],
      "host": "RATIO-FACTORS",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d07.Ratio.test_v44_factors"
+     ]
     }
    ]
   },
@@ -1386,8 +1521,10 @@
       "D07"
      ],
      "host": "RATIO-EVIDENCE",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d07.Ratio.test_v45_evidence"
+     ]
     }
    ]
   },

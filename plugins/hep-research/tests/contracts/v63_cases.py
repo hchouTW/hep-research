@@ -143,6 +143,25 @@ def positive_case(root: Path, variant=None, freeze: bool = True):
     return c.freeze("case-positive") if freeze else c
 
 
+def custom_table(c, table_id, extra_op, extra_cov, recipe_id="flux-reduced", drop_cov=()):
+    """A bundle-supplied table and coverage contract for a synthetic operator (no plugin coverage exists for it)."""
+    from contracts.effect_catalog import load_coverage
+    from contracts.recipe_semantics import canonical_sha256
+    table = copy.deepcopy(c.doc("differential-flux"))
+    table["table_id"] = table_id
+    if extra_op:
+        table["operators"].append(extra_op)
+    c.remove("differential-flux")
+    c.add("semantics-table", table_id, f"{table_id}.json", table)
+    c.doc(recipe_id)["semantics"] = {"table_id": table_id, "sha256": canonical_sha256(table)}
+    cov = copy.deepcopy(load_coverage("differential-flux"))
+    cov.update(table_id=table_id, table_sha256=canonical_sha256(table))
+    cov["operators"] = [o for o in cov["operators"] if o["operator_id"] not in drop_cov]
+    if extra_cov:
+        cov["operators"].append(extra_cov)
+    c.add("coverage-contract", f"{table_id}-coverage", f"{table_id}.coverage.json", cov)
+
+
 def copy_case(src: Path, dst: Path) -> Path:
     shutil.copytree(src, dst)
     return dst / "bundle.json"
@@ -150,3 +169,55 @@ def copy_case(src: Path, dst: Path) -> Path:
 
 def deep(obj):
     return copy.deepcopy(obj)
+
+
+def ratio_case(root: Path, variant=None, freeze: bool = True):
+    """RATIO-FACTORS / RATIO-EVIDENCE (v6.3 M2b): two species in one period, each a reduced chain; a ratio root over
+    the species axis; one calibration item that gives trigger efficiency as a common scalar and selection efficiency
+    per species (different bins of one table); a validation record for the selection-efficiency independence claim."""
+    c = positive_case(root, None, freeze=False)
+    period = "synthetic-period-1"
+    scopes = {s: f"species:{s}/period:{period}" for s in SPECIES}
+    spec = c.doc("spec")
+    spec["extension"]["corrections"] = [
+        {"effect_id": "trigger_efficiency", "category": "trigger_efficiency", "applied_in": "estimator", "variation_id": "nominal"},
+        {"effect_id": "selection_efficiency", "category": "selection_efficiency", "applied_in": "estimator", "variation_id": "nominal"}]
+    spec["extension"]["ratio"] = {"numerator": "helium flux", "denominator": "proton flux", "cancellations": [
+        {"effect": "trigger_efficiency", "treatment": "cancels", "correlation_model": "one per-period estimate divides both species"},
+        {"effect": "selection_efficiency", "treatment": "independent", "correlation_model": "separate control samples per species"}]}
+    cov_extra = None
+    custom_table(c, "differential-flux-r", None, cov_extra, recipe_id="flux-reduced")
+    cov = c.doc("differential-flux-r-coverage")
+    op = next(o for o in cov["operators"] if o["operator_id"] == "correct_efficiency")
+    op["class_coverage"]["efficiency"] = {"members": ["trigger_efficiency", "selection_efficiency"],
+                                          "basis": "synthetic: the operator divides by trigger and selection efficiency"}
+    edges = spec["extension"]["observable"]["variables"][0]["edges"]
+    n = len(edges) - 1
+    c.add("calibration", "eff-cal", "efficiency-calibration.json", {"factor_table_version": "1.0.0", "factors": {
+        "trigger_efficiency": {"scalar": 0.97},
+        "selection_efficiency": {"by_scope": {scopes["proton"]: [0.90 + 0.005 * k for k in range(n)],
+                                              scopes["helium"]: [0.80 + 0.010 * k for k in range(n)]}}}})
+    c.add("validation-record", "vr-selection", "validation-selection.json", {
+        "validation_record_version": "1.0.0", "claim": {"effect": "selection_efficiency", "relation": "independent"},
+        "subjects": [{"root": "flux-helium-p1", "version": "synthetic-1"}, {"root": "flux-proton-p1", "version": "synthetic-1"}],
+        "method": "separate control samples per species; no shared events (synthetic)", "tolerance": "exact by construction",
+        "scope": f"period:{period}"})
+    insts = []
+    c.context["scope_axes"] = {"species": list(SPECIES), "period": [period]}
+    c.context["roots"], c.context["recipe_instances"] = [], []
+    for s in SPECIES:
+        iid = f"{s}-p1"
+        insts.append(iid)
+        c.context["recipe_instances"].append({"instance_id": iid, "recipe": "flux-reduced", "scope": scopes[s], "variation": "nominal",
+                                              "role": "nominal", "nominal": None,
+                                              "calibrations": {"trigger_efficiency": "eff-cal", "selection_efficiency": "eff-cal"}})
+        c.context["roots"].append({"root_id": f"flux-{s}-p1", "quantity": "differential_flux", "unit": "1/(m2 sr s GV)",
+                                   "binning": {"item": "spec", "pointer": "/extension/observable/variables/0/edges"},
+                                   "scope": scopes[s], "output": {"instance": iid}})
+    c.context["declarations"] = mapping({"trigger_efficiency": insts, "selection_efficiency": insts})
+    c.context["suites"] = [{"id": "ratio-subset", "version": "1.0.0"}]
+    c.context["ratio_roots"] = [{"root_id": "ratio-p1", "numerator": {"root": "flux-helium-p1"},
+                                 "denominator": {"root": "flux-proton-p1"}, "over_axis": "species", "quantity": "ratio", "unit": "1"}]
+    if variant:
+        variant(c)
+    return c.freeze("case-ratio") if freeze else c

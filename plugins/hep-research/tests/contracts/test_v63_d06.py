@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "contracts"))
 import v63_cases as cases  # noqa: E402
+from v63_cases import custom_table  # noqa: E402
 
 NEEDS_AMS = unittest.skipUnless(cases.HAVE_AMS, "the AMS example is not in this copy")
 SCOPE = "species:proton/period:synthetic-period-1"
@@ -58,25 +59,6 @@ def add_instance(c, iid, recipe_id, steps, role="nominal", nominal=None, variati
 
 PRE_STEPS = [{"step_id": "background", "operator": "subtract_background"},
              {"step_id": "efficiency", "operator": "correct_efficiency"}]
-
-
-def custom_table(c, table_id, extra_op, extra_cov, recipe_id="flux-reduced", drop_cov=()):
-    """A bundle-supplied table and coverage contract for a synthetic operator (no plugin coverage exists for it)."""
-    from contracts.effect_catalog import load_coverage
-    from contracts.recipe_semantics import canonical_sha256
-    table = copy.deepcopy(c.doc("differential-flux"))
-    table["table_id"] = table_id
-    if extra_op:
-        table["operators"].append(extra_op)
-    c.remove("differential-flux")
-    c.add("semantics-table", table_id, f"{table_id}.json", table)
-    recipe_of(c, recipe_id)["semantics"] = {"table_id": table_id, "sha256": canonical_sha256(table)}
-    cov = copy.deepcopy(load_coverage("differential-flux"))
-    cov.update(table_id=table_id, table_sha256=canonical_sha256(table))
-    cov["operators"] = [o for o in cov["operators"] if o["operator_id"] not in drop_cov]
-    if extra_cov:
-        cov["operators"].append(extra_cov)
-    c.add("coverage-contract", f"{table_id}-coverage", f"{table_id}.coverage.json", cov)
 
 
 class Tmp(unittest.TestCase):

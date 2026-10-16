@@ -102,7 +102,7 @@ class Findings(unittest.TestCase):
         self.assertLess(rep["formal_use_view"]["counts"]["not_applicable"], rep["counts"]["not_applicable"])
 
     def test_response_rule_with_unknown_coverage(self):
-        from test_v63_d06 import custom_table
+        from v63_cases import custom_table
 
         def variant(c):
             custom_table(c, "differential-flux-z", None, None, drop_cov=("divide_bin_width",))
