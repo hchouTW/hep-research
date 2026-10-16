@@ -78,7 +78,8 @@ Input (fit, "model": "tabulated-grid"): a fit of parameters tabulated on a grid 
 Usage: covariance_fit.py fit --input FILE [--allow-plugin]
        covariance_fit.py break-scan --input FILE [--toys 200 --seed 1 --cl 0.6827]
 Exit codes: 0 fitted; 1 refused (covariance singular beyond the declared constraints, a declared constraint that is not a
-null direction, no convergence (a grid fit whose optimizer stopped: "status": "failed" with "reason"); for a grid: a prediction not gated, not comparable or refused by the gate, a minimum outside the grid);
+null direction, no convergence (a grid fit whose optimizer stopped and whose restart neither succeeds nor passes the EDM
+check: "status": "failed" with "reason"); for a grid: a prediction not gated, not comparable or refused by the gate, a minimum outside the grid);
 2 bad input; 3 incomplete (a data covariance or uncertainty correlation is missing: "status": "incomplete" with
 "missing"). Output JSON labelled [General method].
 """
@@ -687,7 +688,14 @@ def _grid_one(grid: _Grid, names, scales, y, cov, u, start, monomials, declared)
         start = min((nodes[i] for i in tied), key=lambda t: float(np.sum(((t - centre) / (grid.hi - grid.lo)) ** 2)))
     p0 = np.append(start, [0.0] * nz)
     bounds = [(lo, hi) for lo, hi in zip(grid.lo, grid.hi)] + [(None, None)] * nz
-    res = optimize.minimize(m2ll, p0, method="L-BFGS-B", bounds=bounds, options={"ftol": 1e-14, "gtol": 1e-10, "maxiter": 2000})
+    opts = {"ftol": 1e-14, "gtol": 1e-10, "maxiter": 2000}
+    res = optimize.minimize(m2ll, p0, method="L-BFGS-B", bounds=bounds, options=opts)
+    convergence = {"optimizer": str(res.message), "restarted": False}
+    if not res.success:
+        # a line search can stop abnormally at a point that is already the minimum (an Asimov fit starts there): restart
+        # once from where it stopped before judging; the EDM check below decides if the restart does not succeed (F-01)
+        res = optimize.minimize(m2ll, np.asarray(res.x, dtype=float), method="L-BFGS-B", bounds=bounds, options=opts)
+        convergence.update(restarted=True, optimizer_after_restart=str(res.message))
     p = np.asarray(res.x, dtype=float)
     p[:k] = np.clip(p[:k], grid.lo, grid.hi)
     chi2 = m2ll(p)
@@ -745,6 +753,19 @@ def _grid_one(grid: _Grid, names, scales, y, cov, u, start, monomials, declared)
         fk = fisher[:k, :k] - np.outer(fisher[:k, k], fisher[k, :k]) / fisher[k, k]     # nuisance profiled
     else:
         fk = fisher
+    if res.success:
+        convergence["converged_by"] = "optimizer"
+    else:
+        # EDM in -2 ln L units from the optimizer's gradient, projected on the bounds (a component pushing outward at an
+        # active bound is not a distance to the minimum), with the Hessian 2 J^T C^-1 J (+ the nuisance constraint)
+        g = np.asarray(getattr(res, "jac", np.full(k + nz, np.inf)), dtype=float)
+        lo = np.append(grid.lo, [-np.inf] * nz)
+        hi = np.append(grid.hi, [np.inf] * nz)
+        span_all = np.where(np.isfinite(hi - lo), hi - lo, 1.0)
+        g = np.where(((p - lo) <= 1e-6 * span_all) & (g > 0) | ((hi - p) <= 1e-6 * span_all) & (g < 0), 0.0, g)
+        edm = float(0.25 * g @ np.linalg.pinv(fisher, rcond=1e-12) @ g) if np.all(np.isfinite(g)) else float("inf")
+        convergence.update(edm=edm, edm_max=EDM_MAX)
+        convergence["converged_by"] = "edm" if edm <= EDM_MAX else None
     ev, evec = np.linalg.eigh(0.5 * (fk + fk.T))
     lam_max = max(float(ev[-1]), 1e-300)
     cond = float(lam_max / ev[0]) if ev[0] > 0 else None
@@ -815,7 +836,8 @@ def _grid_one(grid: _Grid, names, scales, y, cov, u, start, monomials, declared)
                       "method": "J^T C^-1 J at the best fit, J by central differences over one grid cell"
                                 + ("; the normalization nuisance profiled (Schur complement)" if nz else "")},
            "degenerate_directions": [e for e, _, _ in degenerate], "combinations": combos, "warnings": warnings,
-           "prediction_at_best_fit": pred0.tolist(), "converged": bool(res.success), "optimizer_message": str(res.message)}
+           "prediction_at_best_fit": pred0.tolist(), "converged": convergence["converged_by"] is not None,
+           "optimizer_message": str(res.message), "convergence": convergence}
     if nz:
         out["normalization_nuisance"] = float(p[k])
     return out

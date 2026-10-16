@@ -396,5 +396,26 @@ class GridNonConvergenceIsFailed(unittest.TestCase):
         self.assertIn("did not converge", out["reason"])
 
 
+    def test_abnormal_stop_at_the_minimum_is_confirmed_by_the_edm(self):
+        """An optimizer that stops 'abnormally' at the minimum (the suspected cause of the bc-propagation example failing
+        on x86_64 Linux CI after F-01) is not a failure: the restart and the EDM check confirm convergence."""
+        from unittest import mock
+        y = model_ab(**TRUTH_AB)
+        doc = {"model": "tabulated-grid", "measurement": measurement(y, components(y)), "predictions": grid_ab(),
+               "grid": AB_GRID}
+        real = cf.optimize.minimize
+
+        def never_success(*args, **kwargs):
+            res = real(*args, **kwargs)
+            res.success, res.message = False, "ABNORMAL_TERMINATION_IN_LNSRCH (simulated)"
+            return res
+
+        with mock.patch.object(cf.optimize, "minimize", never_success):
+            fit = cf.grid_fit(doc)["fits"][0]
+        self.assertTrue(fit["converged"], fit["convergence"])
+        self.assertEqual(fit["convergence"]["converged_by"], "edm")
+        self.assertTrue(fit["convergence"]["restarted"])
+        self.assertLessEqual(fit["convergence"]["edm"], cf.EDM_MAX)
+
 if __name__ == "__main__":
     unittest.main()
