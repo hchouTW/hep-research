@@ -449,7 +449,8 @@
      "check.response_use_unbound"
     ],
     "unsupported": [
-     "check.folding_unsupported"
+     "check.folding_unsupported",
+     "check.response_use_unknown"
     ]
    },
    "legacy_codes": [],

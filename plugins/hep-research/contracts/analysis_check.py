@@ -121,12 +121,51 @@ def _view(items: dict, context: dict) -> tuple[dict, list[dict]]:
     return view, diags
 
 
+JSON_ROLES = ("measurement-spec", "recipe", "semantics-table", "response", "dataset-record", "context", "semantic-lock",
+              "coverage-contract")
+SHAPES = {"recipe": "recipe.json", "semantics-table": "operator_semantics.json", "coverage-contract": "operator_coverage.json"}
+
+
+def _is_json(ref) -> bool:
+    return str(ref).lower().endswith(".json")
+
+
+def shape_diagnostics(items: dict) -> list[dict]:
+    """Input-invalid diagnostics for item documents the rules read, checked against their schemas; a document that
+    fails is set to None so no rule or generator reads it (the check reports the input, never a traceback)."""
+    diags = []
+    for iid, it in sorted(items.items()):
+        role, doc = it.get("role"), it.get("doc")
+        if role in JSON_ROLES and _is_json(it.get("ref")) and doc is None:
+            continue  # unreadable: verify reports the frozen file
+        if role in JSON_ROLES and not isinstance(doc, dict):
+            diags.append({"kind": "input-invalid", "code": "item.not_an_object", "message": f"{iid}: a {role} is a JSON object"})
+            it["doc"] = None
+        elif role in SHAPES:
+            res = validate(doc, SHAPES[role])
+            if not res.ok:
+                diags.append({"kind": "input-invalid", "code": f"item.schema:{role}",
+                              "message": f"{iid}: " + "; ".join(f"{f.path}: {f.code}" for f in res.errors[:5])})
+                it["doc"] = None
+        elif role == "measurement-spec":
+            corr = (doc.get("extension") or {}).get("corrections") if isinstance(doc.get("extension"), dict) else None
+            if corr is not None and not (isinstance(corr, list) and all(isinstance(c, dict) for c in corr)):
+                diags.append({"kind": "input-invalid", "code": "spec.bad_corrections", "message": f"{iid}: corrections are objects"})
+                it["doc"] = None
+                continue
+            ids = [c.get("effect_id") for c in corr or []]
+            for d in sorted({str(x) for x in ids if ids.count(x) > 1}):
+                diags.append({"kind": "input-invalid", "code": "spec.duplicate_effect_id",
+                              "message": f"{iid}: effect_id {d!r} names two corrections"})
+    return diags
+
+
 def draft_view(root, items: list, context: dict, files: dict | None = None) -> dict:
     """A check view before freezing, from in-memory documents (files: ref -> content) or the files under root."""
     out = {}
     for it in items:
         doc = (files or {}).get(it["ref"])
-        if doc is None and str(it["ref"]).endswith(".json"):
+        if doc is None and _is_json(it["ref"]):
             doc = json.loads(_read(Path(root).resolve(), it["ref"]).decode("utf-8"))
         out[it["id"]] = {"role": it["role"], "ref": it["ref"], "doc": doc if isinstance(doc, (dict, list)) else None}
     return _view(out, context)[0]
@@ -140,12 +179,24 @@ def _item(root: Path, it: dict) -> dict:
     return rec
 
 
-def _write_once(path: Path, doc: dict) -> None:
-    data = (json.dumps(doc, indent=1, sort_keys=True) + "\n").encode("utf-8")
-    if path.exists() and path.read_bytes() != data:
+def _serialized(doc: dict) -> bytes:
+    return (json.dumps(doc, indent=1, sort_keys=True) + "\n").encode("utf-8")
+
+
+def _generated_item(role: str, iid: str, ref: str, doc: dict) -> dict:
+    return {"role": role, "id": iid, "ref": ref, "sha256": canonical_sha256(doc), "digest_kind": "canonical-json",
+            "bytes_sha256": hashlib.sha256(_serialized(doc)).hexdigest()}
+
+
+def _check_once(path: Path, doc: dict) -> None:
+    if path.exists() and path.read_bytes() != _serialized(doc):
         raise BundleRefused("bundle.exists", f"{path.name} exists with other content: freeze never overwrites")
+
+
+def _write_once(path: Path, doc: dict) -> None:
+    _check_once(path, doc)
     tmp = path.with_suffix(path.suffix + ".tmp")
-    tmp.write_bytes(data)
+    tmp.write_bytes(_serialized(doc))
     tmp.replace(path)
 
 
@@ -153,11 +204,15 @@ def freeze(root, analysis: str, items: list, context: dict, mode: str = "chain")
     root = Path(root).resolve()
     if not isinstance(items, list) or not items:
         raise BundleRefused("bundle.no_items", "a bundle needs its items")
-    ids, refs = [it.get("id") for it in items], [it.get("ref") for it in items]
     for it in items:
         if not (isinstance(it, dict) and it.get("role") in ROLES2 and it.get("role") not in ("context", "semantic-lock")
                 and isinstance(it.get("id"), str) and isinstance(it.get("ref"), str)):
             raise BundleRefused("bundle.bad_item", f"{it!r}: a role from {list(ROLES2)} (context and lock are generated), an id, a ref")
+        if it["role"] in JSON_ROLES and not _is_json(it["ref"]):
+            raise BundleRefused("bundle.bad_item", f"{it['id']}: a {it['role']} item is a .json file")
+    ids, refs = [it["id"] for it in items], [it["ref"] for it in items]
+    if not isinstance(context, dict):
+        raise BundleRefused("bundle.context_schema", "the context is a JSON object")
     if len(set(ids)) != len(ids) or {"check-context", "semantic-lock"} & set(ids):
         raise BundleRefused("bundle.duplicate_id", "item ids are unique (and 'check-context', 'semantic-lock' are reserved)")
     if len(set(refs)) != len(refs) or {CONTEXT_REF, LOCK_REF} & set(refs):
@@ -166,7 +221,13 @@ def freeze(root, analysis: str, items: list, context: dict, mode: str = "chain")
     rep = validate(context, "check_context.json")
     if not rep.ok:
         raise BundleRefused("bundle.context_schema", "; ".join(f"{f.path}: {f.code}" for f in rep.errors))
-    view = draft_view(root, items, context)
+    try:
+        view = draft_view(root, items, context)
+    except (UnicodeError, ValueError) as exc:
+        raise BundleRefused("bundle.bad_json", f"an item is not readable JSON: {exc}") from None
+    shapes = shape_diagnostics(view["items"])
+    if shapes:
+        raise BundleRefused("bundle.item_schema", "; ".join(d["message"] for d in shapes))
     roles = {it["id"]: it["role"] for it in items}
     bad = [f for f in check_context(context, roles) if f["code"] in ("context.duplicate_id", "context.unknown_reference")]
     if bad:
@@ -175,17 +236,18 @@ def freeze(root, analysis: str, items: list, context: dict, mode: str = "chain")
     full = dict(context, obligations=obl.generate(suite, view))
     view["context"] = full
     lock = build_lock(suite, generator_code_digest() or "", view, registry_digest())
-    _write_once(root / CONTEXT_REF, full)
-    _write_once(root / LOCK_REF, lock)
-    recs = [_item(root, it) for it in items + [{"role": "context", "id": "check-context", "ref": CONTEXT_REF},
-                                               {"role": "semantic-lock", "id": "semantic-lock", "ref": LOCK_REF}]]
-    _roles_ok([r["role"] for r in recs], mode)
+    recs = [_item(root, it) for it in items] + [_generated_item("context", "check-context", CONTEXT_REF, full),
+                                                _generated_item("semantic-lock", "semantic-lock", LOCK_REF, lock)]
     doc = {"bundle_version": "2.0.0", "format": FORMAT2, "mode": mode, "analysis": analysis,
            "items": sorted(recs, key=lambda x: (ROLES2.index(x["role"]), x["id"])), "plugin_release": dict(plugin_release())}
     doc["bundle_digest"] = canonical_sha256(doc)
     rep = validate(doc, "analysis_bundle_v2.json")
     if not rep.ok:
         raise BundleRefused("bundle.schema", "; ".join(f"{f.path}: {f.code}" for f in rep.errors))
+    _check_once(root / CONTEXT_REF, full)  # every check passes before anything is written
+    _check_once(root / LOCK_REF, lock)
+    _write_once(root / CONTEXT_REF, full)
+    _write_once(root / LOCK_REF, lock)
     return doc
 
 
@@ -245,12 +307,13 @@ def load_subject(bundle_path, root) -> tuple[dict, list[dict]]:
         if not isinstance(it, dict) or "id" not in it:
             continue
         rec = dict(it, doc=None)
-        if str(it.get("ref", "")).endswith(".json"):
+        if isinstance(it.get("ref"), str) and _is_json(it["ref"]):
             try:
                 rec["doc"] = json.loads(_read(root, it["ref"]).decode("utf-8"))
             except (BundleRefused, UnicodeError, ValueError):
                 pass  # reported by verify as a missing or changed frozen file
         items[it["id"]] = rec
+    diags += shape_diagnostics(items)
     ctx_items = [i for i in items.values() if i.get("role") == "context"]
     lock_items = [i for i in items.values() if i.get("role") == "semantic-lock"]
     context = ctx_items[0]["doc"] if ctx_items and isinstance(ctx_items[0]["doc"], dict) else {}
@@ -319,8 +382,10 @@ def evaluate(view: dict, diags: list[dict], previous: dict | None = None, vocab=
     from contracts.analysis_checks.lock import compare
     from contracts.analysis_checks.outcomes import formal_view, summarize
     from contracts.analysis_checks.rules import evaluate as run_rules
-    diags = list(diags) + [dict(d, kind="input-invalid") for d in check_inventory(view)]
     lock_diff = compare(view.get("lock") or {}, current_lock(view)) if view.get("suite") else []
+    # with drifted definitions a regenerated inventory may differ for that reason alone: drift, not invalid input
+    diags = list(diags) + [dict(d, kind="dependency-missing", code=d["code"] + "_under_drift") if lock_diff else
+                           dict(d, kind="input-invalid") for d in check_inventory(view)]
     input_valid = not any(d["kind"] == "input-invalid" for d in diags)
     obligations = ((view.get("context") or {}).get("obligations") or {}).get("items", [])
     if input_valid:
@@ -472,6 +537,10 @@ def main(argv=None) -> int:
             context = json.loads(args.context.read_text(encoding="utf-8"))
             if args.out.exists():
                 raise UsageError(f"{args.out} exists: a bundle is written once")
+            if args.out.resolve() in {(args.root / r).resolve() for r in (CONTEXT_REF, LOCK_REF)}:
+                raise UsageError(f"{args.out} is where freeze writes the context or lock")
+            if not args.out.parent.is_dir():
+                raise UsageError(f"{args.out.parent} is not a directory")
             try:
                 doc = freeze(args.root, args.analysis, items, context)
             except BundleRefused as exc:
@@ -482,11 +551,15 @@ def main(argv=None) -> int:
             return 0
         if args.cmd == "summary":
             report = json.loads(args.report.read_text(encoding="utf-8"))
+            if not (isinstance(report, dict) and isinstance(report.get("obligations"), list)):
+                raise UsageError(f"{args.report} is not an analysis-check report")
             if args.cursor < 0 or args.max_bytes < 1024:
                 raise UsageError("--cursor is >= 0 and --max-bytes >= 1024")
             print(json.dumps(summary_page(report, args.cursor, args.max_bytes), indent=1))
             return 0
         previous = json.loads(args.previous.read_text(encoding="utf-8")) if args.previous else None
+        if previous is not None and not (isinstance(previous, dict) and isinstance(previous.get("obligations"), list)):
+            raise UsageError(f"{args.previous} is not an analysis-check report")
         vocab = _vocab(args.profiles_from)
         view, diags = load_subject(args.bundle, args.root)
         if args.out is not None:
@@ -496,7 +569,9 @@ def main(argv=None) -> int:
                 raise UsageError("a report is never written into the bundle it examines")
             if args.out.exists():
                 raise UsageError(f"{args.out} exists: reports are never overwritten")
-    except (OSError, ValueError) as exc:
+            if not args.out.parent.is_dir():
+                raise UsageError(f"{args.out.parent} is not a directory")
+    except (OSError, ValueError, TypeError) as exc:
         print(json.dumps({"status": "usage", "error": str(exc)}, indent=1))
         return 2
     report = evaluate(view, diags, previous, vocab)

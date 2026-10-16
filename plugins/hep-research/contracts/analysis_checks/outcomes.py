@@ -5,7 +5,7 @@ run is unverified (check.rule_not_run), never satisfied. Coverage is complete wh
 satisfied, violated or not_applicable, expressed as completed over all, never as a pass percentage. Consistency is
 inconsistent when a violation is established on valid inputs, consistent only when every obligation is satisfied or
 not_applicable on valid inputs, and undetermined otherwise. The formal-use view treats a declaration-based satisfied
-obligation as unverified: declarations an agent wrote support diagnostics only (A10, C12).
+or not_applicable obligation as unverified: declarations an agent wrote support diagnostics only (A10, C12).
 
 Legacy mapping (C10 table): legacy findings keep their own field; map_legacy says which state each would mean."""
 from __future__ import annotations
@@ -33,8 +33,8 @@ def summarize(outcomes: list[dict], input_valid: bool) -> dict:
 
 def formal_view(outcomes: list[dict], input_valid: bool) -> dict:
     """The summary when declaration-based outcomes count as unverified (formal use without an accepted review)."""
-    demoted = [dict(o, state="unverified") if o["state"] == "satisfied" and o.get("declaration_based") else o
-               for o in outcomes]
+    demoted = [dict(o, state="unverified") if o["state"] in ("satisfied", "not_applicable") and o.get("declaration_based")
+               else o for o in outcomes]
     out = summarize(demoted, input_valid)
     out["declaration_based_as"] = "unverified"
     out["note"] = ("declaration-based outcomes count for formal use only through an accepted attestation review that "

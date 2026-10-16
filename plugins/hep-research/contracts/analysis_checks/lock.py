@@ -52,8 +52,10 @@ def build_lock(suite: dict, generator_code_digest: str, view: dict, registry_dig
     if registry_digest is not None:
         defs.append({"kind": "rule-registry", "id": "contracts/rules/registry.json", "version": None,
                      "digest": registry_digest, "owner": "core"})
-    readers = sorted({str((view.get("items", {}).get(i.get("recipe")) or {}).get("doc", {}).get("recipe_version"))
-                      for i in view["context"].get("recipe_instances", []) if isinstance(i, dict)})
+    readers = sorted({str(doc.get("recipe_version")) for i in (view.get("context") or {}).get("recipe_instances", [])
+                      if isinstance(i, dict)
+                      for doc in [((view.get("items", {}).get(i.get("recipe")) or {}).get("doc")) or {}]
+                      if isinstance(doc, dict)})
     return {"lock_version": "1.0.0", "suite": {"id": suite.get("suite_id"), "version": suite.get("version")},
             "generator": dict(suite.get("generator", {}), code_digest=generator_code_digest),
             "definitions": defs, "member_sets": [{k: m[k] for k in ("class", "members", "strategy", "closure_digest")}

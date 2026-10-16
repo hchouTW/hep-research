@@ -50,27 +50,23 @@ class Findings(unittest.TestCase):
         view, diags = ac().load_subject(b, root)
         return ac().evaluate(view, diags)
 
-    @unittest.expectedFailure  # finding 1: a deleted recipe file gives an input-invalid report, not a traceback
     def test_missing_recipe_file(self):
         b, root = self.case()
         (root / "recipe.json").unlink()
         self.assertEqual(cli("check", b, "--root", root), 1)
 
-    @unittest.expectedFailure  # finding 1/8: a non-JSON or malformed recipe is refused at freeze
     def test_freeze_refuses_malformed_recipe(self):
         def bad(c):
             c.files["recipe.json"] = {"steps": ["x"]}
         with self.assertRaises(ac().BundleRefused):
             self.case(variant=bad)
 
-    @unittest.expectedFailure  # finding 8: a malformed recipe in a frozen bundle is input-invalid
     def test_malformed_recipe_in_bundle(self):
         b, root = self.case()
         (root / "recipe.json").write_text(json.dumps({"steps": ["x"]}))
         view, diags = ac().load_subject(b, root)
         self.assertEqual(ac().evaluate(view, diags)["input_validity"], "invalid")
 
-    @unittest.expectedFailure  # finding 2: a recipe without estimand_kind does not prove the root
     def test_root_needs_the_estimand(self):
         from contracts.analysis_checks.rules import evaluate
         b, root = self.case()
@@ -85,14 +81,12 @@ class Findings(unittest.TestCase):
             c.context["recipe_instances"][0]["calibrations"] = {"exposure": "factors"}
         return get(self.report(variant=variant), f"r-comp.factor_values:proton-p1#{COMP}")
 
-    @unittest.expectedFailure  # finding 3: no bins or non-finite values are never satisfied
     def test_factor_values_need_finite_bins(self):
         empty = {k: {"values": []} for k in ("exposure", "acceptance", "livetime")}
         self.assertEqual(self.factors(empty)["state"], "unverified")
         nan = {"exposure": {"values": [float("nan")]}, "acceptance": {"values": [1.0]}, "livetime": {"values": [1.0]}}
         self.assertNotEqual(self.factors(nan)["state"], "satisfied")
 
-    @unittest.expectedFailure  # finding 4: a declaration that excludes an instance is flagged, and formal use demotes it
     def test_declaration_reached_not_applicable(self):
         def two(c):
             spec = c.doc("spec")
@@ -107,7 +101,6 @@ class Findings(unittest.TestCase):
         self.assertEqual((o["state"], o["declaration_based"]), ("not_applicable", True))
         self.assertLess(rep["formal_use_view"]["counts"]["not_applicable"], rep["counts"]["not_applicable"])
 
-    @unittest.expectedFailure  # finding 5: R-RESP is unsupported when an operator's migration coverage is unknown
     def test_response_rule_with_unknown_coverage(self):
         from test_v63_d06 import custom_table
 
@@ -116,16 +109,17 @@ class Findings(unittest.TestCase):
         o = get(self.report(variant=variant), "r-resp.response_use:proton-p1")
         self.assertEqual(o["state"], "unsupported")
 
-    @unittest.expectedFailure  # finding 6: duplicate spec effect_ids are input-invalid
     def test_duplicate_effect_ids(self):
         def dup(c):
             spec = c.doc("spec")
             spec["extension"]["corrections"].append(dict(spec["extension"]["corrections"][1], category="fiducial"))
-        rep = self.report(variant=dup)
-        self.assertEqual(rep["input_validity"], "invalid")
-        self.assertIn("spec.duplicate_effect_id", {d["code"] for d in rep["input_diagnostics"]})
+        with self.assertRaises(ac().BundleRefused):
+            self.case(variant=dup)
+        from contracts.analysis_check import shape_diagnostics
+        spec = {"extension": {"corrections": [{"effect_id": "x"}, {"effect_id": "x", "category": "fiducial"}]}}
+        diags = shape_diagnostics({"spec": {"role": "measurement-spec", "ref": "s.json", "doc": spec}})
+        self.assertEqual([d["code"] for d in diags], ["spec.duplicate_effect_id"])
 
-    @unittest.expectedFailure  # finding 7: a scope that cannot be compared is unverified, not a conflict
     def test_partial_target_scope(self):
         def partial(c):
             c.doc("spec")["extension"]["corrections"][0]["target_scope"] = "species:proton"
@@ -133,7 +127,6 @@ class Findings(unittest.TestCase):
         o = get(self.report(variant=partial), "r-real.description:selection_efficiency@proton-p1")
         self.assertEqual(o["state"], "unverified")
 
-    @unittest.expectedFailure  # finding 9: freeze refuses bad items and reserved output paths and leaves no orphans
     def test_freeze_guards(self):
         with self.assertRaises(ac().BundleRefused):
             ac().freeze(self.base, "a", ["x"], {})
@@ -147,7 +140,6 @@ class Findings(unittest.TestCase):
         self.assertFalse((c.root / "check-context.json").exists())
         self.assertEqual(cli(*args, "--out", self.base / "b.json"), 0)
 
-    @unittest.expectedFailure  # finding 10: malformed CLI inputs are usage errors (2), never tracebacks
     def test_cli_usage_errors(self):
         b, root = self.case()
         bad = self.base / "list.json"
@@ -156,7 +148,6 @@ class Findings(unittest.TestCase):
         self.assertEqual(cli("summary", bad), 2)
         self.assertEqual(cli("check", b, "--root", root, "--out", self.base / "no" / "dir" / "r.json"), 2)
 
-    @unittest.expectedFailure  # LOW: an inventory change caused by drifted definitions is drift (3), not invalid (1)
     def test_inventory_mismatch_under_drift(self):
         b, root = self.case()
         view, diags = ac().load_subject(b, root)

@@ -4,6 +4,8 @@ contracts/rules/registry.json; a rule the suite names but this module does not i
 unverified (check.rule_not_run), and so does a rule that fails while running."""
 from __future__ import annotations
 
+import math
+
 from contracts.analysis_checks.context import accepted_declarations
 from contracts.analysis_checks.instances import build_view
 from contracts.analysis_checks.obligations import corrections as spec_corrections
@@ -13,7 +15,8 @@ from contracts.effect_catalog import classify
 
 def outcome(state: str, reason: str, message: str = "", evidence=(), declarations=(), **extra) -> dict:
     out = {"state": state, "reason": reason, "message": message, "evidence": list(evidence),
-           "declaration_based": bool(declarations) and state == "satisfied", "declarations": sorted(declarations)}
+           "declaration_based": bool(declarations) and state in ("satisfied", "not_applicable"),
+           "declarations": sorted(declarations)}
     out.update(extra)
     return out
 
@@ -106,7 +109,9 @@ def r_inv_root(ob: dict, env: Env) -> dict:
     if inst is None:
         return outcome("unverified", "check.root_incomplete", "the root's output instance is missing", ev)
     recipe = env.recipe_of(inst)
-    if recipe.get("estimand_kind") and recipe.get("estimand_kind") != root.get("quantity"):
+    if not recipe.get("estimand_kind"):
+        return outcome("unverified", "check.root_incomplete", "the output instance's recipe states no estimand", ev)
+    if recipe.get("estimand_kind") != root.get("quantity"):
         return outcome("violated", "check.root_output_conflict",
                        f"the root asks for {root.get('quantity')!r}; its instance's recipe produces {recipe.get('estimand_kind')!r}", ev)
     cmp = compare_scopes(root.get("scope"), inst.get("scope"), env.axes)
@@ -125,8 +130,7 @@ def r_map_classification(ob: dict, env: Env) -> dict:
     c = env.corrections.get(eid)
     if c is None:
         return outcome("unverified", "check.correction_missing", "the spec correction cannot be read")
-    idx = list(env.corrections).index(eid)
-    ev = [{"item": env.ctx.get("spec"), "pointer": f"/extension/corrections/{idx}"}]
+    ev = correction_evidence(env, eid)
     if c.get("exact_zero") is True:
         return outcome("not_applicable", "check.correction_exact_zero", "the correction is exactly zero", ev)
     cls = classify(env.catalog, str(c.get("category")))
@@ -204,7 +208,9 @@ def op_stage(env: Env, inst_id: str, operator) -> str | None:
 
 
 def correction_evidence(env: Env, eid: str) -> list[dict]:
-    return [{"item": env.ctx.get("spec"), "pointer": f"/extension/corrections/{list(env.corrections).index(eid)}"}]
+    raw = ((env.spec.get("extension") or {}).get("corrections") or []) if isinstance(env.spec, dict) else []
+    idx = next((k for k, c in enumerate(raw) if isinstance(c, dict) and c.get("effect_id") == eid), None)
+    return [{"item": env.ctx.get("spec"), "pointer": f"/extension/corrections/{idx}"}] if idx is not None else []
 
 
 # --- R-REAL -----------------------------------------------------------------------------------------------------
@@ -259,7 +265,14 @@ def r_real_description(ob: dict, env: Env) -> dict:
         if have is None:
             return outcome("unverified", "check.description_incomplete",
                            f"the spec gives {spec_field} but the application has none to compare", ev)
-        same = compare_scopes(want, have, env.axes) == "equal" or want == have if spec_field == "target_scope" else want == have
+        if spec_field == "target_scope" and want != have:
+            rel = compare_scopes(want, have, env.axes)
+            if rel in ("unknown", "invalid"):
+                return outcome("unverified", "check.description_incomplete",
+                               f"the spec's target_scope {want!r} cannot be compared with the application's", ev)
+            same = rel == "equal"
+        else:
+            same = want == have
         if not same:
             return outcome("violated", "check.description_conflict",
                            f"the spec's {spec_field} differs from the application's", ev, decls)
@@ -460,8 +473,10 @@ def r_comp_factor_values(ob: dict, env: Env) -> dict:
                        "only per-bin scalar factor lists are supported (no matrices or expressions)", ev)
     arrays: dict[str, list] = {k: list(v or []) for k, v in raw.items()}
     n = len(arrays[comp["parent"]])
-    if any(len(a) != n for a in arrays.values()):
-        return outcome("unverified", "check.factor_values_incomplete", "the factor lists have different bin counts", ev)
+    if n == 0 or any(len(a) != n for a in arrays.values()):
+        return outcome("unverified", "check.factor_values_incomplete", "the factor lists are empty or differ in bin count", ev)
+    if not all(math.isfinite(x) for a in arrays.values() for x in a):
+        return outcome("unverified", "check.factor_values_incomplete", "a factor value is not a finite number", ev)
     tol = float((doc.get("tolerance") or {}).get("relative", 1e-9))
     failed = []
     for k in range(n):
@@ -482,7 +497,15 @@ def r_comp_factor_values(ob: dict, env: Env) -> dict:
 def r_resp_response_use(ob: dict, env: Env) -> dict:
     inst_id = ob["subject"]["instance"]
     view = env.views.get(inst_id) or {}
-    unfold = [s for s in view.get("steps", []) if step_state(env, inst_id, s, "migration") == "covered"]
+    mstates = [(s, step_state(env, inst_id, s, "migration")) for s in view.get("steps", [])]
+    unfold = [s for s, st in mstates if st == "covered"]
+    if not unfold and any(st == "unsupported" for _, st in mstates):
+        return outcome("unsupported", "check.response_use_unknown",
+                       "an operator of the instance has no coverage contract: its use of a response is unknown",
+                       [{"instance": inst_id, "step": s.get("step_id")} for s, st in mstates if st == "unsupported"])
+    if not unfold and any(st == "unverified" for _, st in mstates):
+        return outcome("unverified", "check.response_use_unbound", "whether an operator unfolds is undefined in its coverage",
+                       [{"instance": inst_id}])
     migr = []
     for eid, c in env.corrections.items():
         if str(c.get("category")) == "migration":
@@ -505,6 +528,7 @@ def r_resp_response_use(ob: dict, env: Env) -> dict:
                                "the response bound to the unfolding step is not an unfolding response with migration inside", ev)
         return outcome("satisfied", "check.response_use_consistent", "the unfolding step uses a bound unfolding response", ev)
     in_scope = [(eid, c, app, d) for eid, c, app, d in migr if app != "no"]
+    excluded = sorted({x for _, _, app, d in migr if app == "no" for x in d})
     if any(c.get("applied_in") == "unfolding" and app == "yes" for _, c, app, _ in in_scope):
         decls = [x for _, c, app, d in in_scope if app == "yes" for x in d]
         return outcome("violated", "check.response_use_conflict",
@@ -533,7 +557,7 @@ def r_resp_response_use(ob: dict, env: Env) -> dict:
         return outcome("unverified", "check.response_use_unbound",
                        "the bundle carries responses that nothing binds to a use", ev)
     return outcome("not_applicable", "check.response_not_needed",
-                   "no migration correction, no unfolding step and no response: no response use is required", ev)
+                   "no migration correction, no unfolding step and no response: no response use is required", ev, excluded)
 
 
 RULES = {"r-inv.root": r_inv_root, "r-map.classification": r_map_classification,

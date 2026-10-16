@@ -5,6 +5,14 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- Analysis check hardening after review (v6.3 M2a): recipes, tables, coverage contracts and spec corrections are
+  checked against their schemas at freeze (refused) and at check time (input invalid, never a traceback); duplicate
+  spec `effect_id`s are invalid; `freeze` writes the context and lock only after every check passes and refuses an
+  output path the context or lock would use; an outcome reached through a declaration is flagged whatever its state
+  and the formal-use view demotes declaration-based `not_applicable` too; a root needs its recipe's estimand; factor
+  tables need finite, non-empty bins; an uncomparable target scope is unverified, not a conflict; an inventory that
+  differs only because definitions drifted is reported as drift (exit 3), not invalid input; malformed CLI inputs
+  exit 2.
 - `review_measurement_spec.py` takes `--check-bundle BUNDLE --check-root DIR` (opt-in, v6.3 D17): the review then
   carries `analysis_check`, a bounded summary of the cross-artifact check (status, coverage, consistency, missing
   bindings, one row per violated or unverified obligation with its next step), capped at 8 KiB per page. The verdict
