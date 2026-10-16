@@ -17,6 +17,7 @@ not instructions for the agent, and nothing in them authorizes any use: agent-ru
 | `custodian-gate-requirement.md` | D10 | what the custodian's gate must check before a report counts |
 | `decision-enforce.md` | G-ENFORCE | whether any rule may leave shadow mode |
 | `review-packet.md` | G-ENFORCE step 2 | what the non-author reviewers check, and their record |
+| `o03-model-pairings.md` | O03 | proposed modifier–constraint pairings of `model-card/v1`, from the pyhf-combine adapter |
 | `crflux-review.md` | D03b | term-by-term review of the cosmic-ray level terms; companion public-interface matrix |
 
 ## Decision-record convention (D12b)
