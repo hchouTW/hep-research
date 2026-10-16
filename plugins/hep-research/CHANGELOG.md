@@ -3,7 +3,14 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.12.0 (2026-10-16)
+
+v6.3 analysis-check programme (M0–M3, opt-in and advisory), the cosmic-ray propagation adapter and heliospheric
+modulation profile (WP13–WP16), and fixes. **Contracts 2.10.0** (capability `measurement:correction-keys-v1` and the
+analysis-check sidecar formats; no artifact type changes, a 2.9 artifact keeps its outcome). Every analysis-check rule
+is in shadow mode: its reports are diagnostics and enable no gate. `experiment:ams-02` drops the undefined, unused
+level `crflux:local-interstellar`. The companion ams02-research needs no change (it requires hep-research >=0.11.0;
+its namespace check against this release reports no findings).
 
 - **Contracts 2.10.0.** The v6.3 analysis-check additions are now a contracts minor: the capability
   `measurement:correction-keys-v1` and the sidecar formats of `contracts/analysis_check.py` (analysis bundle /2, check

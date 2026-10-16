@@ -1700,3 +1700,30 @@ Branch `v63/refusal-blockers`, head `bbed3ec`, clean worktree.
 | `check_relocation.py` | pass |
 | Ruff 0.16.10, mypy 2.4.0 | clean |
 | Legacy capture (132 old-CLI runs) | unchanged |
+
+## 0.12.0 release check (2026-10-16, E2 and the CI lock)
+
+Release branch `release/0.12.0` from main `8c05905`. It covers the v6.3 analysis-check programme (PRs #116–#120, #122),
+contracts 2.10.0 with the retirement of `crflux:local-interstellar` (#121), and WP13–WP16 with the DRAGON2 fix
+(#110–#115).
+
+What changed:
+- Version 0.12.0 in both manifests, `pyproject.toml` and the README; CHANGELOG "Unreleased" became 0.12.0.
+- Examples regenerated with the E2 venv. Only version strings and the bc-propagation-fit grid hash change; that hash
+  covers version-stamped artifacts.
+- Two regenerated values were reverted:
+  - the unfolding-coverage drift (about 1e-13);
+  - one bc-propagation-fit `condition_number_log10` that flipped between 17.2 and null. Both mean a flat direction,
+    and the test treats them alike.
+- The sbottom benchmark artifacts' `plugin` string was rewritten by hand.
+- The three theory profiles stamp 0.12.0 / contracts 2.10.0, and their artifacts were regenerated with their own
+  scripts.
+
+The companion ams02-research 1.5.0 requires hep-research >=0.11.0. Its namespace check (`registry.py --local`)
+reported no findings.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail; 3542 tests, 0 failures, 61 skipped, 265 modules |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 25 pass, 0 fail; 3542 tests, 0 failures, 170 skipped |
+| Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
