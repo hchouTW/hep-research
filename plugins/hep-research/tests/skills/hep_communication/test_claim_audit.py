@@ -160,6 +160,18 @@ class WordingScans(Base):
         self.assertIn("wording.status_promotion", self.codes(rep, "warning"))
         self.assertEqual(rep["status"], "pass")
 
+    def test_status_promotion_wording_in_chinese(self):
+        """F-12: Simplified Chinese status words are caught like the Traditional ones (before the fix only
+        Traditional Chinese and English were); negation still clears them."""
+        c2 = self.doc["extension"]["claims"][1]
+        for text in ("数据显示 R = 0.98（合成资料）。", "资料顯示 R = 0.98（合成資料）。", "我们测得 R = 0.98。",
+                     "数據顯示 R = 0.98。"):
+            with self.subTest(text=text):
+                c2["text"] = text
+                self.assertIn("wording.status_promotion", self.codes(self.audit(), "warning"))
+        c2["text"] = "我们没有在数据显示中看到 R 的偏离。"
+        self.assertNotIn("wording.status_promotion", self.codes(self.audit()))
+
     def test_quoted_and_negated_wording_not_flagged(self):
         c2 = self.doc["extension"]["claims"][1]
         c2["text"] = 'Ref. [3] reports "observation of a deviation"; we find no evidence for it (synthetic fixture).'

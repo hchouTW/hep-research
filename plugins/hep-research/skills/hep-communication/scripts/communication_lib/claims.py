@@ -24,16 +24,20 @@ from contracts.evidence import STRENGTH
 NOTE = ("assessment recorded by its assessor and checked for consistency with the record; whether the evidence supports "
         "the wording is the reader's judgment, not established by this audit; wording findings are advisory")
 PROMOTED = {"synthetic", "asimov", "preliminary", "unvalidated", "failed", "user-supplied"}
-# English and Traditional Chinese (RC-A10). CJK alternatives carry no \\b: CJK characters are word characters.
+# English, Traditional Chinese (RC-A10) and Simplified Chinese (F-12): each CJK character that differs between the two
+# scripts is a character class, so mixed forms match too. CJK alternatives carry no \\b: CJK characters are word
+# characters.
+_DATA = r"(?:[资資]料|[数數][据據])"
 MEASURED_RE = re.compile(r"\b(we measure|measured|observed|observation of|in data|the data show|data show)\b"
-                         r"|測量到|量測到|測得|觀測到|觀察到|在資料中|資料顯示|數據顯示", re.I)
-DISCOVERY_RE = re.compile(r"\b(observation of|evidence for|discover(?:y|ed)?|establish(?:es|ed)?)\b|發現|證實|確立|觀測到.{0,6}訊號", re.I)
+                         r"|[测測]量到|量[测測]到|[测測]得|[观觀][测測]到|[观觀]察到|在" + _DATA + r"中|" + _DATA + r"[显顯]示", re.I)
+DISCOVERY_RE = re.compile(r"\b(observation of|evidence for|discover(?:y|ed)?|establish(?:es|ed)?)\b"
+                          r"|[发發][现現]|[证證][实實]|[确確]立|[观觀][测測]到.{0,6}[讯訊信][号號]", re.I)
 UNIVERSAL_RE = re.compile(r"\b(for all|all energies|all masses|universal(?:ly)?|always|in general|any (?:energy|mass|regime))\b"
-                          r"|對所有|所有能量|所有質量|普遍|總是|一般而言|任何能區", re.I)
+                          r"|[对對]所有|所有能量|所有[质質]量|普遍|[总總]是|一般而言|任何能[区區]", re.I)
 NEGATION_RE = re.compile(r"\b(no evidence|not|neither|nor|fails? to|without|rule[sd]? out|disfavou?r)\b"
-                         r"|沒有|並未|並非|未能|無法|排除|不支持|不是", re.I)
+                         r"|[没沒]有|[并並]未|[并並]非|未能|[无無]法|排除|不支持|不是", re.I)
 ATTRIBUTION_RE = re.compile(r"\b(Ref\.|refs?\.|reported (?:by|in)|claims? that|according to|argue[sd]? that|et al\.)\b"
-                            r"|根據|據.{0,10}報導|文獻\s*\[|等人", re.I)
+                            r"|根[据據]|[据據].{0,10}[报報][导導道]|文[献獻]\s*\[|等人", re.I)
 QUOTE_RE = re.compile(r"[\"“「『][^\"”」』]*[\"”」』]")
 
 
