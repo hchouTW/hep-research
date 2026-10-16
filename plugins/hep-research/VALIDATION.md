@@ -1639,7 +1639,7 @@ context cost, then the fixes of an independent code review. Stacked branches `v6
 | Same with the CI lock (no torch), `96f18b9` | 25 pass, 0 fail; 3518 tests, 0 failures, 170 skipped |
 | `check_relocation.py`, `96f18b9` | pass |
 | Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
-| V cases | all 40 M2a parts passing (registry); 43 of 80 parts passing overall, the rest are M2b, M2c, D11b and M3 |
+| V cases | all 40 M2a parts passing (registry); 45 of 80 parts passing overall (the M1 and M2a parts), the rest are M2b, M2c, D11b and M3 |
 | Cases | reduced positive case complete and consistent (exit 0); CASE-CHAIN partial, 44 of 64 obligations decided (exit 3) |
 | Legacy capture (132 runs of the old CLIs on the existing fixtures) | unchanged against the post-D03a capture |
 
