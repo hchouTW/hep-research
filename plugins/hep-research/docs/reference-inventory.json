@@ -3197,12 +3197,13 @@
     "skills/hep-statistics/references/inference-recipes.md",
     "skills/hep-statistics/references/nuisance-modeling.md",
     "tests/skills/hep_statistics/test_core_stats_guide.py",
-    "tests/skills/test_documented_output_claims.py"
+    "tests/skills/test_documented_output_claims.py",
+    "tests/tools/test_reference_soft_budget.py"
    ],
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "740918b 2026-10-17"
+   "last_commit": "e1623b1 2026-10-17"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
