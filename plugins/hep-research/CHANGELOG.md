@@ -5,6 +5,13 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Contracts 2.10.0.** The v6.3 analysis-check additions are now a contracts minor: the capability
+  `measurement:correction-keys-v1` and the sidecar formats of `contracts/analysis_check.py` (analysis bundle /2, check
+  context, semantic lock, check report, validation record, effect catalog, operator coverage, rule registry). No
+  artifact type changes; a 2.9 artifact keeps its outcome. All analysis-check rules stay advisory and in shadow mode.
+- `experiment:ams-02` no longer declares the level `crflux:local-interstellar`. No file defined it and nothing used
+  it (`docs/dev/v6.3/crflux-review.md`); `crflux:top-of-instrument` is unchanged. Interstellar spectra keep their own
+  terms in the theory profiles (`crsr:local-interstellar`).
 - `recipe_semantics.py` refuses an `--upstream` artifact that requires a capability it does not implement
   (`semantics.upstream_unknown_capability`; nothing is read from it). No existing fixture declares such a capability,
   so no existing output changes (v6.3 G-ENFORCE step 1, refusal matrix).

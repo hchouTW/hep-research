@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "2.9.0"
+CONTRACTS_VERSION = "2.10.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -52,10 +52,13 @@ CONTRACTS_VERSION = "2.9.0"
 # policy (--strict-versions, protected use); contracts/migrate_skill_names.py rewrites producer_skill and
 # handoff.to_skill. No capability and no other rule change: a 2.8 artifact keeps its outcome apart from that warning,
 # and a 2.8 reader rejects a new skill name in producer_skill (schema enum) instead of misreading it.
-# measurement:correction-keys-v1 (v6.3 D05a, no version change): a measurement-spec correction may carry the R4
-# correction keys (target_scope, calibration_digest, variation_id, stage) and application_id; contracts.validate knows
-# and checks them only under this capability, so a spec without it keeps its findings and a reader without it refuses
-# the spec instead of reading the keys as unknown.
+# 2.10.0 (v6.3 analysis-check programme) adds the capability measurement:correction-keys-v1 (D05a): a measurement-spec
+# correction may carry the R4 correction keys (target_scope, calibration_digest, variation_id, stage) and
+# application_id; contracts.validate knows and checks them only under this capability, so a spec without it keeps its
+# findings and a reader without it refuses the spec instead of reading the keys as unknown. It also adds sidecar
+# formats read only by contracts.analysis_check and its readers (analysis bundle /2, check context, semantic lock,
+# check report, validation record, effect catalog, operator coverage, rule registry); no artifact type changes, and a
+# 2.9 artifact keeps its outcome under a 2.10 reader. The checks are advisory and in shadow mode.
 KNOWN_CAPABILITIES = frozenset({"core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})

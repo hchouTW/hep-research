@@ -69,3 +69,10 @@ From the public files only (`docs/profile-authoring.md`, `docs/deployment-model.
 `python3 "<hep-research root>/contracts/registry.py" --local "<companion root>/profile"`, against this branch. A
 `profile.namespace_collision` there means the companion declares a namespace the public `experiment:ams-02` owns;
 resolve it by an ownership record or a companion change before release (companion transition stays at stage 1, O11).
+
+## Decision (2026-10-16)
+
+The owner chose the recommendation: **retire `crflux:local-interstellar`**. It is removed from
+`profiles/experiments/ams-02/profile.json` (the `experiment:ams-02` profile is part of this plugin, not of the
+companion). Nothing is promoted and every other name stays. Before the removal, the companion's own check
+(`registry.py --local`) against main `c1ab70b` reported `ok` with no findings, so there is no `profile.namespace_collision`.
