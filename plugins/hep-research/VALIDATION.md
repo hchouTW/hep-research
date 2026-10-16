@@ -1806,3 +1806,28 @@ How it was built:
 | Same with the CI lock (no torch) | 25 pass, 0 fail; 3580 tests, 0 failures, 170 skipped |
 | `check_relocation.py` | pass |
 | Ruff 0.16.10, mypy 2.4.0 | clean |
+
+## 0.13.0 release check (2026-10-16, E2 and the CI lock)
+
+Release branch `release/0.13.0` from main `4b90c71`. It covers the v6.3 model-card suite, the custody inventory and run
+lineage (PRs #124–#127): all 80 V parts pass.
+
+What changed:
+- **Contracts 2.11.0:** new sidecar formats only. The 127 fixtures and the measurement-spec template moved to 2.11.0.
+- **Version 0.13.0** in both manifests, `pyproject.toml` and the README; CHANGELOG "Unreleased" became 0.13.0.
+- **Examples regenerated** with the E2 venv. Only version strings and the bc-propagation-fit grid hash change.
+  - The unfolding-coverage drift was reverted.
+  - The bc-propagation-fit flat-direction condition number (17.2 versus null) was kept at its committed value.
+- **Hand edits:** the sbottom benchmark artifacts' `plugin` string.
+- **Theory profiles:** the three stamp 0.13.0 / contracts 2.11.0, and their artifacts were regenerated with their own
+  scripts.
+- **Review packet** (`docs/dev/v6.3/review-packet.md`): extended to the full suite set.
+
+The companion ams02-research 1.5.0 requires hep-research >=0.11.0. Its namespace check (`registry.py --local`)
+against main `4b90c71` reported no findings.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail; 3580 tests, 0 failures, 61 skipped, 268 modules |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 25 pass, 0 fail; 3580 tests, 0 failures, 170 skipped |
+| Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |

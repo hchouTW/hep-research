@@ -3,7 +3,17 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.13.0 (2026-10-16)
+
+v6.3 analysis-check programme completed on synthetic cases. The release adds:
+- the model-card suite (M2b model part);
+- the stage-1 custody inventory (V30);
+- run lineage with result bindings (M2c).
+
+All 80 V parts pass. **Contracts 2.11.0**: new sidecar formats only (the model bundle mode, the pairing contract, the
+result binding); no artifact type changes, and a 2.10 artifact keeps its outcome. Every analysis-check rule stays in
+shadow mode: reports are diagnostics, enable no gate, and are self-reviewed (C15). The companion ams02-research needs
+no change: it requires hep-research >=0.11.0, and its namespace check against this release reports no findings.
 
 - Run lineage `run-lineage/v1` (v6.3 M2c; design `docs/dev/v6.3/m2c-design.md`; decision `m2c-proposal.md`), opt-in
   and in shadow mode.
