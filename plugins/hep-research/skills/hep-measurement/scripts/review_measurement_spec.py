@@ -13,7 +13,8 @@ Usage: python3 review_measurement_spec.py SPEC.json [--profiles-from hep-researc
 Output: JSON {"status", "verdict", "reason", "defects": [...ranked...], "unresolved": [...], "warnings": [...],
 "note"}; --markdown prints the review in the order of assets/measurement-review-template.md instead.
 Exit codes: 0 verdict acceptable-with-open-inputs; 1 verdict blocked or needs-work (a finding); 2 unreadable or
-invalid input (not JSON, not a measurement-spec, malformed project config). Standard library only.
+invalid input (not JSON, not a measurement-spec, a malformed project config or one with errors, such as a
+profile that did not load cleanly). Standard library only.
 """
 from __future__ import annotations
 
@@ -93,7 +94,10 @@ def main(argv=None) -> int:
         vocab = None
         if args.profiles_from:
             from contracts.project import load_project
-            vocab = Vocabulary.with_profiles(load_project(args.profiles_from).profiles)
+            proj = load_project(args.profiles_from)
+            if not proj.report.ok:  # a profile that did not load cleanly must not shape the review
+                raise ValueError('invalid project config: ' + '; '.join(f'{f.code}: {f.message}' for f in proj.report.errors))
+            vocab = Vocabulary.with_profiles(proj.profiles)
         review = draft(doc, vocab)
     except (OSError, ValueError) as exc:
         print(f'review_measurement_spec.py: error: {exc}', file=sys.stderr)

@@ -5,6 +5,33 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- New effect catalog `contracts/vocab/effects.json` and operator coverage contract
+  `contracts/semantics/coverage/differential-flux.coverage.json`, checked by `contracts/effect_catalog.py` (schemas
+  `effect_catalog.json`, `operator_coverage.json`; v6.3 D04). The catalog classifies effects (an efficiency class with
+  listed members) and states conditional compositions (exposure = acceptance × live time only under its listed
+  conditions). The coverage contract binds the existing `differential-flux` table by its digest and lists, per
+  operator, its stage, the effects and class members it covers and its factor powers; where the table leaves the
+  efficiency members of an operator undefined (`unfold_with_efficiency`, `divide_effective_exposure`), every member is
+  unverified rather than inferred from the class. `coverage_state` and `resolve_members` (member closure with its
+  dependencies and digest) are for the later chain checks. The legacy table, its digest, `IMPLIED_CORRECTIONS` and
+  the `<x>_efficiency` rule are unchanged, and no existing entry point reads the new files.
+- Profile loading respects load errors everywhere (v6.3 D03a). New `contracts.registry.load_registry` separates usable
+  profiles from rejected ones (a profile with an error of its own, such as `profile.incompatible_version`, a namespace
+  collision, or a missing or rejected dependency); `validate_registry` and the `registry.py` CLI output are unchanged.
+  `load_project` binds only usable profiles and reports `project.profile_rejected` for a bound one that did not load
+  cleanly (`project.py` still lists every bound id); `project.resolve_context` returns decision `invalid` for a project
+  with errors. Behaviour changes: `review_measurement_spec.py --profiles-from` now exits 2 when the project config has
+  errors (it used to review with whatever loaded), and `communication_project.py` reports
+  `resolution.project_config_invalid` as an error and binds no profile (it was a warning, with the profiles still
+  used for ledgers and vocabulary).
+- Namespace ownership at load time: each namespace has exactly one owner across the public registry, the project's
+  local profiles and `--local` profiles; a second declaring profile gives `profile.namespace_collision` and neither
+  is used (`compose.namespace_collision` stays as a second check).
+- New `contracts/resolve.py` with the alias contract: owner, target, versions, rationale and retirement per alias;
+  checks for a missing target, cross-owner takeover, ambiguity, cycles and aliases that would need a conversion; an
+  in-memory canonical view where old and new keys merge only with equal values and a conflict is rejected with both
+  sources (`alias.key_conflict`). No alias is declared yet, so nothing consumes it outside its tests; wiring it into
+  the comparison gate's level identification waits for the first declared alias (D03b).
 - New rule and obligation registry `contracts/rules/registry.json` (schema `contracts/schemas/rule_registry.json`,
   checker `contracts/rule_registry.py`; v6.3 D12a), run by `tools/run_all_checks.py` as the static check
   `rule_registry`. It registers the existing R4 rules of `contracts/recipe_semantics.py` with `outcome_contract:

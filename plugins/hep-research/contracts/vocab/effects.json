@@ -1,0 +1,113 @@
+{
+ "catalog_version": "1.0.0",
+ "owner": "core",
+ "$comment": "Effect catalog (v6.3 D04, C8): which class an effect belongs to and how a parent factor is composed under stated conditions. Classification is not coverage: which members an operator handles is in the operator coverage contracts (contracts/semantics/coverage/). The legacy '<x>_efficiency' pattern and validate.IMPLIED_CORRECTIONS stay as legacy adapters; this catalog never replaces them for old entry points.",
+ "classes": [
+  {
+   "class_id": "efficiency",
+   "members": [
+    "trigger_efficiency",
+    "reconstruction_efficiency",
+    "selection_efficiency",
+    "identification_efficiency"
+   ],
+   "member_set": "listed",
+   "definition": "inefficiencies of the selection chain; a new member is added here explicitly and is never covered by an operator until its coverage contract lists it"
+  }
+ ],
+ "effects": [
+  {
+   "effect_id": "background",
+   "class": null,
+   "definition": "the estimated background (possibly zero) subtracted from selected counts"
+  },
+  {
+   "effect_id": "migration",
+   "class": null,
+   "definition": "Bin-to-bin migration between truth and reco (the matrix itself)"
+  },
+  {
+   "effect_id": "efficiency",
+   "class": "efficiency",
+   "definition": "legacy bare term: the inefficiency of the whole selection; keeps its legacy meaning and is never split into members automatically"
+  },
+  {
+   "effect_id": "trigger_efficiency",
+   "class": "efficiency",
+   "definition": "Trigger efficiency (efficiency class)"
+  },
+  {
+   "effect_id": "reconstruction_efficiency",
+   "class": "efficiency",
+   "definition": "Reconstruction or tracking efficiency (efficiency class)"
+  },
+  {
+   "effect_id": "selection_efficiency",
+   "class": "efficiency",
+   "definition": "Offline selection efficiency (efficiency class)"
+  },
+  {
+   "effect_id": "identification_efficiency",
+   "class": "efficiency",
+   "definition": "Particle identification efficiency (efficiency class)"
+  },
+  {
+   "effect_id": "acceptance",
+   "class": null,
+   "definition": "Geometric or kinematic acceptance"
+  },
+  {
+   "effect_id": "fiducial",
+   "class": null,
+   "definition": "Out-of-fiducial truth events (truth outside the declared phase space)"
+  },
+  {
+   "effect_id": "fakes",
+   "class": null,
+   "definition": "Reco events with no matching truth event (background-like, applied in reco space)"
+  },
+  {
+   "effect_id": "exposure",
+   "class": null,
+   "definition": "Exposure (acceptance x live time) normalization"
+  },
+  {
+   "effect_id": "luminosity",
+   "class": null,
+   "definition": "Integrated luminosity normalization"
+  },
+  {
+   "effect_id": "livetime",
+   "class": null,
+   "definition": "Detector live time"
+  },
+  {
+   "effect_id": "bin_width",
+   "class": null,
+   "definition": "division by the bin width of the variable the result is differential in"
+  }
+ ],
+ "compositions": [
+  {
+   "composition_id": "exposure_acceptance_livetime",
+   "parent": "exposure",
+   "children": [
+    {
+     "effect": "acceptance",
+     "power": 1
+    },
+    {
+     "effect": "livetime",
+     "power": 1
+    }
+   ],
+   "normalization_kind": "exposure",
+   "conditions": [
+    "acceptance is geometric (area times solid angle) and contains no efficiency",
+    "live time is the detector live time of the same data selection",
+    "any further factor (for example a geomagnetic cutoff fraction) is listed as its own child; without it this composition does not apply"
+   ],
+   "convention": "exposure = acceptance x live time under the conditions above; an effective exposure that contains efficiency is not this composition"
+  }
+ ]
+}

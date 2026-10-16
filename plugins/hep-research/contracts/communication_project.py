@@ -144,8 +144,10 @@ def _load_project(root: Path, r: _Resolver):
     except (OSError, ValueError) as exc:
         r.add("warning", "$project", "resolution.project_config_unreadable", f"{CONFIG_NAME} cannot be read ({exc}); no profile is bound")
         return None
-    for f in proj.report.errors:
-        r.add("warning", "$project", "resolution.project_config_invalid", f"{f.code}: {f.message}")
+    if not proj.report.ok:  # no profile of an invalid project is used: its errors stay errors
+        for f in proj.report.errors:
+            r.add("error", "$project", "resolution.project_config_invalid", f"{f.code}: {f.message}; no profile is bound")
+        return None
     return proj
 
 
@@ -351,6 +353,10 @@ def resolve_context(artifact_path, project_root, *, vocab: Vocabulary | None = N
         return ctx
     ctx["artifact"] = doc
     proj = project if project is not None else _load_project(root, r)
+    if proj is not None and not proj.report.ok:  # a given project with errors binds nothing either
+        for f in proj.report.errors:
+            r.add("error", "$project", "resolution.project_config_invalid", f"{f.code}: {f.message}; no profile is bound")
+        proj = None
     if proj is not None:
         ctx["profiles"] = [p.get("id") for p in proj.profiles]
         if vocab is None:

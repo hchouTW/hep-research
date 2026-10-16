@@ -1,0 +1,33 @@
+{"$comment": "Effect catalog (v6.3 D04, contracts/vocab/effects.json): classes with listed members, effects with their class, and conditional compositions of a parent factor. contracts/effect_catalog.py adds the cross-field checks.",
+ "type": "object",
+ "required": ["catalog_version", "owner", "classes", "effects", "compositions"],
+ "additionalProperties": false,
+ "properties": {
+  "$comment": {"type": "string"},
+  "catalog_version": {"type": "string", "enum": ["1.0.0"]},
+  "owner": {"type": "string", "minLength": 1},
+  "classes": {"type": "array", "items": {"type": "object", "required": ["class_id", "members", "member_set", "definition"],
+   "additionalProperties": false, "properties": {
+    "class_id": {"$ref": "#/$defs/id"},
+    "members": {"type": "array", "items": {"$ref": "#/$defs/id"}},
+    "member_set": {"$comment": "listed: exactly the members named; nothing else belongs to the class", "type": "string", "enum": ["listed"]},
+    "definition": {"type": "string", "minLength": 1}}}},
+  "effects": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["effect_id", "class", "definition"],
+   "additionalProperties": false, "properties": {
+    "effect_id": {"$ref": "#/$defs/id"},
+    "class": {"anyOf": [{"type": "null"}, {"$ref": "#/$defs/id"}]},
+    "definition": {"type": "string", "minLength": 1}}}},
+  "compositions": {"type": "array", "items": {"type": "object",
+   "required": ["composition_id", "parent", "children", "normalization_kind", "conditions", "convention"],
+   "additionalProperties": false, "properties": {
+    "composition_id": {"$ref": "#/$defs/id"},
+    "parent": {"$ref": "#/$defs/id"},
+    "children": {"type": "array", "minItems": 1, "items": {"type": "object", "required": ["effect", "power"],
+     "additionalProperties": false, "properties": {"effect": {"$ref": "#/$defs/id"}, "power": {"type": "integer"}}}},
+    "normalization_kind": {"type": "string", "minLength": 1},
+    "conditions": {"$comment": "a composition holds only under its conditions; never a general identity", "type": "array",
+                   "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "convention": {"type": "string", "minLength": 1}}}}
+ },
+ "$defs": {"id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*(:[a-z][a-z0-9_]*)?$"}}
+}

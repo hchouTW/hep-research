@@ -122,7 +122,9 @@ The registry validator checks the whole registry plus the given folders, and the
 a finding unrelated to the companion (for example the project's `plugin_version` range) keeps its own path and code
 and must be reported as itself, not as a companion version mismatch. The same folder given twice (through
 `local_profile_paths` and `--local`, or through a symbolic link) is one profile; two folders with one profile ID are
-a `registry.duplicate_id` error. A profile may `depends_on` a registered profile (for example `experiment:ams-02`) and
+a `registry.duplicate_id` error. Each vocabulary namespace has exactly one owner across the registry and the local
+profiles: a profile that declares a namespace another loaded profile declares gives `profile.namespace_collision`, and
+neither profile is used; a profile with any error of its own is not used by any consumer. A profile may `depends_on` a registered profile (for example `experiment:ams-02`) and
 must satisfy the same schema and version checks. Running these validators by hand checks a profile; it does not
 certify a companion package or run its preflight.
 

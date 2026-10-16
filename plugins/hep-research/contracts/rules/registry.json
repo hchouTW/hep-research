@@ -320,8 +320,10 @@
       "D03a"
      ],
      "host": "resolver unit test",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d03a.V13AliasKeys.test_equal_values_merge_and_conflicts_are_rejected"
+     ]
     }
    ]
   },
@@ -634,8 +636,13 @@
       "D03a"
      ],
      "host": "resolver unit test",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d03a.V29AliasContract.test_cross_owner_takeover",
+      "tests.contracts.test_v63_d03a.V29AliasContract.test_cycle",
+      "tests.contracts.test_v63_d03a.V29AliasContract.test_ambiguous_missing_target_conversion_and_malformed",
+      "tests.contracts.test_v63_d03a.V29AliasContract.test_a_promotion_by_the_owner_passes"
+     ]
     }
    ]
   },
@@ -730,10 +737,22 @@
    "expected": "realized only with listed operator coverage; the classification alone is not enough",
    "parts": [
     {
+     "slice": "M1",
+     "suite": "chain",
+     "work_packages": [
+      "D04"
+     ],
+     "host": "effect catalog and coverage contract (definition part)",
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d04.V35Definition.test_class_alone_is_not_coverage",
+      "tests.contracts.test_v63_d04.V35Definition.test_listed_members_are_covered"
+     ]
+    },
+    {
      "slice": "M2a",
      "suite": "chain",
      "work_packages": [
-      "D04",
       "D06"
      ],
      "host": "CASE-CHAIN",
@@ -868,10 +887,23 @@
    "expected": "Cannot be realized automatically",
    "parts": [
     {
+     "slice": "M1",
+     "suite": "chain",
+     "work_packages": [
+      "D04"
+     ],
+     "host": "effect catalog and coverage contract (definition part)",
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d04.V43Definition.test_new_member_is_not_covered",
+      "tests.contracts.test_v63_d04.V43Definition.test_unknown_effect_or_operator_is_unsupported",
+      "tests.contracts.test_v63_d04.V43Definition.test_bare_efficiency_keeps_legacy_coverage"
+     ]
+    },
+    {
      "slice": "M2a",
      "suite": "chain",
      "work_packages": [
-      "D04",
       "D06"
      ],
      "host": "catalog",
@@ -1124,10 +1156,21 @@
    "expected": "Set-query dependencies go into the lock; unrelated definitions do not change the semantic closure",
    "parts": [
     {
+     "slice": "M1",
+     "suite": null,
+     "work_packages": [
+      "D04"
+     ],
+     "host": "effect catalog and coverage contract (definition part)",
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d04.V58Definition.test_member_closure"
+     ]
+    },
+    {
      "slice": "M2a",
      "suite": null,
      "work_packages": [
-      "D04",
       "D05b"
      ],
      "host": "LOCK-CLOSURE",
@@ -1382,7 +1425,8 @@
     "contracts/project.py",
     "contracts/comparison/composition.py",
     "contracts/communication_project.py",
-    "skills/hep-measurement/scripts/review_measurement_spec.py"
+    "skills/hep-measurement/scripts/review_measurement_spec.py",
+    "contracts/resolve.py"
    ],
    "checks": [
     "tests.contracts.test_contracts",
@@ -1391,13 +1435,14 @@
     "tests.contracts.test_strict_versions",
     "tests.contracts.test_communication_project",
     "tests.contracts.test_v63_baseline_gaps",
-    "part:static"
+    "part:static",
+    "tests.contracts.test_v63_d03a",
+    "tests.contracts.test_companion_validation_cli",
+    "tests.skills.hep_measurement.test_review_procedure",
+    "tests.skills.hep_measurement.test_cli_contract",
+    "tests.skills.test_cli_robustness"
    ],
-   "not_available": [
-    "namespace ownership over the visible closure (D03a)",
-    "alias contract (D03a)",
-    "failing-profile test per consumer (D03a)"
-   ],
+   "not_available": [],
    "full": false
   },
   {
@@ -1408,12 +1453,14 @@
     "contracts/recipe_semantics.py",
     "contracts/schemas/recipe.json",
     "contracts/schemas/operator_semantics.json",
-    "contracts/vocab/effects.json"
+    "contracts/vocab/effects.json",
+    "contracts/effect_catalog.py"
    ],
    "checks": [
     "tests.contracts.test_recipe_semantics",
     "tests.contracts.test_v63_baseline_gaps",
-    "tests.contracts.test_r5_contracts"
+    "tests.contracts.test_r5_contracts",
+    "tests.contracts.test_v63_d04"
    ],
    "not_available": [
     "L3 chain rules (D06)",

@@ -87,7 +87,7 @@ SemVer for plugin (`.claude-plugin/plugin.json`), contracts (`contracts.CONTRACT
 | R8 | Collider/AMS terms leak into core | Vocabulary + schema-term scan + experiment-name scan | Active, found and fixed 2 leaks in M1 |
 | R9 | Private data leaks into the package | Local profiles rejected inside plugin; packaging scan M5 | Partly |
 | R10 | Always-on cost grows | Host estimate recorded each run | ~2,005 tok |
-| R11 (new) | A profile adds vocabulary under a namespace shared by several profiles (e.g. a cosmic-ray namespace) | `vocabulary_namespaces` must be declared; validator rejects undeclared namespaces | Active |
+| R11 (new) | A profile adds vocabulary under a namespace shared by several profiles (e.g. a cosmic-ray namespace) | `vocabulary_namespaces` must be declared; validator rejects undeclared namespaces; each namespace has exactly one owner across the registry and local profiles (`profile.namespace_collision`, v6.3 D03a), with `compose.namespace_collision` as a second check; every profile loading path refuses a profile that did not load cleanly | Active |
 | R12 (new) | Fixtures inside the package look like real profiles or private data | Fixture IDs prefixed `fixture-`, objectives marked SYNTHETIC; project fixtures are copied to a temp dir before loading | Active |
 | R13 (new) | Headless traces may not expose skill loads (host fact 7) | Fall back to tool-use events in stream-json at M5 | Open |
 

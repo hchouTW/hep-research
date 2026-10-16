@@ -21,7 +21,7 @@ from typing import Any
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from contracts.registry import PLUGIN_ROOT, option_values, validate_registry  # noqa: E402
+from contracts.registry import PLUGIN_ROOT, load_registry, option_values  # noqa: E402
 from contracts.schema import Report, validate  # noqa: E402
 from contracts.semver import parse, satisfies, valid_spec  # noqa: E402
 from contracts.protected_use import guard_report  # noqa: E402
@@ -38,8 +38,10 @@ class Project:
     config_path: Path | None
     config: dict
     report: Report
-    profiles: list[dict] = field(default_factory=list)   # bound + local profile metadata
+    profiles: list[dict] = field(default_factory=list)   # bound profiles that loaded cleanly (usable)
     artifacts_dir: Path | None = None
+    bound_ids: list[str] = field(default_factory=list)   # every bound profile id, rejected ones included (CLI listing)
+    rejected: dict[str, list[str]] = field(default_factory=dict)  # bound id -> error codes that keep it out
 
 
 def _plugin_version() -> str:
@@ -77,10 +79,11 @@ def load_project(path: Path, registry_path: Path | None = None, extra_local: lis
             rep.add("error", "--local", "project.local_in_plugin", "local profiles live in the project, never inside the plugin")
         if d not in local_dirs:
             local_dirs.append(d)
-    reg_rep, loaded = validate_registry(registry_path, local_dirs)
-    rep.findings.extend(reg_rep.findings)
+    reg = load_registry(registry_path, local_dirs)
+    rep.findings.extend(reg.report.findings)
+    loaded = reg.every_profile
 
-    profiles = []
+    profiles, bound_ids, rejected = [], [], {}
     seen: dict[str, Any] = {}
     for axis in ("experiments", "theory"):
         want_kind = "experiment" if axis == "experiments" else "theory-domain"
@@ -97,8 +100,15 @@ def load_project(path: Path, registry_path: Path | None = None, extra_local: lis
                 rep.add("error", where, "project.wrong_axis", f"'{pid}' is a {prof['kind']} profile, bound under '{axis}'")
             if prof["version"] != b["version"]:
                 rep.add("error", where, "project.version_pin_mismatch", f"pinned {b['version']}, available {prof['version']}")
-            if prof not in profiles:
+            if pid in reg.rejected:
+                if pid not in rejected:
+                    rejected[pid] = reg.rejected[pid]
+                    rep.add("error", where, "project.profile_rejected",
+                            f"'{pid}' did not load cleanly ({', '.join(reg.rejected[pid])}): it is not bound")
+            elif prof not in profiles:
                 profiles.append(prof)
+            if pid not in bound_ids:
+                bound_ids.append(pid)
     for o in cfg.get("overrides", []):
         if o.get("variant_of"):
             rep.add("warning", "config.overrides", "project.variant_as_override",
@@ -106,7 +116,7 @@ def load_project(path: Path, registry_path: Path | None = None, extra_local: lis
     art = (proj_dir / cfg.get("artifacts_dir", DEFAULT_ARTIFACTS_DIR)).resolve()
     if art == PLUGIN_ROOT.resolve() or PLUGIN_ROOT.resolve() in art.parents:
         rep.add("error", "config.artifacts_dir", "project.writes_into_plugin", "artifacts_dir must be outside the installed plugin")
-    return Project(cfg_path, cfg, rep, profiles, art)
+    return Project(cfg_path, cfg, rep, profiles, art, bound_ids, rejected)
 
 
 def check_schema_version(cfg: dict, rep: Report) -> None:
@@ -185,8 +195,12 @@ def load_blinding(path: Path) -> dict:
 
 def resolve_context(request: dict, project: Project | None, needs_profile: bool) -> dict:
     """Decide which profiles a task uses. `request` holds only IDs the user stated explicitly:
-    {"experiments": [...], "theory": [...]}. Returns {"decision", "source", "experiments", "theory"}."""
+    {"experiments": [...], "theory": [...]}. Returns {"decision", "source", "experiments", "theory"}; decision "invalid"
+    (with the error codes) when the project config has errors, since none of its profiles may then be used."""
     exp, th = list(request.get("experiments", [])), list(request.get("theory", []))
+    if project is not None and not project.report.ok:
+        return {"decision": "invalid", "source": "project-config", "experiments": [], "theory": [],
+                "errors": sorted({f.code for f in project.report.errors})}
     if exp or th:
         return {"decision": "use", "source": "request", "experiments": exp, "theory": th}
     if project is not None and (project.config.get("experiments") or project.config.get("theory")):
@@ -211,7 +225,7 @@ def main(argv=None) -> int:
     except (OSError, ValueError) as exc:
         print(json.dumps({"ok": False, "error": str(exc)}))
         return 2
-    out = {**p.report.as_dict(), "profiles": [x["id"] for x in p.profiles], "artifacts_dir": str(p.artifacts_dir),
+    out = {**p.report.as_dict(), "profiles": p.bound_ids, "artifacts_dir": str(p.artifacts_dir),
            "note": "advisory check: a valid config, including agent_policy, does not enforce or authorize anything"}
     print(json.dumps(out, indent=1))
     return 0 if p.report.ok else 1

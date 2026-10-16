@@ -8,6 +8,7 @@ not instructions for the agent, and nothing in them authorizes any use: agent-ru
 | `m0-baseline.md` | D01 | checkout identity, facts table, gap runs, consumer inventory |
 | `m0-budget.md` | D02 | loading-budget and evidence-query measurements, with the method |
 | `decision-m0.md` | G-M0 | the M0 decision record |
+| `crflux-review.md` | D03b | term-by-term review of the cosmic-ray level terms; companion public-interface matrix |
 
 ## Decision-record convention (D12b)
 

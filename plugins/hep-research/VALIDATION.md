@@ -1601,3 +1601,24 @@ Two failures met on the way, both caused by the new files and fixed before the r
 gap tests had no timeout (T14), and the baseline record named a local path (packaging scan). No legacy entry point
 changed output, verdict or exit code; V cases V01–V71 are registered as `not-run`. Software checks only: these runs
 say nothing about physical validity.
+
+## V63-M1 (2026-10-16, Python 3.13.2 on macOS 26.5 arm64; on top of V63-M0)
+
+Phase M1 of the v6.3 programme after the G-M0 decision (full bounded path): D03a namespace ownership, alias contract
+and load-error consumers; D04 effect catalog and operator coverage contract; D03b review of the cosmic-ray level
+terms (`docs/dev/v6.3/crflux-review.md`, no term promoted). Stacked branches `v63/d03a-namespaces-aliases`,
+`v63/d04-effect-contracts`, `v63/d03b-crflux-review`; each gate run used a clean worktree of the branch head.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py`, `v63/d03a-namespaces-aliases` `c945263` | 25 pass, 0 fail; 3432 tests, 0 failures, 107 skipped |
+| Same, `v63/d04-effect-contracts` `1d0376e` | 25 pass, 0 fail; 3444 tests, 0 failures, 107 skipped |
+| Same, `v63/d03b-crflux-review` `d1a5b61` | 25 pass, 0 fail; 3444 tests, 0 failures, 107 skipped |
+| Same with the CI lock (no torch), `d1a5b61` | 25 pass, 0 fail; 3444 tests, 0 failures, 170 skipped |
+| `check_relocation.py`, `d1a5b61` | pass |
+| Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
+| V cases | V13, V29 passing; V35, V43, V58 definition parts (M1) passing; their M2a parts not run |
+| Legacy capture (132 runs of the registry, project, validate, review and communication CLIs on the existing fixtures) | unchanged except 18 runs of `review_measurement_spec.py --profiles-from` an invalid project config, now exit 2 instead of a review (intended: D03a) |
+
+Open before release: the companion's namespaces were not checked (its content is out of scope here); run
+`contracts/registry.py --local <companion>/profile` on this tree first. Software checks only.
