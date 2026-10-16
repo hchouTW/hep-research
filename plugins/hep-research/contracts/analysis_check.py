@@ -43,7 +43,7 @@ from core.protected.identity import plugin_release  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 FORMAT2 = "hep-research-analysis-bundle/2"
 ROLES2 = ("measurement-spec", "recipe", "semantics-table", "calibration", "tool-contract", "environment-lock", "review",
-          "response", "dataset-record", "context", "semantic-lock", "coverage-contract")
+          "response", "dataset-record", "context", "semantic-lock", "coverage-contract", "validation-record")
 MODE_ROLES = {"chain": {"exactly_one": ("measurement-spec", "environment-lock", "context", "semantic-lock"),
                        "at_least_one": ("recipe",)}}
 SUITE_DIR = ROOT / "contracts" / "rules" / "suites"
@@ -87,6 +87,16 @@ def load_suite(suite_id: str, version: str) -> dict:
     return json.loads((SUITE_DIR / f"{suite_id}-{version}.json").read_text(encoding="utf-8"))
 
 
+def context_suites(context: dict) -> list[dict]:
+    """The suites a context selects: its primary suite, then any further ones, each once."""
+    out = []
+    for s in [context.get("suite") or {}] + list(context.get("suites") or []):
+        key = {"id": s.get("id"), "version": s.get("version")}
+        if key not in out:
+            out.append(key)
+    return out
+
+
 def _plugin_coverage() -> dict:
     out = {}
     for p in sorted(COVERAGE_DIR.glob("*.coverage.json")):
@@ -122,8 +132,9 @@ def _view(items: dict, context: dict) -> tuple[dict, list[dict]]:
 
 
 JSON_ROLES = ("measurement-spec", "recipe", "semantics-table", "response", "dataset-record", "context", "semantic-lock",
-              "coverage-contract")
-SHAPES = {"recipe": "recipe.json", "semantics-table": "operator_semantics.json", "coverage-contract": "operator_coverage.json"}
+              "coverage-contract", "validation-record")
+SHAPES = {"recipe": "recipe.json", "semantics-table": "operator_semantics.json", "coverage-contract": "operator_coverage.json",
+          "validation-record": "validation_record.json"}
 
 
 def _is_json(ref) -> bool:
@@ -232,10 +243,14 @@ def freeze(root, analysis: str, items: list, context: dict, mode: str = "chain")
     bad = [f for f in check_context(context, roles) if f["code"] in ("context.duplicate_id", "context.unknown_reference")]
     if bad:
         raise BundleRefused("bundle.context_references", "; ".join(f"{f['where']}: {f['message']}" for f in bad))
-    suite = load_suite(context["suite"]["id"], context["suite"]["version"])
-    full = dict(context, obligations=obl.generate(suite, view))
+    try:
+        suites = [load_suite(s["id"], s["version"]) for s in context_suites(context)]
+    except (OSError, ValueError) as exc:
+        raise BundleRefused("bundle.suite_missing", f"a selected suite is not installed: {exc}") from None
+    full = dict(context, obligations=obl.generate_all(suites, view))
     view["context"] = full
-    lock = build_lock(suite, generator_code_digest() or "", view, registry_digest())
+    view["suites"] = suites
+    lock = build_lock(suites[0], generator_code_digest() or "", view, registry_digest())
     recs = [_item(root, it) for it in items] + [_generated_item("context", "check-context", CONTEXT_REF, full),
                                                 _generated_item("semantic-lock", "semantic-lock", LOCK_REF, lock)]
     doc = {"bundle_version": "2.0.0", "format": FORMAT2, "mode": mode, "analysis": analysis,
@@ -330,13 +345,17 @@ def load_subject(bundle_path, root) -> tuple[dict, list[dict]]:
     for f in view["context_findings"]:
         if f["code"] in ("context.duplicate_id", "context.unknown_reference"):
             diags.append({"kind": "input-invalid", "code": f["code"], "message": f"{f['where']}: {f['message']}"})
-    suite = (context.get("suite") or {}) if isinstance(context, dict) else {}
-    try:
-        view["suite"] = load_suite(str(suite.get("id")), str(suite.get("version")))
-    except (OSError, ValueError):
-        view["suite"] = None
-        diags.append({"kind": "dependency-missing", "code": "definition.suite_missing",
-                      "message": f"suite {suite.get('id')!r} version {suite.get('version')!r} is not installed"})
+    view["suite"], view["suites"] = None, []
+    for k, s in enumerate(context_suites(context) if isinstance(context, dict) else []):
+        try:
+            loaded = load_suite(str(s.get("id")), str(s.get("version")))
+        except (OSError, ValueError):
+            diags.append({"kind": "dependency-missing", "code": "definition.suite_missing",
+                          "message": f"suite {s.get('id')!r} version {s.get('version')!r} is not installed"})
+            continue
+        view["suites"].append(loaded)
+        if k == 0:
+            view["suite"] = loaded
     return view, diags
 
 
@@ -346,9 +365,9 @@ def current_lock(view: dict) -> dict:
 
 def check_inventory(view: dict) -> list[dict]:
     frozen = (view.get("context") or {}).get("obligations") or {}
-    if view.get("suite") is None:
+    if view.get("suite") is None or len(view.get("suites") or []) != len(context_suites(view.get("context") or {})):
         return []
-    return obl.check_inventory(frozen, obl.generate(view["suite"], view))
+    return obl.check_inventory(frozen, obl.generate_all(view["suites"], view))
 
 
 # --- evaluation and report (D05c) ---------------------------------------------------------------------------------
@@ -403,12 +422,13 @@ def evaluate(view: dict, diags: list[dict], previous: dict | None = None, vocab=
     summary = summarize(outcomes, input_valid)
     bundle = view.get("bundle") or {}
     suite = view.get("suite") or {}
-    rules_used = [{"rule_id": r["rule_id"], "version": r["version"]} for r in suite.get("rules", [])]
+    rules_used = [{"rule_id": r["rule_id"], "version": r["version"]} for s in view.get("suites") or [suite] for r in s.get("rules", [])]
     checker = checker_identity()
     settings = dict(settings or {})
     inv = (view.get("context") or {}).get("obligations") or {}
     lock = view.get("lock") or {}
     assessment = {"subject": bundle.get("bundle_digest"), "suite": {"id": suite.get("suite_id"), "version": suite.get("version")},
+                  "suites": [{"id": s.get("suite_id"), "version": s.get("version")} for s in view.get("suites") or []],
                   "rules": rules_used, "registry": registry_digest(), "checker": checker["digest"],
                   "readers": lock.get("readers"), "settings": settings}
     decl_ids = {d for o in outcomes for d in o.get("declarations", [])}

@@ -32,7 +32,7 @@ def check_context(ctx: dict, item_roles: dict) -> list[dict]:
     instances = {i.get("instance_id"): i for i in ctx.get("recipe_instances", []) if isinstance(i, dict)}
     ids: list[tuple[str, object]] = []
     for kind, key in (("roots", "root_id"), ("recipe_instances", "instance_id"), ("bindings", "binding_id"),
-                      ("declarations", "declaration_id")):
+                      ("declarations", "declaration_id"), ("ratio_roots", "root_id")):
         ids += [(kind, r.get(key)) for r in ctx.get(kind, []) if isinstance(r, dict)]
     names = [i for _, i in ids]
     for d in sorted({i for i in names if names.count(i) > 1 and isinstance(i, str)}):
@@ -59,6 +59,11 @@ def check_context(ctx: dict, item_roles: dict) -> list[dict]:
         res = parse_scope(root.get("scope"), axes)
         if not res["ok"]:
             out.append(_f("context.bad_scope", f"{where}.scope", f"{root.get('scope')!r}: {res['errors']}"))
+    roots = {r.get("root_id") for r in ctx.get("roots", []) if isinstance(r, dict)}
+    for k, rr in enumerate(ctx.get("ratio_roots", [])):
+        for side in ("numerator", "denominator"):
+            if (rr.get(side) or {}).get("root") not in roots:
+                out.append(_f("context.unknown_reference", f"$.ratio_roots[{k}].{side}", "a ratio operand is a root of the context"))
     for k, inst in enumerate(ctx.get("recipe_instances", [])):
         where = f"$.recipe_instances[{k}]"
         if item_roles.get(inst.get("recipe")) != "recipe":

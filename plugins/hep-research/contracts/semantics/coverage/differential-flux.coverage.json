@@ -49,7 +49,12 @@
      "basis": "table meaning: 'divide by the selection efficiency'; other members are not covered"
     }
    },
-   "factors": []
+   "factors": [
+    {
+     "effect": "efficiency",
+     "power": -1
+    }
+   ]
   },
   {
    "operator_id": "divide_exposure",
@@ -84,6 +89,10 @@
    "factors": [
     {
      "effect": "exposure",
+     "power": -1
+    },
+    {
+     "effect": "efficiency",
      "power": -1
     }
    ]

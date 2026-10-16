@@ -63,9 +63,9 @@ class ShippedRegistry(unittest.TestCase):
         self.assertIn("semantics.repeated_correction", r4["l2.r4.repeat"]["legacy_codes"])
 
     def test_suite_rules_are_registered_with_full_contracts(self):
-        suite = json.loads((ROOT / "contracts" / "rules" / "suites" / "counting-chain-1.0.0.json").read_text())
         registered = {r["rule_id"]: r for r in SHIPPED["rules"]}
-        for rule in suite["rules"]:
+        for rule in [r for f in sorted((ROOT / "contracts" / "rules" / "suites").glob("*.json"))
+                     for r in json.loads(f.read_text())["rules"]]:
             reg = registered[rule["rule_id"]]
             self.assertEqual((reg["version"], reg["kind"]), (rule["version"], "new"))
             self.assertIsInstance(reg["outcome_contract"], dict)

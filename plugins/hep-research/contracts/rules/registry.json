@@ -1174,7 +1174,7 @@
       "D07"
      ],
      "host": "CASE-CHAIN old version",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d07.Ratio.test_v28_free_text_ratio"
      ]
@@ -1502,7 +1502,7 @@
       "D07"
      ],
      "host": "RATIO-FACTORS",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d07.Ratio.test_v44_factors"
      ]
@@ -1521,7 +1521,7 @@
       "D07"
      ],
      "host": "RATIO-EVIDENCE",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d07.Ratio.test_v45_evidence"
      ]
@@ -2072,11 +2072,13 @@
     "tests.contracts.test_v63_d05b",
     "tests.contracts.test_v63_d05c",
     "tests.contracts.test_v63_d06",
+    "tests.contracts.test_v63_d07",
     "tests.contracts.test_v63_d11a",
-    "tests.contracts.test_v63_d17"
+    "tests.contracts.test_v63_d17",
+    "tests.contracts.test_v63_review_fixes"
    ],
    "not_available": [
-    "CASE-MODEL (D08, M2b)"
+    "CASE-MODEL (D08, M2b model part, waits for O03)"
    ],
    "full": false
   },
@@ -2095,8 +2097,10 @@
     "tests.contracts.test_v63_d05b",
     "tests.contracts.test_v63_d05c",
     "tests.contracts.test_v63_d06",
+    "tests.contracts.test_v63_d07",
     "tests.contracts.test_v63_d11a",
-    "tests.contracts.test_v63_d17"
+    "tests.contracts.test_v63_d17",
+    "tests.contracts.test_v63_review_fixes"
    ],
    "not_available": [],
    "full": false

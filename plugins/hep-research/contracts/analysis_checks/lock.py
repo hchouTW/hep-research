@@ -60,13 +60,14 @@ def build_lock(suite: dict, generator_code_digest: str, view: dict, registry_dig
             "generator": dict(suite.get("generator", {}), code_digest=generator_code_digest),
             "definitions": defs, "member_sets": [{k: m[k] for k in ("class", "members", "strategy", "closure_digest")}
                                                  for m in member_sets],
-            "readers": [{"id": f"recipe-{v}-view", "version": "1.0.0"} for v in readers]}
+            "readers": [{"id": f"recipe-{v}-view", "version": "1.0.0"} for v in readers],
+            "suites": [{"id": s.get("suite_id"), "version": s.get("version")} for s in view.get("suites") or [suite]]}
 
 
 def compare(locked: dict, current: dict) -> list[dict]:
     """Differences between a frozen lock and the lock the current definitions give, as [{kind, id, locked, current}]."""
     out = []
-    for key in ("suite", "generator"):
+    for key in ("suite", "generator", "suites"):
         if locked.get(key) != current.get(key):
             out.append({"kind": key, "id": key, "locked": locked.get(key), "current": current.get(key)})
     a = {(d["kind"], d["id"]): d.get("digest") for d in locked.get("definitions", [])}

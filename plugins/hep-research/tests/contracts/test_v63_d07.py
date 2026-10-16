@@ -43,14 +43,12 @@ class Ratio(unittest.TestCase):
         view, diags = ac().load_subject(b, root)
         return ac().evaluate(view, diags)
 
-    @unittest.expectedFailure  # D07: the reduced ratio case is decidable end to end
     def test_positive_ratio_case(self):
         rep = self.run_case()
         self.assertEqual((rep["status"], rep["consistency"]), ("complete", "consistent"))
         self.assertIn({"id": "ratio-subset", "version": "1.0.0"}, rep["assessment"]["suites"])
         self.assertEqual(get(rep, "r-ratio.operands:ratio-p1")["reason"], "check.ratio_operands_compatible")
 
-    @unittest.expectedFailure  # V44 (D07): different bins of one table versus a common scalar
     def test_v44_factors(self):
         rep = self.run_case()
         o = get(rep, "r-ratio.cancellation:ratio-p1#trigger_efficiency")
@@ -76,7 +74,6 @@ class Ratio(unittest.TestCase):
         o = get(self.run_case(variant=zero), "r-ratio.cancellation:ratio-p1#trigger_efficiency")
         self.assertEqual((o["state"], o["reason"]), ("violated", "check.cancellation_domain"))
 
-    @unittest.expectedFailure  # V45 (D07): a bare claim or verification text is not evidence
     def test_v45_evidence(self):
         def bare(c):
             c.remove("vr-selection")
@@ -104,7 +101,6 @@ class Ratio(unittest.TestCase):
         o = get(self.run_case(variant=declared), "r-ratio.correlation:ratio-p1#selection_efficiency")
         self.assertEqual((o["state"], o["declaration_based"]), ("satisfied", True))
 
-    @unittest.expectedFailure  # V28 (D07): an old ratio with free-text operands is unverified
     def test_v28_free_text_ratio(self):
         def ratio_suite(c):
             c.context["suites"] = [{"id": "ratio-subset", "version": "1.0.0"}]
@@ -113,7 +109,6 @@ class Ratio(unittest.TestCase):
         self.assertEqual((o["state"], o["reason"]), ("unverified", "check.ratio_operands_unbound"))
         self.assertEqual([x for x in self.run_case(cases.chain_case)["obligations"] if x["rule_id"].startswith("r-ratio")], [])
 
-    @unittest.expectedFailure  # D07: operands must differ in the ratio axis only
     def test_operand_scopes(self):
         def wrong_axis(c):
             c.context["ratio_roots"][0]["over_axis"] = "period"
