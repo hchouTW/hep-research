@@ -1751,3 +1751,16 @@ How it was built:
 
 One failure seen once and not reproduced: `test_a_hanging_module_fails_with_a_reason` failed during a parallel full
 run. It passed alone and in both full reruns, so it is timing under load.
+
+## V63-D12B-CUSTODY (2026-10-16, Python 3.13.2 on macOS 26.5 arm64; branch `v63/d12b-custody` on `v63/m2b-model`)
+
+V30 at companion transition stage 1: `contracts/custody.py`, an inventory and report only. Red tests first
+(`aadc554`), then the implementation. All profiles are synthetic stand-ins in temporary folders; no companion content
+was read.
+
+| Check | Result |
+|---|---|
+| `tests/contracts/test_v63_d12b.py` | 3 tests pass. Plugin profile: public by origin. Run-time `--local` profile: `controlled-metadata-missing`, unverified. Project-local profiles, including one whose content is public: `unknown`, unverified, never public. A rejected run-time profile stays rejected, and `load_project` gives the same result before and after the inventory. |
+| Registry | V30 passing (68 of 80 V parts) |
+| `run_all_checks.py`, then the CI lock | first run: 23 pass, 2 fail. The packaging scan read the argument name `args.local` as a site fact; it was renamed to `run_time_dirs`. The final-tree run is recorded below (V63-M2C-PROPOSAL). |
+| Ruff, mypy | clean |

@@ -1431,7 +1431,7 @@
       "D12b"
      ],
      "host": "project",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d12b.CustodyInventory.test_v30_stage1_statuses",
       "tests.contracts.test_v63_d12b.CustodyInventory.test_v30_refusals_unchanged"

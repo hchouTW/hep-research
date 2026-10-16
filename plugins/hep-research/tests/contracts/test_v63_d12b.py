@@ -32,7 +32,7 @@ def setup(root: Path, bad_companion: bool = False) -> tuple[Path, Path]:
         write_profile(root / "companion", "profile", profile("experiment:fixture-ctl", "experiment", "fxctl"))
     pid = json.loads((companion / "profile.json").read_text())["id"]
     cfg = {"schema_version": "1.0.0", "plugin_version": ">=0.11,<1.0",
-           "experiments": [{"profile": PUBLIC, "version": "0.1.0"},
+           "experiments": [{"profile": PUBLIC, "version": "1.0.0"},
                            {"profile": "experiment:fixture-own", "version": "1.0.0"},
                            {"profile": "experiment:fixture-mirror", "version": "1.0.0"},
                            {"profile": pid, "version": "1.0.0"}],
@@ -42,7 +42,6 @@ def setup(root: Path, bad_companion: bool = False) -> tuple[Path, Path]:
 
 
 class CustodyInventory(unittest.TestCase):
-    @unittest.expectedFailure  # V30, red until contracts/custody.py exists (D12b)
     def test_v30_stage1_statuses(self):
         from contracts.custody import inventory
         with tempfile.TemporaryDirectory() as td:
@@ -60,7 +59,6 @@ class CustodyInventory(unittest.TestCase):
                          ("run-time-local", "controlled-metadata-missing", "unverified", "custody.metadata_missing"))
         self.assertNotIn("public", {r["custody"] for r in inv["profiles"] if r["origin"] != "plugin"})
 
-    @unittest.expectedFailure  # V30, red until contracts/custody.py exists (D12b)
     def test_v30_refusals_unchanged(self):
         from contracts.custody import inventory
         from contracts.project import load_project
@@ -76,7 +74,6 @@ class CustodyInventory(unittest.TestCase):
         row = next(r for r in inv["profiles"] if r["profile"] == pid)
         self.assertEqual((row["custody"], row["rejected"]), ("controlled-metadata-missing", before.rejected[pid]))
 
-    @unittest.expectedFailure  # V30, red until contracts/custody.py exists (D12b)
     def test_cli(self):
         with tempfile.TemporaryDirectory() as td:
             proj, companion = setup(Path(td))

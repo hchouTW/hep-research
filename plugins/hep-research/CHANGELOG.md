@@ -5,6 +5,16 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- New `contracts/custody.py PROJECT_DIR [--local DIR ...]` (v6.3 D12b, V30). It is a custody inventory of every
+  profile a project sees, at companion transition stage 1: an inventory and report only, which loads nothing
+  differently and relaxes no refusal.
+  - **Plugin profiles:** public, because of where they ship.
+  - **Folders supplied at run time** (a companion's `--local`): known-controlled with custody metadata missing,
+    `unverified`.
+  - **A project's own local profiles:** custody `unknown`, `unverified`.
+
+  A missing `custody_domain` is never read as public, even when a local profile's content looks public. Rejected
+  profiles keep their rejection codes.
 - Model suite `model-card/v1` (v6.3 M2b model part; design `docs/dev/v6.3/m2b-model-design.md`), opt-in and in shadow
   mode.
   - **New bundle mode `model`**, for model-only diagnostics: `analysis_check.py freeze --mode model`. It takes one or
