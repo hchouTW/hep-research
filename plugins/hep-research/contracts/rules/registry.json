@@ -1401,7 +1401,10 @@
     "tests.contracts.test_v63_baseline_gaps",
     "part:static",
     "tests.contracts.test_v63_d03a",
-    "tests.contracts.test_companion_validation_cli"
+    "tests.contracts.test_companion_validation_cli",
+    "tests.skills.hep_measurement.test_review_procedure",
+    "tests.skills.hep_measurement.test_cli_contract",
+    "tests.skills.test_cli_robustness"
    ],
    "not_available": [],
    "full": false
