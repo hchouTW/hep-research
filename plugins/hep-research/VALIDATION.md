@@ -1762,5 +1762,5 @@ was read.
 |---|---|
 | `tests/contracts/test_v63_d12b.py` | 3 tests pass. Plugin profile: public by origin. Run-time `--local` profile: `controlled-metadata-missing`, unverified. Project-local profiles, including one whose content is public: `unknown`, unverified, never public. A rejected run-time profile stays rejected, and `load_project` gives the same result before and after the inventory. |
 | Registry | V30 passing (68 of 80 V parts) |
-| `run_all_checks.py`, then the CI lock | first run: 23 pass, 2 fail. The packaging scan read the argument name `args.local` as a site fact; it was renamed to `run_time_dirs`. The final-tree run is recorded below (V63-M2C-PROPOSAL). |
+| `run_all_checks.py`, then the CI lock | first run: 23 pass, 2 fail. The packaging scan read the old argument destination as a site fact (a `.local` host name); it was renamed to `run_time_dirs`. The final-tree run is recorded below (V63-M2C-PROPOSAL). |
 | Ruff, mypy | clean |
