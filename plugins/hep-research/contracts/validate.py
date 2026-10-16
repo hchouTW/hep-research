@@ -1115,6 +1115,13 @@ MEASUREMENT_KEYS = {
                     "validation", "magnitude", "evidence_ids", "notes", "status", "correlation_evidence",
                     "proposed_scheme", "ref", "periods", "regions", "value", "unit"},
 }
+# v6.3 D05a: correction keys of a measurement-spec, known only when the spec declares the capability (an older reader
+# refuses such a spec through contract.unknown_capability; without it the keys stay measurement.unknown_key warnings).
+# The R4 keys follow contracts/schemas/recipe.json (correction_key); application_id names a recipe step_id.
+CORRECTION_KEYS_CAPABILITY = "measurement:correction-keys-v1"
+CORRECTION_KEY_PATTERNS = {"target_scope": r"[A-Za-z0-9][A-Za-z0-9_.:/+-]{0,127}", "calibration_digest": r"[0-9a-f]{64}|none",
+                           "variation_id": r"[a-z0-9][a-z0-9_-]{0,63}", "stage": r"[a-z0-9][a-z0-9_-]{0,63}",
+                           "application_id": r"[a-z0-9][a-z0-9_-]{0,63}"}
 _ISO_DATE = re.compile(r"^\d{4}(-\d{2}(-\d{2})?)?([T ].*)?$")
 
 
@@ -1280,7 +1287,14 @@ def _measurement_semantics(doc: dict, ext: dict, vocab: Vocabulary, rep: Report)
         if _is_zero(c.get("value")) and c.get("exact_zero") is not True:
             rep.add("error", f"{x}.corrections[{i}].value", "measurement.zero_value",
                     f"correction '{c.get('effect_id')}' has value 0 without \"exact_zero\": true")
-        _key_checks(c, MEASUREMENT_KEYS["corrections"], f"{x}.corrections[{i}]", rep)
+        keyed = CORRECTION_KEYS_CAPABILITY in (doc.get("required_capabilities") or [])
+        _key_checks(c, MEASUREMENT_KEYS["corrections"] | (set(CORRECTION_KEY_PATTERNS) if keyed else set()),
+                    f"{x}.corrections[{i}]", rep)
+        if keyed:
+            for key, pattern in CORRECTION_KEY_PATTERNS.items():
+                if key in c and not (isinstance(c[key], str) and re.fullmatch(pattern, c[key])):
+                    rep.add("error", f"{x}.corrections[{i}].{key}", "measurement.bad_correction_key",
+                            f"{key} {c[key]!r} does not match {pattern} (the recipe correction-key form)")
     syst: Any = ext.get("systematics")
     if isinstance(syst, list) and not syst:
         rep.add("error", f"{x}.systematics", "measurement.systematics_empty",

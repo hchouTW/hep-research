@@ -5,6 +5,13 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- New capability `measurement:correction-keys-v1` (v6.3 D05a): a measurement-spec that declares it may give each
+  correction the R4 keys `target_scope`, `calibration_digest`, `variation_id`, `stage` and an `application_id` (a
+  recipe `step_id`); `validate.py` then knows them and rejects a malformed one (`measurement.bad_correction_key`). A
+  spec without the capability keeps its `measurement.unknown_key` warnings, and a reader without the capability refuses
+  the spec. New pure modules `contracts/analysis_checks/` (`scope.py`: bounded `axis:value` scopes where a missing
+  axis is never a wildcard; `instances.py`: read-only recipe instance views that fill only unspecified keys, with a
+  source pointer per field; `context.py`: check-context bindings and attributed declarations, never a rule waiver).
 - New effect catalog `contracts/vocab/effects.json` and operator coverage contract
   `contracts/semantics/coverage/differential-flux.coverage.json`, checked by `contracts/effect_catalog.py` (schemas
   `effect_catalog.json`, `operator_coverage.json`; v6.3 D04). The catalog classifies effects (an efficiency class with

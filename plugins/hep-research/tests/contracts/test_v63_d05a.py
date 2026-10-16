@@ -38,7 +38,6 @@ def instance(**kw):
 class V36SpecKeys(unittest.TestCase):
     """V36: with the capability the R4 keys and application_id are known; without it the legacy warnings stay."""
 
-    @unittest.expectedFailure  # V36 (D05a)
     def test_capability_makes_the_keys_known(self):
         rep = validate_artifact(keyed_spec(), Vocabulary(), strict=True)
         self.assertFalse([f for f in rep.findings if f.code in ("measurement.unknown_key", "contract.unknown_capability")],
@@ -49,7 +48,6 @@ class V36SpecKeys(unittest.TestCase):
         flagged = {f.path.rsplit(".", 1)[-1] for f in rep.findings if f.code == "measurement.unknown_key"}
         self.assertEqual(flagged, set(R4))
 
-    @unittest.expectedFailure  # V36 (D05a): malformed keys are errors under the capability
     def test_malformed_keys_are_errors(self):
         spec = keyed_spec()
         spec["extension"]["corrections"][0]["calibration_digest"] = "not-a-digest"
@@ -60,7 +58,6 @@ class V36SpecKeys(unittest.TestCase):
 class V42ScopeParser(unittest.TestCase):
     """V42: illegal grammar is rejected and missing information is not a wildcard."""
 
-    @unittest.expectedFailure  # V42 (D05a)
     def test_grammar(self):
         from contracts.analysis_checks.scope import parse_scope
         self.assertEqual(parse_scope("period:p1/species:proton", AXES)["axes"], {"period": "p1", "species": "proton"})
@@ -72,7 +69,6 @@ class V42ScopeParser(unittest.TestCase):
                 self.assertFalse(res["ok"])
                 self.assertIn(code, res["errors"])
 
-    @unittest.expectedFailure  # V42 (D05a)
     def test_comparison(self):
         from contracts.analysis_checks.scope import compare_scopes
         self.assertEqual(compare_scopes("species:proton/period:p1", "period:p1/species:proton", AXES), "equal")
@@ -89,7 +85,6 @@ class V05InstanceViews(unittest.TestCase):
         from contracts.analysis_checks.instances import build_view
         return build_view(recipe, "recipe", TABLE, inst, "/recipe_instances/0", digests or {})
 
-    @unittest.expectedFailure  # V05 (D05a)
     def test_template_filled_with_sources(self):
         views = [self.build(RECIPE, instance(instance_id=f"{s}-{p}", scope=f"species:{s}/period:{p}"))
                  for s in ("proton", "helium") for p in ("p1", "p2")]
@@ -104,7 +99,6 @@ class V05InstanceViews(unittest.TestCase):
         self.assertEqual(v["findings"], [])
         self.assertNotEqual(views[0]["view_digest"], views[1]["view_digest"])
 
-    @unittest.expectedFailure  # V05 (D05a)
     def test_literal_is_never_overridden(self):
         recipe = copy.deepcopy(RECIPE)
         recipe["recipe_version"] = "1.1.0"
@@ -117,7 +111,6 @@ class V05InstanceViews(unittest.TestCase):
         self.assertEqual(key["target_scope"]["value"], "species:helium/period:p1")
         self.assertEqual(key["target_scope"]["source"], "recipe:/steps/1/effect_keys/exposure/target_scope")
 
-    @unittest.expectedFailure  # V05 (D05a)
     def test_calibration_binding_fills_the_digest(self):
         v = self.build(RECIPE, instance(calibrations={"exposure": "cal-p1"}), {"cal-p1": "c" * 64})
         key = v["steps"][1]["effects"]["exposure"]
@@ -137,12 +130,10 @@ class ContextRecords(unittest.TestCase):
                 "recipe_instances": [instance()], "bindings": [], "declarations": [],
                 "obligations": {"generator": {"id": "g", "version": "1.0.0"}, "digest": "0" * 64, "items": []}}
 
-    @unittest.expectedFailure  # D05a
     def test_clean_context(self):
         from contracts.analysis_checks.context import check_context
         self.assertEqual(check_context(self.ctx(), {"spec": "measurement-spec", "recipe": "recipe"}), [])
 
-    @unittest.expectedFailure  # D05a
     def test_defects(self):
         from contracts.analysis_checks.context import check_context
         ctx = self.ctx()

@@ -52,6 +52,10 @@ CONTRACTS_VERSION = "2.9.0"
 # policy (--strict-versions, protected use); contracts/migrate_skill_names.py rewrites producer_skill and
 # handoff.to_skill. No capability and no other rule change: a 2.8 artifact keeps its outcome apart from that warning,
 # and a 2.8 reader rejects a new skill name in producer_skill (schema enum) instead of misreading it.
+# measurement:correction-keys-v1 (v6.3 D05a, no version change): a measurement-spec correction may carry the R4
+# correction keys (target_scope, calibration_digest, variation_id, stage) and application_id; contracts.validate knows
+# and checks them only under this capability, so a spec without it keeps its findings and a reader without it refuses
+# the spec instead of reading the keys as unknown.
 KNOWN_CAPABILITIES = frozenset({"core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
-                                "core:decision-lineage"})
+                                "core:decision-lineage", "measurement:correction-keys-v1"})
