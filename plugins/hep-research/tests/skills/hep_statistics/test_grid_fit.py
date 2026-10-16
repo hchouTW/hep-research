@@ -365,5 +365,36 @@ class JacobianStepsStayInsideTheGrid(unittest.TestCase):
                 self.assertAlmostEqual(pars["a"]["error_coordinate"] / ref["a"]["error_coordinate"], 1.0, delta=0.02)
 
 
+class GridNonConvergenceIsFailed(unittest.TestCase):
+    """F-01: a grid fit whose optimizer stops before converging must report status 'failed' with the reason and exit 1;
+    before the fix main() stored 'converged': false but set status 'ok' and exited 0. The fit is made unable to converge
+    by capping the real optimizer at one iteration from a start far from the minimum."""
+
+    def test_unconverged_grid_fit_is_failed_exit_1(self):
+        import contextlib
+        import io
+        from unittest import mock
+        y = model_ab(**TRUTH_AB)
+        doc = {"model": "tabulated-grid", "measurement": measurement(y, components(y)), "predictions": grid_ab(),
+               "grid": AB_GRID, "start": {"a": 0.55, "b": 0.012}}
+        real = cf.optimize.minimize
+
+        def one_step(*args, **kwargs):
+            kwargs["options"] = dict(kwargs.get("options") or {}, maxiter=1)
+            return real(*args, **kwargs)
+
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td) / "input.json"
+            p.write_text(json.dumps(doc))
+            buf = io.StringIO()
+            with mock.patch.object(cf.optimize, "minimize", one_step), contextlib.redirect_stdout(buf):
+                code = cf.main(["fit", "--input", str(p)])
+        out = json.loads(buf.getvalue())
+        self.assertFalse(out["fits"][0]["converged"])
+        self.assertEqual(out["status"], "failed", out.get("reason"))
+        self.assertEqual(code, 1)
+        self.assertIn("did not converge", out["reason"])
+
+
 if __name__ == "__main__":
     unittest.main()

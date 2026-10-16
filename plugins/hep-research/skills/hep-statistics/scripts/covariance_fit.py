@@ -76,7 +76,7 @@ Input (fit, "model": "tabulated-grid"): a fit of parameters tabulated on a grid 
 Usage: covariance_fit.py fit --input FILE
        covariance_fit.py break-scan --input FILE [--toys 200 --seed 1 --cl 0.6827]
 Exit codes: 0 fitted; 1 refused (covariance singular beyond the declared constraints, a declared constraint that is not a
-null direction, no convergence; for a grid: a prediction not gated, not comparable or refused by the gate, a minimum outside the grid);
+null direction, no convergence (a grid fit whose optimizer stopped: "status": "failed" with "reason"); for a grid: a prediction not gated, not comparable or refused by the gate, a minimum outside the grid);
 2 bad input; 3 incomplete (a data covariance or uncertainty correlation is missing: "status": "incomplete" with
 "missing"). Output JSON labelled [General method].
 """
@@ -1042,6 +1042,15 @@ def main(argv=None) -> int:
     except (TypeError, ValueError, AttributeError) as exc:     # a field of the wrong JSON type
         print(json.dumps({"status": "rejected", "error": f"bad input: {type(exc).__name__}: {exc}"}))
         return 2
+    # a grid fit whose optimizer stopped before converging is a failed fit, not a result (F-01); the other models
+    # refuse non-convergence earlier through the EDM check of _verdict
+    stalled = [f for f in out.get("fits") or [] if not f.get("converged", True)]
+    if stalled:
+        out["status"] = "failed"
+        out["reason"] = ("the grid fit did not converge: " + "; ".join(
+            f"cross-section set {f.get('alternative')!r}: {f.get('optimizer_message')}" for f in stalled))
+        print(json.dumps(out, indent=1))
+        return 1
     out["status"] = "ok"
     print(json.dumps(out, indent=1))
     return 0
