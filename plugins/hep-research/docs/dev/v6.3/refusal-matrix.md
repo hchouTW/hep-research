@@ -19,9 +19,11 @@ its check context and semantic lock, a check report, a validation record, and a 
 | check-context 1.0.0 | `dependencies.py` | **accepts** | **accepts** | `status: ok`, exit 0: a file without inputs passes | **yes** |
 | spec with the capability | `recipe_semantics.py --upstream` | **exposes** | **exposes** | reads the correction keys (`repeat_undetermined`) without checking `required_capabilities` (V59) | **yes** |
 | spec with the capability | `validate.py` | implements | refuses | 0.11.0: `contract.unknown_capability` | no |
+| analysis bundle 2.0.0 | `attestation.py` (bundle digest) | implements | refuses | 0.11.0 digests it as an execution bundle (`attestation.bundle_changed`) | no |
 
 `permit.py` and `attestation.py` read a bundle only through `analysis_bundle.py` (v1), so they refuse a v2 bundle
-through the first row (**Inferred** from `contracts/permit.py`; D10 adds its own v2 path).
+through the first row (**Inferred** from `contracts/permit.py`). D10 adds the advisory `permit.py check-report`, which
+reads a v2 bundle, and gives `attestation.py` the v2 digest rule.
 
 **Blockers (Inferred).** Neither non-refusing row misreads a field today:
 - `dependencies.py` finds no inputs in a context and calls it consistent.

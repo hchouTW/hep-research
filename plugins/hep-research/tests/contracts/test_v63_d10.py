@@ -52,7 +52,7 @@ class ReportCheck(unittest.TestCase):
         self.permit = {"subject": {"analysis_bundle_sha256": self.bundle["bundle_digest"], "analysis_bundle_ref": "bundle.json",
                                    "artifacts": ["0" * 64]}}
 
-    def attest(self, report=None, conclusion="accepted", include_report=True):
+    def attest(self, report=None, conclusion="accepted", include_report=True, purposes=("formal-analysis",)):
         report = self.report if report is None else report
         ev = self.root / "evidence"
         ev.mkdir(exist_ok=True)
@@ -63,7 +63,7 @@ class ReportCheck(unittest.TestCase):
             evidence.append({"ref": "evidence/report.json", "sha256": hashlib.sha256((ev / "report.json").read_bytes()).hexdigest()})
         scope = {"observable": "synthetic He/p ratio", "data": ["synthetic"],
                  "recipe": {"recipe_id": self.recipe["recipe_id"], "sha256": canonical_sha256(self.recipe)},
-                 "calibrations": [], "assumptions": ["synthetic"], "purposes": ["formal-analysis"]}
+                 "calibrations": [], "assumptions": ["synthetic"], "purposes": list(purposes)}
         review = {"reviewer": "synthetic reviewer", "role": "analysis-reviewer", "date": "2026-10-15",
                   "bundle_sha256": self.bundle["bundle_digest"], "scope_sha256": canonical_sha256(scope),
                   "evidence": evidence, "conclusion": conclusion, "record_ref": "review-record-1"}
@@ -79,18 +79,15 @@ class ReportCheck(unittest.TestCase):
                             permit=self.permit if permit is None else permit, now=NOW, revocations=REV,
                             roles=["analysis-reviewer"])
 
-    @unittest.expectedFailure  # V65 (D10): a report in an accepted review's evidence counts, declarations included
     def test_v65_accepted_review_with_report(self):
         self.assertTrue(any(o["declaration_based"] for o in self.report["obligations"]))
         self.assertEqual(self.report["formal_use_view"]["coverage"]["value"], "partial")
         self.assertEqual(self.check(self.attest()), [])
 
-    @unittest.expectedFailure  # V66 (D10): a pass report without an accepted review is refused
     def test_v66_no_accepted_review(self):
         self.assertIn("permit.report_unreviewed", codes(self.check(self.attest(conclusion="rejected"))))
         self.assertIn("permit.report_missing", codes(self.check(self.attest(include_report=False))))
 
-    @unittest.expectedFailure  # V60 (D10, pre-execution parts)
     def test_v60_wrong_bindings(self):
         edited = copy.deepcopy(self.report)
         edited["obligations"][0]["state"] = "violated"  # a hand edit that the summary fields no longer match
@@ -111,9 +108,10 @@ class ReportCheck(unittest.TestCase):
         strict = copy.deepcopy(self.policy)
         strict["purposes"]["formal-analysis"]["accept_pre_execution_only"] = False
         self.assertIn("permit.report_pre_execution_only", codes(self.check(self.attest(), policy=strict)))
-        self.assertIn("permit.report_policy_missing", codes(self.check(self.attest(), purpose="publication")))
+        both = self.attest(purposes=("formal-analysis", "validation"))
+        self.assertIn("permit.report_policy_missing", codes(self.check(both, purpose="validation")))
+        self.assertIn("permit.report_unreviewed", codes(self.check(self.attest(), purpose="validation")))
 
-    @unittest.expectedFailure  # V60 (D10): an incomplete or violated report is refused
     def test_incomplete_or_violated(self):
         partial = copy.deepcopy(self.report)
         partial["obligations"][0].update(state="unverified", reason="check.rule_not_run")
@@ -123,7 +121,6 @@ class ReportCheck(unittest.TestCase):
                        formal_use_view=formal_view(partial["obligations"], True))
         self.assertIn("permit.report_incomplete", codes(self.check(self.attest(partial))))
 
-    @unittest.expectedFailure  # D10: the CLI is advisory
     def test_cli(self):
         from contracts import permit
         att = self.attest()
@@ -145,7 +142,6 @@ class ReportCheck(unittest.TestCase):
 class V26Exceptions(unittest.TestCase):
     """V26: a scoped exception keeps the original finding; a non-waivable item is rejected."""
 
-    @unittest.expectedFailure  # V26 (D10)
     def test_scoped_exception(self):
         with tempfile.TemporaryDirectory() as td:
             def unfolding(c):

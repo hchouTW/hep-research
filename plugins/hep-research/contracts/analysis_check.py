@@ -16,6 +16,7 @@ dependency-missing (a definition the check needs is not available).
 Usage: python3 contracts/analysis_check.py freeze --root DIR --analysis NAME --items ITEMS.json --context CONTEXT.json --out FILE
                                             [--snapshots DIR]
        python3 contracts/analysis_check.py check BUNDLE --root DIR [--out REPORT] [--previous REPORT] [--snapshots DIR]
+                                            [--exceptions FILE]
        python3 contracts/analysis_check.py summary REPORT [--cursor N] [--max-bytes N]
 Exit codes of check: 0 inputs valid and the suite complete and consistent; 1 a violation, or invalid schema,
 references or digests of an input already read; 2 usage error or an unreadable top-level input; 3 otherwise
@@ -439,7 +440,7 @@ def legacy_findings(view: dict, vocab=None) -> list[dict]:
 
 
 def evaluate(view: dict, diags: list[dict], previous: dict | None = None, vocab=None, settings: dict | None = None,
-             rules: dict | None = None, snapshots=None) -> dict:
+             rules: dict | None = None, snapshots=None, exceptions: list | None = None, now: str | None = None) -> dict:
     from contracts.analysis_checks.lock import compare, rebuild
     from contracts.analysis_checks.outcomes import formal_view, summarize
     from contracts.analysis_checks.rules import evaluate as run_rules
@@ -513,7 +514,7 @@ def evaluate(view: dict, diags: list[dict], previous: dict | None = None, vocab=
         "semantics_source": source, "installed_differences": installed_diff if source == "snapshot" else [],
         "snapshot_missing": sorted(set(missing)),
         "checker_changed": ((view.get("lock") or {}).get("generator") or {}).get("code_digest") != generator_code_digest(),
-        "exceptions": [],
+        "exceptions": judge_exceptions(exceptions or [], outcomes, now),
         "note": "software consistency of declared contracts only, not physical validity; a diagnostic that authorizes "
                 "nothing (HC-05); declaration-based outcomes count for formal use only through an accepted review",
     }
@@ -569,6 +570,39 @@ def difference_review(view: dict, report: dict) -> dict:
     for r in rows:
         counts[r["class"]] = counts.get(r["class"], 0) + 1
     return {"rows": rows, "counts": counts, "unclassified": counts.get("unclassified", 0)}
+
+
+def judge_exceptions(exceptions: list, outcomes: list[dict], now: str | None = None) -> list[dict]:
+    """Scoped exceptions (C10): a separate adjudication that never changes a state, a severity, coverage or
+    consistency, and never authorizes use. Each binds an obligation, its finding, a rationale, a person who decided
+    and an expiry; a rule the registry marks non-waivable (roots and inventory) is rejected, so is an agent."""
+    import datetime
+    try:
+        reg = {r["rule_id"]: r for r in json.loads(REGISTRY.read_text(encoding="utf-8"))["rules"]}
+    except (OSError, ValueError, KeyError):
+        reg = {}
+    today = now or datetime.date.today().isoformat()
+    by_id = {o["obligation_id"]: o for o in outcomes}
+    out = []
+    for e in exceptions:
+        e = dict(e) if isinstance(e, dict) else {"obligation_id": None}
+        o = by_id.get(e.get("obligation_id"))
+        reason = None
+        if o is None:
+            reason = "exception.unknown_obligation"
+        elif not (reg.get(o["rule_id"]) or {}).get("waivable", False):
+            reason = "exception.not_waivable"
+        elif e.get("finding") != o.get("reason"):
+            reason = "exception.finding_mismatch"
+        elif not (isinstance(e.get("decided_by"), dict) and e["decided_by"].get("kind") == "person" and e["decided_by"].get("id")):
+            reason = "exception.not_a_person"
+        elif not e.get("rationale"):
+            reason = "exception.no_rationale"
+        elif not isinstance(e.get("expires"), str) or e["expires"] <= today:
+            reason = "exception.expired"
+        out.append(dict(e, status="rejected" if reason else "accepted", **({"reason": reason} if reason else {}),
+                        note="an exception keeps the finding and its state; it never completes a suite or authorizes use"))
+    return out
 
 
 def scope_delta(previous: dict, subject: str | None, obligations: list[dict]) -> dict:
@@ -657,6 +691,7 @@ def main(argv=None) -> int:
     c.add_argument("--previous", type=Path)
     c.add_argument("--profiles-from", type=Path, help="project config whose profiles extend the vocabulary of the legacy L1 run")
     c.add_argument("--snapshots", type=Path, help="snapshot store: reproduce a subject whose definitions changed since freezing")
+    c.add_argument("--exceptions", type=Path, help="scoped exceptions (JSON list): judged and listed, never change a state")
     s = sub.add_parser("summary")
     s.add_argument("report", type=Path)
     s.add_argument("--cursor", type=int, default=0)
@@ -695,6 +730,9 @@ def main(argv=None) -> int:
         if previous is not None and not (isinstance(previous, dict) and isinstance(previous.get("obligations"), list)):
             raise UsageError(f"{args.previous} is not an analysis-check report")
         vocab = _vocab(args.profiles_from)
+        exceptions = json.loads(args.exceptions.read_text(encoding="utf-8")) if args.exceptions else None
+        if exceptions is not None and not isinstance(exceptions, list):
+            raise UsageError(f"{args.exceptions} is not a JSON list of exceptions")
         view, diags = load_subject(args.bundle, args.root)
         if args.out is not None:
             refs = {(Path(args.root).resolve() / it.get("ref", "")).resolve() for it in view["bundle"].get("items", [])
@@ -708,7 +746,7 @@ def main(argv=None) -> int:
     except (OSError, ValueError, TypeError) as exc:
         print(json.dumps({"status": "usage", "error": str(exc)}, indent=1))
         return 2
-    report = evaluate(view, diags, previous, vocab, snapshots=getattr(args, "snapshots", None))
+    report = evaluate(view, diags, previous, vocab, snapshots=getattr(args, "snapshots", None), exceptions=exceptions)
     if args.out is not None:
         args.out.write_text(json.dumps(report, indent=1) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=1))

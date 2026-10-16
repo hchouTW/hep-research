@@ -76,6 +76,15 @@
    "release_0_11_0": "refuses",
    "blocker": false,
    "note": "the 0.11.0 reader rejects the spec with contract.unknown_capability"
+  },
+  {
+   "format": "analysis bundle 2.0.0",
+   "entry_point": "contracts/attestation.py (bundle digest)",
+   "current": "implements",
+   "evidence": "the v2 digest rule is the 1.0.0 one (D10)",
+   "release_0_11_0": "refuses",
+   "blocker": false,
+   "note": "0.11.0 digests a v2 bundle as an execution bundle, so its attestation never binds (attestation.bundle_changed)"
   }
  ]
 }

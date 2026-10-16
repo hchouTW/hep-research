@@ -171,7 +171,7 @@
     "V35",
     "V43"
    ],
-   "waivable": false,
+   "waivable": true,
    "accepted_applicability_facts": [],
    "owner": "hep-measurement",
    "review_status": "unreviewed",
@@ -228,7 +228,7 @@
     "V39",
     "V43"
    ],
-   "waivable": false,
+   "waivable": true,
    "accepted_applicability_facts": [],
    "owner": "hep-measurement",
    "review_status": "unreviewed",
@@ -272,7 +272,7 @@
    "v_cases": [
     "V39"
    ],
-   "waivable": false,
+   "waivable": true,
    "accepted_applicability_facts": [],
    "owner": "hep-measurement",
    "review_status": "unreviewed",
@@ -327,7 +327,7 @@
     "V41",
     "V49"
    ],
-   "waivable": false,
+   "waivable": true,
    "accepted_applicability_facts": [],
    "owner": "hep-measurement",
    "review_status": "unreviewed",
@@ -371,7 +371,7 @@
     "V09",
     "V10"
    ],
-   "waivable": false,
+   "waivable": true,
    "accepted_applicability_facts": [],
    "owner": "hep-measurement",
    "review_status": "unreviewed",
@@ -413,7 +413,7 @@
    "v_cases": [
     "V69"
    ],
-   "waivable": false,
+   "waivable": true,
    "accepted_applicability_facts": [],
    "owner": "hep-measurement",
    "review_status": "unreviewed",
@@ -461,7 +461,7 @@
     "V34",
     "V48"
    ],
-   "waivable": false,
+   "waivable": true,
    "accepted_applicability_facts": [],
    "owner": "hep-measurement",
    "review_status": "unreviewed",
@@ -503,7 +503,7 @@
    "v_cases": [
     "V28"
    ],
-   "waivable": false,
+   "waivable": true,
    "accepted_applicability_facts": [],
    "owner": "hep-statistics",
    "review_status": "unreviewed",
@@ -548,7 +548,7 @@
    "v_cases": [
     "V44"
    ],
-   "waivable": false,
+   "waivable": true,
    "accepted_applicability_facts": [],
    "owner": "hep-statistics",
    "review_status": "unreviewed",
@@ -592,7 +592,7 @@
    "v_cases": [
     "V45"
    ],
-   "waivable": false,
+   "waivable": true,
    "accepted_applicability_facts": [],
    "owner": "hep-statistics",
    "review_status": "unreviewed",
@@ -1140,7 +1140,7 @@
       "D10"
      ],
      "host": "report test",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d10.V26Exceptions.test_scoped_exception"
      ]
@@ -1817,7 +1817,7 @@
       "D10"
      ],
      "host": "gate integration",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d10.ReportCheck.test_v60_wrong_bindings",
       "tests.contracts.test_v63_d10.ReportCheck.test_incomplete_or_violated"
@@ -1917,7 +1917,7 @@
       "D10"
      ],
      "host": "gate integration",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d10.ReportCheck.test_v65_accepted_review_with_report"
      ]
@@ -1936,7 +1936,7 @@
       "D10"
      ],
      "host": "gate integration",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d10.ReportCheck.test_v66_no_accepted_review"
      ]
@@ -2190,17 +2190,13 @@
     "contracts/revocation.py"
    ],
    "checks": [
-    "tests.contracts.test_permits",
     "tests.contracts.test_attestation",
+    "tests.contracts.test_permits",
+    "tests.contracts.test_protected_entry_points",
     "tests.contracts.test_revocation",
-    "tests.contracts.test_protected_entry_points"
+    "tests.contracts.test_v63_d10"
    ],
-   "not_available": [
-    "forged or wrong-version reports (D10)",
-    "attestation evidence path for reports (D10)",
-    "permit.py advisory report check (D10)",
-    "per-purpose conditions (D10)"
-   ],
+   "not_available": [],
    "full": false
   },
   {

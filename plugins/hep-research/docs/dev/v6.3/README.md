@@ -14,6 +14,7 @@ not instructions for the agent, and nothing in them authorizes any use: agent-ru
 | `o16-agent-interface.md` | D17 | who calls the check, when, where the summary goes |
 | `refusal-matrix.md` | D09 | what old readers do with each new format; release blockers |
 | `shadow-review.md` | D09 | legacy-versus-new difference review per case |
+| `custodian-gate-requirement.md` | D10 | what the custodian's gate must check before a report counts |
 | `crflux-review.md` | D03b | term-by-term review of the cosmic-ray level terms; companion public-interface matrix |
 
 ## Decision-record convention (D12b)

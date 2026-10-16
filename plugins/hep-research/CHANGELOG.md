@@ -5,6 +5,14 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- Advisory report check (v6.3 D10): `permit.py check-report` counts an analysis-check report only among an accepted,
+  bound review's evidence, about the permit's bundle, consistent with its own obligations (a hand-edited pass fails),
+  from the suites and checker of the custodian's purpose policy, complete and without violation; a pre-execution
+  report passes only if the policy accepts it (codes `permit.report_*`; `formal_use_allowed` stays false). The
+  existing `permit.py verify` is unchanged. `attestation.py` digests an analysis bundle 2.0.0 with the 1.0.0 rule.
+  `analysis_check.py check --exceptions FILE` judges scoped exceptions (accepted only for a waivable rule, the
+  finding as reported, a person, a rationale and a future expiry); they never change a state. The requirement for
+  the custodian's gate is `docs/dev/v6.3/custodian-gate-requirement.md`.
 - Shadow review and refusal matrix (v6.3 D09). `analysis_check.difference_review` classifies every legacy finding and
   every new violation (artifact-local, recipe-local, agrees, new-decides, new-only); on the chain and ratio cases none
   is unclassified. `contracts/rules/refusal_matrix.json` (record `docs/dev/v6.3/refusal-matrix.md`) states what each
