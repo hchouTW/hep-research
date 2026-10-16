@@ -33,7 +33,7 @@ One number: when a shell is available, run its row's tool, state the constructio
 | Combination | `sc/combine_measurements.py` | asymmetric errors: `sc/combine_asymmetric.py` |
 | D'Agostini iterations | `cs/statistical_toys.py unfold-scan`, then `cs/unfolding_diagnostics.py closure` | unfold data with covariance: `dagostini-unfold` |
 | MCMC posterior | user's sampler, `sc/bayes_diagnostics.py diagnose`, then `result_artifact.py --paradigm bayesian` | SBC: `sc/bayes_calibration.py sbc` |
-| Fit to published points, covariance | `sc/covariance_fit.py fit` (line, exponential, broken power law, plug-in) | break position: `break-scan` |
+| Fit to published points, covariance | `sc/covariance_fit.py fit` (line, exponential, broken power law, plug-in with `--allow-plugin`) | break position: `break-scan` |
 | Ratio with covariance | `cs/statistical_toys.py ratio-cov` (counts <= 1e5) | counts >= 1e4: `ratio-cov-analytic` |
 | Write the result | `sc/result_artifact.py` | then `contracts/validate.py --gate publication` |
 

@@ -26,7 +26,9 @@ Input (fit): {"y": [...], "cov": [[...]] (additive part), "x": [...] (abscissa, 
   "multiplicative": {"relative_cov": [[...]], "mode": "data" | "model" | "nuisance"} (optional)}
 
   "model_options": {"smoothness": s} for smoothly-broken-power-law, {"plugin": {"path", "function", "n_params"}} for
-  plugin (a Python file defining function(theta, x) -> n predictions; it runs with your permissions)}
+  plugin (a Python file defining function(theta, x) -> n predictions; it runs with your permissions, so only with
+  --allow-plugin; a relative path is read from the input file's folder; an exception in it is "status": "failed",
+  exit 1)}
 Models with x > 0: broken-power-law (sharp) and smoothly-broken-power-law, theta = [ln A, gamma1, gamma2, ln x_b],
   ln F = ln A - gamma1 (u - h) - gamma2 h, u = ln(x / x_b), h = max(u, 0) or s ln((1 + e^(u/s)) / 2); give start.
 Input (break-scan): {"y", "cov", "x", "smoothness": 0 (sharp), "break_range": [lo, hi], "grid_points": 40}: the profile
@@ -73,7 +75,7 @@ Input (fit, "model": "tabulated-grid"): a fit of parameters tabulated on a grid 
   A best fit on the grid edge with chi2 still falling outward (more than 1e-3 per cell) is refused: the minimum is not
   inside the grid and nothing is extrapolated.
 
-Usage: covariance_fit.py fit --input FILE
+Usage: covariance_fit.py fit --input FILE [--allow-plugin]
        covariance_fit.py break-scan --input FILE [--toys 200 --seed 1 --cl 0.6827]
 Exit codes: 0 fitted; 1 refused (covariance singular beyond the declared constraints, a declared constraint that is not a
 null direction, no convergence (a grid fit whose optimizer stopped: "status": "failed" with "reason"); for a grid: a prediction not gated, not comparable or refused by the gate, a minimum outside the grid);
@@ -108,6 +110,10 @@ class CovFitError(ValueError):
 
 class CovFitInputError(CovFitError):
     """A malformed input (exit 2), as opposed to a refused fit (exit 1)."""
+
+
+class CovFitPluginError(CovFitError):
+    """The user's plugin model raised or misbehaved: status 'failed', exit 1 (F-09)."""
 
 
 def subspace(cov: np.ndarray, constraints) -> tuple[np.ndarray, dict]:
@@ -150,24 +156,38 @@ def bpl_log(theta, x, smoothness=0.0):
     return _bpl.log_flux(np.asarray(x, dtype=float), theta[0], theta[1], theta[2], theta[3], smoothness)
 
 
-def _plugin(spec, n):
-    """A user model: {"path": "model.py", "function": "predict", "n_params": k}; predict(theta, x) -> n values."""
+def _plugin(spec, n, allow=False, base_dir=None):
+    """A user model: {"path": "model.py", "function": "predict", "n_params": k}; predict(theta, x) -> n values. It runs
+    user code, so only with allow (--allow-plugin); a relative path is resolved against base_dir (the input file's
+    folder); its exceptions become CovFitPluginError (F-09)."""
     import importlib.util
     if not isinstance(spec, dict) or not all(k in spec for k in ("path", "function", "n_params")):
         raise CovFitInputError('a plugin model needs {"path", "function", "n_params"}')
+    if not allow:
+        raise CovFitError("a plugin model runs your Python file with your permissions; pass --allow-plugin "
+                          "(allow_plugin=True) to run it")
     path = Path(spec["path"])
+    if not path.is_absolute() and base_dir is not None:
+        path = Path(base_dir) / path
     if not path.is_file():
         raise CovFitInputError(f"plugin file {path} not found")
-    mod_spec = importlib.util.spec_from_file_location("covariance_fit_plugin", path)
-    mod = importlib.util.module_from_spec(mod_spec)
-    mod_spec.loader.exec_module(mod)  # type: ignore[union-attr]
+    sys.dont_write_bytecode = True  # importing the plugin leaves no __pycache__ next to it
+    try:
+        mod_spec = importlib.util.spec_from_file_location("covariance_fit_plugin", path)
+        mod = importlib.util.module_from_spec(mod_spec)
+        mod_spec.loader.exec_module(mod)  # type: ignore[union-attr]
+    except Exception as exc:  # noqa: BLE001 - any failure of user code is reported, never a traceback
+        raise CovFitPluginError(f"the plugin {path} failed to load: {type(exc).__name__}: {exc}") from exc
     fn = getattr(mod, spec["function"], None)
     k = spec["n_params"]
     if not callable(fn) or not (isinstance(k, int) and k >= 1):
         raise CovFitInputError("the plugin function must exist and n_params must be a positive integer")
 
     def f(th):
-        out = np.asarray(fn(np.asarray(th, dtype=float), _plugin_x), dtype=float)
+        try:
+            out = np.asarray(fn(np.asarray(th, dtype=float), _plugin_x), dtype=float)
+        except Exception as exc:  # noqa: BLE001
+            raise CovFitPluginError(f"the plugin function {spec['function']} raised {type(exc).__name__}: {exc}") from exc
         if out.shape != (n,) or not np.all(np.isfinite(out)):
             raise CovFitError(f"the plugin returned {out.shape} or non-finite values; expected {n} finite values")
         return out
@@ -177,7 +197,7 @@ def _plugin(spec, n):
 _plugin_x: object = None
 
 
-def model_fn(name, x, options=None):
+def model_fn(name, x, options=None, allow_plugin=False, base_dir=None):
     """Prediction function and parameter count. Models: constant, line, exponential-normalized, broken-power-law
     (sharp), smoothly-broken-power-law (options.smoothness), plugin (options.plugin, see _plugin)."""
     global _plugin_x
@@ -192,7 +212,7 @@ def model_fn(name, x, options=None):
         return (lambda th: np.exp(bpl_log(th, x, float(sm)))), 4
     if name == "plugin":
         _plugin_x = x
-        return _plugin(options.get("plugin"), len(x))
+        return _plugin(options.get("plugin"), len(x), allow_plugin, base_dir)
     if name == "tabulated-grid":
         raise CovFitInputError("tabulated-grid takes predictions and a measurement, not y and cov: use grid_fit(doc) or "
                                "the fit command with the tabulated-grid input")
@@ -280,14 +300,14 @@ def _rank_one(rel):
 
 
 def fit(y, cov, model="constant", x=None, constraints=None, start=None, multiplicative=None, logdet=True,
-        model_options=None) -> dict:
+        model_options=None, allow_plugin=False, base_dir=None) -> dict:
     y = np.asarray(y, dtype=float)
     cov = np.asarray(cov, dtype=float)
     n = len(y)
     if cov.shape != (n, n) or not np.allclose(cov, cov.T, rtol=1e-12, atol=0):
         raise CovFitError("cov must be a symmetric n x n matrix")
     x = np.arange(n, dtype=float) if x is None else np.asarray(x, dtype=float)
-    f, npar = model_fn(model, x, model_options)
+    f, npar = model_fn(model, x, model_options, allow_plugin, base_dir)
     rel, mode = None, None
     if multiplicative:
         rel = _relative_cov(multiplicative["relative_cov"], n)
@@ -1003,6 +1023,9 @@ def main(argv=None) -> int:
     sub = ap.add_subparsers(dest="command", required=True)
     p = sub.add_parser("fit")
     p.add_argument("--input", required=True)
+    p.add_argument("--allow-plugin", action="store_true",
+                   help="run a plugin model (a Python file named in the input, relative to the input's folder); it "
+                        "runs with your permissions")
     bs = sub.add_parser("break-scan", help="break position of a broken power law with a toy-calibrated interval")
     bs.add_argument("--input", required=True)
     bs.add_argument("--toys", type=int, default=200)
@@ -1026,7 +1049,8 @@ def main(argv=None) -> int:
             out = grid_fit(doc, Path(a.input).resolve().parent)
         else:
             out = fit(doc["y"], doc["cov"], doc.get("model", "constant"), doc.get("x"), doc.get("constraints"),
-                      doc.get("start"), doc.get("multiplicative"), model_options=doc.get("model_options"))
+                      doc.get("start"), doc.get("multiplicative"), model_options=doc.get("model_options"),
+                      allow_plugin=a.allow_plugin, base_dir=Path(a.input).resolve().parent)
     except KeyError as exc:
         print(json.dumps({"status": "rejected", "error": f"missing {exc}"}))
         return 2
@@ -1036,6 +1060,9 @@ def main(argv=None) -> int:
     except CovFitIncomplete as exc:
         print(json.dumps({"label": LABEL, "status": "incomplete", "error": str(exc), "missing": exc.missing}, indent=1))
         return 3
+    except CovFitPluginError as exc:
+        print(json.dumps({"label": LABEL, "status": "failed", "error": str(exc)}))
+        return 1
     except CovFitError as exc:
         print(json.dumps({"label": LABEL, "status": "refused", "error": str(exc)}))
         return 1

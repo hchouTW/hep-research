@@ -11,6 +11,7 @@ from scipy import optimize
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "skills" / "hep-statistics" / "scripts"))
+SCRIPT = ROOT / "skills" / "hep-statistics" / "scripts" / "covariance_fit.py"
 
 import covariance_fit as cf  # noqa: E402
 
@@ -72,7 +73,8 @@ class BrokenPowerLawSTH313(unittest.TestCase):
             xs = np.linspace(0.0, 5.0, 8)
             y = 4.0 * np.exp(-xs / 2.0)
             r = cf.fit(y.tolist(), (0.01 * np.eye(8)).tolist(), "plugin", xs.tolist(), start=[3.0, 1.5],
-                       model_options={"plugin": {"path": str(plug), "function": "predict", "n_params": 2}})
+                       model_options={"plugin": {"path": str(plug), "function": "predict", "n_params": 2}},
+                       allow_plugin=True)
             self.assertTrue(np.allclose(r["theta"], [4.0, 2.0], atol=1e-5), r["theta"])
 
     def test_refusals(self):
@@ -232,6 +234,53 @@ class T19Multiplicative(unittest.TestCase):
     def test_mode_is_required(self):
         with self.assertRaises(cf.CovFitError):
             cf.fit(self.Y, self.STAT, "constant", multiplicative={"relative_cov": self.REL.tolist()})
+
+
+class PluginModelF09(unittest.TestCase):
+    """F-09: a plugin model runs user code, so it runs only with --allow-plugin; its path is resolved relative to the
+    input file; its errors become a failed JSON status (exit 1), never a traceback. Before the fix the plugin ran
+    without any opt-in, from a path relative to the working directory, and its exceptions escaped."""
+
+    PLUGIN = "import numpy as np\ndef predict(theta, x):\n    return theta[0] * np.exp(-x / theta[1])\n"
+
+    def cli(self, td, plugin_source, *extra):
+        import json
+        import subprocess
+        d = Path(td) / "inputs"
+        d.mkdir()
+        (d / "m.py").write_text(plugin_source)
+        xs = np.linspace(0.0, 5.0, 8)
+        doc = {"y": (4.0 * np.exp(-xs / 2.0)).tolist(), "cov": (0.01 * np.eye(8)).tolist(), "x": xs.tolist(),
+               "model": "plugin", "start": [3.0, 1.5],
+               "model_options": {"plugin": {"path": "m.py", "function": "predict", "n_params": 2}}}
+        (d / "fit.json").write_text(json.dumps(doc))
+        res = subprocess.run([sys.executable, "-I", str(SCRIPT), "fit", "--input", str(d / "fit.json"), *extra],
+                             capture_output=True, text=True, timeout=300, cwd=td)    # cwd is not the input folder
+        return res.returncode, json.loads(res.stdout), res.stderr
+
+    def test_plugin_needs_the_flag(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            code, out, _ = self.cli(td, self.PLUGIN)
+            self.assertEqual((code, out["status"]), (1, "refused"))
+            self.assertIn("--allow-plugin", out["error"])
+
+    def test_plugin_path_is_relative_to_the_input_file(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as td:
+            code, out, err = self.cli(td, self.PLUGIN, "--allow-plugin")
+            self.assertEqual(code, 0, out)
+            self.assertTrue(np.allclose(out["theta"], [4.0, 2.0], atol=1e-5))
+
+    def test_plugin_errors_are_failed_json(self):
+        import tempfile
+        for source in ("raise RuntimeError('broken at import')\n",
+                       "def predict(theta, x):\n    raise ZeroDivisionError('inside the model')\n"):
+            with self.subTest(source=source), tempfile.TemporaryDirectory() as td:
+                code, out, err = self.cli(td, source, "--allow-plugin")
+                self.assertEqual((code, out["status"]), (1, "failed"), out)
+                self.assertIn("plugin", out["error"])
+                self.assertNotIn("Traceback", err)
 
 
 if __name__ == "__main__":
