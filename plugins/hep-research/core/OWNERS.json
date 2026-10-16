@@ -50,10 +50,11 @@
   "evidence": {
    "steward": "hep-communication",
    "status": "implemented-M2",
-   "purpose": "Evidence-ledger validation and index rendering",
+   "purpose": "Evidence-ledger validation, index rendering and bounded paged queries",
    "files": [
     "ledger",
-    "render_index"
+    "render_index",
+    "query"
    ],
    "source": "explicit paths, optional ID namespace, verification_date with access_date fallback, generic messages"
   },
