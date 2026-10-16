@@ -48,7 +48,7 @@ def ams_vocab() -> Vocabulary:
 
 
 def run(*args, cwd=ROOT) -> tuple[int, dict]:
-    p = subprocess.run([sys.executable, *map(str, args)], capture_output=True, text=True, cwd=cwd)
+    p = subprocess.run([sys.executable, *map(str, args)], capture_output=True, text=True, cwd=cwd, timeout=300)
     return p.returncode, json.loads(p.stdout)
 
 
