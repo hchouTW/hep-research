@@ -5,6 +5,22 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- Definition snapshots and migration (v6.3 D11b). `analysis_check.py freeze --snapshots DIR` stores every definition the
+  semantic lock pins (coverage contracts, catalog effects, compositions, member-set closures, suites, rule registry)
+  content-addressed; `check --snapshots DIR` reproduces a subject whose installed definitions changed from that
+  snapshot (report `semantics_source: snapshot`, with the installed differences listed), leaves it unverified when a
+  pinned digest is missing (never falls back to the latest) and reports a rewritten snapshot as invalid input. The
+  lock now pins the suite files too; a changed checker code alone is reported (`checker_changed`) as a new assessment,
+  not as a definition difference. New `contracts/migrate.py` converts items of a frozen bundle (lossless converter
+  `recipe-1.0.0-to-1.1.0`) into a new folder leaf to root and writes `MIGRATION-COMPLETE.json` only after the new
+  bundle verifies and loads; on failure no marker is written and the original files are unchanged.
+- Ratio subset (v6.3 D07, suite `ratio-subset/v1`): a check context may select further suites and name ratio roots of
+  two chain roots. `r-ratio.operands` requires compatible operands, `r-ratio.cancellation` counts a claimed
+  cancellation as exact only for the same factor instance, selection and power with a nonzero factor (different bins
+  of one calibration table leave a residual, summarized per bin), and `r-ratio.correlation` needs a validation record
+  (new schema `validation_record.json`, bundle role `validation-record`) or a sourced or scoped declaration; bare
+  claims stay unverified. The coverage contract now states the efficiency factor power of `correct_efficiency` and
+  `divide_effective_exposure`. Model-card checks are not built.
 - Analysis check hardening after review (v6.3 M2a): recipes, tables, coverage contracts and spec corrections are
   checked against their schemas at freeze (refused) and at check time (input invalid, never a traceback); duplicate
   spec `effect_id`s are invalid; `freeze` writes the context and lock only after every check passes and refuses an

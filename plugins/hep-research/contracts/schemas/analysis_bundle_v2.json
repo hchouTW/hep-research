@@ -1,27 +1,118 @@
-{"$comment": "Analysis bundle 2.0.0 (v6.3 D05b, contracts/analysis_check.py): one digest over a frozen analysis intent of one mode. Items have unique IDs and a role; sha256 is the semantic digest (canonical JSON for a .json file, bytes otherwise) and a .json item also carries its bytes digest. Chain mode needs exactly one measurement-spec, environment-lock, context and semantic-lock and at least one recipe. Bundle 1.0.0 (analysis_bundle.json) keeps its own reader, which refuses this format.",
+{
+ "$comment": "Analysis bundle 2.0.0 (v6.3 D05b, contracts/analysis_check.py): one digest over a frozen analysis intent of one mode. Items have unique IDs and a role; sha256 is the semantic digest (canonical JSON for a .json file, bytes otherwise) and a .json item also carries its bytes digest. Chain mode needs exactly one measurement-spec, environment-lock, context and semantic-lock and at least one recipe. Bundle 1.0.0 (analysis_bundle.json) keeps its own reader, which refuses this format.",
  "type": "object",
- "required": ["bundle_version", "format", "mode", "analysis", "items", "plugin_release", "bundle_digest"],
+ "required": [
+  "bundle_version",
+  "format",
+  "mode",
+  "analysis",
+  "items",
+  "plugin_release",
+  "bundle_digest"
+ ],
  "additionalProperties": false,
  "properties": {
-  "bundle_version": {"type": "string", "const": "2.0.0"},
-  "format": {"type": "string", "const": "hep-research-analysis-bundle/2"},
-  "mode": {"type": "string", "enum": ["chain"]},
-  "analysis": {"type": "string", "minLength": 1},
-  "items": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/item"}},
-  "plugin_release": {"type": "object", "required": ["release", "digest"], "additionalProperties": false,
-   "properties": {"release": {"type": "string", "minLength": 1}, "digest": {"type": "string", "minLength": 1}}},
-  "bundle_digest": {"$ref": "revocation_event.json#/$defs/sha256"}
+  "bundle_version": {
+   "type": "string",
+   "const": "2.0.0"
+  },
+  "format": {
+   "type": "string",
+   "const": "hep-research-analysis-bundle/2"
+  },
+  "mode": {
+   "type": "string",
+   "enum": [
+    "chain"
+   ]
+  },
+  "analysis": {
+   "type": "string",
+   "minLength": 1
+  },
+  "items": {
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "$ref": "#/$defs/item"
+   }
+  },
+  "plugin_release": {
+   "type": "object",
+   "required": [
+    "release",
+    "digest"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "release": {
+     "type": "string",
+     "minLength": 1
+    },
+    "digest": {
+     "type": "string",
+     "minLength": 1
+    }
+   }
+  },
+  "bundle_digest": {
+   "$ref": "revocation_event.json#/$defs/sha256"
+  }
  },
  "$defs": {
-  "item": {"type": "object", "required": ["role", "id", "ref", "sha256", "digest_kind"], "additionalProperties": false,
+  "item": {
+   "type": "object",
+   "required": [
+    "role",
+    "id",
+    "ref",
+    "sha256",
+    "digest_kind"
+   ],
+   "additionalProperties": false,
    "properties": {
-    "role": {"type": "string", "enum": ["measurement-spec", "recipe", "semantics-table", "calibration", "tool-contract",
-                                        "environment-lock", "review", "response", "dataset-record", "context",
-                                        "semantic-lock", "coverage-contract"]},
-    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"},
-    "ref": {"$comment": "relative to the project root, no '..'", "type": "string", "minLength": 1},
-    "sha256": {"$ref": "revocation_event.json#/$defs/sha256"},
-    "digest_kind": {"type": "string", "enum": ["canonical-json", "bytes"]},
-    "bytes_sha256": {"$comment": "the bytes digest of a .json item, next to its canonical digest", "$ref": "revocation_event.json#/$defs/sha256"}}}
+    "role": {
+     "type": "string",
+     "enum": [
+      "measurement-spec",
+      "recipe",
+      "semantics-table",
+      "calibration",
+      "tool-contract",
+      "environment-lock",
+      "review",
+      "response",
+      "dataset-record",
+      "context",
+      "semantic-lock",
+      "coverage-contract",
+      "validation-record"
+     ]
+    },
+    "id": {
+     "type": "string",
+     "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$"
+    },
+    "ref": {
+     "$comment": "relative to the project root, no '..'",
+     "type": "string",
+     "minLength": 1
+    },
+    "sha256": {
+     "$ref": "revocation_event.json#/$defs/sha256"
+    },
+    "digest_kind": {
+     "type": "string",
+     "enum": [
+      "canonical-json",
+      "bytes"
+     ]
+    },
+    "bytes_sha256": {
+     "$comment": "the bytes digest of a .json item, next to its canonical digest",
+     "$ref": "revocation_event.json#/$defs/sha256"
+    }
+   }
+  }
  }
 }

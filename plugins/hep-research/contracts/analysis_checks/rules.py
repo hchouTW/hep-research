@@ -560,10 +560,179 @@ def r_resp_response_use(ob: dict, env: Env) -> dict:
                    "no migration correction, no unfolding step and no response: no response use is required", ev, excluded)
 
 
+# --- R-RATIO (ratio-subset/v1) ----------------------------------------------------------------------------------
+RELATIONS = ("independent", "correlated", "fully_correlated")
+
+
+def _ratio_parts(env: Env, rid):
+    from contracts.analysis_checks.obligations import ratio_claims, spec_ratio
+    rr = next((r for r in env.ctx.get("ratio_roots", []) if r.get("root_id") == rid), None)
+    claims = {c["effect"]: c for c in ratio_claims(env.view)}
+    return rr, spec_ratio(env.view), claims
+
+
+def r_ratio_operands(ob: dict, env: Env) -> dict:
+    rid = ob["subject"]["ratio_root"]
+    rr, ratio, _ = _ratio_parts(env, rid)
+    ev = [{"item": env.ctx.get("spec"), "pointer": "/extension/ratio"}]
+    if rr is None:
+        return outcome("unverified", "check.ratio_operands_unbound",
+                       f"numerator {ratio.get('numerator')!r} and denominator {ratio.get('denominator')!r} are free text: "
+                       "no ratio root binds them to results", ev)
+    if rr.get("required") is False:
+        return outcome("not_applicable", "check.ratio_not_required", "the context marks this ratio optional", ev)
+    num, den = (env.roots.get((rr.get(k) or {}).get("root")) for k in ("numerator", "denominator"))
+    if num is None or den is None:
+        return outcome("unverified", "check.ratio_operands_unbound", "an operand is not a root of the context", ev)
+    ev += [{"root": num["root_id"]}, {"root": den["root_id"]}]
+    if num.get("quantity") not in CHAIN_QUANTITIES or den.get("quantity") not in CHAIN_QUANTITIES:
+        return outcome("unsupported", "check.ratio_operand_unsupported", "an operand is not a chain result", ev)
+    if (num.get("quantity"), num.get("unit")) != (den.get("quantity"), den.get("unit")):
+        return outcome("violated", "check.ratio_operands_incompatible", "the operands differ in quantity or unit", ev)
+    edges = [pointer_get((env.items.get((r.get("binning") or {}).get("item")) or {}).get("doc"),
+                         (r.get("binning") or {}).get("pointer", "")) for r in (num, den)]
+    if any(e is None for e in edges):
+        return outcome("unverified", "check.ratio_operands_unbound", "an operand's binning cannot be resolved", ev)
+    if edges[0] != edges[1]:
+        return outcome("violated", "check.ratio_operands_incompatible", "the operands have different bins", ev)
+    from contracts.analysis_checks.scope import parse_scope
+    sa, sb = parse_scope(num.get("scope"), env.axes), parse_scope(den.get("scope"), env.axes)
+    axis = rr.get("over_axis")
+    if not (sa["ok"] and sb["ok"]) or set(sa["axes"]) != set(sb["axes"]) or axis not in sa["axes"]:
+        return outcome("unverified", "check.ratio_operands_unbound", "the operand scopes cannot be compared on the ratio axis", ev)
+    others = {k for k in sa["axes"] if k != axis}
+    if any(sa["axes"][k] != sb["axes"][k] for k in others) or sa["axes"][axis] == sb["axes"][axis]:
+        return outcome("violated", "check.ratio_operands_incompatible",
+                       f"the operands must differ in {axis!r} only", ev)
+    return outcome("satisfied", "check.ratio_operands_compatible", "two compatible chain results", ev)
+
+
+def _factor_side(env: Env, root_id: str, effect: str) -> dict:
+    """The factor instance one operand uses for an effect: calibration item, selector, power, values; or why not."""
+    from contracts.effect_catalog import coverage_state
+    cls = classify(env.catalog, effect)
+    if cls["basis"] != "catalog":
+        return {"status": "unsupported", "why": f"{effect!r} is not a catalog effect"}
+    hits = []
+    for inst_id in path_of(env, root_id):
+        cov = env.coverage_of(inst_id)
+        ops = {o.get("operator_id"): o for o in cov.get("operators", [])}
+        table = env.table_of(env.recipe_of(env.insts[inst_id]))
+        for s in (env.views.get(inst_id) or {}).get("steps", []):
+            if coverage_state(cov, str(s.get("operator")), effect, env.catalog, table)["state"] == "covered":
+                hits.append((inst_id, s, ops.get(s.get("operator")) or {}))
+    if len(hits) != 1:
+        return {"status": "unverified", "why": f"{len(hits)} steps apply {effect!r} on the operand's path"}
+    inst_id, step, op = hits[0]
+    powers = [f.get("power") for f in op.get("factors", []) if f.get("effect") in (effect, cls["class"])]
+    if len(powers) != 1:
+        return {"status": "unsupported", "why": f"operator {step.get('operator')!r} states no single power for {effect!r}"}
+    cals = env.insts[inst_id].get("calibrations") or {}
+    item = cals.get(effect) or cals.get(cls["class"])
+    doc = (env.items.get(item) or {}).get("doc") if item else None
+    entry = ((doc or {}).get("factors") or {}).get(effect) if isinstance(doc, dict) else None
+    if not isinstance(entry, dict):
+        return {"status": "unverified", "why": f"no calibration binds {effect!r} for the operand"}
+    vals: object
+    if "scalar" in entry:
+        sel, vals = None, [entry["scalar"]]
+    elif "by_scope" in entry:
+        sel = env.insts[inst_id].get("scope")
+        vals = (entry["by_scope"] or {}).get(sel)
+    else:
+        sel, vals = None, entry.get("values")
+    if not (isinstance(vals, list) and vals and all(isinstance(v, (int, float)) and not isinstance(v, bool)
+                                                     and math.isfinite(v) for v in vals)):
+        return {"status": "unverified", "why": f"the calibration has no finite values for {effect!r} on this side"}
+    return {"status": "ok", "item": item, "selector": sel, "power": powers[0], "values": vals,
+            "ref": {"instance": inst_id, "step": step.get("step_id")}}
+
+
+def r_ratio_cancellation(ob: dict, env: Env) -> dict:
+    rid, effect = ob["subject"]["ratio_root"], ob["subject"]["effect"]
+    rr, _, claims = _ratio_parts(env, rid)
+    claim = claims.get(effect)
+    ev = [{"item": env.ctx.get("spec"), "pointer": "/extension/ratio/cancellations"}]
+    if rr is None or claim is None:
+        return outcome("unverified", "check.cancellation_unbound", "the claim or its ratio root cannot be read", ev)
+    if rr.get("required") is False:
+        return outcome("not_applicable", "check.cancellation_not_claimed", "the context marks this ratio optional", ev)
+    if claim.get("treatment") == "approximately_cancels":
+        return outcome("unverified", "check.cancellation_approximate",
+                       "an approximate cancellation needs a validation record; it is never counted as exact", ev, exact=False)
+    sides = [_factor_side(env, str((rr.get(k) or {}).get("root")), effect) for k in ("numerator", "denominator")]
+    ev += [s["ref"] for s in sides if s.get("ref")]
+    for s in sides:
+        if s["status"] == "unsupported":
+            return outcome("unsupported", "check.factor_undefined", s["why"], ev)
+    for s in sides:
+        if s["status"] != "ok":
+            return outcome("unverified", "check.cancellation_unbound", s["why"], ev)
+    n, d = sides
+    if n["power"] != d["power"]:
+        return outcome("violated", "check.cancellation_not_exact",
+                       f"the factor enters with power {n['power']} and {d['power']}: a net power remains", ev, exact=False)
+    if n["item"] != d["item"] or n["selector"] != d["selector"]:
+        bins = None
+        if len(n["values"]) == len(d["values"]):
+            resid = [k for k, (a, b) in enumerate(zip(n["values"], d["values"])) if a == 0 or abs(b / a - 1.0) > 1e-12]
+            bins = {"evaluated": len(n["values"]), "residual_bins": len(resid), "first_residuals": resid[:5]}
+        why = ("different factor instances" if n["item"] != d["item"] else
+               "the same calibration with different selections: the factor of each side remains as a ratio")
+        return outcome("violated", "check.cancellation_not_exact", why, ev, exact=False, bins=bins)
+    if any(v == 0 for v in n["values"]):
+        return outcome("violated", "check.cancellation_domain", "the common factor is zero somewhere: it cannot cancel", ev)
+    return outcome("satisfied", "check.cancellation_exact",
+                   "the same factor instance, selection and power on both sides cancels exactly", ev, exact=True)
+
+
+def r_ratio_correlation(ob: dict, env: Env) -> dict:
+    rid, effect = ob["subject"]["ratio_root"], ob["subject"]["effect"]
+    rr, _, claims = _ratio_parts(env, rid)
+    claim = claims.get(effect)
+    ev = [{"item": env.ctx.get("spec"), "pointer": "/extension/ratio/cancellations"}]
+    if rr is None or claim is None:
+        return outcome("unverified", "check.correlation_unsupported_claim", "the claim or its ratio root cannot be read", ev)
+    relation = claim.get("treatment")
+    if relation in ("none", "not_applicable"):
+        return outcome("not_applicable", "check.correlation_not_claimed", "the spec makes no correlation claim here", ev)
+    if relation not in RELATIONS:
+        return outcome("unsupported", "check.correlation_relation_unsupported", f"relation {relation!r} is not supported", ev)
+    operands = {(rr.get(k) or {}).get("root") for k in ("numerator", "denominator")}
+    incomplete = False
+    for iid, it in sorted(env.items.items()):
+        doc = it.get("doc")
+        if it.get("role") != "validation-record" or not isinstance(doc, dict) or (doc.get("claim") or {}).get("effect") != effect:
+            continue
+        subjects = {s.get("root") for s in doc.get("subjects", []) if isinstance(s, dict) and s.get("version")}
+        if not operands <= subjects or not all(doc.get(k) for k in ("method", "tolerance", "scope")):
+            incomplete = True
+            continue
+        if doc["claim"].get("relation") != relation:
+            return outcome("violated", "check.correlation_contradicted",
+                           f"validation record {iid!r} finds {doc['claim'].get('relation')!r}, the spec claims {relation!r}",
+                           ev + [{"item": iid, "pointer": "/claim"}])
+        return outcome("satisfied", "check.correlation_evidenced", f"validation record {iid!r} binds both operands",
+                       ev + [{"item": iid, "pointer": "/subjects"}])
+    for d in env.decls("correlation"):
+        c = d.get("content") or {}
+        if c.get("ratio_root") == rid and c.get("effect") == effect and c.get("relation") == relation:
+            if (d.get("basis") or {}).get("source") or c.get("scope"):
+                return outcome("satisfied", "check.correlation_declared", "a sourced or scoped correlation declaration",
+                               ev, [d["declaration_id"]])
+    if incomplete:
+        return outcome("unverified", "check.correlation_evidence_incomplete",
+                       "a validation record names this effect but not both operands with versions, method, tolerance, scope", ev)
+    return outcome("unverified", "check.correlation_unsupported_claim",
+                   "a bare claim (or verification text) is not evidence: a validation record or a sourced declaration is needed", ev)
+
+
 RULES = {"r-inv.root": r_inv_root, "r-map.classification": r_map_classification,
          "r-real.description": r_real_description, "r-stage.position": r_stage_position,
          "r-rep.repetition": r_rep_repetition, "r-comp.composition": r_comp_composition,
-         "r-comp.factor_values": r_comp_factor_values, "r-resp.response_use": r_resp_response_use}
+         "r-comp.factor_values": r_comp_factor_values, "r-resp.response_use": r_resp_response_use,
+         "r-ratio.operands": r_ratio_operands, "r-ratio.cancellation": r_ratio_cancellation,
+         "r-ratio.correlation": r_ratio_correlation}
 
 
 def evaluate(view: dict, obligations: list[dict], rules: dict | None = None) -> list[dict]:

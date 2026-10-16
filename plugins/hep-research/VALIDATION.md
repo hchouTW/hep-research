@@ -1645,3 +1645,22 @@ context cost, then the fixes of an independent code review. Stacked branches `v6
 
 A first gate run of the D06, D11a and D17 heads failed one registry test (its fixture case had become passing in D06);
 the test was fixed in D06 and the later branches restacked before the runs above. Software checks only.
+
+## V63-M2b-ratio and D11b (2026-10-16, Python 3.13.2 on macOS 26.5 arm64; on top of V63-M2a)
+
+After the G-M2a decision (M2b ratio first, M2c paused): D07 ratio subset (`ratio-subset/v1`, R-RATIO) with the
+RATIO-FACTORS and RATIO-EVIDENCE cases, and D11b definition snapshots and the migration dispatcher. Branches
+`v63/d07-ratio-subset`, `v63/d11b-snapshots-migration`; gate runs on clean worktrees of the heads.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py`, D07 `d2bc757` | 25 pass, 0 fail; 3524 tests, 0 failures |
+| Same, D11b `6e1b3d2` | 25 pass, 0 fail; 3530 tests, 0 failures, 107 skipped |
+| Same with the CI lock (no torch), `6e1b3d2` | 25 pass, 0 fail; 3530 tests, 0 failures, 170 skipped |
+| `check_relocation.py`, `6e1b3d2` | pass |
+| Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
+| V cases | V28, V44, V45 (ratio), V19, V57 (D11b) passing; 50 of 80 parts passing overall |
+| V44 oracle | the residual bins reported for a selection efficiency taken from different rows of one table equal the hand-computed e2/e1 != 1 bins |
+| Legacy capture (132 old-CLI runs) | unchanged against the post-D03a capture |
+
+The model-card part of M2b is not built (O03); a context that selects it is refused at freeze. Software checks only.

@@ -14,7 +14,8 @@ input diagnostics, each of kind input-invalid (schema, references, digests, a fr
 dependency-missing (a definition the check needs is not available).
 
 Usage: python3 contracts/analysis_check.py freeze --root DIR --analysis NAME --items ITEMS.json --context CONTEXT.json --out FILE
-       python3 contracts/analysis_check.py check BUNDLE --root DIR [--out REPORT] [--previous REPORT]
+                                            [--snapshots DIR]
+       python3 contracts/analysis_check.py check BUNDLE --root DIR [--out REPORT] [--previous REPORT] [--snapshots DIR]
        python3 contracts/analysis_check.py summary REPORT [--cursor N] [--max-bytes N]
 Exit codes of check: 0 inputs valid and the suite complete and consistent; 1 a violation, or invalid schema,
 references or digests of an input already read; 2 usage error or an unreadable top-level input; 3 otherwise
@@ -43,7 +44,7 @@ from core.protected.identity import plugin_release  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 FORMAT2 = "hep-research-analysis-bundle/2"
 ROLES2 = ("measurement-spec", "recipe", "semantics-table", "calibration", "tool-contract", "environment-lock", "review",
-          "response", "dataset-record", "context", "semantic-lock", "coverage-contract")
+          "response", "dataset-record", "context", "semantic-lock", "coverage-contract", "validation-record")
 MODE_ROLES = {"chain": {"exactly_one": ("measurement-spec", "environment-lock", "context", "semantic-lock"),
                        "at_least_one": ("recipe",)}}
 SUITE_DIR = ROOT / "contracts" / "rules" / "suites"
@@ -87,6 +88,16 @@ def load_suite(suite_id: str, version: str) -> dict:
     return json.loads((SUITE_DIR / f"{suite_id}-{version}.json").read_text(encoding="utf-8"))
 
 
+def context_suites(context: dict) -> list[dict]:
+    """The suites a context selects: its primary suite, then any further ones, each once."""
+    out = []
+    for s in [context.get("suite") or {}] + list(context.get("suites") or []):
+        key = {"id": s.get("id"), "version": s.get("version")}
+        if key not in out:
+            out.append(key)
+    return out
+
+
 def _plugin_coverage() -> dict:
     out = {}
     for p in sorted(COVERAGE_DIR.glob("*.coverage.json")):
@@ -122,8 +133,9 @@ def _view(items: dict, context: dict) -> tuple[dict, list[dict]]:
 
 
 JSON_ROLES = ("measurement-spec", "recipe", "semantics-table", "response", "dataset-record", "context", "semantic-lock",
-              "coverage-contract")
-SHAPES = {"recipe": "recipe.json", "semantics-table": "operator_semantics.json", "coverage-contract": "operator_coverage.json"}
+              "coverage-contract", "validation-record")
+SHAPES = {"recipe": "recipe.json", "semantics-table": "operator_semantics.json", "coverage-contract": "operator_coverage.json",
+          "validation-record": "validation_record.json"}
 
 
 def _is_json(ref) -> bool:
@@ -200,7 +212,45 @@ def _write_once(path: Path, doc: dict) -> None:
     tmp.replace(path)
 
 
-def freeze(root, analysis: str, items: list, context: dict, mode: str = "chain") -> dict:
+class SnapshotInvalid(ValueError):
+    """A stored snapshot whose content does not match its digest (rewritten)."""
+
+
+def save_snapshots(entries: dict, store) -> None:
+    """Write {digest: document} content-addressed into the store, write-once; an existing file must hold that digest."""
+    store = Path(store)
+    store.mkdir(parents=True, exist_ok=True)
+    for digest, doc in sorted(entries.items()):
+        path = store / f"{digest}.json"
+        if path.exists():
+            if canonical_sha256(json.loads(path.read_text(encoding="utf-8"))) != digest:
+                raise BundleRefused("snapshot.digest", f"{path.name} holds other content than its digest")
+            continue
+        tmp = path.with_suffix(".json.tmp")
+        tmp.write_text(json.dumps(doc, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+        tmp.replace(path)
+
+
+def snapshot_lookup(store):
+    def lookup(digest: str):
+        path = Path(store) / f"{digest}.json"
+        if not path.is_file():
+            return None
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        if canonical_sha256(doc) != digest:
+            raise SnapshotInvalid(f"snapshot {digest[:12]} does not match its digest")
+        return doc
+    return lookup
+
+
+def _registry_doc():
+    try:
+        return json.loads(REGISTRY.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+
+
+def freeze(root, analysis: str, items: list, context: dict, mode: str = "chain", snapshots=None) -> dict:
     root = Path(root).resolve()
     if not isinstance(items, list) or not items:
         raise BundleRefused("bundle.no_items", "a bundle needs its items")
@@ -232,10 +282,14 @@ def freeze(root, analysis: str, items: list, context: dict, mode: str = "chain")
     bad = [f for f in check_context(context, roles) if f["code"] in ("context.duplicate_id", "context.unknown_reference")]
     if bad:
         raise BundleRefused("bundle.context_references", "; ".join(f"{f['where']}: {f['message']}" for f in bad))
-    suite = load_suite(context["suite"]["id"], context["suite"]["version"])
-    full = dict(context, obligations=obl.generate(suite, view))
+    try:
+        suites = [load_suite(s["id"], s["version"]) for s in context_suites(context)]
+    except (OSError, ValueError) as exc:
+        raise BundleRefused("bundle.suite_missing", f"a selected suite is not installed: {exc}") from None
+    full = dict(context, obligations=obl.generate_all(suites, view))
     view["context"] = full
-    lock = build_lock(suite, generator_code_digest() or "", view, registry_digest())
+    view["suites"] = suites
+    lock = build_lock(suites[0], generator_code_digest() or "", view, registry_digest())
     recs = [_item(root, it) for it in items] + [_generated_item("context", "check-context", CONTEXT_REF, full),
                                                 _generated_item("semantic-lock", "semantic-lock", LOCK_REF, lock)]
     doc = {"bundle_version": "2.0.0", "format": FORMAT2, "mode": mode, "analysis": analysis,
@@ -248,6 +302,9 @@ def freeze(root, analysis: str, items: list, context: dict, mode: str = "chain")
     _check_once(root / LOCK_REF, lock)
     _write_once(root / CONTEXT_REF, full)
     _write_once(root / LOCK_REF, lock)
+    if snapshots is not None:  # D11b: the pinned definitions, content-addressed, for historical reproduction
+        from contracts.analysis_checks.lock import snapshot_entries
+        save_snapshots(snapshot_entries(view, lock, _registry_doc()), snapshots)
     return doc
 
 
@@ -330,13 +387,17 @@ def load_subject(bundle_path, root) -> tuple[dict, list[dict]]:
     for f in view["context_findings"]:
         if f["code"] in ("context.duplicate_id", "context.unknown_reference"):
             diags.append({"kind": "input-invalid", "code": f["code"], "message": f"{f['where']}: {f['message']}"})
-    suite = (context.get("suite") or {}) if isinstance(context, dict) else {}
-    try:
-        view["suite"] = load_suite(str(suite.get("id")), str(suite.get("version")))
-    except (OSError, ValueError):
-        view["suite"] = None
-        diags.append({"kind": "dependency-missing", "code": "definition.suite_missing",
-                      "message": f"suite {suite.get('id')!r} version {suite.get('version')!r} is not installed"})
+    view["suite"], view["suites"] = None, []
+    for k, s in enumerate(context_suites(context) if isinstance(context, dict) else []):
+        try:
+            loaded = load_suite(str(s.get("id")), str(s.get("version")))
+        except (OSError, ValueError):
+            diags.append({"kind": "dependency-missing", "code": "definition.suite_missing",
+                          "message": f"suite {s.get('id')!r} version {s.get('version')!r} is not installed"})
+            continue
+        view["suites"].append(loaded)
+        if k == 0:
+            view["suite"] = loaded
     return view, diags
 
 
@@ -346,9 +407,9 @@ def current_lock(view: dict) -> dict:
 
 def check_inventory(view: dict) -> list[dict]:
     frozen = (view.get("context") or {}).get("obligations") or {}
-    if view.get("suite") is None:
+    if view.get("suite") is None or len(view.get("suites") or []) != len(context_suites(view.get("context") or {})):
         return []
-    return obl.check_inventory(frozen, obl.generate(view["suite"], view))
+    return obl.check_inventory(frozen, obl.generate_all(view["suites"], view))
 
 
 # --- evaluation and report (D05c) ---------------------------------------------------------------------------------
@@ -378,11 +439,27 @@ def legacy_findings(view: dict, vocab=None) -> list[dict]:
 
 
 def evaluate(view: dict, diags: list[dict], previous: dict | None = None, vocab=None, settings: dict | None = None,
-             rules: dict | None = None) -> dict:
-    from contracts.analysis_checks.lock import compare
+             rules: dict | None = None, snapshots=None) -> dict:
+    from contracts.analysis_checks.lock import compare, rebuild
     from contracts.analysis_checks.outcomes import formal_view, summarize
     from contracts.analysis_checks.rules import evaluate as run_rules
     lock_diff = compare(view.get("lock") or {}, current_lock(view)) if view.get("suite") else []
+    installed_diff, source = list(lock_diff), "installed"
+    missing: list[str] = []
+    if lock_diff and snapshots is not None:  # D11b: reproduce the old subject from its snapshot, never from the latest
+        try:
+            defs, missing = rebuild(view.get("lock") or {}, snapshot_lookup(snapshots))
+        except SnapshotInvalid as exc:
+            defs, missing = None, []
+            diags = list(diags) + [{"kind": "input-invalid", "code": "snapshot.digest", "message": str(exc)}]
+        if defs is not None and not missing:
+            view = dict(view, coverage=defs["coverage"], catalog=defs["catalog"], suites=defs["suites"],
+                        suite=defs["suites"][0] if defs["suites"] else None)
+            locked_registry = next((d["digest"] for d in (view.get("lock") or {}).get("definitions", [])
+                                    if d["kind"] == "rule-registry"), None)
+            lock_diff = compare(view.get("lock") or {}, build_lock(view.get("suite") or {}, generator_code_digest() or "",
+                                                                   view, locked_registry))
+            source = "snapshot" if not lock_diff else "installed"
     # with drifted definitions a regenerated inventory may differ for that reason alone: drift, not invalid input
     diags = list(diags) + [dict(d, kind="dependency-missing", code=d["code"] + "_under_drift") if lock_diff else
                            dict(d, kind="input-invalid") for d in check_inventory(view)]
@@ -403,12 +480,13 @@ def evaluate(view: dict, diags: list[dict], previous: dict | None = None, vocab=
     summary = summarize(outcomes, input_valid)
     bundle = view.get("bundle") or {}
     suite = view.get("suite") or {}
-    rules_used = [{"rule_id": r["rule_id"], "version": r["version"]} for r in suite.get("rules", [])]
+    rules_used = [{"rule_id": r["rule_id"], "version": r["version"]} for s in view.get("suites") or [suite] for r in s.get("rules", [])]
     checker = checker_identity()
     settings = dict(settings or {})
     inv = (view.get("context") or {}).get("obligations") or {}
     lock = view.get("lock") or {}
     assessment = {"subject": bundle.get("bundle_digest"), "suite": {"id": suite.get("suite_id"), "version": suite.get("version")},
+                  "suites": [{"id": s.get("suite_id"), "version": s.get("version")} for s in view.get("suites") or []],
                   "rules": rules_used, "registry": registry_digest(), "checker": checker["digest"],
                   "readers": lock.get("readers"), "settings": settings}
     decl_ids = {d for o in outcomes for d in o.get("declarations", [])}
@@ -432,6 +510,9 @@ def evaluate(view: dict, diags: list[dict], previous: dict | None = None, vocab=
         "validation_status": sorted(set(((view.get("items", {}).get((view.get("context") or {}).get("spec")) or {})
                                           .get("doc") or {}).get("status") or [])),
         "scope_delta": scope_delta(previous, bundle.get("bundle_digest"), obligations) if previous else None,
+        "semantics_source": source, "installed_differences": installed_diff if source == "snapshot" else [],
+        "snapshot_missing": sorted(set(missing)),
+        "checker_changed": ((view.get("lock") or {}).get("generator") or {}).get("code_digest") != generator_code_digest(),
         "exceptions": [],
         "note": "software consistency of declared contracts only, not physical validity; a diagnostic that authorizes "
                 "nothing (HC-05); declaration-based outcomes count for formal use only through an accepted review",
@@ -517,12 +598,14 @@ def main(argv=None) -> int:
     f.add_argument("--items", type=Path, required=True)
     f.add_argument("--context", type=Path, required=True)
     f.add_argument("--out", type=Path, required=True)
+    f.add_argument("--snapshots", type=Path, help="store the pinned definitions content-addressed here (D11b)")
     c = sub.add_parser("check")
     c.add_argument("bundle", type=Path)
     c.add_argument("--root", type=Path, required=True)
     c.add_argument("--out", type=Path)
     c.add_argument("--previous", type=Path)
     c.add_argument("--profiles-from", type=Path, help="project config whose profiles extend the vocabulary of the legacy L1 run")
+    c.add_argument("--snapshots", type=Path, help="snapshot store: reproduce a subject whose definitions changed since freezing")
     s = sub.add_parser("summary")
     s.add_argument("report", type=Path)
     s.add_argument("--cursor", type=int, default=0)
@@ -542,7 +625,7 @@ def main(argv=None) -> int:
             if not args.out.parent.is_dir():
                 raise UsageError(f"{args.out.parent} is not a directory")
             try:
-                doc = freeze(args.root, args.analysis, items, context)
+                doc = freeze(args.root, args.analysis, items, context, snapshots=args.snapshots)
             except BundleRefused as exc:
                 print(json.dumps({"status": "refused", "code": exc.code, "error": str(exc)}, indent=1))
                 return 1
@@ -574,7 +657,7 @@ def main(argv=None) -> int:
     except (OSError, ValueError, TypeError) as exc:
         print(json.dumps({"status": "usage", "error": str(exc)}, indent=1))
         return 2
-    report = evaluate(view, diags, previous, vocab)
+    report = evaluate(view, diags, previous, vocab, snapshots=getattr(args, "snapshots", None))
     if args.out is not None:
         args.out.write_text(json.dumps(report, indent=1) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=1))

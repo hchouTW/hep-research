@@ -1,0 +1,79 @@
+{
+ "$comment": "Validation record 1.0.0 (v6.3 M2b, C8.8): a method's validation of a correlation or cancellation claim for both operands of a ratio. It binds both sides' subjects with their versions, the method, the tolerance and the scope; 'verification: true' or bare text is not a validation record.",
+ "type": "object",
+ "required": [
+  "validation_record_version",
+  "claim",
+  "subjects",
+  "method",
+  "tolerance",
+  "scope"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "validation_record_version": {
+   "type": "string",
+   "const": "1.0.0"
+  },
+  "claim": {
+   "type": "object",
+   "required": [
+    "effect",
+    "relation"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "effect": {
+     "type": "string",
+     "minLength": 1
+    },
+    "relation": {
+     "type": "string",
+     "enum": [
+      "independent",
+      "correlated",
+      "fully_correlated",
+      "cancels"
+     ]
+    }
+   }
+  },
+  "subjects": {
+   "type": "array",
+   "minItems": 2,
+   "items": {
+    "type": "object",
+    "required": [
+     "root",
+     "version"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "root": {
+      "type": "string",
+      "minLength": 1
+     },
+     "version": {
+      "type": "string",
+      "minLength": 1
+     }
+    }
+   }
+  },
+  "method": {
+   "type": "string",
+   "minLength": 1
+  },
+  "tolerance": {
+   "type": "string",
+   "minLength": 1
+  },
+  "scope": {
+   "type": "string",
+   "minLength": 1
+  },
+  "conclusion": {
+   "type": "string"
+  }
+ }
+}

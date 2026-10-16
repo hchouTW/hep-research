@@ -83,3 +83,25 @@ IDs are `<rule>:<subject>` strings; the inventory is sorted and its digest is th
 Fields as in C11. `subject_digest` is the bundle digest; `assessment_id` is the canonical SHA-256 of the subject,
 suite, rule registry digest, checker code digest, readers and settings. Exit codes 0/1/2/3 with precedence
 2 > 1 > 3 > 0. The report is written as a sidecar, never into the bundle.
+
+## M2b ratio subset (`ratio-subset/v1`)
+
+A context may select further suites (`suites`); the inventory is generated over all of them and the report lists
+them. `ratio_roots[]` names a ratio of two chain roots (`numerator`, `denominator`), the scope axis they differ in
+(`over_axis`), its quantity and unit. The spec's `extension.ratio.cancellations` are the claims:
+
+| Rule | Subject | Decides |
+| --- | --- | --- |
+| `r-ratio.operands` | each ratio root (or the spec's free-text ratio when there is none) | operands are chain roots with the same quantity, unit and bins, differing in `over_axis` only |
+| `r-ratio.cancellation` | each ratio root × claim with treatment `cancels` | exact only for the same calibration item, the same selection (no `by_scope` row per side), the same power from the coverage contract's factors, and a nonzero factor; otherwise the residual is summarized per bin |
+| `r-ratio.correlation` | each ratio root × claim with another treatment | a validation record (`validation_record.json`) binding both operands with versions, method, tolerance and scope, or a correlation declaration with a source or a scope; bare text and `verification: true` are not evidence |
+
+Calibration items give a factor as `scalar`, per-bin `values`, or `by_scope` rows keyed by instance scope. Model
+cards (`model-card/v1`) are not built: a context selecting that suite is refused (O03).
+
+## D11b snapshots and migration
+
+Snapshots are files `<canonical sha256>.json` in a store the caller names (`--snapshots DIR`); O07 (where the store
+lives and how long it is kept) stays open, so nothing is stored inside the plugin or the bundle. Reproduction rebuilds
+coverage contracts, catalog and suites from the store by the lock's digests only. `contracts/migrate.py` writes the
+migrated analysis to a new folder; the completion marker is the last file written.

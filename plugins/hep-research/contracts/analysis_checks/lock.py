@@ -49,6 +49,10 @@ def build_lock(suite: dict, generator_code_digest: str, view: dict, registry_dig
     for c in sorted(comps, key=lambda x: x["composition_id"]):
         defs.append({"kind": "composition", "id": c["composition_id"], "version": cat.get("catalog_version"),
                      "digest": canonical_sha256(c), "owner": cat.get("owner")})
+    for s in view.get("suites") or [suite]:
+        if s:
+            defs.append({"kind": "suite", "id": f"{s.get('suite_id')}@{s.get('version')}", "version": s.get("version"),
+                         "digest": canonical_sha256(s), "owner": "core"})
     if registry_digest is not None:
         defs.append({"kind": "rule-registry", "id": "contracts/rules/registry.json", "version": None,
                      "digest": registry_digest, "owner": "core"})
@@ -60,15 +64,20 @@ def build_lock(suite: dict, generator_code_digest: str, view: dict, registry_dig
             "generator": dict(suite.get("generator", {}), code_digest=generator_code_digest),
             "definitions": defs, "member_sets": [{k: m[k] for k in ("class", "members", "strategy", "closure_digest")}
                                                  for m in member_sets],
-            "readers": [{"id": f"recipe-{v}-view", "version": "1.0.0"} for v in readers]}
+            "readers": [{"id": f"recipe-{v}-view", "version": "1.0.0"} for v in readers],
+            "suites": [{"id": s.get("suite_id"), "version": s.get("version")} for s in view.get("suites") or [suite]]}
 
 
 def compare(locked: dict, current: dict) -> list[dict]:
     """Differences between a frozen lock and the lock the current definitions give, as [{kind, id, locked, current}]."""
     out = []
-    for key in ("suite", "generator"):
+    for key in ("suite", "suites"):
         if locked.get(key) != current.get(key):
             out.append({"kind": key, "id": key, "locked": locked.get(key), "current": current.get(key)})
+    strip = lambda g: {k: v for k, v in (g or {}).items() if k != "code_digest"}  # noqa: E731
+    if strip(locked.get("generator")) != strip(current.get("generator")):
+        # a changed generator *code* alone is a new assessment of unchanged definitions (C14), not a difference here
+        out.append({"kind": "generator", "id": "generator", "locked": locked.get("generator"), "current": current.get("generator")})
     a = {(d["kind"], d["id"]): d.get("digest") for d in locked.get("definitions", [])}
     b = {(d["kind"], d["id"]): d.get("digest") for d in current.get("definitions", [])}
     for k in sorted(set(a) | set(b)):
@@ -82,3 +91,74 @@ def compare(locked: dict, current: dict) -> list[dict]:
     if locked.get("readers") != current.get("readers"):
         out.append({"kind": "readers", "id": "readers", "locked": locked.get("readers"), "current": current.get("readers")})
     return out
+
+
+def snapshot_entries(view: dict, lock: dict, registry: dict | None = None) -> dict:
+    """{digest: document} for every definition the lock pins, to store content-addressed (D11b)."""
+    cat = view.get("catalog") or {}
+    out: dict[str, object] = {}
+    for cov in view.get("coverage", {}).values():
+        out[canonical_sha256(cov.get("doc"))] = cov.get("doc")
+    for e in cat.get("effects", []):
+        out[canonical_sha256(e)] = e
+    for c in cat.get("compositions", []):
+        out[canonical_sha256(c)] = c
+    for cls in {m["class"] for m in lock.get("member_sets", [])}:
+        entry = next((c for c in cat.get("classes", []) if c["class_id"] == cls), None)
+        if entry is not None:
+            members = set(entry["members"]) | {cls}
+            closure = {"class": entry, "effects": [e for e in sorted(cat.get("effects", []), key=lambda x: x["effect_id"])
+                                                   if e["effect_id"] in members], "catalog_version": cat.get("catalog_version")}
+            out[canonical_sha256(closure)] = closure
+    for s in view.get("suites") or []:
+        out[canonical_sha256(s)] = s
+    if registry is not None:
+        out[canonical_sha256(registry)] = registry
+    wanted = {d["digest"] for d in lock.get("definitions", []) if d.get("digest")} | \
+        {m["closure_digest"] for m in lock.get("member_sets", []) if m.get("closure_digest")}
+    return {k: v for k, v in out.items() if k in wanted}
+
+
+def rebuild(lock: dict, lookup) -> tuple[dict, list[str]]:
+    """The definitions a lock pins, from a snapshot store (lookup(digest) -> document or None): coverage contracts,
+    catalog (effects, classes, compositions) and suites, plus the digests that are missing. Nothing is taken from
+    the installed definitions: a missing digest stays missing."""
+    missing: list[str] = []
+
+    def get(digest):
+        doc = lookup(digest) if digest else None
+        if doc is None:
+            missing.append(str(digest))
+        return doc
+    coverage, effects, comps, classes, suites, version, owner = {}, {}, [], [], [], None, None
+    for d in lock.get("definitions", []):
+        if d["kind"] == "coverage-contract":
+            doc = get(d["digest"])
+            if doc is not None:
+                coverage[d["id"]] = {"doc": doc, "source": "snapshot"}
+        elif d["kind"] == "effect":
+            doc = get(d["digest"])
+            version, owner = d.get("version"), d.get("owner")
+            if doc is not None:
+                effects[doc["effect_id"]] = doc
+        elif d["kind"] == "composition":
+            doc = get(d["digest"])
+            if doc is not None:
+                comps.append(doc)
+        elif d["kind"] == "suite":
+            doc = get(d["digest"])
+            if doc is not None:
+                suites.append(doc)
+        elif d["kind"] == "rule-registry":
+            get(d["digest"])
+    for m in lock.get("member_sets", []):
+        closure = get(m.get("closure_digest"))
+        if closure is not None:
+            classes.append(closure["class"])
+            for e in closure["effects"]:
+                effects.setdefault(e["effect_id"], e)
+    order = {f"{s.get('id')}@{s.get('version')}": k for k, s in enumerate(lock.get("suites") or [lock.get("suite") or {}])}
+    suites.sort(key=lambda s: order.get(f"{s.get('suite_id')}@{s.get('version')}", 99))
+    catalog = {"catalog_version": version, "owner": owner, "classes": classes,
+               "effects": [effects[k] for k in sorted(effects)], "compositions": comps}
+    return {"coverage": coverage, "catalog": catalog, "suites": suites}, missing
