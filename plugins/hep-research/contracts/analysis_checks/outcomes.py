@@ -45,7 +45,8 @@ def formal_view(outcomes: list[dict], input_valid: bool) -> dict:
 LEGACY_UNVERIFIED = {"semantics.repeat_undetermined", "semantics.repeat_distinct_instance",
                      "semantics.input_effects_unverified", "semantics.input_effects_uncorroborated",
                      "semantics.upstream_unmapped", "semantics.upstream_unrecorded"}
-LEGACY_UNSUPPORTED = {"semantics.unknown_operator", "semantics.table_missing", "semantics.unknown_estimand"}
+LEGACY_UNSUPPORTED = {"semantics.unknown_operator", "semantics.table_missing", "semantics.unknown_estimand",
+                      "semantics.upstream_unknown_capability"}
 
 
 def map_legacy(finding: dict) -> str:

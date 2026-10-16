@@ -8,7 +8,9 @@ Usage: python3 contracts/recipe_semantics.py RECIPE [RECIPE ...] [--table FILE .
   --upstream   contract artifacts the recipe's input comes from: every effect they record as applied
                (extension.observable.included_corrections, extension.corrections[].effect_id) joins the input's
                applied_effects; a name the table does not define is an error (a repeat cannot be excluded), as is an
-               artifact with no such record, or an input effect no upstream artifact records. Without --upstream the
+               artifact with no such record, or an input effect no upstream artifact records, or an artifact that
+               requires a capability this reader does not implement (semantics.upstream_unknown_capability; not
+               read). Without --upstream the
                input's applied_effects are the recipe's own claim (warning semantics.input_effects_unverified)
 
 Checks: the table is consistent (unique ids; every kind and effect an operator or estimand uses is declared); the
@@ -215,7 +217,14 @@ def _walk(recipe: dict, table: dict, upstream: list, contracts: list | None, rep
     # upstream records are cumulative: per effect, an identical key in several records is one application, and an
     # unkeyed record (e.g. included_corrections) is subsumed by a keyed one of the same effect
     up: dict[str, list[tuple[dict | None, str]]] = {}
+    from contracts import KNOWN_CAPABILITIES
     for i, art in enumerate(upstream):
+        caps = art.get("required_capabilities") if isinstance(art, dict) else None
+        unknown = sorted(c for c in caps if c not in KNOWN_CAPABILITIES) if isinstance(caps, list) else []
+        if unknown:  # a reader never reads an artifact under rules it does not implement (refusal matrix, v6.3 D09)
+            rep.add("error", f"upstream[{i}]", "semantics.upstream_unknown_capability",
+                    f"the artifact requires {unknown}, which this reader does not implement: it is not read")
+            continue
         found = upstream_instances(art)
         if found is None:
             rep.add("error", f"upstream[{i}]", "semantics.upstream_unrecorded",

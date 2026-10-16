@@ -1664,3 +1664,39 @@ RATIO-FACTORS and RATIO-EVIDENCE cases, and D11b definition snapshots and the mi
 | Legacy capture (132 old-CLI runs) | unchanged against the post-D03a capture |
 
 The model-card part of M2b is not built (O03); a context that selects it is refused at freeze. Software checks only.
+
+## V63-M3 chain and ratio (2026-10-16, Python 3.13.2 on macOS 26.5 arm64; on top of V63-M2b-ratio and D11b)
+
+After the decision to run M3 for the chain and ratio suites: D09 shadow difference review and reader refusal matrix,
+D10 advisory report check in `permit.py`, scoped exceptions and the custodian-gate requirement. Branches
+`v63/d09-shadow-refusal`, `v63/d10-report-gate`; gate runs on clean worktrees of the heads. Records:
+`docs/dev/v6.3/shadow-review.md`, `refusal-matrix.md`, `custodian-gate-requirement.md`, `decision-enforce.md`.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py`, D09 `1d21e9a` | 25 pass, 0 fail; 3534 tests, 0 failures |
+| Same, D10 `35631eb` | 25 pass, 0 fail; 3540 tests, 0 failures, 107 skipped |
+| Same with the CI lock (no torch), `35631eb` | 25 pass, 0 fail; 3540 tests, 0 failures, 170 skipped |
+| `check_relocation.py`, `35631eb` | pass |
+| Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
+| V cases | V31, V59 (D09), V26, V60 pre-execution parts, V65, V66 (D10) passing; 56 of 80 parts passing overall |
+| Shadow difference review | zero unclassified over eight cases |
+| Refusal matrix | measured on this tree and the 0.11.0 release; two non-refusing readers listed as release blockers |
+| Legacy capture (132 old-CLI runs) | unchanged against the post-D03a capture |
+
+Not run: V32 (post-execution, needs run lineage) and V30 (needs ownership metadata no reader has). No rule enforces:
+the G-ENFORCE record recommends shadow mode. Software checks only.
+
+## V63 G-ENFORCE step 1 (2026-10-16, Python 3.13.2 on macOS 26.5 arm64)
+
+After the decision to keep every rule in shadow mode: `recipe_semantics.py` refuses an upstream artifact with an
+unknown capability; the `dependencies.py` row of the refusal matrix is documented as intended and awaits review.
+Branch `v63/refusal-blockers`, head `bbed3ec`, clean worktree.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py` | 25 pass, 0 fail; 3542 tests, 0 failures, 107 skipped |
+| Same with the CI lock (no torch) | 25 pass, 0 fail; 3542 tests, 0 failures, 170 skipped |
+| `check_relocation.py` | pass |
+| Ruff 0.16.10, mypy 2.4.0 | clean |
+| Legacy capture (132 old-CLI runs) | unchanged |

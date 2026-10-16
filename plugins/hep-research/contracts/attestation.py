@@ -60,10 +60,13 @@ MAX_STATUS_AGE_S = 86400  # the stalest revocation status any attestation may ac
 
 
 def _bundle_digest(bundle: dict) -> str:
-    """The digest of an execution bundle (core.partition.bundle) or an analysis-level bundle (contracts.analysis_bundle):
-    either can be an attestation's subject."""
+    """The digest of an execution bundle (core.partition.bundle) or an analysis-level bundle (contracts.analysis_bundle,
+    format 1 or 2): either can be an attestation's subject."""
     from contracts.analysis_bundle import FORMAT as ANALYSIS_FORMAT, digest_of as analysis_digest_of
-    return analysis_digest_of(bundle) if bundle.get("format") == ANALYSIS_FORMAT else digest_of(bundle)
+    # analysis bundle 2.0.0 (v6.3, contracts/analysis_check.py) has the same digest rule as 1.0.0
+    if bundle.get("format") in (ANALYSIS_FORMAT, "hep-research-analysis-bundle/2"):
+        return analysis_digest_of(bundle)
+    return digest_of(bundle)
 
 
 def capability_axis(att: dict, rep: Report) -> dict:
