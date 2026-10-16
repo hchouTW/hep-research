@@ -11,6 +11,7 @@ from contracts.analysis_checks.instances import build_view
 from contracts.analysis_checks.obligations import corrections as spec_corrections
 from contracts.analysis_checks.scope import compare_scopes
 from contracts.effect_catalog import classify
+from contracts.analysis_checks import model as model_rules  # noqa: E402  (model imports this module lazily)
 
 
 def outcome(state: str, reason: str, message: str = "", evidence=(), declarations=(), **extra) -> dict:
@@ -733,6 +734,8 @@ RULES = {"r-inv.root": r_inv_root, "r-map.classification": r_map_classification,
          "r-comp.factor_values": r_comp_factor_values, "r-resp.response_use": r_resp_response_use,
          "r-ratio.operands": r_ratio_operands, "r-ratio.cancellation": r_ratio_cancellation,
          "r-ratio.correlation": r_ratio_correlation}
+
+RULES.update(model_rules.RULES)  # model-card/v1 (contracts.analysis_checks.model)
 
 
 def evaluate(view: dict, obligations: list[dict], rules: dict | None = None) -> list[dict]:

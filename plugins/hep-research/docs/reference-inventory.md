@@ -266,7 +266,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `inference-recipes.md` | hep-statistics | 18.2 | no | 9 | hep-detector, hep-measurement | 1386866 2026-10-13 |
 | `likelihood-fitting.md` | hep-statistics | 9.5 | no | 7 | hep-computing, hep-detector | 4665f43 2026-10-13 |
 | `ml-assisted-inference.md` | hep-statistics | 6.2 | yes | 7 | hep-ml | 9257d7b 2026-10-15 |
-| `nuisance-modeling.md` | hep-statistics | 19.9 | no | 8 | hep-measurement | 9257d7b 2026-10-15 |
+| `nuisance-modeling.md` | hep-statistics | 20.3 | no | 8 | hep-measurement | 9257d7b 2026-10-15 |
 | `statistical-inference-for-physics.md` | hep-statistics | 12.9 | no | 10 | hep-communication, hep-computing, hep-theory | 9257d7b 2026-10-15 |
 | `statistical-tools.md` | hep-statistics | 9.6 | no | 3 | hep-ml | 578c12f 2026-10-13 |
 | `time-series-inference.md` | hep-statistics | 15.5 | yes | 10 | hep-measurement | 7487999 2026-10-15 |

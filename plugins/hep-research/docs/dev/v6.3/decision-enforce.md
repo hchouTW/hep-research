@@ -91,3 +91,25 @@ deferred (O03, M2c, V30, V32) or depends on a non-author reviewer or the custodi
 - **Companion namespace check:** run against main `c1ab70b`. It reported `ok` with no findings, so there is no
   `profile.namespace_collision`. Rerun it before the release if either repository changes its namespaces.
 - **Contracts 2.10.0:** bumped on branch `contracts-2.10.0`, ahead of the release.
+
+## Decision change (2026-10-16): synthetic completion of the remaining slices
+
+This section replaces "deferred" for the model part and "paused" for M2c. The G-M2a condition is "model or run has a
+concrete need". It was read as needing a real analysis, but the brief's own hosts for both slices are synthetic:
+CASE-MODEL is built from public synthetic files, and the M2c campaign cases are fake-scheduler and local runs.
+
+**Reasons (Inferred):**
+1. Without M2c no post-execution report exists, and no purpose accepts a pre-execution one. The D10 report check can
+   therefore never accept a report, so an enforcement decision now would judge a gate that cannot pass anything.
+2. A non-author reviewer should review the whole set of suites once, rather than slice by slice.
+
+**Decided by the owner (hchouTW):** the implementer's recommendation, steps 1–3.
+
+| Step | Content | Gate |
+| --- | --- | --- |
+| 1 | The model part of M2b: the `model-card/v1` suite, implementing exactly the O03 pairings; CASE-MODEL; the three O03 gap tests | usual per-WP gate |
+| 2 | V30 (D12b): `custody_domain` inventory of local profiles, stage 1 only (missing means unverified, never public; existing refusals unchanged) | usual per-WP gate |
+| 3 | A proposal record for M2c: the `allowed_outputs` matching rule, and O15 | stop for the owner's decision |
+
+Everything stays in shadow mode and synthetic only. There is no schema change to `attestation.json` or
+`permit.json`, and no change to `core/partition/`.

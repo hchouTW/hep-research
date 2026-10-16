@@ -23,7 +23,8 @@
   "mode": {
    "type": "string",
    "enum": [
-    "chain"
+    "chain",
+    "model"
    ]
   },
   "analysis": {
@@ -86,7 +87,8 @@
       "context",
       "semantic-lock",
       "coverage-contract",
-      "validation-record"
+      "validation-record",
+      "model-card"
      ]
     },
     "id": {

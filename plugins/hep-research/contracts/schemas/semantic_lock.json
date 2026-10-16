@@ -51,7 +51,8 @@
        "effect",
        "composition",
        "rule-registry",
-       "suite"
+       "suite",
+       "pairing-contract"
       ]
      },
      "id": {

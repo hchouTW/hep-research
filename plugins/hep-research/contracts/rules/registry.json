@@ -599,6 +599,198 @@
    "review_status": "unreviewed",
    "lifecycle": "shadow",
    "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+  },
+  {
+   "rule_id": "r-model.root",
+   "version": "1.0.0",
+   "layer": "L3",
+   "suites": [
+    "model-card/v1"
+   ],
+   "kind": "new",
+   "prerequisites": [
+    "model root intent",
+    "evaluation",
+    "model card POI"
+   ],
+   "applicability": "a model root names an evaluation of the context and a POI that is its model card's POI",
+   "outcome_contract": {
+    "satisfied": [
+     "check.model_root_complete"
+    ],
+    "violated": [
+     "check.model_root_mismatch"
+    ],
+    "not_applicable": [
+     "check.model_root_not_required"
+    ],
+    "unverified": [
+     "check.model_root_incomplete"
+    ],
+    "unsupported": [
+     "check.model_root_unsupported"
+    ]
+   },
+   "legacy_codes": [],
+   "native_from": null,
+   "v_cases": [
+    "V11",
+    "V24"
+   ],
+   "waivable": false,
+   "accepted_applicability_facts": [],
+   "owner": "hep-statistics",
+   "review_status": "unreviewed",
+   "lifecycle": "shadow",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+  },
+  {
+   "rule_id": "r-model.pairing",
+   "version": "1.0.0",
+   "layer": "L3",
+   "suites": [
+    "model-card/v1"
+   ],
+   "kind": "new",
+   "prerequisites": [
+    "model card",
+    "pairing contract (contracts/semantics/model_pairings.json)"
+   ],
+   "applicability": "every modifier-constraint pairing of a parameter is one of P1-P3 of the pairing contract (O03), consistently described",
+   "outcome_contract": {
+    "satisfied": [
+     "check.pairing_supported"
+    ],
+    "violated": [
+     "check.pairing_invalid"
+    ],
+    "not_applicable": [
+     "check.pairing_unused"
+    ],
+    "unverified": [
+     "check.pairing_unreadable"
+    ],
+    "unsupported": [
+     "check.pairing_unsupported"
+    ]
+   },
+   "legacy_codes": [
+    "stats.model_unconstrained_parameter",
+    "stats.model_poi_mismatch",
+    "stats.prior_in_frequentist_model"
+   ],
+   "native_from": null,
+   "v_cases": [
+    "V06",
+    "V15",
+    "V18"
+   ],
+   "waivable": true,
+   "accepted_applicability_facts": [],
+   "owner": "hep-statistics",
+   "review_status": "unreviewed",
+   "lifecycle": "shadow",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+  },
+  {
+   "rule_id": "r-aux.use",
+   "version": "1.0.0",
+   "layer": "L3",
+   "suites": [
+    "model-card/v1"
+   ],
+   "kind": "new",
+   "prerequisites": [
+    "model card constraints",
+    "evaluations",
+    "observes bindings or provenance_binding declarations"
+   ],
+   "applicability": "R-AUX: within one evaluation, each auxiliary observation enters the likelihood through exactly one constraint term",
+   "outcome_contract": {
+    "satisfied": [
+     "check.aux_single_use"
+    ],
+    "violated": [
+     "check.aux_repeated"
+    ],
+    "not_applicable": [
+     "check.aux_prior"
+    ],
+    "unverified": [
+     "check.aux_unbound",
+     "check.aux_repeat_unknown",
+     "check.aux_binding_ambiguous",
+     "check.aux_overlap_unknown"
+    ],
+    "unsupported": [
+     "check.aux_unsupported"
+    ]
+   },
+   "legacy_codes": [
+    "stats.duplicate_auxiliary"
+   ],
+   "native_from": null,
+   "v_cases": [
+    "V06",
+    "V07",
+    "V08",
+    "V11",
+    "V24",
+    "V25",
+    "V46",
+    "V64"
+   ],
+   "waivable": false,
+   "accepted_applicability_facts": [],
+   "owner": "hep-statistics",
+   "review_status": "unreviewed",
+   "lifecycle": "shadow",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+  },
+  {
+   "rule_id": "r-share.parameters",
+   "version": "1.0.0",
+   "layer": "L3",
+   "suites": [
+    "model-card/v1"
+   ],
+   "kind": "new",
+   "prerequisites": [
+    "evaluations with several models",
+    "shared_parameters",
+    "model cards"
+   ],
+   "applicability": "cross-model shared parameters agree in modifier type and constraint; a joint evaluation of several cards has no backend contract in v1 (O03)",
+   "outcome_contract": {
+    "satisfied": [
+     "check.share_compatible"
+    ],
+    "violated": [
+     "check.share_incompatible"
+    ],
+    "not_applicable": [
+     "check.share_single_model"
+    ],
+    "unverified": [
+     "check.share_unbound"
+    ],
+    "unsupported": [
+     "check.share_unsupported",
+     "check.joint_unsupported"
+    ]
+   },
+   "legacy_codes": [],
+   "native_from": null,
+   "v_cases": [
+    "V46",
+    "V47"
+   ],
+   "waivable": true,
+   "accepted_applicability_facts": [],
+   "owner": "hep-statistics",
+   "review_status": "unreviewed",
+   "lifecycle": "shadow",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
   }
  ],
  "v_cases": [
@@ -712,8 +904,11 @@
       "D07"
      ],
      "host": "CASE-MODEL",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d07_model.ModelCase.test_v06_positive_shared_parameter",
+      "tests.contracts.test_v63_d07_model.ModelCase.test_v06_consistent_with_the_adapter"
+     ]
     }
    ]
   },
@@ -729,8 +924,11 @@
       "D07"
      ],
      "host": "CASE-MODEL variant",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d07_model.ModelCase.test_v07_two_aux_ids_one_observation",
+      "tests.contracts.test_v63_d07_model.ModelCase.test_v07_same_aux_id_twice"
+     ]
     }
    ]
   },
@@ -746,8 +944,10 @@
       "D07"
      ],
      "host": "CASE-MODEL variant",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d07_model.ModelCase.test_v08_two_components_of_one_file"
+     ]
     }
    ]
   },
@@ -815,8 +1015,10 @@
       "D07"
      ],
      "host": "CASE-MODEL",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d07_model.ModelVParts.test_v11_missing_observation_binding"
+     ]
     }
    ]
   },
@@ -902,8 +1104,10 @@
       "D07"
      ],
      "host": "CASE-MODEL",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d07_model.ModelVParts.test_v15_renaming_and_reordering"
+     ]
     }
    ]
   },
@@ -970,8 +1174,10 @@
       "D07"
      ],
      "host": "CASE-MODEL variant",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d07_model.ModelCase.test_v18_unsupported_pairings"
+     ]
     }
    ]
   },
@@ -1095,8 +1301,10 @@
       "D07"
      ],
      "host": "CASE-MODEL",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d07_model.ModelVParts.test_v24_masking_a_binding"
+     ]
     }
    ]
   },
@@ -1124,8 +1332,10 @@
       "D07"
      ],
      "host": "CASE-MODEL",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d07_model.ModelVParts.test_v25_waiver_not_counted"
+     ]
     }
    ]
   },
@@ -1549,8 +1759,10 @@
       "D07"
      ],
      "host": "MODEL-USAGE",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d07_model.ModelCase.test_v46_alternative_models_versus_joint"
+     ]
     }
    ]
   },
@@ -1566,8 +1778,10 @@
       "D07"
      ],
      "host": "MODEL-SHARING",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d07_model.ModelCase.test_v47_cross_model_sharing"
+     ]
     }
    ]
   },
@@ -1901,8 +2115,10 @@
       "D07"
      ],
      "host": "CASE-MODEL",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d07_model.ModelVParts.test_v64_declaration_based_binding"
+     ]
     }
    ]
   },
@@ -2125,7 +2341,8 @@
     "tests.contracts.test_v63_d11a",
     "tests.contracts.test_v63_d11b",
     "tests.contracts.test_v63_d17",
-    "tests.contracts.test_v63_review_fixes"
+    "tests.contracts.test_v63_review_fixes",
+    "tests.contracts.test_v63_d07_model"
    ],
    "not_available": [],
    "full": false

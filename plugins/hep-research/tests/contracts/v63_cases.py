@@ -36,6 +36,7 @@ class Case:
         self.files: dict[str, object] = {}
         self.items: list[dict] = []
         self.context: dict = {}
+        self.mode = "chain"
 
     def add(self, role: str, item_id: str, ref: str, content) -> None:
         self.files[ref] = content
@@ -60,7 +61,7 @@ class Case:
     def freeze(self, analysis: str = "v63-case") -> Path:
         from contracts import analysis_check as ac
         self.write()
-        bundle = ac.freeze(self.root, analysis, self.items, self.context)
+        bundle = ac.freeze(self.root, analysis, self.items, self.context, mode=self.mode)
         out = self.root / "bundle.json"
         out.write_text(json.dumps(bundle, indent=1), encoding="utf-8")
         return out
@@ -221,3 +222,72 @@ def ratio_case(root: Path, variant=None, freeze: bool = True):
     if variant:
         variant(c)
     return c.freeze("case-ratio") if freeze else c
+
+
+# --- CASE-MODEL, MODEL-USAGE, MODEL-SHARING (M2b model part, model-card/v1; synthetic only) ----------------------
+MODEL_SUITE = {"id": "model-card", "version": "1.0.0"}
+OBS = {"luminosity": {"value": 1.0, "relative_uncertainty": 0.02},
+       "trigger": {"value": 0.97, "relative_uncertainty": 0.01}}
+
+
+def sr_cr_card(width: float = 0.02, aux_id: str = "lumi-2026", lumi: str = "lumi") -> dict:
+    """One model, a signal and a control region: mu (P1), mu_b (P2) shared by both backgrounds, lumi (P3) on every
+    sample with one Gaussian constraint and one auxiliary measurement."""
+    lumi_mod = {"type": "constrained-normalization", "parameter": lumi}
+    return {"poi": "mu", "ensemble": "conditional-fluctuated-aux",
+            "channels": [{"name": "SR", "role": "signal-region", "observed": [12]},
+                         {"name": "CR", "role": "control-region", "observed": [100]}],
+            "samples": [{"name": "signal", "channel": "SR", "yields": [5.0],
+                         "modifiers": [{"type": "poi", "parameter": "mu"}, dict(lumi_mod)]},
+                        {"name": "bkg", "channel": "SR", "yields": [8.0],
+                         "modifiers": [{"type": "free-normalization", "parameter": "mu_b"}, dict(lumi_mod)]},
+                        {"name": "bkg", "channel": "CR", "yields": [100.0],
+                         "modifiers": [{"type": "free-normalization", "parameter": "mu_b"}, dict(lumi_mod)]}],
+            "constraints": [{"parameter": lumi, "kind": "auxiliary-measurement", "aux_id": aux_id, "form": "gaussian",
+                             "width": width}]}
+
+
+def observes(binding_id: str, model: str, aux_id: str, pointer: str = "/luminosity", item: str = "aux-inputs") -> dict:
+    return {"binding_id": binding_id, "type": "observes", "from": {"item": item, "pointer": pointer},
+            "to": {"model": model, "aux_id": aux_id}}
+
+
+def model_case(root: Path, variant=None, freeze: bool = True):
+    """CASE-MODEL: one model card, one evaluation, one root; the luminosity constraint bound to one component of a
+    synthetic auxiliary-input file."""
+    c = Case(root)
+    c.mode = "model"
+    c.add("model-card", "card-sr-cr", "models/sr_cr.card.json", sr_cr_card())
+    c.add("calibration", "aux-inputs", "aux/inputs.json", copy.deepcopy(OBS))
+    c.context = {"context_version": "1.0.0", "suite": dict(MODEL_SUITE), "scope_axes": {},
+                 "models": [{"model_id": "sr-cr", "item": "card-sr-cr"}],
+                 "evaluations": [{"evaluation_id": "fit", "models": ["sr-cr"]}],
+                 "model_roots": [{"root_id": "mu-fit", "evaluation": "fit", "poi": {"model": "sr-cr", "parameter": "mu"}}],
+                 "bindings": [observes("obs-lumi", "sr-cr", "lumi-2026")], "declarations": []}
+    if variant:
+        variant(c)
+    return c.freeze("case-model") if freeze else c
+
+
+def two_models(c, joint: bool, width_b: float = 0.02, shared=None) -> None:
+    """MODEL-USAGE / MODEL-SHARING: two alternative cards alt-a and alt-b using the same luminosity observation, either
+    as two separate evaluations or as one joint evaluation (optionally sharing parameters)."""
+    c.remove("card-sr-cr")
+    c.add("model-card", "card-a", "models/a.card.json", sr_cr_card())
+    c.add("model-card", "card-b", "models/b.card.json", sr_cr_card(width=width_b))
+    c.context["models"] = [{"model_id": "alt-a", "item": "card-a"}, {"model_id": "alt-b", "item": "card-b"}]
+    c.context["bindings"] = [observes("obs-a", "alt-a", "lumi-2026"), observes("obs-b", "alt-b", "lumi-2026")]
+    if joint:
+        ev = {"evaluation_id": "joint", "models": ["alt-a", "alt-b"]}
+        if shared is not None:
+            ev["shared_parameters"] = shared
+        c.context["evaluations"] = [ev]
+        c.context["model_roots"] = [{"root_id": "mu-joint", "evaluation": "joint", "poi": {"model": "alt-a", "parameter": "mu"}}]
+    else:
+        c.context["evaluations"] = [{"evaluation_id": "fit-a", "models": ["alt-a"]}, {"evaluation_id": "fit-b", "models": ["alt-b"]}]
+        c.context["model_roots"] = [{"root_id": "mu-a", "evaluation": "fit-a", "poi": {"model": "alt-a", "parameter": "mu"}},
+                                    {"root_id": "mu-b", "evaluation": "fit-b", "poi": {"model": "alt-b", "parameter": "mu"}}]
+
+
+def shared_lumi(param_b: str = "lumi") -> list[dict]:
+    return [{"parameter_id": "lumi", "members": [{"model": "alt-a", "parameter": "lumi"}, {"model": "alt-b", "parameter": param_b}]}]
