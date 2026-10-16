@@ -173,8 +173,12 @@
       "D06"
      ],
      "host": "CASE-CHAIN",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d05a.V05InstanceViews.test_template_filled_with_sources",
+      "tests.contracts.test_v63_d05a.V05InstanceViews.test_literal_is_never_overridden",
+      "tests.contracts.test_v63_d05a.V05InstanceViews.test_calibration_binding_fills_the_digest"
+     ]
     }
    ]
   },
@@ -773,8 +777,12 @@
       "D05a"
      ],
      "host": "L1 regression",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d05a.V36SpecKeys.test_capability_makes_the_keys_known",
+      "tests.contracts.test_v63_d05a.V36SpecKeys.test_without_capability_the_legacy_threshold_holds",
+      "tests.contracts.test_v63_d05a.V36SpecKeys.test_malformed_keys_are_errors"
+     ]
     }
    ]
   },
@@ -876,8 +884,11 @@
       "D05a"
      ],
      "host": "scope parser",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d05a.V42ScopeParser.test_grammar",
+      "tests.contracts.test_v63_d05a.V42ScopeParser.test_comparison"
+     ]
     }
    ]
   },
