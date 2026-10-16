@@ -5,6 +5,22 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- New rule and obligation registry `contracts/rules/registry.json` (schema `contracts/schemas/rule_registry.json`,
+  checker `contracts/rule_registry.py`; v6.3 D12a), run by `tools/run_all_checks.py` as the static check
+  `rule_registry`. It registers the existing R4 rules of `contracts/recipe_semantics.py` with `outcome_contract:
+  "pending"` (evaluated as unverified), the V01–V71 acceptance cases per slice part (all `not-run`), and an impact map
+  from changed paths to test modules or gate parts. A new or changed rule needs reason codes for all five obligation
+  states; a V case marked passing or expected-failure must name tests that exist. `impact` returns the full closure for
+  a path no group covers, a group marked full, or a check that does not exist yet. No existing verdict or exit code
+  changes.
+- New `core/evidence/query.py` (v6.3 D02): bounded, pageable rows of a source and claim ledger, one per (claim, cited
+  source), each with claim and source IDs, scope, `verification_date`, verification level and strength, location and
+  the record position in each file. The ledger is checked with `core/evidence/ledger.py` first and a ledger with
+  errors serves no rows (exit 1). Pages hold at most 20 rows and 16 KiB of JSON (product defaults, not measurements),
+  report the total match count and an index digest, and give a cursor bound to that digest and the query: a cursor
+  used after the ledger changed or with another query is refused (`query.stale_cursor`, `query.cursor_mismatch`,
+  exit 2). A row larger than the cap is not cut; the page names the exact command that fetches it. Its CLI runs under
+  the protected-mode guard like `ledger.py`. Measurements: `docs/dev/v6.3/m0-budget.md`.
 - New optional adapter `adapters/cr-propagation` 0.1.0 (owner hep-computing, required by no skill; adapter status
   `proposed` because GALPROP and USINE are `proposed`). DRAGON2 is `tested-in-declared-environment`: commit cd588707 of
   cosmicrays/DRAGON2-Beta_version built from source on E2 (Homebrew GCC 15.2.0, GSL 2.8, CFITSIO 4.6.4; no system-wide

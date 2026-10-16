@@ -135,6 +135,7 @@ def cli_entries(env: Env):
         ("environment_manifest.py", load_script("skills/hep-computing/scripts/environment_manifest.py").main,
          ["record", "--inputs", a], False, False),
         ("core/evidence/ledger.py", load_script("core/evidence/ledger.py").main, [a], False, False),
+        ("core/evidence/query.py", load_script("core/evidence/query.py").main, [a], False, False),
         ("check_manuscript.py", load_script("skills/hep-communication/scripts/check_manuscript.py").main,
          [str(env.proj)], False, False),
     ]
@@ -146,7 +147,7 @@ def lib_entries(env: Env):
     from contracts import dependencies, project, validate
     from contracts.comparison import combination, gate, model_set
     from core.blinding import blinding
-    from core.evidence import ledger
+    from core.evidence import ledger, query
     from core.partition import campaign, engine
     from core.stats import template_fit
     comb = load_script("skills/hep-statistics/scripts/combine_measurements.py")
@@ -194,6 +195,7 @@ def lib_entries(env: Env):
         ("project.load_project", lambda: project.load_project(env.proj), False),
         ("environment_manifest.record", lambda: em.record([]), False),
         ("ledger.check_ledger", lambda: ledger.check_ledger([], []), False),
+        ("query.query_ledger", lambda: query.query_ledger(b"[]", b"[]", {}), False),
     ]
 
 
