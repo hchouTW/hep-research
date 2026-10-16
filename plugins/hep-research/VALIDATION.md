@@ -1788,7 +1788,7 @@ and in this run:
 `docs/dev/v6.3/m2c-design.md`.
 
 How it was built:
-- Red tests first, as expected failures: `3dae1ed`.
+- Red tests first, as expected failures: `71328d8`.
 - Fixtures are synthetic and in temporary folders (`tests/contracts/v63_runs.py`).
   - Single runs are hand-made computational-runs.
   - The campaign is a `core.partition` campaign run with `LocalExecutor`, with an execution bundle frozen by the test
