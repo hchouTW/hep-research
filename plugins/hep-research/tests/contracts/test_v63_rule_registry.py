@@ -139,7 +139,7 @@ class Prerequisites(unittest.TestCase):
     def test_running_v_case_needs_an_existing_test(self):
         doc = copy.deepcopy(SHIPPED)
         part = doc["v_cases"][33]["parts"][0]
-        part["status"] = "passing"
+        part["status"], part["tests"] = "passing", []
         self.assertIn("registry.v_case_without_test", codes(rr.check(doc)))
         part["tests"] = ["tests.contracts.test_v63_rule_registry.Prerequisites.test_absent"]
         self.assertIn("registry.test_missing", codes(rr.check(doc)))
