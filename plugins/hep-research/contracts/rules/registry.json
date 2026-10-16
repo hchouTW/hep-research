@@ -737,10 +737,22 @@
    "expected": "realized only with listed operator coverage; the classification alone is not enough",
    "parts": [
     {
+     "slice": "M1",
+     "suite": "chain",
+     "work_packages": [
+      "D04"
+     ],
+     "host": "effect catalog and coverage contract (definition part)",
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d04.V35Definition.test_class_alone_is_not_coverage",
+      "tests.contracts.test_v63_d04.V35Definition.test_listed_members_are_covered"
+     ]
+    },
+    {
      "slice": "M2a",
      "suite": "chain",
      "work_packages": [
-      "D04",
       "D06"
      ],
      "host": "CASE-CHAIN",
@@ -875,10 +887,23 @@
    "expected": "Cannot be realized automatically",
    "parts": [
     {
+     "slice": "M1",
+     "suite": "chain",
+     "work_packages": [
+      "D04"
+     ],
+     "host": "effect catalog and coverage contract (definition part)",
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d04.V43Definition.test_new_member_is_not_covered",
+      "tests.contracts.test_v63_d04.V43Definition.test_unknown_effect_or_operator_is_unsupported",
+      "tests.contracts.test_v63_d04.V43Definition.test_bare_efficiency_keeps_legacy_coverage"
+     ]
+    },
+    {
      "slice": "M2a",
      "suite": "chain",
      "work_packages": [
-      "D04",
       "D06"
      ],
      "host": "catalog",
@@ -1131,10 +1156,21 @@
    "expected": "Set-query dependencies go into the lock; unrelated definitions do not change the semantic closure",
    "parts": [
     {
+     "slice": "M1",
+     "suite": null,
+     "work_packages": [
+      "D04"
+     ],
+     "host": "effect catalog and coverage contract (definition part)",
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d04.V58Definition.test_member_closure"
+     ]
+    },
+    {
      "slice": "M2a",
      "suite": null,
      "work_packages": [
-      "D04",
       "D05b"
      ],
      "host": "LOCK-CLOSURE",
