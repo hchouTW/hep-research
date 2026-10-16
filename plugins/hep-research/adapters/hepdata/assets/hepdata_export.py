@@ -38,6 +38,7 @@ import tempfile
 from pathlib import Path
 
 PLUGIN = Path(__file__).resolve().parents[3]
+sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
 sys.path.insert(0, str(PLUGIN))
 from contracts.validate import validate_artifact  # noqa: E402
 from contracts.permit import checker as permit_checker  # noqa: E402

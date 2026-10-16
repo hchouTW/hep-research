@@ -227,6 +227,7 @@ def main(argv=None) -> int:
     return 0
 
 
+sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 if True:  # the plugin root is on sys.path: the exact binomial interval of core/stats
     import importlib

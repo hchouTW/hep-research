@@ -41,6 +41,7 @@ import math
 import sys
 from pathlib import Path
 
+sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
 sys.path.insert(0, str(Path(__file__).resolve().parent))  # the sibling script, also under python3 -I
 from geomagnetic_cutoff import DEFAULT_DIPOLE_MOMENT_G_CM3, STATUSES, stormer_cutoff_gv  # noqa: E402
 

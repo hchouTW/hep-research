@@ -43,6 +43,7 @@ import sys
 import tempfile
 from pathlib import Path
 
+sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from core.partition.engine import (PartitionError, _hash, _load_state, _reduce, _sum, _write_atomic, check_template,  # noqa: E402,F401,E501
                                    make_manifest, merge, parse_rules, reset, run, status, validate_manifest)

@@ -38,6 +38,7 @@ import sys
 from pathlib import Path
 
 PLUGIN = Path(__file__).resolve().parents[3]
+sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
 sys.path.insert(0, str(PLUGIN))
 
 from core.stats import likelihood_limits as ll  # noqa: E402

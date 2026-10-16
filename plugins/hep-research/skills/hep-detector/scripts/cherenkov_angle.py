@@ -49,6 +49,7 @@ import math
 import sys
 from pathlib import Path
 
+sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from pid_separation_power import MASSES_GEV, kinematics, resolve_species  # noqa: E402
 

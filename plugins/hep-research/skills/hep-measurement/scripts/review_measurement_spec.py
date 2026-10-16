@@ -25,6 +25,7 @@ import json
 import sys
 from pathlib import Path
 
+sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))  # the plugin root, also under python3 -I
 from contracts.validate import validate_artifact  # noqa: E402
 from contracts.vocab import Vocabulary  # noqa: E402

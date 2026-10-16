@@ -45,6 +45,7 @@ import random
 import sys
 from pathlib import Path
 
+sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from check_split_integrity import canonical_key, parse_timestamp  # noqa: E402  (one normalization for both tools)
 

@@ -26,6 +26,7 @@ import sys
 from pathlib import Path
 
 PLUGIN = Path(__file__).resolve().parents[3]
+sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
 sys.path.insert(0, str(PLUGIN))
 
 from contracts.schema import Report, validate  # noqa: E402

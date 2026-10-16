@@ -39,6 +39,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 PROFILE = HERE.parent
 PLUGIN_ROOT = PROFILE.parents[2]
+sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
 sys.path.insert(0, str(PLUGIN_ROOT))
 from core.kinematics.relativistic import Species, beta, convert, to_momentum  # noqa: E402
 
