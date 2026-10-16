@@ -1,6 +1,6 @@
 # Decision record G-M0 (v6.3 analysis-check programme)
 
-Status: **awaiting the maintainer's decision.** Written 2026-10-16 at the end of Phase M0 (D01, D02, D12a). Labels:
+Status: **decided 2026-10-16: full bounded path** (see Decision). Written 2026-10-16 at the end of Phase M0 (D01, D02, D12a). Labels:
 **Confirmed**, **Inferred**, **Unresolved**, as in `m0-baseline.md`.
 
 ## Analysis question
@@ -91,4 +91,7 @@ Programme owner: **Requires Confirmation** (the maintainer names one). Implement
 
 ## Decision
 
-*(maintainer)* Option: — · Date: — · Conditions: —
+**Full bounded path**, 2026-10-16: the maintainer's instruction in the session was to follow the recommendation.
+Conditions are the two above: D03a's consumer fixes come first within M1, and G-M2a judges the agent summary against the
+measured activation set. M1 (D03a, D04, D03b side track) is approved; M2b and M2c still need the G-M2a decision. The
+programme owner is still to be named.
