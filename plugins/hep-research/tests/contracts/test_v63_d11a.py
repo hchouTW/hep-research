@@ -20,7 +20,6 @@ def coverage():
 
 
 class V17OldTableReader(unittest.TestCase):
-    @unittest.expectedFailure  # V17 (D11a)
     def test_operator_through_pinned_semantics(self):
         from contracts.analysis_checks.readers import read_table
         cov = coverage()
@@ -32,7 +31,6 @@ class V17OldTableReader(unittest.TestCase):
         self.assertIsNone(op["class_coverage"]["efficiency"]["members"])
         self.assertNotIn("stage", TABLE["operators"][0], "the old table itself is never upgraded")
 
-    @unittest.expectedFailure  # V17 (D11a)
     def test_unpinned_or_changed_semantics_are_not_used(self):
         from contracts.analysis_checks.readers import read_table
         cov = coverage()

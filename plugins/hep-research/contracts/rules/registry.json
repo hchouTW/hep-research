@@ -805,7 +805,7 @@
       "D11a"
      ],
      "host": "reader test",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d11a.V17OldTableReader.test_operator_through_pinned_semantics",
       "tests.contracts.test_v63_d11a.V17OldTableReader.test_unpinned_or_changed_semantics_are_not_used"

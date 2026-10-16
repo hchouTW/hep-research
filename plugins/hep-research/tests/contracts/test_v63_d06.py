@@ -177,6 +177,7 @@ class Coverage(Tmp):
         op = next(o for o in view["coverage"]["differential-flux"]["doc"]["operators"]
                   if o["operator_id"] == "divide_effective_exposure")
         op["class_coverage"]["efficiency"] = {"members": ["trigger_efficiency", "selection_efficiency"], "basis": "synthetic"}
+        view["lock"] = ac().current_lock(view)  # re-pinned: a new subject against the new contract
         out = {o["obligation_id"]: o for o in evaluate(view, view["context"]["obligations"]["items"])}
         for m in ("trigger_efficiency", "selection_efficiency"):
             self.assertEqual(out[f"r-real.description:{m}@proton-p1"]["state"], "satisfied")

@@ -5,6 +5,9 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- Old-table reader `contracts/analysis_checks/readers.py` (v6.3 D11a): the chain rules read the 1.0.0 operator-semantics
+  table through the coverage contract the semantic lock pins; an unpinned or changed contract, or a table that no
+  longer matches the contract, gives no operators (unsupported). The table file is never upgraded.
 - Chain rules of the `counting-chain/v1` suite (v6.3 D06, `contracts/analysis_checks/rules.py`), each returning one
   of five states with a registered reason code: R-REAL (a spec correction is realized by exactly one compatible
   application in each instance it applies to; no broadcast without a spec `target_scope` or an `instance_mapping`

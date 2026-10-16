@@ -40,7 +40,7 @@ class Env:
         self.axes = self.ctx.get("scope_axes") or {}
         self.items = view.get("items", {})
         self.catalog = view.get("catalog") or {}
-        self.coverage = {k: v.get("doc") or {} for k, v in view.get("coverage", {}).items()}
+        self.coverage = self._pinned_coverage(view)
         self.tables = view.get("tables", {})
         self.insts = {i["instance_id"]: i for i in self.ctx.get("recipe_instances", []) if isinstance(i, dict)}
         self.roots = {r["root_id"]: r for r in self.ctx.get("roots", []) if isinstance(r, dict)}
@@ -54,6 +54,24 @@ class Env:
             table = self.table_of(recipe)
             self.views[inst.get("instance_id")] = build_view(recipe, str(inst.get("recipe")), table, inst,
                                                              f"/recipe_instances/{k}", digests, self.axes)
+
+    @staticmethod
+    def _pinned_coverage(view: dict) -> dict:
+        """Coverage per table as the D11a reader gives it through the lock's pin; without a lock (a draft) the current
+        contract is read as is. A pin that does not match leaves the table without operators (unsupported)."""
+        from contracts.analysis_checks.readers import read_table
+        lock = view.get("lock")
+        pins = {d["id"]: d.get("digest") for d in (lock or {}).get("definitions", []) if d.get("kind") == "coverage-contract"}
+        out = {}
+        for tid, cov in view.get("coverage", {}).items():
+            doc = cov.get("doc") or {}
+            if not lock:
+                out[tid] = doc
+                continue
+            res = read_table(view.get("tables", {}).get(tid) or {}, doc, pins.get(tid))
+            out[tid] = dict(doc, operators=[{k: o[k] for k in ("operator_id", "stage", "covers", "class_coverage", "factors")}
+                                            for o in res["operators"].values()])
+        return out
 
     def recipe_of(self, inst: dict) -> dict:
         doc = (self.items.get(inst.get("recipe")) or {}).get("doc")
