@@ -96,6 +96,37 @@ class ShadowDifferenceReview(unittest.TestCase):
         self.assertEqual(report["status"], "complete")
 
 
+class ModelAndRunShadowReview(unittest.TestCase):
+    """The shadow review on the model and run cases (added for the G-ENFORCE inputs, docs/dev/v6.3/shadow-review.md):
+    zero unclassified; the legacy model-card errors that decide the same question as a new rule agree with it."""
+
+    def test_zero_unclassified(self):
+        import v63_runs as runs
+
+        def dup(c):
+            card = c.doc("card-sr-cr")
+            card["samples"][2]["modifiers"][1] = {"type": "constrained-normalization", "parameter": "lumi_cr"}
+            card["constraints"].append({"parameter": "lumi_cr", "kind": "auxiliary-measurement", "aux_id": "lumi-2026",
+                                        "form": "gaussian", "width": 0.02})
+        model = {"positive": (None, {}), "same-aux-id": (dup, {"agrees": 2}),
+                 "unconstrained": (lambda c: c.doc("card-sr-cr").update(constraints=[]), {"agrees": 4}),
+                 "prior": (lambda c: c.doc("card-sr-cr")["constraints"][0].update(kind="prior"), {"artifact-local": 1}),
+                 "joint": (lambda c: cases.two_models(c, joint=True), {"new-only": 2})}
+        with tempfile.TemporaryDirectory() as td:
+            for name, (variant, counts) in model.items():
+                with self.subTest(case=name):
+                    root = Path(td) / name
+                    view, diags = ac().load_subject(cases.model_case(root, variant), root)
+                    review = ac().difference_review(view, ac().evaluate(view, diags))
+                    self.assertEqual((review["unclassified"], review["counts"]), (0, counts))
+            for name, build in (("run-chain", runs.run_chain), ("run-campaign", runs.run_campaign)):
+                with self.subTest(case=name):
+                    post = build(Path(td) / name)
+                    view, diags = ac().load_subject(post.bundle_path, post.root)
+                    rep = ac().evaluate(view, diags, results=json.loads(post.save().read_text()))
+                    self.assertEqual(ac().difference_review(view, rep)["unclassified"], 0)
+
+
 @NEEDS_AMS
 class V59RefusalMatrix(unittest.TestCase):
     """V59: the matrix exposes old readers that do not refuse a new format; each such row is a release blocker."""
