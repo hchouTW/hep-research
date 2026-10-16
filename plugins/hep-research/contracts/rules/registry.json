@@ -1140,8 +1140,10 @@
       "D10"
      ],
      "host": "report test",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d10.V26Exceptions.test_scoped_exception"
+     ]
     }
    ]
   },
@@ -1815,8 +1817,11 @@
       "D10"
      ],
      "host": "gate integration",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d10.ReportCheck.test_v60_wrong_bindings",
+      "tests.contracts.test_v63_d10.ReportCheck.test_incomplete_or_violated"
+     ]
     }
    ]
   },
@@ -1912,8 +1917,10 @@
       "D10"
      ],
      "host": "gate integration",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d10.ReportCheck.test_v65_accepted_review_with_report"
+     ]
     }
    ]
   },
@@ -1929,8 +1936,10 @@
       "D10"
      ],
      "host": "gate integration",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d10.ReportCheck.test_v66_no_accepted_review"
+     ]
     }
    ]
   },
