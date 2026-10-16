@@ -55,7 +55,8 @@ class ShippedRegistry(unittest.TestCase):
 
     def test_catalogue_and_first_entries(self):
         self.assertEqual([c["v_id"] for c in SHIPPED["v_cases"]], [f"V{i:02d}" for i in range(1, 72)])
-        self.assertEqual({p["status"] for c in SHIPPED["v_cases"] for p in c["parts"]}, {"not-run"})
+        statuses = {p["status"] for c in SHIPPED["v_cases"] for p in c["parts"]}
+        self.assertLessEqual(statuses, {"not-run", "expected-failure", "required-before-enforcement", "passing"})
         r4 = {r["rule_id"]: r for r in SHIPPED["rules"]}
         self.assertEqual(set(r4), {"l2.r4.repeat", "l2.r4.upstream", "l2.r4.keys"})
         self.assertEqual({r["outcome_contract"] for r in r4.values()}, {"pending"})

@@ -320,8 +320,10 @@
       "D03a"
      ],
      "host": "resolver unit test",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d03a.V13AliasKeys.test_equal_values_merge_and_conflicts_are_rejected"
+     ]
     }
    ]
   },
@@ -634,8 +636,13 @@
       "D03a"
      ],
      "host": "resolver unit test",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d03a.V29AliasContract.test_cross_owner_takeover",
+      "tests.contracts.test_v63_d03a.V29AliasContract.test_cycle",
+      "tests.contracts.test_v63_d03a.V29AliasContract.test_ambiguous_missing_target_conversion_and_malformed",
+      "tests.contracts.test_v63_d03a.V29AliasContract.test_a_promotion_by_the_owner_passes"
+     ]
     }
    ]
   },
