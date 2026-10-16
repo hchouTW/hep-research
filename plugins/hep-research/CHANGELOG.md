@@ -3,6 +3,49 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+Upgrade plan v1.3, batch 0a (F-01 to F-15): correctness and risk fixes, each with a regression test that fails on
+its parent commit (VALIDATION UPGRADE-0A). Contracts stay 2.11.0 with one additive vocabulary change (F-14); no
+version bump. Every analysis-check rule stays in shadow mode.
+
+- Statistics.
+  - `covariance_fit.py`: a grid fit whose optimizer stopped before converging is `failed` (exit 1), not `ok` (F-01).
+    A plugin model runs only with `--allow-plugin`, its path is read relative to the input file, and its errors are
+    `failed` JSON, never a traceback (F-09).
+  - `result_artifact.py --paradigm frequentist|bayesian|likelihood-only` (default frequentist, unchanged output); a
+    Bayesian result is written from `bayes_diagnostics.py diagnose` output with priors, sampler and convergence (F-02).
+  - `li_ma_significance.py` prints `status`, `method_kind: asymptotic` and a low-count warning (F-03).
+- Script contract (F-04). `core/status.py` (owner hep-computing): run statuses, exit codes 0-3, the mapping to
+  artifact status labels and `add_status_argument`. The plugin-wide test `tests/skills/test_cli_contract.py` checks
+  exit codes, a JSON status on a refused input and `--status`; the scripts of the other skills that print no JSON
+  status on a refused input are listed there for follow-up. `inference.py --on-out-of-domain reject` exits 1 (was 4)
+  with status `refused`. The hep-theory and hep-ml scripts print JSON statuses on refused inputs and take
+  `--status`, echoed as `status_label`.
+- `review_analysis_change.py`: every verdict other than accept exits 1; text outside the Latin script, which the
+  English-only patterns cannot judge, is `needs-human-review` (F-05).
+- `pid_separation_power.py`, `cherenkov_angle.py`, `geomagnetic_cutoff.py` report `inputs` and `defaults_used`
+  and warn when a detector parameter or the dipole moment is defaulted; `geomagnetic_cutoff.py --epoch` (F-06).
+- Partition merge rules (F-07): `sum`, `min`, `max`, `first`, `concat` per key (`engine.merge(rules=)`,
+  `local_partition.py merge --rule`, `batch_campaign.py merge/report --rule`). Undeclared keys still sum; an
+  undeclared key named like a non-additive quantity (seed, median, mean, quantile, min, max, rate, fraction) is
+  refused.
+- hep-ml hashes (F-08): `train_classifier.py` records `split_manifest_sha256`, `calibration.py` records
+  `model_hash`, `inference.py` refuses a calibration made for another model and reports a changed split manifest.
+- No `__pycache__` from scripts (F-10): 40 scripts set `sys.dont_write_bytecode` before importing siblings or plugin
+  packages; `tests/skills/test_no_bytecode.py` runs every CLI from a copy of the plugin.
+- Documentation consistency (F-11): the ninth derivation status in the hep-theory README and reference; the uproot
+  claim of the hep-computing README; the communication-evaluation row; the SKILL.md size record; the solar cycle as
+  a SILSO lookup; `train_classifier.py` drops `accuracy_weighted`; RooFit's `AsymptoticError` treats weights as known.
+- Communication (F-12): the paper skeleton uses `unsrturl` (prints eprints and DOIs) and a `[VALUE NEEDED]`
+  headline; the claim-wording patterns cover Simplified Chinese.
+- Side effects (F-13): a local partition worker gets a default timeout of 3600 s; `check_diagram_sources.py
+  --no-mermaid`; the CERN EOS note says to ask before writing.
+- Vocabulary (F-14): core levels `top-of-instrument` and `top-of-atmosphere`; the synthetic cosmic-ray spec uses the
+  first.
+- Documentation-claim tests (F-15) for the hep-statistics and hep-detector statements about script output; the core/stats
+  guide no longer says the two validators label their output `[General method]`.
+
 ## 0.13.1 (2026-10-17)
 
 G-ENFORCE inputs completed for the full v6.3 suite set, and README updates. Contracts stay 2.11.0, and every
