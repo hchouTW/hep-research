@@ -343,8 +343,10 @@
       "D05b"
      ],
      "host": "resolver and bundle",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d05b.SemanticLock.test_definition_change_is_a_lock_difference"
+     ]
     }
    ]
   },
@@ -1037,8 +1039,10 @@
       "D05b"
      ],
      "host": "bundle lifecycle",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d05b.Subjects.test_deleting_a_root"
+     ]
     }
    ]
   },
@@ -1185,8 +1189,10 @@
       "D05b"
      ],
      "host": "LOCK-CLOSURE",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d05b.SemanticLock.test_member_sets"
+     ]
     }
    ]
   },
@@ -1348,8 +1354,11 @@
       "D05b"
      ],
      "host": "obligation generator",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d05b.Inventory.test_regeneration_is_byte_identical_and_order_free",
+      "tests.contracts.test_v63_d05b.Inventory.test_a_differing_inventory_is_invalid_input"
+     ]
     }
    ]
   },
