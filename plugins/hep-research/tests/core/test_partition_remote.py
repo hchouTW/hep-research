@@ -28,7 +28,7 @@ class RunnerTests(unittest.TestCase):
         self.assertEqual(p.returncode, 0, p.stderr)
         doc = json.loads((out / "c0002-a01.json").read_text())
         chunk = self.manifest["chunks"][2]
-        self.assertEqual((doc["seed"], doc["result"]["seed_echo"], doc["start"]), (chunk["seed"], chunk["seed"], chunk["start"]))
+        self.assertEqual((doc["seed"], doc["result"]["seed_sum"], doc["start"]), (chunk["seed"], chunk["seed"], chunk["start"]))
         meta = json.loads((out / "c0002-a01.meta.json").read_text())
         for k in ("chunk_id", "manifest_hash", "attempt_id", "host", "start_time", "end_time", "exit_code", "python"):
             self.assertIn(k, meta)

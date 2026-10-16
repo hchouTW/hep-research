@@ -37,8 +37,10 @@ timeout; a submit whose outcome is unknown stays unconfirmed, never 'not-submitt
                                                          stop counting as running, only if every job the scheduler
                                                          lists under its tag has ended
 A configured 'limits' section stops a submission or reset that would exceed it (core/partition/limits.py).
-  merge    --config C                                    requires every chunk exactly once
-  report   --config C --out ARTIFACT.json [--label synthetic ...] [--objective TEXT]
+  merge    --config C [--rule KEY=RULE ...]               requires every chunk exactly once; sums results key by key,
+                                                         a key named like a non-additive quantity (seed, median, mean,
+                                                         ...) needs a --rule (sum, min, max, first, concat)
+  report   --config C --out ARTIFACT.json [--label synthetic ...] [--objective TEXT] [--rule KEY=RULE ...]
            writes a computational-run artifact (status 'failed' unless the merge is complete)
 The config file (see batch_config.py) lives in your project; campaign_dir is relative to the config's folder.
 Exit codes: 0 done / complete, 1 incomplete, failed or blocked chunks, 2 refused (configuration or usage).
@@ -95,10 +97,10 @@ def _sha(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def build_artifact(cdir: Path, cfg: dict, executor, labels: list[str], objective: str) -> dict:
+def build_artifact(cdir: Path, cfg: dict, executor, labels: list[str], objective: str, rules: dict | None = None) -> dict:
     """computational-run artifact for a campaign; incomplete campaigns carry 'failed' and a non-zero exit status."""
     manifest, state = cp.load(cdir)
-    merged = cp.merge(cdir)
+    merged = cp.merge(cdir, rules=rules)
     complete = merged["status"] == "complete"
     chunk_hashes = {f"chunks/{p.name}": _sha(p) for p in sorted((cdir / "chunks").glob("*.json"))}
     merged_hash = hashlib.sha256(json.dumps(merged["merged"], sort_keys=True).encode()).hexdigest() if complete else None
@@ -134,7 +136,7 @@ def build_artifact(cdir: Path, cfg: dict, executor, labels: list[str], objective
                                           "bundles": {s["id"]: s.get("bundle_digest") for s in state["submissions"]},
                                           "limits": {"configured": cfg.get("limits"), "usage": limits.usage(state, cfg.get("limits"))}}},
             "seeds": {"manifest_seed": manifest["seed"], "chunk_seeds": {c["id"]: c["seed"] for c in manifest["chunks"]}},
-            "tolerances": {"merge": "exact: every chunk exactly once, item ranges tile [0, n); results summed key by key"},
+            "tolerances": {"merge": "exact: every chunk exactly once, item ranges tile [0, n); results summed key by key unless a merge rule is declared"},
             "resources": resources,
             "exit_status": 0 if complete else 1,
             "output_hashes": dict(chunk_hashes, **({"merged": merged_hash} if merged_hash else {})),
@@ -164,6 +166,9 @@ def main(argv=None, env=None, sleep=None) -> int:
             s.add_argument("--bundle", help="full digest of a frozen bundle: refuse if anything bundled changed since")
         if name == "verify-bundle":
             s.add_argument("--bundle", required=True)
+        if name in ("merge", "report"):
+            s.add_argument("--rule", action="append", default=[], metavar="KEY=RULE",
+                           help="merge rule of a result key: sum, min, max, first or concat (core/partition/engine.py)")
         if name == "freeze":
             s.add_argument("--worker-root", type=Path)
             s.add_argument("--env-lock", type=Path)
@@ -256,9 +261,9 @@ def main(argv=None, env=None, sleep=None) -> int:
         if args.cmd == "cancel":
             return emit(cp.cancel(cdir, ex, args.chunks, approved=args.approve_cancel), 0)
         if args.cmd == "merge":
-            rep = cp.merge(cdir)
+            rep = cp.merge(cdir, rules=engine.parse_rules(args.rule))
             return emit(rep, 0 if rep["status"] == "complete" else 1)
-        art = build_artifact(cdir, cfg, ex, args.label, args.objective)
+        art = build_artifact(cdir, cfg, ex, args.label, args.objective, engine.parse_rules(args.rule))
         args.out.parent.mkdir(parents=True, exist_ok=True)
         args.out.write_text(json.dumps(art, indent=1, sort_keys=True) + "\n", encoding="utf-8")
         return emit({"artifact": str(args.out), "status": art["status"], "exit_status": art["extension"]["exit_status"]},

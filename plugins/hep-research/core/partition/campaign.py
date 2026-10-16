@@ -754,7 +754,7 @@ def report(campaign_dir, collected: dict | None = None) -> dict:
             "collected": collected or {}}
 
 
-def merge(campaign_dir, combine=None) -> dict:
+def merge(campaign_dir, combine=None, rules: dict | None = None) -> dict:
     """engine.merge after a provenance check: every chunk file must be the one collect() recorded (same digest) for an
     attempt of a submission the scheduler accepted. A forged or replaced chunk file fails the merge (X04). This check
     reads agent-writable state: it catches mistakes and forged chunk files, not a forged state.json (that needs the
@@ -765,7 +765,7 @@ def merge(campaign_dir, combine=None) -> dict:
     problems, warnings = provenance_check(cdir, state)
     if problems:
         return {"status": "refused", "problems": problems, "provenance_warnings": warnings, "result": None}
-    return dict(engine.merge(manifest, cdir, combine), provenance_warnings=warnings)
+    return dict(engine.merge(manifest, cdir, combine, rules), provenance_warnings=warnings)
 
 
 def provenance_check(cdir: Path, state: dict) -> tuple[list[dict], list[dict]]:
