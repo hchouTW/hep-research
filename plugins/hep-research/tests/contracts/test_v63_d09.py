@@ -142,6 +142,10 @@ class V59RefusalMatrix(unittest.TestCase):
             found = {f["code"] for rec in out["recipes"] for f in rec["findings"]}
             reads_keys = "semantics.repeat_undetermined" in found or "semantics.repeated_correction" in found
             return "exposes" if reads_keys and not any("capabilit" in c for c in found) else "refuses"
+        if entry == "contracts/attestation.py (bundle digest)":
+            from contracts.attestation import _bundle_digest
+            bundle = json.loads(self.bundle.read_text())
+            return "implements" if _bundle_digest(bundle) == bundle["bundle_digest"] else "refuses"
         raise AssertionError(f"no observation for {entry}")
 
     def test_current_column(self):
