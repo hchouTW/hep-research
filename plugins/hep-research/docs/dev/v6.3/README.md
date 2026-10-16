@@ -9,6 +9,7 @@ not instructions for the agent, and nothing in them authorizes any use: agent-ru
 | `m0-budget.md` | D02 | loading-budget and evidence-query measurements, with the method |
 | `decision-m0.md` | G-M0 | the M0 decision record |
 | `decision-m2a.md` | G-M2a | the M2a decision record with the measured context cost |
+| `decision-m2b.md` | after M2b ratio and D11b | what comes next: M3, the model part or a pause |
 | `m2a-design.md` | M2a | data model of the chain slice |
 | `o16-agent-interface.md` | D17 | who calls the check, when, where the summary goes |
 | `crflux-review.md` | D03b | term-by-term review of the cosmic-ray level terms; companion public-interface matrix |
