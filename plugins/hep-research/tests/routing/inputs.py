@@ -72,6 +72,16 @@ INPUTS = {
                                 "measurements": [{"name": "meas", "config": {"poi": "mu", "parameters": []}}]}, indent=1) + "\n",
   "fit_result.json": json.dumps({"_note": TAG, "fit": "maximum likelihood on workspace.json (pyhf 0.7.6), observed data", "bestfit": {"mu": 1.275, "bkg_norm": 0.053, "jes": 0.052},
                                  "uncertainty": {"mu": 0.845, "bkg_norm": 0.972, "jes": 0.977}}, indent=1) + "\n"},
+ # upgrade plan v1.3 (Appendix L): inputs for the cases that name "my" or "this"
+ "ml-bdt-1": {"signal_nlo.csv": _csv("event_number,pt,eta,mass,weight,label", ["1001,52.1,0.3,118.2,1.12,1", "1002,47.8,-1.1,121.0,-0.94,1", "1003,61.0,0.8,124.9,1.05,1", "2001,33.2,1.9,96.4,1.00,0"])},
+ "st-roofit-1": {"fit_log.txt": f"# {TAG}\nRooFitResult: minimized FCN value: 1234.56, estimated distance to minimum: 3.2e-05\n  covariance matrix quality: Approximation only, not accurate (covQual 1)\n  Status : MINIMIZE=0 HESSE=0 MINOS=0\n  nsig = 152 +21.4 -18.9\n  nbkg = 980 +/- 35\n"},
+ "co-roofit-neg-1": {"build_ws.C": f"// {TAG}\nvoid build_ws() {{\n  RooRealVar x(\"x\", \"x\", 0, 10);\n  RooWorkspace w(\"w\");\n  RooDataSet d1(\"d1\", \"\", RooArgSet(x));\n  RooDataSet d2(\"d2\", \"\", RooArgSet(x));\n  w.import(d1);\n  w.import(d2);  // crashes here\n}}\n"},
+ "co-rntuple-1": {"selection.py": f"# {TAG}\nimport ROOT\ndf = ROOT.RDataFrame('Events', 'events.root')\nh = df.Filter('nMuon >= 2').Define('pt0', 'Muon_pt[0]').Histo1D(('pt0', '', 50, 0, 200), 'pt0')\n"},
+ "co-teff-1": {"eff.C": f"// {TAG}\nvoid eff() {{\n  TH1D pass(\"pass\", \"\", 10, 0, 100);\n  TH1D total(\"total\", \"\", 10, 0, 100);\n  pass.Fill(50); pass.Fill(50);\n  total.Fill(50);\n  TEfficiency e(pass, total);\n}}\n"},
+ "ms-design-neg-1": {"analysis_plan.md": f"<!-- {TAG} -->\n# 截面量測計畫（草稿）\n目標：雙噴流事件的截面。\n選擇：兩個噴流 pT > 30 GeV，|eta| < 2.5。\n尚未定義 fiducial 區域。\n"},
+ "th-pi0-1": {"pi0_spectrum.csv": _csv("E_pi0_GeV,dN_dE_per_GeV", ["1,2.0e3", "3,1.1e2", "10,4.0e0", "30,1.5e-1", "100,4.8e-3"])},
+ "cm-numbers-1": {"statistical_result.json": json.dumps({"_note": TAG, "artifact_type": "statistical-result", "status": ["synthetic"], "extension": {"results": {"mu_hat": 1.04, "mu_err_up": 0.21, "mu_err_down": 0.19, "upper_limit_95": 1.46}}}, indent=1) + "\n"},
+ "cm-translate-1": {"abstract_zh.md": f"<!-- {TAG} -->\n我們以 3.2 fb⁻¹ 的合成資料量測截面，得到 σ = 12.4 ± 0.8 (stat) ± 1.1 (syst) pb，與理論預測一致。\n"}
 }
 # the multi-turn follow-up of j05 needs the same files: its second turn fits "the folded prediction", which exists only
 # if the first turn has a prediction and a response to fold (without them it measured a missing-input dialogue instead)
