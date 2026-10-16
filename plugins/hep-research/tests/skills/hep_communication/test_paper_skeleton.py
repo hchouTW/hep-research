@@ -45,9 +45,9 @@ class PaperSkeleton(unittest.TestCase):
             self.assertTrue(keys)
             (d / "main.tex").write_text(tex.replace("\\end{document}", "\\nocite{*}\n\\end{document}"))
             shutil.copy(PAPER / "references.bib", d / "references.bib")
-            run = dict(capture_output=True, text=True, timeout=300, cwd=d)
-            subprocess.run(["pdflatex", "-interaction=nonstopmode", "-no-shell-escape", "main.tex"], **run)
-            bib = subprocess.run(["bibtex", "main"], **run)
+            subprocess.run(["pdflatex", "-interaction=nonstopmode", "-no-shell-escape", "main.tex"], capture_output=True,
+                           text=True, timeout=300, cwd=d)
+            bib = subprocess.run(["bibtex", "main"], capture_output=True, text=True, timeout=300, cwd=d)
             if not (d / "main.bbl").exists():
                 self.skipTest(f"bibtex produced no .bbl: {bib.stdout[-300:]}")
             bbl = (d / "main.bbl").read_text(encoding="utf-8", errors="replace")
