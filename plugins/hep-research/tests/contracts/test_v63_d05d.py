@@ -37,7 +37,6 @@ class Base(unittest.TestCase):
 
 
 class RunChain(Base):
-    @unittest.expectedFailure  # red until run-lineage/v1 exists (D05d)
     def test_pre_execution(self):
         post = runs.run_chain(self.root())
         rep = post.check(binding=False)
@@ -45,23 +44,25 @@ class RunChain(Base):
             self.assertEqual(run_state(rep, rule), ("unverified", "check.not_executed"), rule)
         self.assertIn("not checked", str(rep["execution_evidence_level"]))
 
-    @unittest.expectedFailure  # red until run-lineage/v1 exists (D05d)
     def test_v53_v56_positive_declared_level(self):
         # V53: run B uses run A's product through a provenance binding; V56: self-reported manifests stay declared
-        rep = runs.run_chain(self.root()).check()
+        post = runs.run_chain(self.root())
+        rep = post.check()
         self.assertEqual(rep["phase"], "post-execution")
         self.assertEqual(run_state(rep, "r-run.closure"), ("satisfied", "check.closure_complete"))
         self.assertEqual(run_state(rep, "r-run.status"), ("satisfied", "check.producer_succeeded"))
         self.assertEqual(run_state(rep, "r-run.binding"), ("satisfied", "check.result_bound"))
         self.assertEqual(run_state(rep, "r-run.campaign"), ("not_applicable", "check.no_campaign"))
-        self.assertEqual(run_state(rep, "r-run.blinding"), ("not_applicable", "check.not_blinded"))
+        # the AMS example's spec is blinded (a synthetic result is permitted); the AMS-optional fallback spec is not
+        blinded = (json.loads((post.root / "spec.json").read_text()).get("extension") or {}).get("blinding", {}).get("blinded")
+        self.assertEqual(run_state(rep, "r-run.blinding"), ("satisfied", "check.blinding_permitted") if blinded
+                         else ("not_applicable", "check.not_blinded"))
         self.assertEqual(rep["execution_evidence_level"], {R: "declared"})
         self.assertEqual(rep["status"], "complete")
         binding = next(o for o in rep["obligations"] if o["rule_id"] == "r-run.binding")
         self.assertTrue(binding["declaration_based"])  # the agent wrote the attribution (C12)
         self.assertEqual(rep["formal_use_view"]["coverage"]["value"], "partial")
 
-    @unittest.expectedFailure  # red until run-lineage/v1 exists (D05d)
     def test_v20_results_after_execution(self):
         # V20: the bundle is unchanged, the binding names no digest of itself, result identity and scope are verified
         from contracts import analysis_check as ac
@@ -87,7 +88,6 @@ class RunChain(Base):
         p.binding["results"] = []
         self.assertEqual(run_state(p.check(), "r-run.binding"), ("unverified", "check.result_unbound"))
 
-    @unittest.expectedFailure  # red until run-lineage/v1 exists (D05d)
     def test_v33_input_neither_frozen_nor_produced(self):
         def extra(post):
             post.write("scratch/notes.json", {"note": "an input nothing froze or produced"})
@@ -96,7 +96,6 @@ class RunChain(Base):
         rep = runs.run_chain(self.root(), extra).check()
         self.assertEqual(run_state(rep, "r-run.closure"), ("violated", "check.closure_open"))
 
-    @unittest.expectedFailure  # red until run-lineage/v1 exists (D05d)
     def test_mapped_input_with_other_bytes(self):
         def other(post):
             post.write("copies/spec.json", {"not": "the frozen spec"})
@@ -106,7 +105,6 @@ class RunChain(Base):
         rep = runs.run_chain(self.root(), other).check()
         self.assertEqual(run_state(rep, "r-run.closure"), ("violated", "check.closure_mismatch"))
 
-    @unittest.expectedFailure  # red until run-lineage/v1 exists (D05d)
     def test_v38_json_inside_the_bundle(self):
         # V38: bytes and canonical digests are each verified; a re-serialized copy is a derived input
         def copy_of(serialize):
@@ -123,7 +121,6 @@ class RunChain(Base):
         rep = runs.run_chain(self.root(), copy_of(lambda d: json.dumps(d, indent=4, sort_keys=True))).check()
         self.assertEqual(run_state(rep, "r-run.closure"), ("unverified", "check.closure_reserialized"))
 
-    @unittest.expectedFailure  # red until run-lineage/v1 exists (D05d)
     def test_v54_failed_run_and_retries(self):
         # V54: a failed execution that left output is not promoted; the binding names the adopted retry
         def failed(post):
@@ -144,12 +141,10 @@ class RunChain(Base):
         self.assertEqual(run_state(runs.run_chain(self.root(), retries("run-b")).check(), "r-run.status"),
                          ("violated", "check.failed_promoted"))
 
-    @unittest.expectedFailure  # red until run-lineage/v1 exists (D05d)
     def test_failure_propagates_downstream(self):
         rep = runs.run_chain(self.root(), lambda p: p.rewrite_run("run-a", lambda d: d["extension"].update(exit_status=1))).check()
         self.assertEqual(run_state(rep, "r-run.status"), ("violated", "check.failed_upstream"))
 
-    @unittest.expectedFailure  # red until run-lineage/v1 exists (D05d)
     def test_v55_ambiguous_producer_cycle_and_role(self):
         # V55: rejected, or an explicit binding required
         def cycle(post):
@@ -172,7 +167,6 @@ class RunChain(Base):
         self.assertEqual(run_state(runs.run_chain(self.root(), same_bytes).check(), "r-run.closure"),
                          ("unverified", "check.closure_unbound"))
 
-    @unittest.expectedFailure  # red until run-lineage/v1 exists (D05d)
     def test_v32_lock_drift(self):
         # V32: a lock in the binding that is not the bundle's is semantic drift; newly installed definitions with the
         # old snapshot available are not
@@ -189,7 +183,6 @@ class RunChain(Base):
 
 
 class RunCampaign(Base):
-    @unittest.expectedFailure  # red until run-lineage/v1 exists (D05d)
     def test_campaign_recorded(self):
         rep = runs.run_campaign(self.root()).check()
         self.assertEqual(run_state(rep, "r-run.campaign"), ("satisfied", "check.campaign_recorded"))
@@ -198,7 +191,6 @@ class RunCampaign(Base):
         self.assertEqual(rep["execution_evidence_level"], {R: "campaign-recorded"})
         self.assertIn("agent-writable", next(o for o in rep["obligations"] if o["rule_id"] == "r-run.campaign")["message"])
 
-    @unittest.expectedFailure  # red until run-lineage/v1 exists (D05d)
     def test_v61_only_the_collected_output_is_adopted(self):
         # V61: a duplicate swapped into the chunk file is not the collected output
         def swap(post, cdir):
@@ -208,7 +200,6 @@ class RunCampaign(Base):
         rep = runs.run_campaign(self.root(), after=swap).check()
         self.assertEqual(run_state(rep, "r-run.campaign"), ("violated", "check.chunk_digest_conflict"))
 
-    @unittest.expectedFailure  # red until run-lineage/v1 exists (D05d)
     def test_v62_digest_conflict_uncollected_and_orphan(self):
         def conflict(post, cdir):
             ref = post.root / "runs/campaign.computational-run.json"
@@ -227,7 +218,6 @@ class RunCampaign(Base):
         self.assertEqual(run_state(rep, "r-run.campaign"), ("unverified", "check.campaign_orphan"))
         self.assertEqual(rep["execution_evidence_level"], {R: "declared"})
 
-    @unittest.expectedFailure  # red until run-lineage/v1 exists (D05d)
     def test_v63_submission_bundle_digests(self):
         def null(s):
             s["submissions"][1]["bundle_digest"] = None
@@ -251,7 +241,6 @@ class RunCampaign(Base):
         self.assertEqual(run_state(runs.run_campaign(self.root(), after=same_name).check(), "r-run.campaign"),
                          ("violated", "check.campaign_mismatch"))
 
-    @unittest.expectedFailure  # red until run-lineage/v1 exists (D05d)
     def test_merge_cross_check(self):
         def other_result(post, cdir):
             post.write("results/merged.json", {"n": 12, "sum": 67})
@@ -276,7 +265,6 @@ class Blinding(Base):
         self.assertNotIn("123.45", text)
         return rep
 
-    @unittest.expectedFailure  # red until run-lineage/v1 exists (D05d)
     def test_v70(self):
         self.assertEqual(run_state(self.check(("observed",), []), "r-run.blinding"), ("violated", "check.blinded_result_cited"))
         self.assertEqual(run_state(self.check(("synthetic",), []), "r-run.blinding"), ("satisfied", "check.blinding_permitted"))
@@ -295,7 +283,6 @@ class PostExecutionPermit(Base):
     """The post-execution part of V60 (D10): the permit's artifacts list the cited results, and its execution bundle
     is the binding's."""
 
-    @unittest.expectedFailure  # red until run-lineage/v1 exists (D05d)
     def test_v60_post_execution_bindings(self):
         import datetime
         import hashlib

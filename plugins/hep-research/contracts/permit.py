@@ -318,6 +318,17 @@ def report_check(att: dict, bundle: dict, root, evidence_root, policy: dict, pur
             refusals.append(_r("permit.report_incomplete", where, "the report is not complete on valid inputs"))
         elif rep_doc["consistency"] != "consistent":
             refusals.append(_r("permit.report_violation", where, "the report establishes a violation"))
+        binding = rep_doc.get("result_binding")
+        if isinstance(binding, dict) and permit is not None:  # post-execution part (V60, m2c-design.md)
+            subject = permit.get("subject") or {}
+            unlisted = [r.get("sha256") for r in binding.get("results", []) if r.get("sha256") not in (subject.get("artifacts") or [])]
+            if unlisted:
+                refusals.append(_r("permit.report_result_unlisted", where,
+                                   f"{len(unlisted)} result file(s) the report's binding cites are not in the permit's artifacts"))
+            eb = subject.get("execution_bundle_sha256")
+            if eb and any(x != eb for x in binding.get("execution_bundles", [])):
+                refusals.append(_r("permit.report_execution_bundle_mismatch", where,
+                                   "the result binding's execution bundle is not the permit's"))
         if "not checked" in str(rep_doc.get("execution_evidence_level")) and not rules.get("accept_pre_execution_only"):
             refusals.append(_r("permit.report_pre_execution_only", where,
                                "a pre-execution report: run lineage was not checked, and the policy does not accept that"))

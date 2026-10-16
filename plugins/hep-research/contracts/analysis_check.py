@@ -16,7 +16,7 @@ dependency-missing (a definition the check needs is not available).
 Usage: python3 contracts/analysis_check.py freeze --root DIR --analysis NAME --items ITEMS.json --context CONTEXT.json --out FILE
                                             [--snapshots DIR] [--mode chain|model]
        python3 contracts/analysis_check.py check BUNDLE --root DIR [--out REPORT] [--previous REPORT] [--snapshots DIR]
-                                            [--exceptions FILE]
+                                            [--exceptions FILE] [--results BINDING] [--project DIR]
        python3 contracts/analysis_check.py summary REPORT [--cursor N] [--max-bytes N]
 Exit codes of check: 0 inputs valid and the suite complete and consistent; 1 a violation, or invalid schema,
 references or digests of an input already read; 2 usage error or an unreadable top-level input; 3 otherwise
@@ -60,7 +60,7 @@ CHECKER_FILES = ("contracts/analysis_check.py", "contracts/analysis_checks/__ini
                  "contracts/analysis_checks/context.py", "contracts/analysis_checks/obligations.py",
                  "contracts/analysis_checks/lock.py", "contracts/analysis_checks/rules.py",
                  "contracts/analysis_checks/outcomes.py", "contracts/analysis_checks/readers.py",
-                 "contracts/analysis_checks/model.py",
+                 "contracts/analysis_checks/model.py", "contracts/analysis_checks/runs.py",
                  "contracts/effect_catalog.py", "contracts/recipe_semantics.py")
 
 
@@ -401,7 +401,7 @@ def load_subject(bundle_path, root) -> tuple[dict, list[dict]]:
             diags.append({"kind": "input-invalid", "code": f"{name.split('.')[0]}.{f.code}", "message": f"{f.path}: {f.message}"})
     view, more = _view(items, context)
     diags += more
-    view.update(bundle=bundle, lock=lock, bundle_verified=ver["status"])
+    view.update(bundle=bundle, lock=lock, bundle_verified=ver["status"], root=str(root))
     roles = {k: v.get("role") for k, v in items.items()}
     view["context_findings"] = check_context(context, roles) if context else []
     for f in view["context_findings"]:
@@ -466,10 +466,18 @@ def legacy_findings(view: dict, vocab=None) -> list[dict]:
 
 
 def evaluate(view: dict, diags: list[dict], previous: dict | None = None, vocab=None, settings: dict | None = None,
-             rules: dict | None = None, snapshots=None, exceptions: list | None = None, now: str | None = None) -> dict:
+             rules: dict | None = None, snapshots=None, exceptions: list | None = None, now: str | None = None,
+             results: dict | None = None, blinding: dict | None = None) -> dict:
+    """results: a result binding (contracts/schemas/result_binding.json) for a post-execution assessment (run-lineage/v1,
+    M2c); blinding: the project's blinding block, for the allowed_outputs matching rule (m2c-proposal.md)."""
     from contracts.analysis_checks.lock import compare, rebuild
     from contracts.analysis_checks.outcomes import formal_view, summarize
     from contracts.analysis_checks.rules import evaluate as run_rules
+    if results is not None:
+        rb = validate(results, "result_binding.json")
+        diags = list(diags) + [{"kind": "input-invalid", "code": f"result_binding.{f.code}", "message": f"{f.path}: {f.message}"}
+                               for f in rb.errors]
+    view = dict(view, results=results, blinding=blinding)
     lock_diff = compare(view.get("lock") or {}, current_lock(view)) if view.get("suite") else []
     installed_diff, source = list(lock_diff), "installed"
     missing: list[str] = []
@@ -535,7 +543,13 @@ def evaluate(view: dict, diags: list[dict], previous: dict | None = None, vocab=
                          for d in (view.get("context") or {}).get("declarations", []) if d.get("declaration_id") in decl_ids],
         "context_findings": view.get("context_findings", []),
         "legacy_findings": legacy_findings(view, vocab) if view.get("items") else [],
-        "execution_evidence_level": "not checked: the chain suite has no run lineage (run-lineage/v1, M2c)",
+        "execution_evidence_level": evidence_levels(view, outcomes, results),
+        "phase": "post-execution" if results is not None else "pre-execution",
+        "result_binding": None if results is None else {
+            "sha256": canonical_sha256(results),
+            "results": [{"root": r.get("root"), "sha256": r.get("sha256")} for r in results.get("results", []) if isinstance(r, dict)],
+            "execution_bundles": sorted({str(c["execution_bundle_sha256"]) for c in results.get("campaigns", [])
+                                         if isinstance(c, dict) and c.get("execution_bundle_sha256")})},
         "validation_status": sorted(set(((view.get("items", {}).get((view.get("context") or {}).get("spec")) or {})
                                           .get("doc") or {}).get("status") or [])),
         "scope_delta": scope_delta(previous, bundle.get("bundle_digest"), obligations) if previous else None,
@@ -547,6 +561,21 @@ def evaluate(view: dict, diags: list[dict], previous: dict | None = None, vocab=
                 "nothing (HC-05); declaration-based outcomes count for formal use only through an accepted review",
     }
     return report
+
+
+def evidence_levels(view: dict, outcomes: list[dict], results: dict | None):
+    """The execution evidence level behind each root's conclusions (C9): a string before execution or without the
+    run-lineage suite; after execution, per root, declared or campaign-recorded (trusted-submitter is reserved)."""
+    selected = any((s or {}).get("suite_id") == "run-lineage" for s in view.get("suites") or [])
+    if results is None or not selected:
+        return ("not checked: run lineage needs a result binding (pre-execution)" if selected else
+                "not checked: the selected suites have no run lineage (run-lineage/v1, M2c)")
+    levels = {}
+    for o in outcomes:
+        if o["rule_id"] == "r-run.campaign":
+            root = o["obligation_id"].split(":", 1)[1]
+            levels[root] = o.get("level") or "declared"
+    return levels
 
 
 L2_REPEAT_ERRORS = {"semantics.repeated_correction"}
@@ -726,6 +755,8 @@ def main(argv=None) -> int:
     c.add_argument("--profiles-from", type=Path, help="project config whose profiles extend the vocabulary of the legacy L1 run")
     c.add_argument("--snapshots", type=Path, help="snapshot store: reproduce a subject whose definitions changed since freezing")
     c.add_argument("--exceptions", type=Path, help="scoped exceptions (JSON list): judged and listed, never change a state")
+    c.add_argument("--results", type=Path, help="a result binding: assess after execution (run-lineage/v1)")
+    c.add_argument("--project", type=Path, help="project folder or config whose blinding block applies (allowed_outputs)")
     s = sub.add_parser("summary")
     s.add_argument("report", type=Path)
     s.add_argument("--cursor", type=int, default=0)
@@ -767,6 +798,13 @@ def main(argv=None) -> int:
         exceptions = json.loads(args.exceptions.read_text(encoding="utf-8")) if args.exceptions else None
         if exceptions is not None and not isinstance(exceptions, list):
             raise UsageError(f"{args.exceptions} is not a JSON list of exceptions")
+        results = json.loads(args.results.read_text(encoding="utf-8")) if args.results else None
+        if results is not None and not isinstance(results, dict):
+            raise UsageError(f"{args.results} is not a result binding")
+        blinding = None
+        if args.project is not None:
+            cfg_path = args.project / "hep-research.project.json" if args.project.is_dir() else args.project
+            blinding = (json.loads(cfg_path.read_text(encoding="utf-8")) or {}).get("blinding") or {"blinded": [], "allowed_outputs": []}
         view, diags = load_subject(args.bundle, args.root)
         if args.out is not None:
             refs = {(Path(args.root).resolve() / it.get("ref", "")).resolve() for it in view["bundle"].get("items", [])
@@ -780,7 +818,8 @@ def main(argv=None) -> int:
     except (OSError, ValueError, TypeError) as exc:
         print(json.dumps({"status": "usage", "error": str(exc)}, indent=1))
         return 2
-    report = evaluate(view, diags, previous, vocab, snapshots=getattr(args, "snapshots", None), exceptions=exceptions)
+    report = evaluate(view, diags, previous, vocab, snapshots=getattr(args, "snapshots", None), exceptions=exceptions,
+                      results=results, blinding=blinding)
     if args.out is not None:
         args.out.write_text(json.dumps(report, indent=1) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=1))

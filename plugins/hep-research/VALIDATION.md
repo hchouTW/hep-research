@@ -1781,3 +1781,28 @@ Two timing-sensitive tests failed once each under a parallel full run and passed
 and in this run:
 - `test_batch_hardening.SubmissionOutcomesT31` (CI lock);
 - `test_run_all_checks.ModuleTimeoutTests` (earlier).
+
+## V63-M2C (2026-10-16, Python 3.13.2 on macOS 26.5 arm64; branch `v63/d05d-run-lineage`)
+
+`run-lineage/v1` (D05d, D08 run cases), built after the owner approved `m2c-proposal.md`. Design in
+`docs/dev/v6.3/m2c-design.md`.
+
+How it was built:
+- Red tests first, as expected failures: `3dae1ed`.
+- Fixtures are synthetic and in temporary folders (`tests/contracts/v63_runs.py`).
+  - Single runs are hand-made computational-runs.
+  - The campaign is a `core.partition` campaign run with `LocalExecutor`, with an execution bundle frozen by the test
+    (`core.partition.bundle.freeze`), and the adapter's `build_artifact` as the interface record.
+  - Tampering variants edit only those temporary records.
+- `core/partition/` and `examples/batch-partition` are unchanged.
+
+| Check | Result |
+|---|---|
+| `tests/contracts/test_v63_d05d.py` | 17 tests pass: V20, V32, V33, V38, V53, V54, V55, V56, V61, V62, V63, V70, and the post-execution part of V60 |
+| V70 | no report or agent summary of the blinded cases contains the fixture's result value |
+| Refusal matrix (`test_v63_d09`) | three result-binding rows. `validate.py` and `review_measurement_spec.py` refuse; `dependencies.py` accepts (the documented behaviour, listed as a blocker) |
+| Registry | **80 of 80 V parts passing** |
+| `run_all_checks.py` | 25 pass, 0 fail; 3580 tests, 0 failures, 107 skipped |
+| Same with the CI lock (no torch) | 25 pass, 0 fail; 3580 tests, 0 failures, 170 skipped |
+| `check_relocation.py` | pass |
+| Ruff 0.16.10, mypy 2.4.0 | clean |

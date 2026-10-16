@@ -17,6 +17,9 @@ its check context and semantic lock, a check report, a validation record, and a 
 | validation record 1.0.0 | `validate.py` | refuses | refuses | `schema.required` | no |
 | check-context 1.0.0 | `review_measurement_spec.py` | refuses | refuses | exit 2, "not a measurement-spec" | no |
 | check-context 1.0.0 | `dependencies.py` | **accepts** | **accepts** | `status: ok`, exit 0: a file without inputs passes | **yes, until reviewed** |
+| result binding 1.0.0 (M2c) | `validate.py` | refuses | refuses | exit 1, `schema.required` (not an artifact envelope) | no |
+| result binding 1.0.0 (M2c) | `review_measurement_spec.py` | refuses | refuses | exit 2, "not a measurement-spec" | no |
+| result binding 1.0.0 (M2c) | `dependencies.py` | **accepts** | **accepts** | `status: ok`, exit 0, `formal_use_allowed` false: the same documented behaviour as for a check context | **yes, until reviewed** |
 | spec with the capability | `recipe_semantics.py --upstream` | implements (since G-ENFORCE step 1) | **exposes** | this tree reads the keys under the capability it implements and refuses an unknown capability (`semantics.upstream_unknown_capability`); 0.11.0 reads keys without checking (V59) | no (this tree) |
 | spec with the capability | `validate.py` | implements | refuses | 0.11.0: `contract.unknown_capability` | no |
 | analysis bundle 2.0.0 | `attestation.py` (bundle digest) | implements | refuses | 0.11.0 digests it as an execution bundle (`attestation.bundle_changed`) | no |

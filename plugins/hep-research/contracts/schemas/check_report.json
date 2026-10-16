@@ -195,7 +195,15 @@
    "type": "array"
   },
   "execution_evidence_level": {
-   "type": "string"
+   "$comment": "a string before execution (run lineage not checked); after execution, per root: declared or campaign-recorded (trusted-submitter is reserved and never shown)",
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "object"
+    }
+   ]
   },
   "validation_status": {
    "type": "array",
@@ -243,6 +251,39 @@
   },
   "checker_changed": {
    "type": "boolean"
+  },
+  "phase": {
+   "enum": [
+    "pre-execution",
+    "post-execution"
+   ]
+  },
+  "result_binding": {
+   "$comment": "post-execution only: the binding's bytes digest, the cited result digests and execution bundle digests (digests and labels, never values)",
+   "anyOf": [
+    {
+     "type": "null"
+    },
+    {
+     "type": "object",
+     "required": [
+      "sha256",
+      "results",
+      "execution_bundles"
+     ],
+     "properties": {
+      "sha256": {
+       "type": "string"
+      },
+      "results": {
+       "type": "array"
+      },
+      "execution_bundles": {
+       "type": "array"
+      }
+     }
+    }
+   ]
   }
  }
 }
