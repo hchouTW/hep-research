@@ -1,6 +1,6 @@
 # M2c proposal: the `allowed_outputs` matching rule and O15 (v6.3 analysis-check programme)
 
-Status: **proposal, 2026-10-16; the owner decides** (see Decision). This is step 3 of the "Decision change" in
+Status: **approved 2026-10-16; M2c is being built** (see Decision). This is step 3 of the "Decision change" in
 `decision-enforce.md`. M2c (D05d run lineage, D08 run cases) starts only after this decision. Labels: **Confirmed**,
 **Inferred**, **Unresolved**.
 
@@ -105,3 +105,12 @@ Programme owner: hchouTW. Implementer: Claude Code session (self-reviewed, C15).
 1. The matching rule: approve A+B as prefixed exact entries, or choose another.
 2. O15: approve the three answers, or change them.
 3. Build M2c now, or keep it paused.
+
+**Decided 2026-10-16 by the owner (hchouTW): "approve and build".**
+- The matching rule is approved as written: prefixed exact entries `artifact:` and `path:`, no kinds, no patterns.
+  Unprefixed entries match nothing, and a match is declaration-based.
+- The three O15 answers are approved as written.
+- M2c is built now, on synthetic campaigns only, under the brief's guardrails:
+  - no change to `core/partition/`;
+  - no state-changing campaign call outside the tests' own temporary campaigns;
+  - `examples/batch-partition/run.py` only with `--out <tmp>`.

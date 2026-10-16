@@ -27,6 +27,7 @@ PREREQUISITES = {
     "aux_constraint": ["model card constraint", "evaluation", "observes binding (item and pointer)"],
     "shared_parameter": ["evaluation with several models", "shared_parameters members", "model cards"],
 }
+PREREQUISITES["run_root"] = ["chain root intent", "result binding (after execution)", "computational-runs or campaign records"]
 MODEL_KINDS = ("model_root", "model_parameter", "aux_constraint", "shared_parameter")
 
 
@@ -81,7 +82,7 @@ def _subjects(kind: str, view: dict, structural: bool) -> list[tuple[str, dict]]
     insts = {i["instance_id"]: i for i in ctx.get("recipe_instances", []) if isinstance(i, dict) and "instance_id" in i}
     roots = [r for r in ctx.get("roots", []) if isinstance(r, dict) and "root_id" in r]
     comps = (view.get("catalog") or {}).get("compositions", [])
-    if kind == "root":
+    if kind in ("root", "run_root"):
         return [(r["root_id"], {"root": r["root_id"]}) for r in roots]
     if kind == "correction":
         return [(c["effect_id"], {"correction": c["effect_id"]}) for c in corrections(view)]

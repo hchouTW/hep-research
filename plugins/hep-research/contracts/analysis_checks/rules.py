@@ -12,6 +12,7 @@ from contracts.analysis_checks.obligations import corrections as spec_correction
 from contracts.analysis_checks.scope import compare_scopes
 from contracts.effect_catalog import classify
 from contracts.analysis_checks import model as model_rules  # noqa: E402  (model imports this module lazily)
+from contracts.analysis_checks import runs as run_rules  # noqa: E402  (runs imports this module lazily)
 
 
 def outcome(state: str, reason: str, message: str = "", evidence=(), declarations=(), **extra) -> dict:
@@ -736,6 +737,7 @@ RULES = {"r-inv.root": r_inv_root, "r-map.classification": r_map_classification,
          "r-ratio.correlation": r_ratio_correlation}
 
 RULES.update(model_rules.RULES)  # model-card/v1 (contracts.analysis_checks.model)
+RULES.update(run_rules.RULES)  # run-lineage/v1 (contracts.analysis_checks.runs)
 
 
 def evaluate(view: dict, obligations: list[dict], rules: dict | None = None) -> list[dict]:

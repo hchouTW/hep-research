@@ -5,6 +5,34 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- Run lineage `run-lineage/v1` (v6.3 M2c; design `docs/dev/v6.3/m2c-design.md`; decision `m2c-proposal.md`), opt-in
+  and in shadow mode.
+  - **Two-stage check.** A chain context selects the suite, and its obligations are frozen before execution.
+    - Before execution they are unverified (`check.not_executed`).
+    - After execution, `analysis_check.py check ... --results BINDING [--project DIR]` assesses them against a result
+      binding: a new sidecar, `contracts/schemas/result_binding.json`, written after execution and never inside the
+      bundle.
+  - **Five rules** (owner hep-computing):
+    - `r-run.binding`: the same bundle and lock, and the root's unit, scope and binning. A different lock is semantic
+      drift. The attribution is a declaration.
+    - `r-run.status`: one named, successful terminal run or a complete merge. Failures propagate; cycles and
+      duplicate run IDs are rejected.
+    - `r-run.closure` (R-CLOSE): each input maps by explicit reference to a frozen item, an external manifest entry or
+      a bound upstream product. A re-serialized JSON input is a derived input.
+    - `r-run.campaign`: the adapter's computational-run, the `state.json` collection records, the chunk files and one
+      common recorded execution bundle (`digest_of`, `check_campaign`) must agree, or the root stays at the declared
+      level.
+    - `r-run.blinding`: implements the approved `allowed_outputs` matching rule. Only exact `path:` or `artifact:`
+      entries match; unprefixed entries match nothing.
+  - **Reports.** A post-execution report states its phase, the binding's digests and the execution evidence level
+    per root. It carries digests and labels only, never result values.
+  - **`permit.py check-report`** refuses a post-execution report whose cited results are not in the permit's
+    `artifacts`, or whose execution bundle is not the permit's.
+  - **Refusal matrix.** It gains three result-binding rows: `validate.py` and the measurement-spec review refuse a
+    binding, and `dependencies.py` accepts it, the same documented behaviour as for a check context.
+  - All 80 V parts of the programme pass. The run-lineage V cases are V20, V32, V33, V38, V53, V54, V55, V56, V61, V62,
+    V63 and V70, plus the post-execution part of V60.
+
 - New `contracts/custody.py PROJECT_DIR [--local DIR ...]` (v6.3 D12b, V30). It is a custody inventory of every
   profile a project sees, at companion transition stage 1: an inventory and report only, which loads nothing
   differently and relaxes no refusal.

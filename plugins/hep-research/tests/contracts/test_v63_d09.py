@@ -113,6 +113,10 @@ class V59RefusalMatrix(unittest.TestCase):
                                            "variation_id": "nominal", "stage": "estimator"}]
         (cls.root / "upstream-cap.json").write_text(json.dumps(up))
         (cls.root / "upstream-cap-v9.json").write_text(json.dumps(dict(up, required_capabilities=["measurement:correction-keys-v9"])))
+        (cls.root / "result-binding.json").write_text(json.dumps(  # M2c's result binding, a synthetic minimal one
+            {"binding_version": "1.0.0", "kind": "result-binding", "analysis_bundle_sha256": "a" * 64,
+             "semantic_lock_sha256": "b" * 64, "asserted_by": {"kind": "agent", "id": "claude-code"},
+             "runs": [], "campaigns": [], "results": []}))
 
     @classmethod
     def tearDownClass(cls):
@@ -122,7 +126,8 @@ class V59RefusalMatrix(unittest.TestCase):
         r, fmt, entry = self.root, row["format"], row["entry_point"]
         files = {"check-context 1.0.0": r / "check-context.json", "semantic-lock 1.0.0": r / "semantic-lock.json",
                  "check report 1.0.0": r / "report.json", "validation record 1.0.0": r / "validation-selection.json",
-                 "measurement-spec with measurement:correction-keys-v1": r / "spec.json"}
+                 "measurement-spec with measurement:correction-keys-v1": r / "spec.json",
+                 "result binding 1.0.0": r / "result-binding.json"}
         if entry == "contracts/analysis_bundle.py verify":
             code, out, _ = run(entry.split()[0], "verify", self.bundle, "--root", r)
             return "refuses" if code == 1 and out["status"] == "invalid" else "accepts"
