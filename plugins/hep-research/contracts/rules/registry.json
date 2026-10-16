@@ -608,8 +608,11 @@
       "D05c"
      ],
      "host": "CLI",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d05c.V27ExitCodes.test_each_cause_and_the_precedence",
+      "tests.contracts.test_v63_d05c.V27ExitCodes.test_report_outside_the_bundle"
+     ]
     }
    ]
   },
@@ -1058,8 +1061,10 @@
       "D05c"
      ],
      "host": "report adapter",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d05c.V51V52Aggregation.test_rule_not_run"
+     ]
     }
    ]
   },
@@ -1075,8 +1080,10 @@
       "D05c"
      ],
      "host": "report aggregation",
-     "status": "not-run",
-     "tests": []
+     "status": "expected-failure",
+     "tests": [
+      "tests.contracts.test_v63_d05c.V51V52Aggregation.test_invalid_versus_inconsistent"
+     ]
     }
    ]
   },
