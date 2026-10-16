@@ -65,7 +65,6 @@ SHADOW_CASES = {
 
 @NEEDS_AMS
 class ShadowDifferenceReview(unittest.TestCase):
-    @unittest.expectedFailure  # D09: every legacy finding and new violation is classified
     def test_zero_unclassified(self):
         with tempfile.TemporaryDirectory() as td:
             for name, (builder, variant) in SHADOW_CASES.items():

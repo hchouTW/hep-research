@@ -1235,8 +1235,11 @@
       "D09"
      ],
      "host": "regression test",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d09.ShadowDifferenceReview.test_v31_old_contract_version",
+      "tests.contracts.test_v63_d09.ShadowDifferenceReview.test_zero_unclassified"
+     ]
     }
    ]
   },
@@ -1792,8 +1795,11 @@
       "D09"
      ],
      "host": "reader matrix",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d09.V59RefusalMatrix.test_current_column",
+      "tests.contracts.test_v63_d09.V59RefusalMatrix.test_non_refusing_rows_are_blockers"
+     ]
     }
    ]
   },
@@ -2129,12 +2135,12 @@
     "tests.contracts.test_r5_contracts",
     "tests.contracts.test_v63_baseline_gaps",
     "tests.contracts.test_v63_d05b",
-    "tests.contracts.test_v63_d05c"
+    "tests.contracts.test_v63_d05c",
+    "tests.contracts.test_v63_d09"
    ],
    "not_available": [
     "run dependencies and status propagation (D05d)",
-    "digest cycles (D05d)",
-    "compatibility matrix (D09)"
+    "digest cycles (D05d)"
    ],
    "full": false
   },

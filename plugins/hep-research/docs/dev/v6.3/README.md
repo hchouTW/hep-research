@@ -12,6 +12,8 @@ not instructions for the agent, and nothing in them authorizes any use: agent-ru
 | `decision-m2b.md` | after M2b ratio and D11b | what comes next: M3, the model part or a pause |
 | `m2a-design.md` | M2a | data model of the chain slice |
 | `o16-agent-interface.md` | D17 | who calls the check, when, where the summary goes |
+| `refusal-matrix.md` | D09 | what old readers do with each new format; release blockers |
+| `shadow-review.md` | D09 | legacy-versus-new difference review per case |
 | `crflux-review.md` | D03b | term-by-term review of the cosmic-ray level terms; companion public-interface matrix |
 
 ## Decision-record convention (D12b)

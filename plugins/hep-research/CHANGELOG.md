@@ -5,6 +5,12 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- Shadow review and refusal matrix (v6.3 D09). `analysis_check.difference_review` classifies every legacy finding and
+  every new violation (artifact-local, recipe-local, agrees, new-decides, new-only); on the chain and ratio cases none
+  is unclassified. `contracts/rules/refusal_matrix.json` (record `docs/dev/v6.3/refusal-matrix.md`) states what each
+  old entry point does with each new format, measured on this tree and on the 0.11.0 release: two readers do not
+  refuse (`dependencies.py` accepts a check context; `recipe_semantics.py --upstream` reads capability-gated
+  correction keys) and are listed as release blockers.
 - Definition snapshots and migration (v6.3 D11b). `analysis_check.py freeze --snapshots DIR` stores every definition the
   semantic lock pins (coverage contracts, catalog effects, compositions, member-set closures, suites, rule registry)
   content-addressed; `check --snapshots DIR` reproduces a subject whose installed definitions changed from that

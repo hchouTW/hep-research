@@ -520,6 +520,57 @@ def evaluate(view: dict, diags: list[dict], previous: dict | None = None, vocab=
     return report
 
 
+L2_REPEAT_ERRORS = {"semantics.repeated_correction"}
+L2_REPEAT_CONSERVATIVE = {"semantics.repeat_undetermined", "semantics.repeat_distinct_instance"}
+
+
+def difference_review(view: dict, report: dict) -> dict:
+    """Legacy versus new, item by item (D09): every legacy finding and every new violation gets a class; anything the
+    rules below do not explain is 'unclassified', and a shadow rollout needs zero of those.
+
+    Classes: artifact-local (an L1 finding of validate.py; the new suite does not repeat artifact-local rules),
+    recipe-local (an L2 finding other than repetition: it stays with recipe_semantics.py), agrees (an L2 repetition
+    finding and the new repetition outcome on the same recipe's instances say the same: violated with violated,
+    undetermined with unverified), new-decides (an undetermined L2 repetition that the new suite decides as violated
+    from data flow), new-only (a new violation with no legacy error on the items it rests on: a cross-artifact
+    finding)."""
+    insts_of = {}
+    for i in (view.get("context") or {}).get("recipe_instances", []):
+        insts_of.setdefault(i.get("recipe"), set()).add(i.get("instance_id"))
+    rep_state: dict[str, set] = {}
+    for o in report.get("obligations", []):
+        if o["rule_id"] == "r-rep.repetition":
+            for e in o.get("evidence", []):
+                if "instance" in e:
+                    rep_state.setdefault(e["instance"], set()).add(o["state"])
+    rows = []
+    for f in report.get("legacy_findings", []):
+        code, cls = f.get("code"), "unclassified"
+        if f.get("entry") == "contracts/validate.py":
+            cls = "artifact-local"
+        elif f.get("entry") == "contracts/recipe_semantics.py":
+            states = set().union(*(rep_state.get(i, set()) for i in insts_of.get(f.get("item"), ())))
+            if code in L2_REPEAT_ERRORS:
+                cls = "agrees" if "violated" in states else "unclassified"
+            elif code in L2_REPEAT_CONSERVATIVE:
+                cls = ("agrees" if "unverified" in states else "new-decides" if "violated" in states else "unclassified")
+            else:
+                cls = "recipe-local"
+        rows.append({"side": "legacy", "entry": f.get("entry"), "item": f.get("item"), "code": code, "class": cls})
+    legacy_items = {f.get("item") for f in report.get("legacy_findings", []) if f.get("entry") == "contracts/recipe_semantics.py"
+                    and f.get("code") in L2_REPEAT_ERRORS | L2_REPEAT_CONSERVATIVE}
+    for o in report.get("obligations", []):
+        if o["state"] != "violated":
+            continue
+        recipes = {r for r, insts in insts_of.items() for e in o.get("evidence", []) if e.get("instance") in insts}
+        cls = "agrees" if o["rule_id"] == "r-rep.repetition" and recipes & legacy_items else "new-only"
+        rows.append({"side": "new", "obligation_id": o["obligation_id"], "code": o["reason"], "class": cls})
+    counts: dict[str, int] = {}
+    for r in rows:
+        counts[r["class"]] = counts.get(r["class"], 0) + 1
+    return {"rows": rows, "counts": counts, "unclassified": counts.get("unclassified", 0)}
+
+
 def scope_delta(previous: dict, subject: str | None, obligations: list[dict]) -> dict:
     from contracts.analysis_checks.obligations import diff
     old = [{"obligation_id": o["obligation_id"]} for o in previous.get("obligations", []) if isinstance(o, dict)]
