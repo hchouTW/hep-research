@@ -1912,3 +1912,30 @@ Commands, from the plugin root with `PYTHONDONTWRITEBYTECODE=1`, on the final tr
 
 Skipped tests are unverified, not passed: they need PyTorch, pyhf, ROOT, uproot, network access or
 `HEP_SLOW_TESTS=1`. Not run: the slow tier, live routing (no description changed), the CLI host checks.
+
+## UPGRADE-0B (2026-10-17, Python 3.13.2 on macOS 26.5 arm64 with the CI lock: NumPy 2.4.6, SciPy 1.17.1, no torch)
+
+Upgrade plan v1.3, batch 0b (B-01 to B-05) on branch `upgrade/0b` from main `b02cd98`, with the validator-label
+follow-up of F-15. Each item's tests, run on the parent with the item's test files, then on the item's commit:
+
+| Item | Parent | Commit |
+|---|---|---|
+| Validator labels (`e1623b1`) | fail (2 errors) | pass |
+| B-01 budget (`feb19ee`) | fail (5 failures, 3 errors) | pass |
+| B-05 reference soft budget (`2251348`) | fail (1 failure, 3 errors) | pass |
+| B-02 routing tables (`c16ff64`) | fail (8 errors) | pass |
+| B-03 entry references (`485e96c`) | fail (5) | pass |
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 4`, baseline main `b02cd98` | 23 pass, 0 fail, 2 skipped; 3645 tests, 3473 pass, 0 failures, 172 skipped |
+| `run_all_checks.py --no-cli --jobs 6`, `c2b743d` | 23 pass, 0 fail, 2 skipped (the `claude` and `codex` CLI checks); 3660 tests, 3488 pass, 0 failures, 172 skipped |
+| `check_relocation.py`, `c2b743d` | pass; 3660 tests, 3482 pass, 0 failures, 178 skipped |
+| `measure_entrypoints.py --no-cli` | ok, no warnings: SKILL.md 7,895-9,322 bytes; descriptions 883-1,017 characters |
+| SKILL.md plus entry reference | 14,895-25,321 bytes (limit 25,600) |
+| `check_routing_static.py` | ok, 259 cases; `check_ownership.py` pass; `check_layering.py` ok |
+| `reference_inventory.py --check` | pass; 5 soft-budget warnings (references above 24 KB; no routing part above 4 KB) |
+
+Not run: live routing for the six new descriptions, the routing tables and the 18 new cases (gate G2; estimate
+$19.90 for all 259 cases, $1.36 for the 18 new ones, from the 2026-10-15 run's cost per turn), the communication
+behavioral evaluation, the slow tier, the CLI host checks. Skipped tests are unverified, not passed.
