@@ -25,7 +25,6 @@ def codes(art):
 
 
 class UpstreamCapabilities(unittest.TestCase):
-    @unittest.expectedFailure  # G-ENFORCE step 1: an unknown capability is refused
     def test_unknown_capability_is_refused(self):
         found = codes(upstream(["measurement:correction-keys-v9"]))
         self.assertIn("semantics.upstream_unknown_capability", found)

@@ -54,7 +54,8 @@
     "semantics.upstream_unmapped",
     "semantics.upstream_unrecorded",
     "semantics.input_effects_unverified",
-    "semantics.input_effects_uncorroborated"
+    "semantics.input_effects_uncorroborated",
+    "semantics.upstream_unknown_capability"
    ],
    "native_from": null,
    "v_cases": [],

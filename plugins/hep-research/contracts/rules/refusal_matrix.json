@@ -57,16 +57,17 @@
    "evidence": "status ok, exit 0: a file without inputs passes",
    "release_0_11_0": "accepts",
    "blocker": true,
-   "note": "does not misread a field (it finds no inputs), but reports a non-artifact as dependency-consistent; refuse non-envelopes before any release that ships v2 bundles"
+   "note": "does not misread a field (it finds no inputs), but reports a non-artifact as dependency-consistent; refuse non-envelopes before any release that ships v2 bundles",
+   "resolution": "documented as intended: the docstring says an artifact with no inputs, or '{}', is consistent but not thereby allowed; it reads no field of the context. Closing this row needs a non-author review (G-ENFORCE step 2)"
   },
   {
    "format": "measurement-spec with measurement:correction-keys-v1",
    "entry_point": "contracts/recipe_semantics.py --upstream",
-   "current": "exposes",
-   "evidence": "reads the correction keys without checking required_capabilities (V59)",
+   "current": "implements",
+   "evidence": "reads the correction keys under measurement:correction-keys-v1, which it implements; refuses an upstream artifact with an unknown capability (semantics.upstream_unknown_capability)",
    "release_0_11_0": "exposes",
-   "blocker": true,
-   "note": "upstream_instances reads target_scope and the other keys from any artifact; give recipe_semantics a capability check, or document that keys are read only from artifacts it is given, before release"
+   "blocker": false,
+   "note": "0.11.0 reads the same keys with the same meaning (R4) and never checks capabilities; a 0.11.0 reader that meets a later capability would still read it: the release column stays 'exposes' (already released)"
   },
   {
    "format": "measurement-spec with measurement:correction-keys-v1",

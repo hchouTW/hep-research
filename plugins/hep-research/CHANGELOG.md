@@ -5,6 +5,9 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- `recipe_semantics.py` refuses an `--upstream` artifact that requires a capability it does not implement
+  (`semantics.upstream_unknown_capability`; nothing is read from it). No existing fixture declares such a capability,
+  so no existing output changes (v6.3 G-ENFORCE step 1, refusal matrix).
 - Advisory report check (v6.3 D10): `permit.py check-report` counts an analysis-check report only among an accepted,
   bound review's evidence, about the permit's bundle, consistent with its own obligations (a hand-edited pass fails),
   from the suites and checker of the custodian's purpose policy, complete and without violation; a pre-execution

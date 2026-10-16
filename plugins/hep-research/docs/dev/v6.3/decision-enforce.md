@@ -49,3 +49,10 @@ limits to public and synthetic diagnostics).
 **Keep every rule in shadow mode**, 2026-10-16: the maintainer's instruction in the session was to follow the
 recommendation. The implementer works on step 1 (non-refusing readers). Steps 2 and 3 (reviewers, custodian adoption)
 are the maintainer's and custodian's.
+
+**Step 1 outcome (2026-10-16):**
+- `recipe_semantics.py` now refuses unknown upstream capabilities.
+- `dependencies.py`'s acceptance of a file without inputs is documented, intended behaviour. That row stays a blocker
+  until a non-author reviewer accepts the rationale (`refusal-matrix.md`).
+
+The reader-matrix condition therefore waits on step 2, like the review condition.

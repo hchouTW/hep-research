@@ -112,6 +112,7 @@ class V59RefusalMatrix(unittest.TestCase):
                                            "applied_in": "estimator", "target_scope": SCOPE, "calibration_digest": "none",
                                            "variation_id": "nominal", "stage": "estimator"}]
         (cls.root / "upstream-cap.json").write_text(json.dumps(up))
+        (cls.root / "upstream-cap-v9.json").write_text(json.dumps(dict(up, required_capabilities=["measurement:correction-keys-v9"])))
 
     @classmethod
     def tearDownClass(cls):
@@ -137,11 +138,15 @@ class V59RefusalMatrix(unittest.TestCase):
             code, out, _ = run(entry, files[fmt], "--root", r)
             return "accepts" if code == 0 and out["status"] == "ok" else "refuses"
         if entry == "contracts/recipe_semantics.py --upstream":
-            code, out, _ = run("contracts/recipe_semantics.py", ROOT / "contracts" / "semantics" / "recipes" / "flux_from_counts.json",
-                               "--upstream", r / "upstream-cap.json")
-            found = {f["code"] for rec in out["recipes"] for f in rec["findings"]}
-            reads_keys = "semantics.repeat_undetermined" in found or "semantics.repeated_correction" in found
-            return "exposes" if reads_keys and not any("capabilit" in c for c in found) else "refuses"
+            def found(upstream):
+                _, out, _ = run("contracts/recipe_semantics.py", ROOT / "contracts" / "semantics" / "recipes" /
+                                "flux_from_counts.json", "--upstream", upstream)
+                return {f["code"] for rec in out["recipes"] for f in rec["findings"]}
+            known, unknown = found(r / "upstream-cap.json"), found(r / "upstream-cap-v9.json")
+            reads_keys = bool({"semantics.repeat_undetermined", "semantics.repeated_correction"} & known)
+            if reads_keys and "semantics.upstream_unknown_capability" in unknown:
+                return "implements"
+            return "exposes" if reads_keys else "refuses"
         if entry == "contracts/attestation.py (bundle digest)":
             from contracts.attestation import _bundle_digest
             bundle = json.loads(self.bundle.read_text())

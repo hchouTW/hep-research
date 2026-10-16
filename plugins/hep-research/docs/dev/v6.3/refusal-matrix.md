@@ -16,8 +16,8 @@ its check context and semantic lock, a check report, a validation record, and a 
 | check report 1.0.0 | `validate.py` | refuses | refuses | `schema.required` | no |
 | validation record 1.0.0 | `validate.py` | refuses | refuses | `schema.required` | no |
 | check-context 1.0.0 | `review_measurement_spec.py` | refuses | refuses | exit 2, "not a measurement-spec" | no |
-| check-context 1.0.0 | `dependencies.py` | **accepts** | **accepts** | `status: ok`, exit 0: a file without inputs passes | **yes** |
-| spec with the capability | `recipe_semantics.py --upstream` | **exposes** | **exposes** | reads the correction keys (`repeat_undetermined`) without checking `required_capabilities` (V59) | **yes** |
+| check-context 1.0.0 | `dependencies.py` | **accepts** | **accepts** | `status: ok`, exit 0: a file without inputs passes | **yes, until reviewed** |
+| spec with the capability | `recipe_semantics.py --upstream` | implements (since G-ENFORCE step 1) | **exposes** | this tree reads the keys under the capability it implements and refuses an unknown capability (`semantics.upstream_unknown_capability`); 0.11.0 reads keys without checking (V59) | no (this tree) |
 | spec with the capability | `validate.py` | implements | refuses | 0.11.0: `contract.unknown_capability` | no |
 | analysis bundle 2.0.0 | `attestation.py` (bundle digest) | implements | refuses | 0.11.0 digests it as an execution bundle (`attestation.bundle_changed`) | no |
 
@@ -32,3 +32,16 @@ reads a v2 bundle, and gives `attestation.py` the v2 digest rule.
 A v2 bundle or a capability spec should still not ship to users of these readers until each refuses explicitly (or
 the behaviour is documented as intended and reviewed). The V59 rule holds: **not released before a real refusal
 threshold exists.**
+
+## G-ENFORCE step 1 (2026-10-16)
+
+- **`recipe_semantics.py --upstream`: fixed (Confirmed, `tests.contracts.test_v63_refusal_blockers`).** It now refuses an
+  upstream artifact that requires a capability it does not implement, and reads the correction keys only under
+  capabilities it implements. The 0.11.0 release reads the same R4 keys with the same meaning, so a 0.11.0 reader of a
+  capability spec does not misread it. It would read any later capability unchecked; that is already released and
+  is recorded, not fixable here.
+- **`dependencies.py`: documented, awaiting review (Inferred).** Its module docstring states that an artifact with no
+  inputs, or `{}`, "is consistent but is not thereby allowed". It reads no field of a check context, and its verdict
+  is only about dependencies. Making it refuse non-envelopes would change documented behaviour and existing tests,
+  so the row stays a blocker until a non-author reviewer accepts this rationale (G-ENFORCE step 2) or asks for a
+  refusal.
