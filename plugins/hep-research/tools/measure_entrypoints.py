@@ -2,8 +2,15 @@
 """Measure loading budgets: SKILL.md lines/bytes, description length, registry and
 profile index sizes, and (when the Claude Code CLI is available) the host's always-on token estimate.
 
-Usage: python3 tools/measure_entrypoints.py [--no-cli]
-Exit 0 within budget or documented exception, 1 otherwise. Output: JSON.
+Budget (upgrade plan B-01): a SKILL.md above skill_bytes_target (12,288 bytes) is a warning, which
+tools/budget_exceptions.json may waive ("<skill>:bytes": reason); above skill_bytes_max (16,384 bytes) or above
+skill_lines_max (500 lines) it fails, with no exception. A description is at most 1,024 characters (the Agent Skills
+specification, https://agentskills.io/specification) and the profile registry at most 3,072 bytes
+(contracts/registry.py REGISTRY_BUDGET); a profile index.md above 4,096 bytes fails unless excepted ("<id>:index").
+
+Usage: python3 tools/measure_entrypoints.py [--no-cli] [--root PLUGIN_ROOT]
+Exit 0 when nothing is over budget (warnings do not change it), 1 otherwise. Output: JSON with over_budget and
+warnings.
 """
 from __future__ import annotations
 
@@ -15,8 +22,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-BUDGET = {"skill_bytes": 8192, "skill_lines_max": 180, "description_chars": 1024, "registry_bytes": 3072, "index_bytes": 4096}
-EXCEPTIONS = ROOT / "tools" / "budget_exceptions.json"
+BUDGET = {"skill_bytes_target": 12288, "skill_bytes_max": 16384, "skill_lines_max": 500, "description_chars": 1024, "registry_bytes": 3072, "index_bytes": 4096}
 
 
 def cli_always_on() -> dict:
@@ -37,19 +43,26 @@ def cli_always_on() -> dict:
 
 
 def main(argv=None) -> int:
-    args = sys.argv[1:] if argv is None else argv
-    exceptions = json.loads(EXCEPTIONS.read_text()) if EXCEPTIONS.is_file() else {}
-    rows, over = [], []
-    for skill in sorted((ROOT / "skills").glob("*/SKILL.md")):
+    args = list(sys.argv[1:] if argv is None else argv)
+    root = Path(args[args.index("--root") + 1]).resolve() if "--root" in args else ROOT
+    exceptions_file = root / "tools" / "budget_exceptions.json"
+    exceptions = json.loads(exceptions_file.read_text()) if exceptions_file.is_file() else {}
+    rows, over, warnings = [], [], []
+    for skill in sorted((root / "skills").glob("*/SKILL.md")):
         text = skill.read_text(encoding="utf-8")
         m = re.search(r'^description:\s*"?(.*?)"?\s*$', text, re.M)
         desc = m.group(1) if m else ""
         row = {"skill": skill.parent.name, "lines": text.count("\n"), "bytes": len(text.encode()), "description_chars": len(desc)}
         rows.append(row)
-        for key, limit in (("bytes", BUDGET["skill_bytes"]), ("lines", BUDGET["skill_lines_max"]), ("description_chars", BUDGET["description_chars"])):
-            if row[key] > limit and f"{row['skill']}:{key}" not in exceptions:
+        # hard limits: never waived
+        for key, limit in (("bytes", BUDGET["skill_bytes_max"]), ("lines", BUDGET["skill_lines_max"]),
+                           ("description_chars", BUDGET["description_chars"])):
+            if row[key] > limit:
                 over.append(f"{row['skill']} {key}={row[key]} > {limit}")
-    reg = ROOT / "profiles" / "registry.json"
+        if BUDGET["skill_bytes_target"] < row["bytes"] <= BUDGET["skill_bytes_max"] and f"{row['skill']}:bytes" not in exceptions:
+            warnings.append(f"{row['skill']} bytes={row['bytes']} > target {BUDGET['skill_bytes_target']} "
+                            "(warning; waive in tools/budget_exceptions.json with a reason)")
+    reg = root / "profiles" / "registry.json"
     reg_bytes = reg.stat().st_size
     if reg_bytes > BUDGET["registry_bytes"]:
         over.append(f"registry {reg_bytes} B > {BUDGET['registry_bytes']}")
@@ -63,9 +76,9 @@ def main(argv=None) -> int:
     result = {
         "ok": not over, "budget": BUDGET, "skills": rows,
         "totals": {"skill_bytes": sum(r["bytes"] for r in rows), "description_chars": sum(r["description_chars"] for r in rows)},
-        "registry_bytes": reg_bytes, "profile_index_bytes": indexes, "over_budget": over,
+        "registry_bytes": reg_bytes, "profile_index_bytes": indexes, "over_budget": over, "warnings": warnings,
         "exceptions": exceptions, "host_estimate": {"status": "skip", "reason": "--no-cli"} if "--no-cli" in args else cli_always_on(),
-        "note": "Line counts are informative: SKILL.md paragraphs are unwrapped, so bytes are the binding budget.",
+        "note": "Bytes are the main budget (SKILL.md paragraphs are unwrapped); lines are capped at 500.",
     }
     print(json.dumps(result, indent=1))
     return 0 if result["ok"] else 1

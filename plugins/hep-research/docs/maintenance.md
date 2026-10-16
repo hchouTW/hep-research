@@ -64,8 +64,12 @@ unverified, never passing.
 
 ## SKILL.md size budget
 
-Every `SKILL.md` must stay at or under 8,192 bytes (`tools/measure_entrypoints.py`, run by `run_all_checks.py`).
-On 2026-10-13 the three files that sat at the limit were trimmed by moving their reference and script lists into index
+`tools/measure_entrypoints.py` (run by `run_all_checks.py`) sets the budget (upgrade plan B-01, 2026-10-17): a
+`SKILL.md` above 12,288 bytes gives a warning, which an entry `"<skill>:bytes": "<reason>"` in
+`tools/budget_exceptions.json` may waive; above 16,384 bytes or 500 lines it fails, with no exception. A description
+stays at or under 1,024 characters, the limit of the [Agent Skills specification](https://agentskills.io/specification),
+and the profile registry at or under 3,072 bytes (`REGISTRY_BUDGET` in `contracts/registry.py`). Until 2026-10-17
+the budget was 8,192 bytes per `SKILL.md`. On 2026-10-13 the three files that sat at the limit were trimmed by moving their reference and script lists into index
 sections of their primary reference (`hep-detector`: section 11 of the principles summary; `hep-statistics`:
 "Skill scripts" in the core/stats guide; `hep-computing`: "Scripts" in the engineering playbook); they now measure
 6,566, 7,545 and 7,598 bytes. Measured on 2026-10-17 (upgrade batch 0a, `tools/measure_entrypoints.py --no-cli`):
