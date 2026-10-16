@@ -32,9 +32,11 @@ Input JSON: {"features": ["a", "b"], "training": [[...], ...], "queries": [[...]
 The fitted method is the importable class DomainModel (fit, classify, to_dict, from_dict), which
 assets/train_classifier.py stores in its checkpoint and assets/inference.py applies: one domain method for training,
 inference and surrogates. The false-positive estimate comes with a Clopper-Pearson 68.27% interval.
-Output: JSON report (strict JSON, no NaN or Infinity) on stdout.
+Output: JSON report (strict JSON, no NaN or Infinity) on stdout, with "status" (passed, failed, rejected, incomplete,
+  missing-dependency; core/status.py) and "status_label" (--status, the inputs' artifact label).
 Exit codes: 0 every query inside, 1 any query outside or sparse, 2 bad input (malformed JSON, wrong dimensions,
-  too few training points to calibrate), 3 numerical failure (for example a covariance that cannot be decomposed).
+  too few training points to calibrate), 3 numerical failure (for example a covariance that cannot be decomposed) or
+  NumPy/SciPy missing.
 Usage notes / assumptions: requires numpy and scipy (core dependencies of the plugin); PyTorch is not required.
   Needs at least 50 training points at the default --holdout-fraction 0.2 (10 held out). Calibration assumes the
   held-out points are exchangeable with in-distribution queries (an i.i.d. training design); for a grid or Latin
@@ -498,18 +500,19 @@ def main(argv=None) -> int:
         with np.errstate(over="ignore", invalid="ignore", divide="ignore"):  # overflow is caught as exit 3
             rep = check(payload, args.quantile, args.k, args.holdout_fraction, args.seed, args.box_strict)
             rep["status_label"] = args.status
+            rep["status"] = "passed" if rep["passed"] else "failed"
         try:
             text = json.dumps(rep, indent=1, allow_nan=False)
         except ValueError as exc:  # a non-finite number reached the report
             raise NumericalFailure(str(exc)) from exc
     except ImportError as exc:
-        print(json.dumps({"error": f"this check needs numpy and scipy: {exc}"}))
-        return 2
+        print(json.dumps({"status": "missing-dependency", "error": f"this check needs numpy and scipy: {exc}"}))
+        return 3
     except NumericalFailure as exc:
-        print(json.dumps({"error": f"numerical failure: {exc}"}))
+        print(json.dumps({"status": "incomplete", "error": f"numerical failure: {exc}"}))
         return 3
     except (OSError, ValueError, KeyError, IndexError, TypeError) as exc:  # malformed input is a JSON error
-        print(json.dumps({"error": f"{type(exc).__name__}: {exc}"}))
+        print(json.dumps({"status": "rejected", "error": f"{type(exc).__name__}: {exc}"}))
         return 2
     print(text)
     return 0 if rep["passed"] else 1

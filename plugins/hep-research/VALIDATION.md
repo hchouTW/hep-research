@@ -1874,3 +1874,41 @@ The companion's namespace check against main `a6adf48` reported no findings.
 |---|---|
 | `run_all_checks.py`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail; 3584 tests, 0 failures, 61 skipped |
 | Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 25 pass, 0 fail; 3584 tests, 0 failures, 170 skipped |
+
+## UPGRADE-0A (2026-10-17, Python 3.13.2 on macOS 26.5 arm64 with the CI lock: NumPy 2.4.6, SciPy 1.17.1, no torch; F-08 also in the E2 venv with PyTorch 2.14.1 CPU)
+
+Upgrade plan v1.3, batch 0a (F-01 to F-15) on branch `upgrade/0a` from main `62f2dd6`. Every item has a regression
+test that fails on its parent commit and passes on the fix commit; the new tests were run on the parent with the fix
+commit's test files (F-10 with `PYTHONDONTWRITEBYTECODE` unset, F-08 in the E2 venv).
+
+| Item | Parent | Fix |
+|---|---|---|
+| F-01 grid-fit status | fail (1) | pass |
+| F-02 paradigm | fail (5 errors) | pass |
+| F-03 Li & Ma labels | fail (1 error) | pass |
+| F-04 status enum, CLI contract | fail (import; with `core/status.py` alone: 3 failures listing the noncompliant scripts) | pass |
+| F-05 review verdicts | fail (4) | pass |
+| F-06 defaults reported | fail (1 failure, 5 errors) | pass |
+| F-07 merge rules | fail (2 failures, 2 errors) | pass |
+| F-08 hashes (E2, PyTorch) | fail (1 failure, 1 error) | pass |
+| F-09 plugin models | fail (1 failure, 3 errors) | pass |
+| F-10 bytecode | fail (1) | pass |
+| F-11 documentation consistency | fail (8) | pass |
+| F-12 skeleton, Simplified Chinese | fail (7) | pass |
+| F-13 side effects | fail (3 failures, 3 errors) | pass |
+| F-14 levels | fail (2) | pass |
+| F-15 documentation claims | fail (2) | pass |
+
+Commands, from the plugin root with `PYTHONDONTWRITEBYTECODE=1`, on the final tree:
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, baseline main `62f2dd6` | 25 pass, 0 fail; 3584 tests, 3414 pass, 0 failures, 170 skipped |
+| `run_all_checks.py --no-cli --jobs 6`, batch head | 23 pass, 0 fail, 2 skipped (the `claude` and `codex` CLI checks); 3644 tests, 3472 pass, 0 failures, 172 skipped |
+| `check_relocation.py` | pass; 3644 tests, 3466 pass, 0 failures, 178 skipped |
+| `measure_entrypoints.py --no-cli` | ok: SKILL.md 7,558-8,145 bytes, 57-71 lines; descriptions 883-1,017 characters |
+| `check_layering.py`, `check_routing_static.py` (241 cases), `check_ownership.py` | pass |
+| `ruff check core contracts`, `mypy` (CI pins) | pass |
+
+Skipped tests are unverified, not passed: they need PyTorch, pyhf, ROOT, uproot, network access or
+`HEP_SLOW_TESTS=1`. Not run: the slow tier, live routing (no description changed), the CLI host checks.

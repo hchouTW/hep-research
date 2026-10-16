@@ -37,6 +37,9 @@ reports below_threshold_intervals, the ceiling is the end of the first separated
 highest_separated is the top of the last separated range, and ceiling_is_lower_bound is
 true when the scan limit is reached still separated (the true end lies beyond it).
 See <plugin root>/skills/hep-detector/references/particle-identification.md.
+Defaults (F-06): the output lists the values used ("inputs") and those taken by default ("defaults_used"); a
+defaulted detector parameter of the chosen mode (tof: path 1 m, time resolution 60 ps; dedx: silicon, 6%;
+velocity: 1e-3) is also a warning, because the default describes no particular detector.
 Status: --status (default unvalidated; one of the core artifact_statuses) is echoed as status.
 Exit codes: 0 ok; 1 the computation failed or the input file is unreadable or invalid (JSON with ok false);
 2 invalid input (JSON with error_kind invalid-input on stdout, the usage on stderr).
@@ -47,6 +50,10 @@ import json
 import math
 import sys
 
+DEFAULTS = {'path': 1.0, 'time_resolution': 60.0, 'material': 'silicon', 'relative_resolution': 0.06,
+            'beta_resolution': 1e-3, 'threshold': 3.0, 'convention': 'single'}
+MODE_PARAMETERS = {'tof': ('path', 'time_resolution'), 'dedx': ('material', 'relative_resolution'),
+                   'velocity': ('beta_resolution',)}  # detector parameters per mode: a default is warned (F-06)
 STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
             'validated-in-scope')  # contracts/vocab/core.json artifact_statuses
 
@@ -451,25 +458,35 @@ def main():
     given.add_argument('--momentum', type=float, default=None, help='GeV/c (default 2)')
     given.add_argument('--rigidity', type=float, default=None,
                        help='GV; each species then has p = |z| * R')
-    parser.add_argument('--path', type=float, default=1.0, help='tof: flight path in m')
-    parser.add_argument('--time-resolution', type=float, default=60.0,
-                        dest='time_resolution', help='tof: timing resolution in ps')
-    parser.add_argument('--material', default='silicon',
-                        choices=sorted(MATERIALS), help='dedx: absorber material')
-    parser.add_argument('--relative-resolution', type=float, default=0.06,
-                        dest='relative_resolution', help='dedx: relative dE/dx resolution')
-    parser.add_argument('--beta-resolution', type=float, default=1e-3,
-                        dest='beta_resolution', help='velocity: relative dbeta/beta')
-    parser.add_argument('--threshold', type=float, default=3.0,
+    parser.add_argument('--path', type=float, default=None, help='tof: flight path in m (default 1, warned)')
+    parser.add_argument('--time-resolution', type=float, default=None,
+                        dest='time_resolution', help='tof: timing resolution in ps (default 60, warned)')
+    parser.add_argument('--material', default=None,
+                        choices=sorted(MATERIALS), help='dedx: absorber material (default silicon, warned)')
+    parser.add_argument('--relative-resolution', type=float, default=None,
+                        dest='relative_resolution', help='dedx: relative dE/dx resolution (default 0.06, warned)')
+    parser.add_argument('--beta-resolution', type=float, default=None,
+                        dest='beta_resolution', help='velocity: relative dbeta/beta (default 1e-3, warned)')
+    parser.add_argument('--threshold', type=float, default=None,
                         help='separation in sigma that counts as separated (default 3)')
-    parser.add_argument('--convention', choices=CONVENTIONS, default='single',
+    parser.add_argument('--convention', choices=CONVENTIONS, default=None,
                         help='single: delta/sigma of species A (default); quadrature: '
                              'delta/sqrt(sigma_A^2 + sigma_B^2)')
     parser.add_argument('--status', choices=STATUSES, default='unvalidated',
                         help='status label of the inputs, echoed as status (default unvalidated)')
     args = parser.parse_args()
 
+    # F-06: a parameter left out takes its default, which is reported in defaults_used; a defaulted detector parameter
+    # of the chosen mode is also a warning (the default describes no particular detector)
+    defaults_used = {}
+    for name, default in DEFAULTS.items():
+        if getattr(args, name) is None:
+            setattr(args, name, default)
+            if name in MODE_PARAMETERS[args.mode] or name in ('threshold', 'convention'):
+                defaults_used[name] = default
     input_variable = 'rigidity' if args.rigidity is not None else 'momentum'
+    if args.rigidity is None and args.momentum is None:
+        defaults_used['momentum'] = 2.0
     value = args.rigidity if args.rigidity is not None else (
         args.momentum if args.momentum is not None else 2.0)
     try:
@@ -487,7 +504,8 @@ def main():
     except (ValueError, KeyError) as exc:
         parser.error(str(exc))
 
-    warnings = []
+    warnings = [f'{name} not given: the default {defaults_used[name]!r} describes no particular detector; give the '
+                'value of yours' for name in MODE_PARAMETERS[args.mode] if name in defaults_used]
     if args.mode == 'tof' and not TIME_RESOLUTION_RANGE_PS[0] <= args.time_resolution <= TIME_RESOLUTION_RANGE_PS[1]:
         warnings.append(f'time resolution {args.time_resolution:g} ps is outside 1 ps - 10 ns; check the unit (ps)')
     if args.mode == 'dedx' and not DEDX_RESOLUTION_RANGE[0] <= args.relative_resolution <= DEDX_RESOLUTION_RANGE[1]:
@@ -512,8 +530,13 @@ def main():
         result['ceiling_is_lower_bound'] = scan['ceiling_is_lower_bound']
         result['below_threshold_intervals'] = scan['below_threshold_intervals']
         result['not_evaluable_intervals'] = scan['not_evaluable_intervals']
+        inputs = {'mode': args.mode, 'species': list(args.species), input_variable: value,
+                  **{name: getattr(args, name) for name in MODE_PARAMETERS[args.mode]},
+                  'threshold': args.threshold, 'convention': args.convention}
         text = json.dumps({
             'status': args.status,
+            'inputs': inputs,
+            'defaults_used': defaults_used,
             **result,
             'note': ('n_sigma follows separation_convention (single: one measurement of the '
                      'reference species; quadrature: both widths). The ceiling is the end of '

@@ -154,7 +154,7 @@ class LocalExecutor(Executor):
 
     def prepare(self, ctx: dict) -> dict:
         argv = [[sys.executable, str(ctx["runner"]), "--spec", str(ctx["spec"]), "--out-dir",
-                 str(Path(ctx["outputs_dir"]) / r["chunk_id"]), "--chunk", r["chunk_id"], "--attempt", r["attempt_id"]]
+                 str(Path(ctx["outputs_dir"]) / r["chunk_id"]), "--chunk", r["chunk_id"], "--attempt", r["attempt_id"], "--local-worker"]
                 for r in ctx["rows"]]
         return {"backend": self.name, "submission_id": ctx["submission_id"], "submission_dir": str(ctx["submission_dir"]),
                 "files": {"commands.json": json.dumps(argv, indent=1) + "\n"}, "submit_argv": ["(in-process)"],

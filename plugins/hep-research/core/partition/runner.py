@@ -7,7 +7,7 @@ spec's) before a job runs it. It never chooses a seed or a chunk on its own: the
 from the submission map written at submit time (--map MAP --index N, where N is the scheduler's array index), and the
 seed, start and stop come from the manifest inside the spec.
 
-  runner.py --spec SPEC (--out-dir DIR | --out-root ROOT) (--chunk ID --attempt ATTEMPT | --map MAP --index N)
+  runner.py --spec SPEC (--out-dir DIR | --out-root ROOT) (--chunk ID --attempt ATTEMPT | --map MAP --index N) [--local-worker]
 
 SPEC is JSON {"manifest": {...}, "cmd": "... {start} {stop} {seed} {out} {id} ...", "container_image": optional}.
 The command writes a JSON result to {out}; exit 0 means success. With --out-root, DIR is ROOT/<chunk ID>. The runner
@@ -15,6 +15,10 @@ then writes
   DIR/<attempt>.json       {"chunk_id", "manifest_hash", "attempt_id", "start", "stop", "seed", "result"}
   DIR/<attempt>.meta.json  {"chunk_id", "manifest_hash", "attempt_id", "host", "start_time", "end_time", "exit_code",
                             "signal", "python", "container_image", "run_file", "runner_error"}
+The worker command is stopped after the spec's worker_timeout_s; with --local-worker (the local executor passes it) and no
+worker_timeout_s it is stopped after DEFAULT_LOCAL_WORKER_TIMEOUT_S, since no scheduler bounds it (F-13); on a batch
+node without worker_timeout_s the scheduler's wall time is the limit. The meta file records worker_timeout_s and
+worker_timeout_source (spec, default for a local worker, none (batch node)).
 Both are written to a temporary file in DIR and then linked into place without overwriting: a second execution of
 the same attempt (an eviction or a requeue that ran the job again) writes <attempt>.rerun-<k>.json instead, which
 collection records as a duplicate and never sums. A failed command leaves only the meta file.
@@ -42,6 +46,7 @@ import tempfile
 from pathlib import Path
 
 RESULT_ERROR = 70
+DEFAULT_LOCAL_WORKER_TIMEOUT_S = 3600  # [Proposal] one hour for a local worker when the campaign sets no worker_timeout_s
 
 
 def _now() -> str:
@@ -114,6 +119,8 @@ def main(argv=None) -> int:
     ap.add_argument("--attempt")
     ap.add_argument("--map")
     ap.add_argument("--index", type=int)
+    ap.add_argument("--local-worker", action="store_true",
+                    help=f"a local worker: default worker timeout {DEFAULT_LOCAL_WORKER_TIMEOUT_S} s when the spec sets none")
     args = ap.parse_args(argv)
     try:
         if (args.out_dir is None) == (args.out_root is None):
@@ -135,6 +142,14 @@ def main(argv=None) -> int:
             "start_time": _now(), "python": platform.python_version(),
             "container_image": spec.get("container_image") or os.environ.get("HEP_CONTAINER_IMAGE"),
             "signal": None, "runner_error": None, "run_file": None}
+    timeout = spec.get("worker_timeout_s")
+    if timeout is not None:
+        meta.update(worker_timeout_s=timeout, worker_timeout_source="spec")
+    elif args.local_worker:
+        timeout = DEFAULT_LOCAL_WORKER_TIMEOUT_S
+        meta.update(worker_timeout_s=timeout, worker_timeout_source="default for a local worker")
+    else:
+        meta.update(worker_timeout_s=None, worker_timeout_source="none (batch node)")
     refused = protected_refusal([args.spec, str(out_dir)])
     if refused:
         meta.update(runner_error=refused, exit_code=3, end_time=_now())
@@ -154,12 +169,12 @@ def main(argv=None) -> int:
         if cmd is not None:
             sys.stdout.flush()
             try:
-                proc = subprocess.run(cmd, timeout=spec.get("worker_timeout_s"))  # None: no limit
+                proc = subprocess.run(cmd, timeout=timeout)  # None (a batch node without one): no limit
                 code = proc.returncode
                 if code < 0:
                     meta["signal"], code = -code, 128 - code
             except subprocess.TimeoutExpired:
-                meta["runner_error"], code = f"worker command exceeded worker_timeout_s={spec['worker_timeout_s']}", 124
+                meta["runner_error"], code = f"worker command exceeded worker_timeout_s={timeout}", 124
         if code == 0:
             try:
                 result = json.loads(out.read_text(encoding="utf-8"))

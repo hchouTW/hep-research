@@ -85,7 +85,7 @@ class ResultArtifactStatus(unittest.TestCase):
             self.assertEqual((code, art), (2, None))
 
     def test_missing_status_needs_an_explicit_assumption(self):
-        """STH-T1.7: li_ma_significance.py prints no status; that is not a converged fit."""
+        """STH-T1.7: an output without a status (li_ma_significance.py's before F-03) is not a converged fit."""
         li_ma = {"method": "Li-Ma", "significance": 2.1, "n_on": 30, "n_off": 100, "alpha": 0.1}
         with tempfile.TemporaryDirectory() as tmp:
             self.assertEqual(self.write(tmp, li_ma), (2, None))
@@ -105,6 +105,74 @@ class ResultArtifactStatus(unittest.TestCase):
             self.assertEqual(self.write(tmp, [1, 2, 3]), (2, None))
             code, art = self.write(tmp, ok, "--coverage-check", "toys", "--coverage-n-toys", "500", "--coverage-value", "0.95")
             self.assertEqual(code, 0)
+
+
+class ResultArtifactParadigm(unittest.TestCase):
+    """F-02: an artifact written from an MCMC result has paradigm 'bayesian' with its priors, sampler and convergence
+    (before the fix every artifact was written as frequentist). SYNTHETIC chains."""
+
+    def mcmc(self, tmp, chains, *extra):
+        import numpy as np
+        import bayes_diagnostics as bd
+        rng = np.random.default_rng(7)
+        draws = rng.normal(1.0, 0.2, size=(4, 1000)) if chains is None else chains
+        diag = bd.diagnose({"mu": draws}, (0.05, 0.5, 0.95), 1.01, 100)
+        src, smp, out = Path(tmp) / "diag.json", Path(tmp) / "sampler.json", Path(tmp) / "res.json"
+        src.write_text(json.dumps(diag))
+        smp.write_text(json.dumps({"name": "random-walk Metropolis (synthetic)", "chains": 4, "draws": 1000}))
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            code = ra.main(["--cli-output", str(src), "--paradigm", "bayesian", "--poi", "mu", "--prior",
+                            "mu=uniform(0, 10)", "--sampler", str(smp), "--label", "synthetic",
+                            "--artifact-id", "synthetic-f02", "--out", str(out), *extra])
+        return code, json.loads(buf.getvalue()), (json.loads(out.read_text()) if out.exists() else None)
+
+    def test_mcmc_result_is_bayesian(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            code, msg, art = self.mcmc(tmp, None)
+            self.assertEqual(code, 0, msg)
+            ext = art["extension"]
+            self.assertEqual(ext["paradigm"], "bayesian")
+            self.assertEqual(ext["priors"], [{"parameter": "mu", "form": "uniform(0, 10)"}])
+            self.assertEqual(ext["sampler"]["chains"], 4)
+            self.assertLess(ext["convergence"]["rhat"]["mu"], 1.01)
+            self.assertEqual(ext["fit_status"], "converged")
+            for k in ("construction", "test_statistic", "coverage"):
+                self.assertNotIn(k, ext)
+            self.assertAlmostEqual(ext["results"]["mu_q0.5"], 1.0, delta=0.05)
+            rep = validate_artifact(art)
+            self.assertTrue(rep.ok, rep.as_dict())
+            self.assertEqual([f for f in rep.as_dict()["findings"] if f["level"] != "info"], [])
+
+    def test_unconverged_chains_are_failed(self):
+        import numpy as np
+        rng = np.random.default_rng(3)
+        stuck = rng.normal(0.0, 0.1, size=(4, 400)) + np.arange(4)[:, None]    # four chains in four places
+        with tempfile.TemporaryDirectory() as tmp:
+            code, _, art = self.mcmc(tmp, stuck)
+            self.assertEqual(code, 1)
+            self.assertEqual(art["extension"]["fit_status"], "failed")
+            self.assertIn("failed", art["status"])
+
+    def test_bayesian_needs_priors_and_refuses_frequentist_fields(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            src = Path(tmp) / "diag.json"
+            src.write_text(json.dumps({"status": "converged", "parameters": {}}))
+            for extra in ([], ["--prior", "mu=uniform(0, 1)", "--construction", "cls"]):
+                with self.subTest(extra=extra), redirect_stdout(io.StringIO()):
+                    code = ra.main(["--cli-output", str(src), "--paradigm", "bayesian", "--poi", "mu", "--label",
+                                    "synthetic", "--artifact-id", "x", "--out", str(Path(tmp) / "o.json"), *extra])
+                self.assertEqual(code, 2)
+                self.assertFalse((Path(tmp) / "o.json").exists())
+
+    def test_frequentist_is_the_default_and_still_needs_its_fields(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            src = Path(tmp) / "cli.json"
+            src.write_text(json.dumps({"status": "ok", "upper_limit": 3.2}))
+            with redirect_stdout(io.StringIO()):
+                code = ra.main(["--cli-output", str(src), "--poi", "mu", "--label", "synthetic", "--artifact-id", "x",
+                                "--out", str(Path(tmp) / "o.json")])
+            self.assertEqual(code, 2)
 
 
 if __name__ == "__main__":

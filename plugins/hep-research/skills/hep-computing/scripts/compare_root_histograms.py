@@ -3,7 +3,7 @@
 
 Usage: python3 compare_root_histograms.py --reference ref.root --candidate cand.root --hist path/in/file
            [--candidate-hist other/path] [--abs-tol A] [--rel-tol R] [--sigma-tol S] [--include-flow]
-           [--backend auto|pyroot|uproot]
+           [--backend auto|pyroot|uproot] [--status LABEL]
 
 Checks (all must pass):
 - shape: same dimension and number of bins on every axis (a mismatch is a verdict, exit 1, not a crash);
@@ -14,7 +14,8 @@ Checks (all must pass):
 Bins are compared per (x, y, z) index in ROOT numbering (1..n; 0 and n+1 are underflow and overflow, included with
 --include-flow). The worst bin by absolute difference, by relative difference and by pull is reported separately.
 
-Output: one JSON object on stdout with "status" ("pass", "fail", "error" or "missing-dependency"), "verdict", the
+Output: one JSON object on stdout with "status" ("pass", "fail", "error" or "missing-dependency"), "status_label"
+(--status, the inputs' artifact label, default unvalidated), "verdict", the
 backend, per-check results, the worst bins and entries/integral of both histograms.
 Backends: PyROOT, else uproot (auto). Exit codes: 0 within tolerance, 1 outside tolerance or shape/edge mismatch,
 2 bad input (missing file, histogram not found, not a histogram, bad tolerance), 3 neither PyROOT nor uproot
@@ -28,6 +29,10 @@ import math
 import sys
 from itertools import product
 from pathlib import Path
+
+sys.dont_write_bytecode = True  # the import below leaves no __pycache__ (F-10)
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))  # the plugin root
+from core.status import add_status_argument  # noqa: E402
 
 EDGE_RTOL = 1e-12
 
@@ -52,6 +57,7 @@ def parse_args(argv=None) -> argparse.Namespace:
     ap.add_argument("--sigma-tol", type=float, help="maximum |difference| / combined bin error")
     ap.add_argument("--include-flow", action="store_true", help="also compare underflow and overflow bins")
     ap.add_argument("--backend", choices=("auto", "pyroot", "uproot"), default="auto")
+    add_status_argument(ap)
     return ap.parse_args(argv)
 
 
@@ -168,7 +174,7 @@ def compare(ref: dict, cand: dict, abs_tol: float, rel_tol: float, sigma_tol: fl
 
 def main(argv=None) -> int:
     args = parse_args(argv)
-    out: dict = {"status": "error", "histogram": args.hist}
+    out: dict = {"status": "error", "status_label": args.status, "histogram": args.hist}
     try:
         for name, tol in (("--abs-tol", args.abs_tol), ("--rel-tol", args.rel_tol), ("--sigma-tol", args.sigma_tol)):
             if tol is not None and not (math.isfinite(tol) and tol >= 0):

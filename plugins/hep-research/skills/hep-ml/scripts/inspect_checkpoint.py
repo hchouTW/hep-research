@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
-"""Inspect a PyTorch checkpoint without loading it onto GPU."""
+"""Inspect a PyTorch checkpoint without loading it onto GPU.
+
+Prints the checkpoint's structure as text. A refused run prints one JSON object with a "status" key on stdout.
+Exit codes: 0 listed; 2 missing or unreadable checkpoint, or refused by weights_only loading; 3 PyTorch not available.
+"""
 
 import argparse
+import json
 import pickle
 import sys
 from collections.abc import Mapping
@@ -40,22 +45,21 @@ def main():
     args = parser.parse_args()
 
     if torch is None:
-        print(f"PyTorch is required to run this script but could not be imported: {_TORCH_IMPORT_ERROR}", file=sys.stderr)
+        print(json.dumps({"status": "missing-dependency",
+                          "error": f"PyTorch is required to run this script but could not be imported: {_TORCH_IMPORT_ERROR}"}))
         sys.exit(3)
 
     try:
         ckpt = torch.load(args.checkpoint, map_location="cpu", weights_only=not args.unsafe_full_unpickle)
     except pickle.UnpicklingError as exc:
-        print(f"Refused to load {args.checkpoint} with weights_only=True: {exc}\n"
-              "Re-run with --unsafe-full-unpickle only if you trust this file.", file=sys.stderr)
+        print(json.dumps({"status": "rejected", "error": f"Refused to load {args.checkpoint} with weights_only=True: {exc}. "
+                          "Re-run with --unsafe-full-unpickle only if you trust this file."}))
+        sys.exit(2)
+    except OSError as exc:  # a missing or unreadable input
+        print(json.dumps({"status": "rejected", "error": f"cannot read {args.checkpoint}: {exc}"}))
         sys.exit(2)
     describe_value(ckpt)
 
 
 if __name__ == "__main__":
-    import sys as _sys
-    try:
-        main()
-    except OSError as _exc:  # a missing or unreadable input: one line, no traceback
-        print(f"inspect_checkpoint.py: error: {_exc}", file=_sys.stderr)
-        raise SystemExit(2)
+    main()

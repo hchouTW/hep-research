@@ -45,7 +45,9 @@ the user; never guess another user's path.
 | Default instance | — | not stated in D2–D5 | without a URL argument the `eos` shell went to the instance in `EOS_MGM_URL`; a login shell may export an experiment instance there, and a bare `eos` command then acts on that instance, not on your home |
 | Which instance a mounted path belongs to | virtual attributes on the mount: `eos.name`, `eos.mgmurl`, `eos.quota`, `eos.url.xroot` (read with `getfattr -n <key> <path>` or `eosxd get <key> <path>`) | D3 | `getfattr --only-values -n eos.mgmurl <EOS home>/<dir>` printed the home instance URL |
 
-**Rule:** name the instance in every command that writes or deletes (`eos root://<instance> ...`,
+**Rule:** ask the user before any command that writes to EOS (copy, move, overwrite, delete, `mkdir`, attribute or
+token changes): name the instance, the path and what changes, and run it only after the user agrees; reading needs no
+approval. Name the instance in every command that writes or deletes (`eos root://<instance> ...`,
 `xrdcp ... root://<instance>/<EOS path>`); do not rely on `EOS_MGM_URL` from the environment.
 
 ## Copying, checksums and atomic uploads

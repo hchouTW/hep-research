@@ -35,6 +35,7 @@ from datetime import date
 from pathlib import Path
 
 PLUGIN = Path(__file__).resolve().parents[3]
+sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
 sys.path.insert(0, str(PLUGIN))
 from contracts import CONTRACTS_VERSION  # noqa: E402
 from contracts.identity import plugin_release  # noqa: E402

@@ -14,7 +14,7 @@ import json, sys
 a = dict(zip(sys.argv[1::2], sys.argv[2::2]))
 start, stop = int(a["--start"]), int(a["--stop"])
 print("worker", a["--id"], "seed", a["--seed"])
-json.dump({"n": stop - start, "sum": sum(range(start, stop)), "seed_echo": int(a["--seed"])}, open(a["--out"], "w"))
+json.dump({"n": stop - start, "sum": sum(range(start, stop)), "seed_sum": int(a["--seed"])}, open(a["--out"], "w"))
 """
 
 
@@ -31,7 +31,7 @@ def single_run(manifest, cmd_root: Path):
     """Reference: every chunk computed once in-process with the same formula as WORKER."""
     out = None
     for c in manifest["chunks"]:
-        r = {"n": c["stop"] - c["start"], "sum": sum(range(c["start"], c["stop"])), "seed_echo": c["seed"]}
+        r = {"n": c["stop"] - c["start"], "sum": sum(range(c["start"], c["stop"])), "seed_sum": c["seed"]}
         out = r if out is None else engine._sum(out, r)
     return out
 

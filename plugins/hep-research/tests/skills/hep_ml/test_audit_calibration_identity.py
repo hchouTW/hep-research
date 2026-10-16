@@ -69,7 +69,7 @@ class CalibrationCliTests(unittest.TestCase):
         (self.dir / "copy_val.csv").write_text(text.replace("e0,", "f0,", 1))  # one byte changed, same events
         r = self.cal()
         self.assertEqual(r.returncode, 2, r.stdout)
-        self.assertIn("--id-col", r.stderr)
+        self.assertIn("--id-col", r.stdout)       # F-04: the refusal is a JSON status on stdout
         r = self.cal("--id-col", "id")
         self.assertEqual(r.returncode, 2, r.stdout)  # 1999 shared event ids
         r = self.cal("--no-id-check")

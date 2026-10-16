@@ -45,6 +45,7 @@ import random
 import sys
 from pathlib import Path
 
+sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from check_split_integrity import canonical_key, parse_timestamp  # noqa: E402  (one normalization for both tools)
 
@@ -310,12 +311,13 @@ def main(argv=None) -> int:
         text = json.dumps(manifest, indent=1, allow_nan=False)
         summary["manifest"] = str(args.out)
         summary["status_label"] = args.status
+        summary["status"] = "ok"
         try:
             Path(args.out).write_text(text + "\n", encoding="utf-8")
         except OSError as exc:
             raise InputError(f"cannot write {args.out}: {exc}") from exc
     except InputError as exc:
-        print(json.dumps({"error": str(exc)}))
+        print(json.dumps({"status": "rejected", "error": str(exc)}))
         return 2
     print(json.dumps(summary, indent=1, allow_nan=False))
     return 0

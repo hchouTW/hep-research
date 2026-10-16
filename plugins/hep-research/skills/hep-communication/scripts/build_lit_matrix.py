@@ -22,6 +22,7 @@ import csv
 import sys
 from pathlib import Path
 
+sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from contracts.communication_project import output_aliases_input  # noqa: E402
 

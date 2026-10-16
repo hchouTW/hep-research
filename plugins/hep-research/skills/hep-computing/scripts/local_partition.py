@@ -23,7 +23,9 @@ CLI:
         [--timeout S] [--env-passthrough NAME ...]   the worker gets PATH, HOME, locale and TMPDIR only, plus named variables
         [--config run-config.json]   (the command writes JSON to {out}; exit 0 means success)
   status --manifest manifest.json --state DIR
-  merge --manifest manifest.json --state DIR   (sums numeric lists/values key by key)
+  merge --manifest manifest.json --state DIR [--rule KEY=RULE ...]   (sums numeric lists/values key by key; a key
+        named like a non-additive quantity (seed, median, mean, quantile, min, max, rate, fraction) is refused unless
+        --rule declares sum, min, max, first or concat for it)
   reset --manifest manifest.json --state DIR --chunks c0004 --reason "fixed input path"   (after fixing a stopped chunk)
 Output: one JSON object with "status": planned, complete, incomplete (run, status, reset, merge) or error.
 Exit codes: 0 complete, 1 incomplete or failed chunks, 2 bad input or a state folder in use by another run, reset
@@ -41,9 +43,10 @@ import sys
 import tempfile
 from pathlib import Path
 
+sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from core.partition.engine import (PartitionError, _hash, _load_state, _reduce, _sum, _write_atomic, check_template,  # noqa: E402,F401,E501
-                                   make_manifest, merge, reset, run, status, validate_manifest)
+                                   make_manifest, merge, parse_rules, reset, run, status, validate_manifest)
 from core.partition.executors import allowed_env  # noqa: E402
 from core.protected.guard import protected_main  # noqa: E402
 
@@ -106,6 +109,10 @@ def main(argv=None) -> int:
             s.add_argument("--timeout", type=float, help="seconds before a chunk's command is stopped (counts as a failure)")
             s.add_argument("--env-passthrough", nargs="*", default=[], metavar="NAME",
                            help="environment variables passed to the worker besides PATH, HOME, locale and TMPDIR")
+        if name == "merge":
+            s.add_argument("--rule", action="append", default=[], metavar="KEY=RULE",
+                           help="merge rule of a result key (sum, min, max, first, concat; nested keys as a.b); keys "
+                                "named like seed, median, mean, quantile, min, max, rate or fraction need one")
         if name == "reset":
             s.add_argument("--chunks", nargs="+", required=True)
             s.add_argument("--reason", required=True)
@@ -132,7 +139,7 @@ def main(argv=None) -> int:
             reset(args.state, args.chunks, args.reason, manifest)
             print(json.dumps(dict(_with_status(status(manifest, args.state)), reset=args.chunks), indent=1))
             return 0
-        res = merge(manifest, args.state)
+        res = merge(manifest, args.state, rules=parse_rules(args.rule))
         print(json.dumps(res, indent=1))
         return 0 if res["status"] == "complete" else 1
     except PartitionError as exc:

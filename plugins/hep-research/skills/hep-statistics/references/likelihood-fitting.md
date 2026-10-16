@@ -25,7 +25,7 @@ A covariance correction for weighted unbinned fits does not automatically guaran
 **Background subtraction** (sideband or sWeight subtraction) does not produce Poisson-distributed pure-signal data; do not fit the subtracted counts as if it did.
 
 The tool `<plugin root>/skills/hep-statistics/scripts/sweighted_fit.py` runs this chain on supplied events and reports the
-naive, SumW2, sandwich (equal to RooFit's AsymptoticError) and asymptotically correct uncertainties with a bootstrap of
+naive, SumW2, sandwich (the weights treated as known; equal to RooFit's AsymptoticError) and asymptotically correct uncertainties with a bootstrap of
 the whole chain, and marks the result invalid when a predeclared sideband test rejects the m-t independence sPlot
 needs. `covariance_fit.py` fits binned measurements with a declared covariance (constraints, C(theta), multiplicative
 normalizations). Signed-weight templates do not belong in an effective-count Barlow-Beeston likelihood
@@ -89,6 +89,8 @@ nsig 2944 +- 67 (3000 generated), nbkg 5488 +- 84 (about 5440 expected in range)
 Checks to do on a real fit, in this order: status and covQual; parameters away from their
 bounds; pulls of the generated truth in a toy study before trusting the errors; and the fit
 repeated with an alternative background shape, whose difference is a systematic. Weighted
-histograms with known, constant per-event weights can use `SumW2Error(True)` (the template sets it); it treats the
-weights as known constants, so for sWeights or weights estimated from the data use the asymptotically correct
-covariance below (Langenbruch, EPJC 82 (2022) 393; RooFit `AsymptoticError`), and check coverage either way.
+histograms with known, constant per-event weights can use `SumW2Error(True)` (the template sets it). It and RooFit's
+`AsymptoticError` (the sandwich estimate) both treat the weights as known constants, so neither carries the
+uncertainty of sWeights or of weights estimated from the data: for those use the asymptotically correct covariance
+below (Langenbruch, EPJC 82 (2022) 393), which `sweighted_fit.py` computes, or a bootstrap of the whole chain, and
+check coverage either way.

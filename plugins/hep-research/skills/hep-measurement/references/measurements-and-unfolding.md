@@ -26,7 +26,8 @@ code (a Rivet routine or equivalent) so a prediction can be computed in the same
 material above it if any. Top of atmosphere: corrected for the overburden of a balloon or ground instrument. Local
 interstellar: additionally corrected for solar modulation, which needs a model (for example the force field,
 `solar_modulation_force_field.py`) and its epoch; a modulated or demodulated flux is model-dependent and is labelled
-so. A profile may define its own levels (for example a top-of-instrument term in its vocabulary).
+so. The core levels include `top-of-instrument` and `top-of-atmosphere` (contracts/vocab/core.json); a profile may
+define further levels of its own in its vocabulary.
 
 One-sentence estimands (synthetic examples):
 

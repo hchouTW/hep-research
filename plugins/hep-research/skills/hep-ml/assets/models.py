@@ -2,8 +2,22 @@
 
 from __future__ import annotations
 
+import hashlib
+
 import torch
 from torch import nn
+
+
+def state_dict_hash(state: dict) -> str:
+    """sha256 over the model weights only (parameter names, dtypes, shapes and bytes, in name order): the hash names
+    the model, not the file, so it does not change with paths, optimizer state or the epoch counter. train_classifier.py
+    records it as model_hash, calibration.py as the model a calibration was made for, inference.py compares them."""
+    h = hashlib.sha256()
+    for name in sorted(state):
+        tensor = state[name].detach().cpu().contiguous()
+        h.update(f"{name}|{tensor.dtype}|{tuple(tensor.shape)}|".encode())
+        h.update(tensor.numpy().tobytes())
+    return "sha256:" + h.hexdigest()
 
 
 class MLPClassifier(nn.Module):

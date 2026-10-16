@@ -37,6 +37,7 @@ import math
 import sys
 from pathlib import Path
 
+sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from core.blinding.blinding import NOT_SEALED, agent_view, scan_paths, seal  # noqa: E402
 from core.protected.guard import protected_main  # noqa: E402

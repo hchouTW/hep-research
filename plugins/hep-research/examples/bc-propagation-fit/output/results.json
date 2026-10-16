@@ -132,7 +132,7 @@
        "L": 0.707106781186
       },
       "matches_theory_spec": "D0/L",
-      "condition_number_log10": 17.2
+      "condition_number_log10": null
      }
     ]
    },
@@ -263,7 +263,7 @@
  "pass": true,
  "environment": {
   "python": "3.13.2",
-  "numpy": "2.5.3",
-  "scipy": "1.18.1"
+  "numpy": "2.4.6",
+  "scipy": "1.17.1"
  }
 }

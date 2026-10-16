@@ -28,6 +28,7 @@ try:
 except ImportError:  # --help works without numpy; combine() reports it
     np = None
 
+sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from contracts.comparison.combination import plan_combination  # noqa: E402
 from core.protected.guard import guard, protected_main  # noqa: E402

@@ -84,6 +84,7 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
+sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from core.protected.guard import protected_main  # noqa: E402
 

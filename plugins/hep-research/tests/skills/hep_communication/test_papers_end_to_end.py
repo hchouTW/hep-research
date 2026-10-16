@@ -47,6 +47,19 @@ class TestEndToEnd(unittest.TestCase):
         return code, out.getvalue()
 
     def test_bundled_templates_pass_the_checker(self):
+        """The skeleton is well formed (citations, labels, references, bibliography); since F-12 its one finding is the
+        unfilled headline value, which a draft must fill before it passes."""
+        import json
+        with redirect_stdout(io.StringIO()) as out:
+            code = cm.main([str(self.dir), "--format", "json"])
+        rep = json.loads(out.getvalue())
+        self.assertEqual(code, 1, rep)
+        self.assertEqual([(f["code"], "[VALUE NEEDED" in f["message"]) for f in rep["findings"]],
+                         [("manuscript.todo_marker", True)])
+        paper = self.dir / "paper.tex"
+        paper.write_text(paper.read_text(encoding="utf-8").replace(
+            "[VALUE NEEDED: headline result from the statistical-result artifact]",
+            "$1.00 \\pm 0.01~\\mathrm{(stat)} \\pm 0.02~\\mathrm{(syst)}$ (synthetic)"), encoding="utf-8")
         code, out = self._check()
         self.assertEqual(code, 0, out)
 

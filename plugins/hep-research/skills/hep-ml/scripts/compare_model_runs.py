@@ -343,12 +343,12 @@ def main():
                          args.resamples, args.seed)
         result["lower_is_better_source"] = source
         lines = verdict(result)
-    except (OSError, ValueError, KeyError, json.JSONDecodeError) as exc:
-        print(f"error: {exc}", file=sys.stderr)
+    except (OSError, ValueError, KeyError, json.JSONDecodeError) as exc:  # JSON status, exit 2 (F-04)
+        print(json.dumps({"status": "rejected", "error": f"{type(exc).__name__}: {exc}"}))
         sys.exit(2)
 
     if args.json:
-        print(json.dumps({**result, "verdict": lines, "status_label": args.status}, indent=2, allow_nan=False))
+        print(json.dumps({"status": "ok", **result, "verdict": lines, "status_label": args.status}, indent=2, allow_nan=False))
     else:
         print(_format(result, lines))
 

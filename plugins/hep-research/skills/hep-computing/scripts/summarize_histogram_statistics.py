@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Summarize ROOT histogram statistics for HEP review (PyROOT).
 
-Usage: python3 summarize_histogram_statistics.py --input file.root --hist h [--include-flow] [--json]
+Usage: python3 summarize_histogram_statistics.py --input file.root --hist h [--include-flow] [--json] [--status LABEL]
 Human-readable text by default; --json prints one JSON object with a "status" key ("ok", "error" or
-"missing-dependency") instead. Exit codes: 0 summarized, 2 bad input (missing or unreadable file, histogram not
+"missing-dependency") and "status_label" (--status, the input's artifact label, default unvalidated) instead. Exit codes: 0 summarized, 2 bad input (missing or unreadable file, histogram not
 found or not a histogram), 3 PyROOT not importable (scripts/find_python.py finds an interpreter that has it).
 """
 from __future__ import annotations
@@ -12,6 +12,10 @@ import argparse
 import json
 import sys
 from pathlib import Path
+
+sys.dont_write_bytecode = True  # the import below leaves no __pycache__ (F-10)
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))  # the plugin root
+from core.status import add_status_argument  # noqa: E402
 
 
 class InputError(Exception):
@@ -25,6 +29,7 @@ def parse_args(argv=None) -> argparse.Namespace:
     parser.add_argument("--hist", required=True, help="Histogram path inside the ROOT file")
     parser.add_argument("--include-flow", action="store_true", help="Include underflow and overflow in the reported integral")
     parser.add_argument("--json", action="store_true", help="print one JSON object instead of text")
+    add_status_argument(parser)
     return parser.parse_args(argv)
 
 
@@ -84,7 +89,7 @@ def main(argv=None) -> int:
         summary = summarize(args)
     except (InputError, OSError) as exc:
         return fail(args, "error", str(exc), 2)
-    print(json.dumps(dict(summary, status="ok"), indent=1) if args.json else text(summary))
+    print(json.dumps(dict(summary, status="ok", status_label=args.status), indent=1) if args.json else text(summary))
     return 0
 
 

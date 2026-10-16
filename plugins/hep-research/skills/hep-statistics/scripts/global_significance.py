@@ -37,6 +37,7 @@ try:  # --help works without them; main() refuses to run without them (STH-T3.1)
 except ImportError:  # pragma: no cover
     np = None  # type: ignore[assignment]
 
+sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 from core.stats.tail_estimation import clopper_pearson, toy_tail  # noqa: E402
 

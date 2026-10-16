@@ -10,7 +10,7 @@
   },
   "hep-computing": {
    "references": 32,
-   "bytes": 297310,
+   "bytes": 297694,
    "uncited": 0
   },
   "hep-detector": {
@@ -20,7 +20,7 @@
   },
   "hep-measurement": {
    "references": 12,
-   "bytes": 98209,
+   "bytes": 98291,
    "uncited": 0
   },
   "hep-ml": {
@@ -30,12 +30,12 @@
   },
   "hep-statistics": {
    "references": 12,
-   "bytes": 170349,
+   "bytes": 170648,
    "uncited": 0
   },
   "hep-theory": {
    "references": 11,
-   "bytes": 81160,
+   "bytes": 81311,
    "uncited": 0
   }
  },
@@ -1132,7 +1132,7 @@
   {
    "path": "skills/hep-computing/references/engineering-playbook.md",
    "owner": "hep-computing",
-   "bytes": 10586,
+   "bytes": 10737,
    "lines": 148,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -1141,7 +1141,7 @@
     "skills/hep-computing/references/agile-development-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "317c39a 2026-10-14"
+   "last_commit": "b7b159f 2026-10-17"
   },
   {
    "path": "skills/hep-computing/references/environments-and-containers.md",
@@ -1388,16 +1388,17 @@
   {
    "path": "skills/hep-computing/references/storage-cern-eos.md",
    "owner": "hep-computing",
-   "bytes": 13194,
-   "lines": 112,
+   "bytes": 13427,
+   "lines": 114,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/references/batch-site-cern-htcondor.md",
-    "skills/hep-computing/references/python-hep-coding-patterns.md"
+    "skills/hep-computing/references/python-hep-coding-patterns.md",
+    "tests/core/test_side_effects_f13.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b0dce7a 2026-10-10"
+   "last_commit": "50decbd 2026-10-17"
   },
   {
    "path": "skills/hep-computing/references/symbolic-and-numerical-computation.md",
@@ -2323,7 +2324,7 @@
   {
    "path": "skills/hep-measurement/references/hep-measurement-guide.md",
    "owner": "hep-measurement",
-   "bytes": 20558,
+   "bytes": 20571,
    "lines": 120,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -2333,12 +2334,13 @@
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
     "tests/skills/hep_detector/test_reference_values.py",
     "tests/skills/hep_measurement/test_method_references.py",
-    "tests/skills/hep_measurement/test_reference_links.py"
+    "tests/skills/hep_measurement/test_reference_links.py",
+    "tests/skills/test_doc_consistency.py"
    ],
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "9257d7b 2026-10-15"
+   "last_commit": "db0a9cc 2026-10-17"
   },
   {
    "path": "skills/hep-measurement/references/histograms-efficiencies.md",
@@ -2364,8 +2366,8 @@
   {
    "path": "skills/hep-measurement/references/measurements-and-unfolding.md",
    "owner": "hep-measurement",
-   "bytes": 7423,
-   "lines": 87,
+   "bytes": 7492,
+   "lines": 88,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/charge-confusion.md",
@@ -2384,7 +2386,7 @@
     "hep-detector",
     "hep-statistics"
    ],
-   "last_commit": "9257d7b 2026-10-15"
+   "last_commit": "7a58495 2026-10-17"
   },
   {
    "path": "skills/hep-measurement/references/review-and-artifacts.md",
@@ -3162,7 +3164,7 @@
   {
    "path": "skills/hep-statistics/references/core-stats-commands.md",
    "owner": "hep-statistics",
-   "bytes": 37992,
+   "bytes": 38111,
    "lines": 409,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -3176,12 +3178,12 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "7487999 2026-10-15"
+   "last_commit": "191242d 2026-10-17"
   },
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 16994,
+   "bytes": 16996,
    "lines": 175,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -3194,7 +3196,8 @@
     "skills/hep-statistics/references/core-stats-commands.md",
     "skills/hep-statistics/references/inference-recipes.md",
     "skills/hep-statistics/references/nuisance-modeling.md",
-    "tests/skills/hep_statistics/test_core_stats_guide.py"
+    "tests/skills/hep_statistics/test_core_stats_guide.py",
+    "tests/skills/test_documented_output_claims.py"
    ],
    "cited_by_other_skills": [
     "hep-measurement"
@@ -3227,8 +3230,8 @@
   {
    "path": "skills/hep-statistics/references/likelihood-fitting.md",
    "owner": "hep-statistics",
-   "bytes": 9530,
-   "lines": 95,
+   "bytes": 9708,
+   "lines": 97,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-computing/references/root-debugging.md",
@@ -3237,13 +3240,14 @@
     "skills/hep-statistics/references/core-stats-guide.md",
     "skills/hep-statistics/references/nuisance-modeling.md",
     "skills/hep-statistics/references/time-series-inference.md",
-    "tests/skills/hep_statistics/test_weighted_unbinned_fit.py"
+    "tests/skills/hep_statistics/test_weighted_unbinned_fit.py",
+    "tests/skills/test_doc_consistency.py"
    ],
    "cited_by_other_skills": [
     "hep-computing",
     "hep-detector"
    ],
-   "last_commit": "4665f43 2026-10-13"
+   "last_commit": "db0a9cc 2026-10-17"
   },
   {
    "path": "skills/hep-statistics/references/ml-assisted-inference.md",
@@ -3470,8 +3474,8 @@
   {
    "path": "skills/hep-theory/references/mathematical-reasoning-and-proof.md",
    "owner": "hep-theory",
-   "bytes": 9006,
-   "lines": 177,
+   "bytes": 9157,
+   "lines": 179,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-communication/references/academic-papers-guide.md",
@@ -3480,13 +3484,14 @@
     "skills/hep-statistics/references/statistical-inference-for-physics.md",
     "skills/hep-theory/README.md",
     "skills/hep-theory/SKILL.md",
-    "tests/routing/test_theory_routing.py"
+    "tests/routing/test_theory_routing.py",
+    "tests/skills/test_doc_consistency.py"
    ],
    "cited_by_other_skills": [
     "hep-communication",
     "hep-statistics"
    ],
-   "last_commit": "9257d7b 2026-10-15"
+   "last_commit": "db0a9cc 2026-10-17"
   },
   {
    "path": "skills/hep-theory/references/pdfs-and-lhapdf.md",

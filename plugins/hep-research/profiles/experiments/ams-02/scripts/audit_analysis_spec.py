@@ -38,6 +38,7 @@ from pathlib import Path
 import sys as _sys
 from pathlib import Path as _Path
 _PLUGIN_ROOT = _Path(__file__).resolve().parents[4]
+sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
 if str(_PLUGIN_ROOT) not in _sys.path:  # make core/ and contracts/ importable when run as a script
     _sys.path.insert(0, str(_PLUGIN_ROOT))
 _sys.path.insert(0, str(_Path(__file__).resolve().parent))

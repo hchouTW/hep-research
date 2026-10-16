@@ -20,10 +20,17 @@ Rules this enforces:
   manifest and has the manifest's id, range and seed, and that the ranges tile [0, n) with no gap or overlap; a missing
   chunk makes the merge 'incomplete', never a silent partial sum. Any other file claiming a manifest chunk is never
   summed: an identical copy is reported, a different one ('merge.conflicting_duplicate') makes the merge incomplete.
+- Merge rules (F-07): the default merge sums numbers key by key. A key may declare its rule (rules={"key": "sum" |
+  "min" | "max" | "first" | "concat"}, nested keys as "outer.inner"); first takes the value of the first chunk in item
+  order, concat joins lists in item order. An undeclared key whose name marks a non-additive quantity (a name token
+  in NON_ADDITIVE_TOKENS: seed, median, mean, quantile, min, max, rate, fraction, and none of ADDITIVE_TOKENS such
+  as sum or total, so seed_sum still sums) is refused
+  ('merge.undeclared_non_additive'): summing it would be wrong. Undeclared other keys keep summing. A combine function
+  replaces all of this.
 
 API: make_manifest(job_id, n_items, chunk_size, seed) -> dict; validate_manifest(manifest); check_template(cmd); run(manifest, state_dir, worker, config=None) -> dict
 (synchronous, in-process); status(manifest, state_dir); reset(state_dir, chunk_ids, reason); merge(manifest,
-state_dir, combine=None); dir_lock(directory, operation, busy). Standard library only.
+state_dir, combine=None, rules=None); dir_lock(directory, operation, busy). Standard library only.
 """
 from __future__ import annotations
 
@@ -362,6 +369,80 @@ def _sum(a, b):
     return a + b
 
 
+MERGE_RULES = ("sum", "min", "max", "first", "concat")
+# name tokens of quantities that do not add across chunks (F-07, proposal of the upgrade plan; open question 11)
+NON_ADDITIVE_TOKENS = frozenset({"seed", "median", "mean", "quantile", "min", "max", "rate", "fraction"})
+# a name that also says it is a sum (seed_sum, n_rate_bins) is additive by its own declaration
+ADDITIVE_TOKENS = frozenset({"sum", "sumw", "sumw2", "total", "count", "counts", "n"})
+
+
+def _non_additive(name: str) -> bool:
+    tokens = {t for t in re.split(r"[^a-z0-9]+", name.lower()) if t}
+    return bool(tokens & NON_ADDITIVE_TOKENS) and not tokens & ADDITIVE_TOKENS
+
+
+def parse_rules(items) -> dict:
+    """KEY=RULE strings (a CLI's --rule values) -> {key: rule}; a malformed item or unknown rule is a ValueError."""
+    rules = {}
+    for item in items or []:
+        key, sep, rule = str(item).partition("=")
+        if not sep or not key or rule not in MERGE_RULES:
+            raise ValueError(f"--rule {item!r}: expected KEY=RULE with RULE one of {', '.join(MERGE_RULES)}")
+        rules[key] = rule
+    return rules
+
+
+def _undeclared_non_additive(result, rules: dict, path: str = "") -> list[str]:
+    """Dotted paths of dict keys that look non-additive and have no declared rule."""
+    out: list[str] = []
+    if isinstance(result, dict):
+        for k, v in result.items():
+            p = f"{path}.{k}" if path else str(k)
+            if p in rules:
+                continue
+            if _non_additive(str(k)):
+                out.append(p)
+            else:
+                out.extend(_undeclared_non_additive(v, rules, p))
+    return out
+
+
+def _numbers(values, what: str):
+    if all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in values):
+        return values
+    if all(isinstance(v, list) for v in values) and len({len(v) for v in values}) == 1:
+        return values
+    raise ValueError(f"merge rule {what} needs numbers or equal-length lists of numbers")
+
+
+def _apply_rule(rule: str, values: list, path: str):
+    if rule == "first":
+        return values[0]
+    if rule == "concat":
+        if not all(isinstance(v, list) for v in values):
+            raise ValueError(f"merge rule concat for {path!r} needs lists")
+        return [x for v in values for x in v]
+    if rule == "sum":
+        return _reduce(values)
+    pick = min if rule == "min" else max
+    vals = _numbers(values, f"{rule} for {path!r}")
+    if isinstance(vals[0], list):
+        return [_apply_rule(rule, [v[i] for v in vals], f"{path}[{i}]") for i in range(len(vals[0]))]
+    return pick(vals)
+
+
+def _combine_with_rules(results: list, rules: dict, path: str = ""):
+    """Key-by-key merge: a declared rule where there is one, summation elsewhere."""
+    if path in rules:
+        return _apply_rule(rules[path], results, path)
+    first = results[0]
+    if isinstance(first, dict):
+        if any(not isinstance(r, dict) or set(r) != set(first) for r in results):
+            raise ValueError("chunk results have different keys")
+        return {k: _combine_with_rules([r[k] for r in results], rules, f"{path}.{k}" if path else str(k)) for k in first}
+    return _reduce(results)
+
+
 def _nonfinite(x, path="result") -> str | None:
     """Path of the first NaN or infinity in a chunk result, else None."""
     if isinstance(x, float) and not math.isfinite(x):
@@ -373,15 +454,20 @@ def _nonfinite(x, path="result") -> str | None:
     return None
 
 
-def merge(manifest: dict, state_dir, combine=None) -> dict:
-    """Merge chunk outputs; combine(list_of_results) defaults to key-by-key summation."""
+def merge(manifest: dict, state_dir, combine=None, rules: dict | None = None) -> dict:
+    """Merge chunk outputs; combine(list_of_results) defaults to key-by-key summation with the declared rules (F-07)."""
     guard("core.partition.engine.merge", paths=[state_dir])
     with dir_lock(state_dir, "merge"):
-        return _merge(manifest, Path(state_dir), combine)
+        return _merge(manifest, Path(state_dir), combine, rules)
 
 
-def _merge(manifest: dict, state_dir: Path, combine=None) -> dict:
-    combine = combine or (lambda rs: _reduce(rs))
+def _merge(manifest: dict, state_dir: Path, combine=None, rules: dict | None = None) -> dict:
+    rules = dict(rules or {})
+    bad_rules = {k: v for k, v in rules.items() if not isinstance(k, str) or v not in MERGE_RULES}
+    if bad_rules and combine is None:
+        raise PartitionError("merge.bad_rule", f"merge rules must map key paths to one of {list(MERGE_RULES)}: {bad_rules}")
+    default = combine is None
+    combine = combine or (lambda rs: _combine_with_rules(rs, rules))
     problems: list[dict[str, Any]] = []
     seen: dict[str, str] = {}
     results = []
@@ -455,6 +541,13 @@ def _merge(manifest: dict, state_dir: Path, combine=None) -> dict:
                                                  "merge.incomplete_range", "merge.non_finite", "merge.id_mismatch",
                                                  "merge.seed_mismatch", "merge.conflicting_duplicate")]
     merged = None
+    if results and not hard and default:
+        undeclared = sorted({k for _, r in results for k in _undeclared_non_additive(r, rules)})
+        if undeclared:
+            problems.append({"code": "merge.undeclared_non_additive", "keys": undeclared,
+                             "message": "these keys name quantities that do not add across chunks; declare a merge rule "
+                                        f"for each ({', '.join(MERGE_RULES)})"})
+            hard.append(problems[-1])
     if results and not hard:
         try:
             merged = combine([r for _, r in sorted(results, key=lambda t: t[0])])
@@ -467,8 +560,11 @@ def _merge(manifest: dict, state_dir: Path, combine=None) -> dict:
                 problems.append({"code": "merge.non_finite", "message": f"{bad} is not finite after combining"})
                 hard.append(problems[-1])
                 merged = None
-    return {"status": "complete" if not hard else "incomplete", "merged": merged, "problems": problems,
-            "chunks_merged": len(seen), "chunks_expected": len(wanted)}
+    out = {"status": "complete" if not hard else "incomplete", "merged": merged, "problems": problems,
+           "chunks_merged": len(seen), "chunks_expected": len(wanted)}
+    if rules:
+        out["merge_rules"] = rules
+    return out
 
 
 _CHUNK_KEYS = ("chunk_id", "manifest_hash", "start", "stop", "result")

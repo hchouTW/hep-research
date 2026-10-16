@@ -27,6 +27,7 @@ from datetime import date
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 

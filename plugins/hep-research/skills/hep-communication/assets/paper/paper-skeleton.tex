@@ -80,9 +80,11 @@ alongside supporting text on how each was evaluated.
 \label{sec:results}
 
 State the headline number plainly, with statistical and systematic
-uncertainty distinguished, e.g.\ $125.3 \pm 0.4~\mathrm{(stat)} \pm
-0.6~\mathrm{(syst)}$~GeV, and compare explicitly to theory or prior
-measurements (Fig.~\ref{fig:result}).
+uncertainty distinguished, in the form central value $\pm$ (stat) $\pm$
+(syst) with its unit:
+[VALUE NEEDED: headline result from the statistical-result artifact],
+and compare explicitly to theory or prior measurements
+(Fig.~\ref{fig:result}).
 
 \begin{figure}[htbp]
   \centering
@@ -105,10 +107,10 @@ Funding agencies and collaboration boilerplate go here; confirm current
 wording with the collaboration's publications committee rather than reusing
 an old paper's text verbatim.
 
-% plain is a placeholder that compiles anywhere, but it DROPS the eprint (arXiv) and doi
-% fields HEP readers expect. Swap for the venue's style before sharing a draft: apsrev4-2
-% with REVTeX (APS), JHEP.bst from the JHEP author pages (JHEP, JCAP), or the journal's own.
-\bibliographystyle{plain}
+% unsrturl (urlbst, in TeX Live) prints the eprint (arXiv) and doi fields HEP readers
+% expect, in citation order. Swap for the venue's style once it is fixed: apsrev4-2 with
+% REVTeX (APS), JHEP.bst from the JHEP author pages (JHEP, JCAP), or the journal's own.
+\bibliographystyle{unsrturl}
 \bibliography{references}
 
 \end{document}

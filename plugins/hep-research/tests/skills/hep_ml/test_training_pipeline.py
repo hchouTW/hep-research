@@ -25,7 +25,7 @@ TORCH = importlib.util.find_spec("torch") is not None
 TORCHVISION = TORCH and importlib.util.find_spec("torchvision") is not None
 YAML = importlib.util.find_spec("yaml") is not None
 
-SUMMARY_KEYS = {"task", "features", "units", "labels", "grouping_key", "split_manifest", "split_check",
+SUMMARY_KEYS = {"task", "features", "units", "labels", "grouping_key", "split_manifest", "split_manifest_sha256", "split_check",
                 "training_domain", "preprocessing", "weights", "model_hash", "checkpoint", "environment", "metrics",
                 "scores"}
 FEATURES = ["pt", "eta", "mass", "iso"]
@@ -105,6 +105,47 @@ class TrainClassifierPipelineTests(unittest.TestCase):
     def summary(self):
         self.assertEqual(self.result.returncode, 0, self.result.stderr)
         return json.loads((self.out / "run_summary.json").read_text())
+
+    def test_split_manifest_hash_recorded_and_change_detected(self):
+        """F-08: training records split_manifest_sha256; inference compares it with the manifest it is given."""
+        summary = self.summary()
+        digest = "sha256:" + hashlib.sha256(self.manifest_path.read_bytes()).hexdigest()
+        self.assertEqual(summary["split_manifest_sha256"], digest)
+        row = [["in", 50.0, 0.1, 100.0, 0.08]]
+        same = json.loads(self.inference(row, "--split-manifest", self.manifest_path).stdout)
+        self.assertTrue(same["split_manifest_check"]["match"])
+        changed = self.dir / "changed-splits.json"
+        doc = json.loads(self.manifest_path.read_text())
+        doc["test"].append(doc["train"].pop(0))
+        changed.write_text(json.dumps(doc))
+        result = self.inference(row, "--split-manifest", changed)
+        self.assertEqual(result.returncode, 0, result.stdout)
+        out = json.loads(result.stdout)
+        self.assertFalse(out["split_manifest_check"]["match"])
+        self.assertEqual(out["split_manifest_check"]["recorded"], digest)
+        self.assertTrue(any("split manifest" in w for w in out["warnings"]))
+
+    def test_calibration_for_another_model_is_refused(self):
+        """F-08: calibration.py records the model hash; inference refuses a calibration made for another model."""
+        summary = self.summary()
+        val, test = self.out / "val_scores.csv", self.out / "test_scores.csv"
+        cal_ok, cal_other = self.dir / "cal-ok.json", self.dir / "cal-other.json"
+        for path, model_hash in ((cal_ok, summary["model_hash"]), (cal_other, "sha256:" + "0" * 64)):
+            res = run([sys.executable, ASSETS / "calibration.py", "--fit", val, "--eval", test, "--id-col", "id",
+                       "--model-hash", model_hash], self.dir)
+            self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
+            doc = json.loads(res.stdout)
+            self.assertEqual(doc["model_hash"], model_hash)
+            path.write_text(res.stdout)
+        row = [["in", 50.0, 0.1, 100.0, 0.08]]
+        ok = self.inference(row, "--calibration", cal_ok)
+        self.assertEqual(ok.returncode, 0, ok.stdout)
+        self.assertEqual(json.loads(ok.stdout)["calibration"]["model_hash"], summary["model_hash"])
+        other = self.inference(row, "--calibration", cal_other)
+        self.assertEqual(other.returncode, 2, other.stdout)
+        refused = json.loads(other.stdout)
+        self.assertEqual(refused["status"], "rejected")
+        self.assertIn("another model", refused["error"])
 
     def test_leaky_manifest_refused_before_training(self):
         leaky, _ = write_manifest(self.dir, self.rows, self.groups, leak=True, name="leaky.json")
@@ -263,8 +304,12 @@ class TrainClassifierPipelineTests(unittest.TestCase):
         self.assertIn("outside:", by_id["out"]["ood_reasons"])
         self.assertTrue(0.0 <= by_id["in"]["score"] <= 1.0)
         rejected = self.inference([inside, outside], "--on-out-of-domain", "reject")
-        self.assertNotEqual(rejected.returncode, 0)
-        self.assertIn("outside the training domain", rejected.stderr)
+        self.assertEqual(rejected.returncode, 1, rejected.stderr)     # F-04: a negative verdict, exit 1 (was 4)
+        verdict = json.loads(rejected.stdout)                          # the JSON summary is kept
+        self.assertEqual(verdict["status"], "refused")
+        self.assertIn("outside the training domain", verdict["reason"])
+        self.assertEqual(verdict["out_of_domain_ids"], ["out"])
+        self.assertNotIn("rows", verdict)
         clean = self.inference([inside], "--on-out-of-domain", "reject")
         self.assertEqual(clean.returncode, 0, clean.stderr)
 
@@ -281,8 +326,9 @@ class TrainClassifierPipelineTests(unittest.TestCase):
         self.summary()
         result = self.inference([["a", 50.0, 0.1, 100.0, 0.08]], header=["id", "pt", "eta", "m", "iso"])
         self.assertEqual(result.returncode, 2)
-        self.assertIn("mass", result.stderr)
-        self.assertIn("missing", result.stderr)
+        self.assertEqual(json.loads(result.stdout)["status"], "rejected")     # F-04: JSON status on stdout
+        self.assertIn("mass", result.stdout)
+        self.assertIn("missing", result.stdout)
 
     def test_inference_loads_weights_only_unless_opted_in(self):
         import torch
@@ -298,7 +344,7 @@ class TrainClassifierPipelineTests(unittest.TestCase):
         safe = run(cmd, self.dir)
         self.assertNotEqual(safe.returncode, 0)
         self.assertNotIn("UNPICKLE-EXECUTED", safe.stdout)
-        self.assertIn("--unsafe-full-unpickle", safe.stderr)
+        self.assertIn("--unsafe-full-unpickle", safe.stdout)     # F-04: JSON status on stdout
         unsafe = run(cmd + ["--unsafe-full-unpickle"], self.dir)
         self.assertEqual(unsafe.returncode, 0, unsafe.stderr)
         self.assertIn("UNPICKLE-EXECUTED", unsafe.stdout)
@@ -456,7 +502,7 @@ class HelpWithoutTorchTests(unittest.TestCase):
             with self.subTest(asset=name):
                 result = run([sys.executable, "-c", NO_TORCH_DRIVER, ASSETS / name, *argv.get(name, [])], ASSETS)
                 self.assertEqual(result.returncode, 3, result.stderr)
-                self.assertIn("not available", result.stderr)
+                self.assertIn("not available", result.stdout + result.stderr)   # inference.py: JSON on stdout (F-04)
                 self.assertNotIn("Traceback", result.stderr)
 
 

@@ -187,9 +187,43 @@ class DataExposureTests(unittest.TestCase):
 
     def test_cli_counts_unknown_exposure_without_flagging(self):
         proc = run_json({"changes": [self.change()]})
-        self.assertEqual(proc.returncode, 0, proc.stdout)
+        self.assertEqual(proc.returncode, 1, proc.stdout)       # F-05: every non-accept verdict exits 1 (was 0)
         out = json.loads(proc.stdout)
         self.assertEqual((out["flagged"], out["exposure_unknown"]), (0, 1))
+
+
+class NonAcceptVerdictsAndUnjudgedText(unittest.TestCase):
+    """F-05: every non-accept verdict exits 1, and text the English-only patterns cannot read is needs-human-review.
+    Before the fix a tuning motivation written in Chinese, with a control sample recorded, was judged accept (exit 0),
+    and needs-provenance and exposure-unknown exited 0."""
+
+    STRUCTURED = {"state": "unexposed", "basis": "structured-record", "record_ref": "exposure.json#1"}
+
+    def test_chinese_tuning_motivation_is_not_accepted(self):
+        for text in ("為了讓訊號區的超出更顯著，把能量刻度調高 2%", "为了让信号区的超出更显著，调整了能量刻度"):
+            with self.subTest(text=text):
+                c = change(motivation=text, data_exposure=dict(self.STRUCTURED))
+                row = rac.review(c)
+                self.assertEqual(row["decision"], "needs-human-review", row)
+                self.assertTrue(any("cannot read" in r for r in row["reasons"]), row)
+                p = run_json({"changes": [c]})
+                self.assertEqual(p.returncode, 1, p.stdout)
+
+    def test_every_non_accept_verdict_exits_1(self):
+        cases = {"needs-provenance": change(evidence={}),
+                 "exposure-unknown": change(looked_at=["full data"])}
+        for decision, c in cases.items():
+            with self.subTest(decision=decision):
+                self.assertEqual(rac.review(c)["decision"], decision)
+                p = run_json({"changes": [c]})
+                self.assertEqual(p.returncode, 1, p.stdout)
+        p = run_json({"changes": [change()]})
+        self.assertEqual(json.loads(p.stdout)["changes"][0]["decision"], "accept")
+        self.assertEqual(p.returncode, 0, p.stdout)
+
+    def test_accented_latin_text_is_still_read(self):
+        self.assertEqual(rac.review(change(motivation="new calibration from the control sample (naïve fit replaced)"))
+                         ["decision"], "accept")
 
 
 if __name__ == "__main__":

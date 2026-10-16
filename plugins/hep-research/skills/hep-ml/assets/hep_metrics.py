@@ -25,6 +25,7 @@ import csv
 import json
 import math
 import sys
+from pathlib import Path
 
 import numpy as np
 
@@ -353,7 +354,11 @@ def _sanitize(o):
 
 
 def main(argv=None):
+    sys.dont_write_bytecode = True  # the import below leaves no __pycache__ (F-10)
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))  # the plugin root
+    from core.status import add_status_argument
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    add_status_argument(ap)
     ap.add_argument("csv", help="CSV with columns score,label[,weight][,mass]")
     ap.add_argument("--eff-s", type=float, nargs="+", default=[0.3, 0.5, 0.7], help="signal efficiencies")
     ap.add_argument("--mass-col", help="column for the mass-sculpting check (background only)")
@@ -380,9 +385,9 @@ def main(argv=None):
             out["signed_weight_out_of_range"] = signed_weight_out_of_range(
                 es, eb, out["auc_weighted"], *[[p["eff_s"], p["eff_b"]] for p in out["working_points"]])
     except (OSError, ValueError, KeyError) as exc:
-        print(f"error: {exc}", file=sys.stderr)
+        print(json.dumps({"status": "rejected", "error": f"{type(exc).__name__}: {exc}"}))
         return 2
-    print(json.dumps(_sanitize(out), indent=2, allow_nan=False, default=float))
+    print(json.dumps(_sanitize({"status": "ok", "status_label": a.status, **out}), indent=2, allow_nan=False, default=float))
     return 0
 
 

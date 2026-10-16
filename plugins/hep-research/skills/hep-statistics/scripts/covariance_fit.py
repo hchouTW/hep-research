@@ -26,7 +26,9 @@ Input (fit): {"y": [...], "cov": [[...]] (additive part), "x": [...] (abscissa, 
   "multiplicative": {"relative_cov": [[...]], "mode": "data" | "model" | "nuisance"} (optional)}
 
   "model_options": {"smoothness": s} for smoothly-broken-power-law, {"plugin": {"path", "function", "n_params"}} for
-  plugin (a Python file defining function(theta, x) -> n predictions; it runs with your permissions)}
+  plugin (a Python file defining function(theta, x) -> n predictions; it runs with your permissions, so only with
+  --allow-plugin; a relative path is read from the input file's folder; an exception in it is "status": "failed",
+  exit 1)}
 Models with x > 0: broken-power-law (sharp) and smoothly-broken-power-law, theta = [ln A, gamma1, gamma2, ln x_b],
   ln F = ln A - gamma1 (u - h) - gamma2 h, u = ln(x / x_b), h = max(u, 0) or s ln((1 + e^(u/s)) / 2); give start.
 Input (break-scan): {"y", "cov", "x", "smoothness": 0 (sharp), "break_range": [lo, hi], "grid_points": 40}: the profile
@@ -73,10 +75,11 @@ Input (fit, "model": "tabulated-grid"): a fit of parameters tabulated on a grid 
   A best fit on the grid edge with chi2 still falling outward (more than 1e-3 per cell) is refused: the minimum is not
   inside the grid and nothing is extrapolated.
 
-Usage: covariance_fit.py fit --input FILE
+Usage: covariance_fit.py fit --input FILE [--allow-plugin]
        covariance_fit.py break-scan --input FILE [--toys 200 --seed 1 --cl 0.6827]
 Exit codes: 0 fitted; 1 refused (covariance singular beyond the declared constraints, a declared constraint that is not a
-null direction, no convergence; for a grid: a prediction not gated, not comparable or refused by the gate, a minimum outside the grid);
+null direction, no convergence (a grid fit whose optimizer stopped and whose restart neither succeeds nor passes the EDM
+check: "status": "failed" with "reason"); for a grid: a prediction not gated, not comparable or refused by the gate, a minimum outside the grid);
 2 bad input; 3 incomplete (a data covariance or uncertainty correlation is missing: "status": "incomplete" with
 "missing"). Output JSON labelled [General method].
 """
@@ -94,6 +97,7 @@ try:  # --help works without them; main() refuses to run without them (STH-T3.1)
 except ImportError:  # pragma: no cover
     np = optimize = None  # type: ignore[assignment]
 
+sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))  # the plugin root
 from core.stats import broken_power_law as _bpl  # noqa: E402
 
@@ -108,6 +112,10 @@ class CovFitError(ValueError):
 
 class CovFitInputError(CovFitError):
     """A malformed input (exit 2), as opposed to a refused fit (exit 1)."""
+
+
+class CovFitPluginError(CovFitError):
+    """The user's plugin model raised or misbehaved: status 'failed', exit 1 (F-09)."""
 
 
 def subspace(cov: np.ndarray, constraints) -> tuple[np.ndarray, dict]:
@@ -150,24 +158,38 @@ def bpl_log(theta, x, smoothness=0.0):
     return _bpl.log_flux(np.asarray(x, dtype=float), theta[0], theta[1], theta[2], theta[3], smoothness)
 
 
-def _plugin(spec, n):
-    """A user model: {"path": "model.py", "function": "predict", "n_params": k}; predict(theta, x) -> n values."""
+def _plugin(spec, n, allow=False, base_dir=None):
+    """A user model: {"path": "model.py", "function": "predict", "n_params": k}; predict(theta, x) -> n values. It runs
+    user code, so only with allow (--allow-plugin); a relative path is resolved against base_dir (the input file's
+    folder); its exceptions become CovFitPluginError (F-09)."""
     import importlib.util
     if not isinstance(spec, dict) or not all(k in spec for k in ("path", "function", "n_params")):
         raise CovFitInputError('a plugin model needs {"path", "function", "n_params"}')
+    if not allow:
+        raise CovFitError("a plugin model runs your Python file with your permissions; pass --allow-plugin "
+                          "(allow_plugin=True) to run it")
     path = Path(spec["path"])
+    if not path.is_absolute() and base_dir is not None:
+        path = Path(base_dir) / path
     if not path.is_file():
         raise CovFitInputError(f"plugin file {path} not found")
-    mod_spec = importlib.util.spec_from_file_location("covariance_fit_plugin", path)
-    mod = importlib.util.module_from_spec(mod_spec)
-    mod_spec.loader.exec_module(mod)  # type: ignore[union-attr]
+    sys.dont_write_bytecode = True  # importing the plugin leaves no __pycache__ next to it
+    try:
+        mod_spec = importlib.util.spec_from_file_location("covariance_fit_plugin", path)
+        mod = importlib.util.module_from_spec(mod_spec)
+        mod_spec.loader.exec_module(mod)  # type: ignore[union-attr]
+    except Exception as exc:  # noqa: BLE001 - any failure of user code is reported, never a traceback
+        raise CovFitPluginError(f"the plugin {path} failed to load: {type(exc).__name__}: {exc}") from exc
     fn = getattr(mod, spec["function"], None)
     k = spec["n_params"]
     if not callable(fn) or not (isinstance(k, int) and k >= 1):
         raise CovFitInputError("the plugin function must exist and n_params must be a positive integer")
 
     def f(th):
-        out = np.asarray(fn(np.asarray(th, dtype=float), _plugin_x), dtype=float)
+        try:
+            out = np.asarray(fn(np.asarray(th, dtype=float), _plugin_x), dtype=float)
+        except Exception as exc:  # noqa: BLE001
+            raise CovFitPluginError(f"the plugin function {spec['function']} raised {type(exc).__name__}: {exc}") from exc
         if out.shape != (n,) or not np.all(np.isfinite(out)):
             raise CovFitError(f"the plugin returned {out.shape} or non-finite values; expected {n} finite values")
         return out
@@ -177,7 +199,7 @@ def _plugin(spec, n):
 _plugin_x: object = None
 
 
-def model_fn(name, x, options=None):
+def model_fn(name, x, options=None, allow_plugin=False, base_dir=None):
     """Prediction function and parameter count. Models: constant, line, exponential-normalized, broken-power-law
     (sharp), smoothly-broken-power-law (options.smoothness), plugin (options.plugin, see _plugin)."""
     global _plugin_x
@@ -192,7 +214,7 @@ def model_fn(name, x, options=None):
         return (lambda th: np.exp(bpl_log(th, x, float(sm)))), 4
     if name == "plugin":
         _plugin_x = x
-        return _plugin(options.get("plugin"), len(x))
+        return _plugin(options.get("plugin"), len(x), allow_plugin, base_dir)
     if name == "tabulated-grid":
         raise CovFitInputError("tabulated-grid takes predictions and a measurement, not y and cov: use grid_fit(doc) or "
                                "the fit command with the tabulated-grid input")
@@ -280,14 +302,14 @@ def _rank_one(rel):
 
 
 def fit(y, cov, model="constant", x=None, constraints=None, start=None, multiplicative=None, logdet=True,
-        model_options=None) -> dict:
+        model_options=None, allow_plugin=False, base_dir=None) -> dict:
     y = np.asarray(y, dtype=float)
     cov = np.asarray(cov, dtype=float)
     n = len(y)
     if cov.shape != (n, n) or not np.allclose(cov, cov.T, rtol=1e-12, atol=0):
         raise CovFitError("cov must be a symmetric n x n matrix")
     x = np.arange(n, dtype=float) if x is None else np.asarray(x, dtype=float)
-    f, npar = model_fn(model, x, model_options)
+    f, npar = model_fn(model, x, model_options, allow_plugin, base_dir)
     rel, mode = None, None
     if multiplicative:
         rel = _relative_cov(multiplicative["relative_cov"], n)
@@ -666,7 +688,14 @@ def _grid_one(grid: _Grid, names, scales, y, cov, u, start, monomials, declared)
         start = min((nodes[i] for i in tied), key=lambda t: float(np.sum(((t - centre) / (grid.hi - grid.lo)) ** 2)))
     p0 = np.append(start, [0.0] * nz)
     bounds = [(lo, hi) for lo, hi in zip(grid.lo, grid.hi)] + [(None, None)] * nz
-    res = optimize.minimize(m2ll, p0, method="L-BFGS-B", bounds=bounds, options={"ftol": 1e-14, "gtol": 1e-10, "maxiter": 2000})
+    opts = {"ftol": 1e-14, "gtol": 1e-10, "maxiter": 2000}
+    res = optimize.minimize(m2ll, p0, method="L-BFGS-B", bounds=bounds, options=opts)
+    convergence = {"optimizer": str(res.message), "restarted": False}
+    if not res.success:
+        # a line search can stop abnormally at a point that is already the minimum (an Asimov fit starts there): restart
+        # once from where it stopped before judging; the EDM check below decides if the restart does not succeed (F-01)
+        res = optimize.minimize(m2ll, np.asarray(res.x, dtype=float), method="L-BFGS-B", bounds=bounds, options=opts)
+        convergence.update(restarted=True, optimizer_after_restart=str(res.message))
     p = np.asarray(res.x, dtype=float)
     p[:k] = np.clip(p[:k], grid.lo, grid.hi)
     chi2 = m2ll(p)
@@ -724,6 +753,19 @@ def _grid_one(grid: _Grid, names, scales, y, cov, u, start, monomials, declared)
         fk = fisher[:k, :k] - np.outer(fisher[:k, k], fisher[k, :k]) / fisher[k, k]     # nuisance profiled
     else:
         fk = fisher
+    if res.success:
+        convergence["converged_by"] = "optimizer"
+    else:
+        # EDM in -2 ln L units from the optimizer's gradient, projected on the bounds (a component pushing outward at an
+        # active bound is not a distance to the minimum), with the Hessian 2 J^T C^-1 J (+ the nuisance constraint)
+        g = np.asarray(getattr(res, "jac", np.full(k + nz, np.inf)), dtype=float)
+        lo = np.append(grid.lo, [-np.inf] * nz)
+        hi = np.append(grid.hi, [np.inf] * nz)
+        span_all = np.where(np.isfinite(hi - lo), hi - lo, 1.0)
+        g = np.where(((p - lo) <= 1e-6 * span_all) & (g > 0) | ((hi - p) <= 1e-6 * span_all) & (g < 0), 0.0, g)
+        edm = float(0.25 * g @ np.linalg.pinv(fisher, rcond=1e-12) @ g) if np.all(np.isfinite(g)) else float("inf")
+        convergence.update(edm=edm, edm_max=EDM_MAX)
+        convergence["converged_by"] = "edm" if edm <= EDM_MAX else None
     ev, evec = np.linalg.eigh(0.5 * (fk + fk.T))
     lam_max = max(float(ev[-1]), 1e-300)
     cond = float(lam_max / ev[0]) if ev[0] > 0 else None
@@ -794,7 +836,8 @@ def _grid_one(grid: _Grid, names, scales, y, cov, u, start, monomials, declared)
                       "method": "J^T C^-1 J at the best fit, J by central differences over one grid cell"
                                 + ("; the normalization nuisance profiled (Schur complement)" if nz else "")},
            "degenerate_directions": [e for e, _, _ in degenerate], "combinations": combos, "warnings": warnings,
-           "prediction_at_best_fit": pred0.tolist(), "converged": bool(res.success), "optimizer_message": str(res.message)}
+           "prediction_at_best_fit": pred0.tolist(), "converged": convergence["converged_by"] is not None,
+           "optimizer_message": str(res.message), "convergence": convergence}
     if nz:
         out["normalization_nuisance"] = float(p[k])
     return out
@@ -1003,6 +1046,9 @@ def main(argv=None) -> int:
     sub = ap.add_subparsers(dest="command", required=True)
     p = sub.add_parser("fit")
     p.add_argument("--input", required=True)
+    p.add_argument("--allow-plugin", action="store_true",
+                   help="run a plugin model (a Python file named in the input, relative to the input's folder); it "
+                        "runs with your permissions")
     bs = sub.add_parser("break-scan", help="break position of a broken power law with a toy-calibrated interval")
     bs.add_argument("--input", required=True)
     bs.add_argument("--toys", type=int, default=200)
@@ -1026,7 +1072,8 @@ def main(argv=None) -> int:
             out = grid_fit(doc, Path(a.input).resolve().parent)
         else:
             out = fit(doc["y"], doc["cov"], doc.get("model", "constant"), doc.get("x"), doc.get("constraints"),
-                      doc.get("start"), doc.get("multiplicative"), model_options=doc.get("model_options"))
+                      doc.get("start"), doc.get("multiplicative"), model_options=doc.get("model_options"),
+                      allow_plugin=a.allow_plugin, base_dir=Path(a.input).resolve().parent)
     except KeyError as exc:
         print(json.dumps({"status": "rejected", "error": f"missing {exc}"}))
         return 2
@@ -1036,12 +1083,24 @@ def main(argv=None) -> int:
     except CovFitIncomplete as exc:
         print(json.dumps({"label": LABEL, "status": "incomplete", "error": str(exc), "missing": exc.missing}, indent=1))
         return 3
+    except CovFitPluginError as exc:
+        print(json.dumps({"label": LABEL, "status": "failed", "error": str(exc)}))
+        return 1
     except CovFitError as exc:
         print(json.dumps({"label": LABEL, "status": "refused", "error": str(exc)}))
         return 1
     except (TypeError, ValueError, AttributeError) as exc:     # a field of the wrong JSON type
         print(json.dumps({"status": "rejected", "error": f"bad input: {type(exc).__name__}: {exc}"}))
         return 2
+    # a grid fit whose optimizer stopped before converging is a failed fit, not a result (F-01); the other models
+    # refuse non-convergence earlier through the EDM check of _verdict
+    stalled = [f for f in out.get("fits") or [] if not f.get("converged", True)]
+    if stalled:
+        out["status"] = "failed"
+        out["reason"] = ("the grid fit did not converge: " + "; ".join(
+            f"cross-section set {f.get('alternative')!r}: {f.get('optimizer_message')}" for f in stalled))
+        print(json.dumps(out, indent=1))
+        return 1
     out["status"] = "ok"
     print(json.dumps(out, indent=1))
     return 0

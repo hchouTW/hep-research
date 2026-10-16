@@ -74,6 +74,8 @@ or in a summary of it:
 - **Empirical observation** — a pattern seen in data, with no claimed
   theoretical mechanism yet.
 - **Conjecture** — an unproven claim offered as a research direction.
+- **Not derived** — no derivation was attempted or recorded here: the result is quoted from a source or assumed,
+  and is used as such.
 
 **Never silently upgrade a heuristic argument, numerical observation,
 perturbative result, or empirical pattern into a proof.** The most common
@@ -171,6 +173,6 @@ When recording a theoretical claim in `../../hep-communication/references/claim-
 matrix, state its justified strength using the proof-status categories above
 (formal proof, analytic derivation, perturbative argument, asymptotic
 argument, heuristic argument, numerical evidence, empirical observation,
-conjecture) rather than a bare "supported"/"unsupported" verdict — the verdict
+conjecture, not derived) rather than a bare "supported"/"unsupported" verdict — the verdict
 answers whether the evidence matches the claim; this ladder answers how strong
 that evidence actually is on its own terms.

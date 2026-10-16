@@ -291,7 +291,7 @@ Scripts are in `<plugin root>/skills/hep-statistics/scripts/` unless an adapter 
 
 | Tool | Question | Oracle and negative baseline (test) |
 |---|---|---|
-| `result_artifact.py` | write a `statistical-result` that keeps a CLI's status | failed fit -> `failed` label; zero-exceedance bound typed (`test_result_artifact.py`) |
+| `result_artifact.py` | write a `statistical-result` that keeps a CLI's status; `--paradigm` frequentist, bayesian or likelihood-only | failed fit -> `failed` label; zero-exceedance bound typed; an MCMC result is `bayesian` with priors, sampler, convergence (`test_result_artifact.py`) |
 | `covariance_fit.py` | fits with a declared covariance: constrained spectra, C(theta) with ln det, multiplicative (Peelle) | closed forms; diagonal approximation and data-scaled covariance detected (`test_covariance_fit.py`) |
 | `covariance_fit.py fit` (`tabulated-grid`) | parameters on a grid of gated predictions (multilinear, no extrapolation), cross sections as a nuisance or a model set, degenerate directions compared with the theory spec | synthetic grids: recovery (Asimov and 200 toys), the flat direction of a model that depends on D0/L only, refusals, exit 3 for a missing covariance (`test_grid_fit.py`) |
 | `sweighted_fit.py` | sWeighted fits: naive, SumW2, sandwich, asymptotic, bootstrap; sPlot independence check | RooFit AsymptoticError, toys and bootstrap; broken factorization flagged invalid (`test_sweighted_fit.py`) |

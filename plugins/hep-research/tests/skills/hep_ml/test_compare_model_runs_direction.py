@@ -42,8 +42,10 @@ class DirectionPrecedenceTests(unittest.TestCase):
 
     def test_non_boolean_file_value_is_rejected(self):
         res = run({**RUNS, "lower_is_better": "yes"})
-        self.assertNotEqual(res.returncode, 0)
-        self.assertIn("true or false", res.stderr)
+        self.assertEqual(res.returncode, 2)
+        out = json.loads(res.stdout)         # F-04: a refused input is a JSON status on stdout
+        self.assertEqual(out["status"], "rejected")
+        self.assertIn("true or false", out["error"])
 
 
 if __name__ == "__main__":
