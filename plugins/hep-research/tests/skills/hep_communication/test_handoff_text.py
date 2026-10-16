@@ -32,7 +32,9 @@ class CodeReviewHandoffs(unittest.TestCase):
         self.assertRegex(t, r"(?i)by (the )?(actual )?question", "routing is by the question asked")
 
     def test_papers_guide_routes_execution_to_computing(self):
-        t = flat("academic-papers-guide.md")
+        # the review-mode list moved from the papers guide to its index file (upgrade plan B-03)
+        self.assertNotIn("hand execution to `hep-measurement`/`hep-ml`", flat("academic-papers-guide.md"))
+        t = flat("papers-review-modes-and-reference-index.md")
         self.assertNotIn("hand execution to `hep-measurement`/`hep-ml`", t)
         self.assertRegex(t, r"Reproducibility auditing[^\n]*`hep-computing`")
         self.assertRegex(t, r"Code review report[^\n]*`hep-computing`")

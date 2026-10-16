@@ -33,7 +33,7 @@ Negative weights (NLO generators, sWeights, subtraction):
     --isotonic-negative-weights merge) first merges events adjacent in score into cells whose net weight is at
     least half of their sum |w| (a one-dimensional cell resampling that keeps the local net weight), then runs PAV
     on the cells. Fitted values outside [0, 1] are clipped and counted. Clipping negative weights to zero is not
-    offered: it is the same as dropping those events, which biases the result (ml-analysis.md, "Negative weights").
+    offered: it is the same as dropping those events, which biases the result (ml-analysis-weights.md, "Negative weights").
   * reliability/ECE: signed weights are kept per bin. Equal-mass edges use |w|. A bin with net weight <= 0 is
     reported with null values and left out of ECE and MCE; the count of such bins is in the table.
 

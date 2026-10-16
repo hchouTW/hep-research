@@ -13,6 +13,7 @@ periods, resolutions) come from the bound profile, never from this file.
 - [Time-dependent flux](#time-dependent-flux)
 - [Rare-event searches](#rare-event-searches)
 - [Anisotropy](#anisotropy) (new content: estimand, exposure, harmonic and dipole estimators, spurious modulations, upper limits)
+- [Astroparticle and cosmic-ray invariants](#astroparticle-and-cosmic-ray-invariants) (moved from the analysis guide)
 
 ## Absolute flux
 
@@ -33,7 +34,7 @@ periods, resolutions) come from the bound profile, never from this file.
 
 | Step | Read |
 |---|---|
-| Shared systematics and the covariance of the two yields | [analysis guide, astroparticle invariants](hep-measurement-guide.md#astroparticle-and-cosmic-ray); script `particle_ratio_with_uncertainty.py` |
+| Shared systematics and the covariance of the two yields | [analysis guide, astroparticle invariants](#astroparticle-and-cosmic-ray-invariants); script `particle_ratio_with_uncertainty.py` |
 | Charge confusion and species-specific backgrounds in antiparticle ratios | [Backgrounds, antiparticles](backgrounds.md#antiparticles-and-charge-sign-confusion) |
 | Secondary-to-primary ratios: fragmentation feed-down, survival probability | [Correction chain, nuclei](correction-chain.md#nuclei-and-isotopes) |
 | Which systematics cancel and which do not | [Systematics, source inventory](systematics.md#source-inventory) |
@@ -54,7 +55,7 @@ periods, resolutions) come from the bound profile, never from this file.
 | Step | Read |
 |---|---|
 | Per-period exposure, exposure-weighted averages, efficiency drift, period-correlated systematics | [Correction chain, time dependence](correction-chain.md#time-dependent-measurements) |
-| Solar modulation and the epoch to state | hep-detector: [solar modulation](../../hep-detector/references/space-based-direct-detection.md#solar-modulation); script `solar_modulation_force_field.py`; the solar-phase rule in the [analysis guide](hep-measurement-guide.md#astroparticle-and-cosmic-ray) |
+| Solar modulation and the epoch to state | hep-detector: [solar modulation](../../hep-detector/references/space-based-direct-detection.md#solar-modulation); script `solar_modulation_force_field.py`; the solar-phase rule in the [analysis guide](#astroparticle-and-cosmic-ray-invariants) |
 | Periodicity in a flux time series (known vs unknown period, binning, charge-sign comparison) | hep-detector: [periodicity](../../hep-detector/references/space-based-direct-detection.md#searching-for-periodicity-and-time-structure-in-a-flux-time-series) |
 | Event-level periodicity tests and variability | hep-statistics: [astroparticle statistics](../../hep-statistics/references/astroparticle-statistics.md#point-sources-test-statistics-periodicity-and-variability) |
 | Time-bin covariance and binned-series inference | [hep-statistics time-series inference](../../hep-statistics/references/time-series-inference.md) (hands off the period-correlated evidence from the correction chain) |
@@ -175,3 +176,13 @@ simulated skies drawn with the real exposure, and the trials over energy bins
 - Amplitude and phase with their uncertainties, or the upper limit and the expected limit, with the Rayleigh
   probability of the observed amplitude.
 - Solar, sidereal and anti-sidereal (or instrument-period) results as checks; the systematics ledger.
+
+## Astroparticle and cosmic-ray invariants
+
+Moved here from the [analysis guide](hep-measurement-guide.md) (B-03); they apply to every measurement above.
+
+- In an ON/OFF or blind sky-scan search, the OFF/background region must not overlap the ON region, and a reported significance must account for the number of independent trials (positions, energy bins, time windows, source catalogs) actually tested, not just the one presented.
+- Distinguish a flux measured at the top of the atmosphere or at an instrument from one corrected to the local interstellar spectrum; state the solar-modulation epoch/potential and the geomagnetic cutoff applied whenever a low-rigidity cosmic-ray flux is reported. Keep an event in a rigidity bin only if the bin's lower edge is above f times the maximum cutoff over the acceptance cone, backtraced through a realistic field model at that time; f is an experiment's convention taken from its profile, and the same rule defines the exposure, E_i = sum over t of T_live(t) A_i step(R_low,i > f Rc_max(t)) ([selection rule](../../hep-detector/references/space-based-direct-detection.md)); a Stormer formula is only a planning estimate. Take the epoch's solar phase from the SILSO sunspot record, never from memory: look up in the [SILSO cycle table](https://www.sidc.be/SILSO/cyclesmm) the minimum and the 13-month smoothed maximum of the cycle that contains the data-taking period, and state them with the date the table was read (smoothed values are revised); a multi-peaked maximum is solar maximum, not a declining phase. The detector reference gives a worked reading for cycles 24 and 25 ([space-based direct detection](../../hep-detector/references/space-based-direct-detection.md)).
+- Do not draw a composition conclusion from a single shower observable (X_max or muon content alone) without stating the hadronic interaction model assumed (quote more than one) and checking consistency against the other observable, given the current muon-content/X_max modeling discrepancy. Use the X_max distribution width (sigma(X_max)), not only the mean: simulations give about 60 g/cm2 for protons and about 20 g/cm2 for iron near 1e18 eV, far wider than the naive superposition value sigma_p/sqrt(A) (about 8 g/cm2); a mixed composition adds the spread of the component means, sigma(X_max)^2 = <sigma_i^2> + (spread of <X_max>_i), so the width measures the variance of lnA; convert mean and width to lnA moments for each hadronic model ([Kampert & Unger 2012, arXiv:1201.0018](https://arxiv.org/abs/1201.0018), Sec. 2).
+- A flux or rate reported from raw counts must use an exact Poisson interval, not a Gaussian sqrt(N) approximation, whenever counts are low enough for the two to disagree (routine in a steeply falling spectrum's high-energy tail); state the exposure (effective area/geometric factor times live time times solid angle) and bin width used, separately from the raw count. If asked whether `sqrt(N)` is right for a few-count bin, answer no (not "approximately right"), run `<plugin root>/skills/hep-measurement/scripts/cosmic_ray_flux.py` for the interval, and for a high-rigidity/energy bin also address resolution spillover and background ([space-based direct detection, low-count bins](../../hep-detector/references/space-based-direct-detection.md#low-count-high-rigidity-bins)).
+- A ratio or fraction of two yields (e.g. a positron fraction or an antiproton/proton ratio) must use the yields' actual covariance, not an independence assumption, whenever they share a systematic (the same acceptance, exposure, or background-template shape) - state which systematics are shared and whether they were treated as correlated. Species-specific effects (e.g. charge confusion, which feeds protons into the antiproton sample) belong to one yield only and do not cancel.

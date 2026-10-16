@@ -3,7 +3,7 @@
 Evaluating a model beyond IID performance before it is trusted for a physics claim. Production drift:
 [monitoring-and-lifecycle.md](monitoring-and-lifecycle.md); slices: [evaluation-strategy.md](evaluation-strategy.md);
 calibration under shift: [uncertainty-and-calibration.md](uncertainty-and-calibration.md); the HEP methods (control
-regions, reweighting, scale factors): [ml-analysis.md](ml-analysis.md), "Simulation-to-data differences".
+regions, reweighting, scale factors): [ml-analysis-decorrelation-and-systematics.md](ml-analysis-decorrelation-and-systematics.md), "Simulation-to-data differences".
 
 | Shift | What moved | Research-time check |
 |---|---|---|

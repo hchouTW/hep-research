@@ -180,7 +180,7 @@ pulls test uncertainties, not just widths; and systematics are propagated by rer
 the reconstruction and selection.
 
 **Family exceptions.** Silicon: charge sharing, ghosts, dose. Drift/TPC: ambiguities
-(left-right, `t_0`), `r(t)`, distortions. Timing: correlated clock terms do not average.
+(left-right, `t_0`), `r(t)`, distortions; a timing error can hide in a spatial residual. Timing: correlated clock terms do not average.
 Cherenkov/DIRC: photon-path and index terms. TRD/`dE/dx`: Landau tails, saturation.
 Calorimeters: `e/h`, sampling, leakage, confusion in particle flow. Muons: charge-sign
 failure at high `p`, weak modes. Noble liquid: recombination and lifetime.

@@ -56,5 +56,20 @@ class RoutingTables(unittest.TestCase):
                     self.assertTrue(path.exists(), path)
 
 
+class QuickQuestionLoad(unittest.TestCase):
+    """B-03: for a quick question, SKILL.md plus its entry reference (the first reference its Resources section links)
+    is at most 25 KB (25,600 bytes)."""
+
+    def test_skill_plus_entry_reference(self):
+        import sys
+        sys.path.insert(0, str(PLUGIN))
+        from tools.reference_inventory import entry_references
+        entries = entry_references(PLUGIN)
+        self.assertEqual(len(entries), len(SKILLS))
+        for rel in entries:
+            skill = PLUGIN / "skills" / Path(rel).parts[1]
+            with self.subTest(entry=rel):
+                self.assertLessEqual(len((skill / "SKILL.md").read_bytes()) + len((PLUGIN / rel).read_bytes()), 25600)
+
 if __name__ == "__main__":
     unittest.main()

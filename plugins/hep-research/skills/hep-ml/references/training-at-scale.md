@@ -41,4 +41,4 @@ Tune small and transfer up (learning rate and batch size transfer along width wh
 it; schedule length and regularization transfer poorly); random search beats grid when few hyperparameters matter;
 stop poor trials early (successive halving, Hyperband); between full-scale runs change one thing at a time
 ([ablation-and-design-review.md](ablation-and-design-review.md)). For physics data the search uses grouped (or nested,
-grouped) cross-validation: [ml-analysis.md](ml-analysis.md), "Hyperparameter search".
+grouped) cross-validation: [ml-analysis-training-and-data.md](ml-analysis-training-and-data.md), "Hyperparameter search".

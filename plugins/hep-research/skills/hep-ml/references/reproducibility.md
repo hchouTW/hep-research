@@ -100,4 +100,4 @@ seed, environment, checkpoint and evaluation version.
 Seed every trial from a base seed and its index, record every trial's config and result (one JSON line each), record
 why a trial was stopped early, and rerun the winner with another seed before reporting it. A single validation split
 reused across many configurations is overfit by the selection: use grouped (or nested) cross-validation
-([ml-analysis.md](ml-analysis.md), "Hyperparameter search").
+([ml-analysis-training-and-data.md](ml-analysis-training-and-data.md), "Hyperparameter search").

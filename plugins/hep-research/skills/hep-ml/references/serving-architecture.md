@@ -1,6 +1,6 @@
 # Serving Architecture Reference
 
-> Generic ML engineering. Deployment inside experiment software and triggers is in [ml-analysis.md](ml-analysis.md),
+> Generic ML engineering. Deployment inside experiment software and triggers is in [ml-analysis-validation-and-deployment.md](ml-analysis-validation-and-deployment.md),
 > "Deployment in experiment software and triggers"; this file is for a model run as a service (a GPU inference server
 > called by many reconstruction or analysis jobs). Export mechanics: [export-and-deployment.md](export-and-deployment.md).
 > Sizing: `<plugin root>/skills/hep-ml/scripts/serving_capacity.py`.

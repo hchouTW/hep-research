@@ -44,3 +44,16 @@ stays under 8 KiB). This README is for people browsing the folder. The skill rea
 through the context-resolution steps in `SKILL.md`; it never embeds experiment facts, and durable results are written
 as JSON artifacts in the project's `artifacts_dir`, never inside the plugin. Scripts take `--help` and are standard
 library first; a successful run is a software check, not scientific validity.
+
+## Example requests
+
+Requests this skill answers (moved from the analysis guide, B-03):
+
+- "Review this measurement spec and tell me whether it is ready."
+- "Design the selection, background estimate and correction chain for a flux measurement over two periods."
+- "Which systematics should I evaluate for this cross section, and how does each reach the result?"
+- "Review this NanoAOD selection and explain the yield difference for the negative-weight sample."
+- "Is a 4.8-sigma excess in my ON/OFF gamma-ray source search significant after accounting for the sky scan?"
+- "Convert this local-interstellar proton spectrum to what we'd expect at 1 AU during solar minimum vs. solar maximum."
+- "Propagate the uncertainty on a positron fraction from independent positron and electron template-fit yields."
+- "Compute the differential flux and its statistical uncertainty from these raw counts, exposure, and bin width."
