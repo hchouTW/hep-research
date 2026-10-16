@@ -5,6 +5,14 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- New rule and obligation registry `contracts/rules/registry.json` (schema `contracts/schemas/rule_registry.json`,
+  checker `contracts/rule_registry.py`; v6.3 D12a), run by `tools/run_all_checks.py` as the static check
+  `rule_registry`. It registers the existing R4 rules of `contracts/recipe_semantics.py` with `outcome_contract:
+  "pending"` (evaluated as unverified), the V01–V71 acceptance cases per slice part (all `not-run`), and an impact map
+  from changed paths to test modules or gate parts. A new or changed rule needs reason codes for all five obligation
+  states; a V case marked passing or expected-failure must name tests that exist. `impact` returns the full closure for
+  a path no group covers, a group marked full, or a check that does not exist yet. No existing verdict or exit code
+  changes.
 - New `core/evidence/query.py` (v6.3 D02): bounded, pageable rows of a source and claim ledger, one per (claim, cited
   source), each with claim and source IDs, scope, `verification_date`, verification level and strength, location and
   the record position in each file. The ledger is checked with `core/evidence/ledger.py` first and a ledger with

@@ -1,0 +1,1597 @@
+{
+ "registry_version": "1.0.0",
+ "$comment": "v6.3 D12a minimal rule and obligation registry. Rules: kind legacy may carry outcome_contract 'pending' (evaluated as unverified); kind new or changed needs reason codes for all five states. V cases: per slice part, status not-run | expected-failure | required-before-enforcement | passing; expected-failure and passing name the tests that run them. Impact groups map changed paths to test modules or run_all_checks parts; a not-available check, an unmatched path or a full group forces the full closure.",
+ "states": [
+  "satisfied",
+  "violated",
+  "not_applicable",
+  "unverified",
+  "unsupported"
+ ],
+ "rules": [
+  {
+   "rule_id": "l2.r4.repeat",
+   "version": "1.0.0",
+   "layer": "L2",
+   "suites": [],
+   "kind": "legacy",
+   "prerequisites": [
+    "recipe steps and input applied_effects",
+    "effect_keys (recipe 1.1.0) or upstream extension.corrections[] R4 keys"
+   ],
+   "applicability": "every second application of one effect along a recipe and its upstream records",
+   "outcome_contract": "pending",
+   "legacy_codes": [
+    "semantics.repeated_correction",
+    "semantics.repeat_undetermined",
+    "semantics.repeat_distinct_instance"
+   ],
+   "native_from": "recipe_version 1.1.0 (keys); unkeyed effect-name rule before",
+   "v_cases": [
+    "V21",
+    "V22"
+   ],
+   "waivable": false,
+   "accepted_applicability_facts": [],
+   "owner": "hep-measurement",
+   "review_status": "unreviewed",
+   "lifecycle": "legacy",
+   "notes": "contracts/recipe_semantics.py _walk/apply with _same_application; maps to R-REP (C3) once its adapter exists"
+  },
+  {
+   "rule_id": "l2.r4.upstream",
+   "version": "1.0.0",
+   "layer": "L2",
+   "suites": [],
+   "kind": "legacy",
+   "prerequisites": [
+    "--upstream artifacts",
+    "the operator-semantics table effects"
+   ],
+   "applicability": "recipes checked with upstream artifacts, or claiming applied input effects",
+   "outcome_contract": "pending",
+   "legacy_codes": [
+    "semantics.upstream_unmapped",
+    "semantics.upstream_unrecorded",
+    "semantics.input_effects_unverified",
+    "semantics.input_effects_uncorroborated"
+   ],
+   "native_from": null,
+   "v_cases": [],
+   "waivable": false,
+   "accepted_applicability_facts": [],
+   "owner": "hep-measurement",
+   "review_status": "unreviewed",
+   "lifecycle": "legacy",
+   "notes": "contracts/recipe_semantics.py upstream_instances; a record that cannot be mapped keeps a repeat open"
+  },
+  {
+   "rule_id": "l2.r4.keys",
+   "version": "1.0.0",
+   "layer": "L2",
+   "suites": [],
+   "kind": "legacy",
+   "prerequisites": [
+    "recipe effect_keys"
+   ],
+   "applicability": "recipes that carry correction keys",
+   "outcome_contract": "pending",
+   "legacy_codes": [
+    "semantics.key_unused",
+    "semantics.key_mismatch",
+    "semantics.version_feature"
+   ],
+   "native_from": "recipe_version 1.1.0",
+   "v_cases": [],
+   "waivable": false,
+   "accepted_applicability_facts": [],
+   "owner": "hep-measurement",
+   "review_status": "unreviewed",
+   "lifecycle": "legacy",
+   "notes": "contracts/recipe_semantics.py: keys only from 1.1.0, each key names an applied effect"
+  }
+ ],
+ "v_cases": [
+  {
+   "v_id": "V01",
+   "scenario": "One more consistent description of the same application",
+   "expected": "Application count and verdict unchanged",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D06"
+     ],
+     "host": "CASE-CHAIN",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V02",
+   "scenario": "Descriptions of the same operation differ in calibration",
+   "expected": "Description conflict checked with or without application_id; legacy finding kept separately",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D06"
+     ],
+     "host": "CASE-CHAIN variant",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V03",
+   "scenario": "The same slot applied twice on the same path",
+   "expected": "violated",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D06"
+     ],
+     "host": "CASE-CHAIN variant",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V04",
+   "scenario": "Two alternative branches, each applied once",
+   "expected": "Not judged a repeat only with explicit branch and root bindings",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D06"
+     ],
+     "host": "CASE-CHAIN variant",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V05",
+   "scenario": "One recipe template builds 4 instances",
+   "expected": "Template listed once; instance view has sources; missing values can be filled, overriding literals is rejected",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D05a",
+      "D06"
+     ],
+     "host": "CASE-CHAIN",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V06",
+   "scenario": "A shared parameter acts on several channels with one auxiliary observation",
+   "expected": "satisfied; consistent with the adapter result",
+   "parts": [
+    {
+     "slice": "M2b",
+     "suite": "model",
+     "work_packages": [
+      "D07"
+     ],
+     "host": "CASE-MODEL",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V07",
+   "scenario": "The same auxiliary observation enters one joint likelihood under two aux IDs",
+   "expected": "violated when source and use are known; unverified when a binding is missing",
+   "parts": [
+    {
+     "slice": "M2b",
+     "suite": "model",
+     "work_packages": [
+      "D07"
+     ],
+     "host": "CASE-MODEL variant",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V08",
+   "scenario": "Same source type, different instances",
+   "expected": "Not merged",
+   "parts": [
+    {
+     "slice": "M2b",
+     "suite": "model",
+     "work_packages": [
+      "D07"
+     ],
+     "host": "CASE-MODEL variant",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V09",
+   "scenario": "A parent described by its children, with one operation only",
+   "expected": "Not double counted under a listed composition contract",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D06"
+     ],
+     "host": "CASE-CHAIN",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V10",
+   "scenario": "The parent and its full decomposition each applied once",
+   "expected": "violated",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D06"
+     ],
+     "host": "CASE-CHAIN variant",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V11",
+   "scenario": "A required response, scope or observation binding is missing",
+   "expected": "Obligation kept, coverage partial; a deleted frozen file is also reported as invalid",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D05b",
+      "D05c"
+     ],
+     "host": "CASE-CHAIN",
+     "status": "not-run",
+     "tests": []
+    },
+    {
+     "slice": "M2b",
+     "suite": "model",
+     "work_packages": [
+      "D07"
+     ],
+     "host": "CASE-MODEL",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V12",
+   "scenario": "The full inputs show a response is genuinely not needed",
+   "expected": "not_applicable only when applicability is false",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D05c"
+     ],
+     "host": "CASE-CHAIN variant",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V13",
+   "scenario": "Old and new alias keys with equal values; a conflict in the same file",
+   "expected": "Equal values resolve the same; a conflict is rejected; the original file is unchanged",
+   "parts": [
+    {
+     "slice": "M1",
+     "suite": null,
+     "work_packages": [
+      "D03a"
+     ],
+     "host": "resolver unit test",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V14",
+   "scenario": "Adopting a new catalog or alias version",
+   "expected": "New lock and subject; in M2a the old subject is unverified",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": null,
+     "work_packages": [
+      "D05b"
+     ],
+     "host": "resolver and bundle",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V15",
+   "scenario": "Renaming files or reordering set enumerations",
+   "expected": "Ordered steps and bin arrays are not reordered; unrelated changes do not alter the semantic verdict",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D05a",
+      "D05c"
+     ],
+     "host": "CASE-CHAIN",
+     "status": "not-run",
+     "tests": []
+    },
+    {
+     "slice": "M2b",
+     "suite": "model",
+     "work_packages": [
+      "D07"
+     ],
+     "host": "CASE-MODEL",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V16",
+   "scenario": "Scope changes only as an opaque string",
+   "expected": "Legacy warning kept; new suite unverified",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D06"
+     ],
+     "host": "CASE-CHAIN variant",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V17",
+   "scenario": "An operator from an old semantics table",
+   "expected": "Mapped through the pinned operator semantics",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D11a"
+     ],
+     "host": "reader test",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V18",
+   "scenario": "An unsupported operator or modifier",
+   "expected": "unsupported; cannot be inferred as a pass from the absence of a legacy finding",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D05c"
+     ],
+     "host": "CASE-CHAIN variant",
+     "status": "not-run",
+     "tests": []
+    },
+    {
+     "slice": "M2b",
+     "suite": "model",
+     "work_packages": [
+      "D07"
+     ],
+     "host": "CASE-MODEL variant",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V19",
+   "scenario": "Updating references from leaf to root",
+   "expected": "References consistent, original files unchanged, no completion marker on failure",
+   "parts": [
+    {
+     "slice": "D11b",
+     "suite": null,
+     "work_packages": [
+      "D11b"
+     ],
+     "host": "migration test",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V20",
+   "scenario": "Adding results after execution",
+   "expected": "Bundle unchanged, no circular digest, result identity and scope verified",
+   "parts": [
+    {
+     "slice": "M2c",
+     "suite": "run",
+     "work_packages": [
+      "D05d"
+     ],
+     "host": "CASE-CHAIN post-execution",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V21",
+   "scenario": "Two operations on the same path with the same scope and variation but different calibrations",
+   "expected": "Both legacy and new suite judge it a repeat; distinguished from a description conflict",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D06"
+     ],
+     "host": "L2 regression",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V22",
+   "scenario": "Incomplete keys",
+   "expected": "Old entry point repeat_undetermined; new report unverified",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D06"
+     ],
+     "host": "L2 regression",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V23",
+   "scenario": "A description cannot be mapped uniquely to a step within one instance",
+   "expected": "unverified; not merged and not judged a violation",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D06"
+     ],
+     "host": "CASE-CHAIN variant",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V24",
+   "scenario": "Masking a required binding or removing a listed file under the same frozen intent",
+   "expected": "Obligations do not disappear and coverage does not rise; removing a file fails integrity",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D05b",
+      "D05c"
+     ],
+     "host": "CASE-CHAIN",
+     "status": "not-run",
+     "tests": []
+    },
+    {
+     "slice": "M2b",
+     "suite": "model",
+     "work_packages": [
+      "D07"
+     ],
+     "host": "CASE-MODEL",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V25",
+   "scenario": "Context directly declares a rule not applicable",
+   "expected": "Not counted; only verifiable applicability facts can affect the verdict",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D05c"
+     ],
+     "host": "CASE-CHAIN",
+     "status": "not-run",
+     "tests": []
+    },
+    {
+     "slice": "M2b",
+     "suite": "model",
+     "work_packages": [
+      "D07"
+     ],
+     "host": "CASE-MODEL",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V26",
+   "scenario": "A scoped exception",
+   "expected": "Original finding kept; non-waivable items rejected",
+   "parts": [
+    {
+     "slice": "M3",
+     "suite": null,
+     "work_packages": [
+      "D10"
+     ],
+     "host": "report test",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V27",
+   "scenario": "Several input errors and incompleteness at once",
+   "expected": "By 2 > 1 > 3 > 0, distinguishing an unreadable top level, a missing frozen file and a missing external dependency",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": null,
+     "work_packages": [
+      "D05c"
+     ],
+     "host": "CLI",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V28",
+   "scenario": "An old ratio with free-text numerator and denominator",
+   "expected": "Ratio rule unverified",
+   "parts": [
+    {
+     "slice": "M2b",
+     "suite": "ratio",
+     "work_packages": [
+      "D07"
+     ],
+     "host": "CASE-CHAIN old version",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V29",
+   "scenario": "An alias taking over across owners, or a cycle",
+   "expected": "Rejected",
+   "parts": [
+    {
+     "slice": "M1",
+     "suite": null,
+     "work_packages": [
+      "D03a"
+     ],
+     "host": "resolver unit test",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V30",
+   "scenario": "Controlled, unknown and public local profiles missing metadata",
+   "expected": "Per transition stage; existing controlled refusals not relaxed",
+   "parts": [
+    {
+     "slice": "M3",
+     "suite": null,
+     "work_packages": [
+      "D12b"
+     ],
+     "host": "project",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V31",
+   "scenario": "Old contract_version, non-strict",
+   "expected": "New rules appear only in the shadow report",
+   "parts": [
+    {
+     "slice": "M3",
+     "suite": "all",
+     "work_packages": [
+      "D09"
+     ],
+     "host": "regression test",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V32",
+   "scenario": "A non-lock alias used at run time",
+   "expected": "Rejected when the lock bound in the result binding differs from the actual semantics; merely installing a new version while the old snapshot is available is not drift (needs D11b)",
+   "parts": [
+    {
+     "slice": "M3",
+     "suite": null,
+     "work_packages": [
+      "D10"
+     ],
+     "host": "gate integration",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V33",
+   "scenario": "An execution read an input that is neither frozen nor from a legitimate producer",
+   "expected": "violated",
+   "parts": [
+    {
+     "slice": "M2c",
+     "suite": "run",
+     "work_packages": [
+      "D05d"
+     ],
+     "host": "CASE-CHAIN post-execution",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V34",
+   "scenario": "The response is used for unfolding, but the recipe handles migration with not_applied",
+   "expected": "violated (R-RESP)",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D06"
+     ],
+     "host": "CASE-CHAIN variant",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V35",
+   "scenario": "Trigger and selection against effective exposure",
+   "expected": "realized only with listed operator coverage; the classification alone is not enough",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D04",
+      "D06"
+     ],
+     "host": "CASE-CHAIN",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V36",
+   "scenario": "A spec correction carrying supported R4 fields",
+   "expected": "The new version no longer reports unknown_key; old versions follow the threshold",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": null,
+     "work_packages": [
+      "D05a"
+     ],
+     "host": "L1 regression",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V37",
+   "scenario": "A description without a scope against 4 instances",
+   "expected": "Needs explicit applicability or an instance mapping; no automatic broadcast",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D05a",
+      "D06"
+     ],
+     "host": "CASE-CHAIN",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V38",
+   "scenario": "An execution reads JSON inside the bundle",
+   "expected": "Bytes and canonical digests each verified; re-serialization treated as a derived input",
+   "parts": [
+    {
+     "slice": "M2c",
+     "suite": "run",
+     "work_packages": [
+      "D05d"
+     ],
+     "host": "CASE-CHAIN post-execution",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V39",
+   "scenario": "An ID points to a step whose stage, effect or calibration does not match",
+   "expected": "violated even though locating succeeded",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D06"
+     ],
+     "host": "CHAIN-ID",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V40",
+   "scenario": "Different scope strings with no basis for mutual exclusion",
+   "expected": "New suite unverified; old warning kept",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D06"
+     ],
+     "host": "CHAIN-SCOPE",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V41",
+   "scenario": "Two mutually exclusive selections from one file; mutual exclusion declared for the same selection",
+   "expected": "The former can hold; the latter is violated",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D06"
+     ],
+     "host": "CHAIN-SCOPE",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V42",
+   "scenario": "Repeated axis, unknown value, missing axis",
+   "expected": "Illegal grammar rejected; missing information is not a wildcard",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D05a"
+     ],
+     "host": "scope parser",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V43",
+   "scenario": "A new efficiency member not included in operator coverage",
+   "expected": "Cannot be realized automatically",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D04",
+      "D06"
+     ],
+     "host": "catalog",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V44",
+   "scenario": "Different bins of the same calibration table, versus a common scalar",
+   "expected": "The former does not cancel exactly; the latter cancels when the conditions hold",
+   "parts": [
+    {
+     "slice": "M2b",
+     "suite": "ratio",
+     "work_packages": [
+      "D07"
+     ],
+     "host": "RATIO-FACTORS",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V45",
+   "scenario": "independent or verification given only as a bare claim",
+   "expected": "unverified",
+   "parts": [
+    {
+     "slice": "M2b",
+     "suite": "ratio",
+     "work_packages": [
+      "D07"
+     ],
+     "host": "RATIO-EVIDENCE",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V46",
+   "scenario": "Alternative models reusing an observation, versus multiplying it again in a joint likelihood",
+   "expected": "The former is not a repeat; the latter is violated, and unknown is unverified",
+   "parts": [
+    {
+     "slice": "M2b",
+     "suite": "model",
+     "work_packages": [
+      "D07"
+     ],
+     "host": "MODEL-USAGE",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V47",
+   "scenario": "Cross-model sharing binds incompatible parameters or constraints",
+   "expected": "Merge rejected; unknown parametrization is unsupported or unverified",
+   "parts": [
+    {
+     "slice": "M2b",
+     "suite": "model",
+     "work_packages": [
+      "D07"
+     ],
+     "host": "MODEL-SHARING",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V48",
+   "scenario": "Only not_applied written, with no prediction-side folding use",
+   "expected": "Cannot claim the response was handled",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D06"
+     ],
+     "host": "CHAIN-RESPONSE",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V49",
+   "scenario": "A variation renamed but its output still rejoins the nominal path",
+   "expected": "Repeat judged from data flow",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D06"
+     ],
+     "host": "CHAIN-FLOW",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V50",
+   "scenario": "Deleting a root and re-freezing a smaller analysis",
+   "expected": "New subject and scope delta; old assessments and permits not inherited",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "all",
+     "work_packages": [
+      "D05b"
+     ],
+     "host": "bundle lifecycle",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V51",
+   "scenario": "No legacy finding, but a required rule did not run",
+   "expected": "unverified; the obligation inventory cannot become empty and pass",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "all",
+     "work_packages": [
+      "D05c"
+     ],
+     "host": "report adapter",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V52",
+   "scenario": "Inputs that cannot be established, versus a completed evaluation with a violation",
+   "expected": "The former is invalid and partial; the latter is complete and inconsistent",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "all",
+     "work_packages": [
+      "D05c"
+     ],
+     "host": "report aggregation",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V53",
+   "scenario": "A product of run A used by run B",
+   "expected": "A legitimate intermediate-product closure passes; provenance binding and bytes checked",
+   "parts": [
+    {
+     "slice": "M2c",
+     "suite": "run",
+     "work_packages": [
+      "D05d"
+     ],
+     "host": "RUN-CHAIN",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V54",
+   "scenario": "A failed single execution leaves output, or several retries",
+   "expected": "Not promoted to success; the result binding names the one adopted",
+   "parts": [
+    {
+     "slice": "M2c",
+     "suite": "run",
+     "work_packages": [
+      "D05d"
+     ],
+     "host": "RUN-STATUS",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V55",
+   "scenario": "Ambiguous product producer, run cycle, the same bytes in a different role",
+   "expected": "Rejected, or an explicit binding required",
+   "parts": [
+    {
+     "slice": "M2c",
+     "suite": "run",
+     "work_packages": [
+      "D05d"
+     ],
+     "host": "RUN-LINEAGE",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V56",
+   "scenario": "A complete but self-reported input manifest",
+   "expected": "Claims only manifest consistency (declared level)",
+   "parts": [
+    {
+     "slice": "M2c",
+     "suite": "run",
+     "work_packages": [
+      "D05d"
+     ],
+     "host": "RUN-EVIDENCE",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V57",
+   "scenario": "The environment has a new version and the complete old snapshot is still available",
+   "expected": "Reproduced from the old snapshot; only an actual swap is drift",
+   "parts": [
+    {
+     "slice": "D11b",
+     "suite": null,
+     "work_packages": [
+      "D11b"
+     ],
+     "host": "LOCK-SNAPSHOT",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V58",
+   "scenario": "An updated class set affects wildcard resolution",
+   "expected": "Set-query dependencies go into the lock; unrelated definitions do not change the semantic closure",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": null,
+     "work_packages": [
+      "D04",
+      "D05b"
+     ],
+     "host": "LOCK-CLOSURE",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V59",
+   "scenario": "An old reader ignores required_capabilities",
+   "expected": "The matrix exposes it; not released before a real refusal threshold exists",
+   "parts": [
+    {
+     "slice": "M3",
+     "suite": null,
+     "work_packages": [
+      "D09"
+     ],
+     "host": "reader matrix",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V60",
+   "scenario": "A hand-edited pass report, wrong suite, stale assessment, requirement before report, or a permit whose execution bundle differs from the result binding's",
+   "expected": "permit.py's advisory check rejects wrong bindings; pre- and post-conditions by purpose",
+   "parts": [
+    {
+     "slice": "M3",
+     "suite": null,
+     "work_packages": [
+      "D10"
+     ],
+     "host": "gate integration",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V61",
+   "scenario": "One chunk of a campaign has two valid outputs",
+   "expected": "Only the one the collection record names is adopted; the duplicate enters neither merge nor root",
+   "parts": [
+    {
+     "slice": "M2c",
+     "suite": "run",
+     "work_packages": [
+      "D05d"
+     ],
+     "host": "CASE-CHAIN campaign (fake schedulers)",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V62",
+   "scenario": "A chunk output digest in the result binding disagrees with the collection record; or the campaign lacks collected or has an orphan output",
+   "expected": "The former is violated; the latter counts only as declared, with related obligations unverified",
+   "parts": [
+    {
+     "slice": "M2c",
+     "suite": "run",
+     "work_packages": [
+      "D05d"
+     ],
+     "host": "RUN-CAMPAIGN",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V63",
+   "scenario": "Submissions owning collected attempts lack a bundle digest, disagree with each other, or disagree with the result binding",
+   "expected": "The first two get no campaign-recorded level; the last is violated; a campaign with the same name does not pass",
+   "parts": [
+    {
+     "slice": "M2c",
+     "suite": "run",
+     "work_packages": [
+      "D05d"
+     ],
+     "host": "RUN-CAMPAIGN",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V64",
+   "scenario": "An obligation is satisfied only through an agent's unconfirmed declaration",
+   "expected": "Diagnostics flag it declaration-based; formal use treats it as unverified",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D05c"
+     ],
+     "host": "CASE-CHAIN",
+     "status": "not-run",
+     "tests": []
+    },
+    {
+     "slice": "M2b",
+     "suite": "model",
+     "work_packages": [
+      "D07"
+     ],
+     "host": "CASE-MODEL",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V65",
+   "scenario": "The evidence of an accepted review includes the report",
+   "expected": "Declaration-based obligations count for formal use",
+   "parts": [
+    {
+     "slice": "M3",
+     "suite": null,
+     "work_packages": [
+      "D10"
+     ],
+     "host": "gate integration",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V66",
+   "scenario": "Only a pass report, no accepted review",
+   "expected": "permit.py rejects; the custodian gate rejects under the same requirement",
+   "parts": [
+    {
+     "slice": "M3",
+     "suite": null,
+     "work_packages": [
+      "D10"
+     ],
+     "host": "gate integration",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V67",
+   "scenario": "The inventory regenerated under the same suite version differs",
+   "expected": "input invalid",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "all",
+     "work_packages": [
+      "D05b"
+     ],
+     "host": "obligation generator",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V68",
+   "scenario": "A new suite version adds obligations",
+   "expected": "New assessment, listing obligations added and removed",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "all",
+     "work_packages": [
+      "D05b",
+      "D05c"
+     ],
+     "host": "obligation generator",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V69",
+   "scenario": "A factor check across many bins",
+   "expected": "One obligation per relation, bin results summarized, report within budget",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": "chain",
+     "work_packages": [
+      "D05c",
+      "D06"
+     ],
+     "host": "CASE-CHAIN",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V70",
+   "scenario": "A blinded spec's result binding points at observed results",
+   "expected": "Rejected; only asimov or synthetic statuses, or outputs matching blinding.allowed_outputs under D05d's matching rule, are accepted; reports and summaries carry no values",
+   "parts": [
+    {
+     "slice": "M2c",
+     "suite": "run",
+     "work_packages": [
+      "D05d"
+     ],
+     "host": "CASE-CHAIN blinded variant",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  },
+  {
+   "v_id": "V71",
+   "scenario": "hep-measurement's review calls the check",
+   "expected": "Summary within budget and names the missing bindings; instruction text passes routing and text checks",
+   "parts": [
+    {
+     "slice": "M2a",
+     "suite": null,
+     "work_packages": [
+      "D17"
+     ],
+     "host": "skill integration",
+     "status": "not-run",
+     "tests": []
+    }
+   ]
+  }
+ ],
+ "impact": [
+  {
+   "id": "profiles-vocabulary",
+   "change": "profile, alias, base vocabulary",
+   "patterns": [
+    "profiles/**",
+    "contracts/vocab/**",
+    "contracts/vocab.py",
+    "contracts/registry.py",
+    "contracts/project.py",
+    "contracts/comparison/composition.py",
+    "contracts/communication_project.py",
+    "skills/hep-measurement/scripts/review_measurement_spec.py"
+   ],
+   "checks": [
+    "tests.contracts.test_contracts",
+    "tests.contracts.test_comparison",
+    "tests.contracts.test_profile_vocab_hint",
+    "tests.contracts.test_strict_versions",
+    "tests.contracts.test_communication_project",
+    "tests.contracts.test_v63_baseline_gaps",
+    "part:static"
+   ],
+   "not_available": [
+    "namespace ownership over the visible closure (D03a)",
+    "alias contract (D03a)",
+    "failing-profile test per consumer (D03a)"
+   ],
+   "full": false
+  },
+  {
+   "id": "catalog-operators",
+   "change": "catalog, operators, member sets",
+   "patterns": [
+    "contracts/semantics/**",
+    "contracts/recipe_semantics.py",
+    "contracts/schemas/recipe.json",
+    "contracts/schemas/operator_semantics.json",
+    "contracts/vocab/effects.json"
+   ],
+   "checks": [
+    "tests.contracts.test_recipe_semantics",
+    "tests.contracts.test_v63_baseline_gaps",
+    "tests.contracts.test_r5_contracts"
+   ],
+   "not_available": [
+    "L3 chain rules (D06)",
+    "old-version readers (D11a)",
+    "semantic lock closure (D05b)",
+    "CASE-CHAIN and CASE-MODEL (D08)"
+   ],
+   "full": false
+  },
+  {
+   "id": "context-obligations",
+   "change": "context, roots, obligations, declarations",
+   "patterns": [
+    "contracts/analysis_checks/**",
+    "contracts/analysis_check.py",
+    "contracts/resolve.py"
+   ],
+   "checks": [],
+   "not_available": [
+    "masking tests on a fixed subject (D05b)",
+    "regeneration comparison (D05b)",
+    "scope delta for a new subject (D05b)",
+    "declaration flags (D05c)"
+   ],
+   "full": false
+  },
+  {
+   "id": "bundle-result-binding",
+   "change": "bundle, result binding",
+   "patterns": [
+    "contracts/analysis_bundle.py",
+    "contracts/schemas/analysis_bundle.json",
+    "contracts/verify_run.py",
+    "contracts/release_manifest.py"
+   ],
+   "checks": [
+    "tests.contracts.test_permits",
+    "tests.contracts.test_r5_contracts",
+    "tests.contracts.test_v63_baseline_gaps"
+   ],
+   "not_available": [
+    "bytes and canonical digests of the new bundle (D05b)",
+    "run dependencies and status propagation (D05d)",
+    "digest cycles (D05d)",
+    "compatibility matrix (D09)"
+   ],
+   "full": false
+  },
+  {
+   "id": "partition-records",
+   "change": "core/partition or batch adapter record fields",
+   "patterns": [
+    "core/partition/**",
+    "adapters/batch-schedulers/**",
+    "examples/batch-partition/**",
+    "examples/local-partition/**"
+   ],
+   "checks": [
+    "tests.core.test_partition",
+    "tests.core.test_partition_states",
+    "tests.core.test_partition_bundle",
+    "tests.core.test_partition_robustness",
+    "tests.core.test_partition_p0_regressions",
+    "tests.adapters.test_batch_hardening",
+    "tests.adapters.test_batch_provenance",
+    "tests.adapters.test_batch_bundle",
+    "tests.contracts.test_v63_baseline_gaps"
+   ],
+   "not_available": [
+    "campaign reader field matrix (D05d)",
+    "fake-scheduler and LocalExecutor campaign cases (D08 run)"
+   ],
+   "full": false
+  },
+  {
+   "id": "report-gate",
+   "change": "report, gate",
+   "patterns": [
+    "contracts/permit.py",
+    "contracts/attestation.py",
+    "contracts/schemas/permit.json",
+    "contracts/schemas/attestation.json",
+    "contracts/revocation.py"
+   ],
+   "checks": [
+    "tests.contracts.test_permits",
+    "tests.contracts.test_attestation",
+    "tests.contracts.test_revocation",
+    "tests.contracts.test_protected_entry_points"
+   ],
+   "not_available": [
+    "assessment binding (D05c)",
+    "forged or wrong-version reports (D10)",
+    "attestation evidence path for reports (D10)",
+    "permit.py advisory report check (D10)",
+    "per-purpose conditions (D10)"
+   ],
+   "full": false
+  },
+  {
+   "id": "agent-text",
+   "change": "agent summary and skill text",
+   "patterns": [
+    "skills/*/SKILL.md",
+    "skills/*/references/**",
+    "skills/*/assets/**",
+    "contracts/stanzas/**",
+    "README.md"
+   ],
+   "checks": [
+    "tests.routing.test_routing_static",
+    "tests.tools.test_check_instruction_text",
+    "part:static"
+   ],
+   "not_available": [
+    "agent summary size (D17)"
+   ],
+   "full": false
+  },
+  {
+   "id": "shared-schemas-readers",
+   "change": "shared resolvers, schemas, readers, selectors",
+   "patterns": [
+    "contracts/schema.py",
+    "contracts/schemas/**",
+    "contracts/validate.py",
+    "contracts/dependencies.py",
+    "contracts/__init__.py"
+   ],
+   "checks": [],
+   "full": true,
+   "not_available": []
+  },
+  {
+   "id": "rule-registry",
+   "change": "rule and obligation registry",
+   "patterns": [
+    "contracts/rules/**",
+    "contracts/rule_registry.py",
+    "contracts/schemas/rule_registry.json"
+   ],
+   "checks": [
+    "tests.contracts.test_v63_rule_registry",
+    "part:static"
+   ],
+   "not_available": [],
+   "full": false
+  },
+  {
+   "id": "evidence",
+   "change": "evidence ledger and query",
+   "patterns": [
+    "core/evidence/**"
+   ],
+   "checks": [
+    "tests.core.test_v63_evidence_query",
+    "tests.core.test_properties",
+    "tests.tools.test_statistics_evidence",
+    "tests.contracts.test_protected_entry_points",
+    "tests.contracts.test_communication_project"
+   ],
+   "not_available": [],
+   "full": false
+  },
+  {
+   "id": "docs-records",
+   "change": "design and decision records, changelog, validation record",
+   "patterns": [
+    "docs/dev/**",
+    "CHANGELOG.md",
+    "VALIDATION.md"
+   ],
+   "checks": [
+    "tests.tools.test_check_instruction_text",
+    "part:static"
+   ],
+   "not_available": [],
+   "full": false
+  }
+ ]
+}
