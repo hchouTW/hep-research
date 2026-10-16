@@ -5,6 +5,15 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- Chain rules of the `counting-chain/v1` suite (v6.3 D06, `contracts/analysis_checks/rules.py`), each returning one
+  of five states with a registered reason code: R-REAL (a spec correction is realized by exactly one compatible
+  application in each instance it applies to; no broadcast without a spec `target_scope` or an `instance_mapping`
+  declaration; a conflicting `application_id`, scope, variation or calibration is a description conflict), R-STAGE
+  (applied_in against the operator's stage), R-REP (no member applied twice on one computation path, judged from
+  `input_of` data flow; variation labels and calibrations grant no exemption, opaque scopes stay unverified, a declared
+  exclusion for one selection is a contradiction), R-COMP (a parent factor and its decomposition on one path; per-bin
+  factor tables summarized per relation without values) and R-RESP (unfolding needs a bound unfolding response; a
+  spec that says unfolding against a chain that does not unfold is violated; forward folding is unsupported).
 - `contracts/analysis_check.py check BUNDLE --root DIR [--out REPORT] [--previous REPORT]` (v6.3 D05c) evaluates a v2
   bundle's frozen obligation inventory and prints a report (schema `check_report.json`): input validity, coverage
   (completed over all), consistency, per-obligation state with reason and evidence pointers, declaration-based flags

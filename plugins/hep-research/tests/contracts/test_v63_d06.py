@@ -101,7 +101,6 @@ class Tmp(unittest.TestCase):
 
 @NEEDS_AMS
 class Realization(Tmp):
-    @unittest.expectedFailure  # V01 (D06)
     def test_v01_one_more_consistent_description(self):
         base = self.pos()
 
@@ -115,7 +114,6 @@ class Realization(Tmp):
                          [(o["obligation_id"], o["state"], o["evidence"]) for o in by_rule(rep, "r-rep.repetition")])
         self.assertEqual((rep["status"], rep["consistency"]), (base["status"], base["consistency"]))
 
-    @unittest.expectedFailure  # V02 (D06)
     def test_v02_calibration_differs(self):
         for keep_id in (True, False):
             def cal(c, keep_id=keep_id):
@@ -131,21 +129,18 @@ class Realization(Tmp):
                 self.assertEqual((o["state"], o["reason"]), ("violated", "check.description_conflict"))
                 self.assertFalse([c for c in legacy_codes(rep) if "description" in c])
 
-    @unittest.expectedFailure  # V09 (D06)
     def test_v09_parent_described_by_a_child(self):
         rep = self.pos()
         self.assertEqual(get(rep, "r-real.description:acceptance@proton-p1")["state"], "satisfied")
         self.assertEqual(get(rep, f"r-comp.composition:flux-proton-p1#{COMP}")["reason"], "check.composition_once")
         self.assertEqual(get(rep, "r-rep.repetition:flux-proton-p1#exposure")["state"], "satisfied")
 
-    @unittest.expectedFailure  # V23 (D06)
     def test_v23_ambiguous_mapping(self):
         def two(c):
             recipe_of(c)["steps"].insert(3, {"step_id": "exposure2", "operator": "divide_effective_exposure"})
         o = get(self.pos(two), "r-real.description:acceptance@proton-p1")
         self.assertEqual((o["state"], o["reason"]), ("unverified", "check.ambiguous_application"))
 
-    @unittest.expectedFailure  # V37 (D06): no broadcast
     def test_v37_scopeless_correction_against_four_instances(self):
         def unmapped(c):
             c.context["declarations"] = []
@@ -156,7 +151,6 @@ class Realization(Tmp):
         mapped = self.chain()
         self.assertNotIn("check.applicability_unbound", {o["reason"] for o in by_rule(mapped, "r-real.description")})
 
-    @unittest.expectedFailure  # V39 (D06): an ID that resolves but contradicts
     def test_v39_application_id_mismatch(self):
         def wrong_effect(c):
             c.doc("spec")["extension"]["corrections"][0]["application_id"] = "exposure"
@@ -173,7 +167,6 @@ class Realization(Tmp):
 
 @NEEDS_AMS
 class Coverage(Tmp):
-    @unittest.expectedFailure  # V35 (D06 part)
     def test_v35_effective_exposure(self):
         rep = self.chain()
         for m in ("trigger_efficiency", "selection_efficiency"):
@@ -188,7 +181,6 @@ class Coverage(Tmp):
         for m in ("trigger_efficiency", "selection_efficiency"):
             self.assertEqual(out[f"r-real.description:{m}@proton-p1"]["state"], "satisfied")
 
-    @unittest.expectedFailure  # V43 (D06 part): a new member cannot be realized automatically
     def test_v43_new_member(self):
         from contracts.analysis_checks.rules import evaluate
 
@@ -207,7 +199,6 @@ class Coverage(Tmp):
         o = after["r-real.description:tracking_efficiency@proton-p1"]
         self.assertEqual((o["state"], o["reason"]), ("violated", "check.unrealized_correction"))
 
-    @unittest.expectedFailure  # V18 (D06 part): an unsupported operator is unsupported, not a pass
     def test_v18_unsupported_operator(self):
         rep = self.pos(lambda c: custom_table(c, "differential-flux-y", None, None, drop_cov=("divide_bin_width",)))
         o = get(rep, "r-rep.repetition:flux-proton-p1#bin_width")
@@ -218,20 +209,17 @@ class Coverage(Tmp):
 
 @NEEDS_AMS
 class Repetition(Tmp):
-    @unittest.expectedFailure  # V03 (D06)
     def test_v03_same_slot_twice_on_one_path(self):
         rep = self.pos(lambda c: add_instance(c, "proton-p1-pre", "flux-pre", PRE_STEPS, feeds="proton-p1"))
         o = get(rep, "r-rep.repetition:flux-proton-p1#efficiency")
         self.assertEqual((o["state"], o["reason"]), ("violated", "check.repeated_application"))
         self.assertEqual(rep["consistency"], "inconsistent")
 
-    @unittest.expectedFailure  # V49 (D06): a renamed variation that rejoins the nominal path
     def test_v49_variation_rejoins(self):
         rep = self.pos(lambda c: add_instance(c, "proton-p1-alt", "flux-alt", PRE_STEPS, role="systematic",
                                               nominal="proton-p1", variation="alt", feeds="proton-p1"))
         self.assertEqual(get(rep, "r-rep.repetition:flux-proton-p1#efficiency")["reason"], "check.repeated_application")
 
-    @unittest.expectedFailure  # V04 (D06)
     def test_v04_alternative_branches(self):
         def alternatives(c, role="alternative"):
             for k in ("a", "b"):
@@ -256,21 +244,18 @@ class Repetition(Tmp):
             c.doc("spec")["extension"]["corrections"][0].pop("application_id")
         return self.pos(variant)
 
-    @unittest.expectedFailure  # V21 (D06): both entries judge a repeat whatever the calibration
     def test_v21_same_scope_two_calibrations(self):
         rep = self.regression(keyed(SCOPE, "a" * 64), keyed(SCOPE, "b" * 64))
         self.assertIn("semantics.repeated_correction", legacy_codes(rep))
         o = get(rep, "r-rep.repetition:flux-proton-p1#efficiency")
         self.assertEqual((o["state"], o["reason"]), ("violated", "check.repeated_application"))
 
-    @unittest.expectedFailure  # V22 (D06): incomplete keys
     def test_v22_incomplete_keys(self):
         rep = self.regression(keyed("species:proton"), None)
         self.assertIn("semantics.repeat_undetermined", legacy_codes(rep))
         o = get(rep, "r-rep.repetition:flux-proton-p1#efficiency")
         self.assertEqual((o["state"], o["reason"]), ("unverified", "check.keys_incomplete"))
 
-    @unittest.expectedFailure  # V16 (D06): scope changes only as an opaque string
     def test_v16_opaque_scope_strings(self):
         rep = self.regression(keyed("region-a"), keyed("region-b"))
         self.assertIn("semantics.repeat_distinct_instance", legacy_codes(rep))
@@ -286,12 +271,10 @@ class Repetition(Tmp):
                 c.context["declarations"].append(declaration)
         return self.pos(variant)
 
-    @unittest.expectedFailure  # V40 (D06)
     def test_v40_no_basis_for_exclusion(self):
         o = get(self.scoped_pair(), "r-rep.repetition:flux-proton-p1#efficiency")
         self.assertEqual((o["state"], o["reason"]), ("unverified", "check.scope_relation_unknown"))
 
-    @unittest.expectedFailure  # V41 (D06)
     def test_v41_declared_exclusion(self):
         def decl(sel_a, sel_b):
             return {"declaration_id": "excl", "type": "partition_exclusive", "asserted_by": dict(cases.AGENT),
@@ -306,7 +289,6 @@ class Repetition(Tmp):
 
 @NEEDS_AMS
 class Composition(Tmp):
-    @unittest.expectedFailure  # V10 (D06)
     def test_v10_parent_and_decomposition(self):
         op = {"operator_id": "divide_acceptance", "input_kind": "counts", "output_kind": "counts", "applies": ["exposure"],
               "requires": ["background"], "forbids_after": [], "meaning": "synthetic: divide by the acceptance alone"}
@@ -334,7 +316,6 @@ class Composition(Tmp):
             c.context["recipe_instances"][0]["calibrations"] = {"exposure": "factors"}
         return self.pos(variant)
 
-    @unittest.expectedFailure  # V69 (D06): one obligation per relation, bins summarized, no values
     def test_v69_factor_check_across_bins(self):
         o = get(self.factors(), f"r-comp.factor_values:proton-p1#{COMP}")
         self.assertEqual((o["state"], o["bins"]), ("satisfied", {"evaluated": 400, "failed": 0, "first_failures": []}))
@@ -348,7 +329,6 @@ class Composition(Tmp):
 
 @NEEDS_AMS
 class ResponseUse(Tmp):
-    @unittest.expectedFailure  # V34 (D06)
     def test_v34_unfolding_against_not_applied(self):
         def unfolding(c):
             corr = next(x for x in c.doc("spec")["extension"]["corrections"] if x["category"] == "migration")
@@ -358,7 +338,6 @@ class ResponseUse(Tmp):
         self.assertEqual((o["state"], o["reason"]), ("violated", "check.response_use_conflict"))
         self.assertEqual(rep["consistency"], "inconsistent")
 
-    @unittest.expectedFailure  # V48 (D06)
     def test_v48_not_applied_only(self):
         o = get(self.chain(), "r-resp.response_use:proton-p1")
         self.assertEqual((o["state"], o["reason"]), ("unverified", "check.response_use_unbound"))
@@ -383,7 +362,6 @@ class ResponseUse(Tmp):
                     c.context["bindings"].append({"binding_id": f"resp-{iid}", "type": "response_used_by",
                                                   "from": {"item": f"response-{iid}"}, "to": {"instance": iid, "step": "unfold"}})
 
-    @unittest.expectedFailure  # V11 (D06 part): a missing required response binding keeps the obligation, partial
     def test_v11_missing_response_binding(self):
         rep = self.chain(lambda c: self.unfold_recipe(c, bind=False))
         o = get(rep, "r-resp.response_use:proton-p1")
@@ -392,7 +370,6 @@ class ResponseUse(Tmp):
         bound = self.chain(lambda c: self.unfold_recipe(c, bind=True))
         self.assertEqual(get(bound, "r-resp.response_use:proton-p1")["state"], "satisfied")
 
-    @unittest.expectedFailure  # V12 (D06 part): not_applicable only when the inputs show no response is needed
     def test_v12_response_not_needed(self):
         def no_migration(c):
             spec = c.doc("spec")
@@ -408,7 +385,6 @@ class ResponseUse(Tmp):
 
 @NEEDS_AMS
 class DeclarationFlags(Tmp):
-    @unittest.expectedFailure  # V64 (D06 part)
     def test_v64_declaration_based(self):
         rep = self.chain()
         o = get(rep, "r-real.description:acceptance@proton-p1")
@@ -419,6 +395,26 @@ class DeclarationFlags(Tmp):
         self.assertIn({"declaration_id": "map-acceptance", "type": "instance_mapping", "asserted_by": cases.AGENT},
                       rep["declarations"])
         self.assertFalse(any(x["declaration_based"] for x in self.pos()["obligations"]))
+
+
+class ReasonCodes(unittest.TestCase):
+    """Every reason code a chain rule can return is registered for that rule and state (D12a outcome contract)."""
+
+    def test_codes_are_registered(self):
+        import ast
+        import inspect
+        from contracts.analysis_checks import rules
+        registry = {r["rule_id"]: r for r in json.loads((ROOT / "contracts" / "rules" / "registry.json").read_text())["rules"]}
+        helpers = {"_pair": "r-rep.repetition"}
+        for rule_id, fn in list(rules.RULES.items()) + [(v, getattr(rules, k)) for k, v in helpers.items()]:
+            contract = registry[rule_id]["outcome_contract"]
+            for node in ast.walk(ast.parse(inspect.getsource(fn))):
+                consts = [n.value for n in ast.walk(node) if isinstance(n, ast.Constant) and isinstance(n.value, str)]
+                if isinstance(node, (ast.Call, ast.Return, ast.Tuple)) and len(consts) >= 2:
+                    for state, code in zip(consts, consts[1:]):
+                        if state in contract and code.startswith("check."):
+                            with self.subTest(rule=rule_id, code=code):
+                                self.assertIn(code, contract[state])
 
 
 if __name__ == "__main__":

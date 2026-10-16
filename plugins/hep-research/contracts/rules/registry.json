@@ -481,7 +481,7 @@
       "D06"
      ],
      "host": "CASE-CHAIN",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d06.Realization.test_v01_one_more_consistent_description"
      ]
@@ -500,7 +500,7 @@
       "D06"
      ],
      "host": "CASE-CHAIN variant",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d06.Realization.test_v02_calibration_differs"
      ]
@@ -519,7 +519,7 @@
       "D06"
      ],
      "host": "CASE-CHAIN variant",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d06.Repetition.test_v03_same_slot_twice_on_one_path"
      ]
@@ -538,7 +538,7 @@
       "D06"
      ],
      "host": "CASE-CHAIN variant",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d06.Repetition.test_v04_alternative_branches"
      ]
@@ -630,7 +630,7 @@
       "D06"
      ],
      "host": "CASE-CHAIN",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d06.Realization.test_v09_parent_described_by_a_child"
      ]
@@ -649,7 +649,7 @@
       "D06"
      ],
      "host": "CASE-CHAIN variant",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d06.Composition.test_v10_parent_and_decomposition"
      ]
@@ -669,7 +669,7 @@
       "D05c"
      ],
      "host": "CASE-CHAIN",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d06.ResponseUse.test_v11_missing_response_binding",
       "tests.contracts.test_v63_d05c.Declarations.test_removing_a_file_fails_integrity"
@@ -699,7 +699,7 @@
       "D05c"
      ],
      "host": "CASE-CHAIN variant",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d06.ResponseUse.test_v12_response_not_needed"
      ]
@@ -757,8 +757,10 @@
       "D05c"
      ],
      "host": "CASE-CHAIN",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d05c.Identity.test_rename_and_reorder"
+     ]
     },
     {
      "slice": "M2b",
@@ -784,7 +786,7 @@
       "D06"
      ],
      "host": "CASE-CHAIN variant",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d06.Repetition.test_v16_opaque_scope_strings"
      ]
@@ -820,7 +822,7 @@
       "D05c"
      ],
      "host": "CASE-CHAIN variant",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d06.Coverage.test_v18_unsupported_operator"
      ]
@@ -883,7 +885,7 @@
       "D06"
      ],
      "host": "L2 regression",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d06.Repetition.test_v21_same_scope_two_calibrations"
      ]
@@ -902,7 +904,7 @@
       "D06"
      ],
      "host": "L2 regression",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d06.Repetition.test_v22_incomplete_keys"
      ]
@@ -921,7 +923,7 @@
       "D06"
      ],
      "host": "CASE-CHAIN variant",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d06.Realization.test_v23_ambiguous_mapping"
      ]
@@ -941,8 +943,11 @@
       "D05c"
      ],
      "host": "CASE-CHAIN",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d05c.Declarations.test_masking_keeps_obligations",
+      "tests.contracts.test_v63_d05c.Declarations.test_removing_a_file_fails_integrity"
+     ]
     },
     {
      "slice": "M2b",
@@ -968,8 +973,10 @@
       "D05c"
      ],
      "host": "CASE-CHAIN",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d05c.Declarations.test_waiver_is_not_counted"
+     ]
     },
     {
      "slice": "M2b",
@@ -1139,7 +1146,7 @@
       "D06"
      ],
      "host": "CASE-CHAIN variant",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d06.ResponseUse.test_v34_unfolding_against_not_applied"
      ]
@@ -1171,7 +1178,7 @@
       "D06"
      ],
      "host": "CASE-CHAIN",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d06.Coverage.test_v35_effective_exposure"
      ]
@@ -1212,7 +1219,7 @@
       "D06"
      ],
      "host": "CASE-CHAIN",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d06.Realization.test_v37_scopeless_correction_against_four_instances"
      ]
@@ -1248,7 +1255,7 @@
       "D06"
      ],
      "host": "CHAIN-ID",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d06.Realization.test_v39_application_id_mismatch"
      ]
@@ -1267,7 +1274,7 @@
       "D06"
      ],
      "host": "CHAIN-SCOPE",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d06.Repetition.test_v40_no_basis_for_exclusion"
      ]
@@ -1286,7 +1293,7 @@
       "D06"
      ],
      "host": "CHAIN-SCOPE",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d06.Repetition.test_v41_declared_exclusion"
      ]
@@ -1339,7 +1346,7 @@
       "D06"
      ],
      "host": "catalog",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d06.Coverage.test_v43_new_member"
      ]
@@ -1426,7 +1433,7 @@
       "D06"
      ],
      "host": "CHAIN-RESPONSE",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d06.ResponseUse.test_v48_not_applied_only"
      ]
@@ -1445,7 +1452,7 @@
       "D06"
      ],
      "host": "CHAIN-FLOW",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d06.Repetition.test_v49_variation_rejoins"
      ]
@@ -1722,7 +1729,7 @@
       "D05c"
      ],
      "host": "CASE-CHAIN",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d06.DeclarationFlags.test_v64_declaration_based"
      ]
@@ -1806,8 +1813,11 @@
       "D05c"
      ],
      "host": "obligation generator",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d05c.Identity.test_previous_report_and_assessment",
+      "tests.contracts.test_v63_d05b.Subjects.test_new_suite_version"
+     ]
     }
    ]
   },
@@ -1824,7 +1834,7 @@
       "D06"
      ],
      "host": "CASE-CHAIN",
-     "status": "expected-failure",
+     "status": "passing",
      "tests": [
       "tests.contracts.test_v63_d06.Composition.test_v69_factor_check_across_bins"
      ]
