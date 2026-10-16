@@ -20,7 +20,7 @@
   },
   "hep-measurement": {
    "references": 12,
-   "bytes": 98209,
+   "bytes": 98222,
    "uncited": 0
   },
   "hep-ml": {
@@ -30,12 +30,12 @@
   },
   "hep-statistics": {
    "references": 12,
-   "bytes": 170468,
+   "bytes": 170646,
    "uncited": 0
   },
   "hep-theory": {
    "references": 11,
-   "bytes": 81160,
+   "bytes": 81311,
    "uncited": 0
   }
  },
@@ -2323,7 +2323,7 @@
   {
    "path": "skills/hep-measurement/references/hep-measurement-guide.md",
    "owner": "hep-measurement",
-   "bytes": 20558,
+   "bytes": 20571,
    "lines": 120,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -2333,7 +2333,8 @@
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
     "tests/skills/hep_detector/test_reference_values.py",
     "tests/skills/hep_measurement/test_method_references.py",
-    "tests/skills/hep_measurement/test_reference_links.py"
+    "tests/skills/hep_measurement/test_reference_links.py",
+    "tests/skills/test_doc_consistency.py"
    ],
    "cited_by_other_skills": [
     "hep-detector"
@@ -3227,8 +3228,8 @@
   {
    "path": "skills/hep-statistics/references/likelihood-fitting.md",
    "owner": "hep-statistics",
-   "bytes": 9530,
-   "lines": 95,
+   "bytes": 9708,
+   "lines": 97,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-computing/references/root-debugging.md",
@@ -3237,7 +3238,8 @@
     "skills/hep-statistics/references/core-stats-guide.md",
     "skills/hep-statistics/references/nuisance-modeling.md",
     "skills/hep-statistics/references/time-series-inference.md",
-    "tests/skills/hep_statistics/test_weighted_unbinned_fit.py"
+    "tests/skills/hep_statistics/test_weighted_unbinned_fit.py",
+    "tests/skills/test_doc_consistency.py"
    ],
    "cited_by_other_skills": [
     "hep-computing",
@@ -3470,8 +3472,8 @@
   {
    "path": "skills/hep-theory/references/mathematical-reasoning-and-proof.md",
    "owner": "hep-theory",
-   "bytes": 9006,
-   "lines": 177,
+   "bytes": 9157,
+   "lines": 179,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-communication/references/academic-papers-guide.md",
@@ -3480,7 +3482,8 @@
     "skills/hep-statistics/references/statistical-inference-for-physics.md",
     "skills/hep-theory/README.md",
     "skills/hep-theory/SKILL.md",
-    "tests/routing/test_theory_routing.py"
+    "tests/routing/test_theory_routing.py",
+    "tests/skills/test_doc_consistency.py"
    ],
    "cited_by_other_skills": [
     "hep-communication",

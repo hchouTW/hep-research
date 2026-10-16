@@ -500,10 +500,9 @@ def weighted_loss_np(scores: np.ndarray, y: np.ndarray, w: np.ndarray) -> float:
 
 
 def evaluate(scores: np.ndarray, y: np.ndarray, w: np.ndarray, labels: list[str]) -> dict:
-    """Weighted metrics (signed weights kept) on one split."""
-    pred = (scores >= 0.5).astype(int) if scores.ndim == 1 else scores.argmax(1)
+    """Weighted metrics (signed weights kept) on one split. No accuracy: a fraction correct at a 0.5 threshold depends
+    on the class balance and the threshold and is not an analysis metric (F-11; see the working points)."""
     out = {"n_events": int(y.size), "loss_weighted": weighted_loss_np(scores, y, w),
-           "accuracy_weighted": float(np.sum(w * (pred == y)) / np.sum(w)),
            "sum_w_per_class": {name: float(w[y == c].sum()) for c, name in enumerate(labels)},
            "n_eff_per_class": {name: effective_entries(w[y == c]) for c, name in enumerate(labels)}}
     if scores.ndim == 1:

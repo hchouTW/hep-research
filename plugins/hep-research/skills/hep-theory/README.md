@@ -20,7 +20,7 @@ Use when the deliverable is a theoretical or phenomenological result: model defi
 
 ## References
 
-`references/mathematical-reasoning-and-proof.md` gives the proof-status ladder (formal, analytic, perturbative, asymptotic, heuristic, numerical, empirical, conjecture) that every derivation record states; the other files are topic references. Shipped theory-domain profiles are listed in `profiles/registry.json`. Outside v1 (lattice QCD and its global analyses, EFT global fits, global cosmic-ray propagation fits that run a propagation code), the skill says what it cannot cover.
+`references/mathematical-reasoning-and-proof.md` gives the proof-status ladder (formal, analytic, perturbative, asymptotic, heuristic, numerical, empirical, conjecture, not derived) that every derivation record states; the other files are topic references. Shipped theory-domain profiles are listed in `profiles/registry.json`. Outside v1 (lattice QCD and its global analyses, EFT global fits, global cosmic-ray propagation fits that run a propagation code), the skill says what it cannot cover.
 
 ## Handoffs
 

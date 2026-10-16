@@ -68,7 +68,9 @@ Every `SKILL.md` must stay at or under 8,192 bytes (`tools/measure_entrypoints.p
 On 2026-10-13 the three files that sat at the limit were trimmed by moving their reference and script lists into index
 sections of their primary reference (`hep-detector`: section 11 of the principles summary; `hep-statistics`:
 "Skill scripts" in the core/stats guide; `hep-computing`: "Scripts" in the engineering playbook); they now measure
-6,566, 7,545 and 7,598 bytes. Keep new material in those index sections, not in `SKILL.md`. A change to what a skill
+6,566, 7,545 and 7,598 bytes. Measured on 2026-10-17 (upgrade batch 0a, `tools/measure_entrypoints.py --no-cli`):
+hep-communication 8,145, hep-computing 8,065, hep-detector 7,558, hep-measurement 7,877, hep-ml 7,692,
+hep-statistics 7,798, hep-theory 7,960 bytes. Keep new material in those index sections, not in `SKILL.md`. A change to what a skill
 reads before it acts needs the routing checks (`check_routing_static.py`, `check_ownership.py`) and a live routing
 rerun of the cases that involve the skill before it is merged (VALIDATION SKILL-TRIM shows the shape of that record).
 
