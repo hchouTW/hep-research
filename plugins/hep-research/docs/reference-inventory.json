@@ -30,7 +30,7 @@
   },
   "hep-statistics": {
    "references": 12,
-   "bytes": 170646,
+   "bytes": 170648,
    "uncited": 0
   },
   "hep-theory": {
@@ -2386,7 +2386,7 @@
     "hep-detector",
     "hep-statistics"
    ],
-   "last_commit": "9257d7b 2026-10-15"
+   "last_commit": "7a58495 2026-10-17"
   },
   {
    "path": "skills/hep-measurement/references/review-and-artifacts.md",
@@ -3183,7 +3183,7 @@
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 16994,
+   "bytes": 16996,
    "lines": 175,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -3196,7 +3196,8 @@
     "skills/hep-statistics/references/core-stats-commands.md",
     "skills/hep-statistics/references/inference-recipes.md",
     "skills/hep-statistics/references/nuisance-modeling.md",
-    "tests/skills/hep_statistics/test_core_stats_guide.py"
+    "tests/skills/hep_statistics/test_core_stats_guide.py",
+    "tests/skills/test_documented_output_claims.py"
    ],
    "cited_by_other_skills": [
     "hep-measurement"

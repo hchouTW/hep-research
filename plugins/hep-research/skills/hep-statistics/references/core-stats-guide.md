@@ -27,9 +27,9 @@ subcommands, inputs and outputs, validation tools outside `core/stats`, publicat
 
 ## Common conventions
 
-- **Dependencies.** Standard library only (the covariance and response validators use NumPy for their eigenvalues
-  when it is installed, and record which solver ran in `eigen_solver`); output is JSON labeled `[General method]`. Nothing in the output is the
-  performance of any experiment.
+- **Dependencies.** Standard library only (the covariance and response validators use NumPy for eigenvalues when
+  installed and record the solver in `eigen_solver`); output is JSON labeled `[General method]` (validators: status
+  and findings). Nothing in it is any experiment's performance.
 - **Run, do not hand-compute.** When a shell is available, run the matching subcommand for an exact limit or
   interval and quote its JSON output; a value worked by hand (no shell, or a quick check) is labeled as such and is
   not presented as the script's result.
