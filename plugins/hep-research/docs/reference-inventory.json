@@ -10,7 +10,7 @@
   },
   "hep-computing": {
    "references": 32,
-   "bytes": 297310,
+   "bytes": 297461,
    "uncited": 0
   },
   "hep-detector": {
@@ -30,7 +30,7 @@
   },
   "hep-statistics": {
    "references": 12,
-   "bytes": 170349,
+   "bytes": 170468,
    "uncited": 0
   },
   "hep-theory": {
@@ -1132,7 +1132,7 @@
   {
    "path": "skills/hep-computing/references/engineering-playbook.md",
    "owner": "hep-computing",
-   "bytes": 10586,
+   "bytes": 10737,
    "lines": 148,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -1141,7 +1141,7 @@
     "skills/hep-computing/references/agile-development-guide.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "317c39a 2026-10-14"
+   "last_commit": "b7b159f 2026-10-17"
   },
   {
    "path": "skills/hep-computing/references/environments-and-containers.md",
@@ -3162,7 +3162,7 @@
   {
    "path": "skills/hep-statistics/references/core-stats-commands.md",
    "owner": "hep-statistics",
-   "bytes": 37992,
+   "bytes": 38111,
    "lines": 409,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -3176,7 +3176,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "7487999 2026-10-15"
+   "last_commit": "191242d 2026-10-17"
   },
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",

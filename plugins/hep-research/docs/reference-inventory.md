@@ -153,7 +153,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `cpp-balanced-design-guidelines.md` | hep-computing | 6.6 | yes | 4 | hep-ml | 8eefac0 2026-10-13 |
 | `crash-and-memory-debugging.md` | hep-computing | 8.2 | no | 6 | - | 9257d7b 2026-10-15 |
 | `design-and-estimation.md` | hep-computing | 5.1 | no | 3 | - | f437237 2026-10-13 |
-| `engineering-playbook.md` | hep-computing | 10.6 | yes | 3 | - | 317c39a 2026-10-14 |
+| `engineering-playbook.md` | hep-computing | 10.7 | yes | 3 | - | b7b159f 2026-10-17 |
 | `environments-and-containers.md` | hep-computing | 4.0 | no | 3 | - | efa283c 2026-10-13 |
 | `example-authoring.md` | hep-computing | 20.0 | no | 7 | hep-ml | 9257d7b 2026-10-15 |
 | `host-notes.md` | hep-computing | 5.6 | no | 2 | - | 364918e 2026-10-09 |
@@ -261,7 +261,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `uncertainty-and-calibration.md` | hep-ml | 6.9 | yes | 9 | hep-statistics | 9257d7b 2026-10-15 |
 | `astroparticle-statistics.md` | hep-statistics | 11.6 | no | 14 | hep-detector, hep-measurement | 14eeda4 2026-10-15 |
 | `combinations.md` | hep-statistics | 4.6 | no | 3 | - | 317c39a 2026-10-14 |
-| `core-stats-commands.md` | hep-statistics | 38.0 | no | 5 | hep-detector, hep-measurement | 7487999 2026-10-15 |
+| `core-stats-commands.md` | hep-statistics | 38.1 | no | 5 | hep-detector, hep-measurement | 191242d 2026-10-17 |
 | `core-stats-guide.md` | hep-statistics | 17.0 | yes | 10 | hep-measurement | 133d757 2026-10-15 |
 | `inference-recipes.md` | hep-statistics | 18.2 | no | 9 | hep-detector, hep-measurement | 1386866 2026-10-13 |
 | `likelihood-fitting.md` | hep-statistics | 9.5 | no | 7 | hep-computing, hep-detector | 4665f43 2026-10-13 |
