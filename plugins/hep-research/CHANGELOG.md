@@ -3,7 +3,10 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.13.1 (2026-10-17)
+
+G-ENFORCE inputs completed for the full v6.3 suite set, and README updates. Contracts stay 2.11.0, and every
+analysis-check rule stays in shadow mode. The companion ams02-research needs no change.
 
 - `permit.py check-report` (advisory, v6.3 G-ENFORCE inputs):
   - It refuses a report whose roots fall below the purpose policy's new optional `min_evidence_level` (`declared` or

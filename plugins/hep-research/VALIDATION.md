@@ -1854,3 +1854,23 @@ that decides the same question.
 | `check_relocation.py` | pass |
 | Ruff 0.16.10, mypy 2.4.0 | clean |
 | Registry | 80 of 80 V parts passing |
+
+## 0.13.1 release check (2026-10-17, E2 and the CI lock)
+
+Release branch `release/0.13.1` from main `a6adf48`. It carries the G-ENFORCE inputs for all suites and the README
+updates (#129). Contracts stay 2.11.0.
+
+What changed:
+- Version 0.13.1 in both manifests, `pyproject.toml` and the README; CHANGELOG "Unreleased" became 0.13.1.
+- Examples regenerated with the E2 venv. Only version strings and the bc-propagation-fit grid hash change.
+  - The unfolding-coverage drift was reverted.
+  - The flat-direction condition number was kept at its committed value.
+- The sbottom benchmark artifacts' `plugin` string was edited by hand.
+- The theory-profile artifacts were regenerated.
+
+The companion's namespace check against main `a6adf48` reported no findings.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py`, E2 (Python 3.13.2, NumPy 2.5.3) | 25 pass, 0 fail; 3584 tests, 0 failures, 61 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, no torch) | 25 pass, 0 fail; 3584 tests, 0 failures, 170 skipped |
