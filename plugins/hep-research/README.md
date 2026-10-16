@@ -1,8 +1,13 @@
 # hep-research
 
-A Claude Code plugin for experimental and theoretical high-energy and astroparticle physics research. It has seven
-core skills, a shared library (`core/`), artifact contracts (`contracts/`), optional experiment and theory-domain
-profiles (`profiles/`) and tool adapters (`adapters/`).
+A Claude Code and Codex plugin for experimental and theoretical high-energy and astroparticle physics research. It
+has:
+- seven core skills;
+- a shared library (`core/`);
+- artifact contracts (`contracts/`), including an opt-in cross-artifact analysis check (see
+  [Cross-artifact analysis check](#cross-artifact-analysis-check-opt-in-advisory));
+- optional experiment and theory-domain profiles (`profiles/`);
+- tool adapters (`adapters/`).
 
 Version 0.13.0, licensed under Apache-2.0 (see [LICENSE](LICENSE)). Not endorsed by AMS or any collaboration. Example data shipped with the plugin is synthetic and is
 labeled synthetic in file names and metadata. What is and is not validated is listed in
@@ -168,11 +173,21 @@ Profiles are used only when you name them or when your project root holds `hep-r
 }
 ```
 
-Shipped profiles: `experiment:ams-02` (public evidence ledger and public-domain methods; no internal data or
-software), `experiment:eic` (EIC facility context and the ePIC experiment, public documents only, no performance
-numbers), `experiment:synthetic-collider` (an invented detector for examples), `theory:qed-benchmark` (tree-level
-QED), `theory:qcd-r-ratio` (R ratio with QCD corrections) and `theory:higgs-bb-width` (H -> b bbar with the MS-bar
-running mass). Private profiles stay in your project and are listed in
+Shipped profiles:
+
+| Profile | Content |
+|---|---|
+| `experiment:ams-02` | public evidence ledger and public-domain methods; no internal data or software |
+| `experiment:eic` | EIC facility context and the ePIC experiment; public documents only, no performance numbers |
+| `experiment:synthetic-collider` | an invented detector for examples |
+| `theory:qed-benchmark` | tree-level QED |
+| `theory:qcd-r-ratio` | the R ratio with QCD corrections |
+| `theory:higgs-bb-width` | H -> b bbar with the MS-bar running mass |
+| `theory:cr-secondary-ratio` | B/C in weighted-slab and 1D thin-disc diffusion models; illustrative cross sections |
+| `theory:cr-secondary-antiprotons` | the antiproton source term; illustrative toy cross sections |
+| `theory:heliospheric-modulation` | force-field solar modulation: validity, limits, a power-law benchmark |
+
+Private profiles stay in your project and are listed in
 the config's `local_profile_paths`; check the config with
 `python3 "<plugin root>/contracts/project.py" <project-dir>`, where `<plugin root>` is the folder that holds this README
 (in an install, the host's copy of the plugin). Nothing private is copied into the plugin.
@@ -242,7 +257,9 @@ read a companion's package manifest or need access to a private repository. Beha
   ROOT tools, `adapters/root-uproot`), pyhf and CMS Combine (`adapters/pyhf-combine`, the end-to-end sample),
   Graphviz, Mermaid, PlantUML and tectonic (diagrams and papers). Slurm and HTCondor (`adapters/batch-schedulers`)
   have each run synthetic campaigns on one site (Slurm 24.05.1 at NSTCCore, HTCondor 24.12.16 at CERN): that adapter is
-  `demonstrated-on-synthetic-data`. Scripts that need them report the missing tool
+  `demonstrated-on-synthetic-data`. The cosmic-ray propagation adapter (`adapters/cr-propagation`, status `proposed`,
+  required by no skill) runs DRAGON2 from a JSON run spec in a recorded environment; GALPROP and USINE are only
+  proposed. Scripts that need them report the missing tool
   and stop with a `failed` status; tests that need them are skipped and counted as unverified.
 
 ## Offline behavior
@@ -253,6 +270,44 @@ installs need network access, which the host asks you to approve; in a protected
 egress policy allows may be reached, uncovered calls are denied, and queries never carry unpublished numbers or
 internal names. Without network access, citations are marked unverified rather than guessed, and nothing is downloaded
 silently.
+
+## Cross-artifact analysis check (opt-in, advisory)
+
+The skills and the old entry points never call this check; you run it when you want it.
+`contracts/analysis_check.py` freezes an analysis into a bundle with:
+- a context: roots, recipe instances or models, and typed bindings;
+- a semantic lock.
+
+It then checks a machine-generated list of obligations against five suites:
+
+| Suite | Checks |
+|---|---|
+| `counting-chain/1.0.0` | correction chains: listed effect members, realization, stage, repetition, factor composition, response use |
+| `ratio-subset/1.0.0` | ratios of two results: operands, exact cancellation of bounded factors, evidence for correlation claims |
+| `model-card/1.0.0` | model cards: the supported modifier–constraint pairings, one observation per constraint term within an evaluation, cross-model sharing |
+| `run-lineage/1.0.0` | after execution, through a result binding: input closure, run status, the campaign evidence level, blinding-permitted outputs |
+| (custody) | `contracts/custody.py`: an inventory of where each profile comes from; a missing custody value is never read as public |
+
+```bash
+python3 contracts/analysis_check.py freeze --root <project> --analysis <name> --items items.json --context context.json --out bundle.json [--mode model]
+python3 contracts/analysis_check.py check bundle.json --root <project> [--results result-binding.json] [--project <project>]
+python3 contracts/analysis_check.py summary report.json      # a bounded summary for the agent
+```
+
+**Reading a report.** Each obligation ends in one of five states: satisfied, violated, not applicable, unverified or
+unsupported. Coverage counts the decided obligations; it is never a pass rate.
+
+**What a report is and is not.**
+- An outcome that rests only on a declaration the agent wrote is flagged, and counts as unverified for formal use.
+- Reports carry digests and labels, never result values.
+- A report is a diagnostic: it establishes software consistency of declared contracts, not physical validity.
+- `contracts/permit.py check-report` reproduces the custodian's conditions as an advisory check. It never allows a
+  use (`formal_use_allowed` is always false).
+- **Every rule is in shadow mode.** No rule becomes an enforcing condition until a reviewer other than the author has
+  reviewed it (`docs/dev/v6.3/review-packet.md`), the custodian's gate has adopted
+  `docs/dev/v6.3/custodian-gate-requirement.md`, and the owner has decided per purpose.
+
+Design and decision records are in [docs/dev/v6.3/](docs/dev/v6.3/README.md).
 
 ## Checks for maintainers
 

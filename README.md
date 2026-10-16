@@ -1,8 +1,12 @@
 # hep-research
 
-**hep-research** is a Claude Code and Codex plugin for experimental and theoretical high-energy physics research:
-seven core skills (analysis, detector response, theory, statistics, computing, physics ML, research communication)
-plus optional experiment and theory-domain profiles. Not endorsed by AMS or any collaboration or institution.
+**hep-research** is a Claude Code and Codex plugin for experimental and theoretical high-energy physics research.
+- **Seven core skills:** `hep-measurement`, `hep-detector`, `hep-theory`, `hep-statistics`, `hep-computing`, `hep-ml`
+  and `hep-communication`.
+- **Optional profiles** for experiments and theory domains.
+- **An opt-in cross-artifact analysis check.** It runs in shadow mode and is advisory only.
+
+Not endorsed by AMS or any collaboration or institution.
 
 - Plugin: [`plugins/hep-research/`](plugins/hep-research/) (install, usage and checks in its [README](plugins/hep-research/README.md))
 - Marketplace `hep-research-dev`: [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json) (Claude Code),
@@ -21,6 +25,9 @@ from this marketplace stays installed but no longer receives updates through it 
 [companion plugins](plugins/hep-research/README.md#companion-plugins)).
 
 Checks: `python3 plugins/hep-research/tools/run_all_checks.py`
+
+Design and decision records of the v6.3 analysis-check programme:
+[`plugins/hep-research/docs/dev/v6.3/`](plugins/hep-research/docs/dev/v6.3/README.md).
 
 Live routing evaluation (paid model calls, outside the plugin): [`evals/routing/`](evals/routing/README.md).
 
