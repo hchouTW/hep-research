@@ -18,8 +18,10 @@ old per-feature range and pinv-Mahalanobis check, and the summary says "legacy d
 The checkpoint is loaded with weights_only=True (tensors and plain containers only); --unsafe-full-unpickle runs a
 full unpickle, which can execute arbitrary code: only for files you trust.
 Output: per-row CSV (--output) or, without it, the rows inside the JSON summary on stdout.
-Exit codes: 0 done, 2 input error (missing features, unreadable or unsafe checkpoint), 3 PyTorch not available,
-4 out-of-domain rows with --on-out-of-domain reject.
+Output JSON: "status" (ok; refused when --on-out-of-domain reject finds out-of-domain rows; rejected; missing-dependency;
+core/status.py) and "status_label" (--status, the inputs' artifact label, default unvalidated).
+Exit codes: 0 done, 1 out-of-domain rows with --on-out-of-domain reject (a negative verdict; the JSON summary lists
+them), 2 input error (missing features, unreadable or unsafe checkpoint), 3 PyTorch not available.
 """
 
 from __future__ import annotations
@@ -34,6 +36,10 @@ from pathlib import Path
 
 import numpy as np
 
+sys.dont_write_bytecode = True  # the imports below leave no __pycache__ (F-10)
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))  # the plugin root
+from core.status import add_status_argument  # noqa: E402
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -46,6 +52,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--device", default="auto")
     parser.add_argument("--unsafe-full-unpickle", action="store_true",
                         help="load with weights_only=False (full pickle, can run arbitrary code); only for files you trust")
+    add_status_argument(parser)
     return parser
 
 
@@ -57,8 +64,8 @@ try:
 except ModuleNotFoundError as _exc:
     if __name__ != "__main__":
         raise
-    print(f"{Path(__file__).name}: torch not available ({_exc}); check the environment with "
-          "scripts/check_pytorch_env.py", file=sys.stderr)
+    print(json.dumps({"status": "missing-dependency", "error": f"torch not available ({_exc}); check the environment "
+                      "with scripts/check_pytorch_env.py"}))
     sys.exit(3)
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -192,12 +199,13 @@ def run(args) -> int:
                "n_mahalanobis": sum(any("ahalanobis" in s for s in r) for r in reasons),
                "n_non_finite": int((~finite).sum()),
                "domain_method": domain.get("method", "legacy domain record (per-feature range + pinv Mahalanobis)"),
-               "on_out_of_domain": args.on_out_of_domain}
+               "on_out_of_domain": args.on_out_of_domain, "status_label": args.status}
     if n_ood and args.on_out_of_domain == "reject":
         summary["out_of_domain_ids"] = [ids[i] for i, r in enumerate(reasons) if r][:50]
+        summary["status"] = "refused"
+        summary["reason"] = f"{n_ood} row(s) outside the training domain; no scores written"
         print(json.dumps(summary, indent=2))
-        print(f"rejected: {n_ood} row(s) outside the training domain", file=sys.stderr)
-        return 4
+        return 1
 
     device = get_device(args.device)
     model = MLPClassifier(cfg["input_dim"], cfg["hidden_dim"], cfg["num_classes"], cfg["dropout"]).to(device)
@@ -229,6 +237,7 @@ def run(args) -> int:
     else:
         summary["rows"] = [{k: (None if isinstance(v, float) and not math.isfinite(v) else v) for k, v in r.items()}
                            for r in rows]
+    summary["status"] = "ok"
     print(json.dumps(summary, indent=2))
     return 0
 
@@ -238,7 +247,7 @@ def main() -> int:
     try:
         return run(args)
     except (InputError, OSError, KeyError) as exc:
-        print(f"{Path(__file__).name}: error: {exc}", file=sys.stderr)
+        print(json.dumps({"status": "rejected", "error": f"{type(exc).__name__}: {exc}"}))
         return 2
 
 

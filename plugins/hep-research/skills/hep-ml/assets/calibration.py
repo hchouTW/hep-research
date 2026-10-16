@@ -50,6 +50,7 @@ import json
 import math
 import os
 import sys
+from pathlib import Path
 
 import numpy as np
 
@@ -514,8 +515,12 @@ def _summary(path, s, y, w):
 
 
 def main(argv=None):
+    sys.dont_write_bytecode = True  # the import below leaves no __pycache__ (F-10)
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3]))  # the plugin root
+    from core.status import add_status_argument
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0],
                                  epilog="Fit and evaluation samples must be disjoint; see the module docstring.")
+    add_status_argument(ap)
     ap.add_argument("--fit", required=True, help="sample to fit the calibration map on (CSV or JSON)")
     ap.add_argument("--eval", required=True, help="separate sample to evaluate it on (CSV or JSON)")
     ap.add_argument("--method", choices=("temperature", "isotonic", "platt"), default="temperature")
@@ -604,9 +609,9 @@ def main(argv=None):
                     "deployment shift",
         }
     except (OSError, ValueError, KeyError, IndexError) as exc:
-        print(f"error: {exc}", file=sys.stderr)
+        print(json.dumps({"status": "rejected", "error": f"{type(exc).__name__}: {exc}"}))
         return 2
-    print(json.dumps(_sanitize(out), indent=2, allow_nan=False))
+    print(json.dumps(_sanitize({"status": "ok", "status_label": a.status, **out}), indent=2, allow_nan=False))
     return 0
 
 

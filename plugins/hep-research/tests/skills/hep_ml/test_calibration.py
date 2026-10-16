@@ -217,7 +217,7 @@ class Cli(unittest.TestCase):
         fit = self.write_csv("fit.csv", 22, 2_000)
         r = self.run_cli("--fit", fit, "--eval", fit)
         self.assertEqual(r.returncode, 2)
-        self.assertIn("not disjoint", r.stderr)
+        self.assertIn("not disjoint", r.stdout)       # F-04: the refusal is a JSON status on stdout
         copy = self.dir / "copy.csv"
         copy.write_bytes(fit.read_bytes())
         self.assertEqual(self.run_cli("--fit", fit, "--eval", copy).returncode, 2)   # same content hash

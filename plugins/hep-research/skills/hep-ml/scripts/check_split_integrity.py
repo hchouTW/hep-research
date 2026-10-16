@@ -382,11 +382,8 @@ def main():
         report = check(payload, strict=args.strict, case_sensitive=args.case_sensitive)
         report["status_label"] = args.status
         text = json.dumps(report, indent=2, allow_nan=False) if args.json else _format(report)
-    except OSError as exc:
-        print(f"error: {exc}", file=sys.stderr)
-        sys.exit(2)
-    except (ValueError, TypeError, json.JSONDecodeError) as exc:
-        print(f"error: {exc}", file=sys.stderr)
+    except (OSError, ValueError, TypeError, json.JSONDecodeError) as exc:  # JSON status, exit 2 (F-04)
+        print(json.dumps({"status": "rejected", "error": f"{type(exc).__name__}: {exc}"}))
         sys.exit(2)
 
     print(text)

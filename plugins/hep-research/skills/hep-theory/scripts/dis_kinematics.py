@@ -20,6 +20,7 @@ The lepton mass defaults to 0 (the PDG neglects it after the definitions). The c
 between the lepton momentum and the reversed hadron momentum, 0 for head-on beams. No polarization, no
 structure functions, no cross sections: see the reference for what belongs to other skills.
 Run: python3 <plugin root>/skills/hep-theory/scripts/dis_kinematics.py --E-lepton 10 --E-hadron 275 --M 0.938 --x 0.1 --y 0.5
+--status LABEL is the inputs' artifact label (default unvalidated), echoed as "status_label".
 Exit 0 ok, 1 unphysical kinematics (status "failed"), 2 bad arguments.
 """
 from __future__ import annotations
@@ -28,6 +29,11 @@ import argparse
 import json
 import math
 import sys
+from pathlib import Path
+
+sys.dont_write_bytecode = True  # sibling imports leave no __pycache__ (F-10)
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))  # the plugin root
+from core.status import add_status_argument  # noqa: E402
 
 
 def _dot(a, b) -> float:
@@ -132,6 +138,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--x", type=float)
     p.add_argument("--y", type=float)
     p.add_argument("--Q2", type=float, help="GeV^2")
+    add_status_argument(p)
     return p
 
 
@@ -159,9 +166,9 @@ def main(argv: list[str] | None = None) -> int:
     try:
         out = invariants(s, a.M, a.m_lepton, a.x, a.y, a.Q2)
     except ValueError as exc:
-        print(json.dumps({"status": "failed", "reason": str(exc), "inputs": inputs, "conventions": conventions, "outputs": {}}, indent=1))
+        print(json.dumps({"status": "failed", "status_label": a.status, "reason": str(exc), "inputs": inputs, "conventions": conventions, "outputs": {}}, indent=1))
         return 1
-    print(json.dumps({"status": "ok", "inputs": inputs, "conventions": conventions, "outputs": out,
+    print(json.dumps({"status": "ok", "status_label": a.status, "inputs": inputs, "conventions": conventions, "outputs": out,
                       "checks": {"x_in_(0,1]": True, "y_in_(0,1]": True, "Q2_positive": True, "W2_at_least_M2": True,
                                  "y_at_most_y_max": True, "Q2_at_least_Q2_min": True}}, indent=1))
     return 0

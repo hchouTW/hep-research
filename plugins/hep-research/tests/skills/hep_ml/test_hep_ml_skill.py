@@ -93,7 +93,8 @@ class InspectCheckpointWeightsOnlyTests(unittest.TestCase):
             safe = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
             self.assertNotEqual(safe.returncode, 0)
             self.assertNotIn("UNPICKLE-EXECUTED", safe.stdout)
-            self.assertIn("--unsafe-full-unpickle", safe.stderr)
+            self.assertEqual(json.loads(safe.stdout)["status"], "rejected")     # F-04: JSON status on stdout
+            self.assertIn("--unsafe-full-unpickle", safe.stdout)
             self.assertNotIn("Traceback", safe.stderr)
             unsafe = subprocess.run(cmd + ["--unsafe-full-unpickle"], capture_output=True, text=True, timeout=600)
             self.assertEqual(unsafe.returncode, 0, unsafe.stderr)

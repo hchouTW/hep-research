@@ -22,8 +22,9 @@ assumption, stated in the output; the alpha_s half difference is not rescaled).
 Input JSON: {"error_type": "symmhessian" | "hessian" | "replicas" (optionally with "+as"),
              "conf_level_percent": 68 | 90, "num_members": int (optional), "alphas_values": [down, up] (optional),
              "members": [X_0, X_1, ...]}
-Run: python3 pdf_uncertainty.py input.json [--rescale-to-68] [--combine-alphas quadrature] [--symmetrize].
-Exit 0 ok, 1 refused input, 2 bad arguments.
+Run: python3 pdf_uncertainty.py input.json [--rescale-to-68] [--combine-alphas quadrature] [--symmetrize] [--status LABEL].
+Output JSON: "status" (run status, core/status.py) and "status_label" (the inputs' artifact label, default unvalidated).
+Exit 0 ok, 1 refused input, 2 bad arguments or unreadable input.
 Standard library only. This combines member values; it does not evaluate PDFs (that needs LHAPDF).
 """
 from __future__ import annotations
@@ -33,6 +34,11 @@ import json
 import math
 import statistics
 import sys
+from pathlib import Path
+
+sys.dont_write_bytecode = True  # sibling imports leave no __pycache__ (F-10)
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))  # the plugin root
+from core.status import add_status_argument  # noqa: E402
 
 BASE_TYPES = ("symmhessian", "hessian", "replicas")
 QUADRATURE_CITATION = "PDF4LHC21 recommendation, arXiv:2203.05506v2, Sec. 6.3.3, Eqs. (6.7)-(6.8) (read 2026-10-13)"
@@ -144,8 +150,13 @@ def main(argv=None) -> int:
     ap.add_argument("--rescale-to-68", action="store_true")
     ap.add_argument("--combine-alphas", choices=["quadrature"], default=None)
     ap.add_argument("--symmetrize", action="store_true", help="hessian only: also report the symmetrized delta")
+    add_status_argument(ap)
     opts = ap.parse_args(argv)
-    text = open(opts.input, encoding="utf-8").read()
+    try:
+        text = open(opts.input, encoding="utf-8").read()
+    except OSError as exc:  # a missing or unreadable input: JSON status, exit 2
+        print(json.dumps({"status": "rejected", "error": f"cannot read {opts.input}: {exc}"}))
+        return 2
     try:
         doc = json.loads(text)
         if not isinstance(doc, dict):
@@ -155,16 +166,11 @@ def main(argv=None) -> int:
                       combine_alphas=opts.combine_alphas, symmetrize=opts.symmetrize)
     except (ValueError, KeyError, TypeError) as exc:
         reason = f"missing field {exc}" if isinstance(exc, KeyError) else str(exc)
-        print(json.dumps({"status": "failed", "reason": reason}))
+        print(json.dumps({"status": "failed", "status_label": opts.status, "reason": reason}))
         return 1
-    print(json.dumps(dict(out, status="ok"), indent=1))
+    print(json.dumps(dict(out, status="ok", status_label=opts.status), indent=1))
     return 0
 
 
 if __name__ == "__main__":
-    import sys as _sys
-    try:
-        sys.exit(main())
-    except OSError as _exc:  # a missing or unreadable input: one line, no traceback
-        print(f"pdf_uncertainty.py: error: {_exc}", file=_sys.stderr)
-        raise SystemExit(2)
+    sys.exit(main())

@@ -53,11 +53,11 @@ class MetricTests(unittest.TestCase):
             r = subprocess.run([sys.executable, str(ASSETS / "hep_metrics.py"), str(p)], capture_output=True, text=True,
                                timeout=600)
             self.assertEqual(r.returncode, 2, r.stdout)
-            self.assertIn("not 0 or 1", r.stderr)
+            self.assertIn("not 0 or 1", r.stdout)       # F-04: the refusal is a JSON status on stdout
             r = subprocess.run([sys.executable, str(ASSETS / "calibration.py"), "--fit", str(p), "--eval", str(p),
                                 "--allow-same-sample", "--id-col", "id"], capture_output=True, text=True, timeout=600)
             self.assertEqual(r.returncode, 2, r.stdout)
-            self.assertIn("not 0 or 1", r.stderr)
+            self.assertIn("not 0 or 1", r.stdout)
 
     def test_signed_weight_out_of_range_flag(self):
         self.assertTrue(hm.signed_weight_out_of_range([0.2, 1.05]))

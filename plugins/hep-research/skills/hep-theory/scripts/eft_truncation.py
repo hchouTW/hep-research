@@ -17,7 +17,9 @@ Input JSON: {"basis": "...", "normalization": "C_i / Lambda^2", "input_scheme": 
              "operators": ["cHq3", ...], "x_sm": float, "linear": {"cHq3": A, ...},
              "quadratic": {"cHq3*cHq3": B, ...}, "points": [{"cHq3": 0.5}, ...], "quadratic_flag_fraction": 0.3 (optional),
              "cross_term_convention": "..." (required when an off-diagonal key exists)}
-Run: python3 eft_truncation.py input.json. Exit 0 ok (flags reported), 1 refused input. Standard library only.
+Run: python3 eft_truncation.py input.json [--status LABEL]. Output JSON: "status" (run status, core/status.py) and
+"status_label" (the inputs' artifact label, default unvalidated). Exit 0 ok (flags reported), 1 refused input,
+2 unreadable input. Standard library only.
 """
 from __future__ import annotations
 
@@ -25,6 +27,11 @@ import argparse
 import json
 import math
 import sys
+from pathlib import Path
+
+sys.dont_write_bytecode = True  # sibling imports leave no __pycache__ (F-10)
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))  # the plugin root
+from core.status import add_status_argument  # noqa: E402
 
 REQUIRED = ("basis", "normalization", "input_scheme", "lambda_tev", "operators", "x_sm", "linear")
 RESCALE_TOL = 1e-12
@@ -146,21 +153,21 @@ def evaluate(doc: dict) -> dict:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("input")
+    add_status_argument(ap)
     opts = ap.parse_args(argv)
-    text = open(opts.input, encoding="utf-8").read()
+    try:
+        text = open(opts.input, encoding="utf-8").read()
+    except OSError as exc:  # a missing or unreadable input: JSON status, exit 2
+        print(json.dumps({"status": "rejected", "error": f"cannot read {opts.input}: {exc}"}))
+        return 2
     try:
         out = evaluate(json.loads(text))
     except (ValueError, TypeError) as exc:
-        print(json.dumps({"status": "failed", "reason": str(exc)}))
+        print(json.dumps({"status": "failed", "status_label": opts.status, "reason": str(exc)}))
         return 1
-    print(json.dumps(dict(out, status="ok"), indent=1))
+    print(json.dumps(dict(out, status="ok", status_label=opts.status), indent=1))
     return 0
 
 
 if __name__ == "__main__":
-    import sys as _sys
-    try:
-        sys.exit(main())
-    except OSError as _exc:  # a missing or unreadable input: one line, no traceback
-        print(f"eft_truncation.py: error: {_exc}", file=_sys.stderr)
-        raise SystemExit(2)
+    sys.exit(main())

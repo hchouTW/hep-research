@@ -88,6 +88,22 @@
     "trusted_input"
    ],
    "source": "agentic-architecture.md §9, task P1/P2"
+  },
+  "status": {
+   "steward": "hep-computing",
+   "status": "implemented",
+   "purpose": "Shared script run statuses, the exit codes 0-3 of the script contract, and their mapping to artifact status labels (F-04)",
+   "files": [
+    "status"
+   ],
+   "consumers": [
+    "skills/hep-theory/scripts",
+    "skills/hep-computing/scripts",
+    "skills/hep-ml/scripts",
+    "skills/hep-ml/assets",
+    "tests/skills/test_cli_contract.py"
+   ],
+   "source": "new in this plugin (upgrade plan v1.3, F-04)"
   }
  }
 }

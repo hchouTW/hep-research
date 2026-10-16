@@ -12,7 +12,9 @@ non-finite luminosity, and selected indices that are not integers, negative, out
 
 Input JSON: {"weights": [...], "sigma_pb": float, "luminosity_ipb": float (optional),
              "selected": [indices] (optional, events passing a selection)}
-Run: python3 event_weights.py weights.json. Exit 0 ok, 1 refused input, 2 bad arguments. Standard library only.
+Run: python3 event_weights.py weights.json [--status LABEL]. Output JSON: "status" (run status, core/status.py) and
+"status_label" (the inputs' artifact label, default unvalidated). Exit 0 ok, 1 refused input, 2 bad arguments or
+unreadable input. Standard library only.
 """
 from __future__ import annotations
 
@@ -20,6 +22,11 @@ import argparse
 import json
 import math
 import sys
+from pathlib import Path
+
+sys.dont_write_bytecode = True  # sibling imports leave no __pycache__ (F-10)
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))  # the plugin root
+from core.status import add_status_argument  # noqa: E402
 
 
 def _finite(name: str, x) -> float:
@@ -83,8 +90,13 @@ def summarize(weights: list[float], sigma_pb: float, luminosity_ipb: float | Non
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("input")
+    add_status_argument(ap)
     opts = ap.parse_args(argv)
-    text = open(opts.input, encoding="utf-8").read()
+    try:
+        text = open(opts.input, encoding="utf-8").read()
+    except OSError as exc:  # a missing or unreadable input: JSON status, exit 2
+        print(json.dumps({"status": "rejected", "error": f"cannot read {opts.input}: {exc}"}))
+        return 2
     try:
         doc = json.loads(text)
         if not isinstance(doc, dict):
@@ -92,16 +104,11 @@ def main(argv=None) -> int:
         out = summarize(doc["weights"], doc["sigma_pb"], doc.get("luminosity_ipb"), doc.get("selected"))
     except (ValueError, KeyError, TypeError) as exc:
         reason = f"missing field {exc}" if isinstance(exc, KeyError) else str(exc)
-        print(json.dumps({"status": "failed", "reason": reason}))
+        print(json.dumps({"status": "failed", "status_label": opts.status, "reason": reason}))
         return 1
-    print(json.dumps(dict(out, status="ok"), indent=1))
+    print(json.dumps(dict(out, status="ok", status_label=opts.status), indent=1))
     return 0
 
 
 if __name__ == "__main__":
-    import sys as _sys
-    try:
-        sys.exit(main())
-    except OSError as _exc:  # a missing or unreadable input: one line, no traceback
-        print(f"event_weights.py: error: {_exc}", file=_sys.stderr)
-        raise SystemExit(2)
+    sys.exit(main())
