@@ -5,6 +5,55 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- Analysis check hardening after review (v6.3 M2a): recipes, tables, coverage contracts and spec corrections are
+  checked against their schemas at freeze (refused) and at check time (input invalid, never a traceback); duplicate
+  spec `effect_id`s are invalid; `freeze` writes the context and lock only after every check passes and refuses an
+  output path the context or lock would use; an outcome reached through a declaration is flagged whatever its state
+  and the formal-use view demotes declaration-based `not_applicable` too; a root needs its recipe's estimand; factor
+  tables need finite, non-empty bins; an uncomparable target scope is unverified, not a conflict; an inventory that
+  differs only because definitions drifted is reported as drift (exit 3), not invalid input; malformed CLI inputs
+  exit 2.
+- `review_measurement_spec.py` takes `--check-bundle BUNDLE --check-root DIR` (opt-in, v6.3 D17): the review then
+  carries `analysis_check`, a bounded summary of the cross-artifact check (status, coverage, consistency, missing
+  bindings, one row per violated or unverified obligation with its next step), capped at 8 KiB per page. The verdict
+  and exit code are unchanged, and without the flags the output is identical. The review reference names the call.
+- Old-table reader `contracts/analysis_checks/readers.py` (v6.3 D11a): the chain rules read the 1.0.0 operator-semantics
+  table through the coverage contract the semantic lock pins; an unpinned or changed contract, or a table that no
+  longer matches the contract, gives no operators (unsupported). The table file is never upgraded.
+- Chain rules of the `counting-chain/v1` suite (v6.3 D06, `contracts/analysis_checks/rules.py`), each returning one
+  of five states with a registered reason code: R-REAL (a spec correction is realized by exactly one compatible
+  application in each instance it applies to; no broadcast without a spec `target_scope` or an `instance_mapping`
+  declaration; a conflicting `application_id`, scope, variation or calibration is a description conflict), R-STAGE
+  (applied_in against the operator's stage), R-REP (no member applied twice on one computation path, judged from
+  `input_of` data flow; variation labels and calibrations grant no exemption, opaque scopes stay unverified, a declared
+  exclusion for one selection is a contradiction), R-COMP (a parent factor and its decomposition on one path; per-bin
+  factor tables summarized per relation without values) and R-RESP (unfolding needs a bound unfolding response; a
+  spec that says unfolding against a chain that does not unfold is violated; forward folding is unsupported).
+- `contracts/analysis_check.py check BUNDLE --root DIR [--out REPORT] [--previous REPORT]` (v6.3 D05c) evaluates a v2
+  bundle's frozen obligation inventory and prints a report (schema `check_report.json`): input validity, coverage
+  (completed over all), consistency, per-obligation state with reason and evidence pointers, declaration-based flags
+  and a formal-use view that counts them as unverified, legacy L1 and L2 findings in their own field, lock differences
+  and the scope delta against a previous report. An obligation whose rule did not run is unverified. `assessment_id`
+  binds subject, suite, rules, rule registry, checker code, readers and settings. Exit codes 0/1/2/3 with precedence
+  2 > 1 > 3 > 0; the report is a sidecar that is never written into the bundle or over an existing file, and
+  `summary REPORT` pages a bounded agent summary. The suite's rules are registered in `contracts/rules/registry.json`
+  with reason codes for all five states.
+- New opt-in `contracts/analysis_check.py` with analysis bundle 2.0.0 (`hep-research-analysis-bundle/2`, schema
+  `analysis_bundle_v2.json`; v6.3 D05b): per-mode roles (chain: one spec, environment lock, check context and semantic
+  lock, at least one recipe), unique item IDs, and for JSON items both the canonical and the bytes digest. New roles
+  `response`, `dataset-record`, `context`, `semantic-lock`, `coverage-contract`. `freeze` completes the check context
+  (schema `check_context.json`) with the obligation inventory of the suite (`contracts/rules/suites/`), generated
+  deterministically by `contracts/analysis_checks/obligations.py` from roots, instances and spec corrections only, and
+  records the semantic lock (`semantic_lock.json`, `contracts/analysis_checks/lock.py`: definitions in use with their
+  digests and member-set closures). Bundle 1.0.0 and `contracts/analysis_bundle.py` are unchanged; that reader refuses
+  a v2 bundle by its schema.
+- New capability `measurement:correction-keys-v1` (v6.3 D05a): a measurement-spec that declares it may give each
+  correction the R4 keys `target_scope`, `calibration_digest`, `variation_id`, `stage` and an `application_id` (a
+  recipe `step_id`); `validate.py` then knows them and rejects a malformed one (`measurement.bad_correction_key`). A
+  spec without the capability keeps its `measurement.unknown_key` warnings, and a reader without the capability refuses
+  the spec. New pure modules `contracts/analysis_checks/` (`scope.py`: bounded `axis:value` scopes where a missing
+  axis is never a wildcard; `instances.py`: read-only recipe instance views that fill only unspecified keys, with a
+  source pointer per field; `context.py`: check-context bindings and attributed declarations, never a rule waiver).
 - New effect catalog `contracts/vocab/effects.json` and operator coverage contract
   `contracts/semantics/coverage/differential-flux.coverage.json`, checked by `contracts/effect_catalog.py` (schemas
   `effect_catalog.json`, `operator_coverage.json`; v6.3 D04). The catalog classifies effects (an efficiency class with

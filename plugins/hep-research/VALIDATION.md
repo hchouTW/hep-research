@@ -1622,3 +1622,26 @@ terms (`docs/dev/v6.3/crflux-review.md`, no term promoted). Stacked branches `v6
 
 Open before release: the companion's namespaces were not checked (its content is out of scope here); run
 `contracts/registry.py --local <companion>/profile` on this tree first. Software checks only.
+
+## V63-M2a (2026-10-16, Python 3.13.2 on macOS 26.5 arm64; on top of V63-M1)
+
+Phase M2a (chain slice) of the v6.3 programme: D05a identity and instances, D05b bundle v2, context, inventory and
+lock, D05c evaluation, report and CLI, D06 chain rules, D11a old-table reader, D17 agent interface, D08 cases and
+context cost, then the fixes of an independent code review. Stacked branches `v63/d05a-identity-instances` …
+`v63/m2a-review-fixes`; each gate run used a clean worktree of the branch head. Records: `docs/dev/v6.3/m2a-design.md`,
+`decision-m2a.md`, `o16-agent-interface.md`.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py`, D05a `ee2b910` / D05b `3774d41` / D05c `207698b` | 25 pass, 0 fail each; 3454 / 3465 / 3476 tests, 0 failures, 107 skipped |
+| Same, D06 `6ede6e7` / D11a `58c0a42` / D17 `77d2607` / D08 `df430b3` | 25 pass, 0 fail each; 3501 / 3503 / 3506 / 3506 tests, 0 failures, 107 skipped |
+| Same, review fixes `96f18b9` | 25 pass, 0 fail; 3518 tests, 0 failures, 107 skipped |
+| Same with the CI lock (no torch), `96f18b9` | 25 pass, 0 fail; 3518 tests, 0 failures, 170 skipped |
+| `check_relocation.py`, `96f18b9` | pass |
+| Ruff 0.16.10, mypy 2.4.0 on `core/` and `contracts/` | clean |
+| V cases | all 40 M2a parts passing (registry); 45 of 80 parts passing overall (the M1 and M2a parts), the rest are M2b, M2c, D11b and M3 |
+| Cases | reduced positive case complete and consistent (exit 0); CASE-CHAIN partial, 44 of 64 obligations decided (exit 3) |
+| Legacy capture (132 runs of the old CLIs on the existing fixtures) | unchanged against the post-D03a capture |
+
+A first gate run of the D06, D11a and D17 heads failed one registry test (its fixture case had become passing in D06);
+the test was fixed in D06 and the later branches restacked before the runs above. Software checks only.

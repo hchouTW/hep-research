@@ -218,7 +218,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `hep-measurement-guide.md` | hep-measurement | 20.6 | yes | 7 | hep-detector | 9257d7b 2026-10-15 |
 | `histograms-efficiencies.md` | hep-measurement | 3.1 | no | 7 | hep-computing, hep-detector | 9257d7b 2026-10-15 |
 | `measurements-and-unfolding.md` | hep-measurement | 7.4 | no | 11 | hep-detector, hep-statistics | 9257d7b 2026-10-15 |
-| `review-and-artifacts.md` | hep-measurement | 7.2 | yes | 9 | - | 9257d7b 2026-10-15 |
+| `review-and-artifacts.md` | hep-measurement | 7.7 | yes | 9 | - | 9257d7b 2026-10-15 |
 | `systematics.md` | hep-measurement | 8.9 | no | 27 | hep-detector, hep-ml, hep-statistics, hep-theory | 9257d7b 2026-10-15 |
 | `weights-normalization.md` | hep-measurement | 4.5 | no | 9 | hep-computing, hep-detector, hep-ml, hep-theory | 9257d7b 2026-10-15 |
 | `ablation-and-design-review.md` | hep-ml | 2.3 | no | 12 | hep-communication | 9257d7b 2026-10-15 |
@@ -272,7 +272,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `time-series-inference.md` | hep-statistics | 15.5 | yes | 10 | hep-measurement | 7487999 2026-10-15 |
 | `unfolding.md` | hep-statistics | 7.0 | no | 25 | hep-detector, hep-measurement | 9257d7b 2026-10-15 |
 | `amplitudes-and-widths.md` | hep-theory | 8.3 | yes | 1 | - | 83ae4f6 2026-10-13 |
-| `cosmic-ray-propagation.md` | hep-theory | 16.0 | yes | 10 | - | b5c3e03 2026-10-15 |
+| `cosmic-ray-propagation.md` | hep-theory | 16.0 | yes | 10 | - | b723a52 2026-10-16 |
 | `dis-kinematics.md` | hep-theory | 5.9 | yes | 4 | - | 9257d7b 2026-10-15 |
 | `event-generation.md` | hep-theory | 9.8 | yes | 4 | hep-detector, hep-measurement | 9257d7b 2026-10-15 |
 | `higher-order-predictions.md` | hep-theory | 4.2 | yes | 1 | - | 351029c 2026-10-07 |

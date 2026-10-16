@@ -36,7 +36,7 @@
    "owner": "hep-measurement",
    "review_status": "unreviewed",
    "lifecycle": "legacy",
-   "notes": "contracts/recipe_semantics.py _walk/apply with _same_application; maps to R-REP (C3) once its adapter exists"
+   "notes": "contracts/recipe_semantics.py _walk/apply with _same_application; maps to R-REP (C3) once its adapter exists The new-suite counterpart is r-rep.repetition."
   },
   {
    "rule_id": "l2.r4.upstream",
@@ -89,6 +89,384 @@
    "review_status": "unreviewed",
    "lifecycle": "legacy",
    "notes": "contracts/recipe_semantics.py: keys only from 1.1.0, each key names an applied effect"
+  },
+  {
+   "rule_id": "r-inv.root",
+   "version": "1.0.0",
+   "layer": "L3",
+   "suites": [
+    "counting-chain/v1"
+   ],
+   "kind": "new",
+   "prerequisites": [
+    "root intent fields",
+    "output instance"
+   ],
+   "applicability": "R-INV: a root's estimand, binning, scope and output are bound and agree",
+   "outcome_contract": {
+    "satisfied": [
+     "check.root_complete"
+    ],
+    "violated": [
+     "check.root_scope_conflict",
+     "check.root_output_conflict"
+    ],
+    "not_applicable": [
+     "check.root_not_required"
+    ],
+    "unverified": [
+     "check.root_incomplete"
+    ],
+    "unsupported": [
+     "check.root_mode_unsupported"
+    ]
+   },
+   "legacy_codes": [],
+   "native_from": null,
+   "v_cases": [
+    "V11",
+    "V50"
+   ],
+   "waivable": false,
+   "accepted_applicability_facts": [],
+   "owner": "hep-measurement",
+   "review_status": "unreviewed",
+   "lifecycle": "shadow",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+  },
+  {
+   "rule_id": "r-map.classification",
+   "version": "1.0.0",
+   "layer": "L3",
+   "suites": [
+    "counting-chain/v1"
+   ],
+   "kind": "new",
+   "prerequisites": [
+    "spec correction category",
+    "effect catalog"
+   ],
+   "applicability": "R-MAP: a spec correction's category is a catalog effect; the legacy pattern alone is not a classification",
+   "outcome_contract": {
+    "satisfied": [
+     "check.classified"
+    ],
+    "violated": [
+     "check.classification_conflict"
+    ],
+    "not_applicable": [
+     "check.correction_exact_zero"
+    ],
+    "unverified": [
+     "check.classified_by_legacy_pattern",
+     "check.correction_missing"
+    ],
+    "unsupported": [
+     "check.unknown_effect"
+    ]
+   },
+   "legacy_codes": [],
+   "native_from": null,
+   "v_cases": [
+    "V35",
+    "V43"
+   ],
+   "waivable": false,
+   "accepted_applicability_facts": [],
+   "owner": "hep-measurement",
+   "review_status": "unreviewed",
+   "lifecycle": "shadow",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+  },
+  {
+   "rule_id": "r-real.description",
+   "version": "1.0.0",
+   "layer": "L3",
+   "suites": [
+    "counting-chain/v1"
+   ],
+   "kind": "new",
+   "prerequisites": [
+    "spec correction",
+    "instance view",
+    "coverage contract",
+    "applicability (spec target_scope or an instance_mapping declaration)"
+   ],
+   "applicability": "R-REAL: a spec correction is realized by exactly one compatible application in each instance it applies to",
+   "outcome_contract": {
+    "satisfied": [
+     "check.description_realized"
+    ],
+    "violated": [
+     "check.description_conflict",
+     "check.unrealized_correction"
+    ],
+    "not_applicable": [
+     "check.realized_by_response",
+     "check.instance_out_of_scope"
+    ],
+    "unverified": [
+     "check.applicability_unbound",
+     "check.ambiguous_application",
+     "check.coverage_undefined",
+     "check.description_incomplete"
+    ],
+    "unsupported": [
+     "check.unknown_effect",
+     "check.unsupported_operator"
+    ]
+   },
+   "legacy_codes": [],
+   "native_from": null,
+   "v_cases": [
+    "V01",
+    "V02",
+    "V09",
+    "V23",
+    "V35",
+    "V37",
+    "V39",
+    "V43"
+   ],
+   "waivable": false,
+   "accepted_applicability_facts": [],
+   "owner": "hep-measurement",
+   "review_status": "unreviewed",
+   "lifecycle": "shadow",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+  },
+  {
+   "rule_id": "r-stage.position",
+   "version": "1.0.0",
+   "layer": "L3",
+   "suites": [
+    "counting-chain/v1"
+   ],
+   "kind": "new",
+   "prerequisites": [
+    "spec correction applied_in",
+    "located application",
+    "coverage contract stage"
+   ],
+   "applicability": "R-STAGE: the spec's applied_in agrees with the stage of the operator that realizes it",
+   "outcome_contract": {
+    "satisfied": [
+     "check.stage_consistent"
+    ],
+    "violated": [
+     "check.stage_conflict"
+    ],
+    "not_applicable": [
+     "check.realized_by_response",
+     "check.instance_out_of_scope"
+    ],
+    "unverified": [
+     "check.stage_unlocated"
+    ],
+    "unsupported": [
+     "check.stage_unsupported"
+    ]
+   },
+   "legacy_codes": [],
+   "native_from": null,
+   "v_cases": [
+    "V39"
+   ],
+   "waivable": false,
+   "accepted_applicability_facts": [],
+   "owner": "hep-measurement",
+   "review_status": "unreviewed",
+   "lifecycle": "shadow",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+  },
+  {
+   "rule_id": "r-rep.repetition",
+   "version": "1.0.0",
+   "layer": "L3",
+   "suites": [
+    "counting-chain/v1"
+   ],
+   "kind": "new",
+   "prerequisites": [
+    "instance views on the root's path",
+    "input_of bindings",
+    "coverage contract"
+   ],
+   "applicability": "R-REP: no effect slot is applied twice on one computation path with overlapping scope and covered members",
+   "outcome_contract": {
+    "satisfied": [
+     "check.no_repetition",
+     "check.exclusive_scopes"
+    ],
+    "violated": [
+     "check.repeated_application",
+     "check.exclusion_contradiction"
+    ],
+    "not_applicable": [
+     "check.effect_not_applied"
+    ],
+    "unverified": [
+     "check.scope_relation_unknown",
+     "check.keys_incomplete",
+     "check.coverage_undefined",
+     "check.branch_unbound"
+    ],
+    "unsupported": [
+     "check.unsupported_operator"
+    ]
+   },
+   "legacy_codes": [],
+   "native_from": null,
+   "v_cases": [
+    "V03",
+    "V04",
+    "V16",
+    "V21",
+    "V22",
+    "V40",
+    "V41",
+    "V49"
+   ],
+   "waivable": false,
+   "accepted_applicability_facts": [],
+   "owner": "hep-measurement",
+   "review_status": "unreviewed",
+   "lifecycle": "shadow",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+  },
+  {
+   "rule_id": "r-comp.composition",
+   "version": "1.0.0",
+   "layer": "L3",
+   "suites": [
+    "counting-chain/v1"
+   ],
+   "kind": "new",
+   "prerequisites": [
+    "instance views on the root's path",
+    "catalog composition",
+    "coverage contract"
+   ],
+   "applicability": "R-COMP: a parent factor and its decomposition are not both applied on one path",
+   "outcome_contract": {
+    "satisfied": [
+     "check.composition_once"
+    ],
+    "violated": [
+     "check.decomposition_double_counted"
+    ],
+    "not_applicable": [
+     "check.composition_absent"
+    ],
+    "unverified": [
+     "check.coverage_undefined"
+    ],
+    "unsupported": [
+     "check.unsupported_operator"
+    ]
+   },
+   "legacy_codes": [],
+   "native_from": null,
+   "v_cases": [
+    "V09",
+    "V10"
+   ],
+   "waivable": false,
+   "accepted_applicability_facts": [],
+   "owner": "hep-measurement",
+   "review_status": "unreviewed",
+   "lifecycle": "shadow",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+  },
+  {
+   "rule_id": "r-comp.factor_values",
+   "version": "1.0.0",
+   "layer": "L3",
+   "suites": [
+    "counting-chain/v1"
+   ],
+   "kind": "new",
+   "prerequisites": [
+    "factor table bound to the instance",
+    "catalog composition"
+   ],
+   "applicability": "R-COMP: per-bin factor values of a bound factor table agree with the catalog composition",
+   "outcome_contract": {
+    "satisfied": [
+     "check.factor_values_consistent"
+    ],
+    "violated": [
+     "check.factor_values_inconsistent"
+    ],
+    "not_applicable": [
+     "check.factor_table_absent"
+    ],
+    "unverified": [
+     "check.factor_values_incomplete"
+    ],
+    "unsupported": [
+     "check.factor_form_unsupported"
+    ]
+   },
+   "legacy_codes": [],
+   "native_from": null,
+   "v_cases": [
+    "V69"
+   ],
+   "waivable": false,
+   "accepted_applicability_facts": [],
+   "owner": "hep-measurement",
+   "review_status": "unreviewed",
+   "lifecycle": "shadow",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
+  },
+  {
+   "rule_id": "r-resp.response_use",
+   "version": "1.0.0",
+   "layer": "L3",
+   "suites": [
+    "counting-chain/v1"
+   ],
+   "kind": "new",
+   "prerequisites": [
+    "instance view",
+    "spec migration corrections",
+    "response items",
+    "response_used_by bindings"
+   ],
+   "applicability": "R-RESP: the response use the spec describes is realized by the chain or bound to a prediction",
+   "outcome_contract": {
+    "satisfied": [
+     "check.response_use_consistent"
+    ],
+    "violated": [
+     "check.response_use_conflict"
+    ],
+    "not_applicable": [
+     "check.response_not_needed"
+    ],
+    "unverified": [
+     "check.response_use_unbound"
+    ],
+    "unsupported": [
+     "check.folding_unsupported",
+     "check.response_use_unknown"
+    ]
+   },
+   "legacy_codes": [],
+   "native_from": null,
+   "v_cases": [
+    "V11",
+    "V12",
+    "V34",
+    "V48"
+   ],
+   "waivable": false,
+   "accepted_applicability_facts": [],
+   "owner": "hep-measurement",
+   "review_status": "unreviewed",
+   "lifecycle": "shadow",
+   "notes": "aggregator codes check.rule_not_run, check.input_invalid and check.semantics_unreproducible are unverified for every rule"
   }
  ],
  "v_cases": [
@@ -104,8 +482,10 @@
       "D06"
      ],
      "host": "CASE-CHAIN",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d06.Realization.test_v01_one_more_consistent_description"
+     ]
     }
    ]
   },
@@ -121,8 +501,10 @@
       "D06"
      ],
      "host": "CASE-CHAIN variant",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d06.Realization.test_v02_calibration_differs"
+     ]
     }
    ]
   },
@@ -138,8 +520,10 @@
       "D06"
      ],
      "host": "CASE-CHAIN variant",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d06.Repetition.test_v03_same_slot_twice_on_one_path"
+     ]
     }
    ]
   },
@@ -155,8 +539,10 @@
       "D06"
      ],
      "host": "CASE-CHAIN variant",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d06.Repetition.test_v04_alternative_branches"
+     ]
     }
    ]
   },
@@ -173,8 +559,12 @@
       "D06"
      ],
      "host": "CASE-CHAIN",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d05a.V05InstanceViews.test_template_filled_with_sources",
+      "tests.contracts.test_v63_d05a.V05InstanceViews.test_literal_is_never_overridden",
+      "tests.contracts.test_v63_d05a.V05InstanceViews.test_calibration_binding_fills_the_digest"
+     ]
     }
    ]
   },
@@ -241,8 +631,10 @@
       "D06"
      ],
      "host": "CASE-CHAIN",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d06.Realization.test_v09_parent_described_by_a_child"
+     ]
     }
    ]
   },
@@ -258,8 +650,10 @@
       "D06"
      ],
      "host": "CASE-CHAIN variant",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d06.Composition.test_v10_parent_and_decomposition"
+     ]
     }
    ]
   },
@@ -276,8 +670,11 @@
       "D05c"
      ],
      "host": "CASE-CHAIN",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d06.ResponseUse.test_v11_missing_response_binding",
+      "tests.contracts.test_v63_d05c.Declarations.test_removing_a_file_fails_integrity"
+     ]
     },
     {
      "slice": "M2b",
@@ -303,8 +700,10 @@
       "D05c"
      ],
      "host": "CASE-CHAIN variant",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d06.ResponseUse.test_v12_response_not_needed"
+     ]
     }
    ]
   },
@@ -339,8 +738,10 @@
       "D05b"
      ],
      "host": "resolver and bundle",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d05b.SemanticLock.test_definition_change_is_a_lock_difference"
+     ]
     }
    ]
   },
@@ -357,8 +758,10 @@
       "D05c"
      ],
      "host": "CASE-CHAIN",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d05c.Identity.test_rename_and_reorder"
+     ]
     },
     {
      "slice": "M2b",
@@ -384,8 +787,10 @@
       "D06"
      ],
      "host": "CASE-CHAIN variant",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d06.Repetition.test_v16_opaque_scope_strings"
+     ]
     }
    ]
   },
@@ -401,8 +806,11 @@
       "D11a"
      ],
      "host": "reader test",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d11a.V17OldTableReader.test_operator_through_pinned_semantics",
+      "tests.contracts.test_v63_d11a.V17OldTableReader.test_unpinned_or_changed_semantics_are_not_used"
+     ]
     }
    ]
   },
@@ -418,8 +826,10 @@
       "D05c"
      ],
      "host": "CASE-CHAIN variant",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d06.Coverage.test_v18_unsupported_operator"
+     ]
     },
     {
      "slice": "M2b",
@@ -479,8 +889,10 @@
       "D06"
      ],
      "host": "L2 regression",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d06.Repetition.test_v21_same_scope_two_calibrations"
+     ]
     }
    ]
   },
@@ -496,8 +908,10 @@
       "D06"
      ],
      "host": "L2 regression",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d06.Repetition.test_v22_incomplete_keys"
+     ]
     }
    ]
   },
@@ -513,8 +927,10 @@
       "D06"
      ],
      "host": "CASE-CHAIN variant",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d06.Realization.test_v23_ambiguous_mapping"
+     ]
     }
    ]
   },
@@ -531,8 +947,11 @@
       "D05c"
      ],
      "host": "CASE-CHAIN",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d05c.Declarations.test_masking_keeps_obligations",
+      "tests.contracts.test_v63_d05c.Declarations.test_removing_a_file_fails_integrity"
+     ]
     },
     {
      "slice": "M2b",
@@ -558,8 +977,10 @@
       "D05c"
      ],
      "host": "CASE-CHAIN",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d05c.Declarations.test_waiver_is_not_counted"
+     ]
     },
     {
      "slice": "M2b",
@@ -602,8 +1023,11 @@
       "D05c"
      ],
      "host": "CLI",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d05c.V27ExitCodes.test_each_cause_and_the_precedence",
+      "tests.contracts.test_v63_d05c.V27ExitCodes.test_report_outside_the_bundle"
+     ]
     }
    ]
   },
@@ -726,8 +1150,10 @@
       "D06"
      ],
      "host": "CASE-CHAIN variant",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d06.ResponseUse.test_v34_unfolding_against_not_applied"
+     ]
     }
    ]
   },
@@ -756,8 +1182,10 @@
       "D06"
      ],
      "host": "CASE-CHAIN",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d06.Coverage.test_v35_effective_exposure"
+     ]
     }
    ]
   },
@@ -773,8 +1201,12 @@
       "D05a"
      ],
      "host": "L1 regression",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d05a.V36SpecKeys.test_capability_makes_the_keys_known",
+      "tests.contracts.test_v63_d05a.V36SpecKeys.test_without_capability_the_legacy_threshold_holds",
+      "tests.contracts.test_v63_d05a.V36SpecKeys.test_malformed_keys_are_errors"
+     ]
     }
    ]
   },
@@ -791,8 +1223,10 @@
       "D06"
      ],
      "host": "CASE-CHAIN",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d06.Realization.test_v37_scopeless_correction_against_four_instances"
+     ]
     }
    ]
   },
@@ -825,8 +1259,10 @@
       "D06"
      ],
      "host": "CHAIN-ID",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d06.Realization.test_v39_application_id_mismatch"
+     ]
     }
    ]
   },
@@ -842,8 +1278,10 @@
       "D06"
      ],
      "host": "CHAIN-SCOPE",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d06.Repetition.test_v40_no_basis_for_exclusion"
+     ]
     }
    ]
   },
@@ -859,8 +1297,10 @@
       "D06"
      ],
      "host": "CHAIN-SCOPE",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d06.Repetition.test_v41_declared_exclusion"
+     ]
     }
    ]
   },
@@ -876,8 +1316,11 @@
       "D05a"
      ],
      "host": "scope parser",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d05a.V42ScopeParser.test_grammar",
+      "tests.contracts.test_v63_d05a.V42ScopeParser.test_comparison"
+     ]
     }
    ]
   },
@@ -907,8 +1350,10 @@
       "D06"
      ],
      "host": "catalog",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d06.Coverage.test_v43_new_member"
+     ]
     }
    ]
   },
@@ -992,8 +1437,10 @@
       "D06"
      ],
      "host": "CHAIN-RESPONSE",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d06.ResponseUse.test_v48_not_applied_only"
+     ]
     }
    ]
   },
@@ -1009,8 +1456,10 @@
       "D06"
      ],
      "host": "CHAIN-FLOW",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d06.Repetition.test_v49_variation_rejoins"
+     ]
     }
    ]
   },
@@ -1026,8 +1475,10 @@
       "D05b"
      ],
      "host": "bundle lifecycle",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d05b.Subjects.test_deleting_a_root"
+     ]
     }
    ]
   },
@@ -1043,8 +1494,10 @@
       "D05c"
      ],
      "host": "report adapter",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d05c.V51V52Aggregation.test_rule_not_run"
+     ]
     }
    ]
   },
@@ -1060,8 +1513,10 @@
       "D05c"
      ],
      "host": "report aggregation",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d05c.V51V52Aggregation.test_invalid_versus_inconsistent"
+     ]
     }
    ]
   },
@@ -1174,8 +1629,10 @@
       "D05b"
      ],
      "host": "LOCK-CLOSURE",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d05b.SemanticLock.test_member_sets"
+     ]
     }
    ]
   },
@@ -1276,8 +1733,10 @@
       "D05c"
      ],
      "host": "CASE-CHAIN",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d06.DeclarationFlags.test_v64_declaration_based"
+     ]
     },
     {
      "slice": "M2b",
@@ -1337,8 +1796,11 @@
       "D05b"
      ],
      "host": "obligation generator",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d05b.Inventory.test_regeneration_is_byte_identical_and_order_free",
+      "tests.contracts.test_v63_d05b.Inventory.test_a_differing_inventory_is_invalid_input"
+     ]
     }
    ]
   },
@@ -1355,8 +1817,11 @@
       "D05c"
      ],
      "host": "obligation generator",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d05c.Identity.test_previous_report_and_assessment",
+      "tests.contracts.test_v63_d05b.Subjects.test_new_suite_version"
+     ]
     }
    ]
   },
@@ -1373,8 +1838,10 @@
       "D06"
      ],
      "host": "CASE-CHAIN",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d06.Composition.test_v69_factor_check_across_bins"
+     ]
     }
    ]
   },
@@ -1407,8 +1874,11 @@
       "D17"
      ],
      "host": "skill integration",
-     "status": "not-run",
-     "tests": []
+     "status": "passing",
+     "tests": [
+      "tests.contracts.test_v63_d17.V71ReviewCallsTheCheck.test_summary_within_budget_names_missing_bindings",
+      "tests.contracts.test_v63_d17.V71ReviewCallsTheCheck.test_summary_pages"
+     ]
     }
    ]
   }
@@ -1457,16 +1927,19 @@
     "contracts/effect_catalog.py"
    ],
    "checks": [
+    "tests.contracts.test_r5_contracts",
     "tests.contracts.test_recipe_semantics",
     "tests.contracts.test_v63_baseline_gaps",
-    "tests.contracts.test_r5_contracts",
-    "tests.contracts.test_v63_d04"
+    "tests.contracts.test_v63_d04",
+    "tests.contracts.test_v63_d05a",
+    "tests.contracts.test_v63_d05b",
+    "tests.contracts.test_v63_d05c",
+    "tests.contracts.test_v63_d06",
+    "tests.contracts.test_v63_d11a",
+    "tests.contracts.test_v63_d17"
    ],
    "not_available": [
-    "L3 chain rules (D06)",
-    "old-version readers (D11a)",
-    "semantic lock closure (D05b)",
-    "CASE-CHAIN and CASE-MODEL (D08)"
+    "CASE-MODEL (D08, M2b)"
    ],
    "full": false
   },
@@ -1474,17 +1947,21 @@
    "id": "context-obligations",
    "change": "context, roots, obligations, declarations",
    "patterns": [
-    "contracts/analysis_checks/**",
     "contracts/analysis_check.py",
-    "contracts/resolve.py"
+    "contracts/analysis_checks/**",
+    "contracts/resolve.py",
+    "contracts/rules/suites/**",
+    "tests/contracts/v63_cases.py"
    ],
-   "checks": [],
-   "not_available": [
-    "masking tests on a fixed subject (D05b)",
-    "regeneration comparison (D05b)",
-    "scope delta for a new subject (D05b)",
-    "declaration flags (D05c)"
+   "checks": [
+    "tests.contracts.test_v63_d05a",
+    "tests.contracts.test_v63_d05b",
+    "tests.contracts.test_v63_d05c",
+    "tests.contracts.test_v63_d06",
+    "tests.contracts.test_v63_d11a",
+    "tests.contracts.test_v63_d17"
    ],
+   "not_available": [],
    "full": false
   },
   {
@@ -1492,17 +1969,19 @@
    "change": "bundle, result binding",
    "patterns": [
     "contracts/analysis_bundle.py",
+    "contracts/release_manifest.py",
     "contracts/schemas/analysis_bundle.json",
-    "contracts/verify_run.py",
-    "contracts/release_manifest.py"
+    "contracts/schemas/analysis_bundle_v2.json",
+    "contracts/verify_run.py"
    ],
    "checks": [
     "tests.contracts.test_permits",
     "tests.contracts.test_r5_contracts",
-    "tests.contracts.test_v63_baseline_gaps"
+    "tests.contracts.test_v63_baseline_gaps",
+    "tests.contracts.test_v63_d05b",
+    "tests.contracts.test_v63_d05c"
    ],
    "not_available": [
-    "bytes and canonical digests of the new bundle (D05b)",
     "run dependencies and status propagation (D05d)",
     "digest cycles (D05d)",
     "compatibility matrix (D09)"
@@ -1552,7 +2031,6 @@
     "tests.contracts.test_protected_entry_points"
    ],
    "not_available": [
-    "assessment binding (D05c)",
     "forged or wrong-version reports (D10)",
     "attestation evidence path for reports (D10)",
     "permit.py advisory report check (D10)",
@@ -1571,13 +2049,12 @@
     "README.md"
    ],
    "checks": [
+    "part:static",
+    "tests.contracts.test_v63_d17",
     "tests.routing.test_routing_static",
-    "tests.tools.test_check_instruction_text",
-    "part:static"
+    "tests.tools.test_check_instruction_text"
    ],
-   "not_available": [
-    "agent summary size (D17)"
-   ],
+   "not_available": [],
    "full": false
   },
   {

@@ -1,0 +1,18 @@
+{"$comment": "Semantic lock 1.0.0 (v6.3 D05b, contracts/analysis_checks/lock.py): the suite, generator and every definition in use with its digest, and the member-set closure of each class a rule resolves. It names neither itself nor the bundle digest.",
+ "type": "object",
+ "required": ["lock_version", "suite", "generator", "definitions", "member_sets", "readers"],
+ "additionalProperties": false,
+ "properties": {
+  "lock_version": {"type": "string", "const": "1.0.0"},
+  "suite": {"type": "object", "required": ["id", "version"]},
+  "generator": {"type": "object", "required": ["id", "version", "code_digest"]},
+  "definitions": {"type": "array", "items": {"type": "object", "required": ["kind", "id", "version", "digest", "owner"],
+   "additionalProperties": false, "properties": {
+    "kind": {"type": "string", "enum": ["semantics-table", "coverage-contract", "effect", "composition", "rule-registry"]},
+    "id": {"type": "string", "minLength": 1}, "version": {"anyOf": [{"type": "null"}, {"type": "string"}]},
+    "digest": {"anyOf": [{"type": "null"}, {"$ref": "revocation_event.json#/$defs/sha256"}]},
+    "owner": {"anyOf": [{"type": "null"}, {"type": "string"}]}}}},
+  "member_sets": {"type": "array", "items": {"type": "object", "required": ["class", "members", "strategy", "closure_digest"]}},
+  "readers": {"type": "array", "items": {"type": "object", "required": ["id", "version"]}}
+ }
+}
