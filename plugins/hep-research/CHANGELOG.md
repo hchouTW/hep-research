@@ -5,6 +5,15 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- `contracts/analysis_check.py check BUNDLE --root DIR [--out REPORT] [--previous REPORT]` (v6.3 D05c) evaluates a v2
+  bundle's frozen obligation inventory and prints a report (schema `check_report.json`): input validity, coverage
+  (completed over all), consistency, per-obligation state with reason and evidence pointers, declaration-based flags
+  and a formal-use view that counts them as unverified, legacy L1 and L2 findings in their own field, lock differences
+  and the scope delta against a previous report. An obligation whose rule did not run is unverified. `assessment_id`
+  binds subject, suite, rules, rule registry, checker code, readers and settings. Exit codes 0/1/2/3 with precedence
+  2 > 1 > 3 > 0; the report is a sidecar that is never written into the bundle or over an existing file, and
+  `summary REPORT` pages a bounded agent summary. The suite's rules are registered in `contracts/rules/registry.json`
+  with reason codes for all five states.
 - New opt-in `contracts/analysis_check.py` with analysis bundle 2.0.0 (`hep-research-analysis-bundle/2`, schema
   `analysis_bundle_v2.json`; v6.3 D05b): per-mode roles (chain: one spec, environment lock, check context and semantic
   lock, at least one recipe), unique item IDs, and for JSON items both the canonical and the bytes digest. New roles

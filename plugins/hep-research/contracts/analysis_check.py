@@ -286,3 +286,225 @@ def check_inventory(view: dict) -> list[dict]:
     if view.get("suite") is None:
         return []
     return obl.check_inventory(frozen, obl.generate(view["suite"], view))
+
+
+# --- evaluation and report (D05c) ---------------------------------------------------------------------------------
+REPORT_VERSION = "1.0.0"
+SUMMARY_BYTES = 8192  # the agent summary's page cap: a product default sharing D02's paging (not a measurement)
+
+
+def legacy_findings(view: dict, vocab=None) -> list[dict]:
+    """Old entry points' findings on the bundle's own artifacts, kept apart (C10): L1 on the spec, L2 per recipe."""
+    from contracts.analysis_checks.outcomes import map_legacy
+    from contracts.recipe_semantics import check_recipe
+    from contracts.validate import validate_artifact
+    from contracts.vocab import Vocabulary
+    out = []
+    spec_id = (view.get("context") or {}).get("spec")
+    spec = (view["items"].get(spec_id) or {}).get("doc")
+    if isinstance(spec, dict):
+        for f in validate_artifact(spec, vocab or Vocabulary(), strict=True).findings:
+            if f.severity in ("error", "warning"):
+                out.append({"entry": "contracts/validate.py", "item": spec_id, **f.as_dict(), "maps_to": map_legacy(f.as_dict())})
+    for iid, it in sorted(view["items"].items()):
+        if it.get("role") == "recipe" and isinstance(it.get("doc"), dict):
+            res = check_recipe(it["doc"], view.get("tables", {}), [], None)
+            for f in res["findings"]:
+                out.append({"entry": "contracts/recipe_semantics.py", "item": iid, **f, "maps_to": map_legacy(f)})
+    return out
+
+
+def evaluate(view: dict, diags: list[dict], previous: dict | None = None, vocab=None, settings: dict | None = None,
+             rules: dict | None = None) -> dict:
+    from contracts.analysis_checks.lock import compare
+    from contracts.analysis_checks.outcomes import formal_view, summarize
+    from contracts.analysis_checks.rules import evaluate as run_rules
+    diags = list(diags) + [dict(d, kind="input-invalid") for d in check_inventory(view)]
+    lock_diff = compare(view.get("lock") or {}, current_lock(view)) if view.get("suite") else []
+    input_valid = not any(d["kind"] == "input-invalid" for d in diags)
+    obligations = ((view.get("context") or {}).get("obligations") or {}).get("items", [])
+    if input_valid:
+        outcomes = run_rules(view, obligations, rules)
+    else:
+        outcomes = [{"obligation_id": o["obligation_id"], "rule_id": o["rule_id"], "state": "unverified",
+                     "reason": "check.input_invalid", "message": "the inputs cannot be established", "evidence": [],
+                     "declaration_based": False, "declarations": []} for o in obligations]
+    if lock_diff and input_valid:
+        outcomes = [o if o["rule_id"] == "r-inv.root" else
+                    dict(o, state="unverified", reason="check.semantics_unreproducible", declaration_based=False,
+                         message="the definitions differ from the semantic lock; this subject's semantics cannot be "
+                                 "reproduced from the current definitions (snapshots: D11b)")
+                    for o in outcomes]
+    summary = summarize(outcomes, input_valid)
+    bundle = view.get("bundle") or {}
+    suite = view.get("suite") or {}
+    rules_used = [{"rule_id": r["rule_id"], "version": r["version"]} for r in suite.get("rules", [])]
+    checker = checker_identity()
+    settings = dict(settings or {})
+    inv = (view.get("context") or {}).get("obligations") or {}
+    lock = view.get("lock") or {}
+    assessment = {"subject": bundle.get("bundle_digest"), "suite": {"id": suite.get("suite_id"), "version": suite.get("version")},
+                  "rules": rules_used, "registry": registry_digest(), "checker": checker["digest"],
+                  "readers": lock.get("readers"), "settings": settings}
+    decl_ids = {d for o in outcomes for d in o.get("declarations", [])}
+    report = {
+        "report_version": REPORT_VERSION, "kind": "analysis-check-report",
+        "status": ("invalid" if not input_valid else "inconsistent" if summary["consistency"] == "inconsistent"
+                   else "complete" if summary["coverage"]["value"] == "complete" and summary["consistency"] == "consistent"
+                   else "incomplete"),
+        "subject_digest": bundle.get("bundle_digest"), "assessment_id": canonical_sha256(assessment),
+        "assessment": assessment, "inventory_digest": inv.get("digest"), "suite": assessment["suite"],
+        "checker": checker, "input_validity": "valid" if input_valid else "invalid",
+        "input_diagnostics": diags, "lock_differences": lock_diff,
+        "coverage": summary["coverage"], "consistency": summary["consistency"], "counts": summary["counts"],
+        "formal_use_view": formal_view(outcomes, input_valid),
+        "obligations": outcomes,
+        "declarations": [{"declaration_id": d.get("declaration_id"), "type": d.get("type"), "asserted_by": d.get("asserted_by")}
+                         for d in (view.get("context") or {}).get("declarations", []) if d.get("declaration_id") in decl_ids],
+        "context_findings": view.get("context_findings", []),
+        "legacy_findings": legacy_findings(view, vocab) if view.get("items") else [],
+        "execution_evidence_level": "not checked: the chain suite has no run lineage (run-lineage/v1, M2c)",
+        "validation_status": sorted(set(((view.get("items", {}).get((view.get("context") or {}).get("spec")) or {})
+                                          .get("doc") or {}).get("status") or [])),
+        "scope_delta": scope_delta(previous, bundle.get("bundle_digest"), obligations) if previous else None,
+        "exceptions": [],
+        "note": "software consistency of declared contracts only, not physical validity; a diagnostic that authorizes "
+                "nothing (HC-05); declaration-based outcomes count for formal use only through an accepted review",
+    }
+    return report
+
+
+def scope_delta(previous: dict, subject: str | None, obligations: list[dict]) -> dict:
+    from contracts.analysis_checks.obligations import diff
+    old = [{"obligation_id": o["obligation_id"]} for o in previous.get("obligations", []) if isinstance(o, dict)]
+    d = diff(old, obligations)
+    return {"previous_assessment": previous.get("assessment_id"), "previous_subject": previous.get("subject_digest"),
+            "new_subject": previous.get("subject_digest") != subject, "added": d["added"], "removed": d["removed"],
+            "inherits": False, "note": "a new assessment never inherits completeness, acceptance or authorization"}
+
+
+def exit_code(report: dict) -> int:
+    """1 for a violation or invalid inputs, 3 for an incomplete check or a missing dependency, 0 when complete and
+    consistent (2, a usage error, is decided before a report exists)."""
+    if report["input_validity"] == "invalid" or report["consistency"] == "inconsistent":
+        return 1
+    if any(d["kind"] == "dependency-missing" for d in report["input_diagnostics"]) or report["coverage"]["value"] != "complete":
+        return 3
+    return 0
+
+
+NEXT_STEPS = {
+    "check.applicability_unbound": "bind the correction to instances: a spec target_scope or an instance_mapping declaration",
+    "check.response_use_unbound": "add a response_used_by binding (unfolding step or prediction-side folding)",
+    "check.coverage_undefined": "list the class members the operator covers in its coverage contract (reviewed)",
+    "check.ambiguous_application": "give the correction an application_id (a recipe step_id)",
+    "check.scope_relation_unknown": "use parseable axis:value scopes or declare the partition for the same source",
+    "check.keys_incomplete": "give target_scope, variation and calibration for both applications",
+    "check.root_incomplete": "bind the root's binning pointer and a scope equal to its output instance",
+    "check.semantics_unreproducible": "re-freeze against the current definitions (a new subject) or restore them",
+    "check.rule_not_run": "use a checker that implements this rule",
+    "check.input_invalid": "fix the input diagnostics first",
+}
+
+
+def summary_page(report: dict, cursor: int = 0, max_bytes: int = SUMMARY_BYTES) -> dict:
+    """A bounded agent summary (D17): violated and unverified obligations, missing bindings and next steps, paged
+    under a byte cap; digests, codes and IDs only, never result values or controlled strings."""
+    rows = [{"obligation_id": o["obligation_id"], "state": o["state"], "reason": o["reason"],
+             "next": NEXT_STEPS.get(o["reason"])}
+            for o in report.get("obligations", []) if o["state"] in ("violated", "unverified", "unsupported")]
+    rows.sort(key=lambda r: ({"violated": 0, "unverified": 1, "unsupported": 2}[r["state"]], r["obligation_id"]))
+    head = {"status": report.get("status"), "assessment_id": report.get("assessment_id"),
+            "subject_digest": report.get("subject_digest"), "input_validity": report.get("input_validity"),
+            "coverage": report.get("coverage"), "consistency": report.get("consistency"),
+            "missing_bindings": sorted({r["reason"] for r in rows if r["reason"] in NEXT_STEPS and r["state"] == "unverified"}),
+            "total_rows": len(rows), "offset": cursor}
+    page: list[dict] = []
+    for r in rows[cursor:]:
+        trial = dict(head, rows=page + [r], next_cursor=cursor + len(page) + 1)
+        if len(json.dumps(trial, indent=1).encode()) > max_bytes and page:
+            break
+        page.append(r)
+    nxt = cursor + len(page)
+    return dict(head, rows=page, next_cursor=nxt if nxt < len(rows) else None,
+                limits={"max_bytes": max_bytes, "note": "a product default sharing the evidence query's paging, not a measurement"})
+
+
+def _vocab(project):
+    if project is None:
+        return None
+    from contracts.project import load_project
+    from contracts.vocab import Vocabulary
+    proj = load_project(Path(project))
+    if not proj.report.ok:
+        raise UsageError("invalid project config: " + "; ".join(f.code for f in proj.report.errors))
+    return Vocabulary.with_profiles(proj.profiles)
+
+
+def main(argv=None) -> int:
+    import argparse
+    ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0], formatter_class=argparse.RawDescriptionHelpFormatter,
+                                 epilog=__doc__.split("\n\n", 1)[1])
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    f = sub.add_parser("freeze")
+    f.add_argument("--root", type=Path, required=True)
+    f.add_argument("--analysis", required=True)
+    f.add_argument("--items", type=Path, required=True)
+    f.add_argument("--context", type=Path, required=True)
+    f.add_argument("--out", type=Path, required=True)
+    c = sub.add_parser("check")
+    c.add_argument("bundle", type=Path)
+    c.add_argument("--root", type=Path, required=True)
+    c.add_argument("--out", type=Path)
+    c.add_argument("--previous", type=Path)
+    c.add_argument("--profiles-from", type=Path, help="project config whose profiles extend the vocabulary of the legacy L1 run")
+    s = sub.add_parser("summary")
+    s.add_argument("report", type=Path)
+    s.add_argument("--cursor", type=int, default=0)
+    s.add_argument("--max-bytes", type=int, default=SUMMARY_BYTES)
+    try:
+        args = ap.parse_args(argv)
+    except SystemExit as exc:
+        return 2 if exc.code else 0
+    try:
+        if args.cmd == "freeze":
+            items = json.loads(args.items.read_text(encoding="utf-8"))
+            context = json.loads(args.context.read_text(encoding="utf-8"))
+            if args.out.exists():
+                raise UsageError(f"{args.out} exists: a bundle is written once")
+            try:
+                doc = freeze(args.root, args.analysis, items, context)
+            except BundleRefused as exc:
+                print(json.dumps({"status": "refused", "code": exc.code, "error": str(exc)}, indent=1))
+                return 1
+            args.out.write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8")
+            print(json.dumps({"status": "frozen", "bundle_digest": doc["bundle_digest"], "out": str(args.out)}, indent=1))
+            return 0
+        if args.cmd == "summary":
+            report = json.loads(args.report.read_text(encoding="utf-8"))
+            if args.cursor < 0 or args.max_bytes < 1024:
+                raise UsageError("--cursor is >= 0 and --max-bytes >= 1024")
+            print(json.dumps(summary_page(report, args.cursor, args.max_bytes), indent=1))
+            return 0
+        previous = json.loads(args.previous.read_text(encoding="utf-8")) if args.previous else None
+        vocab = _vocab(args.profiles_from)
+        view, diags = load_subject(args.bundle, args.root)
+        if args.out is not None:
+            refs = {(Path(args.root).resolve() / it.get("ref", "")).resolve() for it in view["bundle"].get("items", [])
+                    if isinstance(it, dict)}
+            if args.out.resolve() in refs or args.out.resolve() == Path(args.bundle).resolve():
+                raise UsageError("a report is never written into the bundle it examines")
+            if args.out.exists():
+                raise UsageError(f"{args.out} exists: reports are never overwritten")
+    except (OSError, ValueError) as exc:
+        print(json.dumps({"status": "usage", "error": str(exc)}, indent=1))
+        return 2
+    report = evaluate(view, diags, previous, vocab)
+    if args.out is not None:
+        args.out.write_text(json.dumps(report, indent=1) + "\n", encoding="utf-8")
+    print(json.dumps(report, indent=1))
+    return exit_code(report)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

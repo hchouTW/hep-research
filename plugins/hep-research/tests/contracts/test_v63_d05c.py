@@ -61,7 +61,6 @@ class Tmp(unittest.TestCase):
 class V27ExitCodes(Tmp):
     """V27: 2 > 1 > 3 > 0, telling an unreadable top level, a missing frozen file and a missing dependency apart."""
 
-    @unittest.expectedFailure  # V27 (D05c)
     def test_each_cause_and_the_precedence(self):
         base = cases.chain_case(self.root / "a")
         code, rep = check(base, self.root / "a")
@@ -81,7 +80,6 @@ class V27ExitCodes(Tmp):
         self.assertEqual(check(both, self.root / "d")[0], 1)
         self.assertEqual(check(both, self.root / "d", "--previous", self.root / "nothing.json")[0], 2)
 
-    @unittest.expectedFailure  # V27 (D05c): the report is never written into the bundle it examines
     def test_report_outside_the_bundle(self):
         base = cases.chain_case(self.root / "a")
         self.assertEqual(check(base, self.root / "a", "--out", self.root / "a" / "check-context.json")[0], 2)
@@ -93,7 +91,6 @@ class V27ExitCodes(Tmp):
 
 @NEEDS_AMS
 class V51V52Aggregation(Tmp):
-    @unittest.expectedFailure  # V51 (D05c): a required rule that did not run is unverified, never a pass
     def test_rule_not_run(self):
         rep = report(cases.chain_case(self.root / "a"), self.root / "a", rules={})
         self.assertEqual({o["reason"] for o in rep["obligations"]}, {"check.rule_not_run"})
@@ -101,7 +98,6 @@ class V51V52Aggregation(Tmp):
         self.assertEqual(rep["coverage"]["completed"], 0)
         self.assertGreater(rep["coverage"]["total"], 0)
 
-    @unittest.expectedFailure  # V52 (D05c): invalid inputs versus a completed evaluation with a violation
     def test_invalid_versus_inconsistent(self):
         from contracts.analysis_checks.rules import outcome
         bundle = cases.chain_case(self.root / "a")
@@ -118,7 +114,6 @@ class V51V52Aggregation(Tmp):
 
 @NEEDS_AMS
 class Declarations(Tmp):
-    @unittest.expectedFailure  # V25 (D05c): a rule waiver in the context is not counted
     def test_waiver_is_not_counted(self):
         def waive(c):
             c.context["declarations"].append({"declaration_id": "waive-resp", "type": "not_applicable",
@@ -129,7 +124,6 @@ class Declarations(Tmp):
         self.assertEqual(states(plain), states(waived))
         self.assertIn("declaration.rule_waiver_not_counted", {f["code"] for f in waived["context_findings"]})
 
-    @unittest.expectedFailure  # V24 (D05c): masking a declaration under the frozen intent keeps every obligation
     def test_masking_keeps_obligations(self):
         bundle = cases.chain_case(self.root / "a")
         view, diags = ac().load_subject(bundle, self.root / "a")
@@ -140,7 +134,6 @@ class Declarations(Tmp):
         self.assertLessEqual(masked["coverage"]["completed"], full["coverage"]["completed"])
         self.assertEqual(masked["coverage"]["total"], full["coverage"]["total"])
 
-    @unittest.expectedFailure  # V24, V11 (D05c): removing a listed file fails integrity
     def test_removing_a_file_fails_integrity(self):
         bundle = cases.chain_case(self.root / "a")
         (self.root / "a" / "artifacts" / "response_helium_synthetic-period-2.json").unlink()
@@ -152,7 +145,6 @@ class Declarations(Tmp):
 
 @NEEDS_AMS
 class Identity(Tmp):
-    @unittest.expectedFailure  # V15 (D05c): renaming files and reordering set enumerations keeps the verdict
     def test_rename_and_reorder(self):
         def rename_and_reorder(c):
             for it in c.items:
@@ -169,7 +161,12 @@ class Identity(Tmp):
         self.assertNotEqual(a["subject_digest"], b["subject_digest"])
         self.assertEqual(a["inventory_digest"], b["inventory_digest"])
 
-    @unittest.expectedFailure  # V68 (D05c part): a new suite version is a new assessment listing added obligations
+    def test_report_schema(self):
+        from contracts.schema import validate
+        rep = report(cases.chain_case(self.root / "a"), self.root / "a")
+        res = validate(rep, "check_report.json")
+        self.assertTrue(res.ok, [f.as_dict() for f in res.findings])
+
     def test_previous_report_and_assessment(self):
         bundle = cases.chain_case(self.root / "a")
         first = report(bundle, self.root / "a")
